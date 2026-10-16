@@ -89,36 +89,47 @@ for (const lang of ['fi', 'en']) for (const width of [360, 390, 430, 1280]) for 
     expect((await page.locator('.bk-dayresults .bk-notice').count()) > 0, `${tag}: tyhjää päivää ei löytynyt`);
   } else {
     for (let i = 0; i < 4 && (await page.locator('.bk-sd.free').count()) === 0; i++) await page.click('.bk-weeknav a[aria-label]:last-child');
-    await page.locator('.bk-sd.free').last().click(); await page.waitForSelector('.bk-dayresults .bk-slot');
+    await page.locator('.bk-sd.free').last().click(); await page.waitForSelector('.bk-dayresults .bk-pc');
   }
   await page.waitForTimeout(200);
-  const r = await page.evaluate(() => {
-    const box = (el) => { const b = el.getBoundingClientRect(); return { l: b.left, r: b.right, w: b.width, h: b.height }; };
-    const app = box(document.getElementById('booking-app'));
-    const rgb = (c) => (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
-    const lum = (c) => { const [r, g, b] = rgb(c).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
-    const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
-    const effBg = (e) => { for (let n = e; n; n = n.parentElement) { const c = getComputedStyle(n).backgroundColor; if (rgb(c).length && !/rgba\(.*,\s*0\)$/.test(c) && c !== 'transparent') return c; } return 'rgb(255,255,255)'; };   // lähin ei-läpinäkyvä tausta
-    const cr = (sel) => [...document.querySelectorAll(sel)].map((e) => ({ sel, v: ratio(getComputedStyle(e).color, effBg(e)) }));
-    const inside = (sel) => [...document.querySelectorAll(sel)].map((e) => ({ sel, ...box(e) })).filter((b) => b.w > 0);
-    return {
-      sw: document.documentElement.scrollWidth, iw: innerWidth, app,
-      parts: [...inside('.bk-modes'), ...inside('.bk-daypick'), ...inside('.bk-strip'), ...inside('.bk-dayresults'), ...inside('.bk-slot'), ...inside('.bk-notice'), ...inside('.bk-daytools input')],
-      strip: [...document.querySelectorAll('.bk-strip .bk-sd')].map(box), nav: [...document.querySelectorAll('.bk-weeknav .bk-navbtn:not(.off)')].map(box),
-      btns: [...document.querySelectorAll('.bk-dayresults a.btn, .bk-modes a, .bk-today')].map(box),
-      contrast: [...cr('.bk-modes a'), ...cr('.bk-sd.free'), ...cr('.bk-sd.sel'), ...cr('.bk-badge.free'), ...cr('.bk-slot .bk-time'), ...cr('.bk-dayresults a.btn'), ...cr('.bk-today')],
-      names: { h2: document.querySelector('#booking-app h2')?.textContent, labelled: [...document.querySelectorAll('.bk-strip a')].every((a) => a.getAttribute('aria-label')), pickLabel: !!document.querySelector('label[for=bk-day-pick]'), current: document.querySelectorAll('.bk-strip [aria-current=date]').length },
-    };
-  });
-  expect(r.sw <= r.iw, `${tag}: vaakavieritys (${r.sw} > ${r.iw})`);
-  for (const b of r.parts) expect(b.l >= r.app.l - 0.5 && b.r <= r.app.r + 0.5, `${tag}: ${b.sel} ylittää sisältöalueen (${b.l.toFixed(1)}–${b.r.toFixed(1)} vs ${r.app.l.toFixed(1)}–${r.app.r.toFixed(1)})`);
-  expect(r.strip.length === 7 && r.strip.every((b) => Math.abs(b.w - r.strip[0].w) < 1.5 && Math.abs(b.l + b.w - (r.strip[0].l + r.strip[0].w) - (r.strip.indexOf(b) * (r.strip[1].l - r.strip[0].l))) < 1.5 && b.w >= 34 && b.h >= 44), `${tag}: viikkoliuskan päivien pitää olla 7 samanlevyistä ≥34×44 px: ${JSON.stringify(r.strip.map((b) => [Math.round(b.w), Math.round(b.h)]))}`);
-  expect(r.nav.every((b) => b.w >= 44 && b.h >= 44), `${tag}: viikkonuolten kosketuskohde < 44 px`);
-  expect(r.btns.every((b) => b.h >= 40), `${tag}: painikkeiden korkeus < 40 px: ${JSON.stringify(r.btns.map((b) => Math.round(b.h)))}`);
-  for (const c of r.contrast) expect(c.v >= 4.5, `${tag}: kontrasti ${c.sel} ${c.v.toFixed(2)} < 4.5`);
-  expect(r.names.labelled && r.names.pickLabel && r.names.current === 1, `${tag}: saavutettavuus: aria-label/label/aria-current puuttuu (${JSON.stringify(r.names)})`);
+  for (const st of empty ? ['suljettu'] : ['suljettu', 'auki']) {
+    const T = `${tag}/${st}`;
+    if (st === 'auki') { await page.locator('.bk-pc-head').first().click(); await page.waitForSelector('.bk-pc.open .bk-slot:visible'); await page.waitForTimeout(200); }
+    const r = await page.evaluate(() => {
+      const box = (el) => { const b = el.getBoundingClientRect(); return { l: b.left, r: b.right, w: b.width, h: b.height }; };
+      const app = box(document.getElementById('booking-app'));
+      const rgb = (c) => (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+      const lum = (c) => { const [r, g, b] = rgb(c).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+      const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
+      const effBg = (e) => { for (let n = e; n; n = n.parentElement) { const c = getComputedStyle(n).backgroundColor; if (rgb(c).length && !/rgba\(.*,\s*0\)$/.test(c) && c !== 'transparent') return c; } return 'rgb(255,255,255)'; };   // lähin ei-läpinäkyvä tausta
+      const cr = (sel) => [...document.querySelectorAll(sel)].map((e) => ({ sel, v: ratio(getComputedStyle(e).color, effBg(e)) }));
+      const inside = (sel) => [...document.querySelectorAll(sel)].map((e) => ({ sel, ...box(e) })).filter((b) => b.w > 0);
+      return {
+        sw: document.documentElement.scrollWidth, iw: innerWidth, app,
+        parts: [...inside('.bk-modes'), ...inside('.bk-daypick'), ...inside('.bk-strip'), ...inside('.bk-dayresults'), ...inside('.bk-slot'), ...inside('.bk-pc'), ...inside('.bk-pc-head'), ...inside('.bk-pc-panel:not([hidden])'), ...inside('.bk-notice'), ...inside('.bk-daytools input')],
+        strip: [...document.querySelectorAll('.bk-strip .bk-sd')].map(box), nav: [...document.querySelectorAll('.bk-weeknav .bk-navbtn:not(.off)')].map(box),
+        pcheads: [...document.querySelectorAll('.bk-pc-head')].map(box), btns: [...document.querySelectorAll('.bk-dayresults a.btn, .bk-modes a, .bk-today')].map(box),
+        contrast: [...cr('.bk-modes a'), ...cr('.bk-sd.free'), ...cr('.bk-sd.sel'), ...cr('.bk-badge.free'), ...cr('.bk-slot .bk-time'), ...cr('.bk-pc-name'), ...cr('.bk-pc-desc'), ...cr('.bk-pc-meta .bk-badge'), ...cr('.bk-pc-meta .bk-price'), ...cr('.bk-pc-more a'), ...cr('.bk-dayresults a.btn'), ...cr('.bk-today')],
+        names: { h2: document.querySelector('#booking-app h2')?.textContent, labelled: [...document.querySelectorAll('.bk-strip a')].every((a) => a.getAttribute('aria-label')), pickLabel: !!document.querySelector('label[for=bk-day-pick]'), current: document.querySelectorAll('.bk-strip [aria-current=date]').length },
+      };
+    });
+    expect(r.sw <= r.iw, `${T}: vaakavieritys (${r.sw} > ${r.iw})`);
+    for (const b of r.parts) expect(b.l >= r.app.l - 0.5 && b.r <= r.app.r + 0.5, `${T}: ${b.sel} ylittää sisältöalueen (${b.l.toFixed(1)}–${b.r.toFixed(1)} vs ${r.app.l.toFixed(1)}–${r.app.r.toFixed(1)})`);
+    expect(r.strip.length === 7 && r.strip.every((b) => Math.abs(b.w - r.strip[0].w) < 1.5 && Math.abs(b.l + b.w - (r.strip[0].l + r.strip[0].w) - (r.strip.indexOf(b) * (r.strip[1].l - r.strip[0].l))) < 1.5 && b.w >= 34 && b.h >= 44), `${T}: viikkoliuskan päivien pitää olla 7 samanlevyistä ≥34×44 px: ${JSON.stringify(r.strip.map((b) => [Math.round(b.w), Math.round(b.h)]))}`);
+    expect(r.nav.every((b) => b.w >= 44 && b.h >= 44), `${T}: viikkonuolten kosketuskohde < 44 px`);
+    expect(r.btns.filter((b) => b.h > 0).every((b) => b.h >= 40), `${T}: painikkeiden korkeus < 40 px: ${JSON.stringify(r.btns.map((b) => Math.round(b.h)))}`);
+    for (const c of r.contrast) expect(c.v >= 4.5, `${T}: kontrasti ${c.sel} ${c.v.toFixed(2)} < 4.5`);
+    expect(r.names.labelled && r.names.pickLabel && r.names.current === 1, `${T}: saavutettavuus: aria-label/label/aria-current puuttuu (${JSON.stringify(r.names)})`);
+    expect(r.pcheads.every((b) => b.h >= 44), `${T}: tuotekortin painikkeen korkeus < 44 px`);
+
+  }
   // näppäimistö: Tab saavuttaa päivälinkit ja Enter vaihtaa päivän
   if (!mobile && !empty) {
+    // accordion näppäimistöllä: Enter / väli avaa ja sulkee, aria-expanded päivittyy
+    await page.focus('.bk-pc-head');
+    const ex = () => page.locator('.bk-pc-head').first().getAttribute('aria-expanded');
+    const before = await ex(); await page.keyboard.press('Enter'); const afterEnter = await ex(); await page.keyboard.press('Space'); const afterSpace = await ex();
+    expect(before !== afterEnter && afterSpace === before, `${tag}: accordion ei toimi näppäimistöllä (${before} → ${afterEnter} → ${afterSpace})`);
     let hit = false; await page.focus('.bk-modes a');
     for (let i = 0; i < 40 && !hit; i++) { await page.keyboard.press('Tab'); hit = await page.evaluate(() => document.activeElement?.classList.contains('bk-sd')); }
     expect(hit, `${tag}: Tab ei saavuta viikkoliuskan päiviä`);

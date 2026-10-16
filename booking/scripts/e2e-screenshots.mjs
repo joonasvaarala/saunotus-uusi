@@ -45,24 +45,38 @@ if (process.env.ONLY !== 'admin') for (const [name, vp] of [['mobile', { width: 
     if (!/#\/paiva\/\d{4}-\d\d-\d\d$/.test(page.url())) problems.push(`shop-${name}-${lang}: päivänäkymän reitin pitää olla #/paiva/<pvm>: ${page.url()}`);
     for (let i = 0; i < 4 && (await page.locator('.bk-sd.free').count()) === 0; i++) await page.click('.bk-weeknav a[aria-label]:last-child');
     await page.locator('.bk-sd.free').last().click();
-    await page.waitForSelector('.bk-dayresults .bk-slotlist');
-    const items = await page.locator('.bk-dayresults .bk-slot').count();
-    if (items < 2) problems.push(`shop-${name}-${lang}: valitulla päivällä pitäisi olla useita vuoroja, nyt ${items}`);
-    const times = await page.locator('.bk-dayresults .bk-slot .bk-time').allInnerTexts();
-    const startMin = (x) => { const m = x.match(/(\d{1,2})(?::(\d\d))?/); return +m[1] * 60 + +(m[2] || 0); };
-    const kindsOrder = await page.locator('.bk-dayresults .bk-slotlist').evaluateAll((uls) => uls.map((ul) => [...ul.querySelectorAll('.bk-time')].map((e) => e.textContent)));
-    for (const g of kindsOrder) if (g.some((x, i) => i && startMin(x) < startMin(g[i - 1]))) problems.push(`shop-${name}-${lang}: vuorojen pitää olla aikajärjestyksessä: ${g.join(', ')}`);
-    if (!times.length || (await page.locator('.bk-dayresults').innerText()).includes('[object')) problems.push(`shop-${name}-${lang}: päivänäkymän sisältö virheellinen`);
+    await page.waitForSelector('.bk-dayresults .bk-pc');
+    // v14: ensin vain saatavilla olevat tuotteet (kortit suljettuina), ajat vasta kun tuote avataan
+    const cards = await page.locator('.bk-dayresults .bk-pc').count();
+    if (cards < 2) problems.push(`shop-${name}-${lang}: valitulla päivällä pitäisi olla useita tuotteita, nyt ${cards}`);
+    if ((await page.locator('.bk-dayresults .bk-slot:visible').count()) !== 0) problems.push(`shop-${name}-${lang}: vuorot eivät saa näkyä ennen kuin tuote avataan`);
+    if ((await page.locator('.bk-pc-head[aria-expanded=true]').count()) !== 0) problems.push(`shop-${name}-${lang}: kaikkien korttien pitää olla oletuksena suljettuina`);
+    const summaries = await page.locator('.bk-pc-head').allInnerTexts();
+    if (summaries.some((x) => !/\d/.test(x) || x.includes('[object'))) problems.push(`shop-${name}-${lang}: tuotekortin tiivistelmä (vapaita aikoja) puuttuu: ${summaries.join(' | ')}`);
+    if ((await page.locator('.bk-pc-head[aria-controls]').evaluateAll((els) => els.every((e) => document.getElementById(e.getAttribute('aria-controls'))))) !== true) problems.push(`shop-${name}-${lang}: aria-controls ei osoita paneeliin`);
     await page.addStyleTag({ content: '.site-header{position:static!important}' });
     await page.locator('#booking-app').screenshot({ path: join(OUT, `shop-${name}-${L.file}8-paiva-vuorot.png`) });
-    // Valitse → lomake (sama reitti kuin tuotteen päivänäkymästä) → takaisin päivänäkymään
+    // avaa tuote → ajat näkyviin, tila URL:ssa
+    await page.locator('.bk-pc-head').first().click();
+    await page.waitForSelector('.bk-pc.open .bk-slot:visible');
+    if ((await page.locator('.bk-pc-head').first().getAttribute('aria-expanded')) !== 'true' || !/[?]tuote=[a-z0-9-]+$/.test(page.url())) problems.push(`shop-${name}-${lang}: avattu tila ei näy aria-expanded/URL:ssa (${page.url()})`);
+    if ((await page.locator('.bk-pc.open').count()) !== 1) problems.push(`shop-${name}-${lang}: vain yhden kortin pitää olla auki`);
+    const times = await page.locator('.bk-pc.open .bk-slot .bk-time').allInnerTexts();
+    const startMin = (x) => { const m = x.match(/(\d{1,2})(?::(\d\d))?/); return +m[1] * 60 + +(m[2] || 0); };
+    if (times.some((x, i) => i && startMin(x) < startMin(times[i - 1]))) problems.push(`shop-${name}-${lang}: vuorojen pitää olla aikajärjestyksessä: ${times.join(', ')}`);
+    if ((await page.locator('.bk-dayresults').innerText()).includes('[object')) problems.push(`shop-${name}-${lang}: päivänäkymän sisältö virheellinen`);
+    await page.locator('#booking-app').screenshot({ path: join(OUT, `shop-${name}-${L.file}8c-paiva-tuote-auki.png`) });
+    // Valitse → lomake (sama reitti kuin tuotteen päivänäkymästä) → Takaisin palauttaa saman tilan (sama tuote auki)
     const dayUrl = page.url();
-    await page.locator('.bk-dayresults .bk-slot.available a.btn').first().click();
+    const openSlug = await page.locator('.bk-pc.open').getAttribute('data-slug');
+    await page.locator('.bk-pc.open .bk-slot.available a.btn').first().click();
     await page.waitForSelector('form.bk-form');
     if (!/#\/varaa\/\d+\/\d{4}-\d\d-\d\d\/\d+/.test(page.url())) problems.push(`shop-${name}-${lang}: Valitse vei väärälle reitille: ${page.url()}`);
     await page.click('#booking-app > p:first-child a');
     await page.waitForSelector('.bk-strip');
-    if (page.url() !== dayUrl) problems.push(`shop-${name}-${lang}: Takaisin-linkin pitää palata päivänäkymään (${page.url()} ≠ ${dayUrl})`);
+    if (page.url() !== dayUrl || (await page.locator('.bk-pc.open').getAttribute('data-slug').catch(() => null)) !== openSlug) problems.push(`shop-${name}-${lang}: Takaisin-linkin pitää palauttaa päivä ja avattu tuote (${page.url()} ≠ ${dayUrl})`);
+    await page.locator('.bk-pc-head[aria-expanded=true]').click();   // sulje: tuote-parametri pois URL:sta
+    if (/tuote=/.test(page.url())) problems.push(`shop-${name}-${lang}: sulkeminen ei poistanut ?tuote-parametria`);
     // tyhjä päivä: ilmoitus + ehdotus seuraavasta vapaasta päivästä
     let emptyShown = false;
     for (let i = 0; i < 28 && !emptyShown; i++) {
@@ -79,7 +93,7 @@ if (process.env.ONLY !== 'admin') for (const [name, vp] of [['mobile', { width: 
       if (!txt.includes(L.next) || (await page.locator('.bk-dayresults .bk-notice a').count()) !== 1) problems.push(`shop-${name}-${lang}: seuraavan vapaan päivän ehdotus puuttuu`);
       await page.locator('#booking-app').screenshot({ path: join(OUT, `shop-${name}-${L.file}8b-paiva-tyhja.png`) });
       await page.click('.bk-dayresults .bk-notice a');
-      await page.waitForSelector('.bk-dayresults .bk-slot.available');
+      await page.waitForSelector('.bk-dayresults .bk-pc');
     }
   }
   // yleinen vuoro → kalenteri

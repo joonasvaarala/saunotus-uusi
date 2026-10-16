@@ -153,3 +153,19 @@ a.bk-sd:hover{filter:brightness(.97)}
 .bk-daytools .bk-today{background:#fff;color:var(--green);border:1px solid var(--green);box-shadow:none}
 .bk-daytools .bk-today:hover{background:var(--green);color:#fff}
 .bk-slot-side .btn,.bk-dayresults .btn.sm{min-height:44px;display:inline-flex;align-items:center}
+/* Päivänäkymä v14: tuotekortit (accordion), ajat vasta avattaessa */
+.bk-pickhint{margin:0 0 4px}
+.bk-prods{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.bk-pc{background:var(--card);border:1px solid var(--line);border-left:5px solid #7bb28a;border-radius:var(--r);overflow:hidden}
+.bk-pc.open{border-color:var(--green);box-shadow:0 8px 22px rgba(63,53,44,.08)}
+.bk-pc-head{all:unset;box-sizing:border-box;width:100%;min-height:64px;display:flex;gap:12px;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;color:var(--ink)}
+.bk-pc-head:focus-visible{outline:3px solid #1d6fd8;outline-offset:-3px}
+.bk-pc-main{display:flex;flex-direction:column;gap:3px;min-width:0}
+.bk-pc-name{font:600 22px/1.2 var(--head);color:var(--ink);overflow-wrap:anywhere}
+.bk-pc-desc{color:var(--muted);font-size:15px;line-height:1.35}
+.bk-pc-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:4px}
+.bk-pc-chev{flex:none;width:12px;height:12px;border-right:2px solid var(--green);border-bottom:2px solid var(--green);transform:rotate(45deg);margin:0 6px 4px 0;transition:transform .15s}
+.bk-pc.open .bk-pc-chev{transform:rotate(-135deg);margin-bottom:-4px}
+.bk-pc-panel{padding:0 12px 12px;border-top:1px solid var(--line);background:var(--bg,#f4efe7)}
+.bk-pc-panel .bk-slotlist{padding-top:12px}
+.bk-pc-more{margin:12px 4px 0;font-size:15px}
