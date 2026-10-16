@@ -267,7 +267,7 @@ end $$;
 -- Oletettu rakenne (TARKISTETTAVA ennen ajoa, ks. docs/roolit-ja-kb.md):
 --   public.work_shifts(id uuid, calendar_source_id uuid, starts_at timestamptz, ends_at timestamptz, role_type text, status text, staffing_status text)
 --   public.shift_assignments(shift_id uuid, staff_id uuid)      public.staff(id uuid, name text, email text, active boolean)
---   public.calendar_sources(id uuid, name text)
+--   public.calendar_sources(id uuid, calendar_name text)
 -- Palauttaa vain: vuoro-id, ajat, tehtävätyyppi, kalenterin nimi, miehitystila ja henkilön nimi (EI puhelinta, sähköpostia eikä muistiinpanoja).
 -- shifts.view_all: kaikki vuorot (rivi / henkilö, vuoro ilman henkilöä saa tyhjän nimen). shifts.view: vain omat (public_staff_id-linkki), muiden nimiä ei näytetä.
 create or replace function booking.admin_upcoming_shifts(p_from timestamptz, p_to timestamptz)
@@ -286,7 +286,7 @@ begin
     if v_me is null then return; end if;     -- ei linkkiä työntekijään → ei omia vuoroja
   end if;
   return query
-    select ws.id, ws.starts_at, ws.ends_at, ws.role_type::text, cs.name::text, ws.staffing_status::text, ps.name::text
+    select ws.id, ws.starts_at, ws.ends_at, ws.role_type::text, cs.calendar_name::text, ws.staffing_status::text, ps.name::text
       from public.work_shifts ws
       left join public.calendar_sources cs on cs.id = ws.calendar_source_id
       left join public.shift_assignments sa on sa.shift_id = ws.id

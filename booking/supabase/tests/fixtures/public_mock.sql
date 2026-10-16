@@ -11,7 +11,7 @@ create table if not exists public.staff (
 );
 create table if not exists public.calendar_sources (
   id uuid primary key default gen_random_uuid(),
-  name text not null,
+  calendar_name text not null,
   google_calendar_id text
 );
 create table if not exists public.work_shifts (

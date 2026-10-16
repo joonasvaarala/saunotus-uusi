@@ -8,7 +8,7 @@ insert into public.staff(id, name, email, phone, active) values
   ('00000000-0000-4000-8000-0000000000e1', 'Pekka Työntekijä', 'pekka@example.com', '0401110001', true),
   ('00000000-0000-4000-8000-0000000000e2', 'Paula Vuoro',      'paula@example.com', '0401110002', true),
   ('00000000-0000-4000-8000-0000000000e3', 'Passiivinen Pena', 'pena@example.com',  '0401110003', false);
-insert into public.calendar_sources(id, name, google_calendar_id) values ('00000000-0000-4000-8000-0000000000c1', 'Savusauna-vuorot', 'secret-cal-id@group.calendar.google.com');
+insert into public.calendar_sources(id, calendar_name, google_calendar_id) values ('00000000-0000-4000-8000-0000000000c1', 'Savusauna-vuorot', 'secret-cal-id@group.calendar.google.com');
 insert into public.work_shifts(id, calendar_source_id, starts_at, ends_at, role_type, status, staffing_status, notes) values
   ('00000000-0000-4000-8000-0000000000f1', '00000000-0000-4000-8000-0000000000c1', now() + interval '1 day',  now() + interval '1 day 4 hours',  'saunottaja', 'active',    'full',    'SALAINEN-HUOMIO-A'),
   ('00000000-0000-4000-8000-0000000000f2', '00000000-0000-4000-8000-0000000000c1', now() + interval '2 days', now() + interval '2 days 4 hours', 'vastaanotto', 'active',   'full',    'SALAINEN-HUOMIO-B'),

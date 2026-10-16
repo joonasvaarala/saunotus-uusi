@@ -39,7 +39,7 @@ tarvitsen Supabase-projektiin Tapio-havuhattu uuden skeeman `booking` (oma varau
   * `public.work_shifts`: `id uuid`, `calendar_source_id uuid`, `starts_at timestamptz`, `ends_at timestamptz`, `role_type text`, `status text` (arvo `'active'`), `staffing_status text`
   * `public.shift_assignments`: `shift_id uuid`, `staff_id uuid`
   * `public.staff`: `id uuid`, `name text`, `email text`, `active boolean`
-  * `public.calendar_sources`: `id uuid`, `name text`
+  * `public.calendar_sources`: `id uuid`, `calendar_name text` (tarkistettu Bottiavustuksen toimesta)
   Jos jokin poikkeaa, **älä aja migraatiota 06 sellaisenaan**, vaan palauta minulle poikkeamat (taulu.sarake, todellinen nimi/tyyppi), niin korjaan funktioiden SELECT-osat. (Funktiot ovat plpgsql, joten väärä sarakenimi ei kaada migraatiota vaan vasta ajonaikaisen kutsun; siksi tarkistus ennen ajoa.) Funktiot toimivat SECURITY DEFINER -oikeuksilla (omistaja lukee `public`-taulut), joten `authenticated`/`anon`-rooleille **ei anneta** mitään oikeuksia `public`-tauluihin.
 * Jos työvuorotiedot puuttuvat tai haku epäonnistuu, hallinnan kalenteri näyttää varaukset ja ystävällisen huomautuksen.
 

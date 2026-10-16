@@ -69,7 +69,7 @@ insert into public.staff (id, name, email, phone, active) values
   ('00000000-0000-4000-8000-0000000000d4', 'Matti Mallivuoro',    'matti@example.com',  '0400000004', true),
   ('00000000-0000-4000-8000-0000000000d5', 'Entinen Eero',        'eero@example.com',   '0400000005', false)
 on conflict do nothing;
-insert into public.calendar_sources (id, name) values
+insert into public.calendar_sources (id, calendar_name) values
   ('00000000-0000-4000-8000-0000000000b1', 'Saunottajat'), ('00000000-0000-4000-8000-0000000000b2', 'Vastaanotto')
 on conflict do nothing;
 do $$

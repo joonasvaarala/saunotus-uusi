@@ -92,7 +92,7 @@ Tätä koodia kirjoitettaessa ei ollut yhteyttä oikeaan `public`-skeemaan, jote
 | `public.work_shifts` | `id uuid`, `calendar_source_id uuid` (→ `calendar_sources.id`), `starts_at timestamptz`, `ends_at timestamptz`, `role_type text`, `status text` (arvo `'active'` = voimassa), `staffing_status text` | vuoron aika, rooli, tila |
 | `public.shift_assignments` | `shift_id uuid` (→ `work_shifts.id`), `staff_id uuid` (→ `staff.id`) | kuka on vuorossa |
 | `public.staff` | `id uuid`, `name text`, `email text`, `active boolean` | työntekijän nimi; linkitys ja listaus (vain id, name, email, active palautetaan) |
-| `public.calendar_sources` | `id uuid`, `name text` | kalenterin nimi (`calendar_name`) |
+| `public.calendar_sources` | `id uuid`, `calendar_name text` | kalenterin nimi |
 
 Jos jokin nimi poikkeaa (esim. `full_name`, `start_time`, `is_active`), korjataan vain funktioiden `SELECT`-osat migraatiossa 06 (`_check_public_staff`, `admin_list_public_staff`, `admin_upcoming_shifts`) – muuta koodia ei tarvitse muuttaa. Testien mock: `supabase/tests/fixtures/public_mock.sql` (sisältää tahallaan myös `phone`- ja `notes`-sarakkeita todistamaan, ettei niitä vuoda).
 
