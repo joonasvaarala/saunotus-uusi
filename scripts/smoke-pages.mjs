@@ -76,11 +76,6 @@ async function newPage(name, { allowFail = null, viewport = { width: 1100, heigh
       const ds = new Date(Date.now() + 3 * 864e5).toISOString().slice(0, 10);
       return json({ therapist_conflicts: [{ reservation_id: 51, starts_at: `${ds}T12:00:00Z`, ends_at: `${ds}T13:00:00Z`, skill: 'yleinen' }], block_conflicts: [], overrides: [{ reservation_id: 52, starts_at: `${ds}T13:00:00Z`, reason: 'Sovittu asiakkaan kanssa' }], orphan_addons: [] });
     }
-    if (u.pathname.endsWith('/rpc/admin_list_products')) {   // resurssituotteet (migraatiot 14–15): hoito (nykyinen) ja vanha hoito
-      const cfg = (o) => ({ resource_class: 'resourced', min_persons: 1, max_persons: 2, duration_minutes: 60, ...o });
-      return json([{ id: 41, name: 'Hoito (nykyinen)', category: 'hoito', active: true, price: 90, config: cfg({ lifecycle: 'current', sale_kind: 'other' }) },
-        { id: 42, name: 'Vanha hoito', category: 'hoito', active: true, price: 80, config: cfg({ lifecycle: 'old', sale_kind: 'other' }) }]);
-    }
     if (u.pathname.endsWith('/rest/v1/product_space_rules')) return json([{ product_id: 41, leg_no: 1, priority: 1, space_id: 1, mode: 'exclusive', min_persons: 1, max_persons: 2, selection: 'auto', active: true }, { product_id: 42, leg_no: 1, priority: 1, space_id: 1, mode: 'exclusive', min_persons: 1, max_persons: 2, selection: 'auto', active: true }]);
     if (u.pathname.endsWith('/rest/v1/resources')) return json([{ id: 1, code: 'rauni', name: 'Hoitosauna Rauni' }, { id: 2, code: 'lovi', name: 'Hoitosauna Lovi' }]);
     if (u.pathname.endsWith('/rest/v1/payment_methods')) return json([{ code: 'pay_later', label: 'Maksetaan paikalla', is_manual: true, active: true }]);
@@ -101,6 +96,15 @@ async function newPage(name, { allowFail = null, viewport = { width: 1100, heigh
     if (u.pathname.endsWith('/rpc/admin_day_view')) {   // Uusi varaus -näkymän vuorolista: 8 vapaata vuoroa, jotta varauslomake jää aluksi ruudun alapuolelle
       const a = route.request().postDataJSON() || {}, ds = a.p_date;
       return json({ date: ds, blocks: [], reservations: [], sessions: [10, 11, 12, 13, 14, 15, 16, 17].map((h) => ({ rule_id: h, product_id: 1, label: 'Yleinen vuoro', mode: 'public', status: 'available', remaining: 6, min_persons: 1, max_persons: 10, price_mode: 'per_person', unit_price: 29, starts_at: `${ds}T${String(h - 3).padStart(2, '0')}:00:00Z`, ends_at: `${ds}T${String(h - 2).padStart(2, '0')}:00:00Z` })) });
+    }
+    if (u.pathname.endsWith('/rpc/admin_list_products')) {   // tuotelista: product_config.bookable / shop_visible / lifecycle ratkaisevat "Verkossa"; category = kb.products.category
+      const rcfg = (o) => ({ resource_class: 'resourced', min_persons: 1, max_persons: 2, duration_minutes: 60, ...o });
+      const mkp = (id, name, category, cfg) => ({ id, slug: `t${id}`, name, name_en: null, category, price: 10 * id, vat_rate: 25.5, active: true, variants: [], config: cfg });
+      const on = { bookable: true, shop_visible: true, lifecycle: 'current', sort_order: 1, min_persons: 1 };
+      return json([mkp(1, 'Yleinen vuoro', 'public_sauna', on), mkp(2, 'Tunnin vuoro', 'public_sauna', on), mkp(3, 'Oma saunavuoro', 'private_sauna', on), mkp(4, 'Saunahoito', 'treatment', { ...on, bookable: false }), mkp(5, 'Vanha hoito', 'treatment', { ...on, lifecycle: 'old' }), mkp(6, 'Lahjakortti', 'gift_card', null),
+        // resurssivarauslomakkeen tuotteet (migraatio 17): eivät ole verkossa (ei bookable-merkintää)
+        { id: 41, name: 'Hoito (nykyinen)', category: 'hoito', active: true, price: 90, config: rcfg({ lifecycle: 'current', sale_kind: 'other' }) },
+        { id: 42, name: 'Vanha hoito', category: 'hoito', active: true, price: 80, config: rcfg({ lifecycle: 'old', sale_kind: 'other' }) }]);
     }
     if (u.pathname.includes('/rpc/public_settings')) return json({ public_booking_enabled: true });
     if (u.pathname.includes('/rpc/')) return json([]);
@@ -223,6 +227,27 @@ async function loginViaInvite(page) {
   await page.waitForSelector('#shell:not([hidden]) #nav a');
   if (!calls.some((c) => c === 'PUT /auth/v1/user')) problems.push('kutsu: salasanan asetuskutsua (PUT /auth/v1/user) ei tehty');
   for (const r of ['kalenteri', 'varaukset']) { await page.evaluate((x) => { location.hash = `#/${x}`; }, r); await page.waitForTimeout(500); }
+  {   // tuotelistan suodattimet: Näkyvyys (Kaikki/Verkossa/Ei verkossa) + Kategoria + nimihaku, client-side, tila URL:ssa
+    await page.evaluate(() => { location.hash = '#/tuotteet'; });
+    await page.waitForSelector('.prodfilters');
+    const vis = page.getByRole('group', { name: 'Näkyvyys' }), cnt = () => page.locator('#view .prodcount').innerText(), nrows = () => page.locator('#view .prodcount + .list .listrow').count();
+    if ((await nrows()) !== 8 || !/^8 \/ 8 tuotetta/.test(await cnt())) problems.push(`tuotteet: oletuksena 8 / 8 tuotetta (oli ${await cnt()})`);
+    if ((await vis.getByRole('radio').count()) !== 3) problems.push('tuotteet: Näkyvyys-ryhmässä pitää olla 3 vaihtoehtoa');
+    const before = calls.length;
+    await vis.getByRole('radio', { name: /^Verkossa/ }).check();
+    if ((await nrows()) !== 3 || !/3 \/ 8 tuotetta/.test(await cnt())) problems.push(`tuotteet: Verkossa → 3 / 8 odotettiin (${await cnt()})`);
+    await vis.getByRole('radio', { name: /^Ei verkossa/ }).check();   // ei product_configia, bookable=false ja lifecycle=old kuuluvat tähän
+    if ((await nrows()) !== 5 || (await page.locator('#view .prodcount + .list .badge:text-is("Verkossa")').count()) !== 0 || !/nakyvyys=ei-verkossa/.test(page.url())) problems.push('tuotteet: Ei verkossa → 5 tuotetta ilman Verkossa-merkkiä ja URL-tila');
+    await page.selectOption('.prodcatsel', { label: 'Hoidot (2)' }).catch(() => {});   // kapea näkymä käyttää pudotusvalikkoa
+    const wide = await page.getByRole('group', { name: 'Kategoria' }).isVisible();
+    if (wide) await page.getByRole('group', { name: 'Kategoria' }).getByRole('radio', { name: /^Hoidot/ }).check();
+    if ((await nrows()) !== 2 || !/kategoria=treatment/.test(page.url())) problems.push(`tuotteet: kategoria Hoidot + Ei verkossa → 2 tuotetta (${await nrows()}; ${page.url()})`);
+    await page.fill('.prodfilters input[type=search]', 'zzz');
+    await page.waitForSelector('.prodempty');
+    await page.locator('#view .prodcount button', { hasText: 'Tyhjennä suodattimet' }).click();
+    if ((await nrows()) !== 8 || /nakyvyys|kategoria|haku/.test(page.url())) problems.push('tuotteet: Tyhjennä suodattimet palauttaa kaikki tuotteet ja puhdistaa URL:n');
+    if (calls.length !== before) problems.push(`tuotteet: suodatus teki ${calls.length - before} verkkokutsua (pitää olla client-side)`);
+  }
   {   // Johku-tunniste + lähdesuodatin (Kaikki / Uudet / Johku → p_source) varauslistassa ja varauksen tiedoissa
     await page.evaluate(() => { location.hash = '#/varaukset'; });
     await page.waitForSelector('#view .listrow');

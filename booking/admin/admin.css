@@ -199,3 +199,16 @@ h2 .icon,h3 .icon,.addon-mark .icon{display:inline-block;vertical-align:-3px;mar
 .nbsearch{display:flex;gap:8px;align-items:stretch}.nbsearch input{flex:1;min-width:0}.nbsearch .btn{min-height:44px;flex:none}
 .notfound{margin:0;padding:10px 12px;border-radius:10px;background:var(--bg);border-left:4px solid var(--green)}
 .nbform input,.nbform select,.nbform textarea{scroll-margin:76px 0 90px}
+/* tuotelista: näkyvyys- ja kategoriasuodatin (samat pikavalintapainikkeet kuin varauslistassa), tulosrivi, tyhjä tulos */
+.prodfilters{grid-template-columns:minmax(0,1fr)}
+@media(min-width:700px){.prodfilters{grid-template-columns:minmax(0,1fr)}.prodfilters>.fld{max-width:420px}}
+.prodseg .srcopt span{min-width:0;padding:0 14px}
+.prodseg .srcopt input:checked+span{background:var(--green);border-color:var(--green);color:#fff}
+.prodcount{margin:6px 0 2px;display:flex;flex-wrap:wrap;align-items:center;gap:0 4px;min-height:44px}
+.prodcount .link{min-height:44px;padding:0 6px;background:none;border:0;font:inherit;color:var(--gold);text-decoration:underline;cursor:pointer}
+.prodempty{text-align:center;padding:22px 12px;border:1px dashed var(--line);border-radius:10px;background:#fff}
+.prodempty p{margin:0 0 10px;color:var(--ink)}
+.prodcatsel-w{display:grid}
+.prodcatset{display:none}
+.prodcatsel{min-height:44px}
+@media(min-width:700px){.prodcatset{display:block}.prodcatsel-w{display:none}}
