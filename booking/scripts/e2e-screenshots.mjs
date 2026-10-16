@@ -180,6 +180,17 @@ if (process.env.ONLY !== 'shop') for (const [name, vp] of [['mobile', { width: 3
       await page.locator('.cal-day:has(.chip.shift):has(.chip.booking) .cal-dnum').first().click();
       await page.waitForSelector('.cal-detail .cal-item.booking');
       await shot(page, `admin-${name}-10c-kalenteri-paiva.png`);
+      // työvuorojen rooli ja miehitys suomeksi (ei role_type-koodeja, ei "Hoitaja"): päivä, jolla on lämmitys, saunottaja ja vastaanotto
+      await page.locator('.cal-day:has(.chip.shift[title="3 työvuoroa"]) .cal-dnum').first().click();
+      await page.waitForSelector('.cal-detail .cal-item.shift');
+      const shiftText = await page.locator('.cal-detail .cal-item.shift').allInnerTexts();
+      const all = shiftText.join('\n');
+      if (shiftText.length !== 3) problems.push(`admin-${name}: päivällä pitäisi olla 3 työvuoroa, nyt ${shiftText.length}`);
+      for (const w of ['Lämmitykset', 'Vastaanotto', 'Saunottaja', 'Miehitetty']) if (!all.includes(w)) problems.push(`admin-${name}: työvuoroista puuttuu "${w}"`);
+      if (/heater|reception|therapist|assigned|hoitaja/i.test(all.replace(/unassigned/gi, '')) || /\b(assigned|unassigned|open|full)\b/i.test(all)) problems.push(`admin-${name}: työvuoroissa näkyy englanninkielinen koodi: ${all.replace(/\n/g, ' | ')}`);
+      await page.evaluate(() => { const d = document.querySelector('.cal-detail'); window.scrollTo(0, d.getBoundingClientRect().top + scrollY - 70); });
+      await page.waitForTimeout(200);
+      await shot(page, `admin-${name}-10d-kalenteri-tyovuorot-roolit.png`, false);   // näkymän kokoinen kuva: kiinteä alavalikko ei peitä sisältöä
     }
   }
     // ---- Asiakkaat: Lisää asiakas (yksityinen / yritys) ----

@@ -10,7 +10,14 @@ const dayKey = (iso) => new Date(iso).toLocaleDateString('sv-SE', { timeZone: TZ
 const dowMon = (ds) => (new Date(`${ds}T12:00:00Z`).getUTCDay() + 6) % 7;          // ma = 0
 const fmtLong = (ds) => new Intl.DateTimeFormat('fi-FI', { timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(`${ds}T12:00:00Z`));
 const WD = ['Ma', 'Ti', 'Ke', 'To', 'Pe', 'La', 'Su'];
-const STAFFING = { full: 'Miehitetty', open: 'Avoin', partial: 'Osittain' };
+// Työvuoron rooli ja miehitys näytetään aina suomeksi: kiinteä kartoitus tietokannan koodeista (role_type, staffing_status).
+// Tuntematon role_type → kalenterin nimi (calendar_name) tai koodi sellaisenaan. "Hoitaja" yhtenäistetään saunottajaksi.
+const ROLE_FI = { heater: 'Lämmitykset', reception: 'Vastaanotto', therapist: 'Saunottaja', saunottaja: 'Saunottaja', hoitaja: 'Saunottaja' };
+const fixRole = (x) => String(x).replace(/\bhoitaja(t)?\b/gi, (_, pl) => (pl ? 'Saunottajat' : 'Saunottaja'));
+export const roleLabel = (s) => ROLE_FI[String(s.role_type || '').toLowerCase()] || fixRole(s.calendar_name || s.role_type || 'Työvuoro');
+const STAFFING = { assigned: 'Miehitetty', full: 'Miehitetty', unassigned: 'Avoin', open: 'Avoin', partial: 'Osittain' };
+export const staffingLabel = (v) => STAFFING[String(v).toLowerCase()] || v;
+const staffingTone = (v) => (['open', 'unassigned'].includes(String(v).toLowerCase()) ? 'warn' : 'ok');
 function isoWeek(ds) { const d = new Date(`${ds}T12:00:00Z`); const day = (d.getUTCDay() + 6) % 7; d.setUTCDate(d.getUTCDate() - day + 3); const y = d.getUTCFullYear(); const j = new Date(Date.UTC(y, 0, 4)); return 1 + Math.round(((d - j) / 864e5 - 3 + ((j.getUTCDay() + 6) % 7)) / 7); }
 
 export async function render({ ctx, refs, reload }) {
@@ -41,9 +48,9 @@ export async function render({ ctx, refs, reload }) {
 
   const shiftItem = (s) => h('li', { class: 'cal-item shift', 'data-kind': 'shift' },
     h('span', { class: 'cal-time', text: `${fmtTime(s.starts_at)}–${fmtTime(s.ends_at)}` }),
-    h('span', { class: 'cal-txt' }, h('strong', { text: s.role_type || 'Työvuoro' }), s.calendar_name ? h('small', { text: ` ${s.calendar_name}` }) : null,
+    h('span', { class: 'cal-txt' }, h('strong', { text: roleLabel(s) }),
       h('br'), h('span', { text: s.names.length ? s.names.join(', ') : 'Ei nimettyä henkilöä' })),
-    s.staffing_status ? badge(s.staffing_status === 'open' ? 'warn' : 'ok', STAFFING[s.staffing_status] || s.staffing_status) : null);
+    s.staffing_status ? badge(staffingTone(s.staffing_status), staffingLabel(s.staffing_status)) : null);
   const bookingItem = (r) => h('li', { class: 'cal-item booking', 'data-kind': 'booking' },
     h('span', { class: 'cal-time', text: fmtTime(r.starts_at) }),
     h('button', { type: 'button', class: 'link cal-txt', onclick: () => reservationDialog(r, { methods: refs.methods, onChange: () => draw() }) }, h('strong', { text: r.customer_name || '–' }), ` · ${r.persons} hlö`, h('br'), h('small', { text: r.product_name || '' })),

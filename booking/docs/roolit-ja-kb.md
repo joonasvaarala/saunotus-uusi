@@ -83,6 +83,8 @@ Totuus on Google Calendar → Työvuoro-Tapio-synkka → `public.work_shifts`. V
 * palauttaa vain: `shift_id, starts_at, ends_at, role_type, calendar_name, staffing_status, staff_name` (**ei** puhelinta, sähköpostia, muistiinpanoja eikä kalenteri-id:tä); yksi rivi per nimetty työntekijä;
 * enintään 62 päivän aikaväli (muuten virhe `range_too_long`; +1 h liikkumavara kesäaikasiirtymälle), käänteinen/tyhjä väli → `invalid_range`;
 * `shifts.view_all` (admin, manager) näkee kaikki; `shifts.view` (staff) vain omat vuoronsa linkin `booking.staff.public_staff_id` kautta (ei linkkiä → tyhjä lista; omalta vuorolta ei näy kollegojen nimiä); ei kumpaakaan oikeutta → virhe `forbidden`.
+* **Näyttö suomeksi (v10, vain frontend, ei SQL-muutosta):** hallinnan kalenteri (`admin/views/calendar.js`) kartoittaa `role_type`-koodit kiinteästi suomeksi: `heater` → Lämmitykset, `reception` → Vastaanotto, `therapist` → Saunottaja. Tuntemattomalle koodille näytetään `calendar_name` (sana "Hoitaja" → "Saunottaja") tai koodi sellaisenaan. `staffing_status`: `assigned`/`full` → Miehitetty, `unassigned`/`open` → Avoin, `partial` → Osittain (avoin korostetaan keltaisella), muut arvot näytetään sellaisenaan. Koodia ei näytetä käyttäjälle.
+
 `public`-taulujen lukuoikeus annetaan vain funktion omistajalle (SECURITY DEFINER): `authenticated`/`anon` eivät saa suoria oikeuksia `public`-tauluihin (testikanta todistaa tämän: mockiin ei anneta GRANTteja).
 
 ### OLETETUT `public`-sarakkeet (varmistettava ennen migraatioiden ajoa!)

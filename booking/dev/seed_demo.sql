@@ -94,7 +94,7 @@ insert into public.staff (id, name, email, phone, active) values
   ('00000000-0000-4000-8000-0000000000d5', 'Entinen Eero',        'eero@example.com',   '0400000005', false)
 on conflict do nothing;
 insert into public.calendar_sources (id, calendar_name) values
-  ('00000000-0000-4000-8000-0000000000b1', 'Saunottajat'), ('00000000-0000-4000-8000-0000000000b2', 'Vastaanotto')
+  ('00000000-0000-4000-8000-0000000000b1', 'Hoitaja'), ('00000000-0000-4000-8000-0000000000b2', 'Vastaanotto'), ('00000000-0000-4000-8000-0000000000b3', 'Lämmitykset')
 on conflict do nothing;
 do $$
 declare
@@ -106,18 +106,22 @@ begin
     if dow in (1, 2) then continue; end if;                       -- ma–ti ei vuoroja
     -- saunottajan vuoro (to–su), kolmena iltana kaksi saunottajaa
     insert into public.work_shifts (calendar_source_id, starts_at, ends_at, role_type, status, staffing_status, notes)
-      values ('00000000-0000-4000-8000-0000000000b1', ((d::timestamp + time '13:30') at time zone 'Europe/Helsinki'), ((d::timestamp + time '19:00') at time zone 'Europe/Helsinki'), 'Saunottaja', 'active', case when i % 7 = 3 then 'open' else 'full' end, 'demo-muistiinpano (ei saa näkyä)')
+      values ('00000000-0000-4000-8000-0000000000b1', ((d::timestamp + time '13:30') at time zone 'Europe/Helsinki'), ((d::timestamp + time '19:00') at time zone 'Europe/Helsinki'), 'therapist', 'active', case when i % 7 = 3 then 'unassigned' else 'assigned' end, 'demo-muistiinpano (ei saa näkyä)')
       returning id into sid;
     if i % 7 <> 3 then insert into public.shift_assignments (shift_id, staff_id) values (sid, pids[1 + (i + 14) % 4]); end if;
     if dow >= 5 then insert into public.shift_assignments (shift_id, staff_id) values (sid, pids[1 + (i + 15) % 4]); end if;
+    -- lämmittäjä aamuvuorossa (to–su), kuten tuotannossa: role_type heater, kalenterin nimi Lämmitykset
+    insert into public.work_shifts (calendar_source_id, starts_at, ends_at, role_type, status, staffing_status)
+      values ('00000000-0000-4000-8000-0000000000b3', ((d::timestamp + time '08:00') at time zone 'Europe/Helsinki'), ((d::timestamp + time '13:30') at time zone 'Europe/Helsinki'), 'heater', 'active', 'assigned') returning id into sid;
+    insert into public.shift_assignments (shift_id, staff_id) values (sid, pids[1 + (i + 16) % 4]);
     -- vastaanotto lauantaisin
     if dow = 6 then
       insert into public.work_shifts (calendar_source_id, starts_at, ends_at, role_type, status, staffing_status)
-        values ('00000000-0000-4000-8000-0000000000b2', ((d::timestamp + time '13:00') at time zone 'Europe/Helsinki'), ((d::timestamp + time '18:30') at time zone 'Europe/Helsinki'), 'Vastaanotto', 'active', 'full') returning id into sid;
+        values ('00000000-0000-4000-8000-0000000000b2', ((d::timestamp + time '13:00') at time zone 'Europe/Helsinki'), ((d::timestamp + time '18:30') at time zone 'Europe/Helsinki'), 'reception', 'active', 'assigned') returning id into sid;
       insert into public.shift_assignments (shift_id, staff_id) values (sid, '00000000-0000-4000-8000-0000000000d3');
     end if;
     -- yksi peruttu vuoro (ei saa näkyä)
-    if i = 12 then insert into public.work_shifts (calendar_source_id, starts_at, ends_at, role_type, status, staffing_status) values ('00000000-0000-4000-8000-0000000000b1', ((d::timestamp + time '10:00') at time zone 'Europe/Helsinki'), ((d::timestamp + time '12:00') at time zone 'Europe/Helsinki'), 'Saunottaja', 'cancelled', 'full'); end if;
+    if i = 12 then insert into public.work_shifts (calendar_source_id, starts_at, ends_at, role_type, status, staffing_status) values ('00000000-0000-4000-8000-0000000000b1', ((d::timestamp + time '10:00') at time zone 'Europe/Helsinki'), ((d::timestamp + time '12:00') at time zone 'Europe/Helsinki'), 'therapist', 'cancelled', 'assigned'); end if;
   end loop;
 end $$;
 update booking.staff set public_staff_id = '00000000-0000-4000-8000-0000000000d0' where user_id = '00000000-0000-4000-8000-0000000000a1';
