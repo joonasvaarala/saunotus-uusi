@@ -1,5 +1,6 @@
 // Päivittää content/reviews.json Google Places API (New) -datalla.
-// Käyttö: GOOGLE_PLACES_API_KEY=... GOOGLE_PLACE_ID=... npm run reviews:update   (--dry-run: ei kirjoita)
+// Käyttö: GOOGLE_PLACES_API_KEY=... [GOOGLE_PLACE_ID=...] npm run reviews:update   (--dry-run: ei kirjoita)
+// Jos GOOGLE_PLACE_ID puuttuu, paikka haetaan Text Searchilla ("Sipoonjoen perinnesauna Sipoo").
 // Rajoite: API palauttaa korkeintaan 5 arvostelua / kutsu, joten osio kasvaa ajan myötä (uudet lisätään, vanhoja ei poisteta).
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -34,12 +35,34 @@ export function merge(data, found) {
   return fresh;
 }
 
+// Place ID:n haku Text Searchilla (Places API (New)); valitaan tulos, jonka nimi sisältää 'Sipoonjoen perinnesauna'.
+export async function findPlaceId(apiKey) {
+  const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': apiKey, 'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress' },
+    body: JSON.stringify({ textQuery: 'Sipoonjoen perinnesauna Sipoo', languageCode: 'fi' }),
+  });
+  if (!res.ok) throw new Error(`Places Text Search: HTTP ${res.status} ${(await res.text()).slice(0, 300)}`);
+  const hit = ((await res.json()).places || []).find((p) => /sipoonjoen perinnesauna/i.test(p.displayName?.text || ''));
+  if (!hit) return null;
+  console.log(`Paikka löytyi: ${hit.id} | ${hit.displayName.text} | ${hit.formattedAddress || ''}`);
+  return hit.id;
+}
+
 async function main() {
-  const apiKey = process.env.GOOGLE_PLACES_API_KEY, placeId = process.env.GOOGLE_PLACE_ID;
-  if (!apiKey || !placeId) {
-    console.error('reviews:update: GOOGLE_PLACES_API_KEY ja GOOGLE_PLACE_ID puuttuvat. Mitään ei muutettu.\n'
-      + 'Aseta ne ympäristömuuttujiksi (Places API (New) -avain, paikan Place ID) ja aja uudelleen.');
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  let placeId = process.env.GOOGLE_PLACE_ID;
+  if (!apiKey) {
+    console.error('reviews:update: GOOGLE_PLACES_API_KEY puuttuu. Mitään ei muutettu.\n'
+      + 'Aseta se ympäristömuuttujaksi (Places API (New) -avain). GOOGLE_PLACE_ID on valinnainen: ilman sitä paikka haetaan nimellä.');
     process.exit(1);
+  }
+  if (!placeId) {
+    placeId = await findPlaceId(apiKey);
+    if (!placeId) {
+      console.error("reviews:update: Text Search ei löytänyt paikkaa, jonka nimi sisältää 'Sipoonjoen perinnesauna'. Mitään ei muutettu. Aseta GOOGLE_PLACE_ID käsin.");
+      process.exit(1);
+    }
   }
   const data = JSON.parse(readFileSync(FILE, 'utf8'));
   const found = [];

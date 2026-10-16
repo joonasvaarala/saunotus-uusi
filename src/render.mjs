@@ -157,7 +157,7 @@ export function reviewsSection(lang, { compact = false, id } = {}) {
   if (all.length < (R.min_per_lang ?? 3)) return '';
   const list = all.slice(0, compact ? 2 : R.max_per_lang ?? 4);
   const rating = String(R.place.rating).replace('.', lang === 'fi' ? ',' : '.');
-  const count = lang === 'fi' ? `${u.count} ${R.place.count}` : `${R.place.count} ${u.count}`;
+  const count = `${R.place.count} ${u.count}`;
   const cards = list.map((r) => {
     const n = Math.min(5, Math.max(0, Math.round(r.stars)));
     const long = r.text.length > 280;
