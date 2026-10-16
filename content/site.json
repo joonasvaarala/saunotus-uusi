@@ -199,7 +199,27 @@
     "more": "Lue lisää",
     "less": "Näytä vähemmän",
     "all": "Lue kaikki arvostelut Googlessa →",
-    "of": "/ 5"
+    "of": "/ 5",
+    "age": {
+     "today": "tänään",
+     "yesterday": "eilen",
+     "day": {
+      "one": "{n} päivä sitten",
+      "other": "{n} päivää sitten"
+     },
+     "week": {
+      "one": "{n} viikko sitten",
+      "other": "{n} viikkoa sitten"
+     },
+     "month": {
+      "one": "{n} kuukausi sitten",
+      "other": "{n} kuukautta sitten"
+     },
+     "year": {
+      "one": "{n} vuosi sitten",
+      "other": "{n} vuotta sitten"
+     }
+    }
    }
   },
   "en": {
@@ -314,7 +334,27 @@
     "more": "Read more",
     "less": "Show less",
     "all": "Read all reviews on Google →",
-    "of": "/ 5"
+    "of": "/ 5",
+    "age": {
+     "today": "today",
+     "yesterday": "yesterday",
+     "day": {
+      "one": "{n} day ago",
+      "other": "{n} days ago"
+     },
+     "week": {
+      "one": "{n} week ago",
+      "other": "{n} weeks ago"
+     },
+     "month": {
+      "one": "{n} month ago",
+      "other": "{n} months ago"
+     },
+     "year": {
+      "one": "{n} year ago",
+      "other": "{n} years ago"
+     }
+    }
    }
   }
  },

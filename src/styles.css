@@ -188,6 +188,8 @@ address{font-style:normal;background:var(--card);border:1px solid var(--line);bo
 .rv-more[open] .c{display:inline}
 .rv figcaption{margin-top:14px;font-size:14.5px;color:var(--ink)}
 .rv figcaption small{font:600 10px/1 var(--label);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-left:6px}
+.rv figcaption time{font-size:13px;color:var(--muted);margin-left:6px}
+.rv figcaption time::before{content:"·";margin-right:6px}
 .rv-sec.compact{padding:44px 0}
 .rv-sec.compact .rv-sum{margin-bottom:20px}
 @supports not selector(:has(*)){.rv.long .rv-q p{display:block;overflow:visible}.rv-more{display:none}}

@@ -149,6 +149,27 @@ export function pageHero(h, lang, here, o = {}) {
   return `<section class="hero page">${pic(h.img, lang, { eager: true, sizes: '100vw' })}<div class="wrap in"><h1>${e(h.title)}</h1><p>${e(h.text)}</p>${btns ? `<div class="actions">${btns}</div>` : ''}</div></section>`;
 }
 // ---- Google-arvostelut (content/reviews.json) ----
+// "Nyt" Helsingin ajassa; REVIEWS_NOW (esim. 2026-12-01 tai ISO-aika) ohittaa testausta varten.
+const nowDate = () => {
+  const v = process.env.REVIEWS_NOW;
+  const d = v ? new Date(v) : new Date();
+  if (Number.isNaN(+d)) throw new Error('REVIEWS_NOW ei ole kelvollinen päiväys: ' + v);
+  return d;
+};
+const helDay = (d) => new Date(d).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }); // YYYY-MM-DD
+// Suhteellinen ikä rakennushetken päivästä: <7 pv → päiviä (tänään/eilen), <5 vk → viikkoja, <12 kk → kuukausia, muuten vuosia.
+export function reviewAge(published, lang, now = nowDate()) {
+  const t = Date.parse(published || '');
+  if (Number.isNaN(t)) return null;
+  const [py, pm, pd] = helDay(t).split('-').map(Number), [ny, nm, nd] = helDay(now).split('-').map(Number);
+  const days = Math.max(0, Math.round((Date.UTC(ny, nm - 1, nd) - Date.UTC(py, pm - 1, pd)) / 864e5));
+  const a = ui(lang).reviews.age, f = (o, n) => (n === 1 ? o.one : o.other).replace('{n}', n);
+  const months = Math.max(1, (ny - py) * 12 + (nm - pm) - (nd < pd ? 1 : 0));
+  const text = days === 0 ? a.today : days === 1 ? a.yesterday : days < 7 ? f(a.day, days) : days < 35 ? f(a.week, Math.floor(days / 7)) : months < 12 ? f(a.month, months) : f(a.year, Math.floor(months / 12));
+  const exact = lang === 'fi' ? `${pd}.${pm}.${py}` : `${pd} ${MON_EN[pm - 1]} ${py}`;
+  return { text, exact, iso: helDay(t) };
+}
+
 // Kielen mukaiset arvostelut (stars>=4, teksti, uusin ensin). Alle min_per_lang → ei osiota lainkaan.
 export function reviewsSection(lang, { compact = false, id } = {}) {
   const R = reviewsData;
@@ -159,13 +180,15 @@ export function reviewsSection(lang, { compact = false, id } = {}) {
   const list = all.slice(0, compact ? 2 : R.max_per_lang ?? 4);
   const rating = String(R.place.rating).replace('.', lang === 'fi' ? ',' : '.');
   const count = `${R.place.count} ${u.count}`;
+  const now = nowDate();
   const cards = list.map((r) => {
+    const age = reviewAge(r.published, lang, now);
     const n = Math.min(5, Math.max(0, Math.round(r.stars)));
     const long = r.text.length > 280;
     return `<li><figure class="rv${long ? ' long' : ''}"><div class="rv-stars" role="img" aria-label="${e(u.stars.replace('{n}', n))}"><span aria-hidden="true">${'★'.repeat(n)}<i>${'★'.repeat(5 - n)}</i></span></div>`
       + `<blockquote class="rv-q"><p>${e(r.text)}</p></blockquote>`
       + (long ? `<details class="rv-more"><summary><span class="o">${e(u.more)}</span><span class="c">${e(u.less)}</span></summary></details>` : '')
-      + `<figcaption><b>${e(r.author)}</b> <small>Google</small></figcaption></figure></li>`;
+      + `<figcaption><b>${e(r.author)}</b> <small>Google</small>${age ? ` <time datetime="${e(age.iso)}" title="${e(age.exact)}">${e(age.text)}</time>` : ''}</figcaption></figure></li>`;
   }).join('');
   const inner = `${head('', u.title, '', { orn: !compact }).replace('<h2 class="sec-title">', '<h2 class="sec-title" id="rv-h">')}`
     + `<p class="rv-sum"><span class="rv-star" aria-hidden="true">★</span> <strong>${e(rating)}</strong><span class="sr"> ${e(u.of)}</span> <span class="rv-cnt">· ${e(count)}</span></p>`
