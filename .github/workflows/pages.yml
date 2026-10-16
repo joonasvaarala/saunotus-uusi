@@ -1,8 +1,11 @@
 name: Julkaise testiympäristö (GitHub Pages)
-# TESTI: SITE_ENV=test → noindex + robots Disallow. Tuotantoon tämä ei ole tarkoitettu.
+# TESTI: SITE_ENV=test → noindex + robots Disallow koko sivustolla (myös /varaa/ ja /hallinta/). Tuotantoon tämä ei ole tarkoitettu.
+# Yksi Pages-artifact: perussivusto + varauskauppa (/varaa/, /en/book/) + hallinta (/hallinta/). Rakentaa scripts/build-pages.mjs.
+# Deploy VAIN main-haarasta (push / ajastus / käsin ajettu main). Pull request ja muut haarat vain rakentavat ja tarkistavat (ei deployta).
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
   schedule:
     - cron: '15 3 * * *' # päivittäin: menneet tapahtumapäivät putoavat pois
@@ -11,8 +14,14 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
+env:
+  SITE_ENV: test
+  SITE_URL: https://joonasvaarala.github.io/saunotus-uusi
+  BOOKING_SUPABASE_URL: https://sxbofnuisemspgquoxyv.supabase.co
+  # JULKINEN publishable-avain (frontend-avain, saa olla julkinen; oikeudet määrää RLS + funktioiden GRANTit). service_role-avainta EI koskaan tähän.
+  BOOKING_ANON_KEY: sb_publishable_LZFhBH9bMAe8Q8uDI70bvQ_1cSVHCih
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,13 +30,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: SITE_ENV=test node scripts/build.mjs
-      - run: DIST=dist node scripts/check.mjs
+      - run: node --test booking/supabase/functions/admin-users/logic.test.js
+      - run: node scripts/build-pages.mjs
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
         with:
           path: dist
   deploy:
     needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

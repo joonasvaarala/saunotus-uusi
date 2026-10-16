@@ -1,0 +1,3 @@
+# Supabase-projektin asetukset, joita CLI (supabase functions deploy) käyttää. Salaisuuksia EI tallenneta tähän.
+[functions.admin-users]
+verify_jwt = true   # pyynnöllä pitää olla kirjautuneen käyttäjän JWT; admin-oikeus tarkistetaan lisäksi funktiossa (booking.is_admin)

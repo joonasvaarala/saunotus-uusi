@@ -1,5 +1,5 @@
 -- =====================================================================
--- booking 01: skeema, apufunktiot, henkilöstö, asetukset, resurssit
+-- booking 01: skeema, apufunktiot, roolit ja oikeudet, henkilöstö, asetukset, resurssit
 -- Ajetaan Bottiavustuksen kautta (Supabase-projekti Tapio-havuhattu). EI koske public- eikä kb-skeemaan
 -- (kb-skeemaan viitataan vain viiteavaimilla ja SECURITY DEFINER -funktioilla myöhemmissä migraatioissa).
 -- =====================================================================
@@ -38,36 +38,101 @@ begin
   return new;
 end $$;
 
--- ---------- henkilöstö (admin / staff) ----------
+-- ---------- roolit ja oikeudet (taulupohjaiset, helposti laajennettavat) ----------
+-- Roolit ovat DATAA: uusi rooli = uusi rivi tauluun booking.roles (+ oikeudet riveinä tauluun booking.role_permissions).
+-- Ei enum-tyyppiä eikä kovakoodattua rooliluetteloa funktioissa: funktiot kysyvät OIKEUKSIA (has_permission), eivät rooleja.
+--   is_staff = true  → henkilöstörooli (admin / manager / staff): voi saada rivin booking.staff ja pääsee hallintaan
+--   is_staff = false → ei-henkilöstörooli (customer / annual_card): EI oikeuksia hallintaan; käytetään asiakkaan tyyppinä
+--                      (booking.customers.customer_type)
+-- Uuden roolin lisääminen: ks. README "Roolit" / docs/roolit-ja-kb.md.
+create table booking.roles (
+  code        text primary key check (code ~ '^[a-z][a-z0-9_]{1,30}$'),
+  label       text not null,
+  description text,
+  is_staff    boolean not null,
+  sort_order  integer not null default 100,
+  active      boolean not null default true,
+  created_at  timestamptz not null default now(),
+  unique (code, is_staff)                          -- tarvitaan yhdistelmäavaimelle (staff.role / customers.customer_type)
+);
+comment on table booking.roles is 'Roolit (taulupohjainen, ei enumia). is_staff=false: asiakasroolit ilman hallintaoikeuksia.';
+
+-- Oikeuskoodit (hallinnan toiminnot). Funktiot tarkistavat oikeuden, eivät roolinimeä.
+create table booking.role_permissions (
+  role_code  text not null references booking.roles(code) on delete cascade,
+  permission text not null check (permission ~ '^[a-z_]+\.[a-z_]+$'),
+  primary key (role_code, permission)
+);
+comment on table booking.role_permissions is
+  'Rooli → oikeus. Oikeudet: bookings.manage, customers.manage, payments.manage, blocks.manage, catalog.edit (tuotteet/hinnat/kuvaukset), '
+  'settings.edit, resources.edit (kapasiteettipoolit), rules.edit (vuorosäännöt), annual_cards.manage, staff.manage (käyttäjä- ja roolihallinta, vain admin), audit.read, '
+  'shifts.view (omat työvuorot), shifts.view_all (kaikkien työvuorot; lukunäkymä public-skeeman vuorodataan).';
+
+insert into booking.roles(code, label, description, is_staff, sort_order) values
+  ('admin',       'Pääkäyttäjä (admin)',   'Kaikki oikeudet, myös henkilöstön ja roolien hallinta',                                 true,  10),
+  ('manager',     'Ylläpitäjä (manager)', 'Varaukset + hinnat, kuvaukset, tuoteasetukset, asetukset, resurssit ja vuorosäännöt; ei henkilöstön hallintaa', true, 20),
+  ('staff',       'Peruskäyttäjä (staff)','Näkee ja luo/muokkaa varauksia ja asiakkaita; ei hinnan/tuotteen/asetusten muokkausta',  true,  30),
+  ('customer',    'Asiakas',              'Tavallinen asiakas. Ei oikeuksia hallintaan (asiakkaan oma kirjautuminen tulee myöhemmin)', false, 100),
+  ('annual_card', 'Vuosikorttiasiakas',   'Voi tehdä ilmaisia varauksia yleisille vuoroille (yksi tuleva varaus kerrallaan)',      false, 110);
+
+insert into booking.role_permissions(role_code, permission)
+select r.code, p.permission
+  from (values
+    ('admin','bookings.manage'),('admin','customers.manage'),('admin','payments.manage'),('admin','blocks.manage'),
+    ('admin','catalog.edit'),('admin','settings.edit'),('admin','resources.edit'),('admin','rules.edit'),
+    ('admin','annual_cards.manage'),('admin','staff.manage'),('admin','audit.read'),('admin','shifts.view'),('admin','shifts.view_all'),
+    ('manager','bookings.manage'),('manager','customers.manage'),('manager','payments.manage'),('manager','blocks.manage'),
+    ('manager','catalog.edit'),('manager','settings.edit'),('manager','resources.edit'),('manager','rules.edit'),
+    ('manager','annual_cards.manage'),('manager','shifts.view_all'),
+    ('staff','bookings.manage'),('staff','customers.manage'),('staff','payments.manage'),('staff','blocks.manage'),('staff','shifts.view')
+  ) as p(role_code, permission)
+  join booking.roles r on r.code = p.role_code;
+
+-- ---------- henkilöstö (hallinnan käyttäjät) ----------
+-- role viittaa roles-tauluun; generoitu role_is_staff=true + yhdistelmäavain estää ei-henkilöstöroolien (customer, annual_card) käytön tässä.
 create table booking.staff (
   user_id    uuid primary key references auth.users(id) on delete cascade,
   email      text,
   name       text not null,
-  role       text not null check (role in ('admin','staff')),
+  role       text not null,
+  role_is_staff boolean not null generated always as (true) stored,
   active     boolean not null default true,
+  public_staff_id uuid unique,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  constraint staff_role_fk foreign key (role, role_is_staff) references booking.roles(code, is_staff)
 );
-comment on table booking.staff is 'Hallinnan käyttäjät. Vain täällä oleva aktiivinen käyttäjä pääsee hallintaan (auth.uid()).';
+comment on column booking.staff.public_staff_id is
+  'Viittaa LÖYHÄSTI public.staff.id:hen (Työvuoro-Tapio). EI viiteavainta public-skeemaan: booking ei saa riippua public-skeeman rakenteesta eikä kirjoittaa sinne. Käytetään vain omien työvuorojen näyttämiseen (admin_upcoming_shifts).';
+comment on table booking.staff is 'Hallinnan käyttäjät. Vain täällä oleva aktiivinen käyttäjä pääsee hallintaan (auth.uid()). role → booking.roles (is_staff=true).';
 create trigger staff_updated before update on booking.staff for each row execute function booking.set_updated_at();
 
 -- Apufunktiot RLS:lle ja funktioille. SECURITY DEFINER, jotta ne näkevät staff-taulun RLS:stä huolimatta.
 create or replace function booking.current_staff_role()
 returns text language sql stable security definer set search_path = '' as $$
-  select s.role from booking.staff s where s.user_id = auth.uid() and s.active
+  select s.role from booking.staff s join booking.roles r on r.code = s.role and r.active and r.is_staff
+   where s.user_id = auth.uid() and s.active
 $$;
 
 create or replace function booking.is_staff()
 returns boolean language sql stable security definer set search_path = '' as $$
-  select coalesce(booking.current_staff_role() in ('admin','staff'), false)
+  select booking.current_staff_role() is not null
 $$;
 
+-- Onko kirjautuneella käyttäjällä oikeus (rooli → role_permissions). Kaikki hallinnan tarkistukset kulkevat tämän kautta.
+create or replace function booking.has_permission(p_permission text)
+returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from booking.role_permissions rp
+                  where rp.role_code = booking.current_staff_role() and rp.permission = p_permission)
+$$;
+
+-- admin = rooli 'admin' (säilytetty yhteensopivuuden vuoksi; uusi koodi käyttää has_permission)
 create or replace function booking.is_admin()
 returns boolean language sql stable security definer set search_path = '' as $$
   select coalesce(booking.current_staff_role() = 'admin', false)
 $$;
 
--- Nostaa virheen jos kutsuja ei ole staff/admin (käytetään admin_*-funktioissa)
+-- Nostaa virheen jos kutsuja ei ole henkilöstöä (käytetään admin_*-funktioissa)
 create or replace function booking._require_staff()
 returns void language plpgsql stable security definer set search_path = '' as $$
 begin
@@ -77,6 +142,15 @@ create or replace function booking._require_admin()
 returns void language plpgsql stable security definer set search_path = '' as $$
 begin
   if not booking.is_admin() then perform booking._err('forbidden', 'Vain ylläpitäjä (admin)'); end if;
+end $$;
+-- Vaatii nimetyn oikeuden. Ei-henkilöstö saa "Ei oikeuksia", henkilöstö ilman oikeutta "Ei oikeutta tähän toimintoon (<oikeus>)".
+create or replace function booking._require_permission(p_permission text)
+returns void language plpgsql stable security definer set search_path = '' as $$
+begin
+  if not booking.is_staff() then perform booking._err('forbidden', 'Ei oikeuksia'); end if;
+  if not booking.has_permission(p_permission) then
+    perform booking._err('forbidden', 'Ei oikeutta tähän toimintoon (' || p_permission || ')');
+  end if;
 end $$;
 
 -- ---------- asetukset (avain → jsonb) ----------
@@ -92,7 +166,7 @@ create trigger settings_updated before update on booking.settings for each row e
 
 -- ---------- resurssit ----------
 -- space = fyysinen tila / poissulkevuusalue (Savusauna): yksityisvuoro vie koko tilan.
--- capacity_pool = samanaikaisten henkilöiden enimmäismäärä tilassa (esim. 'yleinen_arki' 16, 'yleinen_vkp' 6, 'turve' 8).
+-- capacity_pool = henkilöiden enimmäismäärä (esim. 'yleinen_arki' 16, 'turve' 8; viikonloppuna oma pooli per aloitusaika: 'yleinen_vkp_1400' 6 …).
 -- person = työntekijä (saunottaja), varattu myöhemmin hoitovarauksiin.
 create table booking.resources (
   id             bigint generated always as identity primary key,
@@ -149,8 +223,8 @@ begin
   if tg_op in ('UPDATE','DELETE') then o := to_jsonb(old); end if;
   if tg_op in ('INSERT','UPDATE') then n := to_jsonb(new); end if;
   if tg_op = 'UPDATE' and o = n then return null; end if;
-  pk := coalesce(n ->> 'id', n ->> 'key', n ->> 'user_id', n ->> 'product_id',
-                 o ->> 'id', o ->> 'key', o ->> 'user_id', o ->> 'product_id');
+  pk := coalesce(n ->> 'id', n ->> 'key', n ->> 'user_id', n ->> 'product_id', n ->> 'code',
+                 o ->> 'id', o ->> 'key', o ->> 'user_id', o ->> 'product_id', o ->> 'code');
   insert into booking.audit_log(actor, actor_role, table_name, row_pk, action, old_data, new_data)
   values (auth.uid(), booking._jwt_role(), tg_table_name, pk, tg_op, o, n);
   return null;
@@ -163,7 +237,11 @@ begin
   execute format('create trigger audit_trg after insert or update or delete on %s for each row execute function booking.audit_trg()', p_table);
 end $$;
 
-select booking._add_audit('booking.staff');
-select booking._add_audit('booking.settings');
-select booking._add_audit('booking.resources');
-select booking._add_audit('booking.product_config');
+do $$ begin
+  perform booking._add_audit('booking.roles');
+  perform booking._add_audit('booking.role_permissions');
+  perform booking._add_audit('booking.staff');
+  perform booking._add_audit('booking.settings');
+  perform booking._add_audit('booking.resources');
+  perform booking._add_audit('booking.product_config');
+end $$;

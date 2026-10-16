@@ -6,8 +6,14 @@
 --  2. Yleinen vuoro (mode='shared') ei voi olla päällekkäin aktiivisen yksityisvuoron kanssa.
 --     => yksi henkilökin yleisellä vuorolla estää yksityisvuoron samalle ajalle ja päinvastoin.
 --  3. Yleisten vuorojen samanaikainen henkilömäärä jokaisessa kapasiteettipoolissa <= pool.capacity (huippukuorma
---     varauksen ajalta: limittäiset vuorot lasketaan yhteen).
+--     varauksen ajalta: samassa poolissa limittäiset varaukset lasketaan yhteen). Kapasiteetti on siis POOLIKOHTAINEN:
+--     la–su jokaisella aloitusajalla on oma pooli (2 h vuorot 6 hlö / aloitusaika, tunnin vuorot 10 hlö / aloitusaika),
+--     ma–to jaettu pooli (16; torstaina turvesauna 8 + yleinen 17–19 jakavat 16:n). Pooli-jäsenyys tulee säännöltä
+--     (schedule_rule_pools) ja kopioidaan varaukselle.
 --  4. Sulku (space_blocks) estää kaiken.
+--  5. Vuosikorttivaraus (annual_card_id): vain yleinen vuoro, ilmainen (tilauksen summa 0), kortin ja asiakkaan täsmättävä,
+--     kortti aktiivinen ja voimassa vuoron päivänä, enintään asetuksen annual_card_max_persons henkilöä, ja kortilla
+--     saa olla vain YKSI tuleva aktiivinen varaus kerrallaan.
 -- Kilpailutilanteet: jokainen kirjoitus ottaa tila-kohtaisen pg_advisory_xact_lock-lukon ennen tarkistusta,
 -- joten kaksi samanaikaista varausta serialisoituvat. Lisäksi exclusion constraint estää yksityisvuorojen
 -- päällekkäisyyden vaikka trigger ohitettaisiin.
@@ -93,6 +99,7 @@ returns trigger language plpgsql security definer set search_path = '' as $$
 declare
   v_range tstzrange := tstzrange(new.starts_at, new.ends_at, '[)');
   v_pool bigint; v_cap integer; v_peak integer;
+  v_card booking.annual_cards; v_order_total numeric; v_order_cust bigint;
 begin
   if new.status not in ('pending','confirmed') then
     return new;
@@ -101,7 +108,8 @@ begin
   if tg_op = 'UPDATE' and booking._res_active(old.status, old.hold_expires_at)
      and old.space_id = new.space_id and old.mode = new.mode
      and old.starts_at = new.starts_at and old.ends_at = new.ends_at
-     and old.persons = new.persons and old.pool_ids = new.pool_ids then
+     and old.persons = new.persons and old.pool_ids = new.pool_ids
+     and old.annual_card_id is not distinct from new.annual_card_id then
     return new;
   end if;
 
@@ -118,6 +126,39 @@ begin
   if exists (select 1 from booking.space_blocks b
               where b.active and b.space_id = new.space_id and b.during && v_range) then
     perform booking._err('space_closed', 'Aika ei ole varattavissa (tila suljettu)');
+  end if;
+
+  -- 5. vuosikortti: kortin säännöt moottoritasolla (kortti-lukko tilalukon jälkeen; lukitusjärjestys aina tila → kortti)
+  if new.annual_card_id is not null then
+    perform pg_advisory_xact_lock(hashtextextended('booking:card:' || new.annual_card_id::text, 0));
+    select * into v_card from booking.annual_cards where id = new.annual_card_id;
+    if not found or not v_card.active then
+      perform booking._err('annual_card_inactive', 'Vuosikortti ei ole voimassa');
+    end if;
+    if new.mode <> 'shared' then
+      perform booking._err('annual_card_shared_only', 'Vuosikortilla voi varata vain yleisiä vuoroja (ei yksityisvuoroja)');
+    end if;
+    if (new.starts_at at time zone booking._tz())::date not between v_card.valid_from and v_card.valid_to then
+      perform booking._err('annual_card_expired', 'Vuosikortti ei ole voimassa vuoron päivänä');
+    end if;
+    select o.total_gross, o.customer_id into v_order_total, v_order_cust from booking.orders o where o.id = new.order_id;
+    if v_order_total is distinct from 0 then
+      perform booking._err('annual_card_must_be_free', 'Vuosikorttivarauksen hinta on 0 €');
+    end if;
+    if v_order_cust is distinct from v_card.customer_id then
+      perform booking._err('annual_card_customer_mismatch', 'Vuosikortti kuuluu toiselle asiakkaalle');
+    end if;
+    if new.persons > coalesce((booking._setting('annual_card_max_persons', '1'::jsonb) #>> '{}')::int, 1) then
+      perform booking._err('annual_card_persons', format('Vuosikorttivarauksessa enintään %s henkilöä',
+              coalesce((booking._setting('annual_card_max_persons', '1'::jsonb) #>> '{}')::int, 1)));
+    end if;
+    -- yksi tuleva aktiivinen varaus kerrallaan (menneeseen/käynnissä olevaan kirjaukseen rajaa ei sovelleta)
+    if new.starts_at > now() and exists (
+         select 1 from booking.reservations r
+          where r.annual_card_id = new.annual_card_id and r.id is distinct from new.id
+            and booking._res_active(r.status, r.hold_expires_at) and r.starts_at > now()) then
+      perform booking._err('annual_card_limit', 'Vuosikortilla voi olla vain yksi tuleva varaus kerrallaan');
+    end if;
   end if;
 
   if new.mode = 'exclusive' then

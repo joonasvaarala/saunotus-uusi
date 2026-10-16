@@ -61,6 +61,8 @@ create table booking.space_blocks (
 );
 create index space_blocks_idx on booking.space_blocks using gist (space_id, during) where active;
 
-select booking._add_audit('booking.schedule_rules');
-select booking._add_audit('booking.schedule_rule_pools');
-select booking._add_audit('booking.space_blocks');
+do $$ begin
+  perform booking._add_audit('booking.schedule_rules');
+  perform booking._add_audit('booking.schedule_rule_pools');
+  perform booking._add_audit('booking.space_blocks');
+end $$;

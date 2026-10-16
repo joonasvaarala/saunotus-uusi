@@ -37,10 +37,11 @@ for (const f of files) {
     const u = m[1]; nLinks++;
     if (/^(mailto:|tel:|data:)/.test(u) || u === '') continue;
     if (/^https?:/.test(u)) { if (!u.startsWith('http://localhost') && !/\/\/(uusi\.saunotus\.com|joonasvaarala\.github\.io)/.test(u)) externals.set(u, where); else if (/\/\/(uusi\.saunotus\.com|joonasvaarala\.github\.io)/.test(u) && /<link/.test(m.input.slice(m.index - 30, m.index))) {} continue; }
-    if (u.startsWith('#')) { if (u.length > 1 && !ids.get(f).has(u.slice(1))) errs.push(`${where}: ankkuri ${u} puuttuu`); continue; }
+    if (u.startsWith('#')) { if (u.length > 1 && !/^#[/?]/.test(u) && !ids.get(f).has(u.slice(1))) errs.push(`${where}: ankkuri ${u} puuttuu`); continue; }
     if (!exists(u)) { errs.push(`${where}: rikki ${u}`); continue; }
     const hash = u.split('#')[1];
-    if (hash) { const tf = fileOf(u); if (ids.get(tf) && !ids.get(tf).has(hash)) errs.push(`${where}: ankkuri #${hash} puuttuu sivulta ${u}`); }
+    // varauskaupan SPA-reitit (#/tuote/…, #/?k=…) ja SPA-sivun omat ankkurit eivät ole dokumenttiankkureita
+    if (hash && !/^[/?]/.test(hash)) { const tf = fileOf(u); if (ids.get(tf) && !ids.get(tf).has(hash) && !htmlOf.get(tf)?.includes('id="booking-app"')) errs.push(`${where}: ankkuri #${hash} puuttuu sivulta ${u}`); }
   }
   for (const m of h.matchAll(/(?:srcset|imagesrcset)="([^"]*)"/g)) for (const part of m[1].split(',')) { const u = part.trim().split(/\s+/)[0]; if (u && !exists(u)) errs.push(`${where}: srcset rikki ${u}`); }
   for (const m of h.matchAll(/url\((\/[^)]+)\)/g)) if (!exists(m[1])) errs.push(`${where}: css url rikki ${m[1]}`);

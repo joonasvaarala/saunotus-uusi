@@ -1,0 +1,92 @@
+/* Varauskaupan tyylit: käyttää sivuston CSS-muuttujia (--ink, --gold, --green, --card, --line …). Kevyt, mobiili ensin. */
+#booking-app{min-height:40vh}
+#booking-app h2{font-size:clamp(28px,4.5vw,40px);margin-bottom:.4em}
+#booking-app h3{font-size:24px;margin:1.2em 0 .5em}
+.bk-head{text-align:center;margin-bottom:18px}
+.bk-head .lead{max-width:36em;margin-inline:auto}
+.bk-loading{text-align:center;padding:60px 0;color:var(--muted)}
+.bk-error{background:#fbeaea;border:1px solid #c0392b;color:#7b1d12;padding:12px 16px;border-radius:var(--r);margin:12px 0}
+.bk-ok{background:#e8f3ea;border:1px solid #2f7a45;color:#1d4d2b;padding:12px 16px;border-radius:var(--r)}
+.bk-notice{background:var(--tint);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;margin:20px 0}
+.bk-note{color:var(--muted);font-size:15px}
+.bk-contact a{font-weight:700}
+/* tuotelista */
+.bk-tabs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 22px}
+.bk-tabs a{font:600 12px/1 var(--label);letter-spacing:.08em;text-transform:uppercase;text-decoration:none;padding:12px 16px;border:1px solid var(--line);border-radius:30px;background:#fff;color:var(--ink)}
+.bk-tabs a[aria-current]{background:var(--green);color:#fff;border-color:var(--green)}
+.bk-cards{list-style:none;margin:0;padding:0;display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr))}
+.bk-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:6px;box-shadow:0 8px 22px rgba(63,53,44,.07)}
+.bk-card h3{margin:0;font-size:25px}
+.bk-card h3 a{color:var(--ink);text-decoration:none}
+.bk-card h3 a:hover{color:var(--gold)}
+.bk-card .bk-desc{flex:1;font-size:16px;margin:0}
+.bk-card .btn{align-self:flex-start;margin-top:6px}
+.bk-meta{margin:0;color:var(--muted)}
+.bk-meta strong{color:var(--ink)}
+/* kalenteri */
+.bk-cal{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;max-width:460px}
+.bk-calnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.bk-calnav strong{font:600 18px var(--head);text-transform:capitalize;font-size:22px}
+.bk-calnav button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:24px;line-height:1;cursor:pointer;color:var(--ink)}
+.bk-calnav button:disabled{opacity:.35;cursor:default}
+.bk-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.bk-wd{text-align:center;font:600 11px var(--label);text-transform:uppercase;color:var(--muted);padding:4px 0}
+.bk-cell{aspect-ratio:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid transparent;font:600 16px var(--body);background:transparent;color:var(--ink)}
+.bk-cell.empty{visibility:hidden}
+.bk-cell.off{color:#a79d92;font-weight:400}
+button.bk-cell{cursor:pointer;background:#fff;border-color:var(--line)}
+button.bk-cell.free{background:#e8f3ea;border-color:#7bb28a;color:#1d4d2b}
+button.bk-cell.full{background:#f3eeee;border-color:#d4b9b9;color:#7b4a4a;text-decoration:line-through}
+button.bk-cell.unavail{background:#f1efec;border-color:var(--line);color:#7a7168}
+button.bk-cell.today{box-shadow:inset 0 0 0 2px var(--gold)}
+button.bk-cell.sel{background:var(--green);border-color:var(--green);color:#fff;text-decoration:none}
+button.bk-cell:hover{filter:brightness(.97)}
+.bk-legend{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:14px;color:var(--muted);margin:12px 0 0}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;border:1px solid var(--line);margin-right:4px;vertical-align:-1px}
+.dot.free{background:#7bb28a}.dot.full{background:#d4b9b9}.dot.unavail{background:#cfc8bf}
+/* vuorot */
+.bk-slotlist{list-style:none;margin:0;padding:0;display:grid;gap:10px;max-width:760px}
+.bk-slot{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-left:5px solid #7bb28a;border-radius:var(--r);padding:14px 16px}
+.bk-slot.full{border-left-color:#d4b9b9;opacity:.85}
+.bk-slot.unavailable{border-left-color:#bdb5ab;opacity:.8}
+.bk-slot-main{display:flex;flex-direction:column;gap:2px}
+.bk-time{font:600 22px var(--head);font-size:26px;color:var(--ink)}
+.bk-sub{color:var(--muted);font-size:15px}
+.bk-price{font-size:15px}
+.bk-slot-side{display:flex;align-items:center;gap:12px}
+.bk-badge{font:600 12px var(--label);padding:6px 10px;border-radius:30px;background:#e8f3ea;color:#1d4d2b;white-space:nowrap}
+.bk-badge.full{background:#f3e3e3;color:#7b2d2d}.bk-badge.unavailable{background:#ece8e3;color:#5b524a}
+/* lomake */
+.bk-checkout{display:grid;gap:26px;align-items:start}
+@media(min-width:900px){.bk-checkout{grid-template-columns:minmax(0,1.4fr) minmax(280px,1fr)}.bk-aside{position:sticky;top:90px}}
+.bk-form fieldset{border:0;margin:0 0 6px;padding:0}
+.bk-form legend{font:600 13px var(--label);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;padding:0}
+.bk-stepper{display:inline-flex;align-items:center;gap:8px}
+.bk-step{width:48px;height:48px;border-radius:50%;border:1px solid var(--ink);background:#fff;font-size:26px;cursor:pointer;color:var(--ink)}
+.bk-step:disabled{opacity:.35;cursor:default}
+.bk-stepper input{width:72px;height:48px;text-align:center;font:600 20px var(--body);border:1px solid var(--line);border-radius:10px;background:#fff}
+.bk-field{margin:0 0 14px}
+.bk-field label{display:block;font-weight:700;margin-bottom:4px;font-size:15px}
+.bk-field input,.bk-field textarea{width:100%;font:400 17px var(--body);padding:12px 14px;border:1px solid #8b7f73;border-radius:10px;background:#fff;color:var(--ink)}
+.bk-field input:focus,.bk-field textarea:focus{outline:3px solid #1d6fd8;outline-offset:1px}
+.bk-check{display:flex;gap:10px;align-items:flex-start;margin:0 0 12px;font-size:15px}
+.bk-check input{width:22px;height:22px;margin-top:2px;flex:none;accent-color:var(--green)}
+.bk-form .btn{width:100%;font-size:14px;padding:18px;cursor:pointer}
+.bk-form .btn:disabled{opacity:.6;cursor:default}
+.bk-aside{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px}
+.bk-aside h3{margin-top:0}
+.bk-sum{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0 0 12px}
+.bk-sum dt{font:600 12px var(--label);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding-top:4px}
+.bk-sum dd{margin:0;font-weight:700;color:var(--ink)}
+.bk-totalrow{font-size:20px;border-top:1px solid var(--line);padding-top:12px;margin:0 0 8px}
+.bk-total{font:600 30px var(--head);color:var(--ink)}
+.bk-pay{font-size:15px;color:var(--muted);margin:0}
+/* vahvistus */
+.bk-conf{max-width:640px;margin-inline:auto;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px}
+.bk-conf .bk-status{display:inline-block;font:600 13px var(--label);padding:8px 14px;border-radius:30px;background:#e8f3ea;color:#1d4d2b}
+.bk-conf.pending .bk-status{background:#fdf1d8;color:#6b4b00}
+.bk-conf.cancelled .bk-status,.bk-conf.expired .bk-status{background:#f3e3e3;color:#7b2d2d}
+.bk-actions{display:flex;flex-wrap:wrap;gap:12px;margin:16px 0}
+.bk-actions .btn{cursor:pointer}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+#booking-app [tabindex="-1"]:focus{outline:none}

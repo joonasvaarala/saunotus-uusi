@@ -18,6 +18,12 @@ create table booking.customers (
   country       text not null default 'FI',
   language      text not null default 'fi' check (language in ('fi','en','sv')),
   notes         text,                         -- sisäinen muistiinpano (Johku: description)
+  -- asiakkaan tyyppi (booking.roles, is_staff=false): customer | annual_card | tulevat roolit. 'annual_card' ylläpidetään
+  -- automaattisesti annual_cards-taulun triggerillä; ei muokattavissa hallinnan asiakaslomakkeelta.
+  customer_type text not null default 'customer',
+  customer_type_is_staff boolean not null generated always as (false) stored,
+  -- asiakkaan oma kirjautuminen (Supabase Auth) – VALMIS RAKENNE, ei käytössä vielä: itsepalvelu toteutetaan myöhemmin.
+  auth_user_id  uuid unique references auth.users(id) on delete set null,
   -- markkinointisuostumus (GDPR): milloin, mistä ja minkä tekstiversion perusteella
   marketing_consent              boolean not null default false,
   marketing_consent_at           timestamptz,
@@ -32,6 +38,7 @@ create table booking.customers (
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now(),
   constraint customers_consent_has_time check (not marketing_consent or marketing_consent_at is not null),
+  constraint customers_type_fk foreign key (customer_type, customer_type_is_staff) references booking.roles(code, is_staff),
   constraint customers_name_len check (char_length(name) between 1 and 200),
   constraint customers_ext_pair check ((external_source is null) = (external_id is null))
 );
@@ -179,6 +186,44 @@ create index order_items_order_idx on booking.order_items(order_id);
 create index order_items_product_idx on booking.order_items(product_id);
 create unique index order_items_external_uq on booking.order_items(external_source, external_id) where external_source is not null;
 
+-- ---------- vuosikortit ----------
+-- Vuosikorttiasiakas saa varata ILMAISEKSI yleisiä vuoroja (mode='shared'); voimassa saa olla vain yksi tuleva aktiivinen varaus
+-- kerrallaan. Pakotus on moottorissa (trigger booking.reservations_validate, migraatio 04), ei vain käyttöliittymässä.
+-- Kortti = rivi tässä taulussa (asiakas + voimassaoloaika). Poisto = active=false (rivi säilyy historiana).
+create table booking.annual_cards (
+  id          bigint generated always as identity primary key,
+  customer_id bigint not null references booking.customers(id),
+  valid_from  date not null,
+  valid_to    date not null,
+  active      boolean not null default true,
+  notes       text,                                  -- huomautukset (esim. maksettu / kortin numero)
+  revoked_at  timestamptz,
+  revoked_by  uuid,
+  created_by  uuid,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now(),
+  constraint annual_cards_range_ok check (valid_to >= valid_from),
+  -- asiakkaalla voi olla vain yksi aktiivinen kortti kullakin ajanjaksolla
+  constraint annual_cards_no_overlap exclude using gist (customer_id with =, daterange(valid_from, valid_to, '[]') with &&) where (active)
+);
+create index annual_cards_customer_idx on booking.annual_cards(customer_id);
+create trigger annual_cards_updated before update on booking.annual_cards for each row execute function booking.set_updated_at();
+
+-- Pitää customers.customer_type synkassa: aktiivinen kortti → 'annual_card', ei aktiivista korttia → 'customer'
+-- (muihin tuleviin asiakastyyppeihin ei kosketa).
+create or replace function booking.annual_cards_sync_type()
+returns trigger language plpgsql security definer set search_path = '' as $$
+declare v_cust bigint := coalesce(new.customer_id, old.customer_id);
+begin
+  if exists (select 1 from booking.annual_cards c where c.customer_id = v_cust and c.active) then
+    update booking.customers set customer_type = 'annual_card' where id = v_cust and customer_type = 'customer';
+  else
+    update booking.customers set customer_type = 'customer' where id = v_cust and customer_type = 'annual_card';
+  end if;
+  return null;
+end $$;
+create trigger annual_cards_sync after insert or update or delete on booking.annual_cards for each row execute function booking.annual_cards_sync_type();
+
 -- ---------- varaukset ----------
 -- mode: shared = yleinen vuoro (kapasiteetti), exclusive = yksityisvuoro (vie koko tilan)
 -- Invarianttien valvonta: trigger booking.reservations_validate (migraatio 04) + exclusion constraint.
@@ -188,6 +233,7 @@ create table booking.reservations (
   order_item_id  bigint references booking.order_items(id) on delete set null,
   product_id     bigint references kb.products(id),
   rule_id        bigint,                                   -- FK schedule_rules (migraatio 03)
+  annual_card_id bigint references booking.annual_cards(id), -- vuosikorttivaraus (ilmainen, vain yleinen vuoro); säännöt: trigger migraatiossa 04
   space_id       bigint not null references booking.resources(id),
   mode           text not null check (mode in ('shared','exclusive')),
   starts_at      timestamptz not null,
@@ -221,6 +267,7 @@ create unique index reservations_external_uq on booking.reservations(external_so
 create index reservations_space_time_idx on booking.reservations using gist (space_id, during) where status in ('pending','confirmed');
 create index reservations_starts_idx on booking.reservations(starts_at);
 create index reservations_order_idx on booking.reservations(order_id);
+create index reservations_card_idx on booking.reservations(annual_card_id) where annual_card_id is not null;
 create index reservations_status_idx on booking.reservations(status, hold_expires_at);
 create trigger reservations_updated before update on booking.reservations for each row execute function booking.set_updated_at();
 
@@ -324,17 +371,20 @@ create table booking.rate_limit_hits (
 create index rate_limit_bucket_idx on booking.rate_limit_hits(bucket, at desc);
 
 -- ---------- audit-triggerit ----------
-select booking._add_audit('booking.customers');
-select booking._add_audit('booking.orders');
-select booking._add_audit('booking.order_items');
-select booking._add_audit('booking.reservations');
-select booking._add_audit('booking.payments');
-select booking._add_audit('booking.payment_methods');
-select booking._add_audit('booking.discount_codes');
-select booking._add_audit('booking.gift_cards');
-select booking._add_audit('booking.gift_card_ledger');
-select booking._add_audit('booking.marketing_segments');
-select booking._add_audit('booking.campaigns');
+do $$ begin
+  perform booking._add_audit('booking.customers');
+  perform booking._add_audit('booking.orders');
+  perform booking._add_audit('booking.order_items');
+  perform booking._add_audit('booking.reservations');
+  perform booking._add_audit('booking.annual_cards');
+  perform booking._add_audit('booking.payments');
+  perform booking._add_audit('booking.payment_methods');
+  perform booking._add_audit('booking.discount_codes');
+  perform booking._add_audit('booking.gift_cards');
+  perform booking._add_audit('booking.gift_card_ledger');
+  perform booking._add_audit('booking.marketing_segments');
+  perform booking._add_audit('booking.campaigns');
+end $$;
 
 -- ---------- maksutapojen oletusluettelo ----------
 insert into booking.payment_methods(code, label, is_manual, active, johku_codes, sort_order) values
@@ -347,4 +397,5 @@ insert into booking.payment_methods(code, label, is_manual, active, johku_codes,
   ('gift_card',     'Lahjakortti (oma)',          true,  true,  '{}', 70),
   ('partner_voucher','Kumppanin lahjakortti (Elämyslahjat/Kokemuskauppa/Offerilla)', true, true, '{voucher}', 80),
   ('visma_pay',     'Visma Pay (verkkomaksu)',    false, false, '{paybywaychannel,multi}', 90),
+  ('annual_card',   'Vuosikortti (ilmainen varaus)', false, false, '{}', 95),   -- ei valittavissa käsin; vain admin_create_annual_card_booking kirjaa
   ('other',         'Muu',                        true,  true,  '{paypal,stripe,viva}', 100);
