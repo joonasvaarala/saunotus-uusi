@@ -14,7 +14,8 @@ Ei palvelinkoodia, ei build-vaihetta selaimen koodille, ei kirjastoriippuvuuksia
 | `supabase/manual/` | Käsin tehtävät vaiheet: skeeman avaus REST:iin, ensimmäinen admin, tarkistuskyselyt |
 | `shared/sb.js` | ~110 rivin PostgREST/Auth-asiakas (käytetään kaupassa ja hallinnassa) |
 | `shop/` | Varauskauppa: **kopio uudesta sivustosta**, jossa Johku-linkit avaavat sisäisen kalenterin |
-| `admin/` | Hallinta-SPA (mobiili ensin + työpöytä), Supabase Auth |
+| `admin/` | Hallinta-SPA (mobiili ensin + työpöytä), Supabase Auth. Näkymät: Päivä, Varaukset, **Kalenteri** (työvuorot + varaukset), Uusi varaus, Asiakkaat, Tuotteet, Resurssit, Asetukset, **Käyttäjät** (vain admin) |
+| `supabase/functions/admin-users/` | Edge Function (Deno, `verify_jwt = true`): käyttäjien kutsu, käytöstä poisto ja aktivointi. Validointilogiikka `logic.js` + testit |
 | `dev/` | Paikallinen demo: PostgREST-konfiguraatio, kehityspalvelin (mock-auth), demo-siemen |
 | `scripts/e2e-screenshots.mjs` | Playwright-savutesti + kuvakaappaukset + konsolivirhetarkistus |
 | `docs/` | Maksurajapinta, Johku-tuonti, ristiriidat ja tulkinnat, Bottiavustuspyyntö, kuvakaappaukset |
@@ -125,7 +126,7 @@ Tulkinnat ja avoimet kysymykset: [docs/ristiriidat-ja-tulkinnat.md](docs/ristiri
 | 03 | `…_booking_03_schedule_rules.sql` | Vuorosäännöt, kapasiteettipoolit, sulut |
 | 04 | `…_booking_04_engine.sql` | Päällekkäisyys- ja kapasiteettilogiikka (trigger; poolikohtainen kapasiteetti, vuosikorttisäännöt), vuorogeneraattori, vanhenevat pidot |
 | 05 | `…_booking_05_booking_api.sql` | Julkiset RPC:t (validointi, rate limit, pito, varauksen muutos 48 h) |
-| 06 | `…_booking_06_admin_api.sql` | `admin_*`-funktiot (oikeustarkistus roolin oikeuksilla), kb-tuotemuokkaus, vuorosääntöjen muokkaus, varauksen muutos, vuosikortit, maksuadapterin funktiot (vain service_role) |
+| 06 | `…_booking_06_admin_api.sql` | `admin_*`-funktiot (oikeustarkistus roolin oikeuksilla), kb-tuotemuokkaus, vuorosääntöjen muokkaus, varauksen muutos, vuosikortit, käyttäjähallinta (`admin_set_staff_role`, `admin_link_public_staff`…), työvuorojen lukunäkymä `admin_upcoming_shifts` (lukee `public`-skeemaa, ei kirjoita), `svc_*` (vain service_role, Edge Function), maksuadapterin funktiot (vain service_role) |
 | 07 | `…_booking_07_rls_grants.sql` | RLS kaikkialla + minimioikeudet (revoke all → explicit grant) |
 | 08 | `…_booking_08_seed_rules.sql` | Asetukset, resurssit (poolit), `product_config`, 30 vuorosääntöä kb:n pohjalta (13 yleistä + 17 yksityistä) |
 | 09 | `…_booking_09_cron_optional.sql` | (valinnainen) pg_cron-ajastus pitojen siivoukseen; ohitetaan jos pg_cron puuttuu |
@@ -134,9 +135,10 @@ Migraatiot **eivät muuta `kb`-skeemaa** (vain viittaavat siihen FK:lla ja funkt
 
 Migraatioiden jälkeen (käsin, järjestyksessä):
 1. `supabase/manual/01_expose_schema.md` – lisää `booking` Exposed schemas -listalle.
-2. `supabase/manual/02_first_admin.sql` – luo käyttäjät Authissa ja lisää `booking.staff`-rivit kolmessa erillisessä lohkossa: admin (Joonas, Koodari), manager (Otto, Laura), staff (muut).
-3. `supabase/manual/03_verify.sql` – tarkistukset.
-4. Rakenna kauppa ja hallinta (alla) ja julkaise.
+2. `supabase/manual/02_first_admin.sql` – luo Joonakselle käyttäjä Authissa ja aja YKSI lohko (admin, Joonas.vaarala@gmail.com); muut roolit on kommentoitu. Muut käyttäjät kutsutaan hallinnan Käyttäjät-näkymästä.
+3. Edge Function `admin-users`: salaisuudet + deploy, ks. [Edge Function](#edge-function-admin-users) ja [docs/bottiavustus-pyynto.md](docs/bottiavustus-pyynto.md).
+4. `supabase/manual/03_verify.sql` – tarkistukset.
+5. Rakenna kauppa ja hallinta (alla) ja julkaise.
 
 ### Kauppa
 
@@ -158,6 +160,31 @@ Staattinen: kopioi `admin/` + `shared/sb.js` palvelimelle (esim. `/hallinta/`; �
 mkdir -p out/hallinta && cp -r booking/admin/* out/hallinta/ && cp booking/shared/sb.js out/hallinta/sb.js
 cp out/hallinta/config.example.js out/hallinta/config.js   # täytä url + anonKey
 ```
+
+### Edge Function `admin-users`
+
+Kutsu sähköpostilla, käytöstä poisto/aktivointi (Auth-esto) – tarvitsee service role -avaimen, joten se ajetaan **palvelimella** (Supabase Edge Function), ei selaimessa.
+Kutsuja tunnistetaan omalla JWT:llään (`booking.is_admin()`), sen jälkeen säännöt ja audit-loki tulevat `booking.svc_*`-funktioista.
+
+| Muuttuja | Mistä |
+|---|---|
+| `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | Supabase asettaa automaattisesti Edge Functioneille |
+| `ALLOWED_ORIGINS` | käsin: sallitut originit (esim. `https://<hallinta>`), ei jokerimerkkiä |
+| `SITE_URL` / `INVITE_REDIRECT_URL` | käsin: kutsulinkin kohde (`SITE_URL/admin/`); lisättävä myös Authin *Redirect URLs* -listaan |
+
+```bash
+cd booking     # supabase/config.toml: verify_jwt = true
+supabase secrets set ALLOWED_ORIGINS="https://<hallinta>" SITE_URL="https://<sivusto>" --project-ref <ref>
+supabase functions deploy admin-users --project-ref <ref>
+node --test supabase/functions/admin-users/logic.test.js      # yksikkötestit (myös: deno test …)
+```
+Hallinnan `config.js`:ssä oletus `functions: '/functions/v1'`. Paikallisessa demossa kehityspalvelin tarjoaa **mock-version** samasta rajapinnasta (sama `logic.js` ja samat tietokantafunktiot; kutsulinkki palautetaan vastauksessa sähköpostin sijaan).
+
+### Roolit, käyttäjät ja työvuorot
+
+* `admin` – kaikki, myös **Käyttäjät** (kutsu, rooli, käytöstä poisto, linkitys työntekijään). `manager` – ylläpito + kaikkien työvuorot, **ei** käyttäjähallintaa. `staff` – varaukset + omat työvuorot. Ks. [docs/roolit-ja-kb.md](docs/roolit-ja-kb.md).
+* **Kalenteri** (kuukausi/viikko): työvuorot sinisellä, varaukset vihreällä; päivän klikkaus näyttää tiedot. Työvuorot luetaan `public`-skeemasta (Työvuoro-Tapio; vain luku, **muokkausta ei ole**) funktiolla `admin_upcoming_shifts` – oletetut sarakenimet ja niiden tarkistus: [docs/roolit-ja-kb.md](docs/roolit-ja-kb.md#oletetut-public-sarakkeet-varmistettava-ennen-migraatioiden-ajoa). Jos vuorodataa ei saada, varaukset näkyvät silti ja näytetään huomautus.
+* Staff näkee vain omat vuoronsa, kun hänen käyttäjänsä on linkitetty työntekijään (Käyttäjät → Työntekijä).
 
 ### Ympäristömuuttujat / avaimet
 
@@ -192,7 +219,7 @@ Kuvakaappaukset: [`docs/screenshots/`](docs/screenshots/).
 ```bash
 PGHOST=127.0.0.1 PGPORT=54329 PGUSER=postgres booking/supabase/tests/run.sh
 ```
-Vaatii PostgreSQL + pgTAP. Luo kannan `booking_test`, lataa mock-Supabasen (roolit `anon/authenticated/service_role`, `auth.uid()/auth.jwt()`), mock-kb:n (oikea tuotedata), kaikki migraatiot ja ajaa:
+Vaatii PostgreSQL + pgTAP. Luo kannan `booking_test`, lataa mock-Supabasen (roolit `anon/authenticated/service_role`, `auth.uid()/auth.jwt()`), mock-kb:n (oikea tuotedata), `public`-skeeman mockin (`fixtures/public_mock.sql`: työvuorotaulut, ei GRANTteja), kaikki migraatiot ja ajaa:
 
 * `01_security` – RLS kaikissa tauluissa, `search_path` kaikissa funktioissa, anonin/staffin/ei-staffin oikeudet, ei vuotoja
 * `02_overlap_rules` – yksityinen ↔ yleinen molempiin suuntiin (to, la–su, 1 h vuorot mukaan lukien), sulut, peruutus, vanhenevat pidot
@@ -202,6 +229,8 @@ Vaatii PostgreSQL + pgTAP. Luo kannan `booking_test`, lataa mock-Supabasen (rool
 * `06_roles` – roolitaulut, admin/manager/staff-oikeusmatriisi (staff ei voi päivittää hintaa, manager voi, manager ei voi muokata henkilöstöä tai antaa admin-oikeutta), viimeisen adminin suojaus, uusi rooli ilman koodimuutosta
 * `07_change_booking` – asiakkaan varauksen muutos (`public_change_booking`): vuoron vaihto, henkilömäärä, 48 h raja (rajatapaukset), kapasiteetti ja päällekkäisyys molempiin suuntiin, atomisuus, `admin_change_booking`
 * `08_annual_card` – vuosikortti: vain yleinen vuoro, 0 €, yksi tuleva varaus kerrallaan, ohitusyritykset suoraan tietokannassa, myöntö/peruutus, RLS
+* `09_users_shifts` – työvuorojen lukunäkymä (staff vain omat, manager kaikki, ei oikeutta → virhe, väli > 62 pv → virhe, ei vuotavia kenttiä), roolin vaihdon ja linkityksen suojat (ei itseä, ei viimeistä adminia, epäaktiivinen/tuntematon kohde, vain staff-rooli, sama työntekijä kahdelle), `svc_*`-funktiot (vain service_role, säännöt, audit), ei kirjoituksia `public`-skeemaan
+* `supabase/functions/admin-users/logic.test.js` – Edge Functionin validointi (rooli-sallittulista, syötteet, CORS, kutsulinkin osoite, virhekartoitus); `node --test` tai `deno test`
 * `race.sh` – rinnakkaiset yhteydet yrittävät varata samaa aikaa yhtä aikaa (advisory-lock-portti); invariantit: ei yksityisen ja yleisen päällekkäisyyttä, kapasiteetti ei ylity (ma–to 16, la–su 6 / alkamisaika, 1 h vuoro 10, poolit riippumattomia), vuosikortilla vain yksi tuleva varaus, asiakkaan rinnakkaiset muutokset eivät ylitä kapasiteettia eivätkä riko päällekkäisyyssääntöä
 * `mutation_check.sh` – todistaa että kilpailutesti on herkkä: poistaa lukon testikannasta ja odottaa `race.sh`:n epäonnistuvan
 

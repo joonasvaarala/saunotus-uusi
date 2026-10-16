@@ -37,6 +37,37 @@ async function token() {
   return session.access_token;
 }
 
+// Kutsu-/palautuslinkki palauttaa käyttäjän osoitteeseen #access_token=…&refresh_token=…&type=invite. Otetaan istunto käyttöön ja siivotaan osoite.
+// Palauttaa 'invite' | 'recovery' jos linkistä saatiin istunto, muuten null.
+export function adoptSessionFromHash() {
+  const p = new URLSearchParams(location.hash.replace(/^#/, ''));
+  const at = p.get('access_token'), type = p.get('type');
+  if (!at || !['invite', 'recovery'].includes(type)) return null;
+  let user = null;
+  try { const c = JSON.parse(atob(at.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); user = { id: c.sub, email: c.email }; } catch { return null; }
+  history.replaceState(null, '', location.pathname + location.search);
+  save({ access_token: at, refresh_token: p.get('refresh_token') || '', expires_at: Math.floor(Date.now() / 1000) + (+p.get('expires_in') || 3600), user });
+  return type;
+}
+// Asettaa kirjautuneen käyttäjän salasanan (kutsun hyväksyntä). Vähintään 8 merkkiä; Supabase Auth voi vaatia enemmän.
+export async function setPassword(password) {
+  const tk = await token();
+  const r = await fetch(base(`${cfg().auth || '/auth/v1'}/user`), { method: 'PUT', headers: { apikey: cfg().anonKey, Authorization: `Bearer ${tk}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new ApiError(j.msg || j.message || j.error_description || 'Salasanan asetus epäonnistui', { status: r.status, code: j.error_code });
+  return true;
+}
+// Edge Function -kutsu: fn('admin-users', { action: 'invite', ... }) → JSON. Kutsuja tunnistetaan käyttäjän omalla JWT:llä; palvelinavainta ei käytetä selaimessa.
+export async function fn(name, body) {
+  const tk = await token();
+  const bearer = tk && tk.split('.').length === 3 ? { Authorization: `Bearer ${tk}` } : {};
+  const r = await fetch(base(`${cfg().functions ?? '/functions/v1'}/${name}`), { method: 'POST', headers: { apikey: cfg().anonKey, ...bearer, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const text = await r.text();
+  let j; try { j = text ? JSON.parse(text) : {}; } catch { j = { message: text }; }
+  if (!r.ok || j.ok === false) throw new ApiError(j.message || j.msg || r.statusText || 'Pyyntö epäonnistui', { code: j.code, status: r.status, details: j });
+  return j;
+}
+
 // ---- pyynnöt ----
 async function request(path, { method = 'GET', body, query, headers = {} } = {}) {
   const qs = query ? '?' + new URLSearchParams(query).toString() : '';
@@ -66,5 +97,5 @@ export const rpc = (fn, args = {}) => request(`/rpc/${fn}`, { method: 'POST', bo
 // select('customers', { select: 'id,name', order: 'name.asc', limit: 50, 'name': 'ilike.*abc*' })
 export const select = (table, query = {}) => request(`/${table}`, { query });
 
-export const sb = { rpc, select, signIn, signOut, getSession, onAuthChange };
+export const sb = { rpc, select, fn, signIn, signOut, getSession, onAuthChange, adoptSessionFromHash, setPassword };
 export default sb;

@@ -5,5 +5,6 @@ window.BOOKING_CONFIG = {
   anonKey: '<anon-tai-publishable-avain>',
   rest: '/rest/v1',
   auth: '/auth/v1',
+  functions: '/functions/v1',   // Edge Function admin-users (käyttäjien kutsu ja käytöstä poisto)
   schema: 'booking',
 };

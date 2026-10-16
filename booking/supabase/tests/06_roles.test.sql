@@ -7,12 +7,12 @@ select no_plan();
 select is((select array_agg(code order by sort_order) from booking.roles), array['admin','manager','staff','customer','annual_card'], 'roolit: admin, manager, staff, customer, annual_card');
 select is((select array_agg(code order by sort_order) from booking.roles where is_staff), array['admin','manager','staff'], 'henkilöstörooleja kolme (admin, manager, staff)');
 select is((select count(*)::int from booking.role_permissions where role_code in ('customer','annual_card')), 0, 'asiakasrooleilla ei ole hallinnan oikeuksia');
-select is((select count(*)::int from booking.role_permissions where role_code = 'admin'), 11, 'admin: kaikki 11 oikeutta');
+select is((select count(*)::int from booking.role_permissions where role_code = 'admin'), 13, 'admin: kaikki 13 oikeutta');
 select is((select array_agg(permission order by permission) from booking.role_permissions where role_code = 'manager'),
-          array['annual_cards.manage','blocks.manage','bookings.manage','catalog.edit','customers.manage','payments.manage','resources.edit','rules.edit','settings.edit'],
-          'manager: varaukset + katalogi + asetukset + resurssit + säännöt + vuosikortit (ei henkilöstöä eikä audit-lokia)');
+          array['annual_cards.manage','blocks.manage','bookings.manage','catalog.edit','customers.manage','payments.manage','resources.edit','rules.edit','settings.edit','shifts.view_all'],
+          'manager: varaukset + katalogi + asetukset + resurssit + säännöt + vuosikortit + kaikkien vuorot (ei staff.manage eikä audit-lokia)');
 select is((select array_agg(permission order by permission) from booking.role_permissions where role_code = 'staff'),
-          array['blocks.manage','bookings.manage','customers.manage','payments.manage'], 'staff: vain varaukset, asiakkaat, maksut, sulut');
+          array['blocks.manage','bookings.manage','customers.manage','payments.manage','shifts.view'], 'staff: varaukset, asiakkaat, maksut, sulut + omat vuorot');
 
 -- ei-henkilöstöroolia ei voi antaa henkilöstörivin rooliksi (FK roles(code, is_staff))
 select test.mk_user('role-x@example.com') as ux \gset
@@ -42,7 +42,7 @@ select test.logout();
 -- omat oikeudet (käyttöliittymä)
 select test.login(:'sid');
 select is(booking.admin_my_permissions() ->> 'role', 'staff', 'staff: oma rooli');
-select is(booking.admin_my_permissions() -> 'permissions', '["blocks.manage","bookings.manage","customers.manage","payments.manage"]'::jsonb, 'staff: omat oikeudet');
+select is(booking.admin_my_permissions() -> 'permissions', '["blocks.manage","bookings.manage","customers.manage","payments.manage","shifts.view"]'::jsonb, 'staff: omat oikeudet');
 select is((select booking.has_permission('catalog.edit')), false, 'staff: has_permission(catalog.edit) = false');
 select test.logout();
 select test.login(:'mid');

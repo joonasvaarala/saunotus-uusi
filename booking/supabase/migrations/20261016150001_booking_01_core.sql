@@ -65,7 +65,8 @@ create table booking.role_permissions (
 );
 comment on table booking.role_permissions is
   'Rooli → oikeus. Oikeudet: bookings.manage, customers.manage, payments.manage, blocks.manage, catalog.edit (tuotteet/hinnat/kuvaukset), '
-  'settings.edit, resources.edit (kapasiteettipoolit), rules.edit (vuorosäännöt), annual_cards.manage, staff.manage, audit.read.';
+  'settings.edit, resources.edit (kapasiteettipoolit), rules.edit (vuorosäännöt), annual_cards.manage, staff.manage (käyttäjä- ja roolihallinta, vain admin), audit.read, '
+  'shifts.view (omat työvuorot), shifts.view_all (kaikkien työvuorot; lukunäkymä public-skeeman vuorodataan).';
 
 insert into booking.roles(code, label, description, is_staff, sort_order) values
   ('admin',       'Pääkäyttäjä (admin)',   'Kaikki oikeudet, myös henkilöstön ja roolien hallinta',                                 true,  10),
@@ -79,11 +80,11 @@ select r.code, p.permission
   from (values
     ('admin','bookings.manage'),('admin','customers.manage'),('admin','payments.manage'),('admin','blocks.manage'),
     ('admin','catalog.edit'),('admin','settings.edit'),('admin','resources.edit'),('admin','rules.edit'),
-    ('admin','annual_cards.manage'),('admin','staff.manage'),('admin','audit.read'),
+    ('admin','annual_cards.manage'),('admin','staff.manage'),('admin','audit.read'),('admin','shifts.view'),('admin','shifts.view_all'),
     ('manager','bookings.manage'),('manager','customers.manage'),('manager','payments.manage'),('manager','blocks.manage'),
     ('manager','catalog.edit'),('manager','settings.edit'),('manager','resources.edit'),('manager','rules.edit'),
-    ('manager','annual_cards.manage'),
-    ('staff','bookings.manage'),('staff','customers.manage'),('staff','payments.manage'),('staff','blocks.manage')
+    ('manager','annual_cards.manage'),('manager','shifts.view_all'),
+    ('staff','bookings.manage'),('staff','customers.manage'),('staff','payments.manage'),('staff','blocks.manage'),('staff','shifts.view')
   ) as p(role_code, permission)
   join booking.roles r on r.code = p.role_code;
 
@@ -96,10 +97,13 @@ create table booking.staff (
   role       text not null,
   role_is_staff boolean not null generated always as (true) stored,
   active     boolean not null default true,
+  public_staff_id uuid unique,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint staff_role_fk foreign key (role, role_is_staff) references booking.roles(code, is_staff)
 );
+comment on column booking.staff.public_staff_id is
+  'Viittaa LÖYHÄSTI public.staff.id:hen (Työvuoro-Tapio). EI viiteavainta public-skeemaan: booking ei saa riippua public-skeeman rakenteesta eikä kirjoittaa sinne. Käytetään vain omien työvuorojen näyttämiseen (admin_upcoming_shifts).';
 comment on table booking.staff is 'Hallinnan käyttäjät. Vain täällä oleva aktiivinen käyttäjä pääsee hallintaan (auth.uid()). role → booking.roles (is_staff=true).';
 create trigger staff_updated before update on booking.staff for each row execute function booking.set_updated_at();
 

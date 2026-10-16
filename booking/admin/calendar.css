@@ -1,0 +1,49 @@
+/* Kalenterinäkymä (mobile first). Työvuorot sinisellä, varaukset vihreällä. */
+.cal{--shift:#2f5d8a;--shiftbg:#e6eef6;--book:#1d4d2b;--bookbg:#e8f3ea}
+.cal-bar{justify-content:space-between}
+.cal-title{flex:1;min-width:150px;text-align:center;font-size:17px;color:var(--ink);}.cal-title::first-letter,.cal-detail h2::first-letter{text-transform:uppercase}
+.cal-mode{display:inline-flex;gap:4px}.cal-mode .btn[aria-pressed=true]{background:var(--green);color:#fff}
+.cal-legend{margin:0 0 10px}
+.chip{display:inline-block;font-size:11px;font-weight:600;line-height:1.3;padding:2px 7px;border-radius:12px;white-space:nowrap}
+.chip.shift{background:var(--shiftbg);color:var(--shift);border:1px solid var(--shift)}
+.chip.booking{background:var(--bookbg);color:var(--book);border:1px solid var(--book)}
+.cal-grid{display:grid;gap:2px}
+.cal-grid.month{grid-template-columns:repeat(7,minmax(0,1fr))}
+.cal-head{font-size:12px;font-weight:700;color:var(--muted);text-align:center;padding:4px 0}
+.cal-day{background:#fff;border:1px solid var(--line);border-radius:8px;min-height:64px;padding:2px;display:flex;flex-direction:column;gap:2px;overflow:hidden}
+.cal-day.out{background:#f1ede6;opacity:.65}
+.cal-day.today{border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
+.cal-day.sel{outline:3px solid var(--gold);outline-offset:-2px}
+.cal-dnum{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:6px;align-items:baseline;padding:3px 4px;min-height:28px;border-radius:6px;color:var(--ink)}
+.cal-dnum:focus-visible{outline:3px solid var(--gold)}
+.cal-dnum .n{font-weight:700;font-size:14px}.cal-dnum .wd{display:none;font-size:12px;color:var(--muted)}
+.cal-chips{display:flex;flex-direction:column;gap:2px;align-items:flex-start;padding:0 2px}
+.cal-chips .chip{font-size:11px;padding:1px 7px;max-width:100%}
+.cal-chips .lbl{display:none}
+.cal-grid.week{grid-template-columns:1fr}
+.cal-grid.week .cal-day{min-height:0;padding:6px}
+.cal-grid.week .cal-dnum .wd{display:inline}
+.cal-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.cal-item{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;border-left:5px solid;font-size:14px}
+.cal-item.shift{background:var(--shiftbg);border-color:var(--shift)}
+.cal-item.booking{background:var(--bookbg);border-color:var(--book)}
+.cal-time{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+.cal-txt{text-align:left}
+.cal-detail{margin-top:12px}.cal-detail h2{margin-top:0}
+.cal-detail .shift-h{color:var(--shift)}.cal-detail .booking-h{color:var(--book)}
+.notice{background:var(--warnbg);color:#6b4b00;padding:10px 12px;border-radius:8px;margin:0 0 10px}
+@media (max-width:520px){.cal-item{grid-template-columns:auto 1fr}.cal-item .badge{grid-column:2;justify-self:start}}
+@media (min-width:900px){
+  .cal-day{min-height:96px;padding:4px}
+  .cal-chips .chip{font-size:12px}
+  .cal-chips .lbl{display:inline}
+  .cal-grid.week{grid-template-columns:repeat(7,minmax(0,1fr))}
+  .cal-grid.week .cal-dnum .wd{display:inline}
+  .cal-grid.week .cal-item{grid-template-columns:1fr;gap:2px}
+  .cal-grid.week .cal-day{min-height:260px}
+}
+/* käyttäjähallinta */
+.user.inactive{opacity:.75}
+.user-grid{display:grid;gap:10px;margin-top:10px}
+.user-act{display:flex;align-items:end}
+@media (min-width:700px){.user-grid{grid-template-columns:1fr 1fr auto}}

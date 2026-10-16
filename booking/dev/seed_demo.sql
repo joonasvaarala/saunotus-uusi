@@ -6,10 +6,10 @@ insert into auth.users (id, email) values
   ('00000000-0000-4000-8000-0000000000b2', 'staff@demo.local'),
   ('00000000-0000-4000-8000-0000000000c3', 'manager@demo.local')
 on conflict do nothing;
-insert into booking.staff (user_id, name, role) values
-  ('00000000-0000-4000-8000-0000000000a1', 'Demo Admin', 'admin'),
-  ('00000000-0000-4000-8000-0000000000c3', 'Demo Ylläpitäjä (manager)', 'manager'),
-  ('00000000-0000-4000-8000-0000000000b2', 'Demo Peruskäyttäjä (staff)', 'staff')
+insert into booking.staff (user_id, name, role, email) values
+  ('00000000-0000-4000-8000-0000000000a1', 'Demo Admin', 'admin', 'admin@demo.local'),
+  ('00000000-0000-4000-8000-0000000000c3', 'Demo Ylläpitäjä (manager)', 'manager', 'manager@demo.local'),
+  ('00000000-0000-4000-8000-0000000000b2', 'Demo Peruskäyttäjä (staff)', 'staff', 'staff@demo.local')
 on conflict (user_id) do nothing;
 
 do $$
@@ -58,3 +58,44 @@ begin
            d + 3 + ((3 - extract(isodow from d + 3)::int + 7) % 7), 'Demo: vuosikorttivaraus');
   perform set_config('request.jwt.claims', '', true);
 end $$;
+
+-- ---------- työvuorot (public-skeeman MOCK, oletetut sarakkeet; ks. docs/roolit-ja-kb.md) ----------
+-- Demossa public.staff / work_shifts / shift_assignments / calendar_sources ovat fixtures/public_mock.sql:n tauluja. Tuotannossa ne täyttää Työvuoro-Tapio.
+insert into public.staff (id, name, email, phone, active) values
+  ('00000000-0000-4000-8000-0000000000d0', 'Demo Admin',          'admin@demo.local',   '0400000000', true),
+  ('00000000-0000-4000-8000-0000000000d1', 'Demo Peruskäyttäjä',  'staff@demo.local',   '0400000001', true),
+  ('00000000-0000-4000-8000-0000000000d2', 'Demo Ylläpitäjä',     'manager@demo.local', '0400000002', true),
+  ('00000000-0000-4000-8000-0000000000d3', 'Liisa Vuoro',         'liisa@example.com',  '0400000003', true),
+  ('00000000-0000-4000-8000-0000000000d4', 'Matti Mallivuoro',    'matti@example.com',  '0400000004', true),
+  ('00000000-0000-4000-8000-0000000000d5', 'Entinen Eero',        'eero@example.com',   '0400000005', false)
+on conflict do nothing;
+insert into public.calendar_sources (id, name) values
+  ('00000000-0000-4000-8000-0000000000b1', 'Saunottajat'), ('00000000-0000-4000-8000-0000000000b2', 'Vastaanotto')
+on conflict do nothing;
+do $$
+declare
+  d0 date := (now() at time zone 'Europe/Helsinki')::date; i int; d date; dow int; sid uuid;
+  pids uuid[] := array['00000000-0000-4000-8000-0000000000d1','00000000-0000-4000-8000-0000000000d2','00000000-0000-4000-8000-0000000000d3','00000000-0000-4000-8000-0000000000d4']::uuid[];
+begin
+  for i in -10..45 loop
+    d := d0 + i; dow := extract(isodow from d)::int;
+    if dow in (1, 2) then continue; end if;                       -- ma–ti ei vuoroja
+    -- saunottajan vuoro (to–su), kolmena iltana kaksi saunottajaa
+    insert into public.work_shifts (calendar_source_id, starts_at, ends_at, role_type, status, staffing_status, notes)
+      values ('00000000-0000-4000-8000-0000000000b1', ((d::timestamp + time '13:30') at time zone 'Europe/Helsinki'), ((d::timestamp + time '19:00') at time zone 'Europe/Helsinki'), 'Saunottaja', 'active', case when i % 7 = 3 then 'open' else 'full' end, 'demo-muistiinpano (ei saa näkyä)')
+      returning id into sid;
+    if i % 7 <> 3 then insert into public.shift_assignments (shift_id, staff_id) values (sid, pids[1 + (i + 14) % 4]); end if;
+    if dow >= 5 then insert into public.shift_assignments (shift_id, staff_id) values (sid, pids[1 + (i + 15) % 4]); end if;
+    -- vastaanotto lauantaisin
+    if dow = 6 then
+      insert into public.work_shifts (calendar_source_id, starts_at, ends_at, role_type, status, staffing_status)
+        values ('00000000-0000-4000-8000-0000000000b2', ((d::timestamp + time '13:00') at time zone 'Europe/Helsinki'), ((d::timestamp + time '18:30') at time zone 'Europe/Helsinki'), 'Vastaanotto', 'active', 'full') returning id into sid;
+      insert into public.shift_assignments (shift_id, staff_id) values (sid, '00000000-0000-4000-8000-0000000000d3');
+    end if;
+    -- yksi peruttu vuoro (ei saa näkyä)
+    if i = 12 then insert into public.work_shifts (calendar_source_id, starts_at, ends_at, role_type, status, staffing_status) values ('00000000-0000-4000-8000-0000000000b1', ((d::timestamp + time '10:00') at time zone 'Europe/Helsinki'), ((d::timestamp + time '12:00') at time zone 'Europe/Helsinki'), 'Saunottaja', 'cancelled', 'full'); end if;
+  end loop;
+end $$;
+update booking.staff set public_staff_id = '00000000-0000-4000-8000-0000000000d0' where user_id = '00000000-0000-4000-8000-0000000000a1';
+update booking.staff set public_staff_id = '00000000-0000-4000-8000-0000000000d1' where user_id = '00000000-0000-4000-8000-0000000000b2';
+update booking.staff set public_staff_id = '00000000-0000-4000-8000-0000000000d2' where user_id = '00000000-0000-4000-8000-0000000000c3';

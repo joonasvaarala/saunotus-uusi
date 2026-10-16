@@ -6,13 +6,13 @@ Roolit ja oikeudet ovat **taulupohjaisia**: `booking.roles` (rooli: `code`, `lab
 
 | Rooli | Kuka | Henkilöstö? | Oikeudet |
 |---|---|:-:|---|
-| `admin` | Joonas, Koodari | ✔ | kaikki |
-| `manager` (ylläpitäjä) | Otto, Laura | ✔ | varaukset, asiakkaat, maksut, sulut + hinnat/kuvaukset/tuoteasetukset (`catalog.edit`), muut asetukset (`settings.edit`), resurssit/kapasiteetit (`resources.edit`), vuorosäännöt (`rules.edit`), vuosikortit (`annual_cards.manage`). **Ei** henkilöstöhallintaa eikä audit-lokia |
-| `staff` (peruskäyttäjä) | kaikki työntekijät | ✔ | varausten ja asiakkaiden katselu, luonti ja muokkaus (`bookings.manage`, `customers.manage`), maksujen kirjaus (`payments.manage`), sulut (`blocks.manage`). **Ei** hinta-, tuote- eikä asetusmuokkausta |
+| `admin` | Joonas, Koodari | ✔ | kaikki (13 oikeutta, myös käyttäjähallinta `staff.manage` ja `shifts.view` + `shifts.view_all`) |
+| `manager` (ylläpitäjä) | Otto, Laura | ✔ | varaukset, asiakkaat, maksut, sulut + hinnat/kuvaukset/tuoteasetukset (`catalog.edit`), muut asetukset (`settings.edit`), resurssit/kapasiteetit (`resources.edit`), vuorosäännöt (`rules.edit`), vuosikortit (`annual_cards.manage`) + kaikkien työvuorojen katselu (`shifts.view_all`). **Ei** käyttäjähallintaa (`staff.manage`: kutsut, roolit, käytöstä poisto, linkitys) eikä audit-lokia |
+| `staff` (peruskäyttäjä) | kaikki työntekijät | ✔ | varausten ja asiakkaiden katselu, luonti ja muokkaus (`bookings.manage`, `customers.manage`), maksujen kirjaus (`payments.manage`), sulut (`blocks.manage`) + **omien** työvuorojen katselu (`shifts.view`). **Ei** hinta-, tuote- eikä asetusmuokkausta |
 | `customer` | verkkoasiakas | ✘ | ei hallinnan oikeuksia (ei voi olla `staff`-rivin roolina – FK `roles(code, is_staff)`) |
 | `annual_card` | vuosikorttiasiakas | ✘ | ei hallinnan oikeuksia; ilmaiset varaukset yleisiin vuoroihin (1 hlö, yksi tuleva kerrallaan) – moottoritason säännöt, ks. alla |
 
-Oikeudet (`role_permissions.permission`): `bookings.manage`, `customers.manage`, `payments.manage`, `blocks.manage`, `catalog.edit`, `settings.edit`, `resources.edit`, `rules.edit`, `annual_cards.manage`, `staff.manage`, `audit.read`.
+Oikeudet (`role_permissions.permission`): `bookings.manage`, `customers.manage`, `payments.manage`, `blocks.manage`, `catalog.edit`, `settings.edit`, `resources.edit`, `rules.edit`, `annual_cards.manage`, `staff.manage`, `audit.read`, `shifts.view` (omat työvuorot), `shifts.view_all` (kaikkien työvuorot).
 
 | Toiminto | anon | staff | manager | admin |
 |---|:-:|:-:|:-:|:-:|
@@ -25,10 +25,11 @@ Oikeudet (`role_permissions.permission`): `bookings.manage`, `customers.manage`,
 | Vuorosääntöjen muokkaus (nimi, päällä/pois, hlömäärät, deadline, voimassaolo) | ✘ | ✘ | ✔ | ✔ |
 | Vuosikortin myöntö / jatko / peruutus | ✘ | ✘ | ✔ | ✔ |
 | Vuosikorttivarauksen teko hallinnasta | ✘ | ✔ | ✔ | ✔ |
-| Henkilökunta ja roolit, audit-loki | ✘ | ✘ | ✘ | ✔ |
+| Käyttäjähallinta (kutsu, rooli, käytöstä poisto, linkitys työntekijään), audit-loki | ✘ | ✘ | ✘ | ✔ |
+| Työvuorojen katselu (vain luku, `admin_upcoming_shifts`) | ✔ vain omat | ✔ vain omat | ✔ kaikki | ✔ kaikki |
 | Maksuadapteri (`payment_*`) | ✘ | ✘ | ✘ | ✘ (vain `service_role`, palvelinpuoli) |
 
-Turvasäännöt: manager ei voi muokata henkilöstön rooleja eikä antaa admin-oikeutta (vain `admin` / `staff.manage`); viimeistä aktiivista adminia ei voi alentaa tai poistaa käytöstä. Testit: `06_roles.test.sql`.
+Turvasäännöt: **`staff.manage` on vain adminilla**, joten manager ei voi kutsua käyttäjiä, vaihtaa rooleja, poistaa käyttäjiä käytöstä eikä linkittää työntekijöitä. Manager ei voi muokata henkilöstön rooleja eikä antaa admin-oikeutta (vain `admin` / `staff.manage`); viimeistä aktiivista adminia ei voi alentaa tai poistaa käytöstä. Testit: `06_roles.test.sql`.
 
 ## Uuden roolin lisääminen (ei koodimuutoksia)
 
@@ -53,5 +54,47 @@ Ei-henkilöstöroolit (`is_staff = false`) eivät voi olla `staff.role`. Uusi **
 * Funktiot ovat `SECURITY DEFINER`, `search_path=''`, vain `authenticated`-oikeudella ja oikeus `catalog.edit` (manager, admin) tarkistetaan funktion sisällä.
 * **kb-skeemaan ei tehdä migraatioita tässä PR:ssä.** Jos haluat että muokkaus kulkee kb:n omien oikeuksien kautta tai muutokset vaativat muita kb-sarakkeita, pyydä erikseen Bottiavustukselta.
 
+## Käyttäjähallinta (hallinnan Käyttäjät-näkymä, vain admin)
+
+Näkymä `admin/views/users.js` (valikko **Käyttäjät**, näkyy vain oikeudella `staff.manage`):
+
+| Toiminto | Miten | Missä säännöt |
+|---|---|---|
+| Kutsu käyttäjä sähköpostilla | Edge Function `admin-users` (`invite`): Auth Admin API `inviteUserByEmail` + `booking.staff`-rivi roolilla | `booking.svc_staff_upsert` (service_role) |
+| Roolin vaihto | `booking.admin_set_staff_role(user_id, role)` | ei itseä, ei viimeistä aktiivista adminia, kohde aktiivinen ja jo `booking.staff`-taulussa, rooli olemassa ja `is_staff`, audit-loki |
+| Poista käytöstä / aktivoi | Edge Function (`deactivate` / `reactivate`): `booking.staff.active` + Auth-esto (ban) | `booking.svc_staff_set_active`: ei itseä, ei viimeistä adminia |
+| Linkitys työntekijään (työvuorot) | `booking.admin_list_public_staff()` + `booking.admin_link_public_staff(user_id, public_staff_id)` | `public.staff`-rivin pitää olla olemassa ja aktiivinen; sama työntekijä ei voi olla kahdella käyttäjällä (`public_staff_taken`); kirjoittaa vain `booking.staff`-tauluun |
+
+Kutsuttavat roolit ovat sallittulistalta **admin / manager / staff**; `customer` ja `annual_card` eivät kelpaa (Edge Function hylkää, tietokanta tarkistaa vielä `booking.roles.is_staff`).
+Kutsun hyväksyntä: sähköpostin linkki avaa hallinnan osoitteella `…/admin/#access_token=…&type=invite`; hallinta ottaa istunnon käyttöön, siivoaa tokenit osoiteriviltä ja pyytää käyttäjää asettamaan salasanan (min. 8 merkkiä).
+Jos kutsutulla sähköpostilla on jo Auth-tunnus, uutta kutsua ei lähetetä, vaan tunnukselle annetaan vain rooli.
+Edge Function: ks. [`bottiavustus-pyynto.md`](bottiavustus-pyynto.md) (deploy, salaisuudet) ja `supabase/functions/admin-users/`. Palvelurooliavain ei koskaan mene selaimeen: funktio tarkistaa kutsujan omalla JWT:llä (`booking.is_admin()`) ja käyttää avainta vasta sen jälkeen.
+
+`booking.staff.public_staff_id` (uuid, uniikki, **ei viiteavainta** `public`-skeemaan): löyhä viittaus `public.staff.id`:hen. Viiteavain jätettiin pois, jotta `booking` ei riipu Työvuoro-Tapion skeemasta (migraatiot ja testit toimivat ilman sitä, eikä `public`-muutos voi rikkoa varausjärjestelmää).
+
+## Työvuorot (vain luku, `public`-skeemasta)
+
+Totuus on Google Calendar → Työvuoro-Tapio-synkka → `public.work_shifts`. Varausjärjestelmä **vain lukee** vuoroja (kalenterinäkymä); vuorojen muokkausta ei ole toteutettu eikä `public`-skeemaan kirjoiteta (ei INSERT/UPDATE/DELETE/DDL/GRANT; testattu: taulujen sisältö ei muutu eikä yksikään `booking`-funktio sisällä kirjoituslauseita `public.`-tauluihin).
+
+`booking.admin_upcoming_shifts(p_from, p_to)` – `SECURITY DEFINER`, `search_path=''`, täysin kvalifioidut nimet, vain `authenticated`:
+* lukee vain `public.work_shifts`, `public.shift_assignments`, `public.staff`, `public.calendar_sources`; suodatin `work_shifts.status = 'active'`;
+* palauttaa vain: `shift_id, starts_at, ends_at, role_type, calendar_name, staffing_status, staff_name` (**ei** puhelinta, sähköpostia, muistiinpanoja eikä kalenteri-id:tä); yksi rivi per nimetty työntekijä;
+* enintään 62 päivän aikaväli (muuten virhe `range_too_long`; +1 h liikkumavara kesäaikasiirtymälle), käänteinen/tyhjä väli → `invalid_range`;
+* `shifts.view_all` (admin, manager) näkee kaikki; `shifts.view` (staff) vain omat vuoronsa linkin `booking.staff.public_staff_id` kautta (ei linkkiä → tyhjä lista; omalta vuorolta ei näy kollegojen nimiä); ei kumpaakaan oikeutta → virhe `forbidden`.
+`public`-taulujen lukuoikeus annetaan vain funktion omistajalle (SECURITY DEFINER): `authenticated`/`anon` eivät saa suoria oikeuksia `public`-tauluihin (testikanta todistaa tämän: mockiin ei anneta GRANTteja).
+
+### OLETETUT `public`-sarakkeet (varmistettava ennen migraatioiden ajoa!)
+
+Tätä koodia kirjoitettaessa ei ollut yhteyttä oikeaan `public`-skeemaan, joten sarakenimet ovat **oletuksia**. Bottiavustuksen pitää tarkistaa ne `list_tables`-työkalulla (vain luku) ennen migraatioiden ajoa ja ilmoittaa poikkeamat; funktiot (`_check_public_staff`, `admin_list_public_staff`, `admin_upcoming_shifts`) ovat plpgsql-kielellä, joten väärä sarakenimi ei kaada migraatiota vaan vasta kutsun ajonaikana (siksi tarkistus ensin).
+
+| Taulu | Oletetut sarakkeet | Käyttö |
+|---|---|---|
+| `public.work_shifts` | `id uuid`, `calendar_source_id uuid` (→ `calendar_sources.id`), `starts_at timestamptz`, `ends_at timestamptz`, `role_type text`, `status text` (arvo `'active'` = voimassa), `staffing_status text` | vuoron aika, rooli, tila |
+| `public.shift_assignments` | `shift_id uuid` (→ `work_shifts.id`), `staff_id uuid` (→ `staff.id`) | kuka on vuorossa |
+| `public.staff` | `id uuid`, `name text`, `email text`, `active boolean` | työntekijän nimi; linkitys ja listaus (vain id, name, email, active palautetaan) |
+| `public.calendar_sources` | `id uuid`, `name text` | kalenterin nimi (`calendar_name`) |
+
+Jos jokin nimi poikkeaa (esim. `full_name`, `start_time`, `is_active`), korjataan vain funktioiden `SELECT`-osat migraatiossa 06 (`_check_public_staff`, `admin_list_public_staff`, `admin_upcoming_shifts`) – muuta koodia ei tarvitse muuttaa. Testien mock: `supabase/tests/fixtures/public_mock.sql` (sisältää tahallaan myös `phone`- ja `notes`-sarakkeita todistamaan, ettei niitä vuoda).
+
 ## Ensimmäinen admin
-`supabase/manual/02_first_admin.sql`: kolme erillistä lohkoa – admin (Joonas, Koodari), manager (Otto, Laura), staff (muut). Lisähenkilöt hallinnasta (Asetukset → Henkilökunta; vain admin) kun admin on olemassa; Authin käyttäjä luodaan aina ensin Supabase Authissa.
+`supabase/manual/02_first_admin.sql`: testivaiheessa vain **yksi** lohko – Joonas (admin, Joonas.vaarala@gmail.com); muut roolit ovat kommentoituina. Authin käyttäjä luodaan ensin Supabase Authissa (Dashboard → Add user). Muut käyttäjät kutsutaan jatkossa hallinnan Käyttäjät-näkymästä (vain admin; Edge Function `admin-users`).

@@ -9,6 +9,7 @@ P=(psql -X -q -v ON_ERROR_STOP=1 -d "$DB")
 psql -X -q -d postgres -c "drop database if exists $DB with (force)" -c "create database $DB"
 "${P[@]}" -f supabase/tests/fixtures/00_mock_supabase.sql
 "${P[@]}" -f supabase/tests/fixtures/kb_mock.sql
+"${P[@]}" -f supabase/tests/fixtures/public_mock.sql
 for f in supabase/migrations/*.sql; do "${P[@]}" -1 -f "$f" >/dev/null; done
 "${P[@]}" -f dev/seed_demo.sql
 echo "demotietokanta $DB valmis"

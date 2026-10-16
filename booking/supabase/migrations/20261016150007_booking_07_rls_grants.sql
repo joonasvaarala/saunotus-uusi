@@ -63,7 +63,9 @@ grant execute on function booking.is_staff(), booking.is_admin(), booking.curren
 grant execute on function
   booking.admin_list_products(), booking.admin_update_product(bigint, jsonb), booking.admin_update_price_variant(bigint, jsonb),
   booking.admin_update_product_config(bigint, jsonb), booking.admin_set_setting(text, jsonb), booking.admin_update_resource(bigint, jsonb),
-  booking.admin_list_staff(), booking.admin_upsert_staff(uuid, text, text, boolean),
+  booking.admin_list_staff(), booking.admin_upsert_staff(uuid, text, text, boolean, uuid),
+  booking.admin_set_staff_role(uuid, text), booking.admin_list_public_staff(), booking.admin_link_public_staff(uuid, uuid),
+  booking.admin_upcoming_shifts(timestamptz, timestamptz),
   booking.admin_create_block(bigint, timestamptz, timestamptz, text), booking.admin_delete_block(bigint),
   booking.admin_list_reservations(timestamptz, timestamptz, text, text, bigint, integer, integer),
   booking.admin_day_view(date),
@@ -77,6 +79,8 @@ grant execute on function
   booking.admin_revoke_annual_card(bigint, boolean), booking.admin_list_annual_cards(bigint, boolean),
   booking.admin_create_annual_card_booking(bigint, bigint, date, text)
   to authenticated;
+-- Edge Function admin-users: svc_*-funktiot ja sisäiset apufunktiot (_check_public_staff…, _uid_has_permission) EIVÄT ole authenticated/anon-käytössä:
+-- ylempi 'revoke all on all functions' poisti oikeudet, eikä niille anneta grantia (service_role sai oikeuden riviltä 50).
 -- Maksuadapteri, ajastus: vain service_role (ei anon/authenticated)
 revoke all on function booking.payment_prepare(bigint), booking.payment_attach_provider_ref(bigint, text, text, jsonb),
   booking.payment_mark_paid(text, text, numeric, jsonb), booking.payment_mark_failed(text, text, text, jsonb),

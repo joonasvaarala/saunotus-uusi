@@ -5,6 +5,7 @@
 --   admin   = kaikki oikeudet (myös henkilöstön hallinta ja audit-loki)
 --   manager = ylläpitäjä: varaukset + catalog.edit (tuotteet/hinnat/kuvaukset/tuoteasetukset), settings.edit, resources.edit, rules.edit, annual_cards.manage
 --   staff   = peruskäyttäjä: bookings/customers/payments/blocks (ei hinnan/tuotteen/asetusten muokkausta)
+--   shifts.view / shifts.view_all: työvuorojen LUKUNÄKYMÄ (public-skeema luetaan vain, ei kirjoiteta); staff.manage vain admin
 -- kb.products / kb.product_price_variants on totuus: admin_update_product / admin_update_price_variant
 -- kirjoittavat suoraan kb:hen (SECURITY DEFINER, oikeus catalog.edit) ja kirjaavat booking.audit_log + kb.change_log.
 -- =====================================================================
@@ -162,14 +163,33 @@ begin
 end $$;
 
 create or replace function booking.admin_list_staff()
-returns table (user_id uuid, email text, name text, role text, active boolean)
+returns table (user_id uuid, email text, name text, role text, active boolean, public_staff_id uuid)
 language plpgsql stable security definer set search_path = '' as $$
 begin
   perform booking._require_permission('staff.manage');
-  return query select s.user_id, s.email, s.name, s.role, s.active from booking.staff s order by s.name;
+  return query select s.user_id, s.email, s.name, s.role, s.active, s.public_staff_id from booking.staff s order by s.name;
 end $$;
 
-create or replace function booking.admin_upsert_staff(p_user_id uuid, p_name text, p_role text, p_active boolean default true)
+-- Sisäinen: tarkistaa että public.staff-rivi on olemassa ja aktiivinen (VAIN LUKU public-skeemaan). Oletettu rakenne: public.staff(id uuid, name, email, active boolean)
+create or replace function booking._check_public_staff(p_id uuid)
+returns void language plpgsql stable security definer set search_path = '' as $$
+declare v_active boolean;
+begin
+  select ps.active into v_active from public.staff ps where ps.id = p_id;
+  if not found then perform booking._err('public_staff_not_found', 'Työntekijää ei löydy (public.staff)'); end if;
+  if v_active is not true then perform booking._err('public_staff_inactive', 'Työntekijä ei ole aktiivinen (public.staff)'); end if;
+end $$;
+
+-- Sisäinen: estää saman public_staff_id:n kahdelle käyttäjälle (selkeä virhe uniikkivirheen sijaan)
+create or replace function booking._check_public_staff_free(p_id uuid, p_user_id uuid)
+returns void language plpgsql stable security definer set search_path = '' as $$
+begin
+  if exists (select 1 from booking.staff s where s.public_staff_id = p_id and s.user_id <> p_user_id) then
+    perform booking._err('public_staff_taken', 'Tämä työntekijä on jo linkitetty toiseen käyttäjään');
+  end if;
+end $$;
+
+create or replace function booking.admin_upsert_staff(p_user_id uuid, p_name text, p_role text, p_active boolean default true, p_public_staff_id uuid default null)
 returns jsonb language plpgsql security definer set search_path = '' as $$
 declare v_old booking.staff;
 begin
@@ -179,15 +199,158 @@ begin
   end if;
   if char_length(btrim(coalesce(p_name, ''))) < 1 then perform booking._err('invalid_name', 'Nimi ei voi olla tyhjä'); end if;
   if not exists (select 1 from auth.users where id = p_user_id) then perform booking._err('no_such_user', 'Käyttäjää ei löydy (luo ensin Supabase Authissa)'); end if;
+  if p_public_staff_id is not null then
+    perform booking._check_public_staff(p_public_staff_id);
+    perform booking._check_public_staff_free(p_public_staff_id, p_user_id);
+  end if;
   select * into v_old from booking.staff where user_id = p_user_id;
   -- viimeistä aktiivista adminia ei saa alentaa tai poistaa käytöstä
   if found and v_old.role = 'admin' and v_old.active and (p_role <> 'admin' or not p_active) and
      (select count(*) from booking.staff where role = 'admin' and active and user_id <> p_user_id) = 0 then
     perform booking._err('last_admin', 'Viimeistä ylläpitäjää (admin) ei voi alentaa tai poistaa käytöstä');
   end if;
-  insert into booking.staff(user_id, email, name, role, active)
-  values (p_user_id, (select email from auth.users where id = p_user_id), btrim(p_name), p_role, p_active)
-  on conflict (user_id) do update set name = excluded.name, role = excluded.role, active = excluded.active;
+  insert into booking.staff(user_id, email, name, role, active, public_staff_id)
+  values (p_user_id, (select email from auth.users where id = p_user_id), btrim(p_name), p_role, p_active, p_public_staff_id)
+  on conflict (user_id) do update set name = excluded.name, role = excluded.role, active = excluded.active,
+    public_staff_id = coalesce(excluded.public_staff_id, booking.staff.public_staff_id);   -- null = ei muutosta (linkin poisto: admin_link_public_staff(user, null))
+  return jsonb_build_object('ok', true);
+end $$;
+
+-- Roolin vaihto (staff.manage = vain admin). Ei itseä, ei viimeistä aktiivista adminia, kohde aktiivinen ja jo booking.staff-rivillä.
+-- Muutos kirjautuu audit_logiin staff-taulun triggerillä.
+create or replace function booking.admin_set_staff_role(p_user_id uuid, p_role text)
+returns jsonb language plpgsql security definer set search_path = '' as $$
+declare v booking.staff;
+begin
+  perform booking._require_permission('staff.manage');
+  if p_user_id is not distinct from auth.uid() then perform booking._err('cannot_change_self', 'Omaa roolia ei voi muuttaa'); end if;
+  select * into v from booking.staff where user_id = p_user_id for update;
+  if not found then perform booking._err('no_such_staff', 'Käyttäjää ei löydy henkilökunnasta (booking.staff)'); end if;
+  if not v.active then perform booking._err('staff_inactive', 'Käyttäjä ei ole aktiivinen – aktivoi ensin'); end if;
+  if not exists (select 1 from booking.roles r where r.code = p_role and r.is_staff and r.active) then
+    perform booking._err('invalid_role', 'Tuntematon henkilöstörooli (booking.roles, is_staff=true)');
+  end if;
+  if v.role = 'admin' and p_role <> 'admin' and
+     (select count(*) from booking.staff where role = 'admin' and active and user_id <> p_user_id) = 0 then
+    perform booking._err('last_admin', 'Viimeistä ylläpitäjää (admin) ei voi alentaa tai poistaa käytöstä');
+  end if;
+  update booking.staff set role = p_role where user_id = p_user_id;
+  return jsonb_build_object('ok', true, 'role', p_role);
+end $$;
+
+-- Työntekijälistaus linkitystä varten: VAIN LUKU public.staff; vain id, nimi, sähköposti, aktiivisuus (ei puhelinta tms.)
+create or replace function booking.admin_list_public_staff()
+returns table (id uuid, name text, email text, active boolean)
+language plpgsql stable security definer set search_path = '' as $$
+begin
+  perform booking._require_permission('staff.manage');
+  return query select ps.id, ps.name::text, ps.email::text, ps.active from public.staff ps order by ps.name;
+end $$;
+
+-- Linkitä hallinnan käyttäjä Työvuoro-Tapion työntekijään (kirjoittaa VAIN booking.staff). p_public_staff_id null = poista linkki.
+create or replace function booking.admin_link_public_staff(p_user_id uuid, p_public_staff_id uuid)
+returns jsonb language plpgsql security definer set search_path = '' as $$
+begin
+  perform booking._require_permission('staff.manage');
+  if not exists (select 1 from booking.staff where user_id = p_user_id) then
+    perform booking._err('no_such_staff', 'Käyttäjää ei löydy henkilökunnasta (booking.staff)');
+  end if;
+  if p_public_staff_id is not null then
+    perform booking._check_public_staff(p_public_staff_id);
+    perform booking._check_public_staff_free(p_public_staff_id, p_user_id);
+  end if;
+  update booking.staff set public_staff_id = p_public_staff_id where user_id = p_user_id;
+  return jsonb_build_object('ok', true, 'public_staff_id', p_public_staff_id);
+end $$;
+
+-- Tulevat työvuorot (VAIN LUKU): Työvuoro-Tapion data (Google Calendar → synkka → public.work_shifts). Vuorojen muokkaus ei kuulu tähän.
+-- Oletettu rakenne (TARKISTETTAVA ennen ajoa, ks. docs/roolit-ja-kb.md):
+--   public.work_shifts(id uuid, calendar_source_id uuid, starts_at timestamptz, ends_at timestamptz, role_type text, status text, staffing_status text)
+--   public.shift_assignments(shift_id uuid, staff_id uuid)      public.staff(id uuid, name text, email text, active boolean)
+--   public.calendar_sources(id uuid, name text)
+-- Palauttaa vain: vuoro-id, ajat, tehtävätyyppi, kalenterin nimi, miehitystila ja henkilön nimi (EI puhelinta, sähköpostia eikä muistiinpanoja).
+-- shifts.view_all: kaikki vuorot (rivi / henkilö, vuoro ilman henkilöä saa tyhjän nimen). shifts.view: vain omat (public_staff_id-linkki), muiden nimiä ei näytetä.
+create or replace function booking.admin_upcoming_shifts(p_from timestamptz, p_to timestamptz)
+returns table (shift_id uuid, starts_at timestamptz, ends_at timestamptz, role_type text, calendar_name text, staffing_status text, staff_name text)
+language plpgsql stable security definer set search_path = '' as $$
+declare v_all boolean; v_own boolean; v_me uuid;
+begin
+  perform booking._require_staff();
+  v_all := booking.has_permission('shifts.view_all');
+  v_own := booking.has_permission('shifts.view');
+  if not v_all and not v_own then perform booking._err('forbidden', 'Ei oikeutta tähän toimintoon (shifts.view)'); end if;
+  if p_from is null or p_to is null or p_to <= p_from then perform booking._err('invalid_range', 'Virheellinen aikaväli'); end if;
+  if extract(epoch from (p_to - p_from)) > 62 * 86400 + 3600 then perform booking._err('range_too_long', 'Aikaväli saa olla enintään 62 päivää'); end if;  -- +1 h liikkumavara kesäaikasiirtymälle
+  if not v_all then
+    select s.public_staff_id into v_me from booking.staff s where s.user_id = auth.uid() and s.active;
+    if v_me is null then return; end if;     -- ei linkkiä työntekijään → ei omia vuoroja
+  end if;
+  return query
+    select ws.id, ws.starts_at, ws.ends_at, ws.role_type::text, cs.name::text, ws.staffing_status::text, ps.name::text
+      from public.work_shifts ws
+      left join public.calendar_sources cs on cs.id = ws.calendar_source_id
+      left join public.shift_assignments sa on sa.shift_id = ws.id
+      left join public.staff ps on ps.id = sa.staff_id
+     where ws.status = 'active'
+       and ws.starts_at < p_to and ws.ends_at > p_from
+       and (v_all or sa.staff_id = v_me)
+     order by ws.starts_at, ws.id, ps.name;
+end $$;
+
+-- ---------- Edge Function admin-users (service_role) ----------
+-- Edge Function varmistaa kutsujan JWT:llä is_admin() ja kutsuu näitä palvelinpuolella service_role-avaimella. Säännöt (rooliwhitelist,
+-- viimeinen admin, itsensä deaktivointi, audit) ovat tässä tietokannassa, jotta ne ovat testattuja. EI GRANTia anon/authenticated-rooleille.
+create or replace function booking._uid_has_permission(p_uid uuid, p_perm text)
+returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from booking.staff s
+                   join booking.roles r on r.code = s.role and r.active and r.is_staff
+                   join booking.role_permissions rp on rp.role_code = s.role
+                  where s.user_id = p_uid and s.active and rp.permission = p_perm)
+$$;
+
+create or replace function booking.svc_find_auth_user(p_email text)
+returns uuid language sql stable security definer set search_path = '' as $$
+  select u.id from auth.users u where lower(u.email) = lower(btrim(p_email)) limit 1
+$$;
+
+create or replace function booking.svc_staff_upsert(p_actor uuid, p_user_id uuid, p_name text, p_role text)
+returns jsonb language plpgsql security definer set search_path = '' as $$
+declare v_old booking.staff; v_email text;
+begin
+  if not booking._uid_has_permission(p_actor, 'staff.manage') then perform booking._err('forbidden', 'Ei oikeutta tähän toimintoon (staff.manage)'); end if;
+  if not exists (select 1 from booking.roles r where r.code = p_role and r.is_staff and r.active) then
+    perform booking._err('invalid_role', 'Tuntematon henkilöstörooli (booking.roles, is_staff=true)');
+  end if;
+  if char_length(btrim(coalesce(p_name, ''))) < 1 then perform booking._err('invalid_name', 'Nimi ei voi olla tyhjä'); end if;
+  select email into v_email from auth.users where id = p_user_id;
+  if not found then perform booking._err('no_such_user', 'Käyttäjää ei löydy'); end if;
+  select * into v_old from booking.staff where user_id = p_user_id;
+  if found and v_old.role = 'admin' and v_old.active and p_role <> 'admin' and
+     (select count(*) from booking.staff where role = 'admin' and active and user_id <> p_user_id) = 0 then
+    perform booking._err('last_admin', 'Viimeistä ylläpitäjää (admin) ei voi alentaa tai poistaa käytöstä');
+  end if;
+  insert into booking.staff(user_id, email, name, role, active) values (p_user_id, v_email, btrim(p_name), p_role, true)
+  on conflict (user_id) do update set role = excluded.role, active = true;      -- olemassa olevan käyttäjän nimeä ei ylikirjoiteta
+  insert into booking.audit_log(actor, actor_role, table_name, row_pk, action, new_data)
+  values (p_actor, 'service_role', 'staff', p_user_id::text, 'INVITE', jsonb_build_object('role', p_role, 'email', v_email));
+  return jsonb_build_object('ok', true, 'user_id', p_user_id);
+end $$;
+
+create or replace function booking.svc_staff_set_active(p_actor uuid, p_user_id uuid, p_active boolean)
+returns jsonb language plpgsql security definer set search_path = '' as $$
+declare v booking.staff;
+begin
+  if not booking._uid_has_permission(p_actor, 'staff.manage') then perform booking._err('forbidden', 'Ei oikeutta tähän toimintoon (staff.manage)'); end if;
+  if p_actor = p_user_id and not p_active then perform booking._err('cannot_change_self', 'Itseä ei voi deaktivoida'); end if;
+  select * into v from booking.staff where user_id = p_user_id for update;
+  if not found then perform booking._err('no_such_staff', 'Käyttäjää ei löydy henkilökunnasta (booking.staff)'); end if;
+  if v.role = 'admin' and v.active and not p_active and
+     (select count(*) from booking.staff where role = 'admin' and active and user_id <> p_user_id) = 0 then
+    perform booking._err('last_admin', 'Viimeistä ylläpitäjää (admin) ei voi alentaa tai poistaa käytöstä');
+  end if;
+  update booking.staff set active = p_active where user_id = p_user_id;
+  insert into booking.audit_log(actor, actor_role, table_name, row_pk, action, new_data)
+  values (p_actor, 'service_role', 'staff', p_user_id::text, case when p_active then 'REACTIVATE' else 'DEACTIVATE' end, jsonb_build_object('active', p_active));
   return jsonb_build_object('ok', true);
 end $$;
 

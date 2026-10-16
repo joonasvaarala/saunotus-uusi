@@ -8,6 +8,7 @@
 <title>Varausjärjestelmä – hallinta</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="calendar.css">
 </head>
 <body>
 <div id="app">
@@ -19,6 +20,16 @@
       <label class="fld"><span>Salasana</span><input id="password" type="password" autocomplete="current-password" required></label>
       <p id="login-err" class="err" role="alert" hidden></p>
       <button class="btn primary" type="submit">Kirjaudu</button>
+    </form>
+  </section>
+  <section id="setpw-screen" hidden>
+    <form id="setpw" class="card login" novalidate>
+      <h1>Aseta salasana</h1>
+      <p class="muted">Tervetuloa! Valitse salasana (vähintään 8 merkkiä), jolla kirjaudut jatkossa.</p>
+      <label class="fld"><span>Uusi salasana</span><input id="pw1" type="password" autocomplete="new-password" minlength="8" required></label>
+      <label class="fld"><span>Salasana uudelleen</span><input id="pw2" type="password" autocomplete="new-password" minlength="8" required></label>
+      <p id="setpw-err" class="err" role="alert" hidden></p>
+      <button class="btn primary" type="submit">Tallenna ja jatka</button>
     </form>
   </section>
   <div id="shell" hidden>

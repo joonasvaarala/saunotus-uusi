@@ -12,6 +12,7 @@ psql -X -q -d postgres -c "drop database if exists $DB with (force)" -c "create 
 "${PSQL[@]}" -c "create schema if not exists extensions" -c "create extension if not exists pgtap with schema extensions" >/dev/null
 "${PSQL[@]}" -f fixtures/00_mock_supabase.sql
 "${PSQL[@]}" -f fixtures/kb_mock.sql
+"${PSQL[@]}" -f fixtures/public_mock.sql
 for f in ../migrations/*.sql; do
   echo "migraatio: $(basename "$f")"
   "${PSQL[@]}" -1 -f "$f"

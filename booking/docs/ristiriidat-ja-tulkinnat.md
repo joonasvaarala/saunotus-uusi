@@ -62,3 +62,11 @@ Periaate: **kb on totuus**. Kun Johku ja kb eroavat, järjestelmä noudattaa kb:
 * **Henkilöstöhallinta ja audit-loki** ovat vain `admin`-roolille. Manager voi muokata hintoja ym. mutta ei henkilöstöä eikä antaa admin-oikeuksia. Viimeistä adminia ei voi alentaa tai poistaa käytöstä.
 * **Vuosikortin peruutus** ei peru tulevia varauksia ellei hallinnassa valita sitä erikseen; voimassaolon lyhentäminen ei tarkista olemassa olevia varauksia.
 * **Seuraus viikonlopun mallista:** yhtäaikaisia henkilöitä voi olla enemmän kuin 6 (limittäiset alkamisajat + 1 h vuorot), kapasiteetit ovat erilliset – tämä on omistajan päätös ja kapasiteetteja voi säätää Resurssit-näkymästä.
+
+## F. Käyttäjähallinta ja työvuorot (testiversio 16.10.2026)
+
+* **F1 (tulkinta):** `staff.manage` (käyttäjien kutsu, roolit, käytöstä poisto, linkitys) on vain adminilla; manager ei saa sitä. Uudet oikeudet `shifts.view` (staff: omat) ja `shifts.view_all` (manager, admin).
+* **F2 (tulkinta):** työvuorojen totuus on Google Calendar → Työvuoro-Tapio → `public.work_shifts`. Varausjärjestelmä vain **lukee**; vuorojen muokkausta ei toteuteta. Staff näkee vain omat vuoronsa linkin `booking.staff.public_staff_id` → `public.staff.id` kautta (löyhä viittaus, ei viiteavainta). Ilman linkkiä lista on tyhjä.
+* **F3 (AVOIN, varmistettava):** `public`-skeeman sarakenimet ovat oletuksia (ei yhteyttä oikeaan kantaan koodatessa). Bottiavustus tarkistaa ne ennen migraatioiden ajoa: ks. [roolit-ja-kb.md](roolit-ja-kb.md#oletetut-public-sarakkeet-varmistettava-ennen-migraatioiden-ajoa).
+* **F4 (tulkinta):** kutsu tehdään Edge Functionilla (service role palvelimella), ei selaimesta. Jos kutsutulla sähköpostilla on jo Auth-tunnus, uutta kutsua ei lähetetä vaan tunnukselle annetaan rooli. Käytöstä poisto = `booking.staff.active = false` + Auth-esto. Kutsusähköposti lähtee Supabasen oletuslähettäjältä, kunnes oma SMTP (savusauna@saunotus.fi) on otettu käyttöön – **avoin**.
+* **F5 (tulkinta):** `admin_upsert_staff`:n uusi parametri `p_public_staff_id` = null jättää linkin ennalleen; linkin poisto tehdään `admin_link_public_staff(user, null)`.

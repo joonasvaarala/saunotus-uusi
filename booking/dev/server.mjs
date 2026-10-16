@@ -3,7 +3,9 @@
 // EI tuotantoon: mock-auth hyväksyy kovakoodatut demo-tunnukset ja allekirjoittaa JWT:n demon salaisuudella.
 import { createServer, request as httpRequest } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
-import { createHmac } from 'node:crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
+import { execFile } from 'node:child_process';
+import { validateRequest, mapDbError } from '../supabase/functions/admin-users/logic.js';
 import { join, extname, normalize, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -15,10 +17,60 @@ const SHOP = resolve(process.env.SHOP_DIST || join(booking, 'shop/dist'));
 const USERS = { 'admin@demo.local': '00000000-0000-4000-8000-0000000000a1', 'staff@demo.local': '00000000-0000-4000-8000-0000000000b2', 'manager@demo.local': '00000000-0000-4000-8000-0000000000c3' };
 const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.avif': 'image/avif', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.xml': 'application/xml', '.txt': 'text/plain; charset=utf-8' };
 
+const PASSWORDS = {}, BANNED = new Set();   // kutsutut/esteyt demokäyttäjät (muistissa); oletussalasana 'demo'
+const DEMO_DB = process.env.DEMO_DB || 'booking_demo';
+
 const b64 = (o) => Buffer.from(typeof o === 'string' ? o : JSON.stringify(o)).toString('base64url');
-function jwt(sub, email) {
-  const head = b64({ alg: 'HS256', typ: 'JWT' }), body = b64({ sub, email, role: 'authenticated', aud: 'authenticated', exp: Math.floor(Date.now() / 1000) + 3600 });
+function jwt(sub, email, role = 'authenticated') {
+  const head = b64({ alg: 'HS256', typ: 'JWT' }), body = b64({ sub, email, role, aud: 'authenticated', exp: Math.floor(Date.now() / 1000) + 3600 });
   return `${head}.${body}.${createHmac('sha256', SECRET).update(`${head}.${body}`).digest('base64url')}`;
+}
+function verifyJwt(auth) {
+  const m = /^Bearer (([\w-]+)\.([\w-]+)\.([\w-]+))$/.exec(auth || ''); if (!m) return null;
+  const want = createHmac('sha256', SECRET).update(`${m[2]}.${m[3]}`).digest();
+  const got = Buffer.from(m[4], 'base64url');
+  if (got.length !== want.length || !timingSafeEqual(got, want)) return null;
+  try { const c = JSON.parse(Buffer.from(m[3], 'base64url').toString()); return c.exp > Date.now() / 1000 ? c : null; } catch { return null; }
+}
+// PostgREST-kutsu (booking-skeema) annetulla Authorization-tokenilla; palauttaa { data, error }
+async function pgrst(fnName, args, token) {
+  const r = await fetch(`http://127.0.0.1:${PGRST}/rpc/${fnName}`, { method: 'POST', headers: { 'content-type': 'application/json', 'content-profile': 'booking', 'accept-profile': 'booking', authorization: `Bearer ${token}` }, body: JSON.stringify(args) });
+  const t = await r.text(); const j = t ? JSON.parse(t) : null;
+  return r.ok ? { data: j, error: null } : { data: null, error: j || { message: r.statusText } };
+}
+// MOCK: Auth Adminin inviteUserByEmail → rivi auth.users-tauluun (vain demossa)
+const mockInviteUser = (email) => new Promise((ok, no) => {
+  const p = execFile('psql', ['-X', '-At', '-v', 'ON_ERROR_STOP=1', '-v', `email=${email}`, '-h', process.env.PGHOST || '127.0.0.1', '-p', process.env.PGPORT || '54329', '-U', process.env.PGUSER || 'postgres', '-d', DEMO_DB], (e, out) => (e ? no(e) : ok(out.trim().split('\n')[0])));
+  p.stdin.end("insert into auth.users (email) values (:'email') returning id;\n");
+});
+// MOCK Edge Function admin-users: sama validointi (logic.js) ja samat DB-funktiot kuin oikeassa funktiossa (supabase/functions/admin-users/index.ts)
+async function mockAdminUsers(req, res, origin) {
+  if (req.method !== 'POST') return json(res, 405, { ok: false, code: 'method_not_allowed', message: 'Vain POST' });
+  const claims = verifyJwt(req.headers.authorization);
+  if (!claims || claims.role !== 'authenticated') return json(res, 401, { ok: false, code: 'unauthorized', message: 'Istunto ei kelpaa' });
+  const caller = req.headers.authorization.slice(7);
+  const adm = await pgrst('is_admin', {}, caller);
+  if (adm.error) return json(res, 500, { ok: false, code: 'internal', message: 'Palvelinvirhe' });
+  if (adm.data !== true) return json(res, 403, { ok: false, code: 'forbidden', message: 'Vain admin voi hallita käyttäjiä' });
+  let raw = null; try { raw = JSON.parse((await readBody(req)) || 'null'); } catch {}
+  const v = validateRequest(raw);
+  if (!v.ok) return json(res, v.status, { ok: false, code: v.code, message: v.message });
+  const svc = jwt('00000000-0000-4000-8000-000000000000', null, 'service_role');
+  const fail = (e) => { const m = mapDbError(e); return json(res, m.status, { ok: false, code: m.code, message: m.message }); };
+  if (v.action === 'invite') {
+    const f = await pgrst('svc_find_auth_user', { p_email: v.email }, svc); if (f.error) return fail(f.error);
+    let id = f.data, created = false;
+    if (!id) { id = await mockInviteUser(v.email); created = true; }
+    const u = await pgrst('svc_staff_upsert', { p_actor: claims.sub, p_user_id: id, p_name: v.name, p_role: v.role }, svc); if (u.error) return fail(u.error);
+    USERS[v.email] = id;
+    const body = { ok: true, user_id: id, invited: created, existing_user: !created };
+    if (created) body.dev_invite_link = `${origin}/admin/#access_token=${jwt(id, v.email)}&refresh_token=${id}&expires_in=3600&type=invite`;
+    return json(res, 200, body);
+  }
+  const active = v.action === 'reactivate';
+  const r = await pgrst('svc_staff_set_active', { p_actor: claims.sub, p_user_id: v.user_id, p_active: active }, svc); if (r.error) return fail(r.error);
+  if (active) BANNED.delete(v.user_id); else BANNED.add(v.user_id);
+  return json(res, 200, { ok: true, user_id: v.user_id, active });
 }
 const json = (res, code, o) => { res.writeHead(code, { 'content-type': 'application/json' }); res.end(JSON.stringify(o)); };
 const readBody = (req) => new Promise((ok) => { const c = []; req.on('data', (d) => c.push(d)); req.on('end', () => ok(Buffer.concat(c).toString())); });
@@ -39,8 +91,19 @@ createServer(async (req, res) => {
     const body = JSON.parse((await readBody(req)) || '{}'); const g = url.searchParams.get('grant_type');
     let email = body.email;
     if (g === 'refresh_token') email = Object.keys(USERS).find((e) => USERS[e] === body.refresh_token);
-    if (!USERS[email] || (g === 'password' && body.password !== 'demo')) return json(res, 400, { error: 'invalid_grant', error_description: 'Väärä sähköposti tai salasana (demo: salasana "demo")' });
+    if (!USERS[email] || BANNED.has(USERS[email]) || (g === 'password' && body.password !== (PASSWORDS[email] || 'demo'))) return json(res, 400, { error: 'invalid_grant', error_description: 'Väärä sähköposti tai salasana (demo: salasana "demo")' });
     return json(res, 200, { access_token: jwt(USERS[email], email), refresh_token: USERS[email], expires_in: 3600, user: { id: USERS[email], email } });
+  }
+  if (path === '/auth/v1/user' && req.method === 'PUT') {    // kutsun hyväksyntä: salasanan asetus
+    const c = verifyJwt(req.headers.authorization); if (!c) return json(res, 401, { msg: 'Istunto ei kelpaa' });
+    const pw = JSON.parse((await readBody(req)) || '{}').password;
+    if (typeof pw !== 'string' || pw.length < 8) return json(res, 422, { msg: 'Salasanan pitää olla vähintään 8 merkkiä' });
+    PASSWORDS[c.email] = pw; return json(res, 200, { id: c.sub, email: c.email });
+  }
+  if (path === '/functions/v1/admin-users') {
+    const origin = `http://${req.headers.host}`;
+    if (req.method === 'OPTIONS') { res.writeHead(204); return res.end(); }
+    return mockAdminUsers(req, res, origin).catch((e) => { console.error('mock admin-users', e.message); json(res, 500, { ok: false, code: 'internal', message: 'Palvelinvirhe' }); });
   }
   if (path.startsWith('/rest/v1/')) {            // → PostgREST (poistetaan /rest/v1-etuliite, lisätään x-forwarded-for)
     const headers = { ...req.headers, host: `127.0.0.1:${PGRST}`, 'x-forwarded-for': req.socket.remoteAddress };

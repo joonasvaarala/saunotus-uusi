@@ -31,6 +31,14 @@ select is((select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.
             where n.nspname = 'booking' and p.proname like 'payment\_%' and (has_function_privilege('anon', p.oid, 'execute') or has_function_privilege('authenticated', p.oid, 'execute'))), 0,
           'maksuadapterifunktiot vain service_rolelle');
 select ok(has_function_privilege('service_role', 'booking.payment_mark_paid(text,text,numeric,jsonb)', 'execute'), 'service_role voi kutsua payment_mark_paid');
+-- Edge Function admin-users: svc_*-funktiot vain service_rolelle
+select is((select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+            where n.nspname = 'booking' and p.proname like 'svc\_%' and (has_function_privilege('anon', p.oid, 'execute') or has_function_privilege('authenticated', p.oid, 'execute') or not has_function_privilege('service_role', p.oid, 'execute'))), 0,
+          'svc_*-funktiot (Edge Function) vain service_rolelle');
+select is((select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+            where n.nspname = 'booking' and p.proname in ('admin_set_staff_role','admin_list_public_staff','admin_link_public_staff','admin_upcoming_shifts')
+              and has_function_privilege('authenticated', p.oid, 'execute') and not has_function_privilege('anon', p.oid, 'execute') and not has_function_privilege('public', p.oid, 'execute')), 4,
+          'uudet henkilöstö-/vuorofunktiot: execute vain authenticated (ei anon/public)');
 
 -- anon ei pääse mihinkään tauluun
 select test.anon();
