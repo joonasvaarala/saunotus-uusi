@@ -180,6 +180,47 @@ if (process.env.ONLY !== 'shop') for (const [name, vp] of [['mobile', { width: 3
       await page.locator('.cal-day:has(.chip.shift):has(.chip.booking) .cal-dnum').first().click();
       await page.waitForSelector('.cal-detail .cal-item.booking');
       await shot(page, `admin-${name}-10c-kalenteri-paiva.png`);
+      // työvuorojen rooli ja miehitys suomeksi (ei role_type-koodeja, ei "Hoitaja"): päivä, jolla on lämmitys, saunottaja ja vastaanotto
+      await page.locator('.cal-day:has(.chip.shift[title="4 työvuoroa"]) .cal-dnum').first().click();
+      await page.waitForSelector('.cal-detail .cal-item.shift');
+      const shiftText = await page.locator('.cal-detail .cal-item.shift').allInnerTexts();
+      const all = shiftText.join('\n');
+      if (shiftText.length !== 4) problems.push(`admin-${name}: päivällä pitäisi olla 4 työvuoroa, nyt ${shiftText.length}`);
+      for (const w of ['Lämmitykset', 'Vastaanotto', 'Saunottaja', 'Ei nimettyä tekijää']) if (!all.includes(w)) problems.push(`admin-${name}: työvuoroista puuttuu "${w}"`);
+      if (/heater|reception|therapist|assigned|hoitaja/i.test(all.replace(/unassigned/gi, '')) || /\b(assigned|unassigned|open|full)\b/i.test(all)) problems.push(`admin-${name}: työvuoroissa näkyy englanninkielinen koodi: ${all.replace(/\n/g, ' | ')}`);
+      // miehitysmerkki vain nimeämättömällä vuorolla: nimetty → ei merkkiä (ei "Miehitetty"), nimeämätön → "Ei nimettyä tekijää"
+      const notice = await page.evaluate(() => [...document.querySelectorAll('.cal-detail .cal-item.shift')].map((li) => ({ named: !!li.querySelector('.cal-txt > span'), badge: li.querySelector('.badge')?.textContent ?? null })));
+      if (!notice.some((x) => x.named) || !notice.some((x) => !x.named)) problems.push(`admin-${name}: päivällä pitää olla sekä nimetty että nimeämätön vuoro: ${JSON.stringify(notice)}`);
+      for (const x of notice) if (x.named ? x.badge !== null : x.badge !== 'Ei nimettyä tekijää') problems.push(`admin-${name}: miehitysmerkki väärin (nimetty=${x.named}, merkki=${x.badge})`);
+      if (/miehitetty|osittain|avoin/i.test(all)) problems.push(`admin-${name}: työvuorokortissa ei saa näkyä Miehitetty/Osittain/Avoin: ${all.replace(/\n/g, ' | ')}`);
+      // värit: hillityt, ei sinistä (b-kanava ei dominoi), kolmella roolilla eri väri, teksti-/taustakontrasti ≥ 4,5:1 (WCAG AA)
+      const colors = await page.evaluate(() => {
+        const rgb = (c) => (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+        const lum = (c) => { const [r, g, b] = rgb(c).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+        const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
+        const cards = [...document.querySelectorAll('.cal-detail .cal-item.shift')].map((li) => {
+          const cs = getComputedStyle(li), bg = cs.backgroundColor;
+          const texts = [...li.querySelectorAll('.cal-time, .cal-txt strong, .cal-txt > span')].map((e) => ratio(getComputedStyle(e).color, bg));
+          const badge = li.querySelector('.badge'), bcs = badge && getComputedStyle(badge);
+          return { cls: li.className, role: li.querySelector('strong').textContent, bg, bar: cs.borderLeftColor, minText: Math.min(...texts), badge: badge ? ratio(bcs.color, bcs.backgroundColor) : 99 };
+        });
+        const h3 = getComputedStyle(document.querySelector('.cal-detail .shift-h')).color;
+        const chip = [...document.querySelectorAll('.chip.shift')].map((e) => ({ c: getComputedStyle(e).color, bg: getComputedStyle(e).backgroundColor, b: getComputedStyle(e).borderTopColor }));
+        return { cards, h3, chip, };
+      });
+      const notBlue = (c) => { const [r, g, b] = (c.match(/[\d.]+/g) || []).map(Number); return !(b > r + 8 && b >= g); };   // b-kanava ei dominoi
+      for (const c of colors.cards) {
+        if (!notBlue(c.bg) || !notBlue(c.bar)) problems.push(`admin-${name}: työvuorokortti (${c.role}) on sininen: ${c.bg} / ${c.bar}`);
+        if (c.minText < 4.5 || c.badge < 4.5) problems.push(`admin-${name}: työvuorokortin (${c.role}) kontrasti liian pieni: teksti ${c.minText.toFixed(2)}, merkki ${c.badge.toFixed(2)}`);
+      }
+      const byRole = new Map(colors.cards.map((c) => [c.role, c]));   // sama rooli = sama väri; eri rooleilla eri tausta- ja reunaväri
+      if (new Set([...byRole.values()].map((c) => c.bg)).size !== byRole.size || new Set([...byRole.values()].map((c) => c.bar)).size !== byRole.size) problems.push(`admin-${name}: eri rooleilla pitää olla eri taustaväri ja reunaväri: ${JSON.stringify([...byRole.values()].map((c) => [c.role, c.bg, c.bar]))}`);
+      if (colors.cards.some((c) => c.bg !== byRole.get(c.role).bg)) problems.push(`admin-${name}: saman roolin korttien värin pitää olla sama`);
+      for (const [cls, role] of [['shift-heater', 'Lämmitykset'], ['shift-reception', 'Vastaanotto'], ['shift-therapist', 'Saunottaja']]) if (!colors.cards.some((c) => c.cls.includes(cls) && c.role === role)) problems.push(`admin-${name}: luokka ${cls} puuttuu roolilta ${role}`);
+      if (!notBlue(colors.h3) || colors.chip.some((c) => !notBlue(c.c) || !notBlue(c.bg) || !notBlue(c.b))) problems.push(`admin-${name}: Työvuorot-otsikko tai -merkki on sininen`);
+      await page.evaluate(() => { const d = document.querySelector('.cal-detail'); window.scrollTo(0, d.getBoundingClientRect().top + scrollY - 70); });
+      await page.waitForTimeout(200);
+      await shot(page, `admin-${name}-10d-kalenteri-tyovuorot-roolit.png`, false);   // näkymän kokoinen kuva: kiinteä alavalikko ei peitä sisältöä
     }
   }
     // ---- Asiakkaat: Lisää asiakas (yksityinen / yritys) ----
