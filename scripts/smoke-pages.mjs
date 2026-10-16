@@ -40,7 +40,7 @@ async function newPage(name, { allowFail = null } = {}) {
     if (u.pathname.endsWith('/rpc/admin_upcoming_shifts')) {   // tuotannon kaltaiset englanninkieliset koodit; hallinnan pitää näyttää suomeksi
       const ds = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
       const row = (id, from, to, role, cal, st, who) => ({ shift_id: id, starts_at: `${ds}T${from}:00Z`, ends_at: `${ds}T${to}:00Z`, role_type: role, calendar_name: cal, staffing_status: st, staff_name: who });
-      return json([row('s1', '06:00', '11:00', 'heater', 'Lämmitykset', 'assigned', 'Otto'), row('s2', '11:00', '16:00', 'reception', 'Vastaanotto', 'assigned', 'Otto'), row('s3', '11:00', '17:00', 'therapist', 'Hoitaja', 'assigned', 'Joonas'), row('s4', '12:00', '15:00', 'sauna_x', 'Hoitaja', 'unassigned', null)]);
+      return json([row('s1', '06:00', '11:00', 'heater', 'Lämmitykset', 'assigned', 'Otto'), row('s2', '11:00', '16:00', 'reception', 'Vastaanotto', 'assigned', 'Otto'), row('s3', '11:00', '17:00', 'therapist', 'Hoitaja', 'assigned', 'Joonas'), row('s4', '12:00', '15:00', 'sauna_x', 'Hoitaja', 'unassigned', null), row('s5', '16:00', '18:00', 'therapist', 'Hoitaja', 'partial', 'Matti')]);
     }
     if (u.pathname.includes('/rpc/public_settings')) return json({ public_booking_enabled: true });
     if (u.pathname.includes('/rpc/')) return json([]);
@@ -97,11 +97,14 @@ async function loginViaInvite(page) {
     await page.evaluate(() => { location.hash = '#/kalenteri'; });
     await page.waitForSelector('.cal-detail .cal-item.shift', { timeout: 5000 }).catch(() => problems.push('kalenteri: työvuoroja ei näkynyt'));
     const txt = (await page.locator('.cal-detail .cal-item.shift').allInnerTexts()).join(' | ');
-    for (const w of ['Lämmitykset', 'Vastaanotto', 'Saunottaja', 'Miehitetty', 'Avoin']) if (!txt.includes(w)) problems.push(`kalenteri: työvuorosta puuttuu "${w}": ${txt}`);
+    for (const w of ['Lämmitykset', 'Vastaanotto', 'Saunottaja', 'Ei nimettyä tekijää']) if (!txt.includes(w)) problems.push(`kalenteri: työvuorosta puuttuu "${w}": ${txt}`);
     const cls = await page.locator('.cal-detail .cal-item.shift').evaluateAll((els) => els.map((e) => e.className));
     for (const c of ['shift-heater', 'shift-reception', 'shift-therapist']) if (!cls.some((x) => x.includes(c))) problems.push(`kalenteri: työvuorokortilta puuttuu väriluokka ${c}: ${cls.join(' | ')}`);
     const bgs = await page.locator('.cal-detail .cal-item.shift').evaluateAll((els) => els.map((e) => getComputedStyle(e).backgroundColor));
     if (new Set(bgs.slice(0, 3)).size !== 3) problems.push(`kalenteri: roolien taustavärien pitää erota: ${bgs}`);
+    const badges = await page.locator('.cal-detail .cal-item.shift').evaluateAll((els) => els.map((e) => ({ named: !!e.querySelector('.cal-txt > span'), badge: e.querySelector('.badge')?.textContent ?? null })));
+    if (badges.length !== 5 || badges.filter((b) => b.badge).length !== 1 || badges.some((b) => b.named === !!b.badge || (b.badge && b.badge !== 'Ei nimettyä tekijää'))) problems.push(`kalenteri: merkki vain nimeämättömällä vuorolla: ${JSON.stringify(badges)}`);
+    if (/miehitetty|osittain|\bavoin\b/i.test(txt)) problems.push(`kalenteri: Miehitetty/Osittain/Avoin ei saa näkyä: ${txt}`);
     if (/heater|reception|therapist|assigned|sauna_x|hoitaja|\bopen\b/i.test(txt)) problems.push(`kalenteri: työvuoroissa näkyy koodi tai "Hoitaja": ${txt}`);
   }
   if ((await page.locator('#nav a[href="#/kayttajat"]').count()) !== 0) problems.push('kutsu: staff ei saa nähdä Käyttäjät-valikkoa');

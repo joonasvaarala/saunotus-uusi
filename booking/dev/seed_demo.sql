@@ -119,6 +119,9 @@ begin
       insert into public.work_shifts (calendar_source_id, starts_at, ends_at, role_type, status, staffing_status)
         values ('00000000-0000-4000-8000-0000000000b2', ((d::timestamp + time '13:00') at time zone 'Europe/Helsinki'), ((d::timestamp + time '18:30') at time zone 'Europe/Helsinki'), 'reception', 'active', 'assigned') returning id into sid;
       insert into public.shift_assignments (shift_id, staff_id) values (sid, '00000000-0000-4000-8000-0000000000d3');
+      -- illan lisäsaunottaja ilman nimettyä tekijää (hallinnan kalenterissa näkyy ilmoitus "Ei nimettyä tekijää")
+      insert into public.work_shifts (calendar_source_id, starts_at, ends_at, role_type, status, staffing_status)
+        values ('00000000-0000-4000-8000-0000000000b1', ((d::timestamp + time '19:00') at time zone 'Europe/Helsinki'), ((d::timestamp + time '21:00') at time zone 'Europe/Helsinki'), 'therapist', 'active', 'unassigned');
     end if;
     -- yksi peruttu vuoro (ei saa näkyä)
     if i = 12 then insert into public.work_shifts (calendar_source_id, starts_at, ends_at, role_type, status, staffing_status) values ('00000000-0000-4000-8000-0000000000b1', ((d::timestamp + time '10:00') at time zone 'Europe/Helsinki'), ((d::timestamp + time '12:00') at time zone 'Europe/Helsinki'), 'therapist', 'cancelled', 'assigned'); end if;

@@ -19,9 +19,10 @@ export const roleLabel = (s) => ROLE_FI[String(s.role_type || '').toLowerCase()]
 const KIND_CLASS = { heater: 'shift-heater', therapist: 'shift-therapist', saunottaja: 'shift-therapist', hoitaja: 'shift-therapist', reception: 'shift-reception' };
 const NAME_CLASS = [[/lämmit/i, 'shift-heater'], [/saunottaja|hoitaja/i, 'shift-therapist'], [/vastaanot/i, 'shift-reception']];   // tuntematon koodi → kalenterin nimestä
 export const shiftClass = (s) => KIND_CLASS[String(s.role_type || '').toLowerCase()] || (NAME_CLASS.find(([re]) => re.test(s.calendar_name || '')) || [])[1] || 'shift-other';
-const STAFFING = { assigned: 'Miehitetty', full: 'Miehitetty', unassigned: 'Avoin', open: 'Avoin', partial: 'Osittain' };
-export const staffingLabel = (v) => STAFFING[String(v).toLowerCase()] || v;
-const staffingTone = (v) => (['open', 'unassigned'].includes(String(v).toLowerCase()) ? 'warn' : 'ok');
+// Miehitysmerkki: näytetään AINOASTAAN jos vuorolle ei ole nimetty ketään. Ensisijaisesti nimettyjen henkilöiden perusteella (staff_name / names);
+// staffing_status (assigned/full/partial/open/unassigned) ei tuota merkkiä, jos nimettyjä on – data ei kerro tarvittua määrää, joten ei nimettyjä = ilmoitus, muuten ei mitään.
+export const NO_ASSIGNEE = 'Ei nimettyä tekijää';
+export const needsNotice = (s) => !(s.names && s.names.length);
 function isoWeek(ds) { const d = new Date(`${ds}T12:00:00Z`); const day = (d.getUTCDay() + 6) % 7; d.setUTCDate(d.getUTCDate() - day + 3); const y = d.getUTCFullYear(); const j = new Date(Date.UTC(y, 0, 4)); return 1 + Math.round(((d - j) / 864e5 - 3 + ((j.getUTCDay() + 6) % 7)) / 7); }
 
 export async function render({ ctx, refs, reload }) {
@@ -53,8 +54,8 @@ export async function render({ ctx, refs, reload }) {
   const shiftItem = (s) => h('li', { class: `cal-item shift ${shiftClass(s)}`, 'data-kind': 'shift' },
     h('span', { class: 'cal-time', text: `${fmtTime(s.starts_at)}–${fmtTime(s.ends_at)}` }),
     h('span', { class: 'cal-txt' }, h('strong', { text: roleLabel(s) }),
-      h('br'), h('span', { text: s.names.length ? s.names.join(', ') : 'Ei nimettyä henkilöä' })),
-    s.staffing_status ? badge(staffingTone(s.staffing_status), staffingLabel(s.staffing_status)) : null);
+      s.names.length ? [h('br'), h('span', { text: s.names.join(', ') })] : null),
+    needsNotice(s) ? badge('warn', NO_ASSIGNEE) : null);
   const bookingItem = (r) => h('li', { class: 'cal-item booking', 'data-kind': 'booking' },
     h('span', { class: 'cal-time', text: fmtTime(r.starts_at) }),
     h('button', { type: 'button', class: 'link cal-txt', onclick: () => reservationDialog(r, { methods: refs.methods, onChange: () => draw() }) }, h('strong', { text: r.customer_name || '–' }), ` · ${r.persons} hlö`, h('br'), h('small', { text: r.product_name || '' })),
