@@ -59,8 +59,8 @@ button.bk-cell:hover{filter:brightness(.97)}
 /* lomake */
 .bk-checkout{display:grid;gap:26px;align-items:start}
 @media(min-width:900px){.bk-checkout{grid-template-columns:minmax(0,1.4fr) minmax(280px,1fr)}.bk-aside{position:sticky;top:90px}}
-.bk-form fieldset{border:0;margin:0 0 6px;padding:0}
-.bk-form legend{font:600 13px var(--label);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;padding:0}
+.bk-form fieldset{border:0;margin:0 0 24px;padding:0;min-width:0}
+.bk-form legend{font:600 13px var(--label);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;padding:0}
 .bk-stepper{display:inline-flex;align-items:center;gap:8px}
 .bk-step{width:48px;height:48px;border-radius:50%;border:1px solid var(--ink);background:#fff;font-size:26px;cursor:pointer;color:var(--ink)}
 .bk-step:disabled{opacity:.35;cursor:default}
@@ -75,8 +75,8 @@ button.bk-cell:hover{filter:brightness(.97)}
 .bk-form .btn:disabled{opacity:.6;cursor:default}
 .bk-aside{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px}
 .bk-aside h3{margin-top:0}
-.bk-sum{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0 0 12px}
-.bk-sum dt{font:600 12px var(--label);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding-top:4px}
+.bk-sum{display:grid;grid-template-columns:minmax(80px,38%) minmax(0,1fr);gap:6px 14px;margin:0 0 12px}
+.bk-sum dt{overflow-wrap:anywhere;font:600 12px var(--label);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding-top:4px}
 .bk-sum dd{margin:0;font-weight:700;color:var(--ink)}
 .bk-totalrow{font-size:20px;border-top:1px solid var(--line);padding-top:12px;margin:0 0 8px}
 .bk-total{font:600 30px var(--head);color:var(--ink)}
@@ -91,20 +91,23 @@ button.bk-cell:hover{filter:brightness(.97)}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 #booking-app [tabindex="-1"]:focus{outline:none}
 
-/* Migraatio 11: asiakastyyppi, yritystiedot, lisäpalvelut */
-.bk-kinds,.bk-company,.bk-addons{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 16px;background:#fff}
-.bk-kinds legend,.bk-company legend,.bk-addons legend{font:700 15px var(--body);padding:0 6px;color:var(--ink)}
+/* Migraatio 11: asiakastyyppi, yritystiedot, lisäpalvelut (v9: samat osio-otsikot, leveys ja välit kuin muulla lomakkeella) */
+.bk-form .bk-kinds{margin:0 0 16px}
+.bk-form .bk-kinds>legend{font:700 15px var(--body);text-transform:none;letter-spacing:0;margin-bottom:6px}
+.bk-form fieldset.bk-company{border:1px solid var(--line);border-radius:12px;padding:14px;margin:0 0 18px;background:#fff}
+.bk-form .bk-company>legend{float:left;width:100%;margin:0 0 10px}
+.bk-form .bk-company>legend+*{clear:both}
 .bk-company[hidden]{display:none}
 .bk-kindrow{display:flex;gap:10px;flex-wrap:wrap}
 .bk-kind{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 14px;border:1px solid #8b7f73;border-radius:10px;background:#fff;font-weight:600;cursor:pointer}
 .bk-kind input{width:22px;height:22px;accent-color:var(--green)}
 .bk-company h4{margin:14px 0 8px;font-size:15px}
-.bk-row2{display:grid;grid-template-columns:120px 1fr;gap:10px}
+.bk-row2{display:grid;grid-template-columns:120px minmax(0,1fr);gap:10px}
 .bk-hint{display:block;color:var(--muted);font-size:13px;margin-top:3px}
+.bk-addons>.bk-hint{font-size:14px;margin:0 0 12px}
 .bk-addonlist{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-.bk-addon{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--line)}
-.bk-addon:first-child{border-top:0}
-.bk-addon-info{flex:1 1 200px;display:grid;gap:2px}
+.bk-addon{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.bk-addon-info{flex:1 1 180px;min-width:0;display:grid;gap:2px}
 .bk-addon-info small{color:var(--muted)}
 .bk-addon-price{font-weight:700;color:var(--gold)}
 .bk-addon .bk-stepper input{width:64px}
