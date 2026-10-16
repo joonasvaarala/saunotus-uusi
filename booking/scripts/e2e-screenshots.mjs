@@ -268,6 +268,24 @@ if (process.env.ONLY !== 'shop') for (const [name, vp] of [['mobile', { width: 3
   await page.fill('#email', 'admin@demo.local'); await page.fill('#password', 'demo');
   await page.click('form#login button[type=submit]');
   await page.waitForSelector('#view .day-view, #view .daygrid');
+  {   // yläpalkin haalea logo (korvaa tekstin "Sauna hallinta"): latautuu, 34–36 px korkea, alt-teksti, kontrasti ≥ 4,5:1 tummanvihreää vasten, ei vaakavieritystä (myös 360 px)
+    const img = page.locator('header.top .brand img');
+    await img.waitFor();
+    const m = await img.evaluate(async (el) => {
+      const svg = await (await fetch(el.src)).text(), fill = (svg.match(/fill="(#[0-9a-fA-F]{6})"/) || [])[1];
+      const lum = (hex) => { const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+      const bg = getComputedStyle(document.querySelector('header.top')).backgroundColor.match(/\d+/g).slice(0, 3).map(Number), bgHex = '#' + bg.map((v) => v.toString(16).padStart(2, '0')).join('');
+      const [a, b] = [lum(fill), lum(bgHex)].sort((x, y) => y - x);
+      return { ok: el.complete && el.naturalWidth > 0, h: Math.round(el.getBoundingClientRect().height), alt: el.alt, fill, ratio: (a + 0.05) / (b + 0.05), brandText: document.querySelector('header.top .brand').textContent.trim(), sw: document.documentElement.scrollWidth - document.documentElement.clientWidth, tap: Math.round(el.closest('a').getBoundingClientRect().height) };
+    });
+    if (!m.ok) problems.push(`logo-${name}: yläpalkin kuva ei latautunut`);
+    if (m.h < 34 || m.h > 36) problems.push(`logo-${name}: kuvan korkeus ${m.h} px (odotettiin 34–36)`);
+    if (m.alt !== 'Sauna hallinta' || m.brandText) problems.push(`logo-${name}: alt-teksti "${m.alt}" / näkyvää tekstiä "${m.brandText}"`);
+    if (m.ratio < 4.5) problems.push(`logo-${name}: kontrasti ${m.ratio.toFixed(2)} < 4,5 (${m.fill})`);
+    if (m.sw > 0 || m.tap < 44) problems.push(`logo-${name}: vaakavieritys ${m.sw} px tai linkin korkeus ${m.tap} < 44`);
+    if (name === 'mobile') { await page.setViewportSize({ width: 360, height: 800 }); if ((await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)) > 0) problems.push('logo-360: vaakavieritys 360 px leveydellä'); await page.setViewportSize({ width: 390, height: 844 }); }
+    await page.locator('header.top').screenshot({ path: join(OUT, `admin-${name}-80-ylapalkki-logo.png`) });
+  }
   // päivänäkymä päivälle, jolla on demovarauksia (seuraava maanantai)
   const mon = (() => { const d = new Date(); d.setUTCDate(d.getUTCDate() + ((8 - d.getUTCDay()) % 7 || 7)); return d.toISOString().slice(0, 10); })();
   await page.evaluate((m) => { location.hash = `#/?d=${m}`; }, mon);

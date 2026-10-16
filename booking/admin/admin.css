@@ -15,8 +15,8 @@ small{color:var(--muted)}
 .login{width:min(420px,100%);display:grid;gap:12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
 /* kuori */
-.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--green);color:#fff}
-.brand{font-size:17px;letter-spacing:.04em}.brand span{opacity:.7;font-weight:400;margin-left:4px}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;min-height:56px;padding:10px 14px;background:var(--green);color:#fff}
+.brand{display:flex;align-items:center;min-height:44px;margin:-4px 0;flex:none}.brand img{display:block;height:36px;width:auto}   /* haalea logo (sävy #CFC5A8, kontrasti 6,9:1 tummanvihreää vasten) */
 .who{margin-left:auto;font-size:13px;opacity:.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .top .btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.55)}
 .top .btn.ghost:hover{background:rgba(255,255,255,.12)}
@@ -28,7 +28,7 @@ main{padding:14px 14px 90px;max-width:1100px;margin:0 auto}
 @media(min-width:900px){
   #shell{display:grid;grid-template-columns:220px 1fr;grid-template-rows:auto 1fr;min-height:100vh}
   .top{grid-column:1/-1}
-  .nav{position:sticky;top:52px;align-self:start;height:calc(100vh - 52px);flex-direction:column;border-top:0;border-right:1px solid var(--line);padding:10px 0;overflow:auto}
+  .nav{position:sticky;top:56px;align-self:start;height:calc(100vh - 56px);flex-direction:column;border-top:0;border-right:1px solid var(--line);padding:10px 0;overflow:auto}
   .nav a{display:flex;flex:none;gap:10px;align-items:center;justify-content:flex-start;padding:12px 18px;font-size:15px;min-height:0}
   .nav a[aria-current]{box-shadow:inset 3px 0 0 var(--green);background:var(--bg)}
   main{padding:22px 28px;width:100%}
