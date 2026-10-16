@@ -2,6 +2,9 @@
 export const T = {
   fi: {
     title: 'Varaa saunaelämys', lead: 'Valitse kokemus, päivä ja vuoro. Varaus vahvistetaan heti.',
+    modeLabel: 'Selaustapa', modeCat: 'Selaa kategorioittain', modeDay: 'Selaa päivän mukaan', dayTitle: 'Varaa päivän mukaan', dayLead: 'Valitse päivä ja näet kaikki sen päivän varattavat vuorot.',
+    pickDay: 'Valitse päivä', today: 'Tänään', prevWeek: 'Edellinen viikko', nextWeek: 'Seuraava viikko', daySessions: (n) => (n === 1 ? '1 vapaa vuoro' : `${n} vapaata vuoroa`), noSessions: 'ei vuoroja',
+    noSlotsDay: 'Ei vapaita vuoroja valitulle päivälle.', nextFree: 'Seuraava päivä, jolla on vapaita vuoroja:', noNextFree: 'Lähipäivinä ei ole vapaita vuoroja. Kokeile toista päivää tai selaa kategorioittain.',
     all: 'Kaikki', k_yleinen: 'Yleiset vuorot', k_yksityinen: 'Yksityisvuorot', k_muut: 'Muut',
     choose: 'Valitse', pickDate: 'Valitse päivä', pickSlot: 'Valitse vuoro', details: 'Yhteystiedot', bookTitle: 'Varauksen tiedot', back: '← Takaisin', backList: '← Kaikki tuotteet',
     from: 'alk.', perPerson: '/ hlö', persons: 'Henkilömäärä', person: 'hlö', free: 'vapaana', full: 'Täynnä', unavailable: 'Ei varattavissa',
@@ -39,6 +42,9 @@ export const T = {
   },
   en: {
     title: 'Book a sauna experience', lead: 'Choose an experience, a day and a session. Your booking is confirmed instantly.',
+    modeLabel: 'Browse mode', modeCat: 'Browse by category', modeDay: 'Browse by date', dayTitle: 'Book by date', dayLead: 'Pick a date to see all sessions you can book on that day.',
+    pickDay: 'Pick a date', today: 'Today', prevWeek: 'Previous week', nextWeek: 'Next week', daySessions: (n) => (n === 1 ? '1 session available' : `${n} sessions available`), noSessions: 'no sessions',
+    noSlotsDay: 'No available sessions for the selected date.', nextFree: 'Next day with available sessions:', noNextFree: 'No available sessions in the coming days. Try another date or browse by category.',
     all: 'All', k_yleinen: 'Public sessions', k_yksityinen: 'Private sessions', k_muut: 'Other',
     choose: 'Select', pickDate: 'Pick a date', pickSlot: 'Pick a session', details: 'Your details', bookTitle: 'Booking details', back: '← Back', backList: '← All products',
     from: 'from', perPerson: '/ person', persons: 'Guests', person: 'guests', free: 'available', full: 'Full', unavailable: 'Not available',

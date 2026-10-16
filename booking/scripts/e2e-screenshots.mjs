@@ -32,6 +32,56 @@ if (process.env.ONLY !== 'admin') for (const [name, vp] of [['mobile', { width: 
   await page.goto(`${BASE}/varaa/`);
   await page.waitForSelector('.bk-cards');
   await shot(page, `shop-${name}-1-tuotteet.png`);
+  // ---- Selaa päivän mukaan (v13): FI + EN, päivä jolla on useita vuoroja, tyhjä päivä, siirtymä lomakkeelle ja takaisin ----
+  for (const lang of ['fi', 'en']) {
+    const L = lang === 'fi'
+      ? { base: `${BASE}/varaa/`, modeCat: 'Selaa kategorioittain', modeDay: 'Selaa päivän mukaan', empty: 'Ei vapaita vuoroja valitulle päivälle', next: 'Seuraava päivä, jolla on vapaita vuoroja', file: '' }
+      : { base: `${BASE}/en/book/`, modeCat: 'Browse by category', modeDay: 'Browse by date', empty: 'No available sessions for the selected date', next: 'Next day with available sessions', file: 'en-' };
+    if (lang === 'en') await page.goto(L.base);   // FI: ollaan jo tuotelistassa
+    await page.waitForSelector('.bk-cards');
+    if ((await page.locator('.bk-modes a[aria-current]').innerText()).trim().toLowerCase() !== L.modeCat.toLowerCase()) problems.push(`shop-${name}-${lang}: oletustilan pitää olla "${L.modeCat}"`);
+    await page.click(`.bk-modes a:has-text("${L.modeDay}")`);
+    await page.waitForSelector('.bk-strip');
+    if (!/#\/paiva\/\d{4}-\d\d-\d\d$/.test(page.url())) problems.push(`shop-${name}-${lang}: päivänäkymän reitin pitää olla #/paiva/<pvm>: ${page.url()}`);
+    for (let i = 0; i < 4 && (await page.locator('.bk-sd.free').count()) === 0; i++) await page.click('.bk-weeknav a[aria-label]:last-child');
+    await page.locator('.bk-sd.free').last().click();
+    await page.waitForSelector('.bk-dayresults .bk-slotlist');
+    const items = await page.locator('.bk-dayresults .bk-slot').count();
+    if (items < 2) problems.push(`shop-${name}-${lang}: valitulla päivällä pitäisi olla useita vuoroja, nyt ${items}`);
+    const times = await page.locator('.bk-dayresults .bk-slot .bk-time').allInnerTexts();
+    const startMin = (x) => { const m = x.match(/(\d{1,2})(?::(\d\d))?/); return +m[1] * 60 + +(m[2] || 0); };
+    const kindsOrder = await page.locator('.bk-dayresults .bk-slotlist').evaluateAll((uls) => uls.map((ul) => [...ul.querySelectorAll('.bk-time')].map((e) => e.textContent)));
+    for (const g of kindsOrder) if (g.some((x, i) => i && startMin(x) < startMin(g[i - 1]))) problems.push(`shop-${name}-${lang}: vuorojen pitää olla aikajärjestyksessä: ${g.join(', ')}`);
+    if (!times.length || (await page.locator('.bk-dayresults').innerText()).includes('[object')) problems.push(`shop-${name}-${lang}: päivänäkymän sisältö virheellinen`);
+    await page.addStyleTag({ content: '.site-header{position:static!important}' });
+    await page.locator('#booking-app').screenshot({ path: join(OUT, `shop-${name}-${L.file}8-paiva-vuorot.png`) });
+    // Valitse → lomake (sama reitti kuin tuotteen päivänäkymästä) → takaisin päivänäkymään
+    const dayUrl = page.url();
+    await page.locator('.bk-dayresults .bk-slot.available a.btn').first().click();
+    await page.waitForSelector('form.bk-form');
+    if (!/#\/varaa\/\d+\/\d{4}-\d\d-\d\d\/\d+/.test(page.url())) problems.push(`shop-${name}-${lang}: Valitse vei väärälle reitille: ${page.url()}`);
+    await page.click('#booking-app > p:first-child a');
+    await page.waitForSelector('.bk-strip');
+    if (page.url() !== dayUrl) problems.push(`shop-${name}-${lang}: Takaisin-linkin pitää palata päivänäkymään (${page.url()} ≠ ${dayUrl})`);
+    // tyhjä päivä: ilmoitus + ehdotus seuraavasta vapaasta päivästä
+    let emptyShown = false;
+    for (let i = 0; i < 28 && !emptyShown; i++) {
+      const d = new Date(Date.now() + i * 864e5).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
+      await page.evaluate((x) => { location.hash = `#/paiva/${x}`; }, d);
+      await page.waitForSelector(`.bk-strip a[aria-current=date][href$="${d}"], .bk-strip a[aria-current=date]`);
+      await page.waitForTimeout(150);
+      emptyShown = (await page.locator('.bk-dayresults .bk-notice').count()) > 0;
+    }
+    if (!emptyShown) problems.push(`shop-${name}-${lang}: tyhjää päivää ei löytynyt demodatasta`);
+    else {
+      const txt = await page.locator('.bk-dayresults .bk-notice').innerText();
+      if (!txt.includes(L.empty)) problems.push(`shop-${name}-${lang}: tyhjän päivän ilmoitus puuttuu: ${txt}`);
+      if (!txt.includes(L.next) || (await page.locator('.bk-dayresults .bk-notice a').count()) !== 1) problems.push(`shop-${name}-${lang}: seuraavan vapaan päivän ehdotus puuttuu`);
+      await page.locator('#booking-app').screenshot({ path: join(OUT, `shop-${name}-${L.file}8b-paiva-tyhja.png`) });
+      await page.click('.bk-dayresults .bk-notice a');
+      await page.waitForSelector('.bk-dayresults .bk-slot.available');
+    }
+  }
   // yleinen vuoro → kalenteri
   await page.goto(`${BASE}/varaa/#/tuote/yleinensauna`);
   await page.waitForSelector('.bk-grid button.bk-cell');
