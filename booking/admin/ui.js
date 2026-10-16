@@ -33,6 +33,9 @@ export const PAY = { unpaid: 'Maksamatta', pending: 'Maksu kesken', paid: 'Makse
 export const badge = (kind, text) => h('span', { class: `badge ${kind}`, text });
 export const statusBadge = (s) => badge(`st-${s}`, STATUS[s] || s);
 export const payBadge = (s) => badge(`pay-${s}`, PAY[s] || s);
+// Johku-tunniste: vain lähteelle 'johku' (admin_list_reservations / admin_day_view: source). Puuttuva tai 'native' → ei tunnistetta (defensiivinen: vanha kanta ei palauta kenttää).
+export const isJohku = (r) => r?.source === 'johku';
+export const sourceBadge = (r) => (isJohku(r) ? h('span', { class: 'badge src-johku', title: 'Tuotu Johku-varausjärjestelmästä', text: 'Johku' }) : null);
 
 let toastTimer;
 export function toast(msg, kind = 'ok') {

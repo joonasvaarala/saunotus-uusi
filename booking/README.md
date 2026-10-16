@@ -9,16 +9,16 @@ Ei palvelinkoodia, ei build-vaihetta selaimen koodille, ei kirjastoriippuvuuksia
 
 | Polku | Mitä |
 |---|---|
-| `supabase/migrations/` | 11 SQL-migraatiota (skeema `booking`; 01–09 ajettu testikantaan 16.10., 10 ja 11 odottavat ajoa). **Ainoa tapa muuttaa tuotantokantaa.** |
+| `supabase/migrations/` | 11 SQL-migraatiota (skeema `booking`; 01–09 ajettu testikantaan 16.10., 10 ja 11 odottavat ajoa; 12–13 ajettu tuotantoon, tiedostot lisättävä, ks. alla). **Ainoa tapa muuttaa tuotantokantaa.** |
 | `supabase/tests/` | pgTAP-testit + kilpailutilannetesti (`run.sh`), mock-Supabase ja mock-kb |
 | `supabase/manual/` | Käsin tehtävät vaiheet: skeeman avaus REST:iin, ensimmäinen admin, tarkistuskyselyt |
 | `shared/sb.js` | ~110 rivin PostgREST/Auth-asiakas (käytetään kaupassa ja hallinnassa) |
 | `shop/` | Varauskauppa: **kopio uudesta sivustosta**, jossa Johku-linkit avaavat sisäisen kalenterin |
-| `admin/` | Hallinta-SPA (mobiili ensin + työpöytä), Supabase Auth. Näkymät: Päivä (+ lisäpalvelujen "Valmistele"-yhteenveto), Varaukset, **Kalenteri** (työvuorot + varaukset), Uusi varaus (asiakastyyppi, lisäpalvelut), Asiakkaat (**Lisää asiakas**: yksityinen/yritys), Tuotteet (+ **Lisäpalvelut**), Resurssit, Asetukset, **Käyttäjät** (vain admin) |
+| `admin/` | Hallinta-SPA (mobiili ensin + työpöytä), Supabase Auth. Näkymät: Päivä (+ lisäpalvelujen "Valmistele"-yhteenveto), Varaukset (**lähdesuodatin Kaikki / Uudet / Johku**; Johku-varauksilla "Johku"-tunniste), **Kalenteri** (työvuorot + varaukset), Uusi varaus (asiakastyyppi, lisäpalvelut), Asiakkaat (**Lisää asiakas**: yksityinen/yritys), Tuotteet (+ **Lisäpalvelut**), Resurssit, Asetukset, **Käyttäjät** (vain admin) |
 | `supabase/functions/admin-users/` | Edge Function (Deno, `verify_jwt = true`): käyttäjien kutsu, käytöstä poisto ja aktivointi. Validointilogiikka `logic.js` + testit |
 | `dev/` | Paikallinen demo: PostgREST-konfiguraatio, kehityspalvelin (mock-auth), demo-siemen |
 | `scripts/e2e-screenshots.mjs` | Playwright-savutesti + kuvakaappaukset + konsolivirhetarkistus |
-| `scripts/e2e-shop-layout.mjs` | Kaupan varauslomakkeen ja päivänäkymän (`#/paiva/<pvm>`) asettelutesti (360/390/430/1280 px, FI+EN, yksityinen+yritys; kosketuskohteet, kontrasti, näppäimistö): ei vaakavieritystä, osiot samassa linjassa, järjestys ja otsikot |
+| `scripts/e2e-shop-layout.mjs` | Kaupan varauslomakkeen ja päivänäkymän (`#/paiva/<pvm>`) asettelutesti (360/390/430/1280 px, FI+EN, yksityinen+yritys; kosketuskohteet, kontrasti, näppäimistö): ei vaakavieritystä, osiot samassa linjassa, järjestys ja otsikot; varauslomakkeen otsikon alla lyhyt yhteenveto (tuote, päivä, kellonaika) ja linkki "Vaihda päivää tai aikaa" (päivänäkymästä `?via=day` → `#/paiva/<pvm>?tuote=<slug>`, muuten `#/tuote/<slug>/<pvm>`) |
 | `docs/` | Maksurajapinta, Johku-tuonti, ristiriidat ja tulkinnat, Bottiavustuspyyntö, kuvakaappaukset |
 
 ## Arkkitehtuuri
@@ -135,6 +135,12 @@ Tulkinnat ja avoimet kysymykset: [docs/ristiriidat-ja-tulkinnat.md](docs/ristiri
 | 09 | `…_booking_09_cron_optional.sql` | (valinnainen) pg_cron-ajastus pitojen siivoukseen; ohitetaan jos pg_cron puuttuu |
 | 10 | `…_booking_10_rls_initplan.sql` | Suorituskyky: RLS-politiikat `(select auth.uid())` / `(select booking.is_staff())` -muotoon (advisor `auth_rls_initplan`); sama semantiikka, idempotentti. Ei muokkaa migraatioita 01–09 |
 | 11 | `…_booking_11_customer_kinds_addons.sql` | Asiakastyypit (`customer_kinds`, yritysasiakkaan y-tunnus + verkkolaskutiedot, tilauksen laskutustietojen kuva), lisäpalvelut (`addons`, `order_items.kind='addon'`), `public_addons`, `public_create_booking` (+ asiakastyyppi, yritystiedot, lisäpalvelut), `admin_create_customer`, `admin_set_reservation_addons`, `admin_get_order`, `admin_list/create/update_addon` (`catalog.edit`), `admin_day_view` (+ "valmistele"-yhteenveto). Ei muokkaa migraatioita 01–10 eikä `kb`-skeemaa |
+
+
+> **Migraatiot 12 ja 13 on ajettu tuotantoon** (Bottiavustus ajoi ne 16.10.2026). Tiedostot ovat `supabase/migrations/`-kansiossa versionimillä `20261016202540_booking_12_johku_marker.sql` ja `20261016202553_booking_13_audit_skip.sql` (sama SQL kuin ajettu), jotta paikallinen `run.sh`/`setup-db.sh` vastaa tuotantoa.
+> * **12 `johku_marker`:** `orders.external_meta`, `reservations.external_meta` (jsonb; maksutiedot vain henkilökunnalle, ei anonille), indeksi `reservations_source_idx`; `admin_day_view` palauttaa jokaisessa `reservations`-objektissa `source` (`'johku'` | `'native'`) ja `external_id`; `admin_list_reservations(…, p_source text default null)` (8 parametria; `null` = kaikki) + sarakkeet `source`, `external_id` vanhojen perään. Vanhat kutsut toimivat.
+> * **13 `audit_skip`:** `audit_trg` ohittaa kirjauksen, kun `booking.skip_audit='on'` ja JWT-rooli on tyhjä/`service_role` (massatuonti).
+> * **Hallinta (Varaukset / Päivä / varauksen tiedot):** "Johku"-tunniste (teksti, hiekka + tummanvihreä; näytetään vain kun `source = 'johku'`, puuttuva kenttä = ei tunnistetta), varauksen tiedoissa **Johku-tunnus** (`external_id`). Varauslistan suodatin **Kaikki / Uudet / Johku** välittyy `p_source`-parametriin (`Uudet` = `'native'`, `Johku` = `'johku'`, `Kaikki` = parametria ei lähetetä). Testit: `supabase/tests/12_johku_marker.test.sql` (ohittuu, jos migraatiota 12 ei ole testikannassa), `scripts/e2e-screenshots.mjs` (Johku-osio), `scripts/smoke-pages.mjs`.
 
 Migraatiot **eivät muuta `kb`-skeemaa** (vain viittaavat siihen FK:lla ja funktiot kirjoittavat `kb.products`, `kb.product_price_variants`, `kb.change_log`). Roolit: ei uusia tietokantaroolia; käytetään Supabasen `anon`, `authenticated`, `service_role`.
 
@@ -256,6 +262,7 @@ Vaatii PostgreSQL + pgTAP. Luo kannan `booking_test`, lataa mock-Supabasen (rool
 * `09_users_shifts` – työvuorojen lukunäkymä (staff vain omat, manager kaikki, ei oikeutta → virhe, väli > 62 pv → virhe, ei vuotavia kenttiä), roolin vaihdon ja linkityksen suojat (ei itseä, ei viimeistä adminia, epäaktiivinen/tuntematon kohde, vain staff-rooli, sama työntekijä kahdelle), `svc_*`-funktiot (vain service_role, säännöt, audit), ei kirjoituksia `public`-skeemaan
 * `supabase/functions/admin-users/logic.test.js` – Edge Functionin validointi (rooli-sallittulista, syötteet, CORS, kutsulinkin osoite, virhekartoitus); `node --test` tai `deno test`
 * `11_customer_kinds_addons` – asiakastyypit (y-tunnuksen tarkistenumero ja normalisointi, yritystietojen validointi, tuplien esto, yksityinen ≠ yritys samalla sähköpostilla, laskutustietojen kuva tilauksella), lisäpalvelujen hinnoittelu ja tilaus (summat, ALV-osuus, määrärajat, passiivinen/tuntematon/väärä vuorotyyppi), muutos lisäpalveluiden kanssa (rajaus, maksetun tilauksen hintatarkistus), hallinnan oikeudet (`catalog.edit`: staff ei, manager/admin kyllä), päivänäkymän "valmistele"-yhteenveto, RLS-eristys ja sisäisten funktioiden oikeudet
+* `12_johku_marker` – Johku-merkintä (migraatio 12): `admin_list_reservations` `p_source`-suodatin (johku/native/null), `source`/`external_id` listassa ja `admin_day_view`:ssä, vanhat kutsut ja sarakkeet, `external_meta` ei vuoda (anon ei lue, ei listassa/päivänäkymässä), oikeudet (ei anon). Ohittuu, jos migraatiota 12 ei ole testikannassa
 * `10_rls_initplan` – politiikkojen lausekkeissa ei ole suoraa `auth.uid()`/`is_staff()`/`has_permission()`-kutsua ilman `select`-kääreitä; politiikkojen määrä ja oikeudet (staff/manager/admin/anon) ennallaan
 * `race.sh` – rinnakkaiset yhteydet yrittävät varata samaa aikaa yhtä aikaa (advisory-lock-portti); invariantit: ei yksityisen ja yleisen päällekkäisyyttä, kapasiteetti ei ylity (ma–to 16, la–su 6 / alkamisaika, 1 h vuoro 10, poolit riippumattomia), vuosikortilla vain yksi tuleva varaus, asiakkaan rinnakkaiset muutokset eivät ylitä kapasiteettia eivätkä riko päällekkäisyyssääntöä
 * `mutation_check.sh` – todistaa että kilpailutesti on herkkä: poistaa lukon testikannasta ja odottaa `race.sh`:n epäonnistuvan

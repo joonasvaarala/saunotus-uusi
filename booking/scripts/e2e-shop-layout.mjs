@@ -63,10 +63,40 @@ for (const lang of ['fi', 'en']) for (const width of [360, 390, 430, 1280]) for 
   expect(r.legends[0].toLowerCase().startsWith(pn.toLowerCase().slice(0, 5)) && r.legends[1] === cn && r.legends[2] === an, `${tag}: osioiden järjestys/otsikot väärin: ${r.legends.join(' | ')}`);
   expect(r.h2 !== cn, `${tag}: sivun otsikko toistaa osion otsikon "${cn}"`);
   expect(r.texts.filter((x) => x === cn).length === 1, `${tag}: "${cn}" esiintyy useammin kuin kerran lomakkeessa`);
+  // v16: yhteenveto otsikon alla (tuote, päivä, aika) + "Vaihda päivää tai aikaa": asettelu, kosketuskohde, kontrasti, linkin kohde
+  {
+    const pk = await page.evaluate(() => {
+      const rgb = (c) => (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+      const lum = (c) => { const [r, g, b] = rgb(c).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+      const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
+      const box = (e) => { const b = e.getBoundingClientRect(); return { l: b.left, r: b.right, w: b.width, h: b.height }; };
+      const el = document.querySelector('#booking-app .bk-pick'); const bg = getComputedStyle(el).backgroundColor;
+      const q = (s) => el.querySelector(s);
+      return { ok: !!el, afterH2: document.querySelector('#booking-app h2').nextElementSibling === el, name: q('.bk-pick-name').textContent, when: q('.bk-pick-when').textContent, link: q('a.bk-pick-change').textContent, href: q('a.bk-pick-change').getAttribute('href'),
+        box: box(el), app: box(document.getElementById('booking-app')), linkBox: box(q('a.bk-pick-change')), links: document.querySelectorAll('#booking-app > p a, #booking-app .bk-pick a').length,
+        cr: ['.bk-pick-name', '.bk-pick-when', 'a.bk-pick-change'].map((s) => ratio(getComputedStyle(q(s)).color, bg)), order: [...document.querySelector('#booking-app').children].slice(0, 3).map((c) => c.className || c.tagName) };
+    });
+    expect(pk.ok && pk.afterH2, `${tag}: yhteenvetolaatikon pitää olla heti otsikon alla (${pk.order})`);
+    expect(pk.name.length > 2 && (lang === 'fi' ? /^(ma|ti|ke|to|pe|la|su) \d{1,2}\.\d{1,2}\.\d{4}, klo \d{2}:\d{2}–\d{2}:\d{2}$/ : /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun),? \d{1,2} [A-Z][a-z]{2} \d{4} · \d{2}:\d{2}–\d{2}:\d{2}$/).test(pk.when), `${tag}: yhteenvetorivi väärin: "${pk.name}" / "${pk.when}"`);
+    expect(pk.link === (lang === 'fi' ? 'Vaihda päivää tai aikaa' : 'Change date or time') && pk.links === 1, `${tag}: pitää olla yksi linkki "Vaihda päivää tai aikaa" (ei erillistä Takaisin-linkkiä): ${pk.link} / ${pk.links}`);
+    expect(/#\/tuote\/yleinensauna\/\d{4}-\d\d-\d\d$/.test(pk.href), `${tag}: linkin kohde väärä (tuotesivu + päivä odotettiin): ${pk.href}`);
+    expect(pk.box.l >= pk.app.l - 0.5 && pk.box.r <= pk.app.r + 0.5, `${tag}: yhteenvetolaatikko ylittää sisältöalueen`);
+    expect(pk.linkBox.h >= 44 && pk.linkBox.w >= 44, `${tag}: linkin kosketuskohde < 44 px (${pk.linkBox.w.toFixed(0)}×${pk.linkBox.h.toFixed(0)})`);
+    expect(pk.cr.every((v) => v >= 4.5), `${tag}: yhteenvedon kontrasti < 4,5: ${pk.cr.map((v) => v.toFixed(2))}`);
+    if (OUT && width === 390 && kind === 'private') { await page.addStyleTag({ content: 'header.site-header,.site-header{position:static!important}' }); await page.evaluate(() => scrollTo(0, 0)); await page.screenshot({ path: join(OUT, `shop-mobile-390-${lang}-lomake-yhteenveto-ylaosa.png`), fullPage: true, clip: { x: 0, y: 0, width: 390, height: 900 } }); }
+  }
   if (OUT) await page.addStyleTag({ content: 'header.site-header,.site-header,header[class*=head],.topbar{position:static!important}' });   // kiinteä yläpalkki ei peitä kokosivun kuvaa
   if (OUT && lang === 'fi' && width === 390) await page.screenshot({ path: join(OUT, `shop-mobile-390-lisapalvelut-${kind === 'company' ? 'yritys' : 'yksityinen'}.png`), fullPage: true });
   if (OUT && lang === 'en' && width === 390) await page.screenshot({ path: join(OUT, `shop-mobile-390-en-addons-${kind}.png`), fullPage: true });
   if (OUT && lang === 'fi' && width === 1280 && kind === 'company') await page.screenshot({ path: join(OUT, 'shop-desktop-1280-lisapalvelut-yritys.png'), fullPage: true });
+  // linkki vie takaisin tuotesivulle samalle päivälle
+  if (width === 390 && kind === 'private') {
+    const date = (await page.locator('#booking-app .bk-pick a.bk-pick-change').getAttribute('href')).match(/(\d{4}-\d\d-\d\d)$/)[1];
+    await page.click('#booking-app .bk-pick a.bk-pick-change');
+    await page.waitForSelector('.bk-slot.available');
+    expect(page.url().endsWith(`#/tuote/yleinensauna/${date}`), `${tag}: "Vaihda päivää tai aikaa" ei vienyt tuotesivulle (${page.url()})`);
+    expect((await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)), `${tag}: vaakavieritys tuotesivulla`);
+  }
   await ctx.close();
 }
 

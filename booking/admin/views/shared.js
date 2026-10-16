@@ -2,7 +2,7 @@
 import { rpc } from '../sb.js';
 import { addonPicker } from './addons.js';
 import { icon } from '../icons.js';
-import { h, dialog, toast, run, fmtDay, fmtTime, fmtDT, money, statusBadge, payBadge, field, badge, empty } from '../ui.js';
+import { h, dialog, toast, run, fmtDay, fmtTime, fmtDT, money, statusBadge, payBadge, sourceBadge, isJohku, field, badge, empty } from '../ui.js';
 
 export function reservationDialog(r, { methods, onChange }) {
   const body = h('div', { class: 'stack' });
@@ -14,6 +14,7 @@ export function reservationDialog(r, { methods, onChange }) {
   const orderBox = h('div', { class: 'stack order-extra' });
   body.append(
     h('dl', { class: 'kv' },
+      isJohku(r) ? [h('dt', { text: 'Lähde' }), h('dd', {}, sourceBadge(r), ' tuotu Johku-järjestelmästä'), h('dt', { text: 'Johku-tunnus' }), h('dd', { class: 'ext-id', text: r.external_id || '–' })] : null,
       h('dt', { text: 'Asiakas' }), h('dd', {}, h('strong', { text: r.customer_name || '–' }), h('br'), r.customer_email || '', r.customer_phone ? ` · ${r.customer_phone}` : ''),
       h('dt', { text: 'Palvelu' }), h('dd', { text: r.product_name }),
       h('dt', { text: 'Aika' }), h('dd', { text: `${fmtDay(r.starts_at)}, ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)}` }),

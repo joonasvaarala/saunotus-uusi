@@ -72,9 +72,18 @@ if (process.env.ONLY !== 'admin') for (const [name, vp] of [['mobile', { width: 
     await page.locator('.bk-pc.open .bk-slot.available a.btn').first().click();
     await page.waitForSelector('form.bk-form');
     if (!/#\/varaa\/\d+\/\d{4}-\d\d-\d\d\/\d+/.test(page.url())) problems.push(`shop-${name}-${lang}: Valitse vei väärälle reitille: ${page.url()}`);
-    await page.click('#booking-app > p:first-child a');
+    // v16: lyhyt yhteenveto otsikon alla (tuote, päivä, kellonaika) ja yksi "Vaihda päivää tai aikaa" -linkki (ei erillistä Takaisin-linkkiä)
+    {
+      const pk = await page.evaluate(() => { const h2 = document.querySelector('#booking-app h2'), pk = document.querySelector('#booking-app .bk-pick'); return { h2next: h2?.nextElementSibling === pk, name: pk?.querySelector('.bk-pick-name')?.textContent, when: pk?.querySelector('.bk-pick-when')?.textContent, link: pk?.querySelector('a.bk-pick-change')?.textContent, links: document.querySelectorAll('#booking-app > p a, #booking-app .bk-pick a').length, first: document.querySelector('#booking-app').firstElementChild.tagName }; });
+      const whenRe = lang === 'fi' ? /^(ma|ti|ke|to|pe|la|su) \d{1,2}\.\d{1,2}\.\d{4}, klo \d{2}:\d{2}–\d{2}:\d{2}$/ : /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun),? \d{1,2} [A-Z][a-z]{2} \d{4} · \d{2}:\d{2}–\d{2}:\d{2}$/;
+      if (!pk.h2next || pk.first !== 'H2') problems.push(`shop-${name}-${lang}: yhteenvetolaatikon pitää olla heti otsikon (h2) alla: ${JSON.stringify(pk)}`);
+      if (!pk.name || !whenRe.test(pk.when || '')) problems.push(`shop-${name}-${lang}: yhteenvetorivin sisältö väärä (tuote "${pk.name}", aika "${pk.when}")`);
+      if (pk.link !== (lang === 'fi' ? 'Vaihda päivää tai aikaa' : 'Change date or time') || pk.links !== 1) problems.push(`shop-${name}-${lang}: linkki "Vaihda päivää tai aikaa" puuttuu tai linkkejä on useita: ${JSON.stringify(pk)}`);
+      await page.locator('#booking-app').screenshot({ path: join(OUT, `shop-${name}-${L.file}8d-lomake-yhteenveto.png`) });
+    }
+    await page.click('#booking-app .bk-pick a.bk-pick-change');
     await page.waitForSelector('.bk-strip');
-    if (page.url() !== dayUrl || (await page.locator('.bk-pc.open').getAttribute('data-slug').catch(() => null)) !== openSlug) problems.push(`shop-${name}-${lang}: Takaisin-linkin pitää palauttaa päivä ja avattu tuote (${page.url()} ≠ ${dayUrl})`);
+    if (page.url() !== dayUrl || (await page.locator('.bk-pc.open').getAttribute('data-slug').catch(() => null)) !== openSlug) problems.push(`shop-${name}-${lang}: "Vaihda päivää tai aikaa" -linkin pitää palauttaa päivä ja avattu tuote (${page.url()} ≠ ${dayUrl})`);
     await page.locator('.bk-pc-head[aria-expanded=true]').click();   // sulje: tuote-parametri pois URL:sta
     if (/tuote=/.test(page.url())) problems.push(`shop-${name}-${lang}: sulkeminen ei poistanut ?tuote-parametria`);
     // tyhjä päivä: ilmoitus + ehdotus seuraavasta vapaasta päivästä
@@ -322,6 +331,139 @@ if (process.env.ONLY !== 'shop') for (const [name, vp] of [['mobile', { width: 3
   await shot(page, `admin-${name}-4c-lisapalvelun-muokkaus.png`, false);
   await page.keyboard.press('Escape');
   await ctx.close();
+}
+// ---------- HALLINTA: Johku-tunniste ja lähdesuodatin (Kaikki / Uudet / Johku → p_source) ----------
+// Vaatii migraation booking_12 (admin_list_reservations.p_source/source/external_id, admin_day_view.source) demokannassa ja demosiemenen Johku-varaukset (dev/seed_demo.sql).
+if (process.env.ONLY !== 'shop') {
+  const login = async (page) => { await page.goto(`${BASE}/admin/`); await page.fill('#email', 'admin@demo.local'); await page.fill('#password', 'demo'); await page.click('form#login button[type=submit]'); await page.waitForSelector('#view .day-view, #view .daygrid'); };
+  const nextMon = (() => { const d = new Date(); d.setUTCDate(d.getUTCDate() + ((8 - d.getUTCDay()) % 7 || 7)); return d.toISOString().slice(0, 10); })();
+  const overflow = (page) => page.evaluate(() => { const d = document.querySelector('dialog[open]'); return { page: document.documentElement.scrollWidth - document.documentElement.clientWidth, dlg: d ? d.scrollWidth - d.clientWidth : 0 }; });
+  const rpcArgs = [];
+  const listReload = async (page, action) => { const [resp] = await Promise.all([page.waitForResponse((r) => r.url().includes('/rpc/admin_list_reservations')), action()]); await resp.finished(); await page.waitForTimeout(150); };
+  const rowsInfo = (page) => page.evaluate(() => [...document.querySelectorAll('#view .listrow')].map((li) => ({ johku: !!li.querySelector('.badge.src-johku'), text: li.innerText })));
+  for (const [name, vp] of [['mobile', { width: 390, height: 844, isMobile: true, hasTouch: true }], ['desktop', { width: 1280, height: 900 }]]) {
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, isMobile: vp.isMobile, hasTouch: vp.hasTouch, locale: 'fi-FI', timezoneId: 'Europe/Helsinki' });
+    const page = await ctx.newPage(); watch(page, `johku-${name}`);
+    page.on('request', (r) => { if (r.url().includes('/rpc/admin_list_reservations')) rpcArgs.push(JSON.parse(r.postData() || '{}')); });
+    await login(page);
+    // --- varauslista: tunniste + suodatin ---
+    await page.evaluate(() => { location.hash = '#/varaukset'; });
+    await page.waitForSelector('#view .listrow');
+    const grp = page.getByRole('group', { name: 'Lähde' });
+    if ((await grp.getByRole('radio').count()) !== 3) problems.push(`johku-${name}: lähdesuodattimessa pitää olla 3 vaihtoehtoa (Kaikki/Uudet/Johku)`);
+    for (const l of ['Kaikki', 'Uudet', 'Johku']) if ((await grp.getByRole('radio', { name: l }).count()) !== 1) problems.push(`johku-${name}: suodatinvaihtoehto puuttuu: ${l}`);
+    if (!(await grp.getByRole('radio', { name: 'Kaikki' }).isChecked())) problems.push(`johku-${name}: oletussuodatin pitää olla Kaikki`);
+    const all = await rowsInfo(page);
+    const nJ = all.filter((x) => x.johku).length;
+    if (nJ < 3 || nJ === all.length) problems.push(`johku-${name}: Kaikki-listalla pitää olla sekä Johku- (≥3) että uusia varauksia, nyt ${nJ}/${all.length}`);
+    if (!all.filter((x) => x.johku).every((x) => /Johku/.test(x.text))) problems.push(`johku-${name}: Johku-tunnisteen pitää olla tekstinä`);
+    if (rpcArgs.length && rpcArgs.at(-1).p_source != null) problems.push(`johku-${name}: Kaikki ei saa lähettää p_source-arvoa: ${JSON.stringify(rpcArgs.at(-1))}`);
+    await shot(page, `admin-${name}-20-varauslista-kaikki-johku-tunniste.png`, true);
+    await listReload(page, () => grp.getByRole('radio', { name: 'Johku' }).check());
+    if (rpcArgs.at(-1).p_source !== 'johku') problems.push(`johku-${name}: Johku-suodatin pitää lähettää p_source='johku': ${JSON.stringify(rpcArgs.at(-1))}`);
+    const onlyJ = await rowsInfo(page);
+    if (onlyJ.length !== nJ || !onlyJ.every((x) => x.johku)) problems.push(`johku-${name}: Johku-suodatin: pitäisi näkyä vain ${nJ} Johku-varausta, nyt ${onlyJ.length} (Johku ${onlyJ.filter((x) => x.johku).length})`);
+    if (!(await grp.getByRole('radio', { name: 'Johku' }).isChecked())) problems.push(`johku-${name}: valittu suodatin ei ole merkitty (checked)`);
+    await shot(page, `admin-${name}-21-varauslista-suodatin-johku.png`, false);
+    await listReload(page, () => grp.getByRole('radio', { name: 'Uudet' }).check());
+    if (rpcArgs.at(-1).p_source !== 'native') problems.push(`johku-${name}: Uudet-suodatin pitää lähettää p_source='native': ${JSON.stringify(rpcArgs.at(-1))}`);
+    const onlyN = await rowsInfo(page);
+    if (!onlyN.length || onlyN.some((x) => x.johku) || onlyN.length !== all.length - nJ) problems.push(`johku-${name}: Uudet-suodatin: pitäisi näkyä ${all.length - nJ} ei-Johku-varausta, nyt ${onlyN.length} (Johku ${onlyN.filter((x) => x.johku).length})`);
+    await shot(page, `admin-${name}-22-varauslista-suodatin-uudet.png`, false);
+    await listReload(page, () => grp.getByRole('radio', { name: 'Kaikki' }).check());
+    if (rpcArgs.at(-1).p_source != null || (await rowsInfo(page)).length !== all.length) problems.push(`johku-${name}: paluu Kaikki-suodattimeen ei palauttanut koko listaa`);
+    // suodatin toimii yhdessä haun kanssa ja näppäimistöllä (nuolinäppäin siirtää valintaa)
+    await grp.getByRole('radio', { name: 'Kaikki' }).focus();
+    await listReload(page, () => page.keyboard.press('ArrowRight'));
+    if (rpcArgs.at(-1).p_source !== 'native') problems.push(`johku-${name}: nuolinäppäin ei vaihtanut suodatinta (Uudet)`);
+    await listReload(page, () => grp.getByRole('radio', { name: 'Kaikki' }).check());
+    // --- tunnisteen väri: hiekka + tummanvihreä, ei sinistä, kontrasti ≥ 4,5:1, ei pelkkä väri (teksti) ---
+    const col = await page.evaluate(() => {
+      const el = document.querySelector('#view .badge.src-johku'); const cs = getComputedStyle(el);
+      const rgb = (c) => (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+      const lum = (c) => { const [r, g, b] = rgb(c).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+      const [x, y] = [lum(cs.color), lum(cs.backgroundColor)].sort((m, n) => n - m);
+      return { fg: cs.color, bg: cs.backgroundColor, border: cs.borderTopColor, ratio: (x + 0.05) / (y + 0.05), text: el.textContent, size: el.getBoundingClientRect().height };
+    });
+    const notBlue = (c) => { const [r, g, b] = (c.match(/[\d.]+/g) || []).map(Number); return !(b > r + 8 && b >= g); };
+    if (col.text !== 'Johku' || col.ratio < 4.5 || ![col.fg, col.bg, col.border].every(notBlue)) problems.push(`johku-${name}: tunnisteen ulkoasu: ${JSON.stringify(col)}`);
+    // --- päivänäkymä: tunniste Johku-varauksella, ei natiivilla ---
+    await page.evaluate((m) => { location.hash = `#/?d=${m}`; }, nextMon);
+    await page.waitForSelector('.session .reslist .badge.src-johku');
+    const dayJ = await page.locator('.resrow:has(.badge.src-johku)').count(), dayN = await page.locator('.resrow:not(:has(.badge.src-johku))').count();
+    if (dayJ < 1 || dayN < 1) problems.push(`johku-${name}: päivänäkymässä pitää olla sekä Johku- (${dayJ}) että uusia varauksia (${dayN})`);
+    await page.locator('.resrow:has(.badge.src-johku)').first().evaluate((el) => el.scrollIntoView({ block: 'center' }));
+    await page.waitForTimeout(200);
+    await shot(page, `admin-${name}-23-paivanakyma-johku.png`, false);
+    // --- varauksen tiedot: Johku-tunnus; uudella varauksella ei ---
+    await page.locator('.resrow:has(.badge.src-johku) button.link').first().click();
+    await page.waitForSelector('dialog[open] .kv');
+    const dj = await page.locator('dialog[open]').innerText();
+    if (!/Lähde\s*Johku/.test(dj) || !/Johku-tunnus\s*DEMO-R-\d+/.test(dj)) problems.push(`johku-${name}: Johku-varauksen tiedoissa pitää olla Lähde: Johku ja Johku-tunnus: ${dj.slice(0, 200).replace(/\n/g, ' | ')}`);
+    await shot(page, `admin-${name}-24-varauksen-tiedot-johku.png`, false);
+    await page.keyboard.press('Escape');
+    await page.locator('.resrow:not(:has(.badge.src-johku)) button.link').first().click();
+    await page.waitForSelector('dialog[open] .kv');
+    if (/Johku/.test(await page.locator('dialog[open]').innerText())) problems.push(`johku-${name}: uuden varauksen tiedoissa ei saa olla Johku-tunnistetta`);
+    await page.keyboard.press('Escape');
+    // varauslistalta avattu Johku-varaus näyttää myös tunnuksen
+    await page.evaluate(() => { location.hash = '#/varaukset'; });
+    await page.waitForSelector('#view .listrow .badge.src-johku');
+    await page.locator('#view .listrow:has(.badge.src-johku)').first().click();
+    await page.waitForSelector('dialog[open] .kv');
+    if (!/Johku-tunnus\s*DEMO-R-\d+/.test(await page.locator('dialog[open]').innerText())) problems.push(`johku-${name}: varauslistalta avatun Johku-varauksen tiedoista puuttuu Johku-tunnus`);
+    await page.keyboard.press('Escape');
+    await ctx.close();
+  }
+  // --- ei vaakavieritystä (360/390/430/1280) varauslistassa, päivänäkymässä ja varauksen tiedoissa ---
+  for (const w of [360, 390, 430, 1280]) {
+    const ctx = await browser.newContext({ viewport: { width: w, height: 800 }, isMobile: w < 700, hasTouch: w < 700, locale: 'fi-FI', timezoneId: 'Europe/Helsinki' });
+    const page = await ctx.newPage(); watch(page, `johku-w${w}`);
+    await login(page);
+    await page.evaluate(() => { location.hash = '#/varaukset'; });
+    await page.waitForSelector('#view .listrow .badge.src-johku');
+    let o = await overflow(page); if (o.page > 0) problems.push(`johku-w${w}: varauslista vaakavierittyy (${o.page}px)`);
+    await page.getByRole('group', { name: 'Lähde' }).getByRole('radio', { name: 'Johku' }).check();
+    await page.waitForTimeout(400);
+    o = await overflow(page); if (o.page > 0) problems.push(`johku-w${w}: suodatettu varauslista vaakavierittyy (${o.page}px)`);
+    const sz = await page.evaluate(() => [...document.querySelectorAll('.srcopt span')].map((e) => Math.round(e.getBoundingClientRect().height)));
+    if (sz.some((x) => x < 44)) problems.push(`johku-w${w}: suodatinpainikkeiden kosketuskohde alle 44 px: ${sz}`);
+    await page.evaluate((m) => { location.hash = `#/?d=${m}`; }, nextMon);
+    await page.waitForSelector('.session .reslist .badge.src-johku');
+    o = await overflow(page); if (o.page > 0) problems.push(`johku-w${w}: päivänäkymä vaakavierittyy (${o.page}px)`);
+    await page.locator('.resrow:has(.badge.src-johku) button.link').first().click();
+    await page.waitForSelector('dialog[open] .kv');
+    o = await overflow(page); if (o.page > 0 || o.dlg > 0) problems.push(`johku-w${w}: varauksen tiedot vaakavierittyvät (sivu ${o.page}px, dialogi ${o.dlg}px)`);
+    await ctx.close();
+  }
+  // --- defensiivisyys: vanha kanta (ei source/external_id-kenttiä) → ei tunnistetta eikä virheitä; p_source ilman migraatiota → selkeä virheilmoitus ---
+  {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844, isMobile: true }, locale: 'fi-FI', timezoneId: 'Europe/Helsinki' });
+    const page = await ctx.newPage(); page.on('pageerror', (e) => problems.push(`johku-legacy pageerror: ${e.message}`));   // ei watch(): odotettu 404 (PGRST202) ei ole virhe
+    const strip = (rows) => rows.map(({ source, external_id, ...r }) => r);
+    await page.route('**/rpc/admin_list_reservations', async (route) => {
+      const body = JSON.parse(route.request().postData() || '{}');
+      if (body.p_source) return route.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ code: 'PGRST202', message: 'Could not find the function booking.admin_list_reservations(p_source) in the schema cache' }) });
+      const resp = await route.fetch(); route.fulfill({ response: resp, json: strip(await resp.json()) });
+    });
+    await page.route('**/rpc/admin_day_view', async (route) => { const resp = await route.fetch(); const j = await resp.json(); j.reservations = strip(j.reservations || []); route.fulfill({ response: resp, json: j }); });
+    await login(page);
+    await page.evaluate(() => { location.hash = '#/varaukset'; });
+    await page.waitForSelector('#view .listrow');
+    if ((await page.locator('.badge.src-johku').count()) !== 0) problems.push('johku-legacy: ilman source-kenttää ei saa olla Johku-tunnistetta (varauslista)');
+    await page.getByRole('group', { name: 'Lähde' }).getByRole('radio', { name: 'Johku' }).check();
+    await page.waitForSelector('#view p.err[role=alert]');
+    if (!/booking_12/.test(await page.locator('#view p.err').innerText())) problems.push('johku-legacy: puuttuvasta p_source-tuesta pitää tulla selkeä virheilmoitus (booking_12)');
+    await page.getByRole('group', { name: 'Lähde' }).getByRole('radio', { name: 'Kaikki' }).check();
+    await page.waitForSelector('#view .listrow');
+    await page.evaluate((m) => { location.hash = `#/?d=${m}`; }, nextMon);
+    await page.waitForSelector('.session .reslist');
+    if ((await page.locator('.badge.src-johku').count()) !== 0) problems.push('johku-legacy: ilman source-kenttää ei saa olla Johku-tunnistetta (päivänäkymä)');
+    await page.locator('.resrow button.link').first().click();
+    await page.waitForSelector('dialog[open] .kv');
+    if (/Johku/.test(await page.locator('dialog[open]').innerText())) problems.push('johku-legacy: ilman source-kenttää varauksen tiedoissa ei saa olla Johku-tietoja');
+    await ctx.close();
+  }
 }
 // ---------- HALLINTA: kalenteri toimii vaikka vuorotietoja ei saada (public-skeema tyhjä / ei oikeutta) ----------
 if (process.env.ONLY !== 'shop') {

@@ -18,6 +18,7 @@ const browser = await chromium.launch({ executablePath: process.env.CHROME || '/
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
 const fakeJwt = (claims) => `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64(claims)}.${Buffer.from('x').toString('base64url')}`;
 const calls = [];
+const srcArgs = [];   // admin_list_reservations: p_source-arvot kutsuittain
 
 async function newPage(name, { allowFail = null } = {}) {
   const ctx = await browser.newContext({ viewport: { width: 1100, height: 800 }, locale: 'fi-FI', timezoneId: 'Europe/Helsinki' });
@@ -56,6 +57,12 @@ async function newPage(name, { allowFail = null } = {}) {
         else rows.push(mk(21, 13, '00', 'Oma saunavuoro', 'private', 'unavailable'), mk(22, 20, '00', 'Oma saunavuoro', 'private', 'available'));
       }
       return json(rows);
+    }
+    if (u.pathname.endsWith('/rpc/admin_list_reservations')) {   // migraatio 12: source/external_id + p_source-suodatin (null = kaikki, 'johku' | 'native')
+      const a = route.request().postDataJSON() || {}; srcArgs.push(a.p_source ?? null);
+      const ds = new Date(Date.now() + 2 * 864e5).toISOString().slice(0, 10);
+      const mk = (id, name, src, ext) => ({ reservation_id: id, order_id: id, order_no: 9000 + id, status: 'confirmed', order_status: 'confirmed', payment_status: 'paid', product_id: 1, product_name: 'Yleinen vuoro', mode: 'public', starts_at: `${ds}T14:00:00Z`, ends_at: `${ds}T16:00:00Z`, persons: 2, total_gross: 58, customer_id: id, customer_name: name, customer_email: `${id}@example.com`, customer_phone: '0401234567', source_channel: src === 'johku' ? 'johku_import' : 'web', created_at: `${ds}T08:00:00Z`, hold_expires_at: null, notes: null, annual_card_id: null, total_count: 2, source: src, external_id: ext });
+      return json([mk(1, 'Uusi Asiakas', 'native', null), mk(2, 'Johku Asiakas', 'johku', 'J-48213')].filter((r) => !a.p_source || r.source === a.p_source));
     }
     if (u.pathname.includes('/rpc/public_settings')) return json({ public_booking_enabled: true });
     if (u.pathname.includes('/rpc/')) return json([]);
@@ -122,9 +129,13 @@ for (const [base, L] of [['/varaa/', { cat: 'Selaa kategorioittain', day: 'Selaa
   if (!/#\/varaa\/\d+\/\d{4}-\d\d-\d\d\/\d+\?via=day$/.test(href)) problems.push(`${base}: Valitse-linkki väärä: ${href}`);
   await page.locator('.bk-pc.open .bk-slot.available a.btn').first().click();
   await page.waitForSelector('form.bk-form');
-  const back = await page.locator('#booking-app > p:first-child a').getAttribute('href');
-  if (!back.endsWith(`#/paiva/${oddDay}?tuote=oma`)) problems.push(`${base}: Takaisin-linkin pitää palata päivään ja tuotteeseen: ${back}`);
-  await page.click('#booking-app > p:first-child a'); await page.waitForSelector('.bk-pc[data-slug=oma].open');
+  const back = await page.locator('#booking-app .bk-pick a.bk-pick-change').getAttribute('href');
+  if (!back.endsWith(`#/paiva/${oddDay}?tuote=oma`)) problems.push(`${base}: "Vaihda päivää tai aikaa" -linkin pitää palata päivään ja tuotteeseen: ${back}`);
+  {   // v16: yhteenveto otsikon alla: tuotteen nimi, päivä, kellonaika; ei erillistä Takaisin-linkkiä
+    const pk = await page.evaluate(() => ({ name: document.querySelector('.bk-pick-name')?.textContent, when: document.querySelector('.bk-pick-when')?.textContent, next: document.querySelector('#booking-app h2')?.nextElementSibling?.className, links: document.querySelectorAll('#booking-app > p a, #booking-app .bk-pick a').length }));
+    if (!pk.name || !(base.includes('/en/') ? /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun),? \d{1,2} [A-Z][a-z]{2} \d{4} · \d{2}:\d{2}–\d{2}:\d{2}$/ : /^(ma|ti|ke|to|pe|la|su) \d{1,2}\.\d{1,2}\.\d{4}, klo \d{2}:\d{2}–\d{2}:\d{2}$/).test(pk.when || '') || pk.next !== 'bk-pick' || pk.links !== 1) problems.push(`${base}: varauslomakkeen yhteenveto (tuote, päivä, aika) puuttuu tai väärä: ${JSON.stringify(pk)}`);
+  }
+  await page.click('#booking-app .bk-pick a.bk-pick-change'); await page.waitForSelector('.bk-pc[data-slug=oma].open');
   await page.goto(`${BASE}${base}#/paiva/${evenDay}`);
   await page.waitForSelector('.bk-dayresults .bk-notice');
   const e = await page.locator('.bk-dayresults .bk-notice').innerText();
@@ -158,6 +169,30 @@ async function loginViaInvite(page) {
   await page.waitForSelector('#shell:not([hidden]) #nav a');
   if (!calls.some((c) => c === 'PUT /auth/v1/user')) problems.push('kutsu: salasanan asetuskutsua (PUT /auth/v1/user) ei tehty');
   for (const r of ['kalenteri', 'varaukset']) { await page.evaluate((x) => { location.hash = `#/${x}`; }, r); await page.waitForTimeout(500); }
+  {   // Johku-tunniste + lähdesuodatin (Kaikki / Uudet / Johku → p_source) varauslistassa ja varauksen tiedoissa
+    await page.evaluate(() => { location.hash = '#/varaukset'; });
+    await page.waitForSelector('#view .listrow');
+    const grp = page.getByRole('group', { name: 'Lähde' });
+    if ((await grp.getByRole('radio').count()) !== 3) problems.push('varaukset: lähdesuodattimessa pitää olla 3 vaihtoehtoa (Kaikki/Uudet/Johku)');
+    if ((await page.locator('#view .listrow .badge.src-johku').count()) !== 1 || (await page.locator('#view .listrow').count()) !== 2) problems.push('varaukset: Kaikki-listalla pitää olla 2 varausta, joista yhdellä Johku-tunniste');
+    if (srcArgs.at(-1) !== null) problems.push(`varaukset: Kaikki ei saa lähettää p_source-arvoa: ${srcArgs.at(-1)}`);
+    for (const [label, want, n, johku] of [['Johku', 'johku', 1, 1], ['Uudet', 'native', 1, 0], ['Kaikki', null, 2, 1]]) {
+      await Promise.all([page.waitForResponse((r) => r.url().includes('admin_list_reservations')), grp.getByRole('radio', { name: label }).check()]);
+      await page.waitForTimeout(200);
+      if (srcArgs.at(-1) !== want) problems.push(`varaukset: ${label} → p_source ${JSON.stringify(want)} odotettiin, lähti ${JSON.stringify(srcArgs.at(-1))}`);
+      if ((await page.locator('#view .listrow').count()) !== n || (await page.locator('#view .listrow .badge.src-johku').count()) !== johku) problems.push(`varaukset: suodatin ${label}: rivejä ${n} (Johku-tunnisteita ${johku}) odotettiin`);
+    }
+    await page.locator('#view .listrow:has(.badge.src-johku)').click();
+    await page.waitForSelector('dialog[open] .kv');
+    if (!/Johku-tunnus\s*J-48213/.test(await page.locator('dialog[open]').innerText())) problems.push('varauksen tiedot: Johku-tunnus (J-48213) puuttuu');
+    await page.keyboard.press('Escape');
+    await page.locator('#view .listrow:not(:has(.badge.src-johku))').click();
+    await page.waitForSelector('dialog[open] .kv');
+    if (/Johku/.test(await page.locator('dialog[open]').innerText())) problems.push('varauksen tiedot: uudella varauksella ei saa olla Johku-tietoja');
+    await page.keyboard.press('Escape');
+    const ov = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    if (ov > 0) problems.push(`varaukset: vaakavieritys ${ov}px`);
+  }
   {   // työvuorojen rooli ja miehitys suomeksi (v10): heater/reception/therapist/assigned eivät saa näkyä, Hoitaja → Saunottaja
     await page.evaluate(() => { location.hash = '#/kalenteri'; });
     await page.waitForSelector('.cal-detail .cal-item.shift', { timeout: 5000 }).catch(() => problems.push('kalenteri: työvuoroja ei näkynyt'));

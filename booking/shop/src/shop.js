@@ -406,7 +406,15 @@ async function viewCheckout(ruleId, ds, productId, via) {
     h('div', { class: 'bk-check' }, consent, h('label', { for: 'bk-consent', text: t.consentMarketing })),
     msg, submit);
   form.addEventListener('input', () => msg.replaceChildren());   // vanha virheilmoitus pois kun käyttäjä korjaa tietoja
-  mount(h('p', {}, h('a', { href: via === 'day' ? bk(`/paiva/${ds}?tuote=${p.slug}`) : bk(`/tuote/${p.slug}/${ds}`), text: t.back })), h('h2', { text: t.bookTitle }),
+  // Lyhyt yhteenveto otsikon alla (tuote, päivä, kellonaika) + linkki takaisin valintaan (korvaa erillisen "Takaisin"-linkin):
+  // päivänäkymästä tultaessa (?via=day) päivään ja avoimeen tuotteeseen, muuten tuotesivulle samalle päivälle. Tiedot samasta vuorodatasta kuin lomake.
+  const tm = (iso) => fmt(iso, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).replace('.', ':');
+  const dayShort = (iso) => fmt(iso, S.lang === 'fi' ? { weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric' } : { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  const pick = h('section', { class: 'bk-pick', 'aria-label': t.pickedSlot },
+    h('div', { class: 'bk-pick-main' }, h('strong', { class: 'bk-pick-name', text: pname(p) }),
+      h('span', { class: 'bk-pick-when', text: `${dayShort(s.starts_at)}${S.lang === 'fi' ? ', klo ' : ' · '}${tm(s.starts_at)}${s.ends_at ? `–${tm(s.ends_at)}` : ''}` })),
+    h('a', { class: 'bk-pick-change', href: via === 'day' ? bk(`/paiva/${ds}?tuote=${p.slug}`) : bk(`/tuote/${p.slug}/${ds}`), text: t.changeSlot }));
+  mount(h('h2', { text: t.bookTitle }), pick,
     h('div', { class: 'bk-checkout' }, form,
       h('aside', { class: 'bk-aside', 'aria-label': t.summary }, h('h3', { text: t.summary }), sumList,
         h('p', { class: 'bk-totalrow' }, t.total + ': ', total, ' ', h('small', { text: t.vatIncl })),
