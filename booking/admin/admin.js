@@ -3,7 +3,8 @@ import { signIn, signOut, getSession, onAuthChange, rpc, select } from './sb.js'
 import { h, toast, errMsg } from './ui.js';
 
 const $ = (id) => document.getElementById(id);
-export const ctx = { role: null, name: '', refs: null };
+// perms: roolin oikeudet (booking.role_permissions) palvelimelta; can(oikeus) piilottaa/lukitsee kenttiä. Oikeudet pakotetaan silti tietokannassa.
+export const ctx = { role: null, roleLabel: '', name: '', perms: [], can: (p) => ctx.perms.includes(p), refs: null };
 
 const ROUTES = [
   { path: '', label: 'Päivä', icon: '📅', mod: () => import('./views/day.js') },
@@ -12,7 +13,7 @@ const ROUTES = [
   { path: 'asiakkaat', label: 'Asiakkaat', icon: '👥', mod: () => import('./views/customers.js') },
   { path: 'tuotteet', label: 'Tuotteet', icon: '🏷️', mod: () => import('./views/products.js') },
   { path: 'resurssit', label: 'Resurssit', icon: '🛖', mod: () => import('./views/resources.js') },
-  { path: 'asetukset', label: 'Asetukset', icon: '⚙️', mod: () => import('./views/settings.js') },
+  { path: 'asetukset', label: 'Asetukset', icon: '⚙️', any: ['settings.edit', 'staff.manage'], mod: () => import('./views/settings.js') },
 ];
 
 // Viitedata (tuotteet, maksutavat, resurssit), ladataan kerran istuntoa kohti
@@ -23,13 +24,14 @@ export async function refs(force = false) {
   return ctx.refs;
 }
 
+const allowed = (r) => !r.any || r.any.some((p) => ctx.can(p));
 function drawNav(current) {
-  $('nav').replaceChildren(...ROUTES.map((r) => h('a', { href: `#/${r.path}`, 'aria-current': r.path === current ? 'page' : null }, h('span', { class: 'ico', 'aria-hidden': 'true', text: r.icon }), h('span', { class: 'lbl', text: r.label }))));
+  $('nav').replaceChildren(...ROUTES.filter(allowed).map((r) => h('a', { href: `#/${r.path}`, 'aria-current': r.path === current ? 'page' : null }, h('span', { class: 'ico', 'aria-hidden': 'true', text: r.icon }), h('span', { class: 'lbl', text: r.label }))));
 }
 async function route() {
   if (!getSession()) return;
   const path = location.hash.replace(/^#\/?/, '').split('?')[0].split('/')[0];
-  const r = ROUTES.find((x) => x.path === path) || ROUTES[0];
+  const r = ROUTES.find((x) => x.path === path && allowed(x)) || ROUTES[0];
   drawNav(r.path);
   const view = $('view');
   view.replaceChildren(h('p', { class: 'muted pad', text: 'Ladataan…' }));
@@ -51,8 +53,9 @@ async function enter() {
   try {
     const role = await rpc('current_staff_role');
     if (!role) { signOut(); showLogin('Tällä tunnuksella ei ole oikeutta hallintaan (ei henkilökuntaa).'); return; }
-    ctx.role = role; ctx.name = s.user?.email || '';
-    $('who').textContent = `${ctx.name} · ${role === 'admin' ? 'ylläpitäjä' : 'henkilökunta'}`;
+    const me = await rpc('admin_my_permissions');
+    ctx.role = role; ctx.name = s.user?.email || ''; ctx.perms = me?.permissions || []; ctx.roleLabel = me?.role_label || role;
+    $('who').textContent = `${ctx.name} · ${ctx.roleLabel}`;
     document.body.dataset.role = role;
     route();
   } catch (e) { signOut(); showLogin(errMsg(e)); }
@@ -66,7 +69,7 @@ $('login').addEventListener('submit', async (ev) => {
   const btn = ev.target.querySelector('button'); btn.disabled = true; showLogin('');
   try { await signIn($('email').value.trim(), $('password').value); await enter(); } catch (e) { showLogin(errMsg(e)); } finally { btn.disabled = false; }
 });
-$('logout').addEventListener('click', () => { signOut(); ctx.refs = null; ctx.role = null; showLogin(''); });
+$('logout').addEventListener('click', () => { signOut(); ctx.refs = null; ctx.role = null; ctx.perms = []; showLogin(''); });
 window.addEventListener('hashchange', route);
 onAuthChange((s) => { if (!s) showLogin(''); });
 enter();

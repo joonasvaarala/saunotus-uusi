@@ -58,6 +58,16 @@ if (process.env.ONLY !== 'admin') for (const [name, vp] of [['mobile', { width: 
   await page.waitForURL(/vahvistus/);
   await page.waitForSelector('.bk-conf dl');
   await shot(page, `shop-${name}-5-vahvistus.png`);
+  // asiakas ei voi perua vahvistettua varausta (ei peruutuspainiketta), mutta voi muuttaa sitä (≥ 48 h ennen alkua)
+  if ((await page.locator('.bk-actions button:has-text("Peru")').count()) !== 0) problems.push(`shop-${name}: vahvistetulla varauksella ei saa olla peruutuspainiketta`);
+  await page.click('.bk-actions a:has-text("Muuta varausta")');
+  await page.waitForSelector('.bk-slotlist [role=radio]');
+  await page.waitForTimeout(300);
+  await shot(page, `shop-${name}-6-muuta-varausta.png`);
+  await page.locator('.bk-step[aria-label="+"]').click().catch(() => {});
+  await page.click('form.bk-form button[type=submit]');
+  await page.waitForSelector('.bk-conf dl');
+  await shot(page, `shop-${name}-7-muutettu.png`);
   await ctx.close();
 }
 
@@ -98,6 +108,34 @@ if (process.env.ONLY !== 'shop') for (const [name, vp] of [['mobile', { width: 3
     await page.evaluate((h) => { location.hash = `#/${h}`; }, hash);
     await page.waitForTimeout(600);
     await shot(page, `admin-${name}-${file}.png`, false);
+  }
+  await ctx.close();
+}
+// ---------- HALLINTA: roolit (staff = peruskäyttäjä, manager = ylläpitäjä) ----------
+if (process.env.ONLY !== 'shop') for (const [who, role] of [['staff', 'staff'], ['manager', 'manager']]) {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'fi-FI', timezoneId: 'Europe/Helsinki' });
+  const page = await ctx.newPage(); watch(page, `admin-${role}`);
+  await page.goto(`${BASE}/admin/`);
+  await page.waitForSelector('form#login');
+  await page.fill('#email', `${who}@demo.local`); await page.fill('#password', 'demo');
+  await page.click('form#login button[type=submit]');
+  await page.waitForSelector('#view .day-view, #view .daygrid');
+  const hasSettings = (await page.locator('#nav a[href="#/asetukset"]').count()) > 0;
+  if (role === 'staff' && hasSettings) problems.push('admin-staff: Asetukset-valikon ei pitäisi näkyä peruskäyttäjälle');
+  if (role === 'manager' && !hasSettings) problems.push('admin-manager: Asetukset-valikon pitäisi näkyä ylläpitäjälle');
+  await page.evaluate(() => { location.hash = '#/tuotteet'; });
+  await page.waitForSelector('#view .listrow');
+  await page.locator('#view .listrow').first().click();
+  await page.waitForSelector('dialog[open]');
+  const priceDisabled = await page.locator('dialog input[name=price]').isDisabled();
+  if (role === 'staff' && !priceDisabled) problems.push('admin-staff: hintakentän pitäisi olla lukittu peruskäyttäjälle');
+  if (role === 'manager' && priceDisabled) problems.push('admin-manager: hintakentän pitäisi olla muokattavissa ylläpitäjälle');
+  await shot(page, `admin-desktop-8-${role}-tuote.png`, false);
+  await page.keyboard.press('Escape');
+  if (role === 'manager') {
+    await page.evaluate(() => { location.hash = '#/resurssit'; });
+    await page.waitForTimeout(700);
+    await shot(page, 'admin-desktop-9-manager-resurssit.png');
   }
   await ctx.close();
 }

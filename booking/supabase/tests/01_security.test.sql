@@ -20,12 +20,12 @@ select is((select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.
 -- anon saa suorittaa VAIN public_*-funktioita
 select is((select array_agg(p.proname::text order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
             where n.nspname = 'booking' and has_function_privilege('anon', p.oid, 'execute')),
-          array['public_availability','public_cancel_booking','public_catalog','public_create_booking','public_get_booking','public_settings'],
+          array['public_availability','public_cancel_booking','public_catalog','public_change_booking','public_create_booking','public_get_booking','public_settings'],
           'anon voi kutsua vain public_*-funktioita');
--- authenticated: public_* + admin_* + is_staff/is_admin/current_staff_role, EI sisäisiä (_*) eikä maksuadapteria
+-- authenticated: public_* + admin_* + is_staff/is_admin/current_staff_role/has_permission, EI sisäisiä (_*) eikä maksuadapteria
 select is((select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.pronamespace
             where n.nspname = 'booking' and has_function_privilege('authenticated', p.oid, 'execute')
-              and p.proname not like 'public\_%' and p.proname not like 'admin\_%' and p.proname not in ('is_staff','is_admin','current_staff_role')), 0,
+              and p.proname not like 'public\_%' and p.proname not like 'admin\_%' and p.proname not in ('is_staff','is_admin','current_staff_role','has_permission')), 0,
           'authenticated ei voi kutsua sisäisiä funktioita eikä maksuadapteria');
 select is((select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.pronamespace
             where n.nspname = 'booking' and p.proname like 'payment\_%' and (has_function_privilege('anon', p.oid, 'execute') or has_function_privilege('authenticated', p.oid, 'execute'))), 0,
@@ -64,9 +64,9 @@ select is((select count(*)::int from booking.staff), 1, 'staff näkee vain oman 
 select is((select count(*)::int from booking.audit_log), 0, 'staff ei näe audit-lokia');
 select throws_ok($$update booking.resources set capacity = 99$$, '42501', null, 'staff ei päivitä resursseja suoraan');
 select throws_ok($$insert into booking.reservations(order_id, space_id, mode, starts_at, ends_at, persons, status) values (1,1,'shared', now(), now() + interval '1 h', 1, 'confirmed')$$, '42501', null, 'staff ei lisää varauksia suoraan');
-select throws_ok($$select booking.admin_update_product(1, '{"price": 1}')$$, 'BK001', 'Vain ylläpitäjä (admin)', 'staff ei muokkaa hintoja');
-select throws_ok($$select booking.admin_set_setting('hold_minutes', '20')$$, 'BK001', 'Vain ylläpitäjä (admin)', 'staff ei muuta asetuksia');
-select throws_ok($$select booking.admin_upsert_staff(gen_random_uuid(), 'x', 'admin')$$, 'BK001', 'Vain ylläpitäjä (admin)', 'staff ei hallinnoi henkilöstöä');
+select throws_ok($$select booking.admin_update_product(1, '{"price": 1}')$$, 'BK001', 'Ei oikeutta tähän toimintoon (catalog.edit)', 'staff ei muokkaa hintoja');
+select throws_ok($$select booking.admin_set_setting('hold_minutes', '20')$$, 'BK001', 'Ei oikeutta tähän toimintoon (settings.edit)', 'staff ei muuta asetuksia');
+select throws_ok($$select booking.admin_upsert_staff(gen_random_uuid(), 'x', 'admin')$$, 'BK001', 'Ei oikeutta tähän toimintoon (staff.manage)', 'staff ei hallinnoi henkilöstöä');
 select lives_ok($$select * from booking.admin_list_reservations()$$, 'staff voi listata varaukset');
 select test.logout();
 

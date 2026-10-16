@@ -1,5 +1,6 @@
 // Varauskauppa: tuote → päivä/vuoro → henkilömäärä → yhteystiedot → vahvistus. Vanilla JS, ei riippuvuuksia, ei build-vaihetta.
-// Data tulee vain julkisista RPC-funktioista (public_catalog / public_availability / public_create_booking / public_get_booking).
+// Data tulee vain julkisista RPC-funktioista (public_catalog / public_availability / public_create_booking / public_get_booking / public_change_booking).
+// Asiakas ei voi itse perua vahvistettua varausta (peruutukset sähköpostilla henkilökunnalle); hän voi MUUTTAA varausta (toinen vuoro / henkilömäärä) asetuksen mukaan vähintään 48 h ennen vuoroa.
 import { rpc } from './sb.js';
 import { T } from './i18n.js';
 
@@ -225,11 +226,12 @@ const ics = (b) => {
     `DTSTART:${z(it.starts_at)}`, `DTEND:${z(it.ends_at)}`, `SUMMARY:${it.product_name}`, 'LOCATION:Hindsbyntie 124\\, 04130 Sipoo', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
 };
 async function viewConfirmation() {
-  const token = location.hash.slice(1);
+  const [token, sub] = location.hash.slice(1).split('?')[0].split('/');
   if (!/^[0-9a-f-]{36}$/i.test(token)) { mount(errorBox(t.notFound)); return; }
   spinner();
   let b; try { b = await rpc('public_get_booking', { p_token: token }); } catch { mount(errorBox(t.loadError), phoneBox()); return; }
   if (!b?.ok) { mount(errorBox(t.notFound), phoneBox()); return; }
+  if (sub === 'muuta' && b.can_change) return viewChange(token, b);
   const it = b.items[0];
   const head = { confirmed: t.confConfirmed, pending: t.confPending, cancelled: t.confCancelled, expired: t.confExpired }[b.status] || b.status;
   const pay = { paid: t.paid, unpaid: t.unpaid, pending: t.pending }[b.payment_status] || b.payment_status;
@@ -243,6 +245,7 @@ async function viewConfirmation() {
     const url = URL.createObjectURL(new Blob([ics(b)], { type: 'text/calendar' }));
     actions.append(h('a', { class: 'btn light', href: url, download: `varaus-${b.order_no}.ics`, text: t.addCal }));
   }
+  if (b.status === 'confirmed' && b.can_change) actions.append(h('a', { class: 'btn gold', href: `#${token}/muuta`, text: t.changeBooking }));
   if (b.status === 'pending') actions.append(h('button', { type: 'button', class: 'btn light', onclick: async () => {
     if (!confirm(t.cancelConfirm)) return;
     const r = await rpc('public_cancel_booking', { p_token: token });
@@ -251,8 +254,88 @@ async function viewConfirmation() {
   } }, t.cancelBooking));
   mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { text: b.status === 'cancelled' ? t.confCancelled : t.confTitle }), h('p', { class: 'bk-status', role: 'status', text: head }), dl,
     b.status === 'confirmed' && b.payment_status !== 'paid' ? h('p', { class: 'bk-pay', text: t.payLater }) : null, actions, out,
+    b.status === 'confirmed' ? h('p', { class: 'bk-note', text: b.can_change ? t.changeInfo(b.change_hours_before, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) : t.changeLocked(b.change_hours_before) }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })) : null,
     h('p', { class: 'bk-note', text: t.emailNote }), h('p', {}, h('a', { href: S.infoHref, text: t.directions }))));
   focusTop();
+}
+
+// ---- näkymä 5: varauksen muutos (toinen vapaa vuoro samalle tuotteelle ja/tai henkilömäärä; vähintään N h ennen alkua) ----
+async function viewChange(token, b) {
+  const it = b.items[0];
+  const hours = b.change_hours_before ?? 48;
+  const minStart = Date.now() + hours * 36e5;
+  const today = todayHel();
+  const curDate = new Date(it.starts_at).toLocaleDateString('sv-SE', { timeZone: TZ });
+  const st = { date: curDate, session: null, rows: [] };
+  let n = it.persons;
+  const msg = h('div', { id: 'bk-msg', 'aria-live': 'polite' });
+  const sessionsBox = h('div', { class: 'bk-slots', 'aria-live': 'polite' });
+  const summary = h('p', { class: 'bk-meta' });
+  const num = h('input', { id: 'bk-n', type: 'number', min: 1, inputmode: 'numeric', 'aria-label': t.persons, onchange: () => { n = +num.value || 1; clamp(); upd(); } });
+  const minus = h('button', { type: 'button', class: 'bk-step', 'aria-label': '−', onclick: () => { n--; upd(); } }, '−');
+  const plus = h('button', { type: 'button', class: 'bk-step', 'aria-label': '+', onclick: () => { n++; upd(); } }, '+');
+  const submit = h('button', { type: 'submit', class: 'btn gold', text: t.saveChange });
+  const isCur = (r) => r.rule_id === it.rule_id && r.session_date === curDate;
+  const target = () => st.session || st.rows.find(isCur) || null;     // valittu vuoro tai nykyinen (jos samalla päivällä)
+  const limits = () => {
+    const s = target();
+    if (!s) return { min: 1, max: it.persons };
+    const own = isCur(s) ? it.persons : 0;
+    return { min: s.min_persons, max: Math.max(s.min_persons, Math.min(s.max_persons || 50, s.remaining + own)) };
+  };
+  function clamp() { const { min, max } = limits(); n = Math.min(Math.max(n, min), max); }
+  function upd() {
+    clamp(); const { min, max } = limits(); const s = target();
+    num.min = min; num.max = max; num.value = n; minus.disabled = n <= min; plus.disabled = n >= max;
+    const newTotal = s ? priceFor(s, n) : null;
+    const changed = !!st.session || n !== it.persons;
+    summary.textContent = s ? `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)} · ${n} ${t.person} · ${money(newTotal)}` : '';
+    const priceBlocked = b.payment_status === 'paid' && newTotal != null && Math.abs(newTotal - b.total) > 0.005;
+    msg.replaceChildren(...(priceBlocked ? [h('p', { class: 'bk-note', text: t.changePaidPrice })] : []));
+    submit.disabled = !changed || priceBlocked;
+  }
+  async function loadSessions() {
+    sessionsBox.replaceChildren(h('p', { class: 'bk-loading', role: 'status', text: t.loading }));
+    let rows = [];
+    try { rows = (await rpc('public_availability', { p_product_id: it.product_id, p_from: st.date, p_to: st.date })) || []; } catch { sessionsBox.replaceChildren(errorBox(t.loadError)); return; }
+    st.rows = rows.sort((a, c) => a.starts_at.localeCompare(c.starts_at));
+    sessionsBox.replaceChildren(h('h3', { text: `${t.pickSlot} – ${dayLong(`${st.date}T12:00:00Z`)}` }),
+      st.rows.length ? h('ul', { class: 'bk-slotlist', role: 'radiogroup', 'aria-label': t.pickSlot }, st.rows.map((r) => {
+        const cur = isCur(r);
+        const late = new Date(r.starts_at).getTime() < minStart;
+        const ok = !late && (r.status === 'available' || cur);
+        const title = `${hm(r.starts_at)}–${hm(r.ends_at)}`;
+        const btn = h('button', { type: 'button', role: 'radio', class: 'btn sm', 'aria-checked': (st.session ? st.session === r : cur) ? 'true' : 'false', disabled: !ok || null, onclick: () => {
+          st.session = cur ? null : r; sessionsBox.querySelectorAll('[role=radio]').forEach((x) => x.setAttribute('aria-checked', 'false')); btn.setAttribute('aria-checked', 'true'); upd(); } }, cur ? t.currentSlot : t.choose, h('span', { class: 'sr', text: ` ${title}` }));
+        return h('li', { class: `bk-slot ${ok ? 'available' : r.status}` }, h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }), cleanLabel(r.label) ? h('span', { class: 'bk-sub', text: cleanLabel(r.label) }) : null),
+          h('div', { class: 'bk-slot-side' }, h('span', { class: `bk-badge ${ok ? 'free' : late ? 'unavail' : r.status}`, text: late ? t.tooLate(hours) : ok ? t.freeSpots(cur ? r.remaining + it.persons : r.remaining) : r.status === 'full' ? t.full : t.unavailable }), btn));
+      })) : h('p', { text: t.noSlots }));
+    upd();
+  }
+  const horizon = state.settings?.booking_horizon_days || 120;
+  const maxDate = new Date(Date.now() + horizon * 864e5).toLocaleDateString('sv-SE', { timeZone: TZ });
+  const dateIn = h('input', { id: 'bk-date', type: 'date', value: st.date, min: today, max: maxDate, onchange: (e) => { if (!e.target.value) return; st.date = e.target.value; st.session = null; loadSessions(); } });
+  const form = h('form', { class: 'bk-form', novalidate: true, onsubmit: async (ev) => {
+    ev.preventDefault(); msg.replaceChildren(); submit.disabled = true; submit.textContent = t.saving;
+    try {
+      const args = { p_token: token };
+      if (st.session) { args.p_rule_id = st.session.rule_id; args.p_date = st.date; }
+      if (n !== it.persons) args.p_persons = n;
+      const r = await rpc('public_change_booking', args);
+      if (!r.ok) throw Object.assign(new Error(t.errors[r.code] || r.message), { code: r.code });
+      state.months.clear();
+      location.hash = token; window.scrollTo({ top: 0 });
+    } catch (e) {
+      submit.textContent = t.saveChange; upd();
+      msg.replaceChildren(errorBox(e.message || t.loadError)); msg.firstChild.setAttribute('tabindex', '-1'); msg.firstChild.focus();
+      if (['capacity_exceeded', 'private_booked', 'public_shift_booked', 'space_closed'].includes(e.code)) loadSessions();
+    }
+  } }, h('fieldset', {}, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, minus, num, plus)), summary, msg, submit);
+  mount(h('p', {}, h('a', { href: `#${token}`, text: t.back })), h('h2', { text: t.changeTitle }),
+    h('p', { class: 'bk-note', text: t.changeInfo(hours, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) }),
+    h('dl', { class: 'bk-sum' }, h('dt', { text: t.what }), h('dd', { text: it.product_name }), h('dt', { text: t.when }), h('dd', { text: `${dayLong(it.starts_at)}, ${hm(it.starts_at)}–${hm(it.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(it.persons) })),
+    h('div', { class: 'bk-field' }, h('label', { for: 'bk-date', text: t.pickDate }), dateIn), sessionsBox, form);
+  await loadSessions(); focusTop();
 }
 
 // ---- reititin ----

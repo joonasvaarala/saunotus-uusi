@@ -1,6 +1,6 @@
 -- =====================================================================
 -- booking 05: varauksen luonti (sisäinen ydin) + JULKINEN rajapinta (anon)
--- Anon saa kutsua vain public_*-funktioita. Ne ovat SECURITY DEFINER, validoivat kaiken ja palauttavat
+-- Anon saa kutsua vain public_*-funktioita (asiakas ei voi itse perua vahvistettua varausta, mutta voi muuttaa sitä 48 h ennen). Ne ovat SECURITY DEFINER, validoivat kaiken ja palauttavat
 -- vain julkisia tietoja (ei asiakastietoja). Liiketoimintavirheet palautetaan jsonb {ok:false, code, message}
 -- (ei poikkeuksena), jotta rate limit -laskuri ei kumoudu transaktion mukana.
 -- =====================================================================
@@ -59,19 +59,17 @@ begin
   return v_id;
 end $$;
 
--- ---------- varauksen luonnin ydin (EI anonin eikä authenticatedin kutsuttavissa) ----------
--- p_status: 'confirmed' (esim. käsivaraus, pay_later) tai 'pending' (pito p_hold_minutes kunnes maksettu)
-create or replace function booking._create_booking_core(
-  p_rule_id bigint, p_date date, p_persons integer, p_customer_id bigint,
-  p_channel text, p_created_by uuid, p_locale text, p_note text,
-  p_status text, p_hold_minutes integer, p_enforce_deadline boolean,
-  p_override_start timestamptz default null, p_override_end timestamptz default null, p_price_override numeric default null)
-returns jsonb language plpgsql security definer set search_path = '' as $$
+-- ---------- vuoron ratkaisu ja validointi (jaettu: uusi varaus + varauksen muutos) ----------
+-- Tarkistaa säännön, tuotteen, henkilömäärän rajat, viikonpäivän/voimassaolon ja myynnin sulkeutumisen ja palauttaa
+-- vuoron ajat, tilan ja poolit. Ei kirjoita mitään. p_override_*: vapaa aika (vain yksityisvuoro, ellei p_allow_override_shared).
+create or replace function booking._resolve_session(
+  p_rule_id bigint, p_date date, p_persons integer, p_enforce_deadline boolean,
+  p_override_start timestamptz default null, p_override_end timestamptz default null, p_allow_override_shared boolean default false)
+returns table (o_rule_id bigint, o_product_id bigint, o_space_id bigint, o_mode text, o_starts_at timestamptz, o_ends_at timestamptz, o_pool_ids bigint[])
+language plpgsql stable security definer set search_path = '' as $$
 declare
   r booking.schedule_rules; pc booking.product_config; p kb.products; v kb.product_price_variants;
-  s_start timestamptz; s_end timestamptz;
-  pr record; v_total numeric; v_order booking.orders; v_item_id bigint; v_res_id bigint; v_pools bigint[];
-  v_hold timestamptz;
+  s_start timestamptz; s_end timestamptz; v_pools bigint[];
 begin
   select * into r from booking.schedule_rules where id = p_rule_id and active;
   if not found then perform booking._err('rule_not_found', 'Vuoroa ei löydy tai se ei ole käytössä'); end if;
@@ -79,7 +77,6 @@ begin
   if not found or not pc.bookable then perform booking._err('not_bookable', 'Tuotetta ei voi varata'); end if;
   select * into p from kb.products where id = r.product_id and active;
   if not found then perform booking._err('product_inactive', 'Tuote ei ole myynnissä'); end if;
-  if p.vat_rate is null then perform booking._err('vat_missing', 'Tuotteelta puuttuu ALV-kanta'); end if;
   if r.price_variant_id is not null then select * into v from kb.product_price_variants where id = r.price_variant_id; end if;
 
   if p_persons is null or p_persons < r.min_persons then
@@ -94,11 +91,12 @@ begin
 
   if p_override_start is not null then
     -- vapaa aika (vain käsivaraus / admin): vain yksityisvuoroille
-    if r.mode <> 'exclusive' then perform booking._err('override_not_allowed', 'Mukautettu aika on sallittu vain yksityisvuoroille'); end if;
+    if r.mode <> 'exclusive' and not p_allow_override_shared then perform booking._err('override_not_allowed', 'Mukautettu aika on sallittu vain yksityisvuoroille'); end if;
     s_start := p_override_start; s_end := p_override_end;
     if s_end is null or s_end <= s_start then perform booking._err('bad_time', 'Virheellinen aika'); end if;
   else
-    if not (extract(isodow from p_date)::smallint = any (r.weekdays))
+    if p_date is null
+       or not (extract(isodow from p_date)::smallint = any (r.weekdays))
        or (r.valid_from is not null and p_date < r.valid_from) or (r.valid_to is not null and p_date > r.valid_to)
        or (v.id is not null and (not v.active or (v.valid_from is not null and p_date < v.valid_from) or (v.valid_to is not null and p_date > v.valid_to)))
        or (p.valid_from is not null and p_date < p.valid_from) or (p.valid_to is not null and p_date > p.valid_to) then
@@ -112,9 +110,31 @@ begin
     perform booking._err('sale_closed', 'Vuoron myynti on päättynyt');
   end if;
 
-  select * into pr from booking._rule_price(p_rule_id, p_persons);
-  v_total := coalesce(p_price_override, pr.total);
   select array_agg(pool_id order by pool_id) into v_pools from booking.schedule_rule_pools where rule_id = r.id;
+  return query select r.id, r.product_id, r.space_id, r.mode, s_start, s_end, coalesce(v_pools, '{}'::bigint[]);
+end $$;
+
+-- ---------- varauksen luonnin ydin (EI anonin eikä authenticatedin kutsuttavissa) ----------
+-- p_status: 'confirmed' (esim. käsivaraus, pay_later) tai 'pending' (pito p_hold_minutes kunnes maksettu)
+-- p_annual_card_id: vuosikorttivaraus (hinta pakotetaan 0:ksi; kortin säännöt valvoo trigger reservations_validate)
+create or replace function booking._create_booking_core(
+  p_rule_id bigint, p_date date, p_persons integer, p_customer_id bigint,
+  p_channel text, p_created_by uuid, p_locale text, p_note text,
+  p_status text, p_hold_minutes integer, p_enforce_deadline boolean,
+  p_override_start timestamptz default null, p_override_end timestamptz default null, p_price_override numeric default null,
+  p_annual_card_id bigint default null)
+returns jsonb language plpgsql security definer set search_path = '' as $$
+declare
+  rs record; p kb.products;
+  pr record; v_total numeric; v_order booking.orders; v_item_id bigint; v_res_id bigint;
+  v_hold timestamptz;
+begin
+  select * into rs from booking._resolve_session(p_rule_id, p_date, p_persons, p_enforce_deadline, p_override_start, p_override_end);
+  select * into p from kb.products where id = rs.o_product_id;
+  if p.vat_rate is null then perform booking._err('vat_missing', 'Tuotteelta puuttuu ALV-kanta'); end if;
+
+  select * into pr from booking._rule_price(p_rule_id, p_persons);
+  v_total := case when p_annual_card_id is not null then 0 else coalesce(p_price_override, pr.total) end;
 
   insert into booking.orders(customer_id, status, payment_status, total_gross, source_channel, locale, customer_note, created_by)
   values (p_customer_id, case when p_status = 'confirmed' then 'confirmed' else 'pending' end, 'unpaid', v_total,
@@ -124,20 +144,89 @@ begin
 
   insert into booking.order_items(order_id, product_id, product_name, kind, quantity, unit_price_gross, line_total_gross, vat_rate, price_breakdown)
   values (v_order.id, p.id, p.name, 'reservation', 1, v_total, v_total, p.vat_rate,
-          pr.breakdown || jsonb_build_object('rule_id', r.id, 'rule_label', r.label))
+          pr.breakdown || jsonb_build_object('rule_id', p_rule_id, 'rule_label', (select label from booking.schedule_rules where id = p_rule_id))
+                       || case when p_annual_card_id is not null then jsonb_build_object('annual_card_id', p_annual_card_id) else '{}'::jsonb end)
   returning id into v_item_id;
 
   v_hold := case when p_status = 'pending' then now() + make_interval(mins => greatest(coalesce(p_hold_minutes, 15), 1)) end;
-  -- Trigger reservations_validate lukitsee tilan ja tarkistaa päällekkäisyydet/kapasiteetin; virhe kumoaa koko lisäyksen.
-  insert into booking.reservations(order_id, order_item_id, product_id, rule_id, space_id, mode, starts_at, ends_at, persons,
+  -- Trigger reservations_validate lukitsee tilan ja tarkistaa päällekkäisyydet/kapasiteetin/vuosikortin; virhe kumoaa koko lisäyksen.
+  insert into booking.reservations(order_id, order_item_id, product_id, rule_id, annual_card_id, space_id, mode, starts_at, ends_at, persons,
                                    pool_ids, status, hold_expires_at, created_by)
-  values (v_order.id, v_item_id, p.id, r.id, r.space_id, r.mode, s_start, s_end, p_persons,
-          coalesce(v_pools, '{}'), p_status, v_hold, p_created_by)
+  values (v_order.id, v_item_id, p.id, p_rule_id, p_annual_card_id, rs.o_space_id, rs.o_mode, rs.o_starts_at, rs.o_ends_at, p_persons,
+          rs.o_pool_ids, p_status, v_hold, p_created_by)
   returning id into v_res_id;
 
   return jsonb_build_object('order_id', v_order.id, 'order_no', v_order.order_no, 'public_token', v_order.public_token,
-                            'reservation_id', v_res_id, 'total', v_total, 'starts_at', s_start, 'ends_at', s_end,
+                            'reservation_id', v_res_id, 'total', v_total, 'starts_at', rs.o_starts_at, 'ends_at', rs.o_ends_at,
                             'status', p_status, 'hold_expires_at', v_hold, 'product_name', p.name);
+end $$;
+
+-- ---------- varauksen MUUTTAMINEN (siirto toiseen vuoroon samalle tuotteelle / henkilömäärän muutos) ----------
+-- Atomisesti, samalla lukituksella ja samoilla säännöillä kuin uusi varaus: varausrivi päivitetään paikallaan, jolloin trigger
+-- reservations_validate ottaa tilalukon ja tarkistaa päällekkäisyydet, kapasiteetin (oma vanha varaus ei kuluta kapasiteettia),
+-- sulut ja vuosikortin säännöt. Virhe kumoaa koko muutoksen; vanha varaus säilyy.
+--   p_rule_id + p_date molemmat annettu → siirto toiseen vuoroon (SAMA tuote);   molemmat null → vain henkilömäärän muutos (aika säilyy)
+--   p_persons null → henkilömäärä säilyy
+--   p_notice_hours: asiakkaalle (customer_change_hours_before) vaadittu ennakko sekä vanhaan että uuteen vuoroon; null = ei rajaa (henkilökunta)
+-- Lukitusjärjestys: varausrivi (FOR UPDATE) → tilan advisory-lukko (trigger), kuten admin_set_reservation_status.
+create or replace function booking._change_booking_core(
+  p_reservation_id bigint, p_rule_id bigint, p_date date, p_persons integer,
+  p_enforce_deadline boolean, p_notice_hours integer, p_actor uuid, p_via text)
+returns jsonb language plpgsql security definer set search_path = '' as $$
+declare
+  res booking.reservations; o booking.orders; rs record; pr record; v_keep boolean := (p_rule_id is null and p_date is null);
+  v_persons integer; v_rule bigint; v_total numeric; v_paid numeric; v_old booking.reservations;
+begin
+  if (p_rule_id is null) <> (p_date is null) then perform booking._err('invalid_change', 'Anna sekä uusi vuoro että päivä, tai kumpikaan'); end if;
+  select * into res from booking.reservations where id = p_reservation_id for update;
+  if not found then perform booking._err('not_found', 'Varausta ei löydy'); end if;
+  select * into o from booking.orders where id = res.order_id;
+  if res.status <> 'confirmed' or o.status <> 'confirmed' then
+    perform booking._err('not_changeable', 'Vain vahvistettua varausta voi muuttaa');
+  end if;
+  if p_notice_hours is not null and res.starts_at - make_interval(hours => p_notice_hours) < now() then
+    perform booking._err('change_too_late', format('Varausta voi muuttaa itse viimeistään %s tuntia ennen vuoron alkua – ota yhteyttä sähköpostitse', p_notice_hours));
+  end if;
+  v_old := res;
+  v_persons := coalesce(p_persons, res.persons);
+  v_rule := coalesce(p_rule_id, res.rule_id);
+
+  if v_keep then   -- vain henkilömäärä: aika, tila ja poolit säilyvät
+    select * into rs from booking._resolve_session(v_rule, null, v_persons, false, res.starts_at, res.ends_at, true);
+  else
+    select * into rs from booking._resolve_session(v_rule, p_date, v_persons, p_enforce_deadline);
+  end if;
+  if rs.o_product_id is distinct from res.product_id then
+    perform booking._err('product_mismatch', 'Varauksen voi siirtää vain saman tuotteen toiseen vuoroon');
+  end if;
+  if p_notice_hours is not null and rs.o_starts_at - make_interval(hours => p_notice_hours) < now() then
+    perform booking._err('change_too_late', format('Uuden vuoron pitää alkaa vähintään %s tuntia päästä', p_notice_hours));
+  end if;
+
+  select * into pr from booking._rule_price(v_rule, v_persons);
+  v_total := case when res.annual_card_id is not null then 0 else pr.total end;
+  select coalesce(sum(amount) filter (where status in ('paid','partially_refunded','refunded')), 0) into v_paid from booking.payments where order_id = o.id;
+  if p_notice_hours is not null and v_paid > 0 and v_total is distinct from o.total_gross then
+    perform booking._err('price_change_requires_staff', 'Maksettu varaus, jonka hinta muuttuisi: ota yhteyttä henkilökuntaan');
+  end if;
+
+  -- trigger reservations_validate tarkistaa kaiken (lukko, päällekkäisyys, kapasiteetti, sulku, vuosikortti)
+  update booking.reservations set rule_id = v_rule, space_id = rs.o_space_id, mode = rs.o_mode, starts_at = rs.o_starts_at,
+         ends_at = rs.o_ends_at, persons = v_persons, pool_ids = rs.o_pool_ids
+   where id = res.id returning * into res;
+
+  update booking.order_items set unit_price_gross = v_total, line_total_gross = v_total,
+         price_breakdown = pr.breakdown || jsonb_build_object('rule_id', v_rule, 'rule_label', (select label from booking.schedule_rules where id = v_rule))
+   where id = res.order_item_id;
+  update booking.orders set total_gross = coalesce((select sum(line_total_gross) from booking.order_items where order_id = o.id), 0) where id = o.id;
+  update booking.payments set amount = v_total where order_id = o.id and status = 'pending' and provider = 'manual';
+  perform booking._refresh_order_payment(o.id);
+
+  insert into booking.audit_log(actor, actor_role, table_name, row_pk, action, old_data, new_data)
+  values (p_actor, booking._jwt_role(), 'reservations', res.id::text, p_via, to_jsonb(v_old), to_jsonb(res));
+
+  return jsonb_build_object('reservation_id', res.id, 'order_id', o.id, 'order_no', o.order_no, 'starts_at', res.starts_at, 'ends_at', res.ends_at,
+                            'persons', res.persons, 'total', v_total, 'rule_id', v_rule, 'product_id', res.product_id);
 end $$;
 
 -- ---------- JULKISET FUNKTIOT ----------
@@ -265,9 +354,13 @@ begin
 end $$;
 
 -- Vahvistussivu: haetaan salaisella tokenilla. Ei sisällä asiakastietoja (vain etunimi).
+-- can_change / change_deadline: voiko asiakas vielä itse muuttaa varausta (asetus customer_change_hours_before, oletus 48 h).
 create or replace function booking.public_get_booking(p_token uuid)
 returns jsonb language plpgsql stable security definer set search_path = '' as $$
-declare o booking.orders; res jsonb; cust text;
+declare
+  o booking.orders; res jsonb; cust text;
+  v_hours integer := coalesce((booking._setting('customer_change_hours_before', '48'::jsonb) #>> '{}')::int, 48);
+  v_conf_n integer; v_conf_start timestamptz;
 begin
   if p_token is null then return jsonb_build_object('ok', false, 'code', 'not_found'); end if;
   select * into o from booking.orders where public_token = p_token;
@@ -275,23 +368,31 @@ begin
   select split_part(c.name, ' ', 1) into cust from booking.customers c where c.id = o.customer_id;
   select jsonb_agg(jsonb_build_object(
            'product_name', it.product_name, 'quantity', it.quantity, 'line_total', it.line_total_gross, 'vat_rate', it.vat_rate,
+           'product_id', r.product_id, 'rule_id', r.rule_id,
            'starts_at', r.starts_at, 'ends_at', r.ends_at, 'persons', r.persons, 'mode', r.mode,
            'status', case when r.status = 'pending' and r.hold_expires_at <= now() then 'expired' else r.status end,
            'hold_expires_at', r.hold_expires_at) order by r.starts_at)
     into res
     from booking.order_items it left join booking.reservations r on r.order_item_id = it.id
    where it.order_id = o.id;
+  select count(*), min(r.starts_at) into v_conf_n, v_conf_start from booking.reservations r where r.order_id = o.id and r.status = 'confirmed';
   return jsonb_build_object('ok', true, 'order_no', o.order_no, 'status',
            case when o.status = 'pending' and not exists (select 1 from booking.reservations x where x.order_id = o.id and x.status = 'pending' and x.hold_expires_at > now()) then 'expired' else o.status end,
            'payment_status', o.payment_status, 'total', o.total_gross, 'currency', o.currency, 'created_at', o.created_at,
            'first_name', cust, 'items', coalesce(res, '[]'::jsonb),
-           'payment_methods', (select coalesce(jsonb_agg(p.method), '[]'::jsonb) from booking.payments p where p.order_id = o.id));
+           'payment_methods', (select coalesce(jsonb_agg(p.method), '[]'::jsonb) from booking.payments p where p.order_id = o.id),
+           'can_change', (o.status = 'confirmed' and v_conf_n = 1 and v_conf_start - make_interval(hours => v_hours) >= now()),
+           'change_deadline', case when v_conf_n = 1 then v_conf_start - make_interval(hours => v_hours) end,
+           'change_hours_before', v_hours);
 end $$;
 
--- Asiakas voi perua vielä maksamattoman (pending) varauksen itse; vahvistetut peruutetaan ehtojen mukaan yhteydenotolla.
+-- Asiakas voi perua VAIN vielä maksamattoman (pending) pidon kesken ostoprosessin. Vahvistetun varauksen peruutus tehdään
+-- sähköpostitse henkilökunnalle, ja henkilökunta peruu sen hallinnasta (admin_set_reservation_status). Asiakas voi sen sijaan
+-- itse MUUTTAA vahvistettua varausta (public_change_booking).
 create or replace function booking.public_cancel_booking(p_token uuid)
 returns jsonb language plpgsql security definer set search_path = '' as $$
 declare o booking.orders; n int;
+  v_hours integer := coalesce((booking._setting('customer_change_hours_before', '48'::jsonb) #>> '{}')::int, 48);
 begin
   select * into o from booking.orders where public_token = p_token;
   if not found then return jsonb_build_object('ok', false, 'code', 'not_found'); end if;
@@ -299,9 +400,56 @@ begin
    where order_id = o.id and status = 'pending';
   get diagnostics n = row_count;
   if n = 0 then
-    return jsonb_build_object('ok', false, 'code', 'not_cancellable', 'message', 'Vahvistettu varaus perutaan ottamalla yhteyttä: ks. peruutusehdot');
+    return jsonb_build_object('ok', false, 'code', 'not_cancellable',
+      'message', format('Vahvistetun varauksen peruutus tehdään sähköpostitse henkilökunnalle. Varausta voi muuttaa itse viimeistään %s tuntia ennen vuoron alkua.', v_hours));
   end if;
   update booking.orders set status = 'cancelled', cancelled_at = now() where id = o.id and status = 'pending';
   update booking.payments set status = 'cancelled' where order_id = o.id and status = 'pending';
   return jsonb_build_object('ok', true);
+end $$;
+
+-- Asiakas muuttaa varaustaan tokenilla: siirto toiseen VAPAASEEN vuoroon samalle tuotteelle ja/tai henkilömäärän muutos.
+-- Sallittu viimeistään asetuksen customer_change_hours_before (oletus 48) tuntia ennen vuoron alkua; sama ennakkoraja
+-- koskee uutta vuoroa. Muutos tehdään atomisesti samoilla lukituksilla ja säännöillä kuin uusi varaus (booking._change_booking_core).
+-- Palauttaa jsonb {ok:true,...} tai {ok:false, code, message}.
+create or replace function booking.public_change_booking(
+  p_token uuid, p_rule_id bigint default null, p_date date default null, p_persons integer default null)
+returns jsonb language plpgsql security definer set search_path = '' as $$
+declare
+  v_ip text := booking._client_ip(); o booking.orders; v_res_id bigint; v_n int; v_out jsonb; v_detail text; v_msg text;
+  v_hours integer := coalesce((booking._setting('customer_change_hours_before', '48'::jsonb) #>> '{}')::int, 48);
+begin
+  if p_token is null then return jsonb_build_object('ok', false, 'code', 'not_found'); end if;
+  if v_ip is not null and not booking._rate_limit('ip:' || v_ip, (booking._setting('rl_ip_per_10min', '12'::jsonb) #>> '{}')::int, interval '10 minutes') then
+    return jsonb_build_object('ok', false, 'code', 'rate_limited', 'message', 'Liian monta yritystä, yritä hetken kuluttua uudelleen');
+  end if;
+  if not booking._rate_limit('chg:' || p_token::text, (booking._setting('rl_change_per_10min', '10'::jsonb) #>> '{}')::int, interval '10 minutes') then
+    return jsonb_build_object('ok', false, 'code', 'rate_limited', 'message', 'Liian monta yritystä, yritä hetken kuluttua uudelleen');
+  end if;
+  if (p_rule_id is null) <> (p_date is null) or (p_rule_id is null and p_persons is null) then
+    return jsonb_build_object('ok', false, 'code', 'invalid_change', 'message', 'Valitse uusi vuoro ja/tai henkilömäärä');
+  end if;
+  if p_persons is not null and (p_persons < 1 or p_persons > 50) then
+    return jsonb_build_object('ok', false, 'code', 'invalid_persons', 'message', 'Tarkista henkilömäärä');
+  end if;
+  if p_date is not null and (p_date < (now() at time zone booking._tz())::date
+     or p_date > (now() at time zone booking._tz())::date + (booking._setting('booking_horizon_days', '120'::jsonb) #>> '{}')::int) then
+    return jsonb_build_object('ok', false, 'code', 'invalid_date', 'message', 'Päivä ei ole varattavissa');
+  end if;
+  select * into o from booking.orders where public_token = p_token;
+  if not found then return jsonb_build_object('ok', false, 'code', 'not_found'); end if;
+  select count(*), min(r.id) into v_n, v_res_id from booking.reservations r where r.order_id = o.id and r.status = 'confirmed';
+  if v_n <> 1 or o.status <> 'confirmed' then
+    return jsonb_build_object('ok', false, 'code', 'not_changeable', 'message', 'Tätä varausta ei voi muuttaa verkossa – ota yhteyttä sähköpostitse');
+  end if;
+
+  begin  -- alitransaktio: virhe kumoaa muutoksen kokonaan (vanha varaus säilyy) mutta rate limit -kirjaus säilyy
+    v_out := booking._change_booking_core(v_res_id, p_rule_id, p_date, p_persons, true, v_hours, null, 'CUSTOMER_CHANGE');
+  exception
+    when sqlstate 'BK001' then
+      get stacked diagnostics v_detail = pg_exception_detail, v_msg = message_text;
+      return jsonb_build_object('ok', false, 'code', coalesce(v_detail, 'error'), 'message', v_msg);
+  end;
+  return jsonb_build_object('ok', true, 'order_no', v_out -> 'order_no', 'starts_at', v_out -> 'starts_at', 'ends_at', v_out -> 'ends_at',
+                            'persons', v_out -> 'persons', 'total', v_out -> 'total');
 end $$;

@@ -12,7 +12,7 @@ const booking = resolve(here, '..');
 const PORT = +(process.env.PORT || 4180), PGRST = +(process.env.PGRST_PORT || 3300);
 const SECRET = process.env.JWT_SECRET || 'demo-secret-demo-secret-demo-secret-0123456789';
 const SHOP = resolve(process.env.SHOP_DIST || join(booking, 'shop/dist'));
-const USERS = { 'admin@demo.local': '00000000-0000-4000-8000-0000000000a1', 'staff@demo.local': '00000000-0000-4000-8000-0000000000b2' };
+const USERS = { 'admin@demo.local': '00000000-0000-4000-8000-0000000000a1', 'staff@demo.local': '00000000-0000-4000-8000-0000000000b2', 'manager@demo.local': '00000000-0000-4000-8000-0000000000c3' };
 const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.avif': 'image/avif', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.xml': 'application/xml', '.txt': 'text/plain; charset=utf-8' };
 
 const b64 = (o) => Buffer.from(typeof o === 'string' ? o : JSON.stringify(o)).toString('base64url');

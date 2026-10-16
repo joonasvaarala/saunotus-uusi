@@ -1,10 +1,12 @@
 -- =====================================================================
 -- booking 06: hallinnan rajapinta (authenticated + booking.staff-tarkistus funktiossa)
 -- Kaikki kirjoitukset kulkevat näiden funktioiden kautta (taulujen suoria kirjoitusoikeuksia ei anneta).
--- staff = päivittäinen käyttö (varaukset, asiakkaat, maksukirjaukset, sulut)
--- admin = lisäksi tuotteet/hinnat (kb), asetukset, resurssit, henkilöstö
+-- Jokainen funktio vaatii OIKEUDEN (booking.role_permissions → _require_permission), ei roolinimeä:
+--   admin   = kaikki oikeudet (myös henkilöstön hallinta ja audit-loki)
+--   manager = ylläpitäjä: varaukset + catalog.edit (tuotteet/hinnat/kuvaukset/tuoteasetukset), settings.edit, resources.edit, rules.edit, annual_cards.manage
+--   staff   = peruskäyttäjä: bookings/customers/payments/blocks (ei hinnan/tuotteen/asetusten muokkausta)
 -- kb.products / kb.product_price_variants on totuus: admin_update_product / admin_update_price_variant
--- kirjoittavat suoraan kb:hen (SECURITY DEFINER, vain admin) ja kirjaavat booking.audit_log + kb.change_log.
+-- kirjoittavat suoraan kb:hen (SECURITY DEFINER, oikeus catalog.edit) ja kirjaavat booking.audit_log + kb.change_log.
 -- =====================================================================
 set local search_path = booking, extensions, public;
 
@@ -36,7 +38,7 @@ declare
   allowed text[] := array['name','name_en','description','description_en','price','price_text','vat_rate','active'];
   k text; o kb.products; n kb.products; v_price numeric; v_vat numeric;
 begin
-  perform booking._require_admin();
+  perform booking._require_permission('catalog.edit');
   select * into o from kb.products where id = p_product_id;
   if not found then perform booking._err('not_found', 'Tuotetta ei löydy'); end if;
   for k in select jsonb_object_keys(p_patch) loop
@@ -75,7 +77,7 @@ declare
   allowed text[] := array['label','price','notes','active','included_persons','extra_person_price'];
   k text; o kb.product_price_variants; n kb.product_price_variants; v_price numeric;
 begin
-  perform booking._require_admin();
+  perform booking._require_permission('catalog.edit');
   select * into o from kb.product_price_variants where id = p_variant_id;
   if not found then perform booking._err('not_found', 'Hintavarianttia ei löydy'); end if;
   for k in select jsonb_object_keys(p_patch) loop
@@ -105,7 +107,7 @@ create or replace function booking.admin_update_product_config(p_product_id bigi
 returns jsonb language plpgsql security definer set search_path = '' as $$
 declare allowed text[] := array['bookable','shop_visible','sort_order','min_persons','max_persons','notes']; k text;
 begin
-  perform booking._require_admin();
+  perform booking._require_permission('catalog.edit');
   for k in select jsonb_object_keys(p_patch) loop
     if not (k = any (allowed)) then perform booking._err('unknown_field', 'Kenttää ei saa muokata: ' || k); end if;
   end loop;
@@ -125,11 +127,17 @@ end $$;
 create or replace function booking.admin_set_setting(p_key text, p_value jsonb)
 returns jsonb language plpgsql security definer set search_path = '' as $$
 begin
-  perform booking._require_admin();
+  perform booking._require_permission('settings.edit');
   if not exists (select 1 from booking.settings where key = p_key) then perform booking._err('unknown_setting', 'Tuntematon asetus'); end if;
   -- perusvalidointi tärkeimmille
   if p_key = 'hold_minutes' and (jsonb_typeof(p_value) <> 'number' or (p_value #>> '{}')::numeric not between 1 and 240) then perform booking._err('invalid_value', 'Pitoaika 1–240 min'); end if;
   if p_key = 'public_payment_mode' and (p_value #>> '{}') not in ('pay_later','hold_until_paid') then perform booking._err('invalid_value', 'pay_later tai hold_until_paid'); end if;
+  if p_key = 'customer_change_hours_before' and (jsonb_typeof(p_value) <> 'number' or (p_value #>> '{}')::numeric not between 0 and 720 or (p_value #>> '{}')::numeric <> trunc((p_value #>> '{}')::numeric)) then
+    perform booking._err('invalid_value', 'Asiakkaan muutosraja 0–720 tuntia (kokonaisluku)');
+  end if;
+  if p_key = 'annual_card_max_persons' and (jsonb_typeof(p_value) <> 'number' or (p_value #>> '{}')::numeric not between 1 and 20 or (p_value #>> '{}')::numeric <> trunc((p_value #>> '{}')::numeric)) then
+    perform booking._err('invalid_value', 'Vuosikortin henkilömäärä 1–20');
+  end if;
   update booking.settings set value = p_value, updated_by = auth.uid() where key = p_key;
   return jsonb_build_object('ok', true);
 end $$;
@@ -138,7 +146,7 @@ create or replace function booking.admin_update_resource(p_id bigint, p_patch js
 returns jsonb language plpgsql security definer set search_path = '' as $$
 declare allowed text[] := array['name','capacity','active','notes','sort_order']; k text;
 begin
-  perform booking._require_admin();
+  perform booking._require_permission('resources.edit');
   for k in select jsonb_object_keys(p_patch) loop
     if not (k = any (allowed)) then perform booking._err('unknown_field', 'Kenttää ei saa muokata: ' || k); end if;
   end loop;
@@ -157,24 +165,80 @@ create or replace function booking.admin_list_staff()
 returns table (user_id uuid, email text, name text, role text, active boolean)
 language plpgsql stable security definer set search_path = '' as $$
 begin
-  perform booking._require_admin();
+  perform booking._require_permission('staff.manage');
   return query select s.user_id, s.email, s.name, s.role, s.active from booking.staff s order by s.name;
 end $$;
 
 create or replace function booking.admin_upsert_staff(p_user_id uuid, p_name text, p_role text, p_active boolean default true)
 returns jsonb language plpgsql security definer set search_path = '' as $$
+declare v_old booking.staff;
 begin
-  perform booking._require_admin();
-  if p_role not in ('admin','staff') then perform booking._err('invalid_role', 'Rooli: admin tai staff'); end if;
+  perform booking._require_permission('staff.manage');   -- vain admin: manager/staff eivät voi muuttaa rooleja eikä antaa admin-oikeutta
+  if not exists (select 1 from booking.roles r where r.code = p_role and r.is_staff and r.active) then
+    perform booking._err('invalid_role', 'Tuntematon henkilöstörooli (booking.roles, is_staff=true)');
+  end if;
+  if char_length(btrim(coalesce(p_name, ''))) < 1 then perform booking._err('invalid_name', 'Nimi ei voi olla tyhjä'); end if;
   if not exists (select 1 from auth.users where id = p_user_id) then perform booking._err('no_such_user', 'Käyttäjää ei löydy (luo ensin Supabase Authissa)'); end if;
-  -- viimeistä aktiivista adminia ei saa poistaa
-  if p_user_id = auth.uid() and (p_role <> 'admin' or not p_active) and
+  select * into v_old from booking.staff where user_id = p_user_id;
+  -- viimeistä aktiivista adminia ei saa alentaa tai poistaa käytöstä
+  if found and v_old.role = 'admin' and v_old.active and (p_role <> 'admin' or not p_active) and
      (select count(*) from booking.staff where role = 'admin' and active and user_id <> p_user_id) = 0 then
-    perform booking._err('last_admin', 'Viimeistä ylläpitäjää ei voi alentaa tai poistaa käytöstä');
+    perform booking._err('last_admin', 'Viimeistä ylläpitäjää (admin) ei voi alentaa tai poistaa käytöstä');
   end if;
   insert into booking.staff(user_id, email, name, role, active)
-  values (p_user_id, (select email from auth.users where id = p_user_id), p_name, p_role, p_active)
+  values (p_user_id, (select email from auth.users where id = p_user_id), btrim(p_name), p_role, p_active)
   on conflict (user_id) do update set name = excluded.name, role = excluded.role, active = excluded.active;
+  return jsonb_build_object('ok', true);
+end $$;
+
+-- Omat oikeudet käyttöliittymää varten (näkymien/kenttien piilotus). Palvelin tarkistaa oikeudet aina itse.
+create or replace function booking.admin_my_permissions()
+returns jsonb language plpgsql stable security definer set search_path = '' as $$
+declare v_role text;
+begin
+  perform booking._require_staff();
+  v_role := booking.current_staff_role();
+  return jsonb_build_object('role', v_role,
+    'role_label', (select r.label from booking.roles r where r.code = v_role),
+    'permissions', coalesce((select jsonb_agg(rp.permission order by rp.permission) from booking.role_permissions rp where rp.role_code = v_role), '[]'::jsonb));
+end $$;
+
+-- Henkilöstöroolit valintalistaan (admin: henkilöstön hallinta)
+create or replace function booking.admin_list_roles()
+returns table (code text, label text, description text, is_staff boolean)
+language plpgsql stable security definer set search_path = '' as $$
+begin
+  perform booking._require_staff();
+  return query select r.code, r.label, r.description, r.is_staff from booking.roles r where r.active order by r.sort_order, r.code;
+end $$;
+
+-- Vuorosäännön muokkaus (rules.edit): vain turvalliset kentät. Aikataulun/tuotteen/tilan muutos tehdään edelleen SQL:llä.
+create or replace function booking.admin_update_schedule_rule(p_id bigint, p_patch jsonb)
+returns jsonb language plpgsql security definer set search_path = '' as $$
+declare allowed text[] := array['label','active','min_persons','max_persons','deadline_minutes','valid_from','valid_to','notes','sort_order']; k text;
+  v_min integer; v_max integer;
+begin
+  perform booking._require_permission('rules.edit');
+  for k in select jsonb_object_keys(p_patch) loop
+    if not (k = any (allowed)) then perform booking._err('unknown_field', 'Kenttää ei saa muokata: ' || k); end if;
+  end loop;
+  if p_patch ? 'min_persons' and ((p_patch ->> 'min_persons')::int is null or (p_patch ->> 'min_persons')::int < 1) then perform booking._err('invalid_value', 'Vähimmäishenkilömäärä ≥ 1'); end if;
+  if p_patch ? 'max_persons' and (p_patch ->> 'max_persons') is not null and (p_patch ->> 'max_persons')::int < 1 then perform booking._err('invalid_value', 'Enimmäishenkilömäärä ≥ 1'); end if;
+  if p_patch ? 'deadline_minutes' and ((p_patch ->> 'deadline_minutes')::int is null or (p_patch ->> 'deadline_minutes')::int < 0) then perform booking._err('invalid_value', 'Myynnin sulkeutumisaika ≥ 0 min'); end if;
+  if p_patch ? 'label' and char_length(btrim(coalesce(p_patch ->> 'label', ''))) = 0 then perform booking._err('invalid_name', 'Nimi ei voi olla tyhjä'); end if;
+  update booking.schedule_rules set
+    label = case when p_patch ? 'label' then btrim(p_patch ->> 'label') else label end,
+    active = case when p_patch ? 'active' then (p_patch ->> 'active')::boolean else active end,
+    min_persons = case when p_patch ? 'min_persons' then (p_patch ->> 'min_persons')::int else min_persons end,
+    max_persons = case when p_patch ? 'max_persons' then (p_patch ->> 'max_persons')::int else max_persons end,
+    deadline_minutes = case when p_patch ? 'deadline_minutes' then (p_patch ->> 'deadline_minutes')::int else deadline_minutes end,
+    valid_from = case when p_patch ? 'valid_from' then (p_patch ->> 'valid_from')::date else valid_from end,
+    valid_to = case when p_patch ? 'valid_to' then (p_patch ->> 'valid_to')::date else valid_to end,
+    notes = case when p_patch ? 'notes' then p_patch ->> 'notes' else notes end,
+    sort_order = case when p_patch ? 'sort_order' then (p_patch ->> 'sort_order')::int else sort_order end
+   where id = p_id returning min_persons, max_persons into v_min, v_max;
+  if not found then perform booking._err('not_found', 'Vuorosääntöä ei löydy'); end if;
+  if v_max is not null and v_max < v_min then perform booking._err('invalid_value', 'Enimmäishenkilömäärä on pienempi kuin vähimmäismäärä'); end if;
   return jsonb_build_object('ok', true);
 end $$;
 
@@ -183,7 +247,7 @@ create or replace function booking.admin_create_block(p_space_id bigint, p_start
 returns jsonb language plpgsql security definer set search_path = '' as $$
 declare v_id bigint;
 begin
-  perform booking._require_staff();
+  perform booking._require_permission('blocks.manage');
   perform pg_advisory_xact_lock(hashtextextended('booking:space:' || p_space_id::text, 0));
   perform booking._expire_holds(p_space_id);
   if exists (select 1 from booking.reservations r where r.space_id = p_space_id and booking._res_active(r.status, r.hold_expires_at)
@@ -198,7 +262,7 @@ end $$;
 create or replace function booking.admin_delete_block(p_id bigint)
 returns jsonb language plpgsql security definer set search_path = '' as $$
 begin
-  perform booking._require_staff();
+  perform booking._require_permission('blocks.manage');
   update booking.space_blocks set active = false where id = p_id;
   return jsonb_build_object('ok', true);
 end $$;
@@ -211,7 +275,7 @@ returns table (
   reservation_id bigint, order_id bigint, order_no bigint, status text, order_status text, payment_status text,
   product_id bigint, product_name text, mode text, starts_at timestamptz, ends_at timestamptz, persons integer,
   total_gross numeric, customer_id bigint, customer_name text, customer_email text, customer_phone text,
-  source_channel text, created_at timestamptz, hold_expires_at timestamptz, notes text, total_count bigint)
+  source_channel text, created_at timestamptz, hold_expires_at timestamptz, notes text, annual_card_id bigint, total_count bigint)
 language plpgsql stable security definer set search_path = '' as $$
 declare q text := nullif(btrim(coalesce(p_search, '')), '');
 begin
@@ -220,7 +284,7 @@ begin
     select r.id, o.id, o.order_no,
            case when r.status = 'pending' and r.hold_expires_at <= now() then 'expired' else r.status end,
            o.status, o.payment_status, r.product_id, coalesce(it.product_name, p.name), r.mode, r.starts_at, r.ends_at, r.persons,
-           o.total_gross, c.id, c.name, c.email, c.phone, o.source_channel, o.created_at, r.hold_expires_at, r.notes,
+           o.total_gross, c.id, c.name, c.email, c.phone, o.source_channel, o.created_at, r.hold_expires_at, r.notes, r.annual_card_id,
            count(*) over ()
       from booking.reservations r
       join booking.orders o on o.id = r.order_id
@@ -253,7 +317,7 @@ begin
         'reservation_id', r.id, 'order_no', o.order_no, 'status', r.status, 'payment_status', o.payment_status,
         'product_name', coalesce(it.product_name, p.name), 'mode', r.mode, 'starts_at', r.starts_at, 'ends_at', r.ends_at,
         'persons', r.persons, 'customer_name', c.name, 'customer_phone', c.phone, 'rule_id', r.rule_id, 'notes', r.notes,
-        'hold_expires_at', r.hold_expires_at) order by r.starts_at, r.id)
+        'annual_card', r.annual_card_id is not null, 'hold_expires_at', r.hold_expires_at) order by r.starts_at, r.id)
         from booking.reservations r join booking.orders o on o.id = r.order_id
         left join booking.order_items it on it.id = r.order_item_id left join kb.products p on p.id = r.product_id
         left join booking.customers c on c.id = o.customer_id
@@ -274,7 +338,7 @@ returns jsonb language plpgsql security definer set search_path = '' as $$
 declare
   v_cust bigint := p_customer_id; v_res jsonb; v_email text; v_order bigint; v_pm booking.payment_methods;
 begin
-  perform booking._require_staff();
+  perform booking._require_permission('bookings.manage');
   select * into v_pm from booking.payment_methods where code = p_payment_method and active;
   if not found then perform booking._err('invalid_payment_method', 'Maksutapa ei ole käytössä'); end if;
   if p_channel not in ('admin','phone','email','walk_in','other') then perform booking._err('invalid_channel', 'Virheellinen lähdekanava'); end if;
@@ -333,7 +397,7 @@ create or replace function booking.admin_record_payment(p_order_id bigint, p_met
 returns jsonb language plpgsql security definer set search_path = '' as $$
 declare v_pm booking.payment_methods; v_id bigint;
 begin
-  perform booking._require_staff();
+  perform booking._require_permission('payments.manage');
   select * into v_pm from booking.payment_methods where code = p_method and active and is_manual;
   if not found then perform booking._err('invalid_payment_method', 'Maksutapa ei ole käytössä / ei käsin kirjattava'); end if;
   if p_amount is null or p_amount <= 0 then perform booking._err('invalid_amount', 'Virheellinen summa'); end if;
@@ -353,7 +417,7 @@ create or replace function booking.admin_create_payment_link(p_order_id bigint)
 returns jsonb language plpgsql security definer set search_path = '' as $$
 declare v_amount numeric; v_id bigint;
 begin
-  perform booking._require_staff();
+  perform booking._require_permission('payments.manage');
   select total_gross into v_amount from booking.orders where id = p_order_id;
   if not found then perform booking._err('not_found', 'Tilausta ei löydy'); end if;
   insert into booking.payments(order_id, method, provider, status, amount, link_expires_at, note, created_by)
@@ -369,7 +433,7 @@ create or replace function booking.admin_set_reservation_status(p_reservation_id
 returns jsonb language plpgsql security definer set search_path = '' as $$
 declare r booking.reservations;
 begin
-  perform booking._require_staff();
+  perform booking._require_permission('bookings.manage');
   if p_status not in ('confirmed','cancelled','completed','no_show') then perform booking._err('invalid_status', 'Tila ei sallittu'); end if;
   select * into r from booking.reservations where id = p_reservation_id for update;
   if not found then perform booking._err('not_found', 'Varausta ei löydy'); end if;
@@ -393,7 +457,8 @@ end $$;
 create or replace function booking.admin_list_customers(p_search text default null, p_limit integer default 50, p_offset integer default 0)
 returns table (
   id bigint, name text, email text, phone text, company text, city text, marketing_consent boolean,
-  marketing_consent_at timestamptz, created_at timestamptz, orders_count bigint, last_visit timestamptz, total_count bigint)
+  marketing_consent_at timestamptz, created_at timestamptz, orders_count bigint, last_visit timestamptz, total_count bigint,
+  customer_type text)
 language plpgsql stable security definer set search_path = '' as $$
 declare q text := nullif(btrim(coalesce(p_search, '')), '');
 begin
@@ -403,7 +468,7 @@ begin
            (select count(*) from booking.orders o where o.customer_id = c.id and o.status in ('pending','confirmed','completed')),
            (select max(r.starts_at) from booking.reservations r join booking.orders o on o.id = r.order_id
              where o.customer_id = c.id and r.status in ('confirmed','completed')),
-           count(*) over ()
+           count(*) over (), c.customer_type
       from booking.customers c
      where c.anonymized_at is null
        and (q is null or c.name ilike '%' || q || '%' or c.email ilike '%' || q || '%' or c.phone ilike '%' || q || '%' or c.company ilike '%' || q || '%')
@@ -418,7 +483,9 @@ begin
   perform booking._require_staff();
   select * into c from booking.customers where id = p_id;
   if not found then perform booking._err('not_found', 'Asiakasta ei löydy'); end if;
-  return to_jsonb(c) - 'unsubscribe_token' || jsonb_build_object('orders', coalesce((
+  return to_jsonb(c) - 'unsubscribe_token' - 'customer_type_is_staff' || jsonb_build_object(
+    'annual_cards', coalesce((select jsonb_agg(to_jsonb(ac) - 'created_by' - 'revoked_by' order by ac.valid_from desc) from booking.annual_cards ac where ac.customer_id = c.id), '[]'::jsonb),
+    'orders', coalesce((
     select jsonb_agg(jsonb_build_object('order_id', o.id, 'order_no', o.order_no, 'status', o.status, 'payment_status', o.payment_status,
         'total', o.total_gross, 'created_at', o.created_at, 'channel', o.source_channel,
         'reservations', (select coalesce(jsonb_agg(jsonb_build_object('id', r.id, 'starts_at', r.starts_at, 'persons', r.persons, 'status', r.status,
@@ -431,7 +498,7 @@ create or replace function booking.admin_update_customer(p_id bigint, p_patch js
 returns jsonb language plpgsql security definer set search_path = '' as $$
 declare allowed text[] := array['name','email','phone','company','address','zip','city','country','language','notes','marketing_consent']; k text; v_consent boolean;
 begin
-  perform booking._require_staff();
+  perform booking._require_permission('customers.manage');
   for k in select jsonb_object_keys(p_patch) loop
     if not (k = any (allowed)) then perform booking._err('unknown_field', 'Kenttää ei saa muokata: ' || k); end if;
   end loop;
@@ -455,6 +522,120 @@ begin
    where id = p_id;
   if not found then perform booking._err('not_found', 'Asiakasta ei löydy'); end if;
   return jsonb_build_object('ok', true);
+end $$;
+
+-- ---------- varauksen muuttaminen hallinnasta (bookings.manage) ----------
+-- Siirto toiseen vuoroon (SAMA tuote) ja/tai henkilömäärän muutos; ei 48 h rajaa eikä myyntisulkua. Samat lukitukset ja säännöt
+-- kuin uudella varauksella (booking._change_booking_core). Vain vahvistettu varaus.
+create or replace function booking.admin_change_booking(
+  p_reservation_id bigint, p_rule_id bigint default null, p_date date default null, p_persons integer default null)
+returns jsonb language plpgsql security definer set search_path = '' as $$
+begin
+  perform booking._require_permission('bookings.manage');
+  if p_rule_id is null and p_date is null and p_persons is null then perform booking._err('invalid_change', 'Ei muutettavaa'); end if;
+  return booking._change_booking_core(p_reservation_id, p_rule_id, p_date, p_persons, false, null, auth.uid(), 'ADMIN_CHANGE')
+         || jsonb_build_object('ok', true);
+end $$;
+
+-- ---------- vuosikortit ----------
+-- Vuosikortti: asiakas saa varata ILMAISEKSI yleisiä vuoroja, yksi tuleva varaus kerrallaan (pakotus: trigger migraatiossa 04).
+create or replace function booking.admin_grant_annual_card(p_customer_id bigint, p_valid_from date, p_valid_to date, p_notes text default null)
+returns jsonb language plpgsql security definer set search_path = '' as $$
+declare v_id bigint;
+begin
+  perform booking._require_permission('annual_cards.manage');
+  if not exists (select 1 from booking.customers where id = p_customer_id and anonymized_at is null) then
+    perform booking._err('customer_not_found', 'Asiakasta ei löydy');
+  end if;
+  if p_valid_from is null or p_valid_to is null or p_valid_to < p_valid_from then
+    perform booking._err('invalid_dates', 'Virheellinen voimassaoloaika');
+  end if;
+  begin
+    insert into booking.annual_cards(customer_id, valid_from, valid_to, notes, created_by)
+    values (p_customer_id, p_valid_from, p_valid_to, nullif(btrim(coalesce(p_notes, '')), ''), auth.uid()) returning id into v_id;
+  exception when exclusion_violation then
+    perform booking._err('annual_card_overlap', 'Asiakkaalla on jo aktiivinen vuosikortti tälle ajanjaksolle');
+  end;
+  return jsonb_build_object('ok', true, 'id', v_id);
+end $$;
+
+-- Voimassaolon jatko / huomautusten muokkaus
+create or replace function booking.admin_update_annual_card(p_id bigint, p_patch jsonb)
+returns jsonb language plpgsql security definer set search_path = '' as $$
+declare allowed text[] := array['valid_from','valid_to','notes']; k text;
+begin
+  perform booking._require_permission('annual_cards.manage');
+  for k in select jsonb_object_keys(p_patch) loop
+    if not (k = any (allowed)) then perform booking._err('unknown_field', 'Kenttää ei saa muokata: ' || k); end if;
+  end loop;
+  begin
+    update booking.annual_cards set
+      valid_from = case when p_patch ? 'valid_from' then (p_patch ->> 'valid_from')::date else valid_from end,
+      valid_to = case when p_patch ? 'valid_to' then (p_patch ->> 'valid_to')::date else valid_to end,
+      notes = case when p_patch ? 'notes' then nullif(btrim(coalesce(p_patch ->> 'notes', '')), '') else notes end
+     where id = p_id;
+  exception
+    when exclusion_violation then perform booking._err('annual_card_overlap', 'Asiakkaalla on jo aktiivinen vuosikortti tälle ajanjaksolle');
+    when check_violation then perform booking._err('invalid_dates', 'Virheellinen voimassaoloaika');
+  end;
+  if not found then perform booking._err('not_found', 'Vuosikorttia ei löydy'); end if;
+  return jsonb_build_object('ok', true);
+end $$;
+
+-- Vuosikortin poisto (active=false, rivi säilyy historiana). p_cancel_future: peru myös kortin tulevat varaukset.
+create or replace function booking.admin_revoke_annual_card(p_id bigint, p_cancel_future boolean default false)
+returns jsonb language plpgsql security definer set search_path = '' as $$
+declare c booking.annual_cards; v_n integer; r record; v_cancelled integer := 0;
+begin
+  perform booking._require_permission('annual_cards.manage');
+  select * into c from booking.annual_cards where id = p_id for update;
+  if not found then perform booking._err('not_found', 'Vuosikorttia ei löydy'); end if;
+  update booking.annual_cards set active = false, revoked_at = coalesce(revoked_at, now()), revoked_by = coalesce(revoked_by, auth.uid()) where id = p_id;
+  select count(*) into v_n from booking.reservations x where x.annual_card_id = p_id and x.status in ('pending','confirmed') and x.starts_at > now();
+  if p_cancel_future then
+    for r in select x.id from booking.reservations x where x.annual_card_id = p_id and x.status in ('pending','confirmed') and x.starts_at > now() loop
+      perform booking.admin_set_reservation_status(r.id, 'cancelled', 'annual_card_revoked');
+      v_cancelled := v_cancelled + 1;
+    end loop;
+  end if;
+  return jsonb_build_object('ok', true, 'future_reservations', v_n, 'cancelled', v_cancelled);
+end $$;
+
+create or replace function booking.admin_list_annual_cards(p_customer_id bigint default null, p_only_active boolean default true)
+returns table (id bigint, customer_id bigint, customer_name text, customer_email text, valid_from date, valid_to date, active boolean,
+               notes text, created_at timestamptz, next_reservation_at timestamptz)
+language plpgsql stable security definer set search_path = '' as $$
+begin
+  perform booking._require_staff();
+  return query
+    select a.id, a.customer_id, c.name, c.email, a.valid_from, a.valid_to, a.active, a.notes, a.created_at,
+           (select min(r.starts_at) from booking.reservations r where r.annual_card_id = a.id and r.status in ('pending','confirmed') and r.starts_at > now())
+      from booking.annual_cards a join booking.customers c on c.id = a.customer_id
+     where (p_customer_id is null or a.customer_id = p_customer_id) and (not p_only_active or a.active)
+     order by a.active desc, a.valid_to desc, a.id desc;
+end $$;
+
+-- Vuosikorttivaraus hallinnasta: ilmainen (0 €), vain yleinen vuoro, 1 hlö (asetus annual_card_max_persons), yksi tuleva varaus kerrallaan.
+-- Käyttää asiakkaan voimassa olevaa korttia vuoron päivänä. Samat lukitukset/säännöt kuin muillakin varauksilla.
+create or replace function booking.admin_create_annual_card_booking(
+  p_customer_id bigint, p_rule_id bigint, p_date date, p_note text default null)
+returns jsonb language plpgsql security definer set search_path = '' as $$
+declare v_card booking.annual_cards; v_res jsonb; v_persons integer; v_mode text;
+begin
+  perform booking._require_permission('bookings.manage');
+  if not exists (select 1 from booking.customers where id = p_customer_id) then perform booking._err('customer_not_found', 'Asiakasta ei löydy'); end if;
+  select * into v_card from booking.annual_cards a
+   where a.customer_id = p_customer_id and a.active and p_date between a.valid_from and a.valid_to order by a.id desc limit 1;
+  if not found then perform booking._err('no_annual_card', 'Asiakkaalla ei ole voimassa olevaa vuosikorttia valittuna päivänä'); end if;
+  select mode into v_mode from booking.schedule_rules where id = p_rule_id;
+  if v_mode is distinct from 'shared' then perform booking._err('annual_card_shared_only', 'Vuosikortilla voi varata vain yleisiä vuoroja (ei yksityisvuoroja)'); end if;
+  v_persons := coalesce((booking._setting('annual_card_max_persons', '1'::jsonb) #>> '{}')::int, 1);
+  v_res := booking._create_booking_core(p_rule_id, p_date, v_persons, p_customer_id, 'admin', auth.uid(), 'fi', p_note,
+                                        'confirmed', null, false, null, null, null, v_card.id);
+  insert into booking.payments(order_id, method, provider, status, amount, paid_at, note, created_by)
+  values ((v_res ->> 'order_id')::bigint, 'annual_card', 'manual', 'paid', 0, now(), 'Vuosikorttivaraus', auth.uid());
+  update booking.orders set payment_status = 'paid' where id = (v_res ->> 'order_id')::bigint;
+  return v_res - 'public_token' || jsonb_build_object('customer_id', p_customer_id, 'annual_card_id', v_card.id);
 end $$;
 
 -- ---------- maksuvälittäjäadapteri (service_role; Visma Pay -toteutus kutsuu näitä Edge Functionista) ----------

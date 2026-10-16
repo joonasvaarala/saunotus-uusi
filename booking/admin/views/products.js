@@ -1,11 +1,11 @@
-// Tuotteet: nimet, kuvaukset, hinnat ja ALV muokataan kb.products / kb.product_price_variants -tauluihin (vain admin, SECURITY DEFINER -funktiot).
-// Henkilökunta (staff) näkee tuotteet mutta ei voi muokata hintoja (ehdotus: hinnat vain adminille).
+// Tuotteet: nimet, kuvaukset, hinnat ja ALV muokataan kb.products / kb.product_price_variants -tauluihin (oikeus catalog.edit: manager + admin).
+// Peruskäyttäjä (staff) näkee tuotteet mutta ei voi muokata hintoja.
 import { rpc } from '../sb.js';
 import { h, dialog, field, toast, run, money, badge } from '../ui.js';
 
 const VAT = [25.5, 24, 14, 13.5, 10, 0];
 export async function render({ ctx, refs, reload }) {
-  const isAdmin = ctx.role === 'admin';
+  const isAdmin = ctx.can('catalog.edit');  // manager + admin
   const list = h('div', { class: 'list' });
   for (const p of refs.products) {
     const c = p.config;
@@ -22,7 +22,7 @@ export async function render({ ctx, refs, reload }) {
       h('div', { class: 'row wrap' }, field('Hinta € (sis. ALV)', inp('price', p.price, { type: 'number', step: '0.01', min: '0' })), field('ALV', vat)),
       field('Hintateksti', inp('price_text', p.price_text), 'Näytetään kb:ssä; verkkokauppa laskee näytettävän hinnan hinta-kentästä. Päivitä teksti kun muutat hintaa.'),
       h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'active', disabled: !isAdmin }), ' Aktiivinen (näkyy kb:ssä)'),
-      isAdmin ? h('button', { class: 'btn primary', type: 'submit', text: 'Tallenna tuote' }) : h('p', { class: 'muted', text: 'Vain ylläpitäjä voi muokata tuotteita ja hintoja.' }));
+      isAdmin ? h('button', { class: 'btn primary', type: 'submit', text: 'Tallenna tuote' }) : h('p', { class: 'muted', text: 'Tuotteiden, hintojen ja kuvausten muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }));
     f.active.checked = !!p.active;
     f.addEventListener('submit', (ev) => { ev.preventDefault(); run(f.querySelector('button'), async () => {
       const fd = new FormData(f);
@@ -47,5 +47,5 @@ export async function render({ ctx, refs, reload }) {
     })) : null;
     const d = dialog(p.name, h('div', { class: 'stack' }, f, cfg, vars), { wide: true });
   }
-  return [h('h1', { text: 'Tuotteet' }), h('p', { class: 'muted', text: isAdmin ? 'Tuotetiedot tallentuvat kb-tauluihin (sivusto ja botti käyttävät samaa totuutta). Muutokset kirjataan audit-lokiin ja kb.change_logiin.' : 'Näet tuotteet; muokkaus vain ylläpitäjälle.' }), list];
+  return [h('h1', { text: 'Tuotteet' }), h('p', { class: 'muted', text: isAdmin ? 'Tuotetiedot tallentuvat kb-tauluihin (sivusto ja botti käyttävät samaa totuutta). Muutokset kirjataan audit-lokiin ja kb.change_logiin.' : 'Näet tuotteet; hintojen ja tuotteiden muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }), list];
 }

@@ -1,4 +1,5 @@
 // Manuaalinen varaus (puhelin, paikan päällä, sähköposti): tuote → päivä → vuoro → henkilöt → asiakas → maksutapa/maksettu.
+// Vuosikorttiasiakkaalle yleiseen vuoroon: "Vuosikorttivaraus" (ilmainen, 1 hlö, yksi tuleva varaus kerrallaan).
 import { rpc } from '../sb.js';
 import { h, field, toast, run, fmtTime, fmtDay, money, todayHel, empty } from '../ui.js';
 
@@ -29,17 +30,21 @@ export async function render({ refs, query }) {
     const auto = h('strong', { class: 'autoprice' });
     const upd = () => { auto.textContent = `Hinta ${money(priceFor(s, +n.value || 0))}`; }; n.addEventListener('input', upd); upd();
     const found = h('div', { class: 'found' });
+    const cardChk = h('input', { type: 'checkbox', name: 'cardbooking' });
+    const cardRow = h('label', { class: 'check', hidden: true }, cardChk, ' Vuosikorttivaraus (ilmainen, 1 hlö; yksi tuleva varaus kerrallaan)');
+    const syncCard = () => { const ok = st.customer?.customer_type === 'annual_card' && s.mode === 'shared'; cardRow.hidden = !ok; if (!ok) cardChk.checked = false; };
     const search = h('input', { type: 'search', placeholder: 'Hae olemassa olevaa asiakasta (nimi/sähköposti/puhelin)', 'aria-label': 'Hae asiakas' });
     let timer; search.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(async () => {
       if (search.value.trim().length < 2) { found.replaceChildren(); return; }
       const rows = await rpc('admin_list_customers', { p_search: search.value, p_limit: 5, p_offset: 0 });
-      found.replaceChildren(...rows.map((c) => h('button', { type: 'button', class: 'listrow', onclick: () => { st.customer = c; f.elements.cname.value = c.name; f.elements.cemail.value = c.email || ''; f.elements.cphone.value = c.phone || ''; found.replaceChildren(h('p', { class: 'muted', text: `Valittu asiakas: ${c.name}` })); } }, h('strong', { text: c.name }), h('small', { text: ` ${c.email || ''} ${c.phone || ''}` }))));
+      found.replaceChildren(...rows.map((c) => h('button', { type: 'button', class: 'listrow', onclick: () => { st.customer = c; syncCard(); f.elements.cname.value = c.name; f.elements.cemail.value = c.email || ''; f.elements.cphone.value = c.phone || ''; found.replaceChildren(h('p', { class: 'muted', text: `Valittu asiakas: ${c.name}` })); } }, h('strong', { text: c.name }), h('small', { text: ` ${c.email || ''} ${c.phone || ''}` }))));
     }, 250); });
     const method = h('select', { name: 'method' }, refs.methods.filter((m) => m.active).map((m) => h('option', { value: m.code, text: m.label, selected: m.code === 'pay_later' || null })));
     const paid = h('input', { type: 'checkbox', name: 'paid' });
     const f = h('form', { class: 'stack card', onsubmit: (ev) => { ev.preventDefault(); run(f.querySelector('button[type=submit]'), async () => {
       const cust = st.customer ? { p_customer_id: st.customer.id } : { p_customer: { name: f.elements.cname.value.trim(), email: f.elements.cemail.value.trim(), phone: f.elements.cphone.value.trim() } };
-      const r = await rpc('admin_create_booking', { p_rule_id: s.rule_id, p_date: st.date, p_persons: +n.value, ...cust, p_payment_method: method.value, p_paid: paid.checked, p_note: f.elements.note.value || null, p_price: price.value ? +price.value : null });
+      const r = cardChk.checked ? await rpc('admin_create_annual_card_booking', { p_customer_id: st.customer.id, p_rule_id: s.rule_id, p_date: st.date, p_note: f.elements.note.value || null })
+        : await rpc('admin_create_booking', { p_rule_id: s.rule_id, p_date: st.date, p_persons: +n.value, ...cust, p_payment_method: method.value, p_paid: paid.checked, p_note: f.elements.note.value || null, p_price: price.value ? +price.value : null });
       toast(`Varaus luotu (tilaus #${r.order_no})`);
       result.replaceChildren(h('div', { class: 'card ok-box' }, h('h3', { text: `Varaus luotu – tilaus #${r.order_no}` }), h('p', { text: `${r.product_name}, ${fmtDay(r.starts_at)} ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)} · ${money(r.total)}` }),
         h('div', { class: 'row wrap' }, h('a', { class: 'btn', href: `#/?d=${st.date}`, text: 'Näytä päivänäkymä' }),
@@ -49,8 +54,9 @@ export async function render({ refs, query }) {
       h('h3', { text: `Vuoro: ${refs.productById.get(s.product_id)?.name || s.label}, ${fmtTime(s.starts_at)}–${fmtTime(s.ends_at)}` }),
       h('div', { class: 'row wrap' }, field('Henkilömäärä', n), auto, field('Hinta € (ohita automaattinen)', price)),
       h('h3', { text: 'Asiakas' }), search, found,
-      h('div', { class: 'row wrap' }, field('Nimi', h('input', { name: 'cname', required: true, oninput: () => { st.customer = null; } })), field('Sähköposti', h('input', { name: 'cemail', type: 'email', required: true })), field('Puhelin', h('input', { name: 'cphone', required: true }))),
+      h('div', { class: 'row wrap' }, field('Nimi', h('input', { name: 'cname', required: true, oninput: () => { st.customer = null; syncCard(); } })), field('Sähköposti', h('input', { name: 'cemail', type: 'email', required: true })), field('Puhelin', h('input', { name: 'cphone', required: true }))),
       field('Sisäinen huomio', h('textarea', { name: 'note', rows: 2 })),
+      cardRow,
       h('div', { class: 'row wrap' }, field('Maksutapa', method), h('label', { class: 'check' }, paid, ' Maksettu jo')),
       h('button', { class: 'btn primary', type: 'submit', text: 'Luo varaus' }));
     formBox.replaceChildren(f);

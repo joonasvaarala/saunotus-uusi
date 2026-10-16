@@ -17,12 +17,17 @@ select test.rule('Oma savusaunavuoro ma–pe 16–19%') as r_priv_1619,
        test.rule('Yleinen vuoro la–su 17:00%') as r_sat_1700,
        test.rule('Miesten sauna%') as r_mon,
        test.rule('Naisten sauna%') as r_tue_public,
-       test.rule('Yleinen vuoro la–su 16:00%') as r_x \gset
+       test.rule('Yleinen vuoro la–su 16:00%') as r_x,
+       test.rule('Tunnin saunavuoro la–su 14:00') as r_h14,
+       test.rule('Tunnin saunavuoro la–su 18:00') as r_h18,
+       test.rule('Jälkilöylyt la 19–22%') as r_after_sat,
+       test.rule('Yleinen vuoro la–su 17:00%') as r_sat_1700b \gset
 
 -- 0) alkutila: kaikki myytävissä
 select test.anon();
 select is((select count(*)::int from booking.public_availability(1, :'thu', :'thu') where status = 'available'), 1, 'torstain yleinen vuoro näkyy vapaana');
-select is((select count(*)::int from booking.public_availability(1, :'sat', :'sat') where status = 'available'), 6, 'la: 6 yleistä vuoroa vapaana (14:00,14:30,15:00,16:00,16:30,17:00)');
+select is((select count(*)::int from booking.public_availability(1, :'sat', :'sat') where status = 'available'), 6, 'la: 6 yleistä vuoroa vapaana (14:00,14:30,15:00,16:00,16:30,17:00; ei 15:30)');
+select is((select count(*)::int from booking.public_availability(6, :'sat', :'sat') where status = 'available'), 2, 'la: 2 tunnin vuoroa vapaana (14:00, 18:00)');
 select test.logout();
 
 -- A) YKSITYISVUORO torstaille 16–19 -> yleiset torstain vuorot poistuvat myynnistä
@@ -59,6 +64,35 @@ select test.anon();
 select is((test.pub_book(:r_sat_1400, (:'sat'::date + 14), 2) ->> 'ok')::boolean, true, 'D1: yleinen la 14:00, 2 hlö');
 select is(test.pub_book(:r_priv_sat_1315, (:'sat'::date + 14), 4) ->> 'code', 'public_shift_booked', 'D2: yksityisvuoro 13–15 estyy (yleisellä vuorolla varauksia)');
 select is((test.pub_book(:r_priv_sat_1314, (:'sat'::date + 14), 4) ->> 'ok')::boolean, true, 'D3: yksityisvuoro 13–14 onnistuu (päättyy kun yleinen alkaa)');
+select test.logout();
+
+-- H) VIIKONLOPUN TUNNIN VUOROT (14:00 ja 18:00): sama päällekkäisyyssääntö molempiin suuntiin kuin 2 h vuoroilla
+select test.anon();
+-- H1–H3: yksityisvuoro 13–15 poistaa myös tunnin vuoron 14:00 (ei 18:00)
+select is((test.pub_book(:r_priv_sat_1315, (:'sat'::date + 21), 3) ->> 'ok')::boolean, true, 'H1: la yksityisvuoro 13–15 onnistuu');
+select is((select status from booking.public_availability(6, (:'sat'::date + 21), (:'sat'::date + 21)) where label like '%14:00'), 'unavailable', 'H2: tunnin vuoro 14:00 ei myynnissä yksityisvuoron aikana');
+select is((select status from booking.public_availability(6, (:'sat'::date + 21), (:'sat'::date + 21)) where label like '%18:00'), 'available', 'H3: tunnin vuoro 18:00 ei ole päällekkäinen, vapaa');
+select is(test.pub_book(:r_h14, (:'sat'::date + 21), 2) ->> 'code', 'private_booked', 'H4: tunnin vuoron 14:00 varaus estyy yksityisvuoron päälle');
+select is((test.pub_book(:r_h18, (:'sat'::date + 21), 2) ->> 'ok')::boolean, true, 'H5: tunnin vuoro 18:00 onnistuu');
+-- H6–H9: yksi varaus tunnin vuorolle 14:00 estää yksityisvuoron 13–15 (ja 13–14 onnistuu, koska päättyy kun tunnin vuoro alkaa)
+select is((test.pub_book(:r_h14, (:'sat'::date + 28), 1) ->> 'ok')::boolean, true, 'H6: yksi paikka tunnin vuorolle 14:00');
+select is(test.pub_book(:r_priv_sat_1315, (:'sat'::date + 28), 4) ->> 'code', 'public_shift_booked', 'H7: yksityisvuoro 13–15 estyy tunnin vuoron varauksen takia');
+select is((select status from booking.public_availability(25, (:'sat'::date + 28), (:'sat'::date + 28)) where label like '%13–15%'), 'unavailable', 'H8: yksityisvuoro 13–15 näkyy ei-varattavissa');
+select is((test.pub_book(:r_priv_sat_1314, (:'sat'::date + 28), 4) ->> 'ok')::boolean, true, 'H9: yksityisvuoro 13–14 onnistuu (päättyy kun tunnin vuoro alkaa)');
+-- H10–H12: tunnin vuoro 18:00 ja yksityiset jälkilöylyt 19–22 (ei päällekkäisyyttä); 2 h vuoro 17:00–19:00 vs. yksityisvuoro 18:00 jälkeen
+select is((test.pub_book(:r_h18, (:'sat'::date + 35), 1) ->> 'ok')::boolean, true, 'H10: tunnin vuoro 18:00');
+select is((test.pub_book(:r_after_sat, (:'sat'::date + 35), 2) ->> 'ok')::boolean, true, 'H11: jälkilöylyt 19–22 onnistuvat (tunnin vuoro päättyy 19:00)');
+select is((test.pub_book(:r_sat_1700b, (:'sat'::date + 35), 1) ->> 'ok')::boolean, true, 'H12: 2 h vuoro 17:00–19:00 ei ole päällekkäinen jälkilöylyjen kanssa');
+select test.logout();
+-- H13: sulku peittää tunnin vuoron
+select test.mk_staff('block-staff2@example.com', 'staff') as bid2 \gset
+select test.login(:'bid2');
+select is((booking.admin_create_block((select id from booking.resources where code = 'savusauna'),
+            ((:'sat'::date + 42)::timestamp + time '17:30') at time zone 'Europe/Helsinki', ((:'sat'::date + 42)::timestamp + time '19:30') at time zone 'Europe/Helsinki', 'huolto') ->> 'ok')::boolean, true, 'H13: sulku luotu la 17:30–19:30');
+select test.logout();
+select test.anon();
+select is((select status from booking.public_availability(6, (:'sat'::date + 42), (:'sat'::date + 42)) where label like '%18:00'), 'unavailable', 'H14: tunnin vuoro 18:00 ei myynnissä sulun aikana');
+select is(test.pub_book(:r_h18, (:'sat'::date + 42), 1) ->> 'code', 'space_closed', 'H15: tunnin vuoron varaus estyy sulun aikana');
 select test.logout();
 
 -- E) SULKU: admin sulkee ajan -> ei varattavissa
