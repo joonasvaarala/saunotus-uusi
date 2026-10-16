@@ -120,6 +120,8 @@ PW_DIR=<polku playwright node_modules> BASE_URL=http://127.0.0.1:4190/saunotus-u
 | Joonas (Supabase Dashboard) | Authentication → URL Configuration → *Redirect URLs*: lisää `https://joonasvaarala.github.io/saunotus-uusi/hallinta/` (muuten kutsulinkki ohjautuu Site URL:iin) |
 | Joonas (GitHub) | Pages-lähteeksi *GitHub Actions* (jo asetettu); PR #1:n yhdistäminen `main`iin käynnistää julkaisun |
 
+**Moduulien lataus (välimuisti).** GitHub Pages välimuistittaa tiedostoja noin 10 minuuttia, joten selain voi hetkellisesti yhdistää uuden `index.html`:n ja vanhan moduulin. Siksi `build-pages.mjs` lisää hallinnan kaikkiin importteihin ja resursseihin saman versiotunnuksen (`?v=<commit sha>`; yksi moduuli-instanssi per tiedosto). Lisäksi `admin.js` yrittää epäonnistuneen näkymämoduulin latausta kerran uudelleen cache-bust-parametrilla (`?r=…`); jos sekin epäonnistuu, näytetään virhe ja "Lataa uudelleen" -painike. Paikallisessa kehityksessä tunnus on tyhjä (tiedostot sellaisenaan).
+
 Kutsun hyväksyntä: kutsusähköpostin linkki avaa `/hallinta/#access_token=…&type=invite`; hallinta ottaa istunnon talteen, siivoaa tunnisteen osoiteriviltä ja pyytää asettamaan salasanan.
 
 ## Päätökset ja rajaukset

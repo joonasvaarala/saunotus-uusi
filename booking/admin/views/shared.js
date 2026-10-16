@@ -1,5 +1,7 @@
 // Jaetut komponentit: varauksen tiedot -dialogi (tilamuutokset, varauksen muutos, maksun kirjaus, maksulinkki-placeholder).
 import { rpc } from '../sb.js';
+import { addonPicker } from './addons.js';
+import { icon } from '../icons.js';
 import { h, dialog, toast, run, fmtDay, fmtTime, fmtDT, money, statusBadge, payBadge, field, badge, empty } from '../ui.js';
 
 export function reservationDialog(r, { methods, onChange }) {
@@ -9,6 +11,7 @@ export function reservationDialog(r, { methods, onChange }) {
   const status = (s, reason) => rpc('admin_set_reservation_status', { p_reservation_id: r.reservation_id, p_status: s, p_reason: reason ?? null });
   const method = h('select', { id: 'pm' }, methods.filter((m) => m.active && m.is_manual).map((m) => h('option', { value: m.code, text: m.label })));
   const amount = h('input', { type: 'number', step: '0.01', min: '0', value: r.total_gross, id: 'pa' });
+  const orderBox = h('div', { class: 'stack order-extra' });
   body.append(
     h('dl', { class: 'kv' },
       h('dt', { text: 'Asiakas' }), h('dd', {}, h('strong', { text: r.customer_name || '–' }), h('br'), r.customer_email || '', r.customer_phone ? ` · ${r.customer_phone}` : ''),
@@ -19,6 +22,7 @@ export function reservationDialog(r, { methods, onChange }) {
       h('dt', { text: 'Summa' }), h('dd', {}, money(r.total_gross), r.annual_card_id ? [' ', badge('warn', 'Vuosikortti')] : null),
       h('dt', { text: 'Kanava' }), h('dd', { text: r.source_channel }),
       h('dt', { text: 'Luotu' }), h('dd', { text: fmtDT(r.created_at) }), r.notes ? [h('dt', { text: 'Huomio' }), h('dd', { text: r.notes })] : null),
+    orderBox,
     h('div', { class: 'row wrap' },
       ['pending', 'cancelled', 'expired'].includes(r.status) ? act('Vahvista', () => status('confirmed')) : null,
       r.status === 'confirmed' ? act('Merkitse saapuneeksi', () => status('completed')) : null,
@@ -31,6 +35,38 @@ export function reservationDialog(r, { methods, onChange }) {
     h('div', { class: 'box' }, h('strong', { text: 'Verkkomaksulinkki (Visma Pay)' }),
       h('p', { class: 'muted', text: 'Ei vielä käytössä. Painike luo maksurivin ja näyttää, että linkki toteutetaan Visma Pay -integraation yhteydessä.' }),
       (() => { const out = h('p', { class: 'muted' }); const b = h('button', { type: 'button', class: 'btn', text: 'Luo maksulinkki', onclick: () => run(b, async () => { const j = await rpc('admin_create_payment_link', { p_order_id: r.order_id }); out.textContent = j.link_url || j.message; }) }); return h('div', {}, b, out); })()));
+  // Tilauksen lisätiedot: laskutustiedot (yritysasiakas), lisäpalvelut (+ muokkaus)
+  const drawOrder = async () => {
+    let o; try { o = await rpc('admin_get_order', { p_order_id: r.order_id }); } catch { return; }
+    const res = (o.reservations || []).find((x) => x.id === r.reservation_id) || {};
+    const ad = res.addons || [];
+    const b = o.billing;
+    const kids = [];
+    if (o.customer_kind === 'company' && b) {
+      kids.push(h('div', { class: 'box' }, h('h3', {}, 'Yritysasiakas – laskutustiedot'), h('dl', { class: 'kv' },
+        h('dt', { text: 'Yritys' }), h('dd', { text: b.company || '–' }), h('dt', { text: 'Y-tunnus' }), h('dd', { text: b.business_id || '–' }),
+        h('dt', { text: 'Osoite' }), h('dd', { text: [b.street, [b.zip, b.city].filter(Boolean).join(' ')].filter(Boolean).join(', ') || '–' }),
+        b.einvoice_address ? [h('dt', { text: 'Verkkolasku' }), h('dd', { text: `${b.einvoice_address} / ${b.einvoice_operator || '–'}` })] : null,
+        o.invoice_reference ? [h('dt', { text: 'Viite' }), h('dd', { text: o.invoice_reference })] : null,
+        h('dt', { text: 'Yhteyshenkilö' }), h('dd', { text: [b.contact_name, b.contact_email, b.contact_phone].filter(Boolean).join(' · ') || '–' }))));
+    }
+    const editable = ['pending', 'confirmed'].includes(r.status);
+    kids.push(h('div', { class: 'box addons-box' }, h('h3', {}, icon('leaf', 20), ' Lisäpalvelut'),
+      ad.length ? h('ul', { class: 'reslist' }, ad.map((a) => h('li', { class: 'resrow' }, h('span', { text: `${a.quantity} × ${a.name}` }), h('span', { class: 'meta', text: money(a.line_total) })))) : h('p', { class: 'muted', text: 'Ei lisäpalveluita.' }),
+      editable ? h('button', { type: 'button', class: 'btn sm', text: 'Muokkaa lisäpalveluita', onclick: () => editAddons(ad) }) : null));
+    orderBox.replaceChildren(...kids);
+  };
+  const editAddons = async (current) => {
+    const all = await rpc('admin_list_addons');
+    const picker = addonPicker(all, { getPersons: () => r.persons, getMode: () => r.mode });
+    picker.set(current);
+    const f = h('form', { class: 'stack', onsubmit: (ev) => { ev.preventDefault(); run(f.querySelector('button[type=submit]'), async () => {
+      await rpc('admin_set_reservation_addons', { p_reservation_id: r.reservation_id, p_addons: picker.value() });
+      toast('Lisäpalvelut tallennettu'); dd.close(); d.close(); onChange?.();
+    }); } }, h('p', { class: 'muted', text: `Enimmäismäärä = henkilömäärä (${r.persons}) × lisäpalvelun enimmäismäärä / hlö. Tilauksen summa päivittyy; odottava maksu päivitetään.` }), picker.node, h('button', { class: 'btn primary', type: 'submit', text: 'Tallenna lisäpalvelut' }));
+    const dd = dialog(`Lisäpalvelut – tilaus #${r.order_no}`, f);
+  };
+  drawOrder();
   return d;
 }
 

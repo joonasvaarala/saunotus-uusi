@@ -1,6 +1,7 @@
 // Tuotteet: nimet, kuvaukset, hinnat ja ALV muokataan kb.products / kb.product_price_variants -tauluihin (oikeus catalog.edit: manager + admin).
 // Peruskäyttäjä (staff) näkee tuotteet mutta ei voi muokata hintoja.
 import { rpc } from '../sb.js';
+import { addonsAdmin } from './addons.js';
 import { h, dialog, field, toast, run, money, badge } from '../ui.js';
 
 const VAT = [25.5, 24, 14, 13.5, 10, 0];
@@ -47,5 +48,6 @@ export async function render({ ctx, refs, reload }) {
     })) : null;
     const d = dialog(p.name, h('div', { class: 'stack' }, f, cfg, vars), { wide: true });
   }
-  return [h('h1', { text: 'Tuotteet' }), h('p', { class: 'muted', text: isAdmin ? 'Tuotetiedot tallentuvat kb-tauluihin (sivusto ja botti käyttävät samaa totuutta). Muutokset kirjataan audit-lokiin ja kb.change_logiin.' : 'Näet tuotteet; hintojen ja tuotteiden muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }), list];
+  const addonsSection = await addonsAdmin({ ctx });
+  return [h('h1', { text: 'Tuotteet' }), h('p', { class: 'muted', text: isAdmin ? 'Tuotetiedot tallentuvat kb-tauluihin (sivusto ja botti käyttävät samaa totuutta). Muutokset kirjataan audit-lokiin ja kb.change_logiin.' : 'Näet tuotteet; hintojen ja tuotteiden muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }), list, addonsSection];
 }

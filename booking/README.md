@@ -9,12 +9,12 @@ Ei palvelinkoodia, ei build-vaihetta selaimen koodille, ei kirjastoriippuvuuksia
 
 | Polku | Mitä |
 |---|---|
-| `supabase/migrations/` | 10 SQL-migraatiota (skeema `booking`; 01–09 ajettu testikantaan 16.10., 10 odottaa ajoa). **Ainoa tapa muuttaa tuotantokantaa.** |
+| `supabase/migrations/` | 11 SQL-migraatiota (skeema `booking`; 01–09 ajettu testikantaan 16.10., 10 ja 11 odottavat ajoa). **Ainoa tapa muuttaa tuotantokantaa.** |
 | `supabase/tests/` | pgTAP-testit + kilpailutilannetesti (`run.sh`), mock-Supabase ja mock-kb |
 | `supabase/manual/` | Käsin tehtävät vaiheet: skeeman avaus REST:iin, ensimmäinen admin, tarkistuskyselyt |
 | `shared/sb.js` | ~110 rivin PostgREST/Auth-asiakas (käytetään kaupassa ja hallinnassa) |
 | `shop/` | Varauskauppa: **kopio uudesta sivustosta**, jossa Johku-linkit avaavat sisäisen kalenterin |
-| `admin/` | Hallinta-SPA (mobiili ensin + työpöytä), Supabase Auth. Näkymät: Päivä, Varaukset, **Kalenteri** (työvuorot + varaukset), Uusi varaus, Asiakkaat, Tuotteet, Resurssit, Asetukset, **Käyttäjät** (vain admin) |
+| `admin/` | Hallinta-SPA (mobiili ensin + työpöytä), Supabase Auth. Näkymät: Päivä (+ lisäpalvelujen "Valmistele"-yhteenveto), Varaukset, **Kalenteri** (työvuorot + varaukset), Uusi varaus (asiakastyyppi, lisäpalvelut), Asiakkaat (**Lisää asiakas**: yksityinen/yritys), Tuotteet (+ **Lisäpalvelut**), Resurssit, Asetukset, **Käyttäjät** (vain admin) |
 | `supabase/functions/admin-users/` | Edge Function (Deno, `verify_jwt = true`): käyttäjien kutsu, käytöstä poisto ja aktivointi. Validointilogiikka `logic.js` + testit |
 | `dev/` | Paikallinen demo: PostgREST-konfiguraatio, kehityspalvelin (mock-auth), demo-siemen |
 | `scripts/e2e-screenshots.mjs` | Playwright-savutesti + kuvakaappaukset + konsolivirhetarkistus |
@@ -86,6 +86,8 @@ Keskeiset taulut (kaikissa RLS päällä; tarkka rakenne migraatioissa 02–03):
 * `roles`, `role_permissions` – roolit (admin, manager, staff + ei-henkilöstö customer, annual_card) ja niiden oikeudet; `staff.role` viittaa rooliin.
 * `annual_cards` – asiakkaan vuosikortti (`valid_from/valid_to`, `active`); `customers.customer_type` ja `customers.auth_user_id` (tuleva itsepalvelu); `reservations.annual_card_id`.
 * `audit_log` – kaikkien keskeisten taulujen muutokset (trigger) + hallinnan kb-muutokset.
+* `customer_kinds` – asiakastyypit taulupohjaisesti (`private` = yksityisasiakas, `company` = yritysasiakas). `customers.customer_kind` + `business_id` (y-tunnus), `einvoice_address` (verkkolaskuosoite/OVT), `einvoice_operator` (välittäjätunnus), `invoice_reference`; osoite käyttää sarakkeita `company, address, zip, city, country`. **`customer_type` (customer/annual_card) on eri akseli** (etuustaso), `customer_kind` kertoo yksityinen vs. yritys. `orders.customer_kind`, `orders.billing` (laskutustietojen kuva tilaushetkeltä) ja `orders.invoice_reference` säilyttävät tilauksen laskutustiedot, vaikka asiakasrekisteri myöhemmin muuttuisi.
+* `addons` – lisäpalvelut: `price_gross` (sis. ALV, kuten kaikki hinnat), `vat_rate`, `max_per_person`, `applies_modes` (yleinen/yksityinen vuoro), `active`. Tilauksella lisäpalvelu on `order_items`-rivi (`kind='addon'`, `addon_id`, `parent_item_id` = varausrivi), joten summa, ALV-erittely ja vuorokohtainen yhteenveto tulevat samasta rivitaulusta. Hinta kopioituu riville tilaushetkellä (hinnanmuutos ei muuta vanhoja tilauksia).
 
 ## Päällekkäisyyssäännöt (yksityinen ↔ yleinen) – miten varmistetaan
 
@@ -131,6 +133,7 @@ Tulkinnat ja avoimet kysymykset: [docs/ristiriidat-ja-tulkinnat.md](docs/ristiri
 | 08 | `…_booking_08_seed_rules.sql` | Asetukset, resurssit (poolit), `product_config`, 30 vuorosääntöä kb:n pohjalta (13 yleistä + 17 yksityistä) |
 | 09 | `…_booking_09_cron_optional.sql` | (valinnainen) pg_cron-ajastus pitojen siivoukseen; ohitetaan jos pg_cron puuttuu |
 | 10 | `…_booking_10_rls_initplan.sql` | Suorituskyky: RLS-politiikat `(select auth.uid())` / `(select booking.is_staff())` -muotoon (advisor `auth_rls_initplan`); sama semantiikka, idempotentti. Ei muokkaa migraatioita 01–09 |
+| 11 | `…_booking_11_customer_kinds_addons.sql` | Asiakastyypit (`customer_kinds`, yritysasiakkaan y-tunnus + verkkolaskutiedot, tilauksen laskutustietojen kuva), lisäpalvelut (`addons`, `order_items.kind='addon'`), `public_addons`, `public_create_booking` (+ asiakastyyppi, yritystiedot, lisäpalvelut), `admin_create_customer`, `admin_set_reservation_addons`, `admin_get_order`, `admin_list/create/update_addon` (`catalog.edit`), `admin_day_view` (+ "valmistele"-yhteenveto). Ei muokkaa migraatioita 01–10 eikä `kb`-skeemaa |
 
 Migraatiot **eivät muuta `kb`-skeemaa** (vain viittaavat siihen FK:lla ja funktiot kirjoittavat `kb.products`, `kb.product_price_variants`, `kb.change_log`). Roolit: ei uusia tietokantaroolia; käytetään Supabasen `anon`, `authenticated`, `service_role`.
 
@@ -163,6 +166,12 @@ cp out/hallinta/config.example.js out/hallinta/config.js   # täytä url + anonK
 ```
 
 Kaupan ja hallinnan saa yhdellä komennolla samaan julkaisuun: `node scripts/build-pages.mjs` (ks. [Testiversion julkaisu](../README.md#testiversion-julkaisu-github-pages) juuri-READMEssä). Skripti generoi `hallinta/config.js`:n rakennusajan ympäristömuuttujista.
+
+### Asiakastyypit ja lisäpalvelut (migraatio 11)
+
+* **Asiakastyyppi** valitaan kaupassa (`/varaa/`, `/en/book/`), hallinnan Uusi varaus -lomakkeella ja Asiakkaat → **Lisää asiakas** -ikkunassa: *yksityisasiakas* (nimi, sähköposti, puhelin kuten ennen) tai *yritysasiakas* (yrityksen nimi, **y-tunnus** + tarkistenumero, katuosoite/postinumero/postitoimipaikka, valinnaiset verkkolaskutiedot: verkkolaskuosoite/OVT + operaattorin välittäjätunnus – vain yhdessä –, valinnainen viite/tilausnumero, yhteyshenkilön nimi/puhelin/sähköposti). Validointi on selaimessa ja tietokannassa (sama sääntö); kauppa ja hallinta kutsuvat samoja funktioita (`public_create_booking` / `admin_create_customer` / `admin_create_booking`).
+* **Lisäpalvelut** (alussa *Turvenaamio ja jalkakylpy* 15 €, *Saunavihta* 13 €; hinnat sis. ALV 25,5 %): asiakas valitsee määrän (0 … henkilömäärä × `max_per_person`, oletus 1/hlö, max 99) kaupassa tai henkilökunta hallinnassa; hinta lisätään tilauksen summaan ja tilaukselle tulee oma `order_items`-rivi/lisäpalvelu. Päivänäkymä näyttää *Valmistele*-yhteenvedon vuoroittain ja koko päivälle sekä merkinnän varauksilla; varauksen tiedoissa näkyvät lisäpalvelut, yritysasiakkaan laskutustiedot ja *Muokkaa lisäpalveluita*. Lisäpalvelujen ylläpito (nimi, kuvaus FI/EN, hinta, ALV, enimmäismäärä, vuorotyypit, aktiivisuus): hallinta → Tuotteet → Lisäpalvelut, oikeus `catalog.edit` (manager, admin). Tulkinnat ja avoimet kysymykset: [docs/ristiriidat-ja-tulkinnat.md](docs/ristiriidat-ja-tulkinnat.md#g-asiakastyypit-ja-lisäpalvelut-migraatio-11-v8).
+* RPC:t: julkiset `public_addons()`, `public_create_booking(…, p_customer_kind, p_company, p_addons)`, `public_get_booking` (+ `addons`); hallinta `admin_create_customer`, `admin_update_customer`, `admin_list_customers`, `admin_get_order`, `admin_set_reservation_addons`, `admin_list_addons`, `admin_create_addon`, `admin_update_addon`, `admin_create_booking(…, p_addons, p_invoice_reference)`, `admin_day_view` (+ `prep`, `addon_totals`).
 
 ### Edge Function `admin-users`
 
@@ -234,6 +243,7 @@ Vaatii PostgreSQL + pgTAP. Luo kannan `booking_test`, lataa mock-Supabasen (rool
 * `08_annual_card` – vuosikortti: vain yleinen vuoro, 0 €, yksi tuleva varaus kerrallaan, ohitusyritykset suoraan tietokannassa, myöntö/peruutus, RLS
 * `09_users_shifts` – työvuorojen lukunäkymä (staff vain omat, manager kaikki, ei oikeutta → virhe, väli > 62 pv → virhe, ei vuotavia kenttiä), roolin vaihdon ja linkityksen suojat (ei itseä, ei viimeistä adminia, epäaktiivinen/tuntematon kohde, vain staff-rooli, sama työntekijä kahdelle), `svc_*`-funktiot (vain service_role, säännöt, audit), ei kirjoituksia `public`-skeemaan
 * `supabase/functions/admin-users/logic.test.js` – Edge Functionin validointi (rooli-sallittulista, syötteet, CORS, kutsulinkin osoite, virhekartoitus); `node --test` tai `deno test`
+* `11_customer_kinds_addons` – asiakastyypit (y-tunnuksen tarkistenumero ja normalisointi, yritystietojen validointi, tuplien esto, yksityinen ≠ yritys samalla sähköpostilla, laskutustietojen kuva tilauksella), lisäpalvelujen hinnoittelu ja tilaus (summat, ALV-osuus, määrärajat, passiivinen/tuntematon/väärä vuorotyyppi), muutos lisäpalveluiden kanssa (rajaus, maksetun tilauksen hintatarkistus), hallinnan oikeudet (`catalog.edit`: staff ei, manager/admin kyllä), päivänäkymän "valmistele"-yhteenveto, RLS-eristys ja sisäisten funktioiden oikeudet
 * `10_rls_initplan` – politiikkojen lausekkeissa ei ole suoraa `auth.uid()`/`is_staff()`/`has_permission()`-kutsua ilman `select`-kääreitä; politiikkojen määrä ja oikeudet (staff/manager/admin/anon) ennallaan
 * `race.sh` – rinnakkaiset yhteydet yrittävät varata samaa aikaa yhtä aikaa (advisory-lock-portti); invariantit: ei yksityisen ja yleisen päällekkäisyyttä, kapasiteetti ei ylity (ma–to 16, la–su 6 / alkamisaika, 1 h vuoro 10, poolit riippumattomia), vuosikortilla vain yksi tuleva varaus, asiakkaan rinnakkaiset muutokset eivät ylitä kapasiteettia eivätkä riko päällekkäisyyssääntöä
 * `mutation_check.sh` – todistaa että kilpailutesti on herkkä: poistaa lukon testikannasta ja odottaa `race.sh`:n epäonnistuvan

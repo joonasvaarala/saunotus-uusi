@@ -2,6 +2,7 @@
 import { rpc } from '../sb.js';
 import { h, helsinkiIso, fmtDay, fmtTime, todayHel, addDays, dayStartIso, statusBadge, payBadge, badge, toast, run, dialog, field, fmtDT, empty } from '../ui.js';
 import { reservationDialog } from './shared.js';
+import { icon } from '../icons.js';
 
 export async function render({ ctx, refs, reload, query }) {
   const date = /^\d{4}-\d\d-\d\d$/.test(query.get('d') || '') ? query.get('d') : todayHel();
@@ -17,6 +18,11 @@ export async function render({ ctx, refs, reload, query }) {
     h('button', { class: 'btn ghost sm', type: 'button', onclick: () => go(todayHel()) }, 'Tänään'),
     h('a', { class: 'btn primary sm', href: `#/uusi?d=${date}`, text: '+ Uusi varaus' }));
   const rows = resv || [];
+  // Lisäpalvelut: varauskohtaiset (view.reservations), vuorokohtainen "valmistele" (view.prep) ja päivän summat (view.addon_totals)
+  const dv = new Map((view.reservations || []).map((r) => [r.reservation_id, r]));
+  const lc = (n) => (n ? n.charAt(0).toLowerCase() + n.slice(1) : n);
+  const addonText = (items) => items.map((i) => `${i.quantity} × ${lc(i.name)}`).join(', ');
+  const prepFor = (s) => (view.prep || []).find((p) => p.rule_id === s.rule_id && p.starts_at === s.starts_at);
   const active = rows.filter((r) => ['pending', 'confirmed', 'completed'].includes(r.status));
   const used = new Set();
   const sessions = (view.sessions || []).map((s) => {
@@ -25,9 +31,10 @@ export async function render({ ctx, refs, reload, query }) {
     return { s, mine };
   }).filter(({ s, mine }) => mine.length || s.status !== 'closed');
   const open = (r) => reservationDialog(r, { methods: refs.methods, onChange: reload });
-  const resRow = (r) => h('li', { class: `resrow ${r.status}` },
-    h('button', { type: 'button', class: 'link', onclick: () => open(r) }, h('strong', { text: r.customer_name || '–' }), ` · ${r.persons} hlö`),
-    h('span', { class: 'meta' }, statusBadge(r.status), payBadge(r.payment_status), r.hold_expires_at ? badge('muted', `pito ${fmtTime(r.hold_expires_at)}`) : null, ` #${r.order_no}`));
+  const resRow = (r) => { const x = dv.get(r.reservation_id) || {}; const ad = x.addons || []; return h('li', { class: `resrow ${r.status}${ad.length ? ' has-addons' : ''}` },
+    h('button', { type: 'button', class: 'link', onclick: () => open(r) }, h('strong', { text: r.customer_name || '–' }), ` · ${r.persons} hlö`, x.customer_kind === 'company' ? [' ', badge('warn', 'Yritys'), x.company ? ` ${x.company}` : ''] : null,
+      ad.length ? h('span', { class: 'addon-mark' }, icon('leaf', 16), ` Lisäpalvelut: ${addonText(ad)}`) : null),
+    h('span', { class: 'meta' }, statusBadge(r.status), payBadge(r.payment_status), r.hold_expires_at ? badge('muted', `pito ${fmtTime(r.hold_expires_at)}`) : null, ` #${r.order_no}`)); };
   const card = ({ s, mine }) => {
     const booked = mine.filter((r) => ['pending', 'confirmed', 'completed'].includes(r.status)).reduce((a, r) => a + r.persons, 0);
     const prod = refs.productById.get(s.product_id);
@@ -35,6 +42,7 @@ export async function render({ ctx, refs, reload, query }) {
     return h('section', { class: `card session ${s.mode}` },
       h('header', {}, h('strong', { class: 'time', text: `${fmtTime(s.starts_at)}–${fmtTime(s.ends_at)}` }), h('span', { class: 'ttl', text: prod?.name || s.label }), st,
         h('span', { class: 'cnt', text: s.mode === 'exclusive' ? (mine.some((r) => ['pending', 'confirmed'].includes(r.status)) ? 'Yksityisvuoro varattu' : 'Yksityisvuoro') : `${booked} hlö varattu` })),
+      prepFor(s) ? h('div', { class: 'prep', role: 'note' }, icon('leaf', 18), h('strong', { text: ' Valmistele: ' }), addonText(prepFor(s).items)) : null,
       mine.length ? h('ul', { class: 'reslist' }, mine.map(resRow)) : null);
   };
   const orphan = rows.filter((r) => !used.has(r.reservation_id));
@@ -42,7 +50,10 @@ export async function render({ ctx, refs, reload, query }) {
     (view.blocks || []).length ? h('ul', { class: 'reslist' }, view.blocks.map((b) => h('li', { class: 'resrow' }, h('span', {}, `${fmtDT(b.starts_at)} – ${fmtDT(b.ends_at)} · ${b.reason || ''}`),
       h('button', { type: 'button', class: 'btn danger sm', onclick: (e) => run(e.target, async () => { await rpc('admin_delete_block', { p_id: b.id }); toast('Sulku poistettu'); reload(); }) }, 'Poista')))) : h('p', { class: 'muted', text: 'Ei sulkuja.' }),
     h('button', { type: 'button', class: 'btn ghost sm', onclick: () => blockDialog(date, refs, reload) }, '+ Lisää sulku'));
-  return [h('h1', { text: fmtDay(`${date}T12:00:00Z`) }), toolbar,
+  const prepAll = (view.prep || []).length ? h('section', { class: 'card prepday' }, h('h3', {}, icon('leaf', 20), ' Valmistele päivälle'),
+    h('ul', { class: 'reslist' }, view.prep.map((p) => h('li', { class: 'resrow' }, h('span', {}, h('strong', { text: `${fmtTime(p.starts_at)}–${fmtTime(p.ends_at)}` }), ` ${p.product_name}: `, addonText(p.items))))),
+    h('p', { class: 'muted' }, h('strong', { text: 'Yhteensä: ' }), addonText(view.addon_totals || []))) : null;
+  return [h('h1', { text: fmtDay(`${date}T12:00:00Z`) }), toolbar, prepAll,
     h('div', { class: 'daygrid day-view' }, sessions.length ? sessions.map(card) : empty('Ei vuoroja tälle päivälle.'),
       orphan.length ? h('section', { class: 'card' }, h('h3', { text: 'Muut varaukset' }), h('ul', { class: 'reslist' }, orphan.map(resRow))) : null),
     h('p', { class: 'muted', text: `${active.length} aktiivista varausta, ${active.reduce((a, r) => a + r.persons, 0)} henkilöä yhteensä.` }), blocks];

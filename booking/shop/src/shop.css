@@ -90,3 +90,21 @@ button.bk-cell:hover{filter:brightness(.97)}
 .bk-actions .btn{cursor:pointer}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 #booking-app [tabindex="-1"]:focus{outline:none}
+
+/* Migraatio 11: asiakastyyppi, yritystiedot, lisäpalvelut */
+.bk-kinds,.bk-company,.bk-addons{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 16px;background:#fff}
+.bk-kinds legend,.bk-company legend,.bk-addons legend{font:700 15px var(--body);padding:0 6px;color:var(--ink)}
+.bk-company[hidden]{display:none}
+.bk-kindrow{display:flex;gap:10px;flex-wrap:wrap}
+.bk-kind{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 14px;border:1px solid #8b7f73;border-radius:10px;background:#fff;font-weight:600;cursor:pointer}
+.bk-kind input{width:22px;height:22px;accent-color:var(--green)}
+.bk-company h4{margin:14px 0 8px;font-size:15px}
+.bk-row2{display:grid;grid-template-columns:120px 1fr;gap:10px}
+.bk-hint{display:block;color:var(--muted);font-size:13px;margin-top:3px}
+.bk-addonlist{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.bk-addon{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--line)}
+.bk-addon:first-child{border-top:0}
+.bk-addon-info{flex:1 1 200px;display:grid;gap:2px}
+.bk-addon-info small{color:var(--muted)}
+.bk-addon-price{font-weight:700;color:var(--gold)}
+.bk-addon .bk-stepper input{width:64px}

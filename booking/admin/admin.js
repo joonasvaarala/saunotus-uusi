@@ -1,21 +1,38 @@
 // Hallinnan kuori: kirjautuminen (Supabase Auth), reititys (hash), roolien mukainen valikko. Näkymät ovat tiedostoissa views/*.js.
 import { signIn, signOut, getSession, onAuthChange, rpc, select, adoptSessionFromHash, setPassword } from './sb.js';
 import { h, toast, errMsg } from './ui.js';
+import { icon } from './icons.js';
 
 const $ = (id) => document.getElementById(id);
 // perms: roolin oikeudet (booking.role_permissions) palvelimelta; can(oikeus) piilottaa/lukitsee kenttiä. Oikeudet pakotetaan silti tietokannassa.
 export const ctx = { role: null, roleLabel: '', name: '', perms: [], can: (p) => ctx.perms.includes(p), refs: null };
 
+// Versiotunnus: scripts/build-pages.mjs korvaa tämän rivin (esim. '?v=ab12cd34ef') ja lisää saman tunnuksen kaikkiin importteihin ja index.html:n
+// resursseihin, jolloin selaimen välimuistissa oleva vanha moduuli ei sekoitu uuteen julkaisuun. Kehityksessä tyhjä.
+const ASSET_VER = '';
+const viewUrl = (name, bust) => `./views/${name}.js${ASSET_VER}${bust ? `${ASSET_VER ? '&' : '?'}r=${Date.now()}` : ''}`;
+// Näkymämoduulin lataus: epäonnistunut dynaaminen import jää selaimessa muistiin samalle osoitteelle, joten yksi uusinta tehdään
+// cache-bust-parametrilla. Jos sekin epäonnistuu, näytetään selkeä virhe ja "Lataa uudelleen" -painike (ks. route()).
+async function loadView(name) {
+  try { return await import(viewUrl(name)); } catch (e1) {
+    console.warn(`Näkymän ${name} lataus epäonnistui, yritetään uudelleen`, e1);
+    try { return await import(viewUrl(name, true)); } catch (e2) { throw Object.assign(new Error(`Näkymän ${name} lataus epäonnistui`), { loadFailed: true, cause: e2 }); }
+  }
+}
+const loadErrorView = () => h('div', { class: 'pad', role: 'alert' },
+  h('p', { class: 'err', text: 'Näkymän lataus epäonnistui. Syynä on yleensä hetkellinen verkkovirhe tai selaimen välimuistissa oleva vanha versio. Tarkista yhteys ja lataa sivu uudelleen.' }),
+  h('button', { class: 'btn primary', type: 'button', onclick: () => location.reload() }, 'Lataa uudelleen'));
+
 const ROUTES = [
-  { path: '', label: 'Päivä', icon: '📅', mod: () => import('./views/day.js') },
-  { path: 'varaukset', label: 'Varaukset', icon: '📋', mod: () => import('./views/reservations.js') },
-  { path: 'kalenteri', label: 'Kalenteri', icon: '🗓️', mod: () => import('./views/calendar.js') },
-  { path: 'uusi', label: 'Uusi varaus', icon: '➕', mod: () => import('./views/newbooking.js') },
-  { path: 'asiakkaat', label: 'Asiakkaat', icon: '👥', mod: () => import('./views/customers.js') },
-  { path: 'tuotteet', label: 'Tuotteet', icon: '🏷️', mod: () => import('./views/products.js') },
-  { path: 'resurssit', label: 'Resurssit', icon: '🛖', mod: () => import('./views/resources.js') },
-  { path: 'asetukset', label: 'Asetukset', icon: '⚙️', any: ['settings.edit'], mod: () => import('./views/settings.js') },
-  { path: 'kayttajat', label: 'Käyttäjät', icon: '🔑', any: ['staff.manage'], mod: () => import('./views/users.js') },
+  { path: '', label: 'Päivä', icon: 'day', mod: () => loadView('day') },
+  { path: 'varaukset', label: 'Varaukset', icon: 'list', mod: () => loadView('reservations') },
+  { path: 'kalenteri', label: 'Kalenteri', icon: 'calendar', mod: () => loadView('calendar') },
+  { path: 'uusi', label: 'Uusi varaus', icon: 'plus', mod: () => loadView('newbooking') },
+  { path: 'asiakkaat', label: 'Asiakkaat', icon: 'users', mod: () => loadView('customers') },
+  { path: 'tuotteet', label: 'Tuotteet', icon: 'tag', mod: () => loadView('products') },
+  { path: 'resurssit', label: 'Resurssit', icon: 'cabin', mod: () => loadView('resources') },
+  { path: 'asetukset', label: 'Asetukset', icon: 'sliders', any: ['settings.edit'], mod: () => loadView('settings') },
+  { path: 'kayttajat', label: 'Käyttäjät', icon: 'key', any: ['staff.manage'], mod: () => loadView('users') },
 ];
 
 // Viitedata (tuotteet, maksutavat, resurssit), ladataan kerran istuntoa kohti
@@ -28,7 +45,7 @@ export async function refs(force = false) {
 
 const allowed = (r) => !r.any || r.any.some((p) => ctx.can(p));
 function drawNav(current) {
-  $('nav').replaceChildren(...ROUTES.filter(allowed).map((r) => h('a', { href: `#/${r.path}`, 'aria-current': r.path === current ? 'page' : null }, h('span', { class: 'ico', 'aria-hidden': 'true', text: r.icon }), h('span', { class: 'lbl', text: r.label }))));
+  $('nav').replaceChildren(...ROUTES.filter(allowed).map((r) => h('a', { href: `#/${r.path}`, 'aria-current': r.path === current ? 'page' : null }, h('span', { class: 'ico', 'aria-hidden': 'true' }, icon(r.icon)), h('span', { class: 'lbl', text: r.label }))));
 }
 let routeSeq = 0;   // nopea navigointi: vain viimeisin reitti saa piirtää näkymän (vanhentuneet vastaukset hylätään)
 async function route() {
@@ -49,7 +66,7 @@ async function route() {
   } catch (e) {
     if (seq !== routeSeq) return;
     console.warn(e);
-    view.replaceChildren(h('p', { class: 'err pad', role: 'alert', text: errMsg(e) }));
+    view.replaceChildren(e?.loadFailed ? loadErrorView() : h('p', { class: 'err pad', role: 'alert', text: errMsg(e) }));
   }
 }
 async function enter() {
