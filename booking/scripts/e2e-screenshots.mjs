@@ -1069,6 +1069,112 @@ if (process.env.ONLY !== 'shop') {
     await ctx.close();
   }
 }
+// ---------- HALLINTA: tuotelistan suodattimet (Näkyvyys: Kaikki / Verkossa / Ei verkossa; Kategoria; nimihaku; client-side, tila URL:ssa) ----------
+if (process.env.ONLY !== 'shop') {
+  const login = async (page) => { await page.goto(`${BASE}/admin/`); await page.fill('#email', 'admin@demo.local'); await page.fill('#password', 'demo'); await page.click('form#login button[type=submit]'); await page.waitForSelector('#view .day-view, #view .daygrid'); };
+  const rows = (page) => page.locator('#view .prodcount + .list .listrow');
+  const line = (page) => page.locator('#view .prodcount').innerText();
+  const grp = (page, name) => page.getByRole('group', { name });
+  const num = (t) => +(/\((\d+)\)/.exec(t)?.[1] ?? NaN);
+  const catLabelOf = async (page, re) => ((await page.locator('.prodcatsel option').allInnerTexts()).find((t) => re.test(t)) || '');   // kategorialuku luetaan aina pudotusvalikon vaihtoehdoista (sama teksti kuin painikkeissa)
+  const pickCat = async (page, mobile, re) => { if (mobile) await page.selectOption('.prodcatsel', { label: await catLabelOf(page, re) }); else await grp(page, 'Kategoria').getByRole('radio', { name: re }).check(); };
+  const catChecked = async (page, mobile, re) => (mobile ? (await page.locator('.prodcatsel').evaluate((e) => e.options[e.selectedIndex].textContent)).match(re) !== null : grp(page, 'Kategoria').getByRole('radio', { name: re }).isChecked());
+  for (const [name, vp] of [['mobile', { width: 390, height: 844, isMobile: true, hasTouch: true }], ['desktop', { width: 1280, height: 900 }]]) {
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, isMobile: vp.isMobile, hasTouch: vp.hasTouch, locale: 'fi-FI', timezoneId: 'Europe/Helsinki' });
+    const page = await ctx.newPage(); watch(page, `prodfilter-${name}`);
+    await login(page);
+    await page.evaluate(() => { location.hash = '#/tuotteet'; });
+    await page.waitForSelector('.prodfilters');
+    await page.waitForTimeout(300);
+    const total = await rows(page).count();
+    const rpcCalls = []; page.on('request', (r) => { if (/\/rpc\//.test(r.url())) rpcCalls.push(r.url()); });
+    if (!total || !new RegExp(`^${total} / ${total} tuotetta$`).test((await line(page)).trim())) problems.push(`tuotesuodatin-${name}: oletuksena kaikki tuotteet ja tulosrivi "${total} / ${total} tuotetta" (oli: ${await line(page)})`);
+    await shot(page, `admin-${name}-40-tuotteet-oletus.png`, false);
+    // Näkyvyys: Ei verkossa
+    const vis = grp(page, 'Näkyvyys');
+    const cnt = { all: num(await vis.locator('label', { hasText: 'Kaikki' }).innerText()), on: num(await vis.locator('label', { hasText: /^Verkossa/ }).innerText()), off: num(await vis.locator('label', { hasText: 'Ei verkossa' }).innerText()) };
+    if (cnt.all !== total || cnt.on + cnt.off !== total || !cnt.on || !cnt.off) problems.push(`tuotesuodatin-${name}: näkyvyyslukumäärät ${JSON.stringify(cnt)} / ${total}`);
+    await vis.getByRole('radio', { name: /^Ei verkossa/ }).check();
+    await page.waitForTimeout(100);
+    if ((await rows(page).count()) !== cnt.off || !(await line(page)).includes(`${cnt.off} / ${total} tuotetta`)) problems.push(`tuotesuodatin-${name}: "Ei verkossa" rivejä ${await rows(page).count()} (pitäisi ${cnt.off}); ${await line(page)}`);
+    if ((await rows(page).locator('.badge:text-is("Verkossa")').count()) !== 0 || (await rows(page).locator('.badge:text-is("Ei verkossa")').count()) !== cnt.off) problems.push(`tuotesuodatin-${name}: "Ei verkossa" -tulos sisältää verkossa olevia tuotteita`);
+    if (!/nakyvyys=ei-verkossa/.test(page.url())) problems.push(`tuotesuodatin-${name}: valinta ei tallentunut URL:iin (${page.url()})`);
+    await shot(page, `admin-${name}-41-tuotteet-ei-verkossa.png`, false);
+    // Verkossa: kaikki rivit verkossa-merkillä
+    await vis.getByRole('radio', { name: /^Verkossa/ }).check();
+    if ((await rows(page).count()) !== cnt.on || (await rows(page).locator('.badge:text-is("Verkossa")').count()) !== cnt.on) problems.push(`tuotesuodatin-${name}: "Verkossa" -tulos väärin (${await rows(page).count()} / ${cnt.on})`);
+    {   // tuotekuvat + suodattimet yhdessä: pikkukuvat näkyvät suodatetussa listassa, latautuvat eivätkä riko riviä
+      const th = await rows(page).locator('img.pthumb').evaluateAll((els) => els.map((e) => [e.complete && e.naturalWidth > 0, Math.round(e.getBoundingClientRect().width), Math.round(e.getBoundingClientRect().height)]));
+      if (!th.length || th.some(([ok, w, h]) => !ok || w !== 40 || h !== 40)) problems.push(`tuotesuodatin-${name}: pikkukuvien pitää näkyä (40×40, ladattu) suodatetussa listassa: ${JSON.stringify(th)}`);
+      if ((await rows(page).locator('img.pthumb').count()) !== (await rows(page).filter({ has: page.locator('img.pthumb') }).count())) problems.push(`tuotesuodatin-${name}: yhdellä rivillä saa olla enintään yksi pikkukuva`);
+      if ((await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)) > 0) problems.push(`tuotesuodatin-${name}: vaakavieritys pikkukuvien kanssa`);
+      await shot(page, `admin-${name}-42-tuotteet-verkossa-pikkukuvat.png`, false);
+    }
+    // Kategoria (yhdistettynä Kaikki-näkyvyyteen): Hoidot
+    await vis.getByRole('radio', { name: /^Kaikki/ }).check();
+    const mob = !!vp.isMobile;
+    const hoidotN = num(await catLabelOf(page, /^Hoidot/));
+    await pickCat(page, mob, /^Hoidot/);
+    if (!hoidotN || (await rows(page).count()) !== hoidotN || (await rows(page).locator('.what small:has-text("Hoidot")').count()) !== hoidotN) problems.push(`tuotesuodatin-${name}: kategoria Hoidot: rivejä ${await rows(page).count()} / lukumäärä ${hoidotN}`);
+    if (!/kategoria=treatment/.test(page.url())) problems.push(`tuotesuodatin-${name}: kategoria ei URL:ssa (${page.url()})`);
+    await shot(page, `admin-${name}-42-tuotteet-kategoria.png`, false);
+    // yhdistelmä + latauksen jälkeen tila säilyy URL:sta
+    await vis.getByRole('radio', { name: /^Ei verkossa/ }).check();
+    const comb = await rows(page).count();
+    if (rpcCalls.length) problems.push(`tuotesuodatin-${name}: suodatus teki RPC-kutsuja (${rpcCalls.length}) – pitää olla client-side`);
+    await page.reload(); await page.waitForSelector('.prodfilters'); await page.waitForTimeout(300); rpcCalls.length = 0;   // lataus tekee omat kutsunsa
+    if (!(await grp(page, 'Näkyvyys').getByRole('radio', { name: /^Ei verkossa/ }).isChecked()) || !(await catChecked(page, mob, /^Hoidot/)) || (await rows(page).count()) !== comb) problems.push(`tuotesuodatin-${name}: suodattimet eivät palautuneet URL:sta`);
+    // nuolinäppäimet (radiogroup): Näkyvyys Kaikki → oikea nuoli → Verkossa
+    await vis.getByRole('radio', { name: /^Kaikki/ }).check(); await vis.getByRole('radio', { name: /^Kaikki/ }).focus();
+    await page.keyboard.press('ArrowRight');
+    if (!(await vis.getByRole('radio', { name: /^Verkossa/ }).isChecked())) problems.push(`tuotesuodatin-${name}: nuolinäppäin ei vaihtanut valintaa`);
+    // nimihaku + tyhjä tulos + Tyhjennä suodattimet
+    await page.fill('.prodfilters input[type=search]', 'zzzeituotetta');
+    await page.waitForSelector('.prodempty');
+    if ((await rows(page).count()) !== 0 || !(await page.locator('.prodempty').innerText()).includes('Ei tuotteita valituilla suodattimilla')) problems.push(`tuotesuodatin-${name}: tyhjän tuloksen viesti puuttuu`);
+    await shot(page, `admin-${name}-43-tuotteet-tyhja-tulos.png`, false);
+    await page.locator('#view .prodcount button', { hasText: 'Tyhjennä suodattimet' }).click();
+    await page.waitForTimeout(100);
+    if ((await rows(page).count()) !== total || /nakyvyys|kategoria|haku/.test(page.url()) || (await page.inputValue('.prodfilters input[type=search]')) !== '' || !(await catChecked(page, mob, /^Kaikki kategoriat/))) problems.push(`tuotesuodatin-${name}: Tyhjennä suodattimet ei palauttanut kaikkia (${await rows(page).count()} / ${total}; ${page.url()})`);
+    // haku nimellä: osuma löytyy
+    await page.fill('.prodfilters input[type=search]', 'yleinen');
+    await page.waitForTimeout(100);
+    if ((await rows(page).count()) < 1 || /nakyvyys/.test(page.url()) || !/haku=yleinen/.test(page.url())) problems.push(`tuotesuodatin-${name}: nimihaku "yleinen" ei löytänyt tai URL puuttuu (${page.url()})`);
+    if (rpcCalls.length) problems.push(`tuotesuodatin-${name}: suodatus teki RPC-kutsuja (${rpcCalls.length}) – pitää olla client-side`);
+    // tuotteen muokkausdialogi aukeaa suodatetusta listasta ja lista pysyy suodatettuna tallennuksen/sulkemisen jälkeen
+    await rows(page).first().click(); await page.waitForSelector('dialog[open]'); await page.keyboard.press('Escape');
+    await ctx.close();
+  }
+  // --- ei vaakavieritystä, kosketuskohteet ≥ 44 px ja kontrasti ≥ 4,5:1 (360/390/430/1280) ---
+  for (const w of [360, 390, 430, 1280]) {
+    const ctx = await browser.newContext({ viewport: { width: w, height: 800 }, isMobile: w < 700, hasTouch: w < 700, locale: 'fi-FI', timezoneId: 'Europe/Helsinki' });
+    const page = await ctx.newPage(); watch(page, `prodfilter-w${w}`);
+    await login(page);
+    for (const step of ['oletus', 'ei-verkossa', 'tyhja']) {
+      await page.evaluate((q) => { location.hash = `#/tuotteet${q}`; }, step === 'oletus' ? '' : step === 'ei-verkossa' ? '?nakyvyys=ei-verkossa&kategoria=treatment' : '?haku=zzzeituotetta');
+      await page.waitForSelector('.prodfilters'); await page.waitForTimeout(250);
+      const m = await page.evaluate(() => {
+        const rgb = (c) => (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+        const lum = (c) => { const [r, g, b] = rgb(c).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+        const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+        const segs = [...document.querySelectorAll('.prodfilters .srcopt span'), ...document.querySelectorAll('.prodfilters .prodcatsel')].map((e) => Math.round(e.getBoundingClientRect().height)).filter((x) => x > 0);   // piilotettu kategoriaryhmä (kapea/leveä) ohitetaan
+        const chk = document.querySelector('.prodfilters .srcopt input:checked + span'); const sel = ratio(getComputedStyle(chk).color, getComputedStyle(chk).backgroundColor);
+        const unchk = document.querySelector('.prodfilters .srcopt input:not(:checked) + span'); const un = ratio(getComputedStyle(unchk).color, getComputedStyle(unchk).backgroundColor);
+        const clr = document.querySelector('.prodcount button'); const clrH = clr ? Math.round(clr.getBoundingClientRect().height) : 44; const clrC = clr ? ratio(getComputedStyle(clr).color, getComputedStyle(document.body).backgroundColor) : 21;
+        const search = document.querySelector('.prodfilters input[type=search]').getBoundingClientRect().height;
+        const blue = [...document.querySelectorAll('.prodfilters *')].some((e) => { const c = rgb(getComputedStyle(e).backgroundColor); return c.length === 3 && c[2] > c[0] + 40 && c[2] > c[1] + 40; });
+        return { sw: document.documentElement.scrollWidth - document.documentElement.clientWidth, segs, sel, un, clrH, clrC, search, blue, rowsOver: [...document.querySelectorAll('.prodcount + .list .listrow')].some((c) => c.scrollWidth > c.clientWidth + 1) };
+      });
+      const tag = `prodfilter-w${w} (${step})`;
+      if (m.sw > 0) problems.push(`${tag}: vaakavieritys ${m.sw}px`);
+      if (!m.segs.length || m.segs.some((x) => x < 44) || m.clrH < 44 || m.search < 44) problems.push(`${tag}: kosketuskohde < 44 px: ${m.segs} / tyhjennä ${m.clrH} / haku ${m.search}`);
+      if (m.sel < 4.5 || m.un < 4.5 || m.clrC < 4.5) problems.push(`${tag}: kontrasti < 4,5: valittu ${m.sel.toFixed(2)} / valitsematon ${m.un.toFixed(2)} / tyhjennä ${m.clrC.toFixed(2)}`);
+      if (m.blue) problems.push(`${tag}: sinistä taustaa suodattimissa`);
+      if (m.rowsOver) problems.push(`${tag}: tuoterivin sisältö ylittää rivin leveyden`);
+    }
+    await ctx.close();
+  }
+}
 // ---------- HALLINTA: kalenteri toimii vaikka vuorotietoja ei saada (public-skeema tyhjä / ei oikeutta) ----------
 if (process.env.ONLY !== 'shop') {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844, isMobile: true }, locale: 'fi-FI', timezoneId: 'Europe/Helsinki' });

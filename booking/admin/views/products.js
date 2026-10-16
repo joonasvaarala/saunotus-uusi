@@ -6,16 +6,66 @@ import { addonsAdmin } from './addons.js';
 import { h, dialog, field, toast, run, money, badge } from '../ui.js';
 
 const VAT = [25.5, 24, 14, 13.5, 10, 0];
-export async function render({ ctx, refs, reload }) {
+
+// "Verkossa" = tuote näkyy ja on varattavissa verkkokaupassa: sama ehto kuin public_catalog:ssa (product_config: bookable, shop_visible, lifecycle = 'current').
+// Puuttuva kenttä ei estä (shop_visible/lifecycle voivat puuttua vanhemmasta kannasta); puuttuva product_config = ei verkossa.
+export const isOnline = (p) => { const c = p?.config; return !!c && c.bookable === true && c.shop_visible !== false && c.lifecycle !== 'old'; };
+export const CATEGORY_LABELS = { public_sauna: 'Yleiset saunavuorot', private_sauna: 'Yksityiset saunavuorot', corporate: 'Yritykset', treatment: 'Hoidot', ritual: 'Rituaalit', ceremony: 'Seremoniat', event: 'Tapahtumat', gift_card: 'Lahjakortit', season_card: 'Kausikortit', product_rental: 'Vuokrattavat tuotteet', training: 'Koulutukset', add_on: 'Lisäpalvelut' };
+export const catLabel = (c) => CATEGORY_LABELS[c] || c || 'Ilman kategoriaa';
+export const VISIBILITY = [['', 'Kaikki'], ['online', 'Verkossa'], ['offline', 'Ei verkossa']];
+const VIS_URL = { online: 'verkossa', offline: 'ei-verkossa' };
+const norm = (x) => String(x ?? '').toLocaleLowerCase('fi');   // kirjainkoolla ei ole merkitystä
+
+export async function render({ ctx, refs, reload, query }) {
   const isAdmin = ctx.can('catalog.edit');  // manager + admin
   const fresh = () => { ctx.refs = null; reload(); };   // tuotelista haetaan uudelleen (refs on välimuistissa; muuten uusi kuva/tiedot eivät näy listassa)
   const list = h('div', { class: 'list' });
-  for (const p of refs.products) {
-    const c = p.config;
-    list.append(h('button', { type: 'button', class: 'listrow', onclick: () => edit(p) },
-      h('span', { class: 'what' }, c?.image_path ? h('img', { class: 'pthumb', src: storageUrl('product-images', c.image_path), alt: '', width: 40, height: 40, loading: 'lazy' }) : null, h('strong', { text: p.name }), h('small', { text: ` ${p.category || ''}` })),
-      h('span', { class: 'meta' }, c?.bookable ? badge('ok', 'Verkkovarattavissa') : badge('muted', 'Ei verkossa'), !p.active ? badge('err', 'Piilotettu') : null, h('strong', { text: money(p.price) }), h('small', { text: `ALV ${p.vat_rate} %` }))));
+  const rowOf = (p) => { const c = p.config;
+    return h('button', { type: 'button', class: 'listrow', onclick: () => edit(p) },
+      h('span', { class: 'what' }, c?.image_path ? h('img', { class: 'pthumb', src: storageUrl('product-images', c.image_path), alt: '', width: 40, height: 40, loading: 'lazy' }) : null, h('strong', { text: p.name }), h('small', { text: ` ${catLabel(p.category)}` })),
+      h('span', { class: 'meta' }, isOnline(p) ? badge('ok', 'Verkossa') : badge('muted', 'Ei verkossa'), !p.active ? badge('err', 'Piilotettu') : null, h('strong', { text: money(p.price) }), h('small', { text: `ALV ${p.vat_rate} %` }))); };
+
+  // ---- suodattimet (clientissä: lista on jo ladattu, ei uusia RPC-kutsuja); tila säilyy URL:ssa (#/tuotteet?nakyvyys=…&kategoria=…&haku=…) ----
+  const all = refs.products;
+  const catCodes = [...new Set(all.map((p) => p.category || ''))].sort((a, b) => catLabel(a).localeCompare(catLabel(b), 'fi'));
+  const q0 = query || new URLSearchParams();
+  const f = { vis: Object.keys(VIS_URL).find((k) => VIS_URL[k] === q0.get('nakyvyys')) || '', cat: catCodes.includes(q0.get('kategoria')) ? q0.get('kategoria') : '', search: (q0.get('haku') || '').slice(0, 80) };
+  const matchSearch = (p) => !f.search.trim() || [p.name, p.name_en, p.slug].some((x) => norm(x).includes(norm(f.search.trim())));
+  const matchVis = (p) => !f.vis || (f.vis === 'online') === isOnline(p);
+  const matchCat = (p) => !f.cat || (p.category || '') === f.cat;
+  const active = () => !!(f.vis || f.cat || f.search.trim());
+  const count = h('p', { class: 'muted prodcount', role: 'status', 'aria-live': 'polite' });
+  const clearBtn = h('button', { type: 'button', class: 'link', text: 'Tyhjennä suodattimet', onclick: () => { f.vis = ''; f.cat = ''; f.search = ''; searchInp.value = ''; catSel.value = ''; for (const r of filters.querySelectorAll('input[type=radio]')) r.checked = r.value === ''; draw(); } });
+  const syncUrl = () => {
+    const qs = new URLSearchParams(); if (f.vis) qs.set('nakyvyys', VIS_URL[f.vis]); if (f.cat) qs.set('kategoria', f.cat); if (f.search.trim()) qs.set('haku', f.search.trim());
+    history.replaceState(null, '', `#/tuotteet${qs.toString() ? `?${qs}` : ''}`);   // ei hashchangea → ei uudelleenpiirtoa
+  };
+  const labels = new Map();   // radio-arvo → label-span (lukumäärät päivitetään suodatuksen mukaan: kunkin ryhmän luvut huomioivat muut suodattimet)
+  const seg = (legend, name, opts, cur, onPick, testid) => h('fieldset', { class: 'srcset prodseg', 'data-testid': testid }, h('legend', { text: legend }),
+    opts.map(([v, label]) => { const sp = h('span', { text: label }); labels.set(`${name}:${v}`, [sp, label]);
+      return h('label', { class: 'srcopt' }, h('input', { type: 'radio', name, value: v, checked: v === cur || null, onchange: () => onPick(v) }), sp); }));
+  const searchInp = h('input', { type: 'search', value: f.search, maxlength: 80, placeholder: 'Hae tuotteen nimellä', autocomplete: 'off', 'aria-label': 'Hae tuotteen nimellä' });
+  searchInp.addEventListener('input', () => { f.search = searchInp.value; draw(); });
+  const visSet = seg('Näkyvyys', 'vis', VISIBILITY, f.vis, (v) => { f.vis = v; draw(); }, 'vis-filter');
+  const catOpts = [['', 'Kaikki kategoriat'], ...catCodes.map((c) => [c, catLabel(c)])];
+  const catSet = seg('Kategoria', 'cat', catOpts, f.cat, (v) => { f.cat = v; catSel.value = v; draw(); }, 'cat-filter');
+  // kapealla näytöllä kategoria on pudotusvalikko (13 painiketta veisi koko ruudun); leveällä pikavalintapainikkeet. Molemmat ohjaavat samaa tilaa.
+  const catSel = h('select', { class: 'prodcatsel', 'aria-label': 'Kategoria', 'data-testid': 'cat-select' }, catOpts.map(([v, label]) => h('option', { value: v, text: label })));
+  catSel.value = f.cat;
+  catSel.addEventListener('change', () => { f.cat = catSel.value; for (const r of catSet.querySelectorAll('input')) r.checked = r.value === f.cat; draw(); });
+  catSet.classList.add('prodcatset');
+  const catWrap = h('div', { class: 'prodcat' }, catSet, h('label', { class: 'fld prodcatsel-w' }, h('span', { text: 'Kategoria' }), catSel));
+  const filters = h('div', { class: 'filters card prodfilters' }, field('Haku', searchInp), h('div', { class: 'filter-groups' }, visSet, catWrap));
+  const setLabel = (key, n) => { const [sp, base] = labels.get(key); sp.textContent = `${base} (${n})`; if (key.startsWith('cat:')) { const o = [...catSel.options].find((x) => x.value === key.slice(4)); if (o) o.textContent = `${base} (${n})`; } };
+  function draw() {
+    const shown = all.filter((p) => matchSearch(p) && matchVis(p) && matchCat(p));
+    for (const [v] of VISIBILITY) setLabel(`vis:${v}`, all.filter((p) => matchSearch(p) && matchCat(p) && (!v || (v === 'online') === isOnline(p))).length);
+    for (const [c] of catOpts) setLabel(`cat:${c}`, all.filter((p) => matchSearch(p) && matchVis(p) && (!c || (p.category || '') === c)).length);
+    list.replaceChildren(...(shown.length ? shown.map(rowOf) : [h('div', { class: 'empty prodempty' }, h('p', { text: 'Ei tuotteita valituilla suodattimilla.' }), active() ? h('button', { type: 'button', class: 'btn ghost', text: 'Tyhjennä suodattimet', onclick: () => clearBtn.click() }) : null)]));
+    count.replaceChildren(`${shown.length} / ${all.length} tuotetta`, active() ? ' · ' : '', active() ? clearBtn : '');
+    syncUrl();
   }
+  draw();
   function edit(p) {
     const inp = (name, v, { area, ...o } = {}) => h(area ? 'textarea' : 'input', { name, value: v ?? '', rows: area ? 5 : null, disabled: !isAdmin, ...o });
     const vat = h('select', { name: 'vat_rate', disabled: !isAdmin }, VAT.map((v) => h('option', { value: v, text: `${v} %`, selected: +p.vat_rate === v || null })));
@@ -53,7 +103,7 @@ export async function render({ ctx, refs, reload }) {
     const d = dialog(p.name, h('div', { class: 'stack' }, f, img, cfg, vars), { wide: true });
   }
   const addonsSection = await addonsAdmin({ ctx });
-  return [h('h1', { text: 'Tuotteet' }), h('p', { class: 'muted', text: isAdmin ? 'Tuotetiedot tallentuvat kb-tauluihin (sivusto ja botti käyttävät samaa totuutta). Muutokset kirjataan audit-lokiin ja kb.change_logiin.' : 'Näet tuotteet; hintojen ja tuotteiden muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }), list, addonsSection];
+  return [h('h1', { text: 'Tuotteet' }), h('p', { class: 'muted', text: isAdmin ? 'Tuotetiedot tallentuvat kb-tauluihin (sivusto ja botti käyttävät samaa totuutta). Muutokset kirjataan audit-lokiin ja kb.change_logiin.' : 'Näet tuotteet; hintojen ja tuotteiden muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }), filters, count, list, addonsSection];
 }
 
 // ---- tuotekuva: esikatselu, lataus, alt-teksti, poisto ----
