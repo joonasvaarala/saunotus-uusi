@@ -226,6 +226,10 @@ async function loginViaInvite(page) {
   await page.fill('#pw1', 'pitkasalasana1'); await page.fill('#pw2', 'pitkasalasana1'); await page.click('#setpw button[type=submit]');
   await page.waitForSelector('#shell:not([hidden]) #nav a');
   if (!calls.some((c) => c === 'PUT /auth/v1/user')) problems.push('kutsu: salasanan asetuskutsua (PUT /auth/v1/user) ei tehty');
+  {   // yläpalkin logo latautuu alipolulta (/saunotus-uusi/hallinta/logo-haalea.svg)
+    const li = await page.locator('header.top .brand img').evaluate((e) => ({ ok: e.complete && e.naturalWidth > 0, src: e.src, alt: e.alt }));
+    if (!li.ok || !/\/saunotus-uusi\/hallinta\/logo-haalea\.svg$/.test(li.src) || li.alt !== 'Sauna hallinta') problems.push(`logo: yläpalkin kuva ei latautunut alipolulta tai alt puuttuu: ${JSON.stringify(li)}`);
+  }
   for (const r of ['kalenteri', 'varaukset']) { await page.evaluate((x) => { location.hash = `#/${x}`; }, r); await page.waitForTimeout(500); }
   {   // tuotelistan suodattimet: Näkyvyys (Kaikki/Verkossa/Ei verkossa) + Kategoria + nimihaku, client-side, tila URL:ssa
     await page.evaluate(() => { location.hash = '#/tuotteet'; });
