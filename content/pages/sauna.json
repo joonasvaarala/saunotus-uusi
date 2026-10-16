@@ -1,0 +1,16 @@
+{
+  "fi": {
+    "meta": {"title":"Saunavuorot – yleiset ja yksityiset vuorot | Sipoonjoen Perinnesauna","description":"Yleiset saunavuorot (ma miehet, ti naiset, ke hiljainen, to ja la–su yleinen) ja yksityisvuorot Sipoonjoen perinnesaunalla. Hinnat, ajat ja varaus.","og":"ovi-kaiverrus"},
+    "hero": {"title":"Saunavuorot","text":"Sipoonjoen perinnesaunalla voit tulla nauttimaan savusaunamme täyteläisistä löylyistä, lämpimistä ja kylmistä kylvyistä sekä jokivarren rauhasta.","img":"ovi-kaiverrus","buttons":[{"label":"Yleiset vuorot","to":"#yleiset"},{"label":"Yksityisvuorot","to":"#yksityisvuorot"},{"label":"Hoidot ja rituaalit","to":"treatments"}]},
+    "publicTitle":"Yleiset vuorot","publicIntro":"Yleisillä vuoroilla sauna on avoinna kaikille varanneille. Viikonloppuisin yleinen vuoro on la–su klo 14–19.",
+    "privateTitle":"Yksityisvuorot","privateIntro":"Saunan voi saada myös kokonaan omalle porukalle. Hinnat ovat voimassa vain yksityishenkilöille – yrityksille on omat tuotteet.","companyLink":"Yrityksille →",
+    "bridge":"Tarvitsetko hoitoa tai rituaalin saunavuoron yhteyteen? Katso hoidot ja rituaalit →"
+  },
+  "en": {
+    "meta": {"title":"Sauna sessions – public and private | Sipoonjoen Perinnesauna","description":"Public sauna sessions (Mon men, Tue women, Wed silent, Thu and Sat–Sun public) and private sessions at Sipoonjoen Perinnesauna. Prices, times and booking.","og":"ovi-kaiverrus"},
+    "hero": {"title":"Sauna sessions","text":"At Sipoonjoen Perinnesauna you can enjoy the rich steam of our smoke sauna, warm and cold dips and the peace of the riverbank.","img":"ovi-kaiverrus","buttons":[{"label":"Public sessions","to":"#yleiset"},{"label":"Private sessions","to":"#yksityisvuorot"},{"label":"Treatments & rituals","to":"treatments"}]},
+    "publicTitle":"Public sessions","publicIntro":"At public sessions the sauna is open to everyone who has booked. At weekends the public session runs Sat–Sun 2–7 pm.",
+    "privateTitle":"Private sessions","privateIntro":"You can also have the sauna entirely for your own group. Prices apply to private individuals only – companies have their own products.","companyLink":"For companies →",
+    "bridge":"Need a treatment or ritual alongside your sauna session? See treatments & rituals →"
+  }
+}

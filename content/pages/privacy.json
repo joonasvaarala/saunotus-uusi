@@ -1,0 +1,17 @@
+{
+ "fi": {
+  "meta": {
+   "title": "Tietosuoja | Sipoonjoen Perinnesauna",
+   "description": "Sipoonjoen perinnesaunan asiakasrekisterin tietosuojaseloste.",
+   "og": "ovi-kaiverrus"
+  },
+  "hero": {
+   "title": "Tietosuoja",
+   "text": "Asiakasrekisterin tietosuojaseloste.",
+   "img": "ovi-kaiverrus"
+  },
+  "policies": [
+   7
+  ]
+ }
+}

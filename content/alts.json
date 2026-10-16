@@ -1,0 +1,154 @@
+{
+ "hero-ovi": {
+  "fi": "Savusaunan kaiverrettu kaariovi illalla",
+  "en": "The carved arched door of the smoke sauna in the evening"
+ },
+ "rituaali": {
+  "fi": "Saunottaja ja vieraita lauteilla saunarituaalissa",
+  "en": "A sauna healer and guests on the benches during a sauna ritual"
+ },
+ "rituaali-2": {
+  "fi": "Saunottaja vihtojen kanssa lyhtyjen valossa",
+  "en": "A sauna healer with whisks in lantern light"
+ },
+ "vihta-hoito": {
+  "fi": "Saunottaja tuoreiden vihtojen kanssa",
+  "en": "A sauna healer with fresh whisks"
+ },
+ "yleinen": {
+  "fi": "Vieraita lauteilla yleisellä vuorolla",
+  "en": "Guests on the benches during a public session"
+ },
+ "palju": {
+  "fi": "Kolme ihmistä lämpimässä altaassa metsän keskellä",
+  "en": "Three people in a warm pool in the forest"
+ },
+ "lahja": {
+  "fi": "Punaisella nauhalla sidottu lahjapaketti kuusen oksilla",
+  "en": "A gift tied with a red ribbon among spruce branches"
+ },
+ "saunotus-selka": {
+  "fi": "Saunottaja vihtomassa vierasta hoitosaunassa",
+  "en": "A sauna healer whisking a guest in the treatment sauna"
+ },
+ "saunotus": {
+  "fi": "Saunottaja vihtomassa vierasta hoitosaunassa",
+  "en": "A sauna healer whisking a guest in the treatment sauna"
+ },
+ "syvasaunotus": {
+  "fi": "Rentoutunut vieras kääriytyneenä harmaaseen huopaan",
+  "en": "A relaxed guest wrapped in a grey blanket"
+ },
+ "hunaja": {
+  "fi": "Hunajaa valumassa kauhasta",
+  "en": "Honey dripping from a spoon"
+ },
+ "turve-naama": {
+  "fi": "Vieraat turvenaamioissa saunassa",
+  "en": "Guests in peat masks in the sauna"
+ },
+ "turve-hymy": {
+  "fi": "Hymyilevä vieras turvenaamiossa vihdan kanssa",
+  "en": "A smiling guest in a peat mask with a whisk"
+ },
+ "ovi-kaiverrus": {
+  "fi": "Käsin kaiverrettu puuovi",
+  "en": "A hand-carved wooden door"
+ },
+ "saunottajat": {
+  "fi": "Kaksi saunottajaa koivuvihtojen kanssa",
+  "en": "Two sauna healers with birch whisks"
+ },
+ "j-yleinen": {
+  "fi": "Vieraita yleisellä vuorolla savusaunassa",
+  "en": "Guests at a public session in the smoke sauna"
+ },
+ "j-oma-vuoro": {
+  "fi": "Palju ja savusauna kesällä",
+  "en": "The hot tub and smoke sauna in summer"
+ },
+ "j-jalkiloylyt": {
+  "fi": "Savusaunan ovi lumisessa illassa",
+  "en": "The smoke sauna door on a snowy evening"
+ },
+ "j-yritys": {
+  "fi": "Savusauna yöllä",
+  "en": "The smoke sauna at night"
+ },
+ "j-miehet": {
+  "fi": "Miehiä saunan lauteilla",
+  "en": "Men on the sauna benches"
+ },
+ "j-hiljainen": {
+  "fi": "Vieraita saunan lauteilla",
+  "en": "Guests on the sauna benches"
+ },
+ "j-naiset": {
+  "fi": "Nainen saunassa yrttikimppu kädessä",
+  "en": "A woman in the sauna with a bunch of herbs"
+ },
+ "j-turvetorstai": {
+  "fi": "Kaksi vierasta turvenaamioissa",
+  "en": "Two guests in peat masks"
+ },
+ "j-perinnesaunotusilta": {
+  "fi": "Saunottajat vihtojen ja yrttien kanssa",
+  "en": "Sauna healers with whisks and herbs"
+ },
+ "j-morsiussauna": {
+  "fi": "Kaksi naista koivuvihtojen kanssa",
+  "en": "Two women with birch whisks"
+ },
+ "j-turvesauna": {
+  "fi": "Hymyilevä vieras turvenaamiossa vihdan kanssa",
+  "en": "A smiling guest in a peat mask with a whisk"
+ },
+ "j-synttarisauna": {
+  "fi": "Saunottaja ja vieraita saunassa",
+  "en": "A sauna healer and guests in the sauna"
+ },
+ "j-ryhma": {
+  "fi": "Ryhmä saunassa vihtojen kanssa",
+  "en": "A group in the sauna with whisks"
+ },
+ "j-opiskelija": {
+  "fi": "Saunahoito hoitopöydällä",
+  "en": "A sauna treatment on a treatment bench"
+ },
+ "j-avoin-lahjakortti": {
+  "fi": "Rentoutunut vieras saunahoidossa",
+  "en": "A relaxed guest during a sauna treatment"
+ },
+ "j-lahja-vihta": {
+  "fi": "Saunottaja vihtojen kanssa lyhtyjen valossa",
+  "en": "A sauna healer with whisks in lantern light"
+ },
+ "j-lahja-hoito": {
+  "fi": "Vieras saunahoidossa",
+  "en": "A guest during a sauna treatment"
+ },
+ "j-lahja-kahdelle": {
+  "fi": "Saunahoito kahdelle",
+  "en": "A sauna treatment for two"
+ },
+ "j-lahja-turvenaamio": {
+  "fi": "Kaksi vierasta saunassa",
+  "en": "Two guests in the sauna"
+ },
+ "j-vuosikortti": {
+  "fi": "Savusaunan ovi talvella",
+  "en": "The smoke sauna door in winter"
+ },
+ "j-joulusauna": {
+  "fi": "Punainen lyhty havuilla koristeltuna lumessa",
+  "en": "A red lantern decorated with fir branches in the snow"
+ },
+ "j-yhteisopaiva": {
+  "fi": "Saunottajat lyhtyjen valossa",
+  "en": "Sauna healers in lantern light"
+ },
+ "j-kekri": {
+  "fi": "Havuoksia hämärässä",
+  "en": "Fir branches at dusk"
+ }
+}

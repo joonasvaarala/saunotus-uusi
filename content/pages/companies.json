@@ -1,0 +1,108 @@
+{
+ "fi": {
+  "meta": {
+   "title": "Savusauna yrityksille ja ryhmille – työhyvinvointipäivät | Sipoonjoen Perinnesauna",
+   "description": "Savusaunavuoro yrityksille alk. 350 €, jälkilöylyt yrityksille alk. 250 € sekä työhyvinvointipäivät ja ryhmät Sipoonjoen rannalla. Pyydä tarjous.",
+   "og": "ovi-kaiverrus"
+  },
+  "hero": {
+   "title": "Savusauna yrityksille",
+   "text": "Maan sisälle rakennettu savusauna ja suomalainen saunaperinne Sipoonjoen rannalla.",
+   "img": "ovi-kaiverrus",
+   "buttons": [
+    {
+     "label": "Yleiset vuorot",
+     "to": "sauna#yleiset"
+    },
+    {
+     "label": "Yksityisvuorot",
+     "to": "sauna#yksityisvuorot"
+    },
+    {
+     "label": "Pyydä tarjous",
+     "to": "#tarjous"
+    }
+   ]
+  },
+  "productsTitle": "Yrityksille",
+  "productsText": "Yrityksille on omat tuotteensa: savusaunavuoro ja jälkilöylyt. Yksityisvuorojen hinnat ovat voimassa vain yksityishenkilöille.",
+  "days": {
+   "title": "Työhyvinvointipäivät ja ryhmät",
+   "id": "tarjous",
+   "text": "Savusauna tarjoaa ympäristön työhyvinvointipäiville, pienryhmille ja yhteisille saunailloille. Saunavuorojen, rituaalien ja hoitojen lisäksi päivään voidaan yhdistää esimerkiksi metsäkävely, metsäjooga, eräruokailu laavulla tai vihdansidontatyöpaja. Hinnat tarjouspyynnöstä.",
+   "cta": "Pyydä tarjous",
+   "mailSubject": "Tarjouspyyntö yrityksille",
+   "mailHint": "Kerro viestissä ryhmän koko, toivottu ajankohta ja ohjelmatoiveet."
+  },
+  "links": [
+   {
+    "title": "Saunavuorot",
+    "text": "Yleiset vuorot, yksityisvuorot ja jälkilöylyt. Tule nauttimaan maasavusaunan lämmöstä!",
+    "to": "sauna"
+   },
+   {
+    "title": "Rituaalit ja hoidot",
+    "text": "Saunavuorojen lisäksi päivään voidaan yhdistää saunottajan ohjaamia rituaaleja ja hoitoja.",
+    "to": "treatments"
+   },
+   {
+    "title": "Tapahtumat",
+    "text": "Tulevat tapahtumat ja perinnesaunotusillat.",
+    "to": "book#tapahtumat"
+   }
+  ]
+ },
+ "en": {
+  "meta": {
+   "title": "A smoke sauna for companies and groups – workplace wellbeing days | Sipoonjoen Perinnesauna",
+   "description": "A smoke sauna for companies from €350, after-session sauna from €250, workplace wellbeing days and groups by the Sipoonjoki river. Request a quote.",
+   "og": "ovi-kaiverrus"
+  },
+  "hero": {
+   "title": "A smoke sauna for companies",
+   "text": "A smoke sauna built into the ground and Finnish sauna tradition on the banks of the Sipoonjoki river.",
+   "img": "ovi-kaiverrus",
+   "buttons": [
+    {
+     "label": "Public sessions",
+     "to": "sauna#yleiset"
+    },
+    {
+     "label": "Private sessions",
+     "to": "sauna#yksityisvuorot"
+    },
+    {
+     "label": "Request a quote",
+     "to": "#tarjous"
+    }
+   ]
+  },
+  "productsTitle": "For companies",
+  "productsText": "Companies have their own products: a smoke sauna session and after-session sauna. Prices of the private sessions apply to private individuals only.",
+  "days": {
+   "title": "Workplace wellbeing days and groups",
+   "id": "tarjous",
+   "text": "The smoke sauna offers a setting for workplace wellbeing days, small groups and shared sauna evenings. In addition to sauna sessions, rituals and treatments, the day can be combined with, for example, a forest walk, forest yoga, a wilderness meal at the lean-to or a whisk-binding workshop. Prices on request.",
+   "cta": "Request a quote",
+   "mailSubject": "Request for quote – company",
+   "mailHint": "Tell us the size of the group, the preferred date and any programme wishes in your message."
+  },
+  "links": [
+   {
+    "title": "Sauna sessions",
+    "text": "Public sessions, private sessions and after-sessions. Come and enjoy the warmth of the smoke sauna!",
+    "to": "sauna"
+   },
+   {
+    "title": "Rituals and treatments",
+    "text": "In addition to sauna sessions, the day can include rituals and treatments led by a sauna healer.",
+    "to": "treatments"
+   },
+   {
+    "title": "Events",
+    "text": "Upcoming events and traditional sauna evenings.",
+    "to": "book#tapahtumat"
+   }
+  ]
+ }
+}

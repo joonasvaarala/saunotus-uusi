@@ -1,0 +1,104 @@
+{
+ "fi": {
+  "meta": {
+   "title": "Lahjakortit – avoin lahjakortti ja lahjakorttipaketit | Sipoonjoen Perinnesauna",
+   "description": "Anna lahjaksi aikaa, lämpöä ja hyvää oloa: avoin lahjakortti alk. 29 €, savusaunaelämys-paketit ja vuosikortti. Lahjakortin voimassaolon jatkaminen on maksutonta.",
+   "og": "palju"
+  },
+  "hero": {
+   "title": "Lahjakortit",
+   "text": "Anna lahjaksi aikaa, lämpöä ja hyvää oloa.",
+   "img": "rituaali-2",
+   "buttons": [
+    {
+     "label": "Osta avoin lahjakortti",
+     "to": "#avoin"
+    },
+    {
+     "label": "Lahjakorttipaketit",
+     "to": "#paketit"
+    },
+    {
+     "label": "Minulla on lahjakortti",
+     "to": "#on-jo-lahjakortti"
+    }
+   ]
+  },
+  "openTitle": "Avoin lahjakortti",
+  "openText": "Voit ostaa tästä avoimen lahjakortin, joka käy kaikkiin Sipoonjoen Perinnesaunan palveluihin. Lahjakortti on voimassa 6 kk ostopäivästä alkaen.",
+  "packTitle": "Lahjakorttipaketit",
+  "allGift": "Katso kaikki lahjakortit",
+  "haveTitle": "Tee varaus lahjakortilla",
+  "haveText": "Tee varaus käyttäen Elämyslahjojen, Sipoonjoen Perinnesaunan oman, Kiitoskaupan tai Kokemuskaupan lahjakorttia.",
+  "third": {
+   "kicker": "Onko sinulla",
+   "title": "Elämyslahjojen tai Kokemuskaupan lahjakortti",
+   "text": "Tehdäksesi varauksen Elämyslahjojen lahjakortilla varmista ensin, että lahjakortti on voimassa. Jos lahjakortti on jo ehtinyt vanhentua, ota yhteyttä Elämyslahjojen asiakaspalveluun.",
+   "link": "Elämyslahjojen asiakaspalveluun",
+   "text2": "Varausta varten tarvitset lahjakortin koodin, joka löytyy lahjakortin keskiosasta voimassaolopäivän vierestä. Älä käytä viivakoodin yhteydessä olevaa koodia, se ei toimi. Valitse haluamasi yleinen vuoro ja tee varaus. Syötä lahjakortin koodi sille varattuun paikkaan. Mahdolliset lisäpalvelut varataan erillisellä tilauksella. Tervetuloa saunomaan!",
+   "cta": "Tee varaus"
+  },
+  "own": {
+   "kicker": "Onko sinulla",
+   "title": "Sipoonjoen perinnesaunan oma lahjakortti",
+   "text": "Sipoonjoen perinnesaunan lahjakortilla voit tehdä varauksen suoraan varausjärjestelmän kautta. Syötä lopuksi 12-merkkinen lahjakortin koodi ostoskorissa kenttään ”käytä koodia”.",
+   "cta": "Tee varaus"
+  },
+  "extend": {
+   "title": "Lahjakortin voimassaolon jatkaminen",
+   "text": "Jos lahjakorttia ei ehditä käyttää, voimassaoloa jatketaan maksutta sähköpostitse tai puhelimitse pyydettäessä – toivomaasi päivään asti tai muuten 3 kuukautta pyyntöpäivästä eteenpäin. Jatkamiseen ei liity ehtoja. Pyydä jatkoa:",
+   "third": "Kolmansien osapuolten lahjakorttien (Elämyslahjat, Offerilla, Kokemuskauppa) voimassaolon jatkamisesta ja vanhentuneista korteista vastaa kunkin palvelun oma asiakaspalvelu."
+  }
+ },
+ "en": {
+  "meta": {
+   "title": "Gift cards – open gift card and gift packages | Sipoonjoen Perinnesauna",
+   "description": "Give time, warmth and wellbeing: an open gift card from €29, smoke sauna experience packages and an annual card. Extending the validity of a gift card is free of charge.",
+   "og": "palju"
+  },
+  "hero": {
+   "title": "Gift cards",
+   "text": "Give the gift of time, warmth and wellbeing.",
+   "img": "rituaali-2",
+   "buttons": [
+    {
+     "label": "Buy an open gift card",
+     "to": "#avoin"
+    },
+    {
+     "label": "Gift card packages",
+     "to": "#paketit"
+    },
+    {
+     "label": "I have a gift card",
+     "to": "#on-jo-lahjakortti"
+    }
+   ]
+  },
+  "openTitle": "Open gift card",
+  "openText": "Here you can buy an open gift card that is valid for all services at Sipoonjoen Perinnesauna. The gift card is valid for 6 months from the purchase date.",
+  "packTitle": "Gift card packages",
+  "allGift": "See all gift cards",
+  "haveTitle": "Book with a gift card",
+  "haveText": "Make a booking using a gift card from Elämyslahjat, Sipoonjoen Perinnesauna itself, Kiitoskauppa or Kokemuskauppa.",
+  "third": {
+   "kicker": "Do you have an",
+   "title": "Elämyslahjat or Kokemuskauppa gift card",
+   "text": "To book with an Elämyslahjat gift card, first make sure the card is still valid. If the card has already expired, please contact Elämyslahjat customer service.",
+   "link": "Elämyslahjat customer service",
+   "text2": "For the booking you need the gift card code, found in the middle of the card next to the expiry date. Do not use the code next to the barcode – it does not work. Choose the public session you want and make the booking. Enter the gift card code in the field provided. Any additional services are booked with a separate order. Welcome to the sauna!",
+   "cta": "Make a booking"
+  },
+  "own": {
+   "kicker": "Do you have a",
+   "title": "Sipoonjoen Perinnesauna gift card",
+   "text": "With a Sipoonjoen Perinnesauna gift card you can book directly through the booking system. At the end, enter the 12-character gift card code in the “use code” field in the shopping cart.",
+   "cta": "Make a booking"
+  },
+  "extend": {
+   "title": "Extending the validity of a gift card",
+   "text": "If you cannot use your gift card in time, its validity is extended free of charge on request by email or phone – to the date you wish, or otherwise by 3 months from the day of the request. There are no conditions. To ask for an extension:",
+   "third": "For third-party gift cards (Elämyslahjat, Offerilla, Kokemuskauppa), extensions and expired cards are handled by each service's own customer service."
+  }
+ }
+}

@@ -1,0 +1,333 @@
+{
+ "_doc": "Sivuston yleiset asetukset ja UI-tekstit. Hinnat/ajat tulevat content/kb/kb.json:sta, sivujen tekstit content/pages/*.json:sta.",
+ "canonicalBase": "https://uusi.saunotus.com",
+ "testBase": "https://joonasvaarala.github.io/saunotus-uusi",
+ "booking": {
+  "base": "https://sipoonjoenperinnesauna.johku.com",
+  "giftReservation": "/{loc}/yleinen-lahjakorttivaraus",
+  "giftAll": "/{loc}/sarja-ja-lahjakortit",
+  "events": "/{loc}/tapahtumat",
+  "private": "/{loc}/yksityisvuorot",
+  "publicAll": "/{loc}/yleinen-sauna",
+  "treatments": "/{loc}/hoidot",
+  "ceremonies": "/{loc}/saunaseremoniat",
+  "corporate": "/{loc}/yrityksille",
+  "terms": "/{loc}/info/deliveryTerms",
+  "privacy": "/{loc}/info/privacyPolicy",
+  "home": "/{loc}"
+ },
+ "chatbot": {
+  "_doc": "Saunabot-valmius. enabled=false: ei lataa mitään (vain HTML-kommentti). Ei tuotantoon ennen OpenAI-avainta/päätöstä. Testaus: SAUNABOT=on npm run build",
+  "enabled": false,
+  "widgetSrc": "https://sxbofnuisemspgquoxyv.supabase.co/functions/v1/saunabot/widget.js"
+ },
+ "contact": {
+  "email": "savusauna@saunotus.fi",
+  "phone": "010 299 2866",
+  "phoneTel": "+358102992866",
+  "street": "Hindsbyntie 124",
+  "postal": "04130",
+  "city": "Sipoo",
+  "mapsUrl": "https://maps.app.goo.gl/jBZSyW6mm8XWQMxF6",
+  "hslUrl": "https://reittiopas.hsl.fi/"
+ },
+ "social": [
+  {
+   "name": "Facebook",
+   "url": "https://www.facebook.com/Perinnesauna/"
+  },
+  {
+   "name": "Instagram",
+   "url": "https://www.instagram.com/perinnesauna/"
+  },
+  {
+   "name": "YouTube",
+   "url": "https://www.youtube.com/@SipoonjokiHeritageSauna"
+  }
+ ],
+ "trainingUrl": "https://saunakoulutus.fi",
+ "giftCardSupportUrl": "https://www.elamyslahjat.fi/yhteystiedot/",
+ "pages": {
+  "home": {
+   "fi": "/",
+   "en": "/en/"
+  },
+  "sauna": {
+   "fi": "/saunavuorot/",
+   "en": "/en/sauna/"
+  },
+  "treatments": {
+   "fi": "/hoidot-rituaalit/",
+   "en": "/en/treatments-rituals/"
+  },
+  "gift": {
+   "fi": "/lahjakortti/",
+   "en": "/en/gift-card/"
+  },
+  "book": {
+   "fi": "/varaa/",
+   "en": "/en/book/"
+  },
+  "info": {
+   "fi": "/info/",
+   "en": "/en/info/"
+  },
+  "companies": {
+   "fi": "/yritykset/",
+   "en": "/en/companies/"
+  },
+  "terms": {
+   "fi": "/ehdot/",
+   "en": "/en/terms/"
+  },
+  "privacy": {
+   "fi": "/tietosuoja/",
+   "en": null
+  }
+ },
+ "ui": {
+  "fi": {
+   "lang": "fi",
+   "locale": "fi_FI",
+   "johkuLoc": "fi_FI",
+   "siteName": "Sipoonjoen Perinnesauna",
+   "brandKicker": "saunotus",
+   "brandTitle": "Sipoonjoen Perinnesauna",
+   "skip": "Siirry sisältöön",
+   "menu": "Valikko",
+   "menuLabel": "Päävalikko",
+   "langLabel": "Kieli",
+   "otherLang": "EN",
+   "nav": [
+    [
+     "sauna",
+     "Saunavuorot"
+    ],
+    [
+     "treatments",
+     "Hoidot ja rituaalit"
+    ],
+    [
+     "training",
+     "Koulutukset"
+    ],
+    [
+     "gift",
+     "Lahjakortit"
+    ]
+   ],
+   "book": "Varaa",
+   "bookFull": "Varaa saunaelämys",
+   "days": [
+    "Ma",
+    "Ti",
+    "Ke",
+    "To",
+    "Pe",
+    "La",
+    "Su"
+   ],
+   "daysLong": [
+    "Maanantai",
+    "Tiistai",
+    "Keskiviikko",
+    "Torstai",
+    "Perjantai",
+    "Lauantai",
+    "Sunnuntai"
+   ],
+   "today": "Tänään",
+   "reserve": "Varaa",
+   "reserveArrow": "Varaa →",
+   "fromWord": "alk.",
+   "persons": "hlö",
+   "perPerson": "per henkilö",
+   "perPersonShort": "/ hlö",
+   "footerInfo": "Käytännön info",
+   "footerServices": "Palvelut",
+   "footerContact": "Yhteystiedot",
+   "infoLinks": [
+    [
+     "mita-mukaan",
+     "Mitä mukaan?"
+    ],
+    [
+     "saapuminen",
+     "Saapuminen ja sijainti"
+    ],
+    [
+     "pysakointi",
+     "Pysäköinti"
+    ]
+   ],
+   "legal": "Ehdot",
+   "privacy": "Tietosuoja",
+   "rights": "Havuhattu Oy",
+   "openNewTab": "(avautuu uuteen välilehteen)",
+   "externalNote": "Varaus tapahtuu Johku-verkkokaupassa.",
+   "events": "Tapahtumat",
+   "eventsIntro": "Lämpimiä yhteisiä hetkiä",
+   "allEvents": "Kaikki tapahtumat →",
+   "weekKicker": "Viikko-ohjelma",
+   "weekTitle": "Yleiset saunavuorot",
+   "allSessions": "Kaikki vuorot →",
+   "privateAndEvents": "Yksityisvuorot ja tapahtumat",
+   "noPublic": "Ei yleistä vuoroa",
+   "privateLink": "Yksityisvuorot",
+   "eventsLink": "Tapahtumat",
+   "notFoundTitle": "Sivua ei löydy",
+   "notFoundText": "Hakemaasi sivua ei löytynyt. Palaa etusivulle tai tutustu saunavuoroihin.",
+   "toHome": "Etusivulle",
+   "moreInfo": "Lisätietoja",
+   "readMore": "Lue lisää →",
+   "siteTestNote": "Testiympäristö – ei julkinen julkaisu.",
+   "companies": "Yrityksille",
+   "footerTag": "Maan sisälle rakennettu savusauna Sipoonjoen rannalla, Sipoonkorven kansallispuiston kupeessa.",
+   "faqKicker": "Usein kysyttyä",
+   "termsTitle": "Ehdot",
+   "privacyTitle": "Tietosuoja",
+   "trainingBanner": {
+    "title": "Haluatko oppia saunottajaksi?",
+    "text": "Saunottajakoulutukset järjestetään erillisellä koulutussivustolla.",
+    "cta": "Tutustu koulutuksiin →"
+   },
+   "privatePrompt": "Yksityisvuorot ja tapahtumat"
+  },
+  "en": {
+   "lang": "en",
+   "locale": "en_US",
+   "johkuLoc": "en_US",
+   "siteName": "Sipoonjoen Perinnesauna",
+   "brandKicker": "saunotus",
+   "brandTitle": "Sipoonjoen Perinnesauna",
+   "skip": "Skip to content",
+   "menu": "Menu",
+   "menuLabel": "Main menu",
+   "langLabel": "Language",
+   "otherLang": "FI",
+   "nav": [
+    [
+     "sauna",
+     "Sauna sessions"
+    ],
+    [
+     "treatments",
+     "Treatments & rituals"
+    ],
+    [
+     "training",
+     "Training"
+    ],
+    [
+     "gift",
+     "Gift cards"
+    ]
+   ],
+   "book": "Book",
+   "bookFull": "Book a sauna experience",
+   "days": [
+    "Mon",
+    "Tue",
+    "Wed",
+    "Thu",
+    "Fri",
+    "Sat",
+    "Sun"
+   ],
+   "daysLong": [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday"
+   ],
+   "today": "Today",
+   "reserve": "Book",
+   "reserveArrow": "Book →",
+   "fromWord": "from",
+   "persons": "guests",
+   "perPerson": "per person",
+   "perPersonShort": "/ person",
+   "footerInfo": "Practical info",
+   "footerServices": "Services",
+   "footerContact": "Contact",
+   "infoLinks": [
+    [
+     "mita-mukaan",
+     "What to bring"
+    ],
+    [
+     "saapuminen",
+     "Arrival and location"
+    ],
+    [
+     "pysakointi",
+     "Parking"
+    ]
+   ],
+   "legal": "Terms",
+   "privacy": "Privacy (in Finnish)",
+   "rights": "Havuhattu Oy",
+   "openNewTab": "(opens in a new tab)",
+   "externalNote": "Booking is made in the Johku web shop.",
+   "events": "Events",
+   "eventsIntro": "Warm moments together",
+   "allEvents": "All events →",
+   "weekKicker": "Weekly programme",
+   "weekTitle": "Public sauna sessions",
+   "allSessions": "All sessions →",
+   "privateAndEvents": "Private sessions and events",
+   "noPublic": "No public session",
+   "privateLink": "Private sessions",
+   "eventsLink": "Events",
+   "notFoundTitle": "Page not found",
+   "notFoundText": "We could not find the page you were looking for. Return to the front page or browse the sauna sessions.",
+   "toHome": "Front page",
+   "moreInfo": "More information",
+   "readMore": "Read more →",
+   "siteTestNote": "Test environment – not a public release.",
+   "companies": "For companies",
+   "footerTag": "A smoke sauna built into the ground on the banks of the Sipoonjoki river, next to Sipoonkorpi National Park.",
+   "faqKicker": "FAQ",
+   "termsTitle": "Terms and conditions",
+   "privacyTitle": "Privacy",
+   "trainingBanner": {
+    "title": "Want to become a sauna healer?",
+    "text": "Sauna healer trainings are presented on a separate training site.",
+    "cta": "Explore the trainings →"
+   }
+  }
+ },
+ "sessionLabels": {
+  "men": {
+   "fi": "Miestenvuoro",
+   "en": "Men's session"
+  },
+  "women": {
+   "fi": "Naistenvuoro",
+   "en": "Women's session"
+  },
+  "silent": {
+   "fi": "Hiljainen vuoro",
+   "en": "Silent session"
+  },
+  "peat": {
+   "fi": "Turvetorstai",
+   "en": "Peat Thursday"
+  },
+  "public": {
+   "fi": "Yleinen vuoro",
+   "en": "Public session"
+  },
+  "weekend": {
+   "fi": "Yleinen savusauna",
+   "en": "Public smoke sauna"
+  },
+  "ritual": {
+   "fi": "Saunarituaali-ilta",
+   "en": "Sauna ritual evening"
+  }
+ }
+}

@@ -1,0 +1,482 @@
+{
+ "fi": {
+  "meta": {
+   "title": "Sipoonjoen Perinnesauna – savusauna Sipoossa | Saunotus",
+   "description": "Maan sisälle rakennettu savusauna Sipoossa: yleiset saunavuorot, yksityisvuorot, hoidot ja rituaalit sekä lahjakortit. Varaa saunaelämys Sipoonjoen rannalla.",
+   "og": "hero-ovi"
+  },
+  "hero": {
+   "title": "Savusauna Sipoossa",
+   "text": "Saunotus on enemmän kuin sauna. Lämpöä, löylyä ja kokonaisvaltaisia rituaaleja keholle ja mielelle",
+   "cta1": "Varaa saunaelämys",
+   "cta2": "Anna lahjaksi"
+  },
+  "tiles": [
+   {
+    "icon": "ikoni-hoito",
+    "title": "Hyvät löylyt",
+    "text": "Tule nauttimaan savusaunamme pehmeistä löylyistä ja virkistävistä kylvyistä.",
+    "links": [
+     {
+      "label": "Yleiset saunavuorot →",
+      "to": "sauna#yleiset"
+     }
+    ]
+   },
+   {
+    "icon": "ikoni-maa",
+    "title": "Hoidot & rituaalit",
+    "text": "Ohjattuja rituaaleja ja suomalaisia saunaperinteitä nykypäivään tuotuna.",
+    "links": [
+     {
+      "label": "Tutustu kokemuksiin →",
+      "to": "treatments"
+     }
+    ]
+   },
+   {
+    "icon": "ikoni-savusauna",
+    "title": "Oma saunavuoro",
+    "text": "Varaa sauna omalle seurueelle tai rakenna ryhmällesi kokonainen saunaelämys.",
+    "links": [
+     {
+      "label": "Yksityisvuorot →",
+      "to": "sauna#yksityisvuorot"
+     }
+    ]
+   },
+   {
+    "icon": "ikoni-lotus",
+    "title": "Lahjaksi elämys",
+    "text": "Yhteisiä saunaelämyksiä ja erityisiä hetkiä, jotka jäävät mieleen.",
+    "links": [
+     {
+      "label": "→ Avoin lahjakortti",
+      "to": "gift#avoin"
+     },
+     {
+      "label": "→ Lahjakorttipaketit",
+      "to": "gift#paketit"
+     }
+    ]
+   }
+  ],
+  "ritual": {
+   "kicker": "viikoittain lauantaisin ja sunnuntaisin",
+   "title": "Saunarituaali-ilta",
+   "paras": [
+    "Astu syvälle itämerensuomalaiseen saunotusperinteeseen ja koe vuodenaikojen mukana elävä rituaali. Jokainen kausi tuo mukanaan oman tunnelmansa, tuoksunsa ja saunaperinteensä.",
+    "Rituaali järjestetään hoitosauna Raunissa pienryhmässä – mukaan otetaan kerrallaan enintään kuusi osallistujaa. Rituaalin aikana saat levätä leveillä lauteilla ja antautua lämmön, löylyn ja perinteiden kannateltavaksi."
+   ],
+   "facts": [
+    {
+     "icon": "ikoni-vihta",
+     "text": "Ohjattu rituaali"
+    },
+    {
+     "icon": "ikoni-vuoro",
+     "text": "20 minuuttia"
+    },
+    {
+     "icon": "ikoni-savusauna",
+     "text": "Sisältää savusaunavuoron"
+    },
+    {
+     "icon": "ikoni-mantyyli",
+     "text": "Ohjelma vaihtuu vuodenaikojen mukaan"
+    }
+   ],
+   "cta": "Katso ajat ja varaa →"
+  },
+  "featured": {
+   "title": "Suosittelemme",
+   "items": [
+    {
+     "img": "vihta-hoito",
+     "pill": "koe saunotus",
+     "title": "Hoidot ja rituaalit",
+     "text": "Kokonaisvaltaisia saunahoitoja, rituaaleja ja perinnesaunotuksia savun ja löylyn äärellä. Valitse lyhyt hoitohetki tai syvempi matka suomalaisen saunaperinteen maailmaan.",
+     "kb": "saunahoito-2",
+     "show": [
+      "persons",
+      "duration",
+      "price"
+     ],
+     "to": "treatments",
+     "cta": "Katso hoidot →"
+    },
+    {
+     "img": "yleinen",
+     "pill": "yleinen",
+     "title": "Yleinen sauna",
+     "text": "Ota ystävät tai perhe mukaan ja tule nauttimaan yhteisöllisestä saunaelämyksestä sekä savusaunamme pehmeistä löylyistä ja upeasta miljööstä.",
+     "kb": "yleinensauna",
+     "show": [
+      "duration",
+      "price"
+     ],
+     "over": {
+      "duration": "2–3 h"
+     },
+     "to": "sauna#yleiset",
+     "cta": "Varaa vuorosi →"
+    },
+    {
+     "img": "palju",
+     "pill": "yksityinen",
+     "title": "Yksityisvuorot",
+     "text": "Vuokraamalla Sipoonjoen perinnesaunan oman porukkasi käyttöön pääset nauttimaan saunamiljöömme kauneudesta kaikessa rauhassa.",
+     "kb": "jalkiloylyt",
+     "show": [
+      "duration",
+      "price"
+     ],
+     "over": {
+      "duration": "1–7 h"
+     },
+     "note": "Jälkilöylyjen hinta sisältää 6 hlö, lisähenkilöt 10 €/hlö.",
+     "to": "sauna#yksityisvuorot",
+     "cta": "Tutustu →"
+    },
+    {
+     "img": "lahja",
+     "pill": "lahjaksi",
+     "title": "Lahjakortit",
+     "text": "Anna lahjaksi hetki lämpöä, löylyä ja kiireettömyyttä. Valitse avoin lahjakortti tai valmis elämys erilaisiin hetkiin ja tarpeisiin.",
+     "kb": "lahjakortti",
+     "show": [
+      "price"
+     ],
+     "to": "gift",
+     "cta": "Osta lahjakortti →"
+    },
+    {
+     "img": "saunotus",
+     "pill": "yksityinen",
+     "title": "Saunotus",
+     "text": "Saunotus on kahden tunnin kokonaisvaltainen saunaelämys, jossa lämpö, löyly ja luonnonantimet yhdistyvät syvästi rentouttavaksi kokemukseksi.",
+     "kb": "saunotus-2",
+     "show": [
+      "persons",
+      "duration",
+      "price"
+     ],
+     "exact": true,
+     "to": "treatments#saunotukset",
+     "cta": "Varaa saunotus →"
+    }
+   ]
+  },
+  "about": {
+   "kicker": "mitä on saunotus?",
+   "title": "Elämys, joka juontaa juurensa perinteeseen",
+   "text": "Saunotus on ohjattu moniaistinen saunarituaali, joka juontaa juurensa suomalaiseen kulttuuriperinteeseen. Se herättää vanhat saunaperinteet eloon mytologian, rituaalilaulujen, luonnonantimien, tuoksujen, elementtien ja löylyn kautta – löylyn, joka on sekä saunan henki että sen lämpö.",
+   "elements": [
+    {
+     "icon": "ikoni-maa",
+     "title": "maa",
+     "text": "Kiukaan kivet, metsän antimet ja luonnon tuoksut johdattavat pysähtymään tähän hetkeen"
+    },
+    {
+     "icon": "ikoni-ilma",
+     "title": "ilma",
+     "text": "Vihdan synnyttämä löylyn tuulahdus ja lämpö herättelevät kehoa ja aisteja"
+    },
+    {
+     "icon": "ikoni-tuli",
+     "title": "tuli",
+     "text": "Saunan lämpö ja vihdan työ kuljettavat lämmön syvälle kehoon"
+    },
+    {
+     "icon": "ikoni-vesi",
+     "title": "vesi",
+     "text": "Kiukaalle luotu vesi synnyttää löylyn, viilentävä vesi rauhoittaa ja tasapainottaa"
+    }
+   ],
+   "cta": "Opi lisää saunaperinteestä",
+   "img": "saunotus-selka"
+  },
+  "events": {
+   "title": "Tapahtumat",
+   "empty": "Uusia tapahtumia julkaistaan pian. Seuraa meitä sosiaalisessa mediassa."
+  },
+  "company": {
+   "kicker": "Lämpimiä yhteisiä hetkiä",
+   "title": "Savusauna myös yrityksille ja ryhmille",
+   "text": "Savusauna tarjoaa rauhallisen ympäristön työhyvinvointipäiville, pienryhmille ja yhteisille saunailloille Sipoonjoen rannalla. Perinteisten saunavuorojen, rituaalien ja hoitojen lisäksi päivään voidaan yhdistää esimerkiksi metsäkävely, metsäjooga, eräruokailu laavulla tai vihdansidontatyöpaja.",
+   "cta": "Pyydä tarjous",
+   "cta2": "Yrityksille →",
+   "img": "palju",
+   "mailSubject": "Tarjouspyyntö"
+  },
+  "story": {
+   "kicker": "saunan tarina",
+   "title": "Milloin sauna on rakennettu?",
+   "lead": "Tätä kysytään meiltä usein, joten kokosimme vuodet yhteen.",
+   "items": [
+    {
+     "year": "2021",
+     "text": "Sipoonjoen perinnesauna valmistui. Työtä oli vielä paljon edessä, mutta jo samana syksynä pidettiin ensimmäiset tapahtumat."
+    },
+    {
+     "year": "2022",
+     "text": "Tammikuussa avasimme yleiset vuorot, ja rankka talvi iski heti päälle. Savusaunan lämmittämistä paksussa lumessa, pakkasessa ja jäässä piti ihan oikeasti opetella."
+    },
+    {
+     "year": "2023",
+     "text": "Toiminta alkoi vakiintua, ja loppuvuodesta avasimme myös keskiviikon viikkovuorot."
+    },
+    {
+     "year": "2024",
+     "text": "Toiminta laajeni: koulutukset alkoivat sekä suomalaisille että kansainvälisille ryhmille, ja sauna alkoi lämmetä joka päivä."
+    },
+    {
+     "year": "Sen jälkeen",
+     "text": "Rakennusprojektit etenivät, ja uusi hoitoalue valmistui hoitosaunoineen."
+    }
+   ],
+   "thanks": "Kiitos jokaiselle, joka on ollut matkassa mukana. Tervetuloa löylyihin!",
+   "ig": "Seuraa meitä Instagramissa"
+  }
+ },
+ "en": {
+  "meta": {
+   "title": "Sipoonjoen Perinnesauna – a smoke sauna in Sipoo, Finland | Saunotus",
+   "description": "A smoke sauna built into the ground in Sipoo: public sessions, private sessions, treatments, rituals and gift cards on the banks of the Sipoonjoki river.",
+   "og": "hero-ovi"
+  },
+  "hero": {
+   "title": "A smoke sauna in Sipoo",
+   "text": "Saunotus is more than a sauna. Warmth, steam and all-encompassing rituals for body and mind",
+   "cta1": "Book a sauna experience",
+   "cta2": "Give as a gift"
+  },
+  "tiles": [
+   {
+    "icon": "ikoni-hoito",
+    "title": "Good steam",
+    "text": "Come and enjoy the soft steam of our smoke sauna and refreshing dips.",
+    "links": [
+     {
+      "label": "Public sauna sessions →",
+      "to": "sauna#yleiset"
+     }
+    ]
+   },
+   {
+    "icon": "ikoni-maa",
+    "title": "Treatments & rituals",
+    "text": "Guided rituals and Finnish sauna traditions brought into the present day.",
+    "links": [
+     {
+      "label": "Explore the experiences →",
+      "to": "treatments"
+     }
+    ]
+   },
+   {
+    "icon": "ikoni-savusauna",
+    "title": "Your own sauna session",
+    "text": "Book the sauna for your own group, or build a complete sauna experience for it.",
+    "links": [
+     {
+      "label": "Private sessions →",
+      "to": "sauna#yksityisvuorot"
+     }
+    ]
+   },
+   {
+    "icon": "ikoni-lotus",
+    "title": "An experience as a gift",
+    "text": "Shared sauna experiences and special moments that stay with you.",
+    "links": [
+     {
+      "label": "→ Open gift card",
+      "to": "gift#avoin"
+     },
+     {
+      "label": "→ Gift card packages",
+      "to": "gift#paketit"
+     }
+    ]
+   }
+  ],
+  "ritual": {
+   "kicker": "weekly on Saturdays and Sundays",
+   "title": "Sauna ritual evening",
+   "paras": [
+    "Step deep into the Baltic-Finnic sauna tradition and experience a ritual that lives with the seasons. Each season brings its own atmosphere, scents and sauna traditions.",
+    "The ritual is held in the Rauni treatment sauna in a small group – a maximum of six participants at a time. During the ritual you can rest on the wide benches and let the warmth, the steam and the traditions carry you."
+   ],
+   "facts": [
+    {
+     "icon": "ikoni-vihta",
+     "text": "Guided ritual"
+    },
+    {
+     "icon": "ikoni-vuoro",
+     "text": "20 minutes"
+    },
+    {
+     "icon": "ikoni-savusauna",
+     "text": "Includes a smoke sauna session"
+    },
+    {
+     "icon": "ikoni-mantyyli",
+     "text": "The programme changes with the seasons"
+    }
+   ],
+   "cta": "See times and book →"
+  },
+  "featured": {
+   "title": "We recommend",
+   "items": [
+    {
+     "img": "vihta-hoito",
+     "pill": "experience saunotus",
+     "title": "Treatments and rituals",
+     "text": "All-encompassing sauna treatments, rituals and traditional saunotus in the smoke and steam. Choose a short moment of care or a deeper journey into Finnish sauna tradition.",
+     "kb": "saunahoito-2",
+     "show": [
+      "persons",
+      "duration",
+      "price"
+     ],
+     "to": "treatments",
+     "cta": "See treatments →"
+    },
+    {
+     "img": "yleinen",
+     "pill": "public",
+     "title": "Public sauna",
+     "text": "Bring friends or family and enjoy a communal sauna experience, the soft steam of our smoke sauna and a wonderful setting.",
+     "kb": "yleinensauna",
+     "show": [
+      "duration",
+      "price"
+     ],
+     "over": {
+      "duration": "2–3 h"
+     },
+     "to": "sauna#yleiset",
+     "cta": "Book your session →"
+    },
+    {
+     "img": "palju",
+     "pill": "private",
+     "title": "Private sessions",
+     "text": "By renting the heritage sauna for your own group you can enjoy the beauty of our sauna setting in complete peace.",
+     "kb": "jalkiloylyt",
+     "show": [
+      "duration",
+      "price"
+     ],
+     "over": {
+      "duration": "1–7 h"
+     },
+     "note": "The price of an after-session includes 6 guests; additional guests €10 each.",
+     "to": "sauna#yksityisvuorot",
+     "cta": "Explore →"
+    },
+    {
+     "img": "lahja",
+     "pill": "gift",
+     "title": "Gift cards",
+     "text": "Give the gift of warmth, steam and unhurried time. Choose an open gift card or a ready-made experience for different moments and needs.",
+     "kb": "lahjakortti",
+     "show": [
+      "price"
+     ],
+     "to": "gift",
+     "cta": "Buy a gift card →"
+    },
+    {
+     "img": "saunotus",
+     "pill": "private",
+     "title": "Saunotus",
+     "text": "Saunotus is a two-hour, all-encompassing sauna experience where warmth, steam and the gifts of nature combine into a deeply relaxing experience.",
+     "kb": "saunotus-2",
+     "show": [
+      "persons",
+      "duration",
+      "price"
+     ],
+     "exact": true,
+     "to": "treatments#saunotukset",
+     "cta": "Book a saunotus →"
+    }
+   ]
+  },
+  "about": {
+   "kicker": "what is saunotus?",
+   "title": "An experience rooted in tradition",
+   "text": "Saunotus is a guided, multisensory sauna ritual rooted in Finnish cultural tradition. It brings the old sauna traditions to life through mythology, ritual songs, gifts of nature, scents, the elements and löyly – the steam that is both the spirit of the sauna and its heat.",
+   "elements": [
+    {
+     "icon": "ikoni-maa",
+     "title": "earth",
+     "text": "The stones of the stove, the gifts of the forest and the scents of nature lead you to pause in this moment"
+    },
+    {
+     "icon": "ikoni-ilma",
+     "title": "air",
+     "text": "The breath of steam created by the whisk and the heat awaken the body and the senses"
+    },
+    {
+     "icon": "ikoni-tuli",
+     "title": "fire",
+     "text": "The warmth of the sauna and the work of the whisk carry the heat deep into the body"
+    },
+    {
+     "icon": "ikoni-vesi",
+     "title": "water",
+     "text": "Water thrown on the stove creates the steam, cooling water calms and balances"
+    }
+   ],
+   "cta": "Learn more about sauna tradition",
+   "img": "saunotus-selka"
+  },
+  "events": {
+   "title": "Events",
+   "empty": "New events will be announced soon. Follow us on social media."
+  },
+  "company": {
+   "kicker": "Warm moments together",
+   "title": "A smoke sauna for companies and groups too",
+   "text": "The smoke sauna offers a calm setting for workplace wellbeing days, small groups and shared sauna evenings on the banks of the Sipoonjoki river. In addition to traditional sauna sessions, rituals and treatments, the day can be combined with, for example, a forest walk, forest yoga, a wilderness meal at the lean-to or a whisk-binding workshop.",
+   "cta": "Request a quote",
+   "cta2": "For companies →",
+   "img": "palju",
+   "mailSubject": "Request for quote"
+  },
+  "story": {
+   "kicker": "the story of the sauna",
+   "title": "When was the sauna built?",
+   "lead": "We are often asked this, so we put the years together.",
+   "items": [
+    {
+     "year": "2021",
+     "text": "The Sipoonjoki heritage sauna was completed. There was still a lot of work ahead, but the first events were held that same autumn."
+    },
+    {
+     "year": "2022",
+     "text": "In January we opened the public sessions, and a harsh winter struck right away. Heating a smoke sauna in deep snow, frost and ice really had to be learnt."
+    },
+    {
+     "year": "2023",
+     "text": "Operations began to settle, and towards the end of the year we also opened the Wednesday sessions."
+    },
+    {
+     "year": "2024",
+     "text": "Operations expanded: trainings began for Finnish and international groups, and the sauna began to be heated every day."
+    },
+    {
+     "year": "Since then",
+     "text": "Building projects progressed, and the new treatment area with its treatment saunas was completed."
+    }
+   ],
+   "thanks": "Thank you to everyone who has been along for the ride. Welcome to the steam!",
+   "ig": "Follow us on Instagram"
+  }
+ }
+}

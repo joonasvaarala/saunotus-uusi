@@ -1,0 +1,239 @@
+{
+ "fi": {
+  "meta": {
+   "title": "Käytännön info – mitä mukaan, saapuminen ja pysäköinti | Sipoonjoen Perinnesauna",
+   "description": "Mitä ottaa mukaan saunalle, miten pääset Sipoon Hindsbyyn (Hindsbyntie 124), pysäköinti ja esteettömyys.",
+   "og": "saunotus-selka"
+  },
+  "hero": {
+   "title": "Käytännön info",
+   "text": "Täältä löydät tärkeimmät tiedot siitä, mitä tarvitset mukaan, kuinka saavut perille ja mihin auton voi jättää.",
+   "img": "saunotus-selka"
+  },
+  "sections": [
+   {
+    "id": "mita-mukaan",
+    "icon": "ikoni-mokki",
+    "title": "Mitä mukaan?",
+    "tag": "Mitä tarvitset mukaan saunalle?",
+    "blocks": [
+     {
+      "p": "Saunalle ei tarvitse ottaa paljon tavaraa mukaan. Varaa mukaasi ainakin:"
+     },
+     {
+      "ul": [
+       "Uima-asu tarvittaessa",
+       "Pyyhe",
+       "Juomapullo",
+       "Säänmukaiset vaatteet ja jalkineet"
+      ]
+     },
+     {
+      "p": "Sauna-alueella liikutaan osittain ulkona ympäri vuoden. Talvella kannattaa ottaa mukaan lämpimät ja helposti jalkaan laitettavat jalkineet. Viileämmällä säällä on hyvä olla pipo tai saunahattu paljussa rentoutumista varten."
+     },
+     {
+      "p": "Jos haluat paistaa makkaraa saunaillan aikana, voit ottaa omat makkarat mukaan."
+     },
+     {
+      "note": "<strong>Uima-asun käyttö riippuu vuorosta.</strong> Yleisillä sekavuoroilla saunotaan uima-asussa. Maanantain miestenvuorolla, tiistain naistenvuorolla sekä keskiviikon hiljaisella sekavuorolla uima-asun käyttö ei kuitenkaan ole pakollista. Henkilökohtaisissa saunahoidoissa ja saunotuksissa voit olla oman toiveesi mukaan kokonaan tai osittain ilman uima-asua."
+     },
+     {
+      "p": "Muista juoda riittävästi saunomisen aikana. Saunalla on saatavilla alkoholittomia virvokkeita."
+     }
+    ]
+   },
+   {
+    "id": "saapuminen",
+    "icon": "ikoni-vuoro",
+    "title": "Saapuminen ja sijainti",
+    "tag": "Osoite ja kulkuyhteydet",
+    "blocks": [
+     {
+      "p": "Sipoonjoen perinnesauna sijaitsee Sipoon Hindsbyssä, Sipoonkorven kansallispuiston kupeessa."
+     },
+     {
+      "address": true
+     },
+     {
+      "p": "<strong>Saavu paikalle aikaisintaan noin 10 minuuttia ennen varauksesi alkua.</strong>"
+     },
+     {
+      "p": "Huomioithan, että saunalla on usein yksityisvuoroja, joten odotathan henkilökuntaa parkkipaikan läheisellä terassilla ja tutustut saunan miljööseen henkilökunnan opastuksella."
+     },
+     {
+      "p": "Julkisilla liikkuessa bussilla 841 pääsee Itäkeskuksesta Broböleen. Pysäkiltä on noin kilometrin matka perinnesaunalle.",
+      "link": {
+       "label": "Katso reitti HSL:n Reittioppaasta",
+       "url": "hsl"
+      }
+     }
+    ]
+   },
+   {
+    "id": "pysakointi",
+    "icon": "ikoni-ornamentti",
+    "title": "Pysäköinti",
+    "tag": "Minne auton voi jättää",
+    "blocks": [
+     {
+      "p": "Pysäköinti on asiakkaille maksuton. Saapuessasi alueelle seuraa pysäköintiopasteita ja jätä auto sille osoitetulle pysäköintialueelle."
+     },
+     {
+      "p": "<strong>Pyydämme pysäköimään autot mahdollisimman tiiviisti</strong>, jotta pysäköintialueelle mahtuu mahdollisimman monta autoa. Huolehdi kuitenkin siitä, että kulkuväylät jäävät vapaiksi."
+     },
+     {
+      "p": "Pysäköintialueelta jatketaan jalan sauna-alueelle."
+     },
+     {
+      "note": "Talvella ja märällä säällä alueen tiet ja polut voivat olla liukkaita, joten varaudu keliin sopivilla jalkineilla."
+     }
+    ]
+   },
+   {
+    "id": "esteettomyys",
+    "icon": "ikoni-mantyyli",
+    "title": "Esteettömyys",
+    "tag": "Liikkuminen sauna-alueella",
+    "blocks": [
+     {
+      "p": "Sauna-alue ei ole täysin esteetön, sillä alueella on portaita. Jos tarvitset apua liikkumiseen, kerro siitä etukäteen sähköpostitse.",
+      "mail": true
+     },
+     {
+      "p": "Pukuhuoneilta saunalle on noin 40 metrin matka."
+     }
+    ]
+   }
+  ],
+  "faqTitle": "Usein kysyttyä",
+  "faq": [
+   3,
+   4,
+   5,
+   6,
+   7,
+   10,
+   14
+  ],
+  "cancelTitle": "Varauksen peruminen",
+  "cancelText": "Yleisen vuoron voi perua maksutta vähintään 48 tuntia ennen alkua. Yksityisvuorojen, tapahtumien ja perinnesaunotusiltojen peruutusehdot löydät ehdoista.",
+  "cancelLink": "Lue varaus- ja peruutusehdot"
+ },
+ "en": {
+  "meta": {
+   "title": "Practical information – what to bring, getting here and parking | Sipoonjoen Perinnesauna",
+   "description": "What to bring to the sauna, how to get to Hindsby in Sipoo (Hindsbyntie 124), parking and accessibility.",
+   "og": "saunotus-selka"
+  },
+  "hero": {
+   "title": "Practical information",
+   "text": "Here you will find the most important information about what you need to bring, how to get here and where you can leave the car.",
+   "img": "saunotus-selka"
+  },
+  "sections": [
+   {
+    "id": "mita-mukaan",
+    "icon": "ikoni-mokki",
+    "title": "What to bring",
+    "tag": "What do you need to bring to the sauna?",
+    "blocks": [
+     {
+      "p": "You don't need to bring a lot to the sauna. Bring at least:"
+     },
+     {
+      "ul": [
+       "A swimsuit if necessary",
+       "A towel",
+       "A drinking bottle",
+       "Weather-appropriate clothing and footwear"
+      ]
+     },
+     {
+      "p": "The sauna area is partly outdoors all year round. In winter it is a good idea to bring warm shoes that are easy to put on. In cooler weather a beanie or sauna hat is useful for relaxing in the hot tub."
+     },
+     {
+      "p": "If you want to grill sausages during your sauna evening, you can bring your own."
+     },
+     {
+      "note": "<strong>Swimsuit use depends on the session.</strong> Swimsuits are worn in mixed public sessions. On the Monday men's session, the Tuesday women's session and the Wednesday silent mixed session, wearing a swimsuit is optional. In personal sauna treatments and saunotus sessions you can be fully or partially without a swimsuit, as you wish."
+     },
+     {
+      "p": "Remember to drink enough while in the sauna. Non-alcoholic drinks are available at the sauna."
+     }
+    ]
+   },
+   {
+    "id": "saapuminen",
+    "icon": "ikoni-vuoro",
+    "title": "Arrival and location",
+    "tag": "Address and transport links",
+    "blocks": [
+     {
+      "p": "Sipoonjoen Perinnesauna is located in Hindsby, Sipoo, next to Sipoonkorpi National Park."
+     },
+     {
+      "address": true
+     },
+     {
+      "p": "<strong>Please arrive no earlier than about 10 minutes before your booking starts.</strong>"
+     },
+     {
+      "p": "Please note that the sauna often has private sessions, so wait for the staff on the terrace near the car park and get to know the sauna surroundings with the guidance of the staff."
+     },
+     {
+      "p": "By public transport, bus 841 runs from Itäkeskus to Broböle. The stop is about 1 km from the sauna.",
+      "link": {
+       "label": "See the route in the HSL Journey Planner",
+       "url": "hsl"
+      }
+     }
+    ]
+   },
+   {
+    "id": "pysakointi",
+    "icon": "ikoni-ornamentti",
+    "title": "Parking",
+    "tag": "Where to leave the car",
+    "blocks": [
+     {
+      "p": "Parking is free of charge for customers. When you arrive, follow the parking signs and leave your car in the designated parking area."
+     },
+     {
+      "p": "<strong>Please park as compactly as possible</strong> so that as many cars as possible fit in the parking area. Make sure, however, that the driveways stay clear."
+     },
+     {
+      "p": "From the parking area you continue on foot to the sauna area."
+     },
+     {
+      "note": "In winter and in wet weather the roads and paths in the area can be slippery, so be prepared with footwear suited to the conditions."
+     }
+    ]
+   },
+   {
+    "id": "esteettomyys",
+    "icon": "ikoni-mantyyli",
+    "title": "Accessibility",
+    "tag": "Getting around the sauna area",
+    "blocks": [
+     {
+      "p": "The sauna area is not fully accessible, as there are steps in the area. If you need help getting around, please let us know in advance by email.",
+      "mail": true
+     },
+     {
+      "p": "It is about 40 metres from the changing rooms to the sauna."
+     }
+    ]
+   }
+  ],
+  "faqTitle": "Frequently asked questions",
+  "faq": [
+   19,
+   21,
+   22,
+   23
+  ],
+  "cancelTitle": "Cancelling a booking",
+  "cancelText": "A public session can be cancelled free of charge at least 48 hours before it starts. The cancellation terms for private sessions, events and traditional sauna evenings are in the terms.",
+  "cancelLink": "Read the booking and cancellation terms"
+ }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "saunotus-uusi",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sipoonjoen perinnesauna – kevyt staattinen sivusto (FI/EN)",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "assets": "node scripts/fetch-assets.mjs",
+    "images": "node scripts/optimize-images.mjs",
+    "build": "node scripts/build.mjs",
+    "build:test": "SITE_ENV=test node scripts/build.mjs",
+    "dev": "node scripts/serve.mjs dist 4173",
+    "check": "node scripts/check.mjs",
+    "build:local": "SITE_ENV=test SITE_URL=http://localhost:4173 node scripts/build.mjs",
+    "preview": "npm run build:local && node scripts/serve.mjs dist 4173",
+    "check:external": "node scripts/check.mjs --external",
+    "build:prod": "node scripts/build.mjs"
+  },
+  "devDependencies": {
+    "sharp": "^0.33.5"
+  }
+}

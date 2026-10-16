@@ -1,0 +1,47 @@
+{
+ "fi": {
+  "meta": {
+   "title": "Ehdot – varaus, peruutus ja lahjakortit | Sipoonjoen Perinnesauna",
+   "description": "Sipoonjoen perinnesaunan varaus-, peruutus-, maksu- ja lahjakorttiehdot.",
+   "og": "ovi-kaiverrus"
+  },
+  "hero": {
+   "title": "Ehdot",
+   "text": "Varaus-, peruutus-, maksu- ja lahjakorttiehdot.",
+   "img": "ovi-kaiverrus"
+  },
+  "policies": [
+   1,
+   2,
+   3,
+   5,
+   6,
+   8,
+   25,
+   9
+  ],
+  "note": "Varaukset ja maksut tehdään Johku-verkkokaupassa, jonka ehdot ovat voimassa ostohetkellä."
+ },
+ "en": {
+  "meta": {
+   "title": "Terms and conditions – booking, cancellation and gift cards | Sipoonjoen Perinnesauna",
+   "description": "Booking, cancellation, payment and gift card terms of Sipoonjoen Perinnesauna.",
+   "og": "ovi-kaiverrus"
+  },
+  "hero": {
+   "title": "Terms and conditions",
+   "text": "Booking, cancellation, payment and gift card terms.",
+   "img": "ovi-kaiverrus"
+  },
+  "policies": [
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   26
+  ],
+  "note": "Bookings and payments are made in the Johku web shop, whose terms apply at the time of purchase."
+ }
+}

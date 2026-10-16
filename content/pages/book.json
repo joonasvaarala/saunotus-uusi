@@ -1,0 +1,28 @@
+{
+  "fi": {
+    "meta": {"title":"Varaa saunaelämys | Sipoonjoen Perinnesauna","description":"Varaa yleinen saunavuoro, avoin rituaali, saunahoito, saunotus tai yksityisvuoro Sipoonjoen perinnesaunalle. Varaukset tehdään Johku-verkkokaupassa.","og":"ovi-kaiverrus"},
+    "hero": {"title":"Varaa saunaelämys","text":"Oletko valmiina elämäsi rentouttavimpaan saunakokemukseen?","img":"ovi-kaiverrus"},
+    "chips": [{"label":"Saunavuorot","url":"publicAll"},{"label":"Avoimet rituaalit","url":"ceremonies"},{"label":"Saunahoidot ja saunotukset","url":"treatments"},{"label":"Yksityisvuorot","url":"private"},{"label":"Varaus lahjakortilla","url":"giftReservation"}],
+    "note":"Varaukset ja maksu tehdään Johku-verkkokaupassa (avautuu uuteen välilehteen).",
+    "recTitle":"Suosittelemme näitä kokemuksia","recText":"Ensimmäistä kertaa tulossa? Näistä pääset helposti sisään Sipoonjoen Perinnesaunan maailmaan.",
+    "rec":[
+      {"card":"treatments.avoin-rituaali","title":"Saunarituaali ja savusaunavuoro (la & su)"},
+      {"card":"sauna.yleinen","title":"Yleinen vuoro (to, la–su)"},
+      {"card":"treatments.saunahoito","title":"Saunahoito"}
+    ],
+    "eventsTitle":"Tulevat tapahtumat"
+  },
+  "en": {
+    "meta": {"title":"Book a sauna experience | Sipoonjoen Perinnesauna","description":"Book a public sauna session, open ritual, sauna treatment, saunotus or private session at Sipoonjoen Perinnesauna. Bookings are made in the Johku web shop.","og":"ovi-kaiverrus"},
+    "hero": {"title":"Book a sauna experience","text":"Are you ready for the most relaxing sauna experience of your life?","img":"ovi-kaiverrus"},
+    "chips": [{"label":"Sauna sessions","url":"publicAll"},{"label":"Open rituals","url":"ceremonies"},{"label":"Sauna treatments and saunotus","url":"treatments"},{"label":"Private sessions","url":"private"},{"label":"Book with a gift card","url":"giftReservation"}],
+    "note":"Bookings and payment are made in the Johku web shop (opens in a new tab).",
+    "recTitle":"We recommend these experiences","recText":"Coming for the first time? These are an easy way into the world of Sipoonjoen Perinnesauna.",
+    "rec":[
+      {"card":"treatments.avoin-rituaali","title":"Sauna ritual and smoke sauna session (Sat & Sun)"},
+      {"card":"sauna.yleinen","title":"Public session (Thu, Sat–Sun)"},
+      {"card":"treatments.saunahoito","title":"Sauna treatment"}
+    ],
+    "eventsTitle":"Upcoming events"
+  }
+}
