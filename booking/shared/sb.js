@@ -97,5 +97,27 @@ export const rpc = (fn, args = {}) => request(`/rpc/${fn}`, { method: 'POST', bo
 // select('customers', { select: 'id,name', order: 'name.asc', limit: 50, 'name': 'ilike.*abc*' })
 export const select = (table, query = {}) => request(`/${table}`, { query });
 
-export const sb = { rpc, select, fn, signIn, signOut, getSession, onAuthChange, adoptSessionFromHash, setPassword };
+// ---- Storage (tuotekuvat) ----
+// Julkinen URL (bucket on julkinen): <url>/storage/v1/object/public/<bucket>/<polku>. cfg.storage voi ylikirjoittaa polun (esim. CDN).
+export const storageUrl = (bucket, path) => `${base(cfg().storage ?? '/storage/v1')}/object/public/${bucket}/${String(path).split('/').map(encodeURIComponent).join('/')}`;
+async function storageReq(method, bucket, path, body, contentType) {
+  const tk = await token();
+  const bearer = tk && tk.split('.').length === 3 ? { Authorization: `Bearer ${tk}` } : {};
+  const r = await fetch(base(`${cfg().storage ?? '/storage/v1'}/object/${bucket}/${path}`), {
+    method, headers: { apikey: cfg().anonKey, ...bearer, ...(contentType ? { 'Content-Type': contentType, 'Cache-Control': 'max-age=3600' } : {}) }, body,
+  });
+  const text = await r.text();
+  let j; try { j = text ? JSON.parse(text) : null; } catch { j = { message: text }; }
+  if (!r.ok) {
+    if (r.status === 401) { if (session) save(null); }
+    const msg = r.status === 403 || r.status === 401 ? 'Ei oikeutta kuvien hallintaan' : r.status === 413 ? 'Kuva on liian suuri (enintään 2 MB)' : (j?.message || j?.error || r.statusText);
+    throw new ApiError(msg, { status: r.status, details: j });
+  }
+  return j;
+}
+// Lataa tiedoston kirjautuneen käyttäjän istunnolla (RLS: catalog.edit). Ei ylikirjoita olemassa olevaa (uusi polku joka latauksella).
+export const uploadObject = (bucket, path, blob) => storageReq('POST', bucket, path, blob, blob.type || 'application/octet-stream');
+export const removeObject = (bucket, path) => storageReq('DELETE', bucket, path);
+
+export const sb = { rpc, select, fn, storageUrl, uploadObject, removeObject, signIn, signOut, getSession, onAuthChange, adoptSessionFromHash, setPassword };
 export default sb;

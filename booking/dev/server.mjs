@@ -2,7 +2,8 @@
 //   node booking/dev/server.mjs            → http://localhost:4180/  (kauppa),  /admin/  (hallinta)
 // EI tuotantoon: mock-auth hyväksyy kovakoodatut demo-tunnukset ja allekirjoittaa JWT:n demon salaisuudella.
 import { createServer, request as httpRequest } from 'node:http';
-import { readFile, stat } from 'node:fs/promises';
+import { readFile, stat, writeFile, mkdir, unlink } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { validateRequest, mapDbError } from '../supabase/functions/admin-users/logic.js';
@@ -73,6 +74,7 @@ async function mockAdminUsers(req, res, origin) {
   return json(res, 200, { ok: true, user_id: v.user_id, active });
 }
 const json = (res, code, o) => { res.writeHead(code, { 'content-type': 'application/json' }); res.end(JSON.stringify(o)); };
+const readBuf = (req, max) => new Promise((ok, no) => { const c = []; let n = 0; req.on('data', (d) => { n += d.length; if (n > max) { no(Object.assign(new Error('too large'), { status: 413 })); req.destroy(); } else c.push(d); }); req.on('end', () => ok(Buffer.concat(c))); req.on('error', no); });
 const readBody = (req) => new Promise((ok) => { const c = []; req.on('data', (d) => c.push(d)); req.on('end', () => ok(Buffer.concat(c).toString())); });
 
 // URL → tiedosto. /admin/* → booking/admin, /booking/sb.js ja /admin/sb.js → shared/sb.js, muuten kaupan dist.
@@ -83,9 +85,39 @@ function resolveFile(p) {
   if (p.startsWith('/admin/')) return join(booking, 'admin', p.slice(7) || 'index.html');
   return join(SHOP, p);
 }
+// MOCK Supabase Storage (vain demossa): bucket product-images. Lataukset ~/tmp/booking-demo-storage, demokuvat booking/dev/demo-images.
+// Sama sääntö kuin migraatiossa 14: kirjoitus vaatii oikeuden catalog.edit, polku products/<id>-<tunnus>.<jpg|png|webp>, max 2 MB, vain jpeg/png/webp.
+const STORE = join(tmpdir(), 'booking-demo-storage'), DEMO_IMG = join(booking, 'dev/demo-images');
+const IMG_RE = /^products\/[0-9]{1,18}-[a-z0-9]{6,32}\.(jpg|jpeg|png|webp)$/, IMG_MIME = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
+async function mockStorage(req, res, path) {
+  const pub = path.startsWith('/storage/v1/object/public/product-images/');
+  const obj = decodeURIComponent(path.replace(/^\/storage\/v1\/object\/(public\/)?product-images\//, ''));
+  if (!IMG_RE.test(obj)) return json(res, 400, { message: 'invalid path' });
+  const ext = obj.split('.').pop();
+  if (pub && (req.method === 'GET' || req.method === 'HEAD')) {
+    for (const dir of [STORE, DEMO_IMG]) {
+      try { const buf = await readFile(join(dir, obj)); res.writeHead(200, { 'content-type': IMG_MIME[ext], 'cache-control': 'no-store' }); return res.end(buf); } catch {}
+    }
+    return json(res, 404, { message: 'Object not found' });
+  }
+  if (pub || !['POST', 'PUT', 'DELETE'].includes(req.method)) return json(res, 405, { message: 'method not allowed' });
+  const claims = verifyJwt(req.headers.authorization);
+  if (!claims || claims.role !== 'authenticated') return json(res, 401, { message: 'Unauthorized' });
+  const perm = await pgrst('has_permission', { p_permission: 'catalog.edit' }, req.headers.authorization.slice(7));
+  if (perm.error || perm.data !== true) return json(res, 403, { message: 'new row violates row-level security policy' });
+  if (req.method === 'DELETE') { await unlink(join(STORE, obj)).catch(() => {}); return json(res, 200, { message: 'Successfully deleted' }); }
+  const type = (req.headers['content-type'] || '').split(';')[0];
+  if (!Object.values(IMG_MIME).includes(type)) return json(res, 415, { message: 'mime type not supported' });
+  let buf; try { buf = await readBuf(req, 2 * 1048576); } catch (e) { return json(res, e.status || 400, { message: 'The object exceeded the maximum allowed size' }); }
+  const f = join(STORE, obj);
+  if (req.method === 'POST' && await stat(f).then(() => true, () => false)) return json(res, 409, { message: 'The resource already exists' });
+  await mkdir(dirname(f), { recursive: true }); await writeFile(f, buf);
+  return json(res, 200, { Key: `product-images/${obj}`, Id: obj });
+}
 createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   const path = url.pathname;
+  if (path.startsWith('/storage/v1/object/')) return mockStorage(req, res, path).catch((e) => { console.error('mock storage', e.message); json(res, 500, { message: 'Palvelinvirhe' }); });
   if (path === '/admin') { res.writeHead(301, { location: '/admin/' }); return res.end(); }
   if (path === '/auth/v1/token' && req.method === 'POST') {
     const body = JSON.parse((await readBody(req)) || '{}'); const g = url.searchParams.get('grant_type');

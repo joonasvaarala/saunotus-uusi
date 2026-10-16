@@ -20,9 +20,27 @@ const problems = [];
 const watch = (page, name) => {
   page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) problems.push(`${name} console.${m.type()}: ${m.text()}`); });
   page.on('pageerror', (e) => problems.push(`${name} pageerror: ${e.message}`));
-  page.on('requestfailed', (r) => problems.push(`${name} requestfailed: ${r.url()} ${r.failure()?.errorText}`));
+  page.on('requestfailed', (r) => !(/\/storage\/v1\/object\/public\//.test(r.url()) && /ERR_ABORTED/.test(r.failure()?.errorText || '')) && problems.push(`${name} requestfailed: ${r.url()} ${r.failure()?.errorText}`));
   page.on('response', (r) => { if (r.status() >= 400) problems.push(`${name} HTTP ${r.status()}: ${r.url()}`); });
 };
+// v15b: hero-bannerin tekstin kontrasti kuvan päällä: piilotetaan teksti, kuvataan hero ja haetaan kirkkain kohta tekstialueen takaa (huonoin tapaus) → valkoisen tekstin kontrasti
+async function heroContrast(page) {
+  await page.evaluate(() => window.scrollTo(0, 0));
+  // tekstilaatikot dokumentin koordinaateissa → kuvataan vain ne (teksti piilotettuna): huonoin tapaus = kirkkain pikseli tekstin takana
+  const r = await page.evaluate(() => { const b = [...document.querySelectorAll('main .hero.page h1, main .hero.page .in p')].map((e) => e.getBoundingClientRect()); const x0 = Math.min(...b.map((q) => q.left)), y0 = Math.min(...b.map((q) => q.top)); return { x: Math.max(0, x0), y: y0 + scrollY, w: Math.max(...b.map((q) => q.right)) - Math.max(0, x0), h: Math.max(...b.map((q) => q.bottom)) - y0 }; });
+  await page.addStyleTag({ content: '.hero.page h1,.hero.page .in p{visibility:hidden!important;text-shadow:none!important}' });
+  const png = (await page.screenshot({ fullPage: true, clip: { x: r.x, y: r.y, width: r.w, height: r.h } })).toString('base64');
+  const worst = await page.evaluate(async (b64) => {
+    const im = new Image(); im.src = `data:image/png;base64,${b64}`; await im.decode();
+    const cv = document.createElement('canvas'); cv.width = im.width; cv.height = im.height; const c = cv.getContext('2d'); c.drawImage(im, 0, 0);
+    const d = c.getImageData(0, 0, cv.width, cv.height).data; let max = 0;
+    const lin = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+    for (let i = 0; i < d.length; i += 4) max = Math.max(max, 0.2126 * lin(d[i]) + 0.7152 * lin(d[i + 1]) + 0.0722 * lin(d[i + 2]));
+    return max;
+  }, png);
+  await page.addStyleTag({ content: '.hero.page h1,.hero.page .in p{visibility:visible!important}' });
+  return +((1.05) / (worst + 0.05)).toFixed(2);   // valkoinen teksti (L=1; p-teksti #f3ece2 on hieman tummempi) vs kirkkain taustapikseli
+}
 const shot = (page, file, full = true) => page.screenshot({ path: join(OUT, file), fullPage: full });
 
 // ---------- KAUPPA ----------
@@ -31,6 +49,15 @@ if (process.env.ONLY !== 'admin') for (const [name, vp] of [['mobile', { width: 
   const page = await ctx.newPage(); watch(page, `shop-${name}`);
   await page.goto(`${BASE}/varaa/`);
   await page.waitForSelector('.bk-cards');
+  // v15b: tuotekuvat tuotelistassa (demo: 4 tuotteella kuva, muilla ei) – ladattu, lazy, mitat, alt, ei vaakavieritystä
+  await page.waitForSelector('.bk-card .card-img img');
+  await page.evaluate(async () => { for (const i of document.querySelectorAll('.bk-card img')) { i.scrollIntoView(); if (!i.complete) await new Promise((r) => { i.onload = i.onerror = r; }); } window.scrollTo(0, 0); });   // lazy: ladataan vierittämällä
+  const listImgs = await page.locator('.bk-card .card-img img').evaluateAll((els) => els.map((e) => ({ ok: e.complete && e.naturalWidth > 0, lazy: e.loading, w: e.getAttribute('width'), h: e.getAttribute('height'), alt: e.alt, ratio: +(e.parentElement.getBoundingClientRect().width / e.parentElement.getBoundingClientRect().height).toFixed(2) })));
+  if (listImgs.length !== 4) problems.push(`shop-${name}: tuotelistassa pitäisi olla 4 tuotekuvaa, nyt ${listImgs.length}`);
+  if (listImgs.some((i) => !i.ok || i.lazy !== 'lazy' || !i.w || !i.h || !i.alt || Math.abs(i.ratio - 1.5) > 0.02)) problems.push(`shop-${name}: tuotekuvien lataus/lazy/mitat/alt/kuvasuhde virheellinen: ${JSON.stringify(listImgs)}`);
+  if (!listImgs.some((i) => i.alt === 'Savusaunan lauteet ja kiuas')) problems.push(`shop-${name}: ylläpidon alt-teksti puuttuu kuvasta`);
+  if ((await page.locator('.bk-card').count()) <= listImgs.length) problems.push(`shop-${name}: listalla pitää olla myös kuvattomia tuotteita (kuvaton tila)`);
+  if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)) problems.push(`shop-${name}: tuotelista vierittyy vaakasuunnassa`);
   await shot(page, `shop-${name}-1-tuotteet.png`);
   // ---- Selaa päivän mukaan (v13): FI + EN, päivä jolla on useita vuoroja, tyhjä päivä, siirtymä lomakkeelle ja takaisin ----
   for (const lang of ['fi', 'en']) {
@@ -54,6 +81,9 @@ if (process.env.ONLY !== 'admin') for (const [name, vp] of [['mobile', { width: 
     const summaries = await page.locator('.bk-pc-head').allInnerTexts();
     if (summaries.some((x) => !/\d/.test(x) || x.includes('[object'))) problems.push(`shop-${name}-${lang}: tuotekortin tiivistelmä (vapaita aikoja) puuttuu: ${summaries.join(' | ')}`);
     if ((await page.locator('.bk-pc-head[aria-controls]').evaluateAll((els) => els.every((e) => document.getElementById(e.getAttribute('aria-controls'))))) !== true) problems.push(`shop-${name}-${lang}: aria-controls ei osoita paneeliin`);
+    // v15b: kuvalliset tuotekortit näyttävät pikkukuvan (koriste, nimi on tekstinä), kuvattomat eivät jätä tyhjää tilaa
+    const thumbs = await page.locator('.bk-pc-head .pc-img img').evaluateAll((els) => els.map((e) => ({ ok: e.complete && e.naturalWidth > 0, alt: e.alt, w: e.parentElement.getBoundingClientRect().width, h: e.parentElement.getBoundingClientRect().height })));
+    if (!thumbs.length || thumbs.some((i) => !i.ok || i.alt !== '' || Math.abs(i.w - i.h) > 1 || i.w < 60)) problems.push(`shop-${name}-${lang}: päivänäkymän tuotekorttien kuvat virheelliset: ${JSON.stringify(thumbs)}`);
     await page.addStyleTag({ content: '.site-header{position:static!important}' });
     await page.locator('#booking-app').screenshot({ path: join(OUT, `shop-${name}-${L.file}8-paiva-vuorot.png`) });
     // avaa tuote → ajat näkyviin, tila URL:ssa
@@ -111,7 +141,41 @@ if (process.env.ONLY !== 'admin') for (const [name, vp] of [['mobile', { width: 
   const day = page.locator('.bk-grid button.bk-cell.free').first();
   await day.click();
   await page.waitForSelector('.bk-slotlist');
+  // v15b: tuotesivun hero = tuotteen kuva taustana + otsikko (h1) = tuotteen nimi + tiivis kuvaus; pitkä kuvaus sisältöosassa
+  const hero = await page.evaluate(() => { const el = document.querySelector('main .hero.page'), im = el.querySelector('picture img'); return {
+    cls: el.className, h1: [...document.querySelectorAll('h1')].map((x) => x.textContent), sub: el.querySelector('.in p')?.textContent || '', ok: im.complete && im.naturalWidth > 0, fit: getComputedStyle(im).objectFit, alt: im.alt,
+    heroH: el.getBoundingClientRect().height, long: document.querySelector('.bk-prod .bk-desc')?.textContent || '', dupH2: [...document.querySelectorAll('#booking-app h2')].map((x) => x.textContent), src: im.src }; });
+  if (!/has-prod/.test(hero.cls) || !/product-images|storage/.test(hero.src) || !hero.ok || hero.fit !== 'cover') problems.push(`shop-${name}: tuotesivun heron pitää käyttää tuotteen kuvaa (cover): ${JSON.stringify(hero)}`);
+  if (hero.h1.length !== 1 || !/^Yleinen vuoro/.test(hero.h1[0])) problems.push(`shop-${name}: heron h1 pitää olla tuotteen nimi (ja vain yksi h1): ${hero.h1}`);
+  if (!hero.sub || hero.sub.length > 135 || hero.sub === hero.long || !hero.long.startsWith(hero.sub.replace(/…$/, ''))) problems.push(`shop-${name}: heron alla pitää olla tiivis kuvaus (ei koko pitkää): "${hero.sub}"`);
+  if (hero.dupH2.some((x) => x === hero.h1[0])) problems.push(`shop-${name}: tuotteen nimi toistuu h2-otsikkona heron h1:n lisäksi`);
+  if (hero.alt !== 'Savusaunan lauteet ja kiuas') problems.push(`shop-${name}: heron kuvan alt-teksti väärin: "${hero.alt}"`);
+  const hc = await heroContrast(page);
+  if (hc < 4.5) problems.push(`shop-${name}: heron tekstin kontrasti kuvan päällä ${hc}:1 < 4.5:1`);
+  console.log(`shop-${name}: hero-kontrasti (huonoin kohta) ${hc}:1, korkeus ${Math.round(hero.heroH)} px`);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: join(OUT, `shop-${name}-2b-tuotesivu-hero.png`), fullPage: false });
   await shot(page, `shop-${name}-2-kalenteri-vuorot.png`);
+  // kuvaton tuote (hiljainen sauna): oletushero-kuva säilyy, otsikko silti tuotteen nimi
+  await page.goto(`${BASE}/varaa/#/tuote/hiljainen-sauna`);
+  await page.waitForSelector('.bk-prod');
+  const hn = await page.evaluate(() => ({ cls: document.querySelector('main .hero.page').className, h1: document.querySelector('main .hero.page h1').textContent, src: document.querySelector('main .hero.page picture img').getAttribute('src') }));
+  if (/has-prod/.test(hn.cls) || !/ovi-kaiverrus/.test(hn.src) || !/^Hiljainen sauna/.test(hn.h1)) problems.push(`shop-${name}: kuvattomalla tuotteella pitää säilyä oletushero ja otsikko = tuotteen nimi: ${JSON.stringify(hn)}`);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: join(OUT, `shop-${name}-2c-tuotesivu-ilman-kuvaa.png`), fullPage: false });
+  await page.goto(`${BASE}/varaa/`);
+  await page.waitForSelector('.bk-cards');
+  if ((await page.locator('main .hero.page h1').innerText()).trim() !== 'Varaa saunaelämys' || (await page.locator('main .hero.page.has-prod').count()) !== 0) problems.push(`shop-${name}: tuotelistan heron pitää olla oletus (Varaa saunaelämys)`);
+  // layout-hyppy (CLS) suoralla latauksella tuotesivulle
+  const cp = await ctx.newPage();
+  await cp.addInitScript(() => { window.__cls = 0; new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__cls += e.value; }).observe({ type: 'layout-shift', buffered: true }); });
+  await cp.goto(`${BASE}/varaa/#/tuote/yleinensauna`);
+  await cp.waitForSelector('.bk-prod .bk-grid button.bk-cell');
+  await cp.waitForTimeout(800);
+  const cls = await cp.evaluate(() => window.__cls);
+  console.log(`shop-${name}: CLS tuotesivun suoralla latauksella ${cls.toFixed(3)}`);
+  if (cls > 0.1) problems.push(`shop-${name}: tuotesivun layout-hyppy liian suuri (CLS ${cls.toFixed(3)} > 0.1)`);
+  await cp.close();
   // yksityisvuoron vaikutus: tuote 25 (Oma savusaunavuoro)
   await page.goto(`${BASE}/varaa/#/tuote/oma-saunavuoro`);
   await page.waitForSelector('.bk-grid button.bk-cell');
@@ -125,6 +189,9 @@ if (process.env.ONLY !== 'admin') for (const [name, vp] of [['mobile', { width: 
   await page.fill('#name', `Playwright Testaaja ${name}`);
   await page.fill('#email', `pw-${name}-${Date.now()}@example.com`);
   await page.fill('#phone', '0401234567');
+  if (!(await page.locator('main .hero.page.has-prod picture img').evaluate((e) => e.complete && e.naturalWidth > 0)) || !/^Yleinen vuoro/.test(await page.locator('main .hero.page h1').innerText())) problems.push(`shop-${name}: varauslomakkeen heron pitää näyttää tuotteen kuva ja nimi`);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: join(OUT, `shop-${name}-4c-lomake-hero.png`), fullPage: false });
   await shot(page, `shop-${name}-4-tiedot.png`);
   await page.check('#bk-terms');
   await page.click('button[type=submit]');
@@ -330,6 +397,40 @@ if (process.env.ONLY !== 'shop') for (const [name, vp] of [['mobile', { width: 3
   await page.waitForSelector('dialog[open] form [name=price]');
   await shot(page, `admin-${name}-4c-lisapalvelun-muokkaus.png`, false);
   await page.keyboard.press('Escape');
+  // tuotekuva (v15b): virheelliset tiedostot hylätään, lataus + alt + tallennus, näkyy kaupassa, poisto palauttaa kuvattoman tilan
+  const rowH = page.locator('#view .listrow:has-text("Hiljainen sauna")');
+  await rowH.click();
+  await page.waitForSelector('dialog[open] .imgprev');
+  if ((await page.locator('dialog[open] .imgprev img').count()) !== 0 || (await page.locator('dialog[open] button:has-text("Poista kuva")').isEnabled())) problems.push(`admin-${name}: hiljaisella saunalla ei pitäisi olla kuvaa ennen latausta`);
+  const fin = page.locator('dialog[open] input[type=file]'), stat = page.locator('dialog[open] #img-box-4 [role=status]');
+  await fin.setInputFiles({ name: 'x.gif', mimeType: 'image/gif', buffer: Buffer.from('GIF89a') });
+  await page.waitForFunction(() => /Sallitut kuvatyypit/.test(document.querySelector('dialog[open] [role=status]').textContent));
+  await fin.setInputFiles({ name: 'rikki.png', mimeType: 'image/png', buffer: Buffer.from('tämä ei ole kuva') });
+  await page.waitForFunction(() => /ei voi lukea/.test(document.querySelector('dialog[open] [role=status]').textContent));
+  await fin.setInputFiles({ name: 'iso.png', mimeType: 'image/png', buffer: Buffer.alloc(16 * 1048576) });
+  await page.waitForFunction(() => /liian suuri/.test(document.querySelector('dialog[open] [role=status]').textContent));
+  if (await page.locator('dialog[open] button:has-text("Tallenna kuva")').isEnabled()) problems.push(`admin-${name}: virheellisillä tiedostoilla Tallenna kuva ei saa aueta`);
+  await fin.setInputFiles(join(dirname(fileURLToPath(import.meta.url)), '../../public/img/og-palju.jpg'));
+  await page.waitForSelector('dialog[open] .imgprev img');
+  await page.waitForFunction(() => /Valittu/.test(document.querySelector('dialog[open] [role=status]').textContent));
+  await page.fill('dialog[open] input[name=image_alt]', 'Hiljaisen saunan tunnelma');
+  await page.locator('dialog[open] .imgprev').scrollIntoViewIfNeeded();
+  await shot(page, `admin-${name}-4d-tuotekuva-muokkaus.png`, false);
+  await page.click('dialog[open] button:has-text("Tallenna kuva")');
+  await page.waitForSelector('#toast.show:has-text("Kuva tallennettu")');
+  await page.waitForSelector('#view .listrow:has-text("Hiljainen sauna") img.pthumb');
+  await shot(page, `admin-${name}-4e-tuotelista-kuvilla.png`, false);
+  const sp = await ctx.newPage(); watch(sp, `admin-${name}-shop`);
+  await sp.goto(`${BASE}/varaa/#/tuote/hiljainen-sauna`);
+  await sp.waitForSelector('main .hero.page.has-prod picture img');
+  await sp.evaluate(() => Promise.all([...document.images].map((i) => (i.complete ? 0 : new Promise((r) => { i.onload = i.onerror = r; })))));
+  if (!(await sp.locator('main .hero.page.has-prod picture img').evaluate((e) => e.complete && e.naturalWidth > 0 && e.alt === 'Hiljaisen saunan tunnelma'))) problems.push(`admin-${name}: ladattu kuva ei näy kaupan tuotesivun herossa oikealla alt-tekstillä`);
+  await sp.close();
+  await rowH.click(); await page.waitForSelector('dialog[open] .imgprev img');
+  page.once('dialog', (d) => d.accept());
+  await page.click('dialog[open] button:has-text("Poista kuva")');
+  await page.waitForSelector('#toast.show:has-text("Kuva poistettu")');
+  await page.waitForFunction(() => !document.querySelector('#view .listrow img.pthumb') || ![...document.querySelectorAll('#view .listrow')].find((r) => /Hiljainen sauna/.test(r.textContent))?.querySelector('img.pthumb'));
   await ctx.close();
 }
 // ---------- HALLINTA: Johku-tunniste ja lähdesuodatin (Kaikki / Uudet / Johku → p_source) ----------
@@ -689,6 +790,9 @@ if (process.env.ONLY !== 'shop') for (const [who, role] of [['staff', 'staff'], 
   const priceDisabled = await page.locator('dialog input[name=price]').isDisabled();
   if (role === 'staff' && !priceDisabled) problems.push('admin-staff: hintakentän pitäisi olla lukittu peruskäyttäjälle');
   if (role === 'manager' && priceDisabled) problems.push('admin-manager: hintakentän pitäisi olla muokattavissa ylläpitäjälle');
+  const canImg = (await page.locator('dialog[open] button:has-text("Tallenna kuva")').count()) > 0;
+  if (role === 'staff' && canImg) problems.push('admin-staff: kuvan hallinta ei saa näkyä peruskäyttäjälle');
+  if (role === 'manager' && !canImg) problems.push('admin-manager: kuvan hallinnan pitäisi näkyä ylläpitäjälle');
   await shot(page, `admin-desktop-8-${role}-tuote.png`, false);
   await page.keyboard.press('Escape');
   if (role === 'manager') {
