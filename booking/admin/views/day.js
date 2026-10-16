@@ -3,6 +3,8 @@ import { rpc } from '../sb.js';
 import { h, helsinkiIso, fmtDay, fmtTime, todayHel, addDays, dayStartIso, statusBadge, payBadge, sourceBadge, badge, toast, run, dialog, field, fmtDT, empty } from '../ui.js';
 import { reservationDialog } from './shared.js';
 import { icon } from '../icons.js';
+import { legsList, resourceBadges, spaceBadge } from './legs.js';
+import { blockList, blockDialog } from './blocks.js';
 
 export async function render({ ctx, refs, reload, query }) {
   const date = /^\d{4}-\d\d-\d\d$/.test(query.get('d') || '') ? query.get('d') : todayHel();
@@ -30,11 +32,14 @@ export async function render({ ctx, refs, reload, query }) {
     mine.forEach((r) => used.add(r.reservation_id));
     return { s, mine };
   }).filter(({ s, mine }) => mine.length || s.status !== 'closed');
-  const open = (r) => reservationDialog({ ...r, source: r.source ?? dv.get(r.reservation_id)?.source, external_id: r.external_id ?? dv.get(r.reservation_id)?.external_id }, { methods: refs.methods, onChange: reload });
+  const RES_KEYS = ['lifecycle', 'space_code', 'legs', 'quota_exempt', 'override_reason', 'claim_offset_min', 'claim_minutes', 'parent_reservation_id'];
+  const merged = (r) => { const x = dv.get(r.reservation_id) || {}; const m = { ...r, source: r.source ?? x.source, external_id: r.external_id ?? x.external_id }; for (const k of RES_KEYS) if (x[k] !== undefined) m[k] = x[k]; return m; };
+  const open = (r) => reservationDialog(merged(r), { methods: refs.methods, onChange: reload, refs, can: ctx.can });
   const resRow = (r) => { const x = dv.get(r.reservation_id) || {}; const ad = x.addons || []; const src = { source: r.source ?? x.source, external_id: r.external_id ?? x.external_id }; return h('li', { class: `resrow ${r.status}${ad.length ? ' has-addons' : ''}` },
     h('button', { type: 'button', class: 'link', onclick: () => open(r) }, h('strong', { text: r.customer_name || '–' }), ` · ${r.persons} hlö`, x.customer_kind === 'company' ? [' ', badge('warn', 'Yritys'), x.company ? ` ${x.company}` : ''] : null,
-      ad.length ? h('span', { class: 'addon-mark' }, icon('leaf', 16), ` Lisäpalvelut: ${addonText(ad)}`) : null),
-    h('span', { class: 'meta' }, sourceBadge(src), statusBadge(r.status), payBadge(r.payment_status), r.hold_expires_at ? badge('muted', `pito ${fmtTime(r.hold_expires_at)}`) : null, ` #${r.order_no}`)); };
+      ad.length ? h('span', { class: 'addon-mark' }, icon('leaf', 16), ` Lisäpalvelut: ${addonText(ad)}`) : null,
+      (x.legs || []).length > 1 || (x.space_code && x.space_code !== 'savusauna') ? legsList(x.legs, refs) : null),
+    h('span', { class: 'meta' }, spaceBadge(x, refs), resourceBadges(x), sourceBadge(src), statusBadge(r.status), payBadge(r.payment_status), r.hold_expires_at ? badge('muted', `pito ${fmtTime(r.hold_expires_at)}`) : null, ` #${r.order_no}`)); };
   const card = ({ s, mine }) => {
     const booked = mine.filter((r) => ['pending', 'confirmed', 'completed'].includes(r.status)).reduce((a, r) => a + r.persons, 0);
     const prod = refs.productById.get(s.product_id);
@@ -46,9 +51,7 @@ export async function render({ ctx, refs, reload, query }) {
       mine.length ? h('ul', { class: 'reslist' }, mine.map(resRow)) : null);
   };
   const orphan = rows.filter((r) => !used.has(r.reservation_id));
-  const blocks = h('section', { class: 'card' }, h('h3', { text: 'Sulut' }),
-    (view.blocks || []).length ? h('ul', { class: 'reslist' }, view.blocks.map((b) => h('li', { class: 'resrow' }, h('span', {}, `${fmtDT(b.starts_at)} – ${fmtDT(b.ends_at)} · ${b.reason || ''}`),
-      h('button', { type: 'button', class: 'btn danger sm', onclick: (e) => run(e.target, async () => { await rpc('admin_delete_block', { p_id: b.id }); toast('Sulku poistettu'); reload(); }) }, 'Poista')))) : h('p', { class: 'muted', text: 'Ei sulkuja.' }),
+  const blocks = h('section', { class: 'card', 'data-testid': 'day-blocks' }, h('h3', { text: 'Sulut' }), blockList(view.blocks, refs, reload, 'Ei sulkuja.'),
     h('button', { type: 'button', class: 'btn ghost sm', onclick: () => blockDialog(date, refs, reload) }, '+ Lisää sulku'));
   const prepAll = (view.prep || []).length ? h('section', { class: 'card prepday' }, h('h3', {}, icon('leaf', 20), ' Valmistele päivälle'),
     h('ul', { class: 'reslist' }, view.prep.map((p) => h('li', { class: 'resrow' }, h('span', {}, h('strong', { text: `${fmtTime(p.starts_at)}–${fmtTime(p.ends_at)}` }), ` ${p.product_name}: `, addonText(p.items))))),
@@ -57,18 +60,4 @@ export async function render({ ctx, refs, reload, query }) {
     h('div', { class: 'daygrid day-view' }, sessions.length ? sessions.map(card) : empty('Ei vuoroja tälle päivälle.'),
       orphan.length ? h('section', { class: 'card' }, h('h3', { text: 'Muut varaukset' }), h('ul', { class: 'reslist' }, orphan.map(resRow))) : null),
     h('p', { class: 'muted', text: `${active.length} aktiivista varausta, ${active.reduce((a, r) => a + r.persons, 0)} henkilöä yhteensä.` }), blocks];
-}
-
-function blockDialog(date, refs, reload) {
-  const space = refs.resources.find((r) => r.kind === 'space');
-  const f = h('form', { class: 'stack' },
-    field('Alkaa', h('input', { type: 'datetime-local', name: 's', value: `${date}T08:00`, required: true })),
-    field('Päättyy', h('input', { type: 'datetime-local', name: 'e', value: `${date}T22:00`, required: true })),
-    field('Syy', h('input', { name: 'r', placeholder: 'esim. huolto, yksityistilaisuus', maxlength: 200 })),
-    h('button', { class: 'btn primary', type: 'submit', text: 'Lisää sulku' }));
-  const d = dialog('Lisää sulku (savusauna)', f);
-  f.addEventListener('submit', (ev) => { ev.preventDefault(); run(f.querySelector('button'), async () => {
-    await rpc('admin_create_block', { p_space_id: space.id, p_starts_at: helsinkiIso(f.s.value), p_ends_at: helsinkiIso(f.e.value), p_reason: f.r.value || null });
-    toast('Sulku lisätty'); d.close(); reload();
-  }); });
 }

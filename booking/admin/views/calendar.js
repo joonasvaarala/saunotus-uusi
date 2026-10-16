@@ -58,7 +58,7 @@ export async function render({ ctx, refs, reload }) {
     needsNotice(s) ? badge('warn', NO_ASSIGNEE) : null);
   const bookingItem = (r) => h('li', { class: 'cal-item booking', 'data-kind': 'booking' },
     h('span', { class: 'cal-time', text: fmtTime(r.starts_at) }),
-    h('button', { type: 'button', class: 'link cal-txt', onclick: () => reservationDialog(r, { methods: refs.methods, onChange: () => draw() }) }, h('strong', { text: r.customer_name || '–' }), ` · ${r.persons} hlö`, h('br'), h('small', { text: r.product_name || '' })),
+    h('button', { type: 'button', class: 'link cal-txt', onclick: () => reservationDialog(r, { methods: refs.methods, onChange: () => draw(), refs, can: ctx?.can }) }, h('strong', { text: r.customer_name || '–' }), ` · ${r.persons} hlö`, h('br'), h('small', { text: r.product_name || '' })),
     statusBadge(r.status));
 
   async function draw() {

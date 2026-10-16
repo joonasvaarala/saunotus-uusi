@@ -13,6 +13,8 @@ export const ICONS = {
   tag: [P('M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z'), P('M7.5 7.5h.01')], // Tuotteet
   cabin: [P('M3 11l9-8 9 8M5 9.5V20h14V9.5M10 20v-6h4v6')],                                  // Resurssit: sauna/mökki
   sliders: [P('M3 6h9M16 6h5M3 12h3M10 12h11M3 18h11M18 18h3'), C(14, 6, 2), C(8, 12, 2), C(16, 18, 2)], // Asetukset
+  lock: [R(4, 11, 16, 10, 2), P('M8 11V7a4 4 0 0 1 8 0v4')],                                    // Kalenterisulut: lukko
+  check: [C(12, 12, 10), P('M8.5 12.5l2.5 2.5 4.5-5')],                                       // Tarkista: ympyrä + valintamerkki
   key: [P('M21 2l-9.6 9.6'), C(7.5, 15.5, 5.5), P('M15.5 7.5l3 3L22 7l-3-3')],                // Käyttäjät
   leaf: [P('M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z'), P('M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12')], // Lisäpalvelut: lehti
   close: [P('M18 6L6 18M6 6l12 12')],                                                         // Sulje

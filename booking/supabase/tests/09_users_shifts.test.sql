@@ -4,6 +4,8 @@ set local search_path = extensions, public;
 select no_plan();
 
 -- ---------- mock-data: public-skeema (oletetut sarakenimet, ks. fixtures/public_mock.sql) ----------
+-- fixtures/public_mock.sql sisältää jo migraation 16 vaatimat mock-saunottajat: lasketaan ne pohjaksi (esim. 3 + tämän testin 3 riviä)
+select count(*)::int as pre_staff from public.staff \gset
 insert into public.staff(id, name, email, phone, active) values
   ('00000000-0000-4000-8000-0000000000e1', 'Pekka Työntekijä', 'pekka@example.com', '0401110001', true),
   ('00000000-0000-4000-8000-0000000000e2', 'Paula Vuoro',      'paula@example.com', '0401110002', true),
@@ -88,7 +90,7 @@ select test.logout();
 -- ---------- admin: työntekijälistaus ja linkitys ----------
 select test.login(:'a1');
 select is((select array_agg(k order by k) from (select jsonb_object_keys(to_jsonb(p)) k from booking.admin_list_public_staff() p limit 4) x), array['active','email','id','name'], 'admin_list_public_staff: vain id, name, email, active');
-select is((select count(*)::int from booking.admin_list_public_staff()), 3, 'admin_list_public_staff: kaikki public.staff-rivit');
+select is((select count(*)::int from booking.admin_list_public_staff()), :pre_staff + 3, 'admin_list_public_staff: kaikki public.staff-rivit');
 select is((select count(*)::int from booking.admin_list_public_staff() p where to_jsonb(p)::text ~ '0401110'), 0, 'admin_list_public_staff: ei puhelinta');
 select is(test.code(format($$select booking.admin_link_public_staff(%L, '00000000-0000-4000-8000-0000000000e1')$$, :'s2')), 'public_staff_taken', 'sama työntekijä ei voi olla kahdella käyttäjällä (selkeä virhe)');
 select is(test.code(format($$select booking.admin_link_public_staff(%L, '00000000-0000-4000-8000-0000000000e3')$$, :'s2')), 'public_staff_inactive', 'ei-aktiivista työntekijää ei voi linkittää');

@@ -19,6 +19,11 @@ const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
 const fakeJwt = (claims) => `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64(claims)}.${Buffer.from('x').toString('base64url')}`;
 const calls = [];
 const periodArgs = [];   // admin_list_reservations: [p_from, p_to] kutsuittain
+const resArgs = [];   // admin_create_resource_booking / admin_create_old_booking: [rpc, args]
+let expect400 = false;   // resurssivarauksen BK001-virhetesti: selaimen 400-konsoliviesti on odotettu
+let dropPerms = [];   // oikeudet jotka poistetaan admin_my_permissions-mockista (oikeuspiilotustesti)
+const ovrArgs = [];   // admin_set_closure_override-kutsut
+let extraPerms = [];   // lisäoikeudet admin_my_permissions-mockiin (bookings.override-testi)
 const srcArgs = [];   // admin_list_reservations: p_source-arvot kutsuittain
 
 async function newPage(name, { allowFail = null } = {}) {
@@ -27,7 +32,7 @@ async function newPage(name, { allowFail = null } = {}) {
   page.on('pageerror', (e) => problems.push(`${name} pageerror: ${e.message}`));
   // allowFail: tarkoituksella epäonnistutetut moduulipyynnöt (retry-testit) eivät ole ongelmia; muut konsolivirheet ovat
   const expected = (t) => allowFail && allowFail.test(t);
-  page.on('console', (m) => { if (['error', 'warning'].includes(m.type()) && !expected(m.text()) && !(allowFail && /Näkymän .* lataus epäonnistui|Failed to load resource|Failed to fetch dynamically imported module/.test(m.text()))) problems.push(`${name} console.${m.type()}: ${m.text()}`); });
+  page.on('console', (m) => { if (['error', 'warning'].includes(m.type()) && !expected(m.text()) && !(expect400 && /status of 400/.test(m.text())) && !(allowFail && /Näkymän .* lataus epäonnistui|Failed to load resource|Failed to fetch dynamically imported module/.test(m.text()))) problems.push(`${name} console.${m.type()}: ${m.text()}`); });
   page.on('requestfailed', (r) => { if (!expected(r.url())) problems.push(`${name} requestfailed: ${r.url()} ${r.failure()?.errorText}`); });
   page.on('response', (r) => { if (r.status() >= 400 && r.url().startsWith(BASE.split('/').slice(0, 3).join('/'))) problems.push(`${name} HTTP ${r.status()}: ${r.url()}`); });
   // Supabase-mock: ei yhteyttä oikeaan projektiin
@@ -38,7 +43,7 @@ async function newPage(name, { allowFail = null } = {}) {
     if (m === 'OPTIONS') return json({});
     if (u.pathname === '/auth/v1/user' && m === 'PUT') return json({ id: 'u1', email: 'kutsuttu@example.com' });
     if (u.pathname.endsWith('/rpc/current_staff_role')) return json('staff');
-    if (u.pathname.endsWith('/rpc/admin_my_permissions')) return json({ role: 'staff', role_label: 'Peruskäyttäjä', permissions: ['bookings.manage', 'shifts.view', 'customers.manage', 'catalog.edit'] });
+    if (u.pathname.endsWith('/rpc/admin_my_permissions')) return json({ role: 'staff', role_label: 'Peruskäyttäjä', permissions: ['bookings.manage', 'blocks.manage', 'shifts.view', 'customers.manage', 'catalog.edit', ...extraPerms].filter((x) => !dropPerms.includes(x)) });
     if (u.pathname.endsWith('/rpc/admin_upcoming_shifts')) {   // tuotannon kaltaiset englanninkieliset koodit; hallinnan pitää näyttää suomeksi
       const ds = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
       const row = (id, from, to, role, cal, st, who) => ({ shift_id: id, starts_at: `${ds}T${from}:00Z`, ends_at: `${ds}T${to}:00Z`, role_type: role, calendar_name: cal, staffing_status: st, staff_name: who });
@@ -65,8 +70,34 @@ async function newPage(name, { allowFail = null } = {}) {
       const a = route.request().postDataJSON() || {}; srcArgs.push(a.p_source ?? null); periodArgs.push([a.p_from ?? null, a.p_to ?? null]);
       const ds = new Date(Date.now() + 2 * 864e5).toISOString().slice(0, 10);
       const mk = (id, name, src, ext) => ({ reservation_id: id, order_id: id, order_no: 9000 + id, status: 'confirmed', order_status: 'confirmed', payment_status: 'paid', product_id: 1, product_name: 'Yleinen vuoro', mode: 'public', starts_at: `${ds}T14:00:00Z`, ends_at: `${ds}T16:00:00Z`, persons: 2, total_gross: 58, customer_id: id, customer_name: name, customer_email: `${id}@example.com`, customer_phone: '0401234567', source_channel: src === 'johku' ? 'johku_import' : 'web', created_at: `${ds}T08:00:00Z`, hold_expires_at: null, notes: null, annual_card_id: null, total_count: 2, source: src, external_id: ext });
-      return json([mk(1, 'Uusi Asiakas', 'native', null), mk(2, 'Johku Asiakas', 'johku', 'J-48213')].filter((r) => !a.p_source || r.source === a.p_source));
+      return json([mk(1, 'Uusi Asiakas', 'native', null), mk(2, 'Johku Asiakas', 'johku', 'J-48213')].map((r) => (r.reservation_id === 2 ? { ...r, space_code: 'rauni', lifecycle: 'old' } : r)).filter((r) => !a.p_source || r.source === a.p_source));
     }
+    if (u.pathname.endsWith('/rpc/admin_review_list')) {   // migraatio 17c: neljä osiota
+      const ds = new Date(Date.now() + 3 * 864e5).toISOString().slice(0, 10);
+      return json({ therapist_conflicts: [{ reservation_id: 51, starts_at: `${ds}T12:00:00Z`, ends_at: `${ds}T13:00:00Z`, skill: 'yleinen' }], block_conflicts: [], overrides: [{ reservation_id: 52, starts_at: `${ds}T13:00:00Z`, reason: 'Sovittu asiakkaan kanssa' }], orphan_addons: [] });
+    }
+    if (u.pathname.endsWith('/rpc/admin_list_products')) {   // resurssituotteet (migraatiot 14–15): hoito (nykyinen) ja vanha hoito
+      const cfg = (o) => ({ resource_class: 'resourced', min_persons: 1, max_persons: 2, duration_minutes: 60, ...o });
+      return json([{ id: 41, name: 'Hoito (nykyinen)', category: 'hoito', active: true, price: 90, config: cfg({ lifecycle: 'current', sale_kind: 'other' }) },
+        { id: 42, name: 'Vanha hoito', category: 'hoito', active: true, price: 80, config: cfg({ lifecycle: 'old', sale_kind: 'other' }) }]);
+    }
+    if (u.pathname.endsWith('/rest/v1/product_space_rules')) return json([{ product_id: 41, leg_no: 1, priority: 1, space_id: 1, mode: 'exclusive', min_persons: 1, max_persons: 2, selection: 'auto', active: true }, { product_id: 42, leg_no: 1, priority: 1, space_id: 1, mode: 'exclusive', min_persons: 1, max_persons: 2, selection: 'auto', active: true }]);
+    if (u.pathname.endsWith('/rest/v1/resources')) return json([{ id: 1, code: 'rauni', name: 'Hoitosauna Rauni' }, { id: 2, code: 'lovi', name: 'Hoitosauna Lovi' }]);
+    if (u.pathname.endsWith('/rest/v1/payment_methods')) return json([{ code: 'pay_later', label: 'Maksetaan paikalla', is_manual: true, active: true }]);
+    if (/\/rpc\/admin_create_(resource|old)_booking$/.test(u.pathname)) {   // BK001: koodi DETAIL-kentässä (PostgREST: details)
+      resArgs.push([u.pathname.split('/').pop(), route.request().postDataJSON()]);
+      return json({ code: 'BK001', message: 'Tila varattu (palvelimen viesti)', details: 'space_busy', hint: null }, 400);
+    }
+    if (u.pathname.endsWith('/rpc/admin_closure_overview')) {   // migraatio 18b: kalenterit, tapahtumat, konfliktit, ajot
+      const ds = (n) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
+      return json({ calendars: [{ code: 'hoidot', name: '1 hoidot kiinni', resource_code: 'saunottaja', active: true, configured: true, last_success_at: `${ds(0)}T08:00:00Z`, last_attempt_at: `${ds(0)}T08:00:00Z`, last_error: null, consecutive_failures: 0, last_stats: { events_seen: 4, candidates: 2 } },
+          { code: 'rauni', name: '1 Rauni kiinni', resource_code: 'rauni', active: false, configured: false, last_success_at: null, last_attempt_at: null, last_error: null, consecutive_failures: 0, last_stats: null }],
+        events: [{ id: 71, calendar_code: 'hoidot', class: 'closure', reason: 'Hoidot kiinni', all_day: false, starts_at: `${ds(3)}T09:00:00Z`, ends_at: `${ds(3)}T12:00:00Z`, override: null, override_note: null, effective_block: true },
+          { id: 72, calendar_code: 'hoidot', class: 'rough', reason: 'Pitkä jakso', all_day: false, starts_at: `${ds(5)}T09:00:00Z`, ends_at: `${ds(9)}T12:00:00Z`, override: null, override_note: null, effective_block: false }],
+        conflicts: [{ reservation_id: 5, leg_id: 1, resource_id: 1, block_id: 3, starts_at: `${ds(3)}T10:00:00Z` }],
+        runs: [{ calendar_code: 'hoidot', started_at: `${ds(0)}T08:00:00Z`, outcome: 'ok', error: null, stats: { events_seen: 4, candidates: 2 } }, { calendar_code: 'hoidot', started_at: `${ds(-1)}T08:00:00Z`, outcome: 'error', error: 'API 503', stats: null }] });
+    }
+    if (u.pathname.endsWith('/rpc/admin_set_closure_override')) { ovrArgs.push(route.request().postDataJSON()); return json({ ok: true, blocks_inserted: 0, blocks_updated: 0, blocks_deleted: 1 }); }
     if (u.pathname.includes('/rpc/public_settings')) return json({ public_booking_enabled: true });
     if (u.pathname.includes('/rpc/')) return json([]);
     return json([]);
@@ -226,6 +257,113 @@ async function loginViaInvite(page) {
     await page.keyboard.press('Escape');
     const ov = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     if (ov > 0) problems.push(`varaukset: vaakavieritys ${ov}px`);
+  }
+  {   // migraatio 17: resurssivaraukset – pikapainikkeet, tila-/Vanha tuote -merkit, Tarkista-lista, varaustyyppi, BK001-virheet suomeksi, ylitys vain oikeudella
+    await page.evaluate(() => { location.hash = '#/varaukset'; });
+    await page.waitForSelector('#view .listrow');
+    if ((await page.locator('#view .pageactions a:has-text("Vanha varaus")').count()) !== 1 || (await page.locator('#view .pageactions a:has-text("Tarkista")').count()) !== 1) problems.push('varaukset: Vanha varaus- ja Tarkista-painikkeet puuttuvat');
+    if ((await page.locator('#view .listrow .badge.space:has-text("Rauni")').count()) !== 1 || (await page.locator('#view .listrow .badge.lc-old').count()) !== 1) problems.push('varaukset: Rauni-tilamerkki ja Vanha tuote -merkki pitää näkyä (vain tilalla/vanhalla tuotteella)');
+    if ((await page.locator('#nav a[href="#/tarkista"]').count()) !== 1) problems.push('hallinta: Tarkista puuttuu valikosta');
+    await page.evaluate(() => { location.hash = '#/tarkista'; });
+    await page.waitForSelector('[data-testid=review-overrides]');
+    const secs = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll('.review-sec')].map((e) => [e.dataset.testid, e.querySelectorAll('li.resrow').length])));
+    if (JSON.stringify(secs) !== JSON.stringify({ 'review-therapist_conflicts': 1, 'review-block_conflicts': 0, 'review-overrides': 1, 'review-orphan_addons': 0 })) problems.push(`tarkista: osiot/rivit väärin: ${JSON.stringify(secs)}`);
+    if (!/Syy: Sovittu asiakkaan kanssa/.test(await page.locator('[data-testid=review-overrides]').innerText()) || !/Yleinen/i.test(await page.locator('[data-testid=review-therapist_conflicts]').innerText())) problems.push('tarkista: ylityksen syy tai taidon suomennos puuttuu');
+    // varaustyyppi: radiogroup, Resurssivaraus → lomake, BK001 space_busy suomeksi, ei ylitysvaihtoehtoa ilman oikeutta
+    await page.evaluate(() => { location.hash = '#/uusi'; });
+    await page.waitForSelector('[data-testid=booking-type]');
+    const bt = page.getByRole('group', { name: 'Varaustyyppi' });
+    if ((await bt.getByRole('radio').count()) !== 3 || !(await bt.getByRole('radio', { name: 'Vuoro' }).isChecked())) problems.push('uusi varaus: Varaustyyppi pitää olla 3 vaihtoehtoa, oletuksena Vuoro');
+    await bt.getByRole('radio', { name: 'Resurssivaraus' }).check();
+    await page.waitForSelector('[data-testid=resource-booking-form]');
+    if (!page.url().includes('tyyppi=resurssi')) problems.push(`uusi varaus: tyyppi ei tallennu osoitteeseen: ${page.url()}`);
+    const opts = await page.locator('[data-testid=resource-booking-form] select[name=product] option').allInnerTexts();
+    if (opts.length !== 1 || !/Hoito \(nykyinen\)/.test(opts[0])) problems.push(`resurssivaraus: vain nykyiset tuotteet pitää listata: ${opts}`);
+    if ((await page.locator('[data-testid=override-box]').count()) !== 0) problems.push('resurssivaraus: ylitysvaihtoehto näkyy ilman oikeutta bookings.override');
+    await page.fill('[data-testid=resource-booking-form] [name=cname]', 'Testi Testaaja');
+    await page.fill('[data-testid=resource-booking-form] [name=cemail]', 'testi@example.com');
+    expect400 = true;
+    await page.click('[data-testid=resource-booking-form] button[type=submit]');
+    await page.waitForSelector('[data-testid=resource-booking-form] .err:not([hidden])');
+    expect400 = false;
+    const emsg = await page.locator('[data-testid=resource-booking-form] .err').innerText();
+    if (!/Tila on jo varattu/.test(emsg) || /space_busy|palvelimen viesti/.test(emsg)) problems.push(`resurssivaraus: BK001 space_busy pitää näkyä suomeksi: ${emsg}`);
+    const [rpcName, ra] = resArgs.at(-1) || [];
+    if (rpcName !== 'admin_create_resource_booking' || ra.p_product_id !== 41 || ra.p_override !== false || ra.p_override_reason !== null || !ra.p_customer || !/^\d{4}-\d\d-\d\dT/.test(ra.p_start)) problems.push(`resurssivaraus: RPC-argumentit väärin: ${JSON.stringify(resArgs.at(-1))}`);
+    // Vanha varaus: vain lifecycle='old' -tuotteet, oma RPC
+    await page.evaluate(() => { location.hash = '#/uusi?tyyppi=vanha'; });
+    await page.waitForSelector('[data-testid=old-booking-form]');
+    const oopts = await page.locator('[data-testid=old-booking-form] select[name=product] option').allInnerTexts();
+    if (oopts.length !== 1 || !/Vanha hoito/.test(oopts[0])) problems.push(`vanha varaus: vain vanhat tuotteet pitää listata: ${oopts}`);
+    await page.fill('[data-testid=old-booking-form] [name=cname]', 'Vanha Asiakas');
+    await page.fill('[data-testid=old-booking-form] [name=cemail]', 'testi@example.com');
+    expect400 = true;
+    await page.click('[data-testid=old-booking-form] button[type=submit]');
+    await page.waitForSelector('[data-testid=old-booking-form] .err:not([hidden])');
+    expect400 = false;
+    if (resArgs.at(-1)?.[0] !== 'admin_create_old_booking') problems.push('vanha varaus: pitää kutsua admin_create_old_booking');
+    // ylitys: näkyy vain oikeudella bookings.override, perustelu pakollinen ja lähtee RPC:lle
+    extraPerms = ['bookings.override'];
+    await page.reload();
+    await page.waitForSelector('[data-testid=old-booking-form]');
+    if ((await page.locator('[data-testid=override-box]').count()) !== 1) problems.push('vanha varaus: ylitysvaihtoehdon pitää näkyä oikeudella bookings.override');
+    await page.fill('[data-testid=old-booking-form] [name=cname]', 'Vanha Asiakas');
+    await page.fill('[data-testid=old-booking-form] [name=cemail]', 'testi@example.com');
+    await page.check('[data-testid=override-box] input[name=override]');
+    await page.click('[data-testid=old-booking-form] button[type=submit]');
+    await page.waitForSelector('[data-testid=old-booking-form] .err:not([hidden])');
+    if (!/Ylitys vaatii perustelun/.test(await page.locator('[data-testid=old-booking-form] .err').innerText())) problems.push('ylitys: perustelun puute pitää estää ennen RPC-kutsua');
+    const nOvr = resArgs.length;
+    await page.fill('[data-testid=override-box] [name=override_reason]', 'Sovittu erikseen');
+    expect400 = true;
+    await page.click('[data-testid=old-booking-form] button[type=submit]');
+    await page.waitForTimeout(400);
+    expect400 = false;
+    if (resArgs.length !== nOvr + 1 || resArgs.at(-1)[1].p_override !== true || resArgs.at(-1)[1].p_override_reason !== 'Sovittu erikseen') problems.push(`ylitys: p_override/p_override_reason eivät lähteneet: ${JSON.stringify(resArgs.at(-1))}`);
+    extraPerms = [];
+    // BK001-koodit: kaikilla pitää olla suomenkielinen teksti (errMsg ui.js:stä)
+    const uiUrl = (await page.evaluate(() => performance.getEntriesByType('resource').map((e) => e.name))).find((u) => /\/hallinta\/ui\.js/.test(u));
+    const codes = ['space_busy', 'no_therapist', 'therapist_closed', 'parent_required', 'override_reason_required', 'wrong_lifecycle', 'space_not_allowed', 'no_space', 'no_pool_for_start', 'no_primary_leg', 'bad_rule', 'skill_unknown', 'not_resourced', 'capacity_exceeded', 'space_closed', 'private_booked', 'public_shift_booked', 'bad_pool', 'has_reservations', 'forbidden', 'closure_managed', 'bad_override', 'not_found', 'calendar_not_found'];
+    const msgs = await page.evaluate(async ([url, cs]) => { const m = await import(url); return cs.map((c) => m.errMsg({ code: c, message: `EN ${c}` })); }, [uiUrl, codes]);
+    msgs.forEach((t, i) => { if (/^EN |_/.test(t) || !/[äöå ]/.test(t)) problems.push(`virhekoodi ${codes[i]}: ei suomenkielistä viestiä: ${t}`); });
+    await page.evaluate(() => { location.hash = '#/varaukset'; });
+  }
+  {   // migraatio 18: Kalenterisulut-näkymä (kalenterit, konflikti, tapahtumat, ajot), ohitus (Ohita / Estä / Palauta automaattinen + muistiinpano), oikeuspiilotus, closure_managed suomeksi
+    if ((await page.locator('#nav a[href="#/sulkukalenterit"]').count()) !== 1) problems.push('hallinta: Kalenterisulut puuttuu valikosta (blocks.manage)');
+    await page.evaluate(() => { location.hash = '#/sulkukalenterit'; });
+    await page.waitForSelector('[data-testid=closure-event]');
+    const cal = await page.locator('[data-testid=closure-calendar]').allInnerTexts();
+    if (cal.length !== 2 || !/Käytössä/.test(cal[0]) || /Ei käytössä/.test(cal[0]) || !/Ei käytössä/.test(cal[1])) problems.push(`kalenterisulut: kalenterikortit väärin: ${JSON.stringify(cal)}`);
+    if ((await page.locator('[data-testid=sync-off]').count()) !== 0) problems.push('kalenterisulut: synkka-ei-käynnissä-ilmoitus ei saa näkyä kun kalenteri on käytössä');
+    if ((await page.locator('[data-testid=closure-conflicts] li.resrow').count()) !== 1 || (await page.locator('[data-testid=closure-runs] li.resrow').count()) !== 2) problems.push('kalenterisulut: 1 konflikti ja 2 ajoa odotettiin');
+    const evs = await page.locator('[data-testid=closure-event]').allInnerTexts();
+    if (!/Sulkee/.test(evs[0]) || !/Ei sulje/.test(evs[1]) || !/Karkea jakso/.test(evs[1])) problems.push(`kalenterisulut: tapahtumien merkit väärin: ${JSON.stringify(evs)}`);
+    if ((await page.locator('[data-testid=closure-event]').nth(0).locator('button[data-act=ignore]').count()) !== 1 || (await page.locator('[data-testid=closure-event]').nth(1).locator('button[data-act=block]').count()) !== 1) problems.push('kalenterisulut: Ohita (sulkeva) ja Estä (ei-sulkeva) -napit puuttuvat');
+    await page.locator('[data-testid=closure-event]').nth(0).locator('button[data-act=ignore]').click();
+    await page.waitForSelector('dialog[open] textarea[name=note]');
+    await page.fill('dialog[open] textarea[name=note]', 'sovittu');
+    await page.click('dialog[open] button[type=submit]');
+    await page.waitForSelector('dialog[open]', { state: 'detached' });
+    if (JSON.stringify(ovrArgs.at(-1)) !== JSON.stringify({ p_event_id: 71, p_override: 'ignore', p_note: 'sovittu' })) problems.push(`kalenterisulut: Ohita-kutsun argumentit väärin: ${JSON.stringify(ovrArgs.at(-1))}`);
+    await page.waitForSelector('[data-testid=closure-event]');
+    await page.locator('[data-testid=closure-event]').nth(1).locator('button[data-act=block]').click();
+    await page.waitForSelector('dialog[open] textarea[name=note]');
+    await page.click('dialog[open] button[type=submit]');
+    await page.waitForSelector('dialog[open]', { state: 'detached' });
+    if (JSON.stringify(ovrArgs.at(-1)) !== JSON.stringify({ p_event_id: 72, p_override: 'block', p_note: null })) problems.push(`kalenterisulut: Estä-kutsun argumentit väärin: ${JSON.stringify(ovrArgs.at(-1))}`);
+    const per = page.getByRole('group', { name: 'Näytä tapahtumat' });
+    if ((await per.getByRole('radio').count()) !== 4) problems.push('kalenterisulut: jaksovalinnassa pitää olla 4 vaihtoehtoa');
+    // oikeuspiilotus: ilman blocks.manage ei valikkokohtaa eikä ohitusnappeja (funktio vaatii oikeuden; hallinta piilottaa)
+    dropPerms = ['blocks.manage'];
+    await page.reload();
+    await page.waitForSelector('#shell:not([hidden]) #nav a');
+    if ((await page.locator('#nav a[href="#/sulkukalenterit"]').count()) !== 0) problems.push('kalenterisulut: valikkokohta ei saa näkyä ilman oikeutta blocks.manage');
+    await page.waitForFunction(() => document.querySelector('#view h1') && document.querySelector('#view h1').textContent !== 'Ladataan…', null, { timeout: 8000 }).catch(() => {});
+    if ((await page.locator('[data-testid=closure-event]').count()) !== 0 || (await page.locator('#view h1').first().innerText().catch(() => '')) === 'Kalenterisulut') problems.push('kalenterisulut: suora osoite ei saa avata näkymää ilman oikeutta blocks.manage (reitti putoaa oletusnäkymään)');
+    dropPerms = [];
+    await page.reload();
+    await page.waitForSelector('#shell:not([hidden]) #nav a');
+    await page.evaluate(() => { location.hash = '#/varaukset'; });
   }
   {   // työvuorojen rooli ja miehitys suomeksi (v10): heater/reception/therapist/assigned eivät saa näkyä, Hoitaja → Saunottaja
     await page.evaluate(() => { location.hash = '#/kalenteri'; });

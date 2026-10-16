@@ -44,7 +44,40 @@ export function toast(msg, kind = 'ok') {
   el.className = `toast ${kind} show`; el.textContent = msg;
   clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), kind === 'err' ? 6000 : 2800);
 }
-export const errMsg = (e) => e?.message || String(e);
+// Virhekoodit (SQLSTATE BK001; koodi DETAIL-kentässä → ApiError.code) suomeksi. Tuntemattomalle koodille näytetään palvelimen oma (suomenkielinen) viesti.
+export const ERR_FI = {
+  space_busy: 'Tila on jo varattu tälle ajalle tai sen puskuriaikaan (Raunin istuntojen väli ≥ 15 min).',
+  no_therapist: 'Ei vapaata saunottajaa tälle ajalle (vuoro tai vaadittu taito puuttuu).',
+  therapist_closed: 'Saunottajat eivät ole saatavilla tälle ajalle (hoidot kiinni).',
+  parent_required: 'Lisäpalvelu vaatii jälkilöyly- tai yksityisvuorovarauksen samalle ajalle. Valitse vanhempi varaus tai luo se ensin.',
+  override_reason_required: 'Ylitys vaatii perustelun (vähintään 3 merkkiä).',
+  wrong_lifecycle: 'Väärän tyyppinen tuote: vanhat tuotteet kirjataan "Vanha varaus" -lomakkeella, nykyiset resurssivarauksena.',
+  space_not_allowed: 'Tuote tai henkilömäärä ei sovi valittuun tilaan.',
+  no_space: 'Tuotteelle ei ole sääntöä valitulle tilalle.',
+  no_pool_for_start: 'Alkuajalle ei ole kapasiteettipoolia. Valitse tuotteen mukainen alkamisaika.',
+  no_primary_leg: 'Tuotteelta puuttuu ensisijainen tila (tuotteen tilasäännöt).',
+  bad_rule: 'Tuotteen tilasääntö on virheellinen (yksityisvarauksen pitää kattaa koko aika). Ota yhteys ylläpitoon.',
+  skill_unknown: 'Tuotteen vaatimaa saunottajan taitoa ei tunneta. Ota yhteys ylläpitoon.',
+  not_resourced: 'Tuotteella ei ole resurssisääntöjä, joten sitä ei voi varata tällä lomakkeella.',
+  capacity_exceeded: 'Ei tarpeeksi vapaita paikkoja tälle ajalle.',
+  space_closed: 'Aika ei ole varattavissa (tila suljettu).',
+  private_booked: 'Ajalle on yksityisvuoro – yleistä vuoroa ei voi varata.',
+  public_shift_booked: 'Ajalle on jo varauksia yleisille vuoroille – yksityisvuoroa ei voi varata.',
+  bad_pool: 'Kapasiteettipooli ei kuulu tähän tilaan.',
+  has_reservations: 'Ajalla on varauksia – peru ne ensin.',
+  forbidden: 'Ei oikeuksia tähän toimintoon.',
+  // migraatio 18 (sulkukalenterit)
+  closure_managed: 'Tämä sulku tulee sulkukalenterista, eikä sitä voi muokata tai poistaa hallinnassa. Muuta tai poista tapahtuma kalenterissa tai ohita tapahtuma Kalenterisulut-sivulla.',
+  bad_override: 'Virheellinen ohitus (sallitut: Ohita, Estä, Palauta automaattinen).',
+  not_found: 'Tapahtumaa ei löydy (se on voinut poistua kalenterista). Päivitä sivu.',
+  calendar_not_found: 'Sulkukalenteria ei löydy.',
+};
+export const errMsg = (e) => {
+  const t = e?.code && ERR_FI[e.code];
+  if (!t) return e?.message || String(e);
+  const perm = e.code === 'forbidden' && /\(([a-z_.]+)\)/.exec(e.message || '');   // "Ei oikeutta tähän toimintoon (bookings.override)"
+  return perm ? `${t.replace(/\.$/, '')} (${perm[1]}).` : t;
+};
 // Kääri asynkroninen toiminto: nappi pois käytöstä, virhe näytetään ilmoituksena
 export async function run(btn, fn) {
   if (btn) btn.disabled = true;

@@ -135,6 +135,13 @@ Tulkinnat ja avoimet kysymykset: [docs/ristiriidat-ja-tulkinnat.md](docs/ristiri
 | 09 | `…_booking_09_cron_optional.sql` | (valinnainen) pg_cron-ajastus pitojen siivoukseen; ohitetaan jos pg_cron puuttuu |
 | 10 | `…_booking_10_rls_initplan.sql` | Suorituskyky: RLS-politiikat `(select auth.uid())` / `(select booking.is_staff())` -muotoon (advisor `auth_rls_initplan`); sama semantiikka, idempotentti. Ei muokkaa migraatioita 01–09 |
 | 11 | `…_booking_11_customer_kinds_addons.sql` | Asiakastyypit (`customer_kinds`, yritysasiakkaan y-tunnus + verkkolaskutiedot, tilauksen laskutustietojen kuva), lisäpalvelut (`addons`, `order_items.kind='addon'`), `public_addons`, `public_create_booking` (+ asiakastyyppi, yritystiedot, lisäpalvelut), `admin_create_customer`, `admin_set_reservation_addons`, `admin_get_order`, `admin_list/create/update_addon` (`catalog.edit`), `admin_day_view` (+ "valmistele"-yhteenveto). Ei muokkaa migraatioita 01–10 eikä `kb`-skeemaa |
+| 17a | `…20261016213905_booking_17a_schema.sql` | Resurssivaraukset: `reservation_legs`, `reservations.quota_exempt` / `claim_offset_min` / `claim_minutes` / `parent_reservation_id` / `override_reason`, näkymä `v_claims`, roolioikeus `bookings.override` (admin, manager) |
+| 17b | `…20261016213924_booking_17b_validators.sql` | Validaattorit (tila varattu, saunottaja, vanhempi varaus, tilasäännöt) – virheet SQLSTATE `BK001`, koodi DETAIL-kentässä |
+| 17c | `…20261016213953_booking_17c_admin.sql` | `admin_create_old_booking`, `admin_create_resource_booking`, `admin_move_reservation_space`, `admin_review_list`; `admin_day_view` / `admin_list_reservations` palauttavat lisäksi `space_code`, `lifecycle`, `legs`, `quota_exempt`, `override_reason`, claim-kentät |
+| 17d | `…20261016214007_booking_17d_private_weekend_rules.sql` | Yksityisvuorojen viikonloppusäännöt |
+| 18a | `…20261016221808_booking_18a_schema.sql` | Sulkukalenterit: resurssi `laura` (person, käsin tehtävät koulutus-/poissaolosulut), `closure_calendars` (4 kalenteria, `active=false`), `closure_event_rules` (luokittelusäännöt: peilit, merkinnät, Koulutus → ei sulje), `closure_events` (kirjanpito + ohitus), `closure_sync_runs`, `space_blocks.closure_event_id`, trigger joka estää kalenterisulun muokkauksen (`closure_managed`) |
+| 18b | `…20261016221825_booking_18b_sync.sql` | `apply_closure_events` (idempotentti snapshot-synkka, massapoistosuoja, dry-run; vain `service_role`), `_reconcile_closure_blocks`, `admin_closure_overview(p_days)` ja `admin_set_closure_override(p_event_id, p_override, p_note)` (oikeus `blocks.manage`) |
+| 18c | `…20261016221840_booking_18c_validators.sql` | Validaattorit lukevat kalenterisulut; Lauran taidon legit laura-resurssille; `admin_day_view`: `blocks`-riveillä `closure_event_id` ja `resource_code` |
 | 19 | `…_booking_19_product_images.sql` | Tuotekuvat: `product_config.image_path/image_alt`, Storage-bucket `product-images` (julkinen luku, kirjoitus `catalog.edit`), `public_product_images()`, `admin_set_product_image()` (+ audit). Vain lisäyksiä – ei korvaa aiempia funktioita |
 
 
@@ -194,6 +201,29 @@ cp out/hallinta/config.example.js out/hallinta/config.js   # täytä url + anonK
 
 Kaupan ja hallinnan saa yhdellä komennolla samaan julkaisuun: `node scripts/build-pages.mjs` (ks. [Testiversion julkaisu](../README.md#testiversion-julkaisu-github-pages) juuri-READMEssä). Skripti generoi `hallinta/config.js`:n rakennusajan ympäristömuuttujista.
 
+### Resurssivaraukset hallinnassa (migraatio 17)
+
+Migraatio 17 (17a–17d) on ajettu tuotantoon (versiot 20261016213905 / 213924 / 213953 / 214007; tiedostot tavutarkasti samat kuin ajetut). Hallinta (`admin/`):
+
+* **Uusi varaus → Varaustyyppi** (radiogroup, tallentuu osoitteeseen `#/uusi?tyyppi=…`): *Vuoro* (entinen lomake), *Resurssivaraus* (`admin_create_resource_booking`: hoito, saunotus, rituaali, seremonia, lisäpalvelu; nykyiset tuotteet) ja *Vanha varaus* (`admin_create_old_booking`; vain `lifecycle = 'old'` -tuotteet). Lomake: tuote, päivä, alku (loppu valinnainen), henkilömäärä, tila (Automaattinen / Rauni / Lovi tuotteen `product_space_rules`-sääntöjen mukaan), asiakas, maksu, lisäpalvelut, vanhempi varaus (lisäpalvelulle; automaattinen haku).
+* **Ylitys** (sulku- ja saunottajatarkistuksen ohitus, `p_override` + pakollinen `p_override_reason`) näkyy lomakkeella vain käyttäjälle, jolla on oikeus `bookings.override` (admin, manager). Oikeus tarkistetaan silti tietokannassa.
+* **Päivänäkymä, Varaukset-lista ja varauksen tiedot** näyttävät hillitysti tilan (Rauni/Lovi), *Vanha tuote* -merkin, ylityksen, kiintiövapauden, tilan käyttöikkunan (`claim_offset_min`/`claim_minutes`), vanhemman varauksen ja legit (saunottaja + taito, tila). Kaikki kentät ovat valinnaisia (vanha palvelin ilman kenttiä ei riko näkymiä). Päivänäkymä näyttää vain aktiiviset varaukset; Johku-historia näkyy vain varauslistassa (`admin_list_reservations`).
+* **Rauni ↔ Lovi -siirto** varauksen tiedoissa (`admin_move_reservation_space`, syy valinnainen). Lovi on vain 1 henkilölle, joten usean hengen varausta ei tarjota siirrettäväksi Loviin.
+* **Tarkista** (valikko ja pikapainike Varaukset-sivulla; `admin_review_list`, vain luku): saunottajakonfliktit, sulkukonfliktit, ylitykset (syyn kanssa) ja orvot lisäpalvelut. Laskuri pikapainikkeessa.
+* **Virheilmoitukset suomeksi**: BK001-koodit (`space_busy`, `no_therapist`, `therapist_closed`, `parent_required`, `override_reason_required`, `wrong_lifecycle`, `space_not_allowed`, `no_space`, `no_pool_for_start`, `no_primary_leg`, `bad_rule`, `skill_unknown`, `not_resourced` sekä vanhat `capacity_exceeded`, `space_closed`, `private_booked`, `public_shift_booked`, `bad_pool`, `has_reservations`, `forbidden`) kartoitetaan `admin/ui.js`:n `ERR_FI`-taulukolla; tuntematon koodi näyttää palvelimen viestin.
+* Testit: pgTAP `17_resource_bookings` (75 testiä: skeema, validaattorit, ylitys + oikeus, siirto, katselmointi, vanhat polut), selainsavutesti `scripts/smoke-pages.mjs` (Tarkista, varaustyyppi, BK001 suomeksi, ylitys vain oikeudella) ja `scripts/e2e-screenshots.mjs` (resurssi-osio, 360/390/430/1280, ei vaakavieritystä).
+
+### Kalenterisulut hallinnassa (migraatio 18)
+
+Migraatio 18 (18a–18c; versiot 20261016221808 / 221825 / 221840) on ajettu tuotantoon; kalenterit ovat rekisterissä `active = false` eikä synkkaa ole käynnissä. Hallinta (`admin/`):
+
+* **Päivänäkymä ja Resurssit → Sulut:** kalenterista tuleva sulku (`closure_event_id` ei null) näkyy merkillä *Kalenterisulku*, vain luettavana (ei Poista-nappia; palvelin estää muutoksen virheellä `closure_managed`, joka näytetään suomeksi). Käsin tehdyt sulut poistetaan kuten ennen. Sulun kohde näkyy merkkinä (esim. Rauni, Laura).
+* **+ Lisää sulku:** kohteeksi voi valita tilan tai **Lauran** (koulutus, poissaolo): Koulutus-kalenteritapahtumat eivät sulje mitään, joten koulutus kirjataan käsin Laura-resurssille, joka estää Lauran taitoa vaativat tuotteet.
+* **Kalenterisulut** (valikko; oikeus `blocks.manage` = staff, manager, admin; funktiot tarkistavat saman oikeuden, hallinta piilottaa valikon ja estää suoran osoitteen ilman sitä): `admin_closure_overview` → kalenterit (käytössä / ei käytössä, viimeisin synkka ja virhe), *Synkronointi ei ole käynnissä* -ilmoitus kun mikään kalenteri ei ole käytössä, konfliktit (varaukset, jotka osuvat kalenterisulkuun), tulevat tapahtumat (jakso 30 / 60 / 180 / 365 pv; luokka *Sulku* / *Karkea jakso*, *Sulkee* / *Ei sulje*) ja viimeisimmät synkkaajot.
+* **Ohitus** (`admin_set_closure_override`): *Ohita* (tapahtuma ei sulje), *Estä* (sulkee, esim. yli 36 h karkea jakso) ja *Palauta automaattinen*, valinnainen muistiinpano. Synkka säilyttää ohituksen; vastaus kertoo lisätyt/päivitetyt/poistetut sulut.
+* Demo (`dev/seed_demo.sql`): hoidot ja savusauna on merkitty käyttöön keinotekoisella kalenteritunnuksella, tapahtumia, ohitus, konflikti ylitysvaraukseen, ajoloki ja Lauran käsin tehty sulku; rauni ja perinnesaunotus jäävät käyttämättömiksi.
+* Testit: pgTAP `18_closure_calendars` (76 testiä; Bottiavustuksen luonnos + päivänäkymän `closure_event_id`), `scripts/smoke-pages.mjs` (Kalenterisulut-näkymä, ohituskutsut, oikeuspiilotus, `closure_managed` suomeksi) ja `scripts/e2e-screenshots.mjs` (kalenterisulut-osio, 360/390/430/1280).
+
 ### Asiakastyypit ja lisäpalvelut (migraatio 11)
 
 * **Asiakastyyppi** valitaan kaupassa (`/varaa/`, `/en/book/`), hallinnan Uusi varaus -lomakkeella ja Asiakkaat → **Lisää asiakas** -ikkunassa: *yksityisasiakas* (nimi, sähköposti, puhelin kuten ennen) tai *yritysasiakas* (yrityksen nimi, **y-tunnus** + tarkistenumero, katuosoite/postinumero/postitoimipaikka, valinnaiset verkkolaskutiedot: verkkolaskuosoite/OVT + operaattorin välittäjätunnus – vain yhdessä –, valinnainen viite/tilausnumero, yhteyshenkilön nimi/puhelin/sähköposti). Validointi on selaimessa ja tietokannassa (sama sääntö); kauppa ja hallinta kutsuvat samoja funktioita (`public_create_booking` / `admin_create_customer` / `admin_create_booking`).
@@ -252,6 +282,8 @@ PW_DIR=/polku/node_modules node booking/scripts/e2e-screenshots.mjs
 PW_DIR=/polku/node_modules node booking/scripts/e2e-shop-layout.mjs   # kaupan lomakkeen asettelu eri leveyksillä
 ```
 
+Demodata (`dev/seed_demo.sql`) sisältää kiinteän "tyhjän päivän" (savusauna suljettu koko päivän ensi maanantaista +9 pv), jota kaupan e2e-testit käyttävät; testi ei siis enää riipu kellonajasta.
+
 Kuvakaappaukset: [`docs/screenshots/`](docs/screenshots/).
 
 ## Testit
@@ -259,7 +291,7 @@ Kuvakaappaukset: [`docs/screenshots/`](docs/screenshots/).
 ```bash
 PGHOST=127.0.0.1 PGPORT=54329 PGUSER=postgres booking/supabase/tests/run.sh
 ```
-Vaatii PostgreSQL + pgTAP. Luo kannan `booking_test`, lataa mock-Supabasen (roolit `anon/authenticated/service_role`, `auth.uid()/auth.jwt()`), mock-kb:n (oikea tuotedata), `public`-skeeman mockin (`fixtures/public_mock.sql`: työvuorotaulut, ei GRANTteja), kaikki migraatiot ja ajaa:
+Vaatii PostgreSQL + pgTAP. Luo kannan `booking_test`, lataa mock-Supabasen (roolit `anon/authenticated/service_role`, `auth.uid()/auth.jwt()`), mock-kb:n (oikea tuotedata), `public`-skeeman mockin (`fixtures/public_mock.sql`: työvuorotaulut, `shift_assignments.status`, `staff_roles` ja kolme mock-saunottajaa tuotannon `public.staff`-UUID:illa, joita migraatio 16 vaatii; ei GRANTteja), kaikki migraatiot ja ajaa:
 
 * `01_security` – RLS kaikissa tauluissa, `search_path` kaikissa funktioissa, anonin/staffin/ei-staffin oikeudet, ei vuotoja
 * `02_overlap_rules` – yksityinen ↔ yleinen molempiin suuntiin (to, la–su, 1 h vuorot mukaan lukien), sulut, peruutus, vanhenevat pidot
@@ -273,6 +305,8 @@ Vaatii PostgreSQL + pgTAP. Luo kannan `booking_test`, lataa mock-Supabasen (rool
 * `supabase/functions/admin-users/logic.test.js` – Edge Functionin validointi (rooli-sallittulista, syötteet, CORS, kutsulinkin osoite, virhekartoitus); `node --test` tai `deno test`
 * `11_customer_kinds_addons` – asiakastyypit (y-tunnuksen tarkistenumero ja normalisointi, yritystietojen validointi, tuplien esto, yksityinen ≠ yritys samalla sähköpostilla, laskutustietojen kuva tilauksella), lisäpalvelujen hinnoittelu ja tilaus (summat, ALV-osuus, määrärajat, passiivinen/tuntematon/väärä vuorotyyppi), muutos lisäpalveluiden kanssa (rajaus, maksetun tilauksen hintatarkistus), hallinnan oikeudet (`catalog.edit`: staff ei, manager/admin kyllä), päivänäkymän "valmistele"-yhteenveto, RLS-eristys ja sisäisten funktioiden oikeudet
 * `12_johku_marker` – Johku-merkintä (migraatio 12): `admin_list_reservations` `p_source`-suodatin (johku/native/null), `source`/`external_id` listassa ja `admin_day_view`:ssä, vanhat kutsut ja sarakkeet, `external_meta` ei vuoda (anon ei lue, ei listassa/päivänäkymässä), oikeudet (ei anon). Ohittuu, jos migraatiota 12 ei ole testikannassa
+* `17_resource_bookings` – resurssivaraukset (migraatio 17): `reservation_legs`, validaattorit ja BK001-koodit, `admin_create_resource_booking` / `admin_create_old_booking` (lifecycle-rajaus, ylitys vaatii `bookings.override` + syyn), Rauni↔Lovi-siirto, `admin_review_list`, `v_claims`, yksityisvuorojen viikonloppusäännöt, oikeudet (anon ei pääse, staff ilman oikeutta ei ylitä). Ohittuu, jos migraatiota 17 ei ole testikannassa
+* `18_closure_calendars` – sulkukalenterit (migraatio 18): rekisteri ja säännöt, `apply_closure_events` (alkuajo, idempotenssi, muutos, poisto, massapoistosuoja, dry-run, ikkuna, DST), ohitus (`admin_set_closure_override`), hallinta-esto (`closure_managed`), validaattorit (hoidot / perinne / Rauni / savusauna kiinni, Laura), konfliktit (`admin_review_list`, `admin_closure_overview`), `admin_day_view`:n `closure_event_id`. Ohittuu, jos migraatiota 18 ei ole testikannassa
 * `10_rls_initplan` – politiikkojen lausekkeissa ei ole suoraa `auth.uid()`/`is_staff()`/`has_permission()`-kutsua ilman `select`-kääreitä; politiikkojen määrä ja oikeudet (staff/manager/admin/anon) ennallaan
 * `19_product_images` – tuotekuvat: rajoitteet, bucket + storage-politiikat (anon/staff/manager), `admin_set_product_image` (oikeudet, validointi, audit, polkuhyökkäykset), `public_product_images` (ei vuotoja, piilotettu tuote ei näy)
 * `race.sh` – rinnakkaiset yhteydet yrittävät varata samaa aikaa yhtä aikaa (advisory-lock-portti); invariantit: ei yksityisen ja yleisen päällekkäisyyttä, kapasiteetti ei ylity (ma–to 16, la–su 6 / alkamisaika, 1 h vuoro 10, poolit riippumattomia), vuosikortilla vain yksi tuleva varaus, asiakkaan rinnakkaiset muutokset eivät ylitä kapasiteettia eivätkä riko päällekkäisyyssääntöä
