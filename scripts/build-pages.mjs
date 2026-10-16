@@ -42,10 +42,34 @@ cpSync('booking/shared/sb.js', join(A, 'sb.js'));
 const cfg = { url: SUPA, anonKey: KEY, rest: '/rest/v1', auth: '/auth/v1', functions: '/functions/v1', schema: 'booking' };
 writeFileSync(join(A, 'config.js'), `// Generoitu julkaisussa (scripts/build-pages.mjs). Vain julkinen anon/publishable-avain; service_role ei koskaan tähän.\nwindow.BOOKING_CONFIG=${JSON.stringify(cfg, null, 2)};\n`);
 
+// 3b) versiotunnus kaikkiin hallinnan moduuleihin ja resursseihin (välimuistin sekoittumisen esto; GitHub Pages välimuistittaa tiedostoja ~10 min)
+//     Kaikki importit saavat SAMAN tunnuksen, jotta jokaisesta moduulista (esim. sb.js: istunto) on vain yksi instanssi.
+const VER = '?v=' + ((process.env.GITHUB_SHA || '').slice(0, 10) || Date.now().toString(36));
+let nImports = 0;
+(function ver(d) {
+  for (const n of readdirSync(d)) {
+    const p = join(d, n);
+    if (statSync(p).isDirectory()) { ver(p); continue; }
+    if (!n.endsWith('.js') || n === 'config.js') continue;
+    let t = readFileSync(p, 'utf8');
+    t = t.replace(/(\b(?:from|import)\s*)(['"])(\.{1,2}\/[^'"?]+\.js)\2/g, (_, a, q, u) => { nImports++; return `${a}${q}${u}${VER}${q}`; });
+    if (n === 'admin.js') { if (!t.includes("const ASSET_VER = '';")) { console.error('build-pages: VIRHE: admin.js:stä puuttuu ASSET_VER-rivi'); process.exit(1); } t = t.replace("const ASSET_VER = '';", `const ASSET_VER = '${VER}';`); }
+    writeFileSync(p, t);
+  }
+})(A);
+{
+  const hp = join(A, 'index.html');
+  let t = readFileSync(hp, 'utf8');
+  t = t.replace(/((?:href|src)=")(admin\.css|calendar\.css|config\.js|admin\.js)(")/g, `$1$2${VER}$3`);
+  writeFileSync(hp, t);
+}
+
 // 4) varmistukset
 const fail = (m) => { console.error('build-pages: VIRHE: ' + m); process.exit(1); };
 const adminHtml = readFileSync(join(A, 'index.html'), 'utf8');
 if (!/<meta name="robots" content="noindex/.test(adminHtml)) fail('hallinnan index.html:stä puuttuu noindex');
+if (!nImports || (adminHtml.match(/\?v=/g) || []).length !== 4) fail('hallinnan versiotunnus ei tullut kaikkiin resursseihin');
+(function chk(d) { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) { chk(p); continue; } if (n.endsWith('.js') && /(?:from|import)\s*['"]\.{1,2}\/[^'"?]+\.js['"]/.test(readFileSync(p, 'utf8'))) fail(`${p}: versioimaton relatiivinen import`); } })(A);
 for (const f of ['admin.js', 'ui.js', 'sb.js', 'config.js', 'admin.css', 'calendar.css', 'views/users.js', 'views/calendar.js']) if (!statSync(join(A, f), { throwIfNoEntry: false })) fail(`hallinnasta puuttuu ${f}`);
 if (process.env.SITE_ENV === 'test') {
   const noindex = (p) => /<meta name="robots" content="noindex/.test(readFileSync(p, 'utf8'));
