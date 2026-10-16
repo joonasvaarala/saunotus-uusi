@@ -26,8 +26,8 @@ const ovrArgs = [];   // admin_set_closure_override-kutsut
 let extraPerms = [];   // lisäoikeudet admin_my_permissions-mockiin (bookings.override-testi)
 const srcArgs = [];   // admin_list_reservations: p_source-arvot kutsuittain
 
-async function newPage(name, { allowFail = null } = {}) {
-  const ctx = await browser.newContext({ viewport: { width: 1100, height: 800 }, locale: 'fi-FI', timezoneId: 'Europe/Helsinki' });
+async function newPage(name, { allowFail = null, viewport = { width: 1100, height: 800 }, mobile = false } = {}) {
+  const ctx = await browser.newContext({ viewport, isMobile: mobile, hasTouch: mobile, locale: 'fi-FI', timezoneId: 'Europe/Helsinki' });
   const page = await ctx.newPage();
   page.on('pageerror', (e) => problems.push(`${name} pageerror: ${e.message}`));
   // allowFail: tarkoituksella epäonnistutetut moduulipyynnöt (retry-testit) eivät ole ongelmia; muut konsolivirheet ovat
@@ -98,6 +98,10 @@ async function newPage(name, { allowFail = null } = {}) {
         runs: [{ calendar_code: 'hoidot', started_at: `${ds(0)}T08:00:00Z`, outcome: 'ok', error: null, stats: { events_seen: 4, candidates: 2 } }, { calendar_code: 'hoidot', started_at: `${ds(-1)}T08:00:00Z`, outcome: 'error', error: 'API 503', stats: null }] });
     }
     if (u.pathname.endsWith('/rpc/admin_set_closure_override')) { ovrArgs.push(route.request().postDataJSON()); return json({ ok: true, blocks_inserted: 0, blocks_updated: 0, blocks_deleted: 1 }); }
+    if (u.pathname.endsWith('/rpc/admin_day_view')) {   // Uusi varaus -näkymän vuorolista: 8 vapaata vuoroa, jotta varauslomake jää aluksi ruudun alapuolelle
+      const a = route.request().postDataJSON() || {}, ds = a.p_date;
+      return json({ date: ds, blocks: [], reservations: [], sessions: [10, 11, 12, 13, 14, 15, 16, 17].map((h) => ({ rule_id: h, product_id: 1, label: 'Yleinen vuoro', mode: 'public', status: 'available', remaining: 6, min_persons: 1, max_persons: 10, price_mode: 'per_person', unit_price: 29, starts_at: `${ds}T${String(h - 3).padStart(2, '0')}:00:00Z`, ends_at: `${ds}T${String(h - 2).padStart(2, '0')}:00:00Z` })) });
+    }
     if (u.pathname.includes('/rpc/public_settings')) return json({ public_booking_enabled: true });
     if (u.pathname.includes('/rpc/')) return json([]);
     return json([]);
@@ -436,6 +440,39 @@ async function loginViaInvite(page) {
   await Promise.all([page.waitForNavigation({ waitUntil: 'load' }).catch(() => {}), btn.click()]);
   await page.waitForSelector('#shell:not([hidden]) #nav a', { timeout: 8000 });
   await page.waitForFunction(() => document.title.startsWith('Uusi varaus'), null, { timeout: 8000 }).catch(() => problems.push('retry-fail: näkymä ei latautunut uudelleenlatauksen jälkeen'));
+  await page.context().close();
+}
+// 6) Uusi varaus: vuoron valinta (myös vaihto) vierittää varauslomakkeeseen ja siirtää fokuksen otsikkoon (mobiili 390 + desktop)
+for (const [label, viewport, mobile] of [['mobiili', { width: 390, height: 700 }, true], ['desktop', { width: 1100, height: 560 }, false]]) {
+  const page = await newPage(`uusivaraus-${label}`, { viewport, mobile });
+  await loginViaInvite(page);
+  await page.evaluate(() => { location.hash = '#/uusi?d=2026-12-05'; });
+  await page.waitForSelector('.slotbtn:not([disabled])');
+  const view = () => page.evaluate(() => { const t = document.querySelector('[data-testid=booking-form] h3'), r = t?.getBoundingClientRect(), a = document.activeElement; return { title: t?.textContent || '', top: r?.top, bottom: r?.bottom, header: document.querySelector('.top').getBoundingClientRect().bottom, vh: innerHeight, focusOk: a === t, kbd: ['INPUT', 'TEXTAREA', 'SELECT'].includes(a?.tagName), y: scrollY }; });
+  const still = () => page.waitForFunction(() => { const y = scrollY, k = window.__y === y ? (window.__n = (window.__n || 0) + 1) : (window.__n = 0); window.__y = y; return window.__n > 12; }, null, { polling: 'raf' });
+  for (const idx of [0, 6, 1]) {
+    await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
+    await page.locator('.slotbtn:not([disabled])').nth(idx).click(); await still();
+    const v = await view();
+    if (!/^Vuoro: /.test(v.title) || !(v.top >= v.header - 1 && v.bottom <= v.vh)) problems.push(`uusivaraus-${label}: lomakkeen otsikko pitää näkyä valinnan (${idx}) jälkeen: ${JSON.stringify(v)}`);
+    if (!v.focusOk || v.kbd) problems.push(`uusivaraus-${label}: fokus pitää olla lomakkeen otsikossa (ei kentässä): ${JSON.stringify(v)}`);
+    if (mobile && v.y < 100) problems.push(`uusivaraus-${label}: näkymä ei vieritetty lomakkeeseen (scrollY ${v.y})`);
+    if (!/\d\d:\d\d–\d\d:\d\d/.test(v.title)) problems.push(`uusivaraus-${label}: otsikossa pitää olla valitun vuoron aika: ${v.title}`);
+  }
+  // asiakashaku ilman osumia (mock palauttaa []): nimi → Nimi, sähköposti → Sähköposti, täytettyä ei ylikirjoiteta; Enter ei lähetä varausta
+  const sIn = page.getByLabel('Hae asiakas'), fv = (n) => page.locator(`[data-testid=booking-form] [name=${n}]`).inputValue();
+  await sIn.fill('Maija Meikäläinen'); await sIn.press('Enter'); await page.waitForSelector('[data-testid=customer-notfound]');
+  if ((await fv('cname')) !== 'Maija Meikäläinen' || !/Ei löytynyt – luo uusi asiakas/.test(await page.locator('[data-testid=customer-notfound]').innerText())) problems.push(`uusivaraus-${label}: nimen esitäyttö hakusanasta puuttuu`);
+  await sIn.fill('  maija@example.com '); await sIn.press('Enter'); await page.waitForFunction(() => document.querySelector('[name=cemail]')?.value);
+  if ((await fv('cemail')) !== 'maija@example.com' || (await fv('cname')) !== 'Maija Meikäläinen') problems.push(`uusivaraus-${label}: sähköpostin esitäyttö (trimmattu) puuttuu tai nimi ylikirjoitettiin`);
+  if ((await page.evaluate(() => document.activeElement?.name)) !== 'cphone') problems.push(`uusivaraus-${label}: fokuksen pitää siirtyä seuraavaan tyhjään kenttään (puhelin)`);
+  for (const [kind, tid] of [['resurssi', 'resource-booking-form'], ['vanha', 'old-booking-form']]) {   // sama asiakashaku + esitäyttö resurssi- ja vanha varaus -lomakkeilla
+    await page.evaluate((k) => { location.hash = `#/uusi?tyyppi=${k}`; }, kind);
+    const rf = page.locator(`[data-testid=${tid}]`); await rf.waitFor();
+    await rf.getByLabel('Hae asiakas').fill('Reijo Resurssi'); await rf.getByLabel('Hae asiakas').press('Enter'); await page.waitForSelector('[data-testid=customer-notfound]');
+    await rf.getByLabel('Hae asiakas').fill('reijo@example.com'); await rf.getByLabel('Hae asiakas').press('Enter'); await page.waitForFunction(() => document.querySelector('[name=cemail]')?.value);
+    if ((await rf.locator('[name=cname]').inputValue()) !== 'Reijo Resurssi' || (await rf.locator('[name=cemail]').inputValue()) !== 'reijo@example.com') problems.push(`uusivaraus-${label}/${kind}: asiakashaun esitäyttö puuttuu`);
+  }
   await page.context().close();
 }
 await browser.close();

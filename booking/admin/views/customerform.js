@@ -1,6 +1,7 @@
 // Asiakastyyppi (yksityis- / yritysasiakas) + yritystiedot: jaettu lomake-komponentti (Asiakkaat → Lisää asiakas, Uusi varaus).
 // Yritysasiakkaalla: yrityksen nimi, y-tunnus (muoto 1234567-8 + tarkistenumero), laskutusosoite, verkkolaskutiedot (OVT/osoite + välittäjä) ja
 // valinnainen viite/tilausnumero sekä yhteyshenkilön nimi, puhelin ja sähköposti. Palvelin validoi samat säännöt (migraatio 11).
+import { rpc } from '../sb.js';
 import { h, field } from '../ui.js';
 
 export const KINDS = [['private', 'Yksityisasiakas'], ['company', 'Yritysasiakas']];
@@ -81,6 +82,18 @@ export function customerForm({ initialKind = 'private', contact = true, id = 'cf
       }
       return out;
     },
+    // Esitäyttö hakusanasta, kun haku ei löytänyt asiakasta: sähköpostiosoite → Sähköposti, puhelinnumero → Puhelin, muu → Nimi
+    // (yritysasiakkaalla Yrityksen nimi). Ei ylikirjoita jo täytettyä kenttää. Palauttaa { field, filled } ja siirtää fokuksen seuraavaan täyttämättömään kenttään.
+    prefill(term) {
+      const t = String(term ?? '').trim().replace(/\s+/g, ' ');
+      const isMail = validEmail(t), isPhone = !isMail && /^\+?[\d\s()-]{6,}$/.test(t) && !/[A-Za-zÅÄÖåäö]/.test(t);
+      const [field, el] = isMail ? ['email', email] : isPhone ? ['phone', phone] : kind === 'company' ? ['company', company] : ['name', name];
+      const filled = !!t && !el.value.trim();
+      if (filled) { el.value = t; el.dispatchEvent(new Event('input', { bubbles: true })); }
+      const order = [...(kind === 'company' ? [company, bid, street, zip, city] : []), name, email, phone];
+      (order.find((x) => !x.value.trim() && x !== el) || order.find((x) => !x.value.trim()))?.focus();
+      return { field, filled };
+    },
     // Esitäyttö valitusta asiakkaasta (Uusi varaus: haku)
     fill(c) {
       name.value = c.name || ''; email.value = c.email || ''; phone.value = c.phone || '';
@@ -88,4 +101,37 @@ export function customerForm({ initialKind = 'private', contact = true, id = 'cf
       company.value = c.company || ''; bid.value = c.business_id || '';
     },
   };
+}
+
+// Asiakashaku (Uusi varaus + resurssi-/vanha varaus -lomake): kirjoittaessa osumat (viive); Hae-painike / Enter hakee heti, ja jos osumia ei ole,
+// hakusana esitäytetään uuden asiakkaan lomakkeelle (cf.prefill). st.customer = valittu asiakas; onChange() kutsutaan valinnan/nollauksen jälkeen.
+// Palauttaa { row (hakukenttä + Hae-painike), found (tulosalue), reset() }.
+export function customerSearch({ cf, st, onChange = () => {} }) {
+  const found = h('div', { class: 'found' });
+  const search = h('input', { type: 'search', placeholder: 'Hae olemassa olevaa asiakasta (nimi/sähköposti/puhelin)', 'aria-label': 'Hae asiakas', enterkeyhint: 'search' });
+  let timer, seq = 0;
+  const reset = () => { st.customer = null; cf.existing(false); found.replaceChildren(); onChange(); };
+  const pick = (c) => {
+    st.customer = c; cf.fill(c); cf.existing(true); onChange();
+    found.replaceChildren(h('p', { class: 'muted', text: `Valittu asiakas: ${c.customer_kind === 'company' ? `${c.company || c.name} (${c.business_id || 'yritys'}), yhteyshenkilö ${c.name}` : c.name}. Muuta tietoja Asiakkaat-näkymässä.` }),
+      h('button', { type: 'button', class: 'btn ghost sm', onclick: reset }, 'Uusi asiakas'));
+  };
+  async function doSearch(explicit) {
+    clearTimeout(timer); const term = search.value.trim(), my = ++seq;
+    if (term.length < 2) { found.replaceChildren(); return; }
+    const rows = await rpc('admin_list_customers', { p_search: term, p_limit: 5, p_offset: 0 }).catch(() => []);
+    if (my !== seq) return;   // vanhentunut haku
+    if (!rows.length && explicit) {
+      if (st.customer) { found.replaceChildren(h('p', { class: 'muted', role: 'status', 'data-testid': 'customer-notfound', text: 'Ei löytynyt. Valittu asiakas säilyy – paina "Uusi asiakas" luodaksesi uuden.' })); return; }
+      const r = cf.prefill(term);
+      const what = { email: 'sähköposti', phone: 'puhelin', name: 'nimi', company: 'yrityksen nimi' }[r.field];
+      found.replaceChildren(h('p', { class: 'notfound', role: 'status', 'data-testid': 'customer-notfound' }, h('strong', { text: 'Ei löytynyt – luo uusi asiakas' }), h('small', { text: r.filled ? ` Hakusana siirrettiin kenttään: ${what}.` : ` Kenttä "${what}" oli jo täytetty, sitä ei ylikirjoitettu.` })));
+      return;
+    }
+    found.replaceChildren(...rows.map((c) => h('button', { type: 'button', class: 'listrow', onclick: () => pick(c) }, h('strong', { text: c.customer_kind === 'company' && c.company ? `${c.company} (${c.name})` : c.name }), h('small', { text: ` ${c.email || ''} ${c.phone || ''}` }))));
+  }
+  search.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(() => doSearch(false), 250); });
+  search.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); doSearch(true); } });   // Enter ei saa lähettää varauslomaketta
+  const row = h('div', { class: 'nbsearch' }, search, h('button', { type: 'button', class: 'btn', 'data-testid': 'customer-search-btn', onclick: () => doSearch(true) }, 'Hae'));
+  return { row, found, reset };
 }

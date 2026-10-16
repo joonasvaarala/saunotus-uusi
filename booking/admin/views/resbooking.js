@@ -2,7 +2,7 @@
 // ja "Vanha varaus" → admin_create_old_booking (vain lifecycle = 'old' -tuotteet). Valitaan tuote, aika, henkilömäärä, tila (valinnainen), asiakas, maksu.
 // Ylitys (sulku- ja saunottajatarkistuksen ohitus) vaatii oikeuden bookings.override ja perustelun; vaihtoehto näkyy vain oikeuden omaaville.
 import { rpc, select } from '../sb.js';
-import { customerForm } from './customerform.js';
+import { customerForm, customerSearch } from './customerform.js';
 import { addonPicker } from './addons.js';
 import { resName, catLabel } from './legs.js';
 import { h, field, toast, run, fmtDay, fmtTime, money, todayHel, helsinkiIso, errMsg, dayStartIso, addDays, fmtDT } from '../ui.js';
@@ -52,16 +52,10 @@ export async function render({ ctx, refs, query, kind }) {
     h('label', { class: 'check' }, ovr, ' Ohita sulku- ja saunottajatarkistus (ylitys)'),
     h('div', { class: 'ovr-reason', hidden: true }, field('Perustelu (pakollinen)', ovrReason, 'Ylitys kirjataan varaukseen ja näkyy Tarkista-listalla.')));
   ovr.addEventListener('change', () => { ovrBox.querySelector('.ovr-reason').hidden = !ovr.checked; if (ovr.checked) ovrReason.focus(); });
-  const found = h('div', { class: 'found' });
   const ui = {};
   const cf = customerForm({ id: 'rb', onKind: (k) => { if (!st.customer) method.value = k === 'company' && refs.methods.some((m) => m.active && m.code === 'invoice') ? 'invoice' : 'pay_later'; } });
-  cf.elements.name.addEventListener('input', () => { if (st.customer) { st.customer = null; cf.existing(false); found.replaceChildren(); } });
-  const search = h('input', { type: 'search', placeholder: 'Hae olemassa olevaa asiakasta (nimi/sähköposti/puhelin)', 'aria-label': 'Hae asiakas' });
-  let timer; search.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(async () => {
-    if (search.value.trim().length < 2) { found.replaceChildren(); return; }
-    const rows = await rpc('admin_list_customers', { p_search: search.value, p_limit: 5, p_offset: 0 }).catch(() => []);
-    found.replaceChildren(...rows.map((c) => h('button', { type: 'button', class: 'listrow', onclick: () => { st.customer = c; cf.fill(c); cf.existing(true); found.replaceChildren(h('p', { class: 'muted', text: `Valittu asiakas: ${c.name}` })); } }, h('strong', { text: c.name }), h('small', { text: ` ${c.email || ''} ${c.phone || ''}` }))));
-  }, 250); });
+  const cs = customerSearch({ cf, st });
+  cf.elements.name.addEventListener('input', () => { if (st.customer) cs.reset(); });
 
   async function loadParents(p) {
     const ids = p.config.requires_parent_product_ids || [];
@@ -87,13 +81,13 @@ export async function render({ ctx, refs, query, kind }) {
   for (const el of [prodSel, time]) el.addEventListener('change', sync); time.addEventListener('input', sync);
   persons.addEventListener('input', () => picker.sync()); date.addEventListener('change', () => st.product && loadParents(st.product));
 
-  const f = h('form', { class: 'stack card', novalidate: true, 'data-testid': old ? 'old-booking-form' : 'resource-booking-form' }, h('h3', { text: old ? 'Vanha varaus' : 'Resurssivaraus' }),
+  const f = h('form', { class: 'stack card nbform', novalidate: true, 'data-testid': old ? 'old-booking-form' : 'resource-booking-form' }, h('h3', { text: old ? 'Vanha varaus' : 'Resurssivaraus' }),
     h('p', { class: 'muted', text: old ? 'Kirjaa varaus vanhalle tuotteelle (esim. siirtynyt hoito). Resurssivaikutus säilyy: sulut, päällekkäisyys ja saunottaja tarkistetaan.' : 'Nykyinen resurssituote (hoito, saunotus, rituaali, seremonia, lisäpalvelu) ylläpidon kautta. Tila ja saunottaja varataan tuotteen sääntöjen mukaan.' }),
     field('Tuote', prodSel),
     h('div', { class: 'row wrap' }, field('Päivä', date), field('Alkaa', time), field('Päättyy (valinnainen)', end, null)), endHint,
     h('div', { class: 'row wrap' }, field('Henkilömäärä', persons), field('Hinta € (ohita automaattinen)', price)), personsHint,
     spaceFld, parentFld,
-    h('h3', { text: 'Asiakas' }), search, found, cf.node, picker.node,
+    h('h3', { text: 'Asiakas' }), cs.row, cs.found, cf.node, picker.node,
     field('Laskun viite / tilausnumero (valinnainen)', invRef),
     field('Sisäinen huomio', note),
     h('div', { class: 'row wrap' }, field('Maksutapa', method), h('label', { class: 'check' }, paid, ' Maksettu jo')),

@@ -976,6 +976,99 @@ if (process.env.ONLY !== 'shop') {
     await ctx.close();
   }
 }
+// ---------- HALLINTA: Uusi varaus – vuoron valinnan jälkeen näkymä vierittyy varauslomakkeeseen (v22) ----------
+// Mobiili 390 ja desktop 1280, myös vähennetty liike. Lomakkeen otsikon pitää olla näkyvissä sticky-yläpalkin alla ja (mobiilissa) alapalkin yllä; fokus otsikkoon (ei kenttään → ei näppäimistöä).
+if (process.env.ONLY !== 'shop') {
+  const login = async (page) => { await page.goto(`${BASE}/admin/`); await page.fill('#email', 'admin@demo.local'); await page.fill('#password', 'demo'); await page.click('form#login button[type=submit]'); await page.waitForSelector('#view .day-view, #view .daygrid'); };
+  const satD = (() => { const d = new Date(Date.now() + 3 * 864e5); d.setUTCDate(d.getUTCDate() + ((6 - d.getUTCDay() + 7) % 7)); return d.toISOString().slice(0, 10); })();   // lauantai: monta vuoroa → lomake on aluksi ruudun alapuolella
+  for (const [name, vp, reduce] of [['mobile', { width: 390, height: 844, isMobile: true, hasTouch: true }, false], ['desktop', { width: 1280, height: 700 }, false], ['mobile-reduced', { width: 390, height: 844, isMobile: true, hasTouch: true }, true]]) {
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, isMobile: vp.isMobile, hasTouch: vp.hasTouch, reducedMotion: reduce ? 'reduce' : 'no-preference', locale: 'fi-FI', timezoneId: 'Europe/Helsinki' });
+    const page = await ctx.newPage(); watch(page, `uusivaraus-${name}`);
+    await login(page);
+    await page.evaluate((d) => { location.hash = `#/uusi?d=${d}`; }, satD);
+    await page.waitForSelector('.slotbtn:not([disabled])');
+    const tag = `uusivaraus-${name}`;
+    const settle = () => page.evaluate(() => new Promise((res) => { let last = -1, n = 0; const t = () => { const y = Math.round(scrollY * 10); n = y === last ? n + 1 : 0; last = y; n >= 8 ? res() : requestAnimationFrame(t); }; t(); }));   // vieritys pysähtynyt (~8 kuvaa samassa kohdassa)
+    const state = () => page.evaluate(() => {
+      const f = document.querySelector('[data-testid=booking-form]'), t = f?.querySelector('h3'), top = document.querySelector('.top').getBoundingClientRect().bottom;
+      const nav = document.getElementById('nav').getBoundingClientRect(), bottomBar = nav.top > innerHeight / 2, limit = bottomBar ? nav.top : innerHeight;
+      const r = t?.getBoundingClientRect(), a = document.activeElement;
+      return { has: !!f, title: t?.textContent || '', tTop: r && Math.round(r.top), tBottom: r && Math.round(r.bottom), top: Math.round(top), limit: Math.round(limit), focus: a?.tagName + (a === t ? '(otsikko)' : ''), kbd: ['INPUT', 'TEXTAREA', 'SELECT'].includes(a?.tagName), sw: document.documentElement.scrollWidth - document.documentElement.clientWidth, y: Math.round(scrollY) };
+    });
+    const inView = (s) => s.has && s.tTop >= s.top - 1 && s.tBottom <= s.limit;
+    const slots = page.locator('.slotbtn:not([disabled])');
+    if ((await slots.count()) < 3) problems.push(`${tag}: lauantaina pitää olla vähintään 3 valittavaa vuoroa`);
+    await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
+    const before = await state();
+    if (before.has) problems.push(`${tag}: lomakkeen ei pitäisi olla ennen vuoron valintaa`);
+    await slots.nth(0).click(); await settle();
+    const s1 = await state();
+    if (!inView(s1)) problems.push(`${tag}: lomakkeen otsikon pitää olla näkyvissä vuoron valinnan jälkeen (yläpalkki ${s1.top}, alaraja ${s1.limit}): ${JSON.stringify(s1)}`);
+    if (name !== 'desktop' && s1.y < 100) problems.push(`${tag}: näkymän pitäisi olla vieritetty lomakkeeseen (scrollY ${s1.y})`);
+    if (s1.focus !== 'H3(otsikko)' || s1.kbd) problems.push(`${tag}: fokuksen pitää olla lomakkeen otsikossa eikä kentässä (näppäimistö): ${s1.focus}`);
+    if (!/^Vuoro: /.test(s1.title) || s1.sw > 0) problems.push(`${tag}: otsikko "Vuoro: …" ja ei vaakavieritystä: ${JSON.stringify(s1)}`);
+    await shot(page, `admin-${name}-70-uusi-varaus-valinnan-jalkeen.png`, false);
+    // vaihto toiseen vuoroon: ylös, uusi valinta → lomake vaihtuu ja pysyy näkyvissä
+    await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
+    await slots.nth(2).click(); await settle();
+    const s2 = await state();
+    if (!inView(s2) || s2.title === s1.title) problems.push(`${tag}: vuoron vaihdon jälkeen lomakkeen pitää päivittyä ja olla näkyvissä: ${JSON.stringify(s2)}`);
+    if ((await page.locator('.slotbtn[aria-checked=true]').count()) !== 1) problems.push(`${tag}: täsmälleen yksi vuoro pitää olla valittuna`);
+    // lomakkeen kentät ovat käytettävissä heti: Tab otsikosta siirtyy ensimmäiseen kenttään (henkilömäärä)
+    await page.keyboard.press('Tab');
+    if ((await page.evaluate(() => document.activeElement?.name)) !== 'n') problems.push(`${tag}: Tab otsikosta pitää siirtää Henkilömäärä-kenttään`);
+    // asiakashaku: ei osumia + Hae/Enter → hakusana esitäytetään uuden asiakkaan lomakkeelle (nimi / sähköposti), ei ylikirjoita, fokus seuraavaan tyhjään kenttään
+    if (!reduce) {
+      const sIn = page.getByLabel('Hae asiakas'), val = (n) => page.locator(`[data-testid=booking-form] [name=${n}]`).inputValue(), act = () => page.evaluate(() => document.activeElement?.name || document.activeElement?.tagName);
+      const nf = page.locator('[data-testid=customer-notfound]');
+      const results = () => page.locator('.ok-box').count();
+      await sIn.fill('Ei Löydy Testaaja'); await page.locator('[data-testid=customer-search-btn]').click(); await nf.waitFor();
+      if (!/Ei löytynyt – luo uusi asiakas/.test(await nf.innerText())) problems.push(`${tag}: viesti "Ei löytynyt – luo uusi asiakas" puuttuu`);
+      if ((await val('cname')) !== 'Ei Löydy Testaaja' || (await val('cemail')) !== '' || (await act()) !== 'cemail') problems.push(`${tag}: nimi pitää esitäyttyä ja fokus siirtyä sähköpostiin: nimi=${await val('cname')}, fokus=${await act()}`);
+      await nf.evaluate((el) => scrollBy(0, el.getBoundingClientRect().top - 150));   // viesti ja täytetyt kentät samaan kuvaan
+      await shot(page, `admin-${name}-71-asiakashaku-ei-loytynyt-nimi.png`, false);
+      await sIn.fill('uusi.asiakas@example.com'); await sIn.press('Enter'); await page.waitForFunction(() => document.querySelector('[name=cemail]')?.value);
+      if ((await val('cemail')) !== 'uusi.asiakas@example.com' || (await val('cname')) !== 'Ei Löydy Testaaja' || (await act()) !== 'cphone') problems.push(`${tag}: sähköposti pitää mennä sähköpostikenttään, nimi säilyä ja fokus puhelimeen: ${await val('cemail')} / ${await val('cname')} / ${await act()}`);
+      if ((await results()) !== 0) problems.push(`${tag}: Enter hakukentässä ei saa lähettää varauslomaketta`);
+      await nf.evaluate((el) => scrollBy(0, el.getBoundingClientRect().top - 150));   // viesti ja täytetyt kentät samaan kuvaan
+      await shot(page, `admin-${name}-72-asiakashaku-ei-loytynyt-sahkoposti.png`, false);
+      await sIn.fill('toinen@example.com'); await sIn.press('Enter');
+      await page.waitForFunction(() => /ei ylikirjoitettu/.test(document.querySelector('[data-testid=customer-notfound]')?.textContent || ''));
+      if ((await val('cemail')) !== 'uusi.asiakas@example.com') problems.push(`${tag}: täytettyä sähköpostikenttää ei saa ylikirjoittaa`);
+      await page.locator('[data-testid=booking-form] [name=cname]').fill(''); await page.locator('[data-testid=booking-form] [name=cemail]').fill('');
+      await page.check('input[value=company]'); await sIn.fill('Firma Testi Oy'); await sIn.press('Enter');
+      await page.waitForFunction(() => document.querySelector('[name=company_name]')?.value);
+      if ((await val('company_name')) !== 'Firma Testi Oy' || (await val('cname')) !== '' || (await act()) !== 'business_id') problems.push(`${tag}: yritysasiakkaalla nimi pitää mennä yrityksen nimeen ja fokus y-tunnukseen: ${await val('company_name')} / ${await val('cname')} / ${await act()}`);
+      await page.check('input[value=private]');
+      // osuma → ei esitäyttöä, lista näkyy
+      await sIn.fill('vuosikortti@example.com'); await sIn.press('Enter'); await page.waitForSelector('.found .listrow');
+      if (await nf.count()) problems.push(`${tag}: osumalla ei saa näkyä "Ei löytynyt" -viestiä`);
+      if ((await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)) > 0) problems.push(`${tag}: vaakavieritys asiakashaun jälkeen`);
+    }
+    // Varaustyyppi-valitsin: resurssivaraus- ja vanha varaus -lomakkeilla sama asiakashaku + esitäyttö; takaisin Vuoro-lomakkeeseen vieritys toimii edelleen
+    if (!reduce) {
+      for (const [kind, tid] of [['resurssi', 'resource-booking-form'], ['vanha', 'old-booking-form']]) {
+        await page.evaluate((k) => { location.hash = `#/uusi?tyyppi=${k}`; }, kind);
+        const rf = page.locator(`[data-testid=${tid}]`);
+        if (!(await rf.waitFor({ timeout: 5000 }).then(() => true, () => false))) { problems.push(`${tag}: ${tid} ei aukea (tyyppi=${kind})`); continue; }
+        const rin = rf.getByLabel('Hae asiakas'), rv = (n) => rf.locator(`[name=${n}]`).inputValue(), ract = () => page.evaluate(() => document.activeElement?.name || document.activeElement?.tagName);
+        await rin.fill('Resurssi Asiakas'); await rin.press('Enter'); await page.locator('[data-testid=customer-notfound]').waitFor();
+        if ((await rv('cname')) !== 'Resurssi Asiakas' || (await ract()) !== 'cemail') problems.push(`${tag}/${kind}: nimen esitäyttö + fokus sähköpostiin puuttuu: ${await rv('cname')} / ${await ract()}`);
+        await rin.fill('resurssi@example.com'); await rin.press('Enter'); await page.waitForFunction(() => document.querySelector('[name=cemail]')?.value);
+        if ((await rv('cemail')) !== 'resurssi@example.com' || (await rv('cname')) !== 'Resurssi Asiakas') problems.push(`${tag}/${kind}: sähköpostin esitäyttö puuttuu tai nimi ylikirjoitettiin`);
+        if ((await page.locator('.ok-box').count()) !== 0) problems.push(`${tag}/${kind}: Enter hakukentässä ei saa lähettää lomaketta`);
+        if (kind === 'resurssi') { await rf.locator('[data-testid=customer-notfound]').evaluate((el) => scrollBy(0, el.getBoundingClientRect().top - 150)); await shot(page, `admin-${name}-73-asiakashaku-resurssivaraus.png`, false); }
+      }
+      await page.evaluate((d) => { location.hash = `#/uusi?d=${d}`; }, satD);
+      await page.waitForSelector('.slotbtn:not([disabled])'); await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
+      await page.locator('.slotbtn:not([disabled])').nth(1).click(); await settle();
+      const s3 = await state();
+      if (!inView(s3) || s3.focus !== 'H3(otsikko)') problems.push(`${tag}: Varaustyyppi-vaihdon jälkeen vuoron valinnan pitää vierittää lomakkeeseen: ${JSON.stringify(s3)}`);
+    }
+    // päivän vaihto ei vieritä lomakkeelle (vain käyttäjän vuorovalinta)
+    await ctx.close();
+  }
+}
 // ---------- HALLINTA: kalenteri toimii vaikka vuorotietoja ei saada (public-skeema tyhjä / ei oikeutta) ----------
 if (process.env.ONLY !== 'shop') {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844, isMobile: true }, locale: 'fi-FI', timezoneId: 'Europe/Helsinki' });

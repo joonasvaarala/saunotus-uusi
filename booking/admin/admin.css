@@ -195,3 +195,7 @@ h2 .icon,h3 .icon,.addon-mark .icon{display:inline-block;vertical-align:-3px;mar
 @media(min-width:700px){.calgrid{grid-template-columns:1fr 1fr}.evact .btn{min-height:0}}
 @media(min-width:700px){main{min-width:0}}   /* leveä taulukko (Resurssit: vuorosäännöt) ei saa venyttää sivua: taulukko vierittyy omassa laatikossaan */
 @media(max-width:699px){.blocklist .btn,.blk a{display:inline-flex;align-items:center;justify-content:center;min-height:44px}}
+.nbform h3:focus-visible{outline:3px solid var(--gold);outline-offset:4px;border-radius:4px}
+.nbsearch{display:flex;gap:8px;align-items:stretch}.nbsearch input{flex:1;min-width:0}.nbsearch .btn{min-height:44px;flex:none}
+.notfound{margin:0;padding:10px 12px;border-radius:10px;background:var(--bg);border-left:4px solid var(--green)}
+.nbform input,.nbform select,.nbform textarea{scroll-margin:76px 0 90px}
