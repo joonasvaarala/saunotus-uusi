@@ -1,11 +1,15 @@
-/* Kalenterinäkymä (mobile first). Työvuorot sinisellä, varaukset vihreällä. */
-.cal{--shift:#2f5d8a;--shiftbg:#e6eef6;--book:#1d4d2b;--bookbg:#e8f3ea}
+/* Kalenterinäkymä (mobile first). Varaukset vihreällä; työvuorot hillityillä roolikohtaisilla maaväreillä (ei sinistä):
+   Lämmitykset = hiekka/ruskea, Saunottaja = vaimea vihreä, Vastaanotto = vaimea okra, muu = neutraali beige. */
+.cal{--shift:#5b524a;--shiftbg:#ece8e1;--shiftbar:#8b7f73;--book:#1d4d2b;--bookbg:#e8f3ea;
+  --heater:#6b4a2b;--heaterbg:#efe4d6;--heaterbar:#8a6a4a;
+  --therapist:#1d4d2b;--therapistbg:#e3eadf;--therapistbar:#2b3a30;
+  --reception:#5e4a12;--receptionbg:#f1ead2;--receptionbar:#b08d3c}
 .cal-bar{justify-content:space-between}
 .cal-title{flex:1;min-width:150px;text-align:center;font-size:17px;color:var(--ink);}.cal-title::first-letter,.cal-detail h2::first-letter{text-transform:uppercase}
 .cal-mode{display:inline-flex;gap:4px}.cal-mode .btn[aria-pressed=true]{background:var(--green);color:#fff}
 .cal-legend{margin:0 0 10px}
 .chip{display:inline-block;font-size:11px;font-weight:600;line-height:1.3;padding:2px 7px;border-radius:12px;white-space:nowrap}
-.chip.shift{background:var(--shiftbg);color:var(--shift);border:1px solid var(--shift)}
+.chip.shift{background:var(--shiftbg);color:var(--shift);border:1px solid var(--shiftbar)}
 .chip.booking{background:var(--bookbg);color:var(--book);border:1px solid var(--book)}
 .cal-grid{display:grid;gap:2px}
 .cal-grid.month{grid-template-columns:repeat(7,minmax(0,1fr))}
@@ -25,12 +29,19 @@
 .cal-grid.week .cal-dnum .wd{display:inline}
 .cal-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .cal-item{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;border-left:5px solid;font-size:14px}
-.cal-item.shift{background:var(--shiftbg);border-color:var(--shift)}
+.cal-item.shift{background:var(--shiftbg);border-color:var(--shiftbar)}
+.cal-item.shift-heater{background:var(--heaterbg);border-color:var(--heaterbar)}
+.cal-item.shift-therapist{background:var(--therapistbg);border-color:var(--therapistbar)}
+.cal-item.shift-reception{background:var(--receptionbg);border-color:var(--receptionbar)}
+.cal-item.shift-other{background:var(--shiftbg);border-color:var(--shiftbar)}
+.cal-item.shift .cal-txt strong{color:var(--ink)}
+.cal-item.shift .badge{background:#fff;border:1px solid rgba(63,53,44,.25)}
+.cal-item.shift .badge.warn{background:var(--warnbg);border-color:#c9a45c}
 .cal-item.booking{background:var(--bookbg);border-color:var(--book)}
 .cal-time{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
 .cal-txt{text-align:left}
 .cal-detail{margin-top:12px}.cal-detail h2{margin-top:0}
-.cal-detail .shift-h{color:var(--shift)}.cal-detail .booking-h{color:var(--book)}
+.cal-detail .shift-h{color:var(--green)}.cal-detail .booking-h{color:var(--book)}
 .notice{background:var(--warnbg);color:#6b4b00;padding:10px 12px;border-radius:8px;margin:0 0 10px}
 @media (max-width:520px){.cal-item{grid-template-columns:auto 1fr}.cal-item .badge{grid-column:2;justify-self:start}}
 @media (min-width:900px){

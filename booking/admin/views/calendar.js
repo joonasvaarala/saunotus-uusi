@@ -15,6 +15,10 @@ const WD = ['Ma', 'Ti', 'Ke', 'To', 'Pe', 'La', 'Su'];
 const ROLE_FI = { heater: 'Lämmitykset', reception: 'Vastaanotto', therapist: 'Saunottaja', saunottaja: 'Saunottaja', hoitaja: 'Saunottaja' };
 const fixRole = (x) => String(x).replace(/\bhoitaja(t)?\b/gi, (_, pl) => (pl ? 'Saunottajat' : 'Saunottaja'));
 export const roleLabel = (s) => ROLE_FI[String(s.role_type || '').toLowerCase()] || fixRole(s.calendar_name || s.role_type || 'Työvuoro');
+// Työvuorokortin väriluokka roolin mukaan (värit: calendar.css)
+const KIND_CLASS = { heater: 'shift-heater', therapist: 'shift-therapist', saunottaja: 'shift-therapist', hoitaja: 'shift-therapist', reception: 'shift-reception' };
+const NAME_CLASS = [[/lämmit/i, 'shift-heater'], [/saunottaja|hoitaja/i, 'shift-therapist'], [/vastaanot/i, 'shift-reception']];   // tuntematon koodi → kalenterin nimestä
+export const shiftClass = (s) => KIND_CLASS[String(s.role_type || '').toLowerCase()] || (NAME_CLASS.find(([re]) => re.test(s.calendar_name || '')) || [])[1] || 'shift-other';
 const STAFFING = { assigned: 'Miehitetty', full: 'Miehitetty', unassigned: 'Avoin', open: 'Avoin', partial: 'Osittain' };
 export const staffingLabel = (v) => STAFFING[String(v).toLowerCase()] || v;
 const staffingTone = (v) => (['open', 'unassigned'].includes(String(v).toLowerCase()) ? 'warn' : 'ok');
@@ -46,7 +50,7 @@ export async function render({ ctx, refs, reload }) {
   }
   const group = (rows, key) => { const m = new Map(); for (const r of rows) { const k = dayKey(r[key]); (m.get(k) || m.set(k, []).get(k)).push(r); } return m; };
 
-  const shiftItem = (s) => h('li', { class: 'cal-item shift', 'data-kind': 'shift' },
+  const shiftItem = (s) => h('li', { class: `cal-item shift ${shiftClass(s)}`, 'data-kind': 'shift' },
     h('span', { class: 'cal-time', text: `${fmtTime(s.starts_at)}–${fmtTime(s.ends_at)}` }),
     h('span', { class: 'cal-txt' }, h('strong', { text: roleLabel(s) }),
       h('br'), h('span', { text: s.names.length ? s.names.join(', ') : 'Ei nimettyä henkilöä' })),

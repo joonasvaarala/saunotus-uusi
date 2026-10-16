@@ -98,6 +98,10 @@ async function loginViaInvite(page) {
     await page.waitForSelector('.cal-detail .cal-item.shift', { timeout: 5000 }).catch(() => problems.push('kalenteri: työvuoroja ei näkynyt'));
     const txt = (await page.locator('.cal-detail .cal-item.shift').allInnerTexts()).join(' | ');
     for (const w of ['Lämmitykset', 'Vastaanotto', 'Saunottaja', 'Miehitetty', 'Avoin']) if (!txt.includes(w)) problems.push(`kalenteri: työvuorosta puuttuu "${w}": ${txt}`);
+    const cls = await page.locator('.cal-detail .cal-item.shift').evaluateAll((els) => els.map((e) => e.className));
+    for (const c of ['shift-heater', 'shift-reception', 'shift-therapist']) if (!cls.some((x) => x.includes(c))) problems.push(`kalenteri: työvuorokortilta puuttuu väriluokka ${c}: ${cls.join(' | ')}`);
+    const bgs = await page.locator('.cal-detail .cal-item.shift').evaluateAll((els) => els.map((e) => getComputedStyle(e).backgroundColor));
+    if (new Set(bgs.slice(0, 3)).size !== 3) problems.push(`kalenteri: roolien taustavärien pitää erota: ${bgs}`);
     if (/heater|reception|therapist|assigned|sauna_x|hoitaja|\bopen\b/i.test(txt)) problems.push(`kalenteri: työvuoroissa näkyy koodi tai "Hoitaja": ${txt}`);
   }
   if ((await page.locator('#nav a[href="#/kayttajat"]').count()) !== 0) problems.push('kutsu: staff ei saa nähdä Käyttäjät-valikkoa');
