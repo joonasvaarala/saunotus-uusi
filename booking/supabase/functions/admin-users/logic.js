@@ -46,9 +46,10 @@ export function corsHeaders(origin, allowed) {
   return { 'Access-Control-Allow-Origin': origin, 'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Max-Age': '600', Vary: 'Origin' };
 }
 
-// Kutsulinkin kohde: INVITE_REDIRECT_URL tai SITE_URL + '/admin/'. Pitää olla https (tai http://localhost kehityksessä). Muuten null.
+// Kutsulinkin kohde: INVITE_REDIRECT_URL (ensisijainen, käytetään sellaisenaan) tai varakohde SITE_URL + '/hallinta/'. Pitää olla https (tai http://localhost kehityksessä). Muuten null.
 export function resolveRedirect(env) {
-  const raw = (env.INVITE_REDIRECT_URL || (env.SITE_URL ? `${String(env.SITE_URL).replace(/\/$/, '')}/admin/` : '')).trim();
+  const explicit = String(env.INVITE_REDIRECT_URL || '').trim(), site = String(env.SITE_URL || '').trim().replace(/\/$/, '');
+  const raw = explicit || (site ? `${site}/hallinta/` : '');
   if (!raw) return null;
   try {
     const u = new URL(raw);

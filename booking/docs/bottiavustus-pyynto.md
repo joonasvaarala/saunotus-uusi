@@ -1,10 +1,16 @@
 # Pyyntö Bottiavustukselle: `booking`-skeeman käyttöönotto (Supabase Tapio-havuhattu)
 
+> **PÄIVITYS 16.10. (v5, testiversion julkaisu GitHub Pagesiin) – lue ensin tämä:**
+> 1. **Aja uusi migraatio 10:** `booking/supabase/migrations/20261016150010_booking_10_rls_initplan.sql`. Se korvaa RLS-politiikat (`staff_self_read` ym.) muodolla `(select auth.uid())` / `(select booking.is_staff())` (advisor `auth_rls_initplan`, WARN). Sama semantiikka, idempotentti (`drop policy if exists` + `create policy`), ei kosketa migraatioihin 01–09, ei `public`- eikä `kb`-skeemaan. Ajon jälkeen aja `get_advisors` (performance) uudelleen: `auth_rls_initplan`-varoituksia ei pitäisi enää olla `booking`-skeemassa. Paikallinen testi: 571 pgTAP-tarkistusta + kilpailutesti läpi.
+> 2. **Edge Function `admin-users` – uudelleendeploy SUOSITELTAVA, ei pakollinen.** `index.ts` EI muuttunut; muutos on `logic.js`:ssä (`resolveRedirect`): kutsulinkin kohde on `INVITE_REDIRECT_URL` (ensisijainen, sellaisenaan), muuten `SITE_URL + /hallinta/` (aiemmin varakohde oli `/admin/`), tyhjät/välilyönnit trimmataan. Jos Joonas asettaa `INVITE_REDIRECT_URL`-salaisuuden (`https://joonasvaarala.github.io/saunotus-uusi/hallinta/`), jo deployattu versio toimii sellaisenaan; deploy tarvitaan vain, jos halutaan uusi varakäyttäytyminen. **Salaisuuksien muutos ei vaadi deployta**, mutta tarkista, että `ALLOWED_ORIGINS` sisältää `https://joonasvaarala.github.io` (CORS; muuten hallinnan Käyttäjät-kutsu epäonnistuu selaimessa).
+> 3. **Auth → URL Configuration → Redirect URLs:** lisää `https://joonasvaarala.github.io/saunotus-uusi/hallinta/` (muuten kutsulinkki ohjautuu Site URL:iin).
+> 4. Julkaisun (GitHub Pages) frontend-konfiguraatio tulee workflow'sta (`.github/workflows/pages.yml`): vain julkinen publishable-avain; service role -avain ei koskaan frontendiin tai repoon. Bottiavustuksen ei tarvitse tehdä sille mitään.
+
 > Valmis viesti. Lähetetään vasta kun Joonas on hyväksynyt. Tämä PR ei sisällä salaisuuksia eikä asiakasdataa.
 
 ---
 
-**Aihe:** Pyyntö: uusi `booking`-skeema (varausjärjestelmä), 9 migraatiota + Edge Function `admin-users` + käsin tehtävät vaiheet
+**Aihe:** Pyyntö: uusi `booking`-skeema (varausjärjestelmä), 10 migraatiota (01–09 ajettu jo; **10 uusi**) + Edge Function `admin-users` + käsin tehtävät vaiheet
 
 Hei Bottiavustus,
 
@@ -58,14 +64,14 @@ Koodi: `booking/supabase/functions/admin-users/` (`index.ts`, `logic.js`, `logic
   |---|---|---|
   | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | Supabase asettaa Edge Functioneille automaattisesti | ei tarvitse asettaa käsin; älä tulosta |
   | `ALLOWED_ORIGINS` | **asetetaan käsin** | pilkuilla erotetut originit, esim. `https://<hallinnan-osoite>` (ei jokerimerkkiä; testissä myös `http://localhost:4180`) |
-  | `SITE_URL` (tai `INVITE_REDIRECT_URL`) | **asetetaan käsin** | kutsulinkin kohde on `SITE_URL + /admin/` (tai `INVITE_REDIRECT_URL` sellaisenaan); pitää olla https (tai http://localhost) |
+  | `SITE_URL` (tai `INVITE_REDIRECT_URL`) | **asetetaan käsin** | kutsulinkin kohde on `INVITE_REDIRECT_URL` sellaisenaan (ensisijainen) tai varana `SITE_URL + /hallinta/`; pitää olla https (tai http://localhost) |
 * **Deploy** (Bottiavustus; ajetaan hakemistosta `booking/`, jossa `supabase/config.toml` on):
   ```
   supabase secrets set ALLOWED_ORIGINS="https://<hallinnan-osoite>" SITE_URL="https://<sivuston-osoite>" --project-ref <ref>
   supabase functions deploy admin-users --project-ref <ref>      # verify_jwt = true tulee config.toml:sta; ÄLÄ käytä --no-verify-jwt
   ```
   (Vaihtoehtoisesti Dashboardin kautta; tärkeintä: JWT-tarkistus päällä ja kaksi käsin asetettavaa muuttujaa.)
-* **Auth-asetukset (Dashboard → Authentication):** (1) *URL Configuration → Redirect URLs*: lisää kutsulinkin kohde (`SITE_URL/admin/`), muuten Supabase ohjaa kutsulinkin Site URL:iin. (2) Suositus: *Sign ups* pois päältä (kutsut toimivat silti). (3) Kutsusähköposti lähtee Supabasen oletuslähettäjältä (rajoitettu määrä, voi mennä roskapostiin) – kokeilulle riittää; tuotantoon oma SMTP (savusauna@saunotus.fi), ks. README *Puuttuu*. (4) Tarvittaessa muokkaa *Email Templates → Invite user* suomeksi (linkki `{{ .ConfirmationURL }}` pitää säilyä).
+* **Auth-asetukset (Dashboard → Authentication):** (1) *URL Configuration → Redirect URLs*: lisää kutsulinkin kohde (`INVITE_REDIRECT_URL`, testiversiossa `https://joonasvaarala.github.io/saunotus-uusi/hallinta/`), muuten Supabase ohjaa kutsulinkin Site URL:iin. (2) Suositus: *Sign ups* pois päältä (kutsut toimivat silti). (3) Kutsusähköposti lähtee Supabasen oletuslähettäjältä (rajoitettu määrä, voi mennä roskapostiin) – kokeilulle riittää; tuotantoon oma SMTP (savusauna@saunotus.fi), ks. README *Puuttuu*. (4) Tarvittaessa muokkaa *Email Templates → Invite user* suomeksi (linkki `{{ .ConfirmationURL }}` pitää säilyä).
 * **Testaus deployn jälkeen (ilman salaisuuksia):** a) kutsu ei-admin-tunnuksella (manager/staff) → 403; b) admin kutsuu testiosoitteen → rivi `booking.staff` + sähköposti; c) admin yrittää poistaa itsensä käytöstä → 409 `cannot_change_self`.
 
 **Käsin tehtävät (kertaluonteiset), kun migraatiot on ajettu:**

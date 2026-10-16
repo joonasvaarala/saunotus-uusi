@@ -9,7 +9,7 @@ Ei palvelinkoodia, ei build-vaihetta selaimen koodille, ei kirjastoriippuvuuksia
 
 | Polku | Mitä |
 |---|---|
-| `supabase/migrations/` | 9 SQL-migraatiota (skeema `booking`). **Ainoa tapa muuttaa tuotantokantaa.** |
+| `supabase/migrations/` | 10 SQL-migraatiota (skeema `booking`; 01–09 ajettu testikantaan 16.10., 10 odottaa ajoa). **Ainoa tapa muuttaa tuotantokantaa.** |
 | `supabase/tests/` | pgTAP-testit + kilpailutilannetesti (`run.sh`), mock-Supabase ja mock-kb |
 | `supabase/manual/` | Käsin tehtävät vaiheet: skeeman avaus REST:iin, ensimmäinen admin, tarkistuskyselyt |
 | `shared/sb.js` | ~110 rivin PostgREST/Auth-asiakas (käytetään kaupassa ja hallinnassa) |
@@ -130,6 +130,7 @@ Tulkinnat ja avoimet kysymykset: [docs/ristiriidat-ja-tulkinnat.md](docs/ristiri
 | 07 | `…_booking_07_rls_grants.sql` | RLS kaikkialla + minimioikeudet (revoke all → explicit grant) |
 | 08 | `…_booking_08_seed_rules.sql` | Asetukset, resurssit (poolit), `product_config`, 30 vuorosääntöä kb:n pohjalta (13 yleistä + 17 yksityistä) |
 | 09 | `…_booking_09_cron_optional.sql` | (valinnainen) pg_cron-ajastus pitojen siivoukseen; ohitetaan jos pg_cron puuttuu |
+| 10 | `…_booking_10_rls_initplan.sql` | Suorituskyky: RLS-politiikat `(select auth.uid())` / `(select booking.is_staff())` -muotoon (advisor `auth_rls_initplan`); sama semantiikka, idempotentti. Ei muokkaa migraatioita 01–09 |
 
 Migraatiot **eivät muuta `kb`-skeemaa** (vain viittaavat siihen FK:lla ja funktiot kirjoittavat `kb.products`, `kb.product_price_variants`, `kb.change_log`). Roolit: ei uusia tietokantaroolia; käytetään Supabasen `anon`, `authenticated`, `service_role`.
 
@@ -161,6 +162,8 @@ mkdir -p out/hallinta && cp -r booking/admin/* out/hallinta/ && cp booking/share
 cp out/hallinta/config.example.js out/hallinta/config.js   # täytä url + anonKey
 ```
 
+Kaupan ja hallinnan saa yhdellä komennolla samaan julkaisuun: `node scripts/build-pages.mjs` (ks. [Testiversion julkaisu](../README.md#testiversion-julkaisu-github-pages) juuri-READMEssä). Skripti generoi `hallinta/config.js`:n rakennusajan ympäristömuuttujista.
+
 ### Edge Function `admin-users`
 
 Kutsu sähköpostilla, käytöstä poisto/aktivointi (Auth-esto) – tarvitsee service role -avaimen, joten se ajetaan **palvelimella** (Supabase Edge Function), ei selaimessa.
@@ -169,8 +172,8 @@ Kutsuja tunnistetaan omalla JWT:llään (`booking.is_admin()`), sen jälkeen sä
 | Muuttuja | Mistä |
 |---|---|
 | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | Supabase asettaa automaattisesti Edge Functioneille |
-| `ALLOWED_ORIGINS` | käsin: sallitut originit (esim. `https://<hallinta>`), ei jokerimerkkiä |
-| `SITE_URL` / `INVITE_REDIRECT_URL` | käsin: kutsulinkin kohde (`SITE_URL/admin/`); lisättävä myös Authin *Redirect URLs* -listaan |
+| `ALLOWED_ORIGINS` | käsin: sallitut originit (esim. `https://<hallinta>`; GitHub Pages -testissä `https://joonasvaarala.github.io` – vain origin, ei polkua), ei jokerimerkkiä |
+| `SITE_URL` / `INVITE_REDIRECT_URL` | käsin: kutsulinkin kohde. `INVITE_REDIRECT_URL` käytetään sellaisenaan (ensisijainen); jos puuttuu, kohde on `SITE_URL/hallinta/`. Lisättävä myös Authin *Redirect URLs* -listaan |
 
 ```bash
 cd booking     # supabase/config.toml: verify_jwt = true
@@ -231,6 +234,7 @@ Vaatii PostgreSQL + pgTAP. Luo kannan `booking_test`, lataa mock-Supabasen (rool
 * `08_annual_card` – vuosikortti: vain yleinen vuoro, 0 €, yksi tuleva varaus kerrallaan, ohitusyritykset suoraan tietokannassa, myöntö/peruutus, RLS
 * `09_users_shifts` – työvuorojen lukunäkymä (staff vain omat, manager kaikki, ei oikeutta → virhe, väli > 62 pv → virhe, ei vuotavia kenttiä), roolin vaihdon ja linkityksen suojat (ei itseä, ei viimeistä adminia, epäaktiivinen/tuntematon kohde, vain staff-rooli, sama työntekijä kahdelle), `svc_*`-funktiot (vain service_role, säännöt, audit), ei kirjoituksia `public`-skeemaan
 * `supabase/functions/admin-users/logic.test.js` – Edge Functionin validointi (rooli-sallittulista, syötteet, CORS, kutsulinkin osoite, virhekartoitus); `node --test` tai `deno test`
+* `10_rls_initplan` – politiikkojen lausekkeissa ei ole suoraa `auth.uid()`/`is_staff()`/`has_permission()`-kutsua ilman `select`-kääreitä; politiikkojen määrä ja oikeudet (staff/manager/admin/anon) ennallaan
 * `race.sh` – rinnakkaiset yhteydet yrittävät varata samaa aikaa yhtä aikaa (advisory-lock-portti); invariantit: ei yksityisen ja yleisen päällekkäisyyttä, kapasiteetti ei ylity (ma–to 16, la–su 6 / alkamisaika, 1 h vuoro 10, poolit riippumattomia), vuosikortilla vain yksi tuleva varaus, asiakkaan rinnakkaiset muutokset eivät ylitä kapasiteettia eivätkä riko päällekkäisyyssääntöä
 * `mutation_check.sh` – todistaa että kilpailutesti on herkkä: poistaa lukon testikannasta ja odottaa `race.sh`:n epäonnistuvan
 

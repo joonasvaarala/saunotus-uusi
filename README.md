@@ -31,6 +31,8 @@ src/
 scripts/
   build.mjs            rakentaa dist/ (sivut, sitemap.xml, robots.txt, 404.html)
   check.mjs            linkki-, resurssi-, ankkuri-, alt-, title-tarkistus (--external: ulkoiset linkit)
+  build-pages.mjs      GitHub Pages -koonti: perussivusto + varauskauppa (/varaa/) + hallinta (/hallinta/) yhteen dist/-kansioon
+  smoke-pages.mjs      Playwright-savutesti alipolulle (/saunotus-uusi/): sivut, kauppa, hallinta, kutsun hyväksyntä (Supabase mockattu)
   serve.mjs            paikallinen esikatselu
   fetch-assets.mjs     lataa lähdekuvat live-sivustolta ja Johku-CDN:stä (assets-src/, ei gitissä)
   optimize-images.mjs  avif/webp + OG-kuvat → public/img
@@ -77,6 +79,48 @@ Asiakaskokemukset-osio rakennetaan Google-arvosteluista **rakennusvaiheessa puht
 ## Chatbot-widget (valmius, POIS PÄÄLTÄ)
 
 Upotus on HTML-kommenttina jokaisen sivun lopussa. Se ei lataa mitään. Käyttöönotto: `content/site.json` → `chatbot.enabled: true` (tai testissä `SAUNABOT=on npm run build`). Lisää silloin `<script src=".../saunabot/widget.js" defer>` ja `<div data-saunabot-quiz>`. **Ei tuotantoon** ennen OpenAI-avainta ja päätöstä.
+
+## Testiversion julkaisu (GitHub Pages)
+
+Osoitteet (testi, noindex kaikkialla – myös `/varaa/` ja `/hallinta/`):
+
+| Osoite | Sisältö |
+|---|---|
+| https://joonasvaarala.github.io/saunotus-uusi/ | perussivusto (FI/EN); Johku-linkit korvattu sisäisellä varauskaupalla |
+| https://joonasvaarala.github.io/saunotus-uusi/varaa/ (EN: `/en/book/`) | varauskauppa (Supabase `booking`-skeema) |
+| https://joonasvaarala.github.io/saunotus-uusi/hallinta/ | hallinta (kirjautuminen, kutsun hyväksyntä, salasanan asetus) |
+
+**Miten se toimii.** Workflow `.github/workflows/pages.yml` ajaa `node scripts/build-pages.mjs`, joka tuottaa YHDEN `dist/`-artifactin: kauppa-build (`booking/shop/build.mjs`) rakentaa koko perussivuston + kaupan, ja hallinta (`booking/admin` + `booking/shared/sb.js`) kopioidaan polkuun `hallinta/` generoidulla `config.js`:llä (`url` + julkinen avain). Kaikki polut lasketaan `SITE_URL`:in polusta (`/saunotus-uusi/`), joten linkit, importit ja `config.js` toimivat alipolulla. Skripti ajaa linkkitarkistuksen, varmistaa noindexin kaikilla sivuilla ja kieltäytyy `service_role`/`sb_secret`-avaimista (tarkistaa myös, ettei dist sisällä niitä).
+
+| Tapahtuma | Mitä tapahtuu |
+|---|---|
+| `push` → `main`, `workflow_dispatch` main-haarasta, ajastus (03:15 UTC) | build + check + **deploy** (Pages-ympäristö `github-pages`) |
+| `pull_request` (esim. PR #1, haara `booking`) | vain build + tarkistukset + yksikkötestit (CI-tarkistus), **ei deployta** |
+| `workflow_dispatch` muusta haarasta | vain build, ei deployta |
+
+Julkaisu siis tapahtuu vasta kun `booking`-haara on yhdistetty `main`iin (Pages-asetus: Settings → Pages → Source = GitHub Actions). PR:n esikatselua ei julkaista.
+
+**Rakennusajan muuttujat** (workflow'n `env`): `SITE_ENV=test`, `SITE_URL=https://joonasvaarala.github.io/saunotus-uusi`, `BOOKING_SUPABASE_URL=https://sxbofnuisemspgquoxyv.supabase.co`, `BOOKING_ANON_KEY=<julkinen publishable-avain>`. Avain on frontend-avain ja saa olla repossa; **`service_role`-avainta ei koskaan** viedä workflow'hun, repoon tai frontendiin. Avaimen vaihto: muokkaa `BOOKING_ANON_KEY` workflow'ssa.
+
+Paikallinen ajo ja savutesti:
+
+```bash
+SITE_ENV=test SITE_URL=https://joonasvaarala.github.io/saunotus-uusi BOOKING_SUPABASE_URL=https://<ref>.supabase.co \
+  BOOKING_ANON_KEY=<publishable> node scripts/build-pages.mjs        # → dist/
+# alipolun simulointi: palvele dist/ polun /saunotus-uusi/ alla (esim. python3 -m http.server kansiosta, jossa saunotus-uusi -> dist)
+PW_DIR=<polku playwright node_modules> BASE_URL=http://127.0.0.1:4190/saunotus-uusi node scripts/smoke-pages.mjs
+```
+
+**Kuka asettaa mitä (kertaluonteisesti, ennen kuin kutsut toimivat):**
+
+| Kuka | Mitä |
+|---|---|
+| Bottiavustus | ajaa migraation 10 (`20261016150010_booking_10_rls_initplan.sql`); halutessa deployaa `admin-users`-funktion uudelleen (ei pakollinen, ks. `booking/docs/bottiavustus-pyynto.md`) |
+| Joonas (Supabase Dashboard) | Edge Function -salaisuudet: `INVITE_REDIRECT_URL=https://joonasvaarala.github.io/saunotus-uusi/hallinta/` ja `ALLOWED_ORIGINS` sisältämään `https://joonasvaarala.github.io` (vain origin, ei polkua; ei jokerimerkkiä) |
+| Joonas (Supabase Dashboard) | Authentication → URL Configuration → *Redirect URLs*: lisää `https://joonasvaarala.github.io/saunotus-uusi/hallinta/` (muuten kutsulinkki ohjautuu Site URL:iin) |
+| Joonas (GitHub) | Pages-lähteeksi *GitHub Actions* (jo asetettu); PR #1:n yhdistäminen `main`iin käynnistää julkaisun |
+
+Kutsun hyväksyntä: kutsusähköpostin linkki avaa `/hallinta/#access_token=…&type=invite`; hallinta ottaa istunnon talteen, siivoaa tunnisteen osoiteriviltä ja pyytää asettamaan salasanan.
 
 ## Päätökset ja rajaukset
 

@@ -49,9 +49,13 @@ test('CORS: vain sallitut originit, ei jokerimerkkiä', () => {
   assert.deepEqual(parseAllowedOrigins('*'), []);
 });
 test('kutsulinkin kohde: https tai localhost', () => {
-  assert.equal(resolveRedirect({ SITE_URL: 'https://hallinta.example.fi/' }), 'https://hallinta.example.fi/admin/');
+  assert.equal(resolveRedirect({ SITE_URL: 'https://hallinta.example.fi/' }), 'https://hallinta.example.fi/hallinta/');
+  assert.equal(resolveRedirect({ SITE_URL: 'https://joonasvaarala.github.io/saunotus-uusi' }), 'https://joonasvaarala.github.io/saunotus-uusi/hallinta/');
+  // testiversio: INVITE_REDIRECT_URL voittaa SITE_URL:n ja käytetään sellaisenaan
+  assert.equal(resolveRedirect({ INVITE_REDIRECT_URL: 'https://joonasvaarala.github.io/saunotus-uusi/hallinta/', SITE_URL: 'https://muu.example.fi' }), 'https://joonasvaarala.github.io/saunotus-uusi/hallinta/');
+  assert.equal(resolveRedirect({ INVITE_REDIRECT_URL: '  ', SITE_URL: 'https://a.example.fi' }), 'https://a.example.fi/hallinta/');
   assert.equal(resolveRedirect({ INVITE_REDIRECT_URL: 'https://x.example.fi/hallinta/', SITE_URL: 'https://y.example.fi' }), 'https://x.example.fi/hallinta/');
-  assert.equal(resolveRedirect({ SITE_URL: 'http://localhost:4180' }), 'http://localhost:4180/admin/');
+  assert.equal(resolveRedirect({ SITE_URL: 'http://localhost:4180' }), 'http://localhost:4180/hallinta/');
   assert.equal(resolveRedirect({ SITE_URL: 'http://example.fi' }), null);
   assert.equal(resolveRedirect({ SITE_URL: 'javascript:alert(1)' }), null);
   assert.equal(resolveRedirect({}), null);
