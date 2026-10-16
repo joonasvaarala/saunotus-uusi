@@ -1,4 +1,4 @@
-// Varauskauppa: tuote → päivä/vuoro → henkilömäärä → yhteystiedot → vahvistus. Vanilla JS, ei riippuvuuksia, ei build-vaihetta.
+// Varauskauppa: tuote → päivä/vuoro → henkilömäärä → yhteystiedot → vahvistus. Vaihtoehtoinen selaus: päivän mukaan (#/paiva/<pvm>) → kaikki päivän vuorot. Vanilla JS, ei riippuvuuksia, ei build-vaihetta.
 // Data tulee vain julkisista RPC-funktioista (public_catalog / public_availability / public_create_booking / public_get_booking / public_change_booking).
 // Asiakas ei voi itse perua vahvistettua varausta (peruutukset sähköpostilla henkilökunnalle); hän voi MUUTTAA varausta (toinen vuoro / henkilömäärä) asetuksen mukaan vähintään 48 h ennen vuoroa.
 import { rpc } from './sb.js';
@@ -94,7 +94,108 @@ function viewList(query) {
     h('p', { class: 'bk-desc', text: (pdesc(p) || '').slice(0, 170) + ((pdesc(p) || '').length > 170 ? '…' : '') }),
     h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), p.duration_text ? ` · ${p.duration_text}` : ''),
     h('a', { class: 'btn sm', href: bk(`/tuote/${p.slug}`) }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) })))));
-  mount(h('header', { class: 'bk-head' }, h('h2', { text: t.title }), h('p', { class: 'lead', text: t.lead })), tabs, cards);
+  mount(h('header', { class: 'bk-head' }, h('h2', { text: t.title }), h('p', { class: 'lead', text: t.lead })), modeSwitch('cat'), tabs, cards);
+}
+
+// ---- näkymä 1b: selaa päivän mukaan (#/paiva/<YYYY-MM-DD>) ----
+// Tiedot: public_availability(tuote, kk:n 1.–viim.) kutsutaan kaikille tuotteille rinnakkain (1 kutsu / tuote / kuukausi) ja tulokset välimuistitetaan
+// (sama välimuisti kuin tuotenäkymässä). Viikkoliuska, päivän vuorot ja "seuraava vapaa päivä" luetaan välimuistista → päivän vaihto samassa kuukaudessa ei kutsu palvelinta.
+const addDays = (ds, n) => { const d = new Date(`${ds}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const dowMon = (ds) => (new Date(`${ds}T12:00:00Z`).getUTCDay() + 6) % 7;                 // ma = 0
+const monthOf = (ds) => { const [y, m] = ds.split('-').map(Number); return [y, m - 1]; };
+function modeSwitch(active, ds) {
+  return h('nav', { class: 'bk-modes', 'aria-label': t.modeLabel },
+    h('a', { href: bk('/'), 'aria-current': active === 'cat' ? 'page' : null, text: t.modeCat }),
+    h('a', { href: bk(`/paiva/${ds || state.lastDay || todayHel()}`), 'aria-current': active === 'day' ? 'page' : null, text: t.modeDay }));
+}
+async function ensureMonths(pairs) {   // pairs: [[y, m0], …] → kaikki tuotteet rinnakkain; epäonnistuneet tuotteet jätetään pois (ei välimuistiin)
+  const jobs = [];
+  for (const [y, m] of pairs) for (const p of state.catalog) jobs.push(loadMonth(p.id, y, m));
+  const res = await Promise.allSettled(jobs);
+  if (jobs.length && res.every((x) => x.status === 'rejected')) throw res[0].reason;
+}
+const dayRows = (ds) => {
+  const [y, m] = monthOf(ds);
+  return state.catalog.flatMap((p) => (state.months.get(`${p.id}:${y}-${m}`)?.[ds] || []).map((r) => ({ r, p })))
+    .sort((a, b) => a.r.starts_at.localeCompare(b.r.starts_at) || state.catalog.indexOf(a.p) - state.catalog.indexOf(b.p));
+};
+const freeCount = (ds) => dayRows(ds).filter((x) => x.r.status === 'available').length;
+async function findNextFree(ds, maxDs) {   // seuraava päivä, jolla on vapaita vuoroja (enintään 3 seuraavaa kuukautta, korkeintaan varausikkunan loppuun)
+  let [y, m] = monthOf(ds);
+  for (let i = 0; i < 4; i++) {
+    await ensureMonths([[y, m]]).catch(() => {});
+    const days = new Date(y, m + 1, 0).getDate();
+    for (let d = 1; d <= days; d++) {
+      const x = `${y}-${pad2(m + 1)}-${pad2(d)}`;
+      if (x > ds && x <= maxDs && freeCount(x) > 0) return x;
+    }
+    if (`${y}-${pad2(m + 1)}-31` >= maxDs) break;
+    m++; if (m > 11) { m = 0; y++; }
+  }
+  return null;
+}
+function dayItem({ r, p }, ds) {
+  const ok = r.status === 'available';
+  const title = `${hm(r.starts_at)}–${hm(r.ends_at)}`;
+  const cl = cleanLabel(r.label), sub = cl && !pname(p).toLowerCase().includes(cl.toLowerCase()) ? cl : '';   // ei toisteta tuotteen nimeä
+  const price = r.price_mode === 'per_person' ? `${money(r.unit_price)} ${t.perPerson}` : r.price_mode === 'fixed' ? money(r.base_price) : `${t.from} ${money(r.base_price)}`;
+  return h('li', { class: `bk-slot ${r.status}` },
+    h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }),
+      h('span', { class: 'bk-prodname' }, h('a', { href: bk(`/tuote/${p.slug}/${ds}`), text: pname(p) })), sub ? h('span', { class: 'bk-sub', text: sub }) : null, h('span', { class: 'bk-price', text: price })),
+    h('div', { class: 'bk-slot-side' },
+      ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: `bk-badge ${r.status}`, text: r.status === 'full' ? t.full : t.unavailable, title: r.status === 'unavailable' ? t.unavailableHint : null }),
+      ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}?via=day`) }, t.choose, h('span', { class: 'sr', text: ` ${title}, ${pname(p)}` })) : null));
+}
+async function viewDay(dateStr, keep) {
+  const today = todayHel(), horizon = state.settings.booking_horizon_days || 120, maxDs = addDays(today, horizon);
+  let ds = /^\d{4}-\d\d-\d\d$/.test(dateStr || '') ? dateStr : today;
+  if (Number.isNaN(Date.parse(`${ds}T12:00:00Z`))) ds = today;
+  ds = ds < today ? today : ds > maxDs ? maxDs : ds;
+  state.lastDay = ds;
+  const ws = addDays(ds, -dowMon(ds)), we = addDays(ws, 6);
+  const pairs = [...new Map([monthOf(ds), monthOf(ws), monthOf(we)].map((x) => [x.join('-'), x])).values()];
+  await ensureMonths(pairs);
+  const rows = dayRows(ds), free = rows.filter((x) => x.r.status === 'available');
+  const go = (x) => { location.hash = `#/paiva/${x}`; };
+  const longDate = dayLong(`${ds}T12:00:00Z`);
+  const weekLabel = `${fmt(`${ws}T12:00:00Z`, { day: 'numeric', month: 'numeric' })}–${fmt(`${we}T12:00:00Z`, { day: 'numeric', month: 'numeric', year: 'numeric' })}`;
+  const strip = h('ol', { class: 'bk-strip' }, Array.from({ length: 7 }, (_, i) => {
+    const x = addDays(ws, i), inRange = x >= today && x <= maxDs;
+    const rs = inRange ? dayRows(x) : [], n = rs.filter((q) => q.r.status === 'available').length;
+    const st = !inRange ? 'off' : n ? 'free' : rs.some((q) => q.r.status === 'full') ? 'full' : rs.length ? 'unavail' : 'none';
+    const long = dayLong(`${x}T12:00:00Z`);
+    const label = st === 'free' ? `${long}, ${t.daySessions(n)}` : st === 'full' ? `${long}, ${t.full}` : st === 'unavail' ? `${long}, ${t.unavailable}` : st === 'none' ? `${long}, ${t.noSessions}` : long;
+    const inner = [h('span', { class: 'bk-sd-wd', 'aria-hidden': 'true', text: fmt(`${x}T12:00:00Z`, { weekday: 'short' }) }), h('span', { class: 'bk-sd-n', 'aria-hidden': 'true', text: String(+x.slice(8)) }), h('span', { class: `dot ${st}`, 'aria-hidden': 'true' })];
+    return h('li', {}, !inRange ? h('span', { class: 'bk-sd off', 'aria-label': long }, inner)
+      : h('a', { class: `bk-sd ${st}${x === today ? ' today' : ''}${x === ds ? ' sel' : ''}`, href: bk(`/paiva/${x}`), 'aria-label': label, 'aria-current': x === ds ? 'date' : null }, inner));
+  }));
+  const picker = h('input', { type: 'date', id: 'bk-day-pick', value: ds, min: today, max: maxDs, onchange: (e) => { if (e.target.value) go(e.target.value); } });
+  const prevOk = addDays(ws, -1) >= today, nextOk = addDays(we, 1) <= maxDs;
+  const wkBtn = (ok, target, label, ch) => (ok ? h('a', { class: 'bk-navbtn', href: bk(`/paiva/${target}`), 'aria-label': label, text: ch }) : h('span', { class: 'bk-navbtn off', 'aria-hidden': 'true', text: ch }));
+  const nav = h('div', { class: 'bk-weeknav' },
+    wkBtn(prevOk, addDays(ds, -7) < today ? today : addDays(ds, -7), t.prevWeek, '‹'),
+    h('strong', { 'aria-live': 'polite', text: weekLabel }),
+    wkBtn(nextOk, addDays(ds, 7) > maxDs ? maxDs : addDays(ds, 7), t.nextWeek, '›'));
+  const tools = h('div', { class: 'bk-daytools' },
+    h('a', { class: 'btn sm bk-today', href: bk(`/paiva/${today}`), text: t.today }),
+    h('label', { for: 'bk-day-pick', text: t.pickDay }), picker);
+  let results;
+  const heading = h('h3', { id: 'bk-day-h', text: `${t.slotsFor} – ${longDate}`, tabindex: '-1' });
+  if (!free.length) {
+    const nextDs = await findNextFree(ds, maxDs);
+    results = h('div', { class: 'bk-dayresults' }, heading,
+      h('div', { class: 'bk-notice', role: 'status' }, h('p', { text: t.noSlotsDay }),
+        nextDs ? h('p', {}, t.nextFree + ' ', h('a', { class: 'btn sm', href: bk(`/paiva/${nextDs}`), text: dayLong(`${nextDs}T12:00:00Z`) })) : h('p', { text: t.noNextFree })),
+      rows.length ? h('ul', { class: 'bk-slotlist' }, rows.map((x) => dayItem(x, ds))) : null);
+  } else {
+    const groups = ['yleinen', 'yksityinen', 'muut'].map((k) => [k, rows.filter((x) => kindOf(x.p) === k)]).filter(([, g]) => g.length);
+    results = h('div', { class: 'bk-dayresults' }, heading, groups.flatMap(([k, g]) => [h('h4', { class: 'bk-kindh', text: t['k_' + k] }), h('ul', { class: 'bk-slotlist' }, g.map((x) => dayItem(x, ds)))]));
+  }
+  mount(h('header', { class: 'bk-head' }, h('h2', { text: t.dayTitle }), h('p', { class: 'lead', text: t.dayLead })), modeSwitch('day', ds),
+    h('section', { class: 'bk-daypick', 'aria-label': t.pickDay }, nav, strip,
+      h('p', { class: 'bk-legend' }, h('span', { class: 'dot free' }), t.free, ' ', h('span', { class: 'dot full' }), t.full, ' ', h('span', { class: 'dot unavail' }), t.unavailable), tools),
+    h('div', { class: 'bk-slots', 'aria-live': 'polite' }, results));
+  if (keep) { const el = document.getElementById('bk-day-h'); if (el) el.focus({ preventScroll: true }); } else focusTop();
 }
 
 // ---- näkymä 2: tuote → kalenteri → vuorot ----
@@ -170,7 +271,7 @@ function slotItem(r, ds, p) {
 }
 
 // ---- näkymä 3: henkilömäärä + yhteystiedot ----
-async function viewCheckout(ruleId, ds, productId) {
+async function viewCheckout(ruleId, ds, productId, via) {
   // Haetaan vuoro tuotteen kuukausidatasta (tuote-id tulee linkissä; ilman sitä käydään tuotteet läpi)
   let s = null, p = null;
   const order = [...state.catalog].sort((a, b) => (b.id === +productId) - (a.id === +productId));
@@ -280,7 +381,7 @@ async function viewCheckout(ruleId, ds, productId) {
     h('div', { class: 'bk-check' }, consent, h('label', { for: 'bk-consent', text: t.consentMarketing })),
     msg, submit);
   form.addEventListener('input', () => msg.replaceChildren());   // vanha virheilmoitus pois kun käyttäjä korjaa tietoja
-  mount(h('p', {}, h('a', { href: bk(`/tuote/${p.slug}/${ds}`), text: t.back })), h('h2', { text: t.bookTitle }),
+  mount(h('p', {}, h('a', { href: via === 'day' ? bk(`/paiva/${ds}`) : bk(`/tuote/${p.slug}/${ds}`), text: t.back })), h('h2', { text: t.bookTitle }),
     h('div', { class: 'bk-checkout' }, form,
       h('aside', { class: 'bk-aside', 'aria-label': t.summary }, h('h3', { text: t.summary }), sumList,
         h('p', { class: 'bk-totalrow' }, t.total + ': ', total, ' ', h('small', { text: t.vatIncl })),
@@ -411,18 +512,19 @@ async function viewChange(token, b) {
 }
 
 // ---- reititin ----
-async function route() {
+async function route(keep = false) {
   root.setAttribute('aria-busy', 'true');
   try {
     if (S.page === 'confirm') return await viewConfirmation();
-    spinner();
+    if (!keep) spinner();
     await loadBase();
     if (state.settings.public_booking_enabled === false) { mount(h('div', { class: 'bk-notice' }, h('p', { text: t.disabled }), phoneBox())); return; }
     const [path, qs] = location.hash.slice(1).split('?');
     const parts = path.split('/').filter(Boolean);
     const q = new URLSearchParams(qs || '');
-    if (parts[0] === 'tuote' && parts[1]) await viewProduct(parts[1], /^\d{4}-\d\d-\d\d$/.test(parts[2] || '') ? parts[2] : null);
-    else if (parts[0] === 'varaa' && parts[1] && parts[2]) await viewCheckout(parts[1], parts[2], parts[3]);
+    if (parts[0] === 'paiva') await viewDay(parts[1], keep);
+    else if (parts[0] === 'tuote' && parts[1]) await viewProduct(parts[1], /^\d{4}-\d\d-\d\d$/.test(parts[2] || '') ? parts[2] : null);
+    else if (parts[0] === 'varaa' && parts[1] && parts[2]) await viewCheckout(parts[1], parts[2], parts[3], q.get('via'));
     else { viewList(q); focusTop(); }
   } catch (e) {
     console.warn('booking route error', e);
@@ -432,7 +534,10 @@ async function route() {
 let last = '';
 window.addEventListener('hashchange', () => {
   // päivän valinta kalenterissa vaihtaa hashin ilman uudelleenpiirtoa (replaceState ei laukaise tapahtumaa); muut siirtymät piirretään uudelleen
-  if (location.hash !== last) { last = location.hash; route(); window.scrollTo({ top: 0 }); }
+  if (location.hash !== last) {
+    const keep = /^#\/paiva\b/.test(last) && /^#\/paiva\b/.test(location.hash);   // päivänvaihto päivänäkymässä: ei hypätä sivun alkuun
+    last = location.hash; route(keep); if (!keep) window.scrollTo({ top: 0 });
+  }
 });
 last = location.hash;
 route();

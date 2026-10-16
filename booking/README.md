@@ -18,7 +18,7 @@ Ei palvelinkoodia, ei build-vaihetta selaimen koodille, ei kirjastoriippuvuuksia
 | `supabase/functions/admin-users/` | Edge Function (Deno, `verify_jwt = true`): käyttäjien kutsu, käytöstä poisto ja aktivointi. Validointilogiikka `logic.js` + testit |
 | `dev/` | Paikallinen demo: PostgREST-konfiguraatio, kehityspalvelin (mock-auth), demo-siemen |
 | `scripts/e2e-screenshots.mjs` | Playwright-savutesti + kuvakaappaukset + konsolivirhetarkistus |
-| `scripts/e2e-shop-layout.mjs` | Kaupan varauslomakkeen asettelutesti (360/390/430/1280 px, FI+EN, yksityinen+yritys): ei vaakavieritystä, osiot samassa linjassa, järjestys ja otsikot |
+| `scripts/e2e-shop-layout.mjs` | Kaupan varauslomakkeen ja päivänäkymän (`#/paiva/<pvm>`) asettelutesti (360/390/430/1280 px, FI+EN, yksityinen+yritys; kosketuskohteet, kontrasti, näppäimistö): ei vaakavieritystä, osiot samassa linjassa, järjestys ja otsikot |
 | `docs/` | Maksurajapinta, Johku-tuonti, ristiriidat ja tulkinnat, Bottiavustuspyyntö, kuvakaappaukset |
 
 ## Arkkitehtuuri
@@ -156,6 +156,14 @@ node booking/shop/build.mjs        # → booking/shop/dist/  (koko sivusto + var
 
 Kauppa on sivuston kopio: `scripts/build.mjs` ajetaan erilliseen hakemistoon ja Johku-linkit (`*.johku.com/<kieli>/<kategoria>/<tuote>`) korvataan sisäisillä (`/varaa/#/tuote/<slug>`). Lahjakortti-, yritys- ja info-linkit jäävät toistaiseksi Johkuun (ei vielä toteutettu). Perussivuston tiedostoihin ei kosketa; `booking/shop/dist` on `.gitignore`ssa (`dist/`).
 Ajonaikainen konfiguraatio on tiedostossa `dist/booking/config.js` (voi vaihtaa ilman uudelleenrakennusta).
+
+#### Kaksi tapaa selata: kategorioittain ja päivän mukaan
+
+Kaupan etusivulla (`/varaa/`, `/en/book/`) on valinta **Selaa kategorioittain** (oletus; tuote → päivä → vuoro, reitit `#/` ja `#/tuote/<slug>/<pvm>` ennallaan) ja **Selaa päivän mukaan** (reitti `#/paiva/<YYYY-MM-DD>`, linkitettävissä):
+* Viikkoliuska (ma–su, merkkinä vapaa / täynnä / ei varattavissa, nuolet viikon vaihtoon), "Tänään"-painike ja päivävalitsin (`<input type=date>`) kuukausien välillä liikkumiseen. Menneet päivät ja varausikkunan (`booking_horizon_days`) jälkeiset päivät eivät ole valittavissa.
+* Valitun päivän **kaikki** vuorot aikajärjestyksessä ryhmiteltynä (Yleiset vuorot / Yksityisvuorot / Muut): alkamis- ja päättymisaika, tuote, vapaita paikkoja / Täynnä / Ei varattavissa (päällekkäinen yksityis-/yleisvuoro tai sulku), hinta (alk.) ja **Valitse**, joka vie samalle lomakereitille kuin tuotenäkymä (`#/varaa/<rule_id>/<pvm>/<tuote-id>`; `?via=day` palauttaa Takaisin-linkillä päivänäkymään).
+* Tyhjä päivä: "Ei vapaita vuoroja valitulle päivälle." + ehdotus seuraavasta päivästä, jolla on vapaita vuoroja (haetaan enintään 3 kuukautta eteenpäin).
+* **Haku:** ei SQL-muutoksia. `public_availability(p_product_id, p_from, p_to)` on tuotekohtainen, joten päivänäkymä kutsuu sitä kullekin kaupan tuotteelle rinnakkain koko kuukauden väliltä (1 kutsu / tuote / kuukausi; viikon yli kuukauden rajan 2 kuukautta). Tulokset välimuistitetaan (`state.months`, sama kuin tuotenäkymässä), joten päivän vaihto samassa kuukaudessa ei kutsu palvelinta. Jos tuotteita tulee paljon, kannattaa lisätä migraatio (Bottiavustus), jossa on `public_availability_all(p_from date, p_to date)` (kaikki tuotteet yhdellä kutsulla); frontend vaihtuisi yhteen kutsuun muuttamalla vain `ensureMonths`-funktiota.
 
 ### Hallinta
 

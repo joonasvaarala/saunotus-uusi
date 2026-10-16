@@ -69,6 +69,66 @@ for (const lang of ['fi', 'en']) for (const width of [360, 390, 430, 1280]) for 
   if (OUT && lang === 'fi' && width === 1280 && kind === 'company') await page.screenshot({ path: join(OUT, 'shop-desktop-1280-lisapalvelut-yritys.png'), fullPage: true });
   await ctx.close();
 }
+
+// ---- Selaa päivän mukaan (#/paiva/<pvm>): asettelu, kosketuskohteet, näppäimistö, kontrasti ----
+for (const lang of ['fi', 'en']) for (const width of [360, 390, 430, 1280]) for (const empty of [false, true]) {
+  const tag = `päivänäkymä ${lang}/${width}/${empty ? 'tyhjä' : 'vuoroja'}`;
+  const mobile = width < 600;
+  const ctx = await browser.newContext({ viewport: { width, height: 844 }, isMobile: mobile, hasTouch: mobile, deviceScaleFactor: 1, locale: lang === 'en' ? 'en-GB' : 'fi-FI', timezoneId: 'Europe/Helsinki' });
+  const page = await ctx.newPage();
+  page.on('pageerror', (e) => problems.push(`${tag} pageerror: ${e.message}`));
+  await page.goto(`${BASE}${lang === 'en' ? '/en/book/' : '/varaa/'}`);
+  await page.waitForSelector('.bk-cards');
+  await page.click('.bk-modes a:nth-child(2)');
+  await page.waitForSelector('.bk-strip');
+  if (empty) {   // tyhjä päivä: käydään päivät läpi kunnes ilmoitus löytyy
+    for (let i = 0; i < 28 && (await page.locator('.bk-dayresults .bk-notice').count()) === 0; i++) {
+      const d = new Date(Date.now() + i * 864e5).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
+      await page.evaluate((x) => { location.hash = `#/paiva/${x}`; }, d); await page.waitForTimeout(250);
+    }
+    expect((await page.locator('.bk-dayresults .bk-notice').count()) > 0, `${tag}: tyhjää päivää ei löytynyt`);
+  } else {
+    for (let i = 0; i < 4 && (await page.locator('.bk-sd.free').count()) === 0; i++) await page.click('.bk-weeknav a[aria-label]:last-child');
+    await page.locator('.bk-sd.free').last().click(); await page.waitForSelector('.bk-dayresults .bk-slot');
+  }
+  await page.waitForTimeout(200);
+  const r = await page.evaluate(() => {
+    const box = (el) => { const b = el.getBoundingClientRect(); return { l: b.left, r: b.right, w: b.width, h: b.height }; };
+    const app = box(document.getElementById('booking-app'));
+    const rgb = (c) => (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+    const lum = (c) => { const [r, g, b] = rgb(c).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+    const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
+    const effBg = (e) => { for (let n = e; n; n = n.parentElement) { const c = getComputedStyle(n).backgroundColor; if (rgb(c).length && !/rgba\(.*,\s*0\)$/.test(c) && c !== 'transparent') return c; } return 'rgb(255,255,255)'; };   // lähin ei-läpinäkyvä tausta
+    const cr = (sel) => [...document.querySelectorAll(sel)].map((e) => ({ sel, v: ratio(getComputedStyle(e).color, effBg(e)) }));
+    const inside = (sel) => [...document.querySelectorAll(sel)].map((e) => ({ sel, ...box(e) })).filter((b) => b.w > 0);
+    return {
+      sw: document.documentElement.scrollWidth, iw: innerWidth, app,
+      parts: [...inside('.bk-modes'), ...inside('.bk-daypick'), ...inside('.bk-strip'), ...inside('.bk-dayresults'), ...inside('.bk-slot'), ...inside('.bk-notice'), ...inside('.bk-daytools input')],
+      strip: [...document.querySelectorAll('.bk-strip .bk-sd')].map(box), nav: [...document.querySelectorAll('.bk-weeknav .bk-navbtn:not(.off)')].map(box),
+      btns: [...document.querySelectorAll('.bk-dayresults a.btn, .bk-modes a, .bk-today')].map(box),
+      contrast: [...cr('.bk-modes a'), ...cr('.bk-sd.free'), ...cr('.bk-sd.sel'), ...cr('.bk-badge.free'), ...cr('.bk-slot .bk-time'), ...cr('.bk-dayresults a.btn'), ...cr('.bk-today')],
+      names: { h2: document.querySelector('#booking-app h2')?.textContent, labelled: [...document.querySelectorAll('.bk-strip a')].every((a) => a.getAttribute('aria-label')), pickLabel: !!document.querySelector('label[for=bk-day-pick]'), current: document.querySelectorAll('.bk-strip [aria-current=date]').length },
+    };
+  });
+  expect(r.sw <= r.iw, `${tag}: vaakavieritys (${r.sw} > ${r.iw})`);
+  for (const b of r.parts) expect(b.l >= r.app.l - 0.5 && b.r <= r.app.r + 0.5, `${tag}: ${b.sel} ylittää sisältöalueen (${b.l.toFixed(1)}–${b.r.toFixed(1)} vs ${r.app.l.toFixed(1)}–${r.app.r.toFixed(1)})`);
+  expect(r.strip.length === 7 && r.strip.every((b) => Math.abs(b.w - r.strip[0].w) < 1.5 && Math.abs(b.l + b.w - (r.strip[0].l + r.strip[0].w) - (r.strip.indexOf(b) * (r.strip[1].l - r.strip[0].l))) < 1.5 && b.w >= 34 && b.h >= 44), `${tag}: viikkoliuskan päivien pitää olla 7 samanlevyistä ≥34×44 px: ${JSON.stringify(r.strip.map((b) => [Math.round(b.w), Math.round(b.h)]))}`);
+  expect(r.nav.every((b) => b.w >= 44 && b.h >= 44), `${tag}: viikkonuolten kosketuskohde < 44 px`);
+  expect(r.btns.every((b) => b.h >= 40), `${tag}: painikkeiden korkeus < 40 px: ${JSON.stringify(r.btns.map((b) => Math.round(b.h)))}`);
+  for (const c of r.contrast) expect(c.v >= 4.5, `${tag}: kontrasti ${c.sel} ${c.v.toFixed(2)} < 4.5`);
+  expect(r.names.labelled && r.names.pickLabel && r.names.current === 1, `${tag}: saavutettavuus: aria-label/label/aria-current puuttuu (${JSON.stringify(r.names)})`);
+  // näppäimistö: Tab saavuttaa päivälinkit ja Enter vaihtaa päivän
+  if (!mobile && !empty) {
+    let hit = false; await page.focus('.bk-modes a');
+    for (let i = 0; i < 40 && !hit; i++) { await page.keyboard.press('Tab'); hit = await page.evaluate(() => document.activeElement?.classList.contains('bk-sd')); }
+    expect(hit, `${tag}: Tab ei saavuta viikkoliuskan päiviä`);
+    const target = await page.evaluate(() => document.activeElement.getAttribute('href'));
+    await page.keyboard.press('Enter'); await page.waitForTimeout(500);
+    expect(page.url().endsWith(target.slice(target.indexOf('#'))), `${tag}: Enter ei avannut päivää ${target} (${page.url()})`);
+    expect(await page.evaluate(() => document.activeElement?.id === 'bk-day-h' || document.activeElement === document.body || !!document.activeElement), `${tag}: fokus hukkui`);
+  }
+  await ctx.close();
+}
 await browser.close();
 if (problems.length) { console.error(problems.join('\n')); process.exit(1); }
-console.log(`ok: kaupan lomakkeen asettelu (${checks} tarkistusta; FI+EN, 360/390/430/1280 px, yksityinen+yritys)`);
+console.log(`ok: kaupan lomakkeen ja päivänäkymän asettelu (${checks} tarkistusta; FI+EN, 360/390/430/1280 px)`);

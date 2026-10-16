@@ -42,6 +42,19 @@ async function newPage(name, { allowFail = null } = {}) {
       const row = (id, from, to, role, cal, st, who) => ({ shift_id: id, starts_at: `${ds}T${from}:00Z`, ends_at: `${ds}T${to}:00Z`, role_type: role, calendar_name: cal, staffing_status: st, staff_name: who });
       return json([row('s1', '06:00', '11:00', 'heater', 'Lämmitykset', 'assigned', 'Otto'), row('s2', '11:00', '16:00', 'reception', 'Vastaanotto', 'assigned', 'Otto'), row('s3', '11:00', '17:00', 'therapist', 'Hoitaja', 'assigned', 'Joonas'), row('s4', '12:00', '15:00', 'sauna_x', 'Hoitaja', 'unassigned', null), row('s5', '16:00', '18:00', 'therapist', 'Hoitaja', 'partial', 'Matti')]);
     }
+    if (u.pathname.endsWith('/rpc/public_catalog')) return json([
+      { id: 1, slug: 'yleinen', name: 'Yleinen vuoro', name_en: 'Public session', description: 'x', description_en: 'x', category: 'sauna', sale_kind: 'public_shift', price: 29, price_type: 'per_person', min_persons: 1, max_persons: 10 },
+      { id: 2, slug: 'oma', name: 'Oma saunavuoro', name_en: 'Private sauna', description: 'x', description_en: 'x', category: 'sauna', sale_kind: 'private_shift', price: 250, price_type: 'from', min_persons: 1, max_persons: 20 }]);
+    if (u.pathname.endsWith('/rpc/public_availability')) {   // parittomina kuukauden päivinä vuoroja, parillisina ei yhtään (tyhjä päivä)
+      const a = route.request().postDataJSON() || {}, rows = [];
+      for (let d = new Date(`${a.p_from}T12:00:00Z`); d <= new Date(`${a.p_to}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + 1)) {
+        const ds = d.toISOString().slice(0, 10); if (+ds.slice(8) % 2 === 0) continue;
+        const mk = (rule, hh, mm, label, mode, status) => ({ rule_id: rule, label, mode, session_date: ds, starts_at: `${ds}T${String(hh - 3).padStart(2, '0')}:${mm}:00Z`, ends_at: `${ds}T${String(hh - 2).padStart(2, '0')}:${mm}:00Z`, status, remaining: status === 'available' ? 6 : 0, min_persons: 1, max_persons: 10, price_mode: a.p_product_id === 1 ? 'per_person' : 'base_plus_extra', unit_price: 29, base_price: 250, included_persons: 4, extra_person_price: 20 });
+        if (a.p_product_id === 1) rows.push(mk(11, 18, '00', 'Yleinen vuoro', 'public', 'available'), mk(10, 14, '00', 'Yleinen vuoro', 'public', 'available'), mk(12, 16, '00', 'Yleinen vuoro', 'public', 'full'));
+        else rows.push(mk(21, 13, '00', 'Oma saunavuoro', 'private', 'unavailable'), mk(22, 20, '00', 'Oma saunavuoro', 'private', 'available'));
+      }
+      return json(rows);
+    }
     if (u.pathname.includes('/rpc/public_settings')) return json({ public_booking_enabled: true });
     if (u.pathname.includes('/rpc/')) return json([]);
     return json([]);
@@ -70,6 +83,40 @@ for (const p of ['/', '/en/', '/varaa/', '/en/book/']) {
   if (reqs.filter((u) => /\/hallinta\/sb\.js/.test(u)).length !== 1) problems.push('hallinta: sb.js ladattu useammin kuin kerran (moduuli-instanssit eroavat)');
   if ((await page.locator('meta[name=robots][content*=noindex]').count()) < 1) problems.push('hallinta: noindex puuttuu');
   if (!(await page.evaluate(() => window.BOOKING_CONFIG?.url?.endsWith('.supabase.co')))) problems.push('hallinta: config.js ei osoita Supabaseen');
+  await page.context().close();
+}
+// 2b) kauppa: Selaa päivän mukaan (#/paiva/<pvm>) – versio 13
+for (const [base, L] of [['/varaa/', { cat: 'Selaa kategorioittain', day: 'Selaa päivän mukaan', empty: 'Ei vapaita vuoroja valitulle päivälle', y: 'Yleiset vuorot', o: 'Yksityisvuorot' }], ['/en/book/', { cat: 'Browse by category', day: 'Browse by date', empty: 'No available sessions for the selected date', y: 'Public sessions', o: 'Private sessions' }]]) {
+  const page = await newPage(`päivänäkymä ${base}`);
+  const dates = []; for (let i = 1; dates.length < 2 && i < 12; i++) { const d = new Date(Date.now() + i * 864e5).toISOString().slice(0, 10); const odd = +d.slice(8) % 2 === 1; if (odd === (dates.length === 0)) dates.push(d); }
+  const [oddDay, evenDay] = dates;
+  const avail = []; page.on('request', (r) => { if (r.url().includes('public_availability')) avail.push(r.postDataJSON()); });
+  await page.goto(`${BASE}${base}`);
+  await page.waitForSelector('.bk-cards');
+  if (!(await page.locator('.bk-modes a[aria-current]').innerText()).toLowerCase().includes(L.cat.toLowerCase())) problems.push(`${base}: oletustilan pitää olla "${L.cat}"`);
+  await page.goto(`${BASE}${base}#/paiva/${oddDay}`);
+  await page.waitForSelector('.bk-strip');
+  await page.waitForSelector('.bk-dayresults .bk-slot');
+  const txt = (await page.locator('.bk-dayresults').innerText()).replace(/\n/g, ' ');
+  const tl = txt.toLowerCase();
+  if (!tl.includes(L.y.toLowerCase()) || !tl.includes(L.o.toLowerCase())) problems.push(`${base}: päivänäkymän ryhmät puuttuvat: ${txt.slice(0, 120)}`);
+  const times = await page.locator('.bk-dayresults .bk-time').allInnerTexts();
+  if (times.length !== 5) problems.push(`${base}: päivällä pitäisi olla 5 vuoroa (3 + 2), nyt ${times.length}`);
+  if (/\[object/.test(txt) || !/täynnä|full/i.test(txt) || !/ei varattavissa|not available/i.test(txt)) problems.push(`${base}: täynnä/ei varattavissa -tilat puuttuvat`);
+  if (avail.length < 2 || new Set(avail.map((a) => a.p_product_id)).size !== 2) problems.push(`${base}: kaikille tuotteille pitäisi kutsua public_availability (${avail.length} kutsua)`);
+  const n0 = avail.length;
+  const href = await page.locator('.bk-dayresults .bk-slot.available a.btn').first().getAttribute('href');
+  if (!/#\/varaa\/\d+\/\d{4}-\d\d-\d\d\/\d+\?via=day$/.test(href)) problems.push(`${base}: Valitse-linkki väärä: ${href}`);
+  await page.goto(`${BASE}${base}#/paiva/${evenDay}`);
+  await page.waitForSelector('.bk-dayresults .bk-notice');
+  const e = await page.locator('.bk-dayresults .bk-notice').innerText();
+  if (!e.toLowerCase().includes(L.empty.toLowerCase()) || (await page.locator('.bk-dayresults .bk-notice a').count()) !== 1) problems.push(`${base}: tyhjän päivän ilmoitus/ehdotus puuttuu: ${e}`);
+  if (avail.length !== n0) problems.push(`${base}: päivänvaihto samassa kuussa ei saa kutsua palvelinta uudelleen (${avail.length - n0} uutta kutsua)`);
+  await page.click('.bk-dayresults .bk-notice a'); await page.waitForSelector('.bk-dayresults .bk-slot');
+  // olemassa olevat reitit toimivat: tuotelista ja #/tuote/<slug>/<pvm>
+  await page.goto(`${BASE}${base}#/tuote/yleinen/${oddDay}`);
+  await page.waitForSelector('.bk-grid');
+  await page.goto(`${BASE}${base}#/`); await page.waitForSelector('.bk-cards');
   await page.context().close();
 }
 async function loginViaInvite(page) {
