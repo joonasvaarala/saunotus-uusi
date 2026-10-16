@@ -169,3 +169,10 @@ a.bk-sd:hover{filter:brightness(.97)}
 .bk-pc-panel{padding:0 12px 12px;border-top:1px solid var(--line);background:var(--bg,#f4efe7)}
 .bk-pc-panel .bk-slotlist{padding-top:12px}
 .bk-pc-more{margin:12px 4px 0;font-size:15px}
+
+/* Varauslomake: lyhyt yhteenveto otsikon alla (tuote, päivä, kellonaika) + "Vaihda päivää tai aikaa" */
+.bk-pick{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-left:5px solid #7bb28a;border-radius:var(--r);padding:12px 16px;margin:0 0 22px}
+.bk-pick-main{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 220px}
+.bk-pick-name{font:600 22px/1.2 var(--head);color:var(--ink);overflow-wrap:anywhere}
+.bk-pick-when{color:var(--ink);font-size:16px;font-weight:600}
+.bk-pick-change{display:inline-flex;align-items:center;min-height:44px;font-weight:600;font-size:15px;color:var(--gold);text-decoration:underline;text-underline-offset:3px}

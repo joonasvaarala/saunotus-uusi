@@ -72,9 +72,18 @@ if (process.env.ONLY !== 'admin') for (const [name, vp] of [['mobile', { width: 
     await page.locator('.bk-pc.open .bk-slot.available a.btn').first().click();
     await page.waitForSelector('form.bk-form');
     if (!/#\/varaa\/\d+\/\d{4}-\d\d-\d\d\/\d+/.test(page.url())) problems.push(`shop-${name}-${lang}: Valitse vei väärälle reitille: ${page.url()}`);
-    await page.click('#booking-app > p:first-child a');
+    // v16: lyhyt yhteenveto otsikon alla (tuote, päivä, kellonaika) ja yksi "Vaihda päivää tai aikaa" -linkki (ei erillistä Takaisin-linkkiä)
+    {
+      const pk = await page.evaluate(() => { const h2 = document.querySelector('#booking-app h2'), pk = document.querySelector('#booking-app .bk-pick'); return { h2next: h2?.nextElementSibling === pk, name: pk?.querySelector('.bk-pick-name')?.textContent, when: pk?.querySelector('.bk-pick-when')?.textContent, link: pk?.querySelector('a.bk-pick-change')?.textContent, links: document.querySelectorAll('#booking-app > p a, #booking-app .bk-pick a').length, first: document.querySelector('#booking-app').firstElementChild.tagName }; });
+      const whenRe = lang === 'fi' ? /^(ma|ti|ke|to|pe|la|su) \d{1,2}\.\d{1,2}\.\d{4}, klo \d{2}:\d{2}–\d{2}:\d{2}$/ : /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun),? \d{1,2} [A-Z][a-z]{2} \d{4} · \d{2}:\d{2}–\d{2}:\d{2}$/;
+      if (!pk.h2next || pk.first !== 'H2') problems.push(`shop-${name}-${lang}: yhteenvetolaatikon pitää olla heti otsikon (h2) alla: ${JSON.stringify(pk)}`);
+      if (!pk.name || !whenRe.test(pk.when || '')) problems.push(`shop-${name}-${lang}: yhteenvetorivin sisältö väärä (tuote "${pk.name}", aika "${pk.when}")`);
+      if (pk.link !== (lang === 'fi' ? 'Vaihda päivää tai aikaa' : 'Change date or time') || pk.links !== 1) problems.push(`shop-${name}-${lang}: linkki "Vaihda päivää tai aikaa" puuttuu tai linkkejä on useita: ${JSON.stringify(pk)}`);
+      await page.locator('#booking-app').screenshot({ path: join(OUT, `shop-${name}-${L.file}8d-lomake-yhteenveto.png`) });
+    }
+    await page.click('#booking-app .bk-pick a.bk-pick-change');
     await page.waitForSelector('.bk-strip');
-    if (page.url() !== dayUrl || (await page.locator('.bk-pc.open').getAttribute('data-slug').catch(() => null)) !== openSlug) problems.push(`shop-${name}-${lang}: Takaisin-linkin pitää palauttaa päivä ja avattu tuote (${page.url()} ≠ ${dayUrl})`);
+    if (page.url() !== dayUrl || (await page.locator('.bk-pc.open').getAttribute('data-slug').catch(() => null)) !== openSlug) problems.push(`shop-${name}-${lang}: "Vaihda päivää tai aikaa" -linkin pitää palauttaa päivä ja avattu tuote (${page.url()} ≠ ${dayUrl})`);
     await page.locator('.bk-pc-head[aria-expanded=true]').click();   // sulje: tuote-parametri pois URL:sta
     if (/tuote=/.test(page.url())) problems.push(`shop-${name}-${lang}: sulkeminen ei poistanut ?tuote-parametria`);
     // tyhjä päivä: ilmoitus + ehdotus seuraavasta vapaasta päivästä

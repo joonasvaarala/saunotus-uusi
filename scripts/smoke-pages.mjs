@@ -129,9 +129,13 @@ for (const [base, L] of [['/varaa/', { cat: 'Selaa kategorioittain', day: 'Selaa
   if (!/#\/varaa\/\d+\/\d{4}-\d\d-\d\d\/\d+\?via=day$/.test(href)) problems.push(`${base}: Valitse-linkki väärä: ${href}`);
   await page.locator('.bk-pc.open .bk-slot.available a.btn').first().click();
   await page.waitForSelector('form.bk-form');
-  const back = await page.locator('#booking-app > p:first-child a').getAttribute('href');
-  if (!back.endsWith(`#/paiva/${oddDay}?tuote=oma`)) problems.push(`${base}: Takaisin-linkin pitää palata päivään ja tuotteeseen: ${back}`);
-  await page.click('#booking-app > p:first-child a'); await page.waitForSelector('.bk-pc[data-slug=oma].open');
+  const back = await page.locator('#booking-app .bk-pick a.bk-pick-change').getAttribute('href');
+  if (!back.endsWith(`#/paiva/${oddDay}?tuote=oma`)) problems.push(`${base}: "Vaihda päivää tai aikaa" -linkin pitää palata päivään ja tuotteeseen: ${back}`);
+  {   // v16: yhteenveto otsikon alla: tuotteen nimi, päivä, kellonaika; ei erillistä Takaisin-linkkiä
+    const pk = await page.evaluate(() => ({ name: document.querySelector('.bk-pick-name')?.textContent, when: document.querySelector('.bk-pick-when')?.textContent, next: document.querySelector('#booking-app h2')?.nextElementSibling?.className, links: document.querySelectorAll('#booking-app > p a, #booking-app .bk-pick a').length }));
+    if (!pk.name || !(base.includes('/en/') ? /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun),? \d{1,2} [A-Z][a-z]{2} \d{4} · \d{2}:\d{2}–\d{2}:\d{2}$/ : /^(ma|ti|ke|to|pe|la|su) \d{1,2}\.\d{1,2}\.\d{4}, klo \d{2}:\d{2}–\d{2}:\d{2}$/).test(pk.when || '') || pk.next !== 'bk-pick' || pk.links !== 1) problems.push(`${base}: varauslomakkeen yhteenveto (tuote, päivä, aika) puuttuu tai väärä: ${JSON.stringify(pk)}`);
+  }
+  await page.click('#booking-app .bk-pick a.bk-pick-change'); await page.waitForSelector('.bk-pc[data-slug=oma].open');
   await page.goto(`${BASE}${base}#/paiva/${evenDay}`);
   await page.waitForSelector('.bk-dayresults .bk-notice');
   const e = await page.locator('.bk-dayresults .bk-notice').innerText();
