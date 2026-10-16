@@ -4,10 +4,13 @@ import { rpc } from '../sb.js';
 import { customerForm } from './customerform.js';
 import { addonPicker } from './addons.js';
 import { h, field, toast, run, fmtTime, fmtDay, money, todayHel, empty } from '../ui.js';
+import { typeSwitch, render as renderResource } from './resbooking.js';
 
 const priceFor = (s, n) => (s.price_mode === 'per_person' ? s.unit_price * n : s.price_mode === 'fixed' ? s.base_price : s.base_price + Math.max(0, n - (s.included_persons || 0)) * (s.extra_person_price || 0));
 
-export async function render({ refs, query }) {
+export async function render({ ctx, refs, query }) {
+  const kind = query.get('tyyppi');   // migraatio 17: resurssivaraus / vanha varaus omalla lomakkeellaan
+  if (kind === 'resurssi' || kind === 'vanha') return renderResource({ ctx, refs, query, kind });
   const addons = await rpc('admin_list_addons').catch(() => []);
   const st = { date: /^\d{4}-\d\d-\d\d$/.test(query.get('d') || '') ? query.get('d') : todayHel(), session: null, customer: null };
   const root = h('div', { class: 'stack' });
@@ -75,5 +78,5 @@ export async function render({ refs, query }) {
   }
   root.append(h('div', { class: 'toolbar' }, h('label', { class: 'row' }, 'Päivä ', dateIn)), sessionsBox, formBox, result);
   await loadSessions(); drawForm();
-  return [h('h1', { text: 'Uusi varaus' }), root];
+  return [h('h1', { text: 'Uusi varaus' }), typeSwitch('', st.date), root];
 }

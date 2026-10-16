@@ -2,9 +2,10 @@
 import { rpc } from '../sb.js';
 import { addonPicker } from './addons.js';
 import { icon } from '../icons.js';
-import { h, dialog, toast, run, fmtDay, fmtTime, fmtDT, money, statusBadge, payBadge, sourceBadge, isJohku, field, badge, empty } from '../ui.js';
+import { h, dialog, toast, run, fmtDay, fmtTime, fmtDT, money, statusBadge, payBadge, sourceBadge, isJohku, field, badge, empty, errMsg } from '../ui.js';
+import { legsList, resName, resourceBadges, hasLegs } from './legs.js';
 
-export function reservationDialog(r, { methods, onChange }) {
+export function reservationDialog(r, { methods, onChange, refs, can = () => true }) {
   const body = h('div', { class: 'stack' });
   const d = dialog(`Tilaus #${r.order_no}`, body);
   const act = (label, fn, cls = 'btn') => { const b = h('button', { type: 'button', class: cls, text: label, onclick: () => run(b, async () => { await fn(); toast('Tallennettu'); d.close(); onChange?.(); }) }); return b; };
@@ -12,6 +13,7 @@ export function reservationDialog(r, { methods, onChange }) {
   const method = h('select', { id: 'pm' }, methods.filter((m) => m.active && m.is_manual).map((m) => h('option', { value: m.code, text: m.label })));
   const amount = h('input', { type: 'number', step: '0.01', min: '0', value: r.total_gross, id: 'pa' });
   const orderBox = h('div', { class: 'stack order-extra' });
+  const resBox = h('div', { class: 'resbox' });   // resurssit: tila, legit, ylitys, siirto Rauni ↔ Lovi (migraatio 17)
   body.append(
     h('dl', { class: 'kv' },
       isJohku(r) ? [h('dt', { text: 'Lähde' }), h('dd', {}, sourceBadge(r), ' tuotu Johku-järjestelmästä'), h('dt', { text: 'Johku-tunnus' }), h('dd', { class: 'ext-id', text: r.external_id || '–' })] : null,
@@ -23,6 +25,7 @@ export function reservationDialog(r, { methods, onChange }) {
       h('dt', { text: 'Summa' }), h('dd', {}, money(r.total_gross), r.annual_card_id ? [' ', badge('warn', 'Vuosikortti')] : null),
       h('dt', { text: 'Kanava' }), h('dd', { text: r.source_channel }),
       h('dt', { text: 'Luotu' }), h('dd', { text: fmtDT(r.created_at) }), r.notes ? [h('dt', { text: 'Huomio' }), h('dd', { text: r.notes })] : null),
+    resBox,
     orderBox,
     h('div', { class: 'row wrap' },
       ['pending', 'cancelled', 'expired'].includes(r.status) ? act('Vahvista', () => status('confirmed')) : null,
@@ -36,6 +39,41 @@ export function reservationDialog(r, { methods, onChange }) {
     h('div', { class: 'box' }, h('strong', { text: 'Verkkomaksulinkki (Visma Pay)' }),
       h('p', { class: 'muted', text: 'Ei vielä käytössä. Painike luo maksurivin ja näyttää, että linkki toteutetaan Visma Pay -integraation yhteydessä.' }),
       (() => { const out = h('p', { class: 'muted' }); const b = h('button', { type: 'button', class: 'btn', text: 'Luo maksulinkki', onclick: () => run(b, async () => { const j = await rpc('admin_create_payment_link', { p_order_id: r.order_id }); out.textContent = j.link_url || j.message; }) }); return h('div', {}, b, out); })()));
+  // Resurssit (migraatio 17): tila, elinkaari, ylitys, claim-ikkuna, vanhempi varaus, legit. Päivänäkymän RPC antaa täydet tiedot (ylitys, kiintiö, claim, leg_id);
+  // varauslistan rivillä ne puuttuvat, joten ne haetaan kerran päivänäkymästä. Kaikki kentät valinnaisia.
+  const drawResources = () => {
+    const x = r;
+    if (!x.space_code && !hasLegs(x) && !x.lifecycle) { resBox.replaceChildren(); return; }
+    const other = x.space_code === 'rauni' ? 'lovi' : x.space_code === 'lovi' ? 'rauni' : null;
+    const claim = (x.claim_offset_min > 0 || x.claim_minutes) ? `alkaa +${x.claim_offset_min || 0} min${x.claim_minutes ? `, kesto ${x.claim_minutes} min` : ''}` : null;
+    const kids = [h('h3', { text: 'Resurssit' }), h('dl', { class: 'kv' },
+      x.space_code ? [h('dt', { text: 'Tila' }), h('dd', {}, h('strong', { text: resName(refs, x.space_code) }), ' ', resourceBadges(x))] : null,
+      x.lifecycle ? [h('dt', { text: 'Tuote' }), h('dd', { text: x.lifecycle === 'old' ? 'Vanha tuote (vanha varaus)' : 'Nykyinen tuote' })] : null,
+      x.override_reason ? [h('dt', { text: 'Ylitys' }), h('dd', { text: x.override_reason })] : null,
+      x.quota_exempt ? [h('dt', { text: 'Kiintiö' }), h('dd', { text: 'Kiintiövapaa (esim. lahjakortti): ei kuluta myyntikiintiötä' })] : null,
+      claim ? [h('dt', { text: 'Tilan käyttö' }), h('dd', { text: claim })] : null,
+      x.parent_reservation_id ? [h('dt', { text: 'Vanhempi varaus' }), h('dd', { text: `varaus #${x.parent_reservation_id}` })] : null),
+      legsList(x.legs, refs)];
+    if (other === 'lovi' && x.persons > 1 && x.status === 'confirmed') kids.push(h('p', { class: 'muted', text: 'Loviin mahtuu vain 1 henkilö, joten siirtoa Raunista Loviin ei tarjota.' }));
+    else if (other && x.status === 'confirmed' && can('bookings.manage')) {
+      const reason = h('input', { name: 'reason', maxlength: 200, placeholder: 'Syy (valinnainen)', 'aria-label': 'Siirron syy' });
+      const err = h('p', { class: 'err', role: 'alert', hidden: true });
+      const go = h('button', { type: 'button', class: 'btn sm', text: `Siirrä tilaan: ${resName(refs, other)}` });
+      go.addEventListener('click', () => run(go, async () => {
+        err.hidden = true;
+        try { await rpc('admin_move_reservation_space', { p_reservation_id: r.reservation_id, p_space_code: other, p_reason: reason.value.trim() || null }); } catch (e) { err.textContent = errMsg(e); err.hidden = false; return; }
+        toast(`Varaus siirretty tilaan ${resName(refs, other)}`); d.close(); onChange?.();
+      }));
+      kids.push(h('div', { class: 'moverow' }, h('div', { class: 'row wrap' }, field('Siirto Rauni ↔ Lovi', reason), go), err,
+        h('p', { class: 'muted', text: 'Siirto onnistuu vain, jos tuotteella on sääntö kohdetilaan (Lovi: 1 hlö) eikä tila ole varattu tai suljettu.' })));
+    }
+    resBox.replaceChildren(...kids);
+  };
+  drawResources();
+  if (r.quota_exempt === undefined && r.reservation_id && (r.space_code || hasLegs(r))) {   // täydennä päivänäkymästä (ylitys, kiintiö, claim, leg_id)
+    const day = new Date(r.starts_at).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
+    rpc('admin_day_view', { p_date: day }).then((v) => { const m = (v?.reservations || []).find((y) => y.reservation_id === r.reservation_id); if (m) { Object.assign(r, { quota_exempt: m.quota_exempt, override_reason: m.override_reason, claim_offset_min: m.claim_offset_min, claim_minutes: m.claim_minutes, legs: m.legs?.length ? m.legs : r.legs }); drawResources(); } }).catch(() => {});
+  }
   // Tilauksen lisätiedot: laskutustiedot (yritysasiakas), lisäpalvelut (+ muokkaus)
   const drawOrder = async () => {
     let o; try { o = await rpc('admin_get_order', { p_order_id: r.order_id }); } catch { return; }

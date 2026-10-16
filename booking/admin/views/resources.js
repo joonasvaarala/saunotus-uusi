@@ -1,6 +1,7 @@
 // Resurssit: tila + kapasiteettipoolit (resources.edit), vuorosäännöt (rules.edit: turvalliset kentät; aikataulun muutos SQL-migraatiolla, ks. README) ja sulut.
 import { rpc, select } from '../sb.js';
 import { h, helsinkiIso, dialog, field, toast, run, fmtDT, badge, money } from '../ui.js';
+import { blockList, blockDialog } from './blocks.js';
 
 const WD = ['ma', 'ti', 'ke', 'to', 'pe', 'la', 'su'];
 export async function render({ ctx, refs, reload }) {
@@ -23,18 +24,10 @@ export async function render({ ctx, refs, reload }) {
     h('td', { text: r.price_mode === 'per_person' ? '€/hlö' : r.price_mode === 'fixed' ? 'kiinteä' : `kiinteä + lisä (${r.included_persons ?? ''} sis.)` }),
     h('td', { text: [r.valid_from, r.valid_to].filter(Boolean).join(' – ') }), h('td', { text: r.active ? '' : 'pois' }),
     h('td', {}, canRules ? h('button', { type: 'button', class: 'btn sm', onclick: () => editRule(r, pn(r.product_id), reload) }, 'Muokkaa') : null)));
-  const blockList = blocks.length ? h('ul', { class: 'reslist' }, blocks.map((b) => h('li', { class: 'resrow' }, h('span', { text: `${fmtDT(b.starts_at)} – ${fmtDT(b.ends_at)} · ${b.reason || ''}` }),
-    h('button', { type: 'button', class: 'btn danger sm', onclick: (e) => run(e.target, async () => { await rpc('admin_delete_block', { p_id: b.id }); toast('Sulku poistettu'); reload(); }) }, 'Poista')))) : h('p', { class: 'muted', text: 'Ei tulevia sulkuja.' });
-  const space = refs.resources.find((r) => r.kind === 'space');
-  const addBlock = () => {
-    const f = h('form', { class: 'stack' }, field('Alkaa', h('input', { type: 'datetime-local', name: 's', required: true })), field('Päättyy', h('input', { type: 'datetime-local', name: 'e', required: true })), field('Syy', h('input', { name: 'r' })), h('button', { class: 'btn primary', type: 'submit', text: 'Lisää sulku' }));
-    const d = dialog('Lisää sulku', f);
-    f.addEventListener('submit', (ev) => { ev.preventDefault(); run(f.querySelector('button'), async () => { await rpc('admin_create_block', { p_space_id: space.id, p_starts_at: helsinkiIso(f.s.value), p_ends_at: helsinkiIso(f.e.value), p_reason: f.r.value || null }); toast('Sulku lisätty'); d.close(); reload(); }); });
-  };
   return [h('h1', { text: 'Resurssit' }), h('div', { class: 'stack' }, res),
     h('h2', { text: 'Vuorosäännöt' }), h('p', { class: 'muted', text: 'Säännöt ovat dataa (booking.schedule_rules). Viikonlopun yleisillä vuoroilla on jokaisella alkamisajalla oma kapasiteettipooli (yllä): kapasiteetti on 6 hlö / alkamisaika, 1 h vuoroilla 10 hlö / vuoro. Muokkaus: nimi, päällä/pois, henkilömäärät, myynnin deadline, voimassaolo. Uusi vuoro tai aikataulumuutos tehdään SQL-migraatiolla – ks. README "Sääntöjen muuttaminen".' }),
     h('div', { class: 'tablewrap' }, h('table', { class: 'tbl' }, h('thead', {}, h('tr', {}, ['Tuote', 'Päivät', 'Alkaa', 'Tyyppi', 'Max hlö', 'Hinnoittelu', 'Voimassa', '', ''].map((x) => h('th', { text: x })))), h('tbody', {}, ruleRows))),
-    h('h2', { text: 'Sulut' }), blockList, h('button', { type: 'button', class: 'btn ghost', onclick: addBlock }, '+ Lisää sulku')];
+    h('h2', { text: 'Sulut' }), blockList(blocks, refs, reload, 'Ei tulevia sulkuja.'), h('button', { type: 'button', class: 'btn ghost', onclick: () => blockDialog(null, refs, reload) }, '+ Lisää sulku')];
 }
 
 function editRule(r, productName, reload) {

@@ -6,13 +6,13 @@ Roolit ja oikeudet ovat **taulupohjaisia**: `booking.roles` (rooli: `code`, `lab
 
 | Rooli | Kuka | Henkilöstö? | Oikeudet |
 |---|---|:-:|---|
-| `admin` | Joonas, Koodari | ✔ | kaikki (13 oikeutta, myös käyttäjähallinta `staff.manage` ja `shifts.view` + `shifts.view_all`) |
+| `admin` | Joonas, Koodari | ✔ | kaikki (14 oikeutta, myös käyttäjähallinta `staff.manage` ja `shifts.view` + `shifts.view_all`) |
 | `manager` (ylläpitäjä) | Otto, Laura | ✔ | varaukset, asiakkaat, maksut, sulut + hinnat/kuvaukset/tuoteasetukset (`catalog.edit`), muut asetukset (`settings.edit`), resurssit/kapasiteetit (`resources.edit`), vuorosäännöt (`rules.edit`), vuosikortit (`annual_cards.manage`) + kaikkien työvuorojen katselu (`shifts.view_all`). **Ei** käyttäjähallintaa (`staff.manage`: kutsut, roolit, käytöstä poisto, linkitys) eikä audit-lokia |
 | `staff` (peruskäyttäjä) | kaikki työntekijät | ✔ | varausten ja asiakkaiden katselu, luonti ja muokkaus (`bookings.manage`, `customers.manage`), maksujen kirjaus (`payments.manage`), sulut (`blocks.manage`) + **omien** työvuorojen katselu (`shifts.view`). **Ei** hinta-, tuote- eikä asetusmuokkausta |
 | `customer` | verkkoasiakas | ✘ | ei hallinnan oikeuksia (ei voi olla `staff`-rivin roolina – FK `roles(code, is_staff)`) |
 | `annual_card` | vuosikorttiasiakas | ✘ | ei hallinnan oikeuksia; ilmaiset varaukset yleisiin vuoroihin (1 hlö, yksi tuleva kerrallaan) – moottoritason säännöt, ks. alla |
 
-Oikeudet (`role_permissions.permission`): `bookings.manage`, `customers.manage`, `payments.manage`, `blocks.manage`, `catalog.edit`, `settings.edit`, `resources.edit`, `rules.edit`, `annual_cards.manage`, `staff.manage`, `audit.read`, `shifts.view` (omat työvuorot), `shifts.view_all` (kaikkien työvuorot).
+Oikeudet (`role_permissions.permission`): `bookings.manage`, `customers.manage`, `payments.manage`, `blocks.manage`, `catalog.edit`, `settings.edit`, `resources.edit`, `rules.edit`, `annual_cards.manage`, `staff.manage`, `audit.read`, `shifts.view` (omat työvuorot), `shifts.view_all` (kaikkien työvuorot), `bookings.override` (migraatio 17: resurssivarauksen sulku- ja saunottajatarkistuksen ylitys; **vain admin ja manager**, vaatii aina perustelun; hallinta näyttää ylitysvaihtoehdon vain oikeuden omaavalle, ja `admin_create_resource_booking` / `admin_create_old_booking` tarkistavat oikeuden tietokannassa).
 
 | Toiminto | anon | staff | manager | admin |
 |---|:-:|:-:|:-:|:-:|
@@ -102,3 +102,5 @@ Jos jokin nimi poikkeaa (esim. `full_name`, `start_time`, `is_active`), korjataa
 
 ## Ensimmäinen admin
 `supabase/manual/02_first_admin.sql`: testivaiheessa vain **yksi** lohko – Joonas (admin, Joonas.vaarala@gmail.com); muut roolit ovat kommentoituina. Authin käyttäjä luodaan ensin Supabase Authissa (Dashboard → Add user). Muut käyttäjät kutsutaan jatkossa hallinnan Käyttäjät-näkymästä (vain admin; Edge Function `admin-users`).
+
+**Kalenterisulut (migraatio 18):** `admin_closure_overview` ja `admin_set_closure_override` vaativat oikeuden `blocks.manage` (staff, manager, admin; sama kuin sulkujen lisäys ja poisto). Synkkafunktiot (`apply_closure_events`, `closure_sync_targets`, `record_closure_sync_failure`) ovat vain `service_role`-roolille; kalenterisulun muokkaus tai poisto ylläpidon kautta estetään (`closure_managed`).

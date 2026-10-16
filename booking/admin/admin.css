@@ -145,9 +145,53 @@ fieldset.box legend{font-weight:600;padding:0 6px}
 .kv{grid-template-columns:auto minmax(0,1fr)}.kv dd{overflow-wrap:anywhere}
 h2 .icon,h3 .icon,.addon-mark .icon{display:inline-block;vertical-align:-3px;margin-right:4px;color:var(--icon)}
 .addon-mark .icon{vertical-align:-4px}
+/* resurssivaraukset (migraatio 17): tila- ja ylitysmerkit, legit, siirto, Tarkista-lista, varaustyypin valinta */
+.pageactions{margin:0 0 10px;gap:8px}
+.pageactions .btn{min-height:44px;display:inline-flex;align-items:center;gap:6px}
+.badge.space{background:#E4EBE5;color:var(--green);border:1px solid rgba(43,58,48,.35)}
+.badge.ovr{border:1px solid rgba(107,75,0,.45)}
+.legs{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:2px;font-size:13px;color:var(--muted)}
+.legs .leg{padding-left:10px;border-left:3px solid var(--line);overflow-wrap:anywhere}
+.legs .leg-therapist{border-left-color:#A87B45}.legs .leg-space{border-left-color:#7bb28a}
+.resbox:empty{display:none}
+.resbox{border:1px solid var(--line);border-radius:10px;padding:2px 12px 10px;background:#FBF8F2}
+.resbox h3{margin:10px 0 6px}
+.moverow{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+.moverow .row{align-items:flex-end}
+.typeset{margin:0 0 12px}
+.override-box{border-color:rgba(107,75,0,.45);background:var(--warnbg)}
+.override-box .ovr-reason[hidden]{display:none}
+.review-sec h2{display:flex;align-items:center;gap:8px;margin:0 0 4px;font-size:17px}
+.review-sec .reslist .resrow{align-items:flex-start}
+.rv-link{color:var(--ink);text-decoration-color:var(--line);display:inline-block;min-height:44px;line-height:44px;overflow-wrap:anywhere}
+.rv-link strong{color:var(--green)}
+@media(min-width:700px){.rv-link{min-height:0;line-height:1.5}}
 /* tuotekuva (Tuotteet-näkymä) */
 .imgprev{aspect-ratio:3/2;max-width:360px;width:100%;border-radius:10px;background:var(--bg);border:1px dashed var(--line);display:grid;place-items:center;overflow:hidden}
 .imgprev.has{border-style:solid}
 .imgprev img{width:100%;height:100%;object-fit:cover;display:block}
 .pthumb{width:40px;height:40px;border-radius:8px;object-fit:cover;vertical-align:middle;margin-right:8px;background:var(--bg)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* sulut + kalenterisulut (migraatio 18) */
+.blocklist .resrow{align-items:flex-start;gap:10px}
+.blk{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-width:0;flex:1}
+.blk-time{font-weight:600}
+.blk-meta{display:inline-flex;gap:6px;flex-wrap:wrap}
+.blk-reason{overflow-wrap:anywhere}
+.blk small{flex-basis:100%}
+.calblock{background:#f6f1e7}
+.badge.cal{background:#ece3d0;color:var(--ink);border:1px solid var(--line)}
+.calgrid{list-style:none;margin:0;padding:0;display:grid;gap:10px;grid-template-columns:1fr}
+.calcard{margin:0}.calcard.off{background:#f6f1e7}
+.calhead{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-bottom:4px}
+.calcard p{margin:4px 0}
+.notice{background:#fff3d6;border:1px solid #e6c97a;color:var(--ink);padding:10px 12px;border-radius:8px}
+.evlist .resrow{align-items:flex-start;gap:10px;flex-wrap:wrap}
+.evmain{flex:1 1 240px;min-width:0;overflow-wrap:anywhere}
+.evbadges{display:inline-flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.evnote{display:block;margin-top:4px;color:var(--muted)}
+.evact{gap:6px}
+.evact .btn{min-height:44px}
+@media(min-width:700px){.calgrid{grid-template-columns:1fr 1fr}.evact .btn{min-height:0}}
+@media(min-width:700px){main{min-width:0}}   /* leveä taulukko (Resurssit: vuorosäännöt) ei saa venyttää sivua: taulukko vierittyy omassa laatikossaan */
+@media(max-width:699px){.blocklist .btn,.blk a{display:inline-flex;align-items:center;justify-content:center;min-height:44px}}

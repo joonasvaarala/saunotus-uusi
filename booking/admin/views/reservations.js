@@ -6,8 +6,9 @@ export const SOURCE_FILTERS = [['', 'Kaikki'], ['native', 'Uudet'], ['johku', 'J
 import { rpc } from '../sb.js';
 import { h, fmtDate, fmtTime, todayHel, addDays, dayStartIso, statusBadge, payBadge, sourceBadge, money, field, empty, errMsg, STATUS } from '../ui.js';
 import { reservationDialog } from './shared.js';
+import { resourceBadges, spaceBadge } from './legs.js';
 
-export async function render({ refs, reload }) {
+export async function render({ ctx, refs, reload }) {
   const PAGE = 50;
   const f = { search: '', status: '', product: '', source: '', period: 'all', from: addDays(todayHel(), -7), to: addDays(todayHel(), 60) };
   // valittu ajanjakso → { from: alkupäivä | null, toExcl: päättymispäivän jälkeinen päivä | null } (null = ei rajaa)
@@ -37,11 +38,11 @@ export async function render({ refs, reload }) {
     const total = rows[0]?.total_count ?? 0;
     if (reset && !rows.length) list.append(empty('Ei varauksia hakuehdoilla.'));
     // kortti: ylärivillä aika (vasen) + tilausnumero (oikea yläkulma), keskellä nimi + tuote, alarivillä merkit (vasen alakulma) + hinta (oikea alakulma)
-    for (const r of rows) list.append(h('button', { type: 'button', class: 'listrow rescard', onclick: () => reservationDialog(r, { methods: refs.methods, onChange: () => load(true) }) },
+    for (const r of rows) list.append(h('button', { type: 'button', class: 'listrow rescard', onclick: () => reservationDialog(r, { methods: refs.methods, onChange: () => load(true), refs, can: ctx.can }) },
       h('span', { class: 'rc-when' }, h('strong', { text: fmtDate(r.starts_at) }), ` ${fmtTime(r.starts_at)}`),
       h('span', { class: 'rc-no', text: `#${r.order_no}`, title: 'Tilausnumero' }),
       h('span', { class: 'rc-what' }, h('strong', { text: r.customer_name || '–' }), h('small', { text: ` ${r.product_name} · ${r.persons} hlö` })),
-      h('span', { class: 'meta rc-badges' }, sourceBadge(r), statusBadge(r.status), payBadge(r.payment_status)),
+      h('span', { class: 'meta rc-badges' }, spaceBadge(r, refs), resourceBadges(r), sourceBadge(r), statusBadge(r.status), payBadge(r.payment_status)),
       h('span', { class: 'rc-price', text: money(r.total_gross) })));
     offset += rows.length; count.textContent = `${Math.min(offset, total)} / ${total} varausta · ${periodLabel()}`;
     more.replaceChildren(offset < total ? h('button', { type: 'button', class: 'btn ghost', onclick: () => load(false) }, 'Näytä lisää') : '');
@@ -60,5 +61,11 @@ export async function render({ refs, reload }) {
     field('Tuote', bind(h('select', {}, h('option', { value: '', text: 'Kaikki' }), refs.products.filter((p) => p.config?.bookable).map((p) => h('option', { value: p.id, text: p.name }))), 'product', 'change')),
     h('div', { class: 'filter-groups' }, periodSet, dates, sourceSet));
   await load(true);
-  return [h('h1', { text: 'Varaukset' }), filters, count, list, more];
+  // pikatoiminnot: vanhan varauksen kirjaus (admin_create_old_booking) ja Tarkista-lista (laskuri haetaan taustalla; virhe/puuttuva migraatio = ei laskuria)
+  const reviewCount = h('span', { class: 'badge warn', hidden: true });
+  rpc('admin_review_list').then((v) => { const n = ['therapist_conflicts', 'block_conflicts', 'overrides', 'orphan_addons'].reduce((a, k) => a + (Array.isArray(v?.[k]) ? v[k].length : 0), 0); if (n) { reviewCount.textContent = String(n); reviewCount.hidden = false; reviewCount.setAttribute('aria-label', `${n} tarkistettavaa`); } }).catch(() => {});
+  const actions = h('div', { class: 'row wrap pageactions' },
+    h('a', { class: 'btn', href: '#/uusi?tyyppi=vanha', text: 'Vanha varaus' }),
+    h('a', { class: 'btn ghost', href: '#/tarkista' }, 'Tarkista ', reviewCount));
+  return [h('h1', { text: 'Varaukset' }), actions, filters, count, list, more];
 }
