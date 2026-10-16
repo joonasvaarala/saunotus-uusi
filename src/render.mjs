@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
-  johku, bookingUrl, product, money, dur, priceOf, fromMode, picture, icon, hm,
+  johku, bookingUrl, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
 } from './lib.mjs';
 
 const cards = read('content/cards.json');
@@ -147,6 +147,32 @@ export function pageHero(h, lang, here, o = {}) {
   const btns = (h.buttons || []).map((b, i) => `<a class="btn ${i === 0 ? 'gold' : 'ghost'}" href="${e(link(b.to, lang, here))}">${e(b.label)}</a>`).join('');
   return `<section class="hero page">${pic(h.img, lang, { eager: true, sizes: '100vw' })}<div class="wrap in"><h1>${e(h.title)}</h1><p>${e(h.text)}</p>${btns ? `<div class="actions">${btns}</div>` : ''}</div></section>`;
 }
+// ---- Google-arvostelut (content/reviews.json) ----
+// Kielen mukaiset arvostelut (stars>=4, teksti, uusin ensin). Alle min_per_lang → ei osiota lainkaan.
+export function reviewsSection(lang, { compact = false, id } = {}) {
+  const R = reviewsData;
+  if (!R?.place) return '';
+  const u = ui(lang).reviews;
+  const all = (R.reviews || []).filter((r) => r.lang === lang && r.stars >= 4 && String(r.text || '').trim());
+  if (all.length < (R.min_per_lang ?? 3)) return '';
+  const list = all.slice(0, compact ? 2 : R.max_per_lang ?? 4);
+  const rating = String(R.place.rating).replace('.', lang === 'fi' ? ',' : '.');
+  const count = lang === 'fi' ? `${u.count} ${R.place.count}` : `${R.place.count} ${u.count}`;
+  const cards = list.map((r) => {
+    const n = Math.min(5, Math.max(0, Math.round(r.stars)));
+    const long = r.text.length > 280;
+    return `<li><figure class="rv${long ? ' long' : ''}"><div class="rv-stars" role="img" aria-label="${e(u.stars.replace('{n}', n))}"><span aria-hidden="true">${'★'.repeat(n)}<i>${'★'.repeat(5 - n)}</i></span></div>`
+      + `<blockquote class="rv-q"><p>${e(r.text)}</p></blockquote>`
+      + (long ? `<details class="rv-more"><summary><span class="o">${e(u.more)}</span><span class="c">${e(u.less)}</span></summary></details>` : '')
+      + `<figcaption><b>${e(r.author)}</b> <small>Google</small></figcaption></figure></li>`;
+  }).join('');
+  const inner = `${head('', u.title, '', { orn: !compact }).replace('<h2 class="sec-title">', '<h2 class="sec-title" id="rv-h">')}`
+    + `<p class="rv-sum"><span class="rv-star" aria-hidden="true">★</span> <strong>${e(rating)}</strong><span class="sr"> ${e(u.of)}</span> <span class="rv-cnt">· ${e(count)}</span></p>`
+    + `<ul class="rv-grid">${cards}</ul>`
+    + `<p class="center"><a class="btn light sm" href="${e(R.place.url)}" target="_blank" rel="noopener">${e(u.all)}${NEW(lang)}</a></p>`;
+  return `<section class="section rv-sec${compact ? ' compact' : ''}" id="${id || (lang === 'fi' ? 'arvostelut' : 'reviews')}" aria-labelledby="rv-h"><div class="wrap">${inner}</div></section>`;
+}
+
 const mailBtn = (label, subject, cls = 'btn') => `<a class="${cls}" href="${e(mailto(subject))}">${e(label)}</a>`;
 
 // ---- layout ----
@@ -239,7 +265,7 @@ export function home(lang) {
   const s = d.story;
   const story = sec('', `${head(s.kicker, s.title, s.lead, { orn: true })}<ol class="timeline">${s.items.map((i) => `<li><b>${e(i.year)}</b>${e(i.text)}</li>`).join('')}</ol><p class="center">${e(s.thanks)}</p><p class="center"><a href="${e(site.social[1].url)}" rel="noopener">${e(s.ig)}${NEW(lang)}</a></p>`);
   const pre = `<link rel="preload" as="image" type="image/avif" imagesrcset="${images['hero-ovi'].widths.map((w) => `${href(`/img/hero-ovi-${w}.avif`)} ${w}w`).join(', ')}" imagesizes="100vw" fetchpriority="high">`;
-  return layout({ lang, key: 'home', meta: d.meta, preload: pre, body: hero + tiles + wk + ritual + feat + about + ev + comp + story });
+  return layout({ lang, key: 'home', meta: d.meta, preload: pre, body: hero + tiles + wk + ritual + feat + reviewsSection(lang) + about + ev + comp + story });
 }
 
 export function sauna(lang) {
@@ -287,6 +313,7 @@ export function book(lang) {
   const rec = d.rec.map((r) => card(C(r.card), lang, { title: r.title, sizes: '(min-width:1100px) 360px, 90vw' })).join('');
   const body = pageHero(d.hero, lang, 'book')
     + sec('', `<p class="center lead">${e(d.note)}</p><ul class="chips">${d.chips.map((c) => `<li><a class="btn" href="${e(jk(c.url, lang))}" target="_blank" rel="noopener">${e(c.label)}${NEW(lang)}</a></li>`).join('')}</ul>`)
+    + reviewsSection(lang, { compact: true })
     + sec('tint', `${head('', d.recTitle, d.recText, { orn: true })}<ul class="cards three">${rec}</ul>`)
     + sec('', `${head('', d.eventsTitle, '', { orn: true })}${eventsHtml(lang, P('home')[lang].events.empty)}`, 'tapahtumat');
   return layout({ lang, key: 'book', meta: d.meta, body });

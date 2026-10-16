@@ -170,6 +170,28 @@ address{font-style:normal;background:var(--card);border:1px solid var(--line);bo
 .faq details{background:var(--card);border:1px solid var(--line);border-radius:10px;margin:0 0 10px;padding:0 18px}
 .faq summary{cursor:pointer;font:600 15px/1.4 var(--label);color:var(--ink);padding:16px 0}
 .faq details p{font-size:15.5px}
+/* reviews */
+.rv-sum{text-align:center;margin:0 0 28px;font:600 13px/1.4 var(--label);letter-spacing:.04em;color:var(--muted)}
+.rv-sum strong{font:500 26px/1 var(--head);color:var(--ink);letter-spacing:0}
+.rv-star,.rv-stars{color:var(--gold)}
+.rv-star{font-size:22px;vertical-align:-2px}
+.rv-grid{list-style:none;margin:0 0 30px;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:22px;align-items:start}
+.rv{margin:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px 26px;box-shadow:0 10px 30px rgba(60,45,30,.08)}
+.rv-stars{font-size:18px;letter-spacing:.12em;line-height:1;margin-bottom:12px}
+.rv-stars i{font-style:normal;opacity:.25}
+.rv-q{margin:0;font-size:16px}
+.rv-q p{margin:0;white-space:pre-line;overflow-wrap:anywhere}
+.rv.long .rv-q p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5;line-clamp:5;overflow:hidden}
+.rv.long:has(details[open]) .rv-q p{display:block;overflow:visible}
+.rv-more summary{cursor:pointer;display:inline-block;font:600 11px/1 var(--label);letter-spacing:.08em;text-transform:uppercase;color:var(--gold);padding:12px 0 4px}
+.rv-more .c,.rv-more[open] .o{display:none}
+.rv-more[open] .c{display:inline}
+.rv figcaption{margin-top:14px;font-size:14.5px;color:var(--ink)}
+.rv figcaption small{font:600 10px/1 var(--label);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-left:6px}
+.rv-sec.compact{padding:44px 0}
+.rv-sec.compact .rv-sum{margin-bottom:20px}
+@supports not selector(:has(*)){.rv.long .rv-q p{display:block;overflow:visible}.rv-more{display:none}}
+@media (max-width:720px){.rv-grid{grid-template-columns:1fr}.rv{padding:20px}}
 /* chips (book) */
 .chips{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:34px 0 0;padding:0;list-style:none}
 .chips .btn{background:var(--green)}

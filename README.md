@@ -18,6 +18,7 @@ Pieni oma Node-generaattori (`scripts/build.mjs` + `src/`), ei kehystä.
 content/
   site.json            yleiset asetukset, UI-tekstit (FI/EN), sivujen polut, yhteystiedot, chatbot-lippu
   pages/*.json         sivukohtaiset tekstit (fi + en samassa tiedostossa)
+  reviews.json         Google-arvostelut (osio 'Arvostelut / Testimonials')
   cards.json           tuotekortit (viittaa kb-tuotteen slugiin; show/over ohjaa mitä kenttiä näytetään)
   kb/kb.json           Supabase kb -snapshot (vain julkiset kentät)
   alts.json            kuvien alt-tekstit (fi/en)
@@ -33,6 +34,7 @@ scripts/
   fetch-assets.mjs     lataa lähdekuvat live-sivustolta ja Johku-CDN:stä (assets-src/, ei gitissä)
   optimize-images.mjs  avif/webp + OG-kuvat → public/img
   kb-snapshot.mjs      kb-vienti → content/kb/kb.json (allowlist)
+  update-reviews.mjs   Google Places -arvostelut → content/reviews.json (npm run reviews:update)
 public/                fontit, kuvat, favicon (kopioidaan sellaisenaan)
 docs/kb-export.sql     SELECT-kysely snapshotin päivitykseen
 .github/workflows/pages.yml  GitHub Pages -julkaisu (testi) + päivittäinen ajastettu rakennus
@@ -58,6 +60,17 @@ Ympäristömuuttujat: `SITE_ENV=test` (noindex-meta + `robots.txt` Disallow), `S
 - **Kortin poikkeama:** `cards.json`-kortin `over` ohittaa kb-kentän (esim. kesto "2–3 h"), `show` valitsee näytettävät kentät, `exact: true` näyttää hinnan ilman "alk.".
 - **Uusi kuva:** lisää rivi `content/images.manifest.json`, aja `npm run assets && npm run images`, lisää alt-teksti `content/alts.json`.
 - **Varaus- ja kauppalinkit** osoittavat Johkuun (`https://sipoonjoenperinnesauna.johku.com/`). Johkua ei muuteta tästä repostosta; EN-sivut linkittävät `/en_US/`-polkuihin.
+
+## Arvostelut / Testimonials
+
+Asiakaskokemukset-osio rakennetaan Google-arvosteluista **rakennusvaiheessa puhtaana HTML+CSS:nä** (ei JS:ää, ei ulkoisia pyyntöjä sivua ladattaessa; ainoa ulkoinen asia on linkki Google-listaukseen). Ei schema.org Review/AggregateRating -merkintöjä (omien arvostelujen itse-merkintä on Googlen ohjeiden vastaista).
+
+- **Data:** `content/reviews.json` → `place` (nimi, `rating`, `count`, `url`, `captured_at`), `min_per_lang` (3), `max_per_lang` (4), `reviews[]` uusin ensin: `{author, stars, lang: "fi"|"en", text}`. Teksti tallennetaan **sanasta sanaan** (ei muokata, käännetä tai lyhennetä; emojit säilyvät). Suhteellisia päiväyksiä ("viikko sitten") ei tallenneta, vain `captured_at`. UI-tekstit: `content/site.json` → `ui.<kieli>.reviews`.
+- **Säännöt (render.mjs `reviewsSection`):** sivun kielen mukaiset (`lang`), `stars >= 4`, teksti ei tyhjä, tiedoston järjestyksessä, enintään `max_per_lang`. Jos kielelle on alle `min_per_lang` arvostelua, **osiota ei renderöidä lainkaan** (nyt FI: 3 → näkyy, EN: 1 → ei näy, ennen kuin englanninkielisiä on lisätty ≥ 3). Yli 280 merkin tekstit rajataan CSS:llä (`line-clamp`, 5 riviä) ja avataan natiivilla `<details>` "Lue lisää" -napilla; koko teksti on aina DOM:ssa.
+- **Sijoitus:** etusivu (FI/EN) heti "Suosittelemme"-osion jälkeen, ennen "Mitä on saunotus?" -osiota; varaussivulla (`book`) kompakti versio (arvosana + 2 uusinta) varauslinkkirivin (Saunavuorot… ) alapuolella, ennen suositeltuja – ei varauspolun edellä.
+- **Arvostelun lisääminen käsin:** kopioi uusin arvostelu Google-listauksesta (kirjautuneena näkyy enemmän kuin 5), lisää se `reviews`-listan **alkuun** sanasta sanaan, päivitä `place.rating`, `place.count` ja `captured_at`. Rakenna uudelleen.
+- **Päivityskomento:** `GOOGLE_PLACES_API_KEY=... GOOGLE_PLACE_ID=... npm run reviews:update` (`--dry-run` ei kirjoita). Hakee Places API (New) -rajapinnasta (`GET places/{id}`, kentät `rating,userRatingCount,reviews`) erikseen `languageCode=fi` ja `en`, päivittää `place.rating`/`count`, ja lisää **uudet** arvostelut (≥ 4 tähteä, teksti, `originalText.languageCode` fi/en, teksti = `originalText.text`) tiedoston alkuun; duplikaatit tunnistetaan tekijä + tekstin alku -avaimella eikä mitään koskaan poisteta. Ilman avaimia skripti kertoo syyn ja poistuu muuttamatta mitään. **Huom:** Places API palauttaa enintään 5 arvostelua / kutsu, joten osio kasvaa ajan myötä ajamalla komentoa säännöllisesti; sitä voi täydentää myös käsin (ks. yllä).
+- **Testaus:** `REVIEWS_FILE=/polku/kopio.json npm run build` käyttää vaihtoehtoista datatiedostoa (esim. kopio, jossa on 3 testi-EN-arvostelua), oikeaa tiedostoa ei muuteta.
 
 ## Chatbot-widget (valmius, POIS PÄÄLTÄ)
 

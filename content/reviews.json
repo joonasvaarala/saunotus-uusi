@@ -1,0 +1,37 @@
+{
+ "place": {
+  "name": "Sipoonjoen perinnesauna",
+  "rating": 4.5,
+  "count": 175,
+  "url": "https://www.google.fi/maps/place/Sipoonjoen+perinnesauna/@60.3457464,25.2570176,17z/data=!4m8!3m7!1s0x469203eb68e230d1:0x5d60aa5c693653de!8m2!3d60.3457464!4d25.2570176!9m1!1b1!16s%2Fg%2F11rkbtqpr2",
+  "captured_at": "2026-10-16"
+ },
+ "min_per_lang": 3,
+ "max_per_lang": 4,
+ "reviews": [
+  {
+   "author": "Gyanesh M",
+   "stars": 5,
+   "lang": "en",
+   "text": "I was in two minds whether to write this review, because this seems to be a hidden gem, and perhaps more reviews may make it less hidden and take away the charm/ peaceful atmosphere but here goes!\n\nOne of the best experiences I’ve had in Finland. It’s much smaller compared to other more commercial saunas but that size is indeed one of the best parts of it. Nestled in a forest you are surrounded by tranquility all around. The sauna in itself was great and the sauna master Jonas even threw in some free sauna treatments for me, showed me how to properly use the birch branches and was very informative. I did not know there was a Finnish Sauna back home in Singapore until he told me!!\n\nGreat communication and coordination with Olaf as well. Highly recommend this place, the service, the ambience and the traditional experience."
+  },
+  {
+   "author": "Helmi Turunen",
+   "stars": 5,
+   "lang": "fi",
+   "text": "Ihana, erityinen paikka. Saunassa pehmeät löylyt, tunnelmaa luovat kynttilät. Huolehtiva saunahost, joka perehdytti hyvin toimintaan, piti huolen, että valmista lämmintä pesuvettä riitti ja kaikki oli kunnossa. Altaat oli puhtaat ja paikka täynnä ihania yksityiskohtia. Rakkaus saunaa kohtaan näkyy. ❤️"
+  },
+  {
+   "author": "Emilia Kari",
+   "stars": 4,
+   "lang": "fi",
+   "text": "Pienellä hiomisella vielä tunnelmallisempi ja miellyttävämpi. Roskat ja risut pois, pusikoille vähän trimmausta. Ja vain kaksi seuruetta vaikka kerrallaan niin toinen porukka voi olla paljussa ja toinen saunassa, sauna on aika pieni kuitenkin. Ja pukutila myös. Peseytyminen muiden edessä siinä on vähän niin ja näin, ei tule kunnolla ihmisten huuhdottua itseään ennen paljuun menoa. Liikenteen ääni kuuluu ja lentokoneet lentää yli, sille nyt ei tietysti voi mitään. Löylyt hyvät. Tulipaikka mukava lisä. Palju asteen pari lämpimämmäksi."
+  },
+  {
+   "author": "Marko Helin",
+   "stars": 5,
+   "lang": "fi",
+   "text": "Oli kiva kokemus ja kyllä suosittelen paikkaa muillekin. Sauna on pienehkö ja max 8 hlö mahtuu kerrallaan. 2 tunnissa ehtii hyvin saunoa ja vaikka grillata sen jälkeen"
+  }
+ ]
+}

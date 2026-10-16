@@ -6,6 +6,11 @@ export const read = (p) => JSON.parse(readFileSync(new URL('../' + p, import.met
 export const site = read('content/site.json');
 export const kb = read('content/kb/kb.json');
 export const images = read('content/images.json');
+// Google-arvostelut (content/reviews.json); REVIEWS_FILE ohittaa tiedoston (testaukseen). Puuttuva tiedosto = ei arvosteluja.
+export const reviewsData = (() => {
+  const f = process.env.REVIEWS_FILE;
+  try { return f ? JSON.parse(readFileSync(f, 'utf8')) : read('content/reviews.json'); } catch (err) { if (err.code === 'ENOENT') return null; throw err; }
+})();
 
 const env = process.env;
 export const isTest = env.SITE_ENV === 'test';

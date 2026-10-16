@@ -191,7 +191,16 @@
     "text": "Saunottajakoulutukset järjestetään erillisellä koulutussivustolla.",
     "cta": "Tutustu koulutuksiin →"
    },
-   "privatePrompt": "Yksityisvuorot ja tapahtumat"
+   "privatePrompt": "Yksityisvuorot ja tapahtumat",
+   "reviews": {
+    "title": "Asiakkaiden kokemuksia",
+    "count": "Google-arvostelua",
+    "stars": "{n} tähteä viidestä",
+    "more": "Lue lisää",
+    "less": "Näytä vähemmän",
+    "all": "Lue kaikki arvostelut Googlessa →",
+    "of": "/ 5"
+   }
   },
   "en": {
    "lang": "en",
@@ -297,6 +306,15 @@
     "title": "Want to become a sauna healer?",
     "text": "Sauna healer trainings are presented on a separate training site.",
     "cta": "Explore the trainings →"
+   },
+   "reviews": {
+    "title": "What our guests say",
+    "count": "Google reviews",
+    "stars": "{n} out of 5 stars",
+    "more": "Read more",
+    "less": "Show less",
+    "all": "Read all reviews on Google →",
+    "of": "/ 5"
    }
   }
  },
