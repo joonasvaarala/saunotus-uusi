@@ -14,7 +14,7 @@ Ei palvelinkoodia, ei build-vaihetta selaimen koodille, ei kirjastoriippuvuuksia
 | `supabase/manual/` | Käsin tehtävät vaiheet: skeeman avaus REST:iin, ensimmäinen admin, tarkistuskyselyt |
 | `shared/sb.js` | ~110 rivin PostgREST/Auth-asiakas (käytetään kaupassa ja hallinnassa) |
 | `shop/` | Varauskauppa: **kopio uudesta sivustosta**, jossa Johku-linkit avaavat sisäisen kalenterin |
-| `admin/` | Hallinta-SPA (mobiili ensin + työpöytä), Supabase Auth. Näkymät: Päivä (+ lisäpalvelujen "Valmistele"-yhteenveto), Varaukset (**lähdesuodatin Kaikki / Uudet / Johku**; Johku-varauksilla "Johku"-tunniste), **Kalenteri** (työvuorot + varaukset), Uusi varaus (asiakastyyppi, lisäpalvelut), Asiakkaat (**Lisää asiakas**: yksityinen/yritys), Tuotteet (+ **Lisäpalvelut**), Resurssit, Asetukset, **Käyttäjät** (vain admin) |
+| `admin/` | Hallinta-SPA (mobiili ensin + työpöytä), Supabase Auth. Näkymät: Päivä (+ lisäpalvelujen "Valmistele"-yhteenveto), Varaukset (**Ajanjakso**-pikavalinta Kaikki ajat (oletus) / Tulevat / Menneet / Tämä kuukausi / Oma ajanjakso, **lähdesuodatin Kaikki / Uudet / Johku**; Johku-varauksilla "Johku"-tunniste; kortin oikeassa yläkulmassa tilausnumero ja oikeassa alakulmassa hinta), **Kalenteri** (työvuorot + varaukset), Uusi varaus (asiakastyyppi, lisäpalvelut), Asiakkaat (**Lisää asiakas**: yksityinen/yritys), Tuotteet (+ **Lisäpalvelut**), Resurssit, Asetukset, **Käyttäjät** (vain admin) |
 | `supabase/functions/admin-users/` | Edge Function (Deno, `verify_jwt = true`): käyttäjien kutsu, käytöstä poisto ja aktivointi. Validointilogiikka `logic.js` + testit |
 | `dev/` | Paikallinen demo: PostgREST-konfiguraatio, kehityspalvelin (mock-auth), demo-siemen |
 | `scripts/e2e-screenshots.mjs` | Playwright-savutesti + kuvakaappaukset + konsolivirhetarkistus |
@@ -303,3 +303,6 @@ Hinnat ja tuotetekstit **eivät** ole sääntöjä: ne muokataan hallinnan Tuott
 ## Avoimet kysymykset
 
 Ks. [docs/ristiriidat-ja-tulkinnat.md](docs/ristiriidat-ja-tulkinnat.md) (yhteenveto raportissa).
+
+### Varauslistan ajanjakso
+`Kaikki ajat` kutsuu `admin_list_reservations`:ia ilman päivärajoja (`p_from`/`p_to` = null; funktio sallii nullin, ei SQL-muutoksia). `Tulevat` = tästä päivästä alkaen, `Menneet` = ennen tätä päivää, `Tämä kuukausi` = kuukauden 1. päivä – seuraavan kuun 1. päivä, `Oma ajanjakso` näyttää Alkaen/Päättyen-kentät (tyhjä kenttä = ei rajaa). Lista sivutetaan (50 / sivu, `Näytä lisää`; funktion yläraja 500 / kutsu), joten tuhansia Johku-varauksia sisältävä "Kaikki ajat" ei kuormita. Tulosrivi: `11 / 11 varausta · Kaikki ajat`.

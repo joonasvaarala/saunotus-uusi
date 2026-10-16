@@ -465,6 +465,118 @@ if (process.env.ONLY !== 'shop') {
     await ctx.close();
   }
 }
+// ---------- HALLINTA: varauslistan Ajanjakso-pikavalinta (Kaikki ajat / Tulevat / Menneet / Tämä kuukausi / Oma ajanjakso) + varauskortin asettelu ----------
+if (process.env.ONLY !== 'shop') {
+  const login = async (page) => { await page.goto(`${BASE}/admin/`); await page.fill('#email', 'admin@demo.local'); await page.fill('#password', 'demo'); await page.click('form#login button[type=submit]'); await page.waitForSelector('#view .day-view, #view .daygrid'); };
+  const rpcArgs = [];
+  const reload = async (page, action) => { const [resp] = await Promise.all([page.waitForResponse((r) => r.url().includes('/rpc/admin_list_reservations')), action()]); await resp.finished(); await page.waitForTimeout(150); };
+  const nRows = (page) => page.locator('#view .listrow').count();
+  const resultLine = (page) => page.locator('#view > p.muted').first().innerText();
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
+  for (const [name, vp] of [['mobile', { width: 390, height: 844, isMobile: true, hasTouch: true }], ['desktop', { width: 1280, height: 900 }]]) {
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, isMobile: vp.isMobile, hasTouch: vp.hasTouch, locale: 'fi-FI', timezoneId: 'Europe/Helsinki' });
+    const page = await ctx.newPage(); watch(page, `period-${name}`);
+    page.on('request', (r) => { if (r.url().includes('/rpc/admin_list_reservations')) rpcArgs.push(JSON.parse(r.postData() || '{}')); });
+    await login(page);
+    await page.evaluate(() => { location.hash = '#/varaukset'; });
+    await page.waitForSelector('#view .listrow');
+    const grp = page.getByRole('group', { name: 'Ajanjakso' });
+    const labels = ['Kaikki ajat', 'Tulevat', 'Menneet', 'Tämä kuukausi', 'Oma ajanjakso'];
+    for (const l of labels) if ((await grp.getByRole('radio', { name: l }).count()) !== 1) problems.push(`period-${name}: ajanjaksovalinta puuttuu: ${l}`);
+    if (!(await grp.getByRole('radio', { name: 'Kaikki ajat' }).isChecked())) problems.push(`period-${name}: oletusvalinnan pitää olla Kaikki ajat`);
+    if (rpcArgs.at(-1).p_from !== null || rpcArgs.at(-1).p_to !== null) problems.push(`period-${name}: Kaikki ajat → p_from/p_to pitää olla null: ${JSON.stringify(rpcArgs.at(-1))}`);
+    if (await page.locator('.perdates').isVisible()) problems.push(`period-${name}: Alkaen/Päättyen-kenttien ei pitäisi näkyä ennen Oma ajanjakso -valintaa`);
+    const nAll = await nRows(page);
+    if (!/^\d+ \/ \d+ varausta · Kaikki ajat$/.test(await resultLine(page))) problems.push(`period-${name}: tulosrivi väärä: ${await resultLine(page)}`);
+    await shot(page, `admin-${name}-30-varauslista-kaikki-ajat.png`, false);
+    // Tulevat / Menneet / Tämä kuukausi → p_from/p_to
+    await reload(page, () => grp.getByRole('radio', { name: 'Tulevat' }).check());
+    let a = rpcArgs.at(-1); const nUp = await nRows(page);
+    if (!a.p_from || a.p_to !== null) problems.push(`period-${name}: Tulevat → p_from asetettu, p_to null odotettiin: ${JSON.stringify(a)}`);
+    await reload(page, () => grp.getByRole('radio', { name: 'Menneet' }).check());
+    a = rpcArgs.at(-1); const nPast = await nRows(page);
+    if (a.p_from !== null || !a.p_to) problems.push(`period-${name}: Menneet → p_from null, p_to asetettu odotettiin: ${JSON.stringify(a)}`);
+    if (nUp + nPast !== nAll) problems.push(`period-${name}: Tulevat (${nUp}) + Menneet (${nPast}) pitää olla = Kaikki ajat (${nAll})`);
+    await reload(page, () => grp.getByRole('radio', { name: 'Tämä kuukausi' }).check());
+    a = rpcArgs.at(-1);
+    const d1 = new Date(a.p_from), d2 = new Date(a.p_to);
+    if (!a.p_from || !a.p_to || d2 - d1 < 27 * 864e5 || d2 - d1 > 32 * 864e5 || !/^Tämä kuukausi$/.test((await resultLine(page)).split(' · ')[1])) problems.push(`period-${name}: Tämä kuukausi → välin pitää olla 28–31 pv: ${JSON.stringify(a)}`);
+    // Oma ajanjakso: kentät näkyvät vain valittaessa
+    await reload(page, () => grp.getByRole('radio', { name: 'Oma ajanjakso' }).check());
+    if (!(await page.locator('.perdates').isVisible())) problems.push(`period-${name}: Oma ajanjakso → Alkaen/Päättyen-kenttien pitää näkyä`);
+    if (!(await page.getByLabel('Alkaen').isVisible()) || !(await page.getByLabel('Päättyen').isVisible())) problems.push(`period-${name}: Alkaen/Päättyen-kentät puuttuvat`);
+    await page.evaluate(() => { document.querySelector('.perdates').scrollIntoView({ block: 'center' }); });
+    await shot(page, `admin-${name}-31-oma-ajanjakso-auki.png`, false);
+    await reload(page, () => page.getByLabel('Alkaen').fill('2000-01-01'));
+    await reload(page, () => page.getByLabel('Päättyen').fill('2099-12-31'));
+    if ((await nRows(page)) !== nAll || !/ · 1\.1\.2000–31\.12\.2099$/.test(await resultLine(page))) problems.push(`period-${name}: Oma ajanjakso 2000–2099 pitää näyttää kaikki (${await nRows(page)} / ${nAll}) ja ajanjakso tulosrivillä: ${await resultLine(page)}`);
+    await reload(page, () => page.getByLabel('Alkaen').fill(`${today.slice(0, 4)}-${today.slice(5, 7)}-01`));
+    await reload(page, () => page.getByLabel('Alkaen').fill('2099-01-01'));
+    if ((await nRows(page)) !== 0) problems.push(`period-${name}: Oma ajanjakso 2099→ ei pitäisi löytyä varauksia`);
+    await reload(page, () => page.getByLabel('Alkaen').fill(''));
+    await reload(page, () => page.getByLabel('Päättyen').fill(''));
+    if ((await nRows(page)) !== nAll || rpcArgs.at(-1).p_from !== null || rpcArgs.at(-1).p_to !== null) problems.push('period-' + name + ': tyhjät päivämääräkentät → ei rajausta (p_from/p_to null)');
+    // paluu Kaikki ajat piilottaa kentät; näppäimistö: nuoli vaihtaa valintaa
+    await reload(page, () => grp.getByRole('radio', { name: 'Kaikki ajat' }).check());
+    if (await page.locator('.perdates').isVisible()) problems.push(`period-${name}: Kaikki ajat → päivämääräkenttien pitää piiloutua`);
+    await grp.getByRole('radio', { name: 'Kaikki ajat' }).focus();
+    await reload(page, () => page.keyboard.press('ArrowRight'));
+    if (!(await grp.getByRole('radio', { name: 'Tulevat' }).isChecked()) || !rpcArgs.at(-1).p_from) problems.push(`period-${name}: nuolinäppäin ei vaihtanut ajanjaksoa`);
+    // yhdistelmä: ajanjakso + lähde
+    await reload(page, () => grp.getByRole('radio', { name: 'Kaikki ajat' }).check());
+    await reload(page, () => page.getByRole('group', { name: 'Lähde' }).getByRole('radio', { name: 'Johku' }).check());
+    if (rpcArgs.at(-1).p_source !== 'johku' || rpcArgs.at(-1).p_from !== null) problems.push(`period-${name}: lähde + ajanjakso yhdessä: ${JSON.stringify(rpcArgs.at(-1))}`);
+    await reload(page, () => page.getByRole('group', { name: 'Lähde' }).getByRole('radio', { name: 'Kaikki' }).check());
+    // kortin asettelu: tilausnumero oikeaan yläkulmaan (aikarivin kanssa), hinta oikeaan alakulmaan, merkit vasempaan alakulmaan, nimi + tuote keskellä
+    const cards = await page.evaluate(() => [...document.querySelectorAll('#view .rescard')].map((c) => {
+      const r = (s) => { const b = c.querySelector(s).getBoundingClientRect(); return { l: b.left, r: b.right, t: b.top, b: b.bottom }; };
+      const cb = c.getBoundingClientRect(); const cs = getComputedStyle(c);
+      return { card: { l: cb.left, r: cb.right, t: cb.top, b: cb.bottom }, pad: [parseFloat(cs.paddingLeft), parseFloat(cs.paddingRight), parseFloat(cs.paddingTop), parseFloat(cs.paddingBottom)], when: r('.rc-when'), no: r('.rc-no'), what: r('.rc-what'), badges: r('.rc-badges'), price: r('.rc-price'), noText: c.querySelector('.rc-no').textContent, priceText: c.querySelector('.rc-price').textContent };
+    }));
+    if (!cards.length) problems.push(`period-${name}: varauskortteja ei löytynyt`);
+    cards.forEach((k, i) => {
+      const tag = `period-${name} kortti ${i}`;
+      if (!/^#\d+$/.test(k.noText) || !/€/.test(k.priceText)) problems.push(`${tag}: tilausnumero/hinta puuttuu (${k.noText} / ${k.priceText})`);
+      if (Math.abs(k.no.r - (k.card.r - k.pad[1])) > 2 || Math.abs(k.no.t - k.when.t) > 8 || k.no.t > k.card.t + k.pad[2] + 10) problems.push(`${tag}: tilausnumero ei ole oikeassa yläkulmassa aikarivillä`);
+      if (Math.abs(k.price.r - (k.card.r - k.pad[1])) > 2 || Math.abs(k.price.b - (k.card.b - k.pad[3])) > 6) problems.push(`${tag}: hinta ei ole oikeassa alakulmassa`);
+      if (k.badges.l > k.card.l + k.pad[0] + 2 || k.badges.r > k.price.l + 0.5 && k.badges.b > k.price.t + 1) problems.push(`${tag}: merkit eivät ole vasemmassa alakulmassa tai menevät hinnan päälle`);
+      if (!(k.what.t >= k.when.b - 1 && k.what.b <= k.badges.t + 1)) problems.push(`${tag}: nimi/tuote ei ole aikarivin ja merkkien välissä`);
+      if (k.no.l < k.when.r - 0.5) problems.push(`${tag}: tilausnumero menee ajan päälle`);
+    });
+    await page.locator('#view .rescard').nth(2).evaluate((el) => el.scrollIntoView({ block: 'center' }));
+    await page.waitForTimeout(150);
+    await shot(page, `admin-${name}-32-varauskortit-uusi-asettelu.png`, false);
+    await ctx.close();
+  }
+  // --- ei vaakavieritystä, kosketuskohteet ≥ 44 px ja kontrasti ≥ 4,5:1 (360/390/430/1280) ---
+  for (const w of [360, 390, 430, 1280]) {
+    const ctx = await browser.newContext({ viewport: { width: w, height: 800 }, isMobile: w < 700, hasTouch: w < 700, locale: 'fi-FI', timezoneId: 'Europe/Helsinki' });
+    const page = await ctx.newPage(); watch(page, `period-w${w}`);
+    await login(page);
+    await page.evaluate(() => { location.hash = '#/varaukset'; });
+    await page.waitForSelector('#view .rescard');
+    for (const step of ['oletus', 'oma ajanjakso']) {
+      if (step === 'oma ajanjakso') { await page.getByRole('group', { name: 'Ajanjakso' }).getByRole('radio', { name: 'Oma ajanjakso' }).check(); await page.waitForTimeout(400); }
+      const m = await page.evaluate(() => {
+        const rgb = (c) => (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+        const lum = (c) => { const [r, g, b] = rgb(c).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+        const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+        const segs = [...document.querySelectorAll('.srcopt span')].map((e) => Math.round(e.getBoundingClientRect().height));
+        const k = document.querySelector('#view .rescard'), bg = getComputedStyle(k).backgroundColor;
+        const cr = ['.rc-no', '.rc-price', '.rc-when', '.rc-what strong'].map((s) => ratio(getComputedStyle(k.querySelector(s)).color, bg));
+        const chk = document.querySelector('.srcopt input:checked + span'); const sel = ratio(getComputedStyle(chk).color, getComputedStyle(chk).backgroundColor);
+        const unchk = document.querySelector('.srcopt input:not(:checked) + span'); const un = ratio(getComputedStyle(unchk).color, getComputedStyle(unchk).backgroundColor);
+        return { sw: document.documentElement.scrollWidth - document.documentElement.clientWidth, segs, cr, sel, un };
+      });
+      if (m.sw > 0) problems.push(`period-w${w} (${step}): vaakavieritys ${m.sw}px`);
+      if (m.segs.some((x) => x < 44)) problems.push(`period-w${w} (${step}): pikavalinnan kosketuskohde < 44 px: ${m.segs}`);
+      if (m.cr.some((x) => x < 4.5) || m.sel < 4.5 || m.un < 4.5) problems.push(`period-w${w} (${step}): kontrasti < 4,5: ${m.cr.map((x) => x.toFixed(2))} / valittu ${m.sel.toFixed(2)} / valitsematon ${m.un.toFixed(2)}`);
+    }
+    const ov = await page.evaluate(() => [...document.querySelectorAll('#view .rescard')].some((c) => c.scrollWidth > c.clientWidth + 1));
+    if (ov) problems.push(`period-w${w}: varauskortin sisältö ylittää kortin leveyden`);
+    await ctx.close();
+  }
+}
 // ---------- HALLINTA: kalenteri toimii vaikka vuorotietoja ei saada (public-skeema tyhjä / ei oikeutta) ----------
 if (process.env.ONLY !== 'shop') {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844, isMobile: true }, locale: 'fi-FI', timezoneId: 'Europe/Helsinki' });

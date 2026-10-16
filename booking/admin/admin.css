@@ -53,12 +53,12 @@ button.link{background:none;border:0;padding:6px 0;font:inherit;color:var(--ink)
 .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
 .toolbar input[type=date]{width:auto}
 .filters{display:grid;gap:10px;margin-bottom:10px}
-@media(min-width:700px){.filters{grid-template-columns:2fr 1fr 1fr 1fr 1fr}}
+@media(min-width:700px){.filters{grid-template-columns:2fr 1fr 1fr}.filters .filter-groups{grid-column:1/-1}}
 .list{display:grid;gap:6px;margin:8px 0}
 .listrow{display:grid;gap:6px;text-align:left;font:inherit;color:var(--text);background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;width:100%}
 .listrow:hover{border-color:var(--green)}
 .listrow .meta,.resrow .meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-@media(min-width:700px){.listrow{grid-template-columns:150px 1fr auto;align-items:center}}
+@media(min-width:700px){.listrow:not(.rescard){grid-template-columns:150px 1fr auto;align-items:center}}
 .badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:20px;background:#ece8e3;color:#5b524a;white-space:nowrap}
 .badge.ok,.badge.st-confirmed,.badge.pay-paid{background:var(--okbg);color:var(--ok)}
 .badge.err,.badge.st-cancelled,.badge.st-expired,.badge.st-no_show,.badge.pay-failed{background:#f3e3e3;color:var(--err)}
@@ -75,7 +75,19 @@ button.link{background:none;border:0;padding:6px 0;font:inherit;color:var(--ink)
 .srcopt span{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:76px;padding:0 16px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-weight:600;font-size:14px}
 .srcopt input:checked+span{background:var(--green);border-color:var(--green);color:#fff}
 .srcopt input:focus-visible+span{outline:3px solid var(--gold);outline-offset:2px}
-@media(min-width:700px){.filters .srcset{grid-column:1/-1}}
+/* ajanjakso + lähde: pikavalintaryhmät, otsikko ryhmän yläpuolella; oma ajanjakso -päivämääräkentät vain valittaessa */
+.filter-groups{display:flex;flex-wrap:wrap;gap:12px 32px;min-width:0}
+.srcset legend{float:none;display:block;width:100%;line-height:1.4;margin:0 0 6px}
+.srcset{display:block}.srcset .srcopt{margin:0 6px 6px 0}
+.perdates{flex:1 1 100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-width:520px}
+.perdates[hidden]{display:none}
+/* varauskortti: aika + tilausnumero ylärivillä, nimi + tuote keskellä, merkit vasemmassa ja hinta oikeassa alakulmassa */
+.rescard{grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:4px 12px}
+.rescard .rc-when{grid-column:1;min-width:0}
+.rescard .rc-no{grid-column:2;justify-self:end;font-size:13px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.rescard .rc-what{grid-column:1/-1;min-width:0;overflow-wrap:anywhere;padding:2px 0 4px}
+.rescard .rc-badges{grid-column:1;align-self:end;min-width:0}
+.rescard .rc-price{grid-column:2;justify-self:end;align-self:end;font-weight:700;color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums}
 .empty{color:var(--muted);padding:14px 0}
 /* päivänäkymä */
 .daygrid{display:grid;gap:10px}
