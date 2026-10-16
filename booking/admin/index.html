@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#2B3A30">
+<title>Varausjärjestelmä – hallinta</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div id="app">
+  <section id="login-screen" hidden>
+    <form id="login" class="card login" novalidate>
+      <h1>Hallinta</h1>
+      <p class="muted">Sipoonjoen perinnesauna – varausjärjestelmä</p>
+      <label class="fld"><span>Sähköposti</span><input id="email" type="email" autocomplete="username" required></label>
+      <label class="fld"><span>Salasana</span><input id="password" type="password" autocomplete="current-password" required></label>
+      <p id="login-err" class="err" role="alert" hidden></p>
+      <button class="btn primary" type="submit">Kirjaudu</button>
+    </form>
+  </section>
+  <div id="shell" hidden>
+    <header class="top">
+      <strong class="brand">Sauna<span>hallinta</span></strong>
+      <span id="who" class="who"></span>
+      <button id="logout" class="btn ghost sm" type="button">Kirjaudu ulos</button>
+    </header>
+    <nav id="nav" class="nav" aria-label="Päävalikko"></nav>
+    <main id="view" tabindex="-1"></main>
+  </div>
+</div>
+<script src="config.js"></script>
+<script type="module" src="admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+# EI TESTATTU (kirjoitettu paikallisesti, ei ajettu GitHub Actionsissa).
+# Ota käyttöön kopioimalla tiedostoksi .github/workflows/booking-ci.yml (ei kosketa pages.yml:ään).
+# Ajaa vain kun booking/** muuttuu: SQL-testit (pgTAP + kilpa-ajo) ja kaupan build.
+name: booking-ci
+on:
+  pull_request:
+    paths: ['booking/**']
+permissions:
+  contents: read
+jobs:
+  db-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: PostgreSQL + pgTAP
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql postgresql-contrib postgresql-*-pgtap
+          sudo service postgresql start
+          sudo -u postgres psql -c "create role runner superuser login" || true
+      - name: Testit
+        env: { PGHOST: /var/run/postgresql, PGPORT: '5432', PGUSER: runner }
+        run: bash booking/supabase/tests/run.sh
+  shop-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: node booking/shop/build.mjs
