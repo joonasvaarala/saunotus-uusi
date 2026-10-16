@@ -147,9 +147,91 @@ update booking.staff set public_staff_id = '00000000-0000-4000-8000-0000000000d0
 update booking.staff set public_staff_id = '00000000-0000-4000-8000-0000000000d1' where user_id = '00000000-0000-4000-8000-0000000000b2';
 update booking.staff set public_staff_id = '00000000-0000-4000-8000-0000000000d2' where user_id = '00000000-0000-4000-8000-0000000000c3';
 
+-- saunottajaroolit (migraatio 16 lukee public.staff_roles-taulusta role_type = 'therapist'; tuotannossa Työvuoro-Tapio)
+insert into public.staff_roles (staff_id, role_type, active)
+  select id, 'therapist', true from public.staff
+   where id in ('00000000-0000-4000-8000-0000000000d1', '00000000-0000-4000-8000-0000000000d2', '00000000-0000-4000-8000-0000000000d3', '00000000-0000-4000-8000-0000000000d4');
+
+-- Kaupan e2e-testit tarvitsevat päivän, jolla mikään tuote ei ole varattavissa ("tyhjä päivä" + ehdotus seuraavasta vapaasta päivästä).
+-- Ennen tämä riippui kellonajasta (illalla "tänään" oli tyhjä). Nyt kiinteä: savusauna suljettu koko päivän (siivous/huolto) keskiviikkona viikon päästä ensi maanantaista (mon+9, 10–16 pv päässä;
+-- e2e-screenshots käyttää ensi maanantaita ja mon+8 (tiistai) manuaaliseen varaukseen, joten ne eivät osu sulkuun).
+do $$
+declare t date := (now() at time zone 'Europe/Helsinki')::date; d date; res jsonb;
+begin
+  d := t + (case when extract(isodow from t)::int = 1 then 7 else 8 - extract(isodow from t)::int end) + 9;   -- ensi maanantai (ei tänään) + 9 pv
+  perform set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-0000000000a1", "role": "authenticated"}', true);
+  res := booking.admin_create_block((select id from booking.resources where code = 'savusauna'),
+           (d::timestamp at time zone 'Europe/Helsinki'), ((d + 1)::timestamp at time zone 'Europe/Helsinki'), 'Demo: savusauna suljettu koko päivän');
+  if not coalesce((res ->> 'ok')::boolean, false) then raise exception 'demo-sulun luonti epäonnistui: %', res; end if;
+  perform set_config('request.jwt.claims', '', true);
+end $$;
+
+-- ---------- resurssivaraukset (migraatio 17): hoitoja/rituaali (Rauni + saunottajaleg), vanha varaus ja ylitys ----------
+-- Tehdään admin-funktioilla (sama polku kuin hallinnassa). Päivät: tuleva lauantai/sunnuntai (saunottajavuorot yllä), ylitys tiistaina ilman vuoroja (mon+15).
+insert into booking.customers (name, email, phone, customer_type) values ('Hoito Hanna', 'hanna@example.com', '0401230001', 'customer');
+do $$
+declare
+  t date := (now() at time zone 'Europe/Helsinki')::date;
+  c bigint := (select id from booking.customers where email = 'hanna@example.com');
+  sat date := (t + 3) + ((6 - extract(isodow from t + 3)::int + 7) % 7);
+  mon date := t + (case when extract(isodow from t)::int = 1 then 7 else 8 - extract(isodow from t)::int end);
+  b record; res jsonb;
+begin
+  perform set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-0000000000a1", "role": "authenticated"}', true);
+  for b in
+    select * from (values
+      (10, (sat + time '15:00'), 1, false, null::text), (10, (sat + time '16:15'), 1, false, null),
+      (8,  (sat + time '17:30'), 2, false, null),
+      (16, (sat + 1 + time '14:00'), 1, true, null),
+      (10, (mon + 15 + time '12:00'), 1, false, 'Demo: ylitys – ei saunottajan vuoroa, sovittu erikseen')) x(pid, a, n, old, why)
+  loop
+    if b.old then
+      res := booking.admin_create_old_booking(b.pid, b.a at time zone 'Europe/Helsinki', b.n, c, null, null, null, 'pay_later', false, 'Demo: vanha varaus');
+    else
+      res := booking.admin_create_resource_booking(b.pid, b.a at time zone 'Europe/Helsinki', b.n, c, null, null, null, 'pay_later', false, 'Demo: resurssivaraus',
+               null, b.why is not null, b.why);
+    end if;
+    if res ->> 'reservation_id' is null then raise exception 'demo-resurssivarauksen luonti epäonnistui: %', res; end if;
+  end loop;
+  perform set_config('request.jwt.claims', '', true);
+end $$;
 -- Tuotekuvat (migraatio 14): demokuvat tiedostoista booking/dev/demo-images/products (dev-palvelin tarjoaa ne Storage-mockin kautta).
 -- Hiljainen sauna, turvetorstai, tunnin vuoro ja yritystuotteet jätetään tahallaan ilman kuvaa (kuvaton tila näkyy kaupassa ja testeissä).
 update booking.product_config set image_path = 'products/1-demo01xx.webp',  image_alt = 'Savusaunan lauteet ja kiuas' where product_id = 1;
 update booking.product_config set image_path = 'products/2-demo02xx.webp'  where product_id = 2;
 update booking.product_config set image_path = 'products/3-demo03xx.webp',  image_alt = 'Naisten saunavuoro' where product_id = 3;
 update booking.product_config set image_path = 'products/25-demo25xx.webp' where product_id = 25;
+
+-- ---------- sulkukalenterit (migraatio 18) ----------
+-- Tuotannossa kalenterit ovat active=false eikä synkkaa ole käynnissä; demossa hoidot ja savusauna on merkitty käyttöön (keinotekoinen kalenteritunnus), jotta Kalenterisulut-näkymässä
+-- on tapahtumia, ohitus, konflikti ja ajoloki. rauni ja perinnesaunotus jäävät käyttämättömiksi (näkymän "Ei käytössä" -tila). Tapahtumat kirjataan suoraan kirjanpitoon
+-- ja sulut luodaan samalla täsmäytysfunktiolla kuin synkka (_reconcile_closure_blocks). Päivät ensi maanantaista (mon+3 = torstai; mon+15 = tiistai, jolla on ylitysvaraus).
+do $$
+declare
+  t date := (now() at time zone 'Europe/Helsinki')::date;
+  mon date := t + (case when extract(isodow from t)::int = 1 then 7 else 8 - extract(isodow from t)::int end);
+  hk bigint; res jsonb;
+  ts_ constant text := 'Europe/Helsinki';
+begin
+  update booking.closure_calendars set google_calendar_id = 'demo-' || code || '@group.calendar.google.com', active = true where code in ('hoidot', 'savusauna');
+  insert into booking.closure_events(calendar_code, external_id, class, reason, all_day, starts_at, ends_at, content_hash, override, override_note)
+  values
+    ('savusauna', 'demo-s1', 'closure', 'Huolto', false, (mon + 3 + time '08:00') at time zone ts_, (mon + 3 + time '12:00') at time zone ts_, md5('s1'), null, null),
+    ('savusauna', 'demo-s2', 'closure', 'Savusauna kiinni (talkoot)', true, (mon + 11)::timestamp at time zone ts_, (mon + 12)::timestamp at time zone ts_, md5('s2'), null, null),
+    ('savusauna', 'demo-s3', 'rough', 'Pitkä huoltojakso', false, (mon + 20 + time '08:00') at time zone ts_, (mon + 30 + time '19:00') at time zone ts_, md5('s3'), null, null),
+    ('hoidot', 'demo-h1', 'closure', 'Hoidot kiinni', false, (mon + 15 + time '11:00') at time zone ts_, (mon + 15 + time '14:00') at time zone ts_, md5('h1'), null, null),
+    ('hoidot', 'demo-h2', 'closure', 'Hoidot kiinni (ilta)', false, (mon + 17 + time '16:00') at time zone ts_, (mon + 17 + time '20:00') at time zone ts_, md5('h2'), 'ignore', 'Hoitaja löytyi, hoidot avoinna');
+  perform booking._reconcile_closure_blocks('savusauna');
+  perform booking._reconcile_closure_blocks('hoidot');
+  insert into booking.closure_sync_runs(calendar_code, started_at, outcome, stats, error, source) values
+    ('savusauna', now() - interval '40 minutes', 'ok', '{"events_seen":9,"candidates":3,"inserted":0,"updated":0,"deleted":0,"rough":1,"ignored_mirror":4,"ignored_training":1,"conflicting_reservations":0}', null, 'demo'),
+    ('hoidot', now() - interval '35 minutes', 'ok', '{"events_seen":4,"candidates":2,"inserted":0,"updated":0,"deleted":0,"rough":0,"ignored_mirror":0,"ignored_training":1,"conflicting_reservations":1}', null, 'demo'),
+    ('hoidot', now() - interval '2 days', 'error', null, 'Google Calendar API: 503 (demo)', 'demo');
+  update booking.closure_calendars set last_attempt_at = now() - interval '35 minutes', last_success_at = now() - interval '35 minutes', last_stats = '{"events_seen":4,"candidates":2,"conflicting_reservations":1}' where code = 'hoidot';
+  update booking.closure_calendars set last_attempt_at = now() - interval '40 minutes', last_success_at = now() - interval '40 minutes', last_stats = '{"events_seen":9,"candidates":3,"rough":1}' where code = 'savusauna';
+  -- käsin tehty Laura-sulku (koulutus): muokattava, ei kalenterisulku
+  perform set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-0000000000a1", "role": "authenticated"}', true);
+  res := booking.admin_create_block((select id from booking.resources where code = 'laura'), (mon + 22 + time '09:00') at time zone ts_, (mon + 22 + time '16:00') at time zone ts_, 'Koulutus (käsin tehty)');
+  if not coalesce((res ->> 'ok')::boolean, false) then raise exception 'demo-Laura-sulun luonti epäonnistui: %', res; end if;
+  perform set_config('request.jwt.claims', '', true);
+end $$;

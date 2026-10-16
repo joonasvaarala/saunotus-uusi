@@ -120,7 +120,8 @@ select test.logout();
 update booking.settings set value = '"hold_until_paid"' where key = 'public_payment_mode';
 select test.anon();
 select test.logout();
-select test.next_dow(2, 10) as tue \gset
+-- tiistai vähintään 17 pv päässä: E-osion sulku on tiistaina mon+1 (≤ 10 pv päässä); +10 osui samaan päivään lauantaisin (viikonpäiväriippuva testi)
+select test.next_dow(2, 17) as tue \gset
 select test.anon();
 select test.pub_book(:r_priv_1619, :'tue', 3) as hold \gset
 select is((:'hold'::jsonb ->> 'status'), 'pending', 'G1: pending-varaus luotu');
