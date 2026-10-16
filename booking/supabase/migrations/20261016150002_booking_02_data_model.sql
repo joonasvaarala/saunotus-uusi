@@ -324,17 +324,19 @@ create table booking.rate_limit_hits (
 create index rate_limit_bucket_idx on booking.rate_limit_hits(bucket, at desc);
 
 -- ---------- audit-triggerit ----------
-select booking._add_audit('booking.customers');
-select booking._add_audit('booking.orders');
-select booking._add_audit('booking.order_items');
-select booking._add_audit('booking.reservations');
-select booking._add_audit('booking.payments');
-select booking._add_audit('booking.payment_methods');
-select booking._add_audit('booking.discount_codes');
-select booking._add_audit('booking.gift_cards');
-select booking._add_audit('booking.gift_card_ledger');
-select booking._add_audit('booking.marketing_segments');
-select booking._add_audit('booking.campaigns');
+do $$ begin
+  perform booking._add_audit('booking.customers');
+  perform booking._add_audit('booking.orders');
+  perform booking._add_audit('booking.order_items');
+  perform booking._add_audit('booking.reservations');
+  perform booking._add_audit('booking.payments');
+  perform booking._add_audit('booking.payment_methods');
+  perform booking._add_audit('booking.discount_codes');
+  perform booking._add_audit('booking.gift_cards');
+  perform booking._add_audit('booking.gift_card_ledger');
+  perform booking._add_audit('booking.marketing_segments');
+  perform booking._add_audit('booking.campaigns');
+end $$;
 
 -- ---------- maksutapojen oletusluettelo ----------
 insert into booking.payment_methods(code, label, is_manual, active, johku_codes, sort_order) values

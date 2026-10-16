@@ -163,7 +163,9 @@ begin
   execute format('create trigger audit_trg after insert or update or delete on %s for each row execute function booking.audit_trg()', p_table);
 end $$;
 
-select booking._add_audit('booking.staff');
-select booking._add_audit('booking.settings');
-select booking._add_audit('booking.resources');
-select booking._add_audit('booking.product_config');
+do $$ begin
+  perform booking._add_audit('booking.staff');
+  perform booking._add_audit('booking.settings');
+  perform booking._add_audit('booking.resources');
+  perform booking._add_audit('booking.product_config');
+end $$;
