@@ -18,6 +18,7 @@ const browser = await chromium.launch({ executablePath: process.env.CHROME || '/
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
 const fakeJwt = (claims) => `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64(claims)}.${Buffer.from('x').toString('base64url')}`;
 const calls = [];
+const periodArgs = [];   // admin_list_reservations: [p_from, p_to] kutsuittain
 const srcArgs = [];   // admin_list_reservations: p_source-arvot kutsuittain
 
 async function newPage(name, { allowFail = null } = {}) {
@@ -59,7 +60,7 @@ async function newPage(name, { allowFail = null } = {}) {
       return json(rows);
     }
     if (u.pathname.endsWith('/rpc/admin_list_reservations')) {   // migraatio 12: source/external_id + p_source-suodatin (null = kaikki, 'johku' | 'native')
-      const a = route.request().postDataJSON() || {}; srcArgs.push(a.p_source ?? null);
+      const a = route.request().postDataJSON() || {}; srcArgs.push(a.p_source ?? null); periodArgs.push([a.p_from ?? null, a.p_to ?? null]);
       const ds = new Date(Date.now() + 2 * 864e5).toISOString().slice(0, 10);
       const mk = (id, name, src, ext) => ({ reservation_id: id, order_id: id, order_no: 9000 + id, status: 'confirmed', order_status: 'confirmed', payment_status: 'paid', product_id: 1, product_name: 'Yleinen vuoro', mode: 'public', starts_at: `${ds}T14:00:00Z`, ends_at: `${ds}T16:00:00Z`, persons: 2, total_gross: 58, customer_id: id, customer_name: name, customer_email: `${id}@example.com`, customer_phone: '0401234567', source_channel: src === 'johku' ? 'johku_import' : 'web', created_at: `${ds}T08:00:00Z`, hold_expires_at: null, notes: null, annual_card_id: null, total_count: 2, source: src, external_id: ext });
       return json([mk(1, 'Uusi Asiakas', 'native', null), mk(2, 'Johku Asiakas', 'johku', 'J-48213')].filter((r) => !a.p_source || r.source === a.p_source));
@@ -181,6 +182,21 @@ async function loginViaInvite(page) {
       await page.waitForTimeout(200);
       if (srcArgs.at(-1) !== want) problems.push(`varaukset: ${label} → p_source ${JSON.stringify(want)} odotettiin, lähti ${JSON.stringify(srcArgs.at(-1))}`);
       if ((await page.locator('#view .listrow').count()) !== n || (await page.locator('#view .listrow .badge.src-johku').count()) !== johku) problems.push(`varaukset: suodatin ${label}: rivejä ${n} (Johku-tunnisteita ${johku}) odotettiin`);
+    }
+    {   // Ajanjakso-pikavalinta: oletus Kaikki ajat (p_from/p_to null), Alkaen/Päättyen vain Oma ajanjakso -valinnalla; kortissa tilausnumero ja hinta omilla paikoillaan
+      const per = page.getByRole('group', { name: 'Ajanjakso' });
+      if ((await per.getByRole('radio').count()) !== 5 || !(await per.getByRole('radio', { name: 'Kaikki ajat' }).isChecked())) problems.push('varaukset: Ajanjakso-valinnassa pitää olla 5 vaihtoehtoa ja oletuksena Kaikki ajat');
+      if (periodArgs.at(-1).some((x) => x !== null)) problems.push(`varaukset: Kaikki ajat → p_from/p_to null odotettiin: ${JSON.stringify(periodArgs.at(-1))}`);
+      if (await page.locator('.perdates').isVisible()) problems.push('varaukset: Alkaen/Päättyen ei saa näkyä ennen Oma ajanjakso -valintaa');
+      if (!/^\d+ \/ \d+ varausta · Kaikki ajat$/.test(await page.locator('#view > p.muted').first().innerText())) problems.push('varaukset: tulosrivin pitää näyttää ajanjakso');
+      await Promise.all([page.waitForResponse((r) => r.url().includes('admin_list_reservations')), per.getByRole('radio', { name: 'Tulevat' }).check()]);
+      if (!periodArgs.at(-1)[0] || periodArgs.at(-1)[1] !== null) problems.push(`varaukset: Tulevat → p_from asetettu, p_to null: ${JSON.stringify(periodArgs.at(-1))}`);
+      await Promise.all([page.waitForResponse((r) => r.url().includes('admin_list_reservations')), per.getByRole('radio', { name: 'Oma ajanjakso' }).check()]);
+      if (!(await page.locator('.perdates').isVisible())) problems.push('varaukset: Oma ajanjakso → Alkaen/Päättyen pitää näkyä');
+      await Promise.all([page.waitForResponse((r) => r.url().includes('admin_list_reservations')), per.getByRole('radio', { name: 'Kaikki ajat' }).check()]);
+      await page.waitForTimeout(150);
+      const k = await page.evaluate(() => { const c = document.querySelector('#view .rescard'), b = (s) => c.querySelector(s).getBoundingClientRect(), cb = c.getBoundingClientRect(); return { noRight: Math.round(cb.right - b('.rc-no').right), priceRight: Math.round(cb.right - b('.rc-price').right), noTop: b('.rc-no').top - cb.top, priceBottom: cb.bottom - b('.rc-price').bottom, no: c.querySelector('.rc-no').textContent }; });
+      if (!/^#\d+$/.test(k.no) || k.noRight > 20 || k.priceRight > 20 || k.noTop > 24 || k.priceBottom > 24) problems.push(`varaukset: kortin asettelu (tilausnumero oikea yläkulma, hinta oikea alakulma) väärä: ${JSON.stringify(k)}`);
     }
     await page.locator('#view .listrow:has(.badge.src-johku)').click();
     await page.waitForSelector('dialog[open] .kv');
