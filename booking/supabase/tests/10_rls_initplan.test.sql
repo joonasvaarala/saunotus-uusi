@@ -3,7 +3,7 @@ begin;
 set local search_path = extensions, public;
 select no_plan();
 
-select is((select count(*)::int from pg_policies where schemaname = 'booking'), 25, 'booking-skeemassa 25 politiikkaa (23 staff_read + staff_self_read + audit_admin_read)');
+select is((select count(*)::int from pg_policies where schemaname = 'booking'), 27, 'booking-skeemassa 27 politiikkaa (25 staff_read + staff_self_read + audit_admin_read; migraatio 11 lisäsi customer_kinds ja addons)');
 select is((select count(*)::int from pg_policies where schemaname = 'booking' and (qual is null or qual !~* '\(\s*select\s')), 0, 'jokaisen politiikan lauseke sisältää (select …) -InitPlanin');
 select is((select count(*)::int from pg_policies where schemaname = 'booking' and qual ~* 'auth\.uid\(\)' and qual !~* '\(\s*select\s+auth\.uid\(\)'), 0, 'auth.uid() on aina (select auth.uid()) -muodossa');
 select ok((select qual ~* 'select\s+auth\.uid\(\)' from pg_policies where schemaname = 'booking' and tablename = 'staff' and policyname = 'staff_self_read'), 'staff_self_read: auth.uid() kääritty selectiin');

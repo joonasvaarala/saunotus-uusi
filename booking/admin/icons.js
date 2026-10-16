@@ -14,6 +14,7 @@ export const ICONS = {
   cabin: [P('M3 11l9-8 9 8M5 9.5V20h14V9.5M10 20v-6h4v6')],                                  // Resurssit: sauna/mökki
   sliders: [P('M3 6h9M16 6h5M3 12h3M10 12h11M3 18h11M18 18h3'), C(14, 6, 2), C(8, 12, 2), C(16, 18, 2)], // Asetukset
   key: [P('M21 2l-9.6 9.6'), C(7.5, 15.5, 5.5), P('M15.5 7.5l3 3L22 7l-3-3')],                // Käyttäjät
+  leaf: [P('M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z'), P('M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12')], // Lisäpalvelut: lehti
   close: [P('M18 6L6 18M6 6l12 12')],                                                         // Sulje
 };
 const NS = 'http://www.w3.org/2000/svg';

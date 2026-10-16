@@ -19,7 +19,9 @@ Oikeudet (`role_permissions.permission`): `bookings.manage`, `customers.manage`,
 | Katalogi, vapaat vuorot, varauksen teko (rate limit), oman varauksen muutos (≥ 48 h, token) | ✔ | ✔ | ✔ | ✔ |
 | Varausten ja asiakkaiden lukeminen, haku | ✘ | ✔ | ✔ | ✔ |
 | Manuaalinen varaus, varauksen muutos, tilan muutos, peruutus, maksun kirjaus, sulut | ✘ | ✔ | ✔ | ✔ |
-| Asiakastietojen muokkaus + markkinointiluvan kirjaus | ✘ | ✔ | ✔ | ✔ |
+| Asiakastietojen muokkaus + markkinointiluvan kirjaus, **uuden asiakkaan lisäys (yksityinen/yritys)** | ✘ | ✔ | ✔ | ✔ |
+| Lisäpalvelun valinta/muokkaus varaukselle (`admin_set_reservation_addons`), tilauksen laskutustietojen katselu | ✘ | ✔ | ✔ | ✔ |
+| **Lisäpalvelujen nimet/kuvaukset/hinnat/ALV/aktiivisuus** (`catalog.edit`, kuten tuotetiedot) | ✘ | **✘ (vain luku)** | ✔ | ✔ |
 | **Tuotteiden nimet/kuvaukset/hinnat/ALV (kb), hintavariantit, tuoteasetukset** | ✘ | **✘ (vain luku)** | ✔ | ✔ |
 | Asetukset (`admin_set_setting`), resurssit/kapasiteetit | ✘ | ✘ | ✔ | ✔ |
 | Vuorosääntöjen muokkaus (nimi, päällä/pois, hlömäärät, deadline, voimassaolo) | ✘ | ✘ | ✔ | ✔ |

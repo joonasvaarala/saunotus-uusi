@@ -25,7 +25,7 @@ begin
       (6, 'Yleinen vuoro la–su 14:00%', 3, 1), (6, 'Yleinen vuoro la–su 14:30%', 2, 1), (6, 'Yleinen vuoro la–su 16:00%', 4, 1),
       (7, 'Yleinen vuoro la–su 14:00%', 6, 1), (7, 'Tunnin saunavuoro la–su 18:00', 5, 1),
       (4, 'Turvetorstai%', 6, 1), (4, 'Yleinen vuoro to 17–19', 5, 1),
-      (1, 'Miesten sauna%', 9, 1), (1, 'Miesten sauna%', 7, 1),
+      (1, 'Miesten sauna%', 9, 1), (1, 'Miesten sauna%', 5, 1),
       (2, 'Oma savusaunavuoro ma–pe 16–19%', 10, 1),
       (3, 'Hiljainen sauna ke%', 4, 1)
     ) as t(dow, rule_like, persons, cnt)
@@ -43,6 +43,30 @@ begin
     end loop;
   end loop;
   delete from booking.rate_limit_hits;
+end $$;
+-- lisäpalvelut ja yritysasiakas demossa (migraatio 11): lisäpalveluja muutamalle varaukselle + yksi yritysvaraus (laskutus) maanantaille
+do $$
+declare
+  d date := (now() at time zone 'Europe/Helsinki')::date; v_mon date; v_tue date; v_sat date; r_mon bigint; res jsonb; v_res bigint;
+begin
+  v_mon := d + 2 + ((1 - extract(isodow from d + 2)::int + 7) % 7);
+  v_tue := d + 2 + ((2 - extract(isodow from d + 2)::int + 7) % 7);
+  v_sat := d + 2 + ((6 - extract(isodow from d + 2)::int + 7) % 7);
+  perform set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-0000000000a1", "role": "authenticated"}', true);
+  select id into r_mon from booking.schedule_rules where label like 'Miesten sauna%' order by id limit 1;
+  -- maanantain 9 hengen varaus: 3 saunavihtaa ja 2 turvenaamiota
+  select r.id into v_res from booking.reservations r where r.rule_id = r_mon and r.starts_at >= v_mon::timestamp at time zone 'Europe/Helsinki' and r.starts_at < (v_mon + 1)::timestamp at time zone 'Europe/Helsinki' and r.persons = 9 limit 1;
+  perform booking.admin_set_reservation_addons(v_res, '[{"code":"saunavihta","quantity":3},{"code":"turvenaamio_jalkakylpy","quantity":2}]');
+  -- yritysvaraus (lasku): 2 hlöä + 2 saunavihtaa
+  res := booking.admin_create_booking(r_mon, v_mon, 2, null,
+    '{"kind":"company","name":"Kaisa Yhteys","email":"kaisa.yhteys@demoyritys.example.com","phone":"0401234500","company_details":{"company_name":"Demo Yritys Oy","business_id":"0112038-9","street":"Esimerkkikatu 1","zip":"00100","city":"Helsinki","einvoice_address":"003701120389","einvoice_operator":"003723327487","reference":"PO-1234"}}'::jsonb,
+    'invoice', false, 'Demo: yritysvaraus', null, null, null, 'email', '[{"code":"saunavihta","quantity":2}]'::jsonb);
+  -- tiistain yksityisvuoro (10 hlöä): 6 saunavihtaa + 4 turvenaamiota
+  select r.id into v_res from booking.reservations r where r.mode = 'exclusive' and r.starts_at >= v_tue::timestamp at time zone 'Europe/Helsinki' and r.starts_at < (v_tue + 1)::timestamp at time zone 'Europe/Helsinki' limit 1;
+  if v_res is not null then perform booking.admin_set_reservation_addons(v_res, '[{"code":"saunavihta","quantity":6},{"code":"turvenaamio_jalkakylpy","quantity":4}]'); end if;
+  -- asiakasrekisteriin yksi erillinen yritysasiakas (ei varauksia)
+  perform booking.admin_create_customer('{"kind":"company","name":"Pekka Laskutus","email":"pekka.laskutus@toinenyritys.example.com","phone":"0409876500","company_details":{"company_name":"Toinen Yritys Oy","business_id":"2336509-6","street":"Tehdaskatu 2","zip":"33100","city":"Tampere"}}'::jsonb);
+  perform set_config('request.jwt.claims', '', true);
 end $$;
 -- yksi maksettu ja yksi osittain maksettu tilaus näytille
 update booking.orders set payment_status = 'paid' where id = (select min(id) from booking.orders);

@@ -102,3 +102,22 @@ fieldset.box legend{font-weight:600;padding:0 6px}
 .toast{position:fixed;left:50%;bottom:80px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:var(--green);color:#fff;padding:12px 18px;border-radius:30px;z-index:100;transition:.2s;max-width:90vw}
 .toast.err{background:#b3392b}.toast.show{opacity:1;transform:translate(-50%,0)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Migraatio 11: asiakastyyppi, yritystiedot, lisäpalvelut */
+.between{justify-content:space-between}
+.kindset{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:0}.kindset legend{font-weight:600;color:var(--ink);padding:0 6px}
+.kindopt{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer}
+.kindopt input{width:20px;height:20px;accent-color:var(--green)}
+.company-box h3:first-child{margin-top:0}
+.existing .kindset,.existing .company-box{display:none}
+.addon-picker legend{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--ink);padding:0 6px}
+.addonrow input[type=number]{width:84px}.addonrow .grow{flex:1 1 180px}
+.grow{flex:1 1 auto}
+.prep{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:8px 0 0;padding:8px 10px;border-radius:8px;background:var(--warnbg);border-left:4px solid var(--gold);color:var(--ink)}
+.prepday{border-left:4px solid var(--gold)}
+.addon-mark{display:flex;align-items:center;gap:4px;margin-top:2px;font-size:13px;color:var(--gold)}
+.resrow.has-addons{border-left:3px solid var(--gold);padding-left:6px}
+.resrow .link{text-align:left}
+.kv{grid-template-columns:auto minmax(0,1fr)}.kv dd{overflow-wrap:anywhere}
+h2 .icon,h3 .icon,.addon-mark .icon{display:inline-block;vertical-align:-3px;margin-right:4px;color:var(--icon)}
+.addon-mark .icon{vertical-align:-4px}

@@ -1,6 +1,29 @@
 # Pyyntö Bottiavustukselle: `booking`-skeeman käyttöönotto (Supabase Tapio-havuhattu)
 
-> **PÄIVITYS 16.10. (v5, testiversion julkaisu GitHub Pagesiin) – lue ensin tämä:**
+> **PÄIVITYS 16.10. (v8, asiakastyypit + lisäpalvelut) – lue ensin tämä:**
+> **Aja uusi migraatio 11:** `booking/supabase/migrations/20261016150011_booking_11_customer_kinds_addons.sql` (migraatio 10 ensin, jos sitä ei ole vielä ajettu; 01–10 EI muuteta). Yksi transaktio (`begin … commit`), ajetaan kerran. Ei kosketa `kb`- eikä `public`-skeemaan (ei DDL:ää, ei kirjoitusta); kaikki muutokset ovat `booking`-skeemassa.
+>
+> **Mitä ja miksi:** Joonas halusi (a) kaksi asiakastyyppiä, **yksityisasiakas** ja **yritysasiakas** (yritykseltä: yrityksen nimi, y-tunnus, laskutusosoite, valinnaiset verkkolaskutiedot ja viite/tilausnumero, yhteyshenkilö), sekä (b) **lisäpalvelut** (alkuun *Turvenaamio ja jalkakylpy* 15 € ja *Saunavihta* 13 €, hinnat sis. ALV 25,5 %), joita asiakas valitsee varauksen yhteydessä ja jotka näkyvät hallinnan päivänäkymässä valmisteltavina ("Valmistele: 3 × saunavihta …").
+>
+> **Skeemamuutokset (taulu / sarake):**
+> * UUSI `booking.customer_kinds` (`code` pk: `private`, `company`; `is_company`, `label`, `label_en`, `active`, `sort_order`) – taulupohjainen luettelo, siemen kaksi riviä. RLS päällä, politiikka `staff_read`.
+> * `booking.customers`: + `customer_kind` (fk → `customer_kinds`, oletus `private`, joten vanhat rivit ovat yksityisiä), `business_id` (y-tunnus, muoto `1234567-8`, tarkistenumero tarkistetaan check-rajoitteella), `einvoice_address`, `einvoice_operator`, `invoice_reference`; rajoite `customers_company_data` (yritysasiakkaalla pakollinen `company` + `business_id`, ellei `external_source` ole asetettu eli Johku-tuonti). Osoite käyttää olemassa olevia sarakkeita (`address`, `zip`, `city`, `country`, `company`). **`customer_type` (customer/annual_card) säilyy ennallaan** – `customer_kind` on eri akseli.
+> * `booking.orders`: + `customer_kind`, `billing` (jsonb, laskutustietojen kuva tilaushetkeltä), `invoice_reference`.
+> * UUSI `booking.addons` (`code` unique, `name`, `name_en`, `description(_en)`, `price_gross` ≥ 0 sis. ALV, `vat_rate` (0/10/13,5/14/24/25,5), `max_per_person` (oletus 1), `applies_modes` (`shared`/`exclusive`), `active`, `sort_order`, `external_source/id`, aikaleimat; audit-trigger). Siemen: `turvenaamio_jalkakylpy` 15,00 € ja `saunavihta` 13,00 €, molemmat ALV 25,5 %. RLS päällä, `staff_read`.
+> * `booking.order_items`: `kind`-rajoite sallii arvon `addon`; + `addon_id`, `parent_item_id` (lisäpalvelurivi → varausrivi, `on delete cascade`).
+> * Politiikkoja tulee 2 lisää (`booking`-skeemassa yhteensä 27).
+>
+> **Funktiot (kaikki `SECURITY DEFINER`, `set search_path = ''`, `revoke … from public, anon, authenticated` ennen eksplisiittistä grantia):**
+> * Sisäiset (ei anon/authenticated): `_norm_business_id`, `_business_id_ok`, `_clean_company`, `_valid_email`, `_upsert_customer` (uusi versio), `_upsert_company_customer`, `_stamp_order_billing`, `_addon_limit`, `_attach_addons`, `_addon_total_after`, `_clamp_addons`, `_change_booking_core` (uusi versio: lisäpalvelut mukaan hintatarkistukseen ja määrien rajaukseen).
+> * Julkiset (anon + authenticated): UUSI `public_addons()`; `public_create_booking` (vanha 9-parametrinen versio **poistetaan** ja tilalle tulee 12-parametrinen, uudet parametrit `p_customer_kind`, `p_company`, `p_addons` oletusarvoilla → vanha frontend toimii sellaisenaan); `public_get_booking` (+ `addons`, `customer_kind`; ei vuoda yritys- eikä henkilötietoja).
+> * Hallinta (authenticated; oikeus tarkistetaan funktiossa): UUSI `admin_create_customer` (`customers.manage`), `admin_set_reservation_addons` (`bookings.manage`), `admin_get_order` (staff), `admin_list_addons` (staff), `admin_create_addon` / `admin_update_addon` (**`catalog.edit`**, kuten tuotetiedot); uudet versiot: `admin_update_customer`, `admin_list_customers` (palautustyyppi laajenee → vanha poistetaan), `admin_create_booking` (vanha 12-parametrinen **poistetaan**, uusi 14-parametrinen), `admin_day_view` (+ `prep`, `addon_totals`).
+> * Poistetut vanhat allekirjoitukset: `public_create_booking(bigint,date,integer,text,text,text,boolean,text,text)`, `admin_list_customers(text,integer,integer)` (vanha paluutyyppi), `admin_create_booking(…12 parametria)` – poisto estää PostgREST:n overload-epäselvyyden.
+> * Uusia oikeuksia ei tule: lisäpalvelujen ylläpito käyttää olemassa olevaa `catalog.edit`-oikeutta.
+>
+> **Ajon jälkeen (vain luku):** `select code from booking.customer_kinds;` (2 riviä), `select code, price_gross from booking.addons order by sort_order;` (15,00 ja 13,00), `select count(*) from pg_policies where schemaname='booking';` (27), anonina `select booking.public_addons();` (2 lisäpalvelua). Aja `get_advisors` (security + performance); uusia varoituksia ei pitäisi tulla (RLS päällä, `search_path` tyhjä, politiikat `(select …)`-muodossa). PostgREST päivittää skeemavälimuistin DDL:n jälkeen itse; jos uudet funktiot eivät heti näy, `notify pgrst, 'reload schema'`.
+> **Paikallinen testi:** 789 pgTAP-tarkistusta (571 aiempaa + 218 uutta: `11_customer_kinds_addons`) + kilpailutesti + mutaatiotarkistus läpi; e2e/smoke läpi. Frontend (kauppa + hallinta) tarvitsee migraation 11 ajettuna: uusi kauppa kutsuu `public_addons`-funktiota (virhetilanteessa lisäpalvelut jäävät pois) ja hallinta `admin_list_addons`/`admin_get_order`-funktioita.
+
+> **PÄIVITYS 16.10. (v5, testiversion julkaisu GitHub Pagesiin):**
 > 1. **Aja uusi migraatio 10:** `booking/supabase/migrations/20261016150010_booking_10_rls_initplan.sql`. Se korvaa RLS-politiikat (`staff_self_read` ym.) muodolla `(select auth.uid())` / `(select booking.is_staff())` (advisor `auth_rls_initplan`, WARN). Sama semantiikka, idempotentti (`drop policy if exists` + `create policy`), ei kosketa migraatioihin 01–09, ei `public`- eikä `kb`-skeemaan. Ajon jälkeen aja `get_advisors` (performance) uudelleen: `auth_rls_initplan`-varoituksia ei pitäisi enää olla `booking`-skeemassa. Paikallinen testi: 571 pgTAP-tarkistusta + kilpailutesti läpi.
 > 2. **Edge Function `admin-users` – uudelleendeploy SUOSITELTAVA, ei pakollinen.** `index.ts` EI muuttunut; muutos on `logic.js`:ssä (`resolveRedirect`): kutsulinkin kohde on `INVITE_REDIRECT_URL` (ensisijainen, sellaisenaan), muuten `SITE_URL + /hallinta/` (aiemmin varakohde oli `/admin/`), tyhjät/välilyönnit trimmataan. Jos Joonas asettaa `INVITE_REDIRECT_URL`-salaisuuden (`https://joonasvaarala.github.io/saunotus-uusi/hallinta/`), jo deployattu versio toimii sellaisenaan; deploy tarvitaan vain, jos halutaan uusi varakäyttäytyminen. **Salaisuuksien muutos ei vaadi deployta**, mutta tarkista, että `ALLOWED_ORIGINS` sisältää `https://joonasvaarala.github.io` (CORS; muuten hallinnan Käyttäjät-kutsu epäonnistuu selaimessa).
 > 3. **Auth → URL Configuration → Redirect URLs:** lisää `https://joonasvaarala.github.io/saunotus-uusi/hallinta/` (muuten kutsulinkki ohjautuu Site URL:iin).
@@ -10,7 +33,7 @@
 
 ---
 
-**Aihe:** Pyyntö: uusi `booking`-skeema (varausjärjestelmä), 10 migraatiota (01–09 ajettu jo; **10 uusi**) + Edge Function `admin-users` + käsin tehtävät vaiheet
+**Aihe:** Pyyntö: uusi `booking`-skeema (varausjärjestelmä), 11 migraatiota (01–09 ajettu jo; **10 ja 11 uusia**) + Edge Function `admin-users` + käsin tehtävät vaiheet
 
 Hei Bottiavustus,
 
@@ -31,6 +54,8 @@ tarvitsen Supabase-projektiin Tapio-havuhattu uuden skeeman `booking` (oma varau
 | 7 | `…07_rls_grants.sql` | RLS kaikille `booking`-tauluille, oikeudet minimiin (anon: vain `public_*`-funktiot; authenticated: luku staff-RLS:llä; kirjoitus vain funktioilla; `payment_*` vain service_role) |
 | 8 | `…08_seed_rules.sql` | asetukset, resurssit/kapasiteettipoolit (viikonloppu: oma pooli per alkamisaika), tuotekonfiguraatio ja 30 vuorosääntöä (13 yleistä + 17 yksityistä; kb-tuotteet haetaan `external_system='johku'` + `external_id` -avaimella; kaatuu selkeästi jos yksityisvuoron hintavarianttia ei löydy) |
 | 9 | `…09_cron_optional.sql` | **valinnainen:** pg_cron-ajastus pitojen vanhentamiselle (ohittaa hiljaa jos pg_cron ei ole päällä) |
+| 10 | `…10_rls_initplan.sql` | RLS-politiikat `(select auth.uid())` / `(select booking.is_staff())` -muotoon (advisor `auth_rls_initplan`) |
+| 11 | `…11_customer_kinds_addons.sql` | **UUSI:** asiakastyypit (yksityinen/yritys, y-tunnus, verkkolaskutiedot), lisäpalvelut (`addons`, hinnoittelu, tilausrivit), julkiset ja hallinnan RPC:t, `admin_day_view`-yhteenveto; ks. päivitys ylhäällä |
 
 **kb-muutokset (vain data, vain admin-funktioiden kautta, ei skeemamuutosta):**
 * `booking.admin_update_product(id, patch)` päivittää `kb.products`: `name, name_en, description, description_en, price, price_text, vat_rate, active` (+ `updated_at`).
@@ -50,7 +75,7 @@ tarvitsen Supabase-projektiin Tapio-havuhattu uuden skeeman `booking` (oma varau
 * Jos työvuorotiedot puuttuvat tai haku epäonnistuu, hallinnan kalenteri näyttää varaukset ja ystävällisen huomautuksen.
 
 **Roolit:**
-* `anon`: ei pääsyä tauluihin (eikä uusiin admin_*/svc_*-funktioihin). Saa suorittaa vain `public_settings, public_catalog, public_availability, public_create_booking, public_get_booking, public_cancel_booking` (vain maksamattoman pidon vapautus), `public_change_booking`.
+* `anon`: ei pääsyä tauluihin (eikä uusiin admin_*/svc_*-funktioihin). Saa suorittaa vain `public_settings, public_catalog, public_availability, public_addons, public_create_booking, public_get_booking, public_cancel_booking` (vain maksamattoman pidon vapautus), `public_change_booking`.
 * `authenticated`: SELECT staff-RLS:llä (`booking.is_staff()`); kirjoitus vain `admin_*`-funktioilla, joiden oikeudet määräytyvät roolista (`booking.roles` / `booking.role_permissions`). Pelkkä Auth-tili ei anna oikeuksia ilman riviä `booking.staff`. Roolit: `admin` (kaikki), `manager` = ylläpitäjä (hinnat, kuvaukset, tuoteasetukset, asetukset, resurssit, vuorosäännöt, vuosikortit), `staff` = peruskäyttäjä (varaukset, asiakkaat, maksujen kirjaus, sulut).
 * `service_role`: kaikki (Edge Function `admin-users`; tulevat Visma Pay ja sähköpostit). `svc_*`-funktiot ovat vain service_rolen käytössä.
 * Uusia Postgres-rooleja ei luoda.

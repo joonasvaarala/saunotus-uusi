@@ -20,7 +20,7 @@ select is((select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.
 -- anon saa suorittaa VAIN public_*-funktioita
 select is((select array_agg(p.proname::text order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
             where n.nspname = 'booking' and has_function_privilege('anon', p.oid, 'execute')),
-          array['public_availability','public_cancel_booking','public_catalog','public_change_booking','public_create_booking','public_get_booking','public_settings'],
+          array['public_addons','public_availability','public_cancel_booking','public_catalog','public_change_booking','public_create_booking','public_get_booking','public_settings'],
           'anon voi kutsua vain public_*-funktioita');
 -- authenticated: public_* + admin_* + is_staff/is_admin/current_staff_role/has_permission, EI sisäisiä (_*) eikä maksuadapteria
 select is((select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.pronamespace

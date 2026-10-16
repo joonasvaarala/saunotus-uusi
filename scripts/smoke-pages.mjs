@@ -36,7 +36,7 @@ async function newPage(name, { allowFail = null } = {}) {
     if (m === 'OPTIONS') return json({});
     if (u.pathname === '/auth/v1/user' && m === 'PUT') return json({ id: 'u1', email: 'kutsuttu@example.com' });
     if (u.pathname.endsWith('/rpc/current_staff_role')) return json('staff');
-    if (u.pathname.endsWith('/rpc/admin_my_permissions')) return json({ role: 'staff', role_label: 'Peruskäyttäjä', permissions: ['bookings.manage', 'shifts.view'] });
+    if (u.pathname.endsWith('/rpc/admin_my_permissions')) return json({ role: 'staff', role_label: 'Peruskäyttäjä', permissions: ['bookings.manage', 'shifts.view', 'customers.manage', 'catalog.edit'] });
     if (u.pathname.includes('/rpc/public_settings')) return json({ public_booking_enabled: true });
     if (u.pathname.includes('/rpc/')) return json([]);
     return json([]);
@@ -95,6 +95,24 @@ async function loginViaInvite(page) {
   if (nav.colors.some((c) => c !== 'rgb(43, 58, 48)')) problems.push(`ikonit: väri ei ole tummanvihreä: ${[...new Set(nav.colors)]}`);
   if (nav.size.some((w) => w < 22 || w > 24)) problems.push(`ikonit: koko ${[...new Set(nav.size)]}`);
   if (/[\u2190-\u27bf\u2b00-\u2bff\u{1F000}-\u{1FAFF}\uFE0F]/u.test(nav.text)) problems.push('ikonit: emoji-merkkejä valikossa');
+  // migraatio 11: uudet näkymämoduulit (customerform.js, addons.js) latautuvat versioituina; Lisää asiakas -lomake + y-tunnuksen tarkistus selaimessa
+  {
+    for (const r of ['asiakkaat', 'uusi', 'tuotteet']) { await page.evaluate((x) => { location.hash = `#/${x}`; }, r); await page.waitForTimeout(600); }
+    const mreqs = await page.evaluate(() => performance.getEntriesByType('resource').map((e) => e.name));   // moduuli voi olla ladattu jo aiemmin (shared.js tuo addons.js:n)
+    const need = ['customerform.js', 'addons.js'];
+    for (const f of need) if (!mreqs.some((u) => u.includes(`/hallinta/views/${f}?v=`))) problems.push(`hallinta: views/${f} ei latautunut versioituna`);
+    await page.evaluate(() => { location.hash = '#/asiakkaat'; });
+    await page.waitForSelector('button:has-text("Lisää asiakas")');
+    await page.click('button:has-text("Lisää asiakas")');
+    await page.waitForSelector('dialog[open] .kindset');
+    await page.check('dialog input[value=company]');
+    if ((await page.locator('dialog .company-box').isVisible()) !== true) problems.push('asiakaslomake: yritystiedot eivät tulleet näkyviin');
+    await page.fill('dialog [name=business_id]', '0112038-8');
+    if (!(await page.locator('dialog [name=business_id]').evaluate((e) => e.validationMessage))) problems.push('asiakaslomake: virheellinen y-tunnus ei anna virhettä selaimessa');
+    await page.fill('dialog [name=business_id]', '0112038-9');
+    if (await page.locator('dialog [name=business_id]').evaluate((e) => e.validationMessage)) problems.push('asiakaslomake: kelvollinen y-tunnus hylättiin');
+    await page.keyboard.press('Escape');
+  }
   await page.context().close();
 }
 // 4) näkymämoduulin lataus: ensimmäinen import epäonnistuu → uusinta cache-bust-parametrilla onnistuu

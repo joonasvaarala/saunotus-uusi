@@ -29,6 +29,22 @@ const todayHel = () => new Date().toLocaleDateString('sv-SE', { timeZone: TZ });
 const pad2 = (n) => String(n).padStart(2, '0');
 const cleanLabel = (l) => (l || '').replace(/\(\s*\d+(?:[.,]\d+)?\s*h\s*\)/g, '').replace(/\b(ma|ti|ke|to|pe|la|su)(–(ma|ti|ke|to|pe|la|su))?\b/g, '').replace(/\d{1,2}(:\d{2})?(–\d{1,2}(:\d{2})?)?/g, '').replace(/\s{2,}/g, ' ').trim();
 const priceFor = (s, n) => (s.price_mode === 'per_person' ? s.unit_price * n : s.price_mode === 'fixed' ? s.base_price : s.base_price + Math.max(0, n - (s.included_persons || 0)) * (s.extra_person_price || 0));
+// y-tunnus: muoto 1234567-8 + tarkistenumero (painot 7,9,10,5,8,4,2). Palvelin tarkistaa saman säännön (booking._business_id_ok); tämä on vain nopea palaute.
+const normBid = (v) => {
+  const x = String(v ?? '').replace(/\s/g, '').toUpperCase().replace(/^FI(\d{8})$/, '$1');
+  let m = x.match(/^(\d{7})-?(\d)$/); if (m) return `${m[1]}-${m[2]}`;
+  m = x.match(/^(\d{6})-?(\d)$/); if (m) return `0${m[1]}-${m[2]}`;
+  return x;
+};
+const validBid = (v) => {
+  const m = normBid(v).match(/^(\d{7})-(\d)$/); if (!m) return false;
+  const rem = [...m[1]].reduce((a, c, i) => a + +c * [7, 9, 10, 5, 8, 4, 2][i], 0) % 11;
+  return rem !== 1 && (rem === 0 ? 0 : 11 - rem) === +m[2];
+};
+// lisäpalvelun enimmäismäärä: henkilömäärä × max/hlö, enintään 99 (sama kuin booking._addon_limit)
+const addonLimit = (a, n) => Math.min((a.max_per_person ?? 99) * Math.max(1, n), 99);
+const aname = (a) => (S.lang === 'en' && a.name_en) || a.name;
+const adesc = (a) => (S.lang === 'en' && a.description_en) || a.description;
 const pname = (p) => (S.lang === 'en' && p.name_en) || p.name;
 const pdesc = (p) => (S.lang === 'en' && p.description_en) || p.description;
 const priceText = (p) => {
@@ -170,15 +186,50 @@ async function viewCheckout(ruleId, ds, productId) {
   let n = Math.min(Math.max(+new URLSearchParams(location.hash.split('?')[1] || '').get('n') || s.min_persons, s.min_persons), max);
   const total = h('strong', { class: 'bk-total', 'aria-live': 'polite' });
   const sumList = h('dl', { class: 'bk-sum' });
+  // lisäpalvelut (public_addons): vain tämän vuorotyypin lisäpalvelut; virhe tai puuttuva funktio → ei lisäpalveluita
+  const addons = ((await rpc('public_addons').catch(() => [])) || []).filter((a) => (a.applies_modes || []).includes(s.mode));
+  const qty = new Map(addons.map((a) => [a.id, 0]));
+  let kind = 'private';
+  const addonsSum = () => addons.reduce((x, a) => x + qty.get(a.id) * +a.price, 0);
   const upd = () => {
-    total.textContent = money(priceFor(s, n));
-    sumList.replaceChildren(h('dt', { text: t.what }), h('dd', { text: pname(p) }), h('dt', { text: t.when }), h('dd', { text: `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(n) }));
+    for (const a of addons) qty.set(a.id, Math.min(qty.get(a.id), addonLimit(a, n)));
+    total.textContent = money(priceFor(s, n) + addonsSum());
+    sumList.replaceChildren(h('dt', { text: t.what }), h('dd', { text: pname(p) }), h('dt', { text: t.when }), h('dd', { text: `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(n) }),
+      ...addons.filter((a) => qty.get(a.id) > 0).flatMap((a) => [h('dt', { text: aname(a) }), h('dd', { text: `${qty.get(a.id)} × ${money(a.price)}` })]));
     num.value = n; minus.disabled = n <= s.min_persons; plus.disabled = n >= max;
+    for (const r of addonRows) r.sync();
   };
   const num = h('input', { id: 'bk-n', type: 'number', min: s.min_persons, max, inputmode: 'numeric', 'aria-label': t.persons, onchange: () => { n = Math.min(Math.max(+num.value || s.min_persons, s.min_persons), max); upd(); } });
   const minus = h('button', { type: 'button', class: 'bk-step', 'aria-label': '−', onclick: () => { n--; upd(); } }, '−');
   const plus = h('button', { type: 'button', class: 'bk-step', 'aria-label': '+', onclick: () => { n++; upd(); } }, '+');
-  const field = (id, label, attrs) => h('div', { class: 'bk-field' }, h('label', { for: id, text: label }), h('input', { id, name: id, required: true, ...attrs }));
+  const field = (id, label, { hint, ...attrs } = {}) => h('div', { class: 'bk-field' }, h('label', { for: id, text: label }), h('input', { id, name: id, required: true, 'aria-describedby': hint ? `${id}-hint` : null, ...attrs }), hint ? h('small', { class: 'bk-hint', id: `${id}-hint`, text: hint }) : null);
+  const opt = (id, label, attrs) => field(id, label, { required: false, ...attrs });
+  // lisäpalvelurivi: nimi, hinta, kuvaus + määrävalitsin (− n +)
+  const addonRows = addons.map((a) => {
+    const q = h('input', { id: `bk-a-${a.id}`, type: 'number', min: 0, inputmode: 'numeric', 'aria-label': `${aname(a)}: ${t.addonQty}`, onchange: () => { qty.set(a.id, Math.max(0, Math.min(Math.floor(+q.value) || 0, addonLimit(a, n)))); upd(); } });
+    const dec = h('button', { type: 'button', class: 'bk-step', 'aria-label': `${aname(a)} −`, onclick: () => { qty.set(a.id, qty.get(a.id) - 1); upd(); } }, '−');
+    const inc = h('button', { type: 'button', class: 'bk-step', 'aria-label': `${aname(a)} +`, onclick: () => { qty.set(a.id, qty.get(a.id) + 1); upd(); } }, '+');
+    const sync = () => { const lim = addonLimit(a, n); q.max = lim; q.value = qty.get(a.id); dec.disabled = qty.get(a.id) <= 0; inc.disabled = qty.get(a.id) >= lim; };
+    const node = h('li', { class: 'bk-addon' }, h('div', { class: 'bk-addon-info' }, h('label', { for: `bk-a-${a.id}` }, h('strong', { text: aname(a) }), ' ', h('span', { class: 'bk-addon-price', text: money(a.price) })), adesc(a) ? h('small', { text: adesc(a) }) : null, h('small', { class: 'bk-hint', text: t.addonMax(addonLimit(a, n)) })),
+      h('div', { class: 'bk-stepper' }, dec, q, inc));
+    return { node, sync, a };
+  });
+  // asiakastyyppi: yksityinen / yritys
+  const kindInputs = [['private', t.kindPrivate], ['company', t.kindCompany]].map(([k, label]) => h('label', { class: 'bk-kind' }, h('input', { type: 'radio', name: 'kind', value: k, checked: k === 'private' || null, onchange: () => setKind(k) }), ' ', label));
+  const nameLabel = h('label', { for: 'name', text: t.name });
+  const companyBox = h('fieldset', { class: 'bk-company', id: 'bk-company', hidden: true },
+    h('legend', { text: t.companyTitle }),
+    field('company_name', t.companyName, { maxlength: 200, autocomplete: 'organization' }), field('business_id', t.businessId, { maxlength: 20, inputmode: 'numeric', placeholder: '1234567-8', hint: t.businessIdHint }),
+    field('street', t.street, { maxlength: 200, autocomplete: 'street-address' }),
+    h('div', { class: 'bk-row2' }, field('zip', t.zip, { maxlength: 5, inputmode: 'numeric', autocomplete: 'postal-code' }), field('city', t.city, { maxlength: 100, autocomplete: 'address-level2' })),
+    h('h4', { text: t.einvoiceTitle }),
+    opt('einvoice_address', t.einvoiceAddress, { maxlength: 40 }), opt('einvoice_operator', t.einvoiceOperator, { maxlength: 40, hint: t.einvoiceHint }),
+    opt('reference', t.reference, { maxlength: 100 }),
+    h('p', { class: 'bk-note', text: t.companyNote }));
+  function setKind(k) {
+    kind = k; companyBox.hidden = k !== 'company'; nameLabel.textContent = k === 'company' ? t.contactName : t.name;
+    for (const id of ['company_name', 'business_id', 'street', 'zip', 'city']) { const el = document.getElementById(id); if (el) el.required = k === 'company'; }
+  }
   const msg = h('div', { id: 'bk-msg' });
   const submit = h('button', { type: 'submit', class: 'btn gold', text: t.book });
   const terms = h('input', { type: 'checkbox', id: 'bk-terms', required: true });
@@ -189,10 +240,23 @@ async function viewCheckout(ruleId, ds, productId) {
     const f = new FormData(form);
     const need = ['name', 'email', 'phone'].filter((k) => !String(f.get(k) || '').trim());
     if (need.length || !form.email.checkValidity()) { msg.append(errorBox(t.required)); form[need[0] || 'email'].focus(); return; }
+    const val = (k) => String(f.get(k) || '').trim();
+    let company = null;
+    if (kind === 'company') {
+      const needC = ['company_name', 'business_id', 'street', 'zip', 'city'].filter((k) => !val(k));
+      if (needC.length) { msg.append(errorBox(t.required)); form[needC[0]].focus(); return; }
+      if (!validBid(val('business_id'))) { msg.append(errorBox(t.invalidBusinessId)); form.business_id.focus(); return; }
+      if (!/^\d{5}$/.test(val('zip'))) { msg.append(errorBox(t.invalidZip)); form.zip.focus(); return; }
+      if (!!val('einvoice_address') !== !!val('einvoice_operator')) { msg.append(errorBox(t.einvoiceBoth)); form.einvoice_address.focus(); return; }
+      company = { company_name: val('company_name'), business_id: normBid(val('business_id')), street: val('street'), zip: val('zip'), city: val('city'),
+        einvoice_address: val('einvoice_address') || null, einvoice_operator: val('einvoice_operator') || null, reference: val('reference') || null };
+    }
     if (!terms.checked) { msg.append(errorBox(t.acceptTermsErr)); terms.focus(); return; }
     submit.disabled = true; submit.textContent = t.booking;
     try {
-      const r = await rpc('public_create_booking', { p_rule_id: s.rule_id, p_date: ds, p_persons: n, p_name: f.get('name').trim(), p_email: f.get('email').trim(), p_phone: f.get('phone').trim(), p_marketing_consent: consent.checked, p_locale: S.lang, p_note: (f.get('note') || '').trim() || null });
+      const chosen = addons.filter((a) => qty.get(a.id) > 0).map((a) => ({ id: a.id, quantity: qty.get(a.id) }));
+      const r = await rpc('public_create_booking', { p_rule_id: s.rule_id, p_date: ds, p_persons: n, p_name: f.get('name').trim(), p_email: f.get('email').trim(), p_phone: f.get('phone').trim(), p_marketing_consent: consent.checked, p_locale: S.lang, p_note: (f.get('note') || '').trim() || null,
+        p_customer_kind: kind, p_company: company, p_addons: chosen.length ? chosen : null });
       if (!r.ok) throw Object.assign(new Error(t.errors[r.code] || r.message), { code: r.code });
       state.months.clear();
       location.assign(`${S.confirmHref}#${r.token}`);
@@ -204,13 +268,17 @@ async function viewCheckout(ruleId, ds, productId) {
     }
   } },
     h('fieldset', {}, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, minus, num, plus)),
+    addonRows.length ? h('fieldset', { class: 'bk-addons' }, h('legend', { text: t.addonsTitle }), h('p', { class: 'bk-hint', text: t.addonsHint }), h('ul', { class: 'bk-addonlist' }, addonRows.map((r) => r.node))) : null,
     h('h3', { text: t.details }),
-    field('name', t.name, { autocomplete: 'name', maxlength: 120 }), field('email', t.email, { type: 'email', autocomplete: 'email', maxlength: 254 }),
+    h('fieldset', { class: 'bk-kinds' }, h('legend', { text: t.kindTitle }), h('div', { class: 'bk-kindrow' }, kindInputs)),
+    companyBox,
+    h('div', { class: 'bk-field' }, nameLabel, h('input', { id: 'name', name: 'name', required: true, autocomplete: 'name', maxlength: 120 })), field('email', t.email, { type: 'email', autocomplete: 'email', maxlength: 254 }),
     field('phone', t.phone, { type: 'tel', autocomplete: 'tel', maxlength: 30 }),
     h('div', { class: 'bk-field' }, h('label', { for: 'note', text: t.note }), h('textarea', { id: 'note', name: 'note', rows: 3, maxlength: 1000 })),
     h('div', { class: 'bk-check' }, terms, h('label', { for: 'bk-terms' }, t.acceptTerms + ' ', h('a', { href: S.termsHref, target: '_blank', rel: 'noopener', text: t.termsLink }), ' *')),
     h('div', { class: 'bk-check' }, consent, h('label', { for: 'bk-consent', text: t.consentMarketing })),
     msg, submit);
+  form.addEventListener('input', () => msg.replaceChildren());   // vanha virheilmoitus pois kun käyttäjä korjaa tietoja
   mount(h('p', {}, h('a', { href: bk(`/tuote/${p.slug}/${ds}`), text: t.back })), h('h2', { text: t.details }),
     h('div', { class: 'bk-checkout' }, form,
       h('aside', { class: 'bk-aside', 'aria-label': t.summary }, h('h3', { text: t.summary }), sumList,
@@ -239,6 +307,7 @@ async function viewConfirmation() {
   const dl = h('dl', { class: 'bk-sum' },
     h('dt', { text: t.order }), h('dd', { text: String(b.order_no) }), h('dt', { text: t.what }), h('dd', { text: it.product_name }),
     h('dt', { text: t.when }), h('dd', { text: `${dayLong(it.starts_at)}, ${hm(it.starts_at)}–${hm(it.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(it.persons) }),
+    (b.addons || []).flatMap((a) => [h('dt', { text: (S.lang === 'en' && a.name_en) || a.name }), h('dd', { text: `${a.quantity} × ${money(a.unit_price)}` })]),
     h('dt', { text: t.total }), h('dd', { text: `${money(b.total)} (${t.vatIncl})` }), h('dt', { text: t.payStatus }), h('dd', { text: pay }));
   const actions = h('div', { class: 'bk-actions' });
   if (b.status !== 'cancelled' && b.status !== 'expired') {
@@ -253,7 +322,7 @@ async function viewConfirmation() {
     if (r.ok) setTimeout(() => location.reload(), 800);
   } }, t.cancelBooking));
   mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { text: b.status === 'cancelled' ? t.confCancelled : t.confTitle }), h('p', { class: 'bk-status', role: 'status', text: head }), dl,
-    b.status === 'confirmed' && b.payment_status !== 'paid' ? h('p', { class: 'bk-pay', text: t.payLater }) : null, actions, out,
+    b.status === 'confirmed' && b.payment_status !== 'paid' ? h('p', { class: 'bk-pay', text: b.customer_kind === 'company' ? t.companyNote : t.payLater }) : null, actions, out,
     b.status === 'confirmed' ? h('p', { class: 'bk-note', text: b.can_change ? t.changeInfo(b.change_hours_before, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) : t.changeLocked(b.change_hours_before) }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })) : null,
     h('p', { class: 'bk-note', text: t.emailNote }), h('p', {}, h('a', { href: S.infoHref, text: t.directions }))));
   focusTop();
@@ -287,7 +356,9 @@ async function viewChange(token, b) {
   function upd() {
     clamp(); const { min, max } = limits(); const s = target();
     num.min = min; num.max = max; num.value = n; minus.disabled = n <= min; plus.disabled = n >= max;
-    const newTotal = s ? priceFor(s, n) : null;
+    // lisäpalvelut säilyvät; määrät rajataan uuteen henkilömäärään (sama kuin palvelimella)
+    const addonsNew = (b.addons || []).reduce((x, a) => x + Math.min(a.quantity, addonLimit(a, n)) * +a.unit_price, 0);
+    const newTotal = s ? priceFor(s, n) + addonsNew : null;
     const changed = !!st.session || n !== it.persons;
     summary.textContent = s ? `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)} · ${n} ${t.person} · ${money(newTotal)}` : '';
     const priceBlocked = b.payment_status === 'paid' && newTotal != null && Math.abs(newTotal - b.total) > 0.005;
