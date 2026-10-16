@@ -1,5 +1,6 @@
 // Sivupohjat ja komponentit. Kaikki palauttavat HTML-merkkijonoja; ei ajonaikaista JS:ää (paitsi pieni "tänään"-korostus).
 import { readFileSync } from 'node:fs';
+import { sortReviews } from './reviews-sort.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
   johku, bookingUrl, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
@@ -153,7 +154,7 @@ export function reviewsSection(lang, { compact = false, id } = {}) {
   const R = reviewsData;
   if (!R?.place) return '';
   const u = ui(lang).reviews;
-  const all = (R.reviews || []).filter((r) => r.lang === lang && r.stars >= 4 && String(r.text || '').trim());
+  const all = sortReviews(R.reviews || []).filter((r) => r.lang === lang && r.stars >= 4 && String(r.text || '').trim());
   if (all.length < (R.min_per_lang ?? 3)) return '';
   const list = all.slice(0, compact ? 2 : R.max_per_lang ?? 4);
   const rating = String(R.place.rating).replace('.', lang === 'fi' ? ',' : '.');
