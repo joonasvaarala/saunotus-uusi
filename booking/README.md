@@ -18,6 +18,7 @@ Ei palvelinkoodia, ei build-vaihetta selaimen koodille, ei kirjastoriippuvuuksia
 | `supabase/functions/admin-users/` | Edge Function (Deno, `verify_jwt = true`): käyttäjien kutsu, käytöstä poisto ja aktivointi. Validointilogiikka `logic.js` + testit |
 | `dev/` | Paikallinen demo: PostgREST-konfiguraatio, kehityspalvelin (mock-auth), demo-siemen |
 | `scripts/e2e-screenshots.mjs` | Playwright-savutesti + kuvakaappaukset + konsolivirhetarkistus |
+| `scripts/e2e-shop-layout.mjs` | Kaupan varauslomakkeen asettelutesti (360/390/430/1280 px, FI+EN, yksityinen+yritys): ei vaakavieritystä, osiot samassa linjassa, järjestys ja otsikot |
 | `docs/` | Maksurajapinta, Johku-tuonti, ristiriidat ja tulkinnat, Bottiavustuspyyntö, kuvakaappaukset |
 
 ## Arkkitehtuuri
@@ -222,6 +223,7 @@ BOOKING_SUPABASE_URL= BOOKING_ANON_KEY=demo node booking/shop/build.mjs
 node booking/dev/server.mjs        # http://localhost:4180/  ja  /admin/   (admin@demo.local / staff@demo.local, salasana: demo)
 # 4) kuvakaappaukset + konsolivirhetarkistus
 PW_DIR=/polku/node_modules node booking/scripts/e2e-screenshots.mjs
+PW_DIR=/polku/node_modules node booking/scripts/e2e-shop-layout.mjs   # kaupan lomakkeen asettelu eri leveyksillä
 ```
 
 Kuvakaappaukset: [`docs/screenshots/`](docs/screenshots/).

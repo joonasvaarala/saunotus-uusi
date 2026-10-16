@@ -3,7 +3,7 @@ export const T = {
   fi: {
     title: 'Varaa saunaelämys', lead: 'Valitse kokemus, päivä ja vuoro. Varaus vahvistetaan heti.',
     all: 'Kaikki', k_yleinen: 'Yleiset vuorot', k_yksityinen: 'Yksityisvuorot', k_muut: 'Muut',
-    choose: 'Valitse', pickDate: 'Valitse päivä', pickSlot: 'Valitse vuoro', details: 'Yhteystiedot', back: '← Takaisin', backList: '← Kaikki tuotteet',
+    choose: 'Valitse', pickDate: 'Valitse päivä', pickSlot: 'Valitse vuoro', details: 'Yhteystiedot', bookTitle: 'Varauksen tiedot', back: '← Takaisin', backList: '← Kaikki tuotteet',
     from: 'alk.', perPerson: '/ hlö', persons: 'Henkilömäärä', person: 'hlö', free: 'vapaana', full: 'Täynnä', unavailable: 'Ei varattavissa',
     unavailableHint: 'Päällekkäinen yksityisvuoro tai sulku', freeSpots: (n) => `${n} vapaana`, noSlots: 'Ei vapaita vuoroja valitulle päivälle.',
     noSlotsMonth: 'Tässä kuussa ei ole varattavia vuoroja.', loading: 'Ladataan…', loadError: 'Tietojen lataus epäonnistui. Yritä hetken kuluttua uudelleen tai soita 010 299 2866.',
@@ -40,7 +40,7 @@ export const T = {
   en: {
     title: 'Book a sauna experience', lead: 'Choose an experience, a day and a session. Your booking is confirmed instantly.',
     all: 'All', k_yleinen: 'Public sessions', k_yksityinen: 'Private sessions', k_muut: 'Other',
-    choose: 'Select', pickDate: 'Pick a date', pickSlot: 'Pick a session', details: 'Your details', back: '← Back', backList: '← All products',
+    choose: 'Select', pickDate: 'Pick a date', pickSlot: 'Pick a session', details: 'Your details', bookTitle: 'Booking details', back: '← Back', backList: '← All products',
     from: 'from', perPerson: '/ person', persons: 'Guests', person: 'guests', free: 'available', full: 'Full', unavailable: 'Not available',
     unavailableHint: 'Overlapping private session or closure', freeSpots: (n) => `${n} left`, noSlots: 'No available sessions for the selected day.',
     noSlotsMonth: 'No bookable sessions this month.', loading: 'Loading…', loadError: 'Could not load data. Please try again shortly or call +358 10 299 2866.',
