@@ -1,4 +1,5 @@
 // Pienet UI-apurit: DOM-rakentaja, muotoilut, ilmoitukset, dialogit. Ei riippuvuuksia.
+import { icon } from './icons.js';
 export const h = (tag, attrs, ...kids) => {
   const el = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) {
@@ -48,7 +49,7 @@ export async function run(btn, fn) {
 }
 export function dialog(title, content, { wide = false } = {}) {
   const d = h('dialog', { class: `dlg${wide ? ' wide' : ''}`, 'aria-labelledby': 'dlg-title' },
-    h('div', { class: 'dlg-head' }, h('h2', { id: 'dlg-title', text: title }), h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Sulje', onclick: () => d.close() }, '✕')),
+    h('div', { class: 'dlg-head' }, h('h2', { id: 'dlg-title', text: title }), h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Sulje', onclick: () => d.close() }, icon('close', 22))),
     h('div', { class: 'dlg-body' }, content));
   d.addEventListener('close', () => d.remove());
   document.body.append(d); d.showModal();

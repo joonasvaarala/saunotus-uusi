@@ -1,6 +1,7 @@
 // Hallinnan kuori: kirjautuminen (Supabase Auth), reititys (hash), roolien mukainen valikko. Näkymät ovat tiedostoissa views/*.js.
 import { signIn, signOut, getSession, onAuthChange, rpc, select, adoptSessionFromHash, setPassword } from './sb.js';
 import { h, toast, errMsg } from './ui.js';
+import { icon } from './icons.js';
 
 const $ = (id) => document.getElementById(id);
 // perms: roolin oikeudet (booking.role_permissions) palvelimelta; can(oikeus) piilottaa/lukitsee kenttiä. Oikeudet pakotetaan silti tietokannassa.
@@ -23,15 +24,15 @@ const loadErrorView = () => h('div', { class: 'pad', role: 'alert' },
   h('button', { class: 'btn primary', type: 'button', onclick: () => location.reload() }, 'Lataa uudelleen'));
 
 const ROUTES = [
-  { path: '', label: 'Päivä', icon: '📅', mod: () => loadView('day') },
-  { path: 'varaukset', label: 'Varaukset', icon: '📋', mod: () => loadView('reservations') },
-  { path: 'kalenteri', label: 'Kalenteri', icon: '🗓️', mod: () => loadView('calendar') },
-  { path: 'uusi', label: 'Uusi varaus', icon: '➕', mod: () => loadView('newbooking') },
-  { path: 'asiakkaat', label: 'Asiakkaat', icon: '👥', mod: () => loadView('customers') },
-  { path: 'tuotteet', label: 'Tuotteet', icon: '🏷️', mod: () => loadView('products') },
-  { path: 'resurssit', label: 'Resurssit', icon: '🛖', mod: () => loadView('resources') },
-  { path: 'asetukset', label: 'Asetukset', icon: '⚙️', any: ['settings.edit'], mod: () => loadView('settings') },
-  { path: 'kayttajat', label: 'Käyttäjät', icon: '🔑', any: ['staff.manage'], mod: () => loadView('users') },
+  { path: '', label: 'Päivä', icon: 'day', mod: () => loadView('day') },
+  { path: 'varaukset', label: 'Varaukset', icon: 'list', mod: () => loadView('reservations') },
+  { path: 'kalenteri', label: 'Kalenteri', icon: 'calendar', mod: () => loadView('calendar') },
+  { path: 'uusi', label: 'Uusi varaus', icon: 'plus', mod: () => loadView('newbooking') },
+  { path: 'asiakkaat', label: 'Asiakkaat', icon: 'users', mod: () => loadView('customers') },
+  { path: 'tuotteet', label: 'Tuotteet', icon: 'tag', mod: () => loadView('products') },
+  { path: 'resurssit', label: 'Resurssit', icon: 'cabin', mod: () => loadView('resources') },
+  { path: 'asetukset', label: 'Asetukset', icon: 'sliders', any: ['settings.edit'], mod: () => loadView('settings') },
+  { path: 'kayttajat', label: 'Käyttäjät', icon: 'key', any: ['staff.manage'], mod: () => loadView('users') },
 ];
 
 // Viitedata (tuotteet, maksutavat, resurssit), ladataan kerran istuntoa kohti
@@ -44,7 +45,7 @@ export async function refs(force = false) {
 
 const allowed = (r) => !r.any || r.any.some((p) => ctx.can(p));
 function drawNav(current) {
-  $('nav').replaceChildren(...ROUTES.filter(allowed).map((r) => h('a', { href: `#/${r.path}`, 'aria-current': r.path === current ? 'page' : null }, h('span', { class: 'ico', 'aria-hidden': 'true', text: r.icon }), h('span', { class: 'lbl', text: r.label }))));
+  $('nav').replaceChildren(...ROUTES.filter(allowed).map((r) => h('a', { href: `#/${r.path}`, 'aria-current': r.path === current ? 'page' : null }, h('span', { class: 'ico', 'aria-hidden': 'true' }, icon(r.icon)), h('span', { class: 'lbl', text: r.label }))));
 }
 let routeSeq = 0;   // nopea navigointi: vain viimeisin reitti saa piirtää näkymän (vanhentuneet vastaukset hylätään)
 async function route() {

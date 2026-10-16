@@ -61,6 +61,7 @@ for (const p of ['/', '/en/', '/varaa/', '/en/book/']) {
   await page.waitForSelector('form#login:visible');
   const mods = reqs.filter((u) => /\/hallinta\/[^?]*\.js(\?|$)/.test(u) && !u.includes('config.js'));
   if (!mods.length || mods.some((u) => !/\?v=/.test(u))) problems.push(`hallinta: moduulit ilman versiotunnusta: ${mods.filter((u) => !/\?v=/.test(u)).join(', ')}`);
+  if (!mods.some((u) => /\/hallinta\/icons\.js\?v=/.test(u))) problems.push('hallinta: icons.js ei latautunut versioituna');
   if (reqs.filter((u) => /\/hallinta\/sb\.js/.test(u)).length !== 1) problems.push('hallinta: sb.js ladattu useammin kuin kerran (moduuli-instanssit eroavat)');
   if ((await page.locator('meta[name=robots][content*=noindex]').count()) < 1) problems.push('hallinta: noindex puuttuu');
   if (!(await page.evaluate(() => window.BOOKING_CONFIG?.url?.endsWith('.supabase.co')))) problems.push('hallinta: config.js ei osoita Supabaseen');
@@ -88,6 +89,12 @@ async function loginViaInvite(page) {
   if (!calls.some((c) => c === 'PUT /auth/v1/user')) problems.push('kutsu: salasanan asetuskutsua (PUT /auth/v1/user) ei tehty');
   for (const r of ['kalenteri', 'varaukset']) { await page.evaluate((x) => { location.hash = `#/${x}`; }, r); await page.waitForTimeout(500); }
   if ((await page.locator('#nav a[href="#/kayttajat"]').count()) !== 0) problems.push('kutsu: staff ei saa nähdä Käyttäjät-valikkoa');
+  // valikon ikonit: yksivärisiä SVG:itä tummanvihreällä (#2B3A30), ei emojeita
+  const nav = await page.evaluate(() => ({ links: document.querySelectorAll('#nav a').length, svgs: document.querySelectorAll('#nav a .ico svg').length, colors: [...document.querySelectorAll('#nav a .ico svg')].map((s) => getComputedStyle(s).color), size: [...document.querySelectorAll('#nav a .ico svg')].map((s) => s.getBoundingClientRect().width), text: document.getElementById('nav').textContent }));
+  if (!nav.links || nav.svgs !== nav.links) problems.push(`ikonit: ${nav.svgs} SVG / ${nav.links} linkkiä`);
+  if (nav.colors.some((c) => c !== 'rgb(43, 58, 48)')) problems.push(`ikonit: väri ei ole tummanvihreä: ${[...new Set(nav.colors)]}`);
+  if (nav.size.some((w) => w < 22 || w > 24)) problems.push(`ikonit: koko ${[...new Set(nav.size)]}`);
+  if (/[\u2190-\u27bf\u2b00-\u2bff\u{1F000}-\u{1FAFF}\uFE0F]/u.test(nav.text)) problems.push('ikonit: emoji-merkkejä valikossa');
   await page.context().close();
 }
 // 4) näkymämoduulin lataus: ensimmäinen import epäonnistuu → uusinta cache-bust-parametrilla onnistuu
