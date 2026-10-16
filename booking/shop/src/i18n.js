@@ -2,8 +2,9 @@
 export const T = {
   fi: {
     title: 'Varaa saunaelämys', lead: 'Valitse kokemus, päivä ja vuoro. Varaus vahvistetaan heti.',
-    modeLabel: 'Selaustapa', modeCat: 'Selaa kategorioittain', modeDay: 'Selaa päivän mukaan', dayTitle: 'Varaa päivän mukaan', dayLead: 'Valitse päivä ja näet kaikki sen päivän varattavat vuorot.',
+    modeLabel: 'Selaustapa', modeCat: 'Selaa kategorioittain', modeDay: 'Selaa päivän mukaan', dayTitle: 'Varaa päivän mukaan', dayLead: 'Valitse päivä ja katso, mitkä palvelut ovat silloin varattavissa. Ajat näkyvät kun valitset palvelun.',
     pickDay: 'Valitse päivä', today: 'Tänään', prevWeek: 'Edellinen viikko', nextWeek: 'Seuraava viikko', daySessions: (n) => (n === 1 ? '1 vapaa vuoro' : `${n} vapaata vuoroa`), noSessions: 'ei vuoroja',
+    pickProduct: 'Valitse tuote, niin näet sen vapaat ajat.', timesFree: (n) => (n === 1 ? '1 aika vapaana' : `${n} aikaa vapaana`), firstAt: 'ensimmäinen klo', productInfo: 'Tuotteen tiedot ja muut päivät',
     noSlotsDay: 'Ei vapaita vuoroja valitulle päivälle.', nextFree: 'Seuraava päivä, jolla on vapaita vuoroja:', noNextFree: 'Lähipäivinä ei ole vapaita vuoroja. Kokeile toista päivää tai selaa kategorioittain.',
     all: 'Kaikki', k_yleinen: 'Yleiset vuorot', k_yksityinen: 'Yksityisvuorot', k_muut: 'Muut',
     choose: 'Valitse', pickDate: 'Valitse päivä', pickSlot: 'Valitse vuoro', details: 'Yhteystiedot', bookTitle: 'Varauksen tiedot', back: '← Takaisin', backList: '← Kaikki tuotteet',
@@ -42,8 +43,9 @@ export const T = {
   },
   en: {
     title: 'Book a sauna experience', lead: 'Choose an experience, a day and a session. Your booking is confirmed instantly.',
-    modeLabel: 'Browse mode', modeCat: 'Browse by category', modeDay: 'Browse by date', dayTitle: 'Book by date', dayLead: 'Pick a date to see all sessions you can book on that day.',
+    modeLabel: 'Browse mode', modeCat: 'Browse by category', modeDay: 'Browse by date', dayTitle: 'Book by date', dayLead: 'Pick a date to see which services you can book. Times appear when you choose a service.',
     pickDay: 'Pick a date', today: 'Today', prevWeek: 'Previous week', nextWeek: 'Next week', daySessions: (n) => (n === 1 ? '1 session available' : `${n} sessions available`), noSessions: 'no sessions',
+    pickProduct: 'Choose a service to see its available times.', timesFree: (n) => (n === 1 ? '1 time available' : `${n} times available`), firstAt: 'first at', productInfo: 'Service details and other dates',
     noSlotsDay: 'No available sessions for the selected date.', nextFree: 'Next day with available sessions:', noNextFree: 'No available sessions in the coming days. Try another date or browse by category.',
     all: 'All', k_yleinen: 'Public sessions', k_yksityinen: 'Private sessions', k_muut: 'Other',
     choose: 'Select', pickDate: 'Pick a date', pickSlot: 'Pick a session', details: 'Your details', bookTitle: 'Booking details', back: '← Back', backList: '← All products',

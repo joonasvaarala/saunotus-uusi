@@ -44,6 +44,7 @@ async function newPage(name, { allowFail = null } = {}) {
     }
     if (u.pathname.endsWith('/rpc/public_catalog')) return json([
       { id: 1, slug: 'yleinen', name: 'Yleinen vuoro', name_en: 'Public session', description: 'x', description_en: 'x', category: 'sauna', sale_kind: 'public_shift', price: 29, price_type: 'per_person', min_persons: 1, max_persons: 10 },
+      { id: 3, slug: 'taynna', name: 'Täysi tuote', name_en: 'Fully booked product', description: 'x', description_en: 'x', category: 'sauna', sale_kind: 'public_shift', price: 40, price_type: 'per_person', min_persons: 1, max_persons: 10 },
       { id: 2, slug: 'oma', name: 'Oma saunavuoro', name_en: 'Private sauna', description: 'x', description_en: 'x', category: 'sauna', sale_kind: 'private_shift', price: 250, price_type: 'from', min_persons: 1, max_persons: 20 }]);
     if (u.pathname.endsWith('/rpc/public_availability')) {   // parittomina kuukauden päivinä vuoroja, parillisina ei yhtään (tyhjä päivä)
       const a = route.request().postDataJSON() || {}, rows = [];
@@ -51,6 +52,7 @@ async function newPage(name, { allowFail = null } = {}) {
         const ds = d.toISOString().slice(0, 10); if (+ds.slice(8) % 2 === 0) continue;
         const mk = (rule, hh, mm, label, mode, status) => ({ rule_id: rule, label, mode, session_date: ds, starts_at: `${ds}T${String(hh - 3).padStart(2, '0')}:${mm}:00Z`, ends_at: `${ds}T${String(hh - 2).padStart(2, '0')}:${mm}:00Z`, status, remaining: status === 'available' ? 6 : 0, min_persons: 1, max_persons: 10, price_mode: a.p_product_id === 1 ? 'per_person' : 'base_plus_extra', unit_price: 29, base_price: 250, included_persons: 4, extra_person_price: 20 });
         if (a.p_product_id === 1) rows.push(mk(11, 18, '00', 'Yleinen vuoro', 'public', 'available'), mk(10, 14, '00', 'Yleinen vuoro', 'public', 'available'), mk(12, 16, '00', 'Yleinen vuoro', 'public', 'full'));
+        else if (a.p_product_id === 3) rows.push(mk(31, 15, '00', 'Täysi', 'public', 'full'));
         else rows.push(mk(21, 13, '00', 'Oma saunavuoro', 'private', 'unavailable'), mk(22, 20, '00', 'Oma saunavuoro', 'private', 'available'));
       }
       return json(rows);
@@ -96,23 +98,39 @@ for (const [base, L] of [['/varaa/', { cat: 'Selaa kategorioittain', day: 'Selaa
   if (!(await page.locator('.bk-modes a[aria-current]').innerText()).toLowerCase().includes(L.cat.toLowerCase())) problems.push(`${base}: oletustilan pitää olla "${L.cat}"`);
   await page.goto(`${BASE}${base}#/paiva/${oddDay}`);
   await page.waitForSelector('.bk-strip');
-  await page.waitForSelector('.bk-dayresults .bk-slot');
+  await page.waitForSelector('.bk-dayresults .bk-pc');
   const txt = (await page.locator('.bk-dayresults').innerText()).replace(/\n/g, ' ');
   const tl = txt.toLowerCase();
   if (!tl.includes(L.y.toLowerCase()) || !tl.includes(L.o.toLowerCase())) problems.push(`${base}: päivänäkymän ryhmät puuttuvat: ${txt.slice(0, 120)}`);
-  const times = await page.locator('.bk-dayresults .bk-time').allInnerTexts();
-  if (times.length !== 5) problems.push(`${base}: päivällä pitäisi olla 5 vuoroa (3 + 2), nyt ${times.length}`);
-  if (/\[object/.test(txt) || !/täynnä|full/i.test(txt) || !/ei varattavissa|not available/i.test(txt)) problems.push(`${base}: täynnä/ei varattavissa -tilat puuttuvat`);
-  if (avail.length < 2 || new Set(avail.map((a) => a.p_product_id)).size !== 2) problems.push(`${base}: kaikille tuotteille pitäisi kutsua public_availability (${avail.length} kutsua)`);
+  // v14: vain saatavilla olevat tuotteet (täysi tuote pois), kortit suljettuina, ajat vasta avattaessa
+  if ((await page.locator('.bk-dayresults .bk-pc').count()) !== 2) problems.push(`${base}: päivällä pitäisi olla 2 tuotekorttia (täysi tuote pois), nyt ${await page.locator('.bk-dayresults .bk-pc').count()}`);
+  if (/Täysi tuote|Fully booked product/.test(txt)) problems.push(`${base}: täyttä tuotetta ei saa näyttää`);
+  if ((await page.locator('.bk-dayresults .bk-slot:visible').count()) !== 0 || (await page.locator('.bk-pc-head[aria-expanded=true]').count()) !== 0) problems.push(`${base}: kortit pitää olla oletuksena suljettuina eikä vuoroja näkyvissä`);
+  if (/\[object/.test(txt) || !/\d+ (aikaa|aika|times?) (vapaana|available)/.test(txt)) problems.push(`${base}: tuotekortin tiivistelmä puuttuu: ${txt.slice(0, 200)}`);
+  if (avail.length < 3 || new Set(avail.map((a) => a.p_product_id)).size !== 3) problems.push(`${base}: kaikille tuotteille pitäisi kutsua public_availability (${avail.length} kutsua)`);
   const n0 = avail.length;
-  const href = await page.locator('.bk-dayresults .bk-slot.available a.btn').first().getAttribute('href');
+  await page.locator('.bk-pc[data-slug=yleinen] .bk-pc-head').click();
+  await page.waitForSelector('.bk-pc.open .bk-slot:visible');
+  const times = await page.locator('.bk-pc.open .bk-time').allInnerTexts();
+  const openTxt = await page.locator('.bk-pc.open').innerText();
+  if (times.length !== 3 || !/täynnä|full/i.test(openTxt)) problems.push(`${base}: avatussa kortissa pitäisi olla 3 vuoroa (täynnä mukana), nyt ${times.length}`);
+  if (!page.url().endsWith('?tuote=yleinen')) problems.push(`${base}: avattu tuote ei näy URL:ssa: ${page.url()}`);
+  await page.goto(`${BASE}${base}#/paiva/${oddDay}?tuote=oma`);   // syväosoite: oikea kortti auki
+  await page.waitForSelector('.bk-pc[data-slug=oma].open .bk-slot:visible');
+  if ((await page.locator('.bk-pc.open').count()) !== 1 || !/ei varattavissa|not available/i.test(await page.locator('.bk-pc.open').innerText())) problems.push(`${base}: ?tuote=oma pitää avata vain oma-kortti (ei varattavissa -tila mukana)`);
+  const href = await page.locator('.bk-pc.open .bk-slot.available a.btn').first().getAttribute('href');
   if (!/#\/varaa\/\d+\/\d{4}-\d\d-\d\d\/\d+\?via=day$/.test(href)) problems.push(`${base}: Valitse-linkki väärä: ${href}`);
+  await page.locator('.bk-pc.open .bk-slot.available a.btn').first().click();
+  await page.waitForSelector('form.bk-form');
+  const back = await page.locator('#booking-app > p:first-child a').getAttribute('href');
+  if (!back.endsWith(`#/paiva/${oddDay}?tuote=oma`)) problems.push(`${base}: Takaisin-linkin pitää palata päivään ja tuotteeseen: ${back}`);
+  await page.click('#booking-app > p:first-child a'); await page.waitForSelector('.bk-pc[data-slug=oma].open');
   await page.goto(`${BASE}${base}#/paiva/${evenDay}`);
   await page.waitForSelector('.bk-dayresults .bk-notice');
   const e = await page.locator('.bk-dayresults .bk-notice').innerText();
   if (!e.toLowerCase().includes(L.empty.toLowerCase()) || (await page.locator('.bk-dayresults .bk-notice a').count()) !== 1) problems.push(`${base}: tyhjän päivän ilmoitus/ehdotus puuttuu: ${e}`);
   if (avail.length !== n0) problems.push(`${base}: päivänvaihto samassa kuussa ei saa kutsua palvelinta uudelleen (${avail.length - n0} uutta kutsua)`);
-  await page.click('.bk-dayresults .bk-notice a'); await page.waitForSelector('.bk-dayresults .bk-slot');
+  await page.click('.bk-dayresults .bk-notice a'); await page.waitForSelector('.bk-dayresults .bk-pc');
   // olemassa olevat reitit toimivat: tuotelista ja #/tuote/<slug>/<pvm>
   await page.goto(`${BASE}${base}#/tuote/yleinen/${oddDay}`);
   await page.waitForSelector('.bk-grid');

@@ -134,19 +134,33 @@ async function findNextFree(ds, maxDs) {   // seuraava päivä, jolla on vapaita
   }
   return null;
 }
-function dayItem({ r, p }, ds) {
+function dayItem({ r, p }, ds, withName = false) {
   const ok = r.status === 'available';
   const title = `${hm(r.starts_at)}–${hm(r.ends_at)}`;
   const cl = cleanLabel(r.label), sub = cl && !pname(p).toLowerCase().includes(cl.toLowerCase()) ? cl : '';   // ei toisteta tuotteen nimeä
   const price = r.price_mode === 'per_person' ? `${money(r.unit_price)} ${t.perPerson}` : r.price_mode === 'fixed' ? money(r.base_price) : `${t.from} ${money(r.base_price)}`;
   return h('li', { class: `bk-slot ${r.status}` },
     h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }),
-      h('span', { class: 'bk-prodname' }, h('a', { href: bk(`/tuote/${p.slug}/${ds}`), text: pname(p) })), sub ? h('span', { class: 'bk-sub', text: sub }) : null, h('span', { class: 'bk-price', text: price })),
+      withName ? h('span', { class: 'bk-prodname' }, h('a', { href: bk(`/tuote/${p.slug}/${ds}`), text: pname(p) })) : null, sub ? h('span', { class: 'bk-sub', text: sub }) : null, h('span', { class: 'bk-price', text: price })),
     h('div', { class: 'bk-slot-side' },
       ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: `bk-badge ${r.status}`, text: r.status === 'full' ? t.full : t.unavailable, title: r.status === 'unavailable' ? t.unavailableHint : null }),
       ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}?via=day`) }, t.choose, h('span', { class: 'sr', text: ` ${title}, ${pname(p)}` })) : null));
 }
-async function viewDay(dateStr, keep) {
+// tuotekortti (accordion): otsikkopainike → vain saatavilla olevat tuotteet; ajat näytetään vasta kun kortti avataan (yksi auki kerrallaan, tila URL:ssa ?tuote=<slug>)
+function prodCard(p, rs, ds, open, onToggle) {
+  const avail = rs.filter((x) => x.r.status === 'available'), id = `bk-pc-${p.id}`;
+  const desc = (pdesc(p) || '').replace(/\s+/g, ' ').trim(), short = desc.length > 90 ? `${desc.slice(0, 90).replace(/\s+\S*$/, '')}…` : desc;
+  const panel = h('div', { id: `${id}-panel`, class: 'bk-pc-panel', role: 'region', 'aria-labelledby': `${id}-btn`, hidden: open ? null : true },
+    h('ul', { class: 'bk-slotlist' }, rs.map((x) => dayItem(x, ds))),
+    h('p', { class: 'bk-pc-more' }, h('a', { href: bk(`/tuote/${p.slug}/${ds}`), text: t.productInfo })));
+  const btn = h('button', { type: 'button', id: `${id}-btn`, class: 'bk-pc-head', 'aria-expanded': open ? 'true' : 'false', 'aria-controls': `${id}-panel`, onclick: () => onToggle(p, li) },
+    h('span', { class: 'bk-pc-main' }, h('strong', { class: 'bk-pc-name', text: pname(p) }), short ? h('span', { class: 'bk-pc-desc', text: short }) : null,
+      h('span', { class: 'bk-pc-meta' }, h('span', { class: 'bk-price', text: priceText(p) }), h('span', { class: 'bk-badge free', text: `${t.timesFree(avail.length)} · ${t.firstAt} ${hm(avail[0].r.starts_at)}` }))),
+    h('span', { class: 'bk-pc-chev', 'aria-hidden': 'true' }));
+  const li = h('li', { class: `bk-pc${open ? ' open' : ''}`, 'data-slug': p.slug }, btn, panel);
+  return li;
+}
+async function viewDay(dateStr, keep, openSlug) {
   const today = todayHel(), horizon = state.settings.booking_horizon_days || 120, maxDs = addDays(today, horizon);
   let ds = /^\d{4}-\d\d-\d\d$/.test(dateStr || '') ? dateStr : today;
   if (Number.isNaN(Date.parse(`${ds}T12:00:00Z`))) ds = today;
@@ -181,21 +195,32 @@ async function viewDay(dateStr, keep) {
     h('label', { for: 'bk-day-pick', text: t.pickDay }), picker);
   let results;
   const heading = h('h3', { id: 'bk-day-h', text: `${t.slotsFor} – ${longDate}`, tabindex: '-1' });
-  if (!free.length) {
+  if (!free.length) {   // ei yhtään saatavilla olevaa tuotetta: tyhjän päivän viesti + ehdotus seuraavasta vapaasta päivästä
     const nextDs = await findNextFree(ds, maxDs);
     results = h('div', { class: 'bk-dayresults' }, heading,
       h('div', { class: 'bk-notice', role: 'status' }, h('p', { text: t.noSlotsDay }),
-        nextDs ? h('p', {}, t.nextFree + ' ', h('a', { class: 'btn sm', href: bk(`/paiva/${nextDs}`), text: dayLong(`${nextDs}T12:00:00Z`) })) : h('p', { text: t.noNextFree })),
-      rows.length ? h('ul', { class: 'bk-slotlist' }, rows.map((x) => dayItem(x, ds))) : null);
+        nextDs ? h('p', {}, t.nextFree + ' ', h('a', { class: 'btn sm', href: bk(`/paiva/${nextDs}`), text: dayLong(`${nextDs}T12:00:00Z`) })) : h('p', { text: t.noNextFree })));
   } else {
-    const groups = ['yleinen', 'yksityinen', 'muut'].map((k) => [k, rows.filter((x) => kindOf(x.p) === k)]).filter(([, g]) => g.length);
-    results = h('div', { class: 'bk-dayresults' }, heading, groups.flatMap(([k, g]) => [h('h4', { class: 'bk-kindh', text: t['k_' + k] }), h('ul', { class: 'bk-slotlist' }, g.map((x) => dayItem(x, ds)))]));
+    // vain tuotteet, joilla on vähintään yksi varattavissa oleva vuoro (täynnä / ei varattavissa olevat tuotteet jätetään pois)
+    const prods = state.catalog.map((p) => [p, rows.filter((x) => x.p.id === p.id)]).filter(([, rs]) => rs.some((x) => x.r.status === 'available'));
+    const bySlug = new Map(prods.map(([p]) => [p.slug, p]));
+    let openId = prods.length === 1 ? prods[0][0].id : bySlug.get(openSlug)?.id ?? null;   // yksi tuote → valmiiksi auki
+    const onToggle = (p, li) => {
+      const wasOpen = li.classList.contains('open');
+      for (const el of results.querySelectorAll('.bk-pc')) { el.classList.remove('open'); el.querySelector('.bk-pc-head').setAttribute('aria-expanded', 'false'); el.querySelector('.bk-pc-panel').hidden = true; }
+      if (!wasOpen) { li.classList.add('open'); li.querySelector('.bk-pc-head').setAttribute('aria-expanded', 'true'); li.querySelector('.bk-pc-panel').hidden = false; li.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+      history.replaceState(null, '', bk(`/paiva/${ds}${wasOpen ? '' : `?tuote=${p.slug}`}`)); last = location.hash;   // tila URL:ssa, ei uudelleenpiirtoa
+    };
+    const groups = ['yleinen', 'yksityinen', 'muut'].map((k) => [k, prods.filter(([p]) => kindOf(p) === k)]).filter(([, g]) => g.length);
+    results = h('div', { class: 'bk-dayresults' }, heading, h('p', { class: 'bk-note bk-pickhint', text: t.pickProduct }),
+      groups.flatMap(([k, g]) => [h('h4', { class: 'bk-kindh', text: t['k_' + k] }), h('ul', { class: 'bk-prods' }, g.map(([p, rs]) => prodCard(p, rs, ds, p.id === openId, onToggle)))]));
   }
   mount(h('header', { class: 'bk-head' }, h('h2', { text: t.dayTitle }), h('p', { class: 'lead', text: t.dayLead })), modeSwitch('day', ds),
     h('section', { class: 'bk-daypick', 'aria-label': t.pickDay }, nav, strip,
       h('p', { class: 'bk-legend' }, h('span', { class: 'dot free' }), t.free, ' ', h('span', { class: 'dot full' }), t.full, ' ', h('span', { class: 'dot unavail' }), t.unavailable), tools),
     h('div', { class: 'bk-slots', 'aria-live': 'polite' }, results));
   if (keep) { const el = document.getElementById('bk-day-h'); if (el) el.focus({ preventScroll: true }); } else focusTop();
+  if (!keep && openSlug) document.querySelector('.bk-pc.open')?.scrollIntoView({ block: 'start' });   // Takaisin lomakkeelta → sama tuote auki ja näkyvissä
 }
 
 // ---- näkymä 2: tuote → kalenteri → vuorot ----
@@ -381,7 +406,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
     h('div', { class: 'bk-check' }, consent, h('label', { for: 'bk-consent', text: t.consentMarketing })),
     msg, submit);
   form.addEventListener('input', () => msg.replaceChildren());   // vanha virheilmoitus pois kun käyttäjä korjaa tietoja
-  mount(h('p', {}, h('a', { href: via === 'day' ? bk(`/paiva/${ds}`) : bk(`/tuote/${p.slug}/${ds}`), text: t.back })), h('h2', { text: t.bookTitle }),
+  mount(h('p', {}, h('a', { href: via === 'day' ? bk(`/paiva/${ds}?tuote=${p.slug}`) : bk(`/tuote/${p.slug}/${ds}`), text: t.back })), h('h2', { text: t.bookTitle }),
     h('div', { class: 'bk-checkout' }, form,
       h('aside', { class: 'bk-aside', 'aria-label': t.summary }, h('h3', { text: t.summary }), sumList,
         h('p', { class: 'bk-totalrow' }, t.total + ': ', total, ' ', h('small', { text: t.vatIncl })),
@@ -522,7 +547,7 @@ async function route(keep = false) {
     const [path, qs] = location.hash.slice(1).split('?');
     const parts = path.split('/').filter(Boolean);
     const q = new URLSearchParams(qs || '');
-    if (parts[0] === 'paiva') await viewDay(parts[1], keep);
+    if (parts[0] === 'paiva') await viewDay(parts[1], keep, q.get('tuote'));
     else if (parts[0] === 'tuote' && parts[1]) await viewProduct(parts[1], /^\d{4}-\d\d-\d\d$/.test(parts[2] || '') ? parts[2] : null);
     else if (parts[0] === 'varaa' && parts[1] && parts[2]) await viewCheckout(parts[1], parts[2], parts[3], q.get('via'));
     else { viewList(q); focusTop(); }
