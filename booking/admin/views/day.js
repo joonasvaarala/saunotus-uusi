@@ -1,6 +1,6 @@
 // Päivänäkymä: vuorot kapasiteetteineen + varaukset vuoroittain + sulut.
 import { rpc } from '../sb.js';
-import { h, helsinkiIso, fmtDay, fmtTime, todayHel, addDays, dayStartIso, statusBadge, payBadge, badge, toast, run, dialog, field, fmtDT, empty } from '../ui.js';
+import { h, helsinkiIso, fmtDay, fmtTime, todayHel, addDays, dayStartIso, statusBadge, payBadge, sourceBadge, badge, toast, run, dialog, field, fmtDT, empty } from '../ui.js';
 import { reservationDialog } from './shared.js';
 import { icon } from '../icons.js';
 
@@ -30,11 +30,11 @@ export async function render({ ctx, refs, reload, query }) {
     mine.forEach((r) => used.add(r.reservation_id));
     return { s, mine };
   }).filter(({ s, mine }) => mine.length || s.status !== 'closed');
-  const open = (r) => reservationDialog(r, { methods: refs.methods, onChange: reload });
-  const resRow = (r) => { const x = dv.get(r.reservation_id) || {}; const ad = x.addons || []; return h('li', { class: `resrow ${r.status}${ad.length ? ' has-addons' : ''}` },
+  const open = (r) => reservationDialog({ ...r, source: r.source ?? dv.get(r.reservation_id)?.source, external_id: r.external_id ?? dv.get(r.reservation_id)?.external_id }, { methods: refs.methods, onChange: reload });
+  const resRow = (r) => { const x = dv.get(r.reservation_id) || {}; const ad = x.addons || []; const src = { source: r.source ?? x.source, external_id: r.external_id ?? x.external_id }; return h('li', { class: `resrow ${r.status}${ad.length ? ' has-addons' : ''}` },
     h('button', { type: 'button', class: 'link', onclick: () => open(r) }, h('strong', { text: r.customer_name || '–' }), ` · ${r.persons} hlö`, x.customer_kind === 'company' ? [' ', badge('warn', 'Yritys'), x.company ? ` ${x.company}` : ''] : null,
       ad.length ? h('span', { class: 'addon-mark' }, icon('leaf', 16), ` Lisäpalvelut: ${addonText(ad)}`) : null),
-    h('span', { class: 'meta' }, statusBadge(r.status), payBadge(r.payment_status), r.hold_expires_at ? badge('muted', `pito ${fmtTime(r.hold_expires_at)}`) : null, ` #${r.order_no}`)); };
+    h('span', { class: 'meta' }, sourceBadge(src), statusBadge(r.status), payBadge(r.payment_status), r.hold_expires_at ? badge('muted', `pito ${fmtTime(r.hold_expires_at)}`) : null, ` #${r.order_no}`)); };
   const card = ({ s, mine }) => {
     const booked = mine.filter((r) => ['pending', 'confirmed', 'completed'].includes(r.status)).reduce((a, r) => a + r.persons, 0);
     const prod = refs.productById.get(s.product_id);

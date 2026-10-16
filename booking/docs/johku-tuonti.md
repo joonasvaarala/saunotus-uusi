@@ -24,3 +24,6 @@ Rinnakkaisajon aikana Johku on totuus; tuonti toistetaan juuri ennen siirtymää
 
 ## GDPR
 Tuo vain asiakkaat, joille on laskutus-/kirjanpito-/varaustarve; vanhat tarpeettomat anonymisoidaan (`customers.anonymized_at`). Markkinointilupa vain kun `allowmarketing=1`.
+
+## Johku-merkintä hallinnassa (migraatio 12)
+Tuodut varaukset tunnistetaan kentästä `reservations.external_source = 'johku'` (+ `external_id` = Johkun varaustunnus). Hallinta näyttää niille "Johku"-tunnisteen (varauslista, päivänäkymä) ja varauksen tiedoissa **Johku-tunnuksen**; varauslistan suodatin Kaikki / Uudet / Johku käyttää `admin_list_reservations(p_source)`. Maksutiedot ja muu Johku-metadata tallennetaan `orders.external_meta` / `reservations.external_meta` (jsonb) -kenttiin, joita ei palauteta hallinnan listoissa eikä julkisessa API:ssa.

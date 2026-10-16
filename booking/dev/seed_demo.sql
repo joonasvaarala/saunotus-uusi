@@ -68,6 +68,22 @@ begin
   perform booking.admin_create_customer('{"kind":"company","name":"Pekka Laskutus","email":"pekka.laskutus@toinenyritys.example.com","phone":"0409876500","company_details":{"company_name":"Toinen Yritys Oy","business_id":"2336509-6","street":"Tehdaskatu 2","zip":"33100","city":"Tampere"}}'::jsonb);
   perform set_config('request.jwt.claims', '', true);
 end $$;
+-- Johku-varaukset demossa (migraatio 12: source/external_id): merkitään kolme demovarausta Johku-tuoduiksi (external_source='johku'),
+-- jotta "Johku"-tunniste ja lähdesuodatin näkyvät. Tunnus on keksitty (ei oikeaa Johku-dataa). Kenttäpari on pakollinen (orders_ext_pair / reservations_ext_pair).
+do $$
+declare x record; n int := 0;
+begin
+  for x in
+    select distinct on (sr.label, r.persons) r.id as rid, r.order_id as oid
+      from booking.reservations r join booking.schedule_rules sr on sr.id = r.rule_id
+     where (sr.label like 'Miesten sauna%' and r.persons = 5) or (sr.label like 'Yleinen vuoro to 17–19%' and r.persons = 5) or (sr.label like 'Yleinen vuoro la–su 14:00%' and r.persons = 3)
+     order by sr.label, r.persons, r.id
+  loop
+    n := n + 1;
+    update booking.orders set external_source = 'johku', external_id = 'DEMO-O-' || (48200 + n) where id = x.oid;
+    update booking.reservations set external_source = 'johku', external_id = 'DEMO-R-' || (91400 + n) where id = x.rid;
+  end loop;
+end $$;
 -- yksi maksettu ja yksi osittain maksettu tilaus näytille
 update booking.orders set payment_status = 'paid' where id = (select min(id) from booking.orders);
 
