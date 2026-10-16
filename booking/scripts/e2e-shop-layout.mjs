@@ -170,6 +170,25 @@ for (const lang of ['fi', 'en']) for (const width of [360, 390, 430, 1280]) for 
   }
   await ctx.close();
 }
+// v15b: tuotesivun hero (tuotteen kuva + nimi + tiivis kuvaus) ja tuotekuvat: ei vaakavieritystä, teksti hero-laatikon sisällä, hero ei vaihda korkeutta kuvan latauduttua (ei hyppyä)
+for (const lang of ['fi', 'en']) for (const width of [360, 390, 430, 1280]) {
+  const tag = `hero ${lang}/${width}`, mobile = width < 600;
+  const ctx = await browser.newContext({ viewport: { width, height: 844 }, isMobile: mobile, hasTouch: mobile, locale: lang === 'en' ? 'en-GB' : 'fi-FI', timezoneId: 'Europe/Helsinki' });
+  const page = await ctx.newPage();
+  page.on('pageerror', (e) => problems.push(`${tag} pageerror: ${e.message}`));
+  await page.goto(`${BASE}${lang === 'en' ? '/en/book/' : '/varaa/'}#/tuote/yleinensauna`);
+  await page.waitForSelector('main .hero.page.has-prod picture img');
+  await page.evaluate(async () => { const im = document.querySelector('main .hero.page picture img'); if (!im.complete) await new Promise((r) => { im.onload = im.onerror = r; }); });
+  const r = await page.evaluate(() => { const el = document.querySelector('main .hero.page'), q = (x) => el.querySelector(x).getBoundingClientRect(), hb = el.getBoundingClientRect(), im = el.querySelector('picture img').getBoundingClientRect();
+    return { sw: document.documentElement.scrollWidth, iw: innerWidth, hero: [hb.left, hb.right, hb.height], h1: [q('h1').left, q('h1').right], p: [q('.in p').left, q('.in p').right], img: [im.width, im.height], fit: getComputedStyle(el.querySelector('picture img')).objectFit, hidden: getComputedStyle(el.querySelector('h1')).visibility }; });
+  expect(r.sw <= r.iw, `${tag}: vaakavieritys (${r.sw} > ${r.iw})`);
+  expect(r.h1[0] >= r.hero[0] && r.h1[1] <= r.hero[1] + 0.5 && r.p[0] >= r.hero[0] && r.p[1] <= r.hero[1] + 0.5, `${tag}: otsikko/kuvaus ylittää heron: ${JSON.stringify(r)}`);
+  expect(Math.abs(r.img[0] - (r.hero[1] - r.hero[0])) < 1 && Math.abs(r.img[1] - r.hero[2]) < 1 && r.fit === 'cover', `${tag}: kuvan pitää täyttää hero (cover): ${JSON.stringify(r)}`);
+  expect(r.hidden === 'visible', `${tag}: hero-teksti jäi piiloon (bk-hero-wait)`);
+  const h0 = r.hero[2]; await page.waitForTimeout(500);
+  expect(Math.abs((await page.locator('main .hero.page').boundingBox()).height - h0) < 1, `${tag}: heron korkeus muuttui latauksen jälkeen`);
+  await ctx.close();
+}
 await browser.close();
 if (problems.length) { console.error(problems.join('\n')); process.exit(1); }
 console.log(`ok: kaupan lomakkeen ja päivänäkymän asettelu (${checks} tarkistusta; FI+EN, 360/390/430/1280 px)`);

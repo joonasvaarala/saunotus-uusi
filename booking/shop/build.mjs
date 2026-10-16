@@ -58,7 +58,7 @@ for (const lang of ['fi', 'en']) {
       + `<section class="section"><div class="wrap"><div id="booking-app" aria-busy="true"><noscript><p>${e(t.noscript)}: <a href="tel:${site.contact.phoneTel}">${e(site.contact.phone)}</a></p></noscript></div></div></section>`
       + `<script src="${BASE}/booking/config.js"></script><script>window.BOOKING_SHOP=${JSON.stringify(S)}</script><script type="module" src="${BASE}/booking/shop.js"></script>`;
     let html = R.layout({ lang, key: 'book', meta: { title: page === 'shop' ? t.meta : `${t.ctitle} | Sipoonjoen Perinnesauna`, description: t.desc, og: 'ovi-kaiverrus' }, body });
-    html = html.replace('</head>', `<link rel="stylesheet" href="${BASE}/booking/shop.css"></head>`);
+    html = html.replace('</head>', `<link rel="stylesheet" href="${BASE}/booking/shop.css">${page === 'shop' ? '<script>if(/^#\\/(tuote|varaa)\\//.test(location.hash))document.documentElement.classList.add("bk-hero-wait")</script>' : ''}</head>`);
     if (page === 'confirm') html = html.replace(/<link rel="canonical"[^>]*>(<link rel="alternate"[^>]*>)*/, '').replace('<meta name="description"', '<meta name="robots" content="noindex,nofollow"><meta name="description"');
     write(PATHS[lang][page === 'shop' ? 'shop' : 'confirm'], html);
   }

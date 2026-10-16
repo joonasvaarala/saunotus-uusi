@@ -44,6 +44,8 @@ async function newPage(name, { allowFail = null } = {}) {
       const row = (id, from, to, role, cal, st, who) => ({ shift_id: id, starts_at: `${ds}T${from}:00Z`, ends_at: `${ds}T${to}:00Z`, role_type: role, calendar_name: cal, staffing_status: st, staff_name: who });
       return json([row('s1', '06:00', '11:00', 'heater', 'Lämmitykset', 'assigned', 'Otto'), row('s2', '11:00', '16:00', 'reception', 'Vastaanotto', 'assigned', 'Otto'), row('s3', '11:00', '17:00', 'therapist', 'Hoitaja', 'assigned', 'Joonas'), row('s4', '12:00', '15:00', 'sauna_x', 'Hoitaja', 'unassigned', null), row('s5', '16:00', '18:00', 'therapist', 'Hoitaja', 'partial', 'Matti')]);
     }
+    if (u.pathname.endsWith('/rpc/public_product_images')) return json([{ product_id: 1, slug: 'yleinen', path: 'products/1-smoke01.png', alt: null }]);   // migraatio 19: vain tuotteella 1 on kuva
+    if (u.pathname.startsWith('/storage/v1/object/public/product-images/')) return route.fulfill({ status: 200, contentType: 'image/png', headers: { 'access-control-allow-origin': '*' }, body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64') });
     if (u.pathname.endsWith('/rpc/public_catalog')) return json([
       { id: 1, slug: 'yleinen', name: 'Yleinen vuoro', name_en: 'Public session', description: 'x', description_en: 'x', category: 'sauna', sale_kind: 'public_shift', price: 29, price_type: 'per_person', min_persons: 1, max_persons: 10 },
       { id: 3, slug: 'taynna', name: 'Täysi tuote', name_en: 'Fully booked product', description: 'x', description_en: 'x', category: 'sauna', sale_kind: 'public_shift', price: 40, price_type: 'per_person', min_persons: 1, max_persons: 10 },
@@ -147,6 +149,22 @@ for (const [base, L] of [['/varaa/', { cat: 'Selaa kategorioittain', day: 'Selaa
   await page.goto(`${BASE}${base}#/tuote/yleinen/${oddDay}`);
   await page.waitForSelector('.bk-grid');
   await page.goto(`${BASE}${base}#/`); await page.waitForSelector('.bk-cards');
+  {   // v15: tuotekuvat – listakortti vain kuvalliselle tuotteelle, hero = tuotteen kuva + nimi + tiivis kuvaus (kuvaton: oletushero), kuvan virhe → oletushero
+    if ((await page.locator('.bk-card .card-img img').count()) !== 1) problems.push(`${base}: tuotelistassa pitäisi olla tasan yksi kuvakortti`);
+    const heroOf = () => page.evaluate(() => { const el = document.querySelector('main .hero.page'); return { cls: el.className, h1: el.querySelector('h1').textContent, sub: el.querySelector('.in p')?.textContent || '', src: el.querySelector('picture img').getAttribute('src'), h1n: document.querySelectorAll('h1').length }; });
+    const def = await heroOf();
+    await page.goto(`${BASE}${base}#/tuote/yleinen`); await page.waitForSelector('.bk-prod');
+    await page.waitForSelector('main .hero.page.has-prod');
+    const h1 = await heroOf();
+    if (!/product-images\/products\/1-smoke01\.png$/.test(h1.src) || !/^(Yleinen vuoro|Public session)$/.test(h1.h1) || h1.h1n !== 1 || h1.sub !== 'x') problems.push(`${base}: tuotesivun hero väärin: ${JSON.stringify(h1)}`);
+    await page.goto(`${BASE}${base}#/tuote/oma`); await page.waitForSelector('.bk-prod');
+    await page.waitForFunction(() => !document.querySelector('main .hero.page.has-prod'));
+    const h2 = await heroOf();
+    if (h2.src !== def.src || !/^(Oma saunavuoro|Private sauna)$/.test(h2.h1)) problems.push(`${base}: kuvattoman tuotteen hero väärin: ${JSON.stringify(h2)}`);
+    await page.goto(`${BASE}${base}#/`); await page.waitForFunction(() => document.querySelector('main .hero.page h1').textContent !== 'Oma saunavuoro' && document.querySelector('main .hero.page h1').textContent !== 'Private sauna');
+    const h3 = await heroOf();
+    if (h3.h1 !== def.h1 || h3.cls.includes('has-prod')) problems.push(`${base}: listanäkymän hero ei palautunut oletukseksi: ${JSON.stringify(h3)}`);
+  }
   await page.context().close();
 }
 async function loginViaInvite(page) {

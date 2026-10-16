@@ -176,3 +176,20 @@ a.bk-sd:hover{filter:brightness(.97)}
 .bk-pick-name{font:600 22px/1.2 var(--head);color:var(--ink);overflow-wrap:anywhere}
 .bk-pick-when{color:var(--ink);font-size:16px;font-weight:600}
 .bk-pick-change{display:inline-flex;align-items:center;min-height:44px;font-weight:600;font-size:15px;color:var(--gold);text-decoration:underline;text-underline-offset:3px}
+/* tuotekuvat (public_product_images): kiinteä kuvasuhde varaa tilan etukäteen, object-fit:cover rajaa; tausta näkyy latauksen ajan */
+.bk-img{display:block;overflow:hidden;background:var(--tint,#efe6d8)}
+.bk-img img{display:block;width:100%;height:100%;object-fit:cover}
+.bk-card .card-img{aspect-ratio:3/2;margin:-20px -20px 12px;border-radius:var(--r) var(--r) 0 0}
+.bk-pc-head .pc-img{flex:none;width:88px;height:88px;border-radius:10px}
+.bk-pc-main{flex:1 1 auto}
+@media(max-width:400px){.bk-pc-head .pc-img{width:72px;height:72px}}
+/* sivun hero tuotesivulla/lomakkeella: tuotteen kuva taustana (object-fit:cover, keskitetty), otsikko = tuotteen nimi, alla tiivis kuvaus.
+   Sama korkeus kaikissa näkymissä (min-height) → ei layout-hyppyä; vahvempi peittokerros → valkoinen teksti ≥ 4.5:1 myös vaalealla kuvalla. */
+.hero.page .in{min-height:300px}
+.hero.page .in p[hidden]{display:none}
+.hero.page h1{overflow-wrap:anywhere}
+.hero.page.has-prod picture img{object-position:50% 45%}
+.hero.page.has-prod::after{background:linear-gradient(180deg,rgba(20,14,8,.72),rgba(20,14,8,.82))}
+.hero.page.has-prod h1,.hero.page.has-prod p{text-shadow:0 1px 8px rgba(0,0,0,.45)}
+.hero.page.has-prod .in p{max-width:34em}
+.bk-hero-wait .hero.page picture,.bk-hero-wait .hero.page .in>*{visibility:hidden}

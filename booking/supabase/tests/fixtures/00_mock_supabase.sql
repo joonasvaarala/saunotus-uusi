@@ -33,3 +33,18 @@ create or replace function auth.jwt() returns jsonb language sql stable as $$
 $$;
 grant execute on function auth.uid(), auth.role(), auth.jwt() to anon, authenticated, service_role;
 create extension if not exists pgcrypto with schema extensions;
+
+-- Storage-mock (vain testeihin): bucket-taulu ja objektitaulu RLS:llä kuten Supabasessa
+create schema if not exists storage;
+grant usage on schema storage to anon, authenticated, service_role;
+create table if not exists storage.buckets (
+  id text primary key, name text not null, public boolean default false, file_size_limit bigint, allowed_mime_types text[],
+  created_at timestamptz default now(), updated_at timestamptz default now()
+);
+create table if not exists storage.objects (
+  id uuid primary key default gen_random_uuid(), bucket_id text references storage.buckets(id), name text, owner uuid default auth.uid(),
+  metadata jsonb, created_at timestamptz default now(), unique (bucket_id, name)
+);
+alter table storage.objects enable row level security;
+grant select, insert, update, delete on storage.objects to anon, authenticated;
+grant all on storage.objects, storage.buckets to service_role;

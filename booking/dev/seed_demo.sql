@@ -146,3 +146,10 @@ end $$;
 update booking.staff set public_staff_id = '00000000-0000-4000-8000-0000000000d0' where user_id = '00000000-0000-4000-8000-0000000000a1';
 update booking.staff set public_staff_id = '00000000-0000-4000-8000-0000000000d1' where user_id = '00000000-0000-4000-8000-0000000000b2';
 update booking.staff set public_staff_id = '00000000-0000-4000-8000-0000000000d2' where user_id = '00000000-0000-4000-8000-0000000000c3';
+
+-- Tuotekuvat (migraatio 14): demokuvat tiedostoista booking/dev/demo-images/products (dev-palvelin tarjoaa ne Storage-mockin kautta).
+-- Hiljainen sauna, turvetorstai, tunnin vuoro ja yritystuotteet jätetään tahallaan ilman kuvaa (kuvaton tila näkyy kaupassa ja testeissä).
+update booking.product_config set image_path = 'products/1-demo01xx.webp',  image_alt = 'Savusaunan lauteet ja kiuas' where product_id = 1;
+update booking.product_config set image_path = 'products/2-demo02xx.webp'  where product_id = 2;
+update booking.product_config set image_path = 'products/3-demo03xx.webp',  image_alt = 'Naisten saunavuoro' where product_id = 3;
+update booking.product_config set image_path = 'products/25-demo25xx.webp' where product_id = 25;

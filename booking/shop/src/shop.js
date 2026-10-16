@@ -1,7 +1,7 @@
 // Varauskauppa: tuote → päivä/vuoro → henkilömäärä → yhteystiedot → vahvistus. Vaihtoehtoinen selaus: päivän mukaan (#/paiva/<pvm>) → kaikki päivän vuorot. Vanilla JS, ei riippuvuuksia, ei build-vaihetta.
-// Data tulee vain julkisista RPC-funktioista (public_catalog / public_availability / public_create_booking / public_get_booking / public_change_booking).
+// Data tulee vain julkisista RPC-funktioista (public_catalog / public_product_images / public_availability / public_create_booking / public_get_booking / public_change_booking).
 // Asiakas ei voi itse perua vahvistettua varausta (peruutukset sähköpostilla henkilökunnalle); hän voi MUUTTAA varausta (toinen vuoro / henkilömäärä) asetuksen mukaan vähintään 48 h ennen vuoroa.
-import { rpc } from './sb.js';
+import { rpc, storageUrl } from './sb.js';
 import { T } from './i18n.js';
 
 const S = window.BOOKING_SHOP;                   // build-aikainen konfiguraatio (kieli, polut, ei-verkossa-varattavat tuotteet)
@@ -57,18 +57,30 @@ const priceText = (p) => {
 const kindOf = (p) => (p.sale_kind === 'public_shift' ? 'yleinen' : p.sale_kind === 'private_shift' ? 'yksityinen' : 'muut');
 const bk = (hash) => `${S.shopHref}#${hash}`;
 
-const state = { catalog: null, settings: null, months: new Map(), busy: false };
+const state = { catalog: null, settings: null, images: new Map(), months: new Map(), busy: false };
 const mount = (...nodes) => { root.replaceChildren(...nodes); root.setAttribute('aria-busy', 'false'); };
-const focusTop = () => { const el = root.querySelector('h2,h1'); if (el) { el.setAttribute('tabindex', '-1'); el.focus({ preventScroll: false }); } };
+const focusTop = () => { const el = root.querySelector('h2,h1') || document.querySelector('main .hero.page h1'); if (el) { el.setAttribute('tabindex', '-1'); el.focus({ preventScroll: false }); } };
 const spinner = () => mount(h('p', { class: 'bk-loading', role: 'status', text: t.loading }));
 const errorBox = (msg) => h('p', { class: 'bk-error', role: 'alert', text: msg });
 const phoneBox = () => h('p', { class: 'bk-contact' }, h('a', { href: `tel:${S.phoneTel}`, text: S.phone }), ' · ', h('a', { href: `mailto:${S.email}`, text: S.email }));
 
 async function loadBase() {
   if (state.catalog) return;
-  const [catalog, settings] = await Promise.all([rpc('public_catalog'), rpc('public_settings')]);
+  // Tuotekuvat: public_product_images voi puuttua (migraatio 14 ajamatta) tai epäonnistua → kauppa toimii ilman kuvia
+  const [catalog, settings, imgs] = await Promise.all([rpc('public_catalog'), rpc('public_settings'), rpc('public_product_images').catch(() => [])]);
   state.catalog = catalog || []; state.settings = settings || {};
+  for (const i of Array.isArray(imgs) ? imgs : []) if (i?.path) state.images.set(+i.product_id, { url: storageUrl('product-images', i.path), alt: i.alt || '' });
 }
+// Tuotekuva: kiinteä kuvasuhde (varaa tilan → ei layout-hyppyä), lazy-lataus, alt = ylläpidon alt-teksti tai tuotteen nimi.
+// alt=false → koriste (nimi on jo vieressä tekstinä). Rikkinäinen kuva poistetaan kokonaan (ei rikkinäistä kuvaketta).
+// Palauttaa null jos tuotteella ei ole kuvaa.
+const pimg = (p, cls, { alt = true, eager = false, w = 600, hgt = 400 } = {}) => {
+  const i = state.images.get(p.id); if (!i) return null;
+  const im = h('img', { src: i.url, alt: alt ? (i.alt || pname(p)) : '', width: w, height: hgt, loading: eager ? 'eager' : 'lazy', decoding: 'async' });
+  const box = h('span', { class: `bk-img ${cls}` }, im);
+  im.addEventListener('error', () => box.remove(), { once: true });
+  return box;
+};
 async function loadMonth(productId, year, month) {   // month: 0–11
   const key = `${productId}:${year}-${month}`;
   if (state.months.has(key)) return state.months.get(key);
@@ -82,6 +94,34 @@ async function loadMonth(productId, year, month) {   // month: 0–11
 }
 const dayState = (rows) => (!rows?.length ? 'none' : rows.some((r) => r.status === 'available') ? 'free' : rows.some((r) => r.status === 'full') ? 'full' : 'unavail');
 
+// ---- sivun yläbanneri (hero): tuotesivulla ja varauslomakkeella tuotteen kuva taustana + otsikko = tuotteen nimi + tiivis kuvaus ----
+// Sivun oma hero (<section class="hero page">) on build-aikaista HTML:ää: oletus palautetaan kaikissa muissa näkymissä. Ei erillistä hero-kenttää: sama tuotekuva (object-fit: cover, keskitetty).
+// Lyhyt kuvaus: ensimmäinen virke (ei katkaista kellonaikojen pisteistä "16.30"), enintään ~130 merkkiä sanarajalta. Pitkä kuvaus pysyy sisältöosassa.
+const shortDesc = (p) => {
+  const d = (pdesc(p) || '').replace(/\s+/g, ' ').trim(); if (!d) return '';
+  const m = d.match(/^.{20,}?[.!?](?=\s+[A-ZÅÄÖ])/u); let x = m ? m[0] : d;
+  if (x.length > 130) x = `${x.slice(0, 130).replace(/\s+\S*$/, '')}…`;
+  return x;
+};
+const hero = { def: null };
+function setHero(p) {
+  const el = document.querySelector('main .hero.page'); document.documentElement.classList.remove('bk-hero-wait');
+  if (!el) return;
+  const h1 = el.querySelector('h1'), sub = el.querySelector('.in p'), cur = el.querySelector('picture');
+  if (!hero.def) hero.def = { h1: h1.textContent, sub: sub?.textContent || '', pic: cur };
+  const i = p && state.images.get(p.id);
+  let next = hero.def.pic;
+  if (i) {
+    const im = h('img', { src: i.url, alt: i.alt || '', width: 1600, height: 1000, fetchpriority: 'high', decoding: 'async' });
+    next = h('picture', { class: 'prod-pic' }, im);
+    im.addEventListener('error', () => { if (next.isConnected) { next.replaceWith(hero.def.pic); el.classList.remove('has-prod'); } }, { once: true });
+  }
+  if (cur !== next) cur.replaceWith(next);
+  el.classList.toggle('has-prod', !!i);
+  h1.textContent = p ? pname(p) : hero.def.h1;
+  if (sub) { sub.textContent = p ? shortDesc(p) : hero.def.sub; sub.hidden = !sub.textContent; }
+}
+
 // ---- näkymä 1: tuotelista ----
 function viewList(query) {
   const cat = state.catalog;
@@ -90,6 +130,7 @@ function viewList(query) {
   const list = cat.filter((p) => k === 'all' || kindOf(p) === k);
   const tabs = h('nav', { class: 'bk-tabs', 'aria-label': t.title }, kinds.map((x) => h('a', { href: bk(`/?k=${x}`), 'aria-current': x === k ? 'true' : null, text: t['k_' + x] || t[x] || x })));
   const cards = h('ul', { class: 'bk-cards' }, list.map((p) => h('li', { class: 'bk-card' },
+    pimg(p, 'card-img'),
     h('h3', {}, h('a', { href: bk(`/tuote/${p.slug}`), text: pname(p) })),
     h('p', { class: 'bk-desc', text: (pdesc(p) || '').slice(0, 170) + ((pdesc(p) || '').length > 170 ? '…' : '') }),
     h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), p.duration_text ? ` · ${p.duration_text}` : ''),
@@ -154,6 +195,7 @@ function prodCard(p, rs, ds, open, onToggle) {
     h('ul', { class: 'bk-slotlist' }, rs.map((x) => dayItem(x, ds))),
     h('p', { class: 'bk-pc-more' }, h('a', { href: bk(`/tuote/${p.slug}/${ds}`), text: t.productInfo })));
   const btn = h('button', { type: 'button', id: `${id}-btn`, class: 'bk-pc-head', 'aria-expanded': open ? 'true' : 'false', 'aria-controls': `${id}-panel`, onclick: () => onToggle(p, li) },
+    pimg(p, 'pc-img', { alt: false, w: 160, hgt: 160 }),
     h('span', { class: 'bk-pc-main' }, h('strong', { class: 'bk-pc-name', text: pname(p) }), short ? h('span', { class: 'bk-pc-desc', text: short }) : null,
       h('span', { class: 'bk-pc-meta' }, h('span', { class: 'bk-price', text: priceText(p) }), h('span', { class: 'bk-badge free', text: `${t.timesFree(avail.length)} · ${t.firstAt} ${hm(avail[0].r.starts_at)}` }))),
     h('span', { class: 'bk-pc-chev', 'aria-hidden': 'true' }));
@@ -226,6 +268,7 @@ async function viewDay(dateStr, keep, openSlug) {
 // ---- näkymä 2: tuote → kalenteri → vuorot ----
 async function viewProduct(slug, dateStr) {
   const p = state.catalog.find((x) => x.slug === slug);
+  setHero(p || null);
   if (!p) {
     const st = (await fetch(S.staticProductsUrl).then((r) => r.json()).catch(() => ({})))[slug];
     mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })),
@@ -242,7 +285,7 @@ async function viewProduct(slug, dateStr) {
     const calBox = h('div', { class: 'bk-cal' }), slotBox = h('div', { class: 'bk-slots', 'aria-live': 'polite' });
     wrap.replaceChildren(
       h('p', {}, h('a', { href: bk('/'), text: t.backList })),
-      h('h2', { text: pname(p) }), h('p', { class: 'bk-desc', text: pdesc(p) || '' }),
+      h('p', { class: 'bk-desc', text: pdesc(p) || '' }),
       h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), p.duration_text ? ` · ${p.duration_text}` : ''),
       h('h3', { text: t.pickDate }), calBox, slotBox);
     let byDay = {};
@@ -307,6 +350,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
     if (f) { s = f; p = prod; break; }
     if (+productId === prod.id) break;
   }
+  setHero(p);
   if (!s) { mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })), errorBox(t.noSlots)); focusTop(); return; }
   const max = Math.max(s.min_persons, Math.min(s.max_persons || 50, s.remaining));
   let n = Math.min(Math.max(+new URLSearchParams(location.hash.split('?')[1] || '').get('n') || s.min_persons, s.min_persons), max);
@@ -555,6 +599,7 @@ async function route(keep = false) {
     const [path, qs] = location.hash.slice(1).split('?');
     const parts = path.split('/').filter(Boolean);
     const q = new URLSearchParams(qs || '');
+    if (!(parts[0] === 'tuote' && parts[1]) && !(parts[0] === 'varaa' && parts[1] && parts[2])) setHero(null);   // tuote- ja lomakenäkymä asettavat heron itse
     if (parts[0] === 'paiva') await viewDay(parts[1], keep, q.get('tuote'));
     else if (parts[0] === 'tuote' && parts[1]) await viewProduct(parts[1], /^\d{4}-\d\d-\d\d$/.test(parts[2] || '') ? parts[2] : null);
     else if (parts[0] === 'varaa' && parts[1] && parts[2]) await viewCheckout(parts[1], parts[2], parts[3], q.get('via'));
@@ -562,7 +607,7 @@ async function route(keep = false) {
   } catch (e) {
     console.warn('booking route error', e);
     mount(errorBox(t.loadError), phoneBox());
-  }
+  } finally { document.documentElement.classList.remove('bk-hero-wait'); }
 }
 let last = '';
 window.addEventListener('hashchange', () => {
