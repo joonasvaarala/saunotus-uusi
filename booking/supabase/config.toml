@@ -17,5 +17,13 @@ verify_jwt = false   # asiakas tulee maksulinkistä (RUNKO, 501)
 verify_jwt = false   # Visma Payn palvelinkutsu (RUNKO, allekirjoitus tarkistetaan funktiossa)
 [functions.vismapay-refund]
 verify_jwt = true
+# Vipps MobilePay ePayment (suora integraatio). Salaisuudet: MOBILEPAY_CLIENT_ID, MOBILEPAY_CLIENT_SECRET, MOBILEPAY_SUBSCRIPTION_KEY, MOBILEPAY_MSN, MOBILEPAY_WEBHOOK_SECRET (vain Edge-salaisuuksina). Kytkin: integration_config 'mobilepay' (off/test/live).
+[functions.mobilepay-start]
+verify_jwt = false   # asiakas tilaussivulta/maksulinkistä; tunnistus: tilauksen public_token / linkin token (RPC tarkistaa)
+[functions.mobilepay-notify]
+verify_jwt = false   # Vippsin webhook (HMAC-allekirjoitus tarkistetaan funktiossa) + tilaussivun reconcile (order_token)
+[functions.mobilepay-refund]
+verify_jwt = true    # henkilökunta (payments.refund tarkistetaan funktiossa) tai service role
+
 [functions.procountor-sync]
 verify_jwt = true
