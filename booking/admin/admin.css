@@ -220,3 +220,42 @@ h2 .icon,h3 .icon,.addon-mark .icon{display:inline-block;vertical-align:-3px;mar
 .toast.warn{background:#6b4b00}
 [data-testid=therapist-state] .btn{margin-left:4px}
 .btn[data-testid=grant-btn]{min-height:44px;padding:10px 14px}
+/* Vapaat ajat (admin_treatment_availability): päivä- ja aikapainikkeet, vähintään 44 px; ei sinistä */
+.avail{display:grid;gap:8px}.avail-head{justify-content:space-between}.avail-head h3{margin:0}
+.avail .btn.sm[data-testid=avail-refresh]{min-height:44px;padding:10px 14px}
+.daychips,.slotgrid{display:flex;flex-wrap:wrap;gap:8px}
+.btn.daychip,.btn.slot{min-height:44px;padding:8px 12px}
+.btn.slot{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:76px}
+.btn.slot strong{font-size:16px}.btn.slot .sflag{font-size:11px;line-height:1.2;color:#5a3f00}
+.btn.slot.needs-ovr{border-style:dashed;border-color:#8a6a2c}
+.btn.daychip[aria-pressed=true],.btn.slot[aria-pressed=true]{background:var(--green);color:#fff;border-color:var(--green)}
+.btn.slot[aria-pressed=true] .sflag{color:#F6E6C3}
+.slot-picked{margin:0;padding:10px 12px;border-radius:8px;background:var(--okbg);color:var(--ok)}
+.slot-picked .badge{vertical-align:middle}
+.avail-err{margin:0;color:var(--err);background:var(--errbg);padding:10px 12px;border-radius:8px}
+/* Päivänäkymä (v25): otsikkorivin oikea reuna (hlö + kapasiteettinappi), saapunut-ympyrä, lisäpalveluikonit, työvuoropalkki. Ei sinistä; kosketuskohteet ≥ 44 px */
+.session header{align-items:center}
+.session .hdr-right{margin-left:auto;display:inline-flex;align-items:center;gap:10px;flex:none}
+.session .hdr-right .cnt{font-size:15px;font-weight:600;color:var(--ink);white-space:nowrap}
+.btn.cap{min-height:44px;min-width:44px;padding:10px 14px;border:0;color:#fff;font-weight:700;font-size:14px;line-height:1.1;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center}
+.btn.cap.ok{background:#2E6B3F}.btn.cap.ok:hover{background:#25562f;color:#fff}
+.btn.cap.full{background:#9a2f22;cursor:default}.btn.cap.full:hover{background:#9a2f22}
+.resrow.has-arrive{flex-wrap:nowrap;gap:10px}
+.resrow .resmain{flex:1;min-width:0;display:grid;gap:2px}
+.resrow .resmain .meta{justify-content:flex-start}
+.arrive{flex:none;width:44px;height:44px;border-radius:50%;border:2px solid #2E6B3F;background:#fff;color:transparent;display:inline-grid;place-items:center;padding:0;cursor:pointer}
+.arrive:hover{background:#e8f3ea}
+.arrive.on{background:#2E6B3F;color:#fff}
+.arrive[aria-busy=true]{opacity:.7}
+.arrive .icon{display:block}
+.addon-items{display:flex;flex-wrap:wrap;gap:2px 12px}
+.addon-item{display:inline-flex;align-items:center;gap:4px;font-size:14px;color:var(--gold)}
+.addon-item .icon{color:var(--green);flex:none}
+.dayshifts{margin:0 0 10px;--heater:#6b4a2b;--heaterbg:#efe4d6;--heaterbar:#8a6a4a;--therapist:#1d4d2b;--therapistbg:#e3eadf;--therapistbar:#2b3a30;--reception:#5e4a12;--receptionbg:#f1ead2;--receptionbar:#b08d3c}
+.dayshifts ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.dshift{font-size:13px;line-height:1.35;padding:4px 10px;border-radius:14px;border:1px solid #8b7f73;background:#ece8e1;color:#5b524a}
+.dshift.shift-heater{background:var(--heaterbg);border-color:var(--heaterbar);color:var(--heater)}
+.dshift.shift-therapist{background:var(--therapistbg);border-color:var(--therapistbar);color:var(--therapist)}
+.dshift.shift-reception{background:var(--receptionbg);border-color:var(--receptionbar);color:var(--reception)}
+.dshift .who{font-weight:600}
+.dayshifts-none{margin:0 0 10px;font-size:13px}

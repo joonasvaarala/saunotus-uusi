@@ -230,6 +230,27 @@ Migraatiot 20–23 on ajettu tuotantoon (versiot 20261016224525 / 233600 / 23450
 * Huom: `admin_list_reservations` ei palauta `therapist_missing`-kenttää (speksin mukaan), joten Varaukset-listassa ei ole tunnistetta; se näkyy päivänäkymässä, tiedoissa ja Tarkistassa. Aikaikkunasääntöjen muokkaukseen ei ole hallintanäkymää.
 * Testit: pgTAP `17_resource_bookings` laajennettu Bottiavustuksen v2-testeillä (ryhmät A–N ajetaan aikaikkunatriggeri pois päältä, kuten tuotannossa; uudet ryhmät W ja X testaavat aikaikkunat ja rituaalin alkuajat sekä poikkeukset), selainsavutesti ja e2e (kuvat `admin-*-90…95`).
 
+### Vapaat ajat hallinnan Uusi varaus -lomakkeella (booking_25, `admin_treatment_availability`)
+
+Resurssivaraus-lomakkeella tuotteet kb 8 (rituaali) ja 10–12 (hoidot) näyttävät **Vapaat ajat** -paneelin, joka kutsuu `admin_treatment_availability(p_product_id, p_from, p_to, p_persons, p_override, p_override_reason)` ja näyttää saman tarjonnan kuin verkkosivu (`admin/views/availability.js`):
+
+* Haku 14 päivää valitusta päivästä (`SPAN_DAYS`), päiväpainikkeet (lukumäärä) ja alkuajat (44 px painikkeet). Aika valittaessa lomakkeen päivä ja kellonaika täyttyvät; yhteenvedossa hinta (`total`) ja merkinnät **Ei saunottajaa** (`therapist_missing`, sama kuin booking_22-varoitus) ja **Vaatii ylityksen** (`needs_override`).
+* Raskas haku: **ei pollausta**; haetaan kun tuote, päivä, henkilömäärä (400 ms viive) tai ylitys vaihtuu. Välimuisti muistissa 3 min / haun parametrit; *Päivitä*-painike ohittaa välimuistin.
+* Ylitysajat vain oikeudella `bookings.override` (admin, manager): Ylitys-valinta + perustelu (≥ 3 merkkiä) → haku `p_override=true`. Ilman perustelua haetaan vain tavalliset ajat. Perustason käyttäjä (`bookings.manage`) ei näe ylitysvalintaa.
+* Varaus tehdään edelleen lomakkeen `admin_create_resource_booking`-kutsulla; ajan voi syöttää käsin myös silloin, kun saatavuushaku epäonnistuu (virhe suomeksi: `bad_range`, `busy`, `rate_limited`, `forbidden`, `override_reason_required`).
+* Tuotteet, joilla paneeli näytetään: `SLOT_PRODUCT_IDS = [8, 10, 11, 12]` (`availability.js`). Vanha varaus -lomake ei käytä paneelia.
+* Testit: `scripts/smoke-pages.mjs` (mockattu RPC: argumentit, valinta, välimuisti, virhe, ylitys + oikeus) ja `scripts/e2e-screenshots.mjs` (kuvat `admin-*-96…98`; RPC mockattu, koska migraatioita 24–25 ei ole vielä repossa/paikallisessa kannassa).
+
+### Päivänäkymä ja lisäpalvelut (v25)
+
+* **Työvuorot päivän alla** (`views/dayparts.js` → `shiftsBar`): `admin_upcoming_shifts` (vain luku; `shifts.view_all` = kaikki, `shifts.view` = vain omat; data `public.work_shifts` / `shift_assignments` / `staff`) rooleittain suomeksi ja kalenterin väreillä (Lämmitykset ruskehtava, Saunottaja vihreä, Vastaanotto vaimea kulta, ei sinistä): *Saunottaja 14–20 Maija*; ei nimettyä → "ei nimettyä tekijää". Ei oikeutta tai tietoa → palkkia ei näytetä (varaukset näkyvät silti). Uutta RPC:tä ei tarvittu.
+* **Vuoron otsikkorivi**: oikeassa reunassa henkilömäärä (*4 hlö*) ja kapasiteettinappi: vihreä *Vapaana: N* / *Vapaa* on linkki Uusi varaus -lomakkeelle (`#/uusi?d=…&r=<rule_id>&t=<alkamisaika>`; vuoro esivalittuna, lomake vierittyy näkyviin ja fokus otsikkoon kuten v22:ssa), punainen *Täynnä* / *Varattu* ei ole painike. Nappi ≥ 44 px.
+* **Myymätön vuoro**: tyhjä vuoro, joka ei ole myynnissä (päällekkäisyys, sulku, myynti päättynyt), piilotetaan (`admin_day_view.sessions[].status`: näytetään vain `available` ja `full`); jos vuorolla on varauksia, se näytetään ilman "ei myynnissä" -tekstiä ja ilman nappia. Tietoa ei puuttunut RPC:stä.
+* **Saapunut-nappi** jokaisella varausrivillä (oikeus `bookings.manage`): vihreä ympyrä, painettuna täytetty ✓ (`aria-pressed`, `aria-label` "Saapunut: nimi"); optimistinen päivitys, virheessä palautus + ilmoitus. Käyttää olemassa olevaa `admin_set_reservation_status(…, 'completed')` (asettaa `checkin_at`); uudelleen painaminen palauttaa tilaan `confirmed`. Uutta RPC:tä ei tarvittu.
+* **Lisäpalveluikonit** varausriveillä (`icons.js`: `whisk` saunavihta, `mask` turvenaamio, `towel` pyyhe; yksivärinen viiva kuten valikon ikonit, `title`). Tunnistus `addon.code` tai nimestä (`admin_day_view` antaa vain `addon_id`, `name`, `quantity`; koodi olisi varmempi, ks. pyyntö).
+* **Lisäpalvelut ja resurssivaraus**: Pyyhe 5 € tarjotaan myös hoidoissa ja saunotuksissa; saunavihta, turvenaamio ja jalkakylpy vain yleisillä vuoroilla ja yksityisvarauksessa. Frontti: lisäpalveluvalitsin resurssi- ja vanha varaus -lomakkeilla käyttää tilaa `resource` (`applies_modes` sisältää `resource`), kauppa suodattaa kuten ennen `applies_modes.includes(vuoron tila)`; ylläpitolomakkeella uusi valinta *Hoito / saunotus*. **Vaatii tietokantamuutoksen** (uusi tila + Pyyhe-rivi + palvelinpuolen rajaus + `public_create_treatment_booking`-lisäpalvelut): `docs/bottiavustus-pyynto-pyyhe.md`. Ennen sitä pyyhettä ei ole ja hoitolomakkeen lisäpalvelualue on piilossa.
+* Testit: `scripts/smoke-pages.mjs` (mockattu päivänäkymä: työvuorot, piilotettu myymätön vuoro, näkyvä myymätön vuoro ilman tekstiä, napit, saapunut + virhepalautus, esivalinta, ikonit, lisäpalvelut lomakkeittain) ja `scripts/e2e-screenshots.mjs` (kuvat `admin-*-100…103`).
+
 ### Kalenterisulut hallinnassa (migraatio 18)
 
 Migraatio 18 (18a–18c; versiot 20261016221808 / 221825 / 221840) on ajettu tuotantoon; kalenterit ovat rekisterissä `active = false` eikä synkkaa ole käynnissä. Hallinta (`admin/`):
