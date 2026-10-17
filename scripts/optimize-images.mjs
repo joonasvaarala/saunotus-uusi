@@ -28,8 +28,8 @@ for (const it of manifest.icons) {
   meta[it.id] = { w: it.size, h: it.size, widths: [it.size] };
 }
 for (const it of manifest.svg) copyFileSync(join(SRC, find(it.id)), join(OUT, `${it.id}.svg`));
-// OG-kuvat 1200x630 (jpg) – sivujen meta.og-tunnisteista
-for (const id of ['hero-ovi', 'ovi-kaiverrus', 'saunotus', 'saunotus-selka', 'palju']) {
+// OG-kuvat 1200x630 (jpg) – sivujen meta.og-tunnisteista (hero-ovi-uusi: npm run hero)
+for (const id of ['ovi-kaiverrus', 'saunotus', 'saunotus-selka', 'palju']) {
   await sharp(join(SRC, find(id)), { limitInputPixels: 300e6 }).rotate().resize(1200, 630, { fit: 'cover', position: 'attention' }).jpeg({ quality: 80, mozjpeg: true }).toFile(join(OUT, `og-${id}.jpg`));
 }
 writeFileSync('content/images.json', JSON.stringify(meta, null, 1));

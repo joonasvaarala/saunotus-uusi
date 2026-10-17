@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { sortReviews } from './reviews-sort.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
-  johku, bookingUrl, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
+  johku, bookingUrl, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
 } from './lib.mjs';
 
 const cards = read('content/cards.json');
@@ -208,7 +208,7 @@ function jsonLd(lang) {
   const spec = kb.hours.filter((h) => h.opens && ['public', 'men', 'women', 'silent'].includes(h.session_type)).map((h) => ({ '@type': 'OpeningHoursSpecification', dayOfWeek: days[h.weekday - 1], opens: hm(h.opens).includes(':') ? hm(h.opens) : hm(h.opens) + ':00', closes: hm(h.closes).includes(':') ? hm(h.closes) : hm(h.closes) + ':00' }));
   return JSON.stringify({
     '@context': 'https://schema.org', '@type': ['HealthAndBeautyBusiness', 'LocalBusiness'], name: b.trade_name, legalName: b.legal_name,
-    url: SITE_URL + '/', telephone: site.contact.phoneTel, email: site.contact.email, image: abs('/img/og-hero-ovi.jpg'),
+    url: SITE_URL + '/', telephone: site.contact.phoneTel, email: site.contact.email, image: abs('/img/og-hero-ovi-uusi.jpg'),
     address: { '@type': 'PostalAddress', streetAddress: b.street_address, postalCode: b.postal_code, addressLocality: b.city, addressCountry: 'FI' },
     openingHoursSpecification: spec, sameAs: site.social.map((s) => s.url), inLanguage: lang,
   });
@@ -220,7 +220,7 @@ export function layout({ lang, key, meta, body, preload = '', robotsOnly = false
   const alt_ = site.pages[key] || {};
   const hl = ['fi', 'en'].filter((l) => alt_[l]).map((l) => `<link rel="alternate" hreflang="${l}" href="${abs(alt_[l])}">`).join('');
   const xdef = alt_.fi ? `<link rel="alternate" hreflang="x-default" href="${abs(alt_.fi)}">` : '';
-  const og = abs(`/img/og-${meta.og || 'hero-ovi'}.jpg`);
+  const og = abs(`/img/og-${meta.og || 'hero-ovi-uusi'}.jpg`);
   const o = other(lang);
   const switchHref = alt_[o] ? href(alt_[o]) : pageHref('home', o);
   const nav = u.nav.map(([k, label]) => {
@@ -276,7 +276,7 @@ const P = (name) => read(`content/pages/${name}.json`);
 
 export function home(lang) {
   const d = P('home')[lang], u = ui(lang);
-  const hero = `<section class="hero">${pic('hero-ovi', lang, { eager: true, sizes: '100vw' })}<div class="wrap in"><h1>${e(d.hero.title)}</h1><p>${e(d.hero.text)}</p><div class="actions"><a class="btn gold" href="${pageHref('book', lang)}">${e(d.hero.cta1)}</a><a class="btn ghost" href="${pageHref('gift', lang)}">${e(d.hero.cta2)}</a></div></div></section>`;
+  const hero = `<section class="hero home">${heroPicture({ alt: alt('hero-ovi-uusi', lang) })}<div class="wrap in"><h1>${e(d.hero.title)}</h1><p>${e(d.hero.text)}</p><div class="actions"><a class="btn gold" href="${pageHref('book', lang)}">${e(d.hero.cta1)}</a><a class="btn ghost" href="${pageHref('gift', lang)}">${e(d.hero.cta2)}</a></div></div></section>`;
   const tiles = `<div class="wrap"><ul class="tiles" style="list-style:none;padding:0;margin-bottom:0">${d.tiles.map((t) => `<li class="tile">${icon(t.icon, 44)}<h2>${e(t.title)}</h2><p>${e(t.text)}</p><div class="lk">${t.links.map((l) => `<a href="${e(link(l.to, lang, 'home'))}">${e(l.label)}</a>`).join('')}</div></li>`).join('')}</ul></div>`;
   const wk = sec('', `<div class="week-head">${head(u.weekKicker, u.weekTitle, '', { left: true })}<a class="btn light sm" href="${pageHref('sauna', lang, 'yleiset')}">${e(u.allSessions)}</a></div>${week(lang)}`);
   const rc = C('treatments.avoin-rituaali'), rp = product(rc.kb);
@@ -290,7 +290,7 @@ export function home(lang) {
   const comp = sec('tint', `<div class="company"><div><p class="kicker">${e(co.kicker)}</p><h2 class="sec-title">${e(co.title)}</h2><p>${e(co.text)}</p><div class="actions" style="display:flex;gap:12px;flex-wrap:wrap">${mailBtn(co.cta, co.mailSubject)}<a class="btn light" href="${pageHref('companies', lang)}">${e(co.cta2)}</a></div></div><div class="im">${pic(co.img, lang, { sizes: '(min-width:900px) 520px, 100vw' })}</div></div>`);
   const s = d.story;
   const story = sec('', `${head(s.kicker, s.title, s.lead, { orn: true })}<ol class="timeline">${s.items.map((i) => `<li><b>${e(i.year)}</b>${e(i.text)}</li>`).join('')}</ol><p class="center">${e(s.thanks)}</p><p class="center"><a href="${e(site.social[1].url)}" rel="noopener">${e(s.ig)}${NEW(lang)}</a></p>`);
-  const pre = `<link rel="preload" as="image" type="image/avif" imagesrcset="${images['hero-ovi'].widths.map((w) => `${href(`/img/hero-ovi-${w}.avif`)} ${w}w`).join(', ')}" imagesizes="100vw" fetchpriority="high">`;
+  const pre = heroPreload();
   return layout({ lang, key: 'home', meta: d.meta, preload: pre, body: hero + tiles + wk + ritual + feat + reviewsSection(lang) + about + ev + comp + story });
 }
 
