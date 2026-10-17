@@ -1317,6 +1317,59 @@ if (process.env.ONLY !== 'shop') for (const [name, vp] of [['mobile', { width: 3
   }
   await ctx.close();
 }
+// ---------- HALLINTA: päivänäkymä (v25): työvuorot, hlö + kapasiteettinappi, saapunut-nappi, lisäpalveluikonit, resurssilomakkeen lisäpalvelut ----------
+if (process.env.ONLY !== 'shop') for (const [name, vp] of [['mobile', { width: 390, height: 844, isMobile: true, hasTouch: true }], ['desktop', { width: 1280, height: 900 }]]) {
+  const tag = `paivanakyma-${name}`;
+  const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, isMobile: vp.isMobile, hasTouch: vp.hasTouch, locale: 'fi-FI', timezoneId: 'Europe/Helsinki' });
+  const page = await ctx.newPage(); watch(page, tag);
+  const noH = () => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  const dayD = (() => { const d = new Date(); d.setUTCDate(d.getUTCDate() + ((8 - d.getUTCDay()) % 7 || 7)); return d.toISOString().slice(0, 10); })();   // seuraava maanantai: demossa lämmitys-/saunottaja-/vastaanottovuorot, Miesten sauna ja lisäpalveluvaraus
+  await page.goto(`${BASE}/admin/`); await page.fill('#email', 'admin@demo.local'); await page.fill('#password', 'demo'); await page.click('form#login button[type=submit]');
+  await page.waitForSelector('#view .day-view, #view .daygrid');
+  const satD = (() => { const d = new Date(); d.setUTCDate(d.getUTCDate() + ((6 - d.getUTCDay() + 7) % 7 || 7)); return d.toISOString().slice(0, 10); })();   // seuraava lauantai: demossa Lämmitykset-, Saunottaja- ja Vastaanotto-vuorot
+  await page.evaluate((d) => { location.hash = `#/?d=${d}`; }, satD);
+  await page.waitForSelector('[data-testid=dayshift]'); await page.waitForSelector('[data-testid=session]');
+  const roles = await page.locator('[data-testid=dayshift]').allInnerTexts();
+  if (!roles.length || !roles.every((t) => /^(Lämmitykset|Saunottaja|Vastaanotto)\s+\d/.test(t.replace(/\s+/g, ' ').trim()))) problems.push(`${tag}: työvuorot pitää näyttää muodossa "Rooli 14–20 Nimi" suomeksi: ${JSON.stringify(roles)}`);
+  if ((await page.locator('.dshift.shift-heater').count()) < 1 || (await page.locator('.dshift.shift-therapist').count()) < 1 || (await page.locator('.dshift.shift-reception').count()) < 1) problems.push(`${tag}: kaikki kolme roolia (Lämmitykset, Saunottaja, Vastaanotto) pitää näkyä omilla väreillään`);
+  if ((await noH()) > 0) problems.push(`${tag}: vaakavieritys`);
+  if (/ei myynniss|myynti päättynyt/i.test(await page.locator('#view').innerText())) problems.push(`${tag}: "ei myynnissä" -tekstiä ei saa näkyä`);
+  await shot(page, `admin-${name}-100-paivanakyma-tyovuorot.png`, false);
+  await page.evaluate((d) => { location.hash = `#/?d=${d}`; }, dayD);   // maanantai: Miesten sauna, lisäpalveluvaraukset
+  await page.waitForSelector('[data-testid=session] .reslist'); await page.waitForTimeout(500);
+  const hdr = await page.locator('[data-testid=session] header').first().evaluate((e) => { const c = e.querySelector('.hdr-right'), r = e.getBoundingClientRect(), q = c.getBoundingClientRect(); return { rightGap: Math.round(r.right - q.right), n: e.querySelectorAll('.cap').length }; });
+  if (hdr.rightGap > 20) problems.push(`${tag}: hlö ja kapasiteettinappi pitää olla otsikkorivin oikeassa reunassa (väli ${hdr.rightGap})`);
+  const sizes = await page.evaluate(() => [...document.querySelectorAll('.btn.cap, .arrive')].map((e) => Math.round(e.getBoundingClientRect().height)));
+  if (!sizes.length || Math.min(...sizes) < 44) problems.push(`${tag}: kapasiteetti-/saapunut-nappien korkeus ${Math.min(...sizes)} < 44 px`);
+  const kinds = await page.locator('.addon-item').evaluateAll((els) => els.map((e) => e.dataset.kind));
+  if (!kinds.includes('whisk')) problems.push(`${tag}: saunavihta-ikoni puuttuu lisäpalvelurivistä (löytyi: ${kinds})`);
+  await page.locator('.addon-item').first().scrollIntoViewIfNeeded(); await page.evaluate(() => window.scrollBy(0, -140));
+  await shot(page, `admin-${name}-101-paivanakyma-lisapalvelut.png`, false);
+  // saapunut-nappi (oikea RPC): merkitään saapuneeksi, näkyy latauksen jälkeen, perutaan takaisin
+  const row = page.locator('[data-testid=session] .resrow:has([data-testid=arrive])').first();
+  const nm = (await row.locator('button.link strong').innerText()).trim();
+  const ar = row.locator('[data-testid=arrive]');
+  const wasOn = (await ar.getAttribute('aria-pressed')) === 'true';
+  await ar.click();
+  await page.waitForTimeout(700);
+  await shot(page, `admin-${name}-102-saapunut.png`, false);
+  await page.reload(); await page.waitForSelector('[data-testid=session] .reslist');
+  const ar2 = page.locator(`[data-testid=session] .resrow:has(button.link strong:text-is("${nm}")) [data-testid=arrive]`).first();
+  if ((await ar2.getAttribute('aria-pressed')) !== String(!wasOn)) problems.push(`${tag}: saapunut-tila ei tallentunut (${nm})`);
+  await ar2.click(); await page.waitForTimeout(700);   // palautus
+  // Vapaana-nappi → Uusi varaus esivalittuna ja vierityksellä lomakkeeseen
+  const cap = page.locator('[data-testid=cap-btn]').first();
+  await cap.scrollIntoViewIfNeeded(); await cap.click();
+  await page.waitForSelector('[data-testid=booking-form]'); await page.waitForTimeout(1200);
+  if (!/[?&]r=\d+&t=/.test(page.url()) || (await page.locator('.slotbtn[aria-checked=true]').count()) !== 1) problems.push(`${tag}: Vapaana-napin pitää avata Uusi varaus esivalitulla vuorolla (${page.url()})`);
+  if (!(await page.locator('[data-testid=booking-form] h3').first().evaluate((e) => { const r = e.getBoundingClientRect(); return r.top >= 0 && r.top < window.innerHeight; }))) problems.push(`${tag}: lomakkeen pitää vierittyä näkyviin`);
+  await shot(page, `admin-${name}-103-vapaana-uusi-varaus.png`, false);
+  // hoito-/saunotuslomake: saunavihta, turvenaamio ja jalkakylpy eivät kuulu hoitoon/saunotukseen (ei pyyhettä paikallisessa kannassa → valitsin piilossa)
+  await page.evaluate(() => { location.hash = '#/uusi?tyyppi=resurssi'; }); await page.waitForSelector('[data-testid=resource-booking-form]'); await page.waitForTimeout(500);
+  const resAdd = await page.locator('[data-testid=resource-booking-form] .addon-picker .addonrow:not([hidden]) strong').allInnerTexts().catch(() => []);
+  if (resAdd.some((t) => /vihta|turvenaamio|jalkakylpy/i.test(t))) problems.push(`${tag}: hoito-/saunotuslomakkeella ei saa tarjota vihtaa tai turvenaamiota: ${resAdd}`);
+  await ctx.close();
+}
 // ---------- HALLINTA: kalenteri toimii vaikka vuorotietoja ei saada (public-skeema tyhjä / ei oikeutta) ----------
 if (process.env.ONLY !== 'shop') {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844, isMobile: true }, locale: 'fi-FI', timezoneId: 'Europe/Helsinki' });

@@ -34,7 +34,7 @@ export function availabilityPanel({ getQuery, onPick }) {
     for (const r of st.rows) { if (!byDay.has(r.session_date)) byDay.set(r.session_date, []); byDay.get(r.session_date).push(r); }
     if (!byDay.has(st.day)) st.day = [...byDay.keys()][0] || null;
     days.replaceChildren(...[...byDay.keys()].map((d) => h('button', { type: 'button', class: 'btn daychip', 'aria-pressed': String(d === st.day), 'data-testid': 'day-chip', 'data-day': d, onclick: () => { st.day = d; renderSlots(); } },
-      dayChip(d), h('span', { class: 'cnt', text: ` · ${byDay.get(d).length}` }))));
+      dayChip(d), h('span', { class: 'cnt', text: `\u00a0· ${byDay.get(d).length}` }))));
     slots.replaceChildren(...(byDay.get(st.day) || []).map((r) => {
       const on = st.sel === r.starts_at;
       return h('button', { type: 'button', class: `btn slot${r.needs_override ? ' needs-ovr' : ''}`, 'aria-pressed': String(on), 'data-testid': 'slot', 'data-start': r.starts_at,

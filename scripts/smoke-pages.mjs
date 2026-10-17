@@ -26,6 +26,9 @@ const ovrArgs = [];   // admin_set_closure_override-kutsut
 const availArgs = [];   // admin_treatment_availability-kutsut
 let availMode = 'ok';   // ok | error
 const helIso = (d, hhmm) => { for (const off of [3, 2]) { const t = new Date(`${d}T${hhmm}:00+0${off}:00`); if (new Intl.DateTimeFormat('fi-FI', { timeZone: 'Europe/Helsinki', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(t).replace('.', ':') === hhmm) return t.toISOString(); } return null; };
+let dayMode = false;   // v25: päivänäkymän mock-data (vuorot, varaukset, lisäpalvelut)
+const statusArgs = [];   // admin_set_reservation_status-kutsut
+let statusFail = false;
 let createMode = 'busy';   // admin_create_resource_booking-mockin vastaus: busy | missing (warning therapist_missing) | time_window | ritual_start
 const grantArgs = [];   // admin_grant_therapist_exception-kutsut
 let extraPerms = [];   // lisäoikeudet admin_my_permissions-mockiin (bookings.override-testi)
@@ -71,6 +74,11 @@ async function newPage(name, { allowFail = null, viewport = { width: 1100, heigh
       }
       return json(rows);
     }
+    if (dayMode && u.pathname.endsWith('/rpc/admin_list_reservations')) {
+      const a = route.request().postDataJSON() || {}; const ds = new Date(new Date(a.p_from).getTime() + 12 * 36e5).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }); const t = (h2) => `${ds}T${String(h2).padStart(2, '0')}:00:00Z`;
+      const mk = (id, name, h2, n, st = 'confirmed') => ({ reservation_id: id, order_id: id, order_no: 9100 + id, status: st, order_status: 'confirmed', payment_status: 'unpaid', product_id: 1, product_name: 'Yleinen vuoro', mode: 'shared', starts_at: t(h2), ends_at: t(h2 + 2), persons: n, total_gross: 29 * n, customer_id: id, customer_name: name, customer_email: `${id}@example.com`, customer_phone: '0401234567', source_channel: 'admin', created_at: `${ds}T01:00:00Z`, source: 'native' });
+      return json([mk(101, 'Maija Meikäläinen', 11, 4), mk(102, 'Pekka Pouta', 11, 2, 'pending'), mk(103, 'Tiina Täysi', 13, 10), mk(104, 'Sulku Sakari', 16, 3)]);
+    }
     if (u.pathname.endsWith('/rpc/admin_list_reservations')) {   // migraatio 12: source/external_id + p_source-suodatin (null = kaikki, 'johku' | 'native')
       const a = route.request().postDataJSON() || {}; srcArgs.push(a.p_source ?? null); periodArgs.push([a.p_from ?? null, a.p_to ?? null]);
       const ds = new Date(Date.now() + 2 * 864e5).toISOString().slice(0, 10);
@@ -111,6 +119,14 @@ async function newPage(name, { allowFail = null, viewport = { width: 1100, heigh
         runs: [{ calendar_code: 'hoidot', started_at: `${ds(0)}T08:00:00Z`, outcome: 'ok', error: null, stats: { events_seen: 4, candidates: 2 } }, { calendar_code: 'hoidot', started_at: `${ds(-1)}T08:00:00Z`, outcome: 'error', error: 'API 503', stats: null }] });
     }
     if (u.pathname.endsWith('/rpc/admin_set_closure_override')) { ovrArgs.push(route.request().postDataJSON()); return json({ ok: true, blocks_inserted: 0, blocks_updated: 0, blocks_deleted: 1 }); }
+    if (u.pathname.endsWith('/rpc/admin_set_reservation_status')) { const a = route.request().postDataJSON(); statusArgs.push(a); if (statusFail) return json({ code: 'BK001', message: 'Tila ei sallittu (palvelimen viesti)', details: 'invalid_status', hint: null }, 400); return json({ ok: true }); }
+    if (u.pathname.endsWith('/rpc/admin_list_addons')) return json([{ id: 1, code: 'turvenaamio_jalkakylpy', name: 'Turvenaamio ja jalkakylpy', price: 15, vat_rate: 25.5, max_per_person: 1, applies_modes: ['shared', 'exclusive'], active: true, sort_order: 10 }, { id: 2, code: 'saunavihta', name: 'Saunavihta', price: 13, vat_rate: 25.5, max_per_person: 1, applies_modes: ['shared', 'exclusive'], active: true, sort_order: 20 }, { id: 3, code: 'pyyhe', name: 'Pyyhe', price: 5, vat_rate: 25.5, max_per_person: 1, applies_modes: ['shared', 'exclusive', 'resource'], active: true, sort_order: 30 }]);
+    if (dayMode && u.pathname.endsWith('/rpc/admin_day_view')) {   // v25: A 14:00 yleinen (2 varausta, lisäpalveluja), B 16:00 täynnä, C 18:00 myymätön TYHJÄ (piiloon), D 19:00 myymätön + varaus (näkyy ilman "ei myynnissä" -tekstiä), E 20:00 yksityinen vapaa
+      const a = route.request().postDataJSON() || {}, ds = a.p_date; const t = (h2) => `${ds}T${String(h2).padStart(2, '0')}:00:00Z`;
+      const ses = (rule, h2, o) => ({ rule_id: rule, product_id: 1, label: 'Yleinen vuoro', mode: 'shared', status: 'available', remaining: 6, min_persons: 1, max_persons: 10, price_mode: 'per_person', unit_price: 29, starts_at: t(h2), ends_at: t(h2 + 2), ...o });
+      return json({ date: ds, blocks: [], prep: [], addon_totals: [], reservations: [{ reservation_id: 101, addons: [{ addon_id: 2, name: 'Saunavihta', quantity: 2 }, { addon_id: 1, name: 'Turvenaamio ja jalkakylpy', quantity: 1 }, { addon_id: 3, name: 'Pyyhe', quantity: 4 }] }, { reservation_id: 102, addons: [] }, { reservation_id: 103, addons: [] }, { reservation_id: 104, addons: [] }],
+        sessions: [ses(21, 11), ses(22, 13, { status: 'full', remaining: 0 }), ses(23, 15, { status: 'unavailable', remaining: 0 }), ses(24, 16, { status: 'unavailable', remaining: 0 }), ses(25, 17, { mode: 'exclusive', label: 'Oma saunavuoro' })].map((x) => (x.rule_id === 25 ? { ...x, product_id: 3 } : x)) });
+    }
     if (u.pathname.endsWith('/rpc/admin_day_view')) {   // Uusi varaus -näkymän vuorolista: 8 vapaata vuoroa, jotta varauslomake jää aluksi ruudun alapuolelle
       const a = route.request().postDataJSON() || {}, ds = a.p_date;
       return json({ date: ds, blocks: [], reservations: [], sessions: [10, 11, 12, 13, 14, 15, 16, 17].map((h) => ({ rule_id: h, product_id: 1, label: 'Yleinen vuoro', mode: 'public', status: 'available', remaining: 6, min_persons: 1, max_persons: 10, price_mode: 'per_person', unit_price: 29, starts_at: `${ds}T${String(h - 3).padStart(2, '0')}:00:00Z`, ends_at: `${ds}T${String(h - 2).padStart(2, '0')}:00:00Z` })) });
@@ -442,6 +458,47 @@ async function loginViaInvite(page) {
     const msgs = await page.evaluate(async ([url, cs]) => { const m = await import(url); return cs.map((c) => m.errMsg({ code: c, message: `EN ${c}` })); }, [uiUrl, codes]);
     msgs.forEach((t, i) => { if (/^EN |_/.test(t) || !/[äöå ]/.test(t)) problems.push(`virhekoodi ${codes[i]}: ei suomenkielistä viestiä: ${t}`); });
     await page.evaluate(() => { location.hash = '#/varaukset'; });
+  }
+  {   // v25: päivänäkymä – työvuorot, otsikkorivin hlö + kapasiteettinappi (→ Uusi varaus esivalittuna), myymätön tyhjä vuoro piiloon, saapunut-nappi, lisäpalveluikonit, resurssilomakkeen lisäpalvelut
+    dayMode = true; await page.evaluate(() => { location.hash = '#/'; }); await page.waitForSelector('[data-testid=session]');
+    const shiftTxt = (await page.locator('[data-testid=dayshifts]').innerText()).replace(/\s+/g, ' ');
+    if (!/Lämmitykset \d+–\d+ Otto/.test(shiftTxt) || !/Saunottaja \d+–\d+ Joonas/.test(shiftTxt) || !/Vastaanotto \d+–\d+ Otto/.test(shiftTxt) || !/Saunottaja \d+–\d+ ei nimettyä tekijää/.test(shiftTxt) || /Hoitaja/.test(shiftTxt)) problems.push(`päivänäkymä: työvuorot väärin (rooli suomeksi, nimi, kellonaika): ${shiftTxt}`);
+    if (!(await page.locator('.dshift.shift-heater').count()) || !(await page.locator('.dshift.shift-therapist').count()) || !(await page.locator('.dshift.shift-reception').count())) problems.push('päivänäkymä: työvuoroilla pitää olla roolikohtaiset värit');
+    const sess = await page.locator('[data-testid=session]').count();
+    if (sess !== 4) problems.push(`päivänäkymä: myymätön tyhjä vuoro pitää piilottaa (näkyviä vuoroja ${sess}, odotettu 4)`);
+    const all = await page.locator('#view').innerText();
+    if (/ei myynniss|myynti päättynyt/i.test(all)) problems.push('päivänäkymä: "ei myynnissä" -tekstiä ei saa näkyä');
+    const first = page.locator('[data-testid=session]').first();
+    if (!/6 hlö/.test(await first.locator('[data-testid=session-persons]').innerText())) problems.push('päivänäkymä: vuoron otsikossa pitää näkyä henkilömäärä "6 hlö"');
+    const cap = first.locator('[data-testid=cap-btn]');
+    if (!/Vapaana: 6/.test(await cap.innerText()) || (await cap.evaluate((e) => Math.round(e.getBoundingClientRect().height))) < 44) problems.push('päivänäkymä: Vapaana: 6 -napin pitää olla ≥ 44 px');
+    if ((await page.locator('[data-testid=cap-full]').count()) !== 1 || (await page.locator('[data-testid=cap-btn]').count()) !== 2) problems.push('päivänäkymä: täynnä-vuorolla yksi punainen nappi (cap-full) ja vapailla kahdella vihreä Vapaana/Vapaa -linkki; myymättömällä ei nappia');
+    const ic = await first.locator('.addon-item').evaluateAll((els) => els.map((e) => `${e.dataset.kind}:${e.title}`));
+    if (JSON.stringify(ic) !== JSON.stringify(['whisk:Saunavihta', 'mask:Turvenaamio', 'towel:Pyyhe'])) problems.push(`päivänäkymä: lisäpalveluikonit väärin: ${JSON.stringify(ic)}`);
+    // saapunut-nappi: optimistinen, RPC admin_set_reservation_status('completed'), virheessä palautus
+    const ar = first.locator('[data-testid=arrive]').first();
+    if ((await ar.evaluate((e) => Math.round(e.getBoundingClientRect().height))) < 44 || (await ar.getAttribute('aria-pressed')) !== 'false') problems.push('päivänäkymä: saapunut-napin pitää olla ≥ 44 px ja aria-pressed=false');
+    await ar.click();
+    if ((await ar.getAttribute('aria-pressed')) !== 'true' || !/Saapunut/.test(await ar.getAttribute('aria-label'))) problems.push('päivänäkymä: saapunut-napin pitää päivittyä heti (aria-pressed=true, "Saapunut")');
+    await page.waitForTimeout(300);
+    if (statusArgs.at(-1)?.p_reservation_id !== 101 || statusArgs.at(-1)?.p_status !== 'completed') problems.push(`päivänäkymä: saapunut → RPC väärin: ${JSON.stringify(statusArgs.at(-1))}`);
+    statusFail = true; expect400 = true;
+    await ar.click(); await page.waitForTimeout(500); expect400 = false; statusFail = false;
+    if ((await ar.getAttribute('aria-pressed')) !== 'true') problems.push('päivänäkymä: virhetilassa saapunut-napin pitää palautua edelliseen tilaan');
+    if (!/epäonnistui/.test(await page.locator('#toast').innerText())) problems.push('päivänäkymä: virheilmoitus puuttuu kun saapumisen kirjaus epäonnistuu');
+    // Vapaana-nappi → Uusi varaus esivalittuna (vuoro 21, päivä, alkamisaika)
+    await cap.click(); await page.waitForSelector('[data-testid=booking-form]');
+    if (!/r=21/.test(page.url()) || (await page.locator('.slotbtn[aria-checked=true]').count()) !== 1 || !/Luo varaus/.test(await page.locator('[data-testid=booking-form]').innerText())) problems.push(`päivänäkymä: Vapaana-napin pitää avata Uusi varaus esivalitulla vuorolla (${page.url()})`);
+    await page.waitForTimeout(1000);
+    const inView = await page.locator('[data-testid=booking-form] h3').first().evaluate((e) => { const r = e.getBoundingClientRect(); return r.top >= 0 && r.top < window.innerHeight; });
+    if (!inView) problems.push('päivänäkymä: Uusi varaus -lomakkeen pitää vierittyä näkyviin esivalinnan jälkeen');
+    // resurssivaraus: vain pyyhe (saunavihta, turvenaamio ja jalkakylpy eivät kuulu hoitoon/saunotukseen); vuorolomakkeella kaikki kolme
+    const shiftAddons = await page.locator('[data-testid=booking-form] .addon-picker .addonrow:not([hidden]) strong').allInnerTexts();
+    if (shiftAddons.length !== 3) problems.push(`lisäpalvelut: yleisen vuoron lomakkeella pitää olla 3 lisäpalvelua: ${shiftAddons}`);
+    await page.evaluate(() => { location.hash = '#/uusi?tyyppi=resurssi'; }); await page.waitForSelector('[data-testid=resource-booking-form]');
+    const resAddons = await page.locator('[data-testid=resource-booking-form] .addon-picker .addonrow:not([hidden]) strong').allInnerTexts();
+    if (JSON.stringify(resAddons) !== JSON.stringify(['Pyyhe'])) problems.push(`lisäpalvelut: hoito-/saunotuslomakkeella saa olla vain Pyyhe: ${JSON.stringify(resAddons)}`);
+    dayMode = false; await page.evaluate(() => { location.hash = '#/varaukset'; });
   }
   {   // migraatio 18: Kalenterisulut-näkymä (kalenterit, konflikti, tapahtumat, ajot), ohitus (Ohita / Estä / Palauta automaattinen + muistiinpano), oikeuspiilotus, closure_managed suomeksi
     if ((await page.locator('#nav a[href="#/sulkukalenterit"]').count()) !== 1) problems.push('hallinta: Kalenterisulut puuttuu valikosta (blocks.manage)');

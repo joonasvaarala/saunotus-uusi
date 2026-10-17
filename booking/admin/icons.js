@@ -17,6 +17,10 @@ export const ICONS = {
   check: [C(12, 12, 10), P('M8.5 12.5l2.5 2.5 4.5-5')],                                       // Tarkista: ympyrä + valintamerkki
   key: [P('M21 2l-9.6 9.6'), C(7.5, 15.5, 5.5), P('M15.5 7.5l3 3L22 7l-3-3')],                // Käyttäjät
   leaf: [P('M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z'), P('M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12')], // Lisäpalvelut: lehti
+  whisk: [P('M12 22v-8M10 14h4'), P('M12 14C8.5 12.5 7 8 9 3.5 12 5 13 9 12 14z'), P('M12 14c3.5-1.5 5-6 3-10.5-3 1.5-4 5.5-3 10.5z'), P('M12 14V5')],   // Saunavihta: sidottu vihta, lehdet
+  mask: [P('M12 3c-4 0-7 3.5-7 8.5S8 21 12 21s7-4.5 7-9.5S16 3 12 3z'), P('M5.2 9.5C8 10.5 10 9.5 12 9.5s4 1 6.8 0'), P('M8.5 12.5c.7-.5 1.4-.5 2 0M13.5 12.5c.7-.5 1.4-.5 2 0M10 17h4')],   // Turvenaamio: kasvot, joilla hoitomaski
+  towel: [P('M9 7V4h6v3'), P('M5 7h14a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z'), P('M4 12h16M4 16h16')],   // Pyyhe: ripustettu raidallinen pyyhe
+  tick: [P('M5 12.5l4.5 4.5L19 7.5')],                                                         // Saapunut: valintamerkki
   close: [P('M18 6L6 18M6 6l12 12')],                                                         // Sulje
 };
 const NS = 'http://www.w3.org/2000/svg';
