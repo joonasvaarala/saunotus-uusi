@@ -63,7 +63,8 @@ export function searchFld(placeholder, testid, onChange) {
 }
 
 // Laajennettava rivi: head = napin sisältö (span-elementtejä), build() → sisältö ladataan ensimmäisellä avauksella
-export function expandRow({ id, head, build, testid, cls = '' }) {
+// bar = valinnainen rivi otsikon alla (napin ulkopuolella, jotta siinä voi olla linkkejä/nappeja; näkyy aina)
+export function expandRow({ id, head, build, testid, cls = '', bar = null }) {
   const panel = h('div', { class: 'tl-panel', id: `tl-panel-${id}`, hidden: true, role: 'region', 'aria-label': t('details') });
   let loaded = false;
   const load = async () => {
@@ -75,15 +76,14 @@ export function expandRow({ id, head, build, testid, cls = '' }) {
     btn.setAttribute('aria-expanded', String(open)); panel.hidden = !open; row.classList.toggle('open', open);
     if (open && !loaded) load();
   } }, head, h('span', { class: 'tl-chev', 'aria-hidden': 'true' }, icon('chev', 20)));
-  const row = h('li', { class: `tl-row ${cls}`, 'data-testid': testid }, btn, panel);
+  const row = h('li', { class: `tl-row ${cls}`, 'data-testid': testid }, btn, bar, panel);
   return row;
 }
 
-// Toimintonappi. Pois käytöstä (kunnes RPC valmis): disabled + selite; mockissa/valmiina: toimii. Selite myös näkyvänä tekstinä (title ei riitä kosketuslaitteilla).
-export function actionBtn({ api, key, label, ico, testid, extraDisabled = null, onClick }) {
-  const live = api.actionLive(key);
-  const off = !live || extraDisabled;
-  const b = h('button', { type: 'button', class: `btn tl-btn${off ? ' is-off' : ''}`, 'data-testid': testid, disabled: off ? true : null, title: !live ? t('btn.notReady') : extraDisabled || null,
+// Toimintonappi. Pois käytöstä vain kun toiminto ei sovellu juuri tälle tilaukselle (extraDisabled = selite; näkyy myös title-tekstinä).
+export function actionBtn({ key, label, ico, testid, extraDisabled = null, onClick }) {
+  const off = !!extraDisabled;
+  const b = h('button', { type: 'button', class: `btn tl-btn${off ? ' is-off' : ''}`, 'data-testid': testid, 'data-action': key, disabled: off ? true : null, title: extraDisabled || null,
     onclick: async () => { b.disabled = true; try { await onClick(); } catch (e) { toast(e instanceof FeatureNotReady ? t('notReady', { rpc: e.rpc }) : friendly(e), 'err'); } finally { b.disabled = false; } } },
     ico ? h('span', { class: 'tl-ico', 'aria-hidden': 'true' }, icon(ico, 20)) : null, h('span', { text: label }));
   return b;

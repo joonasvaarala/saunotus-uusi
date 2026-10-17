@@ -1,5 +1,5 @@
-// Talous › Raportit: päivä- tai kuukausiraportti (kassaperuste: kuitin päivä), ALV-kannoittain ja maksutavoittain, CSV-lataus ja PDF (selaimen tulostus).
-// Data: api.reportDaily/reportMonthly (sopimus: admin_report_daily/admin_report_month → totals, by_method, by_vat, by_method_vat, by_category, receipts|by_day, open). Raportit ovat vaihe D:tä → palvelimelta puuttuessaan mock + ilmoitus.
+// Talous › Raportit: päivä- tai kuukausiraportti (kassaperuste: kuitin päivä), ALV-kannoittain ja maksutavoittain, CSV-lataus, PDF (palvelimen report-pdf) ja tulostus.
+// Data: api.reportDaily/reportMonthly (sopimus: admin_report_daily/admin_report_month → totals, by_method, by_vat, by_method_vat, by_category, receipts|by_day, open). Jos jokin RPC puuttuu palvelimelta → mock + ilmoitus.
 import { h, toast, errMsg, todayHel } from '../ui.js';
 import { icon } from '../icons.js';
 import { t, fmt, has } from '../talous-i18n.js';
@@ -18,11 +18,11 @@ export function createReportsTab({ api, canFull = true }) {
   const ym = () => `${st.year}-${String(st.month).padStart(2, '0')}`;
   const isEmpty = (r) => !r.totals.receipts && !r.totals.refund_receipts;
   async function load() {
-    const my = ++seq; current = null; csvBtn.disabled = true; out.replaceChildren(loading());
+    const my = ++seq; current = null; csvBtn.disabled = true; pdfSrvBtn.disabled = true; out.replaceChildren(loading());
     try {
       const r = st.kind === 'daily' ? await api.reportDaily(st.date) : await api.reportMonthly(ym());
       if (my !== seq) return;
-      current = r; csvBtn.disabled = isEmpty(r) || !canFull; out.replaceChildren(view(r));
+      current = r; csvBtn.disabled = isEmpty(r) || !canFull; pdfSrvBtn.disabled = false; out.replaceChildren(view(r));
     } catch (e) { if (my === seq) out.replaceChildren(errorBox(e, load)); }
   }
   const periodLabel = (r) => (r.period.kind === 'day' ? fmt.date(r.period.from) : `${fmt.month(r.period.from.slice(0, 7))} (${fmt.date(r.period.from)} – ${fmt.date(r.period.to)})`);
@@ -74,11 +74,23 @@ export function createReportsTab({ api, canFull = true }) {
       else downloadCsv(`raportti_${p.kind === 'day' ? 'paiva' : 'kuukausi'}_${p.kind === 'day' ? p.from : p.from.slice(0, 7)}.csv`, toCsv(res.lines.map((l) => ({ ...l, group_label: fiGroup(l.group) })), { methodLabel: fiMethod }));
     } catch (e) { toast(errMsg(e), 'err'); } finally { csvBtn.disabled = false; }
   } }, h('span', { class: 'tl-ico', 'aria-hidden': 'true' }, icon('download', 20)), h('span', { text: t('r.csv') }));
+  // Palvelimen report-pdf (verify_jwt=true): haetaan JWT:llä → Blob → lataus. Mockissa ei palvelinta → selaimen tulostus.
+  const pdfSrvBtn = h('button', { type: 'button', class: 'btn tl-btn', 'data-testid': 'r-pdf-server', disabled: true, onclick: async () => {
+    if (!current) return;
+    pdfSrvBtn.disabled = true;
+    try {
+      const res = await api.reportPdf(current), p = current.period;
+      if (!res) { document.title = `${t('nav')} – ${periodLabel(current)}`; window.print(); return; }
+      const url = URL.createObjectURL(new Blob([res.blob], { type: 'application/pdf' }));
+      const a = h('a', { href: url, download: `raportti_${p.kind === 'day' ? 'paiva_' + p.from : 'kuukausi_' + p.from.slice(0, 7)}.pdf` });
+      document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 30000);
+    } catch (e) { toast(`${t('r.pdfFailed')} ${errMsg(e)}`, 'err'); } finally { pdfSrvBtn.disabled = !current; }
+  } }, h('span', { class: 'tl-ico', 'aria-hidden': 'true' }, icon('download', 20)), h('span', { text: t('r.pdfServer') }));
   const pdfBtn = h('button', { type: 'button', class: 'btn tl-btn', 'data-testid': 'r-pdf', onclick: () => { document.title = `${t('nav')} – ${current ? periodLabel(current) : ''}`; window.print(); } },
     h('span', { class: 'tl-ico', 'aria-hidden': 'true' }, icon('print', 20)), h('span', { text: t('r.pdf') }));
   syncKind();
   const controls = h('div', { class: 'tl-toolbar tl-r-controls tl-noprint' }, h('div', { class: 'fld' }, h('span', { text: t('r.type') }), h('div', { role: 'radiogroup', 'aria-label': t('r.type'), class: 'tl-segs' }, kindBtns.daily, kindBtns.monthly)), dayFld, monFld,
-    h('div', { class: 'tl-actions' }, csvBtn, pdfBtn), h('p', { class: 'muted tl-hint', text: t('r.pdfNote') }), canFull ? null : h('p', { class: 'tl-hint', role: 'note', 'data-testid': 'r-limited', text: t('r.limited') }));
+    h('div', { class: 'tl-actions' }, csvBtn, pdfSrvBtn, pdfBtn), h('p', { class: 'muted tl-hint', text: t('r.pdfNote') }), canFull ? null : h('p', { class: 'tl-hint', role: 'note', 'data-testid': 'r-limited', text: t('r.limited') }));
   const node = h('div', { class: 'tl-tab', 'data-testid': 'tab-reports' }, controls, out);
   return { node, load };
 }

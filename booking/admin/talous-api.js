@@ -4,21 +4,18 @@
 // Mock ↔ oikea = YKSI `rpc`-funktio: createTalousApi({ rpc }) kutsuu rpcBackend(rpc):tä. Mock (talous-mock.js → createMock().rpc) vastaa samoilla RPC-nimillä,
 // p_-parametreilla ja vastausrakenteilla, joten sama koodi ajaa molempia.
 //   · Tila 'mock': osoitteessa ?mock=1 (kyselyosassa tai #/talous?mock=1) → kaikki data mockista.
-//   · Tila 'real': kutsut menevät palvelimelle. Jos jokin RPC PUUTTUU (404 / PGRST202 / 42883; esim. raporttien vaihe D ei vielä tuotannossa), kyseinen toiminto
+//   · Tila 'real': kutsut menevät palvelimelle. Jos jokin RPC PUUTTUU (404 / PGRST202 / 42883; esim. vanhempi kanta ilman raportti-RPC:itä), kyseinen toiminto
 //     siirtyy mockiin, sivu näyttää "ominaisuus ei vielä käytössä" -ilmoituksen (api.missing) – muut toiminnot pysyvät oikeina.
-//   · Kirjoittavat toiminnot (LIVE_ACTIONS): oikeassa tilassa pois päältä, kunnes tiimi kytkee ne (yksi lippu per toiminto). Mock-tilassa ne toimivat mockina.
+//   · Kirjoittavat toiminnot (lisäys, maksulinkki, maksun kirjaus, hyvitys, kuitin uudelleenlähetys) menevät oikeassa tilassa aina oikealle palvelimelle (ei mock-varakutsua → ei näennäisiä onnistumisia).
+//   · Kuitit: getReceipt (teksti + snapshot), resendReceipt, receiptPdfUrl (receipt-pdf?t=<public_token>, URL muodostetaan hallinnan Supabase-asetuksesta, ei palvelimen pdf_url-kentästä).
 import { createMock } from './talous-mock.js';
 
 export const RPC = {
   listOrders: 'admin_list_orders', getOrder: 'admin_get_order', listPayments: 'admin_list_payments', listAddons: 'admin_list_addons',
   addToOrder: 'admin_add_to_order', createPaymentLink: 'admin_create_payment_link', refund: 'admin_refund', recordPayment: 'admin_record_payment', listVatRates: 'admin_list_vat_rates',
   reportDaily: 'admin_report_daily', reportMonthly: 'admin_report_month', reportCsv: 'admin_report_csv',
+  getReceipt: 'admin_get_receipt', resendReceipt: 'admin_resend_receipt',
 };
-// Kirjoittavat toiminnot oikeassa tilassa. Rahaa liikuttavat toiminnot on kokeiltu testiprojektissa hallinnan käyttöliittymästä ja RPC-tasolla
-// (booking/scripts/e2e-talous-live.mjs) → päällä. Ne ovat vain hallinnassa ja palvelin vaatii oikeudet (payments.manage / payments.refund / bookings.override).
-// Yksi lippu per toiminto: jos jokin pitää sulkea, aseta false (nappi muuttuu "ei vielä käytössä" -tilaan).
-export const LIVE_ACTIONS = { addToOrder: true, createPaymentLink: true, refund: true, recordPayment: true };
-
 export class FeatureNotReady extends Error {
   constructor(rpc) { super(`Ominaisuus ei vielä käytössä (${rpc})`); this.name = 'FeatureNotReady'; this.code = 'feature_not_ready'; this.rpc = rpc; }
 }
@@ -55,7 +52,11 @@ export function normPaymentRow(p) {
 }
 const normLine = (l) => { const gross = num(l.amount_gross ?? l.gross), rate = num(l.vat_rate), vat = l.line_vat != null ? num(l.line_vat) : vatOf(gross, rate);   // sopimus: rivillä vain brutto + ALV-% → ALV/netto lasketaan tässä (arvio; kuitin pyöristys tehdään loppusummasta)
   return { id: l.id ?? null, order_item_id: l.order_item_id ?? null, description: l.description ?? '', quantity: num(l.quantity, 1), amount_gross: gross, vat_rate: rate, line_vat: vat, line_net: l.line_net != null ? num(l.line_net) : round2(gross - vat) }; };
-const normReceiptRef = (x) => ({ id: x.id ?? null, receipt_no: x.receipt_no, kind: x.kind ?? 'receipt', issued_at: x.issued_at ?? x.created_at ?? null, public_token: x.public_token ?? x.token ?? null, sent_at: x.sent_at ?? null });
+// kuittiviite: admin_get_order.receipts[] (id, receipt_no, kind, issued_at, total, payment_id, refund_id, public_token, sent_at) ja payments[].receipts[] (ilman total/payment_id)
+const normReceiptRef = (x) => ({ id: x.id ?? null, receipt_no: x.receipt_no, kind: x.kind ?? 'receipt', issued_at: x.issued_at ?? x.created_at ?? null, public_token: x.public_token ?? x.token ?? null, sent_at: x.sent_at ?? null,
+  total: x.total != null || x.total_gross != null ? num(x.total ?? x.total_gross) : null, payment_id: x.payment_id ?? null, refund_id: x.refund_id ?? null });
+// admin_get_receipt → { id, receipt_no, kind, issued_at, total_gross, snapshot, text_body, public_token, pdf_url, sent_at, order_id, payment_id, refund_id }
+export const normReceipt = (x) => ({ ...normReceiptRef(x), total: num(x.total_gross ?? x.total), snapshot: x.snapshot ?? null, text_body: String(x.text_body ?? ''), pdf_url: x.pdf_url ?? null, order_id: x.order_id ?? null });
 export function normOrderPayment(p) {
   const receipts = (p.receipts || []).map(normReceiptRef);
   return { payment_id: p.id ?? p.payment_id, method: p.method, method_label: p.method_label ?? null, status: p.status, amount: num(p.amount), refunded_amount: num(p.refunded_amount), rounding: num(p.rounding), paid_at: p.paid_at ?? null,
@@ -140,10 +141,13 @@ export function rpcBackend(rpc) {
     reportDaily: (date) => call('reportDaily', { p_date: date }),
     reportMonthly: (ym) => call('reportMonthly', { p_ym: ym }),
     reportCsv: (a) => call('reportCsv', compact({ p_from: a.from, p_to: a.to, p_kind: a.kind || 'lines' })),
+    getReceipt: (id) => call('getReceipt', { p_receipt_id: id }),
+    resendReceipt: (id) => call('resendReceipt', { p_receipt_id: id }),
   };
 }
 
-export function createTalousApi({ rpc, mock = wantsMock(), mockFactory = () => createMock({ delay: 120 }) } = {}) {
+// io = selaimen apurit (talous.js antaa sb.js:n): functionUrl(nimi, kysely) = Edge-funktion osoite, select(taulu, kysely) = PostgREST-luku, fnBlob(nimi, kysely) = JWT-suojattu GET → {blob,type}
+export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory = () => createMock({ delay: 120 }) } = {}) {
   const forced = !!mock, missing = new Set(), listeners = new Set();
   let mockBackend = null;
   const real = rpc && !forced ? rpcBackend(rpc) : null;
@@ -160,7 +164,6 @@ export function createTalousApi({ rpc, mock = wantsMock(), mockFactory = () => c
   // Kirjoittava toiminto: oikeassa tilassa vain oikealle palvelimelle (ei koskaan mock-varakutsua → ei näennäisiä onnistumisia); puuttuva RPC → FeatureNotReady.
   const act = async (key, args) => {
     if (!real) return getMock()[key](args);
-    if (!LIVE_ACTIONS[key]) throw new FeatureNotReady(RPC[key]);
     if (missing.has(key)) throw new FeatureNotReady(RPC[key]);
     try { return await real[key](args); } catch (e) {
       if (isMissingRpc(e)) { missing.add(key); notify(); throw new FeatureNotReady(RPC[key]); }
@@ -174,8 +177,6 @@ export function createTalousApi({ rpc, mock = wantsMock(), mockFactory = () => c
     onMode(f) { listeners.add(f); return () => listeners.delete(f); },
     // oikea kirjoitus onnistui → muut välilehdet hakevat datan uudelleen kun ne avataan
     onChanged(f) { changeListeners.add(f); return () => changeListeners.delete(f); }, changed() { changeListeners.forEach((f) => f()); },
-    // nappi on käytössä mockissa tai kun LIVE_ACTIONS[key] on päällä
-    actionLive: (key) => !real || (!!LIVE_ACTIONS[key] && !missing.has(key)),
     listOrders: (a) => run('listOrders', a, (r) => ({ total: num(r.total), rows: L(r.rows).map(normOrderRow) })),
     listPayments: (a) => run('listPayments', a, (r) => ({ total: num(r.total), sum_paid: num(r.sum_paid), sum_refunded: num(r.sum_refunded), rows: L(r.rows).map(normPaymentRow) })),
     getOrder: (id) => run('getOrder', id, normOrder),
@@ -191,6 +192,24 @@ export function createTalousApi({ rpc, mock = wantsMock(), mockFactory = () => c
     // ALV-huomautus on vain tiedote: virhe/puuttuva RPC/oikeus puuttuu → null (ei mock-varaa, ei bannerin muutosta)
     listVatRates: async () => { if (!real) return normVatRates(await getMock().listVatRates()); try { return normVatRates(await real.listVatRates()); } catch { return null; } },
     addToOrder: (a) => act('addToOrder', a), createPaymentLink: (a) => act('createPaymentLink', a), refund: (a) => act('refund', a), recordPayment: (a) => act('recordPayment', a),
+    // ---- kuitit ----
+    getReceipt: (id) => run('getReceipt', id, normReceipt),
+    // admin_resend_receipt → { ok, email_queued }: jonoon vain jos asiakkaalla on kelvollinen sähköposti; oikeus payments.manage
+    resendReceipt: (id) => act('resendReceipt', id),
+    // Kuitti-PDF: <SUPABASE_URL>/functions/v1/receipt-pdf?t=<public_token> (verify_jwt=false → suora linkki). URL tulee hallinnan omasta konfiguraatiosta (sama kuin sb.js:n funktiokutsut),
+    // EI palvelimen pdf_url-kentästä: sen isäntä on asetus functions_base_url, joka voi osoittaa toiseen projektiin (esim. testiprojektin kopiossa tuotantoon).
+    receiptPdfUrl: (token) => (token && io.functionUrl ? io.functionUrl('receipt-pdf', { t: token }) : ''),
+    // Sähköpostin lähetystila (integration_config.resend.mode: off | dry_run | live) – luku sallittu henkilökunnalle (RLS). null = ei saatavilla. Mockissa dry_run (kuten tuotannossa nyt).
+    async resendMode() {
+      if (!real) return 'dry_run';
+      try { const rows = await io.select?.('integration_config', { select: 'mode', key: 'eq.resend' }); const m = rows?.[0]?.mode; return ['off', 'dry_run', 'live'].includes(m) ? m : null; } catch { return null; }
+    },
+    // Raportin PDF palvelimelta (report-pdf, verify_jwt=true): kuukausi vaatii reports.view. Mockissa: ei palvelinta → null (näkymä käyttää selaimen tulostusta).
+    async reportPdf(report) {
+      if (!real || !io.fnBlob) return null;
+      const p = report.period, q = p.kind === 'day' ? { kind: 'daily', date: p.from } : { kind: 'month', ym: p.from.slice(0, 7) };
+      return io.fnBlob('report-pdf', q);
+    },
   };
   return api;
 }

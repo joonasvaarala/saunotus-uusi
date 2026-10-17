@@ -57,11 +57,24 @@ export async function setPassword(password) {
   if (!r.ok) throw new ApiError(j.msg || j.message || j.error_description || 'Salasanan asetus epäonnistui', { status: r.status, code: j.error_code });
   return true;
 }
+// Edge Function -osoite: <url><functions ?? /functions/v1>/<nimi>[?kysely]. Sama muodostus kuin fn():ssä (kuitti-PDF: functionUrl('receipt-pdf', { t: <public_token> }); verify_jwt=false → suora linkki).
+export const functionUrl = (name, query) => base(`${cfg().functions ?? '/functions/v1'}/${name}`) + (query ? '?' + new URLSearchParams(query).toString() : '');
+// Edge Function GET → Blob käyttäjän omalla JWT:llä (esim. report-pdf, verify_jwt=true; ei suora <a href>). Virhe: ApiError (palvelimen JSON {ok:false, code, message}).
+export async function fnBlob(name, query) {
+  const tk = await token();
+  const bearer = tk && tk.split('.').length === 3 ? { Authorization: `Bearer ${tk}` } : {};
+  const r = await fetch(functionUrl(name, query), { headers: { apikey: cfg().anonKey, ...bearer } });
+  if (!r.ok) {
+    const text = await r.text(); let j; try { j = text ? JSON.parse(text) : {}; } catch { j = { message: text }; }
+    throw new ApiError(j.message || j.msg || r.statusText || 'Pyyntö epäonnistui', { code: j.code, status: r.status, details: j });
+  }
+  return { blob: await r.blob(), type: r.headers.get('content-type') || '' };
+}
 // Edge Function -kutsu: fn('admin-users', { action: 'invite', ... }) → JSON. Kutsuja tunnistetaan käyttäjän omalla JWT:llä; palvelinavainta ei käytetä selaimessa.
 export async function fn(name, body) {
   const tk = await token();
   const bearer = tk && tk.split('.').length === 3 ? { Authorization: `Bearer ${tk}` } : {};
-  const r = await fetch(base(`${cfg().functions ?? '/functions/v1'}/${name}`), { method: 'POST', headers: { apikey: cfg().anonKey, ...bearer, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const r = await fetch(functionUrl(name), { method: 'POST', headers: { apikey: cfg().anonKey, ...bearer, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   const text = await r.text();
   let j; try { j = text ? JSON.parse(text) : {}; } catch { j = { message: text }; }
   if (!r.ok || j.ok === false) throw new ApiError(j.message || j.msg || r.statusText || 'Pyyntö epäonnistui', { code: j.code, status: r.status, details: j });
@@ -119,5 +132,5 @@ async function storageReq(method, bucket, path, body, contentType) {
 export const uploadObject = (bucket, path, blob) => storageReq('POST', bucket, path, blob, blob.type || 'application/octet-stream');
 export const removeObject = (bucket, path) => storageReq('DELETE', bucket, path);
 
-export const sb = { rpc, select, fn, storageUrl, uploadObject, removeObject, signIn, signOut, getSession, onAuthChange, adoptSessionFromHash, setPassword };
+export const sb = { rpc, select, fn, functionUrl, fnBlob, storageUrl, uploadObject, removeObject, signIn, signOut, getSession, onAuthChange, adoptSessionFromHash, setPassword };
 export default sb;

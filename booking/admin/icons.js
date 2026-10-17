@@ -26,6 +26,9 @@ export const ICONS = {
   link: [P('M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1'), P('M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1')],   // Maksulinkki
   undo: [P('M3 12a9 9 0 1 0 3-6.7L3 8'), P('M3 3v5h5')],                                           // Hyvitä
   download: [P('M12 3v12M7 10l5 5 5-5'), P('M4 20h16')],                                           // CSV-lataus
+  eye: [P('M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z'), C(12, 12, 3)],                          // Näytä kuitti
+  copy: [R(9, 9, 12, 12, 2), P('M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1')],        // Kopioi teksti
+  mail: [R(2, 4, 20, 16, 2), P('M22 7l-10 6L2 7')],                                                // Lähetä uudelleen
   print: [P('M7 9V3h10v6'), R(3, 9, 18, 8, 2), R(7, 14, 10, 7, 1)],                                // PDF / tulostus
   chev: [P('M6 9l6 6 6-6')],                                                                       // Laajenna rivi
   pgfirst: [P('M17 18l-6-6 6-6'), P('M7 6v12')],                                                   // Sivutus: ensimmäinen
