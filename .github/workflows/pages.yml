@@ -32,6 +32,11 @@ jobs:
           node-version: 20
       - run: node --test booking/supabase/functions/admin-users/logic.test.js
       - run: node scripts/build-pages.mjs
+      # sähköpostipohjat ovat TypeScriptiä (vain tyyppisyntaksia) → testi tarvitsee Noden tyyppien poiston (22.18+)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test booking/supabase/functions/send-emails/templates.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

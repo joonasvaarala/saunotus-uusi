@@ -1,3 +1,19 @@
 # Supabase-projektin asetukset, joita CLI (supabase functions deploy) käyttää. Salaisuuksia EI tallenneta tähän.
 [functions.admin-users]
 verify_jwt = true   # pyynnöllä pitää olla kirjautuneen käyttäjän JWT; admin-oikeus tarkistetaan lisäksi funktiossa (booking.is_admin)
+
+# Talous-integraatiot (vastaa tuotannon verify_jwt-asetuksia 17.10.2026). Salaisuudet (RESEND_API_KEY, VISMAPAY_*, PROCOUNTOR_*) vain Edge-salaisuuksina, ei tähän.
+[functions.send-emails]
+verify_jwt = false   # pg_cron kutsuu; tunnistus x-sync-secret (booking._cron_secret_ok)
+[functions.receipt-pdf]
+verify_jwt = false   # kuitin public_token on salaisuus; kuitti on muuttumaton snapshot
+[functions.report-pdf]
+verify_jwt = true
+[functions.vismapay-start]
+verify_jwt = false   # asiakas tulee maksulinkistä (RUNKO, 501)
+[functions.vismapay-notify]
+verify_jwt = false   # Visma Payn palvelinkutsu (RUNKO, allekirjoitus tarkistetaan funktiossa)
+[functions.vismapay-refund]
+verify_jwt = true
+[functions.procountor-sync]
+verify_jwt = true

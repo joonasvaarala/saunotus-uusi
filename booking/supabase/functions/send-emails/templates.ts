@@ -1,0 +1,169 @@
+// Sähköpostimallit: render(kind, data, locale) -> { subject, text, html }.
+// data = booking.email_outbox_claim()-rivi (ks. docs/talous-integraatiot.md): { kind, locale, to_name, order{order_no, order_url, total, items[], reservations[]}, receipt{receipt_no, kind, text_body, total, issued_at}, payment{amount, link_url, link_expires_at} }.
+// FI + EN, HTML (taulukkopohjainen, inline-tyylit, sähköpostiyhteensopiva) + tekstiversio. Ei ulkoisia riippuvuuksia (puhdas funktio, testattu node --test).
+// Tyyli: tumma vihreä + hiekka, ei sinistä. Logo: sivuston /img/logo-kuitti.png (osoite johdetaan tilauslinkistä; muuten LOGO_FALLBACK).
+export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change";
+export interface Rendered { subject: string; text: string; html: string }
+
+export const SELLER = "Sipoonjoen perinnesauna";
+export const COMPANY = "Havuhattu Oy";
+export const ADDRESS = "Hindsbyntie 124, 04130 Sipoo";
+export const EMAIL = "savusauna@saunotus.fi";
+export const PHONE = "010 299 2866";
+export const LOGO_FALLBACK = "https://joonasvaarala.github.io/saunotus-uusi/img/logo-kuitti.png";
+const GREEN = "#1f3d2b", GREEN_SOFT = "#3d5c47", SAND = "#efe7d6", SAND_LIGHT = "#f7f2e7", SAND_LINE = "#d9ccb2", INK = "#2b2a26", MUTED = "#6f6a5d";
+const FONT = "Georgia,'Times New Roman',serif", SANS = "Arial,Helvetica,sans-serif";
+
+const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+const safeUrl = (u: unknown): string => { const s = String(u ?? "").trim(); return /^https?:\/\/[^\s"'<>]+$/i.test(s) ? s : ""; };
+const NBSP = "\u00a0";
+const eur = (n: unknown, en: boolean) => { const v = Number(n ?? 0); const s = Math.abs(v).toFixed(2); return (v < 0 ? "-" : "") + (en ? s : s.replace(".", ",")) + NBSP + "€"; };
+const fmt = (iso: unknown, en: boolean, opts: Intl.DateTimeFormatOptions) => { const d = new Date(String(iso ?? "")); return Number.isNaN(d.getTime()) ? "" : new Intl.DateTimeFormat(en ? "en-GB" : "fi-FI", { timeZone: "Europe/Helsinki", ...opts }).format(d); };
+const dt = (iso: unknown, en: boolean) => fmt(iso, en, { weekday: "short", day: "numeric", month: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" });
+const tm = (iso: unknown, en: boolean) => fmt(iso, en, { hour: "2-digit", minute: "2-digit" });
+const day = (iso: unknown, en: boolean) => fmt(iso, en, { day: "numeric", month: "numeric", year: "numeric" });
+
+/** Sivuston juuri tilauslinkistä (…/tilaus/?t=…) tai maksulinkistä (…/maksa/?p=…); muuten null. */
+export function siteBase(d: any): string | null {
+  for (const u of [d?.order?.order_url, d?.payment?.link_url]) {
+    const m = /^(https?:\/\/[^\s?#]+?)\/(?:tilaus|maksa|en\/order)\/?\?/i.exec(String(u ?? ""));
+    if (m) return m[1];
+  }
+  return null;
+}
+export const logoUrl = (d: any): string => { const b = siteBase(d); return b ? `${b}/img/logo-kuitti.png` : LOGO_FALLBACK; };
+
+// ---------- HTML-rakennuspalikat (taulukkopohjaiset) ----------
+const p = (html: string, extra = "") => `<tr><td style="padding:0 32px 14px 32px;font-family:${SANS};font-size:15px;line-height:1.55;color:${INK};${extra}">${html}</td></tr>`;
+const h1 = (title: string) => `<tr><td style="padding:28px 32px 14px 32px;font-family:${FONT};font-size:24px;line-height:1.25;color:${GREEN};font-weight:normal">${esc(title)}</td></tr>`;
+const button = (url: string, label: string) => {
+  const u = safeUrl(url); if (!u) return "";
+  return `<tr><td style="padding:6px 32px 8px 32px"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${GREEN}" style="border-radius:4px"><a href="${esc(u)}" style="display:inline-block;padding:12px 24px;font-family:${SANS};font-size:15px;font-weight:bold;color:${SAND_LIGHT};text-decoration:none;border-radius:4px">${esc(label)}</a></td></tr></table></td></tr>`
+    + `<tr><td style="padding:6px 32px 18px 32px;font-family:${SANS};font-size:12px;line-height:1.4;color:${MUTED};word-break:break-all">${esc(u)}</td></tr>`;
+};
+const th = (s: string, align = "left") => `<td align="${align}" style="padding:6px 8px;font-family:${SANS};font-size:12px;color:${MUTED};text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid ${SAND_LINE}">${esc(s)}</td>`;
+const td = (s: string, align = "left", bold = false) => `<td align="${align}" valign="top" style="padding:8px;font-family:${SANS};font-size:14px;line-height:1.4;color:${INK};border-bottom:1px solid ${SAND};${bold ? "font-weight:bold;" : ""}">${esc(s)}</td>`;
+const box = (inner: string) => `<tr><td style="padding:0 32px 18px 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${SAND_LIGHT}" style="background:${SAND_LIGHT};border:1px solid ${SAND_LINE};border-radius:4px"><tr><td style="padding:12px 16px">${inner}</td></tr></table></td></tr>`;
+
+function wrapHtml(d: any, title: string, preheader: string, rows: string, en: boolean): string {
+  const logo = logoUrl(d);
+  return `<!doctype html><html lang="${en ? "en" : "fi"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${esc(title)}</title></head>
+<body style="margin:0;padding:0;background:${SAND};-webkit-text-size-adjust:100%">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;font-size:1px;line-height:1px;color:${SAND}">${esc(preheader)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${SAND}" style="background:${SAND}"><tr><td align="center" style="padding:24px 10px">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="width:100%;max-width:600px;background:#ffffff;border-radius:6px;border-top:4px solid ${GREEN}">
+<tr><td style="padding:22px 32px 4px 32px"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+<td valign="middle" style="padding-right:12px"><img src="${esc(logo)}" width="56" alt="${esc(COMPANY)}" style="display:block;border:0;outline:none;height:auto;width:56px"></td>
+<td valign="middle" style="font-family:${FONT};font-size:18px;line-height:1.2;color:${GREEN}">${esc(SELLER)}<br><span style="font-family:${SANS};font-size:12px;color:${MUTED}">${esc(COMPANY)}</span></td>
+</tr></table></td></tr>
+${rows}
+<tr><td style="padding:10px 32px 0 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-top:1px solid ${SAND_LINE};font-size:0;line-height:0">&nbsp;</td></tr></table></td></tr>
+<tr><td style="padding:8px 32px 26px 32px;font-family:${SANS};font-size:12px;line-height:1.6;color:${MUTED}">${esc(SELLER)} · ${esc(COMPANY)}<br>${esc(ADDRESS)}<br><a href="mailto:${EMAIL}" style="color:${GREEN_SOFT}">${EMAIL}</a> · <a href="tel:${PHONE.replace(/\s/g, "")}" style="color:${GREEN_SOFT};text-decoration:none">${PHONE}</a></td></tr>
+</table></td></tr></table></body></html>`;
+}
+
+// ---------- tilaus ----------
+interface Block { text: string; html: string }
+function orderBlock(d: any, en: boolean): Block {
+  const o = d?.order; if (!o) return { text: "", html: "" };
+  const res = (o.reservations ?? []).filter((r: any) => r.status !== "cancelled");
+  const items: any[] = o.items ?? [];
+  const L = en ? { order: "Order", when: "Time", product: "Product", persons: "Guests", qty: "Qty", sum: "Amount", total: "Total", pers: "guests", sauna: "Bookings", lines: "Order lines" }
+               : { order: "Tilaus", when: "Aika", product: "Tuote", persons: "Henkilöt", qty: "Kpl", sum: "Summa", total: "Yhteensä", pers: "hlö", sauna: "Varaukset", lines: "Tilausrivit" };
+  const tl: string[] = [`${L.order} ${o.order_no}`];
+  if (res.length) { tl.push("", `${L.sauna}:`); for (const r of res) tl.push(`  ${r.product_name ?? ""}: ${dt(r.starts_at, en)}–${tm(r.ends_at, en)}, ${r.persons} ${L.pers}`); }
+  if (items.length) { tl.push("", `${L.lines}:`); for (const i of items) tl.push(`  ${i.quantity} × ${i.name} ${eur(i.line_total, en)}`); }
+  tl.push("", `${L.total}: ${eur(o.total, en)}`);
+  let html = `<tr><td style="padding:4px 32px 4px 32px;font-family:${FONT};font-size:17px;color:${GREEN}">${L.order} ${esc(o.order_no)}</td></tr>`;
+  if (res.length) {
+    html += `<tr><td style="padding:6px 32px 12px 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${th(L.product)}${th(L.when)}${th(L.persons, "right")}</tr>`
+      + res.map((r: any) => `<tr>${td(String(r.product_name ?? ""))}${td(`${dt(r.starts_at, en)}–${tm(r.ends_at, en)}`)}${td(String(r.persons ?? ""), "right")}</tr>`).join("") + `</table></td></tr>`;
+  }
+  if (items.length) {
+    html += `<tr><td style="padding:6px 32px 8px 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${th(L.product)}${th(L.qty, "right")}${th(L.sum, "right")}</tr>`
+      + items.map((i: any) => `<tr>${td(String(i.name ?? ""))}${td(String(i.quantity ?? ""), "right")}${td(eur(i.line_total, en), "right")}</tr>`).join("")
+      + `<tr><td colspan="2" align="right" style="padding:10px 8px;font-family:${SANS};font-size:15px;font-weight:bold;color:${GREEN}">${L.total}</td><td align="right" style="padding:10px 8px;font-family:${SANS};font-size:15px;font-weight:bold;color:${GREEN}">${esc(eur(o.total, en))}</td></tr></table></td></tr>`;
+  } else {
+    html += p(`<b>${L.total}: ${esc(eur(o.total, en))}</b>`);
+  }
+  return { text: tl.join("\n") + "\n", html };
+}
+
+const textBlock = (...parts: (string | undefined | false)[]) => parts.filter((x) => typeof x === "string" && x !== "").join("\n\n");
+
+export function render(kind: Kind, d: any, locale?: string): Rendered {
+  const en = (locale ?? d?.locale) === "en";
+  const first = d?.to_name ? String(d.to_name).trim().split(/\s+/)[0] : "";
+  const hello = en ? `Hello${first ? " " + first : ""},` : `Hei${first ? " " + first : ""},`;
+  const no = d?.order?.order_no ?? "";
+  const ob = orderBlock(d, en);
+  const orderUrl = safeUrl(d?.order?.order_url);
+  const sign = en ? `Kind regards,\n${SELLER}\n${COMPANY}` : `Ystävällisin terveisin,\n${SELLER}\n${COMPANY}`;
+  const signHtml = esc(sign).replace(/\n/g, "<br>");
+  const viewLabel = en ? "View your order" : "Avaa tilauksesi";
+  const contact = en ? `Questions? Reply to this email or call ${PHONE}.` : `Kysyttävää? Vastaa tähän viestiin tai soita ${PHONE}.`;
+  const helloRow = p(esc(hello));
+  const tail = `${p(esc(contact), `color:${MUTED};font-size:13px`)}${p(signHtml)}`;
+  const mk = (title: string, preheader: string, rows: string) => wrapHtml(d, title, preheader, rows, en);
+
+  switch (kind) {
+    case "order_confirmation": {
+      const subject = en ? `Order confirmation ${no} – ${SELLER}` : `Tilausvahvistus ${no} – ${SELLER}`;
+      const intro = en ? "Thank you for your order. Your booking is confirmed." : "Kiitos tilauksestasi. Varauksesi on vahvistettu.";
+      const more = en ? "You can view your order, add services, request changes and download receipts here:" : "Voit katsoa tilaustasi, lisätä siihen palveluita, pyytää muutoksia ja ladata kuitit täältä:";
+      const title = en ? "Order confirmation" : "Tilausvahvistus";
+      const text = textBlock(hello, intro, ob.text, orderUrl && `${more}\n${orderUrl}`, contact, sign) + "\n";
+      const html = mk(title, intro, h1(title) + helloRow + p(esc(intro)) + ob.html + (orderUrl ? p(esc(more)) + button(orderUrl, viewLabel) : "") + tail);
+      return { subject, text, html };
+    }
+    case "payment_link": {
+      const url = safeUrl(d?.payment?.link_url) || orderUrl;
+      const amount = eur(d?.payment?.amount, en);
+      const expires = d?.payment?.link_expires_at ? day(d.payment.link_expires_at, en) : "";
+      const subject = en ? `Payment link for order ${no} – ${SELLER}` : `Maksulinkki tilaukseen ${no} – ${SELLER}`;
+      const intro = en ? `You can pay the outstanding amount of ${amount} using the link below.` : `Voit maksaa tilauksen maksamattoman osuuden (${amount}) alla olevasta linkistä.`;
+      const exp = expires ? (en ? `The link is valid until ${expires}.` : `Linkki on voimassa ${expires} asti.`) : "";
+      const title = en ? "Payment link" : "Maksulinkki";
+      const lab = en ? "Amount to pay" : "Maksettava";
+      const pay = en ? "Pay now" : "Maksa nyt";
+      const text = textBlock(hello, intro, url && `${en ? "Payment link" : "Maksulinkki"}:\n${url}`, exp, ob.text, contact, sign) + "\n";
+      const html = mk(title, intro, h1(title) + helloRow + p(esc(intro)) + box(`<span style="font-family:${SANS};font-size:12px;color:${MUTED};text-transform:uppercase;letter-spacing:.04em">${esc(lab)}</span><br><span style="font-family:${FONT};font-size:24px;color:${GREEN}">${esc(amount)}</span>`)
+        + (url ? button(url, pay) : "") + (exp ? p(esc(exp), `color:${MUTED};font-size:13px`) : "") + ob.html + tail);
+      return { subject, text, html };
+    }
+    case "receipt":
+    case "refund_receipt": {
+      const r = d?.receipt; const refund = kind === "refund_receipt";
+      const rno = r?.receipt_no ?? "";
+      const subject = refund ? (en ? `Refund receipt ${rno} – ${SELLER}` : `Hyvityskuitti ${rno} – ${SELLER}`) : (en ? `Receipt ${rno} – ${SELLER}` : `Kuitti ${rno} – ${SELLER}`);
+      const amount = r?.total != null ? eur(Math.abs(Number(r.total)), en) : "";
+      const intro = refund
+        ? (en ? `A refund${amount ? " of " + amount : ""} has been made for your order. The refund receipt is below and attached as a PDF.` : `Tilauksestasi on tehty hyvitys${amount ? " (" + amount + ")" : ""}. Hyvityskuitti on alla ja liitteenä PDF-tiedostona.`)
+        : (en ? "Thank you for your payment. Your receipt is below and attached as a PDF." : "Kiitos maksustasi. Kuittisi on alla ja liitteenä PDF-tiedostona.");
+      const title = refund ? (en ? "Refund receipt" : "Hyvityskuitti") : (en ? "Receipt" : "Kuitti");
+      const body = String(r?.text_body ?? "").trim();
+      const meta = [rno && `${en ? "Receipt no." : "Kuittinumero"}: ${rno}`, r?.issued_at && `${en ? "Date" : "Päivämäärä"}: ${day(r.issued_at, en)}`, amount && `${refund ? (en ? "Refunded" : "Hyvitetty") : (en ? "Paid" : "Maksettu")}: ${amount}`].filter(Boolean) as string[];
+      const text = textBlock(hello, intro, meta.join("\n"), body, orderUrl && `${en ? "Your order" : "Tilauksesi"}: ${orderUrl}`, contact, sign) + "\n";
+      const html = mk(title, intro, h1(title) + helloRow + p(esc(intro))
+        + (meta.length ? box(meta.map((m) => `<span style="font-family:${SANS};font-size:14px;color:${INK}">${esc(m)}</span>`).join("<br>")) : "")
+        + (body ? `<tr><td style="padding:0 32px 18px 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:12px 14px;background:${SAND_LIGHT};border:1px solid ${SAND_LINE};border-radius:4px;font-family:Consolas,'Courier New',monospace;font-size:12px;line-height:1.5;color:${INK};white-space:pre-wrap">${esc(body)}</td></tr></table></td></tr>` : "")
+        + (orderUrl ? button(orderUrl, viewLabel) : "") + tail);
+      return { subject, text, html };
+    }
+    case "cancel_request_ack": {
+      const subject = en ? `We received your cancellation request – order ${no}` : `Peruutuspyyntösi on vastaanotettu – tilaus ${no}`;
+      const msg = en ? "We have received your cancellation request. Our staff will handle it and contact you. The booking remains valid until the cancellation is confirmed." : "Olemme vastaanottaneet peruutuspyyntösi. Henkilökuntamme käsittelee sen ja ottaa yhteyttä. Varaus on voimassa, kunnes peruutus on vahvistettu.";
+      const title = en ? "Cancellation request received" : "Peruutuspyyntö vastaanotettu";
+      const text = textBlock(hello, msg, ob.text, orderUrl && `${en ? "Your order" : "Tilauksesi"}: ${orderUrl}`, contact, sign) + "\n";
+      return { subject, text, html: mk(title, msg, h1(title) + helloRow + p(esc(msg)) + ob.html + (orderUrl ? button(orderUrl, viewLabel) : "") + tail) };
+    }
+    case "order_change":
+    default: {
+      const subject = en ? `Your order has changed – ${no}` : `Tilauksesi on muuttunut – ${no}`;
+      const msg = en ? "Your order has been updated. The current details are below." : "Tilaustasi on päivitetty. Ajantasaiset tiedot ovat alla.";
+      const title = en ? "Order updated" : "Tilaus päivitetty";
+      const text = textBlock(hello, msg, ob.text, orderUrl && `${en ? "Your order" : "Tilauksesi"}: ${orderUrl}`, contact, sign) + "\n";
+      return { subject, text, html: mk(title, msg, h1(title) + helloRow + p(esc(msg)) + ob.html + (orderUrl ? button(orderUrl, viewLabel) : "") + tail) };
+    }
+  }
+}

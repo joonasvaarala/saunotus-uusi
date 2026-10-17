@@ -1,0 +1,126 @@
+// node --test booking/supabase/functions/send-emails/templates.test.mjs
+// templates.ts on pelkkää TypeScript-tyyppisyntaksia (ei riippuvuuksia) → ladataan suoraan Node 22.18+ :n tyyppien poistolla.
+// Vanhemmalla Nodella (20) testit ohitetaan (CI ajaa ne Node 22:lla, ks. .github/workflows/pages.yml).
+import test from 'node:test';
+import assert from 'node:assert/strict';
+
+let T = null;
+try { T = await import('./templates.ts'); } catch (e) { if (!/ERR_UNKNOWN_FILE_EXTENSION|Unknown file extension/.test(String(e?.code || e))) throw e; }
+const R = (...a) => { const m = T.render(...a); return Object.fromEntries(Object.entries(m).map(([k, v]) => [k, v.replaceAll('\u00a0', ' ')])); };   // NBSP → väli vertailua varten
+const skip = T ? false : 'Node ei tue .ts-tuontia (tarvitaan Node >= 22.18)';
+
+const SITE = 'https://uusi.saunotus.com';
+const ORDER_URL = `${SITE}/tilaus/?t=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c`;
+const PAY_URL = `${SITE}/maksa/?p=9d8c7b6a-1111-4222-8333-444455556666`;
+const base = (locale) => ({
+  id: 1, locale, to: 'asiakas@example.com', to_name: 'Matti Meikäläinen',
+  order: {
+    order_no: 15321, order_url: ORDER_URL, total: 134, status: 'confirmed',
+    items: [{ name: 'Yleinen vuoro', quantity: 2, line_total: 36, vat_rate: 25.5, kind: 'product' }, { name: 'Pyyhe', quantity: 2, line_total: 6, vat_rate: 25.5, kind: 'addon' }, { name: 'Hieronta 60 min', quantity: 1, line_total: 92, vat_rate: 25.5, kind: 'product' }],
+    reservations: [{ product_name: 'Yleinen vuoro', starts_at: '2026-11-07T15:00:00Z', ends_at: '2026-11-07T17:00:00Z', persons: 2, status: 'confirmed' }, { product_name: 'Peruttu', starts_at: '2026-11-08T15:00:00Z', ends_at: '2026-11-08T17:00:00Z', persons: 1, status: 'cancelled' }],
+  },
+  receipt: { id: 5, receipt_no: '2026-000123', kind: 'receipt', text_body: 'KUITTI 2026-000123\nYleinen vuoro 2 × 18,00 €\nYhteensä 134,00 €', public_token: 'abc', total: 134, issued_at: '2026-11-07T09:30:00Z' },
+  payment: { id: 9, amount: 98.5, link_url: PAY_URL, link_expires_at: '2026-11-14T20:00:00Z' },
+});
+const KINDS = ['order_confirmation', 'payment_link', 'receipt', 'refund_receipt', 'cancel_request_ack', 'order_change'];
+const refundData = (locale) => { const d = base(locale); d.receipt = { ...d.receipt, kind: 'refund_receipt', receipt_no: '2026-000124', total: -10, text_body: 'HYVITYSKUITTI 2026-000124\nHyvitys -10,00 €' }; return d; };
+const data = (kind, locale) => (kind === 'refund_receipt' ? refundData(locale) : base(locale));
+const hrefs = (html) => [...html.matchAll(/href="([^"]*)"/g)].map((m) => m[1]);
+const hexes = (html) => [...new Set([...html.matchAll(/#([0-9a-f]{6})\b/gi)].map((m) => m[1].toLowerCase()))];
+
+for (const locale of ['fi', 'en']) for (const kind of KINDS) {
+  test(`${kind} ${locale}: aihe, teksti ja HTML täytetty, ei tyhjiä kenttiä`, { skip }, () => {
+    const m = R(kind, data(kind, locale), locale);
+    for (const f of ['subject', 'text', 'html']) assert.ok(m[f] && m[f].trim().length > 20, `${f} tyhjä`);
+    for (const f of ['subject', 'text', 'html']) assert.ok(!/undefined|\bnull\b|NaN|\[object/.test(m[f]), `${f} sisältää tyhjän arvon: ${m[f].match(/.{20}(undefined|null|NaN|\[object).{10}/)?.[0]}`);
+    assert.ok(!/[<>]/.test(m.subject) && !/\n/.test(m.subject));
+    assert.ok(/15321|2026-00012[34]/.test(m.subject), 'aihe sisältää tilaus-/kuittinumeron');
+    assert.ok(!/<[a-z!]/i.test(m.text), 'tekstiversiossa ei HTML:ää');
+    assert.ok(m.text.includes('Matti') && m.html.includes('Matti') && !m.text.includes('Meikäläinen'), 'etunimi tervehdyksessä');
+    assert.ok(m.text.endsWith('\n'));
+  });
+  test(`${kind} ${locale}: kieli, linkit, logo ja tyyli`, { skip }, () => {
+    const m = R(kind, data(kind, locale), locale), en = locale === 'en';
+    assert.ok(m.html.startsWith('<!doctype html><html lang="' + locale + '">'));
+    assert.ok(en ? /Hello Matti,/.test(m.text) && /Kind regards,/.test(m.text) : /Hei Matti,/.test(m.text) && /Ystävällisin terveisin,/.test(m.text), 'tervehdys/allekirjoitus kielellä');
+    assert.ok(en ? !/Ystävällisin|Kiitos|Tilaus\b/.test(m.text) : !/Kind regards|Thank you|\bOrder\b/.test(m.text), 'ei sekakieltä');
+    assert.ok(m.text.includes('Havuhattu Oy') && m.html.includes('Havuhattu Oy') && m.html.includes('Sipoonjoen perinnesauna') && m.html.includes('Hindsbyntie 124'));
+    // linkit
+    const links = hrefs(m.html);
+    assert.ok(links.every((h) => /^(https:\/\/[^\s"]+|mailto:[^\s"]+|tel:\+?\d+)$/.test(h)), `virheellinen linkki: ${links}`);
+    assert.ok(links.includes('mailto:savusauna@saunotus.fi'));
+    const main = kind === 'payment_link' ? PAY_URL : ORDER_URL;
+    assert.ok(links.includes(main), `pääpainike ${main}`); assert.ok(m.text.includes(main), 'linkki myös tekstiversiossa');
+    // logo johdetaan tilauslinkin sivustosta
+    assert.ok(m.html.includes(`<img src="${SITE}/img/logo-kuitti.png"`), 'logo sivuston osoitteesta');
+    assert.ok(/<img [^>]*alt="Havuhattu Oy"/.test(m.html));
+    // taulukkopohjainen, ei sinistä
+    assert.ok(/<table role="presentation"/.test(m.html) && !/<(div|ul|p|h1)\b/.test(m.html.replace(/<div style="display:none[^>]*>[^<]*<\/div>/, '')), 'taulukkopohja (ei div/ul/p/h1-asettelua)');
+    for (const h of hexes(m.html)) { const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)); assert.ok(!(b > r + 24 && b > g + 24), `sinertävä väri #${h}`); }
+    assert.ok(m.html.includes('#1f3d2b') && m.html.includes('#efe7d6'), 'tumma vihreä + hiekka');
+  });
+}
+
+test('tilausvahvistus: varaukset, rivit ja summa; peruttu varaus pois', { skip }, () => {
+  const fi = R('order_confirmation', base('fi'));
+  assert.equal(fi.subject, 'Tilausvahvistus 15321 – Sipoonjoen perinnesauna');
+  assert.ok(fi.text.includes('Yleinen vuoro: ') && fi.text.includes('2 hlö') && !fi.text.includes('Peruttu'));
+  assert.ok(fi.text.includes('2 × Yleinen vuoro 36,00 €') && fi.text.includes('Yhteensä: 134,00 €'));
+  assert.ok(fi.html.includes('134,00') && !fi.html.includes('Peruttu'));
+  const en = R('order_confirmation', base('en'));
+  assert.equal(en.subject, 'Order confirmation 15321 – Sipoonjoen perinnesauna');
+  assert.ok(en.text.includes('Total: 134.00 €') && en.text.includes('2 guests') && en.text.includes('Booking') );
+  // aika Helsingin ajassa (15:00Z = 17:00 EET marraskuussa)
+  assert.ok(fi.text.includes('17.00–19.00') || fi.text.includes('17:00–19:00'), fi.text);
+});
+
+test('maksulinkki: summa, linkki ja voimassaolo', { skip }, () => {
+  const fi = R('payment_link', base('fi'));
+  assert.equal(fi.subject, 'Maksulinkki tilaukseen 15321 – Sipoonjoen perinnesauna');
+  assert.ok(fi.text.includes('98,50 €') && fi.text.includes(PAY_URL) && /voimassa 14\.11\.2026 asti/.test(fi.text));
+  const en = R('payment_link', base('en'));
+  assert.ok(en.text.includes('98.50 €') && /valid until 14\/11\/2026/.test(en.text) && en.html.includes('Pay now'));
+  const d = base('fi'); d.payment.link_url = null; const nolink = R('payment_link', d);
+  assert.ok(nolink.text.includes(ORDER_URL), 'varalinkki tilaussivulle');
+});
+
+test('kuitti ja hyvityskuitti: PDF-maininta, kuittirunko, hyvitetty summa positiivisena', { skip }, () => {
+  const r = R('receipt', base('fi'));
+  assert.equal(r.subject, 'Kuitti 2026-000123 – Sipoonjoen perinnesauna');
+  assert.ok(r.text.includes('liitteenä PDF') && r.text.includes('KUITTI 2026-000123') && r.text.includes('Maksettu: 134,00 €') && r.text.includes('Kuittinumero: 2026-000123'));
+  assert.ok(r.html.includes('white-space:pre-wrap') && r.html.includes('KUITTI 2026-000123'));
+  const h = R('refund_receipt', refundData('fi'));
+  assert.equal(h.subject, 'Hyvityskuitti 2026-000124 – Sipoonjoen perinnesauna');
+  assert.ok(h.text.includes('hyvitys (10,00 €)') && h.text.includes('Hyvitetty: 10,00 €'));
+  const he = R('refund_receipt', refundData('en'));
+  assert.equal(he.subject, 'Refund receipt 2026-000124 – Sipoonjoen perinnesauna');
+  assert.ok(he.text.includes('A refund of 10.00 €') && he.text.includes('Refunded: 10.00 €'));
+});
+
+test('HTML-escape ja vaaralliset linkit', { skip }, () => {
+  const d = base('fi'); d.to_name = '<script>alert(1)</script> X'; d.order.items[0].name = 'A & B "<b>"'; d.order.order_url = 'javascript:alert(1)'; d.payment.link_url = 'https://x.example/"onmouseover="a';
+  for (const k of KINDS) { const m = R(k, d); assert.ok(!/<script/i.test(m.html) && !/javascript:/i.test(m.html) && !/onmouseover=/.test(m.html), k); }
+  const m = R('order_confirmation', d); assert.ok(m.html.includes('A &amp; B &quot;&lt;b&gt;&quot;'));
+});
+
+test('puuttuvat tiedot eivät kaada eikä jätä tyhjää: ei tilausta, ei nimeä, ei tilauslinkkiä', { skip }, () => {
+  for (const k of KINDS) for (const loc of ['fi', 'en']) {
+    const m = R(k, { locale: loc }, loc);
+    assert.ok(m.subject && m.text && m.html, k);
+    assert.ok(m.html.includes(`${loc === 'en' ? 'Hello,' : 'Hei,'}`));
+    assert.ok(m.html.includes(`src="${T.LOGO_FALLBACK}"`), 'oletuslogo');
+  }
+  assert.equal(T.LOGO_FALLBACK, 'https://joonasvaarala.github.io/saunotus-uusi/img/logo-kuitti.png');
+});
+
+test('siteBase / logoUrl: alipolku ja tuotanto', { skip }, () => {
+  assert.equal(T.siteBase({ order: { order_url: 'https://joonasvaarala.github.io/saunotus-uusi/tilaus/?t=x' } }), 'https://joonasvaarala.github.io/saunotus-uusi');
+  assert.equal(T.logoUrl({ payment: { link_url: 'https://uusi.saunotus.com/maksa/?p=1' } }), 'https://uusi.saunotus.com/img/logo-kuitti.png');
+  assert.equal(T.logoUrl({}), T.LOGO_FALLBACK);
+});
+
+test('locale-valinta: parametri voittaa datan, oletus fi', { skip }, () => {
+  assert.ok(R('order_change', { ...base('fi'), locale: 'fi' }, 'en').subject.startsWith('Your order has changed'));
+  assert.ok(R('order_change', base('en')).subject.startsWith('Your order has changed'));
+  assert.ok(R('order_change', { ...base('fi'), locale: undefined }).subject.startsWith('Tilauksesi on muuttunut'));
+});
