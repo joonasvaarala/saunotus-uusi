@@ -111,6 +111,13 @@ export function createGiftMock({ today = new Date().toLocaleDateString('sv-SE', 
     admin_deactivate_gift_card: (a) => { const c = find(a); const r = String(a.p_reason || '').trim(); if (r.length < 3) throw err('invalid_param', 'Syy 3–500 merkkiä'); c.status = 'cancelled'; log(c.id, { delta: 0, reason: 'cancel', balance_after: c.balance, note: r }); return { ok: true, card: view(c) }; },
     admin_reactivate_gift_card: (a) => { const c = find(a); const r = String(a.p_reason || '').trim(); if (r.length < 3) throw err('invalid_param', 'Syy 3–500 merkkiä'); if (!c.activated_at) throw err('gift_card_not_paid', 'Maksamatonta ostoa ei voi aktivoida');
       c.status = c.balance <= 0 ? 'used' : c.valid_to && c.valid_to < today ? 'expired' : 'active'; log(c.id, { delta: 0, reason: 'reactivate', balance_after: c.balance, note: r }); return { ok: true, card: view(c) }; },
+    // §13.12: koodin luokitus. Mock peilaa palvelinta: oma kortti (ei peruttu / maksamaton) → own; muuten unknown + ehdotus koodin muodosta (_vc_guess).
+    public_resolve_gift_code: (a) => {
+      const n = norm(a.p_code); if (n.length < 6 || n.length > 24) throw err('invalid_code', 'Tarkista koodi');
+      if (cards.some((c) => norm(c.code) === n && c.status !== 'cancelled' && c.status !== 'pending_payment')) return { ok: true, kind: 'own' };
+      const g = /^KK[0-9]{5}[A-Z]{6}$/.test(n) ? ['kokemuskauppa', 'high'] : /^OK[0-9]{5}[A-Z]{3}$/.test(n) ? ['offerilla', 'high'] : /^[A-Z0-9]{12}$/.test(n) && /[^3479ACEFHJKLMNPRTUVWXY]/.test(n) ? ['elamyslahjat', 'medium'] : [null, null];
+      return { ok: true, kind: 'unknown', partner_claims_enabled: sett.claims_enabled !== false, suggested_source: g[0], suggestion_confidence: g[1], sources: ['elamyslahjat', 'kokemuskauppa', 'kiitoskauppa', 'offerilla'].map((code) => ({ code, label: code, label_en: code })) };
+    },
     admin_redeem_gift_card: (a) => {
       if (!sett.redeem_enabled) throw err('redeem_disabled', 'Lunastus ei ole käytössä'); const c = cards.find((x) => norm(x.code) === norm(a.p_code)); if (!c) throw err('gift_card_not_found', 'Lahjakorttia ei löydy');
       if (c.source === 'johku' && !sett.johku_cards_redeemable) throw err('johku_cards_closed', 'Johku-korttien lunastus on suljettu');

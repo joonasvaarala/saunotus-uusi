@@ -492,3 +492,13 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 @media (max-width:480px){.opt-host .srcopt,.optset .srcopt{flex:1 1 100%}.optset .srcopt span{justify-content:flex-start;width:100%}}
 .opt-reminder{margin:0 0 10px;padding:10px 12px;border:1px solid #b9954a;border-radius:8px;background:var(--warnbg);color:var(--ink)}
 .optcard{display:grid;gap:8px}
+/* Lahjakoodit / lunastuspyynnöt (§13.12) – hillitty: hiekka + tummanvihreä, ei sinistä */
+.vcl-top{align-items:flex-start;gap:12px;margin:0 0 8px}.vcl-top>div{min-width:0;flex:1 1 280px}.vcl-top .btn{flex:0 0 auto}.vcl-h{margin:0 0 4px;font-size:20px;color:var(--ink)}
+.vcl-sum{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.vcl-chip{min-height:32px;display:inline-flex;align-items:center;padding:4px 12px;border-radius:20px;background:#EDE3D0;color:var(--ink);border:1px solid rgba(43,58,48,.35);font-size:14px;font-weight:600}
+.vcl-chip.bad{background:var(--errbg);color:var(--err);border-color:rgba(123,29,18,.4)}.vcl-chip.warn{background:var(--warnbg);color:#6b4b00;border-color:rgba(107,75,0,.45)}
+.vcl-notes{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;color:var(--ink)}
+.tl-vc-unknown{padding:10px 12px;background:#EDE3D0;border:1px dashed rgba(43,58,48,.55);border-radius:10px}.tl-vc-unknown[hidden]{display:none}.tl-vc-unknown p{margin:0}
+.tl-row[data-stale="1"]{border-color:rgba(107,75,0,.55)}
+/* 5 välilehteä: kapealla näytöllä kaksi riviä (3+2), sana ei katkea kesken */
+@media(max-width:560px){.tl-tabs:has(>.tl-tabbtn:nth-child(5)){flex-wrap:wrap;gap:2px 4px;border-bottom:0}.tl-tabs:has(>.tl-tabbtn:nth-child(5)) .tl-tabbtn{flex:1 1 30%;border-bottom:2px solid var(--line);overflow-wrap:normal;hyphens:none}.tl-tabs:has(>.tl-tabbtn:nth-child(5)) .tl-tabbtn[aria-selected=true]{border-bottom-color:var(--green);box-shadow:none}}

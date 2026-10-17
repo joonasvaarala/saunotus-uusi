@@ -7,6 +7,7 @@ import { FeatureNotReady, RpcError, isMissingRpc, wantsMock } from './talous-api
 export const GC_RPC = {
   packages: 'admin_list_gift_card_packages', list: 'admin_list_gift_cards', get: 'admin_get_gift_card', create: 'admin_create_gift_card',
   setExpiry: 'admin_set_gift_card_expiry', adjust: 'admin_adjust_gift_card', deactivate: 'admin_deactivate_gift_card', reactivate: 'admin_reactivate_gift_card', redeem: 'admin_redeem_gift_card',
+  resolve: 'public_resolve_gift_code',   // §13.12: yksi koodikenttä (anon+authenticated saavat kutsua): kind 'own' | 'unknown' (+ suggested_source). Hallinnassa vain luokitteluun; kirjaukset menevät admin_*-RPC:illä.
 };
 export const GC_STATUSES = ['active', 'used', 'expired', 'cancelled', 'pending_verification', 'pending_payment'];
 export const GC_SORTS = ['created_desc', 'created_asc', 'valid_to_asc', 'valid_to_desc', 'balance_desc', 'balance_asc', 'initial_desc', 'initial_asc'];
@@ -34,6 +35,11 @@ export const normDetail = (r) => ({ card: normCard(r.card), ledger: L(r.ledger).
 export const normSettings = (s) => ({ sale_enabled: !!s?.sale_enabled, redeem_enabled: !!s?.redeem_enabled, johku_cards_redeemable: !!s?.johku_cards_redeemable });
 export const normPackages = (r) => ({ settings: normSettings(r?.settings), packages: L(r?.packages).map((p) => ({ ...p, price: p.price == null ? null : num(p.price), min_amount: p.min_amount == null ? null : num(p.min_amount), max_amount: p.max_amount == null ? null : num(p.max_amount) })) });
 
+// Koodin luokitus (public_resolve_gift_code): own = oma/Johku-kortti; unknown = ei oma (mahdollinen kumppanin lahjakortti, esim. Elämyslahjat)
+export const normResolve = (r) => ({ kind: r?.kind === 'own' ? 'own' : 'unknown', partner_claims_enabled: r?.partner_claims_enabled === true, suggested_source: r?.suggested_source || null, confidence: r?.suggestion_confidence || null });
+// Julkiset koodin pituusrajat (public_resolve_gift_code / public_submit_voucher_claim): 6–24 merkkiä normalisoituna
+export const giftCodeValid = (s) => { const n = normalizeGiftCode(s).length; return n >= 6 && n <= 24; };
+
 export function rpcBackend(rpc) {
   const call = async (key, params = {}) => {
     const res = await rpc(GC_RPC[key], params);
@@ -57,6 +63,7 @@ export function rpcBackend(rpc) {
     deactivate: (a) => call('deactivate', { p_id: a.id, p_reason: a.reason }),
     reactivate: (a) => call('reactivate', { p_id: a.id, p_reason: a.reason }),
     redeem: (a) => call('redeem', compact({ p_order_id: a.orderId, p_code: normalizeGiftCode(a.code), p_amount: a.amount, p_note: a.note })),
+    resolve: (a) => call('resolve', { p_code: normalizeGiftCode(a.code) }),
   };
 }
 
@@ -86,6 +93,7 @@ export function createGiftApi({ rpc, io = {}, mock = wantsMock(), mockFactory = 
     create: (a) => run('create', a, (r) => ({ ...r, cards: L(r.cards).map(normCard) })),
     setExpiry: (a) => run('setExpiry', a), adjust: (a) => run('adjust', a), deactivate: (a) => run('deactivate', a), reactivate: (a) => run('reactivate', a),
     redeem: (a) => run('redeem', a),
+    resolve: (a) => run('resolve', typeof a === 'object' ? a : { code: a }, normResolve),
   };
   return api;
 }

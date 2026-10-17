@@ -319,6 +319,30 @@ a.bk-sd:hover{filter:brightness(.97)}
 .gc-line.to-recipient{border-color:var(--green)}
 .gc-dlvnote{display:block;margin-top:2px}
 @media(min-width:560px){.gc-when-fields{grid-template-columns:1fr 1fr}}
+/* Kumppanilahjakortit (sopimus §13.12): lähdevalinta, vahvistus, pyyntölista, koodin korjaus. Hiekka + tummanvihreä; ei sinistä; kosketuskohteet ≥44 px; nappitekstit tummalla vihreällä/valkoisella (ei valkoista kullalla). */
+.vc-choose{margin-top:16px;padding:16px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;background:#fff;display:grid;gap:10px}
+.vc-choose[hidden]{display:none}
+.vc-ctitle{margin:0;font:600 22px var(--head);color:var(--ink)}.vc-ctitle:focus{outline:none}.vc-ctitle:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.vc-code{margin:0;font:700 17px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;color:var(--ink);overflow-wrap:anywhere}
+.vc-src>legend{font:700 16px var(--body);color:var(--ink)}
+.vc-radios{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))}.vc-opt{flex:none}
+.vc-actions{display:flex;flex-wrap:wrap;gap:10px}.vc-actions .btn{flex:1 1 220px}
+.ord-lines li.vc-item{display:block;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.ord-lines li.vc-item.vc-problem{border-color:#7b2d2d;border-left-width:4px}
+.ord-lines li.vc-item.vc-redeemed{border-left:4px solid #1d4d2b}
+.vc-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}.vc-head strong{color:var(--ink);font-size:17px}
+.vc-mask{font:600 15px ui-monospace,Menlo,Consolas,monospace;color:var(--muted)}
+.vc-text{margin:6px 0 0;color:var(--ink);font-size:16px;overflow-wrap:anywhere}
+.vc-item .bk-contact{margin:8px 0 0}
+.vc-notice{margin:0 0 12px;padding:14px 16px;border-radius:10px;border:1px solid #1d4d2b;border-left-width:5px;background:#e8f3ea;color:#1d3a27}.vc-notice:focus{outline:none}.vc-notice:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.vc-notice.bad{border-color:#7b2d2d;background:#f3e3e3;color:#5a1f1f}
+.vc-notice p{margin:0}.vc-notice-main{font-weight:700}.vc-notice-extra{margin-top:6px!important;font-size:15px}
+.vc-fixbox{margin-top:10px}
+.vc-fixbox>summary{display:flex;align-items:center;min-height:44px;padding:0 4px;cursor:pointer;font-weight:700;color:var(--gold)}
+.vc-fixbox>summary:focus-visible{outline:3px solid var(--gold);outline-offset:2px;border-radius:6px}
+.vc-fixbox>.vc-fix{margin-top:6px}
+.vc-fix select{min-height:48px}
+
 /* MobilePay-maksu (§14): painike (virallinen Vipps MobilePay -komponentti tai varapainike) ja paluutilan paneeli. Paneelien värit: hillitty hiekka/vihreä; punainen vain virheille. */
 .mp-block{display:grid;gap:10px;margin:0 0 14px}.mp-block p{margin:0}
 .mp-title{margin:0;font:600 13px var(--label);letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
