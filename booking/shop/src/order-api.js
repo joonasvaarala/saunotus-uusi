@@ -29,8 +29,9 @@ export function rpcBackend(rpc, token) {
     getReceipt: ({ receiptNo }) => rpc(RPC.getReceipt, { p_order_token: token, p_receipt_no: receiptNo }),   // HUOM: parametri on p_order_token (ei p_token)
   };
 }
-export function createOrderApi({ rpc, token, mock = wantsMock(), mockFactory = () => createOrderMock({ delay: 120 }) } = {}) {
-  const be = rpcBackend(mock ? mockFactory().rpc : rpc, token);
+export function createOrderApi({ rpc, token, mock = wantsMock(), mockFactory = () => createOrderMock({ delay: 120, scenario: typeof location !== 'undefined' ? new URLSearchParams(location.search).get('scenario') || '' : '' }) } = {}) {
+  const backendRpc = mock ? mockFactory().rpc : rpc;
+  const be = rpcBackend(backendRpc, token);
   const wrap = (key) => async (a) => { try { return await be[key](a); } catch (e) { if (!mock && isMissingRpc(e)) return { ok: false, notReady: true, rpc: RPC[key] }; throw e; } };
-  return { mock, get: wrap('get'), addToOrder: wrap('addToOrder'), requestCancel: wrap('requestCancel'), getReceipt: wrap('getReceipt') };
+  return { mock, rpc: backendRpc, get: wrap('get'), addToOrder: wrap('addToOrder'), requestCancel: wrap('requestCancel'), getReceipt: wrap('getReceipt') };
 }

@@ -15,6 +15,8 @@ const pw = await import(pathToFileURL(pwPath));
 const chromium = pw.chromium || pw.default.chromium;
 const { createMock } = await import(pathToFileURL(join(ROOT, 'booking/admin/talous-mock.js')));
 const { createGiftMock } = await import(pathToFileURL(join(ROOT, 'booking/admin/giftcards-mock.js')));
+const { createGiftMock: createShopGiftMock, MOCK_PACKAGES } = await import(pathToFileURL(join(ROOT, 'booking/shop/src/gift-mock.js')));
+const { createOrderMock } = await import(pathToFileURL(join(ROOT, 'booking/shop/src/order-mock.js')));
 const { TEXTS } = await import(pathToFileURL(join(ROOT, 'booking/admin/talous-texts.js')));
 const SHOP = resolve(process.env.SHOP_DIST || '/tmp/shop-dist-lahjakortti'), SHOT = resolve(process.env.SHOT_DIR || '/workspace/screenshots-lahjakortti');
 const ONLY = process.env.ONLY || '';
@@ -323,6 +325,258 @@ async function adminSuite() {
     await page.waitForSelector('dialog[open] [data-testid=redeem-off]:not([hidden])');
     expect(await page.locator('dialog[open] button[type=submit]').isDisabled(), `${name}: lähetys estetty kun lunastus on pois päältä`);
     await page.selectOption('dialog[open] [data-testid=record-method]', 'cash'); expect(!(await page.locator('dialog[open] button[type=submit]').isDisabled()), `${name}: muut maksutavat käytössä`);
+  }
+}
+
+
+// ================= KAUPPA =================
+const GREET300 = 'Ä'.repeat(300);
+async function newShopPage(name, { vp = 390, lang = 'fi', settings = {}, scenario = '', missingRpc = false, cfgExtra = {} } = {}) {
+  const ctx = await browser.newContext({ viewport: { width: vp, height: vp >= 900 ? 900 : 800 }, deviceScaleFactor: 1, isMobile: vp < 700, hasTouch: vp < 700, locale: lang === 'fi' ? 'fi-FI' : 'en-GB', timezoneId: 'Europe/Helsinki' });
+  const page = await ctx.newPage();
+  const st = { calls: [] };
+  st.mock = scenario === 'orderpage' || scenario ? createOrderMock({ delay: 0, scenario: scenario === 'orderpage' ? '' : scenario, giftSettings: settings }) : createShopGiftMock({ delay: 0, settings });
+  page.st = st;
+  page.on('pageerror', (e) => problems.push(`${name} pageerror: ${e.message}`));
+  page.on('console', (m) => { if (['error', 'warning'].includes(m.type()) && !/rest\/v1\/rpc|Failed to load resource: the server responded with a status of 404/.test(m.text())) problems.push(`${name} console ${m.type()}: ${m.text()}`); });
+  page.on('response', (r) => { if (r.status() >= 400 && r.url().startsWith(ORIGIN) && !r.url().includes('/rest/v1/')) problems.push(`${name} HTTP ${r.status()}: ${r.url()}`); });
+  await ctx.route(`${ORIGIN}/booking/config.js`, (route) => route.fulfill({ status: 200, contentType: 'text/javascript', body: `window.BOOKING_CONFIG=${JSON.stringify({ url: ORIGIN, anonKey: 'anon-test', rest: '/rest/v1', auth: '/auth/v1', functions: '/functions/v1', schema: 'booking', ...cfgExtra })};` }));
+  await ctx.route(`${ORIGIN}/rest/v1/**`, async (route) => {
+    const u = new URL(route.request().url()), json = (body, status = 200) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
+    if (route.request().method() !== 'POST') return json([]);
+    const rpcName = u.pathname.split('/rpc/')[1]; let a = {}; try { a = JSON.parse(route.request().postData() || '{}'); } catch { /* tyhjä */ }
+    st.calls.push({ name: rpcName, args: a });
+    if (missingRpc && /gift/.test(rpcName)) return json({ code: 'PGRST202', message: `Could not find the function booking.${rpcName} in the schema cache` }, 404);
+    try { return json(await st.mock.rpc(rpcName, a)); } catch (e) { return json({ code: e.code || 'PGRST202', message: e.message }, e.status || 404); }
+  });
+  await ctx.route(`${ORIGIN}/functions/v1/**`, (route) => route.fulfill({ status: 200, contentType: 'application/pdf', body: '%PDF-1.4\n%%EOF\n' }));
+  return page;
+}
+const rpcCalls = (page, n) => page.st.calls.filter((c) => c.name === n);
+const GIFT = (lang) => (lang === 'fi' ? '/lahjakortti/' : '/en/gift-card/');
+const ORDER_TOKEN = '3f2b8c1e-5a7d-4e9f-8b6a-1c2d3e4f5a6b';
+
+async function shopSuite() {
+  // 1) kytkimet pois päältä (tuotannon tila): sivu ennallaan, ei "ei vielä käytössä" -tekstejä
+  for (const lang of ['fi', 'en']) {
+    const name = `lahjakorttisivu kytkimet pois ${lang}`, page = await newShopPage(name, { lang, settings: { sale_enabled: false, redeem_enabled: false } });
+    await page.goto(`${ORIGIN}${GIFT(lang)}`); await page.waitForTimeout(400);
+    expect(await page.locator('#avoin').count() === 1 && await page.locator('#paketit').count() === 1, `${name}: staattiset osiot #avoin ja #paketit säilyvät`);
+    expect(await page.locator('#gift-app').isHidden() && await page.locator('#gift-balance').isHidden(), `${name}: myynti- ja saldolohko piilossa`);
+    expect(!(await page.locator('body').innerText()).match(/ei vielä käytössä|not available yet|tulossa|coming soon/i), `${name}: ei "ei vielä käytössä" -tekstiä`);
+    expect(await page.locator('#avoin a[href*="johku"], #paketit a[href*="johku"]').count() > 0, `${name}: Johku-linkit paikallaan`);
+    expect(rpcCalls(page, 'public_gift_card_packages').length === 1 && !rpcCalls(page, 'public_buy_gift_card').length, `${name}: vain paketit-RPC kutsuttu`);
+    await page.context().close();
+  }
+  // 1b) RPC puuttuu → sivu ennallaan
+  { const name = 'lahjakorttisivu RPC puuttuu', page = await newShopPage(name, { missingRpc: true }); await page.goto(`${ORIGIN}/lahjakortti/`); await page.waitForTimeout(400);
+    expect(await page.locator('#avoin').count() === 1 && await page.locator('#gift-app').isHidden(), `${name}: sivu ennallaan`); await page.context().close(); }
+
+  // 2) myynti FI: validoinnit, tervehdys, ostoskori, osto
+  {
+    const name = 'lahjakortin osto FI', page = await newShopPage(name, { vp: 390, lang: 'fi' });
+    await page.goto(`${ORIGIN}/lahjakortti/`); await page.waitForSelector('#gift-app .gc-tile');
+    expect(await page.locator('#avoin').count() === 1 && await page.locator('#gift-app #avoin').count() === 1 && await page.locator('#gift-app #paketit').count() === 1, `${name}: ankkurit #avoin/#paketit ovat myyntilohkossa`);
+    expect(await page.locator('section#avoin, section#paketit').count() === 0, `${name}: staattiset Johku-osiot korvattu`);
+    expect(await page.locator('#paketit .gc-tile').count() === 4, `${name}: 4 pakettia`);
+    const names = await page.locator('#paketit h3').allInnerTexts(), prices = await page.locator('#paketit .gc-price').allInnerTexts();
+    expect(names.length === 4 && names.every((n, i) => n === MOCK_PACKAGES[i + 1].name), `${name}: nimet palvelimelta (${names})`);
+    expect(prices.map((p) => num(p.split('·')[0])).join() === '58,88,192,328', `${name}: hinnat palvelimelta (${prices.map((p) => num(p.split('·')[0]))})`);
+    expect(await page.locator('#gc-cart').innerText().then((t) => /Valitse ensin lahjakortti/.test(t)), `${name}: tyhjä ostoskori -ohje`);
+    // avoin summa: virheelliset
+    for (const bad of ['', '28', '501', '12.345', 'abc', '-5']) { await page.fill('#avoin input', bad); await page.click('#avoin .gc-btn'); expect(/29–500/.test(await page.locator('#avoin .gc-err').innerText()), `${name}: virheellinen summa "${bad}" hylätään`); }
+    expect(rpcCalls(page, 'public_buy_gift_card').length === 0 && await page.locator('.gc-line').count() === 0, `${name}: virheellinen summa ei lisää riviä`);
+    await page.fill('#avoin input', '75,5'); await page.click('#avoin .gc-btn'); await page.waitForSelector('.gc-line');
+    expect(await page.locator('#avoin .gc-err').innerText() === '', `${name}: virhe pois kun summa kelpaa`);
+    // paketti kahdesti → kaksi riviä; määrä + ja −
+    await page.locator('#paketit .gc-tile').nth(0).locator('.gc-btn').click(); await page.locator('#paketit .gc-tile').nth(3).locator('.gc-btn').click();
+    expect(await page.locator('.gc-line').count() === 3, `${name}: 3 riviä`);
+    await page.locator('.gc-line').nth(1).getByRole('button', { name: 'Lisää määrää' }).click(); await page.locator('.gc-line').nth(1).getByRole('button', { name: 'Lisää määrää' }).click();
+    await page.locator('.gc-line').nth(1).getByRole('button', { name: 'Vähennä määrää' }).click();
+    expect(await page.locator('.gc-line').nth(1).locator('.bk-stepper input').inputValue() === '2', `${name}: määrä 2`);
+    const total = num(await page.locator('.gc-total .gc-sum').innerText());
+    expect(Math.abs(total - (75.5 + 2 * 58 + 328)) < 0.006, `${name}: loppusumma ${total}`);
+    expect(/4 korttia/.test(await page.locator('.gc-cnt').innerText()), `${name}: korttimäärä`);
+    // tervehdys: laskuri ja raja
+    const gr = page.locator('.gc-line').nth(0).locator('textarea');
+    await gr.fill('Hyvää syntymäpäivää'); expect(await page.locator('.gc-line').nth(0).locator('.gc-counter').innerText() === '19 / 300', `${name}: laskuri 19 / 300`);
+    await gr.fill(GREET300); expect(await page.locator('.gc-line').nth(0).locator('.gc-counter').innerText() === '300 / 300' && !(await page.locator('.gc-line').nth(0).locator('.gc-field:has(textarea) .gc-err').innerText()), `${name}: 300 merkkiä sallittu`);
+    await gr.fill(GREET300 + 'x'); expect(/1 merkkiä liikaa/.test(await page.locator('.gc-line').nth(0).locator('.gc-counter').innerText()) && /liian pitkä/.test(await page.locator('.gc-line').nth(0).locator('.gc-field:has(textarea) .gc-err').innerText()), `${name}: 301 merkkiä → virhe`);
+    expect(await gr.getAttribute('aria-invalid') === 'true', `${name}: aria-invalid tervehdyksessä`);
+    // lähetys tyhjällä → virheet, ei RPC:tä
+    await page.click('.gc-submit');
+    expect(rpcCalls(page, 'public_buy_gift_card').length === 0, `${name}: virheellinen lomake ei lähde palvelimelle`);
+    const errs = await page.locator('.gc-err').allInnerTexts();
+    expect(errs.some((e) => /Anna nimi/.test(e)) && errs.some((e) => /sähköposti/.test(e)) && errs.some((e) => /puhelin/i.test(e)) && errs.some((e) => /Hyväksy ehdot/.test(e)) && errs.some((e) => /liian pitkä/.test(e)), `${name}: kenttävirheet (${errs.filter(Boolean).length})`);
+    expect(await page.evaluate(() => document.activeElement?.closest('.gc-line') != null || document.activeElement?.id?.startsWith('gcf-')), `${name}: fokus ensimmäiseen virheelliseen kenttään`);
+    await shot(page, 'kauppa-osto-virheet-fi-390');
+    // korjaa
+    await gr.fill('Hyvää syntymäpäivää!\nNauti saunasta.');
+    await page.locator('.gc-line').nth(0).locator('input[type=text]').nth(1).fill('Mikko Mallikas');
+    await page.locator('.gc-line').nth(0).locator('input[type=email]').fill('Mikko@Example.fi');
+    await page.fill('input[autocomplete=name]', 'Olli Ostaja'); await page.fill('input[autocomplete=email]', 'Olli@Example.fi'); await page.fill('input[autocomplete=tel]', '+358 40 123 4567');
+    await page.check('#gc-terms'); await page.check('#gc-mkt');
+    await layoutChecks(page, `${name} täytetty lomake 390`, '.gc');
+    await shot(page, 'kauppa-osto-taytetty-fi-390');
+    await page.click('.gc-submit'); await page.waitForSelector('.gc-done');
+    const a = rpcCalls(page, 'public_buy_gift_card').at(-1)?.args;
+    expect(a && a.p_name === 'Olli Ostaja' && a.p_email === 'olli@example.fi' && a.p_phone === '+358 40 123 4567' && a.p_marketing_consent === true && a.p_locale === 'fi', `${name}: ostajan kentät (${JSON.stringify({ ...a, p_items: undefined })})`);
+    expect(a && JSON.stringify(a.p_items) === JSON.stringify([
+      { package: 'open', quantity: 1, amount: 75.5, recipient_name: 'Mikko Mallikas', recipient_email: 'mikko@example.fi', greeting: 'Hyvää syntymäpäivää!\nNauti saunasta.' },
+      { package: 'entry_2', quantity: 2 }, { package: 'saunotus_2', quantity: 1 }]), `${name}: p_items täsmälleen sopimuksen mukaan (${JSON.stringify(a?.p_items)})`);
+    expect(Object.keys(a).sort().join() === 'p_email,p_items,p_locale,p_marketing_consent,p_name,p_phone', `${name}: vain sopimuksen parametrit (${Object.keys(a)})`);
+    const done = await page.locator('.gc-done').innerText();
+    expect(/Kiitos tilauksesta/.test(done) && /#15401/.test(done) && /Odottaa maksua/.test(done) && /maksettu/.test(done), `${name}: kuittaus (${done.slice(0, 60)})`);
+    expect(await page.locator('.gc-done a.btn').getAttribute('href').then((h) => /\/tilaus\/\?t=3f2b8c1e-5a7d-4e9f-8b6a-1c2d3e4f5a6b/.test(h)), `${name}: linkki tilaussivulle tokenilla`);
+    await layoutChecks(page, `${name} kuittaus 390`, '.gc');
+    await shot(page, 'kauppa-osto-valmis-fi-390');
+    await page.context().close();
+  }
+  // 2b) virhetilat: palvelimen virhe, liikaa kortteja
+  {
+    const name = 'lahjakortin osto virheet', page = await newShopPage(name, { vp: 390 });
+    await page.goto(`${ORIGIN}/lahjakortti/`); await page.waitForSelector('#gift-app .gc-tile');
+    for (let i = 0; i < 10; i++) await page.locator('#paketit .gc-tile').nth(0).locator('.gc-btn').click();
+    expect(await page.locator('.gc-line').count() === 10 && /10 korttia/.test(await page.locator('.gc-cnt').innerText()), `${name}: 10 riviä / 10 korttia`);
+    await page.locator('#paketit .gc-tile').nth(1).locator('.gc-btn').click();
+    expect(await page.locator('.gc-line').count() === 10 && /enimmäismäärä|Enintään|täynnä/i.test(await page.locator('[role=status].sr').first().innerText()), `${name}: 11. kortti estetty ilmoituksella`);
+    await page.locator('.gc-line').nth(0).getByRole('button', { name: 'Lisää määrää' }).click();
+    expect(await page.locator('.gc-line').nth(0).locator('.bk-stepper input').inputValue() === '1', `${name}: määrä ei ylitä enimmäismäärää`);
+    for (let i = 9; i >= 1; i--) await page.locator('.gc-line').nth(i).locator('.gc-remove').click();
+    expect(await page.locator('.gc-line').count() === 1, `${name}: rivin poisto`);
+    await page.fill('input[autocomplete=name]', 'Olli Ostaja'); await page.fill('input[autocomplete=email]', 'olli@example.fi'); await page.fill('input[autocomplete=tel]', '0401234567'); await page.check('#gc-terms');
+    // palvelin hylkää: rate_limited
+    page.st.mock.handlers.public_buy_gift_card = () => ({ ok: false, code: 'rate_limited', message: 'x' });
+    await page.click('.gc-submit'); await page.waitForSelector('.gc-msg .bk-error');
+    expect(/Liian monta yritystä/.test(await page.locator('.gc-msg').innerText()) && !(await page.locator('.gc-submit').isDisabled()), `${name}: rate_limited → selkeä virhe, painike taas käytössä`);
+    expect(await page.locator('input[autocomplete=name]').inputValue() === 'Olli Ostaja', `${name}: tiedot säilyvät virheen jälkeen`);
+    page.st.mock.handlers.public_buy_gift_card = () => ({ ok: false, code: 'sale_disabled', message: 'x' });
+    await page.click('.gc-submit'); await page.waitForFunction(() => /ei ole vielä käytössä/.test(document.querySelector('.gc-msg')?.innerText || ''));
+    expect(true, `${name}: sale_disabled-vastaus näytetään selkeästi`);
+    await page.context().close();
+  }
+  // 3) myynti EN
+  {
+    const name = 'lahjakortin osto EN', page = await newShopPage(name, { vp: 390, lang: 'en' });
+    await page.goto(`${ORIGIN}/en/gift-card/`); await page.waitForSelector('#gift-app .gc-tile');
+    const names = await page.locator('#paketit h3').allInnerTexts();
+    expect(names.join('|') === MOCK_PACKAGES.slice(1).map((p) => p.name_en).join('|'), `${name}: englanninkieliset nimet (${names})`);
+    expect(/€58|58 €/.test(await page.locator('#paketit .gc-price').first().innerText()), `${name}: hinta EN-muodossa`);
+    await page.fill('#avoin input', '10'); await page.click('#avoin .gc-btn'); expect(/Enter an amount between €29 and €500/.test(await page.locator('#avoin .gc-err').innerText()), `${name}: EN-virhe`);
+    await page.locator('#paketit .gc-tile').nth(1).locator('.gc-btn').click(); await page.click('.gc-submit');
+    expect((await page.locator('.gc-err').allInnerTexts()).some((e) => /Please enter a name/.test(e)), `${name}: EN-kenttävirhe`);
+    await page.fill('input[autocomplete=name]', 'Olli Ostaja'); await page.fill('input[autocomplete=email]', 'olli@example.fi'); await page.fill('input[autocomplete=tel]', '0401234567'); await page.check('#gc-terms');
+    await page.click('.gc-submit'); await page.waitForSelector('.gc-done');
+    expect(rpcCalls(page, 'public_buy_gift_card').at(-1).args.p_locale === 'en' && /Thank you for your order/.test(await page.locator('.gc-done').innerText()), `${name}: p_locale en + EN-kuittaus`);
+    expect(await page.locator('.gc-done a.btn').getAttribute('href').then((h) => h.startsWith('/en/order/?t=')), `${name}: EN-tilaussivun linkki`);
+    await page.context().close();
+  }
+  // 4) saldotarkistus
+  for (const lang of ['fi', 'en']) {
+    const name = `saldotarkistus ${lang}`, page = await newShopPage(name, { vp: 390, lang, settings: { sale_enabled: false } });
+    await page.goto(`${ORIGIN}${GIFT(lang)}`); await page.waitForSelector('#gift-balance .gc-balform');
+    expect(await page.locator('#gift-app').isHidden(), `${name}: myynti piilossa kun sale_enabled=false`);
+    const inp = page.locator('#gift-balance input');
+    await inp.pressSequentially('hh3a 7cef-hjkl'); expect(await inp.inputValue() === 'HH3A-7CEF-HJKL', `${name}: muotoilu kirjoitettaessa (${await inp.inputValue()})`);
+    await inp.fill(''); await inp.pressSequentially('HH3A7C'); await page.click('#gift-balance button[type=submit]');
+    expect(/12/.test(await page.locator('#gift-balance .gc-err').innerText()) && !rpcCalls(page, 'public_check_gift_card').length, `${name}: puutteellinen koodi estetään paikallisesti`);
+    await inp.fill('hh3a 7cef-hjkl'); await page.click('#gift-balance button[type=submit]'); await page.waitForSelector('#gift-balance .gc-result');
+    expect(rpcCalls(page, 'public_check_gift_card').at(-1).args.p_code === 'HH3A7CEFHJKL', `${name}: p_code normalisoitu`);
+    const txt = await page.locator('#gift-balance .gc-result').innerText();
+    expect(/HH3A-7CEF-HJKL/.test(txt) && /100/.test(txt) && /150/.test(txt) && /\d+[./]\d+[./]\d{4}/.test(txt), `${name}: koodi, saldo, alkuarvo, voimassaolo (${txt.replace(/\n/g, ' ').slice(0, 90)})`);
+    await inp.fill('HHZZ-ZZZZ-ZZZZ'); await page.click('#gift-balance button[type=submit]'); await page.waitForSelector('#gift-balance .bk-error');
+    expect(/Koodia ei löytynyt|Code not found/.test(await page.locator('#gift-balance .bk-error').innerText()), `${name}: tuntematon koodi`);
+    await inp.fill('JK1234567890'); await page.click('#gift-balance button[type=submit]'); await page.waitForSelector('#gift-balance .gc-result');
+    expect(/ei voi vielä käyttää|cannot be used in the online shop yet/.test(await page.locator('#gift-balance .gc-result').innerText()), `${name}: Johku-kortti → ei vielä lunastettavissa`);
+    await inp.fill('HHAA-AAAA-AAAA'); await page.click('#gift-balance button[type=submit]'); await page.waitForFunction(() => /Vanhentunut|Expired/.test(document.querySelector('#gift-balance .gc-result')?.innerText || ''));
+    await layoutChecks(page, `${name} 390`, '#gift-balance'); await shot(page, `kauppa-saldo-${lang}-390`);
+    // rate limit: 10 epäonnistunutta
+    for (let i = 0; i < 10; i++) { await inp.fill(`HHZ${i}-ZZZZ-ZZZZ`); await page.click('#gift-balance button[type=submit]'); await page.waitForTimeout(30); }
+    await inp.fill('HH3A-7CEF-HJKL'); await page.click('#gift-balance button[type=submit]'); await page.waitForFunction(() => /Liian monta yritystä|Too many attempts/.test(document.querySelector('#gift-balance')?.innerText || ''));
+    expect(true, `${name}: rate_limited-viesti`);
+    await page.context().close();
+  }
+  // 4b) saldotarkistus piilossa kun redeem_enabled=false
+  { const name = 'saldotarkistus piilossa', page = await newShopPage(name, { settings: { redeem_enabled: false } }); await page.goto(`${ORIGIN}/lahjakortti/`); await page.waitForSelector('#gift-app .gc-tile');
+    expect(await page.locator('#gift-balance').isHidden() && await page.locator('#saldo').isHidden(), `${name}: saldolohko piilossa`); await page.context().close(); }
+
+  // 5) tilaussivu: Käytä lahjakortti (osittainen lunastus), virheet
+  for (const lang of ['fi', 'en']) {
+    const name = `tilaussivu lahjakortti ${lang}`, page = await newShopPage(name, { vp: 390, lang, scenario: 'gift' });
+    await page.goto(`${ORIGIN}${lang === 'fi' ? '/tilaus/' : '/en/order/'}?t=${ORDER_TOKEN}`); await page.waitForSelector('[data-testid=gc-redeem]');
+    const unpaid0 = num(await page.locator('[data-testid=order-unpaid]').innerText());
+    expect(unpaid0 === 62, `${name}: maksamatonta 62 € (${unpaid0})`);
+    const code = page.locator('[data-testid=gc-code]'), amt = page.locator('[data-testid=gc-amount]'), apply = page.locator('[data-testid=gc-apply]'), msg = page.locator('[data-testid=gc-msg]');
+    await code.fill('hh7mrtuvwxy3x');
+    expect(await code.inputValue() === 'HH7M-RTUV-WXY3', `${name}: syöte rajataan 12 merkkiin ja muotoillaan (${await code.inputValue()})`);
+    await code.fill('hhzz-zzzz-zzzz'); await apply.click(); await page.waitForSelector('[data-testid=gc-msg] .bk-error');
+    expect(/Koodia ei löytynyt|Code not found/.test(await msg.innerText()), `${name}: invalid_code`);
+    const ex = { 'HHAA-AAAA-AAAA': /vanhentunut|expired/i, 'HHCC-CCCC-CCCC': /saldo on käytetty|balance has been used/i, 'JK12-3456-7890': /ei voi vielä käyttää|cannot be used in the online shop yet/ };
+    for (const [c, re] of Object.entries(ex)) { await code.fill(c); await apply.click(); await page.waitForFunction((s) => document.querySelector('[data-testid=gc-msg]')?.innerText.length > 0, null); await page.waitForTimeout(60); expect(re.test(await msg.innerText()), `${name}: ${c} → ${re} (${(await msg.innerText()).slice(0, 50)})`); }
+    await code.fill('HH7M-RTUV-WXY3'); await amt.fill('100'); await apply.click(); await page.waitForTimeout(80);
+    expect(/saldo ei riitä|not enough/i.test(await msg.innerText()), `${name}: insufficient_balance`);
+    await amt.fill('70'); await code.fill('HH3A-7CEF-HJKL'); await apply.click(); await page.waitForTimeout(80);
+    expect(/maksamaton osa|unpaid part/i.test(await msg.innerText()), `${name}: amount_exceeds_unpaid`);
+    await amt.fill('abc'); await apply.click(); expect(await page.locator('.gc-field.bad').count() === 1, `${name}: virheellinen summa`);
+    await amt.fill('');
+    expect(rpcCalls(page, 'public_apply_gift_card').every((c) => !/[^A-Z0-9]/.test(c.args.p_code)), `${name}: p_code aina normalisoitu`);
+    // osittainen: 58 € kortti, maksamatonta 62 → 4 jää
+    await code.fill('hh7m rtuv wxy3'); await apply.click(); await page.waitForFunction(() => /Lahjakortilla maksettu|Paid/.test(document.querySelector('[data-testid=order-msg]')?.innerText || ''));
+    const call = rpcCalls(page, 'public_apply_gift_card').at(-1).args;
+    expect(call.p_code === 'HH7MRTUVWXY3' && call.p_token === ORDER_TOKEN && !('p_amount' in call), `${name}: oletussumma = ei p_amount (${JSON.stringify(call)})`);
+    expect(num(await page.locator('[data-testid=order-unpaid]').innerText()) === 4, `${name}: maksamatonta jäi 4 €`);
+    expect(/58/.test(await page.locator('[data-testid=order-msg]').innerText()) && /0 €|€0/.test(await page.locator('[data-testid=order-msg]').innerText()), `${name}: ilmoitus summasta ja kortin saldosta (${(await page.locator('[data-testid=order-msg]').innerText()).slice(0, 90)})`);
+    await shot(page, `kauppa-tilaus-lahjakortti-osittain-${lang}-390`);
+    // loppu 4 € toisella kortilla, summa annettuna
+    await page.locator('[data-testid=gc-code]').fill('HH3A-7CEF-HJKL'); await page.locator('[data-testid=gc-amount]').fill('4'); await page.locator('[data-testid=gc-apply]').click();
+    await page.waitForFunction(() => document.querySelector('[data-testid=order-unpaid]')?.innerText.replace(/\D/g, '') === '000' || /^0/.test(document.querySelector('[data-testid=order-unpaid]')?.innerText || ''));
+    expect(rpcCalls(page, 'public_apply_gift_card').at(-1).args.p_amount === 4, `${name}: p_amount 4`);
+    expect(await page.locator('[data-testid=gc-redeem]').count() === 0, `${name}: lomake piiloon kun kaikki maksettu`);
+    expect(/paid|maksettu/i.test(await page.locator('.ord-badges').innerText()), `${name}: tila maksettu`);
+    await layoutChecks(page, `${name} 390`, '.ord'); await page.context().close();
+  }
+  // 5b) tilaussivu: lunastus pois päältä / RPC puuttuu → ei lomaketta
+  for (const [label, o] of [['redeem_enabled=false', { settings: { redeem_enabled: false }, scenario: 'gift' }], ['RPC puuttuu', { missingRpc: true, scenario: 'gift' }]]) {
+    const name = `tilaussivu ei lomaketta (${label})`, page = await newShopPage(name, o); await page.goto(`${ORIGIN}/tilaus/?t=${ORDER_TOKEN}`); await page.waitForSelector('[data-testid=order-page]');
+    expect(await page.locator('[data-testid=gc-redeem]').count() === 0 && !(await page.locator('body').innerText()).match(/ei vielä käytössä: lahjakort/i), `${name}`); await page.context().close();
+  }
+  // 5c) lahjakorttitilaus: ostetut kortit, ei "Käytä lahjakortti" -lomaketta, koodi vasta maksun jälkeen, PDF-nappi vain asetuksella
+  for (const [scen, pdf] of [['cards', false], ['cardspaid', false], ['cardspaid', true]]) {
+    const name = `tilaussivu ostetut kortit ${scen}${pdf ? ' +pdf' : ''}`, page = await newShopPage(name, { vp: 390, scenario: scen, cfgExtra: pdf ? { giftCardPdf: true } : {} });
+    await page.goto(`${ORIGIN}/tilaus/?t=${ORDER_TOKEN}`); await page.waitForSelector('[data-testid=gc-cards]');
+    expect(await page.locator('[data-testid=gc-card]').count() === 2 && await page.locator('[data-testid=gc-redeem]').count() === 0, `${name}: 2 korttia, ei lunastuslomaketta`);
+    if (scen === 'cards') {
+      expect(await page.locator('[data-testid=gc-show]').count() === 0 && /Odottaa maksua/.test(await page.locator('[data-testid=gc-cards]').innerText()), `${name}: koodia ei näytetä maksamattomalle`);
+      await shot(page, 'kauppa-tilaus-kortit-maksamatta-fi-390');
+    } else {
+      await page.locator('[data-testid=gc-show]').first().click(); await page.waitForSelector('[data-testid=gc-codetext]');
+      expect(await page.locator('[data-testid=gc-codetext]').innerText() === 'HH3A-7CEF-HJKL' && /Hyvää syntymäpäivää/.test(await page.locator('[data-testid=gc-reveal]').first().innerText()), `${name}: koodi ja tervehdys`);
+      expect(rpcCalls(page, 'public_get_gift_card').at(-1).args.p_public_token === '00000000-0000-4000-8000-000000000001', `${name}: public_get_gift_card kortin tokenilla`);
+      const hasPdf = await page.locator('[data-testid=gc-pdf]').count();
+      expect(hasPdf === (pdf ? 1 : 0), `${name}: PDF-nappi ${pdf ? 'näkyy' : 'EI näy'} (${hasPdf})`);
+      if (pdf) expect(/\/functions\/v1\/gift-card-pdf\?t=00000000-0000-4000-8000-000000000001$/.test(await page.locator('[data-testid=gc-pdf]').getAttribute('href')), `${name}: PDF-linkki`);
+      expect(!(await page.locator('body').innerText()).match(/tulee myöhemmin|coming later|tulossa/i), `${name}: ei "tulee myöhemmin" -tekstiä`);
+      await page.mouse.move(0, 0); await page.waitForTimeout(500);   // hover-siirtymä loppuun ennen kontrastimittausta
+      await layoutChecks(page, `${name} 390`, '.ord');
+      await shot(page, `kauppa-tilaus-kortit-koodi${pdf ? '-pdf' : ''}-fi-390`);
+    }
+    await page.context().close();
+  }
+  // 6) kuvakaappaukset ja asettelu: kaikki leveydet FI/EN
+  for (const lang of ['fi', 'en']) for (const vp of [360, 390, 430, 768, 1280]) {
+    const name = `kuvat ${lang} ${vp}`, page = await newShopPage(name, { vp, lang });
+    await page.goto(`${ORIGIN}${GIFT(lang)}`); await page.waitForSelector('#gift-app .gc-tile');
+    await page.locator('#paketit .gc-tile').nth(1).locator('.gc-btn').click(); await page.locator('#paketit .gc-tile').nth(3).locator('.gc-btn').click();
+    await page.fill('#avoin input', '50'); await page.click('#avoin .gc-btn');
+    await page.locator('.gc-line').nth(2).locator('textarea').fill(lang === 'fi' ? 'Hyvää syntymäpäivää! Nauti lämmöstä ja rauhasta.' : 'Happy birthday! Enjoy the warmth and the calm.');
+    await layoutChecks(page, `${name} myyntisivu`, '.gc');
+    await shot(page, `kauppa-lahjakortti-${lang}-${vp}`);
+    await page.locator('#gift-balance').scrollIntoViewIfNeeded(); await page.fill('#gift-balance input', 'hh3a7cefhjkl'); await page.click('#gift-balance button[type=submit]'); await page.waitForSelector('#gift-balance .gc-result');
+    await layoutChecks(page, `${name} saldo`, '#gift-balance');
+    await page.context().close();
+    const op = await newShopPage(`${name} tilaus`, { vp, lang, scenario: 'gift' });
+    await op.goto(`${ORIGIN}${lang === 'fi' ? '/tilaus/' : '/en/order/'}?t=${ORDER_TOKEN}`); await op.waitForSelector('[data-testid=gc-redeem]');
+    await layoutChecks(op, `${name} tilaussivu`, '.ord'); await shot(op, `kauppa-tilaus-lahjakortti-${lang}-${vp}`); await op.context().close();
   }
 }
 

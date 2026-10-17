@@ -288,3 +288,9 @@ Muut: `invalid_package`, `invalid_quantity`, `too_many_cards`, `invalid_date`, `
 
 ### 13.8 Rollback
 `booking_44_ROLLBACK.sql` (RPC:t pois, `admin_refund`/`admin_list_payments`/`_report_json`/`_acct_excluded` takaisin booking_42-tilaan) ja `booking_43_ROLLBACK.sql` (skeema takaisin; estetty jos natiiveja kortteja tai lahjakorttimaksuja on), Johku-tuonnin purku `booking_43_import_ROLLBACK.sql`. Testattu rollback-transaktiossa (funktiot/sarakkeet/rajoitteet/triggerit/asetukset identtiset ennen ja jälkeen).
+
+### 13.9 UI-toteutus (hallinta + kauppa, 17.10.2026) – päätökset ja huomiot
+- **Kauppa:** `/lahjakortti/` ja `/en/gift-card/` (myynti + saldotarkistus), tilaussivu `/tilaus/` (Käytä lahjakortti, ostetut kortit, koodin näyttö). Näkyvyys: myynti `sale_enabled`, saldo/lunastus `redeem_enabled`; muuten sivut ennallaan (Johku). Täsmälleen §13.2:n RPC:t ja parametrit; ei uusia RPC:itä eikä kenttiä.
+- **Hallinta:** Talous › Lahjakortit + Lisää maksu → Lahjakortti (`admin_redeem_gift_card`); oikeudet kuten §13.0 (`giftcards.manage`, `giftcards.admin`, `payments.manage`).
+- **Havainnot rajapinnasta (ei muutosehdotuksia, vain huomioitavaa):** (1) `public_get_gift_card` on määritelty PDF:lle/saajan sivulle; ostajan tilaussivu käyttää sitä koodin näyttämiseen kun `public_get_order_gift_cards` ei palauta koodeja. (2) Ennen `payment_url`:a ostaja näkee vain "maksu paikan päällä / laskulla" -tekstin; kun Visma Pay otetaan käyttöön, riittää `payment_url`:n täyttö (UI näyttää "Siirry maksamaan"). (3) Lahjakortin PDF-linkki: `<functions>/gift-card-pdf?t=<kortin public_token>` (ehdotus; kytkin `giftCardPdf` config.js:ssä). (4) Johku-korttien saldot pitää synkata uudelleen ennen kuin `johku_cards_redeemable` kytketään päälle (§13.6).
+- **Elämyslahjat/Kokemuskauppa/Offerilla** pysyvät ennallaan (`partner_voucher`, ei lahjakorttimaksutapa).

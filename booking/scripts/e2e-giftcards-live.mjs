@@ -3,7 +3,7 @@
 // LIVE_URL, LIVE_ANON, LIVE_EMAIL, LIVE_PASSWORD, STAFF_EMAIL, STAFF_PASSWORD). Avaimia/salasanoja ei tulosteta. Skripti kieltäytyy ajamasta, jos LIVE_URL sisältää tuotannon ref-tunnuksen.
 // Ajo: PW_DIR=/workspace/node_modules node booking/scripts/e2e-giftcards-live.mjs
 // Testi kirjoittaa testiprojektiin (uusia lahjakortteja, tilauksia, maksuja; kaikki feikkidataa, muistiinpano 'E2E-feikkidata'); jokainen ajo luo itse tuoreet tilaukset (vapaa lauantai-ilta alkaen LIVE_FROM, oletus 2027-09-04).
-// Ympäristö: SHOT_DIR (oletus /workspace/screenshots-lahjakortti-live), CHROME, PW_DIR.
+// Ympäristö: SHOT_DIR (oletus /workspace/screenshots-lahjakortti-live), CHROME, PW_DIR, SHOP_DIST (kauppa-dist: `SHOP_DIST=/tmp/shop-dist-lahjakortti-live node booking/shop/build.mjs` ensin; oletus sama polku; ONLY=admin|shop).
 import { createServer } from 'node:http';
 import { readFile, mkdir, stat, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
@@ -19,6 +19,8 @@ const T = TEXTS.fi;
 const envText = await readFile(process.env.LIVE_ENV || '/workspace/.live/env', 'utf8');
 const E = Object.fromEntries(envText.trim().split('\n').map((l) => { const i = l.indexOf('='); return [l.slice(0, i), l.slice(i + 1)]; }));
 if (!E.LIVE_URL || !E.LIVE_ANON || /sxbofnuisemspgquoxyv/.test(E.LIVE_URL)) { console.error('LIVE_ENV puuttuu tai osoittaa tuotantoon – keskeytetään'); process.exit(2); }
+const SHOP = resolve(process.env.SHOP_DIST || '/tmp/shop-dist-lahjakortti-live');
+const ONLY = process.env.ONLY || '';
 const SHOT = resolve(process.env.SHOT_DIR || '/workspace/screenshots-lahjakortti-live');
 await mkdir(SHOT, { recursive: true });
 const problems = [], findings = []; let checks = 0;
@@ -34,10 +36,11 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let ORIGIN = '';
 const server = createServer(async (req, res) => {
   const u = new URL(req.url, 'http://x'); const p = decodeURIComponent(u.pathname); let file;
+  if (p === '/booking/config.js') { res.writeHead(200, { 'content-type': 'text/javascript' }); return res.end(`window.BOOKING_CONFIG=${JSON.stringify({ url: E.LIVE_URL, anonKey: E.LIVE_ANON, rest: '/rest/v1', auth: '/auth/v1', functions: '/functions/v1', schema: 'booking', ...(globalThis.__cfgExtra || {}) })};`); }
   if (p === '/admin/config.js') { res.writeHead(200, { 'content-type': 'text/javascript' }); return res.end(`window.BOOKING_CONFIG=${JSON.stringify({ url: E.LIVE_URL, anonKey: E.LIVE_ANON, rest: '/rest/v1', auth: '/auth/v1', functions: '/functions/v1', schema: 'booking' })};`); }
   if (p === '/admin/sb.js') file = join(ROOT, 'booking/shared/sb.js');
   else if (p.startsWith('/admin/')) file = join(ROOT, 'booking/admin', p.slice(7) || 'index.html');
-  else { res.writeHead(404); return res.end('Not found'); }
+  else file = join(SHOP, normalize(p));
   try {
     if ((await stat(file)).isDirectory()) file = join(file, 'index.html');
     const buf = await readFile(file);
@@ -257,8 +260,132 @@ async function adminGiftSuite() {
   }
 }
 
+
+// ================= KAUPPA (lahjakorttisivu, saldotarkistus, lunastus tilaussivulla) – oikea testiprojekti =================
+async function openShop(name, path, { vp = 390, lang = 'fi', allow = null } = {}) {
+  const ctx = await browser.newContext({ viewport: { width: vp, height: vp >= 900 ? 900 : 800 }, deviceScaleFactor: 1, isMobile: vp < 700, hasTouch: vp < 700, locale: lang === 'fi' ? 'fi-FI' : 'en-GB', timezoneId: 'Europe/Helsinki' });
+  const page = await ctx.newPage(); page.calls = [];
+  page.on('pageerror', (e) => problems.push(`${name} pageerror: ${e.message}`));
+  page.on('console', (m) => { if (['error', 'warning'].includes(m.type()) && !(allow && allow.test(m.text()))) problems.push(`${name} console ${m.type()}: ${m.text()}`); });
+  page.on('requestfailed', (r) => !/ERR_ABORTED/.test(r.failure()?.errorText || '') && problems.push(`${name} requestfailed: ${r.url().replace(E.LIVE_URL, '<testiprojekti>')}`));
+  page.on('request', (r) => { if (r.url().includes('/rest/v1/rpc/')) page.calls.push({ name: r.url().split('/rpc/')[1], body: r.postData() }); });
+  page.on('response', (r) => { if (r.url().startsWith(ORIGIN) && r.status() >= 400) problems.push(`${name} HTTP ${r.status()} ${r.url()}`); });
+  await page.goto(`${ORIGIN}${path}`);
+  return page;
+}
+async function shopGiftSuite() {
+  const pk = (await rpc('public_gift_card_packages', {}, { access_token: E.LIVE_ANON })).body;
+  expect(pk.ok && pk.sale_enabled === true && pk.redeem_enabled === true, `kytkimet testiprojektissa päällä (sale ${pk.sale_enabled}, redeem ${pk.redeem_enabled})`);
+  const buyerEmail = `live-gift-${RUN}@example.invalid`;
+  // 1) myyntisivu FI: sisältö suoraan palvelimelta
+  let order;
+  {
+    const name = 'live kauppa osto FI', page = await openShop(name, '/lahjakortti/', { vp: 390 });
+    await page.waitForSelector('#gift-app .gc-tile', { timeout: 15000 });
+    expect(await page.locator('section#avoin, section#paketit').count() === 0, `${name}: Johku-osiot korvattu`);
+    const names = await page.locator('#paketit h3').allInnerTexts(), prices = (await page.locator('#paketit .gc-price').allInnerTexts()).map((t) => num(t.split('·')[0]));
+    const fixed = pk.packages.filter((p) => !p.is_open);
+    expect(names.join('|') === fixed.map((p) => p.name).join('|') && prices.join() === fixed.map((p) => p.price).join(), `${name}: nimet ja hinnat = RPC (${names.length} pakettia)`);
+    expect(await page.locator('#avoin h3').innerText() === pk.packages.find((p) => p.is_open).name, `${name}: avoimen kortin nimi = RPC`);
+    await page.fill('#avoin input', '31,5'); await page.click('#avoin .gc-btn'); await page.waitForSelector('.gc-line');
+    await page.locator('#paketit .gc-tile').nth(0).locator('.gc-btn').click();
+    await page.locator('.gc-line').nth(0).locator('textarea').fill('Hyvää syntymäpäivää – E2E-feikkidata');
+    await page.locator('.gc-line').nth(0).locator('input[type=text]').nth(1).fill('Saaja E2E');
+    await page.fill('input[autocomplete=name]', 'Live Ostaja'); await page.fill('input[autocomplete=email]', buyerEmail); await page.fill('input[autocomplete=tel]', '+358400000099'); await page.check('#gc-terms');
+    await page.click('.gc-submit'); await page.waitForSelector('.gc-done', { timeout: 20000 });
+    const txt = await page.locator('.gc-done').innerText();
+    const orderNo = +/#(\d+)/.exec(txt)?.[1];
+    expect(orderNo > 0 && /Odottaa maksua/.test(txt) && Math.abs(num(txt.match(/Yhteensä\s*([\d\s.,]+)/)?.[1] ?? 'x') - 89.5) < 0.01 || /89,50/.test(txt.replace(nbsp, '')), `${name}: kuittaus, tilausnumero ${orderNo}, summa 89,50 (${txt.replace(/\n/g, ' ').slice(0, 100)})`);
+    await shot(page, 'live-kauppa-osto-valmis-fi-390');
+    const lst = await must('admin_list_gift_cards', { p_search: buyerEmail });
+    expect(lst.total === 2 && lst.rows.every((r) => r.status === 'pending_payment' && r.buyer_name === 'Live Ostaja' && r.order_no === orderNo), `${name}: 2 korttia pending_payment, ostaja ja tilausnumero oikein`);
+    const open = lst.rows.find((r) => r.package_code === 'open'), entry = lst.rows.find((r) => r.package_code === 'entry_2');
+    expect(open && open.initial_amount === 31.5 && open.greeting === 'Hyvää syntymäpäivää – E2E-feikkidata' && open.recipient_name === 'Saaja E2E' && entry && entry.initial_amount === 58, `${name}: summat, tervehdys ja saaja tallentuivat`);
+    await page.context().close();
+    const full = await must('admin_get_order', { p_order_id: (await must('admin_list_orders', { p_search: String(orderNo) })).rows[0].order_id });
+    order = { id: full.order_id, token: full.public_token, no: orderNo, open, entry };
+  }
+  // 2) tilaussivu ennen maksua: kortit, ei koodia, ei lunastuslomaketta
+  {
+    const name = 'live kauppa tilaus maksamatta', page = await openShop(name, `/tilaus/?t=${order.token}`);
+    await page.waitForSelector('[data-testid=gc-cards]', { timeout: 15000 });
+    expect(await page.locator('[data-testid=gc-card]').count() === 2 && await page.locator('[data-testid=gc-show]').count() === 0 && await page.locator('[data-testid=gc-redeem]').count() === 0, `${name}: 2 korttia, ei Näytä koodi -nappia eikä lunastuslomaketta`);
+    expect(!(await page.locator('body').innerText()).includes(order.open.code), `${name}: koodia ei vuoda ennen maksua`);
+    await shot(page, 'live-kauppa-tilaus-kortit-maksamatta-fi-390'); await page.context().close();
+    const early = await rpc('public_get_gift_card', { p_public_token: order.open.public_token }, { access_token: E.LIVE_ANON });
+    expect(early.body?.ok === false && early.body.code === 'not_ready', `public_get_gift_card maksamattomalle → not_ready (${early.body?.code})`);
+  }
+  // 3) maksu hallinnasta → kortit aktivoituvat; koodi näkyy tilaussivulla; PDF-nappi vain asetuksella
+  await must('admin_record_payment', { p_order_id: order.id, p_method: 'cash', p_amount: 89.5, p_note: NOTE });
+  const act = await must('admin_list_gift_cards', { p_search: buyerEmail });
+  expect(act.rows.every((r) => r.status === 'active' && r.valid_to), `maksun jälkeen kortit active ja valid_to asetettu (${act.rows.map((r) => r.status)})`);
+  const code = act.rows.find((r) => r.package_code === 'open').code, code2 = act.rows.find((r) => r.package_code === 'entry_2').code;
+  for (const pdf of [false, true]) {
+    globalThis.__cfgExtra = pdf ? { giftCardPdf: true } : {};
+    const name = `live kauppa tilaus maksettu${pdf ? ' +pdf' : ''}`, page = await openShop(name, `/tilaus/?t=${order.token}`);
+    await page.waitForSelector('[data-testid=gc-show]', { timeout: 15000 });
+    await page.locator('[data-testid=gc-card]').filter({ hasText: 'Avoin' }).locator('[data-testid=gc-show]').click(); await page.waitForSelector('[data-testid=gc-codetext]');
+    expect(await page.locator('[data-testid=gc-codetext]').innerText() === code && /E2E-feikkidata/.test(await page.locator('[data-testid=gc-reveal]').first().innerText()), `${name}: koodi ja tervehdys näkyvät`);
+    expect(await page.locator('[data-testid=gc-pdf]').count() === (pdf ? 1 : 0), `${name}: PDF-nappi ${pdf ? 'näkyy' : 'ei näy'}`);
+    expect(await page.locator('[data-testid=gc-redeem]').count() === 0, `${name}: lahjakorttitilauksella ei lunastuslomaketta`);
+    if (!pdf) { await page.mouse.move(0, 0); await shot(page, 'live-kauppa-tilaus-kortit-koodi-fi-390'); }
+    await page.context().close();
+  }
+  globalThis.__cfgExtra = {};
+  // 4) saldotarkistus oikealla koodilla (kirjoitusasuja) ja virhetilat
+  for (const lang of ['fi', 'en']) {
+    const name = `live kauppa saldo ${lang}`, page = await openShop(name, lang === 'fi' ? '/lahjakortti/' : '/en/gift-card/', { lang });
+    await page.waitForSelector('#gift-balance .gc-balform', { timeout: 15000 });
+    await page.fill('#gift-balance input', code.toLowerCase().replace(/-/g, ' ')); await page.click('#gift-balance button[type=submit]'); await page.waitForSelector('#gift-balance .gc-result', { timeout: 15000 });
+    const sent = JSON.parse(page.calls.filter((c) => c.name === 'public_check_gift_card').at(-1).body);
+    expect(sent.p_code === code.replace(/-/g, ''), `${name}: p_code normalisoitu (${sent.p_code})`);
+    const t = (await page.locator('#gift-balance .gc-result').innerText()).replace(nbsp, '');
+    expect(t.includes(code) && /31[,.]5/.test(t), `${name}: koodi ja saldo 31,50 (${t.replace(/\n/g, ' ').slice(0, 80)})`);
+    await page.fill('#gift-balance input', 'HHZZ-ZZZZ-ZZZZ'); await page.click('#gift-balance button[type=submit]'); await page.waitForSelector('#gift-balance .bk-error');
+    expect(/Koodia ei löytynyt|Code not found/.test(await page.locator('#gift-balance .bk-error').innerText()), `${name}: tuntematon koodi → invalid_code`);
+    if (lang === 'fi') await shot(page, 'live-kauppa-saldo-fi-390');
+    await page.context().close();
+  }
+  // 5) lunastus verkkokaupassa: uusi tilaus (134 €), osittainen lunastus 31,50 € + loppu toisella kortilla (58 €)
+  {
+    const o = await freshOrder(); const full = await must('admin_get_order', { p_order_id: o.order_id ?? o.id });
+    const token = full.public_token, orderId = full.order_id, total = full.total;
+    const name = 'live kauppa lunastus', page = await openShop(name, `/tilaus/?t=${token}`);
+    await page.waitForSelector('[data-testid=gc-redeem]', { timeout: 15000 });
+    expect(Math.abs(num(await page.locator('[data-testid=order-unpaid]').innerText()) - total) < 0.01, `${name}: maksamatonta ${total} €`);
+    // virheet oikealta palvelimelta
+    await page.fill('[data-testid=gc-code]', 'HHZZ-ZZZZ-ZZZZ'); await page.click('[data-testid=gc-apply]'); await page.waitForSelector('[data-testid=gc-msg] .bk-error');
+    expect(/Koodia ei löytynyt/.test(await page.locator('[data-testid=gc-msg]').innerText()), `${name}: invalid_code`);
+    await page.fill('[data-testid=gc-code]', code.toLowerCase()); await page.fill('[data-testid=gc-amount]', '40'); await page.click('[data-testid=gc-apply]');
+    await page.waitForFunction(() => /saldo ei riitä/.test(document.querySelector('[data-testid=gc-msg]')?.innerText || ''), null, { timeout: 15000 });
+    expect(true, `${name}: insufficient_balance`);
+    await page.fill('[data-testid=gc-amount]', ''); await page.click('[data-testid=gc-apply]');
+    await page.waitForFunction(() => /Lahjakortilla maksettu/.test(document.querySelector('[data-testid=order-msg]')?.innerText || ''), null, { timeout: 15000 });
+    let c1 = await cardOf(code), pays = await orderPays(orderId);
+    expect(c1.card?.balance === 0 || c1.balance === 0 || JSON.stringify(c1).includes('"balance":0'), `${name}: kortin saldo 0 (osittainen lunastus koko saldolla)`);
+    expect(pays.some((p) => p.method === 'gift_card' && Math.abs(p.amount - 31.5) < 0.01), `${name}: gift_card-maksu 31,50 € tilauksella`);
+    expect(Math.abs(num(await page.locator('[data-testid=order-unpaid]').innerText()) - (total - 31.5)) < 0.01, `${name}: maksamatonta ${total - 31.5} € jäljellä`);
+    await shot(page, 'live-kauppa-lunastus-osittain-fi-390');
+    await page.fill('[data-testid=gc-code]', code2); await page.fill('[data-testid=gc-amount]', '20'); await page.click('[data-testid=gc-apply]');
+    await page.waitForFunction((u) => Math.abs(+document.querySelector('[data-testid=order-unpaid]').innerText.replace(/[^\d,]/g, '').replace(',', '.') - u) < 0.01, +(total - 51.5).toFixed(2), { timeout: 15000 });
+    const sent2 = JSON.parse(page.calls.filter((c) => c.name === 'public_apply_gift_card').at(-1).body);
+    expect(sent2.p_amount === 20 && sent2.p_code === code2.replace(/-/g, '') && sent2.p_token === token, `${name}: p_amount 20, normalisoitu koodi, token`);
+    const c2 = await cardOf(code2); expect(JSON.stringify(c2).includes('"balance":38'), `${name}: toisen kortin saldo 38 (58 − 20)`);
+    note(`lunastus verkkokaupassa: tilaus ${full.order_no}, kortit ${code.slice(-4)}/${code2.slice(-4)}`);
+    await page.context().close();
+  }
+  // 6) kuvat FI/EN kaikilla leveyksillä (live-data)
+  for (const lang of ['fi', 'en']) for (const vp of [360, 390, 430, 768, 1280]) {
+    const name = `live kauppa kuva ${lang} ${vp}`, page = await openShop(name, lang === 'fi' ? '/lahjakortti/' : '/en/gift-card/', { vp, lang });
+    await page.waitForSelector('#gift-app .gc-tile', { timeout: 15000 });
+    await page.locator('#paketit .gc-tile').nth(1).locator('.gc-btn').click();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), `${name}: ei vaakavieritystä`);
+    await shot(page, `live-kauppa-lahjakortti-${lang}-${vp}`); await page.context().close();
+  }
+}
+
 // ================= AJO =================
-try { await adminGiftSuite(); if (typeof shopGiftSuite === 'function') await shopGiftSuite(); } catch (e) { problems.push(`KESKEYTYI: ${e.stack?.split('\n').slice(0, 3).join(' | ')}`); }
+try { if (!ONLY || ONLY === 'admin') await adminGiftSuite(); if (!ONLY || ONLY === 'shop') await shopGiftSuite(); } catch (e) { problems.push(`KESKEYTYI: ${e.stack?.split('\n').slice(0, 3).join(' | ')}`); }
 await browser.close(); server.close();
 for (const f of findings) console.log(`HAVAINTO: ${f}`);
 console.log(`${checks} tarkistusta, ${problems.length} ongelmaa`);
