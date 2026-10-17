@@ -1,5 +1,5 @@
 // Talous: välilehdet Tilaukset, Maksut, Raportit, Lahjakortit. Datakerros: ../talous-api.js (mock kun ?mock=1 tai RPC puuttuu). Kieli FI/EN (../talous-i18n.js).
-import { rpc, select as dbSelect, functionUrl, fnBlob } from '../sb.js';
+import { rpc, select as dbSelect, functionUrl, fnBlob, fn } from '../sb.js';
 import { h } from '../ui.js';
 import { createTalousApi } from '../talous-api.js';
 import { createGiftApi } from '../giftcards-api.js';
@@ -12,7 +12,7 @@ import { createGiftcardsTab } from './talous-giftcards.js';
 const ALL_TABS = [['orders', 'tab.orders'], ['payments', 'tab.payments'], ['reports', 'tab.reports'], ['giftcards', 'tab.giftcards']];
 
 export async function render({ ctx, reload, query }) {
-  const api = createTalousApi({ rpc, io: { select: dbSelect, functionUrl, fnBlob } });
+  const api = createTalousApi({ rpc, io: { select: dbSelect, functionUrl, fnBlob, fn } });
   // Raportit (sopimus §11): välilehti ja päiväraportti = reports.daily TAI reports.view; kuukausi + CSV = vain reports.view (muuten selkeä ilmoitus). Oikeudet luetaan aina oikealta käyttäjältä (myös ?mock=1).
   const canFull = !!ctx.can('reports.view'), canDaily = canFull || !!ctx.can('reports.daily');
   // Lahjakortit-välilehti: giftcards.manage. Tilaukset/Maksut: payments.manage (nav-kohta aukeaa myös pelkällä giftcards.manage → silloin vain Lahjakortit).
