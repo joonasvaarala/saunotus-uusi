@@ -32,6 +32,8 @@ export const ICONS = {
   pgprev: [P('M15 18l-6-6 6-6')],
   pgnext: [P('M9 18l6-6-6-6')],
   pglast: [P('M7 18l6-6-6-6'), P('M17 6v12')],
+  minus: [P('M5 12h14')],                                                                        // Stepper: vähennä
+  add: [P('M12 5v14M5 12h14')],                                                                  // Stepper: lisää
   chart: [P('M4 20V10M10 20V4M16 20v-8M22 20H2')],                                                 // Raportit
   tick: [P('M5 12.5l4.5 4.5L19 7.5')],                                                         // Saapunut: valintamerkki
   close: [P('M18 6L6 18M6 6l12 12')],                                                         // Sulje

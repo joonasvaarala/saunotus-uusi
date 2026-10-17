@@ -5,6 +5,7 @@ import { rpc, select } from '../sb.js';
 import { customerForm, customerSearch } from './customerform.js';
 import { warningBox, hasWarning, MISSING_TEXT } from './therapist.js';
 import { addonPicker } from './addons.js';
+import { stepper } from '../stepper.js';
 import { availabilityPanel, isSlotProduct } from './availability.js';
 import { resName, catLabel } from './legs.js';
 import { h, field, toast, run, fmtDay, fmtTime, money, todayHel, helsinkiIso, errMsg, dayStartIso, addDays, fmtDT } from '../ui.js';
@@ -35,7 +36,7 @@ export async function render({ ctx, refs, query, kind }) {
   const time = h('input', { type: 'time', name: 'time', required: true, step: 300, value: '15:00' });
   const end = h('input', { type: 'time', name: 'end', step: 300 });
   const endHint = h('small', { class: 'muted' }); const windowHint = h('small', { class: 'muted', 'data-testid': 'window-hint' });
-  const persons = h('input', { type: 'number', name: 'n', min: 1, value: 1, required: true });
+  const pst = stepper({ label: 'Henkilömäärä', value: 1, min: 1, max: 99, inputName: 'n', size: 'lg' }); const persons = pst.input;   // jaettu − [ n ] + -stepper (stepper.js); persons.value / 'input'-tapahtuma toimivat kuten ennen
   const personsHint = h('small', { class: 'muted' });
   const spaceSel = h('select', { name: 'space' }); const spaceFld = field('Tila', spaceSel, 'Automaattinen valinta noudattaa tuotteen sääntöjä (esim. Lovi vain kun Rauni on suljettu).');
   const parentSel = h('select', { name: 'parent' }); const parentFld = field('Vanhempi varaus', parentSel, 'Lisäpalvelu vaatii jälkilöyly- tai yksityisvuorovarauksen samalle ajalle; automaattinen haku valitsee sopivan.');
@@ -78,8 +79,7 @@ export async function render({ ctx, refs, query, kind }) {
   const sync = (reload = true) => {
     const p = refs.productById.get(+prodSel.value) || st.product; st.product = p; if (!p) return;
     const c = p.config; const dur = c.duration_minutes;
-    persons.min = c.min_persons || 1; if (c.max_persons) persons.max = c.max_persons; else persons.removeAttribute('max');
-    if (+persons.value < +persons.min) persons.value = persons.min;
+    pst.setRange(c.min_persons || 1, c.max_persons || 99);   // rajaa myös nykyisen arvon
     personsHint.textContent = `${c.min_persons || 1}${c.max_persons ? `–${c.max_persons}` : '+'} hlö${c.required_skill ? ` · vaatii saunottajan (taito: ${c.required_skill})` : ''}`;
     endHint.textContent = dur ? `Oletuskesto ${dur} min${time.value ? ` → päättyy ${addMin(time.value, dur)}` : ''}` : 'Päättymisaika pakollinen (tuotteella ei ole oletuskestoa)';
     end.required = !dur;
@@ -99,7 +99,7 @@ export async function render({ ctx, refs, query, kind }) {
     h('p', { class: 'muted', text: old ? 'Kirjaa varaus vanhalle tuotteelle (esim. siirtynyt hoito). Resurssivaikutus säilyy: sulut, päällekkäisyys ja saunottaja tarkistetaan.' : 'Nykyinen resurssituote (hoito, saunotus, rituaali, seremonia, lisäpalvelu) ylläpidon kautta. Tila ja saunottaja varataan tuotteen sääntöjen mukaan.' }),
     field('Tuote', prodSel), avail ? avail.node : null,
     h('div', { class: 'row wrap' }, field('Päivä', date), field('Alkaa', time), field('Päättyy (valinnainen)', end, null)), endHint, windowHint,
-    h('div', { class: 'row wrap' }, field('Henkilömäärä', persons), field('Hinta € (ohita automaattinen)', price)), personsHint,
+    h('div', { class: 'row wrap' }, h('div', { class: 'fld' }, h('span', { class: 'fld-lab', text: 'Henkilömäärä' }), pst.node), field('Hinta € (ohita automaattinen)', price)), personsHint,
     spaceFld, parentFld,
     h('h3', { text: 'Asiakas' }), cs.row, cs.found, cf.node, picker.node,
     field('Laskun viite / tilausnumero (valinnainen)', invRef),

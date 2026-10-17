@@ -84,7 +84,7 @@ for (const [vname, vp] of [['390', { width: 390, height: 844, deviceScaleFactor:
   const names = await rows.evaluateAll((els) => els.filter((e) => !e.hidden).map((e) => e.querySelector('strong').textContent));
   expect(names.some((x) => /vihta/i.test(x)) && names.some((x) => /turvenaamio/i.test(x)), `${nm}: vihta/turvenaamio puuttuu yleiseltä vuorolta (${names})`);
   if (EXPECT_TOWEL) expect(names.some((x) => /pyyhe/i.test(x)), `${nm}: pyyhe puuttuu yleiseltä vuorolta`);
-  const setQty = async (re, q) => { const row = rows.filter({ hasText: re }).first(); if (await row.count()) await row.locator('input[type=number]').fill(String(q)); };
+  const setQty = async (re, q) => { const row = rows.filter({ hasText: re }).first(); if (await row.count()) await row.locator('.stp-in').fill(String(q)); };
   await setQty(/Saunavihta/, 1); await setQty(/Turvenaamio/, 1); if (EXPECT_TOWEL) await setQty(/Pyyhe/, 1);
   await f.locator('button[type=submit]').click();
   await page.waitForSelector('.ok-box', { timeout: 8000 }).catch(async () => { problems.push(`${nm}: varaus ei luotu: ${(await page.locator('#toast').innerText().catch(() => '')).slice(0, 200)} / ${(await f.locator('.err, [role=alert]').allInnerTexts()).join(' ').slice(0, 200)}`); await page.screenshot({ path: join(OUT, `virhe-${vname}.png`), fullPage: true }); throw new Error('varauksen luonti epäonnistui'); });

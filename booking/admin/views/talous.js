@@ -63,5 +63,7 @@ export async function render({ ctx, reload, query }) {
   const root = h('div', { class: 'tl', lang: getLang(), 'data-testid': 'talous' },
     h('div', { class: 'row between wrap tl-top tl-noprint' }, h('h1', { text: t('title') }), langs), banner, vatBox, list, ...TABS.map(([k]) => panels[k]));
   select(tab);
+  const deepOrder = (query.get('order') || '').trim();   // #/talous?tab=orders&order=<tilausnumero> (esim. Uusi varaus → Avaa tilaus ja maksut): haku + tilaus auki
+  if (deepOrder && tab === 'orders') tabs.orders.setSearch(deepOrder, { open: true });
   return root;
 }

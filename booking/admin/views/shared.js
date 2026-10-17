@@ -1,6 +1,8 @@
 // Jaetut komponentit: varauksen tiedot -dialogi (tilamuutokset, varauksen muutos, maksun kirjaus, maksulinkki-placeholder).
 import { rpc } from '../sb.js';
 import { addonPicker } from './addons.js';
+import { nbt } from '../nb-texts.js';
+import { stepper } from '../stepper.js';
 import { icon } from '../icons.js';
 import { h, dialog, toast, run, fmtDay, fmtTime, fmtDT, money, statusBadge, payBadge, sourceBadge, isJohku, field, badge, empty, errMsg } from '../ui.js';
 import { legsList, resName, resourceBadges, hasLegs } from './legs.js';
@@ -26,6 +28,7 @@ export function reservationDialog(r, { methods, onChange, refs, can = () => true
       h('dt', { text: 'Summa' }), h('dd', {}, money(r.total_gross), r.annual_card_id ? [' ', badge('warn', 'Vuosikortti')] : null),
       h('dt', { text: 'Kanava' }), h('dd', { text: r.source_channel }),
       h('dt', { text: 'Luotu' }), h('dd', { text: fmtDT(r.created_at) }), r.notes ? [h('dt', { text: 'Huomio' }), h('dd', { text: r.notes })] : null),
+    can('payments.manage') ? h('a', { class: 'btn ghost order-link', 'data-testid': 'order-link', href: `#/talous?tab=orders&order=${encodeURIComponent(r.order_no)}`, onclick: () => d.close(), text: nbt('nb.orderLink', { no: r.order_no }) }) : null,   // Talous → Tilaukset: tilaus auki (maksut, kuitit)
     resBox,
     orderBox,
     h('div', { class: 'row wrap' },
@@ -119,7 +122,7 @@ function changeDialog(r, onChange) {
   const day = (iso) => new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
   const st = { date: day(r.starts_at), session: null };
   const sessionsBox = h('div', { class: 'stack' });
-  const persons = h('input', { type: 'number', min: 1, value: r.persons, required: true });
+  const pst = stepper({ label: 'Henkilömäärä', value: r.persons, min: 1, max: 99, size: 'lg' }); const persons = pst.input;
   const dateIn = h('input', { type: 'date', value: st.date, onchange: (e) => { st.date = e.target.value; st.session = null; load(); } });
   async function load() {
     sessionsBox.replaceChildren(h('p', { class: 'muted', text: 'Ladataan…' }));
@@ -141,7 +144,7 @@ function changeDialog(r, onChange) {
     toast('Varaus muutettu'); d.close(); onChange?.();
   }); } },
     h('p', { class: 'muted', text: `Nykyinen: ${fmtDay(r.starts_at)}, ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)}, ${r.persons} hlö` }),
-    h('div', { class: 'row wrap' }, field('Päivä', dateIn), field('Henkilömäärä', persons)), sessionsBox,
+    h('div', { class: 'row wrap' }, field('Päivä', dateIn), h('div', { class: 'fld' }, h('span', { class: 'fld-lab', text: 'Henkilömäärä' }), pst.node)), sessionsBox,
     h('button', { class: 'btn primary', type: 'submit', text: 'Tallenna muutos' }));
   const d = dialog(`Muuta varausta #${r.order_no}`, f);
   load();

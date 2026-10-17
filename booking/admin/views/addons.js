@@ -3,32 +3,38 @@
 import { rpc } from '../sb.js';
 import { h, dialog, field, toast, run, money, badge, empty } from '../ui.js';
 import { icon } from '../icons.js';
+import { stepper } from '../stepper.js';
+import { addonLimit } from '../nb-logic.js';
+import { nbt, nbLang, descRedundant, cleanDesc } from '../nb-texts.js';
 
-export const addonLimit = (a, persons) => Math.min((a.max_per_person ?? 99) * Math.max(0, persons || 0), 99);
+export { addonLimit };   // nb-logic.js (puhdas, testattava)
 export const MODE_LABEL = { shared: 'Yleinen vuoro', exclusive: 'Yksityisvuoro', resource: 'Hoito / saunotus' };
 const VAT = [25.5, 24, 14, 13.5, 10, 0];
 
 // Valitsin: addons = aktiiviset (admin_list_addons), getPersons() = nykyinen henkilömäärä, getMode() = 'shared'|'exclusive'|'resource' (resource = hoito, saunotus, rituaali, tapahtuma).
+// Rivi: nimi + hinta + (tiivis) kuvaus vasemmalla, "− [ 0 ] +" -stepper oikealla (jaettu stepper.js). Enimmäismäärä = addonLimit (henkilömäärä × max/hlö, enintään 99).
 export function addonPicker(addons, { getPersons, getMode, onChange }) {
-  const box = h('fieldset', { class: 'box addon-picker' }, h('legend', {}, icon('leaf', 18), ' Lisäpalvelut'));
+  const box = h('fieldset', { class: 'box addon-picker' }, h('legend', {}, icon('leaf', 18), ' ', nbt('addons.title')));
   const rows = [];
   const total = h('strong', { class: 'addon-total' });
+  const en = nbLang() === 'en';
   for (const a of addons.filter((x) => x.active)) {
-    const q = h('input', { type: 'number', min: 0, max: 0, value: 0, inputmode: 'numeric', 'aria-label': `${a.name}, määrä`, oninput: () => { sync(); onChange?.(); } });
-    const row = h('div', { class: 'row wrap addonrow' }, h('span', { class: 'grow' }, h('strong', { text: a.name }), h('small', { text: ` ${money(a.price)} / kpl${a.description ? ' · ' + a.description : ''}` })), q);
+    const name = (en && a.name_en) || a.name, desc = (en && a.description_en) || a.description;
+    const q = stepper({ label: name, value: 0, min: 0, max: 0, onChange: () => { sync(); onChange?.(); } });
+    const info = h('div', { class: 'addon-info' }, h('strong', { class: 'addon-name', text: name }), h('span', { class: 'addon-price', text: nbt('addons.perPiece', { price: money(a.price) }) }),
+      desc && !descRedundant(name, desc) ? h('small', { class: 'addon-desc', text: cleanDesc(desc) }) : null);
+    const row = h('div', { class: 'addonrow', 'data-addon': a.code || a.id }, info, q.node);
     rows.push({ a, q, row });
     box.append(row);
   }
-  box.append(h('p', { class: 'muted' }, 'Lisäpalvelut yhteensä: ', total));
+  box.append(h('p', { class: 'addon-sum' }, h('span', { text: nbt('addons.total') }), total));
   function sync() {
     const mode = getMode(); const n = getPersons();
     let sum = 0, any = false;
     for (const { a, q, row } of rows) {
       const ok = (a.applies_modes || []).includes(mode); row.hidden = !ok;
-      const lim = ok ? addonLimit(a, n) : 0; q.max = lim;
-      if (+q.value > lim) q.value = lim;
-      if (+q.value < 0 || !Number.isInteger(+q.value)) q.value = Math.max(0, Math.floor(+q.value) || 0);
-      if (ok) any = true; sum += ok ? +q.value * a.price : 0;
+      q.setRange(0, ok ? addonLimit(a, n) : 0);
+      if (ok) any = true; sum += ok ? q.get() * a.price : 0;
     }
     box.hidden = !any; total.textContent = money(sum);
     return sum;
@@ -37,9 +43,9 @@ export function addonPicker(addons, { getPersons, getMode, onChange }) {
   return {
     node: box, sync,
     // Esitäyttö: [{ addon_id | id, quantity }]
-    set(list) { for (const { a, q } of rows) q.value = (list || []).find((x) => (x.addon_id ?? x.id) === a.id)?.quantity ?? 0; sync(); onChange?.(); },
+    set(list) { for (const { a, q } of rows) q.set((list || []).find((x) => (x.addon_id ?? x.id) === a.id)?.quantity ?? 0); sync(); onChange?.(); },
     // [{ id, quantity }] – vain määrät > 0
-    value: () => rows.filter(({ q, a, row }) => !row.hidden && +q.value > 0).map(({ a, q }) => ({ id: a.id, quantity: +q.value })),
+    value: () => rows.filter(({ q, row }) => !row.hidden && q.get() > 0).map(({ a, q }) => ({ id: a.id, quantity: q.get() })),
     total: () => sync(),
   };
 }

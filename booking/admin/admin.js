@@ -27,11 +27,11 @@ const loadErrorView = () => h('div', { class: 'pad', role: 'alert' },
 const ROUTES = [
   { path: '', label: 'Päivä', icon: 'day', mod: () => loadView('day') },
   { path: 'varaukset', label: 'Varaukset', icon: 'list', mod: () => loadView('reservations') },
+  { path: 'talous', label: 'Talous', labelFn: () => tl('nav'), icon: 'euro', any: ['payments.manage'], mod: () => loadView('talous') },
   { path: 'kalenteri', label: 'Kalenteri', icon: 'calendar', mod: () => loadView('calendar') },
   { path: 'tarkista', label: 'Tarkista', icon: 'check', mod: () => loadView('review') },
   { path: 'uusi', label: 'Uusi varaus', icon: 'plus', mod: () => loadView('newbooking') },
   { path: 'asiakkaat', label: 'Asiakkaat', icon: 'users', mod: () => loadView('customers') },
-  { path: 'talous', label: 'Talous', labelFn: () => tl('nav'), icon: 'euro', any: ['payments.manage'], mod: () => loadView('talous') },
   { path: 'tuotteet', label: 'Tuotteet', icon: 'tag', mod: () => loadView('products') },
   { path: 'resurssit', label: 'Resurssit', icon: 'cabin', mod: () => loadView('resources') },
   { path: 'sulkukalenterit', label: 'Kalenterisulut', icon: 'lock', any: ['blocks.manage'], mod: () => loadView('closures') },
@@ -50,6 +50,9 @@ export async function refs(force = false) {
 const allowed = (r) => !r.any || r.any.some((p) => ctx.can(p));
 function drawNav(current) {
   $('nav').replaceChildren(...ROUTES.filter(allowed).map((r) => h('a', { href: `#/${r.path}`, 'aria-current': r.path === current ? 'page' : null }, h('span', { class: 'ico', 'aria-hidden': 'true' }, icon(r.icon)), h('span', { class: 'lbl', text: r.labelFn ? r.labelFn() : r.label }))));
+  // Mobiilin vaakavieritettävä alapalkki: aktiivinen kohta vieritetään näkyviin (keskelle), koska palkki piirretään joka reitillä uudelleen
+  const nav = $('nav'), cur = nav.querySelector('[aria-current]');
+  if (cur && nav.scrollWidth > nav.clientWidth + 1 && nav.scrollHeight <= nav.clientHeight + 1) nav.scrollLeft = Math.max(0, cur.offsetLeft - (nav.clientWidth - cur.offsetWidth) / 2);
 }
 let routeSeq = 0;   // nopea navigointi: vain viimeisin reitti saa piirtää näkymän (vanhentuneet vastaukset hylätään)
 async function route() {
