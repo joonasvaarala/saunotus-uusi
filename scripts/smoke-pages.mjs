@@ -199,11 +199,14 @@ for (const [base, L] of [['/varaa/', { cat: 'Selaa kategorioittain', day: 'Selaa
   await page.waitForSelector('.bk-pc.open .bk-slot:visible');
   const times = await page.locator('.bk-pc.open .bk-time').allInnerTexts();
   const openTxt = await page.locator('.bk-pc.open').innerText();
-  if (times.length !== 3 || !/täynnä|full/i.test(openTxt)) problems.push(`${base}: avatussa kortissa pitäisi olla 3 vuoroa (täynnä mukana), nyt ${times.length}`);
+  // PR #25: asiakasnäkymä näyttää vain vapaat vuorot – mockissa 3 vuoroa (2 vapaata + 1 täynnä) → kortissa 2, täynnä oleva ei näy
+  if (times.length !== 2 || !times.every((x) => /^(14|18)(\D|$)/.test(x))) problems.push(`${base}: avatussa kortissa pitäisi olla vain 2 vapaata vuoroa (klo 14 ja 18), nyt ${times.length}: ${times.join(' | ')}`);
+  if (/täynnä|full/i.test(openTxt) || (await page.locator('.bk-pc.open .bk-slot.full, .bk-pc.open .bk-slot.unavailable').count()) !== 0 || (await page.locator('.bk-pc.open .bk-slot.available a.btn').count()) !== 2) problems.push(`${base}: avatussa kortissa ei saa näkyä täynnä olevaa vuoroa, ja jokaisella näkyvällä vuorolla pitää olla Valitse-linkki: ${openTxt.replace(/\n/g, ' ')}`);
   if (!page.url().endsWith('?tuote=yleinen')) problems.push(`${base}: avattu tuote ei näy URL:ssa: ${page.url()}`);
   await page.goto(`${BASE}${base}#/paiva/${oddDay}?tuote=oma`);   // syväosoite: oikea kortti auki
   await page.waitForSelector('.bk-pc[data-slug=oma].open .bk-slot:visible');
-  if ((await page.locator('.bk-pc.open').count()) !== 1 || !/ei varattavissa|not available/i.test(await page.locator('.bk-pc.open').innerText())) problems.push(`${base}: ?tuote=oma pitää avata vain oma-kortti (ei varattavissa -tila mukana)`);
+  // PR #25: oma-tuotteen mockissa 2 vuoroa (13:00 ei varattavissa, 20:00 vapaa) → vain vapaa näkyy, ei varattavissa -vuoroa ei näytetä
+  if ((await page.locator('.bk-pc.open').count()) !== 1 || (await page.locator('.bk-pc.open .bk-slot').count()) !== 1 || /ei varattavissa|not available/i.test(await page.locator('.bk-pc.open').innerText()) || (await page.locator('.bk-pc.open .bk-slot.available a.btn').count()) !== 1) problems.push(`${base}: ?tuote=oma pitää avata vain oma-kortti, jossa vain yksi vapaa vuoro (ei varattavissa -vuoroa ei näytetä)`);
   const href = await page.locator('.bk-pc.open .bk-slot.available a.btn').first().getAttribute('href');
   if (!/#\/varaa\/\d+\/\d{4}-\d\d-\d\d\/\d+\?via=day$/.test(href)) problems.push(`${base}: Valitse-linkki väärä: ${href}`);
   await page.locator('.bk-pc.open .bk-slot.available a.btn').first().click();

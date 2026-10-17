@@ -13,7 +13,6 @@
 --  4) admin_set_product_image(tuote, polku, alt): oikeus catalog.edit, validointi, null poistaa kuvan; kirjaa audit-lokiin (action ADMIN_SET_IMAGE).
 -- SECURITY DEFINER + search_path = '' kuten aiemmissa. Kuvatiedoston lataus tapahtuu selaimesta Storage-rajapintaan käyttäjän omalla istunnolla.
 -- =====================================================================
-begin;
 set local search_path = booking, extensions, public;
 
 -- ---------- 1) kentät ----------
@@ -88,5 +87,3 @@ revoke all on function booking.public_product_images(), booking.admin_set_produc
 grant execute on function booking.public_product_images() to anon, authenticated;
 grant execute on function booking.admin_set_product_image(bigint, text, text) to authenticated;
 grant execute on function booking.public_product_images(), booking.admin_set_product_image(bigint, text, text) to service_role;
-
-commit;
