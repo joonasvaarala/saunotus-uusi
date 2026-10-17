@@ -36,7 +36,8 @@ ul{margin:0 0 1em;padding-left:1.2em}
 .btn.sm{padding:12px 22px;border-radius:30px}
 .btn.ghost{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.55);box-shadow:none}
 .btn.ghost:hover{background:#fff;color:var(--ink)}
-.btn.gold{background:linear-gradient(180deg,#d1a56f,#a87b45);border-color:#a87b45;color:#fff}
+.btn.gold{background:linear-gradient(180deg,#d1a56f,#a87b45);border-color:#a87b45;color:#1c1209}
+/* kultanappi: tumma teksti (valkoinen kullalla vain 2,3–3,8:1; tumma 4,9–8,2:1) */
 .btn.light{background:transparent;color:var(--ink);border-color:var(--ink);box-shadow:none}
 .btn.light:hover{background:var(--ink);color:#fff}
 .lang{display:flex;border:1px solid var(--line);border-radius:6px;background:#fff;overflow:hidden}
@@ -51,7 +52,7 @@ ul{margin:0 0 1em;padding-left:1.2em}
 .hero{position:relative;isolation:isolate;color:#fff;overflow:hidden;background:#15110d}
 .hero picture,.hero picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
 .hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(8,6,4,.88) 0,rgba(8,6,4,.5) 55%,rgba(8,6,4,.1) 100%)}
-.hero.home picture img{object-position:center 40%}
+.hero.home picture img{object-position:50% 40%}
 .hero.page::after{background:linear-gradient(180deg,rgba(20,14,8,.55),rgba(20,14,8,.7))}
 .hero .in{padding:90px 0 130px;min-height:520px;display:flex;flex-direction:column;justify-content:center}
 .hero h1{font:400 clamp(38px,6vw,66px)/1.08 var(--disp);color:#fff;margin:0 0 .45em;max-width:14ch;text-wrap:balance}
@@ -270,5 +271,18 @@ address{font-style:normal;background:var(--card);border:1px solid var(--line);bo
 @media (max-width:900px){.nav-desk,.hdr>.btn{display:none}.nav-mob{display:block}.about,.company{grid-template-columns:1fr}.info-sec{grid-template-columns:1fr;gap:12px}.quick{grid-template-columns:1fr;margin-top:-20px}.facts{grid-template-columns:repeat(2,1fr)}.ritual .in{padding:44px 26px}.ritual::after{background:rgba(8,6,4,.78)}.elements{grid-template-columns:repeat(2,1fr)}.elements li:nth-child(2){border-right:0}.elements li:nth-child(-n+2){border-bottom:1px solid var(--line)}}
 @media (max-width:640px){body{font-size:16px}.brand small{display:none}.brand b{font-size:19px;letter-spacing:.14em}.brand{gap:8px}.lang a,.lang span{padding:10px}.nav-mob summary{padding:11px 10px}.tiles{grid-template-columns:1fr;margin-top:-60px}.cards.five,.cards.two,.cards.three{grid-template-columns:1fr}.hero .in{min-height:440px;padding:60px 0 110px}.section{padding:52px 0}.fgrid{grid-template-columns:1fr}.hdr{gap:10px}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.card,.btn{transition:none}.card:hover{transform:none}}
-/* etusivun hero: kapeilla näytöillä teksti on kuvan (oven) päällä → tasaisempi tummennus, jotta teksti pysyy luettavana (≥4.5:1) */
-@media (max-width:900px){.hero.home::after{background:linear-gradient(90deg,rgba(8,6,4,.8) 0,rgba(8,6,4,.62) 60%,rgba(8,6,4,.5) 100%)}}
+/* kultanapin hover (tumma teksti säilyy: ≥6:1) */
+.btn.gold:hover{background:linear-gradient(180deg,#dcb480,#b98a52);color:#1c1209}
+/* etusivun hero (kuvat: leveä desktop ≥720 px, 4:5 mobiili ≤719 px; breakpoint = HERO.bp src/lib.mjs). Tummennus kulkee tekstin (--tx = tekstin vasen reuna) mukana */
+.hero.home{--tx:max(20px,calc((100vw - var(--w))/2))}
+.hero.home::after{background:linear-gradient(90deg,rgba(8,6,4,.82) 0,rgba(8,6,4,.78) calc(var(--tx) + 300px),rgba(8,6,4,.56) calc(var(--tx) + 560px),rgba(8,6,4,.16) calc(var(--tx) + 880px),rgba(8,6,4,0) calc(var(--tx) + 1100px))}
+@media (min-width:1100px){.hero.home picture img{object-position:50% 40%}}
+@media (min-width:720px) and (max-width:1099px){.hero.home picture img{object-position:20% 40%}.hero.home p{max-width:24em}.hero.home::after{background:linear-gradient(90deg,rgba(8,6,4,.82) 0,rgba(8,6,4,.76) calc(var(--tx) + 260px),rgba(8,6,4,.5) calc(var(--tx) + 480px),rgba(8,6,4,.14) calc(var(--tx) + 700px),rgba(8,6,4,0) calc(var(--tx) + 880px))}}
+/* mobiili: kuva 4:5 koko leveydeltä ylhäällä (ovi ja veistos näkyvät), teksti kuvan alaosan päällä ja alla tummenevalla pohjalla */
+@media (max-width:719px){
+  .hero.home{--ih:min(125vw,640px)}
+  .hero.home picture{inset:0 0 auto 0;height:var(--ih);bottom:auto}
+  .hero.home picture img{height:var(--ih);object-position:50% 25%}
+  .hero.home::after{background:linear-gradient(180deg,rgba(8,6,4,0) 0,rgba(8,6,4,0) calc(var(--ih)*.28),rgba(8,6,4,.5) calc(var(--ih)*.44),rgba(8,6,4,.72) calc(var(--ih)*.58),rgba(8,6,4,.84) calc(var(--ih)*.76),#15110d calc(var(--ih)*.98))}
+  .hero.home .in{min-height:0;justify-content:flex-end;padding:calc(var(--ih)*.46) 0 96px}
+}

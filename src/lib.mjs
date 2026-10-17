@@ -81,9 +81,10 @@ export const HERO = { mobile: 'hero-ovi-uusi-mobiili', desktop: 'hero-ovi-uusi',
 const heroSet = (id, ext) => hero[id][ext].map((w) => `${href(`/img/${id}-${w}.${ext}`)} ${w}w`).join(', ');
 export function heroPicture({ alt = '' } = {}) {
   const m = hero[HERO.mobile], d = hero[HERO.desktop];
-  const mq = `(max-width:${HERO.bp}px)`;
-  const dflt = d.webp[d.webp.length - 1];
-  return `<picture>${['avif', 'webp'].map((x) => `<source media="${mq}" type="image/${x}" srcset="${heroSet(HERO.mobile, x)}" sizes="100vw" width="${m.w}" height="${m.h}">`).join('')}${['avif', 'webp'].map((x) => `<source type="image/${x}" srcset="${heroSet(HERO.desktop, x)}" sizes="100vw" width="${d.w}" height="${d.h}">`).join('')}<img src="${href(`/img/${HERO.desktop}-${dflt}.webp`)}" width="${d.w}" height="${d.h}" alt="${e(alt)}" fetchpriority="high" decoding="async"></picture>`;
+  const mq = `(max-width:${HERO.bp}px)`, fmt = { avif: 'image/avif', webp: 'image/webp', jpg: 'image/jpeg' };
+  const src = (id, x, o, media) => `<source${media ? ` media="${media}"` : ''} type="${fmt[x]}" srcset="${heroSet(id, x)}" sizes="100vw" width="${o.w}" height="${o.h}">`;
+  const fb = d.jpg[d.jpg.length - 1];   // varakuva (JPEG) = img; mobiili-JPEG on oma <source media>, joten desktop-JPEG ei lataudu mobiilille
+  return `<picture>${['avif', 'webp', 'jpg'].map((x) => src(HERO.mobile, x, m, mq)).join('')}${['avif', 'webp'].map((x) => src(HERO.desktop, x, d)).join('')}<img src="${href(`/img/${HERO.desktop}-${fb}.jpg`)}" srcset="${heroSet(HERO.desktop, 'jpg')}" sizes="100vw" width="${d.w}" height="${d.h}" alt="${e(alt)}" fetchpriority="high" decoding="async"></picture>`;
 }
 // preload oikealle kuvalle media-ehdolla (vain avif; webp-selaimet latautuvat <picture>-elementistä)
 export const heroPreload = () => [[HERO.mobile, `(max-width:${HERO.bp}px)`], [HERO.desktop, `(min-width:${HERO.bp + 1}px)`]]
