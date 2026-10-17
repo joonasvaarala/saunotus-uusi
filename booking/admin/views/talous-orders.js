@@ -5,12 +5,13 @@ import { icon } from '../icons.js';
 import { receiptsList } from './talous-receipts.js';
 import { t, fmt, getLang } from '../talous-i18n.js';
 import { RPC, absLink } from '../talous-api.js';
+import { redeemFields, redeemSubmit } from './talous-giftcards.js';
 import { johkuBadge, PAY, SOURCES, payLabel, sourceLabel, payBadge, sourceBadge, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, dateFld, searchFld, expandRow, actionBtn, doneToast, formDialog, methodLabel, pstatBadge } from './talous-ui.js';
 
 export const ORDER_SORTS = ['created', 'order_no', 'total', 'payment_status', 'first_reservation'];
 const VAT_CHOICES = [25.5, 13.5, 0];
 
-export function createOrdersTab({ api, ctx }) {
+export function createOrdersTab({ api, ctx, gift = null }) {
   const st = { search: '', paymentStatus: '', source: '', native: '', dateField: '', from: '', to: '', sortBy: 'created', sortDir: 'desc', limit: 25, offset: 0 };
   const list = h('ul', { class: 'tl-list', 'data-testid': 'orders-list' }), count = h('p', { class: 'muted tl-count', role: 'status', 'data-testid': 'orders-count' }), pagers = [h('div'), h('div')];
   let seq = 0, reopen = null, autoOpen = false;
@@ -125,14 +126,32 @@ export function createOrdersTab({ api, ctx }) {
   }
   const MANUAL = ['cash', 'card_terminal', 'mobilepay', 'bank_transfer', 'invoice', 'other'];
   function recordDialog(o) {
-    const fromRefs = (ctx.refs?.methods || []).filter((m) => m.is_manual && m.active && m.code !== 'pay_later');
+    const fromRefs = (ctx.refs?.methods || []).filter((m) => m.is_manual && m.active && m.code !== 'pay_later' && m.code !== 'gift_card');
     const methods = fromRefs.length ? fromRefs.map((m) => ({ code: m.code, label: m.label })) : MANUAL.map((c) => ({ code: c, label: null }));
     const amount = h('input', { name: 'amount', type: 'number', step: '0.01', min: '0.01', max: o.balance.unpaid, value: o.balance.unpaid, inputmode: 'decimal', required: true, 'data-testid': 'record-amount' });
-    formDialog(t('btn.recordTitle'), [h('p', { class: 'muted', text: api.isMock('recordPayment') ? t('mock.note') : t('live.note') }),
-      fld(t('record.method'), h('select', { name: 'method', 'data-testid': 'record-method' }, methods.map((m) => h('option', { value: m.code, text: methodLabel(m.code, m.label) })))), fld(t('record.amount'), amount),
-      fld(t('record.note'), h('input', { name: 'note', maxlength: 200 })), h('p', { class: 'muted tl-hint', text: t('record.hint') })], t('record.submit'),
+    // Lahjakortti (sopimus §13.0): admin_record_payment hylkää gift_card-tavan → oma lunastus (admin_redeem_gift_card). Vaatii payments.manage; näkyy vain kun lahjakorttirajapinta on käytössä.
+    const sel = h('select', { name: 'method', 'data-testid': 'record-method' }, methods.map((m) => h('option', { value: m.code, text: methodLabel(m.code, m.label) })), gift && ctx.can('payments.manage') ? h('option', { value: 'gift_card', text: methodLabel('gift_card') }) : null);
+    const rf = gift ? redeemFields({ gift, order: o, amountInput: amount }) : null;
+    if (rf) rf.node.hidden = true;
+    const submitBtn = () => dlg?.querySelector('button[type=submit]');
+    const full = String(amount.value);
+    const sync = () => {
+      const g = sel.value === 'gift_card'; if (rf) rf.node.hidden = !g; hintP.hidden = g;
+      amount.required = !g; if (g) { if (amount.value === full) amount.value = ''; } else if (amount.value === '') amount.value = full;   // lahjakortti: tyhjä summa = palvelin käyttää pienempää kortin saldosta ja maksamattomasta
+      if (submitBtn()) submitBtn().disabled = g && !!rf?.isOff();
+    };
+    const hintP = h('p', { class: 'muted tl-hint', text: t('record.hint') });
+    sel.addEventListener('change', sync); rf?.node.addEventListener('redeem-off', sync);
+    const dlg = formDialog(t('btn.recordTitle'), [h('p', { class: 'muted', text: api.isMock('recordPayment') ? t('mock.note') : t('live.note') }),
+      fld(t('record.method'), sel), ...(rf ? [rf.node] : []), fld(t('record.amount'), amount),
+      fld(t('record.note'), h('input', { name: 'note', maxlength: 200 })), hintP], t('record.submit'),
     async (fd) => {
       const amt = Math.round(+fd.get('amount') * 100) / 100;
+      if (fd.get('method') === 'gift_card') {
+        if (!(amt > 0) && fd.get('amount') !== '') throw new Error(t('gc.o.badAmount'));
+        const res = await redeemSubmit({ gift, order: o, code: rf.code(), amount: amt > 0 ? amt : undefined, note: String(fd.get('note') || '').trim() || undefined });
+        afterChange(res, o.order_id); return;
+      }
       if (!(amt > 0) || amt > o.balance.unpaid + 0.005) throw new Error(t('refund.badAmount'));
       const res = await api.recordPayment({ orderId: o.order_id, method: fd.get('method'), amount: amt, note: String(fd.get('note') || '').trim() || null });
       doneToast(res, RPC.recordPayment); afterChange(res, o.order_id);

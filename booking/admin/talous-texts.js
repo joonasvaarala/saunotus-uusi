@@ -1,6 +1,8 @@
+import { GC_FI, GC_EN } from './giftcards-texts.js';
 // Talous-näkymien tekstit (FI/EN). Avaimet pidetään samoina molemmilla kielillä (node --test tarkistaa, että kaikki käytetyt avaimet löytyvät).
 export const TEXTS = {
   fi: {
+    ...GC_FI,
     title: 'Talous', nav: 'Talous', tabs: 'Talousnäkymät', 'tab.orders': 'Tilaukset', 'tab.payments': 'Maksut', 'tab.reports': 'Raportit', 'lang.label': 'Kieli',
     loading: 'Ladataan…', retry: 'Yritä uudelleen', notReady: 'Ominaisuus ei vielä käytössä ({rpc}).',
     'banner.mock.title': 'Esimerkkidata.', 'banner.mock': 'Tiedot ovat keksittyjä (?mock=1) eikä mikään tallennu palvelimelle.',
@@ -63,6 +65,7 @@ export const TEXTS = {
     'pstat.partially_refunded': 'Osittain hyvitetty', 'pstat.refunded': 'Hyvitetty', 'pstat.cancelled': 'Peruttu', 'src.other': 'Muu',
   },
   en: {
+    ...GC_EN,
     title: 'Finance', nav: 'Finance', tabs: 'Finance views', 'tab.orders': 'Orders', 'tab.payments': 'Payments', 'tab.reports': 'Reports', 'lang.label': 'Language',
     loading: 'Loading…', retry: 'Try again', notReady: 'This feature is not available yet ({rpc}).',
     'banner.mock.title': 'Sample data.', 'banner.mock': 'The data is made up (?mock=1) and nothing is saved to the server.',
