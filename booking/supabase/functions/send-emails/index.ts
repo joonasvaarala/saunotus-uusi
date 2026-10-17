@@ -20,6 +20,8 @@ Deno.serve(async (req) => {
   const from: string = cfg.data?.settings?.from ?? "Sipoonjoen perinnesauna <savusauna@saunotus.fi>";
   const replyTo: string | undefined = cfg.data?.settings?.reply_to;
   const key = Deno.env.get("RESEND_API_KEY");
+  const rs = await bk.from("settings").select("value").eq("key", "gift_cards.redeem_enabled").maybeSingle();
+  const redeemOnline = rs.data?.value === true;
   const claimed = await bk.rpc("email_outbox_claim", { p_limit: 20 });
   if (claimed.error) return json({ ok: false, error: claimed.error.message }, 500);
   const rows: any[] = claimed.data ?? [];
@@ -29,6 +31,15 @@ Deno.serve(async (req) => {
     try {
       if (mode === "off") { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: "resend.mode=off" }); stats.skipped++; continue; }
       if (!r.to || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(r.to)) { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: "ei kelvollista vastaanottajaa" }); stats.skipped++; continue; }
+      const isGc = r.kind === "gift_card_buyer" || r.kind === "gift_card_recipient";
+      if (isGc) {
+        // vain maksetut/käytettävissä olevat kortit; perutut/maksamattomat -> ei viestiä
+        r.gift_cards = (r.gift_cards ?? []).filter((g: any) => g.public_token && ["active", "used", "expired"].includes(g.status));
+        if (!r.gift_cards.length) { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: "ei lähetettäviä lahjakortteja (peruttu/maksamaton)" }); stats.skipped++; continue; }
+        r.functions_url = `${url}/functions/v1`; r.redeem_online = redeemOnline;
+      }
+      if (r.kind === "voucher_claim_problem" && r.voucher_claim?.status !== "problem") { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: "pyyntö ei enää ongelmatilassa" }); stats.skipped++; continue; }
+      if (r.kind === "voucher_claim_received" && (!r.voucher_claim || ["cancelled", "expired"].includes(r.voucher_claim.status))) { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: "pyyntö peruttu/vanhentunut" }); stats.skipped++; continue; }
       const m = render(r.kind as Kind, r, r.locale);
       if (!m.subject || !m.text || !m.html) throw new Error("tyhjä mallipohja");
       if (mode !== "live") { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "dry_run", p_error: `dry_run: ${m.subject}` }); stats.dry_run++; continue; }
@@ -38,6 +49,15 @@ Deno.serve(async (req) => {
         const pdf = await fetch(`${url}/functions/v1/receipt-pdf?t=${r.receipt.public_token}`);
         if (!pdf.ok) throw new Error(`receipt-pdf ${pdf.status}`);
         attachments.push({ filename: `${r.kind === "refund_receipt" ? "hyvityskuitti" : "kuitti"}-${r.receipt.receipt_no}.pdf`, content: b64(new Uint8Array(await pdf.arrayBuffer())) });
+      }
+      if (isGc) {
+        let k = 0;
+        // ostajan viestissä liitteenä vain ostajalle toimitettavat kortit; suoraan saajalle toimitettavien PDF menee saajan viestissä
+        for (const g of r.gift_cards.filter((x: any) => r.kind === "gift_card_recipient" || (x.delivery_to ?? "buyer") !== "recipient")) {
+          const pdf = await fetch(`${url}/functions/v1/gift-card-pdf?t=${g.public_token}&lang=${g.locale === "en" ? "en" : "fi"}`);
+          if (!pdf.ok) throw new Error(`gift-card-pdf ${pdf.status}`);
+          attachments.push({ filename: `${g.locale === "en" ? "gift-card" : "lahjakortti"}${r.gift_cards.length > 1 && r.kind === "gift_card_buyer" ? "-" + (++k) : ""}.pdf`, content: b64(new Uint8Array(await pdf.arrayBuffer())) });
+        }
       }
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",

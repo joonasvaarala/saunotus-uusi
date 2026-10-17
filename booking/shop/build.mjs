@@ -30,11 +30,13 @@ const { site, kb, BASE, e } = L;
 // 2) varausohjelman tiedostot
 const A = join(OUT, 'booking');
 mkdirSync(A, { recursive: true });
-for (const f of ['shop.js', 'i18n.js', 'shop.css', 'treatments.js', 'treatment-ui.js', 'order.js', 'order-texts.js', 'order-api.js', 'order-mock.js']) cpSync(join(here, 'src', f), join(A, f));
+for (const f of ['shop.js', 'i18n.js', 'shop.css', 'treatments.js', 'treatment-ui.js', 'order.js', 'order-texts.js', 'order-api.js', 'order-mock.js', 'order-gift.js', 'gift.js', 'gift-api.js', 'gift-logic.js', 'gift-mock.js', 'gift-texts.js', 'gift-ui.js']) cpSync(join(here, 'src', f), join(A, f));
 cpSync(join(repo, 'booking/shared/sb.js'), join(A, 'sb.js'));
 const cfg = {
   url: process.env.BOOKING_SUPABASE_URL ?? 'http://localhost:4181', anonKey: process.env.BOOKING_ANON_KEY ?? 'anon-demo-key',
   rest: process.env.BOOKING_REST ?? '/rest/v1', auth: process.env.BOOKING_AUTH ?? '/auth/v1', schema: process.env.BOOKING_SCHEMA || 'booking',
+  // Lahjakortin PDF-nappi tilaussivulla: päällä (edge function gift-card-pdf on tuotannossa, sopimus §13.9). BOOKING_GIFT_CARD_PDF=0 piilottaa; funktion nimi = toinen funktio. Muokattavissa julkaisussa tästä tiedostosta.
+  giftCardPdf: /^(0|false)$/i.test(process.env.BOOKING_GIFT_CARD_PDF || '') ? false : (/^(1|true)?$/i.test(process.env.BOOKING_GIFT_CARD_PDF || '') ? true : process.env.BOOKING_GIFT_CARD_PDF),
 };
 writeFileSync(join(A, 'config.js'), `// Muokkaa tätä tiedostoa julkaisussa (ei vaadi uudelleenrakennusta). anon-avain saa olla julkinen.\nwindow.BOOKING_CONFIG=${JSON.stringify(cfg, null, 2)};\n`);
 // Staattinen tuotedata: tuntemattoman tuotteen "ota yhteyttä" -sivu + hoitotuotteiden kortit (hinta, kesto, henkilömäärät; ks. treatments.js loadProducts)
@@ -81,6 +83,21 @@ for (const lang of ['fi', 'en']) {
   html = html.replace('</head>', `<meta name="referrer" content="no-referrer"><link rel="stylesheet" href="${BASE}/booking/shop.css"></head>`);
   html = html.replace(/<link rel="canonical"[^>]*>(<link rel="alternate"[^>]*>)*/, '').replace(/<meta name="robots" content="[^"]*">/, '').replace('<meta name="description"', '<meta name="robots" content="noindex,nofollow"><meta name="description"');
   write(PATHS[lang].order, html);   // polku = sopimus: settings.order_page_path = '/tilaus/' (linkki …/tilaus/?t=<public_token>); EN-sivu /en/order/ (tilauksen locale ohjaa oikeaan kieleen, ks. order.js)
+}
+
+// 3c) lahjakorttisivu (/lahjakortti/, /en/gift-card/): myynti- ja saldolohkot piilossa kunnes gift.js näkee sale_enabled / redeem_enabled = true (muuten sivu on ennallaan: Johku-linkit)
+for (const lang of ['fi', 'en']) {
+  const f = join(OUT, site.pages.gift[lang], 'index.html');
+  let html = readFileSync(f, 'utf8');
+  const S = { lang, page: 'gift', base: BASE, orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order }, termsHref: L.pageHref('terms', lang), phone: site.contact.phone, phoneTel: site.contact.phoneTel, email: site.contact.email };
+  const sale = `<section class="section" hidden><div class="wrap"><div id="gift-app" aria-busy="true"></div></div></section>`;
+  const bal = `<section class="section tint" id="saldo" hidden><div class="wrap"><div id="gift-balance" aria-busy="true"></div></div></section>`;
+  const a = html.indexOf('<section class="section " id="avoin"'), b = html.indexOf('<section class="section tint" id="jatkaminen"');
+  if (a < 0 || b < 0) throw new Error(`lahjakorttisivun osioita (#avoin, #jatkaminen) ei löytynyt: ${f}`);
+  html = html.slice(0, a) + sale + html.slice(a, b) + bal + html.slice(b);
+  html = html.replace('</head>', `<link rel="stylesheet" href="${BASE}/booking/shop.css"></head>`)
+    .replace('</body>', `<script src="${BASE}/booking/config.js"></script><script>window.BOOKING_SHOP=${JSON.stringify(S)}</script><script type="module" src="${BASE}/booking/gift.js"></script></body>`);
+  writeFileSync(f, html);
 }
 
 // 4) Johku-linkit → sisäinen varauskalenteri

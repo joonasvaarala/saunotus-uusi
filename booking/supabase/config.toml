@@ -7,6 +7,8 @@ verify_jwt = true   # pyynnöllä pitää olla kirjautuneen käyttäjän JWT; ad
 verify_jwt = false   # pg_cron kutsuu; tunnistus x-sync-secret (booking._cron_secret_ok)
 [functions.receipt-pdf]
 verify_jwt = false   # kuitin public_token on salaisuus; kuitti on muuttumaton snapshot
+[functions.gift-card-pdf]
+verify_jwt = false   # kortin public_token (UUID) on salaisuus; maksamaton/mitätöity kortti → 409; ei välimuistia
 [functions.report-pdf]
 verify_jwt = true
 [functions.vismapay-start]

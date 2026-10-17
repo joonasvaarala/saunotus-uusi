@@ -96,7 +96,7 @@ export const doneToast = (res, rpcName) => (res?.mock ? toast(t('mock.done', { r
 export function formDialog(title, fields, submitText, onSubmit) {
   const form = h('form', { class: 'stack', novalidate: true, onsubmit: async (ev) => {
     ev.preventDefault(); const btn = form.querySelector('button[type=submit]'); btn.disabled = true;
-    try { await onSubmit(new FormData(form)); d.close(); } catch (e) { toast(friendly(e), 'err'); } finally { btn.disabled = false; }
+    try { await onSubmit(new FormData(form)); d.close(); } catch (e) { if (!e?.handled) toast(friendly(e), 'err'); } finally { btn.disabled = false; }   // handled = virhe näytettiin jo kentän alla
   } }, fields, h('button', { class: 'btn primary', type: 'submit', text: submitText }));
   const d = dialog(title, form);
   return d;

@@ -3,6 +3,8 @@
 import { rpc } from './sb.js';
 import { OT } from './order-texts.js';
 import { createOrderApi, validToken } from './order-api.js';
+import { createGiftApi } from './gift-api.js';
+import { redeemSection, cardsSection } from './order-gift.js';
 
 const S = window.BOOKING_SHOP;
 const L = OT[S.lang] ? S.lang : 'fi', t = OT[L];
@@ -38,7 +40,20 @@ async function main() {
   // sopimuksen linkki on yksi (/tilaus/?t=…): jos tilauksen kieli (locale) on toinen kuin sivun, siirrytään saman tilauksen toiskieliseen sivuun (token säilyy)
   const want = ['fi', 'en'].includes(o.locale) ? o.locale : L;
   if (want !== L && S.orderHref?.[want] && !new URLSearchParams(location.search).has('mock')) { location.replace(`${S.orderHref[want]}${location.search}`); return; }
+  // Lahjakortit (§13): "Käytä lahjakortti" vain kun redeem_enabled; ostetut kortit vain jos tilauksella on niitä. Puuttuva RPC / virhe → ei mitään näkyviin.
+  const gapi = createGiftApi({ rpc: api.mock ? api.rpc : rpc, mock: false });
+  const gift = { redeem: false, cards: [] };
+  async function loadGift() {
+    const [pk, oc] = await Promise.all([gapi.packages().catch(() => null), gapi.orderCards(token).catch(() => null)]);
+    gift.redeem = !!(pk?.ok && pk.redeem_enabled);
+    gift.cards = oc?.ok && Array.isArray(oc.cards) ? oc.cards : [];
+  }
+  await loadGift();
   draw(o);
+  async function reloadAfterGift(text) {
+    try { const n = await api.get(); if (n?.ok) { await loadGift(); draw(n); } } catch { /* näkymä jää ennalleen */ }
+    flash(true, text);
+  }
 
   function draw(o) {
     const stKey = o.cancel_request?.status === 'open' ? 'cancel_requested' : o.status;
@@ -63,6 +78,8 @@ async function main() {
       link ? h('a', { class: 'btn ord-btn', 'data-testid': 'pay-link', href: S.base ? S.base + link.link_path : link.link_path, text: `${t.payRest} (${money(unpaid)})` })
         : h('button', { type: 'button', class: 'btn light ord-btn', disabled: true, 'data-testid': 'pay-rest', text: `${t.payRest} (${money(unpaid)})` }),
       link ? null : h('p', { class: 'bk-note', text: t.payRestSoon })) : null;
+    const giftCards = gift.cards.length ? cardsSection({ S, L, api: gapi, cards: gift.cards }) : null;
+    const giftUse = gift.redeem && unpaid > 0 && !gift.cards.length && ['confirmed', 'pending'].includes(o.status) ? redeemSection({ L, api: gapi, token, onApplied: reloadAfterGift }) : null;
     const receipts = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-r' }, h('h3', { id: 'ord-r', text: t.receiptsTitle }),
       o.receipts.length ? h('ul', { class: 'ord-lines', 'data-testid': 'receipts' }, o.receipts.map((r) => h('li', {},
         h('span', { class: 'ord-l-main' }, h('strong', { text: r.receipt_no }), ' ', badge('', t[r.kind] || r.kind)), h('span', { class: 'ord-l-meta', text: `${r.issued_at ? dt(r.issued_at) : ''}${r.total ? ' · ' + money(r.total) : ''}` }),
@@ -73,7 +90,7 @@ async function main() {
       h('p', { class: 'bk-note' }, `${t.addNewBooking} `, h('a', { href: S.shopHref, text: t.addNewBookingLink })));
     const cancel = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), note,
       o.cancel_request ? h('p', { class: 'bk-ok', role: 'status', 'data-testid': 'cancel-pending', text: t[`cancel.${o.cancel_request.status}`] || t['cancel.open'] }) : cancelForm());
-    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, head, resv, lines, pay, receipts, add, cancel, msg, phoneBox()));
+    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, head, resv, lines, giftCards, pay, giftUse, receipts, add, cancel, msg, phoneBox()));
   }
   async function download(btn, receiptNo) {
     btn.disabled = true;

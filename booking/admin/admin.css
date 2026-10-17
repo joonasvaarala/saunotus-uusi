@@ -449,3 +449,28 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
   body{background:#fff}#shell{display:block}main{padding:0;max-width:none}
   .tl-panel-wrap[hidden]{display:none!important}.tl-stat,.tl-table tr,.tl-sec{break-inside:avoid}
 }
+/* Lahjakortit (Talous › Lahjakortit): kytkinrivi, koodit, tiedot-lista. Ei sinistä; tila kerrotaan aina tekstillä (ei pelkällä värillä). */
+.gc-top{justify-content:space-between;align-items:flex-start;margin:0 0 10px;gap:10px 16px}.gc-switches{min-width:0;flex:1 1 260px}
+.gc-sw-list{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.gc-sw{display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;border:1px solid var(--line);background:#fff;color:var(--ink)}
+.gc-sw.on{background:var(--okbg);color:var(--ok);border-color:rgba(29,77,43,.35)}.gc-sw.off{background:#ece8e3;color:#5b524a}
+.gc-sw-dot{width:9px;height:9px;border-radius:50%;background:currentColor;flex:none}.gc-sw.off .gc-sw-dot{background:transparent;border:2px solid currentColor}
+.gc-new{gap:8px;flex:0 0 auto}.btn.primary.gc-new{min-height:44px}
+.gc-code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.02em;color:var(--ink);overflow-wrap:anywhere}
+.gc-bigcode{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:4px 0 8px}.gc-bigcode strong{font:700 20px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink);overflow-wrap:anywhere}
+.gc-dl{display:grid;grid-template-columns:minmax(110px,max-content) minmax(0,1fr);gap:4px 14px;margin:0}.gc-dl dt{color:var(--muted);font-size:13px}.gc-dl dd{margin:0;overflow-wrap:anywhere}
+.gc-link{min-height:44px;padding:6px 10px}.gc-over{color:var(--err);font-weight:700}
+.chk{display:flex;align-items:center;gap:10px;min-height:44px;font-weight:600;color:var(--ink)}.chk input{width:22px;height:22px;flex:none}
+@media(max-width:420px){.gc-dl{grid-template-columns:minmax(0,1fr)}.gc-dl dt{margin-top:6px}}
+.gc-pdfbox{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:0 0 14px}.gc-pdfbox .tl-hint{margin:0;flex:1 1 220px}
+/* Lahjakortin toimitusvalinta (sopimus §13.11) */
+.gc-dlv{border:0;margin:0;padding:0;min-width:0;display:grid;gap:8px}
+.gc-dlv[hidden],.gc-when-fields[hidden],.fld[hidden]{display:none}
+.gc-dlv>legend{padding:0;margin:0 0 4px;font-weight:700;color:var(--ink)}
+.gc-radios{display:flex;flex-wrap:wrap;gap:8px}
+.gc-radio{display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card,#fff);cursor:pointer;flex:1 1 150px}
+.gc-radio input{width:22px;height:22px;min-height:22px;padding:0;margin:0;flex:none;accent-color:var(--green)}
+.gc-radio:has(input:checked){border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.gc-radio:has(input:focus-visible){outline:3px solid var(--ink);outline-offset:2px}
+.gc-ferr{color:var(--err);font-weight:600}.gc-ferr:empty{display:none}
+.gc-dl dd{white-space:pre-wrap}

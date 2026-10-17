@@ -124,3 +124,84 @@ test('locale-valinta: parametri voittaa datan, oletus fi', { skip }, () => {
   assert.ok(R('order_change', base('en')).subject.startsWith('Your order has changed'));
   assert.ok(R('order_change', { ...base('fi'), locale: undefined }).subject.startsWith('Tilauksesi on muuttunut'));
 });
+
+// ---------- lahjakortit (booking_45, sopimus §13.9): gift_card_buyer / gift_card_recipient ----------
+const GTOK = '0654361d-a2b1-43f4-a25c-8c7223907dd0';
+const gcard = (o = {}) => ({ public_token: GTOK, package_code: 'sauna_treatment_2', package_name: 'Savusaunaelämys ja saunahoito kahdelle', package_name_en: 'Smoke sauna experience and sauna treatment for two', kind: 'product', amount: 192, valid_to: '2027-04-01', recipient_name: 'Mikko Mallikas', greeting: 'Hyvää syntymäpäivää!\nNauti <3 & rentoudu', cover_message: 'Hei <3 & tervetuloa\nToinen rivi', buyer_name: 'Olli Ostaja', persons: 2, locale: 'fi', status: 'active', ...o });
+const gbase = { functions_url: 'https://x.supabase.co/functions/v1', redeem_online: false, to_name: 'Olli Ostaja' };
+for (const locale of ['fi', 'en']) for (const kind of ['gift_card_buyer', 'gift_card_recipient']) {
+  test(`${kind} ${locale}: PDF-linkki lang-parametrilla, ei koodia, ei tyhjiä arvoja, HTML escapattu`, { skip }, () => {
+    const m = R(kind, { ...gbase, gift_cards: [gcard({ locale }), gcard({ package_code: 'open', kind: 'value', amount: 50.5, locale })] }, locale);
+    for (const f of ['subject', 'text', 'html']) assert.ok(m[f] && m[f].trim().length > 20, `${f} tyhjä`);
+    for (const f of ['subject', 'text', 'html']) assert.ok(!/undefined|\bnull\b|NaN|\[object/.test(m[f]), `${f} sisältää tyhjän arvon`);
+    assert.ok(!/\n/.test(m.subject) && !/<[a-z!]/i.test(m.text));
+    const pdfs = hrefs(m.html).filter((u) => u.includes('/gift-card-pdf?'));
+    assert.ok(pdfs.length >= 2 && pdfs.every((u) => u === `https://x.supabase.co/functions/v1/gift-card-pdf?t=${GTOK}&amp;lang=${locale}` || u === `https://x.supabase.co/functions/v1/gift-card-pdf?t=${GTOK}&lang=${locale}`), `PDF-linkit: ${pdfs}`);
+    assert.ok(m.text.includes(`gift-card-pdf?t=${GTOK}&lang=${locale}`));
+    assert.ok(!/HH[0-9A-Z]{2}-/.test(m.text + m.html), 'viesti ei sisällä kortin koodia');
+    if (kind === 'gift_card_recipient') assert.ok(!m.html.includes('<3') && m.html.includes('&lt;3') && m.html.includes('&amp;') && m.html.includes('Toinen rivi') && !m.html.includes('Hyvää syntymäpäivää'), 'saateteksti escapataan; kortin tervehdys ei ole sähköpostissa');
+    assert.ok(m.text.endsWith('\n'));
+  });
+}
+test('gift_card_buyer: EN-viestissä englanninkielinen paketin nimi, FI:ssä suomenkielinen', { skip }, () => {
+  assert.ok(R('gift_card_buyer', { ...gbase, gift_cards: [gcard({ locale: 'en' })] }, 'en').text.includes('Smoke sauna experience'));
+  assert.ok(R('gift_card_buyer', { ...gbase, gift_cards: [gcard()] }, 'fi').text.includes('Savusaunaelämys'));
+});
+test('gift_card_*: redeem_online ohjaa käyttöohjeen tekstin', { skip }, () => {
+  const off = R('gift_card_recipient', { ...gbase, gift_cards: [gcard()] }, 'fi').text;
+  const on = R('gift_card_recipient', { ...gbase, redeem_online: true, gift_cards: [gcard()] }, 'fi').text;
+  assert.notEqual(on, off);
+  assert.ok(/verkossa|verkkosivu|saunotus\.fi/i.test(on));
+});
+
+// ---------- toimitusvalinta (booking_46, sopimus §13.11) ----------
+const rcard = (o = {}) => gcard({ delivery_to: 'recipient', recipient_email: 'saaja@example.com', recipient_name: 'Sanna Saaja', ...o });
+for (const locale of ['fi', 'en']) {
+  test(`gift_card_buyer ${locale}: delivery_to=recipient → ei PDF-linkkiä ostajan viestissä, kerrotaan saajalle lähetyksestä`, { skip }, () => {
+    const m = R('gift_card_buyer', { ...gbase, gift_cards: [rcard({ locale })] }, locale);
+    assert.ok(!m.text.includes('gift-card-pdf') && !hrefs(m.html).some((u) => u.includes('gift-card-pdf')), 'ei PDF-linkkiä');
+    assert.ok(m.text.includes('saaja@example.com') && m.text.includes('Sanna Saaja'));
+    assert.ok(!/undefined|\bnull\b|NaN/.test(m.text + m.html));
+  });
+  test(`gift_card_buyer ${locale}: ajastettu toimitus näyttää päivän ja kellonajan`, { skip }, () => {
+    const m = R('gift_card_buyer', { ...gbase, gift_cards: [rcard({ locale, deliver_on: '2026-12-24', deliver_time: '18:30', deliver_at: '2026-12-24T16:30:00Z' })] }, locale);
+    assert.ok(m.text.includes(locale === 'fi' ? '24.12.2026' : '24 Dec 2026') && /18[.:]30/.test(m.text), m.text);
+    assert.ok(!m.text.includes('gift-card-pdf'));
+  });
+  test(`gift_card_buyer ${locale}: sekatilaus (buyer + recipient) → PDF vain ostajalle toimitettavalle`, { skip }, () => {
+    const m = R('gift_card_buyer', { ...gbase, gift_cards: [gcard({ locale }), rcard({ locale, public_token: '11111111-2222-4333-8444-555555555555' })] }, locale);
+    assert.ok(m.text.includes(GTOK) && !m.text.includes('11111111-2222-4333-8444-555555555555'));
+  });
+}
+test('gift_card_recipient: saateteksti näkyy, kortin tervehdys ei; ostajan nimi mukana; PDF-linkki', { skip }, () => {
+  const m = R('gift_card_recipient', { ...gbase, to_name: 'Sanna Saaja', gift_cards: [rcard()] }, 'fi');
+  assert.ok(m.text.includes('Toinen rivi') && !m.text.includes('Hyvää syntymäpäivää') && m.text.includes('Olli Ostaja') && m.text.includes(`gift-card-pdf?t=${GTOK}`));
+});
+
+// ---------- kumppanilahjakorttien lunastuspyynnöt (voucher_claim_received / voucher_claim_problem) ----------
+const vcData = (locale, vc = {}) => ({ ...base(locale), voucher_claim: { claim_id: 7, status: 'received', source: 'elamyslahjat', code_masked: '…1234', problem_code: 'invalid_code', customer_name: 'Matti Meikäläinen', ...vc } });
+for (const locale of ['fi', 'en']) {
+  test(`voucher_claim_received ${locale}: koodi maskattuna, tilauslinkki, ei puhelinnumeroa eikä aikarajaa`, { skip }, () => {
+    const m = R('voucher_claim_received', vcData(locale), locale);
+    assert.ok(m.subject.includes('Sipoonjoen perinnesauna') && !/undefined|\bnull\b|NaN/.test(m.subject + m.text + m.html));
+    assert.ok(m.text.includes('Elämyslahjat') && m.text.includes('…1234') && m.text.includes(ORDER_URL) && hrefs(m.html).includes(ORDER_URL));
+    assert.ok(!/tel:/.test(m.html) && !m.html.includes('+358') && hrefs(m.html).includes('mailto:savusauna@saunotus.fi'), 'ei puhelinnumeroa');
+    assert.ok(!/\basti\b|\buntil\b|\bhold\b|pidetty/i.test(m.text), 'ei aikarajaa');
+    assert.ok(m.text.includes('Tapio') && m.text.endsWith('\n'));
+  });
+  for (const pc of ['invalid_code', 'expired_code', 'already_used', 'other']) test(`voucher_claim_problem ${locale} ${pc}: oma aihe ja teksti, ei puhelinnumeroa`, { skip }, () => {
+    const m = R('voucher_claim_problem', vcData(locale, { status: 'problem', problem_code: pc }), locale);
+    assert.ok(m.text.includes('…1234') && m.text.includes(ORDER_URL) && !/undefined|\bnull\b|NaN/.test(m.subject + m.text + m.html));
+    assert.ok(!/tel:/.test(m.html) && !/[<>\n]/.test(m.subject) && !/<[a-z!]/i.test(m.text));
+    assert.ok(!m.text.includes(locale === 'fi' ? 'Kind regards' : 'Ystävällisin'), 'ei sekakieltä');
+  });
+}
+test('voucher_claim_problem: eri ongelmakoodeilla eri aiheet; tuntematon kumppani/koodi ei kaada', { skip }, () => {
+  const subj = ['invalid_code', 'expired_code', 'already_used', 'other'].map((pc) => R('voucher_claim_problem', vcData('fi', { problem_code: pc }), 'fi').subject);
+  assert.equal(new Set(subj).size, 4);
+  const m = R('voucher_claim_received', vcData('fi', { source: 'tuntematon', code_masked: '' }), 'fi');
+  assert.ok(m.text.includes('kumppani') && !/koodi\s*[,)]/.test(m.text) && !/undefined|\bnull\b/.test(m.text));
+});
+test('muiden pohjien alatunniste sisältää edelleen puhelinnumeron (noPhone vain voucher_claim-viesteissä)', { skip }, () => {
+  assert.ok(hrefs(R('order_confirmation', base('fi'), 'fi').html).some((h) => h.startsWith('tel:')));
+});
