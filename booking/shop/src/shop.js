@@ -1,13 +1,15 @@
 // Varauskauppa: tuote → päivä/vuoro → henkilömäärä → yhteystiedot → vahvistus. Vaihtoehtoinen selaus: päivän mukaan (#/paiva/<pvm>) → kaikki päivän vuorot. Vanilla JS, ei riippuvuuksia, ei build-vaihetta.
 // Data tulee vain julkisista RPC-funktioista (public_catalog / public_product_images / public_availability / public_create_booking / public_get_booking / public_change_booking).
 // Asiakas ei voi itse perua vahvistettua varausta (peruutukset sähköpostilla henkilökunnalle); hän voi MUUTTAA varausta (toinen vuoro / henkilömäärä) asetuksen mukaan vähintään 48 h ennen vuoroa.
-import { rpc, storageUrl, functionUrl } from './sb.js';
+import { rpc, storageUrl, functionUrl, setRpcOverride } from './sb.js';
 import { createMobilepayApi } from './mobilepay-api.js';
 import { normOptions, shouldShowButton, testUiEnabled } from './mobilepay-logic.js';
 import { payBlock } from './mobilepay-ui.js';
 import { T } from './i18n.js';
 import { loadProducts as loadTreatmentProducts, splitCatalog, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
 import { createTreatmentViews } from './treatment-ui.js';
+import { OPT } from './options-texts.js';
+import { optName, needsOption, findOption } from './options-logic.js';
 
 const S = window.BOOKING_SHOP;                   // build-aikainen konfiguraatio (kieli, polut, ei-verkossa-varattavat tuotteet)
 const t = T[S.lang] || T.fi;
@@ -60,7 +62,10 @@ const priceText = (p) => {
   return v;
 };
 const kindOf = (p) => (p.treatment ? 'hoito' : p.sale_kind === 'public_shift' ? 'yleinen' : p.sale_kind === 'private_shift' ? 'yksityinen' : 'muut');
-const bk = (hash) => `${S.shopHref}#${hash}`;
+// ?mock=1: kokeilutila (EI palvelinta): kaikki RPC-kutsut vastataan selaimessa (shop-mock.js; ei tallenna mitään palvelimelle). Lippu säilytetään linkeissä.
+const MOCK = new URLSearchParams(location.search).get('mock') === '1';
+if (MOCK) setRpcOverride((await import('./shop-mock.js')).createShopMock({ fail: new URLSearchParams(location.search).get('fail') }).rpc);
+const bk = (hash) => `${S.shopHref}${MOCK ? '?mock=1' : ''}#${hash}`;
 
 const state = { catalog: null, settings: null, images: new Map(), treatments: [], months: new Map(), busy: false };
 const mount = (...nodes) => { root.replaceChildren(...nodes); root.setAttribute('aria-busy', 'false'); };
@@ -554,8 +559,18 @@ async function viewConfirmation() {
   const head = { confirmed: t.confConfirmed, pending: t.confPending, cancelled: t.confCancelled, expired: t.confExpired }[b.status] || b.status;
   const pay = { paid: t.paid, unpaid: t.unpaid, pending: t.pending }[b.payment_status] || b.payment_status;
   const out = h('div', { id: 'bk-cancel-msg', 'aria-live': 'polite' });
+  // Valittu hoito (booking_50): items[].option {code,name,name_en}; null + tuote vaatii valinnan (vanha varaus) → "valitsematta" + ohje muuttaa varausta
+  const ox = OPT[S.lang] || OPT.fi;
+  let optRow = null, optNote = null;
+  if (it.option) optRow = optName(it.option, S.lang);
+  else if (isTreatmentBooking(b)) {
+    await ensureTreatments();
+    const tp = state.treatments.find((x) => x.id === +it.product_id);
+    if (tp && needsOption(tp)) { optRow = ox.notChosen; optNote = ox.notChosenConfirm; }
+  }
   const dl = h('dl', { class: 'bk-sum' },
     h('dt', { text: t.order }), h('dd', { text: String(b.order_no) }), h('dt', { text: t.what }), h('dd', { text: prodName }),
+    optRow ? [h('dt', { text: ox.what }), h('dd', { 'data-testid': 'conf-option', class: it.option ? '' : 'bk-opt-missing', text: optRow })] : null,
     h('dt', { text: t.when }), h('dd', { text: `${dayLong(it.starts_at)}, ${hm(it.starts_at)}–${hm(it.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(it.persons) }),
     (b.addons || []).flatMap((a) => [h('dt', { text: (S.lang === 'en' && a.name_en) || a.name }), h('dd', { text: `${a.quantity} × ${money(a.unit_price)}` })]),
     h('dt', { text: t.total }), h('dd', { text: `${money(b.total)} (${t.vatIncl})` }), h('dt', { text: t.payStatus }), h('dd', { text: pay }));
@@ -572,7 +587,7 @@ async function viewConfirmation() {
     if (r.ok) setTimeout(() => location.reload(), 800);
   } }, t.cancelBooking));
   mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { text: b.status === 'cancelled' ? t.confCancelled : t.confTitle }), h('p', { class: 'bk-status', role: 'status', text: head }), dl,
-    b.status === 'confirmed' && b.payment_status !== 'paid' && (b.customer_kind === 'company' || !isTreatmentBooking(b)) ?  /* hoitovarauksella ei maksuohjetta (vain yritysasiakkaan laskutusohje) */ h('p', { class: 'bk-pay', text: b.customer_kind === 'company' ? t.companyNote : t.payLater }) : null, actions, out,
+    b.status === 'confirmed' && b.payment_status !== 'paid' && (b.customer_kind === 'company' || !isTreatmentBooking(b)) ?  /* hoitovarauksella ei maksuohjetta (vain yritysasiakkaan laskutusohje) */ h('p', { class: 'bk-pay', text: b.customer_kind === 'company' ? t.companyNote : t.payLater }) : null, optNote && b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-option-note', text: optNote }) : null, actions, out,
     b.status === 'confirmed' ? h('p', { class: 'bk-note', text: b.can_change ? t.changeInfo(b.change_hours_before, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) : t.changeLocked(b.change_hours_before) }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })) : null,
     h('p', { class: 'bk-note', text: t.emailNote }), h('p', {}, h('a', { href: S.infoHref, text: t.directions }))));
   focusTop();

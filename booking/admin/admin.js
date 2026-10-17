@@ -1,10 +1,19 @@
 // Hallinnan kuori: kirjautuminen (Supabase Auth), reititys (hash), roolien mukainen valikko. Näkymät ovat tiedostoissa views/*.js.
-import { signIn, signOut, getSession, onAuthChange, rpc, select, adoptSessionFromHash, setPassword } from './sb.js';
+import { signIn, signOut, getSession, onAuthChange, rpc, select, adoptSessionFromHash, setPassword, setRpcOverride, setMockSession } from './sb.js';
 import { h, toast, errMsg } from './ui.js';
 import { icon } from './icons.js';
 import { t as tl } from './talous-i18n.js';
+import { createAdminMock } from './options-mock.js';
 
 const $ = (id) => document.getElementById(id);
+// Kokeilutila: osoite /hallinta/?mock=1 → keinoistunto + selaimen oma mock-data (options-mock.js). EI verkkokutsuja eikä kirjautumista; mikään ei tallennu. Ilman parametria ennallaan.
+const MOCK = new URLSearchParams(location.search).get('mock') === '1';
+if (MOCK) {
+  const mock = createAdminMock({ delay: 60 });
+  setRpcOverride((fn, args) => mock.rpc(fn, args));
+  setMockSession({ access_token: 'mock', refresh_token: 'mock', expires_at: 4102444800, user: { email: 'kokeilu@example.com' } });
+  window.__adminMock = mock;
+}
 // perms: roolin oikeudet (booking.role_permissions) palvelimelta; can(oikeus) piilottaa/lukitsee kenttiä. Oikeudet pakotetaan silti tietokannassa.
 export const ctx = { role: null, roleLabel: '', name: '', perms: [], can: (p) => ctx.perms.includes(p), refs: null };
 
@@ -85,7 +94,7 @@ async function enter() {
     if (!role) { signOut(); showLogin('Tällä tunnuksella ei ole oikeutta hallintaan (ei henkilökuntaa).'); return; }
     const me = await rpc('admin_my_permissions');
     ctx.role = role; ctx.name = s.user?.email || ''; ctx.perms = me?.permissions || []; ctx.roleLabel = me?.role_label || role;
-    $('who').textContent = `${ctx.name} · ${ctx.roleLabel}`;
+    $('who').textContent = MOCK ? 'Kokeilutila: esimerkkidata, mikään ei tallennu' : `${ctx.name} · ${ctx.roleLabel}`;
     document.body.dataset.role = role;
     route();
   } catch (e) { signOut(); showLogin(errMsg(e)); }
@@ -99,7 +108,8 @@ $('login').addEventListener('submit', async (ev) => {
   const btn = ev.target.querySelector('button'); btn.disabled = true; showLogin('');
   try { await signIn($('email').value.trim(), $('password').value); await enter(); } catch (e) { showLogin(errMsg(e)); } finally { btn.disabled = false; }
 });
-$('logout').addEventListener('click', () => { signOut(); ctx.refs = null; ctx.role = null; ctx.perms = []; showLogin(''); });
+$('logout').addEventListener('click', () => { if (MOCK) { location.href = location.pathname; return; }
+   signOut(); ctx.refs = null; ctx.role = null; ctx.perms = []; showLogin(''); });
 window.addEventListener('hashchange', route);
 onAuthChange((s) => { if (!s) showLogin(''); });
 // Kutsulinkki (#access_token=…&type=invite): istunto otetaan käyttöön ja käyttäjä asettaa salasanan ennen hallintaan siirtymistä

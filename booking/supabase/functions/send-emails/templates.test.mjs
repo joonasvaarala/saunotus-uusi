@@ -205,3 +205,18 @@ test('voucher_claim_problem: eri ongelmakoodeilla eri aiheet; tuntematon kumppan
 test('muiden pohjien alatunniste sisältää edelleen puhelinnumeron (noPhone vain voucher_claim-viesteissä)', { skip }, () => {
   assert.ok(hrefs(R('order_confirmation', base('fi'), 'fi').html).some((h) => h.startsWith('tel:')));
 });
+
+// booking_50: varauksen tuotevalinta näkyy tilauslohkossa ("Saunahoito – Hunajahoito" / EN "Saunahoito – Honey treatment"); ilman valintaa viesti on ennallaan
+for (const locale of ['fi', 'en']) {
+  test(`order_confirmation ${locale}: varauksen tuotevalinta näkyy tekstissä ja HTML:ssä`, { skip }, () => {
+    const d = base(locale);
+    d.order.reservations = [{ product_name: 'Saunahoito', starts_at: '2026-11-07T15:00:00Z', ends_at: '2026-11-07T16:00:00Z', persons: 1, status: 'confirmed', option: { code: 'hunajahoito', name: 'Hunajahoito', name_en: 'Honey treatment' } }];
+    const m = R('order_confirmation', d, locale);
+    const want = locale === 'en' ? 'Saunahoito – Honey treatment' : 'Saunahoito – Hunajahoito';
+    assert.ok(m.text.includes(want), `teksti: ${want}`);
+    assert.ok(m.html.includes(want), `html: ${want}`);
+    const plain = base(locale); plain.order.reservations = [{ ...d.order.reservations[0], option: null }];
+    const m2 = R('order_confirmation', plain, locale);
+    assert.ok(!m2.text.includes('Saunahoito –') && !m2.html.includes('Saunahoito –'), 'ilman valintaa ei ylimääräistä viivaa');
+  });
+}

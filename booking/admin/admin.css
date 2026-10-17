@@ -477,6 +477,21 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .gc-radio:has(input:focus-visible){outline:3px solid var(--ink);outline-offset:2px}
 .gc-ferr{color:var(--err);font-weight:600}.gc-ferr:empty{display:none}
 .gc-dl dd{white-space:pre-wrap}
+
+/* Tuotevalinta / hoito (booking_50): merkki listoilla, varoitus "valitsematta", valitsin (radio-painikkeet .srcset/.srcopt, 44 px) */
+.badge.opt{background:#EDE3D0;color:var(--green);border:1px solid rgba(43,58,48,.35);white-space:normal}
+.badge.opt-missing{border:1px solid #b9954a;white-space:normal}
+.opt-box{background:#fff}.opt-warn{margin:0 0 8px;color:var(--ink)}
+.opt-host{margin:4px 0}.optset{margin:0 0 8px}
+.opt-dd .badge{margin-left:0}
+.optrow{display:grid;gap:6px;padding:10px 0;border-top:1px solid var(--line)}
+.optrow .optlist{display:flex;flex-wrap:wrap;gap:6px}
+.optitem{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-weight:600;font-size:14px;cursor:pointer;font-family:inherit}
+.optitem.off{color:var(--muted);text-decoration:line-through;background:var(--bg)}
+.optitem:hover{border-color:var(--green)}
+@media (max-width:480px){.opt-host .srcopt,.optset .srcopt{flex:1 1 100%}.optset .srcopt span{justify-content:flex-start;width:100%}}
+.opt-reminder{margin:0 0 10px;padding:10px 12px;border:1px solid #b9954a;border-radius:8px;background:var(--warnbg);color:var(--ink)}
+.optcard{display:grid;gap:8px}
 /* Lahjakoodit / lunastuspyynnöt (§13.12) – hillitty: hiekka + tummanvihreä, ei sinistä */
 .vcl-top{align-items:flex-start;gap:12px;margin:0 0 8px}.vcl-top>div{min-width:0;flex:1 1 280px}.vcl-top .btn{flex:0 0 auto}.vcl-h{margin:0 0 4px;font-size:20px;color:var(--ink)}
 .vcl-sum{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-wrap:wrap;gap:6px}

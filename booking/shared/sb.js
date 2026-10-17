@@ -15,9 +15,11 @@ const KEY = 'booking.session';
 let session = null;
 try { session = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { session = null; }
 const listeners = new Set();
-const save = (s) => { session = s; try { s ? localStorage.setItem(KEY, JSON.stringify(s)) : localStorage.removeItem(KEY); } catch {} listeners.forEach((f) => f(s)); };
+let mockSession = false;   // kokeilutila (?mock=1): keinoistuntoa ei tallenneta localStorageen eikä uloskirjautuminen poista oikeaa istuntoa
+const save = (s) => { session = s; if (!mockSession) { try { s ? localStorage.setItem(KEY, JSON.stringify(s)) : localStorage.removeItem(KEY); } catch {} } listeners.forEach((f) => f(s)); };
 export const onAuthChange = (f) => { listeners.add(f); return () => listeners.delete(f); };
 export const getSession = () => session;
+export function setMockSession(s) { mockSession = true; session = s; }   // vain kokeilutila: kirjautumisnäkymä ohitetaan, verkkoon ei mene mitään (ks. setRpcOverride)
 
 async function authFetch(grant, body) {
   const r = await fetch(base(`${cfg().auth || '/auth/v1'}/token?grant_type=${grant}`), {
@@ -106,9 +108,12 @@ async function request(path, { method = 'GET', body, query, headers = {} } = {})
 }
 
 // rpc('public_availability', { p_product_id: 1, ... }) -> data
-export const rpc = (fn, args = {}) => request(`/rpc/${fn}`, { method: 'POST', body: args });
+// Kokeilutila (?mock=1): setRpcOverride(f) korvaa kaikki rpc-kutsut f(fn, args):lla (selaimessa vastaava mock; ei verkkokutsuja). Ilman ylikirjoitusta ennallaan.
+let rpcOverride = null;
+export const setRpcOverride = (f) => { rpcOverride = typeof f === 'function' ? f : null; };
+export const rpc = (fn, args = {}) => (rpcOverride ? rpcOverride(fn, args) : request(`/rpc/${fn}`, { method: 'POST', body: args }));
 // select('customers', { select: 'id,name', order: 'name.asc', limit: 50, 'name': 'ilike.*abc*' })
-export const select = (table, query = {}) => request(`/${table}`, { query });
+export const select = (table, query = {}) => (rpcOverride ? rpcOverride(`select:${table}`, query) : request(`/${table}`, { query }));
 
 // ---- Storage (tuotekuvat) ----
 // Julkinen URL (bucket on julkinen): <url>/storage/v1/object/public/<bucket>/<polku>. cfg.storage voi ylikirjoittaa polun (esim. CDN).

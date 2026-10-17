@@ -8,6 +8,7 @@ import { addonPicker } from './addons.js';
 import { stepper } from '../stepper.js';
 import { availabilityPanel, isSlotProduct } from './availability.js';
 import { resName, catLabel } from './legs.js';
+import { loadOptionConfig, configLabel, optionPicker, optErr, optName, ot } from '../options.js';
 import { h, field, toast, run, fmtDay, fmtTime, money, todayHel, helsinkiIso, errMsg, dayStartIso, addDays, fmtDT } from '../ui.js';
 
 export const BOOKING_TYPES = [['', 'Vuoro'], ['resurssi', 'Resurssivaraus'], ['vanha', 'Vanha varaus']];
@@ -19,9 +20,10 @@ const addMin = (hhmm, n) => { const [a, b] = hhmm.split(':').map(Number); const 
 
 export async function render({ ctx, refs, query, kind }) {
   const old = kind === 'vanha';
-  const [addons, rules] = await Promise.all([
+  const [addons, rules, optCfg] = await Promise.all([
     rpc('admin_list_addons').catch(() => []),
     select('product_space_rules', { select: 'product_id,leg_no,priority,space_id,mode,min_persons,max_persons,selection,active', active: 'eq.true' }).catch(() => null),   // staff_read; null = ei saatavilla (tilavalinta piiloon)
+    loadOptionConfig(),   // tuotevalinnat (booking_50): Saunahoidon hoito
   ]);
   const hasRules = (id) => !rules || rules.some((x) => x.product_id === id);
   const products = refs.products.filter((p) => p.config?.resource_class === 'resourced' && hasRules(p.id)
@@ -63,6 +65,14 @@ export async function render({ ctx, refs, query, kind }) {
   if (avail) avail.node.hidden = true;
   const loadAvail = () => { if (!avail) return; avail.node.hidden = !isSlotProduct(st.product); avail.load(); };
   const reloadSoon = () => { clearTimeout(availTimer); availTimer = setTimeout(loadAvail, 400); };
+  // Tuotevalinta (booking_50): valitsin näkyy tuotteille, joilla on aktiivisia vaihtoehtoja; pakollinen jos product_config.option_required
+  const optHost = h('div', { class: 'opt-host', 'data-testid': 'booking-option', hidden: true }); let optPick = null, optFor = null;
+  const syncOption = () => {
+    const cfg = st.product ? optCfg.get(st.product.id) : null;
+    if (!cfg || !cfg.options.length) { optHost.hidden = true; optHost.replaceChildren(); optPick = null; optFor = null; return; }
+    if (optFor !== st.product.id) { optFor = st.product.id; optPick = optionPicker({ choices: cfg.options, value: '', label: configLabel(cfg), required: cfg.required, name: 'booking-option', onChange: () => { errBox.hidden = true; } }); optHost.replaceChildren(optPick.node); }
+    optHost.hidden = false;
+  };
   const ui = {};
   const cf = customerForm({ id: 'rb', onKind: (k) => { if (!st.customer) method.value = k === 'company' && refs.methods.some((m) => m.active && m.code === 'invoice') ? 'invoice' : 'pay_later'; } });
   const cs = customerSearch({ cf, st });
@@ -87,7 +97,7 @@ export async function render({ ctx, refs, query, kind }) {
     const sp = rules ? spaceOpts(p) : [];
     spaceFld.hidden = sp.length < 2; spaceSel.replaceChildren(h('option', { value: '', text: 'Automaattinen' }), ...sp.map((x) => h('option', { value: x.id, text: x.name })));
     price.placeholder = p.price != null ? `Tuotteen hinta ${money(p.price)}` : 'Hinta';
-    picker.sync(); loadParents(p);
+    picker.sync(); loadParents(p); syncOption();
     if (reload) loadAvail();
   };
   for (const el of [prodSel, time]) el.addEventListener('change', () => sync(el === prodSel)); time.addEventListener('input', () => sync(false));
@@ -100,7 +110,7 @@ export async function render({ ctx, refs, query, kind }) {
     field('Tuote', prodSel), avail ? avail.node : null,
     h('div', { class: 'row wrap' }, field('Päivä', date), field('Alkaa', time), field('Päättyy (valinnainen)', end, null)), endHint, windowHint,
     h('div', { class: 'row wrap' }, h('div', { class: 'fld' }, h('span', { class: 'fld-lab', text: 'Henkilömäärä' }), pst.node), field('Hinta € (ohita automaattinen)', price)), personsHint,
-    spaceFld, parentFld,
+    spaceFld, parentFld, optHost,
     h('h3', { text: 'Asiakas' }), cs.row, cs.found, cf.node, picker.node,
     field('Laskun viite / tilausnumero (valinnainen)', invRef),
     field('Sisäinen huomio', note),
@@ -117,6 +127,8 @@ export async function render({ ctx, refs, query, kind }) {
     const endIso = end.value ? helsinkiIso(`${date.value}T${end.value}`) : null;
     if (endIso && endIso <= start) fail('Päättymisen pitää olla alkamisen jälkeen.');
     if (!endIso && !st.product.config.duration_minutes) fail('Anna päättymisaika (tuotteella ei ole oletuskestoa).');
+    const ocfg = optCfg.get(st.product.id);
+    if (ocfg?.options.length && ocfg.required && !optPick?.value) { optPick?.focus(); fail(ot('err_option_required')); }
     const useOvr = canOverride && ovr.checked;
     if (useOvr && ovrReason.value.trim().length < 3) { ovrReason.focus(); fail('Ylitys vaatii perustelun (vähintään 3 merkkiä).'); }
     const addonsSel = picker.node.hidden ? [] : picker.value();
@@ -124,14 +136,15 @@ export async function render({ ctx, refs, query, kind }) {
       p_end: endIso, p_space_id: spaceSel.value ? +spaceSel.value : null, p_payment_method: method.value, p_paid: paid.checked, p_note: note.value || null,
       p_price: price.value ? +price.value : null, p_override: useOvr, p_override_reason: useOvr ? ovrReason.value.trim() : null,
       p_addons: addonsSel.length ? addonsSel : null, p_parent_reservation_id: parentSel.value ? +parentSel.value : null, p_invoice_reference: invRef.value.trim() || null };
+    if (ocfg?.options.length) args.p_option_code = optPick?.value || null;   // vain tuotteille joilla vaihtoehtoja (ei parametria muille)
     let r;
     r = await rpc(old ? 'admin_create_old_booking' : 'admin_create_resource_booking', args);
     if (hasWarning(r)) toast(MISSING_TEXT, 'warn'); else toast(`Varaus luotu (tilaus #${r.order_no})`);
     result.replaceChildren(...[warningBox(r, { ctx, onDone: () => { result.replaceChildren(); } }), h('div', { class: 'card ok-box', role: 'status' }, h('h3', { text: `Varaus luotu – tilaus #${r.order_no}` }),
-      h('p', { text: `${r.product_name}, ${fmtDay(r.starts_at)} ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)} · ${money(r.total)}${r.legs ? ` · ${r.legs} lisäresurssia` : ''}` }),
+      h('p', { text: `${r.product_name}${r.option ? ` – ${optName(r.option)}` : ''}, ${fmtDay(r.starts_at)} ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)} · ${money(r.total)}${r.legs ? ` · ${r.legs} lisäresurssia` : ''}` }),
       h('div', { class: 'row wrap' }, h('a', { class: 'btn', href: `#/?d=${date.value}`, text: 'Näytä päivänäkymä' }), h('a', { class: 'btn ghost', href: '#/varaukset', text: 'Varaukset' })))].filter(Boolean));
     result.scrollIntoView?.({ block: 'nearest' });
-  } catch (e) { errBox.textContent = errMsg(e); errBox.hidden = false; errBox.scrollIntoView?.({ block: 'nearest' }); } }); });
+  } catch (e) { errBox.textContent = optErr(e); errBox.hidden = false; errBox.scrollIntoView?.({ block: 'nearest' }); } }); });
   const body = products.length ? [f, result] : [h('p', { class: 'empty', text: old ? 'Ei vanhoja tuotteita, joille voisi kirjata varauksen.' : 'Ei resurssituotteita, joille voisi luoda varauksen.' })];
   if (products.length) sync();
   return [h('h1', { text: old ? 'Vanha varaus' : 'Resurssivaraus' }), typeSwitch(kind), ...body];

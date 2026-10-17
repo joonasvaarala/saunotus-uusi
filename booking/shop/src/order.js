@@ -8,9 +8,12 @@ import { redeemSection, cardsSection, claimsSection } from './order-gift.js';
 import { createMobilepayApi } from './mobilepay-api.js';
 import { normOptions, shouldShowButton, testUiEnabled } from './mobilepay-logic.js';
 import { payBlock, runReturn } from './mobilepay-ui.js';
+import { OPT } from './options-texts.js';
+import { optName, optionMissingOnOrder, optionChanged } from './options-logic.js';
+import { createOptionPicker } from './options-ui.js';
 
 const S = window.BOOKING_SHOP;
-const L = OT[S.lang] ? S.lang : 'fi', t = OT[L];
+const L = OT[S.lang] ? S.lang : 'fi', t = OT[L], ox = OPT[L];   // ox: tuotevalinnan tekstit (booking_50)
 const TZ = 'Europe/Helsinki';
 const root = document.getElementById('order-app');
 const h = (tag, attrs, ...kids) => {
@@ -94,8 +97,10 @@ async function main() {
       o.created_at ? h('p', { class: 'bk-meta', text: `${t.created}: ${dt(o.created_at)}` }) : null);
     const resv = o.reservations.length ? h('section', { class: 'ord-card', 'aria-labelledby': 'ord-rv' }, h('h3', { id: 'ord-rv', text: t.reservationsTitle }),
       h('ul', { class: 'ord-lines', 'data-testid': 'order-reservations' }, o.reservations.map((r) => h('li', {},
-        h('span', { class: 'ord-l-main' }, h('strong', { text: r.product_name }), r.status === 'cancelled' ? ' ' : null, r.status === 'cancelled' ? badge('st-cancelled', t.cancelledRow) : null),
+        h('span', { class: 'ord-l-main' }, h('strong', { text: r.product_name }), r.status === 'cancelled' ? ' ' : null, r.status === 'cancelled' ? badge('st-cancelled', t.cancelledRow) : null,
+          r.option ? h('span', { class: 'ord-l-opt', 'data-testid': 'res-option' }, ` – ${ox.what}: `, h('strong', { text: optName(r.option, L) })) : optionMissingOnOrder(r) && r.status !== 'cancelled' ? [' ', h('span', { class: 'ord-badge opt-missing', 'data-testid': 'res-option-missing', text: `${ox.what}: ${ox.notChosen}` })] : null),
         h('span', { class: 'ord-l-meta', text: `${dt(r.starts_at)}–${hm(r.ends_at)} · ${t.persons.replace('{n}', r.persons)}${r.addons.length ? ' · ' + r.addons.map((a) => `${nm(a)} × ${a.quantity}`).join(', ') : ''}` }))))) : null;
+    const optSec = optionSection(o);
     const lines = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-l' }, h('h3', { id: 'ord-l', text: t.linesTitle }),
       h('ul', { class: 'ord-lines', 'data-testid': 'order-lines' }, o.items.map((i) => h('li', {},
         h('span', { class: 'ord-l-main' }, h('strong', { text: i.quantity > 1 ? `${nm(i)} × ${i.quantity}` : nm(i) })),
@@ -124,7 +129,7 @@ async function main() {
       h('p', { class: 'bk-note' }, `${t.addNewBooking} `, h('a', { href: S.shopHref, text: t.addNewBookingLink })));
     const cancel = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), note,
       o.cancel_request ? h('p', { class: 'bk-ok', role: 'status', 'data-testid': 'cancel-pending', text: t[`cancel.${o.cancel_request.status}`] || t['cancel.open'] }) : cancelForm());
-    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, resv, lines, giftCards, claimBox, pay, giftUse, receipts, add, cancel, msg, phoneBox()));
+    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, resv, optSec, lines, giftCards, claimBox, pay, giftUse, receipts, add, cancel, msg, phoneBox()));
   }
   async function download(btn, receiptNo) {
     btn.disabled = true;
@@ -160,6 +165,32 @@ async function main() {
     resSel ? h('div', { class: 'bk-field' }, h('label', { for: 'ord-res', text: t.addReservation }), resSel) : null,
     h('div', { class: 'bk-field' }, h('label', { for: 'ord-addon', text: t.addAddon }), sel), h('div', { class: 'bk-field' }, h('label', { for: 'ord-qty', text: t.addQty }), qty), btn);
     return f;
+  }
+  // Hoidon valinta/vaihto (booking_50): varaukset, joilla on option_choices; vaihto public_change_order_time (vain p_option_code), vain kun can_change. Null (vanha varaus) → "valitsematta" + pyyntö valita (ei pakollinen).
+  function optionSection(o) {
+    const list = o.reservations.filter((r) => r.status !== 'cancelled' && r.option_choices.length);
+    if (!list.length) return null;
+    return h('section', { class: 'ord-card', 'aria-labelledby': 'ord-o', 'data-testid': 'option-section' }, h('h3', { id: 'ord-o', text: ox.changeTitle }),
+      o.change_deadline ? h('p', { class: 'bk-note', text: o.can_change ? ox.changeLead.replace('{date}', dt(o.change_deadline)) : ox.changeClosed }) : null,
+      list.map((r, i) => {
+        const missing = !r.option;
+        const head = list.length > 1 ? h('h4', { text: `${r.product_name} · ${dt(r.starts_at)}` }) : null;
+        if (!o.can_change) return h('div', { class: 'ord-opt-sec' }, head, h('p', { 'data-testid': 'option-current' }, `${ox.current}: `, h('strong', { text: missing ? ox.notChosen : optName(r.option, L) })));
+        const pk = createOptionPicker({ h, lang: L, options: r.option_choices, value: r.option?.code ?? null, required: null, label: missing ? ox.defaultLabel : ox.changeLabel, hint: missing ? `${ox.notChosenNote} ${ox.hintChange}` : ox.hintChange, step: null, testid: `option-picker-${r.reservation_id}`,
+          onChange: () => { btn.disabled = !optionChanged(r, pk.get()); } });
+        const btn = h('button', { type: 'button', class: 'btn ord-btn', disabled: true, 'data-testid': `option-save-${r.reservation_id}`, text: ox.changeSave });
+        btn.addEventListener('click', async () => {
+          const code = pk.get(); if (!optionChanged(r, code)) { pk.setError(ox['err.option_required']); return; }
+          btn.disabled = true; btn.textContent = ox.changeSaving;
+          try {
+            const res = await api.changeOrderTime({ reservationId: r.reservation_id, optionCode: code });
+            if (res?.notReady) throw new Error('change');
+            if (res?.ok === false) { btn.textContent = ox.changeSave; btn.disabled = false; if (['option_required', 'invalid_option'].includes(res.code)) { pk.setError(ox[`err.${res.code}`]); pk.focus(); } else flash(false, failText(res)); return; }
+            const fresh = await api.get(); if (!fresh?.ok) throw new Error('get'); await redraw(fresh); flash(true, ox.changeDone);
+          } catch { btn.textContent = ox.changeSave; btn.disabled = false; flash(false, t.error); }
+        });
+        return h('div', { class: 'ord-opt-sec' }, head, h('div', { class: 'ord-opt' }, pk.node, btn));
+      }));
   }
   function cancelForm() {
     const reason = h('textarea', { id: 'ord-reason', rows: 3, maxlength: 500, 'data-testid': 'cancel-reason' });

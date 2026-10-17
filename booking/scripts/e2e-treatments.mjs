@@ -1,7 +1,7 @@
 // E2E: hoito- ja rituaalivaraukset kaupassa (kb 10, 11, 12 ja rituaali kb 8). Vaatii käynnissä olevan demon (kehityspalvelin + shop build, ks. booking/README.md).
 // Käyttö:  PW_DIR=/polku/node_modules OUT=/polku/kuvat node booking/scripts/e2e-treatments.mjs
 // TREATMENTS=off: tuotanto ennen lippuja (kehityspalvelin TREATMENT_MOCK=0 → katalogissa ei ole slots-tuotteita) → kauppa näyttää hoidoille "ota yhteyttä".
-// Oletus (on): mock-rajapinta (dev/treatment-mock.mjs, vastaa KOODARI_public_treatment_fi.md:tä). Palvelimen muistissa olevat mock-varaukset kuluttavat aikoja → käynnistä palvelin uudelleen ennen ajoa.
+// Oletus (on): mock-rajapinta (shop/src/treatment-mock.js, vastaa KOODARI_public_treatment_fi.md:tä). Palvelimen muistissa olevat mock-varaukset kuluttavat aikoja → käynnistä palvelin uudelleen ennen ajoa.
 // Epäonnistuu (exit 1), jos konsolissa on virheitä, pyyntö epäonnistuu (paitsi odotetut) tai jokin tarkistus ei täyty.
 import { createRequire } from 'node:module';
 import { pathToFileURL, fileURLToPath } from 'node:url';

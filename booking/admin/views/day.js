@@ -5,15 +5,17 @@ import { reservationDialog } from './shared.js';
 import { icon } from '../icons.js';
 import { capacityButton, arrivalButton, addonItems, shiftsBar, prepCard } from './dayparts.js';
 import { legsList, resourceBadges, spaceBadge } from './legs.js';
+import { optionBadge, optionReminder } from '../options.js';
 import { blockList, blockDialog } from './blocks.js';
 
 export async function render({ ctx, refs, reload, query }) {
   const date = /^\d{4}-\d\d-\d\d$/.test(query.get('d') || '') ? query.get('d') : todayHel();
-  const [view, resv, shifts, addonList] = await Promise.all([
+  const [view, resv, shifts, addonList, optNote] = await Promise.all([
     rpc('admin_day_view', { p_date: date }),
     rpc('admin_list_reservations', { p_from: dayStartIso(date), p_to: dayStartIso(addDays(date, 1)), p_limit: 200 }),
     shiftsBar(date, ctx.can),   // työvuorot (admin_day_shifts tai admin_upcoming_shifts, vain luku); ei koskaan heitä: puuttuva tieto/oikeus → selitysteksti
     rpc('admin_list_addons').catch(() => []),   // lisäpalvelun koodi addon_id:llä (ikonin tunnistus, jos admin_day_view ei anna code-kenttää)
+    optionReminder(),   // muistutus: tulevat hoitovaraukset ilman valittua hoitoa (booking_50); null jos ei muistutettavaa
   ]);
   const codes = new Map((addonList || []).map((a) => [a.id, a.code]));
   const go = (d) => { location.hash = `#/?d=${d}`; };
@@ -36,7 +38,7 @@ export async function render({ ctx, refs, reload, query }) {
     mine.forEach((r) => used.add(r.reservation_id));
     return { s, mine };
   }).filter(({ s, mine }) => mine.length || ['available', 'full'].includes(s.status));   // myymätön (päällekkäisyys, sulku, myynti päättynyt) tyhjä vuoro piiloon; vuoro jolla on varauksia näytetään ilman "ei myynnissä" -tekstiä
-  const RES_KEYS = ['lifecycle', 'space_code', 'legs', 'quota_exempt', 'override_reason', 'claim_offset_min', 'claim_minutes', 'parent_reservation_id', 'therapist_missing', 'therapist_missing_open', 'therapist_exception_at', 'therapist_exception_note'];
+  const RES_KEYS = ['lifecycle', 'space_code', 'legs', 'quota_exempt', 'override_reason', 'claim_offset_min', 'claim_minutes', 'parent_reservation_id', 'therapist_missing', 'therapist_missing_open', 'therapist_exception_at', 'therapist_exception_note', 'option', 'option_missing'];
   const merged = (r) => { const x = dv.get(r.reservation_id) || {}; const m = { ...r, source: r.source ?? x.source, external_id: r.external_id ?? x.external_id }; for (const k of RES_KEYS) if (x[k] !== undefined) m[k] = x[k]; return m; };
   const open = (r) => reservationDialog(merged(r), { methods: refs.methods, onChange: reload, refs, can: ctx.can });
   const resRow = (r) => { const x = dv.get(r.reservation_id) || {}; const ad = x.addons || []; const src = { source: r.source ?? x.source, external_id: r.external_id ?? x.external_id };
@@ -46,7 +48,7 @@ export async function render({ ctx, refs, reload, query }) {
     h('div', { class: 'resmain' }, h('button', { type: 'button', class: 'link', onclick: () => open(r) }, h('strong', { text: r.customer_name || '–' }), ` · ${r.persons} hlö`, x.customer_kind === 'company' ? [' ', badge('warn', 'Yritys'), x.company ? ` ${x.company}` : ''] : null,
       (x.legs || []).length > 1 || (x.space_code && x.space_code !== 'savusauna') ? legsList(x.legs, refs) : null),
     ad.length ? h('div', { class: 'addon-mark' }, addonItems(ad, codes)) : null,
-    h('span', { class: 'meta' }, spaceBadge(x, refs), resourceBadges(x), sourceBadge(src), stBadge, payBadge(r.payment_status), r.hold_expires_at ? badge('muted', `pito ${fmtTime(r.hold_expires_at)}`) : null, ` #${r.order_no}`)),
+    h('span', { class: 'meta' }, optionBadge(x.option !== undefined ? x : r), spaceBadge(x, refs), resourceBadges(x), sourceBadge(src), stBadge, payBadge(r.payment_status), r.hold_expires_at ? badge('muted', `pito ${fmtTime(r.hold_expires_at)}`) : null, ` #${r.order_no}`)),
     arrive); };
   const sumPersons = (list) => list.reduce((a, r) => a + r.persons, 0);
   const card = ({ s, mine }) => {
@@ -72,7 +74,7 @@ export async function render({ ctx, refs, reload, query }) {
   const blocks = h('section', { class: 'card', 'data-testid': 'day-blocks' }, h('h3', { text: 'Sulut' }), blockList(view.blocks, refs, reload, 'Ei sulkuja.'),
     h('button', { type: 'button', class: 'btn ghost sm', onclick: () => blockDialog(date, refs, reload) }, '+ Lisää sulku'));
   const prepBox = prepCard({ totals: view.addon_totals, prep: view.prep, persons: sumPersons(active), bookings: active.length, codes });
-  return [h('h1', { text: fmtDay(`${date}T12:00:00Z`) }), shifts, toolbar, prepBox,
+  return [h('h1', { text: fmtDay(`${date}T12:00:00Z`) }), shifts, optNote, toolbar, prepBox,
     h('div', { class: 'daygrid day-view' }, timeline.length ? timeline : empty('Ei vuoroja tälle päivälle.')),
     inactive.length ? h('details', { class: 'card inactive-res', 'data-testid': 'inactive-res' }, h('summary', { text: `Peruutetut ja päättyneet varaukset (${inactive.length})` }), h('ul', { class: 'reslist' }, inactive.map(resRow))) : null,
     h('p', { class: 'muted', text: `${active.length} aktiivista varausta, ${sumPersons(active)} henkilöä yhteensä.` }), blocks];
