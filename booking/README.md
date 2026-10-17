@@ -19,6 +19,7 @@ Ei palvelinkoodia, ei build-vaihetta selaimen koodille, ei kirjastoriippuvuuksia
 | `dev/` | Paikallinen demo: PostgREST-konfiguraatio, kehityspalvelin (mock-auth), demo-siemen |
 | `scripts/e2e-screenshots.mjs` | Playwright-savutesti + kuvakaappaukset + konsolivirhetarkistus |
 | `scripts/e2e-shop-layout.mjs` | Kaupan varauslomakkeen ja päivänäkymän (`#/paiva/<pvm>`) asettelutesti (360/390/430/1280 px, FI+EN, yksityinen+yritys; kosketuskohteet, kontrasti, näppäimistö): ei vaakavieritystä, osiot samassa linjassa, järjestys ja otsikot; varauslomakkeen otsikon alla lyhyt yhteenveto (tuote, päivä, kellonaika) ja linkki "Vaihda päivää tai aikaa" (päivänäkymästä `?via=day` → `#/paiva/<pvm>?tuote=<slug>`, muuten `#/tuote/<slug>/<pvm>`) |
+| `scripts/e2e-shop-vain-vapaat.mjs` | Kaupan asiakasnäkymä näyttää vain vapaat vuorot (päivänäkymän tuotekortti, tuotesivun vuorolista, ajanmuutosnäkymä; täynnä-päivä → ”Ei vapaita vuoroja”). Ei tarvitse tietokantaa: kaupan build + mockatut `public_*`-RPC:t (sekä vapaita että täynnä-vuoroja) |
 | `docs/` | Maksurajapinta, Johku-tuonti, ristiriidat ja tulkinnat, Bottiavustuspyyntö, kuvakaappaukset |
 
 ## Arkkitehtuuri
@@ -336,6 +337,8 @@ node booking/dev/server.mjs        # http://localhost:4180/  ja  /admin/   (admi
 # 4) kuvakaappaukset + konsolivirhetarkistus
 PW_DIR=/polku/node_modules node booking/scripts/e2e-screenshots.mjs
 PW_DIR=/polku/node_modules node booking/scripts/e2e-shop-layout.mjs   # kaupan lomakkeen asettelu eri leveyksillä
+# ilman tietokantaa (mock-RPC): vain vapaat vuorot asiakkaalle
+SHOP_DIST=/tmp/shop-dist node booking/shop/build.mjs && SHOP_DIST=/tmp/shop-dist PW_DIR=/polku/node_modules node booking/scripts/e2e-shop-vain-vapaat.mjs
 ```
 
 Demodata (`dev/seed_demo.sql`) sisältää kiinteän "tyhjän päivän" (savusauna suljettu koko päivän ensi maanantaista +9 pv), jota kaupan e2e-testit käyttävät; testi ei siis enää riipu kellonajasta.
