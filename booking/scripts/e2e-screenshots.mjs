@@ -243,6 +243,7 @@ if (process.env.ONLY !== 'admin') for (const [name, vp] of [['mobile', { width: 
   if ((await addonRows.count()) < 2) problems.push(`shop-${name}: lisäpalvelut puuttuvat kassalta`);
   await addonRows.nth(0).locator('.bk-step').last().click();                                              // 1 × Turvenaamio
   for (let i = 0; i < 2; i++) await addonRows.nth(1).locator('.bk-step').last().click();                  // 2 × Saunavihta (max = 2 hlö × 1)
+  if ((await addonRows.allInnerTexts()).some((x) => /enintään|\bmax\b|up to/i.test(x))) problems.push(`shop-${name}: lisäpalvelukortti ei saa näyttää enimmäismäärää`);
   if ((await addonRows.nth(1).locator('.bk-step').last().isDisabled()) !== true) problems.push(`shop-${name}: lisäpalvelun määrä ei rajoitu henkilömäärään`);
   await page.check('input[name=kind][value=company]');
   await page.waitForSelector('#bk-company:not([hidden])');

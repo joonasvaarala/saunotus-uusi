@@ -52,6 +52,7 @@ for (const lang of ['fi', 'en']) for (const width of [360, 390, 430, 1280]) for 
       order: [...form.children].map((e) => e.className || e.tagName).slice(0, 4),
     };
   });
+  { const at = await page.locator('.bk-addon').allInnerTexts(); expect(at.length >= 2 && !at.some((x) => /enintään|\bmax\b|up to/i.test(x)), `${tag}: lisäpalvelukortti ei saa näyttää enimmäismäärää (${JSON.stringify(at)})`); }
   expect(r.sw <= r.iw, `${tag}: vaakavieritys (scrollWidth ${r.sw} > ${r.iw})`);
   for (const c of r.cards.filter((x) => x.r > x.l)) expect(c.l >= r.form.l - 0.5 && c.r <= r.form.r + 0.5, `${tag}: ${c.cls} ylittää lomakkeen reunat (${c.l.toFixed(1)}–${c.r.toFixed(1)} vs ${r.form.l.toFixed(1)}–${r.form.r.toFixed(1)})`);
   for (const s of r.sections) expect(Math.abs(s.l - r.form.l) < 0.5 && Math.abs(s.r - r.form.r) < 0.5, `${tag}: osio ei ole lomakkeen levyinen`);
