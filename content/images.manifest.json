@@ -1,7 +1,6 @@
 {
   "_doc": "Lähdekuvat → optimoidut avif/webp-koot. src: 'uusi:<polku wp-content/uploads/ alla>' tai 'johku:<tiedosto-id>'. widths = tuotettavat leveydet (px). Aja: npm run assets && npm run images",
   "images": [
-    {"id":"hero-ovi","src":"uusi:2026/06/Nimeton-malli-9.png","widths":[640,1024,1600,1920]},
     {"id":"rituaali","src":"uusi:2026/05/Nimeton-malli-3.png","widths":[640,1024,1536]},
     {"id":"rituaali-2","src":"uusi:2026/05/Nimeton-malli-2.png","widths":[480,600]},
     {"id":"vihta-hoito","src":"uusi:2026/05/DSC6052_small.jpg","widths":[480,800,1200]},
