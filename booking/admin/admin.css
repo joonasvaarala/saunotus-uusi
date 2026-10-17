@@ -91,7 +91,7 @@ button.link{background:none;border:0;padding:6px 0;font:inherit;color:var(--ink)
 .empty{color:var(--muted);padding:14px 0}
 /* päivänäkymä */
 .daygrid{display:grid;gap:10px}
-@media(min-width:1000px){.daygrid{grid-template-columns:1fr 1fr}}
+@media(min-width:1000px){.daygrid{grid-template-columns:1fr 1fr}.daygrid.day-view{grid-template-columns:minmax(0,760px)}}
 .session header{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
 .session .time{font-size:18px;color:var(--ink)}.session .ttl{font-weight:600;flex:1}.session .cnt{font-size:13px;color:var(--muted)}
 .session.exclusive{border-left:5px solid #a87b45}.session.shared{border-left:5px solid #7bb28a}
@@ -259,3 +259,18 @@ h2 .icon,h3 .icon,.addon-mark .icon{display:inline-block;vertical-align:-3px;mar
 .dshift.shift-reception{background:var(--receptionbg);border-color:var(--receptionbar);color:var(--reception)}
 .dshift .who{font-weight:600}
 .dayshifts-none{margin:0 0 10px;font-size:13px}
+.dayshifts-note{margin:6px 0 0;font-size:12px}
+.inactive-res{margin-top:10px}.inactive-res summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--muted)}
+.session.slot{border-left:5px solid #8a6a4a}
+/* Valmistelu: päivän yhteenvetokortti (hillitty hiekka/vihreä, ei sinistä) */
+.prepcard{max-width:760px;margin:0 0 14px;padding:12px 14px 14px;border-radius:12px;background:#ecebd9;border:1px solid #c5c8a3;border-left:6px solid #7a8a52}
+.prepcard h2{margin:0 0 10px;font-size:17px;color:#33401f;display:flex;align-items:center;gap:6px}
+.prepcard h2 .icon{color:#4f6130}
+.prep-tiles{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.prep-tile{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"ic n" "l l";align-items:center;column-gap:8px;padding:8px 10px;border-radius:10px;background:#f8f6ea;border:1px solid #d6d8b8;color:#33401f}
+.prep-tile .pt-icons{grid-area:ic;display:inline-flex;gap:2px;color:#4f6130}
+.prep-tile .pt-n{grid-area:n;font-size:28px;line-height:1;font-weight:700;text-align:right;color:#26301a}
+.prep-tile .pt-l{grid-area:l;font-size:13px;color:#5a5f43;margin-top:2px}
+.prep-tile.persons .pt-icons{color:#6b4a2b}
+.prep-none{margin:8px 0 0;font-size:13px}
+.prep-rows{list-style:none;margin:10px 0 0;padding:8px 0 0;border-top:1px dashed #c5c8a3;display:grid;gap:3px;font-size:13px;color:#4a4f36}

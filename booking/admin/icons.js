@@ -20,6 +20,7 @@ export const ICONS = {
   whisk: [P('M12 22v-8M10 14h4'), P('M12 14C8.5 12.5 7 8 9 3.5 12 5 13 9 12 14z'), P('M12 14c3.5-1.5 5-6 3-10.5-3 1.5-4 5.5-3 10.5z'), P('M12 14V5')],   // Saunavihta: sidottu vihta, lehdet
   mask: [P('M12 3c-4 0-7 3.5-7 8.5S8 21 12 21s7-4.5 7-9.5S16 3 12 3z'), P('M5.2 9.5C8 10.5 10 9.5 12 9.5s4 1 6.8 0'), P('M8.5 12.5c.7-.5 1.4-.5 2 0M13.5 12.5c.7-.5 1.4-.5 2 0M10 17h4')],   // Turvenaamio: kasvot, joilla hoitomaski
   towel: [P('M9 7V4h6v3'), P('M5 7h14a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z'), P('M4 12h16M4 16h16')],   // Pyyhe: ripustettu raidallinen pyyhe
+  foot: [P('M4 15h16l-1.6 5H5.6z'), P('M9 15V5.5a2 2 0 0 1 4 0V15M13 12.5h2.5')],   // Jalkakylpy: jalka ammeessa
   tick: [P('M5 12.5l4.5 4.5L19 7.5')],                                                         // Saapunut: valintamerkki
   close: [P('M18 6L6 18M6 6l12 12')],                                                         // Sulje
 };
