@@ -1,7 +1,10 @@
 // Varauskauppa: tuote → päivä/vuoro → henkilömäärä → yhteystiedot → vahvistus. Vaihtoehtoinen selaus: päivän mukaan (#/paiva/<pvm>) → kaikki päivän vuorot. Vanilla JS, ei riippuvuuksia, ei build-vaihetta.
 // Data tulee vain julkisista RPC-funktioista (public_catalog / public_product_images / public_availability / public_create_booking / public_get_booking / public_change_booking).
 // Asiakas ei voi itse perua vahvistettua varausta (peruutukset sähköpostilla henkilökunnalle); hän voi MUUTTAA varausta (toinen vuoro / henkilömäärä) asetuksen mukaan vähintään 48 h ennen vuoroa.
-import { rpc, storageUrl } from './sb.js';
+import { rpc, storageUrl, functionUrl } from './sb.js';
+import { createMobilepayApi } from './mobilepay-api.js';
+import { normOptions, shouldShowButton, testUiEnabled } from './mobilepay-logic.js';
+import { payBlock } from './mobilepay-ui.js';
 import { T } from './i18n.js';
 import { loadProducts as loadTreatmentProducts, splitCatalog, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
 import { createTreatmentViews } from './treatment-ui.js';
@@ -573,6 +576,19 @@ async function viewConfirmation() {
     b.status === 'confirmed' ? h('p', { class: 'bk-note', text: b.can_change ? t.changeInfo(b.change_hours_before, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) : t.changeLocked(b.change_hours_before) }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })) : null,
     h('p', { class: 'bk-note', text: t.emailNote }), h('p', {}, h('a', { href: S.infoHref, text: t.directions }))));
   focusTop();
+  if (['confirmed', 'pending'].includes(b.status) && b.payment_status !== 'paid') attachMobilepay(token, root.firstElementChild);
+}
+// "Maksa MobilePaylla" vahvistussivulla (§14.5): vain kun public_payment_options sallii; testitilan tapa vain testiympäristössä. Virhe / puuttuva RPC → ei mitään. Paluu maksun jälkeen tilaussivulle (?pay=mobilepay).
+async function attachMobilepay(token, box) {
+  try {
+    const cfg = window.BOOKING_CONFIG || {}, env = { testUi: testUiEnabled(cfg, location.search), mock: false, official: cfg.mobilepayOfficialButton !== false };
+    const mp = createMobilepayApi({ rpc, token, functionUrl, anonKey: cfg.anonKey });
+    const opts = normOptions(await mp.options());
+    if (!box || root.firstElementChild !== box || !shouldShowButton(opts, env)) return;
+    const sec = h('section', { class: 'bk-mp', 'data-testid': 'mp-section' }, payBlock({ S, L: S.lang === 'en' ? 'en' : 'fi', api: mp, opts, env, amount: opts.unpaid != null ? money(opts.unpaid) : '' }));
+    const anchor = box.querySelector('.bk-actions');
+    anchor ? anchor.before(sec) : box.append(sec);
+  } catch { /* ei painiketta */ }
 }
 
 async function viewTreatmentChange(token, b) {   // hoitovarauksen muutos: tuote haetaan adapterin kautta (vahvistussivulla ei ole ladattu kauppaa)

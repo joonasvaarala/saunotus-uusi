@@ -30,12 +30,14 @@ const { site, kb, BASE, e } = L;
 // 2) varausohjelman tiedostot
 const A = join(OUT, 'booking');
 mkdirSync(A, { recursive: true });
-for (const f of ['shop.js', 'i18n.js', 'shop.css', 'treatments.js', 'treatment-ui.js', 'order.js', 'order-texts.js', 'order-api.js', 'order-mock.js', 'order-gift.js', 'gift.js', 'gift-api.js', 'gift-logic.js', 'gift-mock.js', 'gift-texts.js', 'gift-ui.js']) cpSync(join(here, 'src', f), join(A, f));
+for (const f of ['shop.js', 'i18n.js', 'shop.css', 'treatments.js', 'treatment-ui.js', 'order.js', 'order-texts.js', 'order-api.js', 'order-mock.js', 'order-gift.js', 'gift.js', 'gift-api.js', 'gift-logic.js', 'gift-mock.js', 'gift-texts.js', 'gift-ui.js', 'mobilepay-api.js', 'mobilepay-logic.js', 'mobilepay-texts.js', 'mobilepay-ui.js']) cpSync(join(here, 'src', f), join(A, f));
 cpSync(join(repo, 'booking/shared/sb.js'), join(A, 'sb.js'));
 const cfg = {
   url: process.env.BOOKING_SUPABASE_URL ?? 'http://localhost:4181', anonKey: process.env.BOOKING_ANON_KEY ?? 'anon-demo-key',
   rest: process.env.BOOKING_REST ?? '/rest/v1', auth: process.env.BOOKING_AUTH ?? '/auth/v1', schema: process.env.BOOKING_SCHEMA || 'booking',
   // Lahjakortin PDF-nappi tilaussivulla: päällä (edge function gift-card-pdf on tuotannossa, sopimus §13.9). BOOKING_GIFT_CARD_PDF=0 piilottaa; funktion nimi = toinen funktio. Muokattavissa julkaisussa tästä tiedostosta.
+  // MobilePay (§14): testitilan tapa (public_payment_options methods[].test=true) näytetään vain kun true. Oletus: päällä vain SITE_ENV=test -julkaisussa (testisivusto); tuotannossa pois. BOOKING_MOBILEPAY_TEST_UI=1|0 ylikirjoittaa; muokattavissa julkaisussa. mobilepayOfficialButton=false → aina oma varapainike (ei ulkoista skriptiä).
+  mobilepayTestUi: process.env.BOOKING_MOBILEPAY_TEST_UI ? /^(1|true)$/i.test(process.env.BOOKING_MOBILEPAY_TEST_UI) : process.env.SITE_ENV === 'test', mobilepayOfficialButton: !/^(0|false)$/i.test(process.env.BOOKING_MOBILEPAY_OFFICIAL_BUTTON || ''), siteEnv: process.env.SITE_ENV || '',
   giftCardPdf: /^(0|false)$/i.test(process.env.BOOKING_GIFT_CARD_PDF || '') ? false : (/^(1|true)?$/i.test(process.env.BOOKING_GIFT_CARD_PDF || '') ? true : process.env.BOOKING_GIFT_CARD_PDF),
 };
 writeFileSync(join(A, 'config.js'), `// Muokkaa tätä tiedostoa julkaisussa (ei vaadi uudelleenrakennusta). anon-avain saa olla julkinen.\nwindow.BOOKING_CONFIG=${JSON.stringify(cfg, null, 2)};\n`);
