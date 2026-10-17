@@ -31,6 +31,7 @@ jobs:
         with:
           node-version: 20
       - run: node --test booking/supabase/functions/admin-users/logic.test.js
+      - run: node --test booking/tests/mobilepay-shop.test.mjs
       - run: node scripts/build-pages.mjs
       # etusivun hero: <picture>/preloadit/mitat/alt/OG + kultanapin kontrasti (staattinen tarkistus dististä)
       - run: node scripts/check-hero.mjs

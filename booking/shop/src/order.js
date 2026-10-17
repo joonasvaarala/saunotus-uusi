@@ -1,10 +1,13 @@
 // Asiakkaan tilaussivu: /tilaus/?t=<token> (sopimus: settings.order_page_path; EN-sivu /en/order/?t=<token>, tilauksen locale ohjaa oikeaan kieleen). Token on vain URL-parametrina (ei hashissa/polussa → ei Referer-vuotoa; sivulla meta referrer=no-referrer).
 // Näyttää tilauksen rivit, maksutilan, kuitit sekä ohjauksen lisäykseen ja peruutuspyyntöön. Data: order-api.js (mock kun ?mock=1; puuttuva RPC → "ei vielä käytössä").
-import { rpc } from './sb.js';
+import { rpc, functionUrl } from './sb.js';
 import { OT } from './order-texts.js';
 import { createOrderApi, validToken } from './order-api.js';
 import { createGiftApi } from './gift-api.js';
 import { redeemSection, cardsSection } from './order-gift.js';
+import { createMobilepayApi } from './mobilepay-api.js';
+import { normOptions, shouldShowButton, testUiEnabled } from './mobilepay-logic.js';
+import { payBlock, runReturn } from './mobilepay-ui.js';
 
 const S = window.BOOKING_SHOP;
 const L = OT[S.lang] ? S.lang : 'fi', t = OT[L];
@@ -48,14 +51,32 @@ async function main() {
     gift.redeem = !!(pk?.ok && pk.redeem_enabled);
     gift.cards = oc?.ok && Array.isArray(oc.cards) ? oc.cards : [];
   }
-  await loadGift();
+  // MobilePay (§14): painike vain kun public_payment_options sallii (methods sisältää mobilepayn + order.can_pay_online); testitilan tapa vain testiympäristössä. Puuttuva RPC / virhe → ei painiketta.
+  const cfg = window.BOOKING_CONFIG || {}, search = new URLSearchParams(location.search);
+  const mpEnv = { testUi: testUiEnabled(cfg, location.search), mock: api.mock, official: cfg.mobilepayOfficialButton !== false };
+  const mp = createMobilepayApi({ rpc: api.mock ? api.rpc : rpc, token, functionUrl, anonKey: cfg.anonKey, fetchImpl: api.mock ? api.mpFetch : undefined });
+  const mpState = { opts: normOptions(null), show: false, checking: false };
+  const mpHost = h('div', { 'data-testid': 'mp-result', 'aria-live': 'polite' });
+  const num = (k) => { const v = +search.get(k); return Number.isFinite(v) && v > 0 ? v : undefined; };
+  const mpTiming = api.mock ? { intervalMs: num('mpinterval'), maxMs: num('mpmax') } : {};   // vain mock-tilassa säädettävissä (testit/esittely)
+  async function loadMp() { try { mpState.opts = normOptions(await mp.options()); } catch { mpState.opts = normOptions(null); } mpState.show = shouldShowButton(mpState.opts, mpEnv); }
+  await Promise.all([loadGift(), loadMp()]);
+  let cur = o;
   draw(o);
+  const redraw = async (n) => { await loadMp(); draw(n); };
   async function reloadAfterGift(text) {
-    try { const n = await api.get(); if (n?.ok) { await loadGift(); draw(n); } } catch { /* näkymä jää ennalleen */ }
+    try { const n = await api.get(); if (n?.ok) { await loadGift(); await redraw(n); } } catch { /* näkymä jää ennalleen */ }
     flash(true, text);
   }
+  // Paluu MobilePaysta (?pay=mobilepay): reconcile + public_get_order 2,5 s välein enintään ~60 s, lopputulos näkyy sivun yläreunassa (§14.3)
+  const returning = () => runReturn({ mp, host: mpHost, S, L, orderNo: o.order_no, timing: mpTiming,
+    getOrder: async () => { const n = await api.get(); return n?.ok ? n : null; },
+    onState: (st) => { if (st === 'checking') { mpState.checking = true; draw(cur); } },
+    onDone: async () => { mpState.checking = false; try { const f = await api.get(); if (f?.ok) cur = f; } catch { /* vanha näkymä */ } await loadMp(); draw(cur); } });
+  if (search.get('pay') === 'mobilepay' && ['unpaid', 'pending', 'partially_paid', 'paid', 'failed'].includes(o.payment_status)) returning();
 
   function draw(o) {
+    cur = o;
     const stKey = o.cancel_request?.status === 'open' ? 'cancel_requested' : o.status;
     const unpaid = o.unpaid;
     const head = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-h' },
@@ -74,10 +95,12 @@ async function main() {
         h('div', { class: unpaid > 0 ? 'due' : '' }, h('dt', { text: t.unpaid }), h('dd', { 'data-testid': 'order-unpaid', text: money(unpaid) }))));
     // maksulinkki: avoin (pending) maksu + verkkomaksu käytössä → linkki; muuten maksu paikan päällä
     const link = o.online_payment_enabled ? o.payments.find((p) => p.status === 'pending' && p.link_path) : null;
+    const mpBlock = mpState.show && !mpState.checking && unpaid > 0 ? payBlock({ S, L, api: mp, opts: mpState.opts, env: mpEnv, amount: money(unpaid) }) : null;
     const pay = unpaid > 0 ? h('section', { class: 'ord-card', 'aria-labelledby': 'ord-p' }, h('h3', { id: 'ord-p', text: t.paymentTitle }),
-      link ? h('a', { class: 'btn ord-btn', 'data-testid': 'pay-link', href: S.base ? S.base + link.link_path : link.link_path, text: `${t.payRest} (${money(unpaid)})` })
-        : h('button', { type: 'button', class: 'btn light ord-btn', disabled: true, 'data-testid': 'pay-rest', text: `${t.payRest} (${money(unpaid)})` }),
-      link ? null : h('p', { class: 'bk-note', text: t.payRestSoon })) : null;
+      mpBlock,
+      mpState.checking ? null : link ? h('a', { class: 'btn ord-btn', 'data-testid': 'pay-link', href: S.base ? S.base + link.link_path : link.link_path, text: `${t.payRest} (${money(unpaid)})` })
+        : mpBlock ? null : h('button', { type: 'button', class: 'btn light ord-btn', disabled: true, 'data-testid': 'pay-rest', text: `${t.payRest} (${money(unpaid)})` }),
+      link || mpBlock || mpState.checking ? null : h('p', { class: 'bk-note', text: t.payRestSoon })) : null;
     const giftCards = gift.cards.length ? cardsSection({ S, L, api: gapi, cards: gift.cards }) : null;
     const giftUse = gift.redeem && unpaid > 0 && !gift.cards.length && ['confirmed', 'pending'].includes(o.status) ? redeemSection({ L, api: gapi, token, onApplied: reloadAfterGift }) : null;
     const receipts = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-r' }, h('h3', { id: 'ord-r', text: t.receiptsTitle }),
@@ -90,7 +113,7 @@ async function main() {
       h('p', { class: 'bk-note' }, `${t.addNewBooking} `, h('a', { href: S.shopHref, text: t.addNewBookingLink })));
     const cancel = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), note,
       o.cancel_request ? h('p', { class: 'bk-ok', role: 'status', 'data-testid': 'cancel-pending', text: t[`cancel.${o.cancel_request.status}`] || t['cancel.open'] }) : cancelForm());
-    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, head, resv, lines, giftCards, pay, giftUse, receipts, add, cancel, msg, phoneBox()));
+    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, resv, lines, giftCards, pay, giftUse, receipts, add, cancel, msg, phoneBox()));
   }
   async function download(btn, receiptNo) {
     btn.disabled = true;
@@ -120,7 +143,7 @@ async function main() {
         const r = await api.addToOrder({ items: [item] });
         if (r?.notReady) throw new Error('add');
         if (r?.ok === false) { flash(false, failText(r)); btn.disabled = false; return; }
-        const fresh = await api.get(); if (!fresh?.ok) throw new Error('get'); draw(fresh); flash(true, t.addDone);
+        const fresh = await api.get(); if (!fresh?.ok) throw new Error('get'); await redraw(fresh); flash(true, t.addDone);
       } catch { flash(false, t.error); btn.disabled = false; }
     } }, h('p', { class: 'bk-note', text: t.addLead }),
     resSel ? h('div', { class: 'bk-field' }, h('label', { for: 'ord-res', text: t.addReservation }), resSel) : null,
@@ -136,7 +159,7 @@ async function main() {
         const r = await api.requestCancel({ reason: reason.value.trim() });
         if (r?.notReady) throw new Error('cancel');
         if (r?.ok === false && r.code !== 'request_exists') { flash(false, failText(r)); btn.disabled = false; return; }
-        const fresh = await api.get(); if (!fresh?.ok) throw new Error('get'); draw(fresh); flash(true, r?.ok === false ? t['cancel.open'] : t.cancelDone);
+        const fresh = await api.get(); if (!fresh?.ok) throw new Error('get'); await redraw(fresh); flash(true, r?.ok === false ? t['cancel.open'] : t.cancelDone);
       } catch { flash(false, t.error); btn.disabled = false; }
     } }, h('p', { class: 'bk-note', text: t.cancelLead }), h('div', { class: 'bk-field' }, h('label', { for: 'ord-reason', text: t.cancelReason }), reason), btn);
   }

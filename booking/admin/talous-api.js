@@ -201,6 +201,19 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
     },
     // ALV-huomautus on vain tiedote: virhe/puuttuva RPC/oikeus puuttuu → null (ei mock-varaa, ei bannerin muutosta)
     listVatRates: async () => { if (!real) return normVatRates(await getMock().listVatRates()); try { return normVatRates(await real.listVatRates()); } catch { return null; } },
+    // MobilePay-hyvitys (sopimus §14.4): admin_refund luo rivin status='requested' (provider='mobilepay'); sen jälkeen POST mobilepay-refund {refund_id} käyttäjän JWT:llä (vaatii payments.refund).
+    // Palauttaa { result: done | failed | retry_later | unverified | db_error | none | off | forbidden | error, detail? }. Ei koskaan heitä: tulos näytetään käyttäjälle, hyvitysrivi säilyy 'requested' kunnes käsitelty (turvallista toistaa: Idempotency-Key).
+    async mobilepayRefund(refundId) {
+      if (!real || !io.fn) return { result: 'done', mock: true };
+      try {
+        const j = await io.fn('mobilepay-refund', { refund_id: refundId });
+        const x = (j?.processed || []).find((p) => +p.refund_id === +refundId);
+        return x ? { result: String(x.result || 'error'), detail: x.detail ?? null } : { result: j?.mode === 'off' ? 'off' : 'none' };
+      } catch (e) {
+        const code = e?.code || e?.details?.code || null;
+        return { result: code === 'forbidden' || e?.status === 403 ? 'forbidden' : 'error', code, status: e?.status ?? null };
+      }
+    },
     addToOrder: (a) => act('addToOrder', a), createPaymentLink: (a) => act('createPaymentLink', a), refund: (a) => act('refund', a), recordPayment: (a) => act('recordPayment', a),
     // ---- kuitit ----
     getReceipt: (id) => run('getReceipt', id, normReceipt),

@@ -1,6 +1,6 @@
 // Talous › Tilaukset: uusin ensin, haku, lajittelu, suodattimet ja PALVELINPUOLEN sivutus (12 000+ tilausta) – rivi aukeaa maksuiksi ja varauksiksi.
 // Datan muoto: ../talous-api.js (admin_list_orders / admin_get_order). Napit (lisää, maksulinkki, maksun kirjaus, hyvitys) kutsuvat api:a; kuitit (lataus, näyttö, uudelleenlähetys): ./talous-receipts.js.
-import { h, dialog } from '../ui.js';
+import { h, dialog, toast } from '../ui.js';
 import { icon } from '../icons.js';
 import { receiptsList } from './talous-receipts.js';
 import { t, fmt, getLang } from '../talous-i18n.js';
@@ -49,6 +49,15 @@ export function createOrdersTab({ api, ctx, gift = null }) {
     row.dataset.orderId = o.order_id;
     return row;
   }
+  // Keskeneräiset / epäonnistuneet hyvitykset (requested, processing, failed) maksun alla; MobilePay-hyvityksen voi käsitellä uudelleen (§14.4: retry_later → kutsu uudelleen, Idempotency-Key estää tuplahyvityksen)
+  function openRefunds(o, p) {
+    const rows = (p.refunds || []).filter((r) => ['requested', 'processing', 'failed'].includes(r.status));
+    if (!rows.length) return null;
+    const canRetry = p.provider === 'mobilepay' && !api.isMock('refund') && ctx.can('payments.refund');
+    return h('ul', { class: 'tl-refunds', 'data-testid': 'order-open-refunds' }, rows.map((r) => h('li', { 'data-testid': 'open-refund', 'data-status': r.status },
+      h('span', { class: `badge ${r.status === 'failed' ? 'st-cancelled' : 'st-pending'}`, text: t(r.status === 'failed' ? 'refund.failed' : 'refund.pending') }), ' ', h('span', { text: `${fmt.money(r.amount)}${r.reason ? ' · ' + r.reason : ''}` }),
+      canRetry && r.status !== 'failed' ? actionBtn({ key: 'refund-retry', label: t('refund.retry'), testid: 'btn-refund-retry', onClick: async () => { await processMobilepayRefund(r.id); afterChange(null, o.order_id); } }) : null)));
+  }
   async function orderDetail(id) {
     const o = await api.getOrder(id);
     const b = o.balance, unpaid = b.unpaid;
@@ -57,7 +66,8 @@ export function createOrdersTab({ api, ctx, gift = null }) {
       ? h('ul', { class: 'tl-sub', 'data-testid': 'order-payments' }, o.payments.map((p) => h('li', {},
         h('span', { class: 'tl-sub-main' }, h('strong', { text: methodLabel(p.method, p.method_label) }), ' ', pstatBadge(p.status), !o.is_native ? johkuBadge() : null),   // Johku-tilauksen maksu: ei kirjanpitoon (booking_41)
         h('span', { class: 'tl-sub-meta', text: [fmt.dt(p.paid_at || p.created_at), p.receipt_no ? `${t('receipt')} ${p.receipt_no}` : null, p.link_token && p.status === 'pending' ? t('payment.linkOpen') : null].filter(Boolean).join(' · ') }),
-        h('span', { class: 'tl-sub-sum' }, h('strong', { text: fmt.money(p.amount) }), p.refunded_amount ? h('small', { text: ` ${t('refunded')} ${fmt.money(p.refunded_amount)}` }) : null))))
+        h('span', { class: 'tl-sub-sum' }, h('strong', { text: fmt.money(p.amount) }), p.refunded_amount ? h('small', { text: ` ${t('refunded')} ${fmt.money(p.refunded_amount)}` }) : null),
+        openRefunds(o, p))))
       : emptyBox(t(o.is_native ? 'order.noPayments' : 'order.noPaymentsJohku'));
     const reservations = o.reservations.length
       ? h('ul', { class: 'tl-sub', 'data-testid': 'order-reservations' }, o.reservations.map((r) => h('li', {},
@@ -162,15 +172,29 @@ export function createOrdersTab({ api, ctx, gift = null }) {
     const sel = h('select', { name: 'payment', onchange: () => { amount.value = left(refundable.find((p) => String(p.payment_id) === sel.value)); amount.max = amount.value; } },
       refundable.map((p) => h('option', { value: p.payment_id, text: `${methodLabel(p.method, p.method_label)} · ${fmt.money(left(p))}` })));
     const amount = h('input', { name: 'amount', type: 'number', step: '0.01', min: '0.01', max: left(refundable[0]), value: left(refundable[0]), inputmode: 'decimal', required: true });
+    // MobilePay-verkkomaksu (provider 'mobilepay'): hyvitys lähtee MobilePayhin heti (§14.4); vihje näkyy vain sille maksulle
+    const mpHint = h('p', { class: 'muted tl-hint', 'data-testid': 'refund-mp-hint', text: t('refund.mobilepay') });
+    const syncHint = () => { mpHint.hidden = refundable.find((p) => String(p.payment_id) === sel.value)?.provider !== 'mobilepay'; };
+    sel.addEventListener('change', syncHint); syncHint();
     formDialog(t('btn.refund'), [h('p', { class: 'muted', text: api.isMock('refund') ? t('mock.note') : t('live.note') }), fld(t('refund.payment'), sel), fld(t('refund.amount'), amount),
-      fld(t('refund.reason'), h('input', { name: 'reason', required: true, maxlength: 200 })), h('p', { class: 'muted tl-hint', text: t('refund.visma') })], t('refund.submit'),
+      fld(t('refund.reason'), h('input', { name: 'reason', required: true, maxlength: 200 })), h('p', { class: 'muted tl-hint', text: t('refund.visma') }), mpHint], t('refund.submit'),
     async (fd) => {
       const amt = +fd.get('amount'), p = refundable.find((x) => String(x.payment_id) === fd.get('payment'));
       if (!(amt > 0) || amt > left(p)) throw new Error(t('refund.badAmount'));
       if (String(fd.get('reason') || '').trim().length < 3) throw new Error(t('refund.noReason'));
       const res = await api.refund({ paymentId: p.payment_id, amount: amt, reason: String(fd.get('reason')).trim() });
-      doneToast(res, RPC.refund); afterChange(res, o.order_id);
+      doneToast(res, RPC.refund);
+      // MobilePay-verkkomaksu: rivi on 'requested' → käsittely heti (mobilepay-refund käyttäjän JWT:llä), tulos näkyviin
+      if (res?.status === 'requested' && !res.mock && p.provider === 'mobilepay') await processMobilepayRefund(res.refund_id);
+      afterChange(res, o.order_id);
     });
+  }
+  const MP_KINDS = { done: 'ok', failed: 'err', retry_later: 'warn', unverified: 'warn', db_error: 'warn', none: 'warn', off: 'warn', forbidden: 'err', error: 'warn' };
+  async function processMobilepayRefund(refundId) {
+    const m = await api.mobilepayRefund(refundId);
+    const key = `refund.mp.${m.result}`;
+    toast(t(MP_KINDS[m.result] ? key : 'refund.mp.error'), MP_KINDS[m.result] || 'warn');
+    return m;
   }
   // ---- työkalupalkki ----
   const sortSel = h('select', { 'data-testid': 'orders-sort', onchange: (e) => { st.sortBy = e.target.value; if (st.sortBy === 'payment_status') st.sortDir = 'desc'; syncDir(); change({}); } }, ORDER_SORTS.map((k) => h('option', { value: k, text: t(`sort.${k}`) })));
