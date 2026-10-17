@@ -124,3 +124,32 @@ test('locale-valinta: parametri voittaa datan, oletus fi', { skip }, () => {
   assert.ok(R('order_change', base('en')).subject.startsWith('Your order has changed'));
   assert.ok(R('order_change', { ...base('fi'), locale: undefined }).subject.startsWith('Tilauksesi on muuttunut'));
 });
+
+// ---------- lahjakortit (booking_45, sopimus §13.9): gift_card_buyer / gift_card_recipient ----------
+const GTOK = '0654361d-a2b1-43f4-a25c-8c7223907dd0';
+const gcard = (o = {}) => ({ public_token: GTOK, package_code: 'sauna_treatment_2', package_name: 'Savusaunaelämys ja saunahoito kahdelle', package_name_en: 'Smoke sauna experience and sauna treatment for two', kind: 'product', amount: 192, valid_to: '2027-04-01', recipient_name: 'Mikko Mallikas', greeting: 'Hyvää syntymäpäivää!\nNauti <3 & rentoudu', buyer_name: 'Olli Ostaja', persons: 2, locale: 'fi', status: 'active', ...o });
+const gbase = { functions_url: 'https://x.supabase.co/functions/v1', redeem_online: false, to_name: 'Olli Ostaja' };
+for (const locale of ['fi', 'en']) for (const kind of ['gift_card_buyer', 'gift_card_recipient']) {
+  test(`${kind} ${locale}: PDF-linkki lang-parametrilla, ei koodia, ei tyhjiä arvoja, HTML escapattu`, { skip }, () => {
+    const m = R(kind, { ...gbase, gift_cards: [gcard({ locale }), gcard({ package_code: 'open', kind: 'value', amount: 50.5, locale })] }, locale);
+    for (const f of ['subject', 'text', 'html']) assert.ok(m[f] && m[f].trim().length > 20, `${f} tyhjä`);
+    for (const f of ['subject', 'text', 'html']) assert.ok(!/undefined|\bnull\b|NaN|\[object/.test(m[f]), `${f} sisältää tyhjän arvon`);
+    assert.ok(!/\n/.test(m.subject) && !/<[a-z!]/i.test(m.text));
+    const pdfs = hrefs(m.html).filter((u) => u.includes('/gift-card-pdf?'));
+    assert.ok(pdfs.length >= 2 && pdfs.every((u) => u === `https://x.supabase.co/functions/v1/gift-card-pdf?t=${GTOK}&amp;lang=${locale}` || u === `https://x.supabase.co/functions/v1/gift-card-pdf?t=${GTOK}&lang=${locale}`), `PDF-linkit: ${pdfs}`);
+    assert.ok(m.text.includes(`gift-card-pdf?t=${GTOK}&lang=${locale}`));
+    assert.ok(!/HH[0-9A-Z]{2}-/.test(m.text + m.html), 'viesti ei sisällä kortin koodia');
+    if (kind === 'gift_card_recipient') assert.ok(!m.html.includes('<3') && m.html.includes('&lt;3') && m.html.includes('&amp;'), 'tervehdys escapataan');
+    assert.ok(m.text.endsWith('\n'));
+  });
+}
+test('gift_card_buyer: EN-viestissä englanninkielinen paketin nimi, FI:ssä suomenkielinen', { skip }, () => {
+  assert.ok(R('gift_card_buyer', { ...gbase, gift_cards: [gcard({ locale: 'en' })] }, 'en').text.includes('Smoke sauna experience'));
+  assert.ok(R('gift_card_buyer', { ...gbase, gift_cards: [gcard()] }, 'fi').text.includes('Savusaunaelämys'));
+});
+test('gift_card_*: redeem_online ohjaa käyttöohjeen tekstin', { skip }, () => {
+  const off = R('gift_card_recipient', { ...gbase, gift_cards: [gcard()] }, 'fi').text;
+  const on = R('gift_card_recipient', { ...gbase, redeem_online: true, gift_cards: [gcard()] }, 'fi').text;
+  assert.notEqual(on, off);
+  assert.ok(/verkossa|verkkosivu|saunotus\.fi/i.test(on));
+});

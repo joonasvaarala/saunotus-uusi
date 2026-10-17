@@ -1,0 +1,16 @@
+import { buildGiftCardPdf, san, sanGreeting } from "./render.ts";
+const logo = await Deno.readFile(new URL("../../../docs/giftcards/logo.png", import.meta.url));
+const seller = { name: "Havuhattu Oy / Sipoonjoen perinnesauna", legal_name: "Havuhattu Oy", business_id: "3018112-1", address: "Hindsbyntie 124", zip: "04130", city: "Sipoo", email: "savusauna@saunotus.fi", phone: "010 299 2866", web: "https://saunotus.fi" };
+const longG = ("Rakas Mikko, onnea syntymäpäivänä! Toivomme että saat nauttia lämmöstä ja rauhasta yhdessä rakkaasi kanssa. Nauti löylyistä, vihdasta ja hiljaisuudesta. Kiitos kaikesta mitä olet tehnyt. Ota rennosti, ja muista juoda vettä. Nähdään pian! ").slice(0, 300);
+const base = { ok: true, status: "active", currency: "EUR", locale: "fi", valid_from: "2026-10-01", valid_to: "2027-04-01", issued_at: "2026-10-01T09:00:00+03:00", seller, redeemable_now: true, source: "native" };
+const cases: Record<string, any> = {
+  fi_pkg_greet: { ...base, code: "HH3A-7CEF-HJKL", kind: "product", package_code: "sauna_treatment_2", package: { name: "Savusaunaelämys ja saunahoito kahdelle", name_en: "Smoke sauna experience and sauna treatment for two", persons: 2, is_open: false, items: [{ label: "Yleinen vuoro", label_en: "General session", persons: 2 }, { label: "Saunahoito", label_en: "Sauna treatment", persons: 2 }] }, initial_amount: 192, balance: 192, recipient_name: "Mikko Mallikas", buyer_name: "Olli Ostaja", greeting: "Hyvää syntymäpäivää, Mikko!\nNauti lämmöstä ja rauhasta yhdessä." },
+  en_open: { ...base, locale: "en", code: "HH7M-RTUV-WXY3", kind: "value", package_code: "open", package: { name: "Avoin lahjakortti", name_en: "Open gift card", is_open: true, items: [] }, initial_amount: 75, balance: 75, recipient_name: "Mikko Mallikas", buyer_name: "Olli Ostaja", greeting: null },
+  fi_long: { ...base, code: "HH9A-ECFH-JKLM", kind: "product", package_code: "peat_mask_2", package: { name: "Savusaunaelämys turvenaamiolla ja jalkakylvyllä kahdelle", name_en: "x", persons: 2, is_open: false, items: [{ label: "Yleinen vuoro", persons: 2 }, { label: "Turvenaamio ja jalkakylpy", persons: 2 }] }, initial_amount: 88, balance: 88, recipient_name: "Mikko Mallikas", buyer_name: "Olli Ostaja", greeting: longG },
+  fi_emoji_expired: { ...base, status: "expired", code: "HHAA-BBCC-DDEE".replace(/[BD]/g, "C"), kind: "value", package_code: "open", package: { is_open: true }, initial_amount: 50.5, balance: 20.25, recipient_name: "Ŝaaja Šíä", buyer_name: null, greeting: "Moi 😀🎉 hyvää joulua!\n\n\n\nÄÖÅ €uro “lainaus” – ok\u0000\u200b", redeemable_now: false },
+  johku_used: { ...base, source: "johku", status: "used", code: "ZZ3479ACEFHJ".replace(/(.{4})(.{4})(.{4})/, "$1-$2-$3"), kind: "product", package_code: null, package: null, initial_amount: 58, balance: 0, recipient_name: null, buyer_name: "Johku Ostaja", greeting: null, redeemable_now: false },
+};
+for (const [k, v] of Object.entries(cases)) { const b = await buildGiftCardPdf(v, k === "johku_used" ? null : logo); await Deno.writeFile(new URL(`./out_${k}.pdf`, import.meta.url), b); console.log(k, b.length); }
+console.log("san:", san("Moi 😀 šäö €"), "|", JSON.stringify(sanGreeting("a\r\n\n\n\nb  \n c")));
+// 'fi' override
+const b2 = await buildGiftCardPdf(cases.en_open, logo, "fi"); await Deno.writeFile(new URL("./out_en_open_as_fi.pdf", import.meta.url), b2);

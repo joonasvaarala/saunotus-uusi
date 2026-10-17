@@ -42,9 +42,10 @@ function buildSale(pk) {
     return true;
   };
   const tile = (p) => {
-    // p.items ({label, persons, kb_product_id} | {persons, addon_code}) ei näytetä: sisältö kuvataan palvelimen description(_en)-kentässä (ei kielitettyjä item-nimiä)
+    // Sisältölista: p.items[].label (FI) / label_en (EN, booking_45); jos kyseisen kielen nimiä ei ole, listaa ei näytetä (kuvaus kertoo sisällön)
+    const contents = G.itemLabels(p, L);
     const meta = h('p', { class: 'gc-meta' }, p.is_open ? tx('amountFrom', { min: p.min_amount, max: p.max_amount }) : '', p.is_open ? ' · ' : '', tx('valid', { months: p.valid_months }));
-    const kids = [h('p', { class: 'kicker', text: p.is_open ? tx('openKicker') : tx('pkgKicker') }), h('h3', { text: pick(p, 'name') }), pick(p, 'description') ? h('p', { class: 'gc-desc', text: pick(p, 'description') }) : null];
+    const kids = [h('p', { class: 'kicker', text: p.is_open ? tx('openKicker') : tx('pkgKicker') }), h('h3', { text: pick(p, 'name') }), pick(p, 'description') ? h('p', { class: 'gc-desc', text: pick(p, 'description') }) : null, !p.is_open && contents.length ? h('ul', { class: 'gc-items', 'data-testid': 'gc-items', 'aria-label': tx('contents') }, contents.map((t) => h('li', { text: t }))) : null];
     if (p.is_open) {
       const amt = h('input', { type: 'text', inputmode: 'decimal', autocomplete: 'off', value: '', placeholder: '50' });
       const f = field({ label: tx('amountLabel'), control: amt, hint: tx('amountHint', { min: p.min_amount, max: p.max_amount }), name: 'open' });

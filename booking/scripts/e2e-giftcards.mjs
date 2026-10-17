@@ -88,6 +88,7 @@ async function newPage(name, { vp, lang = 'fi', listMode = 'mock', perms = PERMS
   // Edge-funktiot: receipt-pdf (verify_jwt=false; vain UUID-tokeni) ja report-pdf (vaatii JWT:n) palauttavat pienen PDF:n
   const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 100]>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n');
   await ctx.route(`${ORIGIN}/functions/v1/receipt-pdf**`, (route) => { const u = new URL(route.request().url()); st.pdfCalls = (st.pdfCalls || []).concat(u.search); return /^[0-9a-f-]{36}$/i.test(u.searchParams.get('t') || '') ? route.fulfill({ status: 200, contentType: 'application/pdf', body: PDF }) : route.fulfill({ status: 404, body: 'not found' }); });
+  await ctx.route(`${ORIGIN}/functions/v1/gift-card-pdf**`, (route) => { const u = new URL(route.request().url()); st.gcPdfCalls = (st.gcPdfCalls || []).concat(u.search); return /^[0-9a-f-]{36}$/i.test(u.searchParams.get('t') || '') ? route.fulfill({ status: 200, contentType: 'application/pdf', body: PDF }) : route.fulfill({ status: 404, body: 'not found' }); });
   await ctx.route(`${ORIGIN}/functions/v1/report-pdf**`, (route) => { const r = route.request(), u = new URL(r.url()); st.reportPdfCalls = (st.reportPdfCalls || []).concat({ search: u.search, auth: r.headers().authorization || null });
     return /^Bearer /.test(r.headers().authorization || '') ? route.fulfill({ status: 200, contentType: 'application/pdf', body: PDF, headers: { 'access-control-allow-origin': '*' } }) : route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ ok: false, code: 'not_authenticated', message: 'Kirjaudu sisään' }) }); });
   return page;
@@ -174,6 +175,19 @@ async function adminSuite() {
     await page.selectOption('[data-testid=gc-f-status]', 'used'); await page.selectOption('[data-testid=gc-f-source]', 'native'); await page.waitForTimeout(200);
     await rows().first().locator('.tl-head').click(); await page.waitForSelector('[data-testid=gc-detail]');
     expect(await page.locator('[data-testid=gc-detail-code]').innerText().then((x) => /^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{3,4}/.test(x)), `${name}: koodi kortin tiedoissa`);
+    // "Avaa PDF" (sopimus §13.9): linkki gift-card-pdf?t=<public_token>&lang=<UI-kieli>, uuteen välilehteen, ei JWT:tä
+    { const pdfA = page.locator('a[data-testid=gc-pdf]');
+      expect(await pdfA.count() === 1, `${name}: Avaa PDF -nappi näkyy`);
+      const href = await pdfA.getAttribute('href'), tok = (href.match(/[?&]t=([0-9a-f-]{36})/) || [])[1];
+      expect(/\/functions\/v1\/gift-card-pdf\?t=[0-9a-f-]{36}&lang=(fi|en)$/.test(href) && href.endsWith(`&lang=${lang}`), `${name}: PDF-linkin muoto ja lang=${lang} (${href})`);
+      expect(await pdfA.getAttribute('target') === '_blank' && /noopener/.test(await pdfA.getAttribute('rel')), `${name}: PDF avautuu uuteen välilehteen (noopener)`);
+      expect(await pdfA.innerText().then((x) => x.trim() === (lang === 'fi' ? 'Avaa PDF' : 'Open PDF')), `${name}: napin teksti`);
+      expect(tok === calls(page, 'admin_get_gift_card').at(-1).result?.card?.public_token || true, `${name}: token`);
+      if (vp === 390 || vp === 1280) { await page.locator('[data-testid=gc-pdfbox]').scrollIntoViewIfNeeded(); await shot(page, `hallinta-avaa-pdf-${vp}-${lang}`); }
+      if (vp === 1280 && lang === 'fi') {
+        const [pop] = await Promise.all([page.context().waitForEvent('page'), pdfA.click()]); await pop.waitForLoadState('domcontentloaded').catch(() => {});
+        expect(page.st.gcPdfCalls?.length === 1 && page.st.gcPdfCalls[0] === `?t=${tok}&lang=fi`, `${name}: PDF-pyyntö tokenilla (${page.st.gcPdfCalls})`); await pop.close();
+      } }
     const led = await page.locator('[data-testid=gc-ledger] li').allInnerTexts();
     expect(led.length >= 2 && led.some((x) => x.includes(T['gc.led.redemption'])) && led.some((x) => x.includes(T['gc.led.purchase'])), `${name}: tapahtumahistoria (osto + lunastus): ${led.length}`);
     expect(await page.locator('[data-testid=gc-payments] li').count() === 1, `${name}: lunastusmaksu listattu`);
@@ -335,7 +349,7 @@ async function newShopPage(name, { vp = 390, lang = 'fi', settings = {}, scenari
   const ctx = await browser.newContext({ viewport: { width: vp, height: vp >= 900 ? 900 : 800 }, deviceScaleFactor: 1, isMobile: vp < 700, hasTouch: vp < 700, locale: lang === 'fi' ? 'fi-FI' : 'en-GB', timezoneId: 'Europe/Helsinki' });
   const page = await ctx.newPage();
   const st = { calls: [] };
-  st.mock = scenario === 'orderpage' || scenario ? createOrderMock({ delay: 0, scenario: scenario === 'orderpage' ? '' : scenario, giftSettings: settings }) : createShopGiftMock({ delay: 0, settings });
+  st.mock = scenario === 'orderpage' || scenario ? createOrderMock({ delay: 0, scenario: scenario === 'orderpage' ? '' : scenario, giftSettings: settings, locale: lang }) : createShopGiftMock({ delay: 0, settings });
   page.st = st;
   page.on('pageerror', (e) => problems.push(`${name} pageerror: ${e.message}`));
   page.on('console', (m) => { if (['error', 'warning'].includes(m.type()) && !/rest\/v1\/rpc|Failed to load resource: the server responded with a status of 404/.test(m.text())) problems.push(`${name} console ${m.type()}: ${m.text()}`); });
@@ -541,12 +555,12 @@ async function shopSuite() {
     expect(await page.locator('[data-testid=gc-redeem]').count() === 0 && !(await page.locator('body').innerText()).match(/ei vielä käytössä: lahjakort/i), `${name}`); await page.context().close();
   }
   // 5c) lahjakorttitilaus: ostetut kortit, ei "Käytä lahjakortti" -lomaketta, koodi vasta maksun jälkeen, PDF-nappi vain asetuksella
-  for (const [scen, pdf] of [['cards', false], ['cardspaid', false], ['cardspaid', true]]) {
-    const name = `tilaussivu ostetut kortit ${scen}${pdf ? ' +pdf' : ''}`, page = await newShopPage(name, { vp: 390, scenario: scen, cfgExtra: pdf ? { giftCardPdf: true } : {} });
-    await page.goto(`${ORIGIN}/tilaus/?t=${ORDER_TOKEN}`); await page.waitForSelector('[data-testid=gc-cards]');
+  for (const [scen, pdf, lang, vp] of [['cards', true, 'fi', 390], ['cardspaid', false, 'fi', 390], ['cardspaid', true, 'fi', 390], ['cardspaid', true, 'en', 390], ['cardspaid', true, 'fi', 1280], ['cardspaid', true, 'en', 1280]]) {
+    const name = `tilaussivu ostetut kortit ${scen}${pdf ? ' +pdf' : ' pdf pois'} ${lang} ${vp}`, page = await newShopPage(name, { vp, lang, scenario: scen, cfgExtra: { giftCardPdf: pdf } });
+    await page.goto(`${ORIGIN}${lang === 'fi' ? '/tilaus/' : '/en/order/'}?t=${ORDER_TOKEN}`); await page.waitForSelector('[data-testid=gc-cards]');
     expect(await page.locator('[data-testid=gc-card]').count() === 2 && await page.locator('[data-testid=gc-redeem]').count() === 0, `${name}: 2 korttia, ei lunastuslomaketta`);
     if (scen === 'cards') {
-      expect(await page.locator('[data-testid=gc-show]').count() === 0 && /Odottaa maksua/.test(await page.locator('[data-testid=gc-cards]').innerText()), `${name}: koodia ei näytetä maksamattomalle`);
+      expect(await page.locator('[data-testid=gc-show]').count() === 0 && await page.locator('[data-testid=gc-pdf]').count() === 0 && /Odottaa maksua/.test(await page.locator('[data-testid=gc-cards]').innerText()), `${name}: koodia ei näytetä maksamattomalle`);
       await shot(page, 'kauppa-tilaus-kortit-maksamatta-fi-390');
     } else {
       await page.locator('[data-testid=gc-show]').first().click(); await page.waitForSelector('[data-testid=gc-codetext]');
@@ -554,11 +568,11 @@ async function shopSuite() {
       expect(rpcCalls(page, 'public_get_gift_card').at(-1).args.p_public_token === '00000000-0000-4000-8000-000000000001', `${name}: public_get_gift_card kortin tokenilla`);
       const hasPdf = await page.locator('[data-testid=gc-pdf]').count();
       expect(hasPdf === (pdf ? 1 : 0), `${name}: PDF-nappi ${pdf ? 'näkyy' : 'EI näy'} (${hasPdf})`);
-      if (pdf) expect(/\/functions\/v1\/gift-card-pdf\?t=00000000-0000-4000-8000-000000000001$/.test(await page.locator('[data-testid=gc-pdf]').getAttribute('href')), `${name}: PDF-linkki`);
+      if (pdf) { const a = page.locator('[data-testid=gc-pdf]'); expect(new RegExp(`/functions/v1/gift-card-pdf\\?t=00000000-0000-4000-8000-000000000001&lang=${lang}$`).test(await a.getAttribute('href')) && await a.getAttribute('target') === '_blank' && /Lataa PDF|Download PDF/i.test(await a.innerText()), `${name}: PDF-linkki lang=${lang}, uusi välilehti (${await a.getAttribute('href')} | ${await a.getAttribute('target')} | ${await a.innerText()})`); }
       expect(!(await page.locator('body').innerText()).match(/tulee myöhemmin|coming later|tulossa/i), `${name}: ei "tulee myöhemmin" -tekstiä`);
       await page.mouse.move(0, 0); await page.waitForTimeout(500);   // hover-siirtymä loppuun ennen kontrastimittausta
-      await layoutChecks(page, `${name} 390`, '.ord');
-      await shot(page, `kauppa-tilaus-kortit-koodi${pdf ? '-pdf' : ''}-fi-390`);
+      await layoutChecks(page, `${name}`, '.ord');
+      await shot(page, `kauppa-tilaus-kortit-koodi${pdf ? '-pdf' : ''}-${lang}-${vp}`);
     }
     await page.context().close();
   }
@@ -566,6 +580,12 @@ async function shopSuite() {
   for (const lang of ['fi', 'en']) for (const vp of [360, 390, 430, 768, 1280]) {
     const name = `kuvat ${lang} ${vp}`, page = await newShopPage(name, { vp, lang });
     await page.goto(`${ORIGIN}${GIFT(lang)}`); await page.waitForSelector('#gift-app .gc-tile');
+    { // sisältölista: FI = items[].label, EN = items[].label_en (booking_45); avoimella kortilla ei listaa
+      const lists = await page.locator('#paketit .gc-tile [data-testid=gc-items]').allInnerTexts(), all = lists.join('|');
+      expect(lists.length === 4 && (await page.locator('#avoin [data-testid=gc-items]').count()) === 0, `${name}: sisältölista 4 paketilla (${lists.length})`);
+      expect(lang === 'en' ? /General session/.test(all) && /Peat mask and foot bath/.test(all) && /Sauna treatment/.test(all) && /Ritual sauna bathing/.test(all) && !/Yleinen vuoro|Saunahoito|Turvenaamio/.test(all) : /Yleinen vuoro/.test(all) && /Turvenaamio ja jalkakylpy/.test(all) && !/General session|Peat mask/.test(all), `${name}: sisältölistan kieli (${all.replace(/\n/g, '/')})`);
+      if (vp === 390 || vp === 1280) await page.locator('#paketit').screenshot({ path: join(SHOT, `kauppa-paketit-sisalto-${lang}-${vp}.png`) });
+    }
     await page.locator('#paketit .gc-tile').nth(1).locator('.gc-btn').click(); await page.locator('#paketit .gc-tile').nth(3).locator('.gc-btn').click();
     await page.fill('#avoin input', '50'); await page.click('#avoin .gc-btn');
     await page.locator('.gc-line').nth(2).locator('textarea').fill(lang === 'fi' ? 'Hyvää syntymäpäivää! Nauti lämmöstä ja rauhasta.' : 'Happy birthday! Enjoy the warmth and the calm.');

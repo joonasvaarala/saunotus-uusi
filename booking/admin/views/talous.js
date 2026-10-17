@@ -16,7 +16,7 @@ export async function render({ ctx, reload, query }) {
   // Raportit (sopimus §11): välilehti ja päiväraportti = reports.daily TAI reports.view; kuukausi + CSV = vain reports.view (muuten selkeä ilmoitus). Oikeudet luetaan aina oikealta käyttäjältä (myös ?mock=1).
   const canFull = !!ctx.can('reports.view'), canDaily = canFull || !!ctx.can('reports.daily');
   // Lahjakortit-välilehti: giftcards.manage. Tilaukset/Maksut: payments.manage (nav-kohta aukeaa myös pelkällä giftcards.manage → silloin vain Lahjakortit).
-  const gift = createGiftApi({ rpc }), canGift = !!ctx.can('giftcards.manage'), canPay = !!ctx.can('payments.manage');
+  const gift = createGiftApi({ rpc, io: { functionUrl } }), canGift = !!ctx.can('giftcards.manage'), canPay = !!ctx.can('payments.manage');
   const TABS = ALL_TABS.filter(([k]) => (k === 'reports' ? canDaily : k === 'giftcards' ? canGift : canPay || !canGift));
   const hashQ = () => new URLSearchParams(location.hash.split('?')[1] || '');
   let tab = TABS.some(([k]) => k === query.get('tab')) ? query.get('tab') : TABS[0][0];

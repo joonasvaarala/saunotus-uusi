@@ -26,12 +26,12 @@ export function createGiftApi({ rpc, mock = wantsMock(), mockFactory = () => cre
     card: (publicToken) => run(GRPC.card, { p_public_token: publicToken }),
   };
 }
-// PDF-nappi: vain kun asetus on päällä – config.js: giftCardPdf = true (tai edge functionin nimi) tai sivun BOOKING_SHOP.giftCardPdf. Edge function gift-card-pdf tulee myöhemmin (Bottiavustus);
-// ennen sitä asetus on false eikä nappia näytetä (ei "tulossa" -tekstiä). Linkki: <functions>/gift-card-pdf?t=<kortin public_token> (sama käytäntö kuin receipt-pdf).
+// PDF-nappi (tilaussivu, kortti valmis): config.js giftCardPdf – oletus true (edge function gift-card-pdf on tuotannossa, sopimus §13.9); false piilottaa napin, merkkijono = toisen funktion nimi.
+// Linkki: <functions>/gift-card-pdf?t=<kortin public_token>&lang=fi|en (sivun kieli; sama käytäntö kuin receipt-pdf). Ilman asetusta (S.giftCardPdf, config.js puuttuu) nappia ei näytetä.
 export const pdfSetting = (S) => { const c = typeof window !== 'undefined' ? window.BOOKING_CONFIG?.giftCardPdf : undefined; return c !== undefined && c !== null ? c : S?.giftCardPdf; };
 export const pdfEnabled = (S) => { const v = pdfSetting(S); return !!v && v !== 'false' && v !== '0'; };
-export function pdfHref(S, cardToken, functionUrl) {
+export function pdfHref(S, cardToken, functionUrl, lang) {
   if (!pdfEnabled(S) || !cardToken) return '';
   const v = pdfSetting(S);
-  return functionUrl(typeof v === 'string' && !['true', '1'].includes(v) ? v : 'gift-card-pdf', { t: cardToken });
+  return functionUrl(typeof v === 'string' && !['true', '1'].includes(v) ? v : 'gift-card-pdf', { t: cardToken, lang: lang === 'en' ? 'en' : 'fi' });
 }

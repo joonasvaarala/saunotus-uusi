@@ -61,3 +61,6 @@ export function buyArgs({ lines, pkgs, buyer, locale }) {
   return { p_items: itemsPayload(lines, pkgs), p_name: buyer.name.trim(), p_email: buyer.email.trim().toLowerCase(), p_phone: buyer.phone.trim(), p_marketing_consent: !!buyer.marketing, p_locale: locale === 'en' ? 'en' : 'fi' };
 }
 export const validToken = (t) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(t || ''));
+
+// Paketin sisältölista (public_gift_card_packages.items[]): FI = label, EN = label_en (migraatio booking_45). Vain rivit joilla on nimi kyseisellä kielellä (ei FI-nimeä EN-sivulle).
+export const itemLabels = (p, lang) => (Array.isArray(p?.items) ? p.items : []).map((it) => String((lang === 'en' ? it?.label_en : it?.label) ?? '').trim()).filter(Boolean);

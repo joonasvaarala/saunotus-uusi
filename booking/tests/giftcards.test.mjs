@@ -185,3 +185,13 @@ test('Ikonit ja käyttöliittymä: gift-ikoni, lahjakorttinäkymän ikonit ja oi
   const css = readFileSync(join(root, 'admin/admin.css'), 'utf8');
   assert.ok(!/#(?:00[0-9a-f]{2}ff|0[0-9a-f]{2}[0-9a-f]{2}ee)\b/i.test(css.slice(css.indexOf('/* Lahjakortit'))), 'ei sinistä');
 });
+
+test('Datakerros: pdfUrl = gift-card-pdf?t=<public_token>&lang=fi|en (functionUrl kuten receipt-pdf); ei tokenia/functionUrlia → tyhjä', () => {
+  const fu = (n, q) => `https://x.supabase.co/functions/v1/${n}?${new URLSearchParams(q)}`;
+  const a = G.createGiftApi({ rpc: async () => ({}), io: { functionUrl: fu }, mock: false });
+  assert.equal(a.pdfUrl('0654361d-a2b1-43f4-a25c-8c7223907dd0', 'fi'), 'https://x.supabase.co/functions/v1/gift-card-pdf?t=0654361d-a2b1-43f4-a25c-8c7223907dd0&lang=fi');
+  assert.ok(a.pdfUrl('t', 'en').endsWith('&lang=en')); assert.ok(a.pdfUrl('t', 'sv').endsWith('&lang=fi'));
+  assert.equal(a.pdfUrl('', 'fi'), ''); assert.equal(a.pdfUrl(null, 'fi'), '');
+  assert.equal(G.createGiftApi({ rpc: async () => ({}), mock: false }).pdfUrl('t', 'fi'), '');
+  assert.equal(G.normDetail({ card: { id: 1, public_token: 'abc' } }).card.public_token, 'abc', 'normDetail säilyttää public_tokenin');
+});

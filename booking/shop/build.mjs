@@ -35,8 +35,8 @@ cpSync(join(repo, 'booking/shared/sb.js'), join(A, 'sb.js'));
 const cfg = {
   url: process.env.BOOKING_SUPABASE_URL ?? 'http://localhost:4181', anonKey: process.env.BOOKING_ANON_KEY ?? 'anon-demo-key',
   rest: process.env.BOOKING_REST ?? '/rest/v1', auth: process.env.BOOKING_AUTH ?? '/auth/v1', schema: process.env.BOOKING_SCHEMA || 'booking',
-  // Lahjakortin PDF-nappi tilaussivulla: false kunnes edge function gift-card-pdf on käytössä (true tai funktion nimi). Muokattavissa julkaisussa tästä tiedostosta.
-  giftCardPdf: /^(1|true)$/i.test(process.env.BOOKING_GIFT_CARD_PDF || '') ? true : (process.env.BOOKING_GIFT_CARD_PDF && !/^(0|false)$/i.test(process.env.BOOKING_GIFT_CARD_PDF) ? process.env.BOOKING_GIFT_CARD_PDF : false),
+  // Lahjakortin PDF-nappi tilaussivulla: päällä (edge function gift-card-pdf on tuotannossa, sopimus §13.9). BOOKING_GIFT_CARD_PDF=0 piilottaa; funktion nimi = toinen funktio. Muokattavissa julkaisussa tästä tiedostosta.
+  giftCardPdf: /^(0|false)$/i.test(process.env.BOOKING_GIFT_CARD_PDF || '') ? false : (/^(1|true)?$/i.test(process.env.BOOKING_GIFT_CARD_PDF || '') ? true : process.env.BOOKING_GIFT_CARD_PDF),
 };
 writeFileSync(join(A, 'config.js'), `// Muokkaa tätä tiedostoa julkaisussa (ei vaadi uudelleenrakennusta). anon-avain saa olla julkinen.\nwindow.BOOKING_CONFIG=${JSON.stringify(cfg, null, 2)};\n`);
 // Staattinen tuotedata: tuntemattoman tuotteen "ota yhteyttä" -sivu + hoitotuotteiden kortit (hinta, kesto, henkilömäärät; ks. treatments.js loadProducts)

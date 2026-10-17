@@ -1,6 +1,6 @@
 // Lahjakorttien MOCK-PALVELIN (kauppa): keksityt kortit muistissa; vain kun osoitteessa on ?mock=1 (sekä testit). Ei kosketa palvelinta.
 // Vastaa KOODARI_talous_A_D_fi.md §13.2: nimet, p_-parametrit, vastausrakenteet, virheet {ok:false, code, message}.
-// public_gift_card_packages-vastauksen sisältö (testiprojekti = tuotannon siemendata, 17.10.2026): nimet, hinnat, kuvaukset ja items-rakenne ({label, persons, kb_product_id} | {persons, addon_code})
+// public_gift_card_packages-vastauksen sisältö (testiprojekti = tuotannon siemendata, 17.10.2026): nimet, hinnat, kuvaukset ja items-rakenne ({label, label_en, persons, kb_product_id} | {label, label_en, persons, addon_code}; label_en lisätty migraatiossa booking_45)
 export const MOCK_PACKAGES = [
   {
     code: 'open',
@@ -35,6 +35,7 @@ export const MOCK_PACKAGES = [
     items: [
       {
         label: 'Yleinen vuoro',
+        label_en: 'General session',
         persons: 2,
         kb_product_id: 1
       }
@@ -57,10 +58,13 @@ export const MOCK_PACKAGES = [
     items: [
       {
         label: 'Yleinen vuoro',
+        label_en: 'General session',
         persons: 2,
         kb_product_id: 1
       },
       {
+        label: 'Turvenaamio ja jalkakylpy',
+        label_en: 'Peat mask and foot bath',
         persons: 2,
         addon_code: 'turvenaamio_jalkakylpy'
       }
@@ -83,11 +87,13 @@ export const MOCK_PACKAGES = [
     items: [
       {
         label: 'Yleinen vuoro',
+        label_en: 'General session',
         persons: 2,
         kb_product_id: 1
       },
       {
         label: 'Saunahoito',
+        label_en: 'Sauna treatment',
         persons: 2,
         kb_product_id: 10
       }
@@ -110,11 +116,13 @@ export const MOCK_PACKAGES = [
     items: [
       {
         label: 'Yleinen vuoro',
+        label_en: 'General session',
         persons: 2,
         kb_product_id: 1
       },
       {
         label: 'Saunotus',
+        label_en: 'Ritual sauna bathing',
         persons: 2,
         kb_product_id: 11
       }
