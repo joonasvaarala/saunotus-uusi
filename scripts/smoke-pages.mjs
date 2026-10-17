@@ -18,6 +18,8 @@ const browser = await chromium.launch({ executablePath: process.env.CHROME || '/
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
 const fakeJwt = (claims) => `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64(claims)}.${Buffer.from('x').toString('base64url')}`;
 const calls = [];
+let giftMode = 'off';   // lahjakorttisivu: 'off' (kytkimet pois, tuotannon tila) | 'on' | 'missing' (RPC puuttuu)
+const { MOCK_PACKAGES: GIFT_PKGS } = await import(new URL('../booking/shop/src/gift-mock.js', import.meta.url));
 const periodArgs = [];   // admin_list_reservations: [p_from, p_to] kutsuittain
 const resArgs = [];   // admin_create_resource_booking / admin_create_old_booking: [rpc, args]
 let shiftsFn = false;   // t66u: admin_day_shifts (migraatio 27) olemassa? false = 404 → hallinta putoaa admin_upcoming_shifts-kutsuun
@@ -60,6 +62,7 @@ async function newPage(name, { allowFail = null, viewport = { width: 1100, heigh
       const row = (id, from, to, role, cal, st, who) => ({ shift_id: id, starts_at: `${ds}T${from}:00Z`, ends_at: `${ds}T${to}:00Z`, role_type: role, calendar_name: cal, staffing_status: st, staff_name: who });
       return json([row('s1', '06:00', '11:00', 'heater', 'Lämmitykset', 'assigned', 'Otto'), row('s2', '11:00', '16:00', 'reception', 'Vastaanotto', 'assigned', 'Otto'), row('s3', '11:00', '17:00', 'therapist', 'Hoitaja', 'assigned', 'Joonas'), row('s4', '12:00', '15:00', 'sauna_x', 'Hoitaja', 'unassigned', null), row('s5', '16:00', '18:00', 'therapist', 'Hoitaja', 'partial', 'Matti')]);
     }
+    if (u.pathname.endsWith('/rpc/public_gift_card_packages')) return giftMode === 'missing' ? json({ code: 'PGRST202', message: 'Could not find the function booking.public_gift_card_packages in the schema cache' }, 404) : json({ ok: true, sale_enabled: giftMode === 'on', redeem_enabled: giftMode === 'on', max_cards_per_order: 10, currency: 'EUR', packages: GIFT_PKGS });
     if (u.pathname.endsWith('/rpc/public_product_images')) return json([{ product_id: 1, slug: 'yleinen', path: 'products/1-smoke01.png', alt: null }]);   // migraatio 19: vain tuotteella 1 on kuva
     if (u.pathname.startsWith('/storage/v1/object/public/product-images/')) return route.fulfill({ status: 200, contentType: 'image/png', headers: { 'access-control-allow-origin': '*' }, body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64') });
     if (u.pathname.endsWith('/rpc/public_catalog')) return json([
@@ -510,7 +513,7 @@ async function loginViaInvite(page) {
     if (!/epäonnistui/.test(await page.locator('#toast').innerText())) problems.push('päivänäkymä: virheilmoitus puuttuu kun saapumisen kirjaus epäonnistuu');
     // Vapaana-nappi → Uusi varaus esivalittuna (vuoro 21, päivä, alkamisaika)
     await cap.click(); await page.waitForSelector('[data-testid=booking-form]');
-    if (!/r=21/.test(page.url()) || (await page.locator('.slotbtn[aria-checked=true]').count()) !== 1 || !/Luo varaus/.test(await page.locator('[data-testid=booking-form]').innerText())) problems.push(`päivänäkymä: Vapaana-napin pitää avata Uusi varaus esivalitulla vuorolla (${page.url()})`);
+    if (!/r=21/.test(page.url()) || (await page.locator('.slotbtn[aria-checked=true]').count()) !== 1 || !/Tallenna varaus/.test(await page.locator('[data-testid=booking-form]').innerText())) problems.push(`päivänäkymä: Vapaana-napin pitää avata Uusi varaus esivalitulla vuorolla (${page.url()})`);
     await page.waitForTimeout(1000);
     const inView = await page.locator('[data-testid=booking-form] h3').first().evaluate((e) => { const r = e.getBoundingClientRect(); return r.top >= 0 && r.top < window.innerHeight; });
     if (!inView) problems.push('päivänäkymä: Uusi varaus -lomakkeen pitää vierittyä näkyviin esivalinnan jälkeen');
@@ -671,6 +674,7 @@ for (const [label, viewport, mobile] of [['mobiili', { width: 390, height: 700 }
   await loginViaInvite(page);
   await page.waitForSelector('#shell:not([hidden]) #nav a');
   if ((await page.locator('#nav a', { hasText: 'Talous' }).count()) !== 0) problems.push('talous: nav-kohta pitää olla piilossa ilman oikeutta payments.manage');
+  await page.waitForLoadState('networkidle');   // kalenterin admin_upcoming_shifts-haku loppuun ennen reloadia (muuten ERR_ABORTED näkyy requestfailed-ongelmana)
   extraPerms = ['payments.manage', 'reports.daily', 'reports.view']; await page.reload(); await page.waitForSelector('#nav a');
   if ((await page.locator('#nav a', { hasText: 'Talous' }).count()) !== 1) problems.push('talous: nav-kohta puuttuu oikeudella payments.manage');
   await page.evaluate(() => { location.hash = '#/talous?mock=1'; });
@@ -685,6 +689,18 @@ for (const [label, viewport, mobile] of [['mobiili', { width: 390, height: 700 }
   if (!/noindex/.test((await page.locator('meta[name=robots]').getAttribute('content')) || '')) problems.push('tilaussivu: noindex puuttuu');
   await page.context().close();
 }
+// 8) Lahjakorttisivu alipolulla: kytkimet pois → ennallaan (Johku-osiot); päällä → myynti- ja saldolohko; RPC puuttuu → ennallaan
+for (const [mode, lang, path] of [['off', 'fi', '/lahjakortti/'], ['on', 'fi', '/lahjakortti/'], ['on', 'en', '/en/gift-card/'], ['missing', 'fi', '/lahjakortti/']]) {
+  giftMode = mode;
+  const page = await newPage(`lahjakortti-${mode}-${lang}`, { allowFail: mode === 'missing' ? /status of 404|public_gift_card_packages/ : null });
+  await page.goto(`${BASE}${path}`); await page.waitForTimeout(mode === 'on' ? 800 : 500);
+  const sale = await page.locator('#gift-app .gc-tile').count(), bal = await page.locator('#gift-balance .gc-balform').count(), statics = await page.locator('section#avoin, section#paketit').count();
+  if (mode === 'on' && (sale !== 5 || bal !== 1 || statics !== 0)) problems.push(`lahjakortti-${mode}-${lang}: myynti 5 korttia + saldolohko odotettiin (kortit ${sale}, saldo ${bal}, staattiset ${statics})`);
+  if (mode !== 'on' && (sale !== 0 || bal !== 0 || statics !== 2 || !(await page.locator('#gift-app').isHidden()))) problems.push(`lahjakortti-${mode}-${lang}: sivun pitää olla ennallaan (kortit ${sale}, saldo ${bal}, staattiset ${statics})`);
+  if (!/noindex/.test((await page.locator('meta[name=robots]').getAttribute('content')) || '')) problems.push(`lahjakortti-${mode}-${lang}: noindex puuttuu`);
+  await page.context().close();
+}
+giftMode = 'off';
 await browser.close();
 if (problems.length) { console.error('ONGELMIA:\n' + [...new Set(problems)].join('\n')); process.exit(1); }
 console.log(`ok: Pages-kooste toimii alipolulla ${BASE} (sivut, kauppa, hallinta, kutsun hyväksyntä); Supabase-kutsuja mockattu ${calls.length} kpl`);
