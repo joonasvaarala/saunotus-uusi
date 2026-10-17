@@ -30,14 +30,16 @@ const { site, kb, BASE, e } = L;
 // 2) varausohjelman tiedostot
 const A = join(OUT, 'booking');
 mkdirSync(A, { recursive: true });
-for (const f of ['shop.js', 'i18n.js', 'shop.css']) cpSync(join(here, 'src', f), join(A, f));
+for (const f of ['shop.js', 'i18n.js', 'shop.css', 'treatments.js', 'treatment-ui.js']) cpSync(join(here, 'src', f), join(A, f));
 cpSync(join(repo, 'booking/shared/sb.js'), join(A, 'sb.js'));
 const cfg = {
   url: process.env.BOOKING_SUPABASE_URL ?? 'http://localhost:4181', anonKey: process.env.BOOKING_ANON_KEY ?? 'anon-demo-key',
   rest: process.env.BOOKING_REST ?? '/rest/v1', auth: process.env.BOOKING_AUTH ?? '/auth/v1', schema: process.env.BOOKING_SCHEMA || 'booking',
 };
 writeFileSync(join(A, 'config.js'), `// Muokkaa tätä tiedostoa julkaisussa (ei vaadi uudelleenrakennusta). anon-avain saa olla julkinen.\nwindow.BOOKING_CONFIG=${JSON.stringify(cfg, null, 2)};\n`);
-writeFileSync(join(A, 'static-products.json'), JSON.stringify(Object.fromEntries(kb.products.map((p) => [p.slug, { name: p.name, description: p.description }]))));
+// Staattinen tuotedata: tuntemattoman tuotteen "ota yhteyttä" -sivu + hoitotuotteiden kortit (hinta, kesto, henkilömäärät; ks. treatments.js loadProducts)
+const STATIC_KEYS = ['id', 'name', 'name_en', 'description', 'description_en', 'category', 'price', 'price_type', 'included_persons', 'extra_person_price', 'duration_minutes', 'duration_text', 'capacity_min', 'capacity_max'];
+writeFileSync(join(A, 'static-products.json'), JSON.stringify(Object.fromEntries(kb.products.map((p) => [p.slug, Object.fromEntries(STATIC_KEYS.filter((k) => p[k] != null).map((k) => [k, p[k]])) ]))));
 
 // 3) varaussivut (FI/EN) + vahvistussivut: sivuston oma layout
 const PATHS = { fi: { shop: site.pages.book.fi, confirm: site.pages.book.fi + 'vahvistus/' }, en: { shop: site.pages.book.en, confirm: site.pages.book.en + 'confirmation/' } };
@@ -58,7 +60,7 @@ for (const lang of ['fi', 'en']) {
       + `<section class="section"><div class="wrap"><div id="booking-app" aria-busy="true"><noscript><p>${e(t.noscript)}: <a href="tel:${site.contact.phoneTel}">${e(site.contact.phone)}</a></p></noscript></div></div></section>`
       + `<script src="${BASE}/booking/config.js"></script><script>window.BOOKING_SHOP=${JSON.stringify(S)}</script><script type="module" src="${BASE}/booking/shop.js"></script>`;
     let html = R.layout({ lang, key: 'book', meta: { title: page === 'shop' ? t.meta : `${t.ctitle} | Sipoonjoen Perinnesauna`, description: t.desc, og: 'ovi-kaiverrus' }, body });
-    html = html.replace('</head>', `<link rel="stylesheet" href="${BASE}/booking/shop.css">${page === 'shop' ? '<script>if(/^#\\/(tuote|varaa)\\//.test(location.hash))document.documentElement.classList.add("bk-hero-wait")</script>' : ''}</head>`);
+    html = html.replace('</head>', `<link rel="stylesheet" href="${BASE}/booking/shop.css">${page === 'shop' ? '<script>if(/^#\\/(tuote|varaa|hoito)\\//.test(location.hash))document.documentElement.classList.add("bk-hero-wait")</script>' : ''}</head>`);
     if (page === 'confirm') html = html.replace(/<link rel="canonical"[^>]*>(<link rel="alternate"[^>]*>)*/, '').replace('<meta name="description"', '<meta name="robots" content="noindex,nofollow"><meta name="description"');
     write(PATHS[lang][page === 'shop' ? 'shop' : 'confirm'], html);
   }

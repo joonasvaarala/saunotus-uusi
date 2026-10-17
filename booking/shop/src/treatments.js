@@ -1,0 +1,130 @@
+// Hoito- ja rituaalivaraukset (resurssituotteet kb 10, 11, 12 ja rituaali kb 8): OHUT ADAPTERI palvelinrajapinnan ja käyttöliittymän välillä.
+// Kaikki RPC-nimet, parametrit ja vastausmuodot on KERÄTTY TÄHÄN: kun Bottiavustuksen rajapintadokumentti (KOODARI_public_treatment_fi.md)
+// muuttaa nimiä/kenttiä, muutos tehdään vain tähän tiedostoon (RPC-taulukko, args-funktiot ja normalisoijat). UI (treatment-ui.js) ei tunne RPC:itä.
+// Rajapinnan puuttuminen ei ole virhe: tuotelista palauttaa [] ja kauppa näyttää hoitotuotteille "ota yhteyttä" (ks. loadProducts).
+//
+// Rajapinta: /workspace/johku/import/KOODARI_public_treatment_fi.md (booking_25). Hoitotuotteet tulevat public_catalog():sta (booking_kind = 'slots'); ne näkyvät vasta kun
+// Tapio/Joonas asettaa tuotteille bookable + shop_visible -liput (lippuja ei muuteta tässä). Paikallinen mock: booking/dev/treatment-mock.mjs (vastaa dokumenttia).
+import { rpc } from './sb.js';
+
+const TZ = 'Europe/Helsinki';
+
+export const RPC = {
+  catalog: 'public_catalog',                      // booking_kind 'slots' = hoito/rituaali (valitaan aika), 'rules' = vanha vuoropohjainen
+  availability: 'public_treatment_availability',  // (tuote, väli ≤ 14 pv, henkilömäärä) → vain vapaat alkuajat + total
+  create: 'public_create_treatment_booking',
+  get: 'public_get_booking',
+  change: 'public_change_treatment_booking',      // vahvistussivu valitsee tämän get_bookingin change_via-kentästä
+};
+export const args = {
+  availability: (p, persons, from, to) => ({ p_product_id: p.id, p_from: from, p_to: to, p_persons: persons }),
+  create: (p, { start, persons, name, email, phone, marketing, locale, note, kind, company }) => ({
+    p_product_id: p.id, p_start: start, p_persons: persons, p_name: name, p_email: email, p_phone: phone, p_marketing_consent: !!marketing,
+    p_locale: locale, p_note: note || null, p_customer_kind: kind, p_company: company || null }),
+  change: (token, { start, persons }) => ({ p_token: token, p_start: start ?? null, p_persons: persons ?? null }),
+};
+// Päätökset (Joonas), näytetään asiakkaalle vihjeenä; palvelin päättää viime kädessä (suljetut päivät, vapaat resurssit).
+export const POLICY = {
+  noFriday: true,
+  weekday: { from: '16:00', to: '20:30' },     // ma–to (alkuaika ≥, loppu ≤)
+  weekend: { from: '13:00', to: '20:30' },      // la–su
+  ritualStarts: ['16:00', '16:30', '17:00'],    // rituaali kb 8: vain la–su, nämä alkuajat
+  changeHoursBefore: 48,
+  horizonDays: 14,                              // public_treatment_horizon_days (oletus; public_settings voi antaa tarkemman)
+  maxRangeDays: 14,                             // yksi saatavuushaku enintään 14 pv
+  cacheMs: 3 * 60e3,                            // saatavuuden välimuisti (haku 0,3–1,7 s; ei pollausta)
+};
+export const KB_IDS = [10, 11, 12, 8];           // näytetään tässä järjestyksessä
+export const horizonDays = (settings) => +settings?.public_treatment_horizon_days || POLICY.horizonDays;
+export const isRitual = (p) => p?.id === 8 || p?.category === 'ritual';
+
+// Virhekoodit → i18n-avain (treatment-ui.js: tr.errors[avain]). Tuntematon koodi → yleisviesti. therapist_* koodeja ei koskaan näytetä asiakkaalle.
+const ERR = {
+  time_window: 'time_window', ritual_start: 'ritual_start', not_offered_day: 'not_offered_day',
+  slot_unavailable: 'taken', bad_slot: 'taken', too_soon: 'too_soon', too_far: 'too_far', invalid_date: 'taken',
+  rate_limited: 'rate_limited', busy: 'busy', booking_disabled: 'disabled', not_bookable: 'disabled',
+  invalid_persons: 'persons', too_many_open: 'too_many_open', not_found: 'not_found',
+  change_too_late: 'too_late', not_changeable: 'too_late', price_change_requires_staff: 'staff', invalid_change: 'nochange', use_treatment_change: 'too_late',
+  invalid_email: 'contact', invalid_phone: 'contact', invalid_name: 'contact', invalid_note: 'contact', invalid_customer_kind: 'contact', vat_missing: 'contact',
+};
+export const errorKey = (code) => ERR[code] || 'generic';
+export const isSlotLost = (code) => ['taken', 'time_window', 'ritual_start', 'not_offered_day', 'too_soon'].includes(errorKey(code));
+export const isRetryable = (code) => ['rate_limited', 'busy'].includes(code);
+
+// ---- apurit ----
+const hmKey = (iso) => new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(iso));   // "17:00"
+const dayKey = (iso) => new Date(iso).toLocaleDateString('sv-SE', { timeZone: TZ });
+export const timeToken = (hhmm) => hhmm.replace(':', '');          // URL: 1700
+export const timeFromToken = (tok) => (/^\d{4}$/.test(tok || '') ? `${tok.slice(0, 2)}:${tok.slice(2)}` : null);
+const apiCode = (e) => e?.code || e?.details?.code || null;
+const num = (v) => (v == null || v === '' ? null : +v);
+
+// ---- tuotteet ----
+// Hoitotuotteet = public_catalog()-rivit, joilla booking_kind === 'slots' (piilotetut tuotteet eivät näy katalogissa). Katalogirivi täydennetään build-aikaisella
+// kb-datalla (static-products.json: lisähenkilön hinta, kuvaus), jotta kortit ja hinta-arvio toimivat myös jos katalogi ei anna kaikkea.
+// splitCatalog: jakaa jo haetun katalogin → { rules: vuoropohjaiset, treatments }. Ei booking_kind-kenttää (vanha kanta) → kaikki 'rules'.
+export function splitCatalog(catalog, staticById) {
+  const rules = [], treatments = [];
+  for (const r of Array.isArray(catalog) ? catalog : []) {
+    if (r?.booking_kind !== 'slots') { rules.push(r); continue; }
+    const id = +r.id, st = staticById.get(id) || {};
+    const o = Object.fromEntries(Object.entries({ name: r.name, name_en: r.name_en, description: r.description, description_en: r.description_en, price: num(r.price), price_type: r.price_type,
+      duration_minutes: num(r.duration_minutes), duration_text: r.duration_text, capacity_min: num(r.min_persons), capacity_max: num(r.max_persons), category: r.category, slug: r.slug })
+      .filter(([, v]) => v != null && v !== ''));
+    treatments.push({ ...st, ...o, id, treatment: true, sale_kind: r.sale_kind });
+  }
+  treatments.sort((a, b) => KB_IDS.indexOf(a.id) - KB_IDS.indexOf(b.id));
+  return { rules, treatments };
+}
+// Vahvistussivu (ei kauppaa ladattuna): hae katalogi erikseen. Virhe → [] (muutos sähköpostilla).
+export async function loadProducts(staticById) {
+  try { return splitCatalog(await rpc(RPC.catalog, {}), staticById).treatments; } catch { return []; }
+}
+export const maxPersons = (p) => p.capacity_max || 1;
+export const minPersons = (p) => p.capacity_min || 1;
+// Hinta henkilömäärälle (palvelin laskee lopullisen; vastauksen total/price ohittaa tämän jos annettu)
+export const priceFor = (p, n) => (p.price_type === 'per_person' ? p.price * n : p.price + Math.max(0, n - (p.included_persons || 1)) * (p.extra_person_price || 0));
+
+// ---- vapaus ----
+// → Map<'YYYY-MM-DD', [{ start: ISO, end: ISO, time: 'HH:MM', total }]> (järjestetty). Rivit: { session_date, starts_at, ends_at, status:'available', total, … } (vain vapaat alkuajat).
+// Haku on raskas (0,3–1,7 s / 14 pv) → välimuisti (lupaus + TTL) tuote + henkilömäärä + väli -avaimella, väli pilkotaan ≤ 14 pv:n osiin, ei pollausta.
+// Virhe (rate_limited, busy, bad_range) heitetään ApiErrorina (code = BK001-detail).
+const cache = new Map();
+export const clearCache = () => cache.clear();
+const addDay = (ds, n) => { const d = new Date(`${ds}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+function fetchChunk(p, persons, from, to) {
+  const k = `${p.id}|${persons}|${from}|${to}`, hit = cache.get(k);
+  if (hit && Date.now() - hit.at < POLICY.cacheMs) return hit.p;
+  const pr = rpc(RPC.availability, args.availability(p, persons, from, to)).then((rows) => (Array.isArray(rows) ? rows : []));
+  cache.set(k, { at: Date.now(), p: pr });
+  pr.catch(() => cache.delete(k));
+  return pr;
+}
+export async function loadAvailability(p, persons, from, to) {
+  const jobs = [];
+  for (let a = from; a <= to; a = addDay(a, POLICY.maxRangeDays)) jobs.push(fetchChunk(p, persons, a, [addDay(a, POLICY.maxRangeDays - 1), to].sort()[0]));
+  const byDay = new Map();
+  for (const r of (await Promise.all(jobs)).flat()) {
+    const start = r.starts_at; if (!start) continue;
+    if (r.status && r.status !== 'available') continue;
+    const day = r.session_date || dayKey(start);
+    (byDay.get(day) || byDay.set(day, []).get(day)).push({ start, end: r.ends_at || null, time: hmKey(start), total: num(r.total) });
+  }
+  for (const list of byDay.values()) list.sort((a, b) => a.start.localeCompare(b.start));
+  return byDay;
+}
+
+// ---- varaus ----
+const wrap = async (fn) => {
+  try { const r = await fn(); if (r && r.ok === false) return { ok: false, code: r.code || 'generic', message: r.message }; return { ok: true, ...(r || {}) }; }
+  catch (e) { return { ok: false, code: apiCode(e) || 'generic', message: e?.message, status: e?.status }; }
+};
+// → { ok:true, token, order_no } | { ok:false, code, message }
+export const createBooking = (p, data) => wrap(async () => {
+  const r = await rpc(RPC.create, args.create(p, data));
+  clearCache();   // uusi varaus muuttaa saatavuutta
+  return r;       // { ok:true, token, order_no, … } | { ok:false, code, message } (wrap)
+});
+export const changeBooking = (token, data) => wrap(async () => { const r = await rpc(RPC.change, args.change(token, data)); clearCache(); return r; });
+// Vahvistussivun varaus (public_get_booking) on hoitovaraus, kun booking_kind = 'slots' tai change_via = 'public_change_treatment_booking'.
+export const isTreatmentBooking = (b) => !!b?.items?.length && (b.booking_kind === 'slots' || b.change_via === RPC.change);

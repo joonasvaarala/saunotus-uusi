@@ -6,6 +6,7 @@ import { readFile, stat, writeFile, mkdir, unlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { execFile } from 'node:child_process';
+import { treatmentRpc, catalogEntries, IMAGES as TREATMENT_IMAGES } from './treatment-mock.mjs';
 import { validateRequest, mapDbError } from '../supabase/functions/admin-users/logic.js';
 import { join, extname, normalize, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -140,6 +141,25 @@ createServer(async (req, res) => {
   if (path.startsWith('/rest/v1/')) {            // → PostgREST (poistetaan /rest/v1-etuliite, lisätään x-forwarded-for)
     const headers = { ...req.headers, host: `127.0.0.1:${PGRST}`, 'x-forwarded-for': req.socket.remoteAddress };
     if (req.headers['x-test-ip']) headers['x-forwarded-for'] = req.headers['x-test-ip'];
+    const rpcName = req.method === 'POST' && /^\/rest\/v1\/rpc\/([a-z_]+)$/.exec(path)?.[1];
+    // MOCK hoito- ja rituaalivaraukset (ks. treatment-mock.mjs): vain demossa, pois päältä TREATMENT_MOCK=0. Ei mockattu → oikea PostgREST samalla pyynnön rungolla.
+    if (rpcName && process.env.TREATMENT_MOCK !== '0' && (rpcName.includes('treatment') || ['public_get_booking', 'public_product_images', 'public_catalog'].includes(rpcName))) {
+      const raw = await readBody(req); let args = {}; try { args = JSON.parse(raw || '{}'); } catch {}
+      const m = ['public_product_images', 'public_catalog'].includes(rpcName) ? null : treatmentRpc(rpcName, args);
+      if (m) return json(res, m.status, m.body);
+      delete headers['content-length'];
+      const up = httpRequest({ host: '127.0.0.1', port: PGRST, path: req.url.replace('/rest/v1', ''), method: 'POST', headers: { ...headers, 'content-length': Buffer.byteLength(raw) } }, async (r) => {
+        if (!['public_product_images', 'public_catalog'].includes(rpcName)) { res.writeHead(r.statusCode, r.headers); return r.pipe(res); }
+        const c = []; for await (const d of r) c.push(d);
+        let rows = []; try { rows = JSON.parse(Buffer.concat(c).toString() || '[]'); } catch {}
+        if (rpcName === 'public_catalog') return json(res, 200, [...(Array.isArray(rows) ? rows : []), ...catalogEntries()]);   // MOCK: hoitotuotteet "verkossa" (liput päällä)
+        const have = new Set(rows.map((x) => +x.product_id));
+        for (const [id, path] of TREATMENT_IMAGES) if (!have.has(id)) rows.push({ product_id: id, slug: `treatment-${id}`, path, alt: '' });
+        json(res, 200, rows);
+      });
+      up.on('error', () => json(res, 502, { message: 'PostgREST ei vastaa' }));
+      return up.end(raw);
+    }
     const up = httpRequest({ host: '127.0.0.1', port: PGRST, path: req.url.replace('/rest/v1', '') || '/', method: req.method, headers }, (r) => { res.writeHead(r.statusCode, r.headers); r.pipe(res); });
     up.on('error', () => json(res, 502, { message: 'PostgREST ei vastaa' }));
     return req.pipe(up);
