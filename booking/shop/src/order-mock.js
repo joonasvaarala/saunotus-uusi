@@ -22,7 +22,7 @@ export function createOrderMock({ delay = 0, scenario = '', giftSettings = {}, l
   const sync = () => { o.total = r2(o.items.reduce((s, i) => s + i.line_total, 0)); o.unpaid = r2(Math.max(0, o.total - o.paid)); o.payment_status = o.unpaid === 0 ? 'paid' : o.paid > 0 ? 'partially_paid' : 'unpaid'; };
   // Skenaariot lahjakorttinäkymille (?mock=1&scenario=gift|cards|cardspaid|cardsdelivery): gift = maksamatonta jäljellä (Käytä lahjakortti), cards = lahjakorttitilaus maksamatta, cardspaid = maksettu, cardsdelivery = maksettu + toimitusvalinnat (ostajalle / saajalle ajastettu / saajalle lähetetty)
   const giftCards = [];
-  if (scenario === 'gift') { o.items = [{ id: 1, name: 'Yleinen saunavuoro', name_en: 'Public sauna session', quantity: 2, line_total: 72, vat_rate: 25.5 }, { id: 2, name: 'Pyyhe', name_en: 'Towel', quantity: 2, line_total: 10, vat_rate: 25.5 }]; o.paid = 20; o.payments[0].amount = 20; o.receipts = []; }
+  if (scenario === 'gift' || scenario === 'claims' || scenario === 'claimsoff' || scenario === 'claimproblem') { o.items = [{ id: 1, name: 'Yleinen saunavuoro', name_en: 'Public sauna session', quantity: 2, line_total: 72, vat_rate: 25.5 }, { id: 2, name: 'Pyyhe', name_en: 'Towel', quantity: 2, line_total: 10, vat_rate: 25.5 }]; o.paid = 20; o.payments[0].amount = 20; o.receipts = []; }
   if (scenario === 'cards' || scenario === 'cardspaid' || scenario === 'cardsdelivery') {
     const paid = scenario !== 'cards';
     o.items = [{ id: 1, name: 'Avoin lahjakortti', name_en: 'Open gift card', quantity: 1, line_total: 75, vat_rate: 25.5 }, { id: 2, name: 'Saunahoito kahdelle', name_en: 'Sauna treatment for two', quantity: 1, line_total: 192, vat_rate: 25.5 }];
@@ -62,12 +62,15 @@ export function createOrderMock({ delay = 0, scenario = '', giftSettings = {}, l
     },
   };
   // Lahjakorttien julkiset RPC:t samalla tilauksella (public_apply_gift_card muuttaa tilausta)
-  const gm = createGiftMock({ today, settings: giftSettings, order: {
-    hasGiftCards: () => giftCards.length > 0, unpaid: () => o.unpaid, orderNo: o.order_no, paymentStatus: () => o.payment_status,
+  // Skenaariot kumppanilahjakorteille (?mock=1&scenario=…): claims = kolme pyyntöä (vastaanotettu, ongelma invalid_code, lunastettu), claimproblem = yksi ongelmapyyntö, claimsoff = kumppanilunastus pois päältä (voucher_claims.enabled=false)
+  const claimSeed = scenario === 'claims' ? [{ source: 'kokemuskauppa', status: 'open', code: 'KK12345ABCDEF' }, { source: 'elamyslahjat', status: 'problem', problem_code: 'invalid_code', code: 'ZXQW98765432' }, { source: 'offerilla', status: 'redeemed', amount: 40, code: 'OK19123ABC' }]
+    : scenario === 'claimproblem' ? [{ source: 'elamyslahjat', status: 'problem', problem_code: 'invalid_code', code: 'ZXQW98765432' }] : [];
+  const gm = createGiftMock({ today, settings: { ...(scenario === 'claimsoff' ? { claims_enabled: false } : {}), ...(claimSeed.length ? { claims_seed: claimSeed } : {}), ...giftSettings }, order: {
+    hasGiftCards: () => giftCards.length > 0, unpaid: () => o.unpaid, status: () => o.status, orderNo: o.order_no, paymentStatus: () => o.payment_status,
     pay: (amt, c) => { o.paid = r2(o.paid + amt); o.payments.push({ status: 'paid', amount: amt, paid_at: new Date().toISOString(), method_label: 'Lahjakortti', link_token: null, link_path: null }); sync(); if (o.unpaid === 0 && o.status === 'pending') o.status = 'confirmed'; void c; return { total: o.total, paid: o.paid, unpaid: o.unpaid }; },
     giftCardList: () => giftCards.map(({ code, balance, greeting, ...c }) => c), cardByToken: (t) => { const c = giftCards.find((x) => x.token === t); return c ? { ...c, public_token: c.token } : null; },
   } });
-  for (const k of ['public_gift_card_packages', 'public_check_gift_card', 'public_apply_gift_card', 'public_get_order_gift_cards', 'public_get_gift_card']) handlers[k] = gm.handlers[k];
+  for (const k of ['public_gift_card_packages', 'public_check_gift_card', 'public_apply_gift_card', 'public_get_order_gift_cards', 'public_get_gift_card', 'public_resolve_gift_code', 'public_submit_voucher_claim', 'public_get_order_voucher_claims', 'public_update_voucher_claim_code']) handlers[k] = gm.handlers[k];
   async function rpc(name, args = {}) {
     await wait();
     const h = handlers[name]; if (!h) throw Object.assign(new Error(`Could not find the function booking.${name} in the schema cache`), { status: 404, code: 'PGRST202' });

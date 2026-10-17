@@ -1,23 +1,25 @@
-// Talous: välilehdet Tilaukset, Maksut, Raportit, Lahjakortit. Datakerros: ../talous-api.js (mock kun ?mock=1 tai RPC puuttuu). Kieli FI/EN (../talous-i18n.js).
+// Talous: välilehdet Tilaukset, Maksut, Raportit, Lahjakortit, Lahjakoodit (lunastuspyynnöt). Datakerros: ../talous-api.js (mock kun ?mock=1 tai RPC puuttuu). Kieli FI/EN (../talous-i18n.js).
 import { rpc, select as dbSelect, functionUrl, fnBlob } from '../sb.js';
 import { h } from '../ui.js';
 import { createTalousApi } from '../talous-api.js';
 import { createGiftApi } from '../giftcards-api.js';
+import { createVoucherApi } from '../vouchers-api.js';
 import { t, getLang, setLang, LANGS } from '../talous-i18n.js';
 import { createOrdersTab } from './talous-orders.js';
 import { createPaymentsTab } from './talous-payments.js';
 import { createReportsTab } from './talous-reports.js';
 import { createGiftcardsTab } from './talous-giftcards.js';
+import { createVouchersTab } from './talous-vouchers.js';
 
-const ALL_TABS = [['orders', 'tab.orders'], ['payments', 'tab.payments'], ['reports', 'tab.reports'], ['giftcards', 'tab.giftcards']];
+const ALL_TABS = [['orders', 'tab.orders'], ['payments', 'tab.payments'], ['reports', 'tab.reports'], ['giftcards', 'tab.giftcards'], ['vouchers', 'tab.vouchers']];
 
 export async function render({ ctx, reload, query }) {
   const api = createTalousApi({ rpc, io: { select: dbSelect, functionUrl, fnBlob } });
   // Raportit (sopimus §11): välilehti ja päiväraportti = reports.daily TAI reports.view; kuukausi + CSV = vain reports.view (muuten selkeä ilmoitus). Oikeudet luetaan aina oikealta käyttäjältä (myös ?mock=1).
   const canFull = !!ctx.can('reports.view'), canDaily = canFull || !!ctx.can('reports.daily');
   // Lahjakortit-välilehti: giftcards.manage. Tilaukset/Maksut: payments.manage (nav-kohta aukeaa myös pelkällä giftcards.manage → silloin vain Lahjakortit).
-  const gift = createGiftApi({ rpc, io: { functionUrl } }), canGift = !!ctx.can('giftcards.manage'), canPay = !!ctx.can('payments.manage');
-  const TABS = ALL_TABS.filter(([k]) => (k === 'reports' ? canDaily : k === 'giftcards' ? canGift : canPay || !canGift));
+  const gift = createGiftApi({ rpc, io: { functionUrl } }), vouchers = createVoucherApi({ rpc }), canGift = !!ctx.can('giftcards.manage'), canPay = !!ctx.can('payments.manage');
+  const TABS = ALL_TABS.filter(([k]) => (k === 'reports' ? canDaily : k === 'giftcards' || k === 'vouchers' ? canGift : canPay || !canGift));
   const hashQ = () => new URLSearchParams(location.hash.split('?')[1] || '');
   let tab = TABS.some(([k]) => k === query.get('tab')) ? query.get('tab') : TABS[0][0];
   const tabs = {}, panels = {}, tabBtns = {};
@@ -39,11 +41,12 @@ export async function render({ ctx, reload, query }) {
     vatBox.hidden = false; vatBox.dataset.count = String(r.missing.length);
   }).catch(() => {});
   const dirty = new Set();
-  api.onChanged(() => { for (const k of ['payments', 'reports', 'giftcards']) if (tabs[k]) dirty.add(k); });
+  api.onChanged(() => { for (const k of ['payments', 'reports', 'giftcards', 'vouchers']) if (tabs[k]) dirty.add(k); });
   const factories = {
     orders: () => createOrdersTab({ api, ctx, gift }),
     payments: () => createPaymentsTab({ api, ctx, onOpenOrder: (no) => { select('orders'); tabs.orders.setSearch(String(no)); } }),
     reports: () => createReportsTab({ api, canFull }),
+    vouchers: () => createVouchersTab({ api, vouchers, ctx, onOpenOrder: (no) => { select('orders'); tabs.orders.setSearch(String(no), { open: true }); } }),
     giftcards: () => createGiftcardsTab({ api, gift, ctx, onOpenOrder: (no) => { select('orders'); tabs.orders.setSearch(String(no), { open: true }); } }),
   };
   function ensure(k) {

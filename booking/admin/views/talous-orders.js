@@ -1,6 +1,6 @@
 // Talous › Tilaukset: uusin ensin, haku, lajittelu, suodattimet ja PALVELINPUOLEN sivutus (12 000+ tilausta) – rivi aukeaa maksuiksi ja varauksiksi.
 // Datan muoto: ../talous-api.js (admin_list_orders / admin_get_order). Napit (lisää, maksulinkki, maksun kirjaus, hyvitys) kutsuvat api:a; kuitit (lataus, näyttö, uudelleenlähetys): ./talous-receipts.js.
-import { h, dialog } from '../ui.js';
+import { h, dialog, toast } from '../ui.js';
 import { icon } from '../icons.js';
 import { receiptsList } from './talous-receipts.js';
 import { t, fmt, getLang } from '../talous-i18n.js';
@@ -131,20 +131,27 @@ export function createOrdersTab({ api, ctx, gift = null }) {
     const amount = h('input', { name: 'amount', type: 'number', step: '0.01', min: '0.01', max: o.balance.unpaid, value: o.balance.unpaid, inputmode: 'decimal', required: true, 'data-testid': 'record-amount' });
     // Lahjakortti (sopimus §13.0): admin_record_payment hylkää gift_card-tavan → oma lunastus (admin_redeem_gift_card). Vaatii payments.manage; näkyy vain kun lahjakorttirajapinta on käytössä.
     const sel = h('select', { name: 'method', 'data-testid': 'record-method' }, methods.map((m) => h('option', { value: m.code, text: methodLabel(m.code, m.label) })), gift && ctx.can('payments.manage') ? h('option', { value: 'gift_card', text: methodLabel('gift_card') }) : null);
-    const rf = gift ? redeemFields({ gift, order: o, amountInput: amount }) : null;
+    const noteInput = h('input', { name: 'note', maxlength: 200 });
+    // Tuntematon koodi (§13.12): oikotie maksutapaan Kumppanin lahjakortti (ei kuittia); muistiinpanoon maskattu koodi
+    const usePartner = ({ note }) => {
+      const opt = [...sel.options].find((x) => x.value === 'partner_voucher');
+      if (!opt) { toast(t('gc.o.partnerOff'), 'warn'); return; }
+      sel.value = 'partner_voucher'; sync(); if (!noteInput.value) noteInput.value = note; amount.focus();
+    };
+    const rf = gift ? redeemFields({ gift, order: o, amountInput: amount, onPartner: usePartner }) : null;
     if (rf) rf.node.hidden = true;
     const submitBtn = () => dlg?.querySelector('button[type=submit]');
     const full = String(amount.value);
     const sync = () => {
       const g = sel.value === 'gift_card'; if (rf) rf.node.hidden = !g; hintP.hidden = g;
       amount.required = !g; if (g) { if (amount.value === full) amount.value = ''; } else if (amount.value === '') amount.value = full;   // lahjakortti: tyhjä summa = palvelin käyttää pienempää kortin saldosta ja maksamattomasta
-      if (submitBtn()) submitBtn().disabled = g && !!rf?.isOff();
+      if (submitBtn()) submitBtn().disabled = g && (!!rf?.isOff() || !!rf?.isUnknown());
     };
     const hintP = h('p', { class: 'muted tl-hint', text: t('record.hint') });
-    sel.addEventListener('change', sync); rf?.node.addEventListener('redeem-off', sync);
+    sel.addEventListener('change', sync); rf?.node.addEventListener('redeem-off', sync); rf?.node.addEventListener('redeem-unknown', sync);
     const dlg = formDialog(t('btn.recordTitle'), [h('p', { class: 'muted', text: api.isMock('recordPayment') ? t('mock.note') : t('live.note') }),
       fld(t('record.method'), sel), ...(rf ? [rf.node] : []), fld(t('record.amount'), amount),
-      fld(t('record.note'), h('input', { name: 'note', maxlength: 200 })), hintP], t('record.submit'),
+      fld(t('record.note'), noteInput), hintP], t('record.submit'),
     async (fd) => {
       const amt = Math.round(+fd.get('amount') * 100) / 100;
       if (fd.get('method') === 'gift_card') {

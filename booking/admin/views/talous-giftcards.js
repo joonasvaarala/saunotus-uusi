@@ -5,7 +5,7 @@ import { h, dialog, toast, badge } from '../ui.js';
 import { icon } from '../icons.js';
 import { t, fmt, getLang } from '../talous-i18n.js';
 import { deliveryErrors, SERVER_FIELD, deliverMaxDate, helsinkiNow, coverState, COVER_MAX } from '../giftcards-delivery.js';
-import { GC_STATUSES, GC_SORTS, GC_PAY_METHODS, GC_GREETING_MAX, normalizeGiftCode, formatGiftCode } from '../giftcards-api.js';
+import { GC_STATUSES, GC_SORTS, GC_PAY_METHODS, GC_GREETING_MAX, normalizeGiftCode, formatGiftCode, giftCodeValid } from '../giftcards-api.js';
 import { loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, searchFld, expandRow, actionBtn, formDialog, friendly, methodLabel } from './talous-ui.js';
 
 const fld = (label, ...kids) => h('label', { class: 'fld' }, h('span', { text: label }), ...kids);
@@ -18,33 +18,46 @@ const doneToast = (api, rpc) => (api.isMock() ? toast(t('mock.done', { rpc }), '
 
 // ---- "Lisää maksu → Lahjakortti" (tilauksen maksulomake) ----
 // Palauttaa { node, submit(order) , hint } – node = koodikenttä + haku + yhteenveto; summa ja muistiinpano ovat maksulomakkeen omat kentät.
-export function redeemFields({ gift, order, amountInput, onCard }) {
-  const code = h('input', { name: 'gc_code', autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false', maxlength: 24, placeholder: 'HHXX-XXXX-XXXX', 'data-testid': 'redeem-code', 'aria-describedby': 'gc-code-hint' });
+export function redeemFields({ gift, order, amountInput, onCard, onPartner }) {
+  const code = h('input', { name: 'gc_code', autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false', maxlength: 32, placeholder: 'HHXX-XXXX-XXXX', 'data-testid': 'redeem-code', 'aria-describedby': 'gc-code-hint' });
   const info = h('p', { class: 'tl-hint', role: 'status', 'data-testid': 'redeem-info' });
   const off = h('p', { class: 'tl-banner', role: 'status', hidden: true, 'data-testid': 'redeem-off', text: t('gc.o.off') });
-  let card = null;
+  const unk = h('div', { class: 'stack tl-vc-unknown', role: 'status', hidden: true, 'data-testid': 'redeem-unknown' });
+  let card = null, unknown = null;
+  const setUnknown = (u) => { unknown = u; unk.hidden = !u; if (!u) unk.replaceChildren(); node.dataset.unknown = u ? '1' : ''; node.dispatchEvent(new CustomEvent('redeem-unknown', { bubbles: true })); };
+  // Yksi kenttä (§13.12): ensin oma kortti (admin_get_gift_card); jos ei löydy → public_resolve_gift_code luokittelee (unknown + ehdotettu myyjä) → ohje: asiakkaan lunastuspyyntö tai maksutapa Kumppanin lahjakortti
   const lookup = async () => {
     const n = normalizeGiftCode(code.value);
-    card = null; info.textContent = ''; info.classList.remove('err');
-    if (n.length !== 12) { info.textContent = t('gc.o.badCode'); info.classList.add('err'); return null; }
+    card = null; info.textContent = ''; info.classList.remove('err'); setUnknown(null);
+    if (!giftCodeValid(n)) { info.textContent = t('gc.o.badCode'); info.classList.add('err'); return null; }
     try {
       const d = await gift.get({ code: n });
-      card = d.card; code.value = formatGiftCode(n);
+      card = d.card; if (n.length === 12) code.value = formatGiftCode(n);
       info.textContent = t('gc.o.cardInfo', { balance: fmt.money(card.balance), valid: card.valid_to ? fmtDay(card.valid_to) : t('gc.noValid'), status: gcStatusLabel(card.effective_status) });
       const unpaid = +order.balance?.unpaid || 0, want = Math.round(Math.min(unpaid, card.balance) * 100) / 100;
       if (amountInput && want > 0) { amountInput.value = want; }
       onCard?.(card);
-    } catch (e) { info.textContent = friendly(e); info.classList.add('err'); }
+    } catch (e) {
+      if (e?.code !== 'gift_card_not_found') { info.textContent = friendly(e); info.classList.add('err'); return null; }
+      let r = null; try { r = await gift.resolve({ code: n }); } catch { r = null; }
+      if (r?.kind === 'own') { info.textContent = friendly(e); info.classList.add('err'); return null; }
+      const guess = r?.suggested_source ? t(`vcl.src.${r.suggested_source}`) : null, mask = `…${n.slice(-4)}`;
+      info.textContent = t('gc.o.unknown');
+      unk.append(h('p', { class: 'tl-hint', text: t('gc.o.unknownHow') }), guess ? h('p', { class: 'tl-hint', 'data-testid': 'redeem-guess', text: t('gc.o.unknownGuess', { source: guess }) }) : null,
+        onPartner ? h('button', { type: 'button', class: 'btn', 'data-testid': 'redeem-partner', onclick: () => onPartner({ source: r?.suggested_source || null, note: t('gc.o.partnerNote', { source: guess || t('vcl.src.partner_other'), mask }) }) }, icon('tag', 18), h('span', { text: t('gc.o.usePartner') })) : null);
+      setUnknown({ source: r?.suggested_source || null, mask });
+    }
     return card;
   };
   const btn = h('button', { type: 'button', class: 'btn', 'data-testid': 'redeem-lookup', onclick: lookup }, icon('eye', 18), h('span', { text: t('gc.o.lookup') }));
   gift.settings().then((s) => { if (s && !s.redeem_enabled) { off.hidden = false; node.dataset.redeemOff = '1'; node.dispatchEvent(new CustomEvent('redeem-off', { bubbles: true })); } });
-  const node = h('div', { class: 'stack', 'data-testid': 'redeem-box' }, fld(t('gc.o.code'), code, h('small', { id: 'gc-code-hint', text: t('gc.o.codeHint') })), btn, info, h('p', { class: 'muted tl-hint', text: t('gc.o.amountHint') }), off);
+  const node = h('div', { class: 'stack', 'data-testid': 'redeem-box' }, fld(t('gc.o.code'), code, h('small', { id: 'gc-code-hint', text: t('gc.o.codeHint') })), btn, info, unk, h('p', { class: 'muted tl-hint', text: t('gc.o.amountHint') }), off);
   code.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); lookup(); } });
-  return { node, lookup, isOff: () => !off.hidden, code: () => normalizeGiftCode(code.value) };
+  code.addEventListener('input', () => { if (unknown) setUnknown(null); });
+  return { node, lookup, isOff: () => !off.hidden, isUnknown: () => !!unknown, code: () => normalizeGiftCode(code.value) };
 }
 export async function redeemSubmit({ gift, order, code, amount, note }) {
-  if (code.length !== 12) throw Object.assign(new Error(t('gc.o.badCode')), { code: undefined });
+  if (!giftCodeValid(code)) throw Object.assign(new Error(t('gc.o.badCode')), { code: undefined });
   const res = await gift.redeem({ orderId: order.order_id, code, amount, note });
   doneToast(gift, 'admin_redeem_gift_card');
   const lines = [t('gc.o.done', { amount: fmt.money(res.amount), balance: fmt.money(res.gift_card?.balance) })];

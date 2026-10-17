@@ -4,7 +4,7 @@ import { rpc } from './sb.js';
 import { OT } from './order-texts.js';
 import { createOrderApi, validToken } from './order-api.js';
 import { createGiftApi } from './gift-api.js';
-import { redeemSection, cardsSection } from './order-gift.js';
+import { redeemSection, cardsSection, claimsSection } from './order-gift.js';
 
 const S = window.BOOKING_SHOP;
 const L = OT[S.lang] ? S.lang : 'fi', t = OT[L];
@@ -42,17 +42,26 @@ async function main() {
   if (want !== L && S.orderHref?.[want] && !new URLSearchParams(location.search).has('mock')) { location.replace(`${S.orderHref[want]}${location.search}`); return; }
   // Lahjakortit (§13): "Käytä lahjakortti" vain kun redeem_enabled; ostetut kortit vain jos tilauksella on niitä. Puuttuva RPC / virhe → ei mitään näkyviin.
   const gapi = createGiftApi({ rpc: api.mock ? api.rpc : rpc, mock: false });
-  const gift = { redeem: false, cards: [] };
+  const gift = { redeem: false, cards: [], claims: [] };
   async function loadGift() {
     const [pk, oc] = await Promise.all([gapi.packages().catch(() => null), gapi.orderCards(token).catch(() => null)]);
     gift.redeem = !!(pk?.ok && pk.redeem_enabled);
+    const vc = gift.redeem ? await gapi.orderClaims(token).catch(() => null) : null;   // pyyntöjä haetaan vain kun lunastus on käytössä (muuten ei ylimääräistä RPC-kutsua)
     gift.cards = oc?.ok && Array.isArray(oc.cards) ? oc.cards : [];
+    gift.claims = vc?.ok && Array.isArray(vc.claims) ? vc.claims : [];   // kumppanilahjakortit (§13.12): puuttuva RPC / virhe → ei osiota
   }
   await loadGift();
+  let notice = null;   // vahvistusteksti lunastuspyynnön jälkeen (näytetään pyyntölistan yläosassa, kerran)
   draw(o);
   async function reloadAfterGift(text) {
     try { const n = await api.get(); if (n?.ok) { await loadGift(); draw(n); } } catch { /* näkymä jää ennalleen */ }
     flash(true, text);
+  }
+  // kumppanin lahjakortti lähetetty lunastettavaksi / koodi korjattu: lataa tilaus + pyynnöt uudelleen ja vie vahvistusteksti näkyviin
+  async function reloadAfterClaim(n) {
+    notice = { ok: true, ...n };
+    try { const fresh = await api.get(); if (fresh?.ok) { await loadGift(); draw(fresh); } else draw(o); } catch { draw(o); }
+    const el = root.querySelector('[data-testid=vc-notice]'); if (el) { el.scrollIntoView({ block: 'center' }); el.focus({ preventScroll: true }); }
   }
 
   function draw(o) {
@@ -79,7 +88,9 @@ async function main() {
         : h('button', { type: 'button', class: 'btn light ord-btn', disabled: true, 'data-testid': 'pay-rest', text: `${t.payRest} (${money(unpaid)})` }),
       link ? null : h('p', { class: 'bk-note', text: t.payRestSoon })) : null;
     const giftCards = gift.cards.length ? cardsSection({ S, L, api: gapi, cards: gift.cards }) : null;
-    const giftUse = gift.redeem && unpaid > 0 && !gift.cards.length && ['confirmed', 'pending'].includes(o.status) ? redeemSection({ L, api: gapi, token, onApplied: reloadAfterGift }) : null;
+    const giftUse = gift.redeem && unpaid > 0 && !gift.cards.length && ['confirmed', 'pending'].includes(o.status) ? redeemSection({ L, api: gapi, token, onApplied: reloadAfterGift, onClaimed: reloadAfterClaim }) : null;
+    const claimBox = gift.claims.length ? claimsSection({ S, L, api: gapi, token, claims: gift.claims, notice, onChanged: reloadAfterClaim }) : null;
+    notice = null;
     const receipts = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-r' }, h('h3', { id: 'ord-r', text: t.receiptsTitle }),
       o.receipts.length ? h('ul', { class: 'ord-lines', 'data-testid': 'receipts' }, o.receipts.map((r) => h('li', {},
         h('span', { class: 'ord-l-main' }, h('strong', { text: r.receipt_no }), ' ', badge('', t[r.kind] || r.kind)), h('span', { class: 'ord-l-meta', text: `${r.issued_at ? dt(r.issued_at) : ''}${r.total ? ' · ' + money(r.total) : ''}` }),
@@ -90,7 +101,7 @@ async function main() {
       h('p', { class: 'bk-note' }, `${t.addNewBooking} `, h('a', { href: S.shopHref, text: t.addNewBookingLink })));
     const cancel = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), note,
       o.cancel_request ? h('p', { class: 'bk-ok', role: 'status', 'data-testid': 'cancel-pending', text: t[`cancel.${o.cancel_request.status}`] || t['cancel.open'] }) : cancelForm());
-    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, head, resv, lines, giftCards, pay, giftUse, receipts, add, cancel, msg, phoneBox()));
+    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, head, resv, lines, giftCards, claimBox, pay, giftUse, receipts, add, cancel, msg, phoneBox()));
   }
   async function download(btn, receiptNo) {
     btn.disabled = true;
