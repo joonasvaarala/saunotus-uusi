@@ -42,7 +42,7 @@ const browser = await chromium.launch({ executablePath: process.env.CHROME || '/
 const mk = createMock({ delay: 0 });
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
 const fakeJwt = () => `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64({ sub: 'u1', email: 'manager@test.local', role: 'authenticated', exp: 4102444800 })}.${Buffer.from('x').toString('base64url')}`;
-const PERMS = ['payments.manage', 'bookings.manage', 'customers.manage'];
+const PERMS = ['payments.manage', 'bookings.manage', 'customers.manage', 'reports.view', 'reports.daily'];
 const missing = (name) => ({ status: 404, body: { code: 'PGRST202', message: `Could not find the function booking.${name} in the schema cache` } });
 // listMode: 'real' = tuotannon vaihe A: admin_list_*/admin_get_order vastaavat (sopimuksen muodossa), raporttien RPC:t (vaihe D) puuttuvat (404);
 //           'real-all' = kaikki RPC:t vastaavat (myös admin_report_*; ilman rivitason `lines`-kenttää kuten oikea palvelin); 'missing' = kaikki 404.
@@ -207,7 +207,7 @@ async function adminSuite() {
     // --- Raportit ---
     await page.click('[data-testid=tab-reports-btn]');
     await page.waitForSelector('[data-testid=r-gross]');
-    for (const id of ['r-by-vat', 'r-by-method', 'r-matrix', 'r-by-group', 'r-net-ex-vat']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: raporttitaulukko ${id}`);
+    for (const id of ['r-by-vat', 'r-by-method', 'r-matrix', 'r-by-group', 'r-gross-after', 'r-net-ex-vat']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: raporttitaulukko ${id}`);
     await layoutChecks(page, `${name} raportti päivä`);
     if (vp === 390 || vp === 1280) await shot(page, `talous-raportit-paiva-${vp}-${lang}`);
     // CSV (päivä)
@@ -367,6 +367,25 @@ async function adminSuite() {
     expect(/admin_list_payments/.test(await page.locator('[data-testid=mock-banner]').innerText()) && /admin_report_month/.test(await page.locator('[data-testid=mock-banner]').innerText()), `${name}: banneri listaa kaikki puuttuvat`);
     await shot(page, 'talous-rpc-puuttuu-390-fi');
     await page.context().close();
+  }
+  // ---- raporttien oikeudet (sopimus §11): reports.daily → päivä; reports.view → kuukausi + CSV ----
+  for (const [pname, perms, full, daily] of [['reports.daily', ['payments.manage', 'reports.daily'], false, true], ['ei raportteja', ['payments.manage'], false, false], ['reports.view', ['payments.manage', 'reports.view'], true, true]]) {
+    for (const vp of [390, 1280]) {
+      const name = `admin ${pname} ${vp}`, page = await newPage(name, { vp, perms });
+      await page.goto(`${ORIGIN}/admin/#/talous?mock=1&tab=reports`);
+      await page.waitForSelector('[data-testid=talous]');
+      expect((await page.locator('[data-testid=tab-reports-btn]').count() === 1) === daily, `${name}: Raportit-välilehti ${daily ? 'näkyy' : 'piilossa'}`);
+      if (!daily) { expect(await page.locator('[data-testid=tab-orders-btn]').getAttribute('aria-selected') === 'true', `${name}: tab=reports ohjautuu Tilauksiin`); if (vp === 390) await shot(page, 'talous-raportit-ei-oikeutta-390-fi'); await page.context().close(); continue; }
+      await page.waitForSelector('[data-testid=r-gross]');
+      expect(await page.locator('[data-testid=r-kind-monthly]').isDisabled() === !full, `${name}: kuukausinappi ${full ? 'käytössä' : 'pois (reports.view puuttuu)'}`);
+      expect((await page.locator('[data-testid=r-limited]').count() === 1) === !full, `${name}: ilmoitus ${full ? 'ei näy' : 'näkyy'}`);
+      expect(await page.locator('[data-testid=r-csv]').isDisabled() === !full, `${name}: CSV ${full ? 'käytössä' : 'pois'}`);
+      expect(await page.locator('[data-testid=r-pdf]').isDisabled() === false, `${name}: PDF (tulosta) käytössä`);
+      expect(await page.locator('[data-testid=r-gross-after]').count() === 1 && await page.locator('[data-testid=r-net-ex-vat]').count() === 1, `${name}: bruttosumma hyvitysten jälkeen + veroton summa`);
+      if (!full) { await page.locator('[data-testid=r-kind-monthly]').click({ force: true }).catch(() => {}); await page.waitForTimeout(150); expect(await page.locator('[data-testid=r-title], [data-testid=report-title]').first().innerText().then((x) => !/Kuukausiraportti/.test(x)), `${name}: kuukausinäkymää ei avata`); }
+      await shot(page, `talous-raportit-${full ? 'view' : 'daily-vain'}-${vp}-fi`);
+      await page.context().close();
+    }
   }
   // ---- oikeudet: ilman payments.manage ei navigaatiokohtaa ----
   {

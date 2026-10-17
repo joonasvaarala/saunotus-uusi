@@ -97,7 +97,7 @@ test('Mock-palvelin: raportit täsmäävät (päivä ↔ kuukausi, ALV, maksutav
   assert.ok(Array.isArray(d.receipts) && !d.by_day); assert.ok(Array.isArray(m.by_day) && !m.receipts);
   assert.ok(d.totals.receipts > 0 && d.lines.every((l) => l.date === '2026-10-10'));
   const c = (n) => Math.round(n * 100), S = (rows, k) => rows.reduce((s, x) => s + c(x[k]), 0);
-  assert.equal(S(d.by_vat, 'gross'), c(d.totals.gross) + c(d.totals.refunds_gross)); assert.equal(c(d.totals.net_after_refunds), c(d.totals.gross) + c(d.totals.refunds_gross)); assert.equal(S(d.by_vat, 'vat'), c(d.totals.vat_after_refunds)); assert.equal(S(d.by_vat, 'net'), c(d.totals.net_ex_vat_after_refunds)); assert.equal(S(d.by_method_vat, 'gross'), S(d.by_vat, 'gross'));
+  assert.equal(S(d.by_vat, 'gross'), c(d.totals.gross) + c(d.totals.refunds_gross)); assert.equal(c(d.totals.gross_after_refunds), c(d.totals.gross) + c(d.totals.refunds_gross)); assert.equal(c(d.totals.gross_after_refunds), c(d.totals.vat_after_refunds) + c(d.totals.net_ex_vat_after_refunds)); assert.equal(d.totals.net_after_refunds, d.totals.gross_after_refunds, 'deprecated-alias = sama arvo kuin palvelimella'); assert.equal(S(d.by_vat, 'vat'), c(d.totals.vat_after_refunds)); assert.equal(S(d.by_vat, 'net'), c(d.totals.net_ex_vat_after_refunds)); assert.equal(S(d.by_method_vat, 'gross'), S(d.by_vat, 'gross'));
   assert.equal(S(d.by_method, 'gross') + S(d.by_method, 'refunds'), S(d.by_vat, 'gross')); assert.equal(S(d.by_category, 'gross'), S(d.by_vat, 'gross'));
   assert.equal(S(d.receipts.filter((x) => x.kind === 'receipt'), 'gross'), c(d.totals.gross));
   assert.equal(d.totals.receipts, d.receipts.filter((x) => x.kind === 'receipt').length);
@@ -199,7 +199,7 @@ test('Datakerros: sopimuksen vastausten normalisointi (rivit, tilaus, raportti)'
   assert.equal(o.balance.unpaid, 60); assert.equal(o.payments[0].payment_id, 4); assert.equal(o.payments[0].receipt_no, 'K-2026-000001'); assert.equal(o.reservations[0].reservation_id, 3); assert.equal(o.first_reservation_at, 'b');
   assert.deepEqual([o.payments[0].lines[0].line_vat, o.payments[0].lines[0].line_net], [25.5, 100]);   // ALV/netto lasketaan bruttosta ja ALV-%:sta
   const r = A.normReport({ period: { from: 'a', to: 'a', kind: 'day' }, totals: { gross: 10 }, by_vat: [{ rate: '25.5', net: 1, vat: 1, gross: 2 }] });
-  assert.equal(r.by_vat[0].rate, 25.5); assert.equal(A.normReport({ period: { from: '2026-10-17', to: '2026-10-17', tz: 'Europe/Helsinki' }, totals: {} }).period.kind, 'day'); assert.equal(A.normReport({ period: { from: '2026-10-01', to: '2026-10-31' }, totals: {} }).period.kind, 'month'); assert.equal(r.totals.net_after_refunds, 10); assert.deepEqual(r.by_method, []); assert.equal(r.receipts, null); assert.equal(r.lines, null);
+  assert.equal(r.by_vat[0].rate, 25.5); assert.equal(A.normReport({ period: { from: '2026-10-17', to: '2026-10-17', tz: 'Europe/Helsinki' }, totals: {} }).period.kind, 'day'); assert.equal(A.normReport({ period: { from: '2026-10-01', to: '2026-10-31' }, totals: {} }).period.kind, 'month'); assert.equal(r.totals.gross_after_refunds, 10); assert.deepEqual(r.by_method, []); assert.equal(r.receipts, null); assert.equal(r.lines, null);
 });
 
 test('Tekstit: FI ja EN sisältävät samat avaimet', () => {
@@ -249,4 +249,15 @@ test('Asiakkaan tilaussivu: tekstit, token, mock (sopimuksen muodot) ja puuttuva
   assert.equal((await mk.addToOrder({ items: [{ type: 'addon', code: 'ei-ole', quantity: 1 }] })).code, 'item_not_found');
   assert.equal((await mk.requestCancel({})).ok, true); assert.equal((await mk.requestCancel({})).code, 'request_exists'); assert.equal((await mk.get()).cancel_request.status, 'open');
   const rc = await mk.getReceipt({ receiptNo: 'K-2026-000321' }); assert.ok(rc.ok && /ESIMERKKIKUITTI/.test(rc.text_body)); assert.equal((await mk.getReceipt({ receiptNo: 'x' })).code, 'receipt_not_found');
+});
+
+test('Raportti (sopimus §11, booking_35): period.kind palvelimelta, gross_after_refunds, net_after_refunds ei käytössä', () => {
+  const day = { from: '2026-10-17', to: '2026-10-17', tz: 'Europe/Helsinki' };
+  assert.equal(A.normReport({ period: { ...day, kind: 'month' }, totals: {} }).period.kind, 'month', 'palvelimen kind voittaa päättelyn');
+  assert.equal(A.normReport({ period: { ...day, kind: 'day' }, totals: {} }).period.kind, 'day');
+  assert.equal(A.normReport({ period: { from: '2026-10-01', to: '2026-10-31' }, totals: {} }).period.kind, 'month', 'varapäättely kun kind puuttuu');
+  assert.equal(A.normReport({ period: { ...day, kind: 'weird' }, totals: {} }).period.kind, 'day', 'tuntematon kind → varapäättely');
+  const t = A.normReport({ period: { ...day, kind: 'day' }, totals: { gross: 100, refunds_gross: -30, gross_after_refunds: 70, net_after_refunds: 999, vat_after_refunds: 13.55, net_ex_vat_after_refunds: 56.45 } }).totals;
+  assert.equal(t.gross_after_refunds, 70); assert.equal(t.vat_after_refunds, 13.55); assert.equal(t.net_ex_vat_after_refunds, 56.45); assert.ok(!('net_after_refunds' in t));
+  assert.equal(A.normReport({ period: day, totals: { gross: 100, refunds_gross: -30, net_after_refunds: 999 } }).totals.gross_after_refunds, 70, 'puuttuessa gross + refunds_gross (ei deprecated-kenttää)');
 });

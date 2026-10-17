@@ -90,9 +90,12 @@ export function siteOrigin(order, fallback = typeof location !== 'undefined' ? l
 export const absLink = (path, order) => (path ? new URL(path, siteOrigin(order)).href : '');
 export function normReport(r) {
   const tt = r.totals || {};
-  const per = r.period || {};   // oikea palvelin: period {from,to,tz} ilman kind-kenttää → päätellään (sama päivä = päivä)
-  return { period: { ...per, from: per.from ?? null, to: per.to ?? null, kind: per.kind || (per.from && per.from === per.to ? 'day' : per.from ? 'month' : 'day') }, generated_at: r.generated_at ?? null,
-    totals: { receipts: num(tt.receipts), refund_receipts: num(tt.refund_receipts), gross: num(tt.gross), net: num(tt.net), vat: num(tt.vat), refunds_gross: num(tt.refunds_gross), net_after_refunds: num(tt.net_after_refunds ?? (num(tt.gross) + num(tt.refunds_gross))), vat_after_refunds: num(tt.vat_after_refunds ?? tt.vat), net_ex_vat_after_refunds: num(tt.net_ex_vat_after_refunds ?? tt.net), rounding: num(tt.rounding) },
+  const per = r.period || {};   // sopimus (booking_35): period {from,to,tz,kind:'day'|'month'}; kind puuttuessa päätellään (sama päivä = päivä)
+  const kind = per.kind === 'day' || per.kind === 'month' ? per.kind : (per.from && per.from === per.to ? 'day' : per.from ? 'month' : 'day');
+  // gross_after_refunds = brutto hyvitysten jälkeen (booking_35). net_after_refunds on DEPRECATED (sama arvo) → ei käytetä; puuttuessa lasketaan gross + refunds_gross.
+  const grossAfter = tt.gross_after_refunds ?? (num(tt.gross) + num(tt.refunds_gross));
+  return { period: { ...per, from: per.from ?? null, to: per.to ?? null, kind }, generated_at: r.generated_at ?? null,
+    totals: { receipts: num(tt.receipts), refund_receipts: num(tt.refund_receipts), gross: num(tt.gross), net: num(tt.net), vat: num(tt.vat), refunds_gross: num(tt.refunds_gross), gross_after_refunds: num(grossAfter), vat_after_refunds: num(tt.vat_after_refunds ?? tt.vat), net_ex_vat_after_refunds: num(tt.net_ex_vat_after_refunds ?? tt.net), rounding: num(tt.rounding) },
     by_method: L(r.by_method).map((m) => ({ method: m.method, label: m.label ?? null, payments: num(m.payments), gross: num(m.gross), refunds: num(m.refunds), rounding: num(m.rounding) })),
     by_vat: L(r.by_vat).map((v) => ({ rate: num(v.rate), net: num(v.net), vat: num(v.vat), gross: num(v.gross) })),
     by_method_vat: L(r.by_method_vat).map((v) => ({ method: v.method, rate: num(v.rate), net: num(v.net), vat: num(v.vat), gross: num(v.gross) })),

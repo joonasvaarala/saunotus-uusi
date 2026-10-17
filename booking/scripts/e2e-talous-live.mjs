@@ -184,8 +184,8 @@ async function readSuite() {
     await page.click('[data-testid=tab-reports-btn]'); await page.waitForSelector('[data-testid=r-gross]');
     expect(await page.locator('[data-testid=mock-banner]').isHidden(), `${name}: raportit oikealta palvelimelta (ei bannerin muutosta)`);
     const g = async (id) => num(await page.locator(`[data-testid=${id}]`).innerText());
-    expect(await g('r-gross') === +daily.totals.gross && await g('r-refunds') === +daily.totals.refunds_gross && await g('r-net') === +daily.totals.net_after_refunds && await g('r-vat') === +daily.totals.vat_after_refunds && await g('r-net-ex-vat') === +daily.totals.net_ex_vat_after_refunds,
-      `${name}: päiväraportin summat = palvelin (${daily.totals.gross}/${daily.totals.refunds_gross}/${daily.totals.net_after_refunds}/${daily.totals.vat_after_refunds}/${daily.totals.net_ex_vat_after_refunds})`);
+    expect(await g('r-gross') === +daily.totals.gross && await g('r-refunds') === +daily.totals.refunds_gross && await g('r-gross-after') === +daily.totals.gross_after_refunds && await g('r-vat') === +daily.totals.vat_after_refunds && await g('r-net-ex-vat') === +daily.totals.net_ex_vat_after_refunds,
+      `${name}: päiväraportin summat = palvelin (${daily.totals.gross}/${daily.totals.refunds_gross}/${daily.totals.gross_after_refunds}/${daily.totals.vat_after_refunds}/${daily.totals.net_ex_vat_after_refunds})`);
     expect((await page.locator('[data-testid=report-title]').innerText()).startsWith(T['r.daily']), `${name}: päiväraportin otsikko (period ilman kind-kenttää)`);
     expect(await g('r-receipts') === daily.totals.receipts && await g('r-refund-receipts') === daily.totals.refund_receipts, `${name}: kuittimäärät`);
     for (const id of ['r-by-vat', 'r-by-method', 'r-matrix', 'r-by-group']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: ${id}`);
@@ -337,7 +337,14 @@ async function permSuite() {
   await page.click('[data-testid=btn-add]'); await page.waitForSelector('dialog[open] form');
   expect(await page.evaluate(() => document.querySelector('dialog[open] [data-testid=add-type] option[value=custom]').disabled), `${name}: mukautettu rivi vaatii bookings.override (staff: pois)`);
   await closeDialogs(page);
-  await page.click('[data-testid=tab-reports-btn]'); await page.waitForTimeout(1200);
+  // Raportit staffilla (sopimus §11): välilehti + päivä näkyvät (reports.daily), kuukausi ja CSV vain reports.view → ilmoitus, ei virhettä
+  await page.click('[data-testid=tab-reports-btn]'); await page.waitForSelector('[data-testid=r-gross]');
+  expect(await page.locator('[data-testid=r-limited]').isVisible() && await page.locator('[data-testid=r-limited]').innerText() === T['r.limited'], `${name}: staff näkee ilmoituksen (kuukausi/CSV vaativat reports.view)`);
+  expect(await page.locator('[data-testid=r-kind-monthly]').isDisabled() && await page.locator('[data-testid=r-csv]').isDisabled(), `${name}: kuukausi ja CSV pois käytöstä`);
+  expect(await page.locator('[data-testid=report-out] .tl-error, [data-testid=report-out] [role=alert]').count() === 0, `${name}: päiväraportti latautuu ilman virhettä`);
+  const sd = await must('admin_report_daily', { p_date: await page.evaluate(() => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Helsinki' }).format(new Date())) }, staff);
+  expect(num(await page.locator('[data-testid=r-gross]').innerText()) === +sd.totals.gross, `${name}: staffin päiväraportin brutto = palvelin`);
+  await shot(page, 'live-staff-raportit-1280-fi');
   const monthErr = await rpc('admin_report_month', { p_ym: '2026-10' }, staff);
   note(`staff: admin_report_month → ${monthErr.status} ${monthErr.code}; admin_report_daily → ${(await rpc('admin_report_daily', { p_date: '2026-10-17' }, staff)).status}; admin_list_payments → ${(await rpc('admin_list_payments', {}, staff)).status}`);
   await page.context().close();

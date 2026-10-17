@@ -668,7 +668,7 @@ for (const [label, viewport, mobile] of [['mobiili', { width: 390, height: 700 }
   await loginViaInvite(page);
   await page.waitForSelector('#shell:not([hidden]) #nav a');
   if ((await page.locator('#nav a', { hasText: 'Talous' }).count()) !== 0) problems.push('talous: nav-kohta pitää olla piilossa ilman oikeutta payments.manage');
-  extraPerms = ['payments.manage']; await page.reload(); await page.waitForSelector('#nav a');
+  extraPerms = ['payments.manage', 'reports.daily', 'reports.view']; await page.reload(); await page.waitForSelector('#nav a');
   if ((await page.locator('#nav a', { hasText: 'Talous' }).count()) !== 1) problems.push('talous: nav-kohta puuttuu oikeudella payments.manage');
   await page.evaluate(() => { location.hash = '#/talous?mock=1'; });
   await page.waitForSelector('[data-testid=orders-list] [data-testid=order]');

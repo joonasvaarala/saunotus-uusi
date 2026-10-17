@@ -7,10 +7,13 @@ import { createOrdersTab } from './talous-orders.js';
 import { createPaymentsTab } from './talous-payments.js';
 import { createReportsTab } from './talous-reports.js';
 
-const TABS = [['orders', 'tab.orders'], ['payments', 'tab.payments'], ['reports', 'tab.reports']];
+const ALL_TABS = [['orders', 'tab.orders'], ['payments', 'tab.payments'], ['reports', 'tab.reports']];
 
 export async function render({ ctx, reload, query }) {
   const api = createTalousApi({ rpc });
+  // Raportit (sopimus §11): välilehti ja päiväraportti = reports.daily TAI reports.view; kuukausi + CSV = vain reports.view (muuten selkeä ilmoitus). Oikeudet luetaan aina oikealta käyttäjältä (myös ?mock=1).
+  const canFull = !!ctx.can('reports.view'), canDaily = canFull || !!ctx.can('reports.daily');
+  const TABS = ALL_TABS.filter(([k]) => k !== 'reports' || canDaily);
   const hashQ = () => new URLSearchParams(location.hash.split('?')[1] || '');
   let tab = TABS.some(([k]) => k === query.get('tab')) ? query.get('tab') : 'orders';
   const tabs = {}, panels = {}, tabBtns = {};
@@ -36,7 +39,7 @@ export async function render({ ctx, reload, query }) {
   const factories = {
     orders: () => createOrdersTab({ api, ctx }),
     payments: () => createPaymentsTab({ api, onOpenOrder: (no) => { select('orders'); tabs.orders.setSearch(String(no)); } }),
-    reports: () => createReportsTab({ api }),
+    reports: () => createReportsTab({ api, canFull }),
   };
   function ensure(k) {
     if (tabs[k]) return;
