@@ -5,16 +5,17 @@ import { reservationDialog } from './shared.js';
 import { icon } from '../icons.js';
 import { capacityButton, arrivalButton, addonItems, shiftsBar, prepCard } from './dayparts.js';
 import { legsList, resourceBadges, spaceBadge } from './legs.js';
-import { optionBadge } from '../options.js';
+import { optionBadge, optionReminder } from '../options.js';
 import { blockList, blockDialog } from './blocks.js';
 
 export async function render({ ctx, refs, reload, query }) {
   const date = /^\d{4}-\d\d-\d\d$/.test(query.get('d') || '') ? query.get('d') : todayHel();
-  const [view, resv, shifts, addonList] = await Promise.all([
+  const [view, resv, shifts, addonList, optNote] = await Promise.all([
     rpc('admin_day_view', { p_date: date }),
     rpc('admin_list_reservations', { p_from: dayStartIso(date), p_to: dayStartIso(addDays(date, 1)), p_limit: 200 }),
     shiftsBar(date, ctx.can),   // työvuorot (admin_day_shifts tai admin_upcoming_shifts, vain luku); ei koskaan heitä: puuttuva tieto/oikeus → selitysteksti
     rpc('admin_list_addons').catch(() => []),   // lisäpalvelun koodi addon_id:llä (ikonin tunnistus, jos admin_day_view ei anna code-kenttää)
+    optionReminder(),   // muistutus: tulevat hoitovaraukset ilman valittua hoitoa (booking_50); null jos ei muistutettavaa
   ]);
   const codes = new Map((addonList || []).map((a) => [a.id, a.code]));
   const go = (d) => { location.hash = `#/?d=${d}`; };
@@ -73,7 +74,7 @@ export async function render({ ctx, refs, reload, query }) {
   const blocks = h('section', { class: 'card', 'data-testid': 'day-blocks' }, h('h3', { text: 'Sulut' }), blockList(view.blocks, refs, reload, 'Ei sulkuja.'),
     h('button', { type: 'button', class: 'btn ghost sm', onclick: () => blockDialog(date, refs, reload) }, '+ Lisää sulku'));
   const prepBox = prepCard({ totals: view.addon_totals, prep: view.prep, persons: sumPersons(active), bookings: active.length, codes });
-  return [h('h1', { text: fmtDay(`${date}T12:00:00Z`) }), shifts, toolbar, prepBox,
+  return [h('h1', { text: fmtDay(`${date}T12:00:00Z`) }), shifts, optNote, toolbar, prepBox,
     h('div', { class: 'daygrid day-view' }, timeline.length ? timeline : empty('Ei vuoroja tälle päivälle.')),
     inactive.length ? h('details', { class: 'card inactive-res', 'data-testid': 'inactive-res' }, h('summary', { text: `Peruutetut ja päättyneet varaukset (${inactive.length})` }), h('ul', { class: 'reslist' }, inactive.map(resRow))) : null,
     h('p', { class: 'muted', text: `${active.length} aktiivista varausta, ${sumPersons(active)} henkilöä yhteensä.` }), blocks];

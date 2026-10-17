@@ -3,6 +3,7 @@
 import { rpc, storageUrl, uploadObject, removeObject } from '../sb.js';
 import { prepareImage, IMG_TYPES, IMG_MAX_INPUT } from './productimage.js';
 import { addonsAdmin } from './addons.js';
+import { productOptionsAdmin } from './productoptions.js';
 import { h, dialog, field, toast, run, money, badge } from '../ui.js';
 
 const VAT = [25.5, 24, 14, 13.5, 10, 0];
@@ -103,7 +104,8 @@ export async function render({ ctx, refs, reload, query }) {
     const d = dialog(p.name, h('div', { class: 'stack' }, f, img, cfg, vars), { wide: true });
   }
   const addonsSection = await addonsAdmin({ ctx });
-  return [h('h1', { text: 'Tuotteet' }), h('p', { class: 'muted', text: isAdmin ? 'Tuotetiedot tallentuvat kb-tauluihin (sivusto ja botti käyttävät samaa totuutta). Muutokset kirjataan audit-lokiin ja kb.change_logiin.' : 'Näet tuotteet; hintojen ja tuotteiden muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }), filters, count, list, addonsSection];
+  const optionsSection = await productOptionsAdmin({ ctx });   // tuotevalinnat (booking_50)
+  return [h('h1', { text: 'Tuotteet' }), h('p', { class: 'muted', text: isAdmin ? 'Tuotetiedot tallentuvat kb-tauluihin (sivusto ja botti käyttävät samaa totuutta). Muutokset kirjataan audit-lokiin ja kb.change_logiin.' : 'Näet tuotteet; hintojen ja tuotteiden muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }), filters, count, list, optionsSection, addonsSection];
 }
 
 // ---- tuotekuva: esikatselu, lataus, alt-teksti, poisto ----

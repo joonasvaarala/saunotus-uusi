@@ -403,7 +403,7 @@ Vipps kutsuu palvelimelle webhookin (`mobilepay-notify`), mutta asiakas voi pala
 `rollbacks/20261017172554_booking_49_ROLLBACK.sql` (kieltäytyy jos MobilePay-maksuja/hyvityksiä on olemassa). Edge-funktiot ovat tilassa `off` toimettomia.
 
 ## 15. Tuotevalinta (product_options) – Saunahoito: asiakas valitsee hoidon (17.10.2026, migraatio `booking_50_product_options`, `send-emails` -versio 9 (templates.ts orderBlock)) [numero §15, koska tässä tiedostossa §14 on MobilePay; ulkoisessa sopimuksessa tämä on §14]
-**Tilanne:** tietokantapuoli TUOTANNOSSA ja testattu (A–K, 71 tarkistusta rollback-transaktiossa; rollback-skripti `booking_50_ROLLBACK.sql`). UI: ks. kauppa (`shop/src/options-*.js`) ja hallinta (`admin/options*.js`); kokeilutila `?mock=1` (README › Hoitovalitsin). Hinta ei muutu valinnan mukaan.
+**Tilanne:** tietokantapuoli TUOTANNOSSA ja testattu (A–K, 71 tarkistusta rollback-transaktiossa; rollback-skripti `booking_50_ROLLBACK.sql`). UI: ks. kauppa (`shop/src/options-*.js`) ja hallinta (`admin/options*.js`, `admin/views/productoptions.js`); kokeilutila `?mock=1` (README › Hoitovalitsin). Hinta ei muutu valinnan mukaan.
 **Malli (yleinen, uudelleenkäytettävä):**
 - Taulu `booking.product_options(id, product_id → kb.products, code ^[a-z0-9_]{1,40}$, name, name_en, description, description_en, sort_order, active, created_at, updated_at; unique(product_id, code))`. RLS: staff lukee; kirjoitus vain funktioilla (audit päällä).
 - `booking.product_config`: `option_required boolean` (oletus false), `option_label`, `option_label_en` (valitsimen otsikko, esim. "Valitse hoito" / "Choose your treatment").

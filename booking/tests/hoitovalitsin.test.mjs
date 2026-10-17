@@ -128,6 +128,21 @@ test('hallinnan mock: uusi varaus vaatii valinnan, virhe ennen sivuvaikutuksia; 
   for (const c of ['hunajahoito', 'vihtahoito', 'suolahoito', 'turvehoito']) await m.rpc('admin_upsert_product_option', { p_product_id: 10, p_code: c, p_name: c, p_active: false });
   assert.ok((await m.rpc('admin_create_resource_booking', a)).ok, 'ei aktiivisia vaihtoehtoja → ei pakollinen');
 });
+test('hallinnan mock: vaihtoehtojen hallinta (upsert, asetukset, no_options, oikeus, koodin muoto)', async () => {
+  const m = ctx();
+  const l = (await m.rpc('admin_list_product_options', {}))[0];
+  assert.equal(l.product_id, 10); assert.equal(l.option_required, true); assert.equal(l.options.length, 4); assert.equal(l.reservations_without_option, 2);
+  const u = await m.rpc('admin_upsert_product_option', { p_product_id: 10, p_code: 'KIVIHOITO', p_name: 'Kivihoito', p_name_en: 'Stone treatment', p_sort_order: 50 });
+  assert.equal(u.option.code, 'kivihoito');
+  assert.equal(await code(m.rpc('admin_upsert_product_option', { p_product_id: 10, p_code: 'Ä ö', p_name: 'x' })), 'invalid_param');
+  assert.equal(await code(m.rpc('admin_upsert_product_option', { p_product_id: 99, p_code: 'x', p_name: 'x' })), 'product_not_found');
+  await m.rpc('admin_set_product_option_settings', { p_product_id: 10, p_required: false, p_label: 'Valitse', p_label_en: 'Choose' });
+  assert.equal((await m.rpc('admin_list_product_options', { p_product_id: 10 }))[0].option_required, false);
+  for (const o of (await m.rpc('admin_list_product_options', {}))[0].options) await m.rpc('admin_upsert_product_option', { p_product_id: 10, p_code: o.code, p_name: o.name, p_active: false });
+  assert.equal(await code(m.rpc('admin_set_product_option_settings', { p_product_id: 10, p_required: true })), 'no_options');
+  assert.equal(await code(createAdminMock({ perms: ['bookings.manage'] }).rpc('admin_upsert_product_option', { p_product_id: 10, p_code: 'x', p_name: 'x' })), 'forbidden');
+  assert.equal(await code(m.rpc('admin_tuntematon', {})), 'mock_unsupported', 'tuntematon RPC ei koskaan mene verkkoon');
+});
 test('helIso: Helsingin aika → UTC (kesä-/talviaika)', () => {
   assert.equal(helIso('2026-10-17', '16:00'), '2026-10-17T13:00:00.000Z'); assert.equal(helIso('2026-12-17', '16:00'), '2026-12-17T14:00:00.000Z'); assert.equal(helIso('2026-07-01', '00:00'), '2026-06-30T21:00:00.000Z');
 });

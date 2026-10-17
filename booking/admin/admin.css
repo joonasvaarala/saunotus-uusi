@@ -484,4 +484,11 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .opt-box{background:#fff}.opt-warn{margin:0 0 8px;color:var(--ink)}
 .opt-host{margin:4px 0}.optset{margin:0 0 8px}
 .opt-dd .badge{margin-left:0}
+.optrow{display:grid;gap:6px;padding:10px 0;border-top:1px solid var(--line)}
+.optrow .optlist{display:flex;flex-wrap:wrap;gap:6px}
+.optitem{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-weight:600;font-size:14px;cursor:pointer;font-family:inherit}
+.optitem.off{color:var(--muted);text-decoration:line-through;background:var(--bg)}
+.optitem:hover{border-color:var(--green)}
 @media (max-width:480px){.opt-host .srcopt,.optset .srcopt{flex:1 1 100%}.optset .srcopt span{justify-content:flex-start;width:100%}}
+.opt-reminder{margin:0 0 10px;padding:10px 12px;border:1px solid #b9954a;border-radius:8px;background:var(--warnbg);color:var(--ink)}
+.optcard{display:grid;gap:8px}

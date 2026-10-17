@@ -168,6 +168,46 @@ for (const lang of ['fi', 'en']) {
   await page.ctx.close();
 }
 
+// ======================= 4) Tuotevalinnat (Tuotteet-sivu): hallinta + muistutus päivänäkymässä =======================
+for (const lang of ['fi', 'en']) {
+  const w = lang === 'fi' ? 390 : 1280;
+  const page = await newPage(w, lang, `hallinta-${lang}`);
+  await goto(page, `/admin/?mock=1&lang=${lang}#/`);
+  await page.waitForSelector('[data-testid=opt-reminder]');
+  expect(/[1-9]/.test(await page.textContent('[data-testid=opt-reminder]')), `muistutus ${lang}: varauksia ilman valintaa: ${await page.textContent('[data-testid=opt-reminder]')}`);
+  await layout(page, '[data-testid=opt-reminder]', `muistutus ${lang} ${w}`);
+  await goto(page, `/admin/?mock=1&lang=${lang}#/tuotteet`);
+  await page.waitForSelector('[data-testid=option-product]');
+  expect((await page.$$('[data-testid=option-product] .optitem')).length === 4, `hallinta ${lang}: 4 vaihtoehtoa`);
+  await layout(page, '[data-testid=product-options]', `hallinta ${lang} ${w}`);
+  if (lang === 'fi') await page.screenshot({ path: join(SHOT, `admin-${w}-tuotevalinnat.png`), fullPage: true });
+  // virheellinen koodi estetään ennen RPC:tä
+  await page.click('[data-testid=option-add]'); await page.waitForSelector('[data-testid=option-form]');
+  await page.fill('[data-testid=option-form] input[name=code]', 'Väärä koodi'); await page.fill('[data-testid=option-form] input[name=name]', 'Kivihoito');
+  await page.click('[data-testid=option-form] button[type=submit]'); await settle(page);
+  expect(await page.isVisible('[data-testid=option-form-error]'), `hallinta ${lang}: virheellinen koodi estetään`);
+  expect((await calls(page, 'admin_upsert_product_option')).length === 0, `hallinta ${lang}: RPC:tä ei kutsuttu virheellisellä koodilla`);
+  await layout(page, 'dialog.dlg', `lomake ${lang} ${w}`);
+  if (lang === 'fi') await page.screenshot({ path: join(SHOT, `admin-${w}-tuotevalinnat-lomake.png`) });
+  await page.fill('[data-testid=option-form] input[name=code]', 'kivihoito'); await page.fill('[data-testid=option-form] input[name=name_en]', 'Stone treatment');
+  await page.click('[data-testid=option-form] button[type=submit]'); await page.waitForSelector('dialog', { state: 'detached' }); await settle(page);
+  const up = await calls(page, 'admin_upsert_product_option');
+  expect(up.length === 1 && up[0].p_code === 'kivihoito' && up[0].p_name === 'Kivihoito' && up[0].p_product_id === 10 && up[0].p_active === true, `hallinta ${lang}: upsert args ${JSON.stringify(up)}`);
+  expect((await page.$$('[data-testid=option-product] .optitem')).length === 5, `hallinta ${lang}: uusi vaihtoehto listalla`);
+  // passivointi
+  await page.click('.optitem[data-code=turvehoito]'); await page.waitForSelector('[data-testid=option-form]');
+  expect(await page.isDisabled('[data-testid=option-form] input[name=code]'), `hallinta ${lang}: koodia ei voi vaihtaa`);
+  await page.uncheck('[data-testid=option-form] input[name=active]'); await page.click('[data-testid=option-form] button[type=submit]'); await page.waitForSelector('dialog', { state: 'detached' }); await settle(page);
+  expect((await page.getAttribute('.optitem[data-code=turvehoito]', 'class')).includes('off'), `hallinta ${lang}: passivoitu näkyy`);
+  // asetukset: pakollisuus pois
+  await page.click('[data-testid=option-settings]'); await page.waitForSelector('[data-testid=option-settings-form]');
+  await page.uncheck('[data-testid=option-settings-form] input[name=required]'); await page.click('[data-testid=option-settings-form] button[type=submit]'); await page.waitForSelector('dialog', { state: 'detached' }); await settle(page);
+  const se = await calls(page, 'admin_set_product_option_settings');
+  expect(se.length === 1 && se[0].p_required === false && se[0].p_product_id === 10, `hallinta ${lang}: asetukset ${JSON.stringify(se)}`);
+  // ilman catalog.edit -oikeutta vain luku
+  await page.ctx.close();
+}
+
 await browser.close(); server.close();
 if (problems.length) { console.error(`EPÄONNISTUI (${problems.length} ongelmaa, ${checks} tarkistusta):\n- ` + [...new Set(problems)].join('\n- ')); process.exit(1); }
 console.log(`OK: ${checks} tarkistusta, kuvat: ${SHOT}`);

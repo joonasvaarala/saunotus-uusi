@@ -35,3 +35,10 @@ export async function loadOptionConfig(force = false) {
   return cache;
 }
 export const configLabel = (cfg) => (getLang() === 'en' ? cfg.label_en || cfg.label : cfg.label || cfg.label_en) || (cfg.required ? ot('choose') : ot('optional'));
+// Etusivun muistutus: tulevat hoitovaraukset ilman valittua hoitoa (admin_list_product_options.reservations_without_option). Ei koskaan heitä; null jos ei muistutettavaa.
+export async function optionReminder() {
+  let rows; try { rows = (await rpc('admin_list_product_options')) || []; } catch { return null; }
+  const n = rows.reduce((a, p) => a + (+p.reservations_without_option || 0), 0);
+  if (!n) return null;
+  return h('p', { class: 'opt-reminder', role: 'status', 'data-testid': 'opt-reminder' }, h('span', { class: 'badge warn', text: ot('notChosen') }), ` ${ot('reminder', { n })} `, h('a', { href: '#/varaukset', text: ot('reminderLink') }));
+}
