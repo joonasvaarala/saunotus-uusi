@@ -18,6 +18,8 @@ export const methodLabel = (c, serverLabel) => (has(`method.${c}`) ? t(`method.$
 export const groupLabel = (c) => lab('group', c);
 export const payBadge = (c) => badge(`pay-${c}`, payLabel(c));
 export const pstatBadge = (c) => badge(PAY.includes(c) && c !== 'unpaid' ? `pay-${c}` : c === 'cancelled' ? 'muted' : 'pay-pending', pstatLabel(c));
+// Johku-lähtöinen (booking_41): pieni merkki, ei kirjanpitoon
+export const johkuBadge = () => { const b = badge('src-johku', t('johku.badge')); b.title = t('johku.badgeTitle'); b.dataset.testid = 'johku-badge'; return b; };
 export const sourceBadge = (c) => badge(c === 'johku_import' ? 'src-johku' : 'muted', sourceLabel(c));
 
 // Virheviesti: tunnettu palvelinkoodi (nothing_to_pay …) → käännetty teksti, muuten ui.js:n errMsg

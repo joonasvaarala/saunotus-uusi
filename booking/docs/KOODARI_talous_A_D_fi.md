@@ -182,3 +182,28 @@ Kaikki alla on tuotannossa ja testattu (rollback-testit + E2E tuotannossa). Funk
 - **Roolit (tarkoituksellinen, ei muutu):** `admin_report_daily` = `reports.daily` TAI `reports.view` → päiväraportin saa myös kassavuorossa oleva henkilökunta (rooli `staff`). `admin_report_month`, `admin_report_csv` ja `report-pdf?kind=month` = vain `reports.view` (manager/admin). `report-pdf?kind=daily` seuraa päiväraportin oikeutta. Virhe ilman oikeutta: `forbidden` (HTTP 403 report-pdf:ssä). Testattu rollbackissa oikealla `staff`-käyttäjällä.
 - **`admin_list_payments`** palauttaa kevyen listan **ilman laskurivejä** (tarkoituksellinen). Rivit haetaan tarvittaessa `admin_get_order(order_id).payments[].lines[]` (sisältää `net`, `vat_eur`).
 - **Tietoturva (booking_36):** sisäinen `_vat_active` ei ole enää kutsuttavissa REST-rajapinnasta (vain service_role).
+
+
+## 12. Johku ei kirjanpitoon (17.10.2026, migraatio booking_41_johku_ei_kirjanpitoon)
+**Päätös (Joonas):** Johku pysyy omanaan ja uusi järjestelmä omanaan. Johkuun lyödyt myynnit eivät näy uuden järjestelmän kirjanpidossa eivätkä lähde kirjanpitäjälle, mutta ne näkyvät kokonaisstatistiikassa.
+
+**Miten Johku-data on merkitty:** `orders.external_source='johku'`, `source_channel='johku_import'`, `johku_order_no` (tilausnumero = Johku-numero; natiivit 15000→), rivit `order_items.external_source='johku'`. Johku-maksutieto on vain `orders.payment_status` + `orders.external_meta.johku{paid, amount, paid_at, payment_method, bill_id}`; Johku-tilauksilla **ei ole** `payments`/`payment_lines`/`receipts`/`accounting_outbox`-rivejä (tarkistettu: 11 952 Johku-tilausta, 0 maksua/kuittia/outbox-riviä). Johku-tilaukset ovat vain luettavia (§0).
+
+**Sääntö:** Johku-lähtöinen = tilaus jolla `external_source` / `johku_order_no` / `source_channel='johku_import'` tai maksu jolla `payments.external_source`. Sisäinen `booking._acct_excluded(order_id, payment_id)` (vain service_role). Tällainen:
+- ei saa kuittia eikä hyvityskuittia (`_issue_receipt`, `_issue_refund_receipt`, maksutriggeri ohittavat; suora `receipts`-insert estetään `BK001 johku_not_accounted`),
+- ei pääse `accounting_outbox`iin (BEFORE INSERT -trigger hylkää rivin hiljaa; koskee myös tulevaa procountor-syncin täyttöä),
+- ei ole `admin_report_daily`/`admin_report_month`/`admin_report_csv`/`report-pdf`-raporteissa (totals, by_*, receipts, CSV lines+vat, `open`, `unreceipted`). PDF käyttää samaa RPC:tä → ei Johkua. `procountor-sync`-runko lukee vain `accounting_outbox`ia → ei muutosta.
+- Johku-tilausten kokonaisstatistiikka (`admin_list_orders`, dashboard) ennallaan.
+
+**Uudet (additiiviset) avaimet – ei riko §10-sopimusta (`totals`-avaimet ja kaikki vanhat avaimet ennallaan):**
+1. `admin_report_daily` / `admin_report_month` → ylätason **`statistics.johku`**:
+```
+"statistics": { "johku": { "label":"Johku (ei kirjanpitoon)", "accounting":false, "basis":"johku_paid_at",
+   "orders": n, "gross": x, "refunded_orders": n, "refunded_gross": x,
+   "by_method": [ {"method":"mobilepay","orders":n,"gross":x}, ... ] } }
+```
+   Perusteena Johku-maksupäivä (`external_meta.johku.paid_at`, Helsingin päivä; Johku antaa vain päivän). `orders`/`gross` = maksetut + osittain hyvitetyt (`gross` = Johkun `amount`), `refunded_*` = kokonaan hyvitetyt. `by_method.method` = Johkun maksutapakoodi (mobilepay, paybywaychannel, voucher, admincash, cash, …). Avain on aina mukana (nollat tyhjällä jaksolla). **UI-suositus:** näytä erillisenä, selvästi harmaana lohkona "Johku (ei kirjanpitoon) – ei sisälly yllä oleviin summiin"; älä laske `totals`-lukuihin. PDF ja CSV eivät sisällä tätä lohkoa (tarkoituksella, koska ne voivat mennä kirjanpitäjälle).
+2. `admin_list_payments` → rivillä **`source`** (`'johku'|'native'`) ja **`is_johku`** (bool); ylätasolla **`sum_paid_ex_johku`**, **`sum_refunded_ex_johku`**, **`johku_rows`**. Vanhat `sum_paid`/`sum_refunded` laskevat kaikki listatut rivit kuten ennen. Johku-maksurivit saavat näkyä Maksut-listassa; merkitse ne selvästi (esim. "Johku"-merkki) eikä niitä käsitellä (ei kuittia/hyvitystä). Tänään tuotannossa Johku-maksurivejä ei ole (maksutieto on tilauksen `payment_status`issa).
+3. Virhekoodi `johku_not_accounted` (vain sisäinen suoja; ei käyttäjäpolkua).
+
+**Huomio tulevaan:** (a) jos Johku-maksut tuodaan joskus `payments`-riveiksi, ne tulee merkitä `external_source='johku'` (ei pakollista: suoja toimii myös Johku-tilauksen perusteella). (b) Natiivi tilaus, jonka rivi on "maksettu Johkussa" (`price_breakdown.prepaid/paid_in='johku'`), ei vielä ole käytössä natiiveilla tilauksilla (nyt kaikki 8 tällaista riviä ovat Johku-tilauksilla ja siksi suojattuja); jos tällainen käyttö aloitetaan, rivin käsittely maksulinjoissa/kuitissa pitää määritellä erikseen. (c) Rollback: `booking_41_ROLLBACK.sql`.

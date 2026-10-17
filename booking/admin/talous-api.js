@@ -48,7 +48,8 @@ export function normOrderRow(r) {
 // admin_list_payments.rows[] (EI laskurivejä: line_count; rivit haetaan admin_get_order:sta)
 export function normPaymentRow(p) {
   return { payment_id: p.payment_id ?? p.id, order_id: p.order_id, order_no: p.order_no, customer_name: p.customer_name ?? '', method: p.method, method_label: p.method_label ?? null, provider: p.provider ?? null, status: p.status,
-    amount: num(p.amount), refunded_amount: num(p.refunded_amount), rounding: num(p.rounding), created_at: p.created_at ?? null, paid_at: p.paid_at ?? null, line_count: num(p.line_count), receipt_no: p.receipt_no ?? null, receipt_token: p.receipt_token ?? null };
+    amount: num(p.amount), refunded_amount: num(p.refunded_amount), rounding: num(p.rounding), created_at: p.created_at ?? null, paid_at: p.paid_at ?? null, line_count: num(p.line_count), receipt_no: p.receipt_no ?? null, receipt_token: p.receipt_token ?? null,
+    source: p.source ?? (p.is_johku ? 'johku' : 'native'), is_johku: p.is_johku != null ? !!p.is_johku : p.source === 'johku' };   // booking_41: source 'johku'|'native' + is_johku (Johku-lähtöinen: ei kirjanpitoon)
 }
 const normLine = (l) => { const gross = num(l.amount_gross ?? l.gross), rate = num(l.vat_rate), vat = l.line_vat != null ? num(l.line_vat) : vatOf(gross, rate);   // sopimus: rivillä vain brutto + ALV-% → ALV/netto lasketaan tässä (arvio; kuitin pyöristys tehdään loppusummasta)
   return { id: l.id ?? null, order_item_id: l.order_item_id ?? null, description: l.description ?? '', quantity: num(l.quantity, 1), amount_gross: gross, vat_rate: rate, line_vat: vat, line_net: l.line_net != null ? num(l.line_net) : round2(gross - vat) }; };
@@ -89,6 +90,12 @@ export function siteOrigin(order, fallback = typeof location !== 'undefined' ? l
   return fallback;
 }
 export const absLink = (path, order) => (path ? new URL(path, siteOrigin(order)).href : '');
+// booking_41: ylätason statistics.johku (EI kirjanpitoon, ei totals-lukuihin). Puuttuessa (vanha palvelin) → null = lohkoa ei näytetä.
+export function normJohkuStats(j) {
+  if (!j || typeof j !== 'object') return null;
+  return { label: j.label ?? 'Johku (ei kirjanpitoon)', accounting: false, basis: j.basis ?? 'johku_paid_at', orders: num(j.orders), gross: num(j.gross), refunded_orders: num(j.refunded_orders), refunded_gross: num(j.refunded_gross),
+    by_method: L(j.by_method).map((m) => ({ method: m.method ?? 'unknown', orders: num(m.orders), gross: num(m.gross) })) };
+}
 export function normReport(r) {
   const tt = r.totals || {};
   const per = r.period || {};   // sopimus (booking_35): period {from,to,tz,kind:'day'|'month'}; kind puuttuessa päätellään (sama päivä = päivä)
@@ -104,6 +111,7 @@ export function normReport(r) {
     receipts: Array.isArray(r.receipts) ? r.receipts.map((x) => ({ receipt_no: x.receipt_no, kind: x.kind, issued_at: x.issued_at, order_no: x.order_no ?? null, method: x.method, gross: num(x.gross), net: num(x.net), vat: num(x.vat) })) : null,
     by_day: Array.isArray(r.by_day) ? r.by_day.map((d) => ({ date: d.date, receipts: num(d.receipts), gross: num(d.gross), vat: num(d.vat), refunds: num(d.refunds) })) : null,
     open: { orders: num(r.open?.orders), unpaid: num(r.open?.unpaid) },
+    statistics: { johku: normJohkuStats(r.statistics?.johku) },
     lines: Array.isArray(r.lines) ? r.lines : null };   // rivitaso: vain mock (asiakaspuolen CSV); oikea palvelin ei sitä vielä palauta
 }
 
@@ -178,7 +186,9 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
     // oikea kirjoitus onnistui → muut välilehdet hakevat datan uudelleen kun ne avataan
     onChanged(f) { changeListeners.add(f); return () => changeListeners.delete(f); }, changed() { changeListeners.forEach((f) => f()); },
     listOrders: (a) => run('listOrders', a, (r) => ({ total: num(r.total), rows: L(r.rows).map(normOrderRow) })),
-    listPayments: (a) => run('listPayments', a, (r) => ({ total: num(r.total), sum_paid: num(r.sum_paid), sum_refunded: num(r.sum_refunded), rows: L(r.rows).map(normPaymentRow) })),
+    listPayments: (a) => run('listPayments', a, (r) => ({ total: num(r.total), sum_paid: num(r.sum_paid), sum_refunded: num(r.sum_refunded),
+      // booking_41: ex_johku-summat (summarivi käyttää näitä) + Johku-rivien määrä; vanha palvelin → ei Johku-rivejä, sama summa
+      sum_paid_ex_johku: num(r.sum_paid_ex_johku ?? r.sum_paid), sum_refunded_ex_johku: num(r.sum_refunded_ex_johku ?? r.sum_refunded), johku_rows: num(r.johku_rows), rows: L(r.rows).map(normPaymentRow) })),
     getOrder: (id) => run('getOrder', id, normOrder),
     listAddons: () => run('listAddons', undefined, (r) => L(r).filter((x) => x.active !== false).map((x) => ({ id: x.id, code: x.code, name: x.name, name_en: x.name_en || x.name, price: num(x.price ?? x.price_gross) }))),
     reportDaily: (date) => run('reportDaily', date, normReport),

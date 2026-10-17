@@ -181,6 +181,73 @@ async function receiptChecks(page, name, vp, lang, T) {
 const nbsp = /[\s\u00a0\u202f]/g;
 const num = (s) => +String(s).replace(nbsp, '').replace(/\u2212/g, '-').replace(',', '.').replace(/[^\d.\-]/g, '');
 
+// Johku ei kirjanpitoon (booking_41): Maksut-listan merkit + ex_johku-summat, Raportit-välilehden erillinen lohko, Johku-tilauksen maksuteksti
+async function johkuChecks(page, name, vp, lang, T) {
+  const shots = lang === 'fi' && (vp === 390 || vp === 1280);
+  // --- Maksut: vanhin ensin → Johku-rivit ensin ---
+  await page.click('[data-testid=tab-payments-btn]'); await page.waitForSelector('[data-testid=payments-list] [data-testid=payment]');
+  await page.click('[data-testid=payments-reset]'); await page.waitForTimeout(250);
+  if ((await page.locator('[data-testid=payments-dir]').getAttribute('data-dir')) !== 'asc') { await page.click('[data-testid=payments-dir]'); await page.waitForTimeout(300); }
+  const prow = page.locator('[data-testid=payments-list] > [data-testid=payment]');
+  const badges = page.locator('[data-testid=payments-list] [data-testid=johku-badge]');
+  const nb = await badges.count();
+  expect(nb >= 1, `${name}: Maksut-listassa Johku-merkki (${nb})`);
+  expect(await badges.evaluateAll((els, o) => els.every((e) => e.textContent.trim() === o.t && e.title === o.title), { t: T['johku.badge'], title: T['johku.badgeTitle'] }), `${name}: Johku-merkin teksti ja title`);
+  // Johku-rivillä ei kuittipalkkia; natiivilla (jolla kuitti) on
+  const jrow = prow.filter({ has: page.locator('[data-testid=johku-badge]') }).first();
+  expect(await jrow.locator('[data-testid=payment-receipt-bar]').count() === 0, `${name}: Johku-rivillä ei kuittia`);
+  // summarivi = ex_johku-summat + Johku-rivien määrä (vertailu mockin vastaukseen koko listalta ilman suodattimia)
+  const all = await mk.rpc('admin_list_payments', { p_limit: 1 });
+  const cnt = await page.locator('[data-testid=payments-count]').innerText();
+  const fmtFi = (n) => new Intl.NumberFormat(lang === 'fi' ? 'fi-FI' : 'en-US', { style: 'currency', currency: 'EUR' }).format(n).replace(nbsp, ' ');
+  const cntN = cnt.replace(nbsp, ' ');
+  expect(cntN.includes(fmtFi(all.sum_paid_ex_johku)) && cntN.includes(fmtFi(all.sum_refunded_ex_johku)) && !cntN.includes(fmtFi(all.sum_paid)), `${name}: summarivi käyttää ex_johku-summia (${cnt})`);
+  expect(cntN.includes(String(all.johku_rows)) && /Johku/.test(cnt) && (await page.locator('[data-testid=payments-count]').getAttribute('data-johku-rows')) === String(all.johku_rows), `${name}: summarivillä Johku-rivien määrä ${all.johku_rows}`);
+  await layoutChecks(page, `${name} maksut johku`);
+  if (shots) { const b = await page.locator('[data-testid=payments-list]').boundingBox(), c = await page.locator('[data-testid=payments-count]').boundingBox(); await page.screenshot({ path: join(SHOT, `talous-maksut-johku-${vp}-${lang}.png`), fullPage: true, clip: { x: 0, y: c.y - 8, width: vp, height: Math.min(760, b.height + (b.y - c.y) + 8) } }); }
+  await jrow.locator('.tl-head').click(); await page.waitForSelector('[data-testid=payment-johku-note]');
+  expect((await page.locator('[data-testid=payment-johku-note]').innerText()) === T['johku.rowNote'], `${name}: Johku-maksun rivin huomautus`);
+  await page.click('[data-testid=payments-reset]'); await page.waitForTimeout(250);
+  if ((await page.locator('[data-testid=payments-dir]').getAttribute('data-dir')) === 'asc') { await page.click('[data-testid=payments-dir]'); await page.waitForTimeout(300); }   // suunta takaisin oletukseen (uusin ensin)
+  // --- Raportit: kuluva kuukausi/päivä (ei Johku-myyntiä → "ei myyntiä" -tila, kirjanpitoluvut ennallaan) ---
+  await page.click('[data-testid=tab-reports-btn]'); await page.waitForSelector('[data-testid=r-gross]');
+  expect(await page.locator('[data-testid=r-johku]').count() === 1 && (await page.locator('[data-testid=r-johku] h3').innerText()) === T['r.johku.title'], `${name}: Raportit: Johku-lohko (otsikko)`);
+  expect(await page.locator('[data-testid=r-johku]').evaluate((el) => !el.closest('.tl-stats') && !el.querySelector('[data-testid=r-gross]') && el.classList.contains('tl-noprint')), `${name}: Johku-lohko erillään ja pois tulosteesta`);
+  expect(/./.test(await page.locator('[data-testid=r-johku] .tl-johku-note').innerText()) && (await page.locator('[data-testid=r-johku] .tl-johku-note').innerText()) === T['r.johku.note'], `${name}: Johku-lohkon selite`);
+  // kuukausi jolla on Johku-myyntiä (mockissa Johku = vanhimmat tilaukset): 2025-03 → kirjanpitoraportti tyhjä, Johku-lohko täynnä
+  const ym = '2025-03', J = (await mk.rpc('admin_report_month', { p_ym: ym })).statistics.johku;
+  expect(J.orders > 0, `${name}: mockissa Johku-myyntiä ${ym}`);
+  await page.click('[data-testid=r-kind-monthly]'); await page.waitForSelector('[data-testid=r-daily], [data-testid=r-johku]');
+  await page.selectOption('[data-testid=r-year]', '2025'); await page.selectOption('[data-testid=r-month]', '3'); await page.waitForSelector('[data-testid=rj-gross]');
+  const rj = async (id) => (await page.locator(`[data-testid=${id}]`).innerText()).replace(nbsp, ' ');
+  expect((await rj('rj-gross')) === fmtFi(J.gross) && (await rj('rj-gross-n')) === T['r.johku.perOrders'].replace('{n}', J.orders.toLocaleString(lang === 'fi' ? 'fi-FI' : 'en-US').replace(nbsp, ' ')) && (await rj('rj-refunded')) === fmtFi(J.refunded_gross) && (await rj('rj-refunded-n')) === T['r.johku.perOrders'].replace('{n}', J.refunded_orders.toLocaleString(lang === 'fi' ? 'fi-FI' : 'en-US').replace(nbsp, ' ')), `${name}: Johku-luvut vastaavat statistics.johku (${await rj('rj-gross')} / ${J.gross})`);
+  const mrows = await page.locator('[data-testid=rj-by-method] tbody tr').count();
+  expect(mrows === J.by_method.length, `${name}: Johku-maksutavat ${mrows}/${J.by_method.length}`);
+  expect(await page.locator('[data-testid=r-gross]').count() === 0 && await page.locator('[data-testid=r-csv]').isDisabled(), `${name}: Johku ei tee kirjanpitoraportista epätyhjää (ei totals-lukuja, CSV pois)`);
+  await layoutChecks(page, `${name} raportti johku`);
+  if (shots) await shot(page, `talous-raportit-johku-${vp}-${lang}`);
+  if (vp === 1280 && lang === 'fi') {   // tulostus: Johku-lohko piilossa
+    await page.emulateMedia({ media: 'print' });
+    expect(await page.locator('[data-testid=r-johku]').evaluate((el) => getComputedStyle(el).display) === 'none', `${name}: Johku-lohko ei tulostu`);
+    await page.emulateMedia({ media: 'screen' });
+  }
+  // sama kuukausi: Johku-lohko päivittyy takaisin kuluvaan jaksoon (ei myyntiä)
+  await page.selectOption('[data-testid=r-year]', String(new Date().getFullYear())); await page.selectOption('[data-testid=r-month]', String(new Date().getMonth() + 1)); await page.waitForSelector('[data-testid=r-daily]');
+  const Jn = (await mk.rpc('admin_report_month', { p_ym: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}` })).statistics.johku;
+  expect(await page.locator('[data-testid=r-johku]').count() === 1 && (Jn.orders > 0 || (await page.locator('[data-testid=r-johku] .tl-empty').count()) === 1) && await page.locator('[data-testid=r-gross]').count() === 1, `${name}: kuluvan kuukauden raportti: kirjanpitoluvut + Johku-lohko erikseen`);
+  await page.click('[data-testid=r-kind-daily]'); await page.waitForSelector('[data-testid=r-gross], [data-testid=r-johku]');
+  // --- Tilaukset: Johku-tilauksen maksuosio ---
+  await page.click('[data-testid=tab-orders-btn]'); await page.click('[data-testid=orders-reset]');
+  const jo = mk.orders.find((o) => o.johku && !o.payments.length && o.payment_status === 'paid');
+  await page.fill('[data-testid=orders-search]', String(jo.order_no)); await page.keyboard.press('Enter'); await page.waitForTimeout(400);
+  const orow = page.locator('[data-testid=orders-list] > [data-testid=order]').first();
+  await orow.locator('.tl-head').click(); await page.waitForSelector('[data-testid=orders-list] .tl-detail');
+  expect((await page.locator('[data-testid=orders-list] .tl-detail .tl-empty').first().innerText()).trim() === T['order.noPaymentsJohku'], `${name}: Johku-tilauksen maksuteksti`);
+  expect(await page.locator('[data-testid=orders-list] [data-testid=order-receipts]').count() === 0, `${name}: Johku-tilauksella ei Kuitit-osiota`);
+  if (shots && vp === 390) await orow.screenshot({ path: join(SHOT, `talous-tilaus-johku-${vp}-${lang}.png`) });
+  await page.click('[data-testid=orders-reset]'); await page.waitForTimeout(300);
+}
+
 // ================= HALLINTA =================
 async function adminSuite() {
   const VPS = [360, 390, 430, 1280];
@@ -253,6 +320,7 @@ async function adminSuite() {
     await page.selectOption('[data-testid=pagesize]', '25');
     // --- Kuitit ---
     await receiptChecks(page, name, vp, lang, T);
+    await johkuChecks(page, name, vp, lang, T);
     // --- Maksut ---
     await page.click('[data-testid=tab-payments-btn]');
     await page.waitForSelector('[data-testid=payments-list] [data-testid=payment]');

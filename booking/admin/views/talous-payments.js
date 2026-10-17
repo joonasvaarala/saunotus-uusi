@@ -2,7 +2,7 @@
 import { h } from '../ui.js';
 import { pdfLink, receiptsList } from './talous-receipts.js';
 import { t, fmt } from '../talous-i18n.js';
-import { METHODS, PSTAT, methodLabel, pstatLabel, pstatBadge, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, dateFld, searchFld, expandRow } from './talous-ui.js';
+import { METHODS, PSTAT, johkuBadge, methodLabel, pstatLabel, pstatBadge, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, dateFld, searchFld, expandRow } from './talous-ui.js';
 
 export function createPaymentsTab({ api, ctx, onOpenOrder }) {
   const st = { search: '', method: '', status: '', from: '', to: '', sortDir: 'desc', limit: 25, offset: 0 };
@@ -16,7 +16,9 @@ export function createPaymentsTab({ api, ctx, onOpenOrder }) {
       if (my !== seq) return;
       list.setAttribute('aria-busy', 'false');
       if (st.offset >= r.total && r.total > 0) { st.offset = Math.max(0, Math.floor((r.total - 1) / st.limit) * st.limit); return load(); }
-      count.textContent = r.total ? `${t('payments.count', { from: fmt.int(st.offset + 1), to: fmt.int(Math.min(st.offset + st.limit, r.total)), total: fmt.int(r.total) })} · ${t('payments.sums', { paid: fmt.money(r.sum_paid), refunded: fmt.money(r.sum_refunded) })}` : '';
+      // summarivi käyttää ex_johku-summia (Johku ei kirjanpitoon); Johku-rivien määrä näytetään kun niitä on
+      count.textContent = r.total ? [t('payments.count', { from: fmt.int(st.offset + 1), to: fmt.int(Math.min(st.offset + st.limit, r.total)), total: fmt.int(r.total) }), t(r.johku_rows ? 'payments.sumsEx' : 'payments.sums', { paid: fmt.money(r.sum_paid_ex_johku), refunded: fmt.money(r.sum_refunded_ex_johku) }), r.johku_rows ? t('payments.johkuRows', { n: fmt.int(r.johku_rows) }) : null].filter(Boolean).join(' · ') : '';
+      count.dataset.johkuRows = String(r.johku_rows);
       list.replaceChildren(...(r.rows.length ? r.rows.map(payRow) : [emptyBox(t('payments.none'))]));
       const mk = () => (r.total > st.limit ? pager({ total: r.total, offset: st.offset, limit: st.limit, onPage: (o) => { st.offset = o; load(); } }) : h('span'));
       pagers[0].replaceChildren(mk()); pagers[1].replaceChildren(mk());
@@ -29,7 +31,7 @@ export function createPaymentsTab({ api, ctx, onOpenOrder }) {
       h('span', { class: 'tl-c tl-main' }, h('strong', { text: `#${p.order_no}` }), ' ', h('span', { class: 'tl-name', text: p.customer_name || '–' })),
       h('span', { class: 'tl-c tl-first' }, h('small', { class: 'tl-lab', text: t('col.method') }), h('span', { text: methodLabel(p.method, p.method_label) })),
       h('span', { class: 'tl-c tl-sum' }, h('strong', { text: fmt.money(p.amount) }), p.refunded_amount ? h('small', { class: 'tl-refund', text: `−${fmt.money(p.refunded_amount)}` }) : null),
-      h('span', { class: 'tl-c tl-badges' }, pstatBadge(p.status)),
+      h('span', { class: 'tl-c tl-badges' }, pstatBadge(p.status), p.is_johku ? johkuBadge() : null),
     ];
     // kuittinumero + PDF-lataus näkyvät aina rivin alla (ei napin sisällä); kuitin teksti ja uudelleenlähetys rivin avauksessa
     const bar = p.receipt_no ? h('div', { class: 'tl-rowbar', 'data-testid': 'payment-receipt-bar' }, h('span', { class: 'tl-rowbar-no' }, h('small', { text: `${t('receipt')} ` }), h('strong', { 'data-testid': 'payment-receipt-no', text: p.receipt_no })), pdfLink({ api, token: p.receipt_token, no: p.receipt_no, short: true, testid: 'payment-receipt-dl' })) : null;
@@ -48,6 +50,7 @@ export function createPaymentsTab({ api, ctx, onOpenOrder }) {
       h('tfoot', {}, h('tr', {}, h('th', { scope: 'row', text: t('line.total') }), h('td', { class: 'r', 'data-label': t('line.qty') }), h('td', { class: 'r', 'data-label': t('line.gross'), text: fmt.money(sumG) }), h('td', { class: 'r', 'data-label': t('line.vatPct') }),
         h('td', { class: 'r', 'data-label': t('line.vat'), text: fmt.money(sumV) }), h('td', { class: 'r', 'data-label': t('line.net'), text: fmt.money(sumN) })))) : emptyBox(t('payment.noLines'));
     return h('div', { class: 'tl-detail' },
+      p.is_johku ? h('p', { class: 'tl-johku-note', role: 'note', 'data-testid': 'payment-johku-note', text: t('johku.rowNote') }) : null,
       h('p', { class: 'muted tl-meta', text: [`${t('payment.id')} ${p.payment_id}`, p.receipt_no ? `${t('receipt')} ${p.receipt_no}` : null, p.provider ? `${t('payment.provider')} ${p.provider}` : null, p.rounding ? `${t('payment.rounding')} ${fmt.money(p.rounding)}` : null].filter(Boolean).join(' · ') }),
       h('section', { class: 'tl-sec' }, h('h3', { text: t('payment.lines') }), table),
       h('section', { class: 'tl-sec' }, h('h3', { text: t('receipts.title') }), receiptsList({ api, ctx, receipts, testid: 'payment-receipts' })),

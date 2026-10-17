@@ -30,7 +30,8 @@ export function createReportsTab({ api, canFull = true }) {
     const M = fmt.money, T = r.totals;
     const head = h('header', { class: 'tl-report-head' }, h('h2', { 'data-testid': 'report-title', text: `${t(r.period.kind === 'day' ? 'r.daily' : 'r.monthly')}: ${periodLabel(r)}` }), h('p', { class: 'muted', text: t('r.basis') }));
     const open = h('p', { class: 'muted', 'data-testid': 'r-open', text: `${t('r.open')}: ${t('r.openVal', { n: fmt.int(r.open.orders), sum: M(r.open.unpaid) })}` });
-    if (isEmpty(r)) return h('div', {}, head, emptyBox(t('r.empty')), open);
+    const johku = johkuBlock(r.statistics?.johku);   // erillinen tilastolohko: EI totals-lukuihin, ei PDF/CSV:hen, ei tulostukseen
+    if (isEmpty(r)) return h('div', {}, head, emptyBox(t('r.empty')), open, johku);
     const card = (label, value, tid) => h('div', { class: 'tl-stat' }, h('dt', { text: label }), h('dd', { 'data-testid': tid, text: value }));
     const stats = h('dl', { class: 'tl-stats' }, card(t('r.gross'), M(T.gross), 'r-gross'), card(t('r.refunds'), M(T.refunds_gross), 'r-refunds'), card(t('r.grossAfter'), M(T.gross_after_refunds), 'r-gross-after'), card(t('r.vatAfter'), M(T.vat_after_refunds), 'r-vat'), card(t('r.netExVat'), M(T.net_ex_vat_after_refunds), 'r-net-ex-vat'),
       card(t('r.receipts'), fmt.int(T.receipts), 'r-receipts'), card(t('r.refundReceipts'), fmt.int(T.refund_receipts), 'r-refund-receipts'), ...(T.rounding ? [card(t('r.rounding'), M(T.rounding), 'r-rounding')] : []));
@@ -50,7 +51,21 @@ export function createReportsTab({ api, canFull = true }) {
     const byCat = table('r-by-group', t('r.byGroup'), [t('r.group'), t('r.qty'), t('r.gross')], [...cats.entries()].sort((a, b) => b[1].gross - a[1].gross).map(([k, x]) => [has(`group.${k}`) ? t(`group.${k}`) : x.label, fmt.int(x.quantity), M(x.gross)]));
     const byDay = r.by_day?.length ? table('r-daily', t('r.dailyBreakdown'), [t('r.date'), t('r.receipts'), t('r.gross'), t('r.refunds')], r.by_day.map((d) => [fmt.date(d.date), fmt.int(d.receipts), M(d.gross), M(d.refunds)])) : null;
     const receipts = r.receipts?.length ? table('r-receipts-list', t('r.receiptsList'), [t('receipt'), t('col.time'), t('col.order'), t('col.method'), t('r.gross')], r.receipts.map((x) => [x.receipt_no, fmt.dt(x.issued_at), x.order_no != null ? `#${x.order_no}` : '–', methodLabel(x.method), M(x.gross)])) : null;
-    return h('div', {}, head, stats, byVat, matrix, byMethod, byCat, byDay, receipts, open);
+    return h('div', {}, head, stats, byVat, matrix, byMethod, byCat, byDay, receipts, open, johku);
+  }
+  // 'Johku (ei kirjanpitoon)' (booking_41, statistics.johku): visuaalisesti erillään (katkoviiva, hiekka-tausta), oma kuvaus; ei tulosteessa (tl-noprint)
+  function johkuBlock(j) {
+    if (!j) return null;
+    const M = fmt.money, jm = (c) => (has(`jm.${c}`) ? t(`jm.${c}`) : methodLabel(c));
+    const card = (label, value, sub, tid) => h('div', { class: 'tl-stat' }, h('dt', { text: label }), h('dd', { 'data-testid': tid, text: value }), sub ? h('small', { class: 'muted', 'data-testid': `${tid}-n`, text: sub }) : null);
+    const none = !j.orders && !j.refunded_orders;
+    const body = none ? [emptyBox(t('r.johku.none'))] : [
+      h('dl', { class: 'tl-stats' }, card(t('r.johku.sales'), M(j.gross), t('r.johku.perOrders', { n: fmt.int(j.orders) }), 'rj-gross'),
+        card(t('r.johku.refunded'), M(j.refunded_gross), t('r.johku.perOrders', { n: fmt.int(j.refunded_orders) }), 'rj-refunded')),
+      j.by_method.length ? h('table', { class: 'tl-table', 'data-testid': 'rj-by-method' }, 
+        h('thead', {}, h('tr', {}, [t('col.method'), t('r.johku.orders'), t('r.gross')].map((c, i) => h('th', { scope: 'col', class: i ? 'r' : '', text: c })))),
+        h('tbody', {}, j.by_method.map((m) => h('tr', {}, h('th', { scope: 'row', text: jm(m.method) }), h('td', { class: 'r', 'data-label': t('r.johku.orders'), text: fmt.int(m.orders) }), h('td', { class: 'r', 'data-label': t('r.gross'), text: M(m.gross) }))))) : null];
+    return h('section', { class: 'tl-johku-block tl-noprint', 'data-testid': 'r-johku', 'aria-labelledby': 'r-johku-h' }, h('h3', { id: 'r-johku-h', text: t('r.johku.title') }), h('p', { class: 'muted tl-johku-note', text: t('r.johku.note') }), ...body);
   }
 
   // ---- valitsimet ----
