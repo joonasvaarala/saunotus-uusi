@@ -438,6 +438,12 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
   .tl-lab{display:none}
   .tl-toolbar{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
+/* Johku (ei kirjanpitoon) – booking_41: erillinen tilastolohko (katkoviiva + hiekka-tausta) ja pieni merkki; ei sinistä */
+.tl-johku-block{margin:28px 0 12px;padding:12px 14px 14px;background:#EDE3D0;border:2px dashed rgba(43,58,48,.55);border-radius:var(--r)}
+.tl-johku-block h3{margin:0 0 4px;font-size:17px}.tl-johku-note{margin:0 0 6px;font-size:14px}
+.tl-johku-block .tl-stat{background:#F8F3E8}.tl-johku-block .tl-table{background:#F8F3E8}.tl-johku-block .tl-stat small{display:block;margin-top:2px;font-size:13px}
+.tl-johku-note[role=note],.tl-detail>.tl-johku-note{padding:8px 12px;margin:0 0 10px;background:#EDE3D0;border:1px dashed rgba(43,58,48,.55);border-radius:10px;font-size:14px;color:var(--ink)}
+.tl-badges .badge.src-johku{white-space:nowrap}
 @media print{
   .top,.nav,.tl-noprint,.tl-tabs,.tl-banner{display:none!important}
   body{background:#fff}#shell{display:block}main{padding:0;max-width:none}

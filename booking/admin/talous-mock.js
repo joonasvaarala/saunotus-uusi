@@ -25,6 +25,7 @@ const CATALOG = [
 const ADDONS = [{ name: 'Saunavihta', price: 5, vat: 25.5 }, { name: 'Pyyhe', price: 5, vat: 25.5 }, { name: 'Turvenaamio ja jalkakylpy', price: 12, vat: 25.5 }];
 export const GROUPS = ['public', 'private', 'treatment', 'addon', 'giftcard', 'event', 'other'];
 export const METHOD_LABELS = { card_terminal: 'Korttipääte', cash: 'Käteinen', mobilepay: 'MobilePay', visma_pay: 'Verkkomaksu (Visma Pay)', bank_transfer: 'Tilisiirto', invoice: 'Lasku', gift_card: 'Lahjakortti', partner_voucher: 'Kumppanin lahjakortti' };
+const JOHKU_METHODS = ['mobilepay', 'paybywaychannel', 'mobilepay', 'voucher', 'admincash', 'cash', 'mobilepay'];   // Johkun maksutapakoodit (sopimus §12)
 const METHODS = [['card_terminal', 30], ['cash', 18], ['mobilepay', 22], ['visma_pay', 16], ['bank_transfer', 4], ['invoice', 5], ['gift_card', 3], ['partner_voucher', 2]];
 
 function vatSplit(gross, rate) { const vat = round2(gross - gross / (1 + rate / 100)); return { vat, net: round2(gross - vat) }; }
@@ -103,7 +104,16 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
         }
         o.payments.push(p); payments.push(p);
       });
-    } else if (source === 'johku_import' && ps !== 'unpaid') { o.paid_amount = total; o.refunded_amount = ps === 'refunded' ? total : ps === 'partially_refunded' ? round2(total / 2) : 0; }
+    } else if (source === 'johku_import' && ps !== 'unpaid') {
+      o.paid_amount = total; o.refunded_amount = ps === 'refunded' ? total : ps === 'partially_refunded' ? round2(total / 2) : 0;
+      // booking_41: Johku-maksutieto = orders.external_meta.johku {paid_at (päivä), amount, payment_method}; ei payments/receipts-rivejä. Deterministinen (ei satunnaislukuja → muu mock-data ennallaan).
+      o.johku = { paid_date: created, method: JOHKU_METHODS[i % JOHKU_METHODS.length], amount: total };
+      // muutama Johku-maksurivi (is_johku) listanäkymän testaamiseen: sopimuksen mukaan tuotannossa niitä ei vielä ole, mutta UI:n pitää käsitellä
+      if (i % 211 === 0 && ps === 'paid') {
+        const pj = { payment_id: payId++, order_id: o.order_id, order_no: o.order_no, customer_name: o.customer_name, method: 'other', status: 'paid', amount: total, refunded_amount: 0, created_at: createdAt, paid_at: createdAt, paid_date: created, provider_ref: null, is_johku: true, lines: linesFor(items, 1, total) };
+        o.payments.push(pj); payments.push(pj);
+      }
+    }
     o.unpaid_amount = ['unpaid', 'pending', 'failed', 'partially_paid'].includes(ps) ? round2(Math.max(0, total - o.paid_amount)) : 0;
     orders.push(o);
   }
@@ -186,17 +196,18 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
     if (a.p_to) rows = rows.filter((p) => dayOf(p.paid_at || p.created_at) <= a.p_to);
     const get = { paid: (p) => p.paid_at || p.created_at, amount: (p) => p.amount, order_no: (p) => p.order_no }[m[1]], dir = m[2] === 'asc' ? 1 : -1;
     rows = rows.slice().sort((x, y) => dir * cmp(get(x), get(y)) || dir * cmp(x.payment_id, y.payment_id));
-    const limit = clamp(a.p_limit, 50, 1, 200), offset = clamp(a.p_offset, 0, 0, 1e9), paid = rows.filter((p) => p.paid_at);
-    return { total: rows.length, sum_paid: round2(paid.reduce((s, p) => s + p.amount, 0)), sum_refunded: round2(rows.reduce((s, p) => s + p.refunded_amount, 0)), rows: rows.slice(offset, offset + limit).map((p) => ({
+    const limit = clamp(a.p_limit, 50, 1, 200), offset = clamp(a.p_offset, 0, 0, 1e9), paid = rows.filter((p) => p.paid_at), paidX = paid.filter((p) => !p.is_johku), nat = rows.filter((p) => !p.is_johku);
+    return { total: rows.length, sum_paid: round2(paid.reduce((s, p) => s + p.amount, 0)), sum_refunded: round2(rows.reduce((s, p) => s + p.refunded_amount, 0)),
+      sum_paid_ex_johku: round2(paidX.reduce((s, p) => s + p.amount, 0)), sum_refunded_ex_johku: round2(nat.reduce((s, p) => s + p.refunded_amount, 0)), johku_rows: rows.length - nat.length, rows: rows.slice(offset, offset + limit).map((p) => ({
       payment_id: p.payment_id, order_id: p.order_id, order_no: p.order_no, method: p.method, method_label: METHOD_LABELS[p.method] || p.method, provider: p.method === 'visma_pay' ? 'visma_pay' : 'manual', status: p.status,
-      amount: p.amount, refunded_amount: p.refunded_amount, rounding: 0, paid_at: p.paid_at, created_at: p.created_at, customer_name: p.customer_name, line_count: p.lines.length, receipt_no: p.receipt_no || null, receipt_token: p.receipt?.public_token || null })) };
+      amount: p.amount, refunded_amount: p.refunded_amount, rounding: 0, paid_at: p.paid_at, created_at: p.created_at, customer_name: p.customer_name, line_count: p.lines.length, receipt_no: p.receipt_no || null, receipt_token: p.receipt?.public_token || null, source: p.is_johku ? 'johku' : 'native', is_johku: !!p.is_johku })) };
   }
 
   // ---- raportit: admin_report_daily(p_date) / admin_report_month(p_ym) → koosteet; rivitaso (`lines`) vain mockissa → asiakaspuolen CSV ----
   function linesBetween(from, to) {
     const out = [];
     for (const p of payments) {
-      if (!p.paid_date) continue;
+      if (!p.paid_date || p.is_johku) continue;   // Johku ei kirjanpitoon (booking_41)
       const at = (d) => (d === p.paid_date ? p.paid_at : iso(d, 700));
       if (p.paid_date >= from && p.paid_date <= to) for (const l of p.lines) out.push({ date: p.paid_date, at: p.paid_at, receipt_no: p.receipt_no, kind: 'receipt', order_no: p.order_no, method: p.method, group: l.group, product: l.description, quantity: l.quantity,
         gross: l.amount_gross, vat_rate: l.vat_rate, vat: l.line_vat, net: l.line_net, refund: 0 });
@@ -207,6 +218,12 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
     return out.sort((a, b) => a.date.localeCompare(b.date) || String(a.receipt_no).localeCompare(String(b.receipt_no)));
   }
   const GROUP_LABELS = { public: 'Yleiset vuorot', private: 'Yksityiset vuorot', treatment: 'Hoidot ja rituaalit', addon: 'Lisäpalvelut', giftcard: 'Lahjakortit', event: 'Tapahtumat', other: 'Muu' };
+  // statistics.johku: Johku-tilaukset, joiden Johku-maksupäivä osuu jaksolle. orders/gross = maksetut + osittain hyvitetyt, refunded_* = kokonaan hyvitetyt (sopimus §12)
+  function johkuStats(from, to) {
+    const rows = orders.filter((o) => o.johku && o.johku.paid_date >= from && o.johku.paid_date <= to), sold = rows.filter((o) => o.payment_status !== 'refunded'), ref = rows.filter((o) => o.payment_status === 'refunded');
+    const m = new Map(); for (const o of sold) { const x = m.get(o.johku.method) || { method: o.johku.method, orders: 0, gross: 0 }; x.orders++; x.gross = round2(x.gross + o.johku.amount); m.set(o.johku.method, x); }
+    return { label: 'Johku (ei kirjanpitoon)', accounting: false, basis: 'johku_paid_at', orders: sold.length, gross: round2(sold.reduce((s, o) => s + o.johku.amount, 0)), refunded_orders: ref.length, refunded_gross: round2(ref.reduce((s, o) => s + o.johku.amount, 0)), by_method: [...m.values()].sort((a, b) => b.gross - a.gross) };
+  }
   function buildReport(from, to, period, { daily = false } = {}) {
     const lines = linesBetween(from, to), by = (rows, keyf, mk) => { const m = new Map(); for (const l of rows) { const k = keyf(l); m.set(k, mk(m.get(k), l)); } return [...m.values()]; };
     const sum = (a, k, b) => round2((a?.[k] || 0) + b[k]);
@@ -223,6 +240,7 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
       by_method_vat: by(lines, (l) => `${l.method}|${l.vat_rate}`, (a, l) => ({ method: l.method, rate: l.vat_rate, net: sum(a, 'net', l), vat: sum(a, 'vat', l), gross: sum(a, 'gross', l) })),
       by_category: by(lines, (l) => `${l.group}|${l.vat_rate}`, (a, l) => ({ category: l.group, label: GROUP_LABELS[l.group] || l.group, rate: l.vat_rate, quantity: (a?.quantity || 0) + (l.kind === 'receipt' ? l.quantity : -l.quantity), gross: sum(a, 'gross', l), net: sum(a, 'net', l), vat: sum(a, 'vat', l) })),
       open: { orders: openO.length, unpaid: round2(openO.reduce((s, o) => s + o.unpaid_amount, 0)) },
+      statistics: { johku: johkuStats(from, to) },   // booking_41: EI totals-lukuihin
       lines,   // vain mock: oikea palvelin ei (vielä) palauta rivejä → CSV tulee admin_report_csv:stä
     };
     for (const m of rep.by_method) m.payments = new Set(receipts.filter((x) => x.method === m.method && x.kind === 'receipt').map((x) => x.receipt_no)).size;

@@ -413,11 +413,54 @@ async function errorCodes() {
   return out;
 }
 
+
+// ---- Johku ei kirjanpitoon (booking_41): testiprojektin feikkidata (Johku-tilaukset 9000001/9000002 + Johku-maksurivi, siemennetty erikseen) ----
+async function johkuSuite() {
+  const pays = await must('admin_list_payments', { p_limit: 200 });
+  const jr = pays.rows.filter((p) => p.is_johku);
+  expect(pays.johku_rows >= 1 && jr.length === pays.johku_rows, `Johku: johku_rows ${pays.johku_rows} = rivit ${jr.length}`);
+  expect(jr.every((p) => p.source === 'johku') && pays.rows.filter((p) => !p.is_johku).every((p) => p.source === 'native'), 'Johku: source/is_johku-rivit');   // (testiprojektissa on myös vanha Johku-rivi, jolle kuitti on annettu ennen booking_41:tä)
+  const jPaid = jr.filter((p) => p.paid_at).reduce((x, p) => x + Number(p.amount), 0), jRef = jr.reduce((x, p) => x + Number(p.refunded_amount), 0);
+  expect(Math.abs((pays.sum_paid - pays.sum_paid_ex_johku) - jPaid) < 0.005 && Math.abs((pays.sum_refunded - pays.sum_refunded_ex_johku) - jRef) < 0.005, `Johku: ex_johku-summat (${pays.sum_paid} − ${pays.sum_paid_ex_johku} = ${jPaid})`);
+  const johkuPay = jr.find((p) => p.order_no === 9000001); expect(!!johkuPay && Number(johkuPay.amount) === 80 && !johkuPay.receipt_no && !johkuPay.receipt_token, 'Johku: siemenmaksu löytyy eikä sillä ole kuittia');
+  // raportit: statistics.johku kirjanpidon ulkopuolella
+  const m = await must('admin_report_month', { p_ym: '2026-03' }), d = await must('admin_report_daily', { p_date: '2026-03-10' });
+  const J = m.statistics?.johku;
+  expect(J && J.label === 'Johku (ei kirjanpitoon)' && J.accounting === false && J.basis === 'johku_paid_at', 'Johku: statistics.johku (kuukausi) metatiedot');
+  expect(J.orders === 1 && Number(J.gross) === 80 && J.refunded_orders === 1 && Number(J.refunded_gross) === 40 && J.by_method.length === 1 && J.by_method[0].method === 'mobilepay' && Number(J.by_method[0].gross) === 80, `Johku: tilastoluvut ${JSON.stringify(J)}`);
+  expect(d.statistics?.johku?.orders === 1 && Number(d.statistics.johku.gross) === 80 && d.statistics.johku.refunded_orders === 0, 'Johku: statistics.johku (päivä)');
+  expect(!(d.receipts || []).some((x) => x.order_no === 9000001) && !JSON.stringify(m.by_method).includes('johku'), 'Johku: ei kirjanpidon kuiteissa / by_method:ssa');
+  const csv = await must('admin_report_csv', { p_from: '2026-03-01', p_to: '2026-03-31' });
+  expect(!/9000001|9000002/.test(csv.content ?? JSON.stringify(csv)), 'Johku: ei CSV:ssä');
+  // UI
+  for (const vp of [1280, 390]) {
+    const page = await openPage(`johku-${vp}`, admin, { vp });
+    await page.waitForSelector('[data-testid=tab-payments-btn]'); await page.click('[data-testid=tab-payments-btn]');
+    await page.waitForSelector('[data-testid=payments-list] [data-testid=payment]');
+    await page.fill('[data-testid=payments-search]', '9000001'); await page.keyboard.press('Enter'); await page.waitForTimeout(600);
+    const row = page.locator('[data-testid=payments-list] > [data-testid=payment]');
+    expect(await row.count() === 1 && await row.locator('[data-testid=johku-badge]').count() === 1 && await row.locator('[data-testid=payment-receipt-bar]').count() === 0, `Johku UI ${vp}: Maksut-rivi merkitty, ei kuittia`);
+    expect((await row.locator('[data-testid=johku-badge]').innerText()).trim() === T['johku.badge'], `Johku UI ${vp}: merkin teksti`);
+    if (vp === 1280) await shot(page, 'live-maksut-johku-1280-fi'); else await shot(page, 'live-maksut-johku-390-fi');
+    await row.locator('.tl-head').click(); await page.waitForSelector('[data-testid=payment-johku-note]');
+    await page.fill('[data-testid=payments-search]', ''); await page.keyboard.press('Enter'); await page.waitForTimeout(600);
+    const cnt = (await page.locator('[data-testid=payments-count]').innerText()).replace(nbsp, ' ');
+    expect(await page.locator('[data-testid=payments-count]').getAttribute('data-johku-rows') === String(pays.johku_rows) && /Johku-rivejä/.test(cnt) && cnt.includes('ilman Johkua'), `Johku UI ${vp}: summarivi (${cnt})`);
+    await page.click('[data-testid=tab-reports-btn]'); await page.waitForSelector('[data-testid=r-johku]');
+    await page.click('[data-testid=r-kind-monthly]'); await page.selectOption('[data-testid=r-year]', '2026'); await page.selectOption('[data-testid=r-month]', '3'); await page.waitForSelector('[data-testid=rj-gross]');
+    expect(num(await page.locator('[data-testid=rj-gross]').innerText()) === 80 && num(await page.locator('[data-testid=rj-refunded]').innerText()) === 40 && (await page.locator('[data-testid=rj-by-method] tbody tr').count()) === 1, `Johku UI ${vp}: Raportit-lohko (80 € / 40 €)`);
+    expect((await page.locator('[data-testid=r-johku] h3').innerText()) === T['r.johku.title'], `Johku UI ${vp}: lohkon otsikko`);
+    await shot(page, `live-raportit-johku-${vp}-fi`);
+    await page.context().close();
+  }
+}
+
 // ---- ajo ----
 const only = process.env.ONLY || '';
 try {
   if (!only || only === 'read') await readSuite();
   if (!only || only === 'write') await writeSuite();
+  if (!only || only === 'johku') await johkuSuite();
   if (!only || only === 'perm') await permSuite();
   if (!only || only === 'errors') { const o = await errorCodes(); console.log(`BK001-koodit: ${o.filter((x) => x.ok).length}/${o.length} odotetun mukaisia`); }
 } catch (e) { problems.push(`KESKEYTYI: ${e.stack || e.message}`); }

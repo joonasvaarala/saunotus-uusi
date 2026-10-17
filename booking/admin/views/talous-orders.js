@@ -5,7 +5,7 @@ import { icon } from '../icons.js';
 import { receiptsList } from './talous-receipts.js';
 import { t, fmt, getLang } from '../talous-i18n.js';
 import { RPC, absLink } from '../talous-api.js';
-import { PAY, SOURCES, payLabel, sourceLabel, payBadge, sourceBadge, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, dateFld, searchFld, expandRow, actionBtn, doneToast, formDialog, methodLabel, pstatBadge } from './talous-ui.js';
+import { johkuBadge, PAY, SOURCES, payLabel, sourceLabel, payBadge, sourceBadge, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, dateFld, searchFld, expandRow, actionBtn, doneToast, formDialog, methodLabel, pstatBadge } from './talous-ui.js';
 
 export const ORDER_SORTS = ['created', 'order_no', 'total', 'payment_status', 'first_reservation'];
 const VAT_CHOICES = [25.5, 13.5, 0];
@@ -54,10 +54,10 @@ export function createOrdersTab({ api, ctx }) {
     const sec = (title, ...kids) => h('section', { class: 'tl-sec' }, h('h3', { text: title }), ...kids);
     const payments = o.payments.length
       ? h('ul', { class: 'tl-sub', 'data-testid': 'order-payments' }, o.payments.map((p) => h('li', {},
-        h('span', { class: 'tl-sub-main' }, h('strong', { text: methodLabel(p.method, p.method_label) }), ' ', pstatBadge(p.status)),
+        h('span', { class: 'tl-sub-main' }, h('strong', { text: methodLabel(p.method, p.method_label) }), ' ', pstatBadge(p.status), !o.is_native ? johkuBadge() : null),   // Johku-tilauksen maksu: ei kirjanpitoon (booking_41)
         h('span', { class: 'tl-sub-meta', text: [fmt.dt(p.paid_at || p.created_at), p.receipt_no ? `${t('receipt')} ${p.receipt_no}` : null, p.link_token && p.status === 'pending' ? t('payment.linkOpen') : null].filter(Boolean).join(' · ') }),
         h('span', { class: 'tl-sub-sum' }, h('strong', { text: fmt.money(p.amount) }), p.refunded_amount ? h('small', { text: ` ${t('refunded')} ${fmt.money(p.refunded_amount)}` }) : null))))
-      : emptyBox(t('order.noPayments'));
+      : emptyBox(t(o.is_native ? 'order.noPayments' : 'order.noPaymentsJohku'));
     const reservations = o.reservations.length
       ? h('ul', { class: 'tl-sub', 'data-testid': 'order-reservations' }, o.reservations.map((r) => h('li', {},
         h('span', { class: 'tl-sub-main' }, h('strong', { text: r.product_name || '–' }), r.status === 'cancelled' ? h('span', { class: 'badge st-cancelled', text: t('cancelled') }) : null),
@@ -80,7 +80,8 @@ export function createOrdersTab({ api, ctx }) {
       actionBtn({ key: 'recordPayment', label: t('btn.record'), ico: 'plus', testid: 'btn-record', extraDisabled: !o.is_native ? t('btn.addJohku') : unpaid > 0 ? null : t('btn.recordNone'), onClick: () => recordDialog(o) }),
       actionBtn({ key: 'refund', label: t('btn.refund'), ico: 'undo', testid: 'btn-refund', extraDisabled: !canRefund ? t('btn.refundNoPerm') : refundable.length ? null : t('btn.refundNone'), onClick: () => refundDialog(o, refundable) }));
     const receipts = sec(`${t('receipts.title')} (${o.receipts.length})`, receiptsList({ api, ctx, receipts: o.receipts }), o.receipts.length ? h('p', { class: 'muted tl-hint', text: t('receipts.emailNote') }) : null);
-    return h('div', { class: 'tl-detail' }, meta, ...notes, sums, sec(t('order.payments'), payments), receipts, sec(t('order.reservations'), reservations), actions);
+    return h('div', { class: 'tl-detail' }, meta, ...notes, sums, sec(t('order.payments'), payments), !o.is_native && !o.receipts.length ? null : receipts,   // Johku-tilaukselle ei synny kuittia (booking_41)
+       sec(t('order.reservations'), reservations), actions);
   }
 
   // ---- dialogit ----

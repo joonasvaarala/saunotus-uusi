@@ -307,3 +307,55 @@ test('Talous: ei "tulee vaiheessa"-stubitekstejä eikä käyttöönottolippuja (
   }
   for (const k of ['receipts.title', 'receipts.none', 'receipt.download', 'receipt.view', 'receipt.resend', 'receipt.copy', 'receipt.copied', 'resend.confirm', 'resend.queued', 'resend.notQueued', 'resend.mode.live', 'resend.mode.dry_run', 'resend.mode.off', 'resend.mode.unknown', 'err.receipt_not_found', 'r.pdfServer']) assert.ok(TEXTS.fi[k] && TEXTS.en[k], k);
 });
+
+test('Johku ei kirjanpitoon (booking_41): statistics.johku normalisoituu eikä kosketa totals-lukuja', () => {
+  const raw = { period: { from: '2026-10-01', to: '2026-10-31', kind: 'month' }, totals: { receipts: 2, refund_receipts: 0, gross: 100, net: 80, vat: 20, refunds_gross: 0 }, by_method: [], statistics: { johku: { label: 'Johku (ei kirjanpitoon)', accounting: false, basis: 'johku_paid_at', orders: '3', gross: '45.5', refunded_orders: 1, refunded_gross: 12, by_method: [{ method: 'mobilepay', orders: 2, gross: 30 }, { method: 'cash', orders: 1, gross: 15.5 }] } } };
+  const n = A.normReport(raw);
+  assert.deepEqual(n.statistics.johku, { label: 'Johku (ei kirjanpitoon)', accounting: false, basis: 'johku_paid_at', orders: 3, gross: 45.5, refunded_orders: 1, refunded_gross: 12, by_method: [{ method: 'mobilepay', orders: 2, gross: 30 }, { method: 'cash', orders: 1, gross: 15.5 }] });
+  assert.equal(n.totals.gross, 100); assert.equal(n.totals.receipts, 2);   // Johku ei totals-lukuihin
+  assert.equal(A.normReport({ ...raw, statistics: undefined }).statistics.johku, null);   // vanha palvelin → lohkoa ei näytetä
+  assert.equal(A.normJohkuStats({}).orders, 0); assert.deepEqual(A.normJohkuStats({}).by_method, []);
+});
+
+test('Johku ei kirjanpitoon: maksurivin source/is_johku ja ex_johku-summat (palvelin + vanha palvelin)', async () => {
+  assert.equal(A.normPaymentRow({ payment_id: 1, source: 'johku', is_johku: true }).is_johku, true);
+  assert.equal(A.normPaymentRow({ payment_id: 1, source: 'native', is_johku: false }).source, 'native');
+  assert.equal(A.normPaymentRow({ payment_id: 1 }).is_johku, false);   // vanha palvelin: ei kenttiä
+  const api = A.createTalousApi({ rpc: async () => ({ total: 2, sum_paid: 100, sum_refunded: 10, sum_paid_ex_johku: 70, sum_refunded_ex_johku: 10, johku_rows: 1, rows: [{ payment_id: 1, source: 'johku', is_johku: true }, { payment_id: 2, source: 'native', is_johku: false }] }), mock: false, mockFactory: () => mock });
+  const r = await api.listPayments({});
+  assert.equal(r.sum_paid_ex_johku, 70); assert.equal(r.johku_rows, 1); assert.equal(r.sum_paid, 100); assert.deepEqual(r.rows.map((x) => x.is_johku), [true, false]);
+  const old = A.createTalousApi({ rpc: async () => ({ total: 1, sum_paid: 50, sum_refunded: 5, rows: [{ payment_id: 3 }] }), mock: false, mockFactory: () => mock });
+  const o = await old.listPayments({});
+  assert.equal(o.sum_paid_ex_johku, 50); assert.equal(o.sum_refunded_ex_johku, 5); assert.equal(o.johku_rows, 0);
+});
+
+test('Johku ei kirjanpitoon: mock – statistics.johku erillään, ei kuitteja/CSV:tä/totalsia, ex_johku-summat täsmäävät', async () => {
+  const all = await R('admin_list_payments', { p_limit: 200 });
+  assert.ok(all.johku_rows > 0, 'mockissa on Johku-maksurivejä');
+  const jr = mock.payments.filter((p) => p.is_johku).map((p) => ({ ...p, receipt_token: p.receipt?.public_token || null }));
+  assert.ok(jr.every((p) => !p.receipt_no && !p.receipt_token && !p.receipt));
+  assert.ok(all.rows.filter((p) => p.is_johku).every((p) => p.source === 'johku' && !p.receipt_no && !p.receipt_token));
+  assert.ok(all.rows.filter((p) => !p.is_johku).every((p) => p.source === 'native'));
+  const jAll = mock.payments.filter((p) => p.is_johku);
+  assert.equal(all.johku_rows, jAll.length);
+  assert.equal(all.sum_paid_ex_johku, Math.round((all.sum_paid - jAll.filter((p) => p.paid_at).reduce((s, p) => s + p.amount, 0)) * 100) / 100);
+  assert.ok(all.sum_paid_ex_johku < all.sum_paid);
+  // raportti: jakso, jolla on Johku-myyntiä
+  const jDay = mock.orders.filter((o) => o.johku).map((o) => o.johku.paid_date).sort()[100], jYm = jDay.slice(0, 7);
+  const m = await R('admin_report_month', { p_ym: jYm });
+  const j = m.statistics.johku;
+  assert.equal(j.label, 'Johku (ei kirjanpitoon)'); assert.equal(j.accounting, false); assert.equal(j.basis, 'johku_paid_at');
+  assert.ok(j.orders > 0 && j.gross > 0 && j.by_method.length > 0);
+  assert.equal(Math.round(j.by_method.reduce((s, x) => s + x.gross, 0) * 100) / 100, j.gross);
+  assert.equal(j.by_method.reduce((s, x) => s + x.orders, 0), j.orders);
+  assert.ok(!m.lines.some((l) => jr.some((p) => p.order_no === l.order_no)), 'Johku-maksu ei kirjanpidon riveissä');
+  const csv = await R('admin_report_csv', { p_from: `${jYm}-01`, p_to: `${jYm}-28` });
+  assert.ok(!/johku/i.test(csv.content));
+  const d = await R('admin_report_daily', { p_date: TODAY }); assert.ok('johku' in d.statistics); assert.equal(typeof d.statistics.johku.orders, 'number');
+});
+
+test('Johku ei kirjanpitoon: FI/EN-tekstit löytyvät ja lohko on tulosteesta pois', () => {
+  for (const k of ['johku.badge', 'johku.badgeTitle', 'johku.rowNote', 'payments.johkuRows', 'payments.sumsEx', 'order.noPaymentsJohku', 'r.johku.title', 'r.johku.note', 'r.johku.sales', 'r.johku.none', 'jm.paybywaychannel']) for (const l of ['fi', 'en']) assert.ok(TEXTS[l][k], `${l}:${k}`);
+  assert.equal(TEXTS.fi['r.johku.title'], 'Johku (ei kirjanpitoon)');
+  assert.match(readFileSync(join(root, 'admin/views/talous-reports.js'), 'utf8'), /tl-johku-block tl-noprint/);
+});
