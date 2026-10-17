@@ -24,6 +24,8 @@ let expect400 = false;   // resurssivarauksen BK001-virhetesti: selaimen 400-kon
 let dropPerms = [];   // oikeudet jotka poistetaan admin_my_permissions-mockista (oikeuspiilotustesti)
 const ovrArgs = [];   // admin_set_closure_override-kutsut
 let extraPerms = [];   // lisäoikeudet admin_my_permissions-mockiin (bookings.override-testi)
+const treatArgs = [];   // hoitovarauksen RPC-kutsut: [nimi, argumentit]
+let treatBooking = null;   // viimeksi luotu mock-hoitovaraus (public_get_booking)
 const srcArgs = [];   // admin_list_reservations: p_source-arvot kutsuittain
 
 async function newPage(name, { allowFail = null, viewport = { width: 1100, height: 800 }, mobile = false } = {}) {
@@ -51,9 +53,26 @@ async function newPage(name, { allowFail = null, viewport = { width: 1100, heigh
     }
     if (u.pathname.endsWith('/rpc/public_product_images')) return json([{ product_id: 1, slug: 'yleinen', path: 'products/1-smoke01.png', alt: null }]);   // migraatio 19: vain tuotteella 1 on kuva
     if (u.pathname.startsWith('/storage/v1/object/public/product-images/')) return route.fulfill({ status: 200, contentType: 'image/png', headers: { 'access-control-allow-origin': '*' }, body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64') });
+    // hoito- ja rituaalivaraukset (booking_25): saatavuus (vain vapaat alkuajat; ei perjantaisin), luonti, varauksen haku ja muutos
+    if (u.pathname.endsWith('/rpc/public_treatment_availability')) {
+      const a = route.request().postDataJSON() || {}, rows = []; treatArgs.push(['availability', a]);
+      for (let d = new Date(`${a.p_from}T12:00:00Z`); d <= new Date(`${a.p_to}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + 1)) {
+        const ds = d.toISOString().slice(0, 10); if (d.getUTCDay() === 5 || ds < new Date().toISOString().slice(0, 10)) continue;
+        for (const [h, m] of [[14, '00'], [14, '30']]) rows.push({ product_id: 11, session_date: ds, starts_at: `${ds}T${h}:${m}:00Z`, ends_at: `${ds}T${h + 2}:${m}:00Z`, duration_minutes: 120, status: 'available', persons: a.p_persons, total: 210 + 60 * (a.p_persons - 1) });
+      }
+      return json(rows);
+    }
+    if (u.pathname.endsWith('/rpc/public_create_treatment_booking')) { const a = route.request().postDataJSON() || {}; treatArgs.push(['create', a]); treatBooking = a; return json({ ok: true, order_no: 9101, token: '11111111-2222-4333-8444-555555555555', status: 'confirmed', starts_at: a.p_start, persons: a.p_persons, total: 210, payment_mode: 'pay_later', booking_kind: 'slots' }); }
+    if (u.pathname.endsWith('/rpc/public_get_booking') && treatBooking) {
+      const a = treatBooking, st = new Date(a.p_start);
+      return json({ ok: true, order_no: 9101, status: 'confirmed', payment_status: 'unpaid', total: 210, customer_kind: a.p_customer_kind, booking_kind: 'slots', change_via: 'public_change_treatment_booking', can_change: true, change_deadline: new Date(st - 48 * 36e5).toISOString(), change_hours_before: 48,
+        items: [{ product_name: 'Saunotus', product_id: 11, rule_id: null, starts_at: a.p_start, ends_at: new Date(st.getTime() + 2 * 36e5).toISOString(), persons: a.p_persons, status: 'confirmed' }], addons: [] });
+    }
+    if (u.pathname.endsWith('/rpc/public_change_treatment_booking')) { treatArgs.push(['change', route.request().postDataJSON()]); return json({ ok: true, order_no: 9101 }); }
     if (u.pathname.endsWith('/rpc/public_catalog')) return json([
       { id: 1, slug: 'yleinen', name: 'Yleinen vuoro', name_en: 'Public session', description: 'x', description_en: 'x', category: 'sauna', sale_kind: 'public_shift', price: 29, price_type: 'per_person', min_persons: 1, max_persons: 10 },
       { id: 3, slug: 'taynna', name: 'Täysi tuote', name_en: 'Fully booked product', description: 'x', description_en: 'x', category: 'sauna', sale_kind: 'public_shift', price: 40, price_type: 'per_person', min_persons: 1, max_persons: 10 },
+      { id: 11, slug: 'saunotus-2', name: 'Saunotus', name_en: 'Sauna ritual (Saunotus)', description: 'Kahden tunnin saunaelämys. Toinen virke.', description_en: 'A two-hour sauna experience. Second sentence.', category: 'treatment', sale_kind: 'other', price: 210, price_type: 'base_plus_extra_person', duration_minutes: 120, min_persons: 1, max_persons: 2, booking_kind: 'slots', slot_grid_minutes: 30 },
       { id: 2, slug: 'oma', name: 'Oma saunavuoro', name_en: 'Private sauna', description: 'x', description_en: 'x', category: 'sauna', sale_kind: 'private_shift', price: 250, price_type: 'from', min_persons: 1, max_persons: 20 }]);
     if (u.pathname.endsWith('/rpc/public_availability')) {   // parittomina kuukauden päivinä vuoroja, parillisina ei yhtään (tyhjä päivä)
       const a = route.request().postDataJSON() || {}, rows = [];
@@ -212,6 +231,52 @@ async function loginViaInvite(page) {
   await page.waitForSelector('#setpw-screen:not([hidden])');
   await page.fill('#pw1', 'pitkasalasana1'); await page.fill('#pw2', 'pitkasalasana1'); await page.click('#setpw button[type=submit]');
   await page.waitForSelector('#shell:not([hidden]) #nav a');
+}
+// 2c) kauppa: hoito- ja rituaalivaraukset (booking_kind 'slots' katalogissa) – koko kulku mobiilissa 390 ja desktopilla, mockatulla rajapinnalla
+for (const [name, viewport, mobile] of [['mobiili 390', { width: 390, height: 844 }, true], ['desktop', { width: 1280, height: 900 }, false]]) {
+  const page = await newPage(`hoito ${name}`, { viewport, mobile });
+  treatArgs.length = 0; treatBooking = null;
+  const hs = () => page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
+  await page.goto(`${BASE}/varaa/#/?k=hoito`); await page.waitForSelector('.bk-cards');
+  if ((await page.locator('.bk-card h3').allInnerTexts()).join() !== 'Saunotus') problems.push(`hoito ${name}: hoitolistalla pitäisi olla vain Saunotus`);
+  // vuorotuote ei saa kutsua hoitorajapintaa; hoitotuote ei saa kutsua public_availabilityä
+  await page.locator('.bk-card h3 a').click(); await page.waitForSelector('.bk-picker .bk-cell.free');
+  if ((await page.locator('main .hero.page h1').innerText()) !== 'Saunotus') problems.push(`hoito ${name}: hero-otsikko`);
+  if (!treatArgs.length || treatArgs.some(([k, a]) => k === 'availability' && (a.p_product_id !== 11 || !a.p_from || !a.p_to || !a.p_persons))) problems.push(`hoito ${name}: saatavuuskutsun parametrit ${JSON.stringify(treatArgs[0])}`);
+  if (treatArgs.some(([k, a]) => k === 'availability' && (new Date(a.p_to) - new Date(a.p_from)) / 864e5 > 14)) problems.push(`hoito ${name}: haun väli yli 14 pv`);
+  const days = await page.locator('.bk-cell.free').evaluateAll((e) => e.map((x) => x.dataset.date));
+  if (!days.length || days.some((d) => new Date(`${d}T12:00:00Z`).getUTCDay() === 5)) problems.push(`hoito ${name}: vapaat päivät (perjantai mukana tai tyhjä): ${days}`);
+  await page.locator('.bk-step').last().click(); await page.waitForSelector('.bk-cal-tr .bk-grid');
+  if (!treatArgs.some(([k, a]) => k === 'availability' && a.p_persons === 2)) problems.push(`hoito ${name}: henkilömäärän vaihto ei hakenut saatavuutta (p_persons 2)`);
+  await page.locator('.bk-cell.free').first().click(); await page.locator('.bk-time-btn').first().click();
+  if (!/270/.test(await page.locator('.bk-pick-sum').innerText())) problems.push(`hoito ${name}: hinta (total) ei tule palvelimelta: ${await page.locator('.bk-pick-sum').innerText()}`);
+  if (await hs()) problems.push(`hoito ${name}: vaakavieritys tuotesivulla`);
+  await page.locator('.bk-continue .btn').click(); await page.waitForSelector('form.bk-form');
+  await page.fill('#name', 'Smoke Testi'); await page.fill('#email', 'smoke@example.com'); await page.fill('#phone', '0401234567'); await page.check('#bk-terms');
+  await page.locator('.bk-form button[type=submit]').click(); await page.waitForSelector('.bk-review');
+  if (!/maksu paikan päällä/i.test(await page.locator('.bk-review').innerText())) problems.push(`hoito ${name}: vahvistusvaiheesta puuttuu "maksu paikan päällä"`);
+  if (await hs()) problems.push(`hoito ${name}: vaakavieritys vahvistusvaiheessa`);
+  await page.locator('.bk-review .bk-actions .btn:not(.light)').click();
+  await page.waitForURL(/vahvistus\/#11111111/); await page.waitForSelector('.bk-conf');
+  const cr = treatArgs.find(([k]) => k === 'create')?.[1];
+  if (!cr || cr.p_product_id !== 11 || cr.p_persons !== 2 || !/^\d{4}-\d\d-\d\dT/.test(cr.p_start) || cr.p_customer_kind !== 'private' || cr.p_locale !== 'fi' || cr.p_email !== 'smoke@example.com') problems.push(`hoito ${name}: luontikutsun parametrit ${JSON.stringify(cr)}`);
+  if (!/9101/.test(await page.locator('.bk-conf').innerText()) || (await page.getByRole('button', { name: /peru/i }).count())) problems.push(`hoito ${name}: vahvistussivu`);
+  await page.getByRole('link', { name: 'Muuta varausta' }).click(); await page.waitForSelector('.bk-picker .bk-cell.free');
+  await page.locator('.bk-cell.free').last().click(); await page.locator('.bk-time-btn').last().click();
+  await page.locator('#booking-app .bk-continue .btn').click(); await page.waitForSelector('.bk-conf');
+  const ch = treatArgs.find(([k]) => k === 'change')?.[1];
+  if (!ch || ch.p_token !== '11111111-2222-4333-8444-555555555555' || !ch.p_start || ch.p_persons !== 2) problems.push(`hoito ${name}: muutoskutsun parametrit ${JSON.stringify(ch)}`);
+  await page.context().close();
+}
+// 2d) hoitotuote piilossa (ei booking_kind slots -riviä katalogissa) → ei hoitoja listalla, tuotesivu = "ota yhteyttä", ei hoitorajapinnan kutsuja
+{
+  const page = await newPage('hoito piilossa');
+  const calls0 = calls.length;
+  await page.route(/\/rpc\/public_catalog$/, (r) => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' }, body: JSON.stringify([]) }), { times: 5 });
+  await page.goto(`${BASE}/varaa/#/tuote/saunotus-2`); await page.waitForSelector('#booking-app .bk-notice');
+  if ((await page.locator('.bk-picker').count()) || !(await page.locator('.bk-notice a[href^="tel:"]').count())) problems.push('hoito piilossa: "ota yhteyttä" puuttuu tai varauskulku näkyy');
+  if (calls.slice(calls0).some((c) => /public_treatment/.test(c))) problems.push('hoito piilossa: hoitorajapintaa kutsuttiin vaikka tuotetta ei ole katalogissa');
+  await page.context().close();
 }
 // 3) kutsulinkki alipolulla: istunto otetaan käyttöön, tokenit siivotaan osoiteriviltä, salasana asetetaan, siirrytään hallintaan
 {

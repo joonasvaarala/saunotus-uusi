@@ -3,6 +3,8 @@
 // Asiakas ei voi itse perua vahvistettua varausta (peruutukset sähköpostilla henkilökunnalle); hän voi MUUTTAA varausta (toinen vuoro / henkilömäärä) asetuksen mukaan vähintään 48 h ennen vuoroa.
 import { rpc, storageUrl } from './sb.js';
 import { T } from './i18n.js';
+import { loadProducts as loadTreatmentProducts, splitCatalog, isTreatmentBooking } from './treatments.js';
+import { createTreatmentViews } from './treatment-ui.js';
 
 const S = window.BOOKING_SHOP;                   // build-aikainen konfiguraatio (kieli, polut, ei-verkossa-varattavat tuotteet)
 const t = T[S.lang] || T.fi;
@@ -54,21 +56,34 @@ const priceText = (p) => {
   if (p.price_type === 'from' || p.price_type === 'variable') return `${t.from} ${v}`;
   return v;
 };
-const kindOf = (p) => (p.sale_kind === 'public_shift' ? 'yleinen' : p.sale_kind === 'private_shift' ? 'yksityinen' : 'muut');
+const kindOf = (p) => (p.treatment ? 'hoito' : p.sale_kind === 'public_shift' ? 'yleinen' : p.sale_kind === 'private_shift' ? 'yksityinen' : 'muut');
 const bk = (hash) => `${S.shopHref}#${hash}`;
 
-const state = { catalog: null, settings: null, images: new Map(), months: new Map(), busy: false };
+const state = { catalog: null, settings: null, images: new Map(), treatments: [], months: new Map(), busy: false };
 const mount = (...nodes) => { root.replaceChildren(...nodes); root.setAttribute('aria-busy', 'false'); };
 const focusTop = () => { const el = root.querySelector('h2,h1') || document.querySelector('main .hero.page h1'); if (el) { el.setAttribute('tabindex', '-1'); el.focus({ preventScroll: false }); } };
 const spinner = () => mount(h('p', { class: 'bk-loading', role: 'status', text: t.loading }));
 const errorBox = (msg) => h('p', { class: 'bk-error', role: 'alert', text: msg });
 const phoneBox = () => h('p', { class: 'bk-contact' }, h('a', { href: `tel:${S.phoneTel}`, text: S.phone }), ' · ', h('a', { href: `mailto:${S.email}`, text: S.email }));
 
+// Hoito- ja rituaalituotteet (adapteri treatments.js): public_catalog()-rivit joilla booking_kind = 'slots'. Rivi täydennetään build-aikaisella kb-datalla (static-products.json).
+// Piilotetut tuotteet eivät ole katalogissa → ne näytetään "ota yhteyttä" -sivuna (viewProduct). Vahvistussivu hakee katalogin itse (ensureTreatments).
+let staticById = null;
+async function loadStatic() {
+  staticById ||= fetch(S.staticProductsUrl).then((r) => r.json()).catch(() => ({})).then((st) => new Map(Object.entries(st).map(([slug, o]) => [o.id, { ...o, slug }])));
+  return staticById;
+}
+let treatmentsReady = null;
+function ensureTreatments() {
+  treatmentsReady ||= (async () => { state.treatments = await loadTreatmentProducts(await loadStatic()).catch(() => []); })();
+  return treatmentsReady;
+}
 async function loadBase() {
   if (state.catalog) return;
   // Tuotekuvat: public_product_images voi puuttua (migraatio 14 ajamatta) tai epäonnistua → kauppa toimii ilman kuvia
-  const [catalog, settings, imgs] = await Promise.all([rpc('public_catalog'), rpc('public_settings'), rpc('public_product_images').catch(() => [])]);
-  state.catalog = catalog || []; state.settings = settings || {};
+  const [catalog, settings, imgs, stat] = await Promise.all([rpc('public_catalog'), rpc('public_settings'), rpc('public_product_images').catch(() => []), loadStatic()]);
+  const split = splitCatalog(catalog, stat);   // vuoropohjaiset tuotteet (rules) ja hoito-/rituaalituotteet (slots) erikseen
+  state.catalog = split.rules; state.treatments = split.treatments; treatmentsReady = Promise.resolve(); state.settings = settings || {};
   for (const i of Array.isArray(imgs) ? imgs : []) if (i?.path) state.images.set(+i.product_id, { url: storageUrl('product-images', i.path), alt: i.alt || '' });
 }
 // Tuotekuva: kiinteä kuvasuhde (varaa tilan → ei layout-hyppyä), lazy-lataus, alt = ylläpidon alt-teksti tai tuotteen nimi.
@@ -124,12 +139,12 @@ function setHero(p) {
 
 // ---- näkymä 1: tuotelista ----
 function viewList(query) {
-  const cat = state.catalog;
+  const cat = [...state.catalog, ...state.treatments];
   const kinds = ['all', ...new Set(cat.map(kindOf))];
   const k = kinds.includes(query.get('k')) ? query.get('k') : 'all';
   const list = cat.filter((p) => k === 'all' || kindOf(p) === k);
   const tabs = h('nav', { class: 'bk-tabs', 'aria-label': t.title }, kinds.map((x) => h('a', { href: bk(`/?k=${x}`), 'aria-current': x === k ? 'true' : null, text: t['k_' + x] || t[x] || x })));
-  const cards = h('ul', { class: 'bk-cards' }, list.map((p) => h('li', { class: 'bk-card' },
+  const cards = h('ul', { class: 'bk-cards' }, list.map((p) => p.treatment ? tv.card(p) : h('li', { class: 'bk-card' },
     pimg(p, 'card-img'),
     h('h3', {}, h('a', { href: bk(`/tuote/${p.slug}`), text: pname(p) })),
     h('p', { class: 'bk-desc', text: (pdesc(p) || '').slice(0, 170) + ((pdesc(p) || '').length > 170 ? '…' : '') }),
@@ -266,7 +281,9 @@ async function viewDay(dateStr, keep, openSlug) {
 }
 
 // ---- näkymä 2: tuote → kalenteri → vuorot ----
-async function viewProduct(slug, dateStr) {
+async function viewProduct(slug, dateStr, query) {
+  const tp = !state.catalog.some((x) => x.slug === slug) && state.treatments.find((x) => x.slug === slug);
+  if (tp) return tv.viewTreatment(tp, query || new URLSearchParams());   // hoito-/rituaalituote: oma kulku (treatment-ui.js)
   const p = state.catalog.find((x) => x.slug === slug);
   setHero(p || null);
   if (!p) {
@@ -291,7 +308,7 @@ async function viewProduct(slug, dateStr) {
     let byDay = {};
     try { byDay = await loadMonth(p.id, y, m); } catch (e) { calBox.append(errorBox(t.loadError)); return; }
     const first = new Date(y, m, 1), days = new Date(y, m + 1, 0).getDate(), lead = (first.getDay() + 6) % 7;
-    const monthName = fmt(first.toISOString(), { month: 'long', year: 'numeric', timeZone: 'UTC' });
+    const monthName = fmt(new Date(Date.UTC(y, m, 1, 12)).toISOString(), { month: 'long', year: 'numeric', timeZone: 'UTC' });
     const maxDate = new Date(Date.now() + horizon * 864e5);
     const prevOk = new Date(y, m, 0) >= new Date(today), nextOk = new Date(y, m + 1, 1) <= maxDate;
     const nav = h('div', { class: 'bk-calnav' },
@@ -338,6 +355,60 @@ function slotItem(r, ds, p) {
       ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}`) }, t.choose, h('span', { class: 'sr', text: ` ${title}` })) : null));
 }
 
+// ---- jaetut lomakeosat (vuorovaraus + hoitovaraus) ----
+const field = (id, label, { hint, ...attrs } = {}) => h('div', { class: 'bk-field' }, h('label', { for: id, text: label }), h('input', { id, name: id, required: true, 'aria-describedby': hint ? `${id}-hint` : null, ...attrs }), hint ? h('small', { class: 'bk-hint', id: `${id}-hint`, text: hint }) : null);
+const opt = (id, label, attrs) => field(id, label, { required: false, ...attrs });
+// Asiakastiedot: yksityinen / yritys + nimi, sähköposti, puhelin. read(form, msg) validoi (virhe → msg + fokus, palauttaa null) ja palauttaa { kind, name, email, phone, company }.
+function customerFields() {
+  let kind = 'private';
+  const kindInputs = [['private', t.kindPrivate], ['company', t.kindCompany]].map(([k, label]) => h('label', { class: 'bk-kind' }, h('input', { type: 'radio', name: 'kind', value: k, checked: k === 'private' || null, onchange: () => setKind(k) }), ' ', label));
+  const nameLabel = h('label', { for: 'name', text: t.name });
+  const companyBox = h('fieldset', { class: 'bk-company', id: 'bk-company', hidden: true },
+    h('legend', { text: t.companyTitle }),
+    field('company_name', t.companyName, { maxlength: 200, autocomplete: 'organization' }), field('business_id', t.businessId, { maxlength: 20, inputmode: 'numeric', placeholder: '1234567-8', hint: t.businessIdHint }),
+    field('street', t.street, { maxlength: 200, autocomplete: 'street-address' }),
+    h('div', { class: 'bk-row2' }, field('zip', t.zip, { maxlength: 5, inputmode: 'numeric', autocomplete: 'postal-code' }), field('city', t.city, { maxlength: 100, autocomplete: 'address-level2' })),
+    h('h4', { text: t.einvoiceTitle }),
+    opt('einvoice_address', t.einvoiceAddress, { maxlength: 40 }), opt('einvoice_operator', t.einvoiceOperator, { maxlength: 40, hint: t.einvoiceHint }),
+    opt('reference', t.reference, { maxlength: 100 }),
+    h('p', { class: 'bk-note', text: t.companyNote }));
+  function setKind(k) {
+    kind = k; companyBox.hidden = k !== 'company'; nameLabel.textContent = k === 'company' ? t.contactName : t.name;
+    for (const id of ['company_name', 'business_id', 'street', 'zip', 'city']) { const el = document.getElementById(id); if (el) el.required = k === 'company'; }
+  }
+  const node = h('fieldset', { class: 'bk-section bk-contact' }, h('legend', { text: t.details }),
+    h('fieldset', { class: 'bk-kinds' }, h('legend', { text: t.kindTitle }), h('div', { class: 'bk-kindrow' }, kindInputs)),
+    companyBox,
+    h('div', { class: 'bk-field' }, nameLabel, h('input', { id: 'name', name: 'name', required: true, autocomplete: 'name', maxlength: 120 })), field('email', t.email, { type: 'email', autocomplete: 'email', maxlength: 254 }),
+    field('phone', t.phone, { type: 'tel', autocomplete: 'tel', maxlength: 30 }));
+  const read = (form, msg) => {
+    const f = new FormData(form), val = (k) => String(f.get(k) || '').trim();
+    const need = ['name', 'email', 'phone'].filter((k) => !val(k));
+    if (need.length || !form.email.checkValidity()) { msg.append(errorBox(t.required)); form[need[0] || 'email'].focus(); return null; }
+    let company = null;
+    if (kind === 'company') {
+      const needC = ['company_name', 'business_id', 'street', 'zip', 'city'].filter((k) => !val(k));
+      if (needC.length) { msg.append(errorBox(t.required)); form[needC[0]].focus(); return null; }
+      if (!validBid(val('business_id'))) { msg.append(errorBox(t.invalidBusinessId)); form.business_id.focus(); return null; }
+      if (!/^\d{5}$/.test(val('zip'))) { msg.append(errorBox(t.invalidZip)); form.zip.focus(); return null; }
+      if (!!val('einvoice_address') !== !!val('einvoice_operator')) { msg.append(errorBox(t.einvoiceBoth)); form.einvoice_address.focus(); return null; }
+      company = { company_name: val('company_name'), business_id: normBid(val('business_id')), street: val('street'), zip: val('zip'), city: val('city'),
+        einvoice_address: val('einvoice_address') || null, einvoice_operator: val('einvoice_operator') || null, reference: val('reference') || null };
+    }
+    return { kind, name: val('name'), email: val('email'), phone: val('phone'), company };
+  };
+  return { node, read, kind: () => kind };
+}
+// Lisätiedot, ehdot ja markkinointisuostumus (nodes: lomakkeeseen järjestyksessä; terms/consent: valintaruudut)
+function legalFields() {
+  const terms = h('input', { type: 'checkbox', id: 'bk-terms', required: true });
+  const consent = h('input', { type: 'checkbox', id: 'bk-consent' });
+  const nodes = [h('div', { class: 'bk-field' }, h('label', { for: 'note', text: t.note }), h('textarea', { id: 'note', name: 'note', rows: 3, maxlength: 1000 })),
+    h('div', { class: 'bk-check' }, terms, h('label', { for: 'bk-terms' }, t.acceptTerms + ' ', h('a', { href: S.termsHref, target: '_blank', rel: 'noopener', text: t.termsLink }), ' *')),
+    h('div', { class: 'bk-check' }, consent, h('label', { for: 'bk-consent', text: t.consentMarketing }))];
+  return { nodes, terms, consent };
+}
+
 // ---- näkymä 3: henkilömäärä + yhteystiedot ----
 async function viewCheckout(ruleId, ds, productId, via) {
   // Haetaan vuoro tuotteen kuukausidatasta (tuote-id tulee linkissä; ilman sitä käydään tuotteet läpi)
@@ -359,7 +430,6 @@ async function viewCheckout(ruleId, ds, productId, via) {
   // lisäpalvelut (public_addons): vain tämän vuorotyypin lisäpalvelut; virhe tai puuttuva funktio → ei lisäpalveluita
   const addons = ((await rpc('public_addons').catch(() => [])) || []).filter((a) => (a.applies_modes || []).includes(s.mode));
   const qty = new Map(addons.map((a) => [a.id, 0]));
-  let kind = 'private';
   const addonsSum = () => addons.reduce((x, a) => x + qty.get(a.id) * +a.price, 0);
   const upd = () => {
     for (const a of addons) qty.set(a.id, Math.min(qty.get(a.id), addonLimit(a, n)));
@@ -372,8 +442,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
   const num = h('input', { id: 'bk-n', type: 'number', min: s.min_persons, max, inputmode: 'numeric', 'aria-label': t.persons, onchange: () => { n = Math.min(Math.max(+num.value || s.min_persons, s.min_persons), max); upd(); } });
   const minus = h('button', { type: 'button', class: 'bk-step', 'aria-label': '−', onclick: () => { n--; upd(); } }, '−');
   const plus = h('button', { type: 'button', class: 'bk-step', 'aria-label': '+', onclick: () => { n++; upd(); } }, '+');
-  const field = (id, label, { hint, ...attrs } = {}) => h('div', { class: 'bk-field' }, h('label', { for: id, text: label }), h('input', { id, name: id, required: true, 'aria-describedby': hint ? `${id}-hint` : null, ...attrs }), hint ? h('small', { class: 'bk-hint', id: `${id}-hint`, text: hint }) : null);
-  const opt = (id, label, attrs) => field(id, label, { required: false, ...attrs });
+  const cf = customerFields();
   // lisäpalvelurivi: nimi, hinta, kuvaus + määrävalitsin (− n +)
   const addonRows = addons.map((a) => {
     const q = h('input', { id: `bk-a-${a.id}`, type: 'number', min: 0, inputmode: 'numeric', 'aria-label': `${aname(a)}: ${t.addonQty}`, onchange: () => { qty.set(a.id, Math.max(0, Math.min(Math.floor(+q.value) || 0, addonLimit(a, n)))); upd(); } });
@@ -384,49 +453,19 @@ async function viewCheckout(ruleId, ds, productId, via) {
       h('div', { class: 'bk-stepper' }, dec, q, inc));
     return { node, sync, a };
   });
-  // asiakastyyppi: yksityinen / yritys
-  const kindInputs = [['private', t.kindPrivate], ['company', t.kindCompany]].map(([k, label]) => h('label', { class: 'bk-kind' }, h('input', { type: 'radio', name: 'kind', value: k, checked: k === 'private' || null, onchange: () => setKind(k) }), ' ', label));
-  const nameLabel = h('label', { for: 'name', text: t.name });
-  const companyBox = h('fieldset', { class: 'bk-company', id: 'bk-company', hidden: true },
-    h('legend', { text: t.companyTitle }),
-    field('company_name', t.companyName, { maxlength: 200, autocomplete: 'organization' }), field('business_id', t.businessId, { maxlength: 20, inputmode: 'numeric', placeholder: '1234567-8', hint: t.businessIdHint }),
-    field('street', t.street, { maxlength: 200, autocomplete: 'street-address' }),
-    h('div', { class: 'bk-row2' }, field('zip', t.zip, { maxlength: 5, inputmode: 'numeric', autocomplete: 'postal-code' }), field('city', t.city, { maxlength: 100, autocomplete: 'address-level2' })),
-    h('h4', { text: t.einvoiceTitle }),
-    opt('einvoice_address', t.einvoiceAddress, { maxlength: 40 }), opt('einvoice_operator', t.einvoiceOperator, { maxlength: 40, hint: t.einvoiceHint }),
-    opt('reference', t.reference, { maxlength: 100 }),
-    h('p', { class: 'bk-note', text: t.companyNote }));
-  function setKind(k) {
-    kind = k; companyBox.hidden = k !== 'company'; nameLabel.textContent = k === 'company' ? t.contactName : t.name;
-    for (const id of ['company_name', 'business_id', 'street', 'zip', 'city']) { const el = document.getElementById(id); if (el) el.required = k === 'company'; }
-  }
   const msg = h('div', { id: 'bk-msg' });
   const submit = h('button', { type: 'submit', class: 'btn gold', text: t.book });
-  const terms = h('input', { type: 'checkbox', id: 'bk-terms', required: true });
-  const consent = h('input', { type: 'checkbox', id: 'bk-consent' });
+  const legal = legalFields(), { terms, consent } = legal;
   const hold = state.settings.public_payment_mode === 'hold_until_paid';
   const form = h('form', { class: 'bk-form', novalidate: true, onsubmit: async (ev) => {
     ev.preventDefault(); msg.replaceChildren();
-    const f = new FormData(form);
-    const need = ['name', 'email', 'phone'].filter((k) => !String(f.get(k) || '').trim());
-    if (need.length || !form.email.checkValidity()) { msg.append(errorBox(t.required)); form[need[0] || 'email'].focus(); return; }
-    const val = (k) => String(f.get(k) || '').trim();
-    let company = null;
-    if (kind === 'company') {
-      const needC = ['company_name', 'business_id', 'street', 'zip', 'city'].filter((k) => !val(k));
-      if (needC.length) { msg.append(errorBox(t.required)); form[needC[0]].focus(); return; }
-      if (!validBid(val('business_id'))) { msg.append(errorBox(t.invalidBusinessId)); form.business_id.focus(); return; }
-      if (!/^\d{5}$/.test(val('zip'))) { msg.append(errorBox(t.invalidZip)); form.zip.focus(); return; }
-      if (!!val('einvoice_address') !== !!val('einvoice_operator')) { msg.append(errorBox(t.einvoiceBoth)); form.einvoice_address.focus(); return; }
-      company = { company_name: val('company_name'), business_id: normBid(val('business_id')), street: val('street'), zip: val('zip'), city: val('city'),
-        einvoice_address: val('einvoice_address') || null, einvoice_operator: val('einvoice_operator') || null, reference: val('reference') || null };
-    }
+    const f = new FormData(form), cust = cf.read(form, msg); if (!cust) return;
     if (!terms.checked) { msg.append(errorBox(t.acceptTermsErr)); terms.focus(); return; }
     submit.disabled = true; submit.textContent = t.booking;
     try {
       const chosen = addons.filter((a) => qty.get(a.id) > 0).map((a) => ({ id: a.id, quantity: qty.get(a.id) }));
-      const r = await rpc('public_create_booking', { p_rule_id: s.rule_id, p_date: ds, p_persons: n, p_name: f.get('name').trim(), p_email: f.get('email').trim(), p_phone: f.get('phone').trim(), p_marketing_consent: consent.checked, p_locale: S.lang, p_note: (f.get('note') || '').trim() || null,
-        p_customer_kind: kind, p_company: company, p_addons: chosen.length ? chosen : null });
+      const r = await rpc('public_create_booking', { p_rule_id: s.rule_id, p_date: ds, p_persons: n, p_name: cust.name, p_email: cust.email, p_phone: cust.phone, p_marketing_consent: consent.checked, p_locale: S.lang, p_note: (f.get('note') || '').trim() || null,
+        p_customer_kind: cust.kind, p_company: cust.company, p_addons: chosen.length ? chosen : null });
       if (!r.ok) throw Object.assign(new Error(t.errors[r.code] || r.message), { code: r.code });
       state.months.clear();
       location.assign(`${S.confirmHref}#${r.token}`);
@@ -439,15 +478,9 @@ async function viewCheckout(ruleId, ds, productId, via) {
   } },
     h('fieldset', { class: 'bk-section' }, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, minus, num, plus)),
     // Järjestys: henkilömäärä → asiakastyyppi ja yhteystiedot → lisäpalvelut → lisätiedot, ehdot ja varaus
-    h('fieldset', { class: 'bk-section bk-contact' }, h('legend', { text: t.details }),
-      h('fieldset', { class: 'bk-kinds' }, h('legend', { text: t.kindTitle }), h('div', { class: 'bk-kindrow' }, kindInputs)),
-      companyBox,
-      h('div', { class: 'bk-field' }, nameLabel, h('input', { id: 'name', name: 'name', required: true, autocomplete: 'name', maxlength: 120 })), field('email', t.email, { type: 'email', autocomplete: 'email', maxlength: 254 }),
-      field('phone', t.phone, { type: 'tel', autocomplete: 'tel', maxlength: 30 })),
+    cf.node,
     addonRows.length ? h('fieldset', { class: 'bk-section bk-addons' }, h('legend', { text: t.addonsTitle }), h('p', { class: 'bk-hint', text: t.addonsHint }), h('ul', { class: 'bk-addonlist' }, addonRows.map((r) => r.node))) : null,
-    h('div', { class: 'bk-field' }, h('label', { for: 'note', text: t.note }), h('textarea', { id: 'note', name: 'note', rows: 3, maxlength: 1000 })),
-    h('div', { class: 'bk-check' }, terms, h('label', { for: 'bk-terms' }, t.acceptTerms + ' ', h('a', { href: S.termsHref, target: '_blank', rel: 'noopener', text: t.termsLink }), ' *')),
-    h('div', { class: 'bk-check' }, consent, h('label', { for: 'bk-consent', text: t.consentMarketing })),
+    legal.nodes,
     msg, submit);
   form.addEventListener('input', () => msg.replaceChildren());   // vanha virheilmoitus pois kun käyttäjä korjaa tietoja
   // Lyhyt yhteenveto otsikon alla (tuote, päivä, kellonaika) + linkki takaisin valintaan (korvaa erillisen "Takaisin"-linkin):
@@ -478,13 +511,14 @@ async function viewConfirmation() {
   spinner();
   let b; try { b = await rpc('public_get_booking', { p_token: token }); } catch { mount(errorBox(t.loadError), phoneBox()); return; }
   if (!b?.ok) { mount(errorBox(t.notFound), phoneBox()); return; }
-  if (sub === 'muuta' && b.can_change) return viewChange(token, b);
+  if (sub === 'muuta' && b.can_change) return isTreatmentBooking(b) ? viewTreatmentChange(token, b) : viewChange(token, b);
   const it = b.items[0];
+  const sp = (await loadStatic()).get(+it.product_id), prodName = (S.lang === 'en' && sp?.name_en) || it.product_name;   // englanniksi kb-nimi (palvelin palauttaa suomenkielisen)
   const head = { confirmed: t.confConfirmed, pending: t.confPending, cancelled: t.confCancelled, expired: t.confExpired }[b.status] || b.status;
   const pay = { paid: t.paid, unpaid: t.unpaid, pending: t.pending }[b.payment_status] || b.payment_status;
   const out = h('div', { id: 'bk-cancel-msg', 'aria-live': 'polite' });
   const dl = h('dl', { class: 'bk-sum' },
-    h('dt', { text: t.order }), h('dd', { text: String(b.order_no) }), h('dt', { text: t.what }), h('dd', { text: it.product_name }),
+    h('dt', { text: t.order }), h('dd', { text: String(b.order_no) }), h('dt', { text: t.what }), h('dd', { text: prodName }),
     h('dt', { text: t.when }), h('dd', { text: `${dayLong(it.starts_at)}, ${hm(it.starts_at)}–${hm(it.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(it.persons) }),
     (b.addons || []).flatMap((a) => [h('dt', { text: (S.lang === 'en' && a.name_en) || a.name }), h('dd', { text: `${a.quantity} × ${money(a.unit_price)}` })]),
     h('dt', { text: t.total }), h('dd', { text: `${money(b.total)} (${t.vatIncl})` }), h('dt', { text: t.payStatus }), h('dd', { text: pay }));
@@ -505,6 +539,13 @@ async function viewConfirmation() {
     b.status === 'confirmed' ? h('p', { class: 'bk-note', text: b.can_change ? t.changeInfo(b.change_hours_before, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) : t.changeLocked(b.change_hours_before) }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })) : null,
     h('p', { class: 'bk-note', text: t.emailNote }), h('p', {}, h('a', { href: S.infoHref, text: t.directions }))));
   focusTop();
+}
+
+async function viewTreatmentChange(token, b) {   // hoitovarauksen muutos: tuote haetaan adapterin kautta (vahvistussivulla ei ole ladattu kauppaa)
+  await ensureTreatments();
+  const p = state.treatments.find((x) => x.id === +b.items[0].product_id);
+  if (!p) { mount(h('p', {}, h('a', { href: `#${token}`, text: t.back })), h('div', { class: 'bk-notice' }, h('p', { text: t.tr.errors.too_late }), phoneBox())); focusTop(); return; }
+  return tv.viewChange(token, b, p);
 }
 
 // ---- näkymä 5: varauksen muutos (toinen vapaa vuoro samalle tuotteelle ja/tai henkilömäärä; vähintään N h ennen alkua) ----
@@ -588,6 +629,9 @@ async function viewChange(token, b) {
   await loadSessions(); focusTop();
 }
 
+// ---- hoito- ja rituaalivaraukset: käyttöliittymä saa tarvitsemansa apurit täältä (luodaan vasta kun kaikki on määritelty) ----
+const tv = createTreatmentViews({ h, t, S, state, money, fmt, hm, dayLong, pad2, todayHel, addDays, pname, pdesc, pimg, setHero, mount, focusTop, errorBox, phoneBox, bk, customerFields, legalFields, setLast: () => { last = location.hash; } });
+
 // ---- reititin ----
 async function route(keep = false) {
   root.setAttribute('aria-busy', 'true');
@@ -599,9 +643,10 @@ async function route(keep = false) {
     const [path, qs] = location.hash.slice(1).split('?');
     const parts = path.split('/').filter(Boolean);
     const q = new URLSearchParams(qs || '');
-    if (!(parts[0] === 'tuote' && parts[1]) && !(parts[0] === 'varaa' && parts[1] && parts[2])) setHero(null);   // tuote- ja lomakenäkymä asettavat heron itse
+    if (!(parts[0] === 'tuote' && parts[1]) && !(parts[0] === 'varaa' && parts[1] && parts[2]) && !(parts[0] === 'hoito' && parts[1])) setHero(null);   // tuote- ja lomakenäkymä asettavat heron itse
     if (parts[0] === 'paiva') await viewDay(parts[1], keep, q.get('tuote'));
-    else if (parts[0] === 'tuote' && parts[1]) await viewProduct(parts[1], /^\d{4}-\d\d-\d\d$/.test(parts[2] || '') ? parts[2] : null);
+    else if (parts[0] === 'tuote' && parts[1]) await viewProduct(parts[1], /^\d{4}-\d\d-\d\d$/.test(parts[2] || '') ? parts[2] : null, q);
+    else if (parts[0] === 'hoito' && parts[1]) { const tp = state.treatments.find((x) => x.slug === parts[1]); if (tp) await tv.viewCheckout(tp, parts[2], parts[3], q); else await viewProduct(parts[1], null, q); }
     else if (parts[0] === 'varaa' && parts[1] && parts[2]) await viewCheckout(parts[1], parts[2], parts[3], q.get('via'));
     else { viewList(q); focusTop(); }
   } catch (e) {
