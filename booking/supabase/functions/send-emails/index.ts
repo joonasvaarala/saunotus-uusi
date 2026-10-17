@@ -38,6 +38,8 @@ Deno.serve(async (req) => {
         if (!r.gift_cards.length) { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: "ei lähetettäviä lahjakortteja (peruttu/maksamaton)" }); stats.skipped++; continue; }
         r.functions_url = `${url}/functions/v1`; r.redeem_online = redeemOnline;
       }
+      if (r.kind === "voucher_claim_problem" && r.voucher_claim?.status !== "problem") { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: "pyyntö ei enää ongelmatilassa" }); stats.skipped++; continue; }
+      if (r.kind === "voucher_claim_received" && (!r.voucher_claim || ["cancelled", "expired"].includes(r.voucher_claim.status))) { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: "pyyntö peruttu/vanhentunut" }); stats.skipped++; continue; }
       const m = render(r.kind as Kind, r, r.locale);
       if (!m.subject || !m.text || !m.html) throw new Error("tyhjä mallipohja");
       if (mode !== "live") { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "dry_run", p_error: `dry_run: ${m.subject}` }); stats.dry_run++; continue; }
