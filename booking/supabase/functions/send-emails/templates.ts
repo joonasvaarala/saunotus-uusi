@@ -130,7 +130,8 @@ function giftCardMail(kind: "gift_card_buyer" | "gift_card_recipient", d: any, e
   const hhmm = (s: string) => en ? s : s.replace(":", ".");
   for (const g of cards) {
     const url = gcUrl(d, g, en);
-    const meta = [gcAmt(g.amount, en), g.persons && !gcOpen(g) ? (en ? `${g.persons} guests` : `${g.persons} henkilöä`) : "", g.valid_to ? (en ? `valid until ${gcDate(g.valid_to, true)}` : `voimassa ${gcDate(g.valid_to, false)} asti`) : "", buyer && g.recipient_name ? (en ? `for ${g.recipient_name}` : `saaja: ${g.recipient_name}`) : ""].filter(Boolean).join(" · ");
+    const showAmt = buyer || gcOpen(g) || !g.package_code;   // saajan viestissä ei pakettihintaa (vain avoimen kortin arvo); ostajan vahvistuksessa hinta saa näkyä
+    const meta = [showAmt ? gcAmt(g.amount, en) : "", g.persons && !gcOpen(g) ? (en ? `${g.persons} guests` : `${g.persons} henkilöä`) : "", g.valid_to ? (en ? `valid until ${gcDate(g.valid_to, true)}` : `voimassa ${gcDate(g.valid_to, false)} asti`) : "", buyer && g.recipient_name ? (en ? `for ${g.recipient_name}` : `saaja: ${g.recipient_name}`) : ""].filter(Boolean).join(" · ");
     const who = [g.recipient_name, g.recipient_email].filter(Boolean).join(", ");
     const when = g.deliver_at ? `${gcDate(g.deliver_on, en)}${g.deliver_time ? (en ? ` at ${g.deliver_time}` : ` klo ${hhmm(g.deliver_time)}`) : ""}` : "";
     const deliv = !buyer || toBuyer(g) ? "" : g.deliver_at
