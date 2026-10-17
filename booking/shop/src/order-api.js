@@ -1,0 +1,36 @@
+// Asiakkaan tilaussivun DATAKERROS: public_get_order, public_add_to_order, public_request_cancel, public_get_receipt (sopimus: KOODARI_talous_A_D_fi.md, vaihe C).
+// Mock ↔ oikea = yksi `rpc`-funktio (order-mock.js:n rpc vastaa samoilla nimillä, parametreilla ja vastausmuodoilla). Mock vain kun osoitteessa on ?mock=1.
+// Asiakkaalle EI näytetä esimerkkidataa, vaikka RPC puuttuisi: puuttuva RPC (404/PGRST202) → { ok:false, notReady:true } → "ominaisuus ei vielä käytössä".
+// Palvelimen virheet tulevat HTTP 200 + { ok:false, code, message } → palautetaan sellaisenaan (ei heitetä).
+import { createOrderMock } from './order-mock.js';
+export const RPC = { get: 'public_get_order', addToOrder: 'public_add_to_order', requestCancel: 'public_request_cancel', getReceipt: 'public_get_receipt' };
+export const isMissingRpc = (e) => !!e && (e.status === 404 || e.code === 'PGRST202' || e.code === '42883' || /could not find the function/i.test(e.message || ''));
+export const wantsMock = (loc = typeof location !== 'undefined' ? location : null) => !!loc && new URLSearchParams(loc.search || '').get('mock') === '1';
+export const validToken = (t) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(t || ''));
+const num = (v, d = 0) => (v == null || v === '' || !Number.isFinite(+v) ? d : +v);
+// public_get_order → sivun malli
+export function normOrder(r) {
+  return { ok: true, order_no: r.order_no, status: r.status, payment_status: r.payment_status || 'unpaid', created_at: r.created_at ?? null, first_name: r.first_name ?? '', locale: r.locale ?? null,
+    total: num(r.total), paid: num(r.paid), unpaid: num(r.unpaid),
+    items: (r.items || []).map((i) => ({ name: i.name, name_en: i.name_en ?? null, quantity: num(i.quantity, 1), line_total: num(i.line_total), vat_rate: num(i.vat_rate) })),
+    reservations: (r.reservations || []).map((x) => ({ reservation_id: x.reservation_id, product_name: x.product_name, starts_at: x.starts_at, ends_at: x.ends_at, persons: num(x.persons, 1), status: x.status,
+      addons: (x.addons || []).map((a) => ({ name: a.name ?? '', name_en: a.name_en ?? null, quantity: num(a.quantity, 1) })) })),
+    payments: (r.payments || []).map((p) => ({ status: p.status, amount: num(p.amount), paid_at: p.paid_at ?? null, method_label: p.method_label ?? null, link_token: p.link_token ?? null, link_path: p.link_path ?? null })),
+    receipts: (r.receipts || []).map((x) => ({ receipt_no: x.receipt_no, kind: x.kind || 'receipt', issued_at: x.issued_at ?? null, token: x.token ?? null, total: num(x.total) })),
+    can_add: !!r.can_add, add_until: r.add_until ?? null, can_change: !!r.can_change, change_deadline: r.change_deadline ?? null, change_hours_before: r.change_hours_before ?? null,
+    cancel_request: r.cancel_request ? { status: r.cancel_request.status, created_at: r.cancel_request.created_at } : null, online_payment_enabled: !!r.online_payment_enabled,
+    upsell_addons: (r.upsell?.addons || []).map((a) => ({ id: a.id, code: a.code, name: a.name, name_en: a.name_en ?? null, price: num(a.price), max: num(a.max, 20) })) };
+}
+export function rpcBackend(rpc, token) {
+  return {
+    get: async () => { const r = await rpc(RPC.get, { p_token: token }); return r?.ok === false ? r : normOrder(r); },
+    addToOrder: ({ items }) => rpc(RPC.addToOrder, { p_token: token, p_items: items }),
+    requestCancel: ({ reason }) => rpc(RPC.requestCancel, reason ? { p_token: token, p_reason: reason } : { p_token: token }),
+    getReceipt: ({ receiptNo }) => rpc(RPC.getReceipt, { p_order_token: token, p_receipt_no: receiptNo }),   // HUOM: parametri on p_order_token (ei p_token)
+  };
+}
+export function createOrderApi({ rpc, token, mock = wantsMock(), mockFactory = () => createOrderMock({ delay: 120 }) } = {}) {
+  const be = rpcBackend(mock ? mockFactory().rpc : rpc, token);
+  const wrap = (key) => async (a) => { try { return await be[key](a); } catch (e) { if (!mock && isMissingRpc(e)) return { ok: false, notReady: true, rpc: RPC[key] }; throw e; } };
+  return { mock, get: wrap('get'), addToOrder: wrap('addToOrder'), requestCancel: wrap('requestCancel'), getReceipt: wrap('getReceipt') };
+}

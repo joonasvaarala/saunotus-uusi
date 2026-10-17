@@ -261,6 +261,13 @@ Resurssivaraus-lomakkeella tuotteet kb 8 (rituaali) ja 10–12 (hoidot) näyttä
 * **Pyyhe ja tapahtumat**: resurssivarauslomakkeella tapahtumatuote (kategoria `event`) = tila `event`: ei lisäpalveluita lainkaan (pyyhekään ei). Palvelinpuolen rajaus + Pyyhe-rivi + `resource`-tila: migraatio booking_27 + pgTAP `27_pyyhe_resource_addons.test.sql`.
 * Testit: `scripts/smoke-pages.mjs` (Valmistelu, aikajärjestys, hoitokortti, peruutetut, työvuoropolut, ikonit) ja **`scripts/e2e-hallinta-etusivu.mjs`** (oikea demokanta, ei mockeja: admin/manager/staff-kirjautuminen, etusivu, *Vapaana: N* → esivalittu Uusi varaus → varaus lisäpalveluineen luodaan kantaan → näkyy vuoron alla, hlö/kapasiteetti päivittyvät, ikonit, Valmistelu, saapunut säilyy latauksen yli, hoito-/tapahtumalomakkeen lisäpalvelut; `EXPECT_DAY_SHIFTS=0 EXPECT_TOWEL=0` jos migraatiota 27 ei ole ajettu kantaan; oletus: demokanta sisältää sen).
 
+### Talous-kehys (hallinta › Talous + asiakkaan tilaussivu; vain mock-data)
+
+* **Hallinta › Talous** (`#/talous`, oikeus `payments.manage`): välilehdet **Tilaukset** (haku, lajittelu, suodattimet, palvelinpuolinen sivutus 25/50/100, rivin laajennus: maksut + varaukset; napit Lisää tilaukseen / Luo maksulinkki / Kuitit / Hyvitä), **Maksut** (aikajärjestys, haku, rivin laajennus: laskurivit), **Raportit** (päivä/kuukausi, ALV-kannoittain, maksutavoittain, CSV, PDF = selaimen tulostus). FI/EN.
+* **Datakerros** `admin/talous-api.js` (ainoa paikka joka tuntee RPC-nimet ja parametrit; sopimus `KOODARI_talous_A_D_fi.md`). Mock = `admin/talous-mock.js` samalla `rpc(nimi, parametrit)`-rajapinnalla. `?mock=1` → mock; puuttuva RPC → vain kyseinen toiminto mockiin + banneri; kirjoittavat toiminnot lukossa `LIVE_ACTIONS`-lipuilla. Katso `docs/talous-kehys-api-oletukset.md`.
+* **Asiakkaan tilaussivu** `/varaa/tilaus/?t=<token>` (EN `/en/book/order/`; myös `/tilaus/`, `/en/order/`): rivit, varaukset, maksutila, kuitit, lisäpalvelun lisäys, peruutuspyyntö. Ei automaattista mockia asiakkaalle (puuttuva RPC → "ei vielä käytössä"); noindex, `referrer=no-referrer`.
+* Testit: `node --test booking/tests/talous.test.mjs` (CSV, mock-palvelin, datakerros, tekstit FI/EN, tilaussivu); e2e: `SHOP_DIST=/tmp/shop-dist-talous node booking/shop/build.mjs && PW_DIR=<playwright-core:n kansio> node booking/scripts/e2e-talous.mjs` (Playwright + google-chrome; 360/390/430/1280, FI/EN, kuvat `SHOT_DIR`); `scripts/smoke-pages.mjs` lohko 7.
+
 ### Kalenterisulut hallinnassa (migraatio 18)
 
 Migraatio 18 (18a–18c; versiot 20261016221808 / 221825 / 221840) on ajettu tuotantoon; kalenterit ovat rekisterissä `active = false` eikä synkkaa ole käynnissä. Hallinta (`admin/`):

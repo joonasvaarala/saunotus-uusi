@@ -2,6 +2,7 @@
 import { signIn, signOut, getSession, onAuthChange, rpc, select, adoptSessionFromHash, setPassword } from './sb.js';
 import { h, toast, errMsg } from './ui.js';
 import { icon } from './icons.js';
+import { t as tl } from './talous-i18n.js';
 
 const $ = (id) => document.getElementById(id);
 // perms: roolin oikeudet (booking.role_permissions) palvelimelta; can(oikeus) piilottaa/lukitsee kenttiä. Oikeudet pakotetaan silti tietokannassa.
@@ -30,6 +31,7 @@ const ROUTES = [
   { path: 'tarkista', label: 'Tarkista', icon: 'check', mod: () => loadView('review') },
   { path: 'uusi', label: 'Uusi varaus', icon: 'plus', mod: () => loadView('newbooking') },
   { path: 'asiakkaat', label: 'Asiakkaat', icon: 'users', mod: () => loadView('customers') },
+  { path: 'talous', label: 'Talous', labelFn: () => tl('nav'), icon: 'euro', any: ['payments.manage'], mod: () => loadView('talous') },
   { path: 'tuotteet', label: 'Tuotteet', icon: 'tag', mod: () => loadView('products') },
   { path: 'resurssit', label: 'Resurssit', icon: 'cabin', mod: () => loadView('resources') },
   { path: 'sulkukalenterit', label: 'Kalenterisulut', icon: 'lock', any: ['blocks.manage'], mod: () => loadView('closures') },
@@ -47,7 +49,7 @@ export async function refs(force = false) {
 
 const allowed = (r) => !r.any || r.any.some((p) => ctx.can(p));
 function drawNav(current) {
-  $('nav').replaceChildren(...ROUTES.filter(allowed).map((r) => h('a', { href: `#/${r.path}`, 'aria-current': r.path === current ? 'page' : null }, h('span', { class: 'ico', 'aria-hidden': 'true' }, icon(r.icon)), h('span', { class: 'lbl', text: r.label }))));
+  $('nav').replaceChildren(...ROUTES.filter(allowed).map((r) => h('a', { href: `#/${r.path}`, 'aria-current': r.path === current ? 'page' : null }, h('span', { class: 'ico', 'aria-hidden': 'true' }, icon(r.icon)), h('span', { class: 'lbl', text: r.labelFn ? r.labelFn() : r.label }))));
 }
 let routeSeq = 0;   // nopea navigointi: vain viimeisin reitti saa piirtää näkymän (vanhentuneet vastaukset hylätään)
 async function route() {
@@ -64,7 +66,7 @@ async function route() {
     const out = await m.render({ ctx, refs: ctx.refs, reload: route, query: new URLSearchParams(location.hash.split('?')[1] || '') });
     if (seq !== routeSeq) return;
     view.replaceChildren(...[].concat(out).filter(Boolean));
-    document.title = `${r.label} – hallinta`;
+    document.title = `${r.labelFn ? r.labelFn() : r.label} – hallinta`;
   } catch (e) {
     if (seq !== routeSeq) return;
     console.warn(e);

@@ -21,6 +21,18 @@ export const ICONS = {
   mask: [P('M12 3c-4 0-7 3.5-7 8.5S8 21 12 21s7-4.5 7-9.5S16 3 12 3z'), P('M5.2 9.5C8 10.5 10 9.5 12 9.5s4 1 6.8 0'), P('M8.5 12.5c.7-.5 1.4-.5 2 0M13.5 12.5c.7-.5 1.4-.5 2 0M10 17h4')],   // Turvenaamio: kasvot, joilla hoitomaski
   towel: [P('M9 7V4h6v3'), P('M5 7h14a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z'), P('M4 12h16M4 16h16')],   // Pyyhe: ripustettu raidallinen pyyhe
   foot: [P('M4 15h16l-1.6 5H5.6z'), P('M9 15V5.5a2 2 0 0 1 4 0V15M13 12.5h2.5')],   // Jalkakylpy: jalka ammeessa
+  euro: [P('M18 7c-1.3-1.4-3-2-4.8-2a7 7 0 0 0 0 14c1.8 0 3.5-.6 4.8-2'), P('M4 10.5h9M4 13.5h9')],         // Talous: euromerkki
+  receipt: [P('M5 2h14v20l-3-2-2 2-2-2-2 2-2-2-3 2z'), P('M9 7h6M9 11h6M9 15h3')],                  // Kuitit
+  link: [P('M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1'), P('M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1')],   // Maksulinkki
+  undo: [P('M3 12a9 9 0 1 0 3-6.7L3 8'), P('M3 3v5h5')],                                           // Hyvitä
+  download: [P('M12 3v12M7 10l5 5 5-5'), P('M4 20h16')],                                           // CSV-lataus
+  print: [P('M7 9V3h10v6'), R(3, 9, 18, 8, 2), R(7, 14, 10, 7, 1)],                                // PDF / tulostus
+  chev: [P('M6 9l6 6 6-6')],                                                                       // Laajenna rivi
+  pgfirst: [P('M17 18l-6-6 6-6'), P('M7 6v12')],                                                   // Sivutus: ensimmäinen
+  pgprev: [P('M15 18l-6-6 6-6')],
+  pgnext: [P('M9 18l6-6-6-6')],
+  pglast: [P('M7 18l6-6-6-6'), P('M17 6v12')],
+  chart: [P('M4 20V10M10 20V4M16 20v-8M22 20H2')],                                                 // Raportit
   tick: [P('M5 12.5l4.5 4.5L19 7.5')],                                                         // Saapunut: valintamerkki
   close: [P('M18 6L6 18M6 6l12 12')],                                                         // Sulje
 };
