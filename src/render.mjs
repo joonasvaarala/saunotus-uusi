@@ -95,21 +95,23 @@ export const C = (path) => path.split('.').reduce((a, k) => a[k], cards);
 export function week(lang) {
   const u = ui(lang);
   const lab = (type, day) => site.sessionLabels[day >= 6 && type === 'public' ? 'weekend' : type]?.[lang] || '';
+  // Yksi vuororivi: aika (ei rituaalilla) · nimi · Varaa-painike. Koko rivi on klikattava (a::after), .sr-selite säilyy.
+  const row = (time, name, url, day) => `<li class="sess${time ? '' : ' nt'}">${time ? `<span class="t">${time}</span>` : ''}<span class="n">${e(name)}</span><a class="bk" href="${e(url)}" target="_blank" rel="noopener"><span class="bk-l">${e(u.reserve)}</span><span class="sr"> – ${e(name)}, ${e(u.daysLong[day - 1])}</span>${NEW(lang)}</a></li>`;
   const li = [];
   for (let d = 1; d <= 7; d++) {
     const rows = kb.hours.filter((h) => h.weekday === d);
     const sess = rows.filter((h) => h.opens).map((h) => {
       const pr = kb.products.find((x) => x.id === h.product_id);
-      const url = pr ? bookingUrl(pr.booking_url, lang) : jk('publicAll', lang);
-      return `<div class="sess"><span class="t">${hm(h.opens)}–${hm(h.closes)}</span><span class="n">${e(lab(h.session_type, d))}</span><a href="${e(url)}" target="_blank" rel="noopener">${e(u.reserve)}<span class="sr"> – ${e(lab(h.session_type, d))}, ${e(u.daysLong[d - 1])}</span>${NEW(lang)}</a></div>`;
+      return row(`${hm(h.opens)}–${hm(h.closes)}`, lab(h.session_type, d), pr ? bookingUrl(pr.booking_url, lang) : jk('publicAll', lang), d);
     });
     const ritual = rows.filter((h) => h.session_type === 'ritual').map((h) => {
       const pr = kb.products.find((x) => x.id === h.product_id);
-      return `<div class="sess"><span class="n">${e(site.sessionLabels.ritual[lang])}</span><a href="${e(pr ? bookingUrl(pr.booking_url, lang) : jk('ceremonies', lang))}" target="_blank" rel="noopener">${e(u.reserve)}<span class="sr"> – ${e(site.sessionLabels.ritual[lang])}, ${e(u.daysLong[d - 1])}</span>${NEW(lang)}</a></div>`;
+      return row('', site.sessionLabels.ritual[lang], pr ? bookingUrl(pr.booking_url, lang) : jk('ceremonies', lang), d);
     });
     const none = rows.some((h) => h.session_type === 'private_only')
-      ? `<div class="sess"><span class="none">${e(u.noPublic)}</span><a href="${e(jk('private', lang))}" target="_blank" rel="noopener">${e(u.privateLink)}${NEW(lang)}</a><br><a href="${e(jk('events', lang))}" target="_blank" rel="noopener">${e(u.eventsLink)}${NEW(lang)}</a></div>` : '';
-    li.push(`<li class="${d >= 6 ? 'we' : ''}"><h3>${e(u.daysLong[d - 1])}<span class="today"> · ${e(u.today)}</span></h3>${sess.join('')}${ritual.join('')}${none}</li>`);
+      ? `<p class="none">${e(u.noPublic)}</p><ul class="alt"><li><a href="${e(jk('private', lang))}" target="_blank" rel="noopener">${e(u.privateLink)}${NEW(lang)}</a></li><li><a href="${e(jk('events', lang))}" target="_blank" rel="noopener">${e(u.eventsLink)}${NEW(lang)}</a></li></ul>` : '';
+    const cls = [d >= 6 ? 'we' : '', none && !sess.length && !ritual.length ? 'off' : ''].filter(Boolean).join(' ');
+    li.push(`<li${cls ? ` class="${cls}"` : ''}><h3>${e(u.daysLong[d - 1])}<span class="today">${e(u.today)}</span></h3>${sess.length + ritual.length ? `<ul class="sl">${sess.join('')}${ritual.join('')}</ul>` : ''}${none}</li>`);
   }
   return `<ol class="week" aria-label="${e(u.weekTitle)}">${li.join('')}</ol>`;
 }
@@ -265,7 +267,7 @@ ${body}
 <div class="fbottom"><span>© ${new Date().getFullYear()} ${e(kb.business.legal_name)} · ${lang === 'fi' ? 'Y-tunnus' : 'Business ID'} ${e(kb.business.business_id)}</span><ul><li><a href="${fl('terms', lang)}">${e(u.legal)}</a></li><li><a href="${pageHref('privacy', 'fi')}"${lang === 'en' ? ' hreflang="fi" lang="fi"' : ''}>${e(u.privacy)}</a></li></ul></div>
 </div></footer>
 ${chat}
-<script>(function(){var d=new Intl.DateTimeFormat('en-US',{weekday:'short',timeZone:'Europe/Helsinki'}).format(new Date()),i={Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6}[d],l=document.querySelectorAll('.week>li');if(l[i])l[i].classList.add('is-today')})()</script>
+<script>(function(){var d=new Intl.DateTimeFormat('en-US',{weekday:'short',timeZone:'Europe/Helsinki'}).format(new Date()),i={Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6}[d],l=document.querySelectorAll('.week>li');if(l[i]){l[i].classList.add('is-today');l[i].setAttribute('aria-current','date')}})()</script>
 </body></html>`;
 }
 
