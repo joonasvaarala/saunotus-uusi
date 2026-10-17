@@ -9,7 +9,8 @@ import { TEXTS } from '../talous-texts.js';
 
 const fiMethod = (c) => TEXTS.fi[`method.${c}`] || c;
 const fiGroup = (c) => TEXTS.fi[`group.${c}`] || c;
-export function createReportsTab({ api }) {
+// Oikeudet (sopimus §11): päivä = reports.daily TAI reports.view; kuukausi, CSV ja report-pdf month = vain reports.view.
+export function createReportsTab({ api, canFull = true }) {
   const today = todayHel();
   const st = { kind: 'daily', date: today, year: +today.slice(0, 4), month: +today.slice(5, 7) };
   const out = h('div', { class: 'tl-report', 'data-testid': 'report-out' });
@@ -21,7 +22,7 @@ export function createReportsTab({ api }) {
     try {
       const r = st.kind === 'daily' ? await api.reportDaily(st.date) : await api.reportMonthly(ym());
       if (my !== seq) return;
-      current = r; csvBtn.disabled = isEmpty(r); out.replaceChildren(view(r));
+      current = r; csvBtn.disabled = isEmpty(r) || !canFull; out.replaceChildren(view(r));
     } catch (e) { if (my === seq) out.replaceChildren(errorBox(e, load)); }
   }
   const periodLabel = (r) => (r.period.kind === 'day' ? fmt.date(r.period.from) : `${fmt.month(r.period.from.slice(0, 7))} (${fmt.date(r.period.from)} – ${fmt.date(r.period.to)})`);
@@ -31,7 +32,7 @@ export function createReportsTab({ api }) {
     const open = h('p', { class: 'muted', 'data-testid': 'r-open', text: `${t('r.open')}: ${t('r.openVal', { n: fmt.int(r.open.orders), sum: M(r.open.unpaid) })}` });
     if (isEmpty(r)) return h('div', {}, head, emptyBox(t('r.empty')), open);
     const card = (label, value, tid) => h('div', { class: 'tl-stat' }, h('dt', { text: label }), h('dd', { 'data-testid': tid, text: value }));
-    const stats = h('dl', { class: 'tl-stats' }, card(t('r.gross'), M(T.gross), 'r-gross'), card(t('r.refunds'), M(T.refunds_gross), 'r-refunds'), card(t('r.netAfter'), M(T.net_after_refunds), 'r-net'), card(t('r.vatAfter'), M(T.vat_after_refunds), 'r-vat'), card(t('r.netExVat'), M(T.net_ex_vat_after_refunds), 'r-net-ex-vat'),
+    const stats = h('dl', { class: 'tl-stats' }, card(t('r.gross'), M(T.gross), 'r-gross'), card(t('r.refunds'), M(T.refunds_gross), 'r-refunds'), card(t('r.grossAfter'), M(T.gross_after_refunds), 'r-gross-after'), card(t('r.vatAfter'), M(T.vat_after_refunds), 'r-vat'), card(t('r.netExVat'), M(T.net_ex_vat_after_refunds), 'r-net-ex-vat'),
       card(t('r.receipts'), fmt.int(T.receipts), 'r-receipts'), card(t('r.refundReceipts'), fmt.int(T.refund_receipts), 'r-refund-receipts'), ...(T.rounding ? [card(t('r.rounding'), M(T.rounding), 'r-rounding')] : []));
     const table = (testid, caption, cols, rows, foot) => h('section', { class: 'tl-sec' }, h('h3', { text: caption }), h('table', { class: 'tl-table', 'data-testid': testid },
       h('thead', {}, h('tr', {}, cols.map((c, i) => h('th', { scope: 'col', class: i ? 'r' : '', text: c })))),
@@ -53,7 +54,7 @@ export function createReportsTab({ api }) {
   }
 
   // ---- valitsimet ----
-  const kindBtn = (k) => h('button', { type: 'button', role: 'radio', class: 'tl-seg', 'aria-checked': String(st.kind === k), 'data-testid': `r-kind-${k}`, onclick: () => { st.kind = k; syncKind(); load(); } }, t(k === 'daily' ? 'r.daily' : 'r.monthly'));
+  const kindBtn = (k) => { const off = k === 'monthly' && !canFull; return h('button', { type: 'button', role: 'radio', class: 'tl-seg', 'aria-checked': String(st.kind === k), 'data-testid': `r-kind-${k}`, disabled: off || null, title: off ? t('r.monthlyNoPerm') : null, onclick: () => { st.kind = k; syncKind(); load(); } }, t(k === 'daily' ? 'r.daily' : 'r.monthly')); };
   const kindBtns = { daily: kindBtn('daily'), monthly: kindBtn('monthly') };
   const dateIn = h('input', { type: 'date', value: st.date, max: today, 'data-testid': 'r-date', 'aria-label': t('r.date'), onchange: (e) => { if (e.target.value) { st.date = e.target.value; load(); } } });
   const monthSel = h('select', { 'data-testid': 'r-month', 'aria-label': t('r.month'), onchange: (e) => { st.month = +e.target.value; load(); } }, Array.from({ length: 12 }, (_, i) => h('option', { value: i + 1, text: fmt.month(`2026-${String(i + 1).padStart(2, '0')}`).replace(/\s*\d{4}$/, '').replace(/^./, (c) => c.toUpperCase()) })));
@@ -64,7 +65,7 @@ export function createReportsTab({ api }) {
   const dayFld = h('label', { class: 'fld tl-r-day' }, h('span', { text: t('r.date') }), dateIn);
   const monFld = h('div', { class: 'fld tl-r-mon' }, h('span', { text: t('r.month') }), h('div', { class: 'tl-sortrow' }, monthSel, yearSel));
   const syncKind = () => { for (const k of ['daily', 'monthly']) kindBtns[k].setAttribute('aria-checked', String(st.kind === k)); dayFld.hidden = st.kind !== 'daily'; monFld.hidden = st.kind !== 'monthly'; };
-  const csvBtn = h('button', { type: 'button', class: 'btn tl-btn', 'data-testid': 'r-csv', disabled: true, onclick: async () => {
+  const csvBtn = h('button', { type: 'button', class: 'btn tl-btn', 'data-testid': 'r-csv', disabled: true, title: canFull ? null : t('r.monthlyNoPerm'), onclick: async () => {
     if (!current) return;
     csvBtn.disabled = true;
     try {
@@ -77,7 +78,7 @@ export function createReportsTab({ api }) {
     h('span', { class: 'tl-ico', 'aria-hidden': 'true' }, icon('print', 20)), h('span', { text: t('r.pdf') }));
   syncKind();
   const controls = h('div', { class: 'tl-toolbar tl-r-controls tl-noprint' }, h('div', { class: 'fld' }, h('span', { text: t('r.type') }), h('div', { role: 'radiogroup', 'aria-label': t('r.type'), class: 'tl-segs' }, kindBtns.daily, kindBtns.monthly)), dayFld, monFld,
-    h('div', { class: 'tl-actions' }, csvBtn, pdfBtn), h('p', { class: 'muted tl-hint', text: t('r.pdfNote') }));
+    h('div', { class: 'tl-actions' }, csvBtn, pdfBtn), h('p', { class: 'muted tl-hint', text: t('r.pdfNote') }), canFull ? null : h('p', { class: 'tl-hint', role: 'note', 'data-testid': 'r-limited', text: t('r.limited') }));
   const node = h('div', { class: 'tl-tab', 'data-testid': 'tab-reports' }, controls, out);
   return { node, load };
 }
