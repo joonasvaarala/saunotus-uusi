@@ -304,3 +304,18 @@ a.bk-sd:hover{filter:brightness(.97)}
 @media(min-width:760px){.gc-open .gc-tile{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(220px,1fr);column-gap:28px;align-items:start}.gc-open .gc-tile>.kicker,.gc-open .gc-tile>h3,.gc-open .gc-tile>.gc-desc,.gc-open .gc-tile>.gc-meta{grid-column:1}.gc-open .gc-tile>.bk-field,.gc-open .gc-tile>.gc-btn{grid-column:2}}
 .gc .bk-stepper input{width:64px;height:48px}
 .gc .bk-check a,.gc .bk-contact a,.gc-done a:not(.btn){display:inline-flex;align-items:center;min-height:44px;padding:0 2px}
+/* Lahjakortin toimitusvalinta (sopimus §13.11): minulle / suoraan saajalle, ajankohta, saateteksti */
+.gc-dlv{border:0;margin:0;padding:0;min-width:0;display:grid;gap:8px}
+.gc-dlv[hidden],.gc-when-fields[hidden],.gc-line .gc-field[hidden]{display:none}
+.gc-dlv>legend{padding:0;margin:0 0 4px;font:700 16px var(--body);color:var(--ink)}
+.gc-radios{display:flex;flex-wrap:wrap;gap:8px}
+.gc-radio{display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer;font-size:16px;color:var(--ink);flex:1 1 150px}
+.gc-radio input{width:22px;height:22px;margin:0;flex:none;accent-color:var(--green)}
+.gc-radio:has(input:checked){border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green);background:#f3f6f1}
+.gc-radio:has(input:focus-visible){outline:3px solid var(--gold);outline-offset:2px}
+.gc-dlvhint{margin:0}
+.gc-when-fields{display:grid;gap:10px;grid-template-columns:1fr}
+.gc-when-fields input[type=date],.gc-when-fields input[type=time]{min-height:44px}
+.gc-line.to-recipient{border-color:var(--green)}
+.gc-dlvnote{display:block;margin-top:2px}
+@media(min-width:560px){.gc-when-fields{grid-template-columns:1fr 1fr}}

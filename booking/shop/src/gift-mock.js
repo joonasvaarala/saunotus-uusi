@@ -1,6 +1,7 @@
 // Lahjakorttien MOCK-PALVELIN (kauppa): keksityt kortit muistissa; vain kun osoitteessa on ?mock=1 (sekä testit). Ei kosketa palvelinta.
 // Vastaa KOODARI_talous_A_D_fi.md §13.2: nimet, p_-parametrit, vastausrakenteet, virheet {ok:false, code, message}.
 // public_gift_card_packages-vastauksen sisältö (testiprojekti = tuotannon siemendata, 17.10.2026): nimet, hinnat, kuvaukset ja items-rakenne ({label, label_en, persons, kb_product_id} | {label, label_en, persons, addon_code}; label_en lisätty migraatiossa booking_45)
+import { resolveDelivery } from './gift-logic.js';
 export const MOCK_PACKAGES = [
   {
     code: 'open',
@@ -189,7 +190,8 @@ export function createGiftMock({ delay = 0, settings = {}, today = new Date().to
       let total = 0;
       items.forEach((it) => {
         const p = MOCK_PACKAGES.find((x) => x.code === it.package), q = it.quantity ?? 1, amt = p.is_open ? +it.amount : p.price;
-        for (let i = 0; i < q; i++) { total += amt; cs.push({ public_token: uuid(myCards.length + cs.length + 1), package_code: p.code, package_name: p.name, amount: amt, status: 'pending_payment', vat_treatment: p.is_open ? 'at_redemption' : 'at_sale', recipient_name: it.recipient_name ?? a.p_recipient_name ?? null }); }
+        const dl = deliveryOf(it, a, p).value;
+        for (let i = 0; i < q; i++) { total += amt; cs.push({ public_token: uuid(myCards.length + cs.length + 1), package_code: p.code, package_name: p.name, amount: amt, status: 'pending_payment', vat_treatment: p.is_open ? 'at_redemption' : 'at_sale', recipient_name: it.recipient_name ?? a.p_recipient_name ?? null, delivery_to: dl.delivery_to, deliver_on: dl.deliver_on, deliver_time: dl.deliver_time }); }
       });
       myCards.push(...cs);
       return { ok: true, mock: true, order_no: ++orderNo, token: MOCK_TOKEN, status: 'confirmed', total: r2(total), payment_mode: 'pay_later', payment_url: null, cards: cs, note: 'Kortit aktivoituvat, kun tilaus on maksettu.' };
@@ -197,7 +199,7 @@ export function createGiftMock({ delay = 0, settings = {}, today = new Date().to
     public_get_order_gift_cards: ({ p_token }) => {
       if (!p_token) return bad('not_found', 'Tilausta ei löytynyt');
       if (order?.giftCardList) return { ok: true, order_no: order.orderNo, payment_status: order.paymentStatus(), cards: order.giftCardList() };
-      return { ok: true, order_no: orderNo, payment_status: 'unpaid', cards: myCards.map((c) => ({ token: c.public_token, package_code: c.package_code, package_name: c.package_name, amount: c.amount, status: c.status, valid_to: null, recipient_name: c.recipient_name, ready: false })) };
+      return { ok: true, order_no: orderNo, payment_status: 'unpaid', cards: myCards.map((c) => ({ token: c.public_token, package_code: c.package_code, package_name: c.package_name, amount: c.amount, status: c.status, valid_to: null, recipient_name: c.recipient_name, delivery_to: c.delivery_to ?? 'buyer', deliver_on: c.deliver_on ?? null, deliver_time: c.deliver_time ?? null, delivered_at: null, ready: false })) };
     },
     public_get_gift_card: ({ p_public_token }) => {
       const c = order?.cardByToken?.(p_public_token) ?? myCards.find((x) => x.public_token === p_public_token);
@@ -213,6 +215,12 @@ export function createGiftMock({ delay = 0, settings = {}, today = new Date().to
     return h(args);
   }
   return { rpc, cards, cfg, handlers, myCards };
+}
+// Toimitusvalinta (§13.11): sama kuin palvelimen _gc_delivery_resolve; rivin arvo voittaa p_-oletuksen
+const DELIVERY_MSG = { invalid_delivery_to: 'Toimitustapa: buyer tai recipient', recipient_email_required: 'Anna saajan sähköpostiosoite kun lahjakortti lähetetään suoraan saajalle', invalid_cover_message: 'Saateteksti on liian pitkä (max 1000 merkkiä)', invalid_deliver_on: 'Anna ajankohta muodossa VVVV-KK-PP', invalid_deliver_time: 'Kellonaika muodossa HH:MM', deliver_on_past: 'Toimituspäivä ei voi olla menneisyydessä', deliver_on_too_far: 'Toimituspäivä on liian kaukana' };
+export function deliveryOf(it, a, p) {
+  const re = String(it.recipient_email ?? a.p_recipient_email ?? '').trim().toLowerCase() || null;
+  return resolveDelivery({ to: it.delivery_to ?? a.p_delivery_to, recipientEmail: re, cover: it.cover_message ?? a.p_cover_message, on: it.deliver_on ?? a.p_deliver_on, time: it.deliver_time ?? a.p_deliver_time, months: p.valid_months ?? 6 });
 }
 // Palvelimen tarkistukset (§13.2): järjestys kuten tietokannassa suunnilleen; riittää testaamaan UI:n virhepolut
 export function validateBuy(a, cfg = { max_cards: 10 }) {
@@ -230,6 +238,7 @@ export function validateBuy(a, cfg = { max_cards: 10 }) {
     if (p.is_open) { const am = Number(it.amount); if (!(am >= p.min_amount && am <= p.max_amount) || Math.round(am * 100) !== am * 100) return bad('invalid_amount', 'Virheellinen summa'); }
     const g = it.greeting ?? a.p_greeting; if (g && [...String(g)].length > 300) return bad('invalid_greeting', 'Tervehdys on liian pitkä');
     for (const e of [it.recipient_email ?? a.p_recipient_email]) if (e && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e)) return bad('invalid_email', 'Virheellinen saajan sähköposti');
+    const dl = deliveryOf(it, a, p); if (!dl.ok) return bad(dl.code, DELIVERY_MSG[dl.code] || dl.code);
   }
   if (n > (cfg.max_cards ?? 10)) return bad('too_many_cards', 'Liikaa kortteja');
   return null;

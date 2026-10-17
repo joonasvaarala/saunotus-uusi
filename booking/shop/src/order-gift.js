@@ -45,6 +45,10 @@ export function cardsSection({ S, L, api, cards }) {
   const items = cards.map((c) => {
     const panel = h('div', { class: 'gc-reveal', hidden: true, 'data-testid': 'gc-reveal' });
     const status = GT[L][`cst.${c.status}`] ? tx(`cst.${c.status}`) : c.status;
+    // Toimitusvalinta (sopimus §13.11): suoraan saajalle toimitettavan kortin koodia ja PDF-linkkiä ei näytetä ostajalle (yllätyslahja)
+    const rec = c.delivery_to === 'recipient', hhmm = (t) => String(t || '09:00').replace(/^0/, '');
+    const dlvNote = rec ? (c.delivered_at ? tx('o.dlvRecipientSent', { date: date(G.helsinkiNow(new Date(c.delivered_at)).date) }) : c.deliver_on ? tx('o.dlvRecipientAt', { date: date(c.deliver_on), time: hhmm(c.deliver_time) }) : tx('o.dlvRecipientNow'))
+      : (c.delivered_at ? tx('o.dlvBuyerSent', { date: date(G.helsinkiNow(new Date(c.delivered_at)).date) }) : !c.ready ? tx('o.dlvBuyer') : '');
     const btn = h('button', { type: 'button', class: 'btn light ord-btn', 'data-testid': 'gc-show', text: tx('o.showCode'), 'aria-expanded': 'false', onclick: async () => {
       if (!panel.hidden) { panel.hidden = true; btn.textContent = tx('o.showCode'); btn.setAttribute('aria-expanded', 'false'); return; }
       btn.disabled = true;
@@ -65,7 +69,8 @@ export function cardsSection({ S, L, api, cards }) {
       h('span', { class: 'ord-l-main' }, h('strong', { text: c.package_name || c.package_code }), ' ', h('span', { class: `ord-badge ${badgeClass(c.status)}`, text: status })),
       h('span', { class: 'ord-l-sum', text: money(c.amount) }),
       h('span', { class: 'ord-l-meta', text: [c.recipient_name ? `${tx('o.cardTo')}: ${c.recipient_name}` : '', c.valid_to ? `${tx('o.cardValidTo')}: ${date(c.valid_to)}` : tx('o.cardNotReady')].filter(Boolean).join(' · ') }),
-      c.ready ? h('div', { class: 'gc-oact' }, btn, panel) : null);
+      dlvNote ? h('span', { class: 'ord-l-meta gc-dlvnote', 'data-testid': 'gc-delivery', text: dlvNote }) : null,
+      rec ? (c.ready ? h('span', { class: 'ord-l-meta gc-dlvnote', text: tx('o.dlvSurprise') }) : null) : (c.ready ? h('div', { class: 'gc-oact' }, btn, panel) : null));
   });
   return h('section', { class: 'ord-card', 'aria-labelledby': 'ord-gcs', 'data-testid': 'gc-cards' }, h('h3', { id: 'ord-gcs', text: tx('o.cardsTitle') }), h('p', { class: 'bk-note', text: tx('o.cardsLead') }), h('ul', { class: 'ord-lines gc-olist' }, items));
 }

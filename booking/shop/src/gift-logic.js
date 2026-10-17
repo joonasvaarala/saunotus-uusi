@@ -20,15 +20,15 @@ export const validPhone = (p) => { const s = String(p ?? '').trim(); return /^[+
 export const parseAmount = (v) => { const s = String(v ?? '').trim().replace(',', '.'); return /^\d+(\.\d{1,2})?$/.test(s) ? Math.round(parseFloat(s) * 100) / 100 : null; };
 export const round2 = (n) => Math.round((+n + Number.EPSILON) * 100) / 100;
 
-// Rivi = { id, pkg: <paketin code>, amount: <merkkijono avoimelle>, qty, recipientName, recipientEmail, greeting }
-export function validateLine(line, pkg) {
+// Rivi = { id, pkg: <paketin code>, amount: <merkkijono avoimelle>, qty, recipientName, recipientEmail, greeting, deliveryTo: 'buyer'|'recipient', coverMessage, sendMode: 'now'|'later', deliverOn: 'YYYY-MM-DD', deliverTime: 'HH:MM' }
+export function validateLine(line, pkg, now = new Date()) {
   const err = {};
   if (!pkg) { err.pkg = 'pkg'; return err; }
   if (pkg.is_open) { const a = parseAmount(line.amount); if (a == null || a < pkg.min_amount || a > pkg.max_amount) err.amount = 'amount'; }
   const q = Number(line.qty); if (!Number.isInteger(q) || q < 1) err.qty = 'qty';
-  if (String(line.recipientName ?? '').trim().length > 120) err.recipientName = 'name';
-  if (String(line.recipientEmail ?? '').trim() && !validEmail(line.recipientEmail)) err.recipientEmail = 'email';
-  if (greetingState(line.greeting).over) err.greeting = 'greeting';
+  if (greetingState(line.greeting).over) err.greeting = 'invalid_greeting';
+  Object.assign(err, validateDelivery(line, pkg.valid_months, now));   // saajan nimi/sähköposti, saateteksti, ajankohta (vain kun 'suoraan saajalle')
+  if (err.recipientName === undefined && String(line.recipientName ?? '').trim().length > 120) err.recipientName = 'name';
   return err;
 }
 export function validateBuyer(b) {
@@ -53,7 +53,14 @@ export function itemsPayload(lines, pkgs) {
     const p = by.get(l.pkg), it = { package: l.pkg, quantity: Math.trunc(Number(l.qty)) || 1 };
     if (p?.is_open) it.amount = parseAmount(l.amount);
     const rn = String(l.recipientName ?? '').trim(), re = String(l.recipientEmail ?? '').trim().toLowerCase(), gr = cleanGreeting(l.greeting);
-    if (rn) it.recipient_name = rn; if (re) it.recipient_email = re; if (gr) it.greeting = gr;
+    const to = l.deliveryTo === 'recipient' ? 'recipient' : 'buyer';
+    it.delivery_to = to;   // valinta aina eksplisiittisesti (oletus: minulle)
+    if (rn) it.recipient_name = rn; if (gr) it.greeting = gr;
+    if (to === 'recipient') {   // saajan sähköposti, saateteksti ja ajankohta vain suoraan saajalle -toimituksessa; ajankohta vain kun "Valitse ajankohta"
+      if (re) it.recipient_email = re;
+      const cv = cleanCover(l.coverMessage); if (cv) it.cover_message = cv;
+      if (l.sendMode === 'later' && String(l.deliverOn ?? '').trim()) { it.deliver_on = String(l.deliverOn).trim(); const tm = String(l.deliverTime ?? '').trim(); if (tm) it.deliver_time = tm; }
+    }
     return it;
   });
 }
@@ -61,6 +68,85 @@ export function buyArgs({ lines, pkgs, buyer, locale }) {
   return { p_items: itemsPayload(lines, pkgs), p_name: buyer.name.trim(), p_email: buyer.email.trim().toLowerCase(), p_phone: buyer.phone.trim(), p_marketing_consent: !!buyer.marketing, p_locale: locale === 'en' ? 'en' : 'fi' };
 }
 export const validToken = (t) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(t || ''));
+
+// ---------- Toimitusvalinta (sopimus §13.11, migraatio booking_46) ----------
+// Peilaa palvelimen booking._gc_delivery_resolve:n (sama tarkistusjärjestys ja virhekoodit); palvelin tarkistaa aina uudelleen.
+export const COVER_MAX = 1000;
+export const DELIVER_TIME_DEFAULT = '09:00';
+export const DELIVER_MAX_MONTHS = 12;
+const TZ = 'Europe/Helsinki';
+const p2 = (n) => String(n).padStart(2, '0');
+// Helsingin kellonaika annetusta hetkestä: { date: 'YYYY-MM-DD', time: 'HH:MM' }
+export function helsinkiNow(now = new Date()) {
+  const f = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(now);
+  const g = (t) => f.find((x) => x.type === t).value;
+  return { date: `${g('year')}-${g('month')}-${g('day')}`, time: `${g('hour')}:${g('minute')}` };
+}
+const validYmd = (s) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s); if (!m) return false; const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])); return d.getUTCFullYear() === +m[1] && d.getUTCMonth() === +m[2] - 1 && d.getUTCDate() === +m[3]; };
+// Helsingin paikallinen päivä+aika → UTC-millisekunnit (kesäaika huomioiden)
+export function helsinkiToMs(ymd, hm) {
+  const [y, mo, d] = ymd.split('-').map(Number), [h, mi] = hm.split(':').map(Number);
+  const guess = Date.UTC(y, mo - 1, d, h, mi);
+  const off = (ms) => { const t = helsinkiNow(new Date(ms)); const [yy, mm, dd] = t.date.split('-').map(Number), [hh, nn] = t.time.split(':').map(Number); return Date.UTC(yy, mm - 1, dd, hh, nn) - ms; };
+  let ms = guess - off(guess); ms = guess - off(ms); return ms;
+}
+// date + n kuukautta (kuten Postgres: päivä rajataan kuukauden loppuun)
+export function addMonths(ymd, n) {
+  const [y, m, d] = ymd.split('-').map(Number), t = (m - 1) + n, yy = y + Math.floor(t / 12), mm = ((t % 12) + 12) % 12;
+  const last = new Date(Date.UTC(yy, mm + 1, 0)).getUTCDate();
+  return `${yy}-${p2(mm + 1)}-${p2(Math.min(d, last))}`;
+}
+export const deliverMaxDate = (today, months) => addMonths(today, Math.min(DELIVER_MAX_MONTHS, Math.max(1, Number(months) || 6)));
+export const cleanCover = (s) => String(s ?? '').replace(/\r\n/g, '\n').replace(/[\x00-\x09\x0b-\x1f\x7f]/g, '').trim();
+export const coverState = (s) => { const n = [...cleanCover(s)].length; return { n, left: COVER_MAX - n, over: n > COVER_MAX }; };
+// Palauttaa { ok: true, value: { delivery_to, cover_message, deliver_on, deliver_time } } tai { ok: false, code } (palvelimen virhekoodi)
+export function resolveDelivery({ to, recipientEmail, cover, on, time, months = 6, now = new Date() } = {}) {
+  const bad = (code) => ({ ok: false, code });
+  const re = String(recipientEmail ?? '').trim() || null;
+  let v = String(to ?? '').trim().toLowerCase() || (re ? 'recipient' : 'buyer');
+  if (v !== 'buyer' && v !== 'recipient') return bad('invalid_delivery_to');
+  if (v === 'buyer') return { ok: true, value: { delivery_to: 'buyer', cover_message: null, deliver_on: null, deliver_time: null } };
+  if (!re) return bad('recipient_email_required');
+  const c = cleanCover(cover) || null;
+  if (c && [...c].length > COVER_MAX) return bad('invalid_cover_message');
+  const t0 = helsinkiNow(now), today = t0.date;
+  let onTxt = String(on ?? '').trim() || null, timeTxt = String(time ?? '').trim() || null, d = null, t = null;
+  if (onTxt) {
+    const m = /^(\d{4}-\d{2}-\d{2})(?:[T ](\d{2}:\d{2}))?$/.exec(onTxt);
+    if (!m || !validYmd(m[1])) return bad('invalid_deliver_on');
+    d = m[1]; if (m[2]) timeTxt = timeTxt || m[2];
+  } else if (timeTxt) return bad('invalid_deliver_on');
+  if (timeTxt) { if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(timeTxt)) return bad('invalid_deliver_time'); t = timeTxt; }
+  if (d) {
+    if (d < today) return bad('deliver_on_past');
+    if (t && helsinkiToMs(d, t) < now.getTime() - 5 * 60 * 1000) return bad('deliver_on_past');
+    if (d > deliverMaxDate(today, months)) return bad('deliver_on_too_far');
+    if (d === today && !t) d = null;   // tänään ilman kellonaikaa = heti
+  }
+  return { ok: true, value: { delivery_to: 'recipient', cover_message: c, deliver_on: d, deliver_time: t } };
+}
+// Lomakerivin toimitusvalinta → resolveDelivery-parametrit (ajankohta vain kun "Valitse ajankohta")
+export const lineDeliveryInput = (l, months, now) => ({ to: l.deliveryTo || 'buyer', recipientEmail: l.recipientEmail, cover: l.coverMessage, on: l.sendMode === 'later' ? l.deliverOn : '', time: l.sendMode === 'later' ? l.deliverTime : '', months, now });
+// Kenttäkohtaiset virheet: { recipientName?, recipientEmail?, cover?, deliverOn?, deliverTime? } – arvo = virhekoodi (teksti err.<koodi>)
+export function validateDelivery(l, months, now = new Date()) {
+  const err = {};
+  if ((l.deliveryTo || 'buyer') !== 'recipient') return err;
+  if (!String(l.recipientName ?? '').trim()) err.recipientName = 'recipient_name_required';
+  const re = String(l.recipientEmail ?? '').trim();
+  if (!re) err.recipientEmail = 'recipient_email_required'; else if (!validEmail(re)) err.recipientEmail = 'invalid_email';
+  if (coverState(l.coverMessage).over) err.cover = 'invalid_cover_message';
+  if (l.sendMode === 'later') {
+    if (!String(l.deliverOn ?? '').trim()) err.deliverOn = 'invalid_deliver_on';
+    else {
+      const r = resolveDelivery({ ...lineDeliveryInput(l, months, now), recipientEmail: re || 'x@x.fi' });
+      if (!r.ok) { if (r.code === 'invalid_deliver_time') err.deliverTime = r.code; else if (['invalid_deliver_on', 'deliver_on_past', 'deliver_on_too_far'].includes(r.code)) err.deliverOn = r.code; else if (r.code === 'invalid_cover_message') err.cover = r.code; }
+    }
+  }
+  return err;
+}
+// Palvelimen virhekoodi → rivin kenttä (jonka alle virhe näytetään); null = ei rivikohtainen
+export const SERVER_FIELD = { deliver_on_past: 'deliverOn', deliver_on_too_far: 'deliverOn', invalid_deliver_on: 'deliverOn', invalid_deliver_time: 'deliverTime', invalid_cover_message: 'cover', invalid_greeting: 'greeting', recipient_email_required: 'recipientEmail', invalid_email: 'recipientEmail' };
+export const DELIVERY_ERROR_CODES = Object.keys(SERVER_FIELD);
 
 // Paketin sisältölista (public_gift_card_packages.items[]): FI = label, EN = label_en (migraatio booking_45). Vain rivit joilla on nimi kyseisellä kielellä (ei FI-nimeä EN-sivulle).
 export const itemLabels = (p, lang) => (Array.isArray(p?.items) ? p.items : []).map((it) => String((lang === 'en' ? it?.label_en : it?.label) ?? '').trim()).filter(Boolean);

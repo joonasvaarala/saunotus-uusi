@@ -20,16 +20,21 @@ export function createOrderMock({ delay = 0, scenario = '', giftSettings = {}, l
     upsell: { addons: ADDONS, treatments: [] },
   };
   const sync = () => { o.total = r2(o.items.reduce((s, i) => s + i.line_total, 0)); o.unpaid = r2(Math.max(0, o.total - o.paid)); o.payment_status = o.unpaid === 0 ? 'paid' : o.paid > 0 ? 'partially_paid' : 'unpaid'; };
-  // Skenaariot lahjakorttinäkymille (?mock=1&scenario=gift|cards|cardspaid): gift = maksamatonta jäljellä (Käytä lahjakortti), cards = lahjakorttitilaus maksamatta, cardspaid = maksettu
+  // Skenaariot lahjakorttinäkymille (?mock=1&scenario=gift|cards|cardspaid|cardsdelivery): gift = maksamatonta jäljellä (Käytä lahjakortti), cards = lahjakorttitilaus maksamatta, cardspaid = maksettu, cardsdelivery = maksettu + toimitusvalinnat (ostajalle / saajalle ajastettu / saajalle lähetetty)
   const giftCards = [];
   if (scenario === 'gift') { o.items = [{ id: 1, name: 'Yleinen saunavuoro', name_en: 'Public sauna session', quantity: 2, line_total: 72, vat_rate: 25.5 }, { id: 2, name: 'Pyyhe', name_en: 'Towel', quantity: 2, line_total: 10, vat_rate: 25.5 }]; o.paid = 20; o.payments[0].amount = 20; o.receipts = []; }
-  if (scenario === 'cards' || scenario === 'cardspaid') {
-    const paid = scenario === 'cardspaid';
+  if (scenario === 'cards' || scenario === 'cardspaid' || scenario === 'cardsdelivery') {
+    const paid = scenario !== 'cards';
     o.items = [{ id: 1, name: 'Avoin lahjakortti', name_en: 'Open gift card', quantity: 1, line_total: 75, vat_rate: 25.5 }, { id: 2, name: 'Saunahoito kahdelle', name_en: 'Sauna treatment for two', quantity: 1, line_total: 192, vat_rate: 25.5 }];
     o.reservations = []; o.receipts = []; o.can_add = false; o.can_change = false; o.change_deadline = null; o.add_until = null; o.upsell = { addons: [], treatments: [] };
     o.paid = paid ? 267 : 0; o.payments = paid ? [{ status: 'paid', amount: 267, paid_at: `${day(-1)}T10:00:00Z`, method_label: 'Käteinen', link_token: null, link_path: null }] : [];
-    giftCards.push({ token: '00000000-0000-4000-8000-000000000001', package_code: 'open', package_name: 'Avoin lahjakortti', amount: 75, status: paid ? 'active' : 'pending_payment', valid_to: paid ? day(180) : null, recipient_name: 'Mikko Mallikas', ready: paid, code: 'HH3A7CEFHJKL', balance: 75, greeting: 'Hyvää syntymäpäivää! Nauti saunasta.' },
-      { token: '00000000-0000-4000-8000-000000000002', package_code: 'sauna_treatment_2', package_name: 'Saunahoito kahdelle', amount: 192, status: paid ? 'active' : 'pending_payment', valid_to: paid ? day(180) : null, recipient_name: null, ready: paid, code: 'HH7MRTUVWXY3', balance: 192, greeting: null });
+    giftCards.push({ token: '00000000-0000-4000-8000-000000000001', package_code: 'open', package_name: 'Avoin lahjakortti', amount: 75, status: paid ? 'active' : 'pending_payment', valid_to: paid ? day(180) : null, recipient_name: 'Mikko Mallikas', ready: paid, code: 'HH3A7CEFHJKL', balance: 75, greeting: 'Hyvää syntymäpäivää! Nauti saunasta.', delivery_to: 'buyer', deliver_on: null, deliver_time: null, delivered_at: null },
+      { token: '00000000-0000-4000-8000-000000000002', package_code: 'sauna_treatment_2', package_name: 'Saunahoito kahdelle', amount: 192, status: paid ? 'active' : 'pending_payment', valid_to: paid ? day(180) : null, recipient_name: null, ready: paid, code: 'HH7MRTUVWXY3', balance: 192, greeting: null, delivery_to: 'buyer', deliver_on: null, deliver_time: null, delivered_at: null });
+    if (scenario === 'cardsdelivery') {
+      o.items.push({ id: 3, name: 'Avoin lahjakortti', name_en: 'Open gift card', quantity: 2, line_total: 100, vat_rate: 25.5 }); o.paid = 367; o.payments[0].amount = 367;
+      giftCards.push({ token: '00000000-0000-4000-8000-000000000003', package_code: 'open', package_name: 'Avoin lahjakortti', amount: 50, status: 'active', valid_to: day(180), recipient_name: 'Sanna Saaja', ready: true, code: 'HH5KLMNPQRST', balance: 50, greeting: 'Hauskaa joulua!', delivery_to: 'recipient', deliver_on: day(30), deliver_time: '18:30', delivered_at: null },
+        { token: '00000000-0000-4000-8000-000000000004', package_code: 'open', package_name: 'Avoin lahjakortti', amount: 50, status: 'active', valid_to: day(180), recipient_name: 'Pekka Saaja', ready: true, code: 'HH6UVWXYZ234', balance: 50, greeting: null, delivery_to: 'recipient', deliver_on: null, deliver_time: null, delivered_at: `${day(-1)}T10:05:00Z` });
+    }
   }
   sync();
   const snap = () => JSON.parse(JSON.stringify({ ok: true, ...o }));
