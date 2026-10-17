@@ -237,7 +237,7 @@ function prodCard(p, rs, ds, open, onToggle, treat = false) {
   const avail = rs.filter((x) => x.r.status === 'available'), id = `bk-pc-${p.id}`;
   const desc = (pdesc(p) || '').replace(/\s+/g, ' ').trim(), short = desc.length > 90 ? `${desc.slice(0, 90).replace(/\s+\S*$/, '')}…` : desc;
   const panel = h('div', { id: `${id}-panel`, class: 'bk-pc-panel', role: 'region', 'aria-labelledby': `${id}-btn`, hidden: open ? null : true },
-    h('ul', { class: 'bk-slotlist' }, rs.map((x) => (treat ? treatItem(x, ds) : dayItem(x, ds)))),
+    h('ul', { class: 'bk-slotlist' }, rs.filter((x) => treat || x.r.status === 'available').map((x) => (treat ? treatItem(x, ds) : dayItem(x, ds)))),
     h('p', { class: 'bk-pc-more' }, h('a', { href: treat ? bk(`/tuote/${p.slug}?n=1&d=${ds}`) : bk(`/tuote/${p.slug}/${ds}`), text: t.productInfo })));
   const btn = h('button', { type: 'button', id: `${id}-btn`, class: 'bk-pc-head', 'aria-expanded': open ? 'true' : 'false', 'aria-controls': `${id}-panel`, onclick: () => onToggle(p, li) },
     pimg(p, 'pc-img', { alt: false, w: 160, hgt: 160 }),
@@ -368,7 +368,7 @@ async function viewProduct(slug, dateStr, query) {
     const markSel = () => calBox.querySelectorAll('.bk-cell[aria-pressed]').forEach((b) => { const on = b.textContent === String(+sel?.slice(8)) && sel?.startsWith(`${y}-${pad2(m + 1)}`); b.classList.toggle('sel', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
     const drawSlots = () => {
       if (!sel) { slotBox.replaceChildren(); return; }
-      const rows = byDay[sel] || [];
+      const rows = (byDay[sel] || []).filter((r) => r.status === 'available');   // vain vapaat vuorot asiakkaalle
       slotBox.replaceChildren(h('h3', { text: `${t.pickSlot} – ${dayLong(`${sel}T12:00:00Z`)}` }),
         rows.length ? h('ul', { class: 'bk-slotlist' }, rows.map((r) => slotItem(r, sel, p))) : h('p', { text: t.noSlots }));
     };
@@ -624,8 +624,9 @@ async function viewChange(token, b) {
     let rows = [];
     try { rows = (await rpc('public_availability', { p_product_id: it.product_id, p_from: st.date, p_to: st.date })) || []; } catch { sessionsBox.replaceChildren(errorBox(t.loadError)); return; }
     st.rows = rows.sort((a, c) => a.starts_at.localeCompare(c.starts_at));
+    const visibleRows = st.rows.filter((r) => isCur(r) || (r.status === 'available' && new Date(r.starts_at).getTime() >= minStart));   // täynnä olevia ja myöhästyneitä ei näytetä
     sessionsBox.replaceChildren(h('h3', { text: `${t.pickSlot} – ${dayLong(`${st.date}T12:00:00Z`)}` }),
-      st.rows.length ? h('ul', { class: 'bk-slotlist', role: 'radiogroup', 'aria-label': t.pickSlot }, st.rows.map((r) => {
+      visibleRows.length ? h('ul', { class: 'bk-slotlist', role: 'radiogroup', 'aria-label': t.pickSlot }, visibleRows.map((r) => {
         const cur = isCur(r);
         const late = new Date(r.starts_at).getTime() < minStart;
         const ok = !late && (r.status === 'available' || cur);
