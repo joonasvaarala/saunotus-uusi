@@ -101,9 +101,9 @@ function buildSale(pk) {
     const dlvHint = h('p', { class: 'bk-note gc-hint gc-dlvhint', 'data-testid': 'dlv-hint' });
     const dlv = h('fieldset', { class: 'gc-dlv', 'data-testid': 'dlv' }, h('legend', { text: tx('deliveryLegend') }),
       radios('dlv', [['buyer', tx('deliveryBuyer')], ['recipient', tx('deliveryRecipient')]], () => l.deliveryTo, (v) => { l.deliveryTo = v; }), dlvHint);
-    const rn = h('input', { type: 'text', maxlength: 120, autocomplete: 'off', value: l.recipientName });
+    const rn = h('input', { type: 'text', maxlength: 120, autocomplete: 'off', value: l.recipientName, 'data-testid': 'recipient-name' });
     fs.recipientName = field({ label: tx('recipientName'), control: rn, name: 'rn' }); rn.addEventListener('input', () => { l.recipientName = rn.value; fs.recipientName.setError(''); });
-    const re = h('input', { type: 'email', autocomplete: 'off', inputmode: 'email', value: l.recipientEmail });
+    const re = h('input', { type: 'email', autocomplete: 'off', inputmode: 'email', value: l.recipientEmail, 'data-testid': 'recipient-email' });
     fs.recipientEmail = field({ label: tx('recipientEmailReq'), control: re, hint: tx('recipientEmailHintNow'), name: 're' }); re.addEventListener('input', () => { l.recipientEmail = re.value; fs.recipientEmail.setError(''); });
     // ajankohta
     const maxMonths = Math.min(G.DELIVER_MAX_MONTHS, p.valid_months || 6), today = G.helsinkiNow().date, maxDate = G.deliverMaxDate(today, p.valid_months);
@@ -118,7 +118,7 @@ function buildSale(pk) {
       radios('when', [['now', tx('whenNow')], ['later', tx('whenLater')]], () => l.sendMode, (v) => { l.sendMode = v; }), whenPanel);
     // tervehdys (kortissa) ja saateteksti (sähköpostissa) – kaksi erillistä kenttää
     const counterOf = (stateFn, max) => { const c = h('p', { class: 'gc-counter', 'aria-live': 'polite' }); return { c, set(v) { const g = stateFn(v); c.textContent = g.over ? tx('counterOver', { n: g.n, max, over: -g.left }) : tx('counter', { n: g.n, max }); c.classList.toggle('gc-over', g.over); return g; } }; };
-    const gr = h('textarea', { rows: 3 }); gr.value = l.greeting;
+    const gr = h('textarea', { rows: 3, 'data-testid': 'greeting' }); gr.value = l.greeting;
     fs.greeting = field({ label: tx('greetingCard'), control: gr, hint: tx('greetingCardHint', { max: G.GREETING_MAX }), name: 'gr' });
     const gc = counterOf(G.greetingState, G.GREETING_MAX);
     gr.addEventListener('input', () => { l.greeting = gr.value; fs.greeting.setError(gc.set(gr.value).over ? tx('err.invalid_greeting', { max: G.GREETING_MAX }) : ''); }); gc.set(gr.value);
