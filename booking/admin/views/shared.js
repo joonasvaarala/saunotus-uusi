@@ -4,6 +4,7 @@ import { addonPicker } from './addons.js';
 import { icon } from '../icons.js';
 import { h, dialog, toast, run, fmtDay, fmtTime, fmtDT, money, statusBadge, payBadge, sourceBadge, isJohku, field, badge, empty, errMsg } from '../ui.js';
 import { legsList, resName, resourceBadges, hasLegs } from './legs.js';
+import { missingOpen, grantButton } from './therapist.js';
 
 export function reservationDialog(r, { methods, onChange, refs, can = () => true }) {
   const body = h('div', { class: 'stack' });
@@ -43,7 +44,7 @@ export function reservationDialog(r, { methods, onChange, refs, can = () => true
   // varauslistan rivillä ne puuttuvat, joten ne haetaan kerran päivänäkymästä. Kaikki kentät valinnaisia.
   const drawResources = () => {
     const x = r;
-    if (!x.space_code && !hasLegs(x) && !x.lifecycle) { resBox.replaceChildren(); return; }
+    if (!x.space_code && !hasLegs(x) && !x.lifecycle && !x.therapist_missing) { resBox.replaceChildren(); return; }
     const other = x.space_code === 'rauni' ? 'lovi' : x.space_code === 'lovi' ? 'rauni' : null;
     const claim = (x.claim_offset_min > 0 || x.claim_minutes) ? `alkaa +${x.claim_offset_min || 0} min${x.claim_minutes ? `, kesto ${x.claim_minutes} min` : ''}` : null;
     const kids = [h('h3', { text: 'Resurssit' }), h('dl', { class: 'kv' },
@@ -52,7 +53,10 @@ export function reservationDialog(r, { methods, onChange, refs, can = () => true
       x.override_reason ? [h('dt', { text: 'Ylitys' }), h('dd', { text: x.override_reason })] : null,
       x.quota_exempt ? [h('dt', { text: 'Kiintiö' }), h('dd', { text: 'Kiintiövapaa (esim. lahjakortti): ei kuluta myyntikiintiötä' })] : null,
       claim ? [h('dt', { text: 'Tilan käyttö' }), h('dd', { text: claim })] : null,
-      x.parent_reservation_id ? [h('dt', { text: 'Vanhempi varaus' }), h('dd', { text: `varaus #${x.parent_reservation_id}` })] : null),
+      x.parent_reservation_id ? [h('dt', { text: 'Vanhempi varaus' }), h('dd', { text: `varaus #${x.parent_reservation_id}` })] : null,
+      x.therapist_missing ? [h('dt', { text: 'Saunottaja' }), h('dd', { 'data-testid': 'therapist-state' }, missingOpen(x)
+        ? [h('strong', { text: 'Puuttuu työvuorosta' }), ' ', h('small', { class: 'muted', text: 'Lisää saunottaja työvuoroon tai myönnä poikkeus.' }), ' ', grantButton(x, { ctx: { can }, onDone: () => { d.close(); onChange?.(); } })]
+        : [h('strong', { text: 'Poikkeus myönnetty' }), x.therapist_exception_at ? ` ${fmtDT(x.therapist_exception_at)}` : '', x.therapist_exception_note ? [h('br'), h('small', { text: `Perustelu: ${x.therapist_exception_note}` })] : null])] : null),
       legsList(x.legs, refs)];
     if (other === 'lovi' && x.persons > 1 && x.status === 'confirmed') kids.push(h('p', { class: 'muted', text: 'Loviin mahtuu vain 1 henkilö, joten siirtoa Raunista Loviin ei tarjota.' }));
     else if (other && x.status === 'confirmed' && can('bookings.manage')) {
@@ -72,7 +76,7 @@ export function reservationDialog(r, { methods, onChange, refs, can = () => true
   drawResources();
   if (r.quota_exempt === undefined && r.reservation_id && (r.space_code || hasLegs(r))) {   // täydennä päivänäkymästä (ylitys, kiintiö, claim, leg_id)
     const day = new Date(r.starts_at).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
-    rpc('admin_day_view', { p_date: day }).then((v) => { const m = (v?.reservations || []).find((y) => y.reservation_id === r.reservation_id); if (m) { Object.assign(r, { quota_exempt: m.quota_exempt, override_reason: m.override_reason, claim_offset_min: m.claim_offset_min, claim_minutes: m.claim_minutes, legs: m.legs?.length ? m.legs : r.legs }); drawResources(); } }).catch(() => {});
+    rpc('admin_day_view', { p_date: day }).then((v) => { const m = (v?.reservations || []).find((y) => y.reservation_id === r.reservation_id); if (m) { Object.assign(r, { quota_exempt: m.quota_exempt, override_reason: m.override_reason, claim_offset_min: m.claim_offset_min, claim_minutes: m.claim_minutes, therapist_missing: m.therapist_missing, therapist_missing_open: m.therapist_missing_open, therapist_exception_at: m.therapist_exception_at, therapist_exception_note: m.therapist_exception_note, legs: m.legs?.length ? m.legs : r.legs }); drawResources(); } }).catch(() => {});
   }
   // Tilauksen lisätiedot: laskutustiedot (yritysasiakas), lisäpalvelut (+ muokkaus)
   const drawOrder = async () => {

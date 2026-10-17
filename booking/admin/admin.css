@@ -212,3 +212,11 @@ h2 .icon,h3 .icon,.addon-mark .icon{display:inline-block;vertical-align:-3px;mar
 .prodcatset{display:none}
 .prodcatsel{min-height:44px}
 @media(min-width:700px){.prodcatset{display:block}.prodcatsel-w{display:none}}
+/* saunottaja puuttuu (migraatio 22) */
+.badge.tmiss{background:#F6E6C3;color:#5a3f00;border:1px solid rgba(90,63,0,.5)}
+.badge.tmiss-ok{border:1px solid var(--line)}
+.warn-box{display:grid;gap:6px;padding:12px 14px;border-radius:var(--r);background:var(--warnbg);border:1px solid rgba(90,63,0,.45);border-left:5px solid #8a5a00;color:#4a3300;margin-bottom:12px}
+.warn-box p{margin:0;color:#4a3300}
+.toast.warn{background:#6b4b00}
+[data-testid=therapist-state] .btn{margin-left:4px}
+.btn[data-testid=grant-btn]{min-height:44px;padding:10px 14px}

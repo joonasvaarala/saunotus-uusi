@@ -42,7 +42,7 @@ export function toast(msg, kind = 'ok') {
   let el = document.getElementById('toast');
   if (!el) { el = h('div', { id: 'toast', role: 'status', 'aria-live': 'polite' }); document.body.append(el); }
   el.className = `toast ${kind} show`; el.textContent = msg;
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), kind === 'err' ? 6000 : 2800);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), kind === 'err' ? 6000 : kind === 'warn' ? 7000 : 2800);
 }
 // Virhekoodit (SQLSTATE BK001; koodi DETAIL-kentässä → ApiError.code) suomeksi. Tuntemattomalle koodille näytetään palvelimen oma (suomenkielinen) viesti.
 export const ERR_FI = {
@@ -71,6 +71,12 @@ export const ERR_FI = {
   bad_override: 'Virheellinen ohitus (sallitut: Ohita, Estä, Palauta automaattinen).',
   not_found: 'Tapahtumaa ei löydy (se on voinut poistua kalenterista). Päivitä sivu.',
   calendar_not_found: 'Sulkukalenteria ei löydy.',
+  // migraatiot 22–23 (saunottaja puuttuu, aikaikkuna)
+  time_window: 'Aika on hoitojen ja saunotusten aikaikkunan ulkopuolella: ma–pe 16:00–20:30, la–su 13:00–20:30 (päättyminen viimeistään 20:30). Valitse sallittu aika; ylitys vaatii oikeuden ja perustelun.',
+  ritual_start: 'Rituaalin tai paketin alkuaika voi olla vain 16:00, 16:30 tai 17:00.',
+  note_required: 'Perustelu vaaditaan (vähintään 3 merkkiä).',
+  not_missing: 'Varaukselta ei puutu saunottajaa (tai poikkeus on jo myönnetty), joten poikkeusta ei tarvita.',
+  therapist_present: 'Varauksella on jo saunottaja, joten poikkeusta ei tarvita.',
 };
 export const errMsg = (e) => {
   const t = e?.code && ERR_FI[e.code];

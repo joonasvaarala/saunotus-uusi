@@ -3,6 +3,7 @@
 // Ylitys (sulku- ja saunottajatarkistuksen ohitus) vaatii oikeuden bookings.override ja perustelun; vaihtoehto näkyy vain oikeuden omaaville.
 import { rpc, select } from '../sb.js';
 import { customerForm, customerSearch } from './customerform.js';
+import { warningBox, hasWarning, MISSING_TEXT } from './therapist.js';
 import { addonPicker } from './addons.js';
 import { resName, catLabel } from './legs.js';
 import { h, field, toast, run, fmtDay, fmtTime, money, todayHel, helsinkiIso, errMsg, dayStartIso, addDays, fmtDT } from '../ui.js';
@@ -32,7 +33,7 @@ export async function render({ ctx, refs, query, kind }) {
   const date = h('input', { type: 'date', name: 'date', required: true, value: /^\d{4}-\d\d-\d\d$/.test(query.get('d') || '') ? query.get('d') : todayHel() });
   const time = h('input', { type: 'time', name: 'time', required: true, step: 300, value: '15:00' });
   const end = h('input', { type: 'time', name: 'end', step: 300 });
-  const endHint = h('small', { class: 'muted' });
+  const endHint = h('small', { class: 'muted' }); const windowHint = h('small', { class: 'muted', 'data-testid': 'window-hint' });
   const persons = h('input', { type: 'number', name: 'n', min: 1, value: 1, required: true });
   const personsHint = h('small', { class: 'muted' });
   const spaceSel = h('select', { name: 'space' }); const spaceFld = field('Tila', spaceSel, 'Automaattinen valinta noudattaa tuotteen sääntöjä (esim. Lovi vain kun Rauni on suljettu).');
@@ -49,7 +50,7 @@ export async function render({ ctx, refs, query, kind }) {
   const ovr = h('input', { type: 'checkbox', name: 'override' });
   const ovrReason = h('textarea', { name: 'override_reason', rows: 2, maxlength: 300, placeholder: 'Esim. sovittu erikseen, saunottaja järjestetty', 'aria-required': 'true' });
   const ovrBox = h('fieldset', { class: 'box override-box', 'data-testid': 'override-box' }, h('legend', { text: 'Ylitys' }),
-    h('label', { class: 'check' }, ovr, ' Ohita sulku- ja saunottajatarkistus (ylitys)'),
+    h('label', { class: 'check' }, ovr, ' Ohita sulku-, saunottaja- ja aikaikkunatarkistus (ylitys)'),
     h('div', { class: 'ovr-reason', hidden: true }, field('Perustelu (pakollinen)', ovrReason, 'Ylitys kirjataan varaukseen ja näkyy Tarkista-listalla.')));
   ovr.addEventListener('change', () => { ovrBox.querySelector('.ovr-reason').hidden = !ovr.checked; if (ovr.checked) ovrReason.focus(); });
   const ui = {};
@@ -73,6 +74,7 @@ export async function render({ ctx, refs, query, kind }) {
     personsHint.textContent = `${c.min_persons || 1}${c.max_persons ? `–${c.max_persons}` : '+'} hlö${c.required_skill ? ` · vaatii saunottajan (taito: ${c.required_skill})` : ''}`;
     endHint.textContent = dur ? `Oletuskesto ${dur} min${time.value ? ` → päättyy ${addMin(time.value, dur)}` : ''}` : 'Päättymisaika pakollinen (tuotteella ei ole oletuskestoa)';
     end.required = !dur;
+    windowHint.textContent = c.time_window_class === 'therapy' ? 'Aikaikkuna: ma–pe 16:00–20:30, la–su 13:00–20:30 (päättyy viimeistään 20:30).' : c.time_window_class === 'ritual' ? 'Alkuaika vain 16:00, 16:30 tai 17:00.' : '';
     const sp = rules ? spaceOpts(p) : [];
     spaceFld.hidden = sp.length < 2; spaceSel.replaceChildren(h('option', { value: '', text: 'Automaattinen' }), ...sp.map((x) => h('option', { value: x.id, text: x.name })));
     price.placeholder = p.price != null ? `Tuotteen hinta ${money(p.price)}` : 'Hinta';
@@ -84,7 +86,7 @@ export async function render({ ctx, refs, query, kind }) {
   const f = h('form', { class: 'stack card nbform', novalidate: true, 'data-testid': old ? 'old-booking-form' : 'resource-booking-form' }, h('h3', { text: old ? 'Vanha varaus' : 'Resurssivaraus' }),
     h('p', { class: 'muted', text: old ? 'Kirjaa varaus vanhalle tuotteelle (esim. siirtynyt hoito). Resurssivaikutus säilyy: sulut, päällekkäisyys ja saunottaja tarkistetaan.' : 'Nykyinen resurssituote (hoito, saunotus, rituaali, seremonia, lisäpalvelu) ylläpidon kautta. Tila ja saunottaja varataan tuotteen sääntöjen mukaan.' }),
     field('Tuote', prodSel),
-    h('div', { class: 'row wrap' }, field('Päivä', date), field('Alkaa', time), field('Päättyy (valinnainen)', end, null)), endHint,
+    h('div', { class: 'row wrap' }, field('Päivä', date), field('Alkaa', time), field('Päättyy (valinnainen)', end, null)), endHint, windowHint,
     h('div', { class: 'row wrap' }, field('Henkilömäärä', persons), field('Hinta € (ohita automaattinen)', price)), personsHint,
     spaceFld, parentFld,
     h('h3', { text: 'Asiakas' }), cs.row, cs.found, cf.node, picker.node,
@@ -112,10 +114,10 @@ export async function render({ ctx, refs, query, kind }) {
       p_addons: addonsSel.length ? addonsSel : null, p_parent_reservation_id: parentSel.value ? +parentSel.value : null, p_invoice_reference: invRef.value.trim() || null };
     let r;
     r = await rpc(old ? 'admin_create_old_booking' : 'admin_create_resource_booking', args);
-    toast(`Varaus luotu (tilaus #${r.order_no})`);
-    result.replaceChildren(h('div', { class: 'card ok-box', role: 'status' }, h('h3', { text: `Varaus luotu – tilaus #${r.order_no}` }),
+    if (hasWarning(r)) toast(MISSING_TEXT, 'warn'); else toast(`Varaus luotu (tilaus #${r.order_no})`);
+    result.replaceChildren(...[warningBox(r, { ctx, onDone: () => { result.replaceChildren(); } }), h('div', { class: 'card ok-box', role: 'status' }, h('h3', { text: `Varaus luotu – tilaus #${r.order_no}` }),
       h('p', { text: `${r.product_name}, ${fmtDay(r.starts_at)} ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)} · ${money(r.total)}${r.legs ? ` · ${r.legs} lisäresurssia` : ''}` }),
-      h('div', { class: 'row wrap' }, h('a', { class: 'btn', href: `#/?d=${date.value}`, text: 'Näytä päivänäkymä' }), h('a', { class: 'btn ghost', href: '#/varaukset', text: 'Varaukset' }))));
+      h('div', { class: 'row wrap' }, h('a', { class: 'btn', href: `#/?d=${date.value}`, text: 'Näytä päivänäkymä' }), h('a', { class: 'btn ghost', href: '#/varaukset', text: 'Varaukset' })))].filter(Boolean));
     result.scrollIntoView?.({ block: 'nearest' });
   } catch (e) { errBox.textContent = errMsg(e); errBox.hidden = false; errBox.scrollIntoView?.({ block: 'nearest' }); } }); });
   const body = products.length ? [f, result] : [h('p', { class: 'empty', text: old ? 'Ei vanhoja tuotteita, joille voisi kirjata varauksen.' : 'Ei resurssituotteita, joille voisi luoda varauksen.' })];
