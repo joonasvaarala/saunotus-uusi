@@ -1,5 +1,6 @@
 // Lahjakortti-mock (hallinta): deterministinen, vain keksittyä dataa. Vastaa sopimuksen §13 admin-RPC:itä samoilla nimillä, p_-parametreilla ja vastausrakenteilla,
 // joten giftcards-api.js ajaa sekä mockia että oikeaa palvelinta samalla koodilla. Puhdas moduuli (ei DOM:ia) → node --test voi ajaa sen.
+import { resolveDelivery } from './giftcards-delivery.js';
 const CHARS = '3479ACEFHJKLMNPRTUVWXY';
 const pad = (n, w = 2) => String(n).padStart(w, '0');
 const round2 = (n) => Math.round((+n + Number.EPSILON) * 100) / 100;
@@ -27,6 +28,7 @@ export function createGiftMock({ today = new Date().toLocaleDateString('sv-SE', 
     const c = { id, code: fmtCode(n), code_last4: n.slice(-4), source: 'native', issuer: 'own', kind: pkg.kind, package_code: pkg.code, package_name: pkg.name, product_id: null, initial_amount: o.initial, balance: o.balance ?? o.initial,
       currency: 'EUR', status: 'active', valid_from: o.valid_from || today, valid_to: o.valid_to || monthsAdd(today, 6), balance_verified: true, balance_source: 'native', vat_treatment: pkg.vat_treatment || 'at_sale', sale_vat_rate: 25.5, accounting_origin: 'native',
       single_order: false, buyer_customer_id: null, buyer_name: null, buyer_email: null, recipient_name: null, recipient_email: null, greeting: null, locale: 'fi', purchase_order_id: null, order_no: null,
+      delivery_to: 'buyer', cover_message: null, deliver_on: null, deliver_time: null, delivered_at: null,   // §13.11
       public_token: `00000000-0000-4000-8000-${pad(id, 12)}`, created_at: `${o.created || today}T08:00:00Z`, activated_at: `${o.created || today}T08:00:00Z`, last_used_at: null, note: null, ...o.over };
     cards.push(c); if (o.ledger !== false) log(id, { delta: o.initial, reason: c.source === 'johku' ? 'johku_purchase' : 'purchase', balance_after: o.initial, at: c.created_at });
     return c;
@@ -34,6 +36,8 @@ export function createGiftMock({ today = new Date().toLocaleDateString('sv-SE', 
   // siemendata (deterministinen)
   NAMES.forEach(([r, b], i) => {
     const pk = MOCK_PACKAGES[1 + (i % 4)], c = add({ package_code: pk.code, initial: pk.price, created: dayAdd(today, -20 - i * 9), over: { recipient_name: r, buyer_name: b, buyer_email: `ostaja${i + 1}@example.invalid`, greeting: i % 2 ? 'Rentouttavia hetkiä!' : null, order_no: 14990 + i, purchase_order_id: 7000 + i } });
+    if (i === 1) Object.assign(c, { delivery_to: 'recipient', recipient_email: 'saaja2@example.invalid', cover_message: 'Hyvää syntymäpäivää! Tässä lahjasi.', delivered_at: `${dayAdd(today, -19)}T07:00:00Z` });   // toimitettu saajalle
+    if (i === 2) Object.assign(c, { delivery_to: 'recipient', recipient_email: 'saaja3@example.invalid', cover_message: 'Avaa sitten kun on aika rentoutua.', deliver_on: dayAdd(today, 20), deliver_time: null, delivered_at: null });   // ajastettu
     if (i % 3 === 0) { c.balance = 0; c.status = 'used'; c.last_used_at = `${dayAdd(today, -3)}T10:00:00Z`; log(c.id, { delta: -pk.price, reason: 'redemption', balance_after: 0, order_id: 8000 + i, order_no: 15000 + i, payment_id: 900 + i }); payments.set(c.id, [{ payment_id: 900 + i, order_id: 8000 + i, order_no: 15000 + i, amount: pk.price, refunded_amount: 0, status: 'paid', paid_at: `${dayAdd(today, -3)}T10:00:00Z`, accounted: false }]); }
   });
   [50, 75, 120, 200].forEach((a, i) => { const c = add({ package_code: 'open', initial: a, created: dayAdd(today, -40 - i * 11), over: { recipient_name: NAMES[i][0], buyer_name: NAMES[i][1], buyer_email: `avoin${i + 1}@example.invalid`, vat_treatment: 'at_redemption' } }); if (i === 1) { c.balance = 45; log(c.id, { delta: -30, reason: 'redemption', balance_after: 45, order_id: 8100, order_no: 15050, payment_id: 950 }); payments.set(c.id, [{ payment_id: 950, order_id: 8100, order_no: 15050, amount: 30, refunded_amount: 0, status: 'paid', paid_at: `${dayAdd(today, -5)}T11:00:00Z`, accounted: true }]); } });
@@ -79,12 +83,16 @@ export function createGiftMock({ today = new Date().toLocaleDateString('sv-SE', 
       if (pkg.is_open) { if (a.p_amount == null || round2(a.p_amount) !== +a.p_amount || a.p_amount < pkg.min_amount || a.p_amount > pkg.max_amount) throw err('invalid_amount', `Summa ${pkg.min_amount}–${pkg.max_amount} €`); amount = +a.p_amount; }
       else if (a.p_amount != null && +a.p_amount !== pkg.price) throw err('invalid_amount', 'Paketin hinta on kiinteä');
       if (a.p_greeting && String(a.p_greeting).length > 300) throw err('invalid_greeting', 'Tervehdys on liian pitkä (max 300 merkkiä)');
+      // toimitusvalinta: sama järjestys kuin palvelimella (_gc_sell): sähköposti (invalid_email) → tervehdys → _gc_delivery_resolve
+      if (a.p_recipient_email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(a.p_recipient_email).trim())) throw err('invalid_email', 'Tarkista saajan sähköpostiosoite');
+      const dv = resolveDelivery({ to: a.p_delivery_to, recipientEmail: a.p_recipient_email, cover: a.p_cover_message, on: a.p_deliver_on, time: a.p_deliver_time, months: Math.min(12, a.p_valid_months || pkg.valid_months || 6), now: new Date() });
+      if (!dv.ok) throw err(dv.code, `Toimitusvalinta virheellinen (${dv.code})`);
       const paid = !!a.p_payment_method && !['pay_later', 'invoice'].includes(a.p_payment_method), sale = !!a.p_payment_method;
       if (!sale && String(a.p_note || '').trim().length < 3) throw err('invalid_param', 'Anna maksuttoman kortin syy (p_note)');
       const out = [], on = sale ? ++orderNo : null;
       for (let i = 0; i < q; i++) {
         const c = add({ package_code: pkg.code, initial: sale && !paid ? amount : amount, balance: sale && !paid ? 0 : amount, ledger: sale ? false : true, over: { buyer_name: a.p_buyer?.name || null, buyer_email: a.p_buyer?.email || null, recipient_name: a.p_recipient_name || null, recipient_email: a.p_recipient_email || null,
-          greeting: a.p_greeting || null, vat_treatment: a.p_vat_treatment || (sale ? pkg.vat_treatment : 'at_sale'), locale: a.p_locale || 'fi', note: a.p_note || null, order_no: on, purchase_order_id: on ? on - 15100 + 9000 : null,
+          greeting: a.p_greeting || null, ...dv.value, vat_treatment: a.p_vat_treatment || (sale ? pkg.vat_treatment : 'at_sale'), locale: a.p_locale || 'fi', note: a.p_note || null, order_no: on, purchase_order_id: on ? on - 15100 + 9000 : null,
           status: sale && !paid ? 'pending_payment' : 'active', activated_at: sale && !paid ? null : `${today}T08:00:00Z`, valid_to: sale && !paid ? null : monthsAdd(today, a.p_valid_months || pkg.valid_months) } });
         if (sale && paid) log(c.id, { delta: amount, reason: 'purchase', balance_after: amount, order_no: on });
         if (!sale) { const l = ledgers.get(c.id); l[0].reason = 'manual_issue'; l[0].note = a.p_note; }

@@ -50,10 +50,11 @@ Deno.serve(async (req) => {
       }
       if (isGc) {
         let k = 0;
-        for (const g of r.gift_cards) {
+        // ostajan viestissä liitteenä vain ostajalle toimitettavat kortit; suoraan saajalle toimitettavien PDF menee saajan viestissä
+        for (const g of r.gift_cards.filter((x: any) => r.kind === "gift_card_recipient" || (x.delivery_to ?? "buyer") !== "recipient")) {
           const pdf = await fetch(`${url}/functions/v1/gift-card-pdf?t=${g.public_token}&lang=${g.locale === "en" ? "en" : "fi"}`);
           if (!pdf.ok) throw new Error(`gift-card-pdf ${pdf.status}`);
-          attachments.push({ filename: `${g.locale === "en" ? "gift-card" : "lahjakortti"}${r.gift_cards.length > 1 ? "-" + (++k) : ""}.pdf`, content: b64(new Uint8Array(await pdf.arrayBuffer())) });
+          attachments.push({ filename: `${g.locale === "en" ? "gift-card" : "lahjakortti"}${r.gift_cards.length > 1 && r.kind === "gift_card_buyer" ? "-" + (++k) : ""}.pdf`, content: b64(new Uint8Array(await pdf.arrayBuffer())) });
         }
       }
       const res = await fetch("https://api.resend.com/emails", {

@@ -42,8 +42,9 @@ test('rivin tarkistus: avoin 29–500, määrä, saajan sähköposti, tervehdys'
   assert.equal(G.validateLine({ ...base, amount: '500' }, open).amount, undefined);
   assert.equal(G.validateLine({ ...base, amount: '500.01' }, open).amount, 'amount');
   assert.equal(G.validateLine({ ...base, qty: 0 }, open).qty, 'qty');
-  assert.equal(G.validateLine({ ...base, recipientEmail: 'ei-sähköposti' }, open).recipientEmail, 'email');
-  assert.equal(G.validateLine({ ...base, greeting: 'x'.repeat(301) }, open).greeting, 'greeting');
+  assert.equal(G.validateLine({ ...base, deliveryTo: 'recipient', recipientName: 'Sanna', recipientEmail: 'ei-sähköposti' }, open).recipientEmail, 'invalid_email');
+  assert.equal(G.validateLine({ ...base, recipientEmail: 'ei-sähköposti' }, open).recipientEmail, undefined, 'minulle-valinnalla saajan sähköpostia ei tarkisteta (ei lähetetä)');
+  assert.equal(G.validateLine({ ...base, greeting: 'x'.repeat(301) }, open).greeting, 'invalid_greeting');
   assert.deepEqual(G.validateLine({ pkg: 'entry_2', qty: 2, amount: '' }, pkgs.find((p) => p.code === 'entry_2')), {});   // paketilla summaa ei tarkisteta
 });
 test('ostajan tarkistus', () => {
@@ -53,7 +54,7 @@ test('ostajan tarkistus', () => {
 });
 test('p_items ja kutsun parametrit täsmälleen sopimuksen §13.2 mukaan', () => {
   const lines = [{ pkg: 'open', amount: '75,5', qty: 1, recipientName: ' Mikko ', recipientEmail: 'Mikko@Example.FI', greeting: ' Hei\u0000! ' }, { pkg: 'entry_2', amount: '', qty: 2, recipientName: '', recipientEmail: '', greeting: '' }];
-  assert.deepEqual(G.itemsPayload(lines, pkgs), [{ package: 'open', quantity: 1, amount: 75.5, recipient_name: 'Mikko', recipient_email: 'mikko@example.fi', greeting: 'Hei!' }, { package: 'entry_2', quantity: 2 }]);
+  assert.deepEqual(G.itemsPayload(lines, pkgs), [{ package: 'open', quantity: 1, amount: 75.5, delivery_to: 'buyer', recipient_name: 'Mikko', greeting: 'Hei!' }, { package: 'entry_2', quantity: 2, delivery_to: 'buyer' }], 'oletus = minulle; saajan sähköposti ei lähde kun toimitus ostajalle');
   const a = G.buyArgs({ lines, pkgs, buyer: { name: ' Olli ', email: ' Olli@X.fi ', phone: ' 040 1 ', marketing: 0 }, locale: 'en' });
   assert.deepEqual(Object.keys(a).sort(), ['p_email', 'p_items', 'p_locale', 'p_marketing_consent', 'p_name', 'p_phone']);
   assert.equal(a.p_locale, 'en'); assert.equal(a.p_marketing_consent, false); assert.equal(a.p_email, 'olli@x.fi');
@@ -136,4 +137,81 @@ test('Paketin sisältölista: FI = label, EN = label_en (vain rivit joilla nimi 
   assert.deepEqual(itemLabels({ items: [{ label: 'Yleinen vuoro', persons: 2 }, { persons: 2, addon_code: 'x' }] }, 'en'), [], 'ei label_en → ei listaa EN-sivulle');
   assert.deepEqual(itemLabels({ items: [{ label: 'Yleinen vuoro' }, { addon_code: 'x' }] }, 'fi'), ['Yleinen vuoro']);
   assert.deepEqual(itemLabels(pkgs.find((x) => x.is_open), 'en'), []); assert.deepEqual(itemLabels(null, 'fi'), []);
+});
+
+// ---------- Toimitusvalinta (sopimus §13.11, booking_46) ----------
+const NOW = new Date('2026-10-17T12:00:00Z');   // 17.10.2026 klo 15.00 Helsingin aikaa (kesäaika päättyy 25.10.)
+const R = (o) => G.resolveDelivery({ to: 'recipient', recipientEmail: 'saaja@example.fi', now: NOW, months: 6, ...o });
+test('toimitusvalinta: oletus minulle; buyer ohittaa saate- ja ajastuskentät ilman virhettä', () => {
+  assert.deepEqual(G.resolveDelivery({ now: NOW }).value, { delivery_to: 'buyer', cover_message: null, deliver_on: null, deliver_time: null });
+  assert.equal(G.resolveDelivery({ recipientEmail: 'a@b.fi', now: NOW }).value.delivery_to, 'recipient', 'ei annettu + saajan sähköposti → recipient (kuten palvelin)');
+  assert.deepEqual(G.resolveDelivery({ to: 'buyer', cover: 'x', on: 'roskaa', time: '99:99', now: NOW }).value, { delivery_to: 'buyer', cover_message: null, deliver_on: null, deliver_time: null });
+});
+test('toimitusvalinta: kaikki 8 virhekoodia (palvelimen koodit §13.11)', () => {
+  assert.equal(G.resolveDelivery({ to: 'muu', now: NOW }).code, 'invalid_delivery_to');
+  assert.equal(R({ recipientEmail: '' }).code, 'recipient_email_required');
+  assert.equal(R({ cover: 'x'.repeat(1001) }).code, 'invalid_cover_message');
+  assert.equal(R({ cover: 'x'.repeat(1000) }).ok, true);
+  assert.equal(R({ on: '2026-10-16' }).code, 'deliver_on_past');
+  assert.equal(R({ on: '2026-10-17', time: '14:54' }).code, 'deliver_on_past', 'tänään yli 5 min sitten oleva kellonaika');
+  assert.equal(R({ on: '2026-10-17', time: '14:55' }).ok, true, 'rajalla 5 min');
+  assert.equal(R({ on: '2027-04-18' }).code, 'deliver_on_too_far');
+  assert.equal(R({ on: '2027-04-17' }).ok, true, 'tänään + 6 kk sallittu');
+  assert.equal(R({ on: '2027-04-17', months: 3 }).code, 'deliver_on_too_far', 'ei yli kortin voimassaolon');
+  assert.equal(R({ on: '2028-10-17', months: 36 }).code, 'deliver_on_too_far', 'enintään 12 kk');
+  for (const on of ['17.10.2026', '2026-13-01', '2026-02-30', 'huomenna', '2026-11-01T9:00']) assert.equal(R({ on }).code, 'invalid_deliver_on', on);
+  assert.equal(R({ time: '10:00' }).code, 'invalid_deliver_on', 'kellonaika ilman päivää');
+  for (const time of ['24:00', '9:00', '10:60', 'aamu']) assert.equal(R({ on: '2026-12-01', time }).code, 'invalid_deliver_time', time);
+});
+test('toimitusvalinta: normalisointi (tänään ilman kellonaikaa = heti, pelkkä päivä, T-muoto, saateteksti siivotaan)', () => {
+  assert.deepEqual(R({ on: '2026-10-17' }).value, { delivery_to: 'recipient', cover_message: null, deliver_on: null, deliver_time: null });
+  assert.deepEqual(R({ on: '2026-12-24' }).value, { delivery_to: 'recipient', cover_message: null, deliver_on: '2026-12-24', deliver_time: null });
+  assert.deepEqual(R({ on: '2026-12-24T18:30' }).value.deliver_time, '18:30');
+  assert.equal(R({ cover: '  Hei\r\nMoi\u0000  ' }).value.cover_message, 'Hei\nMoi');
+  assert.equal(G.helsinkiNow(new Date('2026-12-31T22:30:00Z')).date, '2027-01-01', 'Helsingin päivä (talviaika UTC+2)');
+  assert.equal(G.addMonths('2026-08-31', 6), '2027-02-28'); assert.equal(G.deliverMaxDate('2026-10-17', 6), '2027-04-17');
+});
+test('lomakkeen kenttäkohtaiset virheet: saajalle valittaessa nimi + sähköposti pakollisia; ajankohta vain kun valittu', () => {
+  const open = pkgs.find((p) => p.is_open), l = { pkg: 'open', amount: '50', qty: 1, recipientName: '', recipientEmail: '', greeting: '', deliveryTo: 'recipient', coverMessage: '', sendMode: 'now', deliverOn: '', deliverTime: '' };
+  const v = (o) => G.validateLine({ ...l, ...o }, open, NOW);
+  assert.deepEqual(v({}), { recipientName: 'recipient_name_required', recipientEmail: 'recipient_email_required' });
+  assert.deepEqual(v({ recipientName: 'Sanna', recipientEmail: 'saaja@example.fi' }), {});
+  assert.equal(v({ recipientName: 'S', recipientEmail: 'ei' }).recipientEmail, 'invalid_email');
+  assert.equal(v({ recipientName: 'S', recipientEmail: 'a@b.fi', coverMessage: 'x'.repeat(1001) }).cover, 'invalid_cover_message');
+  const ok = { recipientName: 'S', recipientEmail: 'a@b.fi' };
+  assert.deepEqual(v({ ...ok, sendMode: 'now', deliverOn: '2020-01-01' }), {}, 'heti: päivää ei tarkisteta (ei lähetetä)');
+  assert.equal(v({ ...ok, sendMode: 'later', deliverOn: '' }).deliverOn, 'invalid_deliver_on');
+  assert.equal(v({ ...ok, sendMode: 'later', deliverOn: '2026-10-16' }).deliverOn, 'deliver_on_past');
+  assert.equal(v({ ...ok, sendMode: 'later', deliverOn: '2027-05-01' }).deliverOn, 'deliver_on_too_far');
+  assert.equal(v({ ...ok, sendMode: 'later', deliverOn: '2026-12-01', deliverTime: '25:00' }).deliverTime, 'invalid_deliver_time');
+  assert.deepEqual(v({ ...ok, sendMode: 'later', deliverOn: '2026-12-01', deliverTime: '18:30' }), {});
+  assert.equal(G.validateLine({ ...l, deliveryTo: 'buyer', greeting: 'x'.repeat(301) }, open, NOW).greeting, 'invalid_greeting');
+  assert.deepEqual(Object.keys(G.SERVER_FIELD).sort(), ['deliver_on_past', 'deliver_on_too_far', 'invalid_cover_message', 'invalid_deliver_on', 'invalid_deliver_time', 'invalid_email', 'invalid_greeting', 'recipient_email_required']);
+});
+test('p_items: delivery_to aina; saaja-valinnalla email/saate/ajankohta; ajankohta vain kun "Valitse ajankohta"', () => {
+  const base = { qty: 1, recipientName: ' Sanna ', recipientEmail: ' Saaja@Example.FI ', greeting: 'Hei', deliveryTo: 'recipient', coverMessage: ' Terveiset\r\nMoi ', sendMode: 'now', deliverOn: '2026-12-24', deliverTime: '18:30' };
+  const lines = [{ pkg: 'entry_2', ...base }, { pkg: 'entry_2', ...base, sendMode: 'later' }, { pkg: 'entry_2', ...base, sendMode: 'later', deliverTime: '' }, { pkg: 'entry_2', ...base, deliveryTo: 'buyer', sendMode: 'later' }];
+  const it = G.itemsPayload(lines, pkgs);
+  assert.deepEqual(it[0], { package: 'entry_2', quantity: 1, delivery_to: 'recipient', recipient_name: 'Sanna', greeting: 'Hei', recipient_email: 'saaja@example.fi', cover_message: 'Terveiset\nMoi' }, 'heti → ei deliver_on/deliver_time');
+  assert.deepEqual([it[1].deliver_on, it[1].deliver_time], ['2026-12-24', '18:30']);
+  assert.deepEqual([it[2].deliver_on, 'deliver_time' in it[2]], ['2026-12-24', false], 'kellonaika valinnainen');
+  assert.deepEqual(it[3], { package: 'entry_2', quantity: 1, delivery_to: 'buyer', recipient_name: 'Sanna', greeting: 'Hei' }, 'minulle → ei saajan sähköpostia, saatetta eikä ajankohtaa');
+});
+test('mock-palvelin: public_buy_gift_card palauttaa jokaisen virhekoodin {ok:false, code} ja toimituskentät kortilla', async () => {
+  const m = createGiftMock({ delay: 0 });
+  const buy = (it, extra = {}) => m.rpc('public_buy_gift_card', { p_items: [{ package: 'entry_2', quantity: 1, ...it }], p_name: 'Olli Ostaja', p_email: 'olli@example.fi', p_phone: '+358401234567', p_marketing_consent: false, p_locale: 'fi', ...extra });
+  const fut = G.addMonths(G.helsinkiNow().date, 1);
+  const cases = [[{ delivery_to: 'x' }, 'invalid_delivery_to'], [{ delivery_to: 'recipient' }, 'recipient_email_required'], [{ delivery_to: 'recipient', recipient_email: 'ei' }, 'invalid_email'],
+    [{ greeting: 'x'.repeat(301) }, 'invalid_greeting'], [{ delivery_to: 'recipient', recipient_email: 'a@b.fi', cover_message: 'x'.repeat(1001) }, 'invalid_cover_message'],
+    [{ delivery_to: 'recipient', recipient_email: 'a@b.fi', deliver_on: '2020-01-01' }, 'deliver_on_past'], [{ delivery_to: 'recipient', recipient_email: 'a@b.fi', deliver_on: G.addMonths(G.helsinkiNow().date, 7) }, 'deliver_on_too_far'],
+    [{ delivery_to: 'recipient', recipient_email: 'a@b.fi', deliver_on: 'ei-pvm' }, 'invalid_deliver_on'], [{ delivery_to: 'recipient', recipient_email: 'a@b.fi', deliver_on: fut, deliver_time: '99:00' }, 'invalid_deliver_time']];
+  for (const [it, code] of cases) { const r = await buy(it); assert.equal(r.ok, false, code); assert.equal(r.code, code); assert.ok(r.message); }
+  const ok = await buy({ delivery_to: 'recipient', recipient_email: 'a@b.fi', recipient_name: 'Sanna', deliver_on: fut, deliver_time: '18:30', cover_message: 'Hei' });
+  assert.equal(ok.ok, true); assert.deepEqual([ok.cards[0].delivery_to, ok.cards[0].deliver_on, ok.cards[0].deliver_time], ['recipient', fut, '18:30']);
+  const b = await buy({ delivery_to: 'buyer', cover_message: 'x', deliver_on: 'roskaa' }); assert.equal(b.ok, true); assert.equal(b.cards[0].delivery_to, 'buyer'); assert.equal(b.cards[0].deliver_on, null);
+  const top = await buy({}, { p_delivery_to: 'recipient', p_recipient_email: 'a@b.fi', p_deliver_on: '2020-01-01' }); assert.equal(top.code, 'deliver_on_past', 'p_-oletukset toimivat kuten rivikohtaiset');
+});
+test('virheteksti FI ja EN jokaiselle toimitusvirhekoodille (kenttäkohtainen)', () => {
+  for (const code of [...G.DELIVERY_ERROR_CODES, 'invalid_delivery_to', 'recipient_name_required']) for (const lang of ['fi', 'en']) assert.ok(GT[lang][`err.${code}`] && gtText(lang, `err.${code}`, { months: 6, max: 300 }).length > 10, `${lang} err.${code}`);
+  assert.match(gtText('fi', 'err.deliver_on_too_far', { months: 6 }), /6 kk/); assert.match(gtText('en', 'err.deliver_on_too_far', { months: 6 }), /6 months/);
 });

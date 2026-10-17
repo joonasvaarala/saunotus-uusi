@@ -95,6 +95,7 @@ const textBlock = (...parts: (string | undefined | false)[]) => parts.filter((x)
 
 // ---------- lahjakortit (gift_card_buyer / gift_card_recipient) ----------
 // data.gift_cards[]: { public_token, package_code, package_name(_en), kind, amount, valid_to, recipient_name, greeting, buyer_name, persons, locale, status }
+// delivery_to ('buyer'|'recipient'), deliver_on/deliver_time/deliver_at (ajastus), recipient_email (vain ostajan viestissä), cover_message (vain saajan viestissä; EI kortti-PDF:ssä).
 // + data.functions_url (…/functions/v1) ja data.redeem_online (lunastus verkossa päällä?) joita send-emails/index.ts lisää. Koodia EI ole viestissä, vain PDF-linkki.
 const gcAmt = (n: unknown, en: boolean) => { const x = Number(n ?? 0); const w = Math.abs(x - Math.round(x)) < 0.005; const v = w ? String(Math.round(x)) : x.toFixed(2); return en ? `€${v}` : `${v.replace(".", ",")}${NBSP}€`; };
 const gcDate = (s: unknown, en: boolean) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s ?? "")); if (!m) return ""; return en ? new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", day: "numeric", month: "short", year: "numeric" }).format(new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], 12))) : `${+m[3]}.${+m[2]}.${m[1]}`; };
@@ -106,28 +107,42 @@ function giftCardMail(kind: "gift_card_buyer" | "gift_card_recipient", d: any, e
   const cards: any[] = (d?.gift_cards ?? []).filter((g: any) => g?.public_token);
   const n = cards.length, buyer = kind === "gift_card_buyer", c0 = cards[0] ?? {};
   const from = c0.buyer_name ? String(c0.buyer_name).trim() : "";
-  const subject = buyer ? (en ? `Your gift card${n > 1 ? "s" : ""} – ${SELLER}` : `Lahjakorttisi – ${SELLER}`)
+  // ostaja valitsee toimitustavan: 'buyer' = kortti ostajalle (PDF-linkki tässä viestissä), 'recipient' = suoraan saajalle (ei PDF-linkkiä ostajalle)
+  const toBuyer = (g: any) => (g?.delivery_to ?? "buyer") !== "recipient";
+  const anyBuyer = cards.some(toBuyer), anyRecip = cards.some((g) => !toBuyer(g));
+  const subject = buyer ? (anyBuyer ? (en ? `Your gift card${n > 1 ? "s" : ""} – ${SELLER}` : `Lahjakorttisi – ${SELLER}`) : (en ? `Your gift card order is confirmed – ${SELLER}` : `Lahjakorttitilauksesi vahvistus – ${SELLER}`))
     : from ? (en ? `${from} sent you a gift card – ${SELLER}` : `${from} lahjoittaa sinulle lahjakortin – ${SELLER}`) : (en ? `You have received a gift card – ${SELLER}` : `Sait lahjakortin – ${SELLER}`);
-  const title = buyer ? (en ? "Your gift card" : "Lahjakorttisi") : (en ? "You received a gift card" : "Sait lahjakortin");
+  const title = buyer ? (anyBuyer ? (en ? "Your gift card" : "Lahjakorttisi") : (en ? "Order confirmation" : "Tilausvahvistus")) : (en ? "You received a gift card" : "Sait lahjakortin");
   const intro = buyer
-    ? (en ? `Thank you for your purchase! Your gift card${n > 1 ? "s are" : " is"} ready. Open the PDF from the link below – you can print it or forward it to the recipient.` : `Kiitos ostoksestasi! Lahjakortti${n > 1 ? "t ovat valmiit" : " on valmis"}. Avaa PDF alla olevasta linkistä – voit tulostaa sen tai välittää sen lahjan saajalle.`)
+    ? (anyBuyer
+        ? (en ? `Thank you for your purchase! Your gift card${n > 1 ? "s are" : " is"} ready. Open the PDF from the link below – you can print it or forward it to the recipient.` : `Kiitos ostoksestasi! Lahjakortti${n > 1 ? "t ovat valmiit" : " on valmis"}. Avaa PDF alla olevasta linkistä – voit tulostaa sen tai välittää sen lahjan saajalle.`)
+        : (en ? `Thank you for your purchase! Your order is confirmed and the gift card${n > 1 ? "s are" : " is"} delivered directly to the recipient by email, as you chose.` : `Kiitos ostoksestasi! Tilauksesi on vahvistettu ja lahjakortti${n > 1 ? "t toimitetaan" : " toimitetaan"} valintasi mukaan suoraan saajalle sähköpostitse.`))
     : (en ? `${from || "Someone"} has sent you a gift card to ${SELLER}. Enjoy!` : `${from || "Joku"} on lahjoittanut sinulle lahjakortin Sipoonjoen perinnesaunalle. Nauti!`);
   const how = d?.redeem_online
     ? (en ? "The gift card code is in the PDF. Book online at saunotus.fi and enter the code at checkout, or tell us the code at the sauna." : "Lahjakortin koodi on PDF-tiedostossa. Varaa aika verkossa osoitteessa saunotus.fi ja syötä koodi maksuvaiheessa, tai kerro koodi saunalla.")
     : (en ? "The gift card code is in the PDF. Tell us the code at the sauna or contact us to book." : "Lahjakortin koodi on PDF-tiedostossa. Kerro koodi saunalla tai ota yhteyttä varataksesi ajan.");
-  const note = buyer ? (en ? "Tip: the link contains the card code – share it only with the recipient." : "Vinkki: linkki sisältää kortin koodin – jaa se vain lahjan saajalle.") : "";
-  const greet = !buyer && c0.greeting ? String(c0.greeting).trim() : "";
+  const note = buyer && anyBuyer ? (en ? "Tip: the link contains the card code – share it only with the recipient." : "Vinkki: linkki sisältää kortin koodin – jaa se vain lahjan saajalle.") : "";
+  const recipNote = buyer && anyRecip ? (en ? "The recipient receives the gift card, its code and instructions in a separate email. If it does not arrive, please contact us." : "Saaja saa lahjakortin, sen koodin ja ohjeet omassa sähköpostiviestissään. Jos viesti ei saavu perille, ota yhteyttä.") : "";
+  const cover = !buyer && c0.cover_message ? String(c0.cover_message).trim() : "";   // saateteksti: vain sähköpostissa, ei kortti-PDF:ssä
   const contact = en ? `Questions? Reply to this email or call ${PHONE}.` : `Kysyttävää? Vastaa tähän viestiin tai soita ${PHONE}.`;
   const tl: string[] = []; let rows = h1(title) + p(esc(hello)) + p(esc(intro));
-  if (greet) rows += `<tr><td style="padding:0 32px 18px 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:10px 16px;border-left:3px solid #c49a6c;font-family:${FONT};font-style:italic;font-size:17px;line-height:1.45;color:${INK}">${esc(greet).replace(/\n/g, "<br>")}${from ? `<br><span style="font-family:${SANS};font-style:normal;font-size:13px;color:${MUTED}">— ${esc(from)}</span>` : ""}</td></tr></table></td></tr>`;
+  if (cover) rows += `<tr><td style="padding:0 32px 18px 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:10px 16px;border-left:3px solid #c49a6c;font-family:${FONT};font-style:italic;font-size:17px;line-height:1.45;color:${INK}">${esc(cover).replace(/\n/g, "<br>")}${from ? `<br><span style="font-family:${SANS};font-style:normal;font-size:13px;color:${MUTED}">— ${esc(from)}</span>` : ""}</td></tr></table></td></tr>`;
+  const hhmm = (s: string) => en ? s : s.replace(":", ".");
   for (const g of cards) {
     const url = gcUrl(d, g, en);
     const meta = [gcAmt(g.amount, en), g.persons && !gcOpen(g) ? (en ? `${g.persons} guests` : `${g.persons} henkilöä`) : "", g.valid_to ? (en ? `valid until ${gcDate(g.valid_to, true)}` : `voimassa ${gcDate(g.valid_to, false)} asti`) : "", buyer && g.recipient_name ? (en ? `for ${g.recipient_name}` : `saaja: ${g.recipient_name}`) : ""].filter(Boolean).join(" · ");
-    tl.push(`• ${gcTitle(g, en)}\n  ${meta}\n  PDF: ${url}`);
-    rows += box(`<span style="font-family:${FONT};font-size:19px;color:${GREEN}">${esc(gcTitle(g, en))}</span><br><span style="font-family:${SANS};font-size:13px;color:${MUTED}">${esc(meta)}</span>`) + (url ? button(url, en ? "Open gift card (PDF)" : "Avaa lahjakortti (PDF)") : "");
+    const who = [g.recipient_name, g.recipient_email].filter(Boolean).join(", ");
+    const when = g.deliver_at ? `${gcDate(g.deliver_on, en)}${g.deliver_time ? (en ? ` at ${g.deliver_time}` : ` klo ${hhmm(g.deliver_time)}`) : ""}` : "";
+    const deliv = !buyer || toBuyer(g) ? "" : g.deliver_at
+      ? (en ? `The gift card will be sent to the recipient (${who}) on ${when}.` : `Lahjakortti lähetetään saajalle (${who}) ${when}.`)
+      : (en ? `The gift card has been sent to the recipient (${who}).` : `Lahjakortti on lähetetty saajalle (${who}).`);
+    const showLink = !buyer || toBuyer(g);
+    tl.push(`• ${gcTitle(g, en)}\n  ${meta}${deliv ? `\n  ${deliv}` : ""}${showLink ? `\n  PDF: ${url}` : ""}`);
+    rows += box(`<span style="font-family:${FONT};font-size:19px;color:${GREEN}">${esc(gcTitle(g, en))}</span><br><span style="font-family:${SANS};font-size:13px;color:${MUTED}">${esc(meta)}</span>${deliv ? `<br><span style="font-family:${SANS};font-size:14px;color:${INK}">${esc(deliv)}</span>` : ""}`) + (showLink && url ? button(url, en ? "Open gift card (PDF)" : "Avaa lahjakortti (PDF)") : "");
   }
-  rows += p(esc(how)) + (note ? p(esc(note), `color:${MUTED};font-size:13px`) : "") + p(esc(contact), `color:${MUTED};font-size:13px`) + p(signHtml);
-  const text = textBlock(hello, intro, greet && `"${greet}"${from ? `\n— ${from}` : ""}`, tl.join("\n\n"), how, note, contact, sign) + "\n";
+  const showHow = !buyer || anyBuyer;
+  rows += (showHow ? p(esc(how)) : "") + (note ? p(esc(note), `color:${MUTED};font-size:13px`) : "") + (recipNote ? p(esc(recipNote), `color:${MUTED};font-size:13px`) : "") + p(esc(contact), `color:${MUTED};font-size:13px`) + p(signHtml);
+  const text = textBlock(hello, intro, cover && `"${cover}"${from ? `\n— ${from}` : ""}`, tl.join("\n\n"), showHow && how, note, recipNote, contact, sign) + "\n";
   return { subject, text, html: wrapHtml(d, title, intro, rows, en) };
 }
 

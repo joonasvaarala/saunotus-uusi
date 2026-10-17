@@ -4,6 +4,7 @@
 import { h, dialog, toast, badge } from '../ui.js';
 import { icon } from '../icons.js';
 import { t, fmt, getLang } from '../talous-i18n.js';
+import { deliveryErrors, SERVER_FIELD, deliverMaxDate, helsinkiNow, coverState, COVER_MAX } from '../giftcards-delivery.js';
 import { GC_STATUSES, GC_SORTS, GC_PAY_METHODS, GC_GREETING_MAX, normalizeGiftCode, formatGiftCode } from '../giftcards-api.js';
 import { loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, searchFld, expandRow, actionBtn, formDialog, friendly, methodLabel } from './talous-ui.js';
 
@@ -88,6 +89,7 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
     } catch (e) { if (my === seq) { list.replaceChildren(errorBox(e, load)); count.textContent = ''; sums.textContent = ''; pagers.forEach((p) => p.replaceChildren()); } }
   }
   const who = (c) => c.recipient_name || c.buyer_name || t('gc.noName');
+  function deliveryBadge(c) { const s = deliveryStatus(c); return s && s[0] !== 'waiting' ? Object.assign(badge(s[0] === 'delivered' ? 'muted' : 'pay-pending', t(`gc.row.${s[0]}`)), { title: s[1] }) : null; }
   function cardRow(c) {
     const st2 = c.effective_status;
     const head = [
@@ -95,11 +97,18 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
       h('span', { class: 'tl-c tl-date' }, h('small', { class: 'tl-lab', text: t('gc.col.valid') }), h('span', { text: c.valid_to ? t('gc.validTo', { date: fmtDay(c.valid_to) }) : t('gc.noValid') })),
       h('span', { class: 'tl-c tl-first' }, h('small', { class: 'tl-lab', text: t('gc.f.package') }), h('span', { text: c.package_name || '–' })),
       h('span', { class: 'tl-c tl-sum' }, h('strong', { text: fmt.money(c.balance) }), h('small', { class: 'muted', text: `/ ${fmt.money(c.initial_amount)}` })),
-      h('span', { class: 'tl-c tl-badges' }, gcStatusBadge(st2), c.source === 'johku' ? badge('src-johku', t('gcsrc.johku')) : null, !c.balance_verified ? badge('pay-pending', t('gc.verified.no')) : null),
+      h('span', { class: 'tl-c tl-badges' }, gcStatusBadge(st2), c.source === 'johku' ? badge('src-johku', t('gcsrc.johku')) : null, !c.balance_verified ? badge('pay-pending', t('gc.verified.no')) : null, deliveryBadge(c)),
     ];
     const row = expandRow({ id: `gc${c.id}`, head, testid: 'gc', build: () => detail(c.id) });
     row.dataset.cardId = String(c.id); row.dataset.status = st2;
     return row;
+  }
+  // Toimitus (§13.11): valinta, ajankohta, saateteksti, tila (Toimitettu / Ajastettu / Odottaa lähetystä)
+  const deliverWhen = (c) => `${fmtDay(c.deliver_on)} ${t('gc.d.atTime', { time: (c.deliver_time || '09:00').replace(/^0/, '') })}`;
+  function deliveryStatus(c) { return c.delivery_to !== 'recipient' ? null : c.delivered_at ? ['delivered', t('gc.d.delivered', { when: fmt.dt(c.delivered_at) })] : c.deliver_on ? ['scheduled', t('gc.d.scheduled', { when: deliverWhen(c) })] : ['waiting', t('gc.d.dlvWaiting')]; }
+  function deliveryRows(c) {
+    const s = deliveryStatus(c);
+    return [[t('gc.d.delivery'), t(`gc.d.dlv.${c.delivery_to}`)], s && [t('gc.d.dlvStatus'), s[1]], c.delivery_to === 'recipient' && !c.delivered_at && c.deliver_on && [t('gc.d.deliverAt'), deliverWhen(c)], c.cover_message && [t('gc.d.cover'), c.cover_message]].filter(Boolean);
   }
   async function detail(id) {
     const d = await gift.get({ id }), c = d.card;
@@ -109,7 +118,7 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
     const info = h('section', { class: 'tl-sec' }, h('h3', { text: t('gc.d.info') }),
       h('p', { class: 'gc-bigcode', 'data-testid': 'gc-detail-code' }, h('strong', { text: c.code }), codeBtn),
       dl([[t('gc.d.balance'), `${fmt.money(c.balance)} / ${fmt.money(c.initial_amount)}`], [t('gc.d.package'), c.package_name || '–'], [t('gc.d.kind'), t(`gc.kind.${c.kind}`)], [t('gc.d.valid'), c.valid_from || c.valid_to ? `${fmtDay(c.valid_from)} – ${fmtDay(c.valid_to)}` : '–'],
-        buyer && [t('gc.d.buyer'), buyer], rec && [t('gc.d.recipient'), rec], c.greeting && [t('gc.d.greeting'), c.greeting], c.note && [t('gc.d.note'), c.note],
+        buyer && [t('gc.d.buyer'), buyer], rec && [t('gc.d.recipient'), rec], c.greeting && [t('gc.d.greeting'), c.greeting], ...deliveryRows(c), c.note && [t('gc.d.note'), c.note],
         [t('gc.d.vat'), t(`gc.vat.${c.vat_treatment || 'at_sale'}`)], [t('gc.d.origin'), t(`gcsrc.${c.source}`)], c.single_order && [t('gc.single'), '✓'],
         [t('gc.d.created'), fmt.dt(c.created_at)], c.activated_at && [t('gc.d.activated'), fmt.dt(c.activated_at)], c.last_used_at && [t('gc.d.lastUsed'), fmt.dt(c.last_used_at)]]),
       !c.balance_verified ? h('p', { class: 'tl-johku-note', role: 'note', text: t('gc.verified.no') }) : null,
@@ -179,19 +188,40 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
     greeting.addEventListener('input', () => { counter.textContent = t('gc.n.counter', { n: [...greeting.value].length }); counter.classList.toggle('gc-over', [...greeting.value].length > GC_GREETING_MAX); });
     const buyerBox = h('div', { class: 'stack', 'data-testid': 'gc-new-buyer', hidden: true }, fld(t('gc.n.buyerName'), h('input', { name: 'buyer_name', maxlength: 120, autocomplete: 'off' })), fld(t('gc.n.buyerEmail'), h('input', { name: 'buyer_email', type: 'email', autocomplete: 'off' })), fld(t('gc.n.buyerPhone'), h('input', { name: 'buyer_phone', type: 'tel', autocomplete: 'off' })));
     const hint = h('p', { class: 'muted tl-hint', 'data-testid': 'gc-new-hint' });
+    // --- toimitusvalinta (§13.11): ostajalle / suoraan saajalle; ajankohta + saateteksti vain saajalle ---
+    const errs = {}, errEl = (key) => (errs[key] = h('small', { class: 'gc-ferr', role: 'alert', 'data-testid': `gc-new-err-${key}` }));
+    const setErr = (key, msg) => { const e = errs[key]; if (!e) return; e.textContent = msg || ''; const ctl = e.parentElement?.querySelector('input,textarea'); if (ctl) { if (msg) ctl.setAttribute('aria-invalid', 'true'); else ctl.removeAttribute('aria-invalid'); } };
+    const radio = (name, val, label, checked) => h('label', { class: 'gc-radio' }, h('input', { type: 'radio', name, value: val, checked: checked ? true : null, 'data-testid': `gc-new-${name}-${val}` }), h('span', { text: label }));
+    const dlvBox = h('fieldset', { class: 'gc-dlv', 'data-testid': 'gc-new-dlv' }, h('legend', { text: t('gc.n.dlv') }), h('div', { class: 'gc-radios' }, radio('dlv', 'buyer', t('gc.n.dlv.buyer'), true), radio('dlv', 'recipient', t('gc.n.dlv.recipient'))), h('small', { class: 'muted', 'data-testid': 'gc-new-dlv-hint' }), errEl('deliveryTo'));
+    const recEmail = h('input', { name: 'recipient_email', type: 'email', autocomplete: 'off', 'data-testid': 'gc-new-rec-email' }), recEmailLab = h('span', { text: t('gc.n.recEmail') });
+    const recEmailFld = h('label', { class: 'fld', hidden: true }, recEmailLab, recEmail, errEl('recipientEmail'));
+    const deliverOn = h('input', { name: 'deliver_on', type: 'date', autocomplete: 'off', 'data-testid': 'gc-new-deliver-on' }), deliverOnHint = h('small', { class: 'muted' });
+    const deliverTime = h('input', { name: 'deliver_time', type: 'time', autocomplete: 'off', 'data-testid': 'gc-new-deliver-time' });
+    const whenFields = h('div', { class: 'gc-when-fields stack', hidden: true, 'data-testid': 'gc-new-when-fields' }, h('label', { class: 'fld' }, h('span', { text: t('gc.n.deliverOn') }), deliverOn, deliverOnHint, errEl('deliverOn')), h('label', { class: 'fld' }, h('span', { text: t('gc.n.deliverTime') }), deliverTime, h('small', { class: 'muted', text: t('gc.n.deliverTimeHint') }), errEl('deliverTime')));
+    const whenBox = h('fieldset', { class: 'gc-dlv', hidden: true, 'data-testid': 'gc-new-when' }, h('legend', { text: t('gc.n.when') }), h('div', { class: 'gc-radios' }, radio('when', 'now', t('gc.n.when.now'), true), radio('when', 'later', t('gc.n.when.later'))), whenFields);
+    const cover = h('textarea', { name: 'cover_message', rows: 4, maxlength: COVER_MAX + 200, 'data-testid': 'gc-new-cover' }), coverCounter = h('small', { 'data-testid': 'gc-new-cover-counter', text: t('gc.n.coverCounter', { n: 0, max: COVER_MAX }) });
+    const coverFld = h('label', { class: 'fld', hidden: true }, h('span', { text: t('gc.n.cover') }), cover, coverCounter, errEl('cover'));
+    cover.addEventListener('input', () => { const s = coverState(cover.value); coverCounter.textContent = t('gc.n.coverCounter', { n: s.n, max: COVER_MAX }); coverCounter.classList.toggle('gc-over', s.over); setErr('cover', s.over ? t('err.invalid_cover_message') : ''); });
+    const sel = (name) => dlvBox.closest('form')?.querySelector(`input[name=${name}]:checked`)?.value;
     const vat = h('select', { name: 'vat' }, h('option', { value: '', text: t('gc.n.vatDefault') }), h('option', { value: 'at_sale', text: t('gc.vat.at_sale') }), h('option', { value: 'at_redemption', text: t('gc.vat.at_redemption') }));
     const channel = h('select', { name: 'channel' }, ['admin', 'phone', 'email', 'walk_in', 'other'].map((c) => h('option', { value: c, text: t(`gc.n.ch.${c}`) })));
+    const monthsInput = h('input', { name: 'months', type: 'number', min: 1, max: 36, inputmode: 'numeric' });
     const sync = () => {
       const p = pk(pkg.value), free = mode.value === 'free';
       amount.disabled = !p?.is_open; amount.required = !!p?.is_open; if (!p?.is_open) amount.value = '';
       amountHint.textContent = !p ? '' : p.is_open ? t('gc.n.range', { min: p.min_amount, max: p.max_amount }) : t('gc.n.fixed', { price: fmt.money(p.price) });
       noteLab.textContent = free ? t('gc.n.noteFree') : t('gc.n.note'); note.required = free; buyerBox.hidden = free; channel.closest('label').hidden = free;
       hint.textContent = t(free ? 'gc.n.freeHint' : 'gc.n.payHint') + (canPay ? '' : ` ${t('gc.n.needPay')}`);
+      const rec = sel('dlv') === 'recipient', later = rec && sel('when') === 'later', months = Math.min(12, Math.trunc(+monthsInput.value) || p?.valid_months || 6), today = helsinkiNow().date;
+      dlvBox.querySelector('[data-testid=gc-new-dlv-hint]').textContent = t(rec ? 'gc.n.dlv.recipientHint' : 'gc.n.dlv.buyerHint');
+      recEmailFld.hidden = !rec; whenBox.hidden = !rec; whenFields.hidden = !later; coverFld.hidden = !rec;
+      deliverOn.min = today; deliverOn.max = deliverMaxDate(today, months); deliverOnHint.textContent = t('gc.n.deliverOnHint', { max: fmtDay(deliverOn.max), months });
     };
-    mode.addEventListener('change', sync); pkg.addEventListener('change', sync);
+    dlvBox.addEventListener('change', () => sync()); whenBox.addEventListener('change', () => sync());
+    mode.addEventListener('change', sync); pkg.addEventListener('change', sync); monthsInput.addEventListener('input', sync);
     const d = formDialog(t('gc.n.title'), [fld(t('gc.n.mode'), mode), fld(t('gc.n.package'), pkg), h('label', { class: 'fld' }, h('span', { text: t('gc.n.amount') }), amount, amountHint), fld(t('gc.n.qty'), qty),
-      buyerBox, fld(t('gc.n.recName'), h('input', { name: 'recipient_name', maxlength: 120, 'data-testid': 'gc-new-rec-name' })), fld(t('gc.n.recEmail'), h('input', { name: 'recipient_email', type: 'email' })),
-      h('label', { class: 'fld' }, h('span', { text: t('gc.n.greeting') }), greeting, counter), fld(t('gc.n.vat'), vat), fld(t('gc.n.months'), h('input', { name: 'months', type: 'number', min: 1, max: 36, inputmode: 'numeric' })),
+      buyerBox, fld(t('gc.n.recName'), h('input', { name: 'recipient_name', maxlength: 120, 'data-testid': 'gc-new-rec-name' })), dlvBox, recEmailFld, whenBox,
+      h('label', { class: 'fld' }, h('span', { text: t('gc.n.greetingCard') }), greeting, counter, errEl('greeting')), coverFld, fld(t('gc.n.vat'), vat), fld(t('gc.n.months'), monthsInput),
       h('label', { class: 'fld' }, noteLab, note), fld(t('gc.n.channel'), channel), hint], t('gc.n.submit'), async (fd) => {
       const p = pk(fd.get('package')), free = fd.get('mode') === 'free', amt = p?.is_open ? Math.round(+fd.get('amount') * 100) / 100 : undefined;
       if (p?.is_open && (!(amt >= p.min_amount && amt <= p.max_amount) || !centsOk(+fd.get('amount')))) throw new Error(t('gc.n.bad.amount', { min: p.min_amount, max: p.max_amount }));
@@ -199,10 +229,26 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
       if (free && note2.length < 3) throw new Error(t('gc.n.bad.note'));
       const bn = String(fd.get('buyer_name') || '').trim(), be = String(fd.get('buyer_email') || '').trim();
       if (!free && (!bn || !be)) throw new Error(t('gc.n.bad.buyer'));
-      const gr = String(fd.get('greeting') || '').trim(); if ([...gr].length > GC_GREETING_MAX) throw new Error(t('gc.n.bad.greeting'));
-      const res = await gift.create({ package: p.code, amount: amt, quantity: Math.max(1, Math.trunc(+fd.get('quantity')) || 1), buyer: free ? undefined : { name: bn, email: be, phone: String(fd.get('buyer_phone') || '').trim() },
-        recipientName: String(fd.get('recipient_name') || '').trim(), recipientEmail: String(fd.get('recipient_email') || '').trim(), greeting: gr, paymentMethod: free ? undefined : fd.get('mode'),
-        vatTreatment: fd.get('vat') || undefined, validMonths: fd.get('months') ? Math.trunc(+fd.get('months')) : undefined, locale: 'fi', note: note2 || undefined, channel: free ? undefined : fd.get('channel') });
+      const gr = String(fd.get('greeting') || '').trim();
+      // toimitusvalinta: kenttäkohtaiset virheet (sama tarkistus kuin palvelimella); 'buyer' ei lähetä saajan sähköpostia, saatetta eikä ajankohtaa
+      const to = fd.get('dlv') === 'recipient' ? 'recipient' : 'buyer', later = to === 'recipient' && fd.get('when') === 'later', months = Math.min(12, Math.trunc(+fd.get('months')) || p.valid_months || 6);
+      const re = String(fd.get('recipient_email') || '').trim(), cv = String(fd.get('cover_message') || '');
+      const fe = deliveryErrors({ to, recipientEmail: re, cover: cv, later, on: later ? fd.get('deliver_on') : '', time: later ? fd.get('deliver_time') : '', months });
+      if ([...gr].length > GC_GREETING_MAX) fe.greeting = 'invalid_greeting';
+      const text = (code) => t(`err.${code}`, { months });
+      for (const k of Object.keys(errs)) setErr(k, fe[k] ? text(fe[k]) : '');
+      if (Object.keys(fe).length) { dlvBox.closest('form').querySelector('[aria-invalid=true]')?.focus(); throw Object.assign(new Error('fields'), { handled: true }); }
+      let res;
+      try {
+        res = await gift.create({ package: p.code, amount: amt, quantity: Math.max(1, Math.trunc(+fd.get('quantity')) || 1), buyer: free ? undefined : { name: bn, email: be, phone: String(fd.get('buyer_phone') || '').trim() },
+          recipientName: String(fd.get('recipient_name') || '').trim(), recipientEmail: to === 'recipient' ? re : undefined, greeting: gr, paymentMethod: free ? undefined : fd.get('mode'),
+          vatTreatment: fd.get('vat') || undefined, validMonths: fd.get('months') ? Math.trunc(+fd.get('months')) : undefined, locale: 'fi', note: note2 || undefined, channel: free ? undefined : fd.get('channel'),
+          deliveryTo: to, coverMessage: to === 'recipient' ? cv : undefined, deliverOn: later ? String(fd.get('deliver_on') || '') : undefined, deliverTime: later ? String(fd.get('deliver_time') || '') : undefined });
+      } catch (e) {   // palvelimen toimitusvirhe (BK001, koodi = e.code) → kenttäkohtaisesti
+        const key = SERVER_FIELD[e?.code];
+        if (key && errs[key]) { setErr(key, text(e.code)); dlvBox.closest('form').querySelector('[aria-invalid=true]')?.focus(); throw Object.assign(e, { handled: true }); }
+        throw e;
+      }
       doneToast(gift, 'admin_create_gift_card'); load(); resultDialog(res);
     });
     sync(); return d;
@@ -211,7 +257,7 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
     const cards = res.cards || [], one = cards.length === 1;
     const status = res.complimentary ? t('gc.r.free') : res.paid ? t('gc.r.paid') : t('gc.r.pending');
     dialog(t(one ? 'gc.r.title' : 'gc.r.titleN', { n: cards.length }), h('div', { class: 'stack', 'data-testid': 'gc-result' }, h('p', { text: status }), res.order_no ? h('p', { class: 'muted', text: t('gc.r.order', { no: res.order_no }) }) : null,
-      h('ul', { class: 'tl-sub' }, cards.map((c) => h('li', {}, h('span', { class: 'tl-sub-main' }, h('strong', { class: 'gc-code', 'data-testid': 'gc-result-code', text: c.code })), h('span', { class: 'tl-sub-meta', text: [c.package_name, c.recipient_name].filter(Boolean).join(' · ') }), h('span', { class: 'tl-sub-sum', text: fmt.money(c.initial_amount) })))),
+      h('ul', { class: 'tl-sub' }, cards.map((c) => h('li', {}, h('span', { class: 'tl-sub-main' }, h('strong', { class: 'gc-code', 'data-testid': 'gc-result-code', text: c.code })), h('span', { class: 'tl-sub-meta', text: [c.package_name, c.recipient_name, deliveryStatus(c)?.[1]].filter(Boolean).join(' · ') }), h('span', { class: 'tl-sub-sum', text: fmt.money(c.initial_amount) })))),
       h('p', { class: 'muted tl-hint', text: t('gc.r.codes') })));
   }
 

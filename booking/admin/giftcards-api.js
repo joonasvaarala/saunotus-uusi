@@ -25,7 +25,8 @@ export const formatGiftCode = (s) => { const n = normalizeGiftCode(s); return n.
 export function normCard(c) {
   if (!c) return null;
   return { ...c, id: c.id, code: c.code || '', initial_amount: num(c.initial_amount), balance: num(c.balance), status: c.status, effective_status: c.effective_status || c.status,
-    balance_verified: c.balance_verified !== false, single_order: !!c.single_order, source: c.source || 'native', greeting: c.greeting || '' };
+    balance_verified: c.balance_verified !== false, single_order: !!c.single_order, source: c.source || 'native', greeting: c.greeting || '',
+    delivery_to: c.delivery_to === 'recipient' ? 'recipient' : 'buyer', cover_message: c.cover_message || '', deliver_on: c.deliver_on || null, deliver_time: c.deliver_time || null, delivered_at: c.delivered_at || null };   // §13.11
 }
 export const normList = (r) => ({ total: num(r.total), sum_balance: num(r.sum_balance), sum_initial: num(r.sum_initial), sum_balance_redeemable: num(r.sum_balance_redeemable), rows: L(r.rows).map(normCard) });
 export const normDetail = (r) => ({ card: normCard(r.card), ledger: L(r.ledger).map((x) => ({ ...x, delta: num(x.delta), balance_after: num(x.balance_after) })), payments: L(r.payments), expiry_log: L(r.expiry_log),
@@ -47,7 +48,10 @@ export function rpcBackend(rpc) {
     get: (a) => call('get', a.code ? { p_code: normalizeGiftCode(a.code) } : { p_id: a.id }),
     create: (a) => call('create', compact({ p_package: a.package, p_amount: a.amount, p_quantity: a.quantity || 1, p_buyer: a.buyer && Object.keys(compact(a.buyer)).length ? compact(a.buyer) : undefined,
       p_recipient_name: a.recipientName, p_recipient_email: a.recipientEmail, p_greeting: a.greeting, p_payment_method: a.paymentMethod, p_vat_treatment: a.vatTreatment,
-      p_valid_months: a.validMonths, p_locale: a.locale || 'fi', p_note: a.note, p_channel: a.channel || 'admin' })),
+      p_valid_months: a.validMonths, p_locale: a.locale || 'fi', p_note: a.note, p_channel: a.channel || 'admin',
+      // toimitusvalinta (§13.11): 'buyer' = ei muita kenttiä; 'recipient' = saajan sähköposti pakollinen, saate ja ajankohta valinnaisia
+      p_delivery_to: a.deliveryTo === 'recipient' ? 'recipient' : 'buyer', p_cover_message: a.deliveryTo === 'recipient' ? a.coverMessage : undefined,
+      p_deliver_on: a.deliveryTo === 'recipient' ? a.deliverOn : undefined, p_deliver_time: a.deliveryTo === 'recipient' && a.deliverOn ? a.deliverTime : undefined })),
     setExpiry: (a) => call('setExpiry', compact({ p_id: a.id, p_valid_to: a.validTo, p_note: a.note })),
     adjust: (a) => call('adjust', compact({ p_id: a.id, p_delta: a.delta, p_reason: a.reason, p_mark_verified: a.markVerified ? true : undefined })),
     deactivate: (a) => call('deactivate', { p_id: a.id, p_reason: a.reason }),

@@ -33,9 +33,9 @@ test('Datakerros: RPC-nimet ja p_-parametrit sopimuksen mukaan (vain asetetut)',
   await be.get({ code: 'hh4a bcde fghj' }); assert.deepEqual(calls.at(-1), { name: 'admin_get_gift_card', args: { p_code: 'HH4ABCDEFGHJ' } });
   await be.get({ id: 7 }); assert.deepEqual(calls.at(-1), { name: 'admin_get_gift_card', args: { p_id: 7 } });
   await be.create({ package: 'open', amount: 75, note: 'syy', recipientName: 'A', greeting: 'Hei' });
-  assert.deepEqual(calls.at(-1), { name: 'admin_create_gift_card', args: { p_package: 'open', p_amount: 75, p_quantity: 1, p_recipient_name: 'A', p_greeting: 'Hei', p_locale: 'fi', p_note: 'syy', p_channel: 'admin' } });
+  assert.deepEqual(calls.at(-1), { name: 'admin_create_gift_card', args: { p_package: 'open', p_amount: 75, p_quantity: 1, p_recipient_name: 'A', p_greeting: 'Hei', p_locale: 'fi', p_note: 'syy', p_channel: 'admin', p_delivery_to: 'buyer' } });
   await be.create({ package: 'entry_2', quantity: 2, buyer: { name: 'B', email: 'b@example.invalid', phone: '' }, paymentMethod: 'cash', vatTreatment: 'at_redemption', validMonths: 12, channel: 'phone' });
-  assert.deepEqual(calls.at(-1).args, { p_package: 'entry_2', p_quantity: 2, p_buyer: { name: 'B', email: 'b@example.invalid' }, p_payment_method: 'cash', p_vat_treatment: 'at_redemption', p_valid_months: 12, p_locale: 'fi', p_channel: 'phone' });
+  assert.deepEqual(calls.at(-1).args, { p_package: 'entry_2', p_quantity: 2, p_buyer: { name: 'B', email: 'b@example.invalid' }, p_payment_method: 'cash', p_vat_treatment: 'at_redemption', p_valid_months: 12, p_locale: 'fi', p_channel: 'phone', p_delivery_to: 'buyer' });
   await be.setExpiry({ id: 3, validTo: '2027-01-31', note: 'x' }); assert.deepEqual(calls.at(-1), { name: 'admin_set_gift_card_expiry', args: { p_id: 3, p_valid_to: '2027-01-31', p_note: 'x' } });
   await be.adjust({ id: 3, delta: -5, reason: 'korjaus', markVerified: true }); assert.deepEqual(calls.at(-1), { name: 'admin_adjust_gift_card', args: { p_id: 3, p_delta: -5, p_reason: 'korjaus', p_mark_verified: true } });
   await be.adjust({ id: 3, delta: 5, reason: 'korjaus' }); assert.ok(!('p_mark_verified' in calls.at(-1).args));
@@ -194,4 +194,61 @@ test('Datakerros: pdfUrl = gift-card-pdf?t=<public_token>&lang=fi|en (functionUr
   assert.equal(a.pdfUrl('', 'fi'), ''); assert.equal(a.pdfUrl(null, 'fi'), '');
   assert.equal(G.createGiftApi({ rpc: async () => ({}), mock: false }).pdfUrl('t', 'fi'), '');
   assert.equal(G.normDetail({ card: { id: 1, public_token: 'abc' } }).card.public_token, 'abc', 'normDetail säilyttää public_tokenin');
+});
+
+// ---------- Toimitusvalinta (sopimus §13.11, migraatio booking_46) ----------
+const D = await imp('admin/giftcards-delivery.js');
+const SG = await imp('shop/src/gift-logic.js');
+test('Toimitusvalinta: p_-parametrit – buyer ei lähetä saajan kenttiä; recipient + ajankohta; kellonaika vain päivän kanssa', async () => {
+  const calls = [];
+  const be = G.rpcBackend(async (name, args) => { calls.push({ name, args }); return { ok: true }; });
+  await be.create({ package: 'open', amount: 50, note: 'syy', deliveryTo: 'buyer', recipientEmail: 'x@y.fi', coverMessage: 'saate', deliverOn: '2027-01-01', deliverTime: '10:00' });
+  assert.deepEqual(calls.at(-1).args, { p_package: 'open', p_amount: 50, p_quantity: 1, p_recipient_email: 'x@y.fi', p_locale: 'fi', p_note: 'syy', p_channel: 'admin', p_delivery_to: 'buyer' }, 'buyer: ei saatetta eikä ajankohtaa');
+  await be.create({ package: 'open', amount: 50, note: 'syy', deliveryTo: 'recipient', recipientEmail: 'x@y.fi', coverMessage: 'saate', deliverOn: '2027-01-01', deliverTime: '10:00' });
+  assert.deepEqual(calls.at(-1).args, { p_package: 'open', p_amount: 50, p_quantity: 1, p_recipient_email: 'x@y.fi', p_locale: 'fi', p_note: 'syy', p_channel: 'admin', p_delivery_to: 'recipient', p_cover_message: 'saate', p_deliver_on: '2027-01-01', p_deliver_time: '10:00' });
+  await be.create({ package: 'open', amount: 50, note: 'syy', deliveryTo: 'recipient', recipientEmail: 'x@y.fi', deliverTime: '10:00' });
+  assert.ok(!('p_deliver_time' in calls.at(-1).args) && !('p_deliver_on' in calls.at(-1).args), 'heti: ei ajankohtaa; kellonaika ilman päivää ei lähde');
+});
+test('Toimitusvalinta: normCard antaa kentät (oletus buyer) ja mock-data sisältää toimitettu/ajastettu-kortit', async () => {
+  assert.deepEqual([G.normCard({ id: 1 }).delivery_to, G.normCard({ id: 1 }).cover_message, G.normCard({ id: 1 }).deliver_on, G.normCard({ id: 1 }).delivered_at], ['buyer', '', null, null]);
+  const m = mk(), { rows } = await m.rpc('admin_list_gift_cards', { p_limit: 200 });
+  assert.ok(rows.every((c) => ['buyer', 'recipient'].includes(c.delivery_to) && 'cover_message' in c && 'deliver_on' in c && 'deliver_time' in c && 'delivered_at' in c));
+  assert.equal(rows.filter((c) => c.delivery_to === 'recipient' && c.delivered_at).length, 1); assert.equal(rows.filter((c) => c.delivery_to === 'recipient' && c.deliver_on && !c.delivered_at).length, 1);
+});
+test('Mock: admin_create_gift_card – kaikki toimitusvirhekoodit (BK001-poikkeus, koodi = detail) ja kentät kortilla', async () => {
+  const m = mk(), now = D.helsinkiNow().date, R = (a) => m.rpc('admin_create_gift_card', { p_package: 'entry_2', p_note: 'syy', ...a });
+  await fail(R({ p_delivery_to: 'x' }), 'invalid_delivery_to');
+  await fail(R({ p_delivery_to: 'recipient' }), 'recipient_email_required');
+  await fail(R({ p_recipient_email: 'ei' }), 'invalid_email');
+  await fail(R({ p_greeting: 'x'.repeat(301) }), 'invalid_greeting');
+  await fail(R({ p_delivery_to: 'recipient', p_recipient_email: 'a@b.fi', p_cover_message: 'x'.repeat(1001) }), 'invalid_cover_message');
+  await fail(R({ p_delivery_to: 'recipient', p_recipient_email: 'a@b.fi', p_deliver_on: '2020-01-01' }), 'deliver_on_past');
+  await fail(R({ p_delivery_to: 'recipient', p_recipient_email: 'a@b.fi', p_deliver_on: D.addMonths(now, 7) }), 'deliver_on_too_far');
+  await fail(R({ p_delivery_to: 'recipient', p_recipient_email: 'a@b.fi', p_deliver_on: 'huomenna' }), 'invalid_deliver_on');
+  await fail(R({ p_delivery_to: 'recipient', p_recipient_email: 'a@b.fi', p_deliver_time: '10:00' }), 'invalid_deliver_on');
+  await fail(R({ p_delivery_to: 'recipient', p_recipient_email: 'a@b.fi', p_deliver_on: D.addMonths(now, 1), p_deliver_time: '25:00' }), 'invalid_deliver_time');
+  const fut = D.addMonths(now, 1), r = await R({ p_delivery_to: 'recipient', p_recipient_email: 'a@b.fi', p_cover_message: 'Terve', p_deliver_on: fut, p_deliver_time: '18:30' });
+  assert.deepEqual([r.cards[0].delivery_to, r.cards[0].cover_message, r.cards[0].deliver_on, r.cards[0].deliver_time, r.cards[0].delivered_at], ['recipient', 'Terve', fut, '18:30', null]);
+  const b = await R({ p_delivery_to: 'buyer', p_cover_message: 'x', p_deliver_on: 'roskaa' }); assert.deepEqual([b.cards[0].delivery_to, b.cards[0].cover_message, b.cards[0].deliver_on], ['buyer', null, null]);
+  assert.equal((await R({ p_recipient_email: 'a@b.fi' })).cards[0].delivery_to, 'recipient', 'delivery_to puuttuu + saajan sähköposti → recipient');
+});
+test('Toimitusvalinta: hallinnan tarkistus = kaupan tarkistus (sama taulukko, samat koodit) ja kenttäkohtaiset virheet', () => {
+  const now = new Date('2026-10-17T12:00:00Z');
+  const table = [{}, { to: 'recipient' }, { to: 'recipient', recipientEmail: 'a@b.fi' }, { to: 'recipient', recipientEmail: 'a@b.fi', on: '2026-10-16' }, { to: 'recipient', recipientEmail: 'a@b.fi', on: '2026-10-17', time: '14:00' }, { to: 'recipient', recipientEmail: 'a@b.fi', on: '2026-10-17' },
+    { to: 'recipient', recipientEmail: 'a@b.fi', on: '2027-04-17' }, { to: 'recipient', recipientEmail: 'a@b.fi', on: '2027-04-18' }, { to: 'recipient', recipientEmail: 'a@b.fi', on: '2026-12-24T18:30' }, { to: 'recipient', recipientEmail: 'a@b.fi', on: '2026-12-24', time: '24:00' },
+    { to: 'recipient', recipientEmail: 'a@b.fi', time: '10:00' }, { to: 'recipient', recipientEmail: 'a@b.fi', on: '2026-02-30' }, { to: 'recipient', recipientEmail: 'a@b.fi', cover: 'x'.repeat(1001) }, { to: 'recipient', recipientEmail: 'a@b.fi', cover: ' Hei\r\n\u0000 ' }, { to: 'buyer', cover: 'x', on: 'roskaa' }, { to: 'muu' },
+    { to: 'recipient', recipientEmail: 'a@b.fi', on: '2028-10-17', months: 36 }, { to: 'recipient', recipientEmail: 'a@b.fi', on: '2027-01-18', months: 3 }];
+  for (const row of table) assert.deepEqual(D.resolveDelivery({ ...row, now }), SG.resolveDelivery({ ...row, now }), JSON.stringify(row));
+  assert.deepEqual(D.deliveryErrors({ to: 'buyer', recipientEmail: '', now }), {});
+  assert.deepEqual(D.deliveryErrors({ to: 'recipient', recipientEmail: '', now }), { recipientEmail: 'recipient_email_required' });
+  assert.deepEqual(D.deliveryErrors({ to: 'recipient', recipientEmail: 'ei', cover: 'x'.repeat(1001), now }), { recipientEmail: 'invalid_email', cover: 'invalid_cover_message' });
+  const e = (o) => D.deliveryErrors({ to: 'recipient', recipientEmail: 'a@b.fi', later: true, now, ...o });
+  assert.deepEqual(e({ on: '' }), { deliverOn: 'invalid_deliver_on' }); assert.deepEqual(e({ on: '2026-10-16' }), { deliverOn: 'deliver_on_past' }); assert.deepEqual(e({ on: '2027-05-01' }), { deliverOn: 'deliver_on_too_far' });
+  assert.deepEqual(e({ on: '2026-12-01', time: '99:00' }), { deliverTime: 'invalid_deliver_time' }); assert.deepEqual(e({ on: '2026-12-01', time: '18:30' }), {});
+  assert.deepEqual(Object.keys(D.SERVER_FIELD).sort(), [...SG.DELIVERY_ERROR_CODES, 'invalid_delivery_to'].sort());
+});
+test('Toimitusvalinta: tekstit FI/EN jokaiselle virhekoodille ja toimitustiloille', () => {
+  for (const c of ['recipient_email_required', 'invalid_email', 'invalid_cover_message', 'invalid_greeting', 'invalid_deliver_on', 'invalid_deliver_time', 'deliver_on_past', 'deliver_on_too_far', 'invalid_delivery_to']) for (const l of ['fi', 'en']) assert.ok(TEXTS[l][`err.${c}`] && TEXTS[l][`err.${c}`].length > 10, `${l} err.${c}`);
+  for (const k of ['gc.d.delivered', 'gc.d.scheduled', 'gc.d.dlvWaiting', 'gc.row.delivered', 'gc.row.scheduled', 'gc.d.cover', 'gc.d.delivery', 'gc.n.dlv', 'gc.n.cover', 'gc.n.greetingCard']) assert.ok(TEXTS.fi[k] && TEXTS.en[k], k);
+  assert.match(TEXTS.fi['gc.n.cover'], /ei näy kortissa/); assert.match(TEXTS.fi['gc.n.greetingCard'], /näkyy kortissa/);
 });

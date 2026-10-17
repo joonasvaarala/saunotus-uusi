@@ -103,7 +103,7 @@ async function layoutChecks(page, label, scope = '.tl') {
     if (document.documentElement.scrollWidth > vw + 0.5) out.overflow.push(`document ${document.documentElement.scrollWidth} > ${vw}`);
     for (const el of root.querySelectorAll('*')) { const b = el.getBoundingClientRect(); if (b.width && b.right > vw + 1 && getComputedStyle(el).position !== 'fixed' && !el.closest('[hidden]') && !el.closest('thead')) out.overflow.push(`${el.tagName}.${el.className?.baseVal ?? el.className} right=${Math.round(b.right)}`); }
     const vis = (el) => { const b = el.getBoundingClientRect(), cs = getComputedStyle(el); return b.width > 0 && b.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none'; };
-    for (const el of root.querySelectorAll('button,a[href],select,input:not([type=hidden]):not([type=checkbox]),textarea,summary')) { if (!vis(el)) continue; const b = el.getBoundingClientRect(); if (b.height < 43.5 || b.width < 43.5) out.small.push(`${el.tagName}.${el.className} ${Math.round(b.width)}x${Math.round(b.height)} "${(el.textContent || el.getAttribute('aria-label') || '').trim().slice(0, 24)}"`); }
+    for (const el of root.querySelectorAll('button,a[href],select,input:not([type=hidden]):not([type=checkbox]):not([type=radio]),textarea,summary,label.gc-radio')) { if (!vis(el)) continue; const b = el.getBoundingClientRect(); if (b.height < 43.5 || b.width < 43.5) out.small.push(`${el.tagName}.${el.className} ${Math.round(b.width)}x${Math.round(b.height)} "${(el.textContent || el.getAttribute('aria-label') || '').trim().slice(0, 24)}"`); }
     const lum = ([r, g, b]) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
     const parse = (c) => { const m = /rgba?\(([\d.]+)[, ]+([\d.]+)[, ]+([\d.]+)(?:[,/ ]+([\d.]+))?/.exec(c); return m ? [+m[1], +m[2], +m[3], m[4] == null ? 1 : +m[4]] : [0, 0, 0, 0]; };
     const bgOf = (el) => { const stack = []; for (let e = el; e; e = e.parentElement) { const c = parse(getComputedStyle(e).backgroundColor); if (c[3] > 0) { stack.push(c); if (c[3] >= 0.99) break; } } let base = [255, 255, 255]; for (const c of stack.reverse()) base = base.map((v, i) => c[i] * c[3] + v * (1 - c[3])); return base; };
@@ -193,11 +193,26 @@ async function adminSuite() {
     expect(await page.locator('[data-testid=gc-payments] li').count() === 1, `${name}: lunastusmaksu listattu`);
     await layoutChecks(page, `${name} kortti auki`);
     if ([360, 1280].includes(vp)) await shot(page, `lahjakortit-hallinta-kortti-${vp}-${lang}`);
+    // toimitustiedot (§13.11): toimitettu / ajastettu -kortit; Avaa PDF säilyy myös saajalle toimitettavalla kortilla
+    for (const kind of ['delivered', 'scheduled']) {
+      const c = page.st.gk.state.cards.find((x) => x.delivery_to === 'recipient' && (kind === 'delivered' ? x.delivered_at : !x.delivered_at && x.deliver_on));
+      await page.click('[data-testid=gc-reset]'); await page.waitForTimeout(150);
+      await page.fill('[data-testid=gc-search]', c.code); await page.keyboard.press('Enter');
+      await page.waitForFunction(() => document.querySelectorAll('[data-testid=gc-list] > [data-testid=gc]').length === 1);
+      const badgeTxt = await rows().first().locator('.tl-badges').innerText();
+      expect(badgeTxt.includes(T[`gc.row.${kind}`]), `${name}: ${kind}-merkki listassa (${badgeTxt.replace(/\n/g, ' ')})`);
+      await rows().first().locator('.tl-head').click(); await page.waitForSelector('[data-testid=gc-detail]');
+      const dt = await page.locator('[data-testid=gc-detail]').innerText();
+      expect(dt.includes(T['gc.d.dlv.recipient']) && dt.includes(c.cover_message) && dt.includes(T['gc.d.cover']) && dt.includes(T['gc.d.delivery']), `${name}: ${kind}: valinta + saateteksti kortin tiedoissa`);
+      expect(kind === 'delivered' ? dt.includes(T['gc.d.delivered'].split(' {')[0]) : dt.includes(T['gc.d.scheduled'].split(' {')[0]) && dt.includes(T['gc.d.deliverAt']) && dt.includes(lang === 'fi' ? 'klo 9:00' : 'at 9:00'), `${name}: ${kind}: tila näkyy (${dt.replace(/\n/g, ' ').slice(-200)})`);
+      expect(await page.locator('a[data-testid=gc-pdf]').count() === 1, `${name}: ${kind}: Avaa PDF säilyy`);
+      if (kind === 'scheduled') { await layoutChecks(page, `${name} ajastettu kortti auki`); if ([360, 390, 768, 1280].includes(vp)) await shot(page, `lahjakortit-hallinta-toimitus-${vp}-${lang}`); }
+    }
   }
 
   // ---- toiminnot (390 px, FI) ----
   {
-    const name = 'lahjakortit toiminnot', T = TEXTS.fi, page = await newPage(name, { vp: 390 });
+    const name = 'lahjakortit toiminnot', T = TEXTS.fi, page = await newPage(name, { vp: 390, allow: /status of 400/ });   // 400 = simuloitu palvelimen toimitusvirhe
     await page.goto(`${ORIGIN}/admin/#/talous?tab=giftcards`);
     await page.waitForSelector('[data-testid=gc-list] [data-testid=gc]');
     const rows = () => page.locator('[data-testid=gc-list] > [data-testid=gc]');
@@ -227,11 +242,55 @@ async function adminSuite() {
     await page.click('dialog[open] button[type=submit]'); await page.waitForSelector('#toast.show.err');
     await page.fill('dialog[open] input[name=buyer_name]', 'Testi Ostaja'); await page.fill('dialog[open] input[name=buyer_email]', 'ostaja@example.invalid');
     await page.fill('dialog[open] [data-testid=gc-new-greeting]', 'y'.repeat(301)); expect(await page.locator('dialog[open] .gc-over').count() === 1, `${name}: yli 300 → laskuri punaiseksi`);
-    await page.click('dialog[open] button[type=submit]'); await page.waitForSelector('#toast.show.err'); expect(/300/.test(await page.locator('#toast').innerText()), `${name}: yli 300 → virhe`);
+    await page.click('dialog[open] button[type=submit]'); await page.waitForFunction(() => /300/.test(document.querySelector('dialog[open] [data-testid=gc-new-err-greeting]')?.textContent || '')); expect(true, `${name}: yli 300 → kenttäkohtainen virhe`);
     await page.fill('dialog[open] [data-testid=gc-new-greeting]', 'Hyvää syntymäpäivää!'); await page.click('dialog[open] button[type=submit]'); await page.waitForSelector('[data-testid=gc-result]');
     const sale = calls(page, 'admin_create_gift_card').at(-1).args;
     expect(sale.p_payment_method === 'cash' && sale.p_package === 'entry_2' && !('p_amount' in sale) && sale.p_buyer.name === 'Testi Ostaja' && sale.p_buyer.email === 'ostaja@example.invalid' && sale.p_channel === 'admin' && sale.p_greeting === 'Hyvää syntymäpäivää!', `${name}: myyntikutsu (${JSON.stringify(sale)})`);
     expect((await page.locator('[data-testid=gc-result]').innerText()).includes(T['gc.r.paid']), `${name}: maksettu → kortti voimassa`);
+    await page.keyboard.press('Escape');
+    // toimitusvalinta myyntilomakkeella (§13.11): oletus ostajalle; saajalle → sähköposti pakollinen, ajankohta, saateteksti; kenttäkohtaiset virheet
+    await page.click('[data-testid=gc-new]'); await page.waitForSelector('dialog[open] [data-testid=gc-new-mode]');
+    { const dlg = 'dialog[open]', $ = (id) => page.locator(`${dlg} [data-testid=${id}]`), errOf = (k) => $(`gc-new-err-${k}`).innerText();
+      await page.selectOption(`${dlg} [data-testid=gc-new-mode]`, 'cash'); await page.selectOption(`${dlg} [data-testid=gc-new-package]`, 'entry_2');
+      await page.fill(`${dlg} input[name=buyer_name]`, 'Toimitus Ostaja'); await page.fill(`${dlg} input[name=buyer_email]`, 'toimitus@example.invalid');
+      expect(await $('gc-new-dlv-buyer').isChecked() && !(await $('gc-new-rec-email').isVisible()) && !(await $('gc-new-when').isVisible()) && !(await $('gc-new-cover').isVisible()), `${name}: oletus ostajalle; saajan sähköposti, ajankohta ja saateteksti piilossa`);
+      await $('gc-new-dlv-recipient').check();
+      expect(await $('gc-new-rec-email').isVisible() && await $('gc-new-when').isVisible() && await $('gc-new-cover').isVisible() && !(await $('gc-new-deliver-on').isVisible()), `${name}: saajalle → kentät näkyvät, päivä piilossa (heti)`);
+      expect((await page.locator(`${dlg} legend`).allInnerTexts()).some((x) => x.toLowerCase() === T['gc.n.dlv'].toLowerCase()) && await page.locator(`${dlg} label:has-text("${T['gc.n.cover']}")`).count() === 1 && await page.locator(`${dlg} label:has-text("${T['gc.n.greetingCard']}")`).count() === 1, `${name}: tervehdys- ja saatetekstikentät erotettu otsikoilla`);
+      await page.click(`${dlg} button[type=submit]`); await page.waitForFunction(() => document.querySelector('dialog[open] [data-testid=gc-new-err-recipientEmail]')?.textContent);
+      expect(await errOf('recipientEmail') === T['err.recipient_email_required'] && !calls(page, 'admin_create_gift_card').some((c) => c.args.p_delivery_to === 'recipient'), `${name}: recipient_email_required kenttäkohtaisesti, ei kutsua palvelimelle`);
+      await $('gc-new-rec-email').fill('ei-sahkoposti'); await page.click(`${dlg} button[type=submit]`); await page.waitForTimeout(100);
+      expect(await errOf('recipientEmail') === T['err.invalid_email'], `${name}: invalid_email`);
+      await $('gc-new-rec-email').fill('Saaja@Example.invalid');
+      await $('gc-new-when-later').check(); await page.click(`${dlg} button[type=submit]`); await page.waitForTimeout(100);
+      expect(await errOf('deliverOn') === T['err.invalid_deliver_on'], `${name}: invalid_deliver_on (ei päivää)`);
+      await $('gc-new-deliver-on').fill('2020-01-02'); await page.click(`${dlg} button[type=submit]`); await page.waitForTimeout(100);
+      expect(await errOf('deliverOn') === T['err.deliver_on_past'], `${name}: deliver_on_past`);
+      await $('gc-new-deliver-on').fill('2031-01-02'); await page.click(`${dlg} button[type=submit]`); await page.waitForTimeout(100);
+      expect(/6/.test(await errOf('deliverOn')) && await errOf('deliverOn') === T['err.deliver_on_too_far'].replace('{months}', '6'), `${name}: deliver_on_too_far (${await errOf('deliverOn')})`);
+      await $('gc-new-cover').fill('c'.repeat(1001)); expect(/1001 \/ 1000/.test(await $('gc-new-cover-counter').innerText()) && await errOf('cover') === T['err.invalid_cover_message'], `${name}: saatetekstin laskuri ja invalid_cover_message`);
+      await $('gc-new-cover').fill('Hyvää syntymäpäivää!\nTässä lahjasi.');
+      await $('gc-new-greeting').fill('Kortin tervehdys');
+      const mn = await $('gc-new-deliver-on').getAttribute('min'), mx = await $('gc-new-deliver-on').getAttribute('max'), today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
+      expect(mn === today && /^\d{4}-\d{2}-\d{2}$/.test(mx), `${name}: päivän min = tänään, max ${mx}`);
+      await layoutChecks(page, `${name} toimitusvalinta dialogi`, 'dialog[open]'); await shot(page, 'lahjakortit-hallinta-toimitus-lomake-390-fi');
+      const d1 = new Date(`${today}T12:00:00Z`); d1.setUTCMonth(d1.getUTCMonth() + 1); const okDay = d1.toISOString().slice(0, 10);
+      // palvelimen virhe (esim. päivä ehti mennä) → kenttäkohtaisesti, lomake pysyy auki
+      const origRpc = page.st.gk.rpc; page.st.gk.rpc = async (n, a) => { if (n === 'admin_create_gift_card') throw Object.assign(new Error('x'), { code: 'deliver_on_past', status: 400 }); return origRpc(n, a); };
+      await $('gc-new-deliver-on').fill(okDay); await $('gc-new-deliver-time').fill('18:30'); await page.click(`${dlg} button[type=submit]`); await page.waitForFunction(() => document.querySelector('dialog[open] [data-testid=gc-new-err-deliverOn]')?.textContent);
+      expect(await errOf('deliverOn') === T['err.deliver_on_past'] && await $('gc-new-cover').inputValue() !== '', `${name}: palvelimen deliver_on_past → kentän alle, tiedot säilyvät`);
+      page.st.gk.rpc = origRpc;
+      await page.click(`${dlg} button[type=submit]`); await page.waitForSelector('[data-testid=gc-result]');
+      const a = calls(page, 'admin_create_gift_card').at(-1).args;
+      expect(a.p_delivery_to === 'recipient' && a.p_recipient_email === 'Saaja@Example.invalid' && a.p_cover_message === 'Hyvää syntymäpäivää!\nTässä lahjasi.' && a.p_deliver_on === okDay && a.p_deliver_time === '18:30' && a.p_greeting === 'Kortin tervehdys' && a.p_payment_method === 'cash', `${name}: create-kutsun toimitusparametrit (${JSON.stringify(a)})`);
+      expect((await page.locator('[data-testid=gc-result]').innerText()).includes(T['gc.d.scheduled'].split(' {')[0]), `${name}: tulosikkuna kertoo ajastuksen`);
+      await page.keyboard.press('Escape'); }
+    // myyntilomake ostajalle: ei saajaa/saatetta/ajankohtaa palvelimelle
+    await page.click('[data-testid=gc-new]'); await page.waitForSelector('dialog[open] [data-testid=gc-new-mode]');
+    await page.selectOption('dialog[open] [data-testid=gc-new-mode]', 'cash'); await page.selectOption('dialog[open] [data-testid=gc-new-package]', 'entry_2');
+    await page.fill('dialog[open] input[name=buyer_name]', 'Ostaja Vain'); await page.fill('dialog[open] input[name=buyer_email]', 'vain@example.invalid');
+    await page.fill('dialog[open] [data-testid=gc-new-rec-name]', 'Nimi Vain'); await page.click('dialog[open] button[type=submit]'); await page.waitForSelector('[data-testid=gc-result]');
+    { const a = calls(page, 'admin_create_gift_card').at(-1).args; expect(a.p_delivery_to === 'buyer' && !('p_cover_message' in a) && !('p_deliver_on' in a) && !('p_deliver_time' in a) && !('p_recipient_email' in a), `${name}: ostajalle → vain p_delivery_to (${JSON.stringify(a)})`); }
     await page.keyboard.press('Escape');
     // lasku (pay_later) → odottaa maksua
     await page.click('[data-testid=gc-new]'); await page.waitForSelector('dialog[open] [data-testid=gc-new-mode]');
@@ -284,6 +343,21 @@ async function adminSuite() {
     await none.goto(`${ORIGIN}/admin/#/talous`); await none.waitForSelector('[data-testid=orders-list] [data-testid=order]');
     expect(await none.locator('[data-testid=tab-giftcards-btn]').count() === 0, 'ilman giftcards.manage ei Lahjakortit-välilehteä');
     expect(calls(none, 'admin_list_gift_cards').length === 0 && calls(none, 'admin_list_gift_card_packages').length === 0, 'ilman oikeutta ei lahjakorttikutsuja');
+  }
+
+  // ---- toimitusvalinnan lomake kaikilla leveyksillä FI/EN (saajalle + ajankohta + virheet) ----
+  for (const lang of ['fi', 'en']) for (const vp of VPS) {
+    const T = TEXTS[lang], name = `toimituslomake ${lang} ${vp}`, page = await newPage(name, { vp, lang });
+    await page.goto(`${ORIGIN}/admin/#/talous?tab=giftcards&lang=${lang}`); await page.waitForSelector('[data-testid=gc-list] [data-testid=gc]');
+    await page.click('[data-testid=gc-new]'); await page.waitForSelector('dialog[open] [data-testid=gc-new-mode]');
+    const $ = (id) => page.locator(`dialog[open] [data-testid=${id}]`);
+    await page.selectOption('dialog[open] [data-testid=gc-new-mode]', 'cash'); await page.selectOption('dialog[open] [data-testid=gc-new-package]', 'entry_2');
+    await $('gc-new-dlv-recipient').check(); await $('gc-new-when-later').check(); await $('gc-new-deliver-on').fill('2020-01-02'); await $('gc-new-cover').fill('Hyvää syntymäpäivää!');
+    await page.fill('dialog[open] input[name=buyer_name]', 'Testi Ostaja'); await page.fill('dialog[open] input[name=buyer_email]', 'ostaja@example.invalid');
+    await page.click('dialog[open] button[type=submit]'); await page.waitForFunction(() => document.querySelector('dialog[open] [data-testid=gc-new-err-deliverOn]')?.textContent);
+    expect(await $('gc-new-err-deliverOn').innerText() === T['err.deliver_on_past'] && await $('gc-new-err-recipientEmail').innerText() === T['err.recipient_email_required'], `${name}: kenttäkohtaiset virheet ${lang}`);
+    await layoutChecks(page, name, 'dialog[open]'); await page.locator('dialog[open]').screenshot({ path: join(SHOT, `hallinta-toimituslomake-virheet-${lang}-${vp}.png`) });
+    await page.context().close();
   }
 
   // ---- ?mock=1: koko välilehti toimii esimerkkidatalla ----
@@ -412,10 +486,10 @@ async function shopSuite() {
     expect(Math.abs(total - (75.5 + 2 * 58 + 328)) < 0.006, `${name}: loppusumma ${total}`);
     expect(/4 korttia/.test(await page.locator('.gc-cnt').innerText()), `${name}: korttimäärä`);
     // tervehdys: laskuri ja raja
-    const gr = page.locator('.gc-line').nth(0).locator('textarea');
-    await gr.fill('Hyvää syntymäpäivää'); expect(await page.locator('.gc-line').nth(0).locator('.gc-counter').innerText() === '19 / 300', `${name}: laskuri 19 / 300`);
-    await gr.fill(GREET300); expect(await page.locator('.gc-line').nth(0).locator('.gc-counter').innerText() === '300 / 300' && !(await page.locator('.gc-line').nth(0).locator('.gc-field:has(textarea) .gc-err').innerText()), `${name}: 300 merkkiä sallittu`);
-    await gr.fill(GREET300 + 'x'); expect(/1 merkkiä liikaa/.test(await page.locator('.gc-line').nth(0).locator('.gc-counter').innerText()) && /liian pitkä/.test(await page.locator('.gc-line').nth(0).locator('.gc-field:has(textarea) .gc-err').innerText()), `${name}: 301 merkkiä → virhe`);
+    const gr = page.locator('.gc-line').nth(0).locator('[data-testid=greeting]');
+    await gr.fill('Hyvää syntymäpäivää'); expect(await page.locator('.gc-line').nth(0).locator('.gc-field:has([data-testid=greeting]) .gc-counter').innerText() === '19 / 300', `${name}: laskuri 19 / 300`);
+    await gr.fill(GREET300); expect(await page.locator('.gc-line').nth(0).locator('.gc-field:has([data-testid=greeting]) .gc-counter').innerText() === '300 / 300' && !(await page.locator('.gc-line').nth(0).locator('.gc-field:has([data-testid=greeting]) .gc-err').innerText()), `${name}: 300 merkkiä sallittu`);
+    await gr.fill(GREET300 + 'x'); expect(/1 merkkiä liikaa/.test(await page.locator('.gc-line').nth(0).locator('.gc-field:has([data-testid=greeting]) .gc-counter').innerText()) && /liian pitkä/.test(await page.locator('.gc-line').nth(0).locator('.gc-field:has([data-testid=greeting]) .gc-err').innerText()), `${name}: 301 merkkiä → virhe`);
     expect(await gr.getAttribute('aria-invalid') === 'true', `${name}: aria-invalid tervehdyksessä`);
     // lähetys tyhjällä → virheet, ei RPC:tä
     await page.click('.gc-submit');
@@ -426,8 +500,9 @@ async function shopSuite() {
     await shot(page, 'kauppa-osto-virheet-fi-390');
     // korjaa
     await gr.fill('Hyvää syntymäpäivää!\nNauti saunasta.');
-    await page.locator('.gc-line').nth(0).locator('input[type=text]').nth(1).fill('Mikko Mallikas');
-    await page.locator('.gc-line').nth(0).locator('input[type=email]').fill('Mikko@Example.fi');
+    await page.locator('.gc-line').nth(0).locator('[data-testid=dlv-recipient]').check();
+    await page.locator('.gc-line').nth(0).locator('[data-testid=recipient-name]').fill('Mikko Mallikas');
+    await page.locator('.gc-line').nth(0).locator('[data-testid=recipient-email]').fill('Mikko@Example.fi');
     await page.fill('input[autocomplete=name]', 'Olli Ostaja'); await page.fill('input[autocomplete=email]', 'Olli@Example.fi'); await page.fill('input[autocomplete=tel]', '+358 40 123 4567');
     await page.check('#gc-terms'); await page.check('#gc-mkt');
     await layoutChecks(page, `${name} täytetty lomake 390`, '.gc');
@@ -436,8 +511,8 @@ async function shopSuite() {
     const a = rpcCalls(page, 'public_buy_gift_card').at(-1)?.args;
     expect(a && a.p_name === 'Olli Ostaja' && a.p_email === 'olli@example.fi' && a.p_phone === '+358 40 123 4567' && a.p_marketing_consent === true && a.p_locale === 'fi', `${name}: ostajan kentät (${JSON.stringify({ ...a, p_items: undefined })})`);
     expect(a && JSON.stringify(a.p_items) === JSON.stringify([
-      { package: 'open', quantity: 1, amount: 75.5, recipient_name: 'Mikko Mallikas', recipient_email: 'mikko@example.fi', greeting: 'Hyvää syntymäpäivää!\nNauti saunasta.' },
-      { package: 'entry_2', quantity: 2 }, { package: 'saunotus_2', quantity: 1 }]), `${name}: p_items täsmälleen sopimuksen mukaan (${JSON.stringify(a?.p_items)})`);
+      { package: 'open', quantity: 1, amount: 75.5, delivery_to: 'recipient', recipient_name: 'Mikko Mallikas', greeting: 'Hyvää syntymäpäivää!\nNauti saunasta.', recipient_email: 'mikko@example.fi' },
+      { package: 'entry_2', quantity: 2, delivery_to: 'buyer' }, { package: 'saunotus_2', quantity: 1, delivery_to: 'buyer' }]), `${name}: p_items täsmälleen sopimuksen mukaan (${JSON.stringify(a?.p_items)})`);
     expect(Object.keys(a).sort().join() === 'p_email,p_items,p_locale,p_marketing_consent,p_name,p_phone', `${name}: vain sopimuksen parametrit (${Object.keys(a)})`);
     const done = await page.locator('.gc-done').innerText();
     expect(/Kiitos tilauksesta/.test(done) && /#15401/.test(done) && /Odottaa maksua/.test(done) && /maksettu/.test(done), `${name}: kuittaus (${done.slice(0, 60)})`);
@@ -576,6 +651,110 @@ async function shopSuite() {
     }
     await page.context().close();
   }
+  // 5d) toimitusvalinta (sopimus §13.11): oletus minulle, saaja → kentät, ajankohta, virheet kenttäkohtaisesti FI/EN, p_items
+  for (const lang of ['fi', 'en']) {
+    const fi = lang === 'fi', name = `toimitusvalinta ${lang}`, page = await newShopPage(name, { vp: 390, lang });
+    const T = (a, b) => (fi ? a : b);
+    await page.goto(`${ORIGIN}${GIFT(lang)}`); await page.waitForSelector('#gift-app .gc-tile');
+    await page.locator('#paketit .gc-tile').nth(0).locator('.gc-btn').click(); await page.waitForSelector('.gc-line');
+    const ln = page.locator('.gc-line').nth(0), tid = (id) => ln.locator(`[data-testid=${id}]`), visible = (id) => tid(id).isVisible();
+    expect(await tid('dlv-buyer').isChecked() && !(await tid('dlv-recipient').isChecked()), `${name}: oletus = minulle`);
+    expect(await ln.locator('legend').first().textContent() === T('Lähetä lahjakortti', 'Send the gift card'), `${name}: valinnan otsikko`);
+    expect(!(await visible('recipient-email')) && !(await visible('when')) && !(await visible('cover-message')) && await visible('greeting'), `${name}: minulle → saajan sähköposti, ajankohta ja saateteksti piilossa; tervehdys näkyy`);
+    expect(await ln.locator('label:has-text("' + T('Tervehdys lahjakorttiin (näkyy kortissa)', 'Greeting on the gift card (shown on the card)') + '")').count() === 1, `${name}: tervehdyskentän otsikko`);
+    await tid('dlv-recipient').check();
+    expect(await visible('recipient-email') && await visible('when') && await visible('cover-message') && await visible('when') && !(await visible('deliver-on')), `${name}: saajalle → sähköposti, ajankohtavalinta, saateteksti näkyvät; päivä piilossa (heti)`);
+    expect(await tid('when-now').isChecked(), `${name}: oletus = lähetä heti`);
+    expect(await ln.locator('label:has-text("' + T('Saateteksti sähköpostiin (ei näy kortissa)', 'Cover message in the email (not shown on the card)') + '")').count() === 1, `${name}: saatetekstin otsikko erottuu tervehdyksestä`);
+    // laskurit erikseen
+    await tid('greeting').fill('x'.repeat(10)); await tid('cover-message').fill('y'.repeat(25));
+    const cnt = await ln.locator('.gc-counter').allInnerTexts();
+    expect(cnt.join('|') === '10 / 300|25 / 1000', `${name}: laskurit 300 ja 1000 (${cnt})`);
+    await tid('cover-message').fill('y'.repeat(1001)); expect(/1 /.test(await ln.locator('.gc-field:has([data-testid=cover-message]) .gc-counter').innerText()) && await tid('cover-message').getAttribute('aria-invalid') === 'true', `${name}: 1001 merkkiä → virhe`);
+    await tid('cover-message').fill('y'.repeat(1000)); expect(await tid('cover-message').getAttribute('aria-invalid') === null, `${name}: 1000 merkkiä sallittu`);
+    // ostajatiedot kuntoon, saajatiedot tyhjiksi → kenttäkohtaiset virheet
+    await page.fill('input[autocomplete=name]', 'Olli Ostaja'); await page.fill('input[autocomplete=email]', 'olli@example.fi'); await page.fill('input[autocomplete=tel]', '0401234567'); await page.check('#gc-terms');
+    const errOf = (id) => ln.locator(`.gc-field:has([data-testid=${id}]) .gc-err`).innerText();
+    await page.click('.gc-submit');
+    expect(!rpcCalls(page, 'public_buy_gift_card').length, `${name}: puutteellinen saaja ei lähde palvelimelle`);
+    expect(await errOf('recipient-name') === T('Anna saajan nimi.', 'Please enter the recipient’s name.'), `${name}: saajan nimi pakollinen (${await errOf('recipient-name')})`);
+    expect(await errOf('recipient-email') === T('Anna saajan sähköpostiosoite – kortti lähetetään suoraan saajalle.', 'Please enter the recipient’s email address – the card is sent directly to them.'), `${name}: recipient_email_required kenttäkohtaisesti`);
+    await tid('recipient-name').fill('Sanna Saaja'); await tid('recipient-email').fill('ei-sahkoposti'); await page.click('.gc-submit');
+    expect(await errOf('recipient-email') === T('Tarkista sähköpostiosoite.', 'Please check the email address.') && await errOf('recipient-name') === '', `${name}: invalid_email`);
+    await tid('recipient-email').fill('Sanna@Example.fi');
+    // ajankohta
+    await tid('when-later').check(); expect(await visible('deliver-on') && await visible('deliver-time'), `${name}: Valitse ajankohta → päivä ja kellonaika`);
+    const mn = await tid('deliver-on').getAttribute('min'), mx = await tid('deliver-on').getAttribute('max'), today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
+    expect(mn === today && /^\d{4}-\d{2}-\d{2}$/.test(mx), `${name}: päivän min = tänään (${mn}), max = ${mx}`);
+    const d6 = new Date(`${today}T12:00:00Z`); d6.setUTCMonth(d6.getUTCMonth() + 6); expect(mx === d6.toISOString().slice(0, 10), `${name}: max = +6 kk (${mx})`);
+    await page.click('.gc-submit'); expect(await errOf('deliver-on') === T('Valitse toimituspäivä.', 'Please choose a date.'), `${name}: invalid_deliver_on (ei päivää)`);
+    await tid('deliver-on').fill('2020-01-02'); await page.click('.gc-submit'); expect(await errOf('deliver-on') === T('Valitse ajankohta tulevaisuudesta.', 'Please choose a time in the future.'), `${name}: deliver_on_past`);
+    await tid('deliver-on').fill('2031-01-02'); await page.click('.gc-submit'); expect(await errOf('deliver-on') === T('Ajankohta voi olla enintään 6 kk päässä.', 'The date can be at most 6 months ahead.'), `${name}: deliver_on_too_far (${await errOf('deliver-on')})`);
+    expect(!rpcCalls(page, 'public_buy_gift_card').length, `${name}: päivämäärävirheet estävät lähetyksen`);
+    await layoutChecks(page, `${name} virheet 390`, '.gc'); await shot(page, `kauppa-toimitus-virheet-${lang}-390`);
+    const ok = new Date(`${today}T12:00:00Z`); ok.setUTCMonth(ok.getUTCMonth() + 1); const okDay = ok.toISOString().slice(0, 10);
+    await tid('deliver-on').fill(okDay); await tid('deliver-time').fill('18:30'); await tid('greeting').fill('Hyvää syntymäpäivää!');
+    await layoutChecks(page, `${name} täytetty 390`, '.gc'); await shot(page, `kauppa-toimitus-taytetty-${lang}-390`);
+    await page.click('.gc-submit'); await page.waitForSelector('.gc-done');
+    const a = rpcCalls(page, 'public_buy_gift_card').at(-1).args, it = a.p_items[0];
+    expect(it.delivery_to === 'recipient' && it.recipient_email === 'sanna@example.fi' && it.deliver_on === okDay && it.deliver_time === '18:30' && it.cover_message === 'y'.repeat(1000) && it.greeting === 'Hyvää syntymäpäivää!' && it.recipient_name === 'Sanna Saaja', `${name}: p_items (${JSON.stringify({ ...it, cover_message: it.cover_message?.length })})`);
+    expect(Object.keys(a).sort().join() === 'p_email,p_items,p_locale,p_marketing_consent,p_name,p_phone', `${name}: vain sopimuksen parametrit`);
+    const dn = await page.locator('[data-testid=done-delivery]').innerText();
+    const dd = new Date(`${okDay}T12:00:00Z`), shown = fi ? `${dd.getUTCDate()}.${dd.getUTCMonth() + 1}.${dd.getUTCFullYear()}` : null;
+    expect((fi ? dn.includes(`saajalle ${shown} klo 18:30`) : /to the recipient on .*18:30/.test(dn)), `${name}: vahvistus kertoo ajankohdan (${dn})`);
+    await layoutChecks(page, `${name} kuittaus`, '.gc'); await shot(page, `kauppa-toimitus-valmis-${lang}-390`);
+    await page.context().close();
+  }
+  // 5e) toimitusvalinta: heti / ilman kellonaikaa / minulle -> p_items, vahvistustekstit; palvelimen virhekoodit kenttäkohtaisesti
+  {
+    const name = 'toimitusvalinta variantit', page = await newShopPage(name, { vp: 390, lang: 'fi' });
+    await page.goto(`${ORIGIN}${GIFT('fi')}`); await page.waitForSelector('#gift-app .gc-tile');
+    for (let i = 0; i < 3; i++) await page.locator('#paketit .gc-tile').nth(0).locator('.gc-btn').click();
+    const L = (i) => page.locator('.gc-line').nth(i), tid = (i, id) => L(i).locator(`[data-testid=${id}]`);
+    await tid(1, 'dlv-recipient').check(); await tid(1, 'recipient-name').fill('Heti Saaja'); await tid(1, 'recipient-email').fill('heti@example.fi');
+    await tid(2, 'dlv-recipient').check(); await tid(2, 'recipient-name').fill('Paiva Saaja'); await tid(2, 'recipient-email').fill('paiva@example.fi'); await tid(2, 'when-later').check();
+    const t = new Date(); t.setDate(t.getDate() + 3); const day = new Date(t.toLocaleString('en-US', { timeZone: 'Europe/Helsinki' })); const iso = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`;
+    await tid(2, 'deliver-on').fill(iso);
+    await page.fill('input[autocomplete=name]', 'Olli Ostaja'); await page.fill('input[autocomplete=email]', 'olli@example.fi'); await page.fill('input[autocomplete=tel]', '0401234567'); await page.check('#gc-terms');
+    // palvelimen virheet → kenttäkohtaisesti oikealle riville/kentälle
+    const cases = [['deliver_on_past', 2, 'deliver-on', /tulevaisuudesta/], ['deliver_on_too_far', 2, 'deliver-on', /6 kk/], ['invalid_deliver_on', 2, 'deliver-on', /toimituspäivä/], ['invalid_deliver_time', 2, 'deliver-time', /tt:mm/], ['invalid_email', 1, 'recipient-email', /sähköposti/], ['recipient_email_required', 1, 'recipient-email', /saajan sähköposti/i], ['invalid_cover_message', 1, 'cover-message', /liian pitkä/], ['invalid_greeting', 0, 'greeting', /liian pitkä/]];
+    if (true) { await tid(0, 'greeting').fill('Moi'); await tid(1, 'cover-message').fill('Terve'); }
+    const origBuy = page.st.mock.handlers.public_buy_gift_card;
+    for (const [code, idx, id, re] of cases) {
+      page.st.mock.handlers.public_buy_gift_card = () => ({ ok: false, code, message: 'x' });
+      await page.click('.gc-submit'); await page.waitForTimeout(120);
+      const txt = await L(idx).locator(`.gc-field:has([data-testid=${id}]) .gc-err`).innerText();
+      expect(re.test(txt) && await tid(idx, id).getAttribute('aria-invalid') === 'true', `${name}: palvelimen ${code} → kenttä ${id} rivillä ${idx + 1} (${txt})`);
+      expect(!(await page.locator('.gc-submit').isDisabled()), `${name}: ${code}: painike käytössä virheen jälkeen`);
+      await page.evaluate(() => document.querySelectorAll('.gc-field.bad').forEach((x) => x.querySelector('input,textarea')?.dispatchEvent(new Event('input', { bubbles: true }))));
+    }
+    page.st.mock.handlers.public_buy_gift_card = origBuy;
+    await page.click('.gc-submit'); await page.waitForSelector('.gc-done, .gc-err:not(:empty), .gc-msg .bk-error', { timeout: 5000 });
+    if (!(await page.locator('.gc-done').count())) { expect(false, `${name}: osto ei onnistunut: ${(await page.locator('.gc-err:not(:empty), .gc-msg').allInnerTexts()).join(' | ')}`); await page.context().close(); return; }
+    const it = rpcCalls(page, 'public_buy_gift_card').at(-1).args.p_items;
+    expect(JSON.stringify(it[0]) === JSON.stringify({ package: 'entry_2', quantity: 1, delivery_to: 'buyer', greeting: 'Moi' }), `${name}: minulle → ei saajaa, saatetta eikä ajankohtaa (${JSON.stringify(it[0])})`);
+    expect(it[1].delivery_to === 'recipient' && !('deliver_on' in it[1]) && !('deliver_time' in it[1]) && it[1].cover_message === 'Terve', `${name}: heti → ei deliver_on/deliver_time (${JSON.stringify(it[1])})`);
+    expect(it[2].deliver_on === iso && !('deliver_time' in it[2]), `${name}: ajankohta ilman kellonaikaa → vain deliver_on (${JSON.stringify(it[2])})`);
+    const notes = await page.locator('[data-testid=done-delivery]').allInnerTexts();
+    expect(notes.length === 3 && /sinulle/.test(notes[0]) && /saajalle heti/.test(notes[1]) && /saajalle \d+\.\d+\.\d{4} klo 9:00/.test(notes[2]), `${name}: vahvistustekstit (${notes.join(' | ')})`);
+    await page.context().close();
+  }
+  // 5f) tilaussivu: saajalle toimitettavan kortin koodia/PDF-linkkiä ei näytetä ostajalle; ostajalle menevällä Näytä koodi + Avaa PDF säilyvät
+  for (const [lang, vp] of [['fi', 390], ['en', 390], ['fi', 1280]]) {
+    const name = `tilaussivu toimitus ${lang} ${vp}`, page = await newShopPage(name, { vp, lang, scenario: 'cardsdelivery', cfgExtra: { giftCardPdf: true } });
+    await page.goto(`${ORIGIN}${lang === 'fi' ? '/tilaus/' : '/en/order/'}?t=${ORDER_TOKEN}`); await page.waitForSelector('[data-testid=gc-cards]');
+    const cards = page.locator('[data-testid=gc-card]');
+    expect(await cards.count() === 4, `${name}: 4 korttia (${await cards.count()})`);
+    expect(await cards.nth(0).locator('[data-testid=gc-show]').count() === 1, `${name}: ostajalle menevällä kortilla Näytä koodi`);
+    for (const i of [2, 3]) expect(await cards.nth(i).locator('[data-testid=gc-show], [data-testid=gc-pdf], a[href*="gift-card-pdf"]').count() === 0 && !/HH5KLMNPQRST|HH6UVWXYZ234/.test(await cards.nth(i).innerText()), `${name}: saajalle menevällä kortilla ${i + 1} ei koodia/PDF-linkkiä`);
+    const notes = await page.locator('[data-testid=gc-delivery]').allInnerTexts();
+    expect(notes.length >= 2 && notes.some((x) => (lang === 'fi' ? /saajalle/ : /recipient/).test(x)), `${name}: toimitusviestit (${notes.join(' | ')})`);
+    await cards.nth(0).locator('[data-testid=gc-show]').click(); await page.waitForSelector('[data-testid=gc-codetext]');
+    expect(await page.locator('[data-testid=gc-pdf]').count() === 1, `${name}: ostajalle menevällä kortilla Avaa PDF säilyy`);
+    expect(!(await page.locator('[data-testid=gc-cards]').innerText()).includes('HH5K'), `${name}: saajan koodi ei missään`);
+    await page.mouse.move(0, 0); await page.waitForTimeout(500); await layoutChecks(page, name, '.ord'); await shot(page, `kauppa-tilaus-toimitus-${lang}-${vp}`);
+    await page.context().close();
+  }
   // 6) kuvakaappaukset ja asettelu: kaikki leveydet FI/EN
   for (const lang of ['fi', 'en']) for (const vp of [360, 390, 430, 768, 1280]) {
     const name = `kuvat ${lang} ${vp}`, page = await newShopPage(name, { vp, lang });
@@ -588,9 +767,16 @@ async function shopSuite() {
     }
     await page.locator('#paketit .gc-tile').nth(1).locator('.gc-btn').click(); await page.locator('#paketit .gc-tile').nth(3).locator('.gc-btn').click();
     await page.fill('#avoin input', '50'); await page.click('#avoin .gc-btn');
-    await page.locator('.gc-line').nth(2).locator('textarea').fill(lang === 'fi' ? 'Hyvää syntymäpäivää! Nauti lämmöstä ja rauhasta.' : 'Happy birthday! Enjoy the warmth and the calm.');
+    await page.locator('.gc-line').nth(2).locator('[data-testid=greeting]').fill(lang === 'fi' ? 'Hyvää syntymäpäivää! Nauti lämmöstä ja rauhasta.' : 'Happy birthday! Enjoy the warmth and the calm.');
     await layoutChecks(page, `${name} myyntisivu`, '.gc');
     await shot(page, `kauppa-lahjakortti-${lang}-${vp}`);
+    { // toimitusvalinta: saajalle + ajankohta valittuna (kenttäkohtaiset virheet esillä)
+      const ln = page.locator('.gc-line').nth(0);
+      await ln.locator('[data-testid=dlv-recipient]').check(); await ln.locator('[data-testid=when-later]').check(); await ln.locator('[data-testid=deliver-on]').fill('2020-01-02'); await ln.locator('[data-testid=cover-message]').fill(lang === 'fi' ? 'Hyvää syntymäpäivää! Tässä lahjasi.' : 'Happy birthday! Here is your gift.');
+      await page.fill('input[autocomplete=name]', 'Olli Ostaja'); await page.fill('input[autocomplete=email]', 'olli@example.fi'); await page.fill('input[autocomplete=tel]', '0401234567'); await page.check('#gc-terms'); await page.click('.gc-submit');
+      await page.waitForFunction(() => [...document.querySelectorAll('.gc-line .gc-err')].some((x) => x.textContent));
+      await layoutChecks(page, `${name} toimitusvalinta`, '.gc'); await shot(page, `kauppa-toimitus-${lang}-${vp}`);
+    }
     await page.locator('#gift-balance').scrollIntoViewIfNeeded(); await page.fill('#gift-balance input', 'hh3a7cefhjkl'); await page.click('#gift-balance button[type=submit]'); await page.waitForSelector('#gift-balance .gc-result');
     await layoutChecks(page, `${name} saldo`, '#gift-balance');
     await page.context().close();
