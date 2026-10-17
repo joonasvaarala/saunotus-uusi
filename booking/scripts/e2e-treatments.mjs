@@ -125,6 +125,9 @@ if (OFF) {
     expect((await page.locator('#booking-app .bk-picker, #booking-app .bk-form').count()) === 0, `off ${hash}: varauskulku näkyy piilotetulle tuotteelle`);
     expect((await page.locator('h1').first().innerText()).length > 0, `off ${hash}: otsikko puuttuu`);
   }
+  { let n = 0; page.on('request', (r) => { if (/public_treatment/.test(r.url())) n++; });
+    await fresh(page, `${shop('fi')}#/paiva/${addDays(today, 2)}`); await page.waitForSelector('.bk-dayresults');
+    expect((await page.locator('.bk-treat-day').count()) === 0 && n === 0, `off: päivänäkymässä hoito-osio tai hoitohaku (${n})`); }
   await shot(page, 'shop-mobile-9i-hoito-ota-yhteytta.png');
   await page.ctx.close();
 } else {
@@ -151,8 +154,7 @@ if (OFF) {
       expect((await page.locator('main .hero.page h1').innerText()) === HERO[slug], `${name} ${slug}: hero-otsikko ei ole tuotteen nimi`);
       expect(await page.locator('main .hero.page.has-prod').count() === 1, `${name} ${slug}: tuotekuva ei ole herona`);
       expect((await page.locator('.bk-picker h3').allInnerTexts()).map((x) => x.replace(/^\d\s*/, '').trim()).join('|').startsWith('Henkilömäärä|Valitse päivä|Valitse kellonaika'), `${name} ${slug}: vaiheotsikot`);
-      expect(/ei perjantaisin/.test(await page.locator('.bk-tr-info').innerText()), `${name} ${slug}: ohjeteksti (ei perjantaisin) puuttuu`);
-      if (slug === 'saunotusrituaali') expect(/vain viikonloppuisin/.test(await page.locator('.bk-tr-info').innerText()) && /16:00, 16:30, 17:00/.test(await page.locator('.bk-tr-info').innerText()), `${name}: rituaalin ohje (la–su, alkuajat) puuttuu`);
+      { const bt = await page.locator('#booking-app').innerText(); expect((await page.locator('.bk-tr-info').count()) === 0 && !/ei perjantaisin|not on Fridays|Visma Pay|14 päivän|up to 14 days|viimeistään klo|Maksu paikan päällä|Payment on site|vain viikonloppuisin|weekends only/i.test(bt), `${name} ${slug}: tuotesivulla on poistettu infoteksti (tai maksuohje)`); }   // säännöt toimivat koodissa (alla), mutta infolaatikkoa ei näytetä
       // henkilömäärä: yläraja = max
       let n = 1; const plus = page.locator('.bk-step').last();
       while (!(await plus.isDisabled()) && n < 10) { await plus.click(); n++; }
@@ -212,7 +214,7 @@ if (OFF) {
     for (const [sel, label] of [['.bk-cell.free', 'päivä'], ['.bk-time-btn', 'kellonaika'], ['.bk-step', 'henkilömäärä +/−'], ['.bk-calnav button', 'kuukausinuoli'], ['.bk-continue .btn', 'Jatka']]) {
       const b = await box(page, sel); expect(b && b.width >= 44 && b.height >= 44, `${name}: ${label} tap-alue < 44 px (${b?.width}×${b?.height})`);
     }
-    for (const [sel, nth, min, label] of [['.bk-time-btn', 0, 4.5, 'kellonaika (valittu)'], ['.bk-time-btn', 1, 4.5, 'kellonaika'], ['.bk-stepn', 0, 4.5, 'vaiheen numero'], ['.bk-cell.free', 0, 4.5, 'vapaa päivä'], ['.bk-cell.sel', 0, 4.5, 'valittu päivä'], ['.bk-note', 0, 4.5, 'muistiinpano'], ['.bk-hint', 0, 4.5, 'vihje'], ['.bk-pick-sum', 0, 4.5, 'valintayhteenveto'], ['.bk-tr-info p', 0, 4.5, 'ohje'], ['.bk-continue .btn', 0, 4.5, 'Jatka']]) {
+    for (const [sel, nth, min, label] of [['.bk-time-btn', 0, 4.5, 'kellonaika (valittu)'], ['.bk-time-btn', 1, 4.5, 'kellonaika'], ['.bk-stepn', 0, 4.5, 'vaiheen numero'], ['.bk-cell.free', 0, 4.5, 'vapaa päivä'], ['.bk-cell.sel', 0, 4.5, 'valittu päivä'], ['.bk-note', 0, 4.5, 'muistiinpano'], ['.bk-hint', 0, 4.5, 'vihje'], ['.bk-pick-sum', 0, 4.5, 'valintayhteenveto'], ['.bk-continue .btn', 0, 4.5, 'Jatka']]) {
       const c = await contrast(page, sel, nth); if (c != null) expect(c >= min, `${name}: kontrasti ${label} ${c}:1 < ${min}`);
     }
     await page.keyboard.press('Shift+Tab'); for (let i = 0; i < 60 && !(await page.evaluate(() => document.activeElement?.classList.contains('bk-time-btn'))); i++) await page.keyboard.press('Tab');   // näppäimistöllä → focus-visible
@@ -243,7 +245,8 @@ if (OFF) {
     await page.check('#bk-terms'); await page.fill('#note', 'Allergia: pähkinä');
     await page.locator('.bk-form button[type=submit]').click(); await page.waitForSelector('.bk-review');
     const rv = (await page.locator('.bk-review').innerText()).replace(/\s+/g, ' ').toLowerCase();
-    for (const needle of ['Saunotus', 'Henkilömäärä 1', 'Testi Asiakas', 'testi@example.com', '0401234567', 'Allergia: pähkinä', '210', 'Maksu paikan päällä']) expect(rv.includes(needle.toLowerCase()), `${name}: vahvistusvaiheesta puuttuu "${needle}"`);
+    for (const needle of ['Saunotus', 'Henkilömäärä 1', 'Testi Asiakas', 'testi@example.com', '0401234567', 'Allergia: pähkinä', '210']) expect(rv.includes(needle.toLowerCase()), `${name}: vahvistusvaiheesta puuttuu "${needle}"`);
+    expect(!/visma pay|maksu paikan päällä\./i.test(rv), `${name}: vahvistusvaiheessa on poistettu maksuohje`);
     expect(!/saunottaja|therapist/i.test(rv), `${name}: saunottajatieto näkyy asiakkaalle`);
     expect(await page.locator('.bk-tr-top').isHidden() && (await page.locator('#tr-review-h').evaluate((e) => e === document.activeElement)), `${name}: vahvistusvaiheen otsikko/fokus`);
     await hscroll(page, `${name} vahvistusvaihe`);
@@ -257,7 +260,8 @@ if (OFF) {
     // vahvistussivu
     const cf = (await page.locator('.bk-conf').innerText()).replace(/\s+/g, ' ');
     const cfl = cf.toLowerCase();
-    for (const needle of ['Saunotus', 'Maksu paikan päällä', 'Henkilömäärä', 'Muuta varausta']) expect(cfl.includes(needle.toLowerCase()) || (await page.getByRole('link', { name: needle }).count()) > 0, `${name}: vahvistussivulta puuttuu "${needle}"`);
+    for (const needle of ['Saunotus', 'Henkilömäärä', 'Muuta varausta']) expect(cfl.includes(needle.toLowerCase()) || (await page.getByRole('link', { name: needle }).count()) > 0, `${name}: vahvistussivulta puuttuu "${needle}"`);
+    expect(!/visma pay|maksu paikan päällä\./i.test(cf), `${name}: vahvistussivulla on poistettu maksuohje`);
     expect(/9\d{3}/.test(cf), `${name}: varaustunnus puuttuu vahvistussivulta`);
     expect((await page.getByRole('button', { name: /peru/i }).count()) === 0 && (await page.getByRole('link', { name: /peru/i }).count()) === 0, `${name}: asiakas voi perua itse`);
     expect(/48/.test(cf) && /peruutus|ota yhteyttä sähköpostilla|Varauksen peruutus/i.test(cf), `${name}: muutos-/peruutusohje puuttuu`);
@@ -283,6 +287,92 @@ if (OFF) {
     await page.ctx.close();
   }
 
+  // ===== 2b) Saatavuushaut: yksi kerrallaan (oikea palvelin vastaa rinnakkaisiin 'busy'), väli ≤ 14 pv, nopea +/+ ei tee turhia hakuja =====
+  {
+    const page = await newPage({ width: 390, height: 844 }, {}, 'haut');
+    let inflight = 0, maxIn = 0; const bodies = [];
+    await page.route('**/rpc/public_treatment_availability', async (r) => { inflight++; maxIn = Math.max(maxIn, inflight); bodies.push(r.request().postDataJSON()); await new Promise((x) => setTimeout(x, 300)); inflight--; r.continue(); });
+    await fresh(page, `${shop('fi')}#/tuote/saunahoito-2`); await page.waitForSelector('.bk-cal-tr .bk-grid');
+    const n0 = bodies.length;
+    expect(n0 === 1, `haut: tuotesivun avaus tekee ${n0} saatavuushakua (odotettu 1)`);
+    for (let i = 0; i < 3; i++) await page.locator('.bk-step').last().click();   // nopea 1→4
+    await page.waitForSelector('.bk-cal-tr .bk-grid'); await page.waitForTimeout(800);
+    expect(bodies.length === n0 + 1 && bodies.at(-1).p_persons === 4, `haut: nopea +/+ → ${bodies.length - n0} hakua (odotettu 1, p_persons 4)`);
+    expect(maxIn <= 1, `haut: rinnakkaisia hakuja ${maxIn}`);
+    expect(bodies.every((b) => (new Date(b.p_to) - new Date(b.p_from)) / 864e5 <= 14), `haut: väli yli 14 pv ${JSON.stringify(bodies)}`);
+    expect(await page.locator('.bk-cal-tr .bk-error').count() === 0, 'haut: virhe nopean +/+ jälkeen');
+    await page.ctx.close();
+  }
+
+  // ===== 2c) Päivänäkymä (#/paiva/<pvm>): hoidot ja rituaali mukana, vain sinä päivänä vapaat tuotteet; haut välimuistista; FI+EN; asettelu =====
+  for (const [lang, w] of [['fi', 390], ['en', 360], ['fi', 430], ['fi', 1280]]) {
+    const page = await newPage({ width: w, height: 844 }, { lang }, `paiva-${lang}-${w}`);
+    let avail = 0; await page.route('**/rpc/public_treatment_availability', (r) => { avail++; r.continue(); });
+    const dayUrl = (d) => `${shop(lang)}#/paiva/${d}`;
+    const settle = async () => { await page.waitForSelector('.bk-dayresults'); await page.waitForFunction(() => !document.querySelector('.bk-treat-status')); };
+    await fresh(page, dayUrl(today)); await settle();
+    const seen = {};   // slug → päivät
+    for (let i = 0; i <= 14; i++) {
+      const d = addDays(today, i);
+      if (i > 0) { await page.evaluate((x) => { location.hash = `#/paiva/${x}`; }, d); await page.waitForSelector(`.bk-dayresults[data-date="${d}"]`); await settle(); }
+      const slugs = await page.locator('.bk-treat-day .bk-pc').evaluateAll((e) => e.map((x) => x.dataset.slug));
+      for (const s of slugs) (seen[s] ||= []).push(d);
+      expect(dow(d) !== 5 || slugs.length === 0, `päivä ${lang} ${w} ${d}: perjantaille tarjotaan hoitoja (${slugs})`);
+      if (slugs.includes('saunotusrituaali')) expect([0, 6].includes(dow(d)), `päivä ${d}: rituaali arkipäivänä`);
+      if (slugs.length) {
+        expect(await page.locator('.bk-treat-day .bk-pc.open').count() === 0 && (await page.locator('.bk-treat-day .bk-slotlist:visible').count()) === 0, `päivä ${d}: hoitokortit pitää olla oletuksena suljettuja (ensin tuote, sitten ajat)`);
+        expect(await page.locator('.bk-treat-day .bk-pc-head').first().getAttribute('aria-expanded') === 'false', `päivä ${d}: aria-expanded`);
+      } else expect(await page.locator('.bk-treat-day').count() === 0, `päivä ${d}: tyhjä hoito-osio näkyy`);
+    }
+    expect(Object.keys(seen).length >= 3, `päivänäkymä ${lang} ${w}: hoitotuotteita löytyi vain ${Object.keys(seen)}`);
+    if (lang === 'fi' && w === 390) {
+      // vastaa tuotesivun saatavuutta (henkilömäärä 1) ja käyttää samaa välimuistia
+      const before = avail;
+      for (const [slug, days] of Object.entries(seen)) {
+        await page.evaluate((s) => { location.hash = `#/tuote/${s}`; }, slug); await page.waitForSelector('.bk-cal-tr .bk-grid');
+        const cells = new Set(); for (let m = 0; m < 2; m++) { for (const x of await page.locator('.bk-cell.free').evaluateAll((el) => el.map((q) => q.dataset.date))) cells.add(x); const nx = page.locator('.bk-calnav button').last(); if (await nx.isDisabled()) break; const lb = await page.locator('.bk-calnav strong').innerText(); await nx.click(); await page.waitForFunction((l) => document.querySelector('.bk-calnav strong')?.innerText !== l, lb); }
+        expect([...cells].sort().join() === days.slice().sort().join(), `${slug}: päivänäkymän päivät ${days} ≠ tuotesivun vapaat päivät ${[...cells].sort()}`);
+      }
+      expect(avail - before === 0, `haut: tuotesivut hakivat uudelleen päivänäkymän jälkeen (${avail - before} hakua; välimuisti kattaa)`);
+    }
+    expect(avail <= 4, `päivänäkymä ${lang} ${w}: ${avail} saatavuushakua koko 15 päivän selauksessa (odotettu ≤ 4, yksi / tuote)`);
+    // kortin avaus → ajat → Valitse vie hoitovarausvirtaan esivalitulla päivällä ja ajalla
+    const d1 = Object.values(seen)[0][0], s1 = Object.keys(seen)[0];
+    await page.goto('about:blank').catch(() => {}); await fresh(page, dayUrl(d1)); await settle();
+    const card = page.locator(`.bk-treat-day .bk-pc[data-slug="${s1}"]`);
+    await card.locator('.bk-pc-head').click();
+    expect(await card.locator('.bk-slotlist').isVisible() && (await card.locator('.bk-pc-head').getAttribute('aria-expanded')) === 'true' && page.url().includes(`?tuote=${s1}`), `päivä ${lang} ${w}: kortin avaus (${page.url()})`);
+    const tTok = (await card.locator('.bk-slot .btn').first().getAttribute('href')).match(/[?&]t=(\d{4})/)[1], firstTime = `${tTok.slice(0, 2)}:${tTok.slice(2)}`;   // Valitse-linkin aika (näyttö: 13–14 / 13:30–14:30)
+    expect(new RegExp(`^${+tTok.slice(0, 2)}(?:[:.]${tTok.slice(2)})?\\D`).test((await card.locator('.bk-time').first().innerText()).trim() + ' ') || tTok.slice(2) !== '00' || /^\d+[–-]/.test((await card.locator('.bk-time').first().innerText()).trim()), `päivä ${lang} ${w}: aikarivi ei vastaa linkkiä`);
+    for (const [sel, label] of [['.bk-treat-day .bk-pc-head', 'korttipainike'], ['.bk-treat-day .bk-slot .btn', 'Valitse']]) { const b = await box(page, sel); expect(b && b.height >= 44 && b.width >= 44, `päivä ${lang} ${w}: ${label} tap-alue ${b?.width}×${b?.height}`); }
+    for (const [sel, label] of [['.bk-treat-day .bk-pc-name', 'nimi'], ['.bk-treat-day .bk-pc-desc', 'kuvaus'], ['.bk-treat-day .bk-time', 'kellonaika'], ['.bk-treat-day .bk-price', 'hinta'], ['.bk-treat-day .bk-kindh', 'otsikko'], ['.bk-treat-day .bk-slot .btn', 'Valitse-painike']]) { const c = await contrast(page, sel); if (c != null) expect(c >= 4.5, `päivä ${lang} ${w}: kontrasti ${label} ${c}:1`); }
+    await hscroll(page, `päivänäkymä ${lang} ${w}`);
+    if (lang === 'en') expect(/^treatments and rituals$/i.test(await page.locator('.bk-treat-day .bk-kindh').innerText()) && /choose|select/i.test(await card.locator('.bk-slot .btn').first().innerText()), 'päivä en: otsikko/painike');
+    await shot(page, `paiva-${lang}-${w}-hoidot.png`);
+    await card.locator('.bk-slot .btn').first().click();
+    await page.waitForSelector('.bk-picker .bk-time-btn[aria-pressed=true]');
+    const q = hp(page);
+    expect(q.get('d') === d1 && q.get('t') === firstTime.replace(':', '') && q.get('n') === '1', `päivä ${lang} ${w}: Valitse ei vie esivalittuun päivään/aikaan (${page.url()})`);
+    expect(!(await page.locator('.bk-continue .btn').isDisabled()) && (await page.locator('.bk-time-btn[aria-pressed=true]').innerText()).includes(firstTime), `päivä ${lang} ${w}: esivalinta tuotesivulla (${firstTime})`);
+    await hscroll(page, `päivä→tuotesivu ${lang} ${w}`);
+    await page.ctx.close();
+  }
+  {   // latausindikaattori, virhe + uudelleenyritys, hoitokortin syväosoite
+    const page = await newPage({ width: 390, height: 844 }, { allow: [/public_treatment_availability/, /status of 4\d\d/] }, 'paiva-tila');
+    await page.route('**/rpc/public_treatment_availability', async (r) => { await new Promise((x) => setTimeout(x, 700)); r.continue(); });
+    await fresh(page, `${shop('fi')}#/paiva/${addDays(today, 1)}`, false);
+    await page.waitForSelector('.bk-treat-status', { timeout: 5000 }).then(() => expect(true, ''), () => expect(false, 'päivä: hoitohaun latausindikaattori puuttuu'));
+    expect(/Haetaan|Ladataan/.test(await page.locator('.bk-treat-status').innerText().catch(() => 'Ladataan')), 'päivä: latausteksti');
+    await page.waitForFunction(() => !document.querySelector('.bk-treat-status'), null, { timeout: 20000 });
+    await page.unroute('**/rpc/public_treatment_availability');
+    await page.route('**/rpc/public_treatment_availability', (r) => r.fulfill({ status: 400, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ code: 'BK001', message: 'x', details: 'rate_limited', hint: null }) }));
+    await fresh(page, `${shop('fi')}#/paiva/${addDays(today, 2)}`); await page.waitForSelector('.bk-dayresults'); await page.waitForFunction(() => !document.querySelector('.bk-treat-status'));
+    expect(/kiireinen|Yritä/i.test(await page.locator('.bk-treat-day').innerText()) && (await page.locator('.bk-treat-day button').count()) === 1, 'päivä: virheilmoitus + Yritä uudelleen puuttuu hoito-osiosta');
+    await page.unroute('**/rpc/public_treatment_availability');
+    await page.locator('.bk-treat-day button').click(); await page.waitForFunction(() => !document.querySelector('.bk-treat-status'));
+    await page.ctx.close();
+  }
+
   // ===== 3) Virhetilanteet, yritysasiakas, lukittu muutos, lataus/uudelleenyritys =====
   {
     const page = await newPage({ width: 390, height: 844 }, { allow: [/public_treatment_availability/] }, 'virheet');
@@ -295,6 +385,7 @@ if (OFF) {
     // aikaikkunavirhe palvelimelta
     const r2 = await book(page, { slug: 'saunahoito-2', email: 'time_window@test.fi', minAhead: 1 });
     expect(r2?.failed && /varausaikojen sisällä/.test(await page.locator('#bk-rmsg').innerText()), 'virhe: time_window-viesti puuttuu');
+    expect(!/null|undefined/.test(await page.locator('#bk-rmsg').innerText()), 'virhe: virheviestin perässä teksti "null"');
     // saatavuushaun virhe (rate_limited / busy) → viesti + Yritä uudelleen
     await page.route('**/rpc/public_treatment_availability', (r) => r.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ code: 'BK001', message: 'Liian kiireinen', details: 'busy', hint: null }) }));
     await fresh(page, `${shop('fi')}#/tuote/saunotus-2`);
@@ -332,13 +423,13 @@ if (OFF) {
     const b = await book(page, { lang: 'en', slug: 'saunahoito-2', minAhead: 3, n: 2, shots: { product: 'shop-mobile-en-9b-hoito-tuotesivu.png', review: 'shop-mobile-en-9d-hoito-vahvistus.png' } });
     expect(b?.token, 'en: varaus ei onnistunut');
     const tx = (await page.locator('.bk-conf').innerText()).replace(/\s+/g, ' ');
-    expect(/Payment on site/.test(tx) && /Sauna treatment/.test(tx) && /Booking confirmation|Thank you|confirmed/i.test(tx), `en: vahvistussivun tekstit (${tx.slice(0, 120)})`);
+    expect(!/Visma Pay|Payment on site/.test(tx) && /Sauna treatment/.test(tx) && /Booking confirmation|Thank you|confirmed/i.test(tx), `en: vahvistussivun tekstit (${tx.slice(0, 120)})`);
     expect(!/(henkilömäärä|maksu paikan|varaus)/i.test(tx), 'en: vahvistussivulla suomenkielistä tekstiä');
     await shot(page, 'shop-mobile-en-9e-hoito-vahvistussivu.png');
     // EN-tuotesivun vaiheet
     await fresh(page, `${shop('en')}#/tuote/saunotusrituaali`); await page.waitForSelector('.bk-picker');
     expect((await page.locator('.bk-picker h3').allInnerTexts()).map((x) => x.replace(/^\d\s*/, '').trim()).join('|') === 'Guests|Pick a date|Pick a time', 'en: vaiheotsikot');
-    expect(/weekends only/.test(await page.locator('.bk-tr-info').innerText()), 'en: rituaalin ohje');
+    expect((await page.locator('.bk-tr-info').count()) === 0 && !/Visma Pay|Treatments are available|weekends only/.test(await page.locator('#booking-app').innerText()), 'en: infolaatikko poistettu');
     await page.ctx.close();
   }
 

@@ -58,7 +58,7 @@ export function createTreatmentViews(c) {
     const dateBox = h('section', { class: 'bk-step-box', 'aria-labelledby': 'tr-h2' }, h('h3', { id: 'tr-h2' }, h('span', { class: 'bk-stepn', 'aria-hidden': 'true', text: '2' }), tr.step2), calBox);
     // 3) kellonaika
     const timeBox = h('section', { class: 'bk-step-box', 'aria-labelledby': 'tr-h3' });
-    const setN = (n) => { n = Math.min(Math.max(n, minN), maxN); if (n === st.n) { syncN(); return; } st.n = n; syncN(); st.time = null; st.slots = new Map(); refresh(); };
+    const setN = (n) => { n = Math.min(Math.max(n, minN), maxN); if (n === st.n) { syncN(); return; } st.n = n; syncN(); st.time = null; st.slots = new Map(); st.seq++; calBox.replaceChildren(h('p', { class: 'bk-loading', role: 'status', text: t.loading })); clearTimeout(st.tm); st.tm = setTimeout(refresh, 350); };   // viive: nopea +/+ ei tee rinnakkaisia hakuja
     const choose = (ds) => { st.date = ds; st.time = null; drawCal(false); drawTimes(); emit(); };
     async function drawCal(load = true) {
       const seq = ++st.seq;
@@ -120,7 +120,6 @@ export function createTreatmentViews(c) {
   // ---- näkymä: hoitotuote (#/tuote/<slug>?n=&d=&t=) ----
   async function viewTreatment(p, query) {
     setHero(p);
-    const policy = A.POLICY, ritual = A.isRitual(p);
     const sum = h('p', { class: 'bk-pick-sum', 'aria-live': 'polite' });
     const go = h('button', { type: 'button', class: 'btn', disabled: true, text: tr.continue });
     let cur = null;
@@ -136,7 +135,6 @@ export function createTreatmentViews(c) {
     mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })),
       h('p', { class: 'bk-desc', text: pdesc(p) || '' }),
       h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), p.duration_text ? ` · ${p.duration_text}` : ''),
-      h('div', { class: 'bk-notice bk-tr-info' }, h('p', { text: tr.info(policy) }), h('p', { text: tr.horizon(A.horizonDays(state.settings)) }), ritual ? h('p', { text: tr.ritualInfo(policy) }) : null, h('p', { text: tr.payNote })),
       picker.node, h('div', { class: 'bk-continue' }, sum, go));
     await picker.ready;
     if (!query.get('n')) focusTop();
@@ -171,7 +169,7 @@ export function createTreatmentViews(c) {
         h('span', { class: 'bk-pick-when', text: `${when(slot.start)}${slot.end ? `–${tm(slot.end)}` : ''} · ${n} ${t.person}` })),
       h('a', { class: 'bk-pick-change', href: back, text: t.changeSlot }));
     const aside = h('aside', { class: 'bk-aside', 'aria-label': t.summary }, h('h3', { text: t.summary }), sumList,
-      h('p', { class: 'bk-totalrow' }, t.total + ': ', h('strong', { class: 'bk-total', text: money(total) }), ' ', h('small', { text: t.vatIncl })), h('p', { class: 'bk-pay', text: tr.payNote }));
+      h('p', { class: 'bk-totalrow' }, t.total + ': ', h('strong', { class: 'bk-total', text: money(total) }), ' ', h('small', { text: t.vatIncl })));
     const formView = h('div', { class: 'bk-checkout' }, form, aside);
     const holder = h('div', {}), topBox = h('div', { class: 'bk-tr-top' });
     // vahvistusvaihe: tiedot yhteenvetona, maksu paikan päällä, "Muokkaa tietoja" / "Vahvista varaus"
@@ -191,12 +189,12 @@ export function createTreatmentViews(c) {
         if (r.ok && r.token) { state.months.clear(); location.assign(`${S.confirmHref}#${r.token}`); return; }
         ok.disabled = edit.disabled = false; ok.textContent = t.book;
         const lost = A.isSlotLost(r.code);
-        err.replaceChildren(errorBox(r.ok ? tr.errors.generic : errMsg(r)), lost ? h('p', {}, h('a', { class: 'btn sm', href: back, text: tr.pickAnother })) : null);
+        err.replaceChildren(...[errorBox(r.ok ? tr.errors.generic : errMsg(r)), lost ? h('p', {}, h('a', { class: 'btn sm', href: back, text: tr.pickAnother })) : null].filter(Boolean));   // replaceChildren(null) kirjoittaisi tekstin "null"
         err.firstChild.setAttribute('tabindex', '-1'); err.firstChild.focus();
       });
       holder.replaceChildren(h('div', { class: 'bk-review' }, head, h('p', { class: 'bk-note', text: tr.reviewLead }), dl,
         h('p', { class: 'bk-totalrow' }, t.total + ': ', h('strong', { class: 'bk-total', text: money(total) }), ' ', h('small', { text: t.vatIncl })),
-        h('p', { class: 'bk-pay bk-paynow', text: cust.kind === 'company' ? t.companyNote : tr.payNote }), err, h('div', { class: 'bk-actions' }, edit, ok)));
+        cust.kind === 'company' ? h('p', { class: 'bk-pay bk-paynow', text: t.companyNote }) : null, err, h('div', { class: 'bk-actions' }, edit, ok)));
       topBox.hidden = true; head.focus(); window.scrollTo({ top: 0 });
     }
     holder.append(formView);

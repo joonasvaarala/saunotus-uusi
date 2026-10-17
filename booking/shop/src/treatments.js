@@ -31,7 +31,7 @@ export const POLICY = {
   ritualStarts: ['16:00', '16:30', '17:00'],    // rituaali kb 8: vain la–su, nämä alkuajat
   changeHoursBefore: 48,
   horizonDays: 14,                              // public_treatment_horizon_days (oletus; public_settings voi antaa tarkemman)
-  maxRangeDays: 14,                             // yksi saatavuushaku enintään 14 pv
+  maxRangeDays: 14,                             // yksi saatavuushaku: p_to − p_from enintään 14 pv (= 15 kalenteripäivää; oikea kanta hyväksyy tämän)
   cacheMs: 3 * 60e3,                            // saatavuuden välimuisti (haku 0,3–1,7 s; ei pollausta)
 };
 export const KB_IDS = [10, 11, 12, 8];           // näytetään tässä järjestyksessä
@@ -92,19 +92,29 @@ export const priceFor = (p, n) => (p.price_type === 'per_person' ? p.price * n :
 const cache = new Map();
 export const clearCache = () => cache.clear();
 const addDay = (ds, n) => { const d = new Date(`${ds}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+// Palvelin sallii vain yhden raskaan haun kerrallaan (rinnakkaiset haut → 'busy'): kaikki haut jonotetaan, 'busy' yritetään kerran uudelleen.
+let queue = Promise.resolve();
+const serial = (fn) => { const r = queue.then(fn, fn); queue = r.catch(() => {}); return r; };
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const callAvailability = (p, persons, from, to) => serial(async () => {
+  try { return await rpc(RPC.availability, args.availability(p, persons, from, to)); }
+  catch (e) { if (apiCode(e) !== 'busy') throw e; await sleep(1500); return rpc(RPC.availability, args.availability(p, persons, from, to)); }
+});
 function fetchChunk(p, persons, from, to) {
   const k = `${p.id}|${persons}|${from}|${to}`, hit = cache.get(k);
   if (hit && Date.now() - hit.at < POLICY.cacheMs) return hit.p;
-  const pr = rpc(RPC.availability, args.availability(p, persons, from, to)).then((rows) => (Array.isArray(rows) ? rows : []));
-  cache.set(k, { at: Date.now(), p: pr });
+  // jo haettu laajempi väli (esim. päivänäkymän koko ikkuna) kattaa tämän → ei uutta hakua
+  for (const [ck, c] of cache) { if (ck.startsWith(`${p.id}|${persons}|`) && c.from <= from && c.to >= to && Date.now() - c.at < POLICY.cacheMs) return c.p.then((rows) => rows.filter((r) => (r.session_date || dayKey(r.starts_at)) >= from && (r.session_date || dayKey(r.starts_at)) <= to)); }
+  const pr = callAvailability(p, persons, from, to).then((rows) => (Array.isArray(rows) ? rows : []));
+  cache.set(k, { at: Date.now(), p: pr, from, to });
   pr.catch(() => cache.delete(k));
   return pr;
 }
 export async function loadAvailability(p, persons, from, to) {
-  const jobs = [];
-  for (let a = from; a <= to; a = addDay(a, POLICY.maxRangeDays)) jobs.push(fetchChunk(p, persons, a, [addDay(a, POLICY.maxRangeDays - 1), to].sort()[0]));
+  const rows = [];
+  for (let a = from; a <= to; a = addDay(a, POLICY.maxRangeDays + 1)) rows.push(...await fetchChunk(p, persons, a, [addDay(a, POLICY.maxRangeDays), to].sort()[0]));
   const byDay = new Map();
-  for (const r of (await Promise.all(jobs)).flat()) {
+  for (const r of rows) {
     const start = r.starts_at; if (!start) continue;
     if (r.status && r.status !== 'available') continue;
     const day = r.session_date || dayKey(start);
