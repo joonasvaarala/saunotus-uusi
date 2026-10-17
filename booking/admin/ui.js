@@ -46,6 +46,7 @@ export function toast(msg, kind = 'ok') {
 }
 // Virhekoodit (SQLSTATE BK001; koodi DETAIL-kentässä → ApiError.code) suomeksi. Tuntemattomalle koodille näytetään palvelimen oma (suomenkielinen) viesti.
 export const ERR_FI = {
+  option_required: 'Valitse hoito.', invalid_option: 'Valittu hoito ei kelpaa tälle tuotteelle.', no_options: 'Pakollinen valinta vaatii vähintään yhden aktiivisen hoidon.',   // booking_50
   space_busy: 'Tila on jo varattu tälle ajalle tai sen puskuriaikaan (Raunin istuntojen väli ≥ 15 min).',
   no_therapist: 'Ei vapaata saunottajaa tälle ajalle (vuoro tai vaadittu taito puuttuu).',
   therapist_closed: 'Saunottajat eivät ole saatavilla tälle ajalle (hoidot kiinni).',

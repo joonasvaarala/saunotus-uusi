@@ -7,6 +7,7 @@ import { rpc } from '../sb.js';
 import { h, fmtDate, fmtTime, todayHel, addDays, dayStartIso, statusBadge, payBadge, sourceBadge, money, field, empty, errMsg, STATUS } from '../ui.js';
 import { reservationDialog } from './shared.js';
 import { resourceBadges, spaceBadge } from './legs.js';
+import { optionBadge } from '../options.js';
 
 export async function render({ ctx, refs, reload }) {
   const PAGE = 50;
@@ -42,7 +43,7 @@ export async function render({ ctx, refs, reload }) {
       h('span', { class: 'rc-when' }, h('strong', { text: fmtDate(r.starts_at) }), ` ${fmtTime(r.starts_at)}`),
       h('span', { class: 'rc-no', text: `#${r.order_no}`, title: 'Tilausnumero' }),
       h('span', { class: 'rc-what' }, h('strong', { text: r.customer_name || '–' }), h('small', { text: ` ${r.product_name} · ${r.persons} hlö` })),
-      h('span', { class: 'meta rc-badges' }, spaceBadge(r, refs), resourceBadges(r), sourceBadge(r), statusBadge(r.status), payBadge(r.payment_status)),
+      h('span', { class: 'meta rc-badges' }, optionBadge(r), spaceBadge(r, refs), resourceBadges(r), sourceBadge(r), statusBadge(r.status), payBadge(r.payment_status)),
       h('span', { class: 'rc-price', text: money(r.total_gross) })));
     offset += rows.length; count.textContent = `${Math.min(offset, total)} / ${total} varausta · ${periodLabel()}`;
     more.replaceChildren(offset < total ? h('button', { type: 'button', class: 'btn ghost', onclick: () => load(false) }, 'Näytä lisää') : '');

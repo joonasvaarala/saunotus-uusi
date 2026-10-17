@@ -7,6 +7,7 @@ import { icon } from '../icons.js';
 import { h, dialog, toast, run, fmtDay, fmtTime, fmtDT, money, statusBadge, payBadge, sourceBadge, isJohku, field, badge, empty, errMsg } from '../ui.js';
 import { legsList, resName, resourceBadges, hasLegs } from './legs.js';
 import { missingOpen, grantButton } from './therapist.js';
+import { optionBadge, optionOf, optionPicker, ot, optErr } from '../options.js';
 
 export function reservationDialog(r, { methods, onChange, refs, can = () => true }) {
   const body = h('div', { class: 'stack' });
@@ -16,12 +17,14 @@ export function reservationDialog(r, { methods, onChange, refs, can = () => true
   const method = h('select', { id: 'pm' }, methods.filter((m) => m.active && m.is_manual).map((m) => h('option', { value: m.code, text: m.label })));
   const amount = h('input', { type: 'number', step: '0.01', min: '0', value: r.total_gross, id: 'pa' });
   const orderBox = h('div', { class: 'stack order-extra' });
+  const optDd = h('dd', { class: 'opt-dd', 'data-testid': 'res-option', hidden: true }); const optBox = h('div', { class: 'box opt-box', 'data-testid': 'option-box', hidden: true });   // hoito (booking_50)
   const resBox = h('div', { class: 'resbox' });   // resurssit: tila, legit, ylitys, siirto Rauni ↔ Lovi (migraatio 17)
   body.append(
     h('dl', { class: 'kv' },
       isJohku(r) ? [h('dt', { text: 'Lähde' }), h('dd', {}, sourceBadge(r), ' tuotu Johku-järjestelmästä'), h('dt', { text: 'Johku-tunnus' }), h('dd', { class: 'ext-id', text: r.external_id || '–' })] : null,
       h('dt', { text: 'Asiakas' }), h('dd', {}, h('strong', { text: r.customer_name || '–' }), h('br'), r.customer_email || '', r.customer_phone ? ` · ${r.customer_phone}` : ''),
       h('dt', { text: 'Palvelu' }), h('dd', { text: r.product_name }),
+      h('dt', { class: 'opt-dt', hidden: true, text: ot('label') }), optDd,
       h('dt', { text: 'Aika' }), h('dd', { text: `${fmtDay(r.starts_at)}, ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)}` }),
       h('dt', { text: 'Henkilöt' }), h('dd', { text: `${r.persons} · ${r.mode === 'exclusive' ? 'yksityisvuoro' : 'yleinen vuoro'}` }),
       h('dt', { text: 'Tila' }), h('dd', {}, statusBadge(r.status), ' ', payBadge(r.payment_status), r.hold_expires_at ? ` (pito päättyy ${fmtTime(r.hold_expires_at)})` : ''),
@@ -30,6 +33,7 @@ export function reservationDialog(r, { methods, onChange, refs, can = () => true
       h('dt', { text: 'Luotu' }), h('dd', { text: fmtDT(r.created_at) }), r.notes ? [h('dt', { text: 'Huomio' }), h('dd', { text: r.notes })] : null),
     can('payments.manage') ? h('a', { class: 'btn ghost order-link', 'data-testid': 'order-link', href: `#/talous?tab=orders&order=${encodeURIComponent(r.order_no)}`, onclick: () => d.close(), text: nbt('nb.orderLink', { no: r.order_no }) }) : null,   // Talous → Tilaukset: tilaus auki (maksut, kuitit)
     resBox,
+    optBox,
     orderBox,
     h('div', { class: 'row wrap' },
       ['pending', 'cancelled', 'expired'].includes(r.status) ? act('Vahvista', () => status('confirmed')) : null,
@@ -81,11 +85,42 @@ export function reservationDialog(r, { methods, onChange, refs, can = () => true
     const day = new Date(r.starts_at).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
     rpc('admin_day_view', { p_date: day }).then((v) => { const m = (v?.reservations || []).find((y) => y.reservation_id === r.reservation_id); if (m) { Object.assign(r, { quota_exempt: m.quota_exempt, override_reason: m.override_reason, claim_offset_min: m.claim_offset_min, claim_minutes: m.claim_minutes, therapist_missing: m.therapist_missing, therapist_missing_open: m.therapist_missing_open, therapist_exception_at: m.therapist_exception_at, therapist_exception_note: m.therapist_exception_note, legs: m.legs?.length ? m.legs : r.legs }); drawResources(); } }).catch(() => {});
   }
+  // Hoito (booking_50): nykyinen valinta + vaihto (admin_set_reservation_option, bookings.manage) + valinnainen ilmoitus asiakkaalle
+  const showOption = (x) => {   // x: { option, option_missing } tai listan option_* -kentät
+    const { name, missing } = optionOf(x); const dt = optDd.previousElementSibling;
+    optDd.replaceChildren(...[name ? name : null, missing ? optionBadge({ option_missing: true }) : null].filter(Boolean));
+    optDd.hidden = dt.hidden = !(name || missing);
+  };
+  showOption(r);
+  const drawOption = (res) => {
+    const choices = res.option_choices || [];
+    const cur = res.option || null;
+    showOption(res);
+    if (!choices.length && !cur) { optBox.hidden = true; return; }
+    const editable = ['pending', 'confirmed'].includes(r.status) && can('bookings.manage');
+    const err = h('p', { class: 'err', role: 'alert', hidden: true, 'data-testid': 'option-error' });
+    const note = h('input', { type: 'checkbox', name: 'notify', 'data-testid': 'option-notify' });
+    const pick = optionPicker({ choices, value: cur?.code || '', label: ot('change'), name: `ro-${r.reservation_id}`, onChange: () => sync() });
+    const save = h('button', { type: 'button', class: 'btn primary', 'data-testid': 'option-save', text: ot('save'), disabled: true });
+    const sync = () => { save.disabled = !pick.value || pick.value === (cur?.code || ''); err.hidden = true; };
+    save.addEventListener('click', () => run(save, async () => {
+      err.hidden = true;
+      try {
+        const v = await rpc('admin_set_reservation_option', { p_reservation_id: r.reservation_id, p_option_code: pick.value, p_notify: note.checked });
+        toast(v?.email_queued ? ot('savedMail') : ot('saved')); d.close(); onChange?.();
+      } catch (e) { err.textContent = optErr(e); err.hidden = false; }
+    }));
+    optBox.replaceChildren(h('h3', { text: ot('label') }),
+      res.option_missing ? h('p', { class: 'opt-warn', 'data-testid': 'option-missing-hint' }, optionBadge({ option_missing: true }), ' ', ot('missingHint')) : h('p', { class: 'muted' }, `${ot('current')}: `, h('strong', { 'data-testid': 'option-current', text: optionOf(res).name || ot('none') })),
+      ...(editable && choices.length ? [pick.node, h('label', { class: 'check' }, note, ` ${ot('notify')}`), err, h('div', { class: 'row' }, save)] : []));
+    optBox.hidden = false;
+  };
   // Tilauksen lisätiedot: laskutustiedot (yritysasiakas), lisäpalvelut (+ muokkaus)
   const drawOrder = async () => {
     let o; try { o = await rpc('admin_get_order', { p_order_id: r.order_id }); } catch { return; }
     const res = (o.reservations || []).find((x) => x.id === r.reservation_id) || {};
     const ad = res.addons || [];
+    drawOption(res);
     const b = o.billing;
     const kids = [];
     if (o.customer_kind === 'company' && b) {
