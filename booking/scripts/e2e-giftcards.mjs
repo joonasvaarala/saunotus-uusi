@@ -591,13 +591,13 @@ async function shopSuite() {
 
   // 5) tilaussivu: Käytä lahjakortti (osittainen lunastus), virheet
   for (const lang of ['fi', 'en']) {
-    const name = `tilaussivu lahjakortti ${lang}`, page = await newShopPage(name, { vp: 390, lang, scenario: 'gift' });
+    const name = `tilaussivu lahjakortti ${lang}`, page = await newShopPage(name, { vp: 390, lang, scenario: 'gift', settings: { claims_enabled: false } });   // kumppanilunastus pois → tuntematon koodi = 'Koodia ei löytynyt' (kumppanipolku: e2e-vouchers.mjs)
     await page.goto(`${ORIGIN}${lang === 'fi' ? '/tilaus/' : '/en/order/'}?t=${ORDER_TOKEN}`); await page.waitForSelector('[data-testid=gc-redeem]');
     const unpaid0 = num(await page.locator('[data-testid=order-unpaid]').innerText());
     expect(unpaid0 === 62, `${name}: maksamatonta 62 € (${unpaid0})`);
     const code = page.locator('[data-testid=gc-code]'), amt = page.locator('[data-testid=gc-amount]'), apply = page.locator('[data-testid=gc-apply]'), msg = page.locator('[data-testid=gc-msg]');
     await code.fill('hh7mrtuvwxy3x');
-    expect(await code.inputValue() === 'HH7M-RTUV-WXY3', `${name}: syöte rajataan 12 merkkiin ja muotoillaan (${await code.inputValue()})`);
+    expect(await code.inputValue() === 'hh7mrtuvwxy3x', `${name}: syöte säilyy sellaisenaan (§13.12: ei 12 merkin rajausta/muotoilua, koska kumppanien koodit ovat 6–24 merkkiä; normalisointi vasta lähetettäessä)`);
     await code.fill('hhzz-zzzz-zzzz'); await apply.click(); await page.waitForSelector('[data-testid=gc-msg] .bk-error');
     expect(/Koodia ei löytynyt|Code not found/.test(await msg.innerText()), `${name}: invalid_code`);
     const ex = { 'HHAA-AAAA-AAAA': /vanhentunut|expired/i, 'HHCC-CCCC-CCCC': /saldo on käytetty|balance has been used/i, 'JK12-3456-7890': /ei voi vielä käyttää|cannot be used in the online shop yet/ };

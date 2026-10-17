@@ -150,3 +150,65 @@ export const DELIVERY_ERROR_CODES = Object.keys(SERVER_FIELD);
 
 // Paketin sisältölista (public_gift_card_packages.items[]): FI = label, EN = label_en (migraatio booking_45). Vain rivit joilla on nimi kyseisellä kielellä (ei FI-nimeä EN-sivulle).
 export const itemLabels = (p, lang) => (Array.isArray(p?.items) ? p.items : []).map((it) => String((lang === 'en' ? it?.label_en : it?.label) ?? '').trim()).filter(Boolean);
+
+// ---------- Yksi koodikenttä: oma kortti vs. kumppanin lahjakortti (sopimus §13.12, migraatiot booking_47/48) ----------
+// Palvelin on totuus (public_resolve_gift_code); nämä ovat vain nopea käyttäjäpalaute ja mockin peili.
+export const CODE_MIN = 6;
+export const CODE_MAX = 24;
+export const codeValid = (s) => { const n = normalizeCode(s).length; return n >= CODE_MIN && n <= CODE_MAX; };
+// Julkiset lähteet (public_submit_voucher_claim: vain nämä 4; partner_other ei julkisesti). Järjestys kuten _vc_sources().
+export const CLAIM_SOURCES = ['elamyslahjat', 'kokemuskauppa', 'kiitoskauppa', 'offerilla'];
+export const SOURCE_LABELS = { elamyslahjat: 'Elämyslahjat', kokemuskauppa: 'Kokemuskauppa', kiitoskauppa: 'Kiitoskauppa', offerilla: 'Offerilla', partner_other: 'Muu kumppani' };
+// Lähde koodin muodosta (peilaa booking._vc_guess; vain aineistosta todetut muodot, Kiitoskauppaa ei tunneta)
+export function guessSource(code) {
+  const n = normalizeCode(code);
+  if (/^KK[0-9]{5}[A-Z]{6}$/.test(n)) return { source: 'kokemuskauppa', confidence: 'high' };
+  if (/^OK[0-9]{5}[A-Z]{3}$/.test(n)) return { source: 'offerilla', confidence: 'high' };
+  if (/^[A-Z0-9]{12}$/.test(n) && /[^3479ACEFHJKLMNPRTUVWXY]/.test(n)) return { source: 'elamyslahjat', confidence: 'medium' };
+  return { source: null, confidence: null };
+}
+// Lunastuspyynnön näyttötila tilaussivulla (public_get_order_voucher_claims): received | redeemed | problem | cancelled | expired.
+// Teksti-avain: vc.st.<tila> tai ongelmassa vc.problem.<problem_code> (tuntematon koodi → other). Ei aikarajoja (booking_48).
+export const PROBLEM_CODES = ['invalid_code', 'expired_code', 'already_used', 'other'];
+export function claimView(c) {
+  const st = ['received', 'redeemed', 'problem', 'cancelled', 'expired'].includes(c?.public_status) ? c.public_status : 'received';
+  const pc = st === 'problem' ? (PROBLEM_CODES.includes(c.problem_code) ? c.problem_code : 'other') : null;
+  return { claimNo: c?.claim_no, state: st, textKey: st === 'problem' ? `vc.problem.${pc}` : `vc.st.${st}`, problemCode: pc, canUpdate: c?.can_update_code === true && (st === 'received' || st === 'problem'),
+    source: c?.source ?? null, sourceLabel: c?.source_label || SOURCE_LABELS[c?.source] || '', codeMasked: c?.code_masked || '', amount: st === 'redeemed' && c?.amount != null ? +c.amount : null };
+}
+// Virhekoodi → tekstiavain: kumppanipolun omat (vc.err.*) ensin, muuten tavallinen lahjakorttivirhe (err.*), muuten err.generic
+export function errorKey(code, has) {
+  if (!code) return 'err.generic';
+  return has(`vc.err.${code}`) ? `vc.err.${code}` : has(`err.${code}`) ? `err.${code}` : 'err.generic';
+}
+// Koodin käsittely yhdellä kentällä. api = createGiftApi (resolve/apply/submitClaim/updateClaimCode). Palauttaa aina { type, ... }:
+//   applied (oma kortti käytetty) | blocked (oma kortti, ei lunastettavissa: reason) | choose_source (tuntematon + kumppanilunastus päällä) | not_found (tuntematon, kumppanilunastus pois) | error (code)
+export async function resolveCode({ api, token, code, amount = null }) {
+  const r = await api.resolve(code);
+  if (r?.notReady) return { type: 'error', code: 'notReady' };
+  if (!r?.ok) return { type: 'error', code: r?.code || 'generic', where: 'resolve' };
+  if (r.kind === 'own') {
+    if (r.redeemable === false) return { type: 'blocked', reason: r.not_redeemable_reason || 'redeem_disabled', card: r };
+    const a = await api.apply({ token, code, amount });
+    if (a?.notReady) return { type: 'error', code: 'notReady' };
+    return a?.ok ? { type: 'applied', result: a } : { type: 'error', code: a?.code || 'generic', where: 'apply' };
+  }
+  if (r.kind !== 'unknown') return { type: 'error', code: 'generic' };
+  if (!r.partner_claims_enabled) return { type: 'not_found' };
+  const known = (Array.isArray(r.sources) ? r.sources : []).map((s) => s.code).filter((c) => CLAIM_SOURCES.includes(c));
+  const sources = (known.length ? known : CLAIM_SOURCES).map((c) => { const s = (r.sources || []).find((x) => x.code === c); return { code: c, label: s?.label || SOURCE_LABELS[c], label_en: s?.label_en || s?.label || SOURCE_LABELS[c] }; });
+  return { type: 'choose_source', sources, suggested: CLAIM_SOURCES.includes(r.suggested_source) ? r.suggested_source : null, confidence: r.suggestion_confidence || null };
+}
+export async function submitClaim({ api, token, code, source }) {
+  if (!CLAIM_SOURCES.includes(source)) return { type: 'error', code: 'invalid_source' };
+  const r = await api.submitClaim({ token, code, source });
+  if (r?.notReady) return { type: 'error', code: 'notReady' };
+  return r?.ok ? { type: 'claimed', claimNo: r.claim_no, already: r.already === true, sourceLabel: r.source_label || SOURCE_LABELS[source], codeMasked: r.code_masked || '', mismatch: r.source_mismatch === true } : { type: 'error', code: r?.code || 'generic' };
+}
+export async function updateClaimCode({ api, token, claimNo, code, source }) {
+  if (source && !CLAIM_SOURCES.includes(source)) return { type: 'error', code: 'invalid_source' };
+  if (!codeValid(code)) return { type: 'error', code: 'invalid_code' };
+  const r = await api.updateClaimCode({ token, claimNo, code, source });
+  if (r?.notReady) return { type: 'error', code: 'notReady' };
+  return r?.ok ? { type: 'updated', claimNo: r.claim_no, sourceLabel: r.source_label || '', codeMasked: r.code_masked || '', mismatch: r.source_mismatch === true } : { type: 'error', code: r?.code || 'generic' };
+}

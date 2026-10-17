@@ -1,7 +1,7 @@
 // Lahjakorttien MOCK-PALVELIN (kauppa): keksityt kortit muistissa; vain kun osoitteessa on ?mock=1 (sekä testit). Ei kosketa palvelinta.
 // Vastaa KOODARI_talous_A_D_fi.md §13.2: nimet, p_-parametrit, vastausrakenteet, virheet {ok:false, code, message}.
 // public_gift_card_packages-vastauksen sisältö (testiprojekti = tuotannon siemendata, 17.10.2026): nimet, hinnat, kuvaukset ja items-rakenne ({label, label_en, persons, kb_product_id} | {label, label_en, persons, addon_code}; label_en lisätty migraatiossa booking_45)
-import { resolveDelivery } from './gift-logic.js';
+import { resolveDelivery, guessSource, CLAIM_SOURCES, SOURCE_LABELS } from './gift-logic.js';
 export const MOCK_PACKAGES = [
   {
     code: 'open',
@@ -136,7 +136,7 @@ const norm = (s) => String(s ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 const r2 = (n) => Math.round(n * 100) / 100;
 const uuid = (i) => `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`;
 export function createGiftMock({ delay = 0, settings = {}, today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }), order = null } = {}) {
-  const cfg = { sale_enabled: true, redeem_enabled: true, max_cards: 10, ...settings };
+  const cfg = { sale_enabled: true, redeem_enabled: true, max_cards: 10, claims_enabled: true, ...settings };
   const day = (n) => { const d = new Date(`${today}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
   const wait = () => (delay ? new Promise((ok) => setTimeout(ok, delay)) : Promise.resolve());
   const bad = (code, message) => ({ ok: false, code, message });
@@ -154,6 +154,15 @@ export function createGiftMock({ delay = 0, settings = {}, today = new Date().to
   const find = (c) => cards.find((x) => x.code === norm(c) && !x.hidden && x.status !== 'cancelled' && x.status !== 'pending_payment');
   const pkgName = (c) => MOCK_PACKAGES.find((p) => p.code === c.pkg)?.name ?? null;
   const notRedeemable = (c) => (!cfg.redeem_enabled ? 'redeem_disabled' : c.source === 'johku' && !cfg.johku ? 'johku_cards_closed' : c.status === 'expired' ? 'expired' : c.balance <= 0 ? 'empty' : null);
+  // ---- Kumppanilahjakortit (§13.12, booking_47/48): lunastuspyynnöt muistissa. Mock peilaa palvelimen virhejärjestystä ja vastausmuotoja. ----
+  const claims = (cfg.claims_seed || []).map((c, i) => ({ claim_no: 100 + i, source: 'elamyslahjat', status: 'open', problem_code: null, amount: null, code: `SEED${i}ABCDEF`, created_at: `${today}T08:00:00Z`, ...c }));
+  let claimSeq = 200;
+  const mask = (c) => `…${String(c).slice(-4)}`;
+  const publicClaim = (c, orderOpen) => ({ claim_no: c.claim_no, source: c.source, source_label: SOURCE_LABELS[c.source] || SOURCE_LABELS.partner_other, code_masked: mask(c.code), status: c.status,
+    public_status: c.status === 'open' || c.status === 'processing' ? 'received' : c.status, problem_code: c.status === 'problem' ? c.problem_code : null, hold_until: null,
+    can_update_code: (c.status === 'open' || c.status === 'problem') && orderOpen, amount: c.status === 'redeemed' ? c.amount : null, created_at: c.created_at });
+  const orderOpen = () => !order?.status || ['pending', 'confirmed'].includes(order.status());
+  const sourcesJson = () => CLAIM_SOURCES.map((code) => ({ code, label: SOURCE_LABELS[code], label_en: SOURCE_LABELS[code] }));
   const myCards = [];      // ostetut kortit (mock-osto)
   let orderNo = 15400;
   const handlers = {
@@ -183,6 +192,55 @@ export function createGiftMock({ delay = 0, settings = {}, today = new Date().to
       c.balance = r2(c.balance - amt); if (c.balance === 0) c.status = 'used';
       const bal = order.pay(amt, c);
       return { ok: true, mock: true, amount: amt, balance: bal, gift_card: { code_last4: c.code.slice(-4), balance: c.balance, status: c.status, valid_to: c.valid_to }, payment_id: 9000 + Math.floor(Math.random() * 100) };
+    },
+    public_resolve_gift_code: ({ p_code }) => {
+      if (limited()) return bad('rate_limited', 'Liian monta yritystä');
+      const n = norm(p_code); if (n.length < 6 || n.length > 24) return bad('invalid_code', 'Tarkista koodi');
+      const own = handlers.public_check_gift_card({ p_code });
+      if (own.ok) return { ...own, kind: 'own' };
+      if (own.code === 'rate_limited') return own;
+      const g = guessSource(n);
+      return { ok: true, kind: 'unknown', partner_claims_enabled: cfg.claims_enabled !== false, suggested_source: g.source, suggestion_confidence: g.confidence, sources: sourcesJson() };
+    },
+    public_submit_voucher_claim: ({ p_token, p_code, p_source, p_order_item_id }) => {
+      void p_order_item_id;
+      if (limited()) return bad('rate_limited', 'Liian monta yritystä');
+      if (cfg.claims_enabled === false) return bad('voucher_claims_disabled', 'Kumppanilahjakorttien lunastus verkossa ei ole vielä käytössä');
+      if (!order || !p_token) return bad('not_found', 'Tilausta ei löydy');
+      const src = String(p_source ?? '').trim().toLowerCase(), n = norm(p_code);
+      if (!CLAIM_SOURCES.includes(src)) return bad('invalid_source', 'Valitse lahjakortin myyjä');
+      if (!/^[A-Z0-9]{6,24}$/.test(n)) { fails.push(1); return bad('invalid_code', 'Tarkista koodi'); }
+      if (!orderOpen()) return bad('order_not_editable', 'Tilaukselle ei voi kirjata maksua');
+      if (order.hasGiftCards()) return bad('gift_card_not_allowed', 'Lahjakortilla ei voi ostaa lahjakorttia');
+      if (cards.some((c) => c.code === n && c.status !== 'cancelled' && c.status !== 'pending_payment')) return bad('use_own_card', 'Koodi on oma lahjakortti: käytä lahjakortin lunastusta');
+      if (order.unpaid() <= 0) return bad('nothing_to_pay', 'Tilauksella ei ole maksettavaa');
+      const ex = claims.find((c) => c.code === n && ['open', 'processing', 'redeemed'].includes(c.status));
+      if (ex) { if (ex.status !== 'redeemed') return { ok: true, already: true, claim_no: ex.claim_no, status: 'open', source: ex.source, source_label: SOURCE_LABELS[ex.source], code_masked: mask(ex.code), hold_until: null }; return bad('code_already_claimed', 'Tämä koodi on jo käytössä toisella varauksella'); }
+      if (claims.filter((c) => ['open', 'processing', 'problem'].includes(c.status)).length >= 10) return bad('too_many_claims', 'Liian monta lahjakoodia tilauksella');
+      claims.filter((c) => c.status === 'problem').forEach((c) => { c.status = 'cancelled'; c.by = 'customer'; });
+      const c = { claim_no: ++claimSeq, source: src, status: 'open', problem_code: null, amount: null, code: n, created_at: new Date().toISOString(), suggested: guessSource(n).source }; claims.push(c);
+      return { ok: true, claim_no: c.claim_no, status: 'open', source: c.source, source_label: SOURCE_LABELS[c.source], code_masked: mask(c.code), hold_until: null, source_mismatch: !!c.suggested && c.suggested !== c.source };
+    },
+    public_get_order_voucher_claims: ({ p_token }) => {
+      if (!p_token) return bad('not_found', 'not_found');
+      return { ok: true, claims: claims.filter((c) => !(c.status === 'cancelled' && c.by === 'customer')).map((c) => publicClaim(c, orderOpen())) };
+    },
+    public_update_voucher_claim_code: ({ p_token, p_claim_id, p_code, p_source }) => {
+      if (limited()) return bad('rate_limited', 'Liian monta yritystä');
+      if (cfg.claims_enabled === false) return bad('voucher_claims_disabled', 'Kumppanilahjakorttien lunastus verkossa ei ole vielä käytössä');
+      if (!order || !p_token) return bad('not_found', 'Tilausta ei löydy');
+      if (!orderOpen()) return bad('order_not_editable', 'Tilaukselle ei voi kirjata maksua');
+      const c = claims.find((x) => x.claim_no === +p_claim_id); if (!c) return bad('not_found', 'Lunastuspyyntöä ei löydy');
+      if (c.status === 'processing') return bad('busy', 'Botti käsittelee juuri');
+      if (!['open', 'problem'].includes(c.status)) return bad('claim_not_editable', 'Pyyntöä ei voi enää muuttaa');
+      const src = p_source == null ? c.source : String(p_source).trim().toLowerCase(), n = norm(p_code);
+      if (!CLAIM_SOURCES.includes(src)) return bad('invalid_source', 'Valitse lahjakortin myyjä');
+      if (!/^[A-Z0-9]{6,24}$/.test(n)) { fails.push(1); return bad('invalid_code', 'Tarkista koodi'); }
+      if (n === c.code && src === c.source) return bad('unchanged', 'Koodi ja myyjä ovat samat');
+      if (cards.some((x) => x.code === n && x.status !== 'cancelled' && x.status !== 'pending_payment')) return bad('use_own_card', 'Koodi on oma lahjakortti');
+      if (claims.some((x) => x !== c && x.code === n && ['open', 'processing', 'redeemed'].includes(x.status))) return bad('code_already_claimed', 'Koodi on jo käytössä');
+      Object.assign(c, { code: n, source: src, status: 'open', problem_code: null, suggested: guessSource(n).source });
+      return { ok: true, claim_no: c.claim_no, status: 'open', public_status: 'received', source: c.source, source_label: SOURCE_LABELS[c.source], code_masked: mask(c.code), source_mismatch: !!c.suggested && c.suggested !== c.source };
     },
     public_buy_gift_card: (a) => {
       const err = validateBuy(a, cfg); if (err) return err;
@@ -214,7 +272,7 @@ export function createGiftMock({ delay = 0, settings = {}, today = new Date().to
     if (name === 'public_buy_gift_card' && !cfg.sale_enabled) return bad('sale_disabled', 'Verkkomyynti ei ole käytössä');
     return h(args);
   }
-  return { rpc, cards, cfg, handlers, myCards };
+  return { rpc, cards, cfg, handlers, myCards, claims };
 }
 // Toimitusvalinta (§13.11): sama kuin palvelimen _gc_delivery_resolve; rivin arvo voittaa p_-oletuksen
 const DELIVERY_MSG = { invalid_delivery_to: 'Toimitustapa: buyer tai recipient', recipient_email_required: 'Anna saajan sähköpostiosoite kun lahjakortti lähetetään suoraan saajalle', invalid_cover_message: 'Saateteksti on liian pitkä (max 1000 merkkiä)', invalid_deliver_on: 'Anna ajankohta muodossa VVVV-KK-PP', invalid_deliver_time: 'Kellonaika muodossa HH:MM', deliver_on_past: 'Toimituspäivä ei voi olla menneisyydessä', deliver_on_too_far: 'Toimituspäivä on liian kaukana' };
