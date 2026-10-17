@@ -65,6 +65,8 @@ ${rows}
 
 // ---------- tilaus ----------
 interface Block { text: string; html: string }
+// booking_50: varauksen tuotevalinta (esim. Saunahoito – Hunajahoito); r.option = {code, name, name_en} tai null
+const resName = (r: any, en: boolean) => { const o = r?.option; const n = o ? String((en ? o.name_en : o.name) ?? o.name ?? "").trim() : ""; const p = String(r?.product_name ?? ""); return n ? (p ? `${p} – ${n}` : n) : p; };
 function orderBlock(d: any, en: boolean): Block {
   const o = d?.order; if (!o) return { text: "", html: "" };
   const res = (o.reservations ?? []).filter((r: any) => r.status !== "cancelled");
@@ -72,13 +74,13 @@ function orderBlock(d: any, en: boolean): Block {
   const L = en ? { order: "Order", when: "Time", product: "Product", persons: "Guests", qty: "Qty", sum: "Amount", total: "Total", pers: "guests", sauna: "Bookings", lines: "Order lines" }
                : { order: "Tilaus", when: "Aika", product: "Tuote", persons: "Henkilöt", qty: "Kpl", sum: "Summa", total: "Yhteensä", pers: "hlö", sauna: "Varaukset", lines: "Tilausrivit" };
   const tl: string[] = [`${L.order} ${o.order_no}`];
-  if (res.length) { tl.push("", `${L.sauna}:`); for (const r of res) tl.push(`  ${r.product_name ?? ""}: ${dt(r.starts_at, en)}–${tm(r.ends_at, en)}, ${r.persons} ${L.pers}`); }
+  if (res.length) { tl.push("", `${L.sauna}:`); for (const r of res) tl.push(`  ${resName(r, en)}: ${dt(r.starts_at, en)}–${tm(r.ends_at, en)}, ${r.persons} ${L.pers}`); }
   if (items.length) { tl.push("", `${L.lines}:`); for (const i of items) tl.push(`  ${i.quantity} × ${i.name} ${eur(i.line_total, en)}`); }
   tl.push("", `${L.total}: ${eur(o.total, en)}`);
   let html = `<tr><td style="padding:4px 32px 4px 32px;font-family:${FONT};font-size:17px;color:${GREEN}">${L.order} ${esc(o.order_no)}</td></tr>`;
   if (res.length) {
     html += `<tr><td style="padding:6px 32px 12px 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${th(L.product)}${th(L.when)}${th(L.persons, "right")}</tr>`
-      + res.map((r: any) => `<tr>${td(String(r.product_name ?? ""))}${td(`${dt(r.starts_at, en)}–${tm(r.ends_at, en)}`)}${td(String(r.persons ?? ""), "right")}</tr>`).join("") + `</table></td></tr>`;
+      + res.map((r: any) => `<tr>${td(resName(r, en))}${td(`${dt(r.starts_at, en)}–${tm(r.ends_at, en)}`)}${td(String(r.persons ?? ""), "right")}</tr>`).join("") + `</table></td></tr>`;
   }
   if (items.length) {
     html += `<tr><td style="padding:6px 32px 8px 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${th(L.product)}${th(L.qty, "right")}${th(L.sum, "right")}</tr>`

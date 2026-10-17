@@ -9,7 +9,7 @@ Ei palvelinkoodia, ei build-vaihetta selaimen koodille, ei kirjastoriippuvuuksia
 
 | Polku | Mitä |
 |---|---|
-| `supabase/migrations/` | SQL-migraatiot 01–46 (skeema `booking`; 01–09 ajettu testikantaan 16.10., 10 ja 11 odottavat ajoa; 12–13 ajettu tuotantoon, tiedostot lisättävä, ks. alla). **Ainoa tapa muuttaa tuotantokantaa.** |
+| `supabase/migrations/` | SQL-migraatiot 01–50 (skeema `booking`; 01–09 ajettu testikantaan 16.10., 10 ja 11 odottavat ajoa; 12–13 ajettu tuotantoon, tiedostot lisättävä, ks. alla). **Ainoa tapa muuttaa tuotantokantaa.** |
 | `supabase/tests/` | pgTAP-testit + kilpailutilannetesti (`run.sh`), mock-Supabase ja mock-kb |
 | `supabase/manual/` | Käsin tehtävät vaiheet: skeeman avaus REST:iin, ensimmäinen admin, tarkistuskyselyt |
 | `shared/sb.js` | ~110 rivin PostgREST/Auth-asiakas (käytetään kaupassa ja hallinnassa) |
@@ -17,7 +17,7 @@ Ei palvelinkoodia, ei build-vaihetta selaimen koodille, ei kirjastoriippuvuuksia
 | `admin/` | Hallinta-SPA (mobiili ensin + työpöytä), Supabase Auth. Näkymät: Päivä (+ lisäpalvelujen "Valmistele"-yhteenveto), Varaukset (**Ajanjakso**-pikavalinta Kaikki ajat (oletus) / Tulevat / Menneet / Tämä kuukausi / Oma ajanjakso, **lähdesuodatin Kaikki / Uudet / Johku**; Johku-varauksilla "Johku"-tunniste; kortin oikeassa yläkulmassa tilausnumero ja oikeassa alakulmassa hinta), **Kalenteri** (työvuorot + varaukset), Uusi varaus (asiakastyyppi, lisäpalvelut), Asiakkaat (**Lisää asiakas**: yksityinen/yritys), Tuotteet (+ **Lisäpalvelut**), Resurssit, Asetukset, **Käyttäjät** (vain admin) |
 | `supabase/functions/admin-users/` | Edge Function (Deno, `verify_jwt = true`): käyttäjien kutsu, käytöstä poisto ja aktivointi. Validointilogiikka `logic.js` + testit |
 | `supabase/functions/{send-emails,receipt-pdf,report-pdf,gift-card-pdf,vismapay-*,procountor-sync}/` | Talous-integraatiot (sähköposti Resend, kuitti-/raportti-/lahjakortti-PDF, Visma Pay- ja Procountor-rungot; mode `off`/`dry_run`). Ohje: [docs/talous-integraatiot.md](docs/talous-integraatiot.md); sähköpostipohjien testit `send-emails/templates.test.mjs` |
-| `supabase/rollbacks/` | Migraatioiden 24–44 palautus-SQL:t (37–38 ja 39–40 yhteisiä; 43:lla lisäksi `…_43_import_ROLLBACK.sql` Johku-tuonnin purkuun; versionumero kuten tuotannossa; EI `migrations/`-kansiossa, ettei CLI aja niitä) |
+| `supabase/rollbacks/` | Migraatioiden 24–44, 49 ja 50 palautus-SQL:t (37–38 ja 39–40 yhteisiä; 43:lla lisäksi `…_43_import_ROLLBACK.sql` Johku-tuonnin purkuun; versionumero kuten tuotannossa; EI `migrations/`-kansiossa, ettei CLI aja niitä) |
 | `dev/` | Paikallinen demo: PostgREST-konfiguraatio, kehityspalvelin (mock-auth), demo-siemen |
 | `scripts/e2e-screenshots.mjs` | Playwright-savutesti + kuvakaappaukset + konsolivirhetarkistus |
 | `scripts/e2e-shop-layout.mjs` | Kaupan varauslomakkeen ja päivänäkymän (`#/paiva/<pvm>`) asettelutesti (360/390/430/1280 px, FI+EN, yksityinen+yritys; kosketuskohteet, kontrasti, näppäimistö): ei vaakavieritystä, osiot samassa linjassa, järjestys ja otsikot; varauslomakkeen otsikon alla lyhyt yhteenveto (tuote, päivä, kellonaika) ja linkki "Vaihda päivää tai aikaa" (päivänäkymästä `?via=day` → `#/paiva/<pvm>?tuote=<slug>`, muuten `#/tuote/<slug>/<pvm>`) |
