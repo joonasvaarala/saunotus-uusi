@@ -348,7 +348,7 @@ Muut: `invalid_package`, `invalid_quantity`, `too_many_cards`, `invalid_date`, `
 
 ## 14. MobilePay-verkkomaksu (Vipps MobilePay ePayment API, suora integraatio) – migraatio booking_49_mobilepay_epayment + edge-funktiot `mobilepay-start` / `mobilepay-notify` / `mobilepay-refund`
 
-**Tila: valmis ja tuotannossa, mutta KYTKETTY POIS (`integration_config.mobilepay.mode = 'off'`).** Kun tila on `off`, `public_payment_options` ei palauta MobilePay-tapaa → **painiketta ei näytetä**. Päälle kytkeminen vaatii Joonaksen luvan (ks. `talous-integraatiot.md` §3b). UI voidaan rakentaa ja testata etukäteen; painike ilmestyy vasta kun tila on `test` tai `live`.
+**Tila: backend valmis ja tuotannossa; `integration_config.mobilepay.mode = 'test'` (MobilePay TESTIYMPÄRISTÖ, apitest.vipps.no; ei oikeita maksuja).** Kun tila on `off`, `public_payment_options` ei palauta MobilePay-tapaa → **painiketta ei näytetä**. `test`-tilassa tapa palautuu merkittynä `test: true` → **tuotantosivusto piilottaa painikkeen, testisivusto (SITE_ENV=test) näyttää sen**. `live`-tilaan siirtyminen vaatii Joonaksen luvan (ks. `talous-integraatiot.md` §3b). UI-toteutus: README → "MobilePay-maksu (UI)".
 
 ### 14.0 Säännöt (lue ensin)
 - **Maksettu = vasta onnistuneen capturen jälkeen.** Asiakkaan hyväksyttyä maksun Vipps-sovelluksessa maksu on vain varattu (AUTHORIZED); edge-funktio tarkistaa summan, varmistaa että aika on yhä vapaana, tekee captureen ja vasta sitten kutsuu `payment_mark_paid` → kuitti, kuittiviesti ja kirjanpito-outbox syntyvät kuten muillakin maksuilla (`_on_payment_paid`). Jos aika ehti mennä, varaus perutaan eikä asiakkaalta veloiteta (tilauksen sisäiseen huomautukseen jää merkintä).

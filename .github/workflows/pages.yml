@@ -31,6 +31,7 @@ jobs:
         with:
           node-version: 20
       - run: node --test booking/supabase/functions/admin-users/logic.test.js
+      - run: node --test booking/tests/mobilepay-shop.test.mjs
       - run: node scripts/build-pages.mjs
       # sähköpostipohjat ovat TypeScriptiä (vain tyyppisyntaksia) → testi tarvitsee Noden tyyppien poiston (22.18+)
       - uses: actions/setup-node@v4
