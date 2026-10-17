@@ -23,6 +23,7 @@ content/
   kb/kb.json           Supabase kb -snapshot (vain julkiset kentät)
   alts.json            kuvien alt-tekstit (fi/en)
   images.manifest.json lähdekuvat → tulokuvat; images.json = generoidut mitat
+  hero.json            etusivun herokuvan mitat (generoi scripts/optimize-hero.mjs)
 src/
   lib.mjs              apufunktiot (escape, hinnat, kuvat, linkit)
   render.mjs           sivupohjat ja komponentit
@@ -36,6 +37,7 @@ scripts/
   serve.mjs            paikallinen esikatselu
   fetch-assets.mjs     lataa lähdekuvat live-sivustolta ja Johku-CDN:stä (assets-src/, ei gitissä)
   optimize-images.mjs  avif/webp + OG-kuvat → public/img
+  optimize-hero.mjs    etusivun herokuva (ovi): desktop + mobiili avif/webp, OG-kuva ja content/hero.json (npm run hero)
   kb-snapshot.mjs      kb-vienti → content/kb/kb.json (allowlist)
   update-reviews.mjs   Google Places -arvostelut → content/reviews.json (npm run reviews:update)
 public/                fontit, kuvat, favicon (kopioidaan sellaisenaan)
@@ -62,6 +64,7 @@ Ympäristömuuttujat: `SITE_ENV=test` (noindex-meta + `robots.txt` Disallow), `S
 - **Hinta, kesto, aukioloajat, tapahtumapäivät:** tulevat kb:stä. Älä kirjoita niitä käsin teksteihin. Päivitys: aja `docs/kb-export.sql` (vain SELECT) Supabasessa, tallenna tulos JSON:iin ja aja `node scripts/kb-snapshot.mjs export.json`. Tapahtumat, joiden päivä on mennyt, poistuvat sivulta automaattisesti rakennuksessa (ajastettu daily build).
 - **Kortin poikkeama:** `cards.json`-kortin `over` ohittaa kb-kentän (esim. kesto "2–3 h"), `show` valitsee näytettävät kentät, `exact: true` näyttää hinnan ilman "alk.".
 - **Uusi kuva:** lisää rivi `content/images.manifest.json`, aja `npm run assets && npm run images`, lisää alt-teksti `content/alts.json`.
+- **Etusivun herokuva (ovi):** `<picture>`: mobiili (≤719 px, 4:5, 1200x1500, `hero-ovi-uusi-mobiili-*`) ja desktop (leveä 2560x1200, `hero-ovi-uusi-*`), avif + webp + jpg (jpg = varakuva), mitat `content/hero.json`, media-ehdolliset avif-preloadit (`heroPicture`/`heroPreload` in `src/lib.mjs`). Mobiilissa kuva näkyy koko leveydeltä ylhäällä ja teksti on kuvan alaosan ja tumman pohjan päällä (veistos ei peity); desktopissa teksti on vasemmalla ja tummennus kulkee tekstin mukana (`.hero.home::after`, `--tx`). Kultanappi `.btn.gold`: tumma teksti #1c1209 (≥4,9:1; valkoinen ei yltänyt 4,5:1). Alt-tekstit: `content/alts.json` (`hero-ovi-uusi`, sama molemmille rajauksille). Uudet tiedostot: `HERO_DESKTOP=… HERO_MOBILE=… npm run hero` (lähdekuvat eivät ole repossa; tuottaa myös `og-hero-ovi-uusi.jpg` 1200x630). Testit: `node scripts/check-hero.mjs` (dist; ajetaan CI:ssä) ja selaintesti `scripts/hero-shots.mjs` (kontrasti, vaakavieritys, screenshotit). Lähde: Google Drive > Okon kuvat kesä 2026 > `_DSC3826_SRGB_LARGE.jpg`.
 - **Varaus- ja kauppalinkit** osoittavat Johkuun (`https://sipoonjoenperinnesauna.johku.com/`). Johkua ei muuteta tästä repostosta; EN-sivut linkittävät `/en_US/`-polkuihin.
 
 ## Arvostelut / Testimonials

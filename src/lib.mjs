@@ -6,6 +6,7 @@ export const read = (p) => JSON.parse(readFileSync(new URL('../' + p, import.met
 export const site = read('content/site.json');
 export const kb = read('content/kb/kb.json');
 export const images = read('content/images.json');
+export const hero = read('content/hero.json');
 // Google-arvostelut (content/reviews.json); REVIEWS_FILE ohittaa tiedoston (testaukseen). Puuttuva tiedosto = ei arvosteluja.
 export const reviewsData = (() => {
   const f = process.env.REVIEWS_FILE;
@@ -75,6 +76,19 @@ export function picture(id, { alt = '', sizes = '100vw', cls = '', eager = false
   const last = m.widths[m.widths.length - 1];
   return `<picture><source type="image/avif" srcset="${set('avif')}" sizes="${sizes}"><source type="image/webp" srcset="${set('webp')}" sizes="${sizes}"><img src="${href(`/img/${id}-${last}.webp`)}" width="${width || m.w}" height="${height || m.h}" alt="${e(alt)}"${cls ? ` class="${cls}"` : ''}${eager ? ' fetchpriority="' + (fetchpriority || 'high') + '"' : ' loading="lazy" decoding="async"'}></picture>`;
 }
+// Etusivun herokuva: <picture> mobiili (<720 px, 4:5) / desktop (leveä kaista). Mitat content/hero.json (scripts/optimize-hero.mjs).
+export const HERO = { mobile: 'hero-ovi-uusi-mobiili', desktop: 'hero-ovi-uusi', bp: 719 };
+const heroSet = (id, ext) => hero[id][ext].map((w) => `${href(`/img/${id}-${w}.${ext}`)} ${w}w`).join(', ');
+export function heroPicture({ alt = '' } = {}) {
+  const m = hero[HERO.mobile], d = hero[HERO.desktop];
+  const mq = `(max-width:${HERO.bp}px)`, fmt = { avif: 'image/avif', webp: 'image/webp', jpg: 'image/jpeg' };
+  const src = (id, x, o, media) => `<source${media ? ` media="${media}"` : ''} type="${fmt[x]}" srcset="${heroSet(id, x)}" sizes="100vw" width="${o.w}" height="${o.h}">`;
+  const fb = d.jpg[d.jpg.length - 1];   // varakuva (JPEG) = img; mobiili-JPEG on oma <source media>, joten desktop-JPEG ei lataudu mobiilille
+  return `<picture>${['avif', 'webp', 'jpg'].map((x) => src(HERO.mobile, x, m, mq)).join('')}${['avif', 'webp'].map((x) => src(HERO.desktop, x, d)).join('')}<img src="${href(`/img/${HERO.desktop}-${fb}.jpg`)}" srcset="${heroSet(HERO.desktop, 'jpg')}" sizes="100vw" width="${d.w}" height="${d.h}" alt="${e(alt)}" fetchpriority="high" decoding="async"></picture>`;
+}
+// preload oikealle kuvalle media-ehdolla (vain avif; webp-selaimet latautuvat <picture>-elementistä)
+export const heroPreload = () => [[HERO.mobile, `(max-width:${HERO.bp}px)`], [HERO.desktop, `(min-width:${HERO.bp + 1}px)`]]
+  .map(([id, mq]) => `<link rel="preload" as="image" type="image/avif" media="${mq}" imagesrcset="${heroSet(id, 'avif')}" imagesizes="100vw" fetchpriority="high">`).join('');
 export const icon = (id, size = 48, alt = '') => {
   const m = images[id];
   const src = m ? href(`/img/${id}.webp`) : href(`/img/${id}.svg`);
