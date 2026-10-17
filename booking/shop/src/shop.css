@@ -223,3 +223,26 @@ a.bk-sd:hover{filter:brightness(.97)}
 .bk-review .bk-actions .btn:disabled{opacity:.6;cursor:default}
 .bk-paynow{font-weight:600;color:var(--ink)}
 .bk-conf .bk-sum,.bk-review .bk-sum{grid-template-columns:minmax(124px,40%) minmax(0,1fr)}
+
+/* ---- asiakkaan tilaussivu (/tilaus/) ---- */
+.ord{display:grid;gap:16px;max-width:720px;margin-inline:auto}
+.ord-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.ord-card h2,.ord-card h3{margin:0 0 8px}
+.ord-badges{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 8px}
+.ord-badge{display:inline-block;font:600 13px var(--label);padding:6px 12px;border-radius:30px;background:#ece8e3;color:#4F443A}
+.ord-badge.st-confirmed,.ord-badge.pay-paid{background:#e8f3ea;color:#1d4d2b}
+.ord-badge.st-pending,.ord-badge.pay-pending,.ord-badge.pay-partially_paid,.ord-badge.st-cancel_requested{background:#fdf1d8;color:#6b4b00}
+.ord-badge.st-cancelled,.ord-badge.st-expired,.ord-badge.pay-failed{background:#f3e3e3;color:#7b2d2d}
+.ord-badge.pay-refunded,.ord-badge.pay-partially_refunded{background:#EDE3D0;color:#4a3418}
+.ord-lines{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.ord-lines li{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"m s" "t s";gap:2px 12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.ord-lines li.addon{margin-left:14px;background:#FBF8F2}
+.ord-l-main{grid-area:m;min-width:0;overflow-wrap:anywhere}.ord-l-meta{grid-area:t;color:var(--muted);font-size:15px;min-width:0}.ord-l-sum{grid-area:s;align-self:center;text-align:right;font-weight:700;color:var(--ink)}
+.ord-sums{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}.ord-sums>div{flex:1 1 130px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:#fff}
+.ord-sums dt{font-size:13px;color:var(--muted)}.ord-sums dd{margin:0;font-weight:700;color:var(--ink);font-size:18px}.ord-sums .due dd{color:#7b1d12}
+.ord-btn{min-height:48px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}.ord-btn:disabled{opacity:1;background:transparent;border:1px dashed #8b7f73;color:var(--muted);cursor:not-allowed}
+.ord-form{display:grid;gap:10px}.ord-form select,.ord-form input,.ord-form textarea{width:100%;min-height:48px;font:inherit;padding:10px 12px;border:1px solid #8b7f73;border-radius:10px;background:#fff;color:var(--ink)}
+.ord-form textarea{min-height:90px}.ord-form .bk-field{margin:0}
+.ord-mock{max-width:720px;margin:0 auto 12px;background:#EDE3D0;border:1px solid rgba(122,85,48,.55);color:#3d2f1f;border-radius:10px;padding:10px 14px;font-size:15px}
+.ord-msg:empty{display:none}
+.ord a,.ord .bk-contact a,#order-app .bk-contact a{display:inline-flex;align-items:center;min-height:44px;padding:0 2px}

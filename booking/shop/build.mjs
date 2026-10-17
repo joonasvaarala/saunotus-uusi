@@ -30,7 +30,7 @@ const { site, kb, BASE, e } = L;
 // 2) varausohjelman tiedostot
 const A = join(OUT, 'booking');
 mkdirSync(A, { recursive: true });
-for (const f of ['shop.js', 'i18n.js', 'shop.css', 'treatments.js', 'treatment-ui.js']) cpSync(join(here, 'src', f), join(A, f));
+for (const f of ['shop.js', 'i18n.js', 'shop.css', 'treatments.js', 'treatment-ui.js', 'order.js', 'order-texts.js', 'order-api.js', 'order-mock.js']) cpSync(join(here, 'src', f), join(A, f));
 cpSync(join(repo, 'booking/shared/sb.js'), join(A, 'sb.js'));
 const cfg = {
   url: process.env.BOOKING_SUPABASE_URL ?? 'http://localhost:4181', anonKey: process.env.BOOKING_ANON_KEY ?? 'anon-demo-key',
@@ -42,7 +42,7 @@ const STATIC_KEYS = ['id', 'name', 'name_en', 'description', 'description_en', '
 writeFileSync(join(A, 'static-products.json'), JSON.stringify(Object.fromEntries(kb.products.map((p) => [p.slug, Object.fromEntries(STATIC_KEYS.filter((k) => p[k] != null).map((k) => [k, p[k]])) ]))));
 
 // 3) varaussivut (FI/EN) + vahvistussivut: sivuston oma layout
-const PATHS = { fi: { shop: site.pages.book.fi, confirm: site.pages.book.fi + 'vahvistus/' }, en: { shop: site.pages.book.en, confirm: site.pages.book.en + 'confirmation/' } };
+const PATHS = { fi: { shop: site.pages.book.fi, confirm: site.pages.book.fi + 'vahvistus/', order: '/tilaus/' }, en: { shop: site.pages.book.en, confirm: site.pages.book.en + 'confirmation/', order: '/en/order/' } };
 const write = (urlPath, html) => { const f = join(OUT, urlPath, 'index.html'); mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, html); };
 const T = {
   fi: { title: 'Varaa saunaelämys', text: 'Valitse kokemus, päivä ja vuoro – varaus vahvistetaan heti.', meta: 'Varaa saunavuoro verkossa | Sipoonjoen Perinnesauna', desc: 'Varaa yleinen saunavuoro tai yksityisvuoro suoraan Sipoonjoen perinnesaunalle.', noscript: 'Varauskalenteri vaatii JavaScriptin. Varaa soittamalla', ctitle: 'Varausvahvistus' },
@@ -64,6 +64,23 @@ for (const lang of ['fi', 'en']) {
     if (page === 'confirm') html = html.replace(/<link rel="canonical"[^>]*>(<link rel="alternate"[^>]*>)*/, '').replace('<meta name="description"', '<meta name="robots" content="noindex,nofollow"><meta name="description"');
     write(PATHS[lang][page === 'shop' ? 'shop' : 'confirm'], html);
   }
+}
+
+// 3b) asiakkaan tilaussivu (vaihe A: UI-runko; token vain URL-parametrina ?t=…, ei indeksointia, ei Referer-vuotoa)
+const OT = {
+  fi: { title: 'Tilauksesi', text: 'Tilauksen rivit, maksutila ja kuitit.', meta: 'Tilauksesi | Sipoonjoen Perinnesauna', noscript: 'Tilaussivu vaatii JavaScriptin. Ota yhteyttä' },
+  en: { title: 'Your order', text: 'Order lines, payment status and receipts.', meta: 'Your order | Sipoonjoen Perinnesauna', noscript: 'The order page requires JavaScript. Please contact us' },
+};
+for (const lang of ['fi', 'en']) {
+  const t = OT[lang];
+  const S = { lang, page: 'order', base: BASE, orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order }, shopHref: BASE + PATHS[lang].shop, phone: site.contact.phone, phoneTel: site.contact.phoneTel, email: site.contact.email };
+  const body = R.pageHero({ title: t.title, text: t.text, img: 'ovi-kaiverrus' }, lang, 'book')
+    + `<section class="section"><div class="wrap"><div id="order-app" aria-busy="true"><noscript><p>${e(t.noscript)}: <a href="tel:${site.contact.phoneTel}">${e(site.contact.phone)}</a></p></noscript></div></div></section>`
+    + `<script src="${BASE}/booking/config.js"></script><script>window.BOOKING_SHOP=${JSON.stringify(S)}</script><script type="module" src="${BASE}/booking/order.js"></script>`;
+  let html = R.layout({ lang, key: 'book', meta: { title: t.meta, description: t.text, og: 'ovi-kaiverrus' }, body });
+  html = html.replace('</head>', `<meta name="referrer" content="no-referrer"><link rel="stylesheet" href="${BASE}/booking/shop.css"></head>`);
+  html = html.replace(/<link rel="canonical"[^>]*>(<link rel="alternate"[^>]*>)*/, '').replace(/<meta name="robots" content="[^"]*">/, '').replace('<meta name="description"', '<meta name="robots" content="noindex,nofollow"><meta name="description"');
+  write(PATHS[lang].order, html);   // polku = sopimus: settings.order_page_path = '/tilaus/' (linkki …/tilaus/?t=<public_token>); EN-sivu /en/order/ (tilauksen locale ohjaa oikeaan kieleen, ks. order.js)
 }
 
 // 4) Johku-linkit → sisäinen varauskalenteri

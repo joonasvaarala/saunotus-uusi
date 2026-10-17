@@ -274,3 +274,76 @@ h2 .icon,h3 .icon,.addon-mark .icon{display:inline-block;vertical-align:-3px;mar
 .prep-tile.persons .pt-icons{color:#6b4a2b}
 .prep-none{margin:8px 0 0;font-size:13px}
 .prep-rows{list-style:none;margin:10px 0 0;padding:8px 0 0;border-top:1px dashed #c5c8a3;display:grid;gap:3px;font-size:13px;color:#4a4f36}
+
+/* ---- Talous (vaihe A: UI-kehys) – hillityt vihreä/hiekka-värit, ei sinistä, 44 px kosketuskohteet ---- */
+.tl :focus-visible{outline-color:var(--green)}
+.tl-top{gap:10px;margin-bottom:4px}.tl-top h1{margin:0}.row.between{justify-content:space-between}
+.tl-langs{display:inline-flex;border:1px solid var(--green);border-radius:8px;overflow:hidden;background:#fff}
+.tl-lang{min-width:48px;min-height:44px;border:0;background:#fff;color:var(--green);font:600 14px/1 inherit;font-family:inherit;cursor:pointer}
+.tl-lang[aria-pressed=true]{background:var(--green);color:#fff}
+.tl-banner{background:#EDE3D0;border:1px solid rgba(122,85,48,.55);color:#3d2f1f;border-radius:10px;padding:10px 12px;margin:10px 0;font-size:14px}
+.tl-tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin:12px 0 14px}
+.tl-tabbtn{flex:1 1 0;min-width:0;min-height:44px;padding:8px 6px;border:0;background:transparent;color:var(--muted);font:600 15px/1.2 inherit;font-family:inherit;cursor:pointer;border-radius:8px 8px 0 0}
+.tl-tabbtn[aria-selected=true]{color:var(--green);font-weight:700;box-shadow:inset 0 -3px 0 var(--green);background:rgba(43,58,48,.06)}
+.tl-toolbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end;margin:0 0 10px}
+.tl-toolbar .tl-search,.tl-toolbar .tl-hint{grid-column:1/-1}.tl-toolbar .btn{width:100%}
+.tl-toolbar input,.tl-toolbar select{min-width:0}
+.tl-sortrow{display:flex;gap:6px}.tl-sortrow select{flex:1;min-width:0}.tl-sortrow .btn{width:auto;flex:none}
+.tl-dir{white-space:nowrap;gap:6px;padding:8px 12px;min-width:44px}.tl-sortrow .tl-dirtxt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.tl-dir .tl-up svg{transform:rotate(180deg)}
+.tl-count{margin:4px 0 0;font-size:14px}
+.tl-pager{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;margin:8px 0}
+.tl-pgbtn{min-width:44px;padding:0 8px}.tl-pgof{display:inline-flex;align-items:center;gap:6px;color:var(--ink);font-weight:600}
+.tl-pageinput{width:76px;text-align:center;padding:8px}
+.tl-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.tl-row{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}.tl-row.open{border-color:var(--green)}
+.tl-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto 24px;grid-template-areas:"main main sum chev" "date first first chev" "badges badges badges chev";gap:6px 10px;width:100%;text-align:left;font:inherit;color:var(--text);background:transparent;border:0;padding:10px 12px;min-height:44px;cursor:pointer;align-items:center}
+.tl-head:hover{background:rgba(43,58,48,.04)}
+.tl-c{min-width:0;overflow-wrap:anywhere}.tl-main{grid-area:main}.tl-date{grid-area:date}.tl-first{grid-area:first}.tl-sum{grid-area:sum;text-align:right;display:grid;justify-items:end}.tl-badges{grid-area:badges;display:flex;gap:6px;flex-wrap:wrap}
+.tl-name{color:var(--text)}.tl-lab{display:block;color:var(--muted);font-size:12px}.tl-date span,.tl-first span{font-size:14px}
+.tl-refund{color:var(--err)}
+.tl-chev{grid-area:chev;color:var(--icon);transition:transform .15s;display:grid;place-items:center}.tl-row.open .tl-chev{transform:rotate(180deg)}
+.tl-cols{display:none}
+.tl-panel{padding:6px 12px 14px;border-top:1px solid var(--line);background:#FBF8F2}
+.tl-detail{display:grid;gap:6px}.tl-meta{margin:6px 0 0;overflow-wrap:anywhere}
+.tl-sec h3{margin:10px 0 6px}
+.tl-sub{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.tl-sub li{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"m s" "t s";gap:2px 10px;padding:8px 10px;background:#fff;border:1px solid var(--line);border-radius:8px}
+.tl-sub-main{grid-area:m;min-width:0;overflow-wrap:anywhere}.tl-sub-meta{grid-area:t;color:var(--muted);font-size:13px;min-width:0;overflow-wrap:anywhere}.tl-sub-sum{grid-area:s;text-align:right;align-self:center}
+.tl-sums{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 0}.tl-sums>div{flex:1 1 100px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.tl-sums dt{font-size:12px;color:var(--muted)}.tl-sums dd{margin:0;font-weight:700;color:var(--ink)}.tl-sums .due dd{color:var(--err)}
+.tl-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.tl-actions .btn{flex:1 1 160px;white-space:normal;text-align:center}
+.tl-btn{gap:8px}.tl-ico{display:inline-grid;place-items:center;color:var(--icon)}
+.tl-btn.is-off,.tl-btn:disabled{background:transparent;border:1px dashed #8b7f73;color:var(--muted);cursor:not-allowed;opacity:1}.tl-btn.is-off .tl-ico,.tl-btn:disabled .tl-ico{color:var(--muted)}
+.tl-hint{font-size:13px;margin:6px 0 0}
+.tl-table{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:8px}
+.tl-table th,.tl-table td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.tl-table .r{text-align:right}
+.tl-table thead th{background:#F1EBDF;color:var(--ink);font-size:13px}.tl-table tfoot th,.tl-table tfoot td{font-weight:700;border-bottom:0;background:#F6F1E7}
+.tl-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:12px 0}
+.tl-stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}.tl-stat dt{font-size:13px;color:var(--muted)}.tl-stat dd{margin:2px 0 0;font-size:19px;font-weight:700;color:var(--ink);overflow-wrap:anywhere}
+.tl-report-head h2{margin:4px 0 2px}
+.tl-segs{display:flex;border:1px solid var(--green);border-radius:8px;overflow:hidden;background:#fff}
+.tl-seg{flex:1;min-height:44px;padding:0 14px;border:0;background:#fff;color:var(--green);font:600 14px/1.2 inherit;font-family:inherit;cursor:pointer}.tl-seg[aria-checked=true]{background:var(--green);color:#fff}
+.tl-r-controls .tl-actions{grid-column:1/-1;margin:0}.tl-r-controls>.fld:first-child{grid-column:1/-1}.tl-seg{white-space:normal}
+.badge.pay-refunded,.badge.pay-partially_refunded{background:#EDE3D0;color:#4a3418}
+@media(max-width:699px){
+  .tl-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .tl-table,.tl-table tbody,.tl-table tfoot,.tl-table tr{display:block;border:0;background:transparent}
+  .tl-table tr{border:1px solid var(--line);border-radius:8px;margin:0 0 6px;padding:6px 10px;background:#fff}
+  .tl-table td,.tl-table th{display:flex;justify-content:space-between;gap:12px;padding:3px 0;border:0;text-align:right;background:transparent!important}
+  .tl-table td::before{content:attr(data-label);color:var(--muted);text-align:left;font-weight:400}
+  .tl-table th[scope=row]{display:block;text-align:left;font-weight:700}.tl-table td:empty{display:none}
+}
+@media(min-width:1100px){.tl-sortrow .tl-dirtxt{position:static;width:auto;height:auto;overflow:visible;clip:auto}}
+@media(min-width:900px){
+  .tl-cols{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.3fr) minmax(0,1fr) 120px minmax(0,1.6fr) 24px;gap:10px;padding:0 13px 4px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  .tl-cols.pay{grid-template-columns:minmax(0,1.3fr) minmax(0,2fr) minmax(0,1fr) 120px minmax(0,1.6fr) 24px}.tl-cols .r{text-align:right}
+  .tl-head{grid-template-columns:minmax(0,2fr) minmax(0,1.3fr) minmax(0,1fr) 120px minmax(0,1.6fr) 24px;grid-template-areas:"main date first sum badges chev"}
+  .tl-list.pay .tl-head{grid-template-columns:minmax(0,1.3fr) minmax(0,2fr) minmax(0,1fr) 120px minmax(0,1.6fr) 24px;grid-template-areas:"date main first sum badges chev"}
+  .tl-lab{display:none}
+  .tl-toolbar{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media print{
+  .top,.nav,.tl-noprint,.tl-tabs,.tl-banner{display:none!important}
+  body{background:#fff}#shell{display:block}main{padding:0;max-width:none}
+  .tl-panel-wrap[hidden]{display:none!important}.tl-stat,.tl-table tr,.tl-sec{break-inside:avoid}
+}

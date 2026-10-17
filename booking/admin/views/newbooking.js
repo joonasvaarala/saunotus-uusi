@@ -68,7 +68,7 @@ export async function render({ ctx, refs, query }) {
       if (hasWarning(r)) toast(MISSING_TEXT, 'warn'); else toast(`Varaus luotu (tilaus #${r.order_no})`);
       result.replaceChildren(...[warningBox(r, { ctx, onDone: () => { result.replaceChildren(); } }), h('div', { class: 'card ok-box' }, h('h3', { text: `Varaus luotu – tilaus #${r.order_no}` }), h('p', { text: `${r.product_name}, ${fmtDay(r.starts_at)} ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)} · ${money(r.total)}` }),
         h('div', { class: 'row wrap' }, h('a', { class: 'btn', href: `#/?d=${st.date}`, text: 'Näytä päivänäkymä' }),
-          (() => { const out = h('span', { class: 'muted' }); const b = h('button', { type: 'button', class: 'btn ghost', text: 'Luo maksulinkki (Visma Pay – tulossa)', onclick: () => run(b, async () => { const j = await rpc('admin_create_payment_link', { p_order_id: r.order_id }); out.textContent = j.link_url || j.message; }) }); return h('span', {}, b, ' ', out); })()))].filter(Boolean));
+          (() => { const out = h('span', { class: 'muted' }); const b = h('button', { type: 'button', class: 'btn ghost', text: 'Luo maksulinkki (Visma Pay – tulossa)', onclick: () => run(b, async () => { const j = await rpc('admin_create_payment_link', { p_order_id: r.order_id }); out.textContent = j.link_url || j.link_path || j.message; }) }); return h('span', {}, b, ' ', out); })()))].filter(Boolean));
       formBox.replaceChildren(); st.session = null; loadSessions();
     }); } },
       h('h3', { text: `Vuoro: ${refs.productById.get(s.product_id)?.name || s.label}, ${fmtTime(s.starts_at)}–${fmtTime(s.ends_at)}` }),
