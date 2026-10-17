@@ -52,6 +52,11 @@ const money = (n: number, en: boolean): string => {
 const stripProto = (u: string) => String(u ?? "").replace(/^https?:\/\//, "").replace(/\/$/, "");
 const unb64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 
+/** Avoin summakortti? */
+export const isOpenCard = (d: any): boolean => !!(d?.package?.is_open) || d?.kind === "value" && !d?.package_code || d?.package_code === "open";
+/** Näytetäänkö hinta/arvo PDF:ssä: vain avoimessa summakortissa (ja Johku-kortilla); lahjakorttipaketilla ei. */
+export const showsPrice = (d: any): boolean => isOpenCard(d) || d?.source === "johku";
+
 export interface LogoImage { bytes: Uint8Array }
 
 export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOverride?: string): Promise<Uint8Array> {
@@ -73,9 +78,11 @@ export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOve
   const photo = await pdf.embedJpg(unb64(PHOTO_B64.photo_arch));   // oven veistos, upotetaan kerran
 
   // ---------- sisältömalli ----------
-  const isOpen = !!(d.package?.is_open) || d.kind === "value" && !d.package_code || d.package_code === "open";
+  const isOpen = isOpenCard(d);
   const pkgName = isOpen ? (en ? "Valid for all our services" : "Käy kaikkiin palveluihimme")
     : san((en ? d.package?.name_en : d.package?.name) ?? d.package?.name ?? (en ? "Smoke sauna gift card" : "Savusaunalahjakortti"));
+  // hinta näytetään vain avoimessa summakortissa (ja Johku-kortilla); lahjakorttipaketilla ei (saaja ei näe pakettihintaa)
+  const hidePrice = !showsPrice(d);
   const value = money(Number(d.initial_amount ?? 0), en);
   const recipient = san(d.recipient_name), buyer = san(d.buyer_name), greeting = sanGreeting(d.greeting);
   const items: any[] = isOpen ? [] : (Array.isArray(d.package?.items) ? d.package.items : []);
@@ -83,7 +90,7 @@ export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOve
   const meta: [string, string][] = [];
   const validTxt = d.valid_to ? (en ? dateOnly(d.valid_to, true) : `${dateOnly(d.valid_to, false)} asti`) : "";
   if (!isOpen && d.package?.persons) meta.push([en ? "Persons" : "Henkilömäärä", en ? `${d.package.persons} persons` : `${d.package.persons} henkilöä`]);
-  if (Math.abs(Number(d.balance ?? 0) - Number(d.initial_amount ?? 0)) > 0.004) meta.push([en ? "Balance" : "Saldo", money(Number(d.balance ?? 0), en)]);
+  if (!hidePrice && Math.abs(Number(d.balance ?? 0) - Number(d.initial_amount ?? 0)) > 0.004) meta.push([en ? "Balance" : "Saldo", money(Number(d.balance ?? 0), en)]);
   meta.push([en ? "Issued" : "Myönnetty", helsinkiDate(d.issued_at, en)]);
   const web = stripProto(S.web ?? "saunotus.fi");
   const how = d.redeemable_now
@@ -168,7 +175,7 @@ export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOve
 
   // Asettelu: kaari (keskitetty, print-turvallinen: kaikki marginaalin sisällä, ei täysreunakuvaa)
   function layoutKaari() {
-    const M = 22, cx = W / 2, colW = 396, archTop = 50, archW = 284;
+    const M = 22, cx = W / 2, colW = 396, archTop = 50, archWMax = 284;
     const title = en ? "Gift card" : "Lahjakortti", titleSz = 46;
     const logoH = 36, fs = 8, flh = 11.5, footBlockH = Math.max(footLines.length * flh, logoImg ? logoH : 0);
     const footTop = H - M - 16 - footBlockH;
@@ -180,6 +187,7 @@ export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOve
     /** Piirtää koko sisällön; palauttaa viimeisen rivin perusviivan. Kuivakierroksella `page` on väliaikainen sivu. */
     const flow = (archH: number, gap: number, gsz: number): number => {
       // kaari
+      const archW = Math.min(archWMax, archH * 1.9);   // matala kaari kapenee, jotta puoliympyrä pysyy kelvollisena
       const ax = cx - archW / 2;
       page.drawSvgPath(archSvg(archW + 14, archH + 7), { x: ax - 7, y: yb(archTop - 7), borderColor: C.accent, borderWidth: 0.7 });
       clipOps(archOps(ax, archTop, archW, archH));
@@ -191,13 +199,23 @@ export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOve
       // tarjous
       if (isOpen) {
         t += 38; txt(value, cx, t, 46, serif, C.gold, "c"); t += 28; txt(pkgName, cx, t, 16, serifI, C.text, "c"); t += 6;
-      } else {
+      } else if (!hidePrice) {      // Johku-kortti: ennallaan (nimi + arvo + sisältö)
         let nsz = 23; let nl = wrap(pkgName, serifB, nsz, colW); if (nl.length > 2) { nsz = 19; nl = wrap(pkgName, serifB, nsz, colW); }
         t += nsz * 0.7;
         for (const l of nl.slice(0, 3)) { txt(l, cx, t, nsz, serifB, C.ink, "c"); t += nsz * 1.08; }
         t += 6; txt(value, cx, t + 14, 26, serif, C.gold, "c"); t += 20;
         const il = wrap(itemLines.join("   ·   "), sans, 10, colW);
         if (il.length) { t += 6; for (const l of il) { t += 13.5; txt(l, cx, t, 10, sans, C.muted, "c"); } }
+      } else {                      // lahjakorttipaketti: EI hintaa; paketin nimi ja sisältö isommin esille
+        let nsz = 30; let nl = wrap(pkgName, serifB, nsz, colW);
+        for (const s2 of [26, 22, 19]) { if (nl.length <= 2) break; nsz = s2; nl = wrap(pkgName, serifB, nsz, colW); }
+        t += nsz * 0.72;
+        for (const l of nl.slice(0, 3)) { txt(l, cx, t, nsz, serifB, C.ink, "c"); t += nsz * 1.08; }
+        const il = itemLines.flatMap((l) => wrap(l, sans, 11.5, colW));
+        if (il.length) {
+          t += 12; caps(en ? "Includes" : "Sisältää", cx, t + 6, 6.8, sansB, C.gold, 2.4, "c"); t += 10;
+          for (const l of il) { t += 16; txt(l, cx, t, 11.5, sans, C.text, "c"); }
+        }
       }
       t += gap * 1.3;
       // saaja + tervehdys
@@ -243,9 +261,10 @@ export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOve
 
     // kuivakierros väliaikaisella sivulla: valitaan tervehdyksen koko ja kaaren korkeus niin, että sisältö täyttää sivun
     const realPage = page; const dry = pdf.addPage([W, H]); page = dry;
-    const MIN_ARCH = 150, MAX_ARCH = 340;
+    let MIN_ARCH = 150; const MAX_ARCH = 340;
     let gsz = gStart;
-    for (const c of [gStart, 20, 18, 17, 16, 15, 14, 13].filter((c) => c <= gStart)) { gsz = c; if (flow(MIN_ARCH, 14, c) <= target) break; }
+    const pick = () => { for (const c of [gStart, 20, 18, 17, 16, 15, 14, 13].filter((c) => c <= gStart)) { gsz = c; if (flow(MIN_ARCH, 14, c) <= target) return true; } return false; };
+    if (!pick()) { MIN_ARCH = 118; pick(); }       // ei mahdu: ensin pienempi tervehdys, sitten matalampi kaari
     const slack = target - flow(MIN_ARCH, 14, gsz);
     const g1 = Math.min(Math.max(slack, 0) / 6, 9);                         // ensin ilmaa väleihin (korkeintaan +9 pt)
     const archH = Math.max(MIN_ARCH, Math.min(MAX_ARCH, MIN_ARCH + slack - g1 * 6));

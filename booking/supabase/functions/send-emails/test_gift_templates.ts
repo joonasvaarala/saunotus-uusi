@@ -9,6 +9,9 @@ for (const [k, d, l, check] of [
   ["gift_card_buyer", { ...base, gift_cards: [g({ ...sched, delivery_to: "recipient", locale: "en" })] }, "en", (r: any) => must(r.text.includes("on 24 Dec 2026 at 14:30") && r.subject.includes("order is confirmed"), "buyer EN scheduled")],
   ["gift_card_recipient", { ...base, redeem_online: true, gift_cards: [g({ delivery_to: "recipient", cover_message: "Hei Mikko,\nTässä saate <b>&" })] }, "fi", (r: any) => must(r.text.includes("Tässä saate") && r.text.includes("— Olli Ostaja") && r.text.includes("gift-card-pdf?t=") && !r.text.includes("Kortin tervehdys") && r.html.includes("&lt;b&gt;") && !r.html.includes("<b>&"), "recipient cover")],
   ["gift_card_recipient", { ...base, gift_cards: [g({ delivery_to: "recipient", locale: "en", cover_message: null, buyer_name: null })] }, "en", (r: any) => must(r.subject.includes("received a gift card") && !r.text.includes('"'), "recipient EN no cover")],
+  ["gift_card_recipient", { ...base, gift_cards: [g({ delivery_to: "recipient" })] }, "fi", (r: any) => must(!/192|€/.test(r.text) && !/192|€/.test(r.html.replace(/<style[\s\S]*?<\/style>/g, "")) && r.text.includes("2 henkilöä"), "saajan viestissä ei pakettihintaa")],
+  ["gift_card_recipient", { ...base, gift_cards: [g({ delivery_to: "recipient", package_code: "open", kind: "value", amount: 50.5, locale: "en" })] }, "en", (r: any) => must(r.text.includes("€50.50"), "saajan viestissä avoimen kortin arvo näkyy")],
+  ["gift_card_buyer", { ...base, to_name: "Olli Ostaja", gift_cards: [g()] }, "fi", (r: any) => must(r.text.includes("192"), "ostajan viestissä hinta saa näkyä")],
   ["gift_card_buyer", { ...base, gift_cards: [g({ locale: "en" })] }, "en", (r: any) => must(r.text.includes("PDF:") && r.text.includes("share it only"), "buyer EN direct")],
 ] as any) {
   const r = render(k, d, l); check(r); out.push(r); console.log("=====", k, l, "\nSUBJECT:", r.subject, "\n" + r.text);

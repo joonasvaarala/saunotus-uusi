@@ -1,6 +1,6 @@
 // Ajo: deno run -A --node-modules-dir=none test_render.ts   (kirjoittaa out_*.pdf tämän kansion viereen; OUT_DIR=... vaihtaa kohteen)
 import { PDFDocument } from "npm:pdf-lib@1.17.1";
-import { buildGiftCardPdf, san, sanGreeting } from "./render.ts";
+import { buildGiftCardPdf, san, sanGreeting, showsPrice } from "./render.ts";
 const logo = await Deno.readFile(new URL("../../../docs/giftcards/logo.png", import.meta.url));
 const seller = { name: "Havuhattu Oy / Sipoonjoen perinnesauna", legal_name: "Havuhattu Oy", business_id: "3018112-1", address: "Hindsbyntie 124", zip: "04130", city: "Sipoo", email: "savusauna@saunotus.fi", phone: "010 299 2866", web: "https://saunotus.fi" };
 const longG = ("Rakas Mikko, onnea syntymäpäivänä! Toivomme että saat nauttia lämmöstä ja rauhasta yhdessä rakkaasi kanssa. Nauti löylyistä, vihdasta ja hiljaisuudesta. Kiitos kaikesta mitä olet tehnyt. Ota rennosti, ja muista juoda vettä. Nähdään pian! Tässä vielä hieman lisää tekstiä, jotta pituus täyttyy kolmeensataan merkkiin asti. Ok.").slice(0, 300);
@@ -36,6 +36,10 @@ for (const [k, v] of Object.entries(cases)) {
 // 'fi'-ohitus
 const b2 = await buildGiftCardPdf(cases.en_open, logo, "fi"); await Deno.writeFile(`${outDir}/out_en_open_as_fi.pdf`, b2);
 const b3 = await buildGiftCardPdf(cases.fi_open, logo, "en"); await Deno.writeFile(`${outDir}/out_fi_open_as_en.pdf`, b3);
+// hinta vain avoimessa summakortissa (+ Johku); paketilla ei
+check(!showsPrice(cases.fi_pkg_greet) && !showsPrice(cases.en_pkg_greet) && !showsPrice(cases.fi_pkg_4items_long_name) && !showsPrice(cases.fi_pkg_expired), "paketti: hintaa ei saa näyttää");
+check(showsPrice(cases.fi_open) && showsPrice(cases.en_open) && showsPrice(cases.fi_open_partial_greet) && showsPrice(cases.fi_emoji_expired), "avoin kortti: hinta näytetään");
+check(showsPrice(cases.johku_used), "Johku-kortti: ennallaan (hinta näkyy)");
 // siivous
 check(san("Moi 😀 šäö €") === "Moi ? säö €", "san emoji/aksentti");
 check(sanGreeting("a\r\n\n\n\nb  \n c") === "a\n\nb\nc", "sanGreeting rivinvaihdot");
