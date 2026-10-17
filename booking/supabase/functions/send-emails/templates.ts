@@ -3,7 +3,7 @@
 // data = booking.email_outbox_claim()-rivi (ks. docs/talous-integraatiot.md): { kind, locale, to_name, order{order_no, order_url, total, items[], reservations[]}, receipt{receipt_no, kind, text_body, total, issued_at}, payment{amount, link_url, link_expires_at} }.
 // FI + EN, HTML (taulukkopohjainen, inline-tyylit, sähköpostiyhteensopiva) + tekstiversio. Ei ulkoisia riippuvuuksia (puhdas funktio, testattu node --test).
 // Tyyli: tumma vihreä + hiekka, ei sinistä. Logo: sivuston /img/logo-kuitti.png (osoite johdetaan tilauslinkistä; muuten LOGO_FALLBACK).
-export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient";
+export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem";
 export interface Rendered { subject: string; text: string; html: string }
 
 export const SELLER = "Sipoonjoen perinnesauna";
@@ -46,7 +46,7 @@ const th = (s: string, align = "left") => `<td align="${align}" style="padding:6
 const td = (s: string, align = "left", bold = false) => `<td align="${align}" valign="top" style="padding:8px;font-family:${SANS};font-size:14px;line-height:1.4;color:${INK};border-bottom:1px solid ${SAND};${bold ? "font-weight:bold;" : ""}">${esc(s)}</td>`;
 const box = (inner: string) => `<tr><td style="padding:0 32px 18px 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${SAND_LIGHT}" style="background:${SAND_LIGHT};border:1px solid ${SAND_LINE};border-radius:4px"><tr><td style="padding:12px 16px">${inner}</td></tr></table></td></tr>`;
 
-function wrapHtml(d: any, title: string, preheader: string, rows: string, en: boolean): string {
+function wrapHtml(d: any, title: string, preheader: string, rows: string, en: boolean, noPhone = false): string {
   const logo = logoUrl(d);
   return `<!doctype html><html lang="${en ? "en" : "fi"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${esc(title)}</title></head>
 <body style="margin:0;padding:0;background:${SAND};-webkit-text-size-adjust:100%">
@@ -59,7 +59,7 @@ function wrapHtml(d: any, title: string, preheader: string, rows: string, en: bo
 </tr></table></td></tr>
 ${rows}
 <tr><td style="padding:10px 32px 0 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-top:1px solid ${SAND_LINE};font-size:0;line-height:0">&nbsp;</td></tr></table></td></tr>
-<tr><td style="padding:8px 32px 26px 32px;font-family:${SANS};font-size:12px;line-height:1.6;color:${MUTED}">${esc(SELLER)} · ${esc(COMPANY)}<br>${esc(ADDRESS)}<br><a href="mailto:${EMAIL}" style="color:${GREEN_SOFT}">${EMAIL}</a> · <a href="tel:${PHONE.replace(/\s/g, "")}" style="color:${GREEN_SOFT};text-decoration:none">${PHONE}</a></td></tr>
+<tr><td style="padding:8px 32px 26px 32px;font-family:${SANS};font-size:12px;line-height:1.6;color:${MUTED}">${esc(SELLER)} · ${esc(COMPANY)}<br>${esc(ADDRESS)}<br><a href="mailto:${EMAIL}" style="color:${GREEN_SOFT}">${EMAIL}</a>${noPhone ? "" : ` · <a href="tel:${PHONE.replace(/\s/g, "")}" style="color:${GREEN_SOFT};text-decoration:none">${PHONE}</a>`}</td></tr>
 </table></td></tr></table></body></html>`;
 }
 
@@ -147,6 +147,77 @@ function giftCardMail(kind: "gift_card_buyer" | "gift_card_recipient", d: any, e
   return { subject, text, html: wrapHtml(d, title, intro, rows, en) };
 }
 
+
+// ---------- kumppanilahjakorttien lunastuspyynnöt (voucher_claim_received / voucher_claim_problem) ----------
+// data.voucher_claim: { claim_id, status, source, code_masked ("…1234"), problem_code (invalid_code|expired_code|already_used|other), customer_name } + data.order (order_url, varaukset). Täyttä koodia ei viesteissä.
+// booking_48: varaus ei vanhene lunastuspyynnön vuoksi -> viesteissä EI aikarajoja eikä "aika on pidetty varattuna … asti" (hold_until on poistettu käytöstä; kenttää ei lueta).
+// Yhteystieto: vain sähköposti (puhelinnumeroa ei ole vahvistettu -> ei näy näissä viesteissä, ei alatunnisteessakaan).
+// Allekirjoitus: Tapio / Sipoonjoen perinnesauna. Ongelmaviesti jonotetaan vain kun asetus voucher_claims.problem_emails_enabled = true.
+const VC_LABEL: Record<string, string> = { elamyslahjat: "Elämyslahjat", kokemuskauppa: "Kokemuskauppa", kiitoskauppa: "Kiitoskauppa", offerilla: "Offerilla" };
+function voucherMail(kind: "voucher_claim_received" | "voucher_claim_problem", d: any, en: boolean, hello: string): Rendered {
+  const vc = d?.voucher_claim ?? {};
+  const label = VC_LABEL[String(vc.source ?? "")] ?? (en ? "partner" : "kumppani");
+  const masked = String(vc.code_masked ?? "").trim();
+  const what = `${label}${masked ? (en ? `, code ${masked}` : `, koodi ${masked}`) : ""}`;
+  const orderUrl = safeUrl(d?.order?.order_url);
+  const ob = orderBlock(d, en);
+  const sign = en ? `Kind regards,\nTapio\n${SELLER}` : `Ystävällisin terveisin,\nTapio\n${SELLER}`;
+  const signHtml = esc(sign).replace(/\n/g, "<br>");
+  const contact = en ? `Questions? Reply to this email or write to ${EMAIL}.` : `Kysyttävää? Vastaa tähän viestiin tai kirjoita ${EMAIL}.`;
+  const viewLabel = en ? "Open your order" : "Avaa tilauksesi";
+  let subject: string, title: string, paras: string[];
+  if (kind === "voucher_claim_received") {
+    subject = en ? `Thank you for your gift card booking – ${SELLER}` : `Kiitos lahjakorttivarauksesta – ${SELLER}`;
+    title = en ? "Thank you for your gift card booking" : "Kiitos lahjakorttivarauksesta";
+    paras = en
+      ? [`Thank you for your booking! We have received your gift card (${what}) and your time is reserved for you.`,
+         "We will check and redeem the gift card shortly. If there are any problems with the redemption, we will contact you."]
+      : [`Kiitos varauksestasi! Olemme vastaanottaneet lahjakorttisi (${what}) ja aikasi on varattu sinulle.`,
+         "Tarkistamme ja lunastamme lahjakortin pian. Jos lunastuksessa ilmenee ongelmia, olemme sinuun yhteydessä."];
+  } else {
+    const how = en ? "You can fix this in two ways: enter the correct code on your order page (link below), or reply to this email with the correct code."
+                   : "Voit korjata asian kahdella tavalla: syötä oikea koodi tilaussivullamme (alla oleva linkki) tai vastaa tähän viestiin ja kerro oikea koodi.";
+    switch (vc.problem_code) {
+      case "expired_code":
+        subject = en ? `Your gift card has expired – ${SELLER}` : `Lahjakortin voimassaolo on päättynyt – ${SELLER}`;
+        title = en ? "Your gift card has expired" : "Lahjakortin voimassaolo on päättynyt";
+        paras = en
+          ? [`Unfortunately we could not redeem your gift card (${what}): the code has expired.`,
+             `If you believe the code is still valid, reply to this email or contact us and we will look into it. You can also ask ${label} whether the validity can be extended, or pay for the booking in another way.`]
+          : [`Emme valitettavasti pystyneet lunastamaan lahjakorttiasi (${what}): koodin voimassaolo on päättynyt.`,
+             `Jos uskot, että koodi on vielä voimassa, vastaa tähän viestiin tai ota yhteyttä saunalle, niin selvitämme asian. Voit myös kysyä lahjakortin myyjältä (${label}) voimassaolon jatkamista tai maksaa varauksen muulla tavalla.`];
+        break;
+      case "already_used":
+        subject = en ? `Your gift card code has already been used – ${SELLER}` : `Lahjakortin koodi on jo käytetty – ${SELLER}`;
+        title = en ? "The gift card code has already been used" : "Lahjakortin koodi on jo käytetty";
+        paras = en
+          ? [`Unfortunately we could not redeem your gift card (${what}): the code appears to have been used already.`,
+             `If the gift card has not been used yet, please contact us: ${EMAIL}`,
+             "If you have another code, you can send it to us or enter it on your order page."]
+          : [`Emme valitettavasti pystyneet lunastamaan lahjakorttiasi (${what}): koodi näyttää olevan jo käytetty.`,
+             `Jos lahjakorttia ei ole vielä käytetty, ole meihin yhteydessä: ${EMAIL}`,
+             "Jos sinulla on toinen koodi, voit lähettää sen meille tai syöttää sen tilaussivullamme."];
+        break;
+      case "invalid_code":
+        subject = en ? `We could not find your gift card code – ${SELLER}` : `Lahjakortin koodia ei löytynyt – ${SELLER}`;
+        title = en ? "We could not find your gift card code" : "Lahjakortin koodia ei löytynyt";
+        paras = en
+          ? [`Unfortunately we could not redeem your gift card (${what}): the code was not found in the ${label} system. This may be due to a typo in the code.`, how]
+          : [`Emme valitettavasti pystyneet lunastamaan lahjakorttiasi (${what}): koodia ei löytynyt kumppanin (${label}) järjestelmästä. Syynä voi olla kirjoitusvirhe koodissa.`, how];
+        break;
+      default:
+        subject = en ? `About your gift card – ${SELLER}` : `Lahjakorttisi lunastuksesta – ${SELLER}`;
+        title = en ? "About your gift card" : "Lahjakorttisi lunastuksesta";
+        paras = en ? [`We ran into a problem redeeming your gift card (${what}). We will look into it and contact you.`] : [`Lahjakortin (${what}) lunastuksessa on ilmennyt ongelma. Selvitämme asian ja otamme sinuun yhteyttä.`];
+    }
+  }
+  paras = paras.filter(Boolean);
+  const more = kind === "voucher_claim_received" ? (en ? "You can follow the status of your booking here:" : "Voit seurata varauksesi tilaa täältä:") : (en ? "Your order:" : "Tilauksesi:");
+  const text = textBlock(hello, ...paras, ob.text, orderUrl && `${more}\n${orderUrl}`, contact, sign) + "\n";
+  const html = wrapHtml(d, title, paras[0], h1(title) + p(esc(hello)) + paras.map((x) => p(esc(x))).join("") + ob.html + (orderUrl ? p(esc(more)) + button(orderUrl, viewLabel) : "") + p(esc(contact), `color:${MUTED};font-size:13px`) + p(signHtml), en, true);
+  return { subject, text, html };
+}
+
 export function render(kind: Kind, d: any, locale?: string): Rendered {
   const en = (locale ?? d?.locale) === "en";
   const first = d?.to_name ? String(d.to_name).trim().split(/\s+/)[0] : "";
@@ -166,6 +237,9 @@ export function render(kind: Kind, d: any, locale?: string): Rendered {
     case "gift_card_buyer":
     case "gift_card_recipient":
       return giftCardMail(kind, d, en, hello, sign, signHtml);
+    case "voucher_claim_received":
+    case "voucher_claim_problem":
+      return voucherMail(kind, d, en, hello);
     case "order_confirmation": {
       const subject = en ? `Order confirmation ${no} – ${SELLER}` : `Tilausvahvistus ${no} – ${SELLER}`;
       const intro = en ? "Thank you for your order. Your booking is confirmed." : "Kiitos tilauksestasi. Varauksesi on vahvistettu.";

@@ -18,3 +18,21 @@ for (const [k, d, l, check] of [
 }
 Deno.writeTextFileSync("tpl_out.html", out.map((r) => `<h3>${r.subject}</h3>` + r.html).join("<hr>"));
 console.log("ALL OK");
+
+// ---- voucher_claim_received / voucher_claim_problem (tuotannon send-emails v6) ----
+{
+  const vcd = (o: any = {}) => ({ to_name: "Matti Meikäläinen", order: { order_no: 15321, order_url: "https://uusi.saunotus.com/tilaus/?t=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c", total: 0, items: [], reservations: [] }, voucher_claim: { claim_id: 7, status: "received", source: "elamyslahjat", code_masked: "…1234", problem_code: "invalid_code", ...o } });
+  const vout: any[] = [];
+  for (const [k, d, l] of [
+    ["voucher_claim_received", vcd(), "fi"], ["voucher_claim_received", vcd(), "en"],
+    ["voucher_claim_problem", vcd({ status: "problem" }), "fi"], ["voucher_claim_problem", vcd({ status: "problem", problem_code: "expired_code" }), "en"],
+    ["voucher_claim_problem", vcd({ status: "problem", problem_code: "already_used" }), "fi"], ["voucher_claim_problem", vcd({ status: "problem", problem_code: "other" }), "en"],
+  ] as any) {
+    const r = render(k, d, l); vout.push(r);
+    must(r.text.includes("…1234") && r.text.includes("/tilaus/?t=") && r.text.includes("Tapio"), `${k} ${l}: koodi, tilauslinkki, allekirjoitus`);
+    must(!r.html.includes("tel:") && r.html.includes("mailto:"), `${k} ${l}: ei puhelinnumeroa alatunnisteessa`);
+    must(!/undefined|\bnull\b|NaN/.test(r.subject + r.text + r.html), `${k} ${l}: ei tyhjiä arvoja`);
+  }
+  must(render("order_confirmation", { ...base, order: vcd().order, to_name: "Matti" }, "fi").html.includes("tel:"), "muiden pohjien alatunnisteessa puhelin säilyy");
+  console.log("VOUCHER_CLAIM OK");
+}

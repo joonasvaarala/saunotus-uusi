@@ -177,3 +177,31 @@ test('gift_card_recipient: saateteksti näkyy, kortin tervehdys ei; ostajan nimi
   const m = R('gift_card_recipient', { ...gbase, to_name: 'Sanna Saaja', gift_cards: [rcard()] }, 'fi');
   assert.ok(m.text.includes('Toinen rivi') && !m.text.includes('Hyvää syntymäpäivää') && m.text.includes('Olli Ostaja') && m.text.includes(`gift-card-pdf?t=${GTOK}`));
 });
+
+// ---------- kumppanilahjakorttien lunastuspyynnöt (voucher_claim_received / voucher_claim_problem) ----------
+const vcData = (locale, vc = {}) => ({ ...base(locale), voucher_claim: { claim_id: 7, status: 'received', source: 'elamyslahjat', code_masked: '…1234', problem_code: 'invalid_code', customer_name: 'Matti Meikäläinen', ...vc } });
+for (const locale of ['fi', 'en']) {
+  test(`voucher_claim_received ${locale}: koodi maskattuna, tilauslinkki, ei puhelinnumeroa eikä aikarajaa`, { skip }, () => {
+    const m = R('voucher_claim_received', vcData(locale), locale);
+    assert.ok(m.subject.includes('Sipoonjoen perinnesauna') && !/undefined|\bnull\b|NaN/.test(m.subject + m.text + m.html));
+    assert.ok(m.text.includes('Elämyslahjat') && m.text.includes('…1234') && m.text.includes(ORDER_URL) && hrefs(m.html).includes(ORDER_URL));
+    assert.ok(!/tel:/.test(m.html) && !m.html.includes('+358') && hrefs(m.html).includes('mailto:savusauna@saunotus.fi'), 'ei puhelinnumeroa');
+    assert.ok(!/\basti\b|\buntil\b|\bhold\b|pidetty/i.test(m.text), 'ei aikarajaa');
+    assert.ok(m.text.includes('Tapio') && m.text.endsWith('\n'));
+  });
+  for (const pc of ['invalid_code', 'expired_code', 'already_used', 'other']) test(`voucher_claim_problem ${locale} ${pc}: oma aihe ja teksti, ei puhelinnumeroa`, { skip }, () => {
+    const m = R('voucher_claim_problem', vcData(locale, { status: 'problem', problem_code: pc }), locale);
+    assert.ok(m.text.includes('…1234') && m.text.includes(ORDER_URL) && !/undefined|\bnull\b|NaN/.test(m.subject + m.text + m.html));
+    assert.ok(!/tel:/.test(m.html) && !/[<>\n]/.test(m.subject) && !/<[a-z!]/i.test(m.text));
+    assert.ok(!m.text.includes(locale === 'fi' ? 'Kind regards' : 'Ystävällisin'), 'ei sekakieltä');
+  });
+}
+test('voucher_claim_problem: eri ongelmakoodeilla eri aiheet; tuntematon kumppani/koodi ei kaada', { skip }, () => {
+  const subj = ['invalid_code', 'expired_code', 'already_used', 'other'].map((pc) => R('voucher_claim_problem', vcData('fi', { problem_code: pc }), 'fi').subject);
+  assert.equal(new Set(subj).size, 4);
+  const m = R('voucher_claim_received', vcData('fi', { source: 'tuntematon', code_masked: '' }), 'fi');
+  assert.ok(m.text.includes('kumppani') && !/koodi\s*[,)]/.test(m.text) && !/undefined|\bnull\b/.test(m.text));
+});
+test('muiden pohjien alatunniste sisältää edelleen puhelinnumeron (noPhone vain voucher_claim-viesteissä)', { skip }, () => {
+  assert.ok(hrefs(R('order_confirmation', base('fi'), 'fi').html).some((h) => h.startsWith('tel:')));
+});
