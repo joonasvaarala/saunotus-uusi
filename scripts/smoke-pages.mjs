@@ -687,6 +687,23 @@ for (const [label, viewport, mobile] of [['mobiili', { width: 390, height: 700 }
   await page.waitForSelector('[data-testid=order-page]');
   if ((await page.locator('[data-testid=order-lines] li').count()) !== 3) problems.push('tilaussivu: 3 tilausriviä odotettiin');
   if (!/noindex/.test((await page.locator('meta[name=robots]').getAttribute('content')) || '')) problems.push('tilaussivu: noindex puuttuu');
+  if ((await page.locator('[data-testid=mp-block], [data-testid=mp-button]').count()) !== 0) problems.push('tilaussivu: MobilePay-painike ei saa näkyä oletus-mockissa (ei MobilePay-tapaa)');
+  await page.context().close();
+}
+// 7b) MobilePay-maksu tilaussivulla (mock-funktiot): painike näkyy testiympäristössä; klikkaus → mobilepay-start → ohjaus; paluu ?pay=mobilepay → maksettu. Ei oikeaa verkkoa: CDN-painike korvataan tynkällä.
+{
+  const MP = '/tilaus/?t=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c&mock=1&scenario=mp';
+  const page = await newPage('mobilepay');
+  await page.route('https://cdn.vippsmobilepay.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/javascript', body: "customElements.get('vipps-mobilepay-button')||customElements.define('vipps-mobilepay-button',class extends HTMLElement{connectedCallback(){const b=document.createElement('button');b.type='button';b.textContent='MobilePay';b.style.minHeight='48px';this.appendChild(b);}});" }));
+  await page.route('**/__mp_redirect__/**', (route) => route.fulfill({ status: 200, contentType: 'text/html', body: '<title>mp</title>' }));
+  await page.goto(`${BASE}${MP}`);
+  await page.waitForSelector('[data-testid=mp-button]');
+  if (!/MobilePay/.test(await page.locator('[data-testid=mp-block]').innerText())) problems.push('mobilepay: MobilePay-lohkon otsikko puuttuu');
+  const sw = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  if (sw > 0) problems.push(`mobilepay: vaakavieritys ${sw}px`);
+  await page.goto(`${BASE}${MP}&pay=mobilepay&mpinterval=100&mpmax=5000`);
+  await page.waitForSelector('[data-testid=mp-result-panel][data-state=paid]', { timeout: 15000 });
+  if (/pay=mobilepay/.test(page.url())) problems.push('mobilepay: ?pay=mobilepay pitää poistaa osoitteesta paluun jälkeen');
   await page.context().close();
 }
 // 8) Lahjakorttisivu alipolulla: kytkimet pois → ennallaan (Johku-osiot); päällä → myynti- ja saldolohko; RPC puuttuu → ennallaan

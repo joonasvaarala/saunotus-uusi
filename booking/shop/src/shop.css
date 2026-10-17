@@ -343,3 +343,28 @@ a.bk-sd:hover{filter:brightness(.97)}
 .vc-fixbox>.vc-fix{margin-top:6px}
 .vc-fix select{min-height:48px}
 
+/* MobilePay-maksu (§14): painike (virallinen Vipps MobilePay -komponentti tai varapainike) ja paluutilan paneeli. Paneelien värit: hillitty hiekka/vihreä; punainen vain virheille. */
+.mp-block{display:grid;gap:10px;margin:0 0 14px}.mp-block p{margin:0}
+.mp-title{margin:0;font:600 13px var(--label);letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.mp-amount{margin:0;font-weight:700;color:var(--ink)}
+.mp-test{margin:0;padding:10px 14px;border:1px solid rgba(122,85,48,.55);background:#EDE3D0;color:#3d2f1f;border-radius:10px;font-size:15px}
+.mp-btnwrap{min-height:48px;display:block;width:100%;max-width:420px}
+.mp-btnwrap vipps-mobilepay-button{display:block;width:100%}
+.mp-fallback{display:block;width:100%;min-height:48px;padding:12px 20px;border:0;border-radius:24px;background:#4961cd;color:#fff;font:700 17px/1.2 var(--body);cursor:pointer}
+.mp-fallback:hover{background:#3b50ad}
+.mp-fallback:focus-visible,.mp-btnwrap:focus-within{outline:3px solid var(--ink);outline-offset:2px}
+.mp-fallback:disabled{opacity:.75;cursor:progress}
+.mp-msg:empty{display:none}
+[data-testid=mp-result]:empty{display:none}
+.mp-result{border-width:2px}
+.mp-result h3{margin:0 0 6px;font-size:24px;color:var(--ink)}
+.mp-result p{margin:0 0 10px}
+.mp-result .ord-btn{margin:2px 10px 6px 0}
+.mp-result.ok{background:#e8f3ea;border-color:#2f7a45;color:#1d4d2b}.mp-result.ok h3{color:#1d4d2b}
+.mp-result.err{background:#fbeaea;border-color:#c0392b;color:#7b1d12}.mp-result.err h3{color:#7b1d12}
+.mp-result.info{background:#EDE3D0;border-color:rgba(122,85,48,.7);color:#3d2f1f}.mp-result.info h3{color:#3d2f1f}
+.mp-result .bk-contact a,.mp-result a:not(.btn){color:inherit;text-decoration:underline}
+.mp-spin{display:inline-block;width:22px;height:22px;margin:0 0 6px;border:3px solid rgba(61,47,31,.25);border-top-color:#3d2f1f;border-radius:50%;animation:mp-spin 1s linear infinite}
+@keyframes mp-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.mp-spin{animation:none;border-top-color:rgba(61,47,31,.25);border-right-color:#3d2f1f}}
+.bk-mp{margin:18px 0}

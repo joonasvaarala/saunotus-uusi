@@ -1,7 +1,7 @@
 // Asiakkaan tilaussivun MOCK-PALVELIN (vaihe A): keksitty tilaus muistissa; ei tallenna mitään palvelimelle. Käytössä vain kun osoitteessa on ?mock=1.
 // createOrderMock().rpc(nimi, parametrit) vastaa KOODARI_talous_A_D_fi.md -sopimuksen public_*-RPC:itä (nimet, p_-parametrit, vastausrakenteet, virheet {ok:false, code, message}).
 import { createGiftMock } from './gift-mock.js';
-export function createOrderMock({ delay = 0, scenario = '', giftSettings = {}, locale = 'fi', today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }) } = {}) {
+export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftSettings = {}, locale = 'fi', today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }) } = {}) {
   const day = (n) => { const d = new Date(`${today}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
   const wait = () => (delay ? new Promise((ok) => setTimeout(ok, delay)) : Promise.resolve());
   const r2 = (n) => Math.round(n * 100) / 100;
@@ -36,11 +36,31 @@ export function createOrderMock({ delay = 0, scenario = '', giftSettings = {}, l
         { token: '00000000-0000-4000-8000-000000000004', package_code: 'open', package_name: 'Avoin lahjakortti', amount: 50, status: 'active', valid_to: day(180), recipient_name: 'Pekka Saaja', ready: true, code: 'HH6UVWXYZ234', balance: 50, greeting: null, delivery_to: 'recipient', deliver_on: null, deliver_time: null, delivered_at: `${day(-1)}T10:05:00Z` });
     }
   }
+  // MobilePay (§14), skenaariot ?mock=1&scenario=mp|mp-prod|mp-off: maksamaton tilaus (40 €), public_payment_options antaa MobilePay-tavan (mp: test=true, mp-prod: test=false, mp-off: ei tapaa).
+  // Paluutulos (?mpresult=paid|review|failed|pending|slotlost|contact|netfail; oletus paid): mpFetch vastaa mobilepay-start / mobilepay-notify (reconcile) -funktioiden muodoilla; maksu kirjautuu 3. public_get_order-kyselyllä paluun jälkeen (kuten webhook).
+  const mpScenario = /^mp(-prod|-off)?$/.test(scenario) ? scenario : '';
+  if (mpScenario) {
+    o.items = [{ id: 1, name: 'Yleinen saunavuoro', name_en: 'Public sauna session', quantity: 2, line_total: 40, vat_rate: 25.5 }];
+    o.reservations = [o.reservations[0]]; o.reservations[0].addons = []; o.status = 'pending'; o.paid = 0; o.payments = []; o.receipts = []; o.online_payment_enabled = true;
+  }
+  const mp = { started: false, returning: false, polls: 0, settled: false };
+  const mpMarkPaid = () => {
+    const amt = o.unpaid; o.paid = r2(o.paid + amt); o.payments.push({ status: 'paid', amount: amt, paid_at: new Date().toISOString(), method_label: 'MobilePay', link_token: null, link_path: null });
+    o.receipts.push({ receipt_no: 'K-2026-000777', kind: 'receipt', issued_at: new Date().toISOString(), token: '9a8b7c6d-1111-4222-8333-444455556677', total: amt }); o.status = 'confirmed'; sync(); mp.settled = true;
+  };
   sync();
   const snap = () => JSON.parse(JSON.stringify({ ok: true, ...o }));
   const bad = (code, message) => ({ ok: false, code, message });
   const handlers = {
-    public_get_order: ({ p_token }) => (p_token === TOKEN || p_token ? snap() : bad('not_found', 'Tilausta ei löytynyt')),
+    public_get_order: ({ p_token }) => {
+      if (mp.returning && mpResult === 'netfail') throw new TypeError('Failed to fetch');
+      if (mp.returning && !mp.settled && ['paid', 'review'].includes(mpResult || 'paid') && ++mp.polls >= 3) mpMarkPaid();
+      return p_token === TOKEN || p_token ? snap() : bad('not_found', 'Tilausta ei löytynyt');
+    },
+    public_payment_options: ({ p_token }) => (mpScenario && mpScenario !== 'mp-off'
+      ? { ok: true, online_enabled: true, methods: [{ code: 'mobilepay', provider: 'vipps_mobilepay', label: 'MobilePay', label_en: 'MobilePay', test: mpScenario !== 'mp-prod', start: { function: 'mobilepay-start', method: 'POST', body: { order_token: p_token } } }],
+        order: { order_no: o.order_no, status: o.status, payment_status: o.payment_status, unpaid: o.unpaid, can_pay_online: o.unpaid > 0 && ['pending', 'confirmed'].includes(o.status), mobilepay_pending: mp.started && o.unpaid > 0 } }
+      : { ok: true, online_enabled: false, methods: [] }),
     public_add_to_order: ({ p_items }) => {
       if (!o.can_add) return bad('order_closed', 'Lisäysaika on päättynyt');
       if (!Array.isArray(p_items) || !p_items.length) return bad('invalid_items', 'Ei rivejä');
@@ -76,5 +96,30 @@ export function createOrderMock({ delay = 0, scenario = '', giftSettings = {}, l
     const h = handlers[name]; if (!h) throw Object.assign(new Error(`Could not find the function booking.${name} in the schema cache`), { status: 404, code: 'PGRST202' });
     return h(args);
   }
-  return { rpc, token: TOKEN, giftMock: gm };
+  // Edge-funktioiden mock (fetch-yhteensopiva): mobilepay-start → redirect_url (takaisin tälle sivulle ?pay=mobilepay), mobilepay-notify {action:'reconcile'} → results[]
+  const res = (status, body) => ({ ok: status < 400, status, text: async () => JSON.stringify(body) });
+  async function mpFetch(url, init = {}) {
+    await wait();
+    const name = String(url).split('?')[0].split('/').pop(); let body = {}; try { body = JSON.parse(init.body || '{}'); } catch { /* tyhjä */ }
+    if (name === 'mobilepay-start') {
+      if (mpResult === 'neterror') throw new TypeError('Failed to fetch');
+      if (mpResult === 'starterror') return res(503, bad('provider_error', 'MobilePay-maksun aloitus epäonnistui, yritä hetken kuluttua uudelleen'));
+      if (o.unpaid <= 0) return res(409, bad('already_paid', 'Tilaus on jo maksettu'));
+      mp.started = true;
+      const back = new URL(typeof location !== 'undefined' ? location.href : 'http://localhost/tilaus/'); back.search = new URLSearchParams({ t: body.order_token || TOKEN, mock: '1', scenario, ...(mpResult ? { mpresult: mpResult } : {}), pay: 'mobilepay' }).toString(); back.hash = '';
+      return res(200, { ok: true, reuse: false, redirect_url: back.href, reference: 'sauna-o15321-p1-a1', payment_id: 1 });
+    }
+    if (name === 'mobilepay-notify' && body.action === 'reconcile') {
+      mp.returning = true;
+      if (mpResult === 'netfail') throw new TypeError('Failed to fetch');
+      const r = mpResult || 'paid', one = (outcome, state) => res(200, { ok: true, payment_status: o.payment_status, results: [{ outcome, state }] });
+      if (o.payment_status === 'paid') return one(r === 'review' ? 'paid_needs_review' : 'paid', 'CAPTURED');
+      if (r === 'failed') return one('not_authorized', 'ABORTED');
+      if (r === 'slotlost') return one('cancelled_slot_lost', 'AUTHORIZED');
+      if (r === 'contact') return one('capture_failed', 'AUTHORIZED');
+      return one('pending', 'CREATED');   // paid/review/pending: asiakas ei ole vielä hyväksynyt / webhook vielä tulossa
+    }
+    return res(400, bad('invalid_param', 'Virheellinen pyyntö'));
+  }
+  return { rpc, mpFetch, token: TOKEN, giftMock: gm };
 }

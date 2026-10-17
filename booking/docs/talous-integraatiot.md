@@ -34,6 +34,35 @@ Tarvitaan käyttöönottoon:
 - Toteutus (vaihe E): Web Payment API w3.2: `auth_payment` (authcode = HMAC-SHA256(private_key, api_key|order_number-sidottu body)), notify-vahvistus `RETURN_CODE|ORDER_NUMBER|SETTLED|INCIDENT_ID` (HMAC-SHA256, vakioaikavertailu) + `check_payment_status`; `create_refund`. Testi: Visma Pay -testitunnukset (testiympäristö) ennen tuotantoavaimia.
 - Kun valmis: `vismapay.mode='live'` (silloin asiakkaan tilaussivu alkaa luoda maksulinkkejä lisäyksille).
 
+## 3b. MobilePay (Vipps MobilePay ePayment API, suora integraatio) – valmis, kytketty pois (`mobilepay.mode = 'off'`)
+
+Suora integraatio ilman Visma Payta: maksu `POST /epayment/v1/payments` (WEB_REDIRECT, `profile.scope = name email phoneNumber`), webhook + capture, hyvitys `…/refund`. Tilaus merkitään maksetuksi vasta capturen jälkeen. Rajapinta Koodarille: `KOODARI_talous_A_D_fi.md` §14.
+
+**Edge-salaisuudet** (Supabase → Edge Functions → Secrets; ei koskaan koodiin/lokiin/tiedostoon):
+| Nimi | Mistä |
+|---|---|
+| `MOBILEPAY_CLIENT_ID` | portal.vippsmobilepay.com → Developer → myyntiyksikkö (testi: "Uudet sivut") → API keys: `client_id` |
+| `MOBILEPAY_CLIENT_SECRET` | sama: `client_secret` |
+| `MOBILEPAY_SUBSCRIPTION_KEY` | sama: `Ocp-Apim-Subscription-Key` (primary) |
+| `MOBILEPAY_MSN` | myyntiyksikön Merchant Serial Number |
+| `MOBILEPAY_WEBHOOK_SECRET` | syntyy webhookin rekisteröinnissä (alla); Vipps näyttää sen vain kerran |
+| `MOBILEPAY_WEBHOOK_URL` (valinnainen) | rekisteröity webhook-osoite (allekirjoituksen polun varmistus) |
+| `MOBILEPAY_ALLOWED_ORIGINS` (valinnainen) | pilkuilla erotetut sivuston originit CORSia varten (oletus `*`) |
+
+Testi- ja tuotantoavaimet ovat eri: `mode='test'` käyttää https://apitest.vipps.no, `mode='live'` https://api.vipps.no – **avaimet vaihdetaan samalla kun tila vaihdetaan** (testiavaimilla ei voi `live`-tilassa maksaa).
+
+Asetus: `booking.settings` `site_base_url` (https) ja `order_page_path` (oletus `/tilaus/`) – asiakas palaa tähän maksun jälkeen.
+
+**Käyttöönotto testitilassa (vaatii Joonaksen luvan):**
+1. Aseta edge-salaisuudet (`supabase secrets set …` tai Dashboard).
+2. Rekisteröi webhook (tallentaa `MOBILEPAY_WEBHOOK_SECRET`:n suoraan Supabaseen, ei tulosta): `deno run -A booking/scripts/mobilepay-webhook.ts register test --project-ref sxbofnuisemspgquoxyv` (avaimet ympäristömuuttujissa). Tapahtumat: authorized, aborted, expired, terminated. Listaus/poisto: `list` / `delete`.
+3. Kytke päälle: `update booking.integration_config set mode='test', settings = settings || jsonb_build_object('approved_by','Joonas Vaarala <pvm>') where key='mobilepay';` (trigger vaatii `approved_by`:n; `dry_run` ei ole sallittu MobilePaylle).
+4. Testaa: tee testitilaus, maksa MobilePay Test -sovelluksella (testikäyttäjä; testisummat: https://developer.vippsmobilepay.com/docs/test-environment/), tarkista kuitti + hyvitys.
+5. Live: aseta tuotantoavaimet, rekisteröi webhook `live`, `mode='live'` + `approved_by`.
+Pois: `update booking.integration_config set mode='off' where key='mobilepay';` (painike katoaa heti; olemassa olevat avoimet maksut jäävät pending/vanhenevat).
+
+Turvallisuus: webhookin HMAC-allekirjoitus tarkistetaan, tila haetaan aina Vippsistä (`GET /payments/{reference}`), Idempotency-Key kaikissa kirjoittavissa kutsuissa, yritysviitteet `sauna-o<tilausnro>-p<maksu>-a<yritys>`, asiakkaan henkilötietoja ei tallenneta lokiin/`raw`-kenttään, Johku-tilaukset eristetty. Testit: `booking/supabase/tests/mobilepay/t49_mobilepay.sql` (60 tarkistusta, rullaa takaisin) ja `deno test booking/supabase/functions/_tests/mobilepay_test.ts` (32 testiä, mock-Vipps).
+
 ## 4. Procountor (kirjanpito) – ei toteutettu, runko valmiina
 Valmiina: `accounting_outbox` (kind, order_id, payment_id, receipt_id, `dedupe_key`, `payload` = kuitin snapshot, `status`, `attempts`, `environment`), täyttö kuiteista kun `procountor.mode <> 'off'`, edge-funktio `procountor-sync` (501), asetus `procountor_env` (`pts`/`prod`).
 Tarvitaan käyttöönottoon:

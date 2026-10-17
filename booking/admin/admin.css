@@ -399,6 +399,9 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .tl-sub{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .tl-sub li{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"m s" "t s";gap:2px 10px;padding:8px 10px;background:#fff;border:1px solid var(--line);border-radius:8px}
 .tl-sub-main{grid-area:m;min-width:0;overflow-wrap:anywhere}.tl-sub-meta{grid-area:t;color:var(--muted);font-size:13px;min-width:0;overflow-wrap:anywhere}.tl-sub-sum{grid-area:s;text-align:right;align-self:center}
+.tl-refunds{grid-column:1/-1;list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px}
+.tl-sub .tl-refunds li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:6px 8px;background:#FBF8F2;border-radius:8px}
+.tl-refunds .tl-btn{flex:0 0 auto;min-height:44px}
 .tl-sums{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 0}.tl-sums>div{flex:1 1 100px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
 .tl-sums dt{font-size:12px;color:var(--muted)}.tl-sums dd{margin:0;font-weight:700;color:var(--ink)}.tl-sums .due dd{color:var(--err)}
 .tl-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.tl-actions .btn{flex:1 1 160px;white-space:normal;text-align:center}
