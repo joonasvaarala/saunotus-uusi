@@ -35,19 +35,19 @@ select lives_ok($$insert into booking.customers(name, customer_kind, company, bu
 select is((select customer_kind from booking.customers where name = 'X Y' and customer_kind = 'private' limit 1), null, 'oletus on private (vanhat asiakkaat)');
 
 -- ================= C) lisäpalvelut: seed, julkinen luku, RLS =================
-select is((select count(*)::int from booking.addons), 2, 'kaksi alkulisäpalvelua');
+select is((select count(*)::int from booking.addons), 3, 'kolme alkulisäpalvelua (turvenaamio+jalkakylpy, vihta + migraation 27 pyyhe)');
 select is((select price_gross from booking.addons where code = 'turvenaamio_jalkakylpy'), 15.00, 'Turvenaamio ja jalkakylpy = 15 € (sis. ALV)');
 select is((select price_gross from booking.addons where code = 'saunavihta'), 13.00, 'Saunavihta = 13 € (sis. ALV)');
 select is((select array_agg(distinct vat_rate) from booking.addons), array[25.5::numeric], 'lisäpalvelujen ALV 25,5 % (kuten muu hinnoittelu)');
 select is((select bool_and(applies_modes @> array['shared','exclusive']) from booking.addons), true, 'lisäpalvelut koskevat yleisiä ja yksityisvuoroja');
 select test.anon();
-select is(jsonb_array_length(booking.public_addons()), 2, 'anon: public_addons palauttaa 2 aktiivista');
+select is(jsonb_array_length(booking.public_addons()), 3, 'anon: public_addons palauttaa 3 aktiivista');
 select ok(not (booking.public_addons()::text ~ 'external_source|created_at|updated_at'), 'public_addons ei sisällä sisäisiä kenttiä');
 select throws_ok('select * from booking.addons', '42501', null, 'anon ei lue addons-taulua suoraan');
 select throws_ok('select * from booking.customer_kinds', '42501', null, 'anon ei lue customer_kinds-taulua suoraan');
 select test.logout();
 select test.login(:'stf');
-select is((select count(*)::int from booking.addons), 2, 'staff lukee lisäpalvelut (staff_read)');
+select is((select count(*)::int from booking.addons), 3, 'staff lukee lisäpalvelut (staff_read)');
 select is((select count(*)::int from booking.customer_kinds), 2, 'staff lukee asiakastyypit');
 select throws_ok($$insert into booking.addons(code, name, price_gross) values ('x_y','X',1)$$, '42501', null, 'staff ei kirjoita addons-tauluun suoraan');
 select test.logout();
@@ -95,7 +95,7 @@ select is((select count(*)::int from booking.orders o join booking.customers c o
 update booking.addons set active = false where code = 'saunavihta';
 select test.anon('10.9.0.1');
 select is(booking.public_create_booking(:r_tue, :'tue', 2, 'A B', 'ad9@example.com', '0401234567', false, 'fi', null, 'private', null, '[{"code":"saunavihta","quantity":1}]') ->> 'code', 'addon_inactive', 'passiivista lisäpalvelua ei voi tilata');
-select is(jsonb_array_length(booking.public_addons()), 1, 'public_addons: passiivinen piilossa');
+select is(jsonb_array_length(booking.public_addons()), 2, 'public_addons: passiivinen piilossa');
 select test.logout();
 update booking.addons set active = true, applies_modes = '{exclusive}' where code = 'saunavihta';
 select test.anon('10.9.0.1');
@@ -263,7 +263,7 @@ select test.logout();
 
 -- ================= H) lisäpalveluiden ylläpito (catalog.edit) + hinnan muutos ei kosketa vanhoja tilauksia =================
 select test.login(:'stf');
-select is(jsonb_array_length(booking.admin_list_addons()), 2, 'staff näkee lisäpalvelut hallinnassa');
+select is(jsonb_array_length(booking.admin_list_addons()), 3, 'staff näkee lisäpalvelut hallinnassa');
 select throws_ok($$select booking.admin_update_addon(1, '{"price":99}')$$, 'BK001', 'Ei oikeutta tähän toimintoon (catalog.edit)', 'staff: ei oikeutta catalog.edit');
 select throws_ok($$select booking.admin_create_addon('{"code":"uusi","name":"Uusi","price":5}')$$, 'BK001', 'Ei oikeutta tähän toimintoon (catalog.edit)', 'staff ei luo lisäpalvelua');
 select test.logout();
@@ -290,7 +290,7 @@ select lives_ok($$select booking.admin_update_addon((select id from booking.addo
 select test.logout();
 select ok((select count(*) from booking.audit_log where table_name like '%addons') > 0, 'lisäpalvelumuutokset kirjautuvat audit-lokiin');
 select test.anon('10.9.0.5');
-select is(jsonb_array_length(booking.public_addons()), 2, 'public_addons: passiivinen kahvi piilossa, hintamuutos näkyy');
+select is(jsonb_array_length(booking.public_addons()), 3, 'public_addons: passiivinen kahvi piilossa, hintamuutos näkyy');
 select is((booking.public_addons() -> 1 ->> 'price')::numeric, 14.50, 'public_addons: uusi hinta näkyy kaupassa');
 select is((select count(*)::int from jsonb_array_elements(booking.public_addons()) e where e ->> 'code' = 'kahvi'), 0, 'passiivinen ei näy');
 -- uusi hinta koskee uusia tilauksia
