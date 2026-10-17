@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fi"><head><meta charset="utf-8"><title>Lahjakortti – PDF-pohja (mockup)</title>
+<style>
+/* Mockup: A5 vaaka (210 × 148 mm = 794 × 559 px @96 dpi). Värit = sivuston tunnukset (ei sinistä). Fontit: public/fonts. */
+@font-face{font-family:"Cormorant Garamond";font-weight:400 600;src:url(../../public/fonts/CormorantGaramond-normal-400-600.woff2) format("woff2")}
+@font-face{font-family:"Cormorant Garamond";font-style:italic;font-weight:400;src:url(../../public/fonts/CormorantGaramond-italic-400.woff2) format("woff2")}
+@font-face{font-family:"Playfair Display";font-weight:400;src:url(../../public/fonts/PlayfairDisplay-normal-400.woff2) format("woff2")}
+@font-face{font-family:"Lato";font-weight:400;src:url(../../public/fonts/Lato-normal-400.woff2) format("woff2")}
+@font-face{font-family:"Lato";font-weight:700;src:url(../../public/fonts/Lato-normal-700.woff2) format("woff2")}
+@font-face{font-family:"Montserrat";font-weight:500 600;src:url(../../public/fonts/Montserrat-normal-500.woff2) format("woff2")}
+:root{--ink:#2F2923;--text:#4F443A;--muted:#6B5E52;--gold:#7A5530;--accent:#C49A6C;--green:#2B3A30;--card:#FAF7F1;--tint:#F3ECE1;--sand:#EDE3D0}
+*{box-sizing:border-box}
+body{margin:0;background:#d9d2c6;padding:24px;display:grid;gap:24px;justify-content:center;font:400 14px/1.5 Lato,Arial,sans-serif;color:var(--text)}
+.sheet{width:794px;height:559px;background:var(--card);position:relative;overflow:hidden;display:grid;grid-template-rows:118px 1fr 56px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.band{background:var(--green);color:#FAF7F1;display:flex;align-items:center;justify-content:space-between;padding:0 44px;border-bottom:4px solid var(--accent)}
+.brand{font:400 26px/1.1 "Playfair Display",Georgia,serif;letter-spacing:.02em}
+.brand small{display:block;font:500 11px/1.4 Montserrat,Arial,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#E3C79A;margin-top:6px}
+.title{font:400 italic 46px/1 "Cormorant Garamond",Georgia,serif;color:#F3ECE1}
+.main{display:grid;grid-template-columns:1.25fr 1fr;gap:0 36px;padding:26px 44px 0}
+.kicker{font:600 11px/1 Montserrat,Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:0 0 8px}
+.what{font:600 27px/1.1 "Cormorant Garamond",Georgia,serif;color:var(--ink);margin:0 0 4px}
+.value{font:600 36px/1 "Cormorant Garamond",Georgia,serif;color:var(--gold);margin:4px 0 10px}
+.to{margin:0 0 10px;font-size:15px}.to b{color:var(--ink)}
+.greet{font:italic 400 17.5px/1.3 "Cormorant Garamond",Georgia,serif;color:var(--ink);white-space:pre-wrap;border-left:3px solid var(--accent);padding:2px 0 2px 14px;margin:0;max-height:176px;overflow:hidden}
+.from{margin:10px 0 0;font-size:13px;color:var(--muted)}
+.codebox{background:var(--sand);border:1px solid rgba(122,85,48,.45);border-radius:10px;padding:16px 18px;text-align:center}
+.codebox .lab{font:600 11px/1 Montserrat,Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);margin:0 0 10px}
+.code{font:700 25px/1 "Courier New",ui-monospace,monospace;letter-spacing:.04em;white-space:nowrap;color:var(--green);margin:0}
+.meta{margin:14px 0 0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13.5px}
+.meta dt{color:var(--muted)}.meta dd{margin:0;color:var(--ink);font-weight:700}
+.how{margin:14px 0 0;font-size:13px;color:var(--text)}
+.foot{background:var(--tint);border-top:1px solid rgba(63,53,44,.16);display:flex;align-items:center;justify-content:space-between;padding:0 44px;font-size:11.5px;color:var(--muted)}
+.foot b{color:var(--ink)}
+.cut{position:absolute;inset:8px;border:1px dashed rgba(122,85,48,.35);border-radius:6px;pointer-events:none}
+.note{width:794px;font:13px/1.5 Lato,Arial,sans-serif;color:#2F2923}
+</style></head><body>
+<p class="note"><b>Mockup 1/2 – paketti (FI):</b> pakettikortti, saajan nimi ja oma tervehdys.</p>
+<section class="sheet" id="fi-package"><div class="cut"></div>
+  <div class="band"><div class="brand">Sipoonjoen Perinnesauna<small>Savusauna · Sipoo</small></div><div class="title">Lahjakortti</div></div>
+  <div class="main">
+    <div>
+      <p class="kicker">Lahjakorttipaketti</p>
+      <h1 class="what">Savusaunaelämys ja saunahoito kahdelle</h1>
+      <p class="value">192 €</p>
+      <p class="to">Saaja: <b>Mikko Mallikas</b></p>
+      <p class="greet">Hyvää syntymäpäivää, Mikko!
+Nauti lämmöstä ja rauhasta yhdessä.</p>
+      <p class="from">Lahjoittaja: Olli Ostaja</p>
+    </div>
+    <div>
+      <div class="codebox"><p class="lab">Lahjakortin koodi</p><p class="code">HH3A-7CEF-HJKL</p></div>
+      <dl class="meta"><dt>Voimassa</dt><dd>1.4.2027 asti</dd><dt>Henkilömäärä</dt><dd>2 henkilöä</dd><dt>Myönnetty</dt><dd>1.10.2026</dd></dl>
+      <p class="how">Varaa aika osoitteessa <b>saunotus.com</b> ja anna koodi tilauksen yhteydessä, tai soita ja kerro koodi.</p>
+    </div>
+  </div>
+  <div class="foot"><span><b>Sipoonjoen Perinnesauna</b> · Hindsbyntie 124, 04130 Sipoo</span><span>010 299 2866 · savusauna@saunotus.fi</span></div>
+</section>
+<p class="note"><b>Mockup 2/2 – avoin lahjakortti (EN):</b> arvo euroina, ei tervehdystä (tervehdysosa piilotetaan kun <code>greeting</code> on tyhjä).</p>
+<section class="sheet" id="en-open"><div class="cut"></div>
+  <div class="band"><div class="brand">Sipoonjoen Perinnesauna<small>Smoke sauna · Sipoo</small></div><div class="title">Gift card</div></div>
+  <div class="main">
+    <div>
+      <p class="kicker">Open gift card</p>
+      <h1 class="what">Valid for all our services</h1>
+      <p class="value">€75</p>
+      <p class="to">For: <b>Mikko Mallikas</b></p>
+      <p class="from">From: Olli Ostaja</p>
+    </div>
+    <div>
+      <div class="codebox"><p class="lab">Gift card code</p><p class="code">HH7M-RTUV-WXY3</p></div>
+      <dl class="meta"><dt>Valid until</dt><dd>1 Apr 2027</dd><dt>Balance</dt><dd>€75</dd><dt>Issued</dt><dd>1 Oct 2026</dd></dl>
+      <p class="how">Book at <b>saunotus.com</b> and enter the code at checkout, or call us and tell us the code.</p>
+    </div>
+  </div>
+  <div class="foot"><span><b>Sipoonjoen Perinnesauna</b> · Hindsbyntie 124, 04130 Sipoo, Finland</span><span>+358 10 299 2866 · savusauna@saunotus.fi</span></div>
+</section>
+</body></html>
