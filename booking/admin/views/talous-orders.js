@@ -1,7 +1,8 @@
 // Talous › Tilaukset: uusin ensin, haku, lajittelu, suodattimet ja PALVELINPUOLEN sivutus (12 000+ tilausta) – rivi aukeaa maksuiksi ja varauksiksi.
-// Datan muoto: ../talous-api.js (admin_list_orders / admin_get_order). Napit (lisää, maksulinkki, hyvitys) kutsuvat api:a; oikeassa tilassa ne ovat pois käytöstä (LIVE_ACTIONS).
+// Datan muoto: ../talous-api.js (admin_list_orders / admin_get_order). Napit (lisää, maksulinkki, maksun kirjaus, hyvitys) kutsuvat api:a; kuitit (lataus, näyttö, uudelleenlähetys): ./talous-receipts.js.
 import { h, dialog } from '../ui.js';
 import { icon } from '../icons.js';
+import { receiptsList } from './talous-receipts.js';
 import { t, fmt, getLang } from '../talous-i18n.js';
 import { RPC, absLink } from '../talous-api.js';
 import { PAY, SOURCES, payLabel, sourceLabel, payBadge, sourceBadge, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, dateFld, searchFld, expandRow, actionBtn, doneToast, formDialog, methodLabel, pstatBadge } from './talous-ui.js';
@@ -74,14 +75,12 @@ export function createOrdersTab({ api, ctx }) {
     const refundable = o.payments.filter((p) => ['paid', 'partially_refunded'].includes(p.status) && p.amount > p.refunded_amount);
     const addOff = !o.is_native ? t('btn.addJohku') : !o.staff_can_add ? t('btn.addClosed') : null;
     const actions = h('div', { class: 'tl-actions', 'data-testid': 'order-actions' },
-      actionBtn({ api, key: 'addToOrder', label: t('btn.addToOrder'), ico: 'plus', testid: 'btn-add', extraDisabled: addOff, onClick: () => addDialog(o) }),
-      actionBtn({ api, key: 'createPaymentLink', label: unpaid > 0 ? t('btn.link', { sum: fmt.money(unpaid) }) : t('btn.linkNone'), ico: 'link', testid: 'btn-link', extraDisabled: unpaid > 0 && o.is_native ? null : t('btn.linkNoneWhy'), onClick: () => linkDialog(o) }),
-      actionBtn({ api, key: 'recordPayment', label: t('btn.record'), ico: 'plus', testid: 'btn-record', extraDisabled: !o.is_native ? t('btn.addJohku') : unpaid > 0 ? null : t('btn.recordNone'), onClick: () => recordDialog(o) }),
-      h('button', { type: 'button', class: `btn tl-btn${o.receipts.length ? '' : ' is-off'}`, 'data-testid': 'btn-receipts', disabled: o.receipts.length ? null : true, title: o.receipts.length ? null : t('btn.noReceipts'), onclick: () => receiptsDialog(o) },
-        h('span', { class: 'tl-ico', 'aria-hidden': 'true' }, icon('receipt', 20)), h('span', { text: `${t('btn.receipts')} (${o.receipts.length})` })),
-      actionBtn({ api, key: 'refund', label: t('btn.refund'), ico: 'undo', testid: 'btn-refund', extraDisabled: !canRefund ? t('btn.refundNoPerm') : refundable.length ? null : t('btn.refundNone'), onClick: () => refundDialog(o, refundable) }));
-    const hint = ['addToOrder', 'createPaymentLink', 'refund', 'recordPayment'].some((k) => !api.isMock(k) && !api.actionLive(k)) ? h('p', { class: 'muted tl-hint', text: t('btn.hint') }) : null;
-    return h('div', { class: 'tl-detail' }, meta, ...notes, sums, sec(t('order.payments'), payments), sec(t('order.reservations'), reservations), actions, hint);
+      actionBtn({ key: 'addToOrder', label: t('btn.addToOrder'), ico: 'plus', testid: 'btn-add', extraDisabled: addOff, onClick: () => addDialog(o) }),
+      actionBtn({ key: 'createPaymentLink', label: unpaid > 0 ? t('btn.link', { sum: fmt.money(unpaid) }) : t('btn.linkNone'), ico: 'link', testid: 'btn-link', extraDisabled: unpaid > 0 && o.is_native ? null : t('btn.linkNoneWhy'), onClick: () => linkDialog(o) }),
+      actionBtn({ key: 'recordPayment', label: t('btn.record'), ico: 'plus', testid: 'btn-record', extraDisabled: !o.is_native ? t('btn.addJohku') : unpaid > 0 ? null : t('btn.recordNone'), onClick: () => recordDialog(o) }),
+      actionBtn({ key: 'refund', label: t('btn.refund'), ico: 'undo', testid: 'btn-refund', extraDisabled: !canRefund ? t('btn.refundNoPerm') : refundable.length ? null : t('btn.refundNone'), onClick: () => refundDialog(o, refundable) }));
+    const receipts = sec(`${t('receipts.title')} (${o.receipts.length})`, receiptsList({ api, ctx, receipts: o.receipts }), o.receipts.length ? h('p', { class: 'muted tl-hint', text: t('receipts.emailNote') }) : null);
+    return h('div', { class: 'tl-detail' }, meta, ...notes, sums, sec(t('order.payments'), payments), receipts, sec(t('order.reservations'), reservations), actions);
   }
 
   // ---- dialogit ----
@@ -153,13 +152,6 @@ export function createOrdersTab({ api, ctx }) {
       doneToast(res, RPC.refund); afterChange(res, o.order_id);
     });
   }
-  function receiptsDialog(o) {
-    dialog(t('btn.receipts'), h('div', { class: 'stack' }, h('p', { class: 'muted', text: t('receipts.note') }), h('ul', { class: 'tl-sub', 'data-testid': 'receipts-list' }, o.receipts.map((r) => h('li', {},
-      h('span', { class: 'tl-sub-main' }, h('strong', { text: r.receipt_no }), ' ', h('span', { class: 'badge', text: t(`receipt.${r.kind}`) })),
-      h('span', { class: 'tl-sub-meta', text: [fmt.dt(r.issued_at), r.sent_at ? t('receipts.sent') : t('receipts.notSent')].join(' · ') }),
-      h('span', { class: 'tl-sub-sum' }, h('button', { type: 'button', class: 'btn tl-btn is-off', disabled: true, title: t('receipts.pdfLater') }, h('span', { class: 'tl-ico', 'aria-hidden': 'true' }, icon('download', 20)), h('span', { text: 'PDF' }))))))));
-  }
-
   // ---- työkalupalkki ----
   const sortSel = h('select', { 'data-testid': 'orders-sort', onchange: (e) => { st.sortBy = e.target.value; if (st.sortBy === 'payment_status') st.sortDir = 'desc'; syncDir(); change({}); } }, ORDER_SORTS.map((k) => h('option', { value: k, text: t(`sort.${k}`) })));
   const dirBtn = h('button', { type: 'button', class: 'btn ghost tl-dir', 'data-testid': 'orders-dir', onclick: () => { st.sortDir = st.sortDir === 'desc' ? 'asc' : 'desc'; syncDir(); change({}); } });

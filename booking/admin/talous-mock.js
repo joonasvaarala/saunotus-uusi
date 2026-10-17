@@ -110,6 +110,12 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
   orders.reverse();   // uusin ensin (ensisijainen järjestys)
   const byId = new Map(orders.map((o) => [o.order_id, o]));
   const payById = new Map(payments.map((p) => [p.payment_id, p]));
+  // kuitit: viittaus maksuun + summa (hyvityskuitti negatiivinen); rcById = admin_get_receipt-haku
+  const rcById = new Map();
+  for (const p of payments) {
+    if (p.receipt) { Object.assign(p.receipt, { payment_id: p.payment_id, total_gross: p.amount }); rcById.set(p.receipt.id, p.receipt); }
+    if (p.refund_receipt) { Object.assign(p.refund_receipt, { payment_id: p.payment_id, total_gross: -p.refunded_amount }); rcById.set(p.refund_receipt.id, p.refund_receipt); }
+  }
   payments.sort((a, b) => (b.paid_at || b.created_at).localeCompare(a.paid_at || a.created_at) || b.payment_id - a.payment_id);
   const wait = () => (delay ? new Promise((ok) => setTimeout(ok, delay)) : Promise.resolve());
   const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
@@ -162,7 +168,7 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
       customer_note: null, internal_note: o.order_id % 9 === 0 ? 'Mock-muistiinpano: asiakas toivoo ikkunapaikkaa.' : null,
       customer: { id: o.order_id % 5000, name: o.customer_name, email: o.email, phone: '+358 40 000 0000', company: o.company, customer_kind: o.company ? 'company' : 'private', business_id: o.company ? '1234567-8' : null },
       public_token: `00000000-0000-4000-8000-${pad(o.order_id, 12)}`, order_page_path: `/tilaus/?t=00000000-0000-4000-8000-${pad(o.order_id, 12)}`, balance: balanceOf(o), can_add: can, add_until: can ? `${today}T21:00:00Z` : null, staff_can_add: can,
-      items, payments: payments_, receipts: o.receipts.map((x) => ({ id: x.id, receipt_no: x.receipt_no, kind: x.kind, issued_at: x.issued_at, public_token: x.public_token, sent_at: x.sent_at, payment_id: null })),
+      items, payments: payments_, receipts: o.receipts.map((x) => ({ id: x.id, receipt_no: x.receipt_no, kind: x.kind, issued_at: x.issued_at, public_token: x.public_token, sent_at: x.sent_at, total: x.total_gross, payment_id: x.payment_id ?? null, refund_id: null })),
       refunds: payments_.flatMap((p) => p.refunds), emails: [], requests: o.order_id % 11 === 0 && o.is_native ? [{ id: o.order_id, kind: 'cancel', status: 'open', reason: 'Mock-peruutuspyyntö', created_at: o.created_at }] : [],
       reservations: o.reservations.map((x) => ({ id: x.id, item_id: x.item_id, status: x.status, product_name: x.product_name, mode: 'shared', starts_at: x.starts_at, ends_at: x.ends_at, persons: x.persons, notes: null, item_total: x.item_total, addons: x.addons })) };
   }
@@ -186,7 +192,7 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
       amount: p.amount, refunded_amount: p.refunded_amount, rounding: 0, paid_at: p.paid_at, created_at: p.created_at, customer_name: p.customer_name, line_count: p.lines.length, receipt_no: p.receipt_no || null, receipt_token: p.receipt?.public_token || null })) };
   }
 
-  // ---- raportit (vaihe D): admin_report_daily(p_date) / admin_report_month(p_ym) → koosteet; rivitaso (`lines`) vain mockissa → asiakaspuolen CSV ----
+  // ---- raportit: admin_report_daily(p_date) / admin_report_month(p_ym) → koosteet; rivitaso (`lines`) vain mockissa → asiakaspuolen CSV ----
   function linesBetween(from, to) {
     const out = [];
     for (const p of payments) {
@@ -235,7 +241,34 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
     return { filename: `kuitit_lines_${a.p_from}_${a.p_to}.csv`, mime: 'text/csv;charset=utf-8', content: `\uFEFF${['pvm;kuitti_no;tilaus_no;maksutapa;tuoteryhmä;tuote;määrä;brutto;alv_%;alv_€;netto;hyvitys', ...rows].join('\r\n')}\r\n` };
   }
 
-  // ---- kirjoittavat RPC:t: vain kuittaus oikeilla vastausmuodoilla (vaiheessa A ei muuteta dataa) ----
+  // ---- admin_get_receipt(p_receipt_id) / admin_resend_receipt(p_receipt_id) (sopimus §3, §9.1) ----
+  const money = (n) => `${Math.abs(n).toFixed(2).replace('.', ',')} €`.replace(/^/, n < 0 ? '-' : '');
+  const SELLER = { name: 'Sipoonjoen perinnesauna', legal_name: 'Havuhattu Oy', business_id: '0000000-0', vat_id: 'FI00000000', address: 'Esimerkkitie 1', zip: '00000', city: 'Sipoo', email: 'esimerkki@example.test', phone: '000 000 0000', web: 'https://example.test', logo_url: null, footer: 'Kiitos käynnistä! (esimerkkikuitti)' };
+  const helsinkiLocal = (iso) => { const q = Object.fromEntries(new Intl.DateTimeFormat('fi-FI', { timeZone: 'Europe/Helsinki', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(iso)).map((x) => [x.type, x.value])); return `${q.day}.${q.month}.${q.year} ${q.hour}:${q.minute}`; };
+  function receiptOf(id) {
+    const rc = rcById.get(+id); if (!rc) throw fail('receipt_not_found', 'Kuittia ei löydy', 404);
+    const p = payById.get(rc.payment_id), refund = rc.kind === 'refund_receipt', sign = refund ? -1 : 1, share = refund ? (p.refunded_amount / p.amount) : 1;
+    const lines = p.lines.map((l) => { const gross = round2(sign * l.amount_gross * share), vat = vatSplit(Math.abs(gross), l.vat_rate).vat * sign; return { description: l.description, quantity: l.quantity, unit_gross: round2(gross / l.quantity), unit_net: round2((gross - vat) / l.quantity), line_gross: gross, line_net: round2(gross - vat), vat_rate: l.vat_rate, kind: l.group === 'addon' ? 'addon' : 'product', starts_at: null, ends_at: null }; });
+    const byRate = new Map(); for (const l of lines) byRate.set(l.vat_rate, round2((byRate.get(l.vat_rate) || 0) + l.line_gross));
+    const vat = [...byRate].map(([rate, gross]) => { const v = round2(sign * vatSplit(Math.abs(gross), rate).vat); return { rate, net: round2(gross - v), vat: v, gross }; });
+    const total = round2(lines.reduce((x, l) => x + l.line_gross, 0)), totalVat = round2(vat.reduce((x, v) => x + v.vat, 0));
+    const o = byId.get(p.order_id), local = helsinkiLocal(rc.issued_at);
+    const snapshot = { v: 1, document: rc.kind, receipt_no: rc.receipt_no, issued_at: rc.issued_at, issued_local: local, seller: SELLER, order_no: o.order_no, payment: { id: p.payment_id, method: p.method, method_label: METHOD_LABELS[p.method] || p.method, paid_at: p.paid_at },
+      buyer: o.company ? { name: o.customer_name, company: o.company, business_id: '1234567-8', address: 'Mockkatu 2', zip: '00100', city: 'Helsinki', reference: null } : null, invoice_required: !!o.company && total > 400,
+      lines, vat, total_gross: total, total_net: round2(total - totalVat), total_vat: totalVat, rounding: 0, total_paid: total, currency: 'EUR',
+      original: refund ? { receipt_no: p.receipt_no, issued_at: p.paid_at } : null, reason: refund ? 'Mock-hyvitys' : null, locale: 'fi' };
+    const t = [SELLER.name, `${SELLER.legal_name}, Y-tunnus ${SELLER.business_id}, ALV-tunnus ${SELLER.vat_id}`, `${SELLER.address}, ${SELLER.zip} ${SELLER.city}`, '',
+      `${refund ? 'HYVITYSKUITTI' : snapshot.invoice_required ? 'KUITTI / LASKU' : 'KUITTI'} ${rc.receipt_no}`, `Päivämäärä: ${local.replace(' ', ' klo ')}`, `Tilaus: ${o.order_no}`, `Maksutapa: ${snapshot.payment.method_label}`];
+    if (snapshot.buyer) t.push(`Ostaja: ${snapshot.buyer.company}, ${snapshot.buyer.name}`);
+    if (refund) t.push(`Alkuperäinen kuitti: ${p.receipt_no}`, 'Hyvityksen syy: Mock-hyvitys');
+    t.push('', ...lines.flatMap((l) => [l.description, `   ${l.quantity} kpl × ${money(l.unit_gross)} = ${money(l.line_gross)} (ALV ${String(l.vat_rate).replace('.', ',')} %)`]), '', 'ALV-erittely',
+      ...vat.map((v) => `ALV ${String(v.rate).replace('.', ',')} %: veroton ${money(v.net)}, ALV ${money(v.vat)}, yhteensä ${money(v.gross)}`), '', `Yhteensä (sis. ALV) ${money(total)}`, `josta ALV ${money(totalVat)}, veroton ${money(total - totalVat)}`, `${refund ? 'Hyvitetty' : 'Maksettu'} ${money(total)}`, '', SELLER.footer);
+    return { id: rc.id, receipt_no: rc.receipt_no, kind: rc.kind, issued_at: rc.issued_at, total_gross: total, snapshot, text_body: `${t.join('\n')}\n`, public_token: rc.public_token, pdf_url: `https://mock.invalid/functions/v1/receipt-pdf?t=${rc.public_token}`, sent_at: rc.sent_at, order_id: rc.order_id, payment_id: rc.payment_id, refund_id: null };
+  }
+  const adminGetReceipt = (a = {}) => receiptOf(a.p_receipt_id);
+  function adminResendReceipt(a = {}) { receiptOf(a.p_receipt_id); return { ok: true, mock: true, email_queued: true }; }
+
+  // ---- kirjoittavat RPC:t: vain kuittaus oikeilla vastausmuodoilla (mock ei muuta dataa) ----
   function adminAddToOrder(a = {}) {
     const o = byId.get(+a.p_order_id); if (!o) throw fail('not_found', 'Tilausta ei löydy', 404);
     const items = Array.isArray(a.p_items) ? a.p_items : []; if (!items.length || items.length > 20) throw fail('invalid_items', 'Rivejä 1–20');
@@ -272,7 +305,7 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
   const ADDON_LIST = [{ id: 1, code: 'saunavihta', name: 'Saunavihta', name_en: 'Sauna whisk (vihta)', price: 5, vat_rate: 25.5, max_per_person: 1, active: true }, { id: 2, code: 'pyyhe', name: 'Pyyhe', name_en: 'Towel', price: 5, vat_rate: 25.5, max_per_person: 1, active: true },
     { id: 3, code: 'turvenaamio_jalkakylpy', name: 'Turvenaamio ja jalkakylpy', name_en: 'Peat mask and foot bath', price: 12, vat_rate: 25.5, max_per_person: 1, active: true }];
   const HANDLERS = { admin_list_orders: adminListOrders, admin_get_order: adminGetOrder, admin_list_payments: adminListPayments, admin_list_addons: () => ADDON_LIST, admin_add_to_order: adminAddToOrder, admin_create_payment_link: adminCreatePaymentLink,
-    admin_refund: adminRefund, admin_record_payment: adminRecordPayment, admin_list_vat_rates: adminListVatRates, admin_report_daily: adminReportDaily, admin_report_month: adminReportMonth, admin_report_csv: adminReportCsv };
+    admin_refund: adminRefund, admin_record_payment: adminRecordPayment, admin_list_vat_rates: adminListVatRates, admin_report_daily: adminReportDaily, admin_report_month: adminReportMonth, admin_report_csv: adminReportCsv, admin_get_receipt: adminGetReceipt, admin_resend_receipt: adminResendReceipt };
   // sama kutsutapa kuin sb.js:n rpc(): rpc(nimi, parametrit) → Promise. Tuntematon nimi = puuttuva RPC (404 / PGRST202) kuten PostgRESTissä.
   async function rpc(name, args = {}) {
     await wait();

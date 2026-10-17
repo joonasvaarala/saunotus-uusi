@@ -1,7 +1,7 @@
 // LIVE-E2E (Playwright + google-chrome): Talous-näkymät oikeaa TESTIPROJEKTIA vasten – ei mockia, ei page.route-vastauksia.
 // Tuotantoprojektia (sxbofnuisemspgquoxyv) ei koskaan käytetä: osoite ja avain luetaan tiedostosta LIVE_ENV (oletus /workspace/.live/env, rivit KEY=VALUE:
 // LIVE_URL, LIVE_ANON, LIVE_EMAIL, LIVE_PASSWORD, STAFF_EMAIL, STAFF_PASSWORD). Avaimia/salasanoja ei tulosteta. Skripti kieltäytyy ajamasta, jos LIVE_URL sisältää tuotannon ref-tunnuksen.
-// Ajo: PW_DIR=/workspace/node_modules node booking/scripts/e2e-talous-live.mjs   (LIVE_FLAGS=1 kytkee LIVE_ACTIONS-liput päälle vain palvelimen tarjoamaan kopioon, jos lähdekoodissa ne vielä false)
+// Ajo: PW_DIR=/workspace/node_modules node booking/scripts/e2e-talous-live.mjs
 // Testi kirjoittaa testiprojektiin (uusia tilauksia, maksuja, hyvityksiä); jokainen ajo luo itse tuoreet tilaukset (vapaa lauantai-ilta alkaen LIVE_FROM, oletus 2027-09-04).
 // Ympäristö: SHOT_DIR (oletus /workspace/screenshots-talous-live), CHROME, PW_DIR.
 import { createServer } from 'node:http';
@@ -40,8 +40,7 @@ const server = createServer(async (req, res) => {
   else { res.writeHead(404); return res.end('Not found'); }
   try {
     if ((await stat(file)).isDirectory()) file = join(file, 'index.html');
-    let buf = await readFile(file);
-    if (process.env.LIVE_FLAGS === '1' && file.endsWith('talous-api.js')) buf = Buffer.from(buf.toString('utf8').replace(/export const LIVE_ACTIONS = \{[^}]*\};/, "export const LIVE_ACTIONS = { addToOrder: true, createPaymentLink: true, refund: true, recordPayment: true };"));
+    const buf = await readFile(file);
     res.writeHead(200, { 'content-type': types[extname(file)] || 'application/octet-stream', 'cache-control': 'no-store' }); res.end(buf);
   } catch { res.writeHead(404); res.end('Not found'); }
 });
@@ -157,7 +156,7 @@ async function readSuite() {
     expect(await dd(page, 'order-total') === +ord.balance.total && await dd(page, 'order-unpaid') === +ord.balance.unpaid, `${name}: laajennus: summat täsmäävät palvelimeen (${ord.balance.total}/${ord.balance.unpaid})`);
     expect(await page.locator('[data-testid=order-reservations] li').count() === ord.reservations.length && ord.reservations.length >= 1, `${name}: laajennus: varaukset`);
     expect(await page.locator('[data-testid=order-payments] li').count() === ord.payments.length, `${name}: laajennus: maksut (${ord.payments.length})`);
-    for (const id of ['btn-add', 'btn-link', 'btn-record', 'btn-refund', 'btn-receipts']) expect(await page.locator(`[data-testid=${id}]`).first().count() === 1, `${name}: nappi ${id}`);
+    for (const id of ['btn-add', 'btn-link', 'btn-record', 'btn-refund']) expect(await page.locator(`[data-testid=${id}]`).first().count() === 1, `${name}: nappi ${id}`);
     await shot(page, `live-tilaus-auki-${vp}-fi`);
     // Johku-tilaus: napit pois käytöstä
     const jo = list.rows.find((r) => !r.is_native);
@@ -213,6 +212,39 @@ async function readSuite() {
 }
 
 // ================= 2. KIRJOITUS: maksun kirjaus, maksulinkki, lisäys, hyvitys + BK001-virheet käyttöliittymässä =================
+// kuitin käyttöliittymä oikeaa (testi)palvelinta vasten: numero + summa, PDF-linkin muoto (+ application/pdf jos receipt-pdf on julkaistu testiprojektissa), teksti, uudelleenlähetys → email_outbox
+async function outboxCount(receiptId) {
+  const r = await fetch(`${E.LIVE_URL}/rest/v1/email_outbox?receipt_id=eq.${receiptId}&select=id,kind,status`, { headers: { apikey: E.LIVE_ANON, authorization: `Bearer ${admin.access_token}`, 'accept-profile': 'booking' } });
+  return r.ok ? r.json() : null;
+}
+async function receiptUiChecks(page, name, orderId, amount) {
+  const ord = await must('admin_get_order', { p_order_id: orderId }), rc = ord.receipts.find((x) => x.kind === 'receipt');
+  const full = await must('admin_get_receipt', { p_receipt_id: rc.id });
+  const item = page.locator('[data-testid=order-receipts] [data-testid=receipt-item]').first();
+  expect(await item.locator('[data-testid=receipt-no]').innerText() === rc.receipt_no && num(await item.locator('[data-testid=receipt-total]').innerText()) === amount, `${name}: kuitin numero ${rc.receipt_no} ja summa ${amount} täsmäävät palvelimeen`);
+  const href = await item.locator('a[data-testid=receipt-dl]').getAttribute('href');
+  expect(href === `${E.LIVE_URL}/functions/v1/receipt-pdf?t=${rc.public_token}`, `${name}: PDF-linkki = <testiprojekti>/functions/v1/receipt-pdf?t=<public_token>`);
+  expect(!/sxbofnuisemspgquoxyv/.test(href), `${name}: PDF-linkki ei osoita tuotantoon (palvelimen pdf_url voi, UI muodostaa osoitteen oman konfiguraationsa mukaan)`);
+  note(`pdf_url (palvelin) isäntä: ${new URL(full.pdf_url).host}; UI-linkin isäntä: ${new URL(href).host}`);
+  const pr = await fetch(href).catch(() => null);
+  if (pr && pr.status === 200) expect(/application\/pdf/.test(pr.headers.get('content-type')) && Buffer.from(await pr.arrayBuffer()).subarray(0, 5).toString() === '%PDF-', `${name}: receipt-pdf palauttaa application/pdf`);
+  else note(`receipt-pdf ei vastaa testiprojektissa (HTTP ${pr?.status ?? 'ei yhteyttä'}) → tarkistettu vain linkin muoto`);
+  await item.locator('[data-testid=receipt-view]').click(); await page.waitForSelector('dialog[open] [data-testid=receipt-text]');
+  expect((await page.locator('dialog[open] [data-testid=receipt-text]').innerText()).trim() === full.text_body.trim() && full.text_body.includes(rc.receipt_no), `${name}: Näytä kuitti = admin_get_receipt.text_body`);
+  await shot(page, 'live-kuitti-teksti-390-fi'); await closeDialogs(page);
+  const before = (await outboxCount(rc.id)) || [];
+  await item.locator('[data-testid=receipt-resend]').click(); await page.waitForSelector('dialog[open] [data-testid=resend-dialog]');
+  await page.waitForFunction(() => document.querySelector('[data-testid=resend-mode]')?.dataset.mode, null, { timeout: 8000 }).catch(() => {});
+  const mode = await page.locator('dialog[open] [data-testid=resend-mode]').getAttribute('data-mode'), modeDb = (await (await fetch(`${E.LIVE_URL}/rest/v1/integration_config?key=eq.resend&select=mode`, { headers: { apikey: E.LIVE_ANON, authorization: `Bearer ${admin.access_token}`, 'accept-profile': 'booking' } })).json())[0]?.mode;
+  expect(mode === modeDb, `${name}: sähköpostin tila UI:ssa (${mode}) = integration_config (${modeDb})`);
+  await page.click('dialog[open] [data-testid=resend-submit]'); await page.waitForSelector('dialog[open] [data-testid=resend-result]');
+  expect(await page.locator('dialog[open] [data-testid=resend-result]').getAttribute('data-queued') === 'true', `${name}: uudelleenlähetys jonoon (email_queued)`);
+  if (modeDb !== 'live') expect(/EI|ei lähde|ei lähetetä/i.test(await page.locator('dialog[open] [data-testid=resend-mode]').innerText()), `${name}: UI kertoo ettei viesti lähde oikeasti (${modeDb})`);
+  await shot(page, 'live-kuitti-laheta-uudelleen-390-fi');
+  const after = (await outboxCount(rc.id)) || [];
+  expect(after.length === before.length + 1 && after.every((x) => x.kind === 'receipt'), `${name}: email_outbox: +1 rivi (kind=receipt) uudelleenlähetyksestä (${before.length} → ${after.length}; tilat ${[...new Set(after.map((x) => x.status))]})`);
+  await closeDialogs(page);
+}
 const balanceOf = async (id) => (await must('admin_get_order', { p_order_id: id })).balance;
 async function writeSuite() {
   const name = 'live kirjoitus', page = await openPage(name, admin, { vp: 390 });
@@ -233,7 +265,8 @@ async function writeSuite() {
   let b = await balanceOf(o1.order_id);
   expect(b.paid === 50.03 && Math.abs(b.unpaid - (o1.total - 50.03)) < 0.03, `${name}: palvelimella maksettu 50,03 (paid ${b.paid}, unpaid ${b.unpaid})`);
   expect(await dd(page, 'order-unpaid') === b.unpaid, `${name}: käyttöliittymä päivittyi (jäännös ${b.unpaid})`);
-  expect(await page.locator('[data-testid=btn-receipts]').innerText().then((x) => /\(1\)/.test(x)), `${name}: kuitti syntyi (Kuitit (1))`);
+  expect(await page.locator('[data-testid=order-receipts] [data-testid=receipt-item]').count() === 1, `${name}: kuitti syntyi ja näkyy maksujen alla`);
+  await receiptUiChecks(page, name, o1.order_id, 50.03);
   await shot(page, 'live-maksu-kirjattu-390-fi');
   // BK001: maksettava muuttuu dialogin ollessa auki → amount_exceeds_unpaid
   await page.click('[data-testid=btn-record]'); await page.waitForSelector('dialog[open] form');
@@ -308,7 +341,8 @@ async function writeSuite() {
   await page.waitForTimeout(900); b = await balanceOf(o4.order_id);
   const ord4 = await must('admin_get_order', { p_order_id: o4.order_id });
   expect(b.refunded === 10 && ord4.refunds.length === 1 && ord4.receipts.some((r) => r.kind === 'refund_receipt'), `${name}: palvelimella hyvitys 10 € + hyvityskuitti (refunded ${b.refunded})`);
-  expect(await page.locator('[data-testid=btn-receipts]').innerText().then((x) => /\(2\)/.test(x)), `${name}: kuitit 2 (kuitti + hyvityskuitti)`);
+  expect(await page.locator('[data-testid=order-receipts] [data-testid=receipt-item]').count() === 2, `${name}: kuitit 2 (kuitti + hyvityskuitti)`);
+  expect(/^H-\d{4}-\d{6}$/.test(await page.locator('[data-testid=order-receipts] [data-testid=receipt-no]').nth(1).innerText()), `${name}: hyvityskuitin numero H-…`);
   await shot(page, 'live-hyvitys-tehty-390-fi');
   // BK001: hyvitettävä muuttuu dialogin ollessa auki
   await page.click('[data-testid=btn-refund]'); await page.waitForSelector('dialog[open] form');

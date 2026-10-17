@@ -71,13 +71,18 @@ async function newPage(name, { vp, lang = 'fi', listMode = 'mock', perms = PERMS
   await page.route(`${ORIGIN}/rest/v1/**`, async (route) => {
     const u = new URL(route.request().url()), m = route.request().method();
     const json = (body, status = 200) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
-    if (m !== 'POST') return json([]);   // select('payment_methods' | 'resources')
+    if (m !== 'POST') return json(u.pathname.endsWith('/integration_config') ? [{ mode: st.resendMode ?? 'dry_run' }] : []);   // select('payment_methods' | 'resources'); integration_config = sähköpostin tila (resend.mode)
     const rpcName = u.pathname.split('/rpc/')[1];
     let a = {}; try { a = JSON.parse(route.request().postData() || '{}'); } catch { /* tyhjä */ }
     const r = await rpcReply(st, rpcName, a);
     return json(r.body, r.status || 200);
   });
   if (admin) await ctx.addInitScript((s) => { try { localStorage.setItem('booking.session', JSON.stringify(s)); } catch { /* */ } }, { access_token: fakeJwt(), refresh_token: 'r', expires_at: 4102444800, user: { id: 'u1', email: 'manager@test.local' } });
+  // Edge-funktiot: receipt-pdf (verify_jwt=false; vain UUID-tokeni) ja report-pdf (vaatii JWT:n) palauttavat pienen PDF:n
+  const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 100]>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n');
+  await ctx.route(`${ORIGIN}/functions/v1/receipt-pdf**`, (route) => { const u = new URL(route.request().url()); st.pdfCalls = (st.pdfCalls || []).concat(u.search); return /^[0-9a-f-]{36}$/i.test(u.searchParams.get('t') || '') ? route.fulfill({ status: 200, contentType: 'application/pdf', body: PDF }) : route.fulfill({ status: 404, body: 'not found' }); });
+  await ctx.route(`${ORIGIN}/functions/v1/report-pdf**`, (route) => { const r = route.request(), u = new URL(r.url()); st.reportPdfCalls = (st.reportPdfCalls || []).concat({ search: u.search, auth: r.headers().authorization || null });
+    return /^Bearer /.test(r.headers().authorization || '') ? route.fulfill({ status: 200, contentType: 'application/pdf', body: PDF, headers: { 'access-control-allow-origin': '*' } }) : route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ ok: false, code: 'not_authenticated', message: 'Kirjaudu sisään' }) }); });
   return page;
 }
 const shot = (page, name) => page.screenshot({ path: join(SHOT, `${name}.png`), fullPage: true });
@@ -109,6 +114,70 @@ async function layoutChecks(page, label, scope = '.tl') {
   expect(!r.small.length, `${label}: alle 44 px kosketuskohteet: ${[...new Set(r.small)].slice(0, 5).join(' | ')}`);
   expect(!r.contrast.length, `${label}: kontrasti <4,5: ${[...new Set(r.contrast)].slice(0, 5).join(' | ')}`);
 }
+// ---- kuitit: lista maksujen alla, PDF-linkki, tekstidialogi (kopiointi), uudelleenlähetys, Maksut-listan kuittipalkki ----
+async function receiptChecks(page, name, vp, lang, T) {
+  const money = /€/;
+  await page.click('[data-testid=orders-reset]');
+  await page.selectOption('[data-testid=orders-f-pay]', 'partially_refunded'); await page.selectOption('[data-testid=orders-f-native]', 'native'); await page.waitForTimeout(350);
+  await page.locator('[data-testid=orders-list] > [data-testid=order]').first().locator('.tl-head').click();
+  await page.waitForSelector('[data-testid=order-receipts] [data-testid=receipt-item]');
+  const items = page.locator('[data-testid=order-receipts] [data-testid=receipt-item]');
+  expect(await items.count() >= 2, `${name}: tilauksella kuitti + hyvityskuitti (${await items.count()})`);
+  expect(await page.locator('.tl-detail section', { has: page.locator('[data-testid=order-receipts]') }).locator('h3').innerText().then((x) => x.startsWith(T['receipts.title'])), `${name}: Kuitit-otsikko`);
+  const order = await page.locator('.tl-detail section h3').allInnerTexts();
+  expect(order.findIndex((x) => x.startsWith(T['receipts.title'])) === order.findIndex((x) => x === T['order.payments']) + 1, `${name}: kuitit heti maksujen alla`);
+  const first = items.first(), no = await first.locator('[data-testid=receipt-no]').innerText();
+  expect(/^K-\d{4}-\d{6}$/.test(no) && money.test(await first.locator('[data-testid=receipt-total]').innerText()), `${name}: kuitin numero ja summa (${no})`);
+  expect(/^H-\d{4}-\d{6}$/.test(await items.nth(1).locator('[data-testid=receipt-no]').innerText()) && /^[−-]/.test(await items.nth(1).locator('[data-testid=receipt-total]').innerText()), `${name}: hyvityskuitti negatiivisena`);
+  const link = first.locator('a[data-testid=receipt-dl]'), href = await link.getAttribute('href');
+  expect(new RegExp(`^${ORIGIN}/functions/v1/receipt-pdf\\?t=[0-9a-f-]{36}$`).test(href) && await link.getAttribute('target') === '_blank' && /noopener/.test(await link.getAttribute('rel')) && await link.innerText() === T['receipt.downloadShort'], `${name}: PDF-linkki ${href}`);
+  const resp = await page.evaluate(async (u) => { const r = await fetch(u); return { status: r.status, type: r.headers.get('content-type'), head: new TextDecoder().decode((await r.arrayBuffer()).slice(0, 5)) }; }, href);
+  expect(resp.status === 200 && /application\/pdf/.test(resp.type) && resp.head === '%PDF-', `${name}: PDF-linkki palauttaa application/pdf (${JSON.stringify(resp)})`);
+  await layoutChecks(page, `${name} kuitit tilauksessa`);
+  if (lang === 'fi' && (vp === 390 || vp === 1280)) await page.locator('.tl-row.open').first().screenshot({ path: join(SHOT, `talous-tilaus-kuitit-${vp}-${lang}.png`) });
+  // Lataa → uusi välilehti (oikea klikkaus; funktio vastaa tokenilla)
+  page.st.pdfCalls = [];
+  const popupP = page.context().waitForEvent('page', { timeout: 5000 }).catch(() => null);
+  await link.click(); const popup = await popupP; await page.waitForTimeout(400);
+  expect(!!popup && page.st.pdfCalls.length >= 1 && page.url().includes('/talous'), `${name}: PDF avautuu uuteen välilehteen, hallinta pysyy auki`);
+  if (popup) await popup.close();
+  // Näytä kuitti: teksti (text_body), kopioitava
+  await first.locator('[data-testid=receipt-view]').click(); await page.waitForSelector('dialog[open] [data-testid=receipt-text]');
+  const txt = await page.locator('dialog[open] [data-testid=receipt-text]').innerText();
+  expect(txt.includes(no) && /KUITTI/.test(txt) && /(Yhteensä|Total) \(/.test(txt) || lang === 'en' && txt.includes(no), `${name}: kuitin teksti näkyy (${txt.slice(0, 40).replace(/\n/g, ' / ')})`);
+  expect(await page.locator('dialog[open] a[data-testid=receipt-dl]').count() === 1 && await page.locator('dialog[open] [data-testid=receipt-resend]').count() === 1, `${name}: dialogissa PDF + uudelleenlähetys`);
+  await layoutChecks(page, `${name} kuittidialogi`, 'dialog[open]');
+  if (lang === 'fi' && (vp === 390 || vp === 1280)) await page.locator('dialog[open]').screenshot({ path: join(SHOT, `talous-kuitti-teksti-${vp}-${lang}.png`) });
+  await page.click('dialog[open] [data-testid=receipt-copy]'); await page.waitForSelector('#toast.show');
+  const clip = await page.evaluate(() => navigator.clipboard.readText().catch(() => null));
+  expect(clip === null || clip.trim() === txt.trim(), `${name}: teksti kopioitui leikepöydälle`);
+  await page.keyboard.press('Escape'); await page.waitForSelector('dialog[open]', { state: 'detached' });
+  // Lähetä uudelleen: vahvistus + testitila-varoitus + tulosviesti
+  await first.locator('[data-testid=receipt-resend]').click(); await page.waitForSelector('dialog[open] [data-testid=resend-dialog]');
+  await page.waitForFunction((m) => document.querySelector('[data-testid=resend-mode]')?.dataset.mode === m, 'dry_run');
+  expect(await page.locator('dialog[open] [data-testid=resend-mode]').innerText() === T['resend.mode.dry_run'] && (await page.locator('dialog[open] [data-testid=resend-dialog] p').first().innerText()).includes(no), `${name}: vahvistus ja dry_run-varoitus`);
+  await layoutChecks(page, `${name} uudelleenlähetysdialogi`, 'dialog[open]');
+  if (lang === 'fi' && vp === 390) await page.locator('dialog[open]').screenshot({ path: join(SHOT, `talous-kuitti-laheta-uudelleen-${vp}-${lang}.png`) });
+  await page.click('dialog[open] [data-testid=resend-submit]'); await page.waitForSelector('dialog[open] [data-testid=resend-result]');
+  expect(await page.locator('dialog[open] [data-testid=resend-result]').getAttribute('data-queued') === 'true' && (await page.locator('dialog[open] [data-testid=resend-result]').innerText()).includes(no) && /dry_run/.test(await page.locator('dialog[open] [data-testid=resend-mode]').innerText()), `${name}: tulosviesti (jonossa, dry_run mainittu)`);
+  if (lang === 'fi' && vp === 390) await page.locator('dialog[open]').screenshot({ path: join(SHOT, `talous-kuitti-laheta-tulos-${vp}-${lang}.png`) });
+  await page.click('dialog[open] [data-testid=resend-close]'); await page.waitForSelector('dialog[open]', { state: 'detached' });
+  // Maksut-lista: kuittinumero + lataus joka rivillä jolla on kuitti
+  await page.click('[data-testid=tab-payments-btn]'); await page.waitForSelector('[data-testid=payments-list] [data-testid=payment]');
+  await page.click('[data-testid=payments-reset]'); await page.waitForTimeout(300);
+  const bars = page.locator('[data-testid=payments-list] [data-testid=payment-receipt-bar]'), nb = await bars.count();
+  expect(nb >= 10, `${name}: Maksut-listassa kuittipalkki (${nb})`);
+  expect(await bars.locator('[data-testid=payment-receipt-no]').evaluateAll((els) => els.every((e) => /^K-\d{4}-\d{6}$/.test(e.textContent))) && await bars.locator('a[data-testid=payment-receipt-dl]').evaluateAll((els, o) => els.length > 0 && els.every((e) => new RegExp(`^${o}/functions/v1/receipt-pdf\\?t=[0-9a-f-]{36}$`).test(e.getAttribute('href'))), ORIGIN), `${name}: Maksut-listan kuittinumerot ja PDF-linkit`);
+  await layoutChecks(page, `${name} maksut kuittipalkit`);
+  if (lang === 'fi' && (vp === 390 || vp === 1280)) { const b = await page.locator('[data-testid=payments-list]').boundingBox(); await page.screenshot({ path: join(SHOT, `talous-maksut-kuitit-${vp}-${lang}.png`), fullPage: true, clip: { x: 0, y: b.y - 120, width: vp, height: Math.min(900, b.height + 120) } }); }
+  // rivin avaus: kuitit-osio (numero, summa, Lataa / Näytä / Lähetä uudelleen)
+  await page.locator('[data-testid=payments-list] > [data-testid=payment]', { has: page.locator('[data-testid=payment-receipt-bar]') }).first().locator('.tl-head').click();
+  await page.waitForSelector('[data-testid=payment-receipts] [data-testid=receipt-item]');
+  const pi = page.locator('[data-testid=payment-receipts] [data-testid=receipt-item]').first();
+  expect(await pi.locator('a[data-testid=receipt-dl]').count() === 1 && await pi.locator('[data-testid=receipt-view]').count() === 1 && await pi.locator('[data-testid=receipt-resend]').count() === 1 && money.test(await pi.locator('[data-testid=receipt-total]').innerText()), `${name}: maksun avauksessa kuitin toiminnot ja summa`);
+  await page.click('[data-testid=payments-reset]'); await page.waitForTimeout(300);   // lista uudelleen (rivit suljettuina)
+  await page.click('[data-testid=tab-orders-btn]'); await page.click('[data-testid=orders-reset]'); await page.waitForTimeout(300);   // suodattimet pois ennen seuraavia vaiheita
+}
 const nbsp = /[\s\u00a0\u202f]/g;
 const num = (s) => +String(s).replace(nbsp, '').replace(/\u2212/g, '-').replace(',', '.').replace(/[^\d.\-]/g, '');
 
@@ -118,6 +187,7 @@ async function adminSuite() {
   for (const lang of ['fi', 'en']) for (const vp of VPS) {
     const T = TEXTS[lang], name = `admin ${lang} ${vp}`;
     const page = await newPage(name, { vp, lang });
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write'], { origin: ORIGIN }).catch(() => {});
     await page.goto(`${ORIGIN}/admin/#/talous?mock=1&lang=${lang}`);
     await page.waitForSelector('[data-testid=orders-list] [data-testid=order]');
     expect(await page.locator('#nav a', { hasText: T.nav }).count() === 1, `${name}: navigaatiossa pitää olla "${T.nav}"`);
@@ -140,7 +210,7 @@ async function adminSuite() {
     await rows().first().locator('.tl-head').click();
     await page.waitForSelector('[data-testid=order-actions]');
     expect(await page.locator('[data-testid=order-reservations]').count() === 1 && await page.locator('[data-testid=order-payments], .tl-panel .tl-empty').count() >= 1, `${name}: laajennuksessa varaukset ja maksut`);
-    for (const id of ['btn-add', 'btn-link', 'btn-receipts', 'btn-refund']) expect(await page.locator(`[data-testid=${id}]`).first().count() === 1, `${name}: nappi ${id}`);
+    for (const id of ['btn-add', 'btn-link', 'btn-refund']) expect(await page.locator(`[data-testid=${id}]`).first().count() === 1, `${name}: nappi ${id}`);
     expect(await page.locator('[data-testid=btn-add]').first().innerText() === T['btn.addToOrder'], `${name}: "Lisää tilaukseen" -teksti`);
     await layoutChecks(page, `${name} tilaus laajennettuna`);
     if (vp === 390 || vp === 1280) await shot(page, `talous-tilaus-auki-${vp}-${lang}`);
@@ -181,6 +251,8 @@ async function adminSuite() {
     await page.locator('[data-testid=pg-last]').first().click(); await page.waitForFunction(() => document.querySelector('[data-testid=pager]').dataset.page === '240');
     expect(await rows().count() === 50, `${name}: viimeinen sivu 50 riviä`);
     await page.selectOption('[data-testid=pagesize]', '25');
+    // --- Kuitit ---
+    await receiptChecks(page, name, vp, lang, T);
     // --- Maksut ---
     await page.click('[data-testid=tab-payments-btn]');
     await page.waitForSelector('[data-testid=payments-list] [data-testid=payment]');
@@ -310,13 +382,25 @@ async function adminSuite() {
     await page.fill('[data-testid=orders-f-from]', '2026-01-01'); await page.fill('[data-testid=orders-search]', 'Virtanen'); await page.keyboard.press('Enter'); await page.waitForTimeout(300);
     a = calls('admin_list_orders').at(-1).args; expect(a.p_from === '2026-01-01' && a.p_search === 'Virtanen', `${name}: aikaväli + haku palvelimelle`);
     await page.click('[data-testid=orders-reset]'); await page.waitForTimeout(250);
-    // laajennus: admin_get_order (balance, items, lines) + napit pois käytöstä (LIVE_ACTIONS)
+    // laajennus: admin_get_order (balance, items, lines) + napit sääntöjen mukaan
     await page.selectOption('[data-testid=orders-f-pay]', 'paid'); await page.waitForTimeout(250);
     await page.locator('[data-testid=orders-list] > [data-testid=order]').first().locator('.tl-head').click(); await page.waitForSelector('[data-testid=order-actions]');
     expect(calls('admin_get_order').length === 1 && typeof calls('admin_get_order')[0].args.p_order_id === 'number', `${name}: admin_get_order kutsuttu`);
-    // LIVE_ACTIONS päällä: oikeassa tilassa napit ovat käytössä palvelimen sääntöjen mukaan (tässä: maksettu natiivitilaus → lisäys sallittu, linkki ei (ei maksettavaa), hyvitys vaatii payments.refund (PERMS ilman))
+    // oikeassa tilassa napit ovat käytössä palvelimen sääntöjen mukaan (tässä: maksettu natiivitilaus → lisäys sallittu, linkki ei (ei maksettavaa), hyvitys vaatii payments.refund (PERMS ilman))
     expect(!(await page.locator('[data-testid=btn-add]').first().isDisabled()) && await page.locator('[data-testid=btn-link]').first().isDisabled() && await page.locator('[data-testid=btn-refund]').first().isDisabled(), `${name}: napit oikeassa tilassa (lisäys käytössä, linkki/hyvitys sääntöjen mukaan)`);
-    expect(await page.locator('[data-testid=btn-record]').count() === 1 && await page.locator('.tl-detail .tl-hint').count() === 0, `${name}: ei "odottaa RPC"-vihjettä kun toiminnot on kytketty`);
+    expect(await page.locator('[data-testid=btn-record]').count() === 1 && !(await page.locator('.tl-detail').innerText()).match(/vaiheessa|phase [A-D]|odottaa palvelimen/i), `${name}: ei stub-tekstejä`);
+    // kuitit oikealla RPC-polulla: admin_get_receipt (teksti), admin_resend_receipt, PDF-linkki tokenilla, sähköpostin tila integration_config:sta
+    await page.waitForSelector('[data-testid=order-receipts] [data-testid=receipt-item]');
+    const ri = page.locator('[data-testid=order-receipts] [data-testid=receipt-item]').first();
+    await ri.locator('[data-testid=receipt-view]').click(); await page.waitForSelector('dialog[open] [data-testid=receipt-text]');
+    const gr = calls('admin_get_receipt').at(-1); expect(!!gr && typeof gr.args.p_receipt_id === 'number' && Object.keys(gr.args).join() === 'p_receipt_id', `${name}: admin_get_receipt p_receipt_id ${JSON.stringify(gr?.args)}`);
+    await page.keyboard.press('Escape'); await page.waitForSelector('dialog[open]', { state: 'detached' });
+    await ri.locator('[data-testid=receipt-resend]').click(); await page.waitForSelector('dialog[open] [data-testid=resend-dialog]');
+    await page.waitForFunction(() => document.querySelector('[data-testid=resend-mode]')?.dataset.mode === 'dry_run');
+    await page.click('dialog[open] [data-testid=resend-submit]'); await page.waitForSelector('dialog[open] [data-testid=resend-result]');
+    const rr = calls('admin_resend_receipt'); expect(rr.length === 1 && rr[0].args.p_receipt_id === gr.args.p_receipt_id && await page.locator('dialog[open] [data-testid=resend-result]').getAttribute('data-queued') === 'true', `${name}: admin_resend_receipt kutsuttu kerran samalla kuitilla`);
+    expect(await page.locator('dialog[open] [data-testid=resend-mode]').innerText() === TEXTS.fi['resend.mode.dry_run'], `${name}: dry_run-varoitus tulosviestissä`);
+    await page.keyboard.press('Escape'); await page.waitForSelector('dialog[open]', { state: 'detached' });
     expect(await page.locator('[data-testid=order-unpaid]').count() === 1 && await page.locator('[data-testid=order-total]').count() === 1, `${name}: summat näkyvät`);
     await shot(page, 'talous-oikea-tila-tilaus-390-fi');
     // Maksut: laskurivit haetaan tilaukselta (admin_list_payments ei palauta rivejä)
@@ -349,6 +433,13 @@ async function adminSuite() {
     const buf = await readFile(await dl.path()), txt = buf.toString('utf8');
     expect(calls('admin_report_csv').length === 1 && calls('admin_report_csv')[0].args.p_from === `${mon}-01` && calls('admin_report_csv')[0].args.p_kind === 'lines', `${name}: admin_report_csv kutsuttu (${JSON.stringify(calls('admin_report_csv')[0]?.args)})`);
     expect(buf[0] === 0xEF && buf[1] === 0xBB && txt.slice(1).startsWith('pvm;kuitti_no;tilaus_no;maksutapa;tuoteryhmä;tuote;määrä;brutto;alv_%;alv_€;netto;hyvitys') && /^kuitit_lines_\d{4}-\d{2}-01_\d{4}-\d{2}-\d{2}\.csv$/.test(dl.suggestedFilename()), `${name}: palvelimen CSV sellaisenaan (${dl.suggestedFilename()})`);
+    // report-pdf (verify_jwt=true): Lataa PDF → fetch JWT:llä → tiedosto
+    await page.click('[data-testid=r-kind-daily]'); await page.waitForSelector('[data-testid=r-gross]'); await page.waitForFunction(() => !document.querySelector('[data-testid=r-pdf-server]').disabled);
+    const [pdl] = await Promise.all([page.waitForEvent('download'), page.click('[data-testid=r-pdf-server]')]);
+    expect(/^raportti_paiva_\d{4}-\d{2}-\d{2}\.pdf$/.test(pdl.suggestedFilename()) && page.st.reportPdfCalls?.length === 1 && /kind=daily&date=\d{4}-\d{2}-\d{2}/.test(page.st.reportPdfCalls[0].search) && /^Bearer /.test(page.st.reportPdfCalls[0].auth), `${name}: report-pdf JWT:llä (${JSON.stringify(page.st.reportPdfCalls)})`);
+    await page.click('[data-testid=r-kind-monthly]'); await page.waitForSelector('[data-testid=r-daily]'); await page.waitForFunction(() => !document.querySelector('[data-testid=r-pdf-server]').disabled);
+    const [pdl2] = await Promise.all([page.waitForEvent('download'), page.click('[data-testid=r-pdf-server]')]);
+    expect(/^raportti_kuukausi_\d{4}-\d{2}\.pdf$/.test(pdl2.suggestedFilename()) && /kind=month&ym=\d{4}-\d{2}/.test(page.st.reportPdfCalls[1].search), `${name}: report-pdf kuukausi`);
     await page.context().close();
   }
   // ---- RPC:t puuttuvat: kaunis "ominaisuus ei vielä käytössä" + esimerkkidata; jokaista puuttuvaa RPC:tä kutsutaan vain kerran ----

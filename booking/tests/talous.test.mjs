@@ -140,10 +140,11 @@ test('Datakerros: ?mock=1 → mock; oikea tila lähettää sopimuksen nimet ja p
   assert.deepEqual(calls.slice(3).map((c) => c[0]), ['admin_report_daily', 'admin_report_month', 'admin_get_order', 'admin_list_addons']);
   assert.deepEqual(calls[3][1], { p_date: '2026-10-01' }); assert.deepEqual(calls[4][1], { p_ym: '2026-10' }); assert.deepEqual(calls[5][1], { p_order_id: 7 });
 });
-test('Datakerros: kirjoittavat toiminnot – LIVE_ACTIONS päällä, parametrit, ei mock-varakutsua oikeassa tilassa', async () => {
-  for (const k of ['addToOrder', 'createPaymentLink', 'refund', 'recordPayment']) assert.equal(A.LIVE_ACTIONS[k], true, `LIVE_ACTIONS.${k}`);
+test('Datakerros: kirjoittavat toiminnot – ei käyttöönottolippuja, parametrit, ei mock-varakutsua oikeassa tilassa', async () => {
+  assert.equal(A.LIVE_ACTIONS, undefined, 'LIVE_ACTIONS-liput on poistettu');
   const real = A.createTalousApi({ rpc: async () => ({ ok: true }), mock: false });
-  for (const k of ['addToOrder', 'createPaymentLink', 'refund', 'recordPayment']) assert.equal(real.actionLive(k), true);
+  for (const k of ['addToOrder', 'createPaymentLink', 'refund', 'recordPayment', 'resendReceipt']) assert.equal(typeof real[k], 'function', k);
+  assert.equal(real.actionLive, undefined);
   const calls = []; const be = A.rpcBackend(async (n, a) => { calls.push([n, a]); return { ok: true }; });
   await be.addToOrder({ orderId: 1, items: [{ type: 'addon' }], createLink: true, sendEmail: false, note: 'n' }); await be.createPaymentLink({ orderId: 1, sendEmail: true, expiresDays: 7 }); await be.refund({ paymentId: 3, amount: 4.5, reason: 'r' }); await be.reportCsv({ from: '2026-10-01', to: '2026-10-31' });
   await be.recordPayment({ orderId: 2, method: 'cash', amount: 12.5, note: 'n' }); await be.listVatRates();
@@ -153,11 +154,11 @@ test('Datakerros: kirjoittavat toiminnot – LIVE_ACTIONS päällä, parametrit,
   // kirjoitus ei koskaan putoa mockiin oikeassa tilassa: puuttuva RPC → FeatureNotReady (ei näennäistä onnistumista); palvelinvirhe (BK001, status 400/404) välittyy sellaisenaan
   const miss = Object.assign(new Error('Could not find the function booking.admin_refund(p_amount, p_payment_id) in the schema cache'), { status: 404, code: 'long text', details: { code: 'PGRST202' } });
   const api1 = A.createTalousApi({ rpc: async () => { throw miss; }, mock: false });
-  await assert.rejects(() => api1.refund({ paymentId: 1, amount: 1, reason: 'abc' }), (e) => e instanceof A.FeatureNotReady); assert.equal(api1.actionLive('refund'), false); assert.deepEqual(api1.missing, ['admin_refund']);
+  await assert.rejects(() => api1.refund({ paymentId: 1, amount: 1, reason: 'abc' }), (e) => e instanceof A.FeatureNotReady); assert.deepEqual(api1.missing, ['admin_refund']);
   const bk = Object.assign(new Error('Tilausta ei löydy'), { status: 404, code: 'not_found', details: { code: 'BK001', details: 'not_found' } });
   assert.ok(!A.isMissingRpc(bk), 'BK001 not_found ei ole puuttuva funktio');
   await assert.rejects(() => A.createTalousApi({ rpc: async () => { throw bk; }, mock: false }).recordPayment({ orderId: 1, method: 'cash', amount: 1 }), (e) => e.code === 'not_found');
-  const m = A.createTalousApi({ mock: true, mockFactory: () => mock }); assert.equal(m.actionLive('refund'), true);
+  const m = A.createTalousApi({ mock: true, mockFactory: () => mock });
   const pd = mock.orders.find((o) => o.is_native && o.payments.some((p) => p.status === 'paid' && p.amount > 2));
   assert.equal((await m.refund({ paymentId: pd.payments.find((p) => p.status === 'paid').payment_id, amount: 1, reason: 'x' })).mock, true);
   const un = mock.orders.find((o) => o.is_native && o.unpaid_amount > 5);
@@ -260,4 +261,49 @@ test('Raportti (sopimus §11, booking_35): period.kind palvelimelta, gross_after
   const t = A.normReport({ period: { ...day, kind: 'day' }, totals: { gross: 100, refunds_gross: -30, gross_after_refunds: 70, net_after_refunds: 999, vat_after_refunds: 13.55, net_ex_vat_after_refunds: 56.45 } }).totals;
   assert.equal(t.gross_after_refunds, 70); assert.equal(t.vat_after_refunds, 13.55); assert.equal(t.net_ex_vat_after_refunds, 56.45); assert.ok(!('net_after_refunds' in t));
   assert.equal(A.normReport({ period: day, totals: { gross: 100, refunds_gross: -30, net_after_refunds: 999 } }).totals.gross_after_refunds, 70, 'puuttuessa gross + refunds_gross (ei deprecated-kenttää)');
+});
+
+test('Kuitit: admin_get_receipt / admin_resend_receipt -parametrit, normalisointi ja PDF-linkin muoto', async () => {
+  const calls = []; const be = A.rpcBackend(async (n, a) => { calls.push([n, a]); return { ok: true }; });
+  await be.getReceipt(19); await be.resendReceipt(19);
+  assert.deepEqual(calls, [['admin_get_receipt', { p_receipt_id: 19 }], ['admin_resend_receipt', { p_receipt_id: 19 }]]);
+  const rc = A.normReceipt({ id: 19, receipt_no: 'K-2026-000001', kind: 'receipt', issued_at: '2026-10-17T09:47:28Z', total_gross: '31.00', snapshot: { v: 1 }, text_body: 'KUITTI\n', public_token: '11111111-2222-4333-8444-555555555555', pdf_url: 'https://x/functions/v1/receipt-pdf?t=1', sent_at: null, order_id: 5, payment_id: 24, refund_id: null });
+  assert.deepEqual([rc.id, rc.receipt_no, rc.total, rc.text_body, rc.payment_id, rc.sent_at], [19, 'K-2026-000001', 31, 'KUITTI\n', 24, null]);
+  // tilauksen kuittiviite: top-level (total, payment_id) ja maksun alla (ilman summaa)
+  const o = A.normOrder({ order_id: 1, order_no: 15001, payments: [{ id: 24, receipts: [{ id: 19, receipt_no: 'K-2026-000001', kind: 'receipt', issued_at: 'x', public_token: 't', sent_at: null }] }], receipts: [{ id: 19, receipt_no: 'K-2026-000001', kind: 'receipt', issued_at: 'x', total: 31, payment_id: 24, refund_id: null, public_token: 't', sent_at: null }] });
+  assert.deepEqual([o.receipts[0].total, o.receipts[0].payment_id, o.payments[0].receipts[0].total, o.payments[0].receipt_no], [31, 24, null, 'K-2026-000001']);
+  // PDF-linkki: <SUPABASE_URL>/functions/v1/receipt-pdf?t=<public_token> (URL io.functionUrl:stä = sb.js, sama muodostus kuin fn())
+  const fu = (name, q) => `https://abc.supabase.co/functions/v1/${name}?${new URLSearchParams(q)}`;
+  const api = A.createTalousApi({ rpc: async () => ({}), mock: false, io: { functionUrl: fu } });
+  assert.equal(api.receiptPdfUrl('11111111-2222-4333-8444-555555555555'), 'https://abc.supabase.co/functions/v1/receipt-pdf?t=11111111-2222-4333-8444-555555555555');
+  assert.equal(api.receiptPdfUrl(null), ''); assert.equal(A.createTalousApi({ mock: true, mockFactory: () => mock }).receiptPdfUrl('x'), '');
+  // sähköpostin tila: integration_config.resend.mode (luku henkilökunnalle); virhe → null
+  const sel = []; const ok = A.createTalousApi({ rpc: async () => ({}), mock: false, io: { select: async (t, q) => { sel.push([t, q]); return [{ mode: 'dry_run' }]; } } });
+  assert.equal(await ok.resendMode(), 'dry_run'); assert.deepEqual(sel, [['integration_config', { select: 'mode', key: 'eq.resend' }]]);
+  assert.equal(await A.createTalousApi({ rpc: async () => ({}), mock: false, io: { select: async () => { throw new Error('x'); } } }).resendMode(), null);
+  // uudelleenlähetys: oikeassa tilassa vain palvelimelle; puuttuva RPC → FeatureNotReady, ei mock-varaa
+  const res = await A.createTalousApi({ rpc: async () => ({ ok: true, email_queued: true }), mock: false }).resendReceipt(19); assert.equal(res.email_queued, true);
+  const miss = Object.assign(new Error('Could not find the function booking.admin_resend_receipt'), { status: 404, code: 'PGRST202', details: { code: 'PGRST202' } });
+  await assert.rejects(() => A.createTalousApi({ rpc: async () => { throw miss; }, mock: false }).resendReceipt(19), (e) => e instanceof A.FeatureNotReady);
+});
+test('Kuitit: mock vastaa admin_get_receipt / admin_resend_receipt sopimuksen muodossa (teksti + snapshot)', async () => {
+  const o = mock.orders.find((x) => x.is_native && x.receipts.some((r) => r.kind === 'refund_receipt'));
+  const full = await mock.rpc('admin_get_order', { p_order_id: o.order_id });
+  assert.ok(full.receipts.every((r) => r.total != null && r.payment_id != null && r.public_token));
+  for (const ref of full.receipts) {
+    const r = await mock.rpc('admin_get_receipt', { p_receipt_id: ref.id });
+    for (const k of ['id', 'receipt_no', 'kind', 'issued_at', 'total_gross', 'snapshot', 'text_body', 'public_token', 'pdf_url', 'sent_at']) assert.ok(k in r, k);
+    assert.match(r.text_body, new RegExp(r.receipt_no)); assert.equal(r.snapshot.v, 1); assert.equal(r.snapshot.document, r.kind); assert.equal(Math.sign(r.total_gross), r.kind === 'refund_receipt' ? -1 : 1);
+    assert.match(r.text_body, r.kind === 'refund_receipt' ? /HYVITYSKUITTI/ : /KUITTI/);
+  }
+  assert.deepEqual(await mock.rpc('admin_resend_receipt', { p_receipt_id: full.receipts[0].id }), { ok: true, mock: true, email_queued: true });
+  await assert.rejects(() => mock.rpc('admin_get_receipt', { p_receipt_id: 1 }), (e) => e.code === 'receipt_not_found');
+});
+test('Talous: ei "tulee vaiheessa"-stubitekstejä eikä käyttöönottolippuja (FI/EN)', () => {
+  for (const lang of ['fi', 'en']) for (const [k, v] of Object.entries(TEXTS[lang])) assert.ok(!/vaiheessa\s+[A-D]\b|phase\s+[A-D]\b|tulee (käyttöön|myöhemmin)|will (be available|come) (in|later)|ei vielä käytössä – odottaa/i.test(String(v)), `${lang}.${k}: ${v}`);
+  for (const f of ['admin/talous-api.js', 'admin/talous-mock.js', 'admin/talous-i18n.js', ...readdirSync(join(root, 'admin/views')).filter((x) => /^talous/.test(x)).map((x) => `admin/views/${x}`)]) {
+    const src = readFileSync(join(root, f), 'utf8');
+    assert.ok(!/LIVE_ACTIONS|actionLive|vaiheessa [A-D]\b|\bphase [A-D]\b/.test(src), `${f}: stubi/lippu jäljellä`);
+  }
+  for (const k of ['receipts.title', 'receipts.none', 'receipt.download', 'receipt.view', 'receipt.resend', 'receipt.copy', 'receipt.copied', 'resend.confirm', 'resend.queued', 'resend.notQueued', 'resend.mode.live', 'resend.mode.dry_run', 'resend.mode.off', 'resend.mode.unknown', 'err.receipt_not_found', 'r.pdfServer']) assert.ok(TEXTS.fi[k] && TEXTS.en[k], k);
 });

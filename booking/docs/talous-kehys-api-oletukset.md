@@ -6,9 +6,9 @@ Tila: 17.10.2026. UI hallintaan (**Talous**: Tilaukset, Maksut, Raportit) ja asi
 
 | Tiedosto | Tehtävä |
 |---|---|
-| `admin/talous-api.js` | **Ainoa** paikka, joka tuntee RPC-nimet, `p_`-parametrit ja vastausmuodot (`RPC`, `rpcBackend`, normalisoijat, `LIVE_ACTIONS`) |
+| `admin/talous-api.js` | **Ainoa** paikka, joka tuntee RPC-nimet, `p_`-parametrit ja vastausmuodot (`RPC`, `rpcBackend`, normalisoijat) |
 | `admin/talous-mock.js` | Mock-PALVELIN: `createMock().rpc(nimi, parametrit)` vastaa sopimuksen RPC:itä (12 000 tilausta, ~8 700 maksua, deterministinen, keksittyä dataa) |
-| `admin/views/talous*.js` | Näkymät (ei RPC-tietoa): `talous.js` (sivu, välilehdet, kielivalinta, banneri), `-orders`, `-payments`, `-reports`, `-ui` |
+| `admin/views/talous*.js` | Näkymät (ei RPC-tietoa): `talous.js` (sivu, välilehdet, kielivalinta, banneri), `-orders`, `-payments`, `-reports`, `-receipts` (kuitit: PDF-linkki, teksti, uudelleenlähetys), `-ui` |
 | `admin/csv.js` | Oma RFC 4180 -CSV: UTF-8 BOM, `;`, CRLF, desimaalipilkku, kaavainjektion esto |
 | `admin/talous-i18n.js`, `talous-texts.js` | FI/EN (`?lang=en` tai kielipainike; avaimet samat, node-testi tarkistaa) |
 | `shop/src/order*.js` | Asiakkaan tilaussivu: **`/tilaus/?t=<token>`** (= `settings.order_page_path`, sopimus/booking_29/34), EN-sivu `/en/order/?t=<token>`; tilauksen `locale` ohjaa oikean kielen sivulle |
@@ -19,9 +19,11 @@ Tila: 17.10.2026. UI hallintaan (**Talous**: Tilaukset, Maksut, Raportit) ja asi
 `createTalousApi({ rpc })` rakentaa `rpcBackend(rpc)`:n; mock käyttää samaa koodia `createMock().rpc`-funktiolla. Tilat:
 
 * `?mock=1` (kyselyosassa tai `#/talous?mock=1`) → kaikki data mockista, banneri "Esimerkkidata", kirjoittavat napit toimivat mockina (ei tallenna).
-* Muuten **oikea tila**. Jos jokin RPC puuttuu palvelimelta (404 / `PGRST202` / `42883`), **vain se toiminto** siirtyy mockiin ja sivu näyttää bannerin "Ominaisuus ei vielä käytössä – palvelimelta puuttuu: <rpc>". Muut toiminnot pysyvät oikeina (esim. tilaukset oikeita, raportit mockia kunnes vaihe D on tuotannossa).
-* Kirjoittavat toiminnot (`LIVE_ACTIONS` talous-api.js:ssä: `addToOrder`, `createPaymentLink`, `refund`, `recordPayment`) ovat **päällä (true)**: ne kokeiltiin ensin testiprojektissa (live-e2e), ja ne ovat vain hallinnassa oikeuksien takana (`payments.manage`, hyvitys `payments.refund`, käsinkirjaus verkkomaksulle vain admin). Oikeassa tilassa kirjoitus **ei koskaan putoa mockiin** (404/virhe näytetään käyttäjälle). Lipun voi sulkea yhdellä rivillä/toiminto.
-* Asiakkaan sivu: **ei automaattista mockia**. Puuttuva `public_*`-RPC (vaihe C) → "Tilaussivu ei ole vielä käytössä" + yhteystiedot. Mock vain `?mock=1`.
+* Muuten **oikea tila**. Jos jokin RPC puuttuu palvelimelta (404 / `PGRST202` / `42883`), **vain se toiminto** siirtyy mockiin ja sivu näyttää bannerin "Ominaisuus ei vielä käytössä – palvelimelta puuttuu: <rpc>". Muut toiminnot pysyvät oikeina (esim. tilaukset oikeita, raportit mockia jos raportti-RPC:t puuttuvat vanhasta kannasta).
+* Kirjoittavat toiminnot (`addToOrder`, `createPaymentLink`, `refund`, `recordPayment`, `resendReceipt`) ovat **aina päällä** (ei käyttöönottolippuja): ne kokeiltiin testiprojektissa (live-e2e) ja ovat vain hallinnassa oikeuksien takana (`payments.manage`, hyvitys `payments.refund`, käsinkirjaus verkkomaksulle vain admin). Nappi on pois käytöstä vain kun toiminto ei sovellu tilaukselle (selite näkyy napin title-tekstinä). Oikeassa tilassa kirjoitus **ei koskaan putoa mockiin** (404/virhe näytetään käyttäjälle).
+* **Kuitit (§3, §9.1):** `admin_get_order.receipts[]` (`id, receipt_no, kind, issued_at, total, payment_id, refund_id, public_token, sent_at`) listataan maksujen alla. **PDF** = tavallinen linkki `<SUPABASE_URL>/functions/v1/receipt-pdf?t=<public_token>` (`sb.js` `functionUrl`, uusi välilehti; `verify_jwt=false`). Osoite muodostetaan hallinnan omasta konfiguraatiosta, **ei** `admin_get_receipt().pdf_url`-kentästä: sen isäntä on `settings.functions_base_url`, joka testiprojektissa osoittaa tuotantoon. **Teksti** = `admin_get_receipt(p_receipt_id).text_body` (dialogi, Kopioi teksti). **Uudelleenlähetys** = `admin_resend_receipt(p_receipt_id)` → `{ok, email_queued}` (oikeus `payments.manage`; `email_queued=false` = asiakkaalla ei kelvollista sähköpostia). Vastaus ei kerro sähköpostin tilaa, joten UI lukee `integration_config.resend.mode` (henkilökunnan SELECT, RLS): `dry_run`/`off` → selvä varoitus ettei viesti lähde oikeasti; `live` → lähtee minuutin sisällä.
+* **Raportin PDF:** `report-pdf` (`verify_jwt=true`) haetaan `fetch` + JWT → Blob → lataus (`sb.js` `fnBlob`); mockissa selaimen tulostus.
+* Asiakkaan sivu: **ei automaattista mockia**. Puuttuva `public_*`-RPC → "Tilaussivu ei ole vielä käytössä" + yhteystiedot. Mock vain `?mock=1`.
 
 ## Käytetyt RPC:t (sopimuksen mukaan)
 
@@ -36,6 +38,7 @@ Tila: 17.10.2026. UI hallintaan (**Talous**: Tilaukset, Maksut, Raportit) ja asi
 | Hyvitys | `admin_refund(p_payment_id, p_amount, p_reason)` – vaatii `payments.refund` (nappi disabloitu ilman oikeutta); syy vähintään 3 merkkiä (UI tarkistaa) |
 | Maksun kirjaus | `admin_record_payment` (Kirjaa maksu -ikkuna; käsinkirjaus verkkomaksulle `p_manual_done` vain admin) |
 | ALV-huomautus | `admin_list_vat_rates()` – puuttuvat ALV-kannat (`missing`) näytetään tiedotteena; virhe/puuttuva RPC → ei huomautusta |
+| Kuitit | `admin_get_receipt(p_receipt_id)` → `{id, receipt_no, kind, issued_at, total_gross, snapshot, text_body, public_token, pdf_url, sent_at, …}`; `admin_resend_receipt(p_receipt_id)` → `{ok, email_queued}`; PDF: `GET <SUPABASE_URL>/functions/v1/receipt-pdf?t=<public_token>` |
 | Raportit (vaihe D) | `admin_report_daily(p_date)`, `admin_report_month(p_ym)`; CSV: `admin_report_csv(p_from, p_to, p_kind='lines'|'vat')` |
 | Asiakas (vaihe C) | `public_get_order(p_token)`, `public_add_to_order(p_token, p_items)`, `public_request_cancel(p_token, p_reason)`, `public_get_receipt(p_order_token, p_receipt_no)` ← huom. kuitissa parametri `p_order_token` |
 
@@ -46,7 +49,7 @@ Virheet: `admin_*` nostaa SQLSTATE BK001 (koodi `details`-kentässä → `ApiErr
 1. **CSV**: palvelimen `admin_report_csv(p_kind='lines')` (booking_34) tuottaa pyydetyt 12 saraketta (`pvm;kuitti_no;tilaus_no;maksutapa;tuoteryhmä;tuote;määrä;brutto;alv_%;alv_€;netto;hyvitys`; pvm PP.KK.VVVV, `hyvitys` = kyllä/ei, hyvitysrivin määrä negatiivinen). UI lataa palvelimen CSV:n sellaisenaan (BOM, `;`, CRLF). `csv.js` jää samoille sarakkeille varakirjoittajaksi/testattavaksi.
 2. **Maksutila-lajittelu**: pysyy `unpaid_desc` (maksamattomat ensin); "Ensimmäinen varauspäivä" = `start_*`.
 3. **Raportin `totals`** (sopimus §11, booking_35): `gross`/`net`/`vat` = myynti (kuitit) ennen hyvityksiä; `refunds_gross` **negatiivinen**; **`gross_after_refunds`** = brutto hyvitysten jälkeen (UI:n kortti "Myynti hyvitysten jälkeen (brutto)"); `net_after_refunds` on **DEPRECATED** (sama arvo, UI ei käytä sitä); `vat_after_refunds` = ALV ja `net_ex_vat_after_refunds` = veroton summa hyvitysten jälkeen (`gross_after_refunds = vat_after_refunds + net_ex_vat_after_refunds`). `period.kind` = `'day'|'month'` luetaan palvelimelta; varapäättely (sama päivä = päivä) vain jos kenttä puuttuu. `by_vat`/`by_method_vat`/`by_category` sisältävät hyvitykset negatiivisina.
-4. **LIVE_ACTIONS** päällä, ks. yllä.
+4. Kirjoittavat toiminnot päällä ilman lippuja, ks. yllä.
 5. **Raporttien oikeudet** (sopimus §11, tarkoituksellinen): `admin_report_daily` = `reports.daily` TAI `reports.view`; `admin_report_month`, `admin_report_csv` ja `report-pdf?kind=month` = vain `reports.view`. UI: sivu vaatii `payments.manage`; **Raportit-välilehti ja päiväraportti näkyvät** kun käyttäjällä on `reports.daily` tai `reports.view` (muuten välilehti piilotetaan); **kuukausivalinta ja CSV ovat pois käytöstä** ilman `reports.view`:tä ja näytetään selkeä ilmoitus (`r-limited`). Oikeudet luetaan aina oikealta käyttäjältä (myös `?mock=1`).
 6. **Tilaussivun polku**: `/tilaus/` (+ `/en/order/`), ei aliaksia `/varaa/tilaus/`. Maksulinkin osoite = asiakassivuston origin + `order_page_path` + `?t=<public_token>` (linkin isäntä ei ole hallinnan osoite).
 7. **Kuittilogo**: `public/img/logo-kuitti.png` (läpinäkyvä, 600 px, Havuhattu-merkki, tumma vihreä) → `seller.logo_url` = `<sivusto>/img/logo-kuitti.png`.

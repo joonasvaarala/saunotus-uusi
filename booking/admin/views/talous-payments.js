@@ -1,9 +1,10 @@
 // Talous › Maksut: aikajärjestyksessä (uusin ensin), haku, suodattimet, palvelinpuolinen sivutus; rivi aukeaa maksun laskuriveiksi.
 import { h } from '../ui.js';
+import { pdfLink, receiptsList } from './talous-receipts.js';
 import { t, fmt } from '../talous-i18n.js';
 import { METHODS, PSTAT, methodLabel, pstatLabel, pstatBadge, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, dateFld, searchFld, expandRow } from './talous-ui.js';
 
-export function createPaymentsTab({ api, onOpenOrder }) {
+export function createPaymentsTab({ api, ctx, onOpenOrder }) {
   const st = { search: '', method: '', status: '', from: '', to: '', sortDir: 'desc', limit: 25, offset: 0 };
   const list = h('ul', { class: 'tl-list pay', 'data-testid': 'payments-list' }), count = h('p', { class: 'muted tl-count', role: 'status', 'data-testid': 'payments-count' }), pagers = [h('div'), h('div')];
   let seq = 0;
@@ -30,12 +31,15 @@ export function createPaymentsTab({ api, onOpenOrder }) {
       h('span', { class: 'tl-c tl-sum' }, h('strong', { text: fmt.money(p.amount) }), p.refunded_amount ? h('small', { class: 'tl-refund', text: `−${fmt.money(p.refunded_amount)}` }) : null),
       h('span', { class: 'tl-c tl-badges' }, pstatBadge(p.status)),
     ];
-    return expandRow({ id: `p${p.payment_id}`, head, testid: 'payment', build: () => payDetail(p) });
+    // kuittinumero + PDF-lataus näkyvät aina rivin alla (ei napin sisällä); kuitin teksti ja uudelleenlähetys rivin avauksessa
+    const bar = p.receipt_no ? h('div', { class: 'tl-rowbar', 'data-testid': 'payment-receipt-bar' }, h('span', { class: 'tl-rowbar-no' }, h('small', { text: `${t('receipt')} ` }), h('strong', { 'data-testid': 'payment-receipt-no', text: p.receipt_no })), pdfLink({ api, token: p.receipt_token, no: p.receipt_no, short: true, testid: 'payment-receipt-dl' })) : null;
+    return expandRow({ id: `p${p.payment_id}`, head, testid: 'payment', bar, build: () => payDetail(p) });
   }
   // maksulistaus ei sisällä laskurivejä (sopimus: vain line_count) → rivit haetaan tilauksen tiedoista (admin_get_order → payments[].lines)
   async function payDetail(row) {
     const order = await api.getOrder(row.order_id);
     const p = { ...row, ...(order.payments.find((x) => x.payment_id === row.payment_id) || { lines: [], receipts: [], refunds: [] }) };
+    const receipts = p.receipts.map((r) => ({ ...r, total: r.total ?? order.receipts.find((x) => x.id === r.id)?.total ?? null, payment_id: r.payment_id ?? p.payment_id }));
     const sumG = p.lines.reduce((s, l) => s + l.amount_gross, 0), sumV = p.lines.reduce((s, l) => s + l.line_vat, 0), sumN = p.lines.reduce((s, l) => s + l.line_net, 0);
     const table = p.lines.length ? h('table', { class: 'tl-table', 'data-testid': 'payment-lines' },
       h('thead', {}, h('tr', {}, ['line.desc', 'line.qty', 'line.gross', 'line.vatPct', 'line.vat', 'line.net'].map((k, i) => h('th', { scope: 'col', class: i ? 'r' : '', text: t(k) })))),
@@ -46,6 +50,7 @@ export function createPaymentsTab({ api, onOpenOrder }) {
     return h('div', { class: 'tl-detail' },
       h('p', { class: 'muted tl-meta', text: [`${t('payment.id')} ${p.payment_id}`, p.receipt_no ? `${t('receipt')} ${p.receipt_no}` : null, p.provider ? `${t('payment.provider')} ${p.provider}` : null, p.rounding ? `${t('payment.rounding')} ${fmt.money(p.rounding)}` : null].filter(Boolean).join(' · ') }),
       h('section', { class: 'tl-sec' }, h('h3', { text: t('payment.lines') }), table),
+      h('section', { class: 'tl-sec' }, h('h3', { text: t('receipts.title') }), receiptsList({ api, ctx, receipts, testid: 'payment-receipts' })),
       h('div', { class: 'tl-actions' }, h('button', { type: 'button', class: 'btn tl-btn', 'data-testid': 'btn-open-order', onclick: () => onOpenOrder(p.order_no) }, h('span', { text: t('payment.openOrder') }))));
   }
   const dirBtn = h('button', { type: 'button', class: 'btn ghost tl-dir', 'data-testid': 'payments-dir', onclick: () => { st.sortDir = st.sortDir === 'desc' ? 'asc' : 'desc'; syncDir(); change({}); } });
