@@ -5,10 +5,10 @@ import { h, dialog, field, toast, run, money, badge, empty } from '../ui.js';
 import { icon } from '../icons.js';
 
 export const addonLimit = (a, persons) => Math.min((a.max_per_person ?? 99) * Math.max(0, persons || 0), 99);
-export const MODE_LABEL = { shared: 'Yleinen vuoro', exclusive: 'Yksityisvuoro' };
+export const MODE_LABEL = { shared: 'Yleinen vuoro', exclusive: 'Yksityisvuoro', resource: 'Hoito / saunotus' };
 const VAT = [25.5, 24, 14, 13.5, 10, 0];
 
-// Valitsin: addons = aktiiviset (admin_list_addons), getPersons() = nykyinen henkilömäärä, getMode() = 'shared'|'exclusive'.
+// Valitsin: addons = aktiiviset (admin_list_addons), getPersons() = nykyinen henkilömäärä, getMode() = 'shared'|'exclusive'|'resource' (resource = hoito, saunotus, rituaali, tapahtuma).
 export function addonPicker(addons, { getPersons, getMode, onChange }) {
   const box = h('fieldset', { class: 'box addon-picker' }, h('legend', {}, icon('leaf', 18), ' Lisäpalvelut'));
   const rows = [];
@@ -60,7 +60,7 @@ export async function addonsAdmin({ ctx }) {
     const isNew = !a;
     const inp = (name, v, o = {}) => h(o.area ? 'textarea' : 'input', { name, value: v ?? '', rows: o.area ? 3 : null, disabled: !can, ...o, area: null });
     const vat = h('select', { name: 'vat_rate', disabled: !can }, VAT.map((v) => h('option', { value: v, text: `${v} %`, selected: +(a?.vat_rate ?? 25.5) === v || null })));
-    const modes = ['shared', 'exclusive'].map((m) => h('label', { class: 'check' }, h('input', { type: 'checkbox', name: `mode_${m}`, checked: (a?.applies_modes || ['shared', 'exclusive']).includes(m) || null, disabled: !can }), ` ${MODE_LABEL[m]}`));
+    const modes = ['shared', 'exclusive', 'resource'].map((m) => h('label', { class: 'check' }, h('input', { type: 'checkbox', name: `mode_${m}`, checked: (a?.applies_modes || ['shared', 'exclusive']).includes(m) || null, disabled: !can }), ` ${MODE_LABEL[m]}`));
     const f = h('form', { class: 'stack' },
       isNew ? field('Tunnus (pienet kirjaimet, numerot, alaviiva)', inp('code', '', { required: true, pattern: '[a-z][a-z0-9_]{1,40}' })) : null,
       field('Nimi (FI)', inp('name', a?.name, { required: true })), field('Nimi (EN)', inp('name_en', a?.name_en)),
@@ -73,7 +73,7 @@ export async function addonsAdmin({ ctx }) {
     const d = dialog(isNew ? 'Uusi lisäpalvelu' : a.name, f);
     f.addEventListener('submit', (ev) => { ev.preventDefault(); run(f.querySelector('button[type=submit]'), async () => {
       const fd = new FormData(f);
-      const am = ['shared', 'exclusive'].filter((m) => f.elements[`mode_${m}`].checked);
+      const am = ['shared', 'exclusive', 'resource'].filter((m) => f.elements[`mode_${m}`].checked);
       if (!am.length) throw new Error('Valitse vähintään yksi vuorotyyppi');
       const body = { name: fd.get('name'), name_en: fd.get('name_en') || null, description: fd.get('description') || null, description_en: fd.get('description_en') || null,
         price: String(fd.get('price')), vat_rate: +fd.get('vat_rate'), max_per_person: +fd.get('max_per_person'), sort_order: +fd.get('sort_order'), applies_modes: am, active: f.elements.active.checked };

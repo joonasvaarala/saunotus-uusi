@@ -13,7 +13,7 @@ export async function render({ ctx, refs, query }) {
   const kind = query.get('tyyppi');   // migraatio 17: resurssivaraus / vanha varaus omalla lomakkeellaan
   if (kind === 'resurssi' || kind === 'vanha') return renderResource({ ctx, refs, query, kind });
   const addons = await rpc('admin_list_addons').catch(() => []);
-  const st = { date: /^\d{4}-\d\d-\d\d$/.test(query.get('d') || '') ? query.get('d') : todayHel(), session: null, customer: null };
+  const st = { date: /^\d{4}-\d\d-\d\d$/.test(query.get('d') || '') ? query.get('d') : todayHel(), session: null, customer: null, pre: query.get('r') && query.get('t') ? { r: query.get('r'), t: query.get('t') } : null };
   const root = h('div', { class: 'stack' });
   const sessionsBox = h('div', { class: 'stack' }); const formBox = h('div', {}); const result = h('div', {});
   const dateIn = h('input', { type: 'date', value: st.date, 'aria-label': 'Päivä', onchange: (e) => { st.date = e.target.value; st.session = null; loadSessions(); drawForm(); } });
@@ -21,6 +21,7 @@ export async function render({ ctx, refs, query }) {
     sessionsBox.replaceChildren(h('p', { class: 'muted', text: 'Ladataan…' }));
     const v = await rpc('admin_day_view', { p_date: st.date });
     const list = (v.sessions || []).filter((s) => s.status !== 'closed');
+    if (st.pre) { const m = list.find((s) => String(s.rule_id) === st.pre.r && s.starts_at === st.pre.t && s.status === 'available'); st.pre = null; if (m) st.session = m; }   // Vapaana-napista (päivänäkymä): esivalittu vuoro
     sessionsBox.replaceChildren(list.length ? h('div', { class: 'slotpick', role: 'radiogroup', 'aria-label': 'Vuoro' }, list.map((s) => {
       const ok = s.status === 'available';
       const b = h('button', { type: 'button', role: 'radio', 'aria-checked': st.session?.rule_id === s.rule_id ? 'true' : 'false', class: `slotbtn ${s.status}`, disabled: !ok || null, onclick: () => { st.session = s; sessionsBox.querySelectorAll('.slotbtn').forEach((x) => x.setAttribute('aria-checked', 'false')); b.setAttribute('aria-checked', 'true'); drawForm(true); } },
@@ -30,7 +31,8 @@ export async function render({ ctx, refs, query }) {
   }
   // Vuoron valinnan (tai vaihdon) jälkeen näkymä vierittyy varauslomakkeeseen ja fokus siirretään lomakkeen otsikkoon: ei avaa mobiilinäppäimistöä,
   // ruudunlukija lukee valitun vuoron. Vieritys on pehmeä vain jos käyttäjä ei ole pyytänyt vähennettyä liikettä; sticky-yläpalkki huomioidaan (scroll-margin).
-  function revealForm(f) {
+  function revealForm(f, tries = 0) {
+    if (!f.isConnected) { if (tries < 20) setTimeout(() => revealForm(f, tries + 1), 60); return; }   // esivalinta: lomake liitetään sivulle vasta renderöinnin jälkeen
     const title = f.querySelector('h3'); title.tabIndex = -1;
     f.style.scrollMarginTop = `${(document.querySelector('.top')?.offsetHeight || 56) + 12}px`;
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -82,6 +84,6 @@ export async function render({ ctx, refs, query }) {
     if (reveal) revealForm(f);
   }
   root.append(h('div', { class: 'toolbar' }, h('label', { class: 'row' }, 'Päivä ', dateIn)), sessionsBox, formBox, result);
-  await loadSessions(); drawForm();
+  await loadSessions(); drawForm(!!st.session);
   return [h('h1', { text: 'Uusi varaus' }), typeSwitch('', st.date), root];
 }
