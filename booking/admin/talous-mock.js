@@ -211,7 +211,7 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
     const rep = {
       period: { from, to, kind: period }, generated_at: `${today}T12:00:00Z`,
       totals: { receipts: receipts.filter((x) => x.kind === 'receipt').length, refund_receipts: receipts.filter((x) => x.kind === 'refund_receipt').length, gross: round2(sales.reduce((s, l) => s + l.gross, 0)), net: round2(sales.reduce((s, l) => s + l.net, 0)), vat: round2(sales.reduce((s, l) => s + l.vat, 0)),
-        refunds_gross: round2(refunds.reduce((s, l) => s + l.gross, 0)), net_after_refunds: round2(lines.reduce((s, l) => s + l.net, 0)), rounding: 0 },
+        refunds_gross: round2(refunds.reduce((s, l) => s + l.gross, 0)), net_after_refunds: round2(lines.reduce((s, l) => s + l.gross, 0)), vat_after_refunds: round2(lines.reduce((s, l) => s + l.vat, 0)), net_ex_vat_after_refunds: round2(lines.reduce((s, l) => s + l.net, 0)), rounding: 0 },
       by_method: by(lines, (l) => l.method, (a, l) => ({ method: l.method, label: METHOD_LABELS[l.method] || l.method, payments: 0, gross: round2((a?.gross || 0) + (l.kind === 'receipt' ? l.gross : 0)), refunds: round2((a?.refunds || 0) + (l.kind === 'refund_receipt' ? l.gross : 0)), rounding: 0 })),
       by_vat: by(lines, (l) => l.vat_rate, (a, l) => ({ rate: l.vat_rate, net: sum(a, 'net', l), vat: sum(a, 'vat', l), gross: sum(a, 'gross', l) })).sort((a, b) => b.rate - a.rate),
       by_method_vat: by(lines, (l) => `${l.method}|${l.vat_rate}`, (a, l) => ({ method: l.method, rate: l.vat_rate, net: sum(a, 'net', l), vat: sum(a, 'vat', l), gross: sum(a, 'gross', l) })),
@@ -227,11 +227,12 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
   const monthEnd = (ym) => dayAdd(`${new Date(Date.UTC(+ym.slice(0, 4), +ym.slice(5, 7), 1)).toISOString().slice(0, 7)}-01`, -1);
   function adminReportDaily(a = {}) { if (!/^\d{4}-\d{2}-\d{2}$/.test(a.p_date || '')) throw fail('invalid_date', 'Virheellinen päivä'); return buildReport(a.p_date, a.p_date, 'day', { daily: true }); }
   function adminReportMonth(a = {}) { if (!/^\d{4}-\d{2}$/.test(a.p_ym || '')) throw fail('invalid_month', 'Virheellinen kuukausi'); return buildReport(`${a.p_ym}-01`, monthEnd(a.p_ym), 'month'); }
-  // admin_report_csv(p_from,p_to,p_kind='lines') → {filename, mime, content} – PALVELIMEN sarakkeet (ei samat kuin asiakaspuolen CSV:ssä)
+  // admin_report_csv(p_from,p_to,p_kind='lines') → {filename, mime, content} – kuten booking_34: 12 saraketta, pvm PP.KK.VVVV, hyvitys kyllä/ei, hyvitysrivin määrä negatiivinen
   function adminReportCsv(a = {}) {
-    const q = (v) => (/[;"\r\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v)), d = (n) => String(n).replace('.', ',');
-    const rows = linesBetween(a.p_from, a.p_to).map((l) => [l.date, new Date(l.at).toISOString().slice(11, 16), l.receipt_no, l.order_no, l.kind, l.method, l.group, l.product, l.quantity, d(l.gross), d(l.vat_rate), d(l.vat), d(l.net)].map(q).join(';'));
-    return { filename: `kuitit_${a.p_from}_${a.p_to}.csv`, mime: 'text/csv', content: `\uFEFF${['pvm;klo;kuitti;tilaus;tyyppi;maksutapa;tuoteryhma;tuote;maara;brutto;alv_prosentti;alv_eur;netto', ...rows].join('\r\n')}\r\n` };
+    const q = (v) => (/[;"\r\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v)), d = (n) => (Math.round(n * 100) / 100).toFixed(2).replace('.', ','), r = (n) => String(Math.round(n * 100) / 100).replace('.', ',');
+    const dmy = (iso10) => `${iso10.slice(8, 10)}.${iso10.slice(5, 7)}.${iso10.slice(0, 4)}`;
+    const rows = linesBetween(a.p_from, a.p_to).map((l) => [dmy(l.date), l.receipt_no, l.order_no, METHOD_LABELS[l.method] || l.method, GROUP_LABELS[l.group] || l.group, l.product, l.kind === 'refund_receipt' ? -Math.abs(l.quantity) : l.quantity, d(l.gross), r(l.vat_rate), d(l.vat), d(l.net), l.kind === 'refund_receipt' ? 'kyllä' : 'ei'].map(q).join(';'));
+    return { filename: `kuitit_lines_${a.p_from}_${a.p_to}.csv`, mime: 'text/csv;charset=utf-8', content: `\uFEFF${['pvm;kuitti_no;tilaus_no;maksutapa;tuoteryhmä;tuote;määrä;brutto;alv_%;alv_€;netto;hyvitys', ...rows].join('\r\n')}\r\n` };
   }
 
   // ---- kirjoittavat RPC:t: vain kuittaus oikeilla vastausmuodoilla (vaiheessa A ei muuteta dataa) ----
@@ -255,10 +256,23 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
     if (!(a.p_amount > 0) || a.p_amount > round2(p.amount - p.refunded_amount)) throw fail('amount_exceeds_refundable', 'Summa ylittää hyvitettävän');
     return { ok: true, mock: true, refund_id: 9e6, status: 'done', balance: balanceOf(byId.get(p.order_id)), receipt_id: null, receipt_no: null };
   }
+  function adminRecordPayment(a = {}) {
+    const o = byId.get(+a.p_order_id); if (!o) throw fail('not_found', 'Tilausta ei löydy', 404);
+    if (!o.is_native) throw fail('order_not_editable', 'Tilaukseen ei voi kirjata maksua');
+    if (!['cash', 'card_terminal', 'mobilepay', 'bank_transfer', 'invoice', 'other'].includes(a.p_method)) throw fail('invalid_payment_method', 'Maksutapa ei ole käytössä / ei käsin kirjattava');
+    if (!(a.p_amount > 0)) throw fail('invalid_amount', 'Summa pitää olla positiivinen');
+    if (a.p_amount > o.unpaid_amount + 0.005) throw fail('amount_exceeds_unpaid', `Summa ylittää maksamattoman osuuden (${o.unpaid_amount} €)`);
+    const b = balanceOf(o), paid = round2(b.paid + a.p_amount);
+    return { ok: true, mock: true, payment_id: 9e6, receipt_id: 9e6, receipt_no: 'K-MOCK-000001', rounding: 0, balance: { ...b, paid, unpaid: round2(b.total - paid), net_paid: paid } };
+  }
+  function adminListVatRates() {
+    return { rates: [{ rate: 25.5, label: 'ALV 25,5 % (yleinen)', active: true, products: 46, addons: 3 }, { rate: 13.5, label: 'ALV 13,5 %', active: true, products: 2, addons: 0 }, { rate: 0, label: 'ALV 0 %', active: true, products: 0, addons: 0 }],
+      missing: [{ kind: 'product', id: 47, name: 'Tossujen tai saunatakin vuokra (paikan päällä)' }], quote_only: [{ id: 50, name: 'Työhyvinvointipäivät ja ryhmät (tarjouspyyntö)' }] };
+  }
   const ADDON_LIST = [{ id: 1, code: 'saunavihta', name: 'Saunavihta', name_en: 'Sauna whisk (vihta)', price: 5, vat_rate: 25.5, max_per_person: 1, active: true }, { id: 2, code: 'pyyhe', name: 'Pyyhe', name_en: 'Towel', price: 5, vat_rate: 25.5, max_per_person: 1, active: true },
     { id: 3, code: 'turvenaamio_jalkakylpy', name: 'Turvenaamio ja jalkakylpy', name_en: 'Peat mask and foot bath', price: 12, vat_rate: 25.5, max_per_person: 1, active: true }];
   const HANDLERS = { admin_list_orders: adminListOrders, admin_get_order: adminGetOrder, admin_list_payments: adminListPayments, admin_list_addons: () => ADDON_LIST, admin_add_to_order: adminAddToOrder, admin_create_payment_link: adminCreatePaymentLink,
-    admin_refund: adminRefund, admin_report_daily: adminReportDaily, admin_report_month: adminReportMonth, admin_report_csv: adminReportCsv };
+    admin_refund: adminRefund, admin_record_payment: adminRecordPayment, admin_list_vat_rates: adminListVatRates, admin_report_daily: adminReportDaily, admin_report_month: adminReportMonth, admin_report_csv: adminReportCsv };
   // sama kutsutapa kuin sb.js:n rpc(): rpc(nimi, parametrit) → Promise. Tuntematon nimi = puuttuva RPC (404 / PGRST202) kuten PostgRESTissä.
   async function rpc(name, args = {}) {
     await wait();

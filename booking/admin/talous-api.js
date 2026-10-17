@@ -11,12 +11,13 @@ import { createMock } from './talous-mock.js';
 
 export const RPC = {
   listOrders: 'admin_list_orders', getOrder: 'admin_get_order', listPayments: 'admin_list_payments', listAddons: 'admin_list_addons',
-  addToOrder: 'admin_add_to_order', createPaymentLink: 'admin_create_payment_link', refund: 'admin_refund',
+  addToOrder: 'admin_add_to_order', createPaymentLink: 'admin_create_payment_link', refund: 'admin_refund', recordPayment: 'admin_record_payment', listVatRates: 'admin_list_vat_rates',
   reportDaily: 'admin_report_daily', reportMonthly: 'admin_report_month', reportCsv: 'admin_report_csv',
 };
-// Kirjoittavat toiminnot oikeassa tilassa. HUOM: sopimuksen mukaan vaihe A (booking_29/30) on tuotannossa ja nämä RPC:t ovat olemassa, mutta rahaa liikuttavat
-// toiminnot kytketään päälle vasta kun ne on kokeiltu hallinnan käyttöliittymästä testikannalla (ei tässä UI-kehyksessä) → false.
-export const LIVE_ACTIONS = { addToOrder: false, createPaymentLink: false, refund: false };
+// Kirjoittavat toiminnot oikeassa tilassa. Rahaa liikuttavat toiminnot on kokeiltu testiprojektissa hallinnan käyttöliittymästä ja RPC-tasolla
+// (booking/scripts/e2e-talous-live.mjs) → päällä. Ne ovat vain hallinnassa ja palvelin vaatii oikeudet (payments.manage / payments.refund / bookings.override).
+// Yksi lippu per toiminto: jos jokin pitää sulkea, aseta false (nappi muuttuu "ei vielä käytössä" -tilaan).
+export const LIVE_ACTIONS = { addToOrder: true, createPaymentLink: true, refund: true, recordPayment: true };
 
 export class FeatureNotReady extends Error {
   constructor(rpc) { super(`Ominaisuus ei vielä käytössä (${rpc})`); this.name = 'FeatureNotReady'; this.code = 'feature_not_ready'; this.rpc = rpc; }
@@ -25,7 +26,8 @@ export class RpcError extends Error {
   constructor(message, { code, status, details } = {}) { super(message); this.name = 'ApiError'; this.code = code; this.status = status; this.details = details; }
 }
 // PostgREST: puuttuva funktio = 404 + PGRST202 ("Could not find the function …"); 42883 = undefined_function
-export const isMissingRpc = (e) => !!e && (e.status === 404 || e.code === 'PGRST202' || e.code === '42883' || /could not find the function/i.test(e.message || ''));
+// HUOM: sb.js asettaa ApiError.code = details || code → PGRST202:ssa `code` on pitkä selite; BK001-virheet (esim. not_found) eivät ole puuttuvia funktioita vaikka status olisi 404.
+export const isMissingRpc = (e) => !!e && e.details?.code !== 'BK001' && (e.status === 404 || e.details?.code === 'PGRST202' || e.code === 'PGRST202' || e.code === '42883' || /could not find the function/i.test(e.message || ''));
 export function wantsMock(loc = typeof location !== 'undefined' ? location : null) {
   if (!loc) return false;
   const q = new URLSearchParams(loc.search || ''), hq = new URLSearchParams((loc.hash || '').split('?')[1] || '');
@@ -75,10 +77,22 @@ export function normOrder(o) {
     payments, reservations, receipts: (o.receipts || []).map(normReceiptRef), requests: o.requests || [], first_reservation_at: reservations.map((x) => x.starts_at).filter(Boolean).sort()[0] ?? null };
 }
 const L = (a) => (Array.isArray(a) ? a : []);
+// admin_list_vat_rates → { missing:[{kind,id,name}], quote_only:[…], rates:[…] }
+export function normVatRates(r) {
+  return { rates: L(r?.rates).map((x) => ({ rate: num(x.rate), label: x.label ?? '', active: x.active !== false, products: num(x.products), addons: num(x.addons) })),
+    missing: L(r?.missing).map((x) => ({ kind: x.kind ?? 'product', id: x.id, name: x.name ?? '' })), quote_only: L(r?.quote_only).map((x) => ({ id: x.id, name: x.name ?? '' })) };
+}
+// Verkkokaupan osoite (maksulinkin isäntä): admin_get_order.order_page_path on todellisuudessa täysi osoite (site_base_url + order_page_path + ?t=…); sopimus sanoo polku → hyväksytään molemmat.
+export function siteOrigin(order, fallback = typeof location !== 'undefined' ? location.origin : '') {
+  try { const u = new URL(order?.order_page_path || '', 'http://x.invalid'); if (u.origin !== 'http://x.invalid') return u.origin; } catch { /* ei osoite */ }
+  return fallback;
+}
+export const absLink = (path, order) => (path ? new URL(path, siteOrigin(order)).href : '');
 export function normReport(r) {
   const tt = r.totals || {};
-  return { period: r.period || { from: null, to: null, kind: 'day' }, generated_at: r.generated_at ?? null,
-    totals: { receipts: num(tt.receipts), refund_receipts: num(tt.refund_receipts), gross: num(tt.gross), net: num(tt.net), vat: num(tt.vat), refunds_gross: num(tt.refunds_gross), net_after_refunds: num(tt.net_after_refunds ?? tt.net), rounding: num(tt.rounding) },
+  const per = r.period || {};   // oikea palvelin: period {from,to,tz} ilman kind-kenttää → päätellään (sama päivä = päivä)
+  return { period: { ...per, from: per.from ?? null, to: per.to ?? null, kind: per.kind || (per.from && per.from === per.to ? 'day' : per.from ? 'month' : 'day') }, generated_at: r.generated_at ?? null,
+    totals: { receipts: num(tt.receipts), refund_receipts: num(tt.refund_receipts), gross: num(tt.gross), net: num(tt.net), vat: num(tt.vat), refunds_gross: num(tt.refunds_gross), net_after_refunds: num(tt.net_after_refunds ?? (num(tt.gross) + num(tt.refunds_gross))), vat_after_refunds: num(tt.vat_after_refunds ?? tt.vat), net_ex_vat_after_refunds: num(tt.net_ex_vat_after_refunds ?? tt.net), rounding: num(tt.rounding) },
     by_method: L(r.by_method).map((m) => ({ method: m.method, label: m.label ?? null, payments: num(m.payments), gross: num(m.gross), refunds: num(m.refunds), rounding: num(m.rounding) })),
     by_vat: L(r.by_vat).map((v) => ({ rate: num(v.rate), net: num(v.net), vat: num(v.vat), gross: num(v.gross) })),
     by_method_vat: L(r.by_method_vat).map((v) => ({ method: v.method, rate: num(v.rate), net: num(v.net), vat: num(v.vat), gross: num(v.gross) })),
@@ -118,6 +132,8 @@ export function rpcBackend(rpc) {
     addToOrder: (a) => call('addToOrder', compact({ p_order_id: a.orderId, p_items: a.items, p_create_link: a.createLink ? true : undefined, p_send_email: a.sendEmail ? true : undefined, p_note: a.note })),
     createPaymentLink: (a) => call('createPaymentLink', compact({ p_order_id: a.orderId, p_send_email: a.sendEmail ? true : undefined, p_expires_days: a.expiresDays, p_note: a.note })),
     refund: (a) => call('refund', compact({ p_payment_id: a.paymentId, p_amount: a.amount, p_reason: a.reason, p_lines: a.lines })),
+    recordPayment: (a) => call('recordPayment', compact({ p_order_id: a.orderId, p_method: a.method, p_amount: a.amount, p_note: a.note, p_lines: a.lines })),
+    listVatRates: () => call('listVatRates'),
     reportDaily: (date) => call('reportDaily', { p_date: date }),
     reportMonthly: (ym) => call('reportMonthly', { p_ym: ym }),
     reportCsv: (a) => call('reportCsv', compact({ p_from: a.from, p_to: a.to, p_kind: a.kind || 'lines' })),
@@ -129,7 +145,7 @@ export function createTalousApi({ rpc, mock = wantsMock(), mockFactory = () => c
   let mockBackend = null;
   const real = rpc && !forced ? rpcBackend(rpc) : null;
   const getMock = () => (mockBackend ||= rpcBackend(mockFactory().rpc));
-  const notify = () => listeners.forEach((f) => f(api));
+  const notify = () => listeners.forEach((f) => f(api)), changeListeners = new Set();
   const run = async (key, args, post = (x) => x) => {
     if (!real || missing.has(key)) return post(await getMock()[key](args));
     try { return post(await real[key](args)); } catch (e) {
@@ -138,15 +154,23 @@ export function createTalousApi({ rpc, mock = wantsMock(), mockFactory = () => c
       return post(await getMock()[key](args));
     }
   };
+  // Kirjoittava toiminto: oikeassa tilassa vain oikealle palvelimelle (ei koskaan mock-varakutsua → ei näennäisiä onnistumisia); puuttuva RPC → FeatureNotReady.
   const act = async (key, args) => {
-    if (real && !LIVE_ACTIONS[key]) throw new FeatureNotReady(RPC[key]);
-    return run(key, args);
+    if (!real) return getMock()[key](args);
+    if (!LIVE_ACTIONS[key]) throw new FeatureNotReady(RPC[key]);
+    if (missing.has(key)) throw new FeatureNotReady(RPC[key]);
+    try { return await real[key](args); } catch (e) {
+      if (isMissingRpc(e)) { missing.add(key); notify(); throw new FeatureNotReady(RPC[key]); }
+      throw e;
+    }
   };
   const api = {
     get mode() { return !real ? 'mock' : missing.size ? 'mixed' : 'real'; }, get reason() { return forced ? 'param' : missing.size ? 'missing' : null; },
     get missing() { return [...missing].map((k) => RPC[k]); }, get missingRpc() { return [...missing].map((k) => RPC[k]).join(', '); },
     isMock: (key) => !real || missing.has(key),
     onMode(f) { listeners.add(f); return () => listeners.delete(f); },
+    // oikea kirjoitus onnistui → muut välilehdet hakevat datan uudelleen kun ne avataan
+    onChanged(f) { changeListeners.add(f); return () => changeListeners.delete(f); }, changed() { changeListeners.forEach((f) => f()); },
     // nappi on käytössä mockissa tai kun LIVE_ACTIONS[key] on päällä
     actionLive: (key) => !real || (!!LIVE_ACTIONS[key] && !missing.has(key)),
     listOrders: (a) => run('listOrders', a, (r) => ({ total: num(r.total), rows: L(r.rows).map(normOrderRow) })),
@@ -155,14 +179,15 @@ export function createTalousApi({ rpc, mock = wantsMock(), mockFactory = () => c
     listAddons: () => run('listAddons', undefined, (r) => L(r).filter((x) => x.active !== false).map((x) => ({ id: x.id, code: x.code, name: x.name, name_en: x.name_en || x.name, price: num(x.price ?? x.price_gross) }))),
     reportDaily: (date) => run('reportDaily', date, normReport),
     reportMonthly: (ym) => run('reportMonthly', ym, normReport),
-    // CSV: jos raportti sisältää rivitason (`lines`, vain mock) → asiakaspuolen CSV (csv.js, pyydetyt 12 saraketta); muuten palvelimen admin_report_csv (sen omat sarakkeet).
-    // Palauttaa { source:'client', lines } tai { source:'server', filename, content }.
+    // CSV: palvelimen admin_report_csv (booking_34: samat 12 saraketta kuin pyydetty: pvm;kuitti_no;tilaus_no;maksutapa;tuoteryhmä;tuote;määrä;brutto;alv_%;alv_€;netto;hyvitys) sellaisenaan.
+    // Palauttaa { source:'server', filename, content }. (csv.js = asiakaspuolen varakirjoittaja samoille sarakkeille, ei käytössä kun palvelin vastaa.)
     async reportCsv(report) {
-      if (report.lines) return { source: 'client', lines: report.lines };
       const res = await run('reportCsv', { from: report.period.from, to: report.period.to, kind: 'lines' });
       return { source: 'server', filename: res.filename || `kuitit_${report.period.from}_${report.period.to}.csv`, content: String(res.content ?? ''), mime: res.mime || 'text/csv' };
     },
-    addToOrder: (a) => act('addToOrder', a), createPaymentLink: (a) => act('createPaymentLink', a), refund: (a) => act('refund', a),
+    // ALV-huomautus on vain tiedote: virhe/puuttuva RPC/oikeus puuttuu → null (ei mock-varaa, ei bannerin muutosta)
+    listVatRates: async () => { if (!real) return normVatRates(await getMock().listVatRates()); try { return normVatRates(await real.listVatRates()); } catch { return null; } },
+    addToOrder: (a) => act('addToOrder', a), createPaymentLink: (a) => act('createPaymentLink', a), refund: (a) => act('refund', a), recordPayment: (a) => act('recordPayment', a),
   };
   return api;
 }

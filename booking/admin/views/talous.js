@@ -21,6 +21,18 @@ export async function render({ ctx, reload, query }) {
     banner.replaceChildren(...(m ? [h('strong', { text: t(api.reason === 'missing' ? 'banner.missing.title' : 'banner.mock.title') }), ' ', h('span', { text: t(api.reason === 'missing' ? 'banner.missing' : 'banner.mock', { rpc: api.missingRpc || '' }) })] : []));
   };
   api.onMode(showBanner); showBanner();
+  // ALV-huomautus: tuotteet ilman ALV-kantaa (admin_list_vat_rates().missing) – lisäys tilaukseen on niiltä estetty (vat_missing)
+  const vatBox = h('div', { class: 'tl-banner tl-vat', role: 'status', 'data-testid': 'vat-missing', hidden: true });
+  api.listVatRates().then((r) => {
+    if (!r || !(r.missing.length || r.quote_only.length)) return;
+    const shown = r.missing.slice(0, 5), more = r.missing.length - shown.length;
+    vatBox.replaceChildren(...(r.missing.length ? [h('strong', { text: t('vat.title') }), ' ', h('span', { text: t('vat.body') }), ' ',
+      h('span', { 'data-testid': 'vat-missing-list', text: shown.map((x) => x.name).join('; ') + (more > 0 ? ` ${t('vat.more', { n: more })}` : '') })] : []),
+      ...(r.quote_only.length ? [h('p', { class: 'muted', 'data-testid': 'vat-quote-only', text: t('vat.quote', { n: r.quote_only.length }) })] : []));
+    vatBox.hidden = false; vatBox.dataset.count = String(r.missing.length);
+  }).catch(() => {});
+  const dirty = new Set();
+  api.onChanged(() => { for (const k of ['payments', 'reports']) if (tabs[k]) dirty.add(k); });
   const factories = {
     orders: () => createOrdersTab({ api, ctx }),
     payments: () => createPaymentsTab({ api, onOpenOrder: (no) => { select('orders'); tabs.orders.setSearch(String(no)); } }),
@@ -34,6 +46,7 @@ export async function render({ ctx, reload, query }) {
     tab = k;
     for (const [key] of TABS) { const on = key === k; tabBtns[key].setAttribute('aria-selected', String(on)); tabBtns[key].tabIndex = on ? 0 : -1; panels[key].hidden = !on; }
     ensure(k);
+    if (dirty.delete(k)) tabs[k].load();
     const q = hashQ(); q.set('tab', k);
     history.replaceState(null, '', `#/talous?${q.toString()}`);   // hashchange-tapahtumaa ei synny → sivua ei piirretä uudelleen
     if (focus) tabBtns[k].focus();
@@ -45,7 +58,7 @@ export async function render({ ctx, reload, query }) {
   const langs = h('div', { class: 'tl-langs tl-noprint', role: 'group', 'aria-label': t('lang.label') }, LANGS.map((l) => h('button', { type: 'button', class: 'tl-lang', 'aria-pressed': String(getLang() === l), 'data-testid': `lang-${l}`, lang: l,
     onclick: () => { if (getLang() === l) return; setLang(l); reload(); } }, l.toUpperCase())));
   const root = h('div', { class: 'tl', lang: getLang(), 'data-testid': 'talous' },
-    h('div', { class: 'row between wrap tl-top tl-noprint' }, h('h1', { text: t('title') }), langs), banner, list, ...TABS.map(([k]) => panels[k]));
+    h('div', { class: 'row between wrap tl-top tl-noprint' }, h('h1', { text: t('title') }), langs), banner, vatBox, list, ...TABS.map(([k]) => panels[k]));
   select(tab);
   return root;
 }

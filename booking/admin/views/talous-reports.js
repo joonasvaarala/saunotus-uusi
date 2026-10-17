@@ -31,7 +31,7 @@ export function createReportsTab({ api }) {
     const open = h('p', { class: 'muted', 'data-testid': 'r-open', text: `${t('r.open')}: ${t('r.openVal', { n: fmt.int(r.open.orders), sum: M(r.open.unpaid) })}` });
     if (isEmpty(r)) return h('div', {}, head, emptyBox(t('r.empty')), open);
     const card = (label, value, tid) => h('div', { class: 'tl-stat' }, h('dt', { text: label }), h('dd', { 'data-testid': tid, text: value }));
-    const stats = h('dl', { class: 'tl-stats' }, card(t('r.gross'), M(T.gross), 'r-gross'), card(t('r.refunds'), M(T.refunds_gross), 'r-refunds'), card(t('r.netAfter'), M(T.net_after_refunds), 'r-net'), card(t('r.vat'), M(T.vat), 'r-vat'),
+    const stats = h('dl', { class: 'tl-stats' }, card(t('r.gross'), M(T.gross), 'r-gross'), card(t('r.refunds'), M(T.refunds_gross), 'r-refunds'), card(t('r.netAfter'), M(T.net_after_refunds), 'r-net'), card(t('r.vatAfter'), M(T.vat_after_refunds), 'r-vat'), card(t('r.netExVat'), M(T.net_ex_vat_after_refunds), 'r-net-ex-vat'),
       card(t('r.receipts'), fmt.int(T.receipts), 'r-receipts'), card(t('r.refundReceipts'), fmt.int(T.refund_receipts), 'r-refund-receipts'), ...(T.rounding ? [card(t('r.rounding'), M(T.rounding), 'r-rounding')] : []));
     const table = (testid, caption, cols, rows, foot) => h('section', { class: 'tl-sec' }, h('h3', { text: caption }), h('table', { class: 'tl-table', 'data-testid': testid },
       h('thead', {}, h('tr', {}, cols.map((c, i) => h('th', { scope: 'col', class: i ? 'r' : '', text: c })))),

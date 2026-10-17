@@ -676,7 +676,7 @@ for (const [label, viewport, mobile] of [['mobiili', { width: 390, height: 700 }
   if (!/12[\s\u00a0\u202f]?000/.test(await page.locator('[data-testid=orders-count]').innerText())) problems.push('talous: kokonaismäärä 12 000 puuttuu');
   for (const tab of ['payments', 'reports']) { await page.click(`[data-testid=tab-${tab}-btn]`); await page.waitForSelector(tab === 'payments' ? '[data-testid=payments-list] [data-testid=payment]' : '[data-testid=r-gross]'); }
   extraPerms = [];
-  await page.goto(`${BASE}/varaa/tilaus/?t=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c&mock=1`);
+  await page.goto(`${BASE}/tilaus/?t=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c&mock=1`);
   await page.waitForSelector('[data-testid=order-page]');
   if ((await page.locator('[data-testid=order-lines] li').count()) !== 3) problems.push('tilaussivu: 3 tilausriviä odotettiin');
   if (!/noindex/.test((await page.locator('meta[name=robots]').getAttribute('content')) || '')) problems.push('tilaussivu: noindex puuttuu');

@@ -97,7 +97,7 @@ test('Mock-palvelin: raportit täsmäävät (päivä ↔ kuukausi, ALV, maksutav
   assert.ok(Array.isArray(d.receipts) && !d.by_day); assert.ok(Array.isArray(m.by_day) && !m.receipts);
   assert.ok(d.totals.receipts > 0 && d.lines.every((l) => l.date === '2026-10-10'));
   const c = (n) => Math.round(n * 100), S = (rows, k) => rows.reduce((s, x) => s + c(x[k]), 0);
-  assert.equal(S(d.by_vat, 'gross'), c(d.totals.gross) + c(d.totals.refunds_gross)); assert.equal(S(d.by_method_vat, 'gross'), S(d.by_vat, 'gross'));
+  assert.equal(S(d.by_vat, 'gross'), c(d.totals.gross) + c(d.totals.refunds_gross)); assert.equal(c(d.totals.net_after_refunds), c(d.totals.gross) + c(d.totals.refunds_gross)); assert.equal(S(d.by_vat, 'vat'), c(d.totals.vat_after_refunds)); assert.equal(S(d.by_vat, 'net'), c(d.totals.net_ex_vat_after_refunds)); assert.equal(S(d.by_method_vat, 'gross'), S(d.by_vat, 'gross'));
   assert.equal(S(d.by_method, 'gross') + S(d.by_method, 'refunds'), S(d.by_vat, 'gross')); assert.equal(S(d.by_category, 'gross'), S(d.by_vat, 'gross'));
   assert.equal(S(d.receipts.filter((x) => x.kind === 'receipt'), 'gross'), c(d.totals.gross));
   assert.equal(d.totals.receipts, d.receipts.filter((x) => x.kind === 'receipt').length);
@@ -106,7 +106,7 @@ test('Mock-palvelin: raportit täsmäävät (päivä ↔ kuukausi, ALV, maksutav
   assert.ok(GROUPS.includes(ag.lines[0].group));
   await assert.rejects(() => R('admin_report_daily', { p_date: 'x' }), (e) => e.code === 'invalid_date');
   const csv = await R('admin_report_csv', { p_from: '2026-10-10', p_to: '2026-10-10' });
-  assert.equal(csv.content.charCodeAt(0), 0xFEFF); assert.equal(csv.content.split('\r\n')[0].slice(1), 'pvm;klo;kuitti;tilaus;tyyppi;maksutapa;tuoteryhma;tuote;maara;brutto;alv_prosentti;alv_eur;netto'); assert.equal(csv.content.trim().split('\r\n').length - 1, d.lines.length);
+  assert.equal(csv.content.charCodeAt(0), 0xFEFF); assert.equal(csv.content.split('\r\n')[0].slice(1), 'pvm;kuitti_no;tilaus_no;maksutapa;tuoteryhmä;tuote;määrä;brutto;alv_%;alv_€;netto;hyvitys'); assert.equal(csv.content.trim().split('\r\n').length - 1, d.lines.length);
 });
 test('Mock-palvelin: kirjoittavat RPC:t palauttavat sopimuksen muodot ja tarkistavat summat', async () => {
   const un = mock.orders.find((o) => o.is_native && o.payment_status === 'unpaid' && o.unpaid_amount > 0), pd = mock.orders.find((o) => o.is_native && o.payment_status === 'paid' && o.payments.length);
@@ -140,17 +140,36 @@ test('Datakerros: ?mock=1 → mock; oikea tila lähettää sopimuksen nimet ja p
   assert.deepEqual(calls.slice(3).map((c) => c[0]), ['admin_report_daily', 'admin_report_month', 'admin_get_order', 'admin_list_addons']);
   assert.deepEqual(calls[3][1], { p_date: '2026-10-01' }); assert.deepEqual(calls[4][1], { p_ym: '2026-10' }); assert.deepEqual(calls[5][1], { p_order_id: 7 });
 });
-test('Datakerros: kirjoittavien toimintojen parametrit (kun LIVE_ACTIONS kytketään) – mockissa toimivat, oikeassa lukossa', async () => {
-  const real = A.createTalousApi({ rpc: async () => ({}), mock: false });
-  for (const k of ['addToOrder', 'createPaymentLink', 'refund']) { assert.equal(A.LIVE_ACTIONS[k], false); assert.equal(real.actionLive(k), false); await assert.rejects(() => real[k]({}), (e) => e instanceof A.FeatureNotReady && /ei vielä käytössä/.test(e.message)); }
+test('Datakerros: kirjoittavat toiminnot – LIVE_ACTIONS päällä, parametrit, ei mock-varakutsua oikeassa tilassa', async () => {
+  for (const k of ['addToOrder', 'createPaymentLink', 'refund', 'recordPayment']) assert.equal(A.LIVE_ACTIONS[k], true, `LIVE_ACTIONS.${k}`);
+  const real = A.createTalousApi({ rpc: async () => ({ ok: true }), mock: false });
+  for (const k of ['addToOrder', 'createPaymentLink', 'refund', 'recordPayment']) assert.equal(real.actionLive(k), true);
   const calls = []; const be = A.rpcBackend(async (n, a) => { calls.push([n, a]); return { ok: true }; });
   await be.addToOrder({ orderId: 1, items: [{ type: 'addon' }], createLink: true, sendEmail: false, note: 'n' }); await be.createPaymentLink({ orderId: 1, sendEmail: true, expiresDays: 7 }); await be.refund({ paymentId: 3, amount: 4.5, reason: 'r' }); await be.reportCsv({ from: '2026-10-01', to: '2026-10-31' });
+  await be.recordPayment({ orderId: 2, method: 'cash', amount: 12.5, note: 'n' }); await be.listVatRates();
   assert.deepEqual(calls, [['admin_add_to_order', { p_order_id: 1, p_items: [{ type: 'addon' }], p_create_link: true, p_note: 'n' }], ['admin_create_payment_link', { p_order_id: 1, p_send_email: true, p_expires_days: 7 }],
-    ['admin_refund', { p_payment_id: 3, p_amount: 4.5, p_reason: 'r' }], ['admin_report_csv', { p_from: '2026-10-01', p_to: '2026-10-31', p_kind: 'lines' }]]);
+    ['admin_refund', { p_payment_id: 3, p_amount: 4.5, p_reason: 'r' }], ['admin_report_csv', { p_from: '2026-10-01', p_to: '2026-10-31', p_kind: 'lines' }],
+    ['admin_record_payment', { p_order_id: 2, p_method: 'cash', p_amount: 12.5, p_note: 'n' }], ['admin_list_vat_rates', {}]]);
+  // kirjoitus ei koskaan putoa mockiin oikeassa tilassa: puuttuva RPC → FeatureNotReady (ei näennäistä onnistumista); palvelinvirhe (BK001, status 400/404) välittyy sellaisenaan
+  const miss = Object.assign(new Error('Could not find the function booking.admin_refund(p_amount, p_payment_id) in the schema cache'), { status: 404, code: 'long text', details: { code: 'PGRST202' } });
+  const api1 = A.createTalousApi({ rpc: async () => { throw miss; }, mock: false });
+  await assert.rejects(() => api1.refund({ paymentId: 1, amount: 1, reason: 'abc' }), (e) => e instanceof A.FeatureNotReady); assert.equal(api1.actionLive('refund'), false); assert.deepEqual(api1.missing, ['admin_refund']);
+  const bk = Object.assign(new Error('Tilausta ei löydy'), { status: 404, code: 'not_found', details: { code: 'BK001', details: 'not_found' } });
+  assert.ok(!A.isMissingRpc(bk), 'BK001 not_found ei ole puuttuva funktio');
+  await assert.rejects(() => A.createTalousApi({ rpc: async () => { throw bk; }, mock: false }).recordPayment({ orderId: 1, method: 'cash', amount: 1 }), (e) => e.code === 'not_found');
   const m = A.createTalousApi({ mock: true, mockFactory: () => mock }); assert.equal(m.actionLive('refund'), true);
   const pd = mock.orders.find((o) => o.is_native && o.payments.some((p) => p.status === 'paid' && p.amount > 2));
   assert.equal((await m.refund({ paymentId: pd.payments.find((p) => p.status === 'paid').payment_id, amount: 1, reason: 'x' })).mock, true);
+  const un = mock.orders.find((o) => o.is_native && o.unpaid_amount > 5);
+  assert.equal((await m.recordPayment({ orderId: un.order_id, method: 'cash', amount: 5 })).mock, true);
+  await assert.rejects(() => m.recordPayment({ orderId: un.order_id, method: 'visma_pay', amount: 5 }), (e) => e.code === 'invalid_payment_method');
   await assert.rejects(() => A.rpcBackend(async () => ({ ok: false, code: 'nothing_to_pay', message: 'Ei maksettavaa' })).createPaymentLink({ orderId: 1 }), (e) => e.code === 'nothing_to_pay' && /Ei maksettavaa/.test(e.message));
+  // ALV-huomautus: normalisointi; virhe → null (ei mock-varaa); linkin isäntä order_page_path:sta (täysi osoite tai polku)
+  assert.deepEqual((await m.listVatRates()).missing.map((x) => x.id), [47]);
+  assert.equal(await A.createTalousApi({ rpc: async () => { throw bk; }, mock: false }).listVatRates(), null);
+  assert.equal(A.siteOrigin({ order_page_path: 'https://uusi.saunotus.com/tilaus/?t=abc' }, 'https://admin.x'), 'https://uusi.saunotus.com');
+  assert.equal(A.siteOrigin({ order_page_path: '/tilaus/?t=abc' }, 'https://admin.x'), 'https://admin.x');
+  assert.equal(A.absLink('/maksa/?p=1', { order_page_path: 'https://uusi.saunotus.com/tilaus/?t=abc' }), 'https://uusi.saunotus.com/maksa/?p=1');
 });
 test('Datakerros: puuttuva RPC → vain se toiminto mockiin + ilmoitus; muu virhe ei piilotu', async () => {
   const miss = Object.assign(new Error('Could not find the function booking.admin_report_daily in the schema cache'), { status: 404, code: 'PGRST202' });
@@ -164,12 +183,12 @@ test('Datakerros: puuttuva RPC → vain se toiminto mockiin + ilmoitus; muu virh
   const bad = A.createTalousApi({ rpc: async () => { throw Object.assign(new Error('Ei oikeuksia'), { status: 403, code: 'forbidden' }); }, mock: false });
   await assert.rejects(() => bad.listOrders({}), /Ei oikeuksia/); assert.equal(bad.mode, 'real');
 });
-test('Datakerros: CSV-lähde (mock: asiakaspuolen 12 saraketta; ilman rivejä: palvelimen admin_report_csv)', async () => {
+test('Datakerros: CSV = palvelimen admin_report_csv (12 saraketta, booking_34)', async () => {
   const api = A.createTalousApi({ mock: true, mockFactory: () => mock });
   const rep = await api.reportMonthly('2026-09'); const c = await api.reportCsv(rep);
-  assert.equal(c.source, 'client'); const out = toCsv(c.lines, { methodLabel: (x) => x }); assert.equal(out.trim().split('\r\n').length - 1, rep.lines.length); assert.ok(out.slice(1).startsWith(CSV_COLUMNS.join(';')));
+  assert.equal(c.source, 'server'); assert.ok(c.content.slice(1).startsWith(CSV_COLUMNS.join(';'))); assert.equal(c.content.trim().split('\r\n').length - 1, rep.lines.length);
   const noLines = { ...rep, lines: null }; const s = await api.reportCsv(noLines);
-  assert.equal(s.source, 'server'); assert.equal(s.filename, 'kuitit_2026-09-01_2026-09-30.csv'); assert.ok(s.content.startsWith('\uFEFFpvm;klo;kuitti;tilaus;tyyppi;maksutapa'));
+  assert.equal(s.source, 'server'); assert.equal(s.filename, 'kuitit_lines_2026-09-01_2026-09-30.csv'); assert.ok(s.content.startsWith('\uFEFFpvm;kuitti_no;tilaus_no;maksutapa;tuoteryhmä'));
 });
 test('Datakerros: sopimuksen vastausten normalisointi (rivit, tilaus, raportti)', () => {
   const row = A.normOrderRow({ order_id: 1, order_no: 2, total: 100, paid: 40, refunded: 5, unpaid: 60, first_start: 'f', customer_company: 'X Oy', johku_order_no: 7 });
@@ -180,7 +199,7 @@ test('Datakerros: sopimuksen vastausten normalisointi (rivit, tilaus, raportti)'
   assert.equal(o.balance.unpaid, 60); assert.equal(o.payments[0].payment_id, 4); assert.equal(o.payments[0].receipt_no, 'K-2026-000001'); assert.equal(o.reservations[0].reservation_id, 3); assert.equal(o.first_reservation_at, 'b');
   assert.deepEqual([o.payments[0].lines[0].line_vat, o.payments[0].lines[0].line_net], [25.5, 100]);   // ALV/netto lasketaan bruttosta ja ALV-%:sta
   const r = A.normReport({ period: { from: 'a', to: 'a', kind: 'day' }, totals: { gross: 10 }, by_vat: [{ rate: '25.5', net: 1, vat: 1, gross: 2 }] });
-  assert.equal(r.by_vat[0].rate, 25.5); assert.equal(r.totals.net_after_refunds, 0); assert.deepEqual(r.by_method, []); assert.equal(r.receipts, null); assert.equal(r.lines, null);
+  assert.equal(r.by_vat[0].rate, 25.5); assert.equal(A.normReport({ period: { from: '2026-10-17', to: '2026-10-17', tz: 'Europe/Helsinki' }, totals: {} }).period.kind, 'day'); assert.equal(A.normReport({ period: { from: '2026-10-01', to: '2026-10-31' }, totals: {} }).period.kind, 'month'); assert.equal(r.totals.net_after_refunds, 10); assert.deepEqual(r.by_method, []); assert.equal(r.receipts, null); assert.equal(r.lines, null);
 });
 
 test('Tekstit: FI ja EN sisältävät samat avaimet', () => {

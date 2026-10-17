@@ -224,7 +224,7 @@ a.bk-sd:hover{filter:brightness(.97)}
 .bk-paynow{font-weight:600;color:var(--ink)}
 .bk-conf .bk-sum,.bk-review .bk-sum{grid-template-columns:minmax(124px,40%) minmax(0,1fr)}
 
-/* ---- asiakkaan tilaussivu (/varaa/tilaus/) ---- */
+/* ---- asiakkaan tilaussivu (/tilaus/) ---- */
 .ord{display:grid;gap:16px;max-width:720px;margin-inline:auto}
 .ord-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px}
 .ord-card h2,.ord-card h3{margin:0 0 8px}

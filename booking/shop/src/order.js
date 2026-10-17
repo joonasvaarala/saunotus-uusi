@@ -1,4 +1,4 @@
-// Asiakkaan tilaussivu (vaihe A: UI-runko): /varaa/tilaus/?t=<token>  (EN: /en/book/order/?t=<token>). Token on vain URL-parametrina (ei hashissa/polussa → ei Referer-vuotoa; sivulla meta referrer=no-referrer).
+// Asiakkaan tilaussivu: /tilaus/?t=<token> (sopimus: settings.order_page_path; EN-sivu /en/order/?t=<token>, tilauksen locale ohjaa oikeaan kieleen). Token on vain URL-parametrina (ei hashissa/polussa → ei Referer-vuotoa; sivulla meta referrer=no-referrer).
 // Näyttää tilauksen rivit, maksutilan, kuitit sekä ohjauksen lisäykseen ja peruutuspyyntöön. Data: order-api.js (mock kun ?mock=1; puuttuva RPC → "ei vielä käytössä").
 import { rpc } from './sb.js';
 import { OT } from './order-texts.js';
@@ -35,6 +35,9 @@ async function main() {
   try { o = await api.get(); } catch { return mount(h('p', { class: 'bk-error', role: 'alert', text: t.loadError }), phoneBox()); }
   if (o?.notReady) return mount(h('div', { class: 'bk-notice', role: 'status', 'data-testid': 'not-ready' }, h('p', { text: t.notReady }), phoneBox()));
   if (!o?.ok) return mount(h('p', { class: 'bk-error', role: 'alert', text: t.notFound }), phoneBox());
+  // sopimuksen linkki on yksi (/tilaus/?t=…): jos tilauksen kieli (locale) on toinen kuin sivun, siirrytään saman tilauksen toiskieliseen sivuun (token säilyy)
+  const want = ['fi', 'en'].includes(o.locale) ? o.locale : L;
+  if (want !== L && S.orderHref?.[want] && !new URLSearchParams(location.search).has('mock')) { location.replace(`${S.orderHref[want]}${location.search}`); return; }
   draw(o);
 
   function draw(o) {

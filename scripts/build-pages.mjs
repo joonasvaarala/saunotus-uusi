@@ -73,7 +73,7 @@ if (!nImports || (adminHtml.match(/\?v=/g) || []).length !== 4) fail('hallinnan 
 for (const f of ['admin.js', 'ui.js', 'icons.js', 'sb.js', 'config.js', 'admin.css', 'calendar.css', 'views/users.js', 'views/calendar.js', 'views/customerform.js', 'views/addons.js', 'views/productimage.js', 'views/talous.js', 'views/talous-orders.js', 'views/talous-payments.js', 'views/talous-reports.js', 'views/talous-ui.js', 'talous-api.js', 'talous-mock.js', 'talous-i18n.js', 'talous-texts.js', 'csv.js', 'logo-haalea.svg']) if (!statSync(join(A, f), { throwIfNoEntry: false })) fail(`hallinnasta puuttuu ${f}`);
 if (process.env.SITE_ENV === 'test') {
   const noindex = (p) => /<meta name="robots" content="noindex/.test(readFileSync(p, 'utf8'));
-  for (const p of ['index.html', 'en/index.html', 'varaa/index.html', 'varaa/tilaus/index.html', 'en/book/order/index.html', 'hallinta/index.html']) { try { if (!noindex(join(OUT, p))) fail(`${p}: noindex puuttuu (SITE_ENV=test)`); } catch (e) { if (e.code === 'ENOENT') fail(`${p} puuttuu dististä`); else throw e; } }
+  for (const p of ['index.html', 'en/index.html', 'varaa/index.html', 'tilaus/index.html', 'en/order/index.html', 'hallinta/index.html']) { try { if (!noindex(join(OUT, p))) fail(`${p}: noindex puuttuu (SITE_ENV=test)`); } catch (e) { if (e.code === 'ENOENT') fail(`${p} puuttuu dististä`); else throw e; } }
   if (!/Disallow: \//.test(readFileSync(join(OUT, 'robots.txt'), 'utf8'))) fail('robots.txt ei estä indeksointia');
 }
 // ei salaisuuksia: service_role/sb_secret ei saa esiintyä missään julkaistavassa tiedostossa (config.js, js, html)

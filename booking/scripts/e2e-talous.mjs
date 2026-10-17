@@ -66,7 +66,7 @@ async function newPage(name, { vp, lang = 'fi', listMode = 'mock', perms = PERMS
   page.st = st;
   page.on('pageerror', (e) => problems.push(`${name} pageerror: ${e.message}`));
   page.on('console', (m) => { if (['error', 'warning'].includes(m.type()) && !(allow && allow.test(m.text()))) problems.push(`${name} console ${m.type()}: ${m.text()}`); });
-  page.on('requestfailed', (r) => problems.push(`${name} requestfailed: ${r.url()}`));
+  page.on('requestfailed', (r) => !/ERR_ABORTED/.test(r.failure()?.errorText || '') && problems.push(`${name} requestfailed: ${r.url()}`));
   page.on('response', (r) => { if (r.status() >= 400 && r.url().startsWith(ORIGIN) && !r.url().includes('/rest/v1/') && !(allow && allow.test(r.url()))) problems.push(`${name} HTTP ${r.status()}: ${r.url()}`); });
   await page.route(`${ORIGIN}/rest/v1/**`, async (route) => {
     const u = new URL(route.request().url()), m = route.request().method();
@@ -110,7 +110,7 @@ async function layoutChecks(page, label, scope = '.tl') {
   expect(!r.contrast.length, `${label}: kontrasti <4,5: ${[...new Set(r.contrast)].slice(0, 5).join(' | ')}`);
 }
 const nbsp = /[\s\u00a0\u202f]/g;
-const num = (s) => +String(s).replace(nbsp, '').replace(',', '.').replace(/[^\d.\-]/g, '');
+const num = (s) => +String(s).replace(nbsp, '').replace(/\u2212/g, '-').replace(',', '.').replace(/[^\d.\-]/g, '');
 
 // ================= HALLINTA =================
 async function adminSuite() {
@@ -123,6 +123,8 @@ async function adminSuite() {
     expect(await page.locator('#nav a', { hasText: T.nav }).count() === 1, `${name}: navigaatiossa pitää olla "${T.nav}"`);
     expect(await page.locator('[data-testid=talous] h1').innerText() === T.title, `${name}: otsikko`);
     expect(await page.locator('[data-testid=mock-banner]').isVisible(), `${name}: mock-banneri näkyviin`);
+    await page.waitForSelector('[data-testid=vat-missing]:not([hidden])');
+    expect(await page.locator('[data-testid=vat-missing]').getAttribute('data-count') === '1' && /Tossujen/.test(await page.locator('[data-testid=vat-missing-list]').innerText()) && await page.locator('[data-testid=vat-missing] strong').innerText() === T['vat.title'], `${name}: ALV-huomautus (puuttuva ALV-kanta)`);
     expect(await page.locator('[data-testid=tab-orders-btn]').innerText() === T['tab.orders'] && await page.locator('[data-testid=tab-payments-btn]').innerText() === T['tab.payments'] && await page.locator('[data-testid=tab-reports-btn]').innerText() === T['tab.reports'], `${name}: välilehtien nimet`);
     // --- Tilaukset ---
     const rows = () => page.locator('[data-testid=orders-list] > [data-testid=order]');
@@ -205,7 +207,7 @@ async function adminSuite() {
     // --- Raportit ---
     await page.click('[data-testid=tab-reports-btn]');
     await page.waitForSelector('[data-testid=r-gross]');
-    for (const id of ['r-by-vat', 'r-by-method', 'r-matrix', 'r-by-group']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: raporttitaulukko ${id}`);
+    for (const id of ['r-by-vat', 'r-by-method', 'r-matrix', 'r-by-group', 'r-net-ex-vat']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: raporttitaulukko ${id}`);
     await layoutChecks(page, `${name} raportti päivä`);
     if (vp === 390 || vp === 1280) await shot(page, `talous-raportit-paiva-${vp}-${lang}`);
     // CSV (päivä)
@@ -215,8 +217,8 @@ async function adminSuite() {
     const txt = d1.buf.toString('utf8').slice(1), lines = txt.split('\r\n');
     expect(lines[0] === 'pvm;kuitti_no;tilaus_no;maksutapa;tuoteryhmä;tuote;määrä;brutto;alv_%;alv_€;netto;hyvitys', `${name}: CSV-otsikko (${lines[0]})`);
     expect(lines.at(-1) === '' && lines.length > 3 && lines.slice(1, -1).every((l) => l.split(';').length >= 12), `${name}: CSV rivit CRLF + 12 saraketta`);
-    expect(/;-?\d+,\d{2};\d+(,\d)?;-?\d+,\d{2};-?\d+,\d{2};\d+,\d{2}\r?$/.test(lines[1]) && !/\d\.\d{2};/.test(lines[1]), `${name}: desimaalipilkku (${lines[1]})`);
-    expect(/^raportti_paiva_\d{4}-\d{2}-\d{2}\.csv$/.test(d1.fn), `${name}: CSV-tiedostonimi ${d1.fn}`);
+    expect(/^\d{2}\.\d{2}\.\d{4};.*;-?\d+,\d{2};\d+(,\d)?;-?\d+,\d{2};-?\d+,\d{2};(kyllä|ei)\r?$/.test(lines[1]) && !/\d\.\d{2};/.test(lines[1].slice(10)), `${name}: desimaalipilkku (${lines[1]})`);
+    expect(/^kuitit_lines_\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2}\.csv$/.test(d1.fn), `${name}: CSV-tiedostonimi ${d1.fn}`);
     // PDF = window.print
     await page.evaluate(() => { window.__printed = 0; window.print = () => { window.__printed++; }; });
     await page.click('[data-testid=r-pdf]'); expect(await page.evaluate(() => window.__printed) === 1, `${name}: PDF-nappi kutsuu tulostusta`);
@@ -232,7 +234,7 @@ async function adminSuite() {
     expect(await page.locator('[data-testid=r-daily] tbody tr').count() >= 10, `${name}: kuukausiraportin päiväerittely`);
     await layoutChecks(page, `${name} raportti kuukausi`);
     if (vp === 390 || vp === 1280) await shot(page, `talous-raportit-kuukausi-${vp}-${lang}`);
-    const d2 = await csvOf(); expect(/^raportti_kuukausi_\d{4}-\d{2}\.csv$/.test(d2.fn) && d2.buf.length > d1.buf.length, `${name}: kuukausi-CSV`);
+    const d2 = await csvOf(); expect(/^kuitit_lines_\d{4}-\d{2}-01_\d{4}-\d{2}-\d{2}\.csv$/.test(d2.fn) && d2.buf.length > d1.buf.length, `${name}: kuukausi-CSV`);
     // hyvitysrivi (negatiivinen) löytyy jossain kuukaudessa: edellinen kuukausi
     // kielenvaihto
     if (vp === 390) {
@@ -256,6 +258,14 @@ async function adminSuite() {
       await page.click('dialog[open] button[type=submit]'); await page.waitForSelector('#toast.show.err'); expect(true, 'tyhjä mukautettu rivi → virhe');
       await page.fill('dialog[open] input[name=desc]', 'Alennus'); await page.fill('dialog[open] input[name=amount]', '-5'); await page.click('dialog[open] button[type=submit]');
       await page.waitForSelector('#toast.show.warn'); expect(/Mock/.test(await page.locator('#toast').innerText()), `${name}: mock-toast`);
+      await openFirst('unpaid');
+      expect(!(await page.locator('[data-testid=btn-record]').isDisabled()), `${name}: Kirjaa maksu käytössä mockissa`);
+      await page.click('[data-testid=btn-record]'); await page.waitForSelector('dialog[open] [data-testid=record-amount]');
+      expect(num(await page.locator('dialog[open] [data-testid=record-amount]').inputValue()) > 0 && await page.locator('dialog[open] [data-testid=record-method] option').count() >= 3, `${name}: kirjauksen oletussumma ja maksutavat`);
+      await shot(page, 'talous-dialogi-kirjaa-maksu-390-fi');
+      await page.fill('dialog[open] [data-testid=record-amount]', '99999'); await page.click('dialog[open] button[type=submit]'); await page.waitForSelector('#toast.show.err');
+      await page.fill('dialog[open] [data-testid=record-amount]', '1'); await page.click('dialog[open] button[type=submit]'); await page.waitForSelector('#toast.show.warn'); expect(/Mock/.test(await page.locator('#toast').innerText()), `${name}: kirjaus mock-toast`);
+      await openFirst('unpaid');
       await page.click('[data-testid=btn-link]'); await page.waitForSelector('dialog[open] form'); expect(/€/.test(await page.locator('dialog[open] [data-testid=link-amount]').innerText()), `${name}: linkin summa`);
       await page.click('dialog[open] button[type=submit]'); await page.waitForSelector('dialog[open] [data-testid=link-url]');
       expect(/\/maksa\/\?p=/.test(await page.locator('dialog[open] [data-testid=link-url]').inputValue()), `${name}: maksulinkki-osoite`);
@@ -304,8 +314,9 @@ async function adminSuite() {
     await page.selectOption('[data-testid=orders-f-pay]', 'paid'); await page.waitForTimeout(250);
     await page.locator('[data-testid=orders-list] > [data-testid=order]').first().locator('.tl-head').click(); await page.waitForSelector('[data-testid=order-actions]');
     expect(calls('admin_get_order').length === 1 && typeof calls('admin_get_order')[0].args.p_order_id === 'number', `${name}: admin_get_order kutsuttu`);
-    for (const id of ['btn-add', 'btn-link', 'btn-refund']) expect(await page.locator(`[data-testid=${id}]`).first().isDisabled(), `${name}: ${id} pois käytöstä oikeassa tilassa`);
-    expect(await page.locator('.tl-hint').first().isVisible(), `${name}: vihjeteksti napeista`);
+    // LIVE_ACTIONS päällä: oikeassa tilassa napit ovat käytössä palvelimen sääntöjen mukaan (tässä: maksettu natiivitilaus → lisäys sallittu, linkki ei (ei maksettavaa), hyvitys vaatii payments.refund (PERMS ilman))
+    expect(!(await page.locator('[data-testid=btn-add]').first().isDisabled()) && await page.locator('[data-testid=btn-link]').first().isDisabled() && await page.locator('[data-testid=btn-refund]').first().isDisabled(), `${name}: napit oikeassa tilassa (lisäys käytössä, linkki/hyvitys sääntöjen mukaan)`);
+    expect(await page.locator('[data-testid=btn-record]').count() === 1 && await page.locator('.tl-detail .tl-hint').count() === 0, `${name}: ei "odottaa RPC"-vihjettä kun toiminnot on kytketty`);
     expect(await page.locator('[data-testid=order-unpaid]').count() === 1 && await page.locator('[data-testid=order-total]').count() === 1, `${name}: summat näkyvät`);
     await shot(page, 'talous-oikea-tila-tilaus-390-fi');
     // Maksut: laskurivit haetaan tilaukselta (admin_list_payments ei palauta rivejä)
@@ -337,7 +348,7 @@ async function adminSuite() {
     const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-testid=r-csv]')]);
     const buf = await readFile(await dl.path()), txt = buf.toString('utf8');
     expect(calls('admin_report_csv').length === 1 && calls('admin_report_csv')[0].args.p_from === `${mon}-01` && calls('admin_report_csv')[0].args.p_kind === 'lines', `${name}: admin_report_csv kutsuttu (${JSON.stringify(calls('admin_report_csv')[0]?.args)})`);
-    expect(buf[0] === 0xEF && buf[1] === 0xBB && txt.slice(1).startsWith('pvm;klo;kuitti;tilaus;tyyppi;maksutapa;tuoteryhma;tuote;maara;brutto;alv_prosentti;alv_eur;netto') && /^kuitit_\d{4}-\d{2}-01_\d{4}-\d{2}-\d{2}\.csv$/.test(dl.suggestedFilename()), `${name}: palvelimen CSV sellaisenaan (${dl.suggestedFilename()})`);
+    expect(buf[0] === 0xEF && buf[1] === 0xBB && txt.slice(1).startsWith('pvm;kuitti_no;tilaus_no;maksutapa;tuoteryhmä;tuote;määrä;brutto;alv_%;alv_€;netto;hyvitys') && /^kuitit_lines_\d{4}-\d{2}-01_\d{4}-\d{2}-\d{2}\.csv$/.test(dl.suggestedFilename()), `${name}: palvelimen CSV sellaisenaan (${dl.suggestedFilename()})`);
     await page.context().close();
   }
   // ---- RPC:t puuttuvat: kaunis "ominaisuus ei vielä käytössä" + esimerkkidata; jokaista puuttuvaa RPC:tä kutsutaan vain kerran ----
@@ -372,7 +383,7 @@ async function adminSuite() {
 const TOKEN = '3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c';
 async function shopSuite() {
   for (const lang of ['fi', 'en']) for (const vp of [360, 390, 1280]) {
-    const name = `shop ${lang} ${vp}`, base = lang === 'fi' ? '/varaa/tilaus/' : '/en/book/order/';
+    const name = `shop ${lang} ${vp}`, base = lang === 'fi' ? '/tilaus/' : '/en/order/';
     const page = await newPage(name, { vp, lang, admin: false });
     page.on('dialog', (d) => d.accept());
     await page.goto(`${ORIGIN}${base}?t=${TOKEN}&mock=1`);
@@ -406,14 +417,26 @@ async function shopSuite() {
   }
   { // RPC puuttuu → ei esimerkkidataa asiakkaalle
     const name = 'shop notready', page = await newPage(name, { vp: 390, admin: false, allow: /status of 404/ });
-    await page.goto(`${ORIGIN}/varaa/tilaus/?t=${TOKEN}`); await page.waitForSelector('[data-testid=not-ready]');
+    await page.goto(`${ORIGIN}/tilaus/?t=${TOKEN}`); await page.waitForSelector('[data-testid=not-ready]');
     expect(await page.locator('[data-testid=order-page]').count() === 0 && await page.locator('[data-testid=mock-banner]').count() === 0, `${name}: ei esimerkkidataa asiakkaalle`);
     await shot(page, 'asiakas-tilaus-ei-kaytossa-390-fi'); await page.context().close();
   }
+  { // sopimuksen yksi linkki (/tilaus/?t=…): tilauksen locale ohjaa oikean kielen sivulle (token säilyy), ja takaisin
+    const { createOrderMock } = await import(pathToFileURL(join(ROOT, 'booking/shop/src/order-mock.js')));
+    for (const [from, loc, to] of [['/tilaus/', 'en', '/en/order/'], ['/en/order/', 'fi', '/tilaus/'], ['/tilaus/', 'fi', '/tilaus/']]) {
+      const name = `shop locale ${from}->${to}`, page = await newPage(name, { vp: 390, lang: loc, admin: false });
+      await page.route(`${ORIGIN}/rest/v1/rpc/public_get_order`, async (route) => { const r = await createOrderMock().rpc('public_get_order', { p_token: TOKEN }); route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ...r, locale: loc }) }); });
+      await page.goto(`${ORIGIN}${from}?t=${TOKEN}`);
+      await page.waitForSelector('[data-testid=order-page]'); await page.waitForTimeout(150);
+      const u = new URL(page.url());
+      expect(u.pathname === to && u.searchParams.get('t') === TOKEN, `${name}: osoite ${u.pathname}${u.search}`);
+      await page.context().close();
+    }
+  }
   { // virheellinen/puuttuva token
     const name = 'shop notoken', page = await newPage(name, { vp: 390, admin: false });
-    await page.goto(`${ORIGIN}/varaa/tilaus/`); await page.waitForSelector('#order-app .bk-error');
-    await page.goto(`${ORIGIN}/varaa/tilaus/?t=abc`); await page.waitForSelector('#order-app .bk-error');
+    await page.goto(`${ORIGIN}/tilaus/`); await page.waitForSelector('#order-app .bk-error');
+    await page.goto(`${ORIGIN}/tilaus/?t=abc`); await page.waitForSelector('#order-app .bk-error');
     expect(true, 'token'); await page.context().close();
   }
 }

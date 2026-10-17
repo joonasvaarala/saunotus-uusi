@@ -39,7 +39,7 @@ export function reservationDialog(r, { methods, onChange, refs, can = () => true
         act('Kirjaa maksu', () => rpc('admin_record_payment', { p_order_id: r.order_id, p_method: method.value, p_amount: +amount.value }), 'btn primary'))) : null,
     h('div', { class: 'box' }, h('strong', { text: 'Verkkomaksulinkki (Visma Pay)' }),
       h('p', { class: 'muted', text: 'Ei vielä käytössä. Painike luo maksurivin ja näyttää, että linkki toteutetaan Visma Pay -integraation yhteydessä.' }),
-      (() => { const out = h('p', { class: 'muted' }); const b = h('button', { type: 'button', class: 'btn', text: 'Luo maksulinkki', onclick: () => run(b, async () => { const j = await rpc('admin_create_payment_link', { p_order_id: r.order_id }); out.textContent = j.link_url || j.message; }) }); return h('div', {}, b, out); })()));
+      (() => { const out = h('p', { class: 'muted' }); const b = h('button', { type: 'button', class: 'btn', text: 'Luo maksulinkki', onclick: () => run(b, async () => { const j = await rpc('admin_create_payment_link', { p_order_id: r.order_id }); out.textContent = j.link_url || j.link_path || j.message; }) }); return h('div', {}, b, out); })()));
   // Resurssit (migraatio 17): tila, elinkaari, ylitys, claim-ikkuna, vanhempi varaus, legit. Päivänäkymän RPC antaa täydet tiedot (ylitys, kiintiö, claim, leg_id);
   // varauslistan rivillä ne puuttuvat, joten ne haetaan kerran päivänäkymästä. Kaikki kentät valinnaisia.
   const drawResources = () => {
