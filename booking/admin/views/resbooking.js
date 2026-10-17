@@ -44,8 +44,9 @@ export async function render({ ctx, refs, query, kind }) {
   const note = h('textarea', { name: 'note', rows: 2 });
   const method = h('select', { name: 'method' }, refs.methods.filter((m) => m.active).map((m) => h('option', { value: m.code, text: m.label, selected: m.code === 'pay_later' || null })));
   const paid = h('input', { type: 'checkbox', name: 'paid' });
-  const modeOf = () => spaceOpts(st.product || {})[0]?.mode || 'exclusive';
-  const picker = addonPicker(addons, { getPersons: () => +persons.value || 0, getMode: () => modeOf(), onChange: () => {} });
+  // Lisäpalvelut hoito-/saunotus-/tapahtumavarauksessa (resurssivaraus): vain lisäpalvelut, joiden applies_modes sisältää 'resource' (pyyhe).
+  // Saunavihta, turvenaamio ja jalkakylpy tarjotaan vain yleisillä vuoroilla ja yksityisvarauksessa (Joonas 17.10.).
+  const picker = addonPicker(addons, { getPersons: () => +persons.value || 0, getMode: () => 'resource', onChange: () => {} });
   // ylitys: vain bookings.override-oikeudella
   const canOverride = ctx.can('bookings.override');
   const ovr = h('input', { type: 'checkbox', name: 'override' });
