@@ -12,7 +12,7 @@ const VAT_CHOICES = [25.5, 13.5, 0];
 export function createOrdersTab({ api, ctx }) {
   const st = { search: '', paymentStatus: '', source: '', native: '', dateField: '', from: '', to: '', sortBy: 'created', sortDir: 'desc', limit: 25, offset: 0 };
   const list = h('ul', { class: 'tl-list', 'data-testid': 'orders-list' }), count = h('p', { class: 'muted tl-count', role: 'status', 'data-testid': 'orders-count' }), pagers = [h('div'), h('div')];
-  let seq = 0, reopen = null;
+  let seq = 0, reopen = null, autoOpen = false;
   async function load() {
     const my = ++seq;
     list.replaceChildren(loading()); list.setAttribute('aria-busy', 'true');
@@ -24,6 +24,7 @@ export function createOrdersTab({ api, ctx }) {
       count.textContent = r.total ? t('orders.count', { from: fmt.int(st.offset + 1), to: fmt.int(Math.min(st.offset + st.limit, r.total)), total: fmt.int(r.total) }) : '';
       list.replaceChildren(...(r.rows.length ? r.rows.map(orderRow) : [emptyBox(t('orders.none'))]));
       if (reopen != null) { list.querySelector(`[data-order-id="${reopen}"] .tl-head`)?.click(); reopen = null; }
+      if (autoOpen) { autoOpen = false; if (r.rows.length === 1) { const row = list.firstElementChild; row.style.scrollMarginTop = '70px'; row.querySelector('.tl-head')?.click(); row.scrollIntoView({ block: 'start' }); } }   // syvälinkki (#/talous?order=<tilausnro>): ainoa osuma avataan
       const mk = () => (r.total > st.limit ? pager({ total: r.total, offset: st.offset, limit: st.limit, onPage: (o) => { st.offset = o; load(); document.querySelector('[data-testid=orders-count]')?.scrollIntoView({ block: 'nearest' }); } }) : h('span'));
       pagers[0].replaceChildren(mk()); pagers[1].replaceChildren(mk());
     } catch (e) { if (my === seq) { list.replaceChildren(errorBox(e, load)); count.textContent = ''; pagers.forEach((p) => p.replaceChildren()); } }
@@ -177,11 +178,11 @@ export function createOrdersTab({ api, ctx }) {
       selectFld(t('filters.dateField'), 'orders-f-datefield', ['start'], (c) => t(`df.${c}`), st.dateField, (v) => change({ dateField: v }), t('df.created')),
       dateFld(t('filters.from'), 'orders-f-from', st.from, (v) => change({ from: v })), dateFld(t('filters.to'), 'orders-f-to', st.to, (v) => change({ to: v })),
       pageSizeSelect(st.limit, (n) => change({ limit: n })), reset);
-    if (toolbar?.isConnected) toolbar.replaceWith(next);
+    if (toolbar?.parentNode) toolbar.replaceWith(next);   // parentNode: myös ennen kuin välilehti on liitetty sivulle (syvälinkki)
     toolbar = next; return next;
   }
   sortSel.value = st.sortBy;
   const cols = h('div', { class: 'tl-cols', 'aria-hidden': 'true' }, h('span', { text: t('col.order') }), h('span', { text: t('col.created') }), h('span', { text: t('col.first') }), h('span', { class: 'r', text: t('col.sum') }), h('span', { text: t('col.status') }), h('span'));
   const node = h('div', { class: 'tl-tab', 'data-testid': 'tab-orders' }, toolbar, count, pagers[0], cols, list, pagers[1]);
-  return { node, load, setSearch(q) { st.search = q; st.offset = 0; buildToolbar(); load(); } };
+  return { node, load, setSearch(q, { open = false } = {}) { st.search = q; st.offset = 0; autoOpen = open; buildToolbar(); load(); } };
 }
