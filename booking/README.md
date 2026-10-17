@@ -143,6 +143,10 @@ Tulkinnat ja avoimet kysymykset: [docs/ristiriidat-ja-tulkinnat.md](docs/ristiri
 | 18b | `…20261016221825_booking_18b_sync.sql` | `apply_closure_events` (idempotentti snapshot-synkka, massapoistosuoja, dry-run; vain `service_role`), `_reconcile_closure_blocks`, `admin_closure_overview(p_days)` ja `admin_set_closure_override(p_event_id, p_override, p_note)` (oikeus `blocks.manage`) |
 | 18c | `…20261016221840_booking_18c_validators.sql` | Validaattorit lukevat kalenterisulut; Lauran taidon legit laura-resurssille; `admin_day_view`: `blocks`-riveillä `closure_event_id` ja `resource_code` |
 | 19 | `…_booking_19_product_images.sql` | Tuotekuvat: `product_config.image_path/image_alt`, Storage-bucket `product-images` (julkinen luku, kirjoitus `catalog.edit`), `public_product_images()`, `admin_set_product_image()` (+ audit). Vain lisäyksiä – ei korvaa aiempia funktioita |
+| 20 | `…20261016224525_booking_20_fk_indexes.sql` | Suorituskyky: puuttuvat viiteavainindeksit (advisor `unindexed_foreign_keys`). Ajettu tuotantoon. |
+| 21 | `…20261016233600_booking_21_ritual_pool_1730.sql` | Uusi kapasiteettipooli `yleinen_vkp_1730`: kb 7 -paketti voi alkaa klo 17:00. Ajettu tuotantoon. |
+| 22 | `…20261016234502_booking_22_therapist_missing.sql` | Saunottaja puuttuu -merkintä: `reservations.therapist_missing` + `therapist_exception_by/at/note`; jos vain saunottajatarkistus ei täyty, varaus luodaan merkittynä (`warning: 'therapist_missing'`); `admin_review_list.missing_therapist`; `admin_grant_therapist_exception`; `therapist_missing_digest` (vain `service_role`). Ajettu tuotantoon. |
+| 23 | `…20261016234534_booking_23_time_windows.sql` | Aikaikkunat: hoitotyyppiset tuotteet (kb 10, 11–15, 16–22, 23, 24) ma–pe 16:00–20:30, la–su 13:00–20:30, ei yli keskiyön; rituaalit (kb 7, 8) alkavat vain 16:00 / 16:30 / 17:00; virheet `time_window` / `ritual_start`; ylitys `bookings.override`. Ajettu tuotantoon. |
 
 
 > **Migraatiot 12 ja 13 on ajettu tuotantoon** (Bottiavustus ajoi ne 16.10.2026). Tiedostot ovat `supabase/migrations/`-kansiossa versionimillä `20261016202540_booking_12_johku_marker.sql` ja `20261016202553_booking_13_audit_skip.sql` (sama SQL kuin ajettu), jotta paikallinen `run.sh`/`setup-db.sh` vastaa tuotantoa.
@@ -214,6 +218,18 @@ Migraatio 17 (17a–17d) on ajettu tuotantoon (versiot 20261016213905 / 213924 /
 * **Virheilmoitukset suomeksi**: BK001-koodit (`space_busy`, `no_therapist`, `therapist_closed`, `parent_required`, `override_reason_required`, `wrong_lifecycle`, `space_not_allowed`, `no_space`, `no_pool_for_start`, `no_primary_leg`, `bad_rule`, `skill_unknown`, `not_resourced` sekä vanhat `capacity_exceeded`, `space_closed`, `private_booked`, `public_shift_booked`, `bad_pool`, `has_reservations`, `forbidden`) kartoitetaan `admin/ui.js`:n `ERR_FI`-taulukolla; tuntematon koodi näyttää palvelimen viestin.
 * Testit: pgTAP `17_resource_bookings` (75 testiä: skeema, validaattorit, ylitys + oikeus, siirto, katselmointi, vanhat polut), selainsavutesti `scripts/smoke-pages.mjs` (Tarkista, varaustyyppi, BK001 suomeksi, ylitys vain oikeudella) ja `scripts/e2e-screenshots.mjs` (resurssi-osio, 360/390/430/1280, ei vaakavieritystä).
 
+### Saunottaja puuttuu ja aikaikkunat hallinnassa (migraatiot 20–23)
+
+Migraatiot 20–23 on ajettu tuotantoon (versiot 20261016224525 / 233600 / 234502 / 234534; tiedostot tavutarkasti samat). Huom: migraatio 19 (tuotekuvat) on repossa myöhemmällä versionimellä (`20261017030000`) kuin 20–23, joten paikallinen ajojärjestys on 20–23 ensin, sitten 19; ne eivät riipu toisistaan. Hallinta (`admin/`):
+
+* **Ei saunottajaa** -tunniste (hillitty hiekka/meripihka, ei sinistä) päivänäkymän resurssivarauksissa ja varauksen tiedoissa (`therapist_missing`, avoin = `therapist_missing_open`). Poikkeuksen myöntämisen jälkeen tunniste muuttuu *Poikkeus myönnetty* -merkiksi ja tiedoissa näkyy perustelu.
+* **Tarkista**: uusi ensimmäinen osio *Ei saunottajaa* (`admin_review_list.missing_therapist`): varaus, tuote, henkilömäärä, tilaus, lähde ja päiviä alkuun.
+* **Myönnä poikkeus** (`admin_grant_therapist_exception(p_reservation_id, p_note)`): painike näkyy vain oikeudella `bookings.override` (admin, manager); perustelu (≥ 3 merkkiä) on pakollinen (`note_required`). Idempotentti.
+* **Luonnin varoitus**: kun `admin_create_resource_booking` / `admin_create_old_booking` palauttaa `warning: 'therapist_missing'`, näytetään huomiolaatikko *Varaus tehty, mutta saunottaja puuttuu työvuorosta* (+ ilmoitus ja linkki Tarkistaan) ennen varauksen vahvistusta.
+* **Virheilmoitukset suomeksi**: `time_window`, `ritual_start`, `note_required`, `not_missing`, `therapist_present`. Resurssivarauslomake näyttää tuotteen aikaikkunavihjeen (`time_window_class`); ylitysvalinta ohittaa myös aikaikkunan.
+* Huom: `admin_list_reservations` ei palauta `therapist_missing`-kenttää (speksin mukaan), joten Varaukset-listassa ei ole tunnistetta; se näkyy päivänäkymässä, tiedoissa ja Tarkistassa. Aikaikkunasääntöjen muokkaukseen ei ole hallintanäkymää.
+* Testit: pgTAP `17_resource_bookings` laajennettu Bottiavustuksen v2-testeillä (ryhmät A–N ajetaan aikaikkunatriggeri pois päältä, kuten tuotannossa; uudet ryhmät W ja X testaavat aikaikkunat ja rituaalin alkuajat sekä poikkeukset), selainsavutesti ja e2e (kuvat `admin-*-90…95`).
+
 ### Kalenterisulut hallinnassa (migraatio 18)
 
 Migraatio 18 (18a–18c; versiot 20261016221808 / 221825 / 221840) on ajettu tuotantoon; kalenterit ovat rekisterissä `active = false` eikä synkkaa ole käynnissä. Hallinta (`admin/`):
@@ -282,8 +298,6 @@ node booking/dev/server.mjs        # http://localhost:4180/  ja  /admin/   (admi
 # 4) kuvakaappaukset + konsolivirhetarkistus
 PW_DIR=/polku/node_modules node booking/scripts/e2e-screenshots.mjs
 PW_DIR=/polku/node_modules node booking/scripts/e2e-shop-layout.mjs   # kaupan lomakkeen asettelu eri leveyksillä
-PW_DIR=/polku/node_modules node booking/scripts/e2e-treatments.mjs   # hoito- ja rituaalivaraus (mock-rajapinta; käynnistä kehityspalvelin uudelleen ennen ajoa)
-TREATMENT_MOCK=0 node booking/dev/server.mjs  &&  TREATMENTS=off node booking/scripts/e2e-treatments.mjs   # tuotanto ennen lippuja: ei hoitotuotteita → "ota yhteyttä"
 ```
 
 Demodata (`dev/seed_demo.sql`) sisältää kiinteän "tyhjän päivän" (savusauna suljettu koko päivän ensi maanantaista +9 pv), jota kaupan e2e-testit käyttävät; testi ei siis enää riipu kellonajasta.
@@ -355,6 +369,3 @@ Ks. [docs/ristiriidat-ja-tulkinnat.md](docs/ristiriidat-ja-tulkinnat.md) (yhteen
 
 ### Varauslistan ajanjakso
 `Kaikki ajat` kutsuu `admin_list_reservations`:ia ilman päivärajoja (`p_from`/`p_to` = null; funktio sallii nullin, ei SQL-muutoksia). `Tulevat` = tästä päivästä alkaen, `Menneet` = ennen tätä päivää, `Tämä kuukausi` = kuukauden 1. päivä – seuraavan kuun 1. päivä, `Oma ajanjakso` näyttää Alkaen/Päättyen-kentät (tyhjä kenttä = ei rajaa). Lista sivutetaan (50 / sivu, `Näytä lisää`; funktion yläraja 500 / kutsu), joten tuhansia Johku-varauksia sisältävä "Kaikki ajat" ei kuormita. Tulosrivi: `11 / 11 varausta · Kaikki ajat`.
-
-### Hoito- ja rituaalivaraus kaupassa (verkossa, ilman verkkomaksua)
-Frontti (`shop/src/treatments.js` = ohut adapteri, `shop/src/treatment-ui.js` = näkymät) käyttää rajapintaa `public_treatment_availability`, `public_create_treatment_booking`, `public_change_treatment_booking` sekä laajennettuja `public_catalog` ja `public_get_booking` (booking_25, ks. `KOODARI_public_treatment_fi.md`). Tuote on hoitotuote, kun `public_catalog()`-rivillä on `booking_kind = 'slots'`; piilotetut tuotteet (kb 8, 10, 11, 12, kunnes `bookable` + `shop_visible` asetetaan) eivät ole katalogissa → kauppa näyttää niille "ota yhteyttä" eikä kutsu uusia RPC:itä. Kulku: tuotekortti → henkilömäärä → päivä (vain vapaat, 14 pv ikkuna) → alkuaika → asiakastiedot (yksityinen/yritys) → tarkistus ("maksu paikan päällä") → vahvistussivu varaustunnuksella; muutos samalla varauslinkillä (≥ 48 h, `change_via`), ei itseperuutusta (peruutus sähköpostilla). Saatavuushaku (0,3–1,7 s / 14 pv) välimuistitetaan (tuote + henkilömäärä + väli, 3 min, väli pilkotaan ≤ 14 pv), ei pollausta, latausindikaattori; `rate_limited`/`busy` → viesti + "Yritä uudelleen". RPC-nimet ja parametrit: yksi paikka (`RPC`/`args` tiedostossa `treatments.js`). Paikallinen mock `dev/treatment-mock.mjs` (kehityspalvelin; `TREATMENT_MOCK=0` poistaa) vastaa dokumenttia (virheet: saatavuus BK001-heitto, varaus/muutos `{ok:false, code}`; testiosoitteet `taken@test.fi`, `time_window@test.fi`, `locked@test.fi`). Testit: `scripts/e2e-treatments.mjs` (+ `scripts/smoke-pages.mjs` mockilla). Tuotantoa vasten ei ajeta testejä: julkaisu (liput) ja testivaraukset sovitaan Tapion kanssa (dokumentin kohta 8).

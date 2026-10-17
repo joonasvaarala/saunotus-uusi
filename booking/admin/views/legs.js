@@ -1,5 +1,6 @@
 // Resurssivarausten (migraatio 17) yhteiset esitystavat: tila, legit (tila / saunottaja), ylitys, elinkaari. Kaikki kentät ovat valinnaisia (vanhempi tietokanta / vanhat rivit).
 import { h, fmtTime, badge } from '../ui.js';
+import { missingBadge } from './therapist.js';
 
 export const ROLE_FI = { space: 'Tila', therapist: 'Saunottaja', group: 'Sulkuryhmä' };
 export const SKILL_FI = { yleinen: 'yleinen', saunotus: 'saunotus', laura: 'Laura', morsiussauna: 'morsiussauna' };
@@ -18,6 +19,7 @@ export const resourceBadges = (r) => [
   r.lifecycle === 'old' ? badge('muted lc-old', 'Vanha tuote') : null,
   r.override_reason ? badge('warn ovr', 'Ylitys') : null,
   r.quota_exempt ? badge('muted', 'Kiintiövapaa') : null,
+  missingBadge(r),   // migraatio 22: Ei saunottajaa / Saunottaja sovittu
 ].filter(Boolean);
 
 // Tilamerkki (vain kun varaus on resurssimallissa eli legejä tai muu kuin savusauna): "Rauni" / "Lovi"

@@ -2,6 +2,7 @@
 // Vuosikorttiasiakkaalle yleiseen vuoroon: "Vuosikorttivaraus" (ilmainen, 1 hlö, yksi tuleva varaus kerrallaan).
 import { rpc } from '../sb.js';
 import { customerForm, customerSearch } from './customerform.js';
+import { warningBox, hasWarning, MISSING_TEXT } from './therapist.js';
 import { addonPicker } from './addons.js';
 import { h, field, toast, run, fmtTime, fmtDay, money, todayHel, empty } from '../ui.js';
 import { typeSwitch, render as renderResource } from './resbooking.js';
@@ -62,10 +63,10 @@ export async function render({ ctx, refs, query }) {
       const addonsSel = picker.node.hidden ? [] : picker.value();
       const r = cardChk.checked ? await rpc('admin_create_annual_card_booking', { p_customer_id: st.customer.id, p_rule_id: s.rule_id, p_date: st.date, p_note: f.elements.note.value || null })
         : await rpc('admin_create_booking', { p_rule_id: s.rule_id, p_date: st.date, p_persons: +n.value, ...cust, p_payment_method: method.value, p_paid: paid.checked, p_note: f.elements.note.value || null, p_price: price.value ? +price.value : null, p_addons: addonsSel.length ? addonsSel : null, p_invoice_reference: invRef.value.trim() || null });
-      toast(`Varaus luotu (tilaus #${r.order_no})`);
-      result.replaceChildren(h('div', { class: 'card ok-box' }, h('h3', { text: `Varaus luotu – tilaus #${r.order_no}` }), h('p', { text: `${r.product_name}, ${fmtDay(r.starts_at)} ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)} · ${money(r.total)}` }),
+      if (hasWarning(r)) toast(MISSING_TEXT, 'warn'); else toast(`Varaus luotu (tilaus #${r.order_no})`);
+      result.replaceChildren(...[warningBox(r, { ctx, onDone: () => { result.replaceChildren(); } }), h('div', { class: 'card ok-box' }, h('h3', { text: `Varaus luotu – tilaus #${r.order_no}` }), h('p', { text: `${r.product_name}, ${fmtDay(r.starts_at)} ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)} · ${money(r.total)}` }),
         h('div', { class: 'row wrap' }, h('a', { class: 'btn', href: `#/?d=${st.date}`, text: 'Näytä päivänäkymä' }),
-          (() => { const out = h('span', { class: 'muted' }); const b = h('button', { type: 'button', class: 'btn ghost', text: 'Luo maksulinkki (Visma Pay – tulossa)', onclick: () => run(b, async () => { const j = await rpc('admin_create_payment_link', { p_order_id: r.order_id }); out.textContent = j.link_url || j.message; }) }); return h('span', {}, b, ' ', out); })())));
+          (() => { const out = h('span', { class: 'muted' }); const b = h('button', { type: 'button', class: 'btn ghost', text: 'Luo maksulinkki (Visma Pay – tulossa)', onclick: () => run(b, async () => { const j = await rpc('admin_create_payment_link', { p_order_id: r.order_id }); out.textContent = j.link_url || j.message; }) }); return h('span', {}, b, ' ', out); })()))].filter(Boolean));
       formBox.replaceChildren(); st.session = null; loadSessions();
     }); } },
       h('h3', { text: `Vuoro: ${refs.productById.get(s.product_id)?.name || s.label}, ${fmtTime(s.starts_at)}–${fmtTime(s.ends_at)}` }),

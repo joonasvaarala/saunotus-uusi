@@ -180,8 +180,11 @@ begin
   perform set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-0000000000a1", "role": "authenticated"}', true);
   for b in
     select * from (values
-      (10, (sat + time '15:00'), 1, false, null::text), (10, (sat + time '16:15'), 1, false, null),
-      (8,  (sat + time '17:30'), 2, false, null),
+      (10, (sat + time '13:30'), 1, false, null::text), (10, (sat + time '14:45'), 1, false, null),
+      (8,  (sat + time '17:00'), 2, false, null),   -- rituaali: alkuaika vain 16:00 / 16:30 / 17:00 (migraatio 23); hoidot ma–pe 16:00–20:30, la–su 13:00–20:30
+      (10, (mon + 7 + time '17:00'), 1, false, null),    -- ei saunottajan vuoroa (ma): varaus syntyy merkinnällä "Ei saunottajaa" (migraatio 22)
+      (10, (mon + 8 + time '17:00'), 1, false, null),    -- sama, mutta poikkeus myönnetään alla
+
       (16, (sat + 1 + time '14:00'), 1, true, null),
       (10, (mon + 15 + time '12:00'), 1, false, 'Demo: ylitys – ei saunottajan vuoroa, sovittu erikseen')) x(pid, a, n, old, why)
   loop
@@ -192,6 +195,10 @@ begin
                null, b.why is not null, b.why);
     end if;
     if res ->> 'reservation_id' is null then raise exception 'demo-resurssivarauksen luonti epäonnistui: %', res; end if;
+    if b.a::date = mon + 8 then   -- poikkeus: saunottaja varmistetaan erikseen (admin_grant_therapist_exception)
+      if not coalesce((res ->> 'therapist_missing')::boolean, false) then raise exception 'demo: odotettiin therapist_missing: %', res; end if;
+      perform booking.admin_grant_therapist_exception((res ->> 'reservation_id')::bigint, 'Demo: saunottaja sovittu erikseen puhelimessa');
+    end if;
   end loop;
   perform set_config('request.jwt.claims', '', true);
 end $$;

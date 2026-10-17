@@ -750,7 +750,7 @@ if (process.env.ONLY !== 'shop') {
     await page.evaluate(() => { location.hash = '#/tarkista'; });
     await page.waitForSelector('[data-testid=review-overrides]');
     const rv = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll('.review-sec')].map((e) => [e.dataset.testid, e.querySelectorAll('li.resrow').length])));
-    if (rv['review-overrides'] < 1 || Object.keys(rv).length !== 4) problems.push(`resurssi-${name}: Tarkista-listalla pitää olla 4 osiota ja ylitys demosta: ${JSON.stringify(rv)}`);
+    if (rv['review-overrides'] < 1 || Object.keys(rv).length !== 5) problems.push(`resurssi-${name}: Tarkista-listalla pitää olla 5 osiota (Ei saunottajaa + 4) ja ylitys demosta: ${JSON.stringify(rv)}`);
     if (!/Syy: Demo: ylitys/.test(await page.locator('[data-testid=review-overrides]').innerText())) problems.push(`resurssi-${name}: ylityksen syy puuttuu Tarkista-listalta`);
     if (!(await page.locator('#nav a[href="#/tarkista"]').count())) problems.push(`resurssi-${name}: Tarkista puuttuu valikosta`);
     await shot(page, `admin-${name}-53-tarkista.png`, true);
@@ -765,7 +765,7 @@ if (process.env.ONLY !== 'shop') {
     const opts = await page.locator('select[name=product] option').allInnerTexts();
     if (!opts.some((t) => /Saunahoito/.test(t)) || opts.some((t) => /Vihtahoito|Perinnesaunotus yhdelle/.test(t))) problems.push(`resurssi-${name}: Resurssivaraus-lomakkeella vain nykyiset tuotteet (oli: ${opts.slice(0, 6)})`);
     await shot(page, `admin-${name}-54-resurssivaraus-lomake.png`, true);
-    // 1) virhe ilman ylitystä: tiistaina ei saunottajavuoroa → suomenkielinen virheilmoitus
+    // 1) virhe ilman ylitystä: tiistaina klo 12 on hoitojen aikaikkunan (ma–pe 16–20:30, migraatio 23) ulkopuolella → suomenkielinen virheilmoitus
     await page.selectOption('select[name=product]', { label: 'Saunahoito (60 min)' });
     await page.fill('input[name=date]', tueFree); await page.fill('input[name=time]', '12:00');
     await page.fill('input[name=cname]', `Resurssi Testi ${Date.now()}`);
@@ -773,7 +773,7 @@ if (process.env.ONLY !== 'shop') {
     await page.click('form[data-testid=resource-booking-form] button[type=submit]');
     await page.waitForSelector('form[data-testid=resource-booking-form] .err:not([hidden])');
     const errTxt = await page.locator('form[data-testid=resource-booking-form] .err').innerText();
-    if (!/saunottaja/i.test(errTxt) || /BK001|no_therapist|therapist_closed/.test(errTxt)) problems.push(`resurssi-${name}: virheilmoituksen pitää olla suomeksi ja kertoa saunottajasta (oli: ${errTxt})`);
+    if (!/aikaikkunan ulkopuolella/i.test(errTxt) || /BK001|time_window|no_therapist|therapist_closed/.test(errTxt)) problems.push(`resurssi-${name}: virheilmoituksen pitää olla suomeksi ja kertoa aikaikkunasta (oli: ${errTxt})`);
     await shot(page, `admin-${name}-55-resurssivaraus-virhe.png`, false);
     // 2) ylitys vaatii perustelun (asiakaspuolen tarkistus), sitten onnistuu
     await page.check('[data-testid=override-box] input[name=override]');
@@ -805,14 +805,14 @@ if (process.env.ONLY !== 'shop') {
     if (!oopts.some((t) => /Vihtahoito/.test(t)) || oopts.some((t) => /^Saunahoito \(/.test(t))) problems.push(`resurssi-${name}: Vanha varaus -lomakkeella vain vanhat tuotteet (oli: ${oopts.slice(0, 6)})`);
     await shot(page, `admin-${name}-57-vanha-varaus-lomake.png`, true);
     await page.selectOption('select[name=product]', { label: oopts.find((t) => /^Vihtahoito \(/.test(t)) });
-    await page.fill('input[name=date]', sat); await page.fill('input[name=time]', '13:45');
+    await page.fill('input[name=date]', tueFree); await page.fill('input[name=time]', '17:30');
     await page.fill('input[name=cname]', `Vanha Testi ${Date.now()}`);
     await page.fill('input[name=cemail]', `vanha-${Date.now()}@example.com`); await page.fill('input[name=cphone]', '0401112244');
     await page.click('form[data-testid=old-booking-form] button[type=submit]');
     await page.waitForSelector('.ok-box, form[data-testid=old-booking-form] .err:not([hidden])');
     if ((await page.locator('.ok-box').count()) !== 1) problems.push(`resurssi-${name}: vanha varaus ei onnistunut: ${await page.locator('form[data-testid=old-booking-form] .err').innerText().catch(() => '?')}`);
     await shot(page, `admin-${name}-58-vanha-varaus-luotu.png`, false);
-    await page.evaluate((d) => { location.hash = `#/?d=${d}`; }, sat);
+    await page.evaluate((d) => { location.hash = `#/?d=${d}`; }, tueFree);
     await page.waitForSelector('#view .resrow');
     const mine = page.locator('#view .resrow:has-text("Vanha Testi")');
     if ((await mine.count()) < 1 || (await mine.first().locator('.badge.lc-old').count()) !== 1) problems.push(`resurssi-${name}: luotu vanha varaus ei näy päivänäkymässä Vanha tuote -merkillä`);
@@ -1192,6 +1192,94 @@ if (process.env.ONLY !== 'shop') {
     }
     await ctx.close();
   }
+}
+// ---------- HALLINTA: saunottaja puuttuu (migraatio 22) + aikaikkuna (migraatio 23): merkki, Tarkista, poikkeus, varoitus luonnin jälkeen, virheilmoitukset ----------
+if (process.env.ONLY !== 'shop') for (const [name, vp] of [['mobile', { width: 390, height: 844, deviceScaleFactor: 1, isMobile: true, hasTouch: true }], ['desktop', { width: 1280, height: 900 }]]) {
+  const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: vp.deviceScaleFactor || 1, isMobile: vp.isMobile, hasTouch: vp.hasTouch, locale: 'fi-FI', timezoneId: 'Europe/Helsinki' });
+  const page = await ctx.newPage();   // odotettu 400 (BK001: time_window, ritual_start) resurssivarauksen virhetestissä ei ole virhe; muut virheet ovat
+  page.on('console', (m) => { if (['error', 'warning'].includes(m.type()) && !/Failed to load resource.*400/.test(m.text())) problems.push(`saunottaja-${name} console.${m.type()}: ${m.text()}`); });
+  page.on('pageerror', (e) => problems.push(`saunottaja-${name} pageerror: ${e.message}`));
+  page.on('requestfailed', (r) => problems.push(`saunottaja-${name} requestfailed: ${r.url()} ${r.failure()?.errorText}`));
+  page.on('response', (r) => { if (r.status() >= 400 && !/admin_create_resource_booking/.test(r.url())) problems.push(`saunottaja-${name} HTTP ${r.status()}: ${r.url()}`); });
+  const login = async (email = 'admin@demo.local') => { await page.goto(`${BASE}/admin/`); await page.fill('#email', email); await page.fill('#password', 'demo'); await page.click('form#login button[type=submit]'); await page.waitForSelector('#nav a'); };
+  const hHel = (n) => { const t = new Date(); t.setUTCDate(t.getUTCDate() + n); return t.toISOString().slice(0, 10); };
+  const mon = (() => { const d = new Date(); d.setUTCDate(d.getUTCDate() + ((8 - d.getUTCDay()) % 7 || 7)); return d; })();
+  const dayOf = (k) => { const d = new Date(mon); d.setUTCDate(d.getUTCDate() + k); return d.toISOString().slice(0, 10); };
+  const noH = () => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  const tag = `saunottaja-${name}`;
+  await login();
+  // --- Tarkista: Ei saunottajaa -osio (demo: 1 avoin + 1 poikkeus myönnetty → vain avoin listalla) ---
+  await page.evaluate(() => { location.hash = '#/tarkista'; });
+  await page.waitForSelector('[data-testid=review-missing_therapist]');
+  const sec = page.locator('[data-testid=review-missing_therapist]');
+  const secTxt = await sec.innerText();
+  if (!/Ei saunottajaa/.test(secTxt) || (await sec.locator('li.resrow').count()) < 1 || !(await sec.locator('[data-testid=grant-btn]').count())) problems.push(`${tag}: Tarkista-listalla pitää olla Ei saunottajaa -osio, rivi ja Myönnä poikkeus -painike`);
+  const tapH = await sec.locator('[data-testid=grant-btn]').first().evaluate((e) => Math.round(e.getBoundingClientRect().height));
+  if (tapH < 44 || (await noH()) > 0) problems.push(`${tag}: Myönnä poikkeus -painikkeen korkeus ${tapH} < 44 tai vaakavieritys`);
+  if (/Poikkeus myönnetty/.test(secTxt)) problems.push(`${tag}: poikkeuksen saanut varaus ei saa olla Tarkista-listalla`);
+  await shot(page, `admin-${name}-90-tarkista-ei-saunottajaa.png`, true);
+  // --- Päivänäkymä: merkki "Ei saunottajaa" (mon+7) ja "Saunottaja sovittu" (mon+8) ---
+  await page.evaluate((d) => { location.hash = `#/?d=${d}`; }, dayOf(7));
+  await page.waitForSelector('#view .resrow');
+  if ((await page.locator('#view .resrow .badge.tmiss:has-text("Ei saunottajaa")').count()) < 1) problems.push(`${tag}: päivänäkymän varauksella pitää olla Ei saunottajaa -merkki`);
+  await shot(page, `admin-${name}-91-paivanakyma-ei-saunottajaa.png`, false);
+  await page.locator('#view .resrow:has(.badge.tmiss) button.link').first().click();
+  await page.waitForSelector('dialog[open] [data-testid=therapist-state]');
+  const st = await page.locator('dialog[open] [data-testid=therapist-state]').innerText();
+  if (!/Puuttuu työvuorosta/.test(st) || !(await page.locator('dialog[open] [data-testid=grant-btn]').count())) problems.push(`${tag}: varauksen tiedoissa pitää näkyä "Puuttuu työvuorosta" ja Myönnä poikkeus: ${st}`);
+  await shot(page, `admin-${name}-92-varauksen-tiedot-ei-saunottajaa.png`, false);
+  await page.keyboard.press('Escape');
+  await page.evaluate((d) => { location.hash = `#/?d=${d}`; }, dayOf(8));
+  await page.waitForSelector('#view .resrow');
+  if ((await page.locator('#view .resrow .badge.tmiss-ok:has-text("Saunottaja sovittu")').count()) < 1 || (await page.locator('#view .resrow .badge.tmiss:has-text("Ei saunottajaa")').count()) !== 0) problems.push(`${tag}: poikkeuksen saaneella varauksella pitää olla "Saunottaja sovittu" eikä "Ei saunottajaa"`);
+  // --- Uusi resurssivaraus ilman saunottajaa (maanantai/tiistai ilman vuoroja): varoitus + poikkeus ---
+  const fresh = (() => { const w = 4 + Math.floor(Math.random() * 14), d = new Date(mon); d.setUTCDate(d.getUTCDate() + 7 * w + Math.floor(Math.random() * 2)); return d.toISOString().slice(0, 10); })();
+  await page.evaluate((d) => { location.hash = `#/uusi?tyyppi=resurssi&d=${d}`; }, fresh);
+  const form = page.locator('[data-testid=resource-booking-form]'); await form.waitFor();
+  await form.locator('[name=product]').selectOption('10');
+  if (!/16:00–20:30/.test(await form.locator('[data-testid=window-hint]').innerText())) problems.push(`${tag}: aikaikkunan vihje puuttuu hoitotuotteella`);
+  await form.locator('[name=date]').fill(fresh); await form.locator('[name=time]').fill('12:00');
+  await form.locator('[name=cname]').fill('Saunottajaton Testi'); await form.locator('[name=cemail]').fill(`saunottajaton-${Date.now()}@example.com`);
+  await form.locator('button[type=submit]').click();
+  await form.locator('[data-testid=window-hint]').waitFor();
+  await page.waitForFunction(() => /aikaikkunan ulkopuolella/.test(document.querySelector('[data-testid=resource-booking-form] .err:not([hidden])')?.textContent || ''), null, { timeout: 8000 }).catch(() => problems.push(`${tag}: time_window-virhe pitää näkyä suomeksi lomakkeella`));
+  await shot(page, `admin-${name}-93-aikaikkuna-virhe.png`, false);
+  await form.locator('[name=product]').selectOption('8'); await form.locator('[name=time]').fill('15:30');
+  await form.locator('button[type=submit]').click();
+  await page.waitForFunction(() => /16:00, 16:30 tai 17:00/.test(document.querySelector('[data-testid=resource-booking-form] .err:not([hidden])')?.textContent || ''), null, { timeout: 8000 }).catch(() => problems.push(`${tag}: ritual_start-virhe pitää näkyä suomeksi lomakkeella`));
+  await form.locator('[name=product]').selectOption('10'); await form.locator('[name=time]').fill('17:00');
+  const warn = page.locator('[data-testid=therapist-warning]');
+  for (let k = 0; k < 6; k++) {   // aiemmat ajot jättävät varauksia: jos tila on varattu tai päivällä on vuoro, kokeile toista päivää
+    await form.locator('button[type=submit]').click();
+    if (await warn.waitFor({ timeout: 4000 }).then(() => true, () => false)) break;
+    const d = new Date(`${fresh}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + 7 * (k + 3) + (k % 2)); await page.evaluate((x) => { location.hash = `#/uusi?tyyppi=resurssi&d=${x}`; }, d.toISOString().slice(0, 10));
+    await form.waitFor(); await form.locator('[name=product]').selectOption('10'); await form.locator('[name=time]').fill('17:00');
+    await form.locator('[name=cname]').fill('Saunottajaton Testi'); await form.locator('[name=cemail]').fill(`saunottajaton-${Date.now()}@example.com`);
+  }
+  await warn.waitFor({ timeout: 10000 });
+  if (!/Varaus tehty, mutta saunottaja puuttuu työvuorosta/.test(await warn.innerText()) || !/Varaus luotu/.test(await page.locator('#view .ok-box').innerText())) problems.push(`${tag}: luonnin jälkeen pitää näkyä varoitus "Varaus tehty, mutta saunottaja puuttuu työvuorosta" ja varaus luotu -ruutu`);
+  const wh = await warn.locator('[data-testid=grant-btn]').evaluate((e) => Math.round(e.getBoundingClientRect().height));
+  if (wh < 44 || (await noH()) > 0) problems.push(`${tag}: varoituksen painike ${wh} < 44 tai vaakavieritys`);
+  await warn.scrollIntoViewIfNeeded(); await shot(page, `admin-${name}-94-varoitus-saunottaja-puuttuu.png`, false);
+  await warn.locator('[data-testid=grant-btn]').click();
+  await page.waitForSelector('dialog[open] [data-testid=grant-form]');
+  await page.locator('dialog[open] [data-testid=grant-submit]').click();   // tyhjä perustelu → virhe, ei kutsua
+  await page.waitForSelector('dialog[open] .err:not([hidden])');
+  if (!/Anna perustelu/.test(await page.locator('dialog[open] .err').innerText())) problems.push(`${tag}: tyhjä perustelu pitää estää viestillä`);
+  await shot(page, `admin-${name}-95-poikkeus-perustelu-puuttuu.png`, false);
+  await page.fill('dialog[open] textarea[name=note]', 'Sovittu erikseen (e2e)');
+  await page.locator('dialog[open] [data-testid=grant-submit]').click();
+  await page.waitForSelector('dialog[open]', { state: 'detached', timeout: 8000 }).catch(() => problems.push(`${tag}: poikkeuksen myöntö ei onnistunut`));
+  await page.waitForFunction(() => /Poikkeus myönnetty/.test(document.getElementById('toast')?.textContent || ''), null, { timeout: 5000 }).catch(() => problems.push(`${tag}: ilmoitus "Poikkeus myönnetty" puuttuu`));
+  if (await warn.count()) problems.push(`${tag}: varoitus pitää poistua poikeuksen myöntämisen jälkeen`);
+  // --- peruskäyttäjä (ei bookings.override): ei Myönnä poikkeus -painikkeita ---
+  await ctx.clearCookies(); await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
+  await login('staff@demo.local');
+  await page.evaluate(() => { location.hash = '#/tarkista'; });
+  if (await page.locator('[data-testid=review-missing_therapist]').count().then(async (n) => n || (await page.waitForSelector('[data-testid=review-missing_therapist], #view .err', { timeout: 5000 }).then(() => page.locator('[data-testid=review-missing_therapist]').count(), () => 0)))) {
+    if (await page.locator('[data-testid=grant-btn]').count()) problems.push(`${tag}: peruskäyttäjälle ei saa näkyä Myönnä poikkeus -painiketta`);
+  }
+  await ctx.close();
 }
 // ---------- HALLINTA: kalenteri toimii vaikka vuorotietoja ei saada (public-skeema tyhjä / ei oikeutta) ----------
 if (process.env.ONLY !== 'shop') {
