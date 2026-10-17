@@ -6,6 +6,7 @@ import { GT, gtText } from '../shop/src/gift-texts.js';
 import { createGiftMock, MOCK_PACKAGES, validateBuy } from '../shop/src/gift-mock.js';
 import { createOrderMock } from '../shop/src/order-mock.js';
 import { normPackages, pdfEnabled, pdfHref } from '../shop/src/gift-api.js';
+import { itemLabels } from '../shop/src/gift-logic.js';
 import { MOCK_PACKAGES as ADMIN_PACKAGES } from '../admin/giftcards-mock.js';
 
 test('koodin normalisointi: isot kirjaimet, viivat ja välilyönnit pois', () => {
@@ -115,14 +116,24 @@ test('mock: osittainen lunastus tilaukselle, kortin saldo ja maksamaton osa', as
   const gs = createOrderMock({ scenario: 'gift', giftSettings: { redeem_enabled: false } });
   assert.equal((await gs.rpc('public_apply_gift_card', { p_token: T, p_code: 'HH3A7CEFHJKL' })).code, 'redeem_disabled');
 });
-test('PDF-nappi: vain asetuksella (config tai sivun asetus)', () => {
+test('PDF-nappi: oletus config.js (päällä), lang sivun kielen mukaan, false piilottaa', () => {
   const fu = (n, q) => `/functions/v1/${n}?${new URLSearchParams(q)}`;
   globalThis.window = {};
-  assert.equal(pdfEnabled({}), false); assert.equal(pdfHref({}, 'tok', fu), '');
-  assert.equal(pdfHref({ giftCardPdf: true }, 'tok', fu), '/functions/v1/gift-card-pdf?t=tok');
-  assert.equal(pdfHref({ giftCardPdf: 'oma-pdf' }, 'tok', fu), '/functions/v1/oma-pdf?t=tok');
+  assert.equal(pdfEnabled({}), false); assert.equal(pdfHref({}, 'tok', fu, 'fi'), '');
+  assert.equal(pdfHref({ giftCardPdf: true }, 'tok', fu, 'fi'), '/functions/v1/gift-card-pdf?t=tok&lang=fi');
+  assert.equal(pdfHref({ giftCardPdf: true }, 'tok', fu, 'en'), '/functions/v1/gift-card-pdf?t=tok&lang=en');
+  assert.equal(pdfHref({ giftCardPdf: true }, 'tok', fu), '/functions/v1/gift-card-pdf?t=tok&lang=fi', 'tuntematon/puuttuva kieli → fi');
+  assert.equal(pdfHref({ giftCardPdf: 'oma-pdf' }, 'tok', fu, 'en'), '/functions/v1/oma-pdf?t=tok&lang=en');
   window.BOOKING_CONFIG = { giftCardPdf: true }; assert.equal(pdfEnabled({}), true);
   window.BOOKING_CONFIG = { giftCardPdf: false }; assert.equal(pdfEnabled({ giftCardPdf: true }), false);       // config.js voittaa
-  assert.equal(pdfHref({ giftCardPdf: true }, '', fu), '');
+  assert.equal(pdfHref({ giftCardPdf: true }, '', fu, 'fi'), '');
   delete globalThis.window;
+});
+test('Paketin sisältölista: FI = label, EN = label_en (vain rivit joilla nimi kyseisellä kielellä)', () => {
+  const p = pkgs.find((x) => x.code === 'peat_mask_2');
+  assert.deepEqual(itemLabels(p, 'fi'), ['Yleinen vuoro', 'Turvenaamio ja jalkakylpy']);
+  assert.deepEqual(itemLabels(p, 'en'), ['General session', 'Peat mask and foot bath']);
+  assert.deepEqual(itemLabels({ items: [{ label: 'Yleinen vuoro', persons: 2 }, { persons: 2, addon_code: 'x' }] }, 'en'), [], 'ei label_en → ei listaa EN-sivulle');
+  assert.deepEqual(itemLabels({ items: [{ label: 'Yleinen vuoro' }, { addon_code: 'x' }] }, 'fi'), ['Yleinen vuoro']);
+  assert.deepEqual(itemLabels(pkgs.find((x) => x.is_open), 'en'), []); assert.deepEqual(itemLabels(null, 'fi'), []);
 });

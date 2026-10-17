@@ -1,6 +1,6 @@
 # Lahjakortin PDF-pohja (suunnitelma ja mockup)
 
-Tila: **suunnittelu valmis, toteutus myöhemmin** (edge function `gift-card-pdf`, vaihe 2, Bottiavustus). Tämä dokumentti on pohja toteutukselle; kauppa ei vielä lataa PDF:ää (ks. "Kytkentä kauppaan" alla).
+Tila: **toteutettu ja tuotannossa 17.10.2026** (edge function `gift-card-pdf`, vaihe 2, Bottiavustus; sopimus §13.9, migraatio `booking_45`). Tämä dokumentti on alkuperäinen suunnitelma/mockup; toteutus on `supabase/functions/gift-card-pdf/` (`render.ts` = pdf-lib-pohja, `index.ts` = HTTP-rajapinta). Kauppa ja hallinta on kytketty (ks. "Kytkentä kauppaan ja hallintaan" alla).
 
 Mockupit (HTML + PNG, 2× tarkkuus): `lahjakortti-pdf-pohja.html`, `lahjakortti-pdf-pohja-fi.png` (paketti + tervehdys), `lahjakortti-pdf-pohja-en.png` (avoin kortti, ei tervehdystä), `lahjakortti-pdf-pohja-fi-pitka-tervehdys.png` (300 merkin tervehdys mahtuu).
 
@@ -37,10 +37,11 @@ Mockupit (HTML + PNG, 2× tarkkuus): `lahjakortti-pdf-pohja.html`, `lahjakortti-
 ## Tervehdyksen mahtuminen
 Tervehdys ≤ 300 merkkiä: mockupissa 17,5 px / 1,3 rivikorkeus, sarakkeen leveys ≈ 370 px → noin 7 riviä (mockup testattu täsmälleen 300 merkillä, ei leikkaannu). PDF:ssä rivitys tehdään sanatasolla (`pdf-lib`: `widthOfTextAtSize`); jos 7 riviä ylittyy (hyvin leveät merkit), fontti pienennetään 17,5 → 15 pt:aan ennen leikkausta. Merkit joita fontti ei osaa (esim. emoji) korvataan `?`:lla tai poistetaan PDF:ssä; web-lomake sallii ne (laskuri laskee koodipisteet).
 
-## Kytkentä kauppaan (jo valmiina)
-- Tilaussivu (`/tilaus/?t=…`): kortin kohdalla **"Lataa PDF"** -painike näkyy vain kun `config.js`:ssä on `giftCardPdf: true` (tai edge functionin nimi) ja kortti on valmis (`ready`). Oletus `false` → painiketta ei ole, eikä sivulla ole "tulossa" -tekstiä. Asetus vaihdetaan julkaisussa `booking/config.js`:ssä (ei uudelleenrakennusta) tai rakennusajossa `BOOKING_GIFT_CARD_PDF=1`.
-- Linkki: `GET <functions>/gift-card-pdf?t=<kortin public_token>` (sama käytäntö kuin `receipt-pdf?t=…`: `verify_jwt=false`, vain UUID-tokeni; **ehdotus, vahvistettava toteutuksen yhteydessä**). Toteutuksen pitää hakea sisältö `public_get_gift_card`-logiikalla palvelinpuolella (service role) ja palauttaa `application/pdf`.
-- Hallintaan (Lahjakortit-yksityiskohta) voi myöhemmin lisätä saman PDF-latauksen `fnBlob`-apurilla (JWT).
+## Kytkentä kauppaan ja hallintaan (valmis)
+- **Linkki:** `GET <SUPABASE_URL>/functions/v1/gift-card-pdf?t=<kortin public_token>&lang=fi|en` (`verify_jwt=false`, vain UUID-tokeni avaa; maksamaton/mitätöity kortti → 409, tuntematon token → 404; ei välimuistia). Selaimessa linkki muodostetaan `sb.js`:n `functionUrl`:lla samoin kuin `receipt-pdf`.
+- **Tilaussivu** (`/tilaus/?t=…`, `/en/order/?t=…`): kortin koodin avauksen yhteydessä **"Lataa PDF"** / "Download PDF" (uusi välilehti) kun kortti on valmis (`ready`). `giftCardPdf` on `config.js`:ssä oletuksena `true` (`BOOKING_GIFT_CARD_PDF=0` tai `giftCardPdf: false` piilottaa napin; merkkijono = toisen funktion nimi). `lang` = sivun kieli. Myyntisivun "valmis"-paneelissa PDF-linkkiä ei ole: kortit ovat siinä vaiheessa maksamattomia (PDF antaisi 409); ostaja saa PDF:n sähköpostissa (`gift_card_buyer`) ja tilaussivulta.
+- **Hallinta** (Talous › Lahjakortit › kortin tiedot): **"Avaa PDF"** / "Open PDF" uuteen välilehteen, vain jos `admin_get_gift_card().card.public_token` on olemassa; `lang` = hallinnan kieli. Tilassa `pending_payment`/`cancelled`/`pending_verification` nappi on pois käytössä (PDF antaisi 409) ja selitys näkyy; varmistamattomalla saldolla (`balance_verified=false`, Johku) näytetään varoitus. Johku-korttien korvaava PDF käyttää samaa koodia ja samaa pohjaa.
+- **Sivun sisältölista:** myyntisivun paketeilla `items[].label` (FI) / `items[].label_en` (EN, migraatio 45).
 
 ## Avoimet kysymykset toteutukselle
 1. Logo: käytetäänkö kuvallista logoa nimen sijaan (SVG → PDF)? Mockup käyttää tekstinimeä.

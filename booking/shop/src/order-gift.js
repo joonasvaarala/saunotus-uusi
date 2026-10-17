@@ -52,7 +52,7 @@ export function cardsSection({ S, L, api, cards }) {
         const r = await api.card(c.token);
         if (!r?.ok) { panel.replaceChildren(h('p', { class: r?.code === 'not_ready' ? 'bk-note' : 'bk-error', role: 'alert', text: r?.code === 'not_ready' ? tx('o.codeNotReady') : tx('o.codeError') })); }
         else {
-          const pdf = pdfHref(S, c.token, functionUrl);
+          const pdf = pdfHref(S, c.token, functionUrl, L);
           panel.replaceChildren(h('p', { class: 'gc-code', 'data-testid': 'gc-codetext', text: r.code }), h('dl', { class: 'bk-sum' }, h('dt', { text: tx('o.codeBalance') }), h('dd', { text: money(r.balance) }), r.greeting ? [h('dt', { text: tx('o.codeGreeting') }), h('dd', { class: 'gc-greet', text: r.greeting })] : []),
             h('div', { class: 'bk-actions' }, h('button', { type: 'button', class: 'btn light ord-btn', text: tx('o.copy'), onclick: async (ev) => { try { await navigator.clipboard.writeText(r.code); ev.currentTarget.textContent = tx('o.copied'); } catch { /* leikepöytä ei käytettävissä: koodi on näkyvissä */ } } }),
               pdf ? h('a', { class: 'btn ord-btn', 'data-testid': 'gc-pdf', href: pdf, target: '_blank', rel: 'noopener', text: tx('o.pdf') }) : null));

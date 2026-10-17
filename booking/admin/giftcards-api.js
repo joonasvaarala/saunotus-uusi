@@ -56,7 +56,7 @@ export function rpcBackend(rpc) {
   };
 }
 
-export function createGiftApi({ rpc, mock = wantsMock(), mockFactory = () => createGiftMock({ delay: 80 }) } = {}) {
+export function createGiftApi({ rpc, io = {}, mock = wantsMock(), mockFactory = () => createGiftMock({ delay: 80 }) } = {}) {
   const forced = !!mock, real = rpc && !forced ? rpcBackend(rpc) : null;
   let mb = null, cache = null;
   const backend = () => real || (mb ||= rpcBackend(mockFactory().rpc));
@@ -68,6 +68,8 @@ export function createGiftApi({ rpc, mock = wantsMock(), mockFactory = () => cre
   };
   const api = {
     get mode() { return real ? 'real' : 'mock'; }, get reason() { return real ? null : 'param'; }, isMock: () => !real,
+    // "Avaa PDF": suora linkki edge-funktioon gift-card-pdf (verify_jwt=false; public_token avaa) – sama tapa kuin receiptPdfUrl (sb.js functionUrl). lang = hallinnan kieli.
+    pdfUrl: (token, lang) => (token && io.functionUrl ? io.functionUrl('gift-card-pdf', { t: token, lang: lang === 'en' ? 'en' : 'fi' }) : ''),
     packages: () => run('packages', undefined, normPackages),
     // kytkimet (gift_cards.*) välimuistissa 30 s: lunastus-/myyntinäppäimet tarkistavat ne ilman jokaista kutsua; virhe → null (ei estä toimintaa, palvelin tarkistaa joka tapauksessa)
     async settings({ fresh = false } = {}) {

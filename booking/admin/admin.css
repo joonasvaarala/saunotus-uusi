@@ -462,3 +462,4 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .gc-link{min-height:44px;padding:6px 10px}.gc-over{color:var(--err);font-weight:700}
 .chk{display:flex;align-items:center;gap:10px;min-height:44px;font-weight:600;color:var(--ink)}.chk input{width:22px;height:22px;flex:none}
 @media(max-width:420px){.gc-dl{grid-template-columns:minmax(0,1fr)}.gc-dl dt{margin-top:6px}}
+.gc-pdfbox{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:0 0 14px}.gc-pdfbox .tl-hint{margin:0;flex:1 1 220px}

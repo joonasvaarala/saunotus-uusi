@@ -1,7 +1,7 @@
 // Asiakkaan tilaussivun MOCK-PALVELIN (vaihe A): keksitty tilaus muistissa; ei tallenna mitään palvelimelle. Käytössä vain kun osoitteessa on ?mock=1.
 // createOrderMock().rpc(nimi, parametrit) vastaa KOODARI_talous_A_D_fi.md -sopimuksen public_*-RPC:itä (nimet, p_-parametrit, vastausrakenteet, virheet {ok:false, code, message}).
 import { createGiftMock } from './gift-mock.js';
-export function createOrderMock({ delay = 0, scenario = '', giftSettings = {}, today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }) } = {}) {
+export function createOrderMock({ delay = 0, scenario = '', giftSettings = {}, locale = 'fi', today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }) } = {}) {
   const day = (n) => { const d = new Date(`${today}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
   const wait = () => (delay ? new Promise((ok) => setTimeout(ok, delay)) : Promise.resolve());
   const r2 = (n) => Math.round(n * 100) / 100;
@@ -9,7 +9,7 @@ export function createOrderMock({ delay = 0, scenario = '', giftSettings = {}, t
     { id: 3, code: 'turvenaamio_jalkakylpy', name: 'Turvenaamio ja jalkakylpy', name_en: 'Peat mask and foot bath', price: 12, max: 2 }];
   const TOKEN = '3f2b8c1e-5a7d-4e9f-8b6a-1c2d3e4f5a6b';
   const o = {
-    order_no: 15321, status: 'confirmed', created_at: `${day(-2)}T09:30:00Z`, currency: 'EUR', locale: 'fi', first_name: 'Esimerkki', customer_kind: 'private',
+    order_no: 15321, status: 'confirmed', created_at: `${day(-2)}T09:30:00Z`, currency: 'EUR', locale, first_name: 'Esimerkki', customer_kind: 'private',
     items: [{ id: 1, name: 'Yleinen saunavuoro', name_en: 'Public sauna session', quantity: 2, line_total: 36, vat_rate: 25.5 }, { id: 2, name: 'Pyyhe', name_en: 'Towel', quantity: 2, line_total: 10, vat_rate: 25.5 }, { id: 3, name: 'Savusaunahoito', name_en: 'Smoke sauna treatment', quantity: 1, line_total: 85, vat_rate: 25.5 }],
     reservations: [
       { reservation_id: 501, product_id: 1, product_name: 'Yleinen saunavuoro', starts_at: `${day(3)}T11:00:00Z`, ends_at: `${day(3)}T12:30:00Z`, persons: 2, status: 'confirmed', addons: [{ name: 'Pyyhe', quantity: 2 }] },

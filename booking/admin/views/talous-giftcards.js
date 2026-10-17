@@ -3,7 +3,7 @@
 // Oikeudet: välilehti giftcards.manage; saldokorjaus/mitätöinti/aktivointi giftcards.admin; maksulla myynti ja lunastus payments.manage.
 import { h, dialog, toast, badge } from '../ui.js';
 import { icon } from '../icons.js';
-import { t, fmt } from '../talous-i18n.js';
+import { t, fmt, getLang } from '../talous-i18n.js';
 import { GC_STATUSES, GC_SORTS, GC_PAY_METHODS, GC_GREETING_MAX, normalizeGiftCode, formatGiftCode } from '../giftcards-api.js';
 import { loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, searchFld, expandRow, actionBtn, formDialog, friendly, methodLabel } from './talous-ui.js';
 
@@ -123,13 +123,19 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
       h('span', { class: 'tl-sub-meta', text: [fmt.dt(x.at), x.by, x.note].filter(Boolean).join(' · ') }), h('span', { class: 'tl-sub-sum' }))), t('gc.d.noExpiry'), 'gc-expiry');
     const pays = sub(t('gc.d.payments'), d.payments.map((p) => h('li', {}, h('span', { class: 'tl-sub-main' }, h('button', { type: 'button', class: 'btn ghost gc-link', onclick: () => onOpenOrder(p.order_no) }, `#${p.order_no}`)),
       h('span', { class: 'tl-sub-meta', text: [fmt.dt(p.paid_at), p.accounted === false ? t('gc.d.notAccounted') : t('gc.d.accounted'), p.refunded_amount ? `−${fmt.money(p.refunded_amount)}` : null].filter(Boolean).join(' · ') }), h('span', { class: 'tl-sub-sum', text: fmt.money(p.amount) }))), t('gc.d.noPayments'), 'gc-payments');
+    // "Avaa PDF" (sopimus §13.9): vain jos kortilla on public_token; avautuu uuteen välilehteen (verify_jwt=false). Maksamaton/mitätöity kortti → PDF palauttaisi 409, joten nappi on silloin pois käytöstä.
+    const pdfHref = gift.pdfUrl(c.public_token, getLang()), pdfReady = ['active', 'used', 'expired'].includes(c.status);
+    const pdfBox = pdfHref ? h('div', { class: 'gc-pdfbox', 'data-testid': 'gc-pdfbox' },
+      pdfReady ? h('a', { class: 'btn tl-btn tl-rc-btn', href: pdfHref, target: '_blank', rel: 'noopener noreferrer', 'data-testid': 'gc-pdf', title: t('gc.d.pdfOpens') }, icon('download', 18), h('span', { text: t('gc.d.pdf') }))
+        : h('button', { type: 'button', class: 'btn tl-btn tl-rc-btn', disabled: true, 'data-testid': 'gc-pdf', title: t('gc.d.pdfNotReady') }, icon('download', 18), h('span', { text: t('gc.d.pdf') })),
+      h('span', { class: 'tl-hint', 'data-testid': 'gc-pdf-note', text: !pdfReady ? t('gc.d.pdfNotReady') : !c.balance_verified ? t('gc.d.pdfUnverified') : t('gc.d.pdfNote') })) : null;
     const noRight = t('gc.a.noRight');
     const actions = h('div', { class: 'tl-actions', 'data-testid': 'gc-actions' },
       actionBtn({ key: 'expiry', label: t('gc.a.expiry'), ico: 'calendar', testid: 'gc-btn-expiry', onClick: () => expiryDialog(c) }),
       actionBtn({ key: 'adjust', label: t('gc.a.adjust'), ico: 'euro', testid: 'gc-btn-adjust', extraDisabled: canAdmin ? null : noRight, onClick: () => adjustDialog(c) }),
       c.status === 'cancelled' ? null : actionBtn({ key: 'deactivate', label: t('gc.a.deactivate'), ico: 'lock', testid: 'gc-btn-deactivate', extraDisabled: canAdmin ? null : noRight, onClick: () => reasonDialog(c, 'deactivate') }),
       actionBtn({ key: 'reactivate', label: t('gc.a.reactivate'), ico: 'undo', testid: 'gc-btn-reactivate', extraDisabled: !canAdmin ? noRight : c.status === 'pending_payment' ? t('gc.a.unpaidNoReact') : c.status === 'cancelled' || c.status === 'used' || c.status === 'expired' ? null : t('gc.a.noneNeeded'), onClick: () => reasonDialog(c, 'reactivate') }));
-    return h('div', { class: 'tl-detail', 'data-testid': 'gc-detail' }, info, d.ledger_consistent ? null : h('p', { class: 'tl-error', role: 'alert', text: t('gc.d.ledgerBad') }), actions, ledger, expiry, pays);
+    return h('div', { class: 'tl-detail', 'data-testid': 'gc-detail' }, info, pdfBox, d.ledger_consistent ? null : h('p', { class: 'tl-error', role: 'alert', text: t('gc.d.ledgerBad') }), actions, ledger, expiry, pays);
   }
 
   // ---- dialogit ----
