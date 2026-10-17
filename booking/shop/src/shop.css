@@ -68,7 +68,7 @@ button.bk-cell:hover{filter:brightness(.97)}
 .bk-field{margin:0 0 14px}
 .bk-field label{display:block;font-weight:700;margin-bottom:4px;font-size:15px}
 .bk-field input,.bk-field textarea{width:100%;font:400 17px var(--body);padding:12px 14px;border:1px solid #8b7f73;border-radius:10px;background:#fff;color:var(--ink)}
-.bk-field input:focus,.bk-field textarea:focus{outline:3px solid #1d6fd8;outline-offset:1px}
+.bk-field input:focus,.bk-field textarea:focus{outline:3px solid var(--ink);outline-offset:1px}
 .bk-check{display:flex;gap:10px;align-items:flex-start;margin:0 0 12px;font-size:15px}
 .bk-check input{width:22px;height:22px;margin-top:2px;flex:none;accent-color:var(--green)}
 .bk-form .btn{width:100%;font-size:14px;padding:18px;cursor:pointer}
@@ -159,11 +159,12 @@ a.bk-sd:hover{filter:brightness(.97)}
 .bk-pc{background:var(--card);border:1px solid var(--line);border-left:5px solid #7bb28a;border-radius:var(--r);overflow:hidden}
 .bk-pc.open{border-color:var(--green);box-shadow:0 8px 22px rgba(63,53,44,.08)}
 .bk-pc-head{all:unset;box-sizing:border-box;width:100%;min-height:64px;display:flex;gap:12px;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;color:var(--ink)}
-.bk-pc-head:focus-visible{outline:3px solid #1d6fd8;outline-offset:-3px}
+.bk-pc-head:focus-visible{outline:3px solid var(--ink);outline-offset:-3px}
 .bk-pc-main{display:flex;flex-direction:column;gap:3px;min-width:0}
 .bk-pc-name{font:600 22px/1.2 var(--head);color:var(--ink);overflow-wrap:anywhere}
 .bk-pc-desc{color:var(--muted);font-size:15px;line-height:1.35}
 .bk-pc-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:4px}
+.bk-pc-meta .bk-badge{white-space:normal;max-width:100%}
 .bk-pc-chev{flex:none;width:12px;height:12px;border-right:2px solid var(--green);border-bottom:2px solid var(--green);transform:rotate(45deg);margin:0 6px 4px 0;transition:transform .15s}
 .bk-pc.open .bk-pc-chev{transform:rotate(-135deg);margin-bottom:-4px}
 .bk-pc-panel{padding:0 12px 12px;border-top:1px solid var(--line);background:var(--bg,#f4efe7)}
@@ -195,8 +196,6 @@ a.bk-sd:hover{filter:brightness(.97)}
 .bk-hero-wait .hero.page picture,.bk-hero-wait .hero.page .in>*{visibility:hidden}
 
 /* Hoito- ja rituaalivaraukset (treatment-ui.js): vaiheet 1–3 (henkilömäärä, päivä, kellonaika), jatka-palkki, tarkistusvaihe. Kalenteri-, stepper-, lomake- ja valintapalkkityylit ovat yllä. */
-.bk-tr-info{max-width:760px}
-.bk-tr-info p{margin:.3em 0}
 .bk-picker{max-width:760px}
 .bk-step-box{margin:0 0 6px}
 .bk-step-box h3{display:flex;align-items:center;gap:10px;margin:1.1em 0 .5em}

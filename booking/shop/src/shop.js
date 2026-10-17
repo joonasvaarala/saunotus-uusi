@@ -3,7 +3,7 @@
 // Asiakas ei voi itse perua vahvistettua varausta (peruutukset sähköpostilla henkilökunnalle); hän voi MUUTTAA varausta (toinen vuoro / henkilömäärä) asetuksen mukaan vähintään 48 h ennen vuoroa.
 import { rpc, storageUrl } from './sb.js';
 import { T } from './i18n.js';
-import { loadProducts as loadTreatmentProducts, splitCatalog, isTreatmentBooking } from './treatments.js';
+import { loadProducts as loadTreatmentProducts, splitCatalog, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
 import { createTreatmentViews } from './treatment-ui.js';
 
 const S = window.BOOKING_SHOP;                   // build-aikainen konfiguraatio (kieli, polut, ei-verkossa-varattavat tuotteet)
@@ -202,13 +202,43 @@ function dayItem({ r, p }, ds, withName = false) {
       ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: `bk-badge ${r.status}`, text: r.status === 'full' ? t.full : t.unavailable, title: r.status === 'unavailable' ? t.unavailableHint : null }),
       ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}?via=day`) }, t.choose, h('span', { class: 'sr', text: ` ${title}, ${pname(p)}` })) : null));
 }
+// hoito-/rituaaliajan rivi päivänäkymässä: valinta vie hoitovarausvirtaan (tuotesivu) esivalitulla päivällä ja ajalla (henkilömäärä 1, vaihdettavissa)
+function treatItem({ r, p }, ds) {
+  const title = r.ends_at ? `${hm(r.starts_at)}–${hm(r.ends_at)}` : hm(r.starts_at);
+  return h('li', { class: 'bk-slot available' },
+    h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }), h('span', { class: 'bk-price', text: priceText(p) })),
+    h('div', { class: 'bk-slot-side' }, h('a', { class: 'btn sm', href: bk(`/tuote/${p.slug}?n=1&d=${ds}&t=${treatmentTimeToken(r.time)}`) }, t.choose, h('span', { class: 'sr', text: ` ${title}, ${pname(p)}` }))));
+}
+// Hoidot päivänäkymässä: vain tuotteet joilla on vapaita aikoja valittuna päivänä (public_treatment_availability, 1 hlö; yksi haku / tuote koko varausikkunalle = välimuistista kaikille päiville,
+// haut jonossa, ei pollausta). Kortit lisätään sitä mukaa kun haku valmistuu; ajat näytetään vasta kun kortti avataan (kuten yleisillä vuoroilla).
+let treatDayToken = 0;
+async function fillTreatments(box, results, ds, today, tmax, openSlug, onToggle, rulesFree) {
+  const token = ++treatDayToken, list = box.querySelector('ul'), status = box.querySelector('.bk-treat-status');
+  let shown = 0, failed = null;
+  for (const p of state.treatments) {
+    let by;
+    try { by = await loadTreatmentSlots(p, 1, today, tmax); } catch (e) { failed = failed || e; continue; }
+    if (token !== treatDayToken || !box.isConnected) return;
+    const slots = by.get(ds) || [];
+    if (!slots.length) continue;
+    const rs = slots.map((s) => ({ r: { status: 'available', starts_at: s.start, ends_at: s.end, time: s.time }, p }));
+    const li = prodCard(p, rs, ds, p.slug === openSlug, onToggle, true);
+    list.append(li); shown++;
+    if (!rulesFree) results.querySelector('.bk-notice')?.remove();
+    if (p.slug === openSlug) li.scrollIntoView({ block: 'nearest' });
+  }
+  if (token !== treatDayToken || !box.isConnected) return;
+  status.remove();
+  if (!shown && !failed) box.remove();
+  else if (!shown) box.append(errorBox(treatmentRetryable(failed?.code) ? t.tr.errors.busy : t.loadError), h('p', {}, h('button', { type: 'button', class: 'btn sm light', text: t.tr.retry, onclick: () => route(true) })));
+}
 // tuotekortti (accordion): otsikkopainike → vain saatavilla olevat tuotteet; ajat näytetään vasta kun kortti avataan (yksi auki kerrallaan, tila URL:ssa ?tuote=<slug>)
-function prodCard(p, rs, ds, open, onToggle) {
+function prodCard(p, rs, ds, open, onToggle, treat = false) {
   const avail = rs.filter((x) => x.r.status === 'available'), id = `bk-pc-${p.id}`;
   const desc = (pdesc(p) || '').replace(/\s+/g, ' ').trim(), short = desc.length > 90 ? `${desc.slice(0, 90).replace(/\s+\S*$/, '')}…` : desc;
   const panel = h('div', { id: `${id}-panel`, class: 'bk-pc-panel', role: 'region', 'aria-labelledby': `${id}-btn`, hidden: open ? null : true },
-    h('ul', { class: 'bk-slotlist' }, rs.map((x) => dayItem(x, ds))),
-    h('p', { class: 'bk-pc-more' }, h('a', { href: bk(`/tuote/${p.slug}/${ds}`), text: t.productInfo })));
+    h('ul', { class: 'bk-slotlist' }, rs.map((x) => (treat ? treatItem(x, ds) : dayItem(x, ds)))),
+    h('p', { class: 'bk-pc-more' }, h('a', { href: treat ? bk(`/tuote/${p.slug}?n=1&d=${ds}`) : bk(`/tuote/${p.slug}/${ds}`), text: t.productInfo })));
   const btn = h('button', { type: 'button', id: `${id}-btn`, class: 'bk-pc-head', 'aria-expanded': open ? 'true' : 'false', 'aria-controls': `${id}-panel`, onclick: () => onToggle(p, li) },
     pimg(p, 'pc-img', { alt: false, w: 160, hgt: 160 }),
     h('span', { class: 'bk-pc-main' }, h('strong', { class: 'bk-pc-name', text: pname(p) }), short ? h('span', { class: 'bk-pc-desc', text: short }) : null,
@@ -251,10 +281,16 @@ async function viewDay(dateStr, keep, openSlug) {
     h('a', { class: 'btn sm bk-today', href: bk(`/paiva/${today}`), text: t.today }),
     h('label', { for: 'bk-day-pick', text: t.pickDay }), picker);
   let results;
+  const toggle = (p, li) => {
+    const wasOpen = li.classList.contains('open');
+    for (const el of results.querySelectorAll('.bk-pc')) { el.classList.remove('open'); el.querySelector('.bk-pc-head').setAttribute('aria-expanded', 'false'); el.querySelector('.bk-pc-panel').hidden = true; }
+    if (!wasOpen) { li.classList.add('open'); li.querySelector('.bk-pc-head').setAttribute('aria-expanded', 'true'); li.querySelector('.bk-pc-panel').hidden = false; li.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+    history.replaceState(null, '', bk(`/paiva/${ds}${wasOpen ? '' : `?tuote=${p.slug}`}`)); last = location.hash;   // tila URL:ssa, ei uudelleenpiirtoa
+  };
   const heading = h('h3', { id: 'bk-day-h', text: `${t.slotsFor} – ${longDate}`, tabindex: '-1' });
   if (!free.length) {   // ei yhtään saatavilla olevaa tuotetta: tyhjän päivän viesti + ehdotus seuraavasta vapaasta päivästä
     const nextDs = await findNextFree(ds, maxDs);
-    results = h('div', { class: 'bk-dayresults' }, heading,
+    results = h('div', { class: 'bk-dayresults', 'data-date': ds }, heading,
       h('div', { class: 'bk-notice', role: 'status' }, h('p', { text: t.noSlotsDay }),
         nextDs ? h('p', {}, t.nextFree + ' ', h('a', { class: 'btn sm', href: bk(`/paiva/${nextDs}`), text: dayLong(`${nextDs}T12:00:00Z`) })) : h('p', { text: t.noNextFree })));
   } else {
@@ -262,22 +298,20 @@ async function viewDay(dateStr, keep, openSlug) {
     const prods = state.catalog.map((p) => [p, rows.filter((x) => x.p.id === p.id)]).filter(([, rs]) => rs.some((x) => x.r.status === 'available'));
     const bySlug = new Map(prods.map(([p]) => [p.slug, p]));
     let openId = prods.length === 1 ? prods[0][0].id : bySlug.get(openSlug)?.id ?? null;   // yksi tuote → valmiiksi auki
-    const onToggle = (p, li) => {
-      const wasOpen = li.classList.contains('open');
-      for (const el of results.querySelectorAll('.bk-pc')) { el.classList.remove('open'); el.querySelector('.bk-pc-head').setAttribute('aria-expanded', 'false'); el.querySelector('.bk-pc-panel').hidden = true; }
-      if (!wasOpen) { li.classList.add('open'); li.querySelector('.bk-pc-head').setAttribute('aria-expanded', 'true'); li.querySelector('.bk-pc-panel').hidden = false; li.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
-      history.replaceState(null, '', bk(`/paiva/${ds}${wasOpen ? '' : `?tuote=${p.slug}`}`)); last = location.hash;   // tila URL:ssa, ei uudelleenpiirtoa
-    };
     const groups = ['yleinen', 'yksityinen', 'muut'].map((k) => [k, prods.filter(([p]) => kindOf(p) === k)]).filter(([, g]) => g.length);
-    results = h('div', { class: 'bk-dayresults' }, heading, h('p', { class: 'bk-note bk-pickhint', text: t.pickProduct }),
-      groups.flatMap(([k, g]) => [h('h4', { class: 'bk-kindh', text: t['k_' + k] }), h('ul', { class: 'bk-prods' }, g.map(([p, rs]) => prodCard(p, rs, ds, p.id === openId, onToggle)))]));
+    results = h('div', { class: 'bk-dayresults', 'data-date': ds }, heading, h('p', { class: 'bk-note bk-pickhint', text: t.pickProduct }),
+      groups.flatMap(([k, g]) => [h('h4', { class: 'bk-kindh', text: t['k_' + k] }), h('ul', { class: 'bk-prods' }, g.map(([p, rs]) => prodCard(p, rs, ds, p.id === openId, toggle)))]));
   }
+  const tmax = addDays(today, treatmentHorizon(state.settings)) < maxDs ? addDays(today, treatmentHorizon(state.settings)) : maxDs;
+  const treatBox = state.treatments.length && ds <= tmax ? h('section', { class: 'bk-treat-day', 'aria-label': t.k_hoito }, h('h4', { class: 'bk-kindh', text: t.k_hoito }), h('p', { class: 'bk-loading bk-treat-status', role: 'status', text: t.loading }), h('ul', { class: 'bk-prods' })) : null;
+  if (treatBox) results.append(treatBox);
   mount(h('header', { class: 'bk-head' }, h('h2', { text: t.dayTitle }), h('p', { class: 'lead', text: t.dayLead })), modeSwitch('day', ds),
     h('section', { class: 'bk-daypick', 'aria-label': t.pickDay }, nav, strip,
       h('p', { class: 'bk-legend' }, h('span', { class: 'dot free' }), t.free, ' ', h('span', { class: 'dot full' }), t.full, ' ', h('span', { class: 'dot unavail' }), t.unavailable), tools),
     h('div', { class: 'bk-slots', 'aria-live': 'polite' }, results));
   if (keep) { const el = document.getElementById('bk-day-h'); if (el) el.focus({ preventScroll: true }); } else focusTop();
   if (!keep && openSlug) document.querySelector('.bk-pc.open')?.scrollIntoView({ block: 'start' });   // Takaisin lomakkeelta → sama tuote auki ja näkyvissä
+  if (treatBox) fillTreatments(treatBox, results, ds, today, tmax, openSlug, toggle, free.length > 0);
 }
 
 // ---- näkymä 2: tuote → kalenteri → vuorot ----
@@ -535,7 +569,7 @@ async function viewConfirmation() {
     if (r.ok) setTimeout(() => location.reload(), 800);
   } }, t.cancelBooking));
   mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { text: b.status === 'cancelled' ? t.confCancelled : t.confTitle }), h('p', { class: 'bk-status', role: 'status', text: head }), dl,
-    b.status === 'confirmed' && b.payment_status !== 'paid' ? h('p', { class: 'bk-pay', text: b.customer_kind === 'company' ? t.companyNote : t.payLater }) : null, actions, out,
+    b.status === 'confirmed' && b.payment_status !== 'paid' && (b.customer_kind === 'company' || !isTreatmentBooking(b)) ?  /* hoitovarauksella ei maksuohjetta (vain yritysasiakkaan laskutusohje) */ h('p', { class: 'bk-pay', text: b.customer_kind === 'company' ? t.companyNote : t.payLater }) : null, actions, out,
     b.status === 'confirmed' ? h('p', { class: 'bk-note', text: b.can_change ? t.changeInfo(b.change_hours_before, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) : t.changeLocked(b.change_hours_before) }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })) : null,
     h('p', { class: 'bk-note', text: t.emailNote }), h('p', {}, h('a', { href: S.infoHref, text: t.directions }))));
   focusTop();
