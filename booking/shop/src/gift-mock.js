@@ -1,14 +1,14 @@
 // Lahjakorttien MOCK-PALVELIN (kauppa): keksityt kortit muistissa; vain kun osoitteessa on ?mock=1 (sekä testit). Ei kosketa palvelinta.
 // Vastaa KOODARI_talous_A_D_fi.md §13.2: nimet, p_-parametrit, vastausrakenteet, virheet {ok:false, code, message}.
-// Tuotannon pakettien tiedot (public_gift_card_packages, 17.10.2026); sama sisältö kuin hallinnan mockissa (testi vertaa)
+// public_gift_card_packages-vastauksen sisältö (testiprojekti = tuotannon siemendata, 17.10.2026): nimet, hinnat, kuvaukset ja items-rakenne ({label, persons, kb_product_id} | {persons, addon_code})
 export const MOCK_PACKAGES = [
   {
     code: 'open',
-    kind: 'value',
     name: 'Avoin lahjakortti',
     name_en: 'Open gift card',
-    description: 'Vapaa summa; käy kaikkiin palveluihin.',
-    description_en: 'Any amount; valid for all services.',
+    description: 'Vapaa summa; käy kaikkiin palveluihin. Voimassa 6 kuukautta.',
+    description_en: 'Any amount; valid for all services. Valid for 6 months.',
+    kind: 'value',
     is_open: true,
     price: null,
     min_amount: 29,
@@ -20,11 +20,11 @@ export const MOCK_PACKAGES = [
   },
   {
     code: 'entry_2',
-    kind: 'product',
     name: 'Sisäänpääsy kahdelle',
     name_en: 'Admission for two',
-    description: 'Savusaunavuoro kahdelle hengelle.',
-    description_en: 'Smoke sauna session for two.',
+    description: 'Savusaunavuoro kahdelle hengelle (2 × 29 €).',
+    description_en: 'Smoke sauna session for two (2 × €29).',
+    kind: 'product',
     is_open: false,
     price: 58,
     min_amount: null,
@@ -32,15 +32,21 @@ export const MOCK_PACKAGES = [
     persons: 2,
     vat_rate: 25.5,
     valid_months: 6,
-    items: []
+    items: [
+      {
+        label: 'Yleinen vuoro',
+        persons: 2,
+        kb_product_id: 1
+      }
+    ]
   },
   {
     code: 'peat_mask_2',
-    kind: 'product',
     name: 'Savusaunaelämys turvenaamiolla ja jalkakylvyllä kahdelle',
     name_en: 'Smoke sauna experience with peat mask and foot bath for two',
-    description: '',
-    description_en: '',
+    description: 'Sisäänpääsy kahdelle + omatoiminen turvenaamio ja jalkakylpy (2 × 15 €).',
+    description_en: 'Admission for two + self-guided peat mask and foot bath.',
+    kind: 'product',
     is_open: false,
     price: 88,
     min_amount: null,
@@ -48,15 +54,25 @@ export const MOCK_PACKAGES = [
     persons: 2,
     vat_rate: 25.5,
     valid_months: 6,
-    items: []
+    items: [
+      {
+        label: 'Yleinen vuoro',
+        persons: 2,
+        kb_product_id: 1
+      },
+      {
+        persons: 2,
+        addon_code: 'turvenaamio_jalkakylpy'
+      }
+    ]
   },
   {
     code: 'sauna_treatment_2',
-    kind: 'product',
     name: 'Savusaunaelämys ja saunahoito kahdelle',
     name_en: 'Smoke sauna experience and sauna treatment for two',
-    description: '',
-    description_en: '',
+    description: 'Sisäänpääsy kahdelle + saunahoito kahdelle (60 min).',
+    description_en: 'Admission for two + sauna treatment for two (60 min).',
+    kind: 'product',
     is_open: false,
     price: 192,
     min_amount: null,
@@ -64,15 +80,26 @@ export const MOCK_PACKAGES = [
     persons: 2,
     vat_rate: 25.5,
     valid_months: 6,
-    items: []
+    items: [
+      {
+        label: 'Yleinen vuoro',
+        persons: 2,
+        kb_product_id: 1
+      },
+      {
+        label: 'Saunahoito',
+        persons: 2,
+        kb_product_id: 10
+      }
+    ]
   },
   {
     code: 'saunotus_2',
-    kind: 'product',
     name: 'Savusaunaelämys ja saunotus kahdelle',
     name_en: 'Smoke sauna experience and ritual sauna bathing for two',
-    description: '',
-    description_en: '',
+    description: 'Sisäänpääsy kahdelle + saunotus kahdelle (2 h).',
+    description_en: 'Admission for two + ritual sauna bathing for two (2 h).',
+    kind: 'product',
     is_open: false,
     price: 328,
     min_amount: null,
@@ -80,7 +107,18 @@ export const MOCK_PACKAGES = [
     persons: 2,
     vat_rate: 25.5,
     valid_months: 6,
-    items: []
+    items: [
+      {
+        label: 'Yleinen vuoro',
+        persons: 2,
+        kb_product_id: 1
+      },
+      {
+        label: 'Saunotus',
+        persons: 2,
+        kb_product_id: 11
+      }
+    ]
   }
 ];
 export const MOCK_TOKEN = '3f2b8c1e-5a7d-4e9f-8b6a-1c2d3e4f5a6b';

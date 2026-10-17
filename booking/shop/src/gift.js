@@ -42,9 +42,9 @@ function buildSale(pk) {
     return true;
   };
   const tile = (p) => {
-    const items = (p.items || []).length ? h('ul', { class: 'gc-items', 'aria-label': tx('itemsTitle') }, p.items.map((i) => h('li', { text: typeof i === 'string' ? i : (pick(i, 'name') || i.name || '') }))) : null;
+    // p.items ({label, persons, kb_product_id} | {persons, addon_code}) ei näytetä: sisältö kuvataan palvelimen description(_en)-kentässä (ei kielitettyjä item-nimiä)
     const meta = h('p', { class: 'gc-meta' }, p.is_open ? tx('amountFrom', { min: p.min_amount, max: p.max_amount }) : '', p.is_open ? ' · ' : '', tx('valid', { months: p.valid_months }));
-    const kids = [h('p', { class: 'kicker', text: p.is_open ? tx('openKicker') : tx('pkgKicker') }), h('h3', { text: pick(p, 'name') }), pick(p, 'description') ? h('p', { class: 'gc-desc', text: pick(p, 'description') }) : null, items];
+    const kids = [h('p', { class: 'kicker', text: p.is_open ? tx('openKicker') : tx('pkgKicker') }), h('h3', { text: pick(p, 'name') }), pick(p, 'description') ? h('p', { class: 'gc-desc', text: pick(p, 'description') }) : null];
     if (p.is_open) {
       const amt = h('input', { type: 'text', inputmode: 'decimal', autocomplete: 'off', value: '', placeholder: '50' });
       const f = field({ label: tx('amountLabel'), control: amt, hint: tx('amountHint', { min: p.min_amount, max: p.max_amount }), name: 'open' });
