@@ -9,7 +9,7 @@ Ei palvelinkoodia, ei build-vaihetta selaimen koodille, ei kirjastoriippuvuuksia
 
 | Polku | Mitä |
 |---|---|
-| `supabase/migrations/` | 11 SQL-migraatiota (skeema `booking`; 01–09 ajettu testikantaan 16.10., 10 ja 11 odottavat ajoa; 12–13 ajettu tuotantoon, tiedostot lisättävä, ks. alla). **Ainoa tapa muuttaa tuotantokantaa.** |
+| `supabase/migrations/` | SQL-migraatiot 01–42 (skeema `booking`; 01–09 ajettu testikantaan 16.10., 10 ja 11 odottavat ajoa; 12–13 ajettu tuotantoon, tiedostot lisättävä, ks. alla). **Ainoa tapa muuttaa tuotantokantaa.** |
 | `supabase/tests/` | pgTAP-testit + kilpailutilannetesti (`run.sh`), mock-Supabase ja mock-kb |
 | `supabase/manual/` | Käsin tehtävät vaiheet: skeeman avaus REST:iin, ensimmäinen admin, tarkistuskyselyt |
 | `shared/sb.js` | ~110 rivin PostgREST/Auth-asiakas (käytetään kaupassa ja hallinnassa) |
@@ -17,7 +17,7 @@ Ei palvelinkoodia, ei build-vaihetta selaimen koodille, ei kirjastoriippuvuuksia
 | `admin/` | Hallinta-SPA (mobiili ensin + työpöytä), Supabase Auth. Näkymät: Päivä (+ lisäpalvelujen "Valmistele"-yhteenveto), Varaukset (**Ajanjakso**-pikavalinta Kaikki ajat (oletus) / Tulevat / Menneet / Tämä kuukausi / Oma ajanjakso, **lähdesuodatin Kaikki / Uudet / Johku**; Johku-varauksilla "Johku"-tunniste; kortin oikeassa yläkulmassa tilausnumero ja oikeassa alakulmassa hinta), **Kalenteri** (työvuorot + varaukset), Uusi varaus (asiakastyyppi, lisäpalvelut), Asiakkaat (**Lisää asiakas**: yksityinen/yritys), Tuotteet (+ **Lisäpalvelut**), Resurssit, Asetukset, **Käyttäjät** (vain admin) |
 | `supabase/functions/admin-users/` | Edge Function (Deno, `verify_jwt = true`): käyttäjien kutsu, käytöstä poisto ja aktivointi. Validointilogiikka `logic.js` + testit |
 | `supabase/functions/{send-emails,receipt-pdf,report-pdf,vismapay-*,procountor-sync}/` | Talous-integraatiot (sähköposti Resend, kuitti-/raportti-PDF, Visma Pay- ja Procountor-rungot; mode `off`/`dry_run`). Ohje: [docs/talous-integraatiot.md](docs/talous-integraatiot.md); sähköpostipohjien testit `send-emails/templates.test.mjs` |
-| `supabase/rollbacks/` | Migraatioiden 29–34 palautus-SQL:t (versionumero kuten tuotannossa; EI `migrations/`-kansiossa, ettei CLI aja niitä) |
+| `supabase/rollbacks/` | Migraatioiden 24–42 palautus-SQL:t (37–38 ja 39–40 yhteisiä; versionumero kuten tuotannossa; EI `migrations/`-kansiossa, ettei CLI aja niitä) |
 | `dev/` | Paikallinen demo: PostgREST-konfiguraatio, kehityspalvelin (mock-auth), demo-siemen |
 | `scripts/e2e-screenshots.mjs` | Playwright-savutesti + kuvakaappaukset + konsolivirhetarkistus |
 | `scripts/e2e-shop-layout.mjs` | Kaupan varauslomakkeen ja päivänäkymän (`#/paiva/<pvm>`) asettelutesti (360/390/430/1280 px, FI+EN, yksityinen+yritys; kosketuskohteet, kontrasti, näppäimistö): ei vaakavieritystä, osiot samassa linjassa, järjestys ja otsikot; varauslomakkeen otsikon alla lyhyt yhteenveto (tuote, päivä, kellonaika) ja linkki "Vaihda päivää tai aikaa" (päivänäkymästä `?via=day` → `#/paiva/<pvm>?tuote=<slug>`, muuten `#/tuote/<slug>/<pvm>`) |
@@ -150,6 +150,25 @@ Tulkinnat ja avoimet kysymykset: [docs/ristiriidat-ja-tulkinnat.md](docs/ristiri
 | 21 | `…20261016233600_booking_21_ritual_pool_1730.sql` | Uusi kapasiteettipooli `yleinen_vkp_1730`: kb 7 -paketti voi alkaa klo 17:00. Ajettu tuotantoon. |
 | 22 | `…20261016234502_booking_22_therapist_missing.sql` | Saunottaja puuttuu -merkintä: `reservations.therapist_missing` + `therapist_exception_by/at/note`; jos vain saunottajatarkistus ei täyty, varaus luodaan merkittynä (`warning: 'therapist_missing'`); `admin_review_list.missing_therapist`; `admin_grant_therapist_exception`; `therapist_missing_digest` (vain `service_role`). Ajettu tuotantoon. |
 | 23 | `…20261016234534_booking_23_time_windows.sql` | Aikaikkunat: hoitotyyppiset tuotteet (kb 10, 11–15, 16–22, 23, 24) ma–pe 16:00–20:30, la–su 13:00–20:30, ei yli keskiyön; rituaalit (kb 7, 8) alkavat vain 16:00 / 16:30 / 17:00; virheet `time_window` / `ritual_start`; ylitys `bookings.override`. Ajettu tuotantoon. |
+| 24 | `…20261017000153_booking_24_closure_writeback.sql` | Hallinnan sulut → Google-sulkukalenteri (jono / outbox). Additiivinen. Ajettu tuotantoon. |
+| 25 | `…20261017002011_booking_25_public_treatment.sql` | Julkinen hoito-/saunotusvaraus (aikaväli- eli legipohjainen "slots"-polku), `admin_treatment_availability`. Ajettu tuotantoon. |
+| 26 | `…20261017011809_booking_26_publish_treatments.sql` | Hoito- ja rituaalivaraus kb 8, 10, 11, 12 näkyviin ja varattaviksi (liput; rollback palauttaa liput `false`). Ajettu tuotantoon. |
+| 27 | `…20261017072446_booking_27_pyyhe_resource_addons.sql` | Pyyhe (5 €), lisäpalvelurajaus hoitoihin/saunotuksiin/tapahtumiin, `code` `admin_day_view`:hin, päivän työvuorot kaikille henkilöstöroolille. Ajettu tuotantoon. |
+| 28 | `…20261017073438_booking_28_descriptions.sql` | Tuotekuvaukset kb 8, 10, 11, 12 (`kb.products.description` / `description_en`); vain tekstit. Ajettu tuotantoon. |
+| 29 | `…20261017083344_booking_29_talous_schema.sql` | Talous (vaiheet A–D): `vat_rates`, `payment_lines`, `refunds`, `receipts`, `email_outbox`, `order_requests`, `accounting_outbox`, `integration_config`; `payments.rounding/link_sent_at`; uudet oikeudet. Ajettu tuotantoon. |
+| 30 | `…20261017083349_booking_30_talous_rpc.sql` | Vaihe A: RPC:t, maksujen kohdistus, maksulinkki, hyvitys, ALV. Ajettu tuotantoon. |
+| 31 | `…20261017084040_booking_31_talous_receipts.sql` | Vaihe B: kuitit, hyvityskuitit, sähköpostijono, tilausvahvistus. Ajettu tuotantoon. |
+| 32 | `…20261017084644_booking_32_talous_reports.sql` | Vaihe D: päivä-/kuukausiraportit kuittien snapshoteista (kassaperuste). Ajettu tuotantoon. |
+| 33 | `…20261017085256_booking_33_talous_customer_order.sql` | Vaihe C (tietokantapuoli): asiakkaan tilaussivu, lisäykset, peruutuspyyntö, ajanmuutos. Ajettu tuotantoon. |
+| 34 | `…20261017090939_booking_34_talous_followups.sql` | CSV-sarakkeet, hyvitykset negatiivisina raportissa, maksurivien net/vat, `order_page_path`. Ajettu tuotantoon. |
+| 35 | `…20261017093548_booking_35_talous_report_fields.sql` | Raportin `totals.gross_after_refunds`, `period.kind`. Ajettu tuotantoon. |
+| 36 | `…20261017093814_booking_36_talous_grants_fix.sql` | `_vat_active` ei kutsuttavissa REST-rajapinnasta (advisor). Ajettu tuotantoon. |
+| 37 | `…20261017100926_booking_37_addon_merge_step1.sql` | Johku-lisäpalvelurivit (kb 45) → addon-rivi emovarauksen tietoihin; `reservations.hidden_at/hidden_reason`. **Tuotantodataa** (kiinteät id:t). Ajettu tuotantoon. |
+| 38 | `…20261017100937_booking_38_addon_merge_hide.sql` | Yhdistettyjen Johku-varausrivien piilotus + listausfunktiot suodattavat `hidden_at is null`. **Tuotantodataa**. Ajettu tuotantoon. |
+| 39 | `…20261017102039_booking_39_vihta_move_addon.sql` | Saunavihta-lisäpalvelu siirretty tilaukselta 11552 tilaukselle 11551. **Tuotantodataa**. Ajettu tuotantoon. |
+| 40 | `…20261017102049_booking_40_vihta_hide_10212.sql` | Varaus 10212 piilotettu (yhdistetty lisäpalveluksi). **Tuotantodataa**. Ajettu tuotantoon. |
+| 41 | `…20261017102841_booking_41_johku_ei_kirjanpitoon.sql` | Johku ei kirjanpitoon: `_acct_excluded`, kuitti-/outbox-triggerit, `statistics.johku` raporteissa, `source/is_johku` + `*_ex_johku`-summat `admin_list_payments`:ssa. Ajettu tuotantoon. |
+| 42 | `…20261017103037_booking_42_hide_package_side_shifts.sql` | Paketin (kb 7) oheisvuoroiksi tuodut 25 Johku-varausta piilotetaan (`status='cancelled'`, `hidden_at`, `merged_into_package`; alkuperäiset arvot talteen `external_meta.merged_into`). **Tuotantodataa**: tarkistaa tasan 25 riviä, joten ei aja tyhjällä kannalla eikä testiprojektissa. Rollback palauttaa rivit alkuperäisiksi. Ajettu tuotantoon. |
 
 
 > **Migraatiot 12 ja 13 on ajettu tuotantoon** (Bottiavustus ajoi ne 16.10.2026). Tiedostot ovat `supabase/migrations/`-kansiossa versionimillä `20261016202540_booking_12_johku_marker.sql` ja `20261016202553_booking_13_audit_skip.sql` (sama SQL kuin ajettu), jotta paikallinen `run.sh`/`setup-db.sh` vastaa tuotantoa.
