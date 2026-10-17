@@ -1,5 +1,7 @@
 # Maksut ja Visma Pay (RAJAPINTA, EI TOTEUTETTU)
 
+> **MobilePay** on toteutettu erikseen suorana Vipps MobilePay ePayment -integraationa (kytketty pois, `mobilepay.mode='off'`): ks. `KOODARI_talous_A_D_fi.md` §14 ja `talous-integraatiot.md` §3b. Tämä dokumentti koskee Visma Pay -runkoa.
+
 **Maksupalveluntarjoaja on Visma Pay (ei Paytrail).** Verkkomaksua ei ole toteutettu: tämä on suunniteltu liitoskohta, jotta toteutus on myöhemmin pieni ja turvallinen. Mitään oikeaa maksua ei voi tehdä.
 
 ## Nykytila: kaksi maksutilaa (`booking.settings.public_payment_mode`)

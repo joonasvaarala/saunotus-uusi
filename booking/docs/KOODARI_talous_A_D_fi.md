@@ -345,3 +345,59 @@ Muut: `invalid_package`, `invalid_quantity`, `too_many_cards`, `invalid_date`, `
 5. Vahvistussivu/tilaussivu: kerro valinta ("Lahjakortti lähetetään saajalle <pvm> klo …" / "Lahjakortti toimitetaan sinulle sähköpostitse maksun jälkeen"); älä näytä PDF-linkkiä kun `delivery_to='recipient'`. Näytä `delivered_at` hallinnassa ("Toimitettu …" / "Ajastettu <pvm>").
 6. Hallinnan kortin yksityiskohta: näytä `delivery_to`, `deliver_on`+`deliver_time`, `cover_message`, `delivered_at`; ("Avaa PDF" -nappi säilyy).
 7. Lisää `config.js`/lomakkeen testit tapauksille §13.11 (virhekoodit yllä).
+
+## 14. MobilePay-verkkomaksu (Vipps MobilePay ePayment API, suora integraatio) – migraatio booking_49_mobilepay_epayment + edge-funktiot `mobilepay-start` / `mobilepay-notify` / `mobilepay-refund`
+
+**Tila: valmis ja tuotannossa, mutta KYTKETTY POIS (`integration_config.mobilepay.mode = 'off'`).** Kun tila on `off`, `public_payment_options` ei palauta MobilePay-tapaa → **painiketta ei näytetä**. Päälle kytkeminen vaatii Joonaksen luvan (ks. `talous-integraatiot.md` §3b). UI voidaan rakentaa ja testata etukäteen; painike ilmestyy vasta kun tila on `test` tai `live`.
+
+### 14.0 Säännöt (lue ensin)
+- **Maksettu = vasta onnistuneen capturen jälkeen.** Asiakkaan hyväksyttyä maksun Vipps-sovelluksessa maksu on vain varattu (AUTHORIZED); edge-funktio tarkistaa summan, varmistaa että aika on yhä vapaana, tekee captureen ja vasta sitten kutsuu `payment_mark_paid` → kuitti, kuittiviesti ja kirjanpito-outbox syntyvät kuten muillakin maksuilla (`_on_payment_paid`). Jos aika ehti mennä, varaus perutaan eikä asiakkaalta veloiteta (tilauksen sisäiseen huomautukseen jää merkintä).
+- **Asiakastiedot:** `profile.scope = name email phoneNumber`. Vipps palauttaa tiedot maksun yhteydessä; ne tallennetaan tilauksen asiakkaalle **vain jos kenttä on tyhjä** (olemassa olevaa ei ylikirjoiteta; puhelin normalisoidaan muotoon `+358…`). UI:n ei tarvitse pyytää näitä erikseen MobilePay-polulla, mutta nimen/sähköpostin kysyminen varauslomakkeella säilyy (tilaus tarvitsee asiakkaan jo luontihetkellä).
+- **Johku eristetty:** Johku-tilauksille (`external_source` ≠ null) ei voi aloittaa verkkomaksua (`order_not_payable`) eikä niiden asiakkaille täydennetä tietoja. Painiketta ei näytetä.
+- Summa/valuutta tulee aina tietokannasta (`payments.amount`, EUR); selaimen antamaa summaa ei käytetä. Vain EUR tuettu.
+- Kaikki edge-funktiot vastaavat JSON:lla `{ok, code?, message?}`; CORS sallittu (`MOBILEPAY_ALLOWED_ORIGINS`, oletus `*`).
+
+### 14.1 Julkinen RPC (anon): `public_payment_options(p_token uuid default null)`
+Palauttaa:
+```json
+{ "ok": true, "online_enabled": true,
+  "methods": [ { "code": "mobilepay", "provider": "vipps_mobilepay", "label": "MobilePay", "label_en": "MobilePay", "test": true,
+                 "start": { "function": "mobilepay-start", "method": "POST", "body": { "order_token": "<token>" } } } ],
+  "order": { "order_no": 123, "status": "pending", "payment_status": "unpaid", "unpaid": 40.00, "can_pay_online": true, "mobilepay_pending": false } }
+```
+- `methods = []` kun tila `off` tai tilaus ei ole maksettavissa (maksettu, peruttu, Johku, summa 0). **Näytä painike vain jos `methods` sisältää `mobilepay` ja `order.can_pay_online = true`.**
+- `test = true` kun tila on `test`: **älä näytä testitilassa julkisella tuotantosivustolla** (vain esikatselu/testiympäristö), koska maksut menevät Vippsin testipalvelimelle.
+- Ilman tokenia palautuu vain yleistieto (`online_enabled`, `methods`).
+- Virheet (`ok:false`): `not_found`, `rate_limited`.
+
+### 14.2 Maksun aloitus: `POST {SUPABASE_URL}/functions/v1/mobilepay-start`
+Body: `{ "order_token": "<orders.public_token>" }` (tilaussivu) **tai** `{ "link_token": "<maksulinkin token>" }` (vain yksi). Ei kirjautumista (apikey-otsikkoa ei tarvita; verify_jwt=false).
+- Onnistuu: `{ ok:true, redirect_url, reference, reuse }` → **`window.location = redirect_url`** (Vipps/MobilePay-sivu, työpöydällä puhelinnumero, mobiilissa sovellus). Saman yrityksen uudelleenavaus alle 8 min sisällä palauttaa saman `redirect_url`:n (`reuse:true`).
+- Asiakas palaa osoitteeseen `{site_base_url}{order_page_path}?t=<order_token>&pay=mobilepay` (= tilaussivu; asetukset `site_base_url`, `order_page_path` oletus `/tilaus/`). Sivuston osoite pitää olla https.
+- Virhekoodit (`code`): `mobilepay_off` (503), `not_configured` (503), `invalid_param` (400), `not_found` (404), `rate_limited` (429), `already_paid`, `nothing_to_pay`, `order_not_payable`, `payment_not_pending`, `other_provider_started`, `link_expired` (410), `link_stale`, `unsupported_currency`, `provider_error` (502/503: Vipps ei vastannut, voi yrittää uudelleen). Näytä `message` asiakkaalle (suomeksi).
+- GET `…/mobilepay-start?p=<link_token>` → 302 suoraan Vippsiin (maksulinkkisähköpostin linkki).
+- Peruttu/keskeytetty maksu (ABORTED/EXPIRED) on päätetty: uusi painallus luo uuden yrityksen (`…-a2`) samalle maksulle; vanha yritys perutaan automaattisesti.
+
+### 14.3 Paluu Vippsistä – tilaussivun tehtävä (`?pay=mobilepay`)
+Vipps kutsuu palvelimelle webhookin (`mobilepay-notify`), mutta asiakas voi palata sivulle ennen sitä. Kun URL:ssa on `pay=mobilepay`:
+1. Näytä "Tarkistetaan maksua…".
+2. Kutsu **`POST /functions/v1/mobilepay-notify`** body `{ "action": "reconcile", "order_token": "<t>" }` ja sen jälkeen `public_get_order(token)`; toista 2–3 s välein enintään ~60 s. Vastaus: `{ ok, payment_status, results:[{outcome,state}] }`.
+3. `public_get_order.payment_status = 'paid'` → "Maksu onnistui" + kuitti-/vahvistus (kuitti syntyy automaattisesti). `results[].outcome` arvot: `paid`, `pending` (asiakas ei ole vielä hyväksynyt), `not_authorized` (keskeytetty/vanhentunut → näytä "Maksu keskeytyi" + painike uudelleen), `cancelled_slot_lost` (aika ehti mennä, ei veloitettu → ohjaa valitsemaan uusi aika), `capture_failed` / `amount_mismatch` (ota yhteyttä; ei veloitettu tai tarkistetaan käsin), `paid_needs_review` (maksettu, henkilökunta tarkistaa).
+4. Poista `pay`-parametri osoitteesta onnistumisen/epäonnistumisen jälkeen.
+`reconcile` käsittelee vain kyseisen tilauksen omat keskeneräiset maksut eikä voi merkitä mitään maksetuksi ilman Vippsin vahvistusta.
+
+### 14.4 Hallinta (authenticated)
+- Maksut-listoissa/maksurivillä `method='mobilepay'`, `provider='mobilepay'`; `provider_status` = CREATED / AUTHORIZED / ABORTED / EXPIRED / CAPTURED / create_failed / capture_failed (tekninen; näytä tarvittaessa tooltipissä). Tapahtumahistoria `payments.raw->'mobilepay'->'events'` (ei henkilötietoja).
+- **Hyvitys:** `admin_refund(payment_id, amount, reason, …)` toimii kuten ennen. Kun `mobilepay.mode ≠ off` ja maksu on verkkomaksu, rivi syntyy `status='requested'`; **UI kutsuu heti perään `POST /functions/v1/mobilepay-refund` body `{ "refund_id": <id> }` käyttäjän JWT:llä** (vaatii oikeuden `payments.refund`). Vastaus `{ ok, processed:[{refund_id, result}] }`, `result`: `done` (hyvityskuitti syntyy kuten ennen), `failed` (Vipps hylkäsi; syy `refunds.raw`), `retry_later` (Vipps ei vastannut; kutsu uudelleen – turvallista, Idempotency-Key estää tuplahyvityksen), `unverified`. Hyvitys näytetään tilassa "käsitellään", kunnes `refunds.status = 'done'`. Kun `mode = off`, hyvitys kirjataan käsin kuten ennen (`p_manual_done`).
+- Maksulinkkisähköposti (`admin_create_payment_link`) toimii ennallaan; MobilePay-linkin käsittely: link_token → `mobilepay-start` (GET `?p=` tai POST `link_token`). Aktivoituu kun mode ≠ off.
+
+### 14.5 Koodarin työlista (UI)
+1. Tilaussivu: kutsu `public_payment_options(token)` → jos `methods` sisältää `mobilepay` ja `order.can_pay_online` → painike "Maksa MobilePaylla" (käytä Vippsin/MobilePayn virallista painiketta/logoa: https://developer.vippsmobilepay.com/docs/design-guidelines/ ; ei omaa muokattua logoa) → `POST mobilepay-start {order_token}` → redirect.
+2. Tilaussivun paluutila `?pay=mobilepay` (§14.3, polling).
+3. Verkkokaupan kassan loppuvaihe (kun `public_payment_mode = hold_until_paid`): tilauksen luonnin jälkeen ohjaa tilaussivulle/maksupainikkeeseen; pidon laskuri näkyviin (olemassa).
+4. Testitilan merkki: jos `methods[].test = true`, älä näytä painiketta tuotantosivustolla.
+5. Hallinta: maksutapa-näyttö "MobilePay" maksurivillä; hyvityksen jälkeen kutsu `mobilepay-refund` (§14.4) ja näytä tulos.
+6. Virhetekstit: näytä `message` sellaisenaan.
+
+### 14.6 Rollback
+`rollbacks/20261017172554_booking_49_ROLLBACK.sql` (kieltäytyy jos MobilePay-maksuja/hyvityksiä on olemassa). Edge-funktiot ovat tilassa `off` toimettomia.
