@@ -55,7 +55,7 @@ Asetus: `booking.settings` `site_base_url` (https) ja `order_page_path` (oletus 
 
 **Käyttöönotto testitilassa (vaatii Joonaksen luvan):**
 1. Aseta edge-salaisuudet (`supabase secrets set …` tai Dashboard).
-2. Rekisteröi webhook (tallentaa `MOBILEPAY_WEBHOOK_SECRET`:n suoraan Supabaseen, ei tulosta): `deno run --allow-env --allow-net --allow-run=supabase booking/scripts/mobilepay-webhook.ts register test --project-ref sxbofnuisemspgquoxyv` (avaimet ympäristömuuttujissa). Tapahtumat: authorized, aborted, expired, terminated. Listaus/poisto: `list` / `delete`.
+2. Rekisteröi webhook (tallentaa `MOBILEPAY_WEBHOOK_SECRET`:n suoraan Supabaseen, ei tulosta): `deno run -A booking/scripts/mobilepay-webhook.ts register test --project-ref sxbofnuisemspgquoxyv` (avaimet ympäristömuuttujissa). Tapahtumat: authorized, aborted, expired, terminated. Listaus/poisto: `list` / `delete`.
 3. Kytke päälle: `update booking.integration_config set mode='test', settings = settings || jsonb_build_object('approved_by','Joonas Vaarala <pvm>') where key='mobilepay';` (trigger vaatii `approved_by`:n; `dry_run` ei ole sallittu MobilePaylle).
 4. Testaa: tee testitilaus, maksa MobilePay Test -sovelluksella (testikäyttäjä; testisummat: https://developer.vippsmobilepay.com/docs/test-environment/), tarkista kuitti + hyvitys.
 5. Live: aseta tuotantoavaimet, rekisteröi webhook `live`, `mode='live'` + `approved_by`.
