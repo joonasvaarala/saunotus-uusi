@@ -212,7 +212,7 @@ async function adminSuite() {
 
   // ---- toiminnot (390 px, FI) ----
   {
-    const name = 'lahjakortit toiminnot', T = TEXTS.fi, page = await newPage(name, { vp: 390 });
+    const name = 'lahjakortit toiminnot', T = TEXTS.fi, page = await newPage(name, { vp: 390, allow: /status of 400/ });   // 400 = simuloitu palvelimen toimitusvirhe
     await page.goto(`${ORIGIN}/admin/#/talous?tab=giftcards`);
     await page.waitForSelector('[data-testid=gc-list] [data-testid=gc]');
     const rows = () => page.locator('[data-testid=gc-list] > [data-testid=gc]');
@@ -343,6 +343,21 @@ async function adminSuite() {
     await none.goto(`${ORIGIN}/admin/#/talous`); await none.waitForSelector('[data-testid=orders-list] [data-testid=order]');
     expect(await none.locator('[data-testid=tab-giftcards-btn]').count() === 0, 'ilman giftcards.manage ei Lahjakortit-välilehteä');
     expect(calls(none, 'admin_list_gift_cards').length === 0 && calls(none, 'admin_list_gift_card_packages').length === 0, 'ilman oikeutta ei lahjakorttikutsuja');
+  }
+
+  // ---- toimitusvalinnan lomake kaikilla leveyksillä FI/EN (saajalle + ajankohta + virheet) ----
+  for (const lang of ['fi', 'en']) for (const vp of VPS) {
+    const T = TEXTS[lang], name = `toimituslomake ${lang} ${vp}`, page = await newPage(name, { vp, lang });
+    await page.goto(`${ORIGIN}/admin/#/talous?tab=giftcards&lang=${lang}`); await page.waitForSelector('[data-testid=gc-list] [data-testid=gc]');
+    await page.click('[data-testid=gc-new]'); await page.waitForSelector('dialog[open] [data-testid=gc-new-mode]');
+    const $ = (id) => page.locator(`dialog[open] [data-testid=${id}]`);
+    await page.selectOption('dialog[open] [data-testid=gc-new-mode]', 'cash'); await page.selectOption('dialog[open] [data-testid=gc-new-package]', 'entry_2');
+    await $('gc-new-dlv-recipient').check(); await $('gc-new-when-later').check(); await $('gc-new-deliver-on').fill('2020-01-02'); await $('gc-new-cover').fill('Hyvää syntymäpäivää!');
+    await page.fill('dialog[open] input[name=buyer_name]', 'Testi Ostaja'); await page.fill('dialog[open] input[name=buyer_email]', 'ostaja@example.invalid');
+    await page.click('dialog[open] button[type=submit]'); await page.waitForFunction(() => document.querySelector('dialog[open] [data-testid=gc-new-err-deliverOn]')?.textContent);
+    expect(await $('gc-new-err-deliverOn').innerText() === T['err.deliver_on_past'] && await $('gc-new-err-recipientEmail').innerText() === T['err.recipient_email_required'], `${name}: kenttäkohtaiset virheet ${lang}`);
+    await layoutChecks(page, name, 'dialog[open]'); await page.locator('dialog[open]').screenshot({ path: join(SHOT, `hallinta-toimituslomake-virheet-${lang}-${vp}.png`) });
+    await page.context().close();
   }
 
   // ---- ?mock=1: koko välilehti toimii esimerkkidatalla ----
@@ -755,6 +770,13 @@ async function shopSuite() {
     await page.locator('.gc-line').nth(2).locator('[data-testid=greeting]').fill(lang === 'fi' ? 'Hyvää syntymäpäivää! Nauti lämmöstä ja rauhasta.' : 'Happy birthday! Enjoy the warmth and the calm.');
     await layoutChecks(page, `${name} myyntisivu`, '.gc');
     await shot(page, `kauppa-lahjakortti-${lang}-${vp}`);
+    { // toimitusvalinta: saajalle + ajankohta valittuna (kenttäkohtaiset virheet esillä)
+      const ln = page.locator('.gc-line').nth(0);
+      await ln.locator('[data-testid=dlv-recipient]').check(); await ln.locator('[data-testid=when-later]').check(); await ln.locator('[data-testid=deliver-on]').fill('2020-01-02'); await ln.locator('[data-testid=cover-message]').fill(lang === 'fi' ? 'Hyvää syntymäpäivää! Tässä lahjasi.' : 'Happy birthday! Here is your gift.');
+      await page.fill('input[autocomplete=name]', 'Olli Ostaja'); await page.fill('input[autocomplete=email]', 'olli@example.fi'); await page.fill('input[autocomplete=tel]', '0401234567'); await page.check('#gc-terms'); await page.click('.gc-submit');
+      await page.waitForFunction(() => [...document.querySelectorAll('.gc-line .gc-err')].some((x) => x.textContent));
+      await layoutChecks(page, `${name} toimitusvalinta`, '.gc'); await shot(page, `kauppa-toimitus-${lang}-${vp}`);
+    }
     await page.locator('#gift-balance').scrollIntoViewIfNeeded(); await page.fill('#gift-balance input', 'hh3a7cefhjkl'); await page.click('#gift-balance button[type=submit]'); await page.waitForSelector('#gift-balance .gc-result');
     await layoutChecks(page, `${name} saldo`, '#gift-balance');
     await page.context().close();
