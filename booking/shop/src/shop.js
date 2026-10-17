@@ -483,7 +483,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
     const dec = h('button', { type: 'button', class: 'bk-step', 'aria-label': `${aname(a)} −`, onclick: () => { qty.set(a.id, qty.get(a.id) - 1); upd(); } }, '−');
     const inc = h('button', { type: 'button', class: 'bk-step', 'aria-label': `${aname(a)} +`, onclick: () => { qty.set(a.id, qty.get(a.id) + 1); upd(); } }, '+');
     const sync = () => { const lim = addonLimit(a, n); q.max = lim; q.value = qty.get(a.id); dec.disabled = qty.get(a.id) <= 0; inc.disabled = qty.get(a.id) >= lim; };
-    const node = h('li', { class: 'bk-addon' }, h('div', { class: 'bk-addon-info' }, h('label', { for: `bk-a-${a.id}` }, h('strong', { text: aname(a) }), ' ', h('span', { class: 'bk-addon-price', text: money(a.price) })), adesc(a) ? h('small', { text: adesc(a) }) : null, h('small', { class: 'bk-hint', text: t.addonMax(addonLimit(a, n)) })),
+    const node = h('li', { class: 'bk-addon' }, h('div', { class: 'bk-addon-info' }, h('label', { for: `bk-a-${a.id}` }, h('strong', { text: aname(a) }), ' ', h('span', { class: 'bk-addon-price', text: money(a.price) })), adesc(a) ? h('small', { text: adesc(a) }) : null),
       h('div', { class: 'bk-stepper' }, dec, q, inc));
     return { node, sync, a };
   });
