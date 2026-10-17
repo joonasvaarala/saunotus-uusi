@@ -17,11 +17,28 @@ mkdirSync(OUT, { recursive: true });
 
 const browser = await chromium.launch({ executablePath: process.env.CHROME || '/usr/bin/google-chrome', args: ['--no-sandbox'] });
 const problems = [];
+// admin_treatment_availability (booking_25) mockataan, koska funktiota ei ole vielä repon migraatioissa/paikallisessa kannassa. Palauttaa kutsulistan.
+function mockAvailability(page) {
+  const helIso = (d, hhmm) => { for (const off of [3, 2]) { const t = new Date(`${d}T${hhmm}:00+0${off}:00`); if (new Intl.DateTimeFormat('fi-FI', { timeZone: 'Europe/Helsinki', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(t).replace('.', ':') === hhmm) return t.toISOString(); } return null; };
+  const addIso = (d, n) => new Date(new Date(`${d}T12:00:00Z`).getTime() + n * 864e5).toISOString().slice(0, 10);
+  const calls = [];
+  page.route('**/rpc/admin_treatment_availability', (r) => {
+    const a = r.request().postDataJSON(); calls.push(a); const rows = [];
+    for (let d = a.p_from; d <= a.p_to; d = addIso(d, 1)) {
+      const dow = new Date(`${d}T12:00:00Z`).getUTCDay();
+      const ts = [[1, 2, 3, 4].includes(dow) ? ['16:00', '17:00', '18:30'] : [0, 6].includes(dow) ? ['13:00', '13:30', '15:00'] : [], a.p_override && dow === 5 ? ['17:00', '18:00'] : []].flat();
+      for (const t of ts) { const st0 = helIso(d, t); rows.push({ product_id: a.p_product_id, session_date: d, starts_at: st0, ends_at: new Date(new Date(st0).getTime() + 36e5).toISOString(), duration_minutes: 60, status: 'available', persons: a.p_persons, total: 99 + 35 * Math.max(a.p_persons - 1, 0), price_type: 'base', therapist_missing: [1, 2].includes(dow) && t === '17:00', needs_override: dow === 5 }); }
+    }
+    return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(rows) });
+  });
+  return calls;
+}
 const watch = (page, name) => {
   page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) problems.push(`${name} console.${m.type()}: ${m.text()}`); });
   page.on('pageerror', (e) => problems.push(`${name} pageerror: ${e.message}`));
   page.on('requestfailed', (r) => !(/\/storage\/v1\/object\/public\//.test(r.url()) && /ERR_ABORTED/.test(r.failure()?.errorText || '')) && problems.push(`${name} requestfailed: ${r.url()} ${r.failure()?.errorText}`));
   page.on('response', (r) => { if (r.status() >= 400) problems.push(`${name} HTTP ${r.status()}: ${r.url()}`); });
+  mockAvailability(page);
 };
 // v15b: hero-bannerin tekstin kontrasti kuvan päällä: piilotetaan teksti, kuvataan hero ja haetaan kirkkain kohta tekstialueen takaa (huonoin tapaus) → valkoisen tekstin kontrasti
 async function heroContrast(page) {
@@ -715,7 +732,7 @@ if (process.env.ONLY !== 'shop') {
     page.on('console', (m) => { if (['error', 'warning'].includes(m.type()) && !/Failed to load resource.*400/.test(m.text())) problems.push(`resurssi-${name} console.${m.type()}: ${m.text()}`); });
     page.on('pageerror', (e) => problems.push(`resurssi-${name} pageerror: ${e.message}`));
     page.on('response', (r) => { if (r.status() >= 400 && !/admin_create_resource_booking/.test(r.url())) problems.push(`resurssi-${name} HTTP ${r.status()}: ${r.url()}`); });
-    page.on('dialog', (dlg) => dlg.accept());
+    page.on('dialog', (dlg) => dlg.accept()); mockAvailability(page);
     await loginAs(page);
     // --- varauslista: pikatoiminnot + tila-/elinkaarimerkit ---
     await page.evaluate(() => { location.hash = '#/varaukset'; });
@@ -1234,6 +1251,8 @@ if (process.env.ONLY !== 'shop') for (const [name, vp] of [['mobile', { width: 3
   if ((await page.locator('#view .resrow .badge.tmiss-ok:has-text("Saunottaja sovittu")').count()) < 1 || (await page.locator('#view .resrow .badge.tmiss:has-text("Ei saunottajaa")').count()) !== 0) problems.push(`${tag}: poikkeuksen saaneella varauksella pitää olla "Saunottaja sovittu" eikä "Ei saunottajaa"`);
   // --- Uusi resurssivaraus ilman saunottajaa (maanantai/tiistai ilman vuoroja): varoitus + poikkeus ---
   const fresh = (() => { const w = 4 + Math.floor(Math.random() * 14), d = new Date(mon); d.setUTCDate(d.getUTCDate() + 7 * w + Math.floor(Math.random() * 2)); return d.toISOString().slice(0, 10); })();
+  const availCalls = mockAvailability(page);   // admin_treatment_availability (booking_25): mockattu; varaus tehdään oikealla admin_create_resource_booking-funktiolla
+  const pickSlot = async () => { await page.waitForSelector('[data-testid=slot]', { timeout: 8000 }); await page.locator('[data-testid=slot]:has-text("17:00")').first().click(); };
   await page.evaluate((d) => { location.hash = `#/uusi?tyyppi=resurssi&d=${d}`; }, fresh);
   const form = page.locator('[data-testid=resource-booking-form]'); await form.waitFor();
   await form.locator('[name=product]').selectOption('10');
@@ -1247,13 +1266,30 @@ if (process.env.ONLY !== 'shop') for (const [name, vp] of [['mobile', { width: 3
   await form.locator('[name=product]').selectOption('8'); await form.locator('[name=time]').fill('15:30');
   await form.locator('button[type=submit]').click();
   await page.waitForFunction(() => /16:00, 16:30 tai 17:00/.test(document.querySelector('[data-testid=resource-booking-form] .err:not([hidden])')?.textContent || ''), null, { timeout: 8000 }).catch(() => problems.push(`${tag}: ritual_start-virhe pitää näkyä suomeksi lomakkeella`));
-  await form.locator('[name=product]').selectOption('10'); await form.locator('[name=time]').fill('17:00');
+  const sel10 = async () => { await form.locator('[name=product]').selectOption('10'); await page.waitForSelector('[data-testid=slot]', { timeout: 8000 }); };
+  await sel10();
+  const sizes = await page.evaluate(() => [...document.querySelectorAll('[data-testid=availability] button')].map((e) => Math.round(e.getBoundingClientRect().height)));
+  if (!sizes.length || Math.min(...sizes) < 44 || (await noH()) > 0) problems.push(`${tag}: vapaat ajat -painikkeiden korkeus ${Math.min(...sizes)} < 44 tai vaakavieritys`);
+  if (!(await page.locator('[data-testid=slot]:has-text("Ei saunottajaa")').count()) || (await page.locator('[data-testid=slot] small.ov').count())) problems.push(`${tag}: vapaat ajat: "Ei saunottajaa" pitää näkyä, "Ylitys" ei ilman ylitystä`);
+  await page.locator('[data-testid=availability]').scrollIntoViewIfNeeded(); await shot(page, `admin-${name}-96-vapaat-ajat.png`, false);
+  // ylitysajat (admin): perustelu → haku p_override=true → ylitysajat merkittyinä
+  await page.check('[data-testid=override-box] input[name=override]');
+  await page.fill('[data-testid=override-box] [name=override_reason]', 'Sovittu erikseen (e2e)'); await page.locator('[data-testid=override-box] [name=override_reason]').blur();
+  await page.waitForFunction(() => /ylitysajat mukana/.test(document.querySelector('[data-testid=avail-status]')?.textContent || ''), null, { timeout: 8000 }).catch(() => problems.push(`${tag}: ylitysaikojen haku ei onnistunut`));
+  if (availCalls.at(-1)?.p_override !== true || availCalls.at(-1)?.p_override_reason !== 'Sovittu erikseen (e2e)') problems.push(`${tag}: ylityshaun argumentit väärin: ${JSON.stringify(availCalls.at(-1))}`);
+  await page.locator('[data-testid=day-chip]:has-text("pe ")').first().click(); await page.locator('[data-testid=slot]').first().click();
+  if (!(await page.locator('[data-testid=slot] small.ov').count()) || !/Vaatii ylityksen/.test(await page.locator('[data-testid=slot-picked]').innerText())) problems.push(`${tag}: ylitysaika pitää olla merkitty ja näkyä yhteenvedossa`);
+  await page.locator('[data-testid=availability]').scrollIntoViewIfNeeded(); await shot(page, `admin-${name}-97-vapaat-ajat-ylitys.png`, false);
+  await page.uncheck('[data-testid=override-box] input[name=override]'); await page.waitForTimeout(700);
+  await sel10(); await pickSlot();
+  if (!/Ei saunottajaa/.test(await page.locator('[data-testid=slot-picked]').innerText()) || (await form.locator('[name=time]').inputValue()) !== '17:00') problems.push(`${tag}: valittu aika ei täyttänyt lomaketta`);
+  await page.locator('[data-testid=availability]').scrollIntoViewIfNeeded(); await shot(page, `admin-${name}-98-vapaat-ajat-valittu.png`, false);
   const warn = page.locator('[data-testid=therapist-warning]');
   for (let k = 0; k < 6; k++) {   // aiemmat ajot jättävät varauksia: jos tila on varattu tai päivällä on vuoro, kokeile toista päivää
     await form.locator('button[type=submit]').click();
     if (await warn.waitFor({ timeout: 4000 }).then(() => true, () => false)) break;
     const d = new Date(`${fresh}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + 7 * (k + 3) + (k % 2)); await page.evaluate((x) => { location.hash = `#/uusi?tyyppi=resurssi&d=${x}`; }, d.toISOString().slice(0, 10));
-    await form.waitFor(); await form.locator('[name=product]').selectOption('10'); await form.locator('[name=time]').fill('17:00');
+    await form.waitFor(); await sel10(); await pickSlot();
     await form.locator('[name=cname]').fill('Saunottajaton Testi'); await form.locator('[name=cemail]').fill(`saunottajaton-${Date.now()}@example.com`);
   }
   await warn.waitFor({ timeout: 10000 });

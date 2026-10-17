@@ -220,3 +220,16 @@ h2 .icon,h3 .icon,.addon-mark .icon{display:inline-block;vertical-align:-3px;mar
 .toast.warn{background:#6b4b00}
 [data-testid=therapist-state] .btn{margin-left:4px}
 .btn[data-testid=grant-btn]{min-height:44px;padding:10px 14px}
+/* Vapaat ajat (admin_treatment_availability): päivä- ja aikapainikkeet, vähintään 44 px; ei sinistä */
+.avail{display:grid;gap:8px}.avail-head{justify-content:space-between}.avail-head h3{margin:0}
+.avail .btn.sm[data-testid=avail-refresh]{min-height:44px;padding:10px 14px}
+.daychips,.slotgrid{display:flex;flex-wrap:wrap;gap:8px}
+.btn.daychip,.btn.slot{min-height:44px;padding:8px 12px}
+.btn.slot{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:76px}
+.btn.slot strong{font-size:16px}.btn.slot .sflag{font-size:11px;line-height:1.2;color:#5a3f00}
+.btn.slot.needs-ovr{border-style:dashed;border-color:#8a6a2c}
+.btn.daychip[aria-pressed=true],.btn.slot[aria-pressed=true]{background:var(--green);color:#fff;border-color:var(--green)}
+.btn.slot[aria-pressed=true] .sflag{color:#F6E6C3}
+.slot-picked{margin:0;padding:10px 12px;border-radius:8px;background:var(--okbg);color:var(--ok)}
+.slot-picked .badge{vertical-align:middle}
+.avail-err{margin:0;color:var(--err);background:var(--errbg);padding:10px 12px;border-radius:8px}
