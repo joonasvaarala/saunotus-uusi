@@ -5,6 +5,7 @@ import { rpc, select } from '../sb.js';
 import { customerForm, customerSearch } from './customerform.js';
 import { warningBox, hasWarning, MISSING_TEXT } from './therapist.js';
 import { addonPicker } from './addons.js';
+import { availabilityPanel, isSlotProduct } from './availability.js';
 import { resName, catLabel } from './legs.js';
 import { h, field, toast, run, fmtDay, fmtTime, money, todayHel, helsinkiIso, errMsg, dayStartIso, addDays, fmtDT } from '../ui.js';
 
@@ -53,6 +54,13 @@ export async function render({ ctx, refs, query, kind }) {
     h('label', { class: 'check' }, ovr, ' Ohita sulku-, saunottaja- ja aikaikkunatarkistus (ylitys)'),
     h('div', { class: 'ovr-reason', hidden: true }, field('Perustelu (pakollinen)', ovrReason, 'Ylitys kirjataan varaukseen ja näkyy Tarkista-listalla.')));
   ovr.addEventListener('change', () => { ovrBox.querySelector('.ovr-reason').hidden = !ovr.checked; if (ovr.checked) ovrReason.focus(); });
+  // saatavuus (migraatio 25): hoidot ja rituaali näyttävät vapaat ajat; muut tuotteet ja Vanha varaus syöttävät ajan käsin
+  let availFrom = date.value; let availTimer = null;
+  const avail = old ? null : availabilityPanel({ getQuery: () => (isSlotProduct(st.product) ? { productId: st.product.id, from: availFrom, persons: +persons.value || 1, override: canOverride && ovr.checked, reason: ovrReason.value } : null),
+    onPick: (r) => { date.value = r.session_date; time.value = fmtTime(r.starts_at); errBox.hidden = true; sync(false); } });
+  if (avail) avail.node.hidden = true;
+  const loadAvail = () => { if (!avail) return; avail.node.hidden = !isSlotProduct(st.product); avail.load(); };
+  const reloadSoon = () => { clearTimeout(availTimer); availTimer = setTimeout(loadAvail, 400); };
   const ui = {};
   const cf = customerForm({ id: 'rb', onKind: (k) => { if (!st.customer) method.value = k === 'company' && refs.methods.some((m) => m.active && m.code === 'invoice') ? 'invoice' : 'pay_later'; } });
   const cs = customerSearch({ cf, st });
@@ -66,7 +74,7 @@ export async function render({ ctx, refs, query, kind }) {
     const lists = await Promise.all(ids.map((id) => rpc('admin_list_reservations', { p_product_id: id, p_from: from, p_status: 'active', p_limit: 50 }).catch(() => [])));
     for (const r of lists.flat().sort((a, b) => a.starts_at.localeCompare(b.starts_at))) parentSel.append(h('option', { value: r.reservation_id, text: `#${r.order_no} ${r.product_name} · ${fmtDT(r.starts_at)} · ${r.customer_name || '–'}` }));
   }
-  const sync = () => {
+  const sync = (reload = true) => {
     const p = refs.productById.get(+prodSel.value) || st.product; st.product = p; if (!p) return;
     const c = p.config; const dur = c.duration_minutes;
     persons.min = c.min_persons || 1; if (c.max_persons) persons.max = c.max_persons; else persons.removeAttribute('max');
@@ -79,13 +87,16 @@ export async function render({ ctx, refs, query, kind }) {
     spaceFld.hidden = sp.length < 2; spaceSel.replaceChildren(h('option', { value: '', text: 'Automaattinen' }), ...sp.map((x) => h('option', { value: x.id, text: x.name })));
     price.placeholder = p.price != null ? `Tuotteen hinta ${money(p.price)}` : 'Hinta';
     picker.sync(); loadParents(p);
+    if (reload) loadAvail();
   };
-  for (const el of [prodSel, time]) el.addEventListener('change', sync); time.addEventListener('input', sync);
-  persons.addEventListener('input', () => picker.sync()); date.addEventListener('change', () => st.product && loadParents(st.product));
+  for (const el of [prodSel, time]) el.addEventListener('change', () => sync(el === prodSel)); time.addEventListener('input', () => sync(false));
+  time.addEventListener('input', () => { if (avail?.selected && fmtTime(avail.selected.starts_at) !== time.value) avail.clearSelection(); });
+  persons.addEventListener('input', () => { picker.sync(); reloadSoon(); }); date.addEventListener('change', () => { if (st.product) loadParents(st.product); availFrom = date.value || todayHel(); avail?.clearSelection(); loadAvail(); });
+  if (avail) { ovr.addEventListener('change', loadAvail); ovrReason.addEventListener('change', loadAvail); }
 
   const f = h('form', { class: 'stack card nbform', novalidate: true, 'data-testid': old ? 'old-booking-form' : 'resource-booking-form' }, h('h3', { text: old ? 'Vanha varaus' : 'Resurssivaraus' }),
     h('p', { class: 'muted', text: old ? 'Kirjaa varaus vanhalle tuotteelle (esim. siirtynyt hoito). Resurssivaikutus säilyy: sulut, päällekkäisyys ja saunottaja tarkistetaan.' : 'Nykyinen resurssituote (hoito, saunotus, rituaali, seremonia, lisäpalvelu) ylläpidon kautta. Tila ja saunottaja varataan tuotteen sääntöjen mukaan.' }),
-    field('Tuote', prodSel),
+    field('Tuote', prodSel), avail ? avail.node : null,
     h('div', { class: 'row wrap' }, field('Päivä', date), field('Alkaa', time), field('Päättyy (valinnainen)', end, null)), endHint, windowHint,
     h('div', { class: 'row wrap' }, field('Henkilömäärä', persons), field('Hinta € (ohita automaattinen)', price)), personsHint,
     spaceFld, parentFld,

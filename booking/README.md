@@ -230,6 +230,17 @@ Migraatiot 20–23 on ajettu tuotantoon (versiot 20261016224525 / 233600 / 23450
 * Huom: `admin_list_reservations` ei palauta `therapist_missing`-kenttää (speksin mukaan), joten Varaukset-listassa ei ole tunnistetta; se näkyy päivänäkymässä, tiedoissa ja Tarkistassa. Aikaikkunasääntöjen muokkaukseen ei ole hallintanäkymää.
 * Testit: pgTAP `17_resource_bookings` laajennettu Bottiavustuksen v2-testeillä (ryhmät A–N ajetaan aikaikkunatriggeri pois päältä, kuten tuotannossa; uudet ryhmät W ja X testaavat aikaikkunat ja rituaalin alkuajat sekä poikkeukset), selainsavutesti ja e2e (kuvat `admin-*-90…95`).
 
+### Vapaat ajat hallinnan Uusi varaus -lomakkeella (booking_25, `admin_treatment_availability`)
+
+Resurssivaraus-lomakkeella tuotteet kb 8 (rituaali) ja 10–12 (hoidot) näyttävät **Vapaat ajat** -paneelin, joka kutsuu `admin_treatment_availability(p_product_id, p_from, p_to, p_persons, p_override, p_override_reason)` ja näyttää saman tarjonnan kuin verkkosivu (`admin/views/availability.js`):
+
+* Haku 14 päivää valitusta päivästä (`SPAN_DAYS`), päiväpainikkeet (lukumäärä) ja alkuajat (44 px painikkeet). Aika valittaessa lomakkeen päivä ja kellonaika täyttyvät; yhteenvedossa hinta (`total`) ja merkinnät **Ei saunottajaa** (`therapist_missing`, sama kuin booking_22-varoitus) ja **Vaatii ylityksen** (`needs_override`).
+* Raskas haku: **ei pollausta**; haetaan kun tuote, päivä, henkilömäärä (400 ms viive) tai ylitys vaihtuu. Välimuisti muistissa 3 min / haun parametrit; *Päivitä*-painike ohittaa välimuistin.
+* Ylitysajat vain oikeudella `bookings.override` (admin, manager): Ylitys-valinta + perustelu (≥ 3 merkkiä) → haku `p_override=true`. Ilman perustelua haetaan vain tavalliset ajat. Perustason käyttäjä (`bookings.manage`) ei näe ylitysvalintaa.
+* Varaus tehdään edelleen lomakkeen `admin_create_resource_booking`-kutsulla; ajan voi syöttää käsin myös silloin, kun saatavuushaku epäonnistuu (virhe suomeksi: `bad_range`, `busy`, `rate_limited`, `forbidden`, `override_reason_required`).
+* Tuotteet, joilla paneeli näytetään: `SLOT_PRODUCT_IDS = [8, 10, 11, 12]` (`availability.js`). Vanha varaus -lomake ei käytä paneelia.
+* Testit: `scripts/smoke-pages.mjs` (mockattu RPC: argumentit, valinta, välimuisti, virhe, ylitys + oikeus) ja `scripts/e2e-screenshots.mjs` (kuvat `admin-*-96…98`; RPC mockattu, koska migraatioita 24–25 ei ole vielä repossa/paikallisessa kannassa).
+
 ### Kalenterisulut hallinnassa (migraatio 18)
 
 Migraatio 18 (18a–18c; versiot 20261016221808 / 221825 / 221840) on ajettu tuotantoon; kalenterit ovat rekisterissä `active = false` eikä synkkaa ole käynnissä. Hallinta (`admin/`):
