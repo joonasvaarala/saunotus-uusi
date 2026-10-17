@@ -43,6 +43,21 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
     o.items = [{ id: 1, name: 'Yleinen saunavuoro', name_en: 'Public sauna session', quantity: 2, line_total: 40, vat_rate: 25.5 }];
     o.reservations = [o.reservations[0]]; o.reservations[0].addons = []; o.status = 'pending'; o.paid = 0; o.payments = []; o.receipts = []; o.online_payment_enabled = true;
   }
+  // Hoitovalinta (booking_50, sopimus §15), skenaariot ?mock=1&scenario=hoito | hoito-valitsematta | hoito-lukittu: Saunahoito-varaus (kb 10). hoito = valittu vihtahoito; hoito-valitsematta = vanha varaus ilman valintaa (option null,
+  // option_choices täynnä → "valitsematta" + pyyntö valita); hoito-lukittu = muutosaika umpeutunut (can_change=false). public_change_order_time vaihtaa vain hoitoa (muut parametrit null).
+  const OPTION_CHOICES = [{ id: 1, code: 'hunajahoito', name: 'Hunajahoito', name_en: 'Honey treatment', sort_order: 10, description: null, description_en: null, active: true },
+    { id: 2, code: 'vihtahoito', name: 'Vihtahoito', name_en: 'Birch whisk treatment', sort_order: 20, description: null, description_en: null, active: true },
+    { id: 3, code: 'suolahoito', name: 'Suolahoito', name_en: 'Salt treatment', sort_order: 30, description: null, description_en: null, active: true },
+    { id: 4, code: 'turvehoito', name: 'Turvehoito', name_en: 'Peat treatment', sort_order: 40, description: null, description_en: null, active: true }];
+  const optJson = (c) => (c ? { id: c.id, code: c.code, name: c.name, name_en: c.name_en } : null);
+  const hoito = /^hoito(-valitsematta|-lukittu)?$/.test(scenario) ? scenario : '';
+  if (hoito) {
+    o.items = [{ id: 1, name: 'Saunahoito', name_en: 'Sauna treatment', quantity: 1, line_total: 99, vat_rate: 25.5 }];
+    o.reservations = [{ reservation_id: 601, product_id: 10, product_name: 'Saunahoito', starts_at: `${day(5)}T13:00:00Z`, ends_at: `${day(5)}T14:00:00Z`, persons: 1, status: 'confirmed', addons: [],
+      option: hoito === 'hoito-valitsematta' ? null : optJson(OPTION_CHOICES[1]), option_choices: OPTION_CHOICES }];
+    o.paid = 0; o.payments = []; o.receipts = []; o.add_until = `${day(5)}T14:00:00Z`; o.change_deadline = `${day(3)}T13:00:00Z`; o.change_hours_before = 48;
+    if (hoito === 'hoito-lukittu') { o.can_change = false; o.change_deadline = `${day(-1)}T13:00:00Z`; }
+  }
   const mp = { started: false, returning: false, polls: 0, settled: false };
   const mpMarkPaid = () => {
     const amt = o.unpaid; o.paid = r2(o.paid + amt); o.payments.push({ status: 'paid', amount: amt, paid_at: new Date().toISOString(), method_label: 'MobilePay', link_token: null, link_path: null });
@@ -66,6 +81,15 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
       if (!Array.isArray(p_items) || !p_items.length) return bad('invalid_items', 'Ei rivejä');
       let added = 0;
       for (const it of p_items) {
+        if (it.type === 'reservation') {   // varausrivin lisäys (§15): Saunahoito vaatii option_code:n; virheet kuten palvelimella
+          if (+it.product_id !== 10) return bad('item_not_found', 'Tuotetta ei löytynyt');
+          const code = String(it.option_code ?? '').trim().toLowerCase(), c = OPTION_CHOICES.find((x) => x.code === code);
+          if (!code) return bad('option_required', 'Valitse hoito');
+          if (!c) return bad('invalid_option', 'Valittu hoito ei kelpaa');
+          o.items.push({ id: 100 + o.items.length, name: 'Saunahoito', name_en: 'Sauna treatment', quantity: 1, line_total: 99, vat_rate: 25.5 });
+          o.reservations.push({ reservation_id: 700 + o.reservations.length, product_id: 10, product_name: 'Saunahoito', starts_at: it.start, ends_at: new Date(Date.parse(it.start) + 36e5).toISOString(), persons: +it.persons || 1, status: 'confirmed', addons: [], option: optJson(c), option_choices: OPTION_CHOICES });
+          added += 99; continue;
+        }
         const a = ADDONS.find((x) => x.id === it.addon_id || x.code === it.code); if (it.type !== 'addon' || !a) return bad('item_not_found', 'Lisäpalvelua ei löytynyt');
         const q = Math.max(1, Math.trunc(+it.quantity) || 1); if (q > a.max) return bad('invalid_items', `Enintään ${a.max}`);
         const line = r2(a.price * q); added += line; o.items.push({ id: 100 + o.items.length, name: a.name, name_en: a.name_en, quantity: q, line_total: line, vat_rate: 25.5 });
@@ -73,6 +97,18 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
       }
       sync();
       return { ok: true, mock: true, added_total: r2(added), balance: { total: o.total, paid: o.paid, unpaid: o.unpaid }, payment: null, online_payment_enabled: false };
+    },
+    public_change_order_time: ({ p_reservation_id, p_start, p_rule_id, p_date, p_persons, p_option_code }) => {
+      if (!o.can_change) return bad('change_too_late', 'Muutosaika on päättynyt');
+      const res = o.reservations.find((x) => x.reservation_id === p_reservation_id); if (!res) return bad('not_found', 'Varausta ei löytynyt');
+      const code = String(p_option_code ?? '').trim().toLowerCase();
+      if (!code && p_start == null && p_rule_id == null && p_date == null && p_persons == null) return bad('invalid_change', 'Ei muutettavaa');
+      if (p_start != null || p_rule_id != null || p_date != null || p_persons != null) return bad('invalid_change', 'Mock tukee vain hoidon vaihtoa');
+      const c = OPTION_CHOICES.find((x) => x.code === code);
+      if (!res.option_choices?.length) return bad('invalid_option', 'Tällä tuotteella ei ole vaihtoehtoja');
+      if (!c) return bad('invalid_option', 'Valittu hoito ei kelpaa');
+      res.option = optJson(c);
+      return { ok: true, mock: true, order_no: o.order_no, starts_at: res.starts_at, ends_at: res.ends_at, persons: res.persons, total: o.total, price_diff: 0, payment: null, balance: { total: o.total, paid: o.paid, unpaid: o.unpaid }, online_payment_enabled: false, option: res.option };
     },
     public_request_cancel: ({ p_reason }) => { if (o.cancel_request) return bad('request_exists', 'Peruutuspyyntö on jo lähetetty'); o.cancel_request = { status: 'open', created_at: new Date().toISOString(), reason: p_reason || null }; return { ok: true, mock: true }; },
     public_get_receipt: ({ p_order_token, p_receipt_no }) => {

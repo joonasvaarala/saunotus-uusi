@@ -3,7 +3,8 @@
 // Asiakkaalle EI näytetä esimerkkidataa, vaikka RPC puuttuisi: puuttuva RPC (404/PGRST202) → { ok:false, notReady:true } → "ominaisuus ei vielä käytössä".
 // Palvelimen virheet tulevat HTTP 200 + { ok:false, code, message } → palautetaan sellaisenaan (ei heitetä).
 import { createOrderMock } from './order-mock.js';
-export const RPC = { get: 'public_get_order', addToOrder: 'public_add_to_order', requestCancel: 'public_request_cancel', getReceipt: 'public_get_receipt' };
+import { normOptions, reservationItem } from './options-logic.js';
+export const RPC = { get: 'public_get_order', addToOrder: 'public_add_to_order', requestCancel: 'public_request_cancel', getReceipt: 'public_get_receipt', changeOrderTime: 'public_change_order_time' };
 export const isMissingRpc = (e) => !!e && (e.status === 404 || e.code === 'PGRST202' || e.code === '42883' || /could not find the function/i.test(e.message || ''));
 export const wantsMock = (loc = typeof location !== 'undefined' ? location : null) => !!loc && new URLSearchParams(loc.search || '').get('mock') === '1';
 export const validToken = (t) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(t || ''));
@@ -13,7 +14,9 @@ export function normOrder(r) {
   return { ok: true, order_no: r.order_no, status: r.status, payment_status: r.payment_status || 'unpaid', created_at: r.created_at ?? null, first_name: r.first_name ?? '', locale: r.locale ?? null,
     total: num(r.total), paid: num(r.paid), unpaid: num(r.unpaid),
     items: (r.items || []).map((i) => ({ name: i.name, name_en: i.name_en ?? null, quantity: num(i.quantity, 1), line_total: num(i.line_total), vat_rate: num(i.vat_rate) })),
-    reservations: (r.reservations || []).map((x) => ({ reservation_id: x.reservation_id, product_name: x.product_name, starts_at: x.starts_at, ends_at: x.ends_at, persons: num(x.persons, 1), status: x.status,
+    // reservations: booking_50 lisää product_id, option (valittu hoito) ja option_choices (vaihtoehdot, muutosvalitsin)
+    reservations: (r.reservations || []).map((x) => ({ reservation_id: x.reservation_id, product_id: x.product_id ?? null, product_name: x.product_name,
+      option: x.option ? { id: x.option.id ?? null, code: x.option.code, name: x.option.name, name_en: x.option.name_en ?? null } : null, option_choices: normOptions({ options: x.option_choices }).options, starts_at: x.starts_at, ends_at: x.ends_at, persons: num(x.persons, 1), status: x.status,
       addons: (x.addons || []).map((a) => ({ name: a.name ?? '', name_en: a.name_en ?? null, quantity: num(a.quantity, 1) })) })),
     payments: (r.payments || []).map((p) => ({ status: p.status, amount: num(p.amount), paid_at: p.paid_at ?? null, method_label: p.method_label ?? null, link_token: p.link_token ?? null, link_path: p.link_path ?? null })),
     receipts: (r.receipts || []).map((x) => ({ receipt_no: x.receipt_no, kind: x.kind || 'receipt', issued_at: x.issued_at ?? null, token: x.token ?? null, total: num(x.total) })),
@@ -25,6 +28,9 @@ export function rpcBackend(rpc, token) {
   return {
     get: async () => { const r = await rpc(RPC.get, { p_token: token }); return r?.ok === false ? r : normOrder(r); },
     addToOrder: ({ items }) => rpc(RPC.addToOrder, { p_token: token, p_items: items }),
+    // booking_50: hoidon vaihto (pelkkä p_option_code; muut null = ennallaan) ja varausrivin lisäys tilaukseen (option_code pakollinen jos tuote vaatii)
+    changeOrderTime: ({ reservationId, optionCode, start, ruleId, date, persons }) => rpc(RPC.changeOrderTime, { p_token: token, p_reservation_id: reservationId, p_start: start ?? null, p_rule_id: ruleId ?? null, p_date: date ?? null, p_persons: persons ?? null, p_option_code: optionCode ?? null }),
+    addReservation: (r) => rpc(RPC.addToOrder, { p_token: token, p_items: [reservationItem(r)] }),
     requestCancel: ({ reason }) => rpc(RPC.requestCancel, reason ? { p_token: token, p_reason: reason } : { p_token: token }),
     getReceipt: ({ receiptNo }) => rpc(RPC.getReceipt, { p_order_token: token, p_receipt_no: receiptNo }),   // HUOM: parametri on p_order_token (ei p_token)
   };
@@ -34,5 +40,5 @@ export function createOrderApi({ rpc, token, mock = wantsMock(), mockFactory = (
   const backendRpc = mock ? inst.rpc : rpc;
   const be = rpcBackend(backendRpc, token);
   const wrap = (key) => async (a) => { try { return await be[key](a); } catch (e) { if (!mock && isMissingRpc(e)) return { ok: false, notReady: true, rpc: RPC[key] }; throw e; } };
-  return { mock, rpc: backendRpc, mpFetch: inst?.mpFetch ?? null, get: wrap('get'), addToOrder: wrap('addToOrder'), requestCancel: wrap('requestCancel'), getReceipt: wrap('getReceipt') };
+  return { mock, rpc: backendRpc, mpFetch: inst?.mpFetch ?? null, get: wrap('get'), addToOrder: wrap('addToOrder'), requestCancel: wrap('requestCancel'), getReceipt: wrap('getReceipt'), changeOrderTime: wrap('changeOrderTime'), addReservation: wrap('addReservation') };
 }

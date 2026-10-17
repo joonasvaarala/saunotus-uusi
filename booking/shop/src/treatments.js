@@ -4,8 +4,9 @@
 // Rajapinnan puuttuminen ei ole virhe: tuotelista palauttaa [] ja kauppa näyttää hoitotuotteille "ota yhteyttä" (ks. loadProducts).
 //
 // Rajapinta: /workspace/johku/import/KOODARI_public_treatment_fi.md (booking_25). Hoitotuotteet tulevat public_catalog():sta (booking_kind = 'slots'); ne näkyvät vasta kun
-// Tapio/Joonas asettaa tuotteille bookable + shop_visible -liput (lippuja ei muuteta tässä). Paikallinen mock: booking/dev/treatment-mock.mjs (vastaa dokumenttia).
+// Tapio/Joonas asettaa tuotteille bookable + shop_visible -liput (lippuja ei muuteta tässä). Paikallinen mock: booking/shop/src/treatment-mock.js (vastaa dokumenttia).
 import { rpc } from './sb.js';
+import { normOptions, withOption, isOptionError } from './options-logic.js';
 
 const TZ = 'Europe/Helsinki';
 
@@ -18,10 +19,11 @@ export const RPC = {
 };
 export const args = {
   availability: (p, persons, from, to) => ({ p_product_id: p.id, p_from: from, p_to: to, p_persons: persons }),
-  create: (p, { start, persons, name, email, phone, marketing, locale, note, kind, company }) => ({
+  // option (booking_50, sopimus §15): hoitovalinta p_option_code; lähetetään vain kun annettu (tuotteet ilman valitsinta toimivat ennallaan)
+  create: (p, { start, persons, name, email, phone, marketing, locale, note, kind, company, option }) => withOption({
     p_product_id: p.id, p_start: start, p_persons: persons, p_name: name, p_email: email, p_phone: phone, p_marketing_consent: !!marketing,
-    p_locale: locale, p_note: note || null, p_customer_kind: kind, p_company: company || null }),
-  change: (token, { start, persons }) => ({ p_token: token, p_start: start ?? null, p_persons: persons ?? null }),
+    p_locale: locale, p_note: note || null, p_customer_kind: kind, p_company: company || null }, option),
+  change: (token, { start, persons, option }) => withOption({ p_token: token, p_start: start ?? null, p_persons: persons ?? null }, option),
 };
 // Päätökset (Joonas), näytetään asiakkaalle vihjeenä; palvelin päättää viime kädessä (suljetut päivät, vapaat resurssit).
 export const POLICY = {
@@ -45,9 +47,11 @@ const ERR = {
   rate_limited: 'rate_limited', busy: 'busy', booking_disabled: 'disabled', not_bookable: 'disabled',
   invalid_persons: 'persons', too_many_open: 'too_many_open', not_found: 'not_found',
   change_too_late: 'too_late', not_changeable: 'too_late', price_change_requires_staff: 'staff', invalid_change: 'nochange', use_treatment_change: 'too_late',
+  option_required: 'option_required', invalid_option: 'invalid_option',
   invalid_email: 'contact', invalid_phone: 'contact', invalid_name: 'contact', invalid_note: 'contact', invalid_customer_kind: 'contact', vat_missing: 'contact',
 };
 export const errorKey = (code) => ERR[code] || 'generic';
+export { isOptionError };
 export const isSlotLost = (code) => ['taken', 'time_window', 'ritual_start', 'not_offered_day', 'too_soon'].includes(errorKey(code));
 export const isRetryable = (code) => ['rate_limited', 'busy'].includes(code);
 
@@ -71,7 +75,8 @@ export function splitCatalog(catalog, staticById) {
     const o = Object.fromEntries(Object.entries({ name: r.name, name_en: r.name_en, description: r.description, description_en: r.description_en, price: num(r.price), price_type: r.price_type,
       duration_minutes: num(r.duration_minutes), duration_text: r.duration_text, capacity_min: num(r.min_persons), capacity_max: num(r.max_persons), category: r.category, slug: r.slug })
       .filter(([, v]) => v != null && v !== ''));
-    treatments.push({ ...st, ...o, id, treatment: true, sale_kind: r.sale_kind });
+    const no = normOptions(r);   // booking_50: options (aktiiviset), option_required, option_label(_en)
+    treatments.push({ ...st, ...o, id, treatment: true, sale_kind: r.sale_kind, options: no.options, option_required: no.required, option_label: no.label, option_label_en: no.label_en });
   }
   treatments.sort((a, b) => KB_IDS.indexOf(a.id) - KB_IDS.indexOf(b.id));
   return { rules, treatments };

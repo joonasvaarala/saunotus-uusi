@@ -16,6 +16,7 @@ export const OT = {
     reservationsTitle: 'Varauksesi', addReservation: 'Varaus', changeNote: 'Muutokset ja peruutukset viimeistään {date}. Sen jälkeen ota yhteyttä puhelimitse.', changeClosed: 'Muutosaika on päättynyt. Ota yhteyttä puhelimitse.',
     'cancel.open': 'Peruutuspyyntö on jo lähetetty ja odottaa käsittelyä.', 'cancel.approved': 'Peruutuspyyntö on hyväksytty.', 'cancel.rejected': 'Peruutuspyyntöä ei voitu hyväksyä. Ota yhteyttä.',
     'err.order_closed': 'Lisäysaika on päättynyt. Tee uusi varaus kalenterissa.', 'err.rate_limited': 'Liian monta yritystä. Yritä hetken kuluttua uudelleen.', 'err.invalid_items': 'Lisäys ei onnistunut: tarkista määrä.', 'err.item_not_found': 'Lisäpalvelua ei löytynyt.',
+    'err.option_required': 'Valitse hoito ennen tallennusta.', 'err.invalid_option': 'Valittua hoitoa ei voi valita. Valitse hoito uudelleen.', 'err.change_too_late': 'Muutosaika on päättynyt. Ota yhteyttä puhelimitse.', 'err.not_changeable': 'Tätä varausta ei voi muuttaa verkossa. Ota yhteyttä.', 'err.invalid_change': 'Ei muutettavaa. Valitse toinen hoito.', 'err.not_found': 'Varausta ei löytynyt.',
     contact: 'Kysyttävää? Ota yhteyttä:', error: 'Toiminto epäonnistui. Yritä uudelleen tai ota yhteyttä.',
   },
   en: {
@@ -34,6 +35,7 @@ export const OT = {
     reservationsTitle: 'Your bookings', addReservation: 'Booking', changeNote: 'Changes and cancellations are possible until {date}. After that please call us.', changeClosed: 'The change deadline has passed. Please call us.',
     'cancel.open': 'A cancellation request has already been sent and is awaiting handling.', 'cancel.approved': 'The cancellation request has been approved.', 'cancel.rejected': 'The cancellation request could not be approved. Please contact us.',
     'err.order_closed': 'The time for additions has ended. Please make a new booking in the calendar.', 'err.rate_limited': 'Too many attempts. Please try again in a moment.', 'err.invalid_items': 'Could not add: please check the quantity.', 'err.item_not_found': 'Add-on not found.',
+    'err.option_required': 'Please choose a treatment before saving.', 'err.invalid_option': 'The selected treatment cannot be chosen. Please choose again.', 'err.change_too_late': 'The change deadline has passed. Please call us.', 'err.not_changeable': 'This booking cannot be changed online. Please contact us.', 'err.invalid_change': 'Nothing to change. Please choose a different treatment.', 'err.not_found': 'Booking not found.',
     contact: 'Questions? Contact us:', error: 'The action failed. Please try again or contact us.',
   },
 };
