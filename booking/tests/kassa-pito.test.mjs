@@ -35,14 +35,32 @@ test('tekstit: FI ja EN samat avaimet ja samat {muuttujat}; ei emojeita; ei tyhj
     assert.ok(!/\p{Extended_Pictographic}/u.test(HT.fi[k] + HT.en[k]), `emoji: ${k}`);
   }
 });
-test('tekstit: Joonaksen sanamuodot kirjaimellisesti (ohje + vanhentunut + lahjakorttilause)', () => {
-  assert.equal(ht('fi', 'lead', { minutes: 15 }), 'Paikkavaraus on voimassa 15 minuuttia, kunnes varaus maksetaan tai voimassa olevan lahjakortin tiedot syötetään.');
+test('tekstit: Joonaksen sanamuodot kirjaimellisesti (vanhentunut + lahjakorttilause)', () => {
+  assert.ok(!('lead' in HT.fi) && !('lead' in HT.en), 'toistava "Paikkavaraus on voimassa…" -teksti (lead) on poistettu FI+EN');
   assert.equal(ht('fi', 'expired', { minutes: 15 }), 'Paikkavaraus vanheni, koska maksua ei saatu 15 minuutin kuluessa. Mitään ei ole veloitettu. Voit tehdä uuden varauksen.');
   assert.equal(ht('en', 'expired', { minutes: 15 }), 'Your spot hold expired because payment was not received within 15 minutes. You have not been charged. You can make a new booking.');
   assert.equal(ht('fi', 'expiredGift'), 'Lahjakortin käytetty osuus on palautettu kortille.');
   assert.equal(ht('en', 'expiredGift'), 'Any gift card amount you applied has been returned to the card.');
   assert.ok(!/lahjakort|gift/i.test(ht('fi', 'expired', { minutes: 15 }) + ht('en', 'expired', { minutes: 15 })), 'perusteksti ei mainitse lahjakorttia (lause on erillinen)');
   assert.ok(ht('fi', 'expired', { minutes: 20 }).includes('20 minuutin'), 'pidon pituus tulee asetuksesta');
+});
+test('tekstit: maksamattoman varauksen peruutusnappi "Peruuta varaus" / "Cancel booking" (ei "Vapauta paikka" -sanastoa), vahvistus/onnistuminen yhtenäisesti', async () => {
+  const i = await import('../shop/src/i18n.js'); const T = i.T || i.default || i.TX; const fi = T.fi, en = T.en;
+  assert.equal(fi.cancelBooking, 'Peruuta varaus'); assert.equal(en.cancelBooking, 'Cancel booking');
+  assert.equal(fi.cancelConfirm, 'Perutaanko varaus?'); assert.equal(en.cancelConfirm, 'Cancel this booking?');
+  assert.equal(fi.cancelled, 'Varaus peruttu.'); assert.equal(en.cancelled, 'Booking cancelled.');
+  const all = (fi.cancelBooking + fi.cancelConfirm + fi.cancelled + fi.cancelFail + en.cancelBooking + en.cancelConfirm + en.cancelled + en.cancelFail);
+  assert.ok(!/vapauta|release|peru maksamaton|unpaid hold/i.test(all), 'napin/dialogin/viestien sanasto: peruuta varaus');
+});
+test('järjestys + kompakti banneri: otsikko + tilabadge → pitopaneeli → tiivis tilausyhteenveto → maksuosio; yhteenveto vain kerran; awaiting-otsikko vain ruudunlukijalle', () => {
+  const shop = src('../shop/src/shop.js'), ord = src('../shop/src/order.js'), ui = src('../shop/src/hold-ui.js'), css = src('../shop/src/shop.css');
+  assert.ok(shop.includes('holdHost, mpHost, dl,'), 'vahvistussivu: pitopaneeli ennen yhteenvetoa');
+  assert.ok(shop.includes('dl.after(secEl)'), 'vahvistussivu: maksuosio yhteenvedon alle');
+  assert.equal((shop.match(/dl\.dataset\.testid = 'conf-summary'/g) || []).length, 1, 'vahvistussivun yhteenveto rakennetaan vain kerran (ei duplikaattia)');
+  assert.ok(/head, holdEl, resv, optSec, lines, giftCards, claimBox, pay,/.test(ord), 'tilaussivu: pitopaneeli → varaus + summat → maksuosio');
+  assert.ok(ui.includes("class: kind === 'awaiting' ? 'sr-only' : ''"), 'awaiting: "Maksa varaus vahvistaaksesi" -otsikko vain ruudunlukijalle (toisto h2:n ja tilabadgen kanssa)');
+  assert.ok(css.includes('.bk-hold-awaiting{display:flex'), 'kompakti banneri (lause + laskuri samalla rivillä)');
+  assert.equal(ht('fi', 'summary.remaining'), 'Maksettavaa jäljellä'); assert.equal(ht('en', 'summary.remaining'), 'Amount left to pay');
 });
 test('tekstit: 15 min -maksuohje (Joonaksen teksti), otsikko "Varauksesi odottaa maksua", testivaihtoehto merkitty testiksi', () => {
   assert.equal(ht('fi', 'mustPay', { minutes: 15 }), 'Varaus täytyy maksaa 15 minuutin sisään, muuten se peruuntuu ja paikka vapautuu.');
@@ -263,6 +281,7 @@ test('ehdot: public_payment_mode ei kirjoiteta; pitoon liittyvät tiedostot muka
   const build = src('../shop/build.mjs'); for (const f of ['hold-texts.js', 'hold-logic.js', 'hold-ui.js', 'hold-mock.js']) assert.ok(build.includes(`'${f}'`), `build kopioi ${f}`);
   for (const f of ['hold-ui.js', 'shop.js', 'order.js', 'treatment-ui.js', 'pay-choices.js']) { const s = src(`../shop/src/${f}`); assert.ok(!s.includes('Paikkavaraus on voimassa') && !s.includes('Paikkavaraus vanheni'), `${f}: tekstit eivät ole kovakoodattu`); }
   const ui = src('../shop/src/hold-ui.js');
+  assert.ok(!ui.includes("tx('lead'") && !ui.includes('hold-lead') && ui.includes("tx('mustPay'") && ui.includes("tx('timerLabel')"), 'paneelissa vain mustPay-ohje + laskuri (ei lead-toistoa)');
   assert.ok(ui.includes("role: 'timer'") && ui.includes("'aria-live': 'off'") && ui.includes("role: 'status'"), 'laskuri role=timer aria-live=off + erillinen status-alue');
   assert.ok(!/animation|blink/i.test(src('../shop/src/shop.css').split('Kassan paikanpito')[1].replace(/prefers-reduced-motion[^}]*}[^}]*}/, '')), 'ei vilkkuvaa/animoitua');
 });

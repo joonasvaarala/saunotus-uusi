@@ -4,7 +4,6 @@ export const HT = {
   fi: {
     'title.awaiting': 'Maksa varaus vahvistaaksesi', 'title.processing': 'Maksua käsitellään', 'title.preliminary': 'Alustava varaus', 'title.expired': 'Paikkavaraus vanheni',
     'status.awaiting': 'Varaus odottaa maksua', 'status.processing': 'Maksua käsitellään', 'status.preliminary': 'Alustava varaus', 'status.expired': 'Paikkavaraus vanheni',
-    lead: 'Paikkavaraus on voimassa {minutes} minuuttia, kunnes varaus maksetaan tai voimassa olevan lahjakortin tiedot syötetään.',
     mustPay: 'Varaus täytyy maksaa {minutes} minuutin sisään, muuten se peruuntuu ja paikka vapautuu.',
     'h2.awaiting': 'Varauksesi odottaa maksua',
     // Testivaihtoehto "maksu paikan päällä" (booking_57, public_confirm_pay_later): nappi näkyy vain kun palvelin listaa pay_later-tavan (pay_later_test_enabled)
@@ -21,7 +20,7 @@ export const HT = {
     timerLabel: 'Paikkaa pidetään vielä', timerChecking: 'Tarkistamme paikkavarauksen tilaa…',
     'announce.minutes': 'Paikkaa pidetään vielä {time}.', spoken_min1: '1 minuutti', spoken_min: '{n} minuuttia', spoken_sec: '{n} sekuntia',
     choose: 'Valitse maksutapa: MobilePay tai lahjakortti. Lahjakortti voi kattaa osan summasta – loppuosan voit maksaa MobilePaylla.',
-    remaining: 'Maksettavaa jäljellä: {amount}',
+    remaining: 'Maksettavaa jäljellä: {amount}', 'summary.remaining': 'Maksettavaa jäljellä',
     processing: 'Maksua käsitellään – älä sulje sivua. Paikkasi pysyy varattuna, kunnes maksun tulos on selvillä.',
     processingLong: 'Tarkistamme maksua yhä. Saat vahvistuksen sähköpostiin, kun maksu on valmis. Voit myös tarkistaa tilan uudelleen.', recheck: 'Tarkista uudelleen',
     confirmed: 'Kiitos! Varauksesi on vahvistettu. Vahvistus ja kuitti on lähetetty sähköpostiisi.', thanks: 'Kiitos',
@@ -45,7 +44,6 @@ export const HT = {
   en: {
     'title.awaiting': 'Pay to confirm your booking', 'title.processing': 'Processing your payment', 'title.preliminary': 'Provisional booking', 'title.expired': 'Your spot hold expired',
     'status.awaiting': 'Booking awaiting payment', 'status.processing': 'Processing your payment', 'status.preliminary': 'Provisional booking', 'status.expired': 'Your spot hold expired',
-    lead: 'Your spot is held for {minutes} minutes, until the booking is paid or the details of a valid gift card are entered.',
     mustPay: 'The booking must be paid within {minutes} minutes, otherwise it is cancelled and your spot is released.',
     'h2.awaiting': 'Your booking is awaiting payment',
     'payLater.btn': 'Test option: pay on site', 'payLater.working': 'Confirming your booking…',
@@ -61,7 +59,7 @@ export const HT = {
     timerLabel: 'Your spot is held for', timerChecking: 'Checking the status of your hold…',
     'announce.minutes': 'Your spot is held for {time} more.', spoken_min1: '1 minute', spoken_min: '{n} minutes', spoken_sec: '{n} seconds',
     choose: 'Choose how to pay: MobilePay or gift card. A gift card can cover part of the amount – you can pay the rest with MobilePay.',
-    remaining: 'Amount left to pay: {amount}',
+    remaining: 'Amount left to pay: {amount}', 'summary.remaining': 'Amount left to pay',
     processing: 'Processing your payment – please keep this page open. Your spot stays reserved until the result is known.',
     processingLong: 'We are still checking your payment. You will receive a confirmation by email when it is done. You can also check the status again.', recheck: 'Check again',
     confirmed: 'Thank you! Your booking is confirmed. A confirmation and receipt have been sent to your email.', thanks: 'Thank you',

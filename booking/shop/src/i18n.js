@@ -31,7 +31,7 @@ export const T = {
     // vahvistus
     confTitle: 'Kiitos varauksesta!', confPending: 'Varaus odottaa maksua', confConfirmed: 'Varaus vahvistettu', confCancelled: 'Varaus peruttu', confExpired: 'Varaus on vanhentunut',
     order: 'Tilausnumero', when: 'Ajankohta', what: 'Palvelu', payStatus: 'Maksun tila', unpaid: 'Maksamatta (maksu paikan päällä)', paid: 'Maksettu', pending: 'Odottaa maksua',
-    addCal: 'Lisää kalenteriin', cancelBooking: 'Vapauta paikka (peru maksamaton pito)', cancelConfirm: 'Perutaanko varaus?', cancelled: 'Varaus peruttu.', cancelFail: 'Vahvistetun varauksen peruutus: ota yhteyttä sähköpostilla.',
+    addCal: 'Lisää kalenteriin', cancelBooking: 'Peruuta varaus', cancelConfirm: 'Perutaanko varaus?', cancelled: 'Varaus peruttu.', cancelFail: 'Vahvistetun varauksen peruutus: ota yhteyttä sähköpostilla.',
     confNote: 'Tallenna tämä sivu tai tilausnumero. Vahvistus näkyy myös tällä osoitteella.', notFound: 'Varausta ei löytynyt. Tarkista linkki.',
     emailNote: 'Sähköpostivahvistus lähetetään, kun viestipalvelu otetaan käyttöön – tallenna siihen asti tämä sivu.',
     changeBooking: 'Muuta varausta', changeTitle: 'Muuta varausta', saveChange: 'Tallenna muutos', saving: 'Tallennetaan…', currentSlot: 'Nykyinen vuoro',
@@ -85,7 +85,7 @@ export const T = {
     required: 'Please fill in all required fields.', until: 'until', included: (n) => `incl. ${n} guest${n === 1 ? '' : 's'}`, extra: (p) => `extra guest +${p}`,
     confTitle: 'Thank you for your booking!', confPending: 'Booking awaiting payment', confConfirmed: 'Booking confirmed', confCancelled: 'Booking cancelled', confExpired: 'Booking expired',
     order: 'Order number', when: 'Date and time', what: 'Service', payStatus: 'Payment', unpaid: 'Unpaid (pay on site)', paid: 'Paid', pending: 'Awaiting payment',
-    addCal: 'Add to calendar', cancelBooking: 'Release spot (cancel unpaid hold)', cancelConfirm: 'Cancel this booking?', cancelled: 'Booking cancelled.', cancelFail: 'To cancel a confirmed booking, please contact us by email.',
+    addCal: 'Add to calendar', cancelBooking: 'Cancel booking', cancelConfirm: 'Cancel this booking?', cancelled: 'Booking cancelled.', cancelFail: 'To cancel a confirmed booking, please contact us by email.',
     confNote: 'Save this page or your order number. The confirmation is also available at this address.', notFound: 'Booking not found. Please check the link.',
     emailNote: 'An email confirmation will be sent once the messaging service is enabled – until then please save this page.',
     changeBooking: 'Change booking', changeTitle: 'Change your booking', saveChange: 'Save change', saving: 'Saving…', currentSlot: 'Current session',
