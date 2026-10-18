@@ -142,7 +142,7 @@ test('varateksti: committed content/site-texts.fallback.json on tuotannon julkai
   assert.ok(fb.texts.length >= 300 && fb.context.catalog.length > 0 && fb.context.settings.public_treatment_horizon_days);
   for (const it of IMPORTED) assert.equal(fb.texts.find((r) => r.key === it.key && r.lang === it.lang)?.text, it.text, `tuotu avain on kannassa ja varatekstissä sellaisenaan: ${it.key} [${it.lang}]`);
   assert.ok(fb.texts.every((r) => r.key && r.lang && r.text.trim()));
-  assert.deepEqual(L.validateTexts(fb.texts, L.makeContext({ catalog: fb.context.catalog, settings: fb.context.settings })), []);
+  assert.deepEqual(L.validateTexts(fb.texts, L.makeContext({ catalog: fb.context.catalog, settings: fb.context.settings, vars: true })), []);
 });
 
 // ================= build-integraatio (ajaa oikean build-skriptin) =================
@@ -269,7 +269,7 @@ test('virhekoodit: invalid_addons, addon_not_found, addon_inactive, addon_not_al
   assert.equal(empty.tx(A.errorTextKey('addon_quantity')), null, 'avain puuttuu kannasta → null → UI käyttää palvelimen message-kenttää, ei raakaa avainta');
   // errMsg-ketju: site_text → palvelimen message → yleisviesti (treatment-ui.js)
   const ui = rd('booking/shop/src/treatment-ui.js');
-  assert.match(ui, /A\.isAddonError\(r\.code\) \? tx\(A\.errorTextKey\(r\.code\)\) \|\| r\.message \|\| tr\.errors\.generic/);
+  assert.match(ui, /A\.isAddonError\(r\.code\) \? tx\(A\.errorTextKey\(r\.code\)\) \|\| t\.errorGeneric/);
 });
 test('tuontilista content/site-texts.imported.json (tuotu tuotantoon 18.10.) noudattaa admin_texts_import-sääntöjä (booking_62) ja §18.2-nimeämistä', () => {
   assert.equal(IMPORTED.length, 10); const seen = new Set();

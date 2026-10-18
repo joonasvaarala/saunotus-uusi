@@ -2,6 +2,7 @@
 // Näyttää tilauksen rivit, maksutilan, kuitit sekä ohjauksen lisäykseen ja peruutuspyyntöön. Data: order-api.js (mock kun ?mock=1; puuttuva RPC → "ei vielä käytössä").
 import { rpc, functionUrl } from './sb.js';
 import { OT } from './order-texts.js';
+import { T } from './i18n.js';
 import { createOrderApi, validToken } from './order-api.js';
 import { createGiftApi } from './gift-api.js';
 import { redeemSection, cardsSection, claimsSection } from './order-gift.js';
@@ -171,7 +172,7 @@ async function main() {
   }
   const flash = (ok, text) => { const m = root.querySelector('[data-testid=order-msg]'); if (m) m.replaceChildren(h('p', { class: ok ? 'bk-ok' : 'bk-error', role: ok ? 'status' : 'alert', text })); };
   // palvelimen virhe {ok:false, code, message}: tunnetut koodit omilla teksteillään, muuten palvelimen (suomenkielinen) viesti
-  const failText = (r) => (r?.code && (t[`err.${r.code}`] || holdError(L, r.code))) || (L === 'fi' && r?.message) || t.error;
+  const failText = (r) => (r?.code && (t[`err.${r.code}`] || holdError(L, r.code))) || (T[L] || T.fi).errorGeneric;   // palvelimen raaka message ei asiakkaalle (ui.shop.error_generic)
   function addForm(o) {
     const sel = h('select', { id: 'ord-addon', 'data-testid': 'add-select' }, o.upsell_addons.map((x) => h('option', { value: x.code, text: `${nm(x)} (${money(x.price)})` })));
     const res = o.reservations.filter((r) => r.status !== 'cancelled');

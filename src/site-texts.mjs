@@ -16,7 +16,8 @@ import { kb, money, dur } from './lib.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const FALLBACK_FILE = join(root, 'content/site-texts.fallback.json');
 export const FIXTURE_DEFAULT = join(root, 'tests/fixtures/site-texts/rpc.json');
-export const SHOP_PREFIXES = ['ui.'];                 // kaupan tarvitsemat avainalueet (§18.2: ui.<alue>.<nimi>); laajenee kun kaupan tekstit siirretään
+export const SHOP_PREFIXES = ['ui.'];                 // kaupan tarvitsemat avainalueet (§18.2: ui.<alue>.<nimi>)
+export const SHOP_EXCLUDE = ['ui.site.', 'ui.footer.', 'ui.reviews.', 'ui.training_banner.', 'ui.articles.', 'ui.card.', 'ui.alt.', 'ui.session.'];   // staattisen sivuston ui-alueet (osa 3 PR 2): rakennusaikaisia, eivät kuulu kaupan datakuormaan
 const readJson = (f) => { try { return JSON.parse(readFileSync(f, 'utf8')); } catch { return null; } };
 
 const cleanRows = (rows) => (Array.isArray(rows) ? rows : []).filter((r) => r && typeof r.key === 'string' && typeof r.lang === 'string' && typeof r.text === 'string' && r.text.trim())
@@ -99,7 +100,7 @@ export function tx(key, lang, { fallback = null, state = STATE, log = console, v
 
 /** Kaupalle: vain tarvittavat avainalueet, paikkamerkit täyttämättä (kauppa täyttää ajoajan datasta). */
 export function shopPayload(state, prefixes = SHOP_PREFIXES) {
-  const texts = state.rows.filter((r) => prefixes.some((p) => r.key.startsWith(p))).map((r) => ({ key: r.key, lang: r.lang, text: r.text, placeholders: r.placeholders }));
+  const texts = state.rows.filter((r) => prefixes.some((p) => r.key.startsWith(p)) && !SHOP_EXCLUDE.some((x) => r.key.startsWith(x))).map((r) => ({ key: r.key, lang: r.lang, text: r.text, placeholders: r.placeholders }));
   return { generated_at: state.generatedAt, source: state.source, langs: LANGS, texts };
 }
 export { PlaceholderError };

@@ -25,7 +25,7 @@ const expect = (ok, msg) => { checks++; if (!ok) problems.push(msg); };
 
 // ---- fixture + build ----
 const J = (p) => JSON.parse(readFileSync(join(root, p), 'utf8'));
-const base = J('tests/fixtures/site-texts/rpc.json'), pending = J('content/site-texts.pending-import.json');
+const base = J('tests/fixtures/site-texts/rpc.json'), pending = J('content/site-texts.imported-pr61.json');
 const OVR = {
   'page.book.title': ['Varaa saunaelämys (DB)', 'Book a sauna experience (DB)'], 'seo.book.title': ['Varaa verkossa (DB) | Sipoonjoen Perinnesauna', 'Book online (DB) | Sipoonjoen Perinnesauna'],
   'page.order.title': ['Tilauksesi (DB)', 'Your order (DB)'], 'ui.shop.lead': ['Valitse kokemus (DB). Soita {{var:phone}}.', 'Choose an experience (DB). Call {{var:phone}}.'],
