@@ -262,8 +262,8 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
       for (const l of linesBetween(from, to)) acc.addNative(m, l.net, l.vat, l.gross);
       for (const o of orders) {
         if (!o.johku || o.johku.paid_date < from || o.johku.paid_date > to) continue;
-        if (!['paid', 'partially_refunded', 'refunded'].includes(o.payment_status)) continue;
-        const signed = o.payment_status === 'refunded' ? -o.johku.amount : o.johku.amount;
+        if (!['paid', 'partially_refunded'].includes(o.payment_status)) continue;
+        const signed = o.johku.amount;
         const lineGross = o.items.reduce((s, it) => s + it.gross, 0);
         const lineVatSum = o.items.reduce((s, it) => s + vatSplit(it.gross, it.vat).vat, 0);
         acc.addJohku(m, { signed, lineGross, lineVat: lineVatSum, accounted: o.receipts.some((rc) => rc && !rc.excluded) });
@@ -271,7 +271,7 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
     }
     const years = new Set([+today.slice(0, 4)]);
     for (const p of payments) { if (p.paid_date && !p.is_johku) years.add(+p.paid_date.slice(0, 4)); if (p.refund_date && !p.is_johku) years.add(+p.refund_date.slice(0, 4)); }
-    for (const o of orders) if (o.johku?.paid_date) years.add(+o.johku.paid_date.slice(0, 4));
+    for (const o of orders) if (o.johku?.paid_date && o.payment_status !== 'refunded') years.add(+o.johku.paid_date.slice(0, 4));
     return acc.finish([...years]);
   }
   // admin_report_csv(p_from,p_to,p_kind='lines') → {filename, mime, content} – kuten booking_34: 12 saraketta, pvm PP.KK.VVVV, hyvitys kyllä/ei, hyvitysrivin määrä negatiivinen

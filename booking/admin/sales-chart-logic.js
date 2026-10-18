@@ -10,7 +10,7 @@ export function lineVat(gross, rate) {
   return round2((+gross || 0) * (+rate || 0) / (100 + (+rate || 0)));
 }
 
-/** signed = Johkun brutto etumerkillä (kokonaan hyvitetty = miinus). accounted = tilauksella on kuitti, joka ei ole kirjanpidosta pois → älä laske uudestaan. */
+/** signed = mukaan laskettava Johku-brutto. Kokonaan hyvitetty tilaus jätetään kutsumatta (nettovaikutus 0). accounted = tilauksella on kuitti, joka ei ole kirjanpidosta pois → älä laske uudestaan. */
 export function splitSignedGross(signed, lineGross, lineVatSum) {
   const g = +signed || 0;
   if (!(+lineGross > 0)) return { net: 0, vat: 0, split: 0, unsplit: g };

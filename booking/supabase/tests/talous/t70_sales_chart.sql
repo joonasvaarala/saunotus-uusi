@@ -93,7 +93,7 @@ begin
   insert into booking.order_items(order_id, product_name, quantity, unit_price_gross, line_total_gross, vat_rate, external_source, external_id)
   values (o_a, 't70 vuoro', 1, 50, 50, 13.5, 'johku', 't70-a-1');
 
-  -- Johku kokonaan hyvitetty 20 @ 25,5 % (miinus maksupäivän kuukauteen).
+  -- Johku kokonaan hyvitetty 20 @ 25,5 %. Käyrään 0 (alkuperäistä plussaa ei ole). Raportin refunded_gross kasvaa, gross ei.
   insert into booking.orders(order_no, status, payment_status, total_gross, currency, source_channel, locale, external_source, external_id, johku_order_no, external_meta)
   values (880002, 'cancelled', 'refunded', 20, 'EUR', 'johku_import', 'fi', 'johku', 't70-b', 880002,
           jsonb_build_object('johku', jsonb_build_object('paid', true, 'amount', '20', 'paid_at', '2031-03-20T12:00:00+00', 'payment_method', 'cash')))
@@ -131,18 +131,22 @@ begin
   perform public.t70_ck((after_chart -> 'months' -> 2 ->> 'native_gross')::numeric - g0 = 100, 'C4: natiivi brutto 100');
   perform public.t70_ck((after_chart -> 'months' -> 2 ->> 'native_vat')::numeric - v0 = 20.32, 'C5: natiivi ALV 20,32');
   perform public.t70_ck((after_chart -> 'months' -> 2 ->> 'native_net')::numeric - n0 = 79.68, 'C6: natiivi netto 79,68');
-  perform public.t70_ck((after_chart -> 'months' -> 2 ->> 'johku_gross')::numeric - jg0 = 30, 'C7: Johku eritelty brutto 50−20');
-  perform public.t70_ck((after_chart -> 'months' -> 2 ->> 'johku_vat')::numeric - jv0 = 1.89, 'C8: Johku ALV 5,95−4,06');
-  perform public.t70_ck((after_chart -> 'months' -> 2 ->> 'johku_net')::numeric - jn0 = 28.11, 'C9: Johku netto 44,05−15,94');
+  perform public.t70_ck((after_chart -> 'months' -> 2 ->> 'johku_gross')::numeric - jg0 = 50, 'C7: Johku eritelty brutto 50');
+  perform public.t70_ck((after_chart -> 'months' -> 2 ->> 'johku_vat')::numeric - jv0 = 5.95, 'C8: Johku ALV 5,95');
+  perform public.t70_ck((after_chart -> 'months' -> 2 ->> 'johku_net')::numeric - jn0 = 44.05, 'C9: Johku netto 44,05');
   perform public.t70_ck((after_chart -> 'months' -> 2 ->> 'unsplit_gross')::numeric - u0 = 10, 'C10: erittelemätön 10');
-  perform public.t70_ck((after_chart -> 'months' -> 2 ->> 'gross')::numeric - tot0 = 140, 'C11: kuukauden brutto 140');
+  perform public.t70_ck((after_chart -> 'months' -> 2 ->> 'gross')::numeric - tot0 = 160, 'C11: kuukauden brutto 160 (100 + 50 + erittelemätön 10; hyvitetty 20 ei vähennä)');
   perform public.t70_ck((after_chart -> 'months' -> 2 ->> 'net')::numeric + (after_chart -> 'months' -> 2 ->> 'vat')::numeric + (after_chart -> 'months' -> 2 ->> 'unsplit_gross')::numeric
                          = (after_chart -> 'months' -> 2 ->> 'gross')::numeric, 'C12: netto + ALV + erittelemätön = brutto');
   perform public.t70_ck((after_chart -> 'months' -> 3 ->> 'johku_gross')::numeric - apr_g0 = 7, 'C13: osahyvitys lasketaan koko Johku-summana');
   perform public.t70_ck((after_chart -> 'months' -> 3 ->> 'johku_vat')::numeric - apr_v0 = 1.42, 'C14: osahyvityksen ALV rivin kannasta');
+  perform public.t70_ck(
+    ((after_chart -> 'months' -> 2 ->> 'johku_gross')::numeric - jg0) + ((after_chart -> 'months' -> 2 ->> 'unsplit_gross')::numeric - u0)
+      = (after_rep -> 'statistics' -> 'johku' ->> 'gross')::numeric - jstat0,
+    'C15: käyrän Johku (brutto + erittelemätön) = statistics.johku.gross, hyvitetty 880002 mukana');
 
   perform public.t70_ck((after_rep -> 'totals' ->> 'gross_after_refunds')::numeric - rg0 = 100, 'R1: raportin brutto kasvaa vain kuitilla');
-  perform public.t70_ck((after_rep -> 'statistics' -> 'johku' ->> 'gross')::numeric - jstat0 = 60, 'R2: statistics.johku.gross = maksetut 50+10 (ei käyrän yhdistelmä)');
+  perform public.t70_ck((after_rep -> 'statistics' -> 'johku' ->> 'gross')::numeric - jstat0 = 60, 'R2: statistics.johku.gross = maksetut 50+10 (hyvitetty ei vähennä bruttoa)');
   perform public.t70_ck((after_rep -> 'statistics' -> 'johku' ->> 'refunded_gross')::numeric - jref0 = 20, 'R3: statistics.johku.refunded_gross = 20');
   perform public.t70_ck(position('880001' in csv) = 0 and position('880002' in csv) = 0 and position('880003' in csv) = 0, 'R4: Johku-tilausnumerot eivät ole CSV:ssä');
   perform public.t70_ck(position('K-2031-T70-1' in csv) > 0, 'R5: natiivikuitti on CSV:ssä');

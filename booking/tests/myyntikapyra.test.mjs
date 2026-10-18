@@ -22,20 +22,19 @@ test('ALV-jako: rivien kanta, ei keksittyä kantaa, päällekkäinen kuitti ohit
   const acc = L.createAccumulator(2031);
   acc.addNative(3, 79.68, 20.32, 100);
   acc.addJohku(3, { signed: 50, lineGross: 50, lineVat: L.lineVat(50, 13.5), accounted: false });
-  acc.addJohku(3, { signed: -20, lineGross: 20, lineVat: L.lineVat(20, 25.5), accounted: false });
   acc.addJohku(3, { signed: 10, lineGross: 0, lineVat: 0, accounted: false });
   acc.addJohku(3, { signed: 999, lineGross: 999, lineVat: 50, accounted: true });
   const m = acc.finish().months[2];
   assert.equal(m.native_gross, 100);
   assert.equal(m.native_vat, 20.32);
   assert.equal(m.native_net, 79.68);
-  assert.equal(m.johku_gross, 30);
-  assert.equal(m.johku_vat, 1.89);
-  assert.equal(m.johku_net, 28.11);
+  assert.equal(m.johku_gross, 50);
+  assert.equal(m.johku_vat, 5.95);
+  assert.equal(m.johku_net, 44.05);
   assert.equal(m.unsplit_gross, 10);
-  assert.equal(m.gross, 140);
+  assert.equal(m.gross, 160);
   assert.equal(round2(m.net + m.vat + m.unsplit_gross), m.gross);
-  assert.equal(m.johku_gross + m.unsplit_gross, 40);
+  assert.equal(m.johku_gross + m.unsplit_gross, 60);
 });
 
 test('Mock: käyrän natiivi = raportin gross_after_refunds, Johku ei ole CSV:ssä eikä raportin totalsissa', async () => {
@@ -47,6 +46,7 @@ test('Mock: käyrän natiivi = raportin gross_after_refunds, Johku ei ole CSV:ss
   assert.equal(chart.basis, 'cash_receipt_issued_at');
   assert.equal(chart.johku_basis, 'johku_paid_at');
   let johkuSeen = 0;
+  let refundedSeen = 0;
   for (let m = 1; m <= 12; m++) {
     const ym = `${year}-${String(m).padStart(2, '0')}`;
     const rep = await mock.rpc('admin_report_month', { p_ym: ym });
@@ -55,16 +55,19 @@ test('Mock: käyrän natiivi = raportin gross_after_refunds, Johku ei ole CSV:ss
     assert.equal(row.native_vat, rep.totals.vat_after_refunds, `${ym} native ALV`);
     assert.equal(row.native_net, rep.totals.net_ex_vat_after_refunds, `${ym} native netto`);
     const j = rep.statistics.johku;
-    const signed = round2(j.gross - j.refunded_gross);
-    assert.equal(round2(row.johku_gross + row.unsplit_gross), signed, `${ym} Johku`);
+    assert.equal(round2(row.johku_gross + row.unsplit_gross), round2(j.gross), `${ym} Johku = statistics.johku.gross`);
     assert.equal(round2(row.net + row.vat + row.unsplit_gross), row.gross, `${ym} pino`);
-    johkuSeen += signed;
+    johkuSeen += j.gross;
+    refundedSeen += j.refunded_gross;
     const csv = await mock.rpc('admin_report_csv', { p_from: `${ym}-01`, p_to: `${ym}-28` });
     assert.equal(/johku/i.test(csv.content), false, `${ym} CSV`);
     const johkuNos = mock.orders.filter((o) => o.johku && o.johku.paid_date.startsWith(ym)).map((o) => o.order_no);
     for (const no of johkuNos) assert.equal(csv.content.includes(`;${no};`), false, `tilaus ${no}`);
   }
-  if (year === 2025) assert.ok(johkuSeen > 0, '2025:ssä on Johku-myyntiä');
+  if (year === 2025) {
+    assert.ok(johkuSeen > 0, '2025:ssä on Johku-myyntiä');
+    assert.ok(refundedSeen > 0, '2025:ssä on kokonaan hyvitetty Johku-tilaus, eikä se vähennä käyrää');
+  }
   assert.ok(chart.months.some((row) => row.native_gross !== 0), `${year}: natiivia myyntiä`);
   }
   const gift = (await mock.rpc('admin_report_month', { p_ym: '2026-06' })).lines.some((l) => l.group === 'giftcard');
@@ -118,6 +121,9 @@ test('Migraatio ei korvaa raporttifunktioita ja vaatii reports.view', () => {
   assert.match(sql, /_require_permission\('reports\.view'\)/);
   assert.match(sql, /revoke all on function booking\.admin_sales_chart\(integer\) from public, anon, authenticated/);
   assert.match(sql, /grant execute on function booking\.admin_sales_chart\(integer\) to authenticated/);
+  assert.match(sql, /payment_status in \('paid', 'partially_refunded'\)/);
+  assert.doesNotMatch(sql, /payment_status in \('paid', 'partially_refunded', 'refunded'\)/);
+  assert.doesNotMatch(sql, /then -j\.amt/);
   assert.match(sql, /not exists/);
   assert.match(sql, /_acct_excluded/);
   assert.match(sql, /cash_receipt_issued_at/);

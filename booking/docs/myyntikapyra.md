@@ -15,7 +15,7 @@ Pino alhaalta ylös: **myynti ilman ALV**, **ALV**, ja tarvittaessa **brutto, AL
 | Osa | Lähde | Päivä |
 |---|---|---|
 | Uusi järjestelmä | `booking.receipts`, joista `not booking._acct_excluded` | `issued_at` → Helsingin päivä. Sama joukko kuin raportin `gross_after_refunds` / `vat_after_refunds` / `net_ex_vat_after_refunds` |
-| Johku | `booking.orders`, joissa `external_source='johku'` tai `johku_order_no` tai `source_channel='johku_import'`, tila `paid` / `partially_refunded` / `refunded` | `external_meta.johku.paid_at` (`booking._try_ts`), Helsingin päivä |
+| Johku | `booking.orders`, joissa `external_source='johku'` tai `johku_order_no` tai `source_channel='johku_import'`, tila `paid` / `partially_refunded` | `external_meta.johku.paid_at` (`booking._try_ts`), Helsingin päivä |
 
 Uutta Johku-dataa ei tuoda. Tauluihin ei tehdä muutoksia.
 
@@ -29,7 +29,7 @@ Johku-metassa on brutto (`johku.amount`, muuten `orders.total_gross`), ei eritel
 
 Jos rivien brutto ei ole positiivinen, kantaa ei keksitä. Summa jää kohtaan `unsplit_gross`.
 
-Kokonaan hyvitetty Johku-tilaus (`payment_status = refunded`) vähennetään alkuperäisen maksupäivän kuusta. Erillistä hyvityspäivää ei ole metassa. Osittain hyvitetty pidetään Johkun koko summana: osahyvityksen määrää ei ole `external_meta.johku`-objektissa.
+Kokonaan hyvitetty Johku-tilaus (`payment_status = refunded`) jätetään pois. Alkuperäistä myyntiä ei lasketa plussaksi, joten miinus veisi kuukauden alle raportin `statistics.johku.gross`. Nettovaikutus on 0. Käyrän Johku-summa (`johku_gross` + `unsplit_gross`) on sama kuin saman kuukauden `statistics.johku.gross`. Hyvitykset jäävät raportin `refunded_gross`-kenttään. Osittain hyvitetty pidetään Johkun koko summana: osahyvityksen määrää ei ole `external_meta.johku`-objektissa.
 
 ## Miten Johku pysyy pois raporteista
 
@@ -51,7 +51,7 @@ Jos funktiota ei ole vielä kannassa, hallinta ei näytä keksimiään lukuja: k
 
 1. Poistetaanko raporttivälilehden harmaa `statistics.johku` -lohko, kun käyrä on käytössä? Tätä PR:ää ei muutettu sitä.
 2. Johkun osahyvityksen määrää ei ole metassa. Käyrä käyttää koko summaa.
-3. Kokonaan hyvitetty Johku-tilaus vähennetään maksupäivän kuusta, ei hyvityspäivältä.
+3. Kokonaan hyvitetty Johku-tilaus on pois käyrästä (nettovaikutus 0), jotta summa täsmää `statistics.johku.gross`-lukuun. Erillistä hyvityspäivää ei ole metassa.
 4. Ilman rivien ALV-kantaa summa näytetään erittelemättömänä bruttona.
 5. Samaa kauppaa ei tunnisteta, jos se on sekä Johku-tuontitilaus että erillinen uusi tilaus.
 6. `at_redemption`-lahjakortin myyntikuitti (0 %) ja lunastuskuitti ovat molemmat mukana, koska raporttikin laskee ne niin.

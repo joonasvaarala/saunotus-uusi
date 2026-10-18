@@ -11,8 +11,10 @@
 --   Kahta erillistä tilausriviä (Johku-tuonti + uusi kirjaus samasta kaupasta) ei tunnisteta.
 -- ALV Johkulle: brutto = johku.amount (jos ei lukua, orders.total_gross). Jos rivien line_total_gross > 0,
 --   ALV = round(brutto * sum(line_vat) / sum(line_total_gross), 2), netto = brutto − ALV.
---   Muuten kantaa ei keksitä: unsplit_gross. Kokonaan hyvitetty (payment_status refunded) miinustetaan maksupäivän kuukauteen
---   (Johkussa ei ole erillistä hyvityspäivää). Osittain hyvitetty pysyy Johkun koko summassa (osahyvityksen määrä ei ole metassa).
+--   Muuten kantaa ei keksitä: unsplit_gross. Kokonaan hyvitetty (payment_status refunded) jätetään pois:
+--   alkuperäistä myyntiä ei lasketa plussaksi, joten miinus veisi kuukauden alle statistics.johku.gross. Nettovaikutus on 0.
+--   Käyrän Johku-summa (johku_gross + unsplit_gross) = saman kuukauden statistics.johku.gross.
+--   Osittain hyvitetty pysyy Johkun koko summassa (osahyvityksen määrä ei ole metassa).
 -- Lahjakortit: vain kuitit, joita _acct_excluded ei sulje pois = sama joukko kuin raportin gross_after_refunds.
 -- Oikeus: reports.view (manager, admin). Ei anonille.
 -- Rollback: rollbacks/20261018190000_booking_71_ROLLBACK.sql
@@ -50,11 +52,10 @@ begin
            (booking._try_ts(o.external_meta -> 'johku' ->> 'paid_at') at time zone 'Europe/Helsinki')::date as d,
            case when (o.external_meta -> 'johku' ->> 'amount') ~ '^-?[0-9]+(\.[0-9]+)?$'
                 then (o.external_meta -> 'johku' ->> 'amount')::numeric
-                else o.total_gross end as amt,
-           o.payment_status as st
+                else o.total_gross end as amt
       from booking.orders o
      where (o.external_source = 'johku' or o.johku_order_no is not null or o.source_channel = 'johku_import')
-       and o.payment_status in ('paid', 'partially_refunded', 'refunded')
+       and o.payment_status in ('paid', 'partially_refunded')
        and not exists (
          select 1 from booking.receipts r
           where r.order_id = o.id
@@ -62,7 +63,7 @@ begin
        )
   ), johku as (
     select extract(month from j.d)::int as m,
-           case when j.st = 'refunded' then -j.amt else j.amt end as signed,
+           j.amt as signed,
            coalesce((select sum(i.line_total_gross) from booking.order_items i where i.order_id = j.id), 0) as lg,
            coalesce((select sum(i.line_vat) from booking.order_items i where i.order_id = j.id), 0) as lv
       from johku_src j
@@ -105,7 +106,7 @@ begin
       select extract(year from (booking._try_ts(o.external_meta -> 'johku' ->> 'paid_at') at time zone 'Europe/Helsinki'))::int
         from booking.orders o
        where (o.external_source = 'johku' or o.johku_order_no is not null or o.source_channel = 'johku_import')
-         and o.payment_status in ('paid', 'partially_refunded', 'refunded')
+         and o.payment_status in ('paid', 'partially_refunded')
          and booking._try_ts(o.external_meta -> 'johku' ->> 'paid_at') is not null
       union
       select extract(year from (now() at time zone 'Europe/Helsinki'))::int
