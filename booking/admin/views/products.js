@@ -97,10 +97,13 @@ export async function render({ ctx, refs, reload, query }) {
     const cfg = c ? h('form', { class: 'stack box' }, h('h3', { text: 'Verkkokaupan asetukset' }),
       h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'bookable', disabled: !isAdmin }), ' Varattavissa verkossa'),
       h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'shop_visible', disabled: !isAdmin }), ' Näkyy kaupan listassa'),
+      'audience' in c ? field('Kalenteri', h('select', { name: 'audience', disabled: !isAdmin }, h('option', { value: 'consumer', text: 'Kuluttajien kalenteri' }), h('option', { value: 'business', text: 'Yrityksille' })), 'Yrityksille-valinta näyttää vuoron vain yritysten kalenterissa.') : null,
       h('div', { class: 'row wrap' }, field('Järjestys', h('input', { name: 'sort_order', type: 'number', value: c.sort_order, disabled: !isAdmin })), field('Min hlö', h('input', { name: 'min_persons', type: 'number', min: 1, value: c.min_persons, disabled: !isAdmin })), field('Max hlö', h('input', { name: 'max_persons', type: 'number', min: 1, value: c.max_persons ?? '', disabled: !isAdmin }))),
       isAdmin ? h('button', { class: 'btn', type: 'submit', text: 'Tallenna asetukset' }) : null) : h('p', { class: 'muted', text: 'Tuotetta ei ole vielä otettu mukaan varausjärjestelmään (product_config puuttuu).' });
-    if (c) { cfg.bookable.checked = !!c.bookable; cfg.shop_visible.checked = !!c.shop_visible; cfg.addEventListener('submit', (ev) => { ev.preventDefault(); run(cfg.querySelector('button'), async () => {
-      await rpc('admin_update_product_config', { p_product_id: p.id, p_patch: { bookable: cfg.bookable.checked, shop_visible: cfg.shop_visible.checked, sort_order: +cfg.sort_order.value, min_persons: +cfg.min_persons.value, max_persons: cfg.max_persons.value ? +cfg.max_persons.value : null } });
+    if (c) { cfg.bookable.checked = !!c.bookable; cfg.shop_visible.checked = !!c.shop_visible; if (cfg.audience) cfg.audience.value = c.audience === 'business' ? 'business' : 'consumer'; cfg.addEventListener('submit', (ev) => { ev.preventDefault(); run(cfg.querySelector('button'), async () => {
+      const patch = { bookable: cfg.bookable.checked, shop_visible: cfg.shop_visible.checked, sort_order: +cfg.sort_order.value, min_persons: +cfg.min_persons.value, max_persons: cfg.max_persons.value ? +cfg.max_persons.value : null };
+      if (cfg.audience) patch.audience = cfg.audience.value;
+      await rpc('admin_update_product_config', { p_product_id: p.id, p_patch: patch });
       toast('Tallennettu'); d.close(); fresh(); }); }); }
     // tuotekuva (Storage: product-images; polku talletetaan funktiolla admin_set_product_image)
     const img = c ? imageBox(p, c, isAdmin, () => { d.close(); fresh(); }) : null;

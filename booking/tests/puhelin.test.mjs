@@ -55,7 +55,7 @@ test('kaupan sanakirjat: fi "010 299 2866", en "+358 10 299 2866" samoilla rivei
 
 test('kauppa: {{var:phone}} täytetään kielen mukaan (build asettaa S.phone = phoneDisplay(lang))', () => {
   const b = readFileSync(join(root, 'booking/shop/build.mjs'), 'utf8');
-  assert.equal((b.match(/phone: L\.phoneDisplay\(lang\)/g) || []).length, 3, 'kauppa-, tilaus- ja lahjakorttisivun S.phone');
+  assert.equal((b.match(/phone: L\.phoneDisplay\(lang\)/g) || []).length, 4, 'kauppa-, tilaus-, lahjakortti- ja yrityssivun S.phone');
   assert.equal((b.match(/\$\{e\(L\.phoneDisplay\(lang\)\)\}/g) || []).length, 2, 'noscript-numerot');
   assert.ok(!/site\.contact\.phone\b/.test(b));
 });

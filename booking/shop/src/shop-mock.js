@@ -7,6 +7,7 @@ import { ApiError } from './sb.js';
 import { treatmentRpc, catalogEntries, snapshotBookings, restoreBookings, ADDONS } from './treatment-mock.js';
 import { createOrderMock } from './order-mock.js';
 import { isHoldScenario, holdMockParams, HOLD_ERRORS } from './hold-mock.js';
+import { pickCatalog } from './catalog-audience.js';
 
 const KEY = 'booking.shopmock.v1';
 const MUTATING = new Set(['public_create_treatment_booking', 'public_change_treatment_booking']);
@@ -33,6 +34,7 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
     }
     switch (name) {
       case 'public_catalog': return catalogEntries();
+      case 'public_catalog_for': return pickCatalog(catalogEntries(), args.p_audience);
       case 'public_settings': return { public_booking_enabled: true, public_treatment_horizon_days: 14 };
       case 'public_product_images': return [];
       case 'public_addons': return ADDONS;   // lisäpalvelut (booking_61: pyyhe resurssivaraukselle, tuote 7); sama muoto kuin tuotannon public_addons()

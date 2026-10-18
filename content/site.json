@@ -112,6 +112,10 @@
     [
      "gift",
      "Lahjakortit"
+    ],
+    [
+     "companies",
+     "Yrityksille"
     ]
    ],
    "book": "Varaa",
@@ -253,6 +257,10 @@
     [
      "gift",
      "Gift cards"
+    ],
+    [
+     "companies",
+     "For companies"
     ]
    ],
    "book": "Book",

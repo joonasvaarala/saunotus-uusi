@@ -266,7 +266,7 @@ ${isTest ? `<div class="testbar" role="note">${e(u.siteTestNote)}</div>` : ''}
 <nav class="nav-desk" aria-label="${e(u.menuLabel)}">${nav}</nav>
 ${langSw}
 <a class="btn sm" href="${bookHref}">${e(u.book)}</a>
-<details class="nav-mob"><summary>${e(u.menu)}</summary><nav aria-label="${e(u.menuLabel)}">${nav}<a href="${pageHref('companies', lang)}">${e(u.companies)}</a><a href="${bookHref}">${e(u.bookFull)}</a></nav></details>
+<details class="nav-mob"><summary>${e(u.menu)}</summary><nav aria-label="${e(u.menuLabel)}">${nav}<a href="${bookHref}">${e(u.bookFull)}</a></nav></details>
 </div></header>
 <main id="main">
 ${body}
@@ -384,13 +384,43 @@ export function info(lang) {
 }
 
 export function companies(lang) {
-  const d = P('companies')[lang], u = ui(lang);
-  const cp = ['vuoro', 'jalkiloylyt'].map((k) => C('corporate.' + k));
-  const body = pageHero(d.hero, lang, 'companies')
-    + sec('', `${head('', d.productsTitle, d.productsText, { orn: true })}${cardList(cp, lang, 'two')}`, 'tuotteet')
-    + sec('tint', `<div class="narrow center" id="${d.days.id}"><h2 class="sec-title">${e(d.days.title)}</h2><p class="lead">${e(d.days.text)}</p><p>${e(d.days.mailHint)}</p>${mailBtn(d.days.cta, d.days.mailSubject)}</div>`)
-    + sec('', `<ul class="cards three">${d.links.map((l) => `<li class="card"><div class="bd"><h3><a href="${e(link(l.to, lang, 'companies'))}">${e(l.title)}</a></h3><p>${e(l.text)}</p></div><div class="cta" aria-hidden="true">${e(u.readMore)}</div></li>`).join('')}</ul>`);
-  return layout({ lang, key: 'companies', meta: d.meta, body });
+  const d = P('companies')[lang], u = ui(lang), f = d.flow;
+  const offs = [
+    ['ritual', f.offering_ritual], ['forest_yoga', f.offering_forest_yoga], ['campfire_meal', f.offering_campfire],
+    ['sauna', f.offering_sauna], ['vihta_workshop', f.offering_vihta], ['other', f.offering_other],
+  ];
+  const errs = ['invalid_company', 'invalid_contact', 'invalid_email', 'invalid_phone', 'invalid_when', 'invalid_persons', 'invalid_offerings', 'invalid_offering_other', 'invalid_message', 'privacy_required', 'rate_limited', 'error_generic'];
+  const choice = sec('', `<div class="narrow">${head('', f.choice_title, f.lead, { orn: true })}<div class="co-choice" data-company-choice>
+<a class="card co-pick" href="#yritysvuorot" data-mode="sauna"><span class="bd"><h3>${e(f.sauna_title)}</h3><p>${e(f.sauna_text)}</p><span class="btn sm">${e(f.sauna_cta)}</span></span></a>
+<a class="card co-pick" href="#tarjous" data-mode="day"><span class="bd"><h3>${e(f.day_title)}</h3><p>${e(f.day_text)}</p><span class="btn sm light">${e(f.day_cta)}</span></span></a>
+</div></div>`);
+  const cal = sec('tint', `${head('', f.calendar_title, f.calendar_text, { orn: true })}<div id="booking-app" aria-busy="true"><noscript><p>${e(f.calendar_noscript)} <a href="tel:${site.contact.phoneTel}">${e(phoneDisplay(lang))}</a></p></noscript></div>`, 'yritysvuorot');
+  const fields = offs.map(([code, label]) => `<label><input type="checkbox" name="offering" value="${e(code)}"> ${e(label)}</label>`).join('');
+  const messages = errs.map((code) => `<p class="co-msg" role="alert" hidden data-code="${code}">${e(code === 'error_generic' ? f.error_generic : f['error_' + code])}</p>`).join('')
+    + `<p class="co-msg ok" role="status" hidden data-code="ok">${e(f.success)}</p>`;
+  const form = sec('', `<div class="narrow"><h2 class="sec-title" tabindex="-1">${e(f.form_title)}</h2><p class="lead">${e(f.form_lead)}</p>
+<form id="company-quote" class="co-form" data-locale="${e(lang)}" novalidate>
+<div data-quote-fields>
+<label>${e(f.company)} <input name="company_name" autocomplete="organization" required maxlength="160"></label>
+<label>${e(f.contact)} <input name="contact_name" autocomplete="name" required maxlength="120"></label>
+<label>${e(f.email)} <input name="email" type="email" autocomplete="email" required maxlength="254"></label>
+<label>${e(f.phone)} <input name="phone" type="tel" autocomplete="tel" required maxlength="30"></label>
+<label>${e(f.when)} <input name="preferred_when" required maxlength="160"></label>
+<label>${e(f.persons)} <input name="persons" inputmode="numeric" required maxlength="3"></label>
+<fieldset><legend>${e(f.offerings_legend)}</legend><div class="checks">${fields}</div>
+<label>${e(f.offering_other_label)} <input name="offering_other" maxlength="200"></label></fieldset>
+<label>${e(f.message)} <textarea name="message" maxlength="2000" rows="4"></textarea></label>
+<div class="co-consent"><label class="check"><input type="checkbox" name="privacy" value="1"> ${e(f.privacy)}</label><a href="${pageHref('privacy', 'fi')}"${lang === 'en' ? ' hreflang="fi" lang="fi"' : ''}>${e(f.notice_link)}</a></div>
+<p class="sr" aria-hidden="true"><label>${e(f.honeypot)} <input name="company_website" tabindex="-1" autocomplete="off"></label></p>
+<button class="btn" type="submit">${e(f.submit)}</button>
+</div>
+${messages}
+</form></div>`, 'tarjous');
+  const links = sec('tint', `<ul class="cards three">${d.links.map((l) => `<li class="card"><div class="bd"><h3><a href="${e(link(l.to, lang, 'companies'))}">${e(l.title)}</a></h3><p>${e(l.text)}</p></div><div class="cta" aria-hidden="true">${e(u.readMore)}</div></li>`).join('')}</ul>`);
+  const boot = `<script>document.documentElement.classList.add('co-js');(function(){var h=location.hash;if(h==='#tarjous')document.documentElement.classList.add('co-show-day');else if(h==='#yritysvuorot'||h.indexOf('#/')===0)document.documentElement.classList.add('co-show-sauna');})();</script>`;
+  const body = pageHero(d.hero, lang, 'companies') + boot + choice + cal + form + links
+    + `<script type="module" src="${href('/js/companies-form.js')}"></script>`;
+  return layout({ lang, key: 'companies', meta: { title: d.meta.title, description: f.seo_description, og: d.meta.og }, body });
 }
 
 export function policyPage(name, key, lang) {

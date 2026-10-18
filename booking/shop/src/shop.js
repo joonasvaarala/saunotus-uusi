@@ -7,6 +7,7 @@ import { loadPayChoices, payChoicesSection, payNotice, onlineAvailable, onlineAt
 import { pt } from './pay-choices-texts.js';
 import { T } from './i18n.js';
 import { loadProducts as loadTreatmentProducts, splitCatalog, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
+import { pickCatalog } from './catalog-audience.js';
 import { createTreatmentViews } from './treatment-ui.js';
 import { createTexts, loadShopTexts, applyShopTexts } from './site-texts.js';
 import { fmtMinutes } from './site-texts-logic.js';
@@ -110,11 +111,15 @@ function ensureTreatments() {
 async function loadBase() {
   if (state.catalog) return;
   // Tuotekuvat: public_product_images voi puuttua (migraatio 14 ajamatta) tai epäonnistua → kauppa toimii ilman kuvia
-  const [catalog, settings, imgs, stat, siteTexts] = await Promise.all([rpc('public_catalog'), rpc('public_settings'), rpc('public_product_images').catch(() => []), loadStatic(), loadShopTexts(S.siteTextsUrl)]);
-  texts.setRows(siteTexts); texts.setData({ catalog: Array.isArray(catalog) ? catalog : [], settings: settings || {} });
-  await applyShopTexts(S, { rows: siteTexts, data: { catalog: Array.isArray(catalog) ? catalog : [], settings: settings || {}, format: { price: (n) => money(n), duration: (m) => fmtMinutes(m) } } });   // osa 3: sanakirjat DB-tekstein (puuttuva avain → repon oletus)
+  // Yritysten kalenteri (BOOKING_SHOP.audience = business) käyttää public_catalog_for; vanha kanta → public_catalog + pickCatalog.
+  const audience = S.audience === 'business' ? 'business' : 'consumer';
+  const catalogPromise = rpc('public_catalog_for', { p_audience: audience }).catch(() => rpc('public_catalog'));
+  const [catalogRaw, settings, imgs, stat, siteTexts] = await Promise.all([catalogPromise, rpc('public_settings'), rpc('public_product_images').catch(() => []), loadStatic(), loadShopTexts(S.siteTextsUrl)]);
+  const catalog = pickCatalog(catalogRaw, audience);
+  texts.setRows(siteTexts); texts.setData({ catalog, settings: settings || {} });
+  await applyShopTexts(S, { rows: siteTexts, data: { catalog, settings: settings || {}, format: { price: (n) => money(n), duration: (m) => fmtMinutes(m) } } });   // osa 3: sanakirjat DB-tekstein (puuttuva avain → repon oletus)
   const split = splitCatalog(catalog, stat);   // vuoropohjaiset tuotteet (rules) ja hoito-/rituaalituotteet (slots) erikseen
-  state.catalog = split.rules; state.treatments = split.treatments; treatmentsReady = Promise.resolve(); state.settings = settings || {};
+  state.catalog = split.rules; state.treatments = audience === 'business' ? [] : split.treatments; treatmentsReady = Promise.resolve(); state.settings = settings || {};
   for (const i of Array.isArray(imgs) ? imgs : []) if (i?.path) state.images.set(+i.product_id, { url: storageUrl('product-images', i.path), alt: i.alt || '' });
 }
 // Tuotekuva: kiinteä kuvasuhde (varaa tilan → ei layout-hyppyä), lazy-lataus, alt = ylläpidon alt-teksti tai tuotteen nimi.
