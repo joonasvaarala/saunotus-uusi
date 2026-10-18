@@ -277,14 +277,14 @@ function businessQuoteNotify(d: any, hello: string, X: X): Rendered {
     [X("email.business_quote.field_id"), id],
   ];
   const lines = rows.map(([k, v]) => `${k}: ${v}`).join("\n");
-  const subject = X("email.business_quote.notify_subject_detail", { company: show(q.company_name), persons: personsN || dash, when: show(q.preferred_when) });
+  const subject = X("email.business_quote.notify_subject_detail", { company: show(q.company_name), persons: personsN || dash, when: show(q.preferred_when) }).replace(/\s+/g, " ");
   const title = X("email.business_quote.notify_title_detail");
   const intro = X("email.business_quote.notify_intro_detail");
   const sign = `${X("email.common.closing")}\n${X("email.business_quote.sign_name")}\n${SELLER}`;
   const signHtml = esc(sign).replace(/\n/g, "<br>");
   const contact = X("email.common.contact", { phone: phoneFor(false) });
   const text = textBlock(hello, intro, lines, contact, sign) + "\n";
-  const htmlLines = rows.map(([k, v]) => `<span style="font-family:${SANS};font-size:14px;line-height:1.45;color:${INK}"><b>${esc(k)}</b>: ${esc(v)}</span>`).join("<br>");
+  const htmlLines = rows.map(([k, v]) => `<span style="font-family:${SANS};font-size:14px;line-height:1.45;color:${INK}"><b>${esc(k)}</b>: ${esc(v).replace(/\n/g, "<br>")}</span>`).join("<br>");
   const html = wrapHtml(d, title, intro, h1(title) + p(esc(hello)) + p(esc(intro)) + box(htmlLines) + p(esc(contact), `color:${MUTED};font-size:13px`) + p(signHtml), false);
   return { subject, text, html };
 }
