@@ -153,7 +153,24 @@ test('Mock: lunastus – osittainen, virheet (vanhentunut, tyhjä, Johku suljett
 test('Mock: pakettien hinnat ja nimet vastaavat tuotannon public_gift_card_packages-vastausta', () => {
   assert.deepEqual(MOCK_PACKAGES.map((p) => [p.code, p.price]), [['open', null], ['entry_2', 58], ['peat_mask_2', 88], ['sauna_treatment_2', 192], ['saunotus_2', 328]]);
   const o = MOCK_PACKAGES[0]; assert.equal(o.min_amount, 29); assert.equal(o.max_amount, 500);
-  assert.equal(MOCK_PACKAGES[1].name, 'Sisäänpääsy kahdelle');
+  assert.equal(MOCK_PACKAGES[1].name, 'Savusaunavuoro kahdelle');
+  assert.equal(MOCK_PACKAGES[1].name_en, 'Smoke sauna session for two');
+  assert.equal(MOCK_PACKAGES[1].price, 58);
+  assert.equal(MOCK_PACKAGES[1].vat_rate, 25.5);
+});
+
+test('Migraatio booking_100 päivittää vain entry_2:n nimen ja on idempotentti', () => {
+  const sql = readFileSync(join(root, 'supabase/migrations/20261019000100_booking_100_giftpkg_entry2_name.sql'), 'utf8');
+  const rb = readFileSync(join(root, 'supabase/rollbacks/20261019000100_booking_100_ROLLBACK.sql'), 'utf8');
+  assert.match(sql, /code = 'entry_2'/);
+  assert.match(sql, /name = 'Savusaunavuoro kahdelle'/);
+  assert.match(sql, /name_en = 'Smoke sauna session for two'/);
+  assert.match(sql, /is distinct from/);
+  assert.doesNotMatch(sql, /\b(price|vat_rate|description|items|sort_order)\s*=/);
+  assert.match(rb, /name = 'Sisäänpääsy kahdelle'/);
+  assert.match(rb, /name_en = 'Admission for two'/);
+  assert.doesNotMatch(rb, /\b(price|vat_rate|description|items|sort_order)\s*=/);
+  assert.doesNotMatch(readFileSync(join(root, 'supabase/migrations/20261017120517_booking_43_giftcards_schema.sql'), 'utf8').split('entry_2')[1], /Savusaunavuoro kahdelle', 'Smoke sauna session for two'/);
 });
 
 test('Tekstit: lahjakorttiavaimet FI = EN, muuttujat samat, kaikki dynaamiset avaimet määritelty, ei vaihe-/stubitekstejä', () => {

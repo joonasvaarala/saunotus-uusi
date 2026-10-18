@@ -21,8 +21,8 @@ export const MOCK_PACKAGES = [
   },
   {
     code: 'entry_2',
-    name: 'Sisäänpääsy kahdelle',
-    name_en: 'Admission for two',
+    name: 'Savusaunavuoro kahdelle',
+    name_en: 'Smoke sauna session for two',
     description: 'Savusaunavuoro kahdelle hengelle (2 × 29 €).',
     description_en: 'Smoke sauna session for two (2 × €29).',
     kind: 'product',
