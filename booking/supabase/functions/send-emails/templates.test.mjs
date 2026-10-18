@@ -247,12 +247,47 @@ for (const locale of ['fi', 'en']) {
     assert.ok(m.html.includes(en ? '+358 10 299 2866' : '010 299 2866') && hrefs(m.html).includes('tel:+358102992866'));
     assert.ok(!m.html.includes(en ? '010 299 2866' : '+358 10 299 2866'));
   });
-  test(`business_quote_notify ${locale}: henkilökunta, ei asiakkaan tietoja`, { skip }, () => {
-    const m = R('business_quote_notify', { to_name: 'Joonas', locale }, locale);
-    const en = locale === 'en';
-    assert.equal(m.subject, en ? 'New company quote request – Sipoonjoen Perinnesauna' : 'Uusi yrityksen tarjouspyyntö – Sipoonjoen Perinnesauna');
-    assert.ok(m.text.includes('Tapio') && m.text.includes('Sipoonjoen Perinnesauna'));
-    assert.ok(m.text.includes(en ? 'The request is in the Companies view in admin.' : 'Pyyntö on hallinnan Yritykset-näkymässä.'));
-    assert.ok(!/€|@|Maija|040/.test(m.subject + m.text));
+  test(`business_quote_notify ${locale}: kaikki lomakkeen kentät, aina suomeksi`, { skip }, () => {
+    const quote = {
+      id: 42, company_name: 'Sipoon Testi Oy', contact_name: 'Maija Meikäläinen', email: 'maija@example.test',
+      phone: '040 123 4567', persons: 12, offerings: ['vihta_workshop', 'ritual', 'other', 'sauna', 'forest_yoga', 'campfire_meal'],
+      offering_other: 'yrityssaunaretki', preferred_when: 'ensi viikon perjantai', message: 'toive metsäkävelystä',
+      locale: 'en', created_at: '2026-10-18T19:14:00.000Z',
+    };
+    const m = R('business_quote_notify', { to_name: 'Joonas', locale, reply_to: quote.email, quote }, locale);
+    const norm = (s) => s.replaceAll('\u00a0', ' ').replaceAll('\u202f', ' ');
+    const text = norm(m.text), html = norm(m.html);
+    const sent = norm(new Intl.DateTimeFormat('fi-FI', { timeZone: 'Europe/Helsinki', weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(quote.created_at)));
+    assert.equal(m.subject, 'Yritysten tarjouspyyntö: Sipoon Testi Oy, 12 hlö, ensi viikon perjantai');
+    const lines = [
+      'Yrityksen nimi: Sipoon Testi Oy',
+      'Yhteyshenkilö: Maija Meikäläinen',
+      'Sähköposti: maija@example.test',
+      'Puhelin: 040 123 4567',
+      'Henkilömäärä: 12 hlö',
+      'Valitut palvelut: Saunarituaali, Metsäjooga, Nuotioruokailu, Saunotus, Vihtatyöpaja, Muu: yrityssaunaretki',
+      'Toivottu ajankohta: ensi viikon perjantai',
+      'Lisätiedot: toive metsäkävelystä',
+      'Kieli: englanti',
+      `Lähetysaika: ${sent}`,
+      'Pyynnön tunnus: 42',
+    ];
+    for (const line of lines) {
+      assert.ok(text.includes(line), `${locale} teksti: ${line}`);
+      const cut = line.indexOf(': ');
+      assert.ok(html.includes(line.slice(0, cut)) && html.includes(line.slice(cut + 2)), `${locale} html: ${line}`);
+    }
+    assert.ok(text.includes('Hei Joonas,') && text.includes('Tapio') && text.includes('Sipoonjoen Perinnesauna'));
+    assert.ok(!/hallinnan Yritykset|Companies view|Company quote request|Selected services|Hello Joonas/.test(m.subject + text));
+    assert.ok(!/€/.test(m.subject + text + html));
+    assert.equal(T.outboundReplyTo('business_quote_notify', { reply_to: quote.email, quote }, 'savusauna@saunotus.fi'), 'maija@example.test');
   });
 }
+test('business_quote_notify: reply-to on asiakas, muut lajit pitävät yhteisen asetuksen', { skip }, () => {
+  assert.equal(T.outboundReplyTo('business_quote_notify', { quote: { email: 'maija@example.test' } }, 'savusauna@saunotus.fi'), 'maija@example.test');
+  assert.equal(T.outboundReplyTo('business_quote_notify', { reply_to: 'ei-osoite', quote: { email: 'maija@example.test' } }, 'savusauna@saunotus.fi'), 'maija@example.test');
+  assert.equal(T.outboundReplyTo('business_quote_notify', { reply_to: 'ei-osoite' }, 'savusauna@saunotus.fi'), 'savusauna@saunotus.fi');
+  assert.equal(T.outboundReplyTo('business_quote_ack', { reply_to: 'maija@example.test' }, 'savusauna@saunotus.fi'), 'savusauna@saunotus.fi');
+  assert.equal(T.outboundReplyTo('order_confirmation', {}, 'savusauna@saunotus.fi'), 'savusauna@saunotus.fi');
+  assert.equal(T.outboundReplyTo('order_confirmation', {}, ''), undefined);
+});

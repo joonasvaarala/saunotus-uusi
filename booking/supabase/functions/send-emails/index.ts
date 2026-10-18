@@ -2,7 +2,7 @@
 // Tilat (booking.integration_config.resend.mode): off -> skipped; dry_run (oletus) -> renderöidään ja merkitään dry_run, MITÄÄN EI LÄHDE; live -> lähetys (vaatii RESEND_API_KEY).
 // Salaisuus: RESEND_API_KEY (Edge Function secret). Ei muita salaisuuksia; SUPABASE_URL/SERVICE_ROLE_KEY tulevat ympäristöstä.
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { render, type Kind } from "./templates.ts";
+import { render, outboundReplyTo, type Kind } from "./templates.ts";
 import { EMAIL_TEXTS } from "./texts.ts";
 import { fetchSiteTexts, makeT } from "../_shared/site_texts.ts";
 
@@ -64,10 +64,11 @@ Deno.serve(async (req) => {
           attachments.push({ filename: `${g.locale === "en" ? "gift-card" : "lahjakortti"}${r.gift_cards.length > 1 && r.kind === "gift_card_buyer" ? "-" + (++k) : ""}.pdf`, content: b64(new Uint8Array(await pdf.arrayBuffer())) });
         }
       }
+      const useReply = outboundReplyTo(r.kind, r, replyTo);
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { authorization: `Bearer ${key}`, "content-type": "application/json", "idempotency-key": `booking-outbox-${r.id}` },
-        body: JSON.stringify({ from, to: [r.to], subject: m.subject, text: m.text, html: m.html, ...(replyTo ? { reply_to: replyTo } : {}), ...(attachments.length ? { attachments } : {}) }),
+        body: JSON.stringify({ from, to: [r.to], subject: m.subject, text: m.text, html: m.html, ...(useReply ? { reply_to: useReply } : {}), ...(attachments.length ? { attachments } : {}) }),
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(`resend ${res.status}: ${JSON.stringify(body).slice(0, 300)}`);
