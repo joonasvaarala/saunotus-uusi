@@ -4,7 +4,6 @@ export const HT = {
   fi: {
     'title.awaiting': 'Maksa varaus vahvistaaksesi', 'title.processing': 'Maksua käsitellään', 'title.preliminary': 'Alustava varaus', 'title.expired': 'Paikkavaraus vanheni',
     'status.awaiting': 'Varaus odottaa maksua', 'status.processing': 'Maksua käsitellään', 'status.preliminary': 'Alustava varaus', 'status.expired': 'Paikkavaraus vanheni',
-    lead: 'Paikkavaraus on voimassa {minutes} minuuttia, kunnes varaus maksetaan tai voimassa olevan lahjakortin tiedot syötetään.',
     mustPay: 'Varaus täytyy maksaa {minutes} minuutin sisään, muuten se peruuntuu ja paikka vapautuu.',
     'h2.awaiting': 'Varauksesi odottaa maksua',
     // Testivaihtoehto "maksu paikan päällä" (booking_57, public_confirm_pay_later): nappi näkyy vain kun palvelin listaa pay_later-tavan (pay_later_test_enabled)
@@ -45,7 +44,6 @@ export const HT = {
   en: {
     'title.awaiting': 'Pay to confirm your booking', 'title.processing': 'Processing your payment', 'title.preliminary': 'Provisional booking', 'title.expired': 'Your spot hold expired',
     'status.awaiting': 'Booking awaiting payment', 'status.processing': 'Processing your payment', 'status.preliminary': 'Provisional booking', 'status.expired': 'Your spot hold expired',
-    lead: 'Your spot is held for {minutes} minutes, until the booking is paid or the details of a valid gift card are entered.',
     mustPay: 'The booking must be paid within {minutes} minutes, otherwise it is cancelled and your spot is released.',
     'h2.awaiting': 'Your booking is awaiting payment',
     'payLater.btn': 'Test option: pay on site', 'payLater.working': 'Confirming your booking…',

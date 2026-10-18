@@ -19,7 +19,7 @@ export function holdPanel({ L = 'fi', co, minutes = 15, giftUsed = false, newHre
   const kids = [h('h3', { id: `${id}-t`, tabindex: '-1', text: tx(`title.${kind}`) })];   // tabindex -1: tilan vaihtuessa fokus siirretään otsikkoon (ruudunlukija lukee uuden tilan)
   let timeEl = null, labelEl = null, announce = null, msgEl = null, recheckBtn = null;
   if (kind === 'awaiting') {
-    kids.push(h('p', { class: 'bk-hold-must', 'data-testid': 'hold-must', text: tx('mustPay', { minutes }) }), h('p', { class: 'bk-hold-lead', 'data-testid': 'hold-lead', text: tx('lead', { minutes }) }));   // selkeä 15 min -ohje ensin; lead = Joonaksen väliaikainen teksti
+    kids.push(h('p', { class: 'bk-hold-must', 'data-testid': 'hold-must', text: tx('mustPay', { minutes }) }));   // selkeä 15 min -ohje (mustPay); ei toistavaa lead-tekstiä (poistettu)
     labelEl = h('span', { class: 'bk-hold-label', id: `${id}-l`, text: tx('timerLabel') });
     timeEl = h('span', { class: 'bk-hold-time', role: 'timer', 'aria-live': 'off', 'aria-labelledby': `${id}-l`, 'data-testid': 'hold-timer', text: clockText(clock.left()) });
     announce = h('p', { class: 'sr-only', role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true', 'data-testid': 'hold-announce' });

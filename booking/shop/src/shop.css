@@ -422,7 +422,6 @@ a.bk-sd:hover{filter:brightness(.97)}
 .bk-hold{display:grid;gap:8px;margin:12px 0;border-left:5px solid var(--green)}
 .bk-hold h3{margin:0}
 .bk-hold p{margin:0}
-.bk-hold-lead{color:var(--ink);font-size:16px;line-height:1.5}
 .bk-hold-clock{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
 .bk-hold-label{font:600 13px var(--label);letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
 .bk-hold-time{font:700 32px/1.1 var(--head);font-variant-numeric:tabular-nums;color:var(--ink)}
