@@ -96,6 +96,8 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS } =
       const total = rows.length; rows = rows.slice(a.p_offset || 0, (a.p_offset || 0) + (a.p_limit || 50));
       return rows.map((r) => ({ ...view(r), total_count: total }));
     },
+    admin_day_extras: (a) => ({ date: a.p_date, tz: 'Europe/Helsinki', revenue_rows: [], events: [],
+      revenue: { basis: 'visit_start', vat_basis: 'gross_incl_vat', currency: 'EUR', gross: 0, vat: 0, net: 0, count: 0, pending_gross: 0, pending_count: 0, unpaid_gross: 0, unpaid_count: 0 } }),
     admin_day_view: (a) => {
       const rs = st.reservations.filter((r) => r.starts_at >= helIso(a.p_date, '00:00') && r.starts_at < helIso(addDays(a.p_date, 1), '00:00'));
       return { date: a.p_date, sessions: [], blocks: [], prep: [], addon_totals: [],
