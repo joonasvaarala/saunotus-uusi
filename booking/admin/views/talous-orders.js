@@ -6,21 +6,23 @@ import { receiptsList } from './talous-receipts.js';
 import { t, fmt, getLang } from '../talous-i18n.js';
 import { RPC, absLink } from '../talous-api.js';
 import { redeemFields, redeemSubmit } from './talous-giftcards.js';
-import { johkuBadge, PAY, SOURCES, payLabel, sourceLabel, payBadge, sourceBadge, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, dateFld, searchFld, expandRow, actionBtn, doneToast, formDialog, methodLabel, pstatBadge } from './talous-ui.js';
+import { johkuBadge, SOURCES, sourceLabel, payBadge, sourceBadge, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, dateFld, searchFld, expandRow, actionBtn, doneToast, formDialog, methodLabel, pstatBadge } from './talous-ui.js';
 import { countActive, filterDrawer } from '../filter-drawer.js';
+import { effectivePaymentFilter, PAYMENT_FILTERS } from '../orders-filter.js';
+import { orderText } from '../orders-texts.js';
 
 export const ORDER_SORTS = ['created', 'order_no', 'total', 'payment_status', 'first_reservation'];
 const VAT_CHOICES = [25.5, 13.5, 0];
 
 export function createOrdersTab({ api, ctx, gift = null }) {
-  const st = { search: '', paymentStatus: '', source: '', native: '', dateField: '', from: '', to: '', sortBy: 'created', sortDir: 'desc', limit: 25, offset: 0 };
+  const st = { search: '', paymentFilter: 'paid', source: '', native: '', dateField: '', from: '', to: '', sortBy: 'created', sortDir: 'desc', limit: 25, offset: 0 };
   const list = h('ul', { class: 'tl-list', 'data-testid': 'orders-list' }), count = h('p', { class: 'muted tl-count', role: 'status', 'data-testid': 'orders-count' }), pagers = [h('div'), h('div')];
   let seq = 0, reopen = null, autoOpen = false;
   async function load() {
     const my = ++seq;
     list.replaceChildren(loading()); list.setAttribute('aria-busy', 'true');
     try {
-      const r = await api.listOrders({ ...st });
+      const r = await api.listOrders({ ...st, paymentFilter: effectivePaymentFilter(st) });
       if (my !== seq) return;
       list.setAttribute('aria-busy', 'false');
       if (st.offset >= r.total && r.total > 0) { st.offset = Math.max(0, Math.floor((r.total - 1) / st.limit) * st.limit); return load(); }
@@ -32,7 +34,18 @@ export function createOrdersTab({ api, ctx, gift = null }) {
       pagers[0].replaceChildren(mk()); pagers[1].replaceChildren(mk());
     } catch (e) { if (my === seq) { list.replaceChildren(errorBox(e, load)); count.textContent = ''; pagers.forEach((p) => p.replaceChildren()); } }
   }
-  const change = (patch) => { Object.assign(st, patch, { offset: 0 }); load(); };
+  const payChip = h('span', { class: 'filter-chip', 'data-testid': 'orders-pay-chip', role: 'status' });
+  const searchNote = h('p', { class: 'muted filter-search-note', 'data-testid': 'orders-search-scope', hidden: true });
+  function paintPay() {
+    const label = orderText(`ui.admin.orders.pay_${st.paymentFilter}`);
+    payChip.textContent = label;
+    payChip.setAttribute('data-filter', st.paymentFilter);
+    payChip.setAttribute('aria-label', orderText('ui.admin.orders.pay_showing', { label }));
+    const widened = !!String(st.search || '').trim() && st.paymentFilter === 'paid';
+    searchNote.hidden = !widened;
+    searchNote.textContent = widened ? orderText('ui.admin.orders.search_all') : '';
+  }
+  const change = (patch) => { Object.assign(st, patch, { offset: 0 }); paintPay(); load(); };
   // Oikea (ei mock) kirjoitus onnistui → lista + avoin tilaus haetaan uudelleen; Maksut/Raportit-välilehdet merkitään vanhentuneiksi (api.changed)
   const afterChange = (res, orderId) => { if (res?.mock) return; reopen = orderId; api.changed(); load(); };
 
@@ -211,16 +224,20 @@ export function createOrdersTab({ api, ctx, gift = null }) {
   const syncDir = () => { dirBtn.replaceChildren(h('span', { class: st.sortDir === 'desc' ? 'tl-down' : 'tl-up', 'aria-hidden': 'true' }, icon('chev', 20)), h('span', { class: 'tl-dirtxt', text: t(`dir.${st.sortDir}`) })); dirBtn.setAttribute('aria-label', `${t('sort.dir')}: ${t(`dir.${st.sortDir}`)}`); dirBtn.dataset.dir = st.sortDir; dirBtn.disabled = st.sortBy === 'payment_status'; };
   syncDir();
   const sortFld = h('div', { class: 'fld tl-sort' }, h('span', { text: t('sort.label') }), h('div', { class: 'tl-sortrow' }, sortSel, dirBtn));
-  const reset = h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'orders-reset', onclick: () => { Object.assign(st, { search: '', paymentStatus: '', source: '', native: '', dateField: '', from: '', to: '' }); buildToolbar(); load(); } }, t('filters.reset'));
+  const reset = h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'orders-reset', onclick: () => { Object.assign(st, { search: '', paymentFilter: 'paid', source: '', native: '', dateField: '', from: '', to: '' }); paintPay(); buildToolbar(); load(); } }, t('filters.reset'));
   let toolbar; buildToolbar();
   function buildToolbar() {
     const ss = searchFld(t('orders.searchPh'), 'orders-search', (v) => change({ search: v })); ss.input.value = st.search;
+    const paySel = h('select', { 'data-testid': 'orders-f-pay', 'aria-label': orderText('ui.admin.orders.pay_filter'), onchange: (e) => change({ paymentFilter: e.target.value }) },
+      PAYMENT_FILTERS.map((c) => h('option', { value: c, text: orderText(`ui.admin.orders.pay_${c}`) })));
+    paySel.value = st.paymentFilter;
     const drawer = filterDrawer({
       search: ss.node,
+      status: [payChip, searchNote],
       testid: 'orders-filters',
-      activeCount: () => countActive(st, { paymentStatus: '', source: '', native: '', dateField: '', from: '', to: '', sortBy: 'created', sortDir: 'desc', limit: 25 }),
+      activeCount: () => countActive(st, { paymentFilter: 'paid', source: '', native: '', dateField: '', from: '', to: '', sortBy: 'created', sortDir: 'desc', limit: 25 }),
       filters: [sortFld,
-        selectFld(t('filters.pay'), 'orders-f-pay', PAY, payLabel, st.paymentStatus, (v) => change({ paymentStatus: v })),
+        h('label', { class: 'fld' }, h('span', { text: orderText('ui.admin.orders.pay_filter') }), paySel),
         selectFld(t('filters.source'), 'orders-f-src', SOURCES, sourceLabel, st.source, (v) => change({ source: v })),
         selectFld(t('filters.native'), 'orders-f-native', ['native', 'imported'], (c) => t(`nat.${c}`), st.native, (v) => change({ native: v })),
         selectFld(t('filters.dateField'), 'orders-f-datefield', ['start'], (c) => t(`df.${c}`), st.dateField, (v) => change({ dateField: v }), t('df.created')),
@@ -229,7 +246,7 @@ export function createOrdersTab({ api, ctx, gift = null }) {
     });
     const next = h('form', { class: 'tl-toolbar', role: 'search', onsubmit: (e) => e.preventDefault() }, drawer.node);
     if (toolbar?.parentNode) toolbar.replaceWith(next);   // parentNode: myös ennen kuin välilehti on liitetty sivulle (syvälinkki)
-    toolbar = next; return next;
+    toolbar = next; paintPay(); return next;
   }
   sortSel.value = st.sortBy;
   const cols = h('div', { class: 'tl-cols', 'aria-hidden': 'true' }, h('span', { text: t('col.order') }), h('span', { text: t('col.created') }), h('span', { text: t('col.first') }), h('span', { class: 'r', text: t('col.sum') }), h('span', { text: t('col.status') }), h('span'));

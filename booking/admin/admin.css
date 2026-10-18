@@ -398,6 +398,9 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .filter-chev{display:inline-grid;place-items:center;transition:transform .15s}
 .filter-drawer.is-open .filter-chev{transform:rotate(180deg)}
 .filter-badge{background:var(--green);color:#fff;border-radius:999px;padding:2px 8px;font-size:13px;font-weight:700;line-height:1.35}
+.filter-drawer-bar>.tl-search{flex:1 1 100%;min-width:0}
+.filter-chip{flex:0 0 auto;display:inline-flex;align-items:center;min-height:44px;padding:8px 12px;border-radius:999px;background:var(--green);color:#fff;font-weight:700;font-size:14px;line-height:1.2;white-space:nowrap}
+.filter-search-note{flex:1 1 100%;margin:0;font-size:14px}
 .filter-panel{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
 .filter-panel .filter-groups{grid-column:1/-1}
 .tl-toolbar input,.tl-toolbar select{min-width:0}

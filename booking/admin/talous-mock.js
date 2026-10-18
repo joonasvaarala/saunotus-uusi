@@ -4,6 +4,7 @@
 // samaa rpcBackend-koodia oikean PostgREST-kutsun ja mockin kanssa; vaihto = yksi `rpc`-funktio.
 // Puhdas moduuli (ei DOM:ia) → node --test voi ajaa sen.
 import { createAccumulator } from './sales-chart-logic.js';
+import { PAYMENT_FILTERS, matchesPaymentFilter, normalizePaymentFilter } from './orders-filter.js';
 const rng = (seed) => { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
 const pick = (r, arr) => arr[Math.floor(r() * arr.length)];
 const weighted = (r, pairs) => { let x = r() * pairs.reduce((s, p) => s + p[1], 0); for (const [v, w] of pairs) { x -= w; if (x < 0) return v; } return pairs[0][0]; };
@@ -136,7 +137,7 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
   const orderStatus = (o) => (o.payment_status === 'refunded' ? 'cancelled' : ['pending', 'failed'].includes(o.payment_status) ? 'pending' : 'confirmed');
   const nullLast = (get, dir) => (a, b) => { const x = get(a), y = get(b); if (x == null || x === '') return y == null || y === '' ? 0 : 1; if (y == null || y === '') return -1; return dir * cmp(x, y); };
 
-  // ---- admin_list_orders(p_search,p_status,p_payment_status,p_source,p_native,p_date_field,p_from,p_to,p_sort,p_limit,p_offset) → {total, rows[]} ----
+  // ---- admin_list_orders(..., p_payment_filter oletus 'paid') → {total, rows[]} ----
   const ORDER_SORTS = { created: (o) => o.created_at, order_no: (o) => o.order_no, total: (o) => o.total_gross, start: (o) => o.first_reservation_at, paid: (o) => o.paid_amount, unpaid: (o) => o.unpaid_amount };
   function adminListOrders(a = {}) {
     const sort = a.p_sort || 'created_desc', m = /^(created|order_no|total|start|paid|unpaid)_(asc|desc)$/.exec(sort);
@@ -146,6 +147,9 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
     if (q) { const num = q.replace(/^#/, ''); rows = /^\d+$/.test(num) ? rows.filter((o) => String(o.order_no) === num || String(o.johku_order_no) === num) : rows.filter((o) => o.customer_name.toLowerCase().includes(q) || o.email.includes(q) || (o.company || '').toLowerCase().includes(q)); }
     if (a.p_status) rows = rows.filter((o) => orderStatus(o) === a.p_status);
     if (a.p_payment_status) rows = rows.filter((o) => o.payment_status === a.p_payment_status);
+    const pf = normalizePaymentFilter(a.p_payment_filter);
+    if (!PAYMENT_FILTERS.includes(pf)) throw fail('invalid_param', 'p_payment_filter: paid|unpaid|all|refunded|cancelled');
+    rows = rows.filter((o) => matchesPaymentFilter(o, pf));
     if (a.p_source) rows = rows.filter((o) => o.source_channel === a.p_source);
     if (a.p_native != null) rows = rows.filter((o) => o.is_native === !!a.p_native);
     const dateOf = a.p_date_field === 'start' ? (o) => (o.first_reservation_at ? dayOf(o.first_reservation_at) : null) : (o) => o.created_date;
