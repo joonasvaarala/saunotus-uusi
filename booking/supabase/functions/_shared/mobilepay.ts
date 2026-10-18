@@ -164,7 +164,8 @@ export function buildReturnUrl(siteBase: string | null | undefined, orderPath: s
   try { base = new URL(siteBase); } catch { return null; }
   if (base.protocol !== "https:") return null;
   const path = (orderPath && orderPath.startsWith("/")) ? orderPath : "/tilaus/";
-  const u = new URL(path, base.origin);
+  // site_base_url voi sisältää polkuetuliitteen (esim. GitHub Pages -testi https://x.github.io/saunotus-uusi): sama liitos kuin sähköposteissa (site_base_url || order_page_path)
+  const u = new URL(base.origin + base.pathname.replace(/\/+$/, "") + path);
   u.searchParams.set("t", orderToken); u.searchParams.set("pay", "mobilepay");
   return u.toString();
 }
