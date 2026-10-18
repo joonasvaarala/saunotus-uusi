@@ -320,6 +320,16 @@
   "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
  },
  {
+  "key": "page.companies.flow.notice_link",
+  "lang": "fi",
+  "text": "Lue seloste",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
   "key": "page.companies.flow.submit",
   "lang": "fi",
   "text": "Lähetä tarjouspyyntö",
@@ -766,6 +776,16 @@
   "class": "protected",
   "kind": "plain",
   "max_len": 300,
+  "placeholders": [],
+  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "page.companies.flow.notice_link",
+  "lang": "en",
+  "text": "Read the notice",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
   "placeholders": [],
   "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
  },

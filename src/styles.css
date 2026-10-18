@@ -308,6 +308,9 @@ html.co-js.co-show-sauna #yritysvuorot,html.co-js.co-show-day #tarjous{display:b
 .co-form legend{font-weight:700;color:var(--ink);padding:0 6px}
 .co-form .checks{display:grid;gap:8px}
 .co-form .checks label,.co-form label.check{font-weight:400;display:flex;gap:10px;align-items:flex-start}
+.co-form .co-consent{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:flex-start}
+.co-form .co-consent label.check{flex:1 1 18rem}
+.co-form .co-consent a{font-weight:700;text-decoration:underline;text-underline-offset:.2em;padding-top:.15em}
 .co-form .checks input,.co-form label.check input{width:1.15em;height:1.15em;margin-top:.35em;flex:none}
 .co-msg{background:#f8ebe6;color:#5c241c;border:1px solid #e2c2b8;border-radius:8px;padding:12px 14px}
 .co-msg.ok{background:#e7f0e8;color:#1c3a24;border-color:#b7d2bc}

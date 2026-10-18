@@ -81,6 +81,12 @@ test('Yrityksille-sivu FI ja EN: valinta, kalenteri, lomake, ei euroja uudessa k
     assert.match(html, /tabindex="-1"/);
     assert.match(html, /data-code="privacy_required"/);
     assert.match(html, /data-code="ok"/);
+    assert.match(html, /<a href="\/tietosuoja\/"/);
+    if (lang === 'en') assert.match(html, /hreflang="fi" lang="fi"/);
+    assert.match(html, lang === 'fi' ? />Lue seloste</ : />Read the notice</);
+    assert.match(html, lang === 'fi'
+      ? /<label class="check"><input type="checkbox" name="privacy" value="1"> Olen lukenut tietosuojaselosteen ja hyväksyn, että yhteystietojani käytetään tämän pyynnön käsittelyyn\.<\/label>/
+      : /<label class="check"><input type="checkbox" name="privacy" value="1"> I have read the privacy notice and accept that my contact details are used to handle this request\.<\/label>/);
     const desc = /<meta name="description" content="([^"]*)"/.exec(html)[1];
     assert.ok(desc.length > 20 && desc.length <= 175, `${lang} description ${desc.length}: ${desc}`);
     assert.doesNotMatch(desc, /€|\{?\{?price:/);
@@ -133,7 +139,13 @@ test('tuontiluonnos: uudet avaimet, tietosuoja protected, ei päällekkäisyytt�
   const cls = (k) => extra.find((r) => r.key === k && r.lang === 'fi').class;
   assert.equal(cls('page.companies.flow.privacy'), 'protected');
   assert.equal(cls('page.companies.flow.error_privacy_required'), 'protected');
+  assert.equal(cls('page.companies.flow.notice_link'), 'normal');
   assert.equal(classForContent('page.companies.flow.privacy', extra.find((r) => r.key === 'page.companies.flow.privacy' && r.lang === 'fi').text), 'protected');
+  assert.equal(classForContent('page.companies.flow.notice_link', extra.find((r) => r.key === 'page.companies.flow.notice_link' && r.lang === 'fi').text), 'normal');
+  assert.equal(extra.find((r) => r.key === 'page.companies.flow.privacy' && r.lang === 'fi').text, 'Olen lukenut tietosuojaselosteen ja hyväksyn, että yhteystietojani käytetään tämän pyynnön käsittelyyn.');
+  assert.equal(extra.find((r) => r.key === 'page.companies.flow.privacy' && r.lang === 'en').text, 'I have read the privacy notice and accept that my contact details are used to handle this request.');
+  assert.equal(extra.find((r) => r.key === 'page.companies.flow.error_privacy_required' && r.lang === 'fi').text, 'Hyväksy tietosuoja, jotta pyyntö voidaan lähettää.');
+  assert.equal(extra.find((r) => r.key === 'page.companies.flow.error_privacy_required' && r.lang === 'en').text, 'Accept the privacy notice so the request can be sent.');
   assert.ok(extra.some((r) => r.key === 'nav.main.companies' && r.lang === 'fi' && r.text === 'Yrityksille'));
   assert.ok(extra.some((r) => r.key === 'email.business_quote.sign_name' && r.text === 'Tapio'));
 });

@@ -65,7 +65,7 @@ Etusivu, sivupohjat (sauna, hoidot, lahjakortti, varaa-info, info, yrityksille, 
 
 ## Yrityksille (luonnos, ei vielä tuotu)
 
-`content/site-texts.pending-import-4.json` on Yrityksille-sivun ja tarjouspyyntösähköpostien luonnos (FI+EN): sivun uudet `page.companies.flow.*` / `nav.main.companies` sekä `email.business_quote.*`. Vanhoja avaimia (myös hinnoiteltu `seo.companies.description` ja yrityskortit) tiedosto ei sisällä eikä tuonti ylikirjoita. Bottiavustus tuo sen `admin_texts_import`-kutsulla (≤ 500 riviä). Tekstit ovat luonnoksia, jotka Otto ja Joonas hyväksyvät.
+`content/site-texts.pending-import-4.json` on Yrityksille-sivun ja tarjouspyyntösähköpostien luonnos (FI+EN): sivun uudet `page.companies.flow.*` / `nav.main.companies` sekä `email.business_quote.*`. Tarjouspyynnön suostumuksen vieressä on erillinen linkki tietosuojaselosteeseen (`page.companies.flow.notice_link`, luokka normal). Neljää tietosuojariviä (`flow.privacy` ja `flow.error_privacy_required`, FI+EN) ei muuteta. Vanhoja avaimia (myös hinnoiteltu `seo.companies.description` ja yrityskortit) tiedosto ei sisällä eikä tuonti ylikirjoita. Bottiavustus tuo sen `admin_texts_import`-kutsulla (≤ 500 riviä). Tekstit ovat luonnoksia, jotka Otto ja Joonas hyväksyvät.
 
 ## Uuden tekstin lisääminen (§18.9, jokaisessa PR:ssä)
 

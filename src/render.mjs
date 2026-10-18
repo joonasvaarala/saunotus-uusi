@@ -410,7 +410,7 @@ export function companies(lang) {
 <fieldset><legend>${e(f.offerings_legend)}</legend><div class="checks">${fields}</div>
 <label>${e(f.offering_other_label)} <input name="offering_other" maxlength="200"></label></fieldset>
 <label>${e(f.message)} <textarea name="message" maxlength="2000" rows="4"></textarea></label>
-<label class="check"><input type="checkbox" name="privacy" value="1"> ${e(f.privacy)}</label>
+<div class="co-consent"><label class="check"><input type="checkbox" name="privacy" value="1"> ${e(f.privacy)}</label><a href="${pageHref('privacy', 'fi')}"${lang === 'en' ? ' hreflang="fi" lang="fi"' : ''}>${e(f.notice_link)}</a></div>
 <p class="sr" aria-hidden="true"><label>${e(f.honeypot)} <input name="company_website" tabindex="-1" autocomplete="off"></label></p>
 <button class="btn" type="submit">${e(f.submit)}</button>
 </div>
