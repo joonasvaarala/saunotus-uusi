@@ -1,8 +1,8 @@
-// Luo tuontitiedoston content/site-texts.pending-import-2.json staattisten sivujen asiakasnäkyvistä teksteistä (sopimus §18, osa 3 PR 2).
+// Luo tuontitiedoston content/site-texts.imported-pr64.json staattisten sivujen asiakasnäkyvistä teksteistä (sopimus §18, osa 3 PR 2).
 // Lähde = koodi/repon JSON (src/content-texts.mjs): tiedosto ei voi poiketa repon oletuksista (testi vertaa).
 // EI ylikirjoita tuotannon tekstejä: mukaan tulevat vain avaimet (avain+kieli), joita ei ole tuotannon public_get_site_texts-vastauksessa.
 // Käyttö:  sh -c 'curl … public_get_site_texts … > /tmp/prod-texts.json'  (vain luku, anon-avain)
-//          node scripts/site-texts-extract-pages.mjs --prod /tmp/prod-texts.json [--out content/site-texts.pending-import-2.json]
+//          node scripts/site-texts-extract-pages.mjs --prod /tmp/prod-texts.json [--out content/site-texts.imported-pr64.json]
 // Tuonti: admin_texts_import(p_items) enintään 500 riviä kerrallaan (Bottiavustus ajaa): jq -c '[.[range(0;500)]]' …  /  '[.[range(500;1000)]]'
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
@@ -12,7 +12,7 @@ import { tokensOf } from '../booking/shop/src/site-texts-logic.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const arg = (n) => { const i = process.argv.indexOf(n); return i > 0 ? process.argv[i + 1] : null; };
-const prodFile = arg('--prod'), outFile = resolve(arg('--out') || `${root}/content/site-texts.pending-import-2.json`);
+const prodFile = arg('--prod'), outFile = resolve(arg('--out') || `${root}/content/site-texts.imported-pr64.json`);
 if (!prodFile) { console.error('käyttö: node scripts/site-texts-extract-pages.mjs --prod <public_get_site_texts-vastaus.json> [--out tiedosto]'); process.exit(2); }
 const prod = JSON.parse(readFileSync(prodFile, 'utf8'));
 if (!prod?.ok || !Array.isArray(prod.texts)) { console.error('tuotannon vastaus ei ole {ok:true, texts:[…]}'); process.exit(1); }

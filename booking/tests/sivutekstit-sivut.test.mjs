@@ -1,5 +1,5 @@
 // Sivutekstit osa 3 / PR 2 (sopimus §18): staattisten sivujen tekstit avaimiksi + tuontitiedosto + DB-peitto repon oletuksilla.
-//  * content/site-texts.pending-import-2.json noudattaa admin_texts_import-sääntöjä (booking_62) ja §18.2-nimeämistä; ei päällekkäisiä avaimia PR 1:n (#61) eikä tuotannon kanssa; generoitu koodista
+//  * content/site-texts.imported-pr64.json noudattaa admin_texts_import-sääntöjä (booking_62) ja §18.2-nimeämistä; ei päällekkäisiä avaimia PR 1:n (#61) eikä tuotannon kanssa; generoitu koodista
 //  * peitto (applyContentTexts): DB-teksti kun saman kielen rivi on, muuten repon oletus; paikkamerkit {{price:ID}}, {{duration:ID}}, {{var:n}}; **lihavointi** → <strong>
 //  * kierros: tuontitiedosto peittona → sivusto tavu tavulta sama kuin ilman peittoa (HTML ei muutu); muutettu teksti näkyy sivulla
 //  * ui.shop.error_generic: palvelimen raaka message ei enää asiakkaalle kaupassa
@@ -25,10 +25,10 @@ const B = await imp('src/site-texts.mjs');
 const { site } = await imp('src/lib.mjs');
 const { cfg: ART } = await imp('src/articles/config.mjs');
 
-const PENDING = J('content/site-texts.pending-import-2.json');
+const PENDING = J('content/site-texts.imported-pr64.json');
 const PR61 = J('content/site-texts.imported-pr61.json');
 const IMPORTED = J('content/site-texts.imported.json');
-const FALLBACK = J('content/site-texts.fallback.json');      // tietokannan julkaistut tekstit (public_get_site_texts)
+const FALLBACK = J('tests/fixtures/site-texts/fallback-pre-pr64.json');      // tuotannon julkaistut tekstit ENNEN PR 2:n tuontia (varateksti ennen synkkaa; nykyinen fallback sisältää tuodut rivit)
 const AREAS = /^(page\.[a-z0-9_]+|seo\.[a-z0-9_]+|nav\.(main|info)|ui\.(site|footer|reviews|training_banner|articles|card|alt|session))\./;
 const quiet = { warn: () => {}, log: () => {} };
 
@@ -75,7 +75,7 @@ test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-pages.mjs
   writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts }));
   const r = spawnSync('node', [join(root, 'scripts/site-texts-extract-pages.mjs'), '--prod', prod, '--out', out], { encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);
-  assert.equal(readFileSync(out, 'utf8'), rd('content/site-texts.pending-import-2.json'));
+  assert.equal(readFileSync(out, 'utf8'), rd('content/site-texts.imported-pr64.json'));
 });
 test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet avaimet) eikä kosketa tuotannon tekstiä', () => {
   const have = PENDING.filter((r) => r.key.startsWith('seo.') || r.key === 'ui.site.book');
@@ -133,7 +133,7 @@ test('peitto: kierros – tuontitiedosto peittona → kaikki oliot täsmälleen 
   const res = CT.applyContentTexts(state, { log: quiet });
   assert.equal(res.used, PENDING.length); assert.equal(res.fallback, 0); assert.equal(res.failed, 0);
   assert.equal(snap(), BASE, 'tuonnin jälkeen oliot poikkeavat oletuksista');
-  const none = CT.applyContentTexts(await B.loadSiteTexts({ env: { SITE_TEXTS_FIXTURE: join(work, 'ei-ole.json') }, log: quiet, cacheDir: join(work, 'c2') }).catch(() => null), { log: quiet });
+  const none = CT.applyContentTexts(await B.loadSiteTexts({ env: { SITE_TEXTS_FIXTURE: join(work, 'ei-ole.json') }, log: quiet, cacheDir: join(work, 'c2'), fallbackFile: join(work, 'ei-ole-varatekstia.json') }).catch(() => null), { log: quiet });
   assert.equal(none.used, 0); assert.equal(snap(), BASE);
 });
 test('peitto: DB-teksti vaihtaa tekstin (FI/EN erikseen), puuttuva kieli → oletus ei fi→en-ristiin, paikkamerkit täytetään, **lihavointi** → <strong>', async () => {
