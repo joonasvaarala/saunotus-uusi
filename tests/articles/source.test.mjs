@@ -77,20 +77,73 @@ test('sitemap-RPC epäonnistuu → sitemap johdetaan listasta (noindex pois)', a
   assert.deepEqual(d.sitemap.map((s) => s.slug).sort(), ['how-to-sauna', 'miten-saunotaan-oikein', 'savusauna-lampiaminen']);
   assert.match(d.warnings.join('\n'), /sitemap/);
 });
-test('uudelleenohjaus: tunnettu vanha slug → moved; poistettu → ei ohjausta; tuntemattomat jätetään huomiotta', async () => {
-  const known = [{ lang: 'fi', slug: 'savusauna-vanha-nimi' }, { lang: 'fi', slug: 'poistettu-artikkeli' }];
-  const d = await load({ committedSlugs: known });
-  assert.deepEqual(d.redirects, [{ lang: 'fi', from: 'savusauna-vanha-nimi', toLang: 'fi', toSlug: 'savusauna-lampiaminen' }]);
+const SAVU = { lang: 'fi', from: 'savusauna-vanha-nimi', toLang: 'fi', toSlug: 'savusauna-lampiaminen' };
+const EN_OLD = { lang: 'en', from: 'sauna-how-to', toLang: 'en', toSlug: 'how-to-sauna' };
+const byKey = (l) => [...l].sort((a, b) => `${a.lang}/${a.from}`.localeCompare(`${b.lang}/${b.from}`));
+const rpcCalls = (f, calls) => { const inner = makeFixtureRpc(f); return async (n, a) => { calls.push([n, a]); return inner(n, a); }; };
+const row = (o) => ({ lang: 'fi', from_slug: 'a-vanha', from_path: '/x/', from_loc: 'https://x/', to_slug: 'miten-saunotaan-oikein', to_path: '/y/', to_loc: 'https://y/', status: 301, ...o });
+
+test('uudelleenohjaukset: public_articles_redirects() on ensisijainen lähde (ei tarvitse tunnettuja slugeja eikä välimuistia, ei per-slug-kyselyjä)', async () => {
+  const calls = [];
+  const d = await loadArticles({ rpc: rpcCalls(fx, calls), log: quiet });
+  assert.deepEqual(byKey(d.redirects), byKey([SAVU, EN_OLD]));
+  assert.equal(d.redirectsSource, 'rpc');
+  assert.ok(calls.some(([n]) => n === 'public_articles_redirects'));
+  assert.ok(!calls.some(([n, a]) => n === 'public_get_article' && a.p_slug === 'savusauna-vanha-nimi'), 'moved-kyselyjä ei tehdä kun RPC vastaa');
 });
-test('tunnetut slugit kertyvät välimuistiin (vanha slug muistetaan seuraavassa rakennuksessa)', async () => {
+test('public_articles_redirects: vain lang/from_slug/to_slug käytetään (polut ja isäntänimet ohitetaan); virheelliset, omat, duplikaatit ja julkaistun artikkelin slug ohitetaan', async () => {
+  const f = { ...fx, redirects: { ok: true, items: [
+    row({ from_slug: 'a-vanha', from_path: 'https://evil.example/', to_loc: 'https://evil.example/' }),
+    row({ from_slug: 'a-vanha' }),                                           // duplikaatti
+    row({ from_slug: 'miten-saunotaan-oikein', to_slug: 'miten-saunotaan-oikein' }),   // ohjaa itseensä
+    row({ from_slug: 'savusauna-lampiaminen', to_slug: 'miten-saunotaan-oikein' }),    // julkaistu artikkeli voittaa
+    row({ from_slug: '../paha' }), row({ from_slug: 'Iso-Kirjain' }), row({ lang: 'sv', from_slug: 'sv-vanha' }), row({ to_slug: 'x y' }), null,
+    row({ lang: 'en', from_slug: 'old-guide', to_slug: 'how-to-sauna' }),
+  ] } };
+  const warns = [];
+  const d = await loadArticles({ rpc: makeFixtureRpc(f), log: { warn: (m) => warns.push(m), log() {} } });
+  assert.deepEqual(d.redirects, [
+    { lang: 'fi', from: 'a-vanha', toLang: 'fi', toSlug: 'miten-saunotaan-oikein' },
+    { lang: 'en', from: 'old-guide', toLang: 'en', toSlug: 'how-to-sauna' },
+  ]);
+  assert.equal(warns.filter((m) => /virheellinen rivi/.test(m)).length, 5);
+});
+test('public_articles_redirects tyhjä lista → ei ohjauksia (vanha cache ei elvytä poistettuja)', async () => {
+  const dir = tmp();
+  try {
+    await load({ cacheDir: dir, committedSlugs: [{ lang: 'fi', slug: 'savusauna-vanha-nimi' }] });
+    const d = await loadArticles({ rpc: makeFixtureRpc({ ...fx, redirects: { ok: true, items: [] } }), log: quiet, cacheDir: dir, committedSlugs: [{ lang: 'fi', slug: 'savusauna-vanha-nimi' }] });
+    assert.deepEqual(d.redirects, []);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+test('varakeino: public_articles_redirects ei vastaa → tunnetut slugit kysytään yksitellen (moved → ohjaus; poistettu → ei ohjausta) + varoitus', async () => {
+  for (const redirects of [null, { ok: false, code: 'boom' }]) {
+    const known = [{ lang: 'fi', slug: 'savusauna-vanha-nimi' }, { lang: 'fi', slug: 'poistettu-artikkeli' }];
+    const warns = [], calls = [];
+    const d = await loadArticles({ rpc: rpcCalls({ ...fx, redirects }, calls), log: { warn: (m) => warns.push(m), log() {} }, committedSlugs: known });
+    assert.deepEqual(d.redirects, [SAVU]);
+    assert.equal(d.redirectsSource, 'fallback');
+    assert.match(warns.join('\n'), /public_articles_redirects epäonnistui/);
+    assert.ok(calls.some(([n, a]) => n === 'public_get_article' && a.p_slug === 'savusauna-vanha-nimi'));
+  }
+});
+test('tunnetut slugit kertyvät välimuistiin: RPC:n antamat vanhat slugit muistetaan, ja varakeino löytää ne vaikka RPC kaatuu', async () => {
   const dir = tmp();
   try {
     const first = await load({ cacheDir: dir });
     assert.ok(first.known.some((k) => k.slug === 'miten-saunotaan-oikein'));
-    const second = await load({ cacheDir: dir, committedSlugs: [{ lang: 'fi', slug: 'savusauna-vanha-nimi' }] });
-    assert.equal(second.redirects.length, 1);
-    const third = await load({ cacheDir: dir });
-    assert.equal(third.redirects.length, 1, 'slug muistetaan ilman committedSlugs-listaa');
+    assert.ok(first.known.some((k) => k.slug === 'savusauna-vanha-nimi'), 'RPC:n vanha slug tallentuu tunnettuihin');
+    const down = await loadArticles({ rpc: makeFixtureRpc({ ...fx, redirects: null }), log: quiet, cacheDir: dir });
+    assert.deepEqual(byKey(down.redirects), byKey([SAVU, EN_OLD]), 'slug muistetaan ilman committedSlugs-listaa ja ilman redirects-RPC:tä');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+test('koko RPC kaatuu: edellisen onnistuneen haun ohjaukset säilyvät välimuistista', async () => {
+  const dir = tmp();
+  try {
+    await load({ cacheDir: dir });
+    const d = await loadArticles({ rpc: async () => { throw new Error('verkko poikki'); }, log: quiet, cacheDir: dir });
+    assert.equal(d.source, 'cache');
+    assert.deepEqual(byKey(d.redirects), byKey([SAVU, EN_OLD]));
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 

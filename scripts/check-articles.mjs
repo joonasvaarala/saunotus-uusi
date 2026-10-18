@@ -44,7 +44,7 @@ export function parseSitemap(xml) {
 }
 
 /** @returns {{errors:string[], warnings:string[], stats:object}} */
-export function checkDist({ dist, siteUrl, isTest, sections }) {
+export function checkDist({ dist, siteUrl, isTest, sections, legacy = {} }) {
   const errors = [], warnings = [];
   const err = (m) => errors.push(m), warn = (m) => warnings.push(m);
   const base = new URL(siteUrl).pathname.replace(/\/$/, '');
@@ -55,7 +55,8 @@ export function checkDist({ dist, siteUrl, isTest, sections }) {
     return existsSync(f) && statSync(f).isDirectory() ? join(f, 'index.html') : f;
   };
   const pathOf = (url) => url.slice(siteUrl.length);
-  const secOf = (path) => Object.entries(sections).find(([, p]) => path.startsWith(p))?.[0];
+  const legacyOf = (path) => Object.entries(legacy).find(([, ps]) => ps.some((p) => path.startsWith(p)))?.[0];   // vanhat osion polut: pitää olla pelkkiä ohjaussivuja
+  const secOf = (path) => Object.entries(sections).find(([, p]) => path.startsWith(p))?.[0] || legacyOf(path);
 
   // kaikki sisältöosion sivut
   const pages = [];
@@ -81,6 +82,7 @@ export function checkDist({ dist, siteUrl, isTest, sections }) {
   for (const p of secPages) {
     const k = kind(p), w = p.rel;
     stats[k === 'article' ? 'articles' : k === 'redirect' ? 'redirects' : 'lists']++;
+    if (legacyOf(p.rel) && k !== 'redirect') err(`${p.rel}: vanha osion polku (legacyPaths) pitää olla ohjaussivu, ei ${k}`);
     // perusasiat
     if (p.canonicals.length !== 1) { err(`${w}: canonical-linkkejä ${p.canonicals.length} (pitää olla 1)`); continue; }
     const canon = p.canonicals[0];
@@ -227,7 +229,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   const { SITE_URL, isTest } = await import('../src/lib.mjs');
   const { cfg } = await import('../src/articles/config.mjs');
   const dist = process.env.DIST || 'dist';
-  const r = checkDist({ dist, siteUrl: SITE_URL, isTest, sections: cfg.path });
+  const r = checkDist({ dist, siteUrl: SITE_URL, isTest, sections: cfg.path, legacy: cfg.legacyPaths });
   console.log(`check-articles: sisältöosion sivuja ${r.stats.pages} (artikkeleita ${r.stats.articles}, listauksia ${r.stats.lists}, ohjaussivuja ${r.stats.redirects}), ympäristö=${isTest ? 'test' : 'prod'}`);
   if (r.warnings.length) console.log('VAROITUKSET:\n' + [...new Set(r.warnings)].join('\n'));
   if (r.errors.length) { console.log('VIRHEET:\n' + [...new Set(r.errors)].join('\n')); process.exit(1); }

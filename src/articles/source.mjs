@@ -46,10 +46,16 @@ export function makeFixtureRpc(fx) {
     }
     if (name === 'public_get_article') return fx.articles[`${args.p_lang || 'fi'}/${args.p_slug}`] || fx.moved?.[`${args.p_lang || 'fi'}/${args.p_slug}`] || { ok: false, code: 'not_found' };
     if (name === 'public_articles_sitemap') return fx.sitemap;
+    if (name === 'public_articles_redirects') {
+      if (fx.redirects) return fx.redirects;
+      if (fx.redirects === null) throw new Error('HTTP 404');   // simuloi: RPC:tä ei ole käytettävissä
+      return { ok: true, items: Object.entries(fx.moved || {}).map(([k, m]) => { const [lang, from] = [k.split('/')[0], k.split('/').slice(1).join('/')]; return { lang, from_slug: from, to_slug: m.slug, status: 301 }; }) };
+    }
     throw new Error('tuntematon RPC ' + name);
   };
 }
 
+const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const readJson = (f) => { try { return JSON.parse(readFileSync(f, 'utf8')); } catch { return null; } };
 const emptyLang = () => ({ items: [], dbPath: null, dbLabel: null });
 export const emptyData = (source = 'none', warnings = []) => ({ source, warnings, lang: { fi: emptyLang(), en: emptyLang() }, sitemap: [], redirects: [] });
@@ -112,22 +118,42 @@ export async function loadArticles({ rpc, cacheDir, committedSlugs = [], strict 
       sitemap = LANGS.flatMap((L) => lang[L].items.filter((x) => !x.card.noindex).map((x) => ({ lang: L, slug: x.slug, updated_at: x.card.updated_at, published_at: x.card.published_at, alternates: [] })));
     }
 
-    // Uudelleenohjaukset: RPC:illä ei voi listata vanhoja slugeja, joten tunnetut slugit (edellisten rakennusten välimuisti + repon content/articles-slugs.json)
-    // joita ei enää ole julkaistu kysytään yksitellen: moved → ohjaussivu, not_found → ei sivua (404).
+    // Uudelleenohjaukset (slug-historia). Ensisijainen lähde: public_articles_redirects() (booking_55) – kaikki ohjaukset yhdellä kutsulla, vain julkisille artikkeleille,
+    // ei ketjuja (vanha slug → nykyinen slug samalla kielellä). Käytetään vain lang/from_slug/to_slug; polut ja isäntänimet lasketaan repon asetuksista.
+    // Varalla (RPC ei vastaa / ei ole käytössä): tunnetut slugit (edellisten rakennusten välimuisti + content/articles-slugs.json) kysytään yksitellen public_get_article:lla.
     const known = new Map();
     for (const k of [...(snap?.known || []), ...committedSlugs]) known.set(`${k.lang}/${k.slug}`, k);
     for (const k of live) { const [l, s] = k.split('/'); known.set(k, { lang: l, slug: s }); }
-    const redirects = [];
-    await pool([...known.entries()].filter(([k]) => !live.has(k)), 4, async ([k, v]) => {
-      try {
-        const r = await rpc('public_get_article', { p_slug: v.slug, p_lang: v.lang });
-        if (r?.ok === false && r.code === 'moved' && r.slug) redirects.push({ lang: v.lang, from: v.slug, toLang: r.lang || v.lang, toSlug: r.slug });
-      } catch (err) {
-        const old = snap?.redirects?.find((x) => x.lang === v.lang && x.from === v.slug);
-        if (old) { redirects.push(old); w(`ohjaustarkistus ${k} epäonnistui (${err.message}); käytetään välimuistia`); } else w(`ohjaustarkistus ${k} epäonnistui (${err.message})`);
+    let redirects = null, redirectsSource = 'rpc';
+    try {
+      const rr = await rpc('public_articles_redirects');
+      if (rr?.ok !== true || !Array.isArray(rr.items)) throw new Error(rr?.code || 'virheellinen vastaus');
+      redirects = [];
+      const seen = new Set();
+      for (const it of rr.items) {
+        if (!LANGS.includes(it?.lang) || !SLUG.test(it.from_slug || '') || !SLUG.test(it.to_slug || '')) { w(`public_articles_redirects: virheellinen rivi ohitettu (${JSON.stringify(it).slice(0, 120)})`); continue; }
+        const key = `${it.lang}/${it.from_slug}`;
+        if (it.from_slug === it.to_slug || live.has(key) || seen.has(key)) continue;   // oma osoite ei ohjaa; julkaistu artikkeli voittaa; duplikaatti
+        seen.add(key); redirects.push({ lang: it.lang, from: it.from_slug, toLang: it.lang, toSlug: it.to_slug });
+        known.set(key, { lang: it.lang, slug: it.from_slug });   // varakeino (RPC-katko myöhemmin) tuntee vanhat slugit
       }
-    });
-    const data = { source: 'rpc', warnings: warn, lang, sitemap, redirects, known: [...known.values()] };
+    } catch (err) {
+      redirects = null;
+      w(`public_articles_redirects epäonnistui (${err.message}); ohjaukset haetaan tunnetuista slugeista (välimuisti + content/articles-slugs.json) yksitellen`);
+    }
+    if (redirects === null) {
+      redirectsSource = 'fallback'; redirects = [];
+      await pool([...known.entries()].filter(([k]) => !live.has(k)), 4, async ([k, v]) => {
+        try {
+          const r = await rpc('public_get_article', { p_slug: v.slug, p_lang: v.lang });
+          if (r?.ok === false && r.code === 'moved' && r.slug) redirects.push({ lang: v.lang, from: v.slug, toLang: r.lang || v.lang, toSlug: r.slug });
+        } catch (err) {
+          const old = snap?.redirects?.find((x) => x.lang === v.lang && x.from === v.slug);
+          if (old) { redirects.push(old); w(`ohjaustarkistus ${k} epäonnistui (${err.message}); käytetään välimuistia`); } else w(`ohjaustarkistus ${k} epäonnistui (${err.message})`);
+        }
+      });
+    }
+    const data = { source: 'rpc', redirectsSource, warnings: warn, lang, sitemap, redirects, known: [...known.values()] };
     if (snapFile) { try { mkdirSync(cacheDir, { recursive: true }); writeFileSync(snapFile, JSON.stringify({ savedAt: new Date().toISOString(), ...data })); } catch (err) { w('välimuistin kirjoitus epäonnistui: ' + err.message); } }
     return data;
   } catch (err) {

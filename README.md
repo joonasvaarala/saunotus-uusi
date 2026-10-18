@@ -129,7 +129,7 @@ Kutsun hyväksyntä: kutsusähköpostin linkki avaa `/hallinta/#access_token=…
 
 ## Saunatietoa (artikkelit)
 
-Esirenderöity sisältöosio (`/saunatietoa/`, EN `/en/sauna-guide/`), jonka artikkelit haetaan buildissa Supabasen `public_*`-RPC:illä. Asetukset yhdessä paikassa: `content/articles.json`. Arkkitehtuuri, artikkelien päätyminen sivulle, vikasietoisuus ja testit: [docs/SAUNATIETOA.md](docs/SAUNATIETOA.md).
+Esirenderöity sisältöosio (`/saunatietoa/`, EN `/en/sauna-knowledge/`), jonka artikkelit haetaan buildissa Supabasen `public_*`-RPC:illä. Asetukset yhdessä paikassa: `content/articles.json`. Arkkitehtuuri, artikkelien päätyminen sivulle, vikasietoisuus ja testit: [docs/SAUNATIETOA.md](docs/SAUNATIETOA.md).
 
 ## Päätökset ja rajaukset
 
