@@ -8,7 +8,7 @@ Tila 17.10.2026. Kaikki integraatiot on rakennettu valmiiksi **ilman ulkoisia yh
 |---|---|---|
 | `resend` | `dry_run` | `off` = viestit merkitään `skipped`; `dry_run` = viestit renderöidään ja merkitään `dry_run`, **ei lähetetä**; `live` = lähetetään Resendillä |
 | `vismapay` | `off` | `off` = ei verkkomaksua (`online_payment_enabled=false`, maksulinkkejä ei luoda asiakkaalle); `live` = maksulinkit/verkkomaksu käytössä |
-| `procountor` | `off` | `off` = kirjanpitojonoon ei kirjoiteta; `dry_run`/`live` = jokainen kuitti ja hyvityskuitti kopioidaan `accounting_outbox`-jonoon |
+| `procountor` | `off` | `off` = kuittijonoa ei kirjoiteta eikä päiväkirjausta tehdä. `dry_run`/`live` kopioi kuitit `accounting_outbox`-jonoon, mutta lähetys on päivän tosite (`daily_enabled`) ja laskun välitys. Ks. docs/procountor-integraatio.md. |
 
 Vaihto (ylläpitäjä, SQL-editori; kirjautuneena ei vielä admin-RPC:tä):
 ```sql
@@ -63,18 +63,22 @@ Pois: `update booking.integration_config set mode='off' where key='mobilepay';` 
 
 Turvallisuus: webhookin HMAC-allekirjoitus tarkistetaan, tila haetaan aina Vippsistä (`GET /payments/{reference}`), Idempotency-Key kaikissa kirjoittavissa kutsuissa, yritysviitteet `sauna-o<tilausnro>-p<maksu>-a<yritys>`, asiakkaan henkilötietoja ei tallenneta lokiin/`raw`-kenttään, Johku-tilaukset eristetty. Testit: `booking/supabase/tests/mobilepay/t49_mobilepay.sql` (60 tarkistusta, rullaa takaisin) ja `deno test booking/supabase/functions/_tests/mobilepay_test.ts` (32 testiä, mock-Vipps).
 
-## 4. Procountor (kirjanpito) – ei toteutettu, runko valmiina
-Valmiina: `accounting_outbox` (kind, order_id, payment_id, receipt_id, `dedupe_key`, `payload` = kuitin snapshot, `status`, `attempts`, `environment`), täyttö kuiteista kun `procountor.mode <> 'off'`, edge-funktio `procountor-sync` (501), asetus `procountor_env` (`pts`/`prod`).
-Tarvitaan käyttöönottoon:
-- Procountor-yrityksen **API-käyttöoikeus**: OAuth2-asiakas (`client_id`, `client_secret`) + API-avain, yrityksen tunniste (company id) ja käyttäjätunnus-sidonta → Edge-salaisuudet **`PROCOUNTOR_CLIENT_ID`**, **`PROCOUNTOR_CLIENT_SECRET`**, **`PROCOUNTOR_API_KEY`**; ympäristö: aloita PTS-testiympäristössä (`procountor_env='pts'`).
-- Kirjanpidon päätökset: tilikartta (myyntitilit ALV-kannoittain 25,5 % / 13,5 % / 0 %, hyvitykset, käteispyöristys), maksutapa → kassa-/pankki-/korttitili, kuittityyppi (myyntilasku vs. ostolasku/kuitti-kirjaus), ALV-koodit, Visma Pay -tilitykset. Nämä sovitaan kirjanpitäjän kanssa; toteutus mäppää snapshotin `lines`/`vat`/`payment.method` niihin.
-- Ennen `live`-tilaa: `dry_run` (jono täyttyy, mitään ei lähetetä) ja täsmäytys Raportit-näkymään.
+## 4. Procountor (kirjanpito) – adapteri, oletuksena pois päältä
+Sopimus ja lähteet: [docs/procountor-integraatio.md](../../docs/procountor-integraatio.md). Edge-funktio `procountor-sync` (verify_jwt pois; tunnistus `x-sync-secret`). Ilman `PROCOUNTOR_*`-salaisuuksia toiminto on dry_run: mitään ei lähetetä.
+
+Myyntikirjaus on **päivän tosite** (`POST /ledgerreceipts`, tyyppi JOURNAL). Se kootaan `booking._report_json`-raportista, ei kuitteja uudelleen laskemalla. `accounting_outbox` täyttyy yhä kuiteista kun `procountor.mode <> 'off'`, mutta `procountor-sync` ei lähetä niitä (sama myynti ei kirjaudu kahdesti).
+
+Laskun välitys on erillinen: `action=send_invoice` ja normalisoitu JSON. Tauluja `booking.invoices` / `booking.invoice_lines` tämä ei luo.
+
+Tila: `booking.accounting_exports` (RLS: luku `settings.edit`). Hallinnan asetuksissa näkyy yhdistetty / harjoitusajo / pois, viimeisin ajo ja virheet. Ei salaisuuksia.
+
+Salaisuudet vain Edgeen: **`PROCOUNTOR_CLIENT_ID`**, **`PROCOUNTOR_CLIENT_SECRET`**, **`PROCOUNTOR_API_KEY`**, **`PROCOUNTOR_REDIRECT_URI`**. Tilit ja ALV-tila ovat `integration_config.settings` (ei salaisuuksia). Ajastus `booking_procountor_daily` (04:20) on paikallaan, mutta ei tee mitään ennen kuin `mode <> 'off'` ja `settings.daily_enabled = true` ja salaisuudet on asetettu. Aloita PTS-testissä (`settings.environment` oletus `pts`).
 
 ## 5. Muut käyttöönoton tarkistukset
 - **Kuitin tiedot:** `settings.seller` (nimi, y-tunnus 3018112-1, ALV-tunnus FI30181121 – johdettu y-tunnuksesta, vahvista, osoite, yhteystiedot, `logo_url`, alatunniste). Logo: `settings.seller.logo_url` = julkinen PNG (`https://joonasvaarala.github.io/saunotus-uusi/img/logo-kuitti.png` kun julkaistu); **asetettu 17.10.2026** (URL palauttaa 200 image/png). Vaihto: `update booking.settings set value = jsonb_set(value, '{logo_url}', to_jsonb('…'::text)) where key = 'seller';`. Muuten PDF tehdään ilman logoa.
 - **Numerointi:** sarjat `receipt_series` (`K`/`H`), vuosi Helsingin ajassa, aukoton; kuitteja ei voi muuttaa tai poistaa (trigger `receipt_immutable`). Älä muuta sarjaa tuotannossa kuin uuden vuoden/sarjan alussa.
 - **Säilytys:** kuitit ovat `booking.receipts`-taulussa (snapshot + teksti) ja PDF-välimuisti yksityisessä Storage-bucketissa `receipts` (voi luoda uudelleen snapshotista). Säilytä vähintään 6 vuotta; taulun varmuuskopiointi Supabasen PITR/varmuuskopioilla.
-- **Edge-funktiot (verify_jwt):** `receipt-pdf` (ei; token), `send-emails` (ei; `x-sync-secret`), `vismapay-start`/`vismapay-notify` (ei; ulkoinen kutsuja/allekirjoitus), `vismapay-refund`/`procountor-sync`/`report-pdf` (kyllä).
+- **Edge-funktiot (verify_jwt):** `receipt-pdf` (ei; token), `send-emails` ja `procountor-sync` (ei; `x-sync-secret`), `vismapay-start`/`vismapay-notify` (ei; ulkoinen kutsuja/allekirjoitus), `vismapay-refund`/`report-pdf` (kyllä).
 - **Raportit:** kassaperuste (kuitin antopäivä). Ennen kuittijärjestelmää tehdyt maksut eivät näy raporteissa; ne näkyvät `unreceipted`-täsmäytysavaimessa.
 
 ## Sähköpostipohjat (`send-emails/templates.ts`)
