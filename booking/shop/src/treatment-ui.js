@@ -18,8 +18,8 @@ export function createTreatmentViews(c) {
   const when = (iso) => `${dayShort(iso)}${S.lang === 'fi' ? ', klo ' : ' · '}${tm(iso)}`;
   const q = (hash) => new URLSearchParams(hash.split('?')[1] || '');
   const ot = OPT[S.lang] || OPT.fi;   // tuotevalinnan tekstit (booking_50)
-  // virheviesti: valinnan virheet (options-texts) → lisäpalveluvirheet (site_texts ui.checkout.error_<koodi>, §18.2; puuttuu → palvelimen message) → pitotilan virheet → kaupan vanhat viestit
-  const errMsg = (r) => (O.isOptionError(r.code) ? ot[`err.${r.code}`] : A.isAddonError(r.code) ? tx(A.errorTextKey(r.code)) || r.message || tr.errors.generic : holdError(S.lang, r.code) || tr.errors[A.errorKey(r.code)] || tr.errors.generic);
+  // virheviesti: valinnan virheet (options-texts) → lisäpalveluvirheet (site_texts ui.checkout.error_<koodi>, §18.2; puuttuu → ui.shop.error_generic; palvelimen raaka message ei asiakkaalle) → pitotilan virheet → kaupan vanhat viestit
+  const errMsg = (r) => (O.isOptionError(r.code) ? ot[`err.${r.code}`] : A.isAddonError(r.code) ? tx(A.errorTextKey(r.code)) || t.errorGeneric : holdError(S.lang, r.code) || tr.errors[A.errorKey(r.code)] || tr.errors.generic);
   const optPicker = (p, o) => createOptionPicker({ h, lang: S.lang, product: p, options: p.options, ...o });
   const optQ = (code) => (code ? `&o=${encodeURIComponent(code)}` : '');
 

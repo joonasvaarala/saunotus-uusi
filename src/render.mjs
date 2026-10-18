@@ -1,6 +1,7 @@
 // Sivupohjat ja komponentit. Kaikki palauttavat HTML-merkkijonoja; ei ajonaikaista JS:ää (paitsi pieni "tänään"-korostus).
 import { readFileSync } from 'node:fs';
 import { sortReviews } from './reviews-sort.mjs';
+import { cards, alts, pageDoc } from './content-texts.mjs';
 import { articlesNav, homeSection } from './articles/runtime.mjs';
 import { tx } from './site-texts.mjs';
 import {
@@ -8,8 +9,6 @@ import {
   johku, bookingUrl, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
 } from './lib.mjs';
 
-const cards = read('content/cards.json');
-const alts = read('content/alts.json');
 const minifyCss = (src) => src
   .replace(/__BASE__/g, BASE)
   .replace(/\/\*[\s\S]*?\*\//g, '')
@@ -71,13 +70,13 @@ function metaItems(c, p, lang) {
       out.push(`<li class="pr">${e(txt)}${per}</li>`);
       if (c.extra) {
         const x = extraFrom(p);
-        if (x) out.push(`<li><small>+ ${e(money(x, lang))} / ${lang === 'fi' ? 'lisähenkilö' : 'extra guest'}</small></li>`);
+        if (x) out.push(`<li><small>+ ${e(money(x, lang))} / ${e(ui(lang).extraGuest)}</small></li>`);
       }
     } else if (k === 'duration') {
       let t = o.duration?.[lang];
       if (!t && p.duration_minutes) {
         t = dur(p.duration_minutes);
-        if (/^noin/i.test(p.duration_text || '')) t = (lang === 'fi' ? 'noin ' : 'about ') + t;
+        if (/^noin/i.test(p.duration_text || '')) t = `${ui(lang).approx} ${t}`;
       }
       if (t) out.push(`<li>${e(t)}</li>`);
     } else if (o[k]?.[lang]) {
@@ -277,9 +276,9 @@ ${body}
 <div class="fbrand"><img src="${href('/img/favicon.svg')}" width="34" height="47" alt="" loading="lazy"><div><b>SAUNOTUS</b><small>${e(u.brandTitle)}</small><p>${e(u.footerTag)}</p></div></div>
 <div><h2>${e(u.footerServices)}</h2><ul><li><a href="${fl('sauna', lang)}">${e(u.nav[0][1])}</a></li><li><a href="${fl('treatments', lang)}">${e(u.nav[1][1])}</a></li><li><a href="${fl('gift', lang)}">${e(u.nav[3][1])}</a></li>${an ? `<li><a href="${e(an.href)}">${e(an.label)}</a></li>` : ''}<li><a href="${fl('companies', lang)}">${e(u.companies)}</a></li><li><a href="${e(site.trainingUrl)}" rel="noopener">${e(u.nav[2][1])}${NEW(lang)}</a></li><li><a href="${fl('book', lang)}">${e(u.bookFull)}</a></li></ul></div>
 <div><h2>${e(u.footerInfo)}</h2><ul>${u.infoLinks.map(([id, l]) => `<li><a href="${pageHref('info', lang, id)}">${e(l)}</a></li>`).join('')}</ul></div>
-<div><h2>${e(u.footerContact)}</h2><ul><li><address style="all:unset">${e(site.contact.street)}<br>${e(site.contact.postal)} ${e(site.contact.city)}</address></li><li><a href="tel:${site.contact.phoneTel}">${e(site.contact.phone)}</a></li><li><a href="mailto:${site.contact.email}">${e(site.contact.email)}</a></li><li><a href="${e(site.contact.mapsUrl)}" rel="noopener">${lang === 'fi' ? 'Reittiohje' : 'Directions'}${NEW(lang)}</a></li>${site.social.map((s) => `<li><a href="${e(s.url)}" rel="noopener">${e(s.name)}${NEW(lang)}</a></li>`).join('')}</ul></div>
+<div><h2>${e(u.footerContact)}</h2><ul><li><address style="all:unset">${e(site.contact.street)}<br>${e(site.contact.postal)} ${e(site.contact.city)}</address></li><li><a href="tel:${site.contact.phoneTel}">${e(site.contact.phone)}</a></li><li><a href="mailto:${site.contact.email}">${e(site.contact.email)}</a></li><li><a href="${e(site.contact.mapsUrl)}" rel="noopener">${e(ui(lang).directions)}${NEW(lang)}</a></li>${site.social.map((s) => `<li><a href="${e(s.url)}" rel="noopener">${e(s.name)}${NEW(lang)}</a></li>`).join('')}</ul></div>
 </div>
-<div class="fbottom"><span>© ${new Date().getFullYear()} ${e(kb.business.legal_name)} · ${lang === 'fi' ? 'Y-tunnus' : 'Business ID'} ${e(kb.business.business_id)}</span><ul><li><a href="${fl('terms', lang)}">${e(u.legal)}</a></li><li><a href="${pageHref('privacy', 'fi')}"${lang === 'en' ? ' hreflang="fi" lang="fi"' : ''}>${e(u.privacy)}</a></li></ul></div>
+<div class="fbottom"><span>© ${new Date().getFullYear()} ${e(kb.business.legal_name)} · ${e(ui(lang).businessId)} ${e(kb.business.business_id)}</span><ul><li><a href="${fl('terms', lang)}">${e(u.legal)}</a></li><li><a href="${pageHref('privacy', 'fi')}"${lang === 'en' ? ' hreflang="fi" lang="fi"' : ''}>${e(u.privacy)}</a></li></ul></div>
 </div></footer>
 ${chat}
 <script>(function(){var d=new Intl.DateTimeFormat('en-US',{weekday:'short',timeZone:'Europe/Helsinki'}).format(new Date()),i={Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6}[d],l=document.querySelectorAll('.week>li');if(l[i]){l[i].classList.add('is-today');l[i].setAttribute('aria-current','date')}})()</script>
@@ -287,7 +286,7 @@ ${chat}
 }
 
 // ---- sivut ----
-const P = (name) => read(`content/pages/${name}.json`);
+const P = pageDoc;
 
 export const homeMeta = (lang) => P('home')[lang].meta;
 export function home(lang, opt = {}) {
@@ -372,7 +371,7 @@ export function info(lang) {
     if (x.p !== undefined) return `<p>${x.p}</p>${x.link ? `<p><a href="${e(x.link.url === 'hsl' ? site.contact.hslUrl : x.link.url)}" rel="noopener">${e(x.link.label)}${NEW(lang)}</a></p>` : ''}${x.mail ? `<p><a href="${e(mailto())}">${e(site.contact.email)}</a></p>` : ''}`;
     if (x.ul) return `<ul>${x.ul.map((i) => `<li>${e(i)}</li>`).join('')}</ul>`;
     if (x.note) return `<p class="note-box">${x.note}</p>`;
-    if (x.address) return `<address><strong>${e(kb.business.trade_name)}</strong><br>${e(site.contact.street)}, ${e(site.contact.postal)} ${e(site.contact.city)}<br><a href="${e(site.contact.mapsUrl)}" rel="noopener">${lang === 'fi' ? 'Avaa Google Mapsissa' : 'Open in Google Maps'}${NEW(lang)}</a></address>`;
+    if (x.address) return `<address><strong>${e(kb.business.trade_name)}</strong><br>${e(site.contact.street)}, ${e(site.contact.postal)} ${e(site.contact.city)}<br><a href="${e(site.contact.mapsUrl)}" rel="noopener">${e(ui(lang).openInMaps)}${NEW(lang)}</a></address>`;
     return '';
   }).join('');
   const secs = d.sections.map((s) => `<div class="info-sec" id="${s.id}"><div>${icon(s.icon, 40)}<h2>${e(s.title)}</h2><p class="tag">${e(s.tag)}</p></div><div>${blocks(s.blocks)}</div></div>`).join('');

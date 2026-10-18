@@ -3,6 +3,7 @@
 // Jos komponentti ei lataudu (CDN estetty, offline) näytetään ohjeen mukainen varapainike (MobilePay-sininen, valkoinen teksti, ei omaa logoa).
 import { h } from './gift-ui.js';
 import { mt } from './mobilepay-texts.js';
+import { T } from './i18n.js';
 import { pollPayment, safeRedirect, shouldShowButton, normOptions, POLL_INTERVAL_MS, POLL_MAX_MS } from './mobilepay-logic.js';
 
 export const OFFICIAL_SRC = 'https://cdn.vippsmobilepay.com/js/button/button.js';
@@ -59,7 +60,7 @@ export function payBlock({ S, L, api, opts, env = {}, amount = '', navigate = (u
   const tx = (k, v) => mt(L, k, v);
   const msg = h('div', { class: 'ord-msg mp-msg', 'aria-live': 'polite', 'data-testid': 'mp-msg' });
   const hasKey = (k) => mt(L, k) !== k;
-  const failMsg = (r) => (r?.code && hasKey(`err.${r.code}`) ? tx(`err.${r.code}`) : (L === 'fi' && r?.message && !['network', 'timeout'].includes(r.code) ? r.message : tx('err.generic')));
+  const failMsg = (r) => (r?.code && hasKey(`err.${r.code}`) ? tx(`err.${r.code}`) : (['network', 'timeout'].includes(r?.code) ? tx('err.generic') : (T[L] || T.fi).errorGeneric));
   let busy = false, btn = null;
   async function activate() {
     if (busy) return;

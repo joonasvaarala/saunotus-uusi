@@ -178,8 +178,8 @@ const checkErrs = (page, where, allow = []) => { const bad = page.__errs.filter(
   };
   await errCase('palvelinvirhe provider_error', { start: 'error' }, /MobilePay ei vastannut/, 'provider_error');
   await errCase('verkkovirhe', { start: 'abort' }, /Yhteys MobilePayhin ei onnistunut/, 'network');
-  await errCase('tuntematon koodi → palvelimen viesti (FI)', { start: 'unknown' }, /Palvelimen oma viesti/, 'jokin_uusi');
-  await errCase('ei-JSON-vastaus (502)', { start: 'html' }, /Maksun aloitus epäonnistui/, 'http_502');
+  await errCase('tuntematon koodi → ui.shop.error_generic (palvelimen raaka viesti ei asiakkaalle)', { start: 'unknown' }, /^Jokin meni pieleen\. Yritä hetken kuluttua uudelleen tai ota yhteyttä meihin\.$/, 'jokin_uusi');
+  await errCase('ei-JSON-vastaus (502) → ui.shop.error_generic', { start: 'html' }, /^Jokin meni pieleen\. Yritä hetken kuluttua uudelleen tai ota yhteyttä meihin\.$/, 'http_502');
   await errCase('http-ohjausosoite hylätään', { start: 'insecure' }, /Maksun aloitus epäonnistui/);
   // englanti: virheteksti englanniksi
   st = await newState({ start: 'error', locale: 'en' }); s = await open({ st, lang: 'en' }); await s.page.waitForSelector('[data-testid=mp-button]');

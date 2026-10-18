@@ -37,6 +37,7 @@ cpSync(join(repo, 'booking/shared/sb.js'), join(A, 'sb.js'));
 // Sivutekstit tietokannasta (§18, src/site-texts.mjs): kaupan avainalueet (ui.*) tiedostoon booking/site-texts.json; paikkamerkit täytetään kaupassa ajoajan datasta. Build on jo tarkistanut paikkamerkit (tuntematon → build kaatuu).
 const siteTexts = await ST.loadSiteTexts();
 ST.setSiteTexts(siteTexts);   // layout() hakee yläpalkin alarivin tx():llä
+(await import(resolve(repo, 'src/content-texts.mjs'))).applyContentTexts(siteTexts, { log: { warn: () => {} } });   // varaus-/tilaussivujen kehys (valikko, alatunniste) käyttää samoja sivutekstejä kuin staattinen sivusto
 writeFileSync(join(A, 'site-texts.json'), JSON.stringify(ST.shopPayload(siteTexts)));
 const cfg = {
   url: process.env.BOOKING_SUPABASE_URL ?? 'http://localhost:4181', anonKey: process.env.BOOKING_ANON_KEY ?? 'anon-demo-key',

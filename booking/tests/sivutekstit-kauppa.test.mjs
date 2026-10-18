@@ -1,5 +1,5 @@
 // Sivutekstit osa 3 / PR 1 (sopimus §18): kaupan kovakoodatut tekstit avaimiksi + tuontitiedosto + DB-peitto repon oletuksilla.
-//  * content/site-texts.pending-import.json noudattaa admin_texts_import-sääntöjä (booking_62) ja §18.2-nimeämistä; ei sisällä tuotannossa jo olevia avaimia; vastaa koodin oletuksia (generoitu koodista)
+//  * content/site-texts.imported-pr61.json noudattaa admin_texts_import-sääntöjä (booking_62) ja §18.2-nimeämistä; ei sisällä tuotannossa jo olevia avaimia; vastaa koodin oletuksia (generoitu koodista)
 //  * peitto (applySiteTexts): DB-teksti kun saman kielen rivi on, muuten repon oletus (ei fi→en-ristiin), paikkamerkit {{var:…}}, {{price:ID}}, aliakset, funktiolehdet (monikko)
 //  * kierros: tuontitiedosto peittona → kaikki sanakirjat täsmälleen ennallaan (ulkoasu ei muutu)
 // Ei verkkoa eikä tietokantaa.
@@ -31,7 +31,7 @@ const { PT } = await imp('booking/shop/src/pay-choices-texts.js');
 const { OPT } = await imp('booking/shop/src/options-texts.js');
 const DICTS = { T, OT, GT, HT, PT, MT, OPT };
 
-const PENDING = J('content/site-texts.pending-import.json');
+const PENDING = J('content/site-texts.imported-pr61.json');
 const FALLBACK = J('content/site-texts.fallback.json');      // tietokannan julkaistut tekstit (public_get_site_texts)
 const IMPORTED = J('content/site-texts.imported.json');
 const PHONE = '010 299 2866';
@@ -65,27 +65,30 @@ test('tuontitiedosto: rivit noudattavat admin_texts_import-sääntöjä (avain, 
   }
   for (const k of new Set(PENDING.map((r) => r.key))) assert.ok(seen.has(`${k}|fi`) && seen.has(`${k}|en`), `${k}: FI+EN molemmat (§18.9 kohta 2)`);
 });
-test('tuontitiedosto: ei sisällä tuotannossa jo olevia avaimia (ei ylikirjoitusta) eikä tuotuja ui.checkout.error_*-avaimia', () => {
-  const have = new Set(FALLBACK.texts.map((r) => `${r.key}|${r.lang}`));
-  for (const r of IMPORTED) have.add(`${r.key}|${r.lang}`);
-  const clash = PENDING.filter((r) => have.has(`${r.key}|${r.lang}`)).map((r) => `${r.key} [${r.lang}]`);
-  assert.deepEqual(clash, []);
-  assert.ok(FALLBACK.texts.some((r) => r.key === 'ui.checkout.error_addon_inactive'), 'fallback sisältää tuodut avaimet');
+test('PR 1:n tuontitiedosto on tuotu (#61): jokainen rivi on varatekstissä (tuotanto) samalla tekstillä, ja varateksti sisältää ui.shop.error_generic', () => {
+  const have = new Map(FALLBACK.texts.map((r) => [`${r.key}|${r.lang}`, r.text]));
+  // Tuotannossa tekstejä on voitu muokata tuonnin jälkeen (versio ≥ 2, esim. Perinnesauna-kirjoitusasu): DB on totuus, repon oletus ei ylikirjoita. Versio 1 = täsmälleen tuotu teksti.
+  const ver = new Map(FALLBACK.texts.map((r) => [`${r.key}|${r.lang}`, r.version]));
+  const diff = PENDING.filter((r) => have.get(`${r.key}|${r.lang}`) !== r.text && !(ver.get(`${r.key}|${r.lang}`) > 1)).map((r) => `${r.key} [${r.lang}]`);
+  assert.deepEqual(diff, [], 'tuotanto poikkeaa tuodusta tiedostosta ilman muokkausversiota');
+  assert.ok(PENDING.every((r) => have.has(`${r.key}|${r.lang}`)), 'jokainen tuotu rivi on tuotannossa');
+  assert.ok(have.has('ui.shop.error_generic|fi') && have.has('ui.shop.error_generic|en'));
 });
 test('tuontitiedosto: yksi tuontikutsu enintään 500 riviä → jaettavissa erin; koko ≤ 3 erää', () => {
   assert.ok(Math.ceil(PENDING.length / 500) <= 3, `${PENDING.length} riviä`);
 });
 test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-shop.mjs tuottaa täsmälleen saman tiedoston (ei poikkeamaa koodin oletuksista)', () => {
   const prod = join(work, 'prod.json'), out = join(work, 'out.json');
-  writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts }));
+  const imp = new Set(PENDING.map((r) => r.key));
+  writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts.filter((r) => !imp.has(r.key)) }));   // tuotanto ennen #61:n tuontia
   const r = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', prod, '--out', out], { encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);
-  assert.equal(readFileSync(out, 'utf8'), rd('content/site-texts.pending-import.json'));
+  assert.equal(readFileSync(out, 'utf8'), rd('content/site-texts.imported-pr61.json'));
 });
 test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet avaimet)', () => {
   const prod = join(work, 'prod2.json'), out = join(work, 'out2.json');
   const have = PENDING.filter((r) => r.key.startsWith('ui.order.') || r.key === 'ui.shop.title');
-  writeFileSync(prod, JSON.stringify({ ok: true, texts: [...FALLBACK.texts, ...have.map((r) => ({ key: r.key, lang: r.lang, text: 'tuotannon teksti', version: 1, placeholders: [] }))] }));
+  writeFileSync(prod, JSON.stringify({ ok: true, texts: [...FALLBACK.texts.filter((r) => !PENDING.some((p) => p.key === r.key)), ...have.map((r) => ({ key: r.key, lang: r.lang, text: 'tuotannon teksti', version: 1, placeholders: [] }))] }));
   const r = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', prod, '--out', out], { encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);
   const rows = JSON.parse(readFileSync(out, 'utf8'));

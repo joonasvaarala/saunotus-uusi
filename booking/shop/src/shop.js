@@ -533,12 +533,12 @@ async function viewCheckout(ruleId, ds, productId, via) {
       const chosen = addons.filter((a) => qty.get(a.id) > 0).map((a) => ({ id: a.id, quantity: qty.get(a.id) }));
       const r = await rpc('public_create_booking', { p_rule_id: s.rule_id, p_date: ds, p_persons: n, p_name: cust.name, p_email: cust.email, p_phone: cust.phone, p_marketing_consent: consent.checked, p_locale: S.lang, p_note: (f.get('note') || '').trim() || null,
         p_customer_kind: cust.kind, p_company: cust.company, p_addons: chosen.length ? chosen : null });
-      if (!r.ok) throw Object.assign(new Error(holdError(S.lang, r.code) || t.errors[r.code] || r.message), { code: r.code });
+      if (!r.ok) throw Object.assign(new Error(holdError(S.lang, r.code) || t.errors[r.code] || t.errorGeneric), { code: r.code, mapped: true });
       state.months.clear();
       location.assign(`${S.confirmHref}${mockQs()}#${r.token}`);
     } catch (e) {
       submit.disabled = false; submit.textContent = hmode.on ? ht(S.lang, 'checkout.button') : t.book;
-      msg.replaceChildren(errorBox(e.message || t.loadError));
+      msg.replaceChildren(errorBox(e.mapped ? e.message : t.errorGeneric));   // palvelimen raaka message ei koskaan asiakkaalle (ui.shop.error_generic)
       if (['capacity_exceeded', 'private_booked', 'public_shift_booked', 'space_closed'].includes(e.code)) state.months.clear();
       msg.firstChild.setAttribute('tabindex', '-1'); msg.firstChild.focus();
     }
@@ -635,7 +635,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   if (b.status === 'pending') actions.append(h('button', { type: 'button', class: 'btn light', onclick: async () => {
     if (!confirm(t.cancelConfirm)) return;
     const r = await rpc('public_cancel_booking', { p_token: token });
-    out.replaceChildren(r.ok ? h('p', { class: 'bk-ok', text: t.cancelled }) : errorBox(r.message || t.cancelFail));
+    out.replaceChildren(r.ok ? h('p', { class: 'bk-ok', text: t.cancelled }) : errorBox(t.errors[r.code] || t.cancelFail));
     if (r.ok) setTimeout(() => location.reload(), 800);
   } }, t.cancelBooking));
   mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { 'data-testid': 'conf-title', text: b.status === 'cancelled' ? t.confCancelled : b.status === 'expired' ? t.confExpired : b.status === 'pending' || (co && co.awaiting) ? ht(S.lang, 'h2.awaiting') : t.confTitle }), h('p', { class: 'bk-status', role: 'status', 'data-testid': 'conf-status', text: head }), holdHost, mpHost, dl,   // pitotilassa: otsikko + tilabadge → pitopaneeli → tiivis tilausyhteenveto → maksuosio (secEl lisätään yhteenvedon jälkeen)
@@ -744,12 +744,12 @@ async function viewChange(token, b) {
       if (st.session) { args.p_rule_id = st.session.rule_id; args.p_date = st.date; }
       if (n !== it.persons) args.p_persons = n;
       const r = await rpc('public_change_booking', args);
-      if (!r.ok) throw Object.assign(new Error(t.errors[r.code] || r.message), { code: r.code });
+      if (!r.ok) throw Object.assign(new Error(t.errors[r.code] || t.errorGeneric), { code: r.code, mapped: true });
       state.months.clear();
       location.hash = token; window.scrollTo({ top: 0 });
     } catch (e) {
       submit.textContent = t.saveChange; upd();
-      msg.replaceChildren(errorBox(e.message || t.loadError)); msg.firstChild.setAttribute('tabindex', '-1'); msg.firstChild.focus();
+      msg.replaceChildren(errorBox(e.mapped ? e.message : t.errorGeneric)); msg.firstChild.setAttribute('tabindex', '-1'); msg.firstChild.focus();
       if (['capacity_exceeded', 'private_booked', 'public_shift_booked', 'space_closed'].includes(e.code)) loadSessions();
     }
   } }, h('fieldset', {}, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, minus, num, plus)), summary, msg, submit);
