@@ -62,6 +62,8 @@ jobs:
       # pakettituote Saunarituaali ja savusaunavuoro (kb 7, booking_58, §17.11): aikajana, loppuaika +2 h, la/su, mock, tuotantofixture
       - run: node --test booking/tests/saunarituaali.test.mjs
       # Sivutekstit tietokannasta (§18) + tuote 7 kentät (booking_61): paikkamerkit, build-haku/välimuisti/varateksti, p_addons, virhekoodit (fixture, ei verkkoa)
+      # puhelinnumero: yksi vakio (booking/shop/src/phone.js), yhtenäinen näkyvä muoto ja tel-linkki kaikkialla; ei vanhoja muotoja lähdekoodissa
+      - run: node --test booking/tests/puhelin.test.mjs
       - run: node --test booking/tests/sivutekstit.test.mjs
       # Sivutekstit osa 3 / PR 1: kaupan sanakirjat avaimiksi, tuontitiedosto (ei ylikirjoita tuotantoa, generoitu koodista), DB-peitto + repon oletukset (ei verkkoa)
       - run: node --test booking/tests/sivutekstit-kauppa.test.mjs

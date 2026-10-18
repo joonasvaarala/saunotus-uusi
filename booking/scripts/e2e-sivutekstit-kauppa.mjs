@@ -39,7 +39,7 @@ const DIST = join(WORK, 'dist');
 const b = spawnSync('node', [join(root, 'booking/shop/build.mjs')], { cwd: root, encoding: 'utf8', env: { ...process.env, SITE_URL: 'http://localhost:4180', SITE_ENV: 'test', SITE_TEXTS_FIXTURE: join(WORK, 'fixture.json'), SHOP_DIST: DIST } });
 if (b.status !== 0) { console.error(b.stdout.slice(-2000), b.stderr.slice(-2000)); process.exit(1); }
 expect(!/käyttää repon varatekstiä/.test(b.stdout), 'buildin pitäisi löytää kaikki page.*/seo.*-avaimet fixturesta');
-const PHONE = JSON.parse(readFileSync(join(root, 'content/site.json'), 'utf8')).contact?.phone;
+const PHONE = (await import(pathToFileURL(join(root, 'booking/shop/src/phone.js')))).PHONE_DISPLAY;   // yksi vakio (näkyvä muoto 010 299 2866)
 expect(!!PHONE, 'site.contact.phone puuttuu');
 
 const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.avif': 'image/avif', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.ico': 'image/x-icon' };

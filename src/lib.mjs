@@ -3,7 +3,11 @@ import { readFileSync } from 'node:fs';
 
 export const read = (p) => JSON.parse(readFileSync(new URL('../' + p, import.meta.url), 'utf8'));
 
-export const site = read('content/site.json');
+import { PHONE_DISPLAY, PHONE_TEL } from '../booking/shop/src/phone.js';
+
+// Puhelinnumero tulee yhdestä vakiosta (booking/shop/src/phone.js), ei site.json:sta: näkyvä "010 299 2866", linkki tel:+358102992866.
+const siteJson = read('content/site.json');
+export const site = { ...siteJson, contact: { ...siteJson.contact, phone: PHONE_DISPLAY, phoneTel: PHONE_TEL } };
 export const kb = read('content/kb/kb.json');
 export const images = read('content/images.json');
 export const hero = read('content/hero.json');

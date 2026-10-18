@@ -71,3 +71,7 @@ Etusivu, sivupohjat (sauna, hoidot, lahjakortti, varaa-info, info, yrityksille, 
 4. Koodi lukee tekstin `tx()`:llä (build) tai kaupan `texts.tx()`:llä; puuttuessa ketju on site_text → repon oletus → `ui.shop.error_generic` (palvelimen raaka `message` ei koskaan asiakkaalle).
 
 Testit: `node --test booking/tests/sivutekstit.test.mjs booking/tests/sivutekstit-kauppa.test.mjs booking/tests/sivutekstit-sivut.test.mjs`; e2e: `booking/scripts/e2e-tuote7-kentat.mjs`, `booking/scripts/e2e-sivutekstit-kauppa.mjs` (rakentaa fixture-dist:n itse).
+
+## Puhelinnumero (yksi vakio)
+
+Päätös (Joonas 18.10.2026): näkyvä muoto on aina `010 299 2866` ja linkki aina `tel:+358102992866`. Numero on koodissa yhdessä paikassa: `booking/shop/src/phone.js` (`PHONE_DISPLAY`, `PHONE_TEL`, `phoneHref()`). `src/lib.mjs` täyttää siitä `site.contact.phone`/`phoneTel` (ei enää `content/site.json`issa), kaupan sanakirjat (`i18n.js`) ja `{{var:phone}}` käyttävät samaa arvoa. Sähköpostipohjat (Deno) pitävät oman kopion (`templates.ts` `PHONE`/`PHONE_TEL`), jonka `templates.test.mjs` vertaa vakioon. PDF:ien numero tulee asetuksesta `seller.phone` (tietokanta). Testi `booking/tests/puhelin.test.mjs` estää vanhat muodot (`+358 10 299 2866`, `tel:0102992866` …) lähdekoodissa. Tietokannan tekstirivit (`booking.site_texts`) korjataan tietokannassa, ei repossa: `content/site-texts.*.json` ovat niiden kopioita.
