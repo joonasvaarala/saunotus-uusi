@@ -10,7 +10,7 @@ export function normCheckout(r) {
   const s = r.checkout_state, num = (v) => (v == null || v === '' || !Number.isFinite(+v) ? null : +v);
   return { state: s, awaiting: s === 'awaiting_payment' || s === 'processing_payment', processing: s === 'processing_payment', preliminary: s === 'preliminary', expired: s === 'expired', cancelled: s === 'cancelled',
     confirmed: s === 'confirmed' || s === 'confirmed_unpaid', holdKind: r.hold_kind ?? null, expiresAt: ms(r.hold_expires_at), serverNow: ms(r.server_now), secondsLeft: num(r.seconds_left), remaining: num(r.remaining_amount ?? r.unpaid),
-    inProgress: r.payment_in_progress === true || s === 'processing_payment' };
+    inProgress: r.payment_in_progress === true || s === 'processing_payment', cancelReason: typeof r.cancel_reason === 'string' && r.cancel_reason ? r.cancel_reason : null };
 }
 export const isHoldView = (co) => !!co && HOLD_VIEWS.includes(co.state);
 // Pitotila (kassa): palvelimen public_checkout_payment_options().hold_until_paid; jos RPC ei vastaa, vanha asetus public_payment_mode (vain lukeminen)

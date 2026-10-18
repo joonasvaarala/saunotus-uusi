@@ -63,9 +63,9 @@ Etusivu, sivupohjat (sauna, hoidot, lahjakortti, varaa-info, info, yrityksille, 
 - **Tunnettu poikkeama oletuksissa:** FI-monikko "Lahjakorttit ovat valmiit" / "lahjakorttit toimitetaan" (oikein "Lahjakortit") on säilytetty sellaisenaan (tavu tavulta -vaatimus); korjaus kuuluu hyväksyntäprosessiin (`texts_propose`).
 - Ei siirretty: raportti-PDF (`report-pdf`, sisäinen), `vismapay-start` (runko, ei asiakaskäytössä), tietokantafunktioiden tuottama teksti (kuitin `text_body`, MobilePay-maksun kuvaus `mobilepay_payment_prepare`, `email_outbox_claim`-data), kumppanien nimet ovat avaimina (`email.voucher.partner_*`) mutta samat FI/EN.
 
-## Yrityksille (luonnos, ei vielä tuotu)
+## Yrityksille
 
-`content/site-texts.pending-import-4.json` on Yrityksille-sivun ja tarjouspyyntösähköpostien luonnos (FI+EN): sivun uudet `page.companies.flow.*` / `nav.main.companies` sekä `email.business_quote.*`. Tarjouspyynnön suostumuksen vieressä on erillinen linkki tietosuojaselosteeseen (`page.companies.flow.notice_link`, luokka normal). Neljää tietosuojariviä (`flow.privacy` ja `flow.error_privacy_required`, FI+EN) ei muuteta. Vanhoja avaimia (myös hinnoiteltu `seo.companies.description` ja yrityskortit) tiedosto ei sisällä eikä tuonti ylikirjoita. Bottiavustus tuo sen `admin_texts_import`-kutsulla (≤ 500 riviä). Tekstit ovat luonnoksia, jotka Otto ja Joonas hyväksyvät.
+`content/site-texts.imported-pr75.json` sisältää Yrityksille-sivun ja tarjouspyyntösähköpostien rivit (FI+EN, kaikki rivit): `page.companies.flow.*`, `nav.main.companies` ja `email.business_quote.*`. Neljä protected-riviä (`flow.privacy` ja `flow.error_privacy_required`, FI+EN) ovat tiedostossa; ne on hyväksytty ja tuodaan erikseen. `content/site-texts.pending-import-4.json` on myyntikäyrän ja suodattimien tekstiä, ei tätä erää. Tietosuojaselosteen linkkiteksti `page.companies.flow.notice_link` (luokka normal) on lisäksi tiedostossa `content/site-texts.pending-import-9.json`.
 
 ## Uuden tekstin lisääminen (§18.9, jokaisessa PR:ssä)
 

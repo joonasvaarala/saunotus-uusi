@@ -38,9 +38,9 @@ begin
   perform public.t75_ck((select count(*) from booking.email_outbox where kind = 'business_quote_ack' and payload ->> 'to_email' = 'maija@example.test' and status = 'pending') = 1, 'R6: asiakkaan kuittaus jonossa');
   perform public.t75_ck((select count(*) from booking.email_outbox where kind = 'business_quote_notify' and dedupe_key like 'business_quote_notify:%' and payload ->> 'to_email' = 'savusauna@saunotus.fi') = 1, 'R7: ilmoitus oletusosoitteeseen');
 
+  n0 := (select count(*) from booking.business_quote_requests);
   perform set_config('request.headers', '{"cf-connecting-ip":"203.0.113.21"}', true);
   execute 'set local role anon';
-  n0 := (select count(*) from booking.business_quote_requests);
   r := booking.public_create_business_quote('Botti Oy', 'Botti', 'botti@example.test', '0401234567', 'huomenna', 4, '["sauna"]'::jsonb, null, null, 'fi', true, 'http://spam.example');
   perform public.t75_logout();
   perform public.t75_ck(r ->> 'ok' = 'true' and (select count(*) from booking.business_quote_requests) = n0, 'R8: honeypot ei tallenna');

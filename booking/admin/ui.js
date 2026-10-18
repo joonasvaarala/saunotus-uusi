@@ -79,6 +79,7 @@ export const ERR_FI = {
   time_window: 'Aika on hoitojen ja saunotusten aikaikkunan ulkopuolella: ma–pe 16:00–20:30, la–su 13:00–20:30 (päättyminen viimeistään 20:30). Valitse sallittu aika; ylitys vaatii oikeuden ja perustelun.',
   ritual_start: 'Rituaalin tai paketin alkuaika voi olla vain 16:00, 16:30 tai 17:00.',
   note_required: 'Perustelu vaaditaan (vähintään 3 merkkiä).',
+  no_conflict: 'Sulkukonfliktia ei ole tälle varaukselle ja sululle.',
   not_missing: 'Varaukselta ei puutu saunottajaa (tai poikkeus on jo myönnetty), joten poikkeusta ei tarvita.',
   therapist_present: 'Varauksella on jo saunottaja, joten poikkeusta ei tarvita.',
 };

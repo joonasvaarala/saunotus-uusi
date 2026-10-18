@@ -70,8 +70,8 @@ test('tuontitiedosto: ei päällekkäisiä avaimia PR 1:n (#61), aiemman tuonnin
   assert.deepEqual(PENDING.filter((r) => have.has(`${r.key}|${r.lang}`)).map((r) => `${r.key} [${r.lang}]`), []);
   assert.ok(Math.ceil(PENDING.length / 500) <= 3, `${PENDING.length} riviä`);
 });
-const PAGE_EXTRA = J('content/site-texts.pending-import-4.json').filter((r) => !r.key.startsWith('email.'));
-test('tuontitiedosto on generoitu koodista: vanhat avaimet = imported-pr64, Yrityksille-lisäys = pending-import-4 (sivut)', () => {
+const PAGE_EXTRA = J('content/site-texts.imported-pr75.json').filter((r) => !r.key.startsWith('email.'));
+test('tuontitiedosto on generoitu koodista: vanhat avaimet = imported-pr64, Yrityksille-lisäys = imported-pr75 (sivut)', () => {
   const prod = join(work, 'prod.json'), out = join(work, 'out.json');
   writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts }));
   const r = spawnSync('node', [join(root, 'scripts/site-texts-extract-pages.mjs'), '--prod', prod, '--out', out], { encoding: 'utf8' });

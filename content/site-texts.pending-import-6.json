@@ -1,0 +1,432 @@
+[
+ {
+  "key": "ui.admin.review.ack_already",
+  "lang": "en",
+  "text": "This conflict was already acknowledged.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_already",
+  "lang": "fi",
+  "text": "Konflikti oli jo kuitattu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_button",
+  "lang": "en",
+  "text": "Acknowledge (not real)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_button",
+  "lang": "fi",
+  "text": "Kuittaa (ei todellinen)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_cancel",
+  "lang": "en",
+  "text": "Cancel",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_cancel",
+  "lang": "fi",
+  "text": "Peruuta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_confirm",
+  "lang": "en",
+  "text": "Acknowledge this closure conflict as not real? The booking and the closure stay as they are, and availability does not change.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_confirm",
+  "lang": "fi",
+  "text": "Kuitataanko sulkukonflikti ei-todelliseksi? Varaus ja sulku jäävät ennalleen, eikä saatavuus muutu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_confirm_button",
+  "lang": "en",
+  "text": "Confirm acknowledgement",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_confirm_button",
+  "lang": "fi",
+  "text": "Vahvista kuittaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_done",
+  "lang": "en",
+  "text": "Closure conflict acknowledged as not real. Availability did not change.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_done",
+  "lang": "fi",
+  "text": "Sulku kuitattu ei-todelliseksi. Saatavuus ei muuttunut.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_label_label",
+  "lang": "en",
+  "text": "Acknowledged by (optional)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_label_label",
+  "lang": "fi",
+  "text": "Kuittaaja (valinnainen)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_label_placeholder",
+  "lang": "en",
+  "text": "E.g. Joonas (decision)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_label_placeholder",
+  "lang": "fi",
+  "text": "Esim. Joonas (päätös)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_note_default",
+  "lang": "en",
+  "text": "Closure added manually in Johku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_note_default",
+  "lang": "fi",
+  "text": "Sulku tehty käsin Johkussa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_note_label",
+  "lang": "en",
+  "text": "Reason",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_note_label",
+  "lang": "fi",
+  "text": "Perustelu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_note_required",
+  "lang": "en",
+  "text": "Enter a reason (at least three characters).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.ack_note_required",
+  "lang": "fi",
+  "text": "Anna perustelu (vähintään kolme merkkiä).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.acked_empty",
+  "lang": "en",
+  "text": "No acknowledged closure conflicts.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.acked_empty",
+  "lang": "fi",
+  "text": "Ei kuitattuja sulkukonflikteja.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.acked_hint",
+  "lang": "en",
+  "text": "These closure conflicts were acknowledged as not real. Availability has not changed. An acknowledgement can be revoked.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.acked_hint",
+  "lang": "fi",
+  "text": "Nämä sulkukonfliktit on kuitattu ei-todellisiksi. Saatavuus ei ole muuttunut. Kuittauksen voi purkaa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.acked_meta",
+  "lang": "en",
+  "text": "Acknowledged{{var:by}}: {{var:reason}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:by}}",
+   "{{var:reason}}"
+  ],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.acked_meta",
+  "lang": "fi",
+  "text": "Kuitattu{{var:by}}: {{var:reason}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:by}}",
+   "{{var:reason}}"
+  ],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.acked_title",
+  "lang": "en",
+  "text": "Acknowledged closure conflicts",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.acked_title",
+  "lang": "fi",
+  "text": "Kuitatut sulkukonfliktit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.block_hint",
+  "lang": "en",
+  "text": "The booking overlaps a closure added later. Move or cancel the booking, or acknowledge the conflict if the closure is not real (for example a block added manually in Johku). Acknowledging does not change availability.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.block_hint",
+  "lang": "fi",
+  "text": "Varaus osuu myöhemmin lisättyyn sulkuun. Siirrä tai peru varaus, tai kuittaa konflikti, jos sulku ei ole todellinen (esimerkiksi käsin tehty sulku Johkussa). Kuittaus ei muuta saatavuutta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.block_reason",
+  "lang": "en",
+  "text": "Closure: {{var:reason}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:reason}}"
+  ],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.block_reason",
+  "lang": "fi",
+  "text": "Sulku: {{var:reason}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:reason}}"
+  ],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.unack_button",
+  "lang": "en",
+  "text": "Revoke acknowledgement",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.unack_button",
+  "lang": "fi",
+  "text": "Pura kuittaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.unack_confirm",
+  "lang": "en",
+  "text": "Revoke the acknowledgement? The conflict returns to the closure-conflict list. Availability does not change.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.unack_confirm",
+  "lang": "fi",
+  "text": "Puretaanko kuittaus? Konflikti palaa Sulkukonfliktit-listalle. Saatavuus ei muutu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.unack_confirm_button",
+  "lang": "en",
+  "text": "Confirm revoke",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.unack_confirm_button",
+  "lang": "fi",
+  "text": "Vahvista purku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.unack_done",
+  "lang": "en",
+  "text": "Acknowledgement revoked.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ },
+ {
+  "key": "ui.admin.review.unack_done",
+  "lang": "fi",
+  "text": "Kuittaus purettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan Tarkista-näkymän sulkukonfliktin kuittaus. Ei koske lukittuja kenttiä. Varateksti booking/admin/review-texts.js."
+ }
+]

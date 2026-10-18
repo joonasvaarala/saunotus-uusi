@@ -4,6 +4,7 @@ import { h, toast, errMsg } from './ui.js';
 import { icon } from './icons.js';
 import { t as tl } from './talous-i18n.js';
 import { createAdminMock } from './options-mock.js';
+import { loadFilterTexts } from './filter-texts.js';
 
 const $ = (id) => document.getElementById(id);
 // Kokeilutila: osoite /hallinta/?mock=1 → keinoistunto + selaimen oma mock-data (options-mock.js). EI verkkokutsuja eikä kirjautumista; mikään ei tallennu. Ilman parametria ennallaan.
@@ -98,6 +99,7 @@ async function enter() {
     ctx.role = role; ctx.name = s.user?.email || ''; ctx.perms = me?.permissions || []; ctx.roleLabel = me?.role_label || role;
     $('who').textContent = MOCK ? 'Kokeilutila: esimerkkidata, mikään ei tallennu' : `${ctx.name} · ${ctx.roleLabel}`;
     document.body.dataset.role = role;
+    await loadFilterTexts(rpc);
     route();
   } catch (e) { signOut(); showLogin(errMsg(e)); }
 }

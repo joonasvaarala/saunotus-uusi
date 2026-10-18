@@ -1,0 +1,166 @@
+[
+ {
+  "key": "ui.admin.orders.pay_filter",
+  "lang": "fi",
+  "text": "Maksutila",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Talous-tilauslista (booking_76): oletussuodatin Maksetut. FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.orders.pay_paid",
+  "lang": "fi",
+  "text": "Maksetut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Talous-tilauslista (booking_76): oletussuodatin Maksetut. FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.orders.pay_unpaid",
+  "lang": "fi",
+  "text": "Maksamattomat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Talous-tilauslista (booking_76): oletussuodatin Maksetut. FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.orders.pay_all",
+  "lang": "fi",
+  "text": "Kaikki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Talous-tilauslista (booking_76): oletussuodatin Maksetut. FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.orders.pay_refunded",
+  "lang": "fi",
+  "text": "Hyvitetyt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Talous-tilauslista (booking_76): oletussuodatin Maksetut. FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.orders.pay_cancelled",
+  "lang": "fi",
+  "text": "Peruttu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Talous-tilauslista (booking_76): oletussuodatin Maksetut. FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.orders.pay_showing",
+  "lang": "fi",
+  "text": "Maksutila: {{var:label}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:label}}"
+  ],
+  "reason": "Talous-tilauslista (booking_76): oletussuodatin Maksetut. FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.orders.search_all",
+  "lang": "fi",
+  "text": "Haku kaikista tilauksista",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Talous-tilauslista (booking_76): oletussuodatin Maksetut. FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.orders.pay_filter",
+  "lang": "en",
+  "text": "Payment status",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Talous-tilauslista (booking_76): oletussuodatin Maksetut. FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.orders.pay_paid",
+  "lang": "en",
+  "text": "Paid",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Talous-tilauslista (booking_76): oletussuodatin Maksetut. FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.orders.pay_unpaid",
+  "lang": "en",
+  "text": "Unpaid",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Talous-tilauslista (booking_76): oletussuodatin Maksetut. FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.orders.pay_all",
+  "lang": "en",
+  "text": "All",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Talous-tilauslista (booking_76): oletussuodatin Maksetut. FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.orders.pay_refunded",
+  "lang": "en",
+  "text": "Refunded",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Talous-tilauslista (booking_76): oletussuodatin Maksetut. FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.orders.pay_cancelled",
+  "lang": "en",
+  "text": "Cancelled",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Talous-tilauslista (booking_76): oletussuodatin Maksetut. FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.orders.pay_showing",
+  "lang": "en",
+  "text": "Payment status: {{var:label}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:label}}"
+  ],
+  "reason": "Talous-tilauslista (booking_76): oletussuodatin Maksetut. FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.orders.search_all",
+  "lang": "en",
+  "text": "Search covers all orders",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Talous-tilauslista (booking_76): oletussuodatin Maksetut. FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ }
+]

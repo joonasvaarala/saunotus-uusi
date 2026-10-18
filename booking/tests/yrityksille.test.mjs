@@ -126,7 +126,8 @@ test('tarjouspyyntö: validointi vastaa samoja rajoja kuin RPC', () => {
 });
 
 test('tuontiluonnos: uudet avaimet, tietosuoja protected, ei päällekkäisyyttä eikä hintoja', () => {
-  const extra = J('content/site-texts.pending-import-4.json');
+  const extra = J('content/site-texts.imported-pr75.json');
+  const pending9 = J('content/site-texts.pending-import-9.json');
   const have = new Set(['content/site-texts.imported-pr61.json', 'content/site-texts.imported-pr64.json', 'content/site-texts.imported-pr66.json', 'content/site-texts.imported.json'].flatMap((p) => J(p).map((r) => `${r.key}|${r.lang}`)));
   const seen = new Set();
   for (const r of extra) {
@@ -142,6 +143,9 @@ test('tuontiluonnos: uudet avaimet, tietosuoja protected, ei päällekkäisyytt�
   assert.equal(cls('page.companies.flow.notice_link'), 'normal');
   assert.equal(classForContent('page.companies.flow.privacy', extra.find((r) => r.key === 'page.companies.flow.privacy' && r.lang === 'fi').text), 'protected');
   assert.equal(classForContent('page.companies.flow.notice_link', extra.find((r) => r.key === 'page.companies.flow.notice_link' && r.lang === 'fi').text), 'normal');
+  assert.deepEqual(pending9, extra.filter((r) => r.key === 'page.companies.flow.notice_link'));
+  assert.equal(pending9.length, 2);
+  assert.ok(pending9.every((r) => r.class === 'normal'));
   assert.equal(extra.find((r) => r.key === 'page.companies.flow.privacy' && r.lang === 'fi').text, 'Olen lukenut tietosuojaselosteen ja hyväksyn, että yhteystietojani käytetään tämän pyynnön käsittelyyn.');
   assert.equal(extra.find((r) => r.key === 'page.companies.flow.privacy' && r.lang === 'en').text, 'I have read the privacy notice and accept that my contact details are used to handle this request.');
   assert.equal(extra.find((r) => r.key === 'page.companies.flow.error_privacy_required' && r.lang === 'fi').text, 'Hyväksy tietosuoja, jotta pyyntö voidaan lähettää.');

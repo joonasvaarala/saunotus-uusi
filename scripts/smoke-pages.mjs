@@ -343,7 +343,7 @@ async function loginViaInvite(page) {
     await page.evaluate(() => { location.hash = '#/tarkista'; });
     await page.waitForSelector('[data-testid=review-overrides]');
     const secs = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll('.review-sec')].map((e) => [e.dataset.testid, e.querySelectorAll('li.resrow').length])));
-    if (JSON.stringify(secs) !== JSON.stringify({ 'review-missing_therapist': 1, 'review-therapist_conflicts': 1, 'review-block_conflicts': 0, 'review-overrides': 1, 'review-orphan_addons': 0 })) problems.push(`tarkista: osiot/rivit väärin: ${JSON.stringify(secs)}`);
+    if (JSON.stringify(secs) !== JSON.stringify({ 'review-missing_therapist': 1, 'review-therapist_conflicts': 1, 'review-block_conflicts': 0, 'review-acked_block_conflicts': 0, 'review-overrides': 1, 'review-orphan_addons': 0 })) problems.push(`tarkista: osiot/rivit väärin: ${JSON.stringify(secs)}`);
     if (!/Syy: Sovittu asiakkaan kanssa/.test(await page.locator('[data-testid=review-overrides]').innerText()) || !/Yleinen/i.test(await page.locator('[data-testid=review-therapist_conflicts]').innerText())) problems.push('tarkista: ylityksen syy tai taidon suomennos puuttuu');
     {   // migraatio 22: Ei saunottajaa -osio; Myönnä poikkeus vain oikeudella bookings.override, perustelu pakollinen
       if (!/Ei saunottajaa/.test(await page.locator('[data-testid=review-missing_therapist]').innerText()) || (await page.locator('[data-testid=grant-btn]').count()) !== 0) problems.push('tarkista: Ei saunottajaa -osion pitää näkyä ilman Myönnä poikkeus -painiketta kun oikeutta bookings.override ei ole');

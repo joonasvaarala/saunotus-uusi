@@ -31,7 +31,7 @@ const { emailCases } = await imp('booking/supabase/functions/send-emails/golden-
 const FILE = 'content/site-texts.imported-pr66.json';
 const PENDING = J(FILE);
 const FALLBACK = J('content/site-texts.fallback.json');
-const OTHERS = ['content/site-texts.imported-pr61.json', 'content/site-texts.imported-pr62.json', 'content/site-texts.imported-pr64.json', 'content/site-texts.imported.json'].map(J);
+const OTHERS = ['content/site-texts.imported-pr61.json', 'content/site-texts.imported-pr62.json', 'content/site-texts.imported-pr64.json', 'content/site-texts.imported.json', 'content/site-texts.imported-pr71.json'].map(J);
 const GOLDEN = J('booking/supabase/functions/send-emails/golden-email.json');
 const AREAS = /^(email\.[a-z0-9_]+|ui\.mobilepay\.start_error_[a-z0-9_]+)(\.|$)/;
 const VARS = new Set(['name', 'no', 'amount', 'date', 'phone', 'email', 'from', 'who', 'when', 'time', 'n', 'label', 'what', 'code', 'id', 'ref', 'web', 'contact']);   // PR-kuvauksessa mainitut muuttujat
@@ -88,10 +88,10 @@ test('tiedosto on generoitu koodista (texts.ts) eikä voi poiketa oletuksista', 
   const g = new Map(gen.map((x) => [`${x.key}|${x.lang}`, x]));
   for (const f of PENDING) assert.deepEqual(f, g.get(`${f.key}|${f.lang}`), `${f.key}: tiedosto ≠ generaattori`);
   const fb = new Set(FALLBACK.texts.map((x) => `${x.key}|${x.lang}`));
-  const extra4 = new Map(J('content/site-texts.pending-import-4.json').map((r) => [`${r.key}|${r.lang}`, r]));
+  const extraKnown = new Map([...J('content/site-texts.pending-import-4.json'), ...J('content/site-texts.imported-pr75.json')].map((r) => [`${r.key}|${r.lang}`, r]));
   for (const [k, x] of g) if (!PENDING.some((f) => `${f.key}|${f.lang}` === k)) {
-    const row = extra4.get(k);
-    if (row) assert.deepEqual(row, x, `${k}: pending-import-4 ≠ generaattori`);
+    const row = extraKnown.get(k);
+    if (row) assert.deepEqual(row, x, `${k}: tuontitiedosto ≠ generaattori`);
     else assert.ok(fb.has(k), `${k}: puuttuu tiedostosta eikä ole tuotannossa`);   // tuonnin jälkeen rivit siirtyvät varatekstiin
   }
   // sama generointi tuoreesta tuotantovastauksesta, jossa osa riveistä on jo: vain puuttuvat

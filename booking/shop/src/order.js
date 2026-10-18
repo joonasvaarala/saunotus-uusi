@@ -79,8 +79,9 @@ async function main() {
   const flagGift = () => { try { return sessionStorage.getItem(giftKey) === '1'; } catch { return false; } };
   async function loadHold(o) {
     const co = o.checkout; if (!co) return;
-    if (co.awaiting && !co.processing) { try { const c = normCheckoutOptions(await mp.checkoutOptions()); if (c.ok && c.holdMinutes) holdX.minutes = c.holdMinutes; } catch { /* oletus 15 */ } }
-    if (co.expired) { let b = null; try { b = await (api.mock ? api.rpc : rpc)('public_get_booking', { p_token: token }); } catch { /* ei tietoa */ } holdX.gift = giftWasUsed(b, flagGift()); }
+    const closed = co.expired || (co.cancelled && co.cancelReason === 'hold_expired');
+    if ((co.awaiting && !co.processing) || closed) { try { const c = normCheckoutOptions(await mp.checkoutOptions()); if (c.ok && c.holdMinutes) holdX.minutes = c.holdMinutes; } catch { /* oletus 15 */ } }
+    if (closed) { let b = null; try { b = await (api.mock ? api.rpc : rpc)('public_get_booking', { p_token: token }); } catch { /* ei tietoa */ } holdX.gift = giftWasUsed(b, flagGift()); }
   }
   let holdCtl = null;
   const stopHold = () => { if (holdCtl) { holdCtl.stop(); holdCtl = null; } };
@@ -123,12 +124,21 @@ async function main() {
         h('span', { class: 'ord-l-meta', text: `${dt(r.starts_at)}–${hm(r.ends_at)} · ${t.persons.replace('{n}', r.persons)}${r.addons.length ? ' · ' + r.addons.map((a) => `${nm(a)} × ${a.quantity}`).join(', ') : ''}` }))))) : null;
     const optSec = co && (co.expired || co.cancelled) ? null : optionSection(o);
     let holdEl = null;
-    if (holdV) {
+    if (holdV && !co.expired) {
       holdCtl = holdPanel({ L, co, minutes: holdX.minutes, giftUsed: holdX.gift, newHref: `${S.shopHref}${api.mock ? '?mock=1' : ''}`,
         fmtDate: (ms) => df({ day: 'numeric', month: 'numeric', year: 'numeric' }).format(new Date(ms)),
         refresh: co.awaiting ? async () => { const n = await api.get(); if (n?.ok) cur = n; return n?.ok ? n.checkout : null; } : null,
         onChange: async () => { try { const n = await api.get(); if (n?.ok) { await redraw(n); root.querySelector('[data-testid=hold-panel] h3')?.focus(); return; } } catch { /* vanha näkymä */ } draw(cur); } });   // fokus uuden tilan otsikkoon
       holdEl = holdCtl.node;
+    }
+    let closedEl = null;
+    if (co && (co.expired || co.cancelled)) {
+      const holdExp = !!(co.expired || co.cancelReason === 'hold_expired');
+      const newHref = `${S.shopHref}${api.mock ? '?mock=1' : ''}`;
+      closedEl = h('section', { class: 'ord-card', role: 'status', 'data-testid': 'order-closed', 'data-reason': holdExp ? 'hold_expired' : 'cancelled' },
+        h('p', { 'data-testid': 'order-closed-msg', text: holdExp ? t.closedHoldExpired.replace('{minutes}', String(holdX.minutes)) : t.closedCancelled }),
+        holdExp && holdX.gift ? h('p', { 'data-testid': 'order-closed-gift', text: t.closedHoldExpiredGift }) : null,
+        h('p', { class: 'bk-actions' }, h('a', { class: 'btn gold', href: newHref, 'data-testid': 'order-closed-new', text: t.closedNewBooking })));
     }
     const lines = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-l' }, h('h3', { id: 'ord-l', text: t.linesTitle }),
       h('ul', { class: 'ord-lines', 'data-testid': 'order-lines' }, o.items.map((i) => h('li', {},
@@ -159,7 +169,7 @@ async function main() {
       h('p', { class: 'bk-note' }, `${t.addNewBooking} `, h('a', { href: S.shopHref, text: t.addNewBookingLink })));
     const cancel = closedHold ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), note,
       o.cancel_request ? h('p', { class: 'bk-ok', role: 'status', 'data-testid': 'cancel-pending', text: t[`cancel.${o.cancel_request.status}`] || t['cancel.open'] }) : cancelForm());
-    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, resv, optSec, lines, giftCards, claimBox, pay, giftUse, receipts, add, cancel, msg, phoneBox()));
+    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, closedEl, resv, optSec, lines, giftCards, claimBox, pay, giftUse, receipts, add, cancel, msg, phoneBox()));
   }
   async function download(btn, receiptNo) {
     btn.disabled = true;

@@ -1,1130 +1,458 @@
 [
  {
-  "key": "nav.main.companies",
+  "key": "ui.admin.sales_chart.title",
   "lang": "fi",
-  "text": "Yrityksille",
+  "text": "Myynti ja ALV",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
   "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/site.json (ui)); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "nav.main.companies",
-  "lang": "en",
-  "text": "For companies",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/site.json (ui)); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.seo_description",
+  "key": "ui.admin.sales_chart.year",
   "lang": "fi",
-  "text": "Yritysten savusaunavuorot ja tarjouspyyntö työntekijäpäivästä. Lomake ei vahvista ajankohtaa eikä hintaa.",
+  "text": "Vuosi",
   "class": "normal",
   "kind": "plain",
-  "max_len": 300,
+  "max_len": 200,
   "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "page.companies.flow.lead",
+  "key": "ui.admin.sales_chart.prev_year",
   "lang": "fi",
-  "text": "Valitkaa ensin, mitä haluatte. Yritysten saunavuorot varataan samalla tavalla kuin muut vuorot. Työntekijäpäivästä pyydetään tarjous.",
+  "text": "Edellinen vuosi",
   "class": "normal",
   "kind": "plain",
-  "max_len": 350,
+  "max_len": 200,
   "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "page.companies.flow.choice_title",
+  "key": "ui.admin.sales_chart.next_year",
   "lang": "fi",
-  "text": "Mitä haluatte tehdä?",
+  "text": "Seuraava vuosi",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
   "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "page.companies.flow.sauna_title",
+  "key": "ui.admin.sales_chart.legend_net",
   "lang": "fi",
-  "text": "Tulemme vain saunomaan",
+  "text": "Myynti ilman ALV",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
   "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "page.companies.flow.sauna_text",
+  "key": "ui.admin.sales_chart.legend_vat",
   "lang": "fi",
-  "text": "Näytämme yrityksille tarkoitetut savusaunavuorot. Varaus ja maksu etenevät samalla tavalla kuin muualla sivustolla.",
+  "text": "ALV",
   "class": "normal",
   "kind": "plain",
-  "max_len": 350,
+  "max_len": 200,
   "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "page.companies.flow.sauna_cta",
+  "key": "ui.admin.sales_chart.legend_unsplit",
   "lang": "fi",
-  "text": "Näytä yritysten saunavuorot",
+  "text": "Brutto, ALV ei eritelty",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
   "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "page.companies.flow.day_title",
+  "key": "ui.admin.sales_chart.total_gross",
   "lang": "fi",
-  "text": "Haluamme järjestää työntekijäpäivän tai työhyvinvointipäivän",
+  "text": "Vuoden myynti sis. ALV",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
   "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "page.companies.flow.day_text",
+  "key": "ui.admin.sales_chart.total_net",
   "lang": "fi",
-  "text": "Kertokaa toiveenne lomakkeella. Lähetys ei vahvista ajankohtaa eikä hintaa. Palaamme asiaan erikseen.",
+  "text": "Ilman ALV",
   "class": "normal",
   "kind": "plain",
-  "max_len": 300,
+  "max_len": 200,
   "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "page.companies.flow.day_cta",
+  "key": "ui.admin.sales_chart.total_vat",
   "lang": "fi",
-  "text": "Avaa tarjouspyyntö",
+  "text": "ALV",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
   "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "page.companies.flow.calendar_title",
+  "key": "ui.admin.sales_chart.basis",
   "lang": "fi",
-  "text": "Yritysten saunavuorot",
+  "text": "Kassaperuste: kuitin antamispäivä (Helsinki), ei käyntipäivä. Tuleva kuukausi on tyhjä, kunnes maksu on kirjattu. Lahjakortit lasketaan samoin kuin myyntiraportissa.",
   "class": "normal",
   "kind": "plain",
-  "max_len": 200,
+  "max_len": 400,
   "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "page.companies.flow.calendar_text",
+  "key": "ui.admin.sales_chart.empty",
   "lang": "fi",
-  "text": "Valitkaa vuoro kalenterista. Varaus jatkuu samalla tavalla kuin muissa saunavuoroissa.",
+  "text": "Tälle vuodelle ei ole myyntiä.",
   "class": "normal",
   "kind": "plain",
-  "max_len": 250,
+  "max_len": 200,
   "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "page.companies.flow.calendar_noscript",
+  "key": "ui.admin.sales_chart.unavailable",
   "lang": "fi",
-  "text": "Saunavuorojen kalenteri tarvitsee JavaScriptin.",
+  "text": "Myyntikäyrä ei ole käytettävissä.",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
   "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "page.companies.flow.form_title",
+  "key": "ui.admin.sales_chart.load_failed",
   "lang": "fi",
-  "text": "Tarjouspyyntö",
+  "text": "Myyntikäyrän lataus epäonnistui.",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
   "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "page.companies.flow.form_lead",
+  "key": "ui.admin.sales_chart.loading",
   "lang": "fi",
-  "text": "Lomake ei vahvista ajankohtaa eikä hintaa.",
+  "text": "Ladataan myyntikäyrää.",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
   "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "page.companies.flow.company",
+  "key": "ui.admin.sales_chart.bar_label",
   "lang": "fi",
-  "text": "Yrityksen nimi",
+  "text": "{{var:month}}: ilman ALV {{var:net}}, ALV {{var:vat}}, erittelemätön brutto {{var:unsplit}}, yhteensä {{var:gross}}",
   "class": "normal",
   "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.contact",
-  "lang": "fi",
-  "text": "Yhteyshenkilö",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.email",
-  "lang": "fi",
-  "text": "Sähköposti",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.phone",
-  "lang": "fi",
-  "text": "Puhelin",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.when",
-  "lang": "fi",
-  "text": "Toivottu päivä tai ajankohta",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.persons",
-  "lang": "fi",
-  "text": "Henkilömäärä",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.offerings_legend",
-  "lang": "fi",
-  "text": "Toivotut sisällöt",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.offering_ritual",
-  "lang": "fi",
-  "text": "Saunarituaali",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.offering_forest_yoga",
-  "lang": "fi",
-  "text": "Metsäjoogaa",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.offering_campfire",
-  "lang": "fi",
-  "text": "Nuotioruokailu",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.offering_sauna",
-  "lang": "fi",
-  "text": "Saunotus",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.offering_vihta",
-  "lang": "fi",
-  "text": "Vihtatyöpaja",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.offering_other",
-  "lang": "fi",
-  "text": "Muu",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.offering_other_label",
-  "lang": "fi",
-  "text": "Muu sisältö",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.message",
-  "lang": "fi",
-  "text": "Lisätiedot",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.privacy",
-  "lang": "fi",
-  "text": "Olen lukenut tietosuojaselosteen ja hyväksyn, että yhteystietojani käytetään tämän pyynnön käsittelyyn.",
-  "class": "protected",
-  "kind": "plain",
-  "max_len": 300,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.notice_link",
-  "lang": "fi",
-  "text": "Lue seloste",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.submit",
-  "lang": "fi",
-  "text": "Lähetä tarjouspyyntö",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.honeypot",
-  "lang": "fi",
-  "text": "Verkkosivusto",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.success",
-  "lang": "fi",
-  "text": "Pyyntö on vastaanotettu. Tämä ei vahvista ajankohtaa eikä hintaa. Palaamme asiaan.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 250,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_invalid_company",
-  "lang": "fi",
-  "text": "Anna yrityksen nimi.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_invalid_contact",
-  "lang": "fi",
-  "text": "Anna yhteyshenkilön nimi.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_invalid_email",
-  "lang": "fi",
-  "text": "Tarkista sähköpostiosoite.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_invalid_phone",
-  "lang": "fi",
-  "text": "Tarkista puhelinnumero.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_invalid_when",
-  "lang": "fi",
-  "text": "Kerro toivottu ajankohta.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_invalid_persons",
-  "lang": "fi",
-  "text": "Anna henkilömäärä.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_invalid_offerings",
-  "lang": "fi",
-  "text": "Valitse vähintään yksi sisältö.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_invalid_offering_other",
-  "lang": "fi",
-  "text": "Kuvaa muu sisältö.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_invalid_message",
-  "lang": "fi",
-  "text": "Lisätiedot ovat liian pitkät.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_privacy_required",
-  "lang": "fi",
-  "text": "Hyväksy tietosuoja, jotta pyyntö voidaan lähettää.",
-  "class": "protected",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_rate_limited",
-  "lang": "fi",
-  "text": "Liian monta yritystä. Yritä hetken kuluttua uudelleen.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_generic",
-  "lang": "fi",
-  "text": "Lähetys ei onnistunut. Yritä hetken kuluttua uudelleen.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.seo_description",
-  "lang": "en",
-  "text": "Smoke-sauna sessions for companies and a quote request for a staff day. The form does not confirm a time or a price.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 300,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.lead",
-  "lang": "en",
-  "text": "Choose first what you want. Company sauna sessions are booked the same way as other sessions. A staff day starts with a quote request.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 350,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.choice_title",
-  "lang": "en",
-  "text": "What would you like to do?",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.sauna_title",
-  "lang": "en",
-  "text": "We only want to sauna",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.sauna_text",
-  "lang": "en",
-  "text": "We show the smoke-sauna sessions meant for companies. Booking and payment continue the same way as elsewhere on the site.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 350,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.sauna_cta",
-  "lang": "en",
-  "text": "Show company sauna sessions",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.day_title",
-  "lang": "en",
-  "text": "We want to arrange a staff day or a workplace wellbeing day",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.day_text",
-  "lang": "en",
-  "text": "Tell us your wishes in the form. Sending it does not confirm a time or a price. We will get back to you separately.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 300,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.day_cta",
-  "lang": "en",
-  "text": "Open the quote request",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.calendar_title",
-  "lang": "en",
-  "text": "Company sauna sessions",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.calendar_text",
-  "lang": "en",
-  "text": "Choose a session in the calendar. Booking continues the same way as for other sauna sessions.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 250,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.calendar_noscript",
-  "lang": "en",
-  "text": "The sauna calendar needs JavaScript.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.form_title",
-  "lang": "en",
-  "text": "Quote request",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.form_lead",
-  "lang": "en",
-  "text": "The form does not confirm a time or a price.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.company",
-  "lang": "en",
-  "text": "Company name",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.contact",
-  "lang": "en",
-  "text": "Contact person",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.email",
-  "lang": "en",
-  "text": "Email",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.phone",
-  "lang": "en",
-  "text": "Phone",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.when",
-  "lang": "en",
-  "text": "Preferred day or time",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.persons",
-  "lang": "en",
-  "text": "Number of people",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.offerings_legend",
-  "lang": "en",
-  "text": "Wished contents",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.offering_ritual",
-  "lang": "en",
-  "text": "Sauna ritual",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.offering_forest_yoga",
-  "lang": "en",
-  "text": "Forest yoga",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.offering_campfire",
-  "lang": "en",
-  "text": "Campfire meal",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.offering_sauna",
-  "lang": "en",
-  "text": "Sauna session",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.offering_vihta",
-  "lang": "en",
-  "text": "Whisk-binding workshop",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.offering_other",
-  "lang": "en",
-  "text": "Other",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.offering_other_label",
-  "lang": "en",
-  "text": "Other content",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.message",
-  "lang": "en",
-  "text": "Additional notes",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.privacy",
-  "lang": "en",
-  "text": "I have read the privacy notice and accept that my contact details are used to handle this request.",
-  "class": "protected",
-  "kind": "plain",
-  "max_len": 300,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.notice_link",
-  "lang": "en",
-  "text": "Read the notice",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.submit",
-  "lang": "en",
-  "text": "Send quote request",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.honeypot",
-  "lang": "en",
-  "text": "Website",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.success",
-  "lang": "en",
-  "text": "The request has been received. This does not confirm a time or a price. We will get back to you.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 250,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_invalid_company",
-  "lang": "en",
-  "text": "Enter the company name.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_invalid_contact",
-  "lang": "en",
-  "text": "Enter the contact person's name.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_invalid_email",
-  "lang": "en",
-  "text": "Check the email address.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_invalid_phone",
-  "lang": "en",
-  "text": "Check the phone number.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_invalid_when",
-  "lang": "en",
-  "text": "Tell us the preferred time.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_invalid_persons",
-  "lang": "en",
-  "text": "Enter the number of people.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_invalid_offerings",
-  "lang": "en",
-  "text": "Choose at least one content.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_invalid_offering_other",
-  "lang": "en",
-  "text": "Describe the other content.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_invalid_message",
-  "lang": "en",
-  "text": "The additional notes are too long.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_privacy_required",
-  "lang": "en",
-  "text": "Accept the privacy notice so the request can be sent.",
-  "class": "protected",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_rate_limited",
-  "lang": "en",
-  "text": "Too many attempts. Please try again in a little while.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "page.companies.flow.error_generic",
-  "lang": "en",
-  "text": "The request could not be sent. Please try again in a little while.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/companies.json); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "email.business_quote.ack_subject",
-  "lang": "fi",
-  "text": "Tarjouspyyntö vastaanotettu – {{setting:business_name}}",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
+  "max_len": 400,
   "placeholders": [
-   "{{setting:business_name}}"
+   "{{var:month}}",
+   "{{var:net}}",
+   "{{var:vat}}",
+   "{{var:unsplit}}",
+   "{{var:gross}}"
   ],
-  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "email.business_quote.ack_subject",
-  "lang": "en",
-  "text": "Quote request received – {{setting:business_name}}",
+  "key": "ui.admin.sales_chart.includes_johku",
+  "lang": "fi",
+  "text": "Pylväissä on uuden järjestelmän kuitit ja Johku-myynti. Johku-myynti ei sisälly raportteihin, CSV-vientiin eikä kuitteihin.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.chart_label",
+  "lang": "fi",
+  "text": "Kuukausittainen myynti",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.future",
+  "lang": "fi",
+  "text": "Tuleva kuukausi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.title",
+  "lang": "en",
+  "text": "Sales and VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.year",
+  "lang": "en",
+  "text": "Year",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.prev_year",
+  "lang": "en",
+  "text": "Previous year",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.next_year",
+  "lang": "en",
+  "text": "Next year",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.legend_net",
+  "lang": "en",
+  "text": "Sales excluding VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.legend_vat",
+  "lang": "en",
+  "text": "VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.legend_unsplit",
+  "lang": "en",
+  "text": "Gross, VAT not itemised",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.total_gross",
+  "lang": "en",
+  "text": "Year sales incl. VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.total_net",
+  "lang": "en",
+  "text": "Excluding VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.total_vat",
+  "lang": "en",
+  "text": "VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.basis",
+  "lang": "en",
+  "text": "Cash basis: the receipt issue date (Helsinki), not the visit date. A future month stays empty until a payment is recorded. Gift cards are counted the same way as in the sales report.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.empty",
+  "lang": "en",
+  "text": "No sales for this year.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.unavailable",
+  "lang": "en",
+  "text": "The sales chart is not available.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.load_failed",
+  "lang": "en",
+  "text": "The sales chart could not be loaded.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.loading",
+  "lang": "en",
+  "text": "Loading the sales chart.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.bar_label",
+  "lang": "en",
+  "text": "{{var:month}}: excluding VAT {{var:net}}, VAT {{var:vat}}, unitemised gross {{var:unsplit}}, total {{var:gross}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
   "placeholders": [
-   "{{setting:business_name}}"
+   "{{var:month}}",
+   "{{var:net}}",
+   "{{var:vat}}",
+   "{{var:unsplit}}",
+   "{{var:gross}}"
   ],
-  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "email.business_quote.ack_title",
-  "lang": "fi",
-  "text": "Tarjouspyyntö vastaanotettu",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "email.business_quote.ack_title",
+  "key": "ui.admin.sales_chart.includes_johku",
   "lang": "en",
-  "text": "Quote request received",
+  "text": "The bars include receipts from the new system and Johku sales. Johku sales are not included in reports, CSV export, or receipts.",
   "class": "normal",
   "kind": "plain",
-  "max_len": 200,
+  "max_len": 400,
   "placeholders": [],
-  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "email.business_quote.ack_intro",
-  "lang": "fi",
-  "text": "Kiitos tarjouspyynnöstä. Palaamme asiaan erikseen.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "email.business_quote.ack_intro",
+  "key": "ui.admin.sales_chart.chart_label",
   "lang": "en",
-  "text": "Thank you for the quote request. We will get back to you separately.",
+  "text": "Monthly sales",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
   "placeholders": [],
-  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "email.business_quote.no_promise",
-  "lang": "fi",
-  "text": "Tämä viesti ei vahvista ajankohtaa eikä hintaa.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "email.business_quote.no_promise",
+  "key": "ui.admin.sales_chart.future",
   "lang": "en",
-  "text": "This message does not confirm a time or a price.",
+  "text": "Future month",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
   "placeholders": [],
-  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Talous-myyntikäyrä (booking_71): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "email.business_quote.sign_name",
+  "key": "ui.admin.filters.show",
   "lang": "fi",
-  "text": "Tapio",
+  "text": "Näytä suodattimet",
   "class": "normal",
   "kind": "plain",
-  "max_len": 200,
+  "max_len": 80,
   "placeholders": [],
-  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Hallinnan listojen suodatinpainike (Näytä/Piilota suodattimet, aktiivisten lukumäärä), FI+EN. Sama tuonti kuin myyntikäyrä; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "email.business_quote.sign_name",
-  "lang": "en",
-  "text": "Tapio",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "email.business_quote.notify_subject",
+  "key": "ui.admin.filters.hide",
   "lang": "fi",
-  "text": "Uusi yrityksen tarjouspyyntö – {{setting:business_name}}",
+  "text": "Piilota suodattimet",
   "class": "normal",
   "kind": "plain",
-  "max_len": 200,
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan listojen suodatinpainike (Näytä/Piilota suodattimet, aktiivisten lukumäärä), FI+EN. Sama tuonti kuin myyntikäyrä; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.filters.active",
+  "lang": "fi",
+  "text": "Suodattimia: {{var:n}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
   "placeholders": [
-   "{{setting:business_name}}"
+   "{{var:n}}"
   ],
-  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Hallinnan listojen suodatinpainike (Näytä/Piilota suodattimet, aktiivisten lukumäärä), FI+EN. Sama tuonti kuin myyntikäyrä; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "email.business_quote.notify_subject",
+  "key": "ui.admin.filters.show",
   "lang": "en",
-  "text": "New company quote request – {{setting:business_name}}",
+  "text": "Show filters",
   "class": "normal",
   "kind": "plain",
-  "max_len": 200,
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan listojen suodatinpainike (Näytä/Piilota suodattimet, aktiivisten lukumäärä), FI+EN. Sama tuonti kuin myyntikäyrä; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.filters.hide",
+  "lang": "en",
+  "text": "Hide filters",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan listojen suodatinpainike (Näytä/Piilota suodattimet, aktiivisten lukumäärä), FI+EN. Sama tuonti kuin myyntikäyrä; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.filters.active",
+  "lang": "en",
+  "text": "Filters: {{var:n}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
   "placeholders": [
-   "{{setting:business_name}}"
+   "{{var:n}}"
   ],
-  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "email.business_quote.notify_title",
-  "lang": "fi",
-  "text": "Uusi tarjouspyyntö",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "email.business_quote.notify_title",
-  "lang": "en",
-  "text": "New quote request",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "email.business_quote.notify_intro",
-  "lang": "fi",
-  "text": "Yritys lähetti pyynnön työntekijäpäivästä tai työhyvinvointipäivästä.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "email.business_quote.notify_intro",
-  "lang": "en",
-  "text": "A company sent a request for a staff day or a workplace wellbeing day.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "email.business_quote.notify_hint",
-  "lang": "fi",
-  "text": "Pyyntö on hallinnan Yritykset-näkymässä.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "email.business_quote.notify_hint",
-  "lang": "en",
-  "text": "The request is in the Companies view in admin.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+  "reason": "Hallinnan listojen suodatinpainike (Näytä/Piilota suodattimet, aktiivisten lukumäärä), FI+EN. Sama tuonti kuin myyntikäyrä; ei ylikirjoita olemassa olevia."
  }
 ]

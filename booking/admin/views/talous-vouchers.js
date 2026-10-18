@@ -5,6 +5,7 @@ import { icon } from '../icons.js';
 import { t, fmt } from '../talous-i18n.js';
 import { VC_STATUSES, VC_SORTS, VC_PROBLEM_CODES, VC_NOTE_MAX, VC_ACTIVE, fmtAge } from '../vouchers-api.js';
 import { payLabel, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, searchFld, expandRow, actionBtn, formDialog, friendly } from './talous-ui.js';
+import { countActive, filterDrawer } from '../filter-drawer.js';
 
 const fld = (label, ...kids) => h('label', { class: 'fld' }, h('span', { text: label }), ...kids);
 const STATUS_BADGE = { open: 'pay-pending', processing: 'pay-pending', problem: 'err', redeemed: 'pay-paid', cancelled: 'muted', expired: 'pay-refunded' };
@@ -129,9 +130,16 @@ export function createVouchersTab({ api, vouchers, ctx, onOpenOrder = () => {} }
     const ss = searchFld(t('vcl.search'), 'vcl-search', (v) => change({ search: v })); ss.input.value = st.search;
     const sort = h('label', { class: 'fld' }, h('span', { text: t('vcl.f.sort') }), h('select', { 'data-testid': 'vcl-f-sort', onchange: (e) => change({ sort: e.target.value }) }, VC_SORTS.map((s) => h('option', { value: s, text: t(`vcl.sort.${s}`) }))));
     sort.querySelector('select').value = st.sort;
-    const next = h('form', { class: 'tl-toolbar', role: 'search', onsubmit: (e) => e.preventDefault() }, ss.node,
-      selectFld(t('vcl.f.status'), 'vcl-f-status', VC_STATUSES, vcStatusLabel, st.status, (v) => change({ status: v }), t('vcl.st.all')), sort, pageSizeSelect(st.limit, (n) => change({ limit: n })),
-      h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'vcl-reset', onclick: () => { Object.assign(st, { search: '', status: 'active', sort: 'oldest_open', offset: 0 }); buildToolbar(); load(); } }, t('filters.reset')));
+    const drawer = filterDrawer({
+      search: ss.node,
+      testid: 'vcl-filters',
+      activeCount: () => countActive(st, { status: 'active', sort: 'oldest_open', limit: 25 }),
+      filters: [
+        selectFld(t('vcl.f.status'), 'vcl-f-status', VC_STATUSES, vcStatusLabel, st.status, (v) => change({ status: v }), t('vcl.st.all')), sort, pageSizeSelect(st.limit, (n) => change({ limit: n })),
+        h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'vcl-reset', onclick: () => { Object.assign(st, { search: '', status: 'active', sort: 'oldest_open', offset: 0 }); buildToolbar(); load(); } }, t('filters.reset')),
+      ],
+    });
+    const next = h('form', { class: 'tl-toolbar', role: 'search', onsubmit: (e) => e.preventDefault() }, drawer.node);
     if (toolbar?.isConnected) toolbar.replaceWith(next);
     toolbar = next; return next;
   }
