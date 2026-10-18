@@ -1,4 +1,4 @@
-// Yritysten tarjouspyynnöt (booking_72): lista + tila. Lukee admin_list_business_quotes, tallentaa admin_set_business_quote_status.
+// Yritysten tarjouspyynnöt (booking_75): lista + tila. Lukee admin_list_business_quotes, tallentaa admin_set_business_quote_status.
 // Vain admin/manager (quotes.manage). Hallinnan tekstit ovat suomeksi (ei asiakkaan site_texts-tuontia).
 import { rpc } from '../sb.js';
 import { h, errMsg, empty, field, fmtDT } from '../ui.js';

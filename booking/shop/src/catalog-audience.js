@@ -1,5 +1,5 @@
 // Kuluttajan ja yritysten kalenteri: yksi asetus (product_config.audience).
-// Jos kanta ei vielä palauta audience-kenttää (migraatio 71 ajamatta), category = corporate tulkitaan yritysvuoroksi,
+// Jos kanta ei vielä palauta audience-kenttää (migraatio 74 ajamatta), category = corporate tulkitaan yritysvuoroksi,
 // jotta lista on korjattavissa heti ja myöhemmin pelkällä näkyvyydellä.
 
 export function productAudience(row) {

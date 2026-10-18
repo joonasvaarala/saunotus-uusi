@@ -45,14 +45,14 @@ test('kauppa pyytää public_catalog_for ja yrityskalenteri ei näytä hoitoja',
   assert.match(rd('booking/shop/src/shop-mock.js'), /public_catalog_for/);
 });
 
-test('migraatio 71 tunnistaa Johku 17 ja 41 sekä slugit, eikä poista rivejä', () => {
-  const s = rd('booking/supabase/migrations/20261018192000_booking_71_company_audience.sql');
+test('migraatio 74 tunnistaa Johku 17 ja 41 sekä slugit, eikä poista rivejä', () => {
+  const s = rd('booking/supabase/migrations/20261018210000_booking_74_company_audience.sql');
   assert.match(s, /external_id in \('17', '41'\)/);
   assert.match(s, /saunavuoro-yrityksille/);
   assert.match(s, /jalkiloylyt-yrityksille/);
   assert.match(s, /public_catalog_for/);
   assert.doesNotMatch(s, /delete from/i);
-  assert.match(rd('booking/supabase/rollbacks/20261018192000_booking_71_ROLLBACK.sql'), /drop column if exists audience/i);
+  assert.match(rd('booking/supabase/rollbacks/20261018210000_booking_74_ROLLBACK.sql'), /drop column if exists audience/i);
 });
 
 test('navigaatio: Yrityksille on viimeinen, lahjakortti pysyy alatunnisteen indeksissä 3', () => {

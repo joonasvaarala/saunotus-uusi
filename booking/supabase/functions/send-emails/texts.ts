@@ -118,7 +118,7 @@ export const EMAIL_TEXTS: TextTable = {
   "email.voucher.other_subject": { fi: `Lahjakorttisi lunastuksesta – ${SN}`, en: `About your gift card – ${SN}` },
   "email.voucher.other_title": { fi: "Lahjakorttisi lunastuksesta", en: "About your gift card" },
   "email.voucher.other_p1": { fi: "Lahjakortin ({{var:what}}) lunastuksessa on ilmennyt ongelma. Selvitämme asian ja otamme sinuun yhteyttä.", en: "We ran into a problem redeeming your gift card ({{var:what}}). We will look into it and contact you.", cls: "protected" },
-  // ---- yrityksen tarjouspyyntö (booking_72; luonnos, Otto ja Joonas hyväksyvät) ----
+  // ---- yrityksen tarjouspyyntö (booking_75; luonnos, Otto ja Joonas hyväksyvät) ----
   "email.business_quote.ack_subject": { fi: `Tarjouspyyntö vastaanotettu – ${SN}`, en: `Quote request received – ${SN}` },
   "email.business_quote.ack_title": { fi: "Tarjouspyyntö vastaanotettu", en: "Quote request received" },
   "email.business_quote.ack_intro": { fi: "Kiitos tarjouspyynnöstä. Palaamme asiaan erikseen.", en: "Thank you for the quote request. We will get back to you separately." },

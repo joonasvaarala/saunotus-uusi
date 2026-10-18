@@ -1,5 +1,5 @@
 -- ============================================================
--- booking_72_business_quotes: yritysten tarjouspyyntö (työntekijä- / työhyvinvointipäivä).
+-- booking_75_business_quotes: yritysten tarjouspyyntö (työntekijä- / työhyvinvointipäivä).
 --  * Taulu booking.business_quote_requests. Ei uutta maksua eikä varausta.
 --  * Anon luo yhden rivin vain RPC:llä public_create_business_quote. Rate limit + honeypot.
 --    Virheet palautetaan jsonbina (ei poikkeusta), jotta rate limit -kirjaus säilyy.
@@ -8,7 +8,7 @@
 --    business_quote_notify (asetus business_quote_notify_email, oletus savusauna@saunotus.fi).
 --    Lähetyslogiikkaa ei muuteta: send-emails kunnioittaa dry_runia. email_outbox_claimia ei kirjoiteta uusiksi
 --    (vastaanottaja on payload.to_email / to_name, kuten booking_50 jo lukee).
--- Rollback: rollbacks/20261018193000_booking_72_ROLLBACK.sql (aja ennen 71:n purkua).
+-- Rollback: rollbacks/20261018211000_booking_75_ROLLBACK.sql (aja ennen 74:n purkua).
 -- ============================================================
 set local lock_timeout = '5s';
 

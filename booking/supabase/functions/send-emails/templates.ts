@@ -210,7 +210,7 @@ function voucherMail(kind: "voucher_claim_received" | "voucher_claim_problem", d
   return { subject, text, html };
 }
 
-// Yrityksen tarjouspyyntö (booking_72). Claim ei palauta pyynnön tietoja, vain vastaanottajan: ei hintaa, ei ajankohtaa, ei asiakkaan tietoja henkilökunnan viestissä.
+// Yrityksen tarjouspyyntö (booking_75). Claim ei palauta pyynnön tietoja, vain vastaanottajan: ei hintaa, ei ajankohtaa, ei asiakkaan tietoja henkilökunnan viestissä.
 // Allekirjoitus: Tapio / Sipoonjoen Perinnesauna. Lähetystila (dry_run) on index.ts:ssä, ei tässä.
 function businessQuoteMail(kind: "business_quote_ack" | "business_quote_notify", d: any, en: boolean, hello: string, X: X): Rendered {
   const ack = kind === "business_quote_ack";

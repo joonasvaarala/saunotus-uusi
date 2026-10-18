@@ -1,6 +1,6 @@
--- booking_72_ROLLBACK: tarjouspyynnöt, oikeus ja sähköpostilajit pois.
+-- booking_75_ROLLBACK: tarjouspyynnöt, oikeus ja sähköpostilajit pois.
 -- Poistaa taulun business_quote_requests (pyynnöt menetetään) ja jonossa olevat business_quote_*-viestit.
--- email_outbox_kind_check palautetaan booking_47:n listaan. Aja ennen booking_71:n purkua.
+-- email_outbox_kind_check palautetaan booking_47:n listaan. Aja ennen booking_74:n purkua.
 set local lock_timeout = '5s';
 
 drop function if exists booking.admin_set_business_quote_status(bigint, text, text);

@@ -1,5 +1,5 @@
 -- ============================================================
--- booking_71_company_audience: yritysten saunavuorot pois kuluttajan kalenterista.
+-- booking_74_company_audience: yritysten saunavuorot pois kuluttajan kalenterista.
 --  * product_config.audience: consumer (oletus) | business. Yksi asetus, jolla lista korjataan hallinnassa.
 --  * Ei poista tuotteita, sääntöjä eikä varauksia. shop_visible ja bookable säilyvät, jotta yritysten kalenteri voi varata samalla polulla.
 --  * Tunnistus (varovainen, ei pelkkä id): Johku external_id 17 tai 41, TAI slug saunavuoro-yrityksille / jalkiloylyt-yrityksille.
@@ -7,7 +7,7 @@
 --    Ei koske Johku 16 (Oma savusaunavuoro) eikä Johku 15 (jälkilöylyt yksityisille) eikä slugia yrityspaivat (tarjous, ei vuoro).
 --  * public_catalog() jätetään ennalleen (booking_61 / myöhempi booking_64). Uusi public_catalog_for(audience) suodattaa sen tuloksen.
 --  * admin_update_product_config: sallittu kenttä audience (catalog.edit).
--- Rollback: rollbacks/20261018192000_booking_71_ROLLBACK.sql
+-- Rollback: rollbacks/20261018210000_booking_74_ROLLBACK.sql
 -- ============================================================
 set local lock_timeout = '5s';
 
@@ -38,10 +38,10 @@ begin
      order by p.id
   loop
     n := n + 1;
-    raise notice 'booking_71 audience=business id=% slug=% system=% external_id=% name=%', r.id, r.slug, r.external_system, r.external_id, r.name;
+    raise notice 'booking_74 audience=business id=% slug=% system=% external_id=% name=%', r.id, r.slug, r.external_system, r.external_id, r.name;
   end loop;
   if n = 0 then
-    raise notice 'booking_71: ei yhtään audience=business -riviä. Odotettu osuma: johku 17/41 tai slug saunavuoro-yrityksille / jalkiloylyt-yrityksille. Aseta näkyvyys hallinnan Tuotteet-näkymässä.';
+    raise notice 'booking_74: ei yhtään audience=business -riviä. Odotettu osuma: johku 17/41 tai slug saunavuoro-yrityksille / jalkiloylyt-yrityksille. Aseta näkyvyys hallinnan Tuotteet-näkymässä.';
   end if;
 end $$;
 

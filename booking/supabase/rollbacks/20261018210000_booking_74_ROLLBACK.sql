@@ -1,6 +1,6 @@
--- booking_71_ROLLBACK: audience-sarake ja public_catalog_for pois. Tuotteet, säännöt ja varaukset säilyvät.
+-- booking_74_ROLLBACK: audience-sarake ja public_catalog_for pois. Tuotteet, säännöt ja varaukset säilyvät.
 -- admin_update_product_config palautetaan booking_14:n allow-listaan (ei audience-kenttää).
--- Aja vasta kun booking_72 on purettu, jos se on käytössä (72 ei riipu sarakkeesta, mutta järjestys on selkeä).
+-- Aja vasta kun booking_75 on purettu, jos se on käytössä (75 ei riipu sarakkeesta, mutta järjestys on selkeä).
 set local lock_timeout = '5s';
 
 create or replace function booking.admin_update_product_config(p_product_id bigint, p_patch jsonb)
