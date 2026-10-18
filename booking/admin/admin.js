@@ -5,6 +5,7 @@ import { icon } from './icons.js';
 import { t as tl } from './talous-i18n.js';
 import { createAdminMock } from './options-mock.js';
 import { loadFilterTexts } from './filter-texts.js';
+import { needsManualRoute, parseAdminHash } from './reservation-query.js';
 
 const $ = (id) => document.getElementById(id);
 // Kokeilutila: osoite /hallinta/?mock=1 → keinoistunto + selaimen oma mock-data (options-mock.js). EI verkkokutsuja eikä kirjautumista; mikään ei tallennu. Ilman parametria ennallaan.
@@ -70,7 +71,7 @@ let routeSeq = 0;   // nopea navigointi: vain viimeisin reitti saa piirtää nä
 async function route() {
   if (!getSession()) return;
   const seq = ++routeSeq;
-  const path = location.hash.replace(/^#\/?/, '').split('?')[0].split('/')[0];
+  const { path, query } = parseAdminHash(location.hash);
   const r = ROUTES.find((x) => x.path === path && allowed(x)) || ROUTES[0];
   drawNav(r.path);
   const view = $('view');
@@ -78,7 +79,7 @@ async function route() {
   try {
     const m = await r.mod();
     await refs();
-    const out = await m.render({ ctx, refs: ctx.refs, reload: route, query: new URLSearchParams(location.hash.split('?')[1] || '') });
+    const out = await m.render({ ctx, refs: ctx.refs, reload: route, query });
     if (seq !== routeSeq) return;
     view.replaceChildren(...[].concat(out).filter(Boolean));
     document.title = `${r.labelFn ? r.labelFn() : r.label} – hallinta`;
@@ -115,6 +116,17 @@ $('login').addEventListener('submit', async (ev) => {
 $('logout').addEventListener('click', () => { if (MOCK) { location.href = location.pathname; return; }
    signOut(); ctx.refs = null; ctx.role = null; ctx.perms = []; showLogin(''); });
 window.addEventListener('hashchange', route);
+// Sama fragmentti (esim. muistutuslinkki kun lista on jo auki samalla suodattimella) ei laukaise hashchangea,
+// jolloin näkymä jäisi piirtämättä ("ei avaa mitään"). Eri fragmentti vaihtuu selaimen hashchange-tapahtumalla.
+document.addEventListener('click', (ev) => {
+  if (ev.defaultPrevented || ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+  const el = ev.target instanceof Element ? ev.target : ev.target?.parentElement;
+  const a = el?.closest?.('a[href^="#"]');
+  if (!a) return;
+  const href = a.getAttribute('href');
+  if (!href || href === '#') return;
+  if (needsManualRoute(location.hash, href)) { ev.preventDefault(); route(); }
+});
 onAuthChange((s) => { if (!s) showLogin(''); });
 // Kutsulinkki (#access_token=…&type=invite): istunto otetaan käyttöön ja käyttäjä asettaa salasanan ennen hallintaan siirtymistä
 if (adoptSessionFromHash()) {

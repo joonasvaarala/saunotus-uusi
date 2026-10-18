@@ -55,6 +55,8 @@ jobs:
       - run: node --test booking/tests/kassa-maksu.test.mjs
       # hoitovalitsin (booking_50): kaupan/hallinnan logiikka, FI/EN-tekstit, mockit vs. sopimus
       - run: node --test booking/tests/hoitovalitsin.test.mjs
+      # hoito valitsematta: muistutuslinkki, varauslistan suodatin, booking_72 vain luku
+      - run: node --test booking/tests/hoito-valitsematta.test.mjs
       # hallinnan päivänäkymä: päivän tuotto (käyntipäivä, brutto, perutut pois) ja tapahtumien sijoittelu
       - run: node --test booking/tests/paivanakyma-tuotto.test.mjs
       # Tarkista: sulkukonfliktin kuittaus (booking_73) ei muuta saatavuutta; tekstit ui.admin.review.*

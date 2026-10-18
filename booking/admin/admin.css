@@ -545,6 +545,11 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .optitem:hover{border-color:var(--green)}
 @media (max-width:480px){.opt-host .srcopt,.optset .srcopt{flex:1 1 100%}.optset .srcopt span{justify-content:flex-start;width:100%}}
 .opt-reminder{margin:0 0 10px;padding:10px 12px;border:1px solid #b9954a;border-radius:8px;background:var(--warnbg);color:var(--ink)}
+.opt-reminder a{color:var(--ink);font-weight:700}
+.active-filters{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 10px}
+.filter-drawer-bar>.active-filters{flex:1 1 100%;margin:0}
+.active-filters[hidden]{display:none}
+.active-filters .chip{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:4px 8px 4px 12px;border:1px solid #b9954a;border-radius:8px;background:var(--warnbg);color:var(--ink);font-weight:600}
 .optcard{display:grid;gap:8px}
 /* Lahjakoodit / lunastuspyynnöt (§13.12) – hillitty: hiekka + tummanvihreä, ei sinistä */
 .vcl-top{align-items:flex-start;gap:12px;margin:0 0 8px}.vcl-top>div{min-width:0;flex:1 1 280px}.vcl-top .btn{flex:0 0 auto}.vcl-h{margin:0 0 4px;font-size:20px;color:var(--ink)}

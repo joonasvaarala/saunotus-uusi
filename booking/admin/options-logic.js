@@ -14,7 +14,7 @@ export const OPT_TEXTS = {
     fDesc: 'Kuvaus (suomi, valinnainen)', fDescEn: 'Kuvaus (englanti, valinnainen)', fRequired: 'Valinta on pakollinen varausta tehdessä', fLabel: 'Valitsimen otsikko (suomi)', fLabelEn: 'Valitsimen otsikko (englanti)',
     mgSaveOpt: 'Tallenna vaihtoehto', mgSaveSet: 'Tallenna asetukset', mgSavedOpt: 'Vaihtoehto tallennettu', mgSavedSet: 'Asetukset tallennettu', mgEditOpt: 'Muokkaa vaihtoehtoa', mgNewOpt: 'Uusi vaihtoehto', mgSettingsOf: 'Asetukset',
     mgCodeInvalid: 'Koodi: käytä vain pieniä kirjaimia, numeroita ja alaviivaa (enintään 40 merkkiä).', mgNameMissing: 'Anna vaihtoehdon nimi.',
-    reminder: '{n} tulevaa hoitovarausta ilman valittua hoitoa.', reminderLink: 'Avaa varaukset', err_invalid_param: 'Tarkista kentät: koodi tai nimi ei kelpaa.', err_product_not_found: 'Tuotetta ei löytynyt.',
+    err_invalid_param: 'Tarkista kentät: koodi tai nimi ei kelpaa.', err_product_not_found: 'Tuotetta ei löytynyt.',
   },
   en: {
     label: 'Treatment', notChosen: 'not chosen', choose: 'Choose treatment', required: 'A treatment must be chosen for this booking (required).',
@@ -30,7 +30,7 @@ export const OPT_TEXTS = {
     fDesc: 'Description (Finnish, optional)', fDescEn: 'Description (English, optional)', fRequired: 'A choice is required when booking', fLabel: 'Picker title (Finnish)', fLabelEn: 'Picker title (English)',
     mgSaveOpt: 'Save option', mgSaveSet: 'Save settings', mgSavedOpt: 'Option saved', mgSavedSet: 'Settings saved', mgEditOpt: 'Edit option', mgNewOpt: 'New option', mgSettingsOf: 'Settings',
     mgCodeInvalid: 'Code: use only lower-case letters, digits and underscore (up to 40 characters).', mgNameMissing: 'Enter a name for the option.',
-    reminder: '{n} upcoming treatment bookings have no treatment chosen.', reminderLink: 'Open bookings', err_invalid_param: 'Check the fields: the code or name is not valid.', err_product_not_found: 'Product not found.',
+    err_invalid_param: 'Check the fields: the code or name is not valid.', err_product_not_found: 'Product not found.',
   },
 };
 export const otFor = (lang, k, vars) => { const v = OPT_TEXTS[lang]?.[k] ?? OPT_TEXTS.fi[k] ?? k; return vars ? v.replace(/\{(\w+)\}/g, (_, n) => (vars[n] == null ? '' : vars[n])) : v; };
