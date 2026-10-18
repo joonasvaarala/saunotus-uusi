@@ -14,7 +14,13 @@ export const PRODUCTS = {
   11: { name: 'Saunotus', minutes: 120, min: 1, max: 2, base: 210, extra: 60, included: 1, type: 'plus' },
   12: { name: 'Syväsaunotus', minutes: 180, min: 1, max: 2, base: 290, extra: 70, included: 1, type: 'plus' },
   8: { name: 'Saunotusrituaali', minutes: 20, min: 1, max: 6, base: 20, extra: 0, included: 0, type: 'person' },
+  // Pakettituote (booking_58, sopimus §17.11): rituaali 0–20 min (Rauni, jaettu rituaalipooli kuten kb 8), tauko 20–30, savusauna 30–120 (ei mallinneta mockissa); la–su, alkuajat 16:00/16:30/17:00; EI hoitovalitsinta
+  7: { name: 'Saunarituaali ja savusaunavuoro (la & su)', name_en: 'Sauna Ritual & Smoke Sauna Session', minutes: 120, ritualMinutes: 20, min: 1, max: 6, base: 49, extra: 0, included: 0, type: 'person', category: 'ritual',
+    duration_text: 'rituaali 20 min + tauko 10 min + savusauna 1 h 30 min (yhteensä 2 h)' },
 };
+const isRit = (id) => id === 7 || id === 8;   // rituaalipooli (Rauni, yht. max 6 hlö samaan aikaan)
+// Rauni-ikkuna (ms): rituaali ja paketin rituaaliosa 20 min, hoidot ja saunotus koko kesto
+const winOf = (id, s) => [s, s + (PRODUCTS[id].ritualMinutes || PRODUCTS[id].minutes) * 60e3];
 // Tuotevalinta (booking_50, sopimus §15): Saunahoito (kb 10) vaatii hoidon valinnan; hinta ei muutu. Rivit kuten tuotannon seed (ei kuvauksia).
 export const OPTIONS = {
   10: { required: true, label: 'Valitse hoito', label_en: 'Choose your treatment', options: [
@@ -66,23 +72,23 @@ function windowOf(ds) { return dow(ds) === 0 || dow(ds) === 6 ? ['13:00', '20:30
 // vapaat alkuajat yhdelle päivälle (skipToken: ohitetaan tämä varaus, kun sitä muutetaan)
 function freeStarts(id, n, ds, now, skipToken) {
   const pr = PRODUCTS[id]; if (!pr || !dayOpen(ds)) return [];
-  if (id === 8 && ![0, 6].includes(dow(ds))) return [];   // rituaali vain la–su
+  if (isRit(id) && ![0, 6].includes(dow(ds))) return [];   // rituaali ja paketti vain la–su
   const [from, to] = windowOf(ds);
-  const starts = id === 8 ? RITUAL_STARTS : Array.from({ length: Math.floor((toMin(to) - pr.minutes - toMin(from)) / 30) + 1 }, (_, i) => fromMin(toMin(from) + i * 30));
+  const starts = isRit(id) ? RITUAL_STARTS : Array.from({ length: Math.floor((toMin(to) - pr.minutes - toMin(from)) / 30) + 1 }, (_, i) => fromMin(toMin(from) + i * 30));
   const mine = (b) => b.token !== skipToken && dayOf(b.start) === ds;
   const taken = [...bookings.values()].filter(mine);
   return starts.filter((hm) => {
-    const s = helToMs(ds, hm), e = s + pr.minutes * 60e3;
+    const s = helToMs(ds, hm), [, e] = winOf(id, s);   // e = Rauni-ikkunan loppu
     if (hm < from || toMin(hm) + pr.minutes > toMin(to)) return false;
     if (s < now + LEAD_MS) return false;
     for (const [a, b] of busyBlocks(ds)) if (s < helToMs(ds, fromMin(b)) + GAP && e + GAP > helToMs(ds, fromMin(a))) return false;
     let ritualPersons = 0;
     for (const b of taken) {
-      const overlap = s < b.end + GAP && e + GAP > b.start;
-      if (id === 8 && b.product_id === 8) { if (s < b.end && e > b.start) ritualPersons += b.persons; continue; }
-      if (overlap) return false;
+      const [bs, be] = winOf(b.product_id, b.start);
+      if (isRit(id) && isRit(b.product_id)) { if (s < be && e > bs) ritualPersons += b.persons; continue; }   // yhteinen rituaalipooli: yht. max 6 hlö
+      if (s < be + GAP && e + GAP > bs) return false;   // Rauni: 15 min puskuri hoitoihin/saunotukseen
     }
-    return !(id === 8 && ritualPersons + n > PRODUCTS[8].max);
+    return !(isRit(id) && ritualPersons + n > PRODUCTS[8].max);
   }).map((hm) => ({ hm, s: helToMs(ds, hm) }));
 }
 
@@ -161,6 +167,7 @@ export const resetBookings = () => bookings.clear();
 export const snapshotBookings = () => ({ orderNo, bookings: [...bookings.values()] });
 export const restoreBookings = (snap) => { bookings.clear(); for (const b of snap?.bookings || []) bookings.set(b.token, b); if (snap?.orderNo > orderNo) orderNo = snap.orderNo; };
 // public_catalog()-lisäys: hoito-/rituaalituotteet (booking_kind 'slots'); vain kun liput olisi päällä → demossa aina. Kuvaus ja lisähenkilön hinta tulevat kaupan staattisesta kb-datasta.
-export const catalogEntries = () => Object.entries(PRODUCTS).map(([id, p]) => ({ id: +id, slug: ({ 8: 'saunotusrituaali', 10: 'saunahoito-2', 11: 'saunotus-2', 12: 'syvasaunotus' })[id], name: p.name,
+export const catalogEntries = () => Object.entries(PRODUCTS).map(([id, p]) => ({ id: +id, slug: ({ 7: 'saunarituaali-ja-savusaunavuoro', 8: 'saunotusrituaali', 10: 'saunahoito-2', 11: 'saunotus-2', 12: 'syvasaunotus' })[id], name: p.name,
+  ...(p.name_en ? { name_en: p.name_en } : {}), ...(p.category ? { category: p.category } : {}), ...(p.duration_text ? { duration_text: p.duration_text } : {}),
   price: p.base, price_type: p.type === 'person' ? 'per_person' : 'base_plus_extra_person', duration_minutes: p.minutes, min_persons: p.min, max_persons: p.max, sale_kind: 'other', booking_kind: 'slots', slot_grid_minutes: 30,
   ...(OPTIONS[id] ? { options: activeOptions(+id), option_required: OPTIONS[id].required, option_label: OPTIONS[id].label, option_label_en: OPTIONS[id].label_en } : { options: [], option_required: false, option_label: null, option_label_en: null }) }));

@@ -25,12 +25,27 @@ export function createTreatmentViews(c) {
     const base = p.price_type === 'per_person' ? `${money(p.price)} ${t.perPerson}` : money(p.price);
     return p.price_type === 'base_plus_extra_person' && p.extra_person_price && A.maxPersons(p) > 1 ? `${base} (${t.included(p.included_persons || 1)}, ${t.extra(money(p.extra_person_price))})` : base;
   };
+  // pakettituote (kb 7): aikajana "rituaali 20 min · tauko 10 min · savusauna 1 h 30 min", kesto "2 h", aikataulu kellonaikoina valitusta alkuajasta
+  const fmtMin = (m) => (m < 60 ? `${m} min` : m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`);
+  const totalMin = (p) => p.duration_minutes || A.timelineMinutes(p);
+  // jakson sisällä sitova väli (NBSP): rivinvaihto vain jaksojen välissä ("savusauna 1 h 30 min" ei katkea)
+  const timelineText = (p) => (A.isPackage(p) ? A.timelineOf(p).map((x) => `${tr.tl[x.key]} ${fmtMin(x.min)}`.replace(/ /g, '\u00a0')).join(' · ') : '');
+  // kesto hintarivillä: paketilla kieliversio (palvelimen duration_text on suomea ja pitkä), muilla palvelimen teksti
+  const durText = (p) => (A.isPackage(p) ? fmtMin(totalMin(p)) : p.duration_text || '');
+  const metaP = (p) => h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), durText(p) ? ` · ${durText(p)}` : '');
+  const bar = (p) => h('span', { class: 'bk-tl-bar', 'aria-hidden': 'true' }, A.timelineOf(p).map((x) => h('span', { class: `bk-tl-seg ${x.key}`, style: `flex:${x.min} 1 0` })));
+  const timelineNode = (p) => (A.isPackage(p) ? h('div', { class: 'bk-timeline', 'data-testid': 'timeline' }, h('p', { class: 'bk-tl-text', text: timelineText(p) }), bar(p)) : null);
+  // aikataulurivit valitulle alkuajalle: "rituaali 16:00–16:20" … (yhteenveto ja tarkistus)
+  const scheduleDd = (p, startIso) => h('dd', { class: 'bk-schedule', 'data-testid': 'schedule' }, A.timelineSlots(p, startIso).map((x) => h('span', { class: 'bk-sched-line', text: `${tr.tl[x.key]} ${x.from}–${x.to}` })));
+  const scheduleRows = (p, startIso) => (A.isPackage(p) && startIso ? [h('dt', { text: tr.tlTitle }), scheduleDd(p, startIso)] : null);
+
   // tuotekortti tuotelistaan (sama rakenne kuin vuorotuotteilla)
   const card = (p) => h('li', { class: 'bk-card' },
     pimg(p, 'card-img'),
     h('h3', {}, h('a', { href: bk(`/tuote/${p.slug}`), text: pname(p) })),
     h('p', { class: 'bk-desc', text: (pdesc(p) || '').slice(0, 170) + ((pdesc(p) || '').length > 170 ? '…' : '') }),
-    h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), p.duration_text ? ` · ${p.duration_text}` : ''),
+    metaP(p),
+    timelineNode(p),
     h('a', { class: 'btn sm', href: bk(`/tuote/${p.slug}`) }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) })));
 
   // ---- valitsin: henkilömäärä → päivä (vain vapaat) → kellonaika ----
@@ -97,7 +112,8 @@ export function createTreatmentViews(c) {
           'aria-label': `${dayLong(`${ds}T12:00:00Z`)}, ${t.timesFree(list.length)}`, onclick: () => choose(ds) }, d));
       }
       calBox.replaceChildren(nav, h('div', { class: 'bk-grid', role: 'group', 'aria-label': monthName }, wd, cells),
-        any ? h('p', { class: 'bk-legend' }, h('span', { class: 'dot free' }), tr.legendFree) : h('p', { class: 'bk-note bk-nofree', role: 'status', text: tr.noFreeMonth }));
+        any ? h('p', { class: 'bk-legend' }, h('span', { class: 'dot free' }), tr.legendFree)
+          : A.isPackage(p) ? h('p', { class: 'bk-note bk-nofree', role: 'status', 'data-testid': 'no-times' }, h('strong', { text: tr.noTimes }), ` – ${tr.noTimesHint}`) : h('p', { class: 'bk-note bk-nofree', role: 'status', text: tr.noFreeMonth }));
       // ensimmäinen avaus ilman valittua päivää: hypätään seuraavaan kuukauteen, jossa on vapaata (enintään 4 kk)
       if (!any && !st.date && st.hop < 4 && nextOk) { st.hop++; return go(1); }
       if (st.date && !st.slots.get(st.date)?.length) { st.date = null; st.time = null; drawTimes(); emit(); }
@@ -112,7 +128,7 @@ export function createTreatmentViews(c) {
             list.length ? h('ul', { class: 'bk-times' }, list.map((s) => h('li', {}, h('button', { type: 'button', class: 'bk-time-btn', 'aria-pressed': s.time === st.time ? 'true' : 'false',
               onclick: () => { st.time = s.time; drawTimes(); emit(); timeBox.querySelector('[aria-pressed="true"]')?.focus(); } },
               h('strong', { text: s.time }), s.end ? h('span', { class: 'bk-time-end', text: `–${tm(s.end)}` }) : null))))
-              : h('p', { class: 'bk-note', text: t.noSlots })));
+              : h('p', { class: 'bk-note', text: A.isPackage(p) ? tr.noTimes : t.noSlots })));
     }
     async function refresh() { st.hop = 0; await drawCal(); drawTimes(); emit(); }
     syncN(); drawTimes();
@@ -149,7 +165,7 @@ export function createTreatmentViews(c) {
     });
     mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })),
       h('p', { class: 'bk-desc', text: pdesc(p) || '' }),
-      h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), p.duration_text ? ` · ${p.duration_text}` : ''),
+      metaP(p), timelineNode(p),
       optStep, picker.node, h('div', { class: 'bk-continue' }, sum, go));
     await picker.ready;
     if (!query.get('n')) focusTop();
@@ -172,7 +188,7 @@ export function createTreatmentViews(c) {
     const optText = () => (opt ? O.optName(O.findOption(p, opt), S.lang) : ot.notChosen);
     const optDd = h('dd', { 'data-testid': 'sum-option', text: optText() });
     const sumList = h('dl', { class: 'bk-sum' }, h('dt', { text: t.what }), h('dd', { text: pname(p) }), showOpt ? [h('dt', { text: ot.what }), optDd] : null, h('dt', { text: tr.date }), h('dd', { text: dayLong(slot.start) }),
-      h('dt', { text: tr.time }), h('dd', { text: slot.end ? `${tm(slot.start)}–${tm(slot.end)}` : tm(slot.start) }), h('dt', { text: t.persons }), h('dd', { text: String(n) }));
+      h('dt', { text: tr.time }), h('dd', { text: slot.end ? `${tm(slot.start)}–${tm(slot.end)}` : tm(slot.start) }), scheduleRows(p, slot.start), h('dt', { text: t.persons }), h('dd', { text: String(n) }));
     const optP = showOpt ? optPicker(p, { value: opt, required: needOpt, onChange: (code) => { opt = code; optDd.textContent = optText(); pickWhen.textContent = whenText(); } }) : null;
     const cf = customerFields(), legal = legalFields(), { terms, consent } = legal;
     const msg = h('div', { id: 'bk-msg' });
@@ -205,7 +221,7 @@ export function createTreatmentViews(c) {
       const ok = h('button', { type: 'button', class: 'btn', 'data-testid': 'review-submit', text: t.book });
       const edit = h('button', { type: 'button', class: 'btn light', text: tr.edit, onclick: () => { topBox.hidden = false; holder.replaceChildren(formView); form.querySelector('input,textarea')?.focus(); window.scrollTo({ top: 0 }); } });
       const dl = h('dl', { class: 'bk-sum' }, h('dt', { text: t.what }), h('dd', { text: pname(p) }), showOpt ? [h('dt', { text: ot.what }), h('dd', { 'data-testid': 'review-option', text: optText() })] : null, h('dt', { text: tr.date }), h('dd', { text: dayLong(slot.start) }), h('dt', { text: tr.time }),
-        h('dd', { text: slot.end ? `${tm(slot.start)}–${tm(slot.end)}` : tm(slot.start) }), h('dt', { text: t.persons }), h('dd', { text: String(n) }),
+        h('dd', { text: slot.end ? `${tm(slot.start)}–${tm(slot.end)}` : tm(slot.start) }), scheduleRows(p, slot.start), h('dt', { text: t.persons }), h('dd', { text: String(n) }),
         h('dt', { text: cust.kind === 'company' ? t.contactName : t.name }), h('dd', { text: cust.name }), cust.company ? [h('dt', { text: t.companyName }), h('dd', { text: cust.company.company_name })] : null,
         h('dt', { text: t.email }), h('dd', { text: cust.email }), h('dt', { text: t.phone }), h('dd', { text: cust.phone }), note ? [h('dt', { text: t.note.replace(/\s*\(.*\)$/, '') }), h('dd', { text: note })] : null,
         null);
@@ -272,5 +288,5 @@ export function createTreatmentViews(c) {
     await picker.ready; focusTop();
   }
 
-  return { card, priceText, viewTreatment, viewCheckout, viewChange };
+  return { card, priceText, timelineText, viewTreatment, viewCheckout, viewChange };
 }

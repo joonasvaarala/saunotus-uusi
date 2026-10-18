@@ -36,7 +36,22 @@ export const POLICY = {
   maxRangeDays: 14,                             // yksi saatavuushaku: p_to − p_from enintään 14 pv (= 15 kalenteripäivää; oikea kanta hyväksyy tämän)
   cacheMs: 3 * 60e3,                            // saatavuuden välimuisti (haku 0,3–1,7 s; ei pollausta)
 };
-export const KB_IDS = [10, 11, 12, 8];           // näytetään tässä järjestyksessä
+export const KB_IDS = [10, 11, 12, 8, 7];        // näytetään tässä järjestyksessä (tuntematon id → loppuun, ks. splitCatalog)
+// Pakettituote kb 7 "Saunarituaali ja savusaunavuoro (la & su)" (booking_58, sopimus §17.11): sama aikavarauspolku kuin hoidoilla (slots, ruudukko 30 min), EI hoitovalitsinta.
+// Aikajana alusta (min): rituaali 0–20 (Rauni), tauko 20–30, savusauna 30–120. Palvelin ei (vielä) palauta jaksoja, joten jaksot ovat tässä yhdessä paikassa;
+// kokonaiskesto = ends_at − starts_at palvelimelta (120 min). Muuttuessa muutetaan vain tätä taulukkoa (ja tr.timeline-tekstejä i18n.js:ssä).
+export const PACKAGE_TIMELINES = {
+  7: [{ key: 'ritual', min: 20 }, { key: 'break', min: 10 }, { key: 'smoke', min: 90 }],
+};
+export const isPackage = (p) => !!PACKAGE_TIMELINES[p?.id];
+export const timelineOf = (p) => PACKAGE_TIMELINES[p?.id] || null;
+export const timelineMinutes = (p) => (timelineOf(p) || []).reduce((a, x) => a + x.min, 0);
+// Aikajanan jaksot kellonaikoina alkuajasta: [{ key, min, from: 'HH:MM', to: 'HH:MM' }] (Helsingin aika)
+export function timelineSlots(p, startIso) {
+  const tl = timelineOf(p); if (!tl || !startIso) return [];
+  let at = new Date(startIso).getTime();
+  return tl.map((x) => { const from = hmKey(new Date(at).toISOString()); at += x.min * 60e3; return { ...x, from, to: hmKey(new Date(at).toISOString()) }; });
+}
 export const horizonDays = (settings) => +settings?.public_treatment_horizon_days || POLICY.horizonDays;
 export const isRitual = (p) => p?.id === 8 || p?.category === 'ritual';
 
@@ -78,7 +93,8 @@ export function splitCatalog(catalog, staticById) {
     const no = normOptions(r);   // booking_50: options (aktiiviset), option_required, option_label(_en)
     treatments.push({ ...st, ...o, id, treatment: true, sale_kind: r.sale_kind, options: no.options, option_required: no.required, option_label: no.label, option_label_en: no.label_en });
   }
-  treatments.sort((a, b) => KB_IDS.indexOf(a.id) - KB_IDS.indexOf(b.id));
+  const ord = (id) => { const i = KB_IDS.indexOf(id); return i < 0 ? KB_IDS.length : i; };   // tuntematon slots-tuote (uusi paketti) → listan loppuun, ei alkuun
+  treatments.sort((a, b) => ord(a.id) - ord(b.id));
   return { rules, treatments };
 }
 // Vahvistussivu (ei kauppaa ladattuna): hae katalogi erikseen. Virhe → [] (muutos sähköpostilla).
@@ -123,7 +139,9 @@ export async function loadAvailability(p, persons, from, to) {
     const start = r.starts_at; if (!start) continue;
     if (r.status && r.status !== 'available') continue;
     const day = r.session_date || dayKey(start);
-    (byDay.get(day) || byDay.set(day, []).get(day)).push({ start, end: r.ends_at || null, time: hmKey(start), total: num(r.total) });
+    // loppuaika: palvelimen ends_at; puuttuessa alku + kesto (rivin duration_minutes tai tuotteen kesto), ei arvata jos kestoa ei tiedetä
+    const dur = num(r.duration_minutes) ?? num(p?.duration_minutes), end = r.ends_at || (dur ? new Date(new Date(start).getTime() + dur * 60e3).toISOString() : null);
+    (byDay.get(day) || byDay.set(day, []).get(day)).push({ start, end, time: hmKey(start), total: num(r.total) });
   }
   for (const list of byDay.values()) list.sort((a, b) => a.start.localeCompare(b.start));
   return byDay;

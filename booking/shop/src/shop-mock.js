@@ -15,6 +15,7 @@ const MUTATING = new Set(['public_create_treatment_booking', 'public_change_trea
 const PAY_RPC = new Set(['public_payment_options', 'public_checkout_payment_options', 'public_confirm_pay_later', 'public_gift_card_packages', 'public_check_gift_card', 'public_apply_gift_card', 'public_get_order_gift_cards', 'public_resolve_gift_code', 'public_submit_voucher_claim', 'public_get_order_voucher_claims', 'public_update_voucher_claim_code']);
 export function createShopMock({ storage = globalThis.sessionStorage, now = () => Date.now(), fail = null, scenario = '', mpResult = '' } = {}) {
   const pay = /^pay(-prod|-off)?$/.test(scenario) || isHoldScenario(scenario) ? createOrderMock({ scenario, mpResult, ...holdMockParams() }) : null;   // hold* = kassan paikanpito (hold-mock.js)
+  const noTimes = fail === 'notimes';   // ?mock=1&fail=notimes: public_treatment_availability palauttaa aina tyhjän ("Ei vapaita aikoja" -tila)
   let failOnce = ['option_required', 'invalid_option', 'online_payment_unavailable', 'too_many_pending'].includes(fail) ? fail : null;
   try { restoreBookings(JSON.parse(storage?.getItem(KEY) || 'null')); } catch { /* tyhjä alku */ }
   const save = () => { try { storage?.setItem(KEY, JSON.stringify(snapshotBookings())); } catch { /* ei säilytystä */ } };
@@ -42,6 +43,7 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
       }
       default: {
         if (failOnce && MUTATING.has(name)) { const code = failOnce; failOnce = null; return { ok: false, code, message: code === 'option_required' ? 'Valitse hoito' : code === 'invalid_option' ? 'Valittu hoito ei kelpaa' : HOLD_ERRORS[code] }; }
+        if (noTimes && name === 'public_treatment_availability') return [];
         const r = treatmentRpc(name, args, now());
         if (!r) throw missing(name);
         if (r.status >= 400) throw new ApiError(r.body.message, { status: r.status, code: r.body.details || r.body.code, details: r.body });
