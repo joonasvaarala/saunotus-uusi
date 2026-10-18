@@ -12,9 +12,11 @@ export function normOptions(r) {
 // public_checkout_payment_options (§14.7, kassa ilman tokenia) → { ok, method (mobilepay | null), gift (lahjakortti redeem-tapa mukana), canPay:false, pending:false, unpaid:null }
 // Palvelin on totuus: tapa näkyy vain jos se on methods-listassa (ei kovakoodattua näkyvyyttä); tyhjä methods = ei verkkomaksutapoja.
 export function normCheckoutOptions(r) {
-  if (!r || r.ok === false) return { ok: false, method: null, gift: false, canPay: false, pending: false, unpaid: null };
+  if (!r || r.ok === false) return { ok: false, method: null, gift: false, hold: false, holdKnown: false, holdMinutes: 15, canPay: false, pending: false, unpaid: null };
   const ms = Array.isArray(r.methods) ? r.methods.filter((m) => m && typeof m === 'object') : [];
-  return { ok: true, method: ms.find((m) => m.code === 'mobilepay') || null, gift: ms.some((m) => m.code === 'gift_card'), canPay: false, pending: false, unpaid: null };
+  const hm = +r.hold_minutes;
+  // booking_53 (§17): hold_until_paid = pitotila päällä (palvelin päättää, ei kovakoodata), hold_minutes = pidon pituus; puuttuvat kentät (vanha backend) → ei pitotilaa
+  return { ok: true, method: ms.find((m) => m.code === 'mobilepay') || null, gift: ms.some((m) => m.code === 'gift_card'), hold: r.hold_until_paid === true, holdKnown: typeof r.hold_until_paid === 'boolean', holdMinutes: Number.isFinite(hm) && hm > 0 ? hm : 15, canPay: false, pending: false, unpaid: null };
 }
 // Näytetäänkö painike: methods sisältää mobilepayn JA order.can_pay_online. Testitilan tapa (methods[].test=true) vain testiympäristössä (env.testUi) – tuotantosivustolla piilotetaan.
 export function shouldShowButton(opts, env = {}) {
@@ -25,7 +27,7 @@ export function shouldShowButton(opts, env = {}) {
 }
 // Testiympäristö: config.js testUi (rakennus: BOOKING_MOBILEPAY_TEST_UI tai SITE_ENV=test) tai ?mock=1
 export function testUiEnabled(cfg = {}, search = '') {
-  if (new URLSearchParams(search || '').get('mock') === '1') return true;
+  { const q = new URLSearchParams(search || ''); if (q.get('mock') === '1') return q.get('testui') !== '0'; }   // mock: testitila päällä, &testui=0 simuloi tuotantoa
   const v = cfg.mobilepayTestUi;
   return v === true || v === 'true' || v === '1' || v === 1;
 }

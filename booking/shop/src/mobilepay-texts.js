@@ -1,7 +1,9 @@
+import { HT } from './hold-texts.js';
 // MobilePay-maksun tekstit (FI/EN). Avaimet samat molemmilla kielillä (node --test tarkistaa). Ei emojeita.
 // Virhekoodit: edge-funktion `code` (sopimus §14.2); tuntematon koodi → yleisteksti (FI: palvelimen message sellaisenaan).
 export const MT = {
   fi: {
+    'err.online_payment_unavailable': HT.fi['err.online_payment_unavailable'], 'err.order_expired': HT.fi['err.order_expired'], 'err.order_preliminary': HT.fi['err.order_preliminary'], 'err.payment_in_progress': HT.fi['err.payment_in_progress'],   // pito (§17): yhteiset tekstit hold-texts.js
     payTitle: 'Maksa verkossa', payLead: 'Maksa maksamaton osa MobilePaylla. Siirryt MobilePayn maksusivulle ja palaat tälle sivulle maksun jälkeen.',
     payBtn: 'Maksa MobilePaylla', payBusy: 'Avataan MobilePayta…', payAmount: 'Maksettava: {amount}',
     testNote: 'Testitila: maksu menee MobilePayn testipalvelimelle eikä oikeaa rahaa veloiteta. Tämä näkyy vain testisivustolla.',
@@ -24,6 +26,7 @@ export const MT = {
     contact: 'Kysyttävää? Ota yhteyttä:',
   },
   en: {
+    'err.online_payment_unavailable': HT.en['err.online_payment_unavailable'], 'err.order_expired': HT.en['err.order_expired'], 'err.order_preliminary': HT.en['err.order_preliminary'], 'err.payment_in_progress': HT.en['err.payment_in_progress'],
     payTitle: 'Pay online', payLead: 'Pay the unpaid part with MobilePay. You will be taken to the MobilePay payment page and returned to this page afterwards.',
     payBtn: 'Pay with MobilePay', payBusy: 'Opening MobilePay…', payAmount: 'Amount due: {amount}',
     testNote: 'Test mode: the payment goes to the MobilePay test server and no real money is charged. This is only shown on the test site.',

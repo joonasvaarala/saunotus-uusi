@@ -4,6 +4,8 @@
 // Palvelimen virheet tulevat HTTP 200 + { ok:false, code, message } → palautetaan sellaisenaan (ei heitetä).
 import { createOrderMock } from './order-mock.js';
 import { normOptions, reservationItem } from './options-logic.js';
+import { normCheckout } from './hold-logic.js';
+import { holdMockParams } from './hold-mock.js';
 export const RPC = { get: 'public_get_order', addToOrder: 'public_add_to_order', requestCancel: 'public_request_cancel', getReceipt: 'public_get_receipt', changeOrderTime: 'public_change_order_time' };
 export const isMissingRpc = (e) => !!e && (e.status === 404 || e.code === 'PGRST202' || e.code === '42883' || /could not find the function/i.test(e.message || ''));
 export const wantsMock = (loc = typeof location !== 'undefined' ? location : null) => !!loc && new URLSearchParams(loc.search || '').get('mock') === '1';
@@ -13,6 +15,7 @@ const num = (v, d = 0) => (v == null || v === '' || !Number.isFinite(+v) ? d : +
 export function normOrder(r) {
   return { ok: true, order_no: r.order_no, status: r.status, payment_status: r.payment_status || 'unpaid', created_at: r.created_at ?? null, first_name: r.first_name ?? '', locale: r.locale ?? null,
     total: num(r.total), paid: num(r.paid), unpaid: num(r.unpaid),
+    checkout: normCheckout(r),   // booking_53 (§17): kassan pitotila; null = vanha backend (tilaussivu toimii ennallaan)
     items: (r.items || []).map((i) => ({ name: i.name, name_en: i.name_en ?? null, quantity: num(i.quantity, 1), line_total: num(i.line_total), vat_rate: num(i.vat_rate) })),
     // reservations: booking_50 lisää product_id, option (valittu hoito) ja option_choices (vaihtoehdot, muutosvalitsin); booking_52 option_label(_fi/_en) (valitsimen otsikko)
     reservations: (r.reservations || []).map((x) => ({ reservation_id: x.reservation_id, product_id: x.product_id ?? null, product_name: x.product_name,
@@ -35,7 +38,7 @@ export function rpcBackend(rpc, token) {
     getReceipt: ({ receiptNo }) => rpc(RPC.getReceipt, { p_order_token: token, p_receipt_no: receiptNo }),   // HUOM: parametri on p_order_token (ei p_token)
   };
 }
-export function createOrderApi({ rpc, token, mock = wantsMock(), mockFactory = () => createOrderMock({ delay: 120, scenario: typeof location !== 'undefined' ? new URLSearchParams(location.search).get('scenario') || '' : '', mpResult: typeof location !== 'undefined' ? new URLSearchParams(location.search).get('mpresult') || '' : '' }) } = {}) {
+export function createOrderApi({ rpc, token, mock = wantsMock(), mockFactory = () => createOrderMock({ delay: 120, scenario: typeof location !== 'undefined' ? new URLSearchParams(location.search).get('scenario') || '' : '', mpResult: typeof location !== 'undefined' ? new URLSearchParams(location.search).get('mpresult') || '' : '', ...holdMockParams() }) } = {}) {
   const inst = mock ? mockFactory() : null;
   const backendRpc = mock ? inst.rpc : rpc;
   const be = rpcBackend(backendRpc, token);

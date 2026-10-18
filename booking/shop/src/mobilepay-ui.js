@@ -55,7 +55,7 @@ export function buttonNode({ L, onActivate, official = true, loadOfficial = load
 }
 
 // Maksuosio: otsikko, ohje, (testitilan merkintä), painike, virheilmoitus. opts = normOptions(public_payment_options).
-export function payBlock({ S, L, api, opts, env = {}, amount = '', navigate = (u) => location.assign(u), showLead = true }) {
+export function payBlock({ S, L, api, opts, env = {}, amount = '', navigate = (u) => location.assign(u), showLead = true, onFail = null }) {
   const tx = (k, v) => mt(L, k, v);
   const msg = h('div', { class: 'ord-msg mp-msg', 'aria-live': 'polite', 'data-testid': 'mp-msg' });
   const hasKey = (k) => mt(L, k) !== k;
@@ -70,6 +70,7 @@ export function payBlock({ S, L, api, opts, env = {}, amount = '', navigate = (u
     if (url) { navigate(url); return; }   // painike pysyy lukittuna kunnes sivu vaihtuu
     msg.replaceChildren(h('p', { class: 'bk-error', role: 'alert', 'data-testid': 'mp-error', 'data-code': r?.code || 'no_url', text: r?.ok ? tx('err.generic') : failMsg(r) }));
     busy = false; btn.setBusy(false);
+    if (onFail && r?.code) { try { onFail(r.code); } catch { /* ei estä virheviestiä */ } }   // pito: order_expired / order_preliminary / payment_in_progress → sivu hakee tilan uudelleen
   }
   btn = buttonNode({ L, onActivate: activate, official: env.official !== false });
   if (typeof window !== 'undefined') window.addEventListener('pageshow', (e) => { if (e.persisted) { busy = false; btn.setBusy(false); } });   // paluu selaimen Takaisin-napilla (bfcache)

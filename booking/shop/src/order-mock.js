@@ -1,7 +1,8 @@
 // Asiakkaan tilaussivun MOCK-PALVELIN (vaihe A): keksitty tilaus muistissa; ei tallenna mitään palvelimelle. Käytössä vain kun osoitteessa on ?mock=1.
 // createOrderMock().rpc(nimi, parametrit) vastaa KOODARI_talous_A_D_fi.md -sopimuksen public_*-RPC:itä (nimet, p_-parametrit, vastausrakenteet, virheet {ok:false, code, message}).
 import { createGiftMock } from './gift-mock.js';
-export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftSettings = {}, locale = 'fi', today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }) } = {}) {
+import { createHoldEngine, isHoldScenario, HOLD_ERRORS } from './hold-mock.js';
+export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftSettings = {}, holdSeconds = 900, serverSkew = 0, procSeconds = 10, storage = globalThis.sessionStorage, locale = 'fi', today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }) } = {}) {
   const day = (n) => { const d = new Date(`${today}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
   const wait = () => (delay ? new Promise((ok) => setTimeout(ok, delay)) : Promise.resolve());
   const r2 = (n) => Math.round(n * 100) / 100;
@@ -39,7 +40,7 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
   // MobilePay (§14), skenaariot ?mock=1&scenario=mp|mp-prod|mp-off: maksamaton tilaus (40 €), public_payment_options antaa MobilePay-tavan (mp: test=true, mp-prod: test=false, mp-off: ei tapaa).
   // Paluutulos (?mpresult=paid|review|failed|pending|slotlost|contact|netfail; oletus paid): mpFetch vastaa mobilepay-start / mobilepay-notify (reconcile) -funktioiden muodoilla; maksu kirjautuu 3. public_get_order-kyselyllä paluun jälkeen (kuten webhook).
   // pay | pay-prod | pay-off = sama maksamaton 40 € tilaus vahvistussivun maksuvalintaa varten (shop-mock.js): MobilePay (mp-skenaarion mukaan) + lahjakortti (HH3A-7CEF-HJKL, saldo 100 €)
-  const mpScenario = /^mp(-prod|-off)?$/.test(scenario) ? scenario : /^pay(-prod|-off)?$/.test(scenario) ? scenario.replace('pay', 'mp') : '';
+  const mpScenario = isHoldScenario(scenario) ? (scenario === 'hold-unavailable' ? 'mp-off' : 'mp-prod') : /^mp(-prod|-off)?$/.test(scenario) ? scenario : /^pay(-prod|-off)?$/.test(scenario) ? scenario.replace('pay', 'mp') : '';
   if (mpScenario) {
     o.items = [{ id: 1, name: 'Yleinen saunavuoro', name_en: 'Public sauna session', quantity: 2, line_total: 40, vat_rate: 25.5 }];
     o.reservations = [o.reservations[0]]; o.reservations[0].addons = []; o.status = 'pending'; o.paid = 0; o.payments = []; o.receipts = []; o.online_payment_enabled = true;
@@ -66,7 +67,9 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
     o.receipts.push({ receipt_no: 'K-2026-000777', kind: 'receipt', issued_at: new Date().toISOString(), token: '9a8b7c6d-1111-4222-8333-444455556677', total: amt }); o.status = 'confirmed'; sync(); mp.settled = true;
   };
   sync();
-  const snap = () => JSON.parse(JSON.stringify({ ok: true, ...o }));
+  // Kassan paikanpito (§17): hold* -skenaariot (hold-mock.js) lisäävät checkout_state-kentät vastauksiin
+  const hold = isHoldScenario(scenario) ? createHoldEngine({ scenario, holdSeconds, skew: serverSkew, procSeconds, storage, ctx: { o, sync, mp, mpMarkPaid, r2 } }) : null;
+  const snap = () => { hold?.tick(); return JSON.parse(JSON.stringify({ ok: true, ...o, ...(hold ? hold.json() : {}) })); };
   const bad = (code, message) => ({ ok: false, code, message });
   const handlers = {
     public_get_order: ({ p_token }) => {
@@ -81,10 +84,12 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
     // §14.7 (booking_52): kassan maksutavat ilman tokenia; MobilePay mp-skenaarion mukaan, lahjakortti gift-mockin redeem_enabled-asetuksesta
     public_checkout_payment_options: () => {
       const mpOn = !!mpScenario && mpScenario !== 'mp-off', gc = !!gm.handlers.public_gift_card_packages().redeem_enabled;
-      return { ok: true, mobilepay_enabled: mpOn, gift_card_redeem_enabled: gc, methods: [
+      return { ok: true, mobilepay_enabled: mpOn, gift_card_redeem_enabled: gc, ...(hold ? { hold_until_paid: true, hold_minutes: 15, group_threshold_persons: 0, group_hold_days: 7 } : {}), methods: [
         ...(mpOn ? [{ code: 'mobilepay', kind: 'online', provider: 'vipps_mobilepay', label: 'MobilePay', label_en: 'MobilePay', test: mpScenario !== 'mp-prod', start: { function: 'mobilepay-start', method: 'POST', body: { order_token: '<tilauksen public_token>' } } }] : []),
         ...(gc ? [{ code: 'gift_card', kind: 'redeem', provider: 'gift_card', label: 'Lahjakortti', label_en: 'Gift card', test: false, check_rpc: 'public_check_gift_card', apply_rpc: 'public_apply_gift_card' }] : [])] };
     },
+    // public_get_booking (vain pitotilassa; vahvistussivu käyttää shop-mock.js:n omaa): pidon tila + payment_methods (myös perutut maksut → lahjakortti käytetty)
+    ...(hold ? { public_get_booking: () => ({ ...snap(), payment_methods: hold.methods() }) } : {}),
     public_add_to_order: ({ p_items }) => {
       if (!o.can_add) return bad('order_closed', 'Lisäysaika on päättynyt');
       if (!Array.isArray(p_items) || !p_items.length) return bad('invalid_items', 'Ei rivejä');
@@ -130,14 +135,15 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
   // Skenaariot kumppanilahjakorteille (?mock=1&scenario=…): claims = kolme pyyntöä (vastaanotettu, ongelma invalid_code, lunastettu), claimproblem = yksi ongelmapyyntö, claimsoff = kumppanilunastus pois päältä (voucher_claims.enabled=false)
   const claimSeed = scenario === 'claims' ? [{ source: 'kokemuskauppa', status: 'open', code: 'KK12345ABCDEF' }, { source: 'elamyslahjat', status: 'problem', problem_code: 'invalid_code', code: 'ZXQW98765432' }, { source: 'offerilla', status: 'redeemed', amount: 40, code: 'OK19123ABC' }]
     : scenario === 'claimproblem' ? [{ source: 'elamyslahjat', status: 'problem', problem_code: 'invalid_code', code: 'ZXQW98765432' }] : [];
-  const gm = createGiftMock({ today, settings: { ...(scenario === 'claimsoff' ? { claims_enabled: false } : {}), ...(claimSeed.length ? { claims_seed: claimSeed } : {}), ...giftSettings }, order: {
+  const gm = createGiftMock({ today, settings: { ...(scenario === 'claimsoff' ? { claims_enabled: false } : {}), ...(scenario === 'hold-unavailable' ? { redeem_enabled: false } : {}), ...(claimSeed.length ? { claims_seed: claimSeed } : {}), ...giftSettings }, order: {
     hasGiftCards: () => giftCards.length > 0, unpaid: () => o.unpaid, status: () => o.status, orderNo: o.order_no, paymentStatus: () => o.payment_status,
     pay: (amt, c) => { o.paid = r2(o.paid + amt); o.payments.push({ status: 'paid', amount: amt, paid_at: new Date().toISOString(), method_label: 'Lahjakortti', link_token: null, link_path: null }); sync(); if (o.unpaid === 0 && o.status === 'pending') o.status = 'confirmed'; void c; return { total: o.total, paid: o.paid, unpaid: o.unpaid }; },
     giftCardList: () => giftCards.map(({ code, balance, greeting, ...c }) => c), cardByToken: (t) => { const c = giftCards.find((x) => x.token === t); return c ? { ...c, public_token: c.token } : null; },
   } });
   for (const k of ['public_gift_card_packages', 'public_check_gift_card', 'public_apply_gift_card', 'public_get_order_gift_cards', 'public_get_gift_card', 'public_resolve_gift_code', 'public_submit_voucher_claim', 'public_get_order_voucher_claims', 'public_update_voucher_claim_code']) handlers[k] = gm.handlers[k];
   async function rpc(name, args = {}) {
-    await wait();
+    await wait(); hold?.tick();
+    if (hold && name === 'public_apply_gift_card' && hold.guard()) { const c = hold.guard(); return bad(c, HOLD_ERRORS[c]); }
     const h = handlers[name]; if (!h) throw Object.assign(new Error(`Could not find the function booking.${name} in the schema cache`), { status: 404, code: 'PGRST202' });
     return h(args);
   }
@@ -149,6 +155,7 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
     if (name === 'mobilepay-start') {
       if (mpResult === 'neterror') throw new TypeError('Failed to fetch');
       if (mpResult === 'starterror') return res(503, bad('provider_error', 'MobilePay-maksun aloitus epäonnistui, yritä hetken kuluttua uudelleen'));
+      hold?.tick(); if (hold?.guard()) { const c = hold.guard(); return res(409, bad(c, HOLD_ERRORS[c])); }
       if (o.unpaid <= 0) return res(409, bad('already_paid', 'Tilaus on jo maksettu'));
       mp.started = true;
       const here = new URL(typeof location !== 'undefined' ? location.href : 'http://localhost/tilaus/'); const back = new URL(here.href);
@@ -169,5 +176,5 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
     }
     return res(400, bad('invalid_param', 'Virheellinen pyyntö'));
   }
-  return { rpc, mpFetch, token: TOKEN, giftMock: gm };
+  return { rpc, mpFetch, token: TOKEN, giftMock: gm, hold };
 }

@@ -1,7 +1,9 @@
+import { HT } from './hold-texts.js';
 // Lahjakorttien kauppatekstit (FI/EN): myyntisivu, saldotarkistus, "Käytä lahjakortti" tilaussivulla. Avaimet samat molemmilla kielillä (node --test tarkistaa).
 // Virhekoodit = KOODARI_talous_A_D_fi.md §13.2/13.3. Tuntematon koodi → 'err.generic'.
 export const GT = {
   fi: {
+    'err.order_expired': HT.fi['err.order_expired'], 'err.order_preliminary': HT.fi['err.order_preliminary'], 'err.payment_in_progress': HT.fi['err.payment_in_progress'],   // pito (§17.3): tekstit yhdessä paikassa (hold-texts.js)
     buyTitle: 'Osta lahjakortti', buyLead: 'Valitse avoin lahjakortti tai valmis paketti kahdelle. Kortti on voimassa {months} kuukautta maksun jälkeen.',
     chooseTitle: 'Valitse lahjakortti', openKicker: 'Vapaa summa', pkgKicker: 'Paketti kahdelle', persons: '{n} henkilölle', amountFrom: '{min}–{max} €', valid: 'Voimassa {months} kk', contents: 'Paketin sisältö',
     itemsTitle: 'Sisältö', add: 'Lisää tilaukseen', added: 'Lisätty tilaukseen', addOpen: 'Lisää summa tilaukseen',
@@ -62,6 +64,7 @@ export const GT = {
     'vc.err.claim_not_editable': 'Tätä lahjakoodia ei voi enää muuttaa.', 'vc.err.invalid_item': 'Tilausriviä ei löytynyt.',
   },
   en: {
+    'err.order_expired': HT.en['err.order_expired'], 'err.order_preliminary': HT.en['err.order_preliminary'], 'err.payment_in_progress': HT.en['err.payment_in_progress'],
     buyTitle: 'Buy a gift card', buyLead: 'Choose an open-value gift card or a ready-made package for two. The card is valid for {months} months after payment.',
     chooseTitle: 'Choose a gift card', openKicker: 'Any amount', pkgKicker: 'Package for two', persons: 'For {n} people', amountFrom: '€{min}–{max}', valid: 'Valid for {months} months', contents: 'Package contents',
     itemsTitle: 'Includes', add: 'Add to order', added: 'Added to order', addOpen: 'Add amount to order',

@@ -5,9 +5,10 @@ import * as A from './treatments.js';
 import * as O from './options-logic.js';
 import { OPT } from './options-texts.js';
 import { createOptionPicker } from './options-ui.js';
+import { ht, holdError } from './hold-texts.js';
 
 export function createTreatmentViews(c) {
-  const { h, t, S, state, money, fmt, hm, dayLong, pad2, todayHel, addDays, pname, pdesc, pimg, setHero, mount, focusTop, errorBox, phoneBox, bk, customerFields, legalFields } = c;
+  const { h, t, S, state, money, fmt, hm, dayLong, pad2, todayHel, addDays, pname, pdesc, pimg, setHero, mount, focusTop, errorBox, phoneBox, bk, customerFields, legalFields, holdInfo = async () => ({ on: false, minutes: 15, extra: () => [] }), confirmUrl = (tok) => `${S.confirmHref}#${tok}` } = c;
   const tr = t.tr;
   const horizonDays = () => A.horizonDays(state.settings);
   const tm = (iso) => fmt(iso, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).replace('.', ':');
@@ -15,7 +16,7 @@ export function createTreatmentViews(c) {
   const when = (iso) => `${dayShort(iso)}${S.lang === 'fi' ? ', klo ' : ' · '}${tm(iso)}`;
   const q = (hash) => new URLSearchParams(hash.split('?')[1] || '');
   const ot = OPT[S.lang] || OPT.fi;   // tuotevalinnan tekstit (booking_50)
-  const errMsg = (r) => (O.isOptionError(r.code) ? ot[`err.${r.code}`] : tr.errors[A.errorKey(r.code)] || tr.errors.generic);
+  const errMsg = (r) => (O.isOptionError(r.code) ? ot[`err.${r.code}`] : holdError(S.lang, r.code) || tr.errors[A.errorKey(r.code)] || tr.errors.generic);
   const optPicker = (p, o) => createOptionPicker({ h, lang: S.lang, product: p, options: p.options, ...o });
   const optQ = (code) => (code ? `&o=${encodeURIComponent(code)}` : '');
 
@@ -199,7 +200,9 @@ export function createTreatmentViews(c) {
     // vahvistusvaihe: tiedot yhteenvetona, maksu paikan päällä, "Muokkaa tietoja" / "Vahvista varaus"
     function review(cust, note) {
       const err = h('div', { id: 'bk-rmsg', 'aria-live': 'polite' });
-      const ok = h('button', { type: 'button', class: 'btn', text: t.book });
+      const hi = { on: false, minutes: 15, extra: () => [] };   // pitotila (§17) selviää palvelimelta kun vaihe avautuu; oletus = vanha käytös
+      const bookText = () => (hi.on ? ht(S.lang, 'checkout.button') : t.book);
+      const ok = h('button', { type: 'button', class: 'btn', 'data-testid': 'review-submit', text: t.book });
       const edit = h('button', { type: 'button', class: 'btn light', text: tr.edit, onclick: () => { topBox.hidden = false; holder.replaceChildren(formView); form.querySelector('input,textarea')?.focus(); window.scrollTo({ top: 0 }); } });
       const dl = h('dl', { class: 'bk-sum' }, h('dt', { text: t.what }), h('dd', { text: pname(p) }), showOpt ? [h('dt', { text: ot.what }), h('dd', { 'data-testid': 'review-option', text: optText() })] : null, h('dt', { text: tr.date }), h('dd', { text: dayLong(slot.start) }), h('dt', { text: tr.time }),
         h('dd', { text: slot.end ? `${tm(slot.start)}–${tm(slot.end)}` : tm(slot.start) }), h('dt', { text: t.persons }), h('dd', { text: String(n) }),
@@ -208,10 +211,10 @@ export function createTreatmentViews(c) {
         null);
       const head = h('h2', { id: 'tr-review-h', text: tr.reviewTitle, tabindex: '-1' });
       ok.addEventListener('click', async () => {
-        ok.disabled = edit.disabled = true; ok.textContent = t.booking; err.replaceChildren();
+        ok.disabled = edit.disabled = true; ok.textContent = hi.on ? ht(S.lang, 'checkout.creating') : t.booking; err.replaceChildren();
         const r = await A.createBooking(p, { start: slot.start, persons: n, name: cust.name, email: cust.email, phone: cust.phone, marketing: consent.checked, locale: S.lang, note, kind: cust.kind, company: cust.company, option: opt });
-        if (r.ok && r.token) { state.months.clear(); location.assign(`${S.confirmHref}${new URLSearchParams(location.search).get('mock') === '1' ? '?mock=1' : ''}#${r.token}`); return; }
-        ok.disabled = edit.disabled = false; ok.textContent = t.book;
+        if (r.ok && r.token) { state.months.clear(); location.assign(confirmUrl(r.token)); return; }
+        ok.disabled = edit.disabled = false; ok.textContent = bookText();
         if (!r.ok && O.isOptionError(r.code) && optP) {   // palvelin hylkäsi valinnan: takaisin lomakkeelle, valitsin korostettuna (virheellinen valinta tyhjennetään)
           if (r.code === 'invalid_option') { opt = null; optP.set(null); optDd.textContent = optText(); pickWhen.textContent = whenText(); }
           topBox.hidden = false; holder.replaceChildren(formView); optP.setError(errMsg(r)); optP.node.scrollIntoView?.({ block: 'center' }); optP.focus(); return;
@@ -220,7 +223,9 @@ export function createTreatmentViews(c) {
         err.replaceChildren(...[errorBox(r.ok ? tr.errors.generic : errMsg(r)), lost ? h('p', {}, h('a', { class: 'btn sm', href: back, text: tr.pickAnother })) : null].filter(Boolean));   // replaceChildren(null) kirjoittaisi tekstin "null"
         err.firstChild.setAttribute('tabindex', '-1'); err.firstChild.focus();
       });
-      holder.replaceChildren(h('div', { class: 'bk-review' }, head, h('p', { class: 'bk-note', text: tr.reviewLead }), dl,
+      const lead = h('p', { class: 'bk-note', 'data-testid': 'review-lead', text: tr.reviewLead }), holdExtra = h('div', { 'data-testid': 'review-hold-extra' });
+      holdInfo().then((x) => { Object.assign(hi, x); if (!hi.on) return; if (!ok.disabled) ok.textContent = bookText(); lead.textContent = ht(S.lang, 'checkout.review', { minutes: hi.minutes }); holdExtra.replaceChildren(...hi.extra(S.lang)); });
+      holder.replaceChildren(h('div', { class: 'bk-review' }, head, lead, holdExtra, dl,
         h('p', { class: 'bk-totalrow' }, t.total + ': ', h('strong', { class: 'bk-total', text: money(total) }), ' ', h('small', { text: t.vatIncl })),
         cust.kind === 'company' ? h('p', { class: 'bk-pay bk-paynow', text: t.companyNote }) : null, err, h('div', { class: 'bk-actions' }, edit, ok)));
       topBox.hidden = true; head.focus(); window.scrollTo({ top: 0 });

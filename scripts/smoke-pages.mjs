@@ -721,6 +721,32 @@ for (const [label, viewport, mobile] of [['mobiili', { width: 390, height: 700 }
   if (!page.url().includes(`${new URL(BASE).pathname.replace(/\/$/, '')}/varaa/vahvistus/`) || /pay=mobilepay/.test(page.url()) || !page.url().includes('#3f2b8c1e')) problems.push(`vahvistus-maksu: paluu väärälle polulle tai ?pay jäi osoitteeseen (${page.url()})`);
   await page.context().close();
 }
+// 7d) Kassan paikanpito (§17, mock scenario=hold): pitopaneeli + laskuri + maksuvalinta vahvistussivulla alipolulla; vanheneminen (holdsec=3) → "tee uusi varaus"; tilaussivu; ilman pitotilaa (scenario=pay) ei paneelia
+for (const [lang, cf] of [['fi', '/varaa/vahvistus/'], ['en', '/en/book/confirmation/']]) {
+  const page = await newPage(`vahvistus-pito-${lang}`);
+  await page.route('https://cdn.vippsmobilepay.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/javascript', body: "customElements.get('vipps-mobilepay-button')||customElements.define('vipps-mobilepay-button',class extends HTMLElement{connectedCallback(){const b=document.createElement('button');b.type='button';b.textContent='MobilePay';this.append(b);}});" }));
+  await page.goto(`${BASE}${cf}?mock=1&scenario=hold&holdsec=3#3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c`);
+  await page.waitForSelector('[data-testid=hold-panel][data-state=awaiting_payment]');
+  if ((await page.getAttribute('[data-testid=hold-timer]', 'role')) !== 'timer' || (await page.locator('[data-testid=pc-mobilepay]').count()) !== 1) problems.push(`vahvistus-pito-${lang}: laskuri (role=timer) ja maksuvalinta odotettiin`);
+  const sw3 = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  if (sw3 > 0) problems.push(`vahvistus-pito-${lang}: vaakavieritys ${sw3}px`);
+  await page.waitForSelector('[data-testid=hold-panel][data-state=expired]', { timeout: 15000 });
+  if ((await page.locator('[data-testid=hold-new]').count()) !== 1 || (await page.locator('[data-testid=hold-gift-returned]').count()) !== 0) problems.push(`vahvistus-pito-${lang}: vanheni: "uusi varaus" -linkki, ei lahjakorttilausetta`);
+  await page.context().close();
+}
+{
+  const page = await newPage('tilaus-pito');
+  await page.goto(`${BASE}/tilaus/?t=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c&mock=1&scenario=hold-expired-gift`);
+  await page.waitForSelector('[data-testid=hold-panel][data-state=expired]');
+  if ((await page.locator('[data-testid=hold-gift-returned]').count()) !== 1) problems.push('tilaus-pito: lahjakortin palautuslause odotettiin');
+  await page.context().close();
+  const legacy = await newPage('vahvistus-pito-vanha');
+  await legacy.route('https://cdn.vippsmobilepay.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/javascript', body: '' }));
+  await legacy.goto(`${BASE}/varaa/vahvistus/?mock=1&scenario=pay#3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c`);
+  await legacy.waitForSelector('[data-testid=pay-choices]');
+  if ((await legacy.locator('[data-testid=hold-panel]').count()) !== 0) problems.push('vahvistus-pito-vanha: pitopaneelia ei saa näkyä ilman pitotilaa');
+  await legacy.context().close();
+}
 // 8) Lahjakorttisivu alipolulla: kytkimet pois → ennallaan (Johku-osiot); päällä → myynti- ja saldolohko; RPC puuttuu → ennallaan
 for (const [mode, lang, path] of [['off', 'fi', '/lahjakortti/'], ['on', 'fi', '/lahjakortti/'], ['on', 'en', '/en/gift-card/'], ['missing', 'fi', '/lahjakortti/']]) {
   giftMode = mode;

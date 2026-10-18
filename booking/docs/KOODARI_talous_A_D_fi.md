@@ -461,3 +461,70 @@ Hoitovarauksille palautetaan valinnan otsikko valmiiksi kielen mukaan (`product_
 - `public_get_booking(token)`: `items[].option_label` (tilauksen `locale`-kielellä) sekä `items[].option_label_fi` ja `items[].option_label_en` (jos UI haluaa valita itse). `items[].option` ennallaan.
 - `public_get_order(token)`: `reservations[].option_label`, `option_label_fi`, `option_label_en` (`reservations[].option` ja `option_choices` ennallaan; tässä RPC:ssä varausrivit ovat `reservations[]`, `items[]` on laskurivit).
 - Käyttö: `option_label` on valitsimen (lomakkeen) otsikko, esim. "Valitse hoito" / "Choose your treatment" – käytä sitä tilaussivun muutosvalitsimen otsikkona. Valitun hoidon nimi tulee edelleen `option.name` / `option.name_en` -kentistä. Testit: `tests/checkout/t52_checkout_options.sql`.
+
+## 17. Kassan pito-malli: "odottaa maksua" – paikka pidetään 15 min, vahvistus vasta kun summa on katettu (migraatiot `booking_53_checkout_hold` + `booking_54_checkout_cancel`, 18.10.2026; päätös Joonas t201u)
+**Tila:** tietokantapuoli TUOTANNOSSA ja testattu (93 + 9 tarkistusta rollback-transaktiossa: `tests/checkout/t53_checkout_hold.sql`, `t54_checkout_cancel.sql`; rollbackit `rollbacks/CHECKOUT_booking_53_ROLLBACK.sql`, `…_54_ROLLBACK.sql`). **Pitotila on valmis mutta EI PÄÄLLÄ:** se aktivoituu vasta kun `settings.public_payment_mode` asetetaan arvoon `hold_until_paid` (nyt `pay_later` → kaikki toimii kuten ennen). Päälle kytkemisestä päättää Joonas erikseen; sitä ennen UI voi rakentaa ja testata testivaiheessa (MobilePay on `test`).
+**Kassan tilan lukeminen:** `public_checkout_payment_options()` palauttaa nyt myös `hold_until_paid` (bool = pitotila päällä), `hold_minutes` (15), `group_threshold_persons`, `group_hold_days`. **Älä kovakoodaa** pitotilaa: jos `hold_until_paid = false`, näytä vanha kulku (varaus vahvistuu heti, maksu myöhemmin) ilman laskuria.
+
+### 17.1 Kulku (pitotila päällä)
+1. Asiakas valitsee ajan/tuotteen ja täyttää yhteystiedot. **Maksutavan valinta näytetään ennen kuin varaus "vahvistetaan"** – kassan painike on "Jatka maksamaan" (ei "Vahvista varaus"). Tarjottavat tavat: `public_checkout_payment_options().methods` (MobilePay, lahjakortti).
+2. `public_create_booking(...)` / `public_create_treatment_booking(...)` luo **pidon**: tilaus `pending`, varaus `pending`, `hold_expires_at` = nyt + `checkout_hold_minutes` (15 min). **Ei vahvistusviestiä, ei kuittia, ei paikkaajamaksua.** Vastaus sisältää `token`, `hold_expires_at`, `checkout_state: 'awaiting_payment'` jne. (§17.2).
+3. Ohjaa tilaussivulle (`order_page_path` + token) → maksuvalinta + laskuri. Maksu:
+   - **MobilePay:** `mobilepay-start` (`order_token`, §14) → `redirect_url`. Kun maksu alkaa, pitoa jatketaan automaattisesti (kunnes Vipps antaa lopputuloksen; katto §17.5).
+   - **Lahjakortti:** `public_check_gift_card(code)` → `public_apply_gift_card(token, code, amount?)`. **Kortti voi kattaa vain osan**: tilaus pysyy `awaiting_payment` ja `remaining_amount` pienenee; loput MobilePaylla (tai toisella kortilla). Kun jäljellä on 0 → tilaus vahvistuu samassa kutsussa (`order_confirmed: true`).
+4. **Vahvistus tapahtuu vasta kun summa on kokonaan katettu** (MobilePay ja/tai lahjakortti): varaus → `confirmed`, tilaus `confirmed`/`paid`, hold poistuu. Silloin lähtee **yksi vahvistusviesti** (`order_confirmation`) ja **kuitit** maksuista (lahjakorttiosuuden kuitti annetaan vasta vahvistuksessa, MobilePay-osuuden kuitti heti maksun jälkeen; ks. rajoitus §17.7).
+5. Ei katettu 15 min kuluessa → pito vapautuu (cron `booking_expire_holds`, joka minuutti): varaus `expired`, tilaus `expired`, aika vapautuu myyntiin; **jo käytetyt lahjakorttiosuudet palautuvat kortille** (kertakäyttökortin jäännöskin). Asiakkaalle ei lähde viestejä eikä kuittia.
+6. Asiakkaan oma peruutus: `public_cancel_booking(token)` (ennallaan pending-tilaukselle); lahjakorttiosuudet palautuvat. Jos MobilePay-maksu on kesken → `{ok:false, code:'payment_in_progress'}` (odota lopputulosta).
+
+### 17.2 Tilakentät (`public_get_order`, `public_get_booking`, `public_payment_options(token).order`, `public_apply_gift_card`, luonti-RPC:t)
+Kaikissa samat kentät (`booking._checkout_state_json`):
+| kenttä | merkitys |
+|---|---|
+| `checkout_state` | `awaiting_payment` · `processing_payment` (MobilePay kesken) · `preliminary` (alustava iso ryhmä) · `confirmed` · `confirmed_unpaid` (vahvistettu, maksamatta: lasku/pay_later/jäännös) · `expired` · `cancelled` |
+| `awaiting_payment` | bool: `awaiting_payment` tai `processing_payment` → näytä laskuri + maksuvalinta |
+| `hold_expires_at` | pidon (tai alustavan varauksen vapautuspäivän) päättymishetki; null jos ei pitoa |
+| `seconds_left` | sekuntia jäljellä palvelimen kellolla (≥ 0); käytä laskurin alkuarvona |
+| `server_now` | palvelimen aika (laske `hold_expires_at − server_now`; **älä luota asiakkaan kelloon**) |
+| `remaining_amount` | vielä katettava summa (€; lahjakorttiosuudet vähennetty); `unpaid` samassa vastauksessa on sama luku |
+| `payment_in_progress` | bool: MobilePay-yritys kesken |
+| `hold_kind` | `checkout` \| `preliminary` \| null |
+Lisäksi vanhat kentät: `status` (`pending`/`confirmed`/`expired`…; **pending pysyy pending myös kun pito on ohi mutta MobilePay on kesken**), `payment_status`, `total`, `paid`.
+`public_apply_gift_card` palauttaa lisäksi `order_confirmed` (bool) ja `remaining` (€).
+
+### 17.3 Virhekoodit (lisäykset)
+- Luonti (`ok:false`): **`online_payment_unavailable`** (pitotila päällä mutta MobilePay `off` → varausta ei voi tehdä; näytä "Verkkomaksu ei ole tilapäisesti käytettävissä, yritä myöhemmin tai ota yhteyttä"), `too_many_pending` (≥ 3 maksamatonta / sähköposti / tunti; nyt myös hoitovarauksissa), vanhat (`slot_unavailable`, `capacity_exceeded`, …).
+- `public_apply_gift_card`: **`order_expired`** (pito ohi/tilaus vanhentunut → "tee uusi varaus"), **`order_preliminary`** (alustavaa varausta ei makseta ennen vahvistusta), vanhat (`amount_exceeds_unpaid`, `insufficient_balance`, `nothing_to_pay`, `gift_card_expired`, …).
+- `mobilepay-start`: `order_not_payable` (myös alustava), `nothing_to_pay`/`already_paid` (kate on jo täynnä; älä näytä maksupainiketta kun `remaining_amount = 0`), `mobilepay_off`.
+- `public_cancel_booking`: `payment_in_progress`.
+- (Sisäinen, ei näy asiakkaalle:) `mobilepay_payment_confirmable` palauttaa `overpay`/`underpay` jos maksun summa ei vastaa maksamatonta osuutta → flow peruu valtuutuksen (asiakkaalta ei veloiteta). Näytä tällöin yleinen "Maksua ei veloitettu, yritä uudelleen".
+
+### 17.4 Poikkeukset
+- **Kumppanin lahjakoodivaraus (`public_submit_voucher_claim`)** pysyy avoimena ilman vanhenemista (`_vc_keep_reserved` poistaa pidon) – ennallaan.
+- **Isot ryhmät:** jos `checkout_group_threshold_persons` > 0 ja henkilömäärä ≥ raja → **alustava varaus** (`hold_kind = 'preliminary'`, `checkout_state = 'preliminary'`): ei maksua, ei vahvistusta; paikka pysyy kunnes henkilökunta vahvistaa (`admin_set_reservation_status`) tai automaattinen vapautus `checkout_group_hold_days` (7) päivän kuluttua. Verkkomaksu ja lahjakortti estetty (`can_pay_online=false`, `order_preliminary`). **Raja on nyt 0 = ei käytössä** (Joonas päättää luvun).
+- **Yritysasiakas** (`customer_kind = company`): menee pitotilassakin laskulle (varaus vahvistuu heti, `confirmed_unpaid`, lasku) kun `checkout_company_invoice_enabled = true` (oletus). Jos halutaan että yritykset maksavat verkossa kuten muut → aseta `false`.
+- **`pay_later`** (nyt voimassa): ennallaan; Joonas päätti ettei se ole käytössä livenä pitotilan käynnistyttyä (pitotilassa `public_payment_mode` ≠ `pay_later`).
+
+### 17.5 Asetukset (`booking.settings`, ei julkisia)
+`checkout_hold_minutes` 15 (5–60) · `checkout_mobilepay_grace_minutes` 15 (MobilePay-maksun aikana pitoa jatketaan tähän asti, 0–60) · `checkout_mobilepay_max_wait_minutes` 30 (katto: pito ei jatku yli tilauksen luonti + pito + tämä; kesken-tila vanhenee myös grace-ajan jälkeen, jos Vipps ei raportoi) · `checkout_group_threshold_persons` 0 · `checkout_group_hold_days` 7 · `checkout_company_invoice_enabled` true.
+
+### 17.6 Suojat (tuplamaksu / ylimaksu / rahan hukkaan meno)
+- Lahjakortti ei voi ylittää maksamatonta osuutta (`amount_exceeds_unpaid`) eikä maksaa maksettua (`nothing_to_pay`); lahjakortin käyttö **peruu avoimen MobilePay-maksun** (ei tuplaa) – peruttu maksu ei vahvistu jälkikäteen (`payment_cancelled`).
+- MobilePay vahvistetaan (veloitus) vain jos maksun summa = maksamaton osuus; muuten valtuutus perutaan. Jo veloitettu ylimaksu (poikkeus) kirjautuu tilauksen `internal_note`en `YLIMAKSU x €` ja `payment_mark_paid` palauttaa `overpaid_amount`.
+- Vapautus-cron **ei vapauta** kun MobilePay-maksu on kesken (Vipps `CREATED`/`AUTHORIZED`, yritys alle grace-ajan vanha); odottaa lopputulosta. Asiakkaan oma peruutus estetty samoin.
+- Samat sähköpostit/kuitit eivät tuplaannu (idempotentit dedupe-avaimet, `payment_mark_paid` idempotentti).
+
+### 17.7 Rajoitukset / avoimet (raportoitu Joonakselle)
+- "**Yksi yhdistetty sähköposti + kuitti**": nykyinen `send-emails` lähettää erilliset viestit: yksi `order_confirmation` + kuitti jokaisesta maksusta (MobilePay + lahjakortti = 2 kuittiviestiä). Yhdistäminen yhteen viestiin vaatii `send-emails`-mallipohjan muutoksen (ei tehty; `send-emails` pysyy `dry_run`).
+- Lahjakorttien **osto** (`public_buy_gift_card`) ja Visma Pay -linkit ennallaan (eivät käytä tätä pitoa).
+- Henkilökunnan peruutus pending-pitotilaukselle jossa lahjakorttiosuus: käytä `admin_refund` (automaattipalautus tehty vain vanhenemiseen ja asiakkaan peruutukseen).
+
+### 17.8 Koodarin UI-lista
+1. Kassa: lue `public_checkout_payment_options()`; jos `hold_until_paid` → pitokassa: painike "Jatka maksamaan", **maksutavan valinta ennen vahvistusta**, ei "varaus vahvistettu" -tekstiä ennen kuin `checkout_state = 'confirmed'`.
+2. Luonnin jälkeen siirry tilaussivulle; näytä **laskuri** (`seconds_left` / `hold_expires_at − server_now`; tarkista palvelimelta kun 0 ja ~30 s välein) + teksti §17.9 + `remaining_amount`.
+3. Maksuvalinta: MobilePay-painike (`mobilepay-start`), lahjakorttikenttä (osamaksu sallittu; näytä kortin jäljelle jäänyt saldo ja `remaining_amount` päivittyen; piilota maksuvalinnat kun `remaining_amount = 0`).
+4. Paluu MobilePaysta: näytä "Maksua käsitellään…" ja kysele `public_get_order` 2–3 s välein kunnes `checkout_state` ≠ `processing_payment`/`awaiting_payment` (max ~2 min, sitten "Tarkistamme maksun – saat vahvistuksen sähköpostiin").
+5. Tilat: `confirmed` → vahvistussivu; `expired` → "Paikkavaraus on vanhentunut" + painike "Tee uusi varaus"; `preliminary` → "Alustava varaus, vahvistamme sen sähköpostitse" ilman maksua; `confirmed_unpaid` → ennallaan.
+6. Virheet §17.3 omilla teksteillään (ei raakaa `message`a, kun ne on kuvattu täällä).
+7. Älä lähetä asiakasta "Peru"-painikkeella kesken MobilePay-maksun (`payment_in_progress`).
+
+### 17.9 Asiakasteksti-ehdotukset (EI JULKAISTA ennen Joonaksen hyväksyntää) – ks. `docs/KASSA_pito_asiakasteksti_fi.md`

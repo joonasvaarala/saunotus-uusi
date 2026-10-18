@@ -36,6 +36,8 @@ jobs:
       - run: node --test booking/tests/kassa-maksu.test.mjs
       # hoitovalitsin (booking_50): kaupan/hallinnan logiikka, FI/EN-tekstit, mockit vs. sopimus
       - run: node --test booking/tests/hoitovalitsin.test.mjs
+      # kassan 15 min paikanpito (§17, booking_53/54): tekstit, tilat, palvelinaikalaskuri, virhekoodit, mock-moottori, migraatiot mukana
+      - run: node --test booking/tests/kassa-pito.test.mjs
       - run: node scripts/build-pages.mjs
       # etusivun hero: <picture>/preloadit/mitat/alt/OG + kultanapin kontrasti (staattinen tarkistus dististä)
       - run: node scripts/check-hero.mjs
