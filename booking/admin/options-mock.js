@@ -15,7 +15,7 @@ export function helIso(ds, hhmm) {
   return new Date(t).toISOString();
 }
 const err = (code, message) => Object.assign(new Error(message || code), { name: 'ApiError', code, status: 400 });
-const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'reports.view'];
+const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'reports.view', 'quotes.manage'];
 const CODE_RE = /^[a-z0-9_]{1,40}$/;
 
 export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager' } = {}) {
@@ -37,6 +37,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     settings: { 10: { option_required: true, option_label: 'Valitse hoito', option_label_en: 'Choose your treatment' } },
     customers: [{ id: 1, name: 'Aino Testaaja', email: 'aino@example.com', phone: '+358401110001' }, { id: 2, name: 'Eero Esimerkki', email: 'eero@example.com', phone: '+358401110002' }, { id: 3, name: 'Helmi Hiljainen', email: 'helmi@example.com', phone: '+358401110003' }, { id: 4, name: 'Ilmari Iltavuoro', email: 'ilmari@example.com', phone: '+358401110004' }],
     reservations: [], seq: { res: 900, order: 7000 },
+    quotes: [{ id: 1, status: 'new', company_name: 'Esimerkki Oy', contact_name: 'Maija Meikäläinen', email: 'maija@example.test', phone: '0401234567', preferred_when: 'ensi viikon perjantai', persons: 12, offerings: ['sauna', 'ritual'], offering_other: null, message: 'toive metsäkävelystä', locale: 'fi', created_at: now.toISOString(), handled_at: null, admin_note: null }],
   };
   const optJson = (id) => { const o = st.options.find((x) => x.id === id); return o ? { id: o.id, code: o.code, name: o.name, name_en: o.name_en } : null; };
   const activeOpts = (pid) => st.options.filter((o) => o.product_id === pid && o.active).sort((a, b) => a.sort_order - b.sort_order || a.id - b.id);
@@ -175,6 +176,23 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       const v = { name: String(a.p_name).trim(), name_en: a.p_name_en || null, sort_order: a.p_sort_order ?? 100, active: a.p_active ?? true, description: a.p_description ?? null, description_en: a.p_description_en ?? null };
       if (o) Object.assign(o, v); else { o = { id: Math.max(0, ...st.options.map((x) => x.id)) + 1, product_id: a.p_product_id, code, ...v }; st.options.push(o); }
       return { ok: true, option: { ...o } };
+    },
+    admin_list_business_quotes: (a) => {
+      need('quotes.manage');
+      const stt = a?.p_status ? String(a.p_status) : '';
+      if (stt && !['new', 'handled', 'offered', 'closed'].includes(stt)) throw err('invalid_status', 'Tila on new, handled, offered tai closed');
+      return st.quotes.filter((q) => !stt || q.status === stt);
+    },
+    admin_set_business_quote_status: (a) => {
+      need('quotes.manage');
+      const s = String(a?.p_status ?? '');
+      if (!['new', 'handled', 'offered', 'closed'].includes(s)) throw err('invalid_status', 'Tila on new, handled, offered tai closed');
+      if (a?.p_note != null && String(a.p_note).trim().length > 2000) throw err('invalid_note', 'Muistiinpano on liian pitkä');
+      const q = st.quotes.find((x) => x.id === a.p_id); if (!q) throw err('not_found', 'Tarjouspyyntöä ei löydy');
+      q.status = s;
+      if (a.p_note != null) q.admin_note = String(a.p_note).trim() || null;
+      q.handled_at = now.toISOString();
+      return { ok: true, id: q.id, status: s };
     },
     admin_set_product_option_settings: (a) => {
       need('catalog.edit');

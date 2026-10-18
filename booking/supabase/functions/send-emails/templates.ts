@@ -3,7 +3,7 @@
 // data = booking.email_outbox_claim()-rivi (ks. docs/talous-integraatiot.md): { kind, locale, to_name, order{order_no, order_url, total, items[], reservations[]}, receipt{receipt_no, kind, text_body, total, issued_at}, payment{amount, link_url, link_expires_at} }.
 // FI + EN, HTML (taulukkopohjainen, inline-tyylit, sähköpostiyhteensopiva) + tekstiversio. Ei ulkoisia riippuvuuksia (puhdas funktio, testattu node --test).
 // Tyyli: tumma vihreä + hiekka, ei sinistä. Logo: sivuston /img/logo-kuitti.png (osoite johdetaan tilauslinkistä; muuten LOGO_FALLBACK).
-export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem";
+export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify";
 export interface Rendered { subject: string; text: string; html: string }
 // Asiakasnäkyvät tekstit: texts.ts (repon oletukset = varateksti) tai tietokannasta (email.*-avaimet, _shared/site_texts.ts). render() ottaa valinnaisen tekstihaun (4. parametri).
 import { makeT, type TFn } from "../_shared/site_texts.ts";
@@ -210,6 +210,22 @@ function voucherMail(kind: "voucher_claim_received" | "voucher_claim_problem", d
   return { subject, text, html };
 }
 
+// Yrityksen tarjouspyyntö (booking_72). Claim ei palauta pyynnön tietoja, vain vastaanottajan: ei hintaa, ei ajankohtaa, ei asiakkaan tietoja henkilökunnan viestissä.
+// Allekirjoitus: Tapio / Sipoonjoen Perinnesauna. Lähetystila (dry_run) on index.ts:ssä, ei tässä.
+function businessQuoteMail(kind: "business_quote_ack" | "business_quote_notify", d: any, en: boolean, hello: string, X: X): Rendered {
+  const ack = kind === "business_quote_ack";
+  const subject = X(ack ? "email.business_quote.ack_subject" : "email.business_quote.notify_subject");
+  const title = X(ack ? "email.business_quote.ack_title" : "email.business_quote.notify_title");
+  const intro = X(ack ? "email.business_quote.ack_intro" : "email.business_quote.notify_intro");
+  const extra = X(ack ? "email.business_quote.no_promise" : "email.business_quote.notify_hint");
+  const sign = `${X("email.common.closing")}\n${X("email.business_quote.sign_name")}\n${SELLER}`;
+  const signHtml = esc(sign).replace(/\n/g, "<br>");
+  const contact = X("email.common.contact", { phone: phoneFor(en) });
+  const text = textBlock(hello, intro, extra, contact, sign) + "\n";
+  const html = wrapHtml(d, title, intro, h1(title) + p(esc(hello)) + p(esc(intro)) + p(esc(extra)) + p(esc(contact), `color:${MUTED};font-size:13px`) + p(signHtml), en);
+  return { subject, text, html };
+}
+
 export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T): Rendered {
   const en = (locale ?? d?.locale) === "en";
   const X: X = (key, vars) => t(key, en ? "en" : "fi", vars);
@@ -283,6 +299,9 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const text = textBlock(hello, msg, ob.text, orderUrl && `${yourOrder}: ${orderUrl}`, contact, sign) + "\n";
       return { subject, text, html: mk(title, msg, h1(title) + helloRow + p(esc(msg)) + ob.html + (orderUrl ? button(orderUrl, viewLabel) : "") + tail) };
     }
+    case "business_quote_ack":
+    case "business_quote_notify":
+      return businessQuoteMail(kind, d, en, hello, X);
     case "order_change":
     default: {
       const subject = X("email.order_change.subject", { no });

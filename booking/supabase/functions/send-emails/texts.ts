@@ -118,4 +118,14 @@ export const EMAIL_TEXTS: TextTable = {
   "email.voucher.other_subject": { fi: `Lahjakorttisi lunastuksesta – ${SN}`, en: `About your gift card – ${SN}` },
   "email.voucher.other_title": { fi: "Lahjakorttisi lunastuksesta", en: "About your gift card" },
   "email.voucher.other_p1": { fi: "Lahjakortin ({{var:what}}) lunastuksessa on ilmennyt ongelma. Selvitämme asian ja otamme sinuun yhteyttä.", en: "We ran into a problem redeeming your gift card ({{var:what}}). We will look into it and contact you.", cls: "protected" },
+  // ---- yrityksen tarjouspyyntö (booking_72; luonnos, Otto ja Joonas hyväksyvät) ----
+  "email.business_quote.ack_subject": { fi: `Tarjouspyyntö vastaanotettu – ${SN}`, en: `Quote request received – ${SN}` },
+  "email.business_quote.ack_title": { fi: "Tarjouspyyntö vastaanotettu", en: "Quote request received" },
+  "email.business_quote.ack_intro": { fi: "Kiitos tarjouspyynnöstä. Palaamme asiaan erikseen.", en: "Thank you for the quote request. We will get back to you separately." },
+  "email.business_quote.no_promise": { fi: "Tämä viesti ei vahvista ajankohtaa eikä hintaa.", en: "This message does not confirm a time or a price." },
+  "email.business_quote.sign_name": { fi: "Tapio", en: "Tapio" },
+  "email.business_quote.notify_subject": { fi: `Uusi yrityksen tarjouspyyntö – ${SN}`, en: `New company quote request – ${SN}` },
+  "email.business_quote.notify_title": { fi: "Uusi tarjouspyyntö", en: "New quote request" },
+  "email.business_quote.notify_intro": { fi: "Yritys lähetti pyynnön työntekijäpäivästä tai työhyvinvointipäivästä.", en: "A company sent a request for a staff day or a workplace wellbeing day." },
+  "email.business_quote.notify_hint": { fi: "Pyyntö on hallinnan Yritykset-näkymässä.", en: "The request is in the Companies view in admin." },
 };

@@ -63,6 +63,10 @@ Etusivu, sivupohjat (sauna, hoidot, lahjakortti, varaa-info, info, yrityksille, 
 - **Tunnettu poikkeama oletuksissa:** FI-monikko "Lahjakorttit ovat valmiit" / "lahjakorttit toimitetaan" (oikein "Lahjakortit") on säilytetty sellaisenaan (tavu tavulta -vaatimus); korjaus kuuluu hyväksyntäprosessiin (`texts_propose`).
 - Ei siirretty: raportti-PDF (`report-pdf`, sisäinen), `vismapay-start` (runko, ei asiakaskäytössä), tietokantafunktioiden tuottama teksti (kuitin `text_body`, MobilePay-maksun kuvaus `mobilepay_payment_prepare`, `email_outbox_claim`-data), kumppanien nimet ovat avaimina (`email.voucher.partner_*`) mutta samat FI/EN.
 
+## Yrityksille (luonnos, ei vielä tuotu)
+
+`content/site-texts.pending-import-4.json` on Yrityksille-sivun ja tarjouspyyntösähköpostien luonnos (FI+EN): sivun uudet `page.companies.flow.*` / `nav.main.companies` sekä `email.business_quote.*`. Vanhoja avaimia (myös hinnoiteltu `seo.companies.description` ja yrityskortit) tiedosto ei sisällä eikä tuonti ylikirjoita. Bottiavustus tuo sen `admin_texts_import`-kutsulla (≤ 500 riviä). Tekstit ovat luonnoksia, jotka Otto ja Joonas hyväksyvät.
+
 ## Uuden tekstin lisääminen (§18.9, jokaisessa PR:ssä)
 
 1. Avain `<alue>.<osa>.<nimi>` (virheet: `ui.<alue>.error_<RPC-koodi>`), FI + EN, luokka `normal`/`protected`.

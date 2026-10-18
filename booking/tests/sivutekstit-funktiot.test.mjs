@@ -88,7 +88,12 @@ test('tiedosto on generoitu koodista (texts.ts) eikä voi poiketa oletuksista', 
   const g = new Map(gen.map((x) => [`${x.key}|${x.lang}`, x]));
   for (const f of PENDING) assert.deepEqual(f, g.get(`${f.key}|${f.lang}`), `${f.key}: tiedosto ≠ generaattori`);
   const fb = new Set(FALLBACK.texts.map((x) => `${x.key}|${x.lang}`));
-  for (const [k, x] of g) if (!PENDING.some((f) => `${f.key}|${f.lang}` === k)) assert.ok(fb.has(k), `${k}: puuttuu tiedostosta eikä ole tuotannossa`);   // tuonnin jälkeen rivit siirtyvät varatekstiin
+  const extra4 = new Map(J('content/site-texts.pending-import-4.json').map((r) => [`${r.key}|${r.lang}`, r]));
+  for (const [k, x] of g) if (!PENDING.some((f) => `${f.key}|${f.lang}` === k)) {
+    const row = extra4.get(k);
+    if (row) assert.deepEqual(row, x, `${k}: pending-import-4 ≠ generaattori`);
+    else assert.ok(fb.has(k), `${k}: puuttuu tiedostosta eikä ole tuotannossa`);   // tuonnin jälkeen rivit siirtyvät varatekstiin
+  }
   // sama generointi tuoreesta tuotantovastauksesta, jossa osa riveistä on jo: vain puuttuvat
   const half = PENDING.slice(0, 10).map((x) => ({ key: x.key, lang: x.lang, text: x.text, version: 1, placeholders: x.placeholders }));
   writeFileSync(prod, JSON.stringify({ ok: true, texts: half })); spawnSync(process.execPath, [join(root, 'scripts/site-texts-extract-functions.mjs'), '--prod', prod, '--out', out]);
@@ -118,6 +123,7 @@ test('sähköpostit: jokainen email.*-avain on käytössä ja jokaisella käytet
   const used = new Set();
   const t = ST.makeT(TPL.EMAIL_TEXTS); const spy = (k, l, v) => { used.add(k); return t(k, l, v); };
   for (const c of emailCases()) TPL.render(c.kind, structuredClone(c.data), c.locale, spy);
+  for (const kind of ['business_quote_ack', 'business_quote_notify']) for (const locale of ['fi', 'en']) TPL.render(kind, { to_name: 'Maija Meikäläinen', locale }, locale, spy);
   const all = Object.keys(TPL.EMAIL_TEXTS);
   assert.deepEqual(all.filter((k) => !used.has(k)), [], 'käyttämättömiä avaimia');
   assert.deepEqual([...used].filter((k) => !TPL.EMAIL_TEXTS[k]), []);

@@ -233,3 +233,26 @@ for (const locale of ['fi', 'en']) {
     assert.ok(!m2.text.includes('Saunahoito –') && !m2.html.includes('Saunahoito –'), 'ilman valintaa ei ylimääräistä viivaa');
   });
 }
+
+for (const locale of ['fi', 'en']) {
+  test(`business_quote_ack ${locale}: Tapio, ei hintaa eikä vahvistettua ajankohtaa`, { skip }, () => {
+    const m = R('business_quote_ack', { to_name: 'Maija Meikäläinen', locale }, locale);
+    const en = locale === 'en';
+    assert.equal(m.subject, en ? 'Quote request received – Sipoonjoen Perinnesauna' : 'Tarjouspyyntö vastaanotettu – Sipoonjoen Perinnesauna');
+    assert.ok(m.text.includes('Tapio') && m.text.includes('Sipoonjoen Perinnesauna') && m.html.includes('Tapio'));
+    assert.ok(m.text.includes(en ? 'This message does not confirm a time or a price.' : 'Tämä viesti ei vahvista ajankohtaa eikä hintaa.'));
+    assert.ok(!/€/.test(m.subject + m.text + m.html));
+    assert.ok(m.text.includes('Maija') && !m.text.includes('Meikäläinen'));
+    assert.ok(en ? /Kind regards,/.test(m.text) && !/Ystävällisin|Kiitos tarjouspyynnöstä/.test(m.text) : /Ystävällisin terveisin,/.test(m.text) && !/Kind regards|Thank you/.test(m.text));
+    assert.ok(m.html.includes(en ? '+358 10 299 2866' : '010 299 2866') && hrefs(m.html).includes('tel:+358102992866'));
+    assert.ok(!m.html.includes(en ? '010 299 2866' : '+358 10 299 2866'));
+  });
+  test(`business_quote_notify ${locale}: henkilökunta, ei asiakkaan tietoja`, { skip }, () => {
+    const m = R('business_quote_notify', { to_name: 'Joonas', locale }, locale);
+    const en = locale === 'en';
+    assert.equal(m.subject, en ? 'New company quote request – Sipoonjoen Perinnesauna' : 'Uusi yrityksen tarjouspyyntö – Sipoonjoen Perinnesauna');
+    assert.ok(m.text.includes('Tapio') && m.text.includes('Sipoonjoen Perinnesauna'));
+    assert.ok(m.text.includes(en ? 'The request is in the Companies view in admin.' : 'Pyyntö on hallinnan Yritykset-näkymässä.'));
+    assert.ok(!/€|@|Maija|040/.test(m.subject + m.text));
+  });
+}

@@ -70,12 +70,16 @@ test('tuontitiedosto: ei päällekkäisiä avaimia PR 1:n (#61), aiemman tuonnin
   assert.deepEqual(PENDING.filter((r) => have.has(`${r.key}|${r.lang}`)).map((r) => `${r.key} [${r.lang}]`), []);
   assert.ok(Math.ceil(PENDING.length / 500) <= 3, `${PENDING.length} riviä`);
 });
-test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-pages.mjs tuottaa täsmälleen saman tiedoston', () => {
+const PAGE_EXTRA = J('content/site-texts.pending-import-4.json').filter((r) => !r.key.startsWith('email.'));
+test('tuontitiedosto on generoitu koodista: vanhat avaimet = imported-pr64, Yrityksille-lisäys = pending-import-4 (sivut)', () => {
   const prod = join(work, 'prod.json'), out = join(work, 'out.json');
   writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts }));
   const r = spawnSync('node', [join(root, 'scripts/site-texts-extract-pages.mjs'), '--prod', prod, '--out', out], { encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);
-  assert.equal(readFileSync(out, 'utf8'), rd('content/site-texts.imported-pr64.json'));
+  const rows = JSON.parse(readFileSync(out, 'utf8'));
+  const oldIds = new Set(PENDING.map((x) => `${x.key}|${x.lang}`));
+  assert.deepEqual(rows.filter((x) => oldIds.has(`${x.key}|${x.lang}`)), PENDING);
+  assert.deepEqual(rows.filter((x) => !oldIds.has(`${x.key}|${x.lang}`)), PAGE_EXTRA);
 });
 test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet avaimet) eikä kosketa tuotannon tekstiä', () => {
   const have = PENDING.filter((r) => r.key.startsWith('seo.') || r.key === 'ui.site.book');
@@ -84,8 +88,9 @@ test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet ava
   const r = spawnSync('node', [join(root, 'scripts/site-texts-extract-pages.mjs'), '--prod', prod, '--out', out], { encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);
   const rows = JSON.parse(readFileSync(out, 'utf8'));
-  assert.equal(rows.length, PENDING.length - have.length);
+  assert.equal(rows.length, PENDING.length - have.length + PAGE_EXTRA.length);
   assert.ok(!rows.some((x) => x.key.startsWith('seo.') || x.key === 'ui.site.book'));
+  for (const x of PAGE_EXTRA) assert.ok(rows.some((r) => r.key === x.key && r.lang === x.lang), x.key);
   assert.notEqual(spawnSync('node', [join(root, 'scripts/site-texts-extract-pages.mjs'), '--prod', join(work, 'ei-ole.json')], { encoding: 'utf8' }).status, 0);
 });
 test('avainkartta: kuolleet ja tekniset kentät pois, nimeäminen §18.2, PR 1:n kaupan avaimet eivät törmää', () => {
@@ -131,7 +136,7 @@ test('HTML: kantaan ei mene <strong> vaan **lihavointi** (kind lite); muunnos on
 test('peitto: kierros – tuontitiedosto peittona → kaikki oliot täsmälleen ennallaan; resetContentTexts palauttaa oletukset', async () => {
   const { state } = await stateWith(PENDING);
   const res = CT.applyContentTexts(state, { log: quiet });
-  assert.equal(res.used, PENDING.length); assert.equal(res.fallback, 0); assert.equal(res.failed, 0);
+  assert.equal(res.used, PENDING.length); assert.equal(res.fallback, PAGE_EXTRA.length); assert.equal(res.failed, 0);
   assert.equal(snap(), BASE, 'tuonnin jälkeen oliot poikkeavat oletuksista');
   const none = CT.applyContentTexts(await B.loadSiteTexts({ env: { SITE_TEXTS_FIXTURE: join(work, 'ei-ole.json') }, log: quiet, cacheDir: join(work, 'c2'), fallbackFile: join(work, 'ei-ole-varatekstia.json') }).catch(() => null), { log: quiet });
   assert.equal(none.used, 0); assert.equal(snap(), BASE);
@@ -176,13 +181,13 @@ test('build: tuontitiedosto "tietokannassa" → koko sivusto (kaikki HTML) tavu 
   const base = build('base', (await stateWith([])).file);
   assert.match(base.log, /staattiset sivut: 0 tekstiä tietokannasta, \d+ repon oletuksella/);
   const all = build('all', (await stateWith(PENDING)).file);
-  assert.match(all.log, new RegExp(`staattiset sivut: ${PENDING.length} tekstiä tietokannasta, 0 repon oletuksella`));
+  assert.match(all.log, new RegExp(`staattiset sivut: ${PENDING.length} tekstiä tietokannasta, ${PAGE_EXTRA.length} repon oletuksella`));
   const fa = files(base.out), fb = files(all.out);
   assert.deepEqual(fb, fa); assert.ok(fa.length > 15);
   for (const f of fa) if (/\.(html|xml|txt|json)$/.test(f)) assert.equal(readFileSync(join(all.out, f), 'utf8'), readFileSync(join(base.out, f), 'utf8'), `${f} muuttui`);
   const chg = build('chg', (await stateWith([
     { key: 'page.front.hero.title', lang: 'fi', text: 'Uusi pääotsikko' }, { key: 'nav.main.gift', lang: 'en', text: 'Gift cards!' }, { key: 'ui.footer.contact', lang: 'fi', text: 'Löydät meidät' },
-    { key: 'ui.site.directions', lang: 'en', text: 'How to find us' }, { key: 'seo.sauna.title', lang: 'fi', text: 'Uusi otsikko | Sipoonjoen Perinnesauna' }, { key: 'ui.card.corporate.vuoro.list.1', lang: 'fi', text: 'Hinta {{price:48}}' },
+    { key: 'ui.site.directions', lang: 'en', text: 'How to find us' }, { key: 'seo.sauna.title', lang: 'fi', text: 'Uusi otsikko | Sipoonjoen Perinnesauna' }, { key: 'page.companies.hero.title', lang: 'fi', text: 'Yrityksille uusi otsikko' },
     { key: 'ui.articles.read_more', lang: 'fi', text: 'Jatka lukemaan' },
     { key: 'page.info.cancel_text', lang: 'en', text: 'Cancel free of charge {{setting:customer_change_hours_before}} hours ahead.' }])).file);
   const h = (d, f) => readFileSync(join(d, f), 'utf8');
@@ -190,7 +195,8 @@ test('build: tuontitiedosto "tietokannassa" → koko sivusto (kaikki HTML) tavu 
   assert.match(h(chg.out, 'index.html'), /Löydät meidät/);
   assert.match(h(chg.out, 'en/index.html'), />Gift cards!</); assert.match(h(chg.out, 'en/info/index.html'), /How to find us/);
   assert.match(h(chg.out, 'saunavuorot/index.html'), /<title>Uusi otsikko \| Sipoonjoen Perinnesauna<\/title>/);
-  assert.match(h(chg.out, 'yritykset/index.html'), /Hinta 350 €/);
+  assert.match(h(chg.out, 'yritykset/index.html'), /Yrityksille uusi otsikko/);
+  assert.doesNotMatch(h(base.out, 'yritykset/index.html'), /Yrityksille uusi otsikko/);
   assert.match(h(chg.out, 'en/info/index.html'), /Cancel free of charge 48 hours ahead\./);
 });
 test('kaupan datakuorma (booking/site-texts.json) sisältää vain kaupan avainalueet, ei staattisen sivuston tekstejä', async () => {
