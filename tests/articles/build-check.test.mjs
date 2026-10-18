@@ -9,7 +9,7 @@ import { join, resolve } from 'node:path';
 
 const root = resolve(new URL('../..', import.meta.url).pathname);
 const work = mkdtempSync(join(tmpdir(), 'art-build-'));
-const SECTIONS = { fi: '/saunatietoa/', en: '/en/sauna-guide/' };
+const SECTIONS = { fi: '/saunatietoa/', en: '/en/sauna-knowledge/' };
 const T_URL = 'https://joonasvaarala.github.io/saunotus-uusi', P_URL = 'https://uusi.saunotus.com';
 const { checkDist } = await import('../../scripts/check-articles.mjs');
 
@@ -19,7 +19,8 @@ function build(name, env) {
   assert.equal(r.status, 0, `build ${name} kaatui:\n${r.stdout}\n${r.stderr}`);
   return { dist, out: r.stdout + r.stderr };
 }
-const check = (dist, isTest) => checkDist({ dist, siteUrl: isTest ? T_URL : P_URL, isTest, sections: SECTIONS });
+const LEGACY = { fi: [], en: ['/en/sauna-guide/'] };
+const check = (dist, isTest) => checkDist({ dist, siteUrl: isTest ? T_URL : P_URL, isTest, sections: SECTIONS, legacy: LEGACY });
 const read = (dist, p) => readFileSync(join(dist, p), 'utf8');
 const mutate = (dist, p, fn) => { const f = join(dist, p); writeFileSync(f, fn(readFileSync(f, 'utf8'))); };
 
@@ -33,7 +34,7 @@ after(() => rmSync(work, { recursive: true, force: true }));
 test('testiympäristö (fixture): tarkistus läpi; kaikki sivut noindex; robots.txt estää', () => {
   const r = check(testDist, true);
   assert.deepEqual(r.errors, []);
-  assert.deepEqual(r.stats, { pages: 19, articles: 4, redirects: 1, lists: 14 });
+  assert.deepEqual(r.stats, { pages: 23, articles: 4, redirects: 5, lists: 14 });   // redirects: 2 siirrettyä slugia (RPC) + vanha EN-listaus + 2 vanhan EN-polun artikkelia
   assert.match(read(testDist, 'robots.txt'), /Disallow: \//);
 });
 test('tuotanto (fixture): tarkistus läpi; canonicalit tuotantoon, indeksoitavat sitemapissa, noindex-artikkeli ei', () => {
@@ -41,7 +42,7 @@ test('tuotanto (fixture): tarkistus läpi; canonicalit tuotantoon, indeksoitavat
   assert.deepEqual(r.errors, []);
   const sm = read(prodDist, 'sitemap.xml');
   assert.match(sm, /<loc>https:\/\/uusi\.saunotus\.com\/saunatietoa\/miten-saunotaan-oikein\/<\/loc>/);
-  assert.match(sm, /<xhtml:link rel="alternate" hreflang="en" href="https:\/\/uusi\.saunotus\.com\/en\/sauna-guide\/how-to-sauna\/"\/>/);
+  assert.match(sm, /<xhtml:link rel="alternate" hreflang="en" href="https:\/\/uusi\.saunotus\.com\/en\/sauna-knowledge\/how-to-sauna\/"\/>/);
   assert.doesNotMatch(sm, /noindex-testiartikkeli|vanha-nimi|\/tagi\//);
   assert.match(read(prodDist, 'robots.txt'), /Allow: \/\n[\s\S]*Sitemap: https:\/\/uusi\.saunotus\.com\/sitemap\.xml/);
   assert.doesNotMatch(read(prodDist, 'saunatietoa/miten-saunotaan-oikein/index.html'), /<meta name="robots" content="noindex/);
@@ -63,14 +64,14 @@ test('responsiiviset kuvat tuotettu (avif+webp, usea leveys) ja viitataan srcset
 test('navigaatio: Saunatietoa-linkki header, mobiilivalikko ja footer (FI+EN) kun artikkeleita on; aria-current osiossa', () => {
   const fi = read(prodDist, 'index.html'), en = read(prodDist, 'en/index.html');
   assert.equal((fi.match(/href="\/saunatietoa\/">Saunatietoa<\/a>/g) || []).length, 3);
-  assert.equal((en.match(/href="\/en\/sauna-guide\/">Sauna guide<\/a>/g) || []).length, 3);
+  assert.equal((en.match(/href="\/en\/sauna-knowledge\/">Sauna knowledge<\/a>/g) || []).length, 3);
   assert.match(read(prodDist, 'saunatietoa/index.html'), /<a href="\/saunatietoa\/" aria-current="page">Saunatietoa<\/a>/);
   assert.match(read(prodDist, 'varaa/index.html'), /href="\/saunatietoa\/">Saunatietoa<\/a>/, 'myös varauskaupan sivut (oma prosessi) saavat linkin');
 });
 
 // ---- mutaatiot: tarkistuksen pitää havaita virheet ----
 const mutated = (name, base, edits) => { const d = join(work, name); cpSync(base, d, { recursive: true }); for (const [p, fn] of edits) mutate(d, p, fn); return d; };
-const ART = 'saunatietoa/miten-saunotaan-oikein/index.html', ART_EN = 'en/sauna-guide/how-to-sauna/index.html';
+const ART = 'saunatietoa/miten-saunotaan-oikein/index.html', ART_EN = 'en/sauna-knowledge/how-to-sauna/index.html';
 const caught = (name, base, isTest, edits, re) => test(`tarkistus havaitsee: ${name}`, () => {
   const r = check(mutated(name.replace(/\W+/g, '_'), base, edits), isTest);
   assert.ok(r.errors.some((e) => re.test(e)), `odotettiin ${re}, saatiin:\n${r.errors.join('\n')}`);
@@ -84,7 +85,7 @@ caught('Article.datePublished virheellinen', P(), false, [[ART, (h) => h.replace
 caught('BreadcrumbList puuttuu', P(), false, [[ART, (h) => h.replace(/<script type="application\/ld\+json">\{"@context":"https:\/\/schema\.org","@type":"BreadcrumbList".*?<\/script>/, '')]], /BreadcrumbList puuttuu/);
 caught('hreflang ei molemminpuolinen', P(), false, [[ART_EN, (h) => h.replace(/<link rel="alternate" hreflang="fi"[^>]*>/, '')]], /hreflang/);
 caught('hreflang ilman x-default', P(), false, [[ART, (h) => h.replace(/<link rel="alternate" hreflang="x-default"[^>]*>/, '')]], /x-default/);
-caught('hreflang viittaa olemattomaan sivuun', P(), false, [[ART, (h) => h.replace('/en/sauna-guide/how-to-sauna/"', '/en/sauna-guide/ei-ole/"')]], /ei löydy dististä/);
+caught('hreflang viittaa olemattomaan sivuun', P(), false, [[ART, (h) => h.replace('/en/sauna-knowledge/how-to-sauna/"', '/en/sauna-knowledge/ei-ole/"')]], /ei löydy dististä/);
 caught('sitemapissa noindex-sivu', P(), false, [['sitemap.xml', (x) => x.replace('</urlset>', '<url><loc>https://uusi.saunotus.com/saunatietoa/noindex-testiartikkeli/</loc><lastmod>2026-10-18</lastmod></url></urlset>')]], /noindex/);
 caught('sitemapista puuttuu indeksoitava artikkeli', P(), false, [['sitemap.xml', (x) => x.replace(/<url><loc>https:\/\/uusi\.saunotus\.com\/saunatietoa\/savusauna-lampiaminen\/<\/loc>.*?<\/url>\n?/, '')]], /puuttuu sitemapista/);
 caught('sitemap-loc ei vastaa sivua', P(), false, [['sitemap.xml', (x) => x.replace('</urlset>', '<url><loc>https://uusi.saunotus.com/saunatietoa/haamu/</loc><lastmod>2026-10-18</lastmod></url></urlset>')]], /ei vastaa dististä sivua/);
@@ -97,6 +98,8 @@ caught('ohjaussivun kohde puuttuu', P(), false, [['saunatietoa/savusauna-vanha-n
 caught('ohjaussivun canonical väärin', P(), false, [['saunatietoa/savusauna-vanha-nimi/index.html', (h) => h.replace(/<link rel="canonical" href="[^"]*"/, '<link rel="canonical" href="https://uusi.saunotus.com/saunatietoa/savusauna-vanha-nimi/"')]], /canonical/);
 caught('tagisivu ilman noindexia', P(), false, [['saunatietoa/tagi/loyly/index.html', (h) => h.replace('<meta name="robots" content="noindex,follow">', '<meta name="robots" content="index,follow">')]], /tagisivun pitää olla noindex/);
 caught('og:url ≠ canonical', P(), false, [[ART, (h) => h.replace(/<meta property="og:url" content="[^"]*"/, '<meta property="og:url" content="https://uusi.saunotus.com/x/"')]], /og:url/);
+caught('vanhan EN-polun ohjaus osoittaa olemattomaan sivuun', P(), false, [['en/sauna-guide/index.html', (h) => h.replace('url=/en/sauna-knowledge/', 'url=/en/sauna-knowledge/ei-ole/')]], /ohjauksen kohdetta ei löydy/);
+caught('vanha EN-polku ei ole ohjaus vaan sivu', P(), false, [['en/sauna-guide/index.html', (h) => h.replace(/<meta http-equiv="refresh"[^>]*>/, '')]], /vanha osion polku/);
 caught('CTA puuttuu', P(), false, [[ART, (h) => h.replace(/<aside class="article-cta">.*?<\/aside>/s, '')]], /CTA/);
 caught('navigaatiolinkki puuttuu', P(), false, [['index.html', (h) => h.replace(/<a href="\/saunatietoa\/">Saunatietoa<\/a>/g, '')]], /navigaatiosta puuttuu/);
 
@@ -105,9 +108,9 @@ test('tyhjä lista: rakennus onnistuu, siisti tyhjä tila, noindex, ei navigaati
   const { dist } = build('empty', { ARTICLES_FIXTURE: join(root, 'tests/articles/fixtures/rpc-empty.json') });
   const r = check(dist, false);
   assert.deepEqual(r.errors, []);
-  assert.deepEqual(r.stats, { pages: 2, articles: 0, redirects: 0, lists: 2 });
+  assert.deepEqual(r.stats, { pages: 3, articles: 0, redirects: 1, lists: 2 });
   assert.doesNotMatch(read(dist, 'index.html'), /saunatietoa/);
-  assert.doesNotMatch(read(dist, 'sitemap.xml'), /saunatietoa|sauna-guide/);
+  assert.doesNotMatch(read(dist, 'sitemap.xml'), /saunatietoa|sauna-knowledge|sauna-guide/);
   assert.match(read(dist, 'saunatietoa/index.html'), /Artikkeleita ei ole vielä julkaistu/);
 });
 test('RPC ei vastaa (yhteys evätty): rakennus EI kaadu, varoitus, tyhjä osio', () => {

@@ -35,4 +35,7 @@ begin
   perform booking.admin_publish_article(a5, now() + interval '30 days');
   perform booking.admin_upsert_article(a2, '{"slug_fi":"savusauna-lampiaminen"}'::jsonb);   -- vanha osoite → moved
 end $do$;
+-- EN-puolen vanha slug (slug-historiarivi suoraan; EN-slugin vaihto adminin kautta vaatisi saman): public_articles_redirects() palauttaa sen
+insert into booking.article_slug_history(article_id, lang, slug) select id, 'en', 'sauna-how-to' from booking.articles where slug_fi = 'miten-saunotaan-oikein' on conflict do nothing;
 select id, slug_fi, slug_en, status, published_at from booking.articles order by id;
+select booking.public_articles_redirects();

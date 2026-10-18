@@ -1,12 +1,18 @@
 {
- "_doc": "Sisältöosion (työnimi 'Saunatietoa') YHDEN PAIKAN asetukset: nimi, polut ja UI-tekstit. Nimen/polun vaihto = muokkaa tätä tiedostoa ja rakenna uudelleen (ks. docs/SAUNATIETOA.md). Artikkelit haetaan rakennuksessa Supabasen public_*-RPC:illä; tietokannan articles_*-asetukset (booking.settings) pidetään samoina, mutta sivusto käyttää tämän tiedoston arvoja ja varoittaa rakennuksessa jos ne poikkeavat.",
+ "_doc": "Sisältöosion (työnimi 'Saunatietoa') YHDEN PAIKAN asetukset: nimi, polut ja UI-tekstit. Nimen/polun vaihto = muokkaa tätä tiedostoa ja rakenna uudelleen (ks. docs/SAUNATIETOA.md). legacyPaths = aiemmat osion polut: niille generoidaan ohjaussivut (listaus + artikkelit) nykyiseen osoitteeseen. Artikkelit haetaan rakennuksessa Supabasen public_*-RPC:illä; tietokannan articles_*-asetukset (booking.settings) pidetään samoina, mutta sivusto käyttää tämän tiedoston arvoja ja varoittaa rakennuksessa jos ne poikkeavat.",
  "label": {
   "fi": "Saunatietoa",
-  "en": "Sauna guide"
+  "en": "Sauna knowledge"
  },
  "path": {
   "fi": "/saunatietoa/",
-  "en": "/en/sauna-guide/"
+  "en": "/en/sauna-knowledge/"
+ },
+ "legacyPaths": {
+  "fi": [],
+  "en": [
+   "/en/sauna-guide/"
+  ]
  },
  "tagSegment": {
   "fi": "tagi",

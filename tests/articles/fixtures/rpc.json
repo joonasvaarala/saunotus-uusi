@@ -707,6 +707,13 @@
    "lang": "fi",
    "path": "/saunatietoa/savusauna-lampiaminen/",
    "slug": "savusauna-lampiaminen"
+  },
+  "en/sauna-how-to": {
+   "ok": false,
+   "code": "moved",
+   "lang": "en",
+   "path": "/en/sauna-knowledge/how-to-sauna/",
+   "slug": "how-to-sauna"
   }
  },
  "sitemap": {
@@ -773,8 +780,37 @@
    "slug": "savusauna-vanha-nimi"
   },
   {
+   "lang": "en",
+   "slug": "sauna-how-to"
+  },
+  {
    "lang": "fi",
    "slug": "poistettu-artikkeli"
   }
- ]
+ ],
+ "redirects": {
+  "ok": true,
+  "items": [
+   {
+    "lang": "en",
+    "status": 301,
+    "to_loc": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+    "to_path": "/en/sauna-knowledge/how-to-sauna/",
+    "to_slug": "how-to-sauna",
+    "from_loc": "https://uusi.saunotus.com/en/sauna-knowledge/sauna-how-to/",
+    "from_path": "/en/sauna-knowledge/sauna-how-to/",
+    "from_slug": "sauna-how-to"
+   },
+   {
+    "lang": "fi",
+    "status": 301,
+    "to_loc": "https://uusi.saunotus.com/saunatietoa/savusauna-lampiaminen/",
+    "to_path": "/saunatietoa/savusauna-lampiaminen/",
+    "to_slug": "savusauna-lampiaminen",
+    "from_loc": "https://uusi.saunotus.com/saunatietoa/savusauna-vanha-nimi/",
+    "from_path": "/saunatietoa/savusauna-vanha-nimi/",
+    "from_slug": "savusauna-vanha-nimi"
+   }
+  ]
+ }
 }

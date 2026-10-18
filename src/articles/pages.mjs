@@ -144,15 +144,17 @@ function articlePage(it, ctx) {
   return { path: articlePath(lang, slug), html, kind: 'article', lang, slug, indexable: isOwn && !a.noindex, alts, canonical };
 }
 
-function redirectPage(r, ctx) {
-  const lang = r.lang, to = articlePath(r.toLang, r.toSlug), target = abs(to);
-  const body = `<section class="section"><div class="wrap narrow center"><h1 class="sec-title">${e(t(lang, 'movedTitle'))}</h1><p>${e(t(lang, 'movedText'))}</p><p><a class="btn" href="${e(href(to))}">${e(t(lang, 'movedLink'))}</a></p></div></section>`;
+/** Ohjaussivu (staattinen 301-vastine): meta refresh + canonical kohteeseen + näkyvä linkki. fromPath/toPath ilman BASE-etuliitettä. */
+function redirectTo({ lang, fromPath, toPath, label }) {
+  const target = abs(toPath);
+  const body = `<section class="section"><div class="wrap narrow center"><h1 class="sec-title">${e(t(lang, 'movedTitle'))}</h1><p>${e(t(lang, 'movedText'))}</p><p><a class="btn" href="${e(href(toPath))}">${e(t(lang, 'movedLink'))}</a></p></div></section>`;
   const html = R.layout({
-    lang, key: null, meta: { title: `${t(lang, 'movedTitle')}: ${r.from} | ${siteName(lang)}`, description: t(lang, 'movedText') }, body,
-    seo: { url: target, hreflangs: [], extraHead: `<meta http-equiv="refresh" content="0; url=${e(href(to))}">`, robots: null, extraCss: R.articlesCss, navCurrent: 'articles', switchHref: href(listPath(other(lang))) },
+    lang, key: null, meta: { title: `${t(lang, 'movedTitle')}: ${label} | ${siteName(lang)}`, description: t(lang, 'movedText') }, body,
+    seo: { url: target, hreflangs: [], extraHead: `<meta http-equiv="refresh" content="0; url=${e(href(toPath))}">`, robots: null, extraCss: R.articlesCss, navCurrent: 'articles', switchHref: href(listPath(other(lang))) },
   });
-  return { path: articlePath(lang, r.from), html, kind: 'redirect', lang, to };
+  return { path: fromPath, html, kind: 'redirect', lang, to: toPath };
 }
+const redirectPage = (r) => redirectTo({ lang: r.lang, fromPath: articlePath(r.lang, r.from), toPath: articlePath(r.toLang, r.toSlug), label: r.from });
 
 /**
  * Rakentaa kaikki sisältöosion sivut ja sitemap-rivit.
@@ -195,9 +197,18 @@ export function buildArticleSite(data, variants) {
   const taken = new Set(pages.map((p) => p.path));
   for (const r of data.redirects || []) {
     if (!live[r.toLang]?.has(r.toSlug)) { warn(`ohjaus ${r.lang}/${r.from} → ${r.toLang}/${r.toSlug}: kohdeartikkeli ei ole julkaistu; ohjaussivua ei luoda (404)`); continue; }
-    const p = redirectPage(r, ctx);
+    const p = redirectPage(r);
     if (taken.has(p.path)) { warn(`ohjaus ${p.path}: osoitteessa on jo sivu; ohitetaan`); continue; }
     taken.add(p.path); pages.push(p);
+  }
+
+  // vanhat osion polut (cfg.legacyPaths, esim. /en/sauna-guide/): listaus ja jokainen julkaistu artikkeli (+ vanhat slugit suoraan nykyiseen) ohjataan nykyiseen osoitteeseen
+  for (const L of LANGS) for (const base of cfg.legacyPaths?.[L] || []) {
+    if (base === cfg.path[L]) continue;
+    const add = (fromPath, toPath, label) => { if (taken.has(fromPath)) return; taken.add(fromPath); pages.push(redirectTo({ lang: L, fromPath, toPath, label })); };
+    add(base, listPath(L), base);
+    for (const slug of live[L]) add(`${base}${slug}/`, articlePath(L, slug), slug);
+    for (const r of data.redirects || []) if (r.lang === L && r.toLang === L && live[L].has(r.toSlug)) add(`${base}${r.from}/`, articlePath(L, r.toSlug), r.from);
   }
 
   // sitemap: artikkelit RPC:n public_articles_sitemap-listan mukaan (vain indeksoitavat), listaukset kun niillä on artikkeleita
