@@ -10,6 +10,7 @@ import { createPaymentsTab } from './talous-payments.js';
 import { createReportsTab } from './talous-reports.js';
 import { createGiftcardsTab } from './talous-giftcards.js';
 import { createVouchersTab } from './talous-vouchers.js';
+import { createSalesChart } from './talous-sales-chart.js';
 
 const ALL_TABS = [['orders', 'tab.orders'], ['payments', 'tab.payments'], ['reports', 'tab.reports'], ['giftcards', 'tab.giftcards'], ['vouchers', 'tab.vouchers']];
 
@@ -68,8 +69,11 @@ export async function render({ ctx, reload, query }) {
   for (const [k] of TABS) panels[k] = h('div', { role: 'tabpanel', id: `tl-pnl-${k}`, 'aria-labelledby': `tl-tab-${k}`, hidden: true, class: 'tl-panel-wrap' });
   const langs = h('div', { class: 'tl-langs tl-noprint', role: 'group', 'aria-label': t('lang.label') }, LANGS.map((l) => h('button', { type: 'button', class: 'tl-lang', 'aria-pressed': String(getLang() === l), 'data-testid': `lang-${l}`, lang: l,
     onclick: () => { if (getLang() === l) return; setLang(l); reload(); } }, l.toUpperCase())));
+  // Myyntikäyrä ennen välilehtiä. Vain reports.view (kuukausiraportin oikeus). Johku on mukana vain tässä käyrässä.
+  const chart = canFull ? createSalesChart({ api, rpc }) : null;
+  if (chart) chart.load();
   const root = h('div', { class: 'tl', lang: getLang(), 'data-testid': 'talous' },
-    h('div', { class: 'row between wrap tl-top tl-noprint' }, h('h1', { text: t('title') }), langs), banner, vatBox, list, ...TABS.map(([k]) => panels[k]));
+    h('div', { class: 'row between wrap tl-top tl-noprint' }, h('h1', { text: t('title') }), langs), banner, vatBox, chart?.node, list, ...TABS.map(([k]) => panels[k]));
   select(tab);
   const deepOrder = (query.get('order') || '').trim();   // #/talous?tab=orders&order=<tilausnumero> (esim. Uusi varaus → Avaa tilaus ja maksut): haku + tilaus auki
   if (deepOrder && tab === 'orders') tabs.orders.setSearch(deepOrder, { open: true });

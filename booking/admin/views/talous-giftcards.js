@@ -7,6 +7,7 @@ import { t, fmt, getLang } from '../talous-i18n.js';
 import { deliveryErrors, SERVER_FIELD, deliverMaxDate, helsinkiNow, coverState, COVER_MAX } from '../giftcards-delivery.js';
 import { GC_STATUSES, GC_SORTS, GC_PAY_METHODS, GC_GREETING_MAX, normalizeGiftCode, formatGiftCode, giftCodeValid } from '../giftcards-api.js';
 import { loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, searchFld, expandRow, actionBtn, formDialog, friendly, methodLabel } from './talous-ui.js';
+import { countActive, filterDrawer } from '../filter-drawer.js';
 
 const fld = (label, ...kids) => h('label', { class: 'fld' }, h('span', { text: label }), ...kids);
 const STATUS_BADGE = { active: 'pay-paid', used: 'muted', expired: 'pay-refunded', cancelled: 'pay-failed', pending_verification: 'pay-pending', pending_payment: 'pay-pending' };
@@ -283,14 +284,21 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
     const ss = searchFld(t('gc.search'), 'gc-search', (v) => change({ search: v })); ss.input.value = st.search;
     const sort = h('label', { class: 'fld' }, h('span', { text: t('gc.f.sort') }), h('select', { 'data-testid': 'gc-f-sort', onchange: (e) => change({ sort: e.target.value }) }, GC_SORTS.map((s) => h('option', { value: s, text: t(`gcsort.${s}`) }))));
     sort.querySelector('select').value = st.sort;
-    const next = h('form', { class: 'tl-toolbar', role: 'search', onsubmit: (e) => e.preventDefault() }, ss.node,
-      selectFld(t('gc.f.status'), 'gc-f-status', GC_STATUSES, gcStatusLabel, st.status, (v) => change({ status: v })),
-      selectFld(t('gc.f.source'), 'gc-f-source', ['native', 'johku'], (c) => t(`gcsrc.${c}`), st.source, (v) => change({ source: v })), buildPkgSel(), sort,
-      simple(t('gc.f.balance'), 'gc-f-balance', [['', t('gc.f.balance.any')], ['yes', t('gc.f.balance.yes')], ['no', t('gc.f.balance.no')]], 'balance'),
-      simple(t('gc.f.expiring'), 'gc-f-expiring', [['', t('gc.f.expiring.any')], ['30', t('gc.f.expiring.30')], ['90', t('gc.f.expiring.90')]], 'expiring'),
-      simple(t('gc.f.unverified'), 'gc-f-unverified', [['', t('gc.f.unverified.any')], ['yes', t('gc.f.unverified.yes')]], 'unverified'),
-      pageSizeSelect(st.limit, (n) => change({ limit: n })),
-      h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'gc-reset', onclick: () => { Object.assign(st, { search: '', status: '', source: '', package: '', sort: 'created_desc', balance: '', expiring: '', unverified: '' }); buildToolbar(); load(); } }, t('filters.reset')));
+    const drawer = filterDrawer({
+      search: ss.node,
+      testid: 'gc-filters',
+      activeCount: () => countActive(st, { status: '', source: '', package: '', sort: 'created_desc', balance: '', expiring: '', unverified: '', limit: 25 }),
+      filters: [
+        selectFld(t('gc.f.status'), 'gc-f-status', GC_STATUSES, gcStatusLabel, st.status, (v) => change({ status: v })),
+        selectFld(t('gc.f.source'), 'gc-f-source', ['native', 'johku'], (c) => t(`gcsrc.${c}`), st.source, (v) => change({ source: v })), buildPkgSel(), sort,
+        simple(t('gc.f.balance'), 'gc-f-balance', [['', t('gc.f.balance.any')], ['yes', t('gc.f.balance.yes')], ['no', t('gc.f.balance.no')]], 'balance'),
+        simple(t('gc.f.expiring'), 'gc-f-expiring', [['', t('gc.f.expiring.any')], ['30', t('gc.f.expiring.30')], ['90', t('gc.f.expiring.90')]], 'expiring'),
+        simple(t('gc.f.unverified'), 'gc-f-unverified', [['', t('gc.f.unverified.any')], ['yes', t('gc.f.unverified.yes')]], 'unverified'),
+        pageSizeSelect(st.limit, (n) => change({ limit: n })),
+        h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'gc-reset', onclick: () => { Object.assign(st, { search: '', status: '', source: '', package: '', sort: 'created_desc', balance: '', expiring: '', unverified: '' }); buildToolbar(); load(); } }, t('filters.reset')),
+      ],
+    });
+    const next = h('form', { class: 'tl-toolbar', role: 'search', onsubmit: (e) => e.preventDefault() }, drawer.node);
     if (toolbar?.isConnected) toolbar.replaceWith(next);
     toolbar = next; return next;
   }
