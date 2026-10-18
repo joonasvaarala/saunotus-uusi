@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { sortReviews } from './reviews-sort.mjs';
 import { cards, alts, pageDoc } from './content-texts.mjs';
 import { articlesNav, homeSection } from './articles/runtime.mjs';
+import { tx } from './site-texts.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
   johku, bookingUrl, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
@@ -21,6 +22,10 @@ export const homeArticlesCss = minifyCss(readFileSync(new URL('./articles/home.c
 export const ui = (lang) => site.ui[lang];
 const alt = (id, lang) => alts[id]?.[lang] ?? '';
 export const pic = (id, lang, o = {}) => picture(id, { alt: o.alt ?? alt(id, lang), ...o });
+// Yläpalkin alarivi ("Sipoonjoen Perinnesauna", §18): teksti tekstitaulusta (nav.brand_tagline = {{setting:business_name}}); siirtymäaikana (avainta ei vielä tuotu) site.json:n brandTitle.
+// Alarivi on osa etusivulinkin nimeä ("Saunotus Sipoonjoen Perinnesauna"), joten sitä ei piilotettu (ei aria-hidden).
+const taglineWarned = new Set();
+const headerTagline = (lang, u) => tx('nav.brand_tagline', lang, { fallback: u.brandTitle, log: { warn: (m) => { if (!taglineWarned.has(m)) { taglineWarned.add(m); console.warn(m); } } } });
 const NEW = (lang) => `<span class="sr"> ${e(ui(lang).openNewTab)}</span>`;
 const mailto = (subject = '') => `mailto:${site.contact.email}${subject ? '?subject=' + encodeURIComponent(subject) : ''}`;
 const other = (lang) => (lang === 'fi' ? 'en' : 'fi');
@@ -257,7 +262,7 @@ ${isTest ? '<meta name="robots" content="noindex,nofollow">' : (seo?.robots ? `<
 ${isTest ? `<div class="testbar" role="note">${e(u.siteTestNote)}</div>` : ''}
 <a class="skip" href="#main">${e(u.skip)}</a>
 <header class="site-header"><div class="wrap hdr">
-<a class="brand" href="${pageHref('home', lang)}"><img src="${href('/img/favicon.svg')}" width="27" height="37" alt=""><span><b>SAUNOTUS</b><small>${e(u.brandTitle)}</small></span></a>
+<a class="brand" href="${pageHref('home', lang)}"><img src="${href('/img/favicon.svg')}" width="27" height="37" alt=""><span class="brand-txt"><b>SAUNOTUS</b> <small>${e(headerTagline(lang, u))}</small></span></a>
 <nav class="nav-desk" aria-label="${e(u.menuLabel)}">${nav}</nav>
 ${langSw}
 <a class="btn sm" href="${bookHref}">${e(u.book)}</a>

@@ -44,7 +44,7 @@ for (const locale of ['fi', 'en']) for (const kind of KINDS) {
     assert.ok(m.html.startsWith('<!doctype html><html lang="' + locale + '">'));
     assert.ok(en ? /Hello Matti,/.test(m.text) && /Kind regards,/.test(m.text) : /Hei Matti,/.test(m.text) && /Ystävällisin terveisin,/.test(m.text), 'tervehdys/allekirjoitus kielellä');
     assert.ok(en ? !/Ystävällisin|Kiitos|Tilaus\b/.test(m.text) : !/Kind regards|Thank you|\bOrder\b/.test(m.text), 'ei sekakieltä');
-    assert.ok(m.text.includes('Havuhattu Oy') && m.html.includes('Havuhattu Oy') && m.html.includes('Sipoonjoen perinnesauna') && m.html.includes('Hindsbyntie 124'));
+    assert.ok(m.text.includes('Havuhattu Oy') && m.html.includes('Havuhattu Oy') && m.html.includes('Sipoonjoen Perinnesauna') && m.html.includes('Hindsbyntie 124'));
     // linkit
     const links = hrefs(m.html);
     assert.ok(links.every((h) => /^(https:\/\/[^\s"]+|mailto:[^\s"]+|tel:\+?\d+)$/.test(h)), `virheellinen linkki: ${links}`);
@@ -63,12 +63,12 @@ for (const locale of ['fi', 'en']) for (const kind of KINDS) {
 
 test('tilausvahvistus: varaukset, rivit ja summa; peruttu varaus pois', { skip }, () => {
   const fi = R('order_confirmation', base('fi'));
-  assert.equal(fi.subject, 'Tilausvahvistus 15321 – Sipoonjoen perinnesauna');
+  assert.equal(fi.subject, 'Tilausvahvistus 15321 – Sipoonjoen Perinnesauna');
   assert.ok(fi.text.includes('Yleinen vuoro: ') && fi.text.includes('2 hlö') && !fi.text.includes('Peruttu'));
   assert.ok(fi.text.includes('2 × Yleinen vuoro 36,00 €') && fi.text.includes('Yhteensä: 134,00 €'));
   assert.ok(fi.html.includes('134,00') && !fi.html.includes('Peruttu'));
   const en = R('order_confirmation', base('en'));
-  assert.equal(en.subject, 'Order confirmation 15321 – Sipoonjoen perinnesauna');
+  assert.equal(en.subject, 'Order confirmation 15321 – Sipoonjoen Perinnesauna');
   assert.ok(en.text.includes('Total: 134.00 €') && en.text.includes('2 guests') && en.text.includes('Booking') );
   // aika Helsingin ajassa (15:00Z = 17:00 EET marraskuussa)
   assert.ok(fi.text.includes('17.00–19.00') || fi.text.includes('17:00–19:00'), fi.text);
@@ -76,7 +76,7 @@ test('tilausvahvistus: varaukset, rivit ja summa; peruttu varaus pois', { skip }
 
 test('maksulinkki: summa, linkki ja voimassaolo', { skip }, () => {
   const fi = R('payment_link', base('fi'));
-  assert.equal(fi.subject, 'Maksulinkki tilaukseen 15321 – Sipoonjoen perinnesauna');
+  assert.equal(fi.subject, 'Maksulinkki tilaukseen 15321 – Sipoonjoen Perinnesauna');
   assert.ok(fi.text.includes('98,50 €') && fi.text.includes(PAY_URL) && /voimassa 14\.11\.2026 asti/.test(fi.text));
   const en = R('payment_link', base('en'));
   assert.ok(en.text.includes('98.50 €') && /valid until 14\/11\/2026/.test(en.text) && en.html.includes('Pay now'));
@@ -86,14 +86,14 @@ test('maksulinkki: summa, linkki ja voimassaolo', { skip }, () => {
 
 test('kuitti ja hyvityskuitti: PDF-maininta, kuittirunko, hyvitetty summa positiivisena', { skip }, () => {
   const r = R('receipt', base('fi'));
-  assert.equal(r.subject, 'Kuitti 2026-000123 – Sipoonjoen perinnesauna');
+  assert.equal(r.subject, 'Kuitti 2026-000123 – Sipoonjoen Perinnesauna');
   assert.ok(r.text.includes('liitteenä PDF') && r.text.includes('KUITTI 2026-000123') && r.text.includes('Maksettu: 134,00 €') && r.text.includes('Kuittinumero: 2026-000123'));
   assert.ok(r.html.includes('white-space:pre-wrap') && r.html.includes('KUITTI 2026-000123'));
   const h = R('refund_receipt', refundData('fi'));
-  assert.equal(h.subject, 'Hyvityskuitti 2026-000124 – Sipoonjoen perinnesauna');
+  assert.equal(h.subject, 'Hyvityskuitti 2026-000124 – Sipoonjoen Perinnesauna');
   assert.ok(h.text.includes('hyvitys (10,00 €)') && h.text.includes('Hyvitetty: 10,00 €'));
   const he = R('refund_receipt', refundData('en'));
-  assert.equal(he.subject, 'Refund receipt 2026-000124 – Sipoonjoen perinnesauna');
+  assert.equal(he.subject, 'Refund receipt 2026-000124 – Sipoonjoen Perinnesauna');
   assert.ok(he.text.includes('A refund of 10.00 €') && he.text.includes('Refunded: 10.00 €'));
 });
 
@@ -183,7 +183,7 @@ const vcData = (locale, vc = {}) => ({ ...base(locale), voucher_claim: { claim_i
 for (const locale of ['fi', 'en']) {
   test(`voucher_claim_received ${locale}: koodi maskattuna, tilauslinkki, ei puhelinnumeroa eikä aikarajaa`, { skip }, () => {
     const m = R('voucher_claim_received', vcData(locale), locale);
-    assert.ok(m.subject.includes('Sipoonjoen perinnesauna') && !/undefined|\bnull\b|NaN/.test(m.subject + m.text + m.html));
+    assert.ok(m.subject.includes('Sipoonjoen Perinnesauna') && !/undefined|\bnull\b|NaN/.test(m.subject + m.text + m.html));
     assert.ok(m.text.includes('Elämyslahjat') && m.text.includes('…1234') && m.text.includes(ORDER_URL) && hrefs(m.html).includes(ORDER_URL));
     assert.ok(!/tel:/.test(m.html) && !m.html.includes('+358') && hrefs(m.html).includes('mailto:savusauna@saunotus.fi'), 'ei puhelinnumeroa');
     assert.ok(!/\basti\b|\buntil\b|\bhold\b|pidetty/i.test(m.text), 'ei aikarajaa');

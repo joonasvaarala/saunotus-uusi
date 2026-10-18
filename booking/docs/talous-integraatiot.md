@@ -14,7 +14,7 @@ Vaihto (ylläpitäjä, SQL-editori; kirjautuneena ei vielä admin-RPC:tä):
 ```sql
 update booking.integration_config set mode = 'live', updated_at = now() where key = 'resend';
 ```
-`integration_config.settings` (ei salaisuuksia): `resend.settings` = `{"from":"Sipoonjoen perinnesauna <savusauna@saunotus.fi>","reply_to":"savusauna@saunotus.fi"}`.
+`integration_config.settings` (ei salaisuuksia): `resend.settings` = `{"from":"Sipoonjoen Perinnesauna <savusauna@saunotus.fi>","reply_to":"savusauna@saunotus.fi"}`.
 
 ## 2. Resend (sähköposti) – tarvitaan ennen live-tilaa
 1. Resend-tili (resend.com) ja **verkkotunnus** `saunotus.fi` lisättynä Resendiin; DNS-tietueet (SPF, DKIM, suositus DMARC) lisätty verkkotunnuksen DNS:ään ja tunnus merkitty Resendissä *Verified*. Lähettäjäosoite oltava vahvistetulla verkkotunnuksella (`savusauna@saunotus.fi`).

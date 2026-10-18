@@ -12,7 +12,7 @@ export const GT = {
     qty: 'Määrä', qtyMinus: 'Vähennä määrää', qtyPlus: 'Lisää määrää', remove: 'Poista rivi', lineTotal: 'Rivin summa',
     recipientName: 'Saajan nimi (valinnainen)', recipientEmail: 'Saajan sähköposti (valinnainen)', recipientEmailHint: 'Vain kortin tietoihin.',
     greeting: 'Oma tervehdys (valinnainen)', greetingHint: 'Tervehdys tulostuu korttiin. Enintään {max} merkkiä.', counter: '{n} / {max}', counterOver: '{n} / {max} – {over} merkkiä liikaa',
-    buyerTitle: 'Ostajan tiedot', name: 'Nimi', email: 'Sähköposti', phone: 'Puhelin', marketing: 'Haluan vastaanottaa Sipoonjoen perinnesaunan uutiskirjeitä ja tarjouksia. Voin perua milloin tahansa.',
+    buyerTitle: 'Ostajan tiedot', name: 'Nimi', email: 'Sähköposti', phone: 'Puhelin', marketing: 'Haluan vastaanottaa Sipoonjoen Perinnesaunan uutiskirjeitä ja tarjouksia. Voin perua milloin tahansa.',
     acceptTerms: 'Hyväksyn', termsLink: 'ostoehdot', 'err.name': 'Anna nimi.', 'err.email': 'Tarkista sähköpostiosoite.', 'err.phone': 'Anna puhelinnumero (esim. +358 40 123 4567).', 'err.terms': 'Hyväksy ehdot jatkaaksesi.', 'err.greeting': 'Tervehdys on liian pitkä (enintään {max} merkkiä).', 'err.recipientName': 'Saajan nimi on liian pitkä.', 'err.recipientEmail': 'Tarkista saajan sähköpostiosoite.', 'err.qty': 'Määrän pitää olla vähintään 1.', 'err.pkg': 'Valitse lahjakortti.', 'err.empty': 'Lisää tilaukseen vähintään yksi lahjakortti.', 'err.fix': 'Korjaa merkityt kentät.',
     // Toimitusvalinta (sopimus §13.11)
     deliveryLegend: 'Lähetä lahjakortti', deliveryBuyer: 'Minulle', deliveryRecipient: 'Suoraan saajalle',

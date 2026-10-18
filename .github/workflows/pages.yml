@@ -67,6 +67,8 @@ jobs:
       - run: node --test booking/tests/sivutekstit-kauppa.test.mjs
       # Sivutekstit osa 3 / PR 2: staattiset sivut (etusivu, sivupohjat, kortit, alt, nav, alatunniste, SEO, Saunatietoa) avaimiksi; tuontitiedosto 2, DB-peitto, HTML tavu tavulta sama; ui.shop.error_generic
       - run: node --test booking/tests/sivutekstit-sivut.test.mjs
+      # yläpalkin alarivi (SAUNOTUS + Sipoonjoen Perinnesauna): teksti tekstitaulusta ({{setting:business_name}}), varateksti, saavutettava nimi, tuontitiedosto, tyylit/kontrasti
+      - run: node --test booking/tests/header-alarivi.test.mjs
       # hallinnan Vapaat ajat: tuotteet config.public_slots-kentästä (ei id-listaa), kb 7 (120 min, pakettiaikajana), mock vs. tuotannon funktio
       - run: node --test booking/tests/admin-vapaat-ajat.test.mjs
       # .cache/articles: edellinen artikkelisnapshot (RPC-katkon varalta + siirrettyjen slugien tunnistus)

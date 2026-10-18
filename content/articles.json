@@ -35,10 +35,10 @@
  },
  "ui": {
   "fi": {
-   "kicker": "Sipoonjoen perinnesauna",
+   "kicker": "Sipoonjoen Perinnesauna",
    "listLead": "Artikkeleita saunomisesta, perinteistä ja hoidoista.",
    "listMeta": "{label}: artikkeleita saunomisesta ja perinteistä",
-   "listDescription": "Artikkeleita saunomisesta, savusaunan perinteestä ja saunahoidoista Sipoonjoen perinnesaunalta.",
+   "listDescription": "Artikkeleita saunomisesta, savusaunan perinteestä ja saunahoidoista Sipoonjoen Perinnesaunalta.",
    "empty": "Artikkeleita ei ole vielä julkaistu. Palaa pian takaisin.",
    "emptyLink": "Tutustu saunavuoroihin",
    "tagsLabel": "Aiheet",
@@ -66,7 +66,7 @@
    "shareSubject": "Artikkeli: {title}",
    "otherLang": "Read this article in English",
    "ctaTitle": "Varaa oma saunahetkesi",
-   "ctaText": "Sipoonjoen perinnesauna tarjoaa savusaunan, saunahoidot ja lahjakortit. Valitse aika ja varaa verkossa.",
+   "ctaText": "Sipoonjoen Perinnesauna tarjoaa savusaunan, saunahoidot ja lahjakortit. Valitse aika ja varaa verkossa.",
    "ctaButton": "Varaa aika",
    "movedTitle": "Sivu on siirtynyt",
    "movedText": "Tämä artikkeli on siirretty uuteen osoitteeseen.",
