@@ -100,7 +100,13 @@ export async function render({ ctx, refs, reload, query }) {
         h('span', { class: 'hdr-right' }, badge('ev', dayText('ui.admin.day.event_badge')), h('span', { class: 'cnt', 'data-testid': 'session-persons', text: `${sumPersons(mine)} hlö` }))),
       mine.length ? h('ul', { class: 'reslist' }, mine.map(resRow)) : null);
   };
-  const plan = assignDayCards({ sessions: view.sessions || [], reservations: rows, events: extras?.events || [], date });
+  // Lista ei tuo rule_id:tä; päivänäkymän varausrivi tuo. Ilman sitä samaan aikaan alkavat säännöt jakaisivat varauksen.
+  const cardRows = rows.map((r) => {
+    if (r.rule_id != null) return r;
+    const ruleId = dv.get(r.reservation_id)?.rule_id;
+    return ruleId == null ? r : { ...r, rule_id: ruleId };
+  });
+  const plan = assignDayCards({ sessions: view.sessions || [], reservations: cardRows, events: extras?.events || [], date });
   const timeline = [
     ...plan.sessions.map((x) => ({ at: x.session.starts_at, end: x.session.ends_at, node: card({ s: x.session, mine: x.reservations }) })),
     ...plan.slots.map((l) => ({ at: l[0].starts_at, end: l[0].ends_at, node: slotCard(l) })),

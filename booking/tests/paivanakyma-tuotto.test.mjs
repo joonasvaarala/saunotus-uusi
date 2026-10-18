@@ -148,6 +148,54 @@ test('aikajana: tapahtuman osallistuja ei toistu slotissa; tyhjä päivä; useit
   assert.equal(assignDayCards({ sessions: [{ ...session, status: 'closed' }], reservations: [], events: [], date: DAY }).empty, true, 'myymätön suljettu vuoro pysyy piilossa');
 });
 
+test('sama alkuaika, eri loppu: varaus vain oikeassa vuorokortissa', () => {
+  const day = '2026-11-13';
+  const start = clockIso(day, 14, 0);
+  const endShort = clockIso(day, 16, 0);
+  const endLong = clockIso(day, 21, 0);
+  const short = { rule_id: 18, product_id: 25, label: 'Oma savusaunavuoro pe 14–16', starts_at: start, ends_at: endShort, status: 'unavailable', mode: 'exclusive' };
+  const long = { rule_id: 16, product_id: 25, label: 'Oma savusaunavuoro pe 14–21', starts_at: start, ends_at: endLong, status: 'unavailable', mode: 'exclusive' };
+  const res = {
+    reservation_id: 10331, product_id: '25', order_no: 13280, status: 'confirmed', persons: 4,
+    starts_at: new Date(start).toISOString().replace('Z', '+00:00'),
+    ends_at: new Date(endShort).toISOString().replace('Z', '+00:00'),
+  };
+  const plan = assignDayCards({ sessions: [long, short], reservations: [res], events: [], date: day });
+  assert.deepEqual(plan.sessions.map((c) => c.session.rule_id), [18]);
+  assert.deepEqual(plan.sessions[0].reservations.map((r) => r.reservation_id), [10331]);
+  assert.equal(plan.slots.length, 0, 'varaus ei jää myös slotiksi');
+  assert.equal(plan.sessions.some((c) => c.session.rule_id === 16), false, 'tyhjä unavailable 14–21 ei näy varattuna');
+
+  const byRule = assignDayCards({
+    sessions: [long, short],
+    reservations: [{ ...res, rule_id: '18', ends_at: endLong }],
+    events: [],
+    date: day,
+  });
+  assert.deepEqual(byRule.sessions.map((c) => c.session.rule_id), [18], 'rule_id voittaa ristiriitaisen loppuajan');
+  assert.equal(byRule.slots.length, 0);
+
+  const loose = assignDayCards({
+    sessions: [long, short],
+    reservations: [{ ...res, rule_id: null, ends_at: clockIso(day, 15, 0) }],
+    events: [],
+    date: day,
+  });
+  assert.deepEqual(loose.sessions.map((c) => c.session.rule_id), [18], 'ilman tarkkaa osumaa lyhin vuoro');
+  assert.equal(loose.slots.length, 0);
+
+  const guest = { reservation_id: 77, product_id: 25, starts_at: start, ends_at: endShort, status: 'confirmed', persons: 1 };
+  const withEvent = assignDayCards({
+    sessions: [long, short],
+    reservations: [res, guest],
+    events: [{ event_id: 1, product_id: 25, starts_on: day, time_text: 'klo 14–16', participants: [guest] }],
+    date: day,
+  });
+  assert.deepEqual(withEvent.sessions.flatMap((c) => c.reservations.map((r) => r.reservation_id)), [10331]);
+  assert.equal(withEvent.slots.length, 0);
+  assert.deepEqual(withEvent.events[0].participants.map((p) => p.reservation_id), [77]);
+});
+
 test('kelloteksti järjestää tapahtuman; ilman kelloa loppuun', () => {
   const ev = { time_text: 'klo 16–19 (saunotus alkaa klo 17)', participants: [] };
   assert.equal(eventTimeLabel(ev).kind, 'text');
@@ -210,6 +258,7 @@ test('migraatio on vain luku ja noudattaa samaa sääntöä', () => {
   const ui = readFileSync(new URL('../admin/views/day.js', import.meta.url), 'utf8');
   assert.match(ui, /revenueView\(/);
   assert.match(ui, /assignDayCards\(/);
+  assert.match(ui, /rule_id: ruleId/);
   assert.match(ui, /data-testid': 'day-revenue'/);
   assert.match(ui, /data-testid': 'event'/);
   assert.match(ui, /admin_day_extras/);
