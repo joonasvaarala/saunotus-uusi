@@ -402,6 +402,22 @@ Vipps kutsuu palvelimelle webhookin (`mobilepay-notify`), mutta asiakas voi pala
 ### 14.6 Rollback
 `rollbacks/20261017172554_booking_49_ROLLBACK.sql` (kieltäytyy jos MobilePay-maksuja/hyvityksiä on olemassa). Edge-funktiot ovat tilassa `off` toimettomia.
 
+### 14.7 Kassan maksutavat ilman tokenia: `public_checkout_payment_options()` (migraatio `booking_52_checkout_options`, 18.10.2026)
+Kassalla ei vielä ole tilausta eikä tokenia, joten `public_payment_options(token)` ei sovellu. Tämä anon-RPC kertoo mitkä verkossa tarjottavat maksutavat ovat käytössä **erillään `public_payment_mode`-asetuksesta** (`pay_later` / `hold_until_paid` ohjaa vain sitä, maksetaanko heti vai myöhemmin – asetusta tai sen semantiikkaa ei muutettu).
+```json
+{ "ok": true, "mobilepay_enabled": true, "gift_card_redeem_enabled": true,
+  "methods": [
+    { "code": "mobilepay", "kind": "online", "provider": "vipps_mobilepay", "label": "MobilePay", "label_en": "MobilePay", "test": true,
+      "start": { "function": "mobilepay-start", "method": "POST", "body": { "order_token": "<tilauksen public_token>" } } },
+    { "code": "gift_card", "kind": "redeem", "provider": "gift_card", "label": "Lahjakortti", "label_en": "Gift card", "test": false,
+      "check_rpc": "public_check_gift_card", "apply_rpc": "public_apply_gift_card" } ] }
+```
+- `mobilepay` on mukana kun `integration_config.mobilepay.mode` on `test` tai `live` (`off` → pois). `test = true` = testiympäristö (§14.0: älä näytä testitilassa tuotantosivustolla ilman erillistä päätöstä).
+- `gift_card` on mukana kun `gift_cards.redeem_enabled = true`. Lunastus tehdään tilauksen luonnin jälkeen: `public_apply_gift_card(p_token, p_code, p_amount)` (§13); koodin saldon voi tarkistaa ennen tilausta `public_check_gift_card(p_code)`.
+- Maksutapa näytetään kassalla vain jos se on `methods`-listassa; **älä kovakoodaa** näkyvyyttä. Tyhjä `methods` = ei verkkomaksutapoja (näytä vain "maksu paikan päällä" jne. `public_payment_mode`n mukaan).
+- Tilauksen luonnin jälkeen tilauskohtainen tilanne (`can_pay_online`, summa jäljellä, avoin MobilePay-yritys) tulee `public_payment_options(token)`-kutsusta (§14.1). Kortti-/Visma Pay -maksutapaa tämä RPC ei listaa (ei käytössä: `vismapay = off`).
+- Ei salaisuuksia vastauksessa; rate limit ei tarvita (ei tilausdataa). Testit: `tests/checkout/t52_checkout_options.sql` (20 tarkistusta). Rollback: `rollbacks/…_booking_52_ROLLBACK.sql`.
+
 ## 15. Tuotevalinta (product_options) – Saunahoito: asiakas valitsee hoidon (17.10.2026, migraatio `booking_50_product_options`, `send-emails` -versio 9 (templates.ts orderBlock)) [numero §15, koska tässä tiedostossa §14 on MobilePay; ulkoisessa sopimuksessa tämä on §14]
 **Tilanne:** tietokantapuoli TUOTANNOSSA ja testattu (A–K, 71 tarkistusta rollback-transaktiossa; rollback-skripti `booking_50_ROLLBACK.sql`). UI: ks. kauppa (`shop/src/options-*.js`) ja hallinta (`admin/options*.js`, `admin/views/productoptions.js`); kokeilutila `?mock=1` (README › Hoitovalitsin). Hinta ei muutu valinnan mukaan.
 **Malli (yleinen, uudelleenkäytettävä):**
@@ -439,3 +455,9 @@ Vipps kutsuu palvelimelle webhookin (`mobilepay-notify`), mutta asiakas voi pala
 5. **Hallinta – tuotteet (valinnainen, `catalog.edit`):** vaihtoehtojen hallinta (`admin_list_product_options`, `admin_upsert_product_option`, `admin_set_product_option_settings`); etusivun muistutus `reservations_without_option` > 0.
 6. Testit: pakollisuus (puuttuva/virheellinen koodi), vaihto tilaussivulla, hallinnan muutos, "valitsematta" vanhoilla.
 **Rollback:** `booking_50_ROLLBACK.sql` palauttaa booking_49-tilan (funktiot identtisinä); HUOM menettää `product_options`-rivit ja varausten valinnat. Edge: palauta `send-emails` varmuuskopiosta (`talous/backup/send-emails_v6/`; platform-versio 8).
+
+### 15.1 Valitsimen otsikko vastauksissa: `option_label` (migraatio `booking_52_checkout_options`, 18.10.2026)
+Hoitovarauksille palautetaan valinnan otsikko valmiiksi kielen mukaan (`product_config.option_label` / `option_label_en`; en puuttuu → fi-otsikko; tuotteella ei otsikkoa → `null`):
+- `public_get_booking(token)`: `items[].option_label` (tilauksen `locale`-kielellä) sekä `items[].option_label_fi` ja `items[].option_label_en` (jos UI haluaa valita itse). `items[].option` ennallaan.
+- `public_get_order(token)`: `reservations[].option_label`, `option_label_fi`, `option_label_en` (`reservations[].option` ja `option_choices` ennallaan; tässä RPC:ssä varausrivit ovat `reservations[]`, `items[]` on laskurivit).
+- Käyttö: `option_label` on valitsimen (lomakkeen) otsikko, esim. "Valitse hoito" / "Choose your treatment" – käytä sitä tilaussivun muutosvalitsimen otsikkona. Valitun hoidon nimi tulee edelleen `option.name` / `option.name_en` -kentistä. Testit: `tests/checkout/t52_checkout_options.sql`.

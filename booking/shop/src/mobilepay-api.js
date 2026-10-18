@@ -2,6 +2,7 @@
 // Palvelimen virheet: HTTP 4xx/5xx + JSON {ok:false, code, message} → palautetaan sellaisenaan. Verkkovirhe / ei vastausta → {ok:false, code:'network'|'timeout'} (ei heitetä).
 // Mock (osoitteessa ?mock=1): order-mock.js:n mpFetch vastaa samoilla muodoilla; mitään ei lähetetä palvelimelle.
 export const MP_RPC = 'public_payment_options';
+export const CHECKOUT_RPC = 'public_checkout_payment_options';   // booking_52, §14.7: kassan maksutavat ilman tokenia (anon)
 export const START_FN = 'mobilepay-start', NOTIFY_FN = 'mobilepay-notify';
 const isMissingRpc = (e) => !!e && (e.status === 404 || e.code === 'PGRST202' || e.code === '42883' || /could not find the function/i.test(e.message || ''));
 
@@ -25,6 +26,11 @@ export function createMobilepayApi({ rpc, token, functionUrl, anonKey = '', fetc
     async options() {
       try { const r = await rpc(MP_RPC, { p_token: token }); return r && typeof r === 'object' ? r : null; }
       catch (e) { if (!isMissingRpc(e)) { /* verkkovirhe tms.: ei painiketta */ } return null; }
+    },
+    // Kassa (ei tokenia): public_checkout_payment_options() → { ok, mobilepay_enabled, gift_card_redeem_enabled, methods[] } tai null (RPC puuttuu / virhe: ei verkkomaksutarjontaa)
+    async checkoutOptions() {
+      try { const r = await rpc(CHECKOUT_RPC, {}); return r && typeof r === 'object' ? r : null; }
+      catch (e) { if (!isMissingRpc(e)) { /* verkkovirhe tms.: ei tarjontaa */ } return null; }
     },
     start: () => post(START_FN, { order_token: token }),
     reconcile: () => post(NOTIFY_FN, { action: 'reconcile', order_token: token }),

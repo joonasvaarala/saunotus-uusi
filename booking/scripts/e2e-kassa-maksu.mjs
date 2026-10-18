@@ -57,6 +57,14 @@ const CATALOG = [{ id: 9001, slug: 'testi-yleinen', name: 'Testi yleinen sauna',
 async function wire(ctx, st) {
   await ctx.route('**/rest/v1/rpc/*', async (route) => {
     const name = new URL(route.request().url()).pathname.split('/').pop(); let a = {}; try { a = JSON.parse(route.request().postData() || '{}'); } catch { /* */ } st.calls.push({ name, a });
+    if (name === 'public_checkout_payment_options') {   // §14.7: kassa ilman tokenia
+      if (st.opts === 'missing') return json(route, { code: 'PGRST202', message: 'Could not find the function booking.public_checkout_payment_options in the schema cache' }, 404);
+      if (st.opts === 'error') return json(route, { message: 'boom' }, 500);
+      const mpOn = st.opts !== 'off';
+      return json(route, { ok: true, mobilepay_enabled: mpOn, gift_card_redeem_enabled: !!st.redeem, methods: [
+        ...(mpOn ? [{ code: 'mobilepay', kind: 'online', provider: 'vipps_mobilepay', label: 'MobilePay', label_en: 'MobilePay', test: st.test, start: { function: 'mobilepay-start', method: 'POST', body: { order_token: '<tilauksen public_token>' } } }] : []),
+        ...(st.redeem ? [{ code: 'gift_card', kind: 'redeem', provider: 'gift_card', label: 'Lahjakortti', label_en: 'Gift card', test: false, check_rpc: 'public_check_gift_card', apply_rpc: 'public_apply_gift_card' }] : [])] });
+    }
     if (name === 'public_payment_options') {
       if (st.opts === 'missing') return json(route, { code: 'PGRST202', message: 'Could not find the function booking.public_payment_options in the schema cache' }, 404);
       if (st.opts === 'error') return json(route, { message: 'boom' }, 500);
@@ -310,7 +318,7 @@ for (const lang of ['fi', 'en']) {
     await page.waitForSelector('[data-testid=checkout-paynote]', { timeout: 15000 }); await page.waitForTimeout(700);
     const tx = await visText(page, '[data-testid=checkout-paynote]');
     expect(expectTxt.test(tx), `${name}: maksuohje (${tx})`);
-    expect(st.calls.some((c) => c.name === 'public_payment_options' && !c.a.p_token), `${name}: public_payment_options ilman tokenia`);
+    expect(st.calls.some((c) => c.name === 'public_checkout_payment_options') && !st.calls.some((c) => c.name === 'public_payment_options' && !c.a.p_token), `${name}: public_checkout_payment_options (ei public_payment_options(null))`);
     if (label === 'pay_later + verkkomaksu' && lang === 'fi') { expect(await noHScroll(page), `${name}: ei vaakavieritystä`); await shot(page, 'kassa-maksuohje-fi-390'); }
     checkErrs(page, name, [/status of (404|500)/]); await closeAll(s);
   }

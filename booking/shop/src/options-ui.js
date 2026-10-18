@@ -21,7 +21,7 @@ export function createOptionPicker({ h, lang, product = null, options, label, va
     return card;
   });
   const mark = () => cards.forEach((c, i) => c.classList.toggle('on', options[i].code === cur));
-  const title = (product ? optLabel(product, L, tx.defaultLabel) : label) || tx.defaultLabel;
+  const title = label || (product ? optLabel(product, L, tx.defaultLabel) : null) || tx.defaultLabel;   // ensin rivin (varauksen) otsikko, sitten tuotteen, sitten oletus
   const node = h('fieldset', { class: 'bk-opt', 'data-testid': testid, 'aria-describedby': `${id}-hint` },
     h('legend', {}, step ? h('span', { class: 'bk-stepn', 'aria-hidden': 'true', text: step }) : null, h('span', { class: 'bk-opt-title', text: title }), ' ', required === null ? null : h('span', { class: `bk-opt-req${required ? '' : ' opt'}`, text: required ? tx.required : tx.optional })),
     h('div', { class: 'bk-opt-grid' }, cards),

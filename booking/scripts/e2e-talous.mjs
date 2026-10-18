@@ -56,6 +56,7 @@ async function rpcReply(st, name, a) {
   if (name === 'public_gift_card_packages') return { body: { ok: true, sale_enabled: false, redeem_enabled: false, max_cards_per_order: 10, currency: 'EUR', packages: [] } };
   // MobilePay (tuotannon tila: ei käytössä → ei maksutapoja → ei painiketta); tilaussivu kysyy tätä aina tokenilla
   if (name === 'public_payment_options') return { body: { ok: true, online_enabled: false, methods: [], order: { can_pay_online: false, mobilepay_pending: false } } };
+  if (name === 'public_checkout_payment_options') return { body: { ok: true, mobilepay_enabled: false, gift_card_redeem_enabled: false, methods: [] } };   // kassa (booking_52): ei verkkomaksutapoja
   if (name === 'public_get_order_gift_cards') return { body: { ok: true, order_no: 0, payment_status: 'unpaid', cards: [] } };
   if (st.listMode === 'missing' || !mk.supported.includes(name) || (st.listMode === 'real' && REPORT_RPCS.includes(name))) return missing(name);
   try {
