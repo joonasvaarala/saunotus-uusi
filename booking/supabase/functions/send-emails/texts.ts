@@ -1,6 +1,6 @@
 // Sähköpostien asiakasnäkyvät tekstit (sopimus §18, avaimet email.<pohja>.<kohta>): REPON OLETUKSET = varateksti.
 // Tuotannossa tekstit luetaan tietokannasta (booking.site_texts; haku _shared/site_texts.ts); tämä taulukko on sama sisältö (tuotu admin_texts_import:lla,
-// content/site-texts.pending-import-3.json) ja toimii, jos haku epäonnistuu tai rivi puuttuu. Paikkamerkit: {{var:nimi}} (koodi täyttää), {{setting:business_name}}.
+// content/site-texts.imported-pr66.json) ja toimii, jos haku epäonnistuu tai rivi puuttuu. Paikkamerkit: {{var:nimi}} (koodi täyttää), {{setting:business_name}}.
 // Muuttujat: name (etunimi), no (tilaus-/kuittinumero), amount (summa), date (päivä), phone, email (yhteystiedot), from (lahjan antaja), who (saaja: nimi, sähköposti),
 //   when (toimituspäivä [+ klo]), time (kellonaika), n (lukumäärä), label (kumppanin nimi), what (kumppani + koodi), code (maskattu koodi).
 // Luokka: protected = yhteystiedot, käyttöohjeet/ehdot, peruutus- ja lunastusviestit (hyväksyjinä Joonas ja Otto, §18.6); muut normal. Teksti on yksirivistä (paitsi missä \n), ei HTML:ää (booking_60 hylkää '<').
