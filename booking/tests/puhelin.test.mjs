@@ -2,8 +2,9 @@
 // node --test booking/tests/puhelin.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -38,9 +39,7 @@ test('kaupan sanakirjat: numero näkyy molemmilla kielillä muodossa "010 299 28
 // Tietokantakopiot (content/site-texts.*.json, tests/fixtures/site-texts, kb.json) ovat tietokannan sisältöä, eivät koodia: ne päivitetään tietokannassa (Bottiavustus).
 test('lähdekoodissa ei kovakoodattuja numeromuotoja vakion ulkopuolella', () => {
   const SKIP = /(^|\/)(node_modules|\.git|dist|\.cache)(\/|$)|^content\/(site-texts\.|kb\/)|^tests\/fixtures\/|^booking\/shop\/src\/phone\.js$|^booking\/tests\/puhelin\.test\.mjs$|^booking\/supabase\/(migrations|rollbacks)\/|^booking\/docs\/|^docs\/|\.md$|package-lock\.json$|deno\.lock$/;
-  const files = [];
-  const walk = (d) => { for (const n of readdirSync(join(root, d))) { const r = d ? `${d}/${n}` : n; if (SKIP.test(r)) continue; const st = statSync(join(root, r)); if (st.isDirectory()) walk(r); else if (/\.(m?js|ts|json|html|css|sql|yml)$/.test(n)) files.push(r); } };
-  walk('');
+  const files = execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8' }).split('\n').filter((r) => r && !SKIP.test(r) && /\.(m?js|ts|json|html|css|sql|yml)$/.test(r));   // vain versionhallinnassa olevat tiedostot
   const bad = [];
   const isTest = (f) => /(^|\/)(tests?|_tests)\/|\.test\.(m?js|ts)$|^booking\/scripts\/|^booking\/supabase\/functions\/(pdf-golden-cases\.mjs|gift-card-pdf\/test_render\.ts)$/.test(f);
   for (const f of files) {
