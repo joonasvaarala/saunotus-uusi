@@ -5,6 +5,8 @@ import { h, badge, errMsg } from './ui.js';
 import { getLang } from './talous-i18n.js';
 
 import { OPT_TEXTS, otFor, optNameFor, optionOfFor } from './options-logic.js';
+import { loadOptionTexts, optionText } from './options-texts.js';
+import { UNASSIGNED_HREF } from './reservation-query.js';
 export { OPT_TEXTS };
 export const ot = (k, vars) => otFor(getLang(), k, vars);
 export const optName = (o) => optNameFor(o, getLang());
@@ -36,9 +38,11 @@ export async function loadOptionConfig(force = false) {
 }
 export const configLabel = (cfg) => (getLang() === 'en' ? cfg.label_en || cfg.label : cfg.label || cfg.label_en) || (cfg.required ? ot('choose') : ot('optional'));
 // Etusivun muistutus: tulevat hoitovaraukset ilman valittua hoitoa (admin_list_product_options.reservations_without_option). Ei koskaan heitä; null jos ei muistutettavaa.
+// Linkki avaa varauslistan suodatettuna (Hoito valitsematta + Tulevat). Tekstit: ui.admin.options.*, sanakirja varalla.
 export async function optionReminder() {
   let rows; try { rows = (await rpc('admin_list_product_options')) || []; } catch { return null; }
   const n = rows.reduce((a, p) => a + (+p.reservations_without_option || 0), 0);
   if (!n) return null;
-  return h('p', { class: 'opt-reminder', role: 'status', 'data-testid': 'opt-reminder' }, h('span', { class: 'badge warn', text: ot('notChosen') }), ` ${ot('reminder', { n })} `, h('a', { href: '#/varaukset', text: ot('reminderLink') }));
+  await loadOptionTexts(rpc);
+  return h('p', { class: 'opt-reminder', role: 'status', 'data-testid': 'opt-reminder' }, h('span', { class: 'badge warn', text: optionText('ui.admin.options.not_chosen') }), ` ${optionText('ui.admin.options.reminder', { n })} `, h('a', { href: UNASSIGNED_HREF, 'data-testid': 'opt-reminder-link', text: optionText('ui.admin.options.reminder_link') }));
 }

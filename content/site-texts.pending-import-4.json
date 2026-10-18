@@ -1,0 +1,142 @@
+[
+ {
+  "key": "ui.admin.options.not_chosen",
+  "lang": "fi",
+  "text": "valitsematta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinnan hoitomuistutus: merkki valitsematta. Varateksti booking/admin/options-texts.js, kunnes Bottiavustus tuo rivin."
+ },
+ {
+  "key": "ui.admin.options.not_chosen",
+  "lang": "en",
+  "text": "not chosen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinnan hoitomuistutus: merkki valitsematta. Varateksti booking/admin/options-texts.js, kunnes Bottiavustus tuo rivin."
+ },
+ {
+  "key": "ui.admin.options.reminder",
+  "lang": "fi",
+  "text": "{{var:n}} tulevaa hoitovarausta ilman valittua hoitoa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": ["{{var:n}}"],
+  "reason": "Hallinnan päivänäkymän keltainen kortti. Varateksti booking/admin/options-texts.js, kunnes Bottiavustus tuo rivin."
+ },
+ {
+  "key": "ui.admin.options.reminder",
+  "lang": "en",
+  "text": "{{var:n}} upcoming treatment bookings have no treatment chosen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": ["{{var:n}}"],
+  "reason": "Hallinnan päivänäkymän keltainen kortti. Varateksti booking/admin/options-texts.js, kunnes Bottiavustus tuo rivin."
+ },
+ {
+  "key": "ui.admin.options.reminder_link",
+  "lang": "fi",
+  "text": "Avaa varaukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Kortin linkki suodatettuun varauslistaan. Varateksti booking/admin/options-texts.js, kunnes Bottiavustus tuo rivin."
+ },
+ {
+  "key": "ui.admin.options.reminder_link",
+  "lang": "en",
+  "text": "Open bookings",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Kortin linkki suodatettuun varauslistaan. Varateksti booking/admin/options-texts.js, kunnes Bottiavustus tuo rivin."
+ },
+ {
+  "key": "ui.admin.options.filter_legend",
+  "lang": "fi",
+  "text": "Hoito",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Varauslistan hoitosuodattimen otsikko. Varateksti booking/admin/options-texts.js, kunnes Bottiavustus tuo rivin."
+ },
+ {
+  "key": "ui.admin.options.filter_legend",
+  "lang": "en",
+  "text": "Treatment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Varauslistan hoitosuodattimen otsikko. Varateksti booking/admin/options-texts.js, kunnes Bottiavustus tuo rivin."
+ },
+ {
+  "key": "ui.admin.options.filter_all",
+  "lang": "fi",
+  "text": "Kaikki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoitosuodatin: ei rajausta. Varateksti booking/admin/options-texts.js, kunnes Bottiavustus tuo rivin."
+ },
+ {
+  "key": "ui.admin.options.filter_all",
+  "lang": "en",
+  "text": "All",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoitosuodatin: ei rajausta. Varateksti booking/admin/options-texts.js, kunnes Bottiavustus tuo rivin."
+ },
+ {
+  "key": "ui.admin.options.filter_unassigned",
+  "lang": "fi",
+  "text": "Hoito valitsematta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoitosuodatin ja aktiivinen siru. Varateksti booking/admin/options-texts.js, kunnes Bottiavustus tuo rivin."
+ },
+ {
+  "key": "ui.admin.options.filter_unassigned",
+  "lang": "en",
+  "text": "Treatment not chosen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoitosuodatin ja aktiivinen siru. Varateksti booking/admin/options-texts.js, kunnes Bottiavustus tuo rivin."
+ },
+ {
+  "key": "ui.admin.options.filter_clear",
+  "lang": "fi",
+  "text": "Poista",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Aktiivisen suodattimen poistopainike. Varateksti booking/admin/options-texts.js, kunnes Bottiavustus tuo rivin."
+ },
+ {
+  "key": "ui.admin.options.filter_clear",
+  "lang": "en",
+  "text": "Remove",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Aktiivisen suodattimen poistopainike. Varateksti booking/admin/options-texts.js, kunnes Bottiavustus tuo rivin."
+ }
+]

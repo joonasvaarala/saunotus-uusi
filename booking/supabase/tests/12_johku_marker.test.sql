@@ -1,11 +1,11 @@
 -- Johku-merkintä (migraatio 12): admin_list_reservations(+p_source, +source/external_id), admin_day_view(source/external_id), external_meta-sarakkeet.
--- Migraatio 12 on ajettu tuotantoon (Bottiavustus 16.10.2026), mutta sen tiedostoa ei ollut repossa tämän testin kirjoitushetkellä.
--- Jos funktion 8-parametrista versiota ei ole testikannassa, testi ohitetaan (skip) eikä kaada ajoa; lisää migraatiotiedosto → testi aktivoituu.
+-- Migraatio 12 on ajettu tuotantoon (Bottiavustus 16.10.2026). booking_70 lisää 9. argumentin p_option_missing
+-- ja poistaa 8-argumenttisen ylikuorman. Jos 9-argumenttista funktiota ei ole, testi ohitetaan.
 begin;
 set local search_path = extensions, public;
 select no_plan();
 
-select to_regprocedure('booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text)') is not null as has12 \gset
+select to_regprocedure('booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text,boolean)') is not null as has12 \gset
 \if :has12
 
 select test.next_dow(4) as thu, test.rule('Yleinen vuoro to 17–19') as r_thu \gset
@@ -22,15 +22,16 @@ update booking.orders set external_source = 'johku', external_id = 'T-ORD-77', e
 update booking.reservations set external_source = 'johku', external_id = 'T-RES-77', external_meta = '{"johku_status":"paid"}' where id = :rj;
 
 -- rakenne
-select is((select pronargs::int from pg_proc where oid = 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text)'::regprocedure), 8, 'admin_list_reservations: 8 parametria');
-select is((select (proargnames)[8] from pg_proc where oid = 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text)'::regprocedure), 'p_source', 'kahdeksas parametri on p_source');
-select ok((select pg_get_function_result(oid) like '%, total_count bigint, source text, external_id text%' from pg_proc where oid = 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text)'::regprocedure), 'uudet sarakkeet source, external_id ovat vanhojen perässä (migraatio 17c lisää niiden jälkeen lifecycle, space_code, legs, parent_reservation_id)');
-select is((select count(*)::int from pg_proc where pronamespace = 'booking'::regnamespace and proname = 'admin_list_reservations'), 1, 'vanha 7-parametrinen versio on poistettu (ei monitulkintaisia kutsuja)');
+select is((select pronargs::int from pg_proc where oid = 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text,boolean)'::regprocedure), 9, 'admin_list_reservations: 9 parametria');
+select is((select (proargnames)[8] from pg_proc where oid = 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text,boolean)'::regprocedure), 'p_source', 'kahdeksas parametri on p_source');
+select is((select (proargnames)[9] from pg_proc where oid = 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text,boolean)'::regprocedure), 'p_option_missing', 'yhdeksäs parametri on p_option_missing');
+select ok((select pg_get_function_result(oid) like '%, total_count bigint, source text, external_id text%' from pg_proc where oid = 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text,boolean)'::regprocedure), 'uudet sarakkeet source, external_id ovat vanhojen perässä (migraatio 17c lisää niiden jälkeen lifecycle, space_code, legs, parent_reservation_id)');
+select is((select count(*)::int from pg_proc where pronamespace = 'booking'::regnamespace and proname = 'admin_list_reservations'), 1, 'vanha 7- ja 8-parametrinen versio on poistettu (ei monitulkintaisia kutsuja)');
 select is((select data_type from information_schema.columns where table_schema = 'booking' and table_name = 'orders' and column_name = 'external_meta'), 'jsonb', 'orders.external_meta jsonb');
 select is((select data_type from information_schema.columns where table_schema = 'booking' and table_name = 'reservations' and column_name = 'external_meta'), 'jsonb', 'reservations.external_meta jsonb');
-select ok(has_function_privilege('authenticated', 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text)', 'execute'), 'authenticated voi kutsua (funktio tarkistaa staff-roolin)');
-select ok(has_function_privilege('service_role', 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text)', 'execute'), 'service_role voi kutsua');
-select ok(not has_function_privilege('anon', 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text)', 'execute'), 'anon ei voi kutsua');
+select ok(has_function_privilege('authenticated', 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text,boolean)', 'execute'), 'authenticated voi kutsua (funktio tarkistaa staff-roolin)');
+select ok(has_function_privilege('service_role', 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text,boolean)', 'execute'), 'service_role voi kutsua');
+select ok(not has_function_privilege('anon', 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text,boolean)', 'execute'), 'anon ei voi kutsua');
 
 -- anon ei pääse maksutietoihin (external_meta) eikä hallinnan RPC:hen
 select test.anon('10.12.0.2');
@@ -74,7 +75,7 @@ select ok(position('verkkomaksu' in booking.admin_day_view(:'thu')::text) = 0, '
 select test.logout();
 
 \else
-select skip('migraatio 12 (admin_list_reservations p_source) puuttuu testikannasta: Johku-merkintätestit ohitetaan', 1);
+select skip('admin_list_reservations (9 argumenttia, p_source + p_option_missing) puuttuu testikannasta: Johku-merkintätestit ohitetaan', 1);
 \endif
 
 select * from finish();
