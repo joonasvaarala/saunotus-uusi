@@ -10,7 +10,7 @@ import { createGiftApi } from './gift-api.js';
 import { redeemSection, claimsSection } from './order-gift.js';
 import { h, makeFmt } from './gift-ui.js';
 import { pt } from './pay-choices-texts.js';
-import { ht } from './hold-texts.js';
+import { ht, payLaterError } from './hold-texts.js';
 
 const PAYABLE = ['confirmed', 'pending'];
 let seq = 0;
@@ -28,13 +28,13 @@ export async function loadPayChoices({ rpc, token = null, fetchImpl, cfg = (type
   const opts = normOptions(o);
   const redeem = !!(pk?.ok && pk.redeem_enabled);
   const vc = redeem ? await gapi.orderClaims(token).catch(() => null) : null;   // kumppanilahjakortit (§13.12): pyynnöt vain kun lunastus käytössä
-  return { env, mp, gapi, opts, mpShow: shouldShowButton(opts, env), redeem, claims: vc?.ok && Array.isArray(vc.claims) ? vc.claims : [] };
+  return { env, mp, gapi, opts, payLater: opts.payLater || null, mpShow: shouldShowButton(opts, env), redeem, claims: vc?.ok && Array.isArray(vc.claims) ? vc.claims : [] };
 }
 
-// Mitä asiakkaalle voidaan tarjota: { mobilepay, gift, claims } (booking = public_get_booking-vastaus)
+// Mitä asiakkaalle voidaan tarjota: { mobilepay, gift, claims, payLater } (booking = public_get_booking-vastaus). payLater = booking_57-testivaihtoehto: vain kun palvelin listasi pay_later-tavan (ei env.testUi-ehtoa)
 export function offers(model, booking) {
   const payable = !!booking && PAYABLE.includes(booking.status) && booking.payment_status !== 'paid' && booking.checkout_state !== 'preliminary' && booking.checkout_state !== 'expired';   // alustavaa varausta ei makseta (order_preliminary)
-  return { mobilepay: payable && model.mpShow, gift: payable && model.redeem, claims: !!booking && model.claims.length > 0 };
+  return { mobilepay: payable && model.mpShow, gift: payable && model.redeem, claims: !!booking && model.claims.length > 0, payLater: payable && !!model.payLater };
 }
 // Maksettava jäljellä: ensisijaisesti palvelimen public_payment_options.order.unpaid; muuten total - paid; muuten null (summaa ei näytetä)
 export function dueAmount(model, booking) {
@@ -49,16 +49,36 @@ export const onlineAvailable = (model) => !!model && (model.mpShow || model.rede
 // Kassa (ennen varausta, ei tokenia): tieto vain siitä että verkkomaksutapa on käytössä (MobilePay-tapa; testitila vain testiympäristössä) tai lahjakortin käyttö on päällä
 export const onlineAtCheckout = (model) => !!model && !!((model.opts?.method && (model.opts.method.test !== true || model.env.testUi)) || model.redeem);
 
+// booking_57: "Testivaihtoehto: maksu paikan päällä". Nappi kutsuu palvelimen ilmoittamaa confirm_rpc:tä (public_confirm_pay_later) order_token:illa.
+// Onnistuessa (ok:true, checkout_state confirmed_unpaid) kutsutaan onPayLater(vastaus) → sivu latautuu uudelleen ja näyttää vahvistetun, maksamattoman tilan. Virheillä ystävällinen FI/EN-viesti (role=alert); nappi pois käytöstä kesken pyynnön (ei tuplaklikkiä).
+function payLaterBlock({ L, model, onPayLater, onHoldError }) {
+  const msg = h('p', { class: 'bk-error pc-paylater-msg', role: 'alert', hidden: true, 'data-testid': 'pc-paylater-error' });
+  let busy = false;
+  const btn = h('button', { type: 'button', class: 'btn light ord-btn pc-paylater-btn', 'data-testid': 'pc-paylater-btn', text: ht(L, 'payLater.btn'),
+    onclick: async () => {
+      if (busy) return;
+      busy = true; btn.disabled = true; btn.setAttribute('aria-busy', 'true'); btn.textContent = ht(L, 'payLater.working'); msg.hidden = true; msg.textContent = '';
+      const r = await model.mp.confirmPayLater(model.payLater.confirmRpc);
+      if (r && r.ok === true) { if (onPayLater) onPayLater(r); return; }   // sivu päivittyy; nappi jää pois käytöstä
+      const code = r && r.code;
+      msg.textContent = payLaterError(L, code); msg.hidden = false;
+      busy = false; btn.removeAttribute('aria-busy'); btn.textContent = ht(L, 'payLater.btn');
+      btn.disabled = code === 'pay_later_unavailable' || code === 'order_cancelled' || code === 'order_expired';   // ei järkeä yrittää uudelleen
+      if (['order_expired', 'order_cancelled', 'payment_in_progress', 'not_found'].includes(code) && onHoldError) onHoldError(code);   // hae tila uudelleen (laskuri/vanhentunut-näkymä)
+    } });
+  return h('div', { class: 'pc-opt pc-paylater', 'data-testid': 'pc-paylater' }, btn, h('p', { class: 'bk-note pc-paylater-note', text: ht(L, 'payLater.text') }), msg);
+}
+
 // Osio. h = DOM-apuri; handlers: onApplied(text) / onClaimed({text, extra}) / onChanged(...) → sivu lataa varauksen uudelleen ja näyttää ilmoituksen.
 /* Ilmoitus maksusta (lahjakortti käytetty). Näytetään myös kun maksuosio poistuu, koska tilaus tuli kokonaan maksetuksi. */
 export function payNotice(L, notice) {
   return h('p', { class: 'bk-ok', role: 'status', tabindex: '-1', 'data-testid': 'pc-notice' }, h('strong', { text: `${notice.title || pt(L, 'noticeTitle')}. ` }), notice.text || '', notice.extra ? ` ${notice.extra}` : '');
 }
 
-export function payChoicesSection({ S, L, token, model, booking, onApplied, onClaimed, onChanged, notice = null, hold = false, holdMinutes = 15, onHoldError = null }) {
+export function payChoicesSection({ S, L, token, model, booking, onApplied, onClaimed, onChanged, onPayLater = null, notice = null, hold = false, onHoldError = null }) {
   const F = makeFmt(L), tx = (k, v) => pt(L, k, v);
   const of = offers(model, booking);
-  if (!of.mobilepay && !of.gift && !of.claims) return null;
+  if (!of.mobilepay && !of.gift && !of.claims && !of.payLater) return null;
   const due = dueAmount(model, booking);
   const id = `pc-${++seq}`;
   const kids = [h('h3', { id: `${id}-t`, text: tx('title') })];
@@ -68,7 +88,6 @@ export function payChoicesSection({ S, L, token, model, booking, onApplied, onCl
   }
   const claimNotice = notice && notice.kind === 'claim' && of.claims ? { ok: true, text: notice.text, extra: notice.extra } : null;   // lunastuspyynnön vahvistus näytetään pyyntölistan yläosassa (kuten tilaussivulla)
   if (notice && !claimNotice) kids.push(payNotice(L, notice));
-  if (hold && model.env?.testUi && (of.mobilepay || of.gift)) kids.push(h('div', { class: 'pc-opt pc-test', 'data-testid': 'pc-onsite-test' }, h('strong', { text: ht(L, 'testOnSite.title') }), h('p', { class: 'bk-note', text: ht(L, 'testOnSite.text', { minutes: holdMinutes }) })));   // pay_later-testivaihtoehto: vain testitilassa ja merkitty testiksi
   if (of.mobilepay) kids.push(h('div', { class: 'pc-opt', 'data-testid': 'pc-mobilepay' }, payBlock({ S, L, api: model.mp, opts: model.opts, env: model.env, onFail: onHoldError ? (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) onHoldError(code); } : null })));
   if (of.gift) {
     const panel = h('div', { class: 'pc-gift-panel', id: `${id}-g`, hidden: true, 'data-testid': 'pc-gift-panel' },
@@ -77,6 +96,7 @@ export function payChoicesSection({ S, L, token, model, booking, onApplied, onCl
       onclick: () => { const open = panel.hidden; panel.hidden = !open; btn.setAttribute('aria-expanded', String(open)); btn.textContent = tx(open ? 'giftBtnClose' : 'giftBtn'); if (open) panel.querySelector('input')?.focus(); } });
     kids.push(h('div', { class: 'pc-opt', 'data-testid': 'pc-gift' }, btn, panel));
   }
+  if (of.payLater) kids.push(payLaterBlock({ L, model, onPayLater, onHoldError }));   // booking_57: oikea nappi (ei enää pelkkä tietolaatikko); näkyy vain kun palvelin listaa pay_later-tavan
   if (of.claims) kids.push(claimsSection({ S, L, api: model.gapi, token, claims: model.claims, notice: claimNotice, onChanged }));
   return h('section', { class: 'bk-paychoices ord-card', 'aria-labelledby': `${id}-t`, 'data-testid': 'pay-choices' }, kids);
 }

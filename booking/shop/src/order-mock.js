@@ -1,8 +1,8 @@
 // Asiakkaan tilaussivun MOCK-PALVELIN (vaihe A): keksitty tilaus muistissa; ei tallenna mitään palvelimelle. Käytössä vain kun osoitteessa on ?mock=1.
 // createOrderMock().rpc(nimi, parametrit) vastaa KOODARI_talous_A_D_fi.md -sopimuksen public_*-RPC:itä (nimet, p_-parametrit, vastausrakenteet, virheet {ok:false, code, message}).
 import { createGiftMock } from './gift-mock.js';
-import { createHoldEngine, isHoldScenario, HOLD_ERRORS } from './hold-mock.js';
-export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftSettings = {}, holdSeconds = 900, serverSkew = 0, procSeconds = 10, storage = globalThis.sessionStorage, locale = 'fi', today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }) } = {}) {
+import { createHoldEngine, isHoldScenario, HOLD_ERRORS, PAY_LATER_METHOD } from './hold-mock.js';
+export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftSettings = {}, holdSeconds = 900, serverSkew = 0, procSeconds = 10, payLaterTest = false, payLaterFail = '', storage = globalThis.sessionStorage, locale = 'fi', today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }) } = {}) {
   const day = (n) => { const d = new Date(`${today}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
   const wait = () => (delay ? new Promise((ok) => setTimeout(ok, delay)) : Promise.resolve());
   const r2 = (n) => Math.round(n * 100) / 100;
@@ -71,16 +71,34 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
   const hold = isHoldScenario(scenario) ? createHoldEngine({ scenario, holdSeconds, skew: serverSkew, procSeconds, storage, ctx: { o, sync, mp, mpMarkPaid, r2 } }) : null;
   const snap = () => { hold?.tick(); return JSON.parse(JSON.stringify({ ok: true, ...o, ...(hold ? hold.json() : {}) })); };
   const bad = (code, message) => ({ ok: false, code, message });
+  const plOffered = () => !!hold && payLaterTest && hold.json().checkout_state === 'awaiting_payment';
+  const withPayLater = (r) => (plOffered() ? { ...r, methods: [...(r.methods || []), PAY_LATER_METHOD] } : r);
+  let plFailLeft = payLaterFail;   // plfail=<koodi>: ensimmäinen vahvistus epäonnistuu tällä koodilla (esim. order_expired)
+  const PL_MSG = { pay_later_unavailable: 'Maksa myöhemmin -vaihtoehto ei ole käytössä', payment_in_progress: 'Maksu on kesken – odota hetki ja yritä uudelleen', order_expired: 'Varauksen pito on päättynyt', order_cancelled: 'Varaus on peruttu', not_found: 'Tilausta ei löytynyt', rate_limited: 'Liian monta yritystä' };
+  function confirmPayLater(token) {   // public_confirm_pay_later (booking_57): sama virhekoodijärjestys kuin palvelimella
+    if (!hold || !payLaterTest) return bad('pay_later_unavailable', PL_MSG.pay_later_unavailable);
+    if (!token) return bad('not_found', PL_MSG.not_found);
+    if (plFailLeft) { const c = plFailLeft; plFailLeft = ''; return bad(c, PL_MSG[c] || 'Virhe'); }
+    const st = hold.json().checkout_state;
+    if (st === 'confirmed' || st === 'confirmed_unpaid') return { ok: true, pay_later: st === 'confirmed_unpaid', idempotent: true, order_id: 15321, order_no: o.order_no, status: o.status, payment_status: o.payment_status, ...hold.json() };
+    if (st === 'processing_payment' || st === 'preliminary') return { ...bad('payment_in_progress', PL_MSG.payment_in_progress), ...hold.json() };
+    if (st === 'expired') return { ...bad('order_expired', PL_MSG.order_expired), ...hold.json() };
+    if (st === 'cancelled') return { ...bad('order_cancelled', PL_MSG.order_cancelled), ...hold.json() };
+    o.status = 'confirmed'; sync();   // pito poistuu, paikka säilyy, maksamatta
+    return { ...hold.json(), ok: true, pay_later: true, idempotent: false, order_id: 15321, order_no: o.order_no, status: o.status, payment_status: o.payment_status };
+  }
   const handlers = {
     public_get_order: ({ p_token }) => {
       if (mp.returning && mpResult === 'netfail') throw new TypeError('Failed to fetch');
       if (mp.returning && !mp.settled && ['paid', 'review'].includes(mpResult || 'paid') && ++mp.polls >= 3) mpMarkPaid();
       return p_token === TOKEN || p_token ? snap() : bad('not_found', 'Tilausta ei löytynyt');
     },
-    public_payment_options: ({ p_token }) => (mpScenario && mpScenario !== 'mp-off'
+    // booking_57: pay_later (testi) vain pitoskenaarioissa, kun testui != 0 ja tilaus odottaa maksua (kuten palvelin: lippu päällä + awaiting_payment)
+    public_payment_options: ({ p_token }) => withPayLater(mpScenario && mpScenario !== 'mp-off'
       ? { ok: true, online_enabled: true, methods: [{ code: 'mobilepay', provider: 'vipps_mobilepay', label: 'MobilePay', label_en: 'MobilePay', test: mpScenario !== 'mp-prod', start: { function: 'mobilepay-start', method: 'POST', body: { order_token: p_token } } }],
         order: { order_no: o.order_no, status: o.status, payment_status: o.payment_status, unpaid: o.unpaid, can_pay_online: o.unpaid > 0 && ['pending', 'confirmed'].includes(o.status), mobilepay_pending: mp.started && o.unpaid > 0 } }
       : { ok: true, online_enabled: false, methods: [] }),
+    public_confirm_pay_later: ({ p_order_token }) => confirmPayLater(p_order_token),
     // §14.7 (booking_52): kassan maksutavat ilman tokenia; MobilePay mp-skenaarion mukaan, lahjakortti gift-mockin redeem_enabled-asetuksesta
     public_checkout_payment_options: () => {
       const mpOn = !!mpScenario && mpScenario !== 'mp-off', gc = !!gm.handlers.public_gift_card_packages().redeem_enabled;

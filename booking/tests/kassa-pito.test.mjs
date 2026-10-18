@@ -45,12 +45,11 @@ test('tekstit: Joonaksen sanamuodot kirjaimellisesti (ohje + vanhentunut + lahja
   assert.ok(ht('fi', 'expired', { minutes: 20 }).includes('20 minuutin'), 'pidon pituus tulee asetuksesta');
 });
 test('tekstit: 15 min -maksuohje (Joonaksen teksti), otsikko "Varauksesi odottaa maksua", testivaihtoehto merkitty testiksi', () => {
-  assert.equal(ht('fi', 'mustPay', { minutes: 15 }), 'Varaus täytyy maksaa 15 minuutin sisään, muuten se peruuntuu ja paikka vapautuu. Varaus vahvistuu, kun koko summa on maksettu.');
-  assert.equal(ht('en', 'mustPay', { minutes: 15 }), 'The booking must be paid within 15 minutes, otherwise it is cancelled and your spot is released. The booking is confirmed once the full amount is paid.');
+  assert.equal(ht('fi', 'mustPay', { minutes: 15 }), 'Varaus täytyy maksaa 15 minuutin sisään, muuten se peruuntuu ja paikka vapautuu.');
+  assert.equal(ht('en', 'mustPay', { minutes: 15 }), 'The booking must be paid within 15 minutes, otherwise it is cancelled and your spot is released.');
   assert.equal(ht('fi', 'h2.awaiting'), 'Varauksesi odottaa maksua'); assert.equal(ht('en', 'h2.awaiting'), 'Your booking is awaiting payment');
-  assert.ok(/testi/i.test(ht('fi', 'testOnSite.title')) && /test/i.test(ht('en', 'testOnSite.title')));
-  const shop = src('../shop/src/shop.js'), pc = src('../shop/src/pay-choices.js');
-  assert.ok(shop.includes("'h2.awaiting'") && pc.includes('hold && model.env?.testUi'), 'otsikko + testivaihtoehto vain pitotilassa ja testitilassa');
+  assert.ok(/testi/i.test(ht('fi', 'payLater.btn')) && /test/i.test(ht('en', 'payLater.btn')));
+  assert.ok(src('../shop/src/shop.js').includes("'h2.awaiting'"), 'otsikko pitotilassa');
 });
 test('virhekoodit: online_payment_unavailable / order_expired / order_preliminary / payment_in_progress selkeinä FI+EN (myös lahjakortti- ja MobilePay-teksteissä)', () => {
   for (const c of ['online_payment_unavailable', 'order_expired', 'order_preliminary', 'payment_in_progress']) {
@@ -156,7 +155,7 @@ test('normOrder / normCheckoutOptions: pitokentät läpi; vanha vastaus → null
 test('offers: alustavaa ja vanhentunutta ei makseta; odottava ja vahvistettu maksamatta saa maksutavat', () => {
   const model = { mpShow: true, redeem: true, claims: [] };
   const b = (s, over = {}) => ({ status: s === 'expired' ? 'expired' : s === 'confirmed_unpaid' ? 'confirmed' : 'pending', payment_status: 'unpaid', checkout_state: s, ...over });
-  assert.deepEqual(offers(model, b('awaiting_payment')), { mobilepay: true, gift: true, claims: false });
+  assert.deepEqual(offers(model, b('awaiting_payment')), { mobilepay: true, gift: true, claims: false, payLater: false });
   assert.equal(offers(model, b('confirmed_unpaid')).mobilepay, true);
   assert.equal(offers(model, b('preliminary')).mobilepay, false); assert.equal(offers(model, b('preliminary')).gift, false);
   assert.equal(offers(model, b('expired')).mobilepay, false);
@@ -168,8 +167,8 @@ const om = (scenario, extra = {}) => createOrderMock({ scenario, storage: memSto
 test('mock: skenaarioiden tunnistus ja parametrit', () => {
   for (const s of ['hold', 'hold-partial', 'hold-processing', 'hold-preliminary', 'hold-confirmed', 'hold-unpaid', 'hold-expired', 'hold-expired-gift', 'hold-cancelled', 'hold-unavailable']) assert.ok(isHoldScenario(s), s);
   for (const s of ['', 'pay', 'mp', 'hold-foo', 'holdx']) assert.ok(!isHoldScenario(s), s);
-  assert.deepEqual(holdMockParams('?mock=1&holdsec=20&serverskew=3600&procsec=3'), { holdSeconds: 20, serverSkew: 3600, procSeconds: 3 });
-  assert.deepEqual(holdMockParams('?mock=1&holdsec=abc&holdsec=0'), { holdSeconds: 900, serverSkew: 0, procSeconds: 10 });
+  assert.deepEqual(holdMockParams('?mock=1&holdsec=20&serverskew=3600&procsec=3'), { holdSeconds: 20, serverSkew: 3600, procSeconds: 3, payLaterTest: true, payLaterFail: '' });
+  assert.deepEqual(holdMockParams('?mock=1&holdsec=abc&holdsec=0'), { holdSeconds: 900, serverSkew: 0, procSeconds: 10, payLaterTest: true, payLaterFail: '' });
 });
 test('mock: tilat vastaavat palvelimen checkout_state-arvoja', async () => {
   const get = async (sc, extra) => (await om(sc, extra).rpc('public_get_order', { p_token: TOKEN }));

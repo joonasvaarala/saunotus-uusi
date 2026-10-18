@@ -2,8 +2,8 @@
 **Tila: EHDOTUS – ei julkaistu. Joonas hyväksyy ennen käyttöä.** Laskuri näytetään muodossa `mm:ss`.
 
 ## Ohjeteksti (laskurin yllä, tilaussivu / maksuvaihe)
-- **FI:** Paikkavaraus on voimassa 15 minuuttia, kunnes varaus maksetaan tai voimassa olevan lahjakortin tiedot syötetään. Varaus vahvistuu, kun koko summa on maksettu.
-- **EN:** Your spot is held for 15 minutes, until the booking is paid or a valid gift card is applied. The booking is confirmed once the full amount is covered.
+- **FI:** Paikkavaraus on voimassa 15 minuuttia, kunnes varaus maksetaan tai voimassa olevan lahjakortin tiedot syötetään.
+- **EN:** Your spot is held for 15 minutes, until the booking is paid or a valid gift card is applied.
 
 ## Laskuri
 - **FI:** Paikkaa pidetään vielä **{mm:ss}**
@@ -37,6 +37,6 @@ Asiakas saa vahvistusviestin ja kuitit vasta kun koko summa on katettu. Ennen si
 
 ## Lisäys 18.10.2026 (Joonas): maksuohje ja otsikko
 
-* Maksuohje (tilarivin alla, maksuosion yläpuolella, kun `checkout_state = awaiting_payment`): FI "Varaus täytyy maksaa 15 minuutin sisään, muuten se peruuntuu ja paikka vapautuu. Varaus vahvistuu, kun koko summa on maksettu." / EN "The booking must be paid within 15 minutes, otherwise it is cancelled and your spot is released. The booking is confirmed once the full amount is paid."
+* Maksuohje (tilarivin alla, maksuosion yläpuolella, kun `checkout_state = awaiting_payment`): FI "Varaus täytyy maksaa 15 minuutin sisään, muuten se peruuntuu ja paikka vapautuu." / EN "The booking must be paid within 15 minutes, otherwise it is cancelled and your spot is released."
 * Otsikko maksamattomalle varaukselle: FI "Varauksesi odottaa maksua" / EN "Your booking is awaiting payment" (ei "Kiitos varauksesta!" ennen maksua).
-* Maksu paikan päällä pitotilassa: vain testitilassa ja merkittynä testivaihtoehdoksi; tuotannossa ei.
+* Maksu paikan päällä pitotilassa: vain "Testivaihtoehto: maksu paikan päällä" -nappina, kun palvelin tarjoaa sen (booking_57, lippu `pay_later_test_enabled`); tuotannossa lippu on pois päältä, jolloin nappia ei näy. Loppulause poistettu Joonaksen pyynnöstä 18.10.2026.

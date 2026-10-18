@@ -5,10 +5,19 @@ export const HT = {
     'title.awaiting': 'Maksa varaus vahvistaaksesi', 'title.processing': 'Maksua käsitellään', 'title.preliminary': 'Alustava varaus', 'title.expired': 'Paikkavaraus vanheni',
     'status.awaiting': 'Varaus odottaa maksua', 'status.processing': 'Maksua käsitellään', 'status.preliminary': 'Alustava varaus', 'status.expired': 'Paikkavaraus vanheni',
     lead: 'Paikkavaraus on voimassa {minutes} minuuttia, kunnes varaus maksetaan tai voimassa olevan lahjakortin tiedot syötetään.',
-    confirmRule: 'Varaus vahvistuu, kun koko summa on maksettu.',
-    mustPay: 'Varaus täytyy maksaa {minutes} minuutin sisään, muuten se peruuntuu ja paikka vapautuu. Varaus vahvistuu, kun koko summa on maksettu.',
+    mustPay: 'Varaus täytyy maksaa {minutes} minuutin sisään, muuten se peruuntuu ja paikka vapautuu.',
     'h2.awaiting': 'Varauksesi odottaa maksua',
-    'testOnSite.title': 'Testivaihtoehto: maksu paikan päällä', 'testOnSite.text': 'Näkyy vain testiympäristössä, ei tuotannossa. Paikka vapautuu silti, ellei varausta makseta verkossa {minutes} minuutin sisään.',
+    // Testivaihtoehto "maksu paikan päällä" (booking_57, public_confirm_pay_later): nappi näkyy vain kun palvelin listaa pay_later-tavan (pay_later_test_enabled)
+    'payLater.btn': 'Testivaihtoehto: maksu paikan päällä', 'payLater.working': 'Vahvistetaan varausta…',
+    'payLater.text': 'Vain testikäyttöön. Varaus vahvistetaan nyt maksamattomana, eikä mitään veloiteta verkossa. Maksu hoidetaan paikan päällä.',
+    'payLater.done': 'Maksamatta – maksu paikan päällä.',
+    'payLater.err.pay_later_unavailable': 'Testivaihtoehto ei ole käytössä juuri nyt. Valitse jokin muu maksutapa.',
+    'payLater.err.payment_in_progress': 'Maksusi on kesken. Odota hetki ja yritä uudelleen.',
+    'payLater.err.order_expired': 'Paikkavaraus on vanhentunut. Tee uusi varaus.',
+    'payLater.err.order_cancelled': 'Varaus on peruttu. Tee tarvittaessa uusi varaus.',
+    'payLater.err.not_found': 'Varausta ei löytynyt. Päivitä sivu tai tee uusi varaus.',
+    'payLater.err.rate_limited': 'Liian monta yritystä. Yritä hetken kuluttua uudelleen.',
+    'payLater.err.generic': 'Varauksen vahvistaminen ei onnistunut. Tarkista yhteys ja yritä uudelleen.',
     timerLabel: 'Paikkaa pidetään vielä', timerChecking: 'Tarkistamme paikkavarauksen tilaa…',
     'announce.minutes': 'Paikkaa pidetään vielä {time}.', spoken_min1: '1 minuutti', spoken_min: '{n} minuuttia', spoken_sec: '{n} sekuntia',
     choose: 'Valitse maksutapa: MobilePay tai lahjakortti. Lahjakortti voi kattaa osan summasta – loppuosan voit maksaa MobilePaylla.',
@@ -37,10 +46,18 @@ export const HT = {
     'title.awaiting': 'Pay to confirm your booking', 'title.processing': 'Processing your payment', 'title.preliminary': 'Provisional booking', 'title.expired': 'Your spot hold expired',
     'status.awaiting': 'Booking awaiting payment', 'status.processing': 'Processing your payment', 'status.preliminary': 'Provisional booking', 'status.expired': 'Your spot hold expired',
     lead: 'Your spot is held for {minutes} minutes, until the booking is paid or the details of a valid gift card are entered.',
-    confirmRule: 'The booking is confirmed once the full amount is covered.',
-    mustPay: 'The booking must be paid within {minutes} minutes, otherwise it is cancelled and your spot is released. The booking is confirmed once the full amount is paid.',
+    mustPay: 'The booking must be paid within {minutes} minutes, otherwise it is cancelled and your spot is released.',
     'h2.awaiting': 'Your booking is awaiting payment',
-    'testOnSite.title': 'Test option: pay on site', 'testOnSite.text': 'Shown in the test environment only, not in production. Your spot is still released unless the booking is paid online within {minutes} minutes.',
+    'payLater.btn': 'Test option: pay on site', 'payLater.working': 'Confirming your booking…',
+    'payLater.text': 'For testing only. Your booking is confirmed now as unpaid, and nothing is charged online. You pay on site.',
+    'payLater.done': 'Unpaid – payment on site.',
+    'payLater.err.pay_later_unavailable': 'The test option is not available right now. Please choose another payment method.',
+    'payLater.err.payment_in_progress': 'Your payment is in progress. Please wait a moment and try again.',
+    'payLater.err.order_expired': 'This hold has expired. Please make a new booking.',
+    'payLater.err.order_cancelled': 'This booking has been cancelled. Please make a new booking if needed.',
+    'payLater.err.not_found': 'We could not find this booking. Please refresh the page or make a new booking.',
+    'payLater.err.rate_limited': 'Too many attempts. Please try again in a moment.',
+    'payLater.err.generic': 'We could not confirm your booking. Please check your connection and try again.',
     timerLabel: 'Your spot is held for', timerChecking: 'Checking the status of your hold…',
     'announce.minutes': 'Your spot is held for {time} more.', spoken_min1: '1 minute', spoken_min: '{n} minutes', spoken_sec: '{n} seconds',
     choose: 'Choose how to pay: MobilePay or gift card. A gift card can cover part of the amount – you can pay the rest with MobilePay.',
@@ -66,6 +83,9 @@ export const HT = {
 };
 const fill = (s, v) => String(s).replace(/\{(\w+)\}/g, (_, k) => (v && v[k] != null ? v[k] : `{${k}}`));
 export const ht = (lang, key, vars) => fill((HT[lang] || HT.fi)[key] ?? HT.fi[key] ?? key, vars);
+// booking_57: pay_later-virhekoodi → ystävällinen viesti (tuntematon koodi / verkkovirhe → yleisviesti)
+export const PAY_LATER_ERRORS = ['pay_later_unavailable', 'payment_in_progress', 'order_expired', 'order_cancelled', 'not_found', 'rate_limited'];
+export const payLaterError = (lang, code) => ht(lang, PAY_LATER_ERRORS.includes(code) ? `payLater.err.${code}` : 'payLater.err.generic');
 export const HOLD_ERROR_CODES = ['online_payment_unavailable', 'order_expired', 'order_preliminary', 'payment_in_progress', 'too_many_pending'];
 // Virhekoodi → selkeä teksti (undefined jos koodi ei ole pitovirhe: kutsuja käyttää omaa käsittelyään)
 export const holdError = (lang, code) => (HT.fi[`err.${code}`] ? ht(lang, `err.${code}`) : undefined);
