@@ -38,19 +38,23 @@ export const POLICY = {
 };
 export const KB_IDS = [10, 11, 12, 8, 7];        // näytetään tässä järjestyksessä (tuntematon id → loppuun, ks. splitCatalog)
 // Pakettituote kb 7 "Saunarituaali ja savusaunavuoro (la & su)" (booking_58, sopimus §17.11): sama aikavarauspolku kuin hoidoilla (slots, ruudukko 30 min), EI hoitovalitsinta.
-// Aikajana alusta (min): rituaali 0–20 (Rauni), tauko 20–30, savusauna 30–120. Palvelin ei (vielä) palauta jaksoja, joten jaksot ovat tässä yhdessä paikassa;
-// kokonaiskesto = ends_at − starts_at palvelimelta (120 min). Muuttuessa muutetaan vain tätä taulukkoa (ja tr.timeline-tekstejä i18n.js:ssä).
+// Asiakkaalle näkyvä aikajana: vain rituaali ja savusauna (sisäistä taukoa ei näytetä). Jakso = kenttäpohjainen rivi { key, start, min }:
+//   key = jakson nimi (i18n tr.tl[key]), start = alkaa N min varauksen alusta (puuttuessa edellisen jakson loppu), min = kesto minuutteina (myös palkin suhde).
+// Rituaali 0–20 (Rauni), savusauna alkaa +30 (kuten backend: savusaunaosa alkaa +30 min ja kestää 90 min) ja päättyy +120. Väli 20–30 on sisäinen eikä näy
+// jaksona, palkissa eikä tekstissä; kokonaiskesto 120 min ja loppuaika = alku + 2 h tulevat palvelimelta (ends_at − starts_at).
+// Palvelin ei (vielä) palauta jaksoja → ne ovat tässä yhdessä paikassa; kun public_catalog() palauttaa saman muotoisen kentän, vaihda vain timelineOf().
 export const PACKAGE_TIMELINES = {
-  7: [{ key: 'ritual', min: 20 }, { key: 'break', min: 10 }, { key: 'smoke', min: 90 }],
+  7: [{ key: 'ritual', start: 0, min: 20 }, { key: 'smoke', start: 30, min: 90 }],
 };
 export const isPackage = (p) => !!PACKAGE_TIMELINES[p?.id];
 export const timelineOf = (p) => PACKAGE_TIMELINES[p?.id] || null;
-export const timelineMinutes = (p) => (timelineOf(p) || []).reduce((a, x) => a + x.min, 0);
-// Aikajanan jaksot kellonaikoina alkuajasta: [{ key, min, from: 'HH:MM', to: 'HH:MM' }] (Helsingin aika)
+// Kokonaiskesto jaksoista = viimeisen jakson loppu (alusta); sisäinen väli lasketaan mukaan (rituaali 20 + väli 10 + savusauna 90 = 120)
+export const timelineMinutes = (p) => (timelineOf(p) || []).reduce((end, x) => Math.max(end, (x.start ?? end) + x.min), 0);
+// Aikajanan jaksot kellonaikoina alkuajasta: [{ key, start, min, from: 'HH:MM', to: 'HH:MM' }] (Helsingin aika)
 export function timelineSlots(p, startIso) {
   const tl = timelineOf(p); if (!tl || !startIso) return [];
-  let at = new Date(startIso).getTime();
-  return tl.map((x) => { const from = hmKey(new Date(at).toISOString()); at += x.min * 60e3; return { ...x, from, to: hmKey(new Date(at).toISOString()) }; });
+  const t0 = new Date(startIso).getTime(); let end = 0;
+  return tl.map((x) => { const start = x.start ?? end; end = start + x.min; return { ...x, start, from: hmKey(new Date(t0 + start * 60e3).toISOString()), to: hmKey(new Date(t0 + end * 60e3).toISOString()) }; });
 }
 export const horizonDays = (settings) => +settings?.public_treatment_horizon_days || POLICY.horizonDays;
 export const isRitual = (p) => p?.id === 8 || p?.category === 'ritual';

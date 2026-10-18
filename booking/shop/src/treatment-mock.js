@@ -14,9 +14,9 @@ export const PRODUCTS = {
   11: { name: 'Saunotus', minutes: 120, min: 1, max: 2, base: 210, extra: 60, included: 1, type: 'plus' },
   12: { name: 'Syväsaunotus', minutes: 180, min: 1, max: 2, base: 290, extra: 70, included: 1, type: 'plus' },
   8: { name: 'Saunotusrituaali', minutes: 20, min: 1, max: 6, base: 20, extra: 0, included: 0, type: 'person' },
-  // Pakettituote (booking_58, sopimus §17.11): rituaali 0–20 min (Rauni, jaettu rituaalipooli kuten kb 8), tauko 20–30, savusauna 30–120 (ei mallinneta mockissa); la–su, alkuajat 16:00/16:30/17:00; EI hoitovalitsinta
+  // Pakettituote (booking_58, sopimus §17.11): rituaali 0–20 min (Rauni, jaettu rituaalipooli kuten kb 8), sisäinen väli 20–30 (ei näy asiakkaalle), savusauna 30–120 (ei mallinneta mockissa); la–su, alkuajat 16:00/16:30/17:00; EI hoitovalitsinta
   7: { name: 'Saunarituaali ja savusaunavuoro (la & su)', name_en: 'Sauna Ritual & Smoke Sauna Session', minutes: 120, ritualMinutes: 20, min: 1, max: 6, base: 49, extra: 0, included: 0, type: 'person', category: 'ritual',
-    duration_text: 'rituaali 20 min + tauko 10 min + savusauna 1 h 30 min (yhteensä 2 h)' },
+    duration_text: 'rituaali 20 min + tauko 10 min + savusauna 1 h 30 min (yhteensä 2 h)' },   // = tuotannon rivi (tests/fixtures/prod-package-7.json); EI näy asiakkaalle (paketilla kesto ja aikajana tulevat PACKAGE_TIMELINES:sta) – päivitetään kannassa
 };
 const isRit = (id) => id === 7 || id === 8;   // rituaalipooli (Rauni, yht. max 6 hlö samaan aikaan)
 // Rauni-ikkuna (ms): rituaali ja paketin rituaaliosa 20 min, hoidot ja saunotus koko kesto

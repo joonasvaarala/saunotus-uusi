@@ -93,26 +93,30 @@ test('saatavuusvirhe (busy / bad_range) heitetään ApiErrorina; ei hiljaa tyhj�
 });
 
 // ---- aikajana ----
-test('aikajana: rituaali 20 · tauko 10 · savusauna 90 = 120 min; vain kb 7', () => {
-  assert.deepEqual(A.timelineOf({ id: 7 }).map((x) => [x.key, x.min]), [['ritual', 20], ['break', 10], ['smoke', 90]]);
+test('aikajana: rituaali 20 (alku 0) · savusauna 90 (alku 30) = 120 min, ei taukojaksoa; vain kb 7', () => {
+  assert.deepEqual(A.timelineOf({ id: 7 }).map((x) => [x.key, x.start, x.min]), [['ritual', 0, 20], ['smoke', 30, 90]]);
+  assert.ok(!A.timelineOf({ id: 7 }).some((x) => x.key === 'break'), 'taukoa ei ole asiakkaalle näkyvänä jaksona');
+  assert.equal(A.timelineOf({ id: 7 }).reduce((a, x) => a + x.min, 0), 110, 'näkyvät jaksot 20 + 90 (väli 10 min on sisäinen)');
   assert.equal(A.timelineMinutes({ id: 7 }), 120); assert.equal(A.isPackage({ id: 7 }), true);
   for (const id of [8, 10, 11, 12]) { assert.equal(A.isPackage({ id }), false); assert.equal(A.timelineOf({ id }), null); assert.deepEqual(A.timelineSlots({ id }, '2026-10-25T14:00:00Z'), []); }
 });
 test('timelineSlots: kellonajat Helsingin ajassa (kesä- ja talviaika)', () => {
   const f = (iso) => A.timelineSlots({ id: 7 }, iso).map((x) => `${x.key} ${x.from}–${x.to}`);
-  assert.deepEqual(f('2026-10-18T13:30:00Z'), ['ritual 16:30–16:50', 'break 16:50–17:00', 'smoke 17:00–18:30'], 'EEST (UTC+3)');
-  assert.deepEqual(f('2026-10-25T14:00:00Z'), ['ritual 16:00–16:20', 'break 16:20–16:30', 'smoke 16:30–18:00'], 'EET (UTC+2)');
-  assert.deepEqual(f('2026-10-25T15:00:00Z'), ['ritual 17:00–17:20', 'break 17:20–17:30', 'smoke 17:30–19:00']);
+  // savusauna alkaa alku + 30 min (kuten backend) ja päättyy alku + 2 h; rituaali päättyy alku + 20 min; väliä ei näytetä rivinä
+  assert.deepEqual(f('2026-10-18T13:30:00Z'), ['ritual 16:30–16:50', 'smoke 17:00–18:30'], 'EEST (UTC+3)');
+  assert.deepEqual(f('2026-10-25T14:00:00Z'), ['ritual 16:00–16:20', 'smoke 16:30–18:00'], 'EET (UTC+2)');
+  assert.deepEqual(f('2026-10-25T15:00:00Z'), ['ritual 17:00–17:20', 'smoke 17:30–19:00']);
   assert.deepEqual(A.timelineSlots({ id: 7 }, null), []);
+  assert.equal(A.timelineSlots({ id: 7 }, '2026-10-25T14:00:00Z').at(-1).to, '18:00', 'viimeinen jakso päättyy alku + 2 h');
 });
 
 // ---- tekstit ----
 test('FI/EN-tekstit: aikajana, "Ei vapaita aikoja" / "No available times", pariteetti', () => {
   const ui = readFileSync(new URL('../shop/src/treatment-ui.js', import.meta.url), 'utf8');
   assert.match(ui, /tr\.tl\[x\.key\]/);
-  assert.deepEqual(Object.keys(T.fi.tr.tl).sort(), ['break', 'ritual', 'smoke']); assert.deepEqual(Object.keys(T.en.tr.tl).sort(), ['break', 'ritual', 'smoke']);
-  assert.deepEqual(T.fi.tr.tl, { ritual: 'rituaali', break: 'tauko', smoke: 'savusauna' });
-  assert.deepEqual(T.en.tr.tl, { ritual: 'ritual', break: 'break', smoke: 'smoke sauna' });
+  assert.deepEqual(Object.keys(T.fi.tr.tl).sort(), ['ritual', 'smoke']); assert.deepEqual(Object.keys(T.en.tr.tl).sort(), ['ritual', 'smoke']);
+  assert.deepEqual(T.fi.tr.tl, { ritual: 'rituaali', smoke: 'savusauna' });
+  assert.deepEqual(T.en.tr.tl, { ritual: 'ritual', smoke: 'smoke sauna' });
   assert.equal(T.fi.tr.noTimes, 'Ei vapaita aikoja'); assert.equal(T.en.tr.noTimes, 'No available times');
   for (const k of ['tlTitle', 'noTimesHint', 'tlDuration', 'ends']) { assert.ok(T.fi.tr[k] && T.en.tr[k] && T.fi.tr[k] !== T.en.tr[k], `tr.${k} FI ≠ EN`); }
 });
