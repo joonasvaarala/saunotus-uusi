@@ -1,6 +1,6 @@
 {
  "_doc": "Varateksti: tietokannan julkaistut sivutekstit (public_get_site_texts) + paikkamerkkien data (hinta/kesto/julkiset asetukset). Käytetään vain jos haku epäonnistuu eikä .cache-välimuistia ole. Päivitys: node scripts/site-texts-sync.mjs",
- "generated_at": "2026-10-18T16:58:16.080986+00:00",
+ "generated_at": "2026-10-18T21:54:03.785461+00:00",
  "texts": [
   {
    "key": "addon.1.description",
@@ -91,6 +91,140 @@
    "lang": "fi",
    "text": "Saunotus on savusaunaelämyksiä, rituaaleja ja perinnettä Sipoonjoen rannalla. Sipoonjoen Perinnesauna on maan sisälle rakennettu savusauna Sipoon Hindsbyssä, Sipoonkorven kansallispuiston kupeessa. Sauna valmistui vuonna 2021; yleiset vuorot avattiin tammikuussa 2022.",
    "version": 2,
+   "placeholders": []
+  },
+  {
+   "key": "email.business_quote.ack_intro",
+   "lang": "en",
+   "text": "Thank you for the quote request. We will get back to you separately.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.business_quote.ack_intro",
+   "lang": "fi",
+   "text": "Kiitos tarjouspyynnöstä. Palaamme asiaan erikseen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.business_quote.ack_subject",
+   "lang": "en",
+   "text": "Quote request received – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.business_quote.ack_subject",
+   "lang": "fi",
+   "text": "Tarjouspyyntö vastaanotettu – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.business_quote.ack_title",
+   "lang": "en",
+   "text": "Quote request received",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.business_quote.ack_title",
+   "lang": "fi",
+   "text": "Tarjouspyyntö vastaanotettu",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.business_quote.no_promise",
+   "lang": "en",
+   "text": "This message does not confirm a time or a price.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.business_quote.no_promise",
+   "lang": "fi",
+   "text": "Tämä viesti ei vahvista ajankohtaa eikä hintaa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.business_quote.notify_hint",
+   "lang": "en",
+   "text": "The request is in the Companies view in admin.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.business_quote.notify_hint",
+   "lang": "fi",
+   "text": "Pyyntö on hallinnan Yritykset-näkymässä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.business_quote.notify_intro",
+   "lang": "en",
+   "text": "A company sent a request for a staff day or a workplace wellbeing day.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.business_quote.notify_intro",
+   "lang": "fi",
+   "text": "Yritys lähetti pyynnön työntekijäpäivästä tai työhyvinvointipäivästä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.business_quote.notify_subject",
+   "lang": "en",
+   "text": "New company quote request – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.business_quote.notify_subject",
+   "lang": "fi",
+   "text": "Uusi yrityksen tarjouspyyntö – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.business_quote.notify_title",
+   "lang": "en",
+   "text": "New quote request",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.business_quote.notify_title",
+   "lang": "fi",
+   "text": "Uusi tarjouspyyntö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.business_quote.sign_name",
+   "lang": "en",
+   "text": "Tapio",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.business_quote.sign_name",
+   "lang": "fi",
+   "text": "Tapio",
+   "version": 1,
    "placeholders": []
   },
   {
@@ -3213,6 +3347,20 @@
    "placeholders": []
   },
   {
+   "key": "nav.main.companies",
+   "lang": "en",
+   "text": "For companies",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "nav.main.companies",
+   "lang": "fi",
+   "text": "Yrityksille",
+   "version": 1,
+   "placeholders": []
+  },
+  {
    "key": "nav.main.gift",
    "lang": "en",
    "text": "Gift cards",
@@ -3643,6 +3791,650 @@
    "key": "page.companies.days.title",
    "lang": "fi",
    "text": "Työhyvinvointipäivät ja ryhmät",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.calendar_noscript",
+   "lang": "en",
+   "text": "The sauna calendar needs JavaScript.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.calendar_noscript",
+   "lang": "fi",
+   "text": "Saunavuorojen kalenteri tarvitsee JavaScriptin.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.calendar_text",
+   "lang": "en",
+   "text": "Choose a session in the calendar. Booking continues the same way as for other sauna sessions.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.calendar_text",
+   "lang": "fi",
+   "text": "Valitkaa vuoro kalenterista. Varaus jatkuu samalla tavalla kuin muissa saunavuoroissa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.calendar_title",
+   "lang": "en",
+   "text": "Company sauna sessions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.calendar_title",
+   "lang": "fi",
+   "text": "Yritysten saunavuorot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.choice_title",
+   "lang": "en",
+   "text": "What would you like to do?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.choice_title",
+   "lang": "fi",
+   "text": "Mitä haluatte tehdä?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.company",
+   "lang": "en",
+   "text": "Company name",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.company",
+   "lang": "fi",
+   "text": "Yrityksen nimi",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.contact",
+   "lang": "en",
+   "text": "Contact person",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.contact",
+   "lang": "fi",
+   "text": "Yhteyshenkilö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.day_cta",
+   "lang": "en",
+   "text": "Open the quote request",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.day_cta",
+   "lang": "fi",
+   "text": "Avaa tarjouspyyntö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.day_text",
+   "lang": "en",
+   "text": "Tell us your wishes in the form. Sending it does not confirm a time or a price. We will get back to you separately.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.day_text",
+   "lang": "fi",
+   "text": "Kertokaa toiveenne lomakkeella. Lähetys ei vahvista ajankohtaa eikä hintaa. Palaamme asiaan erikseen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.day_title",
+   "lang": "en",
+   "text": "We want to arrange a staff day or a workplace wellbeing day",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.day_title",
+   "lang": "fi",
+   "text": "Haluamme järjestää työntekijäpäivän tai työhyvinvointipäivän",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.email",
+   "lang": "en",
+   "text": "Email",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.email",
+   "lang": "fi",
+   "text": "Sähköposti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_generic",
+   "lang": "en",
+   "text": "The request could not be sent. Please try again in a little while.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_generic",
+   "lang": "fi",
+   "text": "Lähetys ei onnistunut. Yritä hetken kuluttua uudelleen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_invalid_company",
+   "lang": "en",
+   "text": "Enter the company name.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_invalid_company",
+   "lang": "fi",
+   "text": "Anna yrityksen nimi.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_invalid_contact",
+   "lang": "en",
+   "text": "Enter the contact person's name.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_invalid_contact",
+   "lang": "fi",
+   "text": "Anna yhteyshenkilön nimi.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_invalid_email",
+   "lang": "en",
+   "text": "Check the email address.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_invalid_email",
+   "lang": "fi",
+   "text": "Tarkista sähköpostiosoite.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_invalid_message",
+   "lang": "en",
+   "text": "The additional notes are too long.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_invalid_message",
+   "lang": "fi",
+   "text": "Lisätiedot ovat liian pitkät.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_invalid_offering_other",
+   "lang": "en",
+   "text": "Describe the other content.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_invalid_offering_other",
+   "lang": "fi",
+   "text": "Kuvaa muu sisältö.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_invalid_offerings",
+   "lang": "en",
+   "text": "Choose at least one content.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_invalid_offerings",
+   "lang": "fi",
+   "text": "Valitse vähintään yksi sisältö.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_invalid_persons",
+   "lang": "en",
+   "text": "Enter the number of people.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_invalid_persons",
+   "lang": "fi",
+   "text": "Anna henkilömäärä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_invalid_phone",
+   "lang": "en",
+   "text": "Check the phone number.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_invalid_phone",
+   "lang": "fi",
+   "text": "Tarkista puhelinnumero.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_invalid_when",
+   "lang": "en",
+   "text": "Tell us the preferred time.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_invalid_when",
+   "lang": "fi",
+   "text": "Kerro toivottu ajankohta.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_privacy_required",
+   "lang": "en",
+   "text": "Accept the privacy notice so the request can be sent.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_privacy_required",
+   "lang": "fi",
+   "text": "Hyväksy tietosuoja, jotta pyyntö voidaan lähettää.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_rate_limited",
+   "lang": "en",
+   "text": "Too many attempts. Please try again in a little while.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.error_rate_limited",
+   "lang": "fi",
+   "text": "Liian monta yritystä. Yritä hetken kuluttua uudelleen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.form_lead",
+   "lang": "en",
+   "text": "The form does not confirm a time or a price.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.form_lead",
+   "lang": "fi",
+   "text": "Lomake ei vahvista ajankohtaa eikä hintaa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.form_title",
+   "lang": "en",
+   "text": "Quote request",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.form_title",
+   "lang": "fi",
+   "text": "Tarjouspyyntö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.honeypot",
+   "lang": "en",
+   "text": "Website",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.honeypot",
+   "lang": "fi",
+   "text": "Verkkosivusto",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.lead",
+   "lang": "en",
+   "text": "Choose first what you want. Company sauna sessions are booked the same way as other sessions. A staff day starts with a quote request.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.lead",
+   "lang": "fi",
+   "text": "Valitkaa ensin, mitä haluatte. Yritysten saunavuorot varataan samalla tavalla kuin muut vuorot. Työntekijäpäivästä pyydetään tarjous.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.message",
+   "lang": "en",
+   "text": "Additional notes",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.message",
+   "lang": "fi",
+   "text": "Lisätiedot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.notice_link",
+   "lang": "en",
+   "text": "Read the notice",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.notice_link",
+   "lang": "fi",
+   "text": "Lue seloste",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.offering_campfire",
+   "lang": "en",
+   "text": "Campfire meal",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.offering_campfire",
+   "lang": "fi",
+   "text": "Nuotioruokailu",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.offering_forest_yoga",
+   "lang": "en",
+   "text": "Forest yoga",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.offering_forest_yoga",
+   "lang": "fi",
+   "text": "Metsäjoogaa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.offering_other",
+   "lang": "en",
+   "text": "Other",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.offering_other",
+   "lang": "fi",
+   "text": "Muu",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.offering_other_label",
+   "lang": "en",
+   "text": "Other content",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.offering_other_label",
+   "lang": "fi",
+   "text": "Muu sisältö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.offering_ritual",
+   "lang": "en",
+   "text": "Sauna ritual",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.offering_ritual",
+   "lang": "fi",
+   "text": "Saunarituaali",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.offering_sauna",
+   "lang": "en",
+   "text": "Sauna session",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.offering_sauna",
+   "lang": "fi",
+   "text": "Saunotus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.offering_vihta",
+   "lang": "en",
+   "text": "Whisk-binding workshop",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.offering_vihta",
+   "lang": "fi",
+   "text": "Vihtatyöpaja",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.offerings_legend",
+   "lang": "en",
+   "text": "Wished contents",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.offerings_legend",
+   "lang": "fi",
+   "text": "Toivotut sisällöt",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.persons",
+   "lang": "en",
+   "text": "Number of people",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.persons",
+   "lang": "fi",
+   "text": "Henkilömäärä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.phone",
+   "lang": "en",
+   "text": "Phone",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.phone",
+   "lang": "fi",
+   "text": "Puhelin",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.privacy",
+   "lang": "en",
+   "text": "I have read the privacy notice and accept that my contact details are used to handle this request.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.privacy",
+   "lang": "fi",
+   "text": "Olen lukenut tietosuojaselosteen ja hyväksyn, että yhteystietojani käytetään tämän pyynnön käsittelyyn.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.sauna_cta",
+   "lang": "en",
+   "text": "Show company sauna sessions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.sauna_cta",
+   "lang": "fi",
+   "text": "Näytä yritysten saunavuorot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.sauna_text",
+   "lang": "en",
+   "text": "We show the smoke-sauna sessions meant for companies. Booking and payment continue the same way as elsewhere on the site.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.sauna_text",
+   "lang": "fi",
+   "text": "Näytämme yrityksille tarkoitetut savusaunavuorot. Varaus ja maksu etenevät samalla tavalla kuin muualla sivustolla.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.sauna_title",
+   "lang": "en",
+   "text": "We only want to sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.sauna_title",
+   "lang": "fi",
+   "text": "Tulemme vain saunomaan",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.seo_description",
+   "lang": "en",
+   "text": "Smoke-sauna sessions for companies and a quote request for a staff day. The form does not confirm a time or a price.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.seo_description",
+   "lang": "fi",
+   "text": "Yritysten savusaunavuorot ja tarjouspyyntö työntekijäpäivästä. Lomake ei vahvista ajankohtaa eikä hintaa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.submit",
+   "lang": "en",
+   "text": "Send quote request",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.submit",
+   "lang": "fi",
+   "text": "Lähetä tarjouspyyntö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.success",
+   "lang": "en",
+   "text": "The request has been received. This does not confirm a time or a price. We will get back to you.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.success",
+   "lang": "fi",
+   "text": "Pyyntö on vastaanotettu. Tämä ei vahvista ajankohtaa eikä hintaa. Palaamme asiaan.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.when",
+   "lang": "en",
+   "text": "Preferred day or time",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.flow.when",
+   "lang": "fi",
+   "text": "Toivottu päivä tai ajankohta",
    "version": 1,
    "placeholders": []
   },
@@ -8243,6 +9035,852 @@
    "key": "ui.admin.day.revenue_vat",
    "lang": "fi",
    "text": "sis. alv",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.filters.active",
+   "lang": "en",
+   "text": "Filters: {{var:n}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.admin.filters.active",
+   "lang": "fi",
+   "text": "Suodattimia: {{var:n}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.admin.filters.hide",
+   "lang": "en",
+   "text": "Hide filters",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.filters.hide",
+   "lang": "fi",
+   "text": "Piilota suodattimet",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.filters.show",
+   "lang": "en",
+   "text": "Show filters",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.filters.show",
+   "lang": "fi",
+   "text": "Näytä suodattimet",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.options.filter_all",
+   "lang": "en",
+   "text": "All",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.options.filter_all",
+   "lang": "fi",
+   "text": "Kaikki",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.options.filter_clear",
+   "lang": "en",
+   "text": "Remove",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.options.filter_clear",
+   "lang": "fi",
+   "text": "Poista",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.options.filter_legend",
+   "lang": "en",
+   "text": "Treatment",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.options.filter_legend",
+   "lang": "fi",
+   "text": "Hoito",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.options.filter_unassigned",
+   "lang": "en",
+   "text": "Treatment not chosen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.options.filter_unassigned",
+   "lang": "fi",
+   "text": "Hoito valitsematta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.options.not_chosen",
+   "lang": "en",
+   "text": "not chosen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.options.not_chosen",
+   "lang": "fi",
+   "text": "valitsematta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.options.reminder",
+   "lang": "en",
+   "text": "{{var:n}} upcoming treatment bookings have no treatment chosen.",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.admin.options.reminder",
+   "lang": "fi",
+   "text": "{{var:n}} tulevaa hoitovarausta ilman valittua hoitoa.",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.admin.options.reminder_link",
+   "lang": "en",
+   "text": "Open bookings",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.options.reminder_link",
+   "lang": "fi",
+   "text": "Avaa varaukset",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.orders.pay_all",
+   "lang": "en",
+   "text": "All",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.orders.pay_all",
+   "lang": "fi",
+   "text": "Kaikki",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.orders.pay_cancelled",
+   "lang": "en",
+   "text": "Cancelled",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.orders.pay_cancelled",
+   "lang": "fi",
+   "text": "Peruttu",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.orders.pay_filter",
+   "lang": "en",
+   "text": "Payment status",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.orders.pay_filter",
+   "lang": "fi",
+   "text": "Maksutila",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.orders.pay_paid",
+   "lang": "en",
+   "text": "Paid",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.orders.pay_paid",
+   "lang": "fi",
+   "text": "Maksetut",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.orders.pay_refunded",
+   "lang": "en",
+   "text": "Refunded",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.orders.pay_refunded",
+   "lang": "fi",
+   "text": "Hyvitetyt",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.orders.pay_showing",
+   "lang": "en",
+   "text": "Payment status: {{var:label}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:label}}"
+   ]
+  },
+  {
+   "key": "ui.admin.orders.pay_showing",
+   "lang": "fi",
+   "text": "Maksutila: {{var:label}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:label}}"
+   ]
+  },
+  {
+   "key": "ui.admin.orders.pay_unpaid",
+   "lang": "en",
+   "text": "Unpaid",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.orders.pay_unpaid",
+   "lang": "fi",
+   "text": "Maksamattomat",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.orders.search_all",
+   "lang": "en",
+   "text": "Search covers all orders",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.orders.search_all",
+   "lang": "fi",
+   "text": "Haku kaikista tilauksista",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_already",
+   "lang": "en",
+   "text": "This conflict was already acknowledged.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_already",
+   "lang": "fi",
+   "text": "Konflikti oli jo kuitattu.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_button",
+   "lang": "en",
+   "text": "Acknowledge (not real)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_button",
+   "lang": "fi",
+   "text": "Kuittaa (ei todellinen)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_cancel",
+   "lang": "en",
+   "text": "Cancel",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_cancel",
+   "lang": "fi",
+   "text": "Peruuta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_confirm",
+   "lang": "en",
+   "text": "Acknowledge this closure conflict as not real? The booking and the closure stay as they are, and availability does not change.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_confirm",
+   "lang": "fi",
+   "text": "Kuitataanko sulkukonflikti ei-todelliseksi? Varaus ja sulku jäävät ennalleen, eikä saatavuus muutu.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_confirm_button",
+   "lang": "en",
+   "text": "Confirm acknowledgement",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_confirm_button",
+   "lang": "fi",
+   "text": "Vahvista kuittaus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_done",
+   "lang": "en",
+   "text": "Closure conflict acknowledged as not real. Availability did not change.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_done",
+   "lang": "fi",
+   "text": "Sulku kuitattu ei-todelliseksi. Saatavuus ei muuttunut.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_label_label",
+   "lang": "en",
+   "text": "Acknowledged by (optional)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_label_label",
+   "lang": "fi",
+   "text": "Kuittaaja (valinnainen)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_label_placeholder",
+   "lang": "en",
+   "text": "E.g. Joonas (decision)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_label_placeholder",
+   "lang": "fi",
+   "text": "Esim. Joonas (päätös)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_note_default",
+   "lang": "en",
+   "text": "Closure added manually in Johku",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_note_default",
+   "lang": "fi",
+   "text": "Sulku tehty käsin Johkussa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_note_label",
+   "lang": "en",
+   "text": "Reason",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_note_label",
+   "lang": "fi",
+   "text": "Perustelu",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_note_required",
+   "lang": "en",
+   "text": "Enter a reason (at least three characters).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.ack_note_required",
+   "lang": "fi",
+   "text": "Anna perustelu (vähintään kolme merkkiä).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.acked_empty",
+   "lang": "en",
+   "text": "No acknowledged closure conflicts.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.acked_empty",
+   "lang": "fi",
+   "text": "Ei kuitattuja sulkukonflikteja.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.acked_hint",
+   "lang": "en",
+   "text": "These closure conflicts were acknowledged as not real. Availability has not changed. An acknowledgement can be revoked.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.acked_hint",
+   "lang": "fi",
+   "text": "Nämä sulkukonfliktit on kuitattu ei-todellisiksi. Saatavuus ei ole muuttunut. Kuittauksen voi purkaa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.acked_meta",
+   "lang": "en",
+   "text": "Acknowledged{{var:by}}: {{var:reason}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:by}}",
+    "{{var:reason}}"
+   ]
+  },
+  {
+   "key": "ui.admin.review.acked_meta",
+   "lang": "fi",
+   "text": "Kuitattu{{var:by}}: {{var:reason}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:by}}",
+    "{{var:reason}}"
+   ]
+  },
+  {
+   "key": "ui.admin.review.acked_title",
+   "lang": "en",
+   "text": "Acknowledged closure conflicts",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.acked_title",
+   "lang": "fi",
+   "text": "Kuitatut sulkukonfliktit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.block_hint",
+   "lang": "en",
+   "text": "The booking overlaps a closure added later. Move or cancel the booking, or acknowledge the conflict if the closure is not real (for example a block added manually in Johku). Acknowledging does not change availability.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.block_hint",
+   "lang": "fi",
+   "text": "Varaus osuu myöhemmin lisättyyn sulkuun. Siirrä tai peru varaus, tai kuittaa konflikti, jos sulku ei ole todellinen (esimerkiksi käsin tehty sulku Johkussa). Kuittaus ei muuta saatavuutta.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.block_reason",
+   "lang": "en",
+   "text": "Closure: {{var:reason}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:reason}}"
+   ]
+  },
+  {
+   "key": "ui.admin.review.block_reason",
+   "lang": "fi",
+   "text": "Sulku: {{var:reason}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:reason}}"
+   ]
+  },
+  {
+   "key": "ui.admin.review.unack_button",
+   "lang": "en",
+   "text": "Revoke acknowledgement",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.unack_button",
+   "lang": "fi",
+   "text": "Pura kuittaus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.unack_confirm",
+   "lang": "en",
+   "text": "Revoke the acknowledgement? The conflict returns to the closure-conflict list. Availability does not change.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.unack_confirm",
+   "lang": "fi",
+   "text": "Puretaanko kuittaus? Konflikti palaa Sulkukonfliktit-listalle. Saatavuus ei muutu.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.unack_confirm_button",
+   "lang": "en",
+   "text": "Confirm revoke",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.unack_confirm_button",
+   "lang": "fi",
+   "text": "Vahvista purku",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.unack_done",
+   "lang": "en",
+   "text": "Acknowledgement revoked.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.review.unack_done",
+   "lang": "fi",
+   "text": "Kuittaus purettu.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.bar_label",
+   "lang": "en",
+   "text": "{{var:month}}: excluding VAT {{var:net}}, VAT {{var:vat}}, unitemised gross {{var:unsplit}}, total {{var:gross}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:gross}}",
+    "{{var:month}}",
+    "{{var:net}}",
+    "{{var:unsplit}}",
+    "{{var:vat}}"
+   ]
+  },
+  {
+   "key": "ui.admin.sales_chart.bar_label",
+   "lang": "fi",
+   "text": "{{var:month}}: ilman ALV {{var:net}}, ALV {{var:vat}}, erittelemätön brutto {{var:unsplit}}, yhteensä {{var:gross}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:gross}}",
+    "{{var:month}}",
+    "{{var:net}}",
+    "{{var:unsplit}}",
+    "{{var:vat}}"
+   ]
+  },
+  {
+   "key": "ui.admin.sales_chart.basis",
+   "lang": "en",
+   "text": "Cash basis: the receipt issue date (Helsinki), not the visit date. A future month stays empty until a payment is recorded. Gift cards are counted the same way as in the sales report.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.basis",
+   "lang": "fi",
+   "text": "Kassaperuste: kuitin antamispäivä (Helsinki), ei käyntipäivä. Tuleva kuukausi on tyhjä, kunnes maksu on kirjattu. Lahjakortit lasketaan samoin kuin myyntiraportissa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.chart_label",
+   "lang": "en",
+   "text": "Monthly sales",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.chart_label",
+   "lang": "fi",
+   "text": "Kuukausittainen myynti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.empty",
+   "lang": "en",
+   "text": "No sales for this year.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.empty",
+   "lang": "fi",
+   "text": "Tälle vuodelle ei ole myyntiä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.future",
+   "lang": "en",
+   "text": "Future month",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.future",
+   "lang": "fi",
+   "text": "Tuleva kuukausi",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.includes_johku",
+   "lang": "en",
+   "text": "The bars include receipts from the new system and Johku sales. Johku sales are not included in reports, CSV export, or receipts.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.includes_johku",
+   "lang": "fi",
+   "text": "Pylväissä on uuden järjestelmän kuitit ja Johku-myynti. Johku-myynti ei sisälly raportteihin, CSV-vientiin eikä kuitteihin.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.legend_net",
+   "lang": "en",
+   "text": "Sales excluding VAT",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.legend_net",
+   "lang": "fi",
+   "text": "Myynti ilman ALV",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.legend_unsplit",
+   "lang": "en",
+   "text": "Gross, VAT not itemised",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.legend_unsplit",
+   "lang": "fi",
+   "text": "Brutto, ALV ei eritelty",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.legend_vat",
+   "lang": "en",
+   "text": "VAT",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.legend_vat",
+   "lang": "fi",
+   "text": "ALV",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.load_failed",
+   "lang": "en",
+   "text": "The sales chart could not be loaded.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.load_failed",
+   "lang": "fi",
+   "text": "Myyntikäyrän lataus epäonnistui.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.loading",
+   "lang": "en",
+   "text": "Loading the sales chart.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.loading",
+   "lang": "fi",
+   "text": "Ladataan myyntikäyrää.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.next_year",
+   "lang": "en",
+   "text": "Next year",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.next_year",
+   "lang": "fi",
+   "text": "Seuraava vuosi",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.prev_year",
+   "lang": "en",
+   "text": "Previous year",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.prev_year",
+   "lang": "fi",
+   "text": "Edellinen vuosi",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.title",
+   "lang": "en",
+   "text": "Sales and VAT",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.title",
+   "lang": "fi",
+   "text": "Myynti ja ALV",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.total_gross",
+   "lang": "en",
+   "text": "Year sales incl. VAT",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.total_gross",
+   "lang": "fi",
+   "text": "Vuoden myynti sis. ALV",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.total_net",
+   "lang": "en",
+   "text": "Excluding VAT",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.total_net",
+   "lang": "fi",
+   "text": "Ilman ALV",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.total_vat",
+   "lang": "en",
+   "text": "VAT",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.total_vat",
+   "lang": "fi",
+   "text": "ALV",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.unavailable",
+   "lang": "en",
+   "text": "The sales chart is not available.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.unavailable",
+   "lang": "fi",
+   "text": "Myyntikäyrä ei ole käytettävissä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.year",
+   "lang": "en",
+   "text": "Year",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.sales_chart.year",
+   "lang": "fi",
+   "text": "Vuosi",
    "version": 1,
    "placeholders": []
   },
