@@ -1,5 +1,6 @@
 -- ROLLBACK booking_90_invoices_schema.
 -- Poistaa laskutaulut, oikeuden invoices.manage, laskuasetukset ja palauttaa orders.payment_status-rajoitteen ilman invoiced-arvoa.
+-- Bucket 'invoices' jätetään paikoilleen; tyhjennä ja poista tarvittaessa Storage API:lla (emptyBucket/deleteBucket).
 -- Ajo keskeytyy, jos tauluissa on rivejä joita ei voi pudottaa (tilauksia ei poisteta). Ei tuotantoajoa tästä tiedostosta.
 
 set local lock_timeout = '5s';
@@ -20,11 +21,7 @@ drop table if exists booking.invoices;
 drop table if exists booking.invoice_counters;
 drop table if exists booking.invoice_customers;
 
-do $$ begin
-  delete from storage.objects where bucket_id = 'invoices';
-exception when undefined_table then null;
-end $$;
-delete from storage.buckets where id = 'invoices';
+-- Bucket 'invoices' jätetään paikoilleen; tyhjennä ja poista tarvittaessa Storage API:lla (emptyBucket/deleteBucket).
 
 delete from booking.role_permissions where permission = 'invoices.manage';
 delete from booking.settings where key in ('invoice_due_days', 'invoice_bank', 'invoice_dispatch_mode');

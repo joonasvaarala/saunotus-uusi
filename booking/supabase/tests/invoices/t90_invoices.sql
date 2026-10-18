@@ -83,7 +83,7 @@ begin
   inv := booking.admin_send_invoice((inv ->> 'id')::bigint, true, false);
   n1 := inv ->> 'invoice_no';
   perform public.t90_ck(n1 = 'L000001', 'S1: ensimmäinen numero L000001');
-  perform public.t90_ck(inv ->> 'reference_no' = booking._fi_reference('001'), 'S2: viite tulee numerosta');
+  perform public.t90_ck(inv ->> 'reference_no' = '0013', 'S2: viite tulee numerosta');
   perform public.t90_ck(inv ->> 'status' = 'sent', 'S3: tila sent');
   perform public.t90_ck(inv ->> 'dispatch_status' = 'dry_run', 'S4: ilman Procountoria dry_run');
   perform public.t90_ck((select count(*) from booking.invoice_dispatch_log d where d.invoice_id = (inv ->> 'id')::bigint) = 1, 'S5: lähetysloki');
