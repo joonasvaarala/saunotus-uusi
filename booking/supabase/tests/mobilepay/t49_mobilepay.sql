@@ -40,7 +40,7 @@ begin
   insert into _t select (p.provider = 'mobilepay' and p.method = 'mobilepay' and p.status = 'pending' and p.amount = 40 and p.provider_ref = v_ref1
      and (select sum(amount_gross) from booking.payment_lines where payment_id = p.id) = 40 and p.link_expires_at > now()), 'T3b maksurivi pending mobilepay, rivit 40 EUR' from booking.payments p where p.id = v_pid;
   insert into _t select o.payment_status = 'pending', 'T3c tilauksen payment_status pending' from booking.orders o where o.id = v_order;
-  insert into _t values (r ->> 'description' like 'Sipoonjoen perinnesauna%' and r ->> 'site_base_url' is not null and r ->> 'order_page_path' = '/tilaus/', 'T3d kuvaus, site_base_url, order_page_path mukana');
+  insert into _t values (r ->> 'description' like 'Sipoonjoen Perinnesauna – tilaus %' and r ->> 'site_base_url' is not null and r ->> 'order_page_path' = '/tilaus/', 'T3d kuvaus, site_base_url, order_page_path mukana');
 
   -- T4 uusi yritys (edellinen ei vielä CREATED-linkkiä) -> a2, edellinen perutaan Vippsissä
   r := booking.mobilepay_payment_prepare(v_tok, null);

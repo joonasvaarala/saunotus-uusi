@@ -1,0 +1,2 @@
+create temp table pre63 as select (select md5(string_agg(pg_get_functiondef(p.oid), '|' order by p.proname)) from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'booking' and p.proname in ('_text_audit', '_text_publish', 'admin_texts_approve', 'admin_texts_reject', 'admin_texts_rollback')) fh,
+  (select string_agg(role_code || ':' || permission, ',' order by role_code, permission) from booking.role_permissions where permission like 'texts.%') perms;
