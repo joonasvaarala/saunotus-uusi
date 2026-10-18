@@ -1,0 +1,108 @@
+{
+ "_doc": "Sisältöosion (työnimi 'Saunatietoa') YHDEN PAIKAN asetukset: nimi, polut ja UI-tekstit. Nimen/polun vaihto = muokkaa tätä tiedostoa ja rakenna uudelleen (ks. docs/SAUNATIETOA.md). Artikkelit haetaan rakennuksessa Supabasen public_*-RPC:illä; tietokannan articles_*-asetukset (booking.settings) pidetään samoina, mutta sivusto käyttää tämän tiedoston arvoja ja varoittaa rakennuksessa jos ne poikkeavat.",
+ "label": {
+  "fi": "Saunatietoa",
+  "en": "Sauna guide"
+ },
+ "path": {
+  "fi": "/saunatietoa/",
+  "en": "/en/sauna-guide/"
+ },
+ "tagSegment": {
+  "fi": "tagi",
+  "en": "tag"
+ },
+ "pageSegment": {
+  "fi": "sivu",
+  "en": "page"
+ },
+ "pageSize": 12,
+ "relatedCount": 3,
+ "widths": [
+  480,
+  800,
+  1200,
+  1600
+ ],
+ "nav": {
+  "showWhenEmpty": false
+ },
+ "ui": {
+  "fi": {
+   "kicker": "Sipoonjoen perinnesauna",
+   "listLead": "Artikkeleita saunomisesta, perinteistä ja hoidoista.",
+   "listMeta": "{label}: artikkeleita saunomisesta ja perinteistä",
+   "listDescription": "Artikkeleita saunomisesta, savusaunan perinteestä ja saunahoidoista Sipoonjoen perinnesaunalta.",
+   "empty": "Artikkeleita ei ole vielä julkaistu. Palaa pian takaisin.",
+   "emptyLink": "Tutustu saunavuoroihin",
+   "tagsLabel": "Aiheet",
+   "allTags": "Kaikki",
+   "tagTitle": "Aihe: {tag}",
+   "tagDescription": "Artikkelit aiheesta {tag}.",
+   "page": "Sivu {n}",
+   "pageTitle": "{title}, sivu {n}",
+   "pagination": "Sivutus",
+   "prev": "Edellinen sivu",
+   "next": "Seuraava sivu",
+   "readArticle": "Lue artikkeli",
+   "readArticleAbout": "Lue artikkeli: {title}",
+   "readMin": "{n} min lukuaika",
+   "published": "Julkaistu",
+   "updated": "Päivitetty",
+   "by": "Kirjoittaja",
+   "breadcrumb": "Murupolku",
+   "home": "Etusivu",
+   "related": "Lisää artikkeleita",
+   "tags": "Aiheet",
+   "back": "Kaikki artikkelit",
+   "share": "Jaa artikkeli",
+   "shareMail": "Lähetä linkki sähköpostilla",
+   "shareSubject": "Artikkeli: {title}",
+   "otherLang": "Read this article in English",
+   "ctaTitle": "Varaa oma saunahetkesi",
+   "ctaText": "Sipoonjoen perinnesauna tarjoaa savusaunan, saunahoidot ja lahjakortit. Valitse aika ja varaa verkossa.",
+   "ctaButton": "Varaa aika",
+   "movedTitle": "Sivu on siirtynyt",
+   "movedText": "Tämä artikkeli on siirretty uuteen osoitteeseen.",
+   "movedLink": "Siirry artikkeliin"
+  },
+  "en": {
+   "kicker": "Sipoonjoki Heritage Sauna",
+   "listLead": "Articles about sauna bathing, traditions and treatments.",
+   "listMeta": "{label}: articles about sauna bathing and traditions",
+   "listDescription": "Articles about sauna bathing, the smoke sauna tradition and sauna treatments from Sipoonjoki Heritage Sauna.",
+   "empty": "No articles have been published yet. Please check back soon.",
+   "emptyLink": "See sauna sessions",
+   "tagsLabel": "Topics",
+   "allTags": "All",
+   "tagTitle": "Topic: {tag}",
+   "tagDescription": "Articles about {tag}.",
+   "page": "Page {n}",
+   "pageTitle": "{title}, page {n}",
+   "pagination": "Pagination",
+   "prev": "Previous page",
+   "next": "Next page",
+   "readArticle": "Read article",
+   "readArticleAbout": "Read article: {title}",
+   "readMin": "{n} min read",
+   "published": "Published",
+   "updated": "Updated",
+   "by": "Author",
+   "breadcrumb": "Breadcrumb",
+   "home": "Home",
+   "related": "More articles",
+   "tags": "Topics",
+   "back": "All articles",
+   "share": "Share this article",
+   "shareMail": "Send the link by email",
+   "shareSubject": "Article: {title}",
+   "otherLang": "Lue artikkeli suomeksi",
+   "ctaTitle": "Book your own sauna moment",
+   "ctaText": "Sipoonjoki Heritage Sauna offers a smoke sauna, sauna treatments and gift cards. Choose a time and book online.",
+   "ctaButton": "Book now",
+   "movedTitle": "This page has moved",
+   "movedText": "This article has moved to a new address.",
+   "movedLink": "Go to the article"
+  }
+ }
+}

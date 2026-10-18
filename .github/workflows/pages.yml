@@ -1,14 +1,18 @@
 name: Julkaise testiympäristö (GitHub Pages)
 # TESTI: SITE_ENV=test → noindex + robots Disallow koko sivustolla (myös /varaa/ ja /hallinta/). Tuotantoon tämä ei ole tarkoitettu.
 # Yksi Pages-artifact: perussivusto + varauskauppa (/varaa/, /en/book/) + hallinta (/hallinta/). Rakentaa scripts/build-pages.mjs.
+# Saunatietoa-artikkelit (docs/SAUNATIETOA.md): build hakee julkaistut artikkelit RPC:llä (public_list_articles / public_get_article / public_articles_sitemap, vain anon-avain, vain luku).
+# Uusi/muuttunut artikkeli päätyy sivulle: repository_dispatch (articles-changed) / workflow_dispatch / tunnin ajastus (ajastettu julkaisu) → build → deploy (vain main).
 # Deploy VAIN main-haarasta (push / ajastus / käsin ajettu main). Pull request ja muut haarat vain rakentavat ja tarkistavat (ei deployta).
 on:
   push:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  repository_dispatch:
+    types: [articles-changed] # POST /repos/{owner}/{repo}/dispatches {"event_type":"articles-changed"} (esim. botti artikkelin tallennuksen jälkeen)
   schedule:
-    - cron: '15 3 * * *' # päivittäin: menneet tapahtumapäivät putoavat pois
+    - cron: '15 * * * *' # tunneittain: ajastetut artikkelit ilmestyvät, menneet tapahtumapäivät putoavat pois
 permissions:
   contents: read
   pages: write
@@ -30,13 +34,29 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      # sharp (artikkelikuvien avif/webp-versiot) on devDependency; ilman sitä build jatkuu alkuperäisillä kuvilla
+      - run: npm ci
+      # Saunatietoa: markdown-, lähde-/RPC-, sivupohja- ja build-tarkistustestit (fixture, ei verkkoa)
+      - run: node --test tests/articles/*.test.mjs
+      # Pelkkä fixture-build (testi + tuotanto): validoi JSON-LD, canonicalit, hreflangit, sitemapin, robotsin
+      - run: ARTICLES_FIXTURE=1 SITE_ENV=test SITE_URL=https://example.test DIST=$RUNNER_TEMP/dist-fixture-test node scripts/build.mjs
+      - run: DIST=$RUNNER_TEMP/dist-fixture-test SITE_ENV=test SITE_URL=https://example.test node scripts/check-articles.mjs
+      - run: ARTICLES_FIXTURE=1 SITE_ENV=prod SITE_URL=https://example.test DIST=$RUNNER_TEMP/dist-fixture-prod node scripts/build.mjs
+      - run: DIST=$RUNNER_TEMP/dist-fixture-prod SITE_ENV=prod SITE_URL=https://example.test node scripts/check-articles.mjs
       - run: node --test booking/supabase/functions/admin-users/logic.test.js
       - run: node --test booking/tests/mobilepay-shop.test.mjs
       # maksuvalinta kassalle/vahvistussivulle (MobilePay + lahjakortti): tekstit, tarjontapäätökset, mock-skenaario, paluuosoite
       - run: node --test booking/tests/kassa-maksu.test.mjs
       # hoitovalitsin (booking_50): kaupan/hallinnan logiikka, FI/EN-tekstit, mockit vs. sopimus
       - run: node --test booking/tests/hoitovalitsin.test.mjs
+      # .cache/articles: edellinen artikkelisnapshot (RPC-katkon varalta + siirrettyjen slugien tunnistus)
+      - uses: actions/cache@v4
+        with:
+          path: .cache/articles
+          key: articles-${{ github.run_id }}
+          restore-keys: articles-
       - run: node scripts/build-pages.mjs
+      - run: node scripts/check-articles.mjs
       # etusivun hero: <picture>/preloadit/mitat/alt/OG + kultanapin kontrasti (staattinen tarkistus dististä)
       - run: node scripts/check-hero.mjs
       # sähköpostipohjat ovat TypeScriptiä (vain tyyppisyntaksia) → testi tarvitsee Noden tyyppien poiston (22.18+)

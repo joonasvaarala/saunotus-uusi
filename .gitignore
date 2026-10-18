@@ -7,3 +7,4 @@ scratch/
 dist-*/
 booking/supabase/functions/gift-card-pdf/out_*.pdf
 booking/supabase/functions/send-emails/tpl_out.html
+.cache/

@@ -1,6 +1,7 @@
 // Sivupohjat ja komponentit. Kaikki palauttavat HTML-merkkijonoja; ei ajonaikaista JS:ää (paitsi pieni "tänään"-korostus).
 import { readFileSync } from 'node:fs';
 import { sortReviews } from './reviews-sort.mjs';
+import { articlesNav } from './articles/runtime.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
   johku, bookingUrl, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
@@ -8,10 +9,13 @@ import {
 
 const cards = read('content/cards.json');
 const alts = read('content/alts.json');
-const css = readFileSync(new URL('./styles.css', import.meta.url), 'utf8')
+const minifyCss = (src) => src
   .replace(/__BASE__/g, BASE)
   .replace(/\/\*[\s\S]*?\*\//g, '')
   .replace(/\s*\n\s*/g, '\n').replace(/\n(?=[^@.\w#:*\[>+~-])/g, '\n').replace(/\s*([{};,>])\s*/g, '$1').replace(/;}/g, '}');
+const css = minifyCss(readFileSync(new URL('./styles.css', import.meta.url), 'utf8'));
+// Sisältöosion tyylit: upotetaan vain artikkelisivuille (layout seo.extraCss), ei muille sivuille
+export const articlesCss = minifyCss(readFileSync(new URL('./articles/articles.css', import.meta.url), 'utf8'));
 
 export const ui = (lang) => site.ui[lang];
 const alt = (id, lang) => alts[id]?.[lang] ?? '';
@@ -213,20 +217,24 @@ function jsonLd(lang) {
     openingHoursSpecification: spec, sameAs: site.social.map((s) => s.url), inLanguage: lang,
   });
 }
-export function layout({ lang, key, meta, body, preload = '', robotsOnly = false }) {
+export function layout({ lang, key, meta, body, preload = '', robotsOnly = false, seo = null }) {
   const u = ui(lang);
   const path = pagePath(key, lang);
-  const url = abs(path);
+  // seo (valinnainen, sisältöosio): { url, hreflangs:[{hreflang,href}], robots, ogType, ogImage:{url,width,height,alt}, ogExtra, extraHead, extraCss, jsonLd:[object], switchHref, navCurrent }
+  const url = seo?.url ?? abs(path);
   const alt_ = site.pages[key] || {};
-  const hl = ['fi', 'en'].filter((l) => alt_[l]).map((l) => `<link rel="alternate" hreflang="${l}" href="${abs(alt_[l])}">`).join('');
-  const xdef = alt_.fi ? `<link rel="alternate" hreflang="x-default" href="${abs(alt_.fi)}">` : '';
-  const og = abs(`/img/og-${meta.og || 'hero-ovi-uusi'}.jpg`);
+  const hl = seo ? (seo.hreflangs || []).map((x) => `<link rel="alternate" hreflang="${e(x.hreflang)}" href="${e(x.href)}">`).join('')
+    : ['fi', 'en'].filter((l) => alt_[l]).map((l) => `<link rel="alternate" hreflang="${l}" href="${abs(alt_[l])}">`).join('');
+  const xdef = seo ? '' : (alt_.fi ? `<link rel="alternate" hreflang="x-default" href="${abs(alt_.fi)}">` : '');
+  const og = seo?.ogImage?.url ?? abs(`/img/og-${meta.og || 'hero-ovi-uusi'}.jpg`);
+  const ogSize = seo?.ogImage ? `<meta property="og:image:width" content="${seo.ogImage.width}"><meta property="og:image:height" content="${seo.ogImage.height}">${seo.ogImage.alt ? `<meta property="og:image:alt" content="${e(seo.ogImage.alt)}">` : ''}` : '<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">';
   const o = other(lang);
-  const switchHref = alt_[o] ? href(alt_[o]) : pageHref('home', o);
+  const switchHref = seo?.switchHref ?? (alt_[o] ? href(alt_[o]) : pageHref('home', o));
+  const an = articlesNav(lang);
   const nav = u.nav.map(([k, label]) => {
     const h = k === 'training' ? site.trainingUrl : pageHref(k, lang);
     return `<a href="${e(h)}"${k === 'training' ? ' rel="noopener"' : ''}${k === key ? ' aria-current="page"' : ''}>${e(label)}${k === 'training' ? NEW(lang) : ''}</a>`;
-  }).join('');
+  }).join('') + (an ? `<a href="${e(an.href)}"${seo?.navCurrent === 'articles' ? ' aria-current="page"' : ''}>${e(an.label)}</a>` : '');
   const bookHref = pageHref('book', lang);
   const langSw = `<div class="lang" role="group" aria-label="${e(u.langLabel)}">${['fi', 'en'].map((l) => (l === lang ? `<span aria-current="true">${l.toUpperCase()}</span>` : `<a href="${e(switchHref)}" hreflang="${l}" lang="${l}">${l.toUpperCase()}</a>`)).join('')}</div>`;
   const chat = chatbotOn
@@ -236,14 +244,14 @@ export function layout({ lang, key, meta, body, preload = '', robotsOnly = false
   return `<!doctype html>
 <html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${e(meta.title)}</title><meta name="description" content="${e(meta.description)}">
-${isTest ? '<meta name="robots" content="noindex,nofollow">' : ''}
-<link rel="canonical" href="${url}">${hl}${xdef}
-<meta property="og:type" content="website"><meta property="og:site_name" content="${e(u.siteName)}"><meta property="og:title" content="${e(meta.title)}"><meta property="og:description" content="${e(meta.description)}"><meta property="og:url" content="${url}"><meta property="og:image" content="${og}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:locale" content="${u.locale}">
+${isTest ? '<meta name="robots" content="noindex,nofollow">' : (seo?.robots ? `<meta name="robots" content="${e(seo.robots)}">` : '')}
+<link rel="canonical" href="${e(url)}">${hl}${xdef}${seo?.extraHead || ''}
+<meta property="og:type" content="${seo?.ogType || 'website'}"><meta property="og:site_name" content="${e(u.siteName)}"><meta property="og:title" content="${e(meta.title)}"><meta property="og:description" content="${e(meta.description)}"><meta property="og:url" content="${e(url)}"><meta property="og:image" content="${e(og)}">${ogSize}<meta property="og:locale" content="${u.locale}">${seo?.ogExtra || ''}
 <meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#2B3A30">
 <link rel="icon" href="${href('/img/favicon.svg')}" type="image/svg+xml">
 <link rel="preload" href="${href('/fonts/Lato-normal-400.woff2')}" as="font" type="font/woff2" crossorigin>${preload}
-<style>${css}</style>
-<script type="application/ld+json">${jsonLd(lang)}</script>
+<style>${css}${seo?.extraCss || ''}</style>
+<script type="application/ld+json">${jsonLd(lang)}</script>${(seo?.jsonLd || []).map((j) => `<script type="application/ld+json">${JSON.stringify(j).replace(/</g, '\\u003c')}</script>`).join('')}
 </head><body>
 ${isTest ? `<div class="testbar" role="note">${e(u.siteTestNote)}</div>` : ''}
 <a class="skip" href="#main">${e(u.skip)}</a>
@@ -260,7 +268,7 @@ ${body}
 <footer class="site-footer"><div class="wrap">
 <div class="fgrid">
 <div class="fbrand"><img src="${href('/img/favicon.svg')}" width="34" height="47" alt="" loading="lazy"><div><b>SAUNOTUS</b><small>${e(u.brandTitle)}</small><p>${e(u.footerTag)}</p></div></div>
-<div><h2>${e(u.footerServices)}</h2><ul><li><a href="${fl('sauna', lang)}">${e(u.nav[0][1])}</a></li><li><a href="${fl('treatments', lang)}">${e(u.nav[1][1])}</a></li><li><a href="${fl('gift', lang)}">${e(u.nav[3][1])}</a></li><li><a href="${fl('companies', lang)}">${e(u.companies)}</a></li><li><a href="${e(site.trainingUrl)}" rel="noopener">${e(u.nav[2][1])}${NEW(lang)}</a></li><li><a href="${fl('book', lang)}">${e(u.bookFull)}</a></li></ul></div>
+<div><h2>${e(u.footerServices)}</h2><ul><li><a href="${fl('sauna', lang)}">${e(u.nav[0][1])}</a></li><li><a href="${fl('treatments', lang)}">${e(u.nav[1][1])}</a></li><li><a href="${fl('gift', lang)}">${e(u.nav[3][1])}</a></li>${an ? `<li><a href="${e(an.href)}">${e(an.label)}</a></li>` : ''}<li><a href="${fl('companies', lang)}">${e(u.companies)}</a></li><li><a href="${e(site.trainingUrl)}" rel="noopener">${e(u.nav[2][1])}${NEW(lang)}</a></li><li><a href="${fl('book', lang)}">${e(u.bookFull)}</a></li></ul></div>
 <div><h2>${e(u.footerInfo)}</h2><ul>${u.infoLinks.map(([id, l]) => `<li><a href="${pageHref('info', lang, id)}">${e(l)}</a></li>`).join('')}</ul></div>
 <div><h2>${e(u.footerContact)}</h2><ul><li><address style="all:unset">${e(site.contact.street)}<br>${e(site.contact.postal)} ${e(site.contact.city)}</address></li><li><a href="tel:${site.contact.phoneTel}">${e(site.contact.phone)}</a></li><li><a href="mailto:${site.contact.email}">${e(site.contact.email)}</a></li><li><a href="${e(site.contact.mapsUrl)}" rel="noopener">${lang === 'fi' ? 'Reittiohje' : 'Directions'}${NEW(lang)}</a></li>${site.social.map((s) => `<li><a href="${e(s.url)}" rel="noopener">${e(s.name)}${NEW(lang)}</a></li>`).join('')}</ul></div>
 </div>
