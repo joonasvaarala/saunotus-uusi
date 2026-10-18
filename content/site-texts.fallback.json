@@ -1,0 +1,2556 @@
+{
+ "_doc": "Varateksti: tietokannan julkaistut sivutekstit (public_get_site_texts) + paikkamerkkien data (hinta/kesto/julkiset asetukset). Käytetään vain jos haku epäonnistuu eikä .cache-välimuistia ole. Päivitys: node scripts/site-texts-sync.mjs",
+ "generated_at": "2026-10-18T10:44:56.133942+00:00",
+ "texts": [
+  {
+   "key": "addon.1.description",
+   "lang": "en",
+   "text": "Add-on for your booking: peat mask and foot bath.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "addon.1.description",
+   "lang": "fi",
+   "text": "Lisäpalvelu varaukseen: turvenaamio ja jalkakylpy.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "addon.1.name",
+   "lang": "en",
+   "text": "Peat mask and foot bath",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "addon.1.name",
+   "lang": "fi",
+   "text": "Turvenaamio ja jalkakylpy",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "addon.2.description",
+   "lang": "en",
+   "text": "Add-on for your booking: sauna whisk (vihta).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "addon.2.description",
+   "lang": "fi",
+   "text": "Lisäpalvelu varaukseen: saunavihta.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "addon.2.name",
+   "lang": "en",
+   "text": "Sauna whisk (vihta)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "addon.2.name",
+   "lang": "fi",
+   "text": "Saunavihta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "addon.5.description",
+   "lang": "en",
+   "text": "Add-on for your booking: towel.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "addon.5.description",
+   "lang": "fi",
+   "text": "Lisäpalvelu varaukseen: pyyhe.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "addon.5.name",
+   "lang": "en",
+   "text": "Towel",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "addon.5.name",
+   "lang": "fi",
+   "text": "Pyyhe",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "business.1.description",
+   "lang": "fi",
+   "text": "Saunotus on savusaunaelämyksiä, rituaaleja ja perinnettä Sipoonjoen rannalla. Sipoonjoen perinnesauna on maan sisälle rakennettu savusauna Sipoon Hindsbyssä, Sipoonkorven kansallispuiston kupeessa. Sauna valmistui vuonna 2021; yleiset vuorot avattiin tammikuussa 2022.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "event.10.time_text",
+   "lang": "fi",
+   "text": "pe 19–22, la–su 9–16",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "event.11.time_text",
+   "lang": "fi",
+   "text": "pe 19–22, la–su 9–16",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "event.12.time_text",
+   "lang": "fi",
+   "text": "pe 19–22, la–su 9–16",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "event.4.time_text",
+   "lang": "fi",
+   "text": "klo 16–19 (saunotus alkaa klo 17)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "event.6.time_text",
+   "lang": "fi",
+   "text": "klo 11–20",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "event.7.time_text",
+   "lang": "fi",
+   "text": "pe 19–22, la–su 9–16",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "event.8.time_text",
+   "lang": "fi",
+   "text": "pe 19–22, la–su 9–16",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "event.9.time_text",
+   "lang": "fi",
+   "text": "pe 19–22, la–su 9–16",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.1.answer",
+   "lang": "fi",
+   "text": "Yleisillä saunavuoroilla sauna on avoinna kaikille varanneille. Viikko-ohjelma (uusi sivusto): ma klo 16–19 miestenvuoro, ti klo 16–19 naistenvuoro, ke klo 16–19 hiljainen vuoro, to klo 16–17 turvetorstai ja klo 17–19 yleinen vuoro, pe vain yksityisvuorot ja tapahtumat, la ja su klo 14–19 yleinen savusauna.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.1.question",
+   "lang": "fi",
+   "text": "Mitä ovat yleiset saunavuorot ja milloin ne ovat?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.10.answer",
+   "lang": "fi",
+   "text": "Yleisen vuoron voi perua maksutta tai siirtää vähintään 48 h ennen (siirto vain kerran, viimeistään 2 vrk ennen). Yksityisvuorot, tapahtumat ja perinnesaunotusillat: maksutta vähintään 14 vrk ennen, 14–7 vrk ennen 50 % tai siirto, alle 7 vrk koko hinta. Ota yhteyttä mahdollisimman ajoissa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.10.question",
+   "lang": "fi",
+   "text": "Voinko perua tai muuttaa varausta?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.11.answer",
+   "lang": "fi",
+   "text": "Osoite Hindsbyntie 124, 04130 Sipoo. Parhaiten omalla autolla tai pyörällä; bussi 841 Itäkeskuksesta Broböleen, josta noin kilometri kävelyä. Pysäköinti on maksuton saunan omalla alueella; pukuhuoneilta saunalle on noin 40 metriä. Saavu aikaisintaan noin 10 min ennen varausta ja odota henkilökuntaa parkkipaikan läheisellä terassilla.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.11.question",
+   "lang": "fi",
+   "text": "Miten pääsen paikalle ja missä pysäköidä?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.12.answer",
+   "lang": "fi",
+   "text": "Ei täysin – alueella on portaita. Jos tarvitset apua liikkumiseen, kerro siitä etukäteen sähköpostitse savusauna@saunotus.fi.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.12.question",
+   "lang": "fi",
+   "text": "Onko sauna-alue esteetön?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.13.answer",
+   "lang": "fi",
+   "text": "Sauna- ja saunotuselämykset korostavat hiljaisuutta, luonnonläheisyyttä ja rauhaa. Sipoonjoen perinnesauna on maan sisälle rakennettu savusauna, joka lämpeää vuoden jokaisena päivänä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.13.question",
+   "lang": "fi",
+   "text": "Millainen tunnelma saunalla on?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.14.answer",
+   "lang": "fi",
+   "text": "Saunahoidoista ja saunotuksista vastaavat Sipoonjoen perinnesaunan saunottajat Laura Foon, Joonas Vaarala ja Saara Mäntykoski. Tiistaisin naisten vuorolla saatavilla on naispuolinen saunottaja.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.14.question",
+   "lang": "fi",
+   "text": "Keitä ovat saunottajat?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.15.answer",
+   "lang": "fi",
+   "text": "Sauna valmistui vuonna 2021 ja ensimmäiset tapahtumat pidettiin samana syksynä. Yleiset vuorot avattiin tammikuussa 2022, keskiviikon vuorot loppuvuodesta 2023, ja vuonna 2024 alkoivat koulutukset ja sauna alkoi lämmetä joka päivä. \"Viime vuonna\" valmistui uusi hoitoalue hoitosaunoineen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.15.question",
+   "lang": "fi",
+   "text": "Milloin sauna on rakennettu?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.16.answer",
+   "lang": "fi",
+   "text": "Omat makkarat voi ottaa mukaan paistettavaksi laavulla. Saunalla on saatavilla alkoholittomia virvokkeita. Alkoholikäytännöstä lähteissä ei ole mainintaa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.16.question",
+   "lang": "fi",
+   "text": "Saako saunalle tuoda omia eväitä tai juomia?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.17.answer",
+   "lang": "fi",
+   "text": "Saunavuorot maksetaan etukäteen verkkokaupassa varauksen yhteydessä. Ostoksia, kuten lahjakortteja, voi vanhan sivuston mukaan maksaa myös paikan päällä kortilla. Laskulla vain yritykset ja yhteisöt.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.17.question",
+   "lang": "fi",
+   "text": "Miten maksan?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.18.answer",
+   "lang": "fi",
+   "text": "Yleinen saunavuoro (ma miesten, ti naisten, ke hiljainen, to sekä la–su yleinen vuoro) maksaa 29 € / hlö ja sisältää pääsyn sauna-alueelle, kylmä- ja lämminvesialtaisiin sekä laavun vapaan käytön. Turvetorstai 35 € / hlö, saunarituaali ja savusaunavuoro (la & su) 49 € / hlö, perinnesaunotusilta 59 € / hlö. Ajantasaiset hinnat verkkokaupassa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.18.question",
+   "lang": "fi",
+   "text": "Mitä yleinen saunavuoro maksaa?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.19.answer",
+   "lang": "en",
+   "text": "Weekly programme: Mon 16–19 men's session, Tue 16–19 women's session, Wed 16–19 silent session, Thu 16–17 Peat Thursday and 17–19 public session, Fri private sessions and events only, Sat & Sun 14–19 public smoke sauna.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.19.question",
+   "lang": "en",
+   "text": "When are the public sauna sessions?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.2.answer",
+   "lang": "fi",
+   "text": "Vanhan sivuston mukaan yleiset saunavuorot kestävät viikonloppuisin kaksi tuntia ja viikolla kolme tuntia. Torstaina voi osallistua turvetorstain seremoniaan klo 16–17 ja jäädä yleiselle vuorolle klo 17–19, tai tulla vain yleiselle vuorolle.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.2.question",
+   "lang": "fi",
+   "text": "Kuinka pitkään yleiset vuorot kestävät?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.20.answer",
+   "lang": "en",
+   "text": "A swimsuit if needed, a towel, a drinking bottle and weather-appropriate clothes and shoes; in winter a beanie or sauna hat. Towels, bathrobes and slippers can be rented on site (€5).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.20.question",
+   "lang": "en",
+   "text": "What should I bring?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.21.answer",
+   "lang": "en",
+   "text": "Swimsuits are worn in mixed public sessions. On the Monday men's, Tuesday women's and Wednesday silent sessions a swimsuit is optional. In personal treatments you may be fully or partially without one.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.21.question",
+   "lang": "en",
+   "text": "Do I need a swimsuit?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.22.answer",
+   "lang": "en",
+   "text": "Hindsbyntie 124, 04130 Sipoo. Bus 841 from Itäkeskus to Broböle, then about 1 km on foot. Parking is free. Arrive no earlier than about 10 minutes before your booking and wait for staff on the terrace near the car park.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.22.question",
+   "lang": "en",
+   "text": "How do I get there and where can I park?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.23.answer",
+   "lang": "en",
+   "text": "Public sessions: free cancellation or transfer at least 48 h before (one transfer, at least 2 days before). Private sessions, events and traditional sauna evenings: free at least 14 days before; 14–7 days 50% or reschedule; under 7 days full price.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.23.question",
+   "lang": "en",
+   "text": "Can I cancel or change my booking?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.3.answer",
+   "lang": "fi",
+   "text": "Kyllä, yleiseen vuoroon voi saapua myös sen alkamisen jälkeen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.3.question",
+   "lang": "fi",
+   "text": "Voiko vuoroon saapua myöhässä?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.4.answer",
+   "lang": "fi",
+   "text": "Kaikki varaukset tehdään verkkovarausjärjestelmässä (sipoonjoenperinnesauna.johku.com). Valitse vuorotyyppi (yleinen, yksityinen, jälkilöylyt jne.), päivämäärä ja osallistujamäärä. Vahvistus ja lisäohjeet tulevat sähköpostitse.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.4.question",
+   "lang": "fi",
+   "text": "Kuinka varaan yleisen tai yksityisvuoron?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.5.answer",
+   "lang": "fi",
+   "text": "Saunavuoron lisäksi voit varata saunottajan hoidon. Tarjolla olevat hoidot ovat saunahoito 1 h (99 €), saunotus 2 h (210 €) ja syväsaunotus 3 h (290 €); hoidot toteutetaan hoitosauna Raunissa. Saunahoidossa hoito valitaan kassalla: hunaja-, vihta-, suola- tai turvehoito. Hoitojen hintaan ei sisälly pääsyä savusaunaan tai paljuihin, vaan saunavuoro varataan erikseen. Vuoron yhteyteen voi ostaa myös valmiiksi liotetun saunavihdan (13 €).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.5.question",
+   "lang": "fi",
+   "text": "Mitä palveluita voi yhdistää saunavuoroon?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.6.answer",
+   "lang": "fi",
+   "text": "Jälkilöyly on yksityinen saunavuoro yleisten vuorojen jälkeen (klo 19 alkaen), jolloin savusaunan löylyt ovat erityisen pehmeät. Yksityisvuorolla koko sauna-alue (savusauna, lämmin- ja kylmävesialtaat, laavu ja mökki) on omalla porukalla käytössä. Hinnat: jälkilöylyt alkaen 180 € / 2 h (6 hlö, lisählöt 10 €), oma saunavuoro alkaen 250 € / 2 h.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.6.question",
+   "lang": "fi",
+   "text": "Mikä on jälkilöyly tai yksityisvuoro?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.7.answer",
+   "lang": "fi",
+   "text": "Kyllä. Sauna-alueen hirsimökissä on suihku ja mökin läheisyydessä huussi. Hoitosauna Raunin asiakkailla on käytössä suihku, pukukoppi ja huussi.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.7.question",
+   "lang": "fi",
+   "text": "Onko saunalla suihku tai wc?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.8.answer",
+   "lang": "fi",
+   "text": "Uima-asu tarvittaessa, pyyhe, juomapullo sekä säänmukaiset vaatteet ja jalkineet; talvella pipo/saunahattu. Pyyhkeen, saunatakin tai tossut voi vuokrata paikan päältä (5 €).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.8.question",
+   "lang": "fi",
+   "text": "Mitä pitää ottaa mukaan?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.9.answer",
+   "lang": "fi",
+   "text": "Yleisillä sekavuoroilla käytetään uima-asua. Maanantain miestenvuorolla, tiistain naistenvuorolla ja keskiviikon hiljaisella vuorolla uima-asu on vapaaehtoinen. Saunahoidoissa voi olla kokonaan tai osittain ilman uima-asua.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "faq.9.question",
+   "lang": "fi",
+   "text": "Pitääkö käyttää uima-asua?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.entry_2.description",
+   "lang": "en",
+   "text": "Smoke sauna session for two (2 × €29).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.entry_2.description",
+   "lang": "fi",
+   "text": "Savusaunavuoro kahdelle hengelle (2 × 29 €).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.entry_2.name",
+   "lang": "en",
+   "text": "Admission for two",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.entry_2.name",
+   "lang": "fi",
+   "text": "Sisäänpääsy kahdelle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.open.description",
+   "lang": "en",
+   "text": "Any amount; valid for all services. Valid for 6 months.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.open.description",
+   "lang": "fi",
+   "text": "Vapaa summa; käy kaikkiin palveluihin. Voimassa 6 kuukautta.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.open.name",
+   "lang": "en",
+   "text": "Open gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.open.name",
+   "lang": "fi",
+   "text": "Avoin lahjakortti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.peat_mask_2.description",
+   "lang": "en",
+   "text": "Admission for two + self-guided peat mask and foot bath.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.peat_mask_2.description",
+   "lang": "fi",
+   "text": "Sisäänpääsy kahdelle + omatoiminen turvenaamio ja jalkakylpy (2 × 15 €).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.peat_mask_2.name",
+   "lang": "en",
+   "text": "Smoke sauna experience with peat mask and foot bath for two",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.peat_mask_2.name",
+   "lang": "fi",
+   "text": "Savusaunaelämys turvenaamiolla ja jalkakylvyllä kahdelle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.sauna_treatment_2.description",
+   "lang": "en",
+   "text": "Admission for two + sauna treatment for two (60 min).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.sauna_treatment_2.description",
+   "lang": "fi",
+   "text": "Sisäänpääsy kahdelle + saunahoito kahdelle (60 min).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.sauna_treatment_2.name",
+   "lang": "en",
+   "text": "Smoke sauna experience and sauna treatment for two",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.sauna_treatment_2.name",
+   "lang": "fi",
+   "text": "Savusaunaelämys ja saunahoito kahdelle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.saunotus_2.description",
+   "lang": "en",
+   "text": "Admission for two + ritual sauna bathing for two (2 h).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.saunotus_2.description",
+   "lang": "fi",
+   "text": "Sisäänpääsy kahdelle + saunotus kahdelle (2 h).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.saunotus_2.name",
+   "lang": "en",
+   "text": "Smoke sauna experience and ritual sauna bathing for two",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "giftpkg.saunotus_2.name",
+   "lang": "fi",
+   "text": "Savusaunaelämys ja saunotus kahdelle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "hours.1.session_name",
+   "lang": "fi",
+   "text": "Miestenvuoro",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "hours.1.swimsuit_rule",
+   "lang": "fi",
+   "text": "Uima-asu vapaaehtoinen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "hours.10.session_name",
+   "lang": "fi",
+   "text": "Saunarituaali-ilta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "hours.10.swimsuit_rule",
+   "lang": "fi",
+   "text": "Alaston sallittu rituaalissa; uima-asu savusaunassa ja altailla",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "hours.2.session_name",
+   "lang": "fi",
+   "text": "Naistenvuoro",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "hours.2.swimsuit_rule",
+   "lang": "fi",
+   "text": "Uima-asu vapaaehtoinen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "hours.3.session_name",
+   "lang": "fi",
+   "text": "Hiljainen vuoro",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "hours.3.swimsuit_rule",
+   "lang": "fi",
+   "text": "Uima-asu vapaaehtoinen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "hours.4.session_name",
+   "lang": "fi",
+   "text": "Turvetorstai",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "hours.5.session_name",
+   "lang": "fi",
+   "text": "Yleinen vuoro",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "hours.5.swimsuit_rule",
+   "lang": "fi",
+   "text": "Uima-asu tai pyyhe (vanha sivusto: torstain yleinen vuoro on sekavuoro)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "hours.6.session_name",
+   "lang": "fi",
+   "text": "Yksityisvuorot ja tapahtumat – ei yleistä vuoroa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "hours.7.session_name",
+   "lang": "fi",
+   "text": "Yleinen savusauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "hours.7.swimsuit_rule",
+   "lang": "fi",
+   "text": "Uima-asu (sekavuoro)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "hours.8.session_name",
+   "lang": "fi",
+   "text": "Yleinen savusauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "hours.8.swimsuit_rule",
+   "lang": "fi",
+   "text": "Uima-asu (sekavuoro)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "hours.9.session_name",
+   "lang": "fi",
+   "text": "Saunarituaali-ilta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "hours.9.swimsuit_rule",
+   "lang": "fi",
+   "text": "Alaston sallittu rituaalissa; uima-asu savusaunassa ja altailla",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "location.1.accessibility",
+   "lang": "fi",
+   "text": "Sauna-alue ei ole esteetön: alueella on jonkin verran portaita. Jos tarvitset apua liikkumiseen sauna-alueella, kerro siitä etukäteen sähköpostitse.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "location.1.description",
+   "lang": "fi",
+   "text": "Sauna-alue Sipoonjoen rannalla Sipoon Hindsbyssä, Sipoonkorven kansallispuiston kupeessa. Alueella liikutaan osittain ulkona ympäri vuoden. Alueella mm. savusauna, hoitosauna Rauni, kylmä- ja lämminvesialtaat (paljut), hirsimökki suihkuineen, huussi, laavu, terassipolku ja patio. Sipoonkorven kansallispuistoon on muutama kilometri.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "location.1.directions",
+   "lang": "fi",
+   "text": "Saavu paikalle aikaisintaan noin 10 minuuttia ennen varauksesi alkua. Saunalla on usein yksityisvuoroja, joten odota henkilökuntaa parkkipaikan läheisellä terassilla ja tutustu saunan miljööseen henkilökunnan opastuksella. Reittiohje: https://maps.app.goo.gl/jBZSyW6mm8XWQMxF6",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "location.1.name",
+   "lang": "fi",
+   "text": "Sipoonjoen perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "location.1.parking",
+   "lang": "fi",
+   "text": "Pysäköinti on asiakkaille maksuton. Seuraa pysäköintiopasteita ja jätä auto osoitetulle pysäköintialueelle. Pysäköi mahdollisimman tiiviisti, mutta jätä kulkuväylät vapaiksi. Pysäköintialueelta jatketaan jalan sauna-alueelle. Talvella ja märällä säällä tiet ja polut voivat olla liukkaita.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "location.1.public_transport",
+   "lang": "fi",
+   "text": "Bussilla 841 Itäkeskuksesta Broböleen; pysäkiltä noin kilometrin matka perinnesaunalle (HSL Reittiopas). Paikalle pääsee myös omalla autolla tai pyörällä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "location.2.description",
+   "lang": "fi",
+   "text": "Maan sisälle rakennettu savusauna, joka jättää erityisen puhdistuneen ja raikkaan olon. Valmistui vuonna 2021. Vanhan sivuston mukaan yksi harvoista vuoden jokaisena päivänä lämpiävistä savusaunoista.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "location.2.name",
+   "lang": "fi",
+   "text": "Savusauna (maasavusauna)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "location.3.description",
+   "lang": "fi",
+   "text": "Sauna-alueella sijaitseva hoito-/saunotussauna, jossa kaikki saunahoidot, saunotukset ja saunarituaalit toteutetaan (omistajan päätös 9.10.2026). Leveät lauteet. Saunan edustalla pieni alue viilentymiseen ja rauhoittumiseen. Hoitoasiakkaiden käytössä pukukoppi, suihku ja huussi. Hoitojen hintaan ei sisälly pääsyä savusaunaan tai paljuihin.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "location.3.name",
+   "lang": "fi",
+   "text": "Hoitosauna Rauni",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "location.4.description",
+   "lang": "fi",
+   "text": "Saunan edustalla kylmävesiallas ja lämminvesiallas (palju). Altaiden lämpötila vaihtelee jonkin verran sääolosuhteiden mukaan. Lämpimästä altaasta näkymä Sipoonjokilaaksoon ja vanhaan metsään. Pääsy altaisiin kuuluu yleisten saunavuorojen ja yksityisvuorojen hintaan, ei erillisiin saunahoitoihin.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "location.4.name",
+   "lang": "fi",
+   "text": "Kylmä- ja lämminvesialtaat",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "location.5.description",
+   "lang": "fi",
+   "text": "Sauna-alueella sijaitseva hirsimökki, jossa suihku. Mökin lähistöllä perinteinen huussi.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "location.5.name",
+   "lang": "fi",
+   "text": "Hirsimökki",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "location.6.description",
+   "lang": "fi",
+   "text": "Laavu on asiakkaiden vapaasti käytettävissä sauna-ajan puitteissa; omia makkaroita voi paistaa. Jälkilöylyjen alussa laavulla voi olla vielä yleisen vuoron asiakkaita klo 19–20.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "location.6.name",
+   "lang": "fi",
+   "text": "Laavu",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "location.7.description",
+   "lang": "fi",
+   "text": "Vanha, hyvin pieni hoitosauna sauna-alueella. Ei enää käytössä saunahoidoissa – kaikki hoidot tehdään hoitosauna Raunissa (omistajan päätös 9.10.2026). Vanhoissa teksteissä taivutusmuodot 'Lovessa'/'Loven'; 'Love' on kirjoitusvirhe.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "location.7.name",
+   "lang": "fi",
+   "text": "Hoitosauna Lovi",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "option.1.name",
+   "lang": "en",
+   "text": "Honey treatment",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "option.1.name",
+   "lang": "fi",
+   "text": "Hunajahoito",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "option.2.name",
+   "lang": "en",
+   "text": "Birch whisk treatment",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "option.2.name",
+   "lang": "fi",
+   "text": "Vihtahoito",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "option.3.name",
+   "lang": "en",
+   "text": "Salt treatment",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "option.3.name",
+   "lang": "fi",
+   "text": "Suolahoito",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "option.4.name",
+   "lang": "en",
+   "text": "Peat treatment",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "option.4.name",
+   "lang": "fi",
+   "text": "Turvehoito",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.1.body",
+   "lang": "fi",
+   "text": "Kauppias: Sipoonjoen perinnesauna - Havuhattu Oy. Asiakas sitoutuu noudattamaan näitä sekä kauppiaskohtaisia ehtoja ostaessaan tuotteita ja palveluja Havuhattu Oy:n Internet-palveluissa.\nVerkkopalvelussa esitetyt hinnat ovat arvonlisäverollisia. Myymme tuotteita täysi-ikäisille yksityishenkilöille sekä yritysasiakkaille. Pidätämme oikeudet hintojen muutoksiin. Asiakas vastaa antamiensa tietojen oikeellisuudesta. Pidätämme oikeuden muuttaa toimitusehtojamme; asiakkaan on ennen tilaustaan tutustuttava kulloinkin voimassa oleviin toimitusehtoihin.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.1.title",
+   "lang": "fi",
+   "text": "Kaupan ehdot: yleiset ehdot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.10.body",
+   "lang": "fi",
+   "text": "Saunalle ei tarvitse ottaa paljon tavaraa. Varaa mukaan ainakin: uima-asu tarvittaessa, pyyhe, juomapullo sekä säänmukaiset vaatteet ja jalkineet. Sauna-alueella liikutaan osittain ulkona ympäri vuoden; talvella kannattaa ottaa lämpimät, helposti jalkaan laitettavat jalkineet ja viileällä säällä pipo tai saunahattu paljussa rentoutumista varten. Omat makkarat voi ottaa mukaan paistettavaksi. Saunalla on saatavilla alkoholittomia virvokkeita. Pyyhkeen, saunatakin tai tossut voi vuokrata paikan päältä (5 €; pyyhe myös verkkokaupasta 5 €/vrk).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.10.title",
+   "lang": "fi",
+   "text": "Mitä ottaa mukaan",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.11.body",
+   "lang": "fi",
+   "text": "Uima-asun käyttö riippuu vuorosta. Yleisillä sekavuoroilla (torstain yleinen vuoro ja viikonloput) saunotaan uima-asussa (vanha sivusto: uima-asu tai pyyhe). Maanantain miestenvuorolla, tiistain naistenvuorolla ja keskiviikon hiljaisella sekavuorolla uima-asu ei ole pakollinen. Henkilökohtaisissa saunahoidoissa ja saunotuksissa voi olla oman toiveen mukaan kokonaan tai osittain ilman uima-asua.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.11.title",
+   "lang": "fi",
+   "text": "Uima-asukäytäntö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.12.body",
+   "lang": "fi",
+   "text": "Osoite: Hindsbyntie 124, 04130 Sipoo (Hindsby, Sipoonkorven kansallispuiston kupeessa). Saavu aikaisintaan noin 10 minuuttia ennen varauksen alkua. Saunalla on usein yksityisvuoroja, joten odota henkilökuntaa parkkipaikan läheisellä terassilla. Vuoroon voi saapua myös sen alkamisen jälkeen (vanha sivusto).\nJulkisilla: bussi 841 Itäkeskuksesta Broböleen, pysäkiltä noin kilometri saunalle (HSL Reittiopas). Pysäköinti on asiakkaille maksuton: seuraa opasteita, pysäköi mahdollisimman tiiviisti ja jätä kulkuväylät vapaiksi. Pysäköintialueelta jatketaan jalan sauna-alueelle; talvella ja märällä säällä tiet ja polut voivat olla liukkaita.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.12.title",
+   "lang": "fi",
+   "text": "Saapuminen, sijainti ja pysäköinti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.13.body",
+   "lang": "fi",
+   "text": "Sauna-alue ei ole esteetön, sillä alueella on portaita. Jos tarvitset apua liikkumiseen sauna-alueella, kerro siitä etukäteen sähköpostitse (savusauna@saunotus.fi). Pukuhuoneilta saunalle on noin 40 metrin matka.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.13.title",
+   "lang": "fi",
+   "text": "Esteettömyys",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.14.body",
+   "lang": "fi",
+   "text": "Hiljaisella vuorolla (ke) puhelimet ja keskustelut jäävät saunan ulkopuolelle; kuulumisia voi vaihtaa laavulla, terassilla tai saunamökillä. Kuumista löylyistä pitävät kannattaa tulla vuoron alussa; lempeämpien löylyjen ystäville viimeinen vuoro tai jälkilöylyt. Yksityisvuorojen ja jälkilöylyjen hinnat ovat voimassa vain yksityishenkilöille (yrityksille omat tuotteet). Tiistaisin naisten vuorolla saatavilla on naispuolinen saunottaja; morsiussaunan tekee aina naispuolinen saunottaja.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.14.title",
+   "lang": "fi",
+   "text": "Saunan käytännöt",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.15.body",
+   "lang": "fi",
+   "text": "Muista juoda riittävästi saunomisen aikana. Talvella ja märällä säällä alueen tiet ja polut voivat olla liukkaita. Kylmä- ja lämminvesialtaiden lämpötila vaihtelee jonkin verran sääolosuhteiden mukaan.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.15.title",
+   "lang": "fi",
+   "text": "Turvallisuus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.16.body",
+   "lang": "en",
+   "text": "Merchant: Sipoonjoki Smoke Sauna – Havuhattu Oy. Prices displayed in the online service include VAT. Products are sold to adult private individuals and business customers. Prices may change. The customer is responsible for the accuracy of their information and must review the currently valid terms before ordering.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.16.title",
+   "lang": "en",
+   "text": "Terms of sale: general terms",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.17.body",
+   "lang": "en",
+   "text": "Terms apply to rental and bookable products and services (the \"item\"). A reservation becomes binding once the order/payment confirmation is sent to the customer's email. The merchant is not responsible for failed reservations; contact the merchant immediately. If the item is no longer available, the payment is refunded or an alternative is offered where possible.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.17.title",
+   "lang": "en",
+   "text": "Reservation terms",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.18.body",
+   "lang": "en",
+   "text": "Private sessions, events and traditional sauna evenings: 14 days or more before – free cancellation and refund; less than 14 but at least 7 days – 50% charged or move to another date; less than 7 days – full price.\nPublic sessions: 48 hours or more before – free cancellation and refund or move to another date; less than 48 hours – full ticket price. A public session reservation can be transferred only once, at least 2 days before the original date; cancelling a transferred reservation is always charged in full.\nForce majeure: the merchant may cancel and the customer receives a full refund; other costs are not compensated.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.18.title",
+   "lang": "en",
+   "text": "Cancellations and changes",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.19.body",
+   "lang": "en",
+   "text": "Reliable and secure payment intermediaries are used; bank or card details are never stored. Invoicing is available only to companies and organizations; late payments incur penalty fees. Orders with an incomplete payment transaction are not processed.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.19.title",
+   "lang": "en",
+   "text": "Payment terms",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.2.body",
+   "lang": "fi",
+   "text": "Ehtoja sovelletaan vuokrattaviin ja varattaviin tuotteisiin ja palveluihin (\"kohde\"). Asiakas vastaa siitä, että tutustuu kohteen kuvaukseen, ohjeistuksiin ja varausehtoihin. Varaus on sitova, kun tilaus-/maksuvahvistus on lähetetty asiakkaan ilmoittamaan sähköpostiosoitteeseen. Asiakas maksaa varauksen valitsemansa maksutavan mukaisesti. Kauppias ei vastaa epäonnistuneesta varauksesta, vaan asiakkaan tulee viipymättä olla yhteydessä kauppiaaseen; kauppias ei takaa, että kohde on tällöin yhä vapaa. Mikäli kohde ei ole vapaa, rahat palautetaan tai tilalle tarjotaan mahdollisuuksien mukaan toista kohdetta.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.2.title",
+   "lang": "fi",
+   "text": "Varausehdot ja varaaminen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.20.body",
+   "lang": "en",
+   "text": "Registration is binding. Booking fee €200, paid at registration; refunded only with a medical certificate preventing participation, but transferable to a later equivalent course free of charge. Course fees are refunded minus a €60 administrative fee if cancelled at least 30 days before the start; within 30 days, refunds for remaining full sessions only with a medical certificate (minus €60), or transfer to a later course. VAT is added for companies. A replacement participant may be arranged. If Havuhattu Oy cancels, all fees are refunded in full.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.20.title",
+   "lang": "en",
+   "text": "Terms for trainings and long-term courses",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.21.body",
+   "lang": "en",
+   "text": "The open gift card is valid for all services at Sipoonjoen Perinnesauna for 6 months from purchase. If you cannot use it in time, the validity can be extended free of charge on request – to the date you wish, or otherwise by 3 months. Own gift card: book directly in the booking system and enter the 12-character code in the cart (\"Apply coupon\"). Elämyslahjat / Kiitoskauppa / Kokemuskauppa cards: check validity first; use the code in the middle of the card next to the expiry date (not the barcode code); choose a public session and enter the code; book any additional services with a separate order.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.21.title",
+   "lang": "en",
+   "text": "Gift cards",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.22.body",
+   "lang": "en",
+   "text": "Bring at least: a swimsuit if needed, a towel, a drinking bottle, and clothing and footwear suited to the weather – the sauna area is partly outdoors all year. In winter, bring warm, easy-to-put-on shoes and a beanie or sauna hat for the hot tub. You may bring your own sausages to grill. Non-alcoholic drinks are available. Towels, bathrobes and slippers can be rented on site (€5).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.22.title",
+   "lang": "en",
+   "text": "What to bring",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.23.body",
+   "lang": "en",
+   "text": "Swimsuit use depends on the session. Swimsuits are worn in mixed public sessions. On the Monday men's session, Tuesday women's session and Wednesday silent mixed session a swimsuit is optional. In personal sauna treatments you may be fully or partially without a swimsuit.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.23.title",
+   "lang": "en",
+   "text": "Swimsuit policy",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.24.body",
+   "lang": "en",
+   "text": "Address: Hindsbyntie 124, 04130 Sipoo (Hindsby, near Sipoonkorpi National Park). Arrive no earlier than about 10 minutes before your booking (FI original: \"aikaisintaan\"). Wait for staff on the terrace near the car park, as private sessions are often running. Bus 841 from Itäkeskus to Broböle; about 1 km walk from the stop. Parking is free; follow the signs and park compactly. Paths can be slippery in winter and wet weather.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.24.title",
+   "lang": "en",
+   "text": "Arrival, location and parking",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.25.body",
+   "lang": "fi",
+   "text": "Sipoonjoen perinnesaunan omien lahjakorttien voimassaoloa jatketaan maksutta asiakkaan toivomaan päivään asti. Jos asiakas ei toivo tiettyä päivää, voimassaoloa jatketaan 3 kuukautta pyyntöpäivästä eteenpäin. Jatkamisesta ei peritä maksua eikä siihen liity ehtoja – olet lämpimästi tervetullut saunomaan! Pyydä jatkoa sähköpostitse (savusauna@saunotus.fi) tai puhelimitse (010 299 2866).\nKolmansien osapuolten lahjakortit (Elämyslahjat, Offerilla, Kokemuskauppa): voimassaolon jatkamisesta ja vanhentuneista korteista vastaa kunkin palvelun oma asiakaspalvelu.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.25.title",
+   "lang": "fi",
+   "text": "Lahjakortin voimassaolon jatkaminen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.26.body",
+   "lang": "en",
+   "text": "Sipoonjoen perinnesauna's own gift cards are extended free of charge to the date the customer requests. If no date is requested, the validity is extended by 3 months from the day of the request. There is no fee and no conditions – you are warmly welcome to come and enjoy the sauna! Ask for an extension by email (savusauna@saunotus.fi) or phone (+358 10 299 2866).\nThird-party gift cards (Elämyslahjat, Offerilla, Kokemuskauppa): extensions and expired cards are handled by each service's own customer service.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.26.title",
+   "lang": "en",
+   "text": "Extending a gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.3.body",
+   "lang": "fi",
+   "text": "Peruutuspäivä on se päivä, jona kauppias on saanut tiedon peruutuksesta; asiakas vastaa siitä, että peruutus lähetetään riittävän ajoissa.\nYksityisvuorot, tapahtumat ja perinnesaunotusillat: peruutus vähintään 14 vrk ennen alkua maksutta (maksu palautetaan); alle 14 vrk mutta vähintään 7 vrk ennen peritään 50 % hinnasta tai varauksen voi siirtää toiseen ajankohtaan; alle 7 vrk ennen peritään koko hinta.\nYleiset vuorot: peruutus vähintään 48 h ennen alkua maksutta (maksu palautetaan) tai varauksen voi siirtää; alle 48 h ennen peritään koko pääsymaksu. Yleisen vuoron paikkavarauksen siirto: vain kerran, viimeistään 2 vrk ennen alkuperäisen varauksen alkua; jos siirretty varaus perutaan, peritään aina koko hinta.\nKauppiaan oikeus peruuttaa: ylivoimaisen esteen (force majeure) sattuessa kauppias voi perua varauksen ja ilmoittaa siitä viipymättä; asiakas saa maksun kokonaan takaisin, mutta asiakkaalle mahdollisesti syntyneitä muita kuluja ei korvata.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.3.title",
+   "lang": "fi",
+   "text": "Peruutukset ja muutokset",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.4.body",
+   "lang": "fi",
+   "text": "Kohde on määritelty kohdekuvauksessa, ja se on asiakkaan käytössä kuvauksessa määriteltynä aikana. Asiakkaalla on vuokra-aikana käyttöoikeus kohteeseen, sen varustukseen sekä erikseen määriteltyihin palveluihin. Havaituista puutteista on ilmoitettava viipymättä saunan henkilökunnalle.\nVahingot: asiakas korvaa aiheuttamansa vahingot; varaaja vastaa myös muista kohteessa vierailevista henkilöistä ja heidän aiheuttamistaan vahingoista. Kauppias ei korvaa luonnonolosuhteista (hyönteiset, eläimet, kelirikko, odottamattomat säänvaihtelut) aiheutuvaa haittaa tai kuluja.\nValitukset: tehtävä mahdollisimman nopeasti; jos tyydyttävää ratkaisua ei saada tai kyse on korvausvaatimuksesta, valitus lähetetään kirjallisesti kuukauden kuluessa vuokra-ajan päättymisestä. Kauppias käsittelee valituksen enintään kuukauden kuluessa. Erimielisyydessä asiakas voi viedä asian kuluttajariitojen ratkaisuelimen käsiteltäväksi (ehdoissa: \"kuluttajavalituslautakunta\").",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.4.title",
+   "lang": "fi",
+   "text": "Kohteen käyttö, vahingot ja valitukset",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.5.body",
+   "lang": "fi",
+   "text": "Kauppias käyttää luotettavia ja turvallisia maksuvälitystahoja eikä tallenna pankkiyhteys- tai luottokorttitietoja missään vaiheessa. Asiakas sitoutuu noudattamaan valitsemansa maksutavan ehtoja. Laskulla maksaminen on mahdollista vain yrityksille ja yhteisöille; lasku maksetaan eräpäivään mennessä ja myöhästyneisiin maksuihin lisätään viivästyskulut (jo syntyneet kulut laskutetaan erikseen). Mikäli maksutapahtumaa ei ole saatettu onnistuneesti loppuun tilaushetkellä, tilausta ei käsitellä.\nVanhan sivuston mukaan saunavuoron voi maksaa etukäteen verkkokaupassa, ja ostoksia (esim. lahjakortteja) voi maksaa myös paikan päällä kortilla.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.5.title",
+   "lang": "fi",
+   "text": "Maksuehdot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.6.body",
+   "lang": "fi",
+   "text": "Ilmoittautuminen on sitova. Varausmaksu on 200 € ja se maksetaan ilmoittautumisen yhteydessä. Varausmaksu palautetaan ainoastaan, jos osallistujalla on esittää lääkärintodistus osallistumisen estävästä syystä; varausmaksun voi kuitenkin siirtää myöhempään vastaavaan kurssiin ilman kuluja.\nMaksetut kurssimaksut palautetaan 60 € toimistokuluilla vähennettynä, jos osallistuminen perutaan vähintään 30 vrk ennen kurssin alkua. 30 vrk tai alle ennen alkua tehdyistä peruutuksista kurssimaksu palautetaan jäljellä olevien kokonaisten kurssijaksojen osalta vain lääkärintodistusta vastaan (vähennettynä 60 € toimistokuluilla); kurssimaksun voi siirtää myöhempään vastaavaan kurssiin ilman kuluja.\nYrityksille arvonlisävero lisätään kurssin hintaan. Kurssin luonteesta riippuen kurssille voi hankkia korvaavan osallistujan. Jos kurssi tai tapahtuma peruuntuu Havuhattu Oy:stä riippuvista syistä, varausmaksu ja kurssimaksut palautetaan kokonaan.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.6.title",
+   "lang": "fi",
+   "text": "Koulutusten ja pidempien kurssien ehdot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.7.body",
+   "lang": "fi",
+   "text": "Rekisterinpitäjä: Sipoonjoen perinnesauna / Havuhattu Oy (3018112-1), Hindsbyntie 124, 04130 Sipoo, 010 299 2866, savusauna@saunotus.fi. Rekisteriasioista vastaava: Joonas Vaarala. Rekisterin nimi: Sipoonjoen perinnesaunan asiakasrekisteri.\nOikeusperuste: sopimus (tilaus verkkokaupasta). Tarkoitus: verkkokaupan kaupankäynti (tilaus-, laskutus-, maksu- ja käsittelytiedot), asiakaspalvelu, asiakassuhteen ylläpito ja sähköinen markkinointi suostumuksella. Tietoja ei käytetä automatisoituun päätöksentekoon; tietoja voidaan käyttää profilointiin.\nTiedot: nimi, osoite, postitoimipaikka, maa, puhelin, sähköposti, henkilötunnus (yksityinen laskutusasiakas), tilauksen lähdesivu; yrityksiltä lisäksi nimi, Y-tunnus, verkkolaskuosoite, välittäjätunnus, viite, merkki; sekä vapaamuotoiset lisätiedot.\nSäilytys: niin kauan kuin sopimus/suostumus on voimassa, ja pidempään lakisääteisten velvoitteiden (esim. kirjanpito) vuoksi.\nLähteet: Johku-verkkopalvelun lomakkeet; puhelin-, sähköposti- ja paikan päällä tehdyt tilaukset syöttää Havuhattu Oy. Luovutukset: tietoja ei luovuteta eteenpäin; tietoja voidaan teknisesti käsitellä EU/ETA-alueen ulkopuolella.\nSuojaus: rekisteri sijaitsee Johku-palvelussa, käsittelijä Aptual Commerce Oy. Tarkastus- ja korjausoikeus Oma Johku -palvelussa (johku.com/customer) tai kirjallisesti rekisterinpitäjälle; vastaus pääsääntöisesti kuukauden kuluessa. Oikeus tulla unohdetuksi ja muut GDPR-oikeudet (kirjanpito- ja verolainsäädännön säilytysvelvoitteet huomioiden). Sivusto käyttää evästeitä, myös mainontaevästeitä (esim. Google). Laadittu 9.3.2023.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.7.title",
+   "lang": "fi",
+   "text": "Tietosuojaseloste (asiakasrekisteri)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.8.body",
+   "lang": "fi",
+   "text": "Avoin lahjakortti käy kaikkiin Sipoonjoen perinnesaunan palveluihin ja on voimassa 6 kuukautta ostopäivästä. Verkkokaupassa arvon voi valita väliltä 29–500 €; kortilla voi maksaa myös osan arvokkaammasta elämyksestä. Jos lahjakorttia ei ehditä käyttää, voimassaoloa voi pyytää jatkamaan maksutta sähköpostitse tai puhelimitse – toivomaasi päivään asti tai muuten 3 kuukautta eteenpäin.\nOma lahjakortti: varaus tehdään suoraan varausjärjestelmässä; syötä lopuksi 12-merkkinen lahjakortin koodi ostoskorissa kenttään \"käytä koodia\".\nElämyslahjat, Kiitoskauppa ja Kokemuskauppa: varmista ensin, että kortti on voimassa (vanhentuneesta Elämyslahjojen kortista ota yhteyttä Elämyslahjojen asiakaspalveluun). Käytä kortin keskiosassa voimassaolopäivän vieressä olevaa koodia – ei viivakoodin yhteydessä olevaa koodia. Valitse yleinen vuoro, tee varaus ja syötä koodi sille varattuun kenttään. Mahdolliset lisäpalvelut varataan erillisellä tilauksella.\nVanhan sivuston mukaan lahjakortteja voi maksaa myös paikan päällä kortilla.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.8.title",
+   "lang": "fi",
+   "text": "Lahjakortit ja niiden käyttö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.9.body",
+   "lang": "fi",
+   "text": "Vuosikortti (290 €) oikeuttaa rajattomiin yleisiin saunavuoroihin vuoden ajan ostopäivästä. Kortti on henkilökohtainen eikä siirrettävissä. Käytettävissä kaikilla yleisillä vuoroilla, mutta ei turvetorstaina tai muissa seremonioissa. Vuoro on varattava etukäteen, ja vain yksi varaus voi olla kerrallaan voimassa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "policy.9.title",
+   "lang": "fi",
+   "text": "Vuosikortin ehdot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product_voucher.7.note",
+   "lang": "en",
+   "text": "With an Elämyslahjat gift card: first book a regular session and buy the ritual separately.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product_voucher.7.note",
+   "lang": "fi",
+   "text": "Elämyslahjojen lahjakortilla: varaa ensin yleinen vuoro ja osta rituaali erikseen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.1.description",
+   "lang": "fi",
+   "text": "Sekavuoro, johon kaikki ovat tervetulleita. Sisältää pääsyn sauna-alueelle, kylmä- ja lämminvesialtaisiin sekä laavulle sauna-ajan puitteissa. Viikonloppuisin (la ja su) yleinen vuoro on klo 14–19 ja saunomisaika kaksi tuntia, paikka on aina varattava etukäteen ja saunotaan uima-asussa. Kuumista löylyistä pitävän kannattaa tulla ensimmäisille vuoroille, pehmeämpien löylyjen ystävän viimeiselle vuorolle tai jälkilöylyille. Torstaisin yleinen vuoro klo 17–19. Tuo oma pyyhe ja tossut (vuokraus paikan päällä 5 €). Hirsimökissä suihku, lähellä huussi.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.1.duration_text",
+   "lang": "fi",
+   "text": "la–su klo 14–19 (saunomisaika 2 h); to klo 17–19",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.1.name",
+   "lang": "en",
+   "text": "Public sauna (Sat & Sun)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.1.name",
+   "lang": "fi",
+   "text": "Yleinen vuoro (to, la-su)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.10.description",
+   "lang": "en",
+   "text": "A gentle yet deep pause with löyly (steam), warmth and natural ingredients. The treatment begins with a steam greeting ritual, after which your sauna therapist performs the treatment of your choice: honey, birch whisk, salt or peat treatment (chosen at checkout). Available for 1–4 guests; the content adapts to the size of the group. The price does not include entrance to the smoke sauna or hot tubs (tickets are sold separately). Held in the Rauni healing sauna. Sauna therapists: Laura Foon, Joonas Vaarala and Saara Mäntykoski. You may take part nude, partly or fully in swimwear.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.10.description",
+   "lang": "fi",
+   "text": "Lempeä mutta syvä pysähdys löylyn, lämmön ja luonnonantimien äärelle. Alkaa löylyntervehdysrituaalilla, jonka jälkeen saunottaja toteuttaa valitun hoidon: hunajahoito, vihtahoito, suolahoito tai turvehoito (valinta kassalla). Varattavissa 1–4 hengelle; sisältö mukautuu ryhmän kokoon. Hoidon hintaan ei sisälly pääsyä savusaunaan tai paljuihin (pääsyliput erikseen). Toteutetaan hoitosauna Raunissa. Saunottajat: Laura Foon, Joonas Vaarala ja Saara Mäntykoski. Hoitoon voi osallistua alasti, osittain tai kokonaan uima-asussa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.10.duration_text",
+   "lang": "fi",
+   "text": "1 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.10.name",
+   "lang": "en",
+   "text": "Sauna treatment",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.10.name",
+   "lang": "fi",
+   "text": "Saunahoito",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.11.description",
+   "lang": "en",
+   "text": "A two-hour, all-round sauna experience: birch whisks, plants, herbs, salt and honey, and optionally a peat treatment; incantations, whisking, techniques with löyly (steam), water and air, a float in a cool pool and herbal tea. The therapist adapts the intensity to you. Available for 1–2 guests. The price does not include entrance to the smoke sauna or hot tubs (tickets are sold separately). Held in the Rauni healing sauna. Sauna therapists: Laura Foon, Joonas Vaarala and Saara Mäntykoski. You may take part nude, partly or fully in swimwear.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.11.description",
+   "lang": "fi",
+   "text": "Kahden tunnin kokonaisvaltainen saunaelämys: vihdat, kasvit, yrtit, suola ja hunaja, halutessa turvehoito; loitsuja, vihtomista, löylyn, veden ja ilman tekniikoita, kellutus viileässä altaassa ja yrttitee. Saunottaja mukauttaa voimakkuuden asiakkaan mukaan. Varattavissa 1–2 hengelle. Hoidon hintaan ei sisälly pääsyä savusaunaan tai paljuihin (pääsyliput erikseen). Toteutetaan hoitosauna Raunissa. Saunottajat: Laura Foon, Joonas Vaarala ja Saara Mäntykoski. Hoitoon voi osallistua alasti, osittain tai kokonaan uima-asussa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.11.duration_text",
+   "lang": "fi",
+   "text": "2 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.11.name",
+   "lang": "en",
+   "text": "Sauna ritual (Saunotus)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.11.name",
+   "lang": "fi",
+   "text": "Saunotus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.12.description",
+   "lang": "en",
+   "text": "A three-hour, multi-stage sauna ritual: birch whisks, plants, herbs, salt, honey and optionally peat; incantations, rhythmic whisking, alternating warm and cool, and a float in a cool pool. Includes herbal tea and a light snack. Available for 1–2 guests. The price does not include entrance to the smoke sauna or hot tubs (tickets are sold separately). Held in the Rauni healing sauna. Sauna therapists: Laura Foon, Joonas Vaarala and Saara Mäntykoski. You may take part nude, partly or fully in swimwear.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.12.description",
+   "lang": "fi",
+   "text": "Kolmen tunnin kokonaisvaltainen saunotusrituaali useassa vaiheessa: vihdat, kasvit, yrtit, suola, hunaja ja halutessa turve; loitsuja, rytmistä vihtomista, lämpimän ja viileän vaihtelua, kellutus viileässä altaassa. Sisältää yrttiteetä ja pientä purtavaa. Varattavissa 1–2 hengelle. Hoidon hintaan ei sisälly pääsyä savusaunaan tai paljuihin (pääsyliput erikseen). Toteutetaan hoitosauna Raunissa. Saunottajat: Laura Foon, Joonas Vaarala ja Saara Mäntykoski. Hoitoon voi osallistua alasti, osittain tai kokonaan uima-asussa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.12.duration_text",
+   "lang": "fi",
+   "text": "3 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.12.name",
+   "lang": "en",
+   "text": "Deep Sauna Ritual",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.12.name",
+   "lang": "fi",
+   "text": "Syväsaunotus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.13.description",
+   "lang": "fi",
+   "text": "Perinnesaunottaja johdattaa ryhmän metsän ja saunan parantavaan maailmaan. Suunniteltu 3–6 hengelle; sisältö vaihtelee henkilömäärän mukaan ja voidaan räätälöidä (kerro toiveet lisätiedoissa). Kesto noin 3 h. Hinta ei sisällä pääsyä savusaunaan tai paljuihin (ostettavissa erikseen). Toteutetaan hoitosauna Raunissa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.13.duration_text",
+   "lang": "fi",
+   "text": "noin 3 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.13.name",
+   "lang": "fi",
+   "text": "Perinnesaunotus ryhmälle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.2.description",
+   "lang": "fi",
+   "text": "Maanantaisin miesten vuoro klo 16–19 (3 h). Voit saapua oman aikataulusi mukaan klo 16 jälkeen. Sisältää pääsyn sauna-alueelle, kylmä- ja lämminvesialtaisiin sekä laavun käytön; makkaroita voi paistaa. Uima-asu on vapaaehtoinen. Tuo oma pyyhe ja tossut tai vuokraa paikan päältä (5 €/kpl). Talvella suositellaan saunatakkia ja saunahattua tai pipoa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.2.duration_text",
+   "lang": "fi",
+   "text": "ma klo 16–19",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.2.name",
+   "lang": "en",
+   "text": "Men's sauna (Mon)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.2.name",
+   "lang": "fi",
+   "text": "Miesten sauna (ma)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.24.description",
+   "lang": "fi",
+   "text": "Satunnainen palvelu: opiskelijoiden tekemiä saunahoitoja tarjotaan vain muutaman kerran vuodessa saunottajakoulutusten yhteydessä, erikseen ilmoitettuina päivinä – ei säännöllisesti varattavissa. Perinteinen saunahoito opiskelijahintaan: saunahierontaa, turvehoitoja ja vihdontaa; hoitoa ei voi valita, vaan se määräytyy koulutuksen teeman mukaan. Hoitajina Terve Löyly -saunottajakoulutuksen opiskelijat saunottajien opastuksessa. Hoidon hintaan ei kuulu pääsy savusaunaan tai paljuihin. Järjestetään erikseen ilmoitettuina päivinä (viimeksi 26.9.2026 klo 13–18).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.24.duration_text",
+   "lang": "fi",
+   "text": "30 min",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.24.name",
+   "lang": "fi",
+   "text": "Saunahoito opiskelijatyönä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.25.description",
+   "lang": "fi",
+   "text": "Koko Sipoonjoen perinnesaunan miljöö omaan käyttöön (esim. ilta ystävien kanssa, synttärit, polttarit). Sisältää savusaunan, lämmin- ja kylmävesialtaat sekä laavun ja hirsimökin vapaan käytön. Tilat voi vuokrata ennen yleisiä vuoroja tai koko päiväksi. Hinnat ovat voimassa ainoastaan yksityishenkilöille; yrityksille omat tuotteet.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.25.duration_text",
+   "lang": "fi",
+   "text": "1–7 h vaihtoehdot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.25.name",
+   "lang": "en",
+   "text": "Private sauna session",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.25.name",
+   "lang": "fi",
+   "text": "Oma savusaunavuoro",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.26.description",
+   "lang": "fi",
+   "text": "Yleisten vuorojen jälkeen viipyilevät ja pehmeät jälkilöylyt omalle porukalle klo 19 alkaen klo 21 saakka viikolla ja klo 22 saakka viikonloppuisin. Sisältää savusaunan, lämmin- ja kylmävesialtaat sekä laavun vapaan käytön. Jälkilöylyt huomioidaan lämmityksessä. Perushinta sisältää 6 osallistujaa, sen jälkeen 10 €/hlö. Hinnat ovat voimassa ainoastaan yksityishenkilöille; yrityksille omat tuotteet.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.26.duration_text",
+   "lang": "fi",
+   "text": "2 h (ma–to klo 19–21), 3 h (pe–su klo 19–22)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.26.name",
+   "lang": "en",
+   "text": "After Session Sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.26.name",
+   "lang": "fi",
+   "text": "Savusaunan jälkilöylyt",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.27.description",
+   "lang": "fi",
+   "text": "Saunottajan palvelut omalle porukalle jälkilöylyille. Valitse yksi kolmesta: 1) ohjattu ryhmäsaunaseremonia (ryhmävihdonta, yrttilöylyt, saunaloitsut, vihtapesu); 2) ohjatut minisaunahoidot koko porukalle tarvikkeineen; 3) opastus vihdontaperinteeseen ja itsevihdontaan (muutama vihta mukana). Halutessa ohjattu löylyntervehdys. Hinta sisältää saunottajan palvelut 1–8 hengelle; isommat ryhmät: savusauna@saunotus.fi.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.27.duration_text",
+   "lang": "fi",
+   "text": "1 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.27.name",
+   "lang": "fi",
+   "text": "Perinnesaunotus jälkilöylyille",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.28.description",
+   "lang": "fi",
+   "text": "Saunottajan palvelut omalle yksityisvuorolle (samat kolme vaihtoehtoa kuin jälkilöylyille). Seremonian kesto 1–8 hengelle noin 1,5 h ja 9–16 hengelle 2 h. Hinta sisältää vain saunottajan palvelut, ei saunan vuokraa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.28.duration_text",
+   "lang": "fi",
+   "text": "n. 1,5 h (1–8 hlö), 2 h (9–16 hlö)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.28.name",
+   "lang": "fi",
+   "text": "Perinnesaunotus yksityisvuorolle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.29.description",
+   "lang": "fi",
+   "text": "Morsiamelle mahdollisuus hiljentyä, päästää irti menneestä ja valmistautua uuteen elämänvaiheeseen. Ohjattu saunaseremonia: opastus morsiussaunaperinteeseen, seremoniavihdonta morsiamelle, ruusukuorinta, yrttilöylyt, lemmenloitsuja ja morsiustaikoja toiveiden mukaan. Seremonian kesto n. 1 h, jonka jälkeen voi jäädä viettämään iltaa omalla porukalla. Morsiussaunan tekee aina naispuolinen saunottaja. Maksimiosallistujamäärä 8 hlö; isommat ryhmät sähköpostitse savusauna@saunotus.fi.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.29.duration_text",
+   "lang": "fi",
+   "text": "seremonia n. 1 h, varaus 3 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.29.name",
+   "lang": "en",
+   "text": "Bridal sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.29.name",
+   "lang": "fi",
+   "text": "Morsiussauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.3.description",
+   "lang": "fi",
+   "text": "Tiistait on pyhitetty naisille: naisten vuoro klo 16–19 (3 h). Sisältää pääsyn sauna-alueelle, kylmä- ja lämminvesialtaisiin sekä laavun ja hirsimökin käytön. Uima-asu on vapaaehtoinen. Tuo oma pyyhe ja tossut tai vuokraa paikan päältä (5 €/kpl). Jos toivot naispuolista saunottajaa hoitoon, suositellaan varaamaan hoito tiistain naisten vuoron yhteyteen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.3.duration_text",
+   "lang": "fi",
+   "text": "ti klo 16–19",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.3.name",
+   "lang": "en",
+   "text": "Women's sauna (Tue)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.3.name",
+   "lang": "fi",
+   "text": "Naisten sauna (ti)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.30.description",
+   "lang": "fi",
+   "text": "Syntymäpäivän saunotus: pestään pois vanha ja turha, tasapainotetaan ja annetaan voimaa tulevaan vuoteen. Sisältää ohjatun saunaseremonian, toiveiden mukaan vihdontaa tai minihoitoja sekä löylyn luontia ja lempeää ilmavihdontaa. Seremonian kesto n. 1 h. Seremonian jälkeen voi nauttia maasavusaunan löylyistä sekä kylmä- ja lämminpaljuista. Maksimiosallistujamäärä 8 hlö; isommat ryhmät: savusauna@saunotus.fi.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.30.duration_text",
+   "lang": "fi",
+   "text": "seremonia n. 1 h; varaus 2–3 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.30.name",
+   "lang": "en",
+   "text": "Birthday sauna ceremony",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.30.name",
+   "lang": "fi",
+   "text": "Synttärisauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.31.description",
+   "lang": "fi",
+   "text": "Turvesaunaseremonia ryhmälle: ohjattu ensilöylyseremonia, saunottajan ohjaama kokovartaloturvehoito sekä löylyn luontia ja lempeää ilmavihdontaa. Turve imee epäpuhtauksia iholta ja hoitaa ihoa, päänahkaa ja hiuspohjaa. Seremonian kesto n. 1 h. Seremonian jälkeen voi nauttia maasavusaunan löylyistä sekä kylmä- ja lämminpaljuista. Maksimiosallistujamäärä 8 hlö; isommat ryhmät: savusauna@saunotus.fi.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.31.duration_text",
+   "lang": "fi",
+   "text": "seremonia n. 1 h; varaus 2–3 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.31.name",
+   "lang": "en",
+   "text": "Peat sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.31.name",
+   "lang": "fi",
+   "text": "Turvesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.32.description",
+   "lang": "fi",
+   "text": "Saunan naisten (Laura ja Saara) ohjaama jouluinen saunailta: savusaunan löylyt, kylmä- ja lämminvesipaljut, alku- ja loppujuomat, havuinen löylyvesi, lempeää vihdontaa, löylyn tervehdysseremonia, pientä purtavaa, pellavaiset laudeliinat ja saunahoitoja. Saavu omassa tahdissa, kuitenkin klo 16.45 mennessä; saunotus alkaa klo 17.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.32.duration_text",
+   "lang": "fi",
+   "text": "pe 18.12.2026 klo 16–19",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.32.name",
+   "lang": "fi",
+   "text": "Naisten jouluinen saunailta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.33.description",
+   "lang": "fi",
+   "text": "Kekrijuhla pyhäinpäivänä 31.10.2026: kekritulet, sadonkorjuun antimet ja saunottajien ohjaama, tavallista pidempi kekrisauna rituaalisauna Raunissa (yrttihoidot, havuilla luotu löyly edesmenneille). Hintaan sisältyy pitkä kekrisaunotus, kevyt sadonkorjuuiltapala, ohjattu kekritulirituaali ja vapaata yhdessäoloa. Ota mukaan saunatarpeet (kylpytakki, pyyhe, lipokkaat, halutessa uima-asu, saunajuoma), lämmintä vaatetta, pieni lahja edesmenneille ja halutessa jotain yhteiseen pöytään.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.33.duration_text",
+   "lang": "fi",
+   "text": "31.10.2026, n. 4 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.33.name",
+   "lang": "fi",
+   "text": "Sipoonjoen Kekri",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.34.description",
+   "lang": "fi",
+   "text": "Yhteisöpäivä Terve Löyly -saunottajakoulutuksen käyneille saunottajille 20.2.2027 klo 11–20: syventäviä teemoja, saunottajan polun haasteita ja toinen toistensa hoitamista. Hinta sisältää saunottajien ohjauksen, lämpimät saunat, saunotustarvikkeet, yrttiteetä ja pientä purtavaa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.34.duration_text",
+   "lang": "fi",
+   "text": "20.2.2027 klo 11–20",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.34.name",
+   "lang": "fi",
+   "text": "Saunottajien yhteisöpäivä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.35.description",
+   "lang": "fi",
+   "text": "Terve Löyly -saunottajakoulutus: lähiopetusta kuutena viikonloppuna (pe klo 19–22 seremonia savusaunassa; la–su klo 9–16: teoria 9–13, käytännön havainnollistus 13.30–14.30, harjoittelu hoito-/telttasaunassa 14.30–16) sekä ohjattua asiakastyöharjoittelua yleisten vuorojen yhteydessä. Koulutuksen hinta 2400 €; sisältää lähiviikonloput savusaunaelämyksineen ja saunotusharjoittelun, ei ruokailuja eikä majoitusta. Paikka varataan maksamalla varausmaksu 200 €, joka vähennetään loppusummasta. Lisätiedot: https://saunakoulutus.fi/ Ajankohta 4.9.2026–16.5.2027. Tila verkkokaupassa: Loppuunmyyty.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.35.duration_text",
+   "lang": "fi",
+   "text": "6 viikonloppua 4.9.2026–16.5.2027",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.35.name",
+   "lang": "fi",
+   "text": "Saunottajakoulutus - Syksy 2026 (varausmaksu)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.36.description",
+   "lang": "fi",
+   "text": "Terve Löyly -saunottajakoulutus: lähiopetusta kuutena viikonloppuna (pe klo 19–22 seremonia savusaunassa; la–su klo 9–16: teoria 9–13, käytännön havainnollistus 13.30–14.30, harjoittelu hoito-/telttasaunassa 14.30–16) sekä ohjattua asiakastyöharjoittelua yleisten vuorojen yhteydessä. Koulutuksen hinta 2400 €; sisältää lähiviikonloput savusaunaelämyksineen ja saunotusharjoittelun, ei ruokailuja eikä majoitusta. Paikka varataan maksamalla varausmaksu 200 €, joka vähennetään loppusummasta. Lisätiedot: https://saunakoulutus.fi/ Ajankohtaa ei ilmoitettu tuotesivulla.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.36.name",
+   "lang": "fi",
+   "text": "Saunottajakoulutus - kevät & syksy 2027 (varausmaksu)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.38.description",
+   "lang": "fi",
+   "text": "Arvolahjakortti, jonka arvon voi valita vapaasti välillä 29–500 € (ehdotukset 29 €, 250 €, 500 €). Ei sidottu tiettyyn tuotteeseen; käy kaikkiin palveluihin ja sillä voi maksaa osan arvokkaammasta elämyksestä. Voimassa kuusi kuukautta ostohetkestä; voidaan toimittaa suoraan vastaanottajalle. Jos lahjakorttia ei ehditä käyttää, voimassaoloa voi pyytää jatkamaan maksutta sähköpostitse tai puhelimitse – toivomaasi päivään asti tai muuten 3 kuukautta eteenpäin.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.38.name",
+   "lang": "en",
+   "text": "Gift Card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.38.name",
+   "lang": "fi",
+   "text": "Avoin lahjakortti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.39.description",
+   "lang": "fi",
+   "text": "Lahjakortti: paikka yleiselle saunavuorolle ja valmiiksi liotettu koivuvihta.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.39.name",
+   "lang": "fi",
+   "text": "Savusaunaelämys ja koivuvihta -lahjakortti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.4.description",
+   "lang": "fi",
+   "text": "Keskiviikkoisin hiljainen sekavuoro klo 16–19 (3 h): puhelimet ja keskustelut jäävät saunan ulkopuolelle, kuulumisia voi vaihtaa laavulla tai terassilla. Voit saapua klo 16 jälkeen oman aikataulusi mukaan. Sisältää pääsyn sauna-alueelle, kylmä- ja lämminvesialtaisiin ja laavulle. Uima-asu on vapaaehtoinen. Pyyhe ja tossut omat tai vuokralla (5 €/kpl).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.4.duration_text",
+   "lang": "fi",
+   "text": "ke klo 16–19",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.4.name",
+   "lang": "en",
+   "text": "Silent sauna (Wed)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.4.name",
+   "lang": "fi",
+   "text": "Hiljainen sauna (ke)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.40.description",
+   "lang": "fi",
+   "text": "Lahjakortti: paikka yleiselle saunavuorolle sekä 60 min vapaavalintainen hoito yhdelle. Hoidon yhteydessä savusauna, kylmä- ja lämminvesialtaat ja nuotiopaikka.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.40.name",
+   "lang": "fi",
+   "text": "Savusaunaelämys ja saunahoito -lahjakortti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.41.description",
+   "lang": "fi",
+   "text": "Lahjakortti kahdelle: paikat yleiselle saunavuorolle ja 60 minuutin saunahoito kahdelle.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.41.name",
+   "lang": "fi",
+   "text": "Savusaunaelämys ja saunahoito kahdelle -lahjakortti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.42.description",
+   "lang": "fi",
+   "text": "Lahjakortti kahdelle: paikat yleiselle vuorolle, turvenaamio ja jalkakylpy (merisuola ja saunan ympäristöstä poimitut yrtit); hoidot tehdään omatoimisesti saunomisen yhteydessä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.42.name",
+   "lang": "fi",
+   "text": "Savusaunaelämys turvenaamiolla ja jalkakylvyllä kahdelle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.43.description",
+   "lang": "fi",
+   "text": "Rajattomat yleiset saunavuorot vuoden ajan. Henkilökohtainen, ei siirrettävissä. Voimassa yhden vuoden ostopäivästä. Käytettävissä kaikilla yleisillä vuoroilla, ei turvetorstaina tai muissa seremonioissa. Vuoro varattava etukäteen; vain yksi varaus voi olla kerrallaan voimassa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.43.duration_text",
+   "lang": "fi",
+   "text": "1 vuosi",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.43.name",
+   "lang": "fi",
+   "text": "Vuosikortti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.44.description",
+   "lang": "fi",
+   "text": "Koivusta valmistettu saunavihta, tarjoillaan liotettuna ja valmiina vihdontaan; ennakkoon tilatut vihdat valmistellaan saunavuoroa varten.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.44.name",
+   "lang": "en",
+   "text": "Saunavihta (birch whisk)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.44.name",
+   "lang": "fi",
+   "text": "Saunavihta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.45.description",
+   "lang": "fi",
+   "text": "Omatoiminen turvenaamio ja jalkakylpy (kylpysuola-yrttisekoitus) saunomisen yhteydessä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.45.name",
+   "lang": "fi",
+   "text": "Jalkakylpy ja turvenaamio",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.46.description",
+   "lang": "fi",
+   "text": "Pellavainen vuokrapyyhe.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.46.name",
+   "lang": "en",
+   "text": "Rental towel",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.46.name",
+   "lang": "fi",
+   "text": "Pyyhe vuokralle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.47.description",
+   "lang": "fi",
+   "text": "Paikan päältä voi vuokrata tai ostaa pyyhkeen, saunatakin tai tossut. Verkkokaupan tuotesivuilla: pyyhe- ja tossuvuokra 5 €. Vanhan sivuston mukaan 5 € / pyyhe, saunatakki tai tossut.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.47.name",
+   "lang": "fi",
+   "text": "Tossujen tai saunatakin vuokra (paikan päällä)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.48.description",
+   "lang": "fi",
+   "text": "Työporukalle ryhmäytymiseen ja rentoutumiseen. Käytössä savusauna, lämmin palju, kylmävesiallas, laavu ja hirsimökki. Hinta sisältää 2 kpl valmiiksi liotettuja koivuisia saunavihtoja. ALV 25,5 %. Perjantaisin kaksi varausaikaa: 12–21 tai 16–21; koko päivän varauksessa sauna käytettävissä klo 14 alkaen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.48.duration_text",
+   "lang": "fi",
+   "text": "2 h / 5 h / 9 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.48.name",
+   "lang": "fi",
+   "text": "Savusaunavuoro yrityksille",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.49.description",
+   "lang": "fi",
+   "text": "Omalla firman porukalla jälkilöylyihin yleisten vuorojen jälkeen klo 19 alkaen. Sisältää savusaunan, lämmin- ja kylmävesialtaat sekä laavun vapaan käytön. Laavulla voi olla vielä ihmisiä klo 19–20.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.49.duration_text",
+   "lang": "fi",
+   "text": "2–3 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.49.name",
+   "lang": "fi",
+   "text": "Savusaunan jälkilöylyt yrityksille",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.5.description",
+   "lang": "fi",
+   "text": "Turvesaunavuoro torstaisin klo 16–19 (3 h). Vuoro alkaa klo 16 omatoimisella saunomisella; klo 16.30 alkaen saunottaja ohjaa yhteisen turveseremonian (löylyntervehdys, vihdoilla lämmittely ja opastus hoitoturpeen käyttöön). Sisältää turveseremonian, hoitoturpeen kasvoille sekä pääsyn sauna-alueelle, kylmä- ja lämminvesialtaisiin ja laavulle. Vuorolla kylvetään uima-asussa. Pyyhe ja tossut omat tai vuokralla 5 €/kpl.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.5.duration_text",
+   "lang": "fi",
+   "text": "to klo 16–19",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.5.name",
+   "lang": "en",
+   "text": "Peat Thursday",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.5.name",
+   "lang": "fi",
+   "text": "Turvetorstai (to)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.50.description",
+   "lang": "fi",
+   "text": "Savusauna tarjoaa ympäristön työhyvinvointipäiville, pienryhmille ja yhteisille saunailloille. Saunavuorojen, rituaalien ja hoitojen lisäksi päivään voidaan yhdistää esim. metsäkävely, metsäjooga, eräruokailu laavulla tai vihdansidontatyöpaja. Hinnat tarjouspyynnöstä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.50.name",
+   "lang": "en",
+   "text": "Company & group days",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.50.name",
+   "lang": "fi",
+   "text": "Työhyvinvointipäivät ja ryhmät (tarjouspyyntö)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.6.description",
+   "lang": "fi",
+   "text": "Tunnin mittainen saunavuoro sekasaunassa lauantaisin ja sunnuntaisin klo 14 ja klo 18. Sisältää pääsyn sauna-alueelle, kylmä- ja lämminvesialtaisiin ja laavulle. Saunotaan uima-asussa; avoin kaikille. Paikka varattava etukäteen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.6.duration_text",
+   "lang": "fi",
+   "text": "1 h, la–su klo 14 tai 18",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.6.name",
+   "lang": "fi",
+   "text": "Tunnin saunavuoro (la-su)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.7.description",
+   "lang": "en",
+   "text": "Open sauna ritual on Saturdays and Sundays: the session starts with a 20-minute sauna ritual in the healing sauna Rauni (small group, max. 6 participants), after which you move on to the smoke sauna. Includes a löyly greeting, light warming vihta whisking and a seasonal mini treatment, plus access to the sauna area, the pools and the lean-to (laavu). You are welcome to join the ritual naked, but swimwear is worn in the smoke sauna and the hot tubs. The programme changes with the seasons.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.7.description",
+   "lang": "fi",
+   "text": "Avoin saunarituaali lauantaisin ja sunnuntaisin: vuoro alkaa 20 minuutin saunotusrituaalilla hoitosauna Raunissa (pienryhmä, enintään 6 osallistujaa), josta siirrytään savusaunaan. Sisältää löylyntervehdyksen, kevyttä lämmittelyvihdontaa ja vuodenkierron mukaisen minihoidon sekä pääsyn sauna-alueelle, altaisiin ja laavulle. Rituaaliin voi tulla alasti, mutta savusaunassa ja paljuissa käytetään uima-asua. Ohjelma vaihtuu vuodenaikojen mukaan.",
+   "version": 2,
+   "placeholders": []
+  },
+  {
+   "key": "product.7.duration_text",
+   "lang": "fi",
+   "text": "rituaali 20 min + tauko 10 min + savusauna 1 h 30 min (yhteensä 2 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.7.name",
+   "lang": "en",
+   "text": "Sauna Ritual & Smoke Sauna Session",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.7.name",
+   "lang": "fi",
+   "text": "Saunarituaali ja savusaunavuoro (la & su)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.8.description",
+   "lang": "en",
+   "text": "A short sauna ritual in the Rauni healing sauna (up to six guests at a time): a greeting of the steam (löyly), gentle warming with birch whisks and a mini treatment that follows the turning of the seasons. Duration 20 minutes; the ritual starts at 16:00, 16:30 or 17:00. The ritual can be booked on its own – no other booking is required. You may take part in swimwear or nude.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.8.description",
+   "lang": "fi",
+   "text": "Lyhyt saunotusrituaali hoitosauna Raunissa (enintään kuusi henkeä kerrallaan): löylyntervehdys, kevyttä lämmittelyvihdontaa ja vuodenkierron mukainen minihoito. Kesto 20 minuuttia; rituaali alkaa klo 16.00, 16.30 tai 17.00. Rituaalin voi varata yksinään – se ei vaadi muuta varausta. Voi osallistua uimapuvussa tai alasti.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.8.duration_text",
+   "lang": "fi",
+   "text": "20 min",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.8.name",
+   "lang": "en",
+   "text": "Short sauna ritual",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.8.name",
+   "lang": "fi",
+   "text": "Saunotusrituaali",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.9.description",
+   "lang": "fi",
+   "text": "Saunottajan ohjaama saunaseremonia savusaunassa, jossa hyödynnetään vuodenajan antimia, kasveja, vihtoja ja saunaloitsuja; illan teema seuraa vuodenkiertoa. Sisältää pääsyn sauna-alueelle, altaisiin ja laavulle; seremonian jälkeen voi jatkaa saunomista. Järjestetään noin 1–2 kertaa kuukaudessa (syksyllä noin kerran kuussa jouluun asti). Pyyhe ja tossut omat tai pyyhe vuokralla 5 €.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.9.duration_text",
+   "lang": "fi",
+   "text": "1 h 30 min",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.9.name",
+   "lang": "en",
+   "text": "Traditional sauna evening",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "product.9.name",
+   "lang": "fi",
+   "text": "Perinnesaunotusilta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.1.label",
+   "lang": "fi",
+   "text": "Miesten sauna ma 16–19",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.10.label",
+   "lang": "fi",
+   "text": "Yleinen vuoro la–su 16:30 (2 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.11.label",
+   "lang": "fi",
+   "text": "Yleinen vuoro la–su 17:00 (2 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.12.label",
+   "lang": "fi",
+   "text": "Tunnin saunavuoro la–su 14:00",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.13.label",
+   "lang": "fi",
+   "text": "Tunnin saunavuoro la–su 18:00",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.14.label",
+   "lang": "fi",
+   "text": "Oma savusaunavuoro la–su 13–14 (1 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.15.label",
+   "lang": "fi",
+   "text": "Oma savusaunavuoro la–su 13–15 (2 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.16.label",
+   "lang": "fi",
+   "text": "Oma savusaunavuoro pe 14–21 (7 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.17.label",
+   "lang": "fi",
+   "text": "Oma savusaunavuoro pe 16–21 (5 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.18.label",
+   "lang": "fi",
+   "text": "Oma savusaunavuoro pe 14–16 (2 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.19.label",
+   "lang": "fi",
+   "text": "Oma savusaunavuoro ma–pe 16–19 (3 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.2.label",
+   "lang": "fi",
+   "text": "Naisten sauna ti 16–19",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.20.label",
+   "lang": "fi",
+   "text": "Oma savusaunavuoro ma–to 14–16 esilöylyt (2 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.22.label",
+   "lang": "fi",
+   "text": "Jälkilöylyt ma–to 19–21 (2 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.23.label",
+   "lang": "fi",
+   "text": "Jälkilöylyt pe 19–22 (3 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.24.label",
+   "lang": "fi",
+   "text": "Jälkilöylyt la 19–22 (3 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.25.label",
+   "lang": "fi",
+   "text": "Jälkilöylyt su 19–22 (3 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.26.label",
+   "lang": "fi",
+   "text": "Savusaunavuoro yrityksille pe 12–21 (9 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.27.label",
+   "lang": "fi",
+   "text": "Savusaunavuoro yrityksille pe 16–21 (5 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.28.label",
+   "lang": "fi",
+   "text": "Savusaunavuoro yrityksille ma–to 14–16 (2 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.29.label",
+   "lang": "fi",
+   "text": "Jälkilöylyt yrityksille la–su 19–22 (3 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.3.label",
+   "lang": "fi",
+   "text": "Hiljainen sauna ke 16–19",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.30.label",
+   "lang": "fi",
+   "text": "Jälkilöylyt yrityksille ma–to 19–21 (2 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.4.label",
+   "lang": "fi",
+   "text": "Turvetorstai to 16–19 (turvesauna 16–17, jää yleiselle vuorolle 17–19)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.5.label",
+   "lang": "fi",
+   "text": "Yleinen vuoro to 17–19",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.6.label",
+   "lang": "fi",
+   "text": "Yleinen vuoro la–su 14:00 (2 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.7.label",
+   "lang": "fi",
+   "text": "Yleinen vuoro la–su 14:30 (2 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.8.label",
+   "lang": "fi",
+   "text": "Yleinen vuoro la–su 15:00 (2 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "schedule.9.label",
+   "lang": "fi",
+   "text": "Yleinen vuoro la–su 16:00 (2 h)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "timeline.1.label",
+   "lang": "en",
+   "text": "ritual",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "timeline.1.label",
+   "lang": "fi",
+   "text": "rituaali",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "timeline.2.label",
+   "lang": "en",
+   "text": "break",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "timeline.2.label",
+   "lang": "fi",
+   "text": "tauko",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "timeline.3.label",
+   "lang": "en",
+   "text": "smoke sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "timeline.3.label",
+   "lang": "fi",
+   "text": "savusauna",
+   "version": 1,
+   "placeholders": []
+  }
+ ],
+ "context": {
+  "catalog": [
+   {
+    "id": 1,
+    "price": 29,
+    "duration_minutes": 120
+   },
+   {
+    "id": 6,
+    "price": 18,
+    "duration_minutes": 60
+   },
+   {
+    "id": 2,
+    "price": 29,
+    "duration_minutes": 180
+   },
+   {
+    "id": 3,
+    "price": 29,
+    "duration_minutes": 180
+   },
+   {
+    "id": 4,
+    "price": 29,
+    "duration_minutes": 180
+   },
+   {
+    "id": 5,
+    "price": 35,
+    "duration_minutes": 180
+   },
+   {
+    "id": 25,
+    "price": 250,
+    "duration_minutes": 120
+   },
+   {
+    "id": 26,
+    "price": 180,
+    "duration_minutes": 120
+   },
+   {
+    "id": 48,
+    "price": 350,
+    "duration_minutes": 120
+   },
+   {
+    "id": 49,
+    "price": 250,
+    "duration_minutes": 120
+   },
+   {
+    "id": 7,
+    "price": 49,
+    "duration_minutes": 120
+   },
+   {
+    "id": 8,
+    "price": 20,
+    "duration_minutes": 20
+   },
+   {
+    "id": 10,
+    "price": 99,
+    "duration_minutes": 60
+   },
+   {
+    "id": 11,
+    "price": 210,
+    "duration_minutes": 120
+   },
+   {
+    "id": 12,
+    "price": 290,
+    "duration_minutes": 180
+   }
+  ],
+  "settings": {
+   "timezone": "Europe/Helsinki",
+   "hold_minutes": 15,
+   "business_name": "Sipoonjoen perinnesauna",
+   "articles_path_en": "/en/sauna-knowledge/",
+   "articles_path_fi": "/saunatietoa/",
+   "articles_label_en": "Sauna knowledge",
+   "articles_label_fi": "Saunatietoa",
+   "public_payment_mode": "hold_until_paid",
+   "booking_horizon_days": 120,
+   "public_booking_enabled": true,
+   "customer_change_hours_before": 48,
+   "public_treatment_horizon_days": 14
+  }
+ }
+}

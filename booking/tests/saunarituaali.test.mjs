@@ -15,7 +15,9 @@ cpSync(new URL('../shared/sb.js', import.meta.url), join(tmp, 'sb.js'));
 const A = await import(pathToFileURL(join(tmp, 'treatments.js')));
 const SB = await import(pathToFileURL(join(tmp, 'sb.js')));
 const { T } = await import(pathToFileURL(join(tmp, 'i18n.js')));
-const FX = JSON.parse(readFileSync(new URL('./fixtures/prod-package-7.json', import.meta.url), 'utf8'));   // tuotannon public_catalog() / public_treatment_availability(7,…) (vain luku)
+const FX = JSON.parse(readFileSync(new URL('./fixtures/prod-package-7.json', import.meta.url), 'utf8'));   // tuotannon public_catalog() / public_treatment_availability(7,…) (vain luku); katalogirivi ENNEN booking_61:tä (ei timeline-kenttiä)
+const FX61 = JSON.parse(readFileSync(new URL('./fixtures/prod-catalog-61.json', import.meta.url), 'utf8'));   // tuotannon public_catalog() / public_addons() / public_settings() booking_61:n jälkeen (vain luku)
+const P7 = () => A.splitCatalog(FX61.catalog, new Map()).treatments.find((x) => x.id === 7);   // tuote 7 kentin (timeline, timeline_text, voucher_note, description_en)
 const row = (id) => FX.catalog.find((r) => r.id === id);
 const norm = (s) => String(s).replace(/\s+/g, ' ').trim();
 const STATIC = new Map([[7, { id: 7, slug: 'saunarituaali-ja-savusaunavuoro', name: 'x', duration_text: 'rituaali 20 min + savusauna 1 h 40 min (verkkokauppa)', description: 'kb-kuvaus' }]]);   // vanhentunut kb-snapshot
@@ -92,35 +94,61 @@ test('saatavuusvirhe (busy / bad_range) heitetään ApiErrorina; ei hiljaa tyhj�
   SB.setRpcOverride(null);
 });
 
-// ---- aikajana ----
-test('aikajana: rituaali 20 (alku 0) · savusauna 90 (alku 30) = 120 min, ei taukojaksoa; vain kb 7', () => {
-  assert.deepEqual(A.timelineOf({ id: 7 }).map((x) => [x.key, x.start, x.min]), [['ritual', 0, 20], ['smoke', 30, 90]]);
-  assert.ok(!A.timelineOf({ id: 7 }).some((x) => x.key === 'break'), 'taukoa ei ole asiakkaalle näkyvänä jaksona');
-  assert.equal(A.timelineOf({ id: 7 }).reduce((a, x) => a + x.min, 0), 110, 'näkyvät jaksot 20 + 90 (väli 10 min on sisäinen)');
-  assert.equal(A.timelineMinutes({ id: 7 }), 120); assert.equal(A.isPackage({ id: 7 }), true);
-  for (const id of [8, 10, 11, 12]) { assert.equal(A.isPackage({ id }), false); assert.equal(A.timelineOf({ id }), null); assert.deepEqual(A.timelineSlots({ id }, '2026-10-25T14:00:00Z'), []); }
+// ---- aikajana (booking_61: public_catalog().timeline / timeline_text; ei kovakoodattua PACKAGE_TIMELINES) ----
+test('aikajana kannasta: rituaali 20 (alku 0) · savusauna 90 (alku 30) = 120 min, sisäinen tauko ei asiakkaalle; vain tuote jolla kenttä on', () => {
+  const p = P7();
+  assert.deepEqual(A.timelineOf(p).map((x) => [x.key, x.start, x.min]), [['ritual', 0, 20], ['smoke_sauna', 30, 90]]);
+  assert.ok(!A.timelineOf(p).some((x) => x.key === 'break'), 'taukoa ei ole asiakkaalle näkyvänä jaksona');
+  assert.deepEqual(A.timelineOf(p).map((x) => [x.label, x.label_en]), [['rituaali', 'ritual'], ['savusauna', 'smoke sauna']], 'jaksojen nimet kannasta (FI + EN)');
+  assert.equal(A.timelineOf(p).reduce((a, x) => a + x.min, 0), 110, 'näkyvät jaksot 20 + 90 (väli 10 min on sisäinen)');
+  assert.equal(A.timelineMinutes(p), 120); assert.equal(A.isPackage(p), true);
+  assert.equal(A.PACKAGE_TIMELINES, undefined, 'kovakoodattu PACKAGE_TIMELINES poistettu');
+  for (const id of [8, 10, 11, 12]) { const q = { id }; assert.equal(A.isPackage(q), false); assert.equal(A.timelineOf(q), null); assert.deepEqual(A.timelineSlots(q, '2026-10-25T14:00:00Z'), []); }
+  assert.equal(A.isPackage({ id: 7 }), false, 'id yksin ei riitä: aikajana tulee vain kentästä');
 });
-test('timelineSlots: kellonajat Helsingin ajassa (kesä- ja talviaika)', () => {
-  const f = (iso) => A.timelineSlots({ id: 7 }, iso).map((x) => `${x.key} ${x.from}–${x.to}`);
+test('varakäyttäytyminen: kenttiä ei ole (vanha kanta) / virheellinen aikajana → tavallinen aikavaraustuote, ei aikajanaa eikä virhettä', () => {
+  const old = A.splitCatalog(FX.catalog, STATIC).treatments.find((x) => x.id === 7);   // katalogirivi ennen booking_61:tä
+  assert.equal(A.timelineOf(old), null); assert.equal(A.isPackage(old), false); assert.equal(A.timelineText(old, 'fi'), ''); assert.deepEqual(A.timelineSlots(old, '2026-10-25T14:00:00Z'), []);
+  assert.equal(old.voucher_note, undefined); assert.equal(old.timeline, undefined);
+  const base = { id: 7, duration_minutes: 120, timeline: [{ seq: 1, kind: 'ritual', label: 'a', minutes: 20, start_min: 0, end_min: 20 }] };
+  assert.equal(A.timelineOf(base), null, 'summa 20 ≠ kesto 120 → aikajanaa ei näytetä (§18.11)');
+  assert.equal(A.timelineOf({ id: 7, timeline: [] }), null); assert.equal(A.timelineOf({ id: 7, timeline: 'x' }), null);
+  assert.equal(A.timelineOf({ id: 7, timeline: [{ kind: 'ritual', minutes: 0, start_min: 0 }] }), null, 'virheellinen jakso');
+  assert.equal(A.timelineOf({ id: 7, duration_minutes: 30, timeline: [{ seq: 1, kind: 'break', label: 'tauko', minutes: 30, start_min: 0, end_min: 30 }] }), null, 'vain sisäisiä jaksoja → ei näytettävää');
+});
+test('timelineSlots: kellonajat Helsingin ajassa (kesä- ja talviaika), jaksojen nimet kannasta', () => {
+  const p = P7(), f = (iso) => A.timelineSlots(p, iso).map((x) => `${x.label} ${x.from}–${x.to}`);
   // savusauna alkaa alku + 30 min (kuten backend) ja päättyy alku + 2 h; rituaali päättyy alku + 20 min; väliä ei näytetä rivinä
-  assert.deepEqual(f('2026-10-18T13:30:00Z'), ['ritual 16:30–16:50', 'smoke 17:00–18:30'], 'EEST (UTC+3)');
-  assert.deepEqual(f('2026-10-25T14:00:00Z'), ['ritual 16:00–16:20', 'smoke 16:30–18:00'], 'EET (UTC+2)');
-  assert.deepEqual(f('2026-10-25T15:00:00Z'), ['ritual 17:00–17:20', 'smoke 17:30–19:00']);
-  assert.deepEqual(A.timelineSlots({ id: 7 }, null), []);
-  assert.equal(A.timelineSlots({ id: 7 }, '2026-10-25T14:00:00Z').at(-1).to, '18:00', 'viimeinen jakso päättyy alku + 2 h');
+  assert.deepEqual(f('2026-10-18T13:30:00Z'), ['rituaali 16:30–16:50', 'savusauna 17:00–18:30'], 'EEST (UTC+3)');
+  assert.deepEqual(f('2026-10-25T14:00:00Z'), ['rituaali 16:00–16:20', 'savusauna 16:30–18:00'], 'EET (UTC+2)');
+  assert.deepEqual(f('2026-10-25T15:00:00Z'), ['rituaali 17:00–17:20', 'savusauna 17:30–19:00']);
+  assert.deepEqual(A.timelineSlots(p, null), []);
+  assert.equal(A.timelineSlots(p, '2026-10-25T14:00:00Z').at(-1).to, '18:00', 'viimeinen jakso päättyy alku + 2 h');
+  assert.equal(A.timelineLabel(A.timelineOf(p)[1], 'en'), 'smoke sauna'); assert.equal(A.timelineLabel(A.timelineOf(p)[1], 'fi'), 'savusauna');
+  assert.equal(A.timelineLabel({ label: 'x', label_en: '' }, 'en'), 'x', 'EN-nimi puuttuu → fi');
+});
+test('timelineText: kannan timeline_text(_en) ilman sisäistä taukoa; puuttuessa jaksojen labelit + kestot; NBSP jakson sisällä', () => {
+  const p = P7(), nb = (x) => x.replace(/\u00a0/g, ' ');
+  assert.equal(nb(A.timelineText(p, 'fi')), 'rituaali 20 min · savusauna 1 h 30 min');
+  assert.equal(nb(A.timelineText(p, 'en')), 'ritual 20 min · smoke sauna 1 h 30 min');
+  assert.ok(!/tauko|break/i.test(A.timelineText(p, 'fi') + A.timelineText(p, 'en')), 'ei taukoa');
+  assert.match(A.timelineText(p, 'fi'), /savusauna\u00a01\u00a0h\u00a030\u00a0min/, 'jakso ei katkea rivinvaihtoon');
+  const noText = { ...p, timeline_text: undefined, timeline_text_en: undefined };
+  assert.equal(nb(A.timelineText(noText, 'fi')), 'rituaali 20 min · savusauna 1 h 30 min', 'timeline_text puuttuu → johdetaan jaksoista');
+  assert.equal(nb(A.timelineText(noText, 'en')), 'ritual 20 min · smoke sauna 1 h 30 min');
+  assert.equal(nb(A.timelineText({ ...p, timeline_text_en: undefined }, 'en')), 'ritual 20 min · smoke sauna 1 h 30 min', 'EN-teksti puuttuu → EN-labelit (ei suomea)');
+  assert.equal(A.timelineText({ id: 10 }, 'fi'), '');
 });
 
 // ---- tekstit ----
-test('FI/EN-tekstit: aikajana, "Ei vapaita aikoja" / "No available times", pariteetti', () => {
+test('FI/EN-tekstit: ei kovakoodattuja jaksojen nimiä (kannasta), "Ei vapaita aikoja" / "No available times", pariteetti', () => {
   const ui = readFileSync(new URL('../shop/src/treatment-ui.js', import.meta.url), 'utf8');
-  assert.match(ui, /tr\.tl\[x\.key\]/);
-  assert.deepEqual(Object.keys(T.fi.tr.tl).sort(), ['ritual', 'smoke']); assert.deepEqual(Object.keys(T.en.tr.tl).sort(), ['ritual', 'smoke']);
-  assert.deepEqual(T.fi.tr.tl, { ritual: 'rituaali', smoke: 'savusauna' });
-  assert.deepEqual(T.en.tr.tl, { ritual: 'ritual', smoke: 'smoke sauna' });
+  assert.match(ui, /A\.timelineLabel\(x, S\.lang\)/); assert.ok(!/tr\.tl\[/.test(ui), 'jaksojen nimiä ei haeta i18n:stä');
+  assert.equal(T.fi.tr.tl, undefined); assert.equal(T.en.tr.tl, undefined);
   assert.equal(T.fi.tr.noTimes, 'Ei vapaita aikoja'); assert.equal(T.en.tr.noTimes, 'No available times');
   for (const k of ['tlTitle', 'noTimesHint', 'tlDuration', 'ends']) { assert.ok(T.fi.tr[k] && T.en.tr[k] && T.fi.tr[k] !== T.en.tr[k], `tr.${k} FI ≠ EN`); }
 });
-test('käyttöliittymä: ei kovakoodattuja tuote-id:itä paketille (aikajana tulee A.PACKAGE_TIMELINES:sta), ei option-polkua, tyhjät mount-lapset ohitetaan', () => {
+test('käyttöliittymä: ei kovakoodattuja tuote-id:itä paketille (aikajana tulee kannan kentistä), ei option-polkua, tyhjät mount-lapset ohitetaan', () => {
   const ui = readFileSync(new URL('../shop/src/treatment-ui.js', import.meta.url), 'utf8'), shop = readFileSync(new URL('../shop/src/shop.js', import.meta.url), 'utf8');
   assert.ok(!/p\.id\s*===\s*7|id\s*===\s*7\b/.test(ui + shop), 'ei id === 7 -ehtoja UI:ssa');
   assert.match(shop, /nodes\.flat\(\)\.filter\(\(n\) => n != null && n !== false\)/, 'mount ei kirjoita "null"-tekstiä');

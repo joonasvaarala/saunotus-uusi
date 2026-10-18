@@ -9,6 +9,7 @@ import { dirname, join } from 'node:path';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const imp = (p) => import(pathToFileURL(join(root, p)));
 const read = (p) => readFileSync(join(root, p), 'utf8');
+const PROD61 = JSON.parse(read('tests/fixtures/prod-catalog-61.json'));   // tuotannon public_catalog() booking_61:n jälkeen (vain luku)
 const TL = await imp('admin/package-timeline.js');
 const { createAdminMock, helIso } = await imp('admin/options-mock.js');
 // kaupan treatments.js importoi ./sb.js:n → kopioidaan väliaikaishakemistoon kuten saunarituaali.test.mjs
@@ -58,12 +59,14 @@ test('resbooking: paneelin näkyvyys ja haku käyttävät isSlotProduct-funktiot
 
 // ---- aikajana ----
 test('aikajana: sama kuin kaupassa (rituaali 20 · tauko 10 · savusauna 90 = 120 min), vain kb 7', () => {
-  // Hallinnan sisäinen aikajana saa sisältää tauon; kaupassa taukoa ei näytetä. Vertailu: rituaalin ja savusaunan kesto + alkuhetki, sekä kokonaiskesto
+  // Kauppa lukee aikajanan kannasta (public_catalog().timeline, booking_61); hallinnan sisäinen aikajana saa sisältää tauon, kaupassa taukoa ei näytetä.
+  // Vertailu tuotannon katalogiriviin: rituaalin ja savusaunan kesto + alkuhetki sekä kokonaiskesto
+  const p7 = shopTl.splitCatalog(PROD61.catalog, new Map()).treatments.find((x) => x.id === 7);
   const admin = (id) => { let at = 0; return Object.fromEntries(TL.timelineOf(id).map((x) => { const r = [x.key, { start: at, min: x.min }]; at += x.min; return r; })); };
-  const shop = (id) => { let end = 0; return Object.fromEntries(shopTl.timelineOf({ id }).map((x) => { const start = x.start ?? end; end = start + x.min; return [x.key, { start, min: x.min }]; })); };
-  for (const k of ['ritual', 'smoke']) assert.deepEqual(admin(7)[k], shop(7)[k], `hallinnan ja kaupan jakso ${k} (alku + kesto) ei saa eriytyä`);
-  assert.equal(TL.timelineMinutes(7), shopTl.timelineMinutes({ id: 7 }), 'kokonaiskesto sama (120 min)');
-  assert.ok(!shopTl.timelineOf({ id: 7 }).some((x) => x.key === 'break'), 'kauppa ei näytä taukoa');
+  const shop = () => Object.fromEntries(shopTl.timelineOf(p7).map((x) => [x.key === 'smoke_sauna' ? 'smoke' : x.key, { start: x.start, min: x.min }]));
+  for (const k of ['ritual', 'smoke']) assert.deepEqual(admin(7)[k], shop()[k], `hallinnan ja kaupan jakso ${k} (alku + kesto) ei saa eriytyä`);
+  assert.equal(TL.timelineMinutes(7), shopTl.timelineMinutes(p7), 'kokonaiskesto sama (120 min)');
+  assert.ok(!shopTl.timelineOf(p7).some((x) => x.key === 'break'), 'kauppa ei näytä taukoa');
   assert.ok(TL.timelineOf(7).some((x) => x.key === 'break'), 'hallinnan sisäinen aikajana näyttää tauon');
   assert.deepEqual(TL.timelineOf(7).map((x) => [x.key, x.min]), [['ritual', 20], ['break', 10], ['smoke', 90]]);
   assert.equal(TL.timelineMinutes(7), 120);

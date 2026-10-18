@@ -4,7 +4,7 @@
 // Virhekokeilu: ?mock=1&fail=option_required|invalid_option → seuraava varaus/muutos palauttaa kyseisen palvelinvirheen kerran (näkee virhekäsittelyn; sama muoto kuin palvelimella {ok:false, code, message}).
 // Erikoissähköpostit (kuten dev-mockissa): taken@test.fi → aika varattu, time_window@test.fi → aikaikkuna, locked@test.fi → muutosaika umpeutunut.
 import { ApiError } from './sb.js';
-import { treatmentRpc, catalogEntries, snapshotBookings, restoreBookings } from './treatment-mock.js';
+import { treatmentRpc, catalogEntries, snapshotBookings, restoreBookings, ADDONS } from './treatment-mock.js';
 import { createOrderMock } from './order-mock.js';
 import { isHoldScenario, holdMockParams, HOLD_ERRORS } from './hold-mock.js';
 
@@ -35,6 +35,7 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
       case 'public_catalog': return catalogEntries();
       case 'public_settings': return { public_booking_enabled: true, public_treatment_horizon_days: 14 };
       case 'public_product_images': return [];
+      case 'public_addons': return ADDONS;   // lisäpalvelut (booking_61: pyyhe resurssivaraukselle, tuote 7); sama muoto kuin tuotannon public_addons()
       case 'public_payment_options': return { ok: true, online_enabled: false, methods: [] };
       case 'public_checkout_payment_options': return { ok: true, mobilepay_enabled: false, gift_card_redeem_enabled: false, methods: [] };
       case 'public_get_booking': {

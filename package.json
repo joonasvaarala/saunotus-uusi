@@ -19,7 +19,8 @@
     "preview": "npm run build:local && node scripts/serve.mjs dist 4173",
     "check:external": "node scripts/check.mjs --external",
     "build:prod": "node scripts/build.mjs",
-    "reviews:update": "node scripts/update-reviews.mjs"
+    "reviews:update": "node scripts/update-reviews.mjs",
+    "texts:sync": "node scripts/site-texts-sync.mjs"
   },
   "devDependencies": {
     "sharp": "^0.33.5"

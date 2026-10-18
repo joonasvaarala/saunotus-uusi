@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path';
 import { site, SITE_URL, isTest, abs, kb } from '../src/lib.mjs';
 import * as R from '../src/render.mjs';
 import { loadForBuild, renderForBuild, renderHomePreview } from '../src/articles/index.mjs';
+import { loadSiteTexts, setSiteTexts } from '../src/site-texts.mjs';
 
 const OUT = process.env.DIST || 'dist';
 rmSync(OUT, { recursive: true, force: true });
@@ -12,6 +13,8 @@ cpSync('public', OUT, { recursive: true });
 
 // Sisältöosio (Saunatietoa): artikkelit haetaan ennen sivujen renderöintiä (navigaatiolinkki riippuu siitä, onko artikkeleita). RPC-vika ei kaada rakennusta.
 const articleData = await loadForBuild();
+// Sivutekstit tietokannasta (§18): public_get_site_texts → välimuisti → repon varateksti; tuntematon paikkamerkki kaataa rakennuksen (src/site-texts.mjs). Sivut hakevat tekstit tx():llä.
+setSiteTexts(await loadSiteTexts());
 
 const write = (urlPath, html) => {
   const file = urlPath.endsWith('/') ? join(OUT, urlPath, 'index.html') : join(OUT, urlPath);

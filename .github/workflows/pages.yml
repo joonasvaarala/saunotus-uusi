@@ -10,7 +10,7 @@ on:
   pull_request:
   workflow_dispatch:
   repository_dispatch:
-    types: [articles-changed] # POST /repos/{owner}/{repo}/dispatches {"event_type":"articles-changed"} (esim. botti artikkelin tallennuksen jälkeen)
+    types: [articles-changed, site-texts-changed] # POST /repos/{owner}/{repo}/dispatches {"event_type":"articles-changed"} (esim. botti artikkelin tallennuksen jälkeen); site-texts-changed = sivutekstit muuttuneet tietokannassa (admin_texts_import / Tekstit-näkymä, sopimus §18) → uusi build
   schedule:
     - cron: '15 * * * *' # tunneittain: ajastetut artikkelit ilmestyvät, menneet tapahtumapäivät putoavat pois
 permissions:
@@ -31,6 +31,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Sivutekstit (§18): build hakee public_get_site_texts → .cache/site-texts; haun epäonnistuessa edellisen ajon välimuisti, sitten repon content/site-texts.fallback.json (build ei kaadu; tuntematon paikkamerkki kaataa)
+      - uses: actions/cache@v4
+        with:
+          path: .cache/site-texts
+          key: site-texts-${{ github.run_id }}
+          restore-keys: site-texts-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -39,9 +45,9 @@ jobs:
       # Saunatietoa: markdown-, lähde-/RPC-, sivupohja- ja build-tarkistustestit (fixture, ei verkkoa)
       - run: node --test tests/articles/*.test.mjs
       # Pelkkä fixture-build (testi + tuotanto): validoi JSON-LD, canonicalit, hreflangit, sitemapin, robotsin
-      - run: ARTICLES_FIXTURE=1 SITE_ENV=test SITE_URL=https://example.test DIST=$RUNNER_TEMP/dist-fixture-test node scripts/build.mjs
+      - run: SITE_TEXTS_FIXTURE=1 ARTICLES_FIXTURE=1 SITE_ENV=test SITE_URL=https://example.test DIST=$RUNNER_TEMP/dist-fixture-test node scripts/build.mjs
       - run: DIST=$RUNNER_TEMP/dist-fixture-test SITE_ENV=test SITE_URL=https://example.test node scripts/check-articles.mjs
-      - run: ARTICLES_FIXTURE=1 SITE_ENV=prod SITE_URL=https://example.test DIST=$RUNNER_TEMP/dist-fixture-prod node scripts/build.mjs
+      - run: SITE_TEXTS_FIXTURE=1 ARTICLES_FIXTURE=1 SITE_ENV=prod SITE_URL=https://example.test DIST=$RUNNER_TEMP/dist-fixture-prod node scripts/build.mjs
       - run: DIST=$RUNNER_TEMP/dist-fixture-prod SITE_ENV=prod SITE_URL=https://example.test node scripts/check-articles.mjs
       - run: node --test booking/supabase/functions/admin-users/logic.test.js
       - run: node --test booking/tests/mobilepay-shop.test.mjs
@@ -55,6 +61,8 @@ jobs:
       - run: node --test booking/tests/pay-later.test.mjs
       # pakettituote Saunarituaali ja savusaunavuoro (kb 7, booking_58, §17.11): aikajana, loppuaika +2 h, la/su, mock, tuotantofixture
       - run: node --test booking/tests/saunarituaali.test.mjs
+      # Sivutekstit tietokannasta (§18) + tuote 7 kentät (booking_61): paikkamerkit, build-haku/välimuisti/varateksti, p_addons, virhekoodit (fixture, ei verkkoa)
+      - run: node --test booking/tests/sivutekstit.test.mjs
       # hallinnan Vapaat ajat: tuotteet config.public_slots-kentästä (ei id-listaa), kb 7 (120 min, pakettiaikajana), mock vs. tuotannon funktio
       - run: node --test booking/tests/admin-vapaat-ajat.test.mjs
       # .cache/articles: edellinen artikkelisnapshot (RPC-katkon varalta + siirrettyjen slugien tunnistus)
