@@ -23,6 +23,7 @@ export const ICONS = {
   foot: [P('M4 15h16l-1.6 5H5.6z'), P('M9 15V5.5a2 2 0 0 1 4 0V15M13 12.5h2.5')],   // Jalkakylpy: jalka ammeessa
   gift: [R(3, 8, 18, 4, 1), P('M12 8v13M19 12v9H5v-9M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5')],   // Lahjakortit: lahjapaketti
   euro: [P('M18 7c-1.3-1.4-3-2-4.8-2a7 7 0 0 0 0 14c1.8 0 3.5-.6 4.8-2'), P('M4 10.5h9M4 13.5h9')],         // Talous: euromerkki
+  till: [R(3, 7, 18, 13, 2), P('M7 7V4h10v3'), P('M7 13h10'), P('M8 17h2M12 17h2M16 17h2')],             // Pikakassa: kassalaatikko
   receipt: [P('M5 2h14v20l-3-2-2 2-2-2-2 2-2-2-3 2z'), P('M9 7h6M9 11h6M9 15h3')],                  // Kuitit
   link: [P('M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1'), P('M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1')],   // Maksulinkki
   undo: [P('M3 12a9 9 0 1 0 3-6.7L3 8'), P('M3 3v5h5')],                                           // Hyvitä

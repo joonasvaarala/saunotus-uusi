@@ -1,0 +1,1382 @@
+[
+ {
+  "key": "ui.pos.nav",
+  "lang": "fi",
+  "text": "Pikakassa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.title",
+  "lang": "fi",
+  "text": "Pikakassa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.pay",
+  "lang": "fi",
+  "text": "Maksa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.lines",
+  "lang": "fi",
+  "text": "Maksurivit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.total",
+  "lang": "fi",
+  "text": "Yhteensä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.empty",
+  "lang": "fi",
+  "text": "Ostoskori on tyhjä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.remove",
+  "lang": "fi",
+  "text": "Poista",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.qty",
+  "lang": "fi",
+  "text": "Määrä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.method",
+  "lang": "fi",
+  "text": "Maksutapa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.method_link",
+  "lang": "fi",
+  "text": "Maksulinkki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.method_mobilepay",
+  "lang": "fi",
+  "text": "MobilePay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.method_qr",
+  "lang": "fi",
+  "text": "QR-koodi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.method_push",
+  "lang": "fi",
+  "text": "Pyyntö puhelimeen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.method_terminal",
+  "lang": "fi",
+  "text": "Korttipääte",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.terminal_later",
+  "lang": "fi",
+  "text": "Tulossa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.phone",
+  "lang": "fi",
+  "text": "Puhelinnumero",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.phone_invalid",
+  "lang": "fi",
+  "text": "Anna suomalainen matkapuhelinnumero",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.paid",
+  "lang": "fi",
+  "text": "Maksettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.waiting",
+  "lang": "fi",
+  "text": "Odotetaan maksua",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.link_help",
+  "lang": "fi",
+  "text": "Asiakas avaa linkin tai skannaa koodin",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.qr_help",
+  "lang": "fi",
+  "text": "Asiakas skannaa koodin omalla puhelimellaan",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.push_help",
+  "lang": "fi",
+  "text": "Pyyntö lähtee asiakkaan MobilePay-sovellukseen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.no_products",
+  "lang": "fi",
+  "text": "Pikakassaan ei ole valittu tuotteita",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.pick_method",
+  "lang": "fi",
+  "text": "Valitse maksutapa maksuriveistä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.gift_blocked",
+  "lang": "fi",
+  "text": "Lahjakortti myydään Talous-näkymässä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.age",
+  "lang": "fi",
+  "text": "Ikärajallinen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.devices",
+  "lang": "fi",
+  "text": "Kylmälaitteet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.device_name",
+  "lang": "fi",
+  "text": "Laitteen nimi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.device_location",
+  "lang": "fi",
+  "text": "Sijainti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.device_add",
+  "lang": "fi",
+  "text": "Lisää laite",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.device_print",
+  "lang": "fi",
+  "text": "Tulosta QR",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.print_help",
+  "lang": "fi",
+  "text": "Skannaa koodi ja maksa juoma puhelimella",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.product_pos",
+  "lang": "fi",
+  "text": "Näytä pikakassassa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.product_pos_sort",
+  "lang": "fi",
+  "text": "Pikakassan järjestys",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.product_fridge",
+  "lang": "fi",
+  "text": "Myytävissä kylmälaitteessa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.product_age",
+  "lang": "fi",
+  "text": "Ikärajallinen tuote",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.fridge_warn",
+  "lang": "fi",
+  "text": "Kylmälaitteeseen vain virvoitusjuomia",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.alcohol_warn",
+  "lang": "fi",
+  "text": "Tuotteen nimi näyttää alkoholilta, sitä ei voi myydä kylmälaitteessa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.next",
+  "lang": "fi",
+  "text": "Seuraava asiakas",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.close",
+  "lang": "fi",
+  "text": "Sulje",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.mp_off",
+  "lang": "fi",
+  "text": "MobilePay ei ole käytössä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.visma_off",
+  "lang": "fi",
+  "text": "Verkkomaksu ei ole käytössä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.badge_pos",
+  "lang": "fi",
+  "text": "Pikakassa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.badge_fridge",
+  "lang": "fi",
+  "text": "Kylmälaite",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.pay_legal",
+  "lang": "fi",
+  "text": "Maksu vahvistetaan ennen luovutusta. Kuitti syntyy, kun maksu on kirjautunut.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.nav",
+  "lang": "en",
+  "text": "Quick till",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.title",
+  "lang": "en",
+  "text": "Quick till",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.pay",
+  "lang": "en",
+  "text": "Pay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.lines",
+  "lang": "en",
+  "text": "Payment lines",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.total",
+  "lang": "en",
+  "text": "Total",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.empty",
+  "lang": "en",
+  "text": "The cart is empty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.remove",
+  "lang": "en",
+  "text": "Remove",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.qty",
+  "lang": "en",
+  "text": "Quantity",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.method",
+  "lang": "en",
+  "text": "Payment method",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.method_link",
+  "lang": "en",
+  "text": "Payment link",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.method_mobilepay",
+  "lang": "en",
+  "text": "MobilePay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.method_qr",
+  "lang": "en",
+  "text": "QR code",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.method_push",
+  "lang": "en",
+  "text": "Request to phone",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.method_terminal",
+  "lang": "en",
+  "text": "Card terminal",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.terminal_later",
+  "lang": "en",
+  "text": "Coming later",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.phone",
+  "lang": "en",
+  "text": "Phone number",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.phone_invalid",
+  "lang": "en",
+  "text": "Enter a Finnish mobile number",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.paid",
+  "lang": "en",
+  "text": "Paid",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.waiting",
+  "lang": "en",
+  "text": "Waiting for payment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.link_help",
+  "lang": "en",
+  "text": "The customer opens the link or scans the code",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.qr_help",
+  "lang": "en",
+  "text": "The customer scans the code with their own phone",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.push_help",
+  "lang": "en",
+  "text": "The request is sent to the customer MobilePay app",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.no_products",
+  "lang": "en",
+  "text": "No products are selected for the till",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.pick_method",
+  "lang": "en",
+  "text": "Choose a payment method from the lines",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.gift_blocked",
+  "lang": "en",
+  "text": "Gift cards are sold in the finance view",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.age",
+  "lang": "en",
+  "text": "Age restricted",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.devices",
+  "lang": "en",
+  "text": "Fridges",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.device_name",
+  "lang": "en",
+  "text": "Device name",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.device_location",
+  "lang": "en",
+  "text": "Location",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.device_add",
+  "lang": "en",
+  "text": "Add device",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.device_print",
+  "lang": "en",
+  "text": "Print QR",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.print_help",
+  "lang": "en",
+  "text": "Scan the code and pay for the drink on your phone",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.product_pos",
+  "lang": "en",
+  "text": "Show in the quick till",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.product_pos_sort",
+  "lang": "en",
+  "text": "Till order",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.product_fridge",
+  "lang": "en",
+  "text": "Sold in the fridge",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.product_age",
+  "lang": "en",
+  "text": "Age-restricted product",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.fridge_warn",
+  "lang": "en",
+  "text": "Only soft drinks belong in the fridge",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.alcohol_warn",
+  "lang": "en",
+  "text": "The product name looks like alcohol and cannot be sold from the fridge",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.next",
+  "lang": "en",
+  "text": "Next customer",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.close",
+  "lang": "en",
+  "text": "Close",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.mp_off",
+  "lang": "en",
+  "text": "MobilePay is not enabled",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.visma_off",
+  "lang": "en",
+  "text": "Online payment is not enabled",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.badge_pos",
+  "lang": "en",
+  "text": "Till",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.badge_fridge",
+  "lang": "en",
+  "text": "Fridge",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.pay_legal",
+  "lang": "en",
+  "text": "Payment is confirmed before the goods are handed over. The receipt is created when the payment is recorded.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.title",
+  "lang": "fi",
+  "text": "Juomat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.lead",
+  "lang": "fi",
+  "text": "Valitse juoma ja maksa puhelimella",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.total",
+  "lang": "fi",
+  "text": "Yhteensä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.pay",
+  "lang": "fi",
+  "text": "Maksa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.email",
+  "lang": "fi",
+  "text": "Sähköposti kuitille",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.email_hint",
+  "lang": "fi",
+  "text": "Vapaaehtoinen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.mobilepay",
+  "lang": "fi",
+  "text": "MobilePay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.visma",
+  "lang": "fi",
+  "text": "Verkkomaksu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.visma_dry",
+  "lang": "fi",
+  "text": "Verkkomaksu on testitilassa, maksua ei veloiteta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.visma_off",
+  "lang": "fi",
+  "text": "Verkkomaksu ei ole juuri nyt käytössä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.visma_live",
+  "lang": "fi",
+  "text": "Verkkomaksun tuotantoyhteys ei ole vielä käytössä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.paid",
+  "lang": "fi",
+  "text": "Maksettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.waiting",
+  "lang": "fi",
+  "text": "Odotetaan maksua",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.empty",
+  "lang": "fi",
+  "text": "Ei juomia myynnissä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.device",
+  "lang": "fi",
+  "text": "Laite",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.no_device",
+  "lang": "fi",
+  "text": "QR-koodi ei vastaa käytössä olevaa laitetta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.qty",
+  "lang": "fi",
+  "text": "Määrä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.add",
+  "lang": "fi",
+  "text": "Lisää",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.remove",
+  "lang": "fi",
+  "text": "Vähennä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.invalid_email",
+  "lang": "fi",
+  "text": "Sähköposti ei ole kelvollinen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.pay_legal",
+  "lang": "fi",
+  "text": "Hinta sisältää arvonlisäveron. Kuitti lähetetään, jos annat sähköpostin.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.title",
+  "lang": "en",
+  "text": "Drinks",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.lead",
+  "lang": "en",
+  "text": "Choose a drink and pay on your phone",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.total",
+  "lang": "en",
+  "text": "Total",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.pay",
+  "lang": "en",
+  "text": "Pay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.email",
+  "lang": "en",
+  "text": "Email for the receipt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.email_hint",
+  "lang": "en",
+  "text": "Optional",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.mobilepay",
+  "lang": "en",
+  "text": "MobilePay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.visma",
+  "lang": "en",
+  "text": "Online payment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.visma_dry",
+  "lang": "en",
+  "text": "Online payment is in test mode and is not charged",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.visma_off",
+  "lang": "en",
+  "text": "Online payment is not available right now",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.visma_live",
+  "lang": "en",
+  "text": "The live online payment connection is not available yet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.paid",
+  "lang": "en",
+  "text": "Paid",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.waiting",
+  "lang": "en",
+  "text": "Waiting for payment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.empty",
+  "lang": "en",
+  "text": "No drinks for sale",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.device",
+  "lang": "en",
+  "text": "Device",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.no_device",
+  "lang": "en",
+  "text": "This QR code does not match an active device",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.qty",
+  "lang": "en",
+  "text": "Quantity",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.add",
+  "lang": "en",
+  "text": "Add",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.remove",
+  "lang": "en",
+  "text": "Decrease",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.invalid_email",
+  "lang": "en",
+  "text": "The email address is not valid",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.pay_legal",
+  "lang": "en",
+  "text": "The price includes VAT. A receipt is sent if you give an email address.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "src.pikakassa",
+  "lang": "fi",
+  "text": "Pikakassa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "src.pikakassa",
+  "lang": "en",
+  "text": "Quick till",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "src.kylmalaite",
+  "lang": "fi",
+  "text": "Kylmälaite",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "src.kylmalaite",
+  "lang": "en",
+  "text": "Fridge",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.mobilepay.start_error_invalid_phone",
+  "lang": "fi",
+  "text": "Anna suomalainen matkapuhelinnumero",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (mobilepay-start/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.mobilepay.start_error_invalid_phone",
+  "lang": "en",
+  "text": "Enter a Finnish mobile number",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (mobilepay-start/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ }
+]

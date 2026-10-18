@@ -1,0 +1,24 @@
+:root { color-scheme: light; --green: #1f4d3a; --sand: #f6f1e7; --ink: #1c1915; }
+* { box-sizing: border-box; }
+body { margin: 0; font: 18px/1.35 system-ui, sans-serif; background: var(--sand); color: var(--ink); }
+main { max-width: 640px; margin: 0 auto; padding: 16px 16px 120px; }
+h1 { font-size: 1.6rem; margin: 0 0 4px; }
+.lead { margin: 0 0 16px; color: #4a453c; }
+.device { margin: 0 0 12px; font-weight: 600; }
+.list { display: grid; gap: 10px; }
+.drink { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; background: #fff; border-radius: 12px; padding: 12px; }
+.drink strong { font-size: 1.15rem; }
+.stepper { display: flex; align-items: center; gap: 8px; }
+.stepper button, .pay { min-width: 56px; min-height: 56px; font: 700 22px/1 inherit; border-radius: 12px; border: 1px solid var(--green); background: #fff; color: var(--green); }
+.pay { width: 100%; background: var(--green); color: #fff; font-size: 20px; }
+.bar { position: sticky; bottom: 0; background: #fff; border-top: 1px solid #e4dccb; padding: 12px 16px 16px; display: grid; gap: 8px; }
+.total { font-size: 2rem; font-weight: 800; margin: 0; }
+.methods { display: flex; gap: 8px; }
+.methods button { flex: 1; min-height: 56px; border-radius: 12px; border: 1px solid var(--green); background: #fff; font: 700 16px/1.2 inherit; }
+.methods button[aria-pressed="true"] { background: var(--green); color: #fff; }
+label.email { display: grid; gap: 4px; font-size: 15px; }
+input { min-height: 48px; font: inherit; padding: 8px 10px; border-radius: 10px; border: 1px solid #c9c0b0; }
+.legal, .note { font-size: 14px; color: #4a453c; margin: 0; }
+.err { color: #8a1f1f; }
+.paid { background: #fff; border-radius: 12px; padding: 20px; text-align: center; }
+.paid h2 { font-size: 2rem; margin: 0 0 8px; }

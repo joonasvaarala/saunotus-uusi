@@ -182,9 +182,10 @@ begin
   update booking.integration_config set mode = 'off' where key = 'mobilepay';
 
   -- T15 oikeudet
-  insert into _t values (not has_function_privilege('anon', 'booking.mobilepay_payment_prepare(uuid,uuid,integer)', 'execute') and not has_function_privilege('authenticated', 'booking.mobilepay_payment_prepare(uuid,uuid,integer)', 'execute')
+  insert into _t values (to_regprocedure('booking.mobilepay_payment_prepare(uuid,uuid,integer)') is null, 'T15a vanhaa kolmen argumentin prepare-ylikuormitusta ei ole');
+  insert into _t values (not has_function_privilege('anon', 'booking.mobilepay_payment_prepare(uuid,uuid,integer,text)', 'execute') and not has_function_privilege('authenticated', 'booking.mobilepay_payment_prepare(uuid,uuid,integer,text)', 'execute')
      and not has_function_privilege('anon', 'booking.mobilepay_fill_customer(bigint,text,text,text)', 'execute') and not has_function_privilege('anon', 'booking.mobilepay_refund_complete(bigint,text,jsonb)', 'execute') and not has_function_privilege('anon', 'booking.mobilepay_order_refs(uuid)', 'execute')
-     and has_function_privilege('service_role', 'booking.mobilepay_payment_prepare(uuid,uuid,integer)', 'execute') and has_function_privilege('anon', 'booking.public_payment_options(uuid)', 'execute'), 'T15 oikeudet: adapteri vain service_role, public_payment_options anon');
+     and has_function_privilege('service_role', 'booking.mobilepay_payment_prepare(uuid,uuid,integer,text)', 'execute') and has_function_privilege('anon', 'booking.public_payment_options(uuid)', 'execute'), 'T15 oikeudet: adapteri vain service_role, public_payment_options anon');
   -- T16 admin_refund: tilan avain
   insert into _t values (replace('mobilepay', '_', '') = 'mobilepay' and exists (select 1 from booking.integration_config where key = replace('mobilepay', '_', '')), 'T16 admin_refund hakee integration_config-avaimen replace(provider,_) = mobilepay');
 

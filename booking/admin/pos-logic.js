@@ -1,0 +1,58 @@
+// Pikakassan puhdas logiikka (ei DOM:ia). Hinta tulee katalogista; kassalle lähtee vain tuotetunnus ja määrä.
+export const TENDER_HANDLERS = {
+  payment_link: { kind: 'link' },
+  mobilepay: { kind: 'mobilepay', flows: ['QR', 'PUSH_MESSAGE'] },
+  visma_pay: { kind: 'visma' },
+  terminal: { kind: 'terminal', later: true },
+};
+
+const ALCOHOL = /(^|[^\p{L}])(olut|oluet|viini|viinit|siideri|lonkero|alkoholi|viina|beer|beers|wine|wines|cider|ciders|whiskey|whisky|vodka|gin|rum|champagne|prosecco|spirits)([^\p{L}]|$)/iu;
+
+export function looksLikeAlcohol(text) {
+  return ALCOHOL.test(String(text ?? ''));
+}
+
+export function cartAdd(cart, product) {
+  const next = cart.map((r) => ({ ...r }));
+  const row = next.find((r) => r.product_id === product.product_id);
+  if (row) row.quantity += 1;
+  else next.push({ product_id: product.product_id, name: product.name, unit_price: Number(product.price), vat_rate: product.vat_rate, quantity: 1, age_restricted: !!product.age_restricted });
+  return next;
+}
+
+export function cartSetQty(cart, productId, quantity) {
+  const q = Math.max(0, Math.min(20, quantity));
+  return cart.map((r) => ({ ...r })).map((r) => (r.product_id === productId ? { ...r, quantity: q } : r)).filter((r) => r.quantity > 0);
+}
+
+export function cartTotal(cart) {
+  return Math.round(cart.reduce((s, r) => s + Number(r.unit_price) * r.quantity, 0) * 100) / 100;
+}
+
+export function checkoutItems(cart) {
+  return cart.filter((r) => r.quantity > 0).map((r) => ({ product_id: r.product_id, quantity: r.quantity }));
+}
+
+export function tendersFor(list, channel) {
+  return (list || [])
+    .filter((t) => Array.isArray(t.channels) ? t.channels.includes(channel) : false)
+    .filter((t) => t.active || t.handler === 'terminal' || t.code === 'card_terminal')
+    .filter((t) => t.code !== 'cash' && t.handler !== 'cash')
+    .sort((a, b) => (a.sort_order ?? 100) - (b.sort_order ?? 100));
+}
+
+export function tenderAvailable(tender, modes) {
+  if (!tender) return false;
+  if (tender.handler === 'terminal' || tender.code === 'card_terminal') return false;
+  if (!tender.active) return false;
+  if (tender.handler === 'mobilepay') return modes?.mobilepay_mode && modes.mobilepay_mode !== 'off';
+  if (tender.handler === 'visma_pay') return modes?.vismapay_mode && modes.vismapay_mode !== 'off';
+  return true;
+}
+
+export function joinUrl(base, path) {
+  const b = String(base || '').replace(/\/$/, '');
+  const p = String(path || '');
+  if (/^https?:\/\//i.test(p)) return p;
+  return b ? b + (p.startsWith('/') ? p : `/${p}`) : p;
+}
