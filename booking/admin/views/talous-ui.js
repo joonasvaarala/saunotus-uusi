@@ -4,7 +4,7 @@ import { icon } from '../icons.js';
 import { t, fmt, has } from '../talous-i18n.js';
 import { FeatureNotReady } from '../talous-api.js';
 
-export const PAY = ['unpaid', 'pending', 'paid', 'partially_paid', 'refunded', 'partially_refunded', 'failed'];
+export const PAY = ['unpaid', 'pending', 'paid', 'partially_paid', 'refunded', 'partially_refunded', 'failed', 'invoiced'];
 export const PSTAT = ['pending', 'paid', 'partially_refunded', 'refunded', 'failed', 'cancelled'];
 export const SOURCES = ['web', 'admin', 'phone', 'email', 'walk_in', 'johku_import', 'pikakassa', 'kylmalaite', 'other'];
 export const METHODS = ['cash', 'card_terminal', 'mobilepay', 'visma_pay', 'bank_transfer', 'invoice', 'gift_card', 'partner_voucher', 'other', 'pay_later'];

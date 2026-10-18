@@ -27,6 +27,7 @@ export function emailCases() {
   const add = (name, kind, data, locale) => out.push({ name, kind, data, locale });
   for (const l of ['fi', 'en']) {
     for (const k of ['order_confirmation', 'payment_link', 'receipt', 'cancel_request_ack', 'order_change']) add(`${k}.${l}`, k, base(l), l);
+    add(`invoice_pdf.${l}`, 'invoice_pdf', { ...base(l), invoice: { id: 3, invoice_no: 'L000001', public_token: 'abc', total: 120, due_date: '2026-11-21', reference_no: '1234561', status: 'sent' } }, l);
     add(`refund_receipt.${l}`, 'refund_receipt', refund(l), l);
     // tyhjät/puuttuvat tiedot
     for (const k of ['order_confirmation', 'payment_link', 'receipt', 'refund_receipt', 'cancel_request_ack', 'order_change']) add(`${k}.${l}.tyhja`, k, { locale: l }, l);

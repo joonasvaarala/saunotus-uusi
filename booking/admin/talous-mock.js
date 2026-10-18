@@ -148,7 +148,7 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
     if (a.p_status) rows = rows.filter((o) => orderStatus(o) === a.p_status);
     if (a.p_payment_status) rows = rows.filter((o) => o.payment_status === a.p_payment_status);
     const pf = normalizePaymentFilter(a.p_payment_filter);
-    if (!PAYMENT_FILTERS.includes(pf)) throw fail('invalid_param', 'p_payment_filter: paid|unpaid|all|refunded|cancelled');
+    if (!PAYMENT_FILTERS.includes(pf)) throw fail('invalid_param', 'p_payment_filter: paid|unpaid|all|refunded|cancelled|invoiced');
     rows = rows.filter((o) => matchesPaymentFilter(o, pf));
     if (a.p_source) rows = rows.filter((o) => o.source_channel === a.p_source);
     if (a.p_native != null) rows = rows.filter((o) => o.is_native === !!a.p_native);

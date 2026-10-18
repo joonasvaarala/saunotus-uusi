@@ -68,7 +68,7 @@ Sopimus ja lähteet: [docs/procountor-integraatio.md](../../docs/procountor-inte
 
 Myyntikirjaus on **päivän tosite** (`POST /ledgerreceipts`, tyyppi JOURNAL). Se kootaan `booking._report_json`-raportista, ei kuitteja uudelleen laskemalla. `accounting_outbox` täyttyy yhä kuiteista kun `procountor.mode <> 'off'`, mutta `procountor-sync` ei lähetä niitä (sama myynti ei kirjaudu kahdesti).
 
-Laskun välitys on erillinen: `action=send_invoice` ja normalisoitu JSON. Tauluja `booking.invoices` / `booking.invoice_lines` tämä ei luo.
+Laskun välitys on erillinen: `action=send_invoice` ja normalisoitu JSON. Tauluja `booking.invoices` / `booking.invoice_lines` tämä ei luo. `invoice-dispatch` on tästä erillinen dry_run-kerros (`booking/docs/laskutus.md`): se lukee laskujonon ja kutsuu provider-rajapintaa, eikä lähetä mitään ulos ennen kuin provider vaihdetaan.
 
 Tila: `booking.accounting_exports` (RLS: luku `settings.edit`). Hallinnan asetuksissa näkyy yhdistetty / harjoitusajo / pois, viimeisin ajo ja virheet. Ei salaisuuksia.
 
@@ -78,7 +78,7 @@ Salaisuudet vain Edgeen: **`PROCOUNTOR_CLIENT_ID`**, **`PROCOUNTOR_CLIENT_SECRET
 - **Kuitin tiedot:** `settings.seller` (nimi, y-tunnus 3018112-1, ALV-tunnus FI30181121 – johdettu y-tunnuksesta, vahvista, osoite, yhteystiedot, `logo_url`, alatunniste). Logo: `settings.seller.logo_url` = julkinen PNG (`https://joonasvaarala.github.io/saunotus-uusi/img/logo-kuitti.png` kun julkaistu); **asetettu 17.10.2026** (URL palauttaa 200 image/png). Vaihto: `update booking.settings set value = jsonb_set(value, '{logo_url}', to_jsonb('…'::text)) where key = 'seller';`. Muuten PDF tehdään ilman logoa.
 - **Numerointi:** sarjat `receipt_series` (`K`/`H`), vuosi Helsingin ajassa, aukoton; kuitteja ei voi muuttaa tai poistaa (trigger `receipt_immutable`). Älä muuta sarjaa tuotannossa kuin uuden vuoden/sarjan alussa.
 - **Säilytys:** kuitit ovat `booking.receipts`-taulussa (snapshot + teksti) ja PDF-välimuisti yksityisessä Storage-bucketissa `receipts` (voi luoda uudelleen snapshotista). Säilytä vähintään 6 vuotta; taulun varmuuskopiointi Supabasen PITR/varmuuskopioilla.
-- **Edge-funktiot (verify_jwt):** `receipt-pdf` (ei; token), `send-emails` ja `procountor-sync` (ei; `x-sync-secret`), `vismapay-start`/`vismapay-notify` (ei; ulkoinen kutsuja/allekirjoitus), `vismapay-refund`/`report-pdf` (kyllä).
+- **Edge-funktiot (verify_jwt):** `receipt-pdf` (ei; token), `invoice-pdf` (ei; token), `send-emails`, `procountor-sync` ja `invoice-dispatch` (ei; `x-sync-secret`), `vismapay-start`/`vismapay-notify` (ei; ulkoinen kutsuja/allekirjoitus), `vismapay-refund`/`report-pdf` (kyllä).
 - **Raportit:** kassaperuste (kuitin antopäivä). Ennen kuittijärjestelmää tehdyt maksut eivät näy raporteissa; ne näkyvät `unreceipted`-täsmäytysavaimessa.
 
 ## Sähköpostipohjat (`send-emails/templates.ts`)

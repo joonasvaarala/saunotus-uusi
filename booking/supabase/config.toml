@@ -7,6 +7,10 @@ verify_jwt = true   # pyynnöllä pitää olla kirjautuneen käyttäjän JWT; ad
 verify_jwt = false   # pg_cron kutsuu; tunnistus x-sync-secret (booking._cron_secret_ok)
 [functions.receipt-pdf]
 verify_jwt = false   # kuitin public_token on salaisuus; kuitti on muuttumaton snapshot
+[functions.invoice-pdf]
+verify_jwt = false   # laskun public_token on salaisuus; numeroitu lasku välimuistissa
+[functions.invoice-dispatch]
+verify_jwt = false   # pg_cron kutsuu; tunnistus x-sync-secret (booking._cron_secret_ok)
 [functions.gift-card-pdf]
 verify_jwt = false   # kortin public_token (UUID) on salaisuus; maksamaton/mitätöity kortti → 409; ei välimuistia
 [functions.report-pdf]

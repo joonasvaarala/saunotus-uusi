@@ -1,6 +1,7 @@
 // Hallinnan kokeilutila (?mock=1) ja testien mock: vastaa selaimessa Päivä-, Varaukset-, Uusi varaus (resurssi)- ja Tuotevalinnat-näkymien RPC:ihin (nimet ja p_-parametrit
 // sopimuksen §14/§15 mukaan, rivit samassa muodossa kuin migraatiossa booking_50). KEKSITTYÄ DATAA: mikään ei mene verkkoon eikä tallennu (tila on vain muistissa).
 // Puhdas moduuli (ei DOM:ia) → node --test voi ajaa sen. Tuntematon RPC → virhe (ei koskaan verkkokutsua).
+import { fiReference, validBusinessId, validOvt, validOperator, normBusinessId, normOvt } from '../shop/src/invoice-validate.js';
 const TZ = 'Europe/Helsinki';
 const todayHel = (now = new Date()) => now.toLocaleDateString('sv-SE', { timeZone: TZ });
 const addDays = (ds, n) => { const d = new Date(`${ds}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
@@ -75,7 +76,7 @@ function procountorStatus(cfg) {
     bank_account_configured: Boolean(cfg.bank_account), last: null, errors: [],
   };
 }
-const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'reports.view', 'settings.edit', 'pos.use'];
+const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'reports.view', 'settings.edit', 'pos.use', 'invoices.manage'];
 const CODE_RE = /^[a-z0-9_]{1,40}$/;
 
 export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager' } = {}) {
@@ -120,6 +121,11 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     blockAcks: [],
     posOrders: [],
     coldUnits: [{ id: 1, code: 'pukuhuone-abcdef1234', name: 'Pukuhuone, jääkaappi 1', location: 'Pukuhuone', active: true, path: '/juomat/?laite=pukuhuone-abcdef1234', path_en: '/en/drinks/?laite=pukuhuone-abcdef1234', print_url: 'https://uusi.saunotus.com/juomat/?laite=pukuhuone-abcdef1234' }],
+    invCustomers: [],
+    invoices: [],
+    invLog: [],
+    invSeq: 0,
+    vatRates: [{ rate: 0, label: '0 %', active: true }, { rate: 13.5, label: '13,5 %', active: true }, { rate: 25.5, label: '25,5 %', active: true }, { rate: 24, label: '24 %', active: false }],
   };
   if (role === 'staff') st.perms = st.perms.filter((p) => p !== 'settings.edit');
   const optJson = (id) => { const o = st.options.find((x) => x.id === id); return o ? { id: o.id, code: o.code, name: o.name, name_en: o.name_en } : null; };
@@ -405,6 +411,112 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       if (a.p_required && !activeOpts(a.p_product_id).length) throw err('no_options', 'Pakollinen valinta vaatii vähintään yhden aktiivisen vaihtoehdon');
       st.settings[a.p_product_id] = { option_required: !!a.p_required, option_label: a.p_label ?? null, option_label_en: a.p_label_en ?? null };
       return { ok: true, product_id: a.p_product_id, option_required: !!a.p_required };
+    },
+    admin_list_vat_rates: () => ({ rates: st.vatRates.map((r) => ({ ...r, products: 0, addons: 0 })), missing: [], quote_only: [] }),
+    admin_list_invoice_customers: (a) => {
+      need('invoices.manage');
+      const q = String(a.p_search || '').toLowerCase();
+      return st.invCustomers.filter((c) => !q || `${c.company_name} ${c.email} ${c.business_id}`.toLowerCase().includes(q));
+    },
+    admin_save_invoice_customer: (a) => {
+      need('invoices.manage');
+      const p = a.p || {};
+      const name = String(p.company_name || p.name || '').trim();
+      if (name.length < 2) throw err('invalid_company_name', 'Anna yrityksen nimi');
+      const bid = p.business_id ? normBusinessId(p.business_id) : null;
+      if (bid && !validBusinessId(bid)) throw err('invalid_business_id', 'Tarkista y-tunnus');
+      const ei = p.einvoice_address ? normOvt(p.einvoice_address) : null;
+      const op = p.einvoice_operator ? normOvt(p.einvoice_operator) : null;
+      if (!!ei !== !!op) throw err('einvoice_incomplete', 'Anna sekä verkkolaskuosoite että välittäjätunnus');
+      if (ei && !validOvt(ei, bid)) throw err('invalid_einvoice_address', 'Tarkista verkkolaskuosoite');
+      if (op && !validOperator(op)) throw err('invalid_einvoice_operator', 'Tarkista välittäjätunnus');
+      const row = { id: a.p_id || st.invCustomers.length + 1, company_name: name, name, contact_name: p.contact_name || null, business_id: bid, vat_id: bid ? `FI${bid.replace(/\D/g, '')}` : null, email: p.email || null, phone: p.phone || null, street: p.street || null, zip: p.zip || null, city: p.city || null, country: 'FI', einvoice_address: ei, einvoice_operator: op, buyer_reference: p.buyer_reference || null, address: [p.street, [p.zip, p.city].filter(Boolean).join(' ')].filter(Boolean).join(', ') };
+      if (a.p_id) {
+        const i = st.invCustomers.findIndex((c) => c.id === a.p_id);
+        if (i < 0) throw err('not_found', 'Asiakasta ei löydy');
+        st.invCustomers[i] = { ...st.invCustomers[i], ...row, id: a.p_id };
+        return st.invCustomers[i];
+      }
+      st.invCustomers.push(row);
+      return row;
+    },
+    admin_save_invoice: (a) => {
+      need('invoices.manage');
+      const p = a.p || {};
+      const customer = st.invCustomers.find((c) => c.id === p.customer_id);
+      if (!customer) throw err('invalid_customer', 'Valitse laskutusasiakas');
+      const lines = (p.lines || []).map((l, i) => {
+        const rate = Number(l.vat_rate);
+        if (!st.vatRates.some((r) => r.active && r.rate === rate)) throw err('invalid_vat', 'ALV-kanta ei ole käytössä');
+        const qty = Number(l.quantity), price = Number(l.unit_price_net);
+        const net = Math.round(qty * price * 100) / 100;
+        const vat = Math.round(net * rate) / 100;
+        return { line_no: i + 1, description: l.description, quantity: qty, unit: l.unit || 'kpl', unit_price_net: price, vat_rate: rate, line_net: net, line_vat: vat, line_gross: Math.round((net + vat) * 100) / 100 };
+      });
+      if (!lines.length) throw err('invalid_lines', 'Laskulla pitää olla rivejä');
+      const today = todayHel(now);
+      const sum = (k) => Math.round(lines.reduce((s, l) => s + l[k], 0) * 100) / 100;
+      const base = { customer_id: customer.id, customer, lines, invoice_date: p.invoice_date || today, due_date: p.due_date || today, buyer_reference: p.buyer_reference || null, notes: p.notes || null, locale: 'fi', seller_snapshot: { name: 'Sipoonjoen Perinnesauna', legal_name: 'Havuhattu Oy', business_id: '0112038-9', vat_id: 'FI01120389', iban: '', bic: '', bank_name: '' }, total_net: sum('line_net'), total_vat: sum('line_vat'), total_gross: sum('line_gross'), dispatch_status: 'none', dispatch_error: null, kind: 'debit', status: 'draft', invoice_no: null, reference_no: null, public_token: `00000000-0000-4000-8000-${String(st.invoices.length + 1).padStart(12, '0')}` };
+      if (a.p_id) {
+        const inv = st.invoices.find((x) => x.id === a.p_id);
+        if (!inv || inv.status !== 'draft') throw err('invoice_locked', 'Vain luonnosta voi muokata');
+        Object.assign(inv, base, { id: inv.id, public_token: inv.public_token });
+        return inv;
+      }
+      const inv = { id: st.invoices.length + 1, ...base };
+      st.invoices.push(inv);
+      return inv;
+    },
+    admin_list_invoices: (a) => {
+      need('invoices.manage');
+      const q = String(a.p_search || '').toLowerCase();
+      const rows = st.invoices.filter((i) => (!a.p_status || i.status === a.p_status) && (!a.p_kind || i.kind === a.p_kind) && (!q || `${i.invoice_no} ${i.customer?.company_name} ${i.customer?.business_id}`.toLowerCase().includes(q)));
+      return { total: rows.length, rows };
+    },
+    admin_get_invoice: (a) => { need('invoices.manage'); const inv = st.invoices.find((i) => i.id === a.p_id); if (!inv) throw err('not_found', 'Laskua ei löydy'); return inv; },
+    admin_send_invoice: (a) => {
+      need('invoices.manage');
+      const inv = st.invoices.find((i) => i.id === a.p_id);
+      if (!inv) throw err('not_found', 'Laskua ei löydy');
+      if (inv.status === 'draft') {
+        st.invSeq += 1;
+        inv.invoice_no = `L${String(st.invSeq).padStart(6, '0')}`;
+        inv.reference_no = fiReference(String(st.invSeq).padStart(3, '0'));
+        inv.status = 'sent';
+      }
+      if (a.p_einvoice) {
+        if (!inv.customer?.einvoice_address) throw err('einvoice_incomplete', 'Verkkolasku tarvitsee OVT-tunnuksen');
+        inv.dispatch_status = 'dry_run';
+        inv.dispatch_error = 'dry_run';
+        st.invLog.push({ invoice_id: inv.id, status: 'dry_run', error: 'dry_run', attempt: st.invLog.length + 1 });
+      }
+      return inv;
+    },
+    admin_mark_invoice_paid: (a) => { need('invoices.manage'); const inv = st.invoices.find((i) => i.id === a.p_id); if (!inv || inv.kind === 'credit' || !['sent', 'overdue'].includes(inv.status)) throw err('invalid_status', 'Vain lähetetty veloituslasku'); inv.status = 'paid'; return inv; },
+    admin_void_invoice: (a) => { need('invoices.manage'); const inv = st.invoices.find((i) => i.id === a.p_id); if (!inv || inv.status !== 'draft') throw err('invalid_status', 'Vain luonnos'); inv.status = 'voided'; return inv; },
+    admin_credit_invoice: (a) => {
+      need('invoices.manage');
+      const inv = st.invoices.find((i) => i.id === a.p_id);
+      if (!inv || inv.kind !== 'debit' || !['sent', 'paid', 'overdue'].includes(inv.status)) throw err('invalid_status', 'Hyvitys tehdään lähetetystä laskusta');
+      const credit = { ...inv, id: st.invoices.length + 1, kind: 'credit', status: 'draft', invoice_no: null, reference_no: null, credit_of_id: inv.id, lines: inv.lines.map((l) => ({ ...l, quantity: l.quantity, unit_price_net: -l.unit_price_net, line_net: -l.line_net, line_vat: -l.line_vat, line_gross: -l.line_gross })), total_gross: -inv.total_gross, dispatch_status: 'none' };
+      st.invoices.push(credit);
+      return credit;
+    },
+    admin_retry_invoice_dispatch: (a) => { need('invoices.manage'); const inv = st.invoices.find((i) => i.id === a.p_id); if (!inv) throw err('not_found', 'Laskua ei löydy'); inv.dispatch_status = 'dry_run'; return inv; },
+    admin_list_invoice_dispatch: (a) => { need('invoices.manage'); return st.invLog.filter((d) => d.invoice_id === a.p_invoice_id); },
+    admin_create_invoice_from_order: (a) => {
+      need('invoices.manage');
+      const res = st.reservations.find((r) => r.order_id === a.p_order_id || r.order_no === a.p_order_id);
+      if (!res) throw err('not_found', 'Tilausta ei löydy');
+      const customer = st.invCustomers[0] || { id: 1, company_name: res.customer_name, name: res.customer_name, email: res.customer_email, business_id: null, einvoice_address: null, einvoice_operator: null };
+      if (!st.invCustomers.length) st.invCustomers.push(customer);
+      const rate = 25.5;
+      const gross = Number(res.total_gross) || 0;
+      const vat = Math.round(gross * rate / (100 + rate) * 100) / 100;
+      const net = Math.round((gross - vat) * 100) / 100;
+      const inv = { id: st.invoices.length + 1, customer_id: customer.id, customer, status: 'draft', kind: 'debit', invoice_no: null, reference_no: null, due_date: todayHel(now), invoice_date: todayHel(now), order_id: res.order_id, dispatch_status: 'none', seller_snapshot: { legal_name: 'Havuhattu Oy', business_id: '0112038-9', vat_id: 'FI01120389' }, lines: [{ description: res.product_name, quantity: 1, unit: 'kpl', vat_rate: rate, line_gross: gross, line_net: net, line_vat: vat }], total_gross: gross, total_net: net, total_vat: vat, public_token: '11111111-1111-4111-8111-111111111111' };
+      st.invoices.push(inv);
+      return inv;
     },
   };
   async function rpc(name, args = {}) {

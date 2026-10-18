@@ -22271,6 +22271,496 @@
    "text": "Tarkista varaus",
    "version": 1,
    "placeholders": []
+  },
+  {
+   "key": "ui.shop.einvoice_title_required",
+   "lang": "fi",
+   "text": "Verkkolaskutus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.shop.einvoice_title_required",
+   "lang": "en",
+   "text": "E-invoicing",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.shop.einvoice_hint_required",
+   "lang": "fi",
+   "text": "Yritysasiakas maksaa vain verkkolaskulla. Anna OVT-tunnus (0037 ja y-tunnus) ja operaattorin välittäjätunnus.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.shop.einvoice_hint_required",
+   "lang": "en",
+   "text": "Business customers pay by e-invoice only. Enter the OVT address (0037 and the business ID) and the operator ID.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.shop.company_invoice_note",
+   "lang": "fi",
+   "text": "Varaus vahvistetaan ja laskutetaan verkkolaskuna. Tilausta ei ole vielä maksettu.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.shop.company_invoice_note",
+   "lang": "en",
+   "text": "The booking is confirmed and will be billed as an e-invoice. The order is not paid yet.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.shop.invalid_ovt",
+   "lang": "fi",
+   "text": "Tarkista verkkolaskuosoite. OVT-tunnus alkaa 0037 ja sisältää y-tunnuksen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.shop.invalid_ovt",
+   "lang": "en",
+   "text": "Check the e-invoice address. An OVT address starts with 0037 and includes the business ID.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.shop.buyer_reference",
+   "lang": "fi",
+   "text": "Viitteenne / tilausviite",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.shop.buyer_reference",
+   "lang": "en",
+   "text": "Your reference / order reference",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice.subject",
+   "lang": "fi",
+   "text": "Lasku {{var:no}} – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:no}}",
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.invoice.subject",
+   "lang": "en",
+   "text": "Invoice {{var:no}} – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:no}}",
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.invoice.title",
+   "lang": "fi",
+   "text": "Lasku",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice.title",
+   "lang": "en",
+   "text": "Invoice",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice.intro",
+   "lang": "fi",
+   "text": "Lasku {{var:no}} on liitteenä. Summa {{var:amount}}, eräpäivä {{var:date}}.",
+   "version": 1,
+   "placeholders": [
+    "{{var:no}}",
+    "{{var:amount}}",
+    "{{var:date}}"
+   ]
+  },
+  {
+   "key": "email.invoice.intro",
+   "lang": "en",
+   "text": "Invoice {{var:no}} is attached. Amount {{var:amount}}, due {{var:date}}.",
+   "version": 1,
+   "placeholders": [
+    "{{var:no}}",
+    "{{var:amount}}",
+    "{{var:date}}"
+   ]
+  },
+  {
+   "key": "email.invoice.attach",
+   "lang": "fi",
+   "text": "PDF-lasku on tämän viestin liitteenä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice.attach",
+   "lang": "en",
+   "text": "The invoice PDF is attached to this message.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice.terms",
+   "lang": "fi",
+   "text": "Maksuehto 14 päivää netto. Viivästyskorko korkolain mukaan. Maksu viitenumerolla.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice.terms",
+   "lang": "en",
+   "text": "Payment terms: 14 days net. Late interest according to the Interest Act. Pay with the reference number.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.doc_invoice",
+   "lang": "fi",
+   "text": "LASKU",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.doc_invoice",
+   "lang": "en",
+   "text": "INVOICE",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.doc_credit",
+   "lang": "fi",
+   "text": "HYVITYSLASKU",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.doc_credit",
+   "lang": "en",
+   "text": "CREDIT INVOICE",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.doc_draft",
+   "lang": "fi",
+   "text": "LUONNOS",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.doc_draft",
+   "lang": "en",
+   "text": "DRAFT",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.seller",
+   "lang": "fi",
+   "text": "Myyjä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.seller",
+   "lang": "en",
+   "text": "Seller",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.buyer",
+   "lang": "fi",
+   "text": "Ostaja",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.buyer",
+   "lang": "en",
+   "text": "Buyer",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.business_id",
+   "lang": "fi",
+   "text": "Y-tunnus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.business_id",
+   "lang": "en",
+   "text": "Business ID",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.vat_id",
+   "lang": "fi",
+   "text": "ALV-tunnus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.vat_id",
+   "lang": "en",
+   "text": "VAT ID",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.date",
+   "lang": "fi",
+   "text": "Laskun päivä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.date",
+   "lang": "en",
+   "text": "Invoice date",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.number",
+   "lang": "fi",
+   "text": "Laskunumero",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.number",
+   "lang": "en",
+   "text": "Invoice number",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.due",
+   "lang": "fi",
+   "text": "Eräpäivä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.due",
+   "lang": "en",
+   "text": "Due date",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.reference",
+   "lang": "fi",
+   "text": "Viitenumero",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.reference",
+   "lang": "en",
+   "text": "Reference number",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.bank",
+   "lang": "fi",
+   "text": "Pankki",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.bank",
+   "lang": "en",
+   "text": "Bank",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.iban",
+   "lang": "fi",
+   "text": "IBAN",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.iban",
+   "lang": "en",
+   "text": "IBAN",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.bic",
+   "lang": "fi",
+   "text": "BIC",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.bic",
+   "lang": "en",
+   "text": "BIC",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.desc",
+   "lang": "fi",
+   "text": "Kuvaus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.desc",
+   "lang": "en",
+   "text": "Description",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.qty",
+   "lang": "fi",
+   "text": "Määrä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.qty",
+   "lang": "en",
+   "text": "Qty",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.unit_price",
+   "lang": "fi",
+   "text": "a-hinta alv 0",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.unit_price",
+   "lang": "en",
+   "text": "Unit price excl. VAT",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.net",
+   "lang": "fi",
+   "text": "Veroton",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.net",
+   "lang": "en",
+   "text": "Net",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.vat",
+   "lang": "fi",
+   "text": "ALV",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.vat",
+   "lang": "en",
+   "text": "VAT",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.gross",
+   "lang": "fi",
+   "text": "Verollinen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.gross",
+   "lang": "en",
+   "text": "Gross",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.vat_breakdown",
+   "lang": "fi",
+   "text": "ALV-erittely",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.vat_breakdown",
+   "lang": "en",
+   "text": "VAT breakdown",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.total",
+   "lang": "fi",
+   "text": "Yhteensä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.total",
+   "lang": "en",
+   "text": "Total",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.terms",
+   "lang": "fi",
+   "text": "Maksuehto 14 päivää netto. Viivästyskorko korkolain mukaan.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.terms",
+   "lang": "en",
+   "text": "Payment terms: 14 days net. Late interest according to the Interest Act.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.privacy",
+   "lang": "fi",
+   "text": "Henkilötietoja käsitellään vain laskutusta varten.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.invoice_pdf.privacy",
+   "lang": "en",
+   "text": "Personal data is processed only for invoicing.",
+   "version": 1,
+   "placeholders": []
   }
  ],
  "context": {

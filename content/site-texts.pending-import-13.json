@@ -1,0 +1,1896 @@
+[
+ {
+  "key": "ui.admin.invoices.title",
+  "lang": "fi",
+  "text": "Laskut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.title",
+  "lang": "en",
+  "text": "Invoices",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.search",
+  "lang": "fi",
+  "text": "Haku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.search",
+  "lang": "en",
+  "text": "Search",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.search_ph",
+  "lang": "fi",
+  "text": "Numero, asiakas, y-tunnus tai viite",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.search_ph",
+  "lang": "en",
+  "text": "Number, customer, business ID or reference",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.status",
+  "lang": "fi",
+  "text": "Tila",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.status",
+  "lang": "en",
+  "text": "Status",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.kind",
+  "lang": "fi",
+  "text": "Laji",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.kind",
+  "lang": "en",
+  "text": "Kind",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.from",
+  "lang": "fi",
+  "text": "Alkaen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.from",
+  "lang": "en",
+  "text": "From",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.to",
+  "lang": "fi",
+  "text": "Asti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.to",
+  "lang": "en",
+  "text": "To",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.new",
+  "lang": "fi",
+  "text": "Uusi lasku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.new",
+  "lang": "en",
+  "text": "New invoice",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.from_order",
+  "lang": "fi",
+  "text": "Tilauksesta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.from_order",
+  "lang": "en",
+  "text": "From order",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.send_einvoice",
+  "lang": "fi",
+  "text": "Lähetä verkkolasku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.send_einvoice",
+  "lang": "en",
+  "text": "Send e-invoice",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.send_email",
+  "lang": "fi",
+  "text": "Lähetä PDF sähköpostilla",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.send_email",
+  "lang": "en",
+  "text": "Email the PDF",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.mark_paid",
+  "lang": "fi",
+  "text": "Merkitse maksetuksi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.mark_paid",
+  "lang": "en",
+  "text": "Mark paid",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.credit",
+  "lang": "fi",
+  "text": "Hyvityslasku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.credit",
+  "lang": "en",
+  "text": "Credit invoice",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.void",
+  "lang": "fi",
+  "text": "Mitätöi luonnos",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.void",
+  "lang": "en",
+  "text": "Void draft",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.preview",
+  "lang": "fi",
+  "text": "Laskuennakko",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.preview",
+  "lang": "en",
+  "text": "Invoice preview",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.empty",
+  "lang": "fi",
+  "text": "Ei laskuja",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.empty",
+  "lang": "en",
+  "text": "No invoices",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.customer",
+  "lang": "fi",
+  "text": "Asiakas",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.customer",
+  "lang": "en",
+  "text": "Customer",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.company",
+  "lang": "fi",
+  "text": "Yritys",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.company",
+  "lang": "en",
+  "text": "Company",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.business_id",
+  "lang": "fi",
+  "text": "Y-tunnus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.business_id",
+  "lang": "en",
+  "text": "Business ID",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.vat_id",
+  "lang": "fi",
+  "text": "ALV-tunnus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.vat_id",
+  "lang": "en",
+  "text": "VAT ID",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.ovt",
+  "lang": "fi",
+  "text": "Verkkolaskuosoite (OVT)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.ovt",
+  "lang": "en",
+  "text": "E-invoice address (OVT)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.operator",
+  "lang": "fi",
+  "text": "Välittäjätunnus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.operator",
+  "lang": "en",
+  "text": "Operator ID",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.email",
+  "lang": "fi",
+  "text": "Sähköposti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.email",
+  "lang": "en",
+  "text": "Email",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.contact",
+  "lang": "fi",
+  "text": "Yhteyshenkilö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.contact",
+  "lang": "en",
+  "text": "Contact",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.buyer_ref",
+  "lang": "fi",
+  "text": "Viitteenne",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.buyer_ref",
+  "lang": "en",
+  "text": "Your reference",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.due",
+  "lang": "fi",
+  "text": "Eräpäivä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.due",
+  "lang": "en",
+  "text": "Due date",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.date",
+  "lang": "fi",
+  "text": "Laskun päivä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.date",
+  "lang": "en",
+  "text": "Invoice date",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.notes",
+  "lang": "fi",
+  "text": "Lisätiedot",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.notes",
+  "lang": "en",
+  "text": "Notes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.desc",
+  "lang": "fi",
+  "text": "Kuvaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.desc",
+  "lang": "en",
+  "text": "Description",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.qty",
+  "lang": "fi",
+  "text": "Määrä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.qty",
+  "lang": "en",
+  "text": "Qty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.unit",
+  "lang": "fi",
+  "text": "Yksikkö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.unit",
+  "lang": "en",
+  "text": "Unit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.price",
+  "lang": "fi",
+  "text": "Yksikköhinta, alv 0 €",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.price",
+  "lang": "en",
+  "text": "Unit price excl. VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.vat",
+  "lang": "fi",
+  "text": "ALV",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.vat",
+  "lang": "en",
+  "text": "VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.add_line",
+  "lang": "fi",
+  "text": "Lisää rivi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.add_line",
+  "lang": "en",
+  "text": "Add line",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.save",
+  "lang": "fi",
+  "text": "Tallenna luonnos",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.save",
+  "lang": "en",
+  "text": "Save draft",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.number",
+  "lang": "fi",
+  "text": "Laskunumero",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.number",
+  "lang": "en",
+  "text": "Invoice number",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.reference",
+  "lang": "fi",
+  "text": "Viitenumero",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.reference",
+  "lang": "en",
+  "text": "Reference number",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.total",
+  "lang": "fi",
+  "text": "Yhteensä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.total",
+  "lang": "en",
+  "text": "Total",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.dispatch",
+  "lang": "fi",
+  "text": "Verkkolaskun lähetys",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.dispatch",
+  "lang": "en",
+  "text": "E-invoice dispatch",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.retry",
+  "lang": "fi",
+  "text": "Yritä uudelleen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.retry",
+  "lang": "en",
+  "text": "Retry",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.st_draft",
+  "lang": "fi",
+  "text": "Luonnos",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.st_draft",
+  "lang": "en",
+  "text": "Draft",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.st_sent",
+  "lang": "fi",
+  "text": "Lähetetty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.st_sent",
+  "lang": "en",
+  "text": "Sent",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.st_paid",
+  "lang": "fi",
+  "text": "Maksettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.st_paid",
+  "lang": "en",
+  "text": "Paid",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.st_overdue",
+  "lang": "fi",
+  "text": "Erääntynyt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.st_overdue",
+  "lang": "en",
+  "text": "Overdue",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.st_credited",
+  "lang": "fi",
+  "text": "Hyvitetty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.st_credited",
+  "lang": "en",
+  "text": "Credited",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.st_voided",
+  "lang": "fi",
+  "text": "Mitätöity",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.st_voided",
+  "lang": "en",
+  "text": "Voided",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.kind_debit",
+  "lang": "fi",
+  "text": "Veloitus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.kind_debit",
+  "lang": "en",
+  "text": "Debit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.kind_credit",
+  "lang": "fi",
+  "text": "Hyvitys",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.kind_credit",
+  "lang": "en",
+  "text": "Credit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.all",
+  "lang": "fi",
+  "text": "Kaikki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.all",
+  "lang": "en",
+  "text": "All",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.order",
+  "lang": "fi",
+  "text": "Tilausnumero",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.order",
+  "lang": "en",
+  "text": "Order number",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.terms",
+  "lang": "fi",
+  "text": "Maksuehto 14 päivää netto. Viivästyskorko korkolain mukaan.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.terms",
+  "lang": "en",
+  "text": "Payment terms: 14 days net. Late interest according to the Interest Act.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.privacy",
+  "lang": "fi",
+  "text": "Laskun henkilötietoja käsitellään vain laskutusta varten.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.privacy",
+  "lang": "en",
+  "text": "Personal data on the invoice is used only for invoicing.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.locked",
+  "lang": "fi",
+  "text": "Rivit on lukittu lähetyksen jälkeen. Korjaus tehdään hyvityslaskulla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.locked",
+  "lang": "en",
+  "text": "Lines are locked after sending. Corrections are made with a credit invoice.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.saved",
+  "lang": "fi",
+  "text": "Luonnos tallennettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.saved",
+  "lang": "en",
+  "text": "Draft saved",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.pdf",
+  "lang": "fi",
+  "text": "Avaa PDF",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.pdf",
+  "lang": "en",
+  "text": "Open PDF",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.log",
+  "lang": "fi",
+  "text": "Lähetysloki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.log",
+  "lang": "en",
+  "text": "Dispatch log",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.orders.pay_invoiced",
+  "lang": "fi",
+  "text": "Laskutetut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: tilauslistan suodatin Laskutetut. Ei pending-import-8:ssa."
+ },
+ {
+  "key": "ui.admin.orders.pay_invoiced",
+  "lang": "en",
+  "text": "Invoiced",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: tilauslistan suodatin Laskutetut. Ei pending-import-8:ssa."
+ },
+ {
+  "key": "ui.shop.einvoice_title_required",
+  "lang": "fi",
+  "text": "Verkkolaskutus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: yrityskassan verkkolasku on ainoa maksutapa. Uusi avain, vanhaa valinnaista tekstiä ei muuteta."
+ },
+ {
+  "key": "ui.shop.einvoice_title_required",
+  "lang": "en",
+  "text": "E-invoicing",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: yrityskassan verkkolasku on ainoa maksutapa. Uusi avain, vanhaa valinnaista tekstiä ei muuteta."
+ },
+ {
+  "key": "ui.shop.einvoice_hint_required",
+  "lang": "fi",
+  "text": "Yritysasiakas maksaa vain verkkolaskulla. Anna OVT-tunnus (0037 ja y-tunnus) ja operaattorin välittäjätunnus.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Laskutus: yrityskassan verkkolasku on ainoa maksutapa. Uusi avain, vanhaa valinnaista tekstiä ei muuteta."
+ },
+ {
+  "key": "ui.shop.einvoice_hint_required",
+  "lang": "en",
+  "text": "Business customers pay by e-invoice only. Enter the OVT address (0037 and the business ID) and the operator ID.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Laskutus: yrityskassan verkkolasku on ainoa maksutapa. Uusi avain, vanhaa valinnaista tekstiä ei muuteta."
+ },
+ {
+  "key": "ui.shop.company_invoice_note",
+  "lang": "fi",
+  "text": "Varaus vahvistetaan ja laskutetaan verkkolaskuna. Tilausta ei ole vielä maksettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Laskutus: yrityskassan verkkolasku on ainoa maksutapa. Uusi avain, vanhaa valinnaista tekstiä ei muuteta."
+ },
+ {
+  "key": "ui.shop.company_invoice_note",
+  "lang": "en",
+  "text": "The booking is confirmed and will be billed as an e-invoice. The order is not paid yet.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Laskutus: yrityskassan verkkolasku on ainoa maksutapa. Uusi avain, vanhaa valinnaista tekstiä ei muuteta."
+ },
+ {
+  "key": "ui.shop.invalid_ovt",
+  "lang": "fi",
+  "text": "Tarkista verkkolaskuosoite. OVT-tunnus alkaa 0037 ja sisältää y-tunnuksen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Laskutus: yrityskassan verkkolasku on ainoa maksutapa. Uusi avain, vanhaa valinnaista tekstiä ei muuteta."
+ },
+ {
+  "key": "ui.shop.invalid_ovt",
+  "lang": "en",
+  "text": "Check the e-invoice address. An OVT address starts with 0037 and includes the business ID.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Laskutus: yrityskassan verkkolasku on ainoa maksutapa. Uusi avain, vanhaa valinnaista tekstiä ei muuteta."
+ },
+ {
+  "key": "ui.shop.buyer_reference",
+  "lang": "fi",
+  "text": "Viitteenne / tilausviite",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: yrityskassan verkkolasku on ainoa maksutapa. Uusi avain, vanhaa valinnaista tekstiä ei muuteta."
+ },
+ {
+  "key": "ui.shop.buyer_reference",
+  "lang": "en",
+  "text": "Your reference / order reference",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: yrityskassan verkkolasku on ainoa maksutapa. Uusi avain, vanhaa valinnaista tekstiä ei muuteta."
+ },
+ {
+  "key": "email.invoice.subject",
+  "lang": "fi",
+  "text": "Lasku {{var:no}} – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}",
+   "{{setting:business_name}}"
+  ],
+  "reason": "Laskutus: laskun PDF-sähköposti (send-emails, kind invoice_pdf)."
+ },
+ {
+  "key": "email.invoice.subject",
+  "lang": "en",
+  "text": "Invoice {{var:no}} – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}",
+   "{{setting:business_name}}"
+  ],
+  "reason": "Laskutus: laskun PDF-sähköposti (send-emails, kind invoice_pdf)."
+ },
+ {
+  "key": "email.invoice.title",
+  "lang": "fi",
+  "text": "Lasku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: laskun PDF-sähköposti (send-emails, kind invoice_pdf)."
+ },
+ {
+  "key": "email.invoice.title",
+  "lang": "en",
+  "text": "Invoice",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: laskun PDF-sähköposti (send-emails, kind invoice_pdf)."
+ },
+ {
+  "key": "email.invoice.intro",
+  "lang": "fi",
+  "text": "Lasku {{var:no}} on liitteenä. Summa {{var:amount}}, eräpäivä {{var:date}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}",
+   "{{var:amount}}",
+   "{{var:date}}"
+  ],
+  "reason": "Laskutus: laskun PDF-sähköposti (send-emails, kind invoice_pdf)."
+ },
+ {
+  "key": "email.invoice.intro",
+  "lang": "en",
+  "text": "Invoice {{var:no}} is attached. Amount {{var:amount}}, due {{var:date}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}",
+   "{{var:amount}}",
+   "{{var:date}}"
+  ],
+  "reason": "Laskutus: laskun PDF-sähköposti (send-emails, kind invoice_pdf)."
+ },
+ {
+  "key": "email.invoice.attach",
+  "lang": "fi",
+  "text": "PDF-lasku on tämän viestin liitteenä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: laskun PDF-sähköposti (send-emails, kind invoice_pdf)."
+ },
+ {
+  "key": "email.invoice.attach",
+  "lang": "en",
+  "text": "The invoice PDF is attached to this message.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: laskun PDF-sähköposti (send-emails, kind invoice_pdf)."
+ },
+ {
+  "key": "email.invoice.terms",
+  "lang": "fi",
+  "text": "Maksuehto 14 päivää netto. Viivästyskorko korkolain mukaan. Maksu viitenumerolla.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Laskutus: laskun PDF-sähköposti (send-emails, kind invoice_pdf)."
+ },
+ {
+  "key": "email.invoice.terms",
+  "lang": "en",
+  "text": "Payment terms: 14 days net. Late interest according to the Interest Act. Pay with the reference number.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Laskutus: laskun PDF-sähköposti (send-emails, kind invoice_pdf)."
+ },
+ {
+  "key": "email.invoice_pdf.doc_invoice",
+  "lang": "fi",
+  "text": "LASKU",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.doc_invoice",
+  "lang": "en",
+  "text": "INVOICE",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.doc_credit",
+  "lang": "fi",
+  "text": "HYVITYSLASKU",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.doc_credit",
+  "lang": "en",
+  "text": "CREDIT INVOICE",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.doc_draft",
+  "lang": "fi",
+  "text": "LUONNOS",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.doc_draft",
+  "lang": "en",
+  "text": "DRAFT",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.seller",
+  "lang": "fi",
+  "text": "Myyjä",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.seller",
+  "lang": "en",
+  "text": "Seller",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.buyer",
+  "lang": "fi",
+  "text": "Ostaja",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.buyer",
+  "lang": "en",
+  "text": "Buyer",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.business_id",
+  "lang": "fi",
+  "text": "Y-tunnus",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.business_id",
+  "lang": "en",
+  "text": "Business ID",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.vat_id",
+  "lang": "fi",
+  "text": "ALV-tunnus",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.vat_id",
+  "lang": "en",
+  "text": "VAT ID",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.date",
+  "lang": "fi",
+  "text": "Laskun päivä",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.date",
+  "lang": "en",
+  "text": "Invoice date",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.number",
+  "lang": "fi",
+  "text": "Laskunumero",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.number",
+  "lang": "en",
+  "text": "Invoice number",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.due",
+  "lang": "fi",
+  "text": "Eräpäivä",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.due",
+  "lang": "en",
+  "text": "Due date",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.reference",
+  "lang": "fi",
+  "text": "Viitenumero",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.reference",
+  "lang": "en",
+  "text": "Reference number",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.bank",
+  "lang": "fi",
+  "text": "Pankki",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.bank",
+  "lang": "en",
+  "text": "Bank",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.iban",
+  "lang": "fi",
+  "text": "IBAN",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.iban",
+  "lang": "en",
+  "text": "IBAN",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.bic",
+  "lang": "fi",
+  "text": "BIC",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.bic",
+  "lang": "en",
+  "text": "BIC",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.desc",
+  "lang": "fi",
+  "text": "Kuvaus",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.desc",
+  "lang": "en",
+  "text": "Description",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.qty",
+  "lang": "fi",
+  "text": "Määrä",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.qty",
+  "lang": "en",
+  "text": "Qty",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.unit_price",
+  "lang": "fi",
+  "text": "a-hinta alv 0",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.unit_price",
+  "lang": "en",
+  "text": "Unit price excl. VAT",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.net",
+  "lang": "fi",
+  "text": "Veroton",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.net",
+  "lang": "en",
+  "text": "Net",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.vat",
+  "lang": "fi",
+  "text": "ALV",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.vat",
+  "lang": "en",
+  "text": "VAT",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.gross",
+  "lang": "fi",
+  "text": "Verollinen",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.gross",
+  "lang": "en",
+  "text": "Gross",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.vat_breakdown",
+  "lang": "fi",
+  "text": "ALV-erittely",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.vat_breakdown",
+  "lang": "en",
+  "text": "VAT breakdown",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.total",
+  "lang": "fi",
+  "text": "Yhteensä",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.total",
+  "lang": "en",
+  "text": "Total",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.terms",
+  "lang": "fi",
+  "text": "Maksuehto 14 päivää netto. Viivästyskorko korkolain mukaan.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.terms",
+  "lang": "en",
+  "text": "Payment terms: 14 days net. Late interest according to the Interest Act.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.privacy",
+  "lang": "fi",
+  "text": "Henkilötietoja käsitellään vain laskutusta varten.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "email.invoice_pdf.privacy",
+  "lang": "en",
+  "text": "Personal data is processed only for invoicing.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus: PDF-laskun lakisääteiset kentät, maksuehto ja tietosuoja. protected."
+ },
+ {
+  "key": "ui.admin.invoices.street",
+  "lang": "fi",
+  "text": "Katuosoite",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.street",
+  "lang": "en",
+  "text": "Street address",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.zip",
+  "lang": "fi",
+  "text": "Postinumero",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.zip",
+  "lang": "en",
+  "text": "Postal code",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.city",
+  "lang": "fi",
+  "text": "Postitoimipaikka",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.city",
+  "lang": "en",
+  "text": "City",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Laskutus (booking_90): hallinnan Laskut-näkymä. FI+EN. Bottiavustus tuo admin_texts_importilla."
+ }
+]

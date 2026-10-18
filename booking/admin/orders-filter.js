@@ -1,5 +1,5 @@
 // Talous-tilauslistan maksusuodatin. Sama sääntö on SQL:ssä (admin_list_orders, p_payment_filter, booking_76).
-// Maksutilat (orders.payment_status): unpaid, pending, paid, partially_paid, refunded, partially_refunded, failed.
+// Maksutilat (orders.payment_status): unpaid, pending, paid, partially_paid, refunded, partially_refunded, failed, invoiced.
 // Tilauksen tila: draft, pending, confirmed, cancelled, expired, completed.
 //
 // 'paid' (oletus): payment_status paid tai partially_refunded, nettomaksu > 0, tila ei cancelled eikä expired.
@@ -8,7 +8,7 @@
 // partially_paid ei ole oletuksessa: rahaa on tullut, mutta tilaus ei ole kokonaan maksettu.
 // Haku: kun valinta on oletus 'paid' ja hakukentässä on tekstiä, kutsu käyttää 'all' (maksamaton löytyy numerolla).
 
-export const PAYMENT_FILTERS = ['paid', 'unpaid', 'all', 'refunded', 'cancelled'];
+export const PAYMENT_FILTERS = ['paid', 'unpaid', 'invoiced', 'all', 'refunded', 'cancelled'];
 export const DEFAULT_PAYMENT_FILTER = 'paid';
 
 const SETTLED = new Set(['paid', 'partially_refunded', 'refunded']);
@@ -59,6 +59,7 @@ export function matchesPaymentFilter(order, filter) {
   const closed = orderStatusOf(order) === 'cancelled' || orderStatusOf(order) === 'expired';
   if (f === 'paid') return (ps === 'paid' || ps === 'partially_refunded') && !closed && netSettled(order) > 0.004;
   if (f === 'unpaid') return UNPAID_STATUS.has(ps) && !closed;
+  if (f === 'invoiced') return ps === 'invoiced' && !closed;
   if (f === 'refunded') return ps === 'refunded' || ps === 'partially_refunded';
   if (f === 'cancelled') return closed;
   return false;

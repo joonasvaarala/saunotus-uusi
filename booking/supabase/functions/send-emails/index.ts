@@ -55,6 +55,11 @@ Deno.serve(async (req) => {
         if (!pdf.ok) throw new Error(`receipt-pdf ${pdf.status}`);
         attachments.push({ filename: `${r.kind === "refund_receipt" ? "hyvityskuitti" : "kuitti"}-${r.receipt.receipt_no}.pdf`, content: b64(new Uint8Array(await pdf.arrayBuffer())) });
       }
+      if (r.kind === "invoice_pdf" && r.invoice?.public_token) {
+        const pdf = await fetch(`${url}/functions/v1/invoice-pdf?t=${r.invoice.public_token}`);
+        if (!pdf.ok) throw new Error(`invoice-pdf ${pdf.status}`);
+        attachments.push({ filename: `lasku-${r.invoice.invoice_no || r.invoice.id}.pdf`, content: b64(new Uint8Array(await pdf.arrayBuffer())) });
+      }
       if (isGc) {
         let k = 0;
         // ostajan viestissä liitteenä vain ostajalle toimitettavat kortit; suoraan saajalle toimitettavien PDF menee saajan viestissä

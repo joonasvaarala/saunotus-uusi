@@ -1,0 +1,31 @@
+// Lasku-PDF:n lakisääteiset otsikot. Kaikki protected (laskun pakolliset tiedot, maksuehto, tietosuoja).
+// Arvot (nimi, y-tunnus, summat) tulevat laskun snapshotista, ei näistä teksteistä.
+import type { TextTable } from "../_shared/site_texts.ts";
+
+const P = "protected" as const;
+export const INVOICE_PDF_TEXTS: TextTable = {
+  "email.invoice_pdf.doc_invoice": { fi: "LASKU", en: "INVOICE", cls: P },
+  "email.invoice_pdf.doc_credit": { fi: "HYVITYSLASKU", en: "CREDIT INVOICE", cls: P },
+  "email.invoice_pdf.doc_draft": { fi: "LUONNOS", en: "DRAFT", cls: P },
+  "email.invoice_pdf.seller": { fi: "Myyjä", en: "Seller", cls: P },
+  "email.invoice_pdf.buyer": { fi: "Ostaja", en: "Buyer", cls: P },
+  "email.invoice_pdf.business_id": { fi: "Y-tunnus", en: "Business ID", cls: P },
+  "email.invoice_pdf.vat_id": { fi: "ALV-tunnus", en: "VAT ID", cls: P },
+  "email.invoice_pdf.date": { fi: "Laskun päivä", en: "Invoice date", cls: P },
+  "email.invoice_pdf.number": { fi: "Laskunumero", en: "Invoice number", cls: P },
+  "email.invoice_pdf.due": { fi: "Eräpäivä", en: "Due date", cls: P },
+  "email.invoice_pdf.reference": { fi: "Viitenumero", en: "Reference number", cls: P },
+  "email.invoice_pdf.bank": { fi: "Pankki", en: "Bank", cls: P },
+  "email.invoice_pdf.iban": { fi: "IBAN", en: "IBAN", cls: P },
+  "email.invoice_pdf.bic": { fi: "BIC", en: "BIC", cls: P },
+  "email.invoice_pdf.desc": { fi: "Kuvaus", en: "Description", cls: P },
+  "email.invoice_pdf.qty": { fi: "Määrä", en: "Qty", cls: P },
+  "email.invoice_pdf.unit_price": { fi: "a-hinta alv 0", en: "Unit price excl. VAT", cls: P },
+  "email.invoice_pdf.net": { fi: "Veroton", en: "Net", cls: P },
+  "email.invoice_pdf.vat": { fi: "ALV", en: "VAT", cls: P },
+  "email.invoice_pdf.gross": { fi: "Verollinen", en: "Gross", cls: P },
+  "email.invoice_pdf.vat_breakdown": { fi: "ALV-erittely", en: "VAT breakdown", cls: P },
+  "email.invoice_pdf.total": { fi: "Yhteensä", en: "Total", cls: P },
+  "email.invoice_pdf.terms": { fi: "Maksuehto 14 päivää netto. Viivästyskorko korkolain mukaan.", en: "Payment terms: 14 days net. Late interest according to the Interest Act.", cls: P },
+  "email.invoice_pdf.privacy": { fi: "Henkilötietoja käsitellään vain laskutusta varten.", en: "Personal data is processed only for invoicing.", cls: P },
+};

@@ -478,5 +478,15 @@
   "subject": "0c26921bc95598c46e4b48a28b12ed946ebd96769cfa36e20bb621e2c604944f",
   "text": "da4eb0e69824bdaeb4fdd40b1f5f2d77555f4e24bd62fa4db0ddf29d1c0311c3",
   "html": "f66442a9c5d431ae211cdacb1fdd8e150944e1230b7bddae875d7b7925dfb272"
+ },
+ "invoice_pdf.fi": {
+  "subject": "8462c2489c17f01b56918e2199c3d140052fea3a2c094bbb94fabe2f8d419f0b",
+  "text": "76c0ac284473dc208ddcc776a19b83e8172012ad1d98deab7c7a96ac43b58cc1",
+  "html": "c7c761cdce3a7f14802f0d6350338f1e76d3f0f409a21fece487b3c84940b7fa"
+ },
+ "invoice_pdf.en": {
+  "subject": "7ff21e7f0e1bec70544b12616af9e6369bb3adb25b2e7a7af83bf41278cf746c",
+  "text": "2aabce911158c4a2d24986defe27b4e2ff60dda7512312e7e4c51947201ca9fa",
+  "html": "a46f94faa1740219d10ff59681981e8c2eeb2d361091fe2c8223580703d1f6f5"
  }
 }
