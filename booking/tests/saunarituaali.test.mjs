@@ -110,11 +110,21 @@ test('varakäyttäytyminen: kenttiä ei ole (vanha kanta) / virheellinen aikajan
   const old = A.splitCatalog(FX.catalog, STATIC).treatments.find((x) => x.id === 7);   // katalogirivi ennen booking_61:tä
   assert.equal(A.timelineOf(old), null); assert.equal(A.isPackage(old), false); assert.equal(A.timelineText(old, 'fi'), ''); assert.deepEqual(A.timelineSlots(old, '2026-10-25T14:00:00Z'), []);
   assert.equal(old.voucher_note, undefined); assert.equal(old.timeline, undefined);
-  const base = { id: 7, duration_minutes: 120, timeline: [{ seq: 1, kind: 'ritual', label: 'a', minutes: 20, start_min: 0, end_min: 20 }] };
-  assert.equal(A.timelineOf(base), null, 'summa 20 ≠ kesto 120 → aikajanaa ei näytetä (§18.11)');
+  const seg = (seq, kind, label, minutes, start_min, extra = {}) => ({ seq, kind, label, label_en: label, minutes, start_min, end_min: start_min + minutes, ...extra });
+  const ok = [seg(1, 'ritual', 'rituaali', 20, 0), seg(3, 'smoke_sauna', 'savusauna', 90, 30)];
+  assert.equal(A.timelineOf({ id: 7, duration_minutes: 120, timeline: ok }).length, 2, 'booking_64: vain näkyvät jaksot, väli 20–30 ilman jaksoa on kelvollinen');
+  assert.equal(A.timelineOf({ id: 7, duration_minutes: 120, timeline: [seg(1, 'ritual', 'rituaali', 20, 0)] }), null, 'aikajana ei pääty kestoon (120) → ei näytetä');
+  assert.equal(A.timelineOf({ id: 7, duration_minutes: 120, timeline: [seg(1, 'ritual', 'a', 60, 0), seg(2, 'smoke_sauna', 'b', 90, 30)] }), null, 'päällekkäiset jaksot → ei näytetä');
   assert.equal(A.timelineOf({ id: 7, timeline: [] }), null); assert.equal(A.timelineOf({ id: 7, timeline: 'x' }), null);
   assert.equal(A.timelineOf({ id: 7, timeline: [{ kind: 'ritual', minutes: 0, start_min: 0 }] }), null, 'virheellinen jakso');
-  assert.equal(A.timelineOf({ id: 7, duration_minutes: 30, timeline: [{ seq: 1, kind: 'break', label: 'tauko', minutes: 30, start_min: 0, end_min: 30 }] }), null, 'vain sisäisiä jaksoja → ei näytettävää');
+  // varmuuden vuoksi: customer_visible=false jaksot jäävät asiakkaalta pois (palvelin ei niitä enää lähetä); taukoa ei oleteta nimellä
+  const withHidden = { id: 7, duration_minutes: 120, timeline: [seg(1, 'ritual', 'rituaali', 20, 0), seg(2, 'break', 'tauko', 10, 20, { customer_visible: false }), seg(3, 'smoke_sauna', 'savusauna', 90, 30)], timeline_text: 'rituaali 20 min · tauko 10 min · savusauna 1 h 30 min' };
+  assert.deepEqual(A.timelineOf(withHidden).map((x) => x.key), ['ritual', 'smoke_sauna'], 'customer_visible=false pois');
+  assert.equal(A.timelineText(withHidden, 'fi').replace(/\u00a0/g, ' '), 'rituaali 20 min · savusauna 1 h 30 min', 'piilotettu jakso ei pääse timeline_text:n kautta');
+  assert.deepEqual(A.timelineSlots(withHidden, '2026-10-25T14:00:00Z').map((x) => x.label), ['rituaali', 'savusauna']);
+  assert.equal(A.timelineOf({ id: 7, duration_minutes: 30, timeline: [seg(1, 'break', 'tauko', 30, 0, { customer_visible: false })] }), null, 'vain piilotettuja → ei näytettävää');
+  assert.equal(A.timelineOf({ id: 7, duration_minutes: 120, timeline: [seg(1, 'ritual', 'rituaali', 20, 0), seg(2, 'break', 'tauko', 10, 20), seg(3, 'smoke_sauna', 'savusauna', 90, 30)] }).length, 3, 'ilman lippua jakso on näkyvä (ei nimiperusteista taukosuodatusta)');
+  assert.equal(A.INTERNAL_KINDS, undefined);
 });
 test('timelineSlots: kellonajat Helsingin ajassa (kesä- ja talviaika), jaksojen nimet kannasta', () => {
   const p = P7(), f = (iso) => A.timelineSlots(p, iso).map((x) => `${x.label} ${x.from}–${x.to}`);
@@ -170,7 +180,7 @@ test('mock: katalogirivi vastaa tuotantoa (slots, 49 €/hlö, 1–6, 120 min, e
   assert.equal(e.slug, 'saunarituaali-ja-savusaunavuoro'); assert.equal(e.booking_kind, 'slots'); assert.equal(e.slot_grid_minutes, 30);
   assert.equal(e.price, 49); assert.equal(e.price_type, 'per_person'); assert.equal(e.min_persons, 1); assert.equal(e.max_persons, 6); assert.equal(e.duration_minutes, 120);
   assert.deepEqual(e.options, []); assert.equal(e.option_required, false); assert.equal(e.category, 'ritual'); assert.equal(e.name_en, 'Sauna Ritual & Smoke Sauna Session');
-  assert.equal(e.duration_text, row(7).duration_text);
+  assert.equal(e.duration_text, FX61.catalog.find((x) => x.id === 7).duration_text, 'duration_text = tuotannon (booking_64: ei taukoa)');
   assert.equal(IMAGES.some(([id]) => id === 7), false, 'mockissa ei kuvaa → "ei kuvaa" -tila testattavissa');
   assert.deepEqual(Object.keys(row(7)).filter((k) => !(k in e) && !['description', 'description_en', 'price_text'].includes(k)), [], 'mock sisältää kaikki tuotannon katalogikentät (paitsi kuvaukset: ne tulevat kb-snapshotista)');
 });

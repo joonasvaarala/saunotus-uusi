@@ -30,7 +30,7 @@ Paikkamerkit (§18.3): `{{price:<tuote-id>}}`, `{{duration:<tuote-id>}}`, `{{set
 ## Uuden tekstin lisääminen (§18.9, jokaisessa PR:ssä)
 
 1. Avain `<alue>.<osa>.<nimi>` (virheet: `ui.<alue>.error_<RPC-koodi>`), FI + EN, luokka `normal`/`protected`.
-2. Teksti **ei** mene koodiin. Lisää rivi tiedostoon `content/site-texts.pending-import.json` → tuonti kantaan (`admin_texts_import`, Bottiavustus/ylläpito) **ennen** mergeä.
+2. Teksti **ei** mene koodiin. Lisää rivi tuontilistaan (esim. `content/site-texts.imported.json` on 18.10. tuotu erä) → tuonti kantaan (`admin_texts_import`, Bottiavustus/ylläpito) **ennen** mergeä.
 3. Varatekstiin (`content/site-texts.fallback.json`) tulee vain kannassa jo oleva teksti (`site-texts-sync`).
 4. Koodi lukee tekstin `tx()`:llä (build) tai kaupan `texts.tx()`:llä; puuttuessa ketju on site_text → palvelimen `message` → vanha yleisteksti.
 

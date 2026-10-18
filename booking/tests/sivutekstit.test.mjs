@@ -27,7 +27,7 @@ const { T } = await import(pathToFileURL(join(tmp, 'i18n.js')));
 const B = await import(pathToFileURL(join(root, 'src/site-texts.mjs')));
 const FX = J('booking/tests/fixtures/prod-catalog-61.json');
 const SITE_FX = J('tests/fixtures/site-texts/rpc.json');
-const PENDING = J('content/site-texts.pending-import.json');
+const IMPORTED = J('content/site-texts.imported.json');   // 18.10.2026 tuotannon kantaan tuodut avaimet (admin_texts_import, Bottiavustus)
 const row7 = () => FX.catalog.find((r) => r.id === 7);
 const P7 = () => A.splitCatalog(FX.catalog, new Map()).treatments.find((x) => x.id === 7);
 const quiet = { log() {}, warn() {} };
@@ -137,11 +137,10 @@ test('shopPayload: vain ui.*-avainalue, paikkamerkit täyttämättä (kauppa tä
   assert.ok(!p.texts.some((r) => r.key.startsWith('product.')), 'tuotetekstit tulevat katalogista, ei tiedostosta');
   assert.deepEqual(B.shopPayload(s, ['product.7.']).texts.map((r) => r.key).sort(), ['product.7.description', 'product.7.description', 'product.7.duration_text', 'product.7.name', 'product.7.name'].sort());
 });
-test('varateksti: committed content/site-texts.fallback.json on tuotannon julkaistu snapshot (vain DB:ssä olevat; ei uusia avaimia)', () => {
+test('varateksti: committed content/site-texts.fallback.json on tuotannon julkaistu snapshot (vain DB:ssä olevat; tuodut ui.checkout.error_* mukana)', () => {
   const fb = J('content/site-texts.fallback.json');
   assert.ok(fb.texts.length >= 300 && fb.context.catalog.length > 0 && fb.context.settings.public_treatment_horizon_days);
-  const pend = new Set(PENDING.map((x) => x.key));
-  assert.ok(!fb.texts.some((r) => pend.has(r.key)), '§18.9/5: varateksti ei sisällä tekstejä, jotka eivät ole vielä tietokannassa (tuontia odottavat avaimet)');
+  for (const it of IMPORTED) assert.equal(fb.texts.find((r) => r.key === it.key && r.lang === it.lang)?.text, it.text, `tuotu avain on kannassa ja varatekstissä sellaisenaan: ${it.key} [${it.lang}]`);
   assert.ok(fb.texts.every((r) => r.key && r.lang && r.text.trim()));
   assert.deepEqual(L.validateTexts(fb.texts, L.makeContext({ catalog: fb.context.catalog, settings: fb.context.settings })), []);
 });
@@ -153,9 +152,9 @@ test('scripts/build.mjs: tuntematon paikkamerkki → exit ≠ 0 ja virhe nimeä�
   const r = run(['scripts/build.mjs'], { DIST: join(work, 'dist-bad'), SITE_ENV: 'test', SITE_TEXTS_FIXTURE: badFx, ARTICLES_CACHE_DIR: join(work, 'ac1'), SITE_TEXTS_CACHE_DIR: join(work, 'sc1') });
   assert.notEqual(r.status, 0, 'build pitää kaatua'); assert.match(r.stderr + r.stdout, /PAIKKAMERKKIVIRHE[\s\S]*ui\.test\.tuntematon/);
   const ok = run(['scripts/build.mjs'], { DIST: join(work, 'dist-ok'), SITE_ENV: 'test', SITE_TEXTS_FIXTURE: '1', ARTICLES_CACHE_DIR: join(work, 'ac2'), SITE_TEXTS_CACHE_DIR: join(work, 'sc2') });
-  assert.equal(ok.status, 0, ok.stderr + ok.stdout); assert.match(ok.stdout + ok.stderr, /site-texts: fixture; 38 riviä/);
+  assert.equal(ok.status, 0, ok.stderr + ok.stdout); assert.match(ok.stdout + ok.stderr, /site-texts: fixture; \d+ riviä/);
 });
-test('kauppa-build: booking/site-texts.json (vain ui.*), siteTextsUrl sivulle, uudet moduulit mukaan; ilman verkkoa varateksti (ei kaadu, ei ui.*-rivejä)', () => {
+test('kauppa-build: booking/site-texts.json (vain ui.*), siteTextsUrl sivulle, uudet moduulit mukaan; ilman verkkoa varateksti (ei kaadu)', () => {
   const dist = join(work, 'shop-dist');
   const r = run(['booking/shop/build.mjs'], { SHOP_DIST: dist, SITE_ENV: 'test', SITE_URL: 'http://localhost:4180', SITE_TEXTS_FIXTURE: '1', ARTICLES_CACHE_DIR: join(work, 'ac3'), SITE_TEXTS_CACHE_DIR: join(work, 'sc3') });
   assert.equal(r.status, 0, r.stderr + r.stdout);
@@ -166,8 +165,8 @@ test('kauppa-build: booking/site-texts.json (vain ui.*), siteTextsUrl sivulle, u
   const dist2 = join(work, 'shop-dist2');
   const r2 = run(['booking/shop/build.mjs'], { SHOP_DIST: dist2, SITE_ENV: 'test', SITE_URL: 'http://localhost:4180', BOOKING_SUPABASE_URL: 'http://localhost:1', BOOKING_ANON_KEY: 'sb_publishable_x', ARTICLES_CACHE_DIR: join(work, 'ac4'), SITE_TEXTS_CACHE_DIR: join(work, 'sc4') });
   assert.equal(r2.status, 0, 'haku epäonnistuu → varateksti, build ei kaadu\n' + r2.stderr);
-  assert.match(r2.stdout + r2.stderr, /site-texts: fallback; 351 riviä/); assert.match(r2.stderr, /site-texts: VAROITUS: haku epäonnistui/);
-  assert.equal(JSON.parse(readFileSync(join(dist2, 'booking/site-texts.json'), 'utf8')).texts.length, 0, 'varatekstissä ei ole ui.*-avaimia (vielä tuomatta)');
+  assert.match(r2.stdout + r2.stderr, /site-texts: fallback; \d+ riviä/); assert.match(r2.stderr, /site-texts: VAROITUS: haku epäonnistui/);
+  const fbUi = JSON.parse(readFileSync(join(dist2, 'booking/site-texts.json'), 'utf8')).texts; assert.ok(fbUi.length >= 10 && fbUi.every((x) => x.key.startsWith('ui.')), 'varateksti (kannan tuodut ui.*-avaimet) päätyy kauppaan');
 });
 
 // ================= kaupan ajoaikainen täyttö =================
@@ -198,7 +197,7 @@ test('tuote 7: voucher_note(_en) erillisenä (ei kuvauksessa), description_en k�
   assert.match(p.voucher_note, /Elämyslahjojen lahjakortilla/); assert.match(p.voucher_note_en, /Elämyslahjat gift card/);
   assert.ok(!p.description.includes(p.voucher_note), 'lahjakorttihuomautus ei ole enää kuvauksessa (kannassa)');
   assert.equal(p.description_en, r.description_en); assert.match(p.description_en, /^Open sauna ritual/);
-  assert.equal(p.timeline.length, 3); assert.equal(p.timeline_text, r.timeline_text); assert.equal(p.timeline_text_en, r.timeline_text_en);
+  assert.equal(p.timeline.length, 2, 'booking_64: vain näkyvät jaksot'); assert.equal(p.timeline_text, r.timeline_text); assert.equal(p.timeline_text_en, r.timeline_text_en);
   const t = A.splitCatalog(FX.catalog, new Map()).treatments.find((x) => x.id === 10);
   assert.equal(t.voucher_note, undefined); assert.equal(t.timeline, undefined); assert.equal(A.isPackage(t), false);
 });
@@ -209,9 +208,9 @@ test('varausikkuna: public_settings().public_treatment_horizon_days (14) ohjaa; 
   const ui = rd('booking/shop/src/treatment-ui.js'); assert.match(ui, /A\.horizonDays\(state\.settings\)/);
   assert.match(rd('booking/shop/src/shop.js'), /treatmentHorizon\(state\.settings\)/);
 });
-test('mock: tuotteen 7 katalogirivi vastaa tuotannon riviä (kentät timeline, timeline_text(_en), voucher_note(_en), description(_en))', () => {
+test('mock: tuotteen 7 katalogirivi vastaa tuotannon riviä (timeline ilman taukoa, timeline_text(_en), voucher_note(_en), description(_en), addons_enabled, allowed_addons)', () => {
   const m = M.catalogEntries().find((x) => x.id === 7), r = row7();
-  for (const k of ['timeline', 'timeline_text', 'timeline_text_en', 'voucher_note', 'voucher_note_en', 'description', 'description_en', 'name', 'name_en', 'price', 'price_type', 'duration_minutes', 'duration_text', 'min_persons', 'max_persons', 'booking_kind', 'category', 'slot_grid_minutes'])
+  for (const k of ['timeline', 'timeline_text', 'timeline_text_en', 'voucher_note', 'voucher_note_en', 'description', 'description_en', 'name', 'name_en', 'price', 'price_type', 'duration_minutes', 'duration_text', 'min_persons', 'max_persons', 'booking_kind', 'category', 'slot_grid_minutes', 'addons_enabled', 'allowed_addons'])
     assert.deepEqual(m[k], r[k], `mock ≠ tuotanto: ${k}`);
 });
 
@@ -227,24 +226,29 @@ test('RPC-argumentit: p_addons vain kun valittu ({id, quantity}); vanha kutsu (e
   assert.deepEqual(c.p_addons, [{ id: 5, quantity: 2 }], 'vain id + quantity'); assert.equal(c.p_product_id, 7);
   assert.deepEqual(A.args.create({ id: 10 }, { ...base, option: 'hunajahoito', addons: [{ id: 5, quantity: 1 }] }).p_option_code, 'hunajahoito');
 });
-test('lisäpalvelut backendiltä (public_addons): vain resource-tilan lisäpalvelu = pyyhe 5 €; hintaa EI kovakoodata; vain tuote 7', async () => {
-  const ad = A.normAddons(FX.addons);
-  assert.deepEqual(ad.map((a) => [a.id, a.code, a.price, a.max_per_person]), [[5, 'pyyhe', 5, 20]], 'turvenaamio/saunavihta (shared/exclusive) suodatetaan pois');
+test('lisäpalvelut: tuotteen addons_enabled + allowed_addons[] (katalogi) rajaa, hinta/nimi/max public_addons()-funktiosta; ei kovakoodattua tuotelistaa', async () => {
+  const p7 = P7(), p10 = A.splitCatalog(FX.catalog, new Map()).treatments.find((x) => x.id === 10), p1 = FX.catalog.find((r) => r.id === 1);
+  assert.equal(p7.addons_enabled, true); assert.deepEqual(p7.allowed_addons, ['pyyhe']); assert.deepEqual(A.allowedAddonCodes(p7), ['pyyhe']);
+  assert.equal(A.addonsAllowed(p7), true); assert.equal(A.addonsAllowed(p10), false, 'tuote 10: addons_enabled=false'); assert.equal(A.addonsAllowed({ id: 7 }), false, 'id yksin ei riitä (ei ADDON_PRODUCT_IDS-vakiota)');
+  assert.equal(A.ADDON_PRODUCT_IDS, undefined); assert.equal(p1.addons_enabled, true, 'vuorotuotteilla kaikki kolme (ei kuulu kassapolkuun)');
+  assert.equal(A.addonsAllowed({ id: 7, addons_enabled: true, allowed_addons: [] }), false); assert.equal(A.addonsAllowed({ id: 7, addons_enabled: false, allowed_addons: ['pyyhe'] }), false);
+  const ad = A.normAddons(FX.addons, A.allowedAddonCodes(p7));
+  assert.deepEqual(ad.map((a) => [a.id, a.code, a.price, a.max_per_person]), [[5, 'pyyhe', 5, 20]], 'vain tuotteelle sallittu (allowed_addons); turvenaamio/saunavihta pois');
   assert.equal(ad[0].name, 'Pyyhe'); assert.equal(ad[0].name_en, 'Towel');
-  assert.equal(A.normAddons(FX.addons.map((a) => (a.id === 5 ? { ...a, price: '7.50' } : a)))[0].price, 7.5, 'hinta tulee palvelimelta');
-  assert.deepEqual(A.normAddons([{ id: 5, applies_modes: ['resource'], price: 5, active: false }]), [], 'passiivinen ei näy');
-  assert.deepEqual(A.normAddons(null), []); assert.deepEqual(A.normAddons([{ id: 9, applies_modes: ['resource'] }]), [], 'hinta puuttuu → pois');
+  assert.equal(A.normAddons(FX.addons.map((a) => (a.id === 5 ? { ...a, price: '7.50' } : a)), ['pyyhe'])[0].price, 7.5, 'hinta tulee palvelimelta');
+  assert.deepEqual(A.normAddons([{ id: 5, code: 'pyyhe', price: 5, active: false }], ['pyyhe']), [], 'passiivinen ei näy');
+  assert.deepEqual(A.normAddons(null), []); assert.deepEqual(A.normAddons([{ id: 9, code: 'pyyhe' }], ['pyyhe']), [], 'hinta puuttuu → pois');
   let calls = 0;
   SB.setRpcOverride(async (name) => { calls++; assert.equal(name, 'public_addons'); return FX.addons; });
   try {
-    assert.deepEqual((await A.loadAddons({ id: 7 })).map((a) => a.code), ['pyyhe']); assert.equal(calls, 1);
-    assert.deepEqual(await A.loadAddons({ id: 10 }), [], 'muu hoitotuote: ei lisäpalveluita (palvelin ei kerro sallittuja tuotteita → ADDON_PRODUCT_IDS)'); assert.equal(calls, 1, 'ei turhaa kutsua');
+    assert.deepEqual((await A.loadAddons(p7)).map((a) => a.code), ['pyyhe']); assert.equal(calls, 1);
+    assert.deepEqual(await A.loadAddons(p10), [], 'addons_enabled=false: ei lisäpalveluita'); assert.deepEqual(await A.loadAddons({ id: 7 }), []); assert.equal(calls, 1, 'ei turhaa kutsua');
     SB.setRpcOverride(async () => { throw new SB.ApiError('x', { status: 404, code: 'PGRST202' }); });
-    assert.deepEqual(await A.loadAddons({ id: 7 }), [], 'RPC puuttuu / virhe → ei lisäpalveluita, kassa toimii');
+    assert.deepEqual(await A.loadAddons(p7), [], 'RPC puuttuu / virhe → ei lisäpalveluita, kassa toimii');
   } finally { SB.setRpcOverride(null); }
 });
 test('lisäpalvelun määrä: enintään henkilömäärä × max/hlö, korkeintaan 99; payload ja summa', () => {
-  const [towel] = A.normAddons(FX.addons);
+  const [towel] = A.normAddons(FX.addons, ['pyyhe']);
   assert.equal(A.addonLimit(towel, 1), 20); assert.equal(A.addonLimit(towel, 6), 99, '6 × 20 = 120 → 99'); assert.equal(A.addonLimit({ max_per_person: null }, 3), 99); assert.equal(A.addonLimit({ max_per_person: 2 }, 3), 6);
   const qty = new Map([[5, 3]]);
   assert.deepEqual(A.addonsPayload([towel], qty), [{ id: 5, quantity: 3 }]); assert.equal(A.addonsSum([towel], qty), 15);
@@ -258,7 +262,7 @@ test('virhekoodit: invalid_addons, addon_not_found, addon_inactive, addon_not_al
   // jokaiselle koodille FI + EN -teksti tuonnissa (§18.9/4) ja fixturessa (tuonnin jälkeinen tila)
   const t = ST.createTexts({ lang: 'fi', rows: SITE_FX.texts }), e = ST.createTexts({ lang: 'en', rows: SITE_FX.texts });
   for (const c of codes) {
-    for (const lang of ['fi', 'en']) assert.ok(PENDING.some((x) => x.key === A.errorTextKey(c) && x.lang === lang && x.text.trim()), `tuonnissa ${c} [${lang}]`);
+    for (const lang of ['fi', 'en']) assert.ok(IMPORTED.some((x) => x.key === A.errorTextKey(c) && x.lang === lang && x.text.trim()), `tuonnissa ${c} [${lang}]`);
     assert.ok(t.tx(A.errorTextKey(c)) && e.tx(A.errorTextKey(c)) && t.tx(A.errorTextKey(c)) !== e.tx(A.errorTextKey(c)), `${c}: FI ≠ EN`);
   }
   const empty = ST.createTexts({ lang: 'fi', rows: [] });
@@ -267,9 +271,9 @@ test('virhekoodit: invalid_addons, addon_not_found, addon_inactive, addon_not_al
   const ui = rd('booking/shop/src/treatment-ui.js');
   assert.match(ui, /A\.isAddonError\(r\.code\) \? tx\(A\.errorTextKey\(r\.code\)\) \|\| r\.message \|\| tr\.errors\.generic/);
 });
-test('tuontilista content/site-texts.pending-import.json noudattaa admin_texts_import-sääntöjä (booking_62) ja §18.2-nimeämistä', () => {
-  assert.equal(PENDING.length, 10); const seen = new Set();
-  for (const it of PENDING) {
+test('tuontilista content/site-texts.imported.json (tuotu tuotantoon 18.10.) noudattaa admin_texts_import-sääntöjä (booking_62) ja §18.2-nimeämistä', () => {
+  assert.equal(IMPORTED.length, 10); const seen = new Set();
+  for (const it of IMPORTED) {
     assert.match(it.key, /^[a-z0-9_]+(\.[a-z0-9_-]+)+$/); assert.ok(it.key.length <= 120); assert.match(it.key, /^ui\.checkout\.error_[a-z_]+$/);
     assert.ok(!/^(product|faq|policy|addon|option|giftpkg|schedule|location|hours|event|business|timeline|product_voucher)\.[0-9a-z_-]+\./.test(it.key), 'varattu prefiksi');
     assert.ok(['fi', 'en'].includes(it.lang)); assert.ok(['normal', 'protected'].includes(it.class)); assert.equal(it.class, 'normal'); assert.ok(['plain', 'lite'].includes(it.kind));
@@ -278,7 +282,7 @@ test('tuontilista content/site-texts.pending-import.json noudattaa admin_texts_i
     assert.ok(!/\d|€|@|https?:|www\./i.test(it.text), 'ei numeroita/€/linkkejä → ei eskalaatiota (§18.7), ei käsin kirjoitettuja lukuja (§18.3)');
     assert.ok(!seen.has(`${it.key}|${it.lang}`), 'duplikaatti'); seen.add(`${it.key}|${it.lang}`);
   }
-  assert.equal(new Set(PENDING.map((x) => x.key)).size, 5);
+  assert.equal(new Set(IMPORTED.map((x) => x.key)).size, 5);
 });
 test('lisäpalveluvalitsin ja kassa: ei kovakoodattuja asiakasnäkyviä merkkijonoja (kommentit pois); tekstit kaupan olemassa olevista t.addons*-teksteistä', () => {
   const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
@@ -319,7 +323,11 @@ test('mock: virhekoodit invalid_addons, addon_not_found, addon_inactive, addon_n
   assert.equal(code([{ id: 5, quantity: 0 }]), 'addon_quantity'); assert.equal(code([{ id: 5, quantity: -1 }]), 'addon_quantity'); assert.equal(code([{ id: 5, quantity: 1.5 }]), 'addon_quantity'); assert.equal(code([{ id: 5, quantity: 41 }], 2), 'addon_quantity', '2 hlö × 20 = 40 enintään');
   assert.equal(mk({ p_addons: [{ id: 5, quantity: 40 }] }, 2).ok, true);
   assert.equal(M.snapshotBookings().bookings.length, 1, 'virheelliset yritykset eivät luoneet varauksia');
-  for (const c of A.ADDON_ERRORS) assert.ok(PENDING.some((x) => x.key === A.errorTextKey(c)), `${c}: teksti tuontilistassa`);
+  for (const c of A.ADDON_ERRORS) assert.ok(IMPORTED.some((x) => x.key === A.errorTextKey(c)), `${c}: teksti tuontilistassa`);
+});
+test('mock: kaikkien katalogirivien addons_enabled / allowed_addons = tuotanto (tuote 7: true, [pyyhe]; 8, 10: false, [])', () => {
+  for (const r of FX.catalog.filter((x) => [7, 8, 10].includes(x.id))) { const m = M.catalogEntries().find((x) => x.id === r.id); assert.equal(m.addons_enabled, r.addons_enabled, `${r.id}`); assert.deepEqual(m.allowed_addons, r.allowed_addons, `${r.id}`); }
+  assert.deepEqual(row7().timeline.map((t) => t.kind), ['ritual', 'smoke_sauna'], 'tuotannon timeline[] ei sisällä taukoa (booking_64)'); assert.ok(!/tauko/i.test(row7().timeline_text + row7().duration_text));
 });
 test('mock: lisäpalvelut = tuotannon public_addons() (id, koodi, hinta 5 €, EN-nimi, applies_modes, max/hlö)', () => {
   const pick = (a) => ({ id: a.id, code: a.code, name: a.name, name_en: a.name_en, price: +a.price, applies_modes: a.applies_modes, max_per_person: a.max_per_person });

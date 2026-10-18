@@ -1,5 +1,5 @@
 {
- "_doc": "Tuotannon julkiset lukufunktiot (anon, vain luku) 18.10.2026 klo ~13:40 (Europe/Helsinki), booking_61 jälkeen: public_catalog() (rivit id 1, 7, 8, 10), public_addons(), public_settings(). Ei kirjoituksia.",
+ "_doc": "Tuotannon julkiset lukufunktiot (anon, vain luku) 18.10.2026 klo ~14:30 (Europe/Helsinki), booking_61 + booking_64 jälkeen: public_catalog() (rivit id 1, 7, 8, 10; mukana addons_enabled + allowed_addons, tuotteen 7 timeline vain asiakkaalle näkyvät jaksot), public_addons(), public_settings(). Ei kirjoituksia.",
  "catalog": [
   {
    "id": 1,
@@ -21,6 +21,12 @@
    "voucher_note": null,
    "duration_text": "la–su klo 14–19 (saunomisaika 2 h); to klo 17–19",
    "timeline_text": null,
+   "addons_enabled": true,
+   "allowed_addons": [
+    "turvenaamio_jalkakylpy",
+    "saunavihta",
+    "pyyhe"
+   ],
    "description_en": null,
    "option_label_en": null,
    "option_required": false,
@@ -48,15 +54,6 @@
      "start_min": 0
     },
     {
-     "seq": 2,
-     "kind": "break",
-     "label": "tauko",
-     "end_min": 30,
-     "minutes": 10,
-     "label_en": "break",
-     "start_min": 20
-    },
-    {
      "seq": 3,
      "kind": "smoke_sauna",
      "label": "savusauna",
@@ -75,14 +72,18 @@
    "booking_kind": "slots",
    "option_label": null,
    "voucher_note": "Elämyslahjojen lahjakortilla: varaa ensin yleinen vuoro ja osta rituaali erikseen.",
-   "duration_text": "rituaali 20 min + tauko 10 min + savusauna 1 h 30 min (yhteensä 2 h)",
-   "timeline_text": "rituaali 20 min · tauko 10 min · savusauna 1 h 30 min",
+   "duration_text": "rituaali 20 min + savusauna 1 h 30 min (yhteensä 2 h)",
+   "timeline_text": "rituaali 20 min · savusauna 1 h 30 min",
+   "addons_enabled": true,
+   "allowed_addons": [
+    "pyyhe"
+   ],
    "description_en": "Open sauna ritual on Saturdays and Sundays: the session starts with a 20-minute sauna ritual in the healing sauna Rauni (small group, max. 6 participants), after which you move on to the smoke sauna. Includes a löyly greeting, light warming vihta whisking and a seasonal mini treatment, plus access to the sauna area, the pools and the lean-to (laavu). You are welcome to join the ritual naked, but swimwear is worn in the smoke sauna and the hot tubs. The programme changes with the seasons.",
    "option_label_en": null,
    "option_required": false,
    "voucher_note_en": "With an Elämyslahjat gift card: first book a regular session and buy the ritual separately.",
    "duration_minutes": 120,
-   "timeline_text_en": "ritual 20 min · break 10 min · smoke sauna 1 h 30 min",
+   "timeline_text_en": "ritual 20 min · smoke sauna 1 h 30 min",
    "slot_grid_minutes": 30
   },
   {
@@ -105,6 +106,8 @@
    "voucher_note": null,
    "duration_text": "20 min",
    "timeline_text": null,
+   "addons_enabled": false,
+   "allowed_addons": [],
    "description_en": "A short sauna ritual in the Rauni healing sauna (up to six guests at a time): a greeting of the steam (löyly), gentle warming with birch whisks and a mini treatment that follows the turning of the seasons. Duration 20 minutes; the ritual starts at 16:00, 16:30 or 17:00. The ritual can be booked on its own – no other booking is required. You may take part in swimwear or nude.",
    "option_label_en": null,
    "option_required": false,
@@ -174,6 +177,8 @@
    "voucher_note": null,
    "duration_text": "1 h",
    "timeline_text": null,
+   "addons_enabled": false,
+   "allowed_addons": [],
    "description_en": "A gentle yet deep pause with löyly (steam), warmth and natural ingredients. The treatment begins with a steam greeting ritual, after which your sauna therapist performs the treatment of your choice: honey, birch whisk, salt or peat treatment (chosen at checkout). Available for 1–4 guests; the content adapts to the size of the group. The price does not include entrance to the smoke sauna or hot tubs (tickets are sold separately). Held in the Rauni healing sauna. Sauna therapists: Laura Foon, Joonas Vaarala and Saara Mäntykoski. You may take part nude, partly or fully in swimwear.",
    "option_label_en": "Choose your treatment",
    "option_required": true,

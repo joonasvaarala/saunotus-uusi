@@ -14,16 +14,18 @@ export const PRODUCTS = {
   11: { name: 'Saunotus', minutes: 120, min: 1, max: 2, base: 210, extra: 60, included: 1, type: 'plus' },
   12: { name: 'Syväsaunotus', minutes: 180, min: 1, max: 2, base: 290, extra: 70, included: 1, type: 'plus' },
   8: { name: 'Saunotusrituaali', minutes: 20, min: 1, max: 6, base: 20, extra: 0, included: 0, type: 'person' },
-  // Pakettituote (booking_58, sopimus §17.11 + booking_61 §18.11): rituaali 0–20 min (Rauni, jaettu rituaalipooli kuten kb 8), sisäinen väli 20–30 (kind 'break', ei näy asiakkaalle), savusauna 30–120 (ei mallinneta mockissa);
-  // la–su, alkuajat 16:00/16:30/17:00; EI hoitovalitsinta. Kentät = tuotannon public_catalog()-rivi 18.10.2026 (booking_61: voucher_note, timeline, timeline_text, description_en); tests/saunarituaali.test.mjs vertaa fixtureen.
+  // Pakettituote (booking_58, sopimus §17.11 + booking_61 §18.11): rituaali 0–20 min (Rauni, jaettu rituaalipooli kuten kb 8), savusauna 30–120 (ei mallinneta mockissa); väli 20–30 on palvelimella sisäinen (customer_visible=false, booking_64) eikä ole timeline[]:ssä;
+  // la–su, alkuajat 16:00/16:30/17:00; EI hoitovalitsinta. Kentät = tuotannon public_catalog()-rivi 18.10.2026 (booking_61/64: voucher_note, timeline (vain asiakkaalle näkyvät jaksot), timeline_text, description_en, addons_enabled + allowed_addons); tests/saunarituaali.test.mjs vertaa fixtureen.
   7: { name: 'Saunarituaali ja savusaunavuoro (la & su)', name_en: 'Sauna Ritual & Smoke Sauna Session', minutes: 120, ritualMinutes: 20, min: 1, max: 6, base: 49, extra: 0, included: 0, type: 'person', category: 'ritual',
-    duration_text: 'rituaali 20 min + tauko 10 min + savusauna 1 h 30 min (yhteensä 2 h)',
+    duration_text: 'rituaali 20 min + savusauna 1 h 30 min (yhteensä 2 h)',
     description: 'Avoin saunarituaali lauantaisin ja sunnuntaisin: vuoro alkaa 20 minuutin saunotusrituaalilla hoitosauna Raunissa (pienryhmä, enintään 6 osallistujaa), josta siirrytään savusaunaan. Sisältää löylyntervehdyksen, kevyttä lämmittelyvihdontaa ja vuodenkierron mukaisen minihoidon sekä pääsyn sauna-alueelle, altaisiin ja laavulle. Rituaaliin voi tulla alasti, mutta savusaunassa ja paljuissa käytetään uima-asua. Ohjelma vaihtuu vuodenaikojen mukaan.',
     description_en: 'Open sauna ritual on Saturdays and Sundays: the session starts with a 20-minute sauna ritual in the healing sauna Rauni (small group, max. 6 participants), after which you move on to the smoke sauna. Includes a löyly greeting, light warming vihta whisking and a seasonal mini treatment, plus access to the sauna area, the pools and the lean-to (laavu). You are welcome to join the ritual naked, but swimwear is worn in the smoke sauna and the hot tubs. The programme changes with the seasons.',
     voucher_note: 'Elämyslahjojen lahjakortilla: varaa ensin yleinen vuoro ja osta rituaali erikseen.', voucher_note_en: 'With an Elämyslahjat gift card: first book a regular session and buy the ritual separately.',
-    timeline: [{ seq: 1, kind: 'ritual', label: 'rituaali', label_en: 'ritual', minutes: 20, start_min: 0, end_min: 20 }, { seq: 2, kind: 'break', label: 'tauko', label_en: 'break', minutes: 10, start_min: 20, end_min: 30 },
+    timeline: [
+      { seq: 1, kind: 'ritual', label: 'rituaali', label_en: 'ritual', minutes: 20, start_min: 0, end_min: 20 },
       { seq: 3, kind: 'smoke_sauna', label: 'savusauna', label_en: 'smoke sauna', minutes: 90, start_min: 30, end_min: 120 }],
-    timeline_text: 'rituaali 20 min · tauko 10 min · savusauna 1 h 30 min', timeline_text_en: 'ritual 20 min · break 10 min · smoke sauna 1 h 30 min' },
+    timeline_text: 'rituaali 20 min · savusauna 1 h 30 min', timeline_text_en: 'ritual 20 min · smoke sauna 1 h 30 min',
+    addons_enabled: true, allowed_addons: ['pyyhe'] },
 };
 const isRit = (id) => id === 7 || id === 8;   // rituaalipooli (Rauni, yht. max 6 hlö samaan aikaan)
 // Rauni-ikkuna (ms): rituaali ja paketin rituaaliosa 20 min, hoidot ja saunotus koko kesto
@@ -46,7 +48,7 @@ export const ADDONS = [
 const ADDON_INACTIVE = { id: 99, code: 'poistunut', name: 'Poistunut lisäpalvelu', name_en: 'Removed add-on', price: 9, applies_modes: ['resource'], active: false, max_per_person: 5 };
 const addonLimit = (a, n) => Math.min((a.max_per_person ?? 99) * Math.max(1, n), 99);   // booking._addon_limit
 // p_addons: null | [{ id|code, quantity }] → { ok:true, items:[{ addon, quantity }], total } | { ok:false, code, message } (booking._attach_addons: virheet BK001 → ok:false + code)
-function resolveAddons(raw, persons) {
+function resolveAddons(raw, persons, productId) {
   if (raw == null) return { ok: true, items: [], total: 0 };
   if (!Array.isArray(raw) || raw.some((x) => !x || typeof x !== 'object' || (x.id == null && !x.code))) return { ok: false, code: 'invalid_addons', message: 'Virheelliset lisäpalvelut' };
   const items = new Map();
@@ -54,7 +56,7 @@ function resolveAddons(raw, persons) {
     const addon = [...ADDONS, ADDON_INACTIVE].find((a) => (x.id != null ? a.id === +x.id : a.code === String(x.code)));
     if (!addon) return { ok: false, code: 'addon_not_found', message: 'Lisäpalvelua ei löydy' };
     if (addon.active === false) return { ok: false, code: 'addon_inactive', message: 'Lisäpalvelu ei ole käytössä' };
-    if (!addon.applies_modes.includes('resource')) return { ok: false, code: 'addon_not_allowed', message: 'Lisäpalvelu ei ole sallittu tälle varaukselle' };
+    if (!(PRODUCTS[productId]?.allowed_addons || []).includes(addon.code)) return { ok: false, code: 'addon_not_allowed', message: 'Lisäpalvelu ei ole sallittu tälle varaukselle' };
     const q = Number(x.quantity);
     if (!Number.isInteger(q) || q < 1) return { ok: false, code: 'addon_quantity', message: 'Virheellinen määrä' };
     items.set(addon.id, { addon, quantity: (items.get(addon.id)?.quantity || 0) + q });
@@ -154,7 +156,7 @@ function create(a, now) {
   const ds = dayOf(s), p = helParts(s), hm = `${p.hour}:${p.minute}`;
   if (a.p_email === 'taken@test.fi' || !freeStarts(id, n, ds, now).some((x) => x.hm === hm)) return fail('slot_unavailable', 'Aika ei ole enää vapaana');
   const opt = resolveOption(id, a.p_option_code); if (!opt.ok) return fail(opt.code, opt.message);   // ennen luontia: ei sivuvaikutuksia virheessä
-  const ad = resolveAddons(a.p_addons, n); if (!ad.ok) return fail(ad.code, ad.message);
+  const ad = resolveAddons(a.p_addons, n, id); if (!ad.ok) return fail(ad.code, ad.message);
   const forced = /^(invalid_addons|addon_not_found|addon_inactive|addon_not_allowed|addon_quantity)@test\.fi$/.exec(String(a.p_email || ''));   // e2e-laukaisin (kuten taken@test.fi): palvelin hylkää lisäpalvelut tällä koodilla, kun niitä on valittu
   if (forced && ad.items.length) return fail(forced[1], 'Lisäpalvelut hylättiin');   // slot- ja valintavirheet ensin (kuten palvelimella: lisäpalvelut liitetään varauksen jälkeen, virhe perii koko luonnin)
   const token = randomUUID(), total = price(pr, n) + ad.total;
@@ -208,6 +210,7 @@ export const restoreBookings = (snap) => { bookings.clear(); for (const b of sna
 export const catalogEntries = () => Object.entries(PRODUCTS).map(([id, p]) => ({ id: +id, slug: ({ 7: 'saunarituaali-ja-savusaunavuoro', 8: 'saunotusrituaali', 10: 'saunahoito-2', 11: 'saunotus-2', 12: 'syvasaunotus' })[id], name: p.name,
   ...(p.name_en ? { name_en: p.name_en } : {}), ...(p.category ? { category: p.category } : {}), ...(p.duration_text ? { duration_text: p.duration_text } : {}),
   ...(p.description ? { description: p.description } : {}), ...(p.description_en ? { description_en: p.description_en } : {}), ...(p.voucher_note ? { voucher_note: p.voucher_note, voucher_note_en: p.voucher_note_en } : {}),
+  addons_enabled: !!p.addons_enabled, allowed_addons: p.allowed_addons || [],
   ...(p.timeline ? { timeline: p.timeline, timeline_text: p.timeline_text, timeline_text_en: p.timeline_text_en } : {}),
   price: p.base, price_type: p.type === 'person' ? 'per_person' : 'base_plus_extra_person', duration_minutes: p.minutes, min_persons: p.min, max_persons: p.max, sale_kind: 'other', booking_kind: 'slots', slot_grid_minutes: 30,
   ...(OPTIONS[id] ? { options: activeOptions(+id), option_required: OPTIONS[id].required, option_label: OPTIONS[id].label, option_label_en: OPTIONS[id].label_en } : { options: [], option_required: false, option_label: null, option_label_en: null }) }));

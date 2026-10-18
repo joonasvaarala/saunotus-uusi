@@ -1,6 +1,6 @@
 {
- "_doc": "Testifixture (EI tuotanto): tuotannon julkaistuja tekstejä (product.7.*, timeline.*, addon.5.*, product_voucher.7.note) + tuonnin odottavat uudet avaimet (content/site-texts.pending-import.json) sellaisina kuin ne olisivat tuonnin jälkeen + testiavain paikkamerkeille. Käyttö: SITE_TEXTS_FIXTURE=1.",
- "generated_at": "2026-10-18T10:44:56Z",
+ "_doc": "Testifixture (EI tuotanto): tuotannon julkaistuja tekstejä (product.7.*, timeline.*, addon.5.*, product_voucher.7.note, ui.checkout.error_*; haettu 18.10.2026 tuonnin jälkeen) + testiavaimet paikkamerkeille. Käyttö: SITE_TEXTS_FIXTURE=1.",
+ "generated_at": "2026-10-18T11:26:35.57876+00:00",
  "texts": [
   {
    "key": "addon.5.description",
@@ -117,8 +117,8 @@
   {
    "key": "product.7.duration_text",
    "lang": "fi",
-   "text": "rituaali 20 min + tauko 10 min + savusauna 1 h 30 min (yhteensä 2 h)",
-   "version": 1,
+   "text": "rituaali 20 min + savusauna 1 h 30 min (yhteensä 2 h)",
+   "version": 2,
    "placeholders": []
   },
   {
@@ -150,20 +150,6 @@
    "placeholders": []
   },
   {
-   "key": "timeline.2.label",
-   "lang": "en",
-   "text": "break",
-   "version": 1,
-   "placeholders": []
-  },
-  {
-   "key": "timeline.2.label",
-   "lang": "fi",
-   "text": "tauko",
-   "version": 1,
-   "placeholders": []
-  },
-  {
    "key": "timeline.3.label",
    "lang": "en",
    "text": "smoke sauna",
@@ -178,30 +164,9 @@
    "placeholders": []
   },
   {
-   "key": "ui.checkout.error_invalid_addons",
-   "lang": "fi",
-   "text": "Lisäpalveluiden valinnassa oli virhe, ja valinta tyhjennettiin. Valitse lisäpalvelut uudelleen tai jatka ilman niitä.",
-   "version": 1,
-   "placeholders": []
-  },
-  {
-   "key": "ui.checkout.error_invalid_addons",
+   "key": "ui.checkout.error_addon_inactive",
    "lang": "en",
-   "text": "There was a problem with the selected add-ons, so the selection was cleared. Please choose your add-ons again or continue without them.",
-   "version": 1,
-   "placeholders": []
-  },
-  {
-   "key": "ui.checkout.error_addon_not_found",
-   "lang": "fi",
-   "text": "Valittua lisäpalvelua ei löytynyt, joten valinta tyhjennettiin. Lataa sivu uudelleen, jos haluat valita lisäpalvelun.",
-   "version": 1,
-   "placeholders": []
-  },
-  {
-   "key": "ui.checkout.error_addon_not_found",
-   "lang": "en",
-   "text": "The selected add-on could not be found, so the selection was cleared. Please reload the page if you want to choose an add-on.",
+   "text": "The selected add-on is no longer available, so the selection was cleared. You can continue without it.",
    "version": 1,
    "placeholders": []
   },
@@ -213,9 +178,9 @@
    "placeholders": []
   },
   {
-   "key": "ui.checkout.error_addon_inactive",
+   "key": "ui.checkout.error_addon_not_allowed",
    "lang": "en",
-   "text": "The selected add-on is no longer available, so the selection was cleared. You can continue without it.",
+   "text": "This add-on cannot be added to this booking, so the selection was cleared. You can continue without it.",
    "version": 1,
    "placeholders": []
   },
@@ -227,9 +192,23 @@
    "placeholders": []
   },
   {
-   "key": "ui.checkout.error_addon_not_allowed",
+   "key": "ui.checkout.error_addon_not_found",
    "lang": "en",
-   "text": "This add-on cannot be added to this booking, so the selection was cleared. You can continue without it.",
+   "text": "The selected add-on could not be found, so the selection was cleared. Please reload the page if you want to choose an add-on.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.checkout.error_addon_not_found",
+   "lang": "fi",
+   "text": "Valittua lisäpalvelua ei löytynyt, joten valinta tyhjennettiin. Lataa sivu uudelleen, jos haluat valita lisäpalvelun.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.checkout.error_addon_quantity",
+   "lang": "en",
+   "text": "The add-on quantity is not valid. Please check the quantity: the maximum depends on the number of guests.",
    "version": 1,
    "placeholders": []
   },
@@ -241,9 +220,16 @@
    "placeholders": []
   },
   {
-   "key": "ui.checkout.error_addon_quantity",
+   "key": "ui.checkout.error_invalid_addons",
    "lang": "en",
-   "text": "The add-on quantity is not valid. Please check the quantity: the maximum depends on the number of guests.",
+   "text": "There was a problem with the selected add-ons, so the selection was cleared. Please choose your add-ons again or continue without them.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.checkout.error_invalid_addons",
+   "lang": "fi",
+   "text": "Lisäpalveluiden valinnassa oli virhe, ja valinta tyhjennettiin. Valitse lisäpalvelut uudelleen tai jatka ilman niitä.",
    "version": 1,
    "placeholders": []
   },
