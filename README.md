@@ -131,6 +131,8 @@ Kutsun hyväksyntä: kutsusähköpostin linkki avaa `/hallinta/#access_token=…
 
 Esirenderöity sisältöosio (`/saunatietoa/`, EN `/en/sauna-knowledge/`), jonka artikkelit haetaan buildissa Supabasen `public_*`-RPC:illä. Asetukset yhdessä paikassa: `content/articles.json`. Arkkitehtuuri, artikkelien päätyminen sivulle, vikasietoisuus ja testit: [docs/SAUNATIETOA.md](docs/SAUNATIETOA.md).
 
+**Etusivun osio:** etusivulla (FI/EN) on esirenderöity "Saunatietoa" / "Sauna knowledge" -osio, jossa 3 uusinta artikkelia (kuva, otsikko, summary, pvm) ja linkki "Kaikki artikkelit" / "All articles". Osio haetaan samalla buildin haulla kuin muu Saunatietoa; jos artikkeleita ei ole tai haku epäonnistuu, osio jää pois kokonaan. Testisivustolla (`SITE_ENV=test`) feikkiartikkeleilla tehty esikatselu: `/esikatselu/etusivu-artikkelit/` ja `/en/preview/home-articles/` (noindex, ei sitemapissa, ei tuotannossa). Ks. docs/SAUNATIETOA.md → Etusivun osio.
+
 ## Päätökset ja rajaukset
 
 - Hinnat ja ajat: kb (omistajan päätökset 9.–11.10.2026): la–su 14–19; Johkun hinnat oikein; hoidot vain Raunissa; hoitoja vain kolme (+ opiskelijahoito, saunotusrituaali, perinnesaunotus ryhmälle); lahjakortin jatko ilmainen.

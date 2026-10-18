@@ -70,7 +70,9 @@
    "ctaButton": "Varaa aika",
    "movedTitle": "Sivu on siirtynyt",
    "movedText": "Tämä artikkeli on siirretty uuteen osoitteeseen.",
-   "movedLink": "Siirry artikkeliin"
+   "movedLink": "Siirry artikkeliin",
+   "homeAll": "Kaikki artikkelit",
+   "readMore": "Lue lisää"
   },
   "en": {
    "kicker": "Sipoonjoki Heritage Sauna",
@@ -108,7 +110,20 @@
    "ctaButton": "Book now",
    "movedTitle": "This page has moved",
    "movedText": "This article has moved to a new address.",
-   "movedLink": "Go to the article"
+   "movedLink": "Go to the article",
+   "homeAll": "All articles",
+   "readMore": "Read more"
+  }
+ },
+ "home": {
+  "limit": 3,
+  "preview": {
+   "fi": "/esikatselu/etusivu-artikkelit/",
+   "en": "/en/preview/home-articles/"
+  },
+  "previewNote": {
+   "fi": "Esikatselu: etusivun Saunatietoa-osio feikkiartikkeleilla (testidataa). Artikkelilinkit eivät johda mihinkään. Tämä sivu on vain testisivustolla eikä ole tuotannossa.",
+   "en": "Preview: the home page Sauna knowledge section with fake articles (test data). Article links do not lead anywhere. This page exists only on the test site, not in production."
   }
  }
 }

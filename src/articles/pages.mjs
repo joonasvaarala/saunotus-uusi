@@ -38,6 +38,29 @@ function card(it, lang, variants) {
 <div class="cta" aria-hidden="true">${e(t(lang, 'readArticle'))} →</div></li>`;
 }
 
+// ---- etusivun osio (Saunatietoa: uusimmat artikkelit) ----
+/** Etusivulle valittavat artikkelit: uusin julkaisu ensin (published_at), ei noindex-artikkeleita (ei nosteta etusivulle), enintään cfg.home.limit. */
+export function pickHomeItems(items, limit = cfg.home?.limit ?? 3) {
+  return items.filter((it) => it?.card?.slug && it.card.title && !it.card.noindex)
+    .map((it, i) => ({ it, i, ts: Date.parse(it.card.published_at) || 0 }))
+    .sort((a, b) => b.ts - a.ts || a.i - b.i).slice(0, limit).map((o) => o.it);
+}
+const homeCard = (it, lang, variants, n, linkFor) => {
+  const c = it.card, im = c.image?.url && variants?.has(c.image.url) ? c.image : null;   // vain jos pieni versio (srcset) on valmistettu: alkuperäistä (jopa 5 Mt) ei ladata pieneen korttiin
+  const date = c.published_at && dateFmt(c.published_at, lang) ? `<ul class="meta"><li>${timeTag(c.published_at, lang)}</li></ul>` : '';
+  // Kuva on koristeellinen (alt=""): kortin linkin nimi on otsikko. Pieni versio: srcset 480/800 w, sizes ~ kortin leveys.
+  const img = im ? `<div class="im">${imgHtml({ ...im, alt: '' }, variants, { sizes: '(min-width:760px) 380px, 100vw' })}</div>` : '';
+  return `<li class="card hart${im ? '' : ' noimg'}">${img}<div class="bd"><h3><a href="${e(linkFor(lang, c.slug))}">${e(c.title)}</a></h3>${c.summary ? `<p>${e(c.summary)}</p>` : ''}${date}</div><div class="cta" aria-hidden="true">${e(t(lang, 'readMore'))}</div></li>`;
+};
+/** Etusivun osio (<section>) tai '' kun ei ole artikkeleita. linkFor(lang, slug) → href (esikatselussa korvataan). */
+export function homeSectionHtml(items, lang, variants, { linkFor = (l, slug) => href(articlePath(l, slug)) } = {}) {
+  const pick = pickHomeItems(items);
+  if (!pick.length) return '';
+  const title = label(lang), hid = `home-art-${lang}`;
+  return `<section class="section home-art" id="saunatietoa" aria-labelledby="${hid}"><div class="wrap"><div class="week-head"><header><h2 class="sec-title" id="${hid}">${e(title)}</h2></header><a class="btn light sm more-all" href="${e(href(listPath(lang)))}">${e(t(lang, 'homeAll'))}</a></div>`
+    + `<ul class="cards hart-list">${pick.map((it, n) => homeCard(it, lang, variants, n, linkFor)).join('')}</ul></div></section>`;
+}
+
 // ---- tagit ----
 function tagIndex(items) {
   const m = new Map();   // slug → {label, items}

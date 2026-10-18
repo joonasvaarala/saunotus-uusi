@@ -3,7 +3,7 @@ import { rmSync, mkdirSync, writeFileSync, cpSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { site, SITE_URL, isTest, abs, kb } from '../src/lib.mjs';
 import * as R from '../src/render.mjs';
-import { loadForBuild, renderForBuild } from '../src/articles/index.mjs';
+import { loadForBuild, renderForBuild, renderHomePreview } from '../src/articles/index.mjs';
 
 const OUT = process.env.DIST || 'dist';
 rmSync(OUT, { recursive: true, force: true });
@@ -22,6 +22,8 @@ const render = {
   home: R.home, sauna: R.sauna, treatments: R.treatments, gift: R.gift, book: R.book, info: R.info, companies: R.companies,
   terms: (l) => R.policyPage('terms', 'terms', l), privacy: (l) => R.policyPage('privacy', 'privacy', l),
 };
+// Artikkelisivut + etusivun osio ennen perussivuja: kuvaversiot ja etusivun esirenderöity osio (setHomeSections) tarvitaan R.home():ssa
+const articles = await renderForBuild(articleData, OUT, { write });
 const urls = [];
 for (const [key, paths] of Object.entries(site.pages)) {
   for (const lang of ['fi', 'en']) {
@@ -31,7 +33,8 @@ for (const [key, paths] of Object.entries(site.pages)) {
   }
 }
 write('/404.html', R.notFound());
-const articles = await renderForBuild(articleData, OUT, { write });
+// Etusivun osion esikatselu (vain SITE_ENV=test): feikkiartikkelit, noindex, ei sitemapissa
+await renderHomePreview(OUT, { write, cacheDir: articleData.cacheDir });
 
 // sitemap.xml (hreflang-vaihtoehdot)
 const today = new Date().toISOString().slice(0, 10);

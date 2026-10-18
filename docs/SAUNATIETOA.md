@@ -38,6 +38,19 @@ Rakennus hakee kaikki slug-ohjaukset **yhdellä kutsulla**: `public_articles_red
 
 **Vanha osion polku:** `content/articles.json` → `legacyPaths` (nyt `en: ["/en/sauna-guide/"]`, joka oli ensimmäisen version EN-polku). Sille generoidaan ohjaussivut nykyiseen osoitteeseen: listaus, jokainen julkaistu artikkeli ja vanhat slugit (suoraan nykyiseen). `check-articles.mjs` varmistaa, että legacy-polun sivut ovat pelkkiä ohjaussivuja. Sivutus- ja tagisivuja legacy-polulle ei ohjata. Poista legacy-polku listasta, kun sitä ei enää tarvita.
 
+## Etusivun osio (3 uusinta)
+
+Etusivun (FI `/`, EN `/en/`) osio **Saunatietoa** / **Sauna knowledge** esirenderöidään samassa buildissa ja samasta datasta kuin muu osio (ei erillistä RPC-kutsua, ei selainhakua; toimii ilman JS:ää):
+
+- **Valinta** (`pickHomeItems`, `src/articles/pages.mjs`): kielen julkaistut artikkelit, uusin `published_at` ensin, **enintään 3** (`content/articles.json` → `home.limit`). `noindex`-artikkeleita ei nosteta etusivulle. Järjestys on tarkoituksella `published_at`, ei RPC:n listausjärjestys (`featured` ensin), koska etusivulla halutaan uusimmat.
+- **Kortti**: yksi linkki (otsikko, peittää koko kortin), kuva (4:3, `object-fit: cover`, `loading=lazy`, `width`/`height`, `alt=""` koska otsikko nimeää linkin), summary rajattu 3 riviin, julkaisupäivä, "Lue lisää". Kuvana käytetään RPC:n korttikuvaa (`image.url`, `width`, `height`); buildin `sharp` tekee siitä 480/800/1200/1600 px avif/webp-versiot ja selain valitsee pienimmän riittävän (kortti ~380 px). Jos pientä versiota ei saatu tehtyä (sharp puuttuu tai lataus epäonnistui), kortti näytetään ilman kuvaa: alkuperäistä (jopa 5 Mt) ei ladata pieneen korttiin. Uutta RPC-kenttää tai thumbnail-versiota ei tarvita.
+- **Linkit**: kortti → `/saunatietoa/<slug>/` (EN `/en/sauna-knowledge/<slug>/`), "Kaikki artikkelit" / "All articles" → `/saunatietoa/` (EN `/en/sauna-knowledge/`). Osoitteet tulevat `content/articles.json`:sta kuten muuallakin.
+- **Tyhjä tai virhe**: 0 näytettävää artikkelia (tai haku epäonnistuu ilman snapshotia, tai renderöinti epäonnistuu) → osiota ei renderöidä lainkaan (ei tyhjää laatikkoa, ei CSS:ää). Build ei kaadu. Haun epäonnistuessa käytetään edellistä snapshotia kuten muussa osiossa.
+- **Tyylit**: `src/articles/home.css` upotetaan etusivulle vain kun osio näkyy.
+- **Tarkistus**: `scripts/check-articles.mjs` varmistaa, ettei osiota ole kun artikkeleita ei ole, että kortteja on 1–3, jokainen kortti sisältää yhden linkin olemassa olevaan artikkelisivuun ja että listauslinkki löytyy. Yksikkö- ja build-testit: `tests/articles/home.test.mjs`. Selaintarkistus + kuvakaappaukset (vaakavieritys, 44 px, kontrasti, rivirajaus, sarakkeet): `scripts/home-articles-shots.mjs`.
+
+**Esikatselu testisivustolla** (kun oikeita artikkeleita ei vielä ole tai halutaan nähdä aina kolme korttia): kun `SITE_ENV=test`, build luo koko etusivun feikkiartikkeleilla (`tests/articles/fixtures/home-preview.json`) osoitteisiin `/esikatselu/etusivu-artikkelit/` (FI) ja `/en/preview/home-articles/` (EN). Sivut ovat `noindex,nofollow`, eivät ole sitemapissa eikä niihin ole linkkiä mistään, ja korttien linkit ovat `#`. Tuotantobuildissa (`SITE_ENV` ≠ `test`) niitä ei luoda, joten tuotantosivuun ei vaikuta mikään. Polut: `content/articles.json` → `home.preview`.
+
 ## Ympäristömuuttujat
 
 | Muuttuja | Merkitys |
@@ -76,4 +89,4 @@ Testidata: `docs/saunatietoa-testidata.sql` luo feikkiartikkelit **vain testipro
 
 ## Koodikartta
 
-`content/articles.json` (asetukset) · `src/articles/` (`config`, `source` RPC + cache, `markdown`, `images`, `pages`, `index`, `articles.css`) · `src/render.mjs` (`layout()`: SEO-ylikirjoitukset, nav) · `scripts/build.mjs` (kytkentä, sitemap) · `scripts/check-articles.mjs`, `scripts/articles-shots.mjs` · `tests/articles/`.
+`content/articles.json` (asetukset) · `src/articles/` (`config`, `source` RPC + cache, `markdown`, `images`, `pages`, `index`, `articles.css`, `home.css` etusivun osio, `runtime`) · `src/render.mjs` (`layout()`: SEO-ylikirjoitukset, nav) · `scripts/build.mjs` (kytkentä, sitemap) · `scripts/check-articles.mjs`, `scripts/articles-shots.mjs` · `tests/articles/`.

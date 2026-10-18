@@ -21,3 +21,9 @@ export function articlesNav(lang) {
   if (!n && !cfg.nav.showWhenEmpty) return null;
   return { href: listHref(lang), label: label(lang) };
 }
+
+// Etusivun artikkeliosio (esirenderöity HTML kielittäin). Vain muistissa: asetetaan renderForBuild:ssa (kun kuvaversiot on valmistettu) ja luetaan R.home():ssa.
+// Tyhjä merkkijono = osio piilossa (ei artikkeleita, haku epäonnistui tai renderöinti epäonnistui).
+let homeSections = { fi: '', en: '' };
+export const setHomeSections = (s) => { homeSections = { fi: s?.fi || '', en: s?.en || '' }; };
+export const homeSection = (lang) => homeSections[lang] || '';

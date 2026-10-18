@@ -1,0 +1,19 @@
+/* Etusivun artikkeliosio ("Saunatietoa"): 3 korttia, pieni kuva, otsikko, summary (3 riviä), pvm, "Lue lisää". Upotetaan vain kun osio näytetään. */
+.home-art .week-head{align-items:center}
+.home-art .week-head header{margin:0}
+.home-art .more-all{display:inline-flex;align-items:center;min-height:44px;padding:0 22px}
+.home-art .hart-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.hart .im{aspect-ratio:4/3}
+.hart .im picture,.hart .im img{display:block;width:100%;height:100%;object-fit:cover}
+.hart.noimg{border-top:4px solid var(--accent)}
+.hart .bd{padding:18px 20px 14px}
+.hart h3{font:600 17px/1.35 var(--label);letter-spacing:.02em;margin:0 0 .5em;overflow-wrap:anywhere}
+.hart h3 a:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:4px}
+.hart:focus-within{box-shadow:0 0 0 3px var(--gold)}
+.hart .bd p{margin:0;font-size:15px;line-height:1.55;color:var(--text);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden;overflow-wrap:anywhere}
+.hart .meta{margin-top:auto;padding-top:12px}
+.hart .meta time{color:var(--muted)}
+.hart .cta{display:flex;align-items:center;justify-content:flex-end;min-height:44px;padding:0 20px;color:var(--gold)}
+.hart .cta::after{content:"\2192";margin-left:8px}
+@media (max-width:759px){.home-art .hart-list{grid-template-columns:1fr;gap:18px}.hart .im{aspect-ratio:16/9;max-height:220px}}
+.prev-note{margin:0;padding:12px 20px;background:var(--tint);border-bottom:1px solid var(--line);color:var(--ink);font:600 13px/1.5 var(--label);text-align:center}
