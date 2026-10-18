@@ -4,9 +4,11 @@
 // Varaus tehdään lomakkeen kautta admin_create_resource_booking-funktiolla.
 import { rpc } from '../sb.js';
 import { h, errMsg, fmtTime, money, addDays, badge } from '../ui.js';
+import { timelineSlots, timelineMinutes, fmtDuration, SEGMENT_FI } from '../package-timeline.js';
 
-export const SLOT_PRODUCT_IDS = [8, 10, 11, 12];   // kb: rituaali 8, hoidot 10–12 (booking_kind = 'slots')
-export const isSlotProduct = (p) => !!p && SLOT_PRODUCT_IDS.includes(p.id) && p.config?.lifecycle === 'current';
+// Paneeli näytetään tuotteille, jotka varataan aikaväli-polulla: product_config.public_slots (admin_list_products → config) = public_catalog:n booking_kind = 'slots'.
+// Ei kovakoodattua id-listaa: uusi slots-tuote (esim. kb 7) tulee mukaan pelkällä asetuksella. Admin-rajapinta ei vaadi bookable/shop_visible (piilotettukin tuote on varattavissa ylläpidosta).
+export const isSlotProduct = (p) => !!p && p.config?.public_slots === true && p.config?.lifecycle === 'current';
 export const SPAN_DAYS = 14;
 const TTL_MS = 3 * 60 * 1000;
 const cache = new Map();   // avain → { at, rows }
@@ -22,12 +24,13 @@ export function availabilityPanel({ getQuery, onPick }) {
   const days = h('div', { class: 'daychips', role: 'group', 'aria-label': 'Päivä' });
   const slots = h('div', { class: 'slotgrid', role: 'group', 'aria-label': 'Alkuajat', 'data-testid': 'slot-list' });
   const picked = h('p', { class: 'slot-picked', 'data-testid': 'slot-picked', hidden: true });
+  const timeline = h('p', { class: 'slot-timeline', 'data-testid': 'slot-timeline', hidden: true });
   const refreshBtn = h('button', { type: 'button', class: 'btn sm ghost', text: 'Päivitä', 'data-testid': 'avail-refresh', onclick: () => load(true) });
   const node = h('section', { class: 'box avail', 'data-testid': 'availability', 'aria-label': 'Vapaat ajat' },
     h('div', { class: 'row wrap avail-head' }, h('h3', { text: 'Vapaat ajat' }), refreshBtn),
     h('p', { class: 'muted', text: `Sama saatavuus kuin verkkosivulla (${SPAN_DAYS} pv valitusta päivästä). Valitse aika, niin päivä ja kellonaika täyttyvät lomakkeelle.` }),
-    status, err, days, slots, picked);
-  const st = { rows: [], day: null, sel: null, seq: 0 };
+    status, err, days, slots, picked, timeline);
+  const st = { rows: [], rowsProduct: null, day: null, sel: null, seq: 0 };
 
   function renderSlots() {
     const byDay = new Map();
@@ -43,7 +46,13 @@ export function availabilityPanel({ getQuery, onPick }) {
     }));
     const r = st.rows.find((x) => x.starts_at === st.sel);
     picked.hidden = !r;
-    if (r) picked.replaceChildren(...[h('strong', { text: `Valittu: ${dayLong(r.session_date)} klo ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)}` }), ` · ${r.persons} hlö${r.total != null ? ` · ${money(r.total)}` : ''}`,
+    const mins = r?.ends_at && r?.starts_at ? Math.round((new Date(r.ends_at) - new Date(r.starts_at)) / 6e4) : null;
+    const dur = fmtDuration(r?.duration_minutes ?? mins);
+    // pakettituotteen aikajana (kb 7): näytetään vain jos jaksot täsmäävät palvelimen kestoon (ends_at − starts_at)
+    const segs = r && mins === timelineMinutes(st.rowsProduct) ? timelineSlots(st.rowsProduct, r.starts_at) : [];
+    timeline.hidden = !segs.length;
+    timeline.replaceChildren(...(segs.length ? [h('strong', { text: 'Aikajana: ' }), segs.map((x) => `${SEGMENT_FI[x.key]} ${x.from}–${x.to}`).join(' · ')] : []));
+    if (r) picked.replaceChildren(...[h('strong', { text: `Valittu: ${dayLong(r.session_date)} klo ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)}` }), `${dur ? ` (${dur})` : ''} · ${r.persons} hlö${r.total != null ? ` · ${money(r.total)}` : ''}`,
       r.therapist_missing ? ' ' : null, r.therapist_missing ? badge('warn tmiss', 'Ei saunottajaa') : null, r.needs_override ? ' ' : null, r.needs_override ? badge('warn', 'Vaatii ylityksen') : null].filter(Boolean));
   }
   function pick(r) { st.sel = r.starts_at; onPick?.(r); renderSlots(); }
@@ -52,22 +61,25 @@ export function availabilityPanel({ getQuery, onPick }) {
   async function load(force = false) {
     const q = getQuery();
     err.hidden = true;
-    if (!q) { st.rows = []; days.replaceChildren(); slots.replaceChildren(); status.textContent = ''; picked.hidden = true; return; }
+    if (!q) { st.rows = []; days.replaceChildren(); slots.replaceChildren(); status.textContent = ''; picked.hidden = true; timeline.hidden = true; return; }
     const useOvr = !!q.override && (q.reason || '').trim().length >= 3;
     const from = q.from, to = addDays(from, SPAN_DAYS - 1);
     const args = { p_product_id: q.productId, p_from: from, p_to: to, p_persons: q.persons || 1, p_override: useOvr, p_override_reason: useOvr ? q.reason.trim() : null };
     const key = JSON.stringify(args); const my = ++st.seq;
+    if (st.rowsProduct !== q.productId) st.sel = null;   // valinta kuuluu yhdelle tuotteelle (sama alkuaika voi löytyä toisenkin tuotteen ajoista)
     const hit = !force && cache.get(key);
     let rows;
     if (hit && Date.now() - hit.at < TTL_MS) rows = hit.rows;
     else {
       node.setAttribute('aria-busy', 'true'); refreshBtn.disabled = true; status.textContent = 'Haetaan vapaita aikoja…';
+      // toisen tuotteen vanhat ajat pois heti: ei valittavia alkuaikoja väärälle tuotteelle (eri kesto/aikajana) haun ajaksi
+      if (st.rowsProduct !== q.productId) { st.rows = []; st.rowsProduct = null; st.sel = null; days.replaceChildren(); slots.replaceChildren(); picked.hidden = true; timeline.hidden = true; }
       try { rows = await rpc('admin_treatment_availability', args); cache.set(key, { at: Date.now(), rows }); }
-      catch (e) { if (my !== st.seq) return; node.removeAttribute('aria-busy'); refreshBtn.disabled = false; st.rows = []; days.replaceChildren(); slots.replaceChildren(); picked.hidden = true; status.textContent = ''; err.textContent = `Saatavuutta ei saatu: ${errMsg(e).replace(/\.?$/, '.')} Voit silti syöttää ajan käsin alla.`; err.hidden = false; return; }
+      catch (e) { if (my !== st.seq) return; node.removeAttribute('aria-busy'); refreshBtn.disabled = false; st.rows = []; days.replaceChildren(); slots.replaceChildren(); picked.hidden = true; timeline.hidden = true; status.textContent = ''; err.textContent = `Saatavuutta ei saatu: ${errMsg(e).replace(/\.?$/, '.')} Voit silti syöttää ajan käsin alla.`; err.hidden = false; return; }
     }
     if (my !== st.seq) return;   // uudempi haku ehti mukaan
     node.removeAttribute('aria-busy'); refreshBtn.disabled = false;
-    st.rows = (rows || []).filter((r) => r.status === 'available' || r.status == null);
+    st.rows = (rows || []).filter((r) => r.status === 'available' || r.status == null); st.rowsProduct = q.productId;
     if (st.sel && !st.rows.some((r) => r.starts_at === st.sel)) st.sel = null;
     const ovrHint = q.override && !useOvr ? ' Ylitysajat haetaan kun perustelu (vähintään 3 merkkiä) on annettu.' : '';
     status.textContent = st.rows.length ? `${st.rows.length} aikaa, ${new Set(st.rows.map((r) => r.session_date)).size} päivänä${useOvr ? ' (ylitysajat mukana)' : ''}.${ovrHint}` : `Ei vapaita aikoja valitulla jaksolla (${dayChip(from)} – ${dayChip(to)}). Kokeile myöhempää päivää${useOvr ? '' : ' tai ylitystä'}.${ovrHint}`;

@@ -322,6 +322,7 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .btn.slot[aria-pressed=true] .sflag{color:#F6E6C3}
 .slot-picked{margin:0;padding:10px 12px;border-radius:8px;background:var(--okbg);color:var(--ok)}
 .slot-picked .badge{vertical-align:middle}
+.slot-timeline{margin:0;padding:8px 12px;border-radius:8px;background:#fff;border:1px solid var(--line);color:var(--text)}
 .avail-err{margin:0;color:var(--err);background:var(--errbg);padding:10px 12px;border-radius:8px}
 /* Päivänäkymä (v25): otsikkorivin oikea reuna (hlö + kapasiteettinappi), saapunut-ympyrä, lisäpalveluikonit, työvuoropalkki. Ei sinistä; kosketuskohteet ≥ 44 px */
 .session header{align-items:center}
