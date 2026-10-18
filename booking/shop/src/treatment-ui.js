@@ -6,9 +6,11 @@ import * as O from './options-logic.js';
 import { OPT } from './options-texts.js';
 import { createOptionPicker } from './options-ui.js';
 import { ht, holdError } from './hold-texts.js';
+import { fmtMinutes } from './site-texts-logic.js';
+import { createAddonPicker } from './treatment-addons.js';
 
 export function createTreatmentViews(c) {
-  const { h, t, S, state, money, fmt, hm, dayLong, pad2, todayHel, addDays, pname, pdesc, pimg, setHero, mount, focusTop, errorBox, phoneBox, bk, customerFields, legalFields, holdInfo = async () => ({ on: false, minutes: 15, extra: () => [] }), confirmUrl = (tok) => `${S.confirmHref}#${tok}` } = c;
+  const { h, t, S, state, money, fmt, hm, dayLong, pad2, todayHel, addDays, pname, pdesc, pimg, setHero, mount, focusTop, errorBox, phoneBox, bk, customerFields, legalFields, holdInfo = async () => ({ on: false, minutes: 15, extra: () => [] }), tx = () => null, confirmUrl = (tok) => `${S.confirmHref}#${tok}` } = c;
   const tr = t.tr;
   const horizonDays = () => A.horizonDays(state.settings);
   const tm = (iso) => fmt(iso, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).replace('.', ':');
@@ -16,7 +18,8 @@ export function createTreatmentViews(c) {
   const when = (iso) => `${dayShort(iso)}${S.lang === 'fi' ? ', klo ' : ' · '}${tm(iso)}`;
   const q = (hash) => new URLSearchParams(hash.split('?')[1] || '');
   const ot = OPT[S.lang] || OPT.fi;   // tuotevalinnan tekstit (booking_50)
-  const errMsg = (r) => (O.isOptionError(r.code) ? ot[`err.${r.code}`] : holdError(S.lang, r.code) || tr.errors[A.errorKey(r.code)] || tr.errors.generic);
+  // virheviesti: valinnan virheet (options-texts) → lisäpalveluvirheet (site_texts ui.checkout.error_<koodi>, §18.2; puuttuu → palvelimen message) → pitotilan virheet → kaupan vanhat viestit
+  const errMsg = (r) => (O.isOptionError(r.code) ? ot[`err.${r.code}`] : A.isAddonError(r.code) ? tx(A.errorTextKey(r.code)) || r.message || tr.errors.generic : holdError(S.lang, r.code) || tr.errors[A.errorKey(r.code)] || tr.errors.generic);
   const optPicker = (p, o) => createOptionPicker({ h, lang: S.lang, product: p, options: p.options, ...o });
   const optQ = (code) => (code ? `&o=${encodeURIComponent(code)}` : '');
 
@@ -25,19 +28,22 @@ export function createTreatmentViews(c) {
     const base = p.price_type === 'per_person' ? `${money(p.price)} ${t.perPerson}` : money(p.price);
     return p.price_type === 'base_plus_extra_person' && p.extra_person_price && A.maxPersons(p) > 1 ? `${base} (${t.included(p.included_persons || 1)}, ${t.extra(money(p.extra_person_price))})` : base;
   };
-  // pakettituote (kb 7): aikajana "rituaali 20 min · savusauna 1 h 30 min", kesto "2 h", aikataulu kellonaikoina valitusta alkuajasta
-  const fmtMin = (m) => (m < 60 ? `${m} min` : m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`);
+  // pakettituote (kb 7): aikajana kannasta (public_catalog().timeline / timeline_text; sisäistä taukoa ei näytetä), kesto "2 h", aikataulu kellonaikoina valitusta alkuajasta
+  const fmtMin = fmtMinutes;
   const totalMin = (p) => p.duration_minutes || A.timelineMinutes(p);
   // jakson sisällä sitova väli (NBSP): rivinvaihto vain jaksojen välissä ("savusauna 1 h 30 min" ei katkea)
-  const timelineText = (p) => (A.isPackage(p) ? A.timelineOf(p).map((x) => `${tr.tl[x.key]} ${fmtMin(x.min)}`.replace(/ /g, '\u00a0')).join(' · ') : '');
+  const timelineText = (p) => A.timelineText(p, S.lang);
   // kesto hintarivillä: paketilla kieliversio (palvelimen duration_text on suomea ja pitkä), muilla palvelimen teksti
   const durText = (p) => (A.isPackage(p) ? fmtMin(totalMin(p)) : p.duration_text || '');
+  // lahjakorttihuomautus (booking_61: voucher_note / voucher_note_en): erillinen huomautus, ei osa tuotekuvausta; en puuttuu → fi
+  const voucherNote = (p) => ((S.lang === 'en' && p.voucher_note_en) || p.voucher_note || '').trim();
+  const voucherNode = (p) => (voucherNote(p) ? h('aside', { class: 'bk-voucher-note', 'data-testid': 'voucher-note', role: 'note' }, h('p', { text: voucherNote(p) })) : null);
   const metaP = (p) => h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), durText(p) ? ` · ${durText(p)}` : '');
   // palkki: vain näkyvät jaksot, leveys = kesto (rituaali : savusauna = 20 : 90)
-  const bar = (p) => h('span', { class: 'bk-tl-bar', 'aria-hidden': 'true' }, A.timelineOf(p).map((x) => h('span', { class: `bk-tl-seg ${x.key}`, style: `flex:${x.min} 1 0` })));
+  const bar = (p) => h('span', { class: 'bk-tl-bar', 'aria-hidden': 'true' }, A.timelineOf(p).map((x) => h('span', { class: `bk-tl-seg ${x.key.replace(/[^a-z0-9_-]/gi, '')}`, style: `flex:${x.min} 1 0` })));
   const timelineNode = (p) => (A.isPackage(p) ? h('div', { class: 'bk-timeline', 'data-testid': 'timeline' }, h('p', { class: 'bk-tl-text', text: timelineText(p) }), bar(p)) : null);
   // aikataulurivit valitulle alkuajalle: "rituaali 16:00–16:20" … (yhteenveto ja tarkistus)
-  const scheduleDd = (p, startIso) => h('dd', { class: 'bk-schedule', 'data-testid': 'schedule' }, A.timelineSlots(p, startIso).map((x) => h('span', { class: 'bk-sched-line', text: `${tr.tl[x.key]} ${x.from}–${x.to}` })));
+  const scheduleDd = (p, startIso) => h('dd', { class: 'bk-schedule', 'data-testid': 'schedule' }, A.timelineSlots(p, startIso).map((x) => h('span', { class: 'bk-sched-line', text: `${A.timelineLabel(x, S.lang)} ${x.from}–${x.to}` })));
   const scheduleRows = (p, startIso) => (A.isPackage(p) && startIso ? [h('dt', { text: tr.tlTitle }), scheduleDd(p, startIso)] : null);
 
   // tuotekortti tuotelistaan (sama rakenne kuin vuorotuotteilla)
@@ -165,7 +171,7 @@ export function createTreatmentViews(c) {
       if (cur?.slot) location.hash = `#/hoito/${p.slug}/${cur.date}/${A.timeToken(cur.time)}?n=${cur.n}${optQ(opt)}`;
     });
     mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })),
-      h('p', { class: 'bk-desc', text: pdesc(p) || '' }),
+      h('p', { class: 'bk-desc', text: pdesc(p) || '' }), voucherNode(p),
       metaP(p), timelineNode(p),
       optStep, picker.node, h('div', { class: 'bk-continue' }, sum, go));
     await picker.ready;
@@ -185,11 +191,21 @@ export function createTreatmentViews(c) {
       try { slot = (await A.loadAvailability(p, n, ds, ds)).get(ds)?.find((s) => s.time === time) || null; } catch { mount(errorBox(t.loadError), phoneBox()); focusTop(); return; }
     }
     if (!slot) { mount(h('p', {}, h('a', { href: bk(`/tuote/${p.slug}`), text: t.backList })), errorBox(tr.errors.taken), h('p', {}, h('a', { class: 'btn sm', href: back, text: tr.pickAnother }))); focusTop(); return; }
-    const total = slot.total ?? A.priceFor(p, n);
+    const baseTotal = slot.total ?? A.priceFor(p, n);
+    // lisäpalvelut (booking_61: pyyhe tuotteelle 7): haetaan palvelimelta (public_addons); puuttuu / ei sallittu → ei valitsinta
+    const addons = await A.loadAddons(p);
+    const ap = addons.length ? createAddonPicker({ h, t, lang: S.lang, money, addons, persons: n, onChange: () => refreshSum() }) : null;
+    const aLabel = (a) => (S.lang === 'en' && a.name_en) || a.name;
+    const chosenAddons = () => addons.filter((a) => (ap?.qty.get(a.id) || 0) > 0);
+    const addonRows = () => chosenAddons().flatMap((a) => [h('dt', { text: aLabel(a) }), h('dd', { 'data-testid': `sum-addon-${a.code || a.id}`, text: `${ap.qty.get(a.id)} × ${money(a.price)}` })]);
+    const totalNow = () => baseTotal + (ap ? ap.total() : 0);
     const optText = () => (opt ? O.optName(O.findOption(p, opt), S.lang) : ot.notChosen);
     const optDd = h('dd', { 'data-testid': 'sum-option', text: optText() });
-    const sumList = h('dl', { class: 'bk-sum' }, h('dt', { text: t.what }), h('dd', { text: pname(p) }), showOpt ? [h('dt', { text: ot.what }), optDd] : null, h('dt', { text: tr.date }), h('dd', { text: dayLong(slot.start) }),
-      h('dt', { text: tr.time }), h('dd', { text: slot.end ? `${tm(slot.start)}–${tm(slot.end)}` : tm(slot.start) }), scheduleRows(p, slot.start), h('dt', { text: t.persons }), h('dd', { text: String(n) }));
+    const sumRows = () => [h('dt', { text: t.what }), h('dd', { text: pname(p) }), showOpt ? [h('dt', { text: ot.what }), optDd] : null, h('dt', { text: tr.date }), h('dd', { text: dayLong(slot.start) }),
+      h('dt', { text: tr.time }), h('dd', { text: slot.end ? `${tm(slot.start)}–${tm(slot.end)}` : tm(slot.start) }), scheduleRows(p, slot.start), h('dt', { text: t.persons }), h('dd', { text: String(n) }), addonRows()].flat();   // .flat(): sisäkkäiset rivilistat (valitsin, aikataulu, lisäpalvelut) samaan tasoon
+    const sumList = h('dl', { class: 'bk-sum' }, sumRows());
+    const totalEl = h('strong', { class: 'bk-total', 'data-testid': 'sum-total', text: money(totalNow()) });
+    const refreshSum = () => { sumList.replaceChildren(...sumRows().flat(2).filter(Boolean)); totalEl.textContent = money(totalNow()); };
     const optP = showOpt ? optPicker(p, { value: opt, required: needOpt, onChange: (code) => { opt = code; optDd.textContent = optText(); pickWhen.textContent = whenText(); } }) : null;
     const cf = customerFields(), legal = legalFields(), { terms, consent } = legal;
     const msg = h('div', { id: 'bk-msg' });
@@ -200,7 +216,7 @@ export function createTreatmentViews(c) {
       const cust = cf.read(form, msg); if (!cust) return;
       if (!terms.checked) { msg.append(errorBox(t.acceptTermsErr)); terms.focus(); return; }
       review(cust, (new FormData(form).get('note') || '').trim());
-    } }, optP ? optP.node : null, cf.node, legal.nodes, msg, next);
+    } }, optP ? optP.node : null, ap ? ap.node : null, cf.node, legal.nodes, msg, next);
     form.addEventListener('input', () => msg.replaceChildren());
     const whenText = () => `${opt ? `${O.optName(O.findOption(p, opt), S.lang)} · ` : ''}${when(slot.start)}${slot.end ? `–${tm(slot.end)}` : ''} · ${n} ${t.person}`;
     const pickWhen = h('span', { class: 'bk-pick-when', text: whenText() });
@@ -211,7 +227,7 @@ export function createTreatmentViews(c) {
       h('div', { class: 'bk-pick-main' }, h('strong', { class: 'bk-pick-name', text: pname(p) }), pickWhen),
       pickChange);
     const aside = h('aside', { class: 'bk-aside', 'aria-label': t.summary }, h('h3', { text: t.summary }), sumList,
-      h('p', { class: 'bk-totalrow' }, t.total + ': ', h('strong', { class: 'bk-total', text: money(total) }), ' ', h('small', { text: t.vatIncl })));
+      h('p', { class: 'bk-totalrow' }, t.total + ': ', totalEl, ' ', h('small', { text: t.vatIncl })));
     const formView = h('div', { class: 'bk-checkout' }, form, aside);
     const holder = h('div', {}), topBox = h('div', { class: 'bk-tr-top' });
     // vahvistusvaihe: tiedot yhteenvetona, maksu paikan päällä, "Muokkaa tietoja" / "Vahvista varaus"
@@ -222,19 +238,23 @@ export function createTreatmentViews(c) {
       const ok = h('button', { type: 'button', class: 'btn', 'data-testid': 'review-submit', text: t.book });
       const edit = h('button', { type: 'button', class: 'btn light', text: tr.edit, onclick: () => { topBox.hidden = false; holder.replaceChildren(formView); form.querySelector('input,textarea')?.focus(); window.scrollTo({ top: 0 }); } });
       const dl = h('dl', { class: 'bk-sum' }, h('dt', { text: t.what }), h('dd', { text: pname(p) }), showOpt ? [h('dt', { text: ot.what }), h('dd', { 'data-testid': 'review-option', text: optText() })] : null, h('dt', { text: tr.date }), h('dd', { text: dayLong(slot.start) }), h('dt', { text: tr.time }),
-        h('dd', { text: slot.end ? `${tm(slot.start)}–${tm(slot.end)}` : tm(slot.start) }), scheduleRows(p, slot.start), h('dt', { text: t.persons }), h('dd', { text: String(n) }),
+        h('dd', { text: slot.end ? `${tm(slot.start)}–${tm(slot.end)}` : tm(slot.start) }), scheduleRows(p, slot.start), h('dt', { text: t.persons }), h('dd', { text: String(n) }), addonRows(),
         h('dt', { text: cust.kind === 'company' ? t.contactName : t.name }), h('dd', { text: cust.name }), cust.company ? [h('dt', { text: t.companyName }), h('dd', { text: cust.company.company_name })] : null,
         h('dt', { text: t.email }), h('dd', { text: cust.email }), h('dt', { text: t.phone }), h('dd', { text: cust.phone }), note ? [h('dt', { text: t.note.replace(/\s*\(.*\)$/, '') }), h('dd', { text: note })] : null,
         null);
       const head = h('h2', { id: 'tr-review-h', text: tr.reviewTitle, tabindex: '-1' });
       ok.addEventListener('click', async () => {
         ok.disabled = edit.disabled = true; ok.textContent = hi.on ? ht(S.lang, 'checkout.creating') : t.booking; err.replaceChildren();
-        const r = await A.createBooking(p, { start: slot.start, persons: n, name: cust.name, email: cust.email, phone: cust.phone, marketing: consent.checked, locale: S.lang, note, kind: cust.kind, company: cust.company, option: opt });
+        const r = await A.createBooking(p, { start: slot.start, persons: n, name: cust.name, email: cust.email, phone: cust.phone, marketing: consent.checked, locale: S.lang, note, kind: cust.kind, company: cust.company, option: opt, addons: ap ? ap.payload() : [] });
         if (r.ok && r.token) { state.months.clear(); location.assign(confirmUrl(r.token)); return; }
         ok.disabled = edit.disabled = false; ok.textContent = bookText();
         if (!r.ok && O.isOptionError(r.code) && optP) {   // palvelin hylkäsi valinnan: takaisin lomakkeelle, valitsin korostettuna (virheellinen valinta tyhjennetään)
           if (r.code === 'invalid_option') { opt = null; optP.set(null); optDd.textContent = optText(); pickWhen.textContent = whenText(); }
           topBox.hidden = false; holder.replaceChildren(formView); optP.setError(errMsg(r)); optP.node.scrollIntoView?.({ block: 'center' }); optP.focus(); return;
+        }
+        if (!r.ok && A.isAddonError(r.code) && ap) {   // palvelin hylkäsi lisäpalvelut: takaisin lomakkeelle, virhe lisäpalveluiden kohdalla (määrävirheessä valinta säilyy, muuten tyhjennetään)
+          if (r.code !== 'addon_quantity') ap.clear();
+          topBox.hidden = false; holder.replaceChildren(formView); ap.setError(errMsg(r)); ap.node.scrollIntoView?.({ block: 'center' }); ap.focus(); return;
         }
         const lost = A.isSlotLost(r.code);
         err.replaceChildren(...[errorBox(r.ok ? tr.errors.generic : errMsg(r)), lost ? h('p', {}, h('a', { class: 'btn sm', href: back, text: tr.pickAnother })) : null].filter(Boolean));   // replaceChildren(null) kirjoittaisi tekstin "null"
@@ -243,7 +263,7 @@ export function createTreatmentViews(c) {
       const lead = h('p', { class: 'bk-note', 'data-testid': 'review-lead', text: tr.reviewLead }), holdExtra = h('div', { 'data-testid': 'review-hold-extra' });
       holdInfo().then((x) => { Object.assign(hi, x); if (!hi.on) return; if (!ok.disabled) ok.textContent = bookText(); lead.textContent = ht(S.lang, 'checkout.review', { minutes: hi.minutes }); holdExtra.replaceChildren(...hi.extra(S.lang)); });
       holder.replaceChildren(h('div', { class: 'bk-review' }, head, lead, holdExtra, dl,
-        h('p', { class: 'bk-totalrow' }, t.total + ': ', h('strong', { class: 'bk-total', text: money(total) }), ' ', h('small', { text: t.vatIncl })),
+        h('p', { class: 'bk-totalrow' }, t.total + ': ', h('strong', { class: 'bk-total', 'data-testid': 'review-total', text: money(totalNow()) }), ' ', h('small', { text: t.vatIncl })),
         cust.kind === 'company' ? h('p', { class: 'bk-pay bk-paynow', text: t.companyNote }) : null, err, h('div', { class: 'bk-actions' }, edit, ok)));
       topBox.hidden = true; head.focus(); window.scrollTo({ top: 0 });
     }

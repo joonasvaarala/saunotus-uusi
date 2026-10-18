@@ -464,7 +464,7 @@ Hoitovarauksille palautetaan valinnan otsikko valmiiksi kielen mukaan (`product_
 
 ## 16. Artikkelit / sisältöosio (SEO) – migraatio `booking_51_articles` (18.10.2026) – tietokanta ja RPC:t TUOTANNOSSA, ei sisältöä, mitään ei ole julkaistu
 **Tila:** tietokantapuoli valmis ja testattu (94 tarkistusta rollback-transaktiossa: `tests/articles/t51_articles.sql`; rollback `rollbacks/…_booking_51_ROLLBACK.sql`). Taulut ovat tyhjät: `public_list_articles` palauttaa `items: []`, `public_articles_sitemap` `items: []`.
-**Nimi:** tietokannassa neutraali `articles`; osion näkyvä nimi ja polku ovat asetuksia (`booking.settings`, julkiset): `articles_label_fi` = "Saunatietoa", `articles_label_en` = "Sauna knowledge", `articles_path_fi` = `/saunatietoa/`, `articles_path_en` = `/en/sauna-knowledge/`. Artikkelin osoite = `{site_base_url}{articles_path_<kieli>}{slug}/`. Nimen/polun vaihto = päivitä asetus + rakenna sivusto uudelleen (RPC:t palauttavat valmiit `path`/`loc`/`canonical`-arvot, joten UI ei kovakoodaa polkuja).
+**Nimi:** tietokannassa neutraali `articles`; osion näkyvä nimi ja polku ovat asetuksia (`booking.settings`, julkiset): `articles_label_fi` = "Saunatietoa", `articles_label_en` = "Sauna guide", `articles_path_fi` = `/saunatietoa/`, `articles_path_en` = `/en/sauna-guide/`. Artikkelin osoite = `{site_base_url}{articles_path_<kieli>}{slug}/`. Nimen/polun vaihto = päivitä asetus + rakenna sivusto uudelleen (RPC:t palauttavat valmiit `path`/`loc`/`canonical`-arvot, joten UI ei kovakoodaa polkuja).
 
 ### 16.0 Periaatteet
 - **EI editori-UI:ta hallintaan.** Artikkelit tuodaan botin kautta: Joonas lähettää botille tekstin ja kuvat, botti tallentaa ne tähän muotoon `admin_*`-RPC:illä (service role -avain tai suora tietokantayhteys; ks. `docs/ARTIKKELI_botti_ohje_fi.md` ja pohja `docs/ARTIKKELIPOHJA_fi.md`). Koodarin työ on vain **julkinen sivusto** (listaus, artikkelisivu, sitemap, SEO). Hallintaan ei tehdä artikkelisivua.
@@ -499,6 +499,8 @@ Sallittu syntaksi (renderöijän pitää tukea täsmälleen näitä; kaikki muu 
 - `admin_delete_article(p_id)` (pehmeä: `deleted_at`, status → draft) ja `admin_restore_article(p_id)` (→ luonnos; `slug_taken` jos slug on nyt toisella).
 - **Kuvat:** (1) lataa tiedosto Storage-bucketiin `article-images` polkuun `articles/<artikkelin id>/<aikaleima>-<satunnaistunnus 6–32 merkkiä a-z0-9>.<jpg|png|webp>` (max 5 Mt; service role -avaimella tai henkilöstön JWT:llä jolla `articles.manage`; bucket on julkinen luku), (2) rekisteröi: `admin_register_article_image(p_article_id, p_path, p_width, p_height, p_alt_fi default null, p_alt_en default null, p_caption_fi default null, p_caption_en default null, p_bytes default null, p_mime default null, p_sort default 0, p_set_hero default false)` → `{ok, image{id,url,…}, article}`; `admin_update_article_image(p_image_id, p_data {alt_fi, alt_en, caption_fi, caption_en, sort_order})`; `admin_remove_article_image(p_image_id)` → `{removed_path, bucket}` (**Storage-tiedoston poistaa kutsuja** Storage-API:lla; kuvaa johon sisältö viittaa tai julkaistun pääkuvaa ei voi poistaa: `image_in_use`).
 - **Virhekoodit (`detail`):** `forbidden`, `not_found`, `deleted`, `invalid_param`, `invalid_slug`, `slug_taken`, `invalid_content`, `invalid_image`, `hero_not_found`, `file_not_uploaded` (kuvaa ei löydy Storagesta rekisteröitäessä), `image_in_use`, `not_publishable`. Julkisissa `ok:false` + `code` (`not_found`, `moved`).
+
+**Jakokuva (migraatio `booking_56_articles_og_image`, 18.10.2026):** `articles.og_image_id` (valinnainen) + `admin_set_article_og_image(article_id, image_id|null)`. Kun asetettu, `public_get_article().seo.og_image` on jakokuva (esim. 1200×630) ja `seo.json_ld.image` = [pääkuva, jakokuva]; muuten `seo.og_image` = pääkuva (ennallaan). `admin_*`-vastausten `article.og_image_id` kertoo valinnan. Julkinen UI ei muutu: käytä `seo.og_image` kuten ennenkin.
 
 ### 16.5 SEO-vaatimukset (Koodarin tehtävä, julkinen sivusto)
 1. **Staattinen esirenderöinti:** rakennusvaiheessa (build) kutsu `public_list_articles` (sivutus) ja `public_get_article` jokaiselle sitemapin kohteelle ja generoi staattiset HTML-sivut: listaus `{path}`, artikkeli `{path}{slug}/` (fi) ja `/en/…` (en). Sisältö (otsikko, teksti, kuvat, JSON-LD) pitää olla valmiina HTML:ssä ilman JavaScriptiä. Rakenna uudelleen julkaisun/muokkauksen jälkeen (botti triggeröi workflow_dispatch) ja ajastetusti (ajastetut julkaisut).
@@ -573,6 +575,15 @@ Lisäksi vanhat kentät: `status` (`pending`/`confirmed`/`expired`…; **pending
 - Lahjakorttien **osto** (`public_buy_gift_card`) ja Visma Pay -linkit ennallaan (eivät käytä tätä pitoa).
 - Henkilökunnan peruutus pending-pitotilaukselle jossa lahjakorttiosuus: käytä `admin_refund` (automaattipalautus tehty vain vanhenemiseen ja asiakkaan peruutukseen).
 
+### 17.10 "Maksa myöhemmin" (TESTI) – migraatio `booking_57_pay_later_test` (18.10.2026)
+- **Lippu:** `booking.settings.pay_later_test_enabled` (oletus **false**, EI päällä). Kun false: `public_confirm_pay_later` palauttaa `{ok:false, code:'pay_later_unavailable'}` eikä `methods`-listoissa ole `pay_later`-vaihtoehtoa.
+- **RPC (anon/authenticated):** `public_confirm_pay_later(p_order_token uuid)` → odottava (`checkout_state='awaiting_payment'`) tilaus vahvistetaan maksamattomana: varaukset `confirmed`, `hold_expires_at=null` (paikka säilyy, `_expire_holds` ei vanhenna), tilaus `confirmed`, `payment_status` = `unpaid` (tai `partially_paid` jos lahjakorttiosuus käytetty; osuus säilyy käytettynä). Normaali `order_confirmation`-sähköposti jonoon samalla triggerillä kuin muissakin vahvistuksissa (email on edelleen dry_run), lisäksi `audit_log`-rivi `pay_later_confirmed`.
+- **Paluu:** `_checkout_state_json`-kentät (`checkout_state:'confirmed_unpaid'`, `remaining_amount`, `awaiting_payment:false`, …) + `ok:true`, `pay_later:true`, `idempotent:false`, `order_id`, `order_no`, `status`, `payment_status`. Uutta tilaa ei tarvittu (`confirmed_unpaid` on jo olemassa).
+- **Virheet (`{ok:false, code}`):** `pay_later_unavailable` (lippu pois / ulkoinen tilaus), `not_found`, `rate_limited`, `payment_in_progress` (MobilePay kesken TAI alustava `preliminary`-varaus), `order_expired` (myös kun pito on päättynyt mutta cron ei ole vielä ajanut: ei elvytetä), `order_cancelled`. Jo vahvistettu (`confirmed`/`confirmed_unpaid`) → `ok:true, idempotent:true` + nykyinen tila, ei uutta kirjausta eikä viestiä.
+- **Maksuvaihtoehdot:** kun lippu päällä, `public_checkout_payment_options().methods` ja `public_payment_options(null).methods` sisältävät `{code:'pay_later', kind:'later', test:true, enabled:true, confirm_rpc:'public_confirm_pay_later', label, label_en}`; `public_payment_options(token)` sisältää sen vain kun kyseinen tilaus on `awaiting_payment` (ei ulkoinen). `public_checkout_payment_options` palauttaa myös `pay_later_test_enabled`.
+- **Vahvistuksen jälkeen** tilaus on tavallinen vahvistettu maksamaton tilaus: MobilePay-maksu onnistuu yhä (`can_pay_online`), `pay_later` ei enää tarjolla.
+- Rollback: `rollbacks/CHECKOUT_booking_57_ROLLBACK.sql`; testit: `tests/checkout/t57_pay_later_test.sql` (41 tarkistusta).
+
 ### 17.8 Koodarin UI-lista
 1. Kassa: lue `public_checkout_payment_options()`; jos `hold_until_paid` → pitokassa: painike "Jatka maksamaan", **maksutavan valinta ennen vahvistusta**, ei "varaus vahvistettu" -tekstiä ennen kuin `checkout_state = 'confirmed'`.
 2. Luonnin jälkeen siirry tilaussivulle; näytä **laskuri** (`seconds_left` / `hold_expires_at − server_now`; tarkista palvelimelta kun 0 ja ~30 s välein) + teksti §17.9 + `remaining_amount`.
@@ -583,3 +594,82 @@ Lisäksi vanhat kentät: `status` (`pending`/`confirmed`/`expired`…; **pending
 7. Älä lähetä asiakasta "Peru"-painikkeella kesken MobilePay-maksun (`payment_in_progress`).
 
 ### 17.9 Asiakasteksti-ehdotukset (EI JULKAISTA ennen Joonaksen hyväksyntää) – ks. `docs/KASSA_pito_asiakasteksti_fi.md`
+
+### 17.11 Paketti "Saunarituaali ja savusaunavuoro (la & su)" (kb 7) verkkokaupassa – migraatio `booking_58_package_ritual` (18.10.2026)
+- Tuote on `public_catalog()`issa: `id 7`, `booking_kind = 'slots'`, `slot_grid_minutes 30`, hinta 49 € / hlö (ALV 25,5 % sis.), `min_persons 1`, `max_persons 6`, `duration_minutes 120`, `duration_text` "rituaali 20 min + tauko 10 min + savusauna 1 h 30 min (yhteensä 2 h)". `description_en` puuttuu (EN-teksti tulossa Joonakselta).
+- Aikajana (varauksen alusta): 0–20 min Rauni (rituaalipooli, yht. max 6 hlö samaan aikaan, jaettu Saunotusrituaalin kanssa), 20–30 tauko, 30–120 savusauna 90 min (jaettu pooli, 6 hlö). Saunottaja 0–20 min.
+- Saatavuus: `public_treatment_availability(7, from, to, persons)` (sama kuin tuotteet 8/10/11; max 14 pv; vain la & su; alkuajat 16:00, 16:30 ja 17:00). Aika ei palaudu, jos Raunissa on hoito/saunotus (15 min puskuri), Rauni tai savusauna on suljettu, savusauna on yksityisvuorolla, tai kapasiteetti (6) täynnä. Näytä vain palautetut `available`-ajat.
+- Varaus: `public_create_treatment_booking(7, p_start, persons, …)` täsmälleen kuten muut slot-tuotteet (pito, `checkout_state`, ryhmäkynnys, virhekoodit §17.3). Ei `p_option_code`a.
+- UI: tuotekortti "Varaa aika" -polkuun (ei vuoropohjainen `public_create_booking`). Näytä aikajana tuotteella: "Saunarituaali 20 min · tauko 10 min · savusauna 1 h 30 min" ja loppuaika = alku + 2 h. Henkilömäärävalinta 1–6, ei rivejä jos `available` puuttuu ("Ei vapaita aikoja – kokeile toista päivää").
+- Rollback: `supabase/rollbacks/CHECKOUT_booking_58_ROLLBACK.sql` (piilottaa tuotteen; olemassa olevat varaukset säilyvät).
+
+## 18. Kaikki asiakasnäkyvät tekstit tietokannassa (päätös Joonas 18.10.2026, malli (c)) – migraatiot `booking_60_site_texts`, `booking_61_package_catalog`, `booking_62_text_import` (TUOTANNOSSA, ei muutosta asiakkaille näkyvään sivustoon)
+
+### 18.1 Periaate (sitova kaikille sivuston muutoksille)
+- **Asiakkaalle ulospäin näytettävää tekstiä ei kovakoodata** koodiin, komponentteihin, JSON-tiedostoihin eikä templateihin. Jokainen asiakasnäkyvä teksti (sivutekstit, otsikot, painikkeet, lomake- ja virheilmoitukset, tuote-/UKK-/ehtotekstit, sähköpostipohjien asiakasnäkyvät osat, SEO-otsikot/-kuvaukset) haetaan tietokannasta (`booking.site_texts` / lähdetaulut, joita `site_texts` peilaa).
+- **Poikkeus: puhtaasti tekniset merkkijonot** (CSS-luokat, reitit/slugit, avainnimet, API-kentät, lokiviestit, `aria-`-tunnisteet jotka eivät näy ihmiselle, päivämäärä-/numeroformaattien mallit). Epäselvässä tapauksessa: jos asiakas voisi nähdä tai kuulla sen (myös ruudunlukija), se on teksti.
+- **Uusia kovakoodattuja asiakasnäkyviä tekstejä ei hyväksytä PR:ssä** (ks. §18.9). Vanhat kovakoodatut tekstit siirretään vaiheessa 2 (§18.10); siirtymäaikana vanha teksti saa jäädä vain varateksti (fallback), jonka avain on olemassa.
+- Teksti on aina **FI + EN**. FI on pakollinen julkaistessa; puuttuva EN näkyy puutelistassa (`texts_list(p_missing => true)`, `admin_texts_review_queue()`), sivusto näyttää silloin FI-tekstin (ei tyhjää).
+
+### 18.2 Avainnimeämiskäytäntö
+- Muoto: `alue.kohde.kenttä`, vain `a-z 0-9 _ -` ja pisteet, max 120 merkkiä, aina pienillä kirjaimilla. Kieli EI ole avaimessa (rivi on `(key, lang)`).
+- **Lähdetaulupohjaiset (jo rekisterissä, älä luo uudelleen):** `product.<id>.name|description|duration_text`, `product.<id>.price_text|slug|booking_url` (lukittu), `faq.<id>.question|answer`, `policy.<id>.title|body`, `addon.<id>.name|description`, `option.<id>.name|description`, `giftpkg.<code>.name|description`, `schedule.<id>.label`, `location.<id>.<kenttä>`, `hours.<id>.session_name|swimsuit_rule`, `event.<id>.time_text`, `business.<id>.description`, `product_voucher.<tuote>.note` (lahjakorttihuomautus, `booking.product_config.voucher_note[_en]`), `timeline.<segmentti-id>.label` (aikajanan osavaiheiden nimet).
+- **Vapaat avaimet (käyttöliittymä/sivut):** `ui.<alue>.<nimi>` (painikkeet, labelit, virheet: `ui.shop.cta_book`, `ui.checkout.error_slot_unavailable`), `page.<sivu>.<lohko>` (sivujen leipätekstit: `page.front.hero_title`), `seo.<sivu>.title|description`, `email.<pohja>.<kohta>` (asiakkaalle näkyvät sähköpostitekstit), `nav.<kohta>`. Prefiksit `product|faq|policy|addon|option|giftpkg|schedule|location|hours|event|business|timeline|product_voucher` on varattu lähdetauluille (tuonti hylkää: `reserved_key`).
+- Virhekoodit: `ui.<alue>.error_<RPC-koodi>` (esim. `ui.checkout.error_addon_not_allowed`) → kaupan UI käyttää näitä, ei RPC:n suomenkielistä `message`a.
+
+### 18.3 Paikkamerkit (luvut ja muuttuvat tosiasiat EIVÄT kirjoiteta tekstiin käsin)
+- Hinnat, kestot, henkilömäärät ym. luvut tekstiin **paikkamerkillä**: `{{price:7}}` (tuotteen 7 hinta katalogista, muotoiltuna "49 €"), `{{duration:7}}` (kesto katalogista), `{{setting:<avain>}}` (vain `public_settings()`-avaimet, esim. `{{setting:public_treatment_horizon_days}}`). Muoto `^\{\{[a-z_]+(:[A-Za-z0-9_]+)?\}\}$`.
+- Paikkamerkit **julkaistaan tekstissä sellaisenaan** (`public_get_site_texts` palauttaa `text` + `placeholders`-taulukon); **build/kauppa täyttää ne** ajoajan datasta. Tuntematon paikkamerkki tai puuttuva arvo → **build epäonnistuu** (ei raakaa `{{…}}` sivulle).
+- Paikkamerkit ovat tekstikohtaisesti ilmoitettu joukko (`placeholders`); ehdotus ei voi poistaa eikä lisätä paikkamerkkiä (`placeholder_mismatch`). Lähdesarakkeisiin (esim. `kb.products.description`) EI kirjoiteta paikkamerkkejä (vain vapaat avaimet).
+- Lukuarvojen oikea lähde on aina data (hinta `kb.products.price`, kesto `product_config.duration_minutes`, aikajana `product_timeline_segments`), ei teksti.
+
+### 18.4 Lukitut kentät (eivät muokattavissa tekstijärjestelmän kautta, ehdotus estetty `text_locked`)
+- Hinnat ja hintatekstit (`product.*.price_text`), ALV, `slug`, `booking_url`, kaikki URL:t, tuote-/varaus-id:t. Lukitut rivit näkyvät rekisterissä (`class='locked'`, `lang='all'` tai `fi`), mutta eivät `public_get_site_texts`-vastauksessa. Muutos vain admin-RPC:llä (`catalog.edit`), ei tekstinä.
+
+### 18.5 Tilat ja versiot
+- Versio kulkee **draft → proposed → approved → published** (+ `rejected`, `superseded`, `stale`). Julkaisu kirjoittaa tekstin lähdesarakkeeseen (tai vapaan avaimen riville) ja arkistoi edellisen version; **peruutus** = `admin_texts_rollback(key, lang, to_version)`. Historia on append-only (`booking.site_text_versions`).
+- Jos lähdetaulua muokataan suoraan (esim. `kb.products.description`), trigger kirjaa muutoksen uudeksi julkaistuksi versioksi (`TEXT_DIRECT_EDIT`); `admin_texts_drift()` = [] kun kaikki on synkassa.
+- Hyväksyjää ei voi olla sama kuin ehdottaja protected-teksteissä; kilpaileva ehdotus vanhenee (`stale`) kun toinen julkaistaan.
+
+### 18.6 Suojatut luokat (Joonaksen hyväksyntä, `texts.approve_protected`)
+- Luokka `protected`: **käyttöehdot ja lakitekstit** (`kb.policies`: peruutus-, lahjakortti-, kausikortti-, koulutus-, tietosuoja-, maksu-, turvallisuus-, esteettömyysehdot), **yhteystiedot, aukioloajat ja vuorot** (`kb.locations`, `kb.opening_hours`, `kb.event_dates`, `kb.businesses`, tuotteen `duration_text`), **suostumus-/markkinointitekstit**, **turvallisuus- ja terveysväitteet**, lahjakorttihuomautukset. Uudet vastaavat avaimet luodaan luokalla `protected` (`admin_texts_import` `class:'protected'` tai `admin_texts_set_class`).
+- Tavalliset tekstit (`normal`): Otto (manager, `texts.approve`) hyväksyy. Botti (`text_editor`) voi vain **ehdottaa** (`texts.propose`).
+
+### 18.7 Automaattinen eskalointi
+- Jos ehdotus muuttaa **numeroita, €/eur-merkintää, prosentteja, kellonaikoja (hh:mm), puhelinnumeroa, sähköpostiosoitetta tai linkkiä** (`http(s)://`, `www.`, markdown-linkki) vanhaan julkaistuun tekstiin verrattuna, versio merkitään `protected=true` + `escalation=[numbers|currency|percent|time|phone|email|link]` ja vaatii Joonaksen (`texts.approve_protected`), vaikka rivin luokka olisi `normal`. Pelkkä sanamuutos ei eskaloidu.
+- Raaka HTML/skripti, ohjausmerkit ja linkkimerkintä `plain`-kentässä hylätään.
+
+### 18.8 RPC:t ja kentät (Koodari)
+- **Luku (anon, build/kauppa):** `booking.public_get_site_texts(p_lang text default null)` → `{ok, generated_at, texts:[{key, lang, text, version, placeholders[]}]}` (vain `published`, ei lukitut, ei tyhjät). Kutsu buildissa (kuten artikkelit) + välimuisti/varateksti jos haku epäonnistuu; sisältömuutoksen jälkeen `repository_dispatch` (kuten artikkelit).
+- **Ehdotus/luku (authenticated, text_editor tai henkilöstö):** `texts_propose(key, lang, text, reason, draft)`, `texts_submit(version_id)`, `texts_withdraw(version_id)`, `texts_list(prefix, lang, status, missing, limit, offset)`, `texts_get(key, lang)`.
+- **Hyväksyntä (authenticated):** `admin_texts_queue(protected, limit)`, `admin_texts_approve(version_id, note, publish)`, `admin_texts_publish`, `admin_texts_reject`, `admin_texts_rollback(key, lang, to_version, note)`, `admin_texts_mark_reviewed(key, lang, note)` (EN-luonnos tarkistettu), `admin_texts_review_queue(limit)`.
+- **Ylläpito (texts.manage / service_role):** `admin_texts_sync()` (rekisteröi uudet lähderivit), `admin_texts_drift()`, `admin_texts_set_class(key, lang, class, note)`, `admin_texts_import(p_items jsonb)` (vapaat avaimet: `[{key, lang, text, class?, kind?, max_len?, placeholders?[], reason?}]`, max 500/kutsu, ei ylikirjoita olemassa olevia → `result: created|exists|error`).
+- **Roolit:** `text_editor` (botti: vain `texts.propose`; EI henkilöstö, ei pääsyä asiakas-/tilaus-/maksu-/hintatietoihin; taulu `booking.text_bots`), `manager` (Otto: propose + approve), `admin` (Joonas: kaikki). Botin tunnukset toimitetaan erikseen (Joonas); **älä pyydä tai talleta service_role-avainta bottia varten**.
+- **Hallinnan näkymä (Koodari, vaihe 2):** "Tekstit": lista + haku (avain/kieli/tila), puutelista (`p_missing`), EN-tarkistusjono, ehdotukset (`admin_texts_queue`), eskalaatiomerkinnät (miksi protected), hyväksy/hylkää/peruuta versio, versiohistoria (`texts_get`), drift-varoitus. Näkymä käyttää vain yllä olevia RPC:itä (ei suoria taulukirjoituksia).
+
+### 18.9 Kooditarkistus / PR-checklist (Koodari ei merge:ä ilman näitä)
+1. [ ] PR ei lisää **yhtään** uutta kovakoodattua asiakasnäkyvää merkkijonoa (JSX/Astro/TS/JSON/CSS `content:`/`alt`/`title`/`placeholder`/`aria-label`/meta/`<title>`/sähköpostipohja). Tarkista `rg` -haulla diffistä (suomen-/englanninkieliset lauseet, `€`, kellonajat, puhelin/sähköposti).
+2. [ ] Jokaiselle uudelle tekstille on **avain** §18.2:n mukaan **FI + EN** tietokannassa (tuotu `admin_texts_import`illa tai migraatiolla; EN voi olla `needs_review`-luonnos, ei tyhjä) ja luokka (`normal`/`protected`) oikein (§18.6).
+3. [ ] Luvut/hinnat/kestot paikkamerkkeinä (§18.3) tai datasta; **ei lukuja tekstissä käsin**. Paikkamerkki-resolveri epäonnistuu buildissa tuntemattomalle arvolle.
+4. [ ] Virhetilat: jokaiselle RPC-virhekoodille on `ui.*.error_<koodi>`-teksti; oletusvirheelle yleisteksti DB:ssä.
+5. [ ] Build hakee tekstit `public_get_site_texts`ista; varateksti/välimuisti ei sisällä uusia tekstejä, jotka puuttuvat DB:stä.
+6. [ ] Ei julkaisua: tekstien julkaisu/muutos vain `texts_*`/`admin_texts_*`-RPC:illä (ei suoria `update`ja `kb.*`-tauluihin eikä `service_role`-kirjoituksia ilman hyväksyntäjonoa).
+7. [ ] PR-kuvaus listaa: uudet avaimet (+ luokka), poistetut kovakoodatut tekstit, miten FI/EN katsottiin tietokannasta, ja näyttökuva/URL esikatselusta.
+8. [ ] Sähköpostit: asiakkaalle näkyvät tekstit `email.*`-avaimista; `dry_run` pysyy päällä kunnes Joonas erikseen sallii.
+9. [ ] Testit: build ilman verkkoa käyttää välimuistia; puuttuva avain ei tuota tyhjää tai raakaa avainta sivulle (näytä FI-varateksti, lokita).
+
+### 18.10 Vaihe 2 (Koodari) – siirtymäsuunnitelma
+1. **Build lukee** `public_get_site_texts` (+ välimuisti/varateksti + paikkamerkkiresolveri). kb-snapshot korvataan live-haulla (tuotteet/UKK/ehdot luetaan tietokannasta; tekstit samasta `site_texts`-rekisteristä).
+2. **Avainten siirto:** kerää repon kovakoodatut asiakasnäkyvät tekstit (kategorianimet, navigaatio, lomake-, virhe- ja kaupan UI-tekstit, `privacy.json` + EN-versio, sähköpostipohjien asiakasnäkyvät osat) → `admin_texts_import` (luokka oikein; protected: ehdot, tietosuoja, yhteystiedot, suostumus, turvallisuus). Poista kovakoodaus vasta kun avain on tuotannossa ja build on vihreä.
+3. **Hallinnan Tekstit-näkymä** (§18.8) – Otto/Joonas hyväksyvät; botti ehdottaa.
+4. **Lahjakorttihuomautus, aikajana, EN-kuvaus** (§17.11b) kauppaan: lue `voucher_note[_en]`, `timeline_text[_en]`/`timeline[]`, `description_en`.
+5. Puutelista: `docs/otto_tekstit/puutelista_tekstit.md|csv` (EN puuttuu, `needs_review`).
+- Rollbackit: `rollbacks/TEXTS_booking_60_ROLLBACK.sql`, `rollbacks/CHECKOUT_booking_61_ROLLBACK.sql`, `rollbacks/TEXTS_booking_62_ROLLBACK.sql` (testattu rollback-transaktiossa; lähdedata ennallaan). Testit: `tests/t60_site_texts.sql` (108 tarkistusta), `tests/t61_package_catalog.sql` (48), `tests/t62_text_import.sql` (10).
+
+### 18.11 Paketti kb 7 – DB-päivitykset `booking_61_package_catalog` (korvaa/täydentää §17.11)
+- **`public_catalog()` uudet kentät** (kaikilla tuotteilla, null kun ei käytössä): `voucher_note`, `voucher_note_en` (lahjakorttihuomautus, **ei enää kuvauksen lopussa**; tuote 7: "Elämyslahjojen lahjakortilla: varaa ensin yleinen vuoro ja osta rituaali erikseen." / EN), `timeline` (taulukko `{seq, kind, label, label_en, minutes, start_min, end_min}`), `timeline_text` ("rituaali 20 min · tauko 10 min · savusauna 1 h 30 min"), `timeline_text_en` ("ritual 20 min · break 10 min · smoke sauna 1 h 30 min"). Aikajana näkyy vain jos osavaiheiden summa = `duration_minutes` (tuote 7: 20 + 10 + 90 = 120). **Loppuaika = alku + `duration_minutes`** (2 h). Näytä lahjakorttihuomautus erillisenä huomautuksena tuotekortilla (ei osana kuvausta).
+- **`description_en`** tuotteelle 7 kirjoitettu (EN-luonnos, `needs_review`); FI-kuvaus puhdistettu (ei lahjakorttihuomautusta).
+- **`public_settings()`**: `public_treatment_horizon_days` (nyt 14) julkinen → kauppa käyttää sitä (ei kovakoodattua 14). `public_treatment_min_lead_minutes` ei julkinen.
+- **`public_create_treatment_booking(…, p_option_code, p_addons jsonb default null)`**: uusi viimeinen parametri `p_addons` = `[{"code":"pyyhe","quantity":2}]` tai `{"id":5,"quantity":1}` (kuten `public_create_booking`). Tuotteelle 7 sallittu lisäpalvelu on **pyyhe** (`applies_modes` sisältää `resource`; 5 €/kpl, ALV 25,5 %); turvenaamio/saunavihta → `addon_not_allowed`. Vastaus sisältää `addons_total`; `total` = hinta + lisäpalvelut; tilauksen summa, pay_later-maksurivi ja pitotilan odottava summa sisältävät lisäpalvelut. Vanha 12-parametrinen kutsu toimii ennallaan. Uudet virhekoodit (`ok:false, code`): `invalid_addons`, `addon_not_found`, `addon_inactive`, `addon_not_allowed`, `addon_quantity`. Lisäpalveluvalinta kassalle: `public_addons()` (suodata `applies_modes` ∋ `resource`).
+- **Aikajanan hallinta:** `admin_set_product_timeline(p_product_id, p_segments jsonb)` (`catalog.edit`; summa = kesto, muuten `timeline_sum`).
+- Rollback: `rollbacks/CHECKOUT_booking_61_ROLLBACK.sql`; testi: `tests/t61_package_catalog.sql` (48 tarkistusta, mm. muiden tuotteiden katalogirivit ennallaan).
