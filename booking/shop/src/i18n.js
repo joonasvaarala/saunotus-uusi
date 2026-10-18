@@ -20,7 +20,7 @@ export const T = {
     companyNote: 'Yritysasiakkaalle varaus laskutetaan: lasku lähetetään verkkolaskuna tai sähköpostilla.',
     addonsTitle: 'Lisäpalvelut', addonsHint: 'Valinnaiset lisäpalvelut hinnoitellaan kappaleittain ja lisätään varauksen hintaan.', addonQty: 'Määrä', addonsTotal: 'Lisäpalvelut', addonUnit: 'kpl',
     name: 'Nimi', email: 'Sähköposti', phone: 'Puhelin', note: 'Terveisiä tai erityistoiveita (valinnainen)',
-    consentMarketing: 'Haluan vastaanottaa Sipoonjoen perinnesaunan uutiskirjeitä ja tarjouksia. Voin perua milloin tahansa.',
+    consentMarketing: 'Haluan vastaanottaa Sipoonjoen Perinnesaunan uutiskirjeitä ja tarjouksia. Voin perua milloin tahansa.',
     acceptTerms: 'Hyväksyn', termsLink: 'varaus- ja peruutusehdot', acceptTermsErr: 'Hyväksy ehdot jatkaaksesi.',
     summary: 'Yhteenveto', total: 'Yhteensä', vatIncl: 'sis. ALV', book: 'Vahvista varaus', booking: 'Varataan…',
     payLater: 'Maksu paikan päällä. Verkkomaksu (Visma Pay) otetaan käyttöön myöhemmin.',

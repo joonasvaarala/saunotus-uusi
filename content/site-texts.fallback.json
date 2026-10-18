@@ -89,8 +89,8 @@
   {
    "key": "business.1.description",
    "lang": "fi",
-   "text": "Saunotus on savusaunaelämyksiä, rituaaleja ja perinnettä Sipoonjoen rannalla. Sipoonjoen perinnesauna on maan sisälle rakennettu savusauna Sipoon Hindsbyssä, Sipoonkorven kansallispuiston kupeessa. Sauna valmistui vuonna 2021; yleiset vuorot avattiin tammikuussa 2022.",
-   "version": 1,
+   "text": "Saunotus on savusaunaelämyksiä, rituaaleja ja perinnettä Sipoonjoen rannalla. Sipoonjoen Perinnesauna on maan sisälle rakennettu savusauna Sipoon Hindsbyssä, Sipoonkorven kansallispuiston kupeessa. Sauna valmistui vuonna 2021; yleiset vuorot avattiin tammikuussa 2022.",
+   "version": 2,
    "placeholders": []
   },
   {
@@ -208,8 +208,8 @@
   {
    "key": "faq.13.answer",
    "lang": "fi",
-   "text": "Sauna- ja saunotuselämykset korostavat hiljaisuutta, luonnonläheisyyttä ja rauhaa. Sipoonjoen perinnesauna on maan sisälle rakennettu savusauna, joka lämpeää vuoden jokaisena päivänä.",
-   "version": 1,
+   "text": "Sauna- ja saunotuselämykset korostavat hiljaisuutta, luonnonläheisyyttä ja rauhaa. Sipoonjoen Perinnesauna on maan sisälle rakennettu savusauna, joka lämpeää vuoden jokaisena päivänä.",
+   "version": 2,
    "placeholders": []
   },
   {
@@ -222,8 +222,8 @@
   {
    "key": "faq.14.answer",
    "lang": "fi",
-   "text": "Saunahoidoista ja saunotuksista vastaavat Sipoonjoen perinnesaunan saunottajat Laura Foon, Joonas Vaarala ja Saara Mäntykoski. Tiistaisin naisten vuorolla saatavilla on naispuolinen saunottaja.",
-   "version": 1,
+   "text": "Saunahoidoista ja saunotuksista vastaavat Sipoonjoen Perinnesaunan saunottajat Laura Foon, Joonas Vaarala ja Saara Mäntykoski. Tiistaisin naisten vuorolla saatavilla on naispuolinen saunottaja.",
+   "version": 2,
    "placeholders": []
   },
   {
@@ -761,8 +761,8 @@
   {
    "key": "location.1.name",
    "lang": "fi",
-   "text": "Sipoonjoen perinnesauna",
-   "version": 1,
+   "text": "Sipoonjoen Perinnesauna",
+   "version": 2,
    "placeholders": []
   },
   {
@@ -922,8 +922,8 @@
   {
    "key": "policy.1.body",
    "lang": "fi",
-   "text": "Kauppias: Sipoonjoen perinnesauna - Havuhattu Oy. Asiakas sitoutuu noudattamaan näitä sekä kauppiaskohtaisia ehtoja ostaessaan tuotteita ja palveluja Havuhattu Oy:n Internet-palveluissa.\nVerkkopalvelussa esitetyt hinnat ovat arvonlisäverollisia. Myymme tuotteita täysi-ikäisille yksityishenkilöille sekä yritysasiakkaille. Pidätämme oikeudet hintojen muutoksiin. Asiakas vastaa antamiensa tietojen oikeellisuudesta. Pidätämme oikeuden muuttaa toimitusehtojamme; asiakkaan on ennen tilaustaan tutustuttava kulloinkin voimassa oleviin toimitusehtoihin.",
-   "version": 1,
+   "text": "Kauppias: Sipoonjoen Perinnesauna - Havuhattu Oy. Asiakas sitoutuu noudattamaan näitä sekä kauppiaskohtaisia ehtoja ostaessaan tuotteita ja palveluja Havuhattu Oy:n Internet-palveluissa.\nVerkkopalvelussa esitetyt hinnat ovat arvonlisäverollisia. Myymme tuotteita täysi-ikäisille yksityishenkilöille sekä yritysasiakkaille. Pidätämme oikeudet hintojen muutoksiin. Asiakas vastaa antamiensa tietojen oikeellisuudesta. Pidätämme oikeuden muuttaa toimitusehtojamme; asiakkaan on ennen tilaustaan tutustuttava kulloinkin voimassa oleviin toimitusehtoihin.",
+   "version": 2,
    "placeholders": []
   },
   {
@@ -1160,8 +1160,8 @@
   {
    "key": "policy.25.body",
    "lang": "fi",
-   "text": "Sipoonjoen perinnesaunan omien lahjakorttien voimassaoloa jatketaan maksutta asiakkaan toivomaan päivään asti. Jos asiakas ei toivo tiettyä päivää, voimassaoloa jatketaan 3 kuukautta pyyntöpäivästä eteenpäin. Jatkamisesta ei peritä maksua eikä siihen liity ehtoja – olet lämpimästi tervetullut saunomaan! Pyydä jatkoa sähköpostitse (savusauna@saunotus.fi) tai puhelimitse (010 299 2866).\nKolmansien osapuolten lahjakortit (Elämyslahjat, Offerilla, Kokemuskauppa): voimassaolon jatkamisesta ja vanhentuneista korteista vastaa kunkin palvelun oma asiakaspalvelu.",
-   "version": 1,
+   "text": "Sipoonjoen Perinnesaunan omien lahjakorttien voimassaoloa jatketaan maksutta asiakkaan toivomaan päivään asti. Jos asiakas ei toivo tiettyä päivää, voimassaoloa jatketaan 3 kuukautta pyyntöpäivästä eteenpäin. Jatkamisesta ei peritä maksua eikä siihen liity ehtoja – olet lämpimästi tervetullut saunomaan! Pyydä jatkoa sähköpostitse (savusauna@saunotus.fi) tai puhelimitse (010 299 2866).\nKolmansien osapuolten lahjakortit (Elämyslahjat, Offerilla, Kokemuskauppa): voimassaolon jatkamisesta ja vanhentuneista korteista vastaa kunkin palvelun oma asiakaspalvelu.",
+   "version": 2,
    "placeholders": []
   },
   {
@@ -1174,8 +1174,8 @@
   {
    "key": "policy.26.body",
    "lang": "en",
-   "text": "Sipoonjoen perinnesauna's own gift cards are extended free of charge to the date the customer requests. If no date is requested, the validity is extended by 3 months from the day of the request. There is no fee and no conditions – you are warmly welcome to come and enjoy the sauna! Ask for an extension by email (savusauna@saunotus.fi) or phone (+358 10 299 2866).\nThird-party gift cards (Elämyslahjat, Offerilla, Kokemuskauppa): extensions and expired cards are handled by each service's own customer service.",
-   "version": 1,
+   "text": "Sipoonjoen Perinnesauna's own gift cards are extended free of charge to the date the customer requests. If no date is requested, the validity is extended by 3 months from the day of the request. There is no fee and no conditions – you are warmly welcome to come and enjoy the sauna! Ask for an extension by email (savusauna@saunotus.fi) or phone (+358 10 299 2866).\nThird-party gift cards (Elämyslahjat, Offerilla, Kokemuskauppa): extensions and expired cards are handled by each service's own customer service.",
+   "version": 2,
    "placeholders": []
   },
   {
@@ -1244,8 +1244,8 @@
   {
    "key": "policy.7.body",
    "lang": "fi",
-   "text": "Rekisterinpitäjä: Sipoonjoen perinnesauna / Havuhattu Oy (3018112-1), Hindsbyntie 124, 04130 Sipoo, 010 299 2866, savusauna@saunotus.fi. Rekisteriasioista vastaava: Joonas Vaarala. Rekisterin nimi: Sipoonjoen perinnesaunan asiakasrekisteri.\nOikeusperuste: sopimus (tilaus verkkokaupasta). Tarkoitus: verkkokaupan kaupankäynti (tilaus-, laskutus-, maksu- ja käsittelytiedot), asiakaspalvelu, asiakassuhteen ylläpito ja sähköinen markkinointi suostumuksella. Tietoja ei käytetä automatisoituun päätöksentekoon; tietoja voidaan käyttää profilointiin.\nTiedot: nimi, osoite, postitoimipaikka, maa, puhelin, sähköposti, henkilötunnus (yksityinen laskutusasiakas), tilauksen lähdesivu; yrityksiltä lisäksi nimi, Y-tunnus, verkkolaskuosoite, välittäjätunnus, viite, merkki; sekä vapaamuotoiset lisätiedot.\nSäilytys: niin kauan kuin sopimus/suostumus on voimassa, ja pidempään lakisääteisten velvoitteiden (esim. kirjanpito) vuoksi.\nLähteet: Johku-verkkopalvelun lomakkeet; puhelin-, sähköposti- ja paikan päällä tehdyt tilaukset syöttää Havuhattu Oy. Luovutukset: tietoja ei luovuteta eteenpäin; tietoja voidaan teknisesti käsitellä EU/ETA-alueen ulkopuolella.\nSuojaus: rekisteri sijaitsee Johku-palvelussa, käsittelijä Aptual Commerce Oy. Tarkastus- ja korjausoikeus Oma Johku -palvelussa (johku.com/customer) tai kirjallisesti rekisterinpitäjälle; vastaus pääsääntöisesti kuukauden kuluessa. Oikeus tulla unohdetuksi ja muut GDPR-oikeudet (kirjanpito- ja verolainsäädännön säilytysvelvoitteet huomioiden). Sivusto käyttää evästeitä, myös mainontaevästeitä (esim. Google). Laadittu 9.3.2023.",
-   "version": 1,
+   "text": "Rekisterinpitäjä: Sipoonjoen Perinnesauna / Havuhattu Oy (3018112-1), Hindsbyntie 124, 04130 Sipoo, 010 299 2866, savusauna@saunotus.fi. Rekisteriasioista vastaava: Joonas Vaarala. Rekisterin nimi: Sipoonjoen Perinnesaunan asiakasrekisteri.\nOikeusperuste: sopimus (tilaus verkkokaupasta). Tarkoitus: verkkokaupan kaupankäynti (tilaus-, laskutus-, maksu- ja käsittelytiedot), asiakaspalvelu, asiakassuhteen ylläpito ja sähköinen markkinointi suostumuksella. Tietoja ei käytetä automatisoituun päätöksentekoon; tietoja voidaan käyttää profilointiin.\nTiedot: nimi, osoite, postitoimipaikka, maa, puhelin, sähköposti, henkilötunnus (yksityinen laskutusasiakas), tilauksen lähdesivu; yrityksiltä lisäksi nimi, Y-tunnus, verkkolaskuosoite, välittäjätunnus, viite, merkki; sekä vapaamuotoiset lisätiedot.\nSäilytys: niin kauan kuin sopimus/suostumus on voimassa, ja pidempään lakisääteisten velvoitteiden (esim. kirjanpito) vuoksi.\nLähteet: Johku-verkkopalvelun lomakkeet; puhelin-, sähköposti- ja paikan päällä tehdyt tilaukset syöttää Havuhattu Oy. Luovutukset: tietoja ei luovuteta eteenpäin; tietoja voidaan teknisesti käsitellä EU/ETA-alueen ulkopuolella.\nSuojaus: rekisteri sijaitsee Johku-palvelussa, käsittelijä Aptual Commerce Oy. Tarkastus- ja korjausoikeus Oma Johku -palvelussa (johku.com/customer) tai kirjallisesti rekisterinpitäjälle; vastaus pääsääntöisesti kuukauden kuluessa. Oikeus tulla unohdetuksi ja muut GDPR-oikeudet (kirjanpito- ja verolainsäädännön säilytysvelvoitteet huomioiden). Sivusto käyttää evästeitä, myös mainontaevästeitä (esim. Google). Laadittu 9.3.2023.",
+   "version": 2,
    "placeholders": []
   },
   {
@@ -1258,8 +1258,8 @@
   {
    "key": "policy.8.body",
    "lang": "fi",
-   "text": "Avoin lahjakortti käy kaikkiin Sipoonjoen perinnesaunan palveluihin ja on voimassa 6 kuukautta ostopäivästä. Verkkokaupassa arvon voi valita väliltä 29–500 €; kortilla voi maksaa myös osan arvokkaammasta elämyksestä. Jos lahjakorttia ei ehditä käyttää, voimassaoloa voi pyytää jatkamaan maksutta sähköpostitse tai puhelimitse – toivomaasi päivään asti tai muuten 3 kuukautta eteenpäin.\nOma lahjakortti: varaus tehdään suoraan varausjärjestelmässä; syötä lopuksi 12-merkkinen lahjakortin koodi ostoskorissa kenttään \"käytä koodia\".\nElämyslahjat, Kiitoskauppa ja Kokemuskauppa: varmista ensin, että kortti on voimassa (vanhentuneesta Elämyslahjojen kortista ota yhteyttä Elämyslahjojen asiakaspalveluun). Käytä kortin keskiosassa voimassaolopäivän vieressä olevaa koodia – ei viivakoodin yhteydessä olevaa koodia. Valitse yleinen vuoro, tee varaus ja syötä koodi sille varattuun kenttään. Mahdolliset lisäpalvelut varataan erillisellä tilauksella.\nVanhan sivuston mukaan lahjakortteja voi maksaa myös paikan päällä kortilla.",
-   "version": 1,
+   "text": "Avoin lahjakortti käy kaikkiin Sipoonjoen Perinnesaunan palveluihin ja on voimassa 6 kuukautta ostopäivästä. Verkkokaupassa arvon voi valita väliltä 29–500 €; kortilla voi maksaa myös osan arvokkaammasta elämyksestä. Jos lahjakorttia ei ehditä käyttää, voimassaoloa voi pyytää jatkamaan maksutta sähköpostitse tai puhelimitse – toivomaasi päivään asti tai muuten 3 kuukautta eteenpäin.\nOma lahjakortti: varaus tehdään suoraan varausjärjestelmässä; syötä lopuksi 12-merkkinen lahjakortin koodi ostoskorissa kenttään \"käytä koodia\".\nElämyslahjat, Kiitoskauppa ja Kokemuskauppa: varmista ensin, että kortti on voimassa (vanhentuneesta Elämyslahjojen kortista ota yhteyttä Elämyslahjojen asiakaspalveluun). Käytä kortin keskiosassa voimassaolopäivän vieressä olevaa koodia – ei viivakoodin yhteydessä olevaa koodia. Valitse yleinen vuoro, tee varaus ja syötä koodi sille varattuun kenttään. Mahdolliset lisäpalvelut varataan erillisellä tilauksella.\nVanhan sivuston mukaan lahjakortteja voi maksaa myös paikan päällä kortilla.",
+   "version": 2,
    "placeholders": []
   },
   {
@@ -1503,8 +1503,8 @@
   {
    "key": "product.25.description",
    "lang": "fi",
-   "text": "Koko Sipoonjoen perinnesaunan miljöö omaan käyttöön (esim. ilta ystävien kanssa, synttärit, polttarit). Sisältää savusaunan, lämmin- ja kylmävesialtaat sekä laavun ja hirsimökin vapaan käytön. Tilat voi vuokrata ennen yleisiä vuoroja tai koko päiväksi. Hinnat ovat voimassa ainoastaan yksityishenkilöille; yrityksille omat tuotteet.",
-   "version": 1,
+   "text": "Koko Sipoonjoen Perinnesaunan miljöö omaan käyttöön (esim. ilta ystävien kanssa, synttärit, polttarit). Sisältää savusaunan, lämmin- ja kylmävesialtaat sekä laavun ja hirsimökin vapaan käytön. Tilat voi vuokrata ennen yleisiä vuoroja tai koko päiväksi. Hinnat ovat voimassa ainoastaan yksityishenkilöille; yrityksille omat tuotteet.",
+   "version": 2,
    "placeholders": []
   },
   {
@@ -2597,7 +2597,7 @@
   "settings": {
    "timezone": "Europe/Helsinki",
    "hold_minutes": 15,
-   "business_name": "Sipoonjoen perinnesauna",
+   "business_name": "Sipoonjoen Perinnesauna",
    "articles_path_en": "/en/sauna-knowledge/",
    "articles_path_fi": "/saunatietoa/",
    "articles_label_en": "Sauna knowledge",

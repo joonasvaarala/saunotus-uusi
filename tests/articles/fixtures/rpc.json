@@ -242,7 +242,7 @@
      "headline": "Miten saunotaan oikein? Perinteinen opas",
      "keywords": "sauna, löyly, opas",
      "publisher": {
-      "name": "Sipoonjoen perinnesauna (testi)",
+      "name": "Sipoonjoen Perinnesauna (testi)",
       "@type": "Organization"
      },
      "inLanguage": "fi",
@@ -358,7 +358,7 @@
       "slug": "miten-saunotaan-oikein"
      }
     ],
-    "content_md": "Saunominen on **rauhoittumista**, ei suorittamista. Tässä oppaassa käydään läpi miten saunotaan oikein: löyly, lepo ja vesi. Tämä on feikkidataa testausta varten.\n\n## Ensimmäinen kierros\n\nMene lauteille rauhassa ja heitä löylyä vähän kerrallaan. Lue lisää [saunavuoroista](/saunavuorot/) tai [ulkoinen lähde](https://example.com/sauna).\n\n![kuva](img:7)\n\n## Lepo ja juominen\n\n- Juo vettä saunan jälkeen\n- Lepää kunnes syke rauhoittuu\n- Älä kiirehdi\n\n### Vihta\n\nVihta tuoksuu *koivulta*. Kokeile yhdessä ystävän kanssa.\n\n> Hyvä sauna ei kiirehdi.\n\n![kuva](img:8)\n\n## Usein kysyttyä\n\n**Kuinka monta kierrosta?**\nKolme on perinteinen määrä.\n\n---\n\n:::cta\n**Varaa oma saunahetkesi**\nSipoonjoen perinnesauna tarjoaa savusaunan ja hoidot. Valitse aika ja varaa verkossa.\n[Varaa aika](/varaa/)\n:::",
+    "content_md": "Saunominen on **rauhoittumista**, ei suorittamista. Tässä oppaassa käydään läpi miten saunotaan oikein: löyly, lepo ja vesi. Tämä on feikkidataa testausta varten.\n\n## Ensimmäinen kierros\n\nMene lauteille rauhassa ja heitä löylyä vähän kerrallaan. Lue lisää [saunavuoroista](/saunavuorot/) tai [ulkoinen lähde](https://example.com/sauna).\n\n![kuva](img:7)\n\n## Lepo ja juominen\n\n- Juo vettä saunan jälkeen\n- Lepää kunnes syke rauhoittuu\n- Älä kiirehdi\n\n### Vihta\n\nVihta tuoksuu *koivulta*. Kokeile yhdessä ystävän kanssa.\n\n> Hyvä sauna ei kiirehdi.\n\n![kuva](img:8)\n\n## Usein kysyttyä\n\n**Kuinka monta kierrosta?**\nKolme on perinteinen määrä.\n\n---\n\n:::cta\n**Varaa oma saunahetkesi**\nSipoonjoen Perinnesauna tarjoaa savusaunan ja hoidot. Valitse aika ja varaa verkossa.\n[Varaa aika](/varaa/)\n:::",
     "updated_at": "2026-10-18T06:38:30.521934+00:00",
     "published_at": "2026-10-15T06:38:30.521934+00:00",
     "reading_minutes": 1
@@ -375,14 +375,14 @@
       "https://fixture.example/storage/article-images/articles/8/1760000005-heroeee5.jpg"
      ],
      "author": {
-      "name": "Sipoonjoen perinnesauna (testi)",
+      "name": "Sipoonjoen Perinnesauna (testi)",
       "@type": "Organization"
      },
      "@context": "https://schema.org",
      "headline": "Piilotettu testiartikkeli (noindex)",
      "keywords": "testi",
      "publisher": {
-      "name": "Sipoonjoen perinnesauna (testi)",
+      "name": "Sipoonjoen Perinnesauna (testi)",
       "@type": "Organization"
      },
      "inLanguage": "fi",
@@ -472,14 +472,14 @@
       "https://fixture.example/storage/article-images/articles/7/1760000004-heroddd4.jpg"
      ],
      "author": {
-      "name": "Sipoonjoen perinnesauna (testi)",
+      "name": "Sipoonjoen Perinnesauna (testi)",
       "@type": "Organization"
      },
      "@context": "https://schema.org",
      "headline": "Savusauna: lämmitys ja löylyn luonne",
      "keywords": "savusauna, perinne",
      "publisher": {
-      "name": "Sipoonjoen perinnesauna (testi)",
+      "name": "Sipoonjoen Perinnesauna (testi)",
       "@type": "Organization"
      },
      "inLanguage": "fi",
@@ -577,7 +577,7 @@
      "headline": "How to sauna: a traditional guide",
      "keywords": "sauna, löyly, opas",
      "publisher": {
-      "name": "Sipoonjoen perinnesauna (testi)",
+      "name": "Sipoonjoen Perinnesauna (testi)",
       "@type": "Organization"
      },
      "inLanguage": "en",

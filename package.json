@@ -2,7 +2,7 @@
   "name": "saunotus-uusi",
   "version": "0.1.0",
   "private": true,
-  "description": "Sipoonjoen perinnesauna – kevyt staattinen sivusto (FI/EN)",
+  "description": "Sipoonjoen Perinnesauna – kevyt staattinen sivusto (FI/EN)",
   "type": "module",
   "engines": {
     "node": ">=20"

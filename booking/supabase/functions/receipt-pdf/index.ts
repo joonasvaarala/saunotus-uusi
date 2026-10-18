@@ -27,7 +27,7 @@ export async function buildReceiptPdf(s: any): Promise<Uint8Array> {
   const loc = s.locale === "en" ? "en" : "fi";
   const en = loc === "en";
   const pdf = await PDFDocument.create();
-  pdf.setTitle(san(`${s.receipt_no}`)); pdf.setProducer("Sipoonjoen perinnesauna"); pdf.setCreator("booking");
+  pdf.setTitle(san(`${s.receipt_no}`)); pdf.setProducer("Sipoonjoen Perinnesauna"); pdf.setCreator("booking");
   const font = await pdf.embedFont(StandardFonts.Helvetica); const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
   let page = pdf.addPage([595.28, 841.89]);
   const M = 48; const W = 595.28 - 2 * M; let y = 841.89 - M;

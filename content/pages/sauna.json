@@ -1,7 +1,7 @@
 {
   "fi": {
-    "meta": {"title":"Saunavuorot – yleiset ja yksityiset vuorot | Sipoonjoen Perinnesauna","description":"Yleiset saunavuorot (ma miehet, ti naiset, ke hiljainen, to ja la–su yleinen) ja yksityisvuorot Sipoonjoen perinnesaunalla. Hinnat, ajat ja varaus.","og":"ovi-kaiverrus"},
-    "hero": {"title":"Saunavuorot","text":"Sipoonjoen perinnesaunalla voit tulla nauttimaan savusaunamme täyteläisistä löylyistä, lämpimistä ja kylmistä kylvyistä sekä jokivarren rauhasta.","img":"ovi-kaiverrus","buttons":[{"label":"Yleiset vuorot","to":"#yleiset"},{"label":"Yksityisvuorot","to":"#yksityisvuorot"},{"label":"Hoidot ja rituaalit","to":"treatments"}]},
+    "meta": {"title":"Saunavuorot – yleiset ja yksityiset vuorot | Sipoonjoen Perinnesauna","description":"Yleiset saunavuorot (ma miehet, ti naiset, ke hiljainen, to ja la–su yleinen) ja yksityisvuorot Sipoonjoen Perinnesaunalla. Hinnat, ajat ja varaus.","og":"ovi-kaiverrus"},
+    "hero": {"title":"Saunavuorot","text":"Sipoonjoen Perinnesaunalla voit tulla nauttimaan savusaunamme täyteläisistä löylyistä, lämpimistä ja kylmistä kylvyistä sekä jokivarren rauhasta.","img":"ovi-kaiverrus","buttons":[{"label":"Yleiset vuorot","to":"#yleiset"},{"label":"Yksityisvuorot","to":"#yksityisvuorot"},{"label":"Hoidot ja rituaalit","to":"treatments"}]},
     "publicTitle":"Yleiset vuorot","publicIntro":"Yleisillä vuoroilla sauna on avoinna kaikille varanneille. Viikonloppuisin yleinen vuoro on la–su klo 14–19.",
     "privateTitle":"Yksityisvuorot","privateIntro":"Saunan voi saada myös kokonaan omalle porukalle. Hinnat ovat voimassa vain yksityishenkilöille – yrityksille on omat tuotteet.","companyLink":"Yrityksille →",
     "bridge":"Tarvitsetko hoitoa tai rituaalin saunavuoron yhteyteen? Katso hoidot ja rituaalit →"

@@ -88,7 +88,7 @@ Deno.test("webhook-allekirjoitus: oikea hyväksytään, väärä/muokattu runko 
 });
 
 // ---------- start ----------
-const prepOk = (o: Record<string, unknown> = {}) => ({ ok: true, reuse: false, payment_id: 7, reference: REF, attempt: 1, amount: 40, amount_minor: 4000, currency: "EUR", order_id: 1, order_no: 900001, order_token: TOK, mode: "test", superseded: [], description: "Sipoonjoen perinnesauna – tilaus 900001", site_base_url: "https://uusi.example.fi", order_page_path: "/tilaus/", ...o });
+const prepOk = (o: Record<string, unknown> = {}) => ({ ok: true, reuse: false, payment_id: 7, reference: REF, attempt: 1, amount: 40, amount_minor: 4000, currency: "EUR", order_id: 1, order_no: 900001, order_token: TOK, mode: "test", superseded: [], description: "Sipoonjoen Perinnesauna – tilaus 900001", site_base_url: "https://uusi.example.fi", order_page_path: "/tilaus/", ...o });
 const post = (url: string, body: unknown, headers: Record<string, string> = {}) => new Request(url, { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
 
 Deno.test("start: off -> 503, ei kutsuja Vippsiin eikä prepare-kutsua", async () => {

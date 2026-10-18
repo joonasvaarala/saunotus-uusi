@@ -64,7 +64,7 @@ export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOve
   const pdf = await PDFDocument.create();
   pdf.registerFontkit(fontkit);
   const code = san(d.code);
-  pdf.setTitle(san(`${en ? "Gift card" : "Lahjakortti"} ${code}`)); pdf.setProducer("Sipoonjoen perinnesauna"); pdf.setCreator("booking");
+  pdf.setTitle(san(`${en ? "Gift card" : "Lahjakortti"} ${code}`)); pdf.setProducer("Sipoonjoen Perinnesauna"); pdf.setCreator("booking");
   pdf.setSubject(en ? "Gift card" : "Lahjakortti");
   let page = pdf.addPage([W, H]);
   const ef = (k: string) => pdf.embedFont(unb64(FONT_B64[k]), { subset: true, features: k.startsWith("cormorant") ? { lnum: true } : undefined });

@@ -1636,7 +1636,7 @@
  {
   "key": "ui.shop.consent_marketing",
   "lang": "fi",
-  "text": "Haluan vastaanottaa Sipoonjoen perinnesaunan uutiskirjeitä ja tarjouksia. Voin perua milloin tahansa.",
+  "text": "Haluan vastaanottaa Sipoonjoen Perinnesaunan uutiskirjeitä ja tarjouksia. Voin perua milloin tahansa.",
   "class": "protected",
   "kind": "plain",
   "max_len": 300,
@@ -6494,7 +6494,7 @@
  {
   "key": "ui.gift.marketing",
   "lang": "fi",
-  "text": "Haluan vastaanottaa Sipoonjoen perinnesaunan uutiskirjeitä ja tarjouksia. Voin perua milloin tahansa.",
+  "text": "Haluan vastaanottaa Sipoonjoen Perinnesaunan uutiskirjeitä ja tarjouksia. Voin perua milloin tahansa.",
   "class": "protected",
   "kind": "plain",
   "max_len": 300,
@@ -13492,7 +13492,7 @@
  {
   "key": "seo.book.description",
   "lang": "fi",
-  "text": "Varaa yleinen saunavuoro tai yksityisvuoro suoraan Sipoonjoen perinnesaunalle.",
+  "text": "Varaa yleinen saunavuoro tai yksityisvuoro suoraan Sipoonjoen Perinnesaunalle.",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,

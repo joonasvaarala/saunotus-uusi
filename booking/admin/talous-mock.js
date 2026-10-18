@@ -261,7 +261,7 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
 
   // ---- admin_get_receipt(p_receipt_id) / admin_resend_receipt(p_receipt_id) (sopimus §3, §9.1) ----
   const money = (n) => `${Math.abs(n).toFixed(2).replace('.', ',')} €`.replace(/^/, n < 0 ? '-' : '');
-  const SELLER = { name: 'Sipoonjoen perinnesauna', legal_name: 'Havuhattu Oy', business_id: '0000000-0', vat_id: 'FI00000000', address: 'Esimerkkitie 1', zip: '00000', city: 'Sipoo', email: 'esimerkki@example.test', phone: '000 000 0000', web: 'https://example.test', logo_url: null, footer: 'Kiitos käynnistä! (esimerkkikuitti)' };
+  const SELLER = { name: 'Sipoonjoen Perinnesauna', legal_name: 'Havuhattu Oy', business_id: '0000000-0', vat_id: 'FI00000000', address: 'Esimerkkitie 1', zip: '00000', city: 'Sipoo', email: 'esimerkki@example.test', phone: '000 000 0000', web: 'https://example.test', logo_url: null, footer: 'Kiitos käynnistä! (esimerkkikuitti)' };
   const helsinkiLocal = (iso) => { const q = Object.fromEntries(new Intl.DateTimeFormat('fi-FI', { timeZone: 'Europe/Helsinki', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(iso)).map((x) => [x.type, x.value])); return `${q.day}.${q.month}.${q.year} ${q.hour}:${q.minute}`; };
   function receiptOf(id) {
     const rc = rcById.get(+id); if (!rc) throw fail('receipt_not_found', 'Kuittia ei löydy', 404);

@@ -13,7 +13,7 @@ const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { sta
 
 async function build(rep: any, title: string): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
-  pdf.setTitle(san(title)); pdf.setProducer("Sipoonjoen perinnesauna"); pdf.setCreator("booking");
+  pdf.setTitle(san(title)); pdf.setProducer("Sipoonjoen Perinnesauna"); pdf.setCreator("booking");
   const font = await pdf.embedFont(StandardFonts.Helvetica); const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
   const PW = 595.28, PH = 841.89, M = 44;
   let page = pdf.addPage([PW, PH]); let y = PH - M;
@@ -30,7 +30,7 @@ async function build(rep: any, title: string): Promise<Uint8Array> {
     y -= 8;
   };
   const t = rep.totals ?? {};
-  text("Sipoonjoen perinnesauna – " + title, M, 14, bold); y -= 16;
+  text("Sipoonjoen Perinnesauna – " + title, M, 14, bold); y -= 16;
   text(`Jakso ${dfi(rep.period.from)}${rep.period.from !== rep.period.to ? " – " + dfi(rep.period.to) : ""} · perusteena kuitin antopäivä (kassaperuste) · luotu ${tfi(rep.generated_at)}`, M, 8, font, grey); y -= 22;
 
   table(["", "Summa"], [0, 507], [
