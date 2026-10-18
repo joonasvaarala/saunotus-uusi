@@ -1,0 +1,36 @@
+{
+ "_doc": "Tyhjä sisältöosio (ei julkaistuja artikkeleita): public_list_articles/sitemap palauttavat items: [].",
+ "list": {
+  "fi": {
+   "ok": true,
+   "tag": null,
+   "lang": "fi",
+   "path": "/saunatietoa/",
+   "tags": [],
+   "items": [],
+   "label": "Saunatietoa",
+   "limit": 50,
+   "total": 0,
+   "offset": 0
+  },
+  "en": {
+   "ok": true,
+   "tag": null,
+   "lang": "en",
+   "path": "/en/sauna-knowledge/",
+   "tags": [],
+   "items": [],
+   "label": "Sauna knowledge",
+   "limit": 50,
+   "total": 0,
+   "offset": 0
+  }
+ },
+ "articles": {},
+ "moved": {},
+ "sitemap": {
+  "ok": true,
+  "items": []
+ },
+ "known": []
+}

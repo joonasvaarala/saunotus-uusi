@@ -97,7 +97,7 @@ Osoitteet (testi, noindex kaikkialla – myös `/varaa/` ja `/hallinta/`):
 
 | Tapahtuma | Mitä tapahtuu |
 |---|---|
-| `push` → `main`, `workflow_dispatch` main-haarasta, ajastus (03:15 UTC) | build + check + **deploy** (Pages-ympäristö `github-pages`) |
+| `push` → `main`, `workflow_dispatch` main-haarasta, tunneittainen ajastus (HH:15 UTC), `repository_dispatch` `articles-changed` | build + check + **deploy** (Pages-ympäristö `github-pages`) |
 | `pull_request` (esim. PR #1, haara `booking`) | vain build + tarkistukset + yksikkötestit (CI-tarkistus), **ei deployta** |
 | `workflow_dispatch` muusta haarasta | vain build, ei deployta |
 
@@ -126,6 +126,10 @@ PW_DIR=<polku playwright node_modules> BASE_URL=http://127.0.0.1:4190/saunotus-u
 **Moduulien lataus (välimuisti).** GitHub Pages välimuistittaa tiedostoja noin 10 minuuttia, joten selain voi hetkellisesti yhdistää uuden `index.html`:n ja vanhan moduulin. Siksi `build-pages.mjs` lisää hallinnan kaikkiin importteihin ja resursseihin saman versiotunnuksen (`?v=<commit sha>`; yksi moduuli-instanssi per tiedosto). Lisäksi `admin.js` yrittää epäonnistuneen näkymämoduulin latausta kerran uudelleen cache-bust-parametrilla (`?r=…`); jos sekin epäonnistuu, näytetään virhe ja "Lataa uudelleen" -painike. Paikallisessa kehityksessä tunnus on tyhjä (tiedostot sellaisenaan).
 
 Kutsun hyväksyntä: kutsusähköpostin linkki avaa `/hallinta/#access_token=…&type=invite`; hallinta ottaa istunnon talteen, siivoaa tunnisteen osoiteriviltä ja pyytää asettamaan salasanan.
+
+## Saunatietoa (artikkelit)
+
+Esirenderöity sisältöosio (`/saunatietoa/`, EN `/en/sauna-guide/`), jonka artikkelit haetaan buildissa Supabasen `public_*`-RPC:illä. Asetukset yhdessä paikassa: `content/articles.json`. Arkkitehtuuri, artikkelien päätyminen sivulle, vikasietoisuus ja testit: [docs/SAUNATIETOA.md](docs/SAUNATIETOA.md).
 
 ## Päätökset ja rajaukset
 
