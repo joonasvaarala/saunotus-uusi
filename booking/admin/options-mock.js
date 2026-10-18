@@ -96,6 +96,18 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS } =
       const total = rows.length; rows = rows.slice(a.p_offset || 0, (a.p_offset || 0) + (a.p_limit || 50));
       return rows.map((r) => ({ ...view(r), total_count: total }));
     },
+    public_get_site_texts: () => ({ ok: true, texts: [
+      { key: 'ui.admin.day.revenue_title', lang: 'fi', text: 'Päivän tuotto' },
+      { key: 'ui.admin.day.revenue_title', lang: 'en', text: "Day's revenue" },
+      { key: 'ui.admin.day.revenue_vat', lang: 'fi', text: 'sis. alv' },
+      { key: 'ui.admin.day.revenue_vat', lang: 'en', text: 'incl. VAT' },
+      { key: 'ui.admin.day.revenue_unavailable', lang: 'fi', text: 'Päivän tuotto ja tapahtumat eivät ole vielä käytettävissä.' },
+      { key: 'ui.admin.day.revenue_unavailable', lang: 'en', text: "The day's revenue and events are not available yet." },
+      { key: 'ui.admin.day.event_badge', lang: 'fi', text: 'Tapahtuma' },
+      { key: 'ui.admin.day.event_badge', lang: 'en', text: 'Event' },
+      { key: 'ui.admin.day.event_all_day', lang: 'fi', text: 'Koko päivä' },
+      { key: 'ui.admin.day.event_all_day', lang: 'en', text: 'All day' },
+    ] }),
     admin_day_extras: (a) => ({ date: a.p_date, tz: 'Europe/Helsinki', revenue_rows: [], events: [],
       revenue: { basis: 'visit_start', vat_basis: 'gross_incl_vat', currency: 'EUR', gross: 0, vat: 0, net: 0, count: 0, pending_gross: 0, pending_count: 0, unpaid_gross: 0, unpaid_count: 0 } }),
     admin_day_view: (a) => {

@@ -1,6 +1,6 @@
 # Hallinnan päivänäkymä: tuotto ja tapahtumat
 
-Sipoonjoen Perinnesauna. Näytetään hallinnan päivänäkymän yläosassa (`booking/admin/views/day.js`). Luku tulee funktiosta `booking.admin_day_extras(p_date date)` (migraatio `booking_68`, vain luku). Selain laskee saman summan uudelleen riveistä (`booking/admin/day-logic.js`), jotta näkymä ja testi käyttävät samaa koodia.
+Sipoonjoen Perinnesauna. Näytetään hallinnan päivänäkymän yläosassa (`booking/admin/views/day.js`). Luku tulee funktiosta `booking.admin_day_extras(p_date date)` (migraatio `booking_68_admin_day_extras`, vain luku). Selain laskee saman summan uudelleen riveistä (`booking/admin/day-logic.js`), jotta näkymä ja testi käyttävät samaa koodia. Otsikot tulevat `site_texts`-avaimista `ui.admin.day.*`; sanakirja `booking/admin/day-texts.js` on varalla.
 
 ## Mitä tuotto on
 

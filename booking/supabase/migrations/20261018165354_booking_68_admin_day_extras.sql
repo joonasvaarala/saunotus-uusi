@@ -1,5 +1,5 @@
 -- ============================================================
--- booking_68_day_revenue_events: hallinnan päivänäkymän tuotto + tapahtumat (vain luku)
+-- booking_68_admin_day_extras: hallinnan päivänäkymän tuotto + tapahtumat (vain luku)
 -- Uusi funktio booking.admin_day_extras(p_date date) → jsonb. EI muuta admin_day_view-funktiota eikä tauluja.
 -- Ei maksu-, pito-, lahjakortti- tai sähköpostilogiikkaa.
 --
@@ -15,7 +15,7 @@
 -- Tapahtumat: kb.event_dates (olemassa tuotannossa; tätä taulua EI luoda tässä). Päivä osuu väliin
 -- starts_on <= p_date <= coalesce(ends_on, starts_on), active. Osallistujat: sama tuote, varaus leikkaa Helsingin vuorokauden,
 -- hidden_at is null, confirmed/completed tai pending voimassa olevalla pidolla.
--- Rollback: rollbacks/20261018163000_booking_68_ROLLBACK.sql
+-- Rollback: rollbacks/20261018165354_booking_68_ROLLBACK.sql
 -- Testi: tests/day/t68_day_revenue_events.sql (ei CI; botti ajaa). Sääntö: docs/paivanakyma-tuotto.md
 -- ============================================================
 set local lock_timeout = '5s';

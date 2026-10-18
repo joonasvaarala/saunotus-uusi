@@ -1,6 +1,6 @@
 {
  "_doc": "Varateksti: tietokannan julkaistut sivutekstit (public_get_site_texts) + paikkamerkkien data (hinta/kesto/julkiset asetukset). Käytetään vain jos haku epäonnistuu eikä .cache-välimuistia ole. Päivitys: node scripts/site-texts-sync.mjs",
- "generated_at": "2026-10-18T13:24:45.7632+00:00",
+ "generated_at": "2026-10-18T16:58:16.080986+00:00",
  "texts": [
   {
    "key": "addon.1.description",
@@ -8137,6 +8137,112 @@
    "key": "timeline.3.label",
    "lang": "fi",
    "text": "savusauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.day.event_all_day",
+   "lang": "en",
+   "text": "All day",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.day.event_all_day",
+   "lang": "fi",
+   "text": "Koko päivä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.day.event_badge",
+   "lang": "en",
+   "text": "Event",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.day.event_badge",
+   "lang": "fi",
+   "text": "Tapahtuma",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.day.revenue_pending",
+   "lang": "en",
+   "text": "Unconfirmed {{var:amount}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:amount}}"
+   ]
+  },
+  {
+   "key": "ui.admin.day.revenue_pending",
+   "lang": "fi",
+   "text": "Vahvistamatta {{var:amount}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:amount}}"
+   ]
+  },
+  {
+   "key": "ui.admin.day.revenue_title",
+   "lang": "en",
+   "text": "Day's revenue",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.day.revenue_title",
+   "lang": "fi",
+   "text": "Päivän tuotto",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.day.revenue_unavailable",
+   "lang": "en",
+   "text": "The day's revenue and events are not available yet.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.day.revenue_unavailable",
+   "lang": "fi",
+   "text": "Päivän tuotto ja tapahtumat eivät ole vielä käytettävissä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.day.revenue_unpaid",
+   "lang": "en",
+   "text": "Of which unpaid {{var:amount}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:amount}}"
+   ]
+  },
+  {
+   "key": "ui.admin.day.revenue_unpaid",
+   "lang": "fi",
+   "text": "Josta maksamatta {{var:amount}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:amount}}"
+   ]
+  },
+  {
+   "key": "ui.admin.day.revenue_vat",
+   "lang": "en",
+   "text": "incl. VAT",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.day.revenue_vat",
+   "lang": "fi",
+   "text": "sis. alv",
    "version": 1,
    "placeholders": []
   },

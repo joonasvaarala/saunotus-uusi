@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { summarizeRevenue, revenueView, eventsOnDay, eventTimeLabel, eventSortIso, assignDayCards, clockIso, helsinkiDate, effectiveStatus } from '../admin/day-logic.js';
-import { DAY_TEXTS, fillDayText } from '../admin/day-texts.js';
+import { DAY_TEXTS, fillDayText, dayText, loadDayTexts, clearDayTextCache } from '../admin/day-texts.js';
 
 const DAY = '2026-10-20';
 const NEXT = '2026-10-21';
@@ -166,8 +166,12 @@ test('tekstit: FI ja EN, paikkamerkit, tuontitiedosto vastaa sanakirjaa', () => 
   }
   assert.equal(fillDayText(DAY_TEXTS.fi['ui.admin.day.revenue_pending'], { amount: '29,00 €' }), 'Vahvistamatta 29,00 €');
   assert.equal(fillDayText(DAY_TEXTS.en['ui.admin.day.revenue_unpaid'], { amount: '€10.00' }), 'Of which unpaid €10.00');
-  const pending = JSON.parse(readFileSync(new URL('../../content/site-texts.pending-import-4.json', import.meta.url), 'utf8'));
+  const pending = JSON.parse(readFileSync(new URL('../../content/site-texts.imported-pr68.json', import.meta.url), 'utf8'));
   const keys = new Set(Object.keys(DAY_TEXTS.fi));
+  const fallback = JSON.parse(readFileSync(new URL('../../content/site-texts.fallback.json', import.meta.url), 'utf8'));
+  const live = (fallback.texts || []).filter((r) => keys.has(r.key));
+  assert.equal(live.length, keys.size * 2);
+  for (const row of live) assert.equal(row.text, DAY_TEXTS[row.lang][row.key]);
   assert.equal(pending.length, keys.size * 2);
   for (const row of pending) {
     assert.ok(keys.has(row.key), row.key);
@@ -185,8 +189,8 @@ test('tekstit: FI ja EN, paikkamerkit, tuontitiedosto vastaa sanakirjaa', () => 
 });
 
 test('migraatio on vain luku ja noudattaa samaa sääntöä', () => {
-  const sql = readFileSync(new URL('../supabase/migrations/20261018163000_booking_68_day_revenue_events.sql', import.meta.url), 'utf8');
-  const rollback = readFileSync(new URL('../supabase/rollbacks/20261018163000_booking_68_ROLLBACK.sql', import.meta.url), 'utf8');
+  const sql = readFileSync(new URL('../supabase/migrations/20261018165354_booking_68_admin_day_extras.sql', import.meta.url), 'utf8');
+  const rollback = readFileSync(new URL('../supabase/rollbacks/20261018165354_booking_68_ROLLBACK.sql', import.meta.url), 'utf8');
   assert.match(sql, /create or replace function booking\.admin_day_extras\(p_date date\)/);
   assert.match(sql, /r\.starts_at >= v_from/);
   assert.match(sql, /r\.starts_at < v_to/);
@@ -208,4 +212,36 @@ test('migraatio on vain luku ja noudattaa samaa sääntöä', () => {
   assert.match(ui, /data-testid': 'day-revenue'/);
   assert.match(ui, /data-testid': 'event'/);
   assert.match(ui, /admin_day_extras/);
+  assert.match(ui, /loadDayTexts\(rpc\)/);
+  const helpers = readFileSync(new URL('../supabase/tests/fixtures/10_test_helpers.sql', import.meta.url), 'utf8');
+  const t68 = readFileSync(new URL('../supabase/tests/day/t68_day_revenue_events.sql', import.meta.url), 'utf8');
+  assert.match(helpers, /function test\.mk_user/);
+  assert.doesNotMatch(helpers, /on conflict \(email\)/i);
+  assert.match(t68, /42501/);
+  assert.match(t68, /HHT68TEST001/);
+  assert.doesNotMatch(t68, /^\s*set\s+(local\s+)?(lock_timeout|statement_timeout)/im);
+});
+
+test('päivän tekstit: site_texts peittää sanakirjan, puuttuva tai täyttymätön rivi jää varalle', async () => {
+  clearDayTextCache();
+  assert.equal(dayText('ui.admin.day.revenue_title', null, 'fi'), 'Päivän tuotto');
+  const rpc = async (name) => {
+    assert.equal(name, 'public_get_site_texts');
+    return { ok: true, texts: [
+      { key: 'ui.admin.day.revenue_title', lang: 'fi', text: 'Tuotto (DB)' },
+      { key: 'ui.admin.day.revenue_pending', lang: 'fi', text: 'Avoinna {{var:amount}}' },
+      { key: 'ui.admin.day.revenue_unpaid', lang: 'fi', text: 'Rikki {{price:1}}' },
+      { key: 'ui.other', lang: 'fi', text: 'ei kuulu' },
+    ] };
+  };
+  assert.equal(await loadDayTexts(rpc), true);
+  assert.equal(dayText('ui.admin.day.revenue_title', null, 'fi'), 'Tuotto (DB)');
+  assert.equal(dayText('ui.admin.day.revenue_title', null, 'en'), "Day's revenue");
+  assert.equal(dayText('ui.admin.day.revenue_pending', { amount: '2 €' }, 'fi'), 'Avoinna 2 €');
+  assert.equal(dayText('ui.admin.day.revenue_unpaid', { amount: '1 €' }, 'fi'), 'Josta maksamatta 1 €');
+  assert.equal(dayText('ui.admin.day.revenue_vat', null, 'fi'), 'sis. alv');
+  assert.equal(await loadDayTexts(async () => { throw new Error('verkko'); }), true);
+  clearDayTextCache();
+  assert.equal(await loadDayTexts(async () => { throw new Error('verkko'); }), false);
+  assert.equal(dayText('ui.admin.day.revenue_title', null, 'fi'), 'Päivän tuotto');
 });

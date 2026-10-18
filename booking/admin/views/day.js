@@ -8,7 +8,7 @@ import { legsList, resourceBadges, spaceBadge } from './legs.js';
 import { optionBadge, optionReminder } from '../options.js';
 import { blockList, blockDialog } from './blocks.js';
 import { assignDayCards, eventSortIso, eventTimeLabel, revenueView } from '../day-logic.js';
-import { dayLang, dayText } from '../day-texts.js';
+import { dayLang, dayText, loadDayTexts } from '../day-texts.js';
 
 // admin_day_extras puuttuu kunnes migraatio booking_68 on ajettu: näytä selite, älä kaada päivänäkymää. 404:ää ei toisteta minuuttiin.
 let extrasMissing = 0;
@@ -31,6 +31,7 @@ export async function render({ ctx, refs, reload, query }) {
     rpc('admin_list_addons').catch(() => []),   // lisäpalvelun koodi addon_id:llä (ikonin tunnistus, jos admin_day_view ei anna code-kenttää)
     optionReminder(),   // muistutus: tulevat hoitovaraukset ilman valittua hoitoa (booking_50); null jos ei muistutettavaa
     loadExtras(date),   // tuotto + tapahtumat (booking_68); null jos funktiota ei vielä ole
+    loadDayTexts(rpc),  // ui.admin.day.* site_texts; epäonnistuminen jättää sanakirjan
   ]);
   const codes = new Map((addonList || []).map((a) => [a.id, a.code]));
   const go = (d) => { location.hash = `#/?d=${d}`; };

@@ -3,8 +3,7 @@
 -- sen jälkeen kun migraatiot ja testifixtuurit (test.login / test.mk_staff / kb.products) on ladattu.
 -- Lopuksi tahallinen poikkeus: TESTRESULT pass=N fail=0 ja koko lohko kumoutuu. Ei taulumuutoksia migraatiossa;
 -- tämä testi luo kb.event_dates VAIN jos testikannasta puuttuu (tuotannossa taulu on jo).
-set local lock_timeout = '5s';
-set local statement_timeout = '90s';
+-- Aikakatkaisuja ei aseteta tässä tiedostossa. Botin istunto määrää ne.
 
 do $t$
 declare
@@ -45,7 +44,7 @@ begin
   perform test.anon();
   v_code := test.code(format('select booking.admin_day_extras(%L)', v_thu));
   perform test.logout();
-  perform pg_temp.t68_ck(v_code = 'forbidden', 'A1: anon ei saa kutsua');
+  perform pg_temp.t68_ck(v_code in ('forbidden', '42501') or v_code ilike '%permission denied%', 'A1: anon ei saa kutsua');
   perform test.login(test.mk_user('t68-asiakas@example.test'));
   v_code := test.code(format('select booking.admin_day_extras(%L)', v_thu));
   perform test.logout();
@@ -84,7 +83,7 @@ begin
     from booking.order_items i where i.id = v_item or i.parent_item_id = v_item;
 
   insert into booking.gift_cards(code, issuer, kind, initial_amount, balance, status, source, vat_treatment, accounting_origin, balance_verified, valid_to)
-  values ('T68TEST00001', 'own', 'value', 500, 500, 'active', 'native', 'at_redemption', 'native', true, date '2036-01-01')
+  values ('HHT68TEST001', 'own', 'value', 500, 500, 'active', 'native', 'at_redemption', 'native', true, date '2036-01-01')
   returning id into v_gc;
   update booking.payments set method = 'gift_card', gift_card_id = v_gc, status = 'paid', paid_at = now(), amount = 1
    where order_id = (select order_id from booking.reservations where id = v_gift);

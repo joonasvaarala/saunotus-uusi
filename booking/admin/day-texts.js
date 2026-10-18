@@ -1,7 +1,8 @@
-// Hallinnan päivänäkymän uudet tekstit (FI + EN). Avaimet: ui.admin.day.* (§18).
-// Hallinta ei vielä hae public_get_site_texts -vastauksia (kuten muu hallinta: sanakirja on varateksti).
-// Tuonti: content/site-texts.pending-import-4.json (admin_texts_import, ei ylikirjoita). Kieli sama avain
-// kuin Talous-näkymässä (booking.admin.lang / ?lang=). Paikkamerkki {{var:amount}} täytetään käyttöhetkellä.
+// Hallinnan päivänäkymän tekstit (FI + EN). Avaimet: ui.admin.day.* (§18).
+// Sama mekanismi kuin muu hallinta, joka lukee site_texts: public_get_site_texts (rpc), kieli talous-i18n
+// (?lang= / localStorage booking.admin.lang). Sanakirja DAY_TEXTS on vain varalla: rivi puuttuu, haku
+// epäonnistuu tai paikkamerkki ei täyty. Tuonti: content/site-texts.imported-pr68.json.
+import { getLang } from './talous-i18n.js';
 
 export const DAY_TEXTS = {
   fi: {
@@ -24,22 +25,61 @@ export const DAY_TEXTS = {
   },
 };
 
-const LANGS = ['fi', 'en'];
-function currentLang() {
-  try {
-    const q = new URLSearchParams(typeof location !== 'undefined' ? location.search : '');
-    const hq = new URLSearchParams(typeof location !== 'undefined' ? (location.hash || '').split('?')[1] || '' : '');
-    const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('booking.admin.lang') : null;
-    const l = hq.get('lang') || q.get('lang') || stored;
-    return LANGS.includes(l) ? l : 'fi';
-  } catch { return 'fi'; }
-}
-export const dayLang = () => currentLang();
+const PREFIX = 'ui.admin.day.';
+let db = new Map();
+let loaded = false;
+
+export const dayLang = () => getLang();
 
 export function fillDayText(text, vars) {
   return String(text ?? '').replace(/\{\{var:([a-z0-9_]+)\}\}/g, (_, k) => (vars && vars[k] != null ? String(vars[k]) : ''));
 }
-export function dayText(key, vars, lang = currentLang()) {
+
+/** Täyttää {{var:nimi}}. Tuntematon paikkamerkki tai puuttuva arvo → null (kutsuja käyttää sanakirjaa). */
+function applyLive(raw, vars) {
+  const tokens = [...String(raw).matchAll(/\{\{([^{}]*)\}\}/g)];
+  for (const m of tokens) {
+    const name = /^var:([a-z0-9_]+)$/.exec(m[1]);
+    if (!name || vars?.[name[1]] == null) return null;
+  }
+  if (/\{\{|\}\}/.test(fillDayText(raw, vars))) return null;
+  return fillDayText(raw, vars);
+}
+
+/**
+ * Lukee ui.admin.day.*-rivit public_get_site_texts-vastauksesta. Virhe tai väärä vastaus ei kaada näkymää:
+ * dayText käyttää silloin sanakirjaa. Onnistunut haku pysyy muistissa sivulatauksen ajan.
+ */
+export async function loadDayTexts(rpcFn) {
+  if (loaded) return true;
+  if (typeof rpcFn !== 'function') return false;
+  try {
+    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
+    const next = new Map();
+    for (const r of t.texts) {
+      if (!r || typeof r.key !== 'string' || !r.key.startsWith(PREFIX)) continue;
+      if (r.lang !== 'fi' && r.lang !== 'en') continue;
+      if (typeof r.text !== 'string' || !r.text.trim()) continue;
+      next.set(`${r.key}|${r.lang}`, r.text);
+    }
+    db = next;
+    loaded = true;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function clearDayTextCache() {
+  db = new Map();
+  loaded = false;
+}
+
+export function dayText(key, vars, lang = getLang()) {
+  const live = db.get(`${key}|${lang}`);
+  const filled = live != null ? applyLive(live, vars) : null;
+  if (filled != null) return filled;
   const raw = DAY_TEXTS[lang]?.[key] ?? DAY_TEXTS.fi[key] ?? key;
   return vars ? fillDayText(raw, vars) : raw;
 }
