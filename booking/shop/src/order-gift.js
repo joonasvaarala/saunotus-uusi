@@ -13,7 +13,7 @@ const badgeClass = (st) => (st === 'active' ? 'st-confirmed' : st === 'pending_p
 //   → public_submit_voucher_claim → selkeä vahvistusteksti. Näytetään kun redeem_enabled, maksamatonta on ja tilauksella ei ole lahjakorttirivejä (lahjakortilla ei osteta lahjakorttia).
 // bare = ilman omaa otsikkoa/ohjetta (vahvistussivun maksuvalinnan sisällä, otsikko tulee valintapainikkeesta); balance = lisää "Näytä saldo" (public_check_gift_card; unpaid = maksettava, näyttää käytettävissä olevan osuuden).
 // onApplied(text) = oma kortti käytetty; onClaimed({ text, extra }) = kumppanin lahjakortti lähetetty lunastettavaksi (tilaus + pyyntölista ladataan uudelleen).
-export function redeemSection({ L, api, token, onApplied, onClaimed, bare = false, balance = false, unpaid = null }) {
+export function redeemSection({ L, api, token, onApplied, onClaimed, bare = false, balance = false, unpaid = null, onFail = null }) {
   const F = makeFmt(L), { tx, pick } = F;
   const has = (k) => GT[L][k] != null;
   const errText = (code) => (code === 'notReady' ? tx('notReady') : tx(G.errorKey(code, has)));
@@ -72,7 +72,7 @@ export function redeemSection({ L, api, token, onApplied, onClaimed, bare = fals
         else msg.replaceChildren(h('p', { class: 'bk-ok', role: 'status', 'data-testid': 'gc-balance', text: unpaid > 0 ? tx('o.balanceIs', { balance: money(bal), usable: money(Math.min(bal, unpaid)) }) : tx('o.balanceIsFull', { balance: money(bal) }) }));
       } else if (r?.notReady) showError(tx('notReady'));
       else if (r?.code === 'invalid_code' || r?.code === 'not_found') msg.replaceChildren(h('p', { class: 'bk-note', role: 'status', 'data-testid': 'gc-balance-unknown', text: tx('o.checkUnknown') }));
-      else showError(errText(r?.code));
+      else { showError(errText(r?.code)); if (onFail) onFail(r?.code); }
     } catch { showError(tx('err.generic')); }
     chk.disabled = false; chk.textContent = tx('o.checkBtn');
   } });
@@ -92,7 +92,7 @@ export function redeemSection({ L, api, token, onApplied, onClaimed, bare = fals
       if (out.type === 'choose_source') showChoose(out);
       else if (out.type === 'blocked') showError(has(`nr.${out.reason}`) ? tx(`nr.${out.reason}`) : tx('err.generic'));
       else if (out.type === 'not_found') showError(tx('err.invalid_code'));
-      else showError(errText(out.code));
+      else { showError(errText(out.code)); if (onFail) onFail(out.code); }
     } catch { showError(tx('err.generic')); }
     btn.disabled = false; btn.textContent = tx('o.apply');
   } }, fc.wrap, fa.wrap, h('div', { class: 'gc-btnrow' }, btn, chk), msg);

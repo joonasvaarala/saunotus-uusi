@@ -6,6 +6,7 @@
 import { ApiError } from './sb.js';
 import { treatmentRpc, catalogEntries, snapshotBookings, restoreBookings } from './treatment-mock.js';
 import { createOrderMock } from './order-mock.js';
+import { isHoldScenario, holdMockParams, HOLD_ERRORS } from './hold-mock.js';
 
 const KEY = 'booking.shopmock.v1';
 const MUTATING = new Set(['public_create_treatment_booking', 'public_change_treatment_booking']);
@@ -13,8 +14,8 @@ const MUTATING = new Set(['public_create_treatment_booking', 'public_change_trea
 // Demo ilman omaa varausta: tuntematon token → valmis maksamaton varaus (vahvistussivu: /varaa/vahvistus/?mock=1&scenario=pay#<mikä tahansa uuid>).
 const PAY_RPC = new Set(['public_payment_options', 'public_checkout_payment_options', 'public_gift_card_packages', 'public_check_gift_card', 'public_apply_gift_card', 'public_get_order_gift_cards', 'public_resolve_gift_code', 'public_submit_voucher_claim', 'public_get_order_voucher_claims', 'public_update_voucher_claim_code']);
 export function createShopMock({ storage = globalThis.sessionStorage, now = () => Date.now(), fail = null, scenario = '', mpResult = '' } = {}) {
-  const pay = /^pay(-prod|-off)?$/.test(scenario) ? createOrderMock({ scenario, mpResult }) : null;
-  let failOnce = ['option_required', 'invalid_option'].includes(fail) ? fail : null;
+  const pay = /^pay(-prod|-off)?$/.test(scenario) || isHoldScenario(scenario) ? createOrderMock({ scenario, mpResult, ...holdMockParams() }) : null;   // hold* = kassan paikanpito (hold-mock.js)
+  let failOnce = ['option_required', 'invalid_option', 'online_payment_unavailable', 'too_many_pending'].includes(fail) ? fail : null;
   try { restoreBookings(JSON.parse(storage?.getItem(KEY) || 'null')); } catch { /* tyhjä alku */ }
   const save = () => { try { storage?.setItem(KEY, JSON.stringify(snapshotBookings())); } catch { /* ei säilytystä */ } };
   const missing = (name) => new ApiError(`Could not find the function booking.${name} in the schema cache`, { status: 404, code: 'PGRST202' });
@@ -26,7 +27,8 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
     if (pay && name === 'public_get_booking') {
       const po = await pay.rpc('public_get_order', { p_token: args.p_token }), r = treatmentRpc(name, args, now());
       const b = r ? r.body : canned(po);
-      return { ...b, status: po.status, payment_status: po.payment_status, total: po.total, paid: po.paid, unpaid: po.unpaid };
+      const CK = ['checkout_state', 'awaiting_payment', 'hold_kind', 'hold_expires_at', 'seconds_left', 'server_now', 'remaining_amount', 'payment_in_progress'];
+      return { ...b, status: po.status, payment_status: po.payment_status, total: po.total, paid: po.paid, unpaid: po.unpaid, ...(pay.hold ? { ...Object.fromEntries(CK.map((k) => [k, po[k]])), payment_methods: pay.hold.methods() } : {}) };
     }
     switch (name) {
       case 'public_catalog': return catalogEntries();
@@ -39,11 +41,12 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
         return r ? r.body : { ok: false, code: 'not_found', message: 'Varausta ei löytynyt' };
       }
       default: {
-        if (failOnce && MUTATING.has(name)) { const code = failOnce; failOnce = null; return { ok: false, code, message: code === 'option_required' ? 'Valitse hoito' : 'Valittu hoito ei kelpaa' }; }
+        if (failOnce && MUTATING.has(name)) { const code = failOnce; failOnce = null; return { ok: false, code, message: code === 'option_required' ? 'Valitse hoito' : code === 'invalid_option' ? 'Valittu hoito ei kelpaa' : HOLD_ERRORS[code] }; }
         const r = treatmentRpc(name, args, now());
         if (!r) throw missing(name);
         if (r.status >= 400) throw new ApiError(r.body.message, { status: r.status, code: r.body.details || r.body.code, details: r.body });
         if (MUTATING.has(name)) save();
+        if (pay?.hold && name === 'public_create_treatment_booking' && r.body?.ok) pay.hold.restart();   // kassa luo pidon: laskuri alkaa nollasta
         return r.body;
       }
     }

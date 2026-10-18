@@ -10,6 +10,7 @@ import { createGiftApi } from './gift-api.js';
 import { redeemSection, claimsSection } from './order-gift.js';
 import { h, makeFmt } from './gift-ui.js';
 import { pt } from './pay-choices-texts.js';
+import { ht } from './hold-texts.js';
 
 const PAYABLE = ['confirmed', 'pending'];
 let seq = 0;
@@ -32,7 +33,7 @@ export async function loadPayChoices({ rpc, token = null, fetchImpl, cfg = (type
 
 // Mitä asiakkaalle voidaan tarjota: { mobilepay, gift, claims } (booking = public_get_booking-vastaus)
 export function offers(model, booking) {
-  const payable = !!booking && PAYABLE.includes(booking.status) && booking.payment_status !== 'paid';
+  const payable = !!booking && PAYABLE.includes(booking.status) && booking.payment_status !== 'paid' && booking.checkout_state !== 'preliminary' && booking.checkout_state !== 'expired';   // alustavaa varausta ei makseta (order_preliminary)
   return { mobilepay: payable && model.mpShow, gift: payable && model.redeem, claims: !!booking && model.claims.length > 0 };
 }
 // Maksettava jäljellä: ensisijaisesti palvelimen public_payment_options.order.unpaid; muuten total - paid; muuten null (summaa ei näytetä)
@@ -54,7 +55,7 @@ export function payNotice(L, notice) {
   return h('p', { class: 'bk-ok', role: 'status', tabindex: '-1', 'data-testid': 'pc-notice' }, h('strong', { text: `${notice.title || pt(L, 'noticeTitle')}. ` }), notice.text || '', notice.extra ? ` ${notice.extra}` : '');
 }
 
-export function payChoicesSection({ S, L, token, model, booking, onApplied, onClaimed, onChanged, notice = null }) {
+export function payChoicesSection({ S, L, token, model, booking, onApplied, onClaimed, onChanged, notice = null, hold = false, holdMinutes = 15, onHoldError = null }) {
   const F = makeFmt(L), tx = (k, v) => pt(L, k, v);
   const of = offers(model, booking);
   if (!of.mobilepay && !of.gift && !of.claims) return null;
@@ -63,14 +64,15 @@ export function payChoicesSection({ S, L, token, model, booking, onApplied, onCl
   const kids = [h('h3', { id: `${id}-t`, text: tx('title') })];
   if (of.mobilepay || of.gift) {
     if (due != null && due > 0) kids.push(h('p', { class: 'mp-amount', 'data-testid': 'pc-due', text: tx('amountDue', { amount: F.money(due) }) }));
-    kids.push(h('p', { class: 'bk-note', text: booking.status === 'confirmed' ? tx('leadConfirmed') : tx('leadPending') }));
+    kids.push(h('p', { class: 'bk-note', 'data-testid': 'pc-lead', text: hold ? ht(L, 'choose') : booking.status === 'confirmed' ? tx('leadConfirmed') : tx('leadPending') }));   // pitotilassa ei mainita "maksu paikan päällä": varaus vahvistuu vasta maksun jälkeen
   }
   const claimNotice = notice && notice.kind === 'claim' && of.claims ? { ok: true, text: notice.text, extra: notice.extra } : null;   // lunastuspyynnön vahvistus näytetään pyyntölistan yläosassa (kuten tilaussivulla)
   if (notice && !claimNotice) kids.push(payNotice(L, notice));
-  if (of.mobilepay) kids.push(h('div', { class: 'pc-opt', 'data-testid': 'pc-mobilepay' }, payBlock({ S, L, api: model.mp, opts: model.opts, env: model.env })));
+  if (hold && model.env?.testUi && (of.mobilepay || of.gift)) kids.push(h('div', { class: 'pc-opt pc-test', 'data-testid': 'pc-onsite-test' }, h('strong', { text: ht(L, 'testOnSite.title') }), h('p', { class: 'bk-note', text: ht(L, 'testOnSite.text', { minutes: holdMinutes }) })));   // pay_later-testivaihtoehto: vain testitilassa ja merkitty testiksi
+  if (of.mobilepay) kids.push(h('div', { class: 'pc-opt', 'data-testid': 'pc-mobilepay' }, payBlock({ S, L, api: model.mp, opts: model.opts, env: model.env, onFail: onHoldError ? (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) onHoldError(code); } : null })));
   if (of.gift) {
     const panel = h('div', { class: 'pc-gift-panel', id: `${id}-g`, hidden: true, 'data-testid': 'pc-gift-panel' },
-      redeemSection({ L, api: model.gapi, token, bare: true, balance: true, unpaid: due, onApplied, onClaimed }));
+      redeemSection({ L, api: model.gapi, token, bare: true, balance: true, unpaid: due, onApplied, onClaimed, onFail: onHoldError ? (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) onHoldError(code); } : null }));
     const btn = h('button', { type: 'button', class: 'btn light ord-btn pc-gift-btn', 'aria-expanded': 'false', 'aria-controls': `${id}-g`, 'data-testid': 'pc-gift-btn', text: tx('giftBtn'),
       onclick: () => { const open = panel.hidden; panel.hidden = !open; btn.setAttribute('aria-expanded', String(open)); btn.textContent = tx(open ? 'giftBtnClose' : 'giftBtn'); if (open) panel.querySelector('input')?.focus(); } });
     kids.push(h('div', { class: 'pc-opt', 'data-testid': 'pc-gift' }, btn, panel));

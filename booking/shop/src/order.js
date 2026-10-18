@@ -11,6 +11,10 @@ import { payBlock, runReturn } from './mobilepay-ui.js';
 import { OPT } from './options-texts.js';
 import { optName, optionMissingOnOrder, optionChanged, rowLabel } from './options-logic.js';
 import { createOptionPicker } from './options-ui.js';
+import { ht, holdError } from './hold-texts.js';
+import { isHoldView, giftWasUsed } from './hold-logic.js';
+import { holdPanel } from './hold-ui.js';
+import { normCheckoutOptions } from './mobilepay-logic.js';
 
 const S = window.BOOKING_SHOP;
 const L = OT[S.lang] ? S.lang : 'fi', t = OT[L], ox = OPT[L];   // ox: tuotevalinnan tekstit (booking_50)
@@ -66,11 +70,24 @@ async function main() {
   const mpTiming = api.mock ? { intervalMs: num('mpinterval'), maxMs: num('mpmax') } : {};   // vain mock-tilassa säädettävissä (testit/esittely)
   async function loadMp() { try { mpState.opts = normOptions(await mp.options()); } catch { mpState.opts = normOptions(null); } mpState.show = shouldShowButton(mpState.opts, mpEnv); }
   await Promise.all([loadGift(), loadMp()]);
+  // Pitotila (§17): pidon pituus (public_checkout_payment_options) ja lahjakortin käyttö (public_get_booking.payment_methods, myös perutut) haetaan vain kun tarvitaan
+  const holdX = { minutes: 15, gift: false };
+  const giftKey = `bk-gift-${token}`;
+  const flagGift = () => { try { return sessionStorage.getItem(giftKey) === '1'; } catch { return false; } };
+  async function loadHold(o) {
+    const co = o.checkout; if (!co) return;
+    if (co.awaiting && !co.processing) { try { const c = normCheckoutOptions(await mp.checkoutOptions()); if (c.ok && c.holdMinutes) holdX.minutes = c.holdMinutes; } catch { /* oletus 15 */ } }
+    if (co.expired) { let b = null; try { b = await (api.mock ? api.rpc : rpc)('public_get_booking', { p_token: token }); } catch { /* ei tietoa */ } holdX.gift = giftWasUsed(b, flagGift()); }
+  }
+  let holdCtl = null;
+  const stopHold = () => { if (holdCtl) { holdCtl.stop(); holdCtl = null; } };
+  await loadHold(o);
   let notice = null;   // vahvistusteksti lunastuspyynnön jälkeen (näytetään pyyntölistan yläosassa, kerran)
   let cur = o;
   draw(o);
-  const redraw = async (n) => { await loadMp(); draw(n); };
+  const redraw = async (n) => { await loadMp(); await loadHold(n); draw(n); };
   async function reloadAfterGift(text) {
+    try { if (cur.checkout?.awaiting) sessionStorage.setItem(giftKey, '1'); } catch { /* ei sessionStorage */ }
     try { const n = await api.get(); if (n?.ok) { await loadGift(); await redraw(n); } } catch { /* näkymä jää ennalleen */ }
     flash(true, text);
   }
@@ -88,19 +105,28 @@ async function main() {
   if (search.get('pay') === 'mobilepay' && ['unpaid', 'pending', 'partially_paid', 'paid', 'failed'].includes(o.payment_status)) returning();
 
   function draw(o) {
-    cur = o;
+    cur = o; stopHold();
+    const co = o.checkout, holdV = isHoldView(co), closedHold = !!co && (co.expired || co.cancelled);   // closedHold: vanhentunutta/peruttua tilausta ei lisätä eikä peruta   // co = null → vanha näkymä muuttumattomana
     const stKey = o.cancel_request?.status === 'open' ? 'cancel_requested' : o.status;
     const unpaid = o.unpaid;
     const head = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-h' },
       h('h2', { id: 'ord-h', 'data-testid': 'order-title', text: `${t.order} #${o.order_no}` }),
-      h('div', { class: 'ord-badges' }, badge(`st-${stKey}`, t[`st.${stKey}`] || stKey), badge(`pay-${o.payment_status}`, t[`pay.${o.payment_status}`] || o.payment_status)),
+      h('div', { class: 'ord-badges' }, badge(`st-${stKey}`, holdV ? ht(L, { awaiting_payment: 'status.awaiting', processing_payment: 'status.processing', preliminary: 'status.preliminary', expired: 'status.expired' }[co.state]) : t[`st.${stKey}`] || stKey), badge(`pay-${o.payment_status}`, t[`pay.${o.payment_status}`] || o.payment_status)),
       o.created_at ? h('p', { class: 'bk-meta', text: `${t.created}: ${dt(o.created_at)}` }) : null);
     const resv = o.reservations.length ? h('section', { class: 'ord-card', 'aria-labelledby': 'ord-rv' }, h('h3', { id: 'ord-rv', text: t.reservationsTitle }),
       h('ul', { class: 'ord-lines', 'data-testid': 'order-reservations' }, o.reservations.map((r) => h('li', {},
         h('span', { class: 'ord-l-main' }, h('strong', { text: r.product_name }), r.status === 'cancelled' ? ' ' : null, r.status === 'cancelled' ? badge('st-cancelled', t.cancelledRow) : null,
           r.option ? h('span', { class: 'ord-l-opt', 'data-testid': 'res-option' }, ` – ${ox.what}: `, h('strong', { text: optName(r.option, L) })) : optionMissingOnOrder(r) && r.status !== 'cancelled' ? [' ', h('span', { class: 'ord-badge opt-missing', 'data-testid': 'res-option-missing', text: `${ox.what}: ${ox.notChosen}` })] : null),
         h('span', { class: 'ord-l-meta', text: `${dt(r.starts_at)}–${hm(r.ends_at)} · ${t.persons.replace('{n}', r.persons)}${r.addons.length ? ' · ' + r.addons.map((a) => `${nm(a)} × ${a.quantity}`).join(', ') : ''}` }))))) : null;
-    const optSec = optionSection(o);
+    const optSec = co && (co.expired || co.cancelled) ? null : optionSection(o);
+    let holdEl = null;
+    if (holdV) {
+      holdCtl = holdPanel({ L, co, minutes: holdX.minutes, giftUsed: holdX.gift, newHref: `${S.shopHref}${api.mock ? '?mock=1' : ''}`,
+        fmtDate: (ms) => df({ day: 'numeric', month: 'numeric', year: 'numeric' }).format(new Date(ms)),
+        refresh: co.awaiting ? async () => { const n = await api.get(); if (n?.ok) cur = n; return n?.ok ? n.checkout : null; } : null,
+        onChange: async () => { try { const n = await api.get(); if (n?.ok) { await redraw(n); root.querySelector('[data-testid=hold-panel] h3')?.focus(); return; } } catch { /* vanha näkymä */ } draw(cur); } });   // fokus uuden tilan otsikkoon
+      holdEl = holdCtl.node;
+    }
     const lines = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-l' }, h('h3', { id: 'ord-l', text: t.linesTitle }),
       h('ul', { class: 'ord-lines', 'data-testid': 'order-lines' }, o.items.map((i) => h('li', {},
         h('span', { class: 'ord-l-main' }, h('strong', { text: i.quantity > 1 ? `${nm(i)} × ${i.quantity}` : nm(i) })),
@@ -109,14 +135,15 @@ async function main() {
         h('div', { class: unpaid > 0 ? 'due' : '' }, h('dt', { text: t.unpaid }), h('dd', { 'data-testid': 'order-unpaid', text: money(unpaid) }))));
     // maksulinkki: avoin (pending) maksu + verkkomaksu käytössä → linkki; muuten maksu paikan päällä
     const link = o.online_payment_enabled ? o.payments.find((p) => p.status === 'pending' && p.link_path) : null;
-    const mpBlock = mpState.show && !mpState.checking && unpaid > 0 ? payBlock({ S, L, api: mp, opts: mpState.opts, env: mpEnv, amount: money(unpaid) }) : null;
-    const pay = unpaid > 0 ? h('section', { class: 'ord-card', 'aria-labelledby': 'ord-p' }, h('h3', { id: 'ord-p', text: t.paymentTitle }),
+    const mpBlock = mpState.show && !mpState.checking && unpaid > 0 ? payBlock({ S, L, api: mp, opts: mpState.opts, env: mpEnv, amount: money(unpaid), onFail: (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) holdCtl?.poll(true); } }) : null;
+    const payHidden = !!co && (co.preliminary || co.expired || co.cancelled || co.processing);   // alustavaa/vanhentunutta ei makseta; käsittelyn aikana ei toista maksua
+    const pay = unpaid > 0 && !payHidden ? h('section', { class: 'ord-card', 'aria-labelledby': 'ord-p' }, h('h3', { id: 'ord-p', text: t.paymentTitle }), co?.awaiting ? h('p', { class: 'bk-note', 'data-testid': 'ord-hold-choose', text: ht(L, 'choose') }) : null,
       mpBlock,
       mpState.checking ? null : link ? h('a', { class: 'btn ord-btn', 'data-testid': 'pay-link', href: S.base ? S.base + link.link_path : link.link_path, text: `${t.payRest} (${money(unpaid)})` })
         : mpBlock ? null : h('button', { type: 'button', class: 'btn light ord-btn', disabled: true, 'data-testid': 'pay-rest', text: `${t.payRest} (${money(unpaid)})` }),
       link || mpBlock || mpState.checking ? null : h('p', { class: 'bk-note', text: t.payRestSoon })) : null;
     const giftCards = gift.cards.length ? cardsSection({ S, L, api: gapi, cards: gift.cards }) : null;
-    const giftUse = gift.redeem && unpaid > 0 && !gift.cards.length && ['confirmed', 'pending'].includes(o.status) ? redeemSection({ L, api: gapi, token, onApplied: reloadAfterGift, onClaimed: reloadAfterClaim }) : null;
+    const giftUse = gift.redeem && unpaid > 0 && !payHidden && !gift.cards.length && ['confirmed', 'pending'].includes(o.status) ? redeemSection({ L, api: gapi, token, onApplied: reloadAfterGift, onClaimed: reloadAfterClaim, onFail: (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) holdCtl?.poll(true); } }) : null;
     const claimBox = gift.claims.length ? claimsSection({ S, L, api: gapi, token, claims: gift.claims, notice, onChanged: reloadAfterClaim }) : null;
     notice = null;
     const receipts = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-r' }, h('h3', { id: 'ord-r', text: t.receiptsTitle }),
@@ -125,11 +152,11 @@ async function main() {
         h('span', { class: 'ord-l-sum' }, h('button', { type: 'button', class: 'btn light ord-btn', 'data-testid': 'receipt-dl', onclick: (ev) => download(ev.currentTarget, r.receipt_no), text: t.download }))))) : h('p', { class: 'bk-note', text: t.noReceipts }));
     const msg = h('div', { 'aria-live': 'polite', class: 'ord-msg', 'data-testid': 'order-msg' });
     const note = o.change_deadline ? h('p', { class: 'bk-note', 'data-testid': 'change-note', text: o.can_change ? t.changeNote.replace('{date}', dt(o.change_deadline)) : t.changeClosed }) : null;
-    const add = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-a' }, h('h3', { id: 'ord-a', text: t.addTitle }), o.can_add && o.upsell_addons.length ? addForm(o) : h('p', { class: 'bk-note', text: t.addClosed }),
+    const add = closedHold ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-a' }, h('h3', { id: 'ord-a', text: t.addTitle }), o.can_add && o.upsell_addons.length ? addForm(o) : h('p', { class: 'bk-note', text: t.addClosed }),
       h('p', { class: 'bk-note' }, `${t.addNewBooking} `, h('a', { href: S.shopHref, text: t.addNewBookingLink })));
-    const cancel = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), note,
+    const cancel = closedHold ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), note,
       o.cancel_request ? h('p', { class: 'bk-ok', role: 'status', 'data-testid': 'cancel-pending', text: t[`cancel.${o.cancel_request.status}`] || t['cancel.open'] }) : cancelForm());
-    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, resv, optSec, lines, giftCards, claimBox, pay, giftUse, receipts, add, cancel, msg, phoneBox()));
+    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, resv, optSec, lines, giftCards, claimBox, pay, giftUse, receipts, add, cancel, msg, phoneBox()));
   }
   async function download(btn, receiptNo) {
     btn.disabled = true;
@@ -142,7 +169,7 @@ async function main() {
   }
   const flash = (ok, text) => { const m = root.querySelector('[data-testid=order-msg]'); if (m) m.replaceChildren(h('p', { class: ok ? 'bk-ok' : 'bk-error', role: ok ? 'status' : 'alert', text })); };
   // palvelimen virhe {ok:false, code, message}: tunnetut koodit omilla teksteillään, muuten palvelimen (suomenkielinen) viesti
-  const failText = (r) => (r?.code && t[`err.${r.code}`]) || (L === 'fi' && r?.message) || t.error;
+  const failText = (r) => (r?.code && (t[`err.${r.code}`] || holdError(L, r.code))) || (L === 'fi' && r?.message) || t.error;
   function addForm(o) {
     const sel = h('select', { id: 'ord-addon', 'data-testid': 'add-select' }, o.upsell_addons.map((x) => h('option', { value: x.code, text: `${nm(x)} (${money(x.price)})` })));
     const res = o.reservations.filter((r) => r.status !== 'cancelled');
