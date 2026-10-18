@@ -1,0 +1,26 @@
+[
+ {
+  "key": "nav.brand_tagline",
+  "lang": "fi",
+  "text": "{{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 100,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Yläpalkin alarivi SAUNOTUS-logon alla (yläbrändi + yritys); nimi tulee asetuksesta business_name (Sipoonjoen Perinnesauna, booking_65), ei kovakoodattu"
+ },
+ {
+  "key": "nav.brand_tagline",
+  "lang": "en",
+  "text": "{{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 100,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Yläpalkin alarivi SAUNOTUS-logon alla (yläbrändi + yritys); nimi tulee asetuksesta business_name (Sipoonjoen Perinnesauna, booking_65), ei kovakoodattu"
+ }
+]
