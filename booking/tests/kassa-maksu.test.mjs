@@ -58,7 +58,7 @@ test('offers: tarjotaan vain maksettavalle varaukselle, päätökset tulevat pal
   assert.deepEqual(offers(m, booking({ status: 'pending' })), { mobilepay: true, gift: true, claims: false, payLater: false });
   assert.deepEqual(offers(m, booking({ payment_status: 'paid' })), { mobilepay: false, gift: false, claims: false, payLater: false });
   assert.deepEqual(offers(m, booking({ status: 'cancelled' })), { mobilepay: false, gift: false, claims: false, payLater: false });
-  assert.deepEqual(offers(model(), booking()), { mobilepay: false, gift: false, claims: false }, 'ei oletettua maksutapaa');
+  assert.deepEqual(offers(model(), booking()), { mobilepay: false, gift: false, claims: false, payLater: false }, 'ei oletettua maksutapaa');
   assert.deepEqual(offers(model({ claims: [{ id: 1 }] }), booking({ payment_status: 'paid' })).claims, true, 'lunastuspyynnöt näkyvät maksun jälkeenkin');
   assert.deepEqual(offers(m, null), { mobilepay: false, gift: false, claims: false, payLater: false });
 });
