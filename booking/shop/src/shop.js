@@ -615,7 +615,9 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     optRow ? [h('dt', { text: ox.what }), h('dd', { 'data-testid': 'conf-option', class: it.option ? '' : 'bk-opt-missing', text: optRow })] : null,
     h('dt', { text: t.when }), h('dd', { text: `${dayLong(it.starts_at)}, ${hm(it.starts_at)}–${hm(it.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(it.persons) }),
     (b.addons || []).flatMap((a) => [h('dt', { text: (S.lang === 'en' && a.name_en) || a.name }), h('dd', { text: `${a.quantity} × ${money(a.unit_price)}` })]),
-    h('dt', { text: t.total }), h('dd', { text: `${money(b.total)} (${t.vatIncl})` }), h('dt', { text: t.payStatus }), h('dd', { text: pay }));
+    h('dt', { text: t.total }), h('dd', { text: `${money(b.total)} (${t.vatIncl})` }), h('dt', { text: t.payStatus }), h('dd', { text: pay }),
+    holdV && co.awaiting && co.remaining > 0 ? [h('dt', { text: ht(S.lang, 'summary.remaining') }), h('dd', { 'data-testid': 'conf-remaining', text: money(co.remaining) })] : null);   // pitotilassa: maksettavaa jäljellä (lahjakorttiosuuden jälkeen)
+  dl.dataset.testid = 'conf-summary';
   const actions = h('div', { class: 'bk-actions' });
   if (b.status !== 'cancelled' && b.status !== 'expired' && !holdV) {   // kalenterilisäys vasta vahvistetusta varauksesta
     const url = URL.createObjectURL(new Blob([ics(b)], { type: 'text/calendar' }));
@@ -628,7 +630,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     out.replaceChildren(r.ok ? h('p', { class: 'bk-ok', text: t.cancelled }) : errorBox(r.message || t.cancelFail));
     if (r.ok) setTimeout(() => location.reload(), 800);
   } }, t.cancelBooking));
-  mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { 'data-testid': 'conf-title', text: b.status === 'cancelled' ? t.confCancelled : b.status === 'expired' ? t.confExpired : b.status === 'pending' || (co && co.awaiting) ? ht(S.lang, 'h2.awaiting') : t.confTitle }), h('p', { class: 'bk-status', role: 'status', 'data-testid': 'conf-status', text: head }), holdHost, mpHost, dl,
+  mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { 'data-testid': 'conf-title', text: b.status === 'cancelled' ? t.confCancelled : b.status === 'expired' ? t.confExpired : b.status === 'pending' || (co && co.awaiting) ? ht(S.lang, 'h2.awaiting') : t.confTitle }), h('p', { class: 'bk-status', role: 'status', 'data-testid': 'conf-status', text: head }), holdHost, mpHost, dl,   // pitotilassa: otsikko + tilabadge → pitopaneeli → tiivis tilausyhteenveto → maksuosio (secEl lisätään yhteenvedon jälkeen)
     b.status === 'confirmed' && b.payment_status !== 'paid' && (b.customer_kind === 'company' || (!isTreatmentBooking(b) && !online)) ?  /* hoitovarauksella ei maksuohjetta (vain yritysasiakkaan laskutusohje) */ h('p', { class: 'bk-pay', text: b.customer_kind === 'company' ? t.companyNote : t.payLater }) : null, optNote && b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-option-note', text: optNote }) : null, actions, out,
     b.status === 'confirmed' ? h('p', { class: 'bk-note', text: b.can_change ? t.changeInfo(b.change_hours_before, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) : t.changeLocked(b.change_hours_before) }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })) : null,
     h('p', { class: 'bk-note', text: t.emailNote }), h('p', {}, h('a', { href: S.infoHref, text: t.directions }))));
@@ -650,7 +652,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
       onApplied: (text) => { try { if (co?.awaiting) sessionStorage.setItem(`bk-gift-${token}`, '1'); } catch { /* ei sessionStorage */ } again({ kind: 'gift', text }); }, onClaimed: (n) => again({ kind: 'claim', ...n }), onChanged: (n) => again({ kind: 'claim', ...n }) });
   }
   if (!secEl && notice && (notice.kind === 'gift' || notice.kind === 'paylater')) secEl = payNotice(L, notice);   // kokonaan maksettu: maksuosio poistuu, mutta ilmoitus jää
-  if (secEl) { if (holdV) mpHost.after(secEl); else root.firstElementChild.querySelector('.bk-actions')?.before(secEl); }   // pitotilassa maksuvalinta heti laskurin alla
+  if (secEl) { if (holdV) dl.after(secEl); else root.firstElementChild.querySelector('.bk-actions')?.before(secEl); }   // pitotilassa maksuvalinta yhteenvedon alla
   if (refresh) { const el = root.querySelector('[data-testid=pc-notice],[data-testid=vc-notice]'); if (el) { el.scrollIntoView({ block: 'center' }); el.focus({ preventScroll: true }); } else if (holdV && !retPay) holdHost.querySelector('h3')?.focus(); } else focusTop();   // pitotilan vaihtuessa fokus tilaotsikkoon
   if (retPay && model) {   // paluu MobilePaysta: reconcile + public_get_booking-polling → tulos (maksettu / epäonnistui / odottaa), sivu päivittyy lopuksi
     const num = (k) => { const v = +new URLSearchParams(location.search).get(k); return Number.isFinite(v) && v > 0 ? v : undefined; };

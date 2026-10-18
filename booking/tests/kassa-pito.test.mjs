@@ -52,6 +52,16 @@ test('tekstit: maksamattoman varauksen peruutusnappi "Peruuta varaus" / "Cancel 
   const all = (fi.cancelBooking + fi.cancelConfirm + fi.cancelled + fi.cancelFail + en.cancelBooking + en.cancelConfirm + en.cancelled + en.cancelFail);
   assert.ok(!/vapauta|release|peru maksamaton|unpaid hold/i.test(all), 'napin/dialogin/viestien sanasto: peruuta varaus');
 });
+test('järjestys + kompakti banneri: otsikko + tilabadge → pitopaneeli → tiivis tilausyhteenveto → maksuosio; yhteenveto vain kerran; awaiting-otsikko vain ruudunlukijalle', () => {
+  const shop = src('../shop/src/shop.js'), ord = src('../shop/src/order.js'), ui = src('../shop/src/hold-ui.js'), css = src('../shop/src/shop.css');
+  assert.ok(shop.includes('holdHost, mpHost, dl,'), 'vahvistussivu: pitopaneeli ennen yhteenvetoa');
+  assert.ok(shop.includes('dl.after(secEl)'), 'vahvistussivu: maksuosio yhteenvedon alle');
+  assert.equal((shop.match(/dl\.dataset\.testid = 'conf-summary'/g) || []).length, 1, 'vahvistussivun yhteenveto rakennetaan vain kerran (ei duplikaattia)');
+  assert.ok(/head, holdEl, resv, optSec, lines, giftCards, claimBox, pay,/.test(ord), 'tilaussivu: pitopaneeli → varaus + summat → maksuosio');
+  assert.ok(ui.includes("class: kind === 'awaiting' ? 'sr-only' : ''"), 'awaiting: "Maksa varaus vahvistaaksesi" -otsikko vain ruudunlukijalle (toisto h2:n ja tilabadgen kanssa)');
+  assert.ok(css.includes('.bk-hold-awaiting{display:flex'), 'kompakti banneri (lause + laskuri samalla rivillä)');
+  assert.equal(ht('fi', 'summary.remaining'), 'Maksettavaa jäljellä'); assert.equal(ht('en', 'summary.remaining'), 'Amount left to pay');
+});
 test('tekstit: 15 min -maksuohje (Joonaksen teksti), otsikko "Varauksesi odottaa maksua", testivaihtoehto merkitty testiksi', () => {
   assert.equal(ht('fi', 'mustPay', { minutes: 15 }), 'Varaus täytyy maksaa 15 minuutin sisään, muuten se peruuntuu ja paikka vapautuu.');
   assert.equal(ht('en', 'mustPay', { minutes: 15 }), 'The booking must be paid within 15 minutes, otherwise it is cancelled and your spot is released.');

@@ -16,7 +16,7 @@ export function holdPanel({ L = 'fi', co, minutes = 15, giftUsed = false, newHre
   const monoNow = mono || (() => (typeof performance !== 'undefined' ? performance.now() : Date.now()));
   const clock = createHoldClock(co, mono);
   const ann = createAnnouncer();
-  const kids = [h('h3', { id: `${id}-t`, tabindex: '-1', text: tx(`title.${kind}`) })];   // tabindex -1: tilan vaihtuessa fokus siirretään otsikkoon (ruudunlukija lukee uuden tilan)
+  const kids = [h('h3', { id: `${id}-t`, tabindex: '-1', class: kind === 'awaiting' ? 'sr-only' : '', text: tx(`title.${kind}`) })];   // awaiting: otsikko vain ruudunlukijalle (sivun h2 + tilabadge sanovat saman) → kompakti banneri; muut tilat: näkyvä pieni otsikko   // tabindex -1: tilan vaihtuessa fokus siirretään otsikkoon (ruudunlukija lukee uuden tilan)
   let timeEl = null, labelEl = null, announce = null, msgEl = null, recheckBtn = null;
   if (kind === 'awaiting') {
     kids.push(h('p', { class: 'bk-hold-must', 'data-testid': 'hold-must', text: tx('mustPay', { minutes }) }));   // selkeä 15 min -ohje (mustPay); ei toistavaa lead-tekstiä (poistettu)

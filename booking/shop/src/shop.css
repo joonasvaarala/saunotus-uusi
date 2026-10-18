@@ -419,8 +419,14 @@ a.bk-sd:hover{filter:brightness(.97)}
 
 /* Kassan paikanpito (§17): laskuri, tilaviestit, vanhentunut-polku. Ei vilkkuvaa/animoitua; matala aika näkyy värillä + lihavoinnilla (ei vain värillä) */
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.bk-hold{display:grid;gap:8px;margin:12px 0;border-left:5px solid var(--green)}
-.bk-hold h3{margin:0}
+.bk-hold{display:grid;gap:6px;margin:10px 0;padding:12px 14px;border-left:5px solid var(--green)}
+.bk-hold h3{margin:0;font-size:17px;line-height:1.3}
+/* awaiting = kompakti banneri: tumma vihreä vasen reuna + sävytetty tausta; lause ja lähtölaskenta samalla rivillä leveällä, tiiviisti allekkain mobiilissa */
+.bk-hold-awaiting{display:flex;flex-wrap:wrap;align-items:center;gap:4px 20px;padding:10px 14px;background:#eef5ef}
+.bk-hold-awaiting .bk-hold-must{flex:1 1 240px;font-size:15px;line-height:1.4}
+.bk-hold-awaiting .bk-hold-clock{flex:0 0 auto;gap:2px 8px}
+.bk-hold-awaiting .bk-hold-time{font-size:24px}
+.bk-hold-awaiting.low{background:#fff7e6}
 .bk-hold p{margin:0}
 .bk-hold-clock{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
 .bk-hold-label{font:600 13px var(--label);letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
@@ -430,12 +436,12 @@ a.bk-sd:hover{filter:brightness(.97)}
 .bk-hold-processing{border-left-color:#7a6a3a}
 .bk-hold-preliminary{border-left-color:#7a6a3a}
 .bk-hold-expired{border-left-color:#7b1d12;background:#fbf3f1}
-.bk-hold-msg{color:var(--ink);font-size:16px;line-height:1.5}
+.bk-hold-msg{color:var(--ink);font-size:15px;line-height:1.45}
 .bk-hold .bk-actions{margin-top:6px}
 .bk-hold .btn{min-height:44px}
-@media (max-width:400px){.bk-hold-time{font-size:28px}}
+@media (max-width:400px){.bk-hold-time{font-size:28px}.bk-hold-awaiting .bk-hold-time{font-size:22px}}
 @media (prefers-reduced-motion:reduce){.bk-hold *{transition:none!important;animation:none!important}}
-.bk-hold-must{font-weight:600;font-size:17px;line-height:1.45;color:var(--ink)}
+.bk-hold-must{font-weight:700;font-size:16px;line-height:1.4;color:var(--ink)}
 
 /* Testivaihtoehto "maksu paikan päällä" (booking_57): oikea nappi, sivuston tyyli (kulta/vaalea, ei sinistä), 44 px, selite napin alla */
 .pc-paylater{gap:8px}

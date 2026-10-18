@@ -136,8 +136,9 @@ for (const lang of ['fi', 'en']) {
   expect(!/paikan päällä|on site/i.test(await text(page, '[data-testid=pc-lead]')), `${lang}: ei "maksu paikan päällä" -ohjetta pitotilassa`);
   expect(!(await has(page, 'a[download]')), `${lang}: ei kalenterilisäystä ennen vahvistusta`);
   expect((await text(page, '[data-testid=conf-status]')).length > 0 && !/vahvistettu|confirmed/i.test(await text(page, '[data-testid=conf-status]')), `${lang}: tilarivi ei väitä varausta vahvistetuksi`);
-  const order = await page.evaluate(() => { const p = document.querySelector('[data-testid=hold-panel]'), s = document.querySelector('[data-testid=pc-mobilepay]'), d = document.querySelector('dl.bk-sum'); return p.compareDocumentPosition(s) & 4 && s.compareDocumentPosition(d) & 4; });
-  expect(!!order, `${lang}: järjestys laskuri → maksuvalinta → yhteenveto`);
+  const order = await page.evaluate(() => { const p = document.querySelector('[data-testid=hold-panel]'), s = document.querySelector('[data-testid=pc-mobilepay]'), d = document.querySelector('dl.bk-sum'); return p.compareDocumentPosition(d) & 4 && d.compareDocumentPosition(s) & 4; });
+  expect(!!order, `${lang}: järjestys: tilabadge → pitopaneeli/laskuri → yhteenveto → maksuvalinta (yhteenveto ei enää maksuosion alla)`);
+  { const sum = await text(page, '[data-testid=conf-summary]'); expect(/\d/.test(sum) && (await page.locator('dl.bk-sum').count()) === 1 && await has(page, '[data-testid=conf-remaining]'), `${lang}: tiivis yhteenveto (tilausnro, palvelu, aika, henkilömäärä, yhteensä, maksun tila, maksettavaa jäljellä) vain kerran`); }
   await page.waitForTimeout(2300); const t2 = await secs(page); expect(t2 != null && t1 - t2 >= 1 && t1 - t2 <= 4, `${lang}: laskuri etenee (${t1} → ${t2})`);
   expect(((await page.textContent('[data-testid=hold-announce]')) || '') === '', `${lang}: ei ilmoituksia ilman porrasylitystä`);
   await page.reload({ waitUntil: 'load' }); await waitHold(page, 'awaiting_payment'); const t3 = await secs(page); expect(t3 != null && t3 <= t2 && t2 - t3 <= 5, `${lang}: päivitys ei nollaa laskuria (${t2} → ${t3})`);
