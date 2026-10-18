@@ -210,7 +210,7 @@ for (const [lang, w] of [['fi', 390], ['en', 1280]]) for (const code of ['addon_
   await page.locator('[data-testid=addon-qty-pyyhe]').fill('1'); await page.locator('[data-testid=addon-qty-pyyhe]').dispatchEvent('change');
   await fill(page, 'addon_inactive@test.fi'); await page.click('.bk-form button[type=submit]'); await settle(page); await page.waitForSelector('#tr-review-h');
   await page.click('[data-testid=review-submit]'); await page.waitForSelector('[data-testid=addon-error]:not([hidden])', { timeout: 10000 });
-  expect(norm(await page.locator('[data-testid=addon-error]').innerText()) === 'Lisäpalvelut hylättiin', `${label}: avainta ei ole → palvelimen message-kenttä: ${norm(await page.locator('[data-testid=addon-error]').innerText())}`);
+  expect(norm(await page.locator('[data-testid=addon-error]').innerText()) === 'Jokin meni pieleen. Yritä hetken kuluttua uudelleen tai ota yhteyttä meihin.', `${label}: avainta ei ole → ui.shop.error_generic (ei palvelimen raakaa message-kenttää): ${norm(await page.locator('[data-testid=addon-error]').innerText())}`);
   expect(!/error_addon|\{\{/.test(await page.locator('[data-testid=addon-error]').innerText()), `${label}: ei raakaa avainta`);
   expect(await page.locator('[data-testid=voucher-note]').count() === 0, `${label}: (kassalla ei huomautusta)`);
   await page.ctx.close();
