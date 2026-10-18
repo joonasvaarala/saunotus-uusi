@@ -24,7 +24,7 @@ const problems = []; let checks = 0;
 const expect = (ok, msg) => { checks++; if (!ok) problems.push(msg); };
 
 const J = (p) => JSON.parse(readFileSync(join(root, p), 'utf8'));
-const base = J('content/site-texts.fallback.json'), pending = J('content/site-texts.pending-import-2.json');
+const base = J('tests/fixtures/site-texts/fallback-pre-pr64.json'), pending = J('content/site-texts.imported-pr64.json');
 // [fi, en] – korvaavat tekstit (täytyy säilyttää paikkamerkit)
 const OVR = {
   'page.front.hero.title': ['Etusivun otsikko (DB)', 'Front headline (DB)'], 'seo.front.title': ['Etusivu (DB) | Sipoonjoen Perinnesauna', 'Home (DB) | Sipoonjoen Perinnesauna'],

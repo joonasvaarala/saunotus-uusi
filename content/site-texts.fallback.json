@@ -1,6 +1,6 @@
 {
  "_doc": "Varateksti: tietokannan julkaistut sivutekstit (public_get_site_texts) + paikkamerkkien data (hinta/kesto/julkiset asetukset). Käytetään vain jos haku epäonnistuu eikä .cache-välimuistia ole. Päivitys: node scripts/site-texts-sync.mjs",
- "generated_at": "2026-10-18T12:45:34.451586+00:00",
+ "generated_at": "2026-10-18T12:56:30.776941+00:00",
  "texts": [
   {
    "key": "addon.1.description",
@@ -882,6 +882,104 @@
    ]
   },
   {
+   "key": "nav.info.mita_mukaan",
+   "lang": "en",
+   "text": "What to bring",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "nav.info.mita_mukaan",
+   "lang": "fi",
+   "text": "Mitä mukaan?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "nav.info.pysakointi",
+   "lang": "en",
+   "text": "Parking",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "nav.info.pysakointi",
+   "lang": "fi",
+   "text": "Pysäköinti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "nav.info.saapuminen",
+   "lang": "en",
+   "text": "Arrival and location",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "nav.info.saapuminen",
+   "lang": "fi",
+   "text": "Saapuminen ja sijainti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "nav.main.gift",
+   "lang": "en",
+   "text": "Gift cards",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "nav.main.gift",
+   "lang": "fi",
+   "text": "Lahjakortit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "nav.main.sauna",
+   "lang": "en",
+   "text": "Sauna sessions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "nav.main.sauna",
+   "lang": "fi",
+   "text": "Saunavuorot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "nav.main.training",
+   "lang": "en",
+   "text": "Training",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "nav.main.training",
+   "lang": "fi",
+   "text": "Koulutukset",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "nav.main.treatments",
+   "lang": "en",
+   "text": "Treatments & rituals",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "nav.main.treatments",
+   "lang": "fi",
+   "text": "Hoidot ja rituaalit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
    "key": "option.1.name",
    "lang": "en",
    "text": "Honey treatment",
@@ -994,6 +1092,2404 @@
    "placeholders": []
   },
   {
+   "key": "page.booking_info.chips.1.label",
+   "lang": "en",
+   "text": "Sauna sessions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.chips.1.label",
+   "lang": "fi",
+   "text": "Saunavuorot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.chips.2.label",
+   "lang": "en",
+   "text": "Open rituals",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.chips.2.label",
+   "lang": "fi",
+   "text": "Avoimet rituaalit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.chips.3.label",
+   "lang": "en",
+   "text": "Sauna treatments and saunotus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.chips.3.label",
+   "lang": "fi",
+   "text": "Saunahoidot ja saunotukset",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.chips.4.label",
+   "lang": "en",
+   "text": "Private sessions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.chips.4.label",
+   "lang": "fi",
+   "text": "Yksityisvuorot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.chips.5.label",
+   "lang": "en",
+   "text": "Book with a gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.chips.5.label",
+   "lang": "fi",
+   "text": "Varaus lahjakortilla",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.events_title",
+   "lang": "en",
+   "text": "Upcoming events",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.events_title",
+   "lang": "fi",
+   "text": "Tulevat tapahtumat",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.hero.text",
+   "lang": "en",
+   "text": "Are you ready for the most relaxing sauna experience of your life?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.hero.text",
+   "lang": "fi",
+   "text": "Oletko valmiina elämäsi rentouttavimpaan saunakokemukseen?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.hero.title",
+   "lang": "en",
+   "text": "Book a sauna experience",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.hero.title",
+   "lang": "fi",
+   "text": "Varaa saunaelämys",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.note",
+   "lang": "en",
+   "text": "Bookings and payment are made in the Johku web shop (opens in a new tab).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.note",
+   "lang": "fi",
+   "text": "Varaukset ja maksu tehdään Johku-verkkokaupassa (avautuu uuteen välilehteen).",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.rec_text",
+   "lang": "en",
+   "text": "Coming for the first time? These are an easy way into the world of Sipoonjoen Perinnesauna.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.rec_text",
+   "lang": "fi",
+   "text": "Ensimmäistä kertaa tulossa? Näistä pääset helposti sisään Sipoonjoen Perinnesaunan maailmaan.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.rec_title",
+   "lang": "en",
+   "text": "We recommend these experiences",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.rec_title",
+   "lang": "fi",
+   "text": "Suosittelemme näitä kokemuksia",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.rec.1.title",
+   "lang": "en",
+   "text": "Sauna ritual and smoke sauna session (Sat & Sun)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.rec.1.title",
+   "lang": "fi",
+   "text": "Saunarituaali ja savusaunavuoro (la & su)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.rec.2.title",
+   "lang": "en",
+   "text": "Public session (Thu, Sat–Sun)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.rec.2.title",
+   "lang": "fi",
+   "text": "Yleinen vuoro (to, la–su)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.rec.3.title",
+   "lang": "en",
+   "text": "Sauna treatment",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.booking_info.rec.3.title",
+   "lang": "fi",
+   "text": "Saunahoito",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.days.cta",
+   "lang": "en",
+   "text": "Request a quote",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.days.cta",
+   "lang": "fi",
+   "text": "Pyydä tarjous",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.days.mail_hint",
+   "lang": "en",
+   "text": "Tell us the size of the group, the preferred date and any programme wishes in your message.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.days.mail_hint",
+   "lang": "fi",
+   "text": "Kerro viestissä ryhmän koko, toivottu ajankohta ja ohjelmatoiveet.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.days.mail_subject",
+   "lang": "en",
+   "text": "Request for quote – company",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.days.mail_subject",
+   "lang": "fi",
+   "text": "Tarjouspyyntö yrityksille",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.days.text",
+   "lang": "en",
+   "text": "The smoke sauna offers a setting for workplace wellbeing days, small groups and shared sauna evenings. In addition to sauna sessions, rituals and treatments, the day can be combined with, for example, a forest walk, forest yoga, a wilderness meal at the lean-to or a whisk-binding workshop. Prices on request.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.days.text",
+   "lang": "fi",
+   "text": "Savusauna tarjoaa ympäristön työhyvinvointipäiville, pienryhmille ja yhteisille saunailloille. Saunavuorojen, rituaalien ja hoitojen lisäksi päivään voidaan yhdistää esimerkiksi metsäkävely, metsäjooga, eräruokailu laavulla tai vihdansidontatyöpaja. Hinnat tarjouspyynnöstä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.days.title",
+   "lang": "en",
+   "text": "Workplace wellbeing days and groups",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.days.title",
+   "lang": "fi",
+   "text": "Työhyvinvointipäivät ja ryhmät",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.hero.buttons.1.label",
+   "lang": "en",
+   "text": "Public sessions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.hero.buttons.1.label",
+   "lang": "fi",
+   "text": "Yleiset vuorot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.hero.buttons.2.label",
+   "lang": "en",
+   "text": "Private sessions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.hero.buttons.2.label",
+   "lang": "fi",
+   "text": "Yksityisvuorot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.hero.buttons.3.label",
+   "lang": "en",
+   "text": "Request a quote",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.hero.buttons.3.label",
+   "lang": "fi",
+   "text": "Pyydä tarjous",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.hero.text",
+   "lang": "en",
+   "text": "A smoke sauna built into the ground and Finnish sauna tradition on the banks of the Sipoonjoki river.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.hero.text",
+   "lang": "fi",
+   "text": "Maan sisälle rakennettu savusauna ja suomalainen saunaperinne Sipoonjoen rannalla.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.hero.title",
+   "lang": "en",
+   "text": "A smoke sauna for companies",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.hero.title",
+   "lang": "fi",
+   "text": "Savusauna yrityksille",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.links.1.text",
+   "lang": "en",
+   "text": "Public sessions, private sessions and after-sessions. Come and enjoy the warmth of the smoke sauna!",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.links.1.text",
+   "lang": "fi",
+   "text": "Yleiset vuorot, yksityisvuorot ja jälkilöylyt. Tule nauttimaan maasavusaunan lämmöstä!",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.links.1.title",
+   "lang": "en",
+   "text": "Sauna sessions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.links.1.title",
+   "lang": "fi",
+   "text": "Saunavuorot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.links.2.text",
+   "lang": "en",
+   "text": "In addition to sauna sessions, the day can include rituals and treatments led by a sauna healer.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.links.2.text",
+   "lang": "fi",
+   "text": "Saunavuorojen lisäksi päivään voidaan yhdistää saunottajan ohjaamia rituaaleja ja hoitoja.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.links.2.title",
+   "lang": "en",
+   "text": "Rituals and treatments",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.links.2.title",
+   "lang": "fi",
+   "text": "Rituaalit ja hoidot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.links.3.text",
+   "lang": "en",
+   "text": "Upcoming events and traditional sauna evenings.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.links.3.text",
+   "lang": "fi",
+   "text": "Tulevat tapahtumat ja perinnesaunotusillat.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.links.3.title",
+   "lang": "en",
+   "text": "Events",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.links.3.title",
+   "lang": "fi",
+   "text": "Tapahtumat",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.products_text",
+   "lang": "en",
+   "text": "Companies have their own products: a smoke sauna session and after-session sauna. Prices of the private sessions apply to private individuals only.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.products_text",
+   "lang": "fi",
+   "text": "Yrityksille on omat tuotteensa: savusaunavuoro ja jälkilöylyt. Yksityisvuorojen hinnat ovat voimassa vain yksityishenkilöille.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.products_title",
+   "lang": "en",
+   "text": "For companies",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.companies.products_title",
+   "lang": "fi",
+   "text": "Yrityksille",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.cta",
+   "lang": "en",
+   "text": "Learn more about sauna tradition",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.cta",
+   "lang": "fi",
+   "text": "Opi lisää saunaperinteestä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.elements.1.text",
+   "lang": "en",
+   "text": "The stones of the stove, the gifts of the forest and the scents of nature lead you to pause in this moment",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.elements.1.text",
+   "lang": "fi",
+   "text": "Kiukaan kivet, metsän antimet ja luonnon tuoksut johdattavat pysähtymään tähän hetkeen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.elements.1.title",
+   "lang": "en",
+   "text": "earth",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.elements.1.title",
+   "lang": "fi",
+   "text": "maa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.elements.2.text",
+   "lang": "en",
+   "text": "The breath of steam created by the whisk and the heat awaken the body and the senses",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.elements.2.text",
+   "lang": "fi",
+   "text": "Vihdan synnyttämä löylyn tuulahdus ja lämpö herättelevät kehoa ja aisteja",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.elements.2.title",
+   "lang": "en",
+   "text": "air",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.elements.2.title",
+   "lang": "fi",
+   "text": "ilma",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.elements.3.text",
+   "lang": "en",
+   "text": "The warmth of the sauna and the work of the whisk carry the heat deep into the body",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.elements.3.text",
+   "lang": "fi",
+   "text": "Saunan lämpö ja vihdan työ kuljettavat lämmön syvälle kehoon",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.elements.3.title",
+   "lang": "en",
+   "text": "fire",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.elements.3.title",
+   "lang": "fi",
+   "text": "tuli",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.elements.4.text",
+   "lang": "en",
+   "text": "Water thrown on the stove creates the steam, cooling water calms and balances",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.elements.4.text",
+   "lang": "fi",
+   "text": "Kiukaalle luotu vesi synnyttää löylyn, viilentävä vesi rauhoittaa ja tasapainottaa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.elements.4.title",
+   "lang": "en",
+   "text": "water",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.elements.4.title",
+   "lang": "fi",
+   "text": "vesi",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.kicker",
+   "lang": "en",
+   "text": "what is saunotus?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.kicker",
+   "lang": "fi",
+   "text": "mitä on saunotus?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.text",
+   "lang": "en",
+   "text": "Saunotus is a guided, multisensory sauna ritual rooted in Finnish cultural tradition. It brings the old sauna traditions to life through mythology, ritual songs, gifts of nature, scents, the elements and löyly – the steam that is both the spirit of the sauna and its heat.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.text",
+   "lang": "fi",
+   "text": "Saunotus on ohjattu moniaistinen saunarituaali, joka juontaa juurensa suomalaiseen kulttuuriperinteeseen. Se herättää vanhat saunaperinteet eloon mytologian, rituaalilaulujen, luonnonantimien, tuoksujen, elementtien ja löylyn kautta – löylyn, joka on sekä saunan henki että sen lämpö.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.title",
+   "lang": "en",
+   "text": "An experience rooted in tradition",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.about.title",
+   "lang": "fi",
+   "text": "Elämys, joka juontaa juurensa perinteeseen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.company.cta",
+   "lang": "en",
+   "text": "Request a quote",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.company.cta",
+   "lang": "fi",
+   "text": "Pyydä tarjous",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.company.cta2",
+   "lang": "en",
+   "text": "For companies →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.company.cta2",
+   "lang": "fi",
+   "text": "Yrityksille →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.company.kicker",
+   "lang": "en",
+   "text": "Warm moments together",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.company.kicker",
+   "lang": "fi",
+   "text": "Lämpimiä yhteisiä hetkiä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.company.mail_subject",
+   "lang": "en",
+   "text": "Request for quote",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.company.mail_subject",
+   "lang": "fi",
+   "text": "Tarjouspyyntö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.company.text",
+   "lang": "en",
+   "text": "The smoke sauna offers a calm setting for workplace wellbeing days, small groups and shared sauna evenings on the banks of the Sipoonjoki river. In addition to traditional sauna sessions, rituals and treatments, the day can be combined with, for example, a forest walk, forest yoga, a wilderness meal at the lean-to or a whisk-binding workshop.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.company.text",
+   "lang": "fi",
+   "text": "Savusauna tarjoaa rauhallisen ympäristön työhyvinvointipäiville, pienryhmille ja yhteisille saunailloille Sipoonjoen rannalla. Perinteisten saunavuorojen, rituaalien ja hoitojen lisäksi päivään voidaan yhdistää esimerkiksi metsäkävely, metsäjooga, eräruokailu laavulla tai vihdansidontatyöpaja.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.company.title",
+   "lang": "en",
+   "text": "A smoke sauna for companies and groups too",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.company.title",
+   "lang": "fi",
+   "text": "Savusauna myös yrityksille ja ryhmille",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.events.empty",
+   "lang": "en",
+   "text": "New events will be announced soon. Follow us on social media.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.events.empty",
+   "lang": "fi",
+   "text": "Uusia tapahtumia julkaistaan pian. Seuraa meitä sosiaalisessa mediassa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.events.title",
+   "lang": "en",
+   "text": "Events",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.events.title",
+   "lang": "fi",
+   "text": "Tapahtumat",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.1.cta",
+   "lang": "en",
+   "text": "See treatments →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.1.cta",
+   "lang": "fi",
+   "text": "Katso hoidot →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.1.pill",
+   "lang": "en",
+   "text": "experience saunotus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.1.pill",
+   "lang": "fi",
+   "text": "koe saunotus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.1.text",
+   "lang": "en",
+   "text": "All-encompassing sauna treatments, rituals and traditional saunotus in the smoke and steam. Choose a short moment of care or a deeper journey into Finnish sauna tradition.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.1.text",
+   "lang": "fi",
+   "text": "Kokonaisvaltaisia saunahoitoja, rituaaleja ja perinnesaunotuksia savun ja löylyn äärellä. Valitse lyhyt hoitohetki tai syvempi matka suomalaisen saunaperinteen maailmaan.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.1.title",
+   "lang": "en",
+   "text": "Treatments and rituals",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.1.title",
+   "lang": "fi",
+   "text": "Hoidot ja rituaalit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.2.cta",
+   "lang": "en",
+   "text": "Book your session →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.2.cta",
+   "lang": "fi",
+   "text": "Varaa vuorosi →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.2.over.duration",
+   "lang": "en",
+   "text": "2–3 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.2.over.duration",
+   "lang": "fi",
+   "text": "2–3 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.2.pill",
+   "lang": "en",
+   "text": "public",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.2.pill",
+   "lang": "fi",
+   "text": "yleinen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.2.text",
+   "lang": "en",
+   "text": "Bring friends or family and enjoy a communal sauna experience, the soft steam of our smoke sauna and a wonderful setting.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.2.text",
+   "lang": "fi",
+   "text": "Ota ystävät tai perhe mukaan ja tule nauttimaan yhteisöllisestä saunaelämyksestä sekä savusaunamme pehmeistä löylyistä ja upeasta miljööstä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.2.title",
+   "lang": "en",
+   "text": "Public sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.2.title",
+   "lang": "fi",
+   "text": "Yleinen sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.3.cta",
+   "lang": "en",
+   "text": "Explore →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.3.cta",
+   "lang": "fi",
+   "text": "Tutustu →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.3.note",
+   "lang": "en",
+   "text": "The price of an after-session includes 6 guests; additional guests €10 each.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.3.note",
+   "lang": "fi",
+   "text": "Jälkilöylyjen hinta sisältää 6 hlö, lisähenkilöt 10 €/hlö.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.3.over.duration",
+   "lang": "en",
+   "text": "1–7 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.3.over.duration",
+   "lang": "fi",
+   "text": "1–7 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.3.pill",
+   "lang": "en",
+   "text": "private",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.3.pill",
+   "lang": "fi",
+   "text": "yksityinen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.3.text",
+   "lang": "en",
+   "text": "By renting the heritage sauna for your own group you can enjoy the beauty of our sauna setting in complete peace.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.3.text",
+   "lang": "fi",
+   "text": "Vuokraamalla Sipoonjoen Perinnesaunan oman porukkasi käyttöön pääset nauttimaan saunamiljöömme kauneudesta kaikessa rauhassa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.3.title",
+   "lang": "en",
+   "text": "Private sessions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.3.title",
+   "lang": "fi",
+   "text": "Yksityisvuorot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.4.cta",
+   "lang": "en",
+   "text": "Buy a gift card →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.4.cta",
+   "lang": "fi",
+   "text": "Osta lahjakortti →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.4.pill",
+   "lang": "en",
+   "text": "gift",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.4.pill",
+   "lang": "fi",
+   "text": "lahjaksi",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.4.text",
+   "lang": "en",
+   "text": "Give the gift of warmth, steam and unhurried time. Choose an open gift card or a ready-made experience for different moments and needs.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.4.text",
+   "lang": "fi",
+   "text": "Anna lahjaksi hetki lämpöä, löylyä ja kiireettömyyttä. Valitse avoin lahjakortti tai valmis elämys erilaisiin hetkiin ja tarpeisiin.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.4.title",
+   "lang": "en",
+   "text": "Gift cards",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.4.title",
+   "lang": "fi",
+   "text": "Lahjakortit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.5.cta",
+   "lang": "en",
+   "text": "Book a saunotus →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.5.cta",
+   "lang": "fi",
+   "text": "Varaa saunotus →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.5.pill",
+   "lang": "en",
+   "text": "private",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.5.pill",
+   "lang": "fi",
+   "text": "yksityinen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.5.text",
+   "lang": "en",
+   "text": "Saunotus is a two-hour, all-encompassing sauna experience where warmth, steam and the gifts of nature combine into a deeply relaxing experience.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.5.text",
+   "lang": "fi",
+   "text": "Saunotus on kahden tunnin kokonaisvaltainen saunaelämys, jossa lämpö, löyly ja luonnonantimet yhdistyvät syvästi rentouttavaksi kokemukseksi.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.5.title",
+   "lang": "en",
+   "text": "Saunotus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.items.5.title",
+   "lang": "fi",
+   "text": "Saunotus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.title",
+   "lang": "en",
+   "text": "We recommend",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.featured.title",
+   "lang": "fi",
+   "text": "Suosittelemme",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.hero.cta1",
+   "lang": "en",
+   "text": "Book a sauna experience",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.hero.cta1",
+   "lang": "fi",
+   "text": "Varaa saunaelämys",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.hero.cta2",
+   "lang": "en",
+   "text": "Give as a gift",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.hero.cta2",
+   "lang": "fi",
+   "text": "Anna lahjaksi",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.hero.text",
+   "lang": "en",
+   "text": "Saunotus is more than a sauna. Warmth, steam and all-encompassing rituals for body and mind",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.hero.text",
+   "lang": "fi",
+   "text": "Saunotus on enemmän kuin sauna. Lämpöä, löylyä ja kokonaisvaltaisia rituaaleja keholle ja mielelle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.hero.title",
+   "lang": "en",
+   "text": "A smoke sauna in Sipoo",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.hero.title",
+   "lang": "fi",
+   "text": "Savusauna Sipoossa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.ritual.cta",
+   "lang": "en",
+   "text": "See times and book →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.ritual.cta",
+   "lang": "fi",
+   "text": "Katso ajat ja varaa →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.ritual.facts.1.text",
+   "lang": "en",
+   "text": "Guided ritual",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.ritual.facts.1.text",
+   "lang": "fi",
+   "text": "Ohjattu rituaali",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.ritual.facts.2.text",
+   "lang": "en",
+   "text": "20 minutes",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.ritual.facts.2.text",
+   "lang": "fi",
+   "text": "20 minuuttia",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.ritual.facts.3.text",
+   "lang": "en",
+   "text": "Includes a smoke sauna session",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.ritual.facts.3.text",
+   "lang": "fi",
+   "text": "Sisältää savusaunavuoron",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.ritual.facts.4.text",
+   "lang": "en",
+   "text": "The programme changes with the seasons",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.ritual.facts.4.text",
+   "lang": "fi",
+   "text": "Ohjelma vaihtuu vuodenaikojen mukaan",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.ritual.kicker",
+   "lang": "en",
+   "text": "weekly on Saturdays and Sundays",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.ritual.kicker",
+   "lang": "fi",
+   "text": "viikoittain lauantaisin ja sunnuntaisin",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.ritual.paras.1",
+   "lang": "en",
+   "text": "Step deep into the Baltic-Finnic sauna tradition and experience a ritual that lives with the seasons. Each season brings its own atmosphere, scents and sauna traditions.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.ritual.paras.1",
+   "lang": "fi",
+   "text": "Astu syvälle itämerensuomalaiseen saunotusperinteeseen ja koe vuodenaikojen mukana elävä rituaali. Jokainen kausi tuo mukanaan oman tunnelmansa, tuoksunsa ja saunaperinteensä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.ritual.paras.2",
+   "lang": "en",
+   "text": "The ritual is held in the Rauni treatment sauna in a small group – a maximum of six participants at a time. During the ritual you can rest on the wide benches and let the warmth, the steam and the traditions carry you.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.ritual.paras.2",
+   "lang": "fi",
+   "text": "Rituaali järjestetään hoitosauna Raunissa pienryhmässä – mukaan otetaan kerrallaan enintään kuusi osallistujaa. Rituaalin aikana saat levätä leveillä lauteilla ja antautua lämmön, löylyn ja perinteiden kannateltavaksi.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.ritual.title",
+   "lang": "en",
+   "text": "Sauna ritual evening",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.ritual.title",
+   "lang": "fi",
+   "text": "Saunarituaali-ilta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.ig",
+   "lang": "en",
+   "text": "Follow us on Instagram",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.ig",
+   "lang": "fi",
+   "text": "Seuraa meitä Instagramissa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.items.1.text",
+   "lang": "en",
+   "text": "The Sipoonjoki heritage sauna was completed. There was still a lot of work ahead, but the first events were held that same autumn.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.items.1.text",
+   "lang": "fi",
+   "text": "Sipoonjoen Perinnesauna valmistui. Työtä oli vielä paljon edessä, mutta jo samana syksynä pidettiin ensimmäiset tapahtumat.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.items.2.text",
+   "lang": "en",
+   "text": "In January we opened the public sessions, and a harsh winter struck right away. Heating a smoke sauna in deep snow, frost and ice really had to be learnt.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.items.2.text",
+   "lang": "fi",
+   "text": "Tammikuussa avasimme yleiset vuorot, ja rankka talvi iski heti päälle. Savusaunan lämmittämistä paksussa lumessa, pakkasessa ja jäässä piti ihan oikeasti opetella.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.items.3.text",
+   "lang": "en",
+   "text": "Operations began to settle, and towards the end of the year we also opened the Wednesday sessions.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.items.3.text",
+   "lang": "fi",
+   "text": "Toiminta alkoi vakiintua, ja loppuvuodesta avasimme myös keskiviikon viikkovuorot.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.items.4.text",
+   "lang": "en",
+   "text": "Operations expanded: trainings began for Finnish and international groups, and the sauna began to be heated every day.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.items.4.text",
+   "lang": "fi",
+   "text": "Toiminta laajeni: koulutukset alkoivat sekä suomalaisille että kansainvälisille ryhmille, ja sauna alkoi lämmetä joka päivä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.items.5.text",
+   "lang": "en",
+   "text": "Building projects progressed, and the new treatment area with its treatment saunas was completed.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.items.5.text",
+   "lang": "fi",
+   "text": "Rakennusprojektit etenivät, ja uusi hoitoalue valmistui hoitosaunoineen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.items.5.year",
+   "lang": "en",
+   "text": "Since then",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.items.5.year",
+   "lang": "fi",
+   "text": "Sen jälkeen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.kicker",
+   "lang": "en",
+   "text": "the story of the sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.kicker",
+   "lang": "fi",
+   "text": "saunan tarina",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.lead",
+   "lang": "en",
+   "text": "We are often asked this, so we put the years together.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.lead",
+   "lang": "fi",
+   "text": "Tätä kysytään meiltä usein, joten kokosimme vuodet yhteen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.thanks",
+   "lang": "en",
+   "text": "Thank you to everyone who has been along for the ride. Welcome to the steam!",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.thanks",
+   "lang": "fi",
+   "text": "Kiitos jokaiselle, joka on ollut matkassa mukana. Tervetuloa löylyihin!",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.title",
+   "lang": "en",
+   "text": "When was the sauna built?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.story.title",
+   "lang": "fi",
+   "text": "Milloin sauna on rakennettu?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.1.links.1.label",
+   "lang": "en",
+   "text": "Public sauna sessions →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.1.links.1.label",
+   "lang": "fi",
+   "text": "Yleiset saunavuorot →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.1.text",
+   "lang": "en",
+   "text": "Come and enjoy the soft steam of our smoke sauna and refreshing dips.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.1.text",
+   "lang": "fi",
+   "text": "Tule nauttimaan savusaunamme pehmeistä löylyistä ja virkistävistä kylvyistä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.1.title",
+   "lang": "en",
+   "text": "Good steam",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.1.title",
+   "lang": "fi",
+   "text": "Hyvät löylyt",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.2.links.1.label",
+   "lang": "en",
+   "text": "Explore the experiences →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.2.links.1.label",
+   "lang": "fi",
+   "text": "Tutustu kokemuksiin →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.2.text",
+   "lang": "en",
+   "text": "Guided rituals and Finnish sauna traditions brought into the present day.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.2.text",
+   "lang": "fi",
+   "text": "Ohjattuja rituaaleja ja suomalaisia saunaperinteitä nykypäivään tuotuna.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.2.title",
+   "lang": "en",
+   "text": "Treatments & rituals",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.2.title",
+   "lang": "fi",
+   "text": "Hoidot & rituaalit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.3.links.1.label",
+   "lang": "en",
+   "text": "Private sessions →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.3.links.1.label",
+   "lang": "fi",
+   "text": "Yksityisvuorot →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.3.text",
+   "lang": "en",
+   "text": "Book the sauna for your own group, or build a complete sauna experience for it.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.3.text",
+   "lang": "fi",
+   "text": "Varaa sauna omalle seurueelle tai rakenna ryhmällesi kokonainen saunaelämys.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.3.title",
+   "lang": "en",
+   "text": "Your own sauna session",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.3.title",
+   "lang": "fi",
+   "text": "Oma saunavuoro",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.4.links.1.label",
+   "lang": "en",
+   "text": "→ Open gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.4.links.1.label",
+   "lang": "fi",
+   "text": "→ Avoin lahjakortti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.4.links.2.label",
+   "lang": "en",
+   "text": "→ Gift card packages",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.4.links.2.label",
+   "lang": "fi",
+   "text": "→ Lahjakorttipaketit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.4.text",
+   "lang": "en",
+   "text": "Shared sauna experiences and special moments that stay with you.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.4.text",
+   "lang": "fi",
+   "text": "Yhteisiä saunaelämyksiä ja erityisiä hetkiä, jotka jäävät mieleen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.4.title",
+   "lang": "en",
+   "text": "An experience as a gift",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.front.tiles.4.title",
+   "lang": "fi",
+   "text": "Lahjaksi elämys",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.all_gift",
+   "lang": "en",
+   "text": "See all gift cards",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.all_gift",
+   "lang": "fi",
+   "text": "Katso kaikki lahjakortit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.extend.text",
+   "lang": "en",
+   "text": "If you cannot use your gift card in time, its validity is extended free of charge on request by email or phone – to the date you wish, or otherwise by 3 months from the day of the request. There are no conditions. To ask for an extension:",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.extend.text",
+   "lang": "fi",
+   "text": "Jos lahjakorttia ei ehditä käyttää, voimassaoloa jatketaan maksutta sähköpostitse tai puhelimitse pyydettäessä – toivomaasi päivään asti tai muuten 3 kuukautta pyyntöpäivästä eteenpäin. Jatkamiseen ei liity ehtoja. Pyydä jatkoa:",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.extend.third",
+   "lang": "en",
+   "text": "For third-party gift cards (Elämyslahjat, Offerilla, Kokemuskauppa), extensions and expired cards are handled by each service's own customer service.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.extend.third",
+   "lang": "fi",
+   "text": "Kolmansien osapuolten lahjakorttien (Elämyslahjat, Offerilla, Kokemuskauppa) voimassaolon jatkamisesta ja vanhentuneista korteista vastaa kunkin palvelun oma asiakaspalvelu.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.extend.title",
+   "lang": "en",
+   "text": "Extending the validity of a gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.extend.title",
+   "lang": "fi",
+   "text": "Lahjakortin voimassaolon jatkaminen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.have_text",
+   "lang": "en",
+   "text": "Make a booking using a gift card from Elämyslahjat, Sipoonjoen Perinnesauna itself, Kiitoskauppa or Kokemuskauppa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.have_text",
+   "lang": "fi",
+   "text": "Tee varaus käyttäen Elämyslahjojen, Sipoonjoen Perinnesaunan oman, Kiitoskaupan tai Kokemuskaupan lahjakorttia.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.have_title",
+   "lang": "en",
+   "text": "Book with a gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.have_title",
+   "lang": "fi",
+   "text": "Tee varaus lahjakortilla",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.hero.buttons.1.label",
+   "lang": "en",
+   "text": "Buy an open gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.hero.buttons.1.label",
+   "lang": "fi",
+   "text": "Osta avoin lahjakortti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.hero.buttons.2.label",
+   "lang": "en",
+   "text": "Gift card packages",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.hero.buttons.2.label",
+   "lang": "fi",
+   "text": "Lahjakorttipaketit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.hero.buttons.3.label",
+   "lang": "en",
+   "text": "I have a gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.hero.buttons.3.label",
+   "lang": "fi",
+   "text": "Minulla on lahjakortti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.hero.text",
+   "lang": "en",
+   "text": "Give the gift of time, warmth and wellbeing.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.hero.text",
+   "lang": "fi",
+   "text": "Anna lahjaksi aikaa, lämpöä ja hyvää oloa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.hero.title",
+   "lang": "en",
+   "text": "Gift cards",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.hero.title",
+   "lang": "fi",
+   "text": "Lahjakortit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.open_text",
+   "lang": "en",
+   "text": "Here you can buy an open gift card that is valid for all services at Sipoonjoen Perinnesauna. The gift card is valid for 6 months from the purchase date.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.open_text",
+   "lang": "fi",
+   "text": "Voit ostaa tästä avoimen lahjakortin, joka käy kaikkiin Sipoonjoen Perinnesaunan palveluihin. Lahjakortti on voimassa 6 kk ostopäivästä alkaen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.open_title",
+   "lang": "en",
+   "text": "Open gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.open_title",
+   "lang": "fi",
+   "text": "Avoin lahjakortti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.own.cta",
+   "lang": "en",
+   "text": "Make a booking",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.own.cta",
+   "lang": "fi",
+   "text": "Tee varaus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.own.kicker",
+   "lang": "en",
+   "text": "Do you have a",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.own.kicker",
+   "lang": "fi",
+   "text": "Onko sinulla",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.own.text",
+   "lang": "en",
+   "text": "With a Sipoonjoen Perinnesauna gift card you can book directly through the booking system. At the end, enter the 12-character gift card code in the “use code” field in the shopping cart.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.own.text",
+   "lang": "fi",
+   "text": "Sipoonjoen Perinnesaunan lahjakortilla voit tehdä varauksen suoraan varausjärjestelmän kautta. Syötä lopuksi 12-merkkinen lahjakortin koodi ostoskorissa kenttään ”käytä koodia”.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.own.title",
+   "lang": "en",
+   "text": "Sipoonjoen Perinnesauna gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.own.title",
+   "lang": "fi",
+   "text": "Sipoonjoen Perinnesaunan oma lahjakortti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.pack_title",
+   "lang": "en",
+   "text": "Gift card packages",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.pack_title",
+   "lang": "fi",
+   "text": "Lahjakorttipaketit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.third.cta",
+   "lang": "en",
+   "text": "Make a booking",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.third.cta",
+   "lang": "fi",
+   "text": "Tee varaus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.third.kicker",
+   "lang": "en",
+   "text": "Do you have an",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.third.kicker",
+   "lang": "fi",
+   "text": "Onko sinulla",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.third.link",
+   "lang": "en",
+   "text": "Elämyslahjat customer service",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.third.link",
+   "lang": "fi",
+   "text": "Elämyslahjojen asiakaspalveluun",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.third.text",
+   "lang": "en",
+   "text": "To book with an Elämyslahjat gift card, first make sure the card is still valid. If the card has already expired, please contact Elämyslahjat customer service.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.third.text",
+   "lang": "fi",
+   "text": "Tehdäksesi varauksen Elämyslahjojen lahjakortilla varmista ensin, että lahjakortti on voimassa. Jos lahjakortti on jo ehtinyt vanhentua, ota yhteyttä Elämyslahjojen asiakaspalveluun.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.third.text2",
+   "lang": "en",
+   "text": "For the booking you need the gift card code, found in the middle of the card next to the expiry date. Do not use the code next to the barcode – it does not work. Choose the public session you want and make the booking. Enter the gift card code in the field provided. Any additional services are booked with a separate order. Welcome to the sauna!",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.third.text2",
+   "lang": "fi",
+   "text": "Varausta varten tarvitset lahjakortin koodin, joka löytyy lahjakortin keskiosasta voimassaolopäivän vierestä. Älä käytä viivakoodin yhteydessä olevaa koodia, se ei toimi. Valitse haluamasi yleinen vuoro ja tee varaus. Syötä lahjakortin koodi sille varattuun paikkaan. Mahdolliset lisäpalvelut varataan erillisellä tilauksella. Tervetuloa saunomaan!",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.third.title",
+   "lang": "en",
+   "text": "Elämyslahjat or Kokemuskauppa gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.gift.third.title",
+   "lang": "fi",
+   "text": "Elämyslahjojen tai Kokemuskaupan lahjakortti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.cancel_link",
+   "lang": "en",
+   "text": "Read the booking and cancellation terms",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.cancel_link",
+   "lang": "fi",
+   "text": "Lue varaus- ja peruutusehdot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.cancel_text",
+   "lang": "en",
+   "text": "A public session can be cancelled free of charge at least {{setting:customer_change_hours_before}} hours before it starts. The cancellation terms for private sessions, events and traditional sauna evenings are in the terms.",
+   "version": 1,
+   "placeholders": [
+    "{{setting:customer_change_hours_before}}"
+   ]
+  },
+  {
+   "key": "page.info.cancel_text",
+   "lang": "fi",
+   "text": "Yleisen vuoron voi perua maksutta vähintään {{setting:customer_change_hours_before}} tuntia ennen alkua. Yksityisvuorojen, tapahtumien ja perinnesaunotusiltojen peruutusehdot löydät ehdoista.",
+   "version": 1,
+   "placeholders": [
+    "{{setting:customer_change_hours_before}}"
+   ]
+  },
+  {
+   "key": "page.info.cancel_title",
+   "lang": "en",
+   "text": "Cancelling a booking",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.cancel_title",
+   "lang": "fi",
+   "text": "Varauksen peruminen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.faq_title",
+   "lang": "en",
+   "text": "Frequently asked questions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.faq_title",
+   "lang": "fi",
+   "text": "Usein kysyttyä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.hero.text",
+   "lang": "en",
+   "text": "Here you will find the most important information about what you need to bring, how to get here and where you can leave the car.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.hero.text",
+   "lang": "fi",
+   "text": "Täältä löydät tärkeimmät tiedot siitä, mitä tarvitset mukaan, kuinka saavut perille ja mihin auton voi jättää.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.hero.title",
+   "lang": "en",
+   "text": "Practical information",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.hero.title",
+   "lang": "fi",
+   "text": "Käytännön info",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.blocks.1.p",
+   "lang": "en",
+   "text": "You don't need to bring a lot to the sauna. Bring at least:",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.blocks.1.p",
+   "lang": "fi",
+   "text": "Saunalle ei tarvitse ottaa paljon tavaraa mukaan. Varaa mukaasi ainakin:",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.blocks.2.ul.1",
+   "lang": "en",
+   "text": "A swimsuit if necessary",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.blocks.2.ul.1",
+   "lang": "fi",
+   "text": "Uima-asu tarvittaessa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.blocks.2.ul.2",
+   "lang": "en",
+   "text": "A towel",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.blocks.2.ul.2",
+   "lang": "fi",
+   "text": "Pyyhe",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.blocks.2.ul.3",
+   "lang": "en",
+   "text": "A drinking bottle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.blocks.2.ul.3",
+   "lang": "fi",
+   "text": "Juomapullo",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.blocks.2.ul.4",
+   "lang": "en",
+   "text": "Weather-appropriate clothing and footwear",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.blocks.2.ul.4",
+   "lang": "fi",
+   "text": "Säänmukaiset vaatteet ja jalkineet",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.blocks.3.p",
+   "lang": "en",
+   "text": "The sauna area is partly outdoors all year round. In winter it is a good idea to bring warm shoes that are easy to put on. In cooler weather a beanie or sauna hat is useful for relaxing in the hot tub.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.blocks.3.p",
+   "lang": "fi",
+   "text": "Sauna-alueella liikutaan osittain ulkona ympäri vuoden. Talvella kannattaa ottaa mukaan lämpimät ja helposti jalkaan laitettavat jalkineet. Viileämmällä säällä on hyvä olla pipo tai saunahattu paljussa rentoutumista varten.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.blocks.4.p",
+   "lang": "en",
+   "text": "If you want to grill sausages during your sauna evening, you can bring your own.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.blocks.4.p",
+   "lang": "fi",
+   "text": "Jos haluat paistaa makkaraa saunaillan aikana, voit ottaa omat makkarat mukaan.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.blocks.5.note",
+   "lang": "en",
+   "text": "**Swimsuit use depends on the session.** Swimsuits are worn in mixed public sessions. On the Monday men's session, the Tuesday women's session and the Wednesday silent mixed session, wearing a swimsuit is optional. In personal sauna treatments and saunotus sessions you can be fully or partially without a swimsuit, as you wish.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.blocks.5.note",
+   "lang": "fi",
+   "text": "**Uima-asun käyttö riippuu vuorosta.** Yleisillä sekavuoroilla saunotaan uima-asussa. Maanantain miestenvuorolla, tiistain naistenvuorolla sekä keskiviikon hiljaisella sekavuorolla uima-asun käyttö ei kuitenkaan ole pakollista. Henkilökohtaisissa saunahoidoissa ja saunotuksissa voit olla oman toiveesi mukaan kokonaan tai osittain ilman uima-asua.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.blocks.6.p",
+   "lang": "en",
+   "text": "Remember to drink enough while in the sauna. Non-alcoholic drinks are available at the sauna.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.blocks.6.p",
+   "lang": "fi",
+   "text": "Muista juoda riittävästi saunomisen aikana. Saunalla on saatavilla alkoholittomia virvokkeita.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.tag",
+   "lang": "en",
+   "text": "What do you need to bring to the sauna?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.tag",
+   "lang": "fi",
+   "text": "Mitä tarvitset mukaan saunalle?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.title",
+   "lang": "en",
+   "text": "What to bring",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.1.title",
+   "lang": "fi",
+   "text": "Mitä mukaan?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.2.blocks.1.p",
+   "lang": "en",
+   "text": "Sipoonjoen Perinnesauna is located in Hindsby, Sipoo, next to Sipoonkorpi National Park.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.2.blocks.1.p",
+   "lang": "fi",
+   "text": "Sipoonjoen Perinnesauna sijaitsee Sipoon Hindsbyssä, Sipoonkorven kansallispuiston kupeessa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.2.blocks.3.p",
+   "lang": "en",
+   "text": "**Please arrive no earlier than about 10 minutes before your booking starts.**",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.2.blocks.3.p",
+   "lang": "fi",
+   "text": "**Saavu paikalle aikaisintaan noin 10 minuuttia ennen varauksesi alkua.**",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.2.blocks.4.p",
+   "lang": "en",
+   "text": "Please note that the sauna often has private sessions, so wait for the staff on the terrace near the car park and get to know the sauna surroundings with the guidance of the staff.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.2.blocks.4.p",
+   "lang": "fi",
+   "text": "Huomioithan, että saunalla on usein yksityisvuoroja, joten odotathan henkilökuntaa parkkipaikan läheisellä terassilla ja tutustut saunan miljööseen henkilökunnan opastuksella.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.2.blocks.5.link.label",
+   "lang": "en",
+   "text": "See the route in the HSL Journey Planner",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.2.blocks.5.link.label",
+   "lang": "fi",
+   "text": "Katso reitti HSL:n Reittioppaasta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.2.blocks.5.p",
+   "lang": "en",
+   "text": "By public transport, bus 841 runs from Itäkeskus to Broböle. The stop is about 1 km from the sauna.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.2.blocks.5.p",
+   "lang": "fi",
+   "text": "Julkisilla liikkuessa bussilla 841 pääsee Itäkeskuksesta Broböleen. Pysäkiltä on noin kilometrin matka perinnesaunalle.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.2.tag",
+   "lang": "en",
+   "text": "Address and transport links",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.2.tag",
+   "lang": "fi",
+   "text": "Osoite ja kulkuyhteydet",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.2.title",
+   "lang": "en",
+   "text": "Arrival and location",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.2.title",
+   "lang": "fi",
+   "text": "Saapuminen ja sijainti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.3.blocks.1.p",
+   "lang": "en",
+   "text": "Parking is free of charge for customers. When you arrive, follow the parking signs and leave your car in the designated parking area.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.3.blocks.1.p",
+   "lang": "fi",
+   "text": "Pysäköinti on asiakkaille maksuton. Saapuessasi alueelle seuraa pysäköintiopasteita ja jätä auto sille osoitetulle pysäköintialueelle.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.3.blocks.2.p",
+   "lang": "en",
+   "text": "**Please park as compactly as possible** so that as many cars as possible fit in the parking area. Make sure, however, that the driveways stay clear.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.3.blocks.2.p",
+   "lang": "fi",
+   "text": "**Pyydämme pysäköimään autot mahdollisimman tiiviisti**, jotta pysäköintialueelle mahtuu mahdollisimman monta autoa. Huolehdi kuitenkin siitä, että kulkuväylät jäävät vapaiksi.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.3.blocks.3.p",
+   "lang": "en",
+   "text": "From the parking area you continue on foot to the sauna area.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.3.blocks.3.p",
+   "lang": "fi",
+   "text": "Pysäköintialueelta jatketaan jalan sauna-alueelle.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.3.blocks.4.note",
+   "lang": "en",
+   "text": "In winter and in wet weather the roads and paths in the area can be slippery, so be prepared with footwear suited to the conditions.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.3.blocks.4.note",
+   "lang": "fi",
+   "text": "Talvella ja märällä säällä alueen tiet ja polut voivat olla liukkaita, joten varaudu keliin sopivilla jalkineilla.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.3.tag",
+   "lang": "en",
+   "text": "Where to leave the car",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.3.tag",
+   "lang": "fi",
+   "text": "Minne auton voi jättää",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.3.title",
+   "lang": "en",
+   "text": "Parking",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.3.title",
+   "lang": "fi",
+   "text": "Pysäköinti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.4.blocks.1.p",
+   "lang": "en",
+   "text": "The sauna area is not fully accessible, as there are steps in the area. If you need help getting around, please let us know in advance by email.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.4.blocks.1.p",
+   "lang": "fi",
+   "text": "Sauna-alue ei ole täysin esteetön, sillä alueella on portaita. Jos tarvitset apua liikkumiseen, kerro siitä etukäteen sähköpostitse.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.4.blocks.2.p",
+   "lang": "en",
+   "text": "It is about 40 metres from the changing rooms to the sauna.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.4.blocks.2.p",
+   "lang": "fi",
+   "text": "Pukuhuoneilta saunalle on noin 40 metrin matka.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.4.tag",
+   "lang": "en",
+   "text": "Getting around the sauna area",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.4.tag",
+   "lang": "fi",
+   "text": "Liikkuminen sauna-alueella",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.4.title",
+   "lang": "en",
+   "text": "Accessibility",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.info.sections.4.title",
+   "lang": "fi",
+   "text": "Esteettömyys",
+   "version": 1,
+   "placeholders": []
+  },
+  {
    "key": "page.order.lead",
    "lang": "en",
    "text": "Order lines, payment status and receipts.",
@@ -1032,6 +3528,496 @@
    "key": "page.order.title",
    "lang": "fi",
    "text": "Tilauksesi",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.privacy.hero.text",
+   "lang": "fi",
+   "text": "Asiakasrekisterin tietosuojaseloste.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.privacy.hero.title",
+   "lang": "fi",
+   "text": "Tietosuoja",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.bridge",
+   "lang": "en",
+   "text": "Need a treatment or ritual alongside your sauna session? See treatments & rituals →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.bridge",
+   "lang": "fi",
+   "text": "Tarvitsetko hoitoa tai rituaalin saunavuoron yhteyteen? Katso hoidot ja rituaalit →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.company_link",
+   "lang": "en",
+   "text": "For companies →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.company_link",
+   "lang": "fi",
+   "text": "Yrityksille →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.hero.buttons.1.label",
+   "lang": "en",
+   "text": "Public sessions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.hero.buttons.1.label",
+   "lang": "fi",
+   "text": "Yleiset vuorot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.hero.buttons.2.label",
+   "lang": "en",
+   "text": "Private sessions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.hero.buttons.2.label",
+   "lang": "fi",
+   "text": "Yksityisvuorot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.hero.buttons.3.label",
+   "lang": "en",
+   "text": "Treatments & rituals",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.hero.buttons.3.label",
+   "lang": "fi",
+   "text": "Hoidot ja rituaalit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.hero.text",
+   "lang": "en",
+   "text": "At Sipoonjoen Perinnesauna you can enjoy the rich steam of our smoke sauna, warm and cold dips and the peace of the riverbank.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.hero.text",
+   "lang": "fi",
+   "text": "Sipoonjoen Perinnesaunalla voit tulla nauttimaan savusaunamme täyteläisistä löylyistä, lämpimistä ja kylmistä kylvyistä sekä jokivarren rauhasta.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.hero.title",
+   "lang": "en",
+   "text": "Sauna sessions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.hero.title",
+   "lang": "fi",
+   "text": "Saunavuorot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.private_intro",
+   "lang": "en",
+   "text": "You can also have the sauna entirely for your own group. Prices apply to private individuals only – companies have their own products.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.private_intro",
+   "lang": "fi",
+   "text": "Saunan voi saada myös kokonaan omalle porukalle. Hinnat ovat voimassa vain yksityishenkilöille – yrityksille on omat tuotteet.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.private_title",
+   "lang": "en",
+   "text": "Private sessions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.private_title",
+   "lang": "fi",
+   "text": "Yksityisvuorot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.public_intro",
+   "lang": "en",
+   "text": "At public sessions the sauna is open to everyone who has booked. At weekends the public session runs Sat–Sun 2–7 pm.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.public_intro",
+   "lang": "fi",
+   "text": "Yleisillä vuoroilla sauna on avoinna kaikille varanneille. Viikonloppuisin yleinen vuoro on la–su klo 14–19.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.public_title",
+   "lang": "en",
+   "text": "Public sessions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.sauna.public_title",
+   "lang": "fi",
+   "text": "Yleiset vuorot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.terms.hero.text",
+   "lang": "en",
+   "text": "Booking, cancellation, payment and gift card terms.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.terms.hero.text",
+   "lang": "fi",
+   "text": "Varaus-, peruutus-, maksu- ja lahjakorttiehdot.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.terms.hero.title",
+   "lang": "en",
+   "text": "Terms and conditions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.terms.hero.title",
+   "lang": "fi",
+   "text": "Ehdot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.terms.note",
+   "lang": "en",
+   "text": "Bookings and payments are made in the Johku web shop, whose terms apply at the time of purchase.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.terms.note",
+   "lang": "fi",
+   "text": "Varaukset ja maksut tehdään Johku-verkkokaupassa, jonka ehdot ovat voimassa ostohetkellä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.hero.buttons.1.label",
+   "lang": "en",
+   "text": "Saunotus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.hero.buttons.1.label",
+   "lang": "fi",
+   "text": "Saunotukset",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.hero.buttons.2.label",
+   "lang": "en",
+   "text": "Open rituals",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.hero.buttons.2.label",
+   "lang": "fi",
+   "text": "Avoimet rituaalit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.hero.buttons.3.label",
+   "lang": "en",
+   "text": "Private rituals",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.hero.buttons.3.label",
+   "lang": "fi",
+   "text": "Yksityiset rituaalit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.hero.text",
+   "lang": "en",
+   "text": "In saunotus, warmth, steam, whisks, gifts of nature and old sauna traditions combine into a guided experience that calms the body and mind more deeply than ordinary sauna bathing.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.hero.text",
+   "lang": "fi",
+   "text": "Saunotuksessa lämpö, löyly, vihdat, luonnonantimet ja vanhat saunaperinteet yhdistyvät ohjatuksi kokemukseksi, joka rauhoittaa kehoa ja mieltä syvemmin kuin tavallinen saunominen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.hero.title",
+   "lang": "en",
+   "text": "Treatments and rituals",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.hero.title",
+   "lang": "fi",
+   "text": "Hoidot ja rituaalit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.intro.kicker",
+   "lang": "en",
+   "text": "what is saunotus?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.intro.kicker",
+   "lang": "fi",
+   "text": "mitä on saunotus?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.intro.note",
+   "lang": "en",
+   "text": "All treatments and saunotus rituals take place in the Rauni treatment sauna.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.intro.note",
+   "lang": "fi",
+   "text": "Kaikki hoidot ja saunotukset tehdään hoitosauna Raunissa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.intro.text",
+   "lang": "en",
+   "text": "Saunotus is a guided, multisensory sauna ritual rooted in Finnish cultural tradition. It brings the old sauna traditions to life through mythology, ritual songs, gifts of nature, scents, the elements and löyly – the steam that is both the spirit of the sauna and its heat.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.intro.text",
+   "lang": "fi",
+   "text": "Saunotus on ohjattu moniaistinen saunarituaali, joka juontaa juurensa suomalaiseen kulttuuriperinteeseen. Se herättää vanhat saunaperinteet eloon mytologian, rituaalilaulujen, luonnonantimien, tuoksujen, elementtien ja löylyn kautta – löylyn, joka on sekä saunan henki että sen lämpö.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.intro.title",
+   "lang": "en",
+   "text": "An experience rooted in tradition",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.intro.title",
+   "lang": "fi",
+   "text": "Elämys, joka juontaa juurensa perinteeseen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s1.more",
+   "lang": "en",
+   "text": "More information",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s1.more",
+   "lang": "fi",
+   "text": "Lisätiedot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s1.note",
+   "lang": "en",
+   "text": "The price of a treatment does not include access to the smoke sauna or the hot tubs – a sauna session is booked separately.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s1.note",
+   "lang": "fi",
+   "text": "Hoitojen hintaan ei sisälly pääsyä savusaunaan tai paljuihin – saunavuoro varataan erikseen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s1.text",
+   "lang": "en",
+   "text": "Private rituals are unhurried, guided sauna experiences where steam, warmth, whisks and gifts of nature build a unique experience for every group. The content of a ritual always adapts to the guests, the moment and the atmosphere of the sauna.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s1.text",
+   "lang": "fi",
+   "text": "Yksityiset rituaalit ovat kiireettömiä ja ohjattuja saunaelämyksiä, joissa löyly, lämpö, vihdat ja luonnonantimet rakentavat jokaiselle seurueelle omanlaisensa kokemuksen. Rituaalin sisältö mukautuu aina asiakkaiden, hetken ja saunan tunnelman mukaan.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s1.title",
+   "lang": "en",
+   "text": "Treatments and saunotus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s1.title",
+   "lang": "fi",
+   "text": "Hoidot ja saunotukset",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s2.text",
+   "lang": "en",
+   "text": "Open rituals offer a chance to get to know saunotus together with others. The guided moments may include, for example, whisking, peat, sauna songs, natural scents and old sauna traditions – every ritual a little in its own way.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s2.text",
+   "lang": "fi",
+   "text": "Avoimet rituaalit tarjoavat mahdollisuuden tutustua saunotukseen yhdessä muiden kanssa. Ohjatut hetket voivat sisältää esimerkiksi vihtomista, turvetta, saunalauluja, luonnontuoksuja ja vanhoja saunaperinteitä – jokainen rituaali hieman omalla tavallaan.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s2.title",
+   "lang": "en",
+   "text": "Open rituals",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s2.title",
+   "lang": "fi",
+   "text": "Avoimet rituaalit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s3.note",
+   "lang": "en",
+   "text": "Larger groups and special wishes:",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s3.note",
+   "lang": "fi",
+   "text": "Isommat ryhmät ja erityistoiveet:",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s3.text",
+   "lang": "en",
+   "text": "Group rituals are shared experiences where the sauna serves as a place for togetherness, celebration and pausing. Rituals can be gently healing, playful or profound, and they are always built around the group, the situation and your wishes.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s3.text",
+   "lang": "fi",
+   "text": "Ryhmärituaalit ovat yhteisiä elämyksiä, joissa sauna toimii yhdessäolon, juhlan ja pysähtymisen paikkana. Rituaalit voivat olla lempeän hoitavia, leikillisiä tai syvällisiä, ja ne rakennetaan aina ryhmän, tilanteen ja toiveiden mukaan.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s3.title",
+   "lang": "en",
+   "text": "Rituals for groups",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s3.title",
+   "lang": "fi",
+   "text": "Rituaalit ryhmille",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s4.text",
+   "lang": "en",
+   "text": "Occasional services and services that can be added to a sauna session.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s4.text",
+   "lang": "fi",
+   "text": "Satunnaisia ja saunavuoroon liitettäviä palveluja.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s4.title",
+   "lang": "en",
+   "text": "Other treatments and add-ons",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "page.treatments.s4.title",
+   "lang": "fi",
+   "text": "Muut hoidot ja lisäpalvelut",
    "version": 1,
    "placeholders": []
   },
@@ -2576,6 +5562,152 @@
    "placeholders": []
   },
   {
+   "key": "seo.booking_info.description",
+   "lang": "en",
+   "text": "Book a public sauna session, open ritual, sauna treatment, saunotus or private session at Sipoonjoen Perinnesauna. Bookings are made in the Johku web shop.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.booking_info.description",
+   "lang": "fi",
+   "text": "Varaa yleinen saunavuoro, avoin rituaali, saunahoito, saunotus tai yksityisvuoro Sipoonjoen Perinnesaunalle. Varaukset tehdään Johku-verkkokaupassa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.booking_info.title",
+   "lang": "en",
+   "text": "Book a sauna experience | Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.booking_info.title",
+   "lang": "fi",
+   "text": "Varaa saunaelämys | Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.companies.description",
+   "lang": "en",
+   "text": "A smoke sauna for companies from {{price:48}}, after-session sauna from {{price:49}}, workplace wellbeing days and groups by the Sipoonjoki river. Request a quote.",
+   "version": 1,
+   "placeholders": [
+    "{{price:48}}",
+    "{{price:49}}"
+   ]
+  },
+  {
+   "key": "seo.companies.description",
+   "lang": "fi",
+   "text": "Savusaunavuoro yrityksille alk. {{price:48}}, jälkilöylyt yrityksille alk. {{price:49}} sekä työhyvinvointipäivät ja ryhmät Sipoonjoen rannalla. Pyydä tarjous.",
+   "version": 1,
+   "placeholders": [
+    "{{price:48}}",
+    "{{price:49}}"
+   ]
+  },
+  {
+   "key": "seo.companies.title",
+   "lang": "en",
+   "text": "A smoke sauna for companies and groups – workplace wellbeing days | Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.companies.title",
+   "lang": "fi",
+   "text": "Savusauna yrityksille ja ryhmille – työhyvinvointipäivät | Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.front.description",
+   "lang": "en",
+   "text": "A smoke sauna built into the ground in Sipoo: public sessions, private sessions, treatments, rituals and gift cards on the banks of the Sipoonjoki river.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.front.description",
+   "lang": "fi",
+   "text": "Maan sisälle rakennettu savusauna Sipoossa: yleiset saunavuorot, yksityisvuorot, hoidot ja rituaalit sekä lahjakortit. Varaa saunaelämys Sipoonjoen rannalla.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.front.title",
+   "lang": "en",
+   "text": "Sipoonjoen Perinnesauna – a smoke sauna in Sipoo, Finland | Saunotus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.front.title",
+   "lang": "fi",
+   "text": "Sipoonjoen Perinnesauna – savusauna Sipoossa | Saunotus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.gift.description",
+   "lang": "en",
+   "text": "Give time, warmth and wellbeing: an open gift card from €29, smoke sauna experience packages and an annual card. Extending the validity of a gift card is free of charge.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.gift.description",
+   "lang": "fi",
+   "text": "Anna lahjaksi aikaa, lämpöä ja hyvää oloa: avoin lahjakortti alk. 29 €, savusaunaelämys-paketit ja vuosikortti. Lahjakortin voimassaolon jatkaminen on maksutonta.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.gift.title",
+   "lang": "en",
+   "text": "Gift cards – open gift card and gift packages | Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.gift.title",
+   "lang": "fi",
+   "text": "Lahjakortit – avoin lahjakortti ja lahjakorttipaketit | Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.info.description",
+   "lang": "en",
+   "text": "What to bring to the sauna, how to get to Hindsby in Sipoo (Hindsbyntie 124), parking and accessibility.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.info.description",
+   "lang": "fi",
+   "text": "Mitä ottaa mukaan saunalle, miten pääset Sipoon Hindsbyyn (Hindsbyntie 124), pysäköinti ja esteettömyys.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.info.title",
+   "lang": "en",
+   "text": "Practical information – what to bring, getting here and parking | Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.info.title",
+   "lang": "fi",
+   "text": "Käytännön info – mitä mukaan, saapuminen ja pysäköinti | Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
    "key": "seo.order.title",
    "lang": "en",
    "text": "Your order | Sipoonjoen Perinnesauna",
@@ -2586,6 +5718,108 @@
    "key": "seo.order.title",
    "lang": "fi",
    "text": "Tilauksesi | Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.privacy.description",
+   "lang": "fi",
+   "text": "Sipoonjoen Perinnesaunan asiakasrekisterin tietosuojaseloste.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.privacy.title",
+   "lang": "fi",
+   "text": "Tietosuoja | Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.sauna.description",
+   "lang": "en",
+   "text": "Public sauna sessions (Mon men, Tue women, Wed silent, Thu and Sat–Sun public) and private sessions at Sipoonjoen Perinnesauna. Prices, times and booking.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.sauna.description",
+   "lang": "fi",
+   "text": "Yleiset saunavuorot (ma miehet, ti naiset, ke hiljainen, to ja la–su yleinen) ja yksityisvuorot Sipoonjoen Perinnesaunalla. Hinnat, ajat ja varaus.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.sauna.title",
+   "lang": "en",
+   "text": "Sauna sessions – public and private | Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.sauna.title",
+   "lang": "fi",
+   "text": "Saunavuorot – yleiset ja yksityiset vuorot | Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.terms.description",
+   "lang": "en",
+   "text": "Booking, cancellation, payment and gift card terms of Sipoonjoen Perinnesauna.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.terms.description",
+   "lang": "fi",
+   "text": "Sipoonjoen Perinnesaunan varaus-, peruutus-, maksu- ja lahjakorttiehdot.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.terms.title",
+   "lang": "en",
+   "text": "Terms and conditions – booking, cancellation and gift cards | Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.terms.title",
+   "lang": "fi",
+   "text": "Ehdot – varaus, peruutus ja lahjakortit | Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.treatments.description",
+   "lang": "en",
+   "text": "A 1-hour sauna treatment, 2-hour saunotus and 3-hour deep saunotus in the Rauni treatment sauna, plus open and group rituals in the smoke sauna in Sipoo, Finland.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.treatments.description",
+   "lang": "fi",
+   "text": "Saunahoito {{duration:10}}, saunotus {{duration:11}} ja syväsaunotus {{duration:12}} hoitosauna Raunissa sekä avoimet ja ryhmille räätälöidyt rituaalit savusaunassa Sipoossa.",
+   "version": 1,
+   "placeholders": [
+    "{{duration:10}}",
+    "{{duration:11}}",
+    "{{duration:12}}"
+   ]
+  },
+  {
+   "key": "seo.treatments.title",
+   "lang": "en",
+   "text": "Treatments and rituals – sauna treatment, saunotus, deep saunotus | Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "seo.treatments.title",
+   "lang": "fi",
+   "text": "Hoidot ja rituaalit – saunahoito, saunotus, syväsaunotus | Sipoonjoen Perinnesauna",
    "version": 1,
    "placeholders": []
   },
@@ -2614,6 +5848,3090 @@
    "key": "timeline.3.label",
    "lang": "fi",
    "text": "savusauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.hero_ovi_uusi",
+   "lang": "en",
+   "text": "Hand-carved relief on the door of the Sipoonjoki traditional sauna, showing a long-haired figure, a sun and a moon.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.hero_ovi_uusi",
+   "lang": "fi",
+   "text": "Sipoonjoen Perinnesaunan oven käsin veistetty kuvio, jossa pitkätukkainen hahmo, aurinko ja kuu.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.hunaja",
+   "lang": "en",
+   "text": "Honey dripping from a spoon",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.hunaja",
+   "lang": "fi",
+   "text": "Hunajaa valumassa kauhasta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_avoin_lahjakortti",
+   "lang": "en",
+   "text": "A relaxed guest during a sauna treatment",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_avoin_lahjakortti",
+   "lang": "fi",
+   "text": "Rentoutunut vieras saunahoidossa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_hiljainen",
+   "lang": "en",
+   "text": "Guests on the sauna benches",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_hiljainen",
+   "lang": "fi",
+   "text": "Vieraita saunan lauteilla",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_jalkiloylyt",
+   "lang": "en",
+   "text": "The smoke sauna door on a snowy evening",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_jalkiloylyt",
+   "lang": "fi",
+   "text": "Savusaunan ovi lumisessa illassa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_joulusauna",
+   "lang": "en",
+   "text": "A red lantern decorated with fir branches in the snow",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_joulusauna",
+   "lang": "fi",
+   "text": "Punainen lyhty havuilla koristeltuna lumessa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_kekri",
+   "lang": "en",
+   "text": "Fir branches at dusk",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_kekri",
+   "lang": "fi",
+   "text": "Havuoksia hämärässä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_lahja_hoito",
+   "lang": "en",
+   "text": "A guest during a sauna treatment",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_lahja_hoito",
+   "lang": "fi",
+   "text": "Vieras saunahoidossa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_lahja_kahdelle",
+   "lang": "en",
+   "text": "A sauna treatment for two",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_lahja_kahdelle",
+   "lang": "fi",
+   "text": "Saunahoito kahdelle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_lahja_turvenaamio",
+   "lang": "en",
+   "text": "Two guests in the sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_lahja_turvenaamio",
+   "lang": "fi",
+   "text": "Kaksi vierasta saunassa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_lahja_vihta",
+   "lang": "en",
+   "text": "A sauna healer with whisks in lantern light",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_lahja_vihta",
+   "lang": "fi",
+   "text": "Saunottaja vihtojen kanssa lyhtyjen valossa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_miehet",
+   "lang": "en",
+   "text": "Men on the sauna benches",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_miehet",
+   "lang": "fi",
+   "text": "Miehiä saunan lauteilla",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_morsiussauna",
+   "lang": "en",
+   "text": "Two women with birch whisks",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_morsiussauna",
+   "lang": "fi",
+   "text": "Kaksi naista koivuvihtojen kanssa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_naiset",
+   "lang": "en",
+   "text": "A woman in the sauna with a bunch of herbs",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_naiset",
+   "lang": "fi",
+   "text": "Nainen saunassa yrttikimppu kädessä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_oma_vuoro",
+   "lang": "en",
+   "text": "The hot tub and smoke sauna in summer",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_oma_vuoro",
+   "lang": "fi",
+   "text": "Palju ja savusauna kesällä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_opiskelija",
+   "lang": "en",
+   "text": "A sauna treatment on a treatment bench",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_opiskelija",
+   "lang": "fi",
+   "text": "Saunahoito hoitopöydällä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_perinnesaunotusilta",
+   "lang": "en",
+   "text": "Sauna healers with whisks and herbs",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_perinnesaunotusilta",
+   "lang": "fi",
+   "text": "Saunottajat vihtojen ja yrttien kanssa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_ryhma",
+   "lang": "en",
+   "text": "A group in the sauna with whisks",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_ryhma",
+   "lang": "fi",
+   "text": "Ryhmä saunassa vihtojen kanssa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_synttarisauna",
+   "lang": "en",
+   "text": "A sauna healer and guests in the sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_synttarisauna",
+   "lang": "fi",
+   "text": "Saunottaja ja vieraita saunassa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_turvesauna",
+   "lang": "en",
+   "text": "A smiling guest in a peat mask with a whisk",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_turvesauna",
+   "lang": "fi",
+   "text": "Hymyilevä vieras turvenaamiossa vihdan kanssa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_turvetorstai",
+   "lang": "en",
+   "text": "Two guests in peat masks",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_turvetorstai",
+   "lang": "fi",
+   "text": "Kaksi vierasta turvenaamioissa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_vuosikortti",
+   "lang": "en",
+   "text": "The smoke sauna door in winter",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_vuosikortti",
+   "lang": "fi",
+   "text": "Savusaunan ovi talvella",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_yhteisopaiva",
+   "lang": "en",
+   "text": "Sauna healers in lantern light",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_yhteisopaiva",
+   "lang": "fi",
+   "text": "Saunottajat lyhtyjen valossa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_yleinen",
+   "lang": "en",
+   "text": "Guests at a public session in the smoke sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_yleinen",
+   "lang": "fi",
+   "text": "Vieraita yleisellä vuorolla savusaunassa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_yritys",
+   "lang": "en",
+   "text": "The smoke sauna at night",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.j_yritys",
+   "lang": "fi",
+   "text": "Savusauna yöllä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.lahja",
+   "lang": "en",
+   "text": "A gift tied with a red ribbon among spruce branches",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.lahja",
+   "lang": "fi",
+   "text": "Punaisella nauhalla sidottu lahjapaketti kuusen oksilla",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.ovi_kaiverrus",
+   "lang": "en",
+   "text": "A hand-carved wooden door",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.ovi_kaiverrus",
+   "lang": "fi",
+   "text": "Käsin kaiverrettu puuovi",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.palju",
+   "lang": "en",
+   "text": "Three people in a warm pool in the forest",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.palju",
+   "lang": "fi",
+   "text": "Kolme ihmistä lämpimässä altaassa metsän keskellä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.rituaali",
+   "lang": "en",
+   "text": "A sauna healer and guests on the benches during a sauna ritual",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.rituaali",
+   "lang": "fi",
+   "text": "Saunottaja ja vieraita lauteilla saunarituaalissa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.rituaali_2",
+   "lang": "en",
+   "text": "A sauna healer with whisks in lantern light",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.rituaali_2",
+   "lang": "fi",
+   "text": "Saunottaja vihtojen kanssa lyhtyjen valossa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.saunottajat",
+   "lang": "en",
+   "text": "Two sauna healers with birch whisks",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.saunottajat",
+   "lang": "fi",
+   "text": "Kaksi saunottajaa koivuvihtojen kanssa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.saunotus",
+   "lang": "en",
+   "text": "A sauna healer whisking a guest in the treatment sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.saunotus",
+   "lang": "fi",
+   "text": "Saunottaja vihtomassa vierasta hoitosaunassa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.saunotus_selka",
+   "lang": "en",
+   "text": "A sauna healer whisking a guest in the treatment sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.saunotus_selka",
+   "lang": "fi",
+   "text": "Saunottaja vihtomassa vierasta hoitosaunassa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.syvasaunotus",
+   "lang": "en",
+   "text": "A relaxed guest wrapped in a grey blanket",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.syvasaunotus",
+   "lang": "fi",
+   "text": "Rentoutunut vieras kääriytyneenä harmaaseen huopaan",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.turve_hymy",
+   "lang": "en",
+   "text": "A smiling guest in a peat mask with a whisk",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.turve_hymy",
+   "lang": "fi",
+   "text": "Hymyilevä vieras turvenaamiossa vihdan kanssa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.turve_naama",
+   "lang": "en",
+   "text": "Guests in peat masks in the sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.turve_naama",
+   "lang": "fi",
+   "text": "Vieraat turvenaamioissa saunassa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.vihta_hoito",
+   "lang": "en",
+   "text": "A sauna healer with fresh whisks",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.vihta_hoito",
+   "lang": "fi",
+   "text": "Saunottaja tuoreiden vihtojen kanssa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.yleinen",
+   "lang": "en",
+   "text": "Guests on the benches during a public session",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.alt.yleinen",
+   "lang": "fi",
+   "text": "Vieraita lauteilla yleisellä vuorolla",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.all_tags",
+   "lang": "en",
+   "text": "All",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.all_tags",
+   "lang": "fi",
+   "text": "Kaikki",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.back",
+   "lang": "en",
+   "text": "All articles",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.back",
+   "lang": "fi",
+   "text": "Kaikki artikkelit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.breadcrumb",
+   "lang": "en",
+   "text": "Breadcrumb",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.breadcrumb",
+   "lang": "fi",
+   "text": "Murupolku",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.by",
+   "lang": "en",
+   "text": "Author",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.by",
+   "lang": "fi",
+   "text": "Kirjoittaja",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.cta_button",
+   "lang": "en",
+   "text": "Book now",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.cta_button",
+   "lang": "fi",
+   "text": "Varaa aika",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.cta_text",
+   "lang": "en",
+   "text": "Sipoonjoki Heritage Sauna offers a smoke sauna, sauna treatments and gift cards. Choose a time and book online.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.cta_text",
+   "lang": "fi",
+   "text": "Sipoonjoen Perinnesauna tarjoaa savusaunan, saunahoidot ja lahjakortit. Valitse aika ja varaa verkossa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.cta_title",
+   "lang": "en",
+   "text": "Book your own sauna moment",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.cta_title",
+   "lang": "fi",
+   "text": "Varaa oma saunahetkesi",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.empty",
+   "lang": "en",
+   "text": "No articles have been published yet. Please check back soon.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.empty",
+   "lang": "fi",
+   "text": "Artikkeleita ei ole vielä julkaistu. Palaa pian takaisin.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.empty_link",
+   "lang": "en",
+   "text": "See sauna sessions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.empty_link",
+   "lang": "fi",
+   "text": "Tutustu saunavuoroihin",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.home",
+   "lang": "en",
+   "text": "Home",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.home",
+   "lang": "fi",
+   "text": "Etusivu",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.home_all",
+   "lang": "en",
+   "text": "All articles",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.home_all",
+   "lang": "fi",
+   "text": "Kaikki artikkelit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.kicker",
+   "lang": "en",
+   "text": "Sipoonjoki Heritage Sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.kicker",
+   "lang": "fi",
+   "text": "Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.list_description",
+   "lang": "en",
+   "text": "Articles about sauna bathing, the smoke sauna tradition and sauna treatments from Sipoonjoki Heritage Sauna.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.list_description",
+   "lang": "fi",
+   "text": "Artikkeleita saunomisesta, savusaunan perinteestä ja saunahoidoista Sipoonjoen Perinnesaunalta.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.list_lead",
+   "lang": "en",
+   "text": "Articles about sauna bathing, traditions and treatments.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.list_lead",
+   "lang": "fi",
+   "text": "Artikkeleita saunomisesta, perinteistä ja hoidoista.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.list_meta",
+   "lang": "en",
+   "text": "{{var:label}}: articles about sauna bathing and traditions",
+   "version": 1,
+   "placeholders": [
+    "{{var:label}}"
+   ]
+  },
+  {
+   "key": "ui.articles.list_meta",
+   "lang": "fi",
+   "text": "{{var:label}}: artikkeleita saunomisesta ja perinteistä",
+   "version": 1,
+   "placeholders": [
+    "{{var:label}}"
+   ]
+  },
+  {
+   "key": "ui.articles.moved_link",
+   "lang": "en",
+   "text": "Go to the article",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.moved_link",
+   "lang": "fi",
+   "text": "Siirry artikkeliin",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.moved_text",
+   "lang": "en",
+   "text": "This article has moved to a new address.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.moved_text",
+   "lang": "fi",
+   "text": "Tämä artikkeli on siirretty uuteen osoitteeseen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.moved_title",
+   "lang": "en",
+   "text": "This page has moved",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.moved_title",
+   "lang": "fi",
+   "text": "Sivu on siirtynyt",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.next",
+   "lang": "en",
+   "text": "Next page",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.next",
+   "lang": "fi",
+   "text": "Seuraava sivu",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.other_lang",
+   "lang": "en",
+   "text": "Lue artikkeli suomeksi",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.other_lang",
+   "lang": "fi",
+   "text": "Read this article in English",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.page",
+   "lang": "en",
+   "text": "Page {{var:n}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.articles.page",
+   "lang": "fi",
+   "text": "Sivu {{var:n}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.articles.pagination",
+   "lang": "en",
+   "text": "Pagination",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.pagination",
+   "lang": "fi",
+   "text": "Sivutus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.prev",
+   "lang": "en",
+   "text": "Previous page",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.prev",
+   "lang": "fi",
+   "text": "Edellinen sivu",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.published",
+   "lang": "en",
+   "text": "Published",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.published",
+   "lang": "fi",
+   "text": "Julkaistu",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.read_article",
+   "lang": "en",
+   "text": "Read article",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.read_article",
+   "lang": "fi",
+   "text": "Lue artikkeli",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.read_min",
+   "lang": "en",
+   "text": "{{var:n}} min read",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.articles.read_min",
+   "lang": "fi",
+   "text": "{{var:n}} min lukuaika",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.articles.read_more",
+   "lang": "en",
+   "text": "Read more",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.read_more",
+   "lang": "fi",
+   "text": "Lue lisää",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.related",
+   "lang": "en",
+   "text": "More articles",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.related",
+   "lang": "fi",
+   "text": "Lisää artikkeleita",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.share",
+   "lang": "en",
+   "text": "Share this article",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.share",
+   "lang": "fi",
+   "text": "Jaa artikkeli",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.share_mail",
+   "lang": "en",
+   "text": "Send the link by email",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.share_mail",
+   "lang": "fi",
+   "text": "Lähetä linkki sähköpostilla",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.share_subject",
+   "lang": "en",
+   "text": "Article: {{var:title}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:title}}"
+   ]
+  },
+  {
+   "key": "ui.articles.share_subject",
+   "lang": "fi",
+   "text": "Artikkeli: {{var:title}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:title}}"
+   ]
+  },
+  {
+   "key": "ui.articles.tag_description",
+   "lang": "en",
+   "text": "Articles about {{var:tag}}.",
+   "version": 1,
+   "placeholders": [
+    "{{var:tag}}"
+   ]
+  },
+  {
+   "key": "ui.articles.tag_description",
+   "lang": "fi",
+   "text": "Artikkelit aiheesta {{var:tag}}.",
+   "version": 1,
+   "placeholders": [
+    "{{var:tag}}"
+   ]
+  },
+  {
+   "key": "ui.articles.tag_title",
+   "lang": "en",
+   "text": "Topic: {{var:tag}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:tag}}"
+   ]
+  },
+  {
+   "key": "ui.articles.tag_title",
+   "lang": "fi",
+   "text": "Aihe: {{var:tag}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:tag}}"
+   ]
+  },
+  {
+   "key": "ui.articles.tags",
+   "lang": "en",
+   "text": "Topics",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.tags",
+   "lang": "fi",
+   "text": "Aiheet",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.tags_label",
+   "lang": "en",
+   "text": "Topics",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.tags_label",
+   "lang": "fi",
+   "text": "Aiheet",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.updated",
+   "lang": "en",
+   "text": "Updated",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.articles.updated",
+   "lang": "fi",
+   "text": "Päivitetty",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.jalkiloylyt.cta",
+   "lang": "en",
+   "text": "Book →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.jalkiloylyt.cta",
+   "lang": "fi",
+   "text": "Varaa →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.jalkiloylyt.kicker",
+   "lang": "en",
+   "text": "For companies",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.jalkiloylyt.kicker",
+   "lang": "fi",
+   "text": "Yrityksille",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.jalkiloylyt.list.1",
+   "lang": "en",
+   "text": "Mon–Thu 7–9 pm (2 h): {{price:49}}",
+   "version": 1,
+   "placeholders": [
+    "{{price:49}}"
+   ]
+  },
+  {
+   "key": "ui.card.corporate.jalkiloylyt.list.1",
+   "lang": "fi",
+   "text": "Ma–to klo 19–21 (2 h): {{price:49}}",
+   "version": 1,
+   "placeholders": [
+    "{{price:49}}"
+   ]
+  },
+  {
+   "key": "ui.card.corporate.jalkiloylyt.list.2",
+   "lang": "en",
+   "text": "Sat–Sun 7–10 pm (3 h): €350",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.jalkiloylyt.list.2",
+   "lang": "fi",
+   "text": "La–su klo 19–22 (3 h): 350 €",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.jalkiloylyt.list.3",
+   "lang": "en",
+   "text": "Additional guests €10 / person",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.jalkiloylyt.list.3",
+   "lang": "fi",
+   "text": "Lisähenkilöt 10 €/hlö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.jalkiloylyt.over.duration",
+   "lang": "en",
+   "text": "2–3 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.jalkiloylyt.over.duration",
+   "lang": "fi",
+   "text": "2–3 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.jalkiloylyt.text",
+   "lang": "en",
+   "text": "For your company group after the public sessions, from 7 pm. Includes free use of the smoke sauna, the warm and cold pools and the lean-to. There may still be people on the lean-to between 7 and 8 pm.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.jalkiloylyt.text",
+   "lang": "fi",
+   "text": "Omalla firman porukalla jälkilöylyihin yleisten vuorojen jälkeen klo 19 alkaen. Sisältää savusaunan, lämmin- ja kylmävesialtaat sekä laavun vapaan käytön. Laavulla voi olla vielä ihmisiä klo 19–20.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.jalkiloylyt.title",
+   "lang": "en",
+   "text": "After-session sauna for companies",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.jalkiloylyt.title",
+   "lang": "fi",
+   "text": "Jälkilöylyt yrityksille",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.vuoro.cta",
+   "lang": "en",
+   "text": "Book →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.vuoro.cta",
+   "lang": "fi",
+   "text": "Varaa →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.vuoro.kicker",
+   "lang": "en",
+   "text": "For companies",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.vuoro.kicker",
+   "lang": "fi",
+   "text": "Yrityksille",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.vuoro.list.1",
+   "lang": "en",
+   "text": "Mon–Thu 2–4 pm (2 h): {{price:48}}",
+   "version": 1,
+   "placeholders": [
+    "{{price:48}}"
+   ]
+  },
+  {
+   "key": "ui.card.corporate.vuoro.list.1",
+   "lang": "fi",
+   "text": "Ma–to klo 14–16 (2 h): {{price:48}}",
+   "version": 1,
+   "placeholders": [
+    "{{price:48}}"
+   ]
+  },
+  {
+   "key": "ui.card.corporate.vuoro.list.2",
+   "lang": "en",
+   "text": "Fri 4–9 pm (5 h): €500",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.vuoro.list.2",
+   "lang": "fi",
+   "text": "Pe klo 16–21 (5 h): 500 €",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.vuoro.list.3",
+   "lang": "en",
+   "text": "Fri 12 noon–9 pm (9 h): €850",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.vuoro.list.3",
+   "lang": "fi",
+   "text": "Pe klo 12–21 (9 h): 850 €",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.vuoro.over.duration",
+   "lang": "en",
+   "text": "2 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.vuoro.over.duration",
+   "lang": "fi",
+   "text": "2 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.vuoro.text",
+   "lang": "en",
+   "text": "For team building and relaxation. The smoke sauna, a warm hot tub, a cold pool, the lean-to and the log cabin are at your disposal. The price includes 2 pre-soaked birch whisks. On Fridays there are two booking times: 12–21 or 16–21; with a whole-day booking the sauna is available from 2 pm.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.vuoro.text",
+   "lang": "fi",
+   "text": "Työporukalle ryhmäytymiseen ja rentoutumiseen. Käytössä savusauna, lämmin palju, kylmävesiallas, laavu ja hirsimökki. Hinta sisältää 2 kpl valmiiksi liotettuja koivuisia saunavihtoja. Perjantaisin kaksi varausaikaa: 12–21 tai 16–21; koko päivän varauksessa sauna on käytettävissä klo 14 alkaen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.vuoro.title",
+   "lang": "en",
+   "text": "Smoke sauna session for companies",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.corporate.vuoro.title",
+   "lang": "fi",
+   "text": "Savusaunavuoro yrityksille",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.events.naisten_joulusauna.text",
+   "lang": "en",
+   "text": "A Christmas sauna evening led by the women of the sauna (Laura and Saara): smoke sauna steam, cold and warm hot tubs, welcome and closing drinks, fir-scented löyly water, gentle whisking, a löyly greeting ceremony, a light snack, linen bench towels and sauna treatments. Arrive at your own pace, but by 4:45 pm; the sauna ritual begins at 5 pm.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.events.naisten_joulusauna.text",
+   "lang": "fi",
+   "text": "Saunan naisten (Laura ja Saara) ohjaama jouluinen saunailta: savusaunan löylyt, kylmä- ja lämminvesipaljut, alku- ja loppujuomat, havuinen löylyvesi, lempeää vihdontaa, löylyn tervehdysseremonia, pientä purtavaa, pellavaiset laudeliinat ja saunahoitoja. Saavu omassa tahdissa, kuitenkin klo 16.45 mennessä; saunotus alkaa klo 17.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.events.naisten_joulusauna.title",
+   "lang": "en",
+   "text": "Women's Christmas sauna evening",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.events.naisten_joulusauna.title",
+   "lang": "fi",
+   "text": "Naisten jouluinen saunailta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.events.perinnesaunotusilta.text",
+   "lang": "en",
+   "text": "A sauna ceremony led by a sauna healer in the smoke sauna, using the gifts of the season, plants, whisks and sauna incantations. The theme of the evening follows the turn of the year. You can carry on saunaing after the ceremony.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.events.perinnesaunotusilta.text",
+   "lang": "fi",
+   "text": "Saunottajan ohjaama saunaseremonia savusaunassa, jossa hyödynnetään vuodenajan antimia, kasveja, vihtoja ja saunaloitsuja. Illan teema seuraa vuodenkiertoa. Seremonian jälkeen voi jatkaa saunomista.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.events.perinnesaunotusilta.title",
+   "lang": "en",
+   "text": "Traditional sauna evening",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.events.perinnesaunotusilta.title",
+   "lang": "fi",
+   "text": "Perinnesaunotusilta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.events.saunottajien_yhteisopaiva_2.text",
+   "lang": "en",
+   "text": "A community day for sauna healers who have completed the Terve Löyly training: deeper themes, the challenges of the sauna healer's path and taking care of one another.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.events.saunottajien_yhteisopaiva_2.text",
+   "lang": "fi",
+   "text": "Yhteisöpäivä Terve Löyly -saunottajakoulutuksen käyneille saunottajille: syventäviä teemoja, saunottajan polun haasteita ja toinen toistensa hoitamista.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.events.saunottajien_yhteisopaiva_2.title",
+   "lang": "en",
+   "text": "Sauna healers' community day",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.events.saunottajien_yhteisopaiva_2.title",
+   "lang": "fi",
+   "text": "Saunottajien yhteisöpäivä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.events.sipoonjoen_kekri.text",
+   "lang": "en",
+   "text": "A Kekri feast on All Saints' Day: Kekri bonfires, harvest treats and a longer-than-usual Kekri sauna led by sauna healers in the Rauni treatment sauna (herbal treatments, steam created with fir branches for the departed). The price includes a long Kekri sauna ritual, a light harvest supper, a guided Kekri bonfire ritual and free time together.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.events.sipoonjoen_kekri.text",
+   "lang": "fi",
+   "text": "Kekrijuhla pyhäinpäivänä: kekritulet, sadonkorjuun antimet ja saunottajien ohjaama, tavallista pidempi kekrisauna hoitosauna Raunissa (yrttihoidot, havuilla luotu löyly edesmenneille). Hintaan sisältyy pitkä kekrisaunotus, kevyt sadonkorjuuiltapala, ohjattu kekritulirituaali ja vapaata yhdessäoloa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.events.sipoonjoen_kekri.title",
+   "lang": "en",
+   "text": "Sipoonjoki Kekri",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.events.sipoonjoen_kekri.title",
+   "lang": "fi",
+   "text": "Sipoonjoen Kekri",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.avoin.cta",
+   "lang": "en",
+   "text": "Buy a gift card →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.avoin.cta",
+   "lang": "fi",
+   "text": "Osta lahjakortti →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.avoin.kicker",
+   "lang": "en",
+   "text": "Open gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.avoin.kicker",
+   "lang": "fi",
+   "text": "Avoin lahjakortti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.avoin.text",
+   "lang": "en",
+   "text": "A value gift card whose amount you can choose freely between €29 and €500. Valid for all services at Sipoonjoen Perinnesauna, and it can also pay part of a more valuable experience. Valid for six months from purchase; it can be delivered straight to the recipient.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.avoin.text",
+   "lang": "fi",
+   "text": "Arvolahjakortti, jonka arvon voit valita vapaasti väliltä 29–500 €. Käy kaikkiin Sipoonjoen Perinnesaunan palveluihin, ja sillä voi maksaa myös osan arvokkaammasta elämyksestä. Voimassa kuusi kuukautta ostopäivästä; voidaan toimittaa suoraan vastaanottajalle.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.avoin.title",
+   "lang": "en",
+   "text": "open gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.avoin.title",
+   "lang": "fi",
+   "text": "avoin lahjakortti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.hoito_kahdelle.cta",
+   "lang": "en",
+   "text": "Buy →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.hoito_kahdelle.cta",
+   "lang": "fi",
+   "text": "Osta →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.hoito_kahdelle.kicker",
+   "lang": "en",
+   "text": "Gift card package for two",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.hoito_kahdelle.kicker",
+   "lang": "fi",
+   "text": "Lahjakorttipaketti kahdelle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.hoito_kahdelle.text",
+   "lang": "en",
+   "text": "Places in a public session and a 60-minute sauna treatment for two.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.hoito_kahdelle.text",
+   "lang": "fi",
+   "text": "Paikat yleiselle saunavuorolle ja 60 minuutin saunahoito kahdelle.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.hoito_kahdelle.title",
+   "lang": "en",
+   "text": "Smoke sauna experience and sauna treatment for two",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.hoito_kahdelle.title",
+   "lang": "fi",
+   "text": "Savusaunaelämys ja saunahoito kahdelle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.hoito.cta",
+   "lang": "en",
+   "text": "Buy →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.hoito.cta",
+   "lang": "fi",
+   "text": "Osta →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.hoito.kicker",
+   "lang": "en",
+   "text": "Gift card package",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.hoito.kicker",
+   "lang": "fi",
+   "text": "Lahjakorttipaketti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.hoito.text",
+   "lang": "en",
+   "text": "A place in a public session and a 60-minute treatment of your choice for one. With the treatment you get the smoke sauna, the cold and warm pools and the fireplace.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.hoito.text",
+   "lang": "fi",
+   "text": "Paikka yleiselle saunavuorolle sekä 60 min vapaavalintainen hoito yhdelle. Hoidon yhteydessä savusauna, kylmä- ja lämminvesialtaat ja nuotiopaikka.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.hoito.title",
+   "lang": "en",
+   "text": "Smoke sauna experience and sauna treatment",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.hoito.title",
+   "lang": "fi",
+   "text": "Savusaunaelämys ja saunahoito",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.koivuvihta.cta",
+   "lang": "en",
+   "text": "Buy →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.koivuvihta.cta",
+   "lang": "fi",
+   "text": "Osta →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.koivuvihta.kicker",
+   "lang": "en",
+   "text": "Gift card package",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.koivuvihta.kicker",
+   "lang": "fi",
+   "text": "Lahjakorttipaketti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.koivuvihta.text",
+   "lang": "en",
+   "text": "A place in a public session and a pre-soaked birch whisk.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.koivuvihta.text",
+   "lang": "fi",
+   "text": "Paikka yleiselle saunavuorolle ja valmiiksi liotettu koivuvihta.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.koivuvihta.title",
+   "lang": "en",
+   "text": "Smoke sauna experience and birch whisk",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.koivuvihta.title",
+   "lang": "fi",
+   "text": "Savusaunaelämys ja koivuvihta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.turvenaamio.cta",
+   "lang": "en",
+   "text": "Buy →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.turvenaamio.cta",
+   "lang": "fi",
+   "text": "Osta →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.turvenaamio.kicker",
+   "lang": "en",
+   "text": "Gift card package for two",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.turvenaamio.kicker",
+   "lang": "fi",
+   "text": "Lahjakorttipaketti kahdelle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.turvenaamio.text",
+   "lang": "en",
+   "text": "Places in a public session, a peat mask and a foot bath (sea salt and herbs picked around the sauna). The treatments are done by yourselves during the sauna visit.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.turvenaamio.text",
+   "lang": "fi",
+   "text": "Paikat yleiselle vuorolle, turvenaamio ja jalkakylpy (merisuola ja saunan ympäristöstä poimitut yrtit). Hoidot tehdään omatoimisesti saunomisen yhteydessä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.turvenaamio.title",
+   "lang": "en",
+   "text": "Smoke sauna experience with peat mask and foot bath for two",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.turvenaamio.title",
+   "lang": "fi",
+   "text": "Savusaunaelämys turvenaamiolla ja jalkakylvyllä kahdelle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.vuosikortti.cta",
+   "lang": "en",
+   "text": "Buy →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.vuosikortti.cta",
+   "lang": "fi",
+   "text": "Osta →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.vuosikortti.kicker",
+   "lang": "en",
+   "text": "For the regular sauna-goer",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.vuosikortti.kicker",
+   "lang": "fi",
+   "text": "Säännölliselle saunojalle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.vuosikortti.text",
+   "lang": "en",
+   "text": "Unlimited public sauna sessions for a year. Personal and non-transferable; valid for one year from the purchase date. Usable at all public sessions, but not on Peat Thursday or at other ceremonies. A session must be booked in advance, and only one booking can be active at a time.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.vuosikortti.text",
+   "lang": "fi",
+   "text": "Rajattomat yleiset saunavuorot vuoden ajan. Henkilökohtainen, ei siirrettävissä; voimassa yhden vuoden ostopäivästä. Käytettävissä kaikilla yleisillä vuoroilla, ei turvetorstaina tai muissa seremonioissa. Vuoro varataan etukäteen, ja vain yksi varaus voi olla kerrallaan voimassa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.vuosikortti.title",
+   "lang": "en",
+   "text": "annual card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.gift.vuosikortti.title",
+   "lang": "fi",
+   "text": "vuosikortti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.hiljainen.cta",
+   "lang": "en",
+   "text": "Book your session →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.hiljainen.cta",
+   "lang": "fi",
+   "text": "Varaa vuorosi →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.hiljainen.kicker",
+   "lang": "en",
+   "text": "Wednesdays",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.hiljainen.kicker",
+   "lang": "fi",
+   "text": "Keskiviikkoisin",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.hiljainen.over.weekdays",
+   "lang": "en",
+   "text": "Wed",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.hiljainen.over.weekdays",
+   "lang": "fi",
+   "text": "ke",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.hiljainen.text",
+   "lang": "en",
+   "text": "On Wednesdays a silent mixed session, 4–7 pm: phones and conversation stay outside the sauna, and you can catch up on the lean-to or the terrace. You can arrive after 4 pm at your own pace. A swimsuit is optional.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.hiljainen.text",
+   "lang": "fi",
+   "text": "Keskiviikkoisin hiljainen sekavuoro klo 16–19: puhelimet ja keskustelut jäävät saunan ulkopuolelle, kuulumisia voi vaihtaa laavulla tai terassilla. Voit saapua klo 16 jälkeen oman aikataulusi mukaan. Uima-asu on vapaaehtoinen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.hiljainen.title",
+   "lang": "en",
+   "text": "Silent sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.hiljainen.title",
+   "lang": "fi",
+   "text": "Hiljainen sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.jalkiloylyt.cta",
+   "lang": "en",
+   "text": "Book an after-session →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.jalkiloylyt.cta",
+   "lang": "fi",
+   "text": "Varaa jälkilöylyt →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.jalkiloylyt.kicker",
+   "lang": "en",
+   "text": "Private",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.jalkiloylyt.kicker",
+   "lang": "fi",
+   "text": "Yksityinen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.jalkiloylyt.over.duration",
+   "lang": "en",
+   "text": "2–3 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.jalkiloylyt.over.duration",
+   "lang": "fi",
+   "text": "2–3 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.jalkiloylyt.over.included",
+   "lang": "en",
+   "text": "incl. 6 guests, extra guest €10",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.jalkiloylyt.over.included",
+   "lang": "fi",
+   "text": "sis. 6 hlö, lisähenkilö 10 €/hlö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.jalkiloylyt.text",
+   "lang": "en",
+   "text": "After the public sessions: lingering, soft steam for your own group from 7 pm – until 9 pm on weekdays and until 10 pm at weekends. Includes free use of the smoke sauna, the warm and cold pools and the lean-to. The after-session is taken into account when heating the sauna.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.jalkiloylyt.text",
+   "lang": "fi",
+   "text": "Yleisten vuorojen jälkeen viipyilevät ja pehmeät jälkilöylyt omalle porukalle klo 19 alkaen: klo 21 saakka viikolla ja klo 22 saakka viikonloppuisin. Sisältää savusaunan, lämmin- ja kylmävesialtaat sekä laavun vapaan käytön. Jälkilöylyt huomioidaan lämmityksessä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.jalkiloylyt.title",
+   "lang": "en",
+   "text": "After-session smoke sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.jalkiloylyt.title",
+   "lang": "fi",
+   "text": "Savusaunan jälkilöylyt",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.miehet.cta",
+   "lang": "en",
+   "text": "Book your session →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.miehet.cta",
+   "lang": "fi",
+   "text": "Varaa vuorosi →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.miehet.kicker",
+   "lang": "en",
+   "text": "Mondays",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.miehet.kicker",
+   "lang": "fi",
+   "text": "Maanantaisin",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.miehet.over.weekdays",
+   "lang": "en",
+   "text": "Mon",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.miehet.over.weekdays",
+   "lang": "fi",
+   "text": "ma",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.miehet.text",
+   "lang": "en",
+   "text": "The men's session is on Mondays 4–7 pm. You can arrive at your own pace after 4 pm. Includes access to the sauna area, the cold and warm pools and the lean-to, where you can grill sausages. A swimsuit is optional.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.miehet.text",
+   "lang": "fi",
+   "text": "Maanantaisin miesten vuoro klo 16–19. Voit saapua oman aikataulusi mukaan klo 16 jälkeen. Sisältää pääsyn sauna-alueelle, kylmä- ja lämminvesialtaisiin sekä laavun käytön; makkaroita voi paistaa. Uima-asu on vapaaehtoinen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.miehet.title",
+   "lang": "en",
+   "text": "Men's sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.miehet.title",
+   "lang": "fi",
+   "text": "Miesten sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.naiset.cta",
+   "lang": "en",
+   "text": "Book your session →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.naiset.cta",
+   "lang": "fi",
+   "text": "Varaa vuorosi →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.naiset.kicker",
+   "lang": "en",
+   "text": "Tuesdays",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.naiset.kicker",
+   "lang": "fi",
+   "text": "Tiistaisin",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.naiset.over.weekdays",
+   "lang": "en",
+   "text": "Tue",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.naiset.over.weekdays",
+   "lang": "fi",
+   "text": "ti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.naiset.text",
+   "lang": "en",
+   "text": "Tuesdays are devoted to women: the women's session is 4–7 pm. Includes access to the sauna area, the cold and warm pools and the use of the lean-to and the log cabin. A swimsuit is optional. If you would like a female sauna healer for a treatment, we recommend booking it alongside the Tuesday women's session.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.naiset.text",
+   "lang": "fi",
+   "text": "Tiistait on pyhitetty naisille: naisten vuoro klo 16–19. Sisältää pääsyn sauna-alueelle, kylmä- ja lämminvesialtaisiin sekä laavun ja hirsimökin käytön. Uima-asu on vapaaehtoinen. Jos toivot naispuolista saunottajaa hoitoon, suositellaan varaamaan hoito tiistain naisten vuoron yhteyteen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.naiset.title",
+   "lang": "en",
+   "text": "Women's sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.naiset.title",
+   "lang": "fi",
+   "text": "Naisten sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.oma_vuoro.cta",
+   "lang": "en",
+   "text": "Book a session →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.oma_vuoro.cta",
+   "lang": "fi",
+   "text": "Varaa vuoro →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.oma_vuoro.kicker",
+   "lang": "en",
+   "text": "Private",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.oma_vuoro.kicker",
+   "lang": "fi",
+   "text": "Yksityinen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.oma_vuoro.over.duration",
+   "lang": "en",
+   "text": "1–7 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.oma_vuoro.over.duration",
+   "lang": "fi",
+   "text": "1–7 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.oma_vuoro.text",
+   "lang": "en",
+   "text": "The whole setting of the heritage sauna for your own use (e.g. an evening with friends, birthdays, bachelor parties). Includes the smoke sauna, the warm and cold pools and free use of the lean-to and the log cabin. The facilities can be rented before the public sessions or for the whole day. Prices apply to private individuals only; companies have their own products.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.oma_vuoro.text",
+   "lang": "fi",
+   "text": "Koko Sipoonjoen Perinnesaunan miljöö omaan käyttöön (esim. ilta ystävien kanssa, synttärit, polttarit). Sisältää savusaunan, lämmin- ja kylmävesialtaat sekä laavun ja hirsimökin vapaan käytön. Tilat voi vuokrata ennen yleisiä vuoroja tai koko päiväksi. Hinnat ovat voimassa vain yksityishenkilöille; yrityksille omat tuotteet.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.oma_vuoro.title",
+   "lang": "en",
+   "text": "Your own smoke sauna session",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.oma_vuoro.title",
+   "lang": "fi",
+   "text": "Oma savusaunavuoro",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.yleinen.cta",
+   "lang": "en",
+   "text": "Book your session →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.yleinen.cta",
+   "lang": "fi",
+   "text": "Varaa vuorosi →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.yleinen.kicker",
+   "lang": "en",
+   "text": "Mixed session",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.yleinen.kicker",
+   "lang": "fi",
+   "text": "Sekavuoro",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.yleinen.over.duration",
+   "lang": "en",
+   "text": "2 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.yleinen.over.duration",
+   "lang": "fi",
+   "text": "2 h",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.yleinen.over.weekdays",
+   "lang": "en",
+   "text": "Thu, Sat, Sun",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.yleinen.over.weekdays",
+   "lang": "fi",
+   "text": "to, la, su",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.yleinen.text",
+   "lang": "en",
+   "text": "A mixed session where everyone is welcome. Includes access to the sauna area, the cold and warm pools and the lean-to. At weekends (Sat and Sun) the public session runs 2–7 pm with a two-hour sauna time; a place must always be booked in advance and swimsuits are worn. On Thursdays the public session is 5–7 pm.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.yleinen.text",
+   "lang": "fi",
+   "text": "Sekavuoro, johon kaikki ovat tervetulleita. Sisältää pääsyn sauna-alueelle, kylmä- ja lämminvesialtaisiin sekä laavulle. Viikonloppuisin (la ja su) yleinen vuoro on klo 14–19 ja saunomisaika kaksi tuntia; paikka on aina varattava etukäteen ja saunotaan uima-asussa. Torstaisin yleinen vuoro on klo 17–19.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.yleinen.title",
+   "lang": "en",
+   "text": "Public session (Thu, Sat–Sun)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.sauna.yleinen.title",
+   "lang": "fi",
+   "text": "Yleinen vuoro (to, la–su)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.avoin_rituaali.cta",
+   "lang": "en",
+   "text": "Book a time →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.avoin_rituaali.cta",
+   "lang": "fi",
+   "text": "Varaa aika →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.avoin_rituaali.kicker",
+   "lang": "en",
+   "text": "Smoke sauna included!",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.avoin_rituaali.kicker",
+   "lang": "fi",
+   "text": "Sisältää savusaunan!",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.avoin_rituaali.over.persons",
+   "lang": "en",
+   "text": "ritual max. 6 guests",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.avoin_rituaali.over.persons",
+   "lang": "fi",
+   "text": "rituaali enintään 6 hlö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.avoin_rituaali.over.weekdays",
+   "lang": "en",
+   "text": "Sat, Sun",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.avoin_rituaali.over.weekdays",
+   "lang": "fi",
+   "text": "la, su",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.avoin_rituaali.text",
+   "lang": "en",
+   "text": "Step deep into the Baltic-Finnic sauna tradition and experience a ritual that lives with the seasons. Includes access to the smoke sauna and the hot tubs.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.avoin_rituaali.text",
+   "lang": "fi",
+   "text": "Astu syvälle itämerensuomalaiseen saunotusperinteeseen ja koe vuodenaikojen mukana elävä rituaali. Sisältää pääsyn myös savusaunaan ja paljuihin.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.avoin_rituaali.title",
+   "lang": "en",
+   "text": "open sauna ritual",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.avoin_rituaali.title",
+   "lang": "fi",
+   "text": "avoin saunotusrituaali",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.morsiussauna.cta",
+   "lang": "en",
+   "text": "Book a time →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.morsiussauna.cta",
+   "lang": "fi",
+   "text": "Varaa aika →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.morsiussauna.kicker",
+   "lang": "en",
+   "text": "For important moments!",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.morsiussauna.kicker",
+   "lang": "fi",
+   "text": "Tärkeisiin hetkiin!",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.morsiussauna.more",
+   "lang": "en",
+   "text": "A guided sauna ceremony: an introduction to the bridal sauna tradition, ceremonial whisking for the bride, a rose scrub, herbal steam, love charms and bridal magic according to wishes. The ceremony lasts about an hour, after which you can stay on and spend the evening with your own group. The bridal sauna is always performed by a female sauna healer.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.morsiussauna.more",
+   "lang": "fi",
+   "text": "Ohjattu saunaseremonia: opastus morsiussaunaperinteeseen, seremoniavihdonta morsiamelle, ruusukuorinta, yrttilöylyt, lemmenloitsuja ja morsiustaikoja toiveiden mukaan. Seremonia kestää noin tunnin, jonka jälkeen voi jäädä viettämään iltaa omalla porukalla. Morsiussaunan tekee aina naispuolinen saunottaja.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.morsiussauna.over.persons",
+   "lang": "en",
+   "text": "up to 8 guests",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.morsiussauna.over.persons",
+   "lang": "fi",
+   "text": "enintään 8 hlö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.morsiussauna.text",
+   "lang": "en",
+   "text": "The bridal sauna of the heritage sauna gives the bride a chance to quiet down and prepare for a new stage of life. A shared moment in the steam, in the spirit of the old sauna tradition, stays with you long after the celebration.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.morsiussauna.text",
+   "lang": "fi",
+   "text": "Perinnesaunan morsiussauna tarjoaa morsiamelle mahdollisuuden hiljentyä ja valmistautua uuteen elämänvaiheeseen. Vanhan saunaperinteen hengessä jaettu löylyhetki kulkee mukana vielä pitkään juhlapäivän jälkeen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.morsiussauna.title",
+   "lang": "en",
+   "text": "bridal sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.morsiussauna.title",
+   "lang": "fi",
+   "text": "morsiussauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.opiskelija.cta",
+   "lang": "en",
+   "text": "See dates →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.opiskelija.cta",
+   "lang": "fi",
+   "text": "Katso ajankohdat →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.opiskelija.kicker",
+   "lang": "en",
+   "text": "Occasional",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.opiskelija.kicker",
+   "lang": "fi",
+   "text": "Satunnainen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.opiskelija.more",
+   "lang": "en",
+   "text": "The treatments are given by students of the Terve Löyly sauna healer training under the guidance of sauna healers. The price does not include access to the smoke sauna or the hot tubs.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.opiskelija.more",
+   "lang": "fi",
+   "text": "Hoitajina ovat Terve Löyly -saunottajakoulutuksen opiskelijat saunottajien opastuksessa. Hoidon hintaan ei kuulu pääsy savusaunaan tai paljuihin.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.opiskelija.text",
+   "lang": "en",
+   "text": "Sauna treatments given by sauna healer trainees are offered only a few times a year in connection with the trainings, on separately announced days – not bookable regularly. The treatment cannot be chosen; it depends on the theme of the training.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.opiskelija.text",
+   "lang": "fi",
+   "text": "Saunottajakoulutuksen opiskelijoiden tekemiä saunahoitoja tarjotaan vain muutaman kerran vuodessa koulutusten yhteydessä, erikseen ilmoitettuina päivinä – ei säännöllisesti varattavissa. Hoitoa ei voi valita, vaan se määräytyy koulutuksen teeman mukaan.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.opiskelija.title",
+   "lang": "en",
+   "text": "sauna treatment by students",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.opiskelija.title",
+   "lang": "fi",
+   "text": "saunahoito opiskelijatyönä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.perinnesaunotusilta.cta",
+   "lang": "en",
+   "text": "Book a time →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.perinnesaunotusilta.cta",
+   "lang": "fi",
+   "text": "Varaa aika →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.perinnesaunotusilta.kicker",
+   "lang": "en",
+   "text": "Experience the sauna of the ancestors",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.perinnesaunotusilta.kicker",
+   "lang": "fi",
+   "text": "Koe esivanhempien sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.perinnesaunotusilta.over.freq",
+   "lang": "en",
+   "text": "1–2 / month",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.perinnesaunotusilta.over.freq",
+   "lang": "fi",
+   "text": "1–2 / kk",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.perinnesaunotusilta.text",
+   "lang": "en",
+   "text": "In the traditional sauna evenings we delve into the Baltic-Finnic sauna tradition in the gentle steam of the smoke sauna. The theme of the evening changes with the turn of the year.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.perinnesaunotusilta.text",
+   "lang": "fi",
+   "text": "Perinnesaunotusilloissa syvennytään itämerensuomalaiseen saunaperinteeseen savusaunan lempeissä löylyissä. Illan teema vaihtuu vuodenkierron mukaisesti.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.perinnesaunotusilta.title",
+   "lang": "en",
+   "text": "traditional sauna evenings",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.perinnesaunotusilta.title",
+   "lang": "fi",
+   "text": "perinnesaunotusillat",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.rituaali_lisa.cta",
+   "lang": "en",
+   "text": "Book →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.rituaali_lisa.cta",
+   "lang": "fi",
+   "text": "Varaa →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.rituaali_lisa.kicker",
+   "lang": "en",
+   "text": "Add-on for a public session",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.rituaali_lisa.kicker",
+   "lang": "fi",
+   "text": "Lisäpalvelu yleiselle vuorolle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.rituaali_lisa.text",
+   "lang": "en",
+   "text": "A short sauna ritual in the Rauni treatment sauna (up to six guests at a time): a löyly greeting, light warm-up whisking and a mini treatment that follows the turn of the year. You may take part in a swimsuit or naked.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.rituaali_lisa.text",
+   "lang": "fi",
+   "text": "Lyhyt saunotusrituaali hoitosauna Raunissa (enintään kuusi henkeä kerrallaan): löylyntervehdys, kevyttä lämmittelyvihdontaa ja vuodenkierron mukainen minihoito. Voi osallistua uimapuvussa tai alasti.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.rituaali_lisa.title",
+   "lang": "en",
+   "text": "sauna ritual (saunotusrituaali)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.rituaali_lisa.title",
+   "lang": "fi",
+   "text": "saunotusrituaali",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.ryhma.cta",
+   "lang": "en",
+   "text": "Book a time →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.ryhma.cta",
+   "lang": "fi",
+   "text": "Varaa aika →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.ryhma.kicker",
+   "lang": "en",
+   "text": "For groups",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.ryhma.kicker",
+   "lang": "fi",
+   "text": "Ryhmälle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.ryhma.more",
+   "lang": "en",
+   "text": "The price does not include access to the smoke sauna or the hot tubs (available separately). It takes place in the Rauni treatment sauna.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.ryhma.more",
+   "lang": "fi",
+   "text": "Hinta ei sisällä pääsyä savusaunaan tai paljuihin (ostettavissa erikseen). Toteutetaan hoitosauna Raunissa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.ryhma.over.persons",
+   "lang": "en",
+   "text": "3–6 guests",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.ryhma.over.persons",
+   "lang": "fi",
+   "text": "3–6 hlö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.ryhma.text",
+   "lang": "en",
+   "text": "A traditional sauna healer leads the group into the healing world of the forest and the sauna. The content varies with the number of guests and can be tailored – tell us your wishes in the booking notes.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.ryhma.text",
+   "lang": "fi",
+   "text": "Perinnesaunottaja johdattaa ryhmän metsän ja saunan parantavaan maailmaan. Sisältö vaihtelee henkilömäärän mukaan ja voidaan räätälöidä – kerro toiveet varauksen lisätiedoissa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.ryhma.title",
+   "lang": "en",
+   "text": "traditional sauna ritual for a group",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.ryhma.title",
+   "lang": "fi",
+   "text": "perinnesaunotus ryhmälle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunahoito.cta",
+   "lang": "en",
+   "text": "Book a time →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunahoito.cta",
+   "lang": "fi",
+   "text": "Varaa aika →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunahoito.kicker",
+   "lang": "en",
+   "text": "Healing",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunahoito.kicker",
+   "lang": "fi",
+   "text": "Hoitava",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunahoito.more",
+   "lang": "en",
+   "text": "The treatment begins with a löyly greeting ritual, after which the sauna healer performs the treatment you have chosen: a honey, whisk, salt or peat treatment (chosen at checkout). It takes place in the Rauni treatment sauna. The price does not include access to the smoke sauna or the hot tubs – a sauna session is booked separately. You may take part naked, partly or fully in a swimsuit.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunahoito.more",
+   "lang": "fi",
+   "text": "Hoito alkaa löylyntervehdysrituaalilla, jonka jälkeen saunottaja toteuttaa valitun hoidon: hunaja-, vihta-, suola- tai turvehoidon (valinta kassalla). Toteutetaan hoitosauna Raunissa. Hoidon hintaan ei sisälly pääsyä savusaunaan tai paljuihin – saunavuoro varataan erikseen. Hoitoon voi osallistua alasti, osittain tai kokonaan uima-asussa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunahoito.text",
+   "lang": "en",
+   "text": "A sauna treatment is a gentle, unhurried sauna experience where the steam, the warmth and the natural treatment you choose bring a moment of stillness into everyday life. The scope adapts to the group size, from a full individual treatment to a shared moment of relaxation.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunahoito.text",
+   "lang": "fi",
+   "text": "Saunahoito on lempeä ja kiireetön saunaelämys, jossa löyly, lämpö ja valitsemasi luonnonhoito tuovat hetken pysähtymistä arjen keskelle. Hoidon laajuus mukautuu henkilömäärän mukaan kokonaisvaltaisesta yksilöhoidosta yhteiseen rentoutumishetkeen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunahoito.title",
+   "lang": "en",
+   "text": "sauna treatment",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunahoito.title",
+   "lang": "fi",
+   "text": "saunahoito",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunotus.cta",
+   "lang": "en",
+   "text": "Book a time →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunotus.cta",
+   "lang": "fi",
+   "text": "Varaa aika →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunotus.kicker",
+   "lang": "en",
+   "text": "Immersive",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunotus.kicker",
+   "lang": "fi",
+   "text": "Elämyksellinen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunotus.more",
+   "lang": "en",
+   "text": "A saunotus includes whisks, plants, herbs, salt and honey and, if you wish, a peat treatment; incantations, whisking, techniques with steam, water and air, a float in the cool pool and herbal tea. The sauna healer adapts the intensity to you. It takes place in the Rauni treatment sauna. The price does not include access to the smoke sauna or the hot tubs.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunotus.more",
+   "lang": "fi",
+   "text": "Saunotukseen kuuluvat vihdat, kasvit, yrtit, suola ja hunaja, halutessa turvehoito; loitsuja, vihtomista, löylyn, veden ja ilman tekniikoita, kellutus viileässä altaassa ja yrttitee. Saunottaja mukauttaa voimakkuuden asiakkaan mukaan. Toteutetaan hoitosauna Raunissa. Hoidon hintaan ei sisälly pääsyä savusaunaan tai paljuihin.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunotus.text",
+   "lang": "en",
+   "text": "Saunotus is a two-hour, all-encompassing sauna experience where steam, whisks, herbs and other gifts of nature lead you into deep relaxation. Every session is shaped by the guest and the moment.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunotus.text",
+   "lang": "fi",
+   "text": "Saunotus on kahden tunnin kokonaisvaltainen saunaelämys, jossa löyly, vihdat, yrtit ja muut luonnonantimet johdattavat syvään rentoutumisen tilaan. Jokainen saunotus rakentuu asiakkaan ja hetken mukaan.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunotus.title",
+   "lang": "en",
+   "text": "saunotus (sauna ritual)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.saunotus.title",
+   "lang": "fi",
+   "text": "saunotus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.synttarisauna.cta",
+   "lang": "en",
+   "text": "Book a time →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.synttarisauna.cta",
+   "lang": "fi",
+   "text": "Varaa aika →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.synttarisauna.kicker",
+   "lang": "en",
+   "text": "Experience the sauna of the ancestors",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.synttarisauna.kicker",
+   "lang": "fi",
+   "text": "Koe esivanhempien sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.synttarisauna.more",
+   "lang": "en",
+   "text": "Includes a guided sauna ceremony, whisking or mini treatments as wished, and löyly making with gentle air whisking. The ceremony lasts about an hour; the booking is 2–3 h. After the ceremony you can enjoy the steam of the smoke sauna and the cold and warm hot tubs.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.synttarisauna.more",
+   "lang": "fi",
+   "text": "Sisältää ohjatun saunaseremonian, toiveiden mukaan vihdontaa tai minihoitoja sekä löylyn luontia ja lempeää ilmavihdontaa. Seremonia kestää noin tunnin; varaus 2–3 h. Seremonian jälkeen voi nauttia maasavusaunan löylyistä sekä kylmä- ja lämminpaljuista.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.synttarisauna.over.persons",
+   "lang": "en",
+   "text": "up to 8 guests",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.synttarisauna.over.persons",
+   "lang": "fi",
+   "text": "enintään 8 hlö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.synttarisauna.text",
+   "lang": "en",
+   "text": "A birthday is a moment to pause at the path you have walked and look towards a new stage of life. The saunotus balances and harmonises, giving strength for the coming year.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.synttarisauna.text",
+   "lang": "fi",
+   "text": "Syntymäpäivä on hetki pysähtyä kuljetun polun äärelle ja suunnata katse kohti uutta elämänvaihetta. Saunotus tasapainottaa ja harmonisoi oloa, antaen voimaa tulevaan vuoteen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.synttarisauna.title",
+   "lang": "en",
+   "text": "birthday sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.synttarisauna.title",
+   "lang": "fi",
+   "text": "synttärisauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.syvasaunotus.cta",
+   "lang": "en",
+   "text": "Book a time →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.syvasaunotus.cta",
+   "lang": "fi",
+   "text": "Varaa aika →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.syvasaunotus.kicker",
+   "lang": "en",
+   "text": "Unforgettable",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.syvasaunotus.kicker",
+   "lang": "fi",
+   "text": "Ikimuistoinen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.syvasaunotus.more",
+   "lang": "en",
+   "text": "A three-hour sauna ritual in several stages: whisks, plants, herbs, salt, honey and, if you wish, peat; incantations, rhythmic whisking, alternating warm and cool, and a float in the cool pool. Includes herbal tea and a light snack. It takes place in the Rauni treatment sauna. The price does not include access to the smoke sauna or the hot tubs.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.syvasaunotus.more",
+   "lang": "fi",
+   "text": "Kolmen tunnin saunotusrituaali useassa vaiheessa: vihdat, kasvit, yrtit, suola, hunaja ja halutessa turve; loitsuja, rytmistä vihtomista, lämpimän ja viileän vaihtelua ja kellutus viileässä altaassa. Sisältää yrttiteetä ja pientä purtavaa. Toteutetaan hoitosauna Raunissa. Hoidon hintaan ei sisälly pääsyä savusaunaan tai paljuihin.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.syvasaunotus.text",
+   "lang": "en",
+   "text": "The deep saunotus is a long, deeply healing sauna ritual in which the sauna healer can lead you ever deeper into relaxation and presence. The long duration allows a calm pace and a complete sauna experience.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.syvasaunotus.text",
+   "lang": "fi",
+   "text": "Syväsaunotus on pitkä ja syvästi hoitava saunotusrituaali, jossa saunottaja voi johdattaa asiakkaan yhä syvempään rentoutumisen ja läsnäolon tilaan. Pitkä kesto mahdollistaa rauhallisen etenemisen ja kokonaisvaltaisen saunaelämyksen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.syvasaunotus.title",
+   "lang": "en",
+   "text": "deep saunotus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.syvasaunotus.title",
+   "lang": "fi",
+   "text": "syväsaunotus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvesauna.cta",
+   "lang": "en",
+   "text": "Book a time →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvesauna.cta",
+   "lang": "fi",
+   "text": "Varaa aika →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvesauna.kicker",
+   "lang": "en",
+   "text": "Smoke sauna included!",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvesauna.kicker",
+   "lang": "fi",
+   "text": "Sisältää savusaunan!",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvesauna.more",
+   "lang": "en",
+   "text": "A peat sauna ceremony for a group: a guided first-löyly ceremony, a full-body peat treatment led by the sauna healer, löyly making and gentle air whisking. The ceremony lasts about an hour; the booking is 2–3 h. After the ceremony you can enjoy the steam of the smoke sauna and the cold and warm hot tubs.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvesauna.more",
+   "lang": "fi",
+   "text": "Turvesaunaseremonia ryhmälle: ohjattu ensilöylyseremonia, saunottajan ohjaama kokovartaloturvehoito sekä löylyn luontia ja lempeää ilmavihdontaa. Seremonia kestää noin tunnin; varaus 2–3 h. Seremonian jälkeen voi nauttia maasavusaunan löylyistä sekä kylmä- ja lämminpaljuista.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvesauna.over.persons",
+   "lang": "en",
+   "text": "up to 8 guests",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvesauna.over.persons",
+   "lang": "fi",
+   "text": "enintään 8 hlö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvesauna.text",
+   "lang": "en",
+   "text": "Peat is a gift of mother earth whose warm softness helps the body calm down and relax deeply. Come and experience the healing power of peat in a peat ritual led by a sauna healer.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvesauna.text",
+   "lang": "fi",
+   "text": "Turve on äiti maan lahja, jonka lämmin pehmeys auttaa kehoa rauhoittumaan ja syvärentoutumaan. Tule kokemaan turpeen hoitava voima saunottajan ohjaamassa turverituaalissa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvesauna.title",
+   "lang": "en",
+   "text": "peat sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvesauna.title",
+   "lang": "fi",
+   "text": "turvesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvetorstai.cta",
+   "lang": "en",
+   "text": "Book a time →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvetorstai.cta",
+   "lang": "fi",
+   "text": "Varaa aika →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvetorstai.kicker",
+   "lang": "en",
+   "text": "Smoke sauna included!",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvetorstai.kicker",
+   "lang": "fi",
+   "text": "Sisältää savusaunan!",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvetorstai.over.weekdays",
+   "lang": "en",
+   "text": "Thu",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvetorstai.over.weekdays",
+   "lang": "fi",
+   "text": "to",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvetorstai.text",
+   "lang": "en",
+   "text": "On Peat Thursday the sauna healer leads the evening into a soft löyly greeting and warm-up with whisks, after which cleansing natural peat is spread on the skin.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvetorstai.text",
+   "lang": "fi",
+   "text": "Turvetorstaina saunottaja johdattaa illan pehmeään löylyntervehdykseen ja lämmittelyyn vihdoilla, jonka jälkeen levitetään puhdistava luonnonturve iholle.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvetorstai.title",
+   "lang": "en",
+   "text": "Peat Thursday",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.card.treatments.turvetorstai.title",
+   "lang": "fi",
+   "text": "turvetorstai",
    "version": 1,
    "placeholders": []
   },
@@ -2928,6 +9246,90 @@
    "key": "ui.checkout.error_too_soon",
    "lang": "fi",
    "text": "Aika on liian lähellä. Valitse myöhempi aika.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.footer.contact",
+   "lang": "en",
+   "text": "Contact",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.footer.contact",
+   "lang": "fi",
+   "text": "Yhteystiedot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.footer.info",
+   "lang": "en",
+   "text": "Practical info",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.footer.info",
+   "lang": "fi",
+   "text": "Käytännön info",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.footer.legal",
+   "lang": "en",
+   "text": "Terms",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.footer.legal",
+   "lang": "fi",
+   "text": "Ehdot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.footer.privacy",
+   "lang": "en",
+   "text": "Privacy (in Finnish)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.footer.privacy",
+   "lang": "fi",
+   "text": "Tietosuoja",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.footer.services",
+   "lang": "en",
+   "text": "Services",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.footer.services",
+   "lang": "fi",
+   "text": "Palvelut",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.footer.tag",
+   "lang": "en",
+   "text": "A smoke sauna built into the ground on the banks of the Sipoonjoki river, next to Sipoonkorpi National Park.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.footer.tag",
+   "lang": "fi",
+   "text": "Maan sisälle rakennettu savusauna Sipoonjoen rannalla, Sipoonkorven kansallispuiston kupeessa.",
    "version": 1,
    "placeholders": []
   },
@@ -9486,6 +15888,364 @@
    "placeholders": []
   },
   {
+   "key": "ui.reviews.age.day.one",
+   "lang": "en",
+   "text": "{{var:n}} day ago",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.reviews.age.day.one",
+   "lang": "fi",
+   "text": "{{var:n}} päivä sitten",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.reviews.age.day.other",
+   "lang": "en",
+   "text": "{{var:n}} days ago",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.reviews.age.day.other",
+   "lang": "fi",
+   "text": "{{var:n}} päivää sitten",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.reviews.age.month.one",
+   "lang": "en",
+   "text": "{{var:n}} month ago",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.reviews.age.month.one",
+   "lang": "fi",
+   "text": "{{var:n}} kuukausi sitten",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.reviews.age.month.other",
+   "lang": "en",
+   "text": "{{var:n}} months ago",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.reviews.age.month.other",
+   "lang": "fi",
+   "text": "{{var:n}} kuukautta sitten",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.reviews.age.today",
+   "lang": "en",
+   "text": "today",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.reviews.age.today",
+   "lang": "fi",
+   "text": "tänään",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.reviews.age.week.one",
+   "lang": "en",
+   "text": "{{var:n}} week ago",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.reviews.age.week.one",
+   "lang": "fi",
+   "text": "{{var:n}} viikko sitten",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.reviews.age.week.other",
+   "lang": "en",
+   "text": "{{var:n}} weeks ago",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.reviews.age.week.other",
+   "lang": "fi",
+   "text": "{{var:n}} viikkoa sitten",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.reviews.age.year.one",
+   "lang": "en",
+   "text": "{{var:n}} year ago",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.reviews.age.year.one",
+   "lang": "fi",
+   "text": "{{var:n}} vuosi sitten",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.reviews.age.year.other",
+   "lang": "en",
+   "text": "{{var:n}} years ago",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.reviews.age.year.other",
+   "lang": "fi",
+   "text": "{{var:n}} vuotta sitten",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.reviews.age.yesterday",
+   "lang": "en",
+   "text": "yesterday",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.reviews.age.yesterday",
+   "lang": "fi",
+   "text": "eilen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.reviews.all",
+   "lang": "en",
+   "text": "Read all reviews on Google →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.reviews.all",
+   "lang": "fi",
+   "text": "Lue kaikki arvostelut Googlessa →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.reviews.count",
+   "lang": "en",
+   "text": "Google reviews",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.reviews.count",
+   "lang": "fi",
+   "text": "Google-arvostelua",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.reviews.less",
+   "lang": "en",
+   "text": "Show less",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.reviews.less",
+   "lang": "fi",
+   "text": "Näytä vähemmän",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.reviews.more",
+   "lang": "en",
+   "text": "Read more",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.reviews.more",
+   "lang": "fi",
+   "text": "Lue lisää",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.reviews.stars",
+   "lang": "en",
+   "text": "{{var:n}} out of 5 stars",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.reviews.stars",
+   "lang": "fi",
+   "text": "{{var:n}} tähteä viidestä",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "ui.reviews.title",
+   "lang": "en",
+   "text": "What our guests say",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.reviews.title",
+   "lang": "fi",
+   "text": "Asiakkaiden kokemuksia",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.session.men",
+   "lang": "en",
+   "text": "Men's session",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.session.men",
+   "lang": "fi",
+   "text": "Miestenvuoro",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.session.peat",
+   "lang": "en",
+   "text": "Peat Thursday",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.session.peat",
+   "lang": "fi",
+   "text": "Turvetorstai",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.session.public",
+   "lang": "en",
+   "text": "Public session",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.session.public",
+   "lang": "fi",
+   "text": "Yleinen vuoro",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.session.ritual",
+   "lang": "en",
+   "text": "Sauna ritual evening",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.session.ritual",
+   "lang": "fi",
+   "text": "Saunarituaali-ilta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.session.silent",
+   "lang": "en",
+   "text": "Silent session",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.session.silent",
+   "lang": "fi",
+   "text": "Hiljainen vuoro",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.session.weekend",
+   "lang": "en",
+   "text": "Public smoke sauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.session.weekend",
+   "lang": "fi",
+   "text": "Yleinen savusauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.session.women",
+   "lang": "en",
+   "text": "Women's session",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.session.women",
+   "lang": "fi",
+   "text": "Naistenvuoro",
+   "version": 1,
+   "placeholders": []
+  },
+  {
    "key": "ui.shop.accept_terms",
    "lang": "en",
    "text": "I accept the",
@@ -11796,6 +18556,790 @@
    "key": "ui.shop.zip",
    "lang": "fi",
    "text": "Postinumero",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.all_events",
+   "lang": "en",
+   "text": "All events →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.all_events",
+   "lang": "fi",
+   "text": "Kaikki tapahtumat →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.all_sessions",
+   "lang": "en",
+   "text": "All sessions →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.all_sessions",
+   "lang": "fi",
+   "text": "Kaikki vuorot →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.approx",
+   "lang": "en",
+   "text": "about",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.approx",
+   "lang": "fi",
+   "text": "noin",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.book",
+   "lang": "en",
+   "text": "Book",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.book",
+   "lang": "fi",
+   "text": "Varaa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.book_full",
+   "lang": "en",
+   "text": "Book a sauna experience",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.book_full",
+   "lang": "fi",
+   "text": "Varaa saunaelämys",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.brand_title",
+   "lang": "en",
+   "text": "Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.brand_title",
+   "lang": "fi",
+   "text": "Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.business_id",
+   "lang": "en",
+   "text": "Business ID",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.business_id",
+   "lang": "fi",
+   "text": "Y-tunnus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.companies",
+   "lang": "en",
+   "text": "For companies",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.companies",
+   "lang": "fi",
+   "text": "Yrityksille",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days_long.1",
+   "lang": "en",
+   "text": "Monday",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days_long.1",
+   "lang": "fi",
+   "text": "Maanantai",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days_long.2",
+   "lang": "en",
+   "text": "Tuesday",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days_long.2",
+   "lang": "fi",
+   "text": "Tiistai",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days_long.3",
+   "lang": "en",
+   "text": "Wednesday",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days_long.3",
+   "lang": "fi",
+   "text": "Keskiviikko",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days_long.4",
+   "lang": "en",
+   "text": "Thursday",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days_long.4",
+   "lang": "fi",
+   "text": "Torstai",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days_long.5",
+   "lang": "en",
+   "text": "Friday",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days_long.5",
+   "lang": "fi",
+   "text": "Perjantai",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days_long.6",
+   "lang": "en",
+   "text": "Saturday",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days_long.6",
+   "lang": "fi",
+   "text": "Lauantai",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days_long.7",
+   "lang": "en",
+   "text": "Sunday",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days_long.7",
+   "lang": "fi",
+   "text": "Sunnuntai",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days.1",
+   "lang": "en",
+   "text": "Mon",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days.1",
+   "lang": "fi",
+   "text": "Ma",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days.2",
+   "lang": "en",
+   "text": "Tue",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days.2",
+   "lang": "fi",
+   "text": "Ti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days.3",
+   "lang": "en",
+   "text": "Wed",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days.3",
+   "lang": "fi",
+   "text": "Ke",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days.4",
+   "lang": "en",
+   "text": "Thu",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days.4",
+   "lang": "fi",
+   "text": "To",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days.5",
+   "lang": "en",
+   "text": "Fri",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days.5",
+   "lang": "fi",
+   "text": "Pe",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days.6",
+   "lang": "en",
+   "text": "Sat",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days.6",
+   "lang": "fi",
+   "text": "La",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days.7",
+   "lang": "en",
+   "text": "Sun",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.days.7",
+   "lang": "fi",
+   "text": "Su",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.directions",
+   "lang": "en",
+   "text": "Directions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.directions",
+   "lang": "fi",
+   "text": "Reittiohje",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.events",
+   "lang": "en",
+   "text": "Events",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.events",
+   "lang": "fi",
+   "text": "Tapahtumat",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.events_intro",
+   "lang": "en",
+   "text": "Warm moments together",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.events_intro",
+   "lang": "fi",
+   "text": "Lämpimiä yhteisiä hetkiä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.events_link",
+   "lang": "en",
+   "text": "Events",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.events_link",
+   "lang": "fi",
+   "text": "Tapahtumat",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.extra_guest",
+   "lang": "en",
+   "text": "extra guest",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.extra_guest",
+   "lang": "fi",
+   "text": "lisähenkilö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.faq_kicker",
+   "lang": "en",
+   "text": "FAQ",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.faq_kicker",
+   "lang": "fi",
+   "text": "Usein kysyttyä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.from_word",
+   "lang": "en",
+   "text": "from",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.from_word",
+   "lang": "fi",
+   "text": "alk.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.lang_label",
+   "lang": "en",
+   "text": "Language",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.lang_label",
+   "lang": "fi",
+   "text": "Kieli",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.menu",
+   "lang": "en",
+   "text": "Menu",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.menu",
+   "lang": "fi",
+   "text": "Valikko",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.menu_label",
+   "lang": "en",
+   "text": "Main menu",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.menu_label",
+   "lang": "fi",
+   "text": "Päävalikko",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.more_info",
+   "lang": "en",
+   "text": "More information",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.more_info",
+   "lang": "fi",
+   "text": "Lisätietoja",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.no_public",
+   "lang": "en",
+   "text": "No public session",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.no_public",
+   "lang": "fi",
+   "text": "Ei yleistä vuoroa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.not_found_text",
+   "lang": "en",
+   "text": "We could not find the page you were looking for. Return to the front page or browse the sauna sessions.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.not_found_text",
+   "lang": "fi",
+   "text": "Hakemaasi sivua ei löytynyt. Palaa etusivulle tai tutustu saunavuoroihin.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.not_found_title",
+   "lang": "en",
+   "text": "Page not found",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.not_found_title",
+   "lang": "fi",
+   "text": "Sivua ei löydy",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.open_in_maps",
+   "lang": "en",
+   "text": "Open in Google Maps",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.open_in_maps",
+   "lang": "fi",
+   "text": "Avaa Google Mapsissa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.open_new_tab",
+   "lang": "en",
+   "text": "(opens in a new tab)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.open_new_tab",
+   "lang": "fi",
+   "text": "(avautuu uuteen välilehteen)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.other_lang",
+   "lang": "en",
+   "text": "FI",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.other_lang",
+   "lang": "fi",
+   "text": "EN",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.per_person",
+   "lang": "en",
+   "text": "per person",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.per_person",
+   "lang": "fi",
+   "text": "per henkilö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.per_person_short",
+   "lang": "en",
+   "text": "/ person",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.per_person_short",
+   "lang": "fi",
+   "text": "/ hlö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.persons",
+   "lang": "en",
+   "text": "guests",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.persons",
+   "lang": "fi",
+   "text": "hlö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.private_link",
+   "lang": "en",
+   "text": "Private sessions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.private_link",
+   "lang": "fi",
+   "text": "Yksityisvuorot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.read_more",
+   "lang": "en",
+   "text": "Read more →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.read_more",
+   "lang": "fi",
+   "text": "Lue lisää →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.reserve",
+   "lang": "en",
+   "text": "Book",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.reserve",
+   "lang": "fi",
+   "text": "Varaa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.reserve_arrow",
+   "lang": "en",
+   "text": "Book →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.reserve_arrow",
+   "lang": "fi",
+   "text": "Varaa →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.site_name",
+   "lang": "en",
+   "text": "Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.site_name",
+   "lang": "fi",
+   "text": "Sipoonjoen Perinnesauna",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.site_test_note",
+   "lang": "en",
+   "text": "Test environment – not a public release.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.site_test_note",
+   "lang": "fi",
+   "text": "Testiympäristö – ei julkinen julkaisu.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.skip",
+   "lang": "en",
+   "text": "Skip to content",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.skip",
+   "lang": "fi",
+   "text": "Siirry sisältöön",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.to_home",
+   "lang": "en",
+   "text": "Front page",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.to_home",
+   "lang": "fi",
+   "text": "Etusivulle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.today",
+   "lang": "en",
+   "text": "Today",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.today",
+   "lang": "fi",
+   "text": "Tänään",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.week_kicker",
+   "lang": "en",
+   "text": "Weekly programme",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.week_kicker",
+   "lang": "fi",
+   "text": "Viikko-ohjelma",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.week_title",
+   "lang": "en",
+   "text": "Public sauna sessions",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.site.week_title",
+   "lang": "fi",
+   "text": "Yleiset saunavuorot",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.training_banner.cta",
+   "lang": "en",
+   "text": "Explore the trainings →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.training_banner.cta",
+   "lang": "fi",
+   "text": "Tutustu koulutuksiin →",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.training_banner.text",
+   "lang": "en",
+   "text": "Sauna healer trainings are presented on a separate training site.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.training_banner.text",
+   "lang": "fi",
+   "text": "Saunottajakoulutukset järjestetään erillisellä koulutussivustolla.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.training_banner.title",
+   "lang": "en",
+   "text": "Want to become a sauna healer?",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.training_banner.title",
+   "lang": "fi",
+   "text": "Haluatko oppia saunottajaksi?",
    "version": 1,
    "placeholders": []
   },
