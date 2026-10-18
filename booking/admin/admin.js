@@ -9,7 +9,8 @@ const $ = (id) => document.getElementById(id);
 // Kokeilutila: osoite /hallinta/?mock=1 → keinoistunto + selaimen oma mock-data (options-mock.js). EI verkkokutsuja eikä kirjautumista; mikään ei tallennu. Ilman parametria ennallaan.
 const MOCK = new URLSearchParams(location.search).get('mock') === '1';
 if (MOCK) {
-  const mock = createAdminMock({ delay: 60 });
+  const mockRole = new URLSearchParams(location.search).get('role');
+  const mock = createAdminMock({ delay: 60, role: ['admin', 'manager', 'staff'].includes(mockRole) ? mockRole : 'manager' });
   setRpcOverride((fn, args) => mock.rpc(fn, args));
   setMockSession({ access_token: 'mock', refresh_token: 'mock', expires_at: 4102444800, user: { email: 'kokeilu@example.com' } });
   window.__adminMock = mock;

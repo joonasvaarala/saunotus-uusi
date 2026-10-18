@@ -18,7 +18,7 @@ const err = (code, message) => Object.assign(new Error(message || code), { name:
 const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'reports.view'];
 const CODE_RE = /^[a-z0-9_]{1,40}$/;
 
-export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS } = {}) {
+export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager' } = {}) {
   const today = todayHel(now);
   const st = {
     calls: [], perms: [...perms],
@@ -77,8 +77,8 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS } =
   const need = (perm) => { if (!st.perms.includes(perm)) throw err('forbidden', `Ei oikeutta tähän toimintoon (${perm})`); };
   const inRange = (r, a) => (!a.p_from || r.starts_at >= a.p_from) && (!a.p_to || r.starts_at < a.p_to);
   const handlers = {
-    current_staff_role: () => 'manager',
-    admin_my_permissions: () => ({ role: 'manager', role_label: 'Päällikkö (esimerkki)', permissions: st.perms }),
+    current_staff_role: () => role,
+    admin_my_permissions: () => ({ role, role_label: role === 'staff' ? 'Työntekijä (esimerkki)' : role === 'admin' ? 'Pääkäyttäjä (esimerkki)' : 'Päällikkö (esimerkki)', permissions: st.perms }),
     admin_list_products: () => st.products.map((p) => ({ ...p })),
     'select:payment_methods': () => [{ code: 'pay_later', label: 'Maksu myöhemmin', is_manual: true, active: true }, { code: 'cash', label: 'Käteinen', is_manual: true, active: true }, { code: 'card_terminal', label: 'Korttipääte', is_manual: true, active: true }],
     'select:resources': () => [{ id: 1, code: 'rauni', name: 'Rauni', active: true }, { id: 2, code: 'lovi', name: 'Lovi', active: true }],
@@ -108,8 +108,14 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS } =
       { key: 'ui.admin.day.event_all_day', lang: 'fi', text: 'Koko päivä' },
       { key: 'ui.admin.day.event_all_day', lang: 'en', text: 'All day' },
     ] }),
-    admin_day_extras: (a) => ({ date: a.p_date, tz: 'Europe/Helsinki', revenue_rows: [], events: [],
-      revenue: { basis: 'visit_start', vat_basis: 'gross_incl_vat', currency: 'EUR', gross: 0, vat: 0, net: 0, count: 0, pending_gross: 0, pending_count: 0, unpaid_gross: 0, unpaid_count: 0 } }),
+    admin_day_revenue: (a) => {
+      if (role !== 'admin' && role !== 'manager') throw err('forbidden', 'Päivän tuotto näkyy vain ylläpitäjälle');
+      return { date: a.p_date, tz: 'Europe/Helsinki', revenue_rows: [],
+        revenue: { basis: 'visit_start', vat_basis: 'gross_incl_vat', currency: 'EUR', gross: 0, vat: 0, net: 0, count: 0, pending_gross: 0, pending_count: 0, unpaid_gross: 0, unpaid_count: 0 } };
+    },
+    admin_day_extras: (a) => ({ date: a.p_date, tz: 'Europe/Helsinki', events: [],
+      revenue_rows: role === 'admin' || role === 'manager' ? [] : null,
+      revenue: role === 'admin' || role === 'manager' ? { basis: 'visit_start', vat_basis: 'gross_incl_vat', currency: 'EUR', gross: 0, vat: 0, net: 0, count: 0, pending_gross: 0, pending_count: 0, unpaid_gross: 0, unpaid_count: 0 } : null }),
     admin_day_view: (a) => {
       const rs = st.reservations.filter((r) => r.starts_at >= helIso(a.p_date, '00:00') && r.starts_at < helIso(addDays(a.p_date, 1), '00:00'));
       return { date: a.p_date, sessions: [], blocks: [], prep: [], addon_totals: [],

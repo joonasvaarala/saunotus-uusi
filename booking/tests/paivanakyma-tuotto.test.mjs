@@ -3,7 +3,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { summarizeRevenue, revenueView, eventsOnDay, eventTimeLabel, eventSortIso, assignDayCards, clockIso, helsinkiDate, effectiveStatus } from '../admin/day-logic.js';
+import { summarizeRevenue, revenueView, eventsOnDay, eventTimeLabel, eventSortIso, assignDayCards, canSeeDayRevenue, clockIso, helsinkiDate, effectiveStatus } from '../admin/day-logic.js';
+import { createAdminMock } from '../admin/options-mock.js';
 import { DAY_TEXTS, fillDayText, dayText, loadDayTexts, clearDayTextCache } from '../admin/day-texts.js';
 
 const DAY = '2026-10-20';
@@ -213,6 +214,21 @@ test('migraatio on vain luku ja noudattaa samaa sääntöä', () => {
   assert.match(ui, /data-testid': 'event'/);
   assert.match(ui, /admin_day_extras/);
   assert.match(ui, /loadDayTexts\(rpc\)/);
+  assert.match(ui, /canSeeDayRevenue\(ctx\.role\)/);
+  assert.match(ui, /seeMoney \? loadRevenue\(date\) : null/);
+  const sql69 = readFileSync(new URL('../supabase/migrations/20261018171000_booking_69_day_revenue_role.sql', import.meta.url), 'utf8');
+  const rb69 = readFileSync(new URL('../supabase/rollbacks/20261018171000_booking_69_ROLLBACK.sql', import.meta.url), 'utf8');
+  assert.match(sql69, /create or replace function booking\.admin_day_revenue\(p_date date\)/);
+  assert.match(sql69, /current_staff_role\(\) not in \('admin', 'manager'\)/);
+  assert.match(sql69, /current_staff_role\(\) in \('admin', 'manager'\)/);
+  assert.match(sql69, /revoke all on function booking\.admin_day_revenue\(date\) from public, anon, authenticated/);
+  assert.doesNotMatch(sql69, /alter table|create table/i);
+  assert.match(rb69, /drop function if exists booking\.admin_day_revenue\(date\)/);
+  assert.match(rb69, /create or replace function booking\.admin_day_extras\(p_date date\)/);
+  const t69 = readFileSync(new URL('../supabase/tests/day/t69_day_revenue_role.sql', import.meta.url), 'utf8');
+  assert.match(t69, /t69-staff@example\.test', 'staff'/);
+  assert.match(t69, /admin_day_revenue/);
+  assert.doesNotMatch(t69, /^\s*set\s+(local\s+)?(lock_timeout|statement_timeout)/im);
   const helpers = readFileSync(new URL('../supabase/tests/fixtures/10_test_helpers.sql', import.meta.url), 'utf8');
   const t68 = readFileSync(new URL('../supabase/tests/day/t68_day_revenue_events.sql', import.meta.url), 'utf8');
   assert.match(helpers, /function test\.mk_user/);
@@ -220,6 +236,27 @@ test('migraatio on vain luku ja noudattaa samaa sääntöä', () => {
   assert.match(t68, /42501/);
   assert.match(t68, /HHT68TEST001/);
   assert.doesNotMatch(t68, /^\s*set\s+(local\s+)?(lock_timeout|statement_timeout)/im);
+});
+
+test('tuotto vain admin ja manager; työntekijä ei saa lukuja eikä erillistä pyyntöä onnistu', async () => {
+  assert.equal(canSeeDayRevenue('admin'), true);
+  assert.equal(canSeeDayRevenue('manager'), true);
+  assert.equal(canSeeDayRevenue('staff'), false);
+  assert.equal(canSeeDayRevenue('text_editor'), false);
+  assert.equal(canSeeDayRevenue(null), false);
+  const staff = createAdminMock({ role: 'staff' });
+  const extras = await staff.rpc('admin_day_extras', { p_date: '2035-06-07' });
+  assert.equal(extras.revenue, null);
+  assert.equal(extras.revenue_rows, null);
+  assert.ok(Array.isArray(extras.events));
+  await assert.rejects(() => staff.rpc('admin_day_revenue', { p_date: '2035-06-07' }), (e) => e.code === 'forbidden');
+  assert.equal(staff.state.calls.some((c) => c.name === 'admin_day_revenue'), true);
+  const mgr = createAdminMock({ role: 'manager' });
+  const rev = await mgr.rpc('admin_day_revenue', { p_date: '2035-06-07' });
+  assert.equal(rev.revenue.gross, 0);
+  assert.ok(Array.isArray(rev.revenue_rows));
+  const adm = await createAdminMock({ role: 'admin' }).rpc('admin_day_revenue', { p_date: '2035-06-07' });
+  assert.equal(adm.revenue.currency, 'EUR');
 });
 
 test('päivän tekstit: site_texts peittää sanakirjan, puuttuva tai täyttymätön rivi jää varalle', async () => {

@@ -79,7 +79,12 @@ export function summarizeRevenue(rows, date, now = new Date()) {
   };
 }
 
-// extras = admin_day_extras-vastaus tai null (funktiota ei vielä ole). Tyhjä revenue_rows = aito 0 €.
+// Päivän tuotto näkyy vain ylläpitäjille. Muut päivänäkymän roolit näkevät vuorot ja tapahtumat.
+export function canSeeDayRevenue(role) {
+  return role === 'admin' || role === 'manager';
+}
+
+// extras = admin_day_revenue- tai admin_day_extras-vastaus tai null (funktiota ei vielä ole). Tyhjä revenue_rows = aito 0 €.
 export function revenueView(extras, date, now = new Date()) {
   if (!extras || !Array.isArray(extras.revenue_rows)) return { available: false };
   const rev = summarizeRevenue(extras.revenue_rows, date, now);

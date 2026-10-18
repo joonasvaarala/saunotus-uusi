@@ -1,6 +1,8 @@
 # Hallinnan päivänäkymä: tuotto ja tapahtumat
 
-Sipoonjoen Perinnesauna. Näytetään hallinnan päivänäkymän yläosassa (`booking/admin/views/day.js`). Luku tulee funktiosta `booking.admin_day_extras(p_date date)` (migraatio `booking_68_admin_day_extras`, vain luku). Selain laskee saman summan uudelleen riveistä (`booking/admin/day-logic.js`), jotta näkymä ja testi käyttävät samaa koodia. Otsikot tulevat `site_texts`-avaimista `ui.admin.day.*`; sanakirja `booking/admin/day-texts.js` on varalla.
+Sipoonjoen Perinnesauna. Näytetään hallinnan päivänäkymän yläosassa (`booking/admin/views/day.js`) vain rooleille `admin` ja `manager`. Luku tulee funktiosta `booking.admin_day_revenue(p_date date)` (migraatio `booking_69_day_revenue_role`, vain luku). `booking.admin_day_extras` palauttaa tapahtumat kaikille henkilökunnan rooleille ja tuottokentät vain adminille ja managerille. Selain laskee saman summan uudelleen riveistä (`booking/admin/day-logic.js`). Otsikot tulevat `site_texts`-avaimista `ui.admin.day.*`; sanakirja `booking/admin/day-texts.js` on varalla.
+
+Työntekijä ja muut roolit eivät näe tuottoa: näkymä ei piirrä korttia eikä kutsu `admin_day_revenue`. Tapahtumat näkyvät samoille käyttäjille kuin vuorot.
 
 ## Mitä tuotto on
 

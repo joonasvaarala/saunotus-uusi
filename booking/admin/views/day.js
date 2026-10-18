@@ -7,7 +7,7 @@ import { capacityButton, arrivalButton, addonItems, shiftsBar, prepCard } from '
 import { legsList, resourceBadges, spaceBadge } from './legs.js';
 import { optionBadge, optionReminder } from '../options.js';
 import { blockList, blockDialog } from './blocks.js';
-import { assignDayCards, eventSortIso, eventTimeLabel, revenueView } from '../day-logic.js';
+import { assignDayCards, canSeeDayRevenue, eventSortIso, eventTimeLabel, revenueView } from '../day-logic.js';
 import { dayLang, dayText, loadDayTexts } from '../day-texts.js';
 
 // admin_day_extras puuttuu kunnes migraatio booking_68 on ajettu: näytä selite, älä kaada päivänäkymää. 404:ää ei toisteta minuuttiin.
@@ -21,16 +21,29 @@ async function loadExtras(date) {
   try { return await rpc('admin_day_extras', { p_date: date }); }
   catch (e) { if (extrasUnavailable(e)) extrasMissing = Date.now(); return null; }
 }
+// Tuotto on erillinen pyyntö (booking_69). Sitä ei kutsuta eikä korttia piirretä muille kuin adminille ja managerille.
+// 404: funktiota ei ole vielä ajettu → ylläpitäjä voi käyttää booking_68:n lukuja extras-vastauksesta, kunnes migraatio on kannassa.
+let revenueMissing = 0;
+async function loadRevenue(date) {
+  if (Date.now() - revenueMissing < 60000) return undefined;
+  try { return await rpc('admin_day_revenue', { p_date: date }); }
+  catch (e) {
+    if (extrasUnavailable(e)) { revenueMissing = Date.now(); return undefined; }
+    return null;
+  }
+}
 
 export async function render({ ctx, refs, reload, query }) {
   const date = /^\d{4}-\d\d-\d\d$/.test(query.get('d') || '') ? query.get('d') : todayHel();
-  const [view, resv, shifts, addonList, optNote, extras] = await Promise.all([
+  const seeMoney = canSeeDayRevenue(ctx.role);
+  const [view, resv, shifts, addonList, optNote, extras, revenueRpc] = await Promise.all([
     rpc('admin_day_view', { p_date: date }),
     rpc('admin_list_reservations', { p_from: dayStartIso(date), p_to: dayStartIso(addDays(date, 1)), p_limit: 200 }),
     shiftsBar(date, ctx.can),   // työvuorot (admin_day_shifts tai admin_upcoming_shifts, vain luku); ei koskaan heitä: puuttuva tieto/oikeus → selitysteksti
     rpc('admin_list_addons').catch(() => []),   // lisäpalvelun koodi addon_id:llä (ikonin tunnistus, jos admin_day_view ei anna code-kenttää)
     optionReminder(),   // muistutus: tulevat hoitovaraukset ilman valittua hoitoa (booking_50); null jos ei muistutettavaa
-    loadExtras(date),   // tuotto + tapahtumat (booking_68); null jos funktiota ei vielä ole
+    loadExtras(date),   // tapahtumat (ja booking_68:ssa myös tuotto); null jos funktiota ei vielä ole
+    seeMoney ? loadRevenue(date) : null,   // tuottoluvut vain admin/manager; muille ei pyyntöä
     loadDayTexts(rpc),  // ui.admin.day.* site_texts; epäonnistuminen jättää sanakirjan
   ]);
   const codes = new Map((addonList || []).map((a) => [a.id, a.code]));
@@ -93,8 +106,8 @@ export async function render({ ctx, refs, reload, query }) {
     ...plan.slots.map((l) => ({ at: l[0].starts_at, end: l[0].ends_at, node: slotCard(l) })),
     ...plan.events.map((x) => { const at = eventSortIso(x.event, date) || '9999-12-31T23:59:59.000Z'; return { at, end: at, node: eventCard(x.event, x.participants) }; }),
   ].sort((a, b) => a.at.localeCompare(b.at) || a.end.localeCompare(b.end)).map((x) => x.node);
-  const rev = revenueView(extras, date);
-  const revenue = h('section', { class: 'dayrev', 'data-testid': 'day-revenue', 'data-gross': rev.available ? String(rev.gross) : '' },
+  const rev = seeMoney ? revenueView(revenueRpc === undefined ? extras : revenueRpc, date) : null;
+  const revenue = rev && h('section', { class: 'dayrev', 'data-testid': 'day-revenue', 'data-gross': rev.available ? String(rev.gross) : '' },
     h('h2', { text: dayText('ui.admin.day.revenue_title') }),
     rev.available
       ? h('p', { class: 'dayrev-sum' }, h('strong', { 'data-testid': 'day-revenue-gross', text: money(rev.gross) }), ' ', h('span', { class: 'muted', text: dayText('ui.admin.day.revenue_vat') }))
