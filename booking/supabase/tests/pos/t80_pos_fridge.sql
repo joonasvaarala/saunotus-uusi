@@ -14,7 +14,7 @@ end $$;
 create function public.t80_call(p_sql text) returns jsonb language plpgsql as $$
 declare r jsonb; d text; m text; s text;
 begin execute 'select (' || p_sql || ')' into r; return r;
-exception when others then get stacked diagnostics d = pg_exception_detail, m = message_text; s := sqlstate; return jsonb_build_object('err', case when s = 'BK001' then d else s || ':' || left(m, 160) end);
+exception when others then get stacked diagnostics d = pg_exception_detail, m = message_text; s := sqlstate; return jsonb_build_object('err', case when s = 'BK001' then d else s || ':' || left(m, 160) end, 'message', m);
 end $$;
 create function public.t80_login(p_uid uuid) returns void language plpgsql as $$
 begin perform set_config('request.jwt.claims', json_build_object('sub', p_uid, 'role', 'authenticated')::text, true); execute 'set local role authenticated'; end $$;
@@ -30,6 +30,7 @@ declare
   dev text := 'jaakaappi-testi01';
   items jsonb; res jsonb; tok uuid; pos_tok uuid; pos_id bigint; i int; n_ok int := 0;
   pay_id bigint; exp timestamptz; log text; npass int; nfail int;
+  v_c1 bigint; v_c2 bigint; v_hold timestamptz; v_space bigint; v_pre uuid;
 begin
   perform public.t80_ck(not has_function_privilege('anon', 'booking.admin_pos_catalog()', 'execute'), 'G1 anon ei admin_pos_catalog');
   perform public.t80_ck(not has_function_privilege('anon', 'booking.admin_pos_checkout(jsonb,text,text)', 'execute'), 'G2 anon ei checkout');
@@ -70,6 +71,11 @@ begin
   perform public.t80_ck((select unit_price_gross from booking.order_items where order_id = pos_id) = 3, 'P5 rivihinta tuotteesta');
   perform public.t80_ck(public.t80_try(format('select booking.admin_pos_checkout(%L::jsonb, ''fi'', null)', jsonb_build_array(jsonb_build_object('product_id', p_vichy, 'quantity', 1, 'price', 1)))) = 'price_locked', 'P6 hinta lukittu');
   perform public.t80_ck(public.t80_try(format('select booking.admin_pos_checkout(%L::jsonb, ''fi'', null)', jsonb_build_array(jsonb_build_object('product_id', p_gift, 'quantity', 1)))) = 'not_counter_product', 'P7 lahjakortti ei kassarivi');
+  res := booking.admin_pos_checkout(items, 'fi', 'Sama@Example.Test');
+  select customer_id into v_c1 from booking.orders where id = (res->>'order_id')::bigint;
+  res := booking.admin_pos_checkout(items, 'fi', 'sama@example.test');
+  select customer_id into v_c2 from booking.orders where id = (res->>'order_id')::bigint;
+  perform public.t80_ck(v_c1 is not null and v_c1 = v_c2 and (select count(*) from booking.customers where lower(email) = 'sama@example.test') = 1, 'C1 sama sähköposti käyttää olemassa olevaa asiakasta');
   perform public.t80_logout();
   delete from booking.role_permissions where role_code = 'staff' and permission = 'pos.use';
   perform public.t80_login(u_staff);
@@ -82,6 +88,10 @@ begin
   perform public.t80_ck(public.t80_try(format('select booking.admin_update_product_config(%s, %L::jsonb)', p_vichy, '{"age_restricted":true}')) = 'ok', 'A4 ikäraja yksin');
   perform public.t80_ck((select fridge_sale from booking.product_config where product_id = p_vichy) = false, 'A5 ikäraja sammuttaa kylmälaite-lipun');
   perform public.t80_ck(public.t80_try(format('select booking.admin_update_product_config(%s, %L::jsonb)', p_vichy, '{"age_restricted":false,"fridge_sale":true}')) = 'ok', 'A6 virvoitus takaisin');
+  perform public.t80_ck(public.t80_try(format('select booking.admin_update_product_config(%s, %L::jsonb)', p_vichy, '{"audience":"business"}')) = 'ok', 'A7 audience business');
+  perform public.t80_ck((select audience from booking.product_config where product_id = p_vichy) = 'business', 'A8 audience tallentui');
+  perform public.t80_ck(public.t80_try(format('select booking.admin_update_product_config(%s, %L::jsonb)', p_vichy, '{"audience":"wholesale"}')) = 'invalid_audience', 'A9 audience vain consumer tai business');
+  perform public.t80_ck(public.t80_try(format('select booking.admin_update_product_config(%s, %L::jsonb)', p_vichy, '{"audience":"consumer"}')) = 'ok', 'A10 audience consumer');
   perform public.t80_logout();
 
   res := booking.public_drinks_catalog(null);
@@ -129,14 +139,19 @@ begin
   perform public.t80_ck((select payment_status from booking.orders where public_token = tok) = 'paid', 'V6 payment_mark_paid maksaa');
   perform public.t80_ck((select count(*) from booking.receipts where order_id = (select id from booking.orders where public_token = tok)) >= 1, 'V7 kuitti syntyy');
 
-  perform public.t80_login(u_staff);
   update booking.orders set created_at = now() - interval '2 hours' where id = pos_id;
+  perform public.t80_login(u_staff);
   res := booking.admin_pos_status(pos_id);
   perform public.t80_ck(res->>'status' = 'expired', 'X1 maksamaton kassatilaus vanhenee');
+  res := booking.admin_pos_checkout(jsonb_build_array(jsonb_build_object('product_id', p_vichy, 'quantity', 1)), 'fi', null);
+  pos_id := (res->>'order_id')::bigint;
   res := booking.admin_pos_checkout(jsonb_build_array(jsonb_build_object('product_id', p_vichy, 'quantity', 1)), 'fi', null);
   perform booking.admin_record_payment((res->>'order_id')::bigint, 'cash', (res->>'total')::numeric);
   perform public.t80_ck(public.t80_try(format('select booking.admin_pos_void(%s)', (res->>'order_id')::bigint)) = 'already_paid', 'X2 maksettua ei peruta');
   perform public.t80_logout();
+  update booking.orders set created_at = now() - interval '31 minutes' where id = pos_id;
+  perform public.t80_ck(booking.expire_counter_orders() >= 1, 'X3 expire_counter_orders vanhentaa ilman tilakyselyä');
+  perform public.t80_ck((select status from booking.orders where id = pos_id) = 'expired', 'X3b tila expired');
 
   update booking.integration_config set mode = 'test', settings = settings || '{"approved_by":"testi"}'::jsonb where key = 'mobilepay';
   res := public.t80_call($$select booking.mobilepay_payment_prepare(null, null, 120, 'QR')$$);
@@ -146,6 +161,33 @@ begin
   pay_id := (res->>'payment_id')::bigint;
   select link_expires_at into exp from booking.payments where id = pay_id;
   perform public.t80_ck(res->>'user_flow' = 'QR' and exp <= now() + interval '21 minutes' and exp > now() + interval '10 minutes', 'M2 QR-voimassaolo noin 20 min');
+  perform public.t80_ck(res->>'description' like 'Sipoonjoen Perinnesauna – tilaus %', 'M2b kuvaus Sipoonjoen Perinnesauna');
+
+  insert into booking.orders(status, payment_status, total_gross, currency, source_channel, hold_kind)
+  values ('pending', 'unpaid', 3, 'EUR', 'web', 'preliminary') returning public_token into v_pre;
+  res := public.t80_call(format('select booking.mobilepay_payment_prepare(%L::uuid, null, 120, ''WEB_REDIRECT'')', v_pre));
+  perform public.t80_ck(res->>'err' = 'order_not_payable' and res->>'message' = 'Alustavaa varausta ei makseta ennen vahvistusta', 'M3 alustavaa varausta ei makseta');
+
+  res := public.t80_call(format('select booking.mobilepay_payment_prepare(%L::uuid, null, 120, ''PUSH_MESSAGE'')', tok));
+  perform public.t80_ck(res->>'err' = 'push_not_allowed', 'M4 PUSH hylätään kun lähde ei ole pikakassa');
+
+  perform public.t80_login(u_staff);
+  res := booking.admin_pos_checkout(jsonb_build_array(jsonb_build_object('product_id', p_vichy, 'quantity', 1)), 'fi', null);
+  perform public.t80_logout();
+  pos_id := (res->>'order_id')::bigint;
+  pos_tok := (res->>'public_token')::uuid;
+  res := booking.mobilepay_payment_prepare(pos_tok, null, 120, 'PUSH_MESSAGE');
+  perform public.t80_ck(res->>'ok' = 'true' and res->>'user_flow' = 'PUSH_MESSAGE' and res->>'description' like 'Sipoonjoen Perinnesauna – tilaus %', 'M5 pikakassan PUSH ja kuvaus');
+
+  update booking.orders set hold_kind = 'checkout' where id = pos_id;
+  select id into v_space from booking.resources where kind = 'space' and active order by id limit 1;
+  insert into booking.reservations(order_id, space_id, mode, starts_at, ends_at, persons, status, hold_expires_at)
+  values (pos_id, v_space, 'exclusive', now() + interval '400 days', now() + interval '400 days 2 hours', 1, 'pending', now() + interval '2 minutes');
+  select hold_expires_at into v_hold from booking.reservations where order_id = pos_id;
+  res := booking.mobilepay_payment_prepare(pos_tok, null, 120, 'PUSH_MESSAGE');
+  perform public.t80_ck(coalesce(res->>'reuse', '') = 'true', 'M6 sama PUSH-yritys käytetään uudelleen');
+  perform public.t80_ck((select min(hold_expires_at) from booking.reservations where order_id = pos_id) > now() + interval '14 minutes', 'M7 hold pidentyy kun MobilePay alkaa');
+  perform public.t80_ck((select min(hold_expires_at) from booking.reservations where order_id = pos_id) > v_hold, 'M7b pito on pidempi kuin ennen kutsua');
 
   log := current_setting('t80.log', true);
   select count(*) filter (where l like 'P %'), count(*) filter (where l like 'F %') into npass, nfail from unnest(string_to_array(trim(both E'\n' from log), E'\n')) l;

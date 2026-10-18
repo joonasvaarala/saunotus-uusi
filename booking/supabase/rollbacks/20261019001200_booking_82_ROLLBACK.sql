@@ -1,29 +1,23 @@
--- ============================================================
--- booking_82_mobilepay_userflow: Vipps ePayment userFlow (WEB_REDIRECT | QR | PUSH_MESSAGE).
--- Oletus WEB_REDIRECT, joten verkkokaupan kolmen argumentin kutsu toimii (neljäs on oletus).
--- QR ja PUSH_MESSAGE rajataan noin 20 minuuttiin. Uudelleenkäyttö (8 min) vaatii saman user_flow:n.
--- Puhelinnumeroa ei tallenneta: edge lähettää sen vain PUSH_MESSAGE-kutsussa Vippsiin.
--- qrFormat-kuvaa ei pyydetä; kassa piirtää QR:n redirectUrl-osoitteesta paikallisesti.
--- Rollback: rollbacks/20261018211200_booking_82_ROLLBACK.sql
--- ============================================================
-set local lock_timeout = '5s';
+-- ROLLBACK booking_82_mobilepay_userflow.
+-- Palauttaa tuotannon kolmen argumentin mobilepay_payment_prepare-funktion (pg_get_functiondef 2026-10-19):
+-- alustavan varauksen esto, booking._checkout_extend_hold ja kuvaus "Sipoonjoen Perinnesauna".
+-- Oikeudet kuten tuotannossa: vain service_role.
 
-drop function if exists booking.mobilepay_payment_prepare(uuid, uuid, integer);
+drop function if exists booking.mobilepay_payment_prepare(uuid, uuid, integer, text);
 
-create function booking.mobilepay_payment_prepare(p_order_token uuid default null, p_link_token uuid default null, p_expires_minutes integer default 120, p_user_flow text default 'WEB_REDIRECT')
-returns jsonb language plpgsql volatile security definer set search_path = '' as $$
+CREATE OR REPLACE FUNCTION booking.mobilepay_payment_prepare(p_order_token uuid DEFAULT NULL::uuid, p_link_token uuid DEFAULT NULL::uuid, p_expires_minutes integer DEFAULT 120)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
 declare
   v_mode text := booking._mobilepay_mode(); o booking.orders; pay booking.payments; v_tot numeric; v_unpaid numeric; v_open booking.payments;
-  v_super jsonb := '[]'::jsonb; v_raw jsonb; v_mp jsonb; v_att int; v_ref text; v_exp timestamptz; r record; v_started timestamptz;
-  v_flow text; v_mins integer;
+  v_super jsonb := '[]'::jsonb; v_raw jsonb; v_mp jsonb; v_att int; v_ref text; v_id bigint; v_exp timestamptz; r record; v_started timestamptz;
 begin
   if v_mode = 'off' then perform booking._err('mobilepay_off', 'MobilePay-verkkomaksu ei ole käytössä'); end if;
   if (p_order_token is null) = (p_link_token is null) then perform booking._err('invalid_param', 'Anna joko p_order_token tai p_link_token'); end if;
   if p_expires_minutes is null or p_expires_minutes < 15 or p_expires_minutes > 1440 then perform booking._err('invalid_param', 'Voimassaolo 15–1440 min'); end if;
-  v_flow := upper(btrim(coalesce(p_user_flow, 'WEB_REDIRECT')));
-  if v_flow not in ('WEB_REDIRECT', 'QR', 'PUSH_MESSAGE') then perform booking._err('invalid_param', 'userFlow: WEB_REDIRECT, QR tai PUSH_MESSAGE'); end if;
-  v_mins := p_expires_minutes;
-  if v_flow in ('QR', 'PUSH_MESSAGE') and v_mins > 20 then v_mins := 20; end if;
   if not booking._rate_limit('mpstart:' || coalesce(p_order_token, p_link_token)::text, 12, interval '10 minutes') then perform booking._err('rate_limited', 'Liian monta yritystä, yritä hetken kuluttua uudelleen'); end if;
 
   if p_link_token is not null then
@@ -34,8 +28,9 @@ begin
     select * into o from booking.orders where public_token = p_order_token for update;
     if not found then perform booking._err('not_found', 'Tilausta ei löydy'); end if;
   end if;
-  if o.external_source is not null then perform booking._err('order_not_payable', 'Tilausta ei voi maksaa verkossa'); end if;
+  if o.external_source is not null then perform booking._err('order_not_payable', 'Tilausta ei voi maksaa verkossa'); end if;       -- Johku-eristys
   if o.status not in ('pending', 'confirmed', 'completed', 'expired') then perform booking._err('order_not_payable', 'Tilausta ei voi maksaa verkossa'); end if;
+  if o.status = 'pending' and o.hold_kind = 'preliminary' then perform booking._err('order_not_payable', 'Alustavaa varausta ei makseta ennen vahvistusta'); end if;
   if o.currency <> 'EUR' then perform booking._err('unsupported_currency', 'Vain EUR tuettu'); end if;
   v_unpaid := (booking._order_balance(o.id) ->> 'unpaid')::numeric;
 
@@ -46,7 +41,7 @@ begin
     if pay.provider = 'visma_pay' and pay.provider_ref is not null then perform booking._err('other_provider_started', 'Maksu on aloitettu toisella maksutavalla'); end if;
     if pay.link_expires_at is not null and pay.link_expires_at < now() then perform booking._err('link_expired', 'Maksulinkki on vanhentunut'); end if;
     if pay.amount > v_unpaid + 0.004 then perform booking._err('link_stale', 'Maksulinkin summa ei vastaa enää maksamatonta osuutta – pyydä uusi linkki'); end if;
-    if pay.provider = 'visma_pay' then
+    if pay.provider = 'visma_pay' then   -- asiakas valitsi MobilePayn maksulinkin sivulla: siirretään maksu MobilePaylle
       update booking.payments set provider = 'mobilepay', method = 'mobilepay', note = concat_ws(' | ', note, 'vaihdettu MobilePaylle') where id = pay.id returning * into pay;
     end if;
   else
@@ -70,7 +65,7 @@ begin
         end if;
         update booking.payments set status = 'cancelled', note = concat_ws(' | ', note, 'korvattu uudella MobilePay-maksulla') where id = r.id;
       end loop;
-      v_exp := now() + make_interval(mins => v_mins);
+      v_exp := now() + make_interval(mins => p_expires_minutes);
       insert into booking.payments(order_id, method, provider, status, amount, currency, link_expires_at, note)
       values (o.id, 'mobilepay', 'mobilepay', 'pending', v_tot, o.currency, v_exp, 'MobilePay-verkkomaksu') returning * into pay;
       insert into booking.payment_lines(payment_id, order_item_id, description, kind, quantity, amount_gross, vat_rate)
@@ -81,30 +76,27 @@ begin
     end if;
   end if;
 
+  perform booking._checkout_extend_hold(o.id);    -- booking_53: MobilePay-maksu alkaa -> paikka pysyy varattuna lopputulokseen asti (katto: checkout_mobilepay_max_wait_minutes)
   v_raw := coalesce(pay.raw, '{}'::jsonb); v_mp := coalesce(v_raw -> 'mobilepay', '{}'::jsonb);
   v_started := nullif(v_mp ->> 'attempt_started_at', '')::timestamptz;
-  if pay.provider_ref is not null and coalesce(v_mp ->> 'last_state', 'CREATED') = 'CREATED' and v_started is not null and v_started > now() - interval '8 minutes'
-     and coalesce(v_mp ->> 'user_flow', 'WEB_REDIRECT') = v_flow
-     and (v_flow = 'PUSH_MESSAGE' or pay.link_url is not null) then
-    return jsonb_build_object('ok', true, 'reuse', true, 'payment_id', pay.id, 'reference', pay.provider_ref, 'redirect_url', pay.link_url,
-      'user_flow', v_flow, 'pushed', v_flow = 'PUSH_MESSAGE', 'order_no', o.order_no, 'order_token', o.public_token, 'mode', v_mode);
+  -- sama yritys vielä kesken (alle 8 min, Vipps-maksu luotu, ei lopputilaa): käytetään samaa ohjausosoitetta
+  if pay.provider_ref is not null and pay.link_url is not null and coalesce(v_mp ->> 'last_state', 'CREATED') = 'CREATED' and v_started is not null and v_started > now() - interval '8 minutes' then
+    return jsonb_build_object('ok', true, 'reuse', true, 'payment_id', pay.id, 'reference', pay.provider_ref, 'redirect_url', pay.link_url, 'order_no', o.order_no, 'order_token', o.public_token, 'mode', v_mode);
   end if;
   if pay.provider_ref is not null and coalesce(v_mp ->> 'last_state', 'CREATED') = 'CREATED' then
-    v_super := v_super || jsonb_build_array(pay.provider_ref);
+    v_super := v_super || jsonb_build_array(pay.provider_ref);   -- edellinen keskeneräinen yritys perutaan Vippsissä
   end if;
   v_att := coalesce((v_mp ->> 'attempts')::int, 0) + 1;
   v_ref := 'sauna-o' || o.order_no || '-p' || pay.id || '-a' || v_att;
-  v_mp := v_mp || jsonb_build_object('attempts', v_att, 'attempt_started_at', now(), 'last_state', null, 'env', v_mode, 'user_flow', v_flow,
+  v_mp := v_mp || jsonb_build_object('attempts', v_att, 'attempt_started_at', now(), 'last_state', null, 'env', v_mode,
                                      'refs', coalesce(v_mp -> 'refs', '[]'::jsonb) || to_jsonb(v_ref));
-  update booking.payments set provider_ref = v_ref, provider_status = 'initiating', link_url = null,
-         link_expires_at = case when v_flow in ('QR', 'PUSH_MESSAGE') then least(coalesce(link_expires_at, now() + interval '20 minutes'), now() + interval '20 minutes') else link_expires_at end,
-         raw = jsonb_set(v_raw, '{mobilepay}', v_mp, true) where id = pay.id;
+  update booking.payments set provider_ref = v_ref, provider_status = 'initiating', link_url = null, raw = jsonb_set(v_raw, '{mobilepay}', v_mp, true) where id = pay.id;
   perform booking._refresh_order_payment(o.id);
   return jsonb_build_object('ok', true, 'reuse', false, 'payment_id', pay.id, 'reference', v_ref, 'attempt', v_att, 'amount', pay.amount, 'amount_minor', round(pay.amount * 100)::bigint,
-    'currency', pay.currency, 'order_id', o.id, 'order_no', o.order_no, 'order_token', o.public_token, 'locale', o.locale, 'mode', v_mode, 'user_flow', v_flow, 'superseded', v_super,
-    'description', left('Sipoonjoen perinnesauna – tilaus ' || o.order_no, 100),
+    'currency', pay.currency, 'order_id', o.id, 'order_no', o.order_no, 'order_token', o.public_token, 'locale', o.locale, 'mode', v_mode, 'superseded', v_super,
+    'description', left('Sipoonjoen Perinnesauna – tilaus ' || o.order_no, 100),
     'site_base_url', booking._setting('site_base_url', null) #>> '{}', 'order_page_path', booking._setting('order_page_path', to_jsonb('/tilaus/'::text)) #>> '{}');
-end $$;
+end $function$;
 
-revoke all on function booking.mobilepay_payment_prepare(uuid, uuid, integer, text) from public, anon, authenticated;
-grant execute on function booking.mobilepay_payment_prepare(uuid, uuid, integer, text) to service_role;
+revoke all on function booking.mobilepay_payment_prepare(uuid, uuid, integer) from public, anon, authenticated;
+grant execute on function booking.mobilepay_payment_prepare(uuid, uuid, integer) to service_role;

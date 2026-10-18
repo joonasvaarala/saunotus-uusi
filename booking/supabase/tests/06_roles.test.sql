@@ -4,13 +4,13 @@ set local search_path = extensions, public;
 select no_plan();
 
 -- ---------- roolitaulu ----------
-select is((select array_agg(code order by sort_order) from booking.roles), array['admin','manager','staff','customer','annual_card'], 'roolit: admin, manager, staff, customer, annual_card');
+select is((select array_agg(code order by sort_order) from booking.roles), array['admin','manager','staff','text_editor','text_editor_approver','customer','annual_card'], 'roolit: henkilöstö, tekstibotit, asiakas, vuosikortti');
 select is((select array_agg(code order by sort_order) from booking.roles where is_staff), array['admin','manager','staff'], 'henkilöstörooleja kolme (admin, manager, staff)');
 select is((select count(*)::int from booking.role_permissions where role_code in ('customer','annual_card')), 0, 'asiakasrooleilla ei ole hallinnan oikeuksia');
-select is((select count(*)::int from booking.role_permissions where role_code = 'admin'), 25, 'admin: 25 oikeutta (booking_80 lisäsi pos.use)');
+select is((select count(*)::int from booking.role_permissions where role_code = 'admin'), 26, 'admin: 26 oikeutta (quotes.manage + pos.use)');
 select is((select array_agg(permission order by permission) from booking.role_permissions where role_code = 'manager'),
-          array['annual_cards.manage','articles.manage','blocks.manage','bookings.manage','bookings.override','catalog.edit','customers.manage','giftcards.admin','giftcards.manage','payments.manage','payments.refund','pos.use','reports.daily','reports.view','resources.edit','rules.edit','settings.edit','shifts.view_all','texts.approve','texts.propose'],
-          'manager: katalogi, asetukset, raportit, lahjakortit, tekstit, pikakassa (ei staff.manage eikä audit-lokia)');
+          array['annual_cards.manage','articles.manage','blocks.manage','bookings.manage','bookings.override','catalog.edit','customers.manage','giftcards.admin','giftcards.manage','payments.manage','payments.refund','pos.use','quotes.manage','reports.daily','reports.view','resources.edit','rules.edit','settings.edit','shifts.view_all','texts.approve','texts.approve_protected','texts.propose'],
+          'manager: katalogi, asetukset, raportit, lahjakortit, tekstit, tarjoukset, pikakassa (ei staff.manage eikä audit-lokia)');
 select is((select array_agg(permission order by permission) from booking.role_permissions where role_code = 'staff'),
           array['blocks.manage','bookings.manage','customers.manage','giftcards.manage','payments.manage','pos.use','reports.daily','shifts.view'], 'staff: varaukset, asiakkaat, maksut, sulut, lahjakortin käyttö, päiväraportti, pikakassa + omat vuorot');
 

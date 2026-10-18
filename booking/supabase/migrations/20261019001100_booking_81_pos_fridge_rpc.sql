@@ -4,7 +4,8 @@
 -- Lahjakortti ja kausikortti eivät ole kassarivejä (kortti syntyy omassa myynnissä).
 -- Kylmälaite: vain fridge_sale, ei ikärajallista eikä alkoholin näköistä nimeä, aktiivinen laite, nopeusraja.
 -- Visma Pay: vismapay_payment_prepare vain service_role. off ja live eivät luo maksua; dry_run luo pending-maksun eikä merkitse maksetuksi.
--- Rollback: rollbacks/20261018211100_booking_81_ROLLBACK.sql
+-- admin_update_product_config perustuu tuotannon määrittelyyn (2026-10-19) ja lisää vain pikakassa-/kylmälaitekentät.
+-- Rollback: rollbacks/20261019001100_booking_81_ROLLBACK.sql palauttaa tuotannon version (audience säilyy).
 -- ============================================================
 set local lock_timeout = '5s';
 
@@ -15,11 +16,10 @@ create or replace function booking.admin_update_product_config(p_product_id bigi
  security definer
  set search_path to ''
 as $fn$
-declare
-  allowed text[] := array['bookable','shop_visible','sort_order','min_persons','max_persons','notes',
-                          'lifecycle','resource_class','closure_group','duration_minutes','required_skill',
-                          'therapists_needed','therapist_offset_min','therapist_minutes',
-                          'pos_enabled','pos_sort','fridge_sale','age_restricted'];
+declare allowed text[] := array['bookable','shop_visible','sort_order','min_persons','max_persons','notes',
+                                'lifecycle','resource_class','closure_group','duration_minutes','required_skill',
+                                'therapists_needed','therapist_offset_min','therapist_minutes','audience',
+                                'pos_enabled','pos_sort','fridge_sale','age_restricted'];
   k text; c booking.product_config; v_age boolean; v_fridge boolean; v_sort int;
 begin
   perform booking._require_permission('catalog.edit');
@@ -27,6 +27,9 @@ begin
   for k in select jsonb_object_keys(p_patch) loop
     if not (k = any (allowed)) then perform booking._err('unknown_field', 'Kenttää ei saa muokata: ' || k); end if;
   end loop;
+  if p_patch ? 'audience' and coalesce(p_patch ->> 'audience', '') not in ('consumer', 'business') then
+    perform booking._err('invalid_audience', 'Näkyvyys on consumer tai business');
+  end if;
   select * into c from booking.product_config where product_id = p_product_id;
   if not found then perform booking._err('not_found', 'Tuotteella ei ole varauskonfiguraatiota'); end if;
   v_age := case when p_patch ? 'age_restricted' then (p_patch ->> 'age_restricted')::boolean else c.age_restricted end;
@@ -56,11 +59,13 @@ begin
     therapists_needed = case when p_patch ? 'therapists_needed' then (p_patch ->> 'therapists_needed')::int else therapists_needed end,
     therapist_offset_min = case when p_patch ? 'therapist_offset_min' then (p_patch ->> 'therapist_offset_min')::int else therapist_offset_min end,
     therapist_minutes = case when p_patch ? 'therapist_minutes' then (p_patch ->> 'therapist_minutes')::int else therapist_minutes end,
+    audience = case when p_patch ? 'audience' then p_patch ->> 'audience' else audience end,
     pos_enabled = case when p_patch ? 'pos_enabled' then (p_patch ->> 'pos_enabled')::boolean else pos_enabled end,
     pos_sort = case when p_patch ? 'pos_sort' then (p_patch ->> 'pos_sort')::int else pos_sort end,
     fridge_sale = v_fridge,
     age_restricted = v_age
    where product_id = p_product_id;
+  if not found then perform booking._err('not_found', 'Tuotteella ei ole varauskonfiguraatiota'); end if;
   return jsonb_build_object('ok', true);
 end $fn$;
 
@@ -133,8 +138,13 @@ begin
   if p_channel not in ('pikakassa', 'kylmalaite') then perform booking._err('invalid_param', 'Kanava'); end if;
   if v_email is not null and not booking._valid_email(v_email) then perform booking._err('invalid_email', 'Sähköposti ei ole kelvollinen'); end if;
   if v_email is not null then
-    insert into booking.customers(name, email, language, marketing_consent, marketing_consent_source)
-    values (v_email, v_email, v_locale, false, p_channel) returning id into v_cust;
+    select c.id into v_cust from booking.customers c
+     where lower(c.email) = v_email and c.anonymized_at is null
+     order by c.id desc limit 1;
+    if v_cust is null then
+      insert into booking.customers(name, email, language, marketing_consent, marketing_consent_source)
+      values (v_email, v_email, v_locale, false, p_channel) returning id into v_cust;
+    end if;
   end if;
   insert into booking.orders(customer_id, status, payment_status, total_gross, currency, source_channel, locale, created_by, sale_ref, customer_kind)
   values (v_cust, 'pending', 'unpaid', 0, 'EUR', p_channel, v_locale, auth.uid(), nullif(btrim(coalesce(p_sale_ref, '')), ''), 'private')
@@ -327,22 +337,26 @@ create function booking.public_drinks_checkout(p_device text, p_items jsonb, p_e
 returns jsonb language plpgsql volatile security definer set search_path = '' as $$
 declare v_ip text := coalesce(booking._client_ip(), 'unknown'); v_code text := nullif(btrim(coalesce(p_device, '')), ''); u booking.cold_units;
 begin
+  -- Raja kirjataan ennen virheenkäsittelyä. Sisempi poikkeuslohko peruu vain kassan,
+  -- joten hylätty kutsu (esim. price_locked) kuluttaa silti drinks-pay / drinks-dev -kiintiön.
   if not booking._rate_limit('drinks-pay:' || v_ip, 8, interval '10 minutes') then
     return jsonb_build_object('ok', false, 'code', 'rate_limited', 'message', 'Liian monta yritystä, yritä hetken kuluttua uudelleen');
   end if;
   if v_code is not null and not booking._rate_limit('drinks-dev:' || v_code, 30, interval '10 minutes') then
     return jsonb_build_object('ok', false, 'code', 'rate_limited', 'message', 'Liian monta yritystä, yritä hetken kuluttua uudelleen');
   end if;
-  if v_code is null then return jsonb_build_object('ok', false, 'code', 'unknown_device', 'message', 'Kylmälaitetta ei löydy'); end if;
-  select * into u from booking.cold_units where code = v_code and active;
-  if not found then return jsonb_build_object('ok', false, 'code', 'unknown_device', 'message', 'Kylmälaitetta ei löydy'); end if;
-  return booking._counter_checkout('kylmalaite', p_items, p_locale, p_email, u.code);
-exception when others then
-  declare d text; m text; s text;
   begin
-    get stacked diagnostics d = pg_exception_detail, m = message_text, s = sqlstate;
-    if s = 'BK001' then return jsonb_build_object('ok', false, 'code', d, 'message', m); end if;
-    raise;
+    if v_code is null then return jsonb_build_object('ok', false, 'code', 'unknown_device', 'message', 'Kylmälaitetta ei löydy'); end if;
+    select * into u from booking.cold_units where code = v_code and active;
+    if not found then return jsonb_build_object('ok', false, 'code', 'unknown_device', 'message', 'Kylmälaitetta ei löydy'); end if;
+    return booking._counter_checkout('kylmalaite', p_items, p_locale, p_email, u.code);
+  exception when others then
+    declare d text; m text; s text;
+    begin
+      get stacked diagnostics d = pg_exception_detail, m = message_text, s = returned_sqlstate;
+      if s = 'BK001' then return jsonb_build_object('ok', false, 'code', d, 'message', m); end if;
+      raise;
+    end;
   end;
 end $$;
 

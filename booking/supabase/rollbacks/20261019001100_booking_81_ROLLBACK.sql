@@ -1,6 +1,7 @@
 -- ROLLBACK booking_81_pos_fridge_rpc.
--- Poistaa pikakassan ja kylmälaitteen RPC:t ja palauttaa booking_14:n admin_update_product_config-funktion.
--- Skeemamuutokset perutaan booking_80-rollbackilla (aja 82, sitten 81, sitten 80).
+-- Poistaa pikakassan ja kylmälaitteen RPC:t ja palauttaa tuotannon admin_update_product_config-funktion
+-- (pg_get_functiondef 2026-10-19: audience on sallittu kenttä). Skeema perutaan booking_80-rollbackilla
+-- (aja 83, 82, 81, sitten 80).
 
 drop function if exists booking.public_drinks_status(uuid);
 drop function if exists booking.public_drinks_checkout(text, jsonb, text, text);
@@ -26,12 +27,15 @@ create or replace function booking.admin_update_product_config(p_product_id bigi
 as $fn$
 declare allowed text[] := array['bookable','shop_visible','sort_order','min_persons','max_persons','notes',
                                 'lifecycle','resource_class','closure_group','duration_minutes','required_skill',
-                                'therapists_needed','therapist_offset_min','therapist_minutes']; k text;
+                                'therapists_needed','therapist_offset_min','therapist_minutes','audience']; k text;
 begin
   perform booking._require_permission('catalog.edit');
   for k in select jsonb_object_keys(p_patch) loop
     if not (k = any (allowed)) then perform booking._err('unknown_field', 'Kenttää ei saa muokata: ' || k); end if;
   end loop;
+  if p_patch ? 'audience' and coalesce(p_patch ->> 'audience', '') not in ('consumer', 'business') then
+    perform booking._err('invalid_audience', 'Näkyvyys on consumer tai business');
+  end if;
   update booking.product_config set
     bookable = case when p_patch ? 'bookable' then (p_patch ->> 'bookable')::boolean else bookable end,
     shop_visible = case when p_patch ? 'shop_visible' then (p_patch ->> 'shop_visible')::boolean else shop_visible end,
@@ -46,7 +50,8 @@ begin
     required_skill = case when p_patch ? 'required_skill' then nullif(btrim(p_patch ->> 'required_skill'), '') else required_skill end,
     therapists_needed = case when p_patch ? 'therapists_needed' then (p_patch ->> 'therapists_needed')::int else therapists_needed end,
     therapist_offset_min = case when p_patch ? 'therapist_offset_min' then (p_patch ->> 'therapist_offset_min')::int else therapist_offset_min end,
-    therapist_minutes = case when p_patch ? 'therapist_minutes' then (p_patch ->> 'therapist_minutes')::int else therapist_minutes end
+    therapist_minutes = case when p_patch ? 'therapist_minutes' then (p_patch ->> 'therapist_minutes')::int else therapist_minutes end,
+    audience = case when p_patch ? 'audience' then p_patch ->> 'audience' else audience end
    where product_id = p_product_id;
   if not found then perform booking._err('not_found', 'Tuotteella ei ole varauskonfiguraatiota'); end if;
   return jsonb_build_object('ok', true);

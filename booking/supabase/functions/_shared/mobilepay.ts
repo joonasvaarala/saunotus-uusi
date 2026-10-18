@@ -158,7 +158,7 @@ export function dbError(e: { message?: string; details?: string; code?: string }
   return { code: e.code === "BK001" && e.details ? e.details : (e.code ?? "db_error"), message: e.message ?? "" };
 }
 export const httpForCode = (code: string) =>
-  ({ not_found: 404, rate_limited: 429, mobilepay_off: 503, invalid_param: 400, already_paid: 409, nothing_to_pay: 409, order_not_payable: 409, payment_not_pending: 409, link_expired: 410, link_stale: 409, other_provider_started: 409, unsupported_currency: 400 } as Record<string, number>)[code] ?? 500;
+  ({ not_found: 404, rate_limited: 429, mobilepay_off: 503, invalid_param: 400, already_paid: 409, nothing_to_pay: 409, order_not_payable: 409, payment_not_pending: 409, link_expired: 410, link_stale: 409, other_provider_started: 409, unsupported_currency: 400, push_not_allowed: 403 } as Record<string, number>)[code] ?? 500;
 
 export function buildReturnUrl(siteBase: string | null | undefined, orderPath: string | null | undefined, orderToken: string): string | null {
   if (!siteBase) return null;

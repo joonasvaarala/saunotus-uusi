@@ -7,7 +7,7 @@
 --  * pos_tenders: maksutaparekisteri (ei käteistä; korttipääte mukana mutta pois päältä)
 --  * oikeus pos.use: admin, manager, staff
 -- Hinnat ja ALV pysyvät kb.products-taulussa. Tätä ei ajeta tästä repossa; Bottiavustus ajaa.
--- Rollback: rollbacks/20261018211000_booking_80_ROLLBACK.sql
+-- Rollback: rollbacks/20261019001000_booking_80_ROLLBACK.sql
 -- ============================================================
 set local lock_timeout = '5s';
 
