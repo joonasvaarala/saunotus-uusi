@@ -283,6 +283,21 @@ for (const locale of ['fi', 'en']) {
     assert.equal(T.outboundReplyTo('business_quote_notify', { reply_to: quote.email, quote }, 'savusauna@saunotus.fi'), 'maija@example.test');
   });
 }
+test('business_quote_notify: lisätietojen rivinvaihto säilyy HTML:ssä, aihe tiivistää tyhjän', { skip }, () => {
+  const quote = {
+    id: 7, company_name: 'Sipoon\nTesti   Oy', contact_name: 'Maija', email: 'maija@example.test', phone: '0401234567',
+    persons: 12, offerings: ['sauna'], preferred_when: 'ensi viikon perjantai', message: 'rivi yksi\nrivi <kaksi> & "kolme"', locale: 'fi',
+    created_at: '2026-10-18T19:14:00.000Z',
+  };
+  const m = R('business_quote_notify', { to_name: 'Joonas', quote }, 'fi');
+  assert.equal(m.subject, 'Yritysten tarjouspyyntö: Sipoon Testi Oy, 12 hlö, ensi viikon perjantai');
+  assert.ok(!/[\r\n]/.test(m.subject) && !/ {2}/.test(m.subject));
+  assert.ok(m.text.includes('Lisätiedot: rivi yksi\nrivi <kaksi> & "kolme"') && !m.text.includes('<br>'));
+  assert.ok(m.text.includes('Yrityksen nimi: Sipoon\nTesti   Oy'));
+  assert.ok(m.html.includes('Sipoon<br>Testi   Oy'));
+  assert.ok(m.html.includes('rivi yksi<br>rivi &lt;kaksi&gt; &amp; &quot;kolme&quot;'));
+  assert.ok(!m.html.includes('<kaksi>') && !m.html.includes('rivi yksi\n'));
+});
 test('business_quote_notify: reply-to on asiakas, muut lajit pitävät yhteisen asetuksen', { skip }, () => {
   assert.equal(T.outboundReplyTo('business_quote_notify', { quote: { email: 'maija@example.test' } }, 'savusauna@saunotus.fi'), 'maija@example.test');
   assert.equal(T.outboundReplyTo('business_quote_notify', { reply_to: 'ei-osoite', quote: { email: 'maija@example.test' } }, 'savusauna@saunotus.fi'), 'maija@example.test');
