@@ -673,3 +673,14 @@ Lisäksi vanhat kentät: `status` (`pending`/`confirmed`/`expired`…; **pending
 - **`public_create_treatment_booking(…, p_option_code, p_addons jsonb default null)`**: uusi viimeinen parametri `p_addons` = `[{"code":"pyyhe","quantity":2}]` tai `{"id":5,"quantity":1}` (kuten `public_create_booking`). Tuotteelle 7 sallittu lisäpalvelu on **pyyhe** (`applies_modes` sisältää `resource`; 5 €/kpl, ALV 25,5 %); turvenaamio/saunavihta → `addon_not_allowed`. Vastaus sisältää `addons_total`; `total` = hinta + lisäpalvelut; tilauksen summa, pay_later-maksurivi ja pitotilan odottava summa sisältävät lisäpalvelut. Vanha 12-parametrinen kutsu toimii ennallaan. Uudet virhekoodit (`ok:false, code`): `invalid_addons`, `addon_not_found`, `addon_inactive`, `addon_not_allowed`, `addon_quantity`. Lisäpalveluvalinta kassalle: `public_addons()` (suodata `applies_modes` ∋ `resource`).
 - **Aikajanan hallinta:** `admin_set_product_timeline(p_product_id, p_segments jsonb)` (`catalog.edit`; summa = kesto, muuten `timeline_sum`).
 - Rollback: `rollbacks/CHECKOUT_booking_61_ROLLBACK.sql`; testi: `tests/t61_package_catalog.sql` (48 tarkistusta, mm. muiden tuotteiden katalogirivit ennallaan).
+
+## 19. Myyntikäyrä (18.10.2026, migraatio `booking_70_sales_chart`, ei vielä tuotannossa)
+Hallinnan Talous-sivu näyttää välilehtien yläpuolella kuukausipylvään valitulle vuodelle (oletus kuluva vuosi). Tarkempi kuvaus: `booking/docs/myyntikapyra.md`.
+
+- **RPC:** `booking.admin_sales_chart(p_year integer)` → `{year, tz, basis, johku_basis, vat_method, months[12], totals, years}`. Oikeus `reports.view` (manager/admin). Execute: authenticated + service_role. Ei anon, ei public. Virhe ilman oikeutta: `forbidden`. Vuosi muu kuin 2000–2100: `invalid_param`.
+- **Päivä:** sama kassaperuste kuin myyntiraportti (`basis: cash_receipt_issued_at`): kuitin antamispäivä Europe/Helsinki, ei käyntipäivä. Johku: `johku_paid_at` (sama kuin `statistics.johku`).
+- **Pylväs:** netto (ilman ALV) + ALV + erittelemätön brutto = brutto. Erittelemätön vain, jos Johku-tilauksella ei ole positiivista rivibruttoa (kantaa ei keksitä).
+- **Johku vain tässä.** `admin_report_daily` / `admin_report_month` / `admin_report_csv` / PDF / kuitit eivät muutu. Raporttivälilehden harmaa `statistics.johku`-lohko jätettiin ennalleen (avoin kysymys).
+- **Ei tuplalaskua samasta tilauksesta:** Johku-puoli ohittaa tilauksen, jolla on kuitti ja `_acct_excluded` on false. Johku-kuitin estää jo `receipts_no_johku`.
+- **Tekstit:** `ui.admin.sales_chart.*`, tuonti `content/site-texts.pending-import-4.json` (seuraava vapaa numero; ei 6).
+- Rollback: `rollbacks/20261018190000_booking_70_ROLLBACK.sql` (vain `drop function`). Testi: `tests/talous/t70_sales_chart.sql` (Bottiavustus; ei CI:ssä). Node: `booking/tests/myyntikapyra.test.mjs`.

@@ -1,0 +1,394 @@
+[
+ {
+  "key": "ui.admin.sales_chart.title",
+  "lang": "fi",
+  "text": "Myynti ja ALV",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.year",
+  "lang": "fi",
+  "text": "Vuosi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.prev_year",
+  "lang": "fi",
+  "text": "Edellinen vuosi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.next_year",
+  "lang": "fi",
+  "text": "Seuraava vuosi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.legend_net",
+  "lang": "fi",
+  "text": "Myynti ilman ALV",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.legend_vat",
+  "lang": "fi",
+  "text": "ALV",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.legend_unsplit",
+  "lang": "fi",
+  "text": "Brutto, ALV ei eritelty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.total_gross",
+  "lang": "fi",
+  "text": "Vuoden myynti sis. ALV",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.total_net",
+  "lang": "fi",
+  "text": "Ilman ALV",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.total_vat",
+  "lang": "fi",
+  "text": "ALV",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.basis",
+  "lang": "fi",
+  "text": "Kassaperuste: kuitin antamispäivä (Helsinki), ei käyntipäivä. Tuleva kuukausi on tyhjä, kunnes maksu on kirjattu. Lahjakortit lasketaan samoin kuin myyntiraportissa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.empty",
+  "lang": "fi",
+  "text": "Tälle vuodelle ei ole myyntiä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.unavailable",
+  "lang": "fi",
+  "text": "Myyntikäyrä ei ole käytettävissä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.load_failed",
+  "lang": "fi",
+  "text": "Myyntikäyrän lataus epäonnistui.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.loading",
+  "lang": "fi",
+  "text": "Ladataan myyntikäyrää.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.bar_label",
+  "lang": "fi",
+  "text": "{{var:month}}: ilman ALV {{var:net}}, ALV {{var:vat}}, erittelemätön brutto {{var:unsplit}}, yhteensä {{var:gross}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:month}}",
+   "{{var:net}}",
+   "{{var:vat}}",
+   "{{var:unsplit}}",
+   "{{var:gross}}"
+  ],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.includes_johku",
+  "lang": "fi",
+  "text": "Pylväissä on uuden järjestelmän kuitit ja Johku-myynti. Johku-myynti ei sisälly raportteihin, CSV-vientiin eikä kuitteihin.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.chart_label",
+  "lang": "fi",
+  "text": "Kuukausittainen myynti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.future",
+  "lang": "fi",
+  "text": "Tuleva kuukausi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.title",
+  "lang": "en",
+  "text": "Sales and VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.year",
+  "lang": "en",
+  "text": "Year",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.prev_year",
+  "lang": "en",
+  "text": "Previous year",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.next_year",
+  "lang": "en",
+  "text": "Next year",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.legend_net",
+  "lang": "en",
+  "text": "Sales excluding VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.legend_vat",
+  "lang": "en",
+  "text": "VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.legend_unsplit",
+  "lang": "en",
+  "text": "Gross, VAT not itemised",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.total_gross",
+  "lang": "en",
+  "text": "Year sales incl. VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.total_net",
+  "lang": "en",
+  "text": "Excluding VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.total_vat",
+  "lang": "en",
+  "text": "VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.basis",
+  "lang": "en",
+  "text": "Cash basis: the receipt issue date (Helsinki), not the visit date. A future month stays empty until a payment is recorded. Gift cards are counted the same way as in the sales report.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.empty",
+  "lang": "en",
+  "text": "No sales for this year.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.unavailable",
+  "lang": "en",
+  "text": "The sales chart is not available.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.load_failed",
+  "lang": "en",
+  "text": "The sales chart could not be loaded.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.loading",
+  "lang": "en",
+  "text": "Loading the sales chart.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.bar_label",
+  "lang": "en",
+  "text": "{{var:month}}: excluding VAT {{var:net}}, VAT {{var:vat}}, unitemised gross {{var:unsplit}}, total {{var:gross}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:month}}",
+   "{{var:net}}",
+   "{{var:vat}}",
+   "{{var:unsplit}}",
+   "{{var:gross}}"
+  ],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.includes_johku",
+  "lang": "en",
+  "text": "The bars include receipts from the new system and Johku sales. Johku sales are not included in reports, CSV export, or receipts.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.chart_label",
+  "lang": "en",
+  "text": "Monthly sales",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.future",
+  "lang": "en",
+  "text": "Future month",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ }
+]

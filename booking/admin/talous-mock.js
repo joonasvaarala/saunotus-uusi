@@ -3,6 +3,7 @@
 // createMock().rpc(nimi, parametrit) vastaa KOODARI_talous_A_D_fi.md -sopimuksen RPC:itä (nimet, p_-parametrit, palautusrakenteet) → talous-api.js käyttää
 // samaa rpcBackend-koodia oikean PostgREST-kutsun ja mockin kanssa; vaihto = yksi `rpc`-funktio.
 // Puhdas moduuli (ei DOM:ia) → node --test voi ajaa sen.
+import { createAccumulator } from './sales-chart-logic.js';
 const rng = (seed) => { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
 const pick = (r, arr) => arr[Math.floor(r() * arr.length)];
 const weighted = (r, pairs) => { let x = r() * pairs.reduce((s, p) => s + p[1], 0); for (const [v, w] of pairs) { x -= w; if (x < 0) return v; } return pairs[0][0]; };
@@ -251,6 +252,28 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
   const monthEnd = (ym) => dayAdd(`${new Date(Date.UTC(+ym.slice(0, 4), +ym.slice(5, 7), 1)).toISOString().slice(0, 7)}-01`, -1);
   function adminReportDaily(a = {}) { if (!/^\d{4}-\d{2}-\d{2}$/.test(a.p_date || '')) throw fail('invalid_date', 'Virheellinen päivä'); return buildReport(a.p_date, a.p_date, 'day', { daily: true }); }
   function adminReportMonth(a = {}) { if (!/^\d{4}-\d{2}$/.test(a.p_ym || '')) throw fail('invalid_month', 'Virheellinen kuukausi'); return buildReport(`${a.p_ym}-01`, monthEnd(a.p_ym), 'month'); }
+  // admin_sales_chart(p_year): sama kassaperuste kuin raportti (kuitin päivä) + Johku paid_at. Johku ei muuta linesBetween/CSV:tä.
+  function adminSalesChart(a = {}) {
+    const year = +a.p_year;
+    if (!Number.isInteger(year) || year < 2000 || year > 2100) throw fail('invalid_param', 'Vuosi välillä 2000–2100');
+    const acc = createAccumulator(year);
+    for (let m = 1; m <= 12; m++) {
+      const ym = `${year}-${pad(m)}`, from = `${ym}-01`, to = monthEnd(ym);
+      for (const l of linesBetween(from, to)) acc.addNative(m, l.net, l.vat, l.gross);
+      for (const o of orders) {
+        if (!o.johku || o.johku.paid_date < from || o.johku.paid_date > to) continue;
+        if (!['paid', 'partially_refunded', 'refunded'].includes(o.payment_status)) continue;
+        const signed = o.payment_status === 'refunded' ? -o.johku.amount : o.johku.amount;
+        const lineGross = o.items.reduce((s, it) => s + it.gross, 0);
+        const lineVatSum = o.items.reduce((s, it) => s + vatSplit(it.gross, it.vat).vat, 0);
+        acc.addJohku(m, { signed, lineGross, lineVat: lineVatSum, accounted: o.receipts.some((rc) => rc && !rc.excluded) });
+      }
+    }
+    const years = new Set([+today.slice(0, 4)]);
+    for (const p of payments) { if (p.paid_date && !p.is_johku) years.add(+p.paid_date.slice(0, 4)); if (p.refund_date && !p.is_johku) years.add(+p.refund_date.slice(0, 4)); }
+    for (const o of orders) if (o.johku?.paid_date) years.add(+o.johku.paid_date.slice(0, 4));
+    return acc.finish([...years]);
+  }
   // admin_report_csv(p_from,p_to,p_kind='lines') → {filename, mime, content} – kuten booking_34: 12 saraketta, pvm PP.KK.VVVV, hyvitys kyllä/ei, hyvitysrivin määrä negatiivinen
   function adminReportCsv(a = {}) {
     const q = (v) => (/[;"\r\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v)), d = (n) => (Math.round(n * 100) / 100).toFixed(2).replace('.', ','), r = (n) => String(Math.round(n * 100) / 100).replace('.', ',');
@@ -323,7 +346,7 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
   const ADDON_LIST = [{ id: 1, code: 'saunavihta', name: 'Saunavihta', name_en: 'Sauna whisk (vihta)', price: 5, vat_rate: 25.5, max_per_person: 1, active: true }, { id: 2, code: 'pyyhe', name: 'Pyyhe', name_en: 'Towel', price: 5, vat_rate: 25.5, max_per_person: 1, active: true },
     { id: 3, code: 'turvenaamio_jalkakylpy', name: 'Turvenaamio ja jalkakylpy', name_en: 'Peat mask and foot bath', price: 12, vat_rate: 25.5, max_per_person: 1, active: true }];
   const HANDLERS = { admin_list_orders: adminListOrders, admin_get_order: adminGetOrder, admin_list_payments: adminListPayments, admin_list_addons: () => ADDON_LIST, admin_add_to_order: adminAddToOrder, admin_create_payment_link: adminCreatePaymentLink,
-    admin_refund: adminRefund, admin_record_payment: adminRecordPayment, admin_list_vat_rates: adminListVatRates, admin_report_daily: adminReportDaily, admin_report_month: adminReportMonth, admin_report_csv: adminReportCsv, admin_get_receipt: adminGetReceipt, admin_resend_receipt: adminResendReceipt };
+    admin_refund: adminRefund, admin_record_payment: adminRecordPayment, admin_list_vat_rates: adminListVatRates, admin_report_daily: adminReportDaily, admin_report_month: adminReportMonth, admin_report_csv: adminReportCsv, admin_sales_chart: adminSalesChart, admin_get_receipt: adminGetReceipt, admin_resend_receipt: adminResendReceipt };
   // sama kutsutapa kuin sb.js:n rpc(): rpc(nimi, parametrit) → Promise. Tuntematon nimi = puuttuva RPC (404 / PGRST202) kuten PostgRESTissä.
   async function rpc(name, args = {}) {
     await wait();
