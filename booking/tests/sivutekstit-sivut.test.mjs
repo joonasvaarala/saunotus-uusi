@@ -110,6 +110,11 @@ test('hinta- ja kestoviitteet: sidotut kohdat käyttävät {{price:ID}}/{{durati
   assert.equal(t('ui.card.corporate.vuoro.list.1', 'fi'), 'Ma–to klo 14–16 (2 h): {{price:48}}');
   assert.equal(t('ui.card.corporate.jalkiloylyt.list.1', 'en'), 'Mon–Thu 7–9 pm (2 h): {{price:49}}');
   assert.match(t('seo.treatments.description', 'fi'), /^Saunahoito \{\{duration:10\}\}, saunotus \{\{duration:11\}\} ja syväsaunotus \{\{duration:12\}\} /);
+  assert.match(t('page.info.cancel_text', 'fi'), /^Yleisen vuoron voi perua maksutta vähintään \{\{setting:customer_change_hours_before\}\} tuntia ennen alkua\./);
+  assert.match(t('page.info.cancel_text', 'en'), /free of charge at least \{\{setting:customer_change_hours_before\}\} hours before/);
+  assert.deepEqual(PENDING.find((r) => r.key === 'page.info.cancel_text' && r.lang === 'fi').placeholders, ['{{setting:customer_change_hours_before}}']);
+  assert.equal(FALLBACK.context.settings.customer_change_hours_before, 48);
+  for (const k of ['faq.10', 'faq.23', 'policy.3', 'policy.18']) assert.ok(!PENDING.some((r) => r.key.startsWith(k + '.')), `${k} ei kuulu tuontiin`);
   for (const id of [10, 11, 12, 48, 49]) assert.ok(FALLBACK.context.catalog.some((p) => p.id === id), `katalogissa ${id}`);
   // {n}-muuttujat → {{var:n}}
   assert.equal(t('ui.reviews.stars', 'fi'), '{{var:n}} tähteä viidestä');
@@ -178,13 +183,15 @@ test('build: tuontitiedosto "tietokannassa" → koko sivusto (kaikki HTML) tavu 
   const chg = build('chg', (await stateWith([
     { key: 'page.front.hero.title', lang: 'fi', text: 'Uusi pääotsikko' }, { key: 'nav.main.gift', lang: 'en', text: 'Gift cards!' }, { key: 'ui.footer.contact', lang: 'fi', text: 'Löydät meidät' },
     { key: 'ui.site.directions', lang: 'en', text: 'How to find us' }, { key: 'seo.sauna.title', lang: 'fi', text: 'Uusi otsikko | Sipoonjoen Perinnesauna' }, { key: 'ui.card.corporate.vuoro.list.1', lang: 'fi', text: 'Hinta {{price:48}}' },
-    { key: 'ui.articles.read_more', lang: 'fi', text: 'Jatka lukemaan' }])).file);
+    { key: 'ui.articles.read_more', lang: 'fi', text: 'Jatka lukemaan' },
+    { key: 'page.info.cancel_text', lang: 'en', text: 'Cancel free of charge {{setting:customer_change_hours_before}} hours ahead.' }])).file);
   const h = (d, f) => readFileSync(join(d, f), 'utf8');
   assert.match(h(chg.out, 'index.html'), /Uusi pääotsikko/); assert.doesNotMatch(h(base.out, 'index.html'), /Uusi pääotsikko/);
   assert.match(h(chg.out, 'index.html'), /Löydät meidät/);
   assert.match(h(chg.out, 'en/index.html'), />Gift cards!</); assert.match(h(chg.out, 'en/info/index.html'), /How to find us/);
   assert.match(h(chg.out, 'saunavuorot/index.html'), /<title>Uusi otsikko \| Sipoonjoen Perinnesauna<\/title>/);
   assert.match(h(chg.out, 'yritykset/index.html'), /Hinta 350 €/);
+  assert.match(h(chg.out, 'en/info/index.html'), /Cancel free of charge 48 hours ahead\./);
 });
 test('kaupan datakuorma (booking/site-texts.json) sisältää vain kaupan avainalueet, ei staattisen sivuston tekstejä', async () => {
   const { state } = await stateWith(PENDING);

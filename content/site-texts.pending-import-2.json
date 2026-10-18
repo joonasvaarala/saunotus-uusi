@@ -1738,7 +1738,7 @@
  {
   "key": "ui.articles.kicker",
   "lang": "fi",
-  "text": "Sipoonjoen perinnesauna",
+  "text": "Sipoonjoen Perinnesauna",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -1770,7 +1770,7 @@
  {
   "key": "ui.articles.list_description",
   "lang": "fi",
-  "text": "Artikkeleita saunomisesta, savusaunan perinteestä ja saunahoidoista Sipoonjoen perinnesaunalta.",
+  "text": "Artikkeleita saunomisesta, savusaunan perinteestä ja saunahoidoista Sipoonjoen Perinnesaunalta.",
   "class": "normal",
   "kind": "plain",
   "max_len": 300,
@@ -2040,7 +2040,7 @@
  {
   "key": "ui.articles.cta_text",
   "lang": "fi",
-  "text": "Sipoonjoen perinnesauna tarjoaa savusaunan, saunahoidot ja lahjakortit. Valitse aika ja varaa verkossa.",
+  "text": "Sipoonjoen Perinnesauna tarjoaa savusaunan, saunahoidot ja lahjakortit. Valitse aika ja varaa verkossa.",
   "class": "normal",
   "kind": "plain",
   "max_len": 300,
@@ -4222,7 +4222,7 @@
  {
   "key": "ui.card.sauna.oma_vuoro.text",
   "lang": "fi",
-  "text": "Koko Sipoonjoen perinnesaunan miljöö omaan käyttöön (esim. ilta ystävien kanssa, synttärit, polttarit). Sisältää savusaunan, lämmin- ja kylmävesialtaat sekä laavun ja hirsimökin vapaan käytön. Tilat voi vuokrata ennen yleisiä vuoroja tai koko päiväksi. Hinnat ovat voimassa vain yksityishenkilöille; yrityksille omat tuotteet.",
+  "text": "Koko Sipoonjoen Perinnesaunan miljöö omaan käyttöön (esim. ilta ystävien kanssa, synttärit, polttarit). Sisältää savusaunan, lämmin- ja kylmävesialtaat sekä laavun ja hirsimökin vapaan käytön. Tilat voi vuokrata ennen yleisiä vuoroja tai koko päiväksi. Hinnat ovat voimassa vain yksityishenkilöille; yrityksille omat tuotteet.",
   "class": "protected",
   "kind": "plain",
   "max_len": 950,
@@ -5370,7 +5370,7 @@
  {
   "key": "ui.alt.hero_ovi_uusi",
   "lang": "fi",
-  "text": "Sipoonjoen perinnesaunan oven käsin veistetty kuvio, jossa pitkätukkainen hahmo, aurinko ja kuu.",
+  "text": "Sipoonjoen Perinnesaunan oven käsin veistetty kuvio, jossa pitkätukkainen hahmo, aurinko ja kuu.",
   "class": "normal",
   "kind": "plain",
   "max_len": 300,
@@ -6140,7 +6140,7 @@
  {
   "key": "seo.booking_info.description",
   "lang": "fi",
-  "text": "Varaa yleinen saunavuoro, avoin rituaali, saunahoito, saunotus tai yksityisvuoro Sipoonjoen perinnesaunalle. Varaukset tehdään Johku-verkkokaupassa.",
+  "text": "Varaa yleinen saunavuoro, avoin rituaali, saunahoito, saunotus tai yksityisvuoro Sipoonjoen Perinnesaunalle. Varaukset tehdään Johku-verkkokaupassa.",
   "class": "normal",
   "kind": "plain",
   "max_len": 400,
@@ -7056,7 +7056,7 @@
  {
   "key": "page.gift.own.title",
   "lang": "fi",
-  "text": "Sipoonjoen perinnesaunan oma lahjakortti",
+  "text": "Sipoonjoen Perinnesaunan oma lahjakortti",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -7066,7 +7066,7 @@
  {
   "key": "page.gift.own.text",
   "lang": "fi",
-  "text": "Sipoonjoen perinnesaunan lahjakortilla voit tehdä varauksen suoraan varausjärjestelmän kautta. Syötä lopuksi 12-merkkinen lahjakortin koodi ostoskorissa kenttään ”käytä koodia”.",
+  "text": "Sipoonjoen Perinnesaunan lahjakortilla voit tehdä varauksen suoraan varausjärjestelmän kautta. Syötä lopuksi 12-merkkinen lahjakortin koodi ostoskorissa kenttään ”käytä koodia”.",
   "class": "normal",
   "kind": "plain",
   "max_len": 500,
@@ -7776,7 +7776,7 @@
  {
   "key": "page.front.featured.items.3.text",
   "lang": "fi",
-  "text": "Vuokraamalla Sipoonjoen perinnesaunan oman porukkasi käyttöön pääset nauttimaan saunamiljöömme kauneudesta kaikessa rauhassa.",
+  "text": "Vuokraamalla Sipoonjoen Perinnesaunan oman porukkasi käyttöön pääset nauttimaan saunamiljöömme kauneudesta kaikessa rauhassa.",
   "class": "normal",
   "kind": "plain",
   "max_len": 350,
@@ -8126,7 +8126,7 @@
  {
   "key": "page.front.story.items.1.text",
   "lang": "fi",
-  "text": "Sipoonjoen perinnesauna valmistui. Työtä oli vielä paljon edessä, mutta jo samana syksynä pidettiin ensimmäiset tapahtumat.",
+  "text": "Sipoonjoen Perinnesauna valmistui. Työtä oli vielä paljon edessä, mutta jo samana syksynä pidettiin ensimmäiset tapahtumat.",
   "class": "normal",
   "kind": "plain",
   "max_len": 350,
@@ -9206,7 +9206,7 @@
  {
   "key": "page.info.sections.2.blocks.1.p",
   "lang": "fi",
-  "text": "Sipoonjoen perinnesauna sijaitsee Sipoon Hindsbyssä, Sipoonkorven kansallispuiston kupeessa.",
+  "text": "Sipoonjoen Perinnesauna sijaitsee Sipoon Hindsbyssä, Sipoonkorven kansallispuiston kupeessa.",
   "class": "normal",
   "kind": "plain",
   "max_len": 250,
@@ -9376,11 +9376,13 @@
  {
   "key": "page.info.cancel_text",
   "lang": "fi",
-  "text": "Yleisen vuoron voi perua maksutta vähintään 48 tuntia ennen alkua. Yksityisvuorojen, tapahtumien ja perinnesaunotusiltojen peruutusehdot löydät ehdoista.",
+  "text": "Yleisen vuoron voi perua maksutta vähintään {{setting:customer_change_hours_before}} tuntia ennen alkua. Yksityisvuorojen, tapahtumien ja perinnesaunotusiltojen peruutusehdot löydät ehdoista.",
   "class": "protected",
   "kind": "plain",
-  "max_len": 500,
-  "placeholders": [],
+  "max_len": 600,
+  "placeholders": [
+   "{{setting:customer_change_hours_before}}"
+  ],
   "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/info.json); sisältö ennallaan, ei uusia sanamuotoja"
  },
  {
@@ -9736,11 +9738,13 @@
  {
   "key": "page.info.cancel_text",
   "lang": "en",
-  "text": "A public session can be cancelled free of charge at least 48 hours before it starts. The cancellation terms for private sessions, events and traditional sauna evenings are in the terms.",
+  "text": "A public session can be cancelled free of charge at least {{setting:customer_change_hours_before}} hours before it starts. The cancellation terms for private sessions, events and traditional sauna evenings are in the terms.",
   "class": "protected",
   "kind": "plain",
-  "max_len": 500,
-  "placeholders": [],
+  "max_len": 600,
+  "placeholders": [
+   "{{setting:customer_change_hours_before}}"
+  ],
   "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/pages/info.json); sisältö ennallaan, ei uusia sanamuotoja"
  },
  {
@@ -9766,7 +9770,7 @@
  {
   "key": "seo.privacy.description",
   "lang": "fi",
-  "text": "Sipoonjoen perinnesaunan asiakasrekisterin tietosuojaseloste.",
+  "text": "Sipoonjoen Perinnesaunan asiakasrekisterin tietosuojaseloste.",
   "class": "protected",
   "kind": "plain",
   "max_len": 200,
@@ -9806,7 +9810,7 @@
  {
   "key": "seo.sauna.description",
   "lang": "fi",
-  "text": "Yleiset saunavuorot (ma miehet, ti naiset, ke hiljainen, to ja la–su yleinen) ja yksityisvuorot Sipoonjoen perinnesaunalla. Hinnat, ajat ja varaus.",
+  "text": "Yleiset saunavuorot (ma miehet, ti naiset, ke hiljainen, to ja la–su yleinen) ja yksityisvuorot Sipoonjoen Perinnesaunalla. Hinnat, ajat ja varaus.",
   "class": "normal",
   "kind": "plain",
   "max_len": 400,
@@ -9826,7 +9830,7 @@
  {
   "key": "page.sauna.hero.text",
   "lang": "fi",
-  "text": "Sipoonjoen perinnesaunalla voit tulla nauttimaan savusaunamme täyteläisistä löylyistä, lämpimistä ja kylmistä kylvyistä sekä jokivarren rauhasta.",
+  "text": "Sipoonjoen Perinnesaunalla voit tulla nauttimaan savusaunamme täyteläisistä löylyistä, lämpimistä ja kylmistä kylvyistä sekä jokivarren rauhasta.",
   "class": "normal",
   "kind": "plain",
   "max_len": 400,
@@ -10066,7 +10070,7 @@
  {
   "key": "seo.terms.description",
   "lang": "fi",
-  "text": "Sipoonjoen perinnesaunan varaus-, peruutus-, maksu- ja lahjakorttiehdot.",
+  "text": "Sipoonjoen Perinnesaunan varaus-, peruutus-, maksu- ja lahjakorttiehdot.",
   "class": "protected",
   "kind": "plain",
   "max_len": 200,

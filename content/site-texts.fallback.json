@@ -1,6 +1,6 @@
 {
  "_doc": "Varateksti: tietokannan julkaistut sivutekstit (public_get_site_texts) + paikkamerkkien data (hinta/kesto/julkiset asetukset). Käytetään vain jos haku epäonnistuu eikä .cache-välimuistia ole. Päivitys: node scripts/site-texts-sync.mjs",
- "generated_at": "2026-10-18T12:15:44.718078+00:00",
+ "generated_at": "2026-10-18T12:45:34.451586+00:00",
  "texts": [
   {
    "key": "addon.1.description",
@@ -862,6 +862,24 @@
    "text": "Hoitosauna Lovi",
    "version": 1,
    "placeholders": []
+  },
+  {
+   "key": "nav.brand_tagline",
+   "lang": "en",
+   "text": "{{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "nav.brand_tagline",
+   "lang": "fi",
+   "text": "{{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
   },
   {
    "key": "option.1.name",

@@ -90,12 +90,13 @@ export const liteToHtml = (s) => s.replace(/</g, '&lt;').replace(/>/g, '&gt;').r
 // yksittäinen {n}-muuttuja (artikkeli- ja arvostelutekstit) ↔ {{var:n}} (kanta sallii vain {{…}}-paikkamerkit)
 export const braceToVar = (s) => s.replace(/\{([a-z_]+)\}/g, '{{var:$1}}');
 
-// Hintaviitteet: kovakoodattu summa → {{price:ID}} / {{duration:ID}} (arvo katalogista; sama muoto kuin lib.mjs money/dur). Vain selvät, tuotteeseen sidotut kohdat.
+// Hintaviitteet: kovakoodattu summa → {{price:ID}} / {{duration:ID}} / {{setting:avain}} (arvo katalogista; sama muoto kuin lib.mjs money/dur). Vain selvät, tuotteeseen sidotut kohdat.
 const money = (n, lang) => (lang === 'fi' ? `${n} €` : `€${n}`);
 const BINDINGS = {
   'seo.companies.description': (l) => [[money(350, l), '{{price:48}}'], [money(250, l), '{{price:49}}']],
   'ui.card.corporate.vuoro.list.1': (l) => [[money(350, l), '{{price:48}}']],
   'ui.card.corporate.jalkiloylyt.list.1': (l) => [[money(250, l), '{{price:49}}']],
+  'page.info.cancel_text': (l) => [[l === 'fi' ? 'vähintään 48 tuntia' : 'at least 48 hours', l === 'fi' ? 'vähintään {{setting:customer_change_hours_before}} tuntia' : 'at least {{setting:customer_change_hours_before}} hours']],   // public_settings().customer_change_hours_before = 48
   'seo.treatments.description': (l) => (l === 'fi' ? [['Saunahoito 1 h, saunotus 2 h ja syväsaunotus 3 h', 'Saunahoito {{duration:10}}, saunotus {{duration:11}} ja syväsaunotus {{duration:12}}']] : []),
 };
 export const importText = (key, lang, def, raw) => {

@@ -13,7 +13,7 @@ const L = await import('../../booking/shop/src/site-texts-logic.js');
 const J = (f) => JSON.parse(readFileSync(resolve(root, f), 'utf8'));
 const css = readFileSync(resolve(root, 'src/styles.css'), 'utf8');
 const quiet = { warn() {}, log() {} };
-const PENDING = J('content/site-texts.pending-import-3.json');
+const PENDING = J('content/site-texts.imported-pr62.json');
 const FALLBACK = J('content/site-texts.fallback.json');
 
 const stateWith = (rows, settings = { business_name: 'Sipoonjoen Perinnesauna' }) => ({ idx: L.indexTexts(rows), ctx: L.makeContext({ catalog: [], settings }) });
@@ -25,16 +25,16 @@ const render = (lang, state) => {
 const header = (html) => html.match(/<header class="site-header">[\s\S]*?<\/header>/)[0];
 const brandLink = (html) => header(html).match(/<a class="brand"[\s\S]*?<\/a>/)[0];
 
-test('tuontitiedosto pending-import-3: nav.brand_tagline FI+EN, paikkamerkki {{setting:business_name}}, §18.2-säännöt, ei tuotannossa jo', () => {
+test('tuontitiedosto imported-pr62 (tuotu 18.10.): nav.brand_tagline FI+EN, paikkamerkki {{setting:business_name}}, §18.2-säännöt, tuotannossa samalla tekstillä', () => {
   assert.deepEqual(PENDING.map((r) => `${r.key}|${r.lang}`).sort(), ['nav.brand_tagline|en', 'nav.brand_tagline|fi']);
-  const have = new Set(FALLBACK.texts.map((r) => `${r.key}|${r.lang}`));
+  const have = new Map(FALLBACK.texts.map((r) => [`${r.key}|${r.lang}`, r.text]));
   for (const r of PENDING) {
     assert.match(r.key, L.KEY_RE); assert.match(r.key, /^(ui|page|seo|email|nav)\./);
     assert.equal(r.class, 'normal'); assert.equal(r.kind, 'plain');
     assert.equal(r.text, '{{setting:business_name}}');
     assert.deepEqual(r.placeholders, L.tokensOf(r.text)); assert.match(r.placeholders[0], L.TOKEN_RE);
     assert.ok(Number.isInteger(r.max_len) && r.max_len >= r.text.length); assert.ok(r.reason && r.reason.length <= 300);
-    assert.ok(!have.has(`${r.key}|${r.lang}`), `${r.key} [${r.lang}] on jo tuotannossa`);
+    assert.equal(have.get(`${r.key}|${r.lang}`), r.text, `${r.key} [${r.lang}] puuttuu tuotannosta (varatekstistä) tai teksti eroaa`);   // tuotu: varateksti = tuotannon snapshot
   }
 });
 
