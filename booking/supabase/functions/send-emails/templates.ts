@@ -26,6 +26,18 @@ const GREEN = "#1f3d2b", GREEN_SOFT = "#3d5c47", SAND = "#efe7d6", SAND_LIGHT = 
 const FONT = "Georgia,'Times New Roman',serif", SANS = "Arial,Helvetica,sans-serif";
 
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+/** Tarjouspyynnön ilmoituksessa reply-to on asiakkaan osoite, jotta siihen voi vastata suoraan. Muissa lajeissa käytetään Resendin yhteistä reply_to-asetusta. */
+export function outboundReplyTo(kind: string, row: { reply_to?: unknown; quote?: { email?: unknown } } | null | undefined, globalReply?: string | null): string | undefined {
+  if (kind === "business_quote_notify") {
+    for (const raw of [row?.reply_to, row?.quote?.email]) {
+      const cand = String(raw ?? "").trim();
+      if (EMAIL_RE.test(cand)) return cand;
+    }
+  }
+  const g = String(globalReply ?? "").trim();
+  return g || undefined;
+}
 const safeUrl = (u: unknown): string => { const s = String(u ?? "").trim(); return /^https?:\/\/[^\s"'<>]+$/i.test(s) ? s : ""; };
 const NBSP = "\u00a0";
 const eur = (n: unknown, en: boolean) => { const v = Number(n ?? 0); const s = Math.abs(v).toFixed(2); return (v < 0 ? "-" : "") + (en ? s : s.replace(".", ",")) + NBSP + "€"; };
@@ -210,19 +222,70 @@ function voucherMail(kind: "voucher_claim_received" | "voucher_claim_problem", d
   return { subject, text, html };
 }
 
-// Yrityksen tarjouspyyntö (booking_75). Claim ei palauta pyynnön tietoja, vain vastaanottajan: ei hintaa, ei ajankohtaa, ei asiakkaan tietoja henkilökunnan viestissä.
-// Allekirjoitus: Tapio / Sipoonjoen Perinnesauna. Lähetystila (dry_run) on index.ts:ssä, ei tässä.
-function businessQuoteMail(kind: "business_quote_ack" | "business_quote_notify", d: any, en: boolean, hello: string, X: X): Rendered {
-  const ack = kind === "business_quote_ack";
-  const subject = X(ack ? "email.business_quote.ack_subject" : "email.business_quote.notify_subject");
-  const title = X(ack ? "email.business_quote.ack_title" : "email.business_quote.notify_title");
-  const intro = X(ack ? "email.business_quote.ack_intro" : "email.business_quote.notify_intro");
-  const extra = X(ack ? "email.business_quote.no_promise" : "email.business_quote.notify_hint");
+// Asiakkaan kuittaus (booking_75). Ei hintaa eikä vahvistettua ajankohtaa. Allekirjoitus: Tapio. Lähetystila (dry_run) on index.ts:ssä.
+function businessQuoteMail(d: any, en: boolean, hello: string, X: X): Rendered {
+  const subject = X("email.business_quote.ack_subject");
+  const title = X("email.business_quote.ack_title");
+  const intro = X("email.business_quote.ack_intro");
+  const extra = X("email.business_quote.no_promise");
   const sign = `${X("email.common.closing")}\n${X("email.business_quote.sign_name")}\n${SELLER}`;
   const signHtml = esc(sign).replace(/\n/g, "<br>");
   const contact = X("email.common.contact", { phone: phoneFor(en) });
   const text = textBlock(hello, intro, extra, contact, sign) + "\n";
   const html = wrapHtml(d, title, intro, h1(title) + p(esc(hello)) + p(esc(intro)) + p(esc(extra)) + p(esc(contact), `color:${MUTED};font-size:13px`) + p(signHtml), en);
+  return { subject, text, html };
+}
+
+const OFFERING_ORDER = ["ritual", "forest_yoga", "campfire_meal", "sauna", "vihta_workshop", "other"] as const;
+function offeringLine(q: any, X: X): string {
+  const list = Array.isArray(q?.offerings) ? q.offerings.map((x: unknown) => String(x)) : [];
+  const known = new Set<string>(OFFERING_ORDER);
+  const named = OFFERING_ORDER.filter((c) => list.includes(c)).map((c) => {
+    const name = X(`email.business_quote.offering_${c}`);
+    if (c !== "other") return name;
+    const extra = String(q?.offering_other ?? "").trim();
+    return extra ? `${name}: ${extra}` : name;
+  });
+  const rest = list.filter((c) => !known.has(c));
+  return [...named, ...rest].join(", ");
+}
+
+// Henkilökunnan ilmoitus. Teksti on aina suomeksi. d.quote = email_outbox_claim()-lohko (myös jonon payloadissa).
+function businessQuoteNotify(d: any, hello: string, X: X): Rendered {
+  const q = d?.quote && typeof d.quote === "object" ? d.quote : {};
+  const dash = "—";
+  const show = (v: unknown) => { const s = String(v ?? "").trim(); return s ? s : dash; };
+  const personsN = q.persons == null || String(q.persons).trim() === "" ? "" : String(q.persons).trim();
+  const persons = personsN ? X("email.business_quote.persons_value", { n: personsN }) : dash;
+  const offerings = offeringLine(q, X) || dash;
+  const locFi = X("email.business_quote.locale_fi");
+  const locEn = X("email.business_quote.locale_en");
+  const locale = String(q.locale ?? "").trim().toLowerCase() === "en" ? locEn : locFi;
+  const sent = (q.created_at ? dt(q.created_at, false) : "") || dash;
+  const id = q.id == null || String(q.id).trim() === "" ? dash : String(q.id);
+  const rows: [string, string][] = [
+    [X("email.business_quote.field_company"), show(q.company_name)],
+    [X("email.business_quote.field_contact"), show(q.contact_name)],
+    [X("email.business_quote.field_email"), show(q.email)],
+    [X("email.business_quote.field_phone"), show(q.phone)],
+    [X("email.business_quote.field_persons"), persons],
+    [X("email.business_quote.field_offerings"), offerings],
+    [X("email.business_quote.field_when"), show(q.preferred_when)],
+    [X("email.business_quote.field_message"), show(q.message)],
+    [X("email.business_quote.field_locale"), locale],
+    [X("email.business_quote.field_sent"), sent],
+    [X("email.business_quote.field_id"), id],
+  ];
+  const lines = rows.map(([k, v]) => `${k}: ${v}`).join("\n");
+  const subject = X("email.business_quote.notify_subject_detail", { company: show(q.company_name), persons: personsN || dash, when: show(q.preferred_when) });
+  const title = X("email.business_quote.notify_title_detail");
+  const intro = X("email.business_quote.notify_intro_detail");
+  const sign = `${X("email.common.closing")}\n${X("email.business_quote.sign_name")}\n${SELLER}`;
+  const signHtml = esc(sign).replace(/\n/g, "<br>");
+  const contact = X("email.common.contact", { phone: phoneFor(false) });
+  const text = textBlock(hello, intro, lines, contact, sign) + "\n";
+  const htmlLines = rows.map(([k, v]) => `<span style="font-family:${SANS};font-size:14px;line-height:1.45;color:${INK}"><b>${esc(k)}</b>: ${esc(v)}</span>`).join("<br>");
+  const html = wrapHtml(d, title, intro, h1(title) + p(esc(hello)) + p(esc(intro)) + box(htmlLines) + p(esc(contact), `color:${MUTED};font-size:13px`) + p(signHtml), false);
   return { subject, text, html };
 }
 
@@ -300,8 +363,13 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       return { subject, text, html: mk(title, msg, h1(title) + helloRow + p(esc(msg)) + ob.html + (orderUrl ? button(orderUrl, viewLabel) : "") + tail) };
     }
     case "business_quote_ack":
-    case "business_quote_notify":
-      return businessQuoteMail(kind, d, en, hello, X);
+      return businessQuoteMail(d, en, hello, X);
+    case "business_quote_notify": {
+      const Xfi: X = (key, vars) => t(key, "fi", vars);
+      const firstFi = d?.to_name ? String(d.to_name).trim().split(/\s+/)[0] : "";
+      const helloFi = firstFi ? t("email.common.hello", "fi", { name: firstFi }) : t("email.common.hello_anon", "fi");
+      return businessQuoteNotify(d, helloFi, Xfi);
+    }
     case "order_change":
     default: {
       const subject = X("email.order_change.subject", { no });

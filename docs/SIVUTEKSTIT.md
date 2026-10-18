@@ -65,7 +65,7 @@ Etusivu, sivupohjat (sauna, hoidot, lahjakortti, varaa-info, info, yrityksille, 
 
 ## Yrityksille
 
-`content/site-texts.imported-pr75.json` sisältää Yrityksille-sivun ja tarjouspyyntösähköpostien rivit (FI+EN, kaikki rivit): `page.companies.flow.*`, `nav.main.companies` ja `email.business_quote.*`. Neljä protected-riviä (`flow.privacy` ja `flow.error_privacy_required`, FI+EN) ovat tiedostossa; ne on hyväksytty ja tuodaan erikseen. `content/site-texts.pending-import-4.json` on myyntikäyrän ja suodattimien tekstiä, ei tätä erää. Tietosuojaselosteen linkkiteksti `page.companies.flow.notice_link` (luokka normal) on lisäksi tiedostossa `content/site-texts.pending-import-9.json`.
+`content/site-texts.imported-pr75.json` sisältää Yrityksille-sivun ja tarjouspyyntösähköpostien rivit (FI+EN, kaikki rivit): `page.companies.flow.*`, `nav.main.companies` ja `email.business_quote.*`. Neljä protected-riviä (`flow.privacy` ja `flow.error_privacy_required`, FI+EN) ovat tiedostossa; ne on hyväksytty ja tuodaan erikseen. `content/site-texts.pending-import-4.json` on myyntikäyrän ja suodattimien tekstiä, ei tätä erää. Tietosuojaselosteen linkkiteksti `page.companies.flow.notice_link` (luokka normal) on lisäksi tiedostossa `content/site-texts.pending-import-9.json`. Henkilökunnan ilmoituksen uudet rivit (aihe, kenttäotsikot, palveluiden nimet; luokka normal, FI+EN) ovat tiedostossa `content/site-texts.pending-import-14.json`. Asiakkaan kuittaus (`email.business_quote.ack_*`) ei muutu. Hallinnan Yritykset-näkymää ei ole: pyyntö tulee sähköpostiin.
 
 ## Uuden tekstin lisääminen (§18.9, jokaisessa PR:ssä)
 

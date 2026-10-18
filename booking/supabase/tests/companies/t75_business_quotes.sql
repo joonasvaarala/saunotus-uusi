@@ -1,4 +1,5 @@
--- booking_75: tarjouspyyntö, validointi, honeypot, rate limit, RLS (anon luo vain RPC:llä, vain admin/manager lukee).
+-- booking_75 + booking_101/102: tarjouspyyntö, validointi, honeypot, rate limit, RLS.
+-- Hallinnan listaus-RPC:t on poistettu (booking_101). Ilmoituksen payloadissa on lomakkeen kentät (booking_102).
 -- Ajo: psql -v ON_ERROR_STOP=1 -f booking/supabase/tests/companies/t75_business_quotes.sql
 set local lock_timeout = '3s'; set local statement_timeout = '60s';
 select set_config('t75.log', '', true);
@@ -17,7 +18,7 @@ grant execute on all functions in schema public to public;
 do $t$
 declare
   u_mgr uuid := gen_random_uuid(); u_adm uuid := gen_random_uuid(); u_st uuid := gen_random_uuid();
-  r jsonb; n0 int; n1 int; log text; npass int; nfail int; qid bigint;
+  r jsonb; n0 int; n1 int; log text; npass int; nfail int;
 begin
   insert into auth.users(id, email) values (u_mgr, 't75-mgr@example.test'), (u_adm, 't75-adm@example.test'), (u_st, 't75-st@example.test');
   insert into booking.staff(user_id, email, name, role) values
@@ -36,7 +37,12 @@ begin
   perform public.t75_ck((select count(*) from booking.business_quote_requests where email = 'maija@example.test') = 1, 'R4: yksi rivi, status new');
   perform public.t75_ck((select status from booking.business_quote_requests where email = 'maija@example.test') = 'new', 'R5: tila new');
   perform public.t75_ck((select count(*) from booking.email_outbox where kind = 'business_quote_ack' and payload ->> 'to_email' = 'maija@example.test' and status = 'pending') = 1, 'R6: asiakkaan kuittaus jonossa');
-  perform public.t75_ck((select count(*) from booking.email_outbox where kind = 'business_quote_notify' and dedupe_key like 'business_quote_notify:%' and payload ->> 'to_email' = 'savusauna@saunotus.fi') = 1, 'R7: ilmoitus oletusosoitteeseen');
+  perform public.t75_ck((select count(*) from booking.email_outbox where kind = 'business_quote_notify' and dedupe_key like 'business_quote_notify:%'
+    and payload ->> 'to_email' = 'savusauna@saunotus.fi' and payload ->> 'to_name' = 'Joonas' and payload ->> 'reply_to' = 'maija@example.test'
+    and payload ->> 'company_name' = 'Sipoon Testi Oy' and payload ->> 'contact_name' = 'Maija Meikäläinen' and payload ->> 'email' = 'maija@example.test'
+    and payload ->> 'phone' = '0401234567' and (payload ->> 'persons')::int = 12 and payload -> 'offerings' = '["ritual","sauna"]'::jsonb
+    and payload ->> 'preferred_when' = 'ensi viikon perjantai' and payload ->> 'message' = 'toive metsäkävelystä' and payload ->> 'locale' = 'fi'
+    and payload ? 'offering_other' and payload ? 'created_at' and payload ? 'quote_id' and locale = 'fi') = 1, 'R7: ilmoitus savusauna@saunotus.fi, payloadissa lomakkeen kentät');
 
   n0 := (select count(*) from booking.business_quote_requests);
   perform set_config('request.headers', '{"cf-connecting-ip":"203.0.113.21"}', true);
@@ -76,19 +82,15 @@ begin
 
   perform public.t75_login(u_st);
   perform public.t75_ck((select count(*) from booking.business_quote_requests) = 0, 'R18: staffin RLS ei näytä rivejä');
-  perform public.t75_ck(public.t75_try($q$select booking.admin_list_business_quotes(null)$q$) = 'forbidden', 'R19: staff ei listaa');
   perform public.t75_logout();
+  perform public.t75_ck(to_regprocedure('booking.admin_list_business_quotes(text)') is null, 'R19: listaus-RPC poistettu');
+  perform public.t75_ck(to_regprocedure('booking.admin_set_business_quote_status(bigint,text,text)') is null, 'R20: tila-RPC poistettu');
+  perform public.t75_ck(not exists (select 1 from booking.role_permissions where permission = 'quotes.manage'), 'R21: quotes.manage poistettu');
   perform public.t75_login(u_mgr);
-  r := booking.admin_list_business_quotes(null);
-  perform public.t75_ck(jsonb_array_length(r) >= 4 and (select count(*) from jsonb_array_elements(r) x where x ->> 'email' = 'maija@example.test' and x ->> 'status' = 'new') = 1, 'R20: manager näkee listan');
-  select (x ->> 'id')::bigint into qid from jsonb_array_elements(r) x where x ->> 'email' = 'maija@example.test';
-  perform booking.admin_set_business_quote_status(qid, 'offered', 'luonnos');
-  perform public.t75_ck((select status from booking.business_quote_requests where id = qid) = 'offered' and (select admin_note from booking.business_quote_requests where id = qid) = 'luonnos', 'R21: tila tarjottu');
-  perform public.t75_ck(public.t75_try(format('select booking.admin_set_business_quote_status(%s, %L, null)', qid, 'archived')) = 'invalid_status', 'R22: virheellinen tila');
+  perform public.t75_ck((select count(*) from booking.business_quote_requests where email = 'maija@example.test' and status = 'new') = 1, 'R22: manager lukee rivin, RLS ennallaan');
   perform public.t75_logout();
   perform public.t75_login(u_adm);
-  r := booking.admin_list_business_quotes('offered');
-  perform public.t75_ck((select count(*) from jsonb_array_elements(r) x where (x ->> 'id')::bigint = qid) = 1, 'R23: admin suodattaa tarjotut');
+  perform public.t75_ck((select count(*) from booking.business_quote_requests where email = 'maija@example.test') = 1, 'R23: admin lukee rivin');
   perform public.t75_logout();
 
   log := current_setting('t75.log', true);

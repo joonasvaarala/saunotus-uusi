@@ -16,7 +16,6 @@ const { validateQuote, OFFERINGS } = await imp('public/js/companies-form-logic.m
 const { companies } = await imp('src/render.mjs');
 const { pageHref } = await imp('src/lib.mjs');
 const { classForContent } = await imp('src/content-texts.mjs');
-const { createAdminMock } = await imp('booking/admin/options-mock.js');
 
 const okInput = (over = {}) => ({
   company_name: 'Sipoon Testi Oy', contact_name: 'Maija Meik채l채inen', email: 'Maija@Example.Test', phone: '040 123 4567',
@@ -155,16 +154,17 @@ test('tuontiluonnos: uudet avaimet, tietosuoja protected, ei p채채llekk채isyytt�
   assert.ok(extra.some((r) => r.key === 'email.business_quote.sign_name' && r.text === 'Tapio'));
 });
 
-test('hallinnan mock: vain quotes.manage listaa ja vaihtaa tilan', async () => {
-  const m = createAdminMock();
-  const rows = await m.rpc('admin_list_business_quotes', { p_status: null });
-  assert.equal(rows.length, 1);
-  assert.equal(rows[0].status, 'new');
-  await m.rpc('admin_set_business_quote_status', { p_id: 1, p_status: 'offered', p_note: 'luonnos' });
-  const offered = await m.rpc('admin_list_business_quotes', { p_status: 'offered' });
-  assert.equal(offered.length, 1);
-  assert.equal(offered[0].admin_note, 'luonnos');
-  await assert.rejects(() => createAdminMock({ perms: ['catalog.edit'] }).rpc('admin_list_business_quotes', {}), (e) => e.code === 'forbidden');
+test('hallinnassa ei ole Yritykset-n채kym채채 eik채 quotes.manage-oikeutta', () => {
+  const admin = rd('booking/admin/admin.js');
+  assert.doesNotMatch(admin, /yritykset|quotes\.manage|loadView\('quotes'\)/);
+  assert.throws(() => rd('booking/admin/views/quotes.js'));
+  const mock = rd('booking/admin/options-mock.js');
+  assert.doesNotMatch(mock, /quotes\.manage|admin_list_business_quotes|admin_set_business_quote_status/);
   assert.match(rd('booking/admin/views/products.js'), /'audience' in c/);
-  assert.match(rd('booking/admin/admin.js'), /quotes\.manage/);
+  assert.doesNotMatch(rd('scripts/build-pages.mjs'), /views\/quotes\.js/);
+  const mail = J('content/site-texts.pending-import-14.json');
+  const keys = new Set(mail.map((r) => r.key));
+  for (const k of ['email.business_quote.notify_subject_detail', 'email.business_quote.field_company', 'email.business_quote.field_email', 'email.business_quote.field_offerings', 'email.business_quote.offering_ritual', 'email.business_quote.field_id']) assert.ok(keys.has(k), k);
+  assert.ok(mail.every((r) => r.class === 'normal' && (r.lang === 'fi' || r.lang === 'en')));
+  for (const k of keys) assert.ok(mail.some((r) => r.key === k && r.lang === 'fi') && mail.some((r) => r.key === k && r.lang === 'en'), k);
 });

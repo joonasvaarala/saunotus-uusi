@@ -1,0 +1,474 @@
+[
+ {
+  "key": "email.business_quote.notify_subject_detail",
+  "lang": "fi",
+  "text": "Yritysten tarjouspyyntö: {{var:company}}, {{var:persons}} hlö, {{var:when}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:company}}",
+   "{{var:persons}}",
+   "{{var:when}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.notify_subject_detail",
+  "lang": "en",
+  "text": "Company quote request: {{var:company}}, {{var:persons}} people, {{var:when}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:company}}",
+   "{{var:persons}}",
+   "{{var:when}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.notify_title_detail",
+  "lang": "fi",
+  "text": "Yritysten tarjouspyyntö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.notify_title_detail",
+  "lang": "en",
+  "text": "Company quote request",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.notify_intro_detail",
+  "lang": "fi",
+  "text": "Uusi tarjouspyyntö. Lomakkeen tiedot ovat alla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.notify_intro_detail",
+  "lang": "en",
+  "text": "A new quote request. The form details are below.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_company",
+  "lang": "fi",
+  "text": "Yrityksen nimi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_company",
+  "lang": "en",
+  "text": "Company name",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_contact",
+  "lang": "fi",
+  "text": "Yhteyshenkilö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_contact",
+  "lang": "en",
+  "text": "Contact",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_email",
+  "lang": "fi",
+  "text": "Sähköposti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_email",
+  "lang": "en",
+  "text": "Email",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_phone",
+  "lang": "fi",
+  "text": "Puhelin",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_phone",
+  "lang": "en",
+  "text": "Phone",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_persons",
+  "lang": "fi",
+  "text": "Henkilömäärä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_persons",
+  "lang": "en",
+  "text": "Number of people",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_offerings",
+  "lang": "fi",
+  "text": "Valitut palvelut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_offerings",
+  "lang": "en",
+  "text": "Selected services",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_when",
+  "lang": "fi",
+  "text": "Toivottu ajankohta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_when",
+  "lang": "en",
+  "text": "Preferred date",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_message",
+  "lang": "fi",
+  "text": "Lisätiedot",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_message",
+  "lang": "en",
+  "text": "Message",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_locale",
+  "lang": "fi",
+  "text": "Kieli",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_locale",
+  "lang": "en",
+  "text": "Language",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_sent",
+  "lang": "fi",
+  "text": "Lähetysaika",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_sent",
+  "lang": "en",
+  "text": "Sent",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_id",
+  "lang": "fi",
+  "text": "Pyynnön tunnus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.field_id",
+  "lang": "en",
+  "text": "Request id",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.persons_value",
+  "lang": "fi",
+  "text": "{{var:n}} hlö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.persons_value",
+  "lang": "en",
+  "text": "{{var:n}} people",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.offering_ritual",
+  "lang": "fi",
+  "text": "Saunarituaali",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.offering_ritual",
+  "lang": "en",
+  "text": "Sauna ritual",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.offering_forest_yoga",
+  "lang": "fi",
+  "text": "Metsäjooga",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.offering_forest_yoga",
+  "lang": "en",
+  "text": "Forest yoga",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.offering_campfire_meal",
+  "lang": "fi",
+  "text": "Nuotioruokailu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.offering_campfire_meal",
+  "lang": "en",
+  "text": "Campfire meal",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.offering_sauna",
+  "lang": "fi",
+  "text": "Saunotus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.offering_sauna",
+  "lang": "en",
+  "text": "Sauna session",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.offering_vihta_workshop",
+  "lang": "fi",
+  "text": "Vihtatyöpaja",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.offering_vihta_workshop",
+  "lang": "en",
+  "text": "Whisk workshop",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.offering_other",
+  "lang": "fi",
+  "text": "Muu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.offering_other",
+  "lang": "en",
+  "text": "Other",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.locale_fi",
+  "lang": "fi",
+  "text": "suomi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.locale_fi",
+  "lang": "en",
+  "text": "Finnish",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.locale_en",
+  "lang": "fi",
+  "text": "englanti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.business_quote.locale_en",
+  "lang": "en",
+  "text": "English",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ }
+]

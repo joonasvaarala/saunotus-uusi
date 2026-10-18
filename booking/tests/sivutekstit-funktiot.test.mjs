@@ -112,7 +112,7 @@ test('tiedosto on generoitu koodista (texts.ts) eikä voi poiketa oletuksista', 
     } else assert.deepEqual(f, got, `${f.key}: tiedosto ≠ generaattori`);
   }
   const fb = new Set(FALLBACK.texts.map((x) => `${x.key}|${x.lang}`));
-  const extraKnown = new Map([...J('content/site-texts.pending-import-4.json'), ...J('content/site-texts.imported-pr75.json')].map((r) => [`${r.key}|${r.lang}`, r]));
+  const extraKnown = new Map([...J('content/site-texts.pending-import-4.json'), ...J('content/site-texts.imported-pr75.json'), ...J('content/site-texts.pending-import-14.json')].map((r) => [`${r.key}|${r.lang}`, r]));
   for (const [k, x] of g) if (!PENDING.some((f) => `${f.key}|${f.lang}` === k)) {
     const row = extraKnown.get(k);
     if (row) assert.deepEqual(row, x, `${k}: tuontitiedosto ≠ generaattori`);
@@ -147,7 +147,11 @@ test('sähköpostit: jokainen email.*-avain on käytössä ja jokaisella käytet
   const used = new Set();
   const t = ST.makeT(TPL.EMAIL_TEXTS); const spy = (k, l, v) => { used.add(k); return t(k, l, v); };
   for (const c of emailCases()) TPL.render(c.kind, structuredClone(c.data), c.locale, spy);
-  for (const kind of ['business_quote_ack', 'business_quote_notify']) for (const locale of ['fi', 'en']) TPL.render(kind, { to_name: 'Maija Meikäläinen', locale }, locale, spy);
+  const quoteNotify = { to_name: 'Joonas', reply_to: 'maija@example.test', quote: { id: 42, company_name: 'Sipoon Testi Oy', contact_name: 'Maija Meikäläinen', email: 'maija@example.test', phone: '040 123 4567', persons: 12, offerings: ['ritual', 'forest_yoga', 'campfire_meal', 'sauna', 'vihta_workshop', 'other'], offering_other: 'yrityssaunaretki', preferred_when: 'ensi viikon perjantai', message: 'toive', locale: 'en', created_at: '2026-10-18T19:14:00Z' } };
+  for (const locale of ['fi', 'en']) {
+    TPL.render('business_quote_ack', { to_name: 'Maija Meikäläinen', locale }, locale, spy);
+    TPL.render('business_quote_notify', { ...quoteNotify, locale }, locale, spy);
+  }
   const all = Object.keys(TPL.EMAIL_TEXTS);
   assert.deepEqual(all.filter((k) => !used.has(k)), [], 'käyttämättömiä avaimia');
   assert.deepEqual([...used].filter((k) => !TPL.EMAIL_TEXTS[k]), []);
