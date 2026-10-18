@@ -3,7 +3,7 @@
 import { functionUrl } from './sb.js';
 import { GT } from './gift-texts.js';
 import { pdfHref } from './gift-api.js';
-import { h, makeFmt, field } from './gift-ui.js';
+import { h, makeFmt, field, revealForm, revealIfHidden } from './gift-ui.js';
 import * as G from './gift-logic.js';
 
 const badgeClass = (st) => (st === 'active' ? 'st-confirmed' : st === 'pending_payment' || st === 'pending_verification' ? 'st-pending' : st === 'cancelled' || st === 'expired' ? 'st-expired' : '');
@@ -13,6 +13,7 @@ const badgeClass = (st) => (st === 'active' ? 'st-confirmed' : st === 'pending_p
 //   → public_submit_voucher_claim → selkeä vahvistusteksti. Näytetään kun redeem_enabled, maksamatonta on ja tilauksella ei ole lahjakorttirivejä (lahjakortilla ei osteta lahjakorttia).
 // bare = ilman omaa otsikkoa/ohjetta (vahvistussivun maksuvalinnan sisällä, otsikko tulee valintapainikkeesta); balance = lisää "Näytä saldo" (public_check_gift_card; unpaid = maksettava, näyttää käytettävissä olevan osuuden).
 // onApplied(text) = oma kortti käytetty; onClaimed({ text, extra }) = kumppanin lahjakortti lähetetty lunastettavaksi (tilaus + pyyntölista ladataan uudelleen).
+let chooseSeq = 0;
 export function redeemSection({ L, api, token, onApplied, onClaimed, bare = false, balance = false, unpaid = null, onFail = null }) {
   const F = makeFmt(L), { tx, pick } = F;
   const has = (k) => GT[L][k] != null;
@@ -23,11 +24,11 @@ export function redeemSection({ L, api, token, onApplied, onClaimed, bare = fals
   const fa = field({ label: tx('o.amount'), control: amt, hint: tx('o.amountHint'), name: 'ra' });
   const msg = h('div', { class: 'ord-msg gc-msg', 'aria-live': 'polite', 'data-testid': 'gc-msg' });
   const btn = h('button', { type: 'submit', class: 'btn ord-btn', 'data-testid': 'gc-apply', text: tx('o.apply') });
-  const choose = h('div', { class: 'vc-choose', hidden: true, 'data-testid': 'vc-choose' });
+  const choose = h('div', { class: 'vc-choose', role: 'group', 'aria-labelledby': 'vc-ctitle-' + (++chooseSeq), hidden: true, 'data-testid': 'vc-choose' });
   const hideChoose = () => { choose.hidden = true; choose.replaceChildren(); };
   code.addEventListener('input', () => { fc.setError(''); msg.replaceChildren(); hideChoose(); });
   amt.addEventListener('input', () => fa.setError(''));
-  const showError = (text) => msg.replaceChildren(h('p', { class: 'bk-error', role: 'alert', text }));
+  const showError = (text) => { msg.replaceChildren(h('p', { class: 'bk-error', role: 'alert', text })); revealIfHidden(msg); };
 
   // lähdevalinta (tuntematon koodi, kumppanilunastus päällä)
   function showChoose(out) {
@@ -37,7 +38,7 @@ export function redeemSection({ L, api, token, onApplied, onClaimed, bare = fals
     const cmsg = h('div', { class: 'ord-msg', 'aria-live': 'polite', 'data-testid': 'vc-msg' });
     const go = h('button', { type: 'button', class: 'btn ord-btn', 'data-testid': 'vc-submit', text: tx('vc.submit'), onclick: async () => {
       cmsg.replaceChildren();
-      const src = chosen(); if (!src) { cmsg.append(h('p', { class: 'bk-error', role: 'alert', text: tx('vc.err.invalid_source') })); return; }
+      const src = chosen(); if (!src) { cmsg.append(h('p', { class: 'bk-error', role: 'alert', text: tx('vc.err.invalid_source') })); revealIfHidden(cmsg); return; }
       go.disabled = true; go.textContent = tx('vc.submitting');
       try {
         const r = await G.submitClaim({ api, token, code: code.value, source: src });
@@ -47,16 +48,16 @@ export function redeemSection({ L, api, token, onApplied, onClaimed, bare = fals
         }
         cmsg.append(h('p', { class: 'bk-error', role: 'alert', text: errText(r.code) }));
       } catch { cmsg.append(h('p', { class: 'bk-error', role: 'alert', text: tx('err.generic') })); }
-      go.disabled = false; go.textContent = tx('vc.submit');
+      revealIfHidden(cmsg); go.disabled = false; go.textContent = tx('vc.submit');
     } });
     const change = h('button', { type: 'button', class: 'btn light ord-btn', 'data-testid': 'vc-change', text: tx('vc.change'), onclick: () => { hideChoose(); code.focus(); } });
-    const title = h('h4', { class: 'vc-ctitle', tabindex: '-1', text: tx('vc.chooseTitle') });
+    const title = h('h4', { class: 'vc-ctitle', id: choose.getAttribute('aria-labelledby'), tabindex: '-1', text: tx('vc.chooseTitle') });
     choose.replaceChildren(title, h('p', { class: 'bk-note', text: tx('vc.chooseLead') }),
       h('p', { class: 'vc-code', 'data-testid': 'vc-codeis', text: tx('vc.codeIs', { code: G.normalizeCode(code.value) }) }),
       h('fieldset', { class: 'gc-dlv vc-src' }, h('legend', { text: tx('vc.sourceLegend') }), h('div', { class: 'gc-radios vc-radios' }, radios)),
       sel ? h('p', { class: 'bk-note', 'data-testid': 'vc-suggest', text: tx('vc.suggest', { source: pick(out.sources.find((x) => x.code === sel), 'label') }) }) : null,
       h('div', { class: 'vc-actions' }, go, change), cmsg);
-    choose.hidden = false; title.focus({ preventScroll: false });
+    choose.hidden = false; revealForm(choose, title);   // vieritä lomake näkyviin + fokus otsikkoon (ruudunlukija lukee "Mistä lahjakortti on ostettu?")
   }
 
   // "Näytä saldo": oma kortti → saldo (+ tähän tilaukseen käytettävissä oleva osuus); tuntematon koodi → selitys (kumppanin kortin saldoa ei voi nähdä); virheet selkeinä
@@ -74,7 +75,7 @@ export function redeemSection({ L, api, token, onApplied, onClaimed, bare = fals
       else if (r?.code === 'invalid_code' || r?.code === 'not_found') msg.replaceChildren(h('p', { class: 'bk-note', role: 'status', 'data-testid': 'gc-balance-unknown', text: tx('o.checkUnknown') }));
       else { showError(errText(r?.code)); if (onFail) onFail(r?.code); }
     } catch { showError(tx('err.generic')); }
-    chk.disabled = false; chk.textContent = tx('o.checkBtn');
+    revealIfHidden(msg); chk.disabled = false; chk.textContent = tx('o.checkBtn');
   } });
   const form = h('form', { class: 'ord-form bk-form', novalidate: true, onsubmit: async (ev) => {
     ev.preventDefault(); if (btn.disabled) return; msg.replaceChildren(); hideChoose();
