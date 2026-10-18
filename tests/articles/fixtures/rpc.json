@@ -1,0 +1,816 @@
+{
+ "_doc": "Feikkidataa: public_*-RPC-vastaukset testiprojektista (jztczwrqtnpuolhcmktb). Kuvat https://fixture.example/storage/article-images/<polku> → tests/articles/fixtures/images/<tiedostonimi>.",
+ "list": {
+  "fi": {
+   "ok": true,
+   "tag": null,
+   "lang": "fi",
+   "path": "/saunatietoa/",
+   "tags": [
+    {
+     "tag": "löyly",
+     "count": 1
+    },
+    {
+     "tag": "opas",
+     "count": 1
+    },
+    {
+     "tag": "perinne",
+     "count": 1
+    },
+    {
+     "tag": "sauna",
+     "count": 1
+    },
+    {
+     "tag": "savusauna",
+     "count": 1
+    },
+    {
+     "tag": "testi",
+     "count": 1
+    }
+   ],
+   "items": [
+    {
+     "lang": "fi",
+     "slug": "miten-saunotaan-oikein",
+     "tags": [
+      "sauna",
+      "löyly",
+      "opas"
+     ],
+     "image": {
+      "id": 6,
+      "alt": "Savusaunan lauteet ja lämmin valo",
+      "url": "https://fixture.example/storage/article-images/articles/6/1760000001-heroaaa1.jpg",
+      "mime": "image/jpeg",
+      "path": "articles/6/1760000001-heroaaa1.jpg",
+      "bytes": 1000,
+      "width": 1600,
+      "height": 900,
+      "caption": "Savusaunan lauteet"
+     },
+     "title": "Miten saunotaan oikein? Perinteinen opas",
+     "author": "Testikirjoittaja",
+     "noindex": false,
+     "summary": "Perinteinen saunominen on rauhallista: kolme kierrosta, riittävästi lepoa ja vettä. Tässä lyhyt opas ensikertalaiselle.",
+     "category": "saunominen",
+     "featured": true,
+     "alternates": [
+      {
+       "url": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+       "lang": "en",
+       "path": "/en/sauna-knowledge/how-to-sauna/",
+       "slug": "how-to-sauna"
+      },
+      {
+       "url": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+       "lang": "fi",
+       "path": "/saunatietoa/miten-saunotaan-oikein/",
+       "slug": "miten-saunotaan-oikein"
+      }
+     ],
+     "updated_at": "2026-10-18T06:38:30.521934+00:00",
+     "published_at": "2026-10-15T06:38:30.521934+00:00",
+     "reading_minutes": 1
+    },
+    {
+     "lang": "fi",
+     "slug": "noindex-testiartikkeli",
+     "tags": [
+      "testi"
+     ],
+     "image": {
+      "id": 10,
+      "alt": "Noindex-testin kuva",
+      "url": "https://fixture.example/storage/article-images/articles/8/1760000005-heroeee5.jpg",
+      "mime": "image/jpeg",
+      "path": "articles/8/1760000005-heroeee5.jpg",
+      "bytes": 1000,
+      "width": 1600,
+      "height": 900,
+      "caption": null
+     },
+     "title": "Piilotettu testiartikkeli (noindex)",
+     "author": null,
+     "noindex": true,
+     "summary": "Tämä artikkeli on noindex eikä kuulu sitemapiin. Testidataa.",
+     "category": "hoidot",
+     "featured": false,
+     "alternates": [
+      {
+       "url": "https://uusi.saunotus.com/saunatietoa/noindex-testiartikkeli/",
+       "lang": "fi",
+       "path": "/saunatietoa/noindex-testiartikkeli/",
+       "slug": "noindex-testiartikkeli"
+      }
+     ],
+     "updated_at": "2026-10-18T06:38:30.521934+00:00",
+     "published_at": "2026-10-17T06:38:30.521934+00:00",
+     "reading_minutes": 1
+    },
+    {
+     "lang": "fi",
+     "slug": "savusauna-lampiaminen",
+     "tags": [
+      "savusauna",
+      "perinne"
+     ],
+     "image": {
+      "id": 9,
+      "alt": "Savusauna metsän laidalla",
+      "url": "https://fixture.example/storage/article-images/articles/7/1760000004-heroddd4.jpg",
+      "mime": "image/jpeg",
+      "path": "articles/7/1760000004-heroddd4.jpg",
+      "bytes": 1000,
+      "width": 1600,
+      "height": 900,
+      "caption": null
+     },
+     "title": "Savusauna: lämmitys ja löylyn luonne",
+     "author": null,
+     "noindex": false,
+     "summary": "Savusaunaa lämmitetään tunteja. Löyly on pehmeä ja tuoksu ainutlaatuinen. Testidataa.",
+     "category": "perinne",
+     "featured": false,
+     "alternates": [
+      {
+       "url": "https://uusi.saunotus.com/saunatietoa/savusauna-lampiaminen/",
+       "lang": "fi",
+       "path": "/saunatietoa/savusauna-lampiaminen/",
+       "slug": "savusauna-lampiaminen"
+      }
+     ],
+     "updated_at": "2026-10-18T06:38:30.521934+00:00",
+     "published_at": "2026-10-16T06:38:30.521934+00:00",
+     "reading_minutes": 1
+    }
+   ],
+   "label": "Saunatietoa",
+   "limit": 50,
+   "total": 3,
+   "offset": 0
+  },
+  "en": {
+   "ok": true,
+   "tag": null,
+   "lang": "en",
+   "path": "/en/sauna-knowledge/",
+   "tags": [
+    {
+     "tag": "löyly",
+     "count": 1
+    },
+    {
+     "tag": "opas",
+     "count": 1
+    },
+    {
+     "tag": "sauna",
+     "count": 1
+    }
+   ],
+   "items": [
+    {
+     "lang": "en",
+     "slug": "how-to-sauna",
+     "tags": [
+      "sauna",
+      "löyly",
+      "opas"
+     ],
+     "image": {
+      "id": 6,
+      "alt": "Wooden benches and warm light in a smoke sauna",
+      "url": "https://fixture.example/storage/article-images/articles/6/1760000001-heroaaa1.jpg",
+      "mime": "image/jpeg",
+      "path": "articles/6/1760000001-heroaaa1.jpg",
+      "bytes": 1000,
+      "width": 1600,
+      "height": 900,
+      "caption": "Smoke sauna benches"
+     },
+     "title": "How to sauna: a traditional guide",
+     "author": "Testikirjoittaja",
+     "noindex": false,
+     "summary": "Traditional sauna bathing is calm: three rounds, enough rest and water. A short guide for first-timers.",
+     "category": "saunominen",
+     "featured": true,
+     "alternates": [
+      {
+       "url": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+       "lang": "en",
+       "path": "/en/sauna-knowledge/how-to-sauna/",
+       "slug": "how-to-sauna"
+      },
+      {
+       "url": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+       "lang": "fi",
+       "path": "/saunatietoa/miten-saunotaan-oikein/",
+       "slug": "miten-saunotaan-oikein"
+      }
+     ],
+     "updated_at": "2026-10-18T06:38:30.521934+00:00",
+     "published_at": "2026-10-15T06:38:30.521934+00:00",
+     "reading_minutes": 1
+    }
+   ],
+   "label": "Sauna knowledge",
+   "limit": 50,
+   "total": 1,
+   "offset": 0
+  }
+ },
+ "articles": {
+  "fi/miten-saunotaan-oikein": {
+   "ok": true,
+   "seo": {
+    "title": "Miten saunotaan oikein? Perinteinen opas",
+    "robots": "index,follow",
+    "json_ld": {
+     "@type": "Article",
+     "image": [
+      "https://fixture.example/storage/article-images/articles/6/1760000001-heroaaa1.jpg"
+     ],
+     "author": {
+      "name": "Testikirjoittaja",
+      "@type": "Person"
+     },
+     "@context": "https://schema.org",
+     "headline": "Miten saunotaan oikein? Perinteinen opas",
+     "keywords": "sauna, löyly, opas",
+     "publisher": {
+      "name": "Sipoonjoen perinnesauna (testi)",
+      "@type": "Organization"
+     },
+     "inLanguage": "fi",
+     "description": "Miten saunotaan oikein? Käytännön opas löylyyn, lepoon ja juomiseen perinnesaunassa. Lue ohjeet ja varaa oma saunahetkesi.",
+     "dateModified": "2026-10-18T06:38:30.521934+00:00",
+     "datePublished": "2026-10-15T06:38:30.521934+00:00",
+     "articleSection": "saunominen",
+     "mainEntityOfPage": {
+      "@id": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "@type": "WebPage"
+     }
+    },
+    "og_type": "article",
+    "og_image": {
+     "id": 6,
+     "alt": "Savusaunan lauteet ja lämmin valo",
+     "url": "https://fixture.example/storage/article-images/articles/6/1760000001-heroaaa1.jpg",
+     "mime": "image/jpeg",
+     "path": "articles/6/1760000001-heroaaa1.jpg",
+     "bytes": 1000,
+     "width": 1600,
+     "height": 900,
+     "caption": "Savusaunan lauteet"
+    },
+    "canonical": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+    "alternates": [
+     {
+      "href": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+      "hreflang": "en"
+     },
+     {
+      "href": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "hreflang": "fi"
+     },
+     {
+      "href": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "hreflang": "x-default"
+     }
+    ],
+    "description": "Miten saunotaan oikein? Käytännön opas löylyyn, lepoon ja juomiseen perinnesaunassa. Lue ohjeet ja varaa oma saunahetkesi."
+   },
+   "article": {
+    "lang": "fi",
+    "slug": "miten-saunotaan-oikein",
+    "tags": [
+     "sauna",
+     "löyly",
+     "opas"
+    ],
+    "image": {
+     "id": 6,
+     "alt": "Savusaunan lauteet ja lämmin valo",
+     "url": "https://fixture.example/storage/article-images/articles/6/1760000001-heroaaa1.jpg",
+     "mime": "image/jpeg",
+     "path": "articles/6/1760000001-heroaaa1.jpg",
+     "bytes": 1000,
+     "width": 1600,
+     "height": 900,
+     "caption": "Savusaunan lauteet"
+    },
+    "title": "Miten saunotaan oikein? Perinteinen opas",
+    "author": "Testikirjoittaja",
+    "images": [
+     {
+      "id": 6,
+      "alt": "Savusaunan lauteet ja lämmin valo",
+      "url": "https://fixture.example/storage/article-images/articles/6/1760000001-heroaaa1.jpg",
+      "mime": "image/jpeg",
+      "path": "articles/6/1760000001-heroaaa1.jpg",
+      "bytes": 1000,
+      "width": 1600,
+      "height": 900,
+      "caption": "Savusaunan lauteet"
+     },
+     {
+      "id": 7,
+      "alt": "Vihta ja vesisanko lauteilla",
+      "url": "https://fixture.example/storage/article-images/articles/6/1760000002-kuvabbb2.jpg",
+      "mime": "image/jpeg",
+      "path": "articles/6/1760000002-kuvabbb2.jpg",
+      "bytes": 1000,
+      "width": 1200,
+      "height": 800,
+      "caption": "Vihta kuuluu perinteiseen saunomiseen"
+     },
+     {
+      "id": 8,
+      "alt": "Lepohetki ulkona saunan jälkeen",
+      "url": "https://fixture.example/storage/article-images/articles/6/1760000003-kuvaccc3.jpg",
+      "mime": "image/jpeg",
+      "path": "articles/6/1760000003-kuvaccc3.jpg",
+      "bytes": 1000,
+      "width": 1200,
+      "height": 800,
+      "caption": null
+     }
+    ],
+    "noindex": false,
+    "summary": "Perinteinen saunominen on rauhallista: kolme kierrosta, riittävästi lepoa ja vettä. Tässä lyhyt opas ensikertalaiselle.",
+    "category": "saunominen",
+    "featured": true,
+    "alternates": [
+     {
+      "url": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+      "lang": "en",
+      "path": "/en/sauna-knowledge/how-to-sauna/",
+      "slug": "how-to-sauna"
+     },
+     {
+      "url": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "lang": "fi",
+      "path": "/saunatietoa/miten-saunotaan-oikein/",
+      "slug": "miten-saunotaan-oikein"
+     }
+    ],
+    "content_md": "Saunominen on **rauhoittumista**, ei suorittamista. Tässä oppaassa käydään läpi miten saunotaan oikein: löyly, lepo ja vesi. Tämä on feikkidataa testausta varten.\n\n## Ensimmäinen kierros\n\nMene lauteille rauhassa ja heitä löylyä vähän kerrallaan. Lue lisää [saunavuoroista](/saunavuorot/) tai [ulkoinen lähde](https://example.com/sauna).\n\n![kuva](img:7)\n\n## Lepo ja juominen\n\n- Juo vettä saunan jälkeen\n- Lepää kunnes syke rauhoittuu\n- Älä kiirehdi\n\n### Vihta\n\nVihta tuoksuu *koivulta*. Kokeile yhdessä ystävän kanssa.\n\n> Hyvä sauna ei kiirehdi.\n\n![kuva](img:8)\n\n## Usein kysyttyä\n\n**Kuinka monta kierrosta?**\nKolme on perinteinen määrä.\n\n---\n\n:::cta\n**Varaa oma saunahetkesi**\nSipoonjoen perinnesauna tarjoaa savusaunan ja hoidot. Valitse aika ja varaa verkossa.\n[Varaa aika](/varaa/)\n:::",
+    "updated_at": "2026-10-18T06:38:30.521934+00:00",
+    "published_at": "2026-10-15T06:38:30.521934+00:00",
+    "reading_minutes": 1
+   }
+  },
+  "fi/noindex-testiartikkeli": {
+   "ok": true,
+   "seo": {
+    "title": "Piilotettu testiartikkeli (noindex)",
+    "robots": "noindex,follow",
+    "json_ld": {
+     "@type": "Article",
+     "image": [
+      "https://fixture.example/storage/article-images/articles/8/1760000005-heroeee5.jpg"
+     ],
+     "author": {
+      "name": "Sipoonjoen perinnesauna (testi)",
+      "@type": "Organization"
+     },
+     "@context": "https://schema.org",
+     "headline": "Piilotettu testiartikkeli (noindex)",
+     "keywords": "testi",
+     "publisher": {
+      "name": "Sipoonjoen perinnesauna (testi)",
+      "@type": "Organization"
+     },
+     "inLanguage": "fi",
+     "description": "Noindex-testiartikkeli: ei hakukoneille, ei sitemapissa. Vain rakennuksen testausta varten, feikkidataa.",
+     "dateModified": "2026-10-18T06:38:30.521934+00:00",
+     "datePublished": "2026-10-17T06:38:30.521934+00:00",
+     "articleSection": "hoidot",
+     "mainEntityOfPage": {
+      "@id": "https://uusi.saunotus.com/saunatietoa/noindex-testiartikkeli/",
+      "@type": "WebPage"
+     }
+    },
+    "og_type": "article",
+    "og_image": {
+     "id": 10,
+     "alt": "Noindex-testin kuva",
+     "url": "https://fixture.example/storage/article-images/articles/8/1760000005-heroeee5.jpg",
+     "mime": "image/jpeg",
+     "path": "articles/8/1760000005-heroeee5.jpg",
+     "bytes": 1000,
+     "width": 1600,
+     "height": 900,
+     "caption": null
+    },
+    "canonical": "https://uusi.saunotus.com/saunatietoa/noindex-testiartikkeli/",
+    "alternates": [],
+    "description": "Noindex-testiartikkeli: ei hakukoneille, ei sitemapissa. Vain rakennuksen testausta varten, feikkidataa."
+   },
+   "article": {
+    "lang": "fi",
+    "slug": "noindex-testiartikkeli",
+    "tags": [
+     "testi"
+    ],
+    "image": {
+     "id": 10,
+     "alt": "Noindex-testin kuva",
+     "url": "https://fixture.example/storage/article-images/articles/8/1760000005-heroeee5.jpg",
+     "mime": "image/jpeg",
+     "path": "articles/8/1760000005-heroeee5.jpg",
+     "bytes": 1000,
+     "width": 1600,
+     "height": 900,
+     "caption": null
+    },
+    "title": "Piilotettu testiartikkeli (noindex)",
+    "author": null,
+    "images": [
+     {
+      "id": 10,
+      "alt": "Noindex-testin kuva",
+      "url": "https://fixture.example/storage/article-images/articles/8/1760000005-heroeee5.jpg",
+      "mime": "image/jpeg",
+      "path": "articles/8/1760000005-heroeee5.jpg",
+      "bytes": 1000,
+      "width": 1600,
+      "height": 900,
+      "caption": null
+     }
+    ],
+    "noindex": true,
+    "summary": "Tämä artikkeli on noindex eikä kuulu sitemapiin. Testidataa.",
+    "category": "hoidot",
+    "featured": false,
+    "alternates": [
+     {
+      "url": "https://uusi.saunotus.com/saunatietoa/noindex-testiartikkeli/",
+      "lang": "fi",
+      "path": "/saunatietoa/noindex-testiartikkeli/",
+      "slug": "noindex-testiartikkeli"
+     }
+    ],
+    "content_md": "Tämä noindex-artikkeli on testidataa.\n\n## Väliotsikko\n\nTeksti.",
+    "updated_at": "2026-10-18T06:38:30.521934+00:00",
+    "published_at": "2026-10-17T06:38:30.521934+00:00",
+    "reading_minutes": 1
+   }
+  },
+  "fi/savusauna-lampiaminen": {
+   "ok": true,
+   "seo": {
+    "title": "Savusauna: lämmitys ja löylyn luonne",
+    "robots": "index,follow",
+    "json_ld": {
+     "@type": "Article",
+     "image": [
+      "https://fixture.example/storage/article-images/articles/7/1760000004-heroddd4.jpg"
+     ],
+     "author": {
+      "name": "Sipoonjoen perinnesauna (testi)",
+      "@type": "Organization"
+     },
+     "@context": "https://schema.org",
+     "headline": "Savusauna: lämmitys ja löylyn luonne",
+     "keywords": "savusauna, perinne",
+     "publisher": {
+      "name": "Sipoonjoen perinnesauna (testi)",
+      "@type": "Organization"
+     },
+     "inLanguage": "fi",
+     "description": "Savusauna on perinteinen tapa saunoa. Lue miten savusauna lämpiää ja miksi löyly on erilainen. Varaa vuoro.",
+     "dateModified": "2026-10-18T06:38:30.521934+00:00",
+     "datePublished": "2026-10-16T06:38:30.521934+00:00",
+     "articleSection": "perinne",
+     "mainEntityOfPage": {
+      "@id": "https://uusi.saunotus.com/saunatietoa/savusauna-lampiaminen/",
+      "@type": "WebPage"
+     }
+    },
+    "og_type": "article",
+    "og_image": {
+     "id": 9,
+     "alt": "Savusauna metsän laidalla",
+     "url": "https://fixture.example/storage/article-images/articles/7/1760000004-heroddd4.jpg",
+     "mime": "image/jpeg",
+     "path": "articles/7/1760000004-heroddd4.jpg",
+     "bytes": 1000,
+     "width": 1600,
+     "height": 900,
+     "caption": null
+    },
+    "canonical": "https://uusi.saunotus.com/saunatietoa/savusauna-lampiaminen/",
+    "alternates": [],
+    "description": "Savusauna on perinteinen tapa saunoa. Lue miten savusauna lämpiää ja miksi löyly on erilainen. Varaa vuoro."
+   },
+   "article": {
+    "lang": "fi",
+    "slug": "savusauna-lampiaminen",
+    "tags": [
+     "savusauna",
+     "perinne"
+    ],
+    "image": {
+     "id": 9,
+     "alt": "Savusauna metsän laidalla",
+     "url": "https://fixture.example/storage/article-images/articles/7/1760000004-heroddd4.jpg",
+     "mime": "image/jpeg",
+     "path": "articles/7/1760000004-heroddd4.jpg",
+     "bytes": 1000,
+     "width": 1600,
+     "height": 900,
+     "caption": null
+    },
+    "title": "Savusauna: lämmitys ja löylyn luonne",
+    "author": null,
+    "images": [
+     {
+      "id": 9,
+      "alt": "Savusauna metsän laidalla",
+      "url": "https://fixture.example/storage/article-images/articles/7/1760000004-heroddd4.jpg",
+      "mime": "image/jpeg",
+      "path": "articles/7/1760000004-heroddd4.jpg",
+      "bytes": 1000,
+      "width": 1600,
+      "height": 900,
+      "caption": null
+     }
+    ],
+    "noindex": false,
+    "summary": "Savusaunaa lämmitetään tunteja. Löyly on pehmeä ja tuoksu ainutlaatuinen. Testidataa.",
+    "category": "perinne",
+    "featured": false,
+    "alternates": [
+     {
+      "url": "https://uusi.saunotus.com/saunatietoa/savusauna-lampiaminen/",
+      "lang": "fi",
+      "path": "/saunatietoa/savusauna-lampiaminen/",
+      "slug": "savusauna-lampiaminen"
+     }
+    ],
+    "content_md": "Savusauna lämpiää useita tunteja. Tämä on feikkidataa.\n\n## Lämmitys\n\nPuut poltetaan kiukaassa ja savu poistetaan ennen saunomista.",
+    "updated_at": "2026-10-18T06:38:30.521934+00:00",
+    "published_at": "2026-10-16T06:38:30.521934+00:00",
+    "reading_minutes": 1
+   }
+  },
+  "en/how-to-sauna": {
+   "ok": true,
+   "seo": {
+    "title": "How to sauna: a traditional guide",
+    "robots": "index,follow",
+    "json_ld": {
+     "@type": "Article",
+     "image": [
+      "https://fixture.example/storage/article-images/articles/6/1760000001-heroaaa1.jpg"
+     ],
+     "author": {
+      "name": "Testikirjoittaja",
+      "@type": "Person"
+     },
+     "@context": "https://schema.org",
+     "headline": "How to sauna: a traditional guide",
+     "keywords": "sauna, löyly, opas",
+     "publisher": {
+      "name": "Sipoonjoen perinnesauna (testi)",
+      "@type": "Organization"
+     },
+     "inLanguage": "en",
+     "description": "How to sauna properly? A practical guide to heat, rest and hydration in a heritage sauna. Read the tips and book your own sauna moment.",
+     "dateModified": "2026-10-18T06:38:30.521934+00:00",
+     "datePublished": "2026-10-15T06:38:30.521934+00:00",
+     "articleSection": "saunominen",
+     "mainEntityOfPage": {
+      "@id": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+      "@type": "WebPage"
+     }
+    },
+    "og_type": "article",
+    "og_image": {
+     "id": 6,
+     "alt": "Wooden benches and warm light in a smoke sauna",
+     "url": "https://fixture.example/storage/article-images/articles/6/1760000001-heroaaa1.jpg",
+     "mime": "image/jpeg",
+     "path": "articles/6/1760000001-heroaaa1.jpg",
+     "bytes": 1000,
+     "width": 1600,
+     "height": 900,
+     "caption": "Smoke sauna benches"
+    },
+    "canonical": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+    "alternates": [
+     {
+      "href": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+      "hreflang": "en"
+     },
+     {
+      "href": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "hreflang": "fi"
+     },
+     {
+      "href": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "hreflang": "x-default"
+     }
+    ],
+    "description": "How to sauna properly? A practical guide to heat, rest and hydration in a heritage sauna. Read the tips and book your own sauna moment."
+   },
+   "article": {
+    "lang": "en",
+    "slug": "how-to-sauna",
+    "tags": [
+     "sauna",
+     "löyly",
+     "opas"
+    ],
+    "image": {
+     "id": 6,
+     "alt": "Wooden benches and warm light in a smoke sauna",
+     "url": "https://fixture.example/storage/article-images/articles/6/1760000001-heroaaa1.jpg",
+     "mime": "image/jpeg",
+     "path": "articles/6/1760000001-heroaaa1.jpg",
+     "bytes": 1000,
+     "width": 1600,
+     "height": 900,
+     "caption": "Smoke sauna benches"
+    },
+    "title": "How to sauna: a traditional guide",
+    "author": "Testikirjoittaja",
+    "images": [
+     {
+      "id": 6,
+      "alt": "Wooden benches and warm light in a smoke sauna",
+      "url": "https://fixture.example/storage/article-images/articles/6/1760000001-heroaaa1.jpg",
+      "mime": "image/jpeg",
+      "path": "articles/6/1760000001-heroaaa1.jpg",
+      "bytes": 1000,
+      "width": 1600,
+      "height": 900,
+      "caption": "Smoke sauna benches"
+     },
+     {
+      "id": 7,
+      "alt": "Birch whisk and water bucket on the bench",
+      "url": "https://fixture.example/storage/article-images/articles/6/1760000002-kuvabbb2.jpg",
+      "mime": "image/jpeg",
+      "path": "articles/6/1760000002-kuvabbb2.jpg",
+      "bytes": 1000,
+      "width": 1200,
+      "height": 800,
+      "caption": "The whisk belongs to traditional bathing"
+     },
+     {
+      "id": 8,
+      "alt": "Resting outdoors after sauna",
+      "url": "https://fixture.example/storage/article-images/articles/6/1760000003-kuvaccc3.jpg",
+      "mime": "image/jpeg",
+      "path": "articles/6/1760000003-kuvaccc3.jpg",
+      "bytes": 1000,
+      "width": 1200,
+      "height": 800,
+      "caption": null
+     }
+    ],
+    "noindex": false,
+    "summary": "Traditional sauna bathing is calm: three rounds, enough rest and water. A short guide for first-timers.",
+    "category": "saunominen",
+    "featured": true,
+    "alternates": [
+     {
+      "url": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+      "lang": "en",
+      "path": "/en/sauna-knowledge/how-to-sauna/",
+      "slug": "how-to-sauna"
+     },
+     {
+      "url": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "lang": "fi",
+      "path": "/saunatietoa/miten-saunotaan-oikein/",
+      "slug": "miten-saunotaan-oikein"
+     }
+    ],
+    "content_md": "Sauna bathing is about **calming down**. This guide covers how to sauna properly. This is fake test data.\n\n## First round\n\nSit calmly and throw a little water at a time. See [sauna sessions](/en/sauna/).\n\n![img](img:7)\n\n## Rest and hydration\n\n- Drink water after sauna\n- Rest until your pulse settles\n\n:::cta\n**Book your own sauna moment**\nSipoonjoki Heritage Sauna offers a smoke sauna and treatments. Choose a time and book online.\n[Book now](/en/book/)\n:::",
+    "updated_at": "2026-10-18T06:38:30.521934+00:00",
+    "published_at": "2026-10-15T06:38:30.521934+00:00",
+    "reading_minutes": 1
+   }
+  }
+ },
+ "moved": {
+  "fi/savusauna-vanha-nimi": {
+   "ok": false,
+   "code": "moved",
+   "lang": "fi",
+   "path": "/saunatietoa/savusauna-lampiaminen/",
+   "slug": "savusauna-lampiaminen"
+  },
+  "en/sauna-how-to": {
+   "ok": false,
+   "code": "moved",
+   "lang": "en",
+   "path": "/en/sauna-knowledge/how-to-sauna/",
+   "slug": "how-to-sauna"
+  }
+ },
+ "sitemap": {
+  "ok": true,
+  "items": [
+   {
+    "loc": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+    "lang": "en",
+    "path": "/en/sauna-knowledge/how-to-sauna/",
+    "slug": "how-to-sauna",
+    "alternates": [
+     {
+      "href": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+      "hreflang": "en"
+     },
+     {
+      "href": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "hreflang": "fi"
+     },
+     {
+      "href": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "hreflang": "x-default"
+     }
+    ],
+    "updated_at": "2026-10-18T06:38:30.521934+00:00",
+    "published_at": "2026-10-15T06:38:30.521934+00:00"
+   },
+   {
+    "loc": "https://uusi.saunotus.com/saunatietoa/savusauna-lampiaminen/",
+    "lang": "fi",
+    "path": "/saunatietoa/savusauna-lampiaminen/",
+    "slug": "savusauna-lampiaminen",
+    "alternates": [],
+    "updated_at": "2026-10-18T06:38:30.521934+00:00",
+    "published_at": "2026-10-16T06:38:30.521934+00:00"
+   },
+   {
+    "loc": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+    "lang": "fi",
+    "path": "/saunatietoa/miten-saunotaan-oikein/",
+    "slug": "miten-saunotaan-oikein",
+    "alternates": [
+     {
+      "href": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+      "hreflang": "en"
+     },
+     {
+      "href": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "hreflang": "fi"
+     },
+     {
+      "href": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "hreflang": "x-default"
+     }
+    ],
+    "updated_at": "2026-10-18T06:38:30.521934+00:00",
+    "published_at": "2026-10-15T06:38:30.521934+00:00"
+   }
+  ]
+ },
+ "known": [
+  {
+   "lang": "fi",
+   "slug": "savusauna-vanha-nimi"
+  },
+  {
+   "lang": "en",
+   "slug": "sauna-how-to"
+  },
+  {
+   "lang": "fi",
+   "slug": "poistettu-artikkeli"
+  }
+ ],
+ "redirects": {
+  "ok": true,
+  "items": [
+   {
+    "lang": "en",
+    "status": 301,
+    "to_loc": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+    "to_path": "/en/sauna-knowledge/how-to-sauna/",
+    "to_slug": "how-to-sauna",
+    "from_loc": "https://uusi.saunotus.com/en/sauna-knowledge/sauna-how-to/",
+    "from_path": "/en/sauna-knowledge/sauna-how-to/",
+    "from_slug": "sauna-how-to"
+   },
+   {
+    "lang": "fi",
+    "status": 301,
+    "to_loc": "https://uusi.saunotus.com/saunatietoa/savusauna-lampiaminen/",
+    "to_path": "/saunatietoa/savusauna-lampiaminen/",
+    "to_slug": "savusauna-lampiaminen",
+    "from_loc": "https://uusi.saunotus.com/saunatietoa/savusauna-vanha-nimi/",
+    "from_path": "/saunatietoa/savusauna-vanha-nimi/",
+    "from_slug": "savusauna-vanha-nimi"
+   }
+  ]
+ }
+}
