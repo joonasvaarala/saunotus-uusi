@@ -5,6 +5,7 @@ export const PERIODS = [['all', 'Kaikki ajat'], ['upcoming', 'Tulevat'], ['past'
 export const SOURCE_FILTERS = [['', 'Kaikki'], ['native', 'Uudet'], ['johku', 'Johku']];
 import { rpc } from '../sb.js';
 import { h, fmtDate, fmtTime, todayHel, addDays, dayStartIso, statusBadge, payBadge, sourceBadge, money, field, empty, errMsg, STATUS } from '../ui.js';
+import { filterDrawer } from '../filter-drawer.js';
 import { reservationDialog } from './shared.js';
 import { resourceBadges, spaceBadge } from './legs.js';
 import { optionBadge } from '../options.js';
@@ -56,11 +57,17 @@ export async function render({ ctx, refs, reload }) {
     field('Alkaen', bind(h('input', { type: 'date', value: f.from }), 'from', 'change')), field('Päättyen', bind(h('input', { type: 'date', value: f.to }), 'to', 'change')));
   const periodSet = seg('Ajanjakso', 'period', PERIODS, f.period, (v) => { f.period = v; dates.hidden = v !== 'custom'; load(true); }, 'period-filter');
   const sourceSet = seg('Lähde', 'source', SOURCE_FILTERS, f.source, (v) => { f.source = v; load(true); }, 'source-filter');
-  const filters = h('div', { class: 'filters card' },
-    field('Haku', bind(h('input', { type: 'search', placeholder: 'Nimi, sähköposti, puhelin tai tilausnumero' }), 'search')),
-    field('Tila', bind(h('select', {}, h('option', { value: '', text: 'Kaikki' }), Object.entries(STATUS).map(([k, v]) => h('option', { value: k, text: v }))), 'status', 'change')),
-    field('Tuote', bind(h('select', {}, h('option', { value: '', text: 'Kaikki' }), refs.products.filter((p) => p.config?.bookable).map((p) => h('option', { value: p.id, text: p.name }))), 'product', 'change')),
-    h('div', { class: 'filter-groups' }, periodSet, dates, sourceSet));
+  const filters = filterDrawer({
+    className: 'filters card',
+    testid: 'reservations-filters',
+    search: field('Haku', bind(h('input', { type: 'search', placeholder: 'Nimi, sähköposti, puhelin tai tilausnumero', 'data-testid': 'reservations-search' }), 'search')),
+    activeCount: () => [f.status, f.product, f.source].filter(Boolean).length + (f.period !== 'all' ? 1 : 0),
+    filters: [
+      field('Tila', bind(h('select', {}, h('option', { value: '', text: 'Kaikki' }), Object.entries(STATUS).map(([k, v]) => h('option', { value: k, text: v }))), 'status', 'change')),
+      field('Tuote', bind(h('select', {}, h('option', { value: '', text: 'Kaikki' }), refs.products.filter((p) => p.config?.bookable).map((p) => h('option', { value: p.id, text: p.name }))), 'product', 'change')),
+      h('div', { class: 'filter-groups' }, periodSet, dates, sourceSet),
+    ],
+  });
   await load(true);
   // pikatoiminnot: vanhan varauksen kirjaus (admin_create_old_booking) ja Tarkista-lista (laskuri haetaan taustalla; virhe/puuttuva migraatio = ei laskuria)
   const reviewCount = h('span', { class: 'badge warn', hidden: true });
@@ -68,5 +75,5 @@ export async function render({ ctx, refs, reload }) {
   const actions = h('div', { class: 'row wrap pageactions' },
     h('a', { class: 'btn', href: '#/uusi?tyyppi=vanha', text: 'Vanha varaus' }),
     h('a', { class: 'btn ghost', href: '#/tarkista' }, 'Tarkista ', reviewCount));
-  return [h('h1', { text: 'Varaukset' }), actions, filters, count, list, more];
+  return [h('h1', { text: 'Varaukset' }), actions, filters.node, count, list, more];
 }

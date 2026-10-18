@@ -137,7 +137,7 @@ test('Tekstit FI+EN ja tuontitiedosto 4 vastaavat sanakirjaa', () => {
   const en = Object.keys(T.SALES_CHART_TEXTS.en).sort();
   assert.deepEqual(fi, en);
   assert.ok(fi.every((k) => k.startsWith('ui.admin.sales_chart.')));
-  const rows = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-4.json'), 'utf8'));
+  const rows = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-4.json'), 'utf8')).filter((r) => r.key.startsWith('ui.admin.sales_chart.'));
   assert.equal(rows.length, fi.length * 2);
   for (const row of rows) {
     assert.equal(row.class, 'normal');

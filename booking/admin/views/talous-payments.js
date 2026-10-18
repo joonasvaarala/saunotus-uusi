@@ -3,6 +3,7 @@ import { h } from '../ui.js';
 import { pdfLink, receiptsList } from './talous-receipts.js';
 import { t, fmt } from '../talous-i18n.js';
 import { METHODS, PSTAT, johkuBadge, methodLabel, pstatLabel, pstatBadge, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, dateFld, searchFld, expandRow } from './talous-ui.js';
+import { countActive, filterDrawer } from '../filter-drawer.js';
 
 export function createPaymentsTab({ api, ctx, onOpenOrder }) {
   const st = { search: '', method: '', status: '', from: '', to: '', sortDir: 'desc', limit: 25, offset: 0 };
@@ -62,13 +63,20 @@ export function createPaymentsTab({ api, ctx, onOpenOrder }) {
   let toolbar;
   function buildToolbar() {
     const ss = searchFld(t('payments.searchPh'), 'payments-search', (v) => change({ search: v })); ss.input.value = st.search;
-    const next = h('form', { class: 'tl-toolbar', role: 'search', onsubmit: (e) => e.preventDefault() }, ss.node,
-      h('div', { class: 'fld' }, h('span', { text: t('sort.label') }), dirBtn),
-      selectFld(t('filters.method'), 'payments-f-method', METHODS, (c) => methodLabel(c), st.method, (v) => change({ method: v })),
-      selectFld(t('filters.pstat'), 'payments-f-status', PSTAT, pstatLabel, st.status, (v) => change({ status: v })),
-      dateFld(t('filters.from'), 'payments-f-from', st.from, (v) => change({ from: v })), dateFld(t('filters.to'), 'payments-f-to', st.to, (v) => change({ to: v })),
-      pageSizeSelect(st.limit, (n) => change({ limit: n })),
-      h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'payments-reset', onclick: () => { Object.assign(st, { search: '', method: '', status: '', from: '', to: '' }); buildToolbar(); load(); } }, t('filters.reset')));
+    const drawer = filterDrawer({
+      search: ss.node,
+      testid: 'payments-filters',
+      activeCount: () => countActive(st, { method: '', status: '', from: '', to: '', sortDir: 'desc', limit: 25 }),
+      filters: [
+        h('div', { class: 'fld' }, h('span', { text: t('sort.label') }), dirBtn),
+        selectFld(t('filters.method'), 'payments-f-method', METHODS, (c) => methodLabel(c), st.method, (v) => change({ method: v })),
+        selectFld(t('filters.pstat'), 'payments-f-status', PSTAT, pstatLabel, st.status, (v) => change({ status: v })),
+        dateFld(t('filters.from'), 'payments-f-from', st.from, (v) => change({ from: v })), dateFld(t('filters.to'), 'payments-f-to', st.to, (v) => change({ to: v })),
+        pageSizeSelect(st.limit, (n) => change({ limit: n })),
+        h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'payments-reset', onclick: () => { Object.assign(st, { search: '', method: '', status: '', from: '', to: '' }); buildToolbar(); load(); } }, t('filters.reset')),
+      ],
+    });
+    const next = h('form', { class: 'tl-toolbar', role: 'search', onsubmit: (e) => e.preventDefault() }, drawer.node);
     if (toolbar?.isConnected) toolbar.replaceWith(next);
     toolbar = next; return next;
   }

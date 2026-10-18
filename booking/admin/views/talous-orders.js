@@ -7,6 +7,7 @@ import { t, fmt, getLang } from '../talous-i18n.js';
 import { RPC, absLink } from '../talous-api.js';
 import { redeemFields, redeemSubmit } from './talous-giftcards.js';
 import { johkuBadge, PAY, SOURCES, payLabel, sourceLabel, payBadge, sourceBadge, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, dateFld, searchFld, expandRow, actionBtn, doneToast, formDialog, methodLabel, pstatBadge } from './talous-ui.js';
+import { countActive, filterDrawer } from '../filter-drawer.js';
 
 export const ORDER_SORTS = ['created', 'order_no', 'total', 'payment_status', 'first_reservation'];
 const VAT_CHOICES = [25.5, 13.5, 0];
@@ -214,13 +215,19 @@ export function createOrdersTab({ api, ctx, gift = null }) {
   let toolbar; buildToolbar();
   function buildToolbar() {
     const ss = searchFld(t('orders.searchPh'), 'orders-search', (v) => change({ search: v })); ss.input.value = st.search;
-    const next = h('form', { class: 'tl-toolbar', role: 'search', onsubmit: (e) => e.preventDefault() }, ss.node, sortFld,
-      selectFld(t('filters.pay'), 'orders-f-pay', PAY, payLabel, st.paymentStatus, (v) => change({ paymentStatus: v })),
-      selectFld(t('filters.source'), 'orders-f-src', SOURCES, sourceLabel, st.source, (v) => change({ source: v })),
-      selectFld(t('filters.native'), 'orders-f-native', ['native', 'imported'], (c) => t(`nat.${c}`), st.native, (v) => change({ native: v })),
-      selectFld(t('filters.dateField'), 'orders-f-datefield', ['start'], (c) => t(`df.${c}`), st.dateField, (v) => change({ dateField: v }), t('df.created')),
-      dateFld(t('filters.from'), 'orders-f-from', st.from, (v) => change({ from: v })), dateFld(t('filters.to'), 'orders-f-to', st.to, (v) => change({ to: v })),
-      pageSizeSelect(st.limit, (n) => change({ limit: n })), reset);
+    const drawer = filterDrawer({
+      search: ss.node,
+      testid: 'orders-filters',
+      activeCount: () => countActive(st, { paymentStatus: '', source: '', native: '', dateField: '', from: '', to: '', sortBy: 'created', sortDir: 'desc', limit: 25 }),
+      filters: [sortFld,
+        selectFld(t('filters.pay'), 'orders-f-pay', PAY, payLabel, st.paymentStatus, (v) => change({ paymentStatus: v })),
+        selectFld(t('filters.source'), 'orders-f-src', SOURCES, sourceLabel, st.source, (v) => change({ source: v })),
+        selectFld(t('filters.native'), 'orders-f-native', ['native', 'imported'], (c) => t(`nat.${c}`), st.native, (v) => change({ native: v })),
+        selectFld(t('filters.dateField'), 'orders-f-datefield', ['start'], (c) => t(`df.${c}`), st.dateField, (v) => change({ dateField: v }), t('df.created')),
+        dateFld(t('filters.from'), 'orders-f-from', st.from, (v) => change({ from: v })), dateFld(t('filters.to'), 'orders-f-to', st.to, (v) => change({ to: v })),
+        pageSizeSelect(st.limit, (n) => change({ limit: n })), reset],
+    });
+    const next = h('form', { class: 'tl-toolbar', role: 'search', onsubmit: (e) => e.preventDefault() }, drawer.node);
     if (toolbar?.parentNode) toolbar.replaceWith(next);   // parentNode: myös ennen kuin välilehti on liitetty sivulle (syvälinkki)
     toolbar = next; return next;
   }

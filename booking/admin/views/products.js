@@ -5,6 +5,7 @@ import { prepareImage, IMG_TYPES, IMG_MAX_INPUT } from './productimage.js';
 import { addonsAdmin } from './addons.js';
 import { productOptionsAdmin } from './productoptions.js';
 import { h, dialog, field, toast, run, money, badge } from '../ui.js';
+import { filterDrawer } from '../filter-drawer.js';
 
 const VAT = [25.5, 24, 14, 13.5, 10, 0];
 
@@ -45,7 +46,7 @@ export async function render({ ctx, refs, reload, query }) {
   const seg = (legend, name, opts, cur, onPick, testid) => h('fieldset', { class: 'srcset prodseg', 'data-testid': testid }, h('legend', { text: legend }),
     opts.map(([v, label]) => { const sp = h('span', { text: label }); labels.set(`${name}:${v}`, [sp, label]);
       return h('label', { class: 'srcopt' }, h('input', { type: 'radio', name, value: v, checked: v === cur || null, onchange: () => onPick(v) }), sp); }));
-  const searchInp = h('input', { type: 'search', value: f.search, maxlength: 80, placeholder: 'Hae tuotteen nimellä', autocomplete: 'off', 'aria-label': 'Hae tuotteen nimellä' });
+  const searchInp = h('input', { type: 'search', value: f.search, maxlength: 80, placeholder: 'Hae tuotteen nimellä', autocomplete: 'off', 'aria-label': 'Hae tuotteen nimellä', 'data-testid': 'products-search' });
   searchInp.addEventListener('input', () => { f.search = searchInp.value; draw(); });
   const visSet = seg('Näkyvyys', 'vis', VISIBILITY, f.vis, (v) => { f.vis = v; draw(); }, 'vis-filter');
   const catOpts = [['', 'Kaikki kategoriat'], ...catCodes.map((c) => [c, catLabel(c)])];
@@ -56,7 +57,14 @@ export async function render({ ctx, refs, reload, query }) {
   catSel.addEventListener('change', () => { f.cat = catSel.value; for (const r of catSet.querySelectorAll('input')) r.checked = r.value === f.cat; draw(); });
   catSet.classList.add('prodcatset');
   const catWrap = h('div', { class: 'prodcat' }, catSet, h('label', { class: 'fld prodcatsel-w' }, h('span', { text: 'Kategoria' }), catSel));
-  const filters = h('div', { class: 'filters card prodfilters' }, field('Haku', searchInp), h('div', { class: 'filter-groups' }, visSet, catWrap));
+  const drawer = filterDrawer({
+    className: 'filters card prodfilters',
+    testid: 'products-filters',
+    search: field('Haku', searchInp),
+    activeCount: () => (f.vis ? 1 : 0) + (f.cat ? 1 : 0),
+    filters: [h('div', { class: 'filter-groups' }, visSet, catWrap)],
+  });
+  const filters = drawer.node;
   const setLabel = (key, n) => { const [sp, base] = labels.get(key); sp.textContent = `${base} (${n})`; if (key.startsWith('cat:')) { const o = [...catSel.options].find((x) => x.value === key.slice(4)); if (o) o.textContent = `${base} (${n})`; } };
   function draw() {
     const shown = all.filter((p) => matchSearch(p) && matchVis(p) && matchCat(p));
@@ -65,6 +73,7 @@ export async function render({ ctx, refs, reload, query }) {
     list.replaceChildren(...(shown.length ? shown.map(rowOf) : [h('div', { class: 'empty prodempty' }, h('p', { text: 'Ei tuotteita valituilla suodattimilla.' }), active() ? h('button', { type: 'button', class: 'btn ghost', text: 'Tyhjennä suodattimet', onclick: () => clearBtn.click() }) : null)]));
     count.replaceChildren(`${shown.length} / ${all.length} tuotetta`, active() ? ' · ' : '', active() ? clearBtn : '');
     syncUrl();
+    drawer.refresh();
   }
   draw();
   function edit(p) {

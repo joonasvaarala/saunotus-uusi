@@ -390,5 +390,69 @@
   "max_len": 200,
   "placeholders": [],
   "reason": "Talous-myyntikäyrä (booking_70): hallinnan kuukausipylväs, FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.filters.show",
+  "lang": "fi",
+  "text": "Näytä suodattimet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan listojen suodatinpainike (Näytä/Piilota suodattimet, aktiivisten lukumäärä), FI+EN. Sama tuonti kuin myyntikäyrä; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.filters.hide",
+  "lang": "fi",
+  "text": "Piilota suodattimet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan listojen suodatinpainike (Näytä/Piilota suodattimet, aktiivisten lukumäärä), FI+EN. Sama tuonti kuin myyntikäyrä; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.filters.active",
+  "lang": "fi",
+  "text": "Suodattimia: {{var:n}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "Hallinnan listojen suodatinpainike (Näytä/Piilota suodattimet, aktiivisten lukumäärä), FI+EN. Sama tuonti kuin myyntikäyrä; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.filters.show",
+  "lang": "en",
+  "text": "Show filters",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan listojen suodatinpainike (Näytä/Piilota suodattimet, aktiivisten lukumäärä), FI+EN. Sama tuonti kuin myyntikäyrä; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.filters.hide",
+  "lang": "en",
+  "text": "Hide filters",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan listojen suodatinpainike (Näytä/Piilota suodattimet, aktiivisten lukumäärä), FI+EN. Sama tuonti kuin myyntikäyrä; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.filters.active",
+  "lang": "en",
+  "text": "Filters: {{var:n}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "Hallinnan listojen suodatinpainike (Näytä/Piilota suodattimet, aktiivisten lukumäärä), FI+EN. Sama tuonti kuin myyntikäyrä; ei ylikirjoita olemassa olevia."
  }
 ]
