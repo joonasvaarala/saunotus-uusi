@@ -1365,9 +1365,9 @@
   "text": "Anna suomalainen matkapuhelinnumero",
   "class": "normal",
   "kind": "plain",
-  "max_len": 400,
+  "max_len": 200,
   "placeholders": [],
-  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (mobilepay-start/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
  },
  {
   "key": "ui.mobilepay.start_error_invalid_phone",
@@ -1375,8 +1375,8 @@
   "text": "Enter a Finnish mobile number",
   "class": "normal",
   "kind": "plain",
-  "max_len": 400,
+  "max_len": 200,
   "placeholders": [],
-  "reason": "Pikakassa ja kylmälaite (booking_80). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (mobilepay-start/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
  }
 ]
