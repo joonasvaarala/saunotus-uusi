@@ -6,6 +6,8 @@ import { addonsAdmin } from './addons.js';
 import { productOptionsAdmin } from './productoptions.js';
 import { h, dialog, field, toast, run, money, badge } from '../ui.js';
 import { filterDrawer } from '../filter-drawer.js';
+import { posText } from '../pos-texts.js';
+import { looksLikeAlcohol } from '../pos-logic.js';
 
 const VAT = [25.5, 24, 14, 13.5, 10, 0];
 
@@ -25,7 +27,7 @@ export async function render({ ctx, refs, reload, query }) {
   const rowOf = (p) => { const c = p.config;
     return h('button', { type: 'button', class: 'listrow', onclick: () => edit(p) },
       h('span', { class: 'what' }, c?.image_path ? h('img', { class: 'pthumb', src: storageUrl('product-images', c.image_path), alt: '', width: 40, height: 40, loading: 'lazy' }) : null, h('strong', { text: p.name }), h('small', { text: ` ${catLabel(p.category)}` })),
-      h('span', { class: 'meta' }, isOnline(p) ? badge('ok', 'Verkossa') : badge('muted', 'Ei verkossa'), !p.active ? badge('err', 'Piilotettu') : null, h('strong', { text: money(p.price) }), h('small', { text: `ALV ${p.vat_rate} %` }))); };
+      h('span', { class: 'meta' }, isOnline(p) ? badge('ok', 'Verkossa') : badge('muted', 'Ei verkossa'), c?.pos_enabled ? badge('ok', posText('badge_pos')) : null, c?.fridge_sale ? badge('ok', posText('badge_fridge')) : null, !p.active ? badge('err', 'Piilotettu') : null, h('strong', { text: money(p.price) }), h('small', { text: `ALV ${p.vat_rate} %` }))); };
 
   // ---- suodattimet (clientissä: lista on jo ladattu, ei uusia RPC-kutsuja); tila säilyy URL:ssa (#/tuotteet?nakyvyys=…&kategoria=…&haku=…) ----
   const all = refs.products;
@@ -94,14 +96,24 @@ export async function render({ ctx, refs, reload, query }) {
     }); });
     // verkkokaupan asetukset
     const c = p.config;
+    const alcohol = looksLikeAlcohol([p.name, p.name_en, p.description, p.description_en].filter(Boolean).join(' '));
     const cfg = c ? h('form', { class: 'stack box' }, h('h3', { text: 'Verkkokaupan asetukset' }),
       h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'bookable', disabled: !isAdmin }), ' Varattavissa verkossa'),
       h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'shop_visible', disabled: !isAdmin }), ' Näkyy kaupan listassa'),
       'audience' in c ? field('Kalenteri', h('select', { name: 'audience', disabled: !isAdmin }, h('option', { value: 'consumer', text: 'Kuluttajien kalenteri' }), h('option', { value: 'business', text: 'Yrityksille' })), 'Yrityksille-valinta näyttää vuoron vain yritysten kalenterissa.') : null,
       h('div', { class: 'row wrap' }, field('Järjestys', h('input', { name: 'sort_order', type: 'number', value: c.sort_order, disabled: !isAdmin })), field('Min hlö', h('input', { name: 'min_persons', type: 'number', min: 1, value: c.min_persons, disabled: !isAdmin })), field('Max hlö', h('input', { name: 'max_persons', type: 'number', min: 1, value: c.max_persons ?? '', disabled: !isAdmin }))),
+      h('h3', { text: posText('nav') }),
+      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'pos_enabled', disabled: !isAdmin }), ' ' + posText('product_pos')),
+      field(posText('product_pos_sort'), h('input', { name: 'pos_sort', type: 'number', min: 0, max: 10000, value: c.pos_sort ?? 100, disabled: !isAdmin })),
+      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'fridge_sale', disabled: !isAdmin || alcohol || !!c.age_restricted }), ' ' + posText('product_fridge')),
+      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'age_restricted', disabled: !isAdmin }), ' ' + posText('product_age')),
+      h('p', { class: 'muted', text: posText('fridge_warn') }),
+      alcohol ? h('p', { class: 'err', text: posText('alcohol_warn') }) : null,
       isAdmin ? h('button', { class: 'btn', type: 'submit', text: 'Tallenna asetukset' }) : null) : h('p', { class: 'muted', text: 'Tuotetta ei ole vielä otettu mukaan varausjärjestelmään (product_config puuttuu).' });
-    if (c) { cfg.bookable.checked = !!c.bookable; cfg.shop_visible.checked = !!c.shop_visible; if (cfg.audience) cfg.audience.value = c.audience === 'business' ? 'business' : 'consumer'; cfg.addEventListener('submit', (ev) => { ev.preventDefault(); run(cfg.querySelector('button'), async () => {
-      const patch = { bookable: cfg.bookable.checked, shop_visible: cfg.shop_visible.checked, sort_order: +cfg.sort_order.value, min_persons: +cfg.min_persons.value, max_persons: cfg.max_persons.value ? +cfg.max_persons.value : null };
+    if (c) { cfg.bookable.checked = !!c.bookable; cfg.shop_visible.checked = !!c.shop_visible; if (cfg.audience) cfg.audience.value = c.audience === 'business' ? 'business' : 'consumer'; cfg.pos_enabled.checked = !!c.pos_enabled; cfg.fridge_sale.checked = !!c.fridge_sale && !c.age_restricted && !alcohol; cfg.age_restricted.checked = !!c.age_restricted;
+      cfg.age_restricted.addEventListener('change', () => { if (cfg.age_restricted.checked) { cfg.fridge_sale.checked = false; cfg.fridge_sale.disabled = true; } else if (isAdmin && !alcohol) cfg.fridge_sale.disabled = false; });
+      cfg.addEventListener('submit', (ev) => { ev.preventDefault(); run(cfg.querySelector('button'), async () => {
+      const patch = { bookable: cfg.bookable.checked, shop_visible: cfg.shop_visible.checked, sort_order: +cfg.sort_order.value, min_persons: +cfg.min_persons.value, max_persons: cfg.max_persons.value ? +cfg.max_persons.value : null, pos_enabled: cfg.pos_enabled.checked, pos_sort: +cfg.pos_sort.value, fridge_sale: cfg.fridge_sale.checked, age_restricted: cfg.age_restricted.checked };
       if (cfg.audience) patch.audience = cfg.audience.value;
       await rpc('admin_update_product_config', { p_product_id: p.id, p_patch: patch });
       toast('Tallennettu'); d.close(); fresh(); }); }); }

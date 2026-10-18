@@ -143,6 +143,62 @@ Deno.test("start: GET ?p=link -> 302 Vippsiin", async () => {
   const r = await startHandle(new Request(`https://f/mobilepay-start?p=${TOK}`), { db: d.db, env: env(), fetch: m.f });
   assertEquals(r.status, 302); assertEquals(r.headers.get("location"), "https://vipps.example/r");
   assertEquals(d.calls.find((c) => c.fn === "mobilepay_payment_prepare")!.args.p_link_token, TOK);
+  assertEquals(d.calls.find((c) => c.fn === "mobilepay_payment_prepare")!.args.p_user_flow, "WEB_REDIRECT");
+});
+
+Deno.test("createPayment: QR ei pyydä qrFormat-kuvaa", async () => {
+  const m = mockVipps({ ...tokenRoute, "POST /epayment/v1/payments": () => ({ json: { redirectUrl: "https://vipps.example/qr", reference: REF } }) });
+  const api = new MobilePayApi("test", readCreds(env())!, m.f);
+  await api.createPayment({ reference: REF, amountMinor: 300, currency: "EUR", returnUrl: "https://x.fi/r", description: "QR", userFlow: "QR" });
+  const c = m.calls.find((c) => c.url.endsWith("/epayment/v1/payments"))!;
+  assertEquals(c.body.userFlow, "QR");
+  assertEquals(c.body.qrFormat, undefined);
+  assertEquals(c.body.customer, undefined);
+});
+
+Deno.test("createPayment: PUSH_MESSAGE lähettää MSISDN:n ilman plus-merkkiä", async () => {
+  const m = mockVipps({ ...tokenRoute, "POST /epayment/v1/payments": () => ({ json: { reference: REF } }) });
+  const api = new MobilePayApi("test", readCreds(env())!, m.f);
+  await api.createPayment({ reference: REF, amountMinor: 300, currency: "EUR", description: "Push", userFlow: "PUSH_MESSAGE", phoneNumber: "358401234567" });
+  const c = m.calls.find((c) => c.url.endsWith("/epayment/v1/payments"))!;
+  assertEquals(c.body.userFlow, "PUSH_MESSAGE");
+  assertEquals(c.body.customer, { phoneNumber: "358401234567" });
+  assertEquals(c.body.returnUrl, undefined);
+});
+
+Deno.test("start: QR palauttaa qr_url:n redirectUrlista", async () => {
+  const d = fakeDb({ mobilepay_payment_prepare: () => prepOk() });
+  const m = mockVipps({ ...tokenRoute, "POST /epayment/v1/payments": () => ({ json: { redirectUrl: "https://vipps.example/qr", reference: REF } }) });
+  const r = await startHandle(post("https://f/s", { order_token: TOK, user_flow: "QR" }), { db: d.db, env: env(), fetch: m.f });
+  const j = await r.json();
+  assertEquals(j.ok, true);
+  assertEquals(j.qr_url, "https://vipps.example/qr");
+  assertEquals(d.calls.find((c) => c.fn === "mobilepay_payment_prepare")!.args.p_user_flow, "QR");
+  assertEquals(d.calls.find((c) => c.fn === "mobilepay_payment_prepare")!.args.p_expires_minutes, 20);
+  const body = m.calls.find((c) => c.url.endsWith("/epayment/v1/payments"))!.body;
+  assertEquals(body.userFlow, "QR");
+  assertEquals(body.qrFormat, undefined);
+});
+
+Deno.test("start: PUSH hylkää kiinteän numeron ennen tietokantaa", async () => {
+  const d = fakeDb({ mobilepay_payment_prepare: () => prepOk() });
+  const m = mockVipps({ ...tokenRoute });
+  const r = await startHandle(post("https://f/s", { order_token: TOK, user_flow: "PUSH_MESSAGE", phone: "0102992866" }), { db: d.db, env: env(), fetch: m.f });
+  assertEquals(r.status, 400);
+  assertEquals((await r.json()).code, "invalid_phone");
+  assertEquals(d.calls.length, 0);
+  assertEquals(m.calls.length, 0);
+});
+
+Deno.test("start: PUSH onnistuu ilman redirectUrliä", async () => {
+  const d = fakeDb({ mobilepay_payment_prepare: () => prepOk() });
+  const m = mockVipps({ ...tokenRoute, "POST /epayment/v1/payments": () => ({ json: { reference: REF } }) });
+  const r = await startHandle(post("https://f/s", { order_token: TOK, user_flow: "PUSH_MESSAGE", phone: "040 123 4567" }), { db: d.db, env: env(), fetch: m.f });
+  const j = await r.json();
+  assertEquals(r.status, 200);
+  assertEquals(j.pushed, true);
+  assertEquals(j.redirect_url, null);
+  assertEquals(m.calls.find((c) => c.url.endsWith("/epayment/v1/payments"))!.body.customer.phoneNumber, "358401234567");
 });
 
 Deno.test("start: virheilmoitusten tekstit tulevat tekstihausta (DB → oletus); GET-virhesivu ja JSON-message samasta lähteestä (§18)", async () => {

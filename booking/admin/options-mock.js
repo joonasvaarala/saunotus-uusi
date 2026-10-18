@@ -15,7 +15,7 @@ export function helIso(ds, hhmm) {
   return new Date(t).toISOString();
 }
 const err = (code, message) => Object.assign(new Error(message || code), { name: 'ApiError', code, status: 400 });
-const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'reports.view', 'settings.edit'];
+const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'reports.view', 'settings.edit', 'pos.use'];
 const CODE_RE = /^[a-z0-9_]{1,40}$/;
 
 export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager' } = {}) {
@@ -27,6 +27,10 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       { id: 8, name: 'Rituaali 90 min', price: 64, vat_rate: 25.5, active: true, category: 'ritual', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 90, min_persons: 1, max_persons: 6, bookable: true, shop_visible: true, public_slots: true, public_weekdays: [6, 7], time_window_class: 'ritual' } },
       { id: 7, name: 'Saunarituaali ja savusaunavuoro (la & su)', name_en: 'Sauna Ritual & Smoke Sauna Session', price: 49, price_type: 'per_person', vat_rate: 25.5, active: true, category: 'ritual', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 120, min_persons: 1, max_persons: 6, bookable: true, shop_visible: true, public_slots: true, public_weekdays: [6, 7], time_window_class: 'ritual', required_skill: 'yleinen' } },
       { id: 3, name: 'Yleinen saunavuoro', price: 18, vat_rate: 25.5, active: true, category: 'public_sauna', config: { resource_class: 'shift', lifecycle: 'current', sale_kind: 'slots', bookable: true, shop_visible: true } },
+      { id: 101, name: 'Vichy', name_en: 'Vichy', price: 3, vat_rate: 13.5, active: true, category: 'other', config: { sale_kind: 'other', pos_enabled: true, pos_sort: 10, fridge_sale: true, age_restricted: false, bookable: false, shop_visible: false } },
+      { id: 102, name: 'Sipsit', name_en: 'Crisps', price: 3, vat_rate: 13.5, active: true, category: 'other', config: { sale_kind: 'other', pos_enabled: true, pos_sort: 20, fridge_sale: false, age_restricted: false, bookable: false, shop_visible: false } },
+      { id: 103, name: 'Pyyhevuokra', name_en: 'Towel rental', price: 5, vat_rate: 25.5, active: true, category: 'product_rental', config: { sale_kind: 'other', pos_enabled: true, pos_sort: 30, fridge_sale: false, age_restricted: false, bookable: false, shop_visible: false } },
+      { id: 104, name: 'Lahjakortti', price: 58, vat_rate: 0, active: true, category: 'gift_card', config: { sale_kind: 'other', pos_enabled: false, fridge_sale: false, age_restricted: false, bookable: false, shop_visible: false } },
     ],
     options: [   // product_options (10 = Saunahoito)
       { id: 1, product_id: 10, code: 'hunajahoito', name: 'Hunajahoito', name_en: 'Honey treatment', sort_order: 10, active: true, description: null, description_en: null },
@@ -46,6 +50,8 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       closure_reason: 'Perinnesaunotusilta', calendar_name: '1 savusauna kiinni',
     }],
     blockAcks: [],
+    posOrders: [],
+    coldUnits: [{ id: 1, code: 'pukuhuone-abcdef1234', name: 'Pukuhuone, jääkaappi 1', location: 'Pukuhuone', active: true, path: '/juomat/?laite=pukuhuone-abcdef1234', path_en: '/en/drinks/?laite=pukuhuone-abcdef1234', print_url: 'https://uusi.saunotus.com/juomat/?laite=pukuhuone-abcdef1234' }],
   };
   const optJson = (id) => { const o = st.options.find((x) => x.id === id); return o ? { id: o.id, code: o.code, name: o.name, name_en: o.name_en } : null; };
   const activeOpts = (pid) => st.options.filter((o) => o.product_id === pid && o.active).sort((a, b) => a.sort_order - b.sort_order || a.id - b.id);
@@ -221,6 +227,95 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       if (i < 0) return { ok: true, already: true, revoked: false, reservation_id: a.p_reservation_id, block_id: a.p_block_id };
       const [row] = st.blockAcks.splice(i, 1);
       return { ok: true, already: false, revoked: true, id: row.id, reservation_id: row.reservation_id, block_id: row.block_id };
+    },
+    admin_pos_catalog: () => {
+      need('pos.use');
+      return st.products.filter((p) => p.active && p.config?.pos_enabled && !['gift_card', 'season_card'].includes(p.category) && p.price != null)
+        .sort((a, b) => (a.config.pos_sort ?? 100) - (b.config.pos_sort ?? 100) || a.name.localeCompare(b.name, 'fi'))
+        .map((p) => ({ product_id: p.id, name: p.name, name_en: p.name_en || null, price: p.price, vat_rate: p.vat_rate, category: p.category, age_restricted: !!p.config.age_restricted, pos_sort: p.config.pos_sort ?? 100 }));
+    },
+    admin_pos_tenders: () => {
+      need('pos.use');
+      return { mobilepay_mode: 'test', vismapay_mode: 'dry_run', site_base_url: 'https://uusi.saunotus.com', drinks_path: '/juomat/', drinks_path_en: '/en/drinks/', tenders: [
+        { code: 'payment_link', handler: 'payment_link', channels: ['pos'], active: true, sort_order: 10, unavailable_reason: null },
+        { code: 'mobilepay', handler: 'mobilepay', channels: ['pos', 'drinks'], active: true, sort_order: 20, unavailable_reason: null },
+        { code: 'visma_pay', handler: 'visma_pay', channels: ['drinks'], active: true, sort_order: 30, unavailable_reason: null },
+        { code: 'card_terminal', handler: 'terminal', channels: ['pos'], active: false, sort_order: 40, unavailable_reason: 'not_implemented' },
+      ] };
+    },
+    admin_pos_checkout: (a) => {
+      need('pos.use');
+      const items = Array.isArray(a.p_items) ? a.p_items : [];
+      if (items.some((r) => Object.keys(r).some((k) => k !== 'product_id' && k !== 'quantity'))) throw err('price_locked', 'Hintaa ei voi antaa');
+      const lines = [];
+      let total = 0;
+      for (const r of items) {
+        const p = product(r.product_id);
+        if (!p || !p.config?.pos_enabled || ['gift_card', 'season_card'].includes(p.category)) throw err('not_counter_product', 'Tuote ei ole pikakassassa');
+        const line = Math.round(p.price * r.quantity * 100) / 100;
+        total += line;
+        lines.push({ product_id: p.id, name: p.name, quantity: r.quantity, unit_price: p.price, vat_rate: p.vat_rate, line_total: line });
+      }
+      const id = ++st.seq.order;
+      const row = { order_id: id, order_no: id, public_token: `00000000-0000-4000-8000-${String(id).padStart(12, '0')}`, total, status: 'pending', payment_status: 'unpaid', source_channel: 'pikakassa', lines, receipts: [], polls: 0, arm: false };
+      st.posOrders.push(row);
+      return { ok: true, ...row };
+    },
+    admin_pos_status: (a) => {
+      need('pos.use');
+      const o = st.posOrders.find((x) => x.order_id === a.p_order_id);
+      if (!o) throw err('not_found', 'Kassatilausta ei löydy');
+      o.polls += 1;
+      if (o.arm && o.polls >= 1) { o.payment_status = 'paid'; o.status = 'confirmed'; o.receipts = [{ receipt_no: 'R-' + o.order_no, token: o.public_token, total: o.total }]; }
+      return { ok: true, order_id: o.order_id, order_no: o.order_no, public_token: o.public_token, status: o.status, payment_status: o.payment_status, total: o.total, source_channel: 'pikakassa', lines: o.lines, receipts: o.receipts };
+    },
+    admin_pos_void: (a) => {
+      need('pos.use');
+      const o = st.posOrders.find((x) => x.order_id === a.p_order_id);
+      if (!o) throw err('not_found', 'Kassatilausta ei löydy');
+      if (o.payment_status === 'paid') throw err('already_paid', 'Maksettua tilausta ei voi perua kassalla');
+      o.status = 'cancelled';
+      return { ok: true, order_id: o.order_id, status: 'cancelled' };
+    },
+    admin_pos_mock_tender: (a) => {
+      const o = st.posOrders.find((x) => x.order_id === a.p_order_id);
+      if (o) o.arm = true;
+      return { ok: true };
+    },
+    admin_create_payment_link: (a) => {
+      need('payments.manage');
+      const o = st.posOrders.find((x) => x.order_id === a.p_order_id);
+      return { ok: true, payment_id: 1, link_path: '/maksa/?p=11111111-2222-4333-8444-555555555555', amount: o?.total ?? 0, online_payment_enabled: false };
+    },
+    admin_list_cold_units: () => {
+      if (!st.perms.includes('pos.use') && !st.perms.includes('catalog.edit')) throw err('forbidden', 'Ei oikeutta');
+      return st.coldUnits.map((d) => ({ ...d }));
+    },
+    admin_upsert_cold_unit: (a) => {
+      need('catalog.edit');
+      const name = String(a.p_name || '').trim();
+      if (!name) throw err('invalid_param', 'Nimi puuttuu');
+      if (a.p_id) {
+        const d = st.coldUnits.find((x) => x.id === a.p_id);
+        if (!d) throw err('not_found', 'Laitetta ei löydy');
+        d.name = name; d.location = a.p_location || null; d.active = a.p_active !== false;
+        return { ...d };
+      }
+      const code = 'laite-' + Math.random().toString(16).slice(2, 12);
+      const d = { id: st.coldUnits.length + 1, code, name, location: a.p_location || null, active: a.p_active !== false, path: `/juomat/?laite=${code}`, path_en: `/en/drinks/?laite=${code}`, print_url: `https://uusi.saunotus.com/juomat/?laite=${code}` };
+      st.coldUnits.push(d);
+      return { ...d };
+    },
+    admin_update_product_config: (a) => {
+      need('catalog.edit');
+      const p = product(a.p_product_id);
+      if (!p?.config) throw err('not_found', 'Tuotteella ei ole varauskonfiguraatiota');
+      const patch = a.p_patch || {};
+      if (patch.price != null || patch.vat_rate != null) throw err('unknown_field', 'Kenttää ei saa muokata');
+      if (patch.age_restricted && patch.fridge_sale) throw err('age_restricted', 'Ikärajallista tuotetta ei voi myydä kylmälaitteessa');
+      if (patch.age_restricted && patch.fridge_sale == null) patch.fridge_sale = false;
+      Object.assign(p.config, patch);
+      return { ok: true };
     },
     admin_set_product_option_settings: (a) => {
       need('catalog.edit');

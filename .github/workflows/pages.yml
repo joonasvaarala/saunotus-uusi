@@ -108,8 +108,8 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - run: deno test -A --no-lock --node-modules-dir=none booking/supabase/functions/pdf-golden.test.ts booking/supabase/functions/_tests/site_texts_test.ts booking/supabase/functions/_tests/mobilepay_test.ts booking/supabase/functions/_tests/procountor_test.ts
-      - run: node --test booking/tests/procountor-admin.test.mjs
+      - run: deno test -A --no-lock --node-modules-dir=none booking/supabase/functions/pdf-golden.test.ts booking/supabase/functions/_tests/site_texts_test.ts booking/supabase/functions/_tests/mobilepay_test.ts booking/supabase/functions/_tests/procountor_test.ts booking/supabase/functions/_tests/vismapay_test.ts
+      - run: node --test booking/tests/procountor-admin.test.mjs booking/tests/pikakassa.test.mjs
       # lahjakoodi §13.12: kaupan ja hallinnan lunastuspyyntölogiikka (mockatut RPC:t)
       - run: node --test booking/tests/voucher-claims.test.mjs booking/tests/voucher-claims-admin.test.mjs booking/tests/lahjakoodi-vieritys.test.mjs
       - uses: actions/upload-pages-artifact@v3

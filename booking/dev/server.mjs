@@ -78,12 +78,20 @@ const json = (res, code, o) => { res.writeHead(code, { 'content-type': 'applicat
 const readBuf = (req, max) => new Promise((ok, no) => { const c = []; let n = 0; req.on('data', (d) => { n += d.length; if (n > max) { no(Object.assign(new Error('too large'), { status: 413 })); req.destroy(); } else c.push(d); }); req.on('end', () => ok(Buffer.concat(c))); req.on('error', no); });
 const readBody = (req) => new Promise((ok) => { const c = []; req.on('data', (d) => c.push(d)); req.on('end', () => ok(Buffer.concat(c).toString())); });
 
-// URL → tiedosto. /admin/* → booking/admin, /booking/sb.js ja /admin/sb.js → shared/sb.js, muuten kaupan dist.
+// URL → tiedosto. /admin/* → booking/admin, /juomat/ ja /en/drinks/ → booking/drinks, muuten kaupan dist.
+function drinksFile(prefix, p, indexName) {
+  const rel = p.slice(prefix.length);
+  if (rel === '' || rel === 'index.html') return join(booking, 'drinks', indexName);
+  if (rel.includes('..')) return join(booking, 'drinks', 'index.html');
+  return join(booking, 'drinks', rel);
+}
 function resolveFile(p) {
-  if (p === '/admin') return null;
+  if (p === '/admin' || p === '/juomat' || p === '/en/drinks') return null;
   if (p === '/admin/sb.js' || p === '/booking/sb.js') return join(booking, 'shared/sb.js');
   if (p === '/admin/config.js') return join(SHOP, 'booking/config.js');
   if (p.startsWith('/admin/')) return join(booking, 'admin', p.slice(7) || 'index.html');
+  if (p === '/juomat/' || p.startsWith('/juomat/')) return drinksFile('/juomat/', p, 'index.html');
+  if (p === '/en/drinks/' || p.startsWith('/en/drinks/')) return drinksFile('/en/drinks/', p, 'index.en.html');
   return join(SHOP, p);
 }
 // MOCK Supabase Storage (vain demossa): bucket product-images. Lataukset ~/tmp/booking-demo-storage, demokuvat booking/dev/demo-images.
@@ -119,7 +127,7 @@ createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   const path = url.pathname;
   if (path.startsWith('/storage/v1/object/')) return mockStorage(req, res, path).catch((e) => { console.error('mock storage', e.message); json(res, 500, { message: 'Palvelinvirhe' }); });
-  if (path === '/admin') { res.writeHead(301, { location: '/admin/' }); return res.end(); }
+  if (path === '/admin' || path === '/juomat' || path === '/en/drinks') { res.writeHead(301, { location: path + '/' + url.search }); return res.end(); }
   if (path === '/auth/v1/token' && req.method === 'POST') {
     const body = JSON.parse((await readBody(req)) || '{}'); const g = url.searchParams.get('grant_type');
     let email = body.email;

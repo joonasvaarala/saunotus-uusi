@@ -64,18 +64,41 @@ let nImports = 0;
   writeFileSync(hp, t);
 }
 
+// 3c) kylmälaite-sivu → /juomat/ ja /en/drinks/ (polut ovat koodissa, eivät site.jsonissa)
+const DRINK_JS = ['drinks.js', 'drinks-texts.js', 'drinks-logic.js', 'drinks-mock.js', 'phone-fi.js', 'qrsvg.js'];
+function publishDrinks(srcName, destRel) {
+  const dir = join(OUT, destRel);
+  rmSync(dir, { recursive: true, force: true });
+  mkdirSync(dir, { recursive: true });
+  for (const f of [...DRINK_JS, 'drinks.css', 'qrcode-generator.js']) cpSync(join('booking/drinks', f), join(dir, f));
+  for (const f of DRINK_JS) {
+    const p = join(dir, f);
+    let t = readFileSync(p, 'utf8');
+    t = t.replace(/(\b(?:from|import)\s*)(['"])(\.{1,2}\/[^'"?]+\.js)\2/g, (_, a, q, u) => `${a}${q}${u}${VER}${q}`);
+    writeFileSync(p, t);
+  }
+  let html = readFileSync(join('booking/drinks', srcName), 'utf8');
+  if (BASE) html = html.replace(/href="(\/(?:juomat|en\/drinks)\/)"/g, `href="${BASE}$1"`);
+  html = html.replace(/(href|src)="(\.\/[^"?]+\.(?:css|js))"/g, `$1="$2${VER}"`);
+  if (process.env.SITE_ENV === 'test' && !/noindex/.test(html)) html = html.replace('<head>', '<head>\n<meta name="robots" content="noindex, nofollow">');
+  writeFileSync(join(dir, 'index.html'), html);
+  writeFileSync(join(dir, 'config.js'), `// Generoitu julkaisussa (scripts/build-pages.mjs). Vain julkinen anon/publishable-avain; service_role ei koskaan tähän.\nwindow.BOOKING_CONFIG=${JSON.stringify(cfg, null, 2)};\n`);
+}
+publishDrinks('index.html', 'juomat');
+publishDrinks('index.en.html', 'en/drinks');
+
 // 4) varmistukset
 const fail = (m) => { console.error('build-pages: VIRHE: ' + m); process.exit(1); };
 const adminHtml = readFileSync(join(A, 'index.html'), 'utf8');
 if (!/<meta name="robots" content="noindex/.test(adminHtml)) fail('hallinnan index.html:stä puuttuu noindex');
 if (!nImports || (adminHtml.match(/\?v=/g) || []).length !== 4) fail('hallinnan versiotunnus ei tullut kaikkiin resursseihin');
 (function chk(d) { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) { chk(p); continue; } if (n.endsWith('.js') && /(?:from|import)\s*['"]\.{1,2}\/[^'"?]+\.js['"]/.test(readFileSync(p, 'utf8'))) fail(`${p}: versioimaton relatiivinen import`); } })(A);
-for (const f of ['admin.js', 'ui.js', 'icons.js', 'sb.js', 'config.js', 'admin.css', 'calendar.css', 'views/users.js', 'views/calendar.js', 'views/customerform.js', 'views/addons.js', 'views/productimage.js', 'views/talous.js', 'views/talous-orders.js', 'views/talous-payments.js', 'views/talous-reports.js', 'views/talous-ui.js', 'views/talous-receipts.js', 'views/talous-giftcards.js', 'options.js', 'options-logic.js', 'options-mock.js', 'talous-api.js', 'talous-mock.js', 'giftcards-api.js', 'giftcards-mock.js', 'giftcards-texts.js', 'talous-i18n.js', 'talous-texts.js', 'csv.js', 'logo-haalea.svg']) if (!statSync(join(A, f), { throwIfNoEntry: false })) fail(`hallinnasta puuttuu ${f}`);
+for (const f of ['admin.js', 'ui.js', 'icons.js', 'sb.js', 'config.js', 'admin.css', 'calendar.css', 'views/users.js', 'views/calendar.js', 'views/customerform.js', 'views/addons.js', 'views/productimage.js', 'views/talous.js', 'views/talous-orders.js', 'views/talous-payments.js', 'views/talous-reports.js', 'views/talous-ui.js', 'views/talous-receipts.js', 'views/talous-giftcards.js', 'views/pos.js', 'pos-logic.js', 'pos-texts.js', 'phone-fi.js', 'qrsvg.js', 'qrcode-generator.js', 'options.js', 'options-logic.js', 'options-mock.js', 'talous-api.js', 'talous-mock.js', 'giftcards-api.js', 'giftcards-mock.js', 'giftcards-texts.js', 'talous-i18n.js', 'talous-texts.js', 'csv.js', 'logo-haalea.svg']) if (!statSync(join(A, f), { throwIfNoEntry: false })) fail(`hallinnasta puuttuu ${f}`);
 if (process.env.SITE_ENV === 'test') {
   const noindex = (p) => /<meta name="robots" content="noindex/.test(readFileSync(p, 'utf8'));
-  for (const p of ['index.html', 'en/index.html', 'varaa/index.html', 'tilaus/index.html', 'en/order/index.html', 'hallinta/index.html']) { try { if (!noindex(join(OUT, p))) fail(`${p}: noindex puuttuu (SITE_ENV=test)`); } catch (e) { if (e.code === 'ENOENT') fail(`${p} puuttuu dististä`); else throw e; } }
+  for (const p of ['index.html', 'en/index.html', 'varaa/index.html', 'tilaus/index.html', 'en/order/index.html', 'hallinta/index.html', 'juomat/index.html', 'en/drinks/index.html']) { try { if (!noindex(join(OUT, p))) fail(`${p}: noindex puuttuu (SITE_ENV=test)`); } catch (e) { if (e.code === 'ENOENT') fail(`${p} puuttuu dististä`); else throw e; } }
   if (!/Disallow: \//.test(readFileSync(join(OUT, 'robots.txt'), 'utf8'))) fail('robots.txt ei estä indeksointia');
 }
 // ei salaisuuksia: service_role/sb_secret ei saa esiintyä missään julkaistavassa tiedostossa (config.js, js, html)
 (function scan(d) { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) { scan(p); continue; } if (!/\.(js|mjs|html|json|css|txt)$/.test(n)) continue; const t = readFileSync(p, 'utf8'); if (/sb_secret_|"role"\s*:\s*"service_role"/.test(t)) fail(`salaisuuden näköinen sisältö: ${p.slice(OUT.length)}`); } })(OUT);
-console.log(`build-pages ok → ${OUT}  (perussivusto, ${BASE || ''}/varaa/, ${BASE || ''}/hallinta/; Supabase ${new URL(SUPA).hostname})`);
+console.log(`build-pages ok → ${OUT}  (perussivusto, ${BASE || ''}/varaa/, ${BASE || ''}/hallinta/, ${BASE || ''}/juomat/; Supabase ${new URL(SUPA).hostname})`);

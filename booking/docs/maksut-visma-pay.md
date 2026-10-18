@@ -42,5 +42,17 @@ Visma Pay Web Payment API (https://vismapay.github.io/ tai Visman nykyinen dokum
 5. Palautukset: `payments.status = refunded` + Visma Payn portaali/API; kirjaus `admin_*`-funktiolla (lisätään kun tarvitaan).
 6. Täsmäytys: `provider_ref` + `paid_at` + summa → kuukausiraportti ALV-kannoittain (`order_items.line_vat`).
 
+## Kylmälaite ja dry_run (booking_81, ei tuotantomaksua)
+
+`booking.vismapay_payment_prepare(order_token)` on vain `service_role`. Tila luetaan `integration_config.key = vismapay`:
+
+| Tila | Tulos |
+|---|---|
+| `off` | `{ok:false, code:vismapay_off}` — ei maksuriviä |
+| `live` | `{ok:false, code:vismapay_live_not_implemented}` — Vismaan ei lähde HTTP-kutsua, tunnuksia ei ole repossa |
+| `dry_run` | pending-maksu (`provider_ref` `dryrun-…`, `provider_status` `dry_run`) ja maksurivit. Maksua ei merkitä maksetuksi eikä kuittia synny, ennen kuin oikea ilmoitus kutsuu `payment_mark_paid`. |
+
+Edge `vismapay-start` kutsuu vain tätä funktiota. `vismapay-notify` on yhä tyhjä runko. Tuotannon ohjausosoite ja MAC-tarkistus ovat avoin asia, kunnes kauppiastunnukset ovat olemassa.
+
 ## Huomioita Johku-vanhoista maksuista
 Johku ei tallenna Visma Pay -tapahtumatunnistetta API:iin (ks. `johku-vientiselvitys.md` §6). Tuoduille tilauksille `payments.method` mäpätään `payment_methods.johku_codes`-sarakkeella, `provider_ref` jää tyhjäksi.

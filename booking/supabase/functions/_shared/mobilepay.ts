@@ -80,15 +80,17 @@ export class MobilePayApi {
     return this.token.value;
   }
 
-  createPayment(p: { reference: string; amountMinor: number; currency: string; returnUrl: string; description: string; scope?: string }): Promise<{ redirectUrl: string; reference: string }> {
-    return this.call("create", "POST", "/epayment/v1/payments", {
-      idempotencyKey: p.reference,
-      body: {
-        amount: { currency: p.currency, value: p.amountMinor }, paymentMethod: { type: "WALLET" }, reference: p.reference,
-        userFlow: "WEB_REDIRECT", returnUrl: p.returnUrl, paymentDescription: p.description.slice(0, 100),
-        profile: { scope: p.scope ?? "name email phoneNumber" },
-      },
-    });
+  createPayment(p: { reference: string; amountMinor: number; currency: string; returnUrl?: string | null; description: string; scope?: string; userFlow?: "WEB_REDIRECT" | "QR" | "PUSH_MESSAGE"; phoneNumber?: string }): Promise<{ redirectUrl?: string; url?: string; reference: string }> {
+    const userFlow = p.userFlow ?? "WEB_REDIRECT";
+    const body: Record<string, unknown> = {
+      amount: { currency: p.currency, value: p.amountMinor }, paymentMethod: { type: "WALLET" }, reference: p.reference,
+      userFlow, paymentDescription: p.description.slice(0, 100),
+      profile: { scope: p.scope ?? "name email phoneNumber" },
+    };
+    // WEB_REDIRECT vaatii returnUrlin. QR ja PUSH_MESSAGE eivät (Vipps ePayment userFlow). qrFormat-kuvaa ei pyydetä.
+    if (p.returnUrl) body.returnUrl = p.returnUrl;
+    if (userFlow === "PUSH_MESSAGE" && p.phoneNumber) body.customer = { phoneNumber: p.phoneNumber };
+    return this.call("create", "POST", "/epayment/v1/payments", { idempotencyKey: p.reference, body });
   }
   getPayment(reference: string): Promise<VippsPayment> { return this.call("get", "GET", `/epayment/v1/payments/${encodeURIComponent(reference)}`); }
   capture(reference: string, amountMinor: number, currency: string): Promise<VippsPayment> {

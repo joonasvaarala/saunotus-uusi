@@ -6,13 +6,16 @@ import { t as tl } from './talous-i18n.js';
 import { createAdminMock } from './options-mock.js';
 import { loadFilterTexts } from './filter-texts.js';
 import { needsManualRoute, parseAdminHash } from './reservation-query.js';
+import { posText } from './pos-texts.js';
 
 const $ = (id) => document.getElementById(id);
 // Kokeilutila: osoite /hallinta/?mock=1 → keinoistunto + selaimen oma mock-data (options-mock.js). EI verkkokutsuja eikä kirjautumista; mikään ei tallennu. Ilman parametria ennallaan.
 const MOCK = new URLSearchParams(location.search).get('mock') === '1';
 if (MOCK) {
   const mockRole = new URLSearchParams(location.search).get('role');
-  const mock = createAdminMock({ delay: 60, role: ['admin', 'manager', 'staff'].includes(mockRole) ? mockRole : 'manager' });
+  const role = ['admin', 'manager', 'staff'].includes(mockRole) ? mockRole : 'manager';
+  const staffPerms = ['blocks.manage', 'bookings.manage', 'customers.manage', 'giftcards.manage', 'payments.manage', 'pos.use', 'reports.daily', 'shifts.view'];
+  const mock = createAdminMock({ delay: 60, role, perms: role === 'staff' ? staffPerms : undefined });
   setRpcOverride((fn, args) => mock.rpc(fn, args));
   setMockSession({ access_token: 'mock', refresh_token: 'mock', expires_at: 4102444800, user: { email: 'kokeilu@example.com' } });
   window.__adminMock = mock;
@@ -40,6 +43,7 @@ const ROUTES = [
   { path: '', label: 'Päivä', icon: 'day', mod: () => loadView('day') },
   { path: 'varaukset', label: 'Varaukset', icon: 'list', mod: () => loadView('reservations') },
   { path: 'talous', label: 'Talous', labelFn: () => tl('nav'), icon: 'euro', any: ['payments.manage', 'giftcards.manage'], mod: () => loadView('talous') },
+  { path: 'pikakassa', label: 'Pikakassa', labelFn: () => posText('nav', 'fi'), icon: 'till', any: ['pos.use'], mod: () => loadView('pos') },
   { path: 'kalenteri', label: 'Kalenteri', icon: 'calendar', mod: () => loadView('calendar') },
   { path: 'tarkista', label: 'Tarkista', icon: 'check', mod: () => loadView('review') },
   { path: 'uusi', label: 'Uusi varaus', icon: 'plus', mod: () => loadView('newbooking') },
