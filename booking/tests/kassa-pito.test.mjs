@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { HT, ht, holdError, HOLD_ERROR_CODES, methodList } from '../shop/src/hold-texts.js';
+import { OT } from '../shop/src/order-texts.js';
 import { STATES, normCheckout, isHoldView, holdModeOf, giftWasUsed, leftFromServer, createHoldClock, clockText, createAnnouncer, ANNOUNCE_STEPS, spoken, POLL, nextPollIn, changed } from '../shop/src/hold-logic.js';
 import { normCheckoutOptions } from '../shop/src/mobilepay-logic.js';
 import { normOrder } from '../shop/src/order-api.js';
@@ -57,7 +58,7 @@ test('järjestys + kompakti banneri: otsikko + tilabadge → pitopaneeli → tii
   assert.ok(shop.includes('holdHost, mpHost, dl,'), 'vahvistussivu: pitopaneeli ennen yhteenvetoa');
   assert.ok(shop.includes('dl.after(secEl)'), 'vahvistussivu: maksuosio yhteenvedon alle');
   assert.equal((shop.match(/dl\.dataset\.testid = 'conf-summary'/g) || []).length, 1, 'vahvistussivun yhteenveto rakennetaan vain kerran (ei duplikaattia)');
-  assert.ok(/head, holdEl, resv, optSec, lines, giftCards, claimBox, pay,/.test(ord), 'tilaussivu: pitopaneeli → varaus + summat → maksuosio');
+  assert.ok(/head, holdEl, closedEl, resv, optSec, lines, giftCards, claimBox, pay,/.test(ord), 'tilaussivu: pitopaneeli → peruutusviesti → varaus + summat → maksuosio');
   assert.ok(ui.includes("class: kind === 'awaiting' ? 'sr-only' : ''"), 'awaiting: "Maksa varaus vahvistaaksesi" -otsikko vain ruudunlukijalle (toisto h2:n ja tilabadgen kanssa)');
   assert.ok(css.includes('.bk-hold-awaiting{display:flex'), 'kompakti banneri (lause + laskuri samalla rivillä)');
   assert.equal(ht('fi', 'summary.remaining'), 'Maksettavaa jäljellä'); assert.equal(ht('en', 'summary.remaining'), 'Amount left to pay');
@@ -68,6 +69,23 @@ test('tekstit: 15 min -maksuohje (Joonaksen teksti), otsikko "Varauksesi odottaa
   assert.equal(ht('fi', 'h2.awaiting'), 'Varauksesi odottaa maksua'); assert.equal(ht('en', 'h2.awaiting'), 'Your booking is awaiting payment');
   assert.ok(/testi/i.test(ht('fi', 'payLater.btn')) && /test/i.test(ht('en', 'payLater.btn')));
   assert.ok(src('../shop/src/shop.js').includes("'h2.awaiting'"), 'otsikko pitotilassa');
+});
+test('tilaussivu: peruttu ja vanhentunut varaus kertoo peruutuksesta ja linkittää uuteen varaukseen (site_texts, ei kovakoodattua lausetta)', () => {
+  const ord = src('../shop/src/order.js');
+  assert.ok(ord.includes("data-testid': 'order-closed'"), 'peruutusviesti');
+  assert.ok(ord.includes('t.closedHoldExpired') && ord.includes('t.closedCancelled') && ord.includes('t.closedNewBooking') && ord.includes('t.closedHoldExpiredGift'));
+  assert.ok(ord.includes('holdV && !co.expired'), 'vanhentuneella tilaussivulla ei toista pitopaneelia');
+  assert.ok(!ord.includes('Sipoonjoen Perinnesauna') && !ord.includes('Paikkavaraus vanheni'), 'lausetta ei ole kovakoodattu order.js:ään');
+  for (const k of ['closedHoldExpired', 'closedCancelled']) {
+    assert.ok(OT.fi[k].includes('Sipoonjoen Perinnesauna') && OT.en[k].includes('Sipoonjoen Perinnesauna'), k);
+  }
+  assert.ok(OT.fi.closedHoldExpired.includes('{minutes}') && OT.en.closedHoldExpired.includes('{minutes}'));
+  assert.ok(!/lahjakort|gift card/i.test(OT.fi.closedHoldExpired + OT.en.closedHoldExpired), 'perusteksti ei mainitse lahjakorttia');
+  assert.equal(OT.fi.closedHoldExpiredGift, 'Lahjakortin käytetty osuus on palautettu kortille.');
+  assert.equal(OT.en.closedHoldExpiredGift, 'Any gift card amount you applied has been returned to the card.');
+  assert.equal(OT.fi.closedNewBooking, 'Tee uusi varaus');
+  assert.equal(OT.en.closedNewBooking, 'Make a new booking');
+  assert.ok(!ord.includes(OT.fi.closedHoldExpired), 'viesti tulee avaimesta');
 });
 test('virhekoodit: online_payment_unavailable / order_expired / order_preliminary / payment_in_progress selkeinä FI+EN (myös lahjakortti- ja MobilePay-teksteissä)', () => {
   for (const c of ['online_payment_unavailable', 'order_expired', 'order_preliminary', 'payment_in_progress']) {
@@ -91,6 +109,9 @@ test('normCheckout: kaikki 7 tilaa; vanha backend (ei checkout_state) → null',
   assert.equal(normCheckout({ checkout_state: 'preliminary' }).preliminary, true); assert.equal(normCheckout({ checkout_state: 'expired' }).expired, true); assert.equal(normCheckout({ checkout_state: 'confirmed_unpaid' }).confirmed, true);
   assert.deepEqual(STATES.filter((s) => isHoldView(normCheckout({ checkout_state: s }))), ['awaiting_payment', 'processing_payment', 'preliminary', 'expired']);
   assert.equal(normCheckout({ checkout_state: 'expired', seconds_left: null }).secondsLeft, null);
+  assert.equal(normCheckout({ checkout_state: 'cancelled', cancel_reason: 'hold_expired' }).cancelReason, 'hold_expired');
+  assert.equal(normCheckout({ checkout_state: 'cancelled' }).cancelReason, null);
+  assert.equal(normCheckout({ checkout_state: 'expired', cancel_reason: '' }).cancelReason, null);
 });
 test('pitotila: palvelimen hold_until_paid ratkaisee; ei kenttää → vanha käytös; RPC puuttuu → vain vanha ohje', () => {
   const co = (r) => normCheckoutOptions(r);

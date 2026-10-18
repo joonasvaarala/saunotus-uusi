@@ -77,25 +77,56 @@ test('PR 1:n tuontitiedosto on tuotu (#61): jokainen rivi on varatekstissä (tuo
 test('tuontitiedosto: yksi tuontikutsu enintään 500 riviä → jaettavissa erin; koko ≤ 3 erää', () => {
   assert.ok(Math.ceil(PENDING.length / 500) <= 3, `${PENDING.length} riviä`);
 });
-test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-shop.mjs tuottaa täsmälleen saman tiedoston (ei poikkeamaa koodin oletuksista)', () => {
+test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-shop.mjs tuottaa pr61-rivit ja sen jälkeen lisätyt avaimet (pending-import-5)', () => {
   const prod = join(work, 'prod.json'), out = join(work, 'out.json');
+  const extra = new Set(J('content/site-texts.pending-import-5.json').map((r) => `${r.key}|${r.lang}`));
   const imp = new Set(PENDING.map((r) => r.key));
   writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts.filter((r) => !imp.has(r.key)) }));   // tuotanto ennen #61:n tuontia
   const r = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', prod, '--out', out], { encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);
-  assert.equal(readFileSync(out, 'utf8'), rd('content/site-texts.imported-pr61.json'));
+  const got = JSON.parse(readFileSync(out, 'utf8'));
+  const base = got.filter((row) => !extra.has(`${row.key}|${row.lang}`));
+  assert.equal(JSON.stringify(base, null, 1) + '\n', rd('content/site-texts.imported-pr61.json'));
 });
 test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet avaimet)', () => {
   const prod = join(work, 'prod2.json'), out = join(work, 'out2.json');
+  const extraRows = J('content/site-texts.pending-import-5.json');
   const have = PENDING.filter((r) => r.key.startsWith('ui.order.') || r.key === 'ui.shop.title');
+  const haveKeys = new Set(have.map((r) => r.key));
   writeFileSync(prod, JSON.stringify({ ok: true, texts: [...FALLBACK.texts.filter((r) => !PENDING.some((p) => p.key === r.key)), ...have.map((r) => ({ key: r.key, lang: r.lang, text: 'tuotannon teksti', version: 1, placeholders: [] }))] }));
   const r = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', prod, '--out', out], { encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);
   const rows = JSON.parse(readFileSync(out, 'utf8'));
-  assert.equal(rows.length, PENDING.length - have.length);
-  assert.ok(!rows.some((x) => x.key.startsWith('ui.order.') || x.key === 'ui.shop.title'));
+  assert.equal(rows.length, PENDING.length - have.length + extraRows.length);
+  assert.ok(!rows.some((x) => haveKeys.has(x.key)));
+  for (const e of extraRows) assert.ok(rows.some((x) => x.key === e.key && x.lang === e.lang && x.text === e.text), `${e.key} [${e.lang}]`);
   const bad = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', join(work, 'ei-ole.json')], { encoding: 'utf8' });
   assert.notEqual(bad.status, 0);
+});
+
+test('pending-import-5: tilaussivun peruutusviestit FI+EN, sama teksti kuin koodin oletus, ei vielä tuotannossa', () => {
+  const EXTRA = J('content/site-texts.pending-import-5.json');
+  const defaults = new Map(R.collectDefaults().map((r) => [`${r.key}|${r.lang}`, r.text]));
+  const have = new Set(FALLBACK.texts.map((r) => `${r.key}|${r.lang}`));
+  const seen = new Set();
+  assert.equal(EXTRA.length, 8);
+  for (const r of EXTRA) {
+    const w = `${r.key} [${r.lang}]`;
+    assert.match(r.key, /^ui\.order\.closed_(hold_expired|hold_expired_gift|cancelled|new_booking)$/, w);
+    assert.ok(['fi', 'en'].includes(r.lang), w);
+    assert.equal(r.class, 'normal', w);
+    assert.equal(r.kind, 'plain', w);
+    assert.equal(defaults.get(`${r.key}|${r.lang}`), r.text, w);
+    assert.ok(r.max_len >= r.text.length && r.max_len <= 100000, w);
+    assert.deepEqual([...r.placeholders].sort(), [...L.tokensOf(r.text)].sort(), w);
+    assert.doesNotMatch(r.text, /[<>]|https?:\/\/|www\./, w);
+    assert.ok(!have.has(`${r.key}|${r.lang}`), `${w}: jo tuotannossa`);
+    assert.ok(!PENDING.some((p) => p.key === r.key), `${w}: päällekkäinen pr61`);
+    assert.ok(!seen.has(`${r.key}|${r.lang}`)); seen.add(`${r.key}|${r.lang}`);
+  }
+  for (const k of new Set(EXTRA.map((r) => r.key))) assert.ok(seen.has(`${k}|fi`) && seen.has(`${k}|en`), k);
+  assert.ok(EXTRA.find((r) => r.key === 'ui.order.closed_hold_expired' && r.lang === 'fi').text.includes('Sipoonjoen Perinnesauna'));
+  assert.deepEqual(EXTRA.find((r) => r.key === 'ui.order.closed_hold_expired' && r.lang === 'fi').placeholders, ['{{var:minutes}}']);
 });
 
 // ================= avaimet =================

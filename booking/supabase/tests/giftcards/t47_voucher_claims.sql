@@ -216,7 +216,7 @@ begin
   perform pg_temp.t_ok((x ->> 'expired_claims')::int = 1 and (select status from booking.voucher_claims where id = c1) = 'expired' and (select resolved_by from booking.voucher_claims where id = c1) = 'system', 'G4 housekeeping: pito päättynyt → pyyntö expired (system)');
   perform booking._expire_holds(null);
   perform pg_temp.as_(''); delete from booking.rate_limit_hits;
-  perform pg_temp.t_ok((select bool_and(status = 'expired') from booking.reservations where order_id = o6) and booking.public_get_order(pg_temp.tok(o6)) ->> 'status' = 'expired', 'G5 vanha varausvanheneminen (_expire_holds) vapauttaa ajan: varaus expired, tilaussivu näyttää expired – ei jää roikkumaan');
+  perform pg_temp.t_ok((select bool_and(status = 'cancelled' and cancel_reason = 'hold_expired') from booking.reservations where order_id = o6) and booking.public_get_order(pg_temp.tok(o6)) ->> 'status' = 'cancelled', 'G5 varausvanheneminen (_expire_holds) peruu ajan: varaus cancelled, tilaussivu näyttää cancelled – ei jää roikkumaan');
   perform pg_temp.as_(pg_temp.adm());
   perform pg_temp.t_err(format('select booking.admin_resolve_voucher_claim(%s, %L)', c1, 'open'), 'invalid_state', 'G6 vanhentunutta ei voi avata uudelleen');
   
