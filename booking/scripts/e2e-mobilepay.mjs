@@ -247,6 +247,7 @@ const checkErrs = (page, where, allow = []) => { const bad = page.__errs.filter(
     expect(await s.page.locator('[data-testid=mp-button]').count() === 0, `mock ${lang}: painike piilossa tarkistuksen aikana`);
     await waitPanel(s.page, 'paid', 20000);
     expect(new RegExp(lang === 'en' ? 'Payment successful' : 'Maksu onnistui').test(await s.page.locator('[data-testid=mp-result-title]').innerText()), `mock ${lang}: maksettu-otsikko`);
+    await s.page.waitForSelector('[data-testid=receipts] li', { timeout: 10000 }).catch(() => {});   // sivu päivittyy paneelin jälkeen (mpinterval säilyy nyt mock-paluussa)
     expect(await s.page.locator('[data-testid=receipts] li').count() === 1, `mock ${lang}: kuitti ilmestyi tilaukseen`);
     expect(!/pay=/.test(s.page.url()), `mock ${lang}: pay poistettu`); checkErrs(s.page, `mock ${lang}`, [/PGRST202|404/]); await closeAll(s);
   }
@@ -277,12 +278,12 @@ const checkErrs = (page, where, allow = []) => { const bad = page.__errs.filter(
 {
   const st = await newState(); const s = await open({ st, url: `/varaa/vahvistus/#${TOKEN}` });
   await s.page.waitForSelector('[data-testid=mp-button]', { timeout: 10000 });
-  expect(await s.page.locator('.bk-conf [data-testid=mp-section]').count() === 1, 'vahvistussivu: MobilePay-osio');
+  expect(await s.page.locator('.bk-conf [data-testid=pay-choices] [data-testid=mp-block]').count() === 1, 'vahvistussivu: MobilePay-osio');
   expect(await noHScroll(s.page), 'vahvistussivu: ei vaakavieritystä');
   await shot(s.page, 'confirm-page-390-fi');
   await Promise.all([s.page.waitForURL(FAKE_PAY), s.page.locator('[data-testid=mp-button]').click()]); expect(st.startBody?.order_token === TOKEN, 'vahvistussivu: start {order_token}'); await closeAll(s);
   const st2 = await newState({ opts: 'off' }); const s2 = await open({ st: st2, url: `/varaa/vahvistus/#${TOKEN}` }); await s2.page.waitForSelector('.bk-conf'); await s2.page.waitForTimeout(400);
-  expect(await s2.page.locator('[data-testid=mp-section]').count() === 0, 'vahvistussivu: ei painiketta kun methods=[]'); await closeAll(s2);
+  expect(await s2.page.locator('[data-testid=mp-block]').count() === 0, 'vahvistussivu: ei painiketta kun methods=[]'); await closeAll(s2);
 }
 
 // ============ 7) Mitoitus ja kuvat: 360 / 390 / 430 / 1280, FI + EN ============

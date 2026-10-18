@@ -52,6 +52,8 @@ Deno.test("readCreds: puuttuva avain -> null", () => {
 
 Deno.test("buildReturnUrl: vain https, token + pay=mobilepay", () => {
   assertEquals(buildReturnUrl("https://uusi.example.fi", "/tilaus/", TOK), `https://uusi.example.fi/tilaus/?t=${TOK}&pay=mobilepay`);
+  assertEquals(buildReturnUrl("https://x.github.io/saunotus-uusi", "/tilaus/", TOK), `https://x.github.io/saunotus-uusi/tilaus/?t=${TOK}&pay=mobilepay`, "polkuetuliite säilyy");
+  assertEquals(buildReturnUrl("https://x.github.io/saunotus-uusi/", "/tilaus/", TOK), `https://x.github.io/saunotus-uusi/tilaus/?t=${TOK}&pay=mobilepay`);
   assertEquals(buildReturnUrl("http://uusi.example.fi", "/tilaus/", TOK), null);
   assertEquals(buildReturnUrl(null, "/tilaus/", TOK), null);
 });

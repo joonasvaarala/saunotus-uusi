@@ -400,3 +400,18 @@ a.bk-sd:hover{filter:brightness(.97)}
 .ord-opt-sec{margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line)}
 .ord-opt-sec h4{font:600 13px var(--label);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
 @media(max-width:420px){.bk-opt legend{font-size:22px}}
+
+/* ---- Maksuvalinta vahvistussivulla (MobilePay + lahjakortti): sama tyyli kuin tilaussivun maksukortit; vain MobilePay-painike on brändivärinen ---- */
+.bk-paychoices{margin:18px 0}
+.bk-paychoices h3{margin:0 0 8px}
+.bk-paychoices>*+*{margin-top:12px}
+.bk-paychoices .bk-ok{margin:0}
+.pc-opt{display:grid;gap:10px;padding:14px 0 0;border-top:1px solid var(--line)}
+.pc-opt .mp-block{margin:0}
+.pc-gift-btn{width:100%;max-width:420px}
+.pc-gift-panel{display:grid;gap:10px}
+.pc-gift-panel[hidden]{display:none}
+.gc-redeem-bare{display:grid;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:#fff}
+.gc-redeem-bare .bk-note{margin:0}
+.gc-btnrow{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.gc-btnrow .ord-btn{width:100%}

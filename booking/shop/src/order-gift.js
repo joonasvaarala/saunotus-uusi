@@ -11,8 +11,9 @@ const badgeClass = (st) => (st === 'active' ? 'st-confirmed' : st === 'pending_p
 // Yksi kenttä "Lahjakortin koodi" (sopimus §13.12): public_resolve_gift_code kertoo mikä koodi on.
 //   oma kortti → nykyinen lunastus (public_apply_gift_card, summa valinnainen); tuntematon → lähdevalinta (Elämyslahjat / Kokemuskauppa / Kiitoskauppa / Offerilla, esivalinta suggested_source)
 //   → public_submit_voucher_claim → selkeä vahvistusteksti. Näytetään kun redeem_enabled, maksamatonta on ja tilauksella ei ole lahjakorttirivejä (lahjakortilla ei osteta lahjakorttia).
+// bare = ilman omaa otsikkoa/ohjetta (vahvistussivun maksuvalinnan sisällä, otsikko tulee valintapainikkeesta); balance = lisää "Näytä saldo" (public_check_gift_card; unpaid = maksettava, näyttää käytettävissä olevan osuuden).
 // onApplied(text) = oma kortti käytetty; onClaimed({ text, extra }) = kumppanin lahjakortti lähetetty lunastettavaksi (tilaus + pyyntölista ladataan uudelleen).
-export function redeemSection({ L, api, token, onApplied, onClaimed }) {
+export function redeemSection({ L, api, token, onApplied, onClaimed, bare = false, balance = false, unpaid = null }) {
   const F = makeFmt(L), { tx, pick } = F;
   const has = (k) => GT[L][k] != null;
   const errText = (code) => (code === 'notReady' ? tx('notReady') : tx(G.errorKey(code, has)));
@@ -58,6 +59,23 @@ export function redeemSection({ L, api, token, onApplied, onClaimed }) {
     choose.hidden = false; title.focus({ preventScroll: false });
   }
 
+  // "Näytä saldo": oma kortti → saldo (+ tähän tilaukseen käytettävissä oleva osuus); tuntematon koodi → selitys (kumppanin kortin saldoa ei voi nähdä); virheet selkeinä
+  const chk = !balance ? null : h('button', { type: 'button', class: 'btn light ord-btn', 'data-testid': 'gc-check', text: tx('o.checkBtn'), onclick: async () => {
+    if (chk.disabled) return; msg.replaceChildren(); hideChoose();
+    if (!G.codeValid(code.value)) { fc.setError(tx('vc.err.invalid_code')); code.focus(); return; }
+    chk.disabled = true; chk.textContent = tx('o.checking');
+    try {
+      const r = await api.check(code.value);
+      if (r?.ok) {
+        const bal = +r.balance || 0, money = F.money;
+        if (!r.redeemable && r.not_redeemable_reason && has(`nr.${r.not_redeemable_reason}`)) showError(tx(`nr.${r.not_redeemable_reason}`));
+        else msg.replaceChildren(h('p', { class: 'bk-ok', role: 'status', 'data-testid': 'gc-balance', text: unpaid > 0 ? tx('o.balanceIs', { balance: money(bal), usable: money(Math.min(bal, unpaid)) }) : tx('o.balanceIsFull', { balance: money(bal) }) }));
+      } else if (r?.notReady) showError(tx('notReady'));
+      else if (r?.code === 'invalid_code' || r?.code === 'not_found') msg.replaceChildren(h('p', { class: 'bk-note', role: 'status', 'data-testid': 'gc-balance-unknown', text: tx('o.checkUnknown') }));
+      else showError(errText(r?.code));
+    } catch { showError(tx('err.generic')); }
+    chk.disabled = false; chk.textContent = tx('o.checkBtn');
+  } });
   const form = h('form', { class: 'ord-form bk-form', novalidate: true, onsubmit: async (ev) => {
     ev.preventDefault(); if (btn.disabled) return; msg.replaceChildren(); hideChoose();
     if (!G.codeValid(code.value)) { fc.setError(tx('vc.err.invalid_code')); code.focus(); return; }
@@ -77,7 +95,8 @@ export function redeemSection({ L, api, token, onApplied, onClaimed }) {
       else showError(errText(out.code));
     } catch { showError(tx('err.generic')); }
     btn.disabled = false; btn.textContent = tx('o.apply');
-  } }, fc.wrap, fa.wrap, btn, msg);
+  } }, fc.wrap, fa.wrap, h('div', { class: 'gc-btnrow' }, btn, chk), msg);
+  if (bare) return h('div', { class: 'gc-redeem-bare', role: 'group', 'aria-label': tx('o.useTitle'), 'data-testid': 'gc-redeem' }, h('p', { class: 'bk-note', text: tx('o.useLead') }), form, choose);
   return h('section', { class: 'ord-card', 'aria-labelledby': 'ord-gc', 'data-testid': 'gc-redeem' }, h('h3', { id: 'ord-gc', text: tx('o.useTitle') }), h('p', { class: 'bk-note', text: tx('o.useLead') }), form, choose);
 }
 

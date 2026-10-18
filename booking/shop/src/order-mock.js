@@ -38,7 +38,8 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
   }
   // MobilePay (§14), skenaariot ?mock=1&scenario=mp|mp-prod|mp-off: maksamaton tilaus (40 €), public_payment_options antaa MobilePay-tavan (mp: test=true, mp-prod: test=false, mp-off: ei tapaa).
   // Paluutulos (?mpresult=paid|review|failed|pending|slotlost|contact|netfail; oletus paid): mpFetch vastaa mobilepay-start / mobilepay-notify (reconcile) -funktioiden muodoilla; maksu kirjautuu 3. public_get_order-kyselyllä paluun jälkeen (kuten webhook).
-  const mpScenario = /^mp(-prod|-off)?$/.test(scenario) ? scenario : '';
+  // pay | pay-prod | pay-off = sama maksamaton 40 € tilaus vahvistussivun maksuvalintaa varten (shop-mock.js): MobilePay (mp-skenaarion mukaan) + lahjakortti (HH3A-7CEF-HJKL, saldo 100 €)
+  const mpScenario = /^mp(-prod|-off)?$/.test(scenario) ? scenario : /^pay(-prod|-off)?$/.test(scenario) ? scenario.replace('pay', 'mp') : '';
   if (mpScenario) {
     o.items = [{ id: 1, name: 'Yleinen saunavuoro', name_en: 'Public sauna session', quantity: 2, line_total: 40, vat_rate: 25.5 }];
     o.reservations = [o.reservations[0]]; o.reservations[0].addons = []; o.status = 'pending'; o.paid = 0; o.payments = []; o.receipts = []; o.online_payment_enabled = true;
@@ -142,7 +143,10 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
       if (mpResult === 'starterror') return res(503, bad('provider_error', 'MobilePay-maksun aloitus epäonnistui, yritä hetken kuluttua uudelleen'));
       if (o.unpaid <= 0) return res(409, bad('already_paid', 'Tilaus on jo maksettu'));
       mp.started = true;
-      const back = new URL(typeof location !== 'undefined' ? location.href : 'http://localhost/tilaus/'); back.search = new URLSearchParams({ t: body.order_token || TOKEN, mock: '1', scenario, ...(mpResult ? { mpresult: mpResult } : {}), pay: 'mobilepay' }).toString(); back.hash = '';
+      const here = new URL(typeof location !== 'undefined' ? location.href : 'http://localhost/tilaus/'); const back = new URL(here.href);
+      const keep = {}; for (const k of ['mpinterval', 'mpmax']) if (here.searchParams.has(k)) keep[k] = here.searchParams.get(k);
+      back.search = new URLSearchParams({ t: body.order_token || TOKEN, mock: '1', scenario, ...(mpResult ? { mpresult: mpResult } : {}), ...keep, pay: 'mobilepay' }).toString();
+      /* Vahvistussivulla token on hashissa: säilytä se (tilaussivulla hash on tyhjä). */
       return res(200, { ok: true, reuse: false, redirect_url: back.href, reference: 'sauna-o15321-p1-a1', payment_id: 1 });
     }
     if (name === 'mobilepay-notify' && body.action === 'reconcile') {
