@@ -53,6 +53,8 @@ jobs:
       - run: node --test booking/tests/kassa-pito.test.mjs
       # testivaihtoehto "maksu paikan päällä" (booking_57): palvelimen tarjonta, nappi, virheet FI/EN, mock, migraatio mukana
       - run: node --test booking/tests/pay-later.test.mjs
+      # pakettituote Saunarituaali ja savusaunavuoro (kb 7, booking_58, §17.11): aikajana, loppuaika +2 h, la/su, mock, tuotantofixture
+      - run: node --test booking/tests/saunarituaali.test.mjs
       # .cache/articles: edellinen artikkelisnapshot (RPC-katkon varalta + siirrettyjen slugien tunnistus)
       - uses: actions/cache@v4
         with:

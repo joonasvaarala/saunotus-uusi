@@ -84,7 +84,8 @@ let holdCtl = null;   // käynnissä oleva pitopaneeli (laskuri/kyselyt): pysäy
 const stopHold = () => { if (holdCtl) { holdCtl.stop(); holdCtl = null; } };
 
 const state = { catalog: null, settings: null, images: new Map(), treatments: [], months: new Map(), busy: false };
-const mount = (...nodes) => { root.replaceChildren(...nodes); root.setAttribute('aria-busy', 'false'); };
+// tyhjät (null/false) lapset ohitetaan: replaceChildren(null) kirjoittaisi sivulle tekstin "null" (esim. tuotesivu ilman hoitovalitsinta)
+const mount = (...nodes) => { root.replaceChildren(...nodes.flat().filter((n) => n != null && n !== false)); root.setAttribute('aria-busy', 'false'); };
 const focusTop = () => { const el = root.querySelector('h2,h1') || document.querySelector('main .hero.page h1'); if (el) { el.setAttribute('tabindex', '-1'); el.focus({ preventScroll: false }); } };
 const spinner = () => mount(h('p', { class: 'bk-loading', role: 'status', text: t.loading }));
 const errorBox = (msg) => h('p', { class: 'bk-error', role: 'alert', text: msg });
@@ -261,6 +262,7 @@ function prodCard(p, rs, ds, open, onToggle, treat = false) {
   const avail = rs.filter((x) => x.r.status === 'available'), id = `bk-pc-${p.id}`;
   const desc = (pdesc(p) || '').replace(/\s+/g, ' ').trim(), short = desc.length > 90 ? `${desc.slice(0, 90).replace(/\s+\S*$/, '')}…` : desc;
   const panel = h('div', { id: `${id}-panel`, class: 'bk-pc-panel', role: 'region', 'aria-labelledby': `${id}-btn`, hidden: open ? null : true },
+    treat && tv.timelineText(p) ? h('p', { class: 'bk-note bk-pc-tl', text: tv.timelineText(p) }) : null,
     h('ul', { class: 'bk-slotlist' }, rs.filter((x) => treat || x.r.status === 'available').map((x) => (treat ? treatItem(x, ds) : dayItem(x, ds)))),
     h('p', { class: 'bk-pc-more' }, h('a', { href: treat ? bk(`/tuote/${p.slug}?n=1&d=${ds}`) : bk(`/tuote/${p.slug}/${ds}`), text: t.productInfo })));
   const btn = h('button', { type: 'button', id: `${id}-btn`, class: 'bk-pc-head', 'aria-expanded': open ? 'true' : 'false', 'aria-controls': `${id}-panel`, onclick: () => onToggle(p, li) },

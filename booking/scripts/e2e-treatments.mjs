@@ -24,8 +24,9 @@ const TZ = 'Europe/Helsinki';
 const today = new Date().toLocaleDateString('sv-SE', { timeZone: TZ });
 const addDays = (ds, n) => { const d = new Date(`${ds}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 const dow = (ds) => new Date(`${ds}T12:00:00Z`).getUTCDay();
-const HERO = { 'saunahoito-2': 'Saunahoito', 'saunotus-2': 'Saunotus', syvasaunotus: 'Syväsaunotus', saunotusrituaali: 'Saunotusrituaali' };
-const MAXP = { 'saunahoito-2': 4, 'saunotus-2': 2, syvasaunotus: 2, saunotusrituaali: 6 };
+const HERO = { 'saunahoito-2': 'Saunahoito', 'saunotus-2': 'Saunotus', syvasaunotus: 'Syväsaunotus', saunotusrituaali: 'Saunotusrituaali', 'saunarituaali-ja-savusaunavuoro': 'Saunarituaali ja savusaunavuoro (la & su)' };
+const MAXP = { 'saunahoito-2': 4, 'saunotus-2': 2, syvasaunotus: 2, saunotusrituaali: 6, 'saunarituaali-ja-savusaunavuoro': 6 };
+const RITUAL_SLUGS = ['saunotusrituaali', 'saunarituaali-ja-savusaunavuoro'];   // vain la–su, alkuajat 16:00/16:30/17:00 (kb 8 ja paketti kb 7)
 
 const watch = (page, name, allow = []) => {
   const ok = (s) => allow.some((re) => re.test(s));
@@ -138,10 +139,10 @@ if (OFF) {
     const tabs = await page.locator('.bk-tabs a').allInnerTexts();
     expect(tabs.some((x) => /hoidot ja rituaalit/i.test(x)), `${name}: Hoidot ja rituaalit -välilehti puuttuu (${tabs})`);
     const names = await page.locator('.bk-card h3').allInnerTexts();
-    expect(names.join('|') === 'Saunahoito|Saunotus|Syväsaunotus|Saunotusrituaali' || names.join('|') === 'Saunotusrituaali|Saunahoito|Saunotus|Syväsaunotus' || names.length === 4, `${name}: hoitokortit ${names}`);
-    expect(names.length === 4, `${name}: hoitokortteja pitää olla 4, nyt ${names.length}`);
+    expect(names.join('|') === 'Saunahoito|Saunotus|Syväsaunotus|Saunotusrituaali|Saunarituaali ja savusaunavuoro (la & su)', `${name}: hoitokortit ${names}`);
+    expect(names.length === 5, `${name}: hoitokortteja pitää olla 5 (4 + paketti kb 7), nyt ${names.length}`);
     await page.evaluate(async () => { for (const i of document.querySelectorAll('.bk-card img')) { i.scrollIntoView(); if (!i.complete) await new Promise((r) => { i.onload = i.onerror = r; }); } window.scrollTo(0, 0); });
-    expect((await page.locator('.bk-card .card-img img').evaluateAll((els) => els.filter((e) => e.complete && e.naturalWidth > 0).length)) === 4, `${name}: hoitokorttien kuvat eivät ole kaikki ladattu`);
+    expect((await page.locator('.bk-card .card-img img').evaluateAll((els) => els.filter((e) => e.complete && e.naturalWidth > 0).length)) === 4, `${name}: hoitokorttien kuvat (4 kuvallista; paketilla ei kuvaa) eivät ole kaikki ladattu`);
     await hscroll(page, `${name} hoitolista`);
     await shot(page, `shop-${name}-9-hoidot-lista.png`);
     // kategorialistan "Kaikki" sisältää myös hoidot ja vanhat vuorotuotteet säilyvät
@@ -152,7 +153,7 @@ if (OFF) {
       await fresh(page, `${shop('fi')}#/tuote/${slug}`);
       await page.waitForSelector('.bk-picker');
       expect((await page.locator('main .hero.page h1').innerText()) === HERO[slug], `${name} ${slug}: hero-otsikko ei ole tuotteen nimi`);
-      expect(await page.locator('main .hero.page.has-prod').count() === 1, `${name} ${slug}: tuotekuva ei ole herona`);
+      expect(await page.locator('main .hero.page.has-prod').count() === (slug === 'saunarituaali-ja-savusaunavuoro' ? 0 : 1), `${name} ${slug}: tuotekuva herona (paketilla ei kuvaa → oletushero)`);
       expect((await page.locator('.bk-picker h3').allInnerTexts()).map((x) => x.replace(/^\d\s*/, '').trim()).join('|').startsWith('Henkilömäärä|Valitse päivä|Valitse kellonaika'), `${name} ${slug}: vaiheotsikot`);
       { const bt = await page.locator('#booking-app').innerText(); expect((await page.locator('.bk-tr-info').count()) === 0 && !/ei perjantaisin|not on Fridays|Visma Pay|14 päivän|up to 14 days|viimeistään klo|Maksu paikan päällä|Payment on site|vain viikonloppuisin|weekends only/i.test(bt), `${name} ${slug}: tuotesivulla on poistettu infoteksti (tai maksuohje)`); }   // säännöt toimivat koodissa (alla), mutta infolaatikkoa ei näytetä
       // henkilömäärä: yläraja = max
@@ -170,18 +171,18 @@ if (OFF) {
           expect(d >= today && d <= addDays(today, 14), `${name} ${slug} ${d}: päivä varausikkunan (14 pv) ulkopuolella`);
           expect(dow(d) !== 5, `${name} ${slug} ${d}: perjantaille tarjotaan aikoja`);
           const we = [0, 6].includes(dow(d));
-          if (slug === 'saunotusrituaali') expect(we, `${name} rituaali ${d}: arkipäivälle tarjotaan rituaalia`);
+          if (RITUAL_SLUGS.includes(slug)) expect(we, `${name} ${slug} ${d}: arkipäivälle tarjotaan rituaalia/pakettia`);
           for (const tx of await page.locator('.bk-time-btn').allInnerTexts()) {
             const [s, e] = hms(tx);
             expect(s >= (we ? '13:00' : '16:00'), `${name} ${slug} ${d}: alkuaika ${s} ikkunan ulkopuolella`);
             expect(!e || e <= '20:30', `${name} ${slug} ${d}: loppu ${e} yli 20:30`);
-            if (slug === 'saunotusrituaali') expect(['16:00', '16:30', '17:00'].includes(s), `${name} rituaali ${d}: alkuaika ${s}`);
+            if (RITUAL_SLUGS.includes(slug)) expect(['16:00', '16:30', '17:00'].includes(s), `${name} ${slug} ${d}: alkuaika ${s}`);
           }
         }
         const next = page.locator('.bk-calnav button').last(); if (await next.isDisabled()) break;
         const label = await page.locator('.bk-calnav strong').innerText(); await next.click(); await page.waitForFunction((l) => document.querySelector('.bk-calnav strong')?.innerText !== l, label);
       }
-      expect(days > 0 || slug === 'saunotusrituaali', `${name} ${slug}: ei yhtään vapaata päivää (14 pv)`);
+      expect(days > 0 || RITUAL_SLUGS.includes(slug), `${name} ${slug}: ei yhtään vapaata päivää (14 pv)`);
     }
     await page.ctx.close();
   }
@@ -318,7 +319,7 @@ if (OFF) {
       const slugs = await page.locator('.bk-treat-day .bk-pc').evaluateAll((e) => e.map((x) => x.dataset.slug));
       for (const s of slugs) (seen[s] ||= []).push(d);
       expect(dow(d) !== 5 || slugs.length === 0, `päivä ${lang} ${w} ${d}: perjantaille tarjotaan hoitoja (${slugs})`);
-      if (slugs.includes('saunotusrituaali')) expect([0, 6].includes(dow(d)), `päivä ${d}: rituaali arkipäivänä`);
+      if (RITUAL_SLUGS.some((x) => slugs.includes(x))) expect([0, 6].includes(dow(d)), `päivä ${d}: rituaali/paketti arkipäivänä`);
       if (slugs.length) {
         expect(await page.locator('.bk-treat-day .bk-pc.open').count() === 0 && (await page.locator('.bk-treat-day .bk-slotlist:visible').count()) === 0, `päivä ${d}: hoitokortit pitää olla oletuksena suljettuja (ensin tuote, sitten ajat)`);
         expect(await page.locator('.bk-treat-day .bk-pc-head').first().getAttribute('aria-expanded') === 'false', `päivä ${d}: aria-expanded`);
@@ -335,7 +336,7 @@ if (OFF) {
       }
       expect(avail - before === 0, `haut: tuotesivut hakivat uudelleen päivänäkymän jälkeen (${avail - before} hakua; välimuisti kattaa)`);
     }
-    expect(avail <= 4, `päivänäkymä ${lang} ${w}: ${avail} saatavuushakua koko 15 päivän selauksessa (odotettu ≤ 4, yksi / tuote)`);
+    expect(avail <= 5, `päivänäkymä ${lang} ${w}: ${avail} saatavuushakua koko 15 päivän selauksessa (odotettu ≤ 5, yksi / tuote)`);
     // kortin avaus → ajat → Valitse vie hoitovarausvirtaan esivalitulla päivällä ja ajalla
     const d1 = Object.values(seen)[0][0], s1 = Object.keys(seen)[0];
     await page.goto('about:blank').catch(() => {}); await fresh(page, dayUrl(d1)); await settle();

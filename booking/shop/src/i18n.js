@@ -44,6 +44,9 @@ export const T = {
       step1: 'Henkilömäärä', step2: 'Valitse päivä', step3: 'Valitse kellonaika', maxPersons: (n) => `Enintään ${n} henkilöä.`, onePerson: 'Tämä palvelu varataan yhdelle henkilölle.',
       fewer: 'Vähemmän henkilöitä', more: 'Enemmän henkilöitä', legendFree: 'vapaita aikoja', noFreeMonth: 'Tässä kuussa ei ole vapaita aikoja valitulla henkilömäärällä. Kokeile toista kuukautta tai pienempää henkilömäärää.',
       pickDayFirst: 'Valitse ensin päivä kalenterista.', startTimes: 'vapaat alkuajat',
+      // pakettituote (kb 7, booking_58): aikajana ja aikataulu; ei vapaita aikoja -viesti
+      tl: { ritual: 'rituaali', break: 'tauko', smoke: 'savusauna' }, tlTitle: 'Aikataulu', tlDuration: 'Kesto', ends: 'päättyy',
+      noTimes: 'Ei vapaita aikoja', noTimesHint: 'Kokeile toista kuukautta tai pienempää henkilömäärää.',
       retry: 'Yritä uudelleen',
       continue: 'Jatka tietoihin', selected: (when, n, price) => `Valittu: ${when} · ${n} hlö · ${price}`,
       date: 'Päivä', time: 'Kellonaika', picked: 'Valittu aika', pickAnother: 'Valitse toinen aika', toReview: 'Tarkista varaus', edit: 'Muokkaa tietoja',
@@ -98,6 +101,9 @@ export const T = {
       step1: 'Guests', step2: 'Pick a date', step3: 'Pick a time', maxPersons: (n) => `Up to ${n} guests.`, onePerson: 'This service is booked for one guest.',
       fewer: 'Fewer guests', more: 'More guests', legendFree: 'times available', noFreeMonth: 'No available times this month for the selected number of guests. Try another month or fewer guests.',
       pickDayFirst: 'Pick a date in the calendar first.', startTimes: 'available start times',
+      // package product (kb 7, booking_58): timeline and schedule; no-times message
+      tl: { ritual: 'ritual', break: 'break', smoke: 'smoke sauna' }, tlTitle: 'Schedule', tlDuration: 'Duration', ends: 'ends',
+      noTimes: 'No available times', noTimesHint: 'Try another month or fewer guests.',
       retry: 'Try again',
       continue: 'Continue to your details', selected: (when, n, price) => `Selected: ${when} · ${n} guests · ${price}`,
       date: 'Date', time: 'Time', picked: 'Selected time', pickAnother: 'Pick another time', toReview: 'Review booking', edit: 'Edit details',
