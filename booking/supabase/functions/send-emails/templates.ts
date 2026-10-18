@@ -6,7 +6,7 @@
 export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem";
 export interface Rendered { subject: string; text: string; html: string }
 
-export const SELLER = "Sipoonjoen perinnesauna";
+export const SELLER = "Sipoonjoen Perinnesauna";
 export const COMPANY = "Havuhattu Oy";
 export const ADDRESS = "Hindsbyntie 124, 04130 Sipoo";
 export const EMAIL = "savusauna@saunotus.fi";
@@ -119,7 +119,7 @@ function giftCardMail(kind: "gift_card_buyer" | "gift_card_recipient", d: any, e
     ? (anyBuyer
         ? (en ? `Thank you for your purchase! Your gift card${n > 1 ? "s are" : " is"} ready. Open the PDF from the link below – you can print it or forward it to the recipient.` : `Kiitos ostoksestasi! Lahjakortti${n > 1 ? "t ovat valmiit" : " on valmis"}. Avaa PDF alla olevasta linkistä – voit tulostaa sen tai välittää sen lahjan saajalle.`)
         : (en ? `Thank you for your purchase! Your order is confirmed and the gift card${n > 1 ? "s are" : " is"} delivered directly to the recipient by email, as you chose.` : `Kiitos ostoksestasi! Tilauksesi on vahvistettu ja lahjakortti${n > 1 ? "t toimitetaan" : " toimitetaan"} valintasi mukaan suoraan saajalle sähköpostitse.`))
-    : (en ? `${from || "Someone"} has sent you a gift card to ${SELLER}. Enjoy!` : `${from || "Joku"} on lahjoittanut sinulle lahjakortin Sipoonjoen perinnesaunalle. Nauti!`);
+    : (en ? `${from || "Someone"} has sent you a gift card to ${SELLER}. Enjoy!` : `${from || "Joku"} on lahjoittanut sinulle lahjakortin Sipoonjoen Perinnesaunalle. Nauti!`);
   const how = d?.redeem_online
     ? (en ? "The gift card code is in the PDF. Book online at saunotus.fi and enter the code at checkout, or tell us the code at the sauna." : "Lahjakortin koodi on PDF-tiedostossa. Varaa aika verkossa osoitteessa saunotus.fi ja syötä koodi maksuvaiheessa, tai kerro koodi saunalla.")
     : (en ? "The gift card code is in the PDF. Tell us the code at the sauna or contact us to book." : "Lahjakortin koodi on PDF-tiedostossa. Kerro koodi saunalla tai ota yhteyttä varataksesi ajan.");
@@ -154,7 +154,7 @@ function giftCardMail(kind: "gift_card_buyer" | "gift_card_recipient", d: any, e
 // data.voucher_claim: { claim_id, status, source, code_masked ("…1234"), problem_code (invalid_code|expired_code|already_used|other), customer_name } + data.order (order_url, varaukset). Täyttä koodia ei viesteissä.
 // booking_48: varaus ei vanhene lunastuspyynnön vuoksi -> viesteissä EI aikarajoja eikä "aika on pidetty varattuna … asti" (hold_until on poistettu käytöstä; kenttää ei lueta).
 // Yhteystieto: vain sähköposti (puhelinnumeroa ei ole vahvistettu -> ei näy näissä viesteissä, ei alatunnisteessakaan).
-// Allekirjoitus: Tapio / Sipoonjoen perinnesauna. Ongelmaviesti jonotetaan vain kun asetus voucher_claims.problem_emails_enabled = true.
+// Allekirjoitus: Tapio / Sipoonjoen Perinnesauna. Ongelmaviesti jonotetaan vain kun asetus voucher_claims.problem_emails_enabled = true.
 const VC_LABEL: Record<string, string> = { elamyslahjat: "Elämyslahjat", kokemuskauppa: "Kokemuskauppa", kiitoskauppa: "Kiitoskauppa", offerilla: "Offerilla" };
 function voucherMail(kind: "voucher_claim_received" | "voucher_claim_problem", d: any, en: boolean, hello: string): Rendered {
   const vc = d?.voucher_claim ?? {};

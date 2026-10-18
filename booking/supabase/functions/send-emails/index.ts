@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
 
   const cfg = await bk.from("integration_config").select("mode,settings").eq("key", "resend").maybeSingle();
   const mode: string = cfg.data?.mode ?? "off";
-  const from: string = cfg.data?.settings?.from ?? "Sipoonjoen perinnesauna <savusauna@saunotus.fi>";
+  const from: string = cfg.data?.settings?.from ?? "Sipoonjoen Perinnesauna <savusauna@saunotus.fi>";
   const replyTo: string | undefined = cfg.data?.settings?.reply_to;
   const key = Deno.env.get("RESEND_API_KEY");
   const rs = await bk.from("settings").select("value").eq("key", "gift_cards.redeem_enabled").maybeSingle();

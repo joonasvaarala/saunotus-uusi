@@ -1,6 +1,6 @@
 {
   "fi": {
-    "meta": {"title":"Varaa saunaelämys | Sipoonjoen Perinnesauna","description":"Varaa yleinen saunavuoro, avoin rituaali, saunahoito, saunotus tai yksityisvuoro Sipoonjoen perinnesaunalle. Varaukset tehdään Johku-verkkokaupassa.","og":"ovi-kaiverrus"},
+    "meta": {"title":"Varaa saunaelämys | Sipoonjoen Perinnesauna","description":"Varaa yleinen saunavuoro, avoin rituaali, saunahoito, saunotus tai yksityisvuoro Sipoonjoen Perinnesaunalle. Varaukset tehdään Johku-verkkokaupassa.","og":"ovi-kaiverrus"},
     "hero": {"title":"Varaa saunaelämys","text":"Oletko valmiina elämäsi rentouttavimpaan saunakokemukseen?","img":"ovi-kaiverrus"},
     "chips": [{"label":"Saunavuorot","url":"publicAll"},{"label":"Avoimet rituaalit","url":"ceremonies"},{"label":"Saunahoidot ja saunotukset","url":"treatments"},{"label":"Yksityisvuorot","url":"private"},{"label":"Varaus lahjakortilla","url":"giftReservation"}],
     "note":"Varaukset ja maksu tehdään Johku-verkkokaupassa (avautuu uuteen välilehteen).",

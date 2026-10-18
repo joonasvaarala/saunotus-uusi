@@ -40,8 +40,8 @@
   },
   "own": {
    "kicker": "Onko sinulla",
-   "title": "Sipoonjoen perinnesaunan oma lahjakortti",
-   "text": "Sipoonjoen perinnesaunan lahjakortilla voit tehdä varauksen suoraan varausjärjestelmän kautta. Syötä lopuksi 12-merkkinen lahjakortin koodi ostoskorissa kenttään ”käytä koodia”.",
+   "title": "Sipoonjoen Perinnesaunan oma lahjakortti",
+   "text": "Sipoonjoen Perinnesaunan lahjakortilla voit tehdä varauksen suoraan varausjärjestelmän kautta. Syötä lopuksi 12-merkkinen lahjakortin koodi ostoskorissa kenttään ”käytä koodia”.",
    "cta": "Tee varaus"
   },
   "extend": {
