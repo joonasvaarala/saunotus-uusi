@@ -51,6 +51,18 @@ Etusivu, sivupohjat (sauna, hoidot, lahjakortti, varaa-info, info, yrityksille, 
 - Kaupan datakuorma (`booking/site-texts.json`) sisältää vain kaupan `ui.*`-alueet (`SHOP_EXCLUDE` rajaa staattisen sivuston alueet pois).
 - **`ui.shop.error_generic`**: palvelimen raaka `message` ei enää näy asiakkaalle kaupassa (`shop.js`, `order.js`, `mobilepay-ui.js`, `treatment-ui.js`); tunnetut koodit omilla teksteillään, muuten `T.<kieli>.errorGeneric` (= `ui.shop.error_generic`).
 
+## Edge-funktioiden tekstit (osa 3, PR 3): sähköpostit, PDF:t, MobilePay-virhesivu
+
+- **Avaimet:** `email.<pohja>.<kohta>` (`send-emails`: common, order_block, order_confirmation, payment_link, receipt, refund_receipt, cancel_request_ack, order_change, gift_card, voucher), `email.gift_card_pdf.*`, `email.receipt_pdf.*`, `ui.mobilepay.start_error_*` (maksulinkin GET-virhesivu ja JSON-`message`).
+- **Oletukset = varateksti:** `booking/supabase/functions/<funktio>/texts.ts` (`EMAIL_TEXTS`, `GIFT_CARD_PDF_TEXTS`, `RECEIPT_PDF_TEXTS`, `MOBILEPAY_START_TEXTS`; `cls: "protected"` = suojattu luokka). Tuontitiedosto generoidaan niistä: `node scripts/site-texts-extract-functions.mjs --prod <tuore public_get_site_texts> --out content/site-texts.pending-import-3.json` (Node 22.18+; vain tuotannosta puuttuvat rivit).
+- **Haku ajoaikana:** `_shared/site_texts.ts` – `fetchSiteTexts` (anon-avain, vain luku: `public_get_site_texts` + `public_settings`, 4 s aikaraja, 5 min välimuisti isolaatissa) ja `makeT` (DB-rivi → muuten repon oletus). Haku epäonnistuu / rivi puuttuu / DB-rivin paikkamerkki ei täyty → repon oletus (+ lokivaroitus), **raakaa `{{…}}` ei koskaan viestiin**. `send-emails` hakee tekstit vain kun jonossa on lähetettävää; `dry_run` ja muu lähetyslogiikka ennallaan.
+- **Paikkamerkit:** `{{var:nimi}}` (koodi täyttää: name, no, amount, date, time, n, phone, email, from, who, when, label, what, code, id, ref, web, contact), `{{setting:business_name}}`. Yritysnimi/puhelin/osoite/sähköposti *arvot* tulevat koodin vakioista (kuten ennen), tekstissä vain lauseet. Teksti on aina escapattu (HTML) tai san()-siivottu (PDF, WinAnsi) – DB-teksti ei voi rikkoa viestiä eikä PDF:ää.
+- **Ei HTML:ää kantaan:** rakenne (taulukot, painikkeet, lihavoinnit) on koodissa; kantaan vain tekstit.
+- **Kuitti-PDF** tallennetaan Storageen ensimmäisellä haulla (muuttumaton tosite): tekstimuutos ei muuta jo luotuja kuitteja. Kuitin kentät ovat luokkaa `protected`.
+- **Testit:** `node --test booking/supabase/functions/send-emails/templates.test.mjs booking/tests/sivutekstit-funktiot.test.mjs` (Node 22; 96 sähköpostitapausta samat tavut kuin ennen siirtoa: `send-emails/golden-email.json`), `deno test -A --no-lock --node-modules-dir=none booking/supabase/functions/pdf-golden.test.ts booking/supabase/functions/_tests/site_texts_test.ts booking/supabase/functions/_tests/mobilepay_test.ts` (22 PDF-tapausta samat tavut: `pdf-golden.json`).
+- **Tunnettu poikkeama oletuksissa:** FI-monikko "Lahjakorttit ovat valmiit" / "lahjakorttit toimitetaan" (oikein "Lahjakortit") on säilytetty sellaisenaan (tavu tavulta -vaatimus); korjaus kuuluu hyväksyntäprosessiin (`texts_propose`).
+- Ei siirretty: raportti-PDF (`report-pdf`, sisäinen), `vismapay-start` (runko, ei asiakaskäytössä), tietokantafunktioiden tuottama teksti (kuitin `text_body`, MobilePay-maksun kuvaus `mobilepay_payment_prepare`, `email_outbox_claim`-data), kumppanien nimet ovat avaimina (`email.voucher.partner_*`) mutta samat FI/EN.
+
 ## Uuden tekstin lisääminen (§18.9, jokaisessa PR:ssä)
 
 1. Avain `<alue>.<osa>.<nimi>` (virheet: `ui.<alue>.error_<RPC-koodi>`), FI + EN, luokka `normal`/`protected`.

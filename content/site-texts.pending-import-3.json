@@ -1,0 +1,3299 @@
+[
+ {
+  "key": "email.common.hello",
+  "lang": "fi",
+  "text": "Hei {{var:name}},",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.common.hello",
+  "lang": "en",
+  "text": "Hello {{var:name}},",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.common.hello_anon",
+  "lang": "fi",
+  "text": "Hei,",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.common.hello_anon",
+  "lang": "en",
+  "text": "Hello,",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.common.closing",
+  "lang": "fi",
+  "text": "Ystävällisin terveisin,",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.common.closing",
+  "lang": "en",
+  "text": "Kind regards,",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.common.contact",
+  "lang": "fi",
+  "text": "Kysyttävää? Vastaa tähän viestiin tai soita {{var:phone}}.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:phone}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.common.contact",
+  "lang": "en",
+  "text": "Questions? Reply to this email or call {{var:phone}}.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:phone}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.common.view_order",
+  "lang": "fi",
+  "text": "Avaa tilauksesi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.common.view_order",
+  "lang": "en",
+  "text": "View your order",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.common.your_order",
+  "lang": "fi",
+  "text": "Tilauksesi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.common.your_order",
+  "lang": "en",
+  "text": "Your order",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.order",
+  "lang": "fi",
+  "text": "Tilaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.order",
+  "lang": "en",
+  "text": "Order",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.when",
+  "lang": "fi",
+  "text": "Aika",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.when",
+  "lang": "en",
+  "text": "Time",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.product",
+  "lang": "fi",
+  "text": "Tuote",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.product",
+  "lang": "en",
+  "text": "Product",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.persons",
+  "lang": "fi",
+  "text": "Henkilöt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.persons",
+  "lang": "en",
+  "text": "Guests",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.qty",
+  "lang": "fi",
+  "text": "Kpl",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.qty",
+  "lang": "en",
+  "text": "Qty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.sum",
+  "lang": "fi",
+  "text": "Summa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.sum",
+  "lang": "en",
+  "text": "Amount",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.total",
+  "lang": "fi",
+  "text": "Yhteensä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.total",
+  "lang": "en",
+  "text": "Total",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.pers",
+  "lang": "fi",
+  "text": "hlö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.pers",
+  "lang": "en",
+  "text": "guests",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.bookings",
+  "lang": "fi",
+  "text": "Varaukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.bookings",
+  "lang": "en",
+  "text": "Bookings",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.lines",
+  "lang": "fi",
+  "text": "Tilausrivit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_block.lines",
+  "lang": "en",
+  "text": "Order lines",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_confirmation.subject",
+  "lang": "fi",
+  "text": "Tilausvahvistus {{var:no}} – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}",
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_confirmation.subject",
+  "lang": "en",
+  "text": "Order confirmation {{var:no}} – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}",
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_confirmation.title",
+  "lang": "fi",
+  "text": "Tilausvahvistus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_confirmation.title",
+  "lang": "en",
+  "text": "Order confirmation",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_confirmation.intro",
+  "lang": "fi",
+  "text": "Kiitos tilauksestasi. Varauksesi on vahvistettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_confirmation.intro",
+  "lang": "en",
+  "text": "Thank you for your order. Your booking is confirmed.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_confirmation.more",
+  "lang": "fi",
+  "text": "Voit katsoa tilaustasi, lisätä siihen palveluita, pyytää muutoksia ja ladata kuitit täältä:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_confirmation.more",
+  "lang": "en",
+  "text": "You can view your order, add services, request changes and download receipts here:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.payment_link.subject",
+  "lang": "fi",
+  "text": "Maksulinkki tilaukseen {{var:no}} – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}",
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.payment_link.subject",
+  "lang": "en",
+  "text": "Payment link for order {{var:no}} – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}",
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.payment_link.title",
+  "lang": "fi",
+  "text": "Maksulinkki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.payment_link.title",
+  "lang": "en",
+  "text": "Payment link",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.payment_link.intro",
+  "lang": "fi",
+  "text": "Voit maksaa tilauksen maksamattoman osuuden ({{var:amount}}) alla olevasta linkistä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.payment_link.intro",
+  "lang": "en",
+  "text": "You can pay the outstanding amount of {{var:amount}} using the link below.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.payment_link.expires",
+  "lang": "fi",
+  "text": "Linkki on voimassa {{var:date}} asti.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.payment_link.expires",
+  "lang": "en",
+  "text": "The link is valid until {{var:date}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.payment_link.amount_label",
+  "lang": "fi",
+  "text": "Maksettava",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.payment_link.amount_label",
+  "lang": "en",
+  "text": "Amount to pay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.payment_link.pay_button",
+  "lang": "fi",
+  "text": "Maksa nyt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.payment_link.pay_button",
+  "lang": "en",
+  "text": "Pay now",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt.subject",
+  "lang": "fi",
+  "text": "Kuitti {{var:no}} – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}",
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt.subject",
+  "lang": "en",
+  "text": "Receipt {{var:no}} – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}",
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt.title",
+  "lang": "fi",
+  "text": "Kuitti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt.title",
+  "lang": "en",
+  "text": "Receipt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt.intro",
+  "lang": "fi",
+  "text": "Kiitos maksustasi. Kuittisi on alla ja liitteenä PDF-tiedostona.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt.intro",
+  "lang": "en",
+  "text": "Thank you for your payment. Your receipt is below and attached as a PDF.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt.meta_no",
+  "lang": "fi",
+  "text": "Kuittinumero",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt.meta_no",
+  "lang": "en",
+  "text": "Receipt no.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt.meta_date",
+  "lang": "fi",
+  "text": "Päivämäärä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt.meta_date",
+  "lang": "en",
+  "text": "Date",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt.meta_paid",
+  "lang": "fi",
+  "text": "Maksettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt.meta_paid",
+  "lang": "en",
+  "text": "Paid",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.refund_receipt.subject",
+  "lang": "fi",
+  "text": "Hyvityskuitti {{var:no}} – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}",
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.refund_receipt.subject",
+  "lang": "en",
+  "text": "Refund receipt {{var:no}} – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}",
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.refund_receipt.title",
+  "lang": "fi",
+  "text": "Hyvityskuitti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.refund_receipt.title",
+  "lang": "en",
+  "text": "Refund receipt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.refund_receipt.intro",
+  "lang": "fi",
+  "text": "Tilauksestasi on tehty hyvitys. Hyvityskuitti on alla ja liitteenä PDF-tiedostona.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.refund_receipt.intro",
+  "lang": "en",
+  "text": "A refund has been made for your order. The refund receipt is below and attached as a PDF.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.refund_receipt.intro_amount",
+  "lang": "fi",
+  "text": "Tilauksestasi on tehty hyvitys ({{var:amount}}). Hyvityskuitti on alla ja liitteenä PDF-tiedostona.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.refund_receipt.intro_amount",
+  "lang": "en",
+  "text": "A refund of {{var:amount}} has been made for your order. The refund receipt is below and attached as a PDF.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.refund_receipt.meta_refunded",
+  "lang": "fi",
+  "text": "Hyvitetty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.refund_receipt.meta_refunded",
+  "lang": "en",
+  "text": "Refunded",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.cancel_request_ack.subject",
+  "lang": "fi",
+  "text": "Peruutuspyyntösi on vastaanotettu – tilaus {{var:no}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.cancel_request_ack.subject",
+  "lang": "en",
+  "text": "We received your cancellation request – order {{var:no}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.cancel_request_ack.title",
+  "lang": "fi",
+  "text": "Peruutuspyyntö vastaanotettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.cancel_request_ack.title",
+  "lang": "en",
+  "text": "Cancellation request received",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.cancel_request_ack.message",
+  "lang": "fi",
+  "text": "Olemme vastaanottaneet peruutuspyyntösi. Henkilökuntamme käsittelee sen ja ottaa yhteyttä. Varaus on voimassa, kunnes peruutus on vahvistettu.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.cancel_request_ack.message",
+  "lang": "en",
+  "text": "We have received your cancellation request. Our staff will handle it and contact you. The booking remains valid until the cancellation is confirmed.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_change.subject",
+  "lang": "fi",
+  "text": "Tilauksesi on muuttunut – {{var:no}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_change.subject",
+  "lang": "en",
+  "text": "Your order has changed – {{var:no}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_change.title",
+  "lang": "fi",
+  "text": "Tilaus päivitetty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_change.title",
+  "lang": "en",
+  "text": "Order updated",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_change.message",
+  "lang": "fi",
+  "text": "Tilaustasi on päivitetty. Ajantasaiset tiedot ovat alla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_change.message",
+  "lang": "en",
+  "text": "Your order has been updated. The current details are below.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.subject_buyer",
+  "lang": "fi",
+  "text": "Lahjakorttisi – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.subject_buyer",
+  "lang": "en",
+  "text": "Your gift card – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.subject_buyer_many",
+  "lang": "fi",
+  "text": "Lahjakorttisi – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.subject_buyer_many",
+  "lang": "en",
+  "text": "Your gift cards – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.subject_buyer_to_recipient",
+  "lang": "fi",
+  "text": "Lahjakorttitilauksesi vahvistus – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.subject_buyer_to_recipient",
+  "lang": "en",
+  "text": "Your gift card order is confirmed – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.subject_recipient_from",
+  "lang": "fi",
+  "text": "{{var:from}} lahjoittaa sinulle lahjakortin – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:from}}",
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.subject_recipient_from",
+  "lang": "en",
+  "text": "{{var:from}} sent you a gift card – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:from}}",
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.subject_recipient",
+  "lang": "fi",
+  "text": "Sait lahjakortin – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.subject_recipient",
+  "lang": "en",
+  "text": "You have received a gift card – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.title_buyer",
+  "lang": "fi",
+  "text": "Lahjakorttisi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.title_buyer",
+  "lang": "en",
+  "text": "Your gift card",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.title_buyer_to_recipient",
+  "lang": "fi",
+  "text": "Tilausvahvistus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.title_buyer_to_recipient",
+  "lang": "en",
+  "text": "Order confirmation",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.title_recipient",
+  "lang": "fi",
+  "text": "Sait lahjakortin",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.title_recipient",
+  "lang": "en",
+  "text": "You received a gift card",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.intro_buyer",
+  "lang": "fi",
+  "text": "Kiitos ostoksestasi! Lahjakortti on valmis. Avaa PDF alla olevasta linkistä – voit tulostaa sen tai välittää sen lahjan saajalle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.intro_buyer",
+  "lang": "en",
+  "text": "Thank you for your purchase! Your gift card is ready. Open the PDF from the link below – you can print it or forward it to the recipient.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.intro_buyer_many",
+  "lang": "fi",
+  "text": "Kiitos ostoksestasi! Lahjakorttit ovat valmiit. Avaa PDF alla olevasta linkistä – voit tulostaa sen tai välittää sen lahjan saajalle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.intro_buyer_many",
+  "lang": "en",
+  "text": "Thank you for your purchase! Your gift cards are ready. Open the PDF from the link below – you can print it or forward it to the recipient.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.intro_buyer_to_recipient",
+  "lang": "fi",
+  "text": "Kiitos ostoksestasi! Tilauksesi on vahvistettu ja lahjakortti toimitetaan valintasi mukaan suoraan saajalle sähköpostitse.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.intro_buyer_to_recipient",
+  "lang": "en",
+  "text": "Thank you for your purchase! Your order is confirmed and the gift card is delivered directly to the recipient by email, as you chose.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.intro_buyer_to_recipient_many",
+  "lang": "fi",
+  "text": "Kiitos ostoksestasi! Tilauksesi on vahvistettu ja lahjakorttit toimitetaan valintasi mukaan suoraan saajalle sähköpostitse.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.intro_buyer_to_recipient_many",
+  "lang": "en",
+  "text": "Thank you for your purchase! Your order is confirmed and the gift cards are delivered directly to the recipient by email, as you chose.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.intro_recipient",
+  "lang": "fi",
+  "text": "{{var:from}} on lahjoittanut sinulle lahjakortin Sipoonjoen Perinnesaunalle. Nauti!",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{var:from}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.intro_recipient",
+  "lang": "en",
+  "text": "{{var:from}} has sent you a gift card to {{setting:business_name}}. Enjoy!",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{var:from}}",
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.someone",
+  "lang": "fi",
+  "text": "Joku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.someone",
+  "lang": "en",
+  "text": "Someone",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.how_online",
+  "lang": "fi",
+  "text": "Lahjakortin koodi on PDF-tiedostossa. Varaa aika verkossa osoitteessa saunotus.fi ja syötä koodi maksuvaiheessa, tai kerro koodi saunalla.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.how_online",
+  "lang": "en",
+  "text": "The gift card code is in the PDF. Book online at saunotus.fi and enter the code at checkout, or tell us the code at the sauna.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.how_offline",
+  "lang": "fi",
+  "text": "Lahjakortin koodi on PDF-tiedostossa. Kerro koodi saunalla tai ota yhteyttä varataksesi ajan.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.how_offline",
+  "lang": "en",
+  "text": "The gift card code is in the PDF. Tell us the code at the sauna or contact us to book.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.note_share",
+  "lang": "fi",
+  "text": "Vinkki: linkki sisältää kortin koodin – jaa se vain lahjan saajalle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.note_share",
+  "lang": "en",
+  "text": "Tip: the link contains the card code – share it only with the recipient.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.note_recipient_separate",
+  "lang": "fi",
+  "text": "Saaja saa lahjakortin, sen koodin ja ohjeet omassa sähköpostiviestissään. Jos viesti ei saavu perille, ota yhteyttä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.note_recipient_separate",
+  "lang": "en",
+  "text": "The recipient receives the gift card, its code and instructions in a separate email. If it does not arrive, please contact us.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.card_open",
+  "lang": "fi",
+  "text": "Avoin lahjakortti (käy kaikkiin palveluihimme)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.card_open",
+  "lang": "en",
+  "text": "Open gift card (valid for all our services)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.card_default",
+  "lang": "fi",
+  "text": "Lahjakortti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.card_default",
+  "lang": "en",
+  "text": "Gift card",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.meta_persons",
+  "lang": "fi",
+  "text": "{{var:n}} henkilöä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.meta_persons",
+  "lang": "en",
+  "text": "{{var:n}} guests",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.meta_valid",
+  "lang": "fi",
+  "text": "voimassa {{var:date}} asti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.meta_valid",
+  "lang": "en",
+  "text": "valid until {{var:date}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.meta_for",
+  "lang": "fi",
+  "text": "saaja: {{var:name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.meta_for",
+  "lang": "en",
+  "text": "for {{var:name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.when_at",
+  "lang": "fi",
+  "text": "{{var:date}} klo {{var:time}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}",
+   "{{var:time}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.when_at",
+  "lang": "en",
+  "text": "{{var:date}} at {{var:time}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}",
+   "{{var:time}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.delivery_scheduled",
+  "lang": "fi",
+  "text": "Lahjakortti lähetetään saajalle ({{var:who}}) {{var:when}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:who}}",
+   "{{var:when}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.delivery_scheduled",
+  "lang": "en",
+  "text": "The gift card will be sent to the recipient ({{var:who}}) on {{var:when}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:who}}",
+   "{{var:when}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.delivery_sent",
+  "lang": "fi",
+  "text": "Lahjakortti on lähetetty saajalle ({{var:who}}).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:who}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.delivery_sent",
+  "lang": "en",
+  "text": "The gift card has been sent to the recipient ({{var:who}}).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:who}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.open_button",
+  "lang": "fi",
+  "text": "Avaa lahjakortti (PDF)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card.open_button",
+  "lang": "en",
+  "text": "Open gift card (PDF)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.partner_elamyslahjat",
+  "lang": "fi",
+  "text": "Elämyslahjat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.partner_elamyslahjat",
+  "lang": "en",
+  "text": "Elämyslahjat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.partner_kokemuskauppa",
+  "lang": "fi",
+  "text": "Kokemuskauppa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.partner_kokemuskauppa",
+  "lang": "en",
+  "text": "Kokemuskauppa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.partner_kiitoskauppa",
+  "lang": "fi",
+  "text": "Kiitoskauppa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.partner_kiitoskauppa",
+  "lang": "en",
+  "text": "Kiitoskauppa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.partner_offerilla",
+  "lang": "fi",
+  "text": "Offerilla",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.partner_offerilla",
+  "lang": "en",
+  "text": "Offerilla",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.partner_other",
+  "lang": "fi",
+  "text": "kumppani",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.partner_other",
+  "lang": "en",
+  "text": "partner",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.what_with_code",
+  "lang": "fi",
+  "text": "{{var:label}}, koodi {{var:code}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:label}}",
+   "{{var:code}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.what_with_code",
+  "lang": "en",
+  "text": "{{var:label}}, code {{var:code}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:label}}",
+   "{{var:code}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.sign_name",
+  "lang": "fi",
+  "text": "Tapio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.sign_name",
+  "lang": "en",
+  "text": "Tapio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.contact",
+  "lang": "fi",
+  "text": "Kysyttävää? Vastaa tähän viestiin tai kirjoita {{var:email}}.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:email}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.contact",
+  "lang": "en",
+  "text": "Questions? Reply to this email or write to {{var:email}}.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:email}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.view_order",
+  "lang": "fi",
+  "text": "Avaa tilauksesi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.view_order",
+  "lang": "en",
+  "text": "Open your order",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.more_received",
+  "lang": "fi",
+  "text": "Voit seurata varauksesi tilaa täältä:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.more_received",
+  "lang": "en",
+  "text": "You can follow the status of your booking here:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.more_problem",
+  "lang": "fi",
+  "text": "Tilauksesi:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.more_problem",
+  "lang": "en",
+  "text": "Your order:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.received_subject",
+  "lang": "fi",
+  "text": "Kiitos lahjakorttivarauksesta – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.received_subject",
+  "lang": "en",
+  "text": "Thank you for your gift card booking – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.received_title",
+  "lang": "fi",
+  "text": "Kiitos lahjakorttivarauksesta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.received_title",
+  "lang": "en",
+  "text": "Thank you for your gift card booking",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.received_p1",
+  "lang": "fi",
+  "text": "Kiitos varauksestasi! Olemme vastaanottaneet lahjakorttisi ({{var:what}}) ja aikasi on varattu sinulle.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:what}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.received_p1",
+  "lang": "en",
+  "text": "Thank you for your booking! We have received your gift card ({{var:what}}) and your time is reserved for you.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:what}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.received_p2",
+  "lang": "fi",
+  "text": "Tarkistamme ja lunastamme lahjakortin pian. Jos lunastuksessa ilmenee ongelmia, olemme sinuun yhteydessä.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.received_p2",
+  "lang": "en",
+  "text": "We will check and redeem the gift card shortly. If there are any problems with the redemption, we will contact you.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.problem_how",
+  "lang": "fi",
+  "text": "Voit korjata asian kahdella tavalla: syötä oikea koodi tilaussivullamme (alla oleva linkki) tai vastaa tähän viestiin ja kerro oikea koodi.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.problem_how",
+  "lang": "en",
+  "text": "You can fix this in two ways: enter the correct code on your order page (link below), or reply to this email with the correct code.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.expired_subject",
+  "lang": "fi",
+  "text": "Lahjakortin voimassaolo on päättynyt – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.expired_subject",
+  "lang": "en",
+  "text": "Your gift card has expired – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.expired_title",
+  "lang": "fi",
+  "text": "Lahjakortin voimassaolo on päättynyt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.expired_title",
+  "lang": "en",
+  "text": "Your gift card has expired",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.expired_p1",
+  "lang": "fi",
+  "text": "Emme valitettavasti pystyneet lunastamaan lahjakorttiasi ({{var:what}}): koodin voimassaolo on päättynyt.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:what}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.expired_p1",
+  "lang": "en",
+  "text": "Unfortunately we could not redeem your gift card ({{var:what}}): the code has expired.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:what}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.expired_p2",
+  "lang": "fi",
+  "text": "Jos uskot, että koodi on vielä voimassa, vastaa tähän viestiin tai ota yhteyttä saunalle, niin selvitämme asian. Voit myös kysyä lahjakortin myyjältä ({{var:label}}) voimassaolon jatkamista tai maksaa varauksen muulla tavalla.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 600,
+  "placeholders": [
+   "{{var:label}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.expired_p2",
+  "lang": "en",
+  "text": "If you believe the code is still valid, reply to this email or contact us and we will look into it. You can also ask {{var:label}} whether the validity can be extended, or pay for the booking in another way.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 600,
+  "placeholders": [
+   "{{var:label}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.used_subject",
+  "lang": "fi",
+  "text": "Lahjakortin koodi on jo käytetty – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.used_subject",
+  "lang": "en",
+  "text": "Your gift card code has already been used – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.used_title",
+  "lang": "fi",
+  "text": "Lahjakortin koodi on jo käytetty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.used_title",
+  "lang": "en",
+  "text": "The gift card code has already been used",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.used_p1",
+  "lang": "fi",
+  "text": "Emme valitettavasti pystyneet lunastamaan lahjakorttiasi ({{var:what}}): koodi näyttää olevan jo käytetty.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:what}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.used_p1",
+  "lang": "en",
+  "text": "Unfortunately we could not redeem your gift card ({{var:what}}): the code appears to have been used already.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:what}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.used_p2",
+  "lang": "fi",
+  "text": "Jos lahjakorttia ei ole vielä käytetty, ole meihin yhteydessä: {{var:email}}",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:email}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.used_p2",
+  "lang": "en",
+  "text": "If the gift card has not been used yet, please contact us: {{var:email}}",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:email}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.used_p3",
+  "lang": "fi",
+  "text": "Jos sinulla on toinen koodi, voit lähettää sen meille tai syöttää sen tilaussivullamme.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.used_p3",
+  "lang": "en",
+  "text": "If you have another code, you can send it to us or enter it on your order page.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.invalid_subject",
+  "lang": "fi",
+  "text": "Lahjakortin koodia ei löytynyt – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.invalid_subject",
+  "lang": "en",
+  "text": "We could not find your gift card code – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.invalid_title",
+  "lang": "fi",
+  "text": "Lahjakortin koodia ei löytynyt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.invalid_title",
+  "lang": "en",
+  "text": "We could not find your gift card code",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.invalid_p1",
+  "lang": "fi",
+  "text": "Emme valitettavasti pystyneet lunastamaan lahjakorttiasi ({{var:what}}): koodia ei löytynyt kumppanin ({{var:label}}) järjestelmästä. Syynä voi olla kirjoitusvirhe koodissa.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 450,
+  "placeholders": [
+   "{{var:what}}",
+   "{{var:label}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.invalid_p1",
+  "lang": "en",
+  "text": "Unfortunately we could not redeem your gift card ({{var:what}}): the code was not found in the {{var:label}} system. This may be due to a typo in the code.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 450,
+  "placeholders": [
+   "{{var:what}}",
+   "{{var:label}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.other_subject",
+  "lang": "fi",
+  "text": "Lahjakorttisi lunastuksesta – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.other_subject",
+  "lang": "en",
+  "text": "About your gift card – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.other_title",
+  "lang": "fi",
+  "text": "Lahjakorttisi lunastuksesta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.other_title",
+  "lang": "en",
+  "text": "About your gift card",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.other_p1",
+  "lang": "fi",
+  "text": "Lahjakortin ({{var:what}}) lunastuksessa on ilmennyt ongelma. Selvitämme asian ja otamme sinuun yhteyttä.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:what}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.voucher.other_p1",
+  "lang": "en",
+  "text": "We ran into a problem redeeming your gift card ({{var:what}}). We will look into it and contact you.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:what}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.title",
+  "lang": "fi",
+  "text": "Lahjakortti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.title",
+  "lang": "en",
+  "text": "Gift card",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.producer",
+  "lang": "fi",
+  "text": "{{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.producer",
+  "lang": "en",
+  "text": "{{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.open_card_name",
+  "lang": "fi",
+  "text": "Käy kaikkiin palveluihimme",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.open_card_name",
+  "lang": "en",
+  "text": "Valid for all our services",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.default_package_name",
+  "lang": "fi",
+  "text": "Savusaunalahjakortti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.default_package_name",
+  "lang": "en",
+  "text": "Smoke sauna gift card",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.includes",
+  "lang": "fi",
+  "text": "Sisältää",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.includes",
+  "lang": "en",
+  "text": "Includes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.for",
+  "lang": "fi",
+  "text": "Saajalle",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.for",
+  "lang": "en",
+  "text": "For",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.from",
+  "lang": "fi",
+  "text": "Lahjoittaja",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.from",
+  "lang": "en",
+  "text": "From",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.code_label",
+  "lang": "fi",
+  "text": "Lahjakortin koodi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.code_label",
+  "lang": "en",
+  "text": "Gift card code",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.valid_until",
+  "lang": "fi",
+  "text": "Voimassa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.valid_until",
+  "lang": "en",
+  "text": "Valid until",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.valid_value",
+  "lang": "fi",
+  "text": "{{var:date}} asti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.valid_value",
+  "lang": "en",
+  "text": "{{var:date}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.persons_label",
+  "lang": "fi",
+  "text": "Henkilömäärä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.persons_label",
+  "lang": "en",
+  "text": "Persons",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.persons_value",
+  "lang": "fi",
+  "text": "{{var:n}} henkilöä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.persons_value",
+  "lang": "en",
+  "text": "{{var:n}} persons",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.balance",
+  "lang": "fi",
+  "text": "Saldo",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.balance",
+  "lang": "en",
+  "text": "Balance",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.issued",
+  "lang": "fi",
+  "text": "Myönnetty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.issued",
+  "lang": "en",
+  "text": "Issued",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.how_online",
+  "lang": "fi",
+  "text": "Varaa aika osoitteessa {{var:web}} ja syötä koodi maksuvaiheessa tai kerro koodi saunalla.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{var:web}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.how_online",
+  "lang": "en",
+  "text": "Book at {{var:web}} and enter the code at checkout, or tell us the code at the sauna.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{var:web}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.how_offline",
+  "lang": "fi",
+  "text": "Kerro koodi saunalla tai ota yhteyttä: {{var:contact}}.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:contact}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.how_offline",
+  "lang": "en",
+  "text": "Tell us the code at the sauna or contact us: {{var:contact}}.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:contact}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.stamp_expired",
+  "lang": "fi",
+  "text": "VANHENTUNUT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.stamp_expired",
+  "lang": "en",
+  "text": "EXPIRED",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.stamp_used",
+  "lang": "fi",
+  "text": "KÄYTETTY",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.stamp_used",
+  "lang": "en",
+  "text": "USED",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.footer_name",
+  "lang": "fi",
+  "text": "{{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.footer_name",
+  "lang": "en",
+  "text": "{{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.business_id",
+  "lang": "fi",
+  "text": "Y-tunnus {{var:id}}",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:id}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.gift_card_pdf.business_id",
+  "lang": "en",
+  "text": "Business ID {{var:id}}",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:id}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.producer",
+  "lang": "fi",
+  "text": "{{setting:business_name}}",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.producer",
+  "lang": "en",
+  "text": "{{setting:business_name}}",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.business_id",
+  "lang": "fi",
+  "text": "Y-tunnus {{var:id}}",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:id}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.business_id",
+  "lang": "en",
+  "text": "Business ID {{var:id}}",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:id}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.vat_id",
+  "lang": "fi",
+  "text": "ALV-tunnus {{var:id}}",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:id}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.vat_id",
+  "lang": "en",
+  "text": "VAT ID {{var:id}}",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:id}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.title_refund",
+  "lang": "fi",
+  "text": "HYVITYSKUITTI",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.title_refund",
+  "lang": "en",
+  "text": "REFUND RECEIPT",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.title_invoice",
+  "lang": "fi",
+  "text": "KUITTI / LASKU",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.title_invoice",
+  "lang": "en",
+  "text": "RECEIPT / INVOICE",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.title",
+  "lang": "fi",
+  "text": "KUITTI",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.title",
+  "lang": "en",
+  "text": "RECEIPT",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.date",
+  "lang": "fi",
+  "text": "Päivämäärä",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.date",
+  "lang": "en",
+  "text": "Date",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.date_value",
+  "lang": "fi",
+  "text": "{{var:date}} klo {{var:time}}",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}",
+   "{{var:time}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.date_value",
+  "lang": "en",
+  "text": "{{var:date}} at {{var:time}}",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}",
+   "{{var:time}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.order",
+  "lang": "fi",
+  "text": "Tilaus",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.order",
+  "lang": "en",
+  "text": "Order",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.payment_method",
+  "lang": "fi",
+  "text": "Maksutapa",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.payment_method",
+  "lang": "en",
+  "text": "Payment method",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.original",
+  "lang": "fi",
+  "text": "Alkuperäinen kuitti",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.original",
+  "lang": "en",
+  "text": "Original receipt",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.reason",
+  "lang": "fi",
+  "text": "Hyvityksen syy",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.reason",
+  "lang": "en",
+  "text": "Reason",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.buyer",
+  "lang": "fi",
+  "text": "Ostaja",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.buyer",
+  "lang": "en",
+  "text": "Buyer",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.reference",
+  "lang": "fi",
+  "text": "Viitteenne: {{var:ref}}",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:ref}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.reference",
+  "lang": "en",
+  "text": "Your reference: {{var:ref}}",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:ref}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.col_item",
+  "lang": "fi",
+  "text": "Tuote",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.col_item",
+  "lang": "en",
+  "text": "Item",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.col_qty",
+  "lang": "fi",
+  "text": "Kpl",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.col_qty",
+  "lang": "en",
+  "text": "Qty",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.col_unit",
+  "lang": "fi",
+  "text": "À hinta",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.col_unit",
+  "lang": "en",
+  "text": "Unit",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.col_vat",
+  "lang": "fi",
+  "text": "ALV",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.col_vat",
+  "lang": "en",
+  "text": "VAT",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.col_total",
+  "lang": "fi",
+  "text": "Yhteensä",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.col_total",
+  "lang": "en",
+  "text": "Total",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.vat_breakdown",
+  "lang": "fi",
+  "text": "ALV-erittely",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.vat_breakdown",
+  "lang": "en",
+  "text": "VAT breakdown",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.col_rate",
+  "lang": "fi",
+  "text": "Verokanta",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.col_rate",
+  "lang": "en",
+  "text": "Rate",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.col_net",
+  "lang": "fi",
+  "text": "Veroton",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.col_net",
+  "lang": "en",
+  "text": "Excl. VAT",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.total_gross",
+  "lang": "fi",
+  "text": "Yhteensä (sis. ALV)",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.total_gross",
+  "lang": "en",
+  "text": "Total (incl. VAT)",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.of_which_vat",
+  "lang": "fi",
+  "text": "josta ALV",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.of_which_vat",
+  "lang": "en",
+  "text": "of which VAT",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.rounding",
+  "lang": "fi",
+  "text": "Käteispyöristys",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.rounding",
+  "lang": "en",
+  "text": "Cash rounding",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.refunded",
+  "lang": "fi",
+  "text": "Hyvitetty",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.refunded",
+  "lang": "en",
+  "text": "Refunded",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.paid",
+  "lang": "fi",
+  "text": "Maksettu",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.receipt_pdf.paid",
+  "lang": "en",
+  "text": "Paid",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (receipt-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.mobilepay.start_error_default",
+  "lang": "fi",
+  "text": "Maksun aloitus epäonnistui",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (mobilepay-start/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.mobilepay.start_error_default",
+  "lang": "en",
+  "text": "Starting the payment failed",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (mobilepay-start/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.mobilepay.start_error_invalid_param",
+  "lang": "fi",
+  "text": "Virheellinen pyyntö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (mobilepay-start/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.mobilepay.start_error_invalid_param",
+  "lang": "en",
+  "text": "Invalid request",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (mobilepay-start/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.mobilepay.start_error_off",
+  "lang": "fi",
+  "text": "MobilePay-maksu ei ole käytössä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (mobilepay-start/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.mobilepay.start_error_off",
+  "lang": "en",
+  "text": "MobilePay payment is not available",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (mobilepay-start/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.mobilepay.start_error_unavailable",
+  "lang": "fi",
+  "text": "MobilePay-maksu ei ole käytettävissä juuri nyt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (mobilepay-start/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.mobilepay.start_error_unavailable",
+  "lang": "en",
+  "text": "MobilePay payment is not available right now",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (mobilepay-start/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.mobilepay.start_error_provider",
+  "lang": "fi",
+  "text": "MobilePay-maksun aloitus epäonnistui",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (mobilepay-start/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.mobilepay.start_error_provider",
+  "lang": "en",
+  "text": "Starting the MobilePay payment failed",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (mobilepay-start/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.mobilepay.start_error_provider_retry",
+  "lang": "fi",
+  "text": "MobilePay-maksun aloitus epäonnistui, yritä hetken kuluttua uudelleen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (mobilepay-start/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.mobilepay.start_error_provider_retry",
+  "lang": "en",
+  "text": "Starting the MobilePay payment failed, please try again in a moment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (mobilepay-start/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ }
+]

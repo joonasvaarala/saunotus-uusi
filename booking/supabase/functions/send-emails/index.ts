@@ -3,6 +3,8 @@
 // Salaisuus: RESEND_API_KEY (Edge Function secret). Ei muita salaisuuksia; SUPABASE_URL/SERVICE_ROLE_KEY tulevat ympäristöstä.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { render, type Kind } from "./templates.ts";
+import { EMAIL_TEXTS } from "./texts.ts";
+import { fetchSiteTexts, makeT } from "../_shared/site_texts.ts";
 
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { "content-type": "application/json" } });
 const b64 = (u8: Uint8Array) => { let s = ""; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode(...u8.subarray(i, i + 0x8000)); return btoa(s); };
@@ -26,6 +28,9 @@ Deno.serve(async (req) => {
   if (claimed.error) return json({ ok: false, error: claimed.error.message }, 500);
   const rows: any[] = claimed.data ?? [];
   const stats = { mode, claimed: rows.length, sent: 0, dry_run: 0, skipped: 0, failed: 0 };
+  // viestien asiakasnäkyvät tekstit: tietokanta (email.*, anon-avain, vain luku; §18) → repon oletus jos haku epäonnistuu tai rivi puuttuu. Haetaan vain kun on lähetettävää.
+  const st = rows.length ? await fetchSiteTexts({ url, anonKey: Deno.env.get("SUPABASE_ANON_KEY"), prefixes: ["email."] }) : null;
+  const t = makeT(EMAIL_TEXTS, st?.rows, st?.settings);
 
   for (const r of rows) {
     try {
@@ -40,7 +45,7 @@ Deno.serve(async (req) => {
       }
       if (r.kind === "voucher_claim_problem" && r.voucher_claim?.status !== "problem") { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: "pyyntö ei enää ongelmatilassa" }); stats.skipped++; continue; }
       if (r.kind === "voucher_claim_received" && (!r.voucher_claim || ["cancelled", "expired"].includes(r.voucher_claim.status))) { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: "pyyntö peruttu/vanhentunut" }); stats.skipped++; continue; }
-      const m = render(r.kind as Kind, r, r.locale);
+      const m = render(r.kind as Kind, r, r.locale, t);
       if (!m.subject || !m.text || !m.html) throw new Error("tyhjä mallipohja");
       if (mode !== "live") { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "dry_run", p_error: `dry_run: ${m.subject}` }); stats.dry_run++; continue; }
       if (!key) throw new Error("RESEND_API_KEY puuttuu");

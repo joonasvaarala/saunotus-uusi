@@ -86,6 +86,13 @@ jobs:
         with:
           node-version: 22
       - run: node --test booking/supabase/functions/send-emails/templates.test.mjs
+      # sivutekstit osa 3 / PR 3: sähköpostien/PDF:ien/maksusivun tekstit avaimiksi (tuontitiedosto, tavu tavulta samat viestit; TypeScript-taulukot → Node 22)
+      - run: node --test booking/tests/sivutekstit-funktiot.test.mjs
+      # edge-funktioiden Deno-testit: PDF:t samat tavut kuin ennen tekstisiirtoa, tekstihaku (_shared/site_texts.ts), MobilePay-virhetekstit
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno test -A --no-lock --node-modules-dir=none booking/supabase/functions/pdf-golden.test.ts booking/supabase/functions/_tests/site_texts_test.ts booking/supabase/functions/_tests/mobilepay_test.ts
       # lahjakoodi §13.12: kaupan ja hallinnan lunastuspyyntölogiikka (mockatut RPC:t)
       - run: node --test booking/tests/voucher-claims.test.mjs booking/tests/voucher-claims-admin.test.mjs booking/tests/lahjakoodi-vieritys.test.mjs
       - uses: actions/upload-pages-artifact@v3
