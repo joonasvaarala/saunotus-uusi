@@ -1,0 +1,582 @@
+[
+ {
+  "key": "ui.admin.procountor.title",
+  "lang": "fi",
+  "text": "Procountor",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.lead",
+  "lang": "fi",
+  "text": "Kirjanpidon lähetystila. Salaisuuksia ei näytetä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.mode",
+  "lang": "fi",
+  "text": "Tila",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.mode_off",
+  "lang": "fi",
+  "text": "Pois päältä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.mode_dry_run",
+  "lang": "fi",
+  "text": "Harjoitusajo",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.mode_live",
+  "lang": "fi",
+  "text": "Yhdistetty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.env",
+  "lang": "fi",
+  "text": "Ympäristö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.env_pts",
+  "lang": "fi",
+  "text": "Testi (PTS)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.env_prod",
+  "lang": "fi",
+  "text": "Tuotanto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.daily",
+  "lang": "fi",
+  "text": "Päivittäinen myyntikirjaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.daily_on",
+  "lang": "fi",
+  "text": "Käytössä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.daily_off",
+  "lang": "fi",
+  "text": "Ei käytössä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.accounts_ok",
+  "lang": "fi",
+  "text": "Tilit asetettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.accounts_missing",
+  "lang": "fi",
+  "text": "Tilit puuttuvat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.bank_ok",
+  "lang": "fi",
+  "text": "Pankkitili asetettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.bank_missing",
+  "lang": "fi",
+  "text": "Pankkitili puuttuu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.last",
+  "lang": "fi",
+  "text": "Viimeisin ajo",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.last_none",
+  "lang": "fi",
+  "text": "Ei ajoja",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.errors",
+  "lang": "fi",
+  "text": "Virheet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.errors_none",
+  "lang": "fi",
+  "text": "Ei avoimia virheitä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.unavailable",
+  "lang": "fi",
+  "text": "Procountor-tilaa ei saatu haettua.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.status_sent",
+  "lang": "fi",
+  "text": "Lähetetty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.status_dry_run",
+  "lang": "fi",
+  "text": "Harjoitus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.status_failed",
+  "lang": "fi",
+  "text": "Epäonnistui",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.status_needs_review",
+  "lang": "fi",
+  "text": "Tarkistettava",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.status_skipped",
+  "lang": "fi",
+  "text": "Ohitettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.status_pending",
+  "lang": "fi",
+  "text": "Jonossa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.status_processing",
+  "lang": "fi",
+  "text": "Käynnissä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.attempts",
+  "lang": "fi",
+  "text": "Yritykset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.title",
+  "lang": "en",
+  "text": "Procountor",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.lead",
+  "lang": "en",
+  "text": "Accounting send status. Secrets are not shown.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.mode",
+  "lang": "en",
+  "text": "Mode",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.mode_off",
+  "lang": "en",
+  "text": "Off",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.mode_dry_run",
+  "lang": "en",
+  "text": "Dry run",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.mode_live",
+  "lang": "en",
+  "text": "Connected",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.env",
+  "lang": "en",
+  "text": "Environment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.env_pts",
+  "lang": "en",
+  "text": "Test (PTS)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.env_prod",
+  "lang": "en",
+  "text": "Production",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.daily",
+  "lang": "en",
+  "text": "Daily sales posting",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.daily_on",
+  "lang": "en",
+  "text": "On",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.daily_off",
+  "lang": "en",
+  "text": "Off",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.accounts_ok",
+  "lang": "en",
+  "text": "Accounts set",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.accounts_missing",
+  "lang": "en",
+  "text": "Accounts missing",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.bank_ok",
+  "lang": "en",
+  "text": "Bank account set",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.bank_missing",
+  "lang": "en",
+  "text": "Bank account missing",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.last",
+  "lang": "en",
+  "text": "Last run",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.last_none",
+  "lang": "en",
+  "text": "No runs yet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.errors",
+  "lang": "en",
+  "text": "Errors",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.errors_none",
+  "lang": "en",
+  "text": "No open errors",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.unavailable",
+  "lang": "en",
+  "text": "Procountor status could not be loaded.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.status_sent",
+  "lang": "en",
+  "text": "Sent",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.status_dry_run",
+  "lang": "en",
+  "text": "Dry run",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.status_failed",
+  "lang": "en",
+  "text": "Failed",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.status_needs_review",
+  "lang": "en",
+  "text": "Needs review",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.status_skipped",
+  "lang": "en",
+  "text": "Skipped",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.status_pending",
+  "lang": "en",
+  "text": "Pending",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.status_processing",
+  "lang": "en",
+  "text": "Processing",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ },
+ {
+  "key": "ui.admin.procountor.attempts",
+  "lang": "en",
+  "text": "Attempts",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Procountor-asetuskortti (booking_77). FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Ei hintoja, ALV-kantoja eikä URL-osoitteita."
+ }
+]

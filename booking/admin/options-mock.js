@@ -15,7 +15,7 @@ export function helIso(ds, hhmm) {
   return new Date(t).toISOString();
 }
 const err = (code, message) => Object.assign(new Error(message || code), { name: 'ApiError', code, status: 400 });
-const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'reports.view', 'quotes.manage'];
+const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'reports.view', 'quotes.manage', 'settings.edit'];
 const CODE_RE = /^[a-z0-9_]{1,40}$/;
 
 export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager' } = {}) {
@@ -107,6 +107,14 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       const total = rows.length; rows = rows.slice(a.p_offset || 0, (a.p_offset || 0) + (a.p_limit || 50));
       return rows.map((r) => ({ ...view(r), total_count: total }));
     },
+    admin_procountor_status: () => ({
+      ok: true, mode: 'dry_run', environment: 'pts', daily_enabled: false, api_prefix: '/supported/api',
+      accounts_configured: false, bank_account_configured: false, last: null, errors: [],
+    }),
+    'select:settings': () => ([
+      { key: 'timezone', value: 'Europe/Helsinki', is_public: false },
+      { key: 'business_name', value: 'Havuhattu Oy', is_public: true },
+    ]),
     public_get_site_texts: () => ({ ok: true, texts: [
       { key: 'ui.admin.day.revenue_title', lang: 'fi', text: 'Päivän tuotto' },
       { key: 'ui.admin.day.revenue_title', lang: 'en', text: "Day's revenue" },

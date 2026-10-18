@@ -26,4 +26,4 @@ verify_jwt = false   # Vippsin webhook (HMAC-allekirjoitus tarkistetaan funktios
 verify_jwt = true    # henkilökunta (payments.refund tarkistetaan funktiossa) tai service role
 
 [functions.procountor-sync]
-verify_jwt = true
+verify_jwt = false   # pg_cron kutsuu; tunnistus x-sync-secret (booking._cron_secret_ok). Ei JWT:tä.
