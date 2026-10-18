@@ -1,7 +1,7 @@
 // Sivupohjat ja komponentit. Kaikki palauttavat HTML-merkkijonoja; ei ajonaikaista JS:ää (paitsi pieni "tänään"-korostus).
 import { readFileSync } from 'node:fs';
 import { sortReviews } from './reviews-sort.mjs';
-import { articlesNav } from './articles/runtime.mjs';
+import { articlesNav, homeSection } from './articles/runtime.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
   johku, bookingUrl, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
@@ -16,6 +16,8 @@ const minifyCss = (src) => src
 const css = minifyCss(readFileSync(new URL('./styles.css', import.meta.url), 'utf8'));
 // Sisältöosion tyylit: upotetaan vain artikkelisivuille (layout seo.extraCss), ei muille sivuille
 export const articlesCss = minifyCss(readFileSync(new URL('./articles/articles.css', import.meta.url), 'utf8'));
+// Etusivun artikkeliosion tyylit: upotetaan vain etusivulle ja vain kun osio näytetään (layout extraCss)
+export const homeArticlesCss = minifyCss(readFileSync(new URL('./articles/home.css', import.meta.url), 'utf8'));
 
 export const ui = (lang) => site.ui[lang];
 const alt = (id, lang) => alts[id]?.[lang] ?? '';
@@ -217,7 +219,7 @@ function jsonLd(lang) {
     openingHoursSpecification: spec, sameAs: site.social.map((s) => s.url), inLanguage: lang,
   });
 }
-export function layout({ lang, key, meta, body, preload = '', robotsOnly = false, seo = null }) {
+export function layout({ lang, key, meta, body, preload = '', robotsOnly = false, seo = null, extraCss = '' }) {
   const u = ui(lang);
   const path = pagePath(key, lang);
   // seo (valinnainen, sisältöosio): { url, hreflangs:[{hreflang,href}], robots, ogType, ogImage:{url,width,height,alt}, ogExtra, extraHead, extraCss, jsonLd:[object], switchHref, navCurrent }
@@ -250,7 +252,7 @@ ${isTest ? '<meta name="robots" content="noindex,nofollow">' : (seo?.robots ? `<
 <meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#2B3A30">
 <link rel="icon" href="${href('/img/favicon.svg')}" type="image/svg+xml">
 <link rel="preload" href="${href('/fonts/Lato-normal-400.woff2')}" as="font" type="font/woff2" crossorigin>${preload}
-<style>${css}${seo?.extraCss || ''}</style>
+<style>${css}${seo?.extraCss || ''}${extraCss}</style>
 <script type="application/ld+json">${jsonLd(lang)}</script>${(seo?.jsonLd || []).map((j) => `<script type="application/ld+json">${JSON.stringify(j).replace(/</g, '\\u003c')}</script>`).join('')}
 </head><body>
 ${isTest ? `<div class="testbar" role="note">${e(u.siteTestNote)}</div>` : ''}
@@ -282,7 +284,8 @@ ${chat}
 // ---- sivut ----
 const P = (name) => read(`content/pages/${name}.json`);
 
-export function home(lang) {
+export const homeMeta = (lang) => P('home')[lang].meta;
+export function home(lang, opt = {}) {
   const d = P('home')[lang], u = ui(lang);
   const hero = `<section class="hero home">${heroPicture({ alt: alt('hero-ovi-uusi', lang) })}<div class="wrap in"><h1>${e(d.hero.title)}</h1><p>${e(d.hero.text)}</p><div class="actions"><a class="btn gold" href="${pageHref('book', lang)}">${e(d.hero.cta1)}</a><a class="btn ghost" href="${pageHref('gift', lang)}">${e(d.hero.cta2)}</a></div></div></section>`;
   const tiles = `<div class="wrap"><ul class="tiles" style="list-style:none;padding:0;margin-bottom:0">${d.tiles.map((t) => `<li class="tile">${icon(t.icon, 44)}<h2>${e(t.title)}</h2><p>${e(t.text)}</p><div class="lk">${t.links.map((l) => `<a href="${e(link(l.to, lang, 'home'))}">${e(l.label)}</a>`).join('')}</div></li>`).join('')}</ul></div>`;
@@ -299,7 +302,10 @@ export function home(lang) {
   const s = d.story;
   const story = sec('', `${head(s.kicker, s.title, s.lead, { orn: true })}<ol class="timeline">${s.items.map((i) => `<li><b>${e(i.year)}</b>${e(i.text)}</li>`).join('')}</ol><p class="center">${e(s.thanks)}</p><p class="center"><a href="${e(site.social[1].url)}" rel="noopener">${e(s.ig)}${NEW(lang)}</a></p>`);
   const pre = heroPreload();
-  return layout({ lang, key: 'home', meta: d.meta, preload: pre, body: hero + tiles + wk + ritual + feat + reviewsSection(lang) + about + ev + comp + story });
+  // Saunatietoa-osio: esirenderöity buildissa (src/articles/pages.mjs homeSectionHtml); tyhjä merkkijono = ei artikkeleita / haku epäonnistui → osio pois kokonaan
+  const arts = opt.articlesHtml ?? homeSection(lang);
+  const body = (opt.previewNote ? `<p class="prev-note" role="note">${e(opt.previewNote)}</p>` : '') + hero + tiles + wk + ritual + feat + arts + reviewsSection(lang) + about + ev + comp + story;
+  return layout({ lang, key: 'home', meta: opt.meta || d.meta, preload: pre, body, extraCss: arts ? homeArticlesCss : '', seo: opt.seo || null });
 }
 
 export function sauna(lang) {

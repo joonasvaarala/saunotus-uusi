@@ -1,0 +1,127 @@
+{
+ "_doc": "Etusivun artikkeliosion esikatselun ja testien feikkidata (vain kortit; ei oikeita artikkeleita). Kuvat ovat tests/articles/fixtures/images/-kansiossa. 4. artikkeli ja noindex-artikkeli eivät saa näkyä etusivulla.",
+ "fi": [
+  {
+   "slug": "miten-saunotaan-oikein",
+   "title": "Miten saunotaan oikein? Perinteinen opas",
+   "summary": "Perinteinen saunominen on rauhallista: kolme kierrosta, riittävästi lepoa ja vettä. Tässä lyhyt opas ensikertalaiselle, joka haluaa nauttia savusaunan löylystä oikein ja turvallisesti koko illan ajan.",
+   "published_at": "2026-10-17T08:00:00+00:00",
+   "noindex": false,
+   "image": {
+    "id": 1,
+    "alt": "",
+    "url": "https://fixture.example/storage/article-images/articles/1/1760000001-heroaaa1.jpg",
+    "mime": "image/jpeg",
+    "width": 1600,
+    "height": 900
+   },
+   "lang": "fi"
+  },
+  {
+   "slug": "vihta-ja-vasta",
+   "title": "Vihta vai vasta? Näin valmistat ja käytät kotoisen saunavihdan",
+   "summary": "Tuore koivuvihta tuoksuu kesältä.",
+   "published_at": "2026-10-12T08:00:00+00:00",
+   "noindex": false,
+   "image": {
+    "id": 4,
+    "alt": "",
+    "url": "https://fixture.example/storage/article-images/articles/4/1760000004-heroddd4.jpg",
+    "mime": "image/jpeg",
+    "width": 1600,
+    "height": 900
+   },
+   "lang": "fi"
+  },
+  {
+   "slug": "savusauna-lampiaminen",
+   "title": "Savusaunan lämmitys alusta loppuun",
+   "summary": "Savusauna lämmitetään kuudesta kahdeksaan tuntia. Kerromme, miten kiuas, savu ja kiviä pitävä lämpö toimivat yhdessä ja milloin sauna on valmis.",
+   "published_at": "2026-10-05T08:00:00+00:00",
+   "noindex": false,
+   "lang": "fi"
+  },
+  {
+   "slug": "vanhempi-artikkeli",
+   "title": "Neljäs artikkeli, ei näy etusivulla",
+   "summary": "Etusivulle valitaan vain kolme uusinta.",
+   "published_at": "2026-09-01T08:00:00+00:00",
+   "noindex": false,
+   "image": {
+    "id": 5,
+    "alt": "",
+    "url": "https://fixture.example/storage/article-images/articles/5/1760000005-heroeee5.jpg",
+    "mime": "image/jpeg",
+    "width": 1600,
+    "height": 900
+   },
+   "lang": "fi"
+  },
+  {
+   "slug": "noindex-testi",
+   "title": "Noindex-artikkeli (ei nosteta etusivulle)",
+   "summary": "Tämä on uusin mutta noindex.",
+   "published_at": "2026-10-18T08:00:00+00:00",
+   "noindex": true,
+   "lang": "fi"
+  }
+ ],
+ "en": [
+  {
+   "slug": "how-to-sauna",
+   "title": "How to sauna: a traditional guide",
+   "summary": "Traditional bathing is calm and unhurried: three rounds, plenty of rest and water. A short guide for first-timers who want to enjoy the soft heat of a smoke sauna safely and fully.",
+   "published_at": "2026-10-17T08:00:00+00:00",
+   "noindex": false,
+   "image": {
+    "id": 1,
+    "alt": "",
+    "url": "https://fixture.example/storage/article-images/articles/1/1760000001-heroaaa1.jpg",
+    "mime": "image/jpeg",
+    "width": 1600,
+    "height": 900
+   },
+   "lang": "en"
+  },
+  {
+   "slug": "whisk-or-vasta",
+   "title": "Birch whisk: how to make and use a traditional vihta",
+   "summary": "A fresh birch whisk smells of summer.",
+   "published_at": "2026-10-12T08:00:00+00:00",
+   "noindex": false,
+   "image": {
+    "id": 4,
+    "alt": "",
+    "url": "https://fixture.example/storage/article-images/articles/4/1760000004-heroddd4.jpg",
+    "mime": "image/jpeg",
+    "width": 1600,
+    "height": 900
+   },
+   "lang": "en"
+  },
+  {
+   "slug": "heating-a-smoke-sauna",
+   "title": "Heating a smoke sauna from start to finish",
+   "summary": "A smoke sauna is heated for six to eight hours. We explain how the stove, the smoke and the stored heat work together, and when the sauna is ready.",
+   "published_at": "2026-10-05T08:00:00+00:00",
+   "noindex": false,
+   "lang": "en"
+  },
+  {
+   "slug": "older-article",
+   "title": "Fourth article, not shown on the home page",
+   "summary": "Only the three newest are chosen.",
+   "published_at": "2026-09-01T08:00:00+00:00",
+   "noindex": false,
+   "image": {
+    "id": 5,
+    "alt": "",
+    "url": "https://fixture.example/storage/article-images/articles/5/1760000005-heroeee5.jpg",
+    "mime": "image/jpeg",
+    "width": 1600,
+    "height": 900
+   },
+   "lang": "en"
+  }
+ ]
+}
