@@ -9,6 +9,13 @@ export function normOptions(r) {
   const method = (Array.isArray(r.methods) ? r.methods : []).find((m) => m && m.code === 'mobilepay') || null;
   return { ok: true, method, canPay: !!(method && r.order && r.order.can_pay_online === true), pending: !!r.order?.mobilepay_pending, unpaid: r.order?.unpaid ?? null };
 }
+// public_checkout_payment_options (§14.7, kassa ilman tokenia) → { ok, method (mobilepay | null), gift (lahjakortti redeem-tapa mukana), canPay:false, pending:false, unpaid:null }
+// Palvelin on totuus: tapa näkyy vain jos se on methods-listassa (ei kovakoodattua näkyvyyttä); tyhjä methods = ei verkkomaksutapoja.
+export function normCheckoutOptions(r) {
+  if (!r || r.ok === false) return { ok: false, method: null, gift: false, canPay: false, pending: false, unpaid: null };
+  const ms = Array.isArray(r.methods) ? r.methods.filter((m) => m && typeof m === 'object') : [];
+  return { ok: true, method: ms.find((m) => m.code === 'mobilepay') || null, gift: ms.some((m) => m.code === 'gift_card'), canPay: false, pending: false, unpaid: null };
+}
 // Näytetäänkö painike: methods sisältää mobilepayn JA order.can_pay_online. Testitilan tapa (methods[].test=true) vain testiympäristössä (env.testUi) – tuotantosivustolla piilotetaan.
 export function shouldShowButton(opts, env = {}) {
   const o = opts && typeof opts === 'object' && 'canPay' in opts ? opts : normOptions(opts);

@@ -28,6 +28,10 @@ export const validCode = (p, code) => (findOption(p, clean(code).toLowerCase()) 
 // Valitsimen otsikko: tuotteen option_label(_en) tai oletus
 export const optLabel = (p, lang, fallback) => clean(lang === 'en' ? p?.option_label_en || p?.option_label : p?.option_label) || fallback;
 
+// Valitsimen otsikko varaus-/tilausriviltä (booking_52): public_get_booking items[] ja public_get_order reservations[] palauttavat option_label (tilauksen kielellä) sekä option_label_fi / option_label_en.
+// Sivun kieli voittaa tilauksen kielen; puuttuessa null → kutsuja käyttää nykyistä oletusotsikkoa.
+export const rowLabel = (row, lang) => clean(lang === 'en' ? row?.option_label_en || row?.option_label : row?.option_label_fi || row?.option_label) || null;
+
 // Jatkaminen sallittu? (pakollinen valinta tehty)
 export const optionOk = (p, code) => !needsOption(p) || !!validCode(p, code);
 

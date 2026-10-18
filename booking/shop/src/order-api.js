@@ -14,9 +14,9 @@ export function normOrder(r) {
   return { ok: true, order_no: r.order_no, status: r.status, payment_status: r.payment_status || 'unpaid', created_at: r.created_at ?? null, first_name: r.first_name ?? '', locale: r.locale ?? null,
     total: num(r.total), paid: num(r.paid), unpaid: num(r.unpaid),
     items: (r.items || []).map((i) => ({ name: i.name, name_en: i.name_en ?? null, quantity: num(i.quantity, 1), line_total: num(i.line_total), vat_rate: num(i.vat_rate) })),
-    // reservations: booking_50 lisää product_id, option (valittu hoito) ja option_choices (vaihtoehdot, muutosvalitsin)
+    // reservations: booking_50 lisää product_id, option (valittu hoito) ja option_choices (vaihtoehdot, muutosvalitsin); booking_52 option_label(_fi/_en) (valitsimen otsikko)
     reservations: (r.reservations || []).map((x) => ({ reservation_id: x.reservation_id, product_id: x.product_id ?? null, product_name: x.product_name,
-      option: x.option ? { id: x.option.id ?? null, code: x.option.code, name: x.option.name, name_en: x.option.name_en ?? null } : null, option_choices: normOptions({ options: x.option_choices }).options, starts_at: x.starts_at, ends_at: x.ends_at, persons: num(x.persons, 1), status: x.status,
+      option: x.option ? { id: x.option.id ?? null, code: x.option.code, name: x.option.name, name_en: x.option.name_en ?? null } : null, option_choices: normOptions({ options: x.option_choices }).options, option_label: x.option_label ?? null, option_label_fi: x.option_label_fi ?? null, option_label_en: x.option_label_en ?? null, starts_at: x.starts_at, ends_at: x.ends_at, persons: num(x.persons, 1), status: x.status,
       addons: (x.addons || []).map((a) => ({ name: a.name ?? '', name_en: a.name_en ?? null, quantity: num(a.quantity, 1) })) })),
     payments: (r.payments || []).map((p) => ({ status: p.status, amount: num(p.amount), paid_at: p.paid_at ?? null, method_label: p.method_label ?? null, link_token: p.link_token ?? null, link_path: p.link_path ?? null })),
     receipts: (r.receipts || []).map((x) => ({ receipt_no: x.receipt_no, kind: x.kind || 'receipt', issued_at: x.issued_at ?? null, token: x.token ?? null, total: num(x.total) })),

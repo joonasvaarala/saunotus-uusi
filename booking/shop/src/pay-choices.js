@@ -4,7 +4,7 @@
 // Puuttuva RPC / virhe / ei sallittu → ei mitään näkyviin (sivu ennallaan). Ei oleteta maksutapaa: kaikki päätökset tulevat palvelimelta (public_payment_options, redeem_enabled).
 import { functionUrl } from './sb.js';
 import { createMobilepayApi } from './mobilepay-api.js';
-import { normOptions, shouldShowButton, testUiEnabled } from './mobilepay-logic.js';
+import { normOptions, normCheckoutOptions, shouldShowButton, testUiEnabled } from './mobilepay-logic.js';
 import { payBlock } from './mobilepay-ui.js';
 import { createGiftApi } from './gift-api.js';
 import { redeemSection, claimsSection } from './order-gift.js';
@@ -14,15 +14,19 @@ import { pt } from './pay-choices-texts.js';
 const PAYABLE = ['confirmed', 'pending'];
 let seq = 0;
 
-// Lataa maksutavat: MobilePay (public_payment_options) ja lahjakortti (redeem_enabled + lunastuspyynnöt). token = null → vain yleistieto (kassa, ennen varausta).
+// Lataa maksutavat. Tokenilla (vahvistussivu): MobilePay (public_payment_options) + lahjakortti (redeem_enabled + lunastuspyynnöt). Ilman tokenia (kassa, ennen varausta): public_checkout_payment_options (§14.7).
 export async function loadPayChoices({ rpc, token = null, fetchImpl, cfg = (typeof window !== 'undefined' && window.BOOKING_CONFIG) || {}, search = typeof location !== 'undefined' ? location.search : '' } = {}) {
   const env = { testUi: testUiEnabled(cfg, search), mock: !!fetchImpl, official: cfg.mobilepayOfficialButton !== false };
   const mp = createMobilepayApi({ rpc, token, functionUrl, anonKey: cfg.anonKey, fetchImpl });
   const gapi = createGiftApi({ rpc, mock: false });
+  if (!token) {   // kassa (ei tokenia, §14.7): yksi RPC kertoo MobilePayn ja lahjakortin käytön; ei public_payment_options(null)-kutsua
+    const co = normCheckoutOptions(await mp.checkoutOptions());
+    return { env, mp, gapi, opts: co, mpShow: false, redeem: co.gift, claims: [], checkout: co };
+  }
   const [o, pk] = await Promise.all([mp.options().catch(() => null), gapi.packages().catch(() => null)]);
   const opts = normOptions(o);
   const redeem = !!(pk?.ok && pk.redeem_enabled);
-  const vc = token && redeem ? await gapi.orderClaims(token).catch(() => null) : null;   // kumppanilahjakortit (§13.12): pyynnöt vain kun lunastus käytössä
+  const vc = redeem ? await gapi.orderClaims(token).catch(() => null) : null;   // kumppanilahjakortit (§13.12): pyynnöt vain kun lunastus käytössä
   return { env, mp, gapi, opts, mpShow: shouldShowButton(opts, env), redeem, claims: vc?.ok && Array.isArray(vc.claims) ? vc.claims : [] };
 }
 

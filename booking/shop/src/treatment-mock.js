@@ -119,12 +119,14 @@ function create(a, now) {
   return ok({ ok: true, order_no: orderNo, token, status: 'confirmed', starts_at: new Date(s).toISOString(), ends_at: new Date(s + pr.minutes * 60e3).toISOString(), persons: n, total,
     payment_mode: a.p_customer_kind === 'company' ? 'invoice' : 'pay_later', payment_url: null, hold_expires_at: null, product_name: pr.name, option: optJson(opt.option), customer_kind: a.p_customer_kind || 'private', booking_kind: 'slots' });
 }
+// booking_52: valitsimen otsikko vastauksessa (items[].option_label tilauksen kielellä = fi, option_label_fi / option_label_en); tuote ilman otsikkoa → null
+const optLabels = (id) => { const o = OPTIONS[id]; return { option_label: o?.label || null, option_label_fi: o?.label || null, option_label_en: o?.label_en || o?.label || null }; };
 function getBooking(a, now) {
   const b = bookings.get(a.p_token); if (!b) return null;   // ei mock-varaus → oikea funktio
   const deadline = b.start - CHANGE_H * HOURS;
   return ok({ ok: true, order_no: b.order_no, status: 'confirmed', payment_status: 'unpaid', total: b.total, currency: 'EUR', created_at: new Date(now).toISOString(), first_name: String(b.name).split(' ')[0],
     customer_kind: b.kind, items: [{ product_name: PRODUCTS[b.product_id].name, quantity: 1, line_total: b.total, vat_rate: 25.5, product_id: b.product_id, rule_id: null, starts_at: new Date(b.start).toISOString(),
-      ends_at: new Date(b.end).toISOString(), persons: b.persons, mode: 'treatment', status: 'confirmed', hold_expires_at: null, option: optJson(b.option) }], addons: [], payment_methods: [],
+      ends_at: new Date(b.end).toISOString(), persons: b.persons, mode: 'treatment', status: 'confirmed', hold_expires_at: null, option: optJson(b.option), ...optLabels(b.product_id) }], addons: [], payment_methods: [],
     booking_kind: 'slots', change_via: 'public_change_treatment_booking', can_change: !b.locked && deadline >= now, change_deadline: new Date(deadline).toISOString(), change_hours_before: CHANGE_H });
 }
 function change(a, now) {

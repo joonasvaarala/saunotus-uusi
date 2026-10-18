@@ -9,7 +9,7 @@ import { createMobilepayApi } from './mobilepay-api.js';
 import { normOptions, shouldShowButton, testUiEnabled } from './mobilepay-logic.js';
 import { payBlock, runReturn } from './mobilepay-ui.js';
 import { OPT } from './options-texts.js';
-import { optName, optionMissingOnOrder, optionChanged } from './options-logic.js';
+import { optName, optionMissingOnOrder, optionChanged, rowLabel } from './options-logic.js';
 import { createOptionPicker } from './options-ui.js';
 
 const S = window.BOOKING_SHOP;
@@ -176,7 +176,7 @@ async function main() {
         const missing = !r.option;
         const head = list.length > 1 ? h('h4', { text: `${r.product_name} · ${dt(r.starts_at)}` }) : null;
         if (!o.can_change) return h('div', { class: 'ord-opt-sec' }, head, h('p', { 'data-testid': 'option-current' }, `${ox.current}: `, h('strong', { text: missing ? ox.notChosen : optName(r.option, L) })));
-        const pk = createOptionPicker({ h, lang: L, options: r.option_choices, value: r.option?.code ?? null, required: null, label: missing ? ox.defaultLabel : ox.changeLabel, hint: missing ? `${ox.notChosenNote} ${ox.hintChange}` : ox.hintChange, step: null, testid: `option-picker-${r.reservation_id}`,
+        const pk = createOptionPicker({ h, lang: L, options: r.option_choices, value: r.option?.code ?? null, required: null, label: rowLabel(r, L) || (missing ? ox.defaultLabel : ox.changeLabel), hint: missing ? `${ox.notChosenNote} ${ox.hintChange}` : ox.hintChange, step: null, testid: `option-picker-${r.reservation_id}`,
           onChange: () => { btn.disabled = !optionChanged(r, pk.get()); } });
         const btn = h('button', { type: 'button', class: 'btn ord-btn', disabled: true, 'data-testid': `option-save-${r.reservation_id}`, text: ox.changeSave });
         btn.addEventListener('click', async () => {

@@ -164,6 +164,7 @@ async function fillAndReview(page, lang) {
   // muutos: vaihda hoito (pelkkä hoito, ei aikaa)
   await page.click('a[href$="/muuta"]'); await page.waitForSelector('[data-testid=option-picker]');
   expect((await page.textContent('[data-testid=change-current-option]')) === T.salt, 'fi: muutosnäkymä näyttää nykyisen valinnan');
+  expect((await page.textContent('[data-testid=option-picker] legend')).includes('Valitse hoito'), 'fi: muutosnäkymän otsikko = items[].option_label (booking_52)');
   expect(await page.isDisabled('.bk-continue .btn'), 'fi: tallenna pois käytöstä ennen muutosta');
   await page.click('label[for$="-turvehoito"]'); await settle(page);
   expect(!(await page.isDisabled('.bk-continue .btn')), 'fi: tallenna sallittu pelkällä hoidon vaihdolla');
@@ -230,6 +231,7 @@ for (const lang of ['fi', 'en']) for (const w of WIDTHS) {
   expect((await page.textContent('[data-testid=res-option]')).includes(T.cur), `tilaus ${lang}/${w}: varausrivillä valittu hoito`);
   const pk = '[data-testid=option-picker-601]';
   expect((await page.$$(`${pk} input[type=radio]`)).length === 4, `tilaus ${lang}/${w}: 4 vaihtoehtoa`);
+  expect((await page.textContent(`${pk} legend`)).includes(lang === 'fi' ? 'Valitse hoito' : 'Choose your treatment'), `tilaus ${lang}/${w}: valitsimen otsikko = reservations[].option_label (booking_52)`);
   expect(await page.isDisabled('[data-testid=option-save-601]'), `tilaus ${lang}/${w}: tallenna pois käytöstä ennen muutosta`);
   await layout(page, '#order-app', `tilaus ${lang} ${w}`);
   if (lang === 'fi' && [390, 1280].includes(w)) await page.screenshot({ path: join(SHOT, `tilaussivu-${w}-valittu.png`), fullPage: true });

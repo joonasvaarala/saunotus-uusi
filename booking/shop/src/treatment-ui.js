@@ -242,7 +242,7 @@ export function createTreatmentViews(c) {
     // hoitovalinta (booking_50): nykyinen valinta items[0].option; vanha varaus ilman valintaa (null) → "valitsematta", valinta ei pakollinen muutoksessa
     const curOpt = it.option?.code || null, showOpt = O.hasOptions(p);
     let opt = curOpt;
-    const optP = showOpt ? optPicker(p, { value: curOpt, required: null, hint: curOpt ? ot.hintChange : `${ot.notChosenNote} ${ot.hintChange}`, onChange: (code) => { opt = code; refresh(); } }) : null;
+    const optP = showOpt ? optPicker(p, { value: curOpt, required: null, label: O.rowLabel(it, S.lang), hint: curOpt ? ot.hintChange : `${ot.notChosenNote} ${ot.hintChange}`, onChange: (code) => { opt = code; refresh(); } }) : null;
     const slotChanged = () => !!cur?.slot && (cur.slot.start !== it.starts_at || cur.n !== it.persons), optChanged = () => O.optionChanged(it, opt);
     const refresh = () => { save.disabled = !(slotChanged() || optChanged()); };
     const picker = slotPicker(p, { n: it.persons, date: curDate, time: null, minStartMs: Date.now() + hours * 36e5,
