@@ -1,0 +1,86 @@
+[
+ {
+  "key": "ui.order.closed_hold_expired",
+  "lang": "fi",
+  "text": "Tämä varaus on peruttu, koska maksua ei saatu {{var:minutes}} minuutin kuluessa. Paikka on vapautettu muille. Mitään ei ole veloitettu. Voit tehdä uuden varauksen Sipoonjoen Perinnesaunaan.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [
+   "{{var:minutes}}"
+  ],
+  "reason": "PR 71: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Tuotu tuotantoon. Ei sähköpostia."
+ },
+ {
+  "key": "ui.order.closed_hold_expired",
+  "lang": "en",
+  "text": "This booking was cancelled because payment was not received within {{var:minutes}} minutes. The time has been released for others. You have not been charged. You can make a new booking at Sipoonjoen Perinnesauna.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 550,
+  "placeholders": [
+   "{{var:minutes}}"
+  ],
+  "reason": "PR 71: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Tuotu tuotantoon. Ei sähköpostia."
+ },
+ {
+  "key": "ui.order.closed_hold_expired_gift",
+  "lang": "fi",
+  "text": "Lahjakortin käytetty osuus on palautettu kortille.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "PR 71: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Tuotu tuotantoon. Ei sähköpostia."
+ },
+ {
+  "key": "ui.order.closed_hold_expired_gift",
+  "lang": "en",
+  "text": "Any gift card amount you applied has been returned to the card.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "PR 71: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Tuotu tuotantoon. Ei sähköpostia."
+ },
+ {
+  "key": "ui.order.closed_cancelled",
+  "lang": "fi",
+  "text": "Tämä varaus on peruttu. Paikka on vapautettu. Voit tehdä uuden varauksen Sipoonjoen Perinnesaunaan.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "PR 71: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Tuotu tuotantoon. Ei sähköpostia."
+ },
+ {
+  "key": "ui.order.closed_cancelled",
+  "lang": "en",
+  "text": "This booking has been cancelled. The time has been released. You can make a new booking at Sipoonjoen Perinnesauna.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "PR 71: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Tuotu tuotantoon. Ei sähköpostia."
+ },
+ {
+  "key": "ui.order.closed_new_booking",
+  "lang": "fi",
+  "text": "Tee uusi varaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "PR 71: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Tuotu tuotantoon. Ei sähköpostia."
+ },
+ {
+  "key": "ui.order.closed_new_booking",
+  "lang": "en",
+  "text": "Make a new booking",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "PR 71: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Tuotu tuotantoon. Ei sähköpostia."
+ }
+]

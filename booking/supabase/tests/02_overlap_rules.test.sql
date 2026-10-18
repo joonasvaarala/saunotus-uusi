@@ -137,8 +137,8 @@ select is((select status from booking.public_availability(3, :'tue', :'tue')), '
 select is((test.pub_book(:r_tue_public, :'tue', 2) ->> 'ok')::boolean, true, 'G7: yleinen vuoro varattavissa vanhentuneen pidon jälkeen');
 select test.logout();
 select is(booking.expire_holds() >= 0, true, 'G8: expire_holds() ajettavissa');
-select is((select count(*)::int from booking.reservations where status = 'pending'), 1, 'G9: vain uusi (pending) varaus jäi; vanhentunut siivottu tilaan expired');
-select is((select count(*)::int from booking.reservations where status = 'expired'), 1, 'G10: vanhentunut pito merkitty expired');
+select is((select count(*)::int from booking.reservations where status = 'pending'), 1, 'G9: vain uusi (pending) varaus jäi; vanhentunut peruttu');
+select is((select count(*)::int from booking.reservations where status = 'cancelled' and cancel_reason = 'hold_expired'), 1, 'G10: vanhentunut pito merkitty cancelled / hold_expired');
 update booking.settings set value = '"pay_later"' where key = 'public_payment_mode';
 
 select * from finish();
