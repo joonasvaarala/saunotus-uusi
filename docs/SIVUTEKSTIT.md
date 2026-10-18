@@ -27,6 +27,16 @@ Paikkamerkit (§18.3): `{{price:<tuote-id>}}`, `{{duration:<tuote-id>}}`, `{{set
 
 `pages.yml` käynnistyy myös `repository_dispatch`-tapahtumalla `site-texts-changed` (esim. `admin_texts_import`n tai Tekstit-näkymän tallennuksen jälkeen: `POST /repos/{owner}/{repo}/dispatches {"event_type":"site-texts-changed"}`) sekä tunnin ajastuksella.
 
+## Kaupan kovakoodatut tekstit (osa 3, PR 1): avaimet ja peitto
+
+Joonaksen päätös: kaikki asiakasnäkyvät tekstit tietokantaan. Kaupan sanakirjat (`i18n.js`, `order-texts.js`, `gift-texts.js`, `hold-texts.js`, `pay-choices-texts.js`, `mobilepay-texts.js`, `options-texts.js`) ja varaus-/tilaussivujen otsikot (`booking/shop/build.mjs` → `shop-page-texts.js`) ovat nyt avaimia:
+
+- `booking/shop/src/text-registry.js` muuntaa sanakirjan lehdet avaimiksi (`ui.<alue>.<nimi>`; `i18n.js`: ylätaso `ui.shop.*`, `tr.*` → `ui.treatment.*`, `tr.errors.<koodi>` → `ui.checkout.error_<koodi>`, `errors.<koodi>` → `ui.shop.error_<koodi>`; `order-texts` → `ui.order.*`, `gift-texts` → `ui.gift.*`, `hold-texts` → `ui.hold.*`, `pay-choices-texts` → `ui.paychoice.*`, `mobilepay-texts` → `ui.mobilepay.*`, `options-texts` → `ui.option.*`; sivut `page.<sivu>.*` / `seo.<sivu>.*`).
+- Paikkamerkit: `{n}` → `{{var:n}}` (**uusi laji `var`** = kutsuparametri, arvo tulee koodista käyttöhetkellä; ei hinta/kesto/asetus), `{{var:phone}}` = sivuston puhelinnumero (S.phone). Funktiolehdet (esim. `daySessions(n)`) ovat malleja: `ui.shop.day_sessions.one` / `.other` (monikko), argumentit `{{var:n}}`.
+- **Tuontitiedosto** `content/site-texts.pending-import.json` generoidaan koodista: `node scripts/site-texts-extract-shop.mjs --prod <public_get_site_texts-vastaus.json>`; mukaan vain avaimet, joita ei ole tuotannossa (ei ylikirjoitusta). Tuonti `admin_texts_import` ≤ 500 riviä/kutsu (`jq -c '[.[range(0;500)]]' …`, `range(500;1000)`, `range(1000;1500)`).
+- **Peitto** (`applySiteTexts`, kutsutaan `applyShopTexts(S, …)`): kauppa-, tilaus- ja lahjakorttisivu lataavat `booking/site-texts.json`n ja peittävät sanakirjat DB-teksteillä. Saman kielen rivi puuttuu / paikkamerkki ei täyty / JSON virheellinen → repon oletusteksti **samalla kielellä** (ulkoasu ei muutu; en-sivulle ei koskaan fi-tekstiä). Osa 5 poistaa oletukset vasta kun avaimet on vahvistettu tuotannossa.
+- Ei tuoda: `T.directionsUrl` (tekninen URL-polku), `gift-logic.js` SOURCE_LABELS (varaetiketti: nimet tulevat palvelimelta), ICS-tiedoston `LOCATION` (osoite; ei avainta lähdedatassa) ja `PRODID`/`UID` (tekninen), mock-/testitekstit, hallinnan (admin) käyttöliittymä.
+
 ## Uuden tekstin lisääminen (§18.9, jokaisessa PR:ssä)
 
 1. Avain `<alue>.<osa>.<nimi>` (virheet: `ui.<alue>.error_<RPC-koodi>`), FI + EN, luokka `normal`/`protected`.
@@ -34,4 +44,4 @@ Paikkamerkit (§18.3): `{{price:<tuote-id>}}`, `{{duration:<tuote-id>}}`, `{{set
 3. Varatekstiin (`content/site-texts.fallback.json`) tulee vain kannassa jo oleva teksti (`site-texts-sync`).
 4. Koodi lukee tekstin `tx()`:llä (build) tai kaupan `texts.tx()`:llä; puuttuessa ketju on site_text → palvelimen `message` → vanha yleisteksti.
 
-Testit: `node --test booking/tests/sivutekstit.test.mjs`; e2e: `booking/scripts/e2e-tuote7-kentat.mjs`.
+Testit: `node --test booking/tests/sivutekstit.test.mjs booking/tests/sivutekstit-kauppa.test.mjs`; e2e: `booking/scripts/e2e-tuote7-kentat.mjs`, `booking/scripts/e2e-sivutekstit-kauppa.mjs` (rakentaa fixture-dist:n itse).

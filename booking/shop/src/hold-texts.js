@@ -32,7 +32,7 @@ export const HT = {
     'checkout.button': 'Jatka maksamaan', 'checkout.creating': 'Varataan paikkaa…',
     'checkout.lead': 'Paikka varataan {minutes} minuutiksi, kun jatkat maksamaan. Valitset maksutavan seuraavassa vaiheessa.',
     'checkout.methods': 'Maksutavat: {methods}.', 'checkout.review': 'Tarkista tiedot. Paikka varataan {minutes} minuutiksi, kun painat "Jatka maksamaan". Varaus vahvistuu vasta maksun jälkeen.',
-    'method.mobilepay': 'MobilePay', 'method.gift_card': 'lahjakortti', methodsAnd: ' ja ',
+    'method.mobilepay': 'MobilePay', 'method.gift_card': 'lahjakortti', methodsAnd: 'ja',
     // virheet (§17.3)
     'err.online_payment_unavailable': 'Verkkomaksu ei ole tilapäisesti käytettävissä, joten varausta ei voi tehdä juuri nyt. Yritä myöhemmin uudelleen tai ota yhteyttä meihin.',
     'err.order_expired': 'Paikkavaraus on vanhentunut. Tee uusi varaus.',
@@ -70,7 +70,7 @@ export const HT = {
     'checkout.button': 'Continue to payment', 'checkout.creating': 'Reserving your spot…',
     'checkout.lead': 'Your spot is held for {minutes} minutes when you continue to payment. You choose how to pay in the next step.',
     'checkout.methods': 'Payment methods: {methods}.', 'checkout.review': 'Please check the details. Your spot is held for {minutes} minutes when you press "Continue to payment". The booking is confirmed only after payment.',
-    'method.mobilepay': 'MobilePay', 'method.gift_card': 'gift card', methodsAnd: ' and ',
+    'method.mobilepay': 'MobilePay', 'method.gift_card': 'gift card', methodsAnd: 'and',
     'err.online_payment_unavailable': 'Online payment is temporarily unavailable, so we can’t take bookings right now. Please try again later or contact us.',
     'err.order_expired': 'This hold has expired. Please make a new booking.',
     'err.order_preliminary': 'A provisional booking cannot be paid before we have confirmed it. We will confirm it by email.',
@@ -88,4 +88,4 @@ export const HOLD_ERROR_CODES = ['online_payment_unavailable', 'order_expired', 
 // Virhekoodi → selkeä teksti (undefined jos koodi ei ole pitovirhe: kutsuja käyttää omaa käsittelyään)
 export const holdError = (lang, code) => (HT.fi[`err.${code}`] ? ht(lang, `err.${code}`) : undefined);
 // Luettelo "MobilePay ja lahjakortti" palvelimen methods-listasta (code → teksti)
-export const methodList = (lang, codes) => { const names = codes.map((c) => ht(lang, `method.${c}`)).filter((x) => !x.startsWith('method.')); return names.length > 1 ? names.slice(0, -1).join(', ') + ht(lang, 'methodsAnd') + names[names.length - 1] : names[0] || ''; };
+export const methodList = (lang, codes) => { const names = codes.map((c) => ht(lang, `method.${c}`)).filter((x) => !x.startsWith('method.')); return names.length > 1 ? names.slice(0, -1).join(', ') + ` ${ht(lang, 'methodsAnd')} ` + names[names.length - 1] : names[0] || ''; };
