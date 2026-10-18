@@ -16,6 +16,7 @@ import { optName, needsOption, findOption } from './options-logic.js';
 import { ht, holdError, methodList } from './hold-texts.js';
 import { normCheckout, isHoldView, holdModeOf, giftWasUsed } from './hold-logic.js';
 import { holdPanel } from './hold-ui.js';
+import { normBusinessId, validBusinessId, normOvt, validOvt, validOperator } from './invoice-validate.js';
 
 const S = window.BOOKING_SHOP;                   // build-aikainen konfiguraatio (kieli, polut, ei-verkossa-varattavat tuotteet)
 const t = T[S.lang] || T.fi;
@@ -42,18 +43,6 @@ const todayHel = () => new Date().toLocaleDateString('sv-SE', { timeZone: TZ });
 const pad2 = (n) => String(n).padStart(2, '0');
 const cleanLabel = (l) => (l || '').replace(/\(\s*\d+(?:[.,]\d+)?\s*h\s*\)/g, '').replace(/\b(ma|ti|ke|to|pe|la|su)(–(ma|ti|ke|to|pe|la|su))?\b/g, '').replace(/\d{1,2}(:\d{2})?(–\d{1,2}(:\d{2})?)?/g, '').replace(/\s{2,}/g, ' ').trim();
 const priceFor = (s, n) => (s.price_mode === 'per_person' ? s.unit_price * n : s.price_mode === 'fixed' ? s.base_price : s.base_price + Math.max(0, n - (s.included_persons || 0)) * (s.extra_person_price || 0));
-// y-tunnus: muoto 1234567-8 + tarkistenumero (painot 7,9,10,5,8,4,2). Palvelin tarkistaa saman säännön (booking._business_id_ok); tämä on vain nopea palaute.
-const normBid = (v) => {
-  const x = String(v ?? '').replace(/\s/g, '').toUpperCase().replace(/^FI(\d{8})$/, '$1');
-  let m = x.match(/^(\d{7})-?(\d)$/); if (m) return `${m[1]}-${m[2]}`;
-  m = x.match(/^(\d{6})-?(\d)$/); if (m) return `0${m[1]}-${m[2]}`;
-  return x;
-};
-const validBid = (v) => {
-  const m = normBid(v).match(/^(\d{7})-(\d)$/); if (!m) return false;
-  const rem = [...m[1]].reduce((a, c, i) => a + +c * [7, 9, 10, 5, 8, 4, 2][i], 0) % 11;
-  return rem !== 1 && (rem === 0 ? 0 : 11 - rem) === +m[2];
-};
 // lisäpalvelun enimmäismäärä: henkilömäärä × max/hlö, enintään 99 (sama kuin booking._addon_limit)
 const addonLimit = (a, n) => Math.min((a.max_per_person ?? 99) * Math.max(1, n), 99);
 const aname = (a) => (S.lang === 'en' && a.name_en) || a.name;
@@ -439,13 +428,13 @@ function customerFields() {
     field('company_name', t.companyName, { maxlength: 200, autocomplete: 'organization' }), field('business_id', t.businessId, { maxlength: 20, inputmode: 'numeric', placeholder: '1234567-8', hint: t.businessIdHint }),
     field('street', t.street, { maxlength: 200, autocomplete: 'street-address' }),
     h('div', { class: 'bk-row2' }, field('zip', t.zip, { maxlength: 5, inputmode: 'numeric', autocomplete: 'postal-code' }), field('city', t.city, { maxlength: 100, autocomplete: 'address-level2' })),
-    h('h4', { text: t.einvoiceTitle }),
-    opt('einvoice_address', t.einvoiceAddress, { maxlength: 40 }), opt('einvoice_operator', t.einvoiceOperator, { maxlength: 40, hint: t.einvoiceHint }),
-    opt('reference', t.reference, { maxlength: 100 }),
-    h('p', { class: 'bk-note', text: t.companyNote }));
+    h('h4', { text: t.einvoiceTitleRequired }),
+    field('einvoice_address', t.einvoiceAddress, { maxlength: 40 }), field('einvoice_operator', t.einvoiceOperator, { maxlength: 40, hint: t.einvoiceHintRequired }),
+    opt('reference', t.buyerReference, { maxlength: 100 }),
+    h('p', { class: 'bk-note', text: t.companyInvoiceNote }));
   function setKind(k) {
     kind = k; companyBox.hidden = k !== 'company'; nameLabel.textContent = k === 'company' ? t.contactName : t.name;
-    for (const id of ['company_name', 'business_id', 'street', 'zip', 'city']) { const el = document.getElementById(id); if (el) el.required = k === 'company'; }
+    for (const id of ['company_name', 'business_id', 'street', 'zip', 'city', 'einvoice_address', 'einvoice_operator']) { const el = document.getElementById(id); if (el) el.required = k === 'company'; }
   }
   const node = h('fieldset', { class: 'bk-section bk-contact' }, h('legend', { text: t.details }),
     h('fieldset', { class: 'bk-kinds' }, h('legend', { text: t.kindTitle }), h('div', { class: 'bk-kindrow' }, kindInputs)),
@@ -460,11 +449,13 @@ function customerFields() {
     if (kind === 'company') {
       const needC = ['company_name', 'business_id', 'street', 'zip', 'city'].filter((k) => !val(k));
       if (needC.length) { msg.append(errorBox(t.required)); form[needC[0]].focus(); return null; }
-      if (!validBid(val('business_id'))) { msg.append(errorBox(t.invalidBusinessId)); form.business_id.focus(); return null; }
+      if (!validBusinessId(val('business_id'))) { msg.append(errorBox(t.invalidBusinessId)); form.business_id.focus(); return null; }
       if (!/^\d{5}$/.test(val('zip'))) { msg.append(errorBox(t.invalidZip)); form.zip.focus(); return null; }
-      if (!!val('einvoice_address') !== !!val('einvoice_operator')) { msg.append(errorBox(t.einvoiceBoth)); form.einvoice_address.focus(); return null; }
-      company = { company_name: val('company_name'), business_id: normBid(val('business_id')), street: val('street'), zip: val('zip'), city: val('city'),
-        einvoice_address: val('einvoice_address') || null, einvoice_operator: val('einvoice_operator') || null, reference: val('reference') || null };
+      if (!val('einvoice_address') || !val('einvoice_operator')) { msg.append(errorBox(t.einvoiceBoth)); form.einvoice_address.focus(); return null; }
+      if (!validOvt(val('einvoice_address'), val('business_id'))) { msg.append(errorBox(t.invalidOvt)); form.einvoice_address.focus(); return null; }
+      if (!validOperator(val('einvoice_operator'))) { msg.append(errorBox(t.einvoiceBoth)); form.einvoice_operator.focus(); return null; }
+      company = { company_name: val('company_name'), business_id: normBusinessId(val('business_id')), street: val('street'), zip: val('zip'), city: val('city'),
+        einvoice_address: normOvt(val('einvoice_address')), einvoice_operator: normOvt(val('einvoice_operator')), reference: val('reference') || null, require_einvoice: true };
     }
     return { kind, name: val('name'), email: val('email'), phone: val('phone'), company };
   };
@@ -644,7 +635,8 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     if (r.ok) setTimeout(() => location.reload(), 800);
   } }, t.cancelBooking));
   mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { 'data-testid': 'conf-title', text: b.status === 'cancelled' ? t.confCancelled : b.status === 'expired' ? t.confExpired : b.status === 'pending' || (co && co.awaiting) ? ht(S.lang, 'h2.awaiting') : t.confTitle }), h('p', { class: 'bk-status', role: 'status', 'data-testid': 'conf-status', text: head }), holdHost, mpHost, dl,   // pitotilassa: otsikko + tilabadge → pitopaneeli → tiivis tilausyhteenveto → maksuosio (secEl lisätään yhteenvedon jälkeen)
-    b.status === 'confirmed' && b.payment_status !== 'paid' && (b.customer_kind === 'company' || (!isTreatmentBooking(b) && !online)) ?  /* hoitovarauksella ei maksuohjetta (vain yritysasiakkaan laskutusohje) */ h('p', { class: 'bk-pay', text: b.customer_kind === 'company' ? t.companyNote : t.payLater }) : null, optNote && b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-option-note', text: optNote }) : null, actions, out,
+    b.status === 'confirmed' && b.customer_kind === 'company' && b.payment_status !== 'paid' ? h('p', { class: 'bk-pay', text: t.companyInvoiceNote }) : null,
+    b.status === 'confirmed' && b.payment_status !== 'paid' && b.payment_status !== 'invoiced' && b.customer_kind !== 'company' && !isTreatmentBooking(b) && !online ? h('p', { class: 'bk-pay', text: t.payLater }) : null, optNote && b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-option-note', text: optNote }) : null, actions, out,
     b.status === 'confirmed' ? h('p', { class: 'bk-note', text: b.can_change ? t.changeInfo(b.change_hours_before, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) : t.changeLocked(b.change_hours_before) }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })) : null,
     h('p', { class: 'bk-note', text: t.emailNote }), h('p', {}, h('a', { href: S.infoHref, text: t.directions }))));
   // Maksuosio (MobilePay + lahjakortti) toimintojen alle; ei näytetä kun paluu MobilePaysta on kesken (tulos näkyy sivun yläosassa)

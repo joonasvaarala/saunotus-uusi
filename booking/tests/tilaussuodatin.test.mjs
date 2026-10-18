@@ -231,7 +231,9 @@ test('tuontitiedoston tekstit täsmäävät varatekstiin', async () => {
   const fi = Object.keys(ORDER_TEXTS.fi).sort();
   const en = Object.keys(ORDER_TEXTS.en).sort();
   assert.deepEqual(fi, en);
-  assert.equal(rows.length, fi.length * 2);
+  assert.equal(rows.length, 16);
+  assert.ok(fi.includes('ui.admin.orders.pay_invoiced'));
+  assert.equal(rows.some((r) => r.key === 'ui.admin.orders.pay_invoiced'), false);
   for (const row of rows) {
     assert.equal(row.class, 'normal');
     assert.equal(row.kind, 'plain');

@@ -29,7 +29,7 @@ export function helsinkiIso(local) {
 export const dayStartIso = (ds) => helsinkiIso(`${ds}T00:00`);
 
 export const STATUS = { confirmed: 'Vahvistettu', pending: 'Odottaa', cancelled: 'Peruttu', expired: 'Vanhentunut', completed: 'Toteutunut', no_show: 'Ei saapunut', draft: 'Luonnos' };
-export const PAY = { unpaid: 'Maksamatta', pending: 'Maksu kesken', paid: 'Maksettu', partially_paid: 'Osittain maksettu', refunded: 'Palautettu', partially_refunded: 'Osittain palautettu', failed: 'Epäonnistui' };
+export const PAY = { unpaid: 'Maksamatta', pending: 'Maksu kesken', paid: 'Maksettu', partially_paid: 'Osittain maksettu', refunded: 'Palautettu', partially_refunded: 'Osittain palautettu', failed: 'Epäonnistui', invoiced: 'Laskutettu' };
 export const badge = (kind, text) => h('span', { class: `badge ${kind}`, text });
 export const statusBadge = (s) => badge(`st-${s}`, STATUS[s] || s);
 export const payBadge = (s) => badge(`pay-${s}`, PAY[s] || s);

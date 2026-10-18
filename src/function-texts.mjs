@@ -4,6 +4,7 @@ import { EMAIL_TEXTS } from '../booking/supabase/functions/send-emails/texts.ts'
 import { GIFT_CARD_PDF_TEXTS } from '../booking/supabase/functions/gift-card-pdf/texts.ts';
 import { RECEIPT_PDF_TEXTS } from '../booking/supabase/functions/receipt-pdf/texts.ts';
 import { MOBILEPAY_START_TEXTS } from '../booking/supabase/functions/mobilepay-start/texts.ts';
+import { INVOICE_PDF_TEXTS } from '../booking/supabase/functions/invoice-pdf/texts.ts';
 
 /** [lähdetiedosto, taulukko, avainprefiksi(t), mistä funktio hakee] */
 export const FUNCTION_TABLES = [
@@ -11,6 +12,7 @@ export const FUNCTION_TABLES = [
   ['gift-card-pdf/texts.ts', GIFT_CARD_PDF_TEXTS, 'email.gift_card_pdf.'],
   ['receipt-pdf/texts.ts', RECEIPT_PDF_TEXTS, 'email.receipt_pdf.'],
   ['mobilepay-start/texts.ts', MOBILEPAY_START_TEXTS, 'ui.mobilepay.'],
+  ['invoice-pdf/texts.ts', INVOICE_PDF_TEXTS, 'email.invoice_pdf.'],
 ];
 export const tokensOf = (text) => [...new Set([...String(text).matchAll(/\{\{[^{}]*\}\}/g)].map((m) => m[0]))];
 export const maxLenFor = (fi, en = '') => Math.max(200, Math.ceil((Math.max(fi.length, en.length) * 2.5) / 50) * 50);

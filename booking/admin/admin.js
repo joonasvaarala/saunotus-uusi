@@ -44,6 +44,7 @@ const ROUTES = [
   { path: 'varaukset', label: 'Varaukset', icon: 'list', mod: () => loadView('reservations') },
   { path: 'talous', label: 'Talous', labelFn: () => tl('nav'), icon: 'euro', any: ['payments.manage', 'giftcards.manage'], mod: () => loadView('talous') },
   { path: 'pikakassa', label: 'Pikakassa', labelFn: () => posText('nav', 'fi'), icon: 'till', any: ['pos.use'], mod: () => loadView('pos') },
+  { path: 'laskut', label: 'Laskut', icon: 'receipt', any: ['invoices.manage'], mod: () => loadView('invoices') },
   { path: 'kalenteri', label: 'Kalenteri', icon: 'calendar', mod: () => loadView('calendar') },
   { path: 'tarkista', label: 'Tarkista', icon: 'check', mod: () => loadView('review') },
   { path: 'uusi', label: 'Uusi varaus', icon: 'plus', mod: () => loadView('newbooking') },

@@ -33,7 +33,7 @@ export async function loadPayChoices({ rpc, token = null, fetchImpl, cfg = (type
 
 // Mitä asiakkaalle voidaan tarjota: { mobilepay, gift, claims, payLater } (booking = public_get_booking-vastaus). payLater = booking_57-testivaihtoehto: vain kun palvelin listasi pay_later-tavan (ei env.testUi-ehtoa)
 export function offers(model, booking) {
-  const payable = !!booking && PAYABLE.includes(booking.status) && booking.payment_status !== 'paid' && booking.checkout_state !== 'preliminary' && booking.checkout_state !== 'expired';   // alustavaa varausta ei makseta (order_preliminary)
+  const payable = !!booking && PAYABLE.includes(booking.status) && booking.payment_status !== 'paid' && booking.payment_status !== 'invoiced' && booking.customer_kind !== 'company' && booking.checkout_state !== 'preliminary' && booking.checkout_state !== 'expired';   // yritysverkkolasku ja alustava varaus eivät maksa verkossa
   return { mobilepay: payable && model.mpShow, gift: payable && model.redeem, claims: !!booking && model.claims.length > 0, payLater: payable && !!model.payLater };
 }
 // Maksettava jäljellä: ensisijaisesti palvelimen public_payment_options.order.unpaid; muuten total - paid; muuten null (summaa ei näytetä)

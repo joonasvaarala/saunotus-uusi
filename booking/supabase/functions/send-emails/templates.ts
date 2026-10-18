@@ -3,7 +3,7 @@
 // data = booking.email_outbox_claim()-rivi (ks. docs/talous-integraatiot.md): { kind, locale, to_name, order{order_no, order_url, total, items[], reservations[]}, receipt{receipt_no, kind, text_body, total, issued_at}, payment{amount, link_url, link_expires_at} }.
 // FI + EN, HTML (taulukkopohjainen, inline-tyylit, sähköpostiyhteensopiva) + tekstiversio. Ei ulkoisia riippuvuuksia (puhdas funktio, testattu node --test).
 // Tyyli: tumma vihreä + hiekka, ei sinistä. Logo: sivuston /img/logo-kuitti.png (osoite johdetaan tilauslinkistä; muuten LOGO_FALLBACK).
-export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify";
+export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify" | "invoice_pdf";
 export interface Rendered { subject: string; text: string; html: string }
 // Asiakasnäkyvät tekstit: texts.ts (repon oletukset = varateksti) tai tietokannasta (email.*-avaimet, _shared/site_texts.ts). render() ottaa valinnaisen tekstihaun (4. parametri).
 import { makeT, type TFn } from "../_shared/site_texts.ts";
@@ -369,6 +369,21 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const firstFi = d?.to_name ? String(d.to_name).trim().split(/\s+/)[0] : "";
       const helloFi = firstFi ? t("email.common.hello", "fi", { name: firstFi }) : t("email.common.hello_anon", "fi");
       return businessQuoteNotify(d, helloFi, Xfi);
+    }
+    case "invoice_pdf": {
+      const inv = d?.invoice;
+      const ino = inv?.invoice_no ?? "";
+      const amount = inv?.total != null ? eur(inv.total, en) : "";
+      const due = inv?.due_date ? day(inv.due_date, en) : "";
+      const subject = X("email.invoice.subject", { no: ino });
+      const title = X("email.invoice.title");
+      const intro = X("email.invoice.intro", { no: ino, amount, date: due });
+      const attach = X("email.invoice.attach");
+      const terms = X("email.invoice.terms");
+      const ref = inv?.reference_no ? `${X("email.receipt.meta_no")}: ${inv.reference_no}` : "";
+      const text = textBlock(hello, intro, attach, ref, terms, contact, sign) + "\n";
+      const html = mk(title, intro, h1(title) + helloRow + p(esc(intro)) + p(esc(attach)) + (ref ? p(esc(ref)) : "") + p(esc(terms)) + tail);
+      return { subject, text, html };
     }
     case "order_change":
     default: {

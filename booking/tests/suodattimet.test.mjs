@@ -200,6 +200,7 @@ test('sama laatikko on käytössä listoilla, joilla on haku ja useita suodattim
     ['admin/views/talous-vouchers.js', 'vcl-search'],
     ['admin/views/reservations.js', 'reservations-search'],
     ['admin/views/products.js', 'products-search'],
+    ['admin/views/invoices.js', 'invoices-search'],
   ];
   for (const [file, mark] of lists) {
     const src = readFileSync(join(root, file), 'utf8');

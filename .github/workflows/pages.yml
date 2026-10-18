@@ -87,6 +87,8 @@ jobs:
       - run: node --test booking/tests/suodattimet.test.mjs
       # Talous-tilauslista: oletuksena maksetut (booking_76), haku kaikista, tekstit FI+EN
       - run: node --test booking/tests/tilaussuodatin.test.mjs
+      # Laskutus (booking_90–93): viite, OVT, invoiced-suodatin, tuontitekstit, dry_run-provider
+      - run: node --test booking/tests/laskutus.test.mjs
       # .cache/articles: edellinen artikkelisnapshot (RPC-katkon varalta + siirrettyjen slugien tunnistus)
       - uses: actions/cache@v4
         with:

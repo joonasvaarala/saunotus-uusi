@@ -148,4 +148,9 @@ export const EMAIL_TEXTS: TextTable = {
   "email.business_quote.offering_other": { fi: "Muu", en: "Other" },
   "email.business_quote.locale_fi": { fi: "suomi", en: "Finnish" },
   "email.business_quote.locale_en": { fi: "englanti", en: "English" },
+  "email.invoice.subject": { fi: `Lasku {{var:no}} – ${SN}`, en: `Invoice {{var:no}} – ${SN}` },
+  "email.invoice.title": { fi: "Lasku", en: "Invoice" },
+  "email.invoice.intro": { fi: "Lasku {{var:no}} on liitteenä. Summa {{var:amount}}, eräpäivä {{var:date}}.", en: "Invoice {{var:no}} is attached. Amount {{var:amount}}, due {{var:date}}." },
+  "email.invoice.attach": { fi: "PDF-lasku on tämän viestin liitteenä.", en: "The invoice PDF is attached to this message." },
+  "email.invoice.terms": { fi: "Maksuehto 14 päivää netto. Viivästyskorko korkolain mukaan. Maksu viitenumerolla.", en: "Payment terms: 14 days net. Late interest according to the Interest Act. Pay with the reference number.", cls: "protected" },
 };
