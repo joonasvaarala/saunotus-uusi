@@ -112,8 +112,8 @@ test('Puuttuva RPC ei vaihda käyrää mock-lukuihin; kielto ei sekään', async
 });
 
 test('Migraatio ei korvaa raporttifunktioita ja vaatii reports.view', () => {
-  const sql = readFileSync(join(root, 'supabase/migrations/20261018190000_booking_70_sales_chart.sql'), 'utf8');
-  const rb = readFileSync(join(root, 'supabase/rollbacks/20261018190000_booking_70_ROLLBACK.sql'), 'utf8');
+  const sql = readFileSync(join(root, 'supabase/migrations/20261018190000_booking_71_sales_chart.sql'), 'utf8');
+  const rb = readFileSync(join(root, 'supabase/rollbacks/20261018190000_booking_71_ROLLBACK.sql'), 'utf8');
   assert.match(sql, /admin_sales_chart\(p_year integer\)/);
   assert.match(sql, /_require_permission\('reports\.view'\)/);
   assert.match(sql, /revoke all on function booking\.admin_sales_chart\(integer\) from public, anon, authenticated/);

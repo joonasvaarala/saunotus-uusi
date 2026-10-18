@@ -1,4 +1,4 @@
--- t70: admin_sales_chart (booking_70). Rollback-transaktio: lopuksi tahallinen poikkeus. Ei bottitunnuksia.
+-- t70: admin_sales_chart (booking_71). Rollback-transaktio: lopuksi tahallinen poikkeus. Ei bottitunnuksia.
 -- Varmistaa: reports.view, ei anon; Johku mukana käyrässä; raportin totals ja CSV eivät kasva Johkun verran.
 set local lock_timeout = '3s';
 set local statement_timeout = '120s';

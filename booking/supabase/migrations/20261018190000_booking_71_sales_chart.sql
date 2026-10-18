@@ -1,4 +1,4 @@
--- booking_70_sales_chart (18.10.2026)
+-- booking_71_sales_chart (18.10.2026)
 -- Talous-sivun myyntikäyrä: booking.admin_sales_chart(p_year) → 12 kuukautta, netto + ALV + erittelemätön brutto.
 -- Vain luku. Ei taulumuutoksia. Ei korvaa admin_report_* / _report_json / admin_report_csv -funktioita.
 --
@@ -15,7 +15,7 @@
 --   (Johkussa ei ole erillistä hyvityspäivää). Osittain hyvitetty pysyy Johkun koko summassa (osahyvityksen määrä ei ole metassa).
 -- Lahjakortit: vain kuitit, joita _acct_excluded ei sulje pois = sama joukko kuin raportin gross_after_refunds.
 -- Oikeus: reports.view (manager, admin). Ei anonille.
--- Rollback: rollbacks/20261018190000_booking_70_ROLLBACK.sql
+-- Rollback: rollbacks/20261018190000_booking_71_ROLLBACK.sql
 
 create or replace function booking.admin_sales_chart(p_year integer)
 returns jsonb
@@ -135,7 +135,7 @@ end
 $function$;
 
 comment on function booking.admin_sales_chart(integer) is
-  'Talous-myyntikäyrä (reports.view). Kuukausi = kuitin antamispäivä Helsinki + Johku paid_at. Johku ei siirry raportteihin. booking_70.';
+  'Talous-myyntikäyrä (reports.view). Kuukausi = kuitin antamispäivä Helsinki + Johku paid_at. Johku ei siirry raportteihin. booking_71.';
 
 revoke all on function booking.admin_sales_chart(integer) from public, anon, authenticated;
 grant execute on function booking.admin_sales_chart(integer) to service_role;

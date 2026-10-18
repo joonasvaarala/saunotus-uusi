@@ -75,7 +75,7 @@ jobs:
       - run: node --test booking/tests/header-alarivi.test.mjs
       # hallinnan Vapaat ajat: tuotteet config.public_slots-kentästä (ei id-listaa), kb 7 (120 min, pakettiaikajana), mock vs. tuotannon funktio
       - run: node --test booking/tests/admin-vapaat-ajat.test.mjs
-      # Talous-myyntikäyrä (booking_70): Johku vain käyrässä, ei raportissa/CSV:ssä; tekstit FI+EN
+      # Talous-myyntikäyrä (booking_71): Johku vain käyrässä, ei raportissa/CSV:ssä; tekstit FI+EN
       - run: node --test booking/tests/myyntikapyra.test.mjs
       # Hallinnan listojen suodattimet: haku näkyy, suodattimet kiinni oletuksena, painike ja aktiivisten lukumäärä
       - run: node --test booking/tests/suodattimet.test.mjs

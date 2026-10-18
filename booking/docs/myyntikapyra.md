@@ -1,6 +1,6 @@
 # Myyntikäyrä (Talous)
 
-Sipoonjoen Perinnesauna, hallinnan Talous-sivu. Migraatio `booking_70_sales_chart` (ei ajettu tästä PR:stä). Sopimus: `KOODARI_talous_A_D_fi.md` §20.
+Sipoonjoen Perinnesauna, hallinnan Talous-sivu. Migraatio `booking_71_sales_chart` (ei ajettu tästä PR:stä). Sopimus: `KOODARI_talous_A_D_fi.md` §20.
 
 ## Mitä ruudulla näkyy
 
@@ -61,7 +61,7 @@ Jos funktiota ei ole vielä kannassa, hallinta ei näytä keksimiään lukuja: k
 
 ## Bottiavustus
 
-- Aja migraatio `20261018190000_booking_70_sales_chart.sql`. Rollback on `20261018190000_booking_70_ROLLBACK.sql` (pelkkä `drop function`).
+- Aja migraatio `20261018190000_booking_71_sales_chart.sql`. Rollback on `20261018190000_booking_71_ROLLBACK.sql` (pelkkä `drop function`).
 - Aja testi `booking/supabase/tests/talous/t70_sales_chart.sql` (transaktio päättyy tahalliseen poikkeeseen `TESTRESULT`).
 - Tuo `content/site-texts.pending-import-4.json` funktiolla `admin_texts_import` (enintään 500 riviä; tiedostossa myyntikäyrän ja suodatinpainikkeen tekstit). Älä ylikirjoita olemassa olevia avaimia.
 - Älä yhdistä PR:ää tästä ajosta.

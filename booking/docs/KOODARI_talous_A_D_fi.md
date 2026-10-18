@@ -686,7 +686,7 @@ Vain luku. Ei taulumuutoksia, ei maksu-/pito-/lahjakortti-/sähköpostimuutoksia
 - Rollback: `rollbacks/20261018165354_booking_68_ROLLBACK.sql` (drop function). `booking_69`: `rollbacks/20261018171000_booking_69_ROLLBACK.sql` (palauttaa extrasin booking_68-rungon ja poistaa `admin_day_revenue`). Testit: `tests/day/t68_day_revenue_events.sql`, `tests/day/t69_day_revenue_role.sql` (TESTRESULT; ei CI). Selaintesti: `node --test booking/tests/paivanakyma-tuotto.test.mjs`.
 - Tekstit: `ui.admin.day.*` (FI+EN), tuotu `content/site-texts.imported-pr68.json`. Päivänäkymä lukee ne `public_get_site_texts`-vastauksesta (`booking/admin/day-texts.js`); sanakirja on varalla, jos rivi puuttuu tai paikkamerkki ei täyty.
 
-## 20. Myyntikäyrä (18.10.2026, migraatio `booking_70_sales_chart`, ei vielä tuotannossa)
+## 20. Myyntikäyrä (18.10.2026, migraatio `booking_71_sales_chart`, ei vielä tuotannossa)
 Hallinnan Talous-sivu näyttää välilehtien yläpuolella kuukausipylvään valitulle vuodelle (oletus kuluva vuosi). Tarkempi kuvaus: `booking/docs/myyntikapyra.md`.
 
 - **RPC:** `booking.admin_sales_chart(p_year integer)` → `{year, tz, basis, johku_basis, vat_method, months[12], totals, years}`. Oikeus `reports.view` (manager/admin). Execute: authenticated + service_role. Ei anon, ei public. Virhe ilman oikeutta: `forbidden`. Vuosi muu kuin 2000–2100: `invalid_param`.
@@ -696,4 +696,4 @@ Hallinnan Talous-sivu näyttää välilehtien yläpuolella kuukausipylvään val
 - **Ei tuplalaskua samasta tilauksesta:** Johku-puoli ohittaa tilauksen, jolla on kuitti ja `_acct_excluded` on false. Johku-kuitin estää jo `receipts_no_johku`.
 - **Tekstit:** `ui.admin.sales_chart.*`, tuonti `content/site-texts.pending-import-4.json` (seuraava vapaa numero; ei 6). Sama tiedosto sisältää listojen suodatinpainikkeen `ui.admin.filters.*`.
 - **Suodattimet:** Talous-listoilla (tilaukset, maksut, lahjakortit, lahjakoodit) sekä Varaukset- ja Tuotteet-sivuilla haku jää näkyviin. Muut suodattimet ovat kiinni, kunnes painike avaa ne (`booking/admin/filter-drawer.js`). Aktiivinen valinta säilyy ja painikkeessa näkyy lukumäärä. Asiakkaat-sivulla on vain haku, ei suodatinpaneelia. Ei tietokantamuutosta.
-- Rollback: `rollbacks/20261018190000_booking_70_ROLLBACK.sql` (vain `drop function`). Testi: `tests/talous/t70_sales_chart.sql` (Bottiavustus; ei CI:ssä). Node: `booking/tests/myyntikapyra.test.mjs`.
+- Rollback: `rollbacks/20261018190000_booking_71_ROLLBACK.sql` (vain `drop function`). Testi: `tests/talous/t70_sales_chart.sql` (Bottiavustus; ei CI:ssä). Node: `booking/tests/myyntikapyra.test.mjs`.
