@@ -8,7 +8,7 @@ import { pt } from './pay-choices-texts.js';
 import { T } from './i18n.js';
 import { loadProducts as loadTreatmentProducts, splitCatalog, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
 import { createTreatmentViews } from './treatment-ui.js';
-import { createTexts, loadShopTexts } from './site-texts.js';
+import { createTexts, loadShopTexts, applyShopTexts } from './site-texts.js';
 import { fmtMinutes } from './site-texts-logic.js';
 import { OPT } from './options-texts.js';
 import { optName, needsOption, findOption } from './options-logic.js';
@@ -112,6 +112,7 @@ async function loadBase() {
   // Tuotekuvat: public_product_images voi puuttua (migraatio 14 ajamatta) tai epäonnistua → kauppa toimii ilman kuvia
   const [catalog, settings, imgs, stat, siteTexts] = await Promise.all([rpc('public_catalog'), rpc('public_settings'), rpc('public_product_images').catch(() => []), loadStatic(), loadShopTexts(S.siteTextsUrl)]);
   texts.setRows(siteTexts); texts.setData({ catalog: Array.isArray(catalog) ? catalog : [], settings: settings || {} });
+  await applyShopTexts(S, { rows: siteTexts, data: { catalog: Array.isArray(catalog) ? catalog : [], settings: settings || {}, format: { price: (n) => money(n), duration: (m) => fmtMinutes(m) } } });   // osa 3: sanakirjat DB-tekstein (puuttuva avain → repon oletus)
   const split = splitCatalog(catalog, stat);   // vuoropohjaiset tuotteet (rules) ja hoito-/rituaalituotteet (slots) erikseen
   state.catalog = split.rules; state.treatments = split.treatments; treatmentsReady = Promise.resolve(); state.settings = settings || {};
   for (const i of Array.isArray(imgs) ? imgs : []) if (i?.path) state.images.set(+i.product_id, { url: storageUrl('product-images', i.path), alt: i.alt || '' });

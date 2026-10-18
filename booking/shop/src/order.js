@@ -12,6 +12,7 @@ import { OPT } from './options-texts.js';
 import { optName, optionMissingOnOrder, optionChanged, rowLabel } from './options-logic.js';
 import { createOptionPicker } from './options-ui.js';
 import { ht, holdError } from './hold-texts.js';
+import { applyShopTexts } from './site-texts.js';
 import { isHoldView, giftWasUsed } from './hold-logic.js';
 import { holdPanel } from './hold-ui.js';
 import { normCheckoutOptions } from './mobilepay-logic.js';
@@ -39,6 +40,7 @@ const mount = (...nodes) => { root.replaceChildren(...nodes.flat().filter(Boolea
 const badge = (kind, text) => h('span', { class: `ord-badge ${kind}`, text });
 
 async function main() {
+  await applyShopTexts(S);   // sivutekstit tietokannasta (osa 3): puuttuva avain/tiedosto → repon oletus
   const token = new URLSearchParams(location.search).get('t');
   if (!validToken(token)) return mount(h('p', { class: 'bk-error', role: 'alert', text: t.noToken }), phoneBox());
   const api = createOrderApi({ rpc, token });

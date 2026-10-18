@@ -1,0 +1,249 @@
+// Sivutekstit osa 3 / PR 1 (sopimus §18): kaupan kovakoodatut tekstit avaimiksi + tuontitiedosto + DB-peitto repon oletuksilla.
+//  * content/site-texts.pending-import.json noudattaa admin_texts_import-sääntöjä (booking_62) ja §18.2-nimeämistä; ei sisällä tuotannossa jo olevia avaimia; vastaa koodin oletuksia (generoitu koodista)
+//  * peitto (applySiteTexts): DB-teksti kun saman kielen rivi on, muuten repon oletus (ei fi→en-ristiin), paikkamerkit {{var:…}}, {{price:ID}}, aliakset, funktiolehdet (monikko)
+//  * kierros: tuontitiedosto peittona → kaikki sanakirjat täsmälleen ennallaan (ulkoasu ei muutu)
+// Ei verkkoa eikä tietokantaa.
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync, mkdtempSync, rmSync, writeFileSync, existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
+
+const root = resolve(new URL('../..', import.meta.url).pathname);
+const rd = (p) => readFileSync(join(root, p), 'utf8');
+const J = (p) => JSON.parse(rd(p));
+const imp = (p) => import(pathToFileURL(join(root, p)));
+const work = mkdtempSync(join(tmpdir(), 'sivutekstit-kauppa-'));
+test.after(() => rmSync(work, { recursive: true, force: true }));
+
+const L = await imp('booking/shop/src/site-texts-logic.js');
+const R = await imp('booking/shop/src/text-registry.js');
+const PG = await imp('booking/shop/src/shop-page-texts.js');
+const B = await imp('src/site-texts.mjs');
+const { T } = await imp('booking/shop/src/i18n.js');
+const { OT } = await imp('booking/shop/src/order-texts.js');
+const { GT, gtText } = await imp('booking/shop/src/gift-texts.js');
+const { HT, ht } = await imp('booking/shop/src/hold-texts.js');
+const { MT, mt } = await imp('booking/shop/src/mobilepay-texts.js');
+const { PT } = await imp('booking/shop/src/pay-choices-texts.js');
+const { OPT } = await imp('booking/shop/src/options-texts.js');
+const DICTS = { T, OT, GT, HT, PT, MT, OPT };
+
+const PENDING = J('content/site-texts.pending-import.json');
+const FALLBACK = J('content/site-texts.fallback.json');      // tietokannan julkaistut tekstit (public_get_site_texts)
+const IMPORTED = J('content/site-texts.imported.json');
+const PHONE = '010 299 2866';
+const quiet = () => {};
+
+// pistemäinen kopio alkuperäisistä merkkijonolehdistä + funktioista (ennen mitään peittoa)
+const flat = (o, p = '') => Object.entries(o).flatMap(([k, v]) => (v && typeof v === 'object' ? flat(v, `${p}${k}.`) : [[`${p}${k}`, v]]));
+const ORIG = Object.fromEntries(Object.entries(DICTS).map(([n, d]) => [n, Object.fromEntries(['fi', 'en'].map((l) => [l, Object.fromEntries(flat(d[l]))]))]));
+const snapshotStrings = () => JSON.stringify(Object.entries(DICTS).map(([n, d]) => [n, ['fi', 'en'].map((l) => flat(d[l]).map(([k, v]) => [k, typeof v === 'function' ? 'fn' : v]))]));
+const BASE_SNAP = snapshotStrings();
+
+// ================= tuontitiedosto =================
+test('tuontitiedosto: rivit noudattavat admin_texts_import-sääntöjä (avain, kieli, luokka, kind, max_len, paikkamerkit) ja §18.2-nimeämistä', () => {
+  assert.ok(Array.isArray(PENDING) && PENDING.length > 1000, `rivejä ${PENDING.length}`);
+  const seen = new Set();
+  for (const r of PENDING) {
+    const w = `${r.key} [${r.lang}]`;
+    assert.match(r.key, L.KEY_RE, w); assert.ok(r.key.length <= 120, `${w}: avain liian pitkä`);
+    assert.match(r.key, /^(ui|page|seo|email|nav)\./, `${w}: vapaa avainetuliite`);
+    assert.ok(['fi', 'en'].includes(r.lang), w);
+    assert.ok(['normal', 'protected'].includes(r.class), `${w}: luokka ${r.class}`);   // locked = hinnat/ALV/URL: ei kovakoodatuissa teksteissä
+    assert.equal(r.kind, 'plain', w);
+    assert.ok(Number.isInteger(r.max_len) && r.max_len >= r.text.length && r.max_len <= 100000, `${w}: max_len ${r.max_len} < ${r.text.length}`);
+    assert.ok(typeof r.text === 'string' && r.text.trim() === r.text && r.text.length > 0, `${w}: tyhjä tai reunoilla tyhjää`);
+    assert.doesNotMatch(r.text, /[<>]|https?:\/\/|www\.|[\u0000-\u0008\u000b-\u001f]/, `${w}: HTML/linkki/ohjausmerkki plain-kentässä`);
+    assert.deepEqual([...r.placeholders].sort(), [...L.tokensOf(r.text)].sort(), `${w}: placeholders ≠ tekstin merkinnät`);
+    for (const tok of L.tokensOf(r.text)) { assert.match(tok, L.TOKEN_RE, `${w}: ${tok}`); assert.ok(L.KINDS.includes(tok.slice(2, -2).split(':')[0]), `${w}: tuntematon lajike ${tok}`); }
+    assert.doesNotMatch(r.text.replace(/\{\{[^{}]*\}\}/g, ''), /[{}]/, `${w}: yksittäinen aaltosulku (käytä {{var:nimi}})`);
+    assert.ok(r.reason && r.reason.length <= 300, `${w}: perustelu`);
+    assert.ok(!seen.has(`${r.key}|${r.lang}`), `${w}: kaksoiskappale`); seen.add(`${r.key}|${r.lang}`);
+  }
+  for (const k of new Set(PENDING.map((r) => r.key))) assert.ok(seen.has(`${k}|fi`) && seen.has(`${k}|en`), `${k}: FI+EN molemmat (§18.9 kohta 2)`);
+});
+test('tuontitiedosto: ei sisällä tuotannossa jo olevia avaimia (ei ylikirjoitusta) eikä tuotuja ui.checkout.error_*-avaimia', () => {
+  const have = new Set(FALLBACK.texts.map((r) => `${r.key}|${r.lang}`));
+  for (const r of IMPORTED) have.add(`${r.key}|${r.lang}`);
+  const clash = PENDING.filter((r) => have.has(`${r.key}|${r.lang}`)).map((r) => `${r.key} [${r.lang}]`);
+  assert.deepEqual(clash, []);
+  assert.ok(FALLBACK.texts.some((r) => r.key === 'ui.checkout.error_addon_inactive'), 'fallback sisältää tuodut avaimet');
+});
+test('tuontitiedosto: yksi tuontikutsu enintään 500 riviä → jaettavissa erin; koko ≤ 3 erää', () => {
+  assert.ok(Math.ceil(PENDING.length / 500) <= 3, `${PENDING.length} riviä`);
+});
+test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-shop.mjs tuottaa täsmälleen saman tiedoston (ei poikkeamaa koodin oletuksista)', () => {
+  const prod = join(work, 'prod.json'), out = join(work, 'out.json');
+  writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts }));
+  const r = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', prod, '--out', out], { encoding: 'utf8' });
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(readFileSync(out, 'utf8'), rd('content/site-texts.pending-import.json'));
+});
+test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet avaimet)', () => {
+  const prod = join(work, 'prod2.json'), out = join(work, 'out2.json');
+  const have = PENDING.filter((r) => r.key.startsWith('ui.order.') || r.key === 'ui.shop.title');
+  writeFileSync(prod, JSON.stringify({ ok: true, texts: [...FALLBACK.texts, ...have.map((r) => ({ key: r.key, lang: r.lang, text: 'tuotannon teksti', version: 1, placeholders: [] }))] }));
+  const r = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', prod, '--out', out], { encoding: 'utf8' });
+  assert.equal(r.status, 0, r.stderr);
+  const rows = JSON.parse(readFileSync(out, 'utf8'));
+  assert.equal(rows.length, PENDING.length - have.length);
+  assert.ok(!rows.some((x) => x.key.startsWith('ui.order.') || x.key === 'ui.shop.title'));
+  const bad = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', join(work, 'ei-ole.json')], { encoding: 'utf8' });
+  assert.notEqual(bad.status, 0);
+});
+
+// ================= avaimet =================
+test('avaimet: yksilölliset, FI+EN pariksi, kaikki kaupan sanakirjat mukana (lukuun ottamatta teknistä URL-polkua)', () => {
+  const d = R.collectDefaults();
+  const ids = d.map((r) => `${r.key}|${r.lang}`); assert.equal(new Set(ids).size, ids.length, 'kaksoisavain');
+  for (const k of R.allKeys()) assert.ok(ids.includes(`${k}|fi`) && ids.includes(`${k}|en`), `${k}: kieli puuttuu`);
+  // jokainen merkkijonolehti (paitsi aliakset ja poikkeukset) on jollakin avaimella; funktiolehdet laajennettu malleiksi
+  const leaves = Object.entries(ORIG).flatMap(([n, o]) => Object.keys(o.fi).map((k) => `${n}:${k}`)).filter((x) => !R.EXCLUDED.has(x));
+  const covered = new Set(d.filter((r) => r.lang === 'fi').map((r) => `${r.id}:${r.path}`));
+  const aliases = leaves.filter((x) => !covered.has(x));
+  for (const a of aliases) assert.match(a, /^(GT|MT):/, `${a}: ei avainta eikä aliasta`);
+  assert.ok(aliases.length >= 5 && aliases.length <= 14, `aliaksia ${aliases.length}: ${aliases}`);
+  assert.ok(R.allKeys().length > 600);
+  assert.deepEqual([...R.EXCLUDED], ['T:directionsUrl']);
+});
+test('avainnimeäminen: tr.errors.<koodi> → ui.checkout.error_<koodi>, errors.<koodi> → ui.shop.error_<koodi>, tr.* → ui.treatment.*, camelCase → snake_case', () => {
+  const k = new Set(R.allKeys());
+  for (const x of ['ui.checkout.error_generic', 'ui.checkout.error_time_window', 'ui.shop.error_rate_limited', 'ui.treatment.max_persons', 'ui.shop.day_sessions.one', 'ui.shop.day_sessions.other', 'ui.shop.free_spots', 'ui.hold.err.order_expired', 'ui.order.title', 'ui.gift.buy_lead', 'ui.mobilepay.test_note', 'ui.paychoice.title', 'ui.option.not_chosen']) assert.ok(k.has(x), `${x} puuttuu`);
+  assert.ok(![...k].some((x) => /[A-Z]/.test(x)));
+  // oletusvirheelle yleisteksti (§18.9 kohta 4)
+  assert.ok(k.has('ui.checkout.error_generic'));
+});
+test('funktiolehdet: jokaisella mallipohjalla on FI+EN ja malli tuottaa saman tekstin kuin alkuperäinen funktio (monikon molemmat haarat)', () => {
+  const sample = { n: [1, 2, 7], m: [15], p: ['5 €'], h: [48], dl: ['pe 10.10. klo 12.00'], when: ['ma 5.10. klo 18.00'], price: ['49 €'] };
+  const render = (tpl, names, args) => tpl.replace(/\{\{var:(\w+)\}\}/g, (_, k) => String(args[names.indexOf(k)]));
+  const cases = Object.entries(R.FN_SPECS);
+  assert.equal(cases.length, 11);
+  for (const [id, spec] of cases) {
+    const [dn, ...pp] = id.split(':'); const path = pp.join(':');
+    for (const lang of ['fi', 'en']) {
+      const fn = ORIG[dn][lang][path]; assert.equal(typeof fn, 'function', `${id} ${lang}`);
+      const grid = spec.args.map((a) => sample[a] || ['x']);
+      const combos = grid.reduce((acc, vs) => acc.flatMap((c) => vs.map((v) => [...c, v])), [[]]);
+      for (const args of combos) {
+        const tpl = spec.plural ? spec[lang][+args[0] === 1 ? 'one' : 'other'] : spec[lang];
+        assert.equal(render(tpl, spec.args, args), fn(...args), `${id} ${lang} ${JSON.stringify(args)}`);
+      }
+    }
+  }
+});
+test('luokat (§18.6): puhelinnumeroa, suostumusta, ehtoja ja peruutus-/muutosehtoja sisältävät avaimet ovat protected; muut normal', () => {
+  const cls = new Map(PENDING.map((r) => [r.key, r.class]));
+  for (const k of ['ui.shop.load_error', 'ui.shop.disabled', 'ui.checkout.error_generic', 'ui.checkout.error_disabled', 'ui.checkout.error_too_many_open', 'ui.shop.consent_marketing', 'ui.shop.accept_terms', 'ui.shop.terms_link', 'ui.shop.change_info', 'ui.shop.change_locked', 'ui.gift.marketing', 'ui.gift.terms_link', 'ui.gift.buy_lead', 'ui.order.cancel_lead']) assert.equal(cls.get(k), 'protected', k);
+  for (const k of ['ui.shop.title', 'ui.shop.loading', 'ui.order.title']) assert.equal(cls.get(k), 'normal', k);
+  for (const r of PENDING) if (/\{\{var:phone\}\}/.test(r.text)) assert.equal(r.class, 'protected', r.key);
+  const prot = new Set(PENDING.filter((r) => r.class === 'protected').map((r) => r.key));
+  assert.ok(prot.size >= 20 && prot.size <= 40, `protected ${prot.size}`);
+});
+test('puhelinnumero ei ole tuontitekstissä kovakoodattuna: {{var:phone}} (sivuston yhteystiedoista)', () => {
+  assert.ok(!PENDING.some((r) => r.text.includes(PHONE)));
+  assert.equal(PENDING.filter((r) => r.text.includes('{{var:phone}}')).map((r) => r.key).filter((k, i, a) => a.indexOf(k) === i).length, 5);
+});
+
+// ================= sivutekstit build.mjs (page.* / seo.*) =================
+test('varaus-/tilaussivujen tekstit: page.*/seo.*-avaimet FI+EN tuontitiedostossa ja oletukset = nykyiset otsikot', () => {
+  assert.equal(PG.SHOP_PAGE_TEXTS.length, 11);
+  for (const p of PG.SHOP_PAGE_TEXTS) {
+    assert.match(p.key, /^(page|seo)\./); assert.ok(p.fi && p.en);
+    for (const lang of ['fi', 'en']) { const r = PENDING.find((x) => x.key === p.key && x.lang === lang); assert.ok(r, `${p.key} [${lang}] puuttuu tuonnista`); assert.equal(r.text, p[lang]); assert.equal(PG.pageDefault(p.key, lang), p[lang]); }
+  }
+  assert.throws(() => PG.pageDefault('page.ei.ole', 'fi'));
+  // build.mjs lukee ne tx():llä eikä sisällä enää kovakoodattuja otsikoita
+  const b = rd('booking/shop/build.mjs');
+  assert.doesNotMatch(b, /Varaa saunaelämys|Tilauksesi|Your order|Booking confirmation|Varauskalenteri vaatii/);
+});
+test('build: {{var:…}} paikkamerkki – validointi hyväksyy muodon, tx() vaatii arvon (puuttuva arvo kaataa) eikä raaka merkintä päädy tekstiin', async () => {
+  const rows = [{ key: 'ui.test.n', lang: 'fi', text: '{{var:n}} paikkaa', placeholders: ['{{var:n}}'] }];
+  assert.deepEqual(L.validateTexts(rows, L.makeContext({ vars: true })), []);
+  assert.equal(L.validateTexts(rows, L.makeContext({}))[0].problem.includes('arvoa ei löydy'), true);
+  const rpc = async () => ({ ok: true, texts: rows, generated_at: 'x' });
+  const st = await B.loadSiteTexts({ env: { SITE_TEXTS_FIXTURE: '' }, rpc, log: { log() {}, warn() {} }, cacheDir: join(work, 'c1') });   // ei kaadu varsta
+  assert.equal(st.rows.length, 1);
+  assert.equal(B.tx('ui.test.n', 'fi', { state: st, vars: { n: 3 } }), '3 paikkaa');
+  assert.throws(() => B.tx('ui.test.n', 'fi', { state: st, fallback: 'oletus', log: quiet }), (e) => e instanceof L.PlaceholderError);
+  assert.throws(() => B.tx('ui.test.n', 'fi', { state: st, vars: {}, log: quiet }), (e) => e instanceof L.PlaceholderError);
+  assert.throws(() => L.fillPlaceholders('{{foo:bar}}', L.makeContext({ vars: true })), (e) => e instanceof L.PlaceholderError);
+});
+
+// ================= peitto =================
+const dbRows = (o) => Object.entries(o).flatMap(([k, [fi, en]]) => [fi != null && { key: k, lang: 'fi', text: fi }, en != null && { key: k, lang: 'en', text: en }].filter(Boolean));
+test.afterEach(() => R.resetSiteTexts());
+test('peitto: kierros – tuontitiedosto DB-rivinä (puhelin sivun yhteystiedoista) → kaikki sanakirjat täsmälleen ennallaan, funktiot samat', () => {
+  const res = R.applySiteTexts(PENDING.filter((r) => !r.key.startsWith('page.') && !r.key.startsWith('seo.')).map((r) => ({ key: r.key, lang: r.lang, text: r.text })), { vars: { phone: PHONE, email: 'x@example.test' }, log: quiet });
+  assert.deepEqual(res.skipped, []);
+  assert.ok(res.applied.length > 1300, `peitettiin ${res.applied.length}`);
+  assert.equal(snapshotStrings(), BASE_SNAP);
+  // funktiot: täsmälleen samat tulokset kuin alkuperäiset
+  for (const lang of ['fi', 'en']) for (const [id] of Object.entries(R.FN_SPECS)) {
+    const [dn, ...pp] = id.split(':'); const path = pp.join(':'); const o = path.split('.').reduce((a, k) => a[k], DICTS[dn][lang]);
+    for (const args of [[1, 'a', 'b'], [2, 'c', 'd'], [5, 'x', 'y']]) assert.equal(o(...args), ORIG[dn][lang][path](...args), `${id} ${lang}`);
+  }
+  // aliakset seuraavat pitotekstiä ja ovat samat kuin ennen
+  for (const l of ['fi', 'en']) assert.equal(GT[l]['err.order_expired'], HT[l]['err.order_expired']);
+});
+test('peitto: DB-teksti voittaa saman kielen oletuksen; puuttuva rivi → oletus; en puuttuu → en-oletus (ei fi-tekstiä en-sivulle)', () => {
+  R.applySiteTexts(dbRows({ 'ui.shop.title': ['Varaa elämys (DB)', null], 'ui.shop.lead': [null, 'EN lead from DB'], 'ui.order.title': ['Tilaus (DB)', 'Order (DB)'] }), { log: quiet });
+  assert.equal(T.fi.title, 'Varaa elämys (DB)'); assert.equal(T.en.title, ORIG.T.en.title);
+  assert.equal(T.en.lead, 'EN lead from DB'); assert.equal(T.fi.lead, ORIG.T.fi.lead);
+  assert.equal(OT.fi.title, 'Tilaus (DB)'); assert.equal(OT.en.title, 'Order (DB)');
+  assert.equal(T.fi.loading, ORIG.T.fi.loading);
+});
+test('peitto: idempotentti ja palautuva – uusi kutsu alkaa oletuksista (poistettu rivi → oletus takaisin)', () => {
+  R.applySiteTexts(dbRows({ 'ui.shop.title': ['A', 'B'] }), { log: quiet }); R.applySiteTexts(dbRows({ 'ui.shop.title': ['A2', 'B2'] }), { log: quiet });
+  assert.deepEqual([T.fi.title, T.en.title], ['A2', 'B2']);
+  R.applySiteTexts([], { log: quiet });
+  assert.equal(snapshotStrings(), BASE_SNAP);
+});
+test('peitto: tyhjä teksti, virheellinen avain tai tuntematon/täyttymätön paikkamerkki → oletus (ei tyhjää, ei raakaa {{…}}), ohitus raportoidaan', () => {
+  const logs = [];
+  const res = R.applySiteTexts([{ key: 'ui.shop.title', lang: 'fi', text: '   ' }, { key: 'ui.shop.lead', lang: 'fi', text: 'Hinta {{price:99}}' }, { key: 'ui.shop.pick_day', lang: 'fi', text: 'Päivä {{foo:1}}' }, { key: 'ui.shop.loading', lang: 'fi', text: 'Lataus {{var:' }, { key: 'Bad Key', lang: 'fi', text: 'x' }], { log: (m) => logs.push(m) });
+  assert.equal(snapshotStrings(), BASE_SNAP);
+  assert.equal(res.skipped.length, 3); assert.ok(logs.length === 3);
+  for (const [, v] of Object.entries(DICTS).flatMap(([, d]) => ['fi', 'en'].flatMap((l) => flat(d[l])))) if (typeof v === 'string') { assert.ok(v.trim()); assert.doesNotMatch(v, /\{\{|\}\}/); }
+});
+test('peitto: {{price:ID}}, {{duration:ID}}, {{setting:avain}} täytetään ajoajan datasta; {{var:phone}} sivuston yhteystiedoista; muut {{var:x}} → {x} (kutsuhetken arvo)', () => {
+  R.applySiteTexts(dbRows({ 'ui.shop.lead': ['Alkaen {{price:7}}, {{duration:7}}, varaus {{setting:hold_minutes}} min, soita {{var:phone}}', 'From {{price:7}}'], 'ui.order.title': ['{{var:n}} kpl', null] }),
+    { vars: { phone: '09 123 4567' }, data: { catalog: [{ id: 7, price: 49, duration_minutes: 120 }], settings: { hold_minutes: 15 } }, log: quiet });
+  assert.equal(T.fi.lead, 'Alkaen 49 €, 2 h, varaus 15 min, soita 09 123 4567'); assert.equal(T.en.lead, 'From €49');
+  assert.equal(OT.fi.title, '{n} kpl');       // koodi täyttää {n} kuten ennenkin
+  // ilman dataa teksti jää oletukseksi
+  R.applySiteTexts(dbRows({ 'ui.shop.lead': ['Alkaen {{price:7}}', null] }), { log: quiet });
+  assert.equal(T.fi.lead, ORIG.T.fi.lead);
+});
+test('peitto: alias – pitotekstin (HT) muutos näkyy lahjakortti- ja MobilePay-teksteissä jotka kopioivat sen', () => {
+  R.applySiteTexts(dbRows({ 'ui.hold.err.order_expired': ['Vanhentunut (DB)', 'Expired (DB)'] }), { log: quiet });
+  assert.equal(HT.fi['err.order_expired'], 'Vanhentunut (DB)'); assert.equal(GT.fi['err.order_expired'], 'Vanhentunut (DB)'); assert.equal(MT.en['err.order_expired'], 'Expired (DB)');
+  assert.equal(ht('en', 'err.order_expired'), 'Expired (DB)'); assert.equal(gtText('fi', 'err.order_expired'), 'Vanhentunut (DB)'); assert.equal(mt('fi', 'err.order_expired'), 'Vanhentunut (DB)');
+  assert.ok(!R.allKeys().includes('ui.gift.err.order_expired'), 'aliaksella ei omaa avainta');
+});
+test('peitto: funktiolehdet käyttävät DB-mallia (monikko one/other), argumentit {{var:…}} → arvot; puuttuva muoto → alkuperäinen funktio', () => {
+  R.applySiteTexts(dbRows({ 'ui.shop.day_sessions.one': ['Yksi paikka (DB)', null], 'ui.shop.day_sessions.other': ['{{var:n}} paikkaa (DB)', '{{var:n}} spots (DB)'], 'ui.shop.pay_hold': ['Pidossa {{var:m}} min (DB)', null], 'ui.treatment.selected': ['{{var:when}}/{{var:n}}/{{var:price}}', null] }), { log: quiet });
+  assert.equal(T.fi.daySessions(1), 'Yksi paikka (DB)'); assert.equal(T.fi.daySessions(4), '4 paikkaa (DB)');
+  assert.equal(T.en.daySessions(1), ORIG.T.en.daySessions(1)); assert.equal(T.en.daySessions(3), '3 spots (DB)');   // en.one puuttuu → alkuperäinen funktio
+  assert.equal(T.fi.payHold(15), 'Pidossa 15 min (DB)'); assert.equal(T.en.payHold(15), ORIG.T.en.payHold(15));
+  assert.equal(T.fi.tr.selected('ma', 2, '98 €'), 'ma/2/98 €');
+  assert.equal(T.fi.tr.maxPersons(6), ORIG.T.fi['tr.maxPersons'](6));
+});
+test('peitto: i18n-rakenne säilyy – tr/errors-objektit samat viitteet (koodin vakiot t = T[lang] näkevät muutokset), ei uusia haaroja', () => {
+  const t = T.fi, tr = T.fi.tr, errs = T.fi.tr.errors;
+  R.applySiteTexts(dbRows({ 'ui.checkout.error_generic': ['Yleisvirhe (DB)', null], 'ui.treatment.date': ['Pvm (DB)', null], 'ui.shop.error_rate_limited': ['Liikaa (DB)', null] }), { log: quiet });
+  assert.equal(t.tr, tr); assert.equal(tr.errors, errs);
+  assert.equal(errs.generic, 'Yleisvirhe (DB)'); assert.equal(tr.date, 'Pvm (DB)'); assert.equal(t.errors.rate_limited, 'Liikaa (DB)');
+});
+test('vartija: kaikki kaupan kielisanakirjat (export const X = { fi: {…}, en: {…} }) on rekisteröity text-registry.js:ssä – uusi sanakirja ilman avaimia kaataa testin', async () => {
+  const { readdirSync } = await import('node:fs');
+  const dir = join(root, 'booking/shop/src');
+  const dictFiles = readdirSync(dir).filter((f) => f.endsWith('.js') && /^export const [A-Za-z]+ = \{\s*\n\s*fi: \{/m.test(readFileSync(join(dir, f), 'utf8')));
+  assert.deepEqual(dictFiles.sort(), ['gift-texts.js', 'hold-texts.js', 'i18n.js', 'mobilepay-texts.js', 'options-texts.js', 'order-texts.js', 'pay-choices-texts.js']);
+  const reg = rd('booking/shop/src/text-registry.js');
+  for (const f of dictFiles) assert.ok(reg.includes(`./${f}`), `${f} puuttuu text-registry.js:stä`);
+  // tunnetut poikkeukset (raportoitu): ICS-tiedoston osoite (shop.js) ja SOURCE_LABELS (gift-logic.js; palvelin antaa nimet)
+  assert.match(rd('booking/shop/src/shop.js'), /LOCATION:Hindsbyntie 124/);
+});

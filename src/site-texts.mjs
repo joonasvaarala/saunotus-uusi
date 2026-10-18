@@ -72,7 +72,7 @@ export async function loadSiteTexts({ env = process.env, log = console, rpc = nu
     settings ||= snap?.context?.settings || fb?.context?.settings || {};
   }
   const ctx = makeContext({ catalog, settings, format: buildFormat });
-  const problems = validateTexts(rows, ctx);
+  const problems = validateTexts(rows, makeContext({ catalog, settings, format: buildFormat, vars: true }));   // {{var:…}} tarkistetaan vain muodoltaan; arvo tulee kutsuhetkellä
   if (problems.length) throw new Error(`site-texts: PAIKKAMERKKIVIRHE – rakennus keskeytetty (§18.3):\n${problems.map((p) => `  ${p.key} [${p.lang}]: ${p.problem}`).join('\n')}`);
   const out = { source, rows, idx: indexTexts(rows), ctx, generatedAt, warnings, catalog, settings };
   if (source === 'rpc') { try { mkdirSync(dir, { recursive: true }); writeFileSync(snapFile, JSON.stringify({ generated_at: generatedAt, texts: rows, context: { catalog, settings } })); } catch (e) { warn(`välimuistin kirjoitus epäonnistui (${e.message})`); } }
@@ -90,8 +90,8 @@ export class MissingTextError extends Error { constructor(key, lang) { super(`si
  * Teksti sivulle: paikkamerkit täytetty. en puuttuu → fi (lokitetaan). Avainta ei ole: `fallback` (siirtymäajan vanha kovakoodattu teksti, lokitetaan) tai MissingTextError.
  * Ei koskaan tyhjää eikä raakaa avainta/{{…}}-merkintää.
  */
-export function tx(key, lang, { fallback = null, state = STATE, log = console } = {}) {
-  const r = state ? textFor(state.idx, key, lang, state.ctx, { strict: true }) : null;
+export function tx(key, lang, { fallback = null, state = STATE, log = console, vars = null } = {}) {
+  const r = state ? textFor(state.idx, key, lang, vars ? { ...state.ctx, var: (n) => vars[n] ?? null } : state.ctx, { strict: true }) : null;
   if (r) { if (r.fallback) log.warn?.(`site-texts: ${key} puuttuu kielellä ${lang}; käytetään fi-tekstiä`); return r.text; }
   if (fallback != null && String(fallback).trim()) { log.warn?.(`site-texts: avain ${key} puuttuu tietokannasta; käytetään siirtymäajan varatekstiä`); return String(fallback); }
   throw new MissingTextError(key, lang);

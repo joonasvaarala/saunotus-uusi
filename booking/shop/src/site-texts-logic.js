@@ -1,11 +1,12 @@
 // Sivutekstit tietokannasta (sopimus §18, booking_60/62): puhdas logiikka ilman riippuvuuksia. Sama moduuli toimii selaimessa (kauppa) ja Node-buildissa
 // (src/site-texts.mjs). Teksti on aina avain + kieli (fi pakollinen, en voi puuttua → näytetään fi, ei tyhjää eikä raakaa avainta).
 // Paikkamerkit (§18.3): {{price:7}} (tuotteen hinta), {{duration:7}} (tuotteen kesto), {{setting:<avain>}} (vain public_settings()-avaimet).
+// Lisäksi {{var:<nimi>}} (kutsuparametri, esim. {{var:n}} = määrä, {{var:phone}} = sivuston puhelinnumero): arvo tulee koodista tekstiä käytettäessä, ei tietokannasta eikä katalogista.
 // Tuntematon paikkamerkki tai puuttuva arvo = PlaceholderError: build kaatuu (strict) tai teksti jätetään pois (lenient, selaimessa: kutsuja valitsee varatekstin).
 export const LANGS = ['fi', 'en'];
 export const KEY_RE = /^[a-z0-9_]+(\.[a-z0-9_-]+)+$/;                    // sama kuin admin_texts_import (booking_62)
 export const TOKEN_RE = /^\{\{[a-z_]+(:[A-Za-z0-9_]+)?\}\}$/;           // sama kuin _text_validate (booking_60)
-export const KINDS = ['price', 'duration', 'setting'];                  // tunnetut paikkamerkkilajit (§18.3)
+export const KINDS = ['price', 'duration', 'setting', 'var'];            // tunnetut paikkamerkkilajit (§18.3 + var)
 
 export class PlaceholderError extends Error {
   constructor(message, { key = null, lang = null, token = null } = {}) { super(message); this.name = 'PlaceholderError'; Object.assign(this, { key, lang, token }); }
@@ -77,8 +78,9 @@ export function validateTexts(rows, ctx) {
 /**
  * Paikkamerkkikonteksti katalogista ja asetuksista. catalog = public_catalog()-rivit tai [{id, price, duration_minutes}]; settings = public_settings()-objekti.
  * format: { price(n, lang), duration(min, lang) } (oletus: fmtPrice / fmtMinutes). setting: vain merkkijono/luku/boolean-arvot, ei objekteja.
+ * vars: {{var:nimi}}-arvot. Objekti { nimi: arvo } | funktio (nimi, lang) → arvo | true = jätä merkintä muotoon {nimi} (täytetään myöhemmin, kutsuhetkellä). Ilman vars-asetusta var-merkintä on virhe (= ei arvoa).
  */
-export function makeContext({ catalog = [], settings = {}, format = {} } = {}) {
+export function makeContext({ catalog = [], settings = {}, format = {}, vars = null } = {}) {
   const byId = new Map((Array.isArray(catalog) ? catalog : []).map((p) => [String(p.id), p]));
   const fp = format.price || fmtPrice, fd = format.duration || ((m) => fmtMinutes(m));
   const num = (v) => (v == null || v === '' || !Number.isFinite(+v) ? null : +v);
@@ -86,5 +88,6 @@ export function makeContext({ catalog = [], settings = {}, format = {} } = {}) {
     price: (id, lang) => { const v = num(byId.get(String(id))?.price); return v == null ? null : fp(v, lang); },
     duration: (id, lang) => { const v = num(byId.get(String(id))?.duration_minutes); return v == null || v <= 0 ? null : fd(v, lang); },
     setting: (key) => { const v = settings?.[key]; return v != null && typeof v !== 'object' ? String(v) : null; },
+    var: (name, lang) => (vars === true ? `{${name}}` : typeof vars === 'function' ? vars(name, lang) ?? null : vars && vars[name] != null ? String(vars[name]) : null),
   };
 }

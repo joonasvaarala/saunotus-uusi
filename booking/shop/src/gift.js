@@ -4,6 +4,7 @@
 import { rpc } from './sb.js';
 import { GT } from './gift-texts.js';
 import { createGiftApi } from './gift-api.js';
+import { applyShopTexts } from './site-texts.js';
 import { h, makeFmt, phoneBox, field } from './gift-ui.js';
 import * as G from './gift-logic.js';
 
@@ -268,8 +269,10 @@ function buildBalance() {
 
 async function main() {
   let pk;
+  const textsReady = applyShopTexts(S);                          // sivutekstit tietokannasta (osa 3): puuttuva avain/tiedosto → repon oletus
   try { pk = await api.packages(); } catch { return; }          // verkko-/palvelinvika → sivu jää staattiseksi (Johku)
   if (!pk?.ok) return;                                           // puuttuva RPC / virhe → ei muutoksia
+  await textsReady;
   if (pk.sale_enabled && saleRoot && pk.packages.length) {
     document.getElementById('avoin')?.remove(); document.getElementById('paketit')?.remove();   // staattiset Johku-osiot korvataan
     saleRoot.replaceChildren(buildSale(pk)); show(saleRoot);
