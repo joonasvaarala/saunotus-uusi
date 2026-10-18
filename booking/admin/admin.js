@@ -4,6 +4,7 @@ import { h, toast, errMsg } from './ui.js';
 import { icon } from './icons.js';
 import { t as tl } from './talous-i18n.js';
 import { createAdminMock } from './options-mock.js';
+import { loadFilterTexts } from './filter-texts.js';
 import { needsManualRoute, parseAdminHash } from './reservation-query.js';
 
 const $ = (id) => document.getElementById(id);
@@ -98,6 +99,7 @@ async function enter() {
     ctx.role = role; ctx.name = s.user?.email || ''; ctx.perms = me?.permissions || []; ctx.roleLabel = me?.role_label || role;
     $('who').textContent = MOCK ? 'Kokeilutila: esimerkkidata, mikään ei tallennu' : `${ctx.name} · ${ctx.roleLabel}`;
     document.body.dataset.role = role;
+    await loadFilterTexts(rpc);
     route();
   } catch (e) { signOut(); showLogin(errMsg(e)); }
 }

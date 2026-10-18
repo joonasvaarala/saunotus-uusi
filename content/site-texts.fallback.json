@@ -17463,6 +17463,66 @@
    ]
   },
   {
+   "key": "ui.order.closed_cancelled",
+   "lang": "en",
+   "text": "This booking has been cancelled. The time has been released. You can make a new booking at Sipoonjoen Perinnesauna.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.order.closed_cancelled",
+   "lang": "fi",
+   "text": "Tämä varaus on peruttu. Paikka on vapautettu. Voit tehdä uuden varauksen Sipoonjoen Perinnesaunaan.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.order.closed_hold_expired",
+   "lang": "en",
+   "text": "This booking was cancelled because payment was not received within {{var:minutes}} minutes. The time has been released for others. You have not been charged. You can make a new booking at Sipoonjoen Perinnesauna.",
+   "version": 1,
+   "placeholders": [
+    "{{var:minutes}}"
+   ]
+  },
+  {
+   "key": "ui.order.closed_hold_expired",
+   "lang": "fi",
+   "text": "Tämä varaus on peruttu, koska maksua ei saatu {{var:minutes}} minuutin kuluessa. Paikka on vapautettu muille. Mitään ei ole veloitettu. Voit tehdä uuden varauksen Sipoonjoen Perinnesaunaan.",
+   "version": 1,
+   "placeholders": [
+    "{{var:minutes}}"
+   ]
+  },
+  {
+   "key": "ui.order.closed_hold_expired_gift",
+   "lang": "en",
+   "text": "Any gift card amount you applied has been returned to the card.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.order.closed_hold_expired_gift",
+   "lang": "fi",
+   "text": "Lahjakortin käytetty osuus on palautettu kortille.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.order.closed_new_booking",
+   "lang": "en",
+   "text": "Make a new booking",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.order.closed_new_booking",
+   "lang": "fi",
+   "text": "Tee uusi varaus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
    "key": "ui.order.contact",
    "lang": "en",
    "text": "Questions? Contact us:",

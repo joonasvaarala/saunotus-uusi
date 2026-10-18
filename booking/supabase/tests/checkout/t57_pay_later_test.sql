@@ -118,7 +118,7 @@ begin
   perform pg_temp.ck(r ->> 'code' = 'order_expired' and not exists (select 1 from booking.reservations where order_id = oid6 and status = 'confirmed'), 'X1: pito päättynyt (cron ei vielä ajanut) => order_expired, ei elvytetä');
   perform booking._expire_holds();
   r := booking.public_confirm_pay_later(tok6);
-  perform pg_temp.ck(r ->> 'code' = 'order_expired' and (select status from booking.orders where id = oid6) = 'expired', 'X2: cronin jälkeen (expired) => order_expired');
+  perform pg_temp.ck(r ->> 'code' = 'order_cancelled' and (select status from booking.orders where id = oid6) = 'cancelled', 'X2: cronin jälkeen (cancelled) => order_cancelled');
 
   -- ===== peruttu =====
   r := pg_temp.mk(v_slots[6], 'p7@t57.example'); tok7 := (r ->> 'token')::uuid; oid7 := (select id from booking.orders where public_token = tok7);

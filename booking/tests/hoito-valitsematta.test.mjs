@@ -1,6 +1,7 @@
 // Hoito valitsematta: päivänäkymän linkki avaa varauslistan suodattimella treatment_unassigned + period=upcoming.
 // Palvelin (booking_72, p_option_missing) rajaa sivutuksen kanssa. Ennen migraatiota selain rajaa option_missing-kentästä.
-// Tekstit: ui.admin.options.* sanakirjassa ja content/site-texts.pending-import-4.json (ei vielä fallbackissa).
+// Tekstit: ui.admin.options.* sanakirjassa ja content/site-texts.pending-import-10.json (ei vielä fallbackissa).
+// pending-import-4.json on jo tuotu (myyntikäyrä ja suodatinpainike); sitä ei muuteta.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -113,9 +114,11 @@ test('tekstit: FI ja EN, tuontitiedosto vastaa sanakirjaa, fallbackissa ei viel�
   assert.equal(OPTION_TEXTS.fi['ui.admin.options.reminder_link'], 'Avaa varaukset');
   assert.equal(OPTION_TEXTS.fi['ui.admin.options.not_chosen'], 'valitsematta');
   assert.equal(OPTION_TEXTS.fi['ui.admin.options.filter_unassigned'], 'Hoito valitsematta');
-  const pending = JSON.parse(readFileSync(new URL('../../content/site-texts.pending-import-4.json', import.meta.url), 'utf8'));
+  const pending = JSON.parse(readFileSync(new URL('../../content/site-texts.pending-import-10.json', import.meta.url), 'utf8'));
   const keys = new Set(Object.keys(OPTION_TEXTS.fi));
   assert.equal(pending.length, keys.size * 2);
+  const imported4 = JSON.parse(readFileSync(new URL('../../content/site-texts.pending-import-4.json', import.meta.url), 'utf8'));
+  assert.equal(imported4.filter((r) => String(r.key || '').startsWith('ui.admin.options.')).length, 0);
   for (const row of pending) {
     assert.ok(keys.has(row.key), row.key);
     assert.ok(row.lang === 'fi' || row.lang === 'en');
@@ -173,7 +176,11 @@ test('linkki, reititys ja migraatio ovat tiedostoissa; hoitovalintaa ei muuteta'
   assert.match(list, /treatment-filter/);
   assert.match(list, /active-filters/);
   assert.match(list, /loadReservationPage/);
-  assert.match(list, /data-testid': 'reservation-filters'/);
+  assert.match(list, /filterDrawer\(/);
+  assert.match(list, /testid: 'reservations-filters'/);
+  assert.match(list, /data-testid': 'reservations-search'/);
+  assert.match(list, /status: activeBar/);
+  assert.match(list, /reviewAttentionCount/);
   assert.doesNotMatch(list, /admin_set_reservation_option/);
   assert.match(sql, /p_option_missing boolean default null/);
   assert.match(sql, /p_option_missing is not true/);

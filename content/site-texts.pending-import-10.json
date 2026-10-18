@@ -1,0 +1,142 @@
+[
+ {
+  "key": "ui.admin.options.filter_all",
+  "lang": "en",
+  "text": "All",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan varauslistan Hoito valitsematta -suodatin. Ei koske lukittuja kenttiä. Varateksti booking/admin/options-texts.js."
+ },
+ {
+  "key": "ui.admin.options.filter_all",
+  "lang": "fi",
+  "text": "Kaikki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan varauslistan Hoito valitsematta -suodatin. Ei koske lukittuja kenttiä. Varateksti booking/admin/options-texts.js."
+ },
+ {
+  "key": "ui.admin.options.filter_clear",
+  "lang": "en",
+  "text": "Remove",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan varauslistan Hoito valitsematta -suodatin. Ei koske lukittuja kenttiä. Varateksti booking/admin/options-texts.js."
+ },
+ {
+  "key": "ui.admin.options.filter_clear",
+  "lang": "fi",
+  "text": "Poista",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan varauslistan Hoito valitsematta -suodatin. Ei koske lukittuja kenttiä. Varateksti booking/admin/options-texts.js."
+ },
+ {
+  "key": "ui.admin.options.filter_legend",
+  "lang": "en",
+  "text": "Treatment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan varauslistan Hoito valitsematta -suodatin. Ei koske lukittuja kenttiä. Varateksti booking/admin/options-texts.js."
+ },
+ {
+  "key": "ui.admin.options.filter_legend",
+  "lang": "fi",
+  "text": "Hoito",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan varauslistan Hoito valitsematta -suodatin. Ei koske lukittuja kenttiä. Varateksti booking/admin/options-texts.js."
+ },
+ {
+  "key": "ui.admin.options.filter_unassigned",
+  "lang": "en",
+  "text": "Treatment not chosen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan varauslistan Hoito valitsematta -suodatin. Ei koske lukittuja kenttiä. Varateksti booking/admin/options-texts.js."
+ },
+ {
+  "key": "ui.admin.options.filter_unassigned",
+  "lang": "fi",
+  "text": "Hoito valitsematta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan varauslistan Hoito valitsematta -suodatin. Ei koske lukittuja kenttiä. Varateksti booking/admin/options-texts.js."
+ },
+ {
+  "key": "ui.admin.options.not_chosen",
+  "lang": "en",
+  "text": "not chosen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan hoitomuistutus ja rivimerkki. Ei koske lukittuja kenttiä. Varateksti booking/admin/options-texts.js."
+ },
+ {
+  "key": "ui.admin.options.not_chosen",
+  "lang": "fi",
+  "text": "valitsematta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Uusi avain: hallinnan hoitomuistutus ja rivimerkki. Ei koske lukittuja kenttiä. Varateksti booking/admin/options-texts.js."
+ },
+ {
+  "key": "ui.admin.options.reminder",
+  "lang": "en",
+  "text": "{{var:n}} upcoming treatment bookings have no treatment chosen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": ["{{var:n}}"],
+  "reason": "Uusi avain: päivänäkymän keltainen hoitomuistutus. Ei koske lukittuja kenttiä. Varateksti booking/admin/options-texts.js."
+ },
+ {
+  "key": "ui.admin.options.reminder",
+  "lang": "fi",
+  "text": "{{var:n}} tulevaa hoitovarausta ilman valittua hoitoa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": ["{{var:n}}"],
+  "reason": "Uusi avain: päivänäkymän keltainen hoitomuistutus. Ei koske lukittuja kenttiä. Varateksti booking/admin/options-texts.js."
+ },
+ {
+  "key": "ui.admin.options.reminder_link",
+  "lang": "en",
+  "text": "Open bookings",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Uusi avain: päivänäkymän hoitomuistutuksen linkki suodatettuun varauslistaan. Ei koske lukittuja kenttiä. Varateksti booking/admin/options-texts.js."
+ },
+ {
+  "key": "ui.admin.options.reminder_link",
+  "lang": "fi",
+  "text": "Avaa varaukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Uusi avain: päivänäkymän hoitomuistutuksen linkki suodatettuun varauslistaan. Ei koske lukittuja kenttiä. Varateksti booking/admin/options-texts.js."
+ }
+]

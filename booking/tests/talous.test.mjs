@@ -41,37 +41,37 @@ test('CSV: luvut', () => {
 });
 test('Mock-palvelin (sopimuksen muodot): 12 000 tilausta, uusin ensin, tilausnumero kasvaa ajan mukana', async () => {
   assert.equal(mock.orders.length, 12000);
-  const r = await R('admin_list_orders', { p_limit: 100 });
+  const r = await R('admin_list_orders', { p_limit: 100, p_payment_filter: 'all' });
   assert.equal(r.total, 12000); assert.equal(r.rows.length, 100);
   for (const k of ['order_id', 'order_no', 'johku_order_no', 'created_at', 'status', 'payment_status', 'source_channel', 'is_native', 'total', 'paid', 'refunded', 'unpaid', 'customer_name', 'customer_company', 'first_start', 'reservation_count', 'payment_count', 'receipt_count']) assert.ok(k in r.rows[0], k);
   for (let i = 1; i < r.rows.length; i++) { assert.ok(r.rows[i].created_at <= r.rows[i - 1].created_at); assert.ok(r.rows[i].order_no < r.rows[i - 1].order_no); }
-  assert.equal((await R('admin_list_orders', { p_limit: 5000 })).rows.length, 200, 'sivukoon yläraja 200');
-  assert.equal((await R('admin_list_orders', {})).rows.length, 50, 'oletus 50');
+  assert.equal((await R('admin_list_orders', { p_limit: 5000, p_payment_filter: 'all' })).rows.length, 200, 'sivukoon yläraja 200');
+  assert.equal((await R('admin_list_orders', { p_payment_filter: 'all' })).rows.length, 50, 'sivukoko 50 kun koko kanta pyydetään');
 });
 test('Mock-palvelin: sivutus kattaa kaikki rivit kerran (25/50/100), viimeinen sivu', async () => {
   for (const limit of [25, 50, 100]) {
-    const pages = Math.ceil(12000 / limit), last = await R('admin_list_orders', { p_limit: limit, p_offset: (pages - 1) * limit });
+    const pages = Math.ceil(12000 / limit), last = await R('admin_list_orders', { p_payment_filter: 'all', p_limit: limit, p_offset: (pages - 1) * limit });
     assert.equal(last.rows.length, 12000 - (pages - 1) * limit);
-    const p2 = await R('admin_list_orders', { p_limit: limit, p_offset: limit }), p1 = await R('admin_list_orders', { p_limit: limit });
+    const p2 = await R('admin_list_orders', { p_payment_filter: 'all', p_limit: limit, p_offset: limit }), p1 = await R('admin_list_orders', { p_payment_filter: 'all', p_limit: limit });
     assert.ok(!p1.rows.some((a) => p2.rows.some((b) => b.order_id === a.order_id)));
   }
 });
 test('Mock-palvelin: haku (tilausnumero tarkka, nimi osittainen), suodattimet ja p_sort', async () => {
-  const one = mock.orders[500], r = await R('admin_list_orders', { p_search: String(one.order_no), p_limit: 100 });
+  const one = mock.orders[500], r = await R('admin_list_orders', { p_search: String(one.order_no), p_payment_filter: 'all', p_limit: 100 });
   assert.equal(r.total, 1); assert.equal(r.rows[0].order_id, one.order_id);
-  const jo = mock.orders.find((o) => o.johku_order_no); assert.equal((await R('admin_list_orders', { p_search: `#${jo.johku_order_no}` })).rows[0].order_id, jo.order_id);
-  const last = one.customer_name.split(' ')[1].toLowerCase(), byName = await R('admin_list_orders', { p_search: last, p_limit: 100 }); assert.ok(byName.total > 10 && byName.rows.every((x) => `${x.customer_name} ${x.customer_company || ''}`.toLowerCase().includes(last)));
-  const paid = await R('admin_list_orders', { p_payment_status: 'paid', p_source: 'web', p_limit: 100 }); assert.ok(paid.total > 1000 && paid.rows.every((x) => x.payment_status === 'paid' && x.source_channel === 'web'));
-  const nat = await R('admin_list_orders', { p_native: false, p_limit: 100 }); assert.equal(nat.total, 3600); assert.ok(nat.rows.every((x) => !x.is_native && x.source_channel === 'johku_import'));
-  const rng = await R('admin_list_orders', { p_from: '2026-09-01', p_to: '2026-09-30', p_limit: 100 }); assert.ok(rng.total > 100 && rng.total < 2000 && rng.rows.every((x) => x.created_at.slice(0, 7) === '2026-09'));
-  const st = await R('admin_list_orders', { p_date_field: 'start', p_from: '2026-11-01', p_to: '2026-11-30', p_limit: 100 }); assert.ok(st.total > 50 && st.rows.every((x) => x.first_start.slice(0, 7) === '2026-11'));
+  const jo = mock.orders.find((o) => o.johku_order_no); assert.equal((await R('admin_list_orders', { p_search: `#${jo.johku_order_no}`, p_payment_filter: 'all' })).rows[0].order_id, jo.order_id);
+  const last = one.customer_name.split(' ')[1].toLowerCase(), byName = await R('admin_list_orders', { p_search: last, p_payment_filter: 'all', p_limit: 100 }); assert.ok(byName.total > 10 && byName.rows.every((x) => `${x.customer_name} ${x.customer_company || ''}`.toLowerCase().includes(last)));
+  const paid = await R('admin_list_orders', { p_payment_status: 'paid', p_payment_filter: 'all', p_source: 'web', p_limit: 100 }); assert.ok(paid.total > 1000 && paid.rows.every((x) => x.payment_status === 'paid' && x.source_channel === 'web'));
+  const nat = await R('admin_list_orders', { p_native: false, p_payment_filter: 'all', p_limit: 100 }); assert.equal(nat.total, 3600); assert.ok(nat.rows.every((x) => !x.is_native && x.source_channel === 'johku_import'));
+  const rng = await R('admin_list_orders', { p_from: '2026-09-01', p_to: '2026-09-30', p_payment_filter: 'all', p_limit: 100 }); assert.ok(rng.total > 100 && rng.total < 2000 && rng.rows.every((x) => x.created_at.slice(0, 7) === '2026-09'));
+  const st = await R('admin_list_orders', { p_date_field: 'start', p_from: '2026-11-01', p_to: '2026-11-30', p_payment_filter: 'all', p_limit: 100 }); assert.ok(st.total > 50 && st.rows.every((x) => x.first_start.slice(0, 7) === '2026-11'));
   const sorts = { created: (x) => x.created_at, order_no: (x) => x.order_no, total: (x) => x.total, start: (x) => x.first_start || '', paid: (x) => x.paid };
   for (const [k, f] of Object.entries(sorts)) {
-    const asc = (await R('admin_list_orders', { p_sort: `${k}_asc`, p_limit: 100 })).rows, desc = (await R('admin_list_orders', { p_sort: `${k}_desc`, p_limit: 100 })).rows;
+    const asc = (await R('admin_list_orders', { p_sort: `${k}_asc`, p_payment_filter: 'all', p_limit: 100 })).rows, desc = (await R('admin_list_orders', { p_sort: `${k}_desc`, p_payment_filter: 'all', p_limit: 100 })).rows;
     if (k !== 'start') { assert.ok(asc.every((x, i) => i === 0 || f(x) >= f(asc[i - 1])), `${k} asc`); assert.ok(desc.every((x, i) => i === 0 || f(x) <= f(desc[i - 1])), `${k} desc`); }
     else { assert.ok(asc.every((x, i) => i === 0 || f(x) >= f(asc[i - 1]) || !asc[i].first_start), 'start asc'); assert.ok(desc.every((x, i) => i === 0 || f(x) <= f(desc[i - 1]) || !x.first_start), 'start desc'); }
   }
-  const un = (await R('admin_list_orders', { p_sort: 'unpaid_desc', p_limit: 100 })).rows; assert.ok(un.every((x, i) => i === 0 || x.unpaid <= un[i - 1].unpaid));
+  const un = (await R('admin_list_orders', { p_sort: 'unpaid_desc', p_payment_filter: 'all', p_limit: 100 })).rows; assert.ok(un.every((x, i) => i === 0 || x.unpaid <= un[i - 1].unpaid));
   await assert.rejects(() => R('admin_list_orders', { p_sort: 'unpaid_asc' }), (e) => e.code === 'invalid_sort');
   await assert.rejects(() => R('admin_list_orders', { p_sort: 'created' }), (e) => e.code === 'invalid_sort');
   await assert.rejects(() => R('admin_ei_ole_olemassa', {}), (e) => A.isMissingRpc(e));

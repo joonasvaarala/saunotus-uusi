@@ -1,7 +1,8 @@
 // Hallinnan hoitomuistutuksen ja "Hoito valitsematta" -suodattimen tekstit (FI + EN). Avaimet: ui.admin.options.* (§18).
 // Sama mekanismi kuin päivänäkymässä (day-texts.js): public_get_site_texts, kieli talous-i18n (?lang= / localStorage).
 // Sanakirja OPTION_TEXTS on vain varalla: rivi puuttuu, haku epäonnistuu tai paikkamerkki ei täyty.
-// Tuonti: content/site-texts.pending-import-4.json (Bottiavustus ajaa admin_texts_importin; ei vielä fallbackissa).
+// Tuonti: content/site-texts.pending-import-10.json (käyttäjä ajaa admin_texts_importin; ei vielä fallbackissa).
+// pending-import-4.json on toisen muutoksen tekstejä (myyntikäyrä ja suodatinpainike) — siihen ei lisätä näitä avaimia.
 import { getLang } from './talous-i18n.js';
 
 export const OPTION_TEXTS = {

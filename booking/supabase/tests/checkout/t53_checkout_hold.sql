@@ -95,15 +95,15 @@ begin
   r := booking.public_apply_gift_card(tok, 'HHTEST000002', null);
   perform pg_temp.ck(r ->> 'code' = 'order_expired', 'C3: vanhentuneeseen pitoon ei voi enää maksaa lahjakortilla (' || coalesce(r ->> 'code', 'ok') || ')');
   perform booking.expire_holds();
-  perform pg_temp.ck((select status from booking.orders where id = oid) = 'expired' and (select status from booking.reservations where order_id = oid) = 'expired', 'C4: cron vapautti pidon (tilaus+varaus expired)');
+  perform pg_temp.ck((select status from booking.orders where id = oid) = 'cancelled' and (select status from booking.reservations where order_id = oid) = 'cancelled' and (select cancel_reason from booking.reservations where order_id = oid) = 'hold_expired', 'C4: cron perui pidon (tilaus+varaus cancelled, syy hold_expired)');
   perform pg_temp.ck((select balance from booking.gift_cards where id = g1) = v_bal0, 'C5: osamaksu palautettu kortille');
   perform pg_temp.ck((select status from booking.payments where order_id = oid and method = 'gift_card') = 'cancelled', 'C6: korttimaksu merkitty cancelled');
   perform pg_temp.ck(exists (select 1 from booking.gift_card_ledger where gift_card_id = g1 and order_id = oid and reason = 'refund' and delta = 5), 'C7: ledger-rivi palautuksesta');
   perform pg_temp.ck((select payment_status from booking.orders where id = oid) = 'unpaid', 'C8: payment_status unpaid');
   perform pg_temp.ck(not exists (select 1 from booking.receipts where order_id = oid) and not exists (select 1 from booking.email_outbox where order_id = oid and kind in ('receipt', 'order_confirmation')), 'C9: vanhentuneelle ei kuittia/vahvistusta');
-  perform pg_temp.ck(booking.public_get_order(tok) ->> 'checkout_state' = 'expired', 'C10: public_get_order: expired');
+  perform pg_temp.ck(booking.public_get_order(tok) ->> 'checkout_state' = 'cancelled' and booking.public_get_order(tok) ->> 'cancel_reason' = 'hold_expired', 'C10: public_get_order: cancelled / hold_expired');
   r := booking.public_apply_gift_card(tok, 'HHTEST000002', null);
-  perform pg_temp.ck(r ->> 'code' = 'order_expired', 'C11: expired-tilaukseen ei voi maksaa');
+  perform pg_temp.ck(r ->> 'code' = 'order_not_editable', 'C11: peruttuun tilaukseen ei voi maksaa');
   r := pg_temp.mk(v_slots[2], 'c2@t53.example');
   perform pg_temp.ck((r ->> 'ok')::boolean, 'C12: vapautunut aika on taas varattavissa (' || coalesce(r ->> 'code', '') || ')');
   -- kertakäyttökortti
@@ -133,7 +133,7 @@ begin
   -- Vipps lopputila ABORTED => ei kesken => vapautus
   update booking.payments set raw = jsonb_set(raw, '{mobilepay,last_state}', '"ABORTED"') where id = pid;
   perform booking.expire_holds();
-  perform pg_temp.ck((select status from booking.reservations where order_id = oid) = 'expired' and (select status from booking.orders where id = oid) = 'expired', 'D7: lopputilan (ABORTED) jälkeen pito vapautuu');
+  perform pg_temp.ck((select status from booking.reservations where order_id = oid) = 'cancelled' and (select cancel_reason from booking.reservations where order_id = oid) = 'hold_expired' and (select status from booking.orders where id = oid) = 'cancelled', 'D7: lopputilan (ABORTED) jälkeen pito perutaan');
 
   -- ---------- E) MobilePay-maksu kokonaan: vahvistus + kuitti; ylimaksu-/alimaksusuojat ----------
   r := pg_temp.mk(v_slots[3], 'e1@t53.example'); tok := (r ->> 'token')::uuid; oid := pg_temp.oid(tok); v_total := (r ->> 'total')::numeric;
@@ -193,7 +193,7 @@ begin
   perform pg_temp.ck((select status from booking.orders where id = oid) = 'pending', 'G6: cron ei vapauta ennen vapautuspäivää');
   update booking.reservations set hold_expires_at = now() - interval '1 minute' where order_id = oid;
   perform booking.expire_holds();
-  perform pg_temp.ck((select status from booking.orders where id = oid) = 'expired', 'G7: vapautuspäivän jälkeen vapautuu');
+  perform pg_temp.ck((select status from booking.orders where id = oid) = 'cancelled' and (select cancel_reason from booking.reservations where order_id = oid) = 'hold_expired', 'G7: vapautuspäivän jälkeen perutaan');
   update booking.settings set value = '0'::jsonb where key = 'checkout_group_threshold_persons';
 
   -- ---------- H) sauna (yleinen vuoro), yritys, verkkomaksu pois ----------

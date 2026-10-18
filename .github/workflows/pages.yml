@@ -59,6 +59,8 @@ jobs:
       - run: node --test booking/tests/hoito-valitsematta.test.mjs
       # hallinnan päivänäkymä: päivän tuotto (käyntipäivä, brutto, perutut pois) ja tapahtumien sijoittelu
       - run: node --test booking/tests/paivanakyma-tuotto.test.mjs
+      # Tarkista: sulkukonfliktin kuittaus (booking_73) ei muuta saatavuutta; tekstit ui.admin.review.*
+      - run: node --test booking/tests/sulkukonflikti-kuittaus.test.mjs
       # kassan 15 min paikanpito (§17, booking_53/54): tekstit, tilat, palvelinaikalaskuri, virhekoodit, mock-moottori, migraatiot mukana
       - run: node --test booking/tests/kassa-pito.test.mjs
       # testivaihtoehto "maksu paikan päällä" (booking_57): palvelimen tarjonta, nappi, virheet FI/EN, mock, migraatio mukana
@@ -77,6 +79,12 @@ jobs:
       - run: node --test booking/tests/header-alarivi.test.mjs
       # hallinnan Vapaat ajat: tuotteet config.public_slots-kentästä (ei id-listaa), kb 7 (120 min, pakettiaikajana), mock vs. tuotannon funktio
       - run: node --test booking/tests/admin-vapaat-ajat.test.mjs
+      # Talous-myyntikäyrä (booking_71): Johku vain käyrässä, ei raportissa/CSV:ssä; tekstit FI+EN
+      - run: node --test booking/tests/myyntikapyra.test.mjs
+      # Hallinnan listojen suodattimet: haku näkyy, suodattimet kiinni oletuksena, painike ja aktiivisten lukumäärä
+      - run: node --test booking/tests/suodattimet.test.mjs
+      # Talous-tilauslista: oletuksena maksetut (booking_76), haku kaikista, tekstit FI+EN
+      - run: node --test booking/tests/tilaussuodatin.test.mjs
       # .cache/articles: edellinen artikkelisnapshot (RPC-katkon varalta + siirrettyjen slugien tunnistus)
       - uses: actions/cache@v4
         with:

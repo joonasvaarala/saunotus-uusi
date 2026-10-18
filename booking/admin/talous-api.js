@@ -13,7 +13,7 @@ import { createMock } from './talous-mock.js';
 export const RPC = {
   listOrders: 'admin_list_orders', getOrder: 'admin_get_order', listPayments: 'admin_list_payments', listAddons: 'admin_list_addons',
   addToOrder: 'admin_add_to_order', createPaymentLink: 'admin_create_payment_link', refund: 'admin_refund', recordPayment: 'admin_record_payment', listVatRates: 'admin_list_vat_rates',
-  reportDaily: 'admin_report_daily', reportMonthly: 'admin_report_month', reportCsv: 'admin_report_csv',
+  reportDaily: 'admin_report_daily', reportMonthly: 'admin_report_month', reportCsv: 'admin_report_csv', salesChart: 'admin_sales_chart',
   getReceipt: 'admin_get_receipt', resendReceipt: 'admin_resend_receipt',
 };
 export class FeatureNotReady extends Error {
@@ -114,6 +114,27 @@ export function normReport(r) {
     statistics: { johku: normJohkuStats(r.statistics?.johku) },
     lines: Array.isArray(r.lines) ? r.lines : null };   // rivitaso: vain mock (asiakaspuolen CSV); oikea palvelin ei sitä vielä palauta
 }
+// admin_sales_chart(p_year) → 12 kuukautta. Johku on mukana VAIN tässä (ei raportin totals/CSV). Puuttuva RPC ei vaihda sivua mock-dataan.
+const monthNum = (m, i) => ({
+  month: i + 1,
+  native_net: num(m?.native_net), native_vat: num(m?.native_vat), native_gross: num(m?.native_gross),
+  johku_net: num(m?.johku_net), johku_vat: num(m?.johku_vat), johku_gross: num(m?.johku_gross), unsplit_gross: num(m?.unsplit_gross),
+  net: num(m?.net), vat: num(m?.vat), gross: num(m?.gross),
+});
+export function normSalesChart(r) {
+  const src = L(r?.months);
+  const months = Array.from({ length: 12 }, (_, i) => monthNum(src.find((x) => +x.month === i + 1) || src[i], i));
+  const sum = (k) => round2(months.reduce((s, m) => s + m[k], 0));
+  const t = r?.totals || {};
+  return {
+    year: num(r?.year), tz: r?.tz || 'Europe/Helsinki', basis: r?.basis || 'cash_receipt_issued_at', johku_basis: r?.johku_basis || 'johku_paid_at', vat_method: r?.vat_method || 'order_item_rates_proportional',
+    months,
+    totals: { native_net: num(t.native_net, sum('native_net')), native_vat: num(t.native_vat, sum('native_vat')), native_gross: num(t.native_gross, sum('native_gross')),
+      johku_net: num(t.johku_net, sum('johku_net')), johku_vat: num(t.johku_vat, sum('johku_vat')), johku_gross: num(t.johku_gross, sum('johku_gross')), unsplit_gross: num(t.unsplit_gross, sum('unsplit_gross')),
+      net: num(t.net, sum('net')), vat: num(t.vat, sum('vat')), gross: num(t.gross, sum('gross')) },
+    years: L(r?.years).map((y) => +y).filter((y) => y >= 2000 && y <= 2100),
+  };
+}
 
 // ---- parametrien muodostus ----
 const compact = (o) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined && v !== null && v !== ''));
@@ -136,7 +157,7 @@ export function rpcBackend(rpc) {
     return res;
   };
   return {
-    listOrders: async (a) => call('listOrders', compact({ p_search: a.search, p_status: a.status, p_payment_status: a.paymentStatus, p_source: a.source, p_native: a.native === 'native' ? true : a.native === 'imported' ? false : undefined,
+    listOrders: async (a) => call('listOrders', compact({ p_search: a.search, p_status: a.status, p_payment_status: a.paymentStatus, p_payment_filter: a.paymentFilter, p_source: a.source, p_native: a.native === 'native' ? true : a.native === 'imported' ? false : undefined,
       p_date_field: a.dateField === 'start' ? 'start' : undefined, p_from: a.from, p_to: a.to, p_sort: orderSortParam(a.sortBy, a.sortDir), p_limit: lim(a.limit), p_offset: Math.max(0, Math.trunc(+a.offset) || 0) })),
     listPayments: async (a) => call('listPayments', compact({ p_search: a.search, p_method: a.method, p_status: a.status, p_from: a.from, p_to: a.to, p_sort: paymentSortParam(a.sortDir), p_limit: lim(a.limit), p_offset: Math.max(0, Math.trunc(+a.offset) || 0) })),
     getOrder: (id) => call('getOrder', { p_order_id: id }),
@@ -149,6 +170,7 @@ export function rpcBackend(rpc) {
     reportDaily: (date) => call('reportDaily', { p_date: date }),
     reportMonthly: (ym) => call('reportMonthly', { p_ym: ym }),
     reportCsv: (a) => call('reportCsv', compact({ p_from: a.from, p_to: a.to, p_kind: a.kind || 'lines' })),
+    salesChart: (year) => call('salesChart', { p_year: year }),
     getReceipt: (id) => call('getReceipt', { p_receipt_id: id }),
     resendReceipt: (id) => call('resendReceipt', { p_receipt_id: id }),
   };
@@ -193,6 +215,14 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
     listAddons: () => run('listAddons', undefined, (r) => L(r).filter((x) => x.active !== false).map((x) => ({ id: x.id, code: x.code, name: x.name, name_en: x.name_en || x.name, price: num(x.price ?? x.price_gross) }))),
     reportDaily: (date) => run('reportDaily', date, normReport),
     reportMonthly: (ym) => run('reportMonthly', ym, normReport),
+    // Käyrä: oikeassa tilassa puuttuva RPC ei pudota mock-myyntilukuihin (väärä raha hallinnassa). ?mock=1 käyttää mockia.
+    async salesChart(year) {
+      if (!real) return normSalesChart(await getMock().salesChart(year));
+      try { return normSalesChart(await real.salesChart(year)); } catch (e) {
+        if (isMissingRpc(e)) throw new FeatureNotReady(RPC.salesChart);
+        throw e;
+      }
+    },
     // CSV: palvelimen admin_report_csv (booking_34: samat 12 saraketta kuin pyydetty: pvm;kuitti_no;tilaus_no;maksutapa;tuoteryhmä;tuote;määrä;brutto;alv_%;alv_€;netto;hyvitys) sellaisenaan.
     // Palauttaa { source:'server', filename, content }. (csv.js = asiakaspuolen varakirjoittaja samoille sarakkeille, ei käytössä kun palvelin vastaa.)
     async reportCsv(report) {
