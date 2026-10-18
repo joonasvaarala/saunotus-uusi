@@ -65,11 +65,11 @@ for (const lang of ['fi', 'en']) {
     const t = T[lang];
     const S = {
       lang, page: page === 'shop' ? 'shop' : 'confirm', shopHref: BASE + PATHS[lang].shop, confirmHref: BASE + PATHS[lang].confirm,
-      termsHref: L.pageHref('terms', lang), infoHref: L.pageHref('info', lang), phone: site.contact.phone, phoneTel: site.contact.phoneTel, email: site.contact.email,
+      termsHref: L.pageHref('terms', lang), infoHref: L.pageHref('info', lang), phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email,
       staticProductsUrl: `${BASE}/booking/static-products.json`, siteTextsUrl: `${BASE}/booking/site-texts.json`,
     };
     const body = R.pageHero({ title: page === 'shop' ? t.title : t.ctitle, text: page === 'shop' ? t.text : '', img: 'ovi-kaiverrus' }, lang, 'book')
-      + `<section class="section"><div class="wrap"><div id="booking-app" aria-busy="true"><noscript><p>${e(t.noscript)}: <a href="tel:${site.contact.phoneTel}">${e(site.contact.phone)}</a></p></noscript></div></div></section>`
+      + `<section class="section"><div class="wrap"><div id="booking-app" aria-busy="true"><noscript><p>${e(t.noscript)}: <a href="tel:${site.contact.phoneTel}">${e(L.phoneDisplay(lang))}</a></p></noscript></div></div></section>`
       + `<script src="${BASE}/booking/config.js"></script><script>window.BOOKING_SHOP=${JSON.stringify(S)}</script><script type="module" src="${BASE}/booking/shop.js"></script>`;
     let html = R.layout({ lang, key: 'book', meta: { title: page === 'shop' ? t.meta : t.cmeta, description: t.desc, og: 'ovi-kaiverrus' }, body });
     html = html.replace('</head>', `<link rel="stylesheet" href="${BASE}/booking/shop.css">${page === 'shop' ? '<script>if(/^#\\/(tuote|varaa|hoito)\\//.test(location.hash))document.documentElement.classList.add("bk-hero-wait")</script>' : ''}</head>`);
@@ -84,9 +84,9 @@ const OT = { fi: orderSet('fi'), en: orderSet('en') };
 if (pageFallbacks) console.log(`site-texts: ${pageFallbacks} varaus-/tilaussivun tekstiä käyttää repon varatekstiä (avain ei vielä tietokannassa)`);
 for (const lang of ['fi', 'en']) {
   const t = OT[lang];
-  const S = { lang, page: 'order', base: BASE, siteTextsUrl: `${BASE}/booking/site-texts.json`, orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order }, shopHref: BASE + PATHS[lang].shop, phone: site.contact.phone, phoneTel: site.contact.phoneTel, email: site.contact.email };
+  const S = { lang, page: 'order', base: BASE, siteTextsUrl: `${BASE}/booking/site-texts.json`, orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order }, shopHref: BASE + PATHS[lang].shop, phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email };
   const body = R.pageHero({ title: t.title, text: t.text, img: 'ovi-kaiverrus' }, lang, 'book')
-    + `<section class="section"><div class="wrap"><div id="order-app" aria-busy="true"><noscript><p>${e(t.noscript)}: <a href="tel:${site.contact.phoneTel}">${e(site.contact.phone)}</a></p></noscript></div></div></section>`
+    + `<section class="section"><div class="wrap"><div id="order-app" aria-busy="true"><noscript><p>${e(t.noscript)}: <a href="tel:${site.contact.phoneTel}">${e(L.phoneDisplay(lang))}</a></p></noscript></div></div></section>`
     + `<script src="${BASE}/booking/config.js"></script><script>window.BOOKING_SHOP=${JSON.stringify(S)}</script><script type="module" src="${BASE}/booking/order.js"></script>`;
   let html = R.layout({ lang, key: 'book', meta: { title: t.meta, description: t.text, og: 'ovi-kaiverrus' }, body });
   html = html.replace('</head>', `<meta name="referrer" content="no-referrer"><link rel="stylesheet" href="${BASE}/booking/shop.css"></head>`);
@@ -98,7 +98,7 @@ for (const lang of ['fi', 'en']) {
 for (const lang of ['fi', 'en']) {
   const f = join(OUT, site.pages.gift[lang], 'index.html');
   let html = readFileSync(f, 'utf8');
-  const S = { lang, page: 'gift', base: BASE, siteTextsUrl: `${BASE}/booking/site-texts.json`, orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order }, termsHref: L.pageHref('terms', lang), phone: site.contact.phone, phoneTel: site.contact.phoneTel, email: site.contact.email };
+  const S = { lang, page: 'gift', base: BASE, siteTextsUrl: `${BASE}/booking/site-texts.json`, orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order }, termsHref: L.pageHref('terms', lang), phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email };
   const sale = `<section class="section" hidden><div class="wrap"><div id="gift-app" aria-busy="true"></div></div></section>`;
   const bal = `<section class="section tint" id="saldo" hidden><div class="wrap"><div id="gift-balance" aria-busy="true"></div></div></section>`;
   const a = html.indexOf('<section class="section " id="avoin"'), b = html.indexOf('<section class="section tint" id="jatkaminen"');

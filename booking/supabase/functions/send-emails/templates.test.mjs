@@ -205,15 +205,17 @@ test('voucher_claim_problem: eri ongelmakoodeilla eri aiheet; tuntematon kumppan
 test('muiden pohjien alatunniste sisältää edelleen puhelinnumeron (noPhone vain voucher_claim-viesteissä)', { skip }, () => {
   assert.ok(hrefs(R('order_confirmation', base('fi'), 'fi').html).some((h) => h.startsWith('tel:')));
 });
-test('puhelin: näkyvä muoto "010 299 2866" ja linkki tel:+358102992866 (sama vakio kuin sivusto/kauppa, booking/shop/src/phone.js)', { skip }, async () => {
+test('puhelin: näkyvä muoto kielen mukaan (fi 010 299 2866, en +358 10 299 2866), linkki tel:+358102992866 (sama vakio kuin sivusto/kauppa, booking/shop/src/phone.js)', { skip }, async () => {
   const P = await import('../../../shop/src/phone.js');
-  assert.equal(T.PHONE, P.PHONE_DISPLAY); assert.equal(T.PHONE_TEL, P.PHONE_TEL);
-  assert.equal(P.PHONE_DISPLAY, '010 299 2866'); assert.equal(P.PHONE_TEL, '+358102992866'); assert.equal(P.phoneHref(), 'tel:+358102992866');
-  for (const locale of ['fi', 'en']) {
+  assert.equal(T.PHONE_FI, P.PHONE_DISPLAY_FI); assert.equal(T.PHONE_EN, P.PHONE_DISPLAY_EN); assert.equal(T.PHONE_TEL, P.PHONE_TEL);
+  assert.equal(T.phoneFor(false), P.phoneDisplay('fi')); assert.equal(T.phoneFor(true), P.phoneDisplay('en'));
+  assert.equal(P.PHONE_DISPLAY_FI, '010 299 2866'); assert.equal(P.PHONE_DISPLAY_EN, '+358 10 299 2866'); assert.equal(P.PHONE_TEL, '+358102992866'); assert.equal(P.phoneHref(), 'tel:+358102992866');
+  for (const [locale, shown, other] of [['fi', '010 299 2866', '+358 10 299 2866'], ['en', '+358 10 299 2866', '010 299 2866']]) {
     const m = R('order_confirmation', base(locale), locale);
-    assert.ok(hrefs(m.html).includes('tel:+358102992866'), `${locale}: tel-linkki`);
-    assert.ok(m.html.includes('>010 299 2866</a>') && !/\+358[ \d]*10 299/.test(m.html + m.text) && !m.html.includes('tel:0102992866'), `${locale}: näkyvä muoto`);
-    assert.ok(m.text.includes('010 299 2866'), `${locale}: tekstiversio ({{var:phone}})`);
+    assert.ok(hrefs(m.html).includes('tel:+358102992866') && !m.html.includes('tel:0102992866'), `${locale}: tel-linkki`);
+    assert.ok(m.html.includes(`>${shown}</a>`), `${locale}: alatunnisteen näkyvä muoto`);
+    assert.ok(m.text.includes(shown), `${locale}: tekstiversio ({{var:phone}}) "${shown}"`);
+    assert.ok(!(m.html + m.text).includes(other), `${locale}: ei toisen kielen muotoa "${other}"`);
   }
 });
 

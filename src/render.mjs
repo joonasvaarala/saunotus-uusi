@@ -6,7 +6,7 @@ import { articlesNav, homeSection } from './articles/runtime.mjs';
 import { tx } from './site-texts.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
-  johku, bookingUrl, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
+  johku, bookingUrl, phoneDisplay, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
 } from './lib.mjs';
 
 const minifyCss = (src) => src
@@ -276,7 +276,7 @@ ${body}
 <div class="fbrand"><img src="${href('/img/favicon.svg')}" width="34" height="47" alt="" loading="lazy"><div><b>SAUNOTUS</b><small>${e(u.brandTitle)}</small><p>${e(u.footerTag)}</p></div></div>
 <div><h2>${e(u.footerServices)}</h2><ul><li><a href="${fl('sauna', lang)}">${e(u.nav[0][1])}</a></li><li><a href="${fl('treatments', lang)}">${e(u.nav[1][1])}</a></li><li><a href="${fl('gift', lang)}">${e(u.nav[3][1])}</a></li>${an ? `<li><a href="${e(an.href)}">${e(an.label)}</a></li>` : ''}<li><a href="${fl('companies', lang)}">${e(u.companies)}</a></li><li><a href="${e(site.trainingUrl)}" rel="noopener">${e(u.nav[2][1])}${NEW(lang)}</a></li><li><a href="${fl('book', lang)}">${e(u.bookFull)}</a></li></ul></div>
 <div><h2>${e(u.footerInfo)}</h2><ul>${u.infoLinks.map(([id, l]) => `<li><a href="${pageHref('info', lang, id)}">${e(l)}</a></li>`).join('')}</ul></div>
-<div><h2>${e(u.footerContact)}</h2><ul><li><address style="all:unset">${e(site.contact.street)}<br>${e(site.contact.postal)} ${e(site.contact.city)}</address></li><li><a href="tel:${site.contact.phoneTel}">${e(site.contact.phone)}</a></li><li><a href="mailto:${site.contact.email}">${e(site.contact.email)}</a></li><li><a href="${e(site.contact.mapsUrl)}" rel="noopener">${e(ui(lang).directions)}${NEW(lang)}</a></li>${site.social.map((s) => `<li><a href="${e(s.url)}" rel="noopener">${e(s.name)}${NEW(lang)}</a></li>`).join('')}</ul></div>
+<div><h2>${e(u.footerContact)}</h2><ul><li><address style="all:unset">${e(site.contact.street)}<br>${e(site.contact.postal)} ${e(site.contact.city)}</address></li><li><a href="tel:${site.contact.phoneTel}">${e(phoneDisplay(lang))}</a></li><li><a href="mailto:${site.contact.email}">${e(site.contact.email)}</a></li><li><a href="${e(site.contact.mapsUrl)}" rel="noopener">${e(ui(lang).directions)}${NEW(lang)}</a></li>${site.social.map((s) => `<li><a href="${e(s.url)}" rel="noopener">${e(s.name)}${NEW(lang)}</a></li>`).join('')}</ul></div>
 </div>
 <div class="fbottom"><span>© ${new Date().getFullYear()} ${e(kb.business.legal_name)} · ${e(ui(lang).businessId)} ${e(kb.business.business_id)}</span><ul><li><a href="${fl('terms', lang)}">${e(u.legal)}</a></li><li><a href="${pageHref('privacy', 'fi')}"${lang === 'en' ? ' hreflang="fi" lang="fi"' : ''}>${e(u.privacy)}</a></li></ul></div>
 </div></footer>
@@ -348,7 +348,7 @@ export function gift(lang) {
     + sec('', `${head('', d.haveTitle, d.haveText, { orn: true })}<div class="cards two" style="display:grid;gap:22px">
 <article class="card"><div class="bd"><p class="kicker">${e(d.own.kicker)}</p><h3 style="font-family:var(--head);font-size:26px">${e(d.own.title)}</h3><p>${e(d.own.text)}</p><p><a class="btn" href="${e(jk('giftReservation', lang))}" target="_blank" rel="noopener">${e(d.own.cta)}${NEW(lang)}</a></p></div></article>
 <article class="card"><div class="bd"><p class="kicker">${e(d.third.kicker)}</p><h3 style="font-family:var(--head);font-size:26px">${e(d.third.title)}</h3><p>${e(d.third.text)} <a href="${e(site.giftCardSupportUrl)}" rel="noopener">${e(d.third.link)}${NEW(lang)}</a>.</p><p>${e(d.third.text2)}</p><p><a class="btn" href="${e(jk('giftReservation', lang))}" target="_blank" rel="noopener">${e(d.third.cta)}${NEW(lang)}</a></p></div></article></div>`, 'on-jo-lahjakortti')
-    + sec('tint', `<div class="narrow center"><h2 class="sec-title">${e(ext.title)}</h2><p>${e(ext.text)}</p><p>${mailBtn(site.contact.email, ext.title, 'btn light sm')} <a class="btn light sm" href="tel:${site.contact.phoneTel}">${e(site.contact.phone)}</a></p><p>${e(ext.third)}</p></div>`, 'jatkaminen');
+    + sec('tint', `<div class="narrow center"><h2 class="sec-title">${e(ext.title)}</h2><p>${e(ext.text)}</p><p>${mailBtn(site.contact.email, ext.title, 'btn light sm')} <a class="btn light sm" href="tel:${site.contact.phoneTel}">${e(phoneDisplay(lang))}</a></p><p>${e(ext.third)}</p></div>`, 'jatkaminen');
   return layout({ lang, key: 'gift', meta: d.meta, body });
 }
 

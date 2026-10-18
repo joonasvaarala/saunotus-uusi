@@ -35,12 +35,6 @@ const PENDING = J('content/site-texts.imported-pr61.json');
 const FALLBACK = J('content/site-texts.fallback.json');      // tietokannan julkaistut tekstit (public_get_site_texts)
 const IMPORTED = J('content/site-texts.imported.json');
 const PHONE = '010 299 2866';
-// Päätös 18.10.2026: puhelin näytetään aina muodossa "010 299 2866" (koodissa yksi vakio, booking/shop/src/phone.js). Tuontitiedosto pr61 on jo tuotu tietokantaan, ja siinä viidellä
-// englanninkielisellä rivillä on vanha kirjoitettu muoto; koodin oletus on nyt {{var:phone}}. Vanha muoto korjataan tietokantaan Bottiavustuksella (ei tässä PR:ssä), joten
-// vertailuissa vanha muoto luetaan paikkamerkkinä (tuontitiedostoa ei muuteta jälkikäteen).
-const LEGACY_EN_PHONE = '+358 10 299 2866';
-const fixLegacyPhone = (s) => s.replaceAll(LEGACY_EN_PHONE, '{{var:phone}}');
-const fixLegacyRows = (json) => JSON.stringify(JSON.parse(json).map((r) => (r.text.includes(LEGACY_EN_PHONE) ? { ...r, text: fixLegacyPhone(r.text), placeholders: [...r.placeholders, '{{var:phone}}'] } : r)), null, 1) + '\n';
 const quiet = () => {};
 
 // pistemäinen kopio alkuperäisistä merkkijonolehdistä + funktioista (ennen mitään peittoa)
@@ -89,7 +83,7 @@ test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-shop.mjs 
   writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts.filter((r) => !imp.has(r.key)) }));   // tuotanto ennen #61:n tuontia
   const r = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', prod, '--out', out], { encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);
-  assert.equal(readFileSync(out, 'utf8'), fixLegacyRows(rd('content/site-texts.imported-pr61.json')));
+  assert.equal(readFileSync(out, 'utf8'), rd('content/site-texts.imported-pr61.json'));
 });
 test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet avaimet)', () => {
   const prod = join(work, 'prod2.json'), out = join(work, 'out2.json');
@@ -151,11 +145,6 @@ test('luokat (§18.6): puhelinnumeroa, suostumusta, ehtoja ja peruutus-/muutoseh
   const prot = new Set(PENDING.filter((r) => r.class === 'protected').map((r) => r.key));
   assert.ok(prot.size >= 20 && prot.size <= 40, `protected ${prot.size}`);
 });
-test('vanha puhelinmuoto on vain pr61-tuontitiedoston viidellä en-rivillä (tietokantarivit, korjataan Bottiavustuksella)', () => {
-  const old = PENDING.filter((r) => r.text.includes(LEGACY_EN_PHONE));
-  assert.deepEqual(old.map((r) => `${r.key}|${r.lang}`).sort(), ['ui.checkout.error_disabled|en', 'ui.checkout.error_generic|en', 'ui.checkout.error_too_many_open|en', 'ui.shop.disabled|en', 'ui.shop.load_error|en']);
-  assert.ok(!Object.values(T.en).some((v) => typeof v === 'string' && v.includes('+358 10')), 'koodin en-oletus ei sisällä vanhaa muotoa');
-});
 test('puhelinnumero ei ole tuontitekstissä kovakoodattuna: {{var:phone}} (sivuston yhteystiedoista)', () => {
   assert.ok(!PENDING.some((r) => r.text.includes(PHONE)));
   assert.equal(PENDING.filter((r) => r.text.includes('{{var:phone}}')).map((r) => r.key).filter((k, i, a) => a.indexOf(k) === i).length, 5);
@@ -190,7 +179,7 @@ test('build: {{var:…}} paikkamerkki – validointi hyväksyy muodon, tx() vaat
 const dbRows = (o) => Object.entries(o).flatMap(([k, [fi, en]]) => [fi != null && { key: k, lang: 'fi', text: fi }, en != null && { key: k, lang: 'en', text: en }].filter(Boolean));
 test.afterEach(() => R.resetSiteTexts());
 test('peitto: kierros – tuontitiedosto DB-rivinä (puhelin sivun yhteystiedoista) → kaikki sanakirjat täsmälleen ennallaan, funktiot samat', () => {
-  const res = R.applySiteTexts(PENDING.filter((r) => !r.key.startsWith('page.') && !r.key.startsWith('seo.')).map((r) => ({ key: r.key, lang: r.lang, text: fixLegacyPhone(r.text) })), { vars: { phone: PHONE, email: 'x@example.test' }, log: quiet });
+  const res = R.applySiteTexts(PENDING.filter((r) => !r.key.startsWith('page.') && !r.key.startsWith('seo.')).map((r) => ({ key: r.key, lang: r.lang, text: r.text })), { vars: { phone: PHONE, email: 'x@example.test' }, log: quiet });
   assert.deepEqual(res.skipped, []);
   assert.ok(res.applied.length > 1300, `peitettiin ${res.applied.length}`);
   assert.equal(snapshotStrings(), BASE_SNAP);
