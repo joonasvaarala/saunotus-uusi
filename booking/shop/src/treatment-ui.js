@@ -25,7 +25,7 @@ export function createTreatmentViews(c) {
     const base = p.price_type === 'per_person' ? `${money(p.price)} ${t.perPerson}` : money(p.price);
     return p.price_type === 'base_plus_extra_person' && p.extra_person_price && A.maxPersons(p) > 1 ? `${base} (${t.included(p.included_persons || 1)}, ${t.extra(money(p.extra_person_price))})` : base;
   };
-  // pakettituote (kb 7): aikajana "rituaali 20 min · tauko 10 min · savusauna 1 h 30 min", kesto "2 h", aikataulu kellonaikoina valitusta alkuajasta
+  // pakettituote (kb 7): aikajana "rituaali 20 min · savusauna 1 h 30 min", kesto "2 h", aikataulu kellonaikoina valitusta alkuajasta
   const fmtMin = (m) => (m < 60 ? `${m} min` : m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`);
   const totalMin = (p) => p.duration_minutes || A.timelineMinutes(p);
   // jakson sisällä sitova väli (NBSP): rivinvaihto vain jaksojen välissä ("savusauna 1 h 30 min" ei katkea)
@@ -33,6 +33,7 @@ export function createTreatmentViews(c) {
   // kesto hintarivillä: paketilla kieliversio (palvelimen duration_text on suomea ja pitkä), muilla palvelimen teksti
   const durText = (p) => (A.isPackage(p) ? fmtMin(totalMin(p)) : p.duration_text || '');
   const metaP = (p) => h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), durText(p) ? ` · ${durText(p)}` : '');
+  // palkki: vain näkyvät jaksot, leveys = kesto (rituaali : savusauna = 20 : 90)
   const bar = (p) => h('span', { class: 'bk-tl-bar', 'aria-hidden': 'true' }, A.timelineOf(p).map((x) => h('span', { class: `bk-tl-seg ${x.key}`, style: `flex:${x.min} 1 0` })));
   const timelineNode = (p) => (A.isPackage(p) ? h('div', { class: 'bk-timeline', 'data-testid': 'timeline' }, h('p', { class: 'bk-tl-text', text: timelineText(p) }), bar(p)) : null);
   // aikataulurivit valitulle alkuajalle: "rituaali 16:00–16:20" … (yhteenveto ja tarkistus)

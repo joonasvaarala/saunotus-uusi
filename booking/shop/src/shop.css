@@ -203,12 +203,11 @@ a.bk-sd:hover{filter:brightness(.97)}
 .bk-stepn{flex:none;width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;font:600 15px/30px var(--body);text-align:center}
 .bk-step-box .bk-hint{margin-top:6px}
 .bk-nofree{margin:12px 0 0}
-/* Pakettituote (kb 7): aikajana tekstinä + värikaista (koriste, aria-hidden; tieto on tekstissä). Vihreä = rituaali, hiekka = tauko, kulta = savusauna. */
+/* Pakettituote (kb 7): aikajana tekstinä + värikaista (koriste, aria-hidden; tieto on tekstissä). Vihreä = rituaali, kulta = savusauna (sisäistä taukoa ei näytetä). */
 .bk-timeline{margin:8px 0 2px;max-width:34em}
 .bk-tl-text{margin:0 0 6px;color:var(--ink);font-weight:600;font-size:16px;line-height:1.4;overflow-wrap:anywhere}
 .bk-tl-bar{display:flex;gap:2px;height:8px;border-radius:4px;overflow:hidden}
 .bk-tl-seg{display:block;min-width:0;background:var(--green)}
-.bk-tl-seg.break{background:#D9CBB5}
 .bk-tl-seg.smoke{background:var(--gold)}
 .bk-sum dd.bk-schedule{display:grid;gap:2px}
 .bk-sched-line{display:block}

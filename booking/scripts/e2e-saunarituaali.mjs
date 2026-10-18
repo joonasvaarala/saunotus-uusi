@@ -100,7 +100,7 @@ const goto = async (page, url) => { await page.goto(ORIGIN + url, { waitUntil: '
 
 
 const SLUG = 'saunarituaali-ja-savusaunavuoro';
-const TL = { fi: 'rituaali 20 min · tauko 10 min · savusauna 1 h 30 min', en: 'ritual 20 min · break 10 min · smoke sauna 1 h 30 min' };
+const TL = { fi: 'rituaali 20 min · savusauna 1 h 30 min', en: 'ritual 20 min · smoke sauna 1 h 30 min' };
 const NAME = { fi: 'Saunarituaali ja savusaunavuoro (la & su)', en: 'Sauna Ritual & Smoke Sauna Session' };
 const NOTIMES = { fi: 'Ei vapaita aikoja', en: 'No available times' };
 const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
@@ -155,7 +155,10 @@ for (const lang of ['fi', 'en']) for (const w of WIDTHS) {
   expect(norm(await page.locator('main .hero.page h1').innerText()) === NAME[lang], `${lang}/${w}: hero-otsikko = tuotteen nimi`);
   expect((await page.locator('main .hero.page.has-prod').count()) === 0, `${lang}/${w}: ei tuotekuvaa → oletushero (ei rikkinäistä kuvaa)`);
   expect(norm(await page.locator('#booking-app [data-testid=timeline] .bk-tl-text').innerText()) === TL[lang], `${lang}/${w}: tuotesivun aikajanateksti`);
-  expect((await page.locator('#booking-app .bk-tl-seg').count()) === 3, `${lang}/${w}: aikajanakaista 3 jaksoa`);
+  expect((await page.locator('#booking-app .bk-tl-seg').count()) === 2 && (await page.locator('#booking-app .bk-tl-seg.break').count()) === 0, `${lang}/${w}: aikajanakaista 2 jaksoa, ei taukosegmenttiä`);
+  const segW = await page.$$eval('#booking-app .bk-tl-seg', (e) => e.map((x) => x.getBoundingClientRect().width));
+  expect(Math.abs(segW[0] / segW[1] - 20 / 90) < 0.02, `${lang}/${w}: palkin suhde 20:90: ${segW}`);
+  expect(!/tauko|break/i.test(await page.locator('#booking-app').innerText()), `${lang}/${w}: tuotesivulla ei taukoa`);
   expect((await page.locator('[data-testid=option-picker], .bk-opt, .bk-step-opt').count()) === 0, `${lang}/${w}: ei hoitovalitsinta`);
   expect(/49/.test(await page.locator('#booking-app > .bk-meta strong').innerText()), `${lang}/${w}: hinta 49 €/hlö`);
   const heads = (await page.locator('.bk-picker h3').allInnerTexts()).map((x) => x.replace(/^\d\s*/, '').trim());
@@ -188,7 +191,7 @@ for (const lang of ['fi', 'en']) for (const w of WIDTHS) {
   expect(/49/.test(await page.textContent('.bk-pick-sum')) && !/null/.test(await page.textContent('.bk-pick-sum')), `${lang}/${w}: valinnan yhteenveto: ${await page.textContent('.bk-pick-sum')}`);
   expect(!/[?&]o=/.test(page.url()), `${lang}/${w}: URL:ssa ei hoitovalintaa (${page.url()})`);
   await layout(page, '#booking-app', `tuote-valittu ${lang} ${w}`);
-  if (lang === 'fi' && w === 390) await page.screenshot({ path: join(SHOT, 'tuotesivu-390-fi-aika-valittu.png'), fullPage: true });
+  if ([390, 1280].includes(w)) await page.screenshot({ path: join(SHOT, `tuotesivu-${w}-${lang}-aika-valittu.png`), fullPage: true });
   await page.ctx.close();
 }
 
@@ -211,7 +214,7 @@ const fillAndReview = async (page) => {
   await page.click('.bk-form button[type=submit]'); await settle(page);
 };
 const EMAIL = { v: 'testi@example.com' };
-for (const [lang, w] of [['fi', 390], ['en', 1280], ['fi', 360], ['en', 430]]) {
+for (const [lang, w] of [['fi', 390], ['en', 1280], ['fi', 360], ['en', 430], ['en', 390], ['fi', 1280]]) {
   EMAIL.v = 'testi@example.com';
   const { page, ds, start } = await toCheckout(lang, w);
   const end = plus2h(start.replace(':', '')).replace(/^(\d\d)/, '$1:');
@@ -223,28 +226,29 @@ for (const [lang, w] of [['fi', 390], ['en', 1280], ['fi', 360], ['en', 430]]) {
   expect(norm(await page.locator('.bk-pick-when').innerText()).includes(`${start}–${endHm}`), `${lang}/${w}: valintapalkissa loppuaika`);
   const sch = (await page.locator('aside [data-testid=schedule] .bk-sched-line').allInnerTexts()).map(norm);
   const add = (hhmm, m) => { const [H, M] = hhmm.split(':').map(Number), t = H * 60 + M + m; return `${String(Math.floor(t / 60) % 24).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`; };
-  const L = lang === 'fi' ? ['rituaali', 'tauko', 'savusauna'] : ['ritual', 'break', 'smoke sauna'];
-  expect(JSON.stringify(sch) === JSON.stringify([`${L[0]} ${start}–${add(start, 20)}`, `${L[1]} ${add(start, 20)}–${add(start, 30)}`, `${L[2]} ${add(start, 30)}–${add(start, 120)}`]), `${lang}/${w}: aikataulu ${JSON.stringify(sch)}`);
+  const L = lang === 'fi' ? ['rituaali', 'savusauna'] : ['ritual', 'smoke sauna'];
+  expect(JSON.stringify(sch) === JSON.stringify([`${L[0]} ${start}–${add(start, 20)}`, `${L[1]} ${add(start, 30)}–${add(start, 120)}`]), `${lang}/${w}: aikataulu (ei taukoriviä; savusauna alkaa +30) ${JSON.stringify(sch)}`);
+  expect(!/tauko|break/i.test(sumTxt), `${lang}/${w}: kassan yhteenvedossa ei taukoa`);
   expect((await page.locator('.bk-checkout [data-testid=option-picker], .bk-opt').count()) === 0 && (await page.locator('[data-testid=sum-option]').count()) === 0, `${lang}/${w}: kassalla ei hoitovalitsinta`);
   await noNull(page, `kassa ${lang}/${w}`);
   await layout(page, '#booking-app', `kassa ${lang} ${w}`);
-  if (lang === 'fi' && [360, 390].includes(w)) await page.screenshot({ path: join(SHOT, `kassa-${w}-fi.png`), fullPage: true });
-  if (lang === 'en' && w === 1280) await page.screenshot({ path: join(SHOT, 'kassa-1280-en.png'), fullPage: true });
+  if ([390, 1280].includes(w) || (lang === 'fi' && w === 360)) await page.screenshot({ path: join(SHOT, `kassa-${w}-${lang}.png`), fullPage: true });
+
   await fillAndReview(page);
   await page.waitForSelector('#tr-review-h');
   const rev = norm(await page.locator('.bk-review').innerText());
   expect(rev.includes(`${start}–${endHm}`) && rev.includes(NAME[lang]) && !/null/.test(rev), `${lang}/${w}: tarkistuksessa nimi + loppuaika`);
-  expect((await page.locator('.bk-review [data-testid=schedule] .bk-sched-line').count()) === 3, `${lang}/${w}: tarkistuksessa aikataulu`);
+  expect((await page.locator('.bk-review [data-testid=schedule] .bk-sched-line').count()) === 2 && !/tauko|break/i.test(rev), `${lang}/${w}: tarkistuksessa aikataulu 2 riviä, ei taukoa`);
   expect((await page.locator('[data-testid=review-option]').count()) === 0, `${lang}/${w}: tarkistuksessa ei hoitovalintariviä`);
   await layout(page, '#booking-app', `tarkistus ${lang} ${w}`);
-  if (lang === 'fi' && w === 390) await page.screenshot({ path: join(SHOT, 'tarkistus-390-fi.png'), fullPage: true });
+  if ([390, 1280].includes(w)) await page.screenshot({ path: join(SHOT, `tarkistus-${w}-${lang}.png`), fullPage: true });
   await page.click('.bk-review .bk-actions .btn:not(.light)'); await page.waitForSelector('[data-testid=conf-summary]');   // luonti ILMAN p_option_code (mock palauttaisi invalid_option)
   const conf = norm(await page.locator('[data-testid=conf-summary]').innerText());
-  expect(conf.includes(NAME[lang]) && new RegExp(`${start.slice(0,2)}(:${start.slice(3)})?–${endHm.slice(0,2)}(:${endHm.slice(3)})?`).test(conf) && /147/.test(conf), `${lang}/${w}: vahvistussivulla nimi, aika ${start}–${endHm}, 147 €: ${conf}`);
+  expect(!/tauko|break/i.test(conf) && conf.includes(NAME[lang]) && new RegExp(`${start.slice(0,2)}(:${start.slice(3)})?–${endHm.slice(0,2)}(:${endHm.slice(3)})?`).test(conf) && /147/.test(conf), `${lang}/${w}: vahvistussivulla nimi, aika ${start}–${endHm}, 147 €: ${conf}`);
   expect((await page.locator('[data-testid=conf-option]').count()) === 0, `${lang}/${w}: vahvistussivulla ei hoitovalintariviä`);
   await layout(page, '#booking-app', `vahvistus ${lang} ${w}`);
-  if (lang === 'fi' && w === 390) await page.screenshot({ path: join(SHOT, 'vahvistus-390-fi.png'), fullPage: true });
-  if (lang === 'en' && w === 1280) await page.screenshot({ path: join(SHOT, 'vahvistus-1280-en.png'), fullPage: true });
+  if ([390, 1280].includes(w)) await page.screenshot({ path: join(SHOT, `vahvistus-${w}-${lang}.png`), fullPage: true });
+
   await page.ctx.close();
   void ds;
 }
