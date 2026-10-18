@@ -27,3 +27,22 @@ export function field({ label, control, hint, name }) {
   const wrap = h('div', { class: 'bk-field gc-field' }, h('label', { for: id, text: label }), control, hintEl, err);
   return { wrap, control, setError(msg) { err.textContent = msg || ''; if (msg) control.setAttribute('aria-invalid', 'true'); else control.removeAttribute('aria-invalid'); wrap.classList.toggle('bad', !!msg); } };
 }
+
+// Vieritys + fokus kun lomake/viesti ilmestyy (lahjakoodin lähdevalinta, §13.12). Pieni ja puhdas: win on injektoitavissa testejä varten.
+// revealForm: vie lomakkeen alkuun (block:'start'; sticky-yläpalkki huomioitu CSS:n scroll-margin-top:ssa), siirtää fokuksen otsikkoon ilman toista vieritystä (preventScroll)
+// ja kunnioittaa prefers-reduced-motionia (behavior:'auto' = ei animaatiota). Kutsutaan vain kun lomake juuri avautuu, ei renderöinnillä eikä kirjoittaessa.
+export const prefersReducedMotion = (win = globalThis) => !!win?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+export function revealForm(el, focusEl = el, win = globalThis) {
+  if (!el) return false;
+  el.scrollIntoView?.({ block: 'start', behavior: prefersReducedMotion(win) ? 'auto' : 'smooth' });
+  focusEl?.focus?.({ preventScroll: true });
+  return true;
+}
+// revealIfHidden: virhe-/tulosviesti vieritetään näkyviin vain jos se ei ole kokonaan ruudulla (block:'nearest', ei turhaa liikettä).
+export function revealIfHidden(el, win = globalThis) {
+  if (!el?.getBoundingClientRect || !el.scrollIntoView) return false;
+  const r = el.getBoundingClientRect(), vh = win.innerHeight || win.document?.documentElement?.clientHeight || 0;
+  if (r.top >= 80 && r.bottom <= vh) return false;   // 80 px = sticky-yläpalkki (69 px) + väli
+  el.scrollIntoView({ block: 'nearest', behavior: prefersReducedMotion(win) ? 'auto' : 'smooth' });
+  return true;
+}
