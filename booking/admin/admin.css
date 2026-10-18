@@ -161,6 +161,9 @@ h2 .icon,h3 .icon,.addon-mark .icon{display:inline-block;vertical-align:-3px;mar
 .override-box .ovr-reason[hidden]{display:none}
 .review-sec h2{display:flex;align-items:center;gap:8px;margin:0 0 4px;font-size:17px}
 .review-sec .reslist .resrow{align-items:flex-start}
+.review-ack{display:grid;gap:8px;width:100%;margin-top:8px}
+.review-ack .fld{flex:1 1 12rem;min-width:min(100%,12rem)}
+.review-block-reason{display:inline}
 .rv-link{color:var(--ink);text-decoration-color:var(--line);display:inline-block;min-height:44px;line-height:44px;overflow-wrap:anywhere}
 .rv-link strong{color:var(--green)}
 @media(min-width:700px){.rv-link{min-height:0;line-height:1.5}}
