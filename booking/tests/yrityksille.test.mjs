@@ -14,6 +14,7 @@ const imp = (p) => import(pathToFileURL(join(root, p)));
 const { pickCatalog, productAudience } = await imp('booking/shop/src/catalog-audience.js');
 const { validateQuote, OFFERINGS } = await imp('public/js/companies-form-logic.mjs');
 const { companies } = await imp('src/render.mjs');
+const { pageHref } = await imp('src/lib.mjs');
 const { classForContent } = await imp('src/content-texts.mjs');
 const { createAdminMock } = await imp('booking/admin/options-mock.js');
 
@@ -81,7 +82,7 @@ test('Yrityksille-sivu FI ja EN: valinta, kalenteri, lomake, ei euroja uudessa k
     assert.match(html, /tabindex="-1"/);
     assert.match(html, /data-code="privacy_required"/);
     assert.match(html, /data-code="ok"/);
-    assert.match(html, /<a href="\/tietosuoja\/"/);
+    assert.ok(html.includes(`<a href="${pageHref('privacy', 'fi')}"`), `${lang}: tietosuojalinkki`);
     if (lang === 'en') assert.match(html, /hreflang="fi" lang="fi"/);
     assert.match(html, lang === 'fi' ? />Lue seloste</ : />Read the notice</);
     assert.match(html, lang === 'fi'
