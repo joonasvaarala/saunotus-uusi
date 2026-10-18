@@ -15,12 +15,15 @@ const FIXED = new Date("2026-10-18T12:00:00Z").getTime(); const RD = Date;
 const golden: Record<string, string> = JSON.parse(await Deno.readTextFile(new URL("./pdf-golden.json", import.meta.url)));
 const logo = await Deno.readFile(new URL("../../docs/giftcards/logo.png", import.meta.url));
 const imported: any[] = JSON.parse(await Deno.readTextFile(new URL("../../../content/site-texts.imported-pr66.json", import.meta.url)));
-const importedRows: TextRow[] = imported.map((r) => ({ key: r.key, lang: r.lang, text: r.text }));
+const fallback: { texts: { key: string; lang: string; text: string; version?: number }[] } = JSON.parse(await Deno.readTextFile(new URL("../../../content/site-texts.fallback.json", import.meta.url)));
+const REVISED = new Set(["email.gift_card_pdf.how_online", "email.gift_card_pdf.how_offline", "email.gift_card.how_online", "email.gift_card.how_offline"]);
+const published = new Map(fallback.texts.filter((r) => REVISED.has(r.key) && (r.version ?? 1) > 1).map((r) => [`${r.key}|${r.lang}`, r.text]));
+const importedRows: TextRow[] = imported.map((r) => ({ key: r.key, lang: r.lang, text: published.get(`${r.key}|${r.lang}`) ?? r.text }));
 const hex = async (b: Uint8Array) => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", b as unknown as BufferSource))).map((x) => x.toString(16).padStart(2, "0")).join("");
 const tG = (rows?: TextRow[], settings?: Record<string, unknown>) => makeT(GIFT_CARD_PDF_TEXTS, rows, settings, () => {});
 const tR = (rows?: TextRow[], settings?: Record<string, unknown>) => makeT(RECEIPT_PDF_TEXTS, rows, settings, () => {});
 
-for (const [label, rows] of [["repon oletukset", undefined], ["tuontitiedoston rivit DB:nä", importedRows]] as const) {
+for (const [label, rows] of [["repon oletukset", undefined], ["tuonti + tuotannossa muokatut käyttöohjeet DB:nä", importedRows]] as const) {
   Deno.test(`PDF samat tavut kuin ennen siirtoa (${label})`, async () => {
     let n = 0;
     for (const c of giftCardCases()) { assertEquals(await hex(await buildGiftCardPdf(structuredClone(c.data), c.logo ? logo : null, c.lang, tG(rows))), golden[`gift.${c.name}`], `lahjakortti ${c.name}`); n++; }

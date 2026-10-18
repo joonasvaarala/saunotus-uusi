@@ -31,12 +31,18 @@ const { emailCases } = await imp('booking/supabase/functions/send-emails/golden-
 const FILE = 'content/site-texts.imported-pr66.json';
 const PENDING = J(FILE);
 const FALLBACK = J('content/site-texts.fallback.json');
+// Tuotannossa muokattu tuonnin jälkeen (varateksti versio 2). Tuontitiedosto säilyy v1-tekstinä eikä ylikirjoita kantaa.
+const REVISED = new Set(['email.gift_card.how_online', 'email.gift_card.how_offline', 'email.gift_card_pdf.how_online', 'email.gift_card_pdf.how_offline']);
+const publishedText = (key, lang) => FALLBACK.texts.find((r) => r.key === key && r.lang === lang);
 const OTHERS = ['content/site-texts.imported-pr61.json', 'content/site-texts.imported-pr62.json', 'content/site-texts.imported-pr64.json', 'content/site-texts.imported.json', 'content/site-texts.imported-pr71.json'].map(J);
 const GOLDEN = J('booking/supabase/functions/send-emails/golden-email.json');
 const AREAS = /^(email\.[a-z0-9_]+|ui\.mobilepay\.start_error_[a-z0-9_]+)(\.|$)/;
 const VARS = new Set(['name', 'no', 'amount', 'date', 'phone', 'email', 'from', 'who', 'when', 'time', 'n', 'label', 'what', 'code', 'id', 'ref', 'web', 'contact']);   // PR-kuvauksessa mainitut muuttujat
 const sha = (s) => createHash('sha256').update(s).digest('hex');
-const rowsAsDb = (rows) => rows.map((r) => ({ key: r.key, lang: r.lang, text: r.text }));
+const rowsAsDb = (rows) => rows.map((r) => {
+  const fb = publishedText(r.key, r.lang);
+  return { key: r.key, lang: r.lang, text: REVISED.has(r.key) && fb?.version > 1 ? fb.text : r.text };
+});
 
 test('tuontitiedosto noudattaa admin_texts_import-sääntöjä ja §18.2-nimeämistä', { skip }, () => {
   assert.ok(Array.isArray(PENDING) && PENDING.length > 100 && PENDING.length <= 500, `rivejä ${PENDING.length} (yksi erä ≤500)`);
@@ -76,7 +82,14 @@ test('tuontitiedosto noudattaa admin_texts_import-sääntöjä ja §18.2-nimeäm
 test('ei päällekkäisiä avaimia muiden tuontien kanssa; tuotannossa jo olevat rivit vastaavat tiedostoa (synkan jälkeenkin)', { skip }, () => {
   const mine = new Map(PENDING.map((r) => [`${r.key}|${r.lang}`, r.text]));
   for (const rows of OTHERS) for (const r of rows) assert.ok(!mine.has(`${r.key}|${r.lang}`), `päällekkäinen ${r.key} [${r.lang}]`);
-  for (const r of FALLBACK.texts) if (mine.has(`${r.key}|${r.lang}`)) assert.equal(r.text, mine.get(`${r.key}|${r.lang}`), `${r.key}: tuotannossa eri teksti kuin tiedostossa`);
+  for (const r of FALLBACK.texts) {
+    const id = `${r.key}|${r.lang}`;
+    if (!mine.has(id)) continue;
+    if (REVISED.has(r.key)) {
+      assert.equal(r.version, 2, `${r.key} [${r.lang}]: tuotannon muokkaus on versio 2`);
+      assert.notEqual(r.text, mine.get(id), `${r.key}: tuontitiedoston v1-teksti ei saa vaihtua`);
+    } else assert.equal(r.text, mine.get(id), `${r.key}: tuotannossa eri teksti kuin tiedostossa`);
+  }
 });
 
 test('tiedosto on generoitu koodista (texts.ts) eikä voi poiketa oletuksista', { skip }, () => {
@@ -86,7 +99,18 @@ test('tiedosto on generoitu koodista (texts.ts) eikä voi poiketa oletuksista', 
   assert.equal(r.status, 0, r.stderr);
   const gen = JSON.parse(readFileSync(out, 'utf8'));
   const g = new Map(gen.map((x) => [`${x.key}|${x.lang}`, x]));
-  for (const f of PENDING) assert.deepEqual(f, g.get(`${f.key}|${f.lang}`), `${f.key}: tiedosto ≠ generaattori`);
+  for (const f of PENDING) {
+    const got = g.get(`${f.key}|${f.lang}`);
+    if (REVISED.has(f.key)) {
+      const fb = publishedText(f.key, f.lang);
+      assert.equal(fb?.text, got.text, `${f.key} [${f.lang}]: varateksti ≠ texts.ts`);
+      assert.equal(f.class, got.class);
+      assert.equal(f.kind, got.kind);
+      assert.deepEqual(f.placeholders, got.placeholders);
+      assert.equal(f.reason, got.reason);
+      assert.ok(got.max_len >= got.text.length);
+    } else assert.deepEqual(f, got, `${f.key}: tiedosto ≠ generaattori`);
+  }
   const fb = new Set(FALLBACK.texts.map((x) => `${x.key}|${x.lang}`));
   for (const [k, x] of g) if (!PENDING.some((f) => `${f.key}|${f.lang}` === k)) assert.ok(fb.has(k), `${k}: puuttuu tiedostosta eikä ole tuotannossa`);   // tuonnin jälkeen rivit siirtyvät varatekstiin
   // sama generointi tuoreesta tuotantovastauksesta, jossa osa riveistä on jo: vain puuttuvat

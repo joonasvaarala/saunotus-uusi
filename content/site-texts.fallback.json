@@ -340,8 +340,8 @@
   {
    "key": "email.gift_card_pdf.how_offline",
    "lang": "en",
-   "text": "Tell us the code at the sauna or contact us: {{var:contact}}.",
-   "version": 1,
+   "text": "Book your time in advance by contacting us: {{var:contact}}.",
+   "version": 2,
    "placeholders": [
     "{{var:contact}}"
    ]
@@ -349,8 +349,8 @@
   {
    "key": "email.gift_card_pdf.how_offline",
    "lang": "fi",
-   "text": "Kerro koodi saunalla tai ota yhteyttä: {{var:contact}}.",
-   "version": 1,
+   "text": "Varaa aika etukäteen ottamalla yhteyttä: {{var:contact}}.",
+   "version": 2,
    "placeholders": [
     "{{var:contact}}"
    ]
@@ -358,8 +358,8 @@
   {
    "key": "email.gift_card_pdf.how_online",
    "lang": "en",
-   "text": "Book at {{var:web}} and enter the code at checkout, or tell us the code at the sauna.",
-   "version": 1,
+   "text": "Book your time at {{var:web}} and enter the code at checkout.",
+   "version": 2,
    "placeholders": [
     "{{var:web}}"
    ]
@@ -367,8 +367,8 @@
   {
    "key": "email.gift_card_pdf.how_online",
    "lang": "fi",
-   "text": "Varaa aika osoitteessa {{var:web}} ja syötä koodi maksuvaiheessa tai kerro koodi saunalla.",
-   "version": 1,
+   "text": "Varaa aika osoitteessa {{var:web}} ja syötä koodi maksuvaiheessa.",
+   "version": 2,
    "placeholders": [
     "{{var:web}}"
    ]
@@ -608,29 +608,29 @@
   {
    "key": "email.gift_card.how_offline",
    "lang": "en",
-   "text": "The gift card code is in the PDF. Tell us the code at the sauna or contact us to book.",
-   "version": 1,
+   "text": "The gift card code is in the PDF. Contact us to book your time in advance.",
+   "version": 2,
    "placeholders": []
   },
   {
    "key": "email.gift_card.how_offline",
    "lang": "fi",
-   "text": "Lahjakortin koodi on PDF-tiedostossa. Kerro koodi saunalla tai ota yhteyttä varataksesi ajan.",
-   "version": 1,
+   "text": "Lahjakortin koodi on PDF-tiedostossa. Varaa aika etukäteen ottamalla yhteyttä.",
+   "version": 2,
    "placeholders": []
   },
   {
    "key": "email.gift_card.how_online",
    "lang": "en",
-   "text": "The gift card code is in the PDF. Book online at saunotus.fi and enter the code at checkout, or tell us the code at the sauna.",
-   "version": 1,
+   "text": "The gift card code is in the PDF. Book online at saunotus.fi and enter the code at checkout.",
+   "version": 2,
    "placeholders": []
   },
   {
    "key": "email.gift_card.how_online",
    "lang": "fi",
-   "text": "Lahjakortin koodi on PDF-tiedostossa. Varaa aika verkossa osoitteessa saunotus.fi ja syötä koodi maksuvaiheessa, tai kerro koodi saunalla.",
-   "version": 1,
+   "text": "Lahjakortin koodi on PDF-tiedostossa. Varaa aika verkossa osoitteessa saunotus.fi ja syötä koodi maksuvaiheessa.",
+   "version": 2,
    "placeholders": []
   },
   {
@@ -2777,15 +2777,15 @@
   {
    "key": "giftpkg.entry_2.name",
    "lang": "en",
-   "text": "Admission for two",
-   "version": 1,
+   "text": "Smoke sauna session for two",
+   "version": 2,
    "placeholders": []
   },
   {
    "key": "giftpkg.entry_2.name",
    "lang": "fi",
-   "text": "Sisäänpääsy kahdelle",
-   "version": 1,
+   "text": "Savusaunavuoro kahdelle",
+   "version": 2,
    "placeholders": []
   },
   {
