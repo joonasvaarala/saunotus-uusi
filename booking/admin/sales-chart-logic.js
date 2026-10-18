@@ -52,3 +52,75 @@ export function createAccumulator(year) {
     },
   };
 }
+
+// Pystyakselin siisti yläraja. Jakoviivoja on 3–5, tasavälein, ja askel on 1, 2, 2,5 tai 5 × kymmenen potenssi.
+const STEP_FRACS = [1, 2, 2.5, 5];
+const tidy = (n) => {
+  const r = Math.round((+n + Number.EPSILON) * 100) / 100;
+  return Object.is(r, -0) ? 0 : r;
+};
+const lexLess = (a, b) => {
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] < b[i];
+  return false;
+};
+
+export function salesAxis(peak) {
+  const value = Number(peak);
+  if (!Number.isFinite(value) || value <= 0) return { max: 1000, step: 500, ticks: [0, 500, 1000] };
+  const mag = 10 ** Math.floor(Math.log10(value));
+  let best = null;
+  for (let e = -2; e <= 3; e++) {
+    const pow = mag * 10 ** e;
+    if (!Number.isFinite(pow) || pow <= 0) continue;
+    for (const frac of STEP_FRACS) {
+      const step = frac * pow;
+      if (!(step > 0) || !Number.isFinite(step)) continue;
+      for (let intervals = 2; intervals <= 4; intervals++) {
+        const max = step * intervals;
+        if (max + 1e-8 < value) continue;
+        const rel = (max - value) / value;
+        const nTicks = intervals + 1;
+        const score = [rel > 2 ? 1 : 0, Math.round(rel * 1e6), Math.abs(nTicks - 4), frac === 2.5 ? 1 : 0, intervals];
+        const ticks = Array.from({ length: nTicks }, (_, i) => tidy(step * i));
+        const cand = { max: ticks[nTicks - 1], step: tidy(ticks[1] - ticks[0]), ticks, score };
+        if (cand.max + 1e-8 < value) continue;
+        if (!best || lexLess(score, best.score)) best = cand;
+      }
+    }
+  }
+  if (!best) {
+    const step = tidy(value);
+    return { max: step, step: tidy(step / 2), ticks: [0, tidy(step / 2), step] };
+  }
+  return { max: best.max, step: best.step, ticks: best.ticks };
+}
+
+/** Akselin luku suomeksi: "10 000 €" (ryhmittelyväli, ei senttejä tasaluvussa). */
+export function formatAxisEuro(n) {
+  const v = Number(n);
+  const x = Number.isFinite(v) ? tidy(v) : 0;
+  const body = new Intl.NumberFormat('fi-FI', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(Object.is(x, -0) ? 0 : x);
+  return `${body}\u00A0€`;
+}
+
+/** Kuukausien brutto (ja pylvään näkyvä pino) → akseli. Negatiivinen osa saa oman siistin alarajan, jotta euro/pikseli pysyy samana. */
+export function chartScale(months) {
+  let peak = 0, floor = 0;
+  for (const m of Array.isArray(months) ? months : []) {
+    const net = +m?.net || 0, vat = +m?.vat || 0, unsplit = +m?.unsplit_gross || 0;
+    peak = Math.max(peak, +m?.gross || 0, Math.max(0, net) + Math.max(0, vat) + Math.max(0, unsplit));
+    floor = Math.min(floor, Math.min(0, net) + Math.min(0, vat) + Math.min(0, unsplit));
+  }
+  const axis = salesAxis(peak);
+  if (!(floor < 0)) return { max: axis.max, min: 0, step: axis.step, ticks: axis.ticks };
+  const down = salesAxis(-floor);
+  const neg = down.ticks.filter((t) => t > 0).map((t) => tidy(-t)).reverse();
+  return { max: axis.max, min: tidy(-down.max), step: axis.step, ticks: [...neg, ...axis.ticks] };
+}
+
+/** ParentNode.replaceChildren stringifioi null- ja undefined-arvon tekstiksi "null" / "undefined". */
+export function visibleNodes(nodes) {
+  const out = [];
+  for (const n of (Array.isArray(nodes) ? nodes : [nodes]).flat(Infinity)) if (n != null && n !== false) out.push(n);
+  return out;
+}

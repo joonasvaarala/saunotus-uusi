@@ -1,0 +1,22 @@
+[
+ {
+  "key": "ui.admin.sales_chart.axis_label",
+  "lang": "fi",
+  "text": "Euroa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä: pystyakselin nimi (euroa), FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.sales_chart.axis_label",
+  "lang": "en",
+  "text": "Euros",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Talous-myyntikäyrä: pystyakselin nimi (euroa), FI+EN. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ }
+]

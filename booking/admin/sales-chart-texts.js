@@ -1,6 +1,7 @@
 // Talous-sivun myyntikäyrän tekstit (FI + EN). Avaimet: ui.admin.sales_chart.* (§18).
 // public_get_site_texts peittää sanakirjan. Haku epäonnistuu, rivi puuttuu tai paikkamerkki ei täyty → SALES_CHART_TEXTS.
-// Tuonti: content/site-texts.pending-import-4.json (Bottiavustus ajaa admin_texts_import; ei ylikirjoita olemassa olevia).
+// Tuonti: content/site-texts.pending-import-4.json (alkuperäiset) ja pending-import-7.json (akseli).
+// Bottiavustus ajaa admin_texts_import; ei ylikirjoita olemassa olevia.
 import { getLang } from './talous-i18n.js';
 
 export const PREFIX = 'ui.admin.sales_chart.';
@@ -26,6 +27,7 @@ export const SALES_CHART_TEXTS = {
     'ui.admin.sales_chart.includes_johku': 'Pylväissä on uuden järjestelmän kuitit ja Johku-myynti. Johku-myynti ei sisälly raportteihin, CSV-vientiin eikä kuitteihin.',
     'ui.admin.sales_chart.chart_label': 'Kuukausittainen myynti',
     'ui.admin.sales_chart.future': 'Tuleva kuukausi',
+    'ui.admin.sales_chart.axis_label': 'Euroa',
   },
   en: {
     'ui.admin.sales_chart.title': 'Sales and VAT',
@@ -47,6 +49,7 @@ export const SALES_CHART_TEXTS = {
     'ui.admin.sales_chart.includes_johku': 'The bars include receipts from the new system and Johku sales. Johku sales are not included in reports, CSV export, or receipts.',
     'ui.admin.sales_chart.chart_label': 'Monthly sales',
     'ui.admin.sales_chart.future': 'Future month',
+    'ui.admin.sales_chart.axis_label': 'Euros',
   },
 };
 
@@ -97,7 +100,8 @@ export function clearSalesChartTextCache() {
 export function chartText(key, vars, lang = getLang()) {
   const live = db.get(`${key}|${lang}`);
   const filled = live != null ? applyLive(live, vars) : null;
-  if (filled != null) return filled;
+  if (filled != null) return String(filled);
   const raw = SALES_CHART_TEXTS[lang]?.[key] ?? SALES_CHART_TEXTS.fi[key] ?? key;
-  return vars ? fillChartText(raw, vars) : raw;
+  const out = vars ? fillChartText(raw, vars) : raw;
+  return out == null ? '' : String(out);
 }
