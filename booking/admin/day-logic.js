@@ -123,9 +123,58 @@ export function eventSortIso(event, date) {
   return null;
 }
 
+function sameId(a, b) {
+  return a != null && b != null && String(a) === String(b);
+}
+
+function instantMs(v) {
+  if (v == null || v === '') return null;
+  const t = Date.parse(v);
+  return Number.isNaN(t) ? null : t;
+}
+
+function sameInstant(a, b) {
+  const x = instantMs(a);
+  const y = instantMs(b);
+  return x != null && y != null && x === y;
+}
+
+function shiftMs(session) {
+  const a = instantMs(session.starts_at);
+  const b = instantMs(session.ends_at);
+  if (a == null || b == null) return Number.POSITIVE_INFINITY;
+  return b - a;
+}
+
+function shortestSession(list) {
+  return list.slice().sort((a, b) => {
+    const d = shiftMs(a) - shiftMs(b);
+    if (d) return d;
+    return String(a.rule_id ?? '').localeCompare(String(b.rule_id ?? ''))
+      || String(a.ends_at ?? '').localeCompare(String(b.ends_at ?? ''));
+  })[0];
+}
+
+// Samaan aikaan alkavat säännöt (eri ends_at) eivät jaa samaa varausta.
+// rule_id jos se on, muuten tarkka alku+loppu, muuten yksi kortti: lyhin samaan aikaan alkava vuoro.
+function sessionForReservation(reservation, sessions) {
+  const sameProduct = sessions.filter((s) => sameId(s.product_id, reservation.product_id));
+  if (reservation.rule_id != null && reservation.rule_id !== '') {
+    const byRule = sameProduct.filter((s) => sameId(s.rule_id, reservation.rule_id));
+    if (byRule.length) return shortestSession(byRule);
+  }
+  const bySpan = sameProduct.filter((s) => sameInstant(s.starts_at, reservation.starts_at) && sameInstant(s.ends_at, reservation.ends_at));
+  if (bySpan.length) return shortestSession(bySpan);
+  const byStart = sameProduct.filter((s) => sameInstant(s.starts_at, reservation.starts_at));
+  if (byStart.length) return shortestSession(byStart);
+  return null;
+}
+
 // Vuorokortit, tapahtumakortit ja muut varaukset (slot). Tapahtuman osallistuja ei toistu slotissa.
 // Varaus, jolla ei ole tapahtumapäivää, jää slotiksi (kuten ennen).
+// Jokainen varaus kuuluu enintään yhteen vuorokorttiin. Tyhjä unavailable/closed -kortti pysyy piilossa.
 export function assignDayCards({ sessions, reservations, events, date }) {
+  const list = sessions || [];
   const active = (reservations || []).filter((r) => ACTIVE_STATUSES.includes(r.status));
   const eventCards = eventsOnDay(events, date).map((event) => ({
     event,
@@ -134,11 +183,17 @@ export function assignDayCards({ sessions, reservations, events, date }) {
   const eventIds = new Set();
   for (const card of eventCards) for (const p of card.participants) if (p.reservation_id != null) eventIds.add(p.reservation_id);
   const used = new Set(eventIds);
-  const sessionCards = (sessions || []).map((session) => {
-    const mine = active.filter((r) => r.product_id === session.product_id && r.starts_at === session.starts_at && !eventIds.has(r.reservation_id));
-    mine.forEach((r) => used.add(r.reservation_id));
-    return { session, reservations: mine };
-  }).filter(({ session, reservations: mine }) => mine.length || ['available', 'full'].includes(session.status));
+  const mineBySession = new Map();
+  for (const r of active) {
+    if (eventIds.has(r.reservation_id)) continue;
+    const session = sessionForReservation(r, list);
+    if (!session) continue;
+    if (!mineBySession.has(session)) mineBySession.set(session, []);
+    mineBySession.get(session).push(r);
+    used.add(r.reservation_id);
+  }
+  const sessionCards = list.map((session) => ({ session, reservations: mineBySession.get(session) || [] }))
+    .filter(({ session, reservations: mine }) => mine.length || ['available', 'full'].includes(session.status));
   const slotMap = new Map();
   for (const r of active) {
     if (used.has(r.reservation_id)) continue;
