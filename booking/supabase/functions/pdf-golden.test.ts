@@ -1,5 +1,5 @@
 // PDF-pohjien tekstisiirto (osa 3 / PR 3): lahjakortti- ja kuitti-PDF samat tavut kuin ennen siirtoa (tiivisteet pdf-golden.json, otettu vanhalla koodilla),
-// kun tekstit tulevat repon oletuksista TAI tuontitiedoston riveistä (content/site-texts.pending-import-3.json); DB-teksti näkyy PDF:ssä; rikkinäinen DB-teksti → oletus.
+// kun tekstit tulevat repon oletuksista TAI tuontitiedoston riveistä (content/site-texts.imported-pr66.json); DB-teksti näkyy PDF:ssä; rikkinäinen DB-teksti → oletus.
 // Ajo: deno test -A --node-modules-dir=none booking/supabase/functions/pdf-golden.test.ts
 import { assert, assertEquals, assertNotEquals } from "jsr:@std/assert@1";
 import { giftCardCases, receiptCases } from "./pdf-golden-cases.mjs";
@@ -14,7 +14,7 @@ const FIXED = new Date("2026-10-18T12:00:00Z").getTime(); const RD = Date;
 
 const golden: Record<string, string> = JSON.parse(await Deno.readTextFile(new URL("./pdf-golden.json", import.meta.url)));
 const logo = await Deno.readFile(new URL("../../docs/giftcards/logo.png", import.meta.url));
-const imported: any[] = JSON.parse(await Deno.readTextFile(new URL("../../../content/site-texts.pending-import-3.json", import.meta.url)));
+const imported: any[] = JSON.parse(await Deno.readTextFile(new URL("../../../content/site-texts.imported-pr66.json", import.meta.url)));
 const importedRows: TextRow[] = imported.map((r) => ({ key: r.key, lang: r.lang, text: r.text }));
 const hex = async (b: Uint8Array) => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", b as unknown as BufferSource))).map((x) => x.toString(16).padStart(2, "0")).join("");
 const tG = (rows?: TextRow[], settings?: Record<string, unknown>) => makeT(GIFT_CARD_PDF_TEXTS, rows, settings, () => {});

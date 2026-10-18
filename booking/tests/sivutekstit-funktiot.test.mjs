@@ -1,5 +1,5 @@
 // Sivutekstit osa 3 / PR 3 (sopimus §18): sähköpostien, PDF:ien ja edge-funktioiden (mobilepay-start) asiakasnäkyvät tekstit avaimiksi.
-//  * content/site-texts.pending-import-3.json noudattaa admin_texts_import-sääntöjä (booking_62) ja §18.2-nimeämistä; generoitu koodista; ei ylikirjoita tuotannon rivejä
+//  * content/site-texts.imported-pr66.json noudattaa admin_texts_import-sääntöjä (booking_62) ja §18.2-nimeämistä; generoitu koodista; ei ylikirjoita tuotannon rivejä
 //  * sähköpostit: render() antaa SAMAT tavut kuin ennen siirtoa (golden-email.json, 94 tapausta) sekä repon oletuksilla että tuontitiedosto DB:nä; DB-teksti näkyy; rikkinäinen DB-rivi → oletus
 //  * jokainen taulukon avain on käytössä; paikkamerkit vain {{var:…}} / {{setting:business_name}}; staattisen sivuston build ei kaadu uusista riveistä; kauppa ei saa email.*-rivejä
 // PDF:t (Deno): booking/supabase/functions/pdf-golden.test.ts. Vaatii Noden tyyppien poiston (22.18+); vanhemmalla Nodella ohitetaan (CI ajaa Node 22:lla).
@@ -28,7 +28,7 @@ const L = await imp('booking/shop/src/site-texts-logic.js');
 const B = await imp('src/site-texts.mjs');
 const { emailCases } = await imp('booking/supabase/functions/send-emails/golden-cases.mjs');
 
-const FILE = 'content/site-texts.pending-import-3.json';
+const FILE = 'content/site-texts.imported-pr66.json';
 const PENDING = J(FILE);
 const FALLBACK = J('content/site-texts.fallback.json');
 const OTHERS = ['content/site-texts.imported-pr61.json', 'content/site-texts.imported-pr62.json', 'content/site-texts.imported-pr64.json', 'content/site-texts.imported.json'].map(J);

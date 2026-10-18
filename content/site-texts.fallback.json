@@ -1,6 +1,6 @@
 {
  "_doc": "Varateksti: tietokannan julkaistut sivutekstit (public_get_site_texts) + paikkamerkkien data (hinta/kesto/julkiset asetukset). Käytetään vain jos haku epäonnistuu eikä .cache-välimuistia ole. Päivitys: node scripts/site-texts-sync.mjs",
- "generated_at": "2026-10-18T12:56:30.776941+00:00",
+ "generated_at": "2026-10-18T13:24:45.7632+00:00",
  "texts": [
   {
    "key": "addon.1.description",
@@ -92,6 +92,2295 @@
    "text": "Saunotus on savusaunaelämyksiä, rituaaleja ja perinnettä Sipoonjoen rannalla. Sipoonjoen Perinnesauna on maan sisälle rakennettu savusauna Sipoon Hindsbyssä, Sipoonkorven kansallispuiston kupeessa. Sauna valmistui vuonna 2021; yleiset vuorot avattiin tammikuussa 2022.",
    "version": 2,
    "placeholders": []
+  },
+  {
+   "key": "email.cancel_request_ack.message",
+   "lang": "en",
+   "text": "We have received your cancellation request. Our staff will handle it and contact you. The booking remains valid until the cancellation is confirmed.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.cancel_request_ack.message",
+   "lang": "fi",
+   "text": "Olemme vastaanottaneet peruutuspyyntösi. Henkilökuntamme käsittelee sen ja ottaa yhteyttä. Varaus on voimassa, kunnes peruutus on vahvistettu.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.cancel_request_ack.subject",
+   "lang": "en",
+   "text": "We received your cancellation request – order {{var:no}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:no}}"
+   ]
+  },
+  {
+   "key": "email.cancel_request_ack.subject",
+   "lang": "fi",
+   "text": "Peruutuspyyntösi on vastaanotettu – tilaus {{var:no}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:no}}"
+   ]
+  },
+  {
+   "key": "email.cancel_request_ack.title",
+   "lang": "en",
+   "text": "Cancellation request received",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.cancel_request_ack.title",
+   "lang": "fi",
+   "text": "Peruutuspyyntö vastaanotettu",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.common.closing",
+   "lang": "en",
+   "text": "Kind regards,",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.common.closing",
+   "lang": "fi",
+   "text": "Ystävällisin terveisin,",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.common.contact",
+   "lang": "en",
+   "text": "Questions? Reply to this email or call {{var:phone}}.",
+   "version": 1,
+   "placeholders": [
+    "{{var:phone}}"
+   ]
+  },
+  {
+   "key": "email.common.contact",
+   "lang": "fi",
+   "text": "Kysyttävää? Vastaa tähän viestiin tai soita {{var:phone}}.",
+   "version": 1,
+   "placeholders": [
+    "{{var:phone}}"
+   ]
+  },
+  {
+   "key": "email.common.hello",
+   "lang": "en",
+   "text": "Hello {{var:name}},",
+   "version": 1,
+   "placeholders": [
+    "{{var:name}}"
+   ]
+  },
+  {
+   "key": "email.common.hello",
+   "lang": "fi",
+   "text": "Hei {{var:name}},",
+   "version": 1,
+   "placeholders": [
+    "{{var:name}}"
+   ]
+  },
+  {
+   "key": "email.common.hello_anon",
+   "lang": "en",
+   "text": "Hello,",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.common.hello_anon",
+   "lang": "fi",
+   "text": "Hei,",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.common.view_order",
+   "lang": "en",
+   "text": "View your order",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.common.view_order",
+   "lang": "fi",
+   "text": "Avaa tilauksesi",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.common.your_order",
+   "lang": "en",
+   "text": "Your order",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.common.your_order",
+   "lang": "fi",
+   "text": "Tilauksesi",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.balance",
+   "lang": "en",
+   "text": "Balance",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.balance",
+   "lang": "fi",
+   "text": "Saldo",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.business_id",
+   "lang": "en",
+   "text": "Business ID {{var:id}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:id}}"
+   ]
+  },
+  {
+   "key": "email.gift_card_pdf.business_id",
+   "lang": "fi",
+   "text": "Y-tunnus {{var:id}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:id}}"
+   ]
+  },
+  {
+   "key": "email.gift_card_pdf.code_label",
+   "lang": "en",
+   "text": "Gift card code",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.code_label",
+   "lang": "fi",
+   "text": "Lahjakortin koodi",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.default_package_name",
+   "lang": "en",
+   "text": "Smoke sauna gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.default_package_name",
+   "lang": "fi",
+   "text": "Savusaunalahjakortti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.footer_name",
+   "lang": "en",
+   "text": "{{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.gift_card_pdf.footer_name",
+   "lang": "fi",
+   "text": "{{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.gift_card_pdf.for",
+   "lang": "en",
+   "text": "For",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.for",
+   "lang": "fi",
+   "text": "Saajalle",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.from",
+   "lang": "en",
+   "text": "From",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.from",
+   "lang": "fi",
+   "text": "Lahjoittaja",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.how_offline",
+   "lang": "en",
+   "text": "Tell us the code at the sauna or contact us: {{var:contact}}.",
+   "version": 1,
+   "placeholders": [
+    "{{var:contact}}"
+   ]
+  },
+  {
+   "key": "email.gift_card_pdf.how_offline",
+   "lang": "fi",
+   "text": "Kerro koodi saunalla tai ota yhteyttä: {{var:contact}}.",
+   "version": 1,
+   "placeholders": [
+    "{{var:contact}}"
+   ]
+  },
+  {
+   "key": "email.gift_card_pdf.how_online",
+   "lang": "en",
+   "text": "Book at {{var:web}} and enter the code at checkout, or tell us the code at the sauna.",
+   "version": 1,
+   "placeholders": [
+    "{{var:web}}"
+   ]
+  },
+  {
+   "key": "email.gift_card_pdf.how_online",
+   "lang": "fi",
+   "text": "Varaa aika osoitteessa {{var:web}} ja syötä koodi maksuvaiheessa tai kerro koodi saunalla.",
+   "version": 1,
+   "placeholders": [
+    "{{var:web}}"
+   ]
+  },
+  {
+   "key": "email.gift_card_pdf.includes",
+   "lang": "en",
+   "text": "Includes",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.includes",
+   "lang": "fi",
+   "text": "Sisältää",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.issued",
+   "lang": "en",
+   "text": "Issued",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.issued",
+   "lang": "fi",
+   "text": "Myönnetty",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.open_card_name",
+   "lang": "en",
+   "text": "Valid for all our services",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.open_card_name",
+   "lang": "fi",
+   "text": "Käy kaikkiin palveluihimme",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.persons_label",
+   "lang": "en",
+   "text": "Persons",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.persons_label",
+   "lang": "fi",
+   "text": "Henkilömäärä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.persons_value",
+   "lang": "en",
+   "text": "{{var:n}} persons",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "email.gift_card_pdf.persons_value",
+   "lang": "fi",
+   "text": "{{var:n}} henkilöä",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "email.gift_card_pdf.producer",
+   "lang": "en",
+   "text": "{{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.gift_card_pdf.producer",
+   "lang": "fi",
+   "text": "{{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.gift_card_pdf.stamp_expired",
+   "lang": "en",
+   "text": "EXPIRED",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.stamp_expired",
+   "lang": "fi",
+   "text": "VANHENTUNUT",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.stamp_used",
+   "lang": "en",
+   "text": "USED",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.stamp_used",
+   "lang": "fi",
+   "text": "KÄYTETTY",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.title",
+   "lang": "en",
+   "text": "Gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.title",
+   "lang": "fi",
+   "text": "Lahjakortti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.valid_until",
+   "lang": "en",
+   "text": "Valid until",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.valid_until",
+   "lang": "fi",
+   "text": "Voimassa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card_pdf.valid_value",
+   "lang": "en",
+   "text": "{{var:date}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:date}}"
+   ]
+  },
+  {
+   "key": "email.gift_card_pdf.valid_value",
+   "lang": "fi",
+   "text": "{{var:date}} asti",
+   "version": 1,
+   "placeholders": [
+    "{{var:date}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.card_default",
+   "lang": "en",
+   "text": "Gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.card_default",
+   "lang": "fi",
+   "text": "Lahjakortti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.card_open",
+   "lang": "en",
+   "text": "Open gift card (valid for all our services)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.card_open",
+   "lang": "fi",
+   "text": "Avoin lahjakortti (käy kaikkiin palveluihimme)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.delivery_scheduled",
+   "lang": "en",
+   "text": "The gift card will be sent to the recipient ({{var:who}}) on {{var:when}}.",
+   "version": 1,
+   "placeholders": [
+    "{{var:when}}",
+    "{{var:who}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.delivery_scheduled",
+   "lang": "fi",
+   "text": "Lahjakortti lähetetään saajalle ({{var:who}}) {{var:when}}.",
+   "version": 1,
+   "placeholders": [
+    "{{var:when}}",
+    "{{var:who}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.delivery_sent",
+   "lang": "en",
+   "text": "The gift card has been sent to the recipient ({{var:who}}).",
+   "version": 1,
+   "placeholders": [
+    "{{var:who}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.delivery_sent",
+   "lang": "fi",
+   "text": "Lahjakortti on lähetetty saajalle ({{var:who}}).",
+   "version": 1,
+   "placeholders": [
+    "{{var:who}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.how_offline",
+   "lang": "en",
+   "text": "The gift card code is in the PDF. Tell us the code at the sauna or contact us to book.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.how_offline",
+   "lang": "fi",
+   "text": "Lahjakortin koodi on PDF-tiedostossa. Kerro koodi saunalla tai ota yhteyttä varataksesi ajan.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.how_online",
+   "lang": "en",
+   "text": "The gift card code is in the PDF. Book online at saunotus.fi and enter the code at checkout, or tell us the code at the sauna.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.how_online",
+   "lang": "fi",
+   "text": "Lahjakortin koodi on PDF-tiedostossa. Varaa aika verkossa osoitteessa saunotus.fi ja syötä koodi maksuvaiheessa, tai kerro koodi saunalla.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.intro_buyer",
+   "lang": "en",
+   "text": "Thank you for your purchase! Your gift card is ready. Open the PDF from the link below – you can print it or forward it to the recipient.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.intro_buyer",
+   "lang": "fi",
+   "text": "Kiitos ostoksestasi! Lahjakortti on valmis. Avaa PDF alla olevasta linkistä – voit tulostaa sen tai välittää sen lahjan saajalle.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.intro_buyer_many",
+   "lang": "en",
+   "text": "Thank you for your purchase! Your gift cards are ready. Open the PDF from the link below – you can print it or forward it to the recipient.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.intro_buyer_many",
+   "lang": "fi",
+   "text": "Kiitos ostoksestasi! Lahjakorttit ovat valmiit. Avaa PDF alla olevasta linkistä – voit tulostaa sen tai välittää sen lahjan saajalle.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.intro_buyer_to_recipient",
+   "lang": "en",
+   "text": "Thank you for your purchase! Your order is confirmed and the gift card is delivered directly to the recipient by email, as you chose.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.intro_buyer_to_recipient",
+   "lang": "fi",
+   "text": "Kiitos ostoksestasi! Tilauksesi on vahvistettu ja lahjakortti toimitetaan valintasi mukaan suoraan saajalle sähköpostitse.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.intro_buyer_to_recipient_many",
+   "lang": "en",
+   "text": "Thank you for your purchase! Your order is confirmed and the gift cards are delivered directly to the recipient by email, as you chose.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.intro_buyer_to_recipient_many",
+   "lang": "fi",
+   "text": "Kiitos ostoksestasi! Tilauksesi on vahvistettu ja lahjakorttit toimitetaan valintasi mukaan suoraan saajalle sähköpostitse.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.intro_recipient",
+   "lang": "en",
+   "text": "{{var:from}} has sent you a gift card to {{setting:business_name}}. Enjoy!",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}",
+    "{{var:from}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.intro_recipient",
+   "lang": "fi",
+   "text": "{{var:from}} on lahjoittanut sinulle lahjakortin Sipoonjoen Perinnesaunalle. Nauti!",
+   "version": 1,
+   "placeholders": [
+    "{{var:from}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.meta_for",
+   "lang": "en",
+   "text": "for {{var:name}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:name}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.meta_for",
+   "lang": "fi",
+   "text": "saaja: {{var:name}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:name}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.meta_persons",
+   "lang": "en",
+   "text": "{{var:n}} guests",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.meta_persons",
+   "lang": "fi",
+   "text": "{{var:n}} henkilöä",
+   "version": 1,
+   "placeholders": [
+    "{{var:n}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.meta_valid",
+   "lang": "en",
+   "text": "valid until {{var:date}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:date}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.meta_valid",
+   "lang": "fi",
+   "text": "voimassa {{var:date}} asti",
+   "version": 1,
+   "placeholders": [
+    "{{var:date}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.note_recipient_separate",
+   "lang": "en",
+   "text": "The recipient receives the gift card, its code and instructions in a separate email. If it does not arrive, please contact us.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.note_recipient_separate",
+   "lang": "fi",
+   "text": "Saaja saa lahjakortin, sen koodin ja ohjeet omassa sähköpostiviestissään. Jos viesti ei saavu perille, ota yhteyttä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.note_share",
+   "lang": "en",
+   "text": "Tip: the link contains the card code – share it only with the recipient.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.note_share",
+   "lang": "fi",
+   "text": "Vinkki: linkki sisältää kortin koodin – jaa se vain lahjan saajalle.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.open_button",
+   "lang": "en",
+   "text": "Open gift card (PDF)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.open_button",
+   "lang": "fi",
+   "text": "Avaa lahjakortti (PDF)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.someone",
+   "lang": "en",
+   "text": "Someone",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.someone",
+   "lang": "fi",
+   "text": "Joku",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.subject_buyer",
+   "lang": "en",
+   "text": "Your gift card – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.subject_buyer",
+   "lang": "fi",
+   "text": "Lahjakorttisi – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.subject_buyer_many",
+   "lang": "en",
+   "text": "Your gift cards – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.subject_buyer_many",
+   "lang": "fi",
+   "text": "Lahjakorttisi – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.subject_buyer_to_recipient",
+   "lang": "en",
+   "text": "Your gift card order is confirmed – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.subject_buyer_to_recipient",
+   "lang": "fi",
+   "text": "Lahjakorttitilauksesi vahvistus – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.subject_recipient",
+   "lang": "en",
+   "text": "You have received a gift card – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.subject_recipient",
+   "lang": "fi",
+   "text": "Sait lahjakortin – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.subject_recipient_from",
+   "lang": "en",
+   "text": "{{var:from}} sent you a gift card – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}",
+    "{{var:from}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.subject_recipient_from",
+   "lang": "fi",
+   "text": "{{var:from}} lahjoittaa sinulle lahjakortin – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}",
+    "{{var:from}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.title_buyer",
+   "lang": "en",
+   "text": "Your gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.title_buyer",
+   "lang": "fi",
+   "text": "Lahjakorttisi",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.title_buyer_to_recipient",
+   "lang": "en",
+   "text": "Order confirmation",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.title_buyer_to_recipient",
+   "lang": "fi",
+   "text": "Tilausvahvistus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.title_recipient",
+   "lang": "en",
+   "text": "You received a gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.title_recipient",
+   "lang": "fi",
+   "text": "Sait lahjakortin",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.gift_card.when_at",
+   "lang": "en",
+   "text": "{{var:date}} at {{var:time}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:date}}",
+    "{{var:time}}"
+   ]
+  },
+  {
+   "key": "email.gift_card.when_at",
+   "lang": "fi",
+   "text": "{{var:date}} klo {{var:time}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:date}}",
+    "{{var:time}}"
+   ]
+  },
+  {
+   "key": "email.order_block.bookings",
+   "lang": "en",
+   "text": "Bookings",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.bookings",
+   "lang": "fi",
+   "text": "Varaukset",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.lines",
+   "lang": "en",
+   "text": "Order lines",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.lines",
+   "lang": "fi",
+   "text": "Tilausrivit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.order",
+   "lang": "en",
+   "text": "Order",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.order",
+   "lang": "fi",
+   "text": "Tilaus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.pers",
+   "lang": "en",
+   "text": "guests",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.pers",
+   "lang": "fi",
+   "text": "hlö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.persons",
+   "lang": "en",
+   "text": "Guests",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.persons",
+   "lang": "fi",
+   "text": "Henkilöt",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.product",
+   "lang": "en",
+   "text": "Product",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.product",
+   "lang": "fi",
+   "text": "Tuote",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.qty",
+   "lang": "en",
+   "text": "Qty",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.qty",
+   "lang": "fi",
+   "text": "Kpl",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.sum",
+   "lang": "en",
+   "text": "Amount",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.sum",
+   "lang": "fi",
+   "text": "Summa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.total",
+   "lang": "en",
+   "text": "Total",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.total",
+   "lang": "fi",
+   "text": "Yhteensä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.when",
+   "lang": "en",
+   "text": "Time",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_block.when",
+   "lang": "fi",
+   "text": "Aika",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_change.message",
+   "lang": "en",
+   "text": "Your order has been updated. The current details are below.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_change.message",
+   "lang": "fi",
+   "text": "Tilaustasi on päivitetty. Ajantasaiset tiedot ovat alla.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_change.subject",
+   "lang": "en",
+   "text": "Your order has changed – {{var:no}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:no}}"
+   ]
+  },
+  {
+   "key": "email.order_change.subject",
+   "lang": "fi",
+   "text": "Tilauksesi on muuttunut – {{var:no}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:no}}"
+   ]
+  },
+  {
+   "key": "email.order_change.title",
+   "lang": "en",
+   "text": "Order updated",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_change.title",
+   "lang": "fi",
+   "text": "Tilaus päivitetty",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_confirmation.intro",
+   "lang": "en",
+   "text": "Thank you for your order. Your booking is confirmed.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_confirmation.intro",
+   "lang": "fi",
+   "text": "Kiitos tilauksestasi. Varauksesi on vahvistettu.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_confirmation.more",
+   "lang": "en",
+   "text": "You can view your order, add services, request changes and download receipts here:",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_confirmation.more",
+   "lang": "fi",
+   "text": "Voit katsoa tilaustasi, lisätä siihen palveluita, pyytää muutoksia ja ladata kuitit täältä:",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_confirmation.subject",
+   "lang": "en",
+   "text": "Order confirmation {{var:no}} – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}",
+    "{{var:no}}"
+   ]
+  },
+  {
+   "key": "email.order_confirmation.subject",
+   "lang": "fi",
+   "text": "Tilausvahvistus {{var:no}} – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}",
+    "{{var:no}}"
+   ]
+  },
+  {
+   "key": "email.order_confirmation.title",
+   "lang": "en",
+   "text": "Order confirmation",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.order_confirmation.title",
+   "lang": "fi",
+   "text": "Tilausvahvistus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.payment_link.amount_label",
+   "lang": "en",
+   "text": "Amount to pay",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.payment_link.amount_label",
+   "lang": "fi",
+   "text": "Maksettava",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.payment_link.expires",
+   "lang": "en",
+   "text": "The link is valid until {{var:date}}.",
+   "version": 1,
+   "placeholders": [
+    "{{var:date}}"
+   ]
+  },
+  {
+   "key": "email.payment_link.expires",
+   "lang": "fi",
+   "text": "Linkki on voimassa {{var:date}} asti.",
+   "version": 1,
+   "placeholders": [
+    "{{var:date}}"
+   ]
+  },
+  {
+   "key": "email.payment_link.intro",
+   "lang": "en",
+   "text": "You can pay the outstanding amount of {{var:amount}} using the link below.",
+   "version": 1,
+   "placeholders": [
+    "{{var:amount}}"
+   ]
+  },
+  {
+   "key": "email.payment_link.intro",
+   "lang": "fi",
+   "text": "Voit maksaa tilauksen maksamattoman osuuden ({{var:amount}}) alla olevasta linkistä.",
+   "version": 1,
+   "placeholders": [
+    "{{var:amount}}"
+   ]
+  },
+  {
+   "key": "email.payment_link.pay_button",
+   "lang": "en",
+   "text": "Pay now",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.payment_link.pay_button",
+   "lang": "fi",
+   "text": "Maksa nyt",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.payment_link.subject",
+   "lang": "en",
+   "text": "Payment link for order {{var:no}} – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}",
+    "{{var:no}}"
+   ]
+  },
+  {
+   "key": "email.payment_link.subject",
+   "lang": "fi",
+   "text": "Maksulinkki tilaukseen {{var:no}} – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}",
+    "{{var:no}}"
+   ]
+  },
+  {
+   "key": "email.payment_link.title",
+   "lang": "en",
+   "text": "Payment link",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.payment_link.title",
+   "lang": "fi",
+   "text": "Maksulinkki",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.business_id",
+   "lang": "en",
+   "text": "Business ID {{var:id}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:id}}"
+   ]
+  },
+  {
+   "key": "email.receipt_pdf.business_id",
+   "lang": "fi",
+   "text": "Y-tunnus {{var:id}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:id}}"
+   ]
+  },
+  {
+   "key": "email.receipt_pdf.buyer",
+   "lang": "en",
+   "text": "Buyer",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.buyer",
+   "lang": "fi",
+   "text": "Ostaja",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.col_item",
+   "lang": "en",
+   "text": "Item",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.col_item",
+   "lang": "fi",
+   "text": "Tuote",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.col_net",
+   "lang": "en",
+   "text": "Excl. VAT",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.col_net",
+   "lang": "fi",
+   "text": "Veroton",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.col_qty",
+   "lang": "en",
+   "text": "Qty",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.col_qty",
+   "lang": "fi",
+   "text": "Kpl",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.col_rate",
+   "lang": "en",
+   "text": "Rate",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.col_rate",
+   "lang": "fi",
+   "text": "Verokanta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.col_total",
+   "lang": "en",
+   "text": "Total",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.col_total",
+   "lang": "fi",
+   "text": "Yhteensä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.col_unit",
+   "lang": "en",
+   "text": "Unit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.col_unit",
+   "lang": "fi",
+   "text": "À hinta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.col_vat",
+   "lang": "en",
+   "text": "VAT",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.col_vat",
+   "lang": "fi",
+   "text": "ALV",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.date",
+   "lang": "en",
+   "text": "Date",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.date",
+   "lang": "fi",
+   "text": "Päivämäärä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.date_value",
+   "lang": "en",
+   "text": "{{var:date}} at {{var:time}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:date}}",
+    "{{var:time}}"
+   ]
+  },
+  {
+   "key": "email.receipt_pdf.date_value",
+   "lang": "fi",
+   "text": "{{var:date}} klo {{var:time}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:date}}",
+    "{{var:time}}"
+   ]
+  },
+  {
+   "key": "email.receipt_pdf.of_which_vat",
+   "lang": "en",
+   "text": "of which VAT",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.of_which_vat",
+   "lang": "fi",
+   "text": "josta ALV",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.order",
+   "lang": "en",
+   "text": "Order",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.order",
+   "lang": "fi",
+   "text": "Tilaus",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.original",
+   "lang": "en",
+   "text": "Original receipt",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.original",
+   "lang": "fi",
+   "text": "Alkuperäinen kuitti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.paid",
+   "lang": "en",
+   "text": "Paid",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.paid",
+   "lang": "fi",
+   "text": "Maksettu",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.payment_method",
+   "lang": "en",
+   "text": "Payment method",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.payment_method",
+   "lang": "fi",
+   "text": "Maksutapa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.producer",
+   "lang": "en",
+   "text": "{{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.receipt_pdf.producer",
+   "lang": "fi",
+   "text": "{{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.receipt_pdf.reason",
+   "lang": "en",
+   "text": "Reason",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.reason",
+   "lang": "fi",
+   "text": "Hyvityksen syy",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.reference",
+   "lang": "en",
+   "text": "Your reference: {{var:ref}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:ref}}"
+   ]
+  },
+  {
+   "key": "email.receipt_pdf.reference",
+   "lang": "fi",
+   "text": "Viitteenne: {{var:ref}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:ref}}"
+   ]
+  },
+  {
+   "key": "email.receipt_pdf.refunded",
+   "lang": "en",
+   "text": "Refunded",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.refunded",
+   "lang": "fi",
+   "text": "Hyvitetty",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.rounding",
+   "lang": "en",
+   "text": "Cash rounding",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.rounding",
+   "lang": "fi",
+   "text": "Käteispyöristys",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.title",
+   "lang": "en",
+   "text": "RECEIPT",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.title",
+   "lang": "fi",
+   "text": "KUITTI",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.title_invoice",
+   "lang": "en",
+   "text": "RECEIPT / INVOICE",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.title_invoice",
+   "lang": "fi",
+   "text": "KUITTI / LASKU",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.title_refund",
+   "lang": "en",
+   "text": "REFUND RECEIPT",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.title_refund",
+   "lang": "fi",
+   "text": "HYVITYSKUITTI",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.total_gross",
+   "lang": "en",
+   "text": "Total (incl. VAT)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.total_gross",
+   "lang": "fi",
+   "text": "Yhteensä (sis. ALV)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.vat_breakdown",
+   "lang": "en",
+   "text": "VAT breakdown",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.vat_breakdown",
+   "lang": "fi",
+   "text": "ALV-erittely",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.vat_id",
+   "lang": "en",
+   "text": "VAT ID {{var:id}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:id}}"
+   ]
+  },
+  {
+   "key": "email.receipt_pdf.vat_id",
+   "lang": "fi",
+   "text": "ALV-tunnus {{var:id}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:id}}"
+   ]
+  },
+  {
+   "key": "email.receipt.intro",
+   "lang": "en",
+   "text": "Thank you for your payment. Your receipt is below and attached as a PDF.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt.intro",
+   "lang": "fi",
+   "text": "Kiitos maksustasi. Kuittisi on alla ja liitteenä PDF-tiedostona.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt.meta_date",
+   "lang": "en",
+   "text": "Date",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt.meta_date",
+   "lang": "fi",
+   "text": "Päivämäärä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt.meta_no",
+   "lang": "en",
+   "text": "Receipt no.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt.meta_no",
+   "lang": "fi",
+   "text": "Kuittinumero",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt.meta_paid",
+   "lang": "en",
+   "text": "Paid",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt.meta_paid",
+   "lang": "fi",
+   "text": "Maksettu",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt.subject",
+   "lang": "en",
+   "text": "Receipt {{var:no}} – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}",
+    "{{var:no}}"
+   ]
+  },
+  {
+   "key": "email.receipt.subject",
+   "lang": "fi",
+   "text": "Kuitti {{var:no}} – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}",
+    "{{var:no}}"
+   ]
+  },
+  {
+   "key": "email.receipt.title",
+   "lang": "en",
+   "text": "Receipt",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt.title",
+   "lang": "fi",
+   "text": "Kuitti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.refund_receipt.intro",
+   "lang": "en",
+   "text": "A refund has been made for your order. The refund receipt is below and attached as a PDF.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.refund_receipt.intro",
+   "lang": "fi",
+   "text": "Tilauksestasi on tehty hyvitys. Hyvityskuitti on alla ja liitteenä PDF-tiedostona.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.refund_receipt.intro_amount",
+   "lang": "en",
+   "text": "A refund of {{var:amount}} has been made for your order. The refund receipt is below and attached as a PDF.",
+   "version": 1,
+   "placeholders": [
+    "{{var:amount}}"
+   ]
+  },
+  {
+   "key": "email.refund_receipt.intro_amount",
+   "lang": "fi",
+   "text": "Tilauksestasi on tehty hyvitys ({{var:amount}}). Hyvityskuitti on alla ja liitteenä PDF-tiedostona.",
+   "version": 1,
+   "placeholders": [
+    "{{var:amount}}"
+   ]
+  },
+  {
+   "key": "email.refund_receipt.meta_refunded",
+   "lang": "en",
+   "text": "Refunded",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.refund_receipt.meta_refunded",
+   "lang": "fi",
+   "text": "Hyvitetty",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.refund_receipt.subject",
+   "lang": "en",
+   "text": "Refund receipt {{var:no}} – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}",
+    "{{var:no}}"
+   ]
+  },
+  {
+   "key": "email.refund_receipt.subject",
+   "lang": "fi",
+   "text": "Hyvityskuitti {{var:no}} – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}",
+    "{{var:no}}"
+   ]
+  },
+  {
+   "key": "email.refund_receipt.title",
+   "lang": "en",
+   "text": "Refund receipt",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.refund_receipt.title",
+   "lang": "fi",
+   "text": "Hyvityskuitti",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.contact",
+   "lang": "en",
+   "text": "Questions? Reply to this email or write to {{var:email}}.",
+   "version": 1,
+   "placeholders": [
+    "{{var:email}}"
+   ]
+  },
+  {
+   "key": "email.voucher.contact",
+   "lang": "fi",
+   "text": "Kysyttävää? Vastaa tähän viestiin tai kirjoita {{var:email}}.",
+   "version": 1,
+   "placeholders": [
+    "{{var:email}}"
+   ]
+  },
+  {
+   "key": "email.voucher.expired_p1",
+   "lang": "en",
+   "text": "Unfortunately we could not redeem your gift card ({{var:what}}): the code has expired.",
+   "version": 1,
+   "placeholders": [
+    "{{var:what}}"
+   ]
+  },
+  {
+   "key": "email.voucher.expired_p1",
+   "lang": "fi",
+   "text": "Emme valitettavasti pystyneet lunastamaan lahjakorttiasi ({{var:what}}): koodin voimassaolo on päättynyt.",
+   "version": 1,
+   "placeholders": [
+    "{{var:what}}"
+   ]
+  },
+  {
+   "key": "email.voucher.expired_p2",
+   "lang": "en",
+   "text": "If you believe the code is still valid, reply to this email or contact us and we will look into it. You can also ask {{var:label}} whether the validity can be extended, or pay for the booking in another way.",
+   "version": 1,
+   "placeholders": [
+    "{{var:label}}"
+   ]
+  },
+  {
+   "key": "email.voucher.expired_p2",
+   "lang": "fi",
+   "text": "Jos uskot, että koodi on vielä voimassa, vastaa tähän viestiin tai ota yhteyttä saunalle, niin selvitämme asian. Voit myös kysyä lahjakortin myyjältä ({{var:label}}) voimassaolon jatkamista tai maksaa varauksen muulla tavalla.",
+   "version": 1,
+   "placeholders": [
+    "{{var:label}}"
+   ]
+  },
+  {
+   "key": "email.voucher.expired_subject",
+   "lang": "en",
+   "text": "Your gift card has expired – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.voucher.expired_subject",
+   "lang": "fi",
+   "text": "Lahjakortin voimassaolo on päättynyt – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.voucher.expired_title",
+   "lang": "en",
+   "text": "Your gift card has expired",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.expired_title",
+   "lang": "fi",
+   "text": "Lahjakortin voimassaolo on päättynyt",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.invalid_p1",
+   "lang": "en",
+   "text": "Unfortunately we could not redeem your gift card ({{var:what}}): the code was not found in the {{var:label}} system. This may be due to a typo in the code.",
+   "version": 1,
+   "placeholders": [
+    "{{var:label}}",
+    "{{var:what}}"
+   ]
+  },
+  {
+   "key": "email.voucher.invalid_p1",
+   "lang": "fi",
+   "text": "Emme valitettavasti pystyneet lunastamaan lahjakorttiasi ({{var:what}}): koodia ei löytynyt kumppanin ({{var:label}}) järjestelmästä. Syynä voi olla kirjoitusvirhe koodissa.",
+   "version": 1,
+   "placeholders": [
+    "{{var:label}}",
+    "{{var:what}}"
+   ]
+  },
+  {
+   "key": "email.voucher.invalid_subject",
+   "lang": "en",
+   "text": "We could not find your gift card code – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.voucher.invalid_subject",
+   "lang": "fi",
+   "text": "Lahjakortin koodia ei löytynyt – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.voucher.invalid_title",
+   "lang": "en",
+   "text": "We could not find your gift card code",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.invalid_title",
+   "lang": "fi",
+   "text": "Lahjakortin koodia ei löytynyt",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.more_problem",
+   "lang": "en",
+   "text": "Your order:",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.more_problem",
+   "lang": "fi",
+   "text": "Tilauksesi:",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.more_received",
+   "lang": "en",
+   "text": "You can follow the status of your booking here:",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.more_received",
+   "lang": "fi",
+   "text": "Voit seurata varauksesi tilaa täältä:",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.other_p1",
+   "lang": "en",
+   "text": "We ran into a problem redeeming your gift card ({{var:what}}). We will look into it and contact you.",
+   "version": 1,
+   "placeholders": [
+    "{{var:what}}"
+   ]
+  },
+  {
+   "key": "email.voucher.other_p1",
+   "lang": "fi",
+   "text": "Lahjakortin ({{var:what}}) lunastuksessa on ilmennyt ongelma. Selvitämme asian ja otamme sinuun yhteyttä.",
+   "version": 1,
+   "placeholders": [
+    "{{var:what}}"
+   ]
+  },
+  {
+   "key": "email.voucher.other_subject",
+   "lang": "en",
+   "text": "About your gift card – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.voucher.other_subject",
+   "lang": "fi",
+   "text": "Lahjakorttisi lunastuksesta – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.voucher.other_title",
+   "lang": "en",
+   "text": "About your gift card",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.other_title",
+   "lang": "fi",
+   "text": "Lahjakorttisi lunastuksesta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.partner_elamyslahjat",
+   "lang": "en",
+   "text": "Elämyslahjat",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.partner_elamyslahjat",
+   "lang": "fi",
+   "text": "Elämyslahjat",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.partner_kiitoskauppa",
+   "lang": "en",
+   "text": "Kiitoskauppa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.partner_kiitoskauppa",
+   "lang": "fi",
+   "text": "Kiitoskauppa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.partner_kokemuskauppa",
+   "lang": "en",
+   "text": "Kokemuskauppa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.partner_kokemuskauppa",
+   "lang": "fi",
+   "text": "Kokemuskauppa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.partner_offerilla",
+   "lang": "en",
+   "text": "Offerilla",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.partner_offerilla",
+   "lang": "fi",
+   "text": "Offerilla",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.partner_other",
+   "lang": "en",
+   "text": "partner",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.partner_other",
+   "lang": "fi",
+   "text": "kumppani",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.problem_how",
+   "lang": "en",
+   "text": "You can fix this in two ways: enter the correct code on your order page (link below), or reply to this email with the correct code.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.problem_how",
+   "lang": "fi",
+   "text": "Voit korjata asian kahdella tavalla: syötä oikea koodi tilaussivullamme (alla oleva linkki) tai vastaa tähän viestiin ja kerro oikea koodi.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.received_p1",
+   "lang": "en",
+   "text": "Thank you for your booking! We have received your gift card ({{var:what}}) and your time is reserved for you.",
+   "version": 1,
+   "placeholders": [
+    "{{var:what}}"
+   ]
+  },
+  {
+   "key": "email.voucher.received_p1",
+   "lang": "fi",
+   "text": "Kiitos varauksestasi! Olemme vastaanottaneet lahjakorttisi ({{var:what}}) ja aikasi on varattu sinulle.",
+   "version": 1,
+   "placeholders": [
+    "{{var:what}}"
+   ]
+  },
+  {
+   "key": "email.voucher.received_p2",
+   "lang": "en",
+   "text": "We will check and redeem the gift card shortly. If there are any problems with the redemption, we will contact you.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.received_p2",
+   "lang": "fi",
+   "text": "Tarkistamme ja lunastamme lahjakortin pian. Jos lunastuksessa ilmenee ongelmia, olemme sinuun yhteydessä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.received_subject",
+   "lang": "en",
+   "text": "Thank you for your gift card booking – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.voucher.received_subject",
+   "lang": "fi",
+   "text": "Kiitos lahjakorttivarauksesta – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.voucher.received_title",
+   "lang": "en",
+   "text": "Thank you for your gift card booking",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.received_title",
+   "lang": "fi",
+   "text": "Kiitos lahjakorttivarauksesta",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.sign_name",
+   "lang": "en",
+   "text": "Tapio",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.sign_name",
+   "lang": "fi",
+   "text": "Tapio",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.used_p1",
+   "lang": "en",
+   "text": "Unfortunately we could not redeem your gift card ({{var:what}}): the code appears to have been used already.",
+   "version": 1,
+   "placeholders": [
+    "{{var:what}}"
+   ]
+  },
+  {
+   "key": "email.voucher.used_p1",
+   "lang": "fi",
+   "text": "Emme valitettavasti pystyneet lunastamaan lahjakorttiasi ({{var:what}}): koodi näyttää olevan jo käytetty.",
+   "version": 1,
+   "placeholders": [
+    "{{var:what}}"
+   ]
+  },
+  {
+   "key": "email.voucher.used_p2",
+   "lang": "en",
+   "text": "If the gift card has not been used yet, please contact us: {{var:email}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:email}}"
+   ]
+  },
+  {
+   "key": "email.voucher.used_p2",
+   "lang": "fi",
+   "text": "Jos lahjakorttia ei ole vielä käytetty, ole meihin yhteydessä: {{var:email}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:email}}"
+   ]
+  },
+  {
+   "key": "email.voucher.used_p3",
+   "lang": "en",
+   "text": "If you have another code, you can send it to us or enter it on your order page.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.used_p3",
+   "lang": "fi",
+   "text": "Jos sinulla on toinen koodi, voit lähettää sen meille tai syöttää sen tilaussivullamme.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.used_subject",
+   "lang": "en",
+   "text": "Your gift card code has already been used – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.voucher.used_subject",
+   "lang": "fi",
+   "text": "Lahjakortin koodi on jo käytetty – {{setting:business_name}}",
+   "version": 1,
+   "placeholders": [
+    "{{setting:business_name}}"
+   ]
+  },
+  {
+   "key": "email.voucher.used_title",
+   "lang": "en",
+   "text": "The gift card code has already been used",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.used_title",
+   "lang": "fi",
+   "text": "Lahjakortin koodi on jo käytetty",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.view_order",
+   "lang": "en",
+   "text": "Open your order",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.view_order",
+   "lang": "fi",
+   "text": "Avaa tilauksesi",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.voucher.what_with_code",
+   "lang": "en",
+   "text": "{{var:label}}, code {{var:code}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:code}}",
+    "{{var:label}}"
+   ]
+  },
+  {
+   "key": "email.voucher.what_with_code",
+   "lang": "fi",
+   "text": "{{var:label}}, koodi {{var:code}}",
+   "version": 1,
+   "placeholders": [
+    "{{var:code}}",
+    "{{var:label}}"
+   ]
   },
   {
    "key": "event.10.time_text",
@@ -14300,6 +16589,90 @@
    "key": "ui.mobilepay.slot_title",
    "lang": "fi",
    "text": "Aika ehti mennä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.mobilepay.start_error_default",
+   "lang": "en",
+   "text": "Starting the payment failed",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.mobilepay.start_error_default",
+   "lang": "fi",
+   "text": "Maksun aloitus epäonnistui",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.mobilepay.start_error_invalid_param",
+   "lang": "en",
+   "text": "Invalid request",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.mobilepay.start_error_invalid_param",
+   "lang": "fi",
+   "text": "Virheellinen pyyntö",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.mobilepay.start_error_off",
+   "lang": "en",
+   "text": "MobilePay payment is not available",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.mobilepay.start_error_off",
+   "lang": "fi",
+   "text": "MobilePay-maksu ei ole käytössä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.mobilepay.start_error_provider",
+   "lang": "en",
+   "text": "Starting the MobilePay payment failed",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.mobilepay.start_error_provider",
+   "lang": "fi",
+   "text": "MobilePay-maksun aloitus epäonnistui",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.mobilepay.start_error_provider_retry",
+   "lang": "en",
+   "text": "Starting the MobilePay payment failed, please try again in a moment",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.mobilepay.start_error_provider_retry",
+   "lang": "fi",
+   "text": "MobilePay-maksun aloitus epäonnistui, yritä hetken kuluttua uudelleen",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.mobilepay.start_error_unavailable",
+   "lang": "en",
+   "text": "MobilePay payment is not available right now",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.mobilepay.start_error_unavailable",
+   "lang": "fi",
+   "text": "MobilePay-maksu ei ole käytettävissä juuri nyt",
    "version": 1,
    "placeholders": []
   },
