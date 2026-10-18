@@ -23,8 +23,9 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS } =
   const st = {
     calls: [], perms: [...perms],
     products: [
-      { id: 10, name: 'Saunahoito', name_en: 'Sauna treatment', price: 85, vat_rate: 25.5, active: true, category: 'treatment', description: 'Hoitosauna Rauni', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 90, min_persons: 1, max_persons: 4, bookable: true, shop_visible: true, time_window_class: 'therapy', required_skill: 'treatment' } },
-      { id: 8, name: 'Rituaali 90 min', price: 64, vat_rate: 25.5, active: true, category: 'ritual', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 90, min_persons: 1, max_persons: 6, bookable: true, shop_visible: true, time_window_class: 'ritual' } },
+      { id: 10, name: 'Saunahoito', name_en: 'Sauna treatment', price: 85, vat_rate: 25.5, active: true, category: 'treatment', description: 'Hoitosauna Rauni', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 90, min_persons: 1, max_persons: 4, bookable: true, shop_visible: true, public_slots: true, time_window_class: 'therapy', required_skill: 'treatment' } },
+      { id: 8, name: 'Rituaali 90 min', price: 64, vat_rate: 25.5, active: true, category: 'ritual', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 90, min_persons: 1, max_persons: 6, bookable: true, shop_visible: true, public_slots: true, public_weekdays: [6, 7], time_window_class: 'ritual' } },
+      { id: 7, name: 'Saunarituaali ja savusaunavuoro (la & su)', name_en: 'Sauna Ritual & Smoke Sauna Session', price: 49, price_type: 'per_person', vat_rate: 25.5, active: true, category: 'ritual', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 120, min_persons: 1, max_persons: 6, bookable: true, shop_visible: true, public_slots: true, public_weekdays: [6, 7], time_window_class: 'ritual', required_skill: 'yleinen' } },
       { id: 3, name: 'Yleinen saunavuoro', price: 18, vat_rate: 25.5, active: true, category: 'public_sauna', config: { resource_class: 'shift', lifecycle: 'current', sale_kind: 'slots', bookable: true, shop_visible: true } },
     ],
     options: [   // product_options (10 = Saunahoito)
@@ -81,7 +82,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS } =
     admin_list_products: () => st.products.map((p) => ({ ...p })),
     'select:payment_methods': () => [{ code: 'pay_later', label: 'Maksu myöhemmin', is_manual: true, active: true }, { code: 'cash', label: 'Käteinen', is_manual: true, active: true }, { code: 'card_terminal', label: 'Korttipääte', is_manual: true, active: true }],
     'select:resources': () => [{ id: 1, code: 'rauni', name: 'Rauni', active: true }, { id: 2, code: 'lovi', name: 'Lovi', active: true }],
-    'select:product_space_rules': () => [10, 8].map((pid) => ({ product_id: pid, leg_no: 1, priority: 1, space_id: 1, mode: 'exclusive', min_persons: 1, max_persons: 6, selection: 'auto', active: true })),
+    'select:product_space_rules': () => [10, 8, 7].map((pid) => ({ product_id: pid, leg_no: 1, priority: 1, space_id: 1, mode: 'exclusive', min_persons: 1, max_persons: 6, selection: 'auto', active: true })),
     admin_list_addons: () => [],
     admin_list_customers: (a) => st.customers.filter((c) => !a.p_search || `${c.name} ${c.email} ${c.phone}`.toLowerCase().includes(String(a.p_search).toLowerCase())).slice(0, a.p_limit || 5),
     admin_day_shifts: () => [], admin_upcoming_shifts: () => [],
@@ -116,9 +117,20 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS } =
       r.option_id = id;
       return { ok: true, reservation_id: r.reservation_id, option: optJson(id), previous: prev, email_queued: !!a.p_notify };
     },
-    admin_treatment_availability: (a) => {
-      const rows = [];
-      for (let i = 0; i < 14; i++) { const d = addDays(a.p_from, i); for (const at of ['16:00', '17:30']) { const p = product(a.p_product_id); rows.push({ session_date: d, starts_at: helIso(d, at), ends_at: helIso(d, at.startsWith('16') ? '17:30' : '19:00'), status: 'available', persons: a.p_persons || 1, total: p?.price ?? null, therapist_missing: false, needs_override: false }); } }
+    admin_treatment_availability: (a) => {   // vastaa tuotannon admin_treatment_availability-funktiota: kesto = product_config.duration_minutes; public_weekdays (isodow) rajaa päivät; ritual-luokka: alkuajat 16:00/16:30/17:00
+      need('bookings.manage');
+      const p = product(a.p_product_id), c = p?.config, rows = [];
+      if (!c || c.lifecycle !== 'current') return rows;
+      const dur = c.duration_minutes || 60, ritual = c.time_window_class === 'ritual';
+      for (let i = 0; i < 14; i++) {
+        const d = addDays(a.p_from, i), isodow = (new Date(`${d}T12:00:00Z`).getUTCDay() + 6) % 7 + 1;
+        if (c.public_weekdays && !c.public_weekdays.includes(isodow)) continue;
+        for (const at of ritual ? ['16:00', '16:30', '17:00'] : ['16:00', '17:30']) {
+          const s0 = helIso(d, at);
+          rows.push({ product_id: p.id, session_date: d, starts_at: s0, ends_at: new Date(new Date(s0).getTime() + dur * 60e3).toISOString(), duration_minutes: dur, status: 'available', persons: a.p_persons || 1,
+            total: p.price_type === 'per_person' ? p.price * (a.p_persons || 1) : p.price ?? null, therapist_missing: false, needs_override: false });
+        }
+      }
       return rows;
     },
     admin_create_resource_booking: (a) => {
