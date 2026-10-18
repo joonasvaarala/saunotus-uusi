@@ -1,4 +1,4 @@
--- booking_69: maksamattoman pidon vanheneminen peruu tilauksen (status cancelled, varauksen cancel_reason hold_expired).
+-- booking_70: maksamattoman pidon vanheneminen peruu tilauksen (status cancelled, varauksen cancel_reason hold_expired).
 -- Löydös (ei muuteta tässä): booking._res_active on epätosi tilalle expired ja pidolle jonka hold_expires_at on ohi,
 -- joten expired EI kuluta poolikapasiteettia, claim-päällekkäisyyttä (v_claims + _res_active), admin-päivän henkilöitä
 -- eikä (PR #68) päivän tuottoa. Exclusive-gist sisältää yhä pending-rivin kunnes tämä funktio ajaa; varaustrigger
@@ -6,9 +6,11 @@
 -- payment_mark_paid / mobilepay_payment_confirmable kohtelevat expired-varausta yhä vahvistettavana.
 -- Tämä migraatio ei muuta maksun, lahjakortin lunastuksen eikä sähköpostin lähetystä. Vanhentuneelle ei jonoteta viestiä
 -- (orders_confirmed_mail_trg laukeaa vain status → confirmed). resend pysyy dry_run.
--- Kertasiivous: vain status=expired JA payment_status unpaid|pending, ei kuitteja, ei oikeaa maksettua maksua,
--- ei confirmed/completed-varausta, ei kesken olevaa MobilePayta. Tilausriviä ei poisteta.
--- Rollback: rollbacks/20261018180000_booking_69_ROLLBACK.sql
+-- Kertasiivous: vain varsinainen kassapito (external_source is null AND hold_kind is not null) JA status=expired
+-- JA payment_status unpaid|pending, ei kuitteja, ei oikeaa maksettua maksua, ei confirmed/completed-varausta,
+-- ei kesken olevaa MobilePayta. Johku-tuonti (external_source) ja hold_kind-tyhjät rivit jäävät ennalleen.
+-- Tilausriviä ei poisteta.
+-- Rollback: rollbacks/20261018193000_booking_70_ROLLBACK.sql
 set local lock_timeout = '5s';
 
 create or replace function booking._checkout_state_json(p_order bigint) returns jsonb language plpgsql stable security definer set search_path = '' as $$
@@ -85,8 +87,10 @@ begin
   return n;
 end $$;
 
--- Kertasiivous jo vanhentuneille maksamattomille tilauksille. Idempotentti: vain status=expired, leima external_meta.booking_69.
--- Ei koske maksettua, kuitillista, partially_paid, confirmed/completed-varausta eikä MobilePay-kesken -tilausta. Ei poista tilausta. Ei jonota sähköpostia.
+-- Kertasiivous jo vanhentuneille maksamattomille kassapidoille. Idempotentti: vain status=expired,
+-- external_source is null, hold_kind is not null, leima external_meta.booking_70.
+-- Ei koske Johku-tuontia, hold_kind-tyhjää riviä, maksettua, kuitillista, partially_paid, confirmed/completed-varausta eikä MobilePay-kesken -tilausta.
+-- Ei poista tilausta. Ei jonota sähköpostia.
 create or replace function booking._cancel_unpaid_expired_orders() returns integer language plpgsql security definer set search_path = '' as $$
 declare v_id bigint; v_n int; n int := 0; v_ids bigint[] := '{}';
 begin
@@ -94,6 +98,8 @@ begin
     select o.id from booking.orders o
      where o.status = 'expired'
        and o.payment_status in ('unpaid', 'pending')
+       and o.external_source is null
+       and o.hold_kind is not null
        and not exists (select 1 from booking.receipts rc where rc.order_id = o.id)
        and not exists (
          select 1 from booking.payments p
@@ -101,7 +107,7 @@ begin
             and not (p.method = 'gift_card' and not exists (select 1 from booking.receipts rc where rc.payment_id = p.id)))
        and not exists (select 1 from booking.reservations r where r.order_id = o.id and r.status in ('confirmed', 'completed'))
        and not booking._order_mp_inflight(o.id)
-       and not (coalesce(o.external_meta, '{}'::jsonb) ? 'booking_69')
+       and not (coalesce(o.external_meta, '{}'::jsonb) ? 'booking_70')
      order by o.id
      for update of o
   loop
@@ -109,22 +115,23 @@ begin
        set status = 'cancelled',
            cancelled_at = coalesce(r.cancelled_at, now()),
            cancel_reason = coalesce(r.cancel_reason, 'hold_expired'),
-           external_meta = coalesce(r.external_meta, '{}'::jsonb) || jsonb_build_object('booking_69', jsonb_build_object(
+           external_meta = coalesce(r.external_meta, '{}'::jsonb) || jsonb_build_object('booking_70', jsonb_build_object(
              'prev_status', r.status, 'prev_cancel_reason', r.cancel_reason, 'prev_cancelled_at', r.cancelled_at))
      where r.order_id = v_id and r.status in ('expired', 'pending')
-       and not (coalesce(r.external_meta, '{}'::jsonb) ? 'booking_69');
+       and not (coalesce(r.external_meta, '{}'::jsonb) ? 'booking_70');
     update booking.payments p
        set status = 'cancelled',
            raw = coalesce(case when jsonb_typeof(p.raw) = 'object' then p.raw end, '{}'::jsonb)
-                || jsonb_build_object('booking_69', jsonb_build_object('prev_status', p.status))
+                || jsonb_build_object('booking_70', jsonb_build_object('prev_status', p.status))
      where p.order_id = v_id and p.status = 'pending'
-       and not (coalesce(case when jsonb_typeof(p.raw) = 'object' then p.raw end, '{}'::jsonb) ? 'booking_69');
+       and not (coalesce(case when jsonb_typeof(p.raw) = 'object' then p.raw end, '{}'::jsonb) ? 'booking_70');
     update booking.orders o
        set status = 'cancelled',
            cancelled_at = coalesce(o.cancelled_at, now()),
-           external_meta = coalesce(o.external_meta, '{}'::jsonb) || jsonb_build_object('booking_69', jsonb_build_object(
+           external_meta = coalesce(o.external_meta, '{}'::jsonb) || jsonb_build_object('booking_70', jsonb_build_object(
              'prev_status', o.status, 'prev_cancelled_at', o.cancelled_at, 'prev_payment_status', o.payment_status, 'at', now()))
-     where o.id = v_id and o.status = 'expired';
+     where o.id = v_id and o.status = 'expired'
+       and o.external_source is null and o.hold_kind is not null;
     get diagnostics v_n = row_count;
     if v_n = 1 then n := n + 1; v_ids := v_ids || v_id; end if;
   end loop;
@@ -139,6 +146,6 @@ do $cleanup$
 declare n int;
 begin
   n := booking._cancel_unpaid_expired_orders();
-  raise notice 'booking_69: peruutettu maksamattomia vanhentuneita tilauksia: %', n;
+  raise notice 'booking_70: peruutettu maksamattomia vanhentuneita kassapitoja: %', n;
 end
 $cleanup$;

@@ -1,9 +1,11 @@
--- t69: pidon vanheneminen peruu tilauksen (cancelled + cancel_reason hold_expired) ja kertasiivous koskee vain maksamatonta expired-tilausta.
+-- t70: pidon vanheneminen peruu tilauksen (cancelled + cancel_reason hold_expired).
+-- Kertasiivous koskee vain varsinaista kassapitoa: external_source is null AND hold_kind is not null. Johku-tuonti ei muutu.
 -- Ajetaan migraation JÄLKEEN. Yksi DO-lohko; tahallinen poikkeus kumoaa kaiken. Tulos: TESTRESULT pass=… fail=…
+-- statement_timeout on tämän lohkon aikaraja. lock_timeout pysyy lyhyenä (SET LOCAL, ei istuntotason SET): statement_timeout ei pidennä sitä eikä vuoda transaktion ulkopuolelle.
 set local lock_timeout = '3s';
 set local statement_timeout = '90s';
-create temp table t69_r(ok boolean, label text) on commit drop;
-create function pg_temp.ck(p_ok boolean, p_label text) returns void language sql as $$ insert into t69_r values (coalesce(p_ok, false), p_label) $$;
+create temp table t70_r(ok boolean, label text) on commit drop;
+create function pg_temp.ck(p_ok boolean, p_label text) returns void language sql as $$ insert into t70_r values (coalesce(p_ok, false), p_label) $$;
 create function pg_temp.mk(p_start timestamptz, p_email text) returns jsonb language sql as $$
   select booking.public_create_treatment_booking(11, p_start, 2, 'Testi Asiakas', p_email, '+358401234567', false, 'fi', null, 'private', null, null) $$;
 create function pg_temp.oid(p_tok uuid) returns bigint language sql as $$ select id from booking.orders where public_token = p_tok $$;
@@ -25,7 +27,8 @@ begin
      where q.status = 'available' order by q.starts_at loop
     if v_slots is null or r_s.starts_at >= v_slots[cardinality(v_slots)] + interval '5 hours' then v_slots := array_append(v_slots, r_s.starts_at); end if;
   end loop;
-  if v_slots is null or cardinality(v_slots) < 6 then raise exception 'TESTRESULT_ABORT vapaita hoitoaikoja %', coalesce(cardinality(v_slots), 0); end if;
+  if v_slots is null or cardinality(v_slots) < 8 then raise exception 'TESTRESULT_ABORT vapaita hoitoaikoja %', coalesce(cardinality(v_slots), 0); end if;
+  perform pg_temp.ck(current_setting('lock_timeout') = '3s' and current_setting('statement_timeout') = '90s', 'L1: lock_timeout 3s, statement_timeout 90s (lukkoaikaraja ei pidentynyt)');
 
   -- A) cron peruu pidon: tilaus säilyy, kapasiteetti vapaa, ei viestiä
   r := pg_temp.mk(v_slots[1], 'a1@t69.example'); tok := (r ->> 'token')::uuid; oid := pg_temp.oid(tok);
@@ -70,10 +73,11 @@ begin
   update booking.reservations set status = 'expired', cancel_reason = null, cancelled_at = null, hold_expires_at = now() - interval '2 minutes' where order_id = oid;
   update booking.orders set status = 'expired', payment_status = 'unpaid', cancelled_at = null where id = oid;
   select count(*) into v_mail from booking.email_outbox where order_id = oid;
-  perform pg_temp.ck(booking._cancel_unpaid_expired_orders() >= 1, 'D1: siivous peruu expired/unpaid-tilauksen');
-  perform pg_temp.ck((select status from booking.orders where id = oid) = 'cancelled' and (select external_meta -> 'booking_69' ->> 'prev_status' from booking.orders where id = oid) = 'expired', 'D2: leima booking_69, tila cancelled');
+  perform pg_temp.ck((select external_source from booking.orders where id = oid) is null and (select hold_kind from booking.orders where id = oid) is not null, 'D0: siivottava rivi on kassapito');
+  perform pg_temp.ck(booking._cancel_unpaid_expired_orders() >= 1, 'D1: siivous peruu expired/unpaid-kassapidon');
+  perform pg_temp.ck((select status from booking.orders where id = oid) = 'cancelled' and (select external_meta -> 'booking_70' ->> 'prev_status' from booking.orders where id = oid) = 'expired', 'D2: leima booking_70, tila cancelled');
   perform pg_temp.ck((select status from booking.reservations where order_id = oid) = 'cancelled' and (select cancel_reason from booking.reservations where order_id = oid) = 'hold_expired', 'D3: vanha expired-varaus cancelled');
-  perform pg_temp.ck((select status from booking.payments where id = pid) = 'cancelled' and (select raw -> 'booking_69' ->> 'prev_status' from booking.payments where id = pid) = 'pending', 'D4: avoin maksu peruttu ja leimattu');
+  perform pg_temp.ck((select status from booking.payments where id = pid) = 'cancelled' and (select raw -> 'booking_70' ->> 'prev_status' from booking.payments where id = pid) = 'pending', 'D4: avoin maksu peruttu ja leimattu');
   perform pg_temp.ck((select count(*) from booking.email_outbox where order_id = oid) = v_mail, 'D5: siivous ei lisää sähköpostia');
   perform pg_temp.ck(exists (select 1 from booking.orders where id = oid), 'D6: tilausta ei poistettu');
   perform pg_temp.ck(booking._cancel_unpaid_expired_orders() = 0, 'D7: toinen ajo ei koske samaa tilausta');
@@ -107,18 +111,37 @@ begin
   perform booking._cancel_unpaid_expired_orders();
   perform pg_temp.ck((select status from booking.orders where id = oid) = 'expired' and (select status from booking.reservations where order_id = oid) = 'confirmed', 'D12: confirmed-varausta ei peruta vaikka tilaus olisi expired');
 
+  -- D13 Johku-tuonti: expired + unpaid, mutta external_source johku ja hold_kind tyhjä → ei muutosta
+  r := pg_temp.mk(v_slots[7], 'j1@t70.example'); oid := pg_temp.oid((r ->> 'token')::uuid);
+  perform pg_temp.ck(oid is not null, 'D13a: Johku-tapauksen tilaus luotu (' || coalesce(r ->> 'code', '') || ')');
+  update booking.orders set status = 'expired', payment_status = 'unpaid', cancelled_at = null, hold_kind = null, external_source = 'johku', external_id = 't70-johku-' || id::text where id = oid;
+  update booking.reservations set status = 'expired', cancel_reason = null, cancelled_at = null, hold_expires_at = now() - interval '2 minutes' where order_id = oid;
+  select count(*) into v_mail from booking.email_outbox where order_id = oid;
+  perform booking._cancel_unpaid_expired_orders();
+  perform pg_temp.ck((select status from booking.orders where id = oid) = 'expired' and (select external_source from booking.orders where id = oid) = 'johku' and (select hold_kind from booking.orders where id = oid) is null and not (coalesce((select external_meta from booking.orders where id = oid), '{}'::jsonb) ? 'booking_70'), 'D13: Johku-tuontitilaus (external_source johku, expired) ei muutu');
+  perform pg_temp.ck((select status from booking.reservations where order_id = oid) = 'expired' and not (coalesce((select external_meta from booking.reservations where order_id = oid), '{}'::jsonb) ? 'booking_70'), 'D13b: Johku-tilauksen varausta ei leimata');
+  perform pg_temp.ck((select count(*) from booking.email_outbox where order_id = oid) = v_mail, 'D13c: Johku-tuontiin ei jonoudu viestiä');
+
+  -- D14 sama rajaus toisesta suunnasta: native mutta hold_kind tyhjä ei ole kassapito
+  r := pg_temp.mk(v_slots[8], 'n1@t70.example'); oid := pg_temp.oid((r ->> 'token')::uuid);
+  update booking.orders set status = 'expired', payment_status = 'unpaid', cancelled_at = null, hold_kind = null where id = oid;
+  update booking.reservations set status = 'expired', cancel_reason = null, cancelled_at = null, hold_expires_at = now() - interval '2 minutes' where order_id = oid;
+  perform booking._cancel_unpaid_expired_orders();
+  perform pg_temp.ck((select status from booking.orders where id = oid) = 'expired' and (select external_source from booking.orders where id = oid) is null and (select hold_kind from booking.orders where id = oid) is null and not (coalesce((select external_meta from booking.orders where id = oid), '{}'::jsonb) ? 'booking_70'), 'D14: hold_kind-tyhjä expired-tilaus ei ole kassapito eikä muutu');
+
   select booking._checkout_state_json((select id from booking.orders where public_token = (select public_token from booking.orders where id = (select order_id from booking.reservations where cancel_reason = 'hold_expired' order by id desc limit 1)))) ->> 'cancel_reason' into v_reason;
   perform pg_temp.ck(v_reason = 'hold_expired', 'E1: checkout cancel_reason hold_expired');
   select booking._checkout_state_json(oid) ->> 'checkout_state' into v_st;
   perform pg_temp.ck(v_st = 'expired', 'E2: ohitettu expired-tilaus näkyy yhä expired (ei siivottu)');
   perform pg_temp.ck((select mode from booking.integration_config where key = 'resend') = 'dry_run', 'E3: resend pysyy dry_run');
   perform pg_temp.ck(not has_function_privilege('anon', 'booking._cancel_unpaid_expired_orders()', 'execute'), 'E4: siivousfunktio ei ole anonin ajettavissa');
+  perform pg_temp.ck(current_setting('lock_timeout') = '3s', 'E5: lock_timeout on yhä 3s testin jälkeen');
 
   select last_value into v_seq1 from booking.orders_order_no_seq;
   select count(*) into v_made from booking.orders where id > v_maxid;
   select count(*) into v_foreign from booking.orders where id > v_maxid and created_at <> now();
   if v_foreign = 0 then perform setval('booking.orders_order_no_seq', v_seq0, true); end if;
   raise exception 'TESTRESULT pass=% fail=% seq0=% seq1=% orders_made=% :: %',
-    (select count(*) from t69_r where ok), (select count(*) from t69_r where not ok), v_seq0, v_seq1, v_made,
-    coalesce((select string_agg(label, ' | ') from t69_r where not ok), 'ALL OK');
+    (select count(*) from t70_r where ok), (select count(*) from t70_r where not ok), v_seq0, v_seq1, v_made,
+    coalesce((select string_agg(label, ' | ') from t70_r where not ok), 'ALL OK');
 end $t$;

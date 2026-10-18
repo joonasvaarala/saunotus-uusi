@@ -1,32 +1,41 @@
--- ROLLBACK booking_69: palauttaa _expire_holds ja _checkout_state_json booking_53-tilaan.
--- Kertasiivouksen leimaamat rivit (external_meta.booking_69 / payments.raw.booking_69) palautetaan vain jos ne ovat yhä cancelled.
+-- ROLLBACK booking_70: palauttaa _expire_holds ja _checkout_state_json booking_53-tilaan.
+-- Kertasiivouksen leimaamat rivit (external_meta.booking_70 / payments.raw.booking_70) palautetaan vain jos ne ovat yhä cancelled
+-- ja tilaus on varsinainen kassapito (external_source is null AND hold_kind is not null). Johku-tuontia ei palautella.
 -- Lahjakortin palautuskirjauksia ei peruta (ne vastaavat jo booking_53:n vanhenemista; ei kynnetä saldoa takaisin).
 -- Ajonaikaiset vanhenemiset migraation jälkeen eivät saa leimaa, eikä niitä palauteta expired-tilaan.
 set local lock_timeout = '5s';
 
 update booking.reservations r
-   set status = r.external_meta -> 'booking_69' ->> 'prev_status',
-       cancel_reason = r.external_meta -> 'booking_69' ->> 'prev_cancel_reason',
-       cancelled_at = (r.external_meta -> 'booking_69' ->> 'prev_cancelled_at')::timestamptz,
-       external_meta = r.external_meta - 'booking_69'
- where r.external_meta ? 'booking_69'
+   set status = r.external_meta -> 'booking_70' ->> 'prev_status',
+       cancel_reason = r.external_meta -> 'booking_70' ->> 'prev_cancel_reason',
+       cancelled_at = (r.external_meta -> 'booking_70' ->> 'prev_cancelled_at')::timestamptz,
+       external_meta = r.external_meta - 'booking_70'
+ where r.external_meta ? 'booking_70'
    and r.status = 'cancelled'
-   and r.external_meta -> 'booking_69' ->> 'prev_status' in ('expired', 'pending');
+   and r.external_meta -> 'booking_70' ->> 'prev_status' in ('expired', 'pending')
+   and exists (
+     select 1 from booking.orders o
+      where o.id = r.order_id and o.external_source is null and o.hold_kind is not null);
 
 update booking.payments p
-   set status = p.raw -> 'booking_69' ->> 'prev_status',
-       raw = case when (p.raw - 'booking_69') = '{}'::jsonb then null else p.raw - 'booking_69' end
- where jsonb_typeof(p.raw) = 'object' and p.raw ? 'booking_69'
+   set status = p.raw -> 'booking_70' ->> 'prev_status',
+       raw = case when (p.raw - 'booking_70') = '{}'::jsonb then null else p.raw - 'booking_70' end
+ where jsonb_typeof(p.raw) = 'object' and p.raw ? 'booking_70'
    and p.status = 'cancelled'
-   and p.raw -> 'booking_69' ->> 'prev_status' = 'pending';
+   and p.raw -> 'booking_70' ->> 'prev_status' = 'pending'
+   and exists (
+     select 1 from booking.orders o
+      where o.id = p.order_id and o.external_source is null and o.hold_kind is not null);
 
 update booking.orders o
    set status = 'expired',
-       cancelled_at = (o.external_meta -> 'booking_69' ->> 'prev_cancelled_at')::timestamptz,
-       external_meta = o.external_meta - 'booking_69'
- where o.external_meta ? 'booking_69'
+       cancelled_at = (o.external_meta -> 'booking_70' ->> 'prev_cancelled_at')::timestamptz,
+       external_meta = o.external_meta - 'booking_70'
+ where o.external_meta ? 'booking_70'
    and o.status = 'cancelled'
-   and o.external_meta -> 'booking_69' ->> 'prev_status' = 'expired';
+   and o.external_meta -> 'booking_70' ->> 'prev_status' = 'expired'
+   and o.external_source is null
+   and o.hold_kind is not null;
 
 create or replace function booking._checkout_state_json(p_order bigint) returns jsonb language plpgsql stable security definer set search_path = '' as $$
 declare o booking.orders; v_hold timestamptz; v_due numeric; v_net numeric; v_inflight boolean; v_state text; v_open boolean;

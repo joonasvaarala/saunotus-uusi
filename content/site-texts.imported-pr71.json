@@ -9,7 +9,7 @@
   "placeholders": [
    "{{var:minutes}}"
   ],
-  "reason": "booking_69: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Ei sähköpostia."
+  "reason": "PR 71: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Tuotu tuotantoon. Ei sähköpostia."
  },
  {
   "key": "ui.order.closed_hold_expired",
@@ -21,7 +21,7 @@
   "placeholders": [
    "{{var:minutes}}"
   ],
-  "reason": "booking_69: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Ei sähköpostia."
+  "reason": "PR 71: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Tuotu tuotantoon. Ei sähköpostia."
  },
  {
   "key": "ui.order.closed_hold_expired_gift",
@@ -31,7 +31,7 @@
   "kind": "plain",
   "max_len": 200,
   "placeholders": [],
-  "reason": "booking_69: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Ei sähköpostia."
+  "reason": "PR 71: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Tuotu tuotantoon. Ei sähköpostia."
  },
  {
   "key": "ui.order.closed_hold_expired_gift",
@@ -41,7 +41,7 @@
   "kind": "plain",
   "max_len": 200,
   "placeholders": [],
-  "reason": "booking_69: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Ei sähköpostia."
+  "reason": "PR 71: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Tuotu tuotantoon. Ei sähköpostia."
  },
  {
   "key": "ui.order.closed_cancelled",
@@ -51,7 +51,7 @@
   "kind": "plain",
   "max_len": 250,
   "placeholders": [],
-  "reason": "booking_69: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Ei sähköpostia."
+  "reason": "PR 71: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Tuotu tuotantoon. Ei sähköpostia."
  },
  {
   "key": "ui.order.closed_cancelled",
@@ -61,7 +61,7 @@
   "kind": "plain",
   "max_len": 300,
   "placeholders": [],
-  "reason": "booking_69: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Ei sähköpostia."
+  "reason": "PR 71: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Tuotu tuotantoon. Ei sähköpostia."
  },
  {
   "key": "ui.order.closed_new_booking",
@@ -71,7 +71,7 @@
   "kind": "plain",
   "max_len": 200,
   "placeholders": [],
-  "reason": "booking_69: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Ei sähköpostia."
+  "reason": "PR 71: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Tuotu tuotantoon. Ei sähköpostia."
  },
  {
   "key": "ui.order.closed_new_booking",
@@ -81,6 +81,6 @@
   "kind": "plain",
   "max_len": 200,
   "placeholders": [],
-  "reason": "booking_69: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Ei sähköpostia."
+  "reason": "PR 71: tilaussivun viesti, kun varaus on peruttu (pidon vanheneminen tai muu peruutus). FI+EN. Tuotu tuotantoon. Ei sähköpostia."
  }
 ]
