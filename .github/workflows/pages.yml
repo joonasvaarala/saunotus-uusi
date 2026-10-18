@@ -55,6 +55,8 @@ jobs:
       - run: node --test booking/tests/kassa-maksu.test.mjs
       # hoitovalitsin (booking_50): kaupan/hallinnan logiikka, FI/EN-tekstit, mockit vs. sopimus
       - run: node --test booking/tests/hoitovalitsin.test.mjs
+      # hallinnan päivänäkymä: päivän tuotto (käyntipäivä, brutto, perutut pois) ja tapahtumien sijoittelu
+      - run: node --test booking/tests/paivanakyma-tuotto.test.mjs
       # kassan 15 min paikanpito (§17, booking_53/54): tekstit, tilat, palvelinaikalaskuri, virhekoodit, mock-moottori, migraatiot mukana
       - run: node --test booking/tests/kassa-pito.test.mjs
       # testivaihtoehto "maksu paikan päällä" (booking_57): palvelimen tarjonta, nappi, virheet FI/EN, mock, migraatio mukana
@@ -62,7 +64,7 @@ jobs:
       # pakettituote Saunarituaali ja savusaunavuoro (kb 7, booking_58, §17.11): aikajana, loppuaika +2 h, la/su, mock, tuotantofixture
       - run: node --test booking/tests/saunarituaali.test.mjs
       # Sivutekstit tietokannasta (§18) + tuote 7 kentät (booking_61): paikkamerkit, build-haku/välimuisti/varateksti, p_addons, virhekoodit (fixture, ei verkkoa)
-      # puhelinnumero: yksi vakio (booking/shop/src/phone.js), yhtenäinen näkyvä muoto ja tel-linkki kaikkialla; ei vanhoja muotoja lähdekoodissa
+      # puhelinnumero: yksi vakio (booking/shop/src/phone.js), kielikohtainen näkyvä muoto (fi/en), tel-linkki kaikkialla samoin; ei käsin kirjoitettuja numeroita lähdekoodissa
       - run: node --test booking/tests/puhelin.test.mjs
       - run: node --test booking/tests/sivutekstit.test.mjs
       # Sivutekstit osa 3 / PR 1: kaupan sanakirjat avaimiksi, tuontitiedosto (ei ylikirjoita tuotantoa, generoitu koodista), DB-peitto + repon oletukset (ei verkkoa)

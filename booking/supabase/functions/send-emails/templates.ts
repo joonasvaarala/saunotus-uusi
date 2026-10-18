@@ -16,8 +16,10 @@ export const SELLER = "Sipoonjoen Perinnesauna";
 export const COMPANY = "Havuhattu Oy";
 export const ADDRESS = "Hindsbyntie 124, 04130 Sipoo";
 export const EMAIL = "savusauna@saunotus.fi";
-// Puhelin: näkyvä muoto aina "010 299 2866", linkki aina tel:+358102992866. Deno-funktio ei voi tuoda repon booking/shop/src/phone.js:ää (julkaistaan erikseen) → oma kopio; templates.test.mjs vertaa sitä vakioon.
-export const PHONE = "010 299 2866";
+// Puhelin: näkyvä muoto kielen mukaan (fi "010 299 2866", en "+358 10 299 2866"), linkki aina tel:+358102992866. Deno-funktio ei voi tuoda repon booking/shop/src/phone.js:ää (julkaistaan erikseen) → oma kopio; templates.test.mjs vertaa sitä vakioon.
+export const PHONE_FI = "010 299 2866";
+export const PHONE_EN = "+358 10 299 2866";
+export const phoneFor = (en: boolean) => (en ? PHONE_EN : PHONE_FI);
 export const PHONE_TEL = "+358102992866";
 export const LOGO_FALLBACK = "https://joonasvaarala.github.io/saunotus-uusi/img/logo-kuitti.png";
 const GREEN = "#1f3d2b", GREEN_SOFT = "#3d5c47", SAND = "#efe7d6", SAND_LIGHT = "#f7f2e7", SAND_LINE = "#d9ccb2", INK = "#2b2a26", MUTED = "#6f6a5d";
@@ -67,7 +69,7 @@ function wrapHtml(d: any, title: string, preheader: string, rows: string, en: bo
 </tr></table></td></tr>
 ${rows}
 <tr><td style="padding:10px 32px 0 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-top:1px solid ${SAND_LINE};font-size:0;line-height:0">&nbsp;</td></tr></table></td></tr>
-<tr><td style="padding:8px 32px 26px 32px;font-family:${SANS};font-size:12px;line-height:1.6;color:${MUTED}">${esc(SELLER)} · ${esc(COMPANY)}<br>${esc(ADDRESS)}<br><a href="mailto:${EMAIL}" style="color:${GREEN_SOFT}">${EMAIL}</a>${noPhone ? "" : ` · <a href="tel:${PHONE_TEL}" style="color:${GREEN_SOFT};text-decoration:none">${PHONE}</a>`}</td></tr>
+<tr><td style="padding:8px 32px 26px 32px;font-family:${SANS};font-size:12px;line-height:1.6;color:${MUTED}">${esc(SELLER)} · ${esc(COMPANY)}<br>${esc(ADDRESS)}<br><a href="mailto:${EMAIL}" style="color:${GREEN_SOFT}">${EMAIL}</a>${noPhone ? "" : ` · <a href="tel:${PHONE_TEL}" style="color:${GREEN_SOFT};text-decoration:none">${phoneFor(en)}</a>`}</td></tr>
 </table></td></tr></table></body></html>`;
 }
 
@@ -130,7 +132,7 @@ function giftCardMail(kind: "gift_card_buyer" | "gift_card_recipient", d: any, e
   const note = buyer && anyBuyer ? X("email.gift_card.note_share") : "";
   const recipNote = buyer && anyRecip ? X("email.gift_card.note_recipient_separate") : "";
   const cover = !buyer && c0.cover_message ? String(c0.cover_message).trim() : "";   // saateteksti: vain sähköpostissa, ei kortti-PDF:ssä
-  const contact = X("email.common.contact", { phone: PHONE });
+  const contact = X("email.common.contact", { phone: phoneFor(en) });
   const tl: string[] = []; let rows = h1(title) + p(esc(hello)) + p(esc(intro));
   if (cover) rows += `<tr><td style="padding:0 32px 18px 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:10px 16px;border-left:3px solid #c49a6c;font-family:${FONT};font-style:italic;font-size:17px;line-height:1.45;color:${INK}">${esc(cover).replace(/\n/g, "<br>")}${from ? `<br><span style="font-family:${SANS};font-style:normal;font-size:13px;color:${MUTED}">— ${esc(from)}</span>` : ""}</td></tr></table></td></tr>`;
   const hhmm = (s: string) => en ? s : s.replace(":", ".");
@@ -220,7 +222,7 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
   const signHtml = esc(sign).replace(/\n/g, "<br>");
   const viewLabel = X("email.common.view_order");
   const yourOrder = X("email.common.your_order");
-  const contact = X("email.common.contact", { phone: PHONE });
+  const contact = X("email.common.contact", { phone: phoneFor(en) });
   const helloRow = p(esc(hello));
   const tail = `${p(esc(contact), `color:${MUTED};font-size:13px`)}${p(signHtml)}`;
   const mk = (title: string, preheader: string, rows: string) => wrapHtml(d, title, preheader, rows, en);

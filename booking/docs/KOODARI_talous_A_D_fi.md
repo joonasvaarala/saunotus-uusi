@@ -674,7 +674,19 @@ Lisäksi vanhat kentät: `status` (`pending`/`confirmed`/`expired`…; **pending
 - **Aikajanan hallinta:** `admin_set_product_timeline(p_product_id, p_segments jsonb)` (`catalog.edit`; summa = kesto, muuten `timeline_sum`).
 - Rollback: `rollbacks/CHECKOUT_booking_61_ROLLBACK.sql`; testi: `tests/t61_package_catalog.sql` (48 tarkistusta, mm. muiden tuotteiden katalogirivit ennallaan).
 
-## 19. Myyntikäyrä (18.10.2026, migraatio `booking_70_sales_chart`, ei vielä tuotannossa)
+## 19. Päivänäkymän tuotto ja tapahtumat (`booking_68`)
+
+Vain luku. Ei taulumuutoksia, ei maksu-/pito-/lahjakortti-/sähköpostimuutoksia. Laskentasääntö: `docs/paivanakyma-tuotto.md`.
+
+- **`booking.admin_day_extras(p_date date) → jsonb`** (`_require_staff`; anon/ei-henkilöstö → `forbidden` / BK001). Aikavyöhyke Europe/Helsinki, vuorokausi `[p_date 00:00, seuraava 00:00)`. Tapahtumat kaikille henkilökunnan rooleille. Tuottokentät (`revenue`, `revenue_rows`) vain kun `current_staff_role()` on `admin` tai `manager`; muille JSON `null` (`booking_69`, tuotannossa olevaa `booking_68`-tiedostoa ei muuteta).
+- **`booking.admin_day_revenue(p_date date) → jsonb`** (`booking_69`): sama tuottolaskenta. Vain `admin` ja `manager`; muu henkilöstö → `forbidden`. Hallinta kutsuu tätä vain näille rooleille eikä piirrä tuottoa muille.
+- **`revenue`**: `{basis:'visit_start', vat_basis:'gross_incl_vat', currency:'EUR', gross, vat, net, count, pending_gross, pending_count, unpaid_gross, unpaid_count}`. `gross` = vahvistettujen ja toteutuneiden käyntien `line_total_gross` + lapsirivit (`parent_item_id`). Ei `orders.created_at`, ei `payments.amount` (lahjakortti ei vähennä). `unpaid_*` on bruttoon sisältyvä osajoukko (`payment_status` unpaid/pending/failed). `pending_*` = pending ja `hold_expires_at > now()`, ei bruttossa. Pois: cancelled, expired, no_show, päättynyt pito, `hidden_at`.
+- **`revenue_rows`**: rivit, joista selain laskee saman summan (`booking/admin/day-logic.js` `summarizeRevenue`). Kentät: `reservation_id`, `starts_at`, `status` (raaka), `hold_expires_at`, `line_gross`, `line_vat`, `line_net`, `payment_status`, `hidden`, `order_created_at`.
+- **`events`**: `kb.event_dates` (taulua ei luoda; oltava kannassa), `active` ja `starts_on <= p_date <= coalesce(ends_on, starts_on)`. Kentät: `event_id`, `product_id`, `name`, `name_en`, `category`, `starts_on`, `ends_on`, `time_text`, `capacity_max`, `persons`, `participants[]`. Osallistuja leikkaa vuorokauden (`starts_at < päivän loppu` ja `ends_at > päivän alku`), sama tuote, ei piilotettu, tila confirmed/completed tai pending voimassa olevalla pidolla. Osallistujan kentät riittävät päivän riville ja varausdialogiin (nimi, henkilöt, tila, maksu, `order_no`, `total_gross` = tilauksen summa kuten listassa, lisäpalvelut, tila).
+- Rollback: `rollbacks/20261018165354_booking_68_ROLLBACK.sql` (drop function). `booking_69`: `rollbacks/20261018171000_booking_69_ROLLBACK.sql` (palauttaa extrasin booking_68-rungon ja poistaa `admin_day_revenue`). Testit: `tests/day/t68_day_revenue_events.sql`, `tests/day/t69_day_revenue_role.sql` (TESTRESULT; ei CI). Selaintesti: `node --test booking/tests/paivanakyma-tuotto.test.mjs`.
+- Tekstit: `ui.admin.day.*` (FI+EN), tuotu `content/site-texts.imported-pr68.json`. Päivänäkymä lukee ne `public_get_site_texts`-vastauksesta (`booking/admin/day-texts.js`); sanakirja on varalla, jos rivi puuttuu tai paikkamerkki ei täyty.
+
+## 20. Myyntikäyrä (18.10.2026, migraatio `booking_70_sales_chart`, ei vielä tuotannossa)
 Hallinnan Talous-sivu näyttää välilehtien yläpuolella kuukausipylvään valitulle vuodelle (oletus kuluva vuosi). Tarkempi kuvaus: `booking/docs/myyntikapyra.md`.
 
 - **RPC:** `booking.admin_sales_chart(p_year integer)` → `{year, tz, basis, johku_basis, vat_method, months[12], totals, years}`. Oikeus `reports.view` (manager/admin). Execute: authenticated + service_role. Ei anon, ei public. Virhe ilman oikeutta: `forbidden`. Vuosi muu kuin 2000–2100: `invalid_param`.

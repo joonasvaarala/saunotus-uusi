@@ -72,6 +72,12 @@ Etusivu, sivupohjat (sauna, hoidot, lahjakortti, varaa-info, info, yrityksille, 
 
 Testit: `node --test booking/tests/sivutekstit.test.mjs booking/tests/sivutekstit-kauppa.test.mjs booking/tests/sivutekstit-sivut.test.mjs`; e2e: `booking/scripts/e2e-tuote7-kentat.mjs`, `booking/scripts/e2e-sivutekstit-kauppa.mjs` (rakentaa fixture-dist:n itse).
 
-## Puhelinnumero (yksi vakio)
+## Puhelinnumero (yksi vakio, kielikohtainen muoto)
 
-Päätös (Joonas 18.10.2026): näkyvä muoto on aina `010 299 2866` ja linkki aina `tel:+358102992866`. Numero on koodissa yhdessä paikassa: `booking/shop/src/phone.js` (`PHONE_DISPLAY`, `PHONE_TEL`, `phoneHref()`). `src/lib.mjs` täyttää siitä `site.contact.phone`/`phoneTel` (ei enää `content/site.json`issa), kaupan sanakirjat (`i18n.js`) ja `{{var:phone}}` käyttävät samaa arvoa. Sähköpostipohjat (Deno) pitävät oman kopion (`templates.ts` `PHONE`/`PHONE_TEL`), jonka `templates.test.mjs` vertaa vakioon. PDF:ien numero tulee asetuksesta `seller.phone` (tietokanta). Testi `booking/tests/puhelin.test.mjs` estää vanhat muodot (`+358 10 299 2866`, `tel:0102992866` …) lähdekoodissa. Tietokannan tekstirivit (`booking.site_texts`) korjataan tietokannassa, ei repossa: `content/site-texts.*.json` ovat niiden kopioita.
+Päätös (Joonas 18.10.2026): näkyvä muoto on kielikohtainen, suomeksi `010 299 2866` ja englanniksi `+358 10 299 2866`; linkki on kaikkialla `tel:+358102992866`. Numero on koodissa yhdessä paikassa: `booking/shop/src/phone.js` (`PHONE_DISPLAY_FI`, `PHONE_DISPLAY_EN`, `phoneDisplay(lang)`, `PHONE_TEL`, `phoneHref()`).
+- Sivusto: `src/lib.mjs` täyttää `site.contact.phone` (fi), `phoneEn` ja `phoneTel` vakiosta (ei `content/site.json`issa); `src/render.mjs` näyttää `phoneDisplay(lang)`.
+- Kauppa: `booking/shop/build.mjs` asettaa `S.phone = phoneDisplay(lang)` (myös noscript), joten `{{var:phone}}` täyttyy kielen mukaan; `i18n.js`:n oletukset käyttävät fi/en-vakioita. Tuontimuunnos (`text-registry.js` `PHONE_LITERAL`) vaihtaa vain suomalaisen muodon paikkamerkiksi; en-oletuksessa numero jää kirjoitettuna kuten tietokannan en-riveillä.
+- Sähköpostit (Deno): `templates.ts` pitää oman kopion (`PHONE_FI`, `PHONE_EN`, `phoneFor(en)`, `PHONE_TEL`), jonka `templates.test.mjs` vertaa vakioon; en-viesteissä en-muoto, fi-viesteissä fi-muoto.
+- PDF:t: numero tulee asetuksesta `seller.phone` (tietokanta), ei koodista.
+- Tietokannan tekstirivit (`booking.site_texts`) muutetaan tietokannassa, ei repossa: `content/site-texts.*.json` ovat niiden kopioita.
+- Testi `booking/tests/puhelin.test.mjs` varmistaa vakion, sivupohjat, kaupan sanakirjat ja estää käsin kirjoitetut numeromuodot lähdekoodissa.

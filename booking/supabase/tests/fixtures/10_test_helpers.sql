@@ -26,9 +26,14 @@ begin
   perform set_config('request.jwt.claims', '', true);
   perform set_config('request.headers', '', true);
 end $$;
-create or replace function test.mk_user(p_email text) returns uuid language sql as $$
-  insert into auth.users(email) values (p_email) on conflict (email) do update set email = excluded.email returning id
-$$;
+create or replace function test.mk_user(p_email text) returns uuid language plpgsql as $$
+declare u uuid;
+begin
+  select id into u from auth.users where email = p_email limit 1;
+  if u is not null then return u; end if;
+  insert into auth.users(email) values (p_email) returning id into u;
+  return u;
+end $$;
 create or replace function test.mk_staff(p_email text, p_role text) returns uuid language plpgsql as $$
 declare u uuid := test.mk_user(p_email);
 begin

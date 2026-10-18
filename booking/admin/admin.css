@@ -353,6 +353,13 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .dayshifts-note{margin:6px 0 0;font-size:12px}
 .inactive-res{margin-top:10px}.inactive-res summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--muted)}
 .session.slot{border-left:5px solid #8a6a4a}
+.session.event{border-left:5px solid #6b4a2b}
+.badge.ev{background:#efe4d6;color:#6b4a2b;border:1px solid #8a6a4a}
+.dayrev{max-width:760px;margin:0 0 12px;padding:12px 14px 14px;border-radius:12px;background:#f7f3ea;border:1px solid #e2d3b8;border-left:6px solid #a87b45}
+.dayrev h2{margin:0;font-size:15px;font-weight:600;color:#6b4a2b}
+.dayrev-sum{margin:2px 0 0;font-size:28px;line-height:1.15}
+.dayrev-sum strong{font-variant-numeric:tabular-nums;color:var(--ink)}
+.dayrev-note{margin:4px 0 0;font-size:13px}
 /* Valmistelu: päivän yhteenvetokortti (hillitty hiekka/vihreä, ei sinistä) */
 .prepcard{max-width:760px;margin:0 0 14px;padding:12px 14px 14px;border-radius:12px;background:#ecebd9;border:1px solid #c5c8a3;border-left:6px solid #7a8a52}
 .prepcard h2{margin:0 0 10px;font-size:17px;color:#33401f;display:flex;align-items:center;gap:6px}

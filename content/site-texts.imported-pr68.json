@@ -1,0 +1,150 @@
+[
+ {
+  "key": "ui.admin.day.revenue_title",
+  "lang": "fi",
+  "text": "Päivän tuotto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinnan päivänäkymä: päivän tuotto (käynnin arvo). Varateksti booking/admin/day-texts.js, kunnes hallinta lukee site_texts."
+ },
+ {
+  "key": "ui.admin.day.revenue_title",
+  "lang": "en",
+  "text": "Day's revenue",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinnan päivänäkymä: päivän tuotto (käynnin arvo). Varateksti booking/admin/day-texts.js, kunnes hallinta lukee site_texts."
+ },
+ {
+  "key": "ui.admin.day.revenue_vat",
+  "lang": "fi",
+  "text": "sis. alv",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinnan päivänäkymä: tuotto on brutto kuten muualla hallinnassa. Varateksti booking/admin/day-texts.js."
+ },
+ {
+  "key": "ui.admin.day.revenue_vat",
+  "lang": "en",
+  "text": "incl. VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinnan päivänäkymä: tuotto on brutto kuten muualla hallinnassa. Varateksti booking/admin/day-texts.js."
+ },
+ {
+  "key": "ui.admin.day.revenue_pending",
+  "lang": "fi",
+  "text": "Vahvistamatta {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+    "{{var:amount}}"
+  ],
+  "reason": "Hallinnan päivänäkymä: odottava pito ei ole päivän tuotossa. Varateksti booking/admin/day-texts.js."
+ },
+ {
+  "key": "ui.admin.day.revenue_pending",
+  "lang": "en",
+  "text": "Unconfirmed {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+    "{{var:amount}}"
+  ],
+  "reason": "Hallinnan päivänäkymä: odottava pito ei ole päivän tuotossa. Varateksti booking/admin/day-texts.js."
+ },
+ {
+  "key": "ui.admin.day.revenue_unpaid",
+  "lang": "fi",
+  "text": "Josta maksamatta {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+    "{{var:amount}}"
+  ],
+  "reason": "Hallinnan päivänäkymä: vahvistettu maksamaton käynti on tuotossa ja merkitty. Varateksti booking/admin/day-texts.js."
+ },
+ {
+  "key": "ui.admin.day.revenue_unpaid",
+  "lang": "en",
+  "text": "Of which unpaid {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+    "{{var:amount}}"
+  ],
+  "reason": "Hallinnan päivänäkymä: vahvistettu maksamaton käynti on tuotossa ja merkitty. Varateksti booking/admin/day-texts.js."
+ },
+ {
+  "key": "ui.admin.day.revenue_unavailable",
+  "lang": "fi",
+  "text": "Päivän tuotto ja tapahtumat eivät ole vielä käytettävissä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinnan päivänäkymä: teksti kun admin_day_extras puuttuu (ennen migraatiota booking_68). Varateksti booking/admin/day-texts.js."
+ },
+ {
+  "key": "ui.admin.day.revenue_unavailable",
+  "lang": "en",
+  "text": "The day's revenue and events are not available yet.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinnan päivänäkymä: teksti kun admin_day_extras puuttuu (ennen migraatiota booking_68). Varateksti booking/admin/day-texts.js."
+ },
+ {
+  "key": "ui.admin.day.event_badge",
+  "lang": "fi",
+  "text": "Tapahtuma",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinnan päivänäkymä: tapahtumakortin merkki. Varateksti booking/admin/day-texts.js."
+ },
+ {
+  "key": "ui.admin.day.event_badge",
+  "lang": "en",
+  "text": "Event",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinnan päivänäkymä: tapahtumakortin merkki. Varateksti booking/admin/day-texts.js."
+ },
+ {
+  "key": "ui.admin.day.event_all_day",
+  "lang": "fi",
+  "text": "Koko päivä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinnan päivänäkymä: tapahtumalla ei ole time_text-kenttää eikä osallistujien kelloa. Varateksti booking/admin/day-texts.js."
+ },
+ {
+  "key": "ui.admin.day.event_all_day",
+  "lang": "en",
+  "text": "All day",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinnan päivänäkymä: tapahtumalla ei ole time_text-kenttää eikä osallistujien kelloa. Varateksti booking/admin/day-texts.js."
+ }
+]

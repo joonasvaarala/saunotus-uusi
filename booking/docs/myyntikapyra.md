@@ -1,6 +1,6 @@
 # Myyntikäyrä (Talous)
 
-Sipoonjoen Perinnesauna, hallinnan Talous-sivu. Migraatio `booking_70_sales_chart` (ei ajettu tästä PR:stä). Sopimus: `KOODARI_talous_A_D_fi.md` §19.
+Sipoonjoen Perinnesauna, hallinnan Talous-sivu. Migraatio `booking_70_sales_chart` (ei ajettu tästä PR:stä). Sopimus: `KOODARI_talous_A_D_fi.md` §20.
 
 ## Mitä ruudulla näkyy
 
