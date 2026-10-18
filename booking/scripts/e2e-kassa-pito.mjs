@@ -105,12 +105,12 @@ const X = {
     expired: 'Paikkavaraus vanheni, koska maksua ei saatu 15 minuutin kuluessa. Mitään ei ole veloitettu. Voit tehdä uuden varauksen.', gift: 'Lahjakortin käytetty osuus on palautettu kortille.',
     unavailable: 'Verkkomaksu ei ole tilapäisesti käytettävissä, joten varausta ei voi tehdä juuri nyt. Yritä myöhemmin uudelleen tai ota yhteyttä meihin.', tooMany: 'Sinulla on jo useita maksamattomia varauksia. Maksa ne tai odota, että ne vanhenevat.',
     expiredErr: 'Paikkavaraus on vanhentunut. Tee uusi varaus.', prelimErr: 'Alustavaa varausta ei makseta ennen kuin olemme vahvistaneet sen. Vahvistamme sen sähköpostitse.', progressErr: 'Maksusi on kesken. Odota hetki ja yritä uudelleen.',
-    cont: 'Jatka maksamaan', newBooking: 'Tee uusi varaus', must: 'Varaus täytyy maksaa 15 minuutin sisään, muuten se peruuntuu ja paikka vapautuu. Varaus vahvistuu, kun koko summa on maksettu.', h2: 'Varauksesi odottaa maksua' },
+    cont: 'Jatka maksamaan', newBooking: 'Tee uusi varaus', must: 'Varaus täytyy maksaa 15 minuutin sisään, muuten se peruuntuu ja paikka vapautuu.', h2: 'Varauksesi odottaa maksua' },
   en: { lead: 'Your spot is held for 15 minutes, until the booking is paid or the details of a valid gift card are entered.',
     expired: 'Your spot hold expired because payment was not received within 15 minutes. You have not been charged. You can make a new booking.', gift: 'Any gift card amount you applied has been returned to the card.',
     unavailable: 'Online payment is temporarily unavailable, so we can’t take bookings right now. Please try again later or contact us.', tooMany: 'You already have several unpaid bookings. Please pay for them or wait for them to expire.',
     expiredErr: 'This hold has expired. Please make a new booking.', prelimErr: 'A provisional booking cannot be paid before we have confirmed it. We will confirm it by email.', progressErr: 'Your payment is in progress. Please wait a moment and try again.',
-    cont: 'Continue to payment', newBooking: 'Make a new booking', must: 'The booking must be paid within 15 minutes, otherwise it is cancelled and your spot is released. The booking is confirmed once the full amount is paid.', h2: 'Your booking is awaiting payment' },
+    cont: 'Continue to payment', newBooking: 'Make a new booking', must: 'The booking must be paid within 15 minutes, otherwise it is cancelled and your spot is released.', h2: 'Your booking is awaiting payment' },
 };
 const text = async (page, sel) => ((await page.textContent(sel)) || '').replace(/\s+/g, ' ').trim();
 const has = async (page, sel) => (await page.$(sel)) !== null;
@@ -128,7 +128,7 @@ for (const lang of ['fi', 'en']) {
   expect((await text(page, '[data-testid=hold-must]')) === X[lang].must, `${lang}: 15 min -maksuohje kirjaimellisesti (Joonaksen teksti)`);
   expect((await text(page, '[data-testid=conf-title]')) === X[lang].h2, `${lang}: otsikko "${X[lang].h2}" (ei "Kiitos varauksesta!")`);
   expect(await page.evaluate(() => { const st = document.querySelector('[data-testid=conf-status]'), m = document.querySelector('[data-testid=hold-must]'), p = document.querySelector('[data-testid=pc-mobilepay]'); return !!(st.compareDocumentPosition(m) & 4) && !!(m.compareDocumentPosition(p) & 4); }), `${lang}: maksuohje tilan jälkeen ja maksuosion yläpuolella`);
-  expect(await has(page, '[data-testid=pc-onsite-test]') && /test|testi/i.test(await text(page, '[data-testid=pc-onsite-test]')), `${lang}: paikan päällä -vaihtoehto näkyy testitilassa ja on merkitty testiksi`);
+  expect(await has(page, 'button[data-testid=pc-paylater-btn]') && /test|testi/i.test(await text(page, '[data-testid=pc-paylater-btn]')), `${lang}: testivaihtoehto-nappi (pay_later) näkyy kun palvelin tarjoaa sen ja on merkitty testiksi`);
   const t1 = await secs(page); expect(t1 != null && t1 >= 895 && t1 <= 900, `${lang}: laskuri alkaa ~15:00 (${t1})`);
   expect((await page.getAttribute('[data-testid=hold-timer]', 'role')) === 'timer' && (await page.getAttribute('[data-testid=hold-timer]', 'aria-live')) === 'off', `${lang}: laskuri role=timer, aria-live=off (ei joka sekunti)`);
   expect((await page.getAttribute('[data-testid=hold-timer]', 'aria-labelledby')) !== null, `${lang}: laskurilla on nimi`);
@@ -151,7 +151,7 @@ for (const lang of ['fi', 'en']) {
 {
   const page = await newPage(390, 'fi', 'testui-off');
   await goto(page, conf('fi', 'hold', '&testui=0')); await waitHold(page, 'awaiting_payment');
-  expect(!(await has(page, '[data-testid=pc-onsite-test]')), 'tuotantotila (testui=0): paikan päällä -testivaihtoehtoa ei näytetä pitotilassa');
+  expect(!(await has(page, '[data-testid=pc-paylater]')) && !(await has(page, '[data-testid=pc-paylater-btn]')), 'tuotantotila (testui=0): palvelin ei tarjoa pay_later-tapaa → nappia ei näytetä pitotilassa');
   await page.ctx.close();
 }
 
@@ -369,7 +369,7 @@ for (const lang of ['fi', 'en']) {
 for (const lang of ['fi', 'en']) {
   const page = await newPage(390, lang, `legacy-${lang}`);
   await goto(page, conf(lang, 'pay')); await page.waitForSelector('[data-testid=pc-mobilepay]');
-  expect(!(await has(page, '[data-testid=hold-panel]')) && !(await has(page, '[data-testid=hold-timer]')) && !(await has(page, '[data-testid=pc-onsite-test]')), `${lang}: vanha tila: ei pitopaneelia eikä testivaihtoehtoa`);
+  expect(!(await has(page, '[data-testid=hold-panel]')) && !(await has(page, '[data-testid=hold-timer]')) && !(await has(page, '[data-testid=pc-paylater]')), `${lang}: vanha tila: ei pitopaneelia eikä testivaihtoehtoa`);
   expect((await text(page, '[data-testid=conf-title]')) === X[lang].h2, `${lang}: vanha tila: maksamattoman otsikko "${X[lang].h2}"`);
   expect(await has(page, 'a[download]'), `${lang}: vanha tila: kalenterilisäys säilyy`);
   expect(/paikan päällä|on site|Maksettavaa|due/i.test(await text(page, '[data-testid=pc-lead]')) || (await text(page, '[data-testid=pc-lead]')).length > 0, `${lang}: vanha tila: vanha maksuohje (${await text(page, '[data-testid=pc-lead]')})`);

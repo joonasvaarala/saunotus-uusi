@@ -436,5 +436,11 @@ a.bk-sd:hover{filter:brightness(.97)}
 @media (max-width:400px){.bk-hold-time{font-size:28px}}
 @media (prefers-reduced-motion:reduce){.bk-hold *{transition:none!important;animation:none!important}}
 .bk-hold-must{font-weight:600;font-size:17px;line-height:1.45;color:var(--ink)}
-.pc-test{border:1px dashed var(--gold);background:var(--tint);border-radius:var(--r);padding:10px 14px}
-.pc-test p{margin:4px 0 0}
+
+/* Testivaihtoehto "maksu paikan päällä" (booking_57): oikea nappi, sivuston tyyli (kulta/vaalea, ei sinistä), 44 px, selite napin alla */
+.pc-paylater{gap:8px}
+.pc-paylater-btn{width:100%;max-width:420px;min-height:44px;border:2px dashed var(--gold)}
+.pc-paylater-btn:disabled{opacity:.7;cursor:not-allowed}
+.pc-paylater .bk-note{margin:0}
+.pc-paylater-msg{margin:0}
+.pc-paylater-msg[hidden]{display:none}

@@ -32,6 +32,11 @@ export function createMobilepayApi({ rpc, token, functionUrl, anonKey = '', fetc
       try { const r = await rpc(CHECKOUT_RPC, {}); return r && typeof r === 'object' ? r : null; }
       catch (e) { if (!isMissingRpc(e)) { /* verkkovirhe tms.: ei tarjontaa */ } return null; }
     },
+    // booking_57: public_confirm_pay_later(p_order_token) → {ok:true, checkout_state:'confirmed_unpaid', remaining_amount, order_id, …} | {ok:false, code, message}. Verkkovirhe → {ok:false, code:'network'} (ei heitetä).
+    async confirmPayLater(rpcName = 'public_confirm_pay_later') {
+      try { const r = await rpc(rpcName, { p_order_token: token }); return r && typeof r === 'object' ? r : { ok: false, code: 'bad_response' }; }
+      catch (e) { return { ok: false, code: isMissingRpc(e) ? 'pay_later_unavailable' : 'network' }; }
+    },
     start: () => post(START_FN, { order_token: token }),
     reconcile: () => post(NOTIFY_FN, { action: 'reconcile', order_token: token }),
   };

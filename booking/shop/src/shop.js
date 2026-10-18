@@ -557,7 +557,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
     hmode.on = hi.on; hmode.minutes = hi.minutes;
     if (hi.on) {   // pitotila (§17): paikanpito, maksutapa valitaan seuraavassa vaiheessa, varaus vahvistuu vasta maksun jälkeen
       if (!submit.disabled) submit.textContent = ht(S.lang, 'checkout.button');
-      payNote.textContent = `${ht(S.lang, 'checkout.lead', { minutes: hi.minutes })} ${ht(S.lang, 'confirmRule')}`;
+      payNote.textContent = ht(S.lang, 'checkout.lead', { minutes: hi.minutes });
       payExtra.replaceChildren(...hi.extra(S.lang));
       return;
     }
@@ -645,10 +645,11 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     holdHost.append(holdCtl.node);
   }
   if (model && canPay && !retPay && !co?.processing) {
-    secEl = payChoicesSection({ S, L, token, model, booking: b, notice, hold: !!co?.awaiting, holdMinutes: holdModeOf(model?.checkout, state.settings).minutes, onHoldError: () => holdCtl?.poll(true),
+    secEl = payChoicesSection({ S, L, token, model, booking: b, notice, hold: !!co?.awaiting, onHoldError: () => holdCtl?.poll(true),
+      onPayLater: () => again({ kind: 'paylater', title: t.confConfirmed, text: ht(L, 'payLater.done') }),   // booking_57: vahvistettu maksamatta → sivu latautuu uudelleen (confirmed_unpaid)
       onApplied: (text) => { try { if (co?.awaiting) sessionStorage.setItem(`bk-gift-${token}`, '1'); } catch { /* ei sessionStorage */ } again({ kind: 'gift', text }); }, onClaimed: (n) => again({ kind: 'claim', ...n }), onChanged: (n) => again({ kind: 'claim', ...n }) });
   }
-  if (!secEl && notice && notice.kind === 'gift') secEl = payNotice(L, notice);   // kokonaan maksettu: maksuosio poistuu, mutta ilmoitus jää
+  if (!secEl && notice && (notice.kind === 'gift' || notice.kind === 'paylater')) secEl = payNotice(L, notice);   // kokonaan maksettu: maksuosio poistuu, mutta ilmoitus jää
   if (secEl) { if (holdV) mpHost.after(secEl); else root.firstElementChild.querySelector('.bk-actions')?.before(secEl); }   // pitotilassa maksuvalinta heti laskurin alla
   if (refresh) { const el = root.querySelector('[data-testid=pc-notice],[data-testid=vc-notice]'); if (el) { el.scrollIntoView({ block: 'center' }); el.focus({ preventScroll: true }); } else if (holdV && !retPay) holdHost.querySelector('h3')?.focus(); } else focusTop();   // pitotilan vaihtuessa fokus tilaotsikkoon
   if (retPay && model) {   // paluu MobilePaysta: reconcile + public_get_booking-polling → tulos (maksettu / epäonnistui / odottaa), sivu päivittyy lopuksi

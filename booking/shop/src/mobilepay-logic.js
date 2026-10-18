@@ -7,7 +7,16 @@ export const RECONCILE_EVERY = 4;       // reconcile kysyy Vippsiltä: ensin het
 export function normOptions(r) {
   if (!r || r.ok === false) return { ok: false, method: null, pending: false, canPay: false };
   const method = (Array.isArray(r.methods) ? r.methods : []).find((m) => m && m.code === 'mobilepay') || null;
-  return { ok: true, method, canPay: !!(method && r.order && r.order.can_pay_online === true), pending: !!r.order?.mobilepay_pending, unpaid: r.order?.unpaid ?? null };
+  return { ok: true, method, canPay: !!(method && r.order && r.order.can_pay_online === true), pending: !!r.order?.mobilepay_pending, unpaid: r.order?.unpaid ?? null, payLater: payLaterMethod(r.methods) };
+}
+// booking_57: testimaksutapa "maksa myöhemmin / maksu paikan päällä" – palvelin listaa sen methods-listassa VAIN kun pay_later_test_enabled = true (ja token-versiossa vain awaiting_payment-tilaukselle).
+// Palautetaan { code, label, label_en, confirmRpc } tai null. confirm_rpc hyväksytään vain tavallisena public_*-RPC-nimenä (ei mielivaltaista nimeä); puuttuva nimi → public_confirm_pay_later.
+export const PAY_LATER_RPC = 'public_confirm_pay_later';
+export function payLaterMethod(methods) {
+  const m = (Array.isArray(methods) ? methods : []).find((x) => x && x.code === 'pay_later' && x.enabled === true);
+  if (!m) return null;
+  const rpcName = typeof m.confirm_rpc === 'string' && /^public_[a-z0-9_]+$/.test(m.confirm_rpc) ? m.confirm_rpc : PAY_LATER_RPC;
+  return { code: 'pay_later', label: typeof m.label === 'string' ? m.label : null, label_en: typeof m.label_en === 'string' ? m.label_en : null, confirmRpc: rpcName, test: m.test === true };
 }
 // public_checkout_payment_options (§14.7, kassa ilman tokenia) → { ok, method (mobilepay | null), gift (lahjakortti redeem-tapa mukana), canPay:false, pending:false, unpaid:null }
 // Palvelin on totuus: tapa näkyy vain jos se on methods-listassa (ei kovakoodattua näkyvyyttä); tyhjä methods = ei verkkomaksutapoja.

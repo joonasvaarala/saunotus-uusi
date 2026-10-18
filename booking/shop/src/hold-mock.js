@@ -48,6 +48,7 @@ export function createHoldEngine({ scenario, holdSeconds = 900, skew = 0, procSe
   return { kind, restart, tick, json, guard, methods, srvNow };
 }
 
+export const PAY_LATER_METHOD = { code: 'pay_later', kind: 'later', provider: 'manual', label: 'Maksa myöhemmin (testi)', label_en: 'Pay later (test)', test: true, enabled: true, confirm_rpc: 'public_confirm_pay_later' };   // booking_57: _pay_later_method_json()
 export const HOLD_ERRORS = {
   order_expired: 'Maksuaika on päättynyt', order_preliminary: 'Alustava varaus: maksu pyydetään vahvistuksen jälkeen', payment_in_progress: 'Maksua käsitellään jo', online_payment_unavailable: 'Verkkomaksu ei ole käytettävissä', too_many_pending: 'Liian monta maksamatonta varausta',
 };
@@ -55,5 +56,6 @@ export const HOLD_ERRORS = {
 // Mock-parametrit osoitteesta (holdsec, serverskew, procsec); virheelliset arvot → oletus
 export function holdMockParams(search = typeof location !== 'undefined' ? location.search : '') {
   const q = new URLSearchParams(search), n = (k, d, min = -86400) => { const v = q.has(k) ? +q.get(k) : NaN; return Number.isFinite(v) && v >= min ? v : d; };
-  return { holdSeconds: n('holdsec', 900, 1), serverSkew: n('serverskew', 0), procSeconds: n('procsec', 10, 0) };
+  // booking_57: testui=0 → palvelin ei listaa pay_later-tapaa (pay_later_test_enabled=false, kuten tuotanto); plfail=<koodi> → public_confirm_pay_later palauttaa kerran {ok:false, code} (virhetilan kokeilu)
+  return { holdSeconds: n('holdsec', 900, 1), serverSkew: n('serverskew', 0), procSeconds: n('procsec', 10, 0), payLaterTest: q.get('testui') !== '0', payLaterFail: /^[a-z_]{1,40}$/.test(q.get('plfail') || '') ? q.get('plfail') : '' };
 }
