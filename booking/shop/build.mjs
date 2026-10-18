@@ -24,14 +24,20 @@ rmSync(OUT, { recursive: true, force: true });
 execFileSync('node', ['scripts/build.mjs'], { env: { ...process.env, DIST: OUT }, stdio: 'inherit' });
 
 const L = await import(resolve(repo, 'src/lib.mjs'));
+const ST = await import(resolve(repo, 'src/site-texts.mjs'));
 const R = await import(resolve(repo, 'src/render.mjs'));
+const { pageDefault } = await import(resolve(here, 'src/shop-page-texts.js'));
 const { site, kb, BASE, e } = L;
 
 // 2) varausohjelman tiedostot
 const A = join(OUT, 'booking');
 mkdirSync(A, { recursive: true });
-for (const f of ['shop.js', 'i18n.js', 'shop.css', 'treatments.js', 'treatment-ui.js', 'order.js', 'order-texts.js', 'order-api.js', 'order-mock.js', 'order-gift.js', 'gift.js', 'gift-api.js', 'gift-logic.js', 'gift-mock.js', 'gift-texts.js', 'gift-ui.js', 'mobilepay-api.js', 'pay-choices.js', 'hold-texts.js', 'hold-logic.js', 'hold-ui.js', 'hold-mock.js', 'pay-choices-texts.js', 'mobilepay-logic.js', 'mobilepay-texts.js', 'mobilepay-ui.js', 'options-logic.js', 'options-texts.js', 'options-ui.js', 'shop-mock.js', 'treatment-mock.js']) cpSync(join(here, 'src', f), join(A, f));
+for (const f of ['shop.js', 'i18n.js', 'shop.css', 'treatments.js', 'treatment-ui.js', 'order.js', 'order-texts.js', 'order-api.js', 'order-mock.js', 'order-gift.js', 'gift.js', 'gift-api.js', 'gift-logic.js', 'gift-mock.js', 'gift-texts.js', 'gift-ui.js', 'mobilepay-api.js', 'pay-choices.js', 'hold-texts.js', 'hold-logic.js', 'hold-ui.js', 'hold-mock.js', 'pay-choices-texts.js', 'mobilepay-logic.js', 'mobilepay-texts.js', 'mobilepay-ui.js', 'options-logic.js', 'options-texts.js', 'options-ui.js', 'shop-mock.js', 'treatment-mock.js', 'treatment-addons.js', 'site-texts.js', 'site-texts-logic.js', 'text-registry.js']) cpSync(join(here, 'src', f), join(A, f));
 cpSync(join(repo, 'booking/shared/sb.js'), join(A, 'sb.js'));
+// Sivutekstit tietokannasta (§18, src/site-texts.mjs): kaupan avainalueet (ui.*) tiedostoon booking/site-texts.json; paikkamerkit täytetään kaupassa ajoajan datasta. Build on jo tarkistanut paikkamerkit (tuntematon → build kaatuu).
+const siteTexts = await ST.loadSiteTexts();
+ST.setSiteTexts(siteTexts);   // layout() hakee yläpalkin alarivin tx():llä
+writeFileSync(join(A, 'site-texts.json'), JSON.stringify(ST.shopPayload(siteTexts)));
 const cfg = {
   url: process.env.BOOKING_SUPABASE_URL ?? 'http://localhost:4181', anonKey: process.env.BOOKING_ANON_KEY ?? 'anon-demo-key',
   rest: process.env.BOOKING_REST ?? '/rest/v1', auth: process.env.BOOKING_AUTH ?? '/auth/v1', schema: process.env.BOOKING_SCHEMA || 'booking',
@@ -48,22 +54,23 @@ writeFileSync(join(A, 'static-products.json'), JSON.stringify(Object.fromEntries
 // 3) varaussivut (FI/EN) + vahvistussivut: sivuston oma layout
 const PATHS = { fi: { shop: site.pages.book.fi, confirm: site.pages.book.fi + 'vahvistus/', order: '/tilaus/' }, en: { shop: site.pages.book.en, confirm: site.pages.book.en + 'confirmation/', order: '/en/order/' } };
 const write = (urlPath, html) => { const f = join(OUT, urlPath, 'index.html'); mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, html); };
-const T = {
-  fi: { title: 'Varaa saunaelämys', text: 'Valitse kokemus, päivä ja vuoro – varaus vahvistetaan heti.', meta: 'Varaa saunavuoro verkossa | Sipoonjoen Perinnesauna', desc: 'Varaa yleinen saunavuoro tai yksityisvuoro suoraan Sipoonjoen perinnesaunalle.', noscript: 'Varauskalenteri vaatii JavaScriptin. Varaa soittamalla', ctitle: 'Varausvahvistus' },
-  en: { title: 'Book a sauna experience', text: 'Choose an experience, a day and a session – your booking is confirmed instantly.', meta: 'Book a sauna session online | Sipoonjoen Perinnesauna', desc: 'Book a public or private sauna session directly at Sipoonjoen Perinnesauna.', noscript: 'The booking calendar requires JavaScript. Please book by phone', ctitle: 'Booking confirmation' },
-};
+// Sivutekstit (§18, osa 3): avaimet page.*/seo.* tietokannasta (tx), repon oletus shop-page-texts.js kunnes avaimet on tuotu (varatekstien käyttö lasketaan ja raportoidaan).
+let pageFallbacks = 0;
+const px = (key, lang) => ST.tx(key, lang, { state: siteTexts, fallback: pageDefault(key, lang), log: { warn: (m) => { if (/siirtymäajan varatekstiä/.test(m)) pageFallbacks++; else console.warn(m); } } });
+const pageSet = (lang) => ({ title: px('page.book.title', lang), text: px('page.book.lead', lang), meta: px('seo.book.title', lang), desc: px('seo.book.description', lang), noscript: px('page.book.noscript', lang), ctitle: px('page.book_confirm.title', lang), cmeta: px('seo.book_confirm.title', lang) });
+const T = { fi: pageSet('fi'), en: pageSet('en') };
 for (const lang of ['fi', 'en']) {
   for (const page of ['shop', 'confirm']) {
     const t = T[lang];
     const S = {
       lang, page: page === 'shop' ? 'shop' : 'confirm', shopHref: BASE + PATHS[lang].shop, confirmHref: BASE + PATHS[lang].confirm,
       termsHref: L.pageHref('terms', lang), infoHref: L.pageHref('info', lang), phone: site.contact.phone, phoneTel: site.contact.phoneTel, email: site.contact.email,
-      staticProductsUrl: `${BASE}/booking/static-products.json`,
+      staticProductsUrl: `${BASE}/booking/static-products.json`, siteTextsUrl: `${BASE}/booking/site-texts.json`,
     };
     const body = R.pageHero({ title: page === 'shop' ? t.title : t.ctitle, text: page === 'shop' ? t.text : '', img: 'ovi-kaiverrus' }, lang, 'book')
       + `<section class="section"><div class="wrap"><div id="booking-app" aria-busy="true"><noscript><p>${e(t.noscript)}: <a href="tel:${site.contact.phoneTel}">${e(site.contact.phone)}</a></p></noscript></div></div></section>`
       + `<script src="${BASE}/booking/config.js"></script><script>window.BOOKING_SHOP=${JSON.stringify(S)}</script><script type="module" src="${BASE}/booking/shop.js"></script>`;
-    let html = R.layout({ lang, key: 'book', meta: { title: page === 'shop' ? t.meta : `${t.ctitle} | Sipoonjoen Perinnesauna`, description: t.desc, og: 'ovi-kaiverrus' }, body });
+    let html = R.layout({ lang, key: 'book', meta: { title: page === 'shop' ? t.meta : t.cmeta, description: t.desc, og: 'ovi-kaiverrus' }, body });
     html = html.replace('</head>', `<link rel="stylesheet" href="${BASE}/booking/shop.css">${page === 'shop' ? '<script>if(/^#\\/(tuote|varaa|hoito)\\//.test(location.hash))document.documentElement.classList.add("bk-hero-wait")</script>' : ''}</head>`);
     if (page === 'confirm') html = html.replace(/<link rel="canonical"[^>]*>(<link rel="alternate"[^>]*>)*/, '').replace('<meta name="description"', '<meta name="robots" content="noindex,nofollow"><meta name="description"');
     write(PATHS[lang][page === 'shop' ? 'shop' : 'confirm'], html);
@@ -71,13 +78,12 @@ for (const lang of ['fi', 'en']) {
 }
 
 // 3b) asiakkaan tilaussivu (vaihe A: UI-runko; token vain URL-parametrina ?t=…, ei indeksointia, ei Referer-vuotoa)
-const OT = {
-  fi: { title: 'Tilauksesi', text: 'Tilauksen rivit, maksutila ja kuitit.', meta: 'Tilauksesi | Sipoonjoen Perinnesauna', noscript: 'Tilaussivu vaatii JavaScriptin. Ota yhteyttä' },
-  en: { title: 'Your order', text: 'Order lines, payment status and receipts.', meta: 'Your order | Sipoonjoen Perinnesauna', noscript: 'The order page requires JavaScript. Please contact us' },
-};
+const orderSet = (lang) => ({ title: px('page.order.title', lang), text: px('page.order.lead', lang), meta: px('seo.order.title', lang), noscript: px('page.order.noscript', lang) });
+const OT = { fi: orderSet('fi'), en: orderSet('en') };
+if (pageFallbacks) console.log(`site-texts: ${pageFallbacks} varaus-/tilaussivun tekstiä käyttää repon varatekstiä (avain ei vielä tietokannassa)`);
 for (const lang of ['fi', 'en']) {
   const t = OT[lang];
-  const S = { lang, page: 'order', base: BASE, orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order }, shopHref: BASE + PATHS[lang].shop, phone: site.contact.phone, phoneTel: site.contact.phoneTel, email: site.contact.email };
+  const S = { lang, page: 'order', base: BASE, siteTextsUrl: `${BASE}/booking/site-texts.json`, orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order }, shopHref: BASE + PATHS[lang].shop, phone: site.contact.phone, phoneTel: site.contact.phoneTel, email: site.contact.email };
   const body = R.pageHero({ title: t.title, text: t.text, img: 'ovi-kaiverrus' }, lang, 'book')
     + `<section class="section"><div class="wrap"><div id="order-app" aria-busy="true"><noscript><p>${e(t.noscript)}: <a href="tel:${site.contact.phoneTel}">${e(site.contact.phone)}</a></p></noscript></div></div></section>`
     + `<script src="${BASE}/booking/config.js"></script><script>window.BOOKING_SHOP=${JSON.stringify(S)}</script><script type="module" src="${BASE}/booking/order.js"></script>`;
@@ -91,7 +97,7 @@ for (const lang of ['fi', 'en']) {
 for (const lang of ['fi', 'en']) {
   const f = join(OUT, site.pages.gift[lang], 'index.html');
   let html = readFileSync(f, 'utf8');
-  const S = { lang, page: 'gift', base: BASE, orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order }, termsHref: L.pageHref('terms', lang), phone: site.contact.phone, phoneTel: site.contact.phoneTel, email: site.contact.email };
+  const S = { lang, page: 'gift', base: BASE, siteTextsUrl: `${BASE}/booking/site-texts.json`, orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order }, termsHref: L.pageHref('terms', lang), phone: site.contact.phone, phoneTel: site.contact.phoneTel, email: site.contact.email };
   const sale = `<section class="section" hidden><div class="wrap"><div id="gift-app" aria-busy="true"></div></div></section>`;
   const bal = `<section class="section tint" id="saldo" hidden><div class="wrap"><div id="gift-balance" aria-busy="true"></div></div></section>`;
   const a = html.indexOf('<section class="section " id="avoin"'), b = html.indexOf('<section class="section tint" id="jatkaminen"');

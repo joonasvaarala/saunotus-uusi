@@ -1,0 +1,102 @@
+[
+ {
+  "key": "ui.checkout.error_invalid_addons",
+  "lang": "fi",
+  "text": "Lisäpalveluiden valinnassa oli virhe, ja valinta tyhjennettiin. Valitse lisäpalvelut uudelleen tai jatka ilman niitä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "PR sivutekstit-tuote7: lisäpalveluvirhe (public_create_treatment_booking p_addons, §18.2 ui.<alue>.error_<koodi>)"
+ },
+ {
+  "key": "ui.checkout.error_invalid_addons",
+  "lang": "en",
+  "text": "There was a problem with the selected add-ons, so the selection was cleared. Please choose your add-ons again or continue without them.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "PR sivutekstit-tuote7: lisäpalveluvirhe (public_create_treatment_booking p_addons, §18.2 ui.<alue>.error_<koodi>); EN luonnos, needs_review"
+ },
+ {
+  "key": "ui.checkout.error_addon_not_found",
+  "lang": "fi",
+  "text": "Valittua lisäpalvelua ei löytynyt, joten valinta tyhjennettiin. Lataa sivu uudelleen, jos haluat valita lisäpalvelun.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "PR sivutekstit-tuote7: lisäpalveluvirhe (public_create_treatment_booking p_addons, §18.2 ui.<alue>.error_<koodi>)"
+ },
+ {
+  "key": "ui.checkout.error_addon_not_found",
+  "lang": "en",
+  "text": "The selected add-on could not be found, so the selection was cleared. Please reload the page if you want to choose an add-on.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "PR sivutekstit-tuote7: lisäpalveluvirhe (public_create_treatment_booking p_addons, §18.2 ui.<alue>.error_<koodi>); EN luonnos, needs_review"
+ },
+ {
+  "key": "ui.checkout.error_addon_inactive",
+  "lang": "fi",
+  "text": "Valittu lisäpalvelu ei ole enää saatavilla, joten valinta tyhjennettiin. Voit jatkaa ilman sitä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "PR sivutekstit-tuote7: lisäpalveluvirhe (public_create_treatment_booking p_addons, §18.2 ui.<alue>.error_<koodi>)"
+ },
+ {
+  "key": "ui.checkout.error_addon_inactive",
+  "lang": "en",
+  "text": "The selected add-on is no longer available, so the selection was cleared. You can continue without it.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "PR sivutekstit-tuote7: lisäpalveluvirhe (public_create_treatment_booking p_addons, §18.2 ui.<alue>.error_<koodi>); EN luonnos, needs_review"
+ },
+ {
+  "key": "ui.checkout.error_addon_not_allowed",
+  "lang": "fi",
+  "text": "Tätä lisäpalvelua ei voi lisätä tähän varaukseen, joten valinta tyhjennettiin. Voit jatkaa ilman sitä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "PR sivutekstit-tuote7: lisäpalveluvirhe (public_create_treatment_booking p_addons, §18.2 ui.<alue>.error_<koodi>)"
+ },
+ {
+  "key": "ui.checkout.error_addon_not_allowed",
+  "lang": "en",
+  "text": "This add-on cannot be added to this booking, so the selection was cleared. You can continue without it.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "PR sivutekstit-tuote7: lisäpalveluvirhe (public_create_treatment_booking p_addons, §18.2 ui.<alue>.error_<koodi>); EN luonnos, needs_review"
+ },
+ {
+  "key": "ui.checkout.error_addon_quantity",
+  "lang": "fi",
+  "text": "Lisäpalvelun määrä ei kelpaa. Tarkista määrä: enimmäismäärä riippuu henkilömäärästä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "PR sivutekstit-tuote7: lisäpalveluvirhe (public_create_treatment_booking p_addons, §18.2 ui.<alue>.error_<koodi>)"
+ },
+ {
+  "key": "ui.checkout.error_addon_quantity",
+  "lang": "en",
+  "text": "The add-on quantity is not valid. Please check the quantity: the maximum depends on the number of guests.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "PR sivutekstit-tuote7: lisäpalveluvirhe (public_create_treatment_booking p_addons, §18.2 ui.<alue>.error_<koodi>); EN luonnos, needs_review"
+ }
+]

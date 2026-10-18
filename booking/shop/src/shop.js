@@ -8,6 +8,8 @@ import { pt } from './pay-choices-texts.js';
 import { T } from './i18n.js';
 import { loadProducts as loadTreatmentProducts, splitCatalog, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
 import { createTreatmentViews } from './treatment-ui.js';
+import { createTexts, loadShopTexts, applyShopTexts } from './site-texts.js';
+import { fmtMinutes } from './site-texts-logic.js';
 import { OPT } from './options-texts.js';
 import { optName, needsOption, findOption } from './options-logic.js';
 import { ht, holdError, methodList } from './hold-texts.js';
@@ -83,6 +85,8 @@ const holdInfo = () => loadPayChoices({ rpc, fetchImpl: MOCK_FETCH }).then((m) =
 let holdCtl = null;   // käynnissä oleva pitopaneeli (laskuri/kyselyt): pysäytetään kun näkymä vaihtuu
 const stopHold = () => { if (holdCtl) { holdCtl.stop(); holdCtl = null; } };
 
+// Sivutekstit tietokannasta (§18; build → booking/site-texts.json, paikkamerkit täytetään tässä ajoajan katalogista). tx(key) → teksti tai null (kutsuja päättää varatekstin).
+const texts = createTexts({ lang: S.lang, format: { price: (n) => money(n), duration: (m) => fmtMinutes(m) } });
 const state = { catalog: null, settings: null, images: new Map(), treatments: [], months: new Map(), busy: false };
 // tyhjät (null/false) lapset ohitetaan: replaceChildren(null) kirjoittaisi sivulle tekstin "null" (esim. tuotesivu ilman hoitovalitsinta)
 const mount = (...nodes) => { root.replaceChildren(...nodes.flat().filter((n) => n != null && n !== false)); root.setAttribute('aria-busy', 'false'); };
@@ -106,7 +110,9 @@ function ensureTreatments() {
 async function loadBase() {
   if (state.catalog) return;
   // Tuotekuvat: public_product_images voi puuttua (migraatio 14 ajamatta) tai epäonnistua → kauppa toimii ilman kuvia
-  const [catalog, settings, imgs, stat] = await Promise.all([rpc('public_catalog'), rpc('public_settings'), rpc('public_product_images').catch(() => []), loadStatic()]);
+  const [catalog, settings, imgs, stat, siteTexts] = await Promise.all([rpc('public_catalog'), rpc('public_settings'), rpc('public_product_images').catch(() => []), loadStatic(), loadShopTexts(S.siteTextsUrl)]);
+  texts.setRows(siteTexts); texts.setData({ catalog: Array.isArray(catalog) ? catalog : [], settings: settings || {} });
+  await applyShopTexts(S, { rows: siteTexts, data: { catalog: Array.isArray(catalog) ? catalog : [], settings: settings || {}, format: { price: (n) => money(n), duration: (m) => fmtMinutes(m) } } });   // osa 3: sanakirjat DB-tekstein (puuttuva avain → repon oletus)
   const split = splitCatalog(catalog, stat);   // vuoropohjaiset tuotteet (rules) ja hoito-/rituaalituotteet (slots) erikseen
   state.catalog = split.rules; state.treatments = split.treatments; treatmentsReady = Promise.resolve(); state.settings = settings || {};
   for (const i of Array.isArray(imgs) ? imgs : []) if (i?.path) state.images.set(+i.product_id, { url: storageUrl('product-images', i.path), alt: i.alt || '' });
@@ -755,7 +761,7 @@ async function viewChange(token, b) {
 }
 
 // ---- hoito- ja rituaalivaraukset: käyttöliittymä saa tarvitsemansa apurit täältä (luodaan vasta kun kaikki on määritelty) ----
-const tv = createTreatmentViews({ h, t, S, state, money, fmt, hm, dayLong, pad2, todayHel, addDays, pname, pdesc, pimg, setHero, mount, focusTop, errorBox, phoneBox, bk, customerFields, legalFields, setLast: () => { last = location.hash; }, holdInfo, confirmUrl: (token) => `${S.confirmHref}${mockQs()}#${token}` });
+const tv = createTreatmentViews({ h, t, S, state, money, fmt, hm, dayLong, pad2, todayHel, addDays, pname, pdesc, pimg, setHero, mount, focusTop, errorBox, phoneBox, bk, customerFields, legalFields, setLast: () => { last = location.hash; }, holdInfo, tx: texts.tx, confirmUrl: (token) => `${S.confirmHref}${mockQs()}#${token}` });
 
 // ---- reititin ----
 async function route(keep = false) {

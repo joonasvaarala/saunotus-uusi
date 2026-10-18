@@ -20,7 +20,7 @@ export const T = {
     companyNote: 'Yritysasiakkaalle varaus laskutetaan: lasku lähetetään verkkolaskuna tai sähköpostilla.',
     addonsTitle: 'Lisäpalvelut', addonsHint: 'Valinnaiset lisäpalvelut hinnoitellaan kappaleittain ja lisätään varauksen hintaan.', addonQty: 'Määrä', addonsTotal: 'Lisäpalvelut', addonUnit: 'kpl',
     name: 'Nimi', email: 'Sähköposti', phone: 'Puhelin', note: 'Terveisiä tai erityistoiveita (valinnainen)',
-    consentMarketing: 'Haluan vastaanottaa Sipoonjoen perinnesaunan uutiskirjeitä ja tarjouksia. Voin perua milloin tahansa.',
+    consentMarketing: 'Haluan vastaanottaa Sipoonjoen Perinnesaunan uutiskirjeitä ja tarjouksia. Voin perua milloin tahansa.',
     acceptTerms: 'Hyväksyn', termsLink: 'varaus- ja peruutusehdot', acceptTermsErr: 'Hyväksy ehdot jatkaaksesi.',
     summary: 'Yhteenveto', total: 'Yhteensä', vatIncl: 'sis. ALV', book: 'Vahvista varaus', booking: 'Varataan…',
     payLater: 'Maksu paikan päällä. Verkkomaksu (Visma Pay) otetaan käyttöön myöhemmin.',
@@ -45,7 +45,7 @@ export const T = {
       fewer: 'Vähemmän henkilöitä', more: 'Enemmän henkilöitä', legendFree: 'vapaita aikoja', noFreeMonth: 'Tässä kuussa ei ole vapaita aikoja valitulla henkilömäärällä. Kokeile toista kuukautta tai pienempää henkilömäärää.',
       pickDayFirst: 'Valitse ensin päivä kalenterista.', startTimes: 'vapaat alkuajat',
       // pakettituote (kb 7, booking_58): aikajana ja aikataulu; ei vapaita aikoja -viesti
-      tl: { ritual: 'rituaali', smoke: 'savusauna' }, tlTitle: 'Aikataulu', tlDuration: 'Kesto', ends: 'päättyy',
+      tlTitle: 'Aikataulu', tlDuration: 'Kesto', ends: 'päättyy',
       noTimes: 'Ei vapaita aikoja', noTimesHint: 'Kokeile toista kuukautta tai pienempää henkilömäärää.',
       retry: 'Yritä uudelleen',
       continue: 'Jatka tietoihin', selected: (when, n, price) => `Valittu: ${when} · ${n} hlö · ${price}`,
@@ -102,7 +102,7 @@ export const T = {
       fewer: 'Fewer guests', more: 'More guests', legendFree: 'times available', noFreeMonth: 'No available times this month for the selected number of guests. Try another month or fewer guests.',
       pickDayFirst: 'Pick a date in the calendar first.', startTimes: 'available start times',
       // package product (kb 7, booking_58): timeline and schedule; no-times message
-      tl: { ritual: 'ritual', smoke: 'smoke sauna' }, tlTitle: 'Schedule', tlDuration: 'Duration', ends: 'ends',
+      tlTitle: 'Schedule', tlDuration: 'Duration', ends: 'ends',
       noTimes: 'No available times', noTimesHint: 'Try another month or fewer guests.',
       retry: 'Try again',
       continue: 'Continue to your details', selected: (when, n, price) => `Selected: ${when} · ${n} guests · ${price}`,

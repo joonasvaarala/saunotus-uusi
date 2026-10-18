@@ -1,8 +1,8 @@
 {
  "_doc": "Snapshot kb-tietokannasta (vain julkiset kentät, active=true, internal=false). Päivitä: docs/kb-export.sql + scripts/kb-snapshot.mjs",
- "snapshot_at": "2026-10-16T09:03:06.288Z",
+ "snapshot_at": "2026-10-18T12:25:35.242Z",
  "business": {
-  "trade_name": "Sipoonjoen perinnesauna",
+  "trade_name": "Sipoonjoen Perinnesauna",
   "legal_name": "Havuhattu Oy",
   "business_id": "3018112-1",
   "street_address": "Hindsbyntie 124",
@@ -67,7 +67,7 @@
   },
   {
    "id": 1,
-   "name": "Sipoonjoen perinnesauna",
+   "name": "Sipoonjoen Perinnesauna",
    "location_type": "site",
    "description": "Sauna-alue Sipoonjoen rannalla Sipoon Hindsbyssä, Sipoonkorven kansallispuiston kupeessa. Alueella liikutaan osittain ulkona ympäri vuoden. Alueella mm. savusauna, hoitosauna Rauni, kylmä- ja lämminvesialtaat (paljut), hirsimökki suihkuineen, huussi, laavu, terassipolku ja patio. Sipoonkorven kansallispuistoon on muutama kilometri.",
    "accessibility": "Sauna-alue ei ole esteetön: alueella on jonkin verran portaita. Jos tarvitset apua liikkumiseen sauna-alueella, kerro siitä etukäteen sähköpostitse.",
@@ -194,18 +194,19 @@
    "price_type": "per_person",
    "price_text": "49 € / hlö",
    "duration_minutes": 120,
-   "duration_text": "rituaali 20 min + savusauna 1 h 40 min (verkkokauppa)",
+   "duration_text": "rituaali 20 min + savusauna 1 h 30 min (yhteensä 2 h)",
    "capacity_min": 1,
    "capacity_max": 6,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/yleinen-sauna/saunarituaali-ja-savusaunavuoro",
    "includes_smoke_sauna": true,
    "location_id": 3,
-   "description": "Avoin saunarituaali lauantaisin ja sunnuntaisin: vuoro alkaa 20 minuutin saunotusrituaalilla hoitosauna Raunissa (pienryhmä, enintään 6 osallistujaa), josta siirrytään savusaunaan. Sisältää löylyntervehdyksen, kevyttä lämmittelyvihdontaa ja vuodenkierron mukaisen minihoidon sekä pääsyn sauna-alueelle, altaisiin ja laavulle. Rituaaliin voi tulla alasti, mutta savusaunassa ja paljuissa käytetään uima-asua. Ohjelma vaihtuu vuodenaikojen mukaan. Elämyslahjojen lahjakortilla: varaa ensin yleinen vuoro ja osta rituaali erikseen."
+   "description": "Avoin saunarituaali lauantaisin ja sunnuntaisin: vuoro alkaa 20 minuutin saunotusrituaalilla hoitosauna Raunissa (pienryhmä, enintään 6 osallistujaa), josta siirrytään savusaunaan. Sisältää löylyntervehdyksen, kevyttä lämmittelyvihdontaa ja vuodenkierron mukaisen minihoidon sekä pääsyn sauna-alueelle, altaisiin ja laavulle. Rituaaliin voi tulla alasti, mutta savusaunassa ja paljuissa käytetään uima-asua. Ohjelma vaihtuu vuodenaikojen mukaan."
   },
   {
    "id": 8,
    "slug": "saunotusrituaali",
    "name": "Saunotusrituaali",
+   "name_en": "Short sauna ritual",
    "category": "ritual",
    "price": 20,
    "price_type": "per_person",
@@ -217,7 +218,7 @@
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/hoidot/saunotusrituaali",
    "includes_smoke_sauna": false,
    "location_id": 3,
-   "description": "Lyhyt saunotusrituaali hoitosauna Raunissa (enintään kuusi henkeä kerrallaan): löylyntervehdys, kevyttä lämmittelyvihdontaa ja vuodenkierron mukainen minihoito. Voi osallistua uimapuvussa tai alasti. Varattavissa lisäpalveluna yleiselle vuorolle."
+   "description": "Lyhyt saunotusrituaali hoitosauna Raunissa (enintään kuusi henkeä kerrallaan): löylyntervehdys, kevyttä lämmittelyvihdontaa ja vuodenkierron mukainen minihoito. Kesto 20 minuuttia; rituaali alkaa klo 16.00, 16.30 tai 17.00. Rituaalin voi varata yksinään – se ei vaadi muuta varausta. Voi osallistua uimapuvussa tai alasti."
   },
   {
    "id": 9,
@@ -344,7 +345,7 @@
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/yksityisvuorot/oma-saunavuoro",
    "includes_smoke_sauna": true,
    "location_id": 1,
-   "description": "Koko Sipoonjoen perinnesaunan miljöö omaan käyttöön (esim. ilta ystävien kanssa, synttärit, polttarit). Sisältää savusaunan, lämmin- ja kylmävesialtaat sekä laavun ja hirsimökin vapaan käytön. Tilat voi vuokrata ennen yleisiä vuoroja tai koko päiväksi. Hinnat ovat voimassa ainoastaan yksityishenkilöille; yrityksille omat tuotteet."
+   "description": "Koko Sipoonjoen Perinnesaunan miljöö omaan käyttöön (esim. ilta ystävien kanssa, synttärit, polttarit). Sisältää savusaunan, lämmin- ja kylmävesialtaat sekä laavun ja hirsimökin vapaan käytön. Tilat voi vuokrata ennen yleisiä vuoroja tai koko päiväksi. Hinnat ovat voimassa ainoastaan yksityishenkilöille; yrityksille omat tuotteet."
   },
   {
    "id": 26,
@@ -1273,7 +1274,7 @@
    "id": 1,
    "category": "general",
    "title": "Kaupan ehdot: yleiset ehdot",
-   "body": "Kauppias: Sipoonjoen perinnesauna - Havuhattu Oy. Asiakas sitoutuu noudattamaan näitä sekä kauppiaskohtaisia ehtoja ostaessaan tuotteita ja palveluja Havuhattu Oy:n Internet-palveluissa.\nVerkkopalvelussa esitetyt hinnat ovat arvonlisäverollisia. Myymme tuotteita täysi-ikäisille yksityishenkilöille sekä yritysasiakkaille. Pidätämme oikeudet hintojen muutoksiin. Asiakas vastaa antamiensa tietojen oikeellisuudesta. Pidätämme oikeuden muuttaa toimitusehtojamme; asiakkaan on ennen tilaustaan tutustuttava kulloinkin voimassa oleviin toimitusehtoihin.",
+   "body": "Kauppias: Sipoonjoen Perinnesauna - Havuhattu Oy. Asiakas sitoutuu noudattamaan näitä sekä kauppiaskohtaisia ehtoja ostaessaan tuotteita ja palveluja Havuhattu Oy:n Internet-palveluissa.\nVerkkopalvelussa esitetyt hinnat ovat arvonlisäverollisia. Myymme tuotteita täysi-ikäisille yksityishenkilöille sekä yritysasiakkaille. Pidätämme oikeudet hintojen muutoksiin. Asiakas vastaa antamiensa tietojen oikeellisuudesta. Pidätämme oikeuden muuttaa toimitusehtojamme; asiakkaan on ennen tilaustaan tutustuttava kulloinkin voimassa oleviin toimitusehtoihin.",
    "language": "fi"
   },
   {
@@ -1315,14 +1316,14 @@
    "id": 7,
    "category": "privacy",
    "title": "Tietosuojaseloste (asiakasrekisteri)",
-   "body": "Rekisterinpitäjä: Sipoonjoen perinnesauna / Havuhattu Oy (3018112-1), Hindsbyntie 124, 04130 Sipoo, 010 299 2866, savusauna@saunotus.fi. Rekisteriasioista vastaava: Joonas Vaarala. Rekisterin nimi: Sipoonjoen perinnesaunan asiakasrekisteri.\nOikeusperuste: sopimus (tilaus verkkokaupasta). Tarkoitus: verkkokaupan kaupankäynti (tilaus-, laskutus-, maksu- ja käsittelytiedot), asiakaspalvelu, asiakassuhteen ylläpito ja sähköinen markkinointi suostumuksella. Tietoja ei käytetä automatisoituun päätöksentekoon; tietoja voidaan käyttää profilointiin.\nTiedot: nimi, osoite, postitoimipaikka, maa, puhelin, sähköposti, henkilötunnus (yksityinen laskutusasiakas), tilauksen lähdesivu; yrityksiltä lisäksi nimi, Y-tunnus, verkkolaskuosoite, välittäjätunnus, viite, merkki; sekä vapaamuotoiset lisätiedot.\nSäilytys: niin kauan kuin sopimus/suostumus on voimassa, ja pidempään lakisääteisten velvoitteiden (esim. kirjanpito) vuoksi.\nLähteet: Johku-verkkopalvelun lomakkeet; puhelin-, sähköposti- ja paikan päällä tehdyt tilaukset syöttää Havuhattu Oy. Luovutukset: tietoja ei luovuteta eteenpäin; tietoja voidaan teknisesti käsitellä EU/ETA-alueen ulkopuolella.\nSuojaus: rekisteri sijaitsee Johku-palvelussa, käsittelijä Aptual Commerce Oy. Tarkastus- ja korjausoikeus Oma Johku -palvelussa (johku.com/customer) tai kirjallisesti rekisterinpitäjälle; vastaus pääsääntöisesti kuukauden kuluessa. Oikeus tulla unohdetuksi ja muut GDPR-oikeudet (kirjanpito- ja verolainsäädännön säilytysvelvoitteet huomioiden). Sivusto käyttää evästeitä, myös mainontaevästeitä (esim. Google). Laadittu 9.3.2023.",
+   "body": "Rekisterinpitäjä: Sipoonjoen Perinnesauna / Havuhattu Oy (3018112-1), Hindsbyntie 124, 04130 Sipoo, 010 299 2866, savusauna@saunotus.fi. Rekisteriasioista vastaava: Joonas Vaarala. Rekisterin nimi: Sipoonjoen Perinnesaunan asiakasrekisteri.\nOikeusperuste: sopimus (tilaus verkkokaupasta). Tarkoitus: verkkokaupan kaupankäynti (tilaus-, laskutus-, maksu- ja käsittelytiedot), asiakaspalvelu, asiakassuhteen ylläpito ja sähköinen markkinointi suostumuksella. Tietoja ei käytetä automatisoituun päätöksentekoon; tietoja voidaan käyttää profilointiin.\nTiedot: nimi, osoite, postitoimipaikka, maa, puhelin, sähköposti, henkilötunnus (yksityinen laskutusasiakas), tilauksen lähdesivu; yrityksiltä lisäksi nimi, Y-tunnus, verkkolaskuosoite, välittäjätunnus, viite, merkki; sekä vapaamuotoiset lisätiedot.\nSäilytys: niin kauan kuin sopimus/suostumus on voimassa, ja pidempään lakisääteisten velvoitteiden (esim. kirjanpito) vuoksi.\nLähteet: Johku-verkkopalvelun lomakkeet; puhelin-, sähköposti- ja paikan päällä tehdyt tilaukset syöttää Havuhattu Oy. Luovutukset: tietoja ei luovuteta eteenpäin; tietoja voidaan teknisesti käsitellä EU/ETA-alueen ulkopuolella.\nSuojaus: rekisteri sijaitsee Johku-palvelussa, käsittelijä Aptual Commerce Oy. Tarkastus- ja korjausoikeus Oma Johku -palvelussa (johku.com/customer) tai kirjallisesti rekisterinpitäjälle; vastaus pääsääntöisesti kuukauden kuluessa. Oikeus tulla unohdetuksi ja muut GDPR-oikeudet (kirjanpito- ja verolainsäädännön säilytysvelvoitteet huomioiden). Sivusto käyttää evästeitä, myös mainontaevästeitä (esim. Google). Laadittu 9.3.2023.",
    "language": "fi"
   },
   {
    "id": 8,
    "category": "gift_card",
    "title": "Lahjakortit ja niiden käyttö",
-   "body": "Avoin lahjakortti käy kaikkiin Sipoonjoen perinnesaunan palveluihin ja on voimassa 6 kuukautta ostopäivästä. Verkkokaupassa arvon voi valita väliltä 29–500 €; kortilla voi maksaa myös osan arvokkaammasta elämyksestä. Jos lahjakorttia ei ehditä käyttää, voimassaoloa voi pyytää jatkamaan maksutta sähköpostitse tai puhelimitse – toivomaasi päivään asti tai muuten 3 kuukautta eteenpäin.\nOma lahjakortti: varaus tehdään suoraan varausjärjestelmässä; syötä lopuksi 12-merkkinen lahjakortin koodi ostoskorissa kenttään \"käytä koodia\".\nElämyslahjat, Kiitoskauppa ja Kokemuskauppa: varmista ensin, että kortti on voimassa (vanhentuneesta Elämyslahjojen kortista ota yhteyttä Elämyslahjojen asiakaspalveluun). Käytä kortin keskiosassa voimassaolopäivän vieressä olevaa koodia – ei viivakoodin yhteydessä olevaa koodia. Valitse yleinen vuoro, tee varaus ja syötä koodi sille varattuun kenttään. Mahdolliset lisäpalvelut varataan erillisellä tilauksella.\nVanhan sivuston mukaan lahjakortteja voi maksaa myös paikan päällä kortilla.",
+   "body": "Avoin lahjakortti käy kaikkiin Sipoonjoen Perinnesaunan palveluihin ja on voimassa 6 kuukautta ostopäivästä. Verkkokaupassa arvon voi valita väliltä 29–500 €; kortilla voi maksaa myös osan arvokkaammasta elämyksestä. Jos lahjakorttia ei ehditä käyttää, voimassaoloa voi pyytää jatkamaan maksutta sähköpostitse tai puhelimitse – toivomaasi päivään asti tai muuten 3 kuukautta eteenpäin.\nOma lahjakortti: varaus tehdään suoraan varausjärjestelmässä; syötä lopuksi 12-merkkinen lahjakortin koodi ostoskorissa kenttään \"käytä koodia\".\nElämyslahjat, Kiitoskauppa ja Kokemuskauppa: varmista ensin, että kortti on voimassa (vanhentuneesta Elämyslahjojen kortista ota yhteyttä Elämyslahjojen asiakaspalveluun). Käytä kortin keskiosassa voimassaolopäivän vieressä olevaa koodia – ei viivakoodin yhteydessä olevaa koodia. Valitse yleinen vuoro, tee varaus ja syötä koodi sille varattuun kenttään. Mahdolliset lisäpalvelut varataan erillisellä tilauksella.\nVanhan sivuston mukaan lahjakortteja voi maksaa myös paikan päällä kortilla.",
    "language": "fi"
   },
   {
@@ -1441,14 +1442,14 @@
    "id": 25,
    "category": "gift_card",
    "title": "Lahjakortin voimassaolon jatkaminen",
-   "body": "Sipoonjoen perinnesaunan omien lahjakorttien voimassaoloa jatketaan maksutta asiakkaan toivomaan päivään asti. Jos asiakas ei toivo tiettyä päivää, voimassaoloa jatketaan 3 kuukautta pyyntöpäivästä eteenpäin. Jatkamisesta ei peritä maksua eikä siihen liity ehtoja – olet lämpimästi tervetullut saunomaan! Pyydä jatkoa sähköpostitse (savusauna@saunotus.fi) tai puhelimitse (010 299 2866).\nKolmansien osapuolten lahjakortit (Elämyslahjat, Offerilla, Kokemuskauppa): voimassaolon jatkamisesta ja vanhentuneista korteista vastaa kunkin palvelun oma asiakaspalvelu.",
+   "body": "Sipoonjoen Perinnesaunan omien lahjakorttien voimassaoloa jatketaan maksutta asiakkaan toivomaan päivään asti. Jos asiakas ei toivo tiettyä päivää, voimassaoloa jatketaan 3 kuukautta pyyntöpäivästä eteenpäin. Jatkamisesta ei peritä maksua eikä siihen liity ehtoja – olet lämpimästi tervetullut saunomaan! Pyydä jatkoa sähköpostitse (savusauna@saunotus.fi) tai puhelimitse (010 299 2866).\nKolmansien osapuolten lahjakortit (Elämyslahjat, Offerilla, Kokemuskauppa): voimassaolon jatkamisesta ja vanhentuneista korteista vastaa kunkin palvelun oma asiakaspalvelu.",
    "language": "fi"
   },
   {
    "id": 26,
    "category": "gift_card",
    "title": "Extending a gift card",
-   "body": "Sipoonjoen perinnesauna's own gift cards are extended free of charge to the date the customer requests. If no date is requested, the validity is extended by 3 months from the day of the request. There is no fee and no conditions – you are warmly welcome to come and enjoy the sauna! Ask for an extension by email (savusauna@saunotus.fi) or phone (+358 10 299 2866).\nThird-party gift cards (Elämyslahjat, Offerilla, Kokemuskauppa): extensions and expired cards are handled by each service's own customer service.",
+   "body": "Sipoonjoen Perinnesauna's own gift cards are extended free of charge to the date the customer requests. If no date is requested, the validity is extended by 3 months from the day of the request. There is no fee and no conditions – you are warmly welcome to come and enjoy the sauna! Ask for an extension by email (savusauna@saunotus.fi) or phone (+358 10 299 2866).\nThird-party gift cards (Elämyslahjat, Offerilla, Kokemuskauppa): extensions and expired cards are handled by each service's own customer service.",
    "language": "en"
   }
  ],
@@ -1552,7 +1553,7 @@
   {
    "id": 13,
    "question": "Millainen tunnelma saunalla on?",
-   "answer": "Sauna- ja saunotuselämykset korostavat hiljaisuutta, luonnonläheisyyttä ja rauhaa. Sipoonjoen perinnesauna on maan sisälle rakennettu savusauna, joka lämpeää vuoden jokaisena päivänä.",
+   "answer": "Sauna- ja saunotuselämykset korostavat hiljaisuutta, luonnonläheisyyttä ja rauhaa. Sipoonjoen Perinnesauna on maan sisälle rakennettu savusauna, joka lämpeää vuoden jokaisena päivänä.",
    "language": "fi",
    "category": "yleinen",
    "sort_order": 130
@@ -1560,7 +1561,7 @@
   {
    "id": 14,
    "question": "Keitä ovat saunottajat?",
-   "answer": "Saunahoidoista ja saunotuksista vastaavat Sipoonjoen perinnesaunan saunottajat Laura Foon, Joonas Vaarala ja Saara Mäntykoski. Tiistaisin naisten vuorolla saatavilla on naispuolinen saunottaja.",
+   "answer": "Saunahoidoista ja saunotuksista vastaavat Sipoonjoen Perinnesaunan saunottajat Laura Foon, Joonas Vaarala ja Saara Mäntykoski. Tiistaisin naisten vuorolla saatavilla on naispuolinen saunottaja.",
    "language": "fi",
    "category": "yleinen",
    "sort_order": 140

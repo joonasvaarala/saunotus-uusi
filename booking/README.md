@@ -1,4 +1,4 @@
-# Oma varausjärjestelmä (korvaa Johkun) – Sipoonjoen perinnesauna
+# Oma varausjärjestelmä (korvaa Johkun) – Sipoonjoen Perinnesauna
 
 Kevyt, nopea ja helposti muokattava varausjärjestelmä: **Supabase (Postgres, skeema `booking`) + staattinen kauppa + staattinen hallinta**.
 Ei palvelinkoodia, ei build-vaihetta selaimen koodille, ei kirjastoriippuvuuksia. Kaikki säännöt (kapasiteetit, vuorot, hinnat) ovat dataa.

@@ -1,0 +1,253 @@
+{
+ "_doc": "Tuotannon julkiset lukufunktiot (anon, vain luku) 18.10.2026 klo ~14:30 (Europe/Helsinki), booking_61 + booking_64 jälkeen: public_catalog() (rivit id 1, 7, 8, 10; mukana addons_enabled + allowed_addons, tuotteen 7 timeline vain asiakkaalle näkyvät jaksot), public_addons(), public_settings(). Ei kirjoituksia.",
+ "catalog": [
+  {
+   "id": 1,
+   "name": "Yleinen vuoro (to, la-su)",
+   "slug": "yleinensauna",
+   "price": 29.0,
+   "name_en": "Public sauna (Sat & Sun)",
+   "options": [],
+   "category": "public_sauna",
+   "timeline": null,
+   "sale_kind": "public_shift",
+   "price_text": "29,00 € / hlö",
+   "price_type": "per_person",
+   "description": "Sekavuoro, johon kaikki ovat tervetulleita. Sisältää pääsyn sauna-alueelle, kylmä- ja lämminvesialtaisiin sekä laavulle sauna-ajan puitteissa. Viikonloppuisin (la ja su) yleinen vuoro on klo 14–19 ja saunomisaika kaksi tuntia, paikka on aina varattava etukäteen ja saunotaan uima-asussa. Kuumista löylyistä pitävän kannattaa tulla ensimmäisille vuoroille, pehmeämpien löylyjen ystävän viimeiselle vuorolle tai jälkilöylyille. Torstaisin yleinen vuoro klo 17–19. Tuo oma pyyhe ja tossut (vuokraus paikan päällä 5 €). Hirsimökissä suihku, lähellä huussi.",
+   "max_persons": null,
+   "min_persons": 1,
+   "booking_kind": "rules",
+   "option_label": null,
+   "voucher_note": null,
+   "duration_text": "la–su klo 14–19 (saunomisaika 2 h); to klo 17–19",
+   "timeline_text": null,
+   "addons_enabled": true,
+   "allowed_addons": [
+    "turvenaamio_jalkakylpy",
+    "saunavihta",
+    "pyyhe"
+   ],
+   "description_en": null,
+   "option_label_en": null,
+   "option_required": false,
+   "voucher_note_en": null,
+   "duration_minutes": 120,
+   "timeline_text_en": null,
+   "slot_grid_minutes": null
+  },
+  {
+   "id": 7,
+   "name": "Saunarituaali ja savusaunavuoro (la & su)",
+   "slug": "saunarituaali-ja-savusaunavuoro",
+   "price": 49.0,
+   "name_en": "Sauna Ritual & Smoke Sauna Session",
+   "options": [],
+   "category": "ritual",
+   "timeline": [
+    {
+     "seq": 1,
+     "kind": "ritual",
+     "label": "rituaali",
+     "end_min": 20,
+     "minutes": 20,
+     "label_en": "ritual",
+     "start_min": 0
+    },
+    {
+     "seq": 3,
+     "kind": "smoke_sauna",
+     "label": "savusauna",
+     "end_min": 120,
+     "minutes": 90,
+     "label_en": "smoke sauna",
+     "start_min": 30
+    }
+   ],
+   "sale_kind": "other",
+   "price_text": "49 € / hlö",
+   "price_type": "per_person",
+   "description": "Avoin saunarituaali lauantaisin ja sunnuntaisin: vuoro alkaa 20 minuutin saunotusrituaalilla hoitosauna Raunissa (pienryhmä, enintään 6 osallistujaa), josta siirrytään savusaunaan. Sisältää löylyntervehdyksen, kevyttä lämmittelyvihdontaa ja vuodenkierron mukaisen minihoidon sekä pääsyn sauna-alueelle, altaisiin ja laavulle. Rituaaliin voi tulla alasti, mutta savusaunassa ja paljuissa käytetään uima-asua. Ohjelma vaihtuu vuodenaikojen mukaan.",
+   "max_persons": 6,
+   "min_persons": 1,
+   "booking_kind": "slots",
+   "option_label": null,
+   "voucher_note": "Elämyslahjojen lahjakortilla: varaa ensin yleinen vuoro ja osta rituaali erikseen.",
+   "duration_text": "rituaali 20 min + savusauna 1 h 30 min (yhteensä 2 h)",
+   "timeline_text": "rituaali 20 min · savusauna 1 h 30 min",
+   "addons_enabled": true,
+   "allowed_addons": [
+    "pyyhe"
+   ],
+   "description_en": "Open sauna ritual on Saturdays and Sundays: the session starts with a 20-minute sauna ritual in the healing sauna Rauni (small group, max. 6 participants), after which you move on to the smoke sauna. Includes a löyly greeting, light warming vihta whisking and a seasonal mini treatment, plus access to the sauna area, the pools and the lean-to (laavu). You are welcome to join the ritual naked, but swimwear is worn in the smoke sauna and the hot tubs. The programme changes with the seasons.",
+   "option_label_en": null,
+   "option_required": false,
+   "voucher_note_en": "With an Elämyslahjat gift card: first book a regular session and buy the ritual separately.",
+   "duration_minutes": 120,
+   "timeline_text_en": "ritual 20 min · smoke sauna 1 h 30 min",
+   "slot_grid_minutes": 30
+  },
+  {
+   "id": 8,
+   "name": "Saunotusrituaali",
+   "slug": "saunotusrituaali",
+   "price": 20.0,
+   "name_en": "Short sauna ritual",
+   "options": [],
+   "category": "ritual",
+   "timeline": null,
+   "sale_kind": "other",
+   "price_text": "20,00 €",
+   "price_type": "per_person",
+   "description": "Lyhyt saunotusrituaali hoitosauna Raunissa (enintään kuusi henkeä kerrallaan): löylyntervehdys, kevyttä lämmittelyvihdontaa ja vuodenkierron mukainen minihoito. Kesto 20 minuuttia; rituaali alkaa klo 16.00, 16.30 tai 17.00. Rituaalin voi varata yksinään – se ei vaadi muuta varausta. Voi osallistua uimapuvussa tai alasti.",
+   "max_persons": 6,
+   "min_persons": 1,
+   "booking_kind": "slots",
+   "option_label": null,
+   "voucher_note": null,
+   "duration_text": "20 min",
+   "timeline_text": null,
+   "addons_enabled": false,
+   "allowed_addons": [],
+   "description_en": "A short sauna ritual in the Rauni healing sauna (up to six guests at a time): a greeting of the steam (löyly), gentle warming with birch whisks and a mini treatment that follows the turning of the seasons. Duration 20 minutes; the ritual starts at 16:00, 16:30 or 17:00. The ritual can be booked on its own – no other booking is required. You may take part in swimwear or nude.",
+   "option_label_en": null,
+   "option_required": false,
+   "voucher_note_en": null,
+   "duration_minutes": 20,
+   "timeline_text_en": null,
+   "slot_grid_minutes": 30
+  },
+  {
+   "id": 10,
+   "name": "Saunahoito",
+   "slug": "saunahoito-2",
+   "price": 99.0,
+   "name_en": "Sauna treatment",
+   "options": [
+    {
+     "id": 1,
+     "code": "hunajahoito",
+     "name": "Hunajahoito",
+     "active": true,
+     "name_en": "Honey treatment",
+     "sort_order": 10,
+     "description": null,
+     "description_en": null
+    },
+    {
+     "id": 2,
+     "code": "vihtahoito",
+     "name": "Vihtahoito",
+     "active": true,
+     "name_en": "Birch whisk treatment",
+     "sort_order": 20,
+     "description": null,
+     "description_en": null
+    },
+    {
+     "id": 3,
+     "code": "suolahoito",
+     "name": "Suolahoito",
+     "active": true,
+     "name_en": "Salt treatment",
+     "sort_order": 30,
+     "description": null,
+     "description_en": null
+    },
+    {
+     "id": 4,
+     "code": "turvehoito",
+     "name": "Turvehoito",
+     "active": true,
+     "name_en": "Peat treatment",
+     "sort_order": 40,
+     "description": null,
+     "description_en": null
+    }
+   ],
+   "category": "treatment",
+   "timeline": null,
+   "sale_kind": "other",
+   "price_text": "99,00 € (sis. 1 hlö), lisähenkilöt 35,00 €/hlö",
+   "price_type": "base_plus_extra_person",
+   "description": "Lempeä mutta syvä pysähdys löylyn, lämmön ja luonnonantimien äärelle. Alkaa löylyntervehdysrituaalilla, jonka jälkeen saunottaja toteuttaa valitun hoidon: hunajahoito, vihtahoito, suolahoito tai turvehoito (valinta kassalla). Varattavissa 1–4 hengelle; sisältö mukautuu ryhmän kokoon. Hoidon hintaan ei sisälly pääsyä savusaunaan tai paljuihin (pääsyliput erikseen). Toteutetaan hoitosauna Raunissa. Saunottajat: Laura Foon, Joonas Vaarala ja Saara Mäntykoski. Hoitoon voi osallistua alasti, osittain tai kokonaan uima-asussa.",
+   "max_persons": 4,
+   "min_persons": 1,
+   "booking_kind": "slots",
+   "option_label": "Valitse hoito",
+   "voucher_note": null,
+   "duration_text": "1 h",
+   "timeline_text": null,
+   "addons_enabled": false,
+   "allowed_addons": [],
+   "description_en": "A gentle yet deep pause with löyly (steam), warmth and natural ingredients. The treatment begins with a steam greeting ritual, after which your sauna therapist performs the treatment of your choice: honey, birch whisk, salt or peat treatment (chosen at checkout). Available for 1–4 guests; the content adapts to the size of the group. The price does not include entrance to the smoke sauna or hot tubs (tickets are sold separately). Held in the Rauni healing sauna. Sauna therapists: Laura Foon, Joonas Vaarala and Saara Mäntykoski. You may take part nude, partly or fully in swimwear.",
+   "option_label_en": "Choose your treatment",
+   "option_required": true,
+   "voucher_note_en": null,
+   "duration_minutes": 60,
+   "timeline_text_en": null,
+   "slot_grid_minutes": 30
+  }
+ ],
+ "addons": [
+  {
+   "id": 1,
+   "code": "turvenaamio_jalkakylpy",
+   "name": "Turvenaamio ja jalkakylpy",
+   "price": 15.0,
+   "name_en": "Peat mask and foot bath",
+   "vat_rate": 25.5,
+   "description": "Lisäpalvelu varaukseen: turvenaamio ja jalkakylpy.",
+   "applies_modes": [
+    "shared",
+    "exclusive"
+   ],
+   "description_en": "Add-on for your booking: peat mask and foot bath.",
+   "max_per_person": 20
+  },
+  {
+   "id": 2,
+   "code": "saunavihta",
+   "name": "Saunavihta",
+   "price": 13.0,
+   "name_en": "Sauna whisk (vihta)",
+   "vat_rate": 25.5,
+   "description": "Lisäpalvelu varaukseen: saunavihta.",
+   "applies_modes": [
+    "shared",
+    "exclusive"
+   ],
+   "description_en": "Add-on for your booking: sauna whisk (vihta).",
+   "max_per_person": 20
+  },
+  {
+   "id": 5,
+   "code": "pyyhe",
+   "name": "Pyyhe",
+   "price": 5.0,
+   "name_en": "Towel",
+   "vat_rate": 25.5,
+   "description": "Lisäpalvelu varaukseen: pyyhe.",
+   "applies_modes": [
+    "shared",
+    "exclusive",
+    "resource"
+   ],
+   "description_en": "Add-on for your booking: towel.",
+   "max_per_person": 20
+  }
+ ],
+ "settings": {
+  "timezone": "Europe/Helsinki",
+  "hold_minutes": 15,
+  "business_name": "Sipoonjoen Perinnesauna",
+  "articles_path_en": "/en/sauna-knowledge/",
+  "articles_path_fi": "/saunatietoa/",
+  "articles_label_en": "Sauna knowledge",
+  "articles_label_fi": "Saunatietoa",
+  "public_payment_mode": "hold_until_paid",
+  "booking_horizon_days": 120,
+  "public_booking_enabled": true,
+  "customer_change_hours_before": 48,
+  "public_treatment_horizon_days": 14
+ }
+}

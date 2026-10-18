@@ -2,7 +2,7 @@
 import { PDFDocument } from "npm:pdf-lib@1.17.1";
 import { buildGiftCardPdf, san, sanGreeting, showsPrice } from "./render.ts";
 const logo = await Deno.readFile(new URL("../../../docs/giftcards/logo.png", import.meta.url));
-const seller = { name: "Havuhattu Oy / Sipoonjoen perinnesauna", legal_name: "Havuhattu Oy", business_id: "3018112-1", address: "Hindsbyntie 124", zip: "04130", city: "Sipoo", email: "savusauna@saunotus.fi", phone: "010 299 2866", web: "https://saunotus.fi" };
+const seller = { name: "Havuhattu Oy / Sipoonjoen Perinnesauna", legal_name: "Havuhattu Oy", business_id: "3018112-1", address: "Hindsbyntie 124", zip: "04130", city: "Sipoo", email: "savusauna@saunotus.fi", phone: "010 299 2866", web: "https://saunotus.fi" };
 const longG = ("Rakas Mikko, onnea syntymäpäivänä! Toivomme että saat nauttia lämmöstä ja rauhasta yhdessä rakkaasi kanssa. Nauti löylyistä, vihdasta ja hiljaisuudesta. Kiitos kaikesta mitä olet tehnyt. Ota rennosti, ja muista juoda vettä. Nähdään pian! Tässä vielä hieman lisää tekstiä, jotta pituus täyttyy kolmeensataan merkkiin asti. Ok.").slice(0, 300);
 const longEn = "Dear Mikko, happy birthday! We hope you enjoy the warmth and the quiet together with your loved one. Enjoy the steam, the birch whisk and the silence. Thank you for everything you have done. Take it easy and remember to drink water. See you soon! Here is a little more text so that the length reaches three hundred characters. Ok.".slice(0, 300);
 const base = { ok: true, status: "active", currency: "EUR", locale: "fi", valid_from: "2026-10-01", valid_to: "2027-04-01", issued_at: "2026-10-01T09:00:00+03:00", seller, redeemable_now: true, source: "native" };
