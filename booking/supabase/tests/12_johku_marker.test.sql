@@ -1,5 +1,5 @@
 -- Johku-merkintä (migraatio 12): admin_list_reservations(+p_source, +source/external_id), admin_day_view(source/external_id), external_meta-sarakkeet.
--- Migraatio 12 on ajettu tuotantoon (Bottiavustus 16.10.2026). booking_70 lisää 9. argumentin p_option_missing
+-- Migraatio 12 on ajettu tuotantoon (Bottiavustus 16.10.2026). booking_72 lisää 9. argumentin p_option_missing
 -- ja poistaa 8-argumenttisen ylikuorman. Jos 9-argumenttista funktiota ei ole, testi ohitetaan.
 begin;
 set local search_path = extensions, public;

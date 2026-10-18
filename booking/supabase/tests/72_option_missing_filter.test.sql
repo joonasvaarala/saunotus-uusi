@@ -1,4 +1,4 @@
--- booking_70: admin_list_reservations(p_option_missing) on vain luku -rajaus.
+-- booking_72: admin_list_reservations(p_option_missing) on vain luku -rajaus.
 -- TRUE = option_missing (hoito pakollinen, product_option_id null). NULL ja FALSE eivät rajaa.
 -- 8-argumenttinen ylikuorma on poissa. Valinnan jälkeen rivi katoaa suodattimesta.
 begin;

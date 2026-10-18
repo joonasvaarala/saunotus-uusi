@@ -1,6 +1,6 @@
--- Rollback booking_70: admin_list_reservations takaisin booking_50:n 8 argumenttiin.
+-- Rollback booking_72: admin_list_reservations takaisin booking_50:n 8 argumenttiin.
 -- Poistaa p_option_missing-suodatuksen. Ei koske tauluihin, varauksiin eikä hoitovalintaan.
--- Aja: psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f booking/supabase/rollbacks/20261018191000_booking_70_ROLLBACK.sql
+-- Aja: psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f booking/supabase/rollbacks/20261018191000_booking_72_ROLLBACK.sql
 
 set local lock_timeout = '5s';
 

@@ -1,6 +1,6 @@
 // Varauslistan osoite ja "Hoito valitsematta" -suodatin. Puhdas moduuli (ei DOM:ia) → node --test.
 // Linkki päivänäkymästä: #/varaukset?filter=treatment_unassigned&period=upcoming
-// Palvelin (booking_70, p_option_missing) suodattaa sivutuksen kanssa. Ennen migraatiota selain rajaa option_missing-kentästä.
+// Palvelin (booking_72, p_option_missing) suodattaa sivutuksen kanssa. Ennen migraatiota selain rajaa option_missing-kentästä.
 
 export const TREATMENT_UNASSIGNED = 'treatment_unassigned';
 export const PERIODS = ['all', 'upcoming', 'past', 'month', 'custom'];
@@ -66,7 +66,7 @@ export function isTreatmentUnassigned(row) {
   return row?.option_missing === true;
 }
 
-/** PostgREST ei löydä p_option_missing-parametria (migraatio booking_70 ei ole vielä kannassa). */
+/** PostgREST ei löydä p_option_missing-parametria (migraatio booking_72 ei ole vielä kannassa). */
 export function isUnassignedFilterUnsupported(e) {
   const msg = `${e?.status || ''} ${e?.code || ''} ${e?.message || ''}`;
   return e?.status === 404 || /PGRST202|PGRST203|could not find the function|schema cache/i.test(msg);

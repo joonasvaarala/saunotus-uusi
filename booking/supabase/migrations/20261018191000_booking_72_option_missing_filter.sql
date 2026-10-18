@@ -1,5 +1,5 @@
 -- =============================================================================
--- booking_70_option_missing_filter.sql
+-- booking_72_option_missing_filter.sql
 -- =============================================================================
 -- VAIN LUKU. admin_list_reservations saa yhden parametrin lisää:
 -- p_option_missing boolean DEFAULT NULL. TRUE rajaa rivit, joilla hoito on
@@ -10,7 +10,7 @@
 --
 -- Runko on booking_50:n funktio + yksi WHERE-ehto. Ei taulu-, varaus- eikä
 -- hoitovalintamuutoksia. ÄLÄ AJA tätä tiedostoa: Bottiavustus ajaa migraation.
--- Rollback: rollbacks/20261018191000_booking_70_ROLLBACK.sql
+-- Rollback: rollbacks/20261018191000_booking_72_ROLLBACK.sql
 -- =============================================================================
 
 set local lock_timeout = '5s';

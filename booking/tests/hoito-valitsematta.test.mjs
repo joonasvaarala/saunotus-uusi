@@ -1,5 +1,5 @@
 // Hoito valitsematta: päivänäkymän linkki avaa varauslistan suodattimella treatment_unassigned + period=upcoming.
-// Palvelin (booking_70, p_option_missing) rajaa sivutuksen kanssa. Ennen migraatiota selain rajaa option_missing-kentästä.
+// Palvelin (booking_72, p_option_missing) rajaa sivutuksen kanssa. Ennen migraatiota selain rajaa option_missing-kentästä.
 // Tekstit: ui.admin.options.* sanakirjassa ja content/site-texts.pending-import-4.json (ei vielä fallbackissa).
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -161,8 +161,8 @@ test('linkki, reititys ja migraatio ovat tiedostoissa; hoitovalintaa ei muuteta'
   const admin = readFileSync(new URL('../admin/admin.js', import.meta.url), 'utf8');
   const list = readFileSync(new URL('../admin/views/reservations.js', import.meta.url), 'utf8');
   const logic = readFileSync(new URL('../admin/options-logic.js', import.meta.url), 'utf8');
-  const sql = readFileSync(new URL('../supabase/migrations/20261018191000_booking_70_option_missing_filter.sql', import.meta.url), 'utf8');
-  const rollback = readFileSync(new URL('../supabase/rollbacks/20261018191000_booking_70_ROLLBACK.sql', import.meta.url), 'utf8');
+  const sql = readFileSync(new URL('../supabase/migrations/20261018191000_booking_72_option_missing_filter.sql', import.meta.url), 'utf8');
+  const rollback = readFileSync(new URL('../supabase/rollbacks/20261018191000_booking_72_ROLLBACK.sql', import.meta.url), 'utf8');
   const t12 = readFileSync(new URL('../supabase/tests/12_johku_marker.test.sql', import.meta.url), 'utf8');
   assert.match(options, /UNASSIGNED_HREF/);
   assert.match(options, /opt-reminder-link/);

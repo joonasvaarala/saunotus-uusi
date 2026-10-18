@@ -1,7 +1,7 @@
 // Varauslista: haku (nimi/sähköposti/puhelin/tilausnumero), suodattimet (tila, tuote, ajanjakso, lähde, hoito), sivutus.
 // Ajanjakso (pikavalinta): Kaikki ajat (oletus; p_from/p_to = null, RPC sallii null) / Tulevat (tästä päivästä alkaen) / Menneet (ennen tätä päivää) / Tämä kuukausi / Oma ajanjakso (Alkaen/Päättyen näkyvät vain silloin).
 // Lähdesuodatin → RPC:n p_source ('native' = Uudet, 'johku' = Johku; Kaikki = parametria ei lähetetä → null). Johku-varauksilla "Johku"-tunniste.
-// Hoito valitsematta: ?filter=treatment_unassigned (päivänäkymän muistutus lisää myös period=upcoming). Palvelin: p_option_missing (booking_70).
+// Hoito valitsematta: ?filter=treatment_unassigned (päivänäkymän muistutus lisää myös period=upcoming). Palvelin: p_option_missing (booking_72).
 // Ennen migraatiota rajaus tehdään option_missing-kentästä. Aktiiviset suodattimet ovat .filters-kortin ulkopuolella, jotta myöhempi
 // "Näytä suodattimet" -piilotus ei peitä valittua suodatinta.
 export const PERIODS = [['all', 'Kaikki ajat'], ['upcoming', 'Tulevat'], ['past', 'Menneet'], ['month', 'Tämä kuukausi'], ['custom', 'Oma ajanjakso']];
