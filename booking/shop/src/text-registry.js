@@ -7,6 +7,7 @@
 //   i18n.js: ylätaso → ui.shop.*; tr.* → ui.treatment.*; tr.errors.<koodi> → ui.checkout.error_<koodi>; errors.<koodi> → ui.shop.error_<koodi>.
 // Paikkamerkit: {n} → {{var:n}} (kutsuparametri); puhelinnumero → {{var:phone}} (sivuston yhteystiedoista, S.phone).
 import { T } from './i18n.js';
+import { PHONE_DISPLAY } from './phone.js';
 import { OT } from './order-texts.js';
 import { GT } from './gift-texts.js';
 import { HT } from './hold-texts.js';
@@ -15,7 +16,7 @@ import { MT } from './mobilepay-texts.js';
 import { OPT } from './options-texts.js';
 import { makeContext, fillPlaceholders, indexTexts, PlaceholderError, LANGS } from './site-texts-logic.js';
 
-export const PHONE_LITERAL = '010 299 2866';
+export const PHONE_LITERAL = PHONE_DISPLAY;
 const DICTS = [
   { id: 'T', area: 'shop', dict: T }, { id: 'OT', area: 'order', dict: OT }, { id: 'GT', area: 'gift', dict: GT }, { id: 'HT', area: 'hold', dict: HT },
   { id: 'PT', area: 'paychoice', dict: PT }, { id: 'MT', area: 'mobilepay', dict: MT }, { id: 'OPT', area: 'option', dict: OPT },

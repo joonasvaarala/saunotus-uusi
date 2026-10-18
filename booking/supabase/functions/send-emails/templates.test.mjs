@@ -205,6 +205,17 @@ test('voucher_claim_problem: eri ongelmakoodeilla eri aiheet; tuntematon kumppan
 test('muiden pohjien alatunniste sisältää edelleen puhelinnumeron (noPhone vain voucher_claim-viesteissä)', { skip }, () => {
   assert.ok(hrefs(R('order_confirmation', base('fi'), 'fi').html).some((h) => h.startsWith('tel:')));
 });
+test('puhelin: näkyvä muoto "010 299 2866" ja linkki tel:+358102992866 (sama vakio kuin sivusto/kauppa, booking/shop/src/phone.js)', { skip }, async () => {
+  const P = await import('../../../shop/src/phone.js');
+  assert.equal(T.PHONE, P.PHONE_DISPLAY); assert.equal(T.PHONE_TEL, P.PHONE_TEL);
+  assert.equal(P.PHONE_DISPLAY, '010 299 2866'); assert.equal(P.PHONE_TEL, '+358102992866'); assert.equal(P.phoneHref(), 'tel:+358102992866');
+  for (const locale of ['fi', 'en']) {
+    const m = R('order_confirmation', base(locale), locale);
+    assert.ok(hrefs(m.html).includes('tel:+358102992866'), `${locale}: tel-linkki`);
+    assert.ok(m.html.includes('>010 299 2866</a>') && !/\+358[ \d]*10 299/.test(m.html + m.text) && !m.html.includes('tel:0102992866'), `${locale}: näkyvä muoto`);
+    assert.ok(m.text.includes('010 299 2866'), `${locale}: tekstiversio ({{var:phone}})`);
+  }
+});
 
 // booking_50: varauksen tuotevalinta näkyy tilauslohkossa ("Saunahoito – Hunajahoito" / EN "Saunahoito – Honey treatment"); ilman valintaa viesti on ennallaan
 for (const locale of ['fi', 'en']) {
