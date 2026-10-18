@@ -17,7 +17,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const FALLBACK_FILE = join(root, 'content/site-texts.fallback.json');
 export const FIXTURE_DEFAULT = join(root, 'tests/fixtures/site-texts/rpc.json');
 export const SHOP_PREFIXES = ['ui.'];                 // kaupan tarvitsemat avainalueet (§18.2: ui.<alue>.<nimi>)
-export const SHOP_EXCLUDE = ['ui.site.', 'ui.footer.', 'ui.reviews.', 'ui.training_banner.', 'ui.articles.', 'ui.card.', 'ui.alt.', 'ui.session.'];   // staattisen sivuston ui-alueet (osa 3 PR 2): rakennusaikaisia, eivät kuulu kaupan datakuormaan
+export const SHOP_EXCLUDE = ['ui.site.', 'ui.footer.', 'ui.reviews.', 'ui.training_banner.', 'ui.articles.', 'ui.card.', 'ui.alt.', 'ui.session.', 'ui.mobilepay.start_error_'];   // staattisen sivuston ui-alueet (osa 3 PR 2) ja edge-funktion (mobilepay-start) virhesivun tekstit (PR 3): eivät kuulu kaupan datakuormaan
 const readJson = (f) => { try { return JSON.parse(readFileSync(f, 'utf8')); } catch { return null; } };
 
 const cleanRows = (rows) => (Array.isArray(rows) ? rows : []).filter((r) => r && typeof r.key === 'string' && typeof r.lang === 'string' && typeof r.text === 'string' && r.text.trim())

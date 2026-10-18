@@ -9,6 +9,10 @@ import {
 import fontkit from "npm:@pdf-lib/fontkit@1.1.1";
 import { FONT_B64 } from "./fonts.ts";
 import { PHOTO_B64 } from "./photos.ts";
+import { makeT, type TFn } from "../_shared/site_texts.ts";
+import { GIFT_CARD_PDF_TEXTS } from "./texts.ts";
+export { GIFT_CARD_PDF_TEXTS };
+const DEFAULT_T: TFn = makeT(GIFT_CARD_PDF_TEXTS);
 
 const W = 595.28, H = 841.89;              // A4 pysty, pt
 const hex = (h: number) => rgb(((h >> 16) & 255) / 255, ((h >> 8) & 255) / 255, (h & 255) / 255);
@@ -59,13 +63,15 @@ export const showsPrice = (d: any): boolean => isOpenCard(d) || d?.source === "j
 
 export interface LogoImage { bytes: Uint8Array }
 
-export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOverride?: string): Promise<Uint8Array> {
+export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOverride?: string, tfn: TFn = DEFAULT_T): Promise<Uint8Array> {
   const en = (langOverride ?? d.locale) === "en";
+  /** Asiakasnäkyvä teksti (DB tai repon oletus), WinAnsi-siivottuna */
+  const TX = (key: string, vars?: Record<string, string | number | null | undefined>) => san(tfn(key, en ? "en" : "fi", vars));
   const pdf = await PDFDocument.create();
   pdf.registerFontkit(fontkit);
   const code = san(d.code);
-  pdf.setTitle(san(`${en ? "Gift card" : "Lahjakortti"} ${code}`)); pdf.setProducer("Sipoonjoen Perinnesauna"); pdf.setCreator("booking");
-  pdf.setSubject(en ? "Gift card" : "Lahjakortti");
+  pdf.setTitle(san(`${TX("email.gift_card_pdf.title")} ${code}`)); pdf.setProducer(TX("email.gift_card_pdf.producer")); pdf.setCreator("booking");
+  pdf.setSubject(TX("email.gift_card_pdf.title"));
   let page = pdf.addPage([W, H]);
   const ef = (k: string) => pdf.embedFont(unb64(FONT_B64[k]), { subset: true, features: k.startsWith("cormorant") ? { lnum: true } : undefined });
   const serif = await ef("cormorant-500"), serifB = await ef("cormorant-600"), serifI = await ef("cormorant-italic-500");
@@ -79,8 +85,8 @@ export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOve
 
   // ---------- sisältömalli ----------
   const isOpen = isOpenCard(d);
-  const pkgName = isOpen ? (en ? "Valid for all our services" : "Käy kaikkiin palveluihimme")
-    : san((en ? d.package?.name_en : d.package?.name) ?? d.package?.name ?? (en ? "Smoke sauna gift card" : "Savusaunalahjakortti"));
+  const pkgName = isOpen ? TX("email.gift_card_pdf.open_card_name")
+    : san((en ? d.package?.name_en : d.package?.name) ?? d.package?.name ?? TX("email.gift_card_pdf.default_package_name"));
   // hinta näytetään vain avoimessa summakortissa (ja Johku-kortilla); lahjakorttipaketilla ei (saaja ei näe pakettihintaa)
   const hidePrice = !showsPrice(d);
   const value = money(Number(d.initial_amount ?? 0), en);
@@ -88,19 +94,19 @@ export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOve
   const items: any[] = isOpen ? [] : (Array.isArray(d.package?.items) ? d.package.items : []);
   const itemLines = items.map((it) => { const lb = san((en ? it.label_en : it.label) ?? it.label ?? it.label_en ?? ""); return lb ? `${lb}${it.persons ? ` × ${it.persons}` : ""}` : ""; }).filter(Boolean).slice(0, 4);
   const meta: [string, string][] = [];
-  const validTxt = d.valid_to ? (en ? dateOnly(d.valid_to, true) : `${dateOnly(d.valid_to, false)} asti`) : "";
-  if (!isOpen && d.package?.persons) meta.push([en ? "Persons" : "Henkilömäärä", en ? `${d.package.persons} persons` : `${d.package.persons} henkilöä`]);
-  if (!hidePrice && Math.abs(Number(d.balance ?? 0) - Number(d.initial_amount ?? 0)) > 0.004) meta.push([en ? "Balance" : "Saldo", money(Number(d.balance ?? 0), en)]);
-  meta.push([en ? "Issued" : "Myönnetty", helsinkiDate(d.issued_at, en)]);
+  const validTxt = d.valid_to ? TX("email.gift_card_pdf.valid_value", { date: dateOnly(d.valid_to, en) }) : "";
+  if (!isOpen && d.package?.persons) meta.push([TX("email.gift_card_pdf.persons_label"), TX("email.gift_card_pdf.persons_value", { n: d.package.persons })]);
+  if (!hidePrice && Math.abs(Number(d.balance ?? 0) - Number(d.initial_amount ?? 0)) > 0.004) meta.push([TX("email.gift_card_pdf.balance"), money(Number(d.balance ?? 0), en)]);
+  meta.push([TX("email.gift_card_pdf.issued"), helsinkiDate(d.issued_at, en)]);
   const web = stripProto(S.web ?? "saunotus.fi");
   const how = d.redeemable_now
-    ? (en ? `Book at ${web} and enter the code at checkout, or tell us the code at the sauna.` : `Varaa aika osoitteessa ${web} ja syötä koodi maksuvaiheessa tai kerro koodi saunalla.`)
-    : (en ? `Tell us the code at the sauna or contact us: ${[S.email, S.phone].filter(Boolean).join(" · ")}.` : `Kerro koodi saunalla tai ota yhteyttä: ${[S.email, S.phone].filter(Boolean).join(" · ")}.`);
-  const stampTxt = d.status === "expired" ? (en ? "EXPIRED" : "VANHENTUNUT") : d.status === "used" ? (en ? "USED" : "KÄYTETTY") : "";
+    ? TX("email.gift_card_pdf.how_online", { web })
+    : TX("email.gift_card_pdf.how_offline", { contact: [S.email, S.phone].filter(Boolean).join(" · ") });
+  const stampTxt = d.status === "expired" ? TX("email.gift_card_pdf.stamp_expired") : d.status === "used" ? TX("email.gift_card_pdf.stamp_used") : "";
   const addr = [S.address, [S.zip, S.city].filter(Boolean).join(" ")].filter(Boolean).join(", ");
   const footLines = [
-    "Sipoonjoen Perinnesauna",
-    san([addr, [S.legal_name, S.business_id ? `${en ? "Business ID" : "Y-tunnus"} ${S.business_id}` : ""].filter(Boolean).join(", ")].filter(Boolean).join(" · ")),
+    TX("email.gift_card_pdf.footer_name"),
+    san([addr, [S.legal_name, S.business_id ? TX("email.gift_card_pdf.business_id", { id: S.business_id }) : ""].filter(Boolean).join(", ")].filter(Boolean).join(" · ")),
     san([S.phone, S.email, S.web ? stripProto(S.web) : ""].filter(Boolean).join(" · ")),
   ].filter(Boolean);
 
@@ -176,7 +182,7 @@ export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOve
   // Asettelu: kaari (keskitetty, print-turvallinen: kaikki marginaalin sisällä, ei täysreunakuvaa)
   function layoutKaari() {
     const M = 22, cx = W / 2, colW = 396, archTop = 50, archWMax = 284;
-    const title = en ? "Gift card" : "Lahjakortti", titleSz = 46;
+    const title = TX("email.gift_card_pdf.title"), titleSz = 46;
     const logoH = 36, fs = 8, flh = 11.5, footBlockH = Math.max(footLines.length * flh, logoImg ? logoH : 0);
     const footTop = H - M - 16 - footBlockH;
     const target = footTop - 30;                 // viimeisen ohjerivin perusviiva korkeintaan tähän
@@ -213,14 +219,14 @@ export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOve
         for (const l of nl.slice(0, 3)) { txt(l, cx, t, nsz, serifB, C.ink, "c"); t += nsz * 1.08; }
         const il = itemLines.flatMap((l) => wrap(l, sans, 11.5, colW));
         if (il.length) {
-          t += 12; caps(en ? "Includes" : "Sisältää", cx, t + 6, 6.8, sansB, C.gold, 2.4, "c"); t += 10;
+          t += 12; caps(TX("email.gift_card_pdf.includes"), cx, t + 6, 6.8, sansB, C.gold, 2.4, "c"); t += 10;
           for (const l of il) { t += 16; txt(l, cx, t, 11.5, sans, C.text, "c"); }
         }
       }
       t += gap * 1.3;
       // saaja + tervehdys
       if (recipient) {
-        caps(en ? "For" : "Saajalle", cx, t + 4, 7.2, sansB, C.gold, 2.6, "c"); t += 6;
+        caps(TX("email.gift_card_pdf.for"), cx, t + 4, 7.2, sansB, C.gold, 2.6, "c"); t += 6;
         let rs = 27; while (rs > 15 && wid(recipient, serifB, rs) > colW) rs -= 1;
         for (const l of wrap(recipient, serifB, rs, colW).slice(0, 2)) { t += rs * 1.0; txt(l, cx, t, rs, serifB, C.ink, "c"); t += rs * 0.12; }
         t += 4;
@@ -231,7 +237,7 @@ export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOve
       }
       if (buyer && greeting) { const f = fit(`— ${buyer}`, serifB, 13.5, 9, colW); t += 24; txt(f.s, cx, t, f.sz, serifB, C.gold, "c"); }
       else if (buyer) {
-        t += recipient ? 16 : 0; caps(en ? "From" : "Lahjoittaja", cx, t + 4, 7.2, sansB, C.gold, 2.6, "c"); t += 6;
+        t += recipient ? 16 : 0; caps(TX("email.gift_card_pdf.from"), cx, t + 4, 7.2, sansB, C.gold, 2.6, "c"); t += 6;
         const f = fit(buyer, serifB, 21, 13, colW); t += f.sz; txt(f.s, cx, t, f.sz, serifB, C.ink, "c");
       }
       t += 18 + gap;
@@ -239,12 +245,12 @@ export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOve
       const bw = 332, bh = 70, bx = cx - bw / 2;
       page.drawRectangle({ x: bx, y: yb(t + bh), width: bw, height: bh, color: C.green });
       page.drawRectangle({ x: bx + 4, y: yb(t + bh) + 4, width: bw - 8, height: bh - 8, borderColor: C.accent, borderWidth: 0.6, borderOpacity: 0.75 });
-      caps(en ? "Gift card code" : "Lahjakortin koodi", cx, t + 21, 6.8, sansB, C.kick, 2.2, "c");
+      caps(TX("email.gift_card_pdf.code_label"), cx, t + 21, 6.8, sansB, C.kick, 2.2, "c");
       let csz = 28; while (csz > 18 && wid(code, mono, csz) > bw - 36) csz -= 1;
       txt(code, cx, t + 51, csz, mono, C.cream, "c");
       t += bh + gap + 6;
       // voimassaolo + muut tiedot
-      const cells = ([[en ? "Valid until" : "Voimassa", validTxt], ...meta] as [string, string][]).filter((c) => c[1]);
+      const cells = ([[TX("email.gift_card_pdf.valid_until"), validTxt], ...meta] as [string, string][]).filter((c) => c[1]);
       const cw = Math.min(150, 450 / cells.length);
       cells.forEach(([k, v], i) => {
         const x = cx - (cells.length * cw) / 2 + cw * i + cw / 2;

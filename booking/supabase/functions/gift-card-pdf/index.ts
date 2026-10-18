@@ -2,7 +2,8 @@
 // Sisältö: booking.svc_get_gift_card_pdf_data(token) (service_role; ei IP-rate limitiä, public_get_gift_card käyttää samaa). Ei välimuistia: saldo/voimassaolo/tila voivat muuttua.
 // Logo: seller.logo_url (4 s aikaraja; epäonnistuessa PDF ilman logoa). Maksamaton/mitätöity kortti -> 409 not ready (ei PDF:ää).
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { buildGiftCardPdf } from "./render.ts";
+import { buildGiftCardPdf, GIFT_CARD_PDF_TEXTS } from "./render.ts";
+import { fetchSiteTexts, makeT } from "../_shared/site_texts.ts";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const cors = { "access-control-allow-origin": "*", "access-control-allow-headers": "authorization, x-client-info, apikey, content-type" };
@@ -31,6 +32,8 @@ Deno.serve(async (req) => {
   if (!data?.ok) return new Response(data?.code === "not_ready" ? "not ready" : "not found", { status: data?.code === "not_ready" ? 409 : 404, headers: cors });
   const logo = await fetchLogo(data.seller?.logo_url);
   let bytes: Uint8Array;
-  try { bytes = await buildGiftCardPdf(data, logo, lang === "en" || lang === "fi" ? lang : undefined); } catch (_e) { return new Response("error", { status: 500, headers: cors }); }
+  // tekstit tietokannasta (email.gift_card_pdf.*; §18) → repon oletus jos haku epäonnistuu
+  const st = await fetchSiteTexts({ url: Deno.env.get("SUPABASE_URL"), anonKey: Deno.env.get("SUPABASE_ANON_KEY"), prefixes: ["email.gift_card_pdf."] });
+  try { bytes = await buildGiftCardPdf(data, logo, lang === "en" || lang === "fi" ? lang : undefined, makeT(GIFT_CARD_PDF_TEXTS, st?.rows, st?.settings)); } catch (_e) { return new Response("error", { status: 500, headers: cors }); }
   return new Response(req.method === "HEAD" ? null : bytes, { headers: { ...cors, "content-type": "application/pdf", "content-disposition": `inline; filename="lahjakortti.pdf"`, "cache-control": "private, no-store" } });
 });

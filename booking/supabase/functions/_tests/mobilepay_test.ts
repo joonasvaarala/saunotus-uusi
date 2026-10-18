@@ -145,6 +145,21 @@ Deno.test("start: GET ?p=link -> 302 Vippsiin", async () => {
   assertEquals(d.calls.find((c) => c.fn === "mobilepay_payment_prepare")!.args.p_link_token, TOK);
 });
 
+Deno.test("start: virheilmoitusten tekstit tulevat tekstihausta (DB → oletus); GET-virhesivu ja JSON-message samasta lähteestä (§18)", async () => {
+  const { makeT } = await import("../_shared/site_texts.ts");
+  const { MOBILEPAY_START_TEXTS } = await import("../mobilepay-start/texts.ts");
+  const d = fakeDb({}, "off");
+  const texts = makeT(MOBILEPAY_START_TEXTS, [{ key: "ui.mobilepay.start_error_off", lang: "fi", text: "MobilePay on pois käytöstä <b>&" }], null, () => {});
+  const j = await startHandle(post("https://f/s", { order_token: TOK }), { db: d.db, env: env(), fetch: fetch, texts });
+  assertEquals(j.status, 503); assertEquals((await j.json()).message, "MobilePay on pois käytöstä <b>&");
+  const g = await startHandle(new Request(`https://f/mobilepay-start?p=${TOK}`), { db: d.db, env: env(), fetch: fetch, texts });
+  assertEquals(await g.text(), `<!doctype html><meta charset="utf-8"><title>MobilePay</title><p>MobilePay on pois käytöstä b</p>`, "GET-sivulla <>& poistetaan kuten ennenkin");
+  const dflt = await startHandle(post("https://f/s", { order_token: TOK }), { db: d.db, env: env(), fetch: fetch });
+  assertEquals((await dflt.json()).message, "MobilePay-maksu ei ole käytössä", "oletusteksti ennallaan");
+  const bad = await startHandle(post("https://f/s", { order_token: "x" }), { db: d.db, env: env(), fetch: fetch });
+  assertEquals((await bad.json()).message, "Virheellinen pyyntö");
+});
+
 // ---------- flow ----------
 const vp = (o: Record<string, unknown> = {}) => ({ state: "AUTHORIZED", reference: REF, amount: { currency: "EUR", value: 4000 }, aggregate: { authorizedAmount: { currency: "EUR", value: 4000 }, capturedAmount: { currency: "EUR", value: 0 } }, userDetails: { email: "a@b.fi", firstName: "Maija", lastName: "Meikäläinen", mobileNumber: "358401234567" }, ...o });
 const capturedAgg = { aggregate: { authorizedAmount: { currency: "EUR", value: 4000 }, capturedAmount: { currency: "EUR", value: 4000 } } };
