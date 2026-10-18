@@ -39,8 +39,9 @@ const DIST = join(WORK, 'dist');
 const b = spawnSync('node', [join(root, 'booking/shop/build.mjs')], { cwd: root, encoding: 'utf8', env: { ...process.env, SITE_URL: 'http://localhost:4180', SITE_ENV: 'test', SITE_TEXTS_FIXTURE: join(WORK, 'fixture.json'), SHOP_DIST: DIST } });
 if (b.status !== 0) { console.error(b.stdout.slice(-2000), b.stderr.slice(-2000)); process.exit(1); }
 expect(!/käyttää repon varatekstiä/.test(b.stdout), 'buildin pitäisi löytää kaikki page.*/seo.*-avaimet fixturesta');
-const PHONE = (await import(pathToFileURL(join(root, 'booking/shop/src/phone.js')))).PHONE_DISPLAY;   // yksi vakio (näkyvä muoto 010 299 2866)
-expect(!!PHONE, 'site.contact.phone puuttuu');
+const { phoneDisplay } = await import(pathToFileURL(join(root, 'booking/shop/src/phone.js')));   // yksi vakio, kielikohtainen näkyvä muoto (fi 010 299 2866, en +358 10 299 2866)
+const PHONES = { fi: phoneDisplay('fi'), en: phoneDisplay('en') };
+expect(PHONES.fi === '010 299 2866' && PHONES.en === '+358 10 299 2866', 'puhelinvakio');
 
 const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.avif': 'image/avif', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.ico': 'image/x-icon' };
 const server = createServer(async (req, res) => {
@@ -82,7 +83,7 @@ for (const lang of ['fi', 'en']) for (const w of [390, 1280]) {
   const h1 = await page.locator('main h1').first().innerText(), title = await page.title(), txt = await body(page);
   expect(h1 === OVR['page.book.title'][li], `${label}: h1 "${h1}" ≠ DB-teksti (build page.book.title)`);
   expect(title.includes('(DB)'), `${label}: <title> ei käytä seo.book.title-tekstiä: ${title}`);
-  expect(txt.includes(OVR['ui.shop.lead'][li].replace('{{var:phone}}', PHONE)), `${label}: ui.shop.lead (DB) + puhelin "${PHONE}" puuttuu sivulta`);
+  expect(txt.includes(OVR['ui.shop.lead'][li].replace('{{var:phone}}', PHONES[lang])), `${label}: ui.shop.lead (DB) + puhelin "${PHONES[lang]}" puuttuu sivulta`);
   noRaw(txt, label); await hscroll(page, label); await shot(page, label);
   // funktiolehti (times_free, monikko one/other): päivänäkymä – seuraavan 10 päivän ensimmäinen päivä, jolla on vapaita aikoja
   let spots = [];
@@ -114,7 +115,7 @@ for (const [name, handler] of Object.entries(variants)) for (const lang of ['fi'
   const label = `B-${name}-${lang}`, page = await newPage(390, lang, label, handler, name === 'rikkinäinen-paikkamerkki' ? /site-texts: ui\.shop\.lead \[(fi|en)\] ohitettu/ : null);
   await go(page, `${PATH[lang].shop}?mock=1`, '#booking-app [class*=bk-]'); await page.waitForTimeout(500);
   const txt = await body(page), L0 = T[lang].lead;
-  if (name === 'vain-fi' && lang === 'fi') expect(txt.includes(OVR['ui.shop.lead'][0].replace('{{var:phone}}', PHONE)), `${label}: fi-rivit pitäisi käyttää`);
+  if (name === 'vain-fi' && lang === 'fi') expect(txt.includes(OVR['ui.shop.lead'][0].replace('{{var:phone}}', PHONES.fi)), `${label}: fi-rivit pitäisi käyttää`);
   else expect(txt.includes(L0), `${label}: repon oletus "${L0}" puuttuu`);
   if (lang === 'en') expect(!txt.includes(DEFAULTS.fi.lead) && !/Valitse kokemus/.test(txt), `${label}: en-sivulla suomenkielistä tekstiä`);
   if (!(name === 'vain-fi' && lang === 'fi')) expect(!/Valitse kokemus \(DB\)|Choose an experience \(DB\)/.test(txt), `${label}: ui.shop.lead (DB) näkyy vaikka riviä ei pitäisi käyttää`);
