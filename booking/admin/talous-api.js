@@ -157,7 +157,7 @@ export function rpcBackend(rpc) {
     return res;
   };
   return {
-    listOrders: async (a) => call('listOrders', compact({ p_search: a.search, p_status: a.status, p_payment_status: a.paymentStatus, p_source: a.source, p_native: a.native === 'native' ? true : a.native === 'imported' ? false : undefined,
+    listOrders: async (a) => call('listOrders', compact({ p_search: a.search, p_status: a.status, p_payment_status: a.paymentStatus, p_payment_filter: a.paymentFilter, p_source: a.source, p_native: a.native === 'native' ? true : a.native === 'imported' ? false : undefined,
       p_date_field: a.dateField === 'start' ? 'start' : undefined, p_from: a.from, p_to: a.to, p_sort: orderSortParam(a.sortBy, a.sortDir), p_limit: lim(a.limit), p_offset: Math.max(0, Math.trunc(+a.offset) || 0) })),
     listPayments: async (a) => call('listPayments', compact({ p_search: a.search, p_method: a.method, p_status: a.status, p_from: a.from, p_to: a.to, p_sort: paymentSortParam(a.sortDir), p_limit: lim(a.limit), p_offset: Math.max(0, Math.trunc(+a.offset) || 0) })),
     getOrder: (id) => call('getOrder', { p_order_id: id }),

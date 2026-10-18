@@ -1,5 +1,6 @@
 // Jaettu suodatinlaatikko hallinnan listoille: haku jää näkyviin, muut suodattimet ovat kiinni kunnes painike avaa ne.
 // Aktiivinen suodatin (eri kuin oletus) säilyy kiinni ollessaankin, ja painikkeessa näkyy lukumäärä.
+// status-solmu (esim. maksutilan siru) jää palkkiin näkyviin myös kun paneeli on kiinni.
 import { h } from './ui.js';
 import { icon } from './icons.js';
 import { filterText } from './filter-texts.js';
@@ -17,7 +18,7 @@ export function countActive(values, defaults) {
   return n;
 }
 
-export function filterDrawer({ search, filters, activeCount, testid = 'filters', className = '', open = false }) {
+export function filterDrawer({ search, filters, activeCount, status, testid = 'filters', className = '', open = false }) {
   const panelId = `filter-panel-${++seq}`;
   const panel = h('div', { class: 'filter-panel', id: panelId, hidden: !open || null, 'data-testid': `${testid}-panel` }, ...nodes(filters));
   const label = h('span', { class: 'filter-toggle-label', 'data-testid': `${testid}-label` });
@@ -32,7 +33,7 @@ export function filterDrawer({ search, filters, activeCount, testid = 'filters',
     onclick: () => setOpen(btn.getAttribute('aria-expanded') !== 'true'),
   }, label, badge, chev);
   const root = h('div', { class: `filter-drawer${className ? ` ${className}` : ''}`, 'data-testid': testid },
-    h('div', { class: 'filter-drawer-bar' }, ...nodes(search), btn), panel);
+    h('div', { class: 'filter-drawer-bar' }, ...nodes(search), ...nodes(status), btn), panel);
 
   function paint() {
     const on = btn.getAttribute('aria-expanded') === 'true';
