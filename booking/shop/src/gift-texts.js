@@ -44,6 +44,7 @@ export const GT = {
     'cst.pending_payment': 'Odottaa maksua', 'cst.active': 'Voimassa', 'cst.used': 'Käytetty', 'cst.expired': 'Vanhentunut', 'cst.cancelled': 'Mitätöity', 'cst.pending_verification': 'Tarkistettavana',
     'o.showCode': 'Näytä koodi', 'o.hideCode': 'Piilota koodi', 'o.codeLabel': 'Koodi', 'o.copy': 'Kopioi koodi', 'o.copied': 'Koodi kopioitu', 'o.pdf': 'Lataa PDF', 'o.codeGreeting': 'Tervehdys', 'o.codeBalance': 'Saldo', 'o.codeNotReady': 'Koodi tulee näkyviin, kun tilaus on maksettu.', 'o.codeError': 'Koodin haku epäonnistui. Yritä uudelleen.',
     // Yksi koodikenttä + kumppanilahjakortit (§13.12, booking_47/48)
+    'o.checkBtn': 'Näytä saldo', 'o.checking': 'Tarkistetaan…', 'o.balanceIs': 'Kortin saldo: {balance}. Käytettävissä tähän tilaukseen enintään {usable}.', 'o.balanceIsFull': 'Kortin saldo: {balance}.', 'o.checkUnknown': 'Koodi ei ole oman lahjakorttimme koodi. Kumppanin lahjakortin saldo ei näy tässä: kun painat "Käytä lahjakortti", valitset kortin myyjän ja henkilökunta lunastaa kortin.',
     'o.codeHint': 'Kirjoita koodi sellaisenaan. Isot ja pienet kirjaimet, viivat ja välilyönnit ovat yhdentekeviä.',
     'vc.chooseTitle': 'Mistä lahjakortti on ostettu?', 'vc.chooseLead': 'Emme löytäneet koodia omista lahjakorteistamme – valitse mistä lahjakortti on ostettu.', 'vc.sourceLegend': 'Lahjakortin myyjä', 'vc.suggest': 'Koodin muodon perusteella arvaamme: {source}. Tarkista valinta.',
     'vc.codeIs': 'Koodi: {code}', 'vc.change': 'Muuta koodia', 'vc.submit': 'Lähetä lahjakortti lunastettavaksi', 'vc.submitting': 'Lähetetään…',
@@ -100,6 +101,7 @@ export const GT = {
     'cst.pending_payment': 'Awaiting payment', 'cst.active': 'Valid', 'cst.used': 'Used', 'cst.expired': 'Expired', 'cst.cancelled': 'Cancelled', 'cst.pending_verification': 'Being verified',
     'o.showCode': 'Show code', 'o.hideCode': 'Hide code', 'o.codeLabel': 'Code', 'o.copy': 'Copy code', 'o.copied': 'Code copied', 'o.pdf': 'Download PDF', 'o.codeGreeting': 'Greeting', 'o.codeBalance': 'Balance', 'o.codeNotReady': 'The code appears once the order is paid.', 'o.codeError': 'Could not fetch the code. Please try again.',
     // One code field + partner gift cards (§13.12, booking_47/48)
+    'o.checkBtn': 'Show balance', 'o.checking': 'Checking…', 'o.balanceIs': 'Card balance: {balance}. Up to {usable} can be used for this order.', 'o.balanceIsFull': 'Card balance: {balance}.', 'o.checkUnknown': 'This is not a code of our own gift card. The balance of a partner’s gift card is not shown here: when you press "Use gift card", you choose the seller and our staff redeem the card.',
     'o.codeHint': 'Type the code as it is. Upper and lower case, dashes and spaces do not matter.',
     'vc.chooseTitle': 'Where was the gift card bought?', 'vc.chooseLead': 'We could not find the code among our own gift cards – please choose where the gift card was bought.', 'vc.sourceLegend': 'Gift card seller', 'vc.suggest': 'Based on the code format we guess: {source}. Please check the choice.',
     'vc.codeIs': 'Code: {code}', 'vc.change': 'Change code', 'vc.submit': 'Send gift card for redemption', 'vc.submitting': 'Sending…',

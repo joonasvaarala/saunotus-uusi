@@ -1,10 +1,10 @@
 // Varauskauppa: tuote → päivä/vuoro → henkilömäärä → yhteystiedot → vahvistus. Vaihtoehtoinen selaus: päivän mukaan (#/paiva/<pvm>) → kaikki päivän vuorot. Vanilla JS, ei riippuvuuksia, ei build-vaihetta.
 // Data tulee vain julkisista RPC-funktioista (public_catalog / public_product_images / public_availability / public_create_booking / public_get_booking / public_change_booking).
 // Asiakas ei voi itse perua vahvistettua varausta (peruutukset sähköpostilla henkilökunnalle); hän voi MUUTTAA varausta (toinen vuoro / henkilömäärä) asetuksen mukaan vähintään 48 h ennen vuoroa.
-import { rpc, storageUrl, functionUrl, setRpcOverride } from './sb.js';
-import { createMobilepayApi } from './mobilepay-api.js';
-import { normOptions, shouldShowButton, testUiEnabled } from './mobilepay-logic.js';
-import { payBlock } from './mobilepay-ui.js';
+import { rpc, storageUrl, setRpcOverride } from './sb.js';
+import { runReturn } from './mobilepay-ui.js';
+import { loadPayChoices, payChoicesSection, payNotice, onlineAvailable, onlineAtCheckout } from './pay-choices.js';
+import { pt } from './pay-choices-texts.js';
 import { T } from './i18n.js';
 import { loadProducts as loadTreatmentProducts, splitCatalog, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
 import { createTreatmentViews } from './treatment-ui.js';
@@ -64,7 +64,8 @@ const priceText = (p) => {
 const kindOf = (p) => (p.treatment ? 'hoito' : p.sale_kind === 'public_shift' ? 'yleinen' : p.sale_kind === 'private_shift' ? 'yksityinen' : 'muut');
 // ?mock=1: kokeilutila (EI palvelinta): kaikki RPC-kutsut vastataan selaimessa (shop-mock.js; ei tallenna mitään palvelimelle). Lippu säilytetään linkeissä.
 const MOCK = new URLSearchParams(location.search).get('mock') === '1';
-if (MOCK) setRpcOverride((await import('./shop-mock.js')).createShopMock({ fail: new URLSearchParams(location.search).get('fail') }).rpc);
+let MOCK_FETCH;   // ?mock=1&scenario=pay: mobilepay-start / mobilepay-notify -funktioiden mock (fetch-yhteensopiva)
+if (MOCK) { const sm = (await import('./shop-mock.js')).createShopMock({ fail: new URLSearchParams(location.search).get('fail'), scenario: new URLSearchParams(location.search).get('scenario') || '', mpResult: new URLSearchParams(location.search).get('mpresult') || '' }); setRpcOverride(sm.rpc); MOCK_FETCH = sm.mpFetch; }
 const bk = (hash) => `${S.shopHref}${MOCK ? '?mock=1' : ''}#${hash}`;
 
 const state = { catalog: null, settings: null, images: new Map(), treatments: [], months: new Map(), busy: false };
@@ -533,11 +534,17 @@ async function viewCheckout(ruleId, ds, productId, via) {
     h('div', { class: 'bk-pick-main' }, h('strong', { class: 'bk-pick-name', text: pname(p) }),
       h('span', { class: 'bk-pick-when', text: `${dayShort(s.starts_at)}${S.lang === 'fi' ? ', klo ' : ' · '}${tm(s.starts_at)}${s.ends_at ? `–${tm(s.ends_at)}` : ''}` })),
     h('a', { class: 'bk-pick-change', href: via === 'day' ? bk(`/paiva/${ds}?tuote=${p.slug}`) : bk(`/tuote/${p.slug}/${ds}`), text: t.changeSlot }));
+  // Maksuohje: tulee asetuksesta (public_payment_mode) ja palvelimen maksutavoista (MobilePay / lahjakortti) – ei oleteta pay_later-tilaa. Oletusteksti ensin, päivitys kun maksutavat on haettu.
+  const payNote = h('p', { class: 'bk-pay', 'data-testid': 'checkout-paynote', text: hold ? t.payHold(state.settings.hold_minutes || 15) : t.payLater });
+  loadPayChoices({ rpc, fetchImpl: MOCK_FETCH }).then((m) => {
+    if (!onlineAtCheckout(m)) return;
+    payNote.textContent = hold ? `${t.payHold(state.settings.hold_minutes || 15)} ${pt(S.lang, 'checkoutHoldOnline')}` : pt(S.lang, 'checkoutOnlineSite');
+  }).catch(() => { /* oletusteksti jää */ });
   mount(h('h2', { text: t.bookTitle }), pick,
     h('div', { class: 'bk-checkout' }, form,
       h('aside', { class: 'bk-aside', 'aria-label': t.summary }, h('h3', { text: t.summary }), sumList,
         h('p', { class: 'bk-totalrow' }, t.total + ': ', total, ' ', h('small', { text: t.vatIncl })),
-        h('p', { class: 'bk-pay', text: hold ? t.payHold(state.settings.hold_minutes || 15) : t.payLater }))));
+        payNote)));
   upd(); focusTop();
 }
 
@@ -547,18 +554,26 @@ const ics = (b) => {
   return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Sipoonjoen Perinnesauna//Varaus//FI', 'BEGIN:VEVENT', `UID:${b.order_no}@saunotus.fi`, `DTSTAMP:${z(new Date().toISOString())}`,
     `DTSTART:${z(it.starts_at)}`, `DTEND:${z(it.ends_at)}`, `SUMMARY:${it.product_name}`, 'LOCATION:Hindsbyntie 124\\, 04130 Sipoo', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
 };
-async function viewConfirmation() {
+// Vahvistussivu. refresh = päivitys maksun/lahjakortin jälkeen (ei spinneriä, ei fokuksen hyppyä); notice = ilmoitus maksusta; host = paluutilan paneeli (säilyy päivityksessä); noReturn = älä käynnistä ?pay=mobilepay-paluuta uudelleen.
+async function viewConfirmation({ refresh = false, notice = null, host = null, noReturn = false } = {}) {
   const [token, sub] = location.hash.slice(1).split('?')[0].split('/');
   if (!/^[0-9a-f-]{36}$/i.test(token)) { mount(errorBox(t.notFound)); return; }
-  spinner();
+  if (!refresh) spinner();
   let b; try { b = await rpc('public_get_booking', { p_token: token }); } catch { mount(errorBox(t.loadError), phoneBox()); return; }
   if (!b?.ok) { mount(errorBox(t.notFound), phoneBox()); return; }
   if (sub === 'muuta' && b.can_change) return isTreatmentBooking(b) ? viewTreatmentChange(token, b) : viewChange(token, b);
   const it = b.items[0];
   const sp = (await loadStatic()).get(+it.product_id), prodName = (S.lang === 'en' && sp?.name_en) || it.product_name;   // englanniksi kb-nimi (palvelin palauttaa suomenkielisen)
   const head = { confirmed: t.confConfirmed, pending: t.confPending, cancelled: t.confCancelled, expired: t.confExpired }[b.status] || b.status;
-  const pay = { paid: t.paid, unpaid: t.unpaid, pending: t.pending }[b.payment_status] || b.payment_status;
+  // Maksutavat (MobilePay, lahjakortti) samoista moduuleista kuin tilaussivulla; virhe / puuttuva RPC → null (ei maksuosiota, vanha näkymä). Paluu MobilePaysta (?pay=mobilepay) tarvitsee mp-rajapinnan aina.
+  const canPay = ['confirmed', 'pending'].includes(b.status) && b.payment_status !== 'paid';
+  const L = S.lang === 'en' ? 'en' : 'fi';
+  const retPay = new URLSearchParams(location.search).get('pay') === 'mobilepay' && !noReturn;
+  const model = canPay || retPay ? await loadPayChoices({ rpc, token, fetchImpl: MOCK_FETCH }).catch(() => null) : null;
+  const online = !!model && canPay && onlineAvailable(model);   // verkkomaksutapa tarjolla → ei oleteta "maksu paikan päällä"
+  const pay = { paid: t.paid, unpaid: online ? pt(L, 'unpaidOnline') : t.unpaid, pending: t.pending, partially_paid: pt(L, 'partlyPaid') }[b.payment_status] || b.payment_status;
   const out = h('div', { id: 'bk-cancel-msg', 'aria-live': 'polite' });
+  const mpHost = host || h('div', { 'data-testid': 'mp-result', 'aria-live': 'polite' });
   // Valittu hoito (booking_50): items[].option {code,name,name_en}; null + tuote vaatii valinnan (vanha varaus) → "valitsematta" + ohje muuttaa varausta
   const ox = OPT[S.lang] || OPT.fi;
   let optRow = null, optNote = null;
@@ -586,24 +601,27 @@ async function viewConfirmation() {
     out.replaceChildren(r.ok ? h('p', { class: 'bk-ok', text: t.cancelled }) : errorBox(r.message || t.cancelFail));
     if (r.ok) setTimeout(() => location.reload(), 800);
   } }, t.cancelBooking));
-  mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { text: b.status === 'cancelled' ? t.confCancelled : t.confTitle }), h('p', { class: 'bk-status', role: 'status', text: head }), dl,
-    b.status === 'confirmed' && b.payment_status !== 'paid' && (b.customer_kind === 'company' || !isTreatmentBooking(b)) ?  /* hoitovarauksella ei maksuohjetta (vain yritysasiakkaan laskutusohje) */ h('p', { class: 'bk-pay', text: b.customer_kind === 'company' ? t.companyNote : t.payLater }) : null, optNote && b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-option-note', text: optNote }) : null, actions, out,
+  mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { text: b.status === 'cancelled' ? t.confCancelled : t.confTitle }), h('p', { class: 'bk-status', role: 'status', text: head }), mpHost, dl,
+    b.status === 'confirmed' && b.payment_status !== 'paid' && (b.customer_kind === 'company' || (!isTreatmentBooking(b) && !online)) ?  /* hoitovarauksella ei maksuohjetta (vain yritysasiakkaan laskutusohje) */ h('p', { class: 'bk-pay', text: b.customer_kind === 'company' ? t.companyNote : t.payLater }) : null, optNote && b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-option-note', text: optNote }) : null, actions, out,
     b.status === 'confirmed' ? h('p', { class: 'bk-note', text: b.can_change ? t.changeInfo(b.change_hours_before, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) : t.changeLocked(b.change_hours_before) }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })) : null,
     h('p', { class: 'bk-note', text: t.emailNote }), h('p', {}, h('a', { href: S.infoHref, text: t.directions }))));
-  focusTop();
-  if (['confirmed', 'pending'].includes(b.status) && b.payment_status !== 'paid') attachMobilepay(token, root.firstElementChild);
-}
-// "Maksa MobilePaylla" vahvistussivulla (§14.5): vain kun public_payment_options sallii; testitilan tapa vain testiympäristössä. Virhe / puuttuva RPC → ei mitään. Paluu maksun jälkeen tilaussivulle (?pay=mobilepay).
-async function attachMobilepay(token, box) {
-  try {
-    const cfg = window.BOOKING_CONFIG || {}, env = { testUi: testUiEnabled(cfg, location.search), mock: false, official: cfg.mobilepayOfficialButton !== false };
-    const mp = createMobilepayApi({ rpc, token, functionUrl, anonKey: cfg.anonKey });
-    const opts = normOptions(await mp.options());
-    if (!box || root.firstElementChild !== box || !shouldShowButton(opts, env)) return;
-    const sec = h('section', { class: 'bk-mp', 'data-testid': 'mp-section' }, payBlock({ S, L: S.lang === 'en' ? 'en' : 'fi', api: mp, opts, env, amount: opts.unpaid != null ? money(opts.unpaid) : '' }));
-    const anchor = box.querySelector('.bk-actions');
-    anchor ? anchor.before(sec) : box.append(sec);
-  } catch { /* ei painiketta */ }
+  // Maksuosio (MobilePay + lahjakortti) toimintojen alle; ei näytetä kun paluu MobilePaysta on kesken (tulos näkyy sivun yläosassa)
+  const again = (n) => viewConfirmation({ refresh: true, notice: n, host: mpHost, noReturn: true });
+  let secEl = null;
+  if (model && canPay && !retPay) {
+    secEl = payChoicesSection({ S, L, token, model, booking: b, notice,
+      onApplied: (text) => again({ kind: 'gift', text }), onClaimed: (n) => again({ kind: 'claim', ...n }), onChanged: (n) => again({ kind: 'claim', ...n }) });
+  }
+  if (!secEl && notice && notice.kind === 'gift') secEl = payNotice(L, notice);   // kokonaan maksettu: maksuosio poistuu, mutta ilmoitus jää
+  if (secEl) root.firstElementChild.querySelector('.bk-actions')?.before(secEl);
+  if (refresh) { const el = root.querySelector('[data-testid=pc-notice],[data-testid=vc-notice]'); if (el) { el.scrollIntoView({ block: 'center' }); el.focus({ preventScroll: true }); } } else focusTop();
+  if (retPay && model) {   // paluu MobilePaysta: reconcile + public_get_booking-polling → tulos (maksettu / epäonnistui / odottaa), sivu päivittyy lopuksi
+    const num = (k) => { const v = +new URLSearchParams(location.search).get(k); return Number.isFinite(v) && v > 0 ? v : undefined; };
+    runReturn({ mp: model.mp, host: mpHost, S, L, orderNo: b.order_no, timing: MOCK ? { intervalMs: num('mpinterval'), maxMs: num('mpmax') } : {},
+      getOrder: async () => { const n = await rpc('public_get_booking', { p_token: token }); return n?.ok ? n : null; },
+      onDone: async (res) => { if (res?.state === 'net') return;   /* verkkovirhe: jätä tarkista-uudelleen -paneeli näkyviin äläkä lataa sivua uudelleen */
+        await viewConfirmation({ refresh: true, host: mpHost, noReturn: true }); } }).catch(() => {});
+  }
 }
 
 async function viewTreatmentChange(token, b) {   // hoitovarauksen muutos: tuote haetaan adapterin kautta (vahvistussivulla ei ole ladattu kauppaa)

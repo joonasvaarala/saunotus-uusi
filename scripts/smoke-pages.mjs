@@ -706,6 +706,21 @@ for (const [label, viewport, mobile] of [['mobiili', { width: 390, height: 700 }
   if (/pay=mobilepay/.test(page.url())) problems.push('mobilepay: ?pay=mobilepay pitää poistaa osoitteesta paluun jälkeen');
   await page.context().close();
 }
+// 7c) Maksuvalinta vahvistussivulla (mock scenario=pay): MobilePay + lahjakortti; klikkaus → paluu samalle sivulle alipolulla (?pay=mobilepay, token hashissa) → maksettu
+{
+  const CF = '/varaa/vahvistus/?mock=1&scenario=pay&mpinterval=100&mpmax=5000#3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c';
+  const page = await newPage('vahvistus-maksu');
+  await page.route('https://cdn.vippsmobilepay.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/javascript', body: "customElements.get('vipps-mobilepay-button')||customElements.define('vipps-mobilepay-button',class extends HTMLElement{connectedCallback(){const b=document.createElement('button');b.type='button';b.textContent='MobilePay';b.style.minHeight='48px';this.appendChild(b);}});" }));
+  await page.goto(`${BASE}${CF}`);
+  await page.waitForSelector('[data-testid=pay-choices] [data-testid=mp-button]');
+  if ((await page.locator('[data-testid=pc-gift-btn]').count()) !== 1) problems.push('vahvistus-maksu: "Maksa lahjakortilla" puuttuu');
+  const sw2 = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  if (sw2 > 0) problems.push(`vahvistus-maksu: vaakavieritys ${sw2}px`);
+  await page.click('[data-testid=mp-button]');
+  await page.waitForSelector('[data-testid=mp-result-panel][data-state=paid]', { timeout: 15000 });
+  if (!page.url().includes(`${new URL(BASE).pathname.replace(/\/$/, '')}/varaa/vahvistus/`) || /pay=mobilepay/.test(page.url()) || !page.url().includes('#3f2b8c1e')) problems.push(`vahvistus-maksu: paluu väärälle polulle tai ?pay jäi osoitteeseen (${page.url()})`);
+  await page.context().close();
+}
 // 8) Lahjakorttisivu alipolulla: kytkimet pois → ennallaan (Johku-osiot); päällä → myynti- ja saldolohko; RPC puuttuu → ennallaan
 for (const [mode, lang, path] of [['off', 'fi', '/lahjakortti/'], ['on', 'fi', '/lahjakortti/'], ['on', 'en', '/en/gift-card/'], ['missing', 'fi', '/lahjakortti/']]) {
   giftMode = mode;

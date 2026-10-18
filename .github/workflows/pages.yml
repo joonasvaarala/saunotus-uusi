@@ -32,6 +32,8 @@ jobs:
           node-version: 20
       - run: node --test booking/supabase/functions/admin-users/logic.test.js
       - run: node --test booking/tests/mobilepay-shop.test.mjs
+      # maksuvalinta kassalle/vahvistussivulle (MobilePay + lahjakortti): tekstit, tarjontapäätökset, mock-skenaario, paluuosoite
+      - run: node --test booking/tests/kassa-maksu.test.mjs
       # hoitovalitsin (booking_50): kaupan/hallinnan logiikka, FI/EN-tekstit, mockit vs. sopimus
       - run: node --test booking/tests/hoitovalitsin.test.mjs
       - run: node scripts/build-pages.mjs
