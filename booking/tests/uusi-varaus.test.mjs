@@ -100,5 +100,6 @@ test('Tyylit: ei sinistä focus-rengasta, nav-järjestys: Talous heti Varaukset-
   assert.match(css, /:focus-visible\{outline:3px solid var\(--gold\)/);
   const js = readFileSync(join(root, 'admin/admin.js'), 'utf8');
   const order = [...js.matchAll(/\{ path: '([^']*)', label:/g)].map((m) => m[1]);
-  assert.deepEqual(order.slice(0, 7), ['', 'varaukset', 'talous', 'kalenteri', 'tarkista', 'uusi', 'asiakkaat']);
+  assert.equal(order[order.indexOf('varaukset') + 1], 'talous');
+  assert.deepEqual(order.slice(0, 8), ['', 'varaukset', 'talous', 'pikakassa', 'kalenteri', 'tarkista', 'uusi', 'asiakkaat']);
 });

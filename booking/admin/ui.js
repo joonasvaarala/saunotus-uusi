@@ -82,6 +82,10 @@ export const ERR_FI = {
   no_conflict: 'Sulkukonfliktia ei ole tälle varaukselle ja sululle.',
   not_missing: 'Varaukselta ei puutu saunottajaa (tai poikkeus on jo myönnetty), joten poikkeusta ei tarvita.',
   therapist_present: 'Varauksella on jo saunottaja, joten poikkeusta ei tarvita.',
+  secrets_not_allowed: 'Salaisuuksia ei tallenneta asetuksiin. Ne annetaan myöhemmin suojatulla lomakkeella.',
+  approval_required: 'Yhdistetty tila vaatii hyväksyjän nimen ja päivän.',
+  live_incomplete: 'Yhdistetty tila vaatii ALV-tilan, vähintään yhden myyntitilin ja maksutavan tilin.',
+  invalid_setting: 'Asetus ei kelpaa. Tarkista tilit, ALV-tila ja maksuehto.',
 };
 export const errMsg = (e) => {
   const t = e?.code && ERR_FI[e.code];

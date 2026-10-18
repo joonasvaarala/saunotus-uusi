@@ -15,6 +15,66 @@ export function helIso(ds, hhmm) {
   return new Date(t).toISOString();
 }
 const err = (code, message) => Object.assign(new Error(message || code), { name: 'ApiError', code, status: 400 });
+const SECRET_KEYS = new Set(['client_id', 'client_secret', 'api_key', 'password', 'token', 'refresh_token', 'access_token', 'secret', 'private_key', 'authorization', 'redirect_uri']);
+const SALES_RATES = ['25.5', '13.5', '0', '14', '24', '10'];
+const METHODS = ['cash', 'card_terminal', 'mobilepay', 'bank_transfer', 'invoice', 'gift_card', 'partner_voucher', 'visma_pay', 'annual_card', 'pay_later', 'other'];
+const hasSecret = (p) => {
+  if (p == null || typeof p !== 'object') return false;
+  if (Array.isArray(p)) return p.some(hasSecret);
+  return Object.entries(p).some(([k, v]) => SECRET_KEYS.has(String(k).toLowerCase()) || hasSecret(v));
+};
+const kept = (raw, key, prev, map) => (Object.prototype.hasOwnProperty.call(raw, key) ? map(raw[key]) : (prev ?? ''));
+function normalizeProcountor(raw, prev) {
+  if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) throw err('invalid_setting', 'Asetusten pitää olla objekti');
+  if (hasSecret(raw)) throw err('secrets_not_allowed', 'Salaisuuksia ei tallenneta asetuksiin');
+  const mode = String(raw.mode ?? prev.mode ?? 'off');
+  if (!['off', 'dry_run', 'live'].includes(mode)) throw err('invalid_setting', 'Tila on off, dry_run tai live');
+  let environment = String(raw.environment ?? prev.environment ?? 'pts').toLowerCase();
+  if (environment === 'sandbox') environment = 'pts';
+  if (environment !== 'pts' && environment !== 'prod') throw err('invalid_setting', 'Ympäristö on pts tai prod');
+  const approved = kept(raw, 'approved_by', prev.approved_by, (v) => String(v ?? '').trim());
+  if (approved && (approved.length < 3 || approved.length > 80 || approved.startsWith('eyJ'))) throw err('invalid_setting', 'approved_by on nimi ja päivä');
+  if (mode === 'live' && !approved) throw err('approval_required', 'live vaatii approved_by');
+  const vat = kept(raw, 'vat_status', prev.vat_status, (v) => String(v ?? '').trim());
+  if (vat && !/^[0-9]{1,4}$/.test(vat)) throw err('invalid_setting', 'ALV-tila on 1–4 numeroa');
+  const prefix = String(raw.api_prefix ?? prev.api_prefix ?? '/supported/api').trim() || '/supported/api';
+  if (!/^\/api$|^\/latest\/api$|^\/supported\/api$|^\/v[0-9]{4}\/api$/.test(prefix)) throw err('invalid_setting', 'API-etuliite ei kelpaa');
+  const bank = kept(raw, 'bank_account', prev.bank_account, (v) => String(v ?? '').replace(/\s/g, '').toUpperCase());
+  if (bank && !/^[A-Z]{2}[0-9]{2}[A-Z0-9]{10,30}$/.test(bank)) throw err('invalid_setting', 'Tilinumero on IBAN tai tyhjä');
+  const accounts = raw.accounts || {};
+  const rounding = String(accounts.rounding ?? '').trim();
+  if (rounding && !/^[0-9A-Za-z]{1,20}$/.test(rounding)) throw err('invalid_setting', 'Tilinumero ei kelpaa');
+  const sales = {};
+  for (const [k, v] of Object.entries(accounts.sales_by_vat || {})) {
+    if (!SALES_RATES.includes(k)) throw err('invalid_setting', 'Tuntematon ALV-kanta');
+    const code = String(v ?? '').trim();
+    if (code && !/^[0-9A-Za-z]{1,20}$/.test(code)) throw err('invalid_setting', 'Tilinumero ei kelpaa');
+    if (code) sales[k] = code;
+  }
+  const clearing = {};
+  for (const [k, v] of Object.entries(accounts.clearing_by_method || {})) {
+    if (!METHODS.includes(k)) throw err('invalid_setting', 'Tuntematon maksutapa');
+    const code = String(v ?? '').trim();
+    if (code && !/^[0-9A-Za-z]{1,20}$/.test(code)) throw err('invalid_setting', 'Tilinumero ei kelpaa');
+    if (code) clearing[k] = code;
+  }
+  if (mode === 'live' && (!/^[0-9]{1,4}$/.test(vat) || Object.keys(sales).length === 0 || Object.keys(clearing).length === 0)) {
+    throw err('live_incomplete', 'live vaatii ALV-tilan, myyntitilin ja maksutavan tilin');
+  }
+  return {
+    mode, environment, daily_enabled: raw.daily_enabled === true, api_prefix: prefix, vat_status: vat, approved_by: approved, bank_account: bank,
+    accounts: { rounding, sales_by_vat: sales, clearing_by_method: clearing },
+  };
+}
+function procountorStatus(cfg) {
+  const sales = Object.values(cfg.accounts?.sales_by_vat || {}).some((v) => String(v).trim());
+  const clearing = Object.values(cfg.accounts?.clearing_by_method || {}).some((v) => String(v).trim());
+  return {
+    ok: true, mode: cfg.mode, environment: cfg.environment, daily_enabled: cfg.daily_enabled === true, api_prefix: cfg.api_prefix,
+    accounts_configured: /^[0-9]{1,4}$/.test(cfg.vat_status || '') && sales && clearing,
+    bank_account_configured: Boolean(cfg.bank_account), last: null, errors: [],
+  };
+}
 const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'reports.view', 'settings.edit', 'pos.use'];
 const CODE_RE = /^[a-z0-9_]{1,40}$/;
 
@@ -22,6 +82,14 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
   const today = todayHel(now);
   const st = {
     calls: [], perms: [...perms],
+    generalSettings: [
+      { key: 'business_name', value: 'Havuhattu Oy', is_public: true },
+      { key: 'timezone', value: 'Europe/Helsinki', is_public: false },
+    ],
+    procountor: {
+      mode: 'off', environment: 'pts', daily_enabled: false, api_prefix: '/supported/api', vat_status: '', approved_by: '', bank_account: '',
+      accounts: { rounding: '', sales_by_vat: {}, clearing_by_method: {} },
+    },
     products: [
       { id: 10, name: 'Saunahoito', name_en: 'Sauna treatment', price: 85, vat_rate: 25.5, active: true, category: 'treatment', description: 'Hoitosauna Rauni', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 90, min_persons: 1, max_persons: 4, bookable: true, shop_visible: true, public_slots: true, time_window_class: 'therapy', required_skill: 'treatment', audience: 'consumer' } },
       { id: 8, name: 'Rituaali 90 min', price: 64, vat_rate: 25.5, active: true, category: 'ritual', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 90, min_persons: 1, max_persons: 6, bookable: true, shop_visible: true, public_slots: true, public_weekdays: [6, 7], time_window_class: 'ritual', audience: 'consumer' } },
@@ -53,6 +121,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     posOrders: [],
     coldUnits: [{ id: 1, code: 'pukuhuone-abcdef1234', name: 'Pukuhuone, jääkaappi 1', location: 'Pukuhuone', active: true, path: '/juomat/?laite=pukuhuone-abcdef1234', path_en: '/en/drinks/?laite=pukuhuone-abcdef1234', print_url: 'https://uusi.saunotus.com/juomat/?laite=pukuhuone-abcdef1234' }],
   };
+  if (role === 'staff') st.perms = st.perms.filter((p) => p !== 'settings.edit');
   const optJson = (id) => { const o = st.options.find((x) => x.id === id); return o ? { id: o.id, code: o.code, name: o.name, name_en: o.name_en } : null; };
   const activeOpts = (pid) => st.options.filter((o) => o.product_id === pid && o.active).sort((a, b) => a.sort_order - b.sort_order || a.id - b.id);
   const required = (pid) => !!st.settings[pid]?.option_required && activeOpts(pid).length > 0;
@@ -112,14 +181,27 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       const total = rows.length; rows = rows.slice(a.p_offset || 0, (a.p_offset || 0) + (a.p_limit || 50));
       return rows.map((r) => ({ ...view(r), total_count: total }));
     },
-    admin_procountor_status: () => ({
-      ok: true, mode: 'dry_run', environment: 'pts', daily_enabled: false, api_prefix: '/supported/api',
-      accounts_configured: false, bank_account_configured: false, last: null, errors: [],
-    }),
-    'select:settings': () => ([
-      { key: 'timezone', value: 'Europe/Helsinki', is_public: false },
-      { key: 'business_name', value: 'Havuhattu Oy', is_public: true },
-    ]),
+    admin_procountor_status: () => { need('settings.edit'); return procountorStatus(st.procountor); },
+    admin_get_procountor_settings: () => {
+      need('settings.edit');
+      return { ok: true, ...structuredClone(st.procountor) };
+    },
+    admin_set_procountor_settings: (a) => {
+      need('settings.edit');
+      st.procountor = normalizeProcountor(a.p || {}, st.procountor);
+      return { ok: true, ...structuredClone(st.procountor) };
+    },
+    admin_procountor_preview_daily: (a) => {
+      need('settings.edit');
+      return { ok: true, date: a.p_date, sent: false, receipts: 0, refund_receipts: 0, ready: false, missing: ['vat_status'] };
+    },
+    admin_set_setting: (a) => {
+      need('settings.edit');
+      const row = st.generalSettings.find((s) => s.key === a.p_key);
+      if (row) row.value = a.p_value;
+      return { ok: true };
+    },
+    'select:settings': () => st.generalSettings.map((s) => ({ ...s })),
     public_get_site_texts: () => ({ ok: true, texts: [
       { key: 'ui.admin.day.revenue_title', lang: 'fi', text: 'Päivän tuotto' },
       { key: 'ui.admin.day.revenue_title', lang: 'en', text: "Day's revenue" },
