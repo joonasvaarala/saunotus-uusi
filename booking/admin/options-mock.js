@@ -37,6 +37,15 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     settings: { 10: { option_required: true, option_label: 'Valitse hoito', option_label_en: 'Choose your treatment' } },
     customers: [{ id: 1, name: 'Aino Testaaja', email: 'aino@example.com', phone: '+358401110001' }, { id: 2, name: 'Eero Esimerkki', email: 'eero@example.com', phone: '+358401110002' }, { id: 3, name: 'Helmi Hiljainen', email: 'helmi@example.com', phone: '+358401110003' }, { id: 4, name: 'Ilmari Iltavuoro', email: 'ilmari@example.com', phone: '+358401110004' }],
     reservations: [], seq: { res: 900, order: 7000 },
+    // Sulkukonflikti (booking_73). Kuittaus ei koske availabilityBlocked-lippua.
+    availabilityBlocked: true,
+    blockConflicts: [{
+      reservation_id: 8801, leg_id: 1, resource_id: 1, block_id: 501, closure_event_id: 90,
+      starts_at: helIso(addDays(today, 4), '16:00'), ends_at: helIso(addDays(today, 4), '18:00'),
+      block_reason: 'Kalenteri (1 savusauna kiinni): Perinnesaunotusilta',
+      closure_reason: 'Perinnesaunotusilta', calendar_name: '1 savusauna kiinni',
+    }],
+    blockAcks: [],
   };
   const optJson = (id) => { const o = st.options.find((x) => x.id === id); return o ? { id: o.id, code: o.code, name: o.name, name_en: o.name_en } : null; };
   const activeOpts = (pid) => st.options.filter((o) => o.product_id === pid && o.active).sort((a, b) => a.sort_order - b.sort_order || a.id - b.id);
@@ -175,6 +184,34 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       const v = { name: String(a.p_name).trim(), name_en: a.p_name_en || null, sort_order: a.p_sort_order ?? 100, active: a.p_active ?? true, description: a.p_description ?? null, description_en: a.p_description_en ?? null };
       if (o) Object.assign(o, v); else { o = { id: Math.max(0, ...st.options.map((x) => x.id)) + 1, product_id: a.p_product_id, code, ...v }; st.options.push(o); }
       return { ok: true, option: { ...o } };
+    },
+    admin_review_list: () => {
+      const ackedIds = new Set(st.blockAcks.map((a) => `${a.reservation_id}:${a.block_id}`));
+      const open = st.blockConflicts.filter((b) => !ackedIds.has(`${b.reservation_id}:${b.block_id}`));
+      const acked = st.blockConflicts.filter((b) => ackedIds.has(`${b.reservation_id}:${b.block_id}`)).map((b) => {
+        const a = st.blockAcks.find((x) => x.reservation_id === b.reservation_id && x.block_id === b.block_id);
+        return { ...b, ack_id: a.id, ack_reason: a.ack_reason, acked_by_label: a.acked_by_label, acked_at: a.acked_at };
+      });
+      return { missing_therapist: [], therapist_conflicts: [], block_conflicts: open, acked_block_conflicts: acked, overrides: [], orphan_addons: [] };
+    },
+    admin_ack_block_conflict: (a) => {
+      if (!st.perms.includes('blocks.manage') && !st.perms.includes('bookings.override')) throw err('forbidden', 'Ei oikeutta tähän toimintoon (blocks.manage tai bookings.override)');
+      const note = String(a.p_note ?? '').trim();
+      if (note.length < 3) throw err('note_required', 'Kuittaus vaatii perustelun (vähintään 3 merkkiä)');
+      const hit = st.blockConflicts.find((b) => b.reservation_id === a.p_reservation_id && b.block_id === a.p_block_id);
+      if (!hit) throw err('no_conflict', 'Sulkukonfliktia ei ole tälle varaukselle ja sululle');
+      const prev = st.blockAcks.find((x) => x.reservation_id === hit.reservation_id && x.block_id === hit.block_id);
+      if (prev) return { ok: true, already: true, id: prev.id, reservation_id: hit.reservation_id, block_id: hit.block_id };
+      const row = { id: st.blockAcks.length + 1, reservation_id: hit.reservation_id, block_id: hit.block_id, ack_reason: note.slice(0, 300), acked_by_label: String(a.p_label ?? '').trim() || null, acked_at: now.toISOString() };
+      st.blockAcks.push(row);
+      return { ok: true, already: false, id: row.id, reservation_id: row.reservation_id, block_id: row.block_id };
+    },
+    admin_unack_block_conflict: (a) => {
+      if (!st.perms.includes('blocks.manage') && !st.perms.includes('bookings.override')) throw err('forbidden', 'Ei oikeutta tähän toimintoon (blocks.manage tai bookings.override)');
+      const i = st.blockAcks.findIndex((x) => x.reservation_id === a.p_reservation_id && x.block_id === a.p_block_id);
+      if (i < 0) return { ok: true, already: true, revoked: false, reservation_id: a.p_reservation_id, block_id: a.p_block_id };
+      const [row] = st.blockAcks.splice(i, 1);
+      return { ok: true, already: false, revoked: true, id: row.id, reservation_id: row.reservation_id, block_id: row.block_id };
     },
     admin_set_product_option_settings: (a) => {
       need('catalog.edit');
