@@ -12,6 +12,12 @@ function esc(s) {
   return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+/** Sijainti tarrassa. null, undefined, false ja pelkkä tyhjä tila eivät tuota riviä. */
+export function stickerPlace(value) {
+  if (value == null || value === false) return '';
+  return String(value).trim();
+}
+
 /**
  * Tulostusarkin HTML. items: { name, priceText, url, label }.
  * Jokainen kortti sisältää SVG-QR:n, nimen, hinnan ja ohjeen. Tyhjä lista ei ole tyhjä sivu: ohje jää näkyviin.
@@ -20,7 +26,8 @@ export function printSheetHtml(items, { scan = 'Skannaa ja osta', empty = '' } =
   const cards = (items || []).map((it) => {
     const url = String(it.url || '');
     const svg = url ? qrSvgMarkup(url, { size: 280, label: it.name || '' }) : '';
-    const where = it.label ? `<p class="qr-where">${esc(it.label)}</p>` : '';
+    const place = stickerPlace(it.label);
+    const where = place ? `<p class="qr-where">${esc(place)}</p>` : '';
     return `<article class="qr-card" data-url="${esc(url)}"><h2>${esc(it.name || '')}</h2><p class="qr-price">${esc(it.priceText || '')}</p>${where}${svg}<p class="qr-scan">${esc(scan)}</p></article>`;
   });
   const body = cards.length ? cards.join('') : `<p class="qr-empty">${esc(empty)}</p>`;
@@ -47,7 +54,8 @@ export function printSheetSvg(items, { scan = 'Skannaa ja osta' } = {}) {
     }
     parts.push(`<text x="${x + 200}" y="${y + 36}" text-anchor="middle" font-size="22" font-family="sans-serif">${esc(it.name || '')}</text>`);
     parts.push(`<text x="${x + 200}" y="${y + 64}" text-anchor="middle" font-size="18" font-family="sans-serif">${esc(it.priceText || '')}</text>`);
-    if (it.label) parts.push(`<text x="${x + 200}" y="${y + 84}" text-anchor="middle" font-size="14" font-family="sans-serif">${esc(it.label)}</text>`);
+    const place = stickerPlace(it.label);
+    if (place) parts.push(`<text x="${x + 200}" y="${y + 84}" text-anchor="middle" font-size="14" font-family="sans-serif">${esc(place)}</text>`);
     parts.push(`<text x="${x + 200}" y="${y + 400}" text-anchor="middle" font-size="16" font-family="sans-serif">${esc(scan)}</text>`);
   });
   parts.push('</svg>');

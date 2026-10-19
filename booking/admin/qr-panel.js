@@ -3,7 +3,7 @@ import { rpc } from './sb.js';
 import { h, toast, errMsg, money } from './ui.js';
 import { settingsText as tx } from './settings-texts.js';
 import { filterProducts, qrEligible } from './pos-logic.js';
-import { printSheetHtml, printSheetSvg } from './qr-print.js';
+import { printSheetHtml, printSheetSvg, stickerPlace } from './qr-print.js';
 import { qrSvgElement } from './qrsvg.js';
 
 function downloadBlob(filename, blob) {
@@ -66,7 +66,7 @@ export async function renderQrPanel() {
       name: c.name,
       priceText: money(c.price),
       url: c.print_url || c.path,
-      label: c.label || '',
+      label: stickerPlace(c.label),
     }));
   }
 
@@ -79,15 +79,14 @@ export async function renderQrPanel() {
     }
     const sheet = h('div', { class: 'qr-sheet', 'data-testid': 'qr-sheet' });
     for (const it of items) {
-      const card = h('article', { class: 'qr-card', 'data-url': it.url });
-      card.append(
+      const place = stickerPlace(it.label);
+      sheet.append(h('article', { class: 'qr-card', 'data-url': it.url },
         h('h2', { text: it.name }),
         h('p', { class: 'qr-price', text: it.priceText }),
-        it.label ? h('p', { class: 'qr-where', text: it.label }) : null,
+        place ? h('p', { class: 'qr-where', text: place }) : null,
         qrSvgElement(it.url, { size: 280, label: it.name }),
         h('p', { class: 'qr-scan', text: t('scan') }),
-      );
-      sheet.append(card);
+      ));
     }
     root.append(sheet);
     root.dataset.sheet = printSheetHtml(items, { scan: t('scan'), empty: t('empty') });
@@ -110,16 +109,17 @@ export async function renderQrPanel() {
     for (const c of codes) {
       const box = h('input', { type: 'checkbox', checked: chosen.has(c.id) || null, 'aria-label': t('include') });
       box.addEventListener('change', () => { if (box.checked) chosen.add(c.id); else chosen.delete(c.id); drawSheet(preview); });
+      const place = stickerPlace(c.label);
       listBox.append(h('div', { class: 'qr-row' },
         h('label', { class: 'qr-inc' }, box, h('span', { class: 'sr', text: t('include') })),
-        h('span', { class: 'grow' }, h('strong', { text: c.name }), h('small', { text: c.label ? ` · ${c.label}` : '' }), h('small', { text: ` · ${money(c.price)}` })),
+        h('span', { class: 'grow' }, h('strong', { text: c.name }), place ? h('small', { text: ` · ${place}` }) : null, h('small', { text: ` · ${money(c.price)}` })),
         h('button', { type: 'button', class: 'btn danger', text: t('remove'), 'data-testid': `qr-del-${c.id}`, onclick: () => rpc('admin_delete_product_qr', { p_id: c.id }).then(async () => { toast(t('removed')); await load(); paint(); }).catch((e) => toast(errMsg(e))) })));
     }
     drawSheet(preview);
   }
 
   const search = h('input', { type: 'search', 'aria-label': t('search'), 'data-testid': 'qr-search', oninput: (e) => { query = e.target.value; paint(); } });
-  const labelInp = h('input', { type: 'text', maxlength: 120, placeholder: t('label_ph'), 'aria-label': t('label'), 'data-testid': 'qr-label', oninput: (e) => { label = e.target.value; } });
+  const labelInp = h('input', { type: 'text', maxlength: 120, placeholder: t('label_ph'), 'aria-label': t('location'), 'data-testid': 'qr-label', oninput: (e) => { label = e.target.value; } });
   const create = h('button', {
     type: 'button', class: 'btn primary qr-create', 'data-testid': 'qr-create', text: t('create'),
     onclick: () => {
@@ -153,7 +153,7 @@ export async function renderQrPanel() {
     h('div', { class: 'stack set-noprint' },
       h('label', { class: 'fld' }, h('span', { text: t('search') }), search),
       hits,
-      h('label', { class: 'fld' }, h('span', { text: t('label') }), labelInp),
+      h('label', { class: 'fld' }, h('span', { text: t('location') }), labelInp),
       create,
       h('h2', { text: t('sheet') }),
       listBox),

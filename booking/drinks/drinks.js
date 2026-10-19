@@ -1,6 +1,6 @@
 // Julkinen kylmälaite-sivu. Ei kirjautumista. Hinta tulee palvelimelta.
 import { drinksText as tx, loadDrinksTexts } from './drinks-texts.js';
-import { checkoutItems, cartTotal, drinksCartAdd, drinksCartSet, productLabel, deviceFromSearch } from './drinks-logic.js';
+import { checkoutItems, cartTotal, drinksCartAdd, drinksCartSet, productLabel, deviceFromSearch, placeLabel } from './drinks-logic.js';
 import { createDrinksMock } from './drinks-mock.js';
 
 const lang = document.documentElement.lang === 'en' ? 'en' : 'fi';
@@ -66,7 +66,8 @@ function draw() {
   document.title = products.length === 1 ? productLabel(products[0], lang) : t('title');
   const main = el('main');
   main.append(el('h1', { text: t('title') }), el('p', { class: 'lead', text: t('lead') }));
-  if (device?.label) main.append(el('p', { class: 'device', 'data-testid': 'drinks-place', text: device.label }));
+  const place = placeLabel(device?.label);
+  if (place) main.append(el('p', { class: 'device', 'data-testid': 'drinks-place', text: place }));
   if (device && device.active === false) main.append(el('p', { class: 'err', text: t('qr_missing') }));
   if (device?.unknown || !deviceCode) main.append(el('p', { class: 'err', 'data-testid': 'drinks-missing', text: t('qr_missing') }));
   if (phase === 'paid') {

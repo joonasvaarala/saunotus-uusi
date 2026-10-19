@@ -1,5 +1,6 @@
 // Asetusten välilehdet ja QR-tulostus (FI+EN). Avaimet ui.admin.settings.* ja ui.admin.qr.*
 // public_get_site_texts peittää sanakirjan. Tuonti: content/site-texts.pending-import-16.json.
+// Sijaintikentän nimi: content/site-texts.pending-import-24.json (ui.admin.qr.location).
 import { getLang } from './talous-i18n.js';
 
 export const SETTINGS_TEXTS = {
@@ -22,6 +23,7 @@ export const SETTINGS_TEXTS = {
     'ui.admin.qr.search': 'Hae tuotetta',
     'ui.admin.qr.add': 'Lisää tuote',
     'ui.admin.qr.label': 'Tarra',
+    'ui.admin.qr.location': 'Sijainti (näkyy tarrassa, valinnainen)',
     'ui.admin.qr.label_ph': 'Esimerkiksi pukuhuoneen jääkaappi',
     'ui.admin.qr.empty': 'QR-koodeja ei ole vielä. Lisää tuote, niin saat tulostettavan koodin.',
     'ui.admin.qr.print': 'Tulosta',
@@ -60,6 +62,7 @@ export const SETTINGS_TEXTS = {
     'ui.admin.qr.search': 'Search for a product',
     'ui.admin.qr.add': 'Add product',
     'ui.admin.qr.label': 'Label',
+    'ui.admin.qr.location': 'Location (shown on the sticker, optional)',
     'ui.admin.qr.label_ph': 'For example a changing-room fridge',
     'ui.admin.qr.empty': 'There are no QR codes yet. Add a product to get a code you can print.',
     'ui.admin.qr.print': 'Print',
