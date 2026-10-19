@@ -132,7 +132,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       { id: 4, product_id: 10, code: 'turvehoito', name: 'Turvehoito', name_en: 'Peat treatment', sort_order: 40, active: true, description: null, description_en: null },
     ],
     settings: { 10: { option_required: true, option_label: 'Valitse hoito', option_label_en: 'Choose your treatment' } },
-    customers: [{ id: 1, name: 'Aino Testaaja', email: 'aino@example.com', phone: '+358401110001' }, { id: 2, name: 'Eero Esimerkki', email: 'eero@example.com', phone: '+358401110002' }, { id: 3, name: 'Helmi Hiljainen', email: 'helmi@example.com', phone: '+358401110003' }, { id: 4, name: 'Ilmari Iltavuoro', email: 'ilmari@example.com', phone: '+358401110004' }],
+    customers: [{ id: 1, name: 'Aino Testaaja', email: 'aino@example.com', phone: '+358401110001' }, { id: 2, name: 'Eero Esimerkki', email: 'eero@example.com', phone: '+358401110002' }, { id: 3, name: 'Helmi Hiljainen', email: 'helmi@example.com', phone: '+358401110003' }, { id: 4, name: 'Ilmari Iltavuoro', email: 'ilmari@example.com', phone: '+358401110004' }, { id: 5, name: 'Liisa Lasku', email: 'liisa@t112.test', phone: '0401234567', company: 'Koivutesti Oy', customer_kind: 'company', business_id: '1000000-4', address: 'Koivukuja 2', zip: '01300', city: 'Vantaa', marketing_consent: true }],
     reservations: [], seq: { res: 900, order: 7000, pay: 4000 },
     // Sulkukonflikti (booking_73). Kuittaus ei koske availabilityBlocked-lippua.
     availabilityBlocked: true,
@@ -585,7 +585,30 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     admin_list_invoice_customers: (a) => {
       need('invoices.manage');
       const q = String(a.p_search || '').toLowerCase();
-      return st.invCustomers.filter((c) => !q || `${c.company_name} ${c.email} ${c.business_id}`.toLowerCase().includes(q));
+      return st.invCustomers.filter((c) => !q || `${c.company_name} ${c.contact_name || ''} ${c.email} ${c.business_id}`.toLowerCase().includes(q));
+    },
+    admin_search_invoice_customers: (a) => {
+      need('invoices.manage');
+      const q = String(a.p_search || '').trim().toLowerCase();
+      if (q.length < 2) return [];
+      const lim = Math.min(Math.max(Number(a.p_limit) || 10, 1), 20);
+      const digits = q.replace(/\D/g, '');
+      const match = (blob, businessId) => {
+        if (String(blob).toLowerCase().includes(q)) return true;
+        return digits.length >= 2 && String(businessId || '').replace(/\D/g, '').includes(digits);
+      };
+      const invoice = st.invCustomers.filter((c) => match(`${c.company_name || ''} ${c.contact_name || ''} ${c.email || ''} ${c.business_id || ''}`, c.business_id)).slice(0, lim).map((c) => ({ ...c, source: 'invoice' }));
+      const takenIds = new Set(invoice.map((c) => c.customer_id).filter(Boolean));
+      const takenBids = new Set(invoice.map((c) => (c.business_id ? normBusinessId(c.business_id) : '')).filter(Boolean));
+      const booking = st.customers.filter((c) => !c.anonymized_at && match(`${c.name || ''} ${c.email || ''} ${c.phone || ''} ${c.company || ''} ${c.business_id || ''}`, c.business_id))
+        .filter((c) => !takenIds.has(c.id) && !(c.business_id && takenBids.has(normBusinessId(c.business_id))))
+        .slice(0, Math.max(lim - invoice.length, 0))
+        .map((c) => {
+          const company = String(c.company || '').trim();
+          const name = String(c.name || '').trim();
+          return { source: 'booking', id: null, customer_id: c.id, company_name: company || name, contact_name: company ? name : null, business_id: c.business_id || null, email: c.email || null, phone: c.phone || null, street: c.address || null, zip: c.zip || null, city: c.city || null, einvoice_address: c.einvoice_address || null, einvoice_operator: c.einvoice_operator || null, buyer_reference: c.invoice_reference || null };
+        });
+      return [...invoice, ...booking];
     },
     admin_save_invoice_customer: (a) => {
       need('invoices.manage');
@@ -599,12 +622,24 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       if (!!ei !== !!op) throw err('einvoice_incomplete', 'Anna sekä verkkolaskuosoite että välittäjätunnus');
       if (ei && !validOvt(ei, bid)) throw err('invalid_einvoice_address', 'Tarkista verkkolaskuosoite');
       if (op && !validOperator(op)) throw err('invalid_einvoice_operator', 'Tarkista välittäjätunnus');
-      const row = { id: a.p_id || st.invCustomers.length + 1, company_name: name, name, contact_name: p.contact_name || null, business_id: bid, vat_id: bid ? `FI${bid.replace(/\D/g, '')}` : null, email: p.email || null, phone: p.phone || null, street: p.street || null, zip: p.zip || null, city: p.city || null, country: 'FI', einvoice_address: ei, einvoice_operator: op, buyer_reference: p.buyer_reference || null, address: [p.street, [p.zip, p.city].filter(Boolean).join(' ')].filter(Boolean).join(', ') };
+      const email = p.email ? String(p.email).trim().toLowerCase() : null;
+      const clash = (id) => st.invCustomers.find((c) => c.id !== id && bid && c.business_id && normBusinessId(c.business_id) === bid);
+      const row = { id: a.p_id || st.invCustomers.length + 1, company_name: name, name, contact_name: p.contact_name || null, business_id: bid, vat_id: bid ? `FI${bid.replace(/\D/g, '')}` : null, email, phone: p.phone || null, street: p.street || null, zip: p.zip || null, city: p.city || null, country: 'FI', einvoice_address: ei, einvoice_operator: op, buyer_reference: p.buyer_reference || null, address: [p.street, [p.zip, p.city].filter(Boolean).join(' ')].filter(Boolean).join(', '), source: 'invoice' };
+      if (p.customer_id) row.customer_id = p.customer_id;
+      else if (!a.p_id) row.customer_id = null;
       if (a.p_id) {
         const i = st.invCustomers.findIndex((c) => c.id === a.p_id);
         if (i < 0) throw err('not_found', 'Asiakasta ei löydy');
+        const other = clash(a.p_id);
+        if (other) throw Object.assign(err('customer_exists', 'Yritys on jo rekisterissä'), { details: { hint: JSON.stringify(other), details: 'customer_exists' } });
         st.invCustomers[i] = { ...st.invCustomers[i], ...row, id: a.p_id };
         return st.invCustomers[i];
+      }
+      const other = clash(null);
+      if (other) throw Object.assign(err('customer_exists', 'Yritys on jo rekisterissä'), { details: { hint: JSON.stringify(other), details: 'customer_exists' } });
+      if (!bid && email && p.ack_name_email !== true) {
+        const same = st.invCustomers.find((c) => !c.business_id && String(c.company_name || '').trim().toLowerCase() === name.toLowerCase() && String(c.email || '').toLowerCase() === email);
+        if (same) throw Object.assign(err('name_email_match', 'Samanniminen asiakas samalla sähköpostilla on jo rekisterissä'), { details: { hint: JSON.stringify(same), details: 'name_email_match' } });
       }
       st.invCustomers.push(row);
       return row;
@@ -625,7 +660,9 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       if (!lines.length) throw err('invalid_lines', 'Laskulla pitää olla rivejä');
       const today = todayHel(now);
       const sum = (k) => Math.round(lines.reduce((s, l) => s + l[k], 0) * 100) / 100;
-      const base = { customer_id: customer.id, customer, lines, invoice_date: p.invoice_date || today, due_date: p.due_date || today, buyer_reference: p.buyer_reference || null, notes: p.notes || null, locale: 'fi', seller_snapshot: { name: 'Sipoonjoen Perinnesauna', legal_name: 'Havuhattu Oy', business_id: '0112038-9', vat_id: 'FI01120389', iban: '', bic: '', bank_name: '' }, total_net: sum('line_net'), total_vat: sum('line_vat'), total_gross: sum('line_gross'), dispatch_status: 'none', dispatch_error: null, kind: 'debit', status: 'draft', invoice_no: null, reference_no: null, public_token: `00000000-0000-4000-8000-${String(st.invoices.length + 1).padStart(12, '0')}` };
+      const locked = p.snapshot_mode === 'invoice';
+      const view = locked ? { ...customer, ...(p.customer_override || {}), id: customer.id } : { ...customer };
+      const base = { customer_id: customer.id, customer: view, customer_snapshot: view, customer_snapshot_locked: locked, lines, invoice_date: p.invoice_date || today, due_date: p.due_date || today, buyer_reference: p.buyer_reference || null, notes: p.notes || null, locale: 'fi', seller_snapshot: { name: 'Sipoonjoen Perinnesauna', legal_name: 'Havuhattu Oy', business_id: '0112038-9', vat_id: 'FI01120389', iban: '', bic: '', bank_name: '' }, total_net: sum('line_net'), total_vat: sum('line_vat'), total_gross: sum('line_gross'), dispatch_status: 'none', dispatch_error: null, kind: 'debit', status: 'draft', invoice_no: null, reference_no: null, public_token: `00000000-0000-4000-8000-${String(st.invoices.length + 1).padStart(12, '0')}` };
       if (a.p_id) {
         const inv = st.invoices.find((x) => x.id === a.p_id);
         if (!inv || inv.status !== 'draft') throw err('invoice_locked', 'Vain luonnosta voi muokata');

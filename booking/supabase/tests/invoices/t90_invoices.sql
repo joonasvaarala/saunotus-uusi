@@ -104,11 +104,11 @@ begin
   perform public.t90_ck((select status from booking.invoices where id = (inv ->> 'id')::bigint) = 'credited', 'H3: alkuperäinen merkitty hyvitetyksi');
   perform public.t90_ck(public.t90_try(format('select booking.admin_mark_invoice_paid(%s)', credit ->> 'id')) = 'invalid_status', 'H4: hyvityslaskua ei merkitä maksetuksi');
 
-  inv2 := booking.admin_save_invoice_customer(null, '{"company_name":"Vapaa Oy","business_id":"0112038-9","email":"lasku@example.test"}'::jsonb);
+  inv2 := booking.admin_save_invoice_customer(null, '{"company_name":"Vapaa Oy","business_id":"1234567-1","email":"lasku@example.test"}'::jsonb);
   inv2 := booking.admin_save_invoice(null, jsonb_build_object('customer_id', (inv2 ->> 'id')::bigint, 'lines', jsonb_build_array(jsonb_build_object('description','Saunavuoro','quantity',2,'unit','kpl','unit_price_net',10,'vat_rate',25.5))));
   perform public.t90_ck(inv2 ->> 'status' = 'draft' and inv2 ->> 'invoice_no' is null, 'V1: itse tehty lasku on luonnos ilman numeroa');
   perform public.t90_ck(public.t90_try(format('select booking.admin_void_invoice(%s)', inv2 ->> 'id')) = 'ok', 'V2: luonnos mitätöidään');
-  disc := booking.admin_save_invoice_customer(null, '{"company_name":"Alennus Oy","business_id":"0112038-9","email":"alennus@example.test","einvoice_address":"003701120389","einvoice_operator":"003723327487"}'::jsonb);
+  disc := booking.admin_save_invoice_customer(null, '{"company_name":"Alennus Oy","business_id":"2336509-6","email":"alennus@example.test","einvoice_address":"003723365096","einvoice_operator":"003723327487"}'::jsonb);
   disc := booking.admin_save_invoice(null, jsonb_build_object('customer_id', (disc ->> 'id')::bigint, 'lines', jsonb_build_array(
     jsonb_build_object('description','Saunavuoro','quantity',1,'unit','kpl','unit_price_net',100,'vat_rate',25.5),
     jsonb_build_object('description','Alennus','quantity',1,'unit','kpl','unit_price_net',-10,'vat_rate',25.5))));

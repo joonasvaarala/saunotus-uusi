@@ -106,7 +106,7 @@ button.link{background:none;border:0;padding:6px 0;font:inherit;color:var(--ink)
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0}.kv dt{color:var(--muted);font-size:13px}.kv dd{margin:0;color:var(--ink)}
 .box{border:1px solid var(--line);border-radius:10px;padding:12px}
 fieldset.box legend{font-weight:600;padding:0 6px}
-.dlg{width:min(560px,calc(100% - 20px));max-height:calc(100vh - 20px);padding:0;border:0;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.dlg{width:min(560px,calc(100% - 20px));max-height:min(92dvh,calc(100vh - 20px));overflow:auto;padding:0;border:0;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
 .dlg.wide{width:min(760px,calc(100% - 20px))}
 .dlg::backdrop{background:rgba(20,14,8,.5)}
 .dlg-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff}
@@ -252,6 +252,9 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 /* asiakas */
 .nb-search{display:grid;gap:6px}.nb-or{margin:0;font-size:14px}.nb-sec:has(.cf.existing) .nb-or{display:none}
 .found{display:grid;gap:6px}
+.found .listrow{grid-template-columns:1fr}
+.inv-editor .inv-lines .row{flex-wrap:wrap}
+.inv-editor .inv-lines .row>*{flex:1 1 7.5rem;min-width:0}
 .cf-pair{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
 .cf-addr{display:grid;gap:12px;grid-template-columns:110px minmax(0,1fr)}
 .cf-reach{margin-top:-6px}.company-box{background:#FBF8F2}
