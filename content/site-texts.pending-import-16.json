@@ -1,0 +1,1042 @@
+[
+ {
+  "key": "ui.pos.edit",
+  "lang": "fi",
+  "text": "Muokkaa pikakassaa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.add",
+  "lang": "fi",
+  "text": "Lisää tuote pikakassaan",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.search",
+  "lang": "fi",
+  "text": "Hae tuotetta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.in_till",
+  "lang": "fi",
+  "text": "Pikakassassa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.not_shop",
+  "lang": "fi",
+  "text": "Ei näy verkkokaupassa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.up",
+  "lang": "fi",
+  "text": "Siirrä ylös",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.down",
+  "lang": "fi",
+  "text": "Siirrä alas",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.done",
+  "lang": "fi",
+  "text": "Valmis",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.empty_help",
+  "lang": "fi",
+  "text": "Lisää tuotteita pikakassaan. Mukana voivat olla myös tuotteet, jotka eivät näy verkkokaupassa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.qr_sale",
+  "lang": "fi",
+  "text": "Ostettavissa QR-linkillä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.qr_sale_hint",
+  "lang": "fi",
+  "text": "Linkki ei näytä tuotetta verkkokaupan listassa. Ikärajallista tuotetta ei voi valita.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.alcohol_qr",
+  "lang": "fi",
+  "text": "Tuotteen nimi näyttää alkoholilta, sitä ei voi myydä QR-linkillä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.badge_qr",
+  "lang": "fi",
+  "text": "QR-linkki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.added",
+  "lang": "fi",
+  "text": "Tuote lisätty pikakassaan",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.removed_pos",
+  "lang": "fi",
+  "text": "Tuote poistettu pikakassasta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.edit",
+  "lang": "en",
+  "text": "Edit the quick till",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.add",
+  "lang": "en",
+  "text": "Add a product to the quick till",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.search",
+  "lang": "en",
+  "text": "Search for a product",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.in_till",
+  "lang": "en",
+  "text": "On the till",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.not_shop",
+  "lang": "en",
+  "text": "Hidden from the shop",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.up",
+  "lang": "en",
+  "text": "Move up",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.down",
+  "lang": "en",
+  "text": "Move down",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.done",
+  "lang": "en",
+  "text": "Done",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.empty_help",
+  "lang": "en",
+  "text": "Add products to the till. Products that are hidden from the shop can be included.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.qr_sale",
+  "lang": "en",
+  "text": "Purchasable with a QR link",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.qr_sale_hint",
+  "lang": "en",
+  "text": "The link does not list the product in the shop. An age-restricted product cannot be selected.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.alcohol_qr",
+  "lang": "en",
+  "text": "The product name looks like alcohol and cannot be sold with a QR link",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.badge_qr",
+  "lang": "en",
+  "text": "QR link",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.added",
+  "lang": "en",
+  "text": "Product added to the quick till",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.removed_pos",
+  "lang": "en",
+  "text": "Product removed from the quick till",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.title",
+  "lang": "fi",
+  "text": "Asetukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.readonly",
+  "lang": "fi",
+  "text": "Näet asetukset. Muokkaus vaatii ylläpitäjän oikeudet.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tabs",
+  "lang": "fi",
+  "text": "Asetusten osiot",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tab_yleiset",
+  "lang": "fi",
+  "text": "Yleiset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tab_varaukset",
+  "lang": "fi",
+  "text": "Varaukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tab_maksut",
+  "lang": "fi",
+  "text": "Maksut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tab_sahkoposti",
+  "lang": "fi",
+  "text": "Sähköposti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tab_laskutus",
+  "lang": "fi",
+  "text": "Laskutus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tab_kirjanpito",
+  "lang": "fi",
+  "text": "Kirjanpito ja Procountor",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tab_lahjakortit",
+  "lang": "fi",
+  "text": "Lahjakortit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tab_rajat",
+  "lang": "fi",
+  "text": "Rajoitukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tab_qr",
+  "lang": "fi",
+  "text": "QR-koodin tulostus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.save",
+  "lang": "fi",
+  "text": "Tallenna",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.saved",
+  "lang": "fi",
+  "text": "Tallennettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.lead",
+  "lang": "fi",
+  "text": "Valitse tuote, johon koodi johtaa. Tuotteen ei tarvitse näkyä verkkokaupassa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.search",
+  "lang": "fi",
+  "text": "Hae tuotetta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.add",
+  "lang": "fi",
+  "text": "Lisää tuote",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.label",
+  "lang": "fi",
+  "text": "Tarra",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.label_ph",
+  "lang": "fi",
+  "text": "Esimerkiksi pukuhuoneen jääkaappi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.empty",
+  "lang": "fi",
+  "text": "QR-koodeja ei ole vielä. Lisää tuote, niin saat tulostettavan koodin.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.print",
+  "lang": "fi",
+  "text": "Tulosta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.download_png",
+  "lang": "fi",
+  "text": "Lataa PNG",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.download_svg",
+  "lang": "fi",
+  "text": "Lataa SVG",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.scan",
+  "lang": "fi",
+  "text": "Skannaa ja osta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.remove",
+  "lang": "fi",
+  "text": "Poista",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.preview",
+  "lang": "fi",
+  "text": "Esikatselu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.include",
+  "lang": "fi",
+  "text": "Arkille",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.age",
+  "lang": "fi",
+  "text": "Ikärajallista tuotetta ei voi myydä QR-linkillä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.hidden",
+  "lang": "fi",
+  "text": "Ei verkkokaupassa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.create",
+  "lang": "fi",
+  "text": "Luo QR-koodi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.product",
+  "lang": "fi",
+  "text": "Tuote",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.sheet",
+  "lang": "fi",
+  "text": "Tulostusarkki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.saved",
+  "lang": "fi",
+  "text": "QR-koodi luotu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.removed",
+  "lang": "fi",
+  "text": "QR-koodi poistettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.pick",
+  "lang": "fi",
+  "text": "Valitse tuote listasta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.price",
+  "lang": "fi",
+  "text": "Hinta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.title",
+  "lang": "en",
+  "text": "Settings",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.readonly",
+  "lang": "en",
+  "text": "You can view settings. Editing requires an administrator.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tabs",
+  "lang": "en",
+  "text": "Settings sections",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tab_yleiset",
+  "lang": "en",
+  "text": "General",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tab_varaukset",
+  "lang": "en",
+  "text": "Bookings",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tab_maksut",
+  "lang": "en",
+  "text": "Payments",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tab_sahkoposti",
+  "lang": "en",
+  "text": "Email",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tab_laskutus",
+  "lang": "en",
+  "text": "Invoicing",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tab_kirjanpito",
+  "lang": "en",
+  "text": "Accounting and Procountor",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tab_lahjakortit",
+  "lang": "en",
+  "text": "Gift cards",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tab_rajat",
+  "lang": "en",
+  "text": "Limits",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.tab_qr",
+  "lang": "en",
+  "text": "Print QR codes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.save",
+  "lang": "en",
+  "text": "Save",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.settings.saved",
+  "lang": "en",
+  "text": "Saved",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.lead",
+  "lang": "en",
+  "text": "Choose the product the code opens. The product does not have to appear in the shop.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.search",
+  "lang": "en",
+  "text": "Search for a product",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.add",
+  "lang": "en",
+  "text": "Add product",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.label",
+  "lang": "en",
+  "text": "Label",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.label_ph",
+  "lang": "en",
+  "text": "For example a changing-room fridge",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.empty",
+  "lang": "en",
+  "text": "There are no QR codes yet. Add a product to get a code you can print.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.print",
+  "lang": "en",
+  "text": "Print",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.download_png",
+  "lang": "en",
+  "text": "Download PNG",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.download_svg",
+  "lang": "en",
+  "text": "Download SVG",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.scan",
+  "lang": "en",
+  "text": "Scan and buy",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.remove",
+  "lang": "en",
+  "text": "Remove",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.preview",
+  "lang": "en",
+  "text": "Preview",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.include",
+  "lang": "en",
+  "text": "On the sheet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.age",
+  "lang": "en",
+  "text": "An age-restricted product cannot be sold with a QR link",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.hidden",
+  "lang": "en",
+  "text": "Not in the shop",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.create",
+  "lang": "en",
+  "text": "Create QR code",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.product",
+  "lang": "en",
+  "text": "Product",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.sheet",
+  "lang": "en",
+  "text": "Print sheet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.saved",
+  "lang": "en",
+  "text": "QR code created",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.removed",
+  "lang": "en",
+  "text": "QR code removed",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.pick",
+  "lang": "en",
+  "text": "Choose a product from the list",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.qr.price",
+  "lang": "en",
+  "text": "Price",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.qr_missing",
+  "lang": "fi",
+  "text": "Tämä QR-koodi ei ole käytössä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.drinks.qr_missing",
+  "lang": "en",
+  "text": "This QR code is not in use",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tuote ja asetusten välilehdet (booking_104). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ }
+]

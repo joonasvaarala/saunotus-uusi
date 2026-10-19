@@ -1,7 +1,12 @@
-// Yleiset asetukset (oikeus settings.edit: manager + admin). Käyttäjähallinta on omassa näkymässään (views/users.js, vain admin).
+// Asetukset välilehdissä. Oikeus settings.edit: ylläpitäjä ja pääkäyttäjä näkevät asetusryhmät.
+// QR-koodin tulostus: pos.use tai settings.edit. Käyttäjähallinta on omassa näkymässään (views/users.js).
+// Procountor-kortti on Kirjanpito ja Procountor -välilehdessä. Laskutuksen avaimet (invoice_*) osuvat Laskutus-välilehteen.
 import { rpc, select } from '../sb.js';
 import { h, field, toast, run, todayHel } from '../ui.js';
 import { loadProcountorTexts, procountorText as pc } from '../procountor-texts.js';
+import { loadSettingsTexts, settingsText as st } from '../settings-texts.js';
+import { groupSettingKey, visibleSettingTabs, settingsHref, tabFromHash } from '../settings-tabs.js';
+import { renderQrPanel } from '../qr-panel.js';
 
 const META = {
   public_booking_enabled: ['Verkkovaraus käytössä', 'bool'],
@@ -120,22 +125,54 @@ function procountorForm(cfg, isAdmin, reload) {
     previewOut);
 }
 
-export async function render({ ctx, reload }) {
+function settingCard(s, isAdmin) {
+  const [label, type, hint] = META[s.key] || [s.key, 'text'];
+  let input;
+  if (type === 'bool') { input = h('input', { type: 'checkbox', disabled: !isAdmin }); input.checked = s.value === true; }
+  else if (Array.isArray(type)) input = h('select', { disabled: !isAdmin }, type.map((o) => h('option', { value: o, text: o, selected: s.value === o || null })));
+  else input = h('input', { type: type === 'number' ? 'number' : 'text', value: s.value, disabled: !isAdmin });
+  const val = () => (type === 'bool' ? input.checked : type === 'number' ? +input.value : input.value);
+  return h('div', { class: 'card setting', 'data-setting': s.key }, field(label, input, hint), isAdmin ? h('button', { class: 'btn sm', type: 'button', text: st('ui.admin.settings.save'), onclick: (e) => run(e.target, async () => { await rpc('admin_set_setting', { p_key: s.key, p_value: val() }); toast(st('ui.admin.settings.saved')); }) }) : null);
+}
+
+export async function render({ ctx, rest, reload }) {
   const isAdmin = ctx.can('settings.edit');
-  await loadProcountorTexts(rpc);
+  await loadSettingsTexts(rpc);
+  if (isAdmin) await loadProcountorTexts(rpc);
   let procountor = null, procountorFailed = false;
-  try { procountor = await rpc('admin_procountor_status'); } catch { procountorFailed = true; }
   let editor = null;
-  try { editor = await rpc('admin_get_procountor_settings'); } catch { editor = null; }
-  const settings = await select('settings', { select: 'key,value,is_public', order: 'key.asc' });
-  const forms = settings.map((s) => {
-    const [label, type, hint] = META[s.key] || [s.key, 'text'];
-    let input;
-    if (type === 'bool') { input = h('input', { type: 'checkbox', disabled: !isAdmin }); input.checked = s.value === true; }
-    else if (Array.isArray(type)) input = h('select', { disabled: !isAdmin }, type.map((o) => h('option', { value: o, text: o, selected: s.value === o || null })));
-    else input = h('input', { type: type === 'number' ? 'number' : 'text', value: s.value, disabled: !isAdmin });
-    const val = () => (type === 'bool' ? input.checked : type === 'number' ? +input.value : input.value);
-    return h('div', { class: 'card setting' }, field(label, input, hint), isAdmin ? h('button', { class: 'btn sm', type: 'button', text: 'Tallenna', onclick: (e) => run(e.target, async () => { await rpc('admin_set_setting', { p_key: s.key, p_value: val() }); toast('Tallennettu'); }) }) : null);
-  });
-  return [h('h1', { text: 'Asetukset' }), isAdmin ? null : h('p', { class: 'muted', text: 'Näet asetukset; muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }), procountorCard(procountor, procountorFailed), procountorForm(editor, isAdmin, reload), h('div', { class: 'stack' }, forms)];
+  let settings = [];
+  if (isAdmin) {
+    try { procountor = await rpc('admin_procountor_status'); } catch { procountorFailed = true; }
+    try { editor = await rpc('admin_get_procountor_settings'); } catch { editor = null; }
+    settings = await select('settings', { select: 'key,value,is_public', order: 'key.asc' });
+  }
+  const tabs = visibleSettingTabs({ can: (p) => ctx.can(p), keys: settings.map((s) => s.key) });
+  const tab = tabFromHash(`#/asetukset/${rest || ''}`, tabs);
+  if (tab && location.hash !== settingsHref(tab)) history.replaceState(null, '', settingsHref(tab));
+
+  const groups = new Map();
+  for (const s of settings) {
+    const id = groupSettingKey(s.key);
+    if (!groups.has(id)) groups.set(id, []);
+    groups.get(id).push(settingCard(s, isAdmin));
+  }
+
+  let panel = null;
+  if (tab === 'qr') panel = await renderQrPanel();
+  else if (tab === 'kirjanpito') panel = h('div', { class: 'stack', 'data-testid': 'panel-kirjanpito' }, procountorCard(procountor, procountorFailed), procountorForm(editor, isAdmin, reload), ...(groups.get(tab) || []));
+  else if (tab) panel = h('div', { class: 'stack', 'data-testid': `panel-${tab}` }, ...(groups.get(tab) || []));
+
+  const tablist = h('div', { class: 'set-tabs set-noprint', role: 'tablist', 'aria-label': st('ui.admin.settings.tabs'), 'data-testid': 'settings-tabs' },
+    ...tabs.map((id) => h('a', {
+      href: settingsHref(id), role: 'tab', class: 'set-tab', 'data-testid': `tab-${id}`,
+      'aria-selected': id === tab ? 'true' : 'false', id: `set-tab-${id}`,
+    }, st(`ui.admin.settings.tab_${id}`))));
+
+  return [
+    h('h1', { class: 'set-noprint', text: st('ui.admin.settings.title') }),
+    isAdmin || tabs.every((id) => id === 'qr') ? null : h('p', { class: 'muted set-noprint', text: st('ui.admin.settings.readonly') }),
+    tablist,
+    h('div', { role: 'tabpanel', 'aria-labelledby': `set-tab-${tab}`, 'data-testid': 'settings-panel' }, panel),
+  ];
 }

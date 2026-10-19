@@ -22,7 +22,8 @@ export function parseAdminHash(hash) {
   const qIdx = raw.indexOf('?');
   const pathPart = qIdx >= 0 ? raw.slice(0, qIdx) : raw;
   const query = qIdx >= 0 ? raw.slice(qIdx + 1) : '';
-  return { path: pathPart.split('/')[0] || '', query: new URLSearchParams(query) };
+  const parts = pathPart.split('/').filter((s) => s.length > 0);
+  return { path: parts[0] || '', rest: parts.slice(1).join('/'), query: new URLSearchParams(query) };
 }
 
 export function reservationSearch({ treatment = '', period = 'all', status = '', product = '', source = '', search = '', from = '', to = '' } = {}) {

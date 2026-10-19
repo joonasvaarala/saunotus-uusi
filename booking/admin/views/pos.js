@@ -1,9 +1,10 @@
 // Pikakassa: tuotepainikkeet, ostoskori, maksulinkki tai MobilePay (QR / pyyntö puhelimeen).
-// Hintoja ei lähetetä palvelimelle. Korttipääte näkyy rekisterissä, mutta sitä ei voi valita.
+// Tuotteet valitaan tässä näkymässä (myös verkkokaupan ulkopuoliset). Hintoja ei lähetetä palvelimelle.
+// Korttipääte näkyy rekisterissä, mutta sitä ei voi valita. QR-tulostus on Asetuksissa.
 import { rpc, fn } from '../sb.js';
 import { h, toast, money, errMsg } from '../ui.js';
-import { posText as tx } from '../pos-texts.js';
-import { cartAdd, cartSetQty, cartTotal, checkoutItems, tendersFor, tenderAvailable, joinUrl } from '../pos-logic.js';
+import { loadPosTexts, posText as tx } from '../pos-texts.js';
+import { cartAdd, cartSetQty, cartTotal, checkoutItems, tendersFor, tenderAvailable, joinUrl, posCandidates, filterProducts, tillEditorOpen, moveSort } from '../pos-logic.js';
 import { finnishMobileMsisdn } from '../phone-fi.js';
 import { qrSvgElement } from '../qrsvg.js';
 
@@ -12,11 +13,13 @@ const MOCK = () => new URLSearchParams(location.search).get('mock') === '1';
 export async function render({ ctx }) {
   const lang = 'fi';
   const t = (k) => tx(k, lang);
-  const canEdit = ctx.can('catalog.edit');
+  const canEdit = ctx.can('pos.use') || ctx.can('catalog.edit') || ctx.can('settings.edit');
   let catalog = [];
+  let allProducts = [];
   let tenders = [];
   let modes = { mobilepay_mode: 'off', vismapay_mode: 'off', site_base_url: '' };
-  let devices = [];
+  let editing = false;
+  let find = '';
   let cart = [];
   let showLines = false;
   let tender = null;
@@ -32,15 +35,17 @@ export async function render({ ctx }) {
   function stopPoll() { if (pollTimer) clearInterval(pollTimer); pollTimer = null; }
 
   async function load() {
-    const [cat, ten, dev] = await Promise.all([
+    await loadPosTexts(rpc);
+    const [cat, ten, products] = await Promise.all([
       rpc('admin_pos_catalog'),
       rpc('admin_pos_tenders'),
-      rpc('admin_list_cold_units').catch(() => []),
+      canEdit ? rpc('admin_list_products').catch(() => []) : Promise.resolve([]),
     ]);
     catalog = Array.isArray(cat) ? cat : [];
     modes = ten || modes;
     tenders = tendersFor(ten?.tenders || [], 'pos');
-    devices = Array.isArray(dev) ? dev : [];
+    allProducts = Array.isArray(products) ? products : [];
+    editing = tillEditorOpen(catalog.length, editing);
   }
 
   async function voidOpen() {
@@ -100,7 +105,12 @@ export async function render({ ctx }) {
   function draw() {
     const total = cartTotal(cart);
     const grid = h('div', { class: 'pos-grid', 'data-testid': 'pos-grid' });
-    if (!catalog.length) grid.append(h('p', { class: 'muted', text: t('no_products') }));
+    if (!catalog.length) {
+      grid.append(h('div', { class: 'pos-empty', 'data-testid': 'pos-empty' },
+        h('p', { text: t('no_products') }),
+        h('p', { class: 'muted', text: t('empty_help') }),
+        canEdit ? h('button', { type: 'button', class: 'btn primary lg pos-edit', 'data-testid': 'pos-add', text: t('add'), onclick: () => { editing = true; draw(); } }) : null));
+    }
     for (const p of catalog) {
       grid.append(h('button', { type: 'button', class: 'pos-btn', 'data-testid': `pos-product-${p.product_id}`, onclick: () => { if (phase === 'paying') voidOpen().then(() => { cart = cartAdd(cart, p); draw(); }); else { cart = cartAdd(cart, p); draw(); } } },
         h('span', { class: 'pos-name', text: p.name }),
@@ -161,50 +171,56 @@ export async function render({ ctx }) {
     }
     if (phase === 'paying' && payInfo?.pushed) side.append(h('p', { class: 'muted', text: t('push_help') }));
 
-    const devBox = canEdit ? deviceBox() : null;
+    const editBtn = canEdit ? h('button', { type: 'button', class: 'btn lg pos-edit', 'data-testid': 'pos-edit', 'aria-expanded': editing ? 'true' : 'false', text: editing ? t('done') : t('edit'), onclick: () => { editing = !editing; draw(); } }) : null;
     root.replaceChildren(
       h('h1', { text: t('title') }),
-      h('div', { class: 'pos-layout' }, h('div', {}, grid, lines), side),
-      devBox);
+      editBtn,
+      editing && canEdit ? editor() : null,
+      h('div', { class: 'pos-layout' }, h('div', {}, grid, lines), side));
   }
 
-  function deviceBox() {
-    const name = h('input', { name: 'name', maxlength: 80, 'aria-label': t('device_name') });
-    const loc = h('input', { name: 'location', maxlength: 120, 'aria-label': t('device_location') });
-    const list = h('div', { class: 'stack' });
-    for (const d of devices) {
-      list.append(h('div', { class: 'pos-line' },
-        h('span', { class: 'grow' }, h('strong', { text: d.name }), h('small', { text: d.location ? ` · ${d.location}` : '' })),
-        h('button', { type: 'button', class: 'btn', text: t('device_print'), onclick: () => printDevice(d) })));
+  function editor() {
+    const onTill = new Set(catalog.map((p) => p.product_id));
+    const search = h('input', { type: 'search', value: find, 'aria-label': t('search'), 'data-testid': 'pos-search' });
+    const hits = h('div', { class: 'stack', 'data-testid': 'pos-picker' });
+    const paintHits = () => {
+      const candidates = filterProducts(posCandidates(allProducts), find);
+      hits.replaceChildren(...candidates.map((p) => {
+        const inTill = onTill.has(p.id);
+        return h('div', { class: 'pos-line' },
+          h('span', { class: 'grow' }, h('strong', { text: p.name }), h('small', { text: ` ${money(p.price)}` }), p.config?.shop_visible === false ? h('small', { text: ` · ${t('not_shop')}` }) : null),
+          inTill
+            ? h('button', { type: 'button', class: 'btn danger', 'data-testid': `pos-remove-${p.id}`, text: t('remove'), onclick: () => setPos(p.id, false, p.config?.pos_sort ?? 100, 'removed_pos') })
+            : h('button', { type: 'button', class: 'btn primary', 'data-testid': `pos-add-${p.id}`, text: t('add'), onclick: () => setPos(p.id, true, (catalog.length + 1) * 10, 'added') }));
+      }));
+    };
+    search.addEventListener('input', () => { find = search.value; paintHits(); });
+    paintHits();
+    const order = h('div', { class: 'stack' });
+    for (const p of catalog) {
+      order.append(h('div', { class: 'pos-line' },
+        h('span', { class: 'grow', text: p.name }),
+        h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('up'), text: '↑', onclick: () => reorder(p.product_id, -1) }),
+        h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('down'), text: '↓', onclick: () => reorder(p.product_id, 1) })));
     }
-    const form = h('form', { class: 'row wrap' }, name, loc, h('button', { class: 'btn', type: 'submit', text: t('device_add') }));
-    form.addEventListener('submit', (ev) => {
-      ev.preventDefault();
-      rpc('admin_upsert_cold_unit', { p_id: null, p_name: name.value, p_location: loc.value, p_active: true })
-        .then(async () => { devices = await rpc('admin_list_cold_units'); name.value = ''; loc.value = ''; draw(); })
-        .catch((e) => toast(errMsg(e)));
-    });
-    return h('section', { class: 'pos-devices card' }, h('h2', { text: t('devices') }), form, list);
+    return h('section', { class: 'pos-editor card', 'data-testid': 'pos-editor' },
+      h('h2', { text: t('edit') }),
+      h('label', { class: 'fld' }, h('span', { text: t('search') }), search),
+      hits,
+      order);
   }
 
-  function printDevice(d) {
-    const url = d.print_url || d.path;
-    const w = window.open('', '_blank', 'noopener');
-    if (!w) return;
-    const doc = w.document;
-    doc.title = d.name;
-    const style = doc.createElement('style');
-    style.textContent = 'body{font-family:system-ui,sans-serif;text-align:center;margin:24px} h1{font-size:28px} p{font-size:18px}';
-    doc.head.append(style);
-    const h1 = doc.createElement('h1');
-    h1.textContent = d.name;
-    const p = doc.createElement('p');
-    p.textContent = t('print_help');
-    const where = doc.createElement('p');
-    where.textContent = d.location || '';
-    doc.body.append(h1, where, p, doc.importNode(qrSvgElement(url, { size: 420, label: d.name }), true));
-    w.focus();
-    w.print();
+  function setPos(productId, enabled, sort, toastKey) {
+    rpc('admin_set_pos_product', { p_product_id: productId, p_enabled: enabled, p_sort: sort })
+      .then(async () => { toast(t(toastKey)); await load(); draw(); })
+      .catch((e) => toast(errMsg(e)));
+  }
+
+  function reorder(productId, dir) {
+    const next = moveSort(catalog, productId, dir);
+    Promise.all(next.map((r) => rpc('admin_set_pos_product', { p_product_id: r.product_id, p_enabled: true, p_sort: r.pos_sort })))
+      .then(async () => { await load(); draw(); })
+      .catch((e) => toast(errMsg(e)));
   }
 
   await load();
