@@ -1,0 +1,109 @@
+name: Varmuuskopio (Tapio-havuhattu)
+# Yövarmuuskopio Supabasen ulkopuolelle (Google Drive). Ei PR-ajoa, ei sivujulkaisua.
+# Ajastus vain oletushaarassa (main), kun tämä tiedosto on siellä.
+# 00:15 UTC = 02:15 Suomen normaaliaikaa (EET) ja 03:15 Suomen kesäaikaa (EEST).
+# Yksi cron-lauseke ei seuraa kesäaikaa. 00:15 UTC on yöllä molempina vuodenaikoina,
+# ja kuukauden 1. päivän tiedostonimi on sama kalenteripäivä Suomessa.
+
+on:
+  schedule:
+    - cron: '15 0 * * *'
+  workflow_dispatch:
+    inputs:
+      restore_test:
+        description: 'Palautustesti juuri otetulle dumpille (postgres:17 Actionsissa, ei tuotantoon)'
+        required: false
+        type: boolean
+        default: false
+      retention_dry_run:
+        description: 'Vain säilytyksen kuivaharjoitus Drive-kansiossa (ei dumppia, ei poistoja)'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: tapio-havuhattu-db-backup
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  varmuuskopio:
+    name: Varmuuskopio
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      SUPABASE_BACKUP_DB_URL: ${{ secrets.SUPABASE_BACKUP_DB_URL }}
+      BACKUP_AGE_PUBLIC_KEY: ${{ secrets.BACKUP_AGE_PUBLIC_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      RCLONE_DRIVE_TOKEN: ${{ secrets.RCLONE_DRIVE_TOKEN }}
+      BACKUP_DRIVE_FOLDER_ID: ${{ secrets.BACKUP_DRIVE_FOLDER_ID }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      BACKUP_MIN_DUMP_BYTES: ${{ vars.BACKUP_MIN_DUMP_BYTES }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Asenna postgresql-client 17, age ja rclone
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ca-certificates curl gnupg age rclone python3
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          . /etc/os-release
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
+          export PATH="/usr/lib/postgresql/17/bin:${PATH}"
+          pg_dump --version | grep -q ' 17\.'
+          age --version
+          rclone version | head -n 1
+
+      - name: Säilytyksen kuivaharjoitus
+        if: github.event_name == 'workflow_dispatch' && inputs.retention_dry_run
+        run: bash scripts/backup/backup.sh --retention-dry-run
+
+      - name: Dumppi, salaus ja lähetys
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.retention_dry_run != true)
+        run: |
+          set -euo pipefail
+          export PATH="/usr/lib/postgresql/17/bin:${PATH}"
+          if [ -z "${BACKUP_MIN_DUMP_BYTES}" ]; then
+            export BACKUP_MIN_DUMP_BYTES=1048576
+          fi
+          if [ -z "${SUPABASE_URL}" ]; then
+            export SUPABASE_URL="https://sxbofnuisemspgquoxyv.supabase.co"
+          fi
+          run_restore=0
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            day="$(TZ=Europe/Helsinki date +%d)"
+            if [ "$day" = "01" ]; then
+              run_restore=1
+            fi
+          fi
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.restore_test }}" = "true" ]; then
+            run_restore=1
+          fi
+          if [ "$run_restore" = "1" ]; then
+            docker run -d --name backup-restore-pg \
+              -e POSTGRES_PASSWORD=restore-test-only \
+              -p 5432:5432 postgres:17
+            ready=0
+            for _ in $(seq 1 40); do
+              if docker exec backup-restore-pg pg_isready -U postgres; then
+                ready=1
+                break
+              fi
+              sleep 2
+            done
+            [ "$ready" = "1" ]
+            export RUN_RESTORE_TEST=1
+            export RESTORE_TARGET_URL="postgresql://postgres:restore-test-only@127.0.0.1:5432/postgres"
+          fi
+          cleanup_pg() {
+            docker rm -f backup-restore-pg >/dev/null 2>&1 || true
+          }
+          trap cleanup_pg EXIT
+          bash scripts/backup/backup.sh
