@@ -45,9 +45,15 @@ export function tenderAvailable(tender, modes) {
   if (!tender) return false;
   if (tender.handler === 'terminal' || tender.code === 'card_terminal') return false;
   if (!tender.active) return false;
-  if (tender.handler === 'mobilepay') return modes?.mobilepay_mode && modes.mobilepay_mode !== 'off';
-  if (tender.handler === 'visma_pay') return modes?.vismapay_mode && modes.vismapay_mode !== 'off';
+  if (tender.handler === 'mobilepay') return !!(modes?.mobilepay_mode && modes.mobilepay_mode !== 'off');
+  if (tender.handler === 'visma_pay' || tender.handler === 'payment_link') return !!(modes?.vismapay_mode && modes.vismapay_mode !== 'off');
   return true;
+}
+
+/** Sama sääntö kuin booking._valid_email: pituus ja yksi @ sekä piste domainissa. */
+export function validEmail(s) {
+  const t = String(s ?? '').trim();
+  return t.length > 0 && t.length <= 254 && /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(t);
 }
 
 export function joinUrl(base, path) {

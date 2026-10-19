@@ -1,6 +1,7 @@
 // Pikakassan tekstit (FI+EN). Tuotannossa sama sisältö tuodaan site_texts-tauluun (pending-import-12).
 // Uudet muokkaus- ja QR-myyntitekstit: pending-import-16 (POS_EDIT_TEXTS).
 // Maksupopupin uudet avaimet: pending-import-17 (POS_PAY_TEXTS). Sanakirja on varalla, kunnes tuonti on ajettu.
+// Maksulinkin sähköposti: pending-import-18 (POS_LINK_TEXTS). Allekirjoitus Tapio on email.payment_link.sign_name.
 // public_get_site_texts peittää ui.pos.*-avaimet. Haku epäonnistuu tai rivi puuttuu → sanakirja.
 import { getLang } from './talous-i18n.js';
 
@@ -138,6 +139,37 @@ export const POS_EDIT_TEXTS = {
   },
 };
 
+export const POS_LINK_TEXTS = {
+  fi: {
+    email: 'Asiakkaan sähköposti',
+    email_help: 'Maksulinkki lähetetään tähän osoitteeseen',
+    email_invalid: 'Tarkista sähköpostiosoite',
+    email_required: 'Anna sähköpostiosoite',
+    link_sent_to: 'Linkki lähtee osoitteeseen',
+    mail_pending: 'Viesti on jonossa',
+    mail_sent: 'Viesti on lähetetty',
+    mail_dry_run: 'Testitila: viesti ei lähde oikeasti',
+    mail_failed: 'Viestin lähetys epäonnistui',
+    mail_resend: 'Lähetä uudelleen',
+    mail_off: 'Sähköpostilähetys ei ole käytössä',
+    vismapay_off: 'Verkkomaksu ei ole käytössä, joten maksulinkillä ei voi maksaa',
+  },
+  en: {
+    email: 'Customer email',
+    email_help: 'The payment link is sent to this address',
+    email_invalid: 'Check the email address',
+    email_required: 'Enter an email address',
+    link_sent_to: 'The link is sent to',
+    mail_pending: 'The message is queued',
+    mail_sent: 'The message has been sent',
+    mail_dry_run: 'Test mode: the message is not actually sent',
+    mail_failed: 'Sending the message failed',
+    mail_resend: 'Send again',
+    mail_off: 'Email sending is turned off',
+    vismapay_off: 'Online payment is off, so the payment link cannot be used',
+  },
+};
+
 export const POS_PAY_TEXTS = {
   fi: {
     pay_title: 'Maksu',
@@ -188,5 +220,6 @@ export function clearPosTextCache() {
 export function posText(key, lang = getLang()) {
   const live = db.get(`${PREFIX}${key}|${lang}`);
   if (live) return live;
-  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || key;
+  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_LINK_TEXTS[lang]?.[key]
+    || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || POS_LINK_TEXTS.fi[key] || key;
 }

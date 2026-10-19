@@ -38,6 +38,7 @@ export const EMAIL_TEXTS: TextTable = {
   "email.payment_link.expires": { fi: "Linkki on voimassa {{var:date}} asti.", en: "The link is valid until {{var:date}}." },
   "email.payment_link.amount_label": { fi: "Maksettava", en: "Amount to pay" },
   "email.payment_link.pay_button": { fi: "Maksa nyt", en: "Pay now" },
+  "email.payment_link.sign_name": { fi: "Tapio", en: "Tapio" },
   // ---- kuitti / hyvityskuitti ----
   "email.receipt.subject": { fi: `Kuitti {{var:no}} – ${SN}`, en: `Receipt {{var:no}} – ${SN}` },
   "email.receipt.title": { fi: "Kuitti", en: "Receipt" },

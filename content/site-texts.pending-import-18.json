@@ -1,0 +1,262 @@
+[
+ {
+  "key": "ui.pos.email",
+  "lang": "fi",
+  "text": "Asiakkaan sähköposti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.email",
+  "lang": "en",
+  "text": "Customer email",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.email_help",
+  "lang": "fi",
+  "text": "Maksulinkki lähetetään tähän osoitteeseen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.email_help",
+  "lang": "en",
+  "text": "The payment link is sent to this address",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.email_invalid",
+  "lang": "fi",
+  "text": "Tarkista sähköpostiosoite",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.email_invalid",
+  "lang": "en",
+  "text": "Check the email address",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.email_required",
+  "lang": "fi",
+  "text": "Anna sähköpostiosoite",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.email_required",
+  "lang": "en",
+  "text": "Enter an email address",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.link_sent_to",
+  "lang": "fi",
+  "text": "Linkki lähtee osoitteeseen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.link_sent_to",
+  "lang": "en",
+  "text": "The link is sent to",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.mail_pending",
+  "lang": "fi",
+  "text": "Viesti on jonossa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.mail_pending",
+  "lang": "en",
+  "text": "The message is queued",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.mail_sent",
+  "lang": "fi",
+  "text": "Viesti on lähetetty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.mail_sent",
+  "lang": "en",
+  "text": "The message has been sent",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.mail_dry_run",
+  "lang": "fi",
+  "text": "Testitila: viesti ei lähde oikeasti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.mail_dry_run",
+  "lang": "en",
+  "text": "Test mode: the message is not actually sent",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.mail_failed",
+  "lang": "fi",
+  "text": "Viestin lähetys epäonnistui",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.mail_failed",
+  "lang": "en",
+  "text": "Sending the message failed",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.mail_resend",
+  "lang": "fi",
+  "text": "Lähetä uudelleen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.mail_resend",
+  "lang": "en",
+  "text": "Send again",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.mail_off",
+  "lang": "fi",
+  "text": "Sähköpostilähetys ei ole käytössä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.mail_off",
+  "lang": "en",
+  "text": "Email sending is turned off",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.vismapay_off",
+  "lang": "fi",
+  "text": "Verkkomaksu ei ole käytössä, joten maksulinkillä ei voi maksaa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.vismapay_off",
+  "lang": "en",
+  "text": "Online payment is off, so the payment link cannot be used",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksulinkki lähetetään asiakkaan sähköpostiin. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "email.payment_link.sign_name",
+  "lang": "fi",
+  "text": "Tapio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.payment_link.sign_name",
+  "lang": "en",
+  "text": "Tapio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ }
+]

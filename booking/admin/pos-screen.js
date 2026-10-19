@@ -3,7 +3,7 @@
 import { h, toast, money, errMsg } from './ui.js';
 import { icon } from './icons.js';
 import { loadPosTexts, posText as tx } from './pos-texts.js';
-import { cartAdd, cartSetQty, cartTotal, checkoutItems, tendersFor, tenderAvailable, joinUrl, posCandidates, filterProducts, tillEditorOpen, moveSort } from './pos-logic.js';
+import { cartAdd, cartSetQty, cartTotal, checkoutItems, tendersFor, tenderAvailable, joinUrl, posCandidates, filterProducts, tillEditorOpen, moveSort, validEmail } from './pos-logic.js';
 import { finnishMobileMsisdn } from './phone-fi.js';
 import { qrSvgElement } from './qrsvg.js';
 
@@ -24,6 +24,9 @@ export async function renderPos({ ctx, rpc, fn }) {
   let tender = null;
   let mpFlow = 'QR';
   let phone = '';
+  let email = '';
+  let mail = null;
+  let mailError = '';
   let order = null;
   let phase = 'cart';
   let payInfo = null;
@@ -169,7 +172,7 @@ export async function renderPos({ ctx, rpc, fn }) {
   async function voidOpen() {
     if (!order || phase === 'paid') return;
     const id = order.order_id;
-    order = null; phase = 'cart'; payInfo = null; stopPoll();
+    order = null; phase = 'cart'; payInfo = null; mail = null; stopPoll();
     try { await rpc('admin_pos_void', { p_order_id: id }); } catch (e) { toast(errMsg(e)); }
   }
 
@@ -187,6 +190,14 @@ export async function renderPos({ ctx, rpc, fn }) {
           draw();
         }
       } catch { /* seuraava kysely */ }
+      if (payInfo?.kind === 'link' && phase === 'paying') {
+        try {
+          const em = await rpc('admin_pos_email_status', { p_order_id: orderId });
+          const changed = ['status', 'attempts', 'sent_at', 'last_error', 'masked_to'].some((k) => (mail?.[k] ?? null) !== (em?.[k] ?? null));
+          mail = em;
+          if (changed) draw();
+        } catch { /* seuraava kysely */ }
+      }
     };
     pollTimer = setInterval(tick, 2500);
     tick();
@@ -206,17 +217,25 @@ export async function renderPos({ ctx, rpc, fn }) {
       if (!tender || !tenderAvailable(tenders.find((x) => x.code === tender), modes)) { payOpen = true; toast(t('choose_method')); return; }
       const chosen = tenders.find((x) => x.code === tender);
       if (chosen.handler === 'mobilepay' && mpFlow === 'PUSH_MESSAGE' && !finnishMobileMsisdn(phone)) { toast(t('phone_invalid')); payOpen = true; return; }
+      let mailTo = null;
+      if (chosen.handler === 'payment_link') {
+        mailTo = String(email || '').trim();
+        if (!mailTo) { payError = t('email_required'); payOpen = true; toast(payError, 'err'); return; }
+        if (!validEmail(mailTo)) { payError = t('email_invalid'); payOpen = true; toast(payError, 'err'); return; }
+      }
       payError = '';
       draw();
       const items = checkoutItems(cart);
-      const res = await rpc('admin_pos_checkout', { p_items: items, p_locale: lang, p_email: null });
+      const res = await rpc('admin_pos_checkout', { p_items: items, p_locale: lang, p_email: mailTo });
       order = res;
       phase = 'paying';
       try {
         if (chosen.handler === 'payment_link') {
-          const link = await rpc('admin_create_payment_link', { p_order_id: res.order_id, p_send_email: false, p_expires_days: 1, p_note: 'pikakassa' });
+          const link = await rpc('admin_pos_send_link', { p_order_id: res.order_id, p_email: mailTo });
           const url = joinUrl(modes.site_base_url, link.link_path);
-          payInfo = { kind: 'link', url, amount: link.amount, online: link.online_payment_enabled };
+          payInfo = { kind: 'link', url, amount: link.amount };
+          mail = { status: link.outbox_status || 'pending', masked_to: link.masked_to || null, attempts: null, max_attempts: null, sent_at: null, last_error: null };
+          mailError = '';
           if (MOCK()) await rpc('admin_pos_mock_tender', { p_order_id: res.order_id });
           watch(res.order_id, res.public_token);
         } else if (chosen.handler === 'mobilepay') {
@@ -248,9 +267,35 @@ export async function renderPos({ ctx, rpc, fn }) {
 
   function nextCustomer() {
     order = null; phase = 'cart'; payInfo = null; cart = [];
+    email = ''; mail = null; mailError = '';
     payOpen = false; returnFocus = null; modalWasOpen = false;
     stopPoll();
     draw();
+  }
+
+  async function resend() {
+    if (busy || !order || phase !== 'paying') return;
+    busy = true;
+    mailError = '';
+    draw();
+    try {
+      const link = await rpc('admin_pos_send_link', { p_order_id: order.order_id, p_email: String(email || '').trim(), p_resend: true });
+      mail = { ...(mail || {}), status: link.outbox_status || 'pending', masked_to: link.masked_to || mail?.masked_to || null };
+    } catch (e) {
+      mailError = errMsg(e);
+      toast(mailError, 'err');
+    } finally {
+      busy = false;
+      draw();
+    }
+  }
+
+  function mailLabel(status) {
+    if (status === 'sent') return t('mail_sent');
+    if (status === 'dry_run') return t('mail_dry_run');
+    if (status === 'failed' || status === 'dead') return t('mail_failed');
+    if (status === 'skipped') return t('mail_off');
+    return t('mail_pending');
   }
 
   function methodBox() {
@@ -264,7 +309,8 @@ export async function renderPos({ ctx, rpc, fn }) {
         h('span', { text: label }),
         !available && m.handler === 'terminal' ? h('small', { text: t('terminal_later') }) : null,
         !available && m.handler === 'mobilepay' ? h('small', { text: t('mp_off') }) : null,
-        !available && m.handler === 'visma_pay' ? h('small', { text: t('visma_off') }) : null));
+        !available && m.handler === 'visma_pay' ? h('small', { text: t('visma_off') }) : null,
+        !available && m.handler === 'payment_link' ? h('small', { text: t('vismapay_off'), 'data-testid': 'pos-vismapay-off' }) : null));
     }
     return box;
   }
@@ -282,10 +328,26 @@ export async function renderPos({ ctx, rpc, fn }) {
     return box;
   }
 
+  function emailBox() {
+    if (tender !== 'payment_link' || phase !== 'cart') return null;
+    const inp = h('input', { type: 'email', inputmode: 'email', autocomplete: 'email', value: email, 'aria-label': t('email'), 'data-testid': 'pos-email' });
+    inp.addEventListener('input', () => { email = inp.value; });
+    return h('label', { class: 'fld' }, h('span', { text: t('email') }), inp, h('small', { class: 'muted', text: t('email_help') }));
+  }
+
   function statusBlock() {
     const box = h('div', { class: 'pos-status', 'data-testid': 'pos-status' });
-    if (phase === 'paying' && payInfo?.kind === 'link' && payInfo.url) {
-      box.append(h('p', { class: 'muted', text: t('link_help') }), h('p', { class: 'pos-url', text: payInfo.url }), qrSvgElement(payInfo.url, { size: 220, label: t('method_link') }));
+    if (phase === 'paying' && payInfo?.kind === 'link') {
+      box.append(h('p', { 'data-testid': 'pos-mail', text: mailLabel(mail?.status) }));
+      if (mail?.masked_to) box.append(h('p', { 'data-testid': 'pos-mail-to', text: `${t('link_sent_to')} ${mail.masked_to}` }));
+      if (mailError) box.append(h('p', { role: 'alert', class: 'err', 'data-testid': 'pos-mail-error', text: mailError }));
+      if (['failed', 'dead', 'skipped'].includes(mail?.status)) {
+        box.append(h('button', {
+          type: 'button', class: 'btn', 'data-testid': 'pos-mail-resend',
+          text: t('mail_resend'), disabled: busy || null, onclick: () => resend(),
+        }));
+      }
+      if (payInfo.url) box.append(h('p', { class: 'muted', text: t('link_help') }), h('p', { class: 'pos-url', text: payInfo.url }), qrSvgElement(payInfo.url, { size: 220, label: t('method_link') }));
     }
     if (phase === 'paying' && payInfo?.kind === 'mp' && payInfo.flow === 'QR' && payInfo.qr) {
       box.append(h('p', { class: 'muted', text: t('qr_help') }), qrSvgElement(payInfo.qr, { size: 220, label: t('method_qr') }));
@@ -323,6 +385,8 @@ export async function renderPos({ ctx, rpc, fn }) {
       dialog.append(methodBox());
       const flows = flowBox();
       if (flows) dialog.append(flows);
+      const mailField = emailBox();
+      if (mailField) dialog.append(mailField);
     }
     if (phase === 'cart') {
       dialog.append(h('p', { class: 'muted pos-legal', text: t('pay_legal') }));
