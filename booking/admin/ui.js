@@ -71,6 +71,7 @@ export const ERR_FI = {
   has_reservations: 'Ajalla on varauksia – peru ne ensin.',
   forbidden: 'Ei oikeuksia tähän toimintoon.',
   duplicate_name: 'Samanniminen aktiivinen tuote on jo olemassa',
+  no_business: 'Yritystä ei löydy.',
   invalid_category: 'Kategoria ei kelpaa.',
   invalid_name: 'Nimi ei voi olla tyhjä.',
   invalid_vat: 'ALV-kanta ei ole sallittu.',

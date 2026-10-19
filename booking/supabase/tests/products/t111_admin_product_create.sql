@@ -1,5 +1,8 @@
 -- t111: hallinnan tuotteen luonti (booking_111). Rollback-transaktio: lopuksi tahallinen poikkeus.
--- Oikeudet, tyhjä nimi, hinta, ALV, duplikaatti, oletuskentät, site_texts, audit, sarjan nosto.
+-- Oikeudet, tyhjä nimi, hinta, ALV, duplikaatti, oletuskentät, site_texts, audit, business_id.
+-- Nimet ovat testikohtaisia (T111 …), jotta tuotannossa oleva tuote ei osu duplikaattitarkistukseen.
+-- A1–A3 ja D3 luetaan uloskirjautuneena: kb.change_log ei ole authenticated-roolin luettavissa
+-- ja RLS piilottaa passiiviset tuotteet. Testi ei lisää kb.products-rivejä suoraan eikä koske sarjaan.
 -- Ei CI:ssä. GitHub Pages -työnkulussa ei ole Postgresia, ja booking/supabase/tests/run.sh ajaa vain juuren [0-9]*.test.sql.
 -- Bottiavustus ajaa tämän psql:llä migraatioiden jälkeen. Ei tuotantoon.
 set local lock_timeout = '3s';
@@ -25,11 +28,17 @@ declare
   res jsonb;
   res2 jsonb;
   pid bigint;
+  pid_off bigint;
+  pid_age bigint;
+  v_biz bigint;
   n_before int;
   log text;
   npass int;
   nfail int;
 begin
+  select b.id into v_biz from kb.businesses b order by b.id limit 1;
+  perform public.t111_ck(v_biz is not null, 'B0 yritys loytyy');
+
   perform public.t111_ck(not has_function_privilege('anon', 'booking.admin_product_create(jsonb)', 'execute'), 'G1 anon ei luo');
   perform public.t111_ck(not has_function_privilege('public', 'booking.admin_product_create(jsonb)', 'execute'), 'G2 public ei luo');
   perform public.t111_ck(has_function_privilege('authenticated', 'booking.admin_product_create(jsonb)', 'execute'), 'G3 authenticated saa');
@@ -47,32 +56,32 @@ begin
     (u_mgr, 't111-mgr@example.test', 't111 manager', 'manager');
 
   perform public.t111_login(u_staff);
-  perform public.t111_ck(public.t111_try($q$select booking.admin_product_create('{"name":"Ei oikeutta","price":1,"vat_rate":25.5}'::jsonb)$q$) = 'forbidden', 'R1 staff ilman catalog.edit');
+  perform public.t111_ck(public.t111_try($q$select booking.admin_product_create('{"name":"T111 ei oikeutta","price":1,"vat_rate":25.5}'::jsonb)$q$) = 'forbidden', 'R1 staff ilman catalog.edit');
   perform public.t111_logout();
 
   perform public.t111_login(u_mgr);
   select count(*) into n_before from kb.products;
   perform public.t111_ck(public.t111_try($q$select booking.admin_product_create('{"name":"   ","price":1,"vat_rate":25.5}'::jsonb)$q$) = 'invalid_name', 'E1 tyhjä nimi');
-  perform public.t111_ck(public.t111_try($q$select booking.admin_product_create('{"name":"Miinus","price":-1,"vat_rate":25.5}'::jsonb)$q$) = 'invalid_price', 'E2 negatiivinen hinta');
-  perform public.t111_ck(public.t111_try($q$select booking.admin_product_create('{"name":"Vanha alv","price":1,"vat_rate":14}'::jsonb)$q$) = 'invalid_vat', 'E3 alv 14 ei käytössä');
-  perform public.t111_ck(public.t111_try($q$select booking.admin_product_create('{"name":"Outo alv","price":1,"vat_rate":17}'::jsonb)$q$) = 'invalid_vat', 'E4 alv 17 ei sallittu');
-  perform public.t111_ck(public.t111_try($q$select booking.admin_product_create('{"name":"Outo kentta","price":1,"vat_rate":25.5,"slug":"x"}'::jsonb)$q$) = 'unknown_field', 'E5 tuntematon kenttä');
-  perform public.t111_ck(public.t111_try($q$select booking.admin_product_create('{"name":"Väärä kategoria","price":1,"vat_rate":25.5,"category":"juoma"}'::jsonb)$q$) = 'invalid_category', 'E6 kategoria');
+  perform public.t111_ck(public.t111_try($q$select booking.admin_product_create('{"name":"T111 miinus","price":-1,"vat_rate":25.5}'::jsonb)$q$) = 'invalid_price', 'E2 negatiivinen hinta');
+  perform public.t111_ck(public.t111_try($q$select booking.admin_product_create('{"name":"T111 vanha alv","price":1,"vat_rate":14}'::jsonb)$q$) = 'invalid_vat', 'E3 alv 14 ei käytössä');
+  perform public.t111_ck(public.t111_try($q$select booking.admin_product_create('{"name":"T111 outo alv","price":1,"vat_rate":17}'::jsonb)$q$) = 'invalid_vat', 'E4 alv 17 ei sallittu');
+  perform public.t111_ck(public.t111_try($q$select booking.admin_product_create('{"name":"T111 outo kentta","price":1,"vat_rate":25.5,"slug":"x"}'::jsonb)$q$) = 'unknown_field', 'E5 tuntematon kenttä');
+  perform public.t111_ck(public.t111_try($q$select booking.admin_product_create('{"name":"T111 vaara kategoria","price":1,"vat_rate":25.5,"category":"juoma"}'::jsonb)$q$) = 'invalid_category', 'E6 kategoria');
+  perform public.t111_ck(public.t111_try($q$select booking.admin_product_create('{"name":"T111 kauppa","price":1,"vat_rate":25.5,"shop_visible":true}'::jsonb)$q$) = 'unknown_field', 'E8 shop_visible ei ole kentta');
   perform public.t111_ck((select count(*) from kb.products) = n_before, 'E7 virhe ei jättänyt riviä');
 
   res := booking.admin_product_create(jsonb_build_object(
-    'name', 'Virvoitusjuoma',
+    'name', 'T111 testijuoma',
     'price', 3.50,
     'vat_rate', 13.5,
     'category', 'product_rental',
     'active', true,
-    'shop_visible', false,
     'age_restricted', false
   ));
   pid := (res->>'id')::bigint;
   perform public.t111_ck(res->>'ok' = 'true' and pid is not null, 'C1 luonti onnistuu');
-  perform public.t111_ck((select name from kb.products where id = pid) = 'Virvoitusjuoma', 'C2 nimi');
-  perform public.t111_ck((select name_en from kb.products where id = pid) = 'Virvoitusjuoma', 'C3 tyhjä en tallentaa saman nimen');
+  perform public.t111_ck((select name from kb.products where id = pid) = 'T111 testijuoma', 'C2 nimi');
+  perform public.t111_ck((select name_en from kb.products where id = pid) = 'T111 testijuoma', 'C3 tyhjä en tallentaa saman nimen');
   perform public.t111_ck((select price from kb.products where id = pid) = 3.50, 'C4 hinta');
   perform public.t111_ck((select price_text from kb.products where id = pid) = '3,50 €', 'C5 hintateksti');
   perform public.t111_ck((select vat_rate from kb.products where id = pid) = 13.5, 'C6 alv');
@@ -94,37 +103,39 @@ begin
   perform public.t111_ck((select public_slots from booking.product_config where product_id = pid) is false, 'K11 ei julkisia slotteja');
   perform public.t111_ck((res->'product'->'config'->>'audience') = 'consumer', 'K12 vastauksessa audience');
 
-  perform public.t111_ck(public.t111_try(format($q$select booking.admin_product_create(jsonb_build_object('name','  virvoitusjuoma  ','price','3,50','vat_rate','13,5','active',true))$q$)) = 'duplicate_name', 'D1 duplikaatti kirjainkoosta riippumatta');
-  perform public.t111_ck((select count(*) from kb.products where lower(btrim(name)) = 'virvoitusjuoma') = 1, 'D2 virhe ei luonut toista');
+  perform public.t111_ck(public.t111_try(format($q$select booking.admin_product_create(jsonb_build_object('name','  t111 testijuoma  ','price','3,50','vat_rate','13,5','active',true))$q$)) = 'duplicate_name', 'D1 duplikaatti kirjainkoosta riippumatta');
+  perform public.t111_ck((select count(*) from kb.products where lower(btrim(name)) = 't111 testijuoma') = 1, 'D2 virhe ei luonut toista');
 
-  res2 := booking.admin_product_create(jsonb_build_object('name', 'Virvoitusjuoma', 'price', 0, 'vat_rate', 0, 'active', false));
-  perform public.t111_ck(res2->>'ok' = 'true' and (select active from kb.products where id = (res2->>'id')::bigint) is false, 'D3 passiivinen saa saman nimen');
+  res2 := booking.admin_product_create(jsonb_build_object('name', 'T111 testijuoma', 'price', 0, 'vat_rate', 0, 'active', false));
+  pid_off := (res2->>'id')::bigint;
+  perform public.t111_ck(res2->>'ok' = 'true' and pid_off is not null, 'D3a passiivinen luonti onnistuu');
 
   res2 := booking.admin_product_create(jsonb_build_object(
-    'name', 'Kauppatuote', 'name_en', 'Shop item', 'price', '10', 'vat_rate', '25.5',
-    'shop_visible', true, 'age_restricted', true
+    'name', 'T111 ikaraja', 'name_en', 'T111 age item', 'price', '10', 'vat_rate', '25.5',
+    'age_restricted', true
   ));
-  perform public.t111_ck((select category from kb.products where id = (res2->>'id')::bigint) = 'product_rental', 'F1 oletuskategoria');
-  perform public.t111_ck((select name_en from kb.products where id = (res2->>'id')::bigint) = 'Shop item', 'F2 englannin nimi');
-  perform public.t111_ck((select bookable and shop_visible from booking.product_config where product_id = (res2->>'id')::bigint), 'F3 verkko asettaa bookable');
-  perform public.t111_ck((select age_restricted from booking.product_config where product_id = (res2->>'id')::bigint) is true, 'F4 ikäraja');
-  perform public.t111_ck((select fridge_sale from booking.product_config where product_id = (res2->>'id')::bigint) is false, 'F5 ikäraja ei kylmälaitteeseen');
+  pid_age := (res2->>'id')::bigint;
+  perform public.t111_ck((select category from kb.products where id = pid_age) = 'product_rental', 'F1 oletuskategoria');
+  perform public.t111_ck((select name_en from kb.products where id = pid_age) = 'T111 age item', 'F2 englannin nimi');
+  perform public.t111_ck((select bookable from booking.product_config where product_id = pid_age) is false and (select shop_visible from booking.product_config where product_id = pid_age) is false, 'F3 bookable ja shop aina pois');
+  perform public.t111_ck((select age_restricted from booking.product_config where product_id = pid_age) is true, 'F4 ikäraja');
+  perform public.t111_ck((select fridge_sale from booking.product_config where product_id = pid_age) is false, 'F5 ikäraja ei kylmälaitteeseen');
 
-  perform public.t111_ck((select published_text from booking.site_texts where key = 'product.' || pid::text || '.name' and lang = 'fi') = 'Virvoitusjuoma', 'T1 nimi fi');
-  perform public.t111_ck((select published_text from booking.site_texts where key = 'product.' || pid::text || '.name' and lang = 'en') = 'Virvoitusjuoma', 'T2 nimi en');
+  perform public.t111_ck((select published_text from booking.site_texts where key = 'product.' || pid::text || '.name' and lang = 'fi') = 'T111 testijuoma', 'T1 nimi fi');
+  perform public.t111_ck((select published_text from booking.site_texts where key = 'product.' || pid::text || '.name' and lang = 'en') = 'T111 testijuoma', 'T2 nimi en');
   perform public.t111_ck((select class from booking.site_texts where key = 'product.' || pid::text || '.name' and lang = 'fi') = 'normal', 'T3 luokka normal');
   perform public.t111_ck(exists (select 1 from booking.site_text_versions v join booking.site_texts t on t.id = v.text_id where t.key = 'product.' || pid::text || '.name' and t.lang = 'fi' and v.version = 1), 'T4 versio');
 
+  perform public.t111_logout();
+
+  perform public.t111_ck((select name from kb.products where id = pid_off) = 'T111 testijuoma' and (select active from kb.products where id = pid_off) is false, 'D3 passiivinen saa saman nimen');
   perform public.t111_ck(exists (select 1 from booking.audit_log where table_name = 'kb.products' and row_pk = pid::text and action = 'ADMIN_CREATE'), 'A1 audit ADMIN_CREATE');
   perform public.t111_ck(exists (select 1 from kb.change_log where table_name = 'products' and row_id = pid and action = 'insert'), 'A2 change_log');
   perform public.t111_ck(exists (select 1 from booking.audit_log where table_name = 'product_config' and row_pk = pid::text and action = 'INSERT'), 'A3 asetusrivin audit');
+  perform public.t111_ck((select business_id from kb.products where id = pid) = v_biz, 'C12 business_id');
+  perform public.t111_ck((select business_id from kb.products where id = pid_off) = v_biz and (select business_id from kb.products where id = pid_age) = v_biz, 'C13 business_id myos muilla');
 
-  insert into kb.products(id, name, category, price, vat_rate, active)
-  overriding system value values (900000, 'Sekvenssikoe', 'other', 1, 0, false);
-  res2 := booking.admin_product_create(jsonb_build_object('name', 'Sekvenssin jalkeen', 'price', 1, 'vat_rate', 25.5, 'active', true));
-  perform public.t111_ck((res2->>'id')::bigint > 900000, 'S1 sarja nousee suurimman tunnuksen yli');
-
-  perform public.t111_logout();
+  perform public.t111_login(u_mgr);
 
   log := current_setting('t111.log', true);
   select count(*) filter (where l like 'P %'), count(*) filter (where l like 'F %') into npass, nfail from unnest(string_to_array(trim(both E'\n' from log), E'\n')) l;

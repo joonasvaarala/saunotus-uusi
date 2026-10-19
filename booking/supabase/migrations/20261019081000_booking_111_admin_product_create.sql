@@ -5,6 +5,9 @@
 -- Grant: authenticated ja service_role. Ei anonille eikä publicille.
 -- Luo kb.products- ja booking.product_config-rivin samassa funktiossa, kirjaa audit-lokin
 -- ja synkronoi tuotenimen site_texts-rivit (fi + en). Hintoja ja ALV:tä ei kirjoiteta irtoteksteihin.
+-- business_id tulee kb.businesses-taulun ensimmäisestä yrityksestä (tuotannossa NOT NULL, ei oletusta).
+-- Uusi tuote on aina bookable=false ja shop_visible=false: verkkokauppa näyttää vain tuotteet,
+-- joilla on varausajat tai aikataulusääntö. Sarjaa ei muuteta.
 -- Rollback: rollbacks/20261019081000_booking_111_ROLLBACK.sql
 -- Tätä tiedostoa ei ajeta tästä repossa. Bottiavustus ajaa migraation.
 -- ============================================================
@@ -18,7 +21,7 @@ security definer
 set search_path = ''
 as $fn$
 declare
-  allowed text[] := array['name','name_en','description','description_en','price','price_text','vat_rate','category','active','shop_visible','age_restricted'];
+  allowed text[] := array['name','name_en','description','description_en','price','price_text','vat_rate','category','active','age_restricted'];
   cats text[] := array['public_sauna','treatment','ritual','private_sauna','ceremony','event','training','gift_card','season_card','add_on','product_rental','corporate','other'];
   k text;
   v_name text;
@@ -30,15 +33,12 @@ declare
   v_price_text text;
   v_cat text;
   v_active boolean;
-  v_shop boolean;
   v_age boolean;
   v_slug text;
   v_base text;
   v_n integer;
   v_sort integer;
-  v_seq text;
-  v_last bigint;
-  v_max bigint;
+  v_biz bigint;
   n kb.products;
   v_key text;
 begin
@@ -94,16 +94,6 @@ begin
     perform booking._err('invalid_param', 'Aktiivinen-kenttä on virheellinen');
   end if;
 
-  if not (p_data ? 'shop_visible') then
-    v_shop := false;
-  elsif jsonb_typeof(p_data -> 'shop_visible') = 'boolean' then
-    v_shop := (p_data ->> 'shop_visible')::boolean;
-  elsif jsonb_typeof(p_data -> 'shop_visible') = 'string' and lower(btrim(p_data ->> 'shop_visible')) in ('true', 'false', 't', 'f') then
-    v_shop := lower(btrim(p_data ->> 'shop_visible')) in ('true', 't');
-  else
-    perform booking._err('invalid_param', 'Verkkokauppa-kenttä on virheellinen');
-  end if;
-
   if not (p_data ? 'age_restricted') then
     v_age := false;
   elsif jsonb_typeof(p_data -> 'age_restricted') = 'boolean' then
@@ -138,28 +128,17 @@ begin
     if v_n > 200 then perform booking._err('invalid_name', 'Tuotteelle ei löydy vapaata osoitetta'); end if;
   end loop;
 
-  -- Tuotantotunnus on voitu lisätä OVERRIDING SYSTEM VALUE -tavalla ilman, että identiteetti seurasi perässä.
-  -- Nostetaan sarjaa vain eteenpäin, ei koskaan taaksepäin.
-  v_seq := pg_catalog.pg_get_serial_sequence('kb.products', 'id');
-  if v_seq is not null then
-    select coalesce(ps.last_value, 0) into v_last
-      from pg_catalog.pg_sequences ps
-     where ps.schemaname = split_part(v_seq, '.', 1)
-       and ps.sequencename = split_part(v_seq, '.', 2);
-    select coalesce(max(p.id), 0) into v_max from kb.products p;
-    if coalesce(v_last, 0) < v_max then
-      perform pg_catalog.setval(v_seq::regclass, v_max, true);
-    end if;
-  end if;
+  select b.id into v_biz from kb.businesses b order by b.id limit 1;
+  if v_biz is null then perform booking._err('no_business', 'Yritystä ei löydy'); end if;
 
   select coalesce(max(pc.sort_order), 100) + 10 into v_sort from booking.product_config pc;
 
   insert into kb.products (
-    name, name_en, description, description_en, category,
+    business_id, name, name_en, description, description_en, category,
     price, price_type, price_text, vat_rate, price_includes_vat,
     slug, active, external_system, external_id
   ) values (
-    v_name, v_name_en, v_desc, v_desc_en, v_cat,
+    v_biz, v_name, v_name_en, v_desc, v_desc_en, v_cat,
     v_price, 'per_unit', v_price_text, v_vat, true,
     v_slug, v_active, null, null
   ) returning * into n;
@@ -169,7 +148,7 @@ begin
     lifecycle, resource_class, closure_group, duration_minutes,
     audience, pos_enabled, pos_sort, fridge_sale, age_restricted, public_slots
   ) values (
-    n.id, 'other', v_shop, v_shop, v_sort, 1, null,
+    n.id, 'other', false, false, v_sort, 1, null,
     'current', 'none', null, null,
     'consumer', false, 100, false, v_age, false
   );

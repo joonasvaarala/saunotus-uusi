@@ -154,6 +154,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     invLog: [],
     invSeq: 0,
     vatRates: [{ rate: 0, label: '0 %', active: true }, { rate: 13.5, label: '13,5 %', active: true }, { rate: 25.5, label: '25,5 %', active: true }, { rate: 24, label: '24 %', active: false }],
+    businessId: 1,
   };
   if (role === 'staff') st.perms = st.perms.filter((p) => p !== 'settings.edit');
   const optJson = (id) => { const o = st.options.find((x) => x.id === id); return o ? { id: o.id, code: o.code, name: o.name, name_en: o.name_en } : null; };
@@ -514,7 +515,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     admin_product_create: (a) => {
       need('catalog.edit');
       const d = a.p_data || {};
-      const allowed = new Set(['name', 'name_en', 'description', 'description_en', 'price', 'price_text', 'vat_rate', 'category', 'active', 'shop_visible', 'age_restricted']);
+      const allowed = new Set(['name', 'name_en', 'description', 'description_en', 'price', 'price_text', 'vat_rate', 'category', 'active', 'age_restricted']);
       for (const k of Object.keys(d)) if (!allowed.has(k)) throw err('unknown_field', 'Kenttää ei saa muokata: ' + k);
       const name = String(d.name ?? '').trim();
       if (!name || name.length > 200) throw err('invalid_name', 'Nimi ei voi olla tyhjä');
@@ -533,8 +534,8 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       const category = String(d.category || 'product_rental');
       if (!cats.includes(category)) throw err('invalid_category', 'Kategoria ei kelpaa');
       const active = d.active == null ? true : !!d.active;
-      const shop = d.shop_visible == null ? false : !!d.shop_visible;
       const age = d.age_restricted == null ? false : !!d.age_restricted;
+      if (st.businessId == null) throw err('no_business', 'Yritystä ei löydy');
       if (active && st.products.some((p) => p.active && String(p.name).trim().toLowerCase() === name.toLowerCase())) {
         throw err('duplicate_name', 'Samanniminen aktiivinen tuote on jo olemassa');
       }
@@ -546,13 +547,13 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       while (st.products.some((p) => p.slug === slug)) slug = `${base}-${n++}`;
       const sort = Math.max(100, ...st.products.map((p) => p.config?.sort_order || 0)) + 10;
       const row = {
-        id, slug, name, name_en: nameEn,
+        id, business_id: st.businessId, slug, name, name_en: nameEn,
         description: String(d.description || '').trim() || null,
         description_en: String(d.description_en || '').trim() || null,
         category, price, price_type: 'per_unit', price_text: priceText, vat_rate: vat, active,
         external_system: null, external_id: null,
         config: {
-          product_id: id, sale_kind: 'other', bookable: shop, shop_visible: shop, sort_order: sort,
+          product_id: id, sale_kind: 'other', bookable: false, shop_visible: false, sort_order: sort,
           min_persons: 1, max_persons: null, lifecycle: 'current', resource_class: 'none',
           audience: 'consumer', pos_enabled: false, pos_sort: 100, fridge_sale: false, age_restricted: age,
           public_slots: false,

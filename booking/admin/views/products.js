@@ -160,19 +160,18 @@ export async function render({ ctx, refs, reload, query }) {
       field(productText('price_text'), inp('price_text', '', { maxlength: 200 }), productText('price_text_hint')),
       field(productText('category'), cat),
       h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'active' }), ' ' + productText('active')),
-      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'shop_visible' }), ' ' + productText('shop')),
       h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'age_restricted' }), ' ' + productText('age')),
+      h('p', { class: 'muted', text: productText('sell_hint') }),
       h('p', { class: 'muted', text: productText('next') }),
       h('button', { class: 'btn primary', type: 'submit', 'data-testid': 'product-create-submit', text: productText('create') }));
     f.active.checked = true;
-    f.shop_visible.checked = false;
     f.age_restricted.checked = false;
     f.addEventListener('submit', (ev) => { ev.preventDefault(); run(f.querySelector('button'), async () => {
       const fd = new FormData(f);
       const res = await rpc('admin_product_create', { p_data: {
         name: fd.get('name'), name_en: fd.get('name_en'), description: fd.get('description'), description_en: fd.get('description_en'),
         price: fd.get('price'), price_text: fd.get('price_text'), vat_rate: fd.get('vat_rate'), category: fd.get('category'),
-        active: f.active.checked, shop_visible: f.shop_visible.checked, age_restricted: f.age_restricted.checked,
+        active: f.active.checked, age_restricted: f.age_restricted.checked,
       } });
       toast(productText('created')); d.close();
       if (res?.product) edit(res.product);

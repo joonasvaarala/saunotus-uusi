@@ -300,9 +300,9 @@
   "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "ui.admin.product.shop",
+  "key": "ui.admin.product.sell_hint",
   "lang": "fi",
-  "text": "Näkyy verkkokaupassa",
+  "text": "Tuote on myytävissä pikakassassa ja QR-koodilla.",
   "class": "normal",
   "kind": "plain",
   "max_len": 400,
@@ -310,9 +310,9 @@
   "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  },
  {
-  "key": "ui.admin.product.shop",
+  "key": "ui.admin.product.sell_hint",
   "lang": "en",
-  "text": "Visible in the web shop",
+  "text": "The product can be sold in the quick till and with a QR code.",
   "class": "normal",
   "kind": "plain",
   "max_len": 400,
