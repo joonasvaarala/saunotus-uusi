@@ -8,7 +8,9 @@ import { fileURLToPath } from 'node:url';
 import { createAdminMock } from '../admin/options-mock.js';
 import { moveSort, posCandidates, qrEligible, tillEditorOpen } from '../admin/pos-logic.js';
 import { POS_EDIT_TEXTS, POS_TEXTS } from '../admin/pos-texts.js';
-import { drinksQrUrl, printSheetHtml, printSheetSvg, sheetHasQr } from '../admin/qr-print.js';
+import { drinksQrUrl, printSheetHtml, printSheetSvg, sheetHasQr, stickerPlace } from '../admin/qr-print.js';
+import { h } from '../admin/ui.js';
+import { placeLabel } from '../drinks/drinks-logic.js';
 import { parseAdminHash } from '../admin/reservation-query.js';
 import { groupSettingKey, tabFromHash, visibleSettingTabs } from '../admin/settings-tabs.js';
 import { SETTINGS_TEXTS } from '../admin/settings-texts.js';
@@ -18,6 +20,7 @@ import { DRINKS_EXTRA, DRINKS_TEXTS } from '../drinks/drinks-texts.js';
 const read = (rel) => readFileSync(new URL(rel, import.meta.url), 'utf8');
 const pending16 = JSON.parse(read('../../content/site-texts.pending-import-16.json'));
 const pending12 = JSON.parse(read('../../content/site-texts.pending-import-12.json'));
+const pending24 = JSON.parse(read('../../content/site-texts.pending-import-24.json'));
 const URL_QR = 'https://uusi.saunotus.com/juomat/?laite=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
 test('QR-osoite on lukittu polku ja tuloste ei ole tyhjä', () => {
@@ -42,6 +45,32 @@ test('QR-osoite on lukittu polku ja tuloste ei ole tyhjä', () => {
   assert.ok(svg.includes('Vichy'));
   assert.ok(svg.includes('Skannaa ja osta'));
   assert.ok(svg.includes('<rect '));
+  assert.ok(svg.includes('Pukuhuone'));
+});
+
+test('tyhjä sijainti ei näy tarrassa, HTML:ssä eikä SVG:ssä', () => {
+  assert.equal(stickerPlace(null), '');
+  assert.equal(stickerPlace(undefined), '');
+  assert.equal(stickerPlace(false), '');
+  assert.equal(stickerPlace(''), '');
+  assert.equal(stickerPlace('   '), '');
+  assert.equal(stickerPlace('Pukuhuone'), 'Pukuhuone');
+  assert.equal(placeLabel(null), '');
+  assert.equal(placeLabel(undefined), '');
+  assert.equal(placeLabel(''), '');
+  assert.equal(placeLabel('  jääkaappi  '), 'jääkaappi');
+  for (const label of [null, undefined, false, '', '   ']) {
+    const html = printSheetHtml([{ name: 'Vichy', priceText: '3,00 €', url: URL_QR, label }], { scan: 'Skannaa ja osta' });
+    const svg = printSheetSvg([{ name: 'Vichy', priceText: '3,00 €', url: URL_QR, label }], { scan: 'Skannaa ja osta' });
+    assert.equal(html.includes('qr-where'), false, String(label));
+    assert.equal(html.includes('>null<'), false, String(label));
+    assert.equal(html.includes('undefined'), false, String(label));
+    assert.equal(svg.includes('>null<'), false, String(label));
+    assert.equal(svg.includes('undefined'), false, String(label));
+    assert.equal((svg.match(/<text /g) || []).length, 3, String(label));
+  }
+  const shown = printSheetSvg([{ name: 'Vichy', priceText: '3,00 €', url: URL_QR, label: 'Pukuhuone' }]);
+  assert.equal((shown.match(/<text /g) || []).length, 4);
 });
 
 test('pikakassaan voi valita myös verkkokaupan ulkopuolisen tuotteen', () => {
@@ -97,6 +126,11 @@ test('mock: tuote kassaan, ikäraja ei saa QR-koodia, juomasivu näyttää vain 
   await assert.rejects(() => admin.rpc('admin_create_product_qr', { p_product_id: 106, p_label: 'baari' }), (e) => e.code === 'age_restricted');
   const qr = await admin.rpc('admin_create_product_qr', { p_product_id: 105, p_label: 'Pukuhuone' });
   assert.match(qr.code, /^[a-f0-9]{32}$/);
+  const blank = await admin.rpc('admin_create_product_qr', { p_product_id: 105, p_label: '' });
+  assert.equal(blank.label, null);
+  const missing = await admin.rpc('admin_create_product_qr', { p_product_id: 105, p_label: null });
+  assert.equal(missing.label, null);
+  assert.equal(printSheetHtml([{ name: blank.name, priceText: '4,00 €', url: blank.print_url, label: blank.label }]).includes('qr-where'), false);
   assert.equal(qr.print_url, `https://uusi.saunotus.com/juomat/?laite=${qr.code}`);
   assert.equal(qr.name, 'Käsipyyhe');
   assert.equal(qr.price, 4);
@@ -139,6 +173,10 @@ test('näkymät eivät avaa tyhjää ikkunaa ja Procountor-kortti säilyy', () =
   assert.equal(settings.includes('Tilit puuttuvat'), false);
   assert.match(panel, /qr-preview/);
   assert.match(panel, /window\.print/);
+  assert.match(panel, /stickerPlace/);
+  assert.match(panel, /t\('location'\)/);
+  assert.equal(panel.includes('card.append'), false);
+  assert.match(read('../drinks/drinks.js'), /placeLabel\(device\?\.label\)/);
   const html = read('../drinks/index.html');
   const en = read('../drinks/index.en.html');
   assert.match(html, /noindex, nofollow/);
@@ -170,9 +208,11 @@ test('pending-import-16: vain uudet avaimet, FI+EN, ei numeroita', () => {
   }
   for (const lang of ['fi', 'en']) {
     for (const [key, text] of Object.entries(SETTINGS_TEXTS[lang])) {
-      const row = pending16.find((r) => r.key === key && r.lang === lang);
+      const row16 = pending16.find((r) => r.key === key && r.lang === lang);
+      const row = row16 || pending24.find((r) => r.key === key && r.lang === lang);
       assert.ok(row, key);
       assert.equal(row.text, text);
+      if (!row16) assert.equal(pending24.some((r) => r.key === key && r.lang === lang), true, key);
     }
     for (const [key, text] of Object.entries(DRINKS_EXTRA[lang])) {
       assert.equal(DRINKS_TEXTS[lang][key], undefined);
@@ -180,6 +220,83 @@ test('pending-import-16: vain uudet avaimet, FI+EN, ei numeroita', () => {
       assert.equal(row.text, text);
     }
   }
+});
+
+function installDom() {
+  function Node(type) { this.nodeType = type; this.childNodes = []; this.parent = null; }
+  function Text(data) { Node.call(this, 3); this.data = String(data); }
+  function El(tag) {
+    Node.call(this, 1);
+    this.tagName = String(tag).toUpperCase();
+    this.attrs = {};
+    this.className = '';
+  }
+  El.prototype.append = function (...nodes) {
+    for (const n of nodes) {
+      // Selain: ParentNode.append muuttaa null/undefined/false merkkijonoksi.
+      const child = n != null && n !== false && n.nodeType ? n : new Text(n);
+      child.parent = this;
+      this.childNodes.push(child);
+    }
+  };
+  El.prototype.setAttribute = function (k, v) { this.attrs[k] = String(v); };
+  El.prototype.addEventListener = function () {};
+  Object.defineProperty(El.prototype, 'textContent', {
+    set(v) { this.childNodes = [new Text(v)]; },
+    get() { return this.childNodes.map((n) => (n.nodeType === 3 ? n.data : n.textContent)).join(''); },
+  });
+  globalThis.document = {
+    createElement: (tag) => new El(tag),
+    createElementNS: (_ns, tag) => new El(tag),
+    createTextNode: (t) => new Text(t),
+  };
+}
+
+test('h() ohittaa null-, undefined- ja false-lapset', () => {
+  const prev = globalThis.document;
+  installDom();
+  try {
+    const el = h('div', {}, 'a', null, undefined, false, ['b', null], h('span', { text: 'c' }), 0, '');
+    assert.equal(el.textContent, 'abc0');
+    assert.equal(el.childNodes.some((n) => n.data === 'null' || n.data === 'undefined' || n.data === 'false'), false);
+    const card = h('article', { class: 'qr-card' },
+      h('h2', { text: 'Vichy' }),
+      h('p', { class: 'qr-price', text: '3,00 €' }),
+      null,
+      h('p', { class: 'qr-scan', text: 'Skannaa ja osta' }));
+    assert.equal(card.textContent.includes('null'), false);
+    assert.equal(card.childNodes.length, 3);
+    assert.equal(card.childNodes.some((n) => n.nodeType === 3), false);
+  } finally {
+    if (prev === undefined) delete globalThis.document;
+    else globalThis.document = prev;
+  }
+});
+
+test('pending-import-24: sijaintikentän nimi, FI+EN, ei päällekkäin', () => {
+  assert.equal(pending24.length, 2);
+  const seen = new Set();
+  for (const row of pending24) {
+    assert.equal(row.key, 'ui.admin.qr.location');
+    assert.ok(row.lang === 'fi' || row.lang === 'en');
+    assert.equal(row.class, 'normal');
+    assert.equal(row.kind, 'plain');
+    assert.deepEqual(row.placeholders, []);
+    assert.ok(row.max_len >= row.text.length);
+    assert.equal(row.text.includes('{{'), false);
+    assert.equal(seen.has(row.lang), false);
+    seen.add(row.lang);
+    assert.equal(SETTINGS_TEXTS[row.lang][row.key], row.text);
+  }
+  assert.equal(SETTINGS_TEXTS.fi['ui.admin.qr.location'], 'Sijainti (näkyy tarrassa, valinnainen)');
+  assert.equal(SETTINGS_TEXTS.en['ui.admin.qr.location'], 'Location (shown on the sticker, optional)');
+  assert.equal(SETTINGS_TEXTS.fi['ui.admin.qr.label'], 'Tarra');
+  const taken = new Set();
+  for (const row of [...pending12, ...pending16]) taken.add(`${row.key}|${row.lang}`);
+  for (const row of pending24) assert.equal(taken.has(`${row.key}|${row.lang}`), false);
+  const fb = JSON.parse(read('../../content/site-texts.fallback.json'));
+  const fbRows = Array.isArray(fb) ? fb : fb.texts;
+  for (const row of pending24) assert.equal(fbRows.find((r) => r.key === row.key && r.lang === row.lang)?.text, row.text);
 });
 
 test('SQL ja build-lista: t104, ei mobilepay-uudelleenkirjoitusta, uudet moduulit', () => {

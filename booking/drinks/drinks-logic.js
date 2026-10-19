@@ -30,6 +30,12 @@ export function productLabel(product, lang) {
   return product.name;
 }
 
+/** Laitteen sijainti. null, undefined, false ja pelkkä tyhjä tila eivät näy sivulla. */
+export function placeLabel(value) {
+  if (value == null || value === false) return '';
+  return String(value).trim();
+}
+
 export function deviceFromSearch(search) {
   const q = new URLSearchParams(String(search || '').replace(/^\?/, ''));
   return q.get('laite') || q.get('device') || '';

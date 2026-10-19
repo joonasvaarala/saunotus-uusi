@@ -1,0 +1,22 @@
+[
+ {
+  "key": "ui.admin.qr.location",
+  "lang": "fi",
+  "text": "Sijainti (näkyy tarrassa, valinnainen)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tarran sijaintikentän nimi. Vanha ui.admin.qr.label (Tarra) jää voimaan, tätä ei ylikirjoiteta. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.qr.location",
+  "lang": "en",
+  "text": "Location (shown on the sticker, optional)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "QR-tarran sijaintikentän nimi. Vanha ui.admin.qr.label (Tarra) jää voimaan, tätä ei ylikirjoiteta. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ }
+]

@@ -7,7 +7,11 @@ export const h = (tag, attrs, ...kids) => {
     if (k === 'class') el.className = v; else if (k === 'text') el.textContent = v; else if (k === 'value') el.value = v;
     else if (k.startsWith('on')) el.addEventListener(k.slice(2), v); else if (v === true) el.setAttribute(k, ''); else el.setAttribute(k, v);
   }
-  for (const c of kids.flat(Infinity)) if (c != null && c !== false) el.append(c.nodeType ? c : document.createTextNode(c));
+  // null, undefined ja false jätetään pois. Element.append muuttaisi ne tekstiksi "null", "undefined" tai "false".
+  for (const c of kids.flat(Infinity)) {
+    if (c == null || c === false) continue;
+    el.append(c.nodeType ? c : document.createTextNode(c));
+  }
   return el;
 };
 const TZ = 'Europe/Helsinki';

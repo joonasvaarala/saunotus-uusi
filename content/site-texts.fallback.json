@@ -23461,6 +23461,20 @@
    "text": "Type either price. The other updates from the VAT rate.",
    "version": 1,
    "placeholders": []
+  },
+  {
+   "key": "ui.admin.qr.location",
+   "lang": "fi",
+   "text": "Sijainti (näkyy tarrassa, valinnainen)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.qr.location",
+   "lang": "en",
+   "text": "Location (shown on the sticker, optional)",
+   "version": 1,
+   "placeholders": []
   }
  ],
  "context": {
