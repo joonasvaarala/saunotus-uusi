@@ -1,5 +1,5 @@
 // Julkinen kylmälaite-sivu. Ei kirjautumista. Hinta tulee palvelimelta.
-import { drinksText as tx } from './drinks-texts.js';
+import { drinksText as tx, loadDrinksTexts } from './drinks-texts.js';
 import { checkoutItems, cartTotal, drinksCartAdd, drinksCartSet, productLabel, deviceFromSearch } from './drinks-logic.js';
 import { createDrinksMock } from './drinks-mock.js';
 
@@ -63,19 +63,19 @@ function el(tag, attrs, ...kids) {
 const money = (n) => new Intl.NumberFormat(lang === 'en' ? 'en-GB' : 'fi-FI', { style: 'currency', currency: 'EUR' }).format(Number(n) || 0);
 
 function draw() {
-  document.title = t('title');
+  document.title = products.length === 1 ? productLabel(products[0], lang) : t('title');
   const main = el('main');
   main.append(el('h1', { text: t('title') }), el('p', { class: 'lead', text: t('lead') }));
-  if (device?.name) main.append(el('p', { class: 'device', 'data-testid': 'drinks-device', text: `${t('device')}: ${device.name}` }));
-  if (device && device.active === false) main.append(el('p', { class: 'err', text: t('no_device') }));
-  if (device?.unknown) main.append(el('p', { class: 'err', text: t('no_device') }));
+  if (device?.label) main.append(el('p', { class: 'device', 'data-testid': 'drinks-place', text: device.label }));
+  if (device && device.active === false) main.append(el('p', { class: 'err', text: t('qr_missing') }));
+  if (device?.unknown || !deviceCode) main.append(el('p', { class: 'err', 'data-testid': 'drinks-missing', text: t('qr_missing') }));
   if (phase === 'paid') {
     main.append(el('div', { class: 'paid', 'data-testid': 'drinks-paid' }, el('h2', { text: t('paid') }), el('p', { text: money(order?.total) })));
     app.replaceChildren(main);
     return;
   }
   const list = el('div', { class: 'list', 'data-testid': 'drinks-list' });
-  if (!products.length) list.append(el('p', { text: t('empty') }));
+  if (!products.length) list.append(el('p', { 'data-testid': 'drinks-empty', text: deviceCode && device && !device.unknown && device.active !== false ? t('empty') : '' }));
   for (const p of products) {
     const qty = cart.find((r) => r.product_id === p.product_id)?.quantity || 0;
     list.append(el('article', { class: 'drink' },
@@ -102,7 +102,7 @@ function draw() {
 
 async function pay() {
   if (!cart.length || phase === 'paying') return;
-  if (!deviceCode || device?.active === false || device?.unknown) { note = t('no_device'); draw(); return; }
+  if (!deviceCode || device?.active === false || device?.unknown) { note = t('qr_missing'); draw(); return; }
   if (email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email.trim())) { note = t('invalid_email'); draw(); return; }
   note = '';
   const res = await rpc('public_drinks_checkout', { p_device: deviceCode, p_items: checkoutItems(cart), p_email: email.trim() || null, p_locale: lang });
@@ -140,6 +140,7 @@ function watch(token) {
   tick();
 }
 
+await loadDrinksTexts(rpc);
 const cat = await rpc('public_drinks_catalog', { p_device: deviceCode || null });
 products = cat?.products || [];
 device = cat?.device || null;

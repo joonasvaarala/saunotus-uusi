@@ -27,7 +27,8 @@ declare
   u_staff uuid := gen_random_uuid();
   u_mgr uuid := gen_random_uuid();
   p_vichy bigint; p_gift bigint; p_beer bigint; p_free bigint; p_grape bigint;
-  dev text := 'jaakaappi-testi01';
+  dev text := 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+  dev_grape text := 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
   items jsonb; res jsonb; tok uuid; pos_tok uuid; pos_id bigint; i int; n_ok int := 0;
   pay_id bigint; exp timestamptz; log text; npass int; nfail int;
   v_c1 bigint; v_c2 bigint; v_hold timestamptz; v_space bigint; v_pre uuid;
@@ -53,7 +54,7 @@ begin
   perform public.t80_ck(public.t80_try(format('insert into booking.product_config(product_id, sale_kind, fridge_sale) values (%s, ''other'', true)', p_beer)) = 'age_restricted', 'A1 olut ei kylmälaitteeseen');
   insert into booking.product_config(product_id, sale_kind, fridge_sale) values (p_free, 'other', true);
   perform public.t80_ck((select fridge_sale from booking.product_config where product_id = p_free), 'A2 alkoholiton sallittu');
-  insert into booking.cold_units(code, name, location) values (dev, 'Pukuhuone, jääkaappi 1', 'Pukuhuone');
+  insert into booking.product_qr(code, product_id, label) values (dev, p_vichy, 'Pukuhuone'), (dev_grape, p_grape, null);
 
   insert into auth.users(id, email) values (u_staff, 't80-staff@example.test'), (u_mgr, 't80-mgr@example.test');
   insert into booking.staff(user_id, email, name, role) values
@@ -107,7 +108,7 @@ begin
     if i = 1 then
       res := booking.public_drinks_checkout(dev, jsonb_build_array(jsonb_build_object('product_id', p_vichy, 'quantity', 1)), 'asiakas@example.test', 'fi');
     else
-      res := booking.public_drinks_checkout(dev, jsonb_build_array(jsonb_build_object('product_id', p_grape, 'quantity', 1)), null, 'fi');
+      res := booking.public_drinks_checkout(dev_grape, jsonb_build_array(jsonb_build_object('product_id', p_grape, 'quantity', 1)), null, 'fi');
     end if;
     if res->>'ok' = 'true' then
       n_ok := n_ok + 1;

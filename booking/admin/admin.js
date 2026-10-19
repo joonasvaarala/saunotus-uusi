@@ -52,7 +52,7 @@ const ROUTES = [
   { path: 'tuotteet', label: 'Tuotteet', icon: 'tag', mod: () => loadView('products') },
   { path: 'resurssit', label: 'Resurssit', icon: 'cabin', mod: () => loadView('resources') },
   { path: 'sulkukalenterit', label: 'Kalenterisulut', icon: 'lock', any: ['blocks.manage'], mod: () => loadView('closures') },
-  { path: 'asetukset', label: 'Asetukset', icon: 'sliders', any: ['settings.edit'], mod: () => loadView('settings') },
+  { path: 'asetukset', label: 'Asetukset', icon: 'sliders', any: ['settings.edit', 'pos.use'], mod: () => loadView('settings') },
   { path: 'kayttajat', label: 'Käyttäjät', icon: 'key', any: ['staff.manage'], mod: () => loadView('users') },
 ];
 
@@ -75,7 +75,7 @@ let routeSeq = 0;   // nopea navigointi: vain viimeisin reitti saa piirtää nä
 async function route() {
   if (!getSession()) return;
   const seq = ++routeSeq;
-  const { path, query } = parseAdminHash(location.hash);
+  const { path, rest, query } = parseAdminHash(location.hash);
   const r = ROUTES.find((x) => x.path === path && allowed(x)) || ROUTES[0];
   drawNav(r.path);
   const view = $('view');
@@ -83,7 +83,7 @@ async function route() {
   try {
     const m = await r.mod();
     await refs();
-    const out = await m.render({ ctx, refs: ctx.refs, reload: route, query });
+    const out = await m.render({ ctx, refs: ctx.refs, reload: route, query, rest });
     if (seq !== routeSeq) return;
     view.replaceChildren(...[].concat(out).filter(Boolean));
     document.title = `${r.labelFn ? r.labelFn() : r.label} – hallinta`;

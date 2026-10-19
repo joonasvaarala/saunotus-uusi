@@ -86,6 +86,17 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     generalSettings: [
       { key: 'business_name', value: 'Havuhattu Oy', is_public: true },
       { key: 'timezone', value: 'Europe/Helsinki', is_public: false },
+      { key: 'public_booking_enabled', value: true, is_public: true },
+      { key: 'public_payment_mode', value: 'pay_later', is_public: true },
+      { key: 'hold_minutes', value: 15, is_public: true },
+      { key: 'customer_change_hours_before', value: 48, is_public: true },
+      { key: 'business_quote_notify_name', value: 'Joonas', is_public: false },
+      { key: 'checkout_company_invoice_enabled', value: true, is_public: false },
+      { key: 'gift_cards.redeem_enabled', value: false, is_public: false },
+      { key: 'rl_ip_per_10min', value: 12, is_public: false },
+      { key: 'public_treatment_horizon_days', value: 14, is_public: false },
+      { key: 'invoice_bank', value: '', is_public: false },
+      { key: 'seller', value: 'Havuhattu', is_public: false },
     ],
     procountor: {
       mode: 'off', environment: 'pts', daily_enabled: false, api_prefix: '/supported/api', vat_status: '', approved_by: '', bank_account: '',
@@ -100,6 +111,8 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       { id: 102, name: 'Sipsit', name_en: 'Crisps', price: 3, vat_rate: 13.5, active: true, category: 'other', config: { sale_kind: 'other', pos_enabled: true, pos_sort: 20, fridge_sale: false, age_restricted: false, bookable: false, shop_visible: false, audience: 'consumer' } },
       { id: 103, name: 'Pyyhevuokra', name_en: 'Towel rental', price: 5, vat_rate: 25.5, active: true, category: 'product_rental', config: { sale_kind: 'other', pos_enabled: true, pos_sort: 30, fridge_sale: false, age_restricted: false, bookable: false, shop_visible: false, audience: 'consumer' } },
       { id: 104, name: 'Lahjakortti', price: 58, vat_rate: 0, active: true, category: 'gift_card', config: { sale_kind: 'other', pos_enabled: false, fridge_sale: false, age_restricted: false, bookable: false, shop_visible: false, audience: 'consumer' } },
+      { id: 105, name: 'Käsipyyhe', name_en: 'Hand towel', price: 4, vat_rate: 25.5, active: true, category: 'other', config: { sale_kind: 'other', pos_enabled: false, pos_sort: 40, fridge_sale: false, age_restricted: false, bookable: false, shop_visible: false, audience: 'consumer' } },
+      { id: 106, name: 'Olut', name_en: 'Beer', price: 6, vat_rate: 25.5, active: true, category: 'other', config: { sale_kind: 'other', pos_enabled: false, fridge_sale: false, age_restricted: true, bookable: false, shop_visible: false, audience: 'consumer' } },
     ],
     options: [   // product_options (10 = Saunahoito)
       { id: 1, product_id: 10, code: 'hunajahoito', name: 'Hunajahoito', name_en: 'Honey treatment', sort_order: 10, active: true, description: null, description_en: null },
@@ -120,7 +133,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     }],
     blockAcks: [],
     posOrders: [],
-    coldUnits: [{ id: 1, code: 'pukuhuone-abcdef1234', name: 'Pukuhuone, jääkaappi 1', location: 'Pukuhuone', active: true, path: '/juomat/?laite=pukuhuone-abcdef1234', path_en: '/en/drinks/?laite=pukuhuone-abcdef1234', print_url: 'https://uusi.saunotus.com/juomat/?laite=pukuhuone-abcdef1234' }],
+    productQr: [],
     invCustomers: [],
     invoices: [],
     invLog: [],
@@ -165,6 +178,16 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
   };
   const staffOnly = () => {};
   const need = (perm) => { if (!st.perms.includes(perm)) throw err('forbidden', `Ei oikeutta tähän toimintoon (${perm})`); };
+  const needAny = (...perms) => { if (!perms.some((p) => st.perms.includes(p))) throw err('forbidden', 'Ei oikeutta'); };
+  const qrJson = (row) => {
+    const p = product(row.product_id);
+    return {
+      id: row.id, code: row.code, product_id: row.product_id, name: p?.name || '', price: p?.price ?? null,
+      label: row.label, active: row.active,
+      path: `/juomat/?laite=${row.code}`, path_en: `/en/drinks/?laite=${row.code}`,
+      print_url: `https://uusi.saunotus.com/juomat/?laite=${row.code}`,
+    };
+  };
   const inRange = (r, a) => (!a.p_from || r.starts_at >= a.p_from) && (!a.p_to || r.starts_at < a.p_to);
   const handlers = {
     current_staff_role: () => role,
@@ -375,24 +398,37 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       const o = st.posOrders.find((x) => x.order_id === a.p_order_id);
       return { ok: true, payment_id: 1, link_path: '/maksa/?p=11111111-2222-4333-8444-555555555555', amount: o?.total ?? 0, online_payment_enabled: false };
     },
-    admin_list_cold_units: () => {
-      if (!st.perms.includes('pos.use') && !st.perms.includes('catalog.edit')) throw err('forbidden', 'Ei oikeutta');
-      return st.coldUnits.map((d) => ({ ...d }));
+    admin_set_pos_product: (a) => {
+      needAny('pos.use', 'settings.edit');
+      const p = product(a.p_product_id);
+      if (!p?.config || !p.active || p.price == null || ['gift_card', 'season_card'].includes(p.category)) throw err('not_counter_product', 'Tuotetta ei voi lisätä pikakassaan');
+      if (a.p_sort != null && (a.p_sort < 0 || a.p_sort > 10000)) throw err('invalid_param', 'Järjestys');
+      p.config.pos_enabled = !!a.p_enabled;
+      if (a.p_sort != null) p.config.pos_sort = a.p_sort;
+      return { ok: true, product_id: p.id, pos_enabled: p.config.pos_enabled, pos_sort: p.config.pos_sort };
     },
-    admin_upsert_cold_unit: (a) => {
-      need('catalog.edit');
-      const name = String(a.p_name || '').trim();
-      if (!name) throw err('invalid_param', 'Nimi puuttuu');
-      if (a.p_id) {
-        const d = st.coldUnits.find((x) => x.id === a.p_id);
-        if (!d) throw err('not_found', 'Laitetta ei löydy');
-        d.name = name; d.location = a.p_location || null; d.active = a.p_active !== false;
-        return { ...d };
-      }
-      const code = 'laite-' + Math.random().toString(16).slice(2, 12);
-      const d = { id: st.coldUnits.length + 1, code, name, location: a.p_location || null, active: a.p_active !== false, path: `/juomat/?laite=${code}`, path_en: `/en/drinks/?laite=${code}`, print_url: `https://uusi.saunotus.com/juomat/?laite=${code}` };
-      st.coldUnits.push(d);
-      return { ...d };
+    admin_list_product_qr: () => {
+      needAny('pos.use', 'settings.edit');
+      return st.productQr.map(qrJson);
+    },
+    admin_create_product_qr: (a) => {
+      needAny('pos.use', 'settings.edit');
+      const p = product(a.p_product_id);
+      if (!p?.config || !p.active || p.price == null) throw err('not_found', 'Tuotetta ei löydy');
+      if (['gift_card', 'season_card'].includes(p.category)) throw err('not_counter_product', 'Lahjakortti ei kelpaa');
+      if (p.config.age_restricted || /(^|[^\p{L}])(olut|beer)([^\p{L}]|$)/iu.test(`${p.name} ${p.name_en || ''}`)) throw err('age_restricted', 'Ikärajallista tuotetta ei voi myydä QR-linkillä');
+      p.config.fridge_sale = true;
+      const code = [...crypto.getRandomValues(new Uint8Array(16))].map((b) => b.toString(16).padStart(2, '0')).join('');
+      const row = { id: st.productQr.length + 1, code, product_id: p.id, label: a.p_label ? String(a.p_label).trim() : null, active: true };
+      st.productQr.push(row);
+      return qrJson(row);
+    },
+    admin_delete_product_qr: (a) => {
+      needAny('pos.use', 'settings.edit');
+      const i = st.productQr.findIndex((x) => x.id === a.p_id);
+      if (i < 0) throw err('not_found', 'Koodia ei löydy');
+      st.productQr.splice(i, 1);
+      return { ok: true };
     },
     admin_update_product_config: (a) => {
       need('catalog.edit');

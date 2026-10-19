@@ -18,6 +18,28 @@ export function qrMatrix(text) {
 
 const NS = 'http://www.w3.org/2000/svg';
 
+function esc(s) {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/** SVG-merkkijono ilman DOM:ia. Sama matriisi kuin qrSvgElement. Taustarect + tummat modulit. */
+export function qrSvgMarkup(text, { size = 280, label = '' } = {}) {
+  const rows = qrMatrix(text);
+  const n = rows.length;
+  const quiet = 4;
+  const dim = n + quiet * 2;
+  const parts = [`<svg xmlns="${NS}" viewBox="0 0 ${dim} ${dim}" width="${size}" height="${size}" role="img"${label ? ` aria-label="${esc(label)}"` : ''}>`];
+  parts.push(`<rect x="0" y="0" width="${dim}" height="${dim}" fill="#ffffff"/>`);
+  for (let r = 0; r < n; r++) {
+    for (let c = 0; c < n; c++) {
+      if (rows[r][c] !== '1') continue;
+      parts.push(`<rect x="${c + quiet}" y="${r + quiet}" width="1" height="1" fill="#111111"/>`);
+    }
+  }
+  parts.push('</svg>');
+  return parts.join('');
+}
+
 export function qrSvgElement(text, { size = 280, label = '' } = {}) {
   const rows = qrMatrix(text);
   const n = rows.length;

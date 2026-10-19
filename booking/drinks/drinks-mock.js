@@ -1,8 +1,12 @@
 // ?mock=1: ei verkkokutsuja. Hinta tulee mock-katalogista, ei pyynnön rungosta.
-const PRODUCTS = [
-  { product_id: 201, name: 'Vichy', name_en: 'Vichy', price: 3, vat_rate: 13.5 },
-  { product_id: 202, name: 'Lähdevesi', name_en: 'Spring water', price: 2.5, vat_rate: 13.5 },
-];
+// Yksi QR-koodi vastaa yhtä tuotetta. Ilman koodia tai vieraalla koodilla listaa ei palauteta.
+export const DRINKS_QR = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+
+const BY_CODE = {
+  [DRINKS_QR]: { product_id: 201, name: 'Vichy', name_en: 'Vichy', price: 3, label: 'Pukuhuoneen jääkaappi' },
+};
+
+const PATHS = { fi: '/juomat/', en: '/en/drinks/' };
 
 export function createDrinksMock() {
   const orders = new Map();
@@ -10,23 +14,24 @@ export function createDrinksMock() {
   return {
     async rpc(name, args = {}) {
       if (name === 'public_drinks_catalog') {
-        const device = args.p_device
-          ? { code: args.p_device, name: 'Pukuhuone, jääkaappi 1', location: 'Pukuhuone', active: args.p_device !== 'pois' }
-          : null;
-        return { ok: true, device, products: PRODUCTS.slice(), paths: { fi: '/juomat/', en: '/en/drinks/' } };
+        const code = args.p_device || '';
+        const row = BY_CODE[code];
+        if (!row) return { ok: true, device: { unknown: true }, products: [], paths: PATHS };
+        if (code === 'pois') return { ok: true, device: { active: false }, products: [], paths: PATHS };
+        return { ok: true, device: { label: row.label, active: true }, products: [{ product_id: row.product_id, name: row.name, name_en: row.name_en, price: row.price }], paths: PATHS };
       }
       if (name === 'public_drinks_checkout') {
-        if (!args.p_device || args.p_device === 'pois') return { ok: false, code: 'unknown_device' };
+        const row = BY_CODE[args.p_device];
+        if (!row || args.p_device === 'pois') return { ok: false, code: 'unknown_device' };
         const items = args.p_items || [];
         if (items.some((r) => r.price != null || r.unit_price != null || r.vat_rate != null)) return { ok: false, code: 'price_locked' };
+        if (items.some((r) => r.product_id !== row.product_id)) return { ok: false, code: 'not_counter_product' };
         let total = 0;
         const lines = [];
         for (const r of items) {
-          const p = PRODUCTS.find((x) => x.product_id === r.product_id);
-          if (!p) return { ok: false, code: 'not_counter_product' };
-          const line = Math.round(p.price * r.quantity * 100) / 100;
+          const line = Math.round(row.price * r.quantity * 100) / 100;
           total += line;
-          lines.push({ product_id: p.product_id, name: p.name, quantity: r.quantity, unit_price: p.price, vat_rate: p.vat_rate, line_total: line });
+          lines.push({ product_id: row.product_id, name: row.name, quantity: r.quantity, unit_price: row.price, line_total: line });
         }
         const id = ++seq;
         const token = `00000000-0000-4000-8000-${String(id).padStart(12, '0')}`;

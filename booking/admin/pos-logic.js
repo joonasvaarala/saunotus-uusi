@@ -56,3 +56,45 @@ export function joinUrl(base, path) {
   if (/^https?:\/\//i.test(p)) return p;
   return b ? b + (p.startsWith('/') ? p : `/${p}`) : p;
 }
+
+const NOT_TILL = new Set(['gift_card', 'season_card']);
+
+/** Tuotteet, jotka voi lisätä pikakassaan. Verkkokaupan näkyvyys ei rajaa. Lahjakortti ja kausikortti eivät kelpaa. */
+export function posCandidates(products) {
+  return (products || []).filter((p) => p && p.active && p.config && p.price != null && !NOT_TILL.has(p.category));
+}
+
+export function filterProducts(products, query) {
+  const q = String(query || '').trim().toLocaleLowerCase('fi');
+  if (!q) return products || [];
+  return (products || []).filter((p) => `${p.name || ''} ${p.name_en || ''}`.toLocaleLowerCase('fi').includes(q));
+}
+
+/** Tyhjä kassa avaa muokkauksen heti. Muuten vain pyydettäessä. */
+export function tillEditorOpen(catalogLength, requested) {
+  return catalogLength === 0 || !!requested;
+}
+
+export function moveSort(rows, productId, dir) {
+  const list = [...(rows || [])].sort((a, b) => (a.pos_sort ?? 100) - (b.pos_sort ?? 100) || String(a.name).localeCompare(String(b.name), 'fi'));
+  const i = list.findIndex((r) => r.product_id === productId);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= list.length) return list;
+  const next = list.slice();
+  const [row] = next.splice(i, 1);
+  next.splice(j, 0, row);
+  return next.map((r, idx) => ({ ...r, pos_sort: (idx + 1) * 10 }));
+}
+
+export function productBlob(product) {
+  return [product?.name, product?.name_en, product?.description, product?.description_en].filter(Boolean).join(' ');
+}
+
+/** QR-linkillä myytävä: ei ikärajaa, ei alkoholin näköinen nimi, ei lahja- tai kausikortti. shop_visible saa olla false. */
+export function qrEligible(product) {
+  if (!product || !product.active || product.price == null || !product.config) return false;
+  if (NOT_TILL.has(product.category)) return false;
+  if (product.config.age_restricted) return false;
+  if (looksLikeAlcohol(productBlob(product))) return false;
+  return true;
+}

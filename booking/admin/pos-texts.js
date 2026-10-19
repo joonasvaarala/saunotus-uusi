@@ -1,4 +1,8 @@
-// Pikakassan tekstit (FI+EN). Tuotannossa sama sisältö tuodaan site_texts-tauluun (pending-import-12). Tämä on varakopio, kunnes tuonti on ajettu.
+// Pikakassan tekstit (FI+EN). Tuotannossa sama sisältö tuodaan site_texts-tauluun (pending-import-12).
+// Uudet muokkaus- ja QR-myyntitekstit: pending-import-16 (POS_EDIT_TEXTS). Sanakirja on varalla, kunnes tuonti on ajettu.
+// public_get_site_texts peittää ui.pos.*-avaimet. Haku epäonnistuu tai rivi puuttuu → sanakirja.
+import { getLang } from './talous-i18n.js';
+
 export const POS_TEXTS = {
   fi: {
     'nav': 'Pikakassa',
@@ -96,6 +100,75 @@ export const POS_TEXTS = {
   },
 };
 
-export function posText(key, lang = 'fi') {
-  return POS_TEXTS[lang]?.[key] || POS_TEXTS.fi[key] || key;
+export const POS_EDIT_TEXTS = {
+  fi: {
+    edit: 'Muokkaa pikakassaa',
+    add: 'Lisää tuote pikakassaan',
+    search: 'Hae tuotetta',
+    in_till: 'Pikakassassa',
+    not_shop: 'Ei näy verkkokaupassa',
+    up: 'Siirrä ylös',
+    down: 'Siirrä alas',
+    done: 'Valmis',
+    empty_help: 'Lisää tuotteita pikakassaan. Mukana voivat olla myös tuotteet, jotka eivät näy verkkokaupassa.',
+    qr_sale: 'Ostettavissa QR-linkillä',
+    qr_sale_hint: 'Linkki ei näytä tuotetta verkkokaupan listassa. Ikärajallista tuotetta ei voi valita.',
+    alcohol_qr: 'Tuotteen nimi näyttää alkoholilta, sitä ei voi myydä QR-linkillä',
+    badge_qr: 'QR-linkki',
+    added: 'Tuote lisätty pikakassaan',
+    removed_pos: 'Tuote poistettu pikakassasta',
+  },
+  en: {
+    edit: 'Edit the quick till',
+    add: 'Add a product to the quick till',
+    search: 'Search for a product',
+    in_till: 'On the till',
+    not_shop: 'Hidden from the shop',
+    up: 'Move up',
+    down: 'Move down',
+    done: 'Done',
+    empty_help: 'Add products to the till. Products that are hidden from the shop can be included.',
+    qr_sale: 'Purchasable with a QR link',
+    qr_sale_hint: 'The link does not list the product in the shop. An age-restricted product cannot be selected.',
+    alcohol_qr: 'The product name looks like alcohol and cannot be sold with a QR link',
+    badge_qr: 'QR link',
+    added: 'Product added to the quick till',
+    removed_pos: 'Product removed from the quick till',
+  },
+};
+
+const PREFIX = 'ui.pos.';
+let db = new Map();
+let loaded = false;
+
+export async function loadPosTexts(rpcFn) {
+  if (loaded) return true;
+  if (typeof rpcFn !== 'function') return false;
+  try {
+    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
+    const next = new Map();
+    for (const r of t.texts) {
+      if (!r || typeof r.key !== 'string' || !r.key.startsWith(PREFIX)) continue;
+      if (r.lang !== 'fi' && r.lang !== 'en') continue;
+      if (typeof r.text !== 'string' || !r.text.trim()) continue;
+      next.set(`${r.key}|${r.lang}`, r.text);
+    }
+    db = next;
+    loaded = true;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function clearPosTextCache() {
+  db = new Map();
+  loaded = false;
+}
+
+export function posText(key, lang = getLang()) {
+  const live = db.get(`${PREFIX}${key}|${lang}`);
+  if (live) return live;
+  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || key;
 }

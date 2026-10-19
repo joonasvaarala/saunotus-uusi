@@ -47,6 +47,39 @@ export const DRINKS_TEXTS = {
   },
 };
 
+export const DRINKS_EXTRA = {
+  fi: {
+    qr_missing: 'Tämä QR-koodi ei ole käytössä',
+  },
+  en: {
+    qr_missing: 'This QR code is not in use',
+  },
+};
+
+const PREFIX = 'ui.drinks.';
+let db = new Map();
+
+export async function loadDrinksTexts(rpcFn) {
+  if (typeof rpcFn !== 'function') return false;
+  try {
+    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    const rows = Array.isArray(t?.texts) ? t.texts : [];
+    const next = new Map();
+    for (const r of rows) {
+      if (!r || typeof r.key !== 'string' || !r.key.startsWith(PREFIX)) continue;
+      if (r.lang !== 'fi' && r.lang !== 'en') continue;
+      if (typeof r.text !== 'string' || !r.text.trim()) continue;
+      next.set(`${r.key}|${r.lang}`, r.text);
+    }
+    if (next.size) db = next;
+    return next.size > 0;
+  } catch {
+    return false;
+  }
+}
+
 export function drinksText(key, lang = 'fi') {
-  return DRINKS_TEXTS[lang]?.[key] || DRINKS_TEXTS.fi[key] || key;
+  const live = db.get(`${PREFIX}${key}|${lang}`);
+  if (live) return live;
+  return DRINKS_TEXTS[lang]?.[key] || DRINKS_EXTRA[lang]?.[key] || DRINKS_TEXTS.fi[key] || DRINKS_EXTRA.fi[key] || key;
 }
