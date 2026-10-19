@@ -41,12 +41,16 @@ def main() -> None:
             "file_count": storage.get("file_count"),
             "bytes": storage.get("bytes"),
             "buckets": storage.get("buckets", []),
+            "private_missing": storage.get("private_missing", []),
+            "other_buckets": storage.get("other_buckets", []),
+            "notes": storage.get("notes", []),
         },
         "encryption": {"tool": "age", "recipient_in_github_secret": "BACKUP_AGE_PUBLIC_KEY"},
         "notes": [
             "Rivimäärät on laskettu juuri ennen pg_dumpia.",
             "Roolien salasanat eivät ole arkistossa.",
-            "Vault-salaisuudet ovat kannassa vain salatussa muodossa, jos skeema ylipäätään dumppautuu.",
+            "Dumppi sisältää vault-salaisuudet vain salatussa muodossa. Yhteydellä backup_reader voi lukea vault.decrypted_secrets selväkielisenä.",
+            *list(storage.get("notes") or []),
         ],
     }
     with open(args.out, "w", encoding="utf-8") as handle:

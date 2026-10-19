@@ -22,6 +22,9 @@ REQUIRED_SCHEMAS = (
     "supabase_migrations",
 )
 OPTIONAL_SCHEMAS = ("cron",)
+# Julkiset bucketit ladataan ilman avainta. Yksityiset vain erillisellä auth-käyttäjällä.
+PUBLIC_STORAGE_BUCKETS = ("article-images", "product-images")
+PRIVATE_STORAGE_BUCKETS = ("receipts", "invoices")
 # (skeema, taulu, pakollinen). booking.bookings ei ole olemassa:
 # varaukset ovat booking.reservations.
 KEY_TABLES = (

@@ -18,7 +18,7 @@ Ei mukana:
 
 - Edge Function -lähteet (ne ovat tässä repossa).
 - Roolien salasanat, GitHub-salaisuudet, age-yksityinen avain.
-- Vaultin selväkieliset salaisuudet. Jos `vault` dumppautuu, salaisuudet ovat vain salatussa muodossa.
+- Vaultin selväkieliset salaisuudet. Dumppi sisältää vault-salaisuudet vain salatussa muodossa (`vault.secrets`). Näkymän `vault.decrypted_secrets` rivejä ei kirjoiteta dumppiin.
 - Large objectit, jos roolilla ei ole niihin oikeutta. `pg_read_all_data` ei kata niitä. Skripti yrittää silloin uudelleen `--no-large-objects`. Tämän projektin tiedostot ovat Storagessa, ei large objecteina.
 
 Työkalu on `pg_dump` pääversiolla 17, sama kuin kanta. Yhteys on secretissä `SUPABASE_BACKUP_DB_URL`: **session pooler tai suora yhteys, portti 5432**. Portti 6543 on transaktiopooleri, ja skripti kieltäytyy siitä (`pg_dump` ei toimi siinä).
@@ -43,15 +43,16 @@ Skripti ajaa `pg_dumpall --roles-only --no-role-passwords`. Postgres 17:ssä tä
 
 ## Storage
 
-Tiedostot haetaan Supabasen Storage HTTP API:lla service role -avaimella (`SUPABASE_SERVICE_ROLE_KEY`):
+Service role -avainta ei käytetä. Se ohittaisi RLS:n ja antaisi kirjoitusoikeuden.
 
-- `GET /storage/v1/bucket`
-- `POST /storage/v1/object/list/{bucket}` (myös alikansiot)
-- `GET /storage/v1/object/{bucket}/{polku}`
+Tiedostolista luetaan `storage.objects`-taulusta `backup_reader`-yhteydellä. S3-avaimia ei käytetä.
 
-Tämä on yksinkertaisin tie noin kymmenelle objektille: ei erillisiä S3-avaimia. S3-yhteensopiva rajapinta (`/storage/v1/s3`) vaatisi dashboardista luotavat access keyt ja toisen secret-parin. Sitä ei käytetä.
+- Julkiset bucketit `article-images` ja `product-images`: lataus ilman avainta osoitteesta `/storage/v1/object/public/<bucket>/<polku>`.
+- Yksityiset `receipts` ja `invoices` (kuitit ja laskut, laskut säilytetään kirjanpitolain mukaan): erillinen Auth-käyttäjä, jolla on vain luku näihin bucketeihin. Tunnistus on `app_metadata.backup_role = storage_reader`, ei sähköposti. Lataus on `/storage/v1/object/authenticated/<bucket>/<polku>` käyttäjän omalla istunnolla ja julkisella anon-avaimella.
+- Jos yksityisiä tiedostoja ei saada, ajo jatkuu, merkintä jää `manifest.json`-tiedostoon ja tietokantadumppi tehdään silti.
+- Muut bucketit jätetään lataamatta ja nimetään manifestissa.
 
-Service role ohittaa bucketien RLS:n. Avain ei kuulu selaimeen eikä repoon.
+Käyttäjällä ei ole `booking.staff`-riviä eikä henkilöstöroolia. `kb`- ja `booking`-taulujen RLS vaatii `is_staff()` tai `has_permission()`, joten pelkkä kirjautuminen ei näytä muuta dataa. Politiikka on vain `SELECT` bucketeihin `receipts` ja `invoices`.
 
 ## Salaus
 
@@ -97,53 +98,16 @@ Vanilla `postgres:17` ei ole Supabase. Täysi tuotantodumppi voi tarvita Supabas
 
 ## Joonaksen kertaluonteiset askeleet
 
-Tee nämä omalla koneella. Älä liitä tulosteita repoon, chattiin tai GitHub-issueen.
+Omalla koneella. Älä liitä avaimia, tokeneita, salasanoja tai osoitteita repoon, chattiin tai issueen. Ilman secretiä yöajo on vihreä ja Actionsissa näkyy ilmoitus puuttuvista nimistä (`docs/backup.md`).
 
-1. **age-avainpari.** Asenna age ja aja:
-   ```bash
-   age-keygen -o tapio-havuhattu-backup.key
-   ```
-   Tiedoston kommenttirivillä on julkinen avain (`age1...`). Kopioi **vain** se GitHub-secretiin `BACKUP_AGE_PUBLIC_KEY`. Siirrä koko tiedosto (yksityinen avain `AGE-SECRET-KEY-1...`) salasananhallintaan ja poista se työhakemistosta, joka ei ole tämä repo. Yksityistä avainta ei laiteta GitHubiin.
-
-2. **Drive-kansio.** Kirjaudu tilille `sipoonjoenperinnesauna@gmail.com` (tavallinen Gmail, ei Workspacea). Luo kansio, esimerkiksi `tapio-havuhattu-varmuuskopiot`. Avaa kansio. Selaimen osoitteen loppu `https://drive.google.com/drive/folders/KANSION_ID` on kansion ID. Secret `BACKUP_DRIVE_FOLDER_ID`.
-
-3. **rclone-token.** Asenna rclone ja aja komennot yksi kerrallaan:
-   ```bash
-   rclone version
-   ```
-   ```bash
-   rclone authorize "drive" "drive"
-   ```
-   Scope on `drive`, ei `drive.file`. `drive.file` näkee vain rclone-sovelluksen itse luomat tai Google Pickerillä avatut tiedostot. Selaimessa luotu kansio jää sillä näkymättä, eikä lähetys onnistu. Palvelutili ilman Shared Drivea ei toimi tavallisella Gmail-tilillä, siksi OAuth-token.
-   Selain avautuu. Kirjaudu samalle Gmail-tilille. Komento tulostaa JSON-objektin. Kopioi se kokonaan (mukaan lukien `refresh_token`) secretiin `RCLONE_DRIVE_TOKEN`. Sulje pääte sen jälkeen.
-
-4. **Migraatio ja salasana.** Aja tiedosto `booking/supabase/migrations/20261019140000_ops_001_backup_reader.sql` SQL-editorissa tai bottiavustuksella. Tiedosto ei aseta salasanaa. Heti perään, vain SQL-editorissa:
-   ```sql
-   alter role backup_reader password 'pitkä-satunnainen-salasana';
-   ```
-   Tallenna salasana salasananhallintaan. Sitä ei kirjoiteta repoon, workflow-tiedostoon eikä chattiin. Rooli on `LOGIN`, `BYPASSRLS`, `pg_read_all_data`-jäsen ja oletuksena read-only. Ilman `BYPASSRLS`:ää `pg_dump` katkeaa ensimmäiseen RLS-tauluun.
-
-5. **Yhteysosoite.** Dashboard → Connect → Session pooler (portti 5432). Kopioi URI ja vaihda käyttäjä `postgres.sxbofnuisemspgquoxyv` muotoon `backup_reader.sxbofnuisemspgquoxyv`. Salasana on kohdan 4 salasana. Jos siinä on erikoismerkkejä, koodaa ne prosenttikoodauksella (`@` → `%40`, `/` → `%2F`). Lopputulos:
-   ```text
-   postgresql://backup_reader.sxbofnuisemspgquoxyv:SALASANA@aws-0-eu-west-3.pooler.supabase.com:5432/postgres?sslmode=require
-   ```
-   Isäntänimi (`aws-0` tai `aws-1`) otetaan Connect-valikosta, ei tästä esimerkistä. Secret `SUPABASE_BACKUP_DB_URL`.
-
-6. **Service role.** Project Settings → API → `service_role` (secret). Secret `SUPABASE_SERVICE_ROLE_KEY`. Tätä avainta ei saa selaimen koodiin.
-
-7. **GitHub-secretit** (Settings → Secrets and variables → Actions → Repository secrets):
-   - `SUPABASE_BACKUP_DB_URL`
-   - `BACKUP_AGE_PUBLIC_KEY`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-   - `RCLONE_DRIVE_TOKEN`
-   - `BACKUP_DRIVE_FOLDER_ID`
-   Valinnainen muuttuja (Variable, ei secret): `BACKUP_MIN_DUMP_BYTES`. Oletus on 1048576 (1 MiB). Ensimmäisen onnistuneen ajon jälkeen raja kannattaa nostaa noin puoleen tyypillisestä dumpin koosta.
-
-8. **Sähköposti epäonnistumisesta.** Workflow ei lähetä omaa viestiä. Punainen ajo lähtee GitHubin omana sähköpostina, kun ilmoitukset ovat päällä: käyttäjän Settings → Notifications → Actions, ja repon Watch → Custom → Actions. Epäonnistuminen jättää ajon punaiseksi joka tapauksessa.
-
-9. **Ensimmäinen ajo**, kun kohdat 1–8 ovat kunnossa ja workflow on `main`-haarassa. Actions → Varmuuskopio (Tapio-havuhattu) → Run workflow. Ensin voi valita vain säilytyksen kuivaharjoituksen (`retention_dry_run`): se listaa Drive-kansion eikä poista mitään eikä ota dumppia. Sitten ajo ilman rastia. Tarkista, että kansioon ilmestyi `tapio-havuhattu_....dump.tar.age`. Kuivaharjoitus ja oikea ajo ovat erilliset: jos molemmat rastit ovat päällä, ajetaan vain kuivaharjoitus.
-
-10. **Älä commitoi** avainta, tokenia, salasanaa tai yhteysosoitetta. Rollback, jos rooli pitää poistaa: `booking/supabase/rollbacks/20261019140000_ops_001_ROLLBACK.sql`.
+1. **age.** `age-keygen -o tapio-havuhattu-backup.key`. Vain julkinen avain (`age1...`) → secret `BACKUP_AGE_PUBLIC_KEY`. Yksityinen avain (`AGE-SECRET-KEY-1...`) vain salasananhallintaan.
+2. **Drive.** Tilillä `sipoonjoenperinnesauna@gmail.com` kansio, esimerkiksi `tapio-havuhattu-varmuuskopiot`. Kansion ID osoitteesta → secret `BACKUP_DRIVE_FOLDER_ID`.
+3. **rclone.** Komennot yksi kerrallaan: `rclone version`, sitten `rclone authorize "drive"` (oletusscope `drive`, ei `drive.file`: selaimessa luotu kansio jäisi näkymättä). Palvelutili ei toimi tavallisella Gmaililla. Kirjaudu samalle tilille ja kopioi koko JSON → secret `RCLONE_DRIVE_TOKEN`.
+4. **Rooli.** Aja `booking/supabase/migrations/20261019140000_ops_001_backup_reader.sql`. Sitten vain SQL-editorissa `alter role backup_reader password 'pitkä-satunnainen-salasana';`. Salasana on yhtä arvokas kuin koko kanta (`vault.decrypted_secrets` ja `net`-jonot). Secret `SUPABASE_BACKUP_DB_URL`: Connect → Session pooler, portti 5432, käyttäjä `backup_reader.sxbofnuisemspgquoxyv`, isäntä Connect-valikosta (`aws-0` tai `aws-1`). Erikoismerkit prosenttikoodauksella.
+5. **Storage-käyttäjä.** Dashboard → Authentication → Add user. Sähköposti esim. `backup@saunotus.fi`, auto-confirm, salasana salasananhallintaan. App metadataan avain `backup_role` = `storage_reader` (älä tyhjennä muita avaimia; ei User metadata). Älä lisää `booking.staff`-riviä äläkä booking-roolia, jotta hallinta ei aukea. Aja `booking/supabase/migrations/20261019140100_ops_002_backup_storage_read.sql`. Secretit `BACKUP_STORAGE_EMAIL` ja `BACKUP_STORAGE_PASSWORD`. Muuttujat (eivät ole salaisuuksia): `SUPABASE_URL` = `https://sxbofnuisemspgquoxyv.supabase.co` ja `SUPABASE_ANON_KEY` = julkinen anon- tai publishable-avain. Ilman näitä tietokantadumppi syntyy, mutta yksityiset kuitit ja laskut jäävät manifestin merkintään.
+6. **GitHub** (Settings → Secrets and variables → Actions). Secretit: `SUPABASE_BACKUP_DB_URL`, `BACKUP_AGE_PUBLIC_KEY`, `RCLONE_DRIVE_TOKEN`, `BACKUP_DRIVE_FOLDER_ID`, `BACKUP_STORAGE_EMAIL`, `BACKUP_STORAGE_PASSWORD`. Muuttujat: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, valinnainen `BACKUP_MIN_DUMP_BYTES` (oletus 1048576).
+7. **Sähköposti.** Workflow ei lähetä omaa viestiä. Punainen ajo tulee, kun Notifications → Actions ja repon Watch → Custom → Actions ovat päällä.
+8. **Ensimmäinen ajo** vasta `main`-haarassa. Actions → Varmuuskopio (Tapio-havuhattu). Ensin vain `retention_dry_run` (ei dumppia, ei poistoa; riittää rclone-secretit). Sitten ajo ilman rastia. Tarkista tiedosto `tapio-havuhattu_....dump.tar.age`. Älä commitoi salaisuuksia. Rollback: `20261019140100_ops_002_ROLLBACK.sql` ja `20261019140000_ops_001_ROLLBACK.sql`.
 
 ## Jos lukurooli ei riitä
 
@@ -153,7 +117,7 @@ Jos rooli syntyy mutta `pg_dump` kaatuu skeemaan, johon `pg_read_all_data` ei yl
 
 `pg_dump` ei ota event triggereitä ilman superuseria. Ne ovat Supabasen sisäisiä. Custom-roolien salasanat eivät ole dumpissa.
 
-Rooli voi itse ajaa `set default_transaction_read_only = off`, koska asetus on oletus, ei pakko. Sillä ei ole kirjoitusoikeuksia tauluihin (`pg_read_all_data` on pelkkä luku). Yhteysraja on 8.
+Rooli voi itse ajaa `set default_transaction_read_only = off`, koska asetus on oletus, ei pakko. `pg_read_all_data` on pelkkä luku, mutta Supabase antaa `PUBLIC`-oikeuden `net`-skeeman jonotauluihin, joten rooli voi kirjoittaa niihin (esimerkiksi `net.http_request_queue`). Se voi myös lukea `vault.decrypted_secrets` selväkielisenä. Salasana on siksi yhtä arvokas kuin koko kannan data. Yhteysraja on 8. `vault` ei ole migraation eksplisiittisessä skeemalistassa: dumpin kattaa `pg_read_all_data`.
 
 ## Palautus hätätilanteessa
 

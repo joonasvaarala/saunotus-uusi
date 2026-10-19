@@ -10,6 +10,8 @@ import sys
 from common import (
     KEY_TABLES,
     OPTIONAL_SCHEMAS,
+    PRIVATE_STORAGE_BUCKETS,
+    PUBLIC_STORAGE_BUCKETS,
     REQUIRED_SCHEMAS,
     BackupError,
     quote_ident,
@@ -110,6 +112,59 @@ def row_counts() -> list[dict]:
     return rows
 
 
+def list_storage_objects() -> dict:
+    """storage.objects backup_reader-yhteydellä. Epäonnistuminen ei kaada dumppia."""
+    known = set(PUBLIC_STORAGE_BUCKETS) | set(PRIVATE_STORAGE_BUCKETS)
+    private = set(PRIVATE_STORAGE_BUCKETS)
+    empty = {"ok": False, "note": "", "objects": [], "other_buckets": []}
+    try:
+        exists = psql("select (to_regclass('storage.objects') is not null)::text")
+    except BackupError as exc:
+        empty["note"] = f"storage.objects-listaus epäonnistui: {exc}"
+        return empty
+    if exists != "true":
+        empty["note"] = "storage.objects ei ole olemassa"
+        return empty
+    try:
+        raw = psql(
+            "select coalesce(json_agg(json_build_object('bucket', bucket_id, 'path', name) "
+            "order by bucket_id, name), '[]'::json)::text "
+            "from storage.objects "
+            "where bucket_id is not null and name is not null "
+            "and name <> '.emptyFolderPlaceholder'"
+        )
+    except BackupError as exc:
+        empty["note"] = f"storage.objects-listaus epäonnistui: {exc}"
+        return empty
+    try:
+        rows = json.loads(raw or "[]")
+    except json.JSONDecodeError:
+        empty["note"] = "storage.objects-listaus ei ollut jsonia"
+        return empty
+    objects = []
+    other: set[str] = set()
+    if not isinstance(rows, list):
+        empty["note"] = "storage.objects-listaus ei ollut taulukko"
+        return empty
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        bucket = row.get("bucket")
+        path = row.get("path")
+        if not isinstance(bucket, str) or not isinstance(path, str):
+            continue
+        if bucket not in known:
+            other.add(bucket)
+            continue
+        objects.append({"bucket": bucket, "path": path, "private": bucket in private})
+    return {
+        "ok": True,
+        "note": "",
+        "objects": objects,
+        "other_buckets": sorted(other),
+    }
+
+
 def check_dump(path: str, min_bytes: int, required_schemas: list[str]) -> dict:
     if not os.path.isfile(path):
         raise BackupError(f"dumpia ei ole: {path}")
@@ -176,7 +231,7 @@ def compare(manifest: dict, actual: dict[str, int | None]) -> list[str]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=("inspect", "counts", "check-dump", "collect", "compare"))
+    parser.add_argument("command", choices=("inspect", "counts", "check-dump", "collect", "compare", "storage-objects"))
     parser.add_argument("--out")
     parser.add_argument("--dump")
     parser.add_argument("--min-bytes", type=int, default=1)
@@ -199,6 +254,8 @@ def main() -> None:
         elif args.command == "check-dump":
             required = [part for part in args.required_schemas.split(",") if part]
             payload = check_dump(args.dump, args.min_bytes, required)
+        elif args.command == "storage-objects":
+            payload = list_storage_objects()
         elif args.command == "collect":
             manifest = json.loads(open(args.manifest, encoding="utf-8").read())
             payload = counts_for_manifest(manifest)

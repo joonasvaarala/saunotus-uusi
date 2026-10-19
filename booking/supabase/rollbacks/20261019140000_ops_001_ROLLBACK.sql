@@ -1,8 +1,5 @@
 -- ROLLBACK ops_001_backup_reader.
 -- Poistaa lukuroolin. Ei poista tauluja eikä dataa.
--- DROP ROLE ei toimi transaktion sisällä: ensimmäinen COMMIT sulkee ajurin transaktion.
-
-commit;
 
 do $rev$
 declare s text;

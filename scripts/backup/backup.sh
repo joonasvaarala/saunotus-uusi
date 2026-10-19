@@ -146,16 +146,17 @@ json.dump({
 }, open("$WORKDIR/roles.json", "w", encoding="utf-8"), ensure_ascii=False, indent=2)
 PY
 
-unset PGPASSWORD PGHOST PGPORT PGUSER PGDATABASE PGSSLMODE || true
-
 if [[ "$SKIP_STORAGE" == "1" ]]; then
   python3 - <<PY
 import json
-json.dump({"method": "skipped", "file_count": 0, "bytes": 0, "buckets": [], "files": []}, open("$PAYLOAD/storage/manifest.json", "w"))
+json.dump({"method": "skipped", "file_count": 0, "bytes": 0, "buckets": [], "files": [], "private_missing": [], "notes": []}, open("$PAYLOAD/storage/manifest.json", "w"))
 PY
 else
-  [[ -n "${SUPABASE_SERVICE_ROLE_KEY:-}" ]] || die "SUPABASE_SERVICE_ROLE_KEY puuttuu"
-  python3 storage_download.py --dest "$PAYLOAD/storage"
+  python3 dbcheck.py storage-objects --out "$WORKDIR/storage-objects.json"
+fi
+unset PGPASSWORD PGHOST PGPORT PGUSER PGDATABASE PGSSLMODE || true
+if [[ "$SKIP_STORAGE" != "1" ]]; then
+  python3 storage_download.py --dest "$PAYLOAD/storage" --objects "$WORKDIR/storage-objects.json"
 fi
 
 python3 build_manifest.py \

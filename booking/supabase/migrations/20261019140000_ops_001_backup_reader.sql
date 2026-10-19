@@ -4,10 +4,6 @@
 --   alter role backup_reader password '...';
 -- Salasanaa ei kirjoiteta repoon eikä tähän tiedostoon.
 --
--- CREATE ROLE ja ALTER ROLE eivät toimi eksplisiittisen transaktion sisällä (SQLSTATE 25001).
--- psql -1 ja Supabasen migraatioajuri aloittavat transaktion. Ensimmäinen COMMIT sulkee sen.
--- Ilman ulkoista transaktiota COMMIT vain varoittaa ja jatkaa.
---
 -- BYPASSRLS + pg_read_all_data on Supabasen ohje roolille, jolla pg_dump lukee myös RLS-taulut
 -- ja auth/storage-skeemat:
 -- https://supabase.com/docs/guides/troubleshooting/pg_dump-fails-with-query-would-be-affected-by-row-level-security-policy-1d5783
@@ -18,8 +14,6 @@
 -- Aikaleima 20261019140000 on tuotannon booking_112 (20261019102204) jälkeen.
 -- Rollback: rollbacks/20261019140000_ops_001_ROLLBACK.sql
 -- Ei tuotantoajoa tässä commitissa.
-
-commit;
 
 create role backup_reader
   login
@@ -52,7 +46,7 @@ declare
   s text;
   schemas text[] := array[
     'public', 'kb', 'booking', 'auth', 'storage', 'supabase_migrations', 'cron',
-    'extensions', 'vault', 'graphql', 'graphql_public', 'realtime', 'net', 'supabase_functions'
+    'extensions', 'graphql', 'graphql_public', 'realtime', 'net', 'supabase_functions'
   ];
 begin
   foreach s in array schemas loop
