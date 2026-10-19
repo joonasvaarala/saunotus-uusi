@@ -111,7 +111,7 @@ jobs:
         with:
           deno-version: v2.x
       - run: deno test -A --no-lock --node-modules-dir=none booking/supabase/functions/pdf-golden.test.ts booking/supabase/functions/_tests/site_texts_test.ts booking/supabase/functions/_tests/mobilepay_test.ts booking/supabase/functions/_tests/procountor_test.ts booking/supabase/functions/_tests/vismapay_test.ts
-      - run: node --test booking/tests/procountor-admin.test.mjs booking/tests/pikakassa.test.mjs
+      - run: node --test booking/tests/procountor-admin.test.mjs booking/tests/pikakassa.test.mjs booking/tests/pikakassa-nakyma.test.mjs
       # QR-tuote, tulostus ja asetusten välilehdet (booking_104–105).
       # t104 (booking/supabase/tests/pos/t104_product_qr.sql) ei ole tässä ajossa:
       # työnkulussa ei ole Postgresia, ja booking/supabase/tests/run.sh ajaa vain juuren [0-9]*.test.sql.
