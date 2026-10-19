@@ -2,6 +2,7 @@
 // sopimuksen §14/§15 mukaan, rivit samassa muodossa kuin migraatiossa booking_50). KEKSITTYÄ DATAA: mikään ei mene verkkoon eikä tallennu (tila on vain muistissa).
 // Puhdas moduuli (ei DOM:ia) → node --test voi ajaa sen. Tuntematon RPC → virhe (ei koskaan verkkokutsua).
 import { fiReference, validBusinessId, validOvt, validOperator, normBusinessId, normOvt } from '../shop/src/invoice-validate.js';
+import { invoiceLineAmounts } from './invoice-lines.js';
 const TZ = 'Europe/Helsinki';
 const todayHel = (now = new Date()) => now.toLocaleDateString('sv-SE', { timeZone: TZ });
 const addDays = (ds, n) => { const d = new Date(`${ds}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
@@ -107,6 +108,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       { key: 'rl_ip_per_10min', value: 12, is_public: false },
       { key: 'public_treatment_horizon_days', value: 14, is_public: false },
       { key: 'invoice_bank', value: '', is_public: false },
+      { key: 'invoice_due_days', value: 14, is_public: false },
       { key: 'seller', value: 'Havuhattu', is_public: false },
     ],
     procountor: {
@@ -652,10 +654,9 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       const lines = (p.lines || []).map((l, i) => {
         const rate = Number(l.vat_rate);
         if (!st.vatRates.some((r) => r.active && r.rate === rate)) throw err('invalid_vat', 'ALV-kanta ei ole käytössä');
-        const qty = Number(l.quantity), price = Number(l.unit_price_net);
-        const net = Math.round(qty * price * 100) / 100;
-        const vat = Math.round(net * rate) / 100;
-        return { line_no: i + 1, description: l.description, quantity: qty, unit: l.unit || 'kpl', unit_price_net: price, vat_rate: rate, line_net: net, line_vat: vat, line_gross: Math.round((net + vat) * 100) / 100 };
+        const calc = invoiceLineAmounts(l.quantity, l.unit_price_net, l.vat_rate);
+        if (!calc) throw err('invalid_lines', 'Tarkista rivit');
+        return { line_no: i + 1, description: l.description, unit: l.unit || 'kpl', ...calc };
       });
       if (!lines.length) throw err('invalid_lines', 'Laskulla pitää olla rivejä');
       const today = todayHel(now);
