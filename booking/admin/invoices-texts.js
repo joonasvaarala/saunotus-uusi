@@ -93,6 +93,10 @@ export const INVOICE_TEXTS = {
     'ui.admin.invoices.name_email_body': 'Rekisterissä on jo sama nimi ja sähköposti ilman Y-tunnusta.',
     'ui.admin.invoices.save_anyway': 'Tallenna silti uutena',
     'ui.admin.invoices.need_company': 'Anna yrityksen nimi.',
+    'ui.admin.invoices.phone': 'Puhelin',
+    'ui.admin.invoices.src_invoice': 'Laskutusasiakas',
+    'ui.admin.invoices.src_booking': 'Asiakas',
+    'ui.admin.invoices.booking_note': 'Laskutusasiakas syntyy tallennettaessa.',
   },
   en: {
     'ui.admin.invoices.title': 'Invoices',
@@ -182,6 +186,10 @@ export const INVOICE_TEXTS = {
     'ui.admin.invoices.name_email_body': 'The register already has the same name and email without a business ID.',
     'ui.admin.invoices.save_anyway': 'Save as a new customer anyway',
     'ui.admin.invoices.need_company': 'Enter the company name.',
+    'ui.admin.invoices.phone': 'Phone',
+    'ui.admin.invoices.src_invoice': 'Invoice customer',
+    'ui.admin.invoices.src_booking': 'Customer',
+    'ui.admin.invoices.booking_note': 'An invoice customer is created when you save.',
   },
 };
 

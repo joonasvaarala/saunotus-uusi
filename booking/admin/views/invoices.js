@@ -143,7 +143,7 @@ export async function render() {
     const defRate = rates.length ? String(rates.reduce((a, b) => (Number(b.rate) > Number(a.rate) ? b : a)).rate) : '';
     const lines = [{ description: '', quantity: 1, unit: 'kpl', unit_price_net: '', vat_rate: defRate }];
     const f = {};
-    const cust = { row: null, snap: null };
+    const cust = { row: null, snap: null, bookingId: null };
     const box = h('form', { class: 'form inv-editor', 'data-testid': 'invoice-new-form', novalidate: true });
     const add = (key, label, attrs = {}) => { f[key] = input({ name: key, ...attrs }); return field(label, f[key]); };
     const lineBox = h('div', { class: 'inv-lines' });
@@ -157,7 +157,7 @@ export async function render() {
     }
     paintLines();
     const readFields = () => ({
-      company_name: f.company_name.value, business_id: f.business_id.value, contact_name: f.contact_name.value, email: f.email.value,
+      company_name: f.company_name.value, business_id: f.business_id.value, contact_name: f.contact_name.value, email: f.email.value, phone: f.phone.value,
       einvoice_address: f.einvoice_address.value, einvoice_operator: f.einvoice_operator.value, street: f.street.value, zip: f.zip.value, city: f.city.value, buyer_reference: f.buyer_reference.value,
     });
     const payloadOf = () => {
@@ -174,11 +174,15 @@ export async function render() {
     };
     function fillFromCustomer(c) {
       const map = {
-        company_name: c.company_name || c.name || '', business_id: c.business_id || '', contact_name: c.contact_name || '', email: c.email || '',
+        company_name: c.company_name || c.name || '', business_id: c.business_id || '', contact_name: c.contact_name || '', email: c.email || '', phone: c.phone || '',
         einvoice_address: c.einvoice_address || '', einvoice_operator: c.einvoice_operator || '', street: c.street || '', zip: c.zip || '', city: c.city || '', buyer_reference: c.buyer_reference || '',
       };
       for (const [k, v] of Object.entries(map)) if (f[k]) f[k].value = v;
-      cust.row = c; cust.snap = map;
+      if (c.source === 'booking') {
+        cust.row = null; cust.snap = null; cust.bookingId = c.customer_id || null;
+      } else {
+        cust.row = c; cust.snap = map; cust.bookingId = null;
+      }
     }
     const orLine = h('p', { class: 'nb-or muted', text: tx('ui.admin.invoices.find_or') });
     function ytjNode(term, moved) {
@@ -200,16 +204,20 @@ export async function render() {
       placeholder: tx('ui.admin.invoices.find_ph'), ariaLabel: tx('ui.admin.invoices.find_aria'), buttonLabel: tx('ui.admin.invoices.find_btn'),
       buttonTestId: 'invoice-customer-search', pickedTestId: 'invoice-customer-picked',
       search: async (term) => {
-        const rows = await rpc('admin_search_invoice_customers', { p_search: term, p_limit: 8 });
+        const rows = await rpc('admin_search_invoice_customers', { p_search: term, p_limit: 10 });
         return Array.isArray(rows) ? rows : [];
       },
       hitTitle: (c) => c.company_name || c.name || '',
-      hitMeta: (c) => [c.business_id, c.email].filter(Boolean).join(' · '),
+      hitMeta: (c) => [c.business_id, c.email, tx(c.source === 'booking' ? 'ui.admin.invoices.src_booking' : 'ui.admin.invoices.src_invoice')].filter(Boolean).join(' · '),
       onPick: (c) => { fillFromCustomer(c); orLine.hidden = true; },
       pickedTitle: (c) => c.company_name || c.name || '',
-      pickedMeta: (c) => [c.business_id, c.email].filter(Boolean).join(' · ') || tx('ui.admin.invoices.found_note'),
+      pickedMeta: (c) => {
+        const bits = [c.business_id, c.email].filter(Boolean).join(' · ');
+        const note = c.source === 'booking' ? tx('ui.admin.invoices.booking_note') : tx('ui.admin.invoices.found_note');
+        return bits ? `${bits} · ${note}` : note;
+      },
       newLabel: tx('ui.admin.invoices.new_customer'),
-      onReset: () => { cust.row = null; cust.snap = null; orLine.hidden = false; },
+      onReset: () => { cust.row = null; cust.snap = null; cust.bookingId = null; orLine.hidden = false; },
       onExplicitMiss: (term) => ytjNode(term, applyMoved(term)),
     });
     function applyYtj(y) {
@@ -220,11 +228,12 @@ export async function render() {
       if (y.city) f.city.value = y.city;
       cs.reset();
     }
-    cs.input.addEventListener('blur', () => {
+    cs.input.addEventListener('blur', (ev) => {
+      if (ev.relatedTarget && cs.found.contains(ev.relatedTarget)) return;
       const term = cs.input.value.trim();
-      const moved = cust.row ? null : applyMoved(term);
+      const moved = cust.row || cust.bookingId ? null : applyMoved(term);
       setTimeout(() => {
-        if (cust.row || cs.found.querySelector('.listrow') || cs.found.querySelector('[data-testid="invoice-ytj"]')) return;
+        if (cust.row || cust.bookingId || cs.found.querySelector('.picked-cust, .listrow, [data-testid="invoice-ytj"]')) return;
         if (term.length < 2) return;
         cs.found.replaceChildren(ytjNode(term, moved || routeSearchTerm(term, readFields())));
       }, 200);
@@ -246,7 +255,7 @@ export async function render() {
         ]);
         if (choice === 'use') { cs.pick(existing); return { id: existing.id, mode: 'registry' }; }
         if (choice === 'new') {
-          const created = await rpc('admin_save_invoice_customer', { p_id: null, p: { ...payloadOf(), ack_name_email: true } });
+          const created = await rpc('admin_save_invoice_customer', { p_id: null, p: { ...payloadOf(), customer_id: cust.bookingId || null, ack_name_email: true } });
           return { id: created.id, mode: 'registry' };
         }
         return null;
@@ -272,9 +281,13 @@ export async function render() {
         }
       }
       try {
-        const created = await rpc('admin_save_invoice_customer', { p_id: null, p: payload });
+        const created = await rpc('admin_save_invoice_customer', { p_id: null, p: { ...payload, customer_id: cust.bookingId || null } });
         return { id: created.id, mode: 'registry' };
       } catch (e) {
+        if (cust.bookingId && e?.code === 'customer_exists') {
+          const existing = customerFromError(e);
+          if (existing?.id) return { id: existing.id, mode: 'registry' };
+        }
         const alt = await offerExisting(e);
         if (alt !== undefined) return alt;
         throw e;
@@ -287,6 +300,7 @@ export async function render() {
       add('business_id', tx('ui.admin.invoices.business_id')),
       add('contact_name', tx('ui.admin.invoices.contact')),
       add('email', tx('ui.admin.invoices.email'), { type: 'email', inputmode: 'email' }),
+      add('phone', tx('ui.admin.invoices.phone'), { type: 'tel', inputmode: 'tel' }),
       add('einvoice_address', tx('ui.admin.invoices.ovt'), { inputmode: 'numeric' }),
       add('einvoice_operator', tx('ui.admin.invoices.operator')),
       add('street', tx('ui.admin.invoices.street')), add('zip', tx('ui.admin.invoices.zip'), { inputmode: 'numeric' }), add('city', tx('ui.admin.invoices.city')),

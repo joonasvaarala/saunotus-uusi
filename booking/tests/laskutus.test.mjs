@@ -183,6 +183,21 @@ test('mock: haku, Y-tunnuksen duplikaatti, nimi+sähköposti ja laskukohtainen k
   const hits = await mock.rpc('admin_search_invoice_customers', { p_search: 'HAVU', p_limit: 8 });
   assert.equal(hits.length, 1);
   assert.equal(hits[0].company_name, 'Havuhattu Testi Oy');
+  assert.equal(hits[0].source, 'invoice');
+  const book = await mock.rpc('admin_search_invoice_customers', { p_search: 'koivutesti' });
+  assert.equal(book.length, 1);
+  assert.equal(book[0].source, 'booking');
+  assert.equal(book[0].company_name, 'Koivutesti Oy');
+  assert.equal(book[0].contact_name, 'Liisa Lasku');
+  assert.equal(book[0].phone, '0401234567');
+  assert.equal(book[0].street, 'Koivukuja 2');
+  assert.equal(book[0].business_id, '1000000-4');
+  assert.equal('marketing_consent' in book[0], false);
+  const fromBooking = await mock.rpc('admin_save_invoice_customer', { p: { company_name: 'Koivutesti Oy', business_id: '1000000-4', email: 'liisa@t112.test', phone: '0401234567', customer_id: book[0].customer_id } });
+  assert.equal(fromBooking.customer_id, 5);
+  const after = await mock.rpc('admin_search_invoice_customers', { p_search: 'koivutesti' });
+  assert.equal(after[0].source, 'invoice');
+  assert.equal(after.some((c) => c.source === 'booking'), false);
   const byDigits = await mock.rpc('admin_search_invoice_customers', { p_search: '01120389' });
   assert.equal(byDigits[0].id, first.id);
   assert.deepEqual(await mock.rpc('admin_search_invoice_customers', { p_search: 'x' }), []);
@@ -232,6 +247,14 @@ test('booking_112: haku-RPC, uniikki Y-tunnus, duplikaatti keskeyttää, rollbac
   assert.match(sql, /customer_exists/);
   assert.match(sql, /name_email_match/);
   assert.match(sql, /ack_name_email/);
+  const searchAt = sql.indexOf('function booking.admin_search_invoice_customers');
+  const searchBody = sql.slice(searchAt, sql.indexOf('create or replace function booking.admin_save_invoice(', searchAt));
+  assert.match(searchBody, /booking\.customers/);
+  assert.match(searchBody, /'invoice'/);
+  assert.match(searchBody, /'booking'/);
+  assert.match(searchBody, /anonymized_at is null/);
+  assert.doesNotMatch(searchBody, /marketing_consent/);
+  assert.match(searchBody, /p_limit integer default 10/);
   const rb = read('supabase/rollbacks/20261019090000_booking_112_ROLLBACK.sql');
   assert.match(rb, /drop index if exists booking\.invoice_customers_business_uidx/);
   assert.match(rb, /drop column if exists customer_snapshot_locked/);
@@ -239,9 +262,12 @@ test('booking_112: haku-RPC, uniikki Y-tunnus, duplikaatti keskeyttää, rollbac
   assert.match(rb, /create or replace function booking\.admin_save_invoice_customer/);
   assert.match(rb, /create or replace function booking\._ensure_draft_invoice/);
   const t112 = read('supabase/tests/invoices/t112_invoice_customer_lookup.sql');
-  for (const bit of ['customer_exists', 'name_email_match', 'ack_name_email', 'customer_snapshot_locked', '1234567-1', 'invoices.manage']) {
+  for (const bit of ['customer_exists', 'name_email_match', 'ack_name_email', 'customer_snapshot_locked', '1234567-1', 'invoices.manage', 'returned_sqlstate', 'Havu Testi Zz']) {
     assert.match(t112, new RegExp(bit.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
+  assert.match(t112, /t112_logout\(\);\n  perform public\.t112_ck\(\(select count\(\*\) from booking\.invoice_customers where booking\._norm_business_id/);
+  assert.match(t112, /t112_logout\(\);\n  perform public\.t112_ck\(\(select street from booking\.invoice_customers/);
+  assert.match(t112, /perform public\.t112_login\(u_mgr\);/);
   const t90 = read('supabase/tests/invoices/t90_invoices.sql');
   assert.match(t90, /1234567-1/);
   assert.match(t90, /2336509-6/);
@@ -251,7 +277,7 @@ test('pending-import-21 ja näkymä käyttävät samaa hakua kuin Uusi varaus', 
   const rows = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-21.json'), 'utf8'));
   assert.ok(rows.length >= 28 && rows.length <= 500);
   const keys = new Set(rows.map((r) => r.key));
-  for (const k of ['ui.admin.invoices.find', 'ui.admin.invoices.moved', 'ui.admin.invoices.ytj', 'ui.admin.invoices.only_invoice', 'ui.admin.invoices.need_company']) {
+  for (const k of ['ui.admin.invoices.find', 'ui.admin.invoices.moved', 'ui.admin.invoices.ytj', 'ui.admin.invoices.only_invoice', 'ui.admin.invoices.need_company', 'ui.admin.invoices.src_booking', 'ui.admin.invoices.src_invoice', 'ui.admin.invoices.phone']) {
     assert.ok(keys.has(k), k);
   }
   for (const r of rows) {
@@ -275,6 +301,8 @@ test('pending-import-21 ja näkymä käyttävät samaa hakua kuin Uusi varaus', 
   const invoices = read('admin/views/invoices.js');
   assert.match(invoices, /lookupSearch/);
   assert.match(invoices, /admin_search_invoice_customers/);
+  assert.match(invoices, /p_limit: 10/);
+  assert.match(invoices, /source === 'booking'/);
   assert.match(invoices, /fetchYtj/);
   assert.match(invoices, /invoice-customer-search/);
   assert.match(invoices, /routeSearchTerm/);

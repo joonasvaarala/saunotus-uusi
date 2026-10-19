@@ -558,5 +558,85 @@
   "max_len": 400,
   "placeholders": [],
   "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.phone",
+  "lang": "fi",
+  "text": "Puhelin",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): haku ehdottaa myös varausasiakkaita. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.admin.invoices.phone",
+  "lang": "en",
+  "text": "Phone",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): haku ehdottaa myös varausasiakkaita. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.admin.invoices.src_invoice",
+  "lang": "fi",
+  "text": "Laskutusasiakas",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): haku ehdottaa myös varausasiakkaita. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.admin.invoices.src_invoice",
+  "lang": "en",
+  "text": "Invoice customer",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): haku ehdottaa myös varausasiakkaita. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.admin.invoices.src_booking",
+  "lang": "fi",
+  "text": "Asiakas",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): haku ehdottaa myös varausasiakkaita. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.admin.invoices.src_booking",
+  "lang": "en",
+  "text": "Customer",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): haku ehdottaa myös varausasiakkaita. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.admin.invoices.booking_note",
+  "lang": "fi",
+  "text": "Laskutusasiakas syntyy tallennettaessa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): haku ehdottaa myös varausasiakkaita. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.admin.invoices.booking_note",
+  "lang": "en",
+  "text": "An invoice customer is created when you save.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): haku ehdottaa myös varausasiakkaita. FI+EN, luokka normal."
  }
 ]

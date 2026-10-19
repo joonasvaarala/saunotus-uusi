@@ -1,5 +1,5 @@
 -- booking_112_invoice_customer_lookup (19.10.2026)
--- Uusi lasku: haku omasta laskutusrekisteristä, Y-tunnuksen duplikaattisuoja, laskukohtainen asiakaskuva.
+-- Uusi lasku: haku laskutusrekisteristä ja sen jälkeen varausasiakkaista, Y-tunnuksen duplikaattisuoja, laskukohtainen asiakaskuva.
 -- Aikaleima repon viimeisimmän migraation 20261019081000 (booking_111) jälkeen. Ei tuotantoajoa. Ei salaisuuksia.
 -- Rollback: rollbacks/20261019090000_booking_112_ROLLBACK.sql
 
@@ -192,7 +192,7 @@ begin
   return booking._invoice_customer_json(v_id);
 end $$;
 
-create function booking.admin_search_invoice_customers(p_search text default null, p_limit integer default 8)
+create function booking.admin_search_invoice_customers(p_search text default null, p_limit integer default 10)
 returns jsonb
 language plpgsql
 stable
@@ -204,7 +204,7 @@ declare
   v_like text;
   v_digits text;
   v_norm text;
-  v_lim int := least(greatest(coalesce(p_limit, 8), 1), 20);
+  v_lim int := least(greatest(coalesce(p_limit, 10), 1), 20);
 begin
   perform booking._require_permission('invoices.manage');
   if v_s is null or char_length(v_s) < 2 then return '[]'::jsonb; end if;
@@ -213,20 +213,68 @@ begin
   v_norm := booking._norm_business_id(v_s);
   if v_norm is not null and not booking._business_id_ok(v_norm) then v_norm := null; end if;
   return coalesce((
-    select jsonb_agg(booking._invoice_customer_json(s.id) order by s.company_name, s.id)
+    with inv as (
+      select 0 as sort, c.company_name as sort_name, c.id as sort_id,
+             booking._invoice_customer_json(c.id) || jsonb_build_object('source', 'invoice') as row
+        from booking.invoice_customers c
+       where lower(c.company_name) like lower(v_like) escape '\'
+          or lower(coalesce(c.contact_name, '')) like lower(v_like) escape '\'
+          or lower(coalesce(c.email, '')) like lower(v_like) escape '\'
+          or lower(coalesce(c.business_id, '')) like lower(v_like) escape '\'
+          or (v_norm is not null and booking._norm_business_id(c.business_id) = v_norm)
+          or (v_digits is not null and char_length(v_digits) >= 2
+              and regexp_replace(coalesce(c.business_id, ''), '\D', '', 'g') like '%' || v_digits || '%')
+       order by c.company_name, c.id
+       limit v_lim
+    ),
+    book as (
+      select 1 as sort, coalesce(nullif(btrim(c.company), ''), c.name) as sort_name, c.id as sort_id,
+             jsonb_build_object(
+               'source', 'booking',
+               'id', null,
+               'customer_id', c.id,
+               'company_name', coalesce(nullif(btrim(c.company), ''), btrim(c.name)),
+               'contact_name', case when nullif(btrim(c.company), '') is not null then nullif(btrim(c.name), '') else null end,
+               'business_id', c.business_id,
+               'email', c.email,
+               'phone', c.phone,
+               'street', nullif(btrim(c.address), ''),
+               'zip', nullif(btrim(c.zip), ''),
+               'city', nullif(btrim(c.city), ''),
+               'einvoice_address', c.einvoice_address,
+               'einvoice_operator', c.einvoice_operator,
+               'buyer_reference', c.invoice_reference
+             ) as row
+        from booking.customers c
+       where c.anonymized_at is null
+         and (
+           lower(c.name) like lower(v_like) escape '\'
+           or lower(coalesce(c.email, '')) like lower(v_like) escape '\'
+           or lower(coalesce(c.phone, '')) like lower(v_like) escape '\'
+           or lower(coalesce(c.company, '')) like lower(v_like) escape '\'
+           or lower(coalesce(c.business_id, '')) like lower(v_like) escape '\'
+           or (v_norm is not null and booking._norm_business_id(c.business_id) = v_norm)
+           or (v_digits is not null and char_length(v_digits) >= 2
+               and regexp_replace(coalesce(c.business_id, ''), '\D', '', 'g') like '%' || v_digits || '%')
+         )
+         and not exists (
+           select 1 from inv i
+            where (i.row ->> 'customer_id')::bigint = c.id
+               or (
+                 nullif(i.row ->> 'business_id', '') is not null
+                 and booking._norm_business_id(c.business_id) is not null
+                 and booking._norm_business_id(i.row ->> 'business_id') = booking._norm_business_id(c.business_id)
+               )
+         )
+       order by 2, c.id
+       limit (select greatest(v_lim - count(*)::int, 0) from inv)
+    )
+    select jsonb_agg(u.row order by u.sort, u.sort_name, u.sort_id)
       from (
-        select c.id, c.company_name
-          from booking.invoice_customers c
-         where lower(c.company_name) like lower(v_like) escape '\'
-            or lower(coalesce(c.contact_name, '')) like lower(v_like) escape '\'
-            or lower(coalesce(c.email, '')) like lower(v_like) escape '\'
-            or lower(coalesce(c.business_id, '')) like lower(v_like) escape '\'
-            or (v_norm is not null and booking._norm_business_id(c.business_id) = v_norm)
-            or (v_digits is not null and char_length(v_digits) >= 2
-                and regexp_replace(coalesce(c.business_id, ''), '\D', '', 'g') like '%' || v_digits || '%')
-         order by c.company_name, c.id
-         limit v_lim
-      ) s
+        select * from inv
+        union all
+        select * from book
+      ) u
   ), '[]'::jsonb);
 end $$;
 

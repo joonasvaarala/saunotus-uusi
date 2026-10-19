@@ -1,5 +1,5 @@
 -- ROLLBACK booking_112_invoice_customer_lookup.
--- Palauttaa booking_91/92-funktiot. Poistaa haun, siivousapurit ja Y-tunnuksen yksilöivän indeksin.
+-- Palauttaa booking_91/92-funktiot. Poistaa haun (laskutus- ja varausasiakkaat), siivousapurit ja Y-tunnuksen yksilöivän indeksin.
 -- Ei poista laskutusasiakkaita.
 
 set local lock_timeout = '5s';

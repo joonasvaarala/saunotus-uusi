@@ -23153,6 +23153,62 @@
    "text": "Enter the company name.",
    "version": 1,
    "placeholders": []
+  },
+  {
+   "key": "ui.admin.invoices.phone",
+   "lang": "fi",
+   "text": "Puhelin",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.invoices.phone",
+   "lang": "en",
+   "text": "Phone",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.invoices.src_invoice",
+   "lang": "fi",
+   "text": "Laskutusasiakas",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.invoices.src_invoice",
+   "lang": "en",
+   "text": "Invoice customer",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.invoices.src_booking",
+   "lang": "fi",
+   "text": "Asiakas",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.invoices.src_booking",
+   "lang": "en",
+   "text": "Customer",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.invoices.booking_note",
+   "lang": "fi",
+   "text": "Laskutusasiakas syntyy tallennettaessa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.invoices.booking_note",
+   "lang": "en",
+   "text": "An invoice customer is created when you save.",
+   "version": 1,
+   "placeholders": []
   }
  ],
  "context": {

@@ -1,7 +1,7 @@
 // Uusi lasku: hakusanan siirto ja "muuttuiko asiakas" -vertailu. Ei DOM:ia.
 import { normBusinessId, validBusinessId } from '../shop/src/invoice-validate.js';
 
-export const CUSTOMER_FIELDS = ['company_name', 'business_id', 'contact_name', 'email', 'einvoice_address', 'einvoice_operator', 'street', 'zip', 'city', 'buyer_reference'];
+export const CUSTOMER_FIELDS = ['company_name', 'business_id', 'contact_name', 'email', 'phone', 'einvoice_address', 'einvoice_operator', 'street', 'zip', 'city', 'buyer_reference'];
 
 export function normCustomerField(key, value) {
   const s = String(value ?? '').trim();
