@@ -1,0 +1,462 @@
+[
+ {
+  "key": "ui.admin.product.add",
+  "lang": "fi",
+  "text": "Lisää tuote",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.add",
+  "lang": "en",
+  "text": "Add product",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.new_title",
+  "lang": "fi",
+  "text": "Uusi tuote",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.new_title",
+  "lang": "en",
+  "text": "New product",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.create",
+  "lang": "fi",
+  "text": "Luo tuote",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.create",
+  "lang": "en",
+  "text": "Create product",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.created",
+  "lang": "fi",
+  "text": "Tuote luotu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.created",
+  "lang": "en",
+  "text": "Product created",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.name_fi",
+  "lang": "fi",
+  "text": "Nimi (suomi)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.name_fi",
+  "lang": "en",
+  "text": "Name in Finnish",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.name_en",
+  "lang": "fi",
+  "text": "Nimi (englanti)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.name_en",
+  "lang": "en",
+  "text": "Name in English",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.name_en_hint",
+  "lang": "fi",
+  "text": "Valinnainen. Tyhjä kenttä tallentaa saman nimen kuin suomeksi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.name_en_hint",
+  "lang": "en",
+  "text": "Optional. An empty field saves the same name as in Finnish.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.price",
+  "lang": "fi",
+  "text": "Hinta euroina (sis. alv)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.price",
+  "lang": "en",
+  "text": "Price in euros, including VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.price_text",
+  "lang": "fi",
+  "text": "Hintateksti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.price_text",
+  "lang": "en",
+  "text": "Price text",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.price_text_hint",
+  "lang": "fi",
+  "text": "Vapaaehtoinen. Tyhjä kenttä täytetään hinnasta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.price_text_hint",
+  "lang": "en",
+  "text": "Optional. An empty field is filled from the price.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.vat",
+  "lang": "fi",
+  "text": "Alv-prosentti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.vat",
+  "lang": "en",
+  "text": "VAT rate",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.category",
+  "lang": "fi",
+  "text": "Kategoria",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.category",
+  "lang": "en",
+  "text": "Category",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.cat_rental",
+  "lang": "fi",
+  "text": "Tuotteet ja vuokrat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.cat_rental",
+  "lang": "en",
+  "text": "Products and rentals",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.cat_other",
+  "lang": "fi",
+  "text": "Muu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.cat_other",
+  "lang": "en",
+  "text": "Other",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.active",
+  "lang": "fi",
+  "text": "Aktiivinen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.active",
+  "lang": "en",
+  "text": "Active",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.sell_hint",
+  "lang": "fi",
+  "text": "Tuote on myytävissä pikakassassa ja QR-koodilla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.sell_hint",
+  "lang": "en",
+  "text": "The product can be sold in the quick till and with a QR code.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.age",
+  "lang": "fi",
+  "text": "Ikärajallinen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.age",
+  "lang": "en",
+  "text": "Age-restricted",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.next",
+  "lang": "fi",
+  "text": "Tallennuksen jälkeen tuotteen voi lisätä pikakassaan ja sille voi tehdä QR-koodin.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.next",
+  "lang": "en",
+  "text": "After saving, the product can be added to the quick till and a QR code can be printed for it.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.link_pos",
+  "lang": "fi",
+  "text": "Avaa pikakassa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.link_pos",
+  "lang": "en",
+  "text": "Open quick till",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.link_qr",
+  "lang": "fi",
+  "text": "Avaa QR-koodin tulostus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.link_qr",
+  "lang": "en",
+  "text": "Open QR printing",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.pos_hint",
+  "lang": "fi",
+  "text": "Rastita pikakassa ja tallenna asetukset.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.pos_hint",
+  "lang": "en",
+  "text": "Tick the quick till box and save the settings.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.qr_hint",
+  "lang": "fi",
+  "text": "QR-koodi tehdään asetusten tulostusnäkymässä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.qr_hint",
+  "lang": "en",
+  "text": "The QR code is created in settings, under QR printing.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.duplicate",
+  "lang": "fi",
+  "text": "Samanniminen aktiivinen tuote on jo olemassa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.admin.product.duplicate",
+  "lang": "en",
+  "text": "An active product with this name already exists",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hallinnan tuotteen luonti. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ }
+]

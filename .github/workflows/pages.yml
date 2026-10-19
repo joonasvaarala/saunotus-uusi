@@ -119,7 +119,9 @@ jobs:
       # Bottiavustus ajaa t104:n psql:llä migraatioiden jälkeen.
       # t110 (booking/supabase/tests/pos/t110_pos_link_email.sql) ei ole tässä ajossa:
       # työnkulussa ei ole Postgresia. Bottiavustus ajaa t110:n psql:llä migraatioiden jälkeen.
-      - run: node --test booking/tests/qr-asetukset.test.mjs
+      # t111 (booking/supabase/tests/products/t111_admin_product_create.sql) ei ole tässä ajossa:
+      # työnkulussa ei ole Postgresia. Bottiavustus ajaa t111:n psql:llä migraatioiden jälkeen.
+      - run: node --test booking/tests/qr-asetukset.test.mjs booking/tests/tuote-luonti.test.mjs
       # lahjakoodi §13.12: kaupan ja hallinnan lunastuspyyntölogiikka (mockatut RPC:t)
       - run: node --test booking/tests/voucher-claims.test.mjs booking/tests/voucher-claims-admin.test.mjs booking/tests/lahjakoodi-vieritys.test.mjs
       - uses: actions/upload-pages-artifact@v3

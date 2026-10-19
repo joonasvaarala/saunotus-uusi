@@ -295,6 +295,13 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 /* tuotelista: näkyvyys- ja kategoriasuodatin (samat pikavalintapainikkeet kuin varauslistassa), tulosrivi, tyhjä tulos */
 .prodfilters{grid-template-columns:minmax(0,1fr)}
 @media(min-width:700px){.prodfilters{grid-template-columns:minmax(0,1fr)}.prodfilters>.fld{max-width:420px}}
+.prod-head{align-items:center;gap:12px;margin:0 0 8px}
+.prod-head h1{margin:0}
+.prod-add,.prod-next .btn{min-height:44px}
+@media(max-width:699px){
+  .prod-head{align-items:stretch}
+  .prod-add,.prod-next .btn{width:100%}
+}
 .prodseg .srcopt span{min-width:0;padding:0 14px}
 .prodseg .srcopt input:checked+span{background:var(--green);border-color:var(--green);color:#fff}
 .prodcount{margin:6px 0 2px;display:flex;flex-wrap:wrap;align-items:center;gap:0 4px;min-height:44px}
