@@ -1,0 +1,82 @@
+[
+ {
+  "key": "ui.pos.pay_title",
+  "lang": "fi",
+  "text": "Maksu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksupopup. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.pay_title",
+  "lang": "en",
+  "text": "Payment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksupopup. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.amount",
+  "lang": "fi",
+  "text": "Summa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksupopup. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.amount",
+  "lang": "en",
+  "text": "Amount",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksupopup. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.confirm",
+  "lang": "fi",
+  "text": "Vahvista maksu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksupopup. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.confirm",
+  "lang": "en",
+  "text": "Confirm payment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksupopup. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.choose_method",
+  "lang": "fi",
+  "text": "Valitse maksutapa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksupopup. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.choose_method",
+  "lang": "en",
+  "text": "Choose a payment method",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksupopup. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ }
+]

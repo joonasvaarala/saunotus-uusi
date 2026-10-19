@@ -70,9 +70,9 @@ export function filterProducts(products, query) {
   return (products || []).filter((p) => `${p.name || ''} ${p.name_en || ''}`.toLocaleLowerCase('fi').includes(q));
 }
 
-/** Tyhjä kassa avaa muokkauksen heti. Muuten vain pyydettäessä. */
-export function tillEditorOpen(catalogLength, requested) {
-  return catalogLength === 0 || !!requested;
+/** Muokkaus aukeaa vain pyydettäessä. Tyhjä kassakin pysyy kiinni, jotta pikapainikkeet ovat ensimmäisenä. */
+export function tillEditorOpen(_catalogLength, requested) {
+  return !!requested;
 }
 
 export function moveSort(rows, productId, dir) {

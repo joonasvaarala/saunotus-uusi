@@ -1,5 +1,6 @@
 // Pikakassan tekstit (FI+EN). Tuotannossa sama sisältö tuodaan site_texts-tauluun (pending-import-12).
-// Uudet muokkaus- ja QR-myyntitekstit: pending-import-16 (POS_EDIT_TEXTS). Sanakirja on varalla, kunnes tuonti on ajettu.
+// Uudet muokkaus- ja QR-myyntitekstit: pending-import-16 (POS_EDIT_TEXTS).
+// Maksupopupin uudet avaimet: pending-import-17 (POS_PAY_TEXTS). Sanakirja on varalla, kunnes tuonti on ajettu.
 // public_get_site_texts peittää ui.pos.*-avaimet. Haku epäonnistuu tai rivi puuttuu → sanakirja.
 import { getLang } from './talous-i18n.js';
 
@@ -137,6 +138,21 @@ export const POS_EDIT_TEXTS = {
   },
 };
 
+export const POS_PAY_TEXTS = {
+  fi: {
+    pay_title: 'Maksu',
+    amount: 'Summa',
+    confirm: 'Vahvista maksu',
+    choose_method: 'Valitse maksutapa',
+  },
+  en: {
+    pay_title: 'Payment',
+    amount: 'Amount',
+    confirm: 'Confirm payment',
+    choose_method: 'Choose a payment method',
+  },
+};
+
 const PREFIX = 'ui.pos.';
 let db = new Map();
 let loaded = false;
@@ -170,5 +186,5 @@ export function clearPosTextCache() {
 export function posText(key, lang = getLang()) {
   const live = db.get(`${PREFIX}${key}|${lang}`);
   if (live) return live;
-  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || key;
+  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || key;
 }

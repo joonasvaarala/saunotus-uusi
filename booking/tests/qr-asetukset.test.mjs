@@ -54,8 +54,9 @@ test('pikakassaan voi valita myös verkkokaupan ulkopuolisen tuotteen', () => {
   assert.equal(qrEligible(products[0]), true);
   assert.equal(qrEligible(products[1]), false);
   assert.equal(qrEligible(products[2]), false);
-  assert.equal(tillEditorOpen(0, false), true);
+  assert.equal(tillEditorOpen(0, false), false);
   assert.equal(tillEditorOpen(2, false), false);
+  assert.equal(tillEditorOpen(0, true), true);
   assert.equal(tillEditorOpen(2, true), true);
   const sorted = moveSort([{ product_id: 1, name: 'A', pos_sort: 10 }, { product_id: 2, name: 'B', pos_sort: 20 }], 2, -1);
   assert.deepEqual(sorted.map((r) => r.product_id), [2, 1]);
@@ -119,12 +120,13 @@ test('mock: tuote kassaan, ikäraja ei saa QR-koodia, juomasivu näyttää vain 
 });
 
 test('näkymät eivät avaa tyhjää ikkunaa ja Procountor-kortti säilyy', () => {
-  const pos = read('../admin/views/pos.js');
+  const pos = read('../admin/pos-screen.js');
+  const posEntry = read('../admin/views/pos.js');
   const settings = read('../admin/views/settings.js');
   const panel = read('../admin/qr-panel.js');
   const print = read('../admin/qr-print.js');
-  for (const src of [pos, settings, panel, print]) assert.equal(src.includes('window.open'), false);
-  for (const rel of ['../admin/views/pos.js', '../admin/views/settings.js', '../admin/qr-panel.js', '../admin/qr-print.js', '../drinks/drinks.js']) {
+  for (const src of [pos, posEntry, settings, panel, print]) assert.equal(src.includes('window.open'), false);
+  for (const rel of ['../admin/pos-screen.js', '../admin/views/pos.js', '../admin/views/settings.js', '../admin/qr-panel.js', '../admin/qr-print.js', '../drinks/drinks.js']) {
     const file = fileURLToPath(new URL(rel, import.meta.url));
     const checked = spawnSync(process.execPath, ['--check', file], { encoding: 'utf8' });
     assert.equal(checked.status, 0, checked.stderr);
@@ -214,5 +216,5 @@ test('SQL ja build-lista: t104, ei mobilepay-uudelleenkirjoitusta, uudet moduuli
   assert.match(pages, /t104 \(booking\/supabase\/tests\/pos\/t104_product_qr\.sql\) ei ole tässä ajossa/);
   assert.match(pages, /node --test booking\/tests\/procountor-admin\.test\.mjs booking\/tests\/pikakassa\.test\.mjs/);
   assert.match(pages, /node --test booking\/tests\/qr-asetukset\.test\.mjs/);
-  for (const f of ['settings-tabs.js', 'settings-texts.js', 'qr-print.js', 'qr-panel.js']) assert.ok(build.includes(f), f);
+  for (const f of ['settings-tabs.js', 'settings-texts.js', 'qr-print.js', 'qr-panel.js', 'pos-screen.js']) assert.ok(build.includes(f), f);
 });
