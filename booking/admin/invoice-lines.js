@@ -138,6 +138,13 @@ export function catalogPriceString(gross, vatRate, includeVat) {
   return formatFiScaled(shown, 4, 2);
 }
 
+/** Hakuehdotukset eivät pakota valintaa: viimeinen rivi on kirjoitettu teksti sellaisenaan. */
+export function suggestLines(products, query, limit = 8) {
+  const freeText = String(query ?? '').trim();
+  if (!freeText) return { products: [], freeText: null };
+  return { products: filterProducts(products, freeText, limit), freeText };
+}
+
 export function filterProducts(products, query, limit = 8) {
   const q = String(query || '').trim().toLowerCase();
   if (!q) return [];

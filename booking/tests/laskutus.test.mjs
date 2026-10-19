@@ -15,7 +15,7 @@ import { INVOICE_TEXTS } from '../admin/invoices-texts.js';
 import { ICONS } from '../admin/icons.js';
 import {
   amountsForLine, catalogPriceString, convertPriceString, filterProducts, invoiceLineAmounts,
-  lineToPayload, parseScaled, summarize, validateLine, UNITS,
+  lineToPayload, parseScaled, suggestLines, summarize, validateLine, UNITS,
 } from '../admin/invoice-lines.js';
 
 const root = dirname(fileURLToPath(import.meta.url));
@@ -363,14 +363,32 @@ test('laskurivin sentit vastaavat _invoice_put_lines-kaavaa', () => {
   assert.equal(filterProducts(products, 'towel')[0].name, 'Käsipyyhe');
   assert.equal(filterProducts(products, '').length, 0);
   assert.equal(filterProducts(products, 'vanha').length, 0);
+  const none = suggestLines(products, 'oma selite');
+  assert.deepEqual(none.products, []);
+  assert.equal(none.freeText, 'oma selite');
+  const both = suggestLines(products, ' sauna ');
+  assert.ok(both.products.some((p) => p.name === 'Yleinen saunavuoro'));
+  assert.equal(both.freeText, 'sauna');
+  assert.equal(suggestLines(products, '  ').freeText, null);
+  const manual = lineToPayload({ description: 'Kuljetus erikseen', quantity: '2', unit: 'kpl', price: '10,50', vat_rate: '13.5' }, true);
+  assert.equal(manual.description, 'Kuljetus erikseen');
+  assert.equal(manual.quantity, 2);
+  assert.ok(manual.unit_price_net > 0);
   assert.ok(ICONS.trash);
+  const schema = read('supabase/migrations/20261019011400_booking_90_invoices_schema.sql');
+  assert.match(schema, /quantity\s+numeric\(12,3\) not null check \(quantity <> 0\)/);
+  assert.match(schema, /unit_price_net\s+numeric\(12,4\) not null/);
+  assert.match(schema, /vat_rate\s+numeric\(5,2\) not null/);
+  assert.match(schema, /line_gross\s+numeric\(12,2\) not null/);
+  const pdf = read('supabase/functions/invoice-pdf/render.ts');
+  assert.match(pdf, /l\.description.*l\.quantity.*l\.line_gross/s);
 });
 
 test('pending-import-22 ja laskurivin lomake', () => {
   const rows = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-22.json'), 'utf8'));
-  assert.equal(rows.length, 28);
+  assert.equal(rows.length, 30);
   const keys = new Set(rows.map((r) => r.key));
-  for (const k of ['ui.admin.invoices.lines', 'ui.admin.invoices.line_product', 'ui.admin.invoices.price_gross', 'ui.admin.invoices.price_net', 'ui.admin.invoices.prices_include', 'ui.admin.invoices.line_sum', 'ui.admin.invoices.remove_line', 'ui.admin.invoices.err_desc', 'ui.admin.invoices.err_qty', 'ui.admin.invoices.err_price', 'ui.admin.invoices.total_net', 'ui.admin.invoices.vat_pct']) {
+  for (const k of ['ui.admin.invoices.lines', 'ui.admin.invoices.line_product', 'ui.admin.invoices.free_text', 'ui.admin.invoices.price_gross', 'ui.admin.invoices.price_net', 'ui.admin.invoices.prices_include', 'ui.admin.invoices.line_sum', 'ui.admin.invoices.remove_line', 'ui.admin.invoices.err_desc', 'ui.admin.invoices.err_qty', 'ui.admin.invoices.err_price', 'ui.admin.invoices.total_net', 'ui.admin.invoices.vat_pct']) {
     assert.ok(keys.has(k), k);
   }
   for (const r of rows) {
@@ -403,6 +421,11 @@ test('pending-import-22 ja laskurivin lomake', () => {
   assert.match(invoices, /lookupSearch/);
   assert.doesNotMatch(invoices, /unit_price_net: Number/);
   const css = read('admin/admin.css');
+  const formJs = read('admin/invoice-line-form.js');
+  assert.match(formJs, /suggestLines/);
+  assert.match(formJs, /invoice-free-text/);
+  assert.match(formJs, /acceptFree/);
+  assert.doesNotMatch(formJs, /Lisää tekstirivi/);
   assert.match(css, /\.inv-line\{/);
   assert.match(css, /inv-savebar/);
   assert.doesNotMatch(css, /inv-lines \.row>\*\{flex:1 1 7\.5rem/);

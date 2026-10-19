@@ -2,8 +2,8 @@
 import { h, money } from './ui.js';
 import { icon } from './icons.js';
 import {
-  UNITS, amountsForLine, catalogPriceString, convertPriceString, filterProducts, formatRateFi,
-  lineToPayload, rateTenthsOf, summarize, validateLine,
+  UNITS, amountsForLine, catalogPriceString, convertPriceString, formatRateFi,
+  lineToPayload, rateTenthsOf, suggestLines, summarize, validateLine,
 } from './invoice-lines.js';
 
 const ERR = {
@@ -108,15 +108,24 @@ export function mountInvoiceLines({ rates, products, tx }) {
 
     function blockEnter(e) { if (e.key === 'Enter') e.preventDefault(); }
     function openSuggest(q) {
-      hits.items = filterProducts(products, q);
+      const sug = suggestLines(products, q);
+      hits.items = [
+        ...sug.products.map((p) => ({ kind: 'product', product: p })),
+        ...(sug.freeText ? [{ kind: 'free', text: sug.freeText }] : []),
+      ];
       hits.hi = -1;
       if (!hits.items.length) { list.hidden = true; desc.setAttribute('aria-expanded', 'false'); list.replaceChildren(); return; }
       list.hidden = false;
       desc.setAttribute('aria-expanded', 'true');
-      list.replaceChildren(...hits.items.map((p) => h('li', { role: 'presentation' }, h('button', {
-        type: 'button', role: 'option', class: 'inv-hit', 'data-testid': 'invoice-product-hit',
-        onmousedown: (e) => { e.preventDefault(); pick(p); },
-      }, h('span', { text: p.name }), h('small', { text: `${money(p.price)} · ${formatRateFi(rateTenthsOf(p.vat_rate) || 0n)}` })))));
+      list.replaceChildren(...hits.items.map((item) => h('li', { role: 'presentation' }, item.kind === 'free'
+        ? h('button', {
+          type: 'button', role: 'option', class: 'inv-hit inv-hit-free', 'data-testid': 'invoice-free-text',
+          onmousedown: (e) => { e.preventDefault(); acceptFree(item.text); },
+        }, h('span', { text: `${tx('ui.admin.invoices.free_text')}: ${item.text}` }))
+        : h('button', {
+          type: 'button', role: 'option', class: 'inv-hit', 'data-testid': 'invoice-product-hit',
+          onmousedown: (e) => { e.preventDefault(); pick(item.product); },
+        }, h('span', { text: item.product.name }), h('small', { text: `${money(item.product.price)} · ${formatRateFi(rateTenthsOf(item.product.vat_rate) || 0n)}` })))));
     }
     function mark() {
       const buttons = [...list.querySelectorAll('[role=option]')];
@@ -126,19 +135,39 @@ export function mountInvoiceLines({ rates, products, tx }) {
     function onDescKey(e) {
       if (e.key === 'Enter') {
         e.preventDefault();
-        if (!list.hidden && hits.hi >= 0) pick(hits.items[hits.hi]);
+        if (list.hidden) return;
+        if (hits.hi >= 0) choose(hits.items[hits.hi]);
+        else {
+          const free = hits.items.find((item) => item.kind === 'free');
+          if (free) acceptFree(free.text);
+        }
         return;
       }
       if (list.hidden || !hits.items.length) return;
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();
         const n = hits.items.length;
-        hits.hi = e.key === 'ArrowDown' ? (hits.hi + 1) % n : (hits.hi - 1 + n) % n;
+        hits.hi = e.key === 'ArrowDown' ? (hits.hi < 0 ? 0 : (hits.hi + 1) % n) : (hits.hi <= 0 ? n - 1 : hits.hi - 1);
         mark();
       } else if (e.key === 'Escape') {
         list.hidden = true;
         desc.setAttribute('aria-expanded', 'false');
       }
+    }
+    function choose(item) {
+      if (item.kind === 'free') acceptFree(item.text);
+      else pick(item.product);
+    }
+    function acceptFree(text) {
+      ln.description = text;
+      ln.productId = null;
+      desc.value = text;
+      list.hidden = true;
+      desc.setAttribute('aria-expanded', 'false');
+      ln.touched.description = true;
+      sync();
+      showErr();
+      qty.focus();
     }
     function pick(p) {
       ln.description = String(p.name);

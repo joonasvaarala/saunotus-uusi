@@ -23405,6 +23405,20 @@
    "text": "VAT %",
    "version": 1,
    "placeholders": []
+  },
+  {
+   "key": "ui.admin.invoices.free_text",
+   "lang": "fi",
+   "text": "Käytä vapaana tekstinä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.invoices.free_text",
+   "lang": "en",
+   "text": "Use as free text",
+   "version": 1,
+   "placeholders": []
   }
  ],
  "context": {

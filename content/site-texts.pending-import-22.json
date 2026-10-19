@@ -278,5 +278,25 @@
   "max_len": 400,
   "placeholders": [],
   "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.free_text",
+  "lang": "fi",
+  "text": "Käytä vapaana tekstinä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit: ehdotuslistan viimeinen vaihtoehto käyttää kirjoitettua tekstiä sellaisenaan. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.admin.invoices.free_text",
+  "lang": "en",
+  "text": "Use as free text",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit: ehdotuslistan viimeinen vaihtoehto käyttää kirjoitettua tekstiä sellaisenaan. FI+EN, luokka normal."
  }
 ]
