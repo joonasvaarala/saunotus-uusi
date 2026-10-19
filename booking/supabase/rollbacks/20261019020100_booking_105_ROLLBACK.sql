@@ -2,7 +2,8 @@
 -- Palauttaa booking_81:n public_drinks_catalog-, public_drinks_checkout- ja kylmälaitefunktiot
 -- sellaisina kuin ne ovat migraatiossa 20261019011100. Ei koske mobilepay_payment_preparea,
 -- admin_update_product_configia, expire_counter_ordersia eikä email_outbox_claimia.
--- cold_units luodaan uudelleen booking_80:n määrittelyllä (tuotannossa taulu oli tyhjä).
+-- cold_units luodaan uudelleen booking_80:n määrittelyllä ja rivit kopioidaan
+-- booking.cold_units_archive-taulusta. Arkistoa ei pudoteta tässä.
 -- Aja tämä ennen booking_104-rollbackia.
 
 drop function if exists booking.admin_delete_product_qr(bigint);
@@ -32,6 +33,17 @@ begin
   if not exists (select 1 from pg_trigger where tgname = 'audit_trg' and tgrelid = 'booking.cold_units'::regclass) then
     perform booking._add_audit('booking.cold_units'::regclass);
   end if;
+  if to_regclass('booking.cold_units_archive') is null then
+    return;
+  end if;
+  insert into booking.cold_units (id, code, name, location, active, created_at, updated_at)
+  overriding system value
+  select id, code, name, location, active, created_at, updated_at
+    from booking.cold_units_archive;
+  perform setval(
+    pg_get_serial_sequence('booking.cold_units', 'id'),
+    coalesce((select max(id) from booking.cold_units), 1),
+    exists (select 1 from booking.cold_units));
 end
 $audit$;
 

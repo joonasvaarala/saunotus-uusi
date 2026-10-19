@@ -7,6 +7,8 @@
 -- (booking_81), expire_counter_orders (booking_83), vismapay_payment_prepare,
 -- email_outbox_claim, _counter_checkout, _counter_lines.
 -- source_channel pysyy kylmalaite. Hinta tulee kb.productsista.
+-- cold_units-rivit kopioidaan booking_104:n arkistoon ja taulu pudotetaan sen jälkeen.
+-- Rollback palauttaa rivit arkistosta eikä pudota arkistoa.
 -- Rollback: rollbacks/20261019020100_booking_105_ROLLBACK.sql
 -- ============================================================
 set local lock_timeout = '5s';
@@ -208,9 +210,14 @@ begin
   if to_regclass('booking.cold_units') is null then
     return;
   end if;
-  if exists (select 1 from booking.cold_units) then
-    raise exception 'booking.cold_units ei ole tyhjä; booking_105 ei siirrä rivejä';
-  end if;
+  insert into booking.cold_units_archive (id, code, name, location, active, created_at, updated_at)
+  overriding system value
+  select id, code, name, location, active, created_at, updated_at
+    from booking.cold_units;
+  perform setval(
+    pg_get_serial_sequence('booking.cold_units_archive', 'id'),
+    coalesce((select max(id) from booking.cold_units_archive), 1),
+    exists (select 1 from booking.cold_units_archive));
   drop table booking.cold_units;
 end
 $drop$;

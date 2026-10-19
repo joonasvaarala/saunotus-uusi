@@ -1,6 +1,9 @@
 -- t104: tuotekohtainen QR (booking_104–105). Rollback-transaktio: lopuksi tahallinen poikkeus, ei jälkiä.
 -- Anon saa vain public_drinks_*. Katalogi ilman koodia on tyhjä. Kelvollinen koodi palauttaa yhden tuotteen nimen ja hinnan.
 -- Ikärajallinen ei saa koodia. Hinta tulee palvelimelta. lower(email) käyttää samaa asiakasta. expire_counter_orders koskee kylmalaite-lähdettä.
+-- Ei CI:ssä. GitHub Pages -työnkulussa ei ole Postgresia, ja booking/supabase/tests/run.sh ajaa vain juuren [0-9]*.test.sql.
+-- Bottiavustus ajaa tämän psql:llä migraatioiden jälkeen. site_base_url asetetaan tässä transaktiossa
+-- (tuotannossa arvo on joonasvaarala.github.io/saunotus-uusi); peruutus palauttaa sen.
 set local lock_timeout = '3s';
 set local statement_timeout = '120s';
 select set_config('t104.log', '', true);
@@ -28,6 +31,7 @@ declare
   u_mgr uuid := gen_random_uuid();
   u_admin uuid := gen_random_uuid();
   p_vichy bigint; p_grape bigint; p_beer bigint; p_gift bigint; p_hidden bigint;
+  v_biz bigint;
   rowj jsonb; code text; other text; res jsonb; tok uuid; tok2 uuid; v_id bigint;
   v_c1 bigint; v_c2 bigint; log text; npass int; nfail int;
 begin
@@ -39,15 +43,23 @@ begin
   perform public.t104_ck(has_function_privilege('anon', 'booking.public_drinks_checkout(text,jsonb,text,text)', 'execute'), 'G6 anon saa kassan');
   perform public.t104_ck(to_regclass('booking.product_qr') is not null, 'G7 product_qr olemassa');
   perform public.t104_ck(to_regclass('booking.cold_units') is null, 'G8 cold_units poissa');
+  perform public.t104_ck(to_regclass('booking.cold_units_archive') is not null, 'G8b arkisto olemassa');
   execute 'set local role anon';
   perform public.t104_ck(public.t104_try('select count(*) from booking.product_qr') <> 'ok', 'G9 anon ei lue taulua');
+  perform public.t104_ck(public.t104_try('select count(*) from booking.cold_units_archive') <> 'ok', 'G9b anon ei lue arkistoa');
   perform public.t104_logout();
 
-  insert into kb.products(name, category, price, vat_rate, active) values ('Vichy', 'other', 3.00, 13.5, true) returning id into p_vichy;
-  insert into kb.products(name, category, price, vat_rate, active) values ('Viinirypälemehu', 'other', 2.50, 13.5, true) returning id into p_grape;
-  insert into kb.products(name, category, price, vat_rate, active) values ('Olut', 'other', 4, 25.5, true) returning id into p_beer;
-  insert into kb.products(name, category, price, vat_rate, active) values ('Lahjakortti testi', 'gift_card', 58, 0, true) returning id into p_gift;
-  insert into kb.products(name, category, price, vat_rate, active) values ('Käsipyyhe', 'other', 4, 25.5, true) returning id into p_hidden;
+  select id into v_biz from kb.businesses where id = 1;
+  perform public.t104_ck(v_biz is not null, 'B0 yritystunnus');
+  insert into booking.settings(key, value, description, is_public)
+  values ('site_base_url', to_jsonb('https://uusi.saunotus.com'::text), 'Testi asettaa osoitteen; transaktion peruutus palauttaa tuotannon arvon', false)
+  on conflict (key) do update set value = excluded.value;
+
+  insert into kb.products(business_id, name, category, price, vat_rate, active) values (v_biz, 'Vichy', 'other', 3.00, 13.5, true) returning id into p_vichy;
+  insert into kb.products(business_id, name, category, price, vat_rate, active) values (v_biz, 'Viinirypälemehu', 'other', 2.50, 13.5, true) returning id into p_grape;
+  insert into kb.products(business_id, name, category, price, vat_rate, active) values (v_biz, 'Olut', 'other', 4, 25.5, true) returning id into p_beer;
+  insert into kb.products(business_id, name, category, price, vat_rate, active) values (v_biz, 'Lahjakortti testi', 'gift_card', 58, 0, true) returning id into p_gift;
+  insert into kb.products(business_id, name, category, price, vat_rate, active) values (v_biz, 'Käsipyyhe', 'other', 4, 25.5, true) returning id into p_hidden;
   insert into booking.product_config(product_id, sale_kind, bookable, shop_visible, pos_enabled, fridge_sale)
   values
     (p_vichy, 'other', false, false, false, false),
@@ -55,6 +67,8 @@ begin
     (p_gift, 'other', false, false, false, false),
     (p_hidden, 'other', false, false, false, false);
   perform public.t104_ck(public.t104_try(format('insert into booking.product_config(product_id, sale_kind, fridge_sale) values (%s, ''other'', true)', p_beer)) = 'age_restricted', 'A1 olut ei QR-tilaan');
+  insert into booking.product_config(product_id, sale_kind, bookable, shop_visible, pos_enabled, fridge_sale, age_restricted)
+  values (p_beer, 'other', false, false, false, false, true);
 
   insert into auth.users(id, email) values
     (u_staff, 't104-staff@example.test'),

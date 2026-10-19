@@ -1,11 +1,14 @@
 -- ============================================================
 -- booking_104_product_qr_schema: QR-linkki on tuotekohtainen, ei kylmälaite.
--- Tuotannossa ei ole cold_units-rivejä eikä pikakassa-/kylmälaitetilauksia, joten
--- taulun vaihto tehdään booking_105:ssä (funktiot riippuvat cold_units-tyypistä).
--- Tässä syntyy booking.product_qr. fridge_sale-sarake säilyy: se on
--- "ostettavissa QR-linkillä" -tila, ei julkinen verkkokauppanäkyvyys.
--- Hinnat, ALV, site_base_url ja polut /juomat/ + /en/drinks/ eivät muutu.
--- Rollback: rollbacks/20261019020000_booking_104_ROLLBACK.sql (aja 105 ensin).
+-- Tässä syntyy booking.product_qr ja booking.cold_units_archive.
+-- Arkisto on cold_units-taulun sarakkeiden kopio. booking_105 siirtää rivit
+-- sinne ennen pudotusta (tuotannossa on ainakin yksi laite). Taulua ei pudoteta
+-- tässä, koska funktiot riippuvat vielä cold_units-tyypistä.
+-- fridge_sale-sarake säilyy: se on "ostettavissa QR-linkillä" -tila, ei julkinen
+-- verkkokauppanäkyvyys. Hinnat, ALV, site_base_url ja polut /juomat/ + /en/drinks/
+-- eivät muutu.
+-- Rollback: rollbacks/20261019020000_booking_104_ROLLBACK.sql (aja 105 ensin;
+-- se palauttaa rivit arkistosta cold_units-tauluun, tämä pudottaa arkiston).
 -- ============================================================
 set local lock_timeout = '5s';
 
@@ -32,3 +35,13 @@ alter table booking.product_qr enable row level security;
 revoke all on booking.product_qr from public, anon, authenticated;
 grant all on booking.product_qr to service_role;
 select booking._add_audit('booking.product_qr'::regclass);
+
+-- Kylmälaitteiden arkisto. Sarakkeet, rajoitteet ja identiteetti kopioidaan.
+-- Ei myyntiä: anon ja authenticated eivät näe taulua. Vain service_role ja
+-- omistaja (migraatio / definer) kirjoittavat.
+create table booking.cold_units_archive (like booking.cold_units including all);
+comment on table booking.cold_units_archive is
+  'Arkisto booking.cold_units-riveistä. booking_105 kopioi rivit tänne ja pudottaa alkuperäisen taulun. Ei ole myyntikohde.';
+alter table booking.cold_units_archive enable row level security;
+revoke all on booking.cold_units_archive from public, anon, authenticated;
+grant all on booking.cold_units_archive to service_role;
