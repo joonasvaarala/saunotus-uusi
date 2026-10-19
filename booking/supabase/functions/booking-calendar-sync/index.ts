@@ -13,6 +13,7 @@
 // Deploy (ei ajeta tästä haarasta):
 //   supabase functions deploy booking-calendar-sync --project-ref sxbofnuisemspgquoxyv
 // verify_jwt = false (config.toml). Ajastus syntyy migraatiossa booking_114, kun booking.skip_cron ei ole päällä.
+// booking_115: suunnitelman reconcile=true pyytää täyden kirjoituksen. Muuten sama content_hash ohitetaan.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { type Db, type ExportPlan, runExport, safeError } from "./core.ts";
 import { createGoogle, type TokenSource } from "./google.ts";

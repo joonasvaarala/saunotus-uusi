@@ -1,6 +1,6 @@
 # Varauskalenteri (vienti Googleen)
 
-Yksisuuntainen vienti: vahvistetut varaukset näkyvät erillisessä Google-kalenterissa. Kalenterissa tehty muutos ei muuta varausta. Seuraava ajo kirjoittaa tapahtuman uudelleen varausjärjestelmän tiedoista.
+Yksisuuntainen vienti: vahvistetut varaukset näkyvät erillisessä Google-kalenterissa. Kalenterissa tehty muutos ei muuta varausta. Käytössä-tilassa Googleen kirjoitetaan vain, kun tapahtuman sisältö on muuttunut. Noin tunnin välein tehdään täysi uudelleenkirjoitus, joten kalenterista käsin poistettu tapahtuma palautuu seuraavassa täydessä ajossa.
 
 Sulkukalenterit (`1 savusauna kiinni`, `1 perinnesaunotus kiinni`, `1 hoidot kiinni`, `1 Rauni kiinni`) pysyvät kaksisuuntaisina. Niiden tunnuksia ei käytetä tässä viennissä.
 
@@ -17,7 +17,7 @@ Ikkuna on oletuksena tänään − 7 päivää … + 180 päivää (Europe/Helsi
 
 ## Oletus on pois
 
-`integration_config.key = booking_calendar`, `mode = off`. Ajastus saa olla olemassa: `booking.booking_calendar_dispatch` palaa heti eikä kutsu Edgeä eikä Googlea. Harjoitusajo (`dry_run`) laskee tapahtumat eikä kirjoita. `live` kirjoittaa.
+`integration_config.key = booking_calendar`, `mode = off`. Ajastus saa olla olemassa: `booking.booking_calendar_dispatch` palaa heti eikä kutsu Edgeä eikä Googlea. Pois-tilassa lausetriggeri `booking_calendar_nudge` palaa heti eikä päivitä tilariviä, jotta siivousajot ja rinnakkaiset varaukset eivät odota samaa lukkoa. Harjoitusajo (`dry_run`) laskee tapahtumat eikä kirjoita. `live` kirjoittaa Googleen vain muuttuneet tapahtumat. Täysi kirjoitus (`last_reconcile_at`, tunnin välein) palauttaa kalenterista poistetun tapahtuman.
 
 ## Kytkentä
 
@@ -33,6 +33,8 @@ Hallinnan linkki tapahtuman kuvauksessa on `site_base_url` + `/hallinta`, ellei 
 ## Deploy
 
 Migraatio `20261019161000_booking_114_calendar_export` luo taulut, funktiot ja ajastuksen `booking_calendar_export` (`*/5 * * * *`). Rollback: `booking/supabase/rollbacks/20261019161000_booking_114_ROLLBACK.sql`.
+
+Migraatio `20261019221500_booking_115_calendar_quiet` hiljentää pois-tilan triggerin ja lisää täyden kirjoituksen leiman. Rollback: `booking/supabase/rollbacks/20261019221500_booking_115_ROLLBACK.sql`. Triggerin korjaus tulee voimaan migraatiolla. Hashin ohitus tulee voimaan, kun Edge-funktio deployataan uudelleen (komento alla). Tätä deployta ei ajeta tästä haarasta.
 
 Edge, erillinen funktio (sulkusynkkaa ei muuteta):
 
