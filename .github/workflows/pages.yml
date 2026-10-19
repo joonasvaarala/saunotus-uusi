@@ -104,6 +104,7 @@ jobs:
         with:
           node-version: 22
       - run: node --test booking/supabase/functions/send-emails/templates.test.mjs
+      - run: node --test booking/supabase/functions/send-emails/mailer.test.mjs
       # sivutekstit osa 3 / PR 3: sähköpostien/PDF:ien/maksusivun tekstit avaimiksi (tuontitiedosto, tavu tavulta samat viestit; TypeScript-taulukot → Node 22)
       - run: node --test booking/tests/sivutekstit-funktiot.test.mjs
       # edge-funktioiden Deno-testit: PDF:t samat tavut kuin ennen tekstisiirtoa, tekstihaku (_shared/site_texts.ts), MobilePay-virhetekstit

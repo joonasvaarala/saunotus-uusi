@@ -6,7 +6,7 @@ Tila 17.10.2026. Kaikki integraatiot on rakennettu valmiiksi **ilman ulkoisia yh
 
 | key | mode nyt | merkitys |
 |---|---|---|
-| `resend` | `dry_run` | `off` = viestit merkitään `skipped`; `dry_run` = viestit renderöidään ja merkitään `dry_run`, **ei lähetetä**; `live` = lähetetään Resendillä |
+| `resend` | `dry_run` | `off` = viestit merkitään `skipped`; `dry_run` = viestit renderöidään ja merkitään `dry_run`, **ei lähetetä**; `live` = lähetetään (`settings.transport`, oletus Resend). Epätyhjä `settings.test_recipients` rajaa live-vastaanottajat |
 | `vismapay` | `off` | `off` = ei verkkomaksua (`online_payment_enabled=false`, maksulinkkejä ei luoda asiakkaalle); `live` = maksulinkit/verkkomaksu käytössä |
 | `procountor` | `off` | `off` = kuittijonoa ei kirjoiteta eikä päiväkirjausta tehdä. `dry_run`/`live` kopioi kuitit `accounting_outbox`-jonoon, mutta lähetys on päivän tosite (`daily_enabled`) ja laskun välitys. Ks. docs/procountor-integraatio.md. |
 
@@ -16,14 +16,32 @@ update booking.integration_config set mode = 'live', updated_at = now() where ke
 ```
 `integration_config.settings` (ei salaisuuksia): `resend.settings` = `{"from":"Sipoonjoen Perinnesauna <savusauna@saunotus.fi>","reply_to":"savusauna@saunotus.fi"}`.
 
+Lisäasetukset (eivät ole salaisuuksia):
+
+- `transport`: `resend` (oletus, jos kenttä puuttuu) tai `gmail_smtp` (valinnainen testivaiheen SMTP, ks. alla). Resend-haara ja sen idempotenssiavain pysyvät ennallaan.
+- `test_recipients`: taulukko sähköpostiosoitteita lowercasena, esim. `["oma@example.com"]`. Kun taulukko on epätyhjä ja `mode` on `live`, `send-emails` merkitsee ennen renderöintiä ja lähetystä `skipped`-tilaan (`ei allowlistissa`) jokaisen rivin, jonka vastaanottaja ei ole listalla. Vertailu on kirjainkoosta riippumaton ja trimmaa välilyönnit. Tarkistus koskee kaikkia vastaanottajia (`to` ja mahdolliset `cc`/`bcc`); yksikin listan ulkopuolinen estää koko viestin. Tyhjä tai puuttuva lista ei rajaa. `dry_run` ja `off` eivät käytä listaa.
+
 ## 2. Resend (sähköposti) – tarvitaan ennen live-tilaa
 1. Resend-tili (resend.com) ja **verkkotunnus** `saunotus.fi` lisättynä Resendiin; DNS-tietueet (SPF, DKIM, suositus DMARC) lisätty verkkotunnuksen DNS:ään ja tunnus merkitty Resendissä *Verified*. Lähettäjäosoite oltava vahvistetulla verkkotunnuksella (`savusauna@saunotus.fi`).
 2. API-avain (Sending access) → Edge-salaisuus **`RESEND_API_KEY`**.
 3. Tarkista `settings.site_base_url` (nyt `https://uusi.saunotus.com`; vaihda varsinaiseksi osoitteeksi ennen live-tilaa, koska viestien linkit rakentuvat siitä): `update booking.settings set value = to_jsonb('https://…'::text) where key = 'site_base_url';`
-4. Testilähetys: aseta `resend.mode='live'` vain hetkeksi omalla osoitteellasi tehtyä testitilausta vasten (tilauksen sähköposti = oma osoite), tarkista viestit ja PDF-liite, ja tarkista että `email_outbox.status='sent'`.
+4. Testilähetys: aseta ensin `test_recipients` (omat osoitteet), sitten `resend.mode='live'`. Tarkista viestit ja PDF-liite ja että `email_outbox.status='sent'`. Osoite, joka ei ole listalla, merkitään `skipped` (`ei allowlistissa`) eikä lähde.
 5. Live-tilassa viestit lähtevät: tilausvahvistus (45 s viiveellä), kuitti ja hyvityskuitti (PDF liitteenä), maksulinkki, peruutuspyynnön vastaanottoviesti, tilausmuutosviesti. Virheet: uudelleenyritys (`attempts²` min), `dead` kun `max_attempts` täynnä; seuranta: `select kind,status,last_error,count(*) from booking.email_outbox group by 1,2,3;`
 6. `send-emails` ajetaan pg_cronilla (`booking_send_emails`, 1 min); tunnistus `x-sync-secret` = Vault-salaisuus `calendar_sync_cron_secret` (jo olemassa; ei lisäsalaisuutta).
 - Huom: dry_run-tilassa merkityt (`dry_run`) viestit **eivät lähde jälkikäteen**; live-tilaan siirryttäessä vain `pending`-rivit lähtevät. Jos haluat lähettää kuitin uudelleen: `admin_resend_receipt`.
+
+### Testivaiheen lähetys Gmail SMTP:llä (valinnainen)
+
+Resend pysyy oletuksena (`transport` puuttuu tai on `resend`). Testivaiheessa voi asettaa `settings.transport = 'gmail_smtp'`. Yhteys on `smtp.gmail.com` portti **465**, TLS (`npm:nodemailer@10.1.2`, versio lukittu). From on aina `Sipoonjoen Perinnesauna <GMAIL_SMTP_USER>` (Gmail vaatii oman osoitteen). `reply_to` tulee `settings.reply_to`-asetuksesta kuten Resendissä. Liitteet (kuitti, hyvityskuitti, lasku, lahjakortin PDF) haetaan samalla logiikalla kuin Resend-haarassa.
+
+Salaisuudet vain Supabasen Edge Function -salaisuuksiin (Dashboard → Edge Functions → Secrets, tai `supabase secrets set`). Niitä **ei** kirjoiteta repoon eikä chattiin:
+
+- `GMAIL_SMTP_USER`
+- `GMAIL_SMTP_APP_PASSWORD` (Google-sovellussalasana)
+
+Jos salaisuuksia ei ole asetettu, viesti merkitään `failed` ja `last_error` on `GMAIL_SMTP_* puuttuu` (ajo ei kaadu, muita rivejä käsitellään). Portin 465 toimivuus Supabasen edge-ympäristössä varmistetaan kokeilemalla tuotannossa, ei koodissa. Deployn ja `integration_config`-muutokset tekee Bottiavustus.
+
+Rajat: Gmailin lähetyskiintiö on noin 500 viestiä vuorokaudessa. From on Gmail-osoite, ei `savusauna@saunotus.fi`. Roskapostiriski on suurempi kuin Resendillä. `reply_to`-osoitteen on oltava toimiva, jotta vastaukset tulevat perille.
 
 ## 3. Visma Pay (verkkomaksu) – ei toteutettu, runko valmiina
 Valmiina: `payments`-rakenne (`provider='visma_pay'`, `provider_ref`, `provider_status`, `link_token`, `link_expires_at`, `raw`), maksulinkit (`/maksa/?p=<link_token>`), `payment_mark_paid(p_provider text, p_provider_ref text, p_amount numeric, p_raw jsonb)` (vanha, olemassa oleva; service_role; idempotentti `already:true`; hakee maksun `provider`+`provider_ref`-parilla – `vismapay-start` tallentaa Visma Payn palauttaman tokenin `provider_ref`iin maksun luonnin jälkeen; maksu → `paid` käynnistää kuitin ja kuittiviestin triggerillä), `admin_refund` (jää `pending`/kirjataan käsin, kunnes `vismapay-refund` toteutetaan), edge-funktiot `vismapay-start`, `vismapay-notify`, `vismapay-refund` (palauttavat nyt 501).
@@ -85,7 +103,7 @@ Salaisuudet vain Edgeen: **`PROCOUNTOR_CLIENT_ID`**, **`PROCOUNTOR_CLIENT_SECRET
 - `render(kind, data, locale)` → `{subject, text, html}`; kielet FI/EN (`locale` parametri tai datan `locale`, oletus fi); tyypit `order_confirmation`, `payment_link`, `receipt`, `refund_receipt`, `cancel_request_ack`, `order_change`.
 - HTML on taulukkopohjainen ja inline-tyylitelty (sähköpostiyhteensopiva), mukana tekstiversio. Värit: tumma vihreä (#1f3d2b) ja hiekka (#efe7d6), ei sinistä. Logo = `<sivusto>/img/logo-kuitti.png`; sivusto johdetaan tilaus-/maksulinkistä (`site_base_url` + `order_page_path`/`payment_link_path`), muuten oletus `https://joonasvaarala.github.io/saunotus-uusi/img/logo-kuitti.png`.
 - Linkit kulkevat vain `https://`-muodossa (muut pudotetaan), kaikki data HTML-escapataan. `dry_run`-tila ennallaan: viesti renderöidään ja merkitään `dry_run`, mitään ei lähetetä.
-- Testit: `node --test booking/supabase/functions/send-emails/templates.test.mjs` (tarvitsee Node ≥ 22.18, jossa .ts-tuonti toimii; vanhemmalla Nodella testit ohitetaan; CI ajaa Node 22:lla). Tyyppitarkistus: kopioi `functions/` kansioon, jonka yläpuolella ei ole `node_modules`, ja aja `deno check */index.ts`.
+- Testit: `node --test booking/supabase/functions/send-emails/templates.test.mjs` ja `node --test booking/supabase/functions/send-emails/mailer.test.mjs` (allowlist ja mockattu SMTP, ei verkkoa). Tarvitsee Node ≥ 22.18, jossa .ts-tuonti toimii; vanhemmalla Nodella testit ohitetaan; CI ajaa Node 22:lla. Tyyppitarkistus: kopioi `functions/` kansioon, jonka yläpuolella ei ole `node_modules`, ja aja `deno check */index.ts`.
 - Käyttöönotto-huomio: `send-emails` (live-tilassa) hakee PDF:n `receipt-pdf`-funktiosta; tuotannossa `receipt-pdf` ei ollut vielä julkaistu 17.10.2026 → julkaise ennen `resend.mode='live'`.
 - Lahjakortit (migraatio 45, sopimus §13.9): `gift_card_buyer` (yksi viesti per tilaus, kaikki kortit) ja `gift_card_recipient` (vain jos `recipient_email`). `send-emails` hakee jokaiselle kortille PDF:n `gift-card-pdf?t=<public_token>&lang=…` ja liittää sen; viestissä on PDF-linkki mutta ei kortin koodia. Peruttu/maksamaton kortti → rivi `skipped`. Testit: `templates.test.mjs` (Node ≥ 22.18) ja Deno-apuajot `gift-card-pdf/test_render.ts`, `send-emails/test_gift_templates.ts` (`deno run -A --node-modules-dir=none …`).
 - `gift-card-pdf` (verify_jwt=false): `GET ?t=<public_token>[&lang=fi|en]` → A5-vaaka-PDF (`pdf-lib`), 404 tuntematon token, 409 kortti ei valmis, ei välimuistia. Logo `settings.seller.logo_url` (`docs/giftcards/logo.png` on testiajojen kopio).
