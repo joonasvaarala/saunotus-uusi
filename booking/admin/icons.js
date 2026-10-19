@@ -42,6 +42,7 @@ export const ICONS = {
   chart: [P('M4 20V10M10 20V4M16 20v-8M22 20H2')],                                                 // Raportit
   tick: [P('M5 12.5l4.5 4.5L19 7.5')],                                                         // Saapunut: valintamerkki
   close: [P('M18 6L6 18M6 6l12 12')],                                                         // Sulje
+  trash: [P('M3 6h18'), P('M8 6V4h8v2'), P('M19 6l-1 14H6L5 6'), P('M10 11v6M14 11v6')],       // Poista rivi
 };
 const NS = 'http://www.w3.org/2000/svg';
 export function icon(name, size = 24) {

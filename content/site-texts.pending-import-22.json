@@ -1,0 +1,302 @@
+[
+ {
+  "key": "ui.admin.invoices.lines",
+  "lang": "fi",
+  "text": "Laskurivit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.lines",
+  "lang": "en",
+  "text": "Invoice lines",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.line_product",
+  "lang": "fi",
+  "text": "Tuote tai kuvaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.line_product",
+  "lang": "en",
+  "text": "Product or description",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.line_product_ph",
+  "lang": "fi",
+  "text": "Hae tuotetta tai kirjoita kuvaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.line_product_ph",
+  "lang": "en",
+  "text": "Search for a product or type a description",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.price_gross",
+  "lang": "fi",
+  "text": "á-hinta € (sis. alv)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.price_gross",
+  "lang": "en",
+  "text": "Unit price € (incl. VAT)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.price_net",
+  "lang": "fi",
+  "text": "á-hinta € (alv 0 %)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.price_net",
+  "lang": "en",
+  "text": "Unit price € (excl. VAT)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.prices_include",
+  "lang": "fi",
+  "text": "Hinnat sisältävät alv:n",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.prices_include",
+  "lang": "en",
+  "text": "Prices include VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.line_sum",
+  "lang": "fi",
+  "text": "Rivisumma",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.line_sum",
+  "lang": "en",
+  "text": "Line total",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.remove_line",
+  "lang": "fi",
+  "text": "Poista rivi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.remove_line",
+  "lang": "en",
+  "text": "Remove line",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_desc",
+  "lang": "fi",
+  "text": "Kirjoita kuvaus.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_desc",
+  "lang": "en",
+  "text": "Enter a description.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_qty",
+  "lang": "fi",
+  "text": "Tarkista määrä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_qty",
+  "lang": "en",
+  "text": "Check the quantity.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_price",
+  "lang": "fi",
+  "text": "Anna hinta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_price",
+  "lang": "en",
+  "text": "Enter a price.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_vat",
+  "lang": "fi",
+  "text": "Valitse ALV-kanta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_vat",
+  "lang": "en",
+  "text": "Choose a VAT rate.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.total_net",
+  "lang": "fi",
+  "text": "Veroton yhteensä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.total_net",
+  "lang": "en",
+  "text": "Total excl. VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.vat_pct",
+  "lang": "fi",
+  "text": "ALV %",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.vat_pct",
+  "lang": "en",
+  "text": "VAT %",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit (Uusi lasku): korttirivi, tuotelhaku, rivisumma ja alv-erittely. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.free_text",
+  "lang": "fi",
+  "text": "Käytä vapaana tekstinä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit: ehdotuslistan viimeinen vaihtoehto käyttää kirjoitettua tekstiä sellaisenaan. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.admin.invoices.free_text",
+  "lang": "en",
+  "text": "Use as free text",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivit: ehdotuslistan viimeinen vaihtoehto käyttää kirjoitettua tekstiä sellaisenaan. FI+EN, luokka normal."
+ }
+]

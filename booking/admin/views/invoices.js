@@ -1,11 +1,12 @@
 // Hallinta › Laskut: haku näkyvissä, muut suodattimet kiinni. Luonnos, lähetys, hyvitys, itse tehty lasku tai tilauksesta.
-import { rpc, functionUrl } from '../sb.js';
-import { h, money, toast, dialog, field, empty } from '../ui.js';
+import { rpc, functionUrl, select } from '../sb.js';
+import { h, money, toast, dialog, field, empty, todayHel, addDays } from '../ui.js';
 import { countActive, filterDrawer } from '../filter-drawer.js';
 import { invoiceText, loadInvoiceTexts } from '../invoices-texts.js';
 import { lookupSearch } from './customerform.js';
 import { customerDirty, routeSearchTerm } from '../invoice-customer-search.js';
 import { fetchYtj } from '../ytj.js';
+import { mountInvoiceLines } from '../invoice-line-form.js';
 
 const STATUSES = ['draft', 'sent', 'paid', 'overdue', 'credited', 'voided'];
 const tx = (k) => invoiceText(k);
@@ -138,24 +139,31 @@ export async function render() {
     });
   }
 
+  async function paymentTermDays() {
+    try {
+      const rows = await select('settings', { select: 'key,value' });
+      const hit = (Array.isArray(rows) ? rows : []).find((r) => r.key === 'invoice_due_days');
+      const raw = hit && typeof hit.value === 'object' && hit.value !== null ? (hit.value.value ?? hit.value) : hit?.value;
+      const n = Number(raw);
+      if (Number.isFinite(n) && n >= 0 && n <= 3650) return Math.trunc(n);
+    } catch { /* oletus 14 pv, sama kuin booking._setting invoice_due_days */ }
+    return 14;
+  }
+
   async function editor(existing) {
-    const rates = ((await rpc('admin_list_vat_rates').catch(() => ({ rates: [] }))).rates || []).filter((r) => r.active);
-    const defRate = rates.length ? String(rates.reduce((a, b) => (Number(b.rate) > Number(a.rate) ? b : a)).rate) : '';
-    const lines = [{ description: '', quantity: 1, unit: 'kpl', unit_price_net: '', vat_rate: defRate }];
+    const [rateRes, productRes, dueDays] = await Promise.all([
+      rpc('admin_list_vat_rates').catch(() => ({ rates: [] })),
+      rpc('admin_list_products').catch(() => []),
+      paymentTermDays(),
+    ]);
+    const rates = (rateRes.rates || []).filter((r) => r.active);
+    const products = Array.isArray(productRes) ? productRes : [];
+    const linesUi = mountInvoiceLines({ rates, products, tx });
     const f = {};
     const cust = { row: null, snap: null, bookingId: null };
-    const box = h('form', { class: 'form inv-editor', 'data-testid': 'invoice-new-form', novalidate: true });
+    const box = h('form', { id: 'invoice-new-form', class: 'form inv-editor', 'data-testid': 'invoice-new-form', novalidate: true });
     const add = (key, label, attrs = {}) => { f[key] = input({ name: key, ...attrs }); return field(label, f[key]); };
-    const lineBox = h('div', { class: 'inv-lines' });
-    function paintLines() {
-      lineBox.replaceChildren(...lines.map((ln) => h('div', { class: 'row' },
-        input({ value: ln.description, placeholder: tx('ui.admin.invoices.desc'), oninput: (e) => { ln.description = e.target.value; } }),
-        input({ value: String(ln.quantity), inputmode: 'decimal', style: 'width:5rem', 'aria-label': tx('ui.admin.invoices.qty'), oninput: (e) => { ln.quantity = e.target.value; } }),
-        input({ value: ln.unit, style: 'width:5rem', 'aria-label': tx('ui.admin.invoices.unit'), oninput: (e) => { ln.unit = e.target.value; } }),
-        input({ value: String(ln.unit_price_net), inputmode: 'decimal', style: 'width:7rem', 'aria-label': tx('ui.admin.invoices.price'), oninput: (e) => { ln.unit_price_net = e.target.value; } }),
-        h('select', { 'aria-label': tx('ui.admin.invoices.vat'), onchange: (e) => { ln.vat_rate = e.target.value; } }, ...rates.map((r) => h('option', { value: String(r.rate), selected: String(r.rate) === String(ln.vat_rate) || null, text: r.label || String(r.rate) }))))));
-    }
-    paintLines();
+    const today = todayHel();
     const readFields = () => ({
       company_name: f.company_name.value, business_id: f.business_id.value, contact_name: f.contact_name.value, email: f.email.value, phone: f.phone.value,
       einvoice_address: f.einvoice_address.value, einvoice_operator: f.einvoice_operator.value, street: f.street.value, zip: f.zip.value, city: f.city.value, buyer_reference: f.buyer_reference.value,
@@ -305,26 +313,27 @@ export async function render() {
       add('einvoice_operator', tx('ui.admin.invoices.operator')),
       add('street', tx('ui.admin.invoices.street')), add('zip', tx('ui.admin.invoices.zip'), { inputmode: 'numeric' }), add('city', tx('ui.admin.invoices.city')),
       add('buyer_reference', tx('ui.admin.invoices.buyer_ref')),
-      add('invoice_date', tx('ui.admin.invoices.date'), { type: 'date' }),
-      add('due_date', tx('ui.admin.invoices.due'), { type: 'date' }),
+      add('invoice_date', tx('ui.admin.invoices.date'), { type: 'date', value: today }),
+      add('due_date', tx('ui.admin.invoices.due'), { type: 'date', value: addDays(today, dueDays) }),
       add('notes', tx('ui.admin.invoices.notes')),
-      h('h3', { text: tx('ui.admin.invoices.desc') }), lineBox,
-      h('button', { type: 'button', class: 'btn ghost', onclick: () => { lines.push({ description: '', quantity: 1, unit: 'kpl', unit_price_net: '', vat_rate: defRate }); paintLines(); } }, tx('ui.admin.invoices.add_line')),
-      h('button', { class: 'btn primary', type: 'submit' }, tx('ui.admin.invoices.save')));
+      linesUi.node);
     const dlg = dialog(tx('ui.admin.invoices.new'), box, { wide: true });
+    dlg.append(h('div', { class: 'inv-savebar' }, h('button', { class: 'btn primary', type: 'submit', form: 'invoice-new-form', 'data-testid': 'invoice-save' }, tx('ui.admin.invoices.save'))));
     box.onsubmit = async (ev) => {
       ev.preventDefault();
       if (!cust.row) applyMoved(cs.input.value);
       const payload = payloadOf();
+      const lines = linesUi.validateAndPayload();
+      if (!lines) return;
       if (!payload.company_name || payload.company_name.length < 2) { toast(tx('ui.admin.invoices.need_company')); f.company_name.focus(); return; }
       try {
         const linked = await persistCustomer(payload);
         if (!linked) return;
         const inv = await rpc('admin_save_invoice', { p_id: existing, p: {
           customer_id: linked.id, snapshot_mode: linked.mode, customer_override: linked.mode === 'invoice' ? payload : null,
-          invoice_date: f.invoice_date.value || null, due_date: f.due_date.value || null,
+          invoice_date: f.invoice_date.value || today, due_date: f.due_date.value || addDays(today, dueDays),
           buyer_reference: payload.buyer_reference, notes: f.notes.value.trim() || null,
-          lines: lines.map((ln) => ({ description: ln.description, quantity: Number(ln.quantity), unit: ln.unit || 'kpl', unit_price_net: Number(ln.unit_price_net), vat_rate: Number(ln.vat_rate) })),
+          lines,
         } });
         dlg.close(); toast(tx('ui.admin.invoices.saved')); await draw(); detail.replaceChildren(preview(inv));
       } catch (e) { toast(e.message || String(e)); }
