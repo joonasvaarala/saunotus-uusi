@@ -144,12 +144,14 @@ export const POS_PAY_TEXTS = {
     amount: 'Summa',
     confirm: 'Vahvista maksu',
     choose_method: 'Valitse maksutapa',
+    wait: 'Odotetaan',
   },
   en: {
     pay_title: 'Payment',
     amount: 'Amount',
     confirm: 'Confirm payment',
     choose_method: 'Choose a payment method',
+    wait: 'Please wait',
   },
 };
 

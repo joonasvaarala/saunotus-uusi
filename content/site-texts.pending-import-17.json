@@ -78,5 +78,25 @@
   "max_len": 400,
   "placeholders": [],
   "reason": "Pikakassan maksupopup. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.wait",
+  "lang": "fi",
+  "text": "Odotetaan",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksupopup. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.wait",
+  "lang": "en",
+  "text": "Please wait",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Pikakassan maksupopup. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
  }
 ]

@@ -199,9 +199,9 @@ async function flush() {
 }
 const ctx = { can: (p) => p === 'pos.use' || p === 'catalog.edit' || p === 'settings.edit' };
 
-async function mount(rpc = createAdminMock({ delay: 0 }).rpc) {
+async function mount(rpc = createAdminMock({ delay: 0 }).rpc, fn) {
   reset();
-  const root = await renderPos({ ctx, rpc, fn: async (name) => { throw new Error(`fn:${name}`); } });
+  const root = await renderPos({ ctx, rpc, fn: fn || (async (name) => { throw new Error(`fn:${name}`); }) });
   document.body.append(root);
   return root;
 }
@@ -341,6 +341,75 @@ test('maksutapa vahvistetaan popupissa; MobilePayn puhelin ja maksulinkki pysyv�
   }
 });
 
+test('kaksi peräkkäistä vahvistusta luo yhden kassatilauksen', async () => {
+  const mock = createAdminMock({ delay: 0 });
+  let pending = 0;
+  let release;
+  const gate = new Promise((r) => { release = r; });
+  const rpc = async (name, args) => {
+    if (name === 'admin_pos_checkout') { pending += 1; await gate; }
+    return mock.rpc(name, args);
+  };
+  const root = await mount(rpc);
+  q(root, 'pos-product-101').click();
+  q(root, 'pos-pay').click();
+  let dlg = document.getElementById('pos-pay-dialog');
+  all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'payment_link').dispatch('change');
+  dlg = document.getElementById('pos-pay-dialog');
+  const first = q(dlg, 'pos-confirm');
+  first.click();
+  first.click();
+  const again = q(document.getElementById('pos-pay-dialog'), 'pos-confirm');
+  again.click();
+  q(root, 'pos-pay').click();
+  assert.equal(pending, 1);
+  assert.equal(again.hasAttribute('disabled'), true);
+  assert.equal(again.textContent, 'Odotetaan');
+  assert.equal(q(root, 'pos-pay').hasAttribute('disabled'), true);
+  assert.ok(document.getElementById('pos-pay-dialog'));
+  release();
+  await flush();
+  assert.equal(mock.state.calls.filter((c) => c.name === 'admin_pos_checkout').length, 1);
+});
+
+test('mobilepay-startin virhe peruu tilauksen ja näyttää virheen dialogissa', async () => {
+  const prev = globalThis.location.search;
+  globalThis.location.search = '';
+  const mock = createAdminMock({ delay: 0 });
+  try {
+    const root = await mount(mock.rpc);
+    q(root, 'pos-product-101').click();
+    q(root, 'pos-pay').click();
+    let dlg = document.getElementById('pos-pay-dialog');
+    all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'mobilepay').dispatch('change');
+    dlg = document.getElementById('pos-pay-dialog');
+    q(dlg, 'pos-confirm').click();
+    await flush();
+    dlg = document.getElementById('pos-pay-dialog');
+    assert.ok(dlg);
+    const err = q(dlg, 'pos-pay-error');
+    assert.ok(err);
+    assert.equal(err.getAttribute('role'), 'alert');
+    assert.equal(err.className, 'err');
+    assert.match(err.textContent, /mobilepay-start/);
+    assert.ok(q(dlg, 'pos-confirm'));
+    assert.equal(q(dlg, 'pos-confirm').textContent, 'Vahvista maksu');
+    assert.equal(q(dlg, 'pos-status'), null);
+    assert.equal(q(root, 'pos-pay').textContent, 'Maksa');
+    const checkout = mock.state.calls.filter((c) => c.name === 'admin_pos_checkout');
+    const voids = mock.state.calls.filter((c) => c.name === 'admin_pos_void');
+    assert.equal(checkout.length, 1);
+    assert.equal(voids.length, 1);
+    assert.equal(voids[0].args.p_order_id, mock.state.posOrders[0].order_id);
+    assert.equal(mock.state.posOrders[0].status, 'cancelled');
+    const note = document.getElementById('toast');
+    assert.match(note.textContent, /mobilepay-start/);
+    assert.match(note.className, /\berr\b/);
+  } finally {
+    globalThis.location.search = prev;
+  }
+});
+
 test('pending-import-17: vain uudet ui.pos-avaimet, FI+EN, normal, ei numeroita', () => {
   const old = new Set([...pending12, ...pending16].map((r) => `${r.key}|${r.lang}`));
   const seen = new Set();
@@ -369,6 +438,7 @@ test('pending-import-17: vain uudet ui.pos-avaimet, FI+EN, normal, ei numeroita'
   }
   const src = read('../admin/pos-screen.js');
   for (const key of Object.keys(texts.POS_PAY_TEXTS.fi)) assert.match(src, new RegExp(`t\\('${key}'\\)`));
+  assert.ok(src.indexOf('await load()') < src.indexOf('new MutationObserver'));
   for (const m of src.matchAll(/'([^'\n]*)'/g)) assert.equal(/[äöåÄÖÅ]/.test(m[1]), false, m[1]);
   const css = read('../admin/admin.css');
   const layout = css.match(/\.pos-layout\{[^}]+\}/)[0];

@@ -29,6 +29,8 @@ export async function renderPos({ ctx, rpc, fn }) {
   let payInfo = null;
   let pollTimer = null;
   let payOpen = false;
+  let busy = false;
+  let payError = '';
   let returnFocus = null;
   let modalWasOpen = false;
   let keyHandler = null;
@@ -123,6 +125,7 @@ export async function renderPos({ ctx, rpc, fn }) {
   }
 
   function openPay() {
+    if (busy) return;
     if (phase === 'paying') {
       if (!returnFocus || !returnFocus.isConnected) returnFocus = document.activeElement;
       payOpen = true;
@@ -189,33 +192,58 @@ export async function renderPos({ ctx, rpc, fn }) {
     tick();
   }
 
-  async function pay() {
-    if (!cart.length) { toast(t('empty')); return; }
-    if (!tender || !tenderAvailable(tenders.find((x) => x.code === tender), modes)) { payOpen = true; draw(); toast(t('choose_method')); return; }
-    const chosen = tenders.find((x) => x.code === tender);
-    if (chosen.handler === 'mobilepay' && mpFlow === 'PUSH_MESSAGE' && !finnishMobileMsisdn(phone)) { toast(t('phone_invalid')); payOpen = true; draw(); return; }
-    const items = checkoutItems(cart);
-    const res = await rpc('admin_pos_checkout', { p_items: items, p_locale: lang, p_email: null });
-    order = res;
-    phase = 'paying';
-    if (chosen.handler === 'payment_link') {
-      const link = await rpc('admin_create_payment_link', { p_order_id: res.order_id, p_send_email: false, p_expires_days: 1, p_note: 'pikakassa' });
-      const url = joinUrl(modes.site_base_url, link.link_path);
-      payInfo = { kind: 'link', url, amount: link.amount, online: link.online_payment_enabled };
-      if (MOCK()) await rpc('admin_pos_mock_tender', { p_order_id: res.order_id });
-      watch(res.order_id, res.public_token);
-    } else if (chosen.handler === 'mobilepay') {
-      if (MOCK()) {
-        await rpc('admin_pos_mock_tender', { p_order_id: res.order_id });
-        payInfo = { kind: 'mp', flow: mpFlow, qr: mpFlow === 'QR' ? 'https://pay.example.test/mock-qr' : null, pushed: mpFlow === 'PUSH_MESSAGE' };
-      } else {
-        const started = await fn('mobilepay-start', { order_token: res.public_token, user_flow: mpFlow, phone: mpFlow === 'PUSH_MESSAGE' ? finnishMobileMsisdn(phone) : undefined });
-        payInfo = { kind: 'mp', flow: mpFlow, qr: started.qr_url || started.redirect_url || null, pushed: !!started.pushed };
-      }
-      watch(res.order_id, res.public_token);
-    }
+  function showPayError(e) {
+    payError = errMsg(e);
     payOpen = true;
-    draw();
+    toast(payError, 'err');
+  }
+
+  async function pay() {
+    if (busy) return;
+    busy = true;
+    try {
+      if (!cart.length) { toast(t('empty')); return; }
+      if (!tender || !tenderAvailable(tenders.find((x) => x.code === tender), modes)) { payOpen = true; toast(t('choose_method')); return; }
+      const chosen = tenders.find((x) => x.code === tender);
+      if (chosen.handler === 'mobilepay' && mpFlow === 'PUSH_MESSAGE' && !finnishMobileMsisdn(phone)) { toast(t('phone_invalid')); payOpen = true; return; }
+      payError = '';
+      draw();
+      const items = checkoutItems(cart);
+      const res = await rpc('admin_pos_checkout', { p_items: items, p_locale: lang, p_email: null });
+      order = res;
+      phase = 'paying';
+      try {
+        if (chosen.handler === 'payment_link') {
+          const link = await rpc('admin_create_payment_link', { p_order_id: res.order_id, p_send_email: false, p_expires_days: 1, p_note: 'pikakassa' });
+          const url = joinUrl(modes.site_base_url, link.link_path);
+          payInfo = { kind: 'link', url, amount: link.amount, online: link.online_payment_enabled };
+          if (MOCK()) await rpc('admin_pos_mock_tender', { p_order_id: res.order_id });
+          watch(res.order_id, res.public_token);
+        } else if (chosen.handler === 'mobilepay') {
+          if (MOCK()) {
+            await rpc('admin_pos_mock_tender', { p_order_id: res.order_id });
+            payInfo = { kind: 'mp', flow: mpFlow, qr: mpFlow === 'QR' ? 'https://pay.example.test/mock-qr' : null, pushed: mpFlow === 'PUSH_MESSAGE' };
+          } else {
+            const started = await fn('mobilepay-start', { order_token: res.public_token, user_flow: mpFlow, phone: mpFlow === 'PUSH_MESSAGE' ? finnishMobileMsisdn(phone) : undefined });
+            payInfo = { kind: 'mp', flow: mpFlow, qr: started.qr_url || started.redirect_url || null, pushed: !!started.pushed };
+          }
+          watch(res.order_id, res.public_token);
+        }
+        payOpen = true;
+      } catch (e) {
+        await voidOpen();
+        phase = 'cart';
+        payInfo = null;
+        order = null;
+        stopPoll();
+        showPayError(e);
+      }
+    } catch (e) {
+      showPayError(e);
+    } finally {
+      busy = false;
+      draw();
+    }
   }
 
   function nextCustomer() {
@@ -298,10 +326,12 @@ export async function renderPos({ ctx, rpc, fn }) {
     }
     if (phase === 'cart') {
       dialog.append(h('p', { class: 'muted pos-legal', text: t('pay_legal') }));
+      if (payError) dialog.append(h('p', { role: 'alert', class: 'err', 'data-testid': 'pos-pay-error', text: payError }));
       dialog.append(h('button', {
         type: 'button', class: 'btn primary pos-pay', 'data-testid': 'pos-confirm',
-        text: t('confirm'),
-        onclick: () => pay().catch((e) => toast(errMsg(e))),
+        text: busy ? t('wait') : t('confirm'),
+        disabled: busy || null,
+        onclick: () => pay().catch((e) => toast(errMsg(e), 'err')),
       }));
     } else dialog.append(statusBlock());
     const overlay = h('div', { id: 'pos-pay-overlay', class: 'pos-overlay', 'data-testid': 'pos-pay-overlay' }, dialog);
@@ -353,7 +383,8 @@ export async function renderPos({ ctx, rpc, fn }) {
     } else {
       side.append(h('button', {
         type: 'button', class: 'btn primary pos-pay', 'data-testid': 'pos-pay',
-        text: phase === 'paying' ? t('waiting') : t('pay'),
+        text: busy ? t('wait') : (phase === 'paying' ? t('waiting') : t('pay')),
+        disabled: busy || null,
         onclick: () => openPay(),
       }));
     }
@@ -419,14 +450,16 @@ export async function renderPos({ ctx, rpc, fn }) {
       .catch((e) => toast(errMsg(e)));
   }
 
-  if (typeof MutationObserver === 'function') {
+  await load();
+  draw();
+  // Tarkkailija vasta kun näkymä on kiinnitetty. load()in aikana root ei ole vielä sivulla,
+  // ja irtoaminen silloin purkaisi kuuntelijan ennen kuin näkymä ehtii näkyviin.
+  queueMicrotask(() => queueMicrotask(() => {
+    if (!root.isConnected || typeof MutationObserver !== 'function') return;
     const mo = new MutationObserver(() => {
       if (!root.isConnected) { mo.disconnect(); teardown(); }
     });
     mo.observe(document.body, { childList: true, subtree: true });
-  }
-
-  await load();
-  draw();
+  }));
   return root;
 }
