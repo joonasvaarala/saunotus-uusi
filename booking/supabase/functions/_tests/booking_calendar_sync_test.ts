@@ -64,6 +64,29 @@ Deno.test("planOps: lisäys, aina patch, siirto, poisto, sulku ja tyhjä kalente
   assertEquals(again.ops.map((o) => o.op), ["patch"]);
 });
 
+Deno.test("planOps: sama tarkiste ohitetaan, eri tarkiste ja täysi kirjoitus päivittävät", () => {
+  const mapped = [{ event_key: "r:42", google_calendar_id: CAL, google_event_id: "bkr00000042", content_hash: "abc" }];
+  const same = planOps({ mode: "live", reconcile: false, events: [ev()], mapped });
+  assertEquals(same.ops, []);
+  assertEquals(same.unchanged, 1);
+
+  const changed = planOps({ mode: "live", events: [ev({ content_hash: "def" })], mapped });
+  assertEquals(changed.ops.map((o) => o.op), ["patch"]);
+  assertEquals(changed.unchanged, 0);
+
+  const full = planOps({ mode: "live", reconcile: true, events: [ev()], mapped });
+  assertEquals(full.ops.map((o) => o.op), ["patch"]);
+  assertEquals(full.unchanged, 0);
+
+  const gone = planOps({
+    mode: "live",
+    reconcile: false,
+    events: [],
+    mapped,
+  });
+  assertEquals(gone.ops.map((o) => o.op), ["delete"]);
+});
+
 Deno.test("toGoogleEvent merkitsee lähteen eikä laita puhelinta", () => {
   const g = toGoogleEvent(ev({ summary: "Savusauna 0401234567", description: "Tilaus #88011401\nmaija@example.test" }));
   assertEquals(g.extendedProperties.private.booking_source, "booking_calendar");
@@ -125,6 +148,77 @@ Deno.test("live: 409 johtaa patchiin ja 404-poisto onnistuu", async () => {
   assertEquals(out.failed, 0);
   assertEquals((box.payload?.upserts as { event_key: string }[])[0].event_key, "r:42");
   assert((box.payload?.deletes as string[]).includes("s:old"));
+});
+
+Deno.test("live ohittaa saman tarkisteen eikä leimaa täyttä kirjoitusta", async () => {
+  const google = throwingGoogle();
+  const box: { payload: Record<string, unknown> | null } = { payload: null };
+  const db: Db = {
+    plan: async () => ({
+      mode: "live",
+      reconcile: false,
+      run_id: "run-same",
+      events: [ev()],
+      mapped: [{ event_key: "r:42", google_calendar_id: CAL, google_event_id: "bkr00000042", content_hash: "abc" }],
+    }),
+    finish: async (p) => { box.payload = p; },
+  };
+  const out = await runExport(db, google);
+  assertEquals(out.patched, 0);
+  assertEquals(out.unchanged, 1);
+  assertEquals(out.failed, 0);
+  assertEquals(box.payload?.reconcile, false);
+  assertEquals((box.payload?.upserts as unknown[]).length, 0);
+});
+
+Deno.test("täysi kirjoitus päivittää saman tarkisteen ja palauttaa poistetun tapahtuman", async () => {
+  const calls: string[] = [];
+  const google: Google = {
+    async insertEvent() { calls.push("insert"); return "created"; },
+    async patchEvent() { calls.push("patch"); return "missing"; },
+    async deleteEvent() { calls.push("delete"); return "deleted"; },
+  };
+  const box: { payload: Record<string, unknown> | null } = { payload: null };
+  const db: Db = {
+    plan: async () => ({
+      mode: "live",
+      reconcile: true,
+      run_id: "run-full",
+      events: [ev()],
+      mapped: [{ event_key: "r:42", google_calendar_id: CAL, google_event_id: "bkr00000042", content_hash: "abc" }],
+    }),
+    finish: async (p) => { box.payload = p; },
+  };
+  const out = await runExport(db, google);
+  assertEquals(calls, ["patch", "insert"]);
+  assertEquals(out.patched, 1);
+  assertEquals(out.unchanged, 0);
+  assertEquals(box.payload?.reconcile, true);
+  assertEquals((box.payload?.upserts as { event_key: string }[])[0].event_key, "r:42");
+});
+
+Deno.test("epäonnistunut täysi kirjoitus ei leimaa onnistumista", async () => {
+  const { HttpError } = await import("../booking-calendar-sync/core.ts");
+  const google: Google = {
+    async insertEvent() { return "created"; },
+    async patchEvent() { throw new HttpError(403, "forbidden"); },
+    async deleteEvent() { return "deleted"; },
+  };
+  const box: { payload: Record<string, unknown> | null } = { payload: null };
+  const db: Db = {
+    plan: async () => ({
+      mode: "live",
+      reconcile: true,
+      run_id: "run-fail",
+      events: [ev()],
+      mapped: [{ event_key: "r:42", google_calendar_id: CAL, google_event_id: "bkr00000042", content_hash: "abc" }],
+    }),
+    finish: async (p) => { box.payload = p; },
+  };
+  const out = await runExport(db, google);
+  assertEquals(out.ok, false);
+  assertEquals(box.payload?.reconcile, false);
+  assert(String(box.payload?.error).includes("google_http_403"));
 });
 
 Deno.test("live 403 kirjataan ja finish saa virhekoodin", async () => {

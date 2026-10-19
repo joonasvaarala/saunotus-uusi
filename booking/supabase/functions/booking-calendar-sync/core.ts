@@ -1,7 +1,10 @@
 // Varauskalenterin viennin ydin. Ei Deno- eikä Google-riippuvuutta: testit antavat feikin.
-// Suunta on vain varausjärjestelmä -> kalenteri. Kalenterin muutos ei palaa varaukseksi;
-// live-ajossa olemassa oleva tapahtuma kirjoitetaan aina uudelleen (patch), jotta käsin tehty muutos palautuu.
-// Kuivaharjoitus ja pois-tila eivät kutsu kirjoitusmetodeja.
+// Suunta on vain varausjärjestelmä -> kalenteri. Kalenterin muutos ei palaa varaukseksi.
+// Live-ajossa Googleen kirjoitetaan vain, kun content_hash on muuttunut. Kun suunnitelma
+// sanoo reconcile=true (kanta: edellisestä täydestä kirjoituksesta on yli tunti), olemassa
+// oleva tapahtuma kirjoitetaan uudelleen. Patch, joka kertoo tapahtuman puuttuvan, luo sen
+// takaisin, joten kalenterista poistettu tapahtuma palautuu. Kuivaharjoitus ja pois-tila
+// eivät kutsu kirjoitusmetodeja.
 
 export interface DesiredEvent {
   event_key: string;
@@ -31,6 +34,8 @@ export interface ExportPlan {
   ok?: boolean;
   mode: string;
   busy?: boolean;
+  /** Täysi uudelleenkirjoitus: sama tarkiste kirjoitetaan silti, jotta poistettu tapahtuma palautuu. */
+  reconcile?: boolean;
   run_id?: string | null;
   events?: DesiredEvent[];
   mapped?: MappedEvent[];
@@ -98,13 +103,14 @@ export function toGoogleEvent(ev: DesiredEvent): GWriteEvent {
   };
 }
 
-export function planOps(plan: ExportPlan): { ops: SyncOp[]; unconfigured: number; blocked: number } {
+export function planOps(plan: ExportPlan): { ops: SyncOp[]; unconfigured: number; blocked: number; unchanged: number } {
   const closure = new Set((plan.closure_calendar_ids ?? []).filter(Boolean));
   const mapped = new Map((plan.mapped ?? []).map((m) => [m.event_key, m]));
   const ops: SyncOp[] = [];
   const wanted = new Set<string>();
   let unconfigured = 0;
   let blocked = 0;
+  let unchanged = 0;
   for (const ev of plan.events ?? []) {
     const cal = (ev.google_calendar_id ?? "").trim();
     if (!cal) { unconfigured++; continue; }
@@ -119,6 +125,8 @@ export function planOps(plan: ExportPlan): { ops: SyncOp[]; unconfigured: number
       ops.push({ op: "insert", eventKey: ev.event_key, calendarId: cal, eventId: ev.google_event_id, body, row: ev });
     } else if (!prev) {
       ops.push({ op: "insert", eventKey: ev.event_key, calendarId: cal, eventId: ev.google_event_id, body, row: ev });
+    } else if (!plan.reconcile && prev.content_hash && prev.content_hash === ev.content_hash) {
+      unchanged++;
     } else {
       ops.push({ op: "patch", eventKey: ev.event_key, calendarId: cal, eventId: prev.google_event_id, body: { ...body, id: undefined }, row: ev });
     }
@@ -128,7 +136,7 @@ export function planOps(plan: ExportPlan): { ops: SyncOp[]; unconfigured: number
     if (closure.has(m.google_calendar_id)) { blocked++; continue; }
     ops.push({ op: "delete", eventKey: m.event_key, calendarId: m.google_calendar_id, eventId: m.google_event_id });
   }
-  return { ops, unconfigured, blocked };
+  return { ops, unconfigured, blocked, unchanged };
 }
 
 export interface RunResult {
@@ -142,6 +150,7 @@ export interface RunResult {
   failed: number;
   unconfigured: number;
   blocked: number;
+  unchanged: number;
   error?: string;
 }
 
@@ -171,19 +180,19 @@ function counts(ops: SyncOp[]) {
 export async function runExport(db: Db, google: Google, opts: { dryRun?: boolean } = {}): Promise<RunResult> {
   const plan = await db.plan();
   const mode = plan.mode || "off";
-  const empty = { inserted: 0, patched: 0, deleted: 0, failed: 0, unconfigured: 0, blocked: 0 };
+  const empty = { inserted: 0, patched: 0, deleted: 0, failed: 0, unconfigured: 0, blocked: 0, unchanged: 0 };
   if (mode === "off") return { ok: true, mode, skipped: "off", ...empty };
   if (plan.busy) return { ok: true, mode, skipped: "busy", ...empty };
-  const { ops, unconfigured, blocked } = planOps(plan);
+  const { ops, unconfigured, blocked, unchanged } = planOps(plan);
   const base = counts(ops);
   if (mode !== "live" || opts.dryRun) {
     await db.finish({
       run_id: plan.run_id ?? null,
-      stats: { dry_run: true, ...base, unconfigured, blocked },
+      stats: { dry_run: true, ...base, unconfigured, blocked, unchanged },
       upserts: [],
       deletes: [],
     });
-    return { ok: true, mode, dryRun: true, ...empty, unconfigured, blocked, inserted: base.would_insert, patched: base.would_patch, deleted: base.would_delete };
+    return { ok: true, mode, dryRun: true, ...empty, unconfigured, blocked, unchanged, inserted: base.would_insert, patched: base.would_patch, deleted: base.would_delete };
   }
   const upserts: Record<string, unknown>[] = [];
   const deletes: string[] = [];
@@ -222,11 +231,14 @@ export async function runExport(db: Db, google: Google, opts: { dryRun?: boolean
   await db.finish({
     run_id: plan.run_id ?? null,
     error: error ?? null,
-    stats: { dry_run: false, inserted, patched, deleted, failed, unconfigured, blocked },
+    // Leima vain onnistuneesta live-ajosta, jonka suunnitelma pyysi täyttä kirjoitusta.
+    // Virhe jättää leiman ennalleen, jotta seuraava viiden minuutin ajo yrittää uudelleen.
+    reconcile: plan.reconcile === true && !error,
+    stats: { dry_run: false, inserted, patched, deleted, failed, unconfigured, blocked, unchanged },
     upserts,
     deletes,
   });
-  return { ok: failed === 0, mode, inserted, patched, deleted, failed, unconfigured, blocked, error };
+  return { ok: failed === 0, mode, inserted, patched, deleted, failed, unconfigured, blocked, unchanged, error };
 }
 
 function rowOf(ev: DesiredEvent): Record<string, unknown> {
