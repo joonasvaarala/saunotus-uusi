@@ -31,3 +31,7 @@ verify_jwt = true    # henkilökunta (payments.refund tarkistetaan funktiossa) t
 
 [functions.procountor-sync]
 verify_jwt = false   # pg_cron kutsuu; tunnistus x-sync-secret (booking._cron_secret_ok). Ei JWT:tä.
+
+# Varauskalenterin vienti (booking_114). Samat salaisuudet kuin booking-closure-sync: GOOGLE_SERVICE_ACCOUNT_JSON, SYNC_CRON_SECRET. Ei uusia salaisuuksia tähän.
+[functions.booking-calendar-sync]
+verify_jwt = false   # pg_cron kutsuu; tunnistus x-sync-secret. Ei JWT:tä. Oletustila off ei kirjoita kalenteriin.

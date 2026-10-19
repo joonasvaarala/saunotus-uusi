@@ -4,9 +4,11 @@
 import { rpc, select } from '../sb.js';
 import { h, field, toast, run, todayHel } from '../ui.js';
 import { loadProcountorTexts, procountorText as pc } from '../procountor-texts.js';
+import { loadCalendarExportTexts } from '../calendar-export-texts.js';
 import { loadSettingsTexts, settingsText as st } from '../settings-texts.js';
 import { groupSettingKey, visibleSettingTabs, settingsHref, tabFromHash } from '../settings-tabs.js';
 import { renderQrPanel } from '../qr-panel.js';
+import { renderCalendarExport } from './calendar-export.js';
 
 const META = {
   public_booking_enabled: ['Verkkovaraus käytössä', 'bool'],
@@ -138,13 +140,18 @@ function settingCard(s, isAdmin) {
 export async function render({ ctx, rest, reload }) {
   const isAdmin = ctx.can('settings.edit');
   await loadSettingsTexts(rpc);
-  if (isAdmin) await loadProcountorTexts(rpc);
+  if (isAdmin) {
+    await loadProcountorTexts(rpc);
+    await loadCalendarExportTexts(rpc);
+  }
   let procountor = null, procountorFailed = false;
   let editor = null;
+  let calendarExport = null, calendarExportFailed = false;
   let settings = [];
   if (isAdmin) {
     try { procountor = await rpc('admin_procountor_status'); } catch { procountorFailed = true; }
     try { editor = await rpc('admin_get_procountor_settings'); } catch { editor = null; }
+    try { calendarExport = await rpc('admin_get_booking_calendar'); } catch { calendarExportFailed = true; }
     settings = await select('settings', { select: 'key,value,is_public', order: 'key.asc' });
   }
   const tabs = visibleSettingTabs({ can: (p) => ctx.can(p), keys: settings.map((s) => s.key) });
@@ -161,6 +168,7 @@ export async function render({ ctx, rest, reload }) {
   let panel = null;
   if (tab === 'qr') panel = await renderQrPanel();
   else if (tab === 'kirjanpito') panel = h('div', { class: 'stack', 'data-testid': 'panel-kirjanpito' }, procountorCard(procountor, procountorFailed), procountorForm(editor, isAdmin, reload), ...(groups.get(tab) || []));
+  else if (tab === 'varaukset') panel = h('div', { class: 'stack', 'data-testid': 'panel-varaukset' }, renderCalendarExport({ state: calendarExport, failed: calendarExportFailed, isAdmin, reload }), ...(groups.get(tab) || []));
   else if (tab) panel = h('div', { class: 'stack', 'data-testid': `panel-${tab}` }, ...(groups.get(tab) || []));
 
   const tablist = h('div', { class: 'set-tabs set-noprint', role: 'tablist', 'aria-label': st('ui.admin.settings.tabs'), 'data-testid': 'settings-tabs' },

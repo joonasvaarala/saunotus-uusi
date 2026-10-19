@@ -3,6 +3,7 @@
 // Puhdas moduuli (ei DOM:ia) → node --test voi ajaa sen. Tuntematon RPC → virhe (ei koskaan verkkokutsua).
 import { fiReference, validBusinessId, validOvt, validOperator, normBusinessId, normOvt } from '../shop/src/invoice-validate.js';
 import { storedLineFromInput } from './invoice-lines.js';
+import { calendarIdError } from './calendar-export-logic.js';
 const TZ = 'Europe/Helsinki';
 const todayHel = (now = new Date()) => now.toLocaleDateString('sv-SE', { timeZone: TZ });
 const addDays = (ds, n) => { const d = new Date(`${ds}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
@@ -114,6 +115,16 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     procountor: {
       mode: 'off', environment: 'pts', daily_enabled: false, api_prefix: '/supported/api', vat_status: '', approved_by: '', bank_account: '',
       accounts: { rounding: '', sales_by_vat: {}, clearing_by_method: {} },
+    },
+    closureCalendarIds: ['sulku-test@group.calendar.google.com'],
+    bookingCalendar: {
+      mode: 'off', timezone: 'Europe/Helsinki', window_back_days: 7, window_forward_days: 180,
+      admin_base_url: '', shared_calendar_id: '', fast_nudge: false, last: null,
+      resources: [
+        { code: 'savusauna', name: 'Savusauna', calendar_id: '' },
+        { code: 'rauni', name: 'Hoitosauna Rauni', calendar_id: '' },
+        { code: 'lovi', name: 'Lovi', calendar_id: '' },
+      ],
     },
     products: [
       { id: 10, name: 'Saunahoito', name_en: 'Sauna treatment', price: 85, vat_rate: 25.5, active: true, category: 'treatment', description: 'Hoitosauna Rauni', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 90, min_persons: 1, max_persons: 4, bookable: true, shop_visible: true, public_slots: true, time_window_class: 'therapy', required_skill: 'treatment', audience: 'consumer' } },
@@ -241,6 +252,45 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     admin_procountor_preview_daily: (a) => {
       need('settings.edit');
       return { ok: true, date: a.p_date, sent: false, receipts: 0, refund_receipts: 0, ready: false, missing: ['vat_status'] };
+    },
+    admin_get_booking_calendar: () => {
+      need('settings.edit');
+      return { ok: true, ...structuredClone(st.bookingCalendar) };
+    },
+    admin_set_booking_calendar: (a) => {
+      need('settings.edit');
+      const p = a.p || {};
+      const secret = ['api_key', 'token', 'secret', 'private_key', 'client_secret', 'password'].find((k) => Object.prototype.hasOwnProperty.call(p, k));
+      if (secret) throw err('secrets_not_allowed', 'Salaisuuksia ei tallenneta asetuksiin');
+      const mode = p.mode == null || p.mode === '' ? st.bookingCalendar.mode : p.mode;
+      if (!['off', 'dry_run', 'live'].includes(mode)) throw err('invalid_setting', 'Tila on off, dry_run tai live');
+      const shared = p.shared_calendar_id == null ? st.bookingCalendar.shared_calendar_id : String(p.shared_calendar_id).trim();
+      if (calendarIdError(shared)) throw err('invalid_calendar', 'Kalenterin tunnus ei kelpaa');
+      if (shared && st.closureCalendarIds.includes(shared)) throw err('closure_calendar', 'Sulkukalenteria ei käytetä varauksille');
+      const src = p.resource_calendars == null ? Object.fromEntries(st.bookingCalendar.resources.map((r) => [r.code, r.calendar_id])) : p.resource_calendars;
+      if (src == null || typeof src !== 'object' || Array.isArray(src)) throw err('invalid_setting', 'Resurssikalenterit ovat objekti');
+      const known = new Map(st.bookingCalendar.resources.map((r) => [r.code, r]));
+      const next = new Map();
+      for (const [code, raw] of Object.entries(src)) {
+        const id = String(raw ?? '').trim();
+        if (!known.has(code)) throw err('unknown_resource', 'Tuntematon resurssi');
+        if (id && calendarIdError(id)) throw err('invalid_calendar', 'Kalenterin tunnus ei kelpaa');
+        if (id && st.closureCalendarIds.includes(id)) throw err('closure_calendar', 'Sulkukalenteria ei käytetä varauksille');
+        next.set(code, id);
+      }
+      for (const [code, id] of next) known.get(code).calendar_id = id;
+      st.bookingCalendar.mode = mode;
+      st.bookingCalendar.shared_calendar_id = shared;
+      if (p.timezone != null && String(p.timezone).trim()) st.bookingCalendar.timezone = String(p.timezone).trim();
+      if (p.window_back_days != null) st.bookingCalendar.window_back_days = Number(p.window_back_days);
+      if (p.window_forward_days != null) st.bookingCalendar.window_forward_days = Number(p.window_forward_days);
+      if (p.admin_base_url != null) st.bookingCalendar.admin_base_url = String(p.admin_base_url).trim();
+      if (p.fast_nudge != null) st.bookingCalendar.fast_nudge = p.fast_nudge === true;
+      return { ok: true, ...structuredClone(st.bookingCalendar) };
+    },
+    admin_booking_calendar_preview: () => {
+      need('settings.edit');
+      return { ok: true, sent: false, private_events: 0, shift_bars: 0, shift_persons: 0, unconfigured: st.bookingCalendar.shared_calendar_id ? 0 : 3 };
     },
     admin_set_setting: (a) => {
       need('settings.edit');

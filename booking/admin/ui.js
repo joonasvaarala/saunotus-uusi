@@ -97,6 +97,9 @@ export const ERR_FI = {
   approval_required: 'Yhdistetty tila vaatii hyväksyjän nimen ja päivän.',
   live_incomplete: 'Yhdistetty tila vaatii ALV-tilan, vähintään yhden myyntitilin ja maksutavan tilin.',
   invalid_setting: 'Asetus ei kelpaa. Tarkista tilit, ALV-tila ja maksuehto.',
+  invalid_calendar: 'Kalenterin tunnus ei kelpaa.',
+  closure_calendar: 'Sulkukalenteria ei käytetä varauksille.',
+  unknown_resource: 'Tuntematon resurssi.',
 };
 export const errMsg = (e) => {
   const t = e?.code && ERR_FI[e.code];

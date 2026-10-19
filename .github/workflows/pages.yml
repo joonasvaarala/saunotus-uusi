@@ -113,7 +113,7 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - run: deno test -A --no-lock --node-modules-dir=none booking/supabase/functions/pdf-golden.test.ts booking/supabase/functions/_tests/site_texts_test.ts booking/supabase/functions/_tests/mobilepay_test.ts booking/supabase/functions/_tests/procountor_test.ts booking/supabase/functions/_tests/vismapay_test.ts
+      - run: deno test -A --no-lock --node-modules-dir=none booking/supabase/functions/pdf-golden.test.ts booking/supabase/functions/_tests/site_texts_test.ts booking/supabase/functions/_tests/mobilepay_test.ts booking/supabase/functions/_tests/procountor_test.ts booking/supabase/functions/_tests/vismapay_test.ts booking/supabase/functions/_tests/booking_calendar_sync_test.ts
       - run: node --test booking/tests/procountor-admin.test.mjs booking/tests/pikakassa.test.mjs booking/tests/pikakassa-nakyma.test.mjs
       # QR-tuote, tulostus ja asetusten välilehdet (booking_104–105).
       # t104 (booking/supabase/tests/pos/t104_product_qr.sql) ei ole tässä ajossa:
@@ -123,6 +123,10 @@ jobs:
       # työnkulussa ei ole Postgresia. Bottiavustus ajaa t110:n psql:llä migraatioiden jälkeen.
       # t111 (booking/supabase/tests/products/t111_admin_product_create.sql) ei ole tässä ajossa:
       # työnkulussa ei ole Postgresia. Bottiavustus ajaa t111:n psql:llä migraatioiden jälkeen.
+      # t114 (booking/supabase/tests/calendar/t114_booking_calendar.sql) ei ole tässä ajossa:
+      # työnkulussa ei ole Postgresia. Bottiavustus ajaa t114:n samassa transaktiossa kuin
+      # booking_114-migraation, kun booking.skip_cron = on, ja kumoaa kaiken.
+      - run: node --test booking/tests/varauskalenteri.test.mjs
       - run: node --test booking/tests/qr-asetukset.test.mjs booking/tests/tuote-luonti.test.mjs
       # lahjakoodi §13.12: kaupan ja hallinnan lunastuspyyntölogiikka (mockatut RPC:t)
       - run: node --test booking/tests/voucher-claims.test.mjs booking/tests/voucher-claims-admin.test.mjs booking/tests/lahjakoodi-vieritys.test.mjs

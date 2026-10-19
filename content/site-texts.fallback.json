@@ -23475,6 +23475,468 @@
    "text": "Location (shown on the sticker, optional)",
    "version": 1,
    "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.title",
+   "lang": "fi",
+   "text": "Varauskalenteri",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.title",
+   "lang": "en",
+   "text": "Booking calendar",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.lead",
+   "lang": "fi",
+   "text": "Vahvistetut yksityisvaraukset ja yleisten vuorojen palkit viedään erilliseen kalenteriin. Sulkukalenterit eivät muutu. Kalenterissa tehty muutos ei muuta varausta. Oletus on pois päältä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.lead",
+   "lang": "en",
+   "text": "Confirmed private bookings and one bar per public shift are exported to a separate calendar. Closure calendars stay as they are. An edit in the calendar does not change the booking. The default is off.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.mode",
+   "lang": "fi",
+   "text": "Tila",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.mode",
+   "lang": "en",
+   "text": "Mode",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.mode_off",
+   "lang": "fi",
+   "text": "Pois päältä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.mode_off",
+   "lang": "en",
+   "text": "Off",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.mode_dry_run",
+   "lang": "fi",
+   "text": "Harjoitusajo",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.mode_dry_run",
+   "lang": "en",
+   "text": "Dry run",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.mode_live",
+   "lang": "fi",
+   "text": "Käytössä",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.mode_live",
+   "lang": "en",
+   "text": "On",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.shared",
+   "lang": "fi",
+   "text": "Yhteinen kalenteri",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.shared",
+   "lang": "en",
+   "text": "Shared calendar",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.shared_hint",
+   "lang": "fi",
+   "text": "Yksi yhteinen Varaukset-kalenteri. Resurssin nimi on aina otsikossa. Tyhjä tunnus ei vie mitään. Resurssin oma tunnus ohittaa tämän.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.shared_hint",
+   "lang": "en",
+   "text": "One shared bookings calendar. The resource name is always in the title. An empty id exports nothing. A resource id overrides this.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.resources",
+   "lang": "fi",
+   "text": "Resurssien kalenterit",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.resources",
+   "lang": "en",
+   "text": "Resource calendars",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.resource_hint",
+   "lang": "fi",
+   "text": "Tyhjä käyttää yhteistä kalenteria.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.resource_hint",
+   "lang": "en",
+   "text": "Empty uses the shared calendar.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.admin_url",
+   "lang": "fi",
+   "text": "Hallinnan osoite",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.admin_url",
+   "lang": "en",
+   "text": "Admin address",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.admin_url_hint",
+   "lang": "fi",
+   "text": "Tyhjä käyttää sivuston hallintaa. Osoitteessa ei saa olla tunnusta.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.admin_url_hint",
+   "lang": "en",
+   "text": "Empty uses the site admin. The address must not contain a login.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.timezone",
+   "lang": "fi",
+   "text": "Aikavyöhyke",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.timezone",
+   "lang": "en",
+   "text": "Time zone",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.window_back",
+   "lang": "fi",
+   "text": "Päiviä taaksepäin",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.window_back",
+   "lang": "en",
+   "text": "Days back",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.window_forward",
+   "lang": "fi",
+   "text": "Päiviä eteenpäin",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.window_forward",
+   "lang": "en",
+   "text": "Days ahead",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.fast",
+   "lang": "fi",
+   "text": "Nopea päivitys",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.fast",
+   "lang": "en",
+   "text": "Fast update",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.fast_hint",
+   "lang": "fi",
+   "text": "Päivittää noin minuutin kuluessa uudesta varauksesta. Muuten päivitys käy viiden minuutin välein.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.fast_hint",
+   "lang": "en",
+   "text": "Updates within about a minute of a new booking. Otherwise the update runs every five minutes.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.save",
+   "lang": "fi",
+   "text": "Tallenna varauskalenteri",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.save",
+   "lang": "en",
+   "text": "Save booking calendar",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.saved",
+   "lang": "fi",
+   "text": "Varauskalenteri tallennettu",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.saved",
+   "lang": "en",
+   "text": "Booking calendar saved",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.preview",
+   "lang": "fi",
+   "text": "Esikatsele",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.preview",
+   "lang": "en",
+   "text": "Preview",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.preview_private",
+   "lang": "fi",
+   "text": "Yksityisiä tapahtumia",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.preview_private",
+   "lang": "en",
+   "text": "Private events",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.preview_shifts",
+   "lang": "fi",
+   "text": "Vuoropalkkeja",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.preview_shifts",
+   "lang": "en",
+   "text": "Shift bars",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.preview_persons",
+   "lang": "fi",
+   "text": "Henkilöitä vuoropalkissa",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.preview_persons",
+   "lang": "en",
+   "text": "People on shift bars",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.preview_unconfigured",
+   "lang": "fi",
+   "text": "Ilman kalenteria",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.preview_unconfigured",
+   "lang": "en",
+   "text": "Without a calendar",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.preview_not_sent",
+   "lang": "fi",
+   "text": "Mitään ei lähetetä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.preview_not_sent",
+   "lang": "en",
+   "text": "Nothing is sent.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.last",
+   "lang": "fi",
+   "text": "Viimeisin ajo",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.last",
+   "lang": "en",
+   "text": "Latest run",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.last_none",
+   "lang": "fi",
+   "text": "Ei ajoja",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.last_none",
+   "lang": "en",
+   "text": "No runs",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.last_ok",
+   "lang": "fi",
+   "text": "Onnistui",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.last_ok",
+   "lang": "en",
+   "text": "Succeeded",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.unavailable",
+   "lang": "fi",
+   "text": "Varauskalenterin asetuksia ei saatu haettua. Vienti ei ole käytössä.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.unavailable",
+   "lang": "en",
+   "text": "Booking calendar settings could not be loaded. Export is off.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.dry_note",
+   "lang": "fi",
+   "text": "Harjoitusajo ei kirjoita kalenteriin.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.dry_note",
+   "lang": "en",
+   "text": "A dry run does not write to the calendar.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.off_note",
+   "lang": "fi",
+   "text": "Pois päältä ei vie varauksia.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.off_note",
+   "lang": "en",
+   "text": "Off does not export bookings.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.error_invalid",
+   "lang": "fi",
+   "text": "Kalenterin tunnus ei kelpaa.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.error_invalid",
+   "lang": "en",
+   "text": "The calendar id is not valid.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.error_closure",
+   "lang": "fi",
+   "text": "Sulkukalenteria ei käytetä varauksille.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.calendar_export.error_closure",
+   "lang": "en",
+   "text": "A closure calendar is not used for bookings.",
+   "version": 1,
+   "placeholders": []
   }
  ],
  "context": {
