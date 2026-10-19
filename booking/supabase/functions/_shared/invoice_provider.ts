@@ -16,7 +16,7 @@ export interface NormalizedInvoice {
   due_date: string;
   reference?: string | null;
   currency: string;
-  lines: { description: string; quantity: number; unit: string; unit_price_net: number; vat_rate: number }[];
+  lines: { description: string; quantity: number; unit: string; unit_price_net: number; vat_rate: number; unit_price_gross?: number | null; price_basis?: "net" | "gross" | null }[];
   notes?: string | null;
 }
 

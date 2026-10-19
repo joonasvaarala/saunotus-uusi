@@ -133,6 +133,22 @@ Deno.test("laskurunko: sähköposti, verkkolasku, numero ja viite", () => {
   assert(half.blockers.includes("bank_account"));
   const unit = buildProcountorInvoice(invoice({ lines: [{ description: "X", quantity: 1, unit: "kori", unit_price_net: 1, vat_rate: 25.5 }] }), { vatStatus: "1", bankAccount: "FI21" });
   assert(unit.errors.includes("unknown_unit"));
+
+  const gross = buildProcountorInvoice(invoice({
+    lines: [{ description: "Sauna", quantity: 1, unit: "kpl", unit_price_net: 51, unit_price_gross: 64, price_basis: "gross", vat_rate: 25.5 }],
+  }), { vatStatus: "1", bankAccount: "FI21" });
+  assertEquals((gross.request?.extraInfo as { unitPricesIncludeVat: boolean }).unitPricesIncludeVat, true);
+  assertEquals((gross.request?.invoiceRows as { unitPrice: number }[])[0].unitPrice, 64);
+
+  const mixed = buildProcountorInvoice(invoice({
+    lines: [
+      { description: "A", quantity: 1, unit: "kpl", unit_price_net: 51, unit_price_gross: 64, price_basis: "gross", vat_rate: 25.5 },
+      { description: "B", quantity: 1, unit: "kpl", unit_price_net: 100, unit_price_gross: 125.5, price_basis: "net", vat_rate: 25.5 },
+    ],
+  }), { vatStatus: "1", bankAccount: "FI21" });
+  assertEquals((mixed.request?.extraInfo as { unitPricesIncludeVat: boolean }).unitPricesIncludeVat, false);
+  assertEquals((mixed.request?.invoiceRows as { unitPrice: number }[])[0].unitPrice, 51);
+  assertEquals((mixed.request?.invoiceRows as { unitPrice: number }[])[1].unitPrice, 100);
 });
 
 function fakeDb(handlers: Record<string, (a?: any) => any>): { db: Db; calls: { fn: string; args: any }[] } {

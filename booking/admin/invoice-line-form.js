@@ -2,7 +2,7 @@
 import { h, money } from './ui.js';
 import { icon } from './icons.js';
 import {
-  UNITS, amountsForLine, catalogPriceString, convertPriceString, formatRateFi,
+  UNITS, amountsForLine, catalogPriceString, formatFiScaled, formatRateFi,
   lineToPayload, rateTenthsOf, suggestLines, summarize, validateLine,
 } from './invoice-lines.js';
 
@@ -17,31 +17,31 @@ function euro(cents) {
   return money(Number(cents) / 100);
 }
 
+function lineAmounts(ln) {
+  return amountsForLine({
+    quantity: ln.quantity,
+    priceNet: ln.price_net,
+    priceGross: ln.price_gross,
+    vatRate: ln.vat_rate,
+    basis: ln.basis === 'net' ? 'net' : 'gross',
+  });
+}
+
 export function mountInvoiceLines({ rates, products, tx }) {
   const active = (rates || []).filter((r) => r && r.active !== false);
   const defRate = active.length ? String(active.reduce((a, b) => (Number(b.rate) > Number(a.rate) ? b : a)).rate) : '';
-  const state = { includeVat: true, showErrors: false, lines: [blank()] };
+  const state = { showErrors: false, lines: [blank()] };
   const lineBox = h('div', { class: 'inv-lines', 'data-testid': 'invoice-lines' });
   const totals = h('div', { class: 'inv-totals', 'data-testid': 'invoice-totals' });
-  const toggle = h('input', { type: 'checkbox', checked: true, 'data-testid': 'invoice-prices-include', onchange: (e) => setInclude(e.target.checked) });
   const block = h('div', { class: 'inv-lineblock' },
     h('h3', { class: 'inv-lines-h', text: tx('ui.admin.invoices.lines') }),
-    h('label', { class: 'check' }, toggle, h('span', { text: tx('ui.admin.invoices.prices_include') })),
+    h('p', { class: 'inv-price-note', text: tx('ui.admin.invoices.price_either') }),
     lineBox,
     h('button', { type: 'button', class: 'inv-add', 'data-testid': 'invoice-add-line', onclick: () => addLine() }, `+ ${tx('ui.admin.invoices.add_line')}`),
     totals);
 
   function blank() {
-    return { description: '', quantity: '1', unit: 'kpl', price: '', vat_rate: defRate, productId: null, touched: {} };
-  }
-  function priceLabel() {
-    return tx(state.includeVat ? 'ui.admin.invoices.price_gross' : 'ui.admin.invoices.price_net');
-  }
-  function setInclude(next) {
-    if (next === state.includeVat) return;
-    for (const ln of state.lines) ln.price = convertPriceString(ln.price, ln.vat_rate, state.includeVat, next);
-    state.includeVat = next;
-    paint();
+    return { description: '', quantity: '1', unit: 'kpl', price_net: '', price_gross: '', basis: 'gross', vat_rate: defRate, productId: null, touched: {} };
   }
   function addLine() {
     state.lines.push(blank());
@@ -55,7 +55,7 @@ export function mountInvoiceLines({ rates, products, tx }) {
     paint();
   }
   function refreshTotals() {
-    const rows = state.lines.map((ln) => amountsForLine({ quantity: ln.quantity, price: ln.price, vatRate: ln.vat_rate, includeVat: state.includeVat }));
+    const rows = state.lines.map((ln) => lineAmounts(ln));
     const s = summarize(rows);
     const vatRows = s.vatByRate.map((r) => h('p', { class: 'inv-tot-row' },
       h('span', { text: `${tx('ui.admin.invoices.vat')} ${formatRateFi(r.rateTenths)}` }),
@@ -72,7 +72,8 @@ export function mountInvoiceLines({ rates, products, tx }) {
   function card(ln, index) {
     const descErr = h('span', { class: 'fld-err', role: 'alert' });
     const qtyErr = h('span', { class: 'fld-err', role: 'alert' });
-    const priceErr = h('span', { class: 'fld-err', role: 'alert' });
+    const netErr = h('span', { class: 'fld-err', role: 'alert' });
+    const grossErr = h('span', { class: 'fld-err', role: 'alert' });
     const vatErr = h('span', { class: 'fld-err', role: 'alert' });
     const sumEl = h('strong', { class: 'inv-line-sum', 'data-testid': 'invoice-line-sum' });
     const list = h('ul', { class: 'inv-suggest', role: 'listbox', hidden: true });
@@ -86,7 +87,7 @@ export function mountInvoiceLines({ rates, products, tx }) {
     });
     const qty = h('input', {
       type: 'text', inputmode: 'decimal', value: ln.quantity, autocomplete: 'off', 'data-testid': 'invoice-line-qty',
-      oninput: (e) => { ln.quantity = e.target.value; sync(); },
+      oninput: (e) => { ln.quantity = e.target.value; refreshPair(); },
       onkeydown: blockEnter,
       onblur: () => { ln.touched.quantity = true; showErr(); },
     });
@@ -94,14 +95,20 @@ export function mountInvoiceLines({ rates, products, tx }) {
       'data-testid': 'invoice-line-unit', onchange: (e) => { ln.unit = e.target.value; },
     }, ...UNITS.map((u) => h('option', { value: u, text: u })));
     unit.value = UNITS.includes(ln.unit) ? ln.unit : 'kpl';
-    const price = h('input', {
-      type: 'text', inputmode: 'decimal', value: ln.price, autocomplete: 'off', 'data-testid': 'invoice-line-price',
-      oninput: (e) => { ln.price = e.target.value; ln.productId = null; sync(); },
+    const priceNet = h('input', {
+      type: 'text', inputmode: 'decimal', value: ln.price_net, autocomplete: 'off', 'data-testid': 'invoice-line-price-net',
+      oninput: (e) => applySource('net', e.target.value),
       onkeydown: blockEnter,
-      onblur: () => { ln.touched.price = true; showErr(); },
+      onblur: () => { ln.touched.price_net = true; showErr(); },
+    });
+    const priceGross = h('input', {
+      type: 'text', inputmode: 'decimal', value: ln.price_gross, autocomplete: 'off', 'data-testid': 'invoice-line-price-gross',
+      oninput: (e) => applySource('gross', e.target.value),
+      onkeydown: blockEnter,
+      onblur: () => { ln.touched.price_gross = true; showErr(); },
     });
     const vat = h('select', {
-      class: 'inv-vat', 'data-testid': 'invoice-line-vat', onchange: (e) => { ln.vat_rate = e.target.value; sync(); showErr(); },
+      class: 'inv-vat', 'data-testid': 'invoice-line-vat', onchange: (e) => { ln.vat_rate = e.target.value; refreshPair(); showErr(); },
     }, ...active.map((r) => h('option', { value: String(r.rate), text: r.label || formatRateFi(rateTenthsOf(r.rate) || 0n) })));
     if (defRate || ln.vat_rate) vat.value = String(ln.vat_rate || defRate);
     ln.vat_rate = vat.value;
@@ -175,32 +182,65 @@ export function mountInvoiceLines({ rates, products, tx }) {
       desc.value = ln.description;
       const rate = active.find((r) => rateTenthsOf(r.rate) === rateTenthsOf(p.vat_rate));
       if (rate) { ln.vat_rate = String(rate.rate); vat.value = ln.vat_rate; }
-      ln.price = catalogPriceString(p.price, ln.vat_rate, state.includeVat);
-      price.value = ln.price;
+      ln.basis = 'gross';
+      ln.price_gross = catalogPriceString(p.price);
+      priceGross.value = ln.price_gross;
+      const a = lineAmounts(ln);
+      ln.price_net = a ? formatFiScaled(a.net10000, 4, 2) : '';
+      priceNet.value = ln.price_net;
       list.hidden = true;
       desc.setAttribute('aria-expanded', 'false');
       ln.touched.description = true;
-      ln.touched.price = true;
+      ln.touched.price_gross = true;
       sync();
       showErr();
       qty.focus();
     }
+    function applySource(which, raw) {
+      ln.basis = which;
+      ln.productId = null;
+      if (which === 'net') ln.price_net = raw;
+      else ln.price_gross = raw;
+      const a = lineAmounts(ln);
+      if (a && which === 'gross') {
+        ln.price_net = formatFiScaled(a.net10000, 4, 2);
+        priceNet.value = ln.price_net;
+      } else if (a && which === 'net') {
+        ln.price_gross = formatFiScaled(a.gross10000, 4, 2);
+        priceGross.value = ln.price_gross;
+      }
+      sumEl.textContent = a ? euro(a.grossCents) : '–';
+      refreshTotals();
+    }
+    function refreshPair() {
+      const a = lineAmounts(ln);
+      if (a && ln.basis === 'net') {
+        ln.price_gross = formatFiScaled(a.gross10000, 4, 2);
+        priceGross.value = ln.price_gross;
+      } else if (a) {
+        ln.price_net = formatFiScaled(a.net10000, 4, 2);
+        priceNet.value = ln.price_net;
+      }
+      sumEl.textContent = a ? euro(a.grossCents) : '–';
+      refreshTotals();
+    }
     function sync() {
-      const a = amountsForLine({ quantity: ln.quantity, price: ln.price, vatRate: ln.vat_rate, includeVat: state.includeVat });
+      const a = lineAmounts(ln);
       sumEl.textContent = a ? euro(a.grossCents) : '–';
       refreshTotals();
     }
     function showErr() {
-      const errs = validateLine({ description: ln.description, quantity: ln.quantity, price: ln.price, vatRate: ln.vat_rate, rates: active });
+      const errs = validateLine({ description: ln.description, quantity: ln.quantity, priceNet: ln.price_net, priceGross: ln.price_gross, vatRate: ln.vat_rate, rates: active, basis: ln.basis });
       apply(desc, descErr, 'description', errs.description);
       apply(qty, qtyErr, 'quantity', errs.quantity);
-      apply(price, priceErr, 'price', errs.price);
+      apply(priceNet, netErr, 'price_net', errs.price_net);
+      apply(priceGross, grossErr, 'price_gross', errs.price_gross);
       apply(vat, vatErr, 'vat', errs.vat);
     }
     function apply(input, errEl, key, code) {
       const on = Boolean((state.showErrors || ln.touched[key]) && code);
       if (on) input.setAttribute('aria-invalid', 'true'); else input.removeAttribute('aria-invalid');
-      errEl.textContent = on ? tx(ERR[key]) : '';
+      errEl.textContent = on ? tx(ERR[code] || ERR.price) : '';
     }
     sync();
     showErr();
@@ -209,8 +249,10 @@ export function mountInvoiceLines({ rates, products, tx }) {
       h('div', { class: 'inv-nums' },
         h('label', { class: 'fld' }, h('span', { text: tx('ui.admin.invoices.qty') }), qty, qtyErr),
         h('label', { class: 'fld' }, h('span', { text: tx('ui.admin.invoices.unit') }), unit),
-        h('label', { class: 'fld' }, h('span', { text: priceLabel() }), price, priceErr),
         h('label', { class: 'fld' }, h('span', { text: tx('ui.admin.invoices.vat_pct') }), vat, vatErr)),
+      h('div', { class: 'inv-prices' },
+        h('label', { class: 'fld' }, h('span', { text: tx('ui.admin.invoices.unit_net') }), priceNet, netErr),
+        h('label', { class: 'fld' }, h('span', { text: tx('ui.admin.invoices.unit_gross') }), priceGross, grossErr)),
       h('div', { class: 'inv-line-foot' },
         h('p', { class: 'inv-line-sumline' }, h('span', { text: tx('ui.admin.invoices.line_sum') }), sumEl),
         h('button', { type: 'button', class: 'icon-btn', 'aria-label': tx('ui.admin.invoices.remove_line'), 'data-testid': 'invoice-line-remove', onclick: () => remove(index) }, icon('trash', 22))));
@@ -222,22 +264,32 @@ export function mountInvoiceLines({ rates, products, tx }) {
     validateAndPayload() {
       state.showErrors = true;
       for (const ln of state.lines) {
+        const a = lineAmounts(ln);
+        if (a && ln.basis === 'net') ln.price_gross = formatFiScaled(a.gross10000, 4, 2);
+        else if (a) ln.price_net = formatFiScaled(a.net10000, 4, 2);
         ln.touched.description = true;
         ln.touched.quantity = true;
-        ln.touched.price = true;
+        ln.touched.price_net = true;
+        ln.touched.price_gross = true;
         ln.touched.vat = true;
       }
-      const all = state.lines.map((ln) => validateLine({ description: ln.description, quantity: ln.quantity, price: ln.price, vatRate: ln.vat_rate, rates: active }));
+      const all = state.lines.map((ln) => validateLine({ description: ln.description, quantity: ln.quantity, priceNet: ln.price_net, priceGross: ln.price_gross, vatRate: ln.vat_rate, rates: active, basis: ln.basis }));
       const bad = all.findIndex((e) => Object.keys(e).length);
       paint();
       if (bad >= 0) {
         const cardEl = lineBox.querySelectorAll('[data-testid=invoice-line]')[bad];
         const key = Object.keys(all[bad])[0];
-        const sel = { description: '[data-testid=invoice-line-desc]', quantity: '[data-testid=invoice-line-qty]', price: '[data-testid=invoice-line-price]', vat: '[data-testid=invoice-line-vat]' }[key];
+        const sel = {
+          description: '[data-testid=invoice-line-desc]',
+          quantity: '[data-testid=invoice-line-qty]',
+          price_net: '[data-testid=invoice-line-price-net]',
+          price_gross: '[data-testid=invoice-line-price-gross]',
+          vat: '[data-testid=invoice-line-vat]',
+        }[key];
         cardEl?.querySelector(sel)?.focus();
         return null;
       }
-      return state.lines.map((ln) => lineToPayload(ln, state.includeVat));
+      return state.lines.map((ln) => lineToPayload(ln));
     },
   };
 }

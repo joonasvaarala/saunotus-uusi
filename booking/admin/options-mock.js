@@ -2,7 +2,7 @@
 // sopimuksen §14/§15 mukaan, rivit samassa muodossa kuin migraatiossa booking_50). KEKSITTYÄ DATAA: mikään ei mene verkkoon eikä tallennu (tila on vain muistissa).
 // Puhdas moduuli (ei DOM:ia) → node --test voi ajaa sen. Tuntematon RPC → virhe (ei koskaan verkkokutsua).
 import { fiReference, validBusinessId, validOvt, validOperator, normBusinessId, normOvt } from '../shop/src/invoice-validate.js';
-import { invoiceLineAmounts } from './invoice-lines.js';
+import { storedLineFromInput } from './invoice-lines.js';
 const TZ = 'Europe/Helsinki';
 const todayHel = (now = new Date()) => now.toLocaleDateString('sv-SE', { timeZone: TZ });
 const addDays = (ds, n) => { const d = new Date(`${ds}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
@@ -654,7 +654,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       const lines = (p.lines || []).map((l, i) => {
         const rate = Number(l.vat_rate);
         if (!st.vatRates.some((r) => r.active && r.rate === rate)) throw err('invalid_vat', 'ALV-kanta ei ole käytössä');
-        const calc = invoiceLineAmounts(l.quantity, l.unit_price_net, l.vat_rate);
+        const calc = storedLineFromInput({ quantity: l.quantity, unitPriceNet: l.unit_price_net, unitPriceGross: l.unit_price_gross, vatRate: l.vat_rate, priceBasis: l.price_basis === 'gross' ? 'gross' : 'net' });
         if (!calc) throw err('invalid_lines', 'Tarkista rivit');
         return { line_no: i + 1, description: l.description, unit: l.unit || 'kpl', ...calc };
       });
@@ -705,7 +705,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       need('invoices.manage');
       const inv = st.invoices.find((i) => i.id === a.p_id);
       if (!inv || inv.kind !== 'debit' || !['sent', 'paid', 'overdue'].includes(inv.status)) throw err('invalid_status', 'Hyvitys tehdään lähetetystä laskusta');
-      const credit = { ...inv, id: st.invoices.length + 1, kind: 'credit', status: 'draft', invoice_no: null, reference_no: null, credit_of_id: inv.id, lines: inv.lines.map((l) => ({ ...l, quantity: l.quantity, unit_price_net: -l.unit_price_net, line_net: -l.line_net, line_vat: -l.line_vat, line_gross: -l.line_gross })), total_gross: -inv.total_gross, dispatch_status: 'none' };
+      const credit = { ...inv, id: st.invoices.length + 1, kind: 'credit', status: 'draft', invoice_no: null, reference_no: null, credit_of_id: inv.id, lines: inv.lines.map((l) => ({ ...l, quantity: l.quantity, unit_price_net: l.unit_price_net == null ? null : -l.unit_price_net, unit_price_gross: l.unit_price_gross == null ? null : -l.unit_price_gross, line_net: -l.line_net, line_vat: -l.line_vat, line_gross: -l.line_gross })), total_gross: -inv.total_gross, dispatch_status: 'none' };
       st.invoices.push(credit);
       return credit;
     },

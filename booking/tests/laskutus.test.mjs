@@ -15,7 +15,7 @@ import { INVOICE_TEXTS } from '../admin/invoices-texts.js';
 import { ICONS } from '../admin/icons.js';
 import {
   amountsForLine, catalogPriceString, convertPriceString, filterProducts, invoiceLineAmounts,
-  lineToPayload, parseScaled, suggestLines, summarize, validateLine, UNITS,
+  lineToPayload, parseScaled, storedLineFromInput, suggestLines, summarize, validateLine, UNITS,
 } from '../admin/invoice-lines.js';
 
 const root = dirname(fileURLToPath(import.meta.url));
@@ -322,28 +322,33 @@ test('pending-import-21 ja näkymä käyttävät samaa hakua kuin Uusi varaus', 
 });
 
 test('laskurivin sentit vastaavat _invoice_put_lines-kaavaa', () => {
-  const one = amountsForLine({ quantity: '1', price: '18,00', vatRate: '25.5', includeVat: true });
-  assert.deepEqual([Number(one.net10000), Number(one.netCents), Number(one.vatCents), Number(one.grossCents)], [143426, 1434, 366, 1800]);
-  const three = amountsForLine({ quantity: '3', price: '18', vatRate: 25.5, includeVat: true });
+  const one = amountsForLine({ quantity: '1', priceGross: '18,00', vatRate: '25.5', basis: 'gross' });
+  assert.deepEqual([Number(one.net10000), Number(one.netCents), Number(one.vatCents), Number(one.grossCents)], [143400, 1434, 366, 1800]);
+  const three = amountsForLine({ quantity: '3', priceGross: '18', vatRate: 25.5, basis: 'gross' });
   assert.deepEqual([Number(three.netCents), Number(three.vatCents), Number(three.grossCents)], [4303, 1097, 5400]);
-  const net = amountsForLine({ quantity: '2', price: '80', vatRate: '25,5', includeVat: false });
+  const net = amountsForLine({ quantity: '2', priceNet: '80', vatRate: '25,5', basis: 'net' });
   assert.equal(Number(net.grossCents), 20080);
-  const saved = lineToPayload({ description: ' Yleinen saunavuoro ', quantity: '1', unit: 'kpl', price: '18,00', vat_rate: '25.5' }, true);
-  assert.equal(saved.unit_price_net, 14.3426);
-  assert.equal(JSON.stringify(saved.unit_price_net), '14.3426');
+  const saved = lineToPayload({ description: ' Yleinen saunavuoro ', quantity: '1', unit: 'kpl', price_gross: '18,00', vat_rate: '25.5', basis: 'gross' });
+  assert.equal(saved.price_basis, 'gross');
+  assert.equal(saved.unit_price_gross, 18);
+  assert.equal(saved.unit_price_net, 14.34);
   assert.equal(saved.description, 'Yleinen saunavuoro');
   const neg = invoiceLineAmounts(-1, '1.005', 25.5);
   assert.deepEqual([neg.line_net, neg.line_vat, neg.line_gross], [-1.01, -0.26, -1.27]);
   const shelf = invoiceLineAmounts(2, 80, 25.5);
   assert.equal(shelf.line_gross, 200.8);
-  // 25,5 % ei osu jokaiseen senttiin: verollinen 64 € tallentuu rivisummana 64,01 €.
-  const off = amountsForLine({ quantity: '1', price: '64', vatRate: 25.5, includeVat: true });
-  assert.equal(Number(off.grossCents), 6401);
-  assert.equal(catalogPriceString(18, 25.5, true), '18,00');
-  assert.equal(catalogPriceString(18, 25.5, false), '14,3426');
+  const gross64 = storedLineFromInput({ quantity: 1, unitPriceGross: '64,00', vatRate: 25.5, priceBasis: 'gross' });
+  assert.deepEqual([gross64.line_gross, gross64.line_vat, gross64.line_net, gross64.unit_price_net], [64, 13, 51, 51]);
+  const vichy = storedLineFromInput({ quantity: 3, unitPriceGross: '3,50', vatRate: 13.5, priceBasis: 'gross' });
+  assert.deepEqual([vichy.line_gross, vichy.line_vat, vichy.line_net, vichy.unit_price_net], [10.5, 1.25, 9.25, 3.0833]);
+  const net100 = storedLineFromInput({ quantity: 1, unitPriceNet: '100,00', vatRate: 25.5, priceBasis: 'net' });
+  assert.deepEqual([net100.line_net, net100.line_vat, net100.line_gross, net100.price_basis], [100, 25.5, 125.5, 'net']);
+  const zero = storedLineFromInput({ quantity: '2', unitPriceGross: '10', vatRate: 0, priceBasis: 'gross' });
+  assert.deepEqual([zero.line_net, zero.line_vat, zero.line_gross, zero.unit_price_net], [20, 0, 20, 10]);
+  assert.equal(catalogPriceString(18), '18,00');
   assert.equal(convertPriceString('18,00', 25.5, true, false), '14,3426');
   assert.equal(convertPriceString('14,3426', 25.5, false, true), '18,00');
-  const rows = summarize([one, amountsForLine({ quantity: '1', price: '3', vatRate: 13.5, includeVat: true })]);
+  const rows = summarize([one, amountsForLine({ quantity: '1', priceGross: '3', vatRate: 13.5, basis: 'gross' })]);
   assert.equal(Number(rows.netCents), 1434 + 264);
   assert.deepEqual(rows.vatByRate.map((r) => Number(r.rateTenths)), [255, 135]);
   assert.equal(parseScaled('1,5', 3), 1500n);
@@ -351,12 +356,12 @@ test('laskurivin sentit vastaavat _invoice_put_lines-kaavaa', () => {
   assert.equal(parseScaled('-2', 3), -2000n);
   assert.equal(parseScaled('1,2345', 3), null);
   const rates = [{ rate: 25.5, active: true }, { rate: 13.5, active: true }, { rate: 0, active: true }];
-  assert.deepEqual(validateLine({ description: '', quantity: '1', price: '10', vatRate: 25.5, rates }), { description: 'desc' });
-  assert.deepEqual(validateLine({ description: 'X', quantity: '0', price: '10', vatRate: 25.5, rates }), { quantity: 'qty' });
-  assert.deepEqual(validateLine({ description: 'X', quantity: '', price: '10', vatRate: 25.5, rates }), { quantity: 'qty' });
-  assert.deepEqual(validateLine({ description: 'X', quantity: '-1', price: '', vatRate: 25.5, rates }), { price: 'price' });
-  assert.deepEqual(validateLine({ description: 'X', quantity: '-1,5', price: '0', vatRate: 25.5, rates }), {});
-  assert.equal(validateLine({ description: 'X', quantity: '1', price: '-2,5', vatRate: 0, rates }).price, undefined);
+  assert.deepEqual(validateLine({ description: '', quantity: '1', priceGross: '10', vatRate: 25.5, rates, basis: 'gross' }), { description: 'desc' });
+  assert.deepEqual(validateLine({ description: 'X', quantity: '0', priceGross: '10', vatRate: 25.5, rates, basis: 'gross' }), { quantity: 'qty' });
+  assert.deepEqual(validateLine({ description: 'X', quantity: '', priceGross: '10', vatRate: 25.5, rates, basis: 'gross' }), { quantity: 'qty' });
+  assert.deepEqual(validateLine({ description: 'X', quantity: '-1', priceGross: '', priceNet: '', vatRate: 25.5, rates, basis: 'gross' }), { price_net: 'price', price_gross: 'price' });
+  assert.deepEqual(validateLine({ description: 'X', quantity: '-1,5', priceGross: '0', vatRate: 25.5, rates, basis: 'gross' }), {});
+  assert.equal(validateLine({ description: 'X', quantity: '1', priceGross: '-2,5', vatRate: 0, rates, basis: 'gross' }).price_gross, undefined);
   assert.deepEqual(UNITS, ['kpl', 'h', 'pv', 'hlö', 'krt', 'erä']);
   const products = [{ name: 'Yleinen saunavuoro', price: 18, vat_rate: 25.5, active: true }, { name: 'Käsipyyhe', name_en: 'Hand towel', price: 4, vat_rate: 25.5, active: true }, { name: 'Vanha', active: false }];
   assert.equal(filterProducts(products, 'yle')[0].name, 'Yleinen saunavuoro');
@@ -370,9 +375,10 @@ test('laskurivin sentit vastaavat _invoice_put_lines-kaavaa', () => {
   assert.ok(both.products.some((p) => p.name === 'Yleinen saunavuoro'));
   assert.equal(both.freeText, 'sauna');
   assert.equal(suggestLines(products, '  ').freeText, null);
-  const manual = lineToPayload({ description: 'Kuljetus erikseen', quantity: '2', unit: 'kpl', price: '10,50', vat_rate: '13.5' }, true);
+  const manual = lineToPayload({ description: 'Kuljetus erikseen', quantity: '2', unit: 'kpl', price_gross: '10,50', vat_rate: '13.5', basis: 'gross' });
   assert.equal(manual.description, 'Kuljetus erikseen');
   assert.equal(manual.quantity, 2);
+  assert.equal(manual.price_basis, 'gross');
   assert.ok(manual.unit_price_net > 0);
   assert.ok(ICONS.trash);
   const schema = read('supabase/migrations/20261019011400_booking_90_invoices_schema.sql');
@@ -382,6 +388,8 @@ test('laskurivin sentit vastaavat _invoice_put_lines-kaavaa', () => {
   assert.match(schema, /line_gross\s+numeric\(12,2\) not null/);
   const pdf = read('supabase/functions/invoice-pdf/render.ts');
   assert.match(pdf, /l\.description.*l\.quantity.*l\.line_gross/s);
+  assert.match(pdf, /unitPrice\(l\.unit_price_net/);
+  assert.match(pdf, /toFixed\(4\)/);
 });
 
 test('pending-import-22 ja laskurivin lomake', () => {
@@ -429,4 +437,58 @@ test('pending-import-22 ja laskurivin lomake', () => {
   assert.match(css, /\.inv-line\{/);
   assert.match(css, /inv-savebar/);
   assert.doesNotMatch(css, /inv-lines \.row>\*\{flex:1 1 7\.5rem/);
+});
+
+test('pending-import-23 ja hintaperuste booking_113', () => {
+  const rows = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-23.json'), 'utf8'));
+  assert.equal(rows.length, 6);
+  const keys = new Set(rows.map((r) => r.key));
+  assert.deepEqual([...keys].sort(), ['ui.admin.invoices.price_either', 'ui.admin.invoices.unit_gross', 'ui.admin.invoices.unit_net']);
+  for (const r of rows) {
+    assert.equal(r.class, 'normal', r.key);
+    assert.equal(r.kind, 'plain', r.key);
+    assert.ok(r.lang === 'fi' || r.lang === 'en');
+    assert.deepEqual(r.placeholders, []);
+    assert.equal(INVOICE_TEXTS[r.lang][r.key], r.text, `${r.key} ${r.lang}`);
+    assert.equal(r.text.includes('{{'), false, r.key);
+  }
+  for (const lang of ['fi', 'en']) assert.equal(rows.filter((r) => r.lang === lang).length, keys.size);
+  const taken = new Set();
+  for (const f of readdirSync(join(repo, 'content'))) {
+    if (!/^site-texts\.(pending-import(?!-23)|imported)/.test(f) || !f.endsWith('.json')) continue;
+    for (const r of JSON.parse(readFileSync(join(repo, 'content', f), 'utf8'))) taken.add(`${r.key}|${r.lang}`);
+  }
+  const fb = JSON.parse(readFileSync(join(repo, 'content/site-texts.fallback.json'), 'utf8'));
+  const fbRows = Array.isArray(fb) ? fb : fb.texts;
+  for (const r of rows) {
+    assert.equal(taken.has(`${r.key}|${r.lang}`), false, r.key);
+    const hit = fbRows.find((x) => x.key === r.key && x.lang === r.lang);
+    assert.equal(hit?.text, r.text, r.key);
+  }
+  const formJs = read('admin/invoice-line-form.js');
+  assert.match(formJs, /invoice-line-price-net/);
+  assert.match(formJs, /invoice-line-price-gross/);
+  assert.match(formJs, /ui\.admin\.invoices\.unit_net/);
+  assert.match(formJs, /ui\.admin\.invoices\.unit_gross/);
+  assert.doesNotMatch(formJs, /invoice-prices-include/);
+  assert.match(formJs, /suggestLines/);
+  assert.match(formJs, /acceptFree/);
+  const mig = read('supabase/migrations/20261019150000_booking_113_invoice_price_basis.sql');
+  assert.match(mig, /price_basis text not null default 'net'/);
+  assert.match(mig, /round\(v_gross \* v_rate \/ \(100 \+ v_rate\), 2\)/);
+  assert.match(mig, /v_net := v_gross - v_vat/);
+  assert.match(mig, /-l\.unit_price_gross, l\.price_basis/);
+  assert.match(mig, /'price_basis', l\.price_basis/);
+  assert.doesNotMatch(mig, /update booking\.invoice_lines set/);
+  const rb = read('supabase/rollbacks/20261019150000_booking_113_ROLLBACK.sql');
+  assert.match(rb, /drop column if exists price_basis/);
+  assert.match(rb, /v_net := round\(v_qty \* v_price, 2\)/);
+  const sql = read('supabase/tests/invoices/t113_invoice_price_basis.sql');
+  for (const bit of ['64.00', '10.50', '125.50', '200.80', 'returned_sqlstate', 't113_logout', 'Gross 64', '3.50', 'Net 100', 'Zero', '64.01']) {
+    assert.match(sql, new RegExp(bit.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
+  assert.doesNotMatch(sql, /_next_invoice_seq|admin_send_invoice/);
+  const pro = read('supabase/functions/procountor-sync/invoice.ts');
+  assert.match(pro, /unitPricesIncludeVat: pricesIncludeVat/);
+  assert.match(pro, /price_basis === "gross"/);
 });
