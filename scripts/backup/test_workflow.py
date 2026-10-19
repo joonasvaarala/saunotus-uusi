@@ -78,6 +78,12 @@ class WorkflowAndSqlTest(unittest.TestCase):
         self.assertNotIn("sb_secret", sql)
         self.assertIn("drop role backup_reader", rollback)
         self.assertNotRegex(rollback_code.lower(), r"password\s+'")
+        grant_at = rollback_code.lower().find(
+            "grant backup_reader to current_user with inherit true, set false;"
+        )
+        drop_owned_at = rollback_code.lower().find("drop owned by backup_reader;")
+        self.assertGreater(grant_at, -1)
+        self.assertLess(grant_at, drop_owned_at)
         self.assertIn("ops_002_backup_storage_read", storage)
         self.assertIn("20261019140100", storage)
         self.assertNotRegex(storage, r"(?m)^commit;\s*$")

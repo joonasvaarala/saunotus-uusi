@@ -18,6 +18,9 @@ PRIVATE = b"receipt-pdf"
 
 
 class Handler(BaseHTTPRequestHandler):
+    login_authorization = "unset"
+    login_apikey = ""
+
     def log_message(self, fmt, *args):
         return
 
@@ -35,9 +38,14 @@ class Handler(BaseHTTPRequestHandler):
         if self.path != "/auth/v1/token?grant_type=password":
             self._json({"error": "path"}, 404)
             return
+        if self.headers.get("Authorization"):
+            self._json({"error": "login must not send Authorization"}, 401)
+            return
         if self.headers.get("apikey") != "anon-key":
             self._json({"error": "apikey"}, 401)
             return
+        Handler.login_authorization = self.headers.get("Authorization")
+        Handler.login_apikey = self.headers.get("apikey")
         body = json.loads(raw.decode("utf-8") or "{}")
         if body.get("email") != "backup@saunotus.fi" or body.get("password") != "storage-test-only":
             self._json({"error": "login"}, 400)
@@ -113,6 +121,8 @@ class StorageDownloadTest(unittest.TestCase):
                 by_path = {item["path"]: item["sha256"] for item in summary["files"]}
                 self.assertEqual(by_path["a.txt"], hashlib.sha256(PUBLIC).hexdigest())
                 self.assertEqual(summary["private_missing"], [])
+                self.assertIsNone(Handler.login_authorization)
+                self.assertEqual(Handler.login_apikey, "anon-key")
                 self.assertIn("logos", summary["other_buckets"])
                 self.assertTrue(any("logos" in note for note in summary["notes"]))
         finally:

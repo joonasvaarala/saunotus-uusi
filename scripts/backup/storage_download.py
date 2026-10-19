@@ -72,7 +72,6 @@ def sign_in(base: str, anon_key: str, email: str, password: str) -> str:
         f"{base}/auth/v1/token?grant_type=password",
         headers={
             "apikey": anon_key,
-            "Authorization": f"Bearer {anon_key}",
             "Content-Type": "application/json",
         },
         method="POST",

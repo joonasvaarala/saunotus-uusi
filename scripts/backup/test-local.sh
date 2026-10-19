@@ -187,6 +187,8 @@ class H(BaseHTTPRequestHandler):
         body = json.loads(self.rfile.read(n).decode() or "{}")
         if self.path != "/auth/v1/token?grant_type=password":
             self.send_response(404); self.end_headers(); return
+        if self.headers.get("Authorization"):
+            self.send_response(401); self.end_headers(); return
         if body.get("email") == "backup@saunotus.fi" and body.get("password") == "storage-test-only" and self.headers.get("apikey") == "test-anon":
             self._json({"access_token": "user-token"})
             return

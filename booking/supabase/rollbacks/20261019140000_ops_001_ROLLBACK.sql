@@ -43,5 +43,7 @@ begin
 end
 $m$;
 
+-- PG17: roolin luojalla on vain admin-oikeus, ei oikeutta pudottaa roolin omistamia objekteja.
+grant backup_reader to current_user with inherit true, set false;
 drop owned by backup_reader;
 drop role backup_reader;
