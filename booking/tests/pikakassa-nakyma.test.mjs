@@ -240,6 +240,54 @@ test('pikapainikkeet ovat ylimpänä, muokkaus alhaalla ja kiinni', async () => 
   assert.ok(q(root, 'pos-remove-101'));
 });
 
+test('maksurivipalkki on matala rivi ja maara on samalla rivilla', async () => {
+  const root = await mount();
+  let btn = q(root, 'pos-lines');
+  assert.equal(btn.tagName, 'BUTTON');
+  assert.equal(btn.classList.contains('pos-lines-btn'), true);
+  assert.equal(btn.classList.contains('pos-btn'), false);
+  assert.equal(btn.getAttribute('aria-expanded'), 'false');
+  assert.equal(btn.getAttribute('aria-label'), 'Maksurivit 0');
+  const kids = btn.children.filter((c) => c.nodeType === 1);
+  assert.equal(kids.length, 2);
+  assert.equal(kids[0].className, 'pos-lines-label');
+  assert.equal(kids[0].textContent, 'Maksurivit');
+  assert.equal(kids[1].className, 'pos-lines-count');
+  assert.equal(kids[1].classList.contains('pos-price'), false);
+  assert.equal(kids[1].textContent, '0');
+  assert.equal(q(root, 'pos-product-101').classList.contains('pos-btn'), true);
+  q(root, 'pos-product-101').click();
+  q(root, 'pos-product-101').click();
+  btn = q(root, 'pos-lines');
+  assert.equal(btn.getAttribute('aria-expanded'), 'false');
+  assert.equal(btn.getAttribute('aria-label'), 'Maksurivit 2');
+  assert.equal(btn.children.filter((c) => c.nodeType === 1)[1].textContent, '2');
+  assert.equal(q(root, 'pos-panel').textContent.includes('Vichy'), false);
+  btn.click();
+  btn = q(root, 'pos-lines');
+  assert.equal(btn.getAttribute('aria-expanded'), 'true');
+  assert.match(q(root, 'pos-panel').textContent, /Vichy/);
+  btn.click();
+  assert.equal(q(root, 'pos-lines').getAttribute('aria-expanded'), 'false');
+  const css = read('../admin/admin.css');
+  const bar = css.match(/\.pos-lines-btn\{[^}]+\}/)[0];
+  const prod = css.match(/\.pos-btn\{[^}]+\}/)[0];
+  const pill = css.match(/\.pos-lines-count\{[^}]+\}/)[0];
+  assert.match(bar, /flex-direction:row/);
+  assert.match(bar, /justify-content:space-between/);
+  assert.equal(bar.includes('88px'), false);
+  assert.ok(Number(bar.match(/padding:(\d+)px/)[1]) <= 8);
+  assert.ok(Number(bar.match(/min-height:(\d+)px/)[1]) <= 44);
+  assert.match(prod, /flex-direction:column/);
+  assert.match(prod, /min-height:88px/);
+  assert.ok(Number(pill.match(/font-size:(\d+)px/)[1]) <= 15);
+  assert.match(pill, /border-radius:999px/);
+  const src = read('../admin/pos-screen.js');
+  assert.match(src, /class: 'pos-lines-btn'/);
+  assert.equal(src.includes('pos-btn pos-lines-btn'), false);
+  assert.match(src, /aria-expanded/);
+});
+
 test('tyhjä kassa ei avaa muokkausosioita itsestään', async () => {
   const mock = createAdminMock({ delay: 0 });
   const root = await mount(async (name, args) => (name === 'admin_pos_catalog' ? [] : mock.rpc(name, args)));
