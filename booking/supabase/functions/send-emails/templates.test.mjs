@@ -44,7 +44,13 @@ for (const locale of ['fi', 'en']) for (const kind of KINDS) {
     assert.ok(m.html.startsWith('<!doctype html><html lang="' + locale + '">'));
     assert.ok(en ? /Hello Matti,/.test(m.text) && /Kind regards,/.test(m.text) : /Hei Matti,/.test(m.text) && /Ystävällisin terveisin,/.test(m.text), 'tervehdys/allekirjoitus kielellä');
     assert.ok(en ? !/Ystävällisin|Kiitos|Tilaus\b/.test(m.text) : !/Kind regards|Thank you|\bOrder\b/.test(m.text), 'ei sekakieltä');
-    assert.ok(m.text.includes('Havuhattu Oy') && m.html.includes('Havuhattu Oy') && m.html.includes('Sipoonjoen Perinnesauna') && m.html.includes('Hindsbyntie 124'));
+    if (kind === 'payment_link') {
+      assert.ok(m.text.includes('Tapio') && m.text.includes('Sipoonjoen Perinnesauna') && !m.text.includes('Havuhattu Oy'), 'maksulinkki allekirjoitetaan Tapiolla');
+      assert.ok(m.html.includes('Tapio') && m.html.includes('Havuhattu Oy') && m.html.includes('Sipoonjoen Perinnesauna') && m.html.includes('Hindsbyntie 124'));
+    } else {
+      assert.ok(!m.text.includes('Tapio'), `${kind}: Tapio vain maksulinkissä`);
+      assert.ok(m.text.includes('Havuhattu Oy') && m.html.includes('Havuhattu Oy') && m.html.includes('Sipoonjoen Perinnesauna') && m.html.includes('Hindsbyntie 124'));
+    }
     // linkit
     const links = hrefs(m.html);
     assert.ok(links.every((h) => /^(https:\/\/[^\s"]+|mailto:[^\s"]+|tel:\+?\d+)$/.test(h)), `virheellinen linkki: ${links}`);
@@ -78,6 +84,8 @@ test('maksulinkki: summa, linkki ja voimassaolo', { skip }, () => {
   const fi = R('payment_link', base('fi'));
   assert.equal(fi.subject, 'Maksulinkki tilaukseen 15321 – Sipoonjoen Perinnesauna');
   assert.ok(fi.text.includes('98,50 €') && fi.text.includes(PAY_URL) && /voimassa 14\.11\.2026 asti/.test(fi.text));
+  assert.ok(fi.text.includes('Tapio') && fi.text.includes('Sipoonjoen Perinnesauna') && !fi.text.includes('Havuhattu Oy'));
+  assert.ok(!R('order_confirmation', base('fi')).text.includes('Tapio'));
   const en = R('payment_link', base('en'));
   assert.ok(en.text.includes('98.50 €') && /valid until 14\/11\/2026/.test(en.text) && en.html.includes('Pay now'));
   const d = base('fi'); d.payment.link_url = null; const nolink = R('payment_link', d);

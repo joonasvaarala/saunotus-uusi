@@ -166,6 +166,7 @@ const texts = await import(href('../admin/pos-texts.js'));
 
 const read = (rel) => readFileSync(new URL(rel, import.meta.url), 'utf8');
 const pending17 = JSON.parse(read('../../content/site-texts.pending-import-17.json'));
+const pending18 = JSON.parse(read('../../content/site-texts.pending-import-18.json'));
 const pending16 = JSON.parse(read('../../content/site-texts.pending-import-16.json'));
 const pending12 = JSON.parse(read('../../content/site-texts.pending-import-12.json'));
 
@@ -275,6 +276,7 @@ test('Maksa avaa popupin; Escape, tausta ja sulku palauttavat fokuksen ja scroll
   assert.deepEqual(radios.map((n) => n.value), ['payment_link', 'mobilepay', 'card_terminal']);
   assert.equal(radios.find((n) => n.value === 'card_terminal').hasAttribute('disabled'), true);
   assert.equal(radios.find((n) => n.value === 'mobilepay').hasAttribute('disabled'), false);
+  assert.equal(radios.find((n) => n.value === 'payment_link').hasAttribute('disabled'), false);
   assert.equal(all(root).some((n) => n.getAttribute('name') === 'tender'), false);
   assert.equal(dlg.textContent.includes('Käteinen'), false);
   assert.match(dlg.textContent, /Tulossa/);
@@ -326,13 +328,21 @@ test('maksutapa vahvistetaan popupissa; MobilePayn puhelin ja maksulinkki pysyv�
   globalThis.clearInterval = () => {};
   try {
     dlg = document.getElementById('pos-pay-dialog');
+    const email = q(dlg, 'pos-email');
+    assert.equal(email.getAttribute('type'), 'email');
+    assert.equal(email.getAttribute('inputmode'), 'email');
+    assert.equal(email.getAttribute('autocomplete'), 'email');
+    email.value = 'asiakas@example.test';
+    email.dispatch('input');
     q(dlg, 'pos-confirm').click();
     await flush();
     const paid = document.getElementById('pos-pay-dialog');
     assert.match(paid.textContent, /Maksettu/);
     const checkout = mock.state.calls.find((c) => c.name === 'admin_pos_checkout');
     assert.deepEqual(checkout.args.p_items, [{ product_id: 101, quantity: 1 }]);
-    assert.equal(mock.state.calls.some((c) => c.name === 'admin_create_payment_link'), true);
+    assert.equal(checkout.args.p_email, 'asiakas@example.test');
+    assert.equal(mock.state.calls.some((c) => c.name === 'admin_create_payment_link'), false);
+    assert.equal(mock.state.calls.some((c) => c.name === 'admin_pos_send_link'), true);
     assert.equal(mock.state.calls.some((c) => c.name === 'admin_pos_mock_tender'), true);
     assert.equal(all(root).some((n) => n.getAttribute('name') === 'tender'), false);
   } finally {
@@ -356,6 +366,9 @@ test('kaksi peräkkäistä vahvistusta luo yhden kassatilauksen', async () => {
   let dlg = document.getElementById('pos-pay-dialog');
   all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'payment_link').dispatch('change');
   dlg = document.getElementById('pos-pay-dialog');
+  const email = q(dlg, 'pos-email');
+  email.value = 'asiakas@example.test';
+  email.dispatch('input');
   const first = q(dlg, 'pos-confirm');
   first.click();
   first.click();
@@ -370,6 +383,7 @@ test('kaksi peräkkäistä vahvistusta luo yhden kassatilauksen', async () => {
   release();
   await flush();
   assert.equal(mock.state.calls.filter((c) => c.name === 'admin_pos_checkout').length, 1);
+  assert.equal(mock.state.calls.filter((c) => c.name === 'admin_pos_send_link').length, 1);
 });
 
 test('mobilepay-startin virhe peruu tilauksen ja näyttää virheen dialogissa', async () => {
@@ -410,6 +424,123 @@ test('mobilepay-startin virhe peruu tilauksen ja näyttää virheen dialogissa',
   }
 });
 
+test('maksulinkki vaatii osoitteen, näyttää jonon ja uudelleenlähetys ei perua tilausta', async () => {
+  const prev = globalThis.location.search;
+  globalThis.location.search = '';
+  const mock = createAdminMock({ delay: 0 });
+  let tick = null;
+  const origSet = globalThis.setInterval;
+  const origClear = globalThis.clearInterval;
+  globalThis.setInterval = (fn) => { tick = fn; return 1; };
+  globalThis.clearInterval = () => {};
+  try {
+    const root = await mount(mock.rpc);
+    q(root, 'pos-product-101').click();
+    q(root, 'pos-pay').click();
+    let dlg = document.getElementById('pos-pay-dialog');
+    all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'payment_link').dispatch('change');
+    dlg = document.getElementById('pos-pay-dialog');
+    q(dlg, 'pos-confirm').click();
+    await flush();
+    dlg = document.getElementById('pos-pay-dialog');
+    assert.match(q(dlg, 'pos-pay-error').textContent, /Anna sähköpostiosoite/);
+    assert.equal(mock.state.calls.some((c) => c.name === 'admin_pos_checkout'), false);
+    let inp = q(dlg, 'pos-email');
+    inp.value = 'ei-kelpaa';
+    inp.dispatch('input');
+    q(dlg, 'pos-confirm').click();
+    await flush();
+    dlg = document.getElementById('pos-pay-dialog');
+    assert.match(q(dlg, 'pos-pay-error').textContent, /Tarkista sähköpostiosoite/);
+    assert.equal(mock.state.calls.some((c) => c.name === 'admin_pos_checkout'), false);
+    inp = q(dlg, 'pos-email');
+    inp.value = 'asiakas@example.test';
+    inp.dispatch('input');
+    q(dlg, 'pos-confirm').click();
+    await flush();
+    dlg = document.getElementById('pos-pay-dialog');
+    assert.match(q(dlg, 'pos-mail').textContent, /jonossa/);
+    assert.match(q(dlg, 'pos-mail-to').textContent, /a\*\*\*@e\*\*\*\.test/);
+    assert.equal(dlg.textContent.includes('asiakas@example.test'), false);
+    assert.match(dlg.textContent, /maksa/i);
+    assert.equal(q(dlg, 'pos-mail-resend'), null);
+    assert.equal(mock.state.calls.some((c) => c.name === 'admin_create_payment_link'), false);
+    assert.equal(mock.state.posMail.length, 1);
+    mock.state.posMail[0].status = 'dry_run';
+    await tick();
+    await flush();
+    dlg = document.getElementById('pos-pay-dialog');
+    assert.match(q(dlg, 'pos-mail').textContent, /ei lähde oikeasti/);
+    mock.state.posMail[0].status = 'failed';
+    await tick();
+    await flush();
+    dlg = document.getElementById('pos-pay-dialog');
+    assert.equal(q(dlg, 'pos-mail-resend').textContent, 'Lähetä uudelleen');
+    q(dlg, 'pos-mail-resend').click();
+    await flush();
+    dlg = document.getElementById('pos-pay-dialog');
+    assert.match(q(dlg, 'pos-mail-error').textContent, /Liian monta/);
+    assert.equal(mock.state.posOrders[0].status, 'pending');
+    assert.equal(mock.state.calls.filter((c) => c.name === 'admin_pos_void').length, 0);
+    assert.equal(mock.state.posMail.length, 1);
+    mock.state.posMail[0].created = Date.now() - 120000;
+    q(dlg, 'pos-mail-resend').click();
+    await flush();
+    assert.equal(mock.state.calls.filter((c) => c.name === 'admin_pos_send_link' && c.args.p_resend === true).length, 2);
+    assert.equal(mock.state.posMail.length, 2);
+    assert.equal(mock.state.posOrders[0].status, 'pending');
+  } finally {
+    globalThis.setInterval = origSet;
+    globalThis.clearInterval = origClear;
+    globalThis.location.search = prev;
+  }
+});
+
+test('maksulinkin virhe peruu tilauksen ja jättää popupin auki', async () => {
+  const prev = globalThis.location.search;
+  globalThis.location.search = '';
+  const mock = createAdminMock({ delay: 0 });
+  const rpc = async (name, args) => {
+    if (name === 'admin_pos_send_link') throw Object.assign(new Error('linkki epaonnistui'), { code: 'link_down' });
+    return mock.rpc(name, args);
+  };
+  try {
+    const root = await mount(rpc);
+    q(root, 'pos-product-101').click();
+    q(root, 'pos-pay').click();
+    let dlg = document.getElementById('pos-pay-dialog');
+    all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'payment_link').dispatch('change');
+    dlg = document.getElementById('pos-pay-dialog');
+    const inp = q(dlg, 'pos-email');
+    inp.value = 'asiakas@example.test';
+    inp.dispatch('input');
+    q(dlg, 'pos-confirm').click();
+    await flush();
+    dlg = document.getElementById('pos-pay-dialog');
+    assert.match(q(dlg, 'pos-pay-error').textContent, /linkki epaonnistui/);
+    assert.ok(q(dlg, 'pos-confirm'));
+    assert.equal(q(dlg, 'pos-status'), null);
+    assert.equal(mock.state.posOrders[0].status, 'cancelled');
+    assert.equal(mock.state.calls.filter((c) => c.name === 'admin_pos_void').length, 1);
+    assert.equal(mock.state.calls.some((c) => c.name === 'admin_create_payment_link'), false);
+  } finally {
+    globalThis.location.search = prev;
+  }
+});
+
+test('verkkomaksu pois paalta estaa maksulinkin', async () => {
+  const mock = createAdminMock({ delay: 0 });
+  mock.state.posModes.vismapay_mode = 'off';
+  const root = await mount(mock.rpc);
+  q(root, 'pos-product-101').click();
+  q(root, 'pos-pay').click();
+  const dlg = document.getElementById('pos-pay-dialog');
+  const link = all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'payment_link');
+  assert.equal(link.hasAttribute('disabled'), true);
+  assert.match(q(dlg, 'pos-vismapay-off').textContent, /maksulinkillä ei voi maksaa/);
+  assert.equal(q(dlg, 'pos-email'), null);
+});
+
 test('pending-import-17: vain uudet ui.pos-avaimet, FI+EN, normal, ei numeroita', () => {
   const old = new Set([...pending12, ...pending16].map((r) => `${r.key}|${r.lang}`));
   const seen = new Set();
@@ -447,4 +578,43 @@ test('pending-import-17: vain uudet ui.pos-avaimet, FI+EN, normal, ei numeroita'
   assert.match(css, /\.pos-overlay\{position:fixed/);
   assert.match(css, /\.pos-edit-link\{/);
   assert.match(css, /html\.pos-modal-open,body\.pos-modal-open\{overflow:hidden/);
+});
+
+test('pending-import-18: maksulinkin tekstit FI+EN, normal, ei numeroita, kaytossa nakymassa', () => {
+  const old = new Set([...pending12, ...pending16, ...pending17].map((r) => `${r.key}|${r.lang}`));
+  const seen = new Set();
+  const ui = pending18.filter((r) => r.key.startsWith('ui.pos.'));
+  assert.equal(ui.length, Object.keys(texts.POS_LINK_TEXTS.fi).length * 2);
+  for (const row of ui) {
+    assert.match(row.key, /^ui\.pos\.[a-z0-9_]+$/);
+    assert.ok(['fi', 'en'].includes(row.lang));
+    assert.equal(row.class, 'normal');
+    assert.equal(row.kind, 'plain');
+    assert.ok(row.max_len >= row.text.length);
+    assert.deepEqual(row.placeholders, []);
+    assert.equal(/\d|€|@|https?:|www\./i.test(row.text), false);
+    assert.equal(old.has(`${row.key}|${row.lang}`), false);
+    assert.equal(seen.has(`${row.key}|${row.lang}`), false);
+    seen.add(`${row.key}|${row.lang}`);
+  }
+  for (const key of Object.keys(texts.POS_LINK_TEXTS.fi)) {
+    assert.equal(texts.POS_TEXTS.fi[key], undefined);
+    assert.equal(texts.POS_PAY_TEXTS.fi[key], undefined);
+    for (const lang of ['fi', 'en']) {
+      const row = ui.find((r) => r.key === `ui.pos.${key}` && r.lang === lang);
+      assert.ok(row, key + ' ' + lang);
+      assert.equal(row.text, texts.POS_LINK_TEXTS[lang][key]);
+      assert.equal(texts.posText(key, lang), texts.POS_LINK_TEXTS[lang][key]);
+    }
+  }
+  const src = read('../admin/pos-screen.js');
+  for (const key of Object.keys(texts.POS_LINK_TEXTS.fi)) assert.match(src, new RegExp(`t\\('${key}'\\)`));
+  assert.equal(src.includes('admin_create_payment_link'), false);
+  assert.match(src, /admin_pos_send_link/);
+  assert.match(src, /admin_pos_email_status/);
+  const pages = read('../../.github/workflows/pages.yml');
+  assert.match(pages, /t110 \(booking\/supabase\/tests\/pos\/t110_pos_link_email\.sql\) ei ole tässä ajossa/);
+  const sign = pending18.filter((r) => r.key === 'email.payment_link.sign_name');
+  assert.deepEqual(sign.map((r) => r.text), ['Tapio', 'Tapio']);
+  assert.ok(sign.every((r) => r.class === 'normal' && r.lang && r.max_len === 200));
 });

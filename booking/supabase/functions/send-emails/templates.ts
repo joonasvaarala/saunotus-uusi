@@ -332,9 +332,11 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const title = X("email.payment_link.title");
       const lab = X("email.payment_link.amount_label");
       const pay = X("email.payment_link.pay_button");
-      const text = textBlock(hello, intro, url && `${title}:\n${url}`, exp, ob.text, contact, sign) + "\n";
+      const linkSign = `${X("email.common.closing")}\n${X("email.payment_link.sign_name")}\n${SELLER}`;
+      const linkTail = `${p(esc(contact), `color:${MUTED};font-size:13px`)}${p(esc(linkSign).replace(/\n/g, "<br>"))}`;
+      const text = textBlock(hello, intro, url && `${title}:\n${url}`, exp, ob.text, contact, linkSign) + "\n";
       const html = mk(title, intro, h1(title) + helloRow + p(esc(intro)) + box(`<span style="font-family:${SANS};font-size:12px;color:${MUTED};text-transform:uppercase;letter-spacing:.04em">${esc(lab)}</span><br><span style="font-family:${FONT};font-size:24px;color:${GREEN}">${esc(amount)}</span>`)
-        + (url ? button(url, pay) : "") + (exp ? p(esc(exp), `color:${MUTED};font-size:13px`) : "") + ob.html + tail);
+        + (url ? button(url, pay) : "") + (exp ? p(esc(exp), `color:${MUTED};font-size:13px`) : "") + ob.html + linkTail);
       return { subject, text, html };
     }
     case "receipt":

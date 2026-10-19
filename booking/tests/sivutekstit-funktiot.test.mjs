@@ -112,7 +112,7 @@ test('tiedosto on generoitu koodista (texts.ts) eikä voi poiketa oletuksista', 
     } else assert.deepEqual(f, got, `${f.key}: tiedosto ≠ generaattori`);
   }
   const fb = new Set(FALLBACK.texts.map((x) => `${x.key}|${x.lang}`));
-  const extraKnown = new Map([...J('content/site-texts.pending-import-4.json'), ...J('content/site-texts.imported-pr75.json'), ...J('content/site-texts.pending-import-12.json'), ...J('content/site-texts.pending-import-14.json')].map((r) => [`${r.key}|${r.lang}`, r]));
+  const extraKnown = new Map([...J('content/site-texts.pending-import-4.json'), ...J('content/site-texts.imported-pr75.json'), ...J('content/site-texts.pending-import-12.json'), ...J('content/site-texts.pending-import-14.json'), ...J('content/site-texts.pending-import-18.json')].map((r) => [`${r.key}|${r.lang}`, r]));
   for (const [k, x] of g) if (!PENDING.some((f) => `${f.key}|${f.lang}` === k)) {
     const row = extraKnown.get(k);
     if (row) assert.deepEqual(row, x, `${k}: tuontitiedosto ≠ generaattori`);

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { finnishMobileMsisdn } from '../admin/phone-fi.js';
-import { cartAdd, cartSetQty, cartTotal, checkoutItems, looksLikeAlcohol, tenderAvailable, tendersFor } from '../admin/pos-logic.js';
+import { cartAdd, cartSetQty, cartTotal, checkoutItems, looksLikeAlcohol, tenderAvailable, tendersFor, validEmail } from '../admin/pos-logic.js';
 import { POS_TEXTS } from '../admin/pos-texts.js';
 import { qrMatrix } from '../admin/qrsvg.js';
 import { deviceFromSearch, drinksCartAdd, looksLikeAlcohol as drinksAlcohol } from '../drinks/drinks-logic.js';
@@ -53,6 +53,20 @@ test('maksutavat: ei käteistä, korttipääte näkyy mutta ei ole valittavissa'
   assert.equal(tenderAvailable(list.find((t) => t.code === 'card_terminal'), { mobilepay_mode: 'test' }), false);
   assert.equal(tenderAvailable(list.find((t) => t.code === 'mobilepay'), { mobilepay_mode: 'off' }), false);
   assert.equal(tenderAvailable(list.find((t) => t.code === 'mobilepay'), { mobilepay_mode: 'test' }), true);
+  const link = list.find((t) => t.code === 'payment_link');
+  assert.equal(tenderAvailable(link, { vismapay_mode: 'off' }), false);
+  assert.equal(tenderAvailable(link, {}), false);
+  assert.equal(tenderAvailable(link, { vismapay_mode: 'dry_run' }), true);
+});
+
+test('sähköposti: sama sääntö kuin palvelimella', () => {
+  assert.equal(validEmail('  Asiakas@Example.Test  '), true);
+  assert.equal(validEmail('asiakas@example.test'), true);
+  assert.equal(validEmail(''), false);
+  assert.equal(validEmail('   '), false);
+  assert.equal(validEmail('ei-kelpaa'), false);
+  assert.equal(validEmail('a@b.c'), false);
+  assert.equal(validEmail(`${'a'.repeat(250)}@x.co`), false);
 });
 
 test('alkoholi: sanaraja, alkoholiton ja viinirypäle sallitaan', () => {
@@ -114,4 +128,49 @@ test('mock-kassa: lahjakortti pois, asiakkaan hinta hylätään, summa katalogis
   assert.equal(order.source_channel, 'pikakassa');
   assert.equal(order.total, 6);
   assert.equal(order.lines[0].unit_price, 3);
+});
+
+test('mock: pos.use saa lähettää linkin, payments.manage ei ole tarpeen, tuplakutsu on yksi rivi', async () => {
+  const mock = createAdminMock({ delay: 0, perms: ['pos.use'] });
+  const order = await mock.rpc('admin_pos_checkout', { p_items: [{ product_id: 101, quantity: 1 }], p_email: '  Asiakas@Example.Test  ' });
+  assert.equal(order.customer_email, 'asiakas@example.test');
+  const link = await mock.rpc('admin_pos_send_link', { p_order_id: order.order_id, p_email: '  Asiakas@Example.Test  ' });
+  assert.equal(link.ok, true);
+  assert.equal(link.email_queued, true);
+  assert.equal(link.masked_to, 'a***@e***.test');
+  assert.equal(JSON.stringify(link).includes('asiakas@example.test'), false);
+  const again = await mock.rpc('admin_pos_send_link', { p_order_id: order.order_id, p_email: 'asiakas@example.test' });
+  assert.equal(again.email_queued, false);
+  assert.equal(again.payment_id, link.payment_id);
+  assert.equal(mock.state.posMail.length, 1);
+  await assert.rejects(() => mock.rpc('admin_pos_send_link', { p_order_id: order.order_id, p_email: 'ei' }), (e) => e.code === 'invalid_email');
+  await assert.rejects(() => mock.rpc('admin_pos_send_link', { p_order_id: order.order_id, p_email: 'asiakas@example.test', p_resend: true }), (e) => e.code === 'rate_limited');
+  assert.equal(mock.state.posMail.length, 1);
+  mock.state.posMail[0].created = Date.now() - 120000;
+  const resent = await mock.rpc('admin_pos_send_link', { p_order_id: order.order_id, p_email: 'asiakas@example.test', p_resend: true });
+  assert.equal(resent.email_queued, true);
+  assert.equal(mock.state.posMail.length, 2);
+  mock.state.posMail.forEach((m) => { m.created = Date.now() - 120000; });
+  await mock.rpc('admin_pos_send_link', { p_order_id: order.order_id, p_email: 'asiakas@example.test', p_resend: true });
+  await assert.rejects(() => mock.rpc('admin_pos_send_link', { p_order_id: order.order_id, p_email: 'asiakas@example.test', p_resend: true }), (e) => e.code === 'rate_limited');
+  assert.equal(mock.state.posMail.length, 3);
+  await assert.rejects(() => mock.rpc('admin_create_payment_link', { p_order_id: order.order_id }), (e) => e.code === 'forbidden');
+  const st = await mock.rpc('admin_pos_email_status', { p_order_id: order.order_id });
+  assert.equal(st.masked_to, 'a***@e***.test');
+  assert.equal(JSON.stringify(st).includes('asiakas@example.test'), false);
+  mock.state.posOrders[0].status = 'cancelled';
+  await assert.rejects(() => mock.rpc('admin_pos_send_link', { p_order_id: order.order_id, p_email: 'asiakas@example.test' }), (e) => e.code === 'order_not_editable');
+});
+
+test('mock: ilman pos.use tai settings.edit linkkiä ei saa lähettää', async () => {
+  const mock = createAdminMock({ delay: 0, perms: [] });
+  mock.state.posOrders.push({ order_id: 1, status: 'pending', payment_status: 'unpaid', source_channel: 'pikakassa', total: 3, customer_email: null });
+  await assert.rejects(() => mock.rpc('admin_pos_send_link', { p_order_id: 1, p_email: 'asiakas@example.test' }), (e) => e.code === 'forbidden');
+  await assert.rejects(() => mock.rpc('admin_pos_email_status', { p_order_id: 1 }), (e) => e.code === 'forbidden');
+  const editor = createAdminMock({ delay: 0, perms: ['settings.edit'] });
+  editor.state.posOrders.push({ order_id: 1, status: 'pending', payment_status: 'unpaid', source_channel: 'pikakassa', total: 3, customer_email: null });
+  const link = await editor.rpc('admin_pos_send_link', { p_order_id: 1, p_email: 'asiakas@example.test' });
+  assert.equal(link.ok, true);
+  assert.equal(editor.state.resendMode, 'dry_run');
+  assert.equal(editor.state.posModes.vismapay_mode, 'dry_run');
 });

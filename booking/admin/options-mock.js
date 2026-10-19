@@ -16,6 +16,17 @@ export function helIso(ds, hhmm) {
   return new Date(t).toISOString();
 }
 const err = (code, message) => Object.assign(new Error(message || code), { name: 'ApiError', code, status: 400 });
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/;
+function maskEmail(raw) {
+  const email = String(raw || '').trim().toLowerCase();
+  const at = email.indexOf('@');
+  if (at < 1 || !EMAIL_RE.test(email)) return null;
+  const local = email.slice(0, at);
+  const dom = email.slice(at + 1);
+  const dot = dom.lastIndexOf('.');
+  const tld = dot >= 0 ? dom.slice(dot) : '';
+  return `${local.slice(0, 1)}***@${dom.slice(0, 1)}***${tld}`;
+}
 const SECRET_KEYS = new Set(['client_id', 'client_secret', 'api_key', 'password', 'token', 'refresh_token', 'access_token', 'secret', 'private_key', 'authorization', 'redirect_uri']);
 const SALES_RATES = ['25.5', '13.5', '0', '14', '24', '10'];
 const METHODS = ['cash', 'card_terminal', 'mobilepay', 'bank_transfer', 'invoice', 'gift_card', 'partner_voucher', 'visma_pay', 'annual_card', 'pay_later', 'other'];
@@ -122,7 +133,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     ],
     settings: { 10: { option_required: true, option_label: 'Valitse hoito', option_label_en: 'Choose your treatment' } },
     customers: [{ id: 1, name: 'Aino Testaaja', email: 'aino@example.com', phone: '+358401110001' }, { id: 2, name: 'Eero Esimerkki', email: 'eero@example.com', phone: '+358401110002' }, { id: 3, name: 'Helmi Hiljainen', email: 'helmi@example.com', phone: '+358401110003' }, { id: 4, name: 'Ilmari Iltavuoro', email: 'ilmari@example.com', phone: '+358401110004' }],
-    reservations: [], seq: { res: 900, order: 7000 },
+    reservations: [], seq: { res: 900, order: 7000, pay: 4000 },
     // Sulkukonflikti (booking_73). Kuittaus ei koske availabilityBlocked-lippua.
     availabilityBlocked: true,
     blockConflicts: [{
@@ -133,6 +144,9 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     }],
     blockAcks: [],
     posOrders: [],
+    posMail: [],
+    posModes: { mobilepay_mode: 'test', vismapay_mode: 'dry_run' },
+    resendMode: 'dry_run',
     productQr: [],
     invCustomers: [],
     invoices: [],
@@ -347,7 +361,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     },
     admin_pos_tenders: () => {
       need('pos.use');
-      return { mobilepay_mode: 'test', vismapay_mode: 'dry_run', site_base_url: 'https://uusi.saunotus.com', drinks_path: '/juomat/', drinks_path_en: '/en/drinks/', tenders: [
+      return { mobilepay_mode: st.posModes.mobilepay_mode, vismapay_mode: st.posModes.vismapay_mode, site_base_url: 'https://uusi.saunotus.com', drinks_path: '/juomat/', drinks_path_en: '/en/drinks/', tenders: [
         { code: 'payment_link', handler: 'payment_link', channels: ['pos'], active: true, sort_order: 10, unavailable_reason: null },
         { code: 'mobilepay', handler: 'mobilepay', channels: ['pos', 'drinks'], active: true, sort_order: 20, unavailable_reason: null },
         { code: 'visma_pay', handler: 'visma_pay', channels: ['drinks'], active: true, sort_order: 30, unavailable_reason: null },
@@ -367,8 +381,10 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
         total += line;
         lines.push({ product_id: p.id, name: p.name, quantity: r.quantity, unit_price: p.price, vat_rate: p.vat_rate, line_total: line });
       }
+      const raw = a.p_email == null ? '' : String(a.p_email).trim().toLowerCase();
+      if (raw && (raw.length > 254 || !EMAIL_RE.test(raw))) throw err('invalid_email', 'Sähköposti ei ole kelvollinen');
       const id = ++st.seq.order;
-      const row = { order_id: id, order_no: id, public_token: `00000000-0000-4000-8000-${String(id).padStart(12, '0')}`, total, status: 'pending', payment_status: 'unpaid', source_channel: 'pikakassa', lines, receipts: [], polls: 0, arm: false };
+      const row = { order_id: id, order_no: id, public_token: `00000000-0000-4000-8000-${String(id).padStart(12, '0')}`, total, status: 'pending', payment_status: 'unpaid', source_channel: 'pikakassa', customer_email: raw || null, lines, receipts: [], polls: 0, arm: false };
       st.posOrders.push(row);
       return { ok: true, ...row };
     },
@@ -397,6 +413,51 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       need('payments.manage');
       const o = st.posOrders.find((x) => x.order_id === a.p_order_id);
       return { ok: true, payment_id: 1, link_path: '/maksa/?p=11111111-2222-4333-8444-555555555555', amount: o?.total ?? 0, online_payment_enabled: false };
+    },
+    admin_pos_send_link: (a) => {
+      needAny('pos.use', 'settings.edit');
+      const o = st.posOrders.find((x) => x.order_id === a.p_order_id && x.source_channel === 'pikakassa');
+      if (!o) throw err('not_found', 'Kassatilausta ei löydy');
+      if (o.status !== 'pending' || o.payment_status !== 'unpaid') throw err('order_not_editable', 'Tilaukselle ei voi lähettää maksulinkkiä');
+      const email = String(a.p_email || '').trim().toLowerCase();
+      if (!email || email.length > 254 || !EMAIL_RE.test(email)) throw err('invalid_email', 'Sähköposti ei ole kelvollinen');
+      o.customer_email = email;
+      if (!o.payment_id) o.payment_id = ++st.seq.pay;
+      const rows = st.posMail.filter((m) => m.payment_id === o.payment_id && m.dedupe.startsWith(`pos_link:${o.payment_id}:`));
+      let n;
+      if (a.p_resend) {
+        if (rows.length >= 3) throw err('rate_limited', 'Maksulinkki on lähetetty jo kolme kertaa');
+        const latest = rows.reduce((m, r) => Math.max(m, r.created), 0);
+        if (latest && Date.now() - latest < 60000) throw err('rate_limited', 'Odota hetki ennen uutta lähetystä');
+        n = rows.length;
+      } else n = 0;
+      const dedupe = `pos_link:${o.payment_id}:${n}`;
+      let row = st.posMail.find((m) => m.dedupe === dedupe);
+      let queued = false;
+      if (!row) {
+        row = {
+          id: st.posMail.length + 1, order_id: o.order_id, payment_id: o.payment_id, kind: 'payment_link', dedupe,
+          status: st.resendMode === 'off' ? 'skipped' : 'pending', attempts: 0, max_attempts: 6, sent_at: null, last_error: null, created: Date.now(),
+        };
+        st.posMail.push(row);
+        queued = true;
+      }
+      return { ok: true, payment_id: o.payment_id, link_path: '/maksa/?p=11111111-2222-4333-8444-555555555555', amount: o.total, email_queued: queued, outbox_status: row.status, masked_to: maskEmail(email) };
+    },
+    admin_pos_email_status: (a) => {
+      needAny('pos.use', 'settings.edit');
+      const o = st.posOrders.find((x) => x.order_id === a.p_order_id && x.source_channel === 'pikakassa');
+      if (!o) throw err('not_found', 'Kassatilausta ei löydy');
+      const row = [...st.posMail].reverse().find((m) => m.order_id === o.order_id && m.kind === 'payment_link');
+      return {
+        ok: true,
+        status: row?.status ?? null,
+        attempts: row?.attempts ?? null,
+        max_attempts: row?.max_attempts ?? null,
+        sent_at: row?.sent_at ?? null,
+        last_error: row?.last_error ? String(row.last_error).slice(0, 120) : null,
+        masked_to: maskEmail(o.customer_email),
+      };
     },
     admin_set_pos_product: (a) => {
       needAny('pos.use', 'settings.edit');
