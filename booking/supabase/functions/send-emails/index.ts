@@ -1,10 +1,13 @@
-// send-emails: pg_cron (1 min) kutsuu POST + x-sync-secret. Lukee booking.email_outbox_claim(), renderöi templates.ts:llä ja lähettää Resendillä.
-// Tilat (booking.integration_config.resend.mode): off -> skipped; dry_run (oletus) -> renderöidään ja merkitään dry_run, MITÄÄN EI LÄHDE; live -> lähetys (vaatii RESEND_API_KEY).
-// Salaisuus: RESEND_API_KEY (Edge Function secret). Ei muita salaisuuksia; SUPABASE_URL/SERVICE_ROLE_KEY tulevat ympäristöstä.
+// send-emails: pg_cron (1 min) kutsuu POST + x-sync-secret. Lukee booking.email_outbox_claim(), renderöi templates.ts:llä ja lähettää.
+// Tilat (booking.integration_config.resend.mode): off -> skipped; dry_run (oletus) -> renderöidään ja merkitään dry_run, MITÄÄN EI LÄHDE; live -> lähetys.
+// Lähetystapa settings.transport: resend (oletus, RESEND_API_KEY, idempotenssi ennallaan) tai gmail_smtp (GMAIL_SMTP_USER + GMAIL_SMTP_APP_PASSWORD; ei lokiteta).
+// Live + epätyhjä settings.test_recipients: vastaanottaja listan ulkopuolella -> skipped 'ei allowlistissa' ennen renderöintiä. Tyhjä lista = ei rajausta.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { render, outboundReplyTo, type Kind } from "./templates.ts";
 import { EMAIL_TEXTS } from "./texts.ts";
 import { fetchSiteTexts, makeT } from "../_shared/site_texts.ts";
+import { GMAIL_SECRET_ERROR, outboxAllowlistBlock, parseTestRecipients, resolveTransport, sendViaGmail } from "./mailer.ts";
+import { gmailSmtpSend } from "./gmail_smtp.ts";
 
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { "content-type": "application/json" } });
 const b64 = (u8: Uint8Array) => { let s = ""; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode(...u8.subarray(i, i + 0x8000)); return btoa(s); };
@@ -21,7 +24,11 @@ Deno.serve(async (req) => {
   const mode: string = cfg.data?.mode ?? "off";
   const from: string = cfg.data?.settings?.from ?? "Sipoonjoen Perinnesauna <savusauna@saunotus.fi>";
   const replyTo: string | undefined = cfg.data?.settings?.reply_to;
+  const transport = resolveTransport(cfg.data?.settings);
+  const testRecipients = parseTestRecipients(cfg.data?.settings?.test_recipients);
   const key = Deno.env.get("RESEND_API_KEY");
+  const gmailUser = Deno.env.get("GMAIL_SMTP_USER");
+  const gmailPass = Deno.env.get("GMAIL_SMTP_APP_PASSWORD");
   const rs = await bk.from("settings").select("value").eq("key", "gift_cards.redeem_enabled").maybeSingle();
   const redeemOnline = rs.data?.value === true;
   const claimed = await bk.rpc("email_outbox_claim", { p_limit: 20 });
@@ -36,6 +43,8 @@ Deno.serve(async (req) => {
     try {
       if (mode === "off") { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: "resend.mode=off" }); stats.skipped++; continue; }
       if (!r.to || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(r.to)) { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: "ei kelvollista vastaanottajaa" }); stats.skipped++; continue; }
+      const blocked = outboxAllowlistBlock(mode, r, testRecipients);
+      if (blocked) { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: blocked }); stats.skipped++; continue; }
       const isGc = r.kind === "gift_card_buyer" || r.kind === "gift_card_recipient";
       if (isGc) {
         // vain maksetut/käytettävissä olevat kortit; perutut/maksamattomat -> ei viestiä
@@ -48,7 +57,8 @@ Deno.serve(async (req) => {
       const m = render(r.kind as Kind, r, r.locale, t);
       if (!m.subject || !m.text || !m.html) throw new Error("tyhjä mallipohja");
       if (mode !== "live") { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "dry_run", p_error: `dry_run: ${m.subject}` }); stats.dry_run++; continue; }
-      if (!key) throw new Error("RESEND_API_KEY puuttuu");
+      if (transport === "gmail_smtp") { if (!gmailUser?.trim() || !gmailPass) throw new Error(GMAIL_SECRET_ERROR); }
+      else if (!key) throw new Error("RESEND_API_KEY puuttuu");
       const attachments: { filename: string; content: string }[] = [];
       if ((r.kind === "receipt" || r.kind === "refund_receipt") && r.receipt?.public_token) {
         const pdf = await fetch(`${url}/functions/v1/receipt-pdf?t=${r.receipt.public_token}`);
@@ -70,6 +80,15 @@ Deno.serve(async (req) => {
         }
       }
       const useReply = outboundReplyTo(r.kind, r, replyTo);
+      if (transport === "gmail_smtp") {
+        const sent = await sendViaGmail(
+          { to: r.to, cc: r.cc, bcc: r.bcc, subject: m.subject, text: m.text, html: m.html, replyTo: useReply, attachments },
+          { user: gmailUser, pass: gmailPass },
+          gmailSmtpSend,
+        );
+        await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "sent", p_provider_id: sent.id }); stats.sent++;
+        continue;
+      }
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { authorization: `Bearer ${key}`, "content-type": "application/json", "idempotency-key": `booking-outbox-${r.id}` },
