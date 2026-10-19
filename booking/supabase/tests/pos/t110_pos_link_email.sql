@@ -37,6 +37,7 @@ declare
   log text;
   npass int;
   nfail int;
+  v_old bigint;
 begin
   select mode into v_mode from booking.integration_config where key = 'resend';
   select mode into v_visma from booking.integration_config where key = 'vismapay';
@@ -86,6 +87,7 @@ begin
   perform public.t110_ck(public.t110_try(format('select booking.admin_pos_send_link(%s, %L, false)', oid, '   ')) = 'invalid_email', 'E2 tyhjä osoite');
   perform public.t110_ck((select count(*) from booking.email_outbox where order_id = oid and kind = 'payment_link') = 1, 'E3 virhe ei luonut toista riviä');
 
+  perform public.t110_ck((select payment_status from booking.orders where id = oid) = 'pending', 'D0 linkin jälkeen maksun tila on pending');
   res2 := booking.admin_pos_send_link(oid, v_email, false);
   select count(*) into n from booking.email_outbox where order_id = oid and dedupe_key like 'pos_link:%';
   perform public.t110_ck(n = 1 and res2->>'email_queued' = 'false', 'D1 tuplakutsu ei luo uutta riviä');
@@ -125,8 +127,11 @@ begin
 
   res := booking.admin_pos_checkout(items, 'fi', 'vanha@example.test');
   oid2 := (res->>'order_id')::bigint;
+  select customer_id into v_old from booking.orders where id = oid2;
   perform booking.admin_pos_send_link(oid2, 'uusi@example.test', false);
-  perform public.t110_ck((select email from booking.customers c join booking.orders o on o.customer_id = c.id where o.id = oid2) = 'uusi@example.test', 'C5 maksamattoman osoite päivittyy');
+  perform public.t110_ck((select email from booking.customers c join booking.orders o on o.customer_id = c.id where o.id = oid2) = 'uusi@example.test', 'C5 tilaus liitetään uuden osoitteen asiakkaaseen');
+  perform public.t110_ck((select customer_id from booking.orders where id = oid2) is distinct from v_old, 'C6 asiakas vaihtuu');
+  perform public.t110_ck((select email from booking.customers where id = v_old) = 'vanha@example.test', 'C7 vanhan asiakkaan osoite säilyy');
 
   perform public.t110_logout();
   update booking.orders set status = 'cancelled' where id = oid2;

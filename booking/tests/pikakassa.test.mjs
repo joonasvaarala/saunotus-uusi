@@ -162,6 +162,25 @@ test('mock: pos.use saa lähettää linkin, payments.manage ei ole tarpeen, tupl
   await assert.rejects(() => mock.rpc('admin_pos_send_link', { p_order_id: order.order_id, p_email: 'asiakas@example.test' }), (e) => e.code === 'order_not_editable');
 });
 
+test('mock: linkin jälkeen pending-tilainen tilaus lähtee uudelleen, vanhaa asiakasta ei muuteta', async () => {
+  const mock = createAdminMock({ delay: 0, perms: ['pos.use'] });
+  const order = await mock.rpc('admin_pos_checkout', { p_items: [{ product_id: 101, quantity: 1 }], p_email: 'vanha@example.test' });
+  const oldId = mock.state.posOrders[0].customer_id;
+  const link = await mock.rpc('admin_pos_send_link', { p_order_id: order.order_id, p_email: 'vanha@example.test' });
+  assert.equal(mock.state.posOrders[0].payment_status, 'pending');
+  const again = await mock.rpc('admin_pos_send_link', { p_order_id: order.order_id, p_email: 'vanha@example.test' });
+  assert.equal(again.ok, true);
+  assert.equal(again.email_queued, false);
+  assert.equal(again.payment_id, link.payment_id);
+  assert.equal(mock.state.posMail.length, 1);
+  const moved = await mock.rpc('admin_pos_send_link', { p_order_id: order.order_id, p_email: 'uusi@example.test' });
+  assert.equal(moved.ok, true);
+  assert.equal(moved.masked_to, 'u***@e***.test');
+  assert.notEqual(mock.state.posOrders[0].customer_id, oldId);
+  assert.equal(mock.state.posCustomers.find((c) => c.id === oldId).email, 'vanha@example.test');
+  assert.equal(mock.state.posOrders[0].customer_email, 'uusi@example.test');
+});
+
 test('mock: ilman pos.use tai settings.edit linkkiä ei saa lähettää', async () => {
   const mock = createAdminMock({ delay: 0, perms: [] });
   mock.state.posOrders.push({ order_id: 1, status: 'pending', payment_status: 'unpaid', source_channel: 'pikakassa', total: 3, customer_email: null });

@@ -496,6 +496,48 @@ test('maksulinkki vaatii osoitteen, näyttää jonon ja uudelleenlähetys ei per
   }
 });
 
+test('muuttumaton sähköpostitila ei rakenna popupia uudelleen', async () => {
+  const prev = globalThis.location.search;
+  globalThis.location.search = '';
+  const mock = createAdminMock({ delay: 0 });
+  let tick = null;
+  const origSet = globalThis.setInterval;
+  const origClear = globalThis.clearInterval;
+  globalThis.setInterval = (fn) => { tick = fn; return 1; };
+  globalThis.clearInterval = () => {};
+  try {
+    const root = await mount(mock.rpc);
+    q(root, 'pos-product-101').click();
+    q(root, 'pos-pay').click();
+    let dlg = document.getElementById('pos-pay-dialog');
+    all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'payment_link').dispatch('change');
+    dlg = document.getElementById('pos-pay-dialog');
+    const inp = q(dlg, 'pos-email');
+    inp.value = 'asiakas@example.test';
+    inp.dispatch('input');
+    q(dlg, 'pos-confirm').click();
+    await flush();
+    await tick();
+    await flush();
+    const settled = document.getElementById('pos-pay-dialog');
+    assert.match(q(settled, 'pos-mail').textContent, /jonossa/);
+    await tick();
+    await flush();
+    assert.equal(document.getElementById('pos-pay-dialog'), settled);
+    mock.state.posMail[0].status = 'sent';
+    mock.state.posMail[0].sent_at = '2026-10-19T05:00:00.000Z';
+    await tick();
+    await flush();
+    const next = document.getElementById('pos-pay-dialog');
+    assert.notEqual(next, settled);
+    assert.match(q(next, 'pos-mail').textContent, /lähetetty/);
+  } finally {
+    globalThis.setInterval = origSet;
+    globalThis.clearInterval = origClear;
+    globalThis.location.search = prev;
+  }
+});
+
 test('maksulinkin virhe peruu tilauksen ja jättää popupin auki', async () => {
   const prev = globalThis.location.search;
   globalThis.location.search = '';

@@ -192,9 +192,10 @@ export async function renderPos({ ctx, rpc, fn }) {
       } catch { /* seuraava kysely */ }
       if (payInfo?.kind === 'link' && phase === 'paying') {
         try {
-          mail = await rpc('admin_pos_email_status', { p_order_id: orderId });
-          mailError = '';
-          draw();
+          const em = await rpc('admin_pos_email_status', { p_order_id: orderId });
+          const changed = ['status', 'attempts', 'sent_at', 'last_error', 'masked_to'].some((k) => (mail?.[k] ?? null) !== (em?.[k] ?? null));
+          mail = em;
+          if (changed) draw();
         } catch { /* seuraava kysely */ }
       }
     };

@@ -145,6 +145,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     blockAcks: [],
     posOrders: [],
     posMail: [],
+    posCustomers: [],
     posModes: { mobilepay_mode: 'test', vismapay_mode: 'dry_run' },
     resendMode: 'dry_run',
     productQr: [],
@@ -383,8 +384,17 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       }
       const raw = a.p_email == null ? '' : String(a.p_email).trim().toLowerCase();
       if (raw && (raw.length > 254 || !EMAIL_RE.test(raw))) throw err('invalid_email', 'Sähköposti ei ole kelvollinen');
+      let customerId = null;
+      if (raw) {
+        let cust = [...st.posCustomers].reverse().find((c) => c.email === raw);
+        if (!cust) {
+          cust = { id: st.posCustomers.length + 1, email: raw };
+          st.posCustomers.push(cust);
+        }
+        customerId = cust.id;
+      }
       const id = ++st.seq.order;
-      const row = { order_id: id, order_no: id, public_token: `00000000-0000-4000-8000-${String(id).padStart(12, '0')}`, total, status: 'pending', payment_status: 'unpaid', source_channel: 'pikakassa', customer_email: raw || null, lines, receipts: [], polls: 0, arm: false };
+      const row = { order_id: id, order_no: id, public_token: `00000000-0000-4000-8000-${String(id).padStart(12, '0')}`, total, status: 'pending', payment_status: 'unpaid', source_channel: 'pikakassa', customer_id: customerId, customer_email: raw || null, lines, receipts: [], polls: 0, arm: false };
       st.posOrders.push(row);
       return { ok: true, ...row };
     },
@@ -418,10 +428,19 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       needAny('pos.use', 'settings.edit');
       const o = st.posOrders.find((x) => x.order_id === a.p_order_id && x.source_channel === 'pikakassa');
       if (!o) throw err('not_found', 'Kassatilausta ei löydy');
-      if (o.status !== 'pending' || o.payment_status !== 'unpaid') throw err('order_not_editable', 'Tilaukselle ei voi lähettää maksulinkkiä');
+      if (o.status !== 'pending' || !['unpaid', 'pending'].includes(o.payment_status)) throw err('order_not_editable', 'Tilaukselle ei voi lähettää maksulinkkiä');
       const email = String(a.p_email || '').trim().toLowerCase();
       if (!email || email.length > 254 || !EMAIL_RE.test(email)) throw err('invalid_email', 'Sähköposti ei ole kelvollinen');
-      o.customer_email = email;
+      const current = st.posCustomers.find((c) => c.id === o.customer_id);
+      if (!o.customer_id || current?.email !== email) {
+        let cust = [...st.posCustomers].reverse().find((c) => c.email === email);
+        if (!cust) {
+          cust = { id: st.posCustomers.length + 1, email };
+          st.posCustomers.push(cust);
+        }
+        o.customer_id = cust.id;
+        o.customer_email = email;
+      }
       if (!o.payment_id) o.payment_id = ++st.seq.pay;
       const rows = st.posMail.filter((m) => m.payment_id === o.payment_id && m.dedupe.startsWith(`pos_link:${o.payment_id}:`));
       let n;
@@ -442,6 +461,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
         st.posMail.push(row);
         queued = true;
       }
+      o.payment_status = 'pending';
       return { ok: true, payment_id: o.payment_id, link_path: '/maksa/?p=11111111-2222-4333-8444-555555555555', amount: o.total, email_queued: queued, outbox_status: row.status, masked_to: maskEmail(email) };
     },
     admin_pos_email_status: (a) => {

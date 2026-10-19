@@ -37,14 +37,20 @@ begin
   if p_order_id is null then perform booking._err('not_found', 'Kassatilausta ei löydy'); end if;
   select * into o from booking.orders where id = p_order_id and source_channel = 'pikakassa' for update;
   if not found then perform booking._err('not_found', 'Kassatilausta ei löydy'); end if;
-  if o.status is distinct from 'pending' or o.payment_status is distinct from 'unpaid' then
+  -- _create_link_payment siirtää payment_status-arvon pending-tilaan, joten uudelleenlähetys pitää sallia.
+  if o.status is distinct from 'pending' or o.payment_status not in ('unpaid', 'pending') then
     perform booking._err('order_not_editable', 'Tilaukselle ei voi lähettää maksulinkkiä');
   end if;
   if v_email is null or not booking._valid_email(v_email) then
     perform booking._err('invalid_email', 'Sähköposti ei ole kelvollinen');
   end if;
 
-  if o.customer_id is null then
+  if o.customer_id is not null then
+    select lower(btrim(coalesce(c.email, ''))) into v_cur
+      from booking.customers c where c.id = o.customer_id;
+  end if;
+  -- Osoite ei päivitä olemassa olevan asiakkaan kenttää. Uusi osoite haetaan tai luodaan ja tilaus liitetään siihen.
+  if o.customer_id is null or (o.payment_status in ('unpaid', 'pending') and v_cur is distinct from v_email) then
     select c.id into v_cust from booking.customers c
      where lower(c.email) = v_email and c.anonymized_at is null
      order by c.id desc limit 1;
@@ -53,13 +59,9 @@ begin
       values (v_email, v_email, case when o.locale in ('fi', 'en', 'sv') then o.locale else 'fi' end, false, 'pikakassa')
       returning id into v_cust;
     end if;
-    update booking.orders set customer_id = v_cust where id = o.id;
-    o.customer_id := v_cust;
-  elsif o.payment_status = 'unpaid' then
-    select lower(btrim(coalesce(c.email, ''))) into v_cur
-      from booking.customers c where c.id = o.customer_id for update;
-    if v_cur is distinct from v_email then
-      update booking.customers set email = v_email where id = o.customer_id;
+    if o.customer_id is distinct from v_cust then
+      update booking.orders set customer_id = v_cust where id = o.id;
+      o.customer_id := v_cust;
     end if;
   end if;
 
