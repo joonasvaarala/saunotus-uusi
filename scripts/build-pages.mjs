@@ -39,6 +39,9 @@ rmSync(A, { recursive: true, force: true });
 mkdirSync(A, { recursive: true });
 cpSync('booking/admin', A, { recursive: true, filter: (s) => !/config\.example\.js$/.test(s) });
 cpSync('booking/shared/sb.js', join(A, 'sb.js'));
+// options-mock.js (admin.js tuo sen staattisesti) tuo '../shop/src/invoice-validate.js' → /shop/src/invoice-validate.js; ilman tätä koko hallinta-SPA:n moduulipuu kaatuu 404:ään (tyhjä sivu).
+mkdirSync(join(OUT, 'shop', 'src'), { recursive: true });
+cpSync('booking/shop/src/invoice-validate.js', join(OUT, 'shop', 'src', 'invoice-validate.js'));
 const cfg = { url: SUPA, anonKey: KEY, rest: '/rest/v1', auth: '/auth/v1', functions: '/functions/v1', schema: 'booking' };
 writeFileSync(join(A, 'config.js'), `// Generoitu julkaisussa (scripts/build-pages.mjs). Vain julkinen anon/publishable-avain; service_role ei koskaan tähän.\nwindow.BOOKING_CONFIG=${JSON.stringify(cfg, null, 2)};\n`);
 
@@ -94,6 +97,7 @@ if (!/<meta name="robots" content="noindex/.test(adminHtml)) fail('hallinnan ind
 if (!nImports || (adminHtml.match(/\?v=/g) || []).length !== 4) fail('hallinnan versiotunnus ei tullut kaikkiin resursseihin');
 (function chk(d) { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) { chk(p); continue; } if (n.endsWith('.js') && /(?:from|import)\s*['"]\.{1,2}\/[^'"?]+\.js['"]/.test(readFileSync(p, 'utf8'))) fail(`${p}: versioimaton relatiivinen import`); } })(A);
 for (const f of ['admin.js', 'ui.js', 'icons.js', 'sb.js', 'config.js', 'admin.css', 'calendar.css', 'views/users.js', 'views/calendar.js', 'views/customerform.js', 'views/addons.js', 'views/productimage.js', 'views/talous.js', 'views/talous-orders.js', 'views/talous-payments.js', 'views/talous-reports.js', 'views/talous-ui.js', 'views/talous-receipts.js', 'views/talous-giftcards.js', 'views/pos.js', 'pos-screen.js', 'pos-logic.js', 'pos-texts.js', 'phone-fi.js', 'qrsvg.js', 'qrcode-generator.js', 'settings-tabs.js', 'settings-texts.js', 'qr-print.js', 'qr-panel.js', 'options.js', 'options-logic.js', 'options-mock.js', 'talous-api.js', 'talous-mock.js', 'giftcards-api.js', 'giftcards-mock.js', 'giftcards-texts.js', 'talous-i18n.js', 'talous-texts.js', 'csv.js', 'logo-haalea.svg']) if (!statSync(join(A, f), { throwIfNoEntry: false })) fail(`hallinnasta puuttuu ${f}`);
+(function chkImports(d) { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) { chkImports(p); continue; } if (!n.endsWith('.js')) continue; for (const m of readFileSync(p, 'utf8').matchAll(/(?:from|import)\s*\(?\s*(['"])(\.{1,2}\/[^'"?]+\.js)(?:\?[^'"]*)?\1/g)) { if (!statSync(resolve(d, m[2]), { throwIfNoEntry: false })) fail(`${p}: tuotu moduuli puuttuu dististä: ${m[2]}`); } } })(A);
 if (process.env.SITE_ENV === 'test') {
   const noindex = (p) => /<meta name="robots" content="noindex/.test(readFileSync(p, 'utf8'));
   for (const p of ['index.html', 'en/index.html', 'varaa/index.html', 'tilaus/index.html', 'en/order/index.html', 'hallinta/index.html', 'juomat/index.html', 'en/drinks/index.html']) { try { if (!noindex(join(OUT, p))) fail(`${p}: noindex puuttuu (SITE_ENV=test)`); } catch (e) { if (e.code === 'ENOENT') fail(`${p} puuttuu dististä`); else throw e; } }
