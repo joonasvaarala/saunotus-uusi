@@ -23419,6 +23419,48 @@
    "text": "Use as free text",
    "version": 1,
    "placeholders": []
+  },
+  {
+   "key": "ui.admin.invoices.unit_net",
+   "lang": "fi",
+   "text": "á-hinta (alv 0)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.invoices.unit_net",
+   "lang": "en",
+   "text": "Unit price (excl. VAT)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.invoices.unit_gross",
+   "lang": "fi",
+   "text": "á-hinta (sis. alv)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.invoices.unit_gross",
+   "lang": "en",
+   "text": "Unit price (incl. VAT)",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.invoices.price_either",
+   "lang": "fi",
+   "text": "Kirjoita jompaankumpaan. Toinen päivittyy ALV-kannan mukaan.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.admin.invoices.price_either",
+   "lang": "en",
+   "text": "Type either price. The other updates from the VAT rate.",
+   "version": 1,
+   "placeholders": []
   }
  ],
  "context": {

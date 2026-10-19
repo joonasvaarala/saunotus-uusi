@@ -1,0 +1,62 @@
+[
+ {
+  "key": "ui.admin.invoices.unit_net",
+  "lang": "fi",
+  "text": "á-hinta (alv 0)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivin kaksi á-hintaa: veroton ja verollinen, toinen lasketaan kannan mukaan. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.unit_net",
+  "lang": "en",
+  "text": "Unit price (excl. VAT)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivin kaksi á-hintaa: veroton ja verollinen, toinen lasketaan kannan mukaan. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.unit_gross",
+  "lang": "fi",
+  "text": "á-hinta (sis. alv)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivin kaksi á-hintaa: veroton ja verollinen, toinen lasketaan kannan mukaan. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.unit_gross",
+  "lang": "en",
+  "text": "Unit price (incl. VAT)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivin kaksi á-hintaa: veroton ja verollinen, toinen lasketaan kannan mukaan. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.price_either",
+  "lang": "fi",
+  "text": "Kirjoita jompaankumpaan. Toinen päivittyy ALV-kannan mukaan.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivin kaksi á-hintaa: veroton ja verollinen, toinen lasketaan kannan mukaan. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.price_either",
+  "lang": "en",
+  "text": "Type either price. The other updates from the VAT rate.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskurivin kaksi á-hintaa: veroton ja verollinen, toinen lasketaan kannan mukaan. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ }
+]

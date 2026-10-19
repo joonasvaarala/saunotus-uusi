@@ -3,7 +3,15 @@
 // Toinen agentti rakentaa booking.invoices-taulut ja kutsuu buildProcountorInvoice + deliverInvoice.
 
 export type InvoiceAddress = { street?: string; zip?: string; city?: string; country?: string };
-export type InvoiceLine = { description: string; quantity: number; unit?: string; unit_price_net: number; vat_rate: number };
+export type InvoiceLine = {
+  description: string;
+  quantity: number;
+  unit?: string;
+  unit_price_net: number;
+  unit_price_gross?: number | null;
+  price_basis?: "net" | "gross" | null;
+  vat_rate: number;
+};
 export type InvoiceCustomer = {
   name: string;
   business_id?: string;
@@ -108,16 +116,21 @@ export function buildProcountorInvoice(invoice: NormalizedInvoice, opts: BuildOp
 
   const lines = Array.isArray(invoice?.lines) ? invoice.lines : [];
   if (!lines.length) errors.push("lines");
+  const grossUnit = (line: InvoiceLine): number | null =>
+    line?.price_basis === "gross" && finite(line.unit_price_gross) ? Number(line.unit_price_gross) : null;
+  // Rivikohtaista verollisuuslippua ei ole. Koko lasku lähetetään verollisena vain, kun jokainen rivi on gross-perusteella.
+  const pricesIncludeVat = lines.length > 0 && lines.every((line) => grossUnit(line) != null);
   const rows = lines.map((line) => {
     if (!blank(line?.description)) errors.push("line_description");
     if (!finite(line?.quantity) || line.quantity === 0) errors.push("line_quantity");
-    if (!finite(line?.unit_price_net)) errors.push("line_price");
+    const price = pricesIncludeVat ? grossUnit(line) : line?.unit_price_net;
+    if (!finite(price)) errors.push("line_price");
     if (!finite(line?.vat_rate) || line.vat_rate < 0 || line.vat_rate > 100) errors.push("line_vat");
     return {
       product: blank(line?.description).slice(0, 255),
       quantity: line?.quantity,
       unit: mapUnit(line?.unit, errors),
-      unitPrice: line?.unit_price_net,
+      unitPrice: price,
       discountPercent: 0,
       vatPercent: line?.vat_rate,
     };
@@ -150,7 +163,7 @@ export function buildProcountorInvoice(invoice: NormalizedInvoice, opts: BuildOp
     vatStatus: Number(vatStatus),
     counterParty,
     billingAddress: channel === "ELECTRONIC_INVOICE" ? { ...address } : {},
-    extraInfo: { accountingByRow: false, unitPricesIncludeVat: false },
+    extraInfo: { accountingByRow: false, unitPricesIncludeVat: pricesIncludeVat },
     invoiceRows: rows,
     paymentInfo: {
       paymentMethod: "BANK_TRANSFER",

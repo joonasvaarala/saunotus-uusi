@@ -6,6 +6,17 @@ export { INVOICE_PDF_TEXTS };
 
 export const san = (s: unknown): string => String(s ?? "").replace(/[^\u0020-\u007E\u00A0-\u00FF\u20AC\u2013\u2014\u2018\u2019\u201C\u201D\u2022\u2026]/g, "?");
 const money = (n: number, loc: string) => (loc === "en" ? Number(n).toFixed(2) : Number(n).toFixed(2).replace(".", ",")) + " EUR";
+// Veroton á-hinta voi olla neljän desimaalin johdettu luku (verollinen peruste). Näytä 2–4 desimaalia, rivisumma pysyy kahdessa.
+const unitPrice = (n: number, loc: string) => {
+  const v = Number(n);
+  if (!Number.isFinite(v)) return money(0, loc);
+  const sign = v < 0 ? "-" : "";
+  let s = Math.abs(v).toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+  const frac = s.includes(".") ? s.length - s.indexOf(".") - 1 : 0;
+  if (frac < 2) s = Math.abs(v).toFixed(2);
+  if (loc !== "en") s = s.replace(".", ",");
+  return `${sign}${s} EUR`;
+};
 
 export async function buildInvoicePdf(inv: any, tfn: TFn = makeT(INVOICE_PDF_TEXTS)): Promise<Uint8Array> {
   const loc = inv.locale === "en" ? "en" : "fi";
@@ -41,7 +52,7 @@ export async function buildInvoicePdf(inv: any, tfn: TFn = makeT(INVOICE_PDF_TEX
   y -= 8;
   line(`${TX("email.invoice_pdf.desc")}    ${TX("email.invoice_pdf.qty")}    ${TX("email.invoice_pdf.unit_price")}    ${TX("email.invoice_pdf.vat")}    ${TX("email.invoice_pdf.gross")}`, 9, bold);
   for (const l of inv.lines || []) {
-    line(`${l.description}  ${l.quantity} ${l.unit || ""}  ${money(l.unit_price_net, loc)}  ${l.vat_rate} %  ${money(l.line_gross, loc)}`, 9);
+    line(`${l.description}  ${l.quantity} ${l.unit || ""}  ${unitPrice(l.unit_price_net, loc)}  ${l.vat_rate} %  ${money(l.line_gross, loc)}`, 9);
   }
   y -= 6;
   line(`${TX("email.invoice_pdf.vat_breakdown")}`, 11, bold);
