@@ -267,9 +267,9 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .inv-nums input,.inv-nums select{padding:8px 6px}
 .inv-nums input{text-align:right;font-variant-numeric:tabular-nums}
 .inv-suggest{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:4px}
-.inv-hit{width:100%;min-height:44px;display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font:inherit;color:var(--ink);cursor:pointer}
-.inv-hit span{min-width:0;overflow-wrap:anywhere}
-.inv-hit small{white-space:nowrap}
+.inv-hit{width:100%;min-height:44px;display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:2px;text-align:left;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font:inherit;color:var(--ink);cursor:pointer}
+.inv-hit span{min-width:0;overflow-wrap:break-word}
+.inv-hit small{align-self:flex-end;white-space:nowrap;font-weight:600}
 .inv-hit-free{font-weight:600}
 .inv-hit[aria-selected=true],.inv-hit:hover{border-color:var(--green);background:#E4EBE5}
 .inv-line-foot{display:flex;justify-content:flex-end;align-items:center;gap:2px}
