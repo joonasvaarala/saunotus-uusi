@@ -1,0 +1,562 @@
+[
+ {
+  "key": "ui.admin.invoices.find",
+  "lang": "fi",
+  "text": "Hae yritystä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.find",
+  "lang": "en",
+  "text": "Find a company",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.find_ph",
+  "lang": "fi",
+  "text": "Nimi tai Y-tunnus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.find_ph",
+  "lang": "en",
+  "text": "Name or business ID",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.find_aria",
+  "lang": "fi",
+  "text": "Hae yritystä rekisteristä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.find_aria",
+  "lang": "en",
+  "text": "Search the company register",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.find_btn",
+  "lang": "fi",
+  "text": "Hae",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.find_btn",
+  "lang": "en",
+  "text": "Search",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.find_or",
+  "lang": "fi",
+  "text": "Tai täytä uuden asiakkaan tiedot:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.find_or",
+  "lang": "en",
+  "text": "Or enter a new customer:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.found_note",
+  "lang": "fi",
+  "text": "Lasku liitetään tähän asiakkaaseen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.found_note",
+  "lang": "en",
+  "text": "The invoice is linked to this customer.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.new_customer",
+  "lang": "fi",
+  "text": "Uusi asiakas",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.new_customer",
+  "lang": "en",
+  "text": "New customer",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.not_found",
+  "lang": "fi",
+  "text": "Ei löytynyt laskutusrekisteristä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.not_found",
+  "lang": "en",
+  "text": "Not in the invoice register",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.moved",
+  "lang": "fi",
+  "text": "Nimi siirrettiin Yritys-kenttään.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.moved",
+  "lang": "en",
+  "text": "The name was moved to the Company field.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.moved_bid",
+  "lang": "fi",
+  "text": "Y-tunnus siirrettiin kenttään.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.moved_bid",
+  "lang": "en",
+  "text": "The business ID was moved to its field.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.not_overwritten",
+  "lang": "fi",
+  "text": "Kenttä oli jo täytetty.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.not_overwritten",
+  "lang": "en",
+  "text": "That field already had a value.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.ytj",
+  "lang": "fi",
+  "text": "Hae avoimesta yritysrekisteristä (PRH)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.ytj",
+  "lang": "en",
+  "text": "Search the open company register (PRH)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.ytj_loading",
+  "lang": "fi",
+  "text": "Haetaan yritysrekisteristä…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.ytj_loading",
+  "lang": "en",
+  "text": "Searching the company register…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.ytj_empty",
+  "lang": "fi",
+  "text": "Ei osumia avoimessa yritysrekisterissä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.ytj_empty",
+  "lang": "en",
+  "text": "No matches in the open company register.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.ytj_error",
+  "lang": "fi",
+  "text": "Yritysrekisterin haku ei onnistunut. Täytä tiedot käsin.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.ytj_error",
+  "lang": "en",
+  "text": "The company register search failed. Enter the details manually.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.ytj_note",
+  "lang": "fi",
+  "text": "Verkkolaskuosoite ei tule yritysrekisteristä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.ytj_note",
+  "lang": "en",
+  "text": "The e-invoice address is not provided by the company register.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.ytj_hit",
+  "lang": "fi",
+  "text": "Avoin yritysrekisteri",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.ytj_hit",
+  "lang": "en",
+  "text": "Open company register",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.changed_title",
+  "lang": "fi",
+  "text": "Asiakkaan tiedot muuttuivat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.changed_title",
+  "lang": "en",
+  "text": "Customer details changed",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.changed_body",
+  "lang": "fi",
+  "text": "Päivitetäänkö asiakkaan tiedot rekisteriin vai käytetäänkö muutoksia vain tällä laskulla?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.changed_body",
+  "lang": "en",
+  "text": "Update the customer register, or use the changes only on this invoice?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.update_customer",
+  "lang": "fi",
+  "text": "Päivitä asiakkaan tiedot",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.update_customer",
+  "lang": "en",
+  "text": "Update the customer",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.only_invoice",
+  "lang": "fi",
+  "text": "Vain tämä lasku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.only_invoice",
+  "lang": "en",
+  "text": "Only this invoice",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.exists_title",
+  "lang": "fi",
+  "text": "Yritys on jo rekisterissä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.exists_title",
+  "lang": "en",
+  "text": "Company already exists",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.exists_body",
+  "lang": "fi",
+  "text": "Sama Y-tunnus on jo laskutusasiakkaalla. Käytä olemassa olevaa asiakasta, jotta duplikaattia ei synny.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.exists_body",
+  "lang": "en",
+  "text": "This business ID is already on an invoice customer. Use the existing customer to avoid a duplicate.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.use_existing",
+  "lang": "fi",
+  "text": "Käytä tätä asiakasta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.use_existing",
+  "lang": "en",
+  "text": "Use this customer",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.name_email_title",
+  "lang": "fi",
+  "text": "Samankaltainen asiakas",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.name_email_title",
+  "lang": "en",
+  "text": "Similar customer",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.name_email_body",
+  "lang": "fi",
+  "text": "Rekisterissä on jo sama nimi ja sähköposti ilman Y-tunnusta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.name_email_body",
+  "lang": "en",
+  "text": "The register already has the same name and email without a business ID.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.save_anyway",
+  "lang": "fi",
+  "text": "Tallenna silti uutena",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.save_anyway",
+  "lang": "en",
+  "text": "Save as a new customer anyway",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.need_company",
+  "lang": "fi",
+  "text": "Anna yrityksen nimi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.need_company",
+  "lang": "en",
+  "text": "Enter the company name.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Laskutus (booking_112): Uusi lasku hakee yrityksen omasta laskutusrekisteristä. FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ }
+]

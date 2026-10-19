@@ -585,7 +585,19 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     admin_list_invoice_customers: (a) => {
       need('invoices.manage');
       const q = String(a.p_search || '').toLowerCase();
-      return st.invCustomers.filter((c) => !q || `${c.company_name} ${c.email} ${c.business_id}`.toLowerCase().includes(q));
+      return st.invCustomers.filter((c) => !q || `${c.company_name} ${c.contact_name || ''} ${c.email} ${c.business_id}`.toLowerCase().includes(q));
+    },
+    admin_search_invoice_customers: (a) => {
+      need('invoices.manage');
+      const q = String(a.p_search || '').trim().toLowerCase();
+      if (q.length < 2) return [];
+      const lim = Math.min(Math.max(Number(a.p_limit) || 8, 1), 20);
+      const digits = q.replace(/\D/g, '');
+      return st.invCustomers.filter((c) => {
+        const blob = `${c.company_name || ''} ${c.contact_name || ''} ${c.email || ''} ${c.business_id || ''}`.toLowerCase();
+        if (blob.includes(q)) return true;
+        return digits.length >= 2 && String(c.business_id || '').replace(/\D/g, '').includes(digits);
+      }).slice(0, lim);
     },
     admin_save_invoice_customer: (a) => {
       need('invoices.manage');
@@ -599,12 +611,22 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       if (!!ei !== !!op) throw err('einvoice_incomplete', 'Anna sekä verkkolaskuosoite että välittäjätunnus');
       if (ei && !validOvt(ei, bid)) throw err('invalid_einvoice_address', 'Tarkista verkkolaskuosoite');
       if (op && !validOperator(op)) throw err('invalid_einvoice_operator', 'Tarkista välittäjätunnus');
-      const row = { id: a.p_id || st.invCustomers.length + 1, company_name: name, name, contact_name: p.contact_name || null, business_id: bid, vat_id: bid ? `FI${bid.replace(/\D/g, '')}` : null, email: p.email || null, phone: p.phone || null, street: p.street || null, zip: p.zip || null, city: p.city || null, country: 'FI', einvoice_address: ei, einvoice_operator: op, buyer_reference: p.buyer_reference || null, address: [p.street, [p.zip, p.city].filter(Boolean).join(' ')].filter(Boolean).join(', ') };
+      const email = p.email ? String(p.email).trim().toLowerCase() : null;
+      const clash = (id) => st.invCustomers.find((c) => c.id !== id && bid && c.business_id && normBusinessId(c.business_id) === bid);
+      const row = { id: a.p_id || st.invCustomers.length + 1, company_name: name, name, contact_name: p.contact_name || null, business_id: bid, vat_id: bid ? `FI${bid.replace(/\D/g, '')}` : null, email, phone: p.phone || null, street: p.street || null, zip: p.zip || null, city: p.city || null, country: 'FI', einvoice_address: ei, einvoice_operator: op, buyer_reference: p.buyer_reference || null, address: [p.street, [p.zip, p.city].filter(Boolean).join(' ')].filter(Boolean).join(', ') };
       if (a.p_id) {
         const i = st.invCustomers.findIndex((c) => c.id === a.p_id);
         if (i < 0) throw err('not_found', 'Asiakasta ei löydy');
+        const other = clash(a.p_id);
+        if (other) throw Object.assign(err('customer_exists', 'Yritys on jo rekisterissä'), { details: { hint: JSON.stringify(other), details: 'customer_exists' } });
         st.invCustomers[i] = { ...st.invCustomers[i], ...row, id: a.p_id };
         return st.invCustomers[i];
+      }
+      const other = clash(null);
+      if (other) throw Object.assign(err('customer_exists', 'Yritys on jo rekisterissä'), { details: { hint: JSON.stringify(other), details: 'customer_exists' } });
+      if (!bid && email && p.ack_name_email !== true) {
+        const same = st.invCustomers.find((c) => !c.business_id && String(c.company_name || '').trim().toLowerCase() === name.toLowerCase() && String(c.email || '').toLowerCase() === email);
+        if (same) throw Object.assign(err('name_email_match', 'Samanniminen asiakas samalla sähköpostilla on jo rekisterissä'), { details: { hint: JSON.stringify(same), details: 'name_email_match' } });
       }
       st.invCustomers.push(row);
       return row;
@@ -625,7 +647,9 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       if (!lines.length) throw err('invalid_lines', 'Laskulla pitää olla rivejä');
       const today = todayHel(now);
       const sum = (k) => Math.round(lines.reduce((s, l) => s + l[k], 0) * 100) / 100;
-      const base = { customer_id: customer.id, customer, lines, invoice_date: p.invoice_date || today, due_date: p.due_date || today, buyer_reference: p.buyer_reference || null, notes: p.notes || null, locale: 'fi', seller_snapshot: { name: 'Sipoonjoen Perinnesauna', legal_name: 'Havuhattu Oy', business_id: '0112038-9', vat_id: 'FI01120389', iban: '', bic: '', bank_name: '' }, total_net: sum('line_net'), total_vat: sum('line_vat'), total_gross: sum('line_gross'), dispatch_status: 'none', dispatch_error: null, kind: 'debit', status: 'draft', invoice_no: null, reference_no: null, public_token: `00000000-0000-4000-8000-${String(st.invoices.length + 1).padStart(12, '0')}` };
+      const locked = p.snapshot_mode === 'invoice';
+      const view = locked ? { ...customer, ...(p.customer_override || {}), id: customer.id } : { ...customer };
+      const base = { customer_id: customer.id, customer: view, customer_snapshot: view, customer_snapshot_locked: locked, lines, invoice_date: p.invoice_date || today, due_date: p.due_date || today, buyer_reference: p.buyer_reference || null, notes: p.notes || null, locale: 'fi', seller_snapshot: { name: 'Sipoonjoen Perinnesauna', legal_name: 'Havuhattu Oy', business_id: '0112038-9', vat_id: 'FI01120389', iban: '', bic: '', bank_name: '' }, total_net: sum('line_net'), total_vat: sum('line_vat'), total_gross: sum('line_gross'), dispatch_status: 'none', dispatch_error: null, kind: 'debit', status: 'draft', invoice_no: null, reference_no: null, public_token: `00000000-0000-4000-8000-${String(st.invoices.length + 1).padStart(12, '0')}` };
       if (a.p_id) {
         const inv = st.invoices.find((x) => x.id === a.p_id);
         if (!inv || inv.status !== 'draft') throw err('invoice_locked', 'Vain luonnosta voi muokata');

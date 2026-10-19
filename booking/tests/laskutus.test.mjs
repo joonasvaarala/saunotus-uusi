@@ -1,7 +1,7 @@
 // Laskutus: viite, OVT, maksutila invoiced, tekstit ja migraatiot. Ei tietokantaa.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fiReference, validBusinessId, validOvt, validOperator } from '../shop/src/invoice-validate.js';
@@ -9,6 +9,9 @@ import { createAdminMock } from '../admin/options-mock.js';
 import { matchesPaymentFilter, PAYMENT_FILTERS } from '../admin/orders-filter.js';
 import { PAY } from '../admin/views/talous-ui.js';
 import { TEXTS } from '../admin/talous-texts.js';
+import { customerDirty, routeSearchTerm } from '../admin/invoice-customer-search.js';
+import { mapYtjCompany, mapYtjResponse, titleFi, ytjSearchUrl } from '../admin/ytj.js';
+import { INVOICE_TEXTS } from '../admin/invoices-texts.js';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const repo = join(root, '../..');
@@ -135,4 +138,152 @@ test('mock: luonnos, verkkolasku dry_run, hyvitys ja virheellinen y-tunnus', asy
   assert.equal(credit.total_gross, -200.8);
   const rates = await mock.rpc('admin_list_vat_rates');
   assert.deepEqual(rates.rates.filter((r) => r.active).map((r) => r.rate), [0, 13.5, 25.5]);
+});
+
+test('hakusana siirtyy tyhjään Yritys- tai Y-tunnus-kenttään', () => {
+  assert.deepEqual(routeSearchTerm('  Havu   hattu '), { field: 'company_name', value: 'Havu hattu', filled: true });
+  assert.deepEqual(routeSearchTerm('0112038-9'), { field: 'business_id', value: '0112038-9', filled: true });
+  assert.deepEqual(routeSearchTerm('FI01120389'), { field: 'business_id', value: '0112038-9', filled: true });
+  assert.equal(routeSearchTerm('a').filled, false);
+  assert.equal(routeSearchTerm('Uusi Oy', { company_name: 'Vanha Oy' }).filled, false);
+  assert.equal(routeSearchTerm('0112038-9', { business_id: '1234567-1' }).filled, false);
+  assert.equal(customerDirty({ company_name: 'A Oy', email: 'A@B.FI' }, { company_name: 'A Oy', email: 'a@b.fi' }), false);
+  assert.equal(customerDirty({ company_name: 'A Oy', street: 'Katu 2' }, { company_name: 'A Oy', street: 'Katu 1' }), true);
+});
+
+test('YTJ-osoite ja vastaus: nimi, Y-tunnus ja postiosoite, ei verkkolaskua', () => {
+  assert.match(ytjSearchUrl('Havuhattu'), /name=Havuhattu$/);
+  assert.match(ytjSearchUrl('0112038-9'), /businessId=0112038-9$/);
+  assert.equal(ytjSearchUrl('x'), '');
+  assert.equal(titleFi('SIPOO'), 'Sipoo');
+  const mapped = mapYtjCompany({
+    businessId: { value: '3018112-1' },
+    names: [
+      { name: 'VANHA', type: '1', endDate: '2020-01-01', registrationDate: '2010-01-01' },
+      { name: 'HAVUHATTU OY', type: '1', registrationDate: '2020-01-02' },
+    ],
+    addresses: [{
+      type: '2', street: 'Hindsbyntie', buildingNumber: '124', co: 'c/o Otto kronqvist', postCode: '04130',
+      postOffices: [{ languageCode: '1', city: 'SIPOO' }, { languageCode: '2', city: 'SIBBO' }],
+    }],
+  });
+  assert.equal(mapped.company_name, 'HAVUHATTU OY');
+  assert.equal(mapped.business_id, '3018112-1');
+  assert.equal(mapped.street, 'c/o Otto kronqvist, Hindsbyntie 124');
+  assert.equal(mapped.zip, '04130');
+  assert.equal(mapped.city, 'Sipoo');
+  assert.equal('einvoice_address' in mapped, false);
+  assert.equal(mapYtjResponse({ companies: [mapped && { names: [], businessId: {} }, { names: [{ name: 'Oy', type: '1' }], businessId: { value: '1234567-1' } }] }).length, 1);
+});
+
+test('mock: haku, Y-tunnuksen duplikaatti, nimi+sähköposti ja laskukohtainen kuva', async () => {
+  const mock = createAdminMock({ delay: 0 });
+  const line = { description: 'Saunavuoro', quantity: 1, unit: 'kpl', unit_price_net: 10, vat_rate: 25.5 };
+  const first = await mock.rpc('admin_save_invoice_customer', { p: { company_name: 'Havuhattu Testi Oy', business_id: '0112038-9', street: 'Vanha katu 1', email: 'aino@example.com', einvoice_address: '003701120389', einvoice_operator: '003723327487' } });
+  const hits = await mock.rpc('admin_search_invoice_customers', { p_search: 'HAVU', p_limit: 8 });
+  assert.equal(hits.length, 1);
+  assert.equal(hits[0].company_name, 'Havuhattu Testi Oy');
+  const byDigits = await mock.rpc('admin_search_invoice_customers', { p_search: '01120389' });
+  assert.equal(byDigits[0].id, first.id);
+  assert.deepEqual(await mock.rpc('admin_search_invoice_customers', { p_search: 'x' }), []);
+  await assert.rejects(
+    mock.rpc('admin_save_invoice_customer', { p: { company_name: 'Toinen Oy', business_id: 'FI01120389', email: 'b@example.com' } }),
+    (e) => {
+      assert.equal(e.code, 'customer_exists');
+      assert.equal(JSON.parse(e.details.hint).id, first.id);
+      return true;
+    },
+  );
+  const person = await mock.rpc('admin_save_invoice_customer', { p: { company_name: 'Matti Meikäläinen', email: 'matti@example.test' } });
+  await assert.rejects(
+    mock.rpc('admin_save_invoice_customer', { p: { company_name: 'matti meikäläinen', email: 'Matti@example.test' } }),
+    (e) => e.code === 'name_email_match' && JSON.parse(e.details.hint).id === person.id,
+  );
+  const anyway = await mock.rpc('admin_save_invoice_customer', { p: { company_name: 'matti meikäläinen', email: 'Matti@example.test', ack_name_email: true } });
+  assert.notEqual(anyway.id, person.id);
+  const inv = await mock.rpc('admin_save_invoice', { p: { customer_id: first.id, snapshot_mode: 'invoice', customer_override: { street: 'Vain laskulla 2' }, lines: [line] } });
+  assert.equal(inv.customer_snapshot_locked, true);
+  assert.equal(inv.customer.street, 'Vain laskulla 2');
+  const stored = (await mock.rpc('admin_list_invoice_customers', { p_search: 'Havuhattu' })).find((c) => c.id === first.id);
+  assert.equal(stored.street, 'Vanha katu 1');
+  const credit = await mock.rpc('admin_credit_invoice', { p_id: (await mock.rpc('admin_mark_invoice_paid', { p_id: (await mock.rpc('admin_send_invoice', { p_id: inv.id, p_einvoice: false })).id })).id });
+  assert.equal(credit.customer_snapshot_locked, true);
+  assert.equal(credit.customer.street, 'Vain laskulla 2');
+});
+
+test('booking_112: haku-RPC, uniikki Y-tunnus, duplikaatti keskeyttää, rollback', () => {
+  const sql = read('supabase/migrations/20261019090000_booking_112_invoice_customer_lookup.sql');
+  assert.match(sql, /DUPLICATE_BUSINESS_ID/);
+  assert.match(sql, /Yhtään riviä ei poistettu/);
+  assert.doesNotMatch(sql, /delete from booking\.invoice_customers/i);
+  assert.match(sql, /create unique index invoice_customers_business_uidx/);
+  assert.match(sql, /customer_snapshot_locked boolean not null default false/);
+  assert.match(sql, /create function booking\.admin_search_invoice_customers/);
+  for (const name of ['admin_search_invoice_customers', 'admin_save_invoice_customer', 'admin_save_invoice', '_invoice_customer_clean', '_ensure_draft_invoice']) {
+    const at = sql.indexOf(`function booking.${name}`);
+    assert.ok(at > 0, name);
+    const body = sql.slice(at, at + 500);
+    assert.match(body, /security definer/i, name);
+    assert.match(body, /set search_path = ''/, name);
+  }
+  assert.match(sql, /perform booking\._require_permission\('invoices\.manage'\)/);
+  assert.match(sql, /grant execute on function booking\.admin_search_invoice_customers\(text, integer\) to authenticated, service_role/);
+  assert.doesNotMatch(sql, /grant execute on function booking\._ensure_draft_invoice/);
+  assert.match(sql, /customer_exists/);
+  assert.match(sql, /name_email_match/);
+  assert.match(sql, /ack_name_email/);
+  const rb = read('supabase/rollbacks/20261019090000_booking_112_ROLLBACK.sql');
+  assert.match(rb, /drop index if exists booking\.invoice_customers_business_uidx/);
+  assert.match(rb, /drop column if exists customer_snapshot_locked/);
+  assert.match(rb, /drop function if exists booking\.admin_search_invoice_customers/);
+  assert.match(rb, /create or replace function booking\.admin_save_invoice_customer/);
+  assert.match(rb, /create or replace function booking\._ensure_draft_invoice/);
+  const t112 = read('supabase/tests/invoices/t112_invoice_customer_lookup.sql');
+  for (const bit of ['customer_exists', 'name_email_match', 'ack_name_email', 'customer_snapshot_locked', '1234567-1', 'invoices.manage']) {
+    assert.match(t112, new RegExp(bit.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
+  const t90 = read('supabase/tests/invoices/t90_invoices.sql');
+  assert.match(t90, /1234567-1/);
+  assert.match(t90, /2336509-6/);
+});
+
+test('pending-import-21 ja näkymä käyttävät samaa hakua kuin Uusi varaus', () => {
+  const rows = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-21.json'), 'utf8'));
+  assert.ok(rows.length >= 28 && rows.length <= 500);
+  const keys = new Set(rows.map((r) => r.key));
+  for (const k of ['ui.admin.invoices.find', 'ui.admin.invoices.moved', 'ui.admin.invoices.ytj', 'ui.admin.invoices.only_invoice', 'ui.admin.invoices.need_company']) {
+    assert.ok(keys.has(k), k);
+  }
+  for (const r of rows) {
+    assert.equal(r.class, 'normal', r.key);
+    assert.ok(r.lang === 'fi' || r.lang === 'en', r.key);
+    assert.equal(INVOICE_TEXTS[r.lang][r.key], r.text, `${r.key} ${r.lang}`);
+  }
+  for (const lang of ['fi', 'en']) assert.equal(rows.filter((r) => r.lang === lang).length, keys.size);
+  const taken = new Set();
+  for (const f of readdirSync(join(repo, 'content'))) {
+    if (!/^site-texts\.(pending-import(?!-21)|imported)/.test(f) || !f.endsWith('.json')) continue;
+    for (const r of JSON.parse(readFileSync(join(repo, 'content', f), 'utf8'))) taken.add(`${r.key}|${r.lang}`);
+  }
+  const fb = JSON.parse(readFileSync(join(repo, 'content/site-texts.fallback.json'), 'utf8'));
+  const fbRows = Array.isArray(fb) ? fb : fb.texts;
+  for (const r of rows) {
+    assert.equal(taken.has(`${r.key}|${r.lang}`), false, r.key);
+    const hit = fbRows.find((x) => x.key === r.key && x.lang === r.lang);
+    assert.equal(hit?.text, r.text, r.key);
+  }
+  const invoices = read('admin/views/invoices.js');
+  assert.match(invoices, /lookupSearch/);
+  assert.match(invoices, /admin_search_invoice_customers/);
+  assert.match(invoices, /fetchYtj/);
+  assert.match(invoices, /invoice-customer-search/);
+  assert.match(invoices, /routeSearchTerm/);
+  assert.match(invoices, /snapshot_mode/);
+  assert.match(invoices, /ack_name_email/);
+  const form = read('admin/views/customerform.js');
+  assert.match(form, /export function lookupSearch/);
+  assert.match(form, /export function customerSearch/);
+  assert.match(form, /return lookupSearch\(/);
+  assert.match(form, /admin_list_customers/);
+  assert.match(form, /customer-search-btn/);
 });

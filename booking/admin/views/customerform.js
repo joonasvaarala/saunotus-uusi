@@ -147,37 +147,68 @@ export function customerForm({ initialKind = 'private', contact = true, id = 'cf
   };
 }
 
-// Asiakashaku (Uusi varaus + resurssi-/vanha varaus -lomake): kirjoittaessa osumat (viive); Hae-painike / Enter hakee heti, ja jos osumia ei ole,
-// hakusana esitäytetään uuden asiakkaan lomakkeelle (cf.prefill). st.customer = valittu asiakas; onChange() kutsutaan valinnan/nollauksen jälkeen.
-// Palauttaa { row (hakukenttä + Hae-painike), found (tulosalue), reset() }.
-export function customerSearch({ cf, st, onChange = () => {} }) {
+// Yhteinen haku (Uusi varaus ja Uusi lasku): kirjoittaessa osumat (viive); Hae / Enter hakee heti.
+// Jos osumia ei ole ja haku on tahallinen, onExplicitMiss(term) palauttaa näytettävän solmun (esim. nimi siirretään kenttään).
+// Palauttaa { row, found, reset(), input, pick(row) }.
+export function lookupSearch({
+  placeholder, ariaLabel, buttonLabel, buttonTestId = 'customer-search-btn', search,
+  hitTitle, hitMeta = () => '', onPick, pickedTitle, pickedMeta = () => '', newLabel, onReset, onExplicitMiss,
+  pickedTestId = 'customer-picked',
+} = {}) {
   const found = h('div', { class: 'found', 'aria-live': 'polite' });
-  const search = h('input', { type: 'search', placeholder: nbt('cu.searchPh'), 'aria-label': nbt('cu.searchAria'), enterkeyhint: 'search', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', name: 'csearch' });
+  const input = h('input', { type: 'search', placeholder, 'aria-label': ariaLabel, enterkeyhint: 'search', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', name: 'csearch' });
   let timer, seq = 0;
-  const reset = () => { st.customer = null; cf.existing(false); found.replaceChildren(); onChange(); };
-  const pick = (c) => {
-    st.customer = c; cf.fill(c); cf.existing(true); onChange();
-    const who = c.customer_kind === 'company' ? `${c.company || c.name} (${c.business_id || nbt('cu.company')}), ${nbt('cu.contact')} ${c.name}` : c.name;
-    found.replaceChildren(h('div', { class: 'picked-cust', 'data-testid': 'customer-picked' }, h('span', { class: 'pc-ico' }, icon('check', 22)),
-      h('div', { class: 'pc-txt' }, h('strong', { text: who }), h('small', { text: [c.email, c.phone].filter(Boolean).join(' · ') || nbt('cu.selectedNote') })),
-      h('button', { type: 'button', class: 'btn ghost', onclick: reset }, nbt('cu.new'))));
+  const reset = () => { onReset?.(); found.replaceChildren(); };
+  const pick = (row) => {
+    onPick?.(row);
+    found.replaceChildren(h('div', { class: 'picked-cust', 'data-testid': pickedTestId }, h('span', { class: 'pc-ico' }, icon('check', 22)),
+      h('div', { class: 'pc-txt' }, h('strong', { text: pickedTitle(row) }), h('small', { text: pickedMeta(row) })),
+      h('button', { type: 'button', class: 'btn ghost', onclick: reset }, newLabel)));
   };
   async function doSearch(explicit) {
-    clearTimeout(timer); const term = search.value.trim(), my = ++seq;
+    clearTimeout(timer); const term = input.value.trim(), my = ++seq;
     if (term.length < 2) { found.replaceChildren(); return; }
-    const rows = await rpc('admin_list_customers', { p_search: term, p_limit: 5, p_offset: 0 }).catch(() => []);
-    if (my !== seq) return;   // vanhentunut haku
-    if (!rows.length && explicit) {
-      if (st.customer) { found.replaceChildren(h('p', { class: 'muted', role: 'status', 'data-testid': 'customer-notfound', text: nbt('cu.notFoundKept') })); return; }
-      const r = cf.prefill(term);
-      const what = nbt(`cu.what.${r.field}`);
-      found.replaceChildren(h('p', { class: 'notfound', role: 'status', 'data-testid': 'customer-notfound' }, h('strong', { text: nbt('cu.notFound') }), h('small', { text: ` ${r.filled ? nbt('cu.prefilled', { what }) : nbt('cu.notOverwritten', { what })}` })));
+    let rows = [];
+    try { rows = await search(term); } catch { rows = []; }
+    if (my !== seq) return;
+    if (!Array.isArray(rows)) rows = [];
+    if (!rows.length) {
+      if (explicit && onExplicitMiss) {
+        const node = onExplicitMiss(term);
+        if (node) found.replaceChildren(node); else found.replaceChildren();
+      } else {
+        // Tyhjä kirjoitushaku tyhjentää vain osumalistan. "Ei löydy" / YTJ jää näkyviin.
+        const kids = [...found.children];
+        if (kids.length && kids.every((el) => el.classList?.contains('listrow'))) found.replaceChildren();
+      }
       return;
     }
-    found.replaceChildren(...rows.map((c) => h('button', { type: 'button', class: 'listrow', onclick: () => pick(c) }, h('strong', { text: c.customer_kind === 'company' && c.company ? `${c.company} (${c.name})` : c.name }), h('small', { text: ` ${c.email || ''} ${c.phone || ''}` }))));
+    found.replaceChildren(...rows.map((row) => h('button', { type: 'button', class: 'listrow', onclick: () => pick(row) }, h('strong', { text: hitTitle(row) }), h('small', { text: ` ${hitMeta(row)}` }))));
   }
-  search.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(() => doSearch(false), 250); });
-  search.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); doSearch(true); } });   // Enter ei saa lähettää varauslomaketta
-  const row = h('div', { class: 'nbsearch' }, search, h('button', { type: 'button', class: 'btn', 'data-testid': 'customer-search-btn', onclick: () => doSearch(true) }, nbt('cu.searchBtn')));
-  return { row, found, reset, input: search };
+  input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(() => doSearch(false), 250); });
+  input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); doSearch(true); } });
+  const row = h('div', { class: 'nbsearch' }, input, h('button', { type: 'button', class: 'btn', 'data-testid': buttonTestId, onclick: () => doSearch(true) }, buttonLabel));
+  return { row, found, reset, input, pick };
+}
+
+// Asiakashaku (Uusi varaus + resurssi-/vanha varaus -lomake). Sama ulkoasu kuin lookupSearch.
+// st.customer = valittu asiakas; onChange() kutsutaan valinnan/nollauksen jälkeen.
+export function customerSearch({ cf, st, onChange = () => {} }) {
+  return lookupSearch({
+    placeholder: nbt('cu.searchPh'), ariaLabel: nbt('cu.searchAria'), buttonLabel: nbt('cu.searchBtn'),
+    search: (term) => rpc('admin_list_customers', { p_search: term, p_limit: 5, p_offset: 0 }).catch(() => []),
+    hitTitle: (c) => (c.customer_kind === 'company' && c.company ? `${c.company} (${c.name})` : c.name),
+    hitMeta: (c) => `${c.email || ''} ${c.phone || ''}`,
+    onPick: (c) => { st.customer = c; cf.fill(c); cf.existing(true); onChange(); },
+    pickedTitle: (c) => (c.customer_kind === 'company' ? `${c.company || c.name} (${c.business_id || nbt('cu.company')}), ${nbt('cu.contact')} ${c.name}` : c.name),
+    pickedMeta: (c) => [c.email, c.phone].filter(Boolean).join(' · ') || nbt('cu.selectedNote'),
+    newLabel: nbt('cu.new'),
+    onReset: () => { st.customer = null; cf.existing(false); onChange(); },
+    onExplicitMiss: (term) => {
+      if (st.customer) return h('p', { class: 'muted', role: 'status', 'data-testid': 'customer-notfound', text: nbt('cu.notFoundKept') });
+      const r = cf.prefill(term);
+      const what = nbt(`cu.what.${r.field}`);
+      return h('p', { class: 'notfound', role: 'status', 'data-testid': 'customer-notfound' }, h('strong', { text: nbt('cu.notFound') }), h('small', { text: ` ${r.filled ? nbt('cu.prefilled', { what }) : nbt('cu.notOverwritten', { what })}` }));
+    },
+  });
 }
