@@ -6,7 +6,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.5 system-ui
 h1{font-size:24px;margin:0 0 12px;color:var(--ink)}h2{font-size:19px;margin:22px 0 8px;color:var(--ink)}h3{font-size:16px;margin:14px 0 6px;color:var(--ink)}
 a{color:var(--gold)}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px}   /* tumma kullanruskea: kontrasti 6,6:1 valkoista ja 5,8:1 hiekkaa vasten (≥3:1), ei sinistä */
-.top :focus-visible,.btn.primary:focus-visible{outline-color:#EDE3D0}   /* tummalla vihreällä: hiekka 9,4:1 */
+.top :focus-visible,.btn.primary:focus-visible,.pos-lines-btn:focus-visible{outline-color:#EDE3D0}   /* tummalla vihreällä: hiekka 9,4:1 */
 .top :focus-visible{outline-offset:-2px}
 input:focus-visible,select:focus-visible,textarea:focus-visible{border-color:var(--green)}
 [hidden]{display:none!important}
@@ -569,7 +569,9 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .pos-btn:hover{border-color:var(--green)}
 .pos-name{font-size:16px}
 .pos-price{font-size:18px}
-.pos-lines-btn{width:100%;background:var(--green);color:#fff;border-color:var(--green)}
+.pos-lines-btn{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:36px;margin:0;padding:4px 12px;border-radius:10px;border:1px solid var(--green);background:var(--green);color:#fff;font-family:inherit;font-weight:600;font-size:15px;line-height:1.2;text-align:left;cursor:pointer}
+.pos-lines-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pos-lines-count{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:1.5em;height:1.35em;padding:0 6px;border-radius:999px;background:#EDE3D0;color:var(--green);font-size:13px;font-weight:700;line-height:1}
 .pos-panel{display:grid;gap:8px;margin-top:12px}
 .pos-line{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px}
 .pos-step{min-width:48px;min-height:48px;padding:0}

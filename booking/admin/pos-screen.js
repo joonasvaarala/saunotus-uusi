@@ -420,9 +420,15 @@ export async function renderPos({ ctx, rpc, fn }) {
     }
 
     const lines = h('div', { class: 'pos-panel', 'data-testid': 'pos-panel' });
-    lines.append(h('button', { type: 'button', class: 'pos-btn pos-lines-btn', 'data-testid': 'pos-lines', 'aria-expanded': showLines ? 'true' : 'false', onclick: () => { showLines = !showLines; draw(); } },
-      h('span', { class: 'pos-name', text: t('lines') }),
-      h('strong', { class: 'pos-price', text: String(cart.reduce((n, r) => n + r.quantity, 0)) })));
+    const lineQty = cart.reduce((n, r) => n + r.quantity, 0);
+    lines.append(h('button', {
+      type: 'button', class: 'pos-lines-btn', 'data-testid': 'pos-lines',
+      'aria-expanded': showLines ? 'true' : 'false',
+      'aria-label': `${t('lines')} ${lineQty}`,
+      onclick: () => { showLines = !showLines; draw(); },
+    },
+      h('span', { class: 'pos-lines-label', text: t('lines') }),
+      h('span', { class: 'pos-lines-count', text: String(lineQty) })));
     if (showLines) {
       if (!cart.length) lines.append(h('p', { class: 'muted', text: t('empty') }));
       for (const r of cart) {
