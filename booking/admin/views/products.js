@@ -7,21 +7,32 @@ import { productOptionsAdmin } from './productoptions.js';
 import { h, dialog, field, toast, run, money, badge } from '../ui.js';
 import { filterDrawer } from '../filter-drawer.js';
 import { loadPosTexts, posText } from '../pos-texts.js';
+import { loadProductTexts, productText } from '../product-texts.js';
+import { settingsHref } from '../settings-tabs.js';
 import { looksLikeAlcohol } from '../pos-logic.js';
 
-const VAT = [25.5, 24, 14, 13.5, 10, 0];
+const VAT_ACTIVE = [25.5, 13.5, 0];
+const CATEGORY_ORDER = ['product_rental', 'add_on', 'public_sauna', 'private_sauna', 'corporate', 'treatment', 'ritual', 'ceremony', 'event', 'gift_card', 'season_card', 'training', 'other'];
+function vatChoices(current) {
+  const cur = current == null || current === '' ? null : +current;
+  const list = [...VAT_ACTIVE];
+  if (cur != null && Number.isFinite(cur) && !list.some((v) => v === cur)) list.push(cur);
+  return list;
+}
+const vatLabel = (v) => `${String(v).replace('.', ',')} %`;
 
 // "Verkossa" = tuote näkyy ja on varattavissa verkkokaupassa: sama ehto kuin public_catalog:ssa (product_config: bookable, shop_visible, lifecycle = 'current').
 // Puuttuva kenttä ei estä (shop_visible/lifecycle voivat puuttua vanhemmasta kannasta); puuttuva product_config = ei verkossa.
 export const isOnline = (p) => { const c = p?.config; return !!c && c.bookable === true && c.shop_visible !== false && c.lifecycle !== 'old'; };
-export const CATEGORY_LABELS = { public_sauna: 'Yleiset saunavuorot', private_sauna: 'Yksityiset saunavuorot', corporate: 'Yritykset', treatment: 'Hoidot', ritual: 'Rituaalit', ceremony: 'Seremoniat', event: 'Tapahtumat', gift_card: 'Lahjakortit', season_card: 'Kausikortit', product_rental: 'Vuokrattavat tuotteet', training: 'Koulutukset', add_on: 'Lisäpalvelut' };
-export const catLabel = (c) => CATEGORY_LABELS[c] || c || 'Ilman kategoriaa';
+export const CATEGORY_LABELS = { public_sauna: 'Yleiset saunavuorot', private_sauna: 'Yksityiset saunavuorot', corporate: 'Yritykset', treatment: 'Hoidot', ritual: 'Rituaalit', ceremony: 'Seremoniat', event: 'Tapahtumat', gift_card: 'Lahjakortit', season_card: 'Kausikortit', product_rental: 'Tuotteet ja vuokrat', training: 'Koulutukset', add_on: 'Lisäpalvelut', other: 'Muu' };
+export const catLabel = (c) => (c === 'product_rental' ? productText('cat_rental') : c === 'other' ? productText('cat_other') : (CATEGORY_LABELS[c] || c || 'Ilman kategoriaa'));
 export const VISIBILITY = [['', 'Kaikki'], ['online', 'Verkossa'], ['offline', 'Ei verkossa']];
 const VIS_URL = { online: 'verkossa', offline: 'ei-verkossa' };
 const norm = (x) => String(x ?? '').toLocaleLowerCase('fi');   // kirjainkoolla ei ole merkitystä
 
 export async function render({ ctx, refs, reload, query }) {
   await loadPosTexts(rpc);
+  await loadProductTexts(rpc);
   const isAdmin = ctx.can('catalog.edit');  // manager + admin
   const fresh = () => { ctx.refs = null; reload(); };   // tuotelista haetaan uudelleen (refs on välimuistissa; muuten uusi kuva/tiedot eivät näy listassa)
   const list = h('div', { class: 'list' });
@@ -81,7 +92,7 @@ export async function render({ ctx, refs, reload, query }) {
   draw();
   function edit(p) {
     const inp = (name, v, { area, ...o } = {}) => h(area ? 'textarea' : 'input', { name, value: v ?? '', rows: area ? 5 : null, disabled: !isAdmin, ...o });
-    const vat = h('select', { name: 'vat_rate', disabled: !isAdmin }, VAT.map((v) => h('option', { value: v, text: `${v} %`, selected: +p.vat_rate === v || null })));
+    const vat = h('select', { name: 'vat_rate', disabled: !isAdmin }, vatChoices(p.vat_rate).map((v) => h('option', { value: v, text: vatLabel(v), selected: +p.vat_rate === v || null })));
     const f = h('form', { class: 'stack' },
       field('Nimi (FI)', inp('name', p.name, { required: true })), field('Nimi (EN)', inp('name_en', p.name_en)),
       field('Kuvaus (FI)', inp('description', p.description, { area: true })), field('Kuvaus (EN)', inp('description_en', p.description_en, { area: true })),
@@ -126,11 +137,53 @@ export async function render({ ctx, refs, reload, query }) {
       return h('div', { class: 'row wrap varrow' }, h('span', { class: 'grow' }, h('strong', { text: v.label }), h('small', { text: ` ${v.valid_from || ''}${v.valid_to ? '–' + v.valid_to : ''}${v.included_persons ? ` · sis. ${v.included_persons} hlö` : ''}${v.extra_person_price ? ` · lisählö ${v.extra_person_price} €` : ''}` })), inpP,
         isAdmin ? h('button', { type: 'button', class: 'btn sm', text: 'Tallenna', onclick: (e) => run(e.target, async () => { await rpc('admin_update_price_variant', { p_variant_id: v.id, p_patch: { price: +inpP.value } }); toast('Hinta tallennettu'); fresh(); }) }) : null);
     })) : null;
-    const d = dialog(p.name, h('div', { class: 'stack' }, f, img, cfg, vars), { wide: true });
+    let d;
+    const next = c && isAdmin ? h('div', { class: 'box stack prod-next', 'data-testid': 'product-next' },
+      h('p', { text: productText('next') }),
+      h('p', { class: 'muted', text: productText('pos_hint') }),
+      h('a', { class: 'btn', href: '#/pikakassa', 'data-testid': 'product-open-pos', text: productText('link_pos'), onclick: () => d?.close() }),
+      h('p', { class: 'muted', text: productText('qr_hint') }),
+      h('a', { class: 'btn', href: settingsHref('qr'), 'data-testid': 'product-open-qr', text: productText('link_qr'), onclick: () => d?.close() })) : null;
+    d = dialog(p.name, h('div', { class: 'stack' }, f, img, cfg, next, vars), { wide: true });
+  }
+  function createProduct() {
+    const inp = (name, v, o = {}) => h(o.area ? 'textarea' : 'input', { name, value: v ?? '', rows: o.area ? 5 : null, ...o, area: null });
+    const vat = h('select', { name: 'vat_rate', 'data-testid': 'product-create-vat' }, vatChoices(25.5).map((v) => h('option', { value: v, text: vatLabel(v), selected: v === 25.5 || null })));
+    vat.value = '25.5';
+    const cat = h('select', { name: 'category', 'data-testid': 'product-create-category' }, CATEGORY_ORDER.map((c) => h('option', { value: c, text: catLabel(c), selected: c === 'product_rental' || null })));
+    cat.value = 'product_rental';
+    const f = h('form', { class: 'stack', 'data-testid': 'product-create-form' },
+      field(productText('name_fi'), inp('name', '', { required: true, maxlength: 200 })),
+      field(productText('name_en'), inp('name_en', '', { maxlength: 200 }), productText('name_en_hint')),
+      field('Kuvaus (FI)', inp('description', '', { area: true })), field('Kuvaus (EN)', inp('description_en', '', { area: true })),
+      h('div', { class: 'row wrap' }, field(productText('price'), inp('price', '', { type: 'number', step: '0.01', min: '0', required: true, inputmode: 'decimal' })), field(productText('vat'), vat)),
+      field(productText('price_text'), inp('price_text', '', { maxlength: 200 }), productText('price_text_hint')),
+      field(productText('category'), cat),
+      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'active' }), ' ' + productText('active')),
+      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'shop_visible' }), ' ' + productText('shop')),
+      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'age_restricted' }), ' ' + productText('age')),
+      h('p', { class: 'muted', text: productText('next') }),
+      h('button', { class: 'btn primary', type: 'submit', 'data-testid': 'product-create-submit', text: productText('create') }));
+    f.active.checked = true;
+    f.shop_visible.checked = false;
+    f.age_restricted.checked = false;
+    f.addEventListener('submit', (ev) => { ev.preventDefault(); run(f.querySelector('button'), async () => {
+      const fd = new FormData(f);
+      const res = await rpc('admin_product_create', { p_data: {
+        name: fd.get('name'), name_en: fd.get('name_en'), description: fd.get('description'), description_en: fd.get('description_en'),
+        price: fd.get('price'), price_text: fd.get('price_text'), vat_rate: fd.get('vat_rate'), category: fd.get('category'),
+        active: f.active.checked, shop_visible: f.shop_visible.checked, age_restricted: f.age_restricted.checked,
+      } });
+      toast(productText('created')); d.close();
+      if (res?.product) edit(res.product);
+      fresh();
+    }); });
+    const d = dialog(productText('new_title'), f, { wide: true });
   }
   const addonsSection = await addonsAdmin({ ctx });
   const optionsSection = await productOptionsAdmin({ ctx });   // tuotevalinnat (booking_50)
-  return [h('h1', { text: 'Tuotteet' }), h('p', { class: 'muted', text: isAdmin ? 'Tuotetiedot tallentuvat kb-tauluihin (sivusto ja botti käyttävät samaa totuutta). Muutokset kirjataan audit-lokiin ja kb.change_logiin.' : 'Näet tuotteet; hintojen ja tuotteiden muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }), filters, count, list, optionsSection, addonsSection];
+  const addBtn = isAdmin ? h('button', { type: 'button', class: 'btn primary prod-add', 'data-testid': 'product-add', text: productText('add'), onclick: () => createProduct() }) : null;
+  return [h('div', { class: 'row between wrap prod-head' }, h('h1', { text: 'Tuotteet' }), addBtn), h('p', { class: 'muted', text: isAdmin ? 'Tuotetiedot tallentuvat kb-tauluihin (sivusto ja botti käyttävät samaa totuutta). Muutokset kirjataan audit-lokiin ja kb.change_logiin.' : 'Näet tuotteet; hintojen ja tuotteiden muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }), filters, count, list, optionsSection, addonsSection];
 }
 
 // ---- tuotekuva: esikatselu, lataus, alt-teksti, poisto ----

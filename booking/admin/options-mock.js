@@ -511,6 +511,57 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       st.productQr.splice(i, 1);
       return { ok: true };
     },
+    admin_product_create: (a) => {
+      need('catalog.edit');
+      const d = a.p_data || {};
+      const allowed = new Set(['name', 'name_en', 'description', 'description_en', 'price', 'price_text', 'vat_rate', 'category', 'active', 'shop_visible', 'age_restricted']);
+      for (const k of Object.keys(d)) if (!allowed.has(k)) throw err('unknown_field', 'Kenttää ei saa muokata: ' + k);
+      const name = String(d.name ?? '').trim();
+      if (!name || name.length > 200) throw err('invalid_name', 'Nimi ei voi olla tyhjä');
+      let nameEn = String(d.name_en ?? '').trim();
+      if (!nameEn) nameEn = name;
+      if (nameEn.length > 200) throw err('invalid_name', 'Englanninkielinen nimi on liian pitkä');
+      const priceRaw = String(d.price ?? '').trim().replace(',', '.');
+      if (!/^\d{1,6}(\.\d{1,2})?$/.test(priceRaw)) throw err('invalid_price', 'Virheellinen hinta');
+      const price = Number(priceRaw);
+      if (price < 0 || price > 100000) throw err('invalid_price', 'Virheellinen hinta');
+      const vatRaw = String(d.vat_rate ?? '').trim().replace(',', '.');
+      if (!/^\d{1,2}(\.\d{1,2})?$/.test(vatRaw)) throw err('invalid_vat', 'ALV-kanta ei ole sallittu');
+      const vat = Number(vatRaw);
+      if (!st.vatRates.some((r) => r.active && r.rate === vat)) throw err('invalid_vat', 'ALV-kanta ei ole sallittu');
+      const cats = ['public_sauna', 'treatment', 'ritual', 'private_sauna', 'ceremony', 'event', 'training', 'gift_card', 'season_card', 'add_on', 'product_rental', 'corporate', 'other'];
+      const category = String(d.category || 'product_rental');
+      if (!cats.includes(category)) throw err('invalid_category', 'Kategoria ei kelpaa');
+      const active = d.active == null ? true : !!d.active;
+      const shop = d.shop_visible == null ? false : !!d.shop_visible;
+      const age = d.age_restricted == null ? false : !!d.age_restricted;
+      if (active && st.products.some((p) => p.active && String(p.name).trim().toLowerCase() === name.toLowerCase())) {
+        throw err('duplicate_name', 'Samanniminen aktiivinen tuote on jo olemassa');
+      }
+      const id = Math.max(0, ...st.products.map((p) => p.id)) + 1;
+      const priceText = String(d.price_text || '').trim() || `${price.toFixed(2).replace('.', ',')} €`;
+      let slug = name.toLowerCase().replace(/[äå]/g, 'a').replace(/ö/g, 'o').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'tuote';
+      const base = slug;
+      let n = 2;
+      while (st.products.some((p) => p.slug === slug)) slug = `${base}-${n++}`;
+      const sort = Math.max(100, ...st.products.map((p) => p.config?.sort_order || 0)) + 10;
+      const row = {
+        id, slug, name, name_en: nameEn,
+        description: String(d.description || '').trim() || null,
+        description_en: String(d.description_en || '').trim() || null,
+        category, price, price_type: 'per_unit', price_text: priceText, vat_rate: vat, active,
+        external_system: null, external_id: null,
+        config: {
+          product_id: id, sale_kind: 'other', bookable: shop, shop_visible: shop, sort_order: sort,
+          min_persons: 1, max_persons: null, lifecycle: 'current', resource_class: 'none',
+          audience: 'consumer', pos_enabled: false, pos_sort: 100, fridge_sale: false, age_restricted: age,
+          public_slots: false,
+        },
+        variants: [],
+      };
+      st.products.push(row);
+      return { ok: true, id, product: row };
+    },
     admin_update_product_config: (a) => {
       need('catalog.edit');
       const p = product(a.p_product_id);

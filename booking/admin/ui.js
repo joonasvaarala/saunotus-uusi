@@ -70,6 +70,12 @@ export const ERR_FI = {
   bad_pool: 'Kapasiteettipooli ei kuulu tähän tilaan.',
   has_reservations: 'Ajalla on varauksia – peru ne ensin.',
   forbidden: 'Ei oikeuksia tähän toimintoon.',
+  duplicate_name: 'Samanniminen aktiivinen tuote on jo olemassa',
+  invalid_category: 'Kategoria ei kelpaa.',
+  invalid_name: 'Nimi ei voi olla tyhjä.',
+  invalid_vat: 'ALV-kanta ei ole sallittu.',
+  invalid_price: 'Virheellinen hinta.',
+  unknown_field: 'Kenttää ei saa muokata.',
   // migraatio 18 (sulkukalenterit)
   closure_managed: 'Tämä sulku tulee sulkukalenterista, eikä sitä voi muokata tai poistaa hallinnassa. Muuta tai poista tapahtuma kalenterissa tai ohita tapahtuma Kalenterisulut-sivulla.',
   bad_override: 'Virheellinen ohitus (sallitut: Ohita, Estä, Palauta automaattinen).',
