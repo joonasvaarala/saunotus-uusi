@@ -67,9 +67,8 @@ export function renderCalendarExport({ state, failed, isAdmin, reload }) {
   const preview = h('button', { class: 'btn', type: 'button', text: cx('ui.admin.calendar_export.preview'), 'data-testid': 'calendar-export-preview-btn', onclick: (e) => run(e.target, async () => {
     const res = await rpc('admin_booking_calendar_preview');
     previewOut.textContent = [
-      `${cx('ui.admin.calendar_export.preview_private')} ${res.private_events ?? 0}`,
-      `${cx('ui.admin.calendar_export.preview_shifts')} ${res.shift_bars ?? 0}`,
-      `${cx('ui.admin.calendar_export.preview_persons')} ${res.shift_persons ?? 0}`,
+      `${cx('ui.admin.calendar_export.preview_days')} ${res.day_bars ?? 0}`,
+      `${cx('ui.admin.calendar_export.preview_bookings')} ${res.bookings ?? 0}`,
       `${cx('ui.admin.calendar_export.preview_unconfigured')} ${res.unconfigured ?? 0}`,
       cx('ui.admin.calendar_export.preview_not_sent'),
     ].join(' · ');

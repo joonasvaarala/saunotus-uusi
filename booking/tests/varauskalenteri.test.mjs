@@ -10,17 +10,21 @@ const repo = join(root, '..');
 const texts = await import(pathToFileURL(join(root, 'admin/calendar-export-texts.js')));
 const logic = await import(pathToFileURL(join(root, 'admin/calendar-export-logic.js')));
 const pending = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-25.json'), 'utf8'));
+const pending26 = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-26.json'), 'utf8'));
 const fallback = JSON.parse(readFileSync(join(repo, 'content/site-texts.fallback.json'), 'utf8'));
 const settings = readFileSync(join(root, 'admin/views/settings.js'), 'utf8');
 const view = readFileSync(join(root, 'admin/views/calendar-export.js'), 'utf8');
 const migration = readFileSync(join(root, 'supabase/migrations/20261019161000_booking_114_calendar_export.sql'), 'utf8');
 const ci = readFileSync(join(repo, '.github/workflows/pages.yml'), 'utf8');
 
-test('sanakirja, pending-import-25 ja varateksti täsmäävät', () => {
+test('sanakirja, tuontitiedostot ja varateksti täsmäävät', () => {
   const fb = fallback.texts;
+  const overlay = new Map();
+  for (const row of pending) overlay.set(row.key + '|' + row.lang, row);
+  for (const row of pending26) overlay.set(row.key + '|' + row.lang, row);
   for (const lang of ['fi', 'en']) {
     for (const [key, text] of Object.entries(texts.CALENDAR_EXPORT_TEXTS[lang])) {
-      const row = pending.find((r) => r.key === key && r.lang === lang);
+      const row = overlay.get(key + '|' + lang);
       assert.ok(row, key + ' ' + lang);
       assert.equal(row.text, text);
       assert.equal(row.class, 'normal');
@@ -34,9 +38,12 @@ test('sanakirja, pending-import-25 ja varateksti täsmäävät', () => {
       assert.deepEqual(fbRow.placeholders, []);
     }
   }
-  assert.equal(new Set(pending.map((r) => r.key + '|' + r.lang)).size, pending.length);
-  assert.equal(pending.length, Object.keys(texts.CALENDAR_EXPORT_TEXTS.fi).length * 2);
-  assert.equal(pending.some((r) => r.key.startsWith('ui.admin.calendar_export.') && r.lang === 'fi' && r.lang === 'en'), false);
+  assert.equal(new Set(pending26.map((r) => r.key + '|' + r.lang)).size, pending26.length);
+  assert.equal(pending26.length % 2, 0);
+  for (const row of pending26) {
+    assert.equal(texts.CALENDAR_EXPORT_TEXTS[row.lang][row.key], row.text);
+  }
+  assert.ok(pending26.some((r) => r.key === 'ui.admin.calendar_export.preview_days'));
 });
 
 test('tunniste: sähköpostimuoto ja lyhyt tunnus, tyhjä sallitaan, väli ei', () => {

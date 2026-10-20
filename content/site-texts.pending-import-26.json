@@ -1,0 +1,102 @@
+[
+ {
+  "key": "ui.admin.calendar_export.lead",
+  "lang": "fi",
+  "text": "Jokaiselle päivälle viedään yksi palkki kaikkien resurssien vahvistetuista varauksista. Sulkukalenterit eivät muutu. Kalenterissa tehty muutos ei muuta varausta. Oletus on pois päältä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Päiväpalkki korvaa yksittäiset tapahtumat. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.admin.calendar_export.lead",
+  "lang": "en",
+  "text": "Each day is exported as one bar of confirmed bookings across all resources. Closure calendars stay as they are. An edit in the calendar does not change the booking. The default is off.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Päiväpalkki korvaa yksittäiset tapahtumat. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.admin.calendar_export.shared_hint",
+  "lang": "fi",
+  "text": "Päivän palkki menee tähän kalenteriin. Tyhjä tunnus ei vie mitään.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Päiväpalkki käyttää yhteistä kalenteritunnusta. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.admin.calendar_export.shared_hint",
+  "lang": "en",
+  "text": "The day bar goes to this calendar. An empty id exports nothing.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Päiväpalkki käyttää yhteistä kalenteritunnusta. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.admin.calendar_export.resource_hint",
+  "lang": "fi",
+  "text": "Päiväpalkki käyttää yhteistä kalenteria. Nämä tunnukset eivät ohita sitä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Resurssikohtainen tunnus ei ohita päiväpalkin yhteistä kalenteria. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.admin.calendar_export.resource_hint",
+  "lang": "en",
+  "text": "The day bar uses the shared calendar. These ids do not override it.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Resurssikohtainen tunnus ei ohita päiväpalkin yhteistä kalenteria. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.admin.calendar_export.preview_days",
+  "lang": "fi",
+  "text": "Päiväpalkkeja",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Esikatselu laskee päiväpalkit. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.admin.calendar_export.preview_days",
+  "lang": "en",
+  "text": "Day bars",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Esikatselu laskee päiväpalkit. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.admin.calendar_export.preview_bookings",
+  "lang": "fi",
+  "text": "Varausta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Esikatselu laskee varaukset päiväpalkeissa. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.admin.calendar_export.preview_bookings",
+  "lang": "en",
+  "text": "Bookings",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Esikatselu laskee varaukset päiväpalkeissa. FI+EN, luokka normal."
+ }
+]
