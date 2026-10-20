@@ -9,7 +9,7 @@ const monthsAdd = (ds, m) => { const d = new Date(`${ds}T12:00:00Z`); d.setUTCMo
 const fmtCode = (n) => `${n.slice(0, 4)}-${n.slice(4, 8)}-${n.slice(8)}`;
 const norm = (s) => String(s ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 export const MOCK_PACKAGES = [
-  { code: 'open', kind: 'value', name: 'Avoin lahjakortti', name_en: 'Open gift card', description: 'Vapaa summa; käy kaikkiin palveluihin.', description_en: 'Any amount; valid for all services.', is_open: true, price: null, min_amount: 29, max_amount: 500, persons: null, vat_rate: 25.5, vat_treatment: 'at_redemption', valid_months: 6, active: true, sort_order: 1, items: [] },
+  { code: 'open', kind: 'value', name: 'Avoin lahjakortti', name_en: 'Open gift card', description: 'Vapaa summa; käy kaikkiin palveluihin.', description_en: 'Any amount; valid for all services.', is_open: true, price: null, min_amount: 29, max_amount: 500, persons: null, vat_rate: 25.5, vat_treatment: 'at_sale', valid_months: 6, active: true, sort_order: 1, items: [] },
   { code: 'entry_2', kind: 'product', name: 'Savusaunavuoro kahdelle', name_en: 'Smoke sauna session for two', description: 'Savusaunavuoro kahdelle hengelle.', description_en: 'Smoke sauna session for two.', is_open: false, price: 58, min_amount: null, max_amount: null, persons: 2, vat_rate: 25.5, vat_treatment: 'at_sale', valid_months: 6, active: true, sort_order: 2, items: [] },
   { code: 'peat_mask_2', kind: 'product', name: 'Savusaunaelämys turvenaamiolla ja jalkakylvyllä kahdelle', name_en: 'Smoke sauna experience with peat mask and foot bath for two', description: '', description_en: '', is_open: false, price: 88, min_amount: null, max_amount: null, persons: 2, vat_rate: 25.5, vat_treatment: 'at_sale', valid_months: 6, active: true, sort_order: 3, items: [] },
   { code: 'sauna_treatment_2', kind: 'product', name: 'Savusaunaelämys ja saunahoito kahdelle', name_en: 'Smoke sauna experience and sauna treatment for two', description: '', description_en: '', is_open: false, price: 192, min_amount: null, max_amount: null, persons: 2, vat_rate: 25.5, vat_treatment: 'at_sale', valid_months: 6, active: true, sort_order: 4, items: [] },
@@ -40,7 +40,7 @@ export function createGiftMock({ today = new Date().toLocaleDateString('sv-SE', 
     if (i === 2) Object.assign(c, { delivery_to: 'recipient', recipient_email: 'saaja3@example.invalid', cover_message: 'Avaa sitten kun on aika rentoutua.', deliver_on: dayAdd(today, 20), deliver_time: null, delivered_at: null });   // ajastettu
     if (i % 3 === 0) { c.balance = 0; c.status = 'used'; c.last_used_at = `${dayAdd(today, -3)}T10:00:00Z`; log(c.id, { delta: -pk.price, reason: 'redemption', balance_after: 0, order_id: 8000 + i, order_no: 15000 + i, payment_id: 900 + i }); payments.set(c.id, [{ payment_id: 900 + i, order_id: 8000 + i, order_no: 15000 + i, amount: pk.price, refunded_amount: 0, status: 'paid', paid_at: `${dayAdd(today, -3)}T10:00:00Z`, accounted: false }]); }
   });
-  [50, 75, 120, 200].forEach((a, i) => { const c = add({ package_code: 'open', initial: a, created: dayAdd(today, -40 - i * 11), over: { recipient_name: NAMES[i][0], buyer_name: NAMES[i][1], buyer_email: `avoin${i + 1}@example.invalid`, vat_treatment: 'at_redemption' } }); if (i === 1) { c.balance = 45; log(c.id, { delta: -30, reason: 'redemption', balance_after: 45, order_id: 8100, order_no: 15050, payment_id: 950 }); payments.set(c.id, [{ payment_id: 950, order_id: 8100, order_no: 15050, amount: 30, refunded_amount: 0, status: 'paid', paid_at: `${dayAdd(today, -5)}T11:00:00Z`, accounted: true }]); } });
+  [50, 75, 120, 200].forEach((a, i) => { const c = add({ package_code: 'open', initial: a, created: dayAdd(today, -40 - i * 11), over: { recipient_name: NAMES[i][0], buyer_name: NAMES[i][1], buyer_email: `avoin${i + 1}@example.invalid`, vat_treatment: 'at_sale' } }); if (i === 1) { c.balance = 45; log(c.id, { delta: -30, reason: 'redemption', balance_after: 45, order_id: 8100, order_no: 15050, payment_id: 950 }); payments.set(c.id, [{ payment_id: 950, order_id: 8100, order_no: 15050, amount: 30, refunded_amount: 0, status: 'paid', paid_at: `${dayAdd(today, -5)}T11:00:00Z`, accounted: false }]); } });
   add({ package_code: 'open', initial: 60, created: dayAdd(today, -200), valid_to: dayAdd(today, -15), over: { status: 'active', recipient_name: 'Vanhentunut Esimerkki' } });
   add({ package_code: 'entry_2', initial: 58, created: dayAdd(today, -170), valid_to: dayAdd(today, 12), over: { recipient_name: 'Pian Vanhenevat' } });
   add({ package_code: 'open', initial: 100, balance: 100, created: dayAdd(today, -2), over: { status: 'cancelled', recipient_name: 'Mitätöity Esimerkki', note: 'Mitätöity: väärä summa' } });
@@ -88,11 +88,13 @@ export function createGiftMock({ today = new Date().toLocaleDateString('sv-SE', 
       const dv = resolveDelivery({ to: a.p_delivery_to, recipientEmail: a.p_recipient_email, cover: a.p_cover_message, on: a.p_deliver_on, time: a.p_deliver_time, months: Math.min(12, a.p_valid_months || pkg.valid_months || 6), now: new Date() });
       if (!dv.ok) throw err(dv.code, `Toimitusvalinta virheellinen (${dv.code})`);
       const paid = !!a.p_payment_method && !['pay_later', 'invoice'].includes(a.p_payment_method), sale = !!a.p_payment_method;
+      if (a.p_payment_method === 'cash') throw err('cash_not_accepted', 'Käteistä ei oteta vastaan');
+      if (a.p_vat_treatment && a.p_vat_treatment !== 'at_sale') throw err('gift_card_vat_rate', 'Lahjakortilla voi maksaa vain tuotteita, joiden arvonlisävero on 25,5 %');
       if (!sale && String(a.p_note || '').trim().length < 3) throw err('invalid_param', 'Anna maksuttoman kortin syy (p_note)');
       const out = [], on = sale ? ++orderNo : null;
       for (let i = 0; i < q; i++) {
         const c = add({ package_code: pkg.code, initial: sale && !paid ? amount : amount, balance: sale && !paid ? 0 : amount, ledger: sale ? false : true, over: { buyer_name: a.p_buyer?.name || null, buyer_email: a.p_buyer?.email || null, recipient_name: a.p_recipient_name || null, recipient_email: a.p_recipient_email || null,
-          greeting: a.p_greeting || null, ...dv.value, vat_treatment: a.p_vat_treatment || (sale ? pkg.vat_treatment : 'at_sale'), locale: a.p_locale || 'fi', note: a.p_note || null, order_no: on, purchase_order_id: on ? on - 15100 + 9000 : null,
+          greeting: a.p_greeting || null, ...dv.value, vat_treatment: 'at_sale', sale_vat_rate: sale ? 25.5 : 0, complimentary: !sale, locale: a.p_locale || 'fi', note: a.p_note || null, order_no: on, purchase_order_id: on ? on - 15100 + 9000 : null,
           status: sale && !paid ? 'pending_payment' : 'active', activated_at: sale && !paid ? null : `${today}T08:00:00Z`, valid_to: sale && !paid ? null : monthsAdd(today, a.p_valid_months || pkg.valid_months) } });
         if (sale && paid) log(c.id, { delta: amount, reason: 'purchase', balance_after: amount, order_no: on });
         if (!sale) { const l = ledgers.get(c.id); l[0].reason = 'manual_issue'; l[0].note = a.p_note; }
@@ -127,7 +129,8 @@ export function createGiftMock({ today = new Date().toLocaleDateString('sv-SE', 
       c.balance = round2(c.balance - amt); if (c.balance === 0) c.status = 'used'; c.last_used_at = `${today}T12:00:00Z`; const pid = 1000 + ledgerId;
       log(c.id, { delta: -amt, reason: 'redemption', balance_after: c.balance, order_id: +a.p_order_id, payment_id: pid, note: a.p_note || null });
       const accounted = c.accounting_origin !== 'johku' && c.vat_treatment === 'at_redemption';
-      return { ok: true, payment_id: pid, amount: amt, order_id: +a.p_order_id, balance: { unpaid: 0 }, gift_card: { id: c.id, code_last4: c.code_last4, balance: c.balance, status: c.status, valid_to: c.valid_to }, receipt_id: accounted ? 1 : null, receipt_no: accounted ? 'K2026-9001' : null, accounted };
+      const info = !accounted && c.source !== 'johku' && c.accounting_origin !== 'johku' && c.vat_treatment === 'at_sale' && !c.complimentary && c.purchase_order_id;
+      return { ok: true, payment_id: pid, amount: amt, order_id: +a.p_order_id, balance: { unpaid: 0 }, gift_card: { id: c.id, code_last4: c.code_last4, balance: c.balance, status: c.status, valid_to: c.valid_to }, receipt_id: accounted || info ? 1 : null, receipt_no: accounted || info ? 'K2026-9001' : null, accounted };
     },
   };
   const rpc = async (name, args = {}) => {

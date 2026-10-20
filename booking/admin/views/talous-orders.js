@@ -148,9 +148,9 @@ export function createOrdersTab({ api, ctx, gift = null }) {
         h('p', { class: 'muted', text: res.online_payment_enabled ? t('link.online') : t('link.onsite') })));
     });
   }
-  const MANUAL = ['cash', 'card_terminal', 'mobilepay', 'bank_transfer', 'invoice', 'other'];
+  const MANUAL = ['card_terminal', 'mobilepay', 'bank_transfer', 'invoice', 'other'];
   function recordDialog(o) {
-    const fromRefs = (ctx.refs?.methods || []).filter((m) => m.is_manual && m.active && m.code !== 'pay_later' && m.code !== 'gift_card');
+    const fromRefs = (ctx.refs?.methods || []).filter((m) => m.is_manual && m.active && m.code !== 'pay_later' && m.code !== 'gift_card' && m.code !== 'cash');
     const methods = fromRefs.length ? fromRefs.map((m) => ({ code: m.code, label: m.label })) : MANUAL.map((c) => ({ code: c, label: null }));
     const amount = h('input', { name: 'amount', type: 'number', step: '0.01', min: '0.01', max: o.balance.unpaid, value: o.balance.unpaid, inputmode: 'decimal', required: true, 'data-testid': 'record-amount' });
     // Lahjakortti (sopimus §13.0): admin_record_payment hylkää gift_card-tavan → oma lunastus (admin_redeem_gift_card). Vaatii payments.manage; näkyy vain kun lahjakorttirajapinta on käytössä.

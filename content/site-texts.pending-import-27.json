@@ -1,0 +1,2242 @@
+[
+ {
+  "key": "ui.admin.reports.day",
+  "lang": "fi",
+  "text": "Päivä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.day",
+  "lang": "en",
+  "text": "Day",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.this_month",
+  "lang": "fi",
+  "text": "Tämä kuukausi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.this_month",
+  "lang": "en",
+  "text": "This month",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.prev_month",
+  "lang": "fi",
+  "text": "Edellinen kuukausi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.prev_month",
+  "lang": "en",
+  "text": "Previous month",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pick_month",
+  "lang": "fi",
+  "text": "Kuukausi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pick_month",
+  "lang": "en",
+  "text": "Month",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.range",
+  "lang": "fi",
+  "text": "Aikaväli",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.range",
+  "lang": "en",
+  "text": "Date range",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.from",
+  "lang": "fi",
+  "text": "Alkaen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.from",
+  "lang": "en",
+  "text": "From",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.to",
+  "lang": "fi",
+  "text": "Asti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.to",
+  "lang": "en",
+  "text": "To",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.basis",
+  "lang": "fi",
+  "text": "Kassaperuste: jakso on kuitin antopäivä (Helsinki). Hyvitys kuuluu hyvityskuitin jaksoon.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.basis",
+  "lang": "en",
+  "text": "Cash basis: the period is the receipt issue date (Helsinki). A refund belongs to the refund receipt period.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.by_product",
+  "lang": "fi",
+  "text": "Myynti tuotteittain",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.by_product",
+  "lang": "en",
+  "text": "Sales by product",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.refunds_by_product",
+  "lang": "fi",
+  "text": "Hyvitykset tuotteittain",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.refunds_by_product",
+  "lang": "en",
+  "text": "Refunds by product",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.no_refunds",
+  "lang": "fi",
+  "text": "Ei hyvityksiä tällä jaksolla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.no_refunds",
+  "lang": "en",
+  "text": "No refunds in this period.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.sales_count",
+  "lang": "fi",
+  "text": "Myynti, kpl",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.sales_count",
+  "lang": "en",
+  "text": "Sales, pcs",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.refund_count",
+  "lang": "fi",
+  "text": "Hyvitykset, kpl",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.refund_count",
+  "lang": "en",
+  "text": "Refunds, pcs",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.sales_list",
+  "lang": "fi",
+  "text": "Myynti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.sales_list",
+  "lang": "en",
+  "text": "Sales",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_product",
+  "lang": "fi",
+  "text": "Tuote",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_product",
+  "lang": "en",
+  "text": "Product",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_qty",
+  "lang": "fi",
+  "text": "Määrä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_qty",
+  "lang": "en",
+  "text": "Qty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_count",
+  "lang": "fi",
+  "text": "kpl",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_count",
+  "lang": "en",
+  "text": "pcs",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_net",
+  "lang": "fi",
+  "text": "Veroton",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_net",
+  "lang": "en",
+  "text": "Excl. VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_vat_pct",
+  "lang": "fi",
+  "text": "ALV %",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_vat_pct",
+  "lang": "en",
+  "text": "VAT %",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_vat_eur",
+  "lang": "fi",
+  "text": "ALV €",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_vat_eur",
+  "lang": "en",
+  "text": "VAT €",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_gross",
+  "lang": "fi",
+  "text": "Brutto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_gross",
+  "lang": "en",
+  "text": "Gross",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.total",
+  "lang": "fi",
+  "text": "Yhteensä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.total",
+  "lang": "en",
+  "text": "Total",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.payments",
+  "lang": "fi",
+  "text": "Maksutavat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.payments",
+  "lang": "en",
+  "text": "Payment methods",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pay_net",
+  "lang": "fi",
+  "text": "Maksutavat yhteensä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pay_net",
+  "lang": "en",
+  "text": "Payment methods total",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.by_vat",
+  "lang": "fi",
+  "text": "ALV-kannat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.by_vat",
+  "lang": "en",
+  "text": "VAT rates",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.vat_breakdown",
+  "lang": "fi",
+  "text": "ALV-erittely",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.vat_breakdown",
+  "lang": "en",
+  "text": "VAT breakdown",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.vat_breakdown_note",
+  "lang": "fi",
+  "text": "Myynti vähennettynä hyvityksillä vastaa tätä erittelyä. Luvut on laskettu kuittien riveistä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.vat_breakdown_note",
+  "lang": "en",
+  "text": "Sales minus refunds match this breakdown. The figures are calculated from the receipt lines.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.reconcile",
+  "lang": "fi",
+  "text": "Täsmäytys",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.reconcile",
+  "lang": "en",
+  "text": "Reconciliation",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.reconcile_sales",
+  "lang": "fi",
+  "text": "Myynti brutto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.reconcile_sales",
+  "lang": "en",
+  "text": "Sales gross",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.reconcile_refunds",
+  "lang": "fi",
+  "text": "Hyvitykset brutto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.reconcile_refunds",
+  "lang": "en",
+  "text": "Refunds gross",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.reconcile_products",
+  "lang": "fi",
+  "text": "Tuotteet yhteensä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.reconcile_products",
+  "lang": "en",
+  "text": "Products total",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.reconcile_payments",
+  "lang": "fi",
+  "text": "Maksutavat yhteensä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.reconcile_payments",
+  "lang": "en",
+  "text": "Payment methods total",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.reconcile_diff",
+  "lang": "fi",
+  "text": "Erotus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.reconcile_diff",
+  "lang": "en",
+  "text": "Difference",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.reconcile_ok",
+  "lang": "fi",
+  "text": "Täsmää",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.reconcile_ok",
+  "lang": "en",
+  "text": "Balances",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.vat_rounding",
+  "lang": "fi",
+  "text": "ALV-pyöristys",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.vat_rounding",
+  "lang": "en",
+  "text": "VAT rounding",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.vat_rounding_note",
+  "lang": "fi",
+  "text": "Tuoterivien arvonlisävero on laskettu riveittäin. Kuitin verokantaryhmä pyöristetään ryhmänä, joten erotus voi olla senttejä. Erotus näytetään pyöristysrivinä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.vat_rounding_note",
+  "lang": "en",
+  "text": "Product-line VAT is calculated per line. A receipt rounds each VAT rate as a group, so the difference can be cents. The difference is shown as a rounding row.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.rounding_row",
+  "lang": "fi",
+  "text": "Pyöristys, rivi vastaan kuitti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.rounding_row",
+  "lang": "en",
+  "text": "Rounding, line versus receipt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.cash_rounding",
+  "lang": "fi",
+  "text": "Käteispyöristys",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.cash_rounding",
+  "lang": "en",
+  "text": "Cash rounding",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.tx_csv",
+  "lang": "fi",
+  "text": "Tapahtumat CSV",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.tx_csv",
+  "lang": "en",
+  "text": "Transactions CSV",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.tx_pdf",
+  "lang": "fi",
+  "text": "Tapahtumat PDF",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.tx_pdf",
+  "lang": "en",
+  "text": "Transactions PDF",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.summary_csv",
+  "lang": "fi",
+  "text": "Yhteenveto CSV",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.summary_csv",
+  "lang": "en",
+  "text": "Summary CSV",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.summary_pdf",
+  "lang": "fi",
+  "text": "Yhteenveto PDF",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.summary_pdf",
+  "lang": "en",
+  "text": "Summary PDF",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.open_note",
+  "lang": "fi",
+  "text": "Avoin tarkoittaa vahvistettua tilausta, jota ei ole vielä maksettu. Tapahtumaraportin avoin rivi käyttää vahvistuspäivää eikä sisälly myynnin yhteissummiin.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.open_note",
+  "lang": "en",
+  "text": "Open means a confirmed order that is not yet paid. An open row in the transaction report uses the confirmation date and is not included in the sales totals.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_voucher",
+  "lang": "fi",
+  "text": "Tosite",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_voucher",
+  "lang": "en",
+  "text": "Voucher",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_date",
+  "lang": "fi",
+  "text": "Päivä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_date",
+  "lang": "en",
+  "text": "Date",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_customer",
+  "lang": "fi",
+  "text": "Asiakas",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_customer",
+  "lang": "en",
+  "text": "Customer",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_method",
+  "lang": "fi",
+  "text": "Maksutapa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_method",
+  "lang": "en",
+  "text": "Payment method",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_status",
+  "lang": "fi",
+  "text": "Tila",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_status",
+  "lang": "en",
+  "text": "Status",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_kind",
+  "lang": "fi",
+  "text": "Laji",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.col_kind",
+  "lang": "en",
+  "text": "Type",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.status_open",
+  "lang": "fi",
+  "text": "Avoin",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.status_open",
+  "lang": "en",
+  "text": "Open",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.status_paid",
+  "lang": "fi",
+  "text": "Maksettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.status_paid",
+  "lang": "en",
+  "text": "Paid",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.kind_sale",
+  "lang": "fi",
+  "text": "Myynti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.kind_sale",
+  "lang": "en",
+  "text": "Sale",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.kind_refund",
+  "lang": "fi",
+  "text": "Hyvitys",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.kind_refund",
+  "lang": "en",
+  "text": "Refund",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.kind_redemption",
+  "lang": "fi",
+  "text": "Lunastus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.kind_redemption",
+  "lang": "en",
+  "text": "Redemption",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.prepaid_title",
+  "lang": "fi",
+  "text": "Ennakkoon maksetun lahjakortin lunastus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.prepaid_title",
+  "lang": "en",
+  "text": "Redemption of a prepaid gift card",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.prepaid_note",
+  "lang": "fi",
+  "text": "Nämä lunastukset eivät ole myyntiä. Arvonlisävero on kirjattu kortin myynnissä, eikä sitä kirjata uudelleen. Erittely on vain tiedoksi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.prepaid_note",
+  "lang": "en",
+  "text": "These redemptions are not sales. VAT was recorded when the card was sold and is not recorded again. The breakdown is for information only.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_summary_title",
+  "lang": "fi",
+  "text": "Lahjakortit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_summary_title",
+  "lang": "en",
+  "text": "Gift cards",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_sold",
+  "lang": "fi",
+  "text": "Myydyt lahjakortit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_sold",
+  "lang": "en",
+  "text": "Gift cards sold",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_sold_note",
+  "lang": "fi",
+  "text": "Myydyt lahjakortit sisältyvät yllä olevaan myyntiin ja ALV-erittelyyn. Arvonlisävero on kirjattu kortin myynnissä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_sold_note",
+  "lang": "en",
+  "text": "Sold gift cards are included in the sales and the VAT breakdown above. VAT was recorded when the card was sold.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_redeemed",
+  "lang": "fi",
+  "text": "Käytetyt lahjakortit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_redeemed",
+  "lang": "en",
+  "text": "Gift cards redeemed",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_complimentary_title",
+  "lang": "fi",
+  "text": "Maksuttomat lahjakortit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_complimentary_title",
+  "lang": "en",
+  "text": "Complimentary gift cards",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_comp_issued",
+  "lang": "fi",
+  "text": "Myönnetyt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_comp_issued",
+  "lang": "en",
+  "text": "Issued",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_comp_redeemed",
+  "lang": "fi",
+  "text": "Käytetyt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_comp_redeemed",
+  "lang": "en",
+  "text": "Redeemed",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_comp_note",
+  "lang": "fi",
+  "text": "Maksuttomasta kortista ei ole veloitettu arvonlisäveroa. Sen myöntö ja käyttö eivät ole myyntiä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_comp_note",
+  "lang": "en",
+  "text": "No VAT was charged on a complimentary card. Issuing or redeeming it is not a sale.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_title",
+  "lang": "fi",
+  "text": "Lahjakorttien varasto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_title",
+  "lang": "en",
+  "text": "Gift card stock",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_filter",
+  "lang": "fi",
+  "text": "Lahjakortin tila",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_filter",
+  "lang": "en",
+  "text": "Gift card status",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_open",
+  "lang": "fi",
+  "text": "Avoimet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_open",
+  "lang": "en",
+  "text": "Open",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_used",
+  "lang": "fi",
+  "text": "Käytetyt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_used",
+  "lang": "en",
+  "text": "Used",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_all",
+  "lang": "fi",
+  "text": "Kaikki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_all",
+  "lang": "en",
+  "text": "All",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_csv",
+  "lang": "fi",
+  "text": "Lahjakortit CSV",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_csv",
+  "lang": "en",
+  "text": "Gift cards CSV",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_pdf",
+  "lang": "fi",
+  "text": "Lahjakortit PDF",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_pdf",
+  "lang": "en",
+  "text": "Gift cards PDF",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_own",
+  "lang": "fi",
+  "text": "Omat lahjakortit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_own",
+  "lang": "en",
+  "text": "Own gift cards",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_johku",
+  "lang": "fi",
+  "text": "Johku-lahjakortit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_johku",
+  "lang": "en",
+  "text": "Johku gift cards",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_count",
+  "lang": "fi",
+  "text": "{{var:n}} korttia",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_count",
+  "lang": "en",
+  "text": "{{var:n}} cards",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_sum",
+  "lang": "fi",
+  "text": "Saldo {{var:balance}}, alkuarvo {{var:initial}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:balance}}",
+   "{{var:initial}}"
+  ],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_sum",
+  "lang": "en",
+  "text": "Balance {{var:balance}}, original value {{var:initial}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:balance}}",
+   "{{var:initial}}"
+  ],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_note",
+  "lang": "fi",
+  "text": "Johku-osio on erillään. Sen luvut eivät sisälly uuden järjestelmän yhteissummiin, koska arvonlisävero on kirjattu Johkussa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_note",
+  "lang": "en",
+  "text": "The Johku section is separate. Its figures are not included in the new system totals, because the VAT was recorded in Johku.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_paid_note",
+  "lang": "fi",
+  "text": "Maksetun oman kortin arvonlisävero on kirjattu myynnissä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_paid_note",
+  "lang": "en",
+  "text": "VAT on a paid own card was recorded when the card was sold.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_complimentary",
+  "lang": "fi",
+  "text": "Maksuton kortti on merkitty erikseen. Siitä ei ole kirjattu arvonlisäveroa, eikä sen lunastus ole myyntiä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_complimentary",
+  "lang": "en",
+  "text": "A complimentary card is marked separately. No VAT was recorded on it, and redeeming it is not a sale.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_mark_complimentary",
+  "lang": "fi",
+  "text": "Maksuton",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_mark_complimentary",
+  "lang": "en",
+  "text": "Complimentary",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_col_code",
+  "lang": "fi",
+  "text": "Koodi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_col_code",
+  "lang": "en",
+  "text": "Code",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_col_buyer",
+  "lang": "fi",
+  "text": "Ostaja",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_col_buyer",
+  "lang": "en",
+  "text": "Buyer",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_col_package",
+  "lang": "fi",
+  "text": "Paketti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_col_package",
+  "lang": "en",
+  "text": "Package",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_col_initial",
+  "lang": "fi",
+  "text": "Alkuarvo",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_col_initial",
+  "lang": "en",
+  "text": "Original value",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_col_balance",
+  "lang": "fi",
+  "text": "Saldo",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_col_balance",
+  "lang": "en",
+  "text": "Balance",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_col_sold",
+  "lang": "fi",
+  "text": "Myyntipäivä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_col_sold",
+  "lang": "en",
+  "text": "Sale date",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_col_valid",
+  "lang": "fi",
+  "text": "Voimassa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_col_valid",
+  "lang": "en",
+  "text": "Valid until",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_col_status",
+  "lang": "fi",
+  "text": "Tila",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_col_status",
+  "lang": "en",
+  "text": "Status",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_col_vat",
+  "lang": "fi",
+  "text": "ALV-käsittely",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.gc_col_vat",
+  "lang": "en",
+  "text": "VAT treatment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_summary",
+  "lang": "fi",
+  "text": "Myyntiyhteenveto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_summary",
+  "lang": "en",
+  "text": "Sales summary",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_transactions",
+  "lang": "fi",
+  "text": "Tapahtumaraportti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_transactions",
+  "lang": "en",
+  "text": "Transaction report",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_giftcards",
+  "lang": "fi",
+  "text": "Lahjakorttiraportti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_giftcards",
+  "lang": "en",
+  "text": "Gift card report",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_period",
+  "lang": "fi",
+  "text": "{{var:from}} – {{var:to}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:from}}",
+   "{{var:to}}"
+  ],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_period",
+  "lang": "en",
+  "text": "{{var:from}} – {{var:to}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:from}}",
+   "{{var:to}}"
+  ],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_heading",
+  "lang": "fi",
+  "text": "{{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_heading",
+  "lang": "en",
+  "text": "{{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_receipts",
+  "lang": "fi",
+  "text": "Myynti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_receipts",
+  "lang": "en",
+  "text": "Sales",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_refund_receipts",
+  "lang": "fi",
+  "text": "Hyvitykset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_refund_receipts",
+  "lang": "en",
+  "text": "Refunds",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_sales",
+  "lang": "fi",
+  "text": "Myynti yhteensä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_sales",
+  "lang": "en",
+  "text": "Sales total",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_refunds",
+  "lang": "fi",
+  "text": "Hyvitykset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_refunds",
+  "lang": "en",
+  "text": "Refunds",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_after",
+  "lang": "fi",
+  "text": "Myynti hyvitysten jälkeen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_after",
+  "lang": "en",
+  "text": "Sales after refunds",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_of_which_vat",
+  "lang": "fi",
+  "text": "josta ALV",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_of_which_vat",
+  "lang": "en",
+  "text": "of which VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_ex_vat",
+  "lang": "fi",
+  "text": "Veroton",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.reports.pdf_ex_vat",
+  "lang": "en",
+  "text": "Excl. VAT",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.giftcards.vat_paid",
+  "lang": "fi",
+  "text": "Myydyn lahjakortin arvonlisävero kirjataan myyntihetkellä. Lunastus ei kirjaa veroa uudelleen. Kortilla voi maksaa vain saman verokannan tuotteita.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.giftcards.vat_paid",
+  "lang": "en",
+  "text": "VAT on a sold gift card is recorded when the card is sold. Redemption does not record the VAT again. The card can pay only for products with that same VAT rate.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.giftcards.vat_free",
+  "lang": "fi",
+  "text": "Maksuttomasta kortista ei veloiteta arvonlisäveroa myönnettäessä eikä lunastettaessa. Lunastus ei näy myyntinä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.giftcards.vat_free",
+  "lang": "en",
+  "text": "A complimentary card is never charged VAT, neither when it is issued nor when it is redeemed. The redemption is not a sale.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.giftcards.vat_rate_error",
+  "lang": "fi",
+  "text": "Lahjakortilla voi maksaa vain tuotteita, joiden arvonlisävero on 25,5 %.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.giftcards.vat_rate_error",
+  "lang": "en",
+  "text": "A gift card can pay only for products with 25.5% VAT.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.receipt_pdf.col_vat_pct",
+  "lang": "fi",
+  "text": "ALV %",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.receipt_pdf.col_vat_pct",
+  "lang": "en",
+  "text": "VAT %",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.receipt_pdf.col_vat_eur",
+  "lang": "fi",
+  "text": "ALV €",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.receipt_pdf.col_vat_eur",
+  "lang": "en",
+  "text": "VAT €",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.receipt_pdf.col_gross",
+  "lang": "fi",
+  "text": "Brutto",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.receipt_pdf.col_gross",
+  "lang": "en",
+  "text": "Gross",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.receipt_pdf.word_qty",
+  "lang": "fi",
+  "text": "kpl",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.receipt_pdf.word_qty",
+  "lang": "en",
+  "text": "pcs",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.receipt_pdf.word_net",
+  "lang": "fi",
+  "text": "veroton",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.receipt_pdf.word_net",
+  "lang": "en",
+  "text": "excl. VAT",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.receipt_pdf.word_vat",
+  "lang": "fi",
+  "text": "ALV",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.receipt_pdf.word_vat",
+  "lang": "en",
+  "text": "VAT",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.receipt_pdf.word_gross",
+  "lang": "fi",
+  "text": "brutto",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.receipt_pdf.word_gross",
+  "lang": "en",
+  "text": "gross",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.receipt_pdf.giftcard_info",
+  "lang": "fi",
+  "text": "Arvonlisävero on kirjattu lahjakortin myynnissä. Tämä erittely on vain tiedoksi, eikä sitä kirjata uudelleen.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.receipt_pdf.giftcard_info",
+  "lang": "en",
+  "text": "VAT was recorded when the gift card was sold. This breakdown is for information only and is not recorded again.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Kirjanpitoraportit ja lahjakortin ALV (booking_117–119). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ }
+]

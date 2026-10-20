@@ -168,7 +168,7 @@ select test.anon('10.5.0.8');
 select booking.public_create_booking(:r_tue, (:'tue'::date + 42), 2, 'Maksettu Muutos', 'maksettumuutos@example.com', '0401234567') ->> 'token' as tokpaid \gset
 select test.logout();
 select test.login(:'sid');
-select booking.admin_record_payment((select id from booking.orders where public_token = :'tokpaid'::uuid), 'cash', (test.ord(:'tokpaid'::uuid)).total_gross);
+select booking.admin_record_payment((select id from booking.orders where public_token = :'tokpaid'::uuid), 'card_terminal', (test.ord(:'tokpaid'::uuid)).total_gross);
 select test.logout();
 select test.anon('10.5.0.8');
 select is(booking.public_change_booking(:'tokpaid'::uuid, null, null, 3) ->> 'code', 'price_change_requires_staff', 'M1: maksetun tilauksen hinta ei muutu asiakkaan toimesta');

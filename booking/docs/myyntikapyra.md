@@ -39,7 +39,7 @@ Johku-tilaus ei saa kuittia (`receipts_no_johku`, `BK001 johku_not_accounted`). 
 
 Käyrän Johku-puoli ohittaa lisäksi tilauksen, jolla on kuitti ja `_acct_excluded` on false. Sama tilausrivi ei siis ole sekä kuitissa että Johku-pylväässä.
 
-Lahjakortit: käyrän natiivi osa on samat kuitit kuin myyntiraportti. `at_sale`- ja Johku-kortin lunastus on `_acct_excluded` (kerran, myynnissä tai Johkussa). `at_redemption`-myynnin 0 %:n kuitti ja lunastuskuitti ovat molemmat raportissa, joten ne ovat molemmat myös käyrän natiivi osassa.
+Lahjakortit: käyrän natiivi osa on samat kuitit kuin myyntiraportti. Oman kortin myyntikuitti (ALV 25,5 %) on mukana. Oman ennakkoon maksetun kortin lunastus ja Johku-kortin lunastus ovat `_acct_excluded`, joten lunastusta ei lasketa toiseen kertaan. Maksuttoman kortin lunastus ei ole myyntiä.
 
 ## Oikeudet
 
@@ -54,7 +54,7 @@ Jos funktiota ei ole vielä kannassa, hallinta ei näytä keksimiään lukuja: k
 3. Kokonaan hyvitetty Johku-tilaus on pois käyrästä (nettovaikutus 0), jotta summa täsmää `statistics.johku.gross`-lukuun. Erillistä hyvityspäivää ei ole metassa.
 4. Ilman rivien ALV-kantaa summa näytetään erittelemättömänä bruttona.
 5. Samaa kauppaa ei tunnisteta, jos se on sekä Johku-tuontitilaus että erillinen uusi tilaus.
-6. `at_redemption`-lahjakortin myyntikuitti (0 %) ja lunastuskuitti ovat molemmat mukana, koska raporttikin laskee ne niin.
+6. Oman lahjakortin myyntikuitti on käyrässä. Lunastuksen tiedoksi-kuitti ei ole, koska `_acct_excluded` rajaa sen pois samoin kuin myyntiraportista.
 7. Käyrä vaatii `reports.view`. Kaikki Talous-sivun käyttäjät eivät sitä näe. `reports.daily` ei riitä.
 8. Tuontitiedosto on `content/site-texts.pending-import-4.json`. Numerot 1–3 ovat jo käytössä; 6 ei ollut seuraava vapaa.
 9. Jos Johkun `amount` eroaa rivien summasta, ALV skaalataan niin, että pylvään brutto on Johkun summa.

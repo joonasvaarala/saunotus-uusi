@@ -89,7 +89,7 @@ function procountorStatus(cfg) {
     bank_account_configured: Boolean(cfg.bank_account), last: null, errors: [],
   };
 }
-const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'reports.view', 'settings.edit', 'pos.use', 'invoices.manage'];
+const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'reports.view', 'settings.edit', 'pos.use', 'invoices.manage', 'giftcards.manage'];
 const CODE_RE = /^[a-z0-9_]{1,40}$/;
 
 export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager' } = {}) {
@@ -222,7 +222,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     current_staff_role: () => role,
     admin_my_permissions: () => ({ role, role_label: role === 'staff' ? 'Työntekijä (esimerkki)' : role === 'admin' ? 'Pääkäyttäjä (esimerkki)' : 'Päällikkö (esimerkki)', permissions: st.perms }),
     admin_list_products: () => st.products.map((p) => ({ ...p })),
-    'select:payment_methods': () => [{ code: 'pay_later', label: 'Maksu myöhemmin', is_manual: true, active: true }, { code: 'cash', label: 'Käteinen', is_manual: true, active: true }, { code: 'card_terminal', label: 'Korttipääte', is_manual: true, active: true }],
+    'select:payment_methods': () => [{ code: 'pay_later', label: 'Maksu myöhemmin', is_manual: true, active: true }, { code: 'cash', label: 'Käteinen', is_manual: false, active: false }, { code: 'card_terminal', label: 'Korttipääte', is_manual: true, active: true }],
     'select:resources': () => [{ id: 1, code: 'rauni', name: 'Rauni', active: true }, { id: 2, code: 'lovi', name: 'Lovi', active: true }],
     'select:product_space_rules': () => [10, 8, 7].map((pid) => ({ product_id: pid, leg_no: 1, priority: 1, space_id: 1, mode: 'exclusive', min_persons: 1, max_persons: 6, selection: 'auto', active: true })),
     admin_list_addons: () => [],

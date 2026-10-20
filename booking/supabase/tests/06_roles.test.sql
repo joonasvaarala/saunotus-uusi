@@ -66,7 +66,7 @@ select is((select count(*)::int from booking.audit_log), 0, 'staff: ei näe audi
 select lives_ok($$select booking.admin_list_products()$$, 'staff: näkee tuotteet (vain luku)');
 select lives_ok(format($$select booking.admin_update_customer((select id from booking.customers where email = 'rooli@example.com'), '{"notes": "staff-muistiinpano"}')$$), 'staff: muokkaa asiakasta');
 select is((booking.admin_create_booking(:r_tue, (:'tue'::date + 14), 1, null, '{"name": "Staff Asiakas", "email": "staffasiakas@example.com", "phone": "0407654321"}') ->> 'order_id') is not null, true, 'staff: luo varauksen');
-select is((booking.admin_record_payment(:oid, 'cash', 5) ->> 'ok')::boolean, true, 'staff: kirjaa maksun');
+select is((booking.admin_record_payment(:oid, 'card_terminal', 5) ->> 'ok')::boolean, true, 'staff: kirjaa maksun');
 select is((booking.admin_create_block((select id from booking.resources where code = 'savusauna'), now() + interval '300 days', now() + interval '300 days 1 hour', 'staff-sulku') ->> 'ok')::boolean, true, 'staff: luo sulun');
 select is((booking.admin_change_booking(:rid, null, null, 3) ->> 'ok')::boolean, true, 'staff: muuttaa varausta (henkilömäärä)');
 select is((booking.admin_set_reservation_status(:rid_b, 'cancelled', 'staff') ->> 'ok')::boolean, true, 'staff: peruu varauksen');
@@ -146,7 +146,7 @@ insert into booking.roles(code, label, is_staff, sort_order) values ('bookkeeper
 insert into booking.role_permissions(role_code, permission) values ('bookkeeper', 'payments.manage');
 select test.mk_staff('r-bookkeeper@example.com', 'bookkeeper') as kid \gset
 select test.login(:'kid');
-select is((booking.admin_record_payment(:oid, 'cash', 1) ->> 'ok')::boolean, true, 'uusi rooli (bookkeeper): sai vain payments.manage → maksun kirjaus onnistuu');
+select is((booking.admin_record_payment(:oid, 'card_terminal', 1) ->> 'ok')::boolean, true, 'uusi rooli (bookkeeper): sai vain payments.manage → maksun kirjaus onnistuu');
 select throws_ok(format($$select booking.admin_create_booking(%s, %L, 1, null, '{"name": "Kirja Pitäjä", "email": "kp@example.com", "phone": "0407654321"}')$$, :r_tue, (:'tue'::date + 21)), 'BK001', 'Ei oikeutta tähän toimintoon (bookings.manage)', 'uusi rooli: varaus estetty (ei bookings.manage)');
 select throws_ok(format($$select booking.admin_update_product(%s, '{"price": 2}')$$, :pid), 'BK001', 'Ei oikeutta tähän toimintoon (catalog.edit)', 'uusi rooli: hinnanmuutos estetty');
 select test.logout();

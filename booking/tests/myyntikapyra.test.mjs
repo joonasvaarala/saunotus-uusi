@@ -74,14 +74,16 @@ test('Mock: käyrän natiivi = raportin gross_after_refunds, Johku ei ole CSV:ss
   assert.equal(typeof gift, 'boolean');
 });
 
-test('Lahjakorttirivi (ALV 0) on sekä raportissa että käyrän natiivissa, ei kahdesti käyrässä', async () => {
+test('Lahjakortin myynti (ALV 25,5) on sekä raportissa että käyrän natiivissa, ei kahdesti käyrässä', async () => {
   const mock = createMock({ n: 800, seed: 11, today: '2026-10-17' });
   let found = false;
   for (let m = 1; m <= 12 && !found; m++) {
     const ym = `2026-${String(m).padStart(2, '0')}`;
     const rep = await mock.rpc('admin_report_month', { p_ym: ym });
-    if (!rep.lines.some((l) => l.group === 'giftcard')) continue;
+    const line = rep.lines.find((l) => l.group === 'giftcard');
+    if (!line) continue;
     found = true;
+    assert.equal(line.vat_rate, 25.5);
     const chart = await mock.rpc('admin_sales_chart', { p_year: 2026 });
     assert.equal(chart.months[m - 1].native_gross, rep.totals.gross_after_refunds);
   }

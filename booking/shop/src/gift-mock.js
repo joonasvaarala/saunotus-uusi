@@ -249,7 +249,7 @@ export function createGiftMock({ delay = 0, settings = {}, today = new Date().to
       items.forEach((it) => {
         const p = MOCK_PACKAGES.find((x) => x.code === it.package), q = it.quantity ?? 1, amt = p.is_open ? +it.amount : p.price;
         const dl = deliveryOf(it, a, p).value;
-        for (let i = 0; i < q; i++) { total += amt; cs.push({ public_token: uuid(myCards.length + cs.length + 1), package_code: p.code, package_name: p.name, amount: amt, status: 'pending_payment', vat_treatment: p.is_open ? 'at_redemption' : 'at_sale', recipient_name: it.recipient_name ?? a.p_recipient_name ?? null, delivery_to: dl.delivery_to, deliver_on: dl.deliver_on, deliver_time: dl.deliver_time }); }
+        for (let i = 0; i < q; i++) { total += amt; cs.push({ public_token: uuid(myCards.length + cs.length + 1), package_code: p.code, package_name: p.name, amount: amt, status: 'pending_payment', vat_treatment: 'at_sale', recipient_name: it.recipient_name ?? a.p_recipient_name ?? null, delivery_to: dl.delivery_to, deliver_on: dl.deliver_on, deliver_time: dl.deliver_time }); }
       });
       myCards.push(...cs);
       return { ok: true, mock: true, order_no: ++orderNo, token: MOCK_TOKEN, status: 'confirmed', total: r2(total), payment_mode: 'pay_later', payment_url: null, cards: cs, note: 'Kortit aktivoituvat, kun tilaus on maksettu.' };

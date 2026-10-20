@@ -6,6 +6,7 @@ import { icon } from '../icons.js';
 import { t, fmt, getLang } from '../talous-i18n.js';
 import { deliveryErrors, SERVER_FIELD, deliverMaxDate, helsinkiNow, coverState, COVER_MAX } from '../giftcards-delivery.js';
 import { GC_STATUSES, GC_SORTS, GC_PAY_METHODS, GC_GREETING_MAX, normalizeGiftCode, formatGiftCode, giftCodeValid } from '../giftcards-api.js';
+import { reportText } from '../reports-texts.js';
 import { loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, searchFld, expandRow, actionBtn, formDialog, friendly, methodLabel } from './talous-ui.js';
 import { countActive, filterDrawer } from '../filter-drawer.js';
 
@@ -217,11 +218,16 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
     const coverFld = h('label', { class: 'fld', hidden: true }, h('span', { text: t('gc.n.cover') }), cover, coverCounter, errEl('cover'));
     cover.addEventListener('input', () => { const s = coverState(cover.value); coverCounter.textContent = t('gc.n.coverCounter', { n: s.n, max: COVER_MAX }); coverCounter.classList.toggle('gc-over', s.over); setErr('cover', s.over ? t('err.invalid_cover_message') : ''); });
     const sel = (name) => dlvBox.closest('form')?.querySelector(`input[name=${name}]:checked`)?.value;
-    const vat = h('select', { name: 'vat' }, h('option', { value: '', text: t('gc.n.vatDefault') }), h('option', { value: 'at_sale', text: t('gc.vat.at_sale') }), h('option', { value: 'at_redemption', text: t('gc.vat.at_redemption') }));
+    const vat = h('select', { name: 'vat', 'data-testid': 'gc-new-vat' });
+    const vatHint = h('p', { class: 'muted tl-hint', 'data-testid': 'gc-new-vat-hint' });
+    const vatFld = fld(t('gc.n.vat'), vat);
     const channel = h('select', { name: 'channel' }, ['admin', 'phone', 'email', 'walk_in', 'other'].map((c) => h('option', { value: c, text: t(`gc.n.ch.${c}`) })));
     const monthsInput = h('input', { name: 'months', type: 'number', min: 1, max: 36, inputmode: 'numeric' });
     const sync = () => {
       const p = pk(pkg.value), free = mode.value === 'free';
+      vat.replaceChildren(h('option', { value: '', text: t('gc.n.vatDefault') }));
+      vatFld.hidden = true;
+      vatHint.textContent = reportText(free ? 'ui.admin.giftcards.vat_free' : 'ui.admin.giftcards.vat_paid');
       amount.disabled = !p?.is_open; amount.required = !!p?.is_open; if (!p?.is_open) amount.value = '';
       amountHint.textContent = !p ? '' : p.is_open ? t('gc.n.range', { min: p.min_amount, max: p.max_amount }) : t('gc.n.fixed', { price: fmt.money(p.price) });
       noteLab.textContent = free ? t('gc.n.noteFree') : t('gc.n.note'); note.required = free; buyerBox.hidden = free; channel.closest('label').hidden = free;
@@ -235,7 +241,7 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
     mode.addEventListener('change', sync); pkg.addEventListener('change', sync); monthsInput.addEventListener('input', sync);
     const d = formDialog(t('gc.n.title'), [fld(t('gc.n.mode'), mode), fld(t('gc.n.package'), pkg), h('label', { class: 'fld' }, h('span', { text: t('gc.n.amount') }), amount, amountHint), fld(t('gc.n.qty'), qty),
       buyerBox, fld(t('gc.n.recName'), h('input', { name: 'recipient_name', maxlength: 120, 'data-testid': 'gc-new-rec-name' })), dlvBox, recEmailFld, whenBox,
-      h('label', { class: 'fld' }, h('span', { text: t('gc.n.greetingCard') }), greeting, counter, errEl('greeting')), coverFld, fld(t('gc.n.vat'), vat), fld(t('gc.n.months'), monthsInput),
+      h('label', { class: 'fld' }, h('span', { text: t('gc.n.greetingCard') }), greeting, counter, errEl('greeting')), coverFld, vatFld, vatHint, fld(t('gc.n.months'), monthsInput),
       h('label', { class: 'fld' }, noteLab, note), fld(t('gc.n.channel'), channel), hint], t('gc.n.submit'), async (fd) => {
       const p = pk(fd.get('package')), free = fd.get('mode') === 'free', amt = p?.is_open ? Math.round(+fd.get('amount') * 100) / 100 : undefined;
       if (p?.is_open && (!(amt >= p.min_amount && amt <= p.max_amount) || !centsOk(+fd.get('amount')))) throw new Error(t('gc.n.bad.amount', { min: p.min_amount, max: p.max_amount }));
@@ -256,7 +262,7 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
       try {
         res = await gift.create({ package: p.code, amount: amt, quantity: Math.max(1, Math.trunc(+fd.get('quantity')) || 1), buyer: free ? undefined : { name: bn, email: be, phone: String(fd.get('buyer_phone') || '').trim() },
           recipientName: String(fd.get('recipient_name') || '').trim(), recipientEmail: to === 'recipient' ? re : undefined, greeting: gr, paymentMethod: free ? undefined : fd.get('mode'),
-          vatTreatment: fd.get('vat') || undefined, validMonths: fd.get('months') ? Math.trunc(+fd.get('months')) : undefined, locale: 'fi', note: note2 || undefined, channel: free ? undefined : fd.get('channel'),
+          validMonths: fd.get('months') ? Math.trunc(+fd.get('months')) : undefined, locale: 'fi', note: note2 || undefined, channel: free ? undefined : fd.get('channel'),
           deliveryTo: to, coverMessage: to === 'recipient' ? cv : undefined, deliverOn: later ? String(fd.get('deliver_on') || '') : undefined, deliverTime: later ? String(fd.get('deliver_time') || '') : undefined });
       } catch (e) {   // palvelimen toimitusvirhe (BK001, koodi = e.code) → kenttäkohtaisesti
         const key = SERVER_FIELD[e?.code];
