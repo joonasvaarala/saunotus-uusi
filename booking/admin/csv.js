@@ -1,7 +1,7 @@
 // Raportin CSV-vienti (oma toteutus, ei kirjastoa): RFC 4180 (CRLF-rivinvaihto, kentät lainausmerkkeihin kun sisältävät erottimen, lainausmerkin tai rivinvaihdon,
 // lainausmerkki kahdennetaan), UTF-8 BOM (Excel tunnistaa merkistön), erotin ; ja desimaalipilkku (suomalainen Excel/Procountor).
 // Puhdas moduuli (ei DOM:ia) → testattavissa node --test:llä. Lataus selaimessa: downloadCsv().
-export const CSV_COLUMNS = ['pvm', 'kuitti_no', 'tilaus_no', 'maksutapa', 'tuoteryhmä', 'tuote', 'määrä', 'brutto', 'alv_%', 'alv_€', 'netto', 'hyvitys'];
+export const CSV_COLUMNS = ['tosite', 'pvm', 'asiakas', 'tuote', 'maara', 'netto', 'alv_%', 'alv_eur', 'brutto', 'maksutapa', 'tila', 'laji'];
 export const SEP = ';';
 const round2 = (n) => Math.round((+n + Number.EPSILON) * 100) / 100;
 // Rahasumma: 2 desimaalia, pilkku, ei tuhaterotinta ("1234,50"); tyhjä/virheellinen → "0,00"
@@ -15,12 +15,16 @@ export function csvText(v) {
   return csvQuote(s);
 }
 export function csvQuote(s) { return /[";\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; }
-const TEXT_COLS = new Set(['pvm', 'kuitti_no', 'tilaus_no', 'maksutapa', 'tuoteryhmä', 'tuote']);
-// rivi (raporttirivi RPC:ltä) → CSV-sarakkeet. Hyvitys: hyvitetty summa (positiivinen); hyvitysrivillä brutto/alv/netto ovat negatiivisia.
+const TEXT_COLS = new Set(['tosite', 'pvm', 'asiakas', 'tuote', 'maksutapa', 'tila', 'laji']);
+const statusFi = (l) => (l.status === 'open' || l.status === 'avoin' ? 'avoin' : 'maksettu');
+const kindFi = (l) => (l.kind === 'refund' || l.kind === 'refund_receipt' || l.kind === 'hyvitys' ? 'hyvitys' : l.kind === 'redemption' || l.kind === 'lunastus' ? 'lunastus' : 'myynti');
+// Tapahtumaraportin rivi. Hyvitysrivin määrä, netto, ALV ja brutto ovat etumerkillisiä kuten kuitissa.
 export function lineToRow(l, methodLabel = (c) => c) {
+  const qty = l.kind === 'refund_receipt' ? -Math.abs(l.quantity ?? 1) : (l.quantity ?? 1);
   return {
-    pvm: l.date, kuitti_no: l.receipt_no || '', tilaus_no: l.order_no ?? '', maksutapa: methodLabel(l.method), tuoteryhmä: l.group_label || l.group || '', tuote: l.product || '',
-    määrä: fiNum(l.quantity ?? 1), brutto: fiMoney(l.gross), 'alv_%': fiNum(l.vat_rate), 'alv_€': fiMoney(l.vat), netto: fiMoney(l.net), hyvitys: fiMoney(l.refund || 0),
+    tosite: l.voucher || l.receipt_no || '', pvm: l.date, asiakas: l.customer || '', tuote: l.product || '',
+    maara: fiNum(qty), netto: fiMoney(l.net), 'alv_%': fiNum(l.vat_rate), alv_eur: fiMoney(l.vat), brutto: fiMoney(l.gross),
+    maksutapa: l.method ? methodLabel(l.method) : '', tila: statusFi(l), laji: kindFi(l),
   };
 }
 export function toCsv(lines, { methodLabel, bom = true } = {}) {

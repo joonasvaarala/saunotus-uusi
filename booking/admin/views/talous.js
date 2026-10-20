@@ -12,12 +12,14 @@ import { createGiftcardsTab } from './talous-giftcards.js';
 import { createVouchersTab } from './talous-vouchers.js';
 import { createSalesChart } from './talous-sales-chart.js';
 import { loadOrderTexts } from '../orders-texts.js';
+import { loadReportTexts } from '../reports-texts.js';
 
 const ALL_TABS = [['orders', 'tab.orders'], ['payments', 'tab.payments'], ['reports', 'tab.reports'], ['giftcards', 'tab.giftcards'], ['vouchers', 'tab.vouchers']];
 
 export async function render({ ctx, reload, query }) {
   const api = createTalousApi({ rpc, io: { select: dbSelect, functionUrl, fnBlob, fn } });
   await loadOrderTexts(rpc);
+  await loadReportTexts(rpc);
   // Raportit (sopimus §11): välilehti ja päiväraportti = reports.daily TAI reports.view; kuukausi + CSV = vain reports.view (muuten selkeä ilmoitus). Oikeudet luetaan aina oikealta käyttäjältä (myös ?mock=1).
   const canFull = !!ctx.can('reports.view'), canDaily = canFull || !!ctx.can('reports.daily');
   // Lahjakortit-välilehti: giftcards.manage. Tilaukset/Maksut: payments.manage (nav-kohta aukeaa myös pelkällä giftcards.manage → silloin vain Lahjakortit).

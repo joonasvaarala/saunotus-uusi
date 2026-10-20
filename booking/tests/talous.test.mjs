@@ -20,12 +20,12 @@ const mock = createMock({ today: TODAY });
 const R = (name, args) => mock.rpc(name, args);
 
 test('CSV: otsikko, BOM, CRLF, erotin ; ja desimaalipilkku', () => {
-  assert.deepEqual(CSV_COLUMNS, ['pvm', 'kuitti_no', 'tilaus_no', 'maksutapa', 'tuoteryhmä', 'tuote', 'määrä', 'brutto', 'alv_%', 'alv_€', 'netto', 'hyvitys']);
-  const out = toCsv([{ date: '2026-10-17', receipt_no: '2026-000001', order_no: 123, method: 'cash', group: 'public', product: 'Yleinen vuoro', quantity: 2, gross: 36, vat_rate: 25.5, vat: 7.31, net: 28.69, refund: 0 }], { methodLabel: () => 'Käteinen' });
+  assert.deepEqual(CSV_COLUMNS, ['tosite', 'pvm', 'asiakas', 'tuote', 'maara', 'netto', 'alv_%', 'alv_eur', 'brutto', 'maksutapa', 'tila', 'laji']);
+  const out = toCsv([{ date: '2026-10-17', receipt_no: '2026-000001', customer: 'A', method: 'cash', product: 'Yleinen vuoro', quantity: 2, gross: 36, vat_rate: 25.5, vat: 7.31, net: 28.69 }], { methodLabel: () => 'Käteinen' });
   assert.equal(out.charCodeAt(0), 0xFEFF);
   const lines = out.slice(1).split('\r\n');
-  assert.equal(lines[0], 'pvm;kuitti_no;tilaus_no;maksutapa;tuoteryhmä;tuote;määrä;brutto;alv_%;alv_€;netto;hyvitys');
-  assert.equal(lines[1], '2026-10-17;2026-000001;123;Käteinen;public;Yleinen vuoro;2;36,00;25,5;7,31;28,69;0,00');
+  assert.equal(lines[0], 'tosite;pvm;asiakas;tuote;maara;netto;alv_%;alv_eur;brutto;maksutapa;tila;laji');
+  assert.equal(lines[1], '2026-000001;2026-10-17;A;Yleinen vuoro;2;28,69;25,5;7,31;36,00;Käteinen;maksettu;myynti');
   assert.equal(lines[2], ''); assert.equal(lines.length, 3);
   assert.ok(!/\n(?<!\r\n)/.test(out.replace(/\r\n/g, '')), 'vain CRLF-rivinvaihdot');
 });
@@ -106,7 +106,17 @@ test('Mock-palvelin: raportit täsmäävät (päivä ↔ kuukausi, ALV, maksutav
   assert.ok(GROUPS.includes(ag.lines[0].group));
   await assert.rejects(() => R('admin_report_daily', { p_date: 'x' }), (e) => e.code === 'invalid_date');
   const csv = await R('admin_report_csv', { p_from: '2026-10-10', p_to: '2026-10-10' });
-  assert.equal(csv.content.charCodeAt(0), 0xFEFF); assert.equal(csv.content.split('\r\n')[0].slice(1), 'pvm;kuitti_no;tilaus_no;maksutapa;tuoteryhmä;tuote;määrä;brutto;alv_%;alv_€;netto;hyvitys'); assert.equal(csv.content.trim().split('\r\n').length - 1, d.lines.length);
+  assert.equal(csv.content.charCodeAt(0), 0xFEFF); assert.equal(csv.content.split('\r\n')[0].slice(1), 'tosite;pvm;asiakas;tuote;maara;netto;alv_%;alv_eur;brutto;maksutapa;tila;laji'); assert.equal(csv.content.trim().split('\r\n').length - 1, d.lines.length);
+  assert.equal(Math.round(d.reconciliation.difference * 100), 0);
+  assert.ok(Array.isArray(d.by_product) && Array.isArray(d.refunds_by_product));
+  assert.equal(S(d.vat_summary, 'gross'), c(d.reconciliation.product_gross));
+  assert.ok(d.gift_card_period?.sold && Array.isArray(d.prepaid_redemptions.by_vat));
+  const sumDay = await R('admin_report_csv', { p_from: '2026-10-10', p_to: '2026-10-10', p_kind: 'summary' });
+  assert.equal(sumDay.content.includes('maksutapa;'), false);
+  assert.equal(sumDay.content.includes('tasmaytys;tuotteet'), true);
+  const sumMonth = await R('admin_report_csv', { p_from: '2026-10-01', p_to: '2026-10-31', p_kind: 'summary' });
+  assert.equal(sumMonth.content.includes('\r\nmaksutapa;'), true);
+  assert.equal(sumMonth.content.includes('lahjakortti_maksuton;myonnetty'), true);
 });
 test('Mock-palvelin: kirjoittavat RPC:t palauttavat sopimuksen muodot ja tarkistavat summat', async () => {
   const un = mock.orders.find((o) => o.is_native && o.payment_status === 'unpaid' && o.unpaid_amount > 0), pd = mock.orders.find((o) => o.is_native && o.payment_status === 'paid' && o.payments.length);
@@ -162,7 +172,8 @@ test('Datakerros: kirjoittavat toiminnot – ei käyttöönottolippuja, parametr
   const pd = mock.orders.find((o) => o.is_native && o.payments.some((p) => p.status === 'paid' && p.amount > 2));
   assert.equal((await m.refund({ paymentId: pd.payments.find((p) => p.status === 'paid').payment_id, amount: 1, reason: 'x' })).mock, true);
   const un = mock.orders.find((o) => o.is_native && o.unpaid_amount > 5);
-  assert.equal((await m.recordPayment({ orderId: un.order_id, method: 'cash', amount: 5 })).mock, true);
+  assert.equal((await m.recordPayment({ orderId: un.order_id, method: 'card_terminal', amount: 5 })).mock, true);
+  await assert.rejects(() => m.recordPayment({ orderId: un.order_id, method: 'cash', amount: 5 }), (e) => e.code === 'cash_not_accepted');
   await assert.rejects(() => m.recordPayment({ orderId: un.order_id, method: 'visma_pay', amount: 5 }), (e) => e.code === 'invalid_payment_method');
   await assert.rejects(() => A.rpcBackend(async () => ({ ok: false, code: 'nothing_to_pay', message: 'Ei maksettavaa' })).createPaymentLink({ orderId: 1 }), (e) => e.code === 'nothing_to_pay' && /Ei maksettavaa/.test(e.message));
   // ALV-huomautus: normalisointi; virhe → null (ei mock-varaa); linkin isäntä order_page_path:sta (täysi osoite tai polku)
@@ -189,7 +200,7 @@ test('Datakerros: CSV = palvelimen admin_report_csv (12 saraketta, booking_34)',
   const rep = await api.reportMonthly('2026-09'); const c = await api.reportCsv(rep);
   assert.equal(c.source, 'server'); assert.ok(c.content.slice(1).startsWith(CSV_COLUMNS.join(';'))); assert.equal(c.content.trim().split('\r\n').length - 1, rep.lines.length);
   const noLines = { ...rep, lines: null }; const s = await api.reportCsv(noLines);
-  assert.equal(s.source, 'server'); assert.equal(s.filename, 'kuitit_lines_2026-09-01_2026-09-30.csv'); assert.ok(s.content.startsWith('\uFEFFpvm;kuitti_no;tilaus_no;maksutapa;tuoteryhmä'));
+  assert.equal(s.source, 'server'); assert.equal(s.filename, 'tapahtumat_2026-09-01_2026-09-30.csv'); assert.ok(s.content.startsWith('\uFEFFtosite;pvm;asiakas;tuote;maara'));
 });
 test('Datakerros: sopimuksen vastausten normalisointi (rivit, tilaus, raportti)', () => {
   const row = A.normOrderRow({ order_id: 1, order_no: 2, total: 100, paid: 40, refunded: 5, unpaid: 60, first_start: 'f', customer_company: 'X Oy', johku_order_no: 7 });

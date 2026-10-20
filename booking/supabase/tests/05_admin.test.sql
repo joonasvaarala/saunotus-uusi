@@ -42,7 +42,7 @@ select is((select price from kb.product_price_variants where id = :vid), 777::nu
 
 -- manuaalinen varaus (staff): puhelinvaraus, maksettu käteisellä
 select test.login(:'sid');
-select booking.admin_create_booking(:r_thu, :'thu', 4, null, '{"name": "Puhelin Asiakas", "email": "puhelin@example.com", "phone": "0407654321"}', 'cash', true, 'puhelimitse') as ab \gset
+select booking.admin_create_booking(:r_thu, :'thu', 4, null, '{"name": "Puhelin Asiakas", "email": "puhelin@example.com", "phone": "0407654321"}', 'card_terminal', true, 'puhelimitse') as ab \gset
 select ok(:'ab'::jsonb ? 'order_id', 'staff luo manuaalisen varauksen');
 select (:'ab'::jsonb ->> 'order_id')::bigint as oid \gset
 select test.logout();
@@ -62,9 +62,9 @@ select test.logout();
 select test.login(:'sid');
 select booking.admin_create_booking(:r_tue, (:'tue'::date + 7), 2, null, '{"name": "Maksu Testi", "email": "maksu@example.com", "phone": "0407654321"}', 'pay_later', false) ->> 'order_id' as oid2 \gset
 select is((select payment_status from booking.orders where id = :oid2), 'unpaid', 'pay_later => unpaid');
-select is((booking.admin_record_payment(:oid2, 'cash', 10) ->> 'ok')::boolean, true, 'osamaksun kirjaus');
+select is((booking.admin_record_payment(:oid2, 'card_terminal', 10) ->> 'ok')::boolean, true, 'osamaksun kirjaus');
 select is((select payment_status from booking.orders where id = :oid2), 'partially_paid', 'osamaksu => partially_paid');
-select is((booking.admin_record_payment(:oid2, 'cash', (select total_gross - 10 from booking.orders where id = :oid2)) ->> 'ok')::boolean, true, 'loppumaksu');
+select is((booking.admin_record_payment(:oid2, 'card_terminal', (select total_gross - 10 from booking.orders where id = :oid2)) ->> 'ok')::boolean, true, 'loppumaksu');
 select is((select payment_status from booking.orders where id = :oid2), 'paid', 'täysi maksu => paid');
 select is((booking.admin_create_payment_link(:oid2) ->> 'implemented')::boolean, false, 'maksulinkki on placeholder (ei toteutettu)');
 select is((select link_url from booking.payments where order_id = :oid2 and provider = 'visma_pay' limit 1), null, 'placeholder ei luo oikeaa linkkiä');

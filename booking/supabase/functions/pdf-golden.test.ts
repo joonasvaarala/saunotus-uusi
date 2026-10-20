@@ -1,5 +1,6 @@
-// PDF-pohjien tekstisiirto (osa 3 / PR 3): lahjakortti- ja kuitti-PDF samat tavut kuin ennen siirtoa (tiivisteet pdf-golden.json, otettu vanhalla koodilla),
-// kun tekstit tulevat repon oletuksista TAI tuontitiedoston riveistä (content/site-texts.imported-pr66.json); DB-teksti näkyy PDF:ssä; rikkinäinen DB-teksti → oletus.
+// Lahjakortti-PDF:n tavut pysyvät pdf-golden.json:n gift.*-tiivisteissä.
+// Kuitti-PDF:n rivillä on veroton, ALV-%, ALV-€ ja brutto (booking_119). receipt.*-tiivisteet on otettu tästä asettelusta.
+// Tekstit tulevat repon oletuksista TAI tuontitiedoston riveistä (content/site-texts.imported-pr66.json). Uudet sarakeavaimet eivät ole tuonnissa, joten molemmat polut käyttävät oletusta.
 // Ajo: deno test -A --node-modules-dir=none booking/supabase/functions/pdf-golden.test.ts
 import { assert, assertEquals, assertNotEquals } from "jsr:@std/assert@1";
 import { giftCardCases, receiptCases } from "./pdf-golden-cases.mjs";
@@ -24,7 +25,7 @@ const tG = (rows?: TextRow[], settings?: Record<string, unknown>) => makeT(GIFT_
 const tR = (rows?: TextRow[], settings?: Record<string, unknown>) => makeT(RECEIPT_PDF_TEXTS, rows, settings, () => {});
 
 for (const [label, rows] of [["repon oletukset", undefined], ["tuonti + tuotannossa muokatut käyttöohjeet DB:nä", importedRows]] as const) {
-  Deno.test(`PDF samat tavut kuin ennen siirtoa (${label})`, async () => {
+  Deno.test(`PDF vastaa kultaisia tiivisteitä (${label})`, async () => {
     let n = 0;
     for (const c of giftCardCases()) { assertEquals(await hex(await buildGiftCardPdf(structuredClone(c.data), c.logo ? logo : null, c.lang, tG(rows))), golden[`gift.${c.name}`], `lahjakortti ${c.name}`); n++; }
     for (const c of receiptCases()) { assertEquals(await hex(await buildReceiptPdf(structuredClone(c.data), tR(rows))), golden[`receipt.${c.name}`], `kuitti ${c.name}`); n++; }

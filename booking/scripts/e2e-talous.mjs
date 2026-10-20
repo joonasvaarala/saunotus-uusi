@@ -353,7 +353,8 @@ async function adminSuite() {
     // --- Raportit ---
     await page.click('[data-testid=tab-reports-btn]');
     await page.waitForSelector('[data-testid=r-gross]');
-    for (const id of ['r-by-vat', 'r-by-method', 'r-matrix', 'r-by-group', 'r-gross-after', 'r-net-ex-vat']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: raporttitaulukko ${id}`);
+    for (const id of ['r-by-vat', 'r-by-product', 'r-refunds-product', 'r-gc-summary', 'r-by-group', 'r-gross-after', 'r-net-ex-vat']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: raporttitaulukko ${id}`);
+    for (const id of ['r-by-method', 'r-matrix']) expect(await page.locator(`[data-testid=${id}]`).count() === 0, `${name}: päiväraportissa ei ${id}`);
     await layoutChecks(page, `${name} raportti päivä`);
     if (vp === 390 || vp === 1280) await shot(page, `talous-raportit-paiva-${vp}-${lang}`);
     // CSV (päivä)
@@ -361,10 +362,11 @@ async function adminSuite() {
     const d1 = await csvOf();
     expect(d1.buf[0] === 0xEF && d1.buf[1] === 0xBB && d1.buf[2] === 0xBF, `${name}: CSV alkaa UTF-8 BOM:lla`);
     const txt = d1.buf.toString('utf8').slice(1), lines = txt.split('\r\n');
-    expect(lines[0] === 'pvm;kuitti_no;tilaus_no;maksutapa;tuoteryhmä;tuote;määrä;brutto;alv_%;alv_€;netto;hyvitys', `${name}: CSV-otsikko (${lines[0]})`);
+    expect(lines[0] === 'tosite;pvm;asiakas;tuote;maara;netto;alv_%;alv_eur;brutto;maksutapa;tila;laji', `${name}: CSV-otsikko (${lines[0]})`);
     expect(lines.at(-1) === '' && lines.length > 3 && lines.slice(1, -1).every((l) => l.split(';').length >= 12), `${name}: CSV rivit CRLF + 12 saraketta`);
-    expect(/^\d{2}\.\d{2}\.\d{4};.*;-?\d+,\d{2};\d+(,\d)?;-?\d+,\d{2};-?\d+,\d{2};(kyllä|ei)\r?$/.test(lines[1]) && !/\d\.\d{2};/.test(lines[1].slice(10)), `${name}: desimaalipilkku (${lines[1]})`);
-    expect(/^kuitit_lines_\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2}\.csv$/.test(d1.fn), `${name}: CSV-tiedostonimi ${d1.fn}`);
+    const cols = lines[1].replace(/\r$/, '').split(';');
+    expect(/^-?\d+,\d{2}$/.test(cols[5]) && /^-?\d+,\d{2}$/.test(cols[7]) && /^-?\d+,\d{2}$/.test(cols[8]) && /^(myynti|hyvitys)$/.test(cols[11]), `${name}: desimaalipilkku (${lines[1]})`);
+    expect(/^tapahtumat_\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2}\.csv$/.test(d1.fn), `${name}: CSV-tiedostonimi ${d1.fn}`);
     // PDF = window.print
     await page.evaluate(() => { window.__printed = 0; window.print = () => { window.__printed++; }; });
     await page.click('[data-testid=r-pdf]'); expect(await page.evaluate(() => window.__printed) === 1, `${name}: PDF-nappi kutsuu tulostusta`);
@@ -377,10 +379,11 @@ async function adminSuite() {
     }
     // kuukausiraportti
     await page.click('[data-testid=r-kind-monthly]'); await page.waitForSelector('[data-testid=r-daily]');
+    for (const id of ['r-by-method', 'r-matrix']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: kuukausiraportin ${id}`);
     expect(await page.locator('[data-testid=r-daily] tbody tr').count() >= 10, `${name}: kuukausiraportin päiväerittely`);
     await layoutChecks(page, `${name} raportti kuukausi`);
     if (vp === 390 || vp === 1280) await shot(page, `talous-raportit-kuukausi-${vp}-${lang}`);
-    const d2 = await csvOf(); expect(/^kuitit_lines_\d{4}-\d{2}-01_\d{4}-\d{2}-\d{2}\.csv$/.test(d2.fn) && d2.buf.length > d1.buf.length, `${name}: kuukausi-CSV`);
+    const d2 = await csvOf(); expect(/^tapahtumat_\d{4}-\d{2}-01_\d{4}-\d{2}-\d{2}\.csv$/.test(d2.fn) && d2.buf.length > d1.buf.length, `${name}: kuukausi-CSV`);
     // hyvitysrivi (negatiivinen) löytyy jossain kuukaudessa: edellinen kuukausi
     // kielenvaihto
     if (vp === 390) {
@@ -500,13 +503,15 @@ async function adminSuite() {
     const calls = (n) => page.st.calls.filter((c) => c.name === n);
     expect(await page.locator('[data-testid=mock-banner]').isHidden(), `${name}: ei bannerita`);
     expect(/^\d{4}-\d{2}-\d{2}$/.test(calls('admin_report_daily')[0].args.p_date), `${name}: admin_report_daily`);
-    for (const id of ['r-by-vat', 'r-by-method', 'r-matrix', 'r-by-group', 'r-receipts-list']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: ${id}`);
+    for (const id of ['r-by-vat', 'r-by-group', 'r-receipts-list', 'r-gc-summary']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: ${id}`);
+    for (const id of ['r-by-method', 'r-matrix']) expect(await page.locator(`[data-testid=${id}]`).count() === 0, `${name}: päiväraportissa ei ${id}`);
     await page.click('[data-testid=r-kind-monthly]'); await page.waitForSelector('[data-testid=r-daily]');
+    for (const id of ['r-by-method', 'r-matrix']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: kuukausiraportin ${id}`);
     const mon = calls('admin_report_month').at(-1).args.p_ym;
     const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-testid=r-csv]')]);
     const buf = await readFile(await dl.path()), txt = buf.toString('utf8');
     expect(calls('admin_report_csv').length === 1 && calls('admin_report_csv')[0].args.p_from === `${mon}-01` && calls('admin_report_csv')[0].args.p_kind === 'lines', `${name}: admin_report_csv kutsuttu (${JSON.stringify(calls('admin_report_csv')[0]?.args)})`);
-    expect(buf[0] === 0xEF && buf[1] === 0xBB && txt.slice(1).startsWith('pvm;kuitti_no;tilaus_no;maksutapa;tuoteryhmä;tuote;määrä;brutto;alv_%;alv_€;netto;hyvitys') && /^kuitit_lines_\d{4}-\d{2}-01_\d{4}-\d{2}-\d{2}\.csv$/.test(dl.suggestedFilename()), `${name}: palvelimen CSV sellaisenaan (${dl.suggestedFilename()})`);
+    expect(buf[0] === 0xEF && buf[1] === 0xBB && txt.slice(1).startsWith('tosite;pvm;asiakas;tuote;maara;netto;alv_%;alv_eur;brutto;maksutapa;tila;laji') && /^tapahtumat_\d{4}-\d{2}-01_\d{4}-\d{2}-\d{2}\.csv$/.test(dl.suggestedFilename()), `${name}: palvelimen CSV sellaisenaan (${dl.suggestedFilename()})`);
     // report-pdf (verify_jwt=true): Lataa PDF → fetch JWT:llä → tiedosto
     await page.click('[data-testid=r-kind-daily]'); await page.waitForSelector('[data-testid=r-gross]'); await page.waitForFunction(() => !document.querySelector('[data-testid=r-pdf-server]').disabled);
     const [pdl] = await Promise.all([page.waitForEvent('download'), page.click('[data-testid=r-pdf-server]')]);

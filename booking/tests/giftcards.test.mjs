@@ -98,8 +98,11 @@ test('Mock: luonti – paketit, summat, tervehdys, maksuton myöntö vs. myynti'
   await fail(R('admin_create_gift_card', { p_package: 'open', p_amount: 50, p_note: 'abc', p_quantity: 11 }), 'invalid_quantity');
   const free = await R('admin_create_gift_card', { p_package: 'open', p_amount: 29, p_note: 'Hyvitys', p_greeting: 'x'.repeat(300) });
   assert.equal(free.complimentary, true); assert.equal(free.order_id, null); assert.equal(free.cards[0].status, 'active'); assert.match(free.cards[0].code, /^[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}$/); assert.equal(free.cards[0].balance, 29);
-  const cash = await R('admin_create_gift_card', { p_package: 'entry_2', p_quantity: 2, p_payment_method: 'cash', p_buyer: { name: 'A', email: 'a@example.invalid' } });
-  assert.equal(cash.paid, true); assert.equal(cash.total, 116); assert.equal(cash.cards.length, 2); assert.ok(cash.cards.every((c) => c.status === 'active' && c.balance === 58 && c.order_no === cash.order_no));
+  await fail(R('admin_create_gift_card', { p_package: 'entry_2', p_payment_method: 'cash', p_buyer: { name: 'A', email: 'a@example.invalid' } }), 'cash_not_accepted');
+  await fail(R('admin_create_gift_card', { p_package: 'entry_2', p_payment_method: 'card_terminal', p_vat_treatment: 'at_redemption', p_buyer: { name: 'A', email: 'a@example.invalid' } }), 'gift_card_vat_rate');
+  const sold = await R('admin_create_gift_card', { p_package: 'entry_2', p_quantity: 2, p_payment_method: 'card_terminal', p_buyer: { name: 'A', email: 'a@example.invalid' } });
+  assert.equal(sold.paid, true); assert.equal(sold.total, 116); assert.equal(sold.cards.length, 2); assert.ok(sold.cards.every((c) => c.status === 'active' && c.balance === 58 && c.order_no === sold.order_no && c.vat_treatment === 'at_sale' && c.sale_vat_rate === 25.5 && c.complimentary === false));
+  assert.equal(free.cards[0].complimentary, true); assert.equal(free.cards[0].sale_vat_rate, 0);
   const inv = await R('admin_create_gift_card', { p_package: 'saunotus_2', p_payment_method: 'invoice', p_buyer: { name: 'A', email: 'a@example.invalid' } });
   assert.equal(inv.paid, false); assert.equal(inv.cards[0].status, 'pending_payment'); assert.equal(inv.cards[0].balance, 0);
   const codes = new Set(m.state.cards.map((c) => c.code)); assert.equal(codes.size, m.state.cards.length, 'koodit uniikkeja');
@@ -131,16 +134,17 @@ test('Mock: voimassaolo, korjaus, mitätöinti, aktivointi, historia ja saldojoh
 
 test('Mock: lunastus – osittainen, virheet (vanhentunut, tyhjä, Johku suljettu, kytkin pois), accounted-lippu', async () => {
   const m = mk(), R = (n, a) => m.rpc(n, a);
-  const c = (await R('admin_create_gift_card', { p_package: 'open', p_amount: 80, p_note: 'testi', p_vat_treatment: 'at_redemption' })).cards[0];
+  await fail(R('admin_create_gift_card', { p_package: 'open', p_amount: 80, p_note: 'testi', p_vat_treatment: 'at_redemption' }), 'gift_card_vat_rate');
+  const c = (await R('admin_create_gift_card', { p_package: 'open', p_amount: 80, p_payment_method: 'card_terminal', p_buyer: { name: 'A', email: 'a@example.invalid' } })).cards[0];
   const a = await R('admin_redeem_gift_card', { p_order_id: 5, p_code: c.code.toLowerCase().replace(/-/g, ' '), p_amount: 30 });
-  assert.equal(a.amount, 30); assert.equal(a.gift_card.balance, 50); assert.equal(a.accounted, true); assert.ok(a.receipt_no);
+  assert.equal(a.amount, 30); assert.equal(a.gift_card.balance, 50); assert.equal(a.accounted, false); assert.ok(a.receipt_no);
   const b = await R('admin_redeem_gift_card', { p_order_id: 5, p_code: c.code });
   assert.equal(b.amount, 50, 'tyhjä summa = koko jäljellä oleva saldo'); assert.equal(b.gift_card.status, 'used');
   await fail(R('admin_redeem_gift_card', { p_order_id: 5, p_code: c.code }), 'gift_card_empty');
   await fail(R('admin_redeem_gift_card', { p_order_id: 5, p_code: 'HHZZ-ZZZZ-ZZZZ' }), 'gift_card_not_found');
   const pkg = (await R('admin_create_gift_card', { p_package: 'entry_2', p_note: 'testi' })).cards[0];
   await fail(R('admin_redeem_gift_card', { p_order_id: 5, p_code: pkg.code, p_amount: 59 }), 'insufficient_balance');
-  const r = await R('admin_redeem_gift_card', { p_order_id: 5, p_code: pkg.code, p_amount: 20 }); assert.equal(r.accounted, false); assert.equal(r.receipt_no, null, 'at_sale: ei uutta kuittia');
+  const r = await R('admin_redeem_gift_card', { p_order_id: 5, p_code: pkg.code, p_amount: 20 }); assert.equal(r.accounted, false); assert.equal(r.receipt_no, null, 'maksuton: ei kuittia eikä myyntiä');
   const old = m.state.cards.find((x) => x.valid_to < TODAY && x.status === 'active');
   await fail(R('admin_redeem_gift_card', { p_order_id: 5, p_code: old.code }), 'gift_card_expired');
   const johku = m.state.cards.find((x) => x.source === 'johku' && x.status === 'active' && x.balance > 0);
@@ -157,6 +161,7 @@ test('Mock: pakettien hinnat ja nimet vastaavat tuotannon public_gift_card_packa
   assert.equal(MOCK_PACKAGES[1].name_en, 'Smoke sauna session for two');
   assert.equal(MOCK_PACKAGES[1].price, 58);
   assert.equal(MOCK_PACKAGES[1].vat_rate, 25.5);
+  assert.ok(MOCK_PACKAGES.every((p) => p.vat_treatment === 'at_sale' && p.vat_rate === 25.5));
 });
 
 test('Migraatio booking_100 päivittää vain entry_2:n nimen ja on idempotentti', () => {

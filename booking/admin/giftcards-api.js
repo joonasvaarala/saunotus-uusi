@@ -11,7 +11,7 @@ export const GC_RPC = {
 };
 export const GC_STATUSES = ['active', 'used', 'expired', 'cancelled', 'pending_verification', 'pending_payment'];
 export const GC_SORTS = ['created_desc', 'created_asc', 'valid_to_asc', 'valid_to_desc', 'balance_desc', 'balance_asc', 'initial_desc', 'initial_asc'];
-export const GC_PAY_METHODS = ['cash', 'card_terminal', 'mobilepay', 'bank_transfer', 'invoice', 'pay_later', 'other'];   // admin_create_gift_card: p_payment_method (muu kuin gift_card)
+export const GC_PAY_METHODS = ['card_terminal', 'mobilepay', 'bank_transfer', 'invoice', 'pay_later', 'other'];   // admin_create_gift_card: p_payment_method. Käteinen ei ole käytössä (booking_119).
 export const GC_GREETING_MAX = 300;
 
 const num = (v, d = 0) => (v == null || v === '' || !Number.isFinite(+v) ? d : +v);

@@ -8,7 +8,30 @@ const DEFAULT_T: TFn = makeT(RECEIPT_PDF_TEXTS);
 
 // pdf-lib StandardFonts = WinAnsi: poistetaan merkit joita ei voi koodata
 export const san = (s: unknown): string => String(s ?? "").replace(/[^\u0020-\u007E\u00A0-\u00FF\u20AC\u2013\u2014\u2018\u2019\u201C\u201D\u2022\u2026]/g, "?");
-const money = (n: number, loc: string) => (loc === "en" ? n.toFixed(2) : n.toFixed(2).replace(".", ",")) + " €";
+const money = (n: number, loc: string) => (loc === "en" ? round2(n).toFixed(2) : round2(n).toFixed(2).replace(".", ",")) + " €";
+/** Puolikas pois nollasta, kuten PostgreSQL numeric round. */
+export function round2(n: number): number {
+  const x = Number(n);
+  if (!Number.isFinite(x)) return 0;
+  const s = x < 0 ? -1 : 1;
+  return s * Math.round((Math.abs(x) + Number.EPSILON) * 100) / 100;
+}
+/** line_net on snapshotissa; vanha kuitti ilman sitä johdetaan brutto × kanta / (100 + kanta). */
+export function lineAmounts(l: { line_gross?: unknown; line_net?: unknown; vat_rate?: unknown }): { net: number; vat: number; gross: number; rate: number } {
+  const gross = Number(l.line_gross ?? 0);
+  const rate = Number(l.vat_rate ?? 0);
+  const g = Number.isFinite(gross) ? gross : 0;
+  const rt = Number.isFinite(rate) ? rate : 0;
+  let net: number;
+  if (l.line_net != null && l.line_net !== "") net = Number(l.line_net);
+  else {
+    const div = 100 + rt;
+    const vat = div === 0 ? 0 : round2(g * rt / div);
+    net = round2(g - vat);
+  }
+  if (!Number.isFinite(net)) net = 0;
+  return { net: round2(net), vat: round2(g - net), gross: round2(g), rate: rt };
+}
 const rate = (n: number, loc: string) => (loc === "en" ? String(n) : String(n).replace(".", ",")) + " %";
 const fmtLocal = (iso: string) => new Intl.DateTimeFormat("fi-FI", { timeZone: "Europe/Helsinki", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(iso)).replace(",", "");
 
@@ -79,18 +102,29 @@ export async function buildReceiptPdf(s: any, tfn: TFn = DEFAULT_T): Promise<Uin
     const b = s.buyer;
     for (const l of [[b.company, b.name].filter(Boolean).join(", "), (b.business_id ? TX("email.receipt_pdf.business_id", { id: b.business_id }) : ""), [b.address, [b.zip, b.city].filter(Boolean).join(" ")].filter(Boolean).join(", "), b.reference ? TX("email.receipt_pdf.reference", { ref: b.reference }) : ""].filter(Boolean)) { text(page, l, M, y, 10); y -= 13; }
   }
+  if (s.informational) { y -= 8; need(28); for (const l of wrap(TX("email.receipt_pdf.giftcard_info"), font, 9, W)) { text(page, l, M, y, 9, font, grey); y -= 12; } }
   y -= 10;
   // rivit
-  const cx = { qty: M + W - 215, unit: M + W - 150, vat: M + W - 90, tot: M + W };
+  const cx = { qty: M + 250, net: M + 330, pct: M + 385, vat: M + 445, gross: M + W };
   page.drawLine({ start: { x: M, y: y + 12 }, end: { x: M + W, y: y + 12 }, thickness: 0.8, color: black });
-  text(page, TX("email.receipt_pdf.col_item"), M, y, 9, bold); right(page, TX("email.receipt_pdf.col_qty"), cx.qty + 20, y, 9, bold); right(page, TX("email.receipt_pdf.col_unit"), cx.unit + 50, y, 9, bold); right(page, TX("email.receipt_pdf.col_vat"), cx.vat + 30, y, 9, bold); right(page, TX("email.receipt_pdf.col_total"), cx.tot, y, 9, bold);
+  text(page, TX("email.receipt_pdf.col_item"), M, y, 8, bold);
+  right(page, TX("email.receipt_pdf.col_qty"), cx.qty, y, 8, bold);
+  right(page, TX("email.receipt_pdf.col_net"), cx.net, y, 8, bold);
+  right(page, TX("email.receipt_pdf.col_vat_pct"), cx.pct, y, 8, bold);
+  right(page, TX("email.receipt_pdf.col_vat_eur"), cx.vat, y, 8, bold);
+  right(page, TX("email.receipt_pdf.col_gross"), cx.gross, y, 8, bold);
   y -= 8; page.drawLine({ start: { x: M, y }, end: { x: M + W, y }, thickness: 0.4, color: grey }); y -= 14;
   for (const l of s.lines) {
     let d = l.description as string;
     if (l.starts_at) d += ` (${new Intl.DateTimeFormat("fi-FI", { timeZone: "Europe/Helsinki", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(l.starts_at)).replace(",", "")}–${new Intl.DateTimeFormat("fi-FI", { timeZone: "Europe/Helsinki", hour: "2-digit", minute: "2-digit" }).format(new Date(l.ends_at))})`;
-    const ls = wrap(d, font, 9.5, cx.qty - M - 30); need(ls.length * 12 + 6);
-    ls.forEach((t, i) => text(page, t, M, y - i * 12, 9.5));
-    right(page, String(l.quantity), cx.qty + 20, y, 9.5); right(page, money(Number(l.unit_gross), loc), cx.unit + 50, y, 9.5); right(page, rate(Number(l.vat_rate), loc), cx.vat + 30, y, 9.5); right(page, money(Number(l.line_gross), loc), cx.tot, y, 9.5);
+    const amt = lineAmounts(l);
+    const ls = wrap(d, font, 9, cx.qty - 36 - M); need(ls.length * 12 + 6);
+    ls.forEach((t, i) => text(page, t, M, y - i * 12, 9));
+    right(page, String(l.quantity), cx.qty, y, 8.5);
+    right(page, money(amt.net, loc), cx.net, y, 8.5);
+    right(page, rate(amt.rate, loc), cx.pct, y, 8.5);
+    right(page, money(amt.vat, loc), cx.vat, y, 8.5);
+    right(page, money(amt.gross, loc), cx.gross, y, 8.5);
     y -= ls.length * 12 + 4;
   }
   need(140); page.drawLine({ start: { x: M, y: y + 6 }, end: { x: M + W, y: y + 6 }, thickness: 0.4, color: grey }); y -= 10;

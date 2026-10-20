@@ -13,7 +13,7 @@ import { createMock } from './talous-mock.js';
 export const RPC = {
   listOrders: 'admin_list_orders', getOrder: 'admin_get_order', listPayments: 'admin_list_payments', listAddons: 'admin_list_addons',
   addToOrder: 'admin_add_to_order', createPaymentLink: 'admin_create_payment_link', refund: 'admin_refund', recordPayment: 'admin_record_payment', listVatRates: 'admin_list_vat_rates',
-  reportDaily: 'admin_report_daily', reportMonthly: 'admin_report_month', reportCsv: 'admin_report_csv', salesChart: 'admin_sales_chart',
+  reportDaily: 'admin_report_daily', reportMonthly: 'admin_report_month', reportRange: 'admin_report_range', reportTransactions: 'admin_report_transactions', reportGiftCards: 'admin_report_gift_cards', reportCsv: 'admin_report_csv', salesChart: 'admin_sales_chart',
   getReceipt: 'admin_get_receipt', resendReceipt: 'admin_resend_receipt',
 };
 export class FeatureNotReady extends Error {
@@ -99,7 +99,7 @@ export function normJohkuStats(j) {
 export function normReport(r) {
   const tt = r.totals || {};
   const per = r.period || {};   // sopimus (booking_35): period {from,to,tz,kind:'day'|'month'}; kind puuttuessa päätellään (sama päivä = päivä)
-  const kind = per.kind === 'day' || per.kind === 'month' ? per.kind : (per.from && per.from === per.to ? 'day' : per.from ? 'month' : 'day');
+  const kind = per.kind === 'day' || per.kind === 'month' || per.kind === 'range' ? per.kind : (per.from && per.from === per.to ? 'day' : per.from ? 'month' : 'day');
   // gross_after_refunds = brutto hyvitysten jälkeen (booking_35). net_after_refunds on DEPRECATED (sama arvo) → ei käytetä; puuttuessa lasketaan gross + refunds_gross.
   const grossAfter = tt.gross_after_refunds ?? (num(tt.gross) + num(tt.refunds_gross));
   return { period: { ...per, from: per.from ?? null, to: per.to ?? null, kind }, generated_at: r.generated_at ?? null,
@@ -108,6 +108,30 @@ export function normReport(r) {
     by_vat: L(r.by_vat).map((v) => ({ rate: num(v.rate), net: num(v.net), vat: num(v.vat), gross: num(v.gross) })),
     by_method_vat: L(r.by_method_vat).map((v) => ({ method: v.method, rate: num(v.rate), net: num(v.net), vat: num(v.vat), gross: num(v.gross) })),
     by_category: L(r.by_category).map((c) => ({ category: c.category, label: c.label ?? null, rate: num(c.rate), quantity: num(c.quantity), gross: num(c.gross), net: num(c.net), vat: num(c.vat) })),
+    by_product: Array.isArray(r.by_product) ? r.by_product.map((p) => ({ product: p.product ?? '', rate: num(p.rate), quantity: num(p.quantity), net: num(p.net), vat: num(p.vat), gross: num(p.gross) })) : null,
+    refunds_by_product: Array.isArray(r.refunds_by_product) ? r.refunds_by_product.map((p) => ({ product: p.product ?? '', rate: num(p.rate), quantity: num(p.quantity), net: num(p.net), vat: num(p.vat), gross: num(p.gross) })) : null,
+    reconciliation: r.reconciliation && typeof r.reconciliation === 'object' ? {
+      sales_gross: num(r.reconciliation.sales_gross), refunds_gross: num(r.reconciliation.refunds_gross), product_gross: num(r.reconciliation.product_gross),
+      payments_gross: num(r.reconciliation.payments_gross), difference: num(r.reconciliation.difference), line_vat: num(r.reconciliation.line_vat), receipt_vat: num(r.reconciliation.receipt_vat),
+      vat_rounding: num(r.reconciliation.vat_rounding), cash_rounding: num(r.reconciliation.cash_rounding), rounding_code: r.reconciliation.rounding_code ?? null,
+    } : null,
+    vat_summary: Array.isArray(r.vat_summary) ? r.vat_summary.map((v) => ({ rate: num(v.rate), net: num(v.net), vat: num(v.vat), gross: num(v.gross) })) : null,
+    gift_card_period: r.gift_card_period && typeof r.gift_card_period === 'object' ? {
+      sold: {
+        count: num(r.gift_card_period.sold?.count), net: num(r.gift_card_period.sold?.net), vat: num(r.gift_card_period.sold?.vat), gross: num(r.gift_card_period.sold?.gross),
+        lines: L(r.gift_card_period.sold?.lines).map((p) => ({ product: p.product ?? '', rate: num(p.rate), quantity: num(p.quantity), net: num(p.net), vat: num(p.vat), gross: num(p.gross) })),
+        by_vat: L(r.gift_card_period.sold?.by_vat).map((v) => ({ rate: num(v.rate), quantity: num(v.quantity), net: num(v.net), vat: num(v.vat), gross: num(v.gross) })),
+      },
+      complimentary: {
+        issued_count: num(r.gift_card_period.complimentary?.issued_count), issued_gross: num(r.gift_card_period.complimentary?.issued_gross),
+        redeemed_count: num(r.gift_card_period.complimentary?.redeemed_count), redeemed_gross: num(r.gift_card_period.complimentary?.redeemed_gross),
+      },
+    } : null,
+    prepaid_redemptions: r.prepaid_redemptions && typeof r.prepaid_redemptions === 'object' ? {
+      accounting: false, payments: num(r.prepaid_redemptions.payments), gross: num(r.prepaid_redemptions.gross), net: num(r.prepaid_redemptions.net), vat: num(r.prepaid_redemptions.vat),
+      lines: L(r.prepaid_redemptions.lines).map((p) => ({ product: p.product ?? '', rate: num(p.rate), quantity: num(p.quantity), net: num(p.net), vat: num(p.vat), gross: num(p.gross) })),
+      by_vat: L(r.prepaid_redemptions.by_vat).map((v) => ({ rate: num(v.rate), quantity: num(v.quantity), net: num(v.net), vat: num(v.vat), gross: num(v.gross) })),
+    } : null,
     receipts: Array.isArray(r.receipts) ? r.receipts.map((x) => ({ receipt_no: x.receipt_no, kind: x.kind, issued_at: x.issued_at, order_no: x.order_no ?? null, method: x.method, gross: num(x.gross), net: num(x.net), vat: num(x.vat) })) : null,
     by_day: Array.isArray(r.by_day) ? r.by_day.map((d) => ({ date: d.date, receipts: num(d.receipts), gross: num(d.gross), vat: num(d.vat), refunds: num(d.refunds) })) : null,
     open: { orders: num(r.open?.orders), unpaid: num(r.open?.unpaid) },
@@ -169,6 +193,9 @@ export function rpcBackend(rpc) {
     listVatRates: () => call('listVatRates'),
     reportDaily: (date) => call('reportDaily', { p_date: date }),
     reportMonthly: (ym) => call('reportMonthly', { p_ym: ym }),
+    reportRange: (a) => call('reportRange', { p_from: a.from, p_to: a.to }),
+    reportTransactions: (a) => call('reportTransactions', { p_from: a.from, p_to: a.to }),
+    reportGiftCards: (a) => call('reportGiftCards', { p_filter: a.filter, p_format: a.format || 'json' }),
     reportCsv: (a) => call('reportCsv', compact({ p_from: a.from, p_to: a.to, p_kind: a.kind || 'lines' })),
     salesChart: (year) => call('salesChart', { p_year: year }),
     getReceipt: (id) => call('getReceipt', { p_receipt_id: id }),
@@ -215,6 +242,10 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
     listAddons: () => run('listAddons', undefined, (r) => L(r).filter((x) => x.active !== false).map((x) => ({ id: x.id, code: x.code, name: x.name, name_en: x.name_en || x.name, price: num(x.price ?? x.price_gross) }))),
     reportDaily: (date) => run('reportDaily', date, normReport),
     reportMonthly: (ym) => run('reportMonthly', ym, normReport),
+    reportRange: (from, to) => run('reportRange', { from, to }, normReport),
+    reportTransactions: (from, to) => run('reportTransactions', { from, to }, (r) => ({ period: r.period || { from, to, kind: 'transactions' }, rows: L(r.rows).map((x) => ({
+      voucher: x.voucher ?? '', date: x.date ?? '', customer: x.customer ?? '', product: x.product ?? '', quantity: num(x.quantity), net: num(x.net), vat_rate: num(x.vat_rate), vat: num(x.vat), gross: num(x.gross),
+      method: x.method ?? '', method_label: x.method_label ?? '', status: x.status === 'open' ? 'open' : 'paid', kind: x.kind === 'refund' ? 'refund' : x.kind === 'redemption' ? 'redemption' : 'sale' })) })),
     // Käyrä: oikeassa tilassa puuttuva RPC ei pudota mock-myyntilukuihin (väärä raha hallinnassa). ?mock=1 käyttää mockia.
     async salesChart(year) {
       if (!real) return normSalesChart(await getMock().salesChart(year));
@@ -223,11 +254,19 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
         throw e;
       }
     },
-    // CSV: palvelimen admin_report_csv (booking_34: samat 12 saraketta kuin pyydetty: pvm;kuitti_no;tilaus_no;maksutapa;tuoteryhmä;tuote;määrä;brutto;alv_%;alv_€;netto;hyvitys) sellaisenaan.
+    // CSV: palvelimen admin_report_csv. lines/transactions = tapahtumaraportti (tosite;pvm;asiakas;…), summary = yhteenveto, vat = ALV-erittely.
     // Palauttaa { source:'server', filename, content }. (csv.js = asiakaspuolen varakirjoittaja samoille sarakkeille, ei käytössä kun palvelin vastaa.)
-    async reportCsv(report) {
-      const res = await run('reportCsv', { from: report.period.from, to: report.period.to, kind: 'lines' });
-      return { source: 'server', filename: res.filename || `kuitit_${report.period.from}_${report.period.to}.csv`, content: String(res.content ?? ''), mime: res.mime || 'text/csv' };
+    async reportCsv(report, kind = 'lines') {
+      const res = await run('reportCsv', { from: report.period.from, to: report.period.to, kind });
+      const prefix = kind === 'summary' ? 'yhteenveto' : kind === 'vat' ? 'kuitit_vat' : 'tapahtumat';
+      return { source: 'server', filename: res.filename || `${prefix}_${report.period.from}_${report.period.to}.csv`, content: String(res.content ?? ''), mime: res.mime || 'text/csv' };
+    },
+    async reportGiftCards(filter = 'open', format = 'json') {
+      const res = await run('reportGiftCards', { filter, format });
+      if (format === 'csv') return { source: 'server', filename: res.filename || `lahjakortit_${filter}.csv`, content: String(res.content ?? ''), mime: res.mime || 'text/csv' };
+      const bucket = (b) => ({ count: num(b?.count), initial: num(b?.initial), balance: num(b?.balance), net: num(b?.net), vat: num(b?.vat), gross: num(b?.gross) });
+      const row = (x) => ({ code_masked: x.code_masked ?? '', buyer: x.buyer ?? '', package: x.package ?? '', initial: num(x.initial), balance: num(x.balance), net: num(x.net), vat_rate: num(x.vat_rate), vat: num(x.vat), gross: num(x.gross), sold_on: x.sold_on ?? null, valid_to: x.valid_to ?? null, status: x.status ?? '', source: x.source ?? '', vat_treatment: x.vat_treatment ?? '', complimentary: x.complimentary === true || x.vat_treatment === 'maksuton' });
+      return { filter: res.filter || filter, own: { rows: L(res.own?.rows).map(row), at_redemption: bucket(res.own?.at_redemption), at_sale: bucket(res.own?.at_sale), complimentary: bucket(res.own?.complimentary) }, johku: { rows: L(res.johku?.rows).map(row), totals: bucket(res.johku?.totals) } };
     },
     // ALV-huomautus on vain tiedote: virhe/puuttuva RPC/oikeus puuttuu → null (ei mock-varaa, ei bannerin muutosta)
     listVatRates: async () => { if (!real) return normVatRates(await getMock().listVatRates()); try { return normVatRates(await real.listVatRates()); } catch { return null; } },
@@ -260,7 +299,12 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
     // Raportin PDF palvelimelta (report-pdf, verify_jwt=true): kuukausi vaatii reports.view. Mockissa: ei palvelinta → null (näkymä käyttää selaimen tulostusta).
     async reportPdf(report) {
       if (!real || !io.fnBlob) return null;
-      const p = report.period, q = p.kind === 'day' ? { kind: 'daily', date: p.from } : { kind: 'month', ym: p.from.slice(0, 7) };
+      const p = report.period || {}, mode = report.pdf || 'summary';
+      const q = mode === 'transactions' ? { kind: 'transactions', from: p.from, to: p.to }
+        : mode === 'giftcards' ? { kind: 'giftcards', filter: report.filter || 'all' }
+        : p.kind === 'day' ? { kind: 'daily', date: p.from }
+        : p.kind === 'month' ? { kind: 'month', ym: String(p.from || '').slice(0, 7) }
+        : { kind: 'range', from: p.from, to: p.to };
       return io.fnBlob('report-pdf', q);
     },
   };

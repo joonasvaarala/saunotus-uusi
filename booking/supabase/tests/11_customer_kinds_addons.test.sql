@@ -245,7 +245,7 @@ select is(test.code(format($$select booking.admin_create_booking(%s, current_dat
 select is(test.code(format($$select booking.admin_create_booking(%s, %L, 2, null, '{"name":"Huono Email","email":"huono"}'::jsonb)$$, :r_tue, (:'tue'::date + 35))), 'invalid_email', 'admin: sähköposti validoidaan varauslomakkeella');
 select is(test.code(format($$select booking.admin_create_booking(%s, %L, 2, null, '{"name":"Lisä Virhe","email":"lisa.virhe@example.com"}'::jsonb, 'pay_later', false, null, null, null, null, 'admin', '[{"code":"saunavihta","quantity":5}]'::jsonb)$$, :r_tue, (:'tue'::date + 35))), 'addon_quantity', 'admin: lisäpalvelun enimmäismäärä pätee');
 select is((select count(*)::int from booking.customers where email = 'lisa.virhe@example.com'), 0, 'admin: epäonnistunut varaus ei jätä asiakasta (atominen)');
-select booking.admin_create_booking(:r_priv, (:'fri'::date + 7), 4, null, '{"name":"Käsi Asiakas","email":"kasi@example.com"}'::jsonb, 'cash', true, null, null, null, null, 'walk_in',
+select booking.admin_create_booking(:r_priv, (:'fri'::date + 7), 4, null, '{"name":"Käsi Asiakas","email":"kasi@example.com"}'::jsonb, 'card_terminal', true, null, null, null, null, 'walk_in',
    '[{"code":"saunavihta","quantity":2}]'::jsonb) as g3 \gset
 select is((select payment_status from booking.orders where id = (:'g3'::jsonb ->> 'order_id')::bigint), 'paid', 'admin: maksettu varaus lisäpalveluilla → paid');
 select is((select amount from booking.payments where order_id = (:'g3'::jsonb ->> 'order_id')::bigint), (:'g3'::jsonb ->> 'total')::numeric, 'admin: maksettu summa = kokonaissumma');
@@ -348,7 +348,7 @@ select is((select amount from booking.payments p join booking.orders o on o.id =
 -- maksettu tilaus + lisäpalvelut: siirto samanhintaiseen vuoroon sallittu (ei virheellistä hintamuutosta), henkilömäärän muutos ei
 select (select id from booking.orders where public_token = :'mtok'::uuid) as m_order \gset
 select test.login(:'stf');
-select booking.admin_record_payment(:m_order, 'cash', 2 * :p_tue::numeric + 29, null);
+select booking.admin_record_payment(:m_order, 'card_terminal', 2 * :p_tue::numeric + 29, null);
 select test.logout();
 select is((select payment_status from booking.orders where id = :m_order), 'paid', 'maksettu kokonaan (lisäpalvelut mukana)');
 select test.anon('10.9.0.6');

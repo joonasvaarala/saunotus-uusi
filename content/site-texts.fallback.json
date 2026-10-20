@@ -1351,6 +1351,20 @@
    "placeholders": []
   },
   {
+   "key": "email.receipt_pdf.col_gross",
+   "lang": "en",
+   "text": "Gross",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.col_gross",
+   "lang": "fi",
+   "text": "Brutto",
+   "version": 1,
+   "placeholders": []
+  },
+  {
    "key": "email.receipt_pdf.col_item",
    "lang": "en",
    "text": "Item",
@@ -1449,6 +1463,34 @@
    "placeholders": []
   },
   {
+   "key": "email.receipt_pdf.col_vat_eur",
+   "lang": "en",
+   "text": "VAT €",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.col_vat_eur",
+   "lang": "fi",
+   "text": "ALV €",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.col_vat_pct",
+   "lang": "en",
+   "text": "VAT %",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.col_vat_pct",
+   "lang": "fi",
+   "text": "ALV %",
+   "version": 1,
+   "placeholders": []
+  },
+  {
    "key": "email.receipt_pdf.date",
    "lang": "en",
    "text": "Date",
@@ -1481,6 +1523,20 @@
     "{{var:date}}",
     "{{var:time}}"
    ]
+  },
+  {
+   "key": "email.receipt_pdf.giftcard_info",
+   "lang": "en",
+   "text": "VAT was recorded when the gift card was sold. This breakdown is for information only and is not recorded again.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.giftcard_info",
+   "lang": "fi",
+   "text": "Arvonlisävero on kirjattu lahjakortin myynnissä. Tämä erittely on vain tiedoksi, eikä sitä kirjata uudelleen.",
+   "version": 1,
+   "placeholders": []
   },
   {
    "key": "email.receipt_pdf.of_which_vat",
@@ -1717,6 +1773,62 @@
    "placeholders": [
     "{{var:id}}"
    ]
+  },
+  {
+   "key": "email.receipt_pdf.word_gross",
+   "lang": "en",
+   "text": "gross",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.word_gross",
+   "lang": "fi",
+   "text": "brutto",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.word_net",
+   "lang": "en",
+   "text": "excl. VAT",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.word_net",
+   "lang": "fi",
+   "text": "veroton",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.word_qty",
+   "lang": "en",
+   "text": "pcs",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.word_qty",
+   "lang": "fi",
+   "text": "kpl",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.word_vat",
+   "lang": "en",
+   "text": "VAT",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "email.receipt_pdf.word_vat",
+   "lang": "fi",
+   "text": "ALV",
+   "version": 1,
+   "placeholders": []
   },
   {
    "key": "email.receipt.intro",
@@ -12923,6 +13035,20 @@
    "key": "ui.gift.err.gift_card_not_found",
    "lang": "fi",
    "text": "Koodia ei löytynyt. Tarkista koodi ja yritä uudelleen.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.gift.err.gift_card_vat_rate",
+   "lang": "en",
+   "text": "A gift card can pay only for products with 25.5% VAT.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.gift.err.gift_card_vat_rate",
+   "lang": "fi",
+   "text": "Lahjakortilla voi maksaa vain tuotteita, joiden arvonlisävero on 25,5 %.",
    "version": 1,
    "placeholders": []
   },
