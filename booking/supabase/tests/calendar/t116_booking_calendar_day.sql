@@ -75,70 +75,76 @@ begin
 
   d := booking._booking_calendar_desired();
   perform public.t116_ck(d ->> 'timezone' = 'Europe/Helsinki', 'T0 aikavyöhyke');
-  perform public.t116_ck((select count(*) from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' in ('d:2026-11-10', 'd:2026-11-17')) = 2, 'D1 molemmat testipäivät');
-  perform public.t116_ck((select count(*) from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' ~ '^[rs]:') = 0, 'D2 ei yksittäistapahtumia');
+  perform public.t116_ck((select count(*) from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-10') = 1, 'D1 vuoropäivällä on palkki');
+  perform public.t116_ck((select count(*) from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-17') = 0, 'D2 pelkkä yksityinen päivä ei saa palkkia');
+  perform public.t116_ck((select count(*) from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' like 's:%') = 0, 'D3 ei erillisiä vuoropalkkeja');
   select x into ev from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-10';
-  perform public.t116_ck(ev ->> 'summary' = 'Varaukset 16–21 · 3 varausta', 'E1 otsikko ensimmäisestä alusta');
-  perform public.t116_ck((ev ->> 'bookings')::int = 3 and (ev ->> 'persons')::int = 13, 'E2 kolme varausta');
+  perform public.t116_ck(ev ->> 'summary' = 'Varaukset 16–21 · 13 hlö (3 varausta)', 'E1 otsikko ensimmäisestä alusta');
+  perform public.t116_ck((ev ->> 'bookings')::int = 3 and (ev ->> 'persons')::int = 13, 'E2 luvuissa myös yksityisvaraus');
   perform public.t116_ck(ev ->> 'google_event_id' = 'bkd20261110' and ev ->> 'kind' = 'day' and ev ->> 'resource_code' = 'all', 'E3 tunniste');
-  perform public.t116_ck(ev ->> 'google_calendar_id' = cal, 'E4 yhteinen kalenteri, ei resurssin tunnusta');
-  perform public.t116_ck(position('Maija' in (ev ->> 'description')) > 0, 'E5 nimi jää');
-  perform public.t116_ck(position('040' in (ev ->> 'description')) = 0, 'E6 puhelin ei jää');
-  perform public.t116_ck(position('@' in (ev ->> 'description')) = 0, 'E7 sähköposti ei jää');
-  perform public.t116_ck(strpos(ev ->> 'description', '#' || o_priv::text) > 0, 'E8 yksityisen tilausnumero');
-  perform public.t116_ck(position(savu_name || ' · yksityisvaraus · 8 hlö' in (ev ->> 'description')) > 0, 'E9 yksityinen rivi');
-  perform public.t116_ck(position('Yleinen vuoro · 5 hlö (2 varausta)' in (ev ->> 'description')) > 0, 'E10 vuoro vain määrinä');
-  perform public.t116_ck(position('Vuoro Testi' in (ev ->> 'description')) = 0, 'E11 vuorossa ei nimeä');
-  perform public.t116_ck(strpos(ev ->> 'description', '#' || o_a::text) = 0 and strpos(ev ->> 'description', '#' || o_b::text) = 0, 'E12 vuorossa ei tilausnumeroita');
-  perform public.t116_ck((ev ->> 'description') like '%/#/?d=2026-11-10%', 'E13 hallintalinkki');
-  select x into ev2 from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-17';
-  perform public.t116_ck(ev2 ->> 'summary' = 'Varaukset 10–12 · 1 varaus', 'E14 yhden varauksen päivä');
-  perform public.t116_ck((select x ->> 'content_hash' from jsonb_array_elements(booking._booking_calendar_desired() -> 'events') x where x ->> 'event_key' = 'd:2026-11-10') = (ev ->> 'content_hash'), 'E15 tarkiste on vakaa');
+  perform public.t116_ck(ev ->> 'google_calendar_id' = cal, 'E4 päiväpalkki yhteisessä kalenterissa');
+  perform public.t116_ck(position('Maija' in (ev ->> 'description')) = 0 and position('Vuoro Testi' in (ev ->> 'description')) = 0, 'E5 päiväpalkissa ei nimiä');
+  perform public.t116_ck(position('040' in (ev ->> 'description')) = 0 and position('@' in (ev ->> 'description')) = 0, 'E6 päiväpalkissa ei yhteystietoja');
+  perform public.t116_ck(strpos(ev ->> 'description', '#' || o_priv::text) = 0 and strpos(ev ->> 'description', '#' || o_a::text) = 0, 'E7 päiväpalkissa ei tilausnumeroita');
+  perform public.t116_ck(position(savu_name || ' · yksityisvaraus · 8 hlö' in (ev ->> 'description')) > 0, 'E8 yksityinen rivi ilman nimeä');
+  perform public.t116_ck(position('Yleinen vuoro · 5 hlö (2 varausta)' in (ev ->> 'description')) > 0, 'E9 vuoro vain määrinä');
+  perform public.t116_ck((ev ->> 'description') like '%/#/?d=2026-11-10%', 'E10 hallintalinkki');
+  select x into ev2 from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'r:' || r_priv::text;
+  perform public.t116_ck(ev2 ->> 'kind' = 'reservation' and ev2 ->> 'google_event_id' = 'bkr' || lpad(r_priv::text, 8, '0'), 'E11 yksityinen on oma tapahtuma');
+  perform public.t116_ck(ev2 ->> 'summary' = savu_name || ' – yksityisvaraus, 8 hlö', 'E12 yksityisen otsikko');
+  perform public.t116_ck(ev2 ->> 'google_calendar_id' = 'savu-t116-cal', 'E13 resurssin tunnus vain yksityisessä');
+  perform public.t116_ck(position('Maija' in (ev2 ->> 'description')) > 0 and strpos(ev2 ->> 'description', '#' || o_priv::text) > 0, 'E14 nimi ja tilausnumero yksityisessä');
+  perform public.t116_ck(position('040' in (ev2 ->> 'description')) = 0 and position('@' in (ev2 ->> 'description')) = 0, 'E15 yksityisestäkin puhelin ja sähköposti pois');
+  select x into ev2 from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'r:' || r_next::text;
+  perform public.t116_ck(ev2 ->> 'summary' = savu_name || ' – yksityisvaraus, 2 hlö', 'E16 pelkän yksityisen päivän tapahtuma');
+  perform public.t116_ck((select x ->> 'content_hash' from jsonb_array_elements(booking._booking_calendar_desired() -> 'events') x where x ->> 'event_key' = 'd:2026-11-10') = (ev ->> 'content_hash'), 'E17 tarkiste on vakaa');
 
   insert into booking.reservations(id, order_id, product_id, space_id, mode, starts_at, ends_at, persons, status)
   overriding system value values
     (r_co, o_co, 25, 12, 'exclusive', timestamptz '2026-11-10 14:00:00+02', timestamptz '2026-11-10 15:00:00+02', 6, 'completed');
   d := booking._booking_calendar_desired();
   select x into ev from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-10';
-  perform public.t116_ck(ev ->> 'summary' = 'Varaukset 14–21 · 4 varausta', 'E16 aikaisempi varaus leventää alun');
-  perform public.t116_ck(position('Havu Paiva Oy' in (ev ->> 'description')) > 0, 'E17 yrityksen nimi');
-  perform public.t116_ck(position('Pekka' in (ev ->> 'description')) = 0, 'E18 yhteyshenkilö ei näy');
-  perform public.t116_ck(position(rauni_name || ' · yritysvaraus · 6 hlö · #' || o_co::text in (ev ->> 'description')) > 0, 'E19 yritysvarauksen rivi');
-  perform public.t116_ck(position('14–15' in (ev ->> 'description')) < position('16–19' in (ev ->> 'description')), 'E20 rivit aikajärjestyksessä');
-
-  update booking.reservations set status = 'cancelled'
-   where id in (r_priv, r_co, r_a, r_b);
-  d := booking._booking_calendar_desired();
-  perform public.t116_ck((select count(*) from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-10') = 0, 'E21 tyhjä päivä poistuu');
-  perform public.t116_ck((select count(*) from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-17') = 1, 'E22 toinen päivä jää');
+  perform public.t116_ck(ev ->> 'summary' = 'Varaukset 14–21 · 19 hlö (4 varausta)', 'E18 aikaisempi varaus leventää alun');
+  perform public.t116_ck(position('Havu Paiva Oy' in (ev ->> 'description')) = 0 and position('Pekka' in (ev ->> 'description')) = 0, 'E19 päiväpalkissa ei yritystä eikä yhteyshenkilöä');
+  perform public.t116_ck(position(rauni_name || ' · yritysvaraus · 6 hlö' in (ev ->> 'description')) > 0, 'E20 yritysvaraus rivinä ilman nimeä');
+  perform public.t116_ck(position('14–15' in (ev ->> 'description')) < position('16–19' in (ev ->> 'description')), 'E21 rivit aikajärjestyksessä');
+  select x into ev2 from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'r:' || r_co::text;
+  perform public.t116_ck(position('Havu Paiva Oy' in (ev2 ->> 'description')) > 0 and position('Pekka' in (ev2 ->> 'description')) = 0, 'E22 yrityksen nimi vain omassa tapahtumassa');
+  perform public.t116_ck(ev2 ->> 'google_calendar_id' = cal, 'E23 ilman resurssitunnusta yhteinen kalenteri');
 
   update booking.integration_config
      set settings = jsonb_set(settings, '{shared_calendar_id}', to_jsonb(v_closure))
    where key = 'booking_calendar';
   d := booking._booking_calendar_desired();
-  perform public.t116_ck((select x ->> 'google_calendar_id' is null from jsonb_array_elements(d -> 'events') x limit 1), 'E23 sulkukalenteri ei ole kohde');
+  perform public.t116_ck((select x ->> 'google_calendar_id' is null from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-10'), 'E24 sulkukalenteri ei ole päiväpalkin kohde');
   update booking.integration_config
      set settings = jsonb_set(settings, '{shared_calendar_id}', to_jsonb(cal))
    where key = 'booking_calendar';
 
+  update booking.reservations set status = 'cancelled' where id in (r_a, r_b);
+  d := booking._booking_calendar_desired();
+  perform public.t116_ck((select count(*) from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-10') = 0, 'E25 ilman yleisiä vuoroja palkki poistuu');
+  perform public.t116_ck((select count(*) from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' in ('r:' || r_priv::text, 'r:' || r_co::text)) = 2, 'E26 yksityiset tapahtumat jäävät');
+
   insert into booking.booking_calendar_events(event_key, kind, reservation_id, resource_code, google_calendar_id, google_event_id, content_hash, starts_at, ends_at)
   values
-    ('r:' || r_priv::text, 'reservation', r_priv, 'savusauna', cal, 'bkr0099011651', 'old', timestamptz '2026-11-10 16:00:00+02', timestamptz '2026-11-10 19:00:00+02'),
     ('s:savusauna|20261110150000|20261110190000', 'shift', null, 'savusauna', cal, 'bksaaaabbbbccccddddeeee01', 'old', timestamptz '2026-11-10 17:00:00+02', timestamptz '2026-11-10 21:00:00+02');
   plan := booking.booking_calendar_export_plan();
   perform public.t116_ck(plan ->> 'mode' = 'dry_run', 'P1 harjoitusajo');
-  perform public.t116_ck((select count(*) from jsonb_array_elements(plan -> 'events') x where x ->> 'kind' <> 'day') = 0, 'P2 suunnitelmassa vain päivät');
-  perform public.t116_ck((select count(*) from jsonb_array_elements(plan -> 'mapped') m where m ->> 'event_key' like 'r:%' or m ->> 'event_key' like 's:%') = 2, 'P3 vanhat rivit näkyvät');
-  fin := booking.booking_calendar_export_finish(jsonb_build_object('deletes', jsonb_build_array('r:' || r_priv::text, 's:savusauna|20261110150000|20261110190000'), 'upserts', '[]'::jsonb));
-  perform public.t116_ck((fin ->> 'deleted')::int = 2 and (select count(*) from booking.booking_calendar_events where event_key like 'r:%' or event_key like 's:%') = 0, 'C1 vanhat rivit poistuvat');
-  fin := booking.booking_calendar_export_finish(jsonb_build_object('deletes', jsonb_build_array('r:' || r_priv::text, 's:savusauna|20261110150000|20261110190000'), 'upserts', '[]'::jsonb));
+  perform public.t116_ck((select count(*) from jsonb_array_elements(plan -> 'events') x where x ->> 'event_key' like 's:%') = 0, 'P2 suunnitelmassa ei vuoropalkkeja');
+  perform public.t116_ck((select count(*) from jsonb_array_elements(plan -> 'events') x where x ->> 'kind' = 'reservation') > 0, 'P3 suunnitelmassa on yksityisiä');
+  perform public.t116_ck((select count(*) from jsonb_array_elements(plan -> 'mapped') m where m ->> 'event_key' like 's:%') = 1, 'P4 vanha vuororivi näkyy');
+  fin := booking.booking_calendar_export_finish(jsonb_build_object('deletes', jsonb_build_array('s:savusauna|20261110150000|20261110190000'), 'upserts', '[]'::jsonb));
+  perform public.t116_ck((fin ->> 'deleted')::int = 1 and (select count(*) from booking.booking_calendar_events where event_key like 's:%') = 0, 'C1 vanha vuoropalkki poistuu');
+  fin := booking.booking_calendar_export_finish(jsonb_build_object('deletes', jsonb_build_array('s:savusauna|20261110150000|20261110190000'), 'upserts', '[]'::jsonb));
   perform public.t116_ck((fin ->> 'deleted')::int = 0, 'C2 toinen poisto ei tee mitään');
 
-  select x into ev from jsonb_array_elements(booking._booking_calendar_desired() -> 'events') x where x ->> 'event_key' = 'd:2026-11-17';
+  update booking.reservations set status = 'completed' where id in (r_a, r_b);
+  select x into ev from jsonb_array_elements(booking._booking_calendar_desired() -> 'events') x where x ->> 'event_key' = 'd:2026-11-10';
   fin := booking.booking_calendar_export_finish(jsonb_build_object('upserts', jsonb_build_array(ev), 'deletes', '[]'::jsonb));
   perform public.t116_ck((fin ->> 'upserted')::int = 1, 'C3 päiväpalkki kirjautuu');
   fin := booking.booking_calendar_export_finish(jsonb_build_object('upserts', jsonb_build_array(ev), 'deletes', '[]'::jsonb));
-  perform public.t116_ck((fin ->> 'upserted')::int = 1 and (select count(*) from booking.booking_calendar_events where event_key = 'd:2026-11-17') = 1, 'C4 sama palkki ei kahdennu');
+  perform public.t116_ck((fin ->> 'upserted')::int = 1 and (select count(*) from booking.booking_calendar_events where event_key = 'd:2026-11-10') = 1, 'C4 sama palkki ei kahdennu');
 
   select last_value into seq_cust2 from pg_sequences where schemaname = 'booking' and sequencename = split_part(pg_get_serial_sequence('booking.customers', 'id'), '.', 2);
   select last_value into seq_ord2 from pg_sequences where schemaname = 'booking' and sequencename = split_part(pg_get_serial_sequence('booking.orders', 'id'), '.', 2);

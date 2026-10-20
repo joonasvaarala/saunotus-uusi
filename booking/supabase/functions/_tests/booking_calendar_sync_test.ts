@@ -87,28 +87,28 @@ Deno.test("planOps: sama tarkiste ohitetaan, eri tarkiste ja täysi kirjoitus p�
   assertEquals(gone.ops.map((o) => o.op), ["delete"]);
 });
 
-Deno.test("planOps: päiväpalkki ohitetaan, vanhat yksittäistapahtumat poistuvat ja toinen ajo on tyhjä", () => {
+Deno.test("planOps: päiväpalkki ja yksityinen säilyvät, vanha vuoropalkki poistuu", () => {
   const day = ev({
-    event_key: "d:2026-12-01",
+    event_key: "d:2026-11-10",
     kind: "day",
     reservation_id: null,
     resource_code: "all",
-    google_event_id: "bkd20261201",
-    summary: "Varaukset 14–21 · 4 varausta",
+    google_event_id: "bkd20261110",
+    summary: "Varaukset 14–21 · 19 hlö (4 varausta)",
     content_hash: "dayhash",
   });
   const mapped = [
-    { event_key: "d:2026-12-01", google_calendar_id: CAL, google_event_id: "bkd20261201", content_hash: "dayhash" },
-    { event_key: "r:42", google_calendar_id: CAL, google_event_id: "bkr00000042", content_hash: "old" },
+    { event_key: "d:2026-11-10", google_calendar_id: CAL, google_event_id: "bkd20261110", content_hash: "dayhash" },
+    { event_key: "r:42", google_calendar_id: CAL, google_event_id: "bkr00000042", content_hash: "abc" },
     { event_key: "s:savusauna|a|b", google_calendar_id: CAL, google_event_id: "bksabcdef0123456789abcd", content_hash: "old" },
   ];
-  const first = planOps({ mode: "live", reconcile: false, events: [day], mapped });
-  assertEquals(first.unchanged, 1);
-  assertEquals(first.ops.map((o) => o.eventKey).sort(), ["r:42", "s:savusauna|a|b"]);
-  assertEquals(first.ops.every((o) => o.op === "delete"), true);
-  const again = planOps({ mode: "live", reconcile: false, events: [day], mapped: mapped.slice(0, 1) });
+  const first = planOps({ mode: "live", reconcile: false, events: [day, ev()], mapped });
+  assertEquals(first.unchanged, 2);
+  assertEquals(first.ops.map((o) => o.op), ["delete"]);
+  assertEquals(first.ops[0].eventKey, "s:savusauna|a|b");
+  const again = planOps({ mode: "live", reconcile: false, events: [day, ev()], mapped: mapped.slice(0, 2) });
   assertEquals(again.ops, []);
-  assertEquals(again.unchanged, 1);
+  assertEquals(again.unchanged, 2);
 });
 
 Deno.test("toGoogleEvent merkitsee lähteen eikä laita puhelinta", () => {

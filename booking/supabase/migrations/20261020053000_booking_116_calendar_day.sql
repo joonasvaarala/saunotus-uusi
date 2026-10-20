@@ -1,9 +1,10 @@
 -- booking_116_calendar_day (20.10.2026)
--- Yksi palkki per Helsinki-päivä kaikista resursseista. Palkki alkaa päivän ensimmäisestä
--- vahvistetusta varauksesta ja päättyy viimeiseen. Peruutus lyhentää palkkia; tyhjä päivä poistuu.
--- Vanhat yksittäistapahtumat (r:/s:) eivät ole enää haluttuja: seuraava ajo poistaa ne
--- varauskalenterista. Poisto on idempotentti, koska toinen ajo ei löydä rivejä.
--- Kohde on yhä shared_calendar_id. Sulkukalenteriin ei kirjoiteta. Oletustila pysyy off.
+-- Yleiset vuorot: yksi palkki per Helsinki-päivä yhteisessä kalenterissa.
+-- Palkki alkaa päivän ensimmäisestä vahvistetusta varauksesta (myös yksityisestä) ja päättyy viimeiseen.
+-- Palkki syntyy vain, jos päivän yleisissä vuoroissa on vähintään yksi vahvistettu varaus.
+-- Yksityisvaraukset pysyvät omiksi tapahtumikseen. Ne lasketaan päiväpalkin aikaan ja lukuihin.
+-- Vanhat vuoropalkit (s:) eivät ole enää haluttuja: seuraava ajo poistaa ne. Poisto on idempotentti.
+-- Sulkukalenteriin ei kirjoiteta. Oletustila pysyy off.
 -- Rollback: rollbacks/20261020053000_booking_116_ROLLBACK.sql
 set local lock_timeout = '5s';
 
@@ -15,9 +16,8 @@ alter table booking.booking_calendar_events drop constraint if exists booking_ca
 alter table booking.booking_calendar_events add constraint booking_calendar_events_event_key_check
   check (event_key ~ '^[rsd]:[A-Za-z0-9_.:|-]+$');
 
--- Haluttu joukko on päiväpalkki. Kelpoisuus on sama kuin booking_114: confirmed/completed/no_show,
--- tilaus confirmed/completed, maksu ei pending eikä failed. Jaettu vuoro tulee mukaan, kun siinä on
--- vähintään yksi tällainen varaus. Yksityisrivillä nimi tai yritys; yleisessä vuorossa vain määrät.
+-- Kelpoisuus on sama kuin booking_114. Yksityinen tapahtuma pitää nimen tai yrityksen.
+-- Päiväpalkin kuvaus on erittely vuoroittain ja resursseittain, ilman nimeä, puhelinta ja sähköpostia.
 create or replace function booking._booking_calendar_desired()
 returns jsonb
 language plpgsql
@@ -45,7 +45,12 @@ begin
            pc.sale_kind, left(p.name, 80) as product_name, o.order_no, o.customer_kind,
            case when c.anonymized_at is not null then null
                 when o.customer_kind <> 'private' then booking._calendar_scrub(coalesce(o.billing ->> 'company', c.company))
-                else booking._calendar_scrub(c.name) end as who
+                else booking._calendar_scrub(c.name) end as who,
+           case when exists (select 1 from booking.closure_calendars cc where cc.google_calendar_id = booking._booking_calendar_target(sp.code, cfg))
+                then null else booking._booking_calendar_target(sp.code, cfg) end as calendar_id,
+           case when pc.sale_kind = 'other' and nullif(left(p.name, 80), '') is not null then left(p.name, 80)
+                when o.customer_kind <> 'private' then 'yritysvaraus'
+                else 'yksityisvaraus' end as type_label
       from booking.reservations r
       join booking.orders o on o.id = r.order_id
       join booking.resources sp on sp.id = r.space_id
@@ -58,17 +63,29 @@ begin
        and o.payment_status not in ('pending', 'failed')
        and r.starts_at < v_to and r.ends_at > v_from
        and sp.code not in ('ei_resurssia', 'perinnesaunotus_ryhma')
-  ), priv as (
-    select b.day, b.starts_at, b.resource_code, b.order_no,
+  ), priv_events as (
+    select 'reservation'::text as kind,
+           'r:' || b.reservation_id::text as event_key,
+           b.reservation_id,
+           b.resource_code,
+           b.calendar_id,
+           b.starts_at,
+           b.ends_at,
+           b.persons,
+           null::int as bookings,
+           booking._calendar_scrub(left(b.resource_name || ' – ' || b.type_label || ', ' || b.persons::text || ' hlö', 180)) as summary,
+           booking._calendar_scrub(concat_ws(E'\n',
+             'Tilaus #' || b.order_no::text,
+             b.who,
+             'Hallinta: ' || v_base || '/#/varaukset?q=' || b.order_no::text)) as description
+      from base b where b.mode = 'exclusive'
+  ), priv_lines as (
+    select b.day, b.starts_at, b.resource_code, b.reservation_id as sort_id,
            booking._calendar_scrub(concat_ws(' · ',
              booking._calendar_span(b.starts_at, b.ends_at, v_tz),
              b.resource_name,
-             case when b.sale_kind = 'other' and nullif(b.product_name, '') is not null then b.product_name
-                  when b.customer_kind <> 'private' then 'yritysvaraus'
-                  else 'yksityisvaraus' end,
-             b.persons::text || ' hlö',
-             '#' || b.order_no::text,
-             b.who)) as line
+             b.type_label,
+             b.persons::text || ' hlö')) as line
       from base b where b.mode = 'exclusive'
   ), grp as (
     select b.day, b.resource_code, min(b.resource_name) as resource_name, b.starts_at, b.ends_at,
@@ -77,8 +94,8 @@ begin
                 then min(b.product_name) else null end as event_label
       from base b where b.mode = 'shared'
      group by b.day, b.resource_code, b.starts_at, b.ends_at
-  ), shifts as (
-    select g.day, g.starts_at, g.resource_code, null::bigint as order_no,
+  ), shift_lines as (
+    select g.day, g.starts_at, g.resource_code, 0::bigint as sort_id,
            booking._calendar_scrub(concat_ws(' · ',
              booking._calendar_span(g.starts_at, g.ends_at, v_tz),
              g.resource_name,
@@ -86,43 +103,64 @@ begin
              g.persons::text || ' hlö (' || g.n::text || case when g.n = 1 then ' varaus)' else ' varausta)' end)) as line
       from grp g
   ), lined as (
-    select day, starts_at, resource_code, order_no, line from priv
+    select day, starts_at, resource_code, sort_id, line from priv_lines
     union all
-    select day, starts_at, resource_code, order_no, line from shifts
+    select day, starts_at, resource_code, sort_id, line from shift_lines
   ), body as (
-    select day, string_agg(line, E'\n' order by starts_at, resource_code, order_no nulls last, line) as lines
+    select day, string_agg(line, E'\n' order by starts_at, resource_code, sort_id, line) as lines
       from lined group by day
-  ),   days as (
+  ), days as (
     select b.day, min(b.starts_at) as starts_at, max(b.ends_at) as ends_at,
            count(*)::int as bookings, sum(b.persons)::int as persons
-      from base b group by b.day
+      from base b
+     group by b.day
+    having count(*) filter (where b.mode = 'shared') > 0
   ), shaped as (
     select d.day, d.starts_at, d.ends_at, d.bookings, d.persons,
            booking._calendar_scrub(left('Varaukset ' || booking._calendar_span(d.starts_at, d.ends_at, v_tz)
-             || ' · ' || d.bookings::text || case when d.bookings = 1 then ' varaus' else ' varausta' end, 180)) as summary,
+             || ' · ' || d.persons::text || ' hlö (' || d.bookings::text
+             || case when d.bookings = 1 then ' varaus)' else ' varausta)' end, 180)) as summary,
            booking._calendar_scrub(left(concat_ws(E'\n',
              b.lines,
              'Hallinta: ' || v_base || '/#/?d=' || to_char(d.day, 'YYYY-MM-DD')), 7000)) as description
       from days d
       left join body b on b.day = d.day
+  ), day_events as (
+    select 'day'::text as kind,
+           'd:' || to_char(s.day, 'YYYY-MM-DD') as event_key,
+           null::bigint as reservation_id,
+           'all'::text as resource_code,
+           v_cal as calendar_id,
+           s.starts_at,
+           s.ends_at,
+           s.persons,
+           s.bookings,
+           s.summary,
+           s.description
+      from shaped s
+  ), all_rows as (
+    select * from priv_events
+    union all
+    select * from day_events
   )
   select coalesce(jsonb_agg(jsonb_build_object(
-           'event_key', 'd:' || to_char(s.day, 'YYYY-MM-DD'),
-           'kind', 'day',
-           'reservation_id', null,
-           'resource_code', 'all',
-           'google_calendar_id', v_cal,
-           'google_event_id', 'bkd' || to_char(s.day, 'YYYYMMDD'),
-           'summary', s.summary,
-           'description', s.description,
-           'starts_at', s.starts_at,
-           'ends_at', s.ends_at,
-           'content_hash', md5(concat_ws('|', s.summary, s.description, s.starts_at::text, s.ends_at::text, coalesce(v_cal, ''))),
+           'event_key', a.event_key,
+           'kind', a.kind,
+           'reservation_id', a.reservation_id,
+           'resource_code', a.resource_code,
+           'google_calendar_id', a.calendar_id,
+           'google_event_id', case when a.kind = 'reservation' then 'bkr' || lpad(a.reservation_id::text, 8, '0')
+                                   else 'bkd' || replace(substr(a.event_key, 3), '-', '') end,
+           'summary', a.summary,
+           'description', a.description,
+           'starts_at', a.starts_at,
+           'ends_at', a.ends_at,
+           'content_hash', md5(concat_ws('|', a.summary, a.description, a.starts_at::text, a.ends_at::text, coalesce(a.calendar_id, ''))),
            'timezone', v_tz,
-           'persons', s.persons,
-           'bookings', s.bookings) order by s.day), '[]'::jsonb)
+           'persons', a.persons,
+           'bookings', a.bookings) order by a.starts_at, a.event_key), '[]'::jsonb)
     into v_out
-    from shaped s;
+    from all_rows a;
   return jsonb_build_object('timezone', v_tz, 'window_from', v_from, 'window_to', v_to, 'events', v_out);
 end $$;
 
@@ -138,9 +176,10 @@ begin
   perform booking._require_permission('settings.edit');
   d := booking._booking_calendar_desired();
   select jsonb_build_object(
-           'day_bars', count(*),
-           'bookings', coalesce(sum((x ->> 'bookings')::int), 0),
-           'persons', coalesce(sum((x ->> 'persons')::int), 0),
+           'private_events', count(*) filter (where x ->> 'kind' = 'reservation'),
+           'day_bars', count(*) filter (where x ->> 'kind' = 'day'),
+           'bookings', coalesce(sum((x ->> 'bookings')::int) filter (where x ->> 'kind' = 'day'), 0),
+           'persons', coalesce(sum((x ->> 'persons')::int) filter (where x ->> 'kind' = 'day'), 0),
            'unconfigured', count(*) filter (where nullif(x ->> 'google_calendar_id', '') is null))
     into ev
     from jsonb_array_elements(d -> 'events') x;
@@ -199,6 +238,6 @@ begin
 end $$;
 
 comment on function booking._booking_calendar_desired() is
-  'Yksi palkki per Helsinki-päivä, shared_calendar_id. Yksityisrivillä nimi tai yritys, yleisessä vuorossa vain määrät. booking_116.';
+  'Yksityisvaraus on oma tapahtuma. Yleiset vuorot kootaan päiväpalkiksi, johon yksityisvaraukset lasketaan. booking_116.';
 comment on function booking.admin_booking_calendar_preview() is
-  'Esikatselu: päiväpalkit ja varausmäärä. Ei lähetä. booking_116.';
+  'Esikatselu: yksityiset tapahtumat ja päiväpalkit. Ei lähetä. booking_116.';

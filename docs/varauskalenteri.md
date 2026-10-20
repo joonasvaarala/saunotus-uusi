@@ -6,15 +6,15 @@ Sulkukalenterit (`1 savusauna kiinni`, `1 perinnesaunotus kiinni`, `1 hoidot kii
 
 ## Mitä kalenteriin tulee
 
-- **Yksi palkki per päivä** (Europe/Helsinki). Palkki alkaa päivän ensimmäisen vahvistetun varauksen alusta ja päättyy viimeisen varauksen loppuun. Mukana ovat kaikki resurssit: yksityisvaraukset ja yleiset vuorot, joissa on vähintään yksi vahvistettu varaus. Otsikko esimerkiksi `Varaukset 14–21 · 6 varausta`.
-- Aikaisempi uusi varaus leventää alkua. Peruutus lyhentää palkkia. Jos päivän kaikki varaukset peruuntuvat, palkki poistuu.
-- Kuvauksessa on lista: aika, resurssi, tyyppi, henkilömäärä ja yksityisvarauksen tilausnumero. Yksityisvarauksessa näkyy nimi tai yrityksen nimi. Yleisestä vuorosta näkyy vain henkilö- ja varausmäärä, ei nimiä eikä tilausnumeroita.
+- **Yksityinen varaus** on edelleen oma tapahtuma. Otsikko esimerkiksi `Savusauna – yksityisvaraus, 8 hlö`. Kuvauksessa on tilausnumero ja nimi tai yrityksen nimi sekä linkki hallintaan. Puhelinta ja sähköpostia ei kirjoiteta.
+- **Yleiset vuorot** kootaan yhdeksi palkiksi per päivä (Europe/Helsinki), yhteiseen Varaukset-kalenteriin. Palkki syntyy vain, jos päivän yleisissä vuoroissa on vähintään yksi vahvistettu varaus. Se alkaa päivän ensimmäisen vahvistetun varauksen alusta ja päättyy viimeisen loppuun, yksityisvaraukset mukaan lukien. Otsikko esimerkiksi `Varaukset 14–20 · 12 hlö (7 varausta)`.
+- Aikaisempi varaus leventää alkua. Peruutus lyhentää palkkia. Jos päivältä katoaa viimeinen yleinen vuoro, palkki poistuu, vaikka yksityisvarauksia jäisi. Yksityiset tapahtumat jäävät.
+- Päiväpalkin kuvaus on erittely vuoroittain ja resursseittain. Siinä ei ole nimiä, puhelinta eikä sähköpostia.
 - Mukaan otetaan varaukset, joiden tila on confirmed, completed tai no_show, tilaus on confirmed tai completed, eikä maksu ole kesken (`pending`) tai epäonnistunut (`failed`). Maksamatta oleva vahvistettu tilaus (kuten Johku-tuonti) näkyy. Keskeneräinen kassa ei näy.
-- Asiakkaan puhelinta ja sähköpostia ei kirjoiteta kalenteriin. Jos ne ovat kiinni nimessä, ne poistetaan.
 
-Kohde on **yksi yhteinen Varaukset-kalenteri** (`shared_calendar_id`). Päiväpalkki ei jakaudu resurssikohtaisiin kalentereihin. Tyhjä tunnus ei vie mitään. Tunnus ja tili vaihdetaan asetuksesta, ei koodista.
+Päiväpalkin kohde on **yhteinen kalenteri** (`shared_calendar_id`). Resurssin oma tunnus ohittaa sen vain kyseisen resurssin yksityisvarauksessa. Tyhjä yhteinen tunnus ei vie päiväpalkkia. Tunnukset ja tili vaihdetaan asetuksesta, ei koodista.
 
-Vanhat yksittäistapahtumat (`r:` ja `s:`), jos niitä on ehditty kirjoittaa, eivät ole enää haluttuja. Seuraava käytössä-ajo poistaa ne. Toinen ajo ei löydä niitä uudelleen.
+Vanhat vuoropalkit (`s:`), jos niitä on, eivät ole enää haluttuja. Seuraava käytössä-ajo poistaa ne. Toinen ajo ei löydä niitä uudelleen. Vientiä ei ole ajettu, joten tuotannossa rivejä on nyt nolla.
 
 Ikkuna on oletuksena tänään − 7 päivää … + 180 päivää (Europe/Helsinki). Ajo on viiden minuutin välein. Nopea päivitys on valinnainen ja oletuksena pois.
 
@@ -39,7 +39,7 @@ Migraatio `20261019161000_booking_114_calendar_export` luo taulut, funktiot ja a
 
 Migraatio `20261019221500_booking_115_calendar_quiet` hiljentää pois-tilan triggerin ja lisää täyden kirjoituksen leiman. Rollback: `booking/supabase/rollbacks/20261019221500_booking_115_ROLLBACK.sql`.
 
-Migraatio `20261020053000_booking_116_calendar_day` vaihtaa viennin päiväpalkkiin. Rollback: `booking/supabase/rollbacks/20261020053000_booking_116_ROLLBACK.sql`. Nykyinen Edge poistaa halutusta joukosta kadonneet tapahtumat, joten päiväpalkki ja vanhojen rivien siivous eivät vaadi uutta deployta. Tätä deployta ei ajeta tästä haarasta.
+Migraatio `20261020053000_booking_116_calendar_day` kokoaa yleiset vuorot päiväpalkiksi ja jättää yksityisvaraukset omiksi tapahtumikseen. Rollback: `booking/supabase/rollbacks/20261020053000_booking_116_ROLLBACK.sql`. Nykyinen Edge poistaa halutusta joukosta kadonneet vuoropalkit, joten muutos ei vaadi uutta deployta. Tätä deployta ei ajeta tästä haarasta.
 
 Edge, erillinen funktio (sulkusynkkaa ei muuteta):
 
@@ -53,7 +53,7 @@ Tekstit: `content/site-texts.pending-import-25.json` ja päiväpalkin muutokset 
 
 ## Joonaksen päätökset
 
-- Kalenterissa on yksi palkki per päivä, ei erillistä tapahtumaa per varaus. Kohde on yhteinen Varaukset-kalenteri.
+- Yleiset vuorot näkyvät yhtenä päiväpalkkina. Yksityisvaraukset pysyvät omin tapahtumina ja lasketaan päiväpalkin aikaan sekä lukuihin.
 - Millä Google-tilillä kalenterit ovat.
 - Kalenteritunnukset asetuksiin, jako palvelutilille, ja milloin tila vaihdetaan pois-tilasta harjoitusajoon ja sitten käytössä-tilaan.
 - Halutaanko nopea päivitys (noin minuutti) vai riittääkö viiden minuutin ajo.

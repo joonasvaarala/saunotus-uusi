@@ -23493,14 +23493,14 @@
   {
    "key": "ui.admin.calendar_export.lead",
    "lang": "fi",
-   "text": "Jokaiselle päivälle viedään yksi palkki kaikkien resurssien vahvistetuista varauksista. Sulkukalenterit eivät muutu. Kalenterissa tehty muutos ei muuta varausta. Oletus on pois päältä.",
+   "text": "Yksityisvaraukset viedään omiksi tapahtumikseen. Yleiset vuorot kootaan yhdeksi päiväpalkiksi. Sulkukalenterit eivät muutu. Kalenterissa tehty muutos ei muuta varausta. Oletus on pois päältä.",
    "version": 1,
    "placeholders": []
   },
   {
    "key": "ui.admin.calendar_export.lead",
    "lang": "en",
-   "text": "Each day is exported as one bar of confirmed bookings across all resources. Closure calendars stay as they are. An edit in the calendar does not change the booking. The default is off.",
+   "text": "Private bookings are exported as their own events. Public shifts are gathered into one bar per day. Closure calendars stay as they are. An edit in the calendar does not change the booking. The default is off.",
    "version": 1,
    "placeholders": []
   },
@@ -23577,14 +23577,14 @@
   {
    "key": "ui.admin.calendar_export.shared_hint",
    "lang": "fi",
-   "text": "Päivän palkki menee tähän kalenteriin. Tyhjä tunnus ei vie mitään.",
+   "text": "Päiväpalkki menee tähän kalenteriin. Yksityisvaraus käyttää tätä, ellei resurssilla ole omaa tunnusta. Tyhjä tunnus ei vie päiväpalkkia.",
    "version": 1,
    "placeholders": []
   },
   {
    "key": "ui.admin.calendar_export.shared_hint",
    "lang": "en",
-   "text": "The day bar goes to this calendar. An empty id exports nothing.",
+   "text": "The day bar goes to this calendar. A private booking uses it unless the resource has its own id. An empty id exports no day bar.",
    "version": 1,
    "placeholders": []
   },
@@ -23605,14 +23605,14 @@
   {
    "key": "ui.admin.calendar_export.resource_hint",
    "lang": "fi",
-   "text": "Päiväpalkki käyttää yhteistä kalenteria. Nämä tunnukset eivät ohita sitä.",
+   "text": "Ohittaa yhteisen kalenterin vain tämän resurssin yksityisvarauksessa. Päiväpalkki jää yhteiseen kalenteriin.",
    "version": 1,
    "placeholders": []
   },
   {
    "key": "ui.admin.calendar_export.resource_hint",
    "lang": "en",
-   "text": "The day bar uses the shared calendar. These ids do not override it.",
+   "text": "Overrides the shared calendar only for private bookings of this resource. The day bar stays on the shared calendar.",
    "version": 1,
    "placeholders": []
   },
