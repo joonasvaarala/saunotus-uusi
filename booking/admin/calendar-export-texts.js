@@ -8,7 +8,7 @@ export const PREFIX = 'ui.admin.calendar_export.';
 export const CALENDAR_EXPORT_TEXTS = {
   fi: {
     'ui.admin.calendar_export.title': 'Varauskalenteri',
-    'ui.admin.calendar_export.lead': 'Yksityisvaraukset viedään omiksi tapahtumikseen. Yleiset vuorot kootaan yhdeksi päiväpalkiksi. Sulkukalenterit eivät muutu. Kalenterissa tehty muutos ei muuta varausta. Oletus on pois päältä.',
+    'ui.admin.calendar_export.lead': 'Yksityisvaraukset viedään omiksi tapahtumikseen. Lisäksi jokaiselle päivälle, jolla on vahvistettuja varauksia, tulee yksi päiväpalkki ensimmäisen varauksen alusta viimeisen loppuun. Sulkukalenterit eivät muutu. Kalenterissa tehty muutos ei muuta varausta. Oletus on pois päältä.',
     'ui.admin.calendar_export.mode': 'Tila',
     'ui.admin.calendar_export.mode_off': 'Pois päältä',
     'ui.admin.calendar_export.mode_dry_run': 'Harjoitusajo',
@@ -45,7 +45,7 @@ export const CALENDAR_EXPORT_TEXTS = {
   },
   en: {
     'ui.admin.calendar_export.title': 'Booking calendar',
-    'ui.admin.calendar_export.lead': 'Private bookings are exported as their own events. Public shifts are gathered into one bar per day. Closure calendars stay as they are. An edit in the calendar does not change the booking. The default is off.',
+    'ui.admin.calendar_export.lead': 'Private bookings are exported as their own events. In addition, every day with confirmed bookings gets one day bar from the start of the first booking to the end of the last. Closure calendars stay as they are. An edit in the calendar does not change the booking. The default is off.',
     'ui.admin.calendar_export.mode': 'Mode',
     'ui.admin.calendar_export.mode_off': 'Off',
     'ui.admin.calendar_export.mode_dry_run': 'Dry run',

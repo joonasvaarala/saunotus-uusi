@@ -1,6 +1,7 @@
 -- t116: yksi päiväpalkki (booking_116).
 -- Aja SAMASSA transaktiossa kuin migraatio, kun booking.skip_cron = on.
--- Tyhjä päivä poistuu, aikaisempi varaus leventää palkkia, vanhat r:/s:-rivit poistuvat kahdesti ajettuna.
+-- Palkki syntyy myös pelkälle yksityispäivälle, katoaa vasta kun päivän viimeinen varaus peruuntuu,
+-- aikaisempi varaus leventää palkkia, ja vanhat s:-rivit poistuvat kahdesti ajettuna.
 --   select set_config('booking.skip_cron','on', true);
 --   \i booking/supabase/migrations/20261020053000_booking_116_calendar_day.sql
 --   \i booking/supabase/tests/calendar/t116_booking_calendar_day.sql
@@ -21,6 +22,7 @@ declare
   o_next bigint := 99011635; o_pend bigint := 99011636; o_fail bigint := 99011637; o_can bigint := 99011638;
   r_priv bigint := 99011651; r_co bigint := 99011652; r_a bigint := 99011653; r_b bigint := 99011654;
   r_next bigint := 99011655; r_pend bigint := 99011656; r_fail bigint := 99011657; r_can bigint := 99011658;
+  r_night bigint := 99011659;
   seq_cust bigint; seq_ord bigint; seq_res bigint;
   seq_cust2 bigint; seq_ord2 bigint; seq_res2 bigint;
   d jsonb; ev jsonb; ev2 jsonb; plan jsonb; fin jsonb;
@@ -69,6 +71,7 @@ begin
     (r_a, o_a, 1, 1, 'shared', timestamptz '2026-11-10 17:00:00+02', timestamptz '2026-11-10 21:00:00+02', 2, 'completed'),
     (r_b, o_b, 1, 1, 'shared', timestamptz '2026-11-10 17:00:00+02', timestamptz '2026-11-10 21:00:00+02', 3, 'completed'),
     (r_next, o_next, 25, 1, 'exclusive', timestamptz '2026-11-17 10:00:00+02', timestamptz '2026-11-17 12:00:00+02', 2, 'completed'),
+    (r_night, o_next, 25, 1, 'exclusive', timestamptz '2026-11-24 23:00:00+02', timestamptz '2026-11-25 00:00:00+02', 1, 'completed'),
     (r_pend, o_pend, 25, 1, 'exclusive', timestamptz '2026-11-10 15:00:00+02', timestamptz '2026-11-10 16:00:00+02', 1, 'completed'),
     (r_fail, o_fail, 25, 1, 'exclusive', timestamptz '2026-11-10 08:00:00+02', timestamptz '2026-11-10 09:00:00+02', 1, 'completed'),
     (r_can, o_can, 25, 1, 'exclusive', timestamptz '2026-11-10 12:00:00+02', timestamptz '2026-11-10 13:00:00+02', 4, 'cancelled');
@@ -76,7 +79,9 @@ begin
   d := booking._booking_calendar_desired();
   perform public.t116_ck(d ->> 'timezone' = 'Europe/Helsinki', 'T0 aikavyöhyke');
   perform public.t116_ck((select count(*) from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-10') = 1, 'D1 vuoropäivällä on palkki');
-  perform public.t116_ck((select count(*) from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-17') = 0, 'D2 pelkkä yksityinen päivä ei saa palkkia');
+  perform public.t116_ck((select x ->> 'summary' from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-17') = 'Varaukset 10–12 · 2 hlö (1 varaus)', 'D2 pelkän yksityisen päivän palkki');
+  perform public.t116_ck((select x ->> 'summary' from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-24') = 'Varaukset 23–24 · 1 hlö (1 varaus)', 'D4 keskiyö näkyy 24:na');
+  perform public.t116_ck((select count(*) from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-25') = 0, 'D5 seuraava päivä ei saa omaa palkkia');
   perform public.t116_ck((select count(*) from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' like 's:%') = 0, 'D3 ei erillisiä vuoropalkkeja');
   select x into ev from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-10';
   perform public.t116_ck(ev ->> 'summary' = 'Varaukset 16–21 · 13 hlö (3 varausta)', 'E1 otsikko ensimmäisestä alusta');
@@ -123,8 +128,14 @@ begin
 
   update booking.reservations set status = 'cancelled' where id in (r_a, r_b);
   d := booking._booking_calendar_desired();
-  perform public.t116_ck((select count(*) from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-10') = 0, 'E25 ilman yleisiä vuoroja palkki poistuu');
+  perform public.t116_ck((select x ->> 'summary' from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-10') = 'Varaukset 14–19 · 14 hlö (2 varausta)', 'E25 ilman yleisiä vuoroja palkki jää');
   perform public.t116_ck((select count(*) from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' in ('r:' || r_priv::text, 'r:' || r_co::text)) = 2, 'E26 yksityiset tapahtumat jäävät');
+  update booking.reservations set status = 'cancelled' where id in (r_priv, r_co);
+  d := booking._booking_calendar_desired();
+  perform public.t116_ck((select count(*) from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-10') = 0, 'E27 päivän viimeinen varaus poistaa palkin');
+  perform public.t116_ck((select count(*) from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' in ('r:' || r_priv::text, 'r:' || r_co::text)) = 0, 'E28 perutut yksityiset katoavat');
+  perform public.t116_ck((select count(*) from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'd:2026-11-17') = 1, 'E29 toinen päivä jää');
+  update booking.reservations set status = 'completed' where id in (r_a, r_b, r_priv, r_co);
 
   insert into booking.booking_calendar_events(event_key, kind, reservation_id, resource_code, google_calendar_id, google_event_id, content_hash, starts_at, ends_at)
   values
@@ -139,7 +150,6 @@ begin
   fin := booking.booking_calendar_export_finish(jsonb_build_object('deletes', jsonb_build_array('s:savusauna|20261110150000|20261110190000'), 'upserts', '[]'::jsonb));
   perform public.t116_ck((fin ->> 'deleted')::int = 0, 'C2 toinen poisto ei tee mitään');
 
-  update booking.reservations set status = 'completed' where id in (r_a, r_b);
   select x into ev from jsonb_array_elements(booking._booking_calendar_desired() -> 'events') x where x ->> 'event_key' = 'd:2026-11-10';
   fin := booking.booking_calendar_export_finish(jsonb_build_object('upserts', jsonb_build_array(ev), 'deletes', '[]'::jsonb));
   perform public.t116_ck((fin ->> 'upserted')::int = 1, 'C3 päiväpalkki kirjautuu');

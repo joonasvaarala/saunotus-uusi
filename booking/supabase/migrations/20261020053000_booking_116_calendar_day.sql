@@ -1,8 +1,9 @@
 -- booking_116_calendar_day (20.10.2026)
--- Yleiset vuorot: yksi palkki per Helsinki-päivä yhteisessä kalenterissa.
--- Palkki alkaa päivän ensimmäisestä vahvistetusta varauksesta (myös yksityisestä) ja päättyy viimeiseen.
--- Palkki syntyy vain, jos päivän yleisissä vuoroissa on vähintään yksi vahvistettu varaus.
--- Yksityisvaraukset pysyvät omiksi tapahtumikseen. Ne lasketaan päiväpalkin aikaan ja lukuihin.
+-- Päiväpalkki jokaiselle päivälle, jolla on ≥1 vahvistettu varaus.
+-- Palkki alkaa päivän ensimmäisestä vahvistetusta varauksesta ja päättyy viimeiseen.
+-- Palkki poistuu, kun päivän viimeinenkin varaus peruuntuu.
+-- Yksityisvaraukset pysyvät omiksi tapahtumikseen ja lasketaan palkin aikaan sekä lukuihin.
+-- Jos palkki jatkuu seuraavaan Helsinki-päivään, tasan keskiyö näkyy lopussa 24:na ja myöhempi loppu merkinnällä +1.
 -- Vanhat vuoropalkit (s:) eivät ole enää haluttuja: seuraava ajo poistaa ne. Poisto on idempotentti.
 -- Sulkukalenteriin ei kirjoiteta. Oletustila pysyy off.
 -- Rollback: rollbacks/20261020053000_booking_116_ROLLBACK.sql
@@ -114,10 +115,17 @@ begin
            count(*)::int as bookings, sum(b.persons)::int as persons
       from base b
      group by b.day
-    having count(*) filter (where b.mode = 'shared') > 0
   ), shaped as (
     select d.day, d.starts_at, d.ends_at, d.bookings, d.persons,
-           booking._calendar_scrub(left('Varaukset ' || booking._calendar_span(d.starts_at, d.ends_at, v_tz)
+           booking._calendar_scrub(left('Varaukset ' ||
+             case
+               when (d.ends_at at time zone v_tz)::date > d.day
+                and to_char(d.ends_at at time zone v_tz, 'HH24MI') = '0000'
+               then booking._calendar_hm(d.starts_at, v_tz) || '–24'
+               when (d.ends_at at time zone v_tz)::date > d.day
+               then booking._calendar_span(d.starts_at, d.ends_at, v_tz) || ' +1'
+               else booking._calendar_span(d.starts_at, d.ends_at, v_tz)
+             end
              || ' · ' || d.persons::text || ' hlö (' || d.bookings::text
              || case when d.bookings = 1 then ' varaus)' else ' varausta)' end, 180)) as summary,
            booking._calendar_scrub(left(concat_ws(E'\n',
@@ -238,6 +246,6 @@ begin
 end $$;
 
 comment on function booking._booking_calendar_desired() is
-  'Yksityisvaraus on oma tapahtuma. Yleiset vuorot kootaan päiväpalkiksi, johon yksityisvaraukset lasketaan. booking_116.';
+  'Päiväpalkki jokaiselle päivälle, jolla on ≥1 vahvistettu varaus. booking_116.';
 comment on function booking.admin_booking_calendar_preview() is
   'Esikatselu: yksityiset tapahtumat ja päiväpalkit. Ei lähetä. booking_116.';

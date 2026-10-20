@@ -7,8 +7,8 @@ Sulkukalenterit (`1 savusauna kiinni`, `1 perinnesaunotus kiinni`, `1 hoidot kii
 ## Mitä kalenteriin tulee
 
 - **Yksityinen varaus** on edelleen oma tapahtuma. Otsikko esimerkiksi `Savusauna – yksityisvaraus, 8 hlö`. Kuvauksessa on tilausnumero ja nimi tai yrityksen nimi sekä linkki hallintaan. Puhelinta ja sähköpostia ei kirjoiteta.
-- **Yleiset vuorot** kootaan yhdeksi palkiksi per päivä (Europe/Helsinki), yhteiseen Varaukset-kalenteriin. Palkki syntyy vain, jos päivän yleisissä vuoroissa on vähintään yksi vahvistettu varaus. Se alkaa päivän ensimmäisen vahvistetun varauksen alusta ja päättyy viimeisen loppuun, yksityisvaraukset mukaan lukien. Otsikko esimerkiksi `Varaukset 14–20 · 12 hlö (7 varausta)`.
-- Aikaisempi varaus leventää alkua. Peruutus lyhentää palkkia. Jos päivältä katoaa viimeinen yleinen vuoro, palkki poistuu, vaikka yksityisvarauksia jäisi. Yksityiset tapahtumat jäävät.
+- **Päiväpalkki** tulee jokaiselle Helsinki-päivälle, jolla on vähintään yksi vahvistettu varaus, myös pelkälle yksityis- tai yritysvaraukselle. Palkki on yhteisessä Varaukset-kalenterissa. Se alkaa päivän ensimmäisen varauksen alusta ja päättyy viimeisen loppuun. Otsikko esimerkiksi `Varaukset 14–20 · 12 hlö (7 varausta)`. Jos palkki jatkuu yli keskiyön, tasan keskiyö näkyy lopussa `24`:na ja myöhempi loppu merkinnällä `+1`.
+- Aikaisempi varaus leventää alkua. Peruutus lyhentää palkkia. Palkki poistuu vasta, kun päivän viimeinenkin varaus peruuntuu. Yksityiset tapahtumat pysyvät niin kauan kuin niiden varaukset ovat voimassa.
 - Päiväpalkin kuvaus on erittely vuoroittain ja resursseittain. Siinä ei ole nimiä, puhelinta eikä sähköpostia.
 - Mukaan otetaan varaukset, joiden tila on confirmed, completed tai no_show, tilaus on confirmed tai completed, eikä maksu ole kesken (`pending`) tai epäonnistunut (`failed`). Maksamatta oleva vahvistettu tilaus (kuten Johku-tuonti) näkyy. Keskeneräinen kassa ei näy.
 
@@ -53,7 +53,7 @@ Tekstit: `content/site-texts.pending-import-25.json` ja päiväpalkin muutokset 
 
 ## Joonaksen päätökset
 
-- Yleiset vuorot näkyvät yhtenä päiväpalkkina. Yksityisvaraukset pysyvät omin tapahtumina ja lasketaan päiväpalkin aikaan sekä lukuihin.
+- Päiväpalkki tulee jokaiselle päivälle, jolla on vähintään yksi vahvistettu varaus. Yksityisvaraukset pysyvät omin tapahtumina ja lasketaan päiväpalkin aikaan sekä lukuihin.
 - Millä Google-tilillä kalenterit ovat.
 - Kalenteritunnukset asetuksiin, jako palvelutilille, ja milloin tila vaihdetaan pois-tilasta harjoitusajoon ja sitten käytössä-tilaan.
 - Halutaanko nopea päivitys (noin minuutti) vai riittääkö viiden minuutin ajo.

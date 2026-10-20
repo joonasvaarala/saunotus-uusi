@@ -162,10 +162,8 @@ begin
   return jsonb_build_object('ok', true, 'upserted', n_up, 'deleted', n_del);
 end $$;
 
-comment on function booking._booking_calendar_desired() is
-  'Vientikelpoiset tapahtumat. Jaettu varaus = yksi palkki, yksinoikeus = yksi tapahtuma. booking_114.';
-comment on function booking.admin_booking_calendar_preview() is
-  'Esikatselu: yksityiset tapahtumat ja vuoropalkit. Ei lähetä. booking_114.';
+comment on function booking._booking_calendar_desired() is null;
+comment on function booking.admin_booking_calendar_preview() is null;
 
 do $rb$
 begin
