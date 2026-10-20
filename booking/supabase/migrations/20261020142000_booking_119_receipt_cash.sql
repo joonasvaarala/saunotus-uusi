@@ -96,6 +96,9 @@ begin
   return array_to_string(t, E'\n') || E'\n';
 end $$;
 
+revoke all on function booking._receipt_text(jsonb) from public, anon, authenticated;
+grant execute on function booking._receipt_text(jsonb) to service_role;
+
 -- Johku-esto säilyy. Poikkeus on vain oman maksetun at_sale-kortin tiedoksi-kuitti: snapshot merkitsee, ettei riviä kirjata.
 create or replace function booking.receipts_no_johku_trg() returns trigger language plpgsql security definer set search_path to ''
 as $$
@@ -151,7 +154,8 @@ begin
   select sum((x ->> 'gross')::numeric), sum((x ->> 'vat')::numeric) into v_gross, v_vatsum from jsonb_array_elements(v_vat) x;
   v_buyer := booking._buyer_json(o.id);
   v_year := booking._receipt_year(v_ts);
-  v_series := booking._setting('receipt_series', '{"receipt":"K"}'::jsonb) ->> 'receipt';
+  -- Oma sarja (L, lunastus tiedoksi). Ei kuluta myyntitositteiden K-laskuria.
+  v_series := coalesce(nullif(booking._setting('receipt_series', '{}'::jsonb) ->> 'giftcard_info', ''), 'L');
   v_seq := booking._next_receipt_no(v_series, v_year);
   v_no := format('%s-%s-%s', v_series, v_year, lpad(v_seq::text, 6, '0'));
   v_snap := jsonb_build_object('v', 1, 'document', 'receipt', 'informational', true, 'accounting', false, 'receipt_no', v_no, 'issued_at', v_ts, 'issued_local', to_char(v_ts at time zone 'Europe/Helsinki', 'DD.MM.YYYY HH24:MI'),
@@ -275,12 +279,17 @@ end $$;
 
 update booking.payment_methods set active = false, is_manual = false where code = 'cash';
 
+update booking.settings
+   set value = coalesce(value, '{}'::jsonb) || '{"giftcard_info":"L"}'::jsonb
+ where key = 'receipt_series'
+   and coalesce(value ->> 'giftcard_info', '') = '';
+
 revoke all on function booking._published_text(text, text, text) from public, anon, authenticated;
 grant execute on function booking._published_text(text, text, text) to service_role;
 revoke all on function booking._issue_giftcard_info_receipt(bigint) from public, anon, authenticated;
 grant execute on function booking._issue_giftcard_info_receipt(bigint) to service_role;
 
-comment on function booking._issue_giftcard_info_receipt(bigint) is 'Maksetun oman at_sale-kortin lunastuksen tiedoksi-kuitti. Ei accounting_outboxia eikä myyntiraporttia. booking_119.';
+comment on function booking._issue_giftcard_info_receipt(bigint) is 'Maksetun oman at_sale-kortin lunastuksen tiedoksi-kuitti sarjassa L (receipt_series.giftcard_info). Ei kuluta K-sarjaa, ei accounting_outboxia eikä myyntiraporttia. booking_119.';
 
 comment on function booking._receipt_text(jsonb) is 'Tekstikuitti: rivillä veroton, ALV-%, ALV euroina ja brutto. booking_119.';
 comment on function booking.admin_record_payment(bigint, text, numeric, text, jsonb) is 'Käsin kirjattu maksu. Käteinen hylätään (cash_not_accepted) eikä uutta käteispyöristystä lasketa. booking_119.';

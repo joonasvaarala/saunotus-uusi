@@ -53,6 +53,9 @@ begin
   return array_to_string(t, E'\n') || E'\n';
 end $$;
 
+revoke all on function booking._receipt_text(jsonb) from public, anon, authenticated;
+grant execute on function booking._receipt_text(jsonb) to service_role;
+
 CREATE OR REPLACE FUNCTION booking.payments_paid_trg()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -116,7 +119,10 @@ begin
                             'rounding', (select rounding from booking.payments where id = v_id));
 end $$;
 
+comment on function booking.admin_record_payment(bigint, text, numeric, text, jsonb) is null;
+
 update booking.payment_methods set active = true, is_manual = true where code = 'cash';
+update booking.settings set value = value - 'giftcard_info' where key = 'receipt_series' and value ? 'giftcard_info';
 drop function if exists booking._published_text(text, text, text);
 drop function if exists booking._issue_giftcard_info_receipt(bigint);
 

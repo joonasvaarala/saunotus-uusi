@@ -21,6 +21,12 @@ function tsTable(file) {
 const reportPdf = tsTable(join(root, 'supabase/functions/report-pdf/texts.ts'));
 const receipt = tsTable(join(root, 'supabase/functions/receipt-pdf/texts.ts'));
 const RECEIPT_KEYS = ['email.receipt_pdf.col_vat_pct', 'email.receipt_pdf.col_vat_eur', 'email.receipt_pdf.col_gross', 'email.receipt_pdf.word_qty', 'email.receipt_pdf.word_net', 'email.receipt_pdf.word_vat', 'email.receipt_pdf.word_gross', 'email.receipt_pdf.giftcard_info'];
+const SHOP_TEXTS = {
+  'ui.gift.err.gift_card_vat_rate': {
+    fi: 'Lahjakortilla voi maksaa vain tuotteita, joiden arvonlisävero on 25,5 %.',
+    en: 'A gift card can pay only for products with 25.5% VAT.',
+  },
+};
 
 test('pending-import-27 vastaa sanakirjoja, FI+EN, ilman hintoja ja osoitteita', () => {
   const by = new Map(pending.map((r) => [`${r.key}|${r.lang}`, r]));
@@ -47,8 +53,16 @@ test('pending-import-27 vastaa sanakirjoja, FI+EN, ilman hintoja ja osoitteita',
     }
   }
   assert.equal(receipt['email.receipt_pdf.col_vat'].fi, 'ALV');
+  for (const [key, texts] of Object.entries(SHOP_TEXTS)) {
+    for (const lang of ['fi', 'en']) {
+      const row = by.get(`${key}|${lang}`);
+      assert.equal(row.text, texts[lang], key);
+      assert.equal(row.class, 'normal');
+      assert.equal(row.kind, 'plain');
+    }
+  }
   assert.equal(Object.keys(REPORT_TEXTS.fi).length, Object.keys(REPORT_TEXTS.en).length);
-  assert.equal(pending.length, (Object.keys(REPORT_TEXTS.fi).length + RECEIPT_KEYS.length) * 2);
+  assert.equal(pending.length, (Object.keys(REPORT_TEXTS.fi).length + RECEIPT_KEYS.length + Object.keys(SHOP_TEXTS).length) * 2);
 });
 
 test('käteinen ei ole uusissa maksutavoissa, ja migraatioissa ei ole commitia', () => {

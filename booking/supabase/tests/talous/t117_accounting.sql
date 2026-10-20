@@ -27,7 +27,7 @@ declare
   u_staff uuid := gen_random_uuid();
   res jsonb; rep jsonb; tx jsonb; gc jsonb; csv text;
   o_nat bigint; p_nat bigint; o_open bigint; c_open bigint; o_johku bigint; p_cash bigint;
-  v_card bigint; v_comp bigint; v_code text; v_pay bigint; o_mix bigint; o_free bigint; v_rate numeric; v_text text; v_out int;
+  v_card bigint; v_comp bigint; v_code text; v_pay bigint; o_mix bigint; o_free bigint; o_k bigint; v_rate numeric; v_text text; v_out int; v_k int; v_l int; v_year int;
   log text; npass int; nfail int;
 begin
   perform public.t117_ck((select count(*) from booking.gift_card_packages where vat_treatment <> 'at_sale' or vat_rate <> 25.5) = 0, 'V1: kaikki omat paketit at_sale 25,5');
@@ -37,6 +37,8 @@ begin
   perform public.t117_ck((select is_manual from booking.payment_methods where code = 'cash') = false, 'C2: käteinen ei ole käsin kirjattava');
   perform public.t117_ck(not has_function_privilege('anon', 'booking.admin_report_range(date,date)', 'execute'), 'G1: anonilta ei rangea');
   perform public.t117_ck(not has_function_privilege('anon', 'booking.admin_report_gift_cards(text,text)', 'execute'), 'G2: anonilta ei lahjakorttiraporttia');
+  perform public.t117_ck(not has_function_privilege('anon', 'booking._receipt_text(jsonb)', 'execute') and not has_function_privilege('authenticated', 'booking._receipt_text(jsonb)', 'execute'), 'G5: anon ja authenticated eivät saa tekstikuittia');
+  perform public.t117_ck(has_function_privilege('service_role', 'booking._receipt_text(jsonb)', 'execute'), 'G6: service_role saa tekstikuitin');
 
   insert into auth.users(id, email) values (u_mgr, 't117-mgr@example.test'), (u_staff, 't117-staff@example.test');
   insert into booking.staff(user_id, email, name, role) values
@@ -105,13 +107,19 @@ begin
          (o_mix, 't117 alennettu', 'reservation', 1, 20, 20, 13.5);
   select code into v_code from booking.gift_cards where id = v_card;
 
+  v_year := booking._receipt_year(now());
+  v_k := coalesce((select last_seq from booking.receipt_counters where series = 'K' and year = v_year), 0);
+  v_l := coalesce((select last_seq from booking.receipt_counters where series = 'L' and year = v_year), 0);
   perform public.t117_login(u_mgr);
   res := public.t117_call(format($q$booking.admin_redeem_gift_card(%s, %L, 40, 'liikaa')$q$, o_mix, v_code));
   perform public.t117_ck(res ->> 'err' = 'gift_card_vat_rate', 'V9: muu verokanta hylätään: ' || coalesce(res ->> 'err', 'ok'));
   res := public.t117_call(format($q$booking.admin_redeem_gift_card(%s, %L, 36, 'vain yleinen')$q$, o_mix, v_code));
   v_pay := (res ->> 'payment_id')::bigint;
   perform public.t117_ck(res ->> 'accounted' = 'false' and res ->> 'receipt_no' is not null, 'V10: tiedoksi-kuitti, ei myyntiä: ' || coalesce(res ->> 'err', res ->> 'receipt_no', 'null'));
+  perform public.t117_ck(res ->> 'receipt_no' = format('L-%s-%s', v_year, lpad((v_l + 1)::text, 6, '0')), 'V10b: tiedoksi-kuitti on L-sarjaa: ' || coalesce(res ->> 'receipt_no', res ->> 'err', 'null'));
   perform public.t117_logout();
+  perform public.t117_ck((select series from booking.receipts where payment_id = v_pay) = 'L', 'V10c: kuitin sarja on L');
+  perform public.t117_ck(coalesce((select last_seq from booking.receipt_counters where series = 'K' and year = v_year), 0) = v_k, 'V10d: K-laskuri ei kasva lunastuksesta');
   update booking.payments set paid_at = '2032-06-15 12:30:00+00' where id = v_pay;
   -- Kuitti on muuttumaton. Testi siirtää tiedoksi-kuitin jaksoon, koska trigger leimaa now().
   alter table booking.receipts disable trigger receipts_guard;
@@ -120,6 +128,14 @@ begin
   select count(*) into v_out from booking.accounting_outbox where payment_id = v_pay;
   perform public.t117_ck(v_out = 0, 'V11: lunastus ei mene kirjanpitojonoon');
   perform public.t117_ck((select snapshot ->> 'informational' from booking.receipts where payment_id = v_pay) = 'true' and (select snapshot ->> 'accounting' from booking.receipts where payment_id = v_pay) = 'false', 'V12: kuitti on vain tiedoksi');
+  insert into booking.orders(customer_id, status, payment_status, total_gross, source_channel, locale)
+  values (c_open, 'confirmed', 'unpaid', 10, 'admin', 'fi') returning id into o_k;
+  insert into booking.order_items(order_id, product_name, kind, quantity, unit_price_gross, line_total_gross, vat_rate)
+  values (o_k, 't117 k-sarja', 'reservation', 1, 10, 10, 25.5);
+  perform public.t117_login(u_mgr);
+  res := public.t117_call(format($q$booking.admin_record_payment(%s, 'card_terminal', 10, 'k-aukko')$q$, o_k));
+  perform public.t117_logout();
+  perform public.t117_ck(res ->> 'receipt_no' = format('K-%s-%s', v_year, lpad((v_k + 1)::text, 6, '0')), 'V10e: seuraava myyntitosite on seuraava K-numero: ' || coalesce(res ->> 'receipt_no', res ->> 'err', 'null'));
   insert into booking.orders(customer_id, status, payment_status, total_gross, source_channel, locale, confirmed_at)
   values (c_open, 'confirmed', 'unpaid', 36, 'admin', 'fi', '2032-06-15 09:30:00+00') returning id into o_free;
   insert into booking.order_items(order_id, product_name, kind, quantity, unit_price_gross, line_total_gross, vat_rate)
@@ -167,6 +183,7 @@ begin
   csv := public.t117_call($q$booking.admin_report_gift_cards('all', 'csv')$q$) ->> 'content';
   perform public.t117_ck(position('johku;****-****-AB12' in csv) > 0 and position('yhteenveto;johku;' in csv) > 0 and position('yhteenveto;oma_myynnissa;' in csv) > 0 and position('yhteenveto;oma_maksuton;' in csv) > 0 and position('oma_lunastus' in csv) = 0, 'L5: CSV erottaa Johkun ja maksuttoman');
 
+  perform public.t117_logout();
   v_text := booking._receipt_text(jsonb_build_object('locale', 'fi', 'document', 'receipt', 'receipt_no', 'K-1', 'issued_local', '15.06.2032 14:00', 'order_no', 1,
     'seller', jsonb_build_object('name', 'S', 'legal_name', 'Havuhattu Oy', 'business_id', '1', 'vat_id', 'FI1'),
     'payment', jsonb_build_object('method_label', 'Kortti'),

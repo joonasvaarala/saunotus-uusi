@@ -256,7 +256,7 @@ as $$
     'valid_from', g.valid_from, 'valid_to', g.valid_to, 'balance_verified', g.balance_verified, 'balance_source', g.balance_source,
     'vat_treatment', g.vat_treatment, 'sale_vat_rate', g.sale_vat_rate, 'accounting_origin', g.accounting_origin, 'single_order', g.single_order,
     'buyer_customer_id', g.buyer_customer_id, 'buyer_name', g.buyer_name, 'buyer_email', g.buyer_email,
-    'recipient_name', g.recipient_name, 'recipient_email', g.recipient_email, 'greeting', g.greeting, 'locale', g.locale,
+    'recipient_name', g.recipient_name, 'recipient_email', g.recipient_email, 'greeting', g.greeting, 'delivery_to', g.delivery_to, 'cover_message', g.cover_message, 'deliver_on', g.deliver_on, 'deliver_time', to_char(g.deliver_time, 'HH24:MI'), 'delivered_at', g.delivered_at, 'locale', g.locale,
     'purchase_order_id', g.purchase_order_id, 'order_no', (select o.order_no from booking.orders o where o.id = g.purchase_order_id),
     'public_token', g.public_token, 'created_at', g.created_at, 'activated_at', g.activated_at, 'last_used_at', g.last_used_at, 'note', g.note)
 $$;

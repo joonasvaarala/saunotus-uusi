@@ -130,7 +130,9 @@ begin
   end if;
   return jsonb_build_object('filename', format('kuitit_%s_%s_%s.csv', p_kind, p_from, p_to), 'mime', 'text/csv;charset=utf-8',
                             'content', chr(65279) || v_hdr || v_cr || v_body || case when v_body <> '' then v_cr else '' end);
-end $function$
+end $function$;
+
+comment on function booking.admin_report_csv(date, date, text) is 'CSV-vienti: vain reports.view (manager/admin). Tarkoituksellinen.';
 
 drop function if exists booking.admin_report_gift_cards(text, text);
 drop function if exists booking.admin_report_transactions(date, date);

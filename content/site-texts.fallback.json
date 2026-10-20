@@ -12927,6 +12927,20 @@
    "placeholders": []
   },
   {
+   "key": "ui.gift.err.gift_card_vat_rate",
+   "lang": "en",
+   "text": "A gift card can pay only for products with 25.5% VAT.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
+   "key": "ui.gift.err.gift_card_vat_rate",
+   "lang": "fi",
+   "text": "Lahjakortilla voi maksaa vain tuotteita, joiden arvonlisävero on 25,5 %.",
+   "version": 1,
+   "placeholders": []
+  },
+  {
    "key": "ui.gift.err.greeting",
    "lang": "en",
    "text": "The greeting is too long (max {{var:max}} characters).",
