@@ -8,7 +8,7 @@
 
 export interface DesiredEvent {
   event_key: string;
-  kind: "reservation" | "shift";
+  kind: "reservation" | "shift" | "day";
   reservation_id?: number | null;
   resource_code: string;
   google_calendar_id?: string | null;

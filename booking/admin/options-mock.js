@@ -290,7 +290,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     },
     admin_booking_calendar_preview: () => {
       need('settings.edit');
-      return { ok: true, sent: false, private_events: 0, shift_bars: 0, shift_persons: 0, unconfigured: st.bookingCalendar.shared_calendar_id ? 0 : 3 };
+      return { ok: true, sent: false, private_events: 1, day_bars: st.bookingCalendar.shared_calendar_id ? 1 : 0, unconfigured: st.bookingCalendar.shared_calendar_id ? 0 : 1 };
     },
     admin_set_setting: (a) => {
       need('settings.edit');

@@ -87,6 +87,30 @@ Deno.test("planOps: sama tarkiste ohitetaan, eri tarkiste ja täysi kirjoitus p�
   assertEquals(gone.ops.map((o) => o.op), ["delete"]);
 });
 
+Deno.test("planOps: päiväpalkki ja yksityinen säilyvät, vanha vuoropalkki poistuu", () => {
+  const day = ev({
+    event_key: "d:2026-11-10",
+    kind: "day",
+    reservation_id: null,
+    resource_code: "all",
+    google_event_id: "bkd20261110",
+    summary: "Varaukset 14–21 · 19 hlö (4 varausta)",
+    content_hash: "dayhash",
+  });
+  const mapped = [
+    { event_key: "d:2026-11-10", google_calendar_id: CAL, google_event_id: "bkd20261110", content_hash: "dayhash" },
+    { event_key: "r:42", google_calendar_id: CAL, google_event_id: "bkr00000042", content_hash: "abc" },
+    { event_key: "s:savusauna|a|b", google_calendar_id: CAL, google_event_id: "bksabcdef0123456789abcd", content_hash: "old" },
+  ];
+  const first = planOps({ mode: "live", reconcile: false, events: [day, ev()], mapped });
+  assertEquals(first.unchanged, 2);
+  assertEquals(first.ops.map((o) => o.op), ["delete"]);
+  assertEquals(first.ops[0].eventKey, "s:savusauna|a|b");
+  const again = planOps({ mode: "live", reconcile: false, events: [day, ev()], mapped: mapped.slice(0, 2) });
+  assertEquals(again.ops, []);
+  assertEquals(again.unchanged, 2);
+});
+
 Deno.test("toGoogleEvent merkitsee lähteen eikä laita puhelinta", () => {
   const g = toGoogleEvent(ev({ summary: "Savusauna 0401234567", description: "Tilaus #88011401\nmaija@example.test" }));
   assertEquals(g.extendedProperties.private.booking_source, "booking_calendar");

@@ -1,6 +1,6 @@
 // Varauskalenterin asetuskortin tekstit (FI + EN). Avaimet: ui.admin.calendar_export.*
 // public_get_site_texts peittää sanakirjan. Haku epäonnistuu tai rivi puuttuu → CALENDAR_EXPORT_TEXTS.
-// Tuonti: content/site-texts.pending-import-25.json. pending-import-24 on varattu toiselle haaralle.
+// Tuonti: content/site-texts.pending-import-26.json täydentää 25:ttä. pending-import-24 on varattu toiselle haaralle.
 import { getLang } from './talous-i18n.js';
 
 export const PREFIX = 'ui.admin.calendar_export.';
@@ -8,15 +8,15 @@ export const PREFIX = 'ui.admin.calendar_export.';
 export const CALENDAR_EXPORT_TEXTS = {
   fi: {
     'ui.admin.calendar_export.title': 'Varauskalenteri',
-    'ui.admin.calendar_export.lead': 'Vahvistetut yksityisvaraukset ja yleisten vuorojen palkit viedään erilliseen kalenteriin. Sulkukalenterit eivät muutu. Kalenterissa tehty muutos ei muuta varausta. Oletus on pois päältä.',
+    'ui.admin.calendar_export.lead': 'Yksityisvaraukset viedään omiksi tapahtumikseen. Lisäksi jokaiselle päivälle, jolla on vahvistettuja varauksia, tulee yksi päiväpalkki ensimmäisen varauksen alusta viimeisen loppuun. Sulkukalenterit eivät muutu. Kalenterissa tehty muutos ei muuta varausta. Oletus on pois päältä.',
     'ui.admin.calendar_export.mode': 'Tila',
     'ui.admin.calendar_export.mode_off': 'Pois päältä',
     'ui.admin.calendar_export.mode_dry_run': 'Harjoitusajo',
     'ui.admin.calendar_export.mode_live': 'Käytössä',
     'ui.admin.calendar_export.shared': 'Yhteinen kalenteri',
-    'ui.admin.calendar_export.shared_hint': 'Yksi yhteinen Varaukset-kalenteri. Resurssin nimi on aina otsikossa. Tyhjä tunnus ei vie mitään. Resurssin oma tunnus ohittaa tämän.',
+    'ui.admin.calendar_export.shared_hint': 'Päiväpalkki menee tähän kalenteriin. Yksityisvaraus käyttää tätä, ellei resurssilla ole omaa tunnusta. Tyhjä tunnus ei vie päiväpalkkia.',
     'ui.admin.calendar_export.resources': 'Resurssien kalenterit',
-    'ui.admin.calendar_export.resource_hint': 'Tyhjä käyttää yhteistä kalenteria.',
+    'ui.admin.calendar_export.resource_hint': 'Ohittaa yhteisen kalenterin vain tämän resurssin yksityisvarauksessa. Päiväpalkki jää yhteiseen kalenteriin.',
     'ui.admin.calendar_export.admin_url': 'Hallinnan osoite',
     'ui.admin.calendar_export.admin_url_hint': 'Tyhjä käyttää sivuston hallintaa. Osoitteessa ei saa olla tunnusta.',
     'ui.admin.calendar_export.timezone': 'Aikavyöhyke',
@@ -30,6 +30,8 @@ export const CALENDAR_EXPORT_TEXTS = {
     'ui.admin.calendar_export.preview_private': 'Yksityisiä tapahtumia',
     'ui.admin.calendar_export.preview_shifts': 'Vuoropalkkeja',
     'ui.admin.calendar_export.preview_persons': 'Henkilöitä vuoropalkissa',
+    'ui.admin.calendar_export.preview_days': 'Päiväpalkkeja',
+    'ui.admin.calendar_export.preview_bookings': 'Varausta',
     'ui.admin.calendar_export.preview_unconfigured': 'Ilman kalenteria',
     'ui.admin.calendar_export.preview_not_sent': 'Mitään ei lähetetä.',
     'ui.admin.calendar_export.last': 'Viimeisin ajo',
@@ -43,15 +45,15 @@ export const CALENDAR_EXPORT_TEXTS = {
   },
   en: {
     'ui.admin.calendar_export.title': 'Booking calendar',
-    'ui.admin.calendar_export.lead': 'Confirmed private bookings and one bar per public shift are exported to a separate calendar. Closure calendars stay as they are. An edit in the calendar does not change the booking. The default is off.',
+    'ui.admin.calendar_export.lead': 'Private bookings are exported as their own events. In addition, every day with confirmed bookings gets one day bar from the start of the first booking to the end of the last. Closure calendars stay as they are. An edit in the calendar does not change the booking. The default is off.',
     'ui.admin.calendar_export.mode': 'Mode',
     'ui.admin.calendar_export.mode_off': 'Off',
     'ui.admin.calendar_export.mode_dry_run': 'Dry run',
     'ui.admin.calendar_export.mode_live': 'On',
     'ui.admin.calendar_export.shared': 'Shared calendar',
-    'ui.admin.calendar_export.shared_hint': 'One shared bookings calendar. The resource name is always in the title. An empty id exports nothing. A resource id overrides this.',
+    'ui.admin.calendar_export.shared_hint': 'The day bar goes to this calendar. A private booking uses it unless the resource has its own id. An empty id exports no day bar.',
     'ui.admin.calendar_export.resources': 'Resource calendars',
-    'ui.admin.calendar_export.resource_hint': 'Empty uses the shared calendar.',
+    'ui.admin.calendar_export.resource_hint': 'Overrides the shared calendar only for private bookings of this resource. The day bar stays on the shared calendar.',
     'ui.admin.calendar_export.admin_url': 'Admin address',
     'ui.admin.calendar_export.admin_url_hint': 'Empty uses the site admin. The address must not contain a login.',
     'ui.admin.calendar_export.timezone': 'Time zone',
@@ -65,6 +67,8 @@ export const CALENDAR_EXPORT_TEXTS = {
     'ui.admin.calendar_export.preview_private': 'Private events',
     'ui.admin.calendar_export.preview_shifts': 'Shift bars',
     'ui.admin.calendar_export.preview_persons': 'People on shift bars',
+    'ui.admin.calendar_export.preview_days': 'Day bars',
+    'ui.admin.calendar_export.preview_bookings': 'Bookings',
     'ui.admin.calendar_export.preview_unconfigured': 'Without a calendar',
     'ui.admin.calendar_export.preview_not_sent': 'Nothing is sent.',
     'ui.admin.calendar_export.last': 'Latest run',
