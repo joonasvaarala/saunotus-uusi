@@ -177,8 +177,8 @@ Nämä näkyvät nykyisellä asetussivulla tai kuvaavat samaa asiaa. Uudessa nä
 | Visma Pay | `integration_config.vismapay`. Tila `off`, `dry_run`, `test` tai `live`. Testi ja live vaativat `approved_by`. Oletus migraatiossa `off`. | `admin_set_vismapay_mode` antaa ylläpitäjän vaihtaa tilan, myös liveen. | Vain tila. Testi näyttää varoituksen: asiakkaalta ei veloiteta oikeaa rahaa. Live näyttäisi toisen varoituksen. Ei valintaa. |
 | MobilePay | `integration_config.mobilepay`. Tila `off`, `test` tai `live` (ei harjoitusajoa). Testi ja live vaativat `approved_by`. Oletus `off`. | Tila ei ole nykyisessä asetusten pudotusvalikossa, mutta se on sama taulu. | Vain tila. |
 | Sähköposti (Resend) | `integration_config.resend`. Oletus `dry_run`. `from` ja `reply_to`. `test_recipients`: kun lista ei ole tyhjä ja tila on live, muu vastaanottaja ohitetaan ("ei allowlistissa"). Tyhjä lista ei rajaa ketään. | Tila ja lista eivät ole lomakkeella. Ne vaihdetaan tietokannassa. | Tila ja "rajaus päällä / ei rajausta" vain lukuina. Listaa ei tyhjennetä eikä tilaa vaihdeta tästä. Lähettäjän **näkyvä nimi** ja **vastausosoite** ovat muokattavia. Osoite `savusauna@saunotus.fi` pysyy lukittuna, koska väärä osoite rikkoo lähtevän postin. |
-| Procountor | `integration_config.procountor`. Oletus `off`, ympäristö `pts`. Tilit, ALV-tila, päiväkirjaus, pankkitili, `api_prefix`. | Nykyinen lomake antaa vaihtaa myös `live` ja `prod` (`admin_set_procountor_settings`). | Vain tila: pois / harjoitusajo / yhdistetty, testi- vai tuotantoympäristö, onko tilit ja pankkitili, viimeisin ajo ja virheet. Ei tilikarttaa eikä live-valintaa. |
-| Google-varauskalenteri | `integration_config.booking_calendar`. Oletus `off`. | Lomake Varaukset-välilehdellä: tila myös `live`, kalenteritunnukset, ikkuna, nopea päivitys. | Vain tila: pois, harjoitusajo tai käytössä, onko tunnus, viimeisin ajo. Tunnusta ei liitetä tästä. Käyttöönotto on ohjeessa `docs/varauskalenteri.md`. Sulkukalenterit ovat eri synkka, eivät tämä kortti. |
+| Procountor | `integration_config.procountor`. Oletus `off`, ympäristö `pts`. Tilit, ALV-tila, päiväkirjaus, pankkitili, `api_prefix`. | Tila, ympäristö ja päiväkirjaus ovat vain luku. Pääkäyttäjä muokkaa tilikarttaa, ALV-tilaa, pyöristystiliä, pankkitiliä ja `api_prefix`-etuliitettä Yhteydet-välilehdellä. Tallennus lähettää tilan, ympäristön ja päiväkirjauksen nykyisinä arvoina, jotta ne eivät nollaudu. | Tila: pois / harjoitusajo / yhdistetty. Tilikartta on muokattava vain roolille admin. |
+| Google-varauskalenteri | `integration_config.booking_calendar`. Oletus `off`. | Lomake Varaukset-välilehdellä, vain pääkäyttäjälle: tila `off` / `dry_run` / `live`, kalenteritunnus, esikatselu. Käyttöönotto 26.10. | Yhteydet-välilehdellä tila on vain luku. Käyttöönotto on Varaukset-kortissa. Sulkukalenterit ovat eri synkka. |
 | Laskun lähetys Procountoriin | `invoice_dispatch_mode` | Katso yllä. | Vain tila. |
 
 Salaisuuksia (API-avaimet, SMTP, Google-palvelutili) ei näytetä eikä kysytä. Ne ovat Edge-salaisuuksia.
@@ -361,7 +361,7 @@ Ei uusia `booking.settings`-avaimia, ellei allekirjoituksesta päätetä toisin.
 | Ehdotus | Tarvitaanko tietokantamuutos | Tarvitaanko koodia |
 |---|---|---|
 | Korttikohtainen tallennus ja suomenkieliset kentät | Ei uusia avaimia. `seller` ja `invoice_bank` pysyvät JSON-objekteina. | Kyllä. Uusi hallintakutsu ja uusi `settings.js`. Vanha avainlista poistuu näkymästä. |
-| Live-, testi- ja allowlist-tilat vain lukuina | Ei. | Kyllä. Uusi sivu ei kutsu `admin_set_vismapay_mode`, `admin_set_procountor_settings` eikä `admin_set_booking_calendar` tilan vaihtoon. |
+| Live-, testi- ja allowlist-tilat vain lukuina | Ei. | Visma Payn tilaa ei vaihdeta (`admin_set_vismapay_mode` ei ole sivulla). Procountorin tila, ympäristö ja päiväkirjaus lähtevät tallennuksessa nykyisinä arvoina. Varauskalenterin tilan pääkäyttäjä valitsee Varaukset-kortissa. |
 | Lähettäjän nimi ja vastausosoite | Ei uutta avainta. Kirjoitus `integration_config.resend.settings`. | Kyllä. Uusi kutsu, joka ei koske tilaan eikä `test_recipients`-listaan. |
 | Hallinnan maksutapojen kytkimet | Ei. Sarake `payment_methods.active` on olemassa. | Kyllä. Uusi kutsu. Käteinen pysyy hylättynä. |
 | Allekirjoitus Tapio muokattavaksi | Vain jos niin päätetään: uusi avain `email_sign_name` tai nykyisten sivutekstien muokkaus. | Kyllä, pohjat lukevat nyt kiinteää tekstiä. Ei toteuteta ennen päätöstä. |
@@ -377,14 +377,14 @@ Näitä ei saa tehdä kytkimiksi eikä pudotusvalikoiksi hallinnassa:
 
 - Visma Payn tila (`off` / `dry_run` / `test` / `live`)
 - MobilePayn tila (`off` / `test` / `live`)
-- Procountorin tila, ympäristö (`pts` / `prod`), päiväkirjaus, tilikartta, `api_prefix` ja Procountorin pankkitili
+- Procountorin tila, ympäristö (`pts` / `prod`) ja päiväkirjaus. Tilikartta, ALV-tila, pyöristys, pankkitili ja `api_prefix` ovat pääkäyttäjän lomakkeella.
 - Sähköpostin lähetystila ja vastaanottajarajaus (`test_recipients`)
 - Laskun lähetystila Procountoriin (`invoice_dispatch_mode`)
 - Maksutila `public_payment_mode`
 - `pay_later_test_enabled`
 - Johku-lahjakorttien lunastus
 - Kumppanikoodien verkkolunastus, ongelmaviestit ja se, tuleeko niistä kuitti
-- Google-kalenterin tila ja kalenteritunnukset
+- Google-kalenterin tila Yhteydet-välilehden yhteenvedossa. Tunnus ja tila (`off` / `dry_run` / `live`) ovat Varaukset-välilehden kortissa, vain pääkäyttäjälle. Käyttöönotto 26.10.
 - Saunabot
 - Kuittisarjojen kirjaimet
 - Sivuston osoite ja polut
@@ -432,6 +432,6 @@ Nämä on lukittu toteutukseen. Peruste on se, ettei sivulle tule kytkintä, jot
 5. **Lahjakortin voimassaolo.** Aika pysyy paketilla (`gift_card_packages.valid_months`). Sivulla on vain yhteenveto. Uutta yhteistä avainta ei ole.
 6. **Henkilökunnan posti.** Vain nykyinen tarjouspyynnön osoite ja tervehdysnimi. Uudesta varauksesta ei lähde erillistä viestiä, eikä sellaista kytkintä lisätä.
 7. **Allekirjoitus.** Jää Tapio, sivuteksteihin `email.*.sign_name`. Asetusta `email_sign_name` ei lisätä, koska lähetys ei lukisi sitä.
-8. **Oikeudet.** Y-tunnus, ALV-tunnus ja laskun tili pysyvät oikeudella `settings.edit` (pääkäyttäjä ja ylläpitäjä). Tekninen välilehti on vain roolille admin. Maksun live-tila, Procountorin tila ja päiväkirjaus sekä sähköpostin vastaanottajarajaus ovat vain luku kaikille, myös pääkäyttäjälle.
+8. **Oikeudet.** Y-tunnus, ALV-tunnus ja laskun tili pysyvät oikeudella `settings.edit` (pääkäyttäjä ja ylläpitäjä). Tekninen välilehti on vain roolille admin. Maksun live-tila, Procountorin tila, ympäristö ja päiväkirjaus sekä sähköpostin vastaanottajarajaus ovat vain luku kaikille, myös pääkäyttäjälle. Procountorin tilikartan ja varauskalenterin käyttöönoton (`off` / `dry_run` / `live`, tunnus, esikatselu) tallentaa vain pääkäyttäjä. Kalenteri otetaan käyttöön 26.10.
 
 Uusia `booking.settings`-avaimia ei ole. `seller` ja `invoice_bank` pysyvät JSON-objekteina ja lomake jakaa ne kenttiin. Kuittilogo ja tuntemattomat kentät säilyvät tallennuksessa. Paikan pito kirjoittaa saman luvun myös vanhaan `hold_minutes`-avaimeen, jotta kaksi pitoaikaa ei erkane. Käteistä ei voi laittaa päälle.

@@ -69,13 +69,46 @@ test('asetusnäkymä käyttää tekstifunktiota eikä upota Procountor-lauseita'
   assert.match(settings, /loadProcountorTexts/);
   assert.match(settings, /procountorText/);
   assert.match(settings, /data-testid": "procountor-status"|'data-testid': 'procountor-status'/);
-  assert.equal(settings.includes('procountor-settings'), false);
-  assert.equal(settings.includes('admin_set_procountor_settings'), false);
+  assert.match(settings, /procountor-settings/);
+  assert.match(settings, /admin_get_procountor_settings/);
+  assert.match(settings, /admin_set_procountor_settings/);
   assert.match(settings, /admin_procountor_status/);
+  assert.equal(settings.includes('procountor-edit-mode'), false);
+  assert.equal(settings.includes('procountor-edit-env'), false);
+  assert.equal(settings.includes('procountor-daily'), false);
+  assert.match(settings, /mode: cfg\.mode/);
+  assert.match(settings, /environment: cfg\.environment/);
+  assert.match(settings, /daily_enabled: cfg\.daily_enabled === true/);
   assert.equal(settings.includes('Harjoitusajo'), false);
   assert.equal(settings.includes('Tilit puuttuvat'), false);
   assert.match(migration, /live_incomplete/);
   assert.match(migration, /p \? 'approved_by'/);
   assert.match(migration, /p \? 'bank_account'/);
   assert.match(migration, /p \? 'vat_status'/);
+});
+
+test('tilit tallentuvat, tila ja päiväkirjaus pysyvät', async () => {
+  const { createAdminMock } = await import(pathToFileURL(join(root, 'admin/options-mock.js')));
+  const mock = createAdminMock({ role: 'admin' });
+  await mock.rpc('admin_set_procountor_settings', { p: {
+    mode: 'dry_run', environment: 'prod', daily_enabled: true, approved_by: 'Joonas 2026-10-18', vat_status: '12', accounts: ACCOUNTS,
+  } });
+  const before = await mock.rpc('admin_get_procountor_settings');
+  const saved = await mock.rpc('admin_set_procountor_settings', { p: {
+    mode: before.mode,
+    environment: before.environment,
+    daily_enabled: before.daily_enabled === true,
+    approved_by: before.approved_by,
+    vat_status: '13',
+    api_prefix: before.api_prefix,
+    bank_account: before.bank_account,
+    accounts: { rounding: '1910', sales_by_vat: { '25.5': '3000' }, clearing_by_method: { card_terminal: '1910' } },
+  } });
+  assert.equal(saved.mode, 'dry_run');
+  assert.equal(saved.environment, 'prod');
+  assert.equal(saved.daily_enabled, true);
+  assert.equal(saved.vat_status, '13');
+  assert.equal(saved.accounts.rounding, '1910');
+  assert.equal(saved.accounts.sales_by_vat['25.5'], '3000');
+  assert.equal(saved.accounts.clearing_by_method.card_terminal, '1910');
 });

@@ -166,7 +166,8 @@ test('näkymät eivät avaa tyhjää ikkunaa ja Procountor-kortti säilyy', () =
   assert.match(settings, /data-testid': 'procountor-status'/);
   assert.match(settings, /panel-yhteydet/);
   assert.equal(settings.includes('admin_set_vismapay_mode'), false);
-  assert.equal(settings.includes('admin_set_procountor_settings'), false);
+  assert.match(settings, /admin_set_procountor_settings/);
+  assert.match(settings, /renderCalendarExport/);
   assert.equal(settings.includes('admin_set_booking_calendar'), false);
   assert.equal(settings.includes('admin_set_setting'), false);
   assert.equal(settings.includes('Harjoitusajo'), false);

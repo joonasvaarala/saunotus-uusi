@@ -42,6 +42,7 @@ cpSync('booking/shared/sb.js', join(A, 'sb.js'));
 // options-mock.js (admin.js tuo sen staattisesti) tuo '../shop/src/invoice-validate.js' → /shop/src/invoice-validate.js; ilman tätä koko hallinta-SPA:n moduulipuu kaatuu 404:ään (tyhjä sivu).
 mkdirSync(join(OUT, 'shop', 'src'), { recursive: true });
 cpSync('booking/shop/src/invoice-validate.js', join(OUT, 'shop', 'src', 'invoice-validate.js'));
+cpSync('booking/shop/src/phone.js', join(OUT, 'shop', 'src', 'phone.js'));
 const cfg = { url: SUPA, anonKey: KEY, rest: '/rest/v1', auth: '/auth/v1', functions: '/functions/v1', schema: 'booking' };
 writeFileSync(join(A, 'config.js'), `// Generoitu julkaisussa (scripts/build-pages.mjs). Vain julkinen anon/publishable-avain; service_role ei koskaan tähän.\nwindow.BOOKING_CONFIG=${JSON.stringify(cfg, null, 2)};\n`);
 

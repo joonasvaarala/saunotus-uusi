@@ -1,6 +1,7 @@
 // Asetussivun kortit: tarkistus selaimessa ja mockissa. Palvelin (admin_save_settings) tarkistaa uudelleen.
 // Ei uusia booking.settings-avaimia. Live-tilat, Procountor ja vastaanottajarajaus eivät ole tässä.
 import { normBusinessId, validBusinessId } from '../shop/src/invoice-validate.js';
+import { PHONE_DISPLAY_FI } from '../shop/src/phone.js';
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const MANUAL_METHODS = ['pay_later', 'card_terminal', 'bank_transfer', 'invoice', 'partner_voucher', 'other'];
@@ -384,7 +385,7 @@ export function exampleBundle() {
         postal_code: '04130',
         city: 'Sipoo',
         country: 'FI',
-        phone: '010 299 2866',
+        phone: PHONE_DISPLAY_FI,
         email: 'savusauna@saunotus.fi',
         website: 'https://saunotus.fi',
         logo_url: '',

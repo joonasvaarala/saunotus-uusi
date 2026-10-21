@@ -30,7 +30,7 @@ declare
   u_staff uuid := gen_random_uuid();
   u_mgr uuid := gen_random_uuid();
   u_admin uuid := gen_random_uuid();
-  got jsonb; bad jsonb; seller jsonb; payload jsonb; resend_mode text; npass int; nfail int; log text;
+  got jsonb; bad jsonb; seller jsonb; payload jsonb; resend_mode text; pay_mode text; npass int; nfail int; log text;
 begin
   insert into auth.users(id, email) values
     (u_staff, 't123-staff-' || u_staff::text || '@example.test'),
@@ -42,6 +42,7 @@ begin
     (u_admin, 't123-admin-' || u_admin::text || '@example.test', 't123 admin', 'admin');
   update booking.settings set value = jsonb_set(coalesce(value, '{}'::jsonb), '{logo_url}', to_jsonb('https://example.test/logo.png'::text), true) where key = 'seller';
   select mode into resend_mode from booking.integration_config where key = 'resend';
+  select value #>> '{}' into pay_mode from booking.settings where key = 'public_payment_mode';
 
   perform public.t123_login(u_staff);
   got := public.t123_call('booking.admin_settings_bundle()');
@@ -78,7 +79,7 @@ begin
   perform public.t123_ck((select value ->> 'footer' from booking.settings where key = 'seller') = 'Kiitos testistä', 'alatunniste vaihtui');
   perform public.t123_ck((select active from booking.payment_methods where code = 'cash') = false, 'käteinen yhä pois');
   perform public.t123_ck((select mode from booking.integration_config where key = 'resend') = resend_mode, 'sähköpostin tila ennallaan');
-  perform public.t123_ck((select value #>> '{}' from booking.settings where key = 'public_payment_mode') is distinct from 'hold_until_paid' or (select value #>> '{}' from booking.settings where key = 'public_payment_mode') = 'pay_later', 'maksutila ei ole vaihdettu pidoksi');
+  perform public.t123_ck((select value #>> '{}' from booking.settings where key = 'public_payment_mode') is not distinct from pay_mode, 'maksutila ennallaan');
 
   perform public.t123_login(u_admin);
   got := public.t123_call($s$booking.admin_save_settings('technical', '{"limits":{"rl_ip_per_10min":13}}'::jsonb)$s$);

@@ -2,11 +2,13 @@
 // Maksun live-tila, Procountor ja sähköpostin vastaanottajarajaus ovat vain tilaa.
 // QR-tulostus: pos.use tai settings.edit. Tekninen välilehti vain roolille admin.
 import { rpc } from '../sb.js';
-import { h, field, toast, run, badge } from '../ui.js';
+import { h, field, toast, run, badge, todayHel } from '../ui.js';
 import { loadProcountorTexts, procountorText } from '../procountor-texts.js';
+import { loadCalendarExportTexts } from '../calendar-export-texts.js';
 import { loadSettingsTexts, settingsText as st } from '../settings-texts.js';
 import { visibleSettingTabs, settingsHref, tabFromHash } from '../settings-tabs.js';
 import { renderQrPanel } from '../qr-panel.js';
+import { renderCalendarExport } from './calendar-export.js';
 import { TECHNICAL_LIMITS, modeBadgeKind, modeTextKey, overviewNotices, splitFrom, validateSection } from '../settings-logic.js';
 
 const tx = (key) => st(`ui.admin.settings.${key}`);
@@ -105,6 +107,69 @@ function procountorCard(state, failed) {
     h('ul', { 'data-testid': 'procountor-error' }, errors));
 }
 
+const SALES = [['25.5', 'sales_25_5'], ['13.5', 'sales_13_5'], ['0', 'sales_0'], ['14', 'sales_14'], ['24', 'sales_24'], ['10', 'sales_10']];
+const METHODS = [['cash', 'method_cash'], ['card_terminal', 'method_card_terminal'], ['mobilepay', 'method_mobilepay'], ['bank_transfer', 'method_bank_transfer'], ['invoice', 'method_invoice'], ['gift_card', 'method_gift_card'], ['partner_voucher', 'method_partner_voucher'], ['visma_pay', 'method_visma_pay'], ['annual_card', 'method_annual_card'], ['pay_later', 'method_pay_later'], ['other', 'method_other']];
+
+function procountorForm(cfg, isAdmin, reload) {
+  if (!cfg) {
+    return h('section', { class: 'card', 'data-testid': 'procountor-settings' },
+      h('h2', { text: procountorText('ui.admin.procountor.edit_title') }),
+      h('p', { class: 'muted', text: procountorText('ui.admin.procountor.unavailable') }));
+  }
+  const s = cfg.accounts || {};
+  const sales = s.sales_by_vat || {};
+  const methods = s.clearing_by_method || {};
+  const approved = h('input', { type: 'text', value: cfg.approved_by || '', disabled: !isAdmin, 'data-testid': 'procountor-approved' });
+  const vat = h('input', { type: 'text', value: cfg.vat_status || '', disabled: !isAdmin, 'data-testid': 'procountor-vat-status' });
+  const prefix = h('input', { type: 'text', value: cfg.api_prefix || '/supported/api', disabled: !isAdmin, 'data-testid': 'procountor-prefix' });
+  const bank = h('input', { type: 'text', value: cfg.bank_account || '', disabled: !isAdmin, 'data-testid': 'procountor-bank', autocomplete: 'off' });
+  const rounding = h('input', { type: 'text', value: s.rounding || '', disabled: !isAdmin, 'data-testid': 'procountor-rounding' });
+  const salesInputs = Object.fromEntries(SALES.map(([rate]) => [rate, h('input', { type: 'text', value: sales[rate] || '', disabled: !isAdmin, 'data-testid': `procountor-sales-${rate}` })]));
+  const methodInputs = Object.fromEntries(METHODS.map(([code]) => [code, h('input', { type: 'text', value: methods[code] || '', disabled: !isAdmin, 'data-testid': `procountor-method-${code}` })]));
+  const previewDate = h('input', { type: 'date', value: todayHel(), 'data-testid': 'procountor-preview-date' });
+  const previewOut = h('p', { 'data-testid': 'procountor-preview-result' });
+  const collect = () => ({
+    mode: cfg.mode || 'off',
+    environment: cfg.environment || 'pts',
+    daily_enabled: cfg.daily_enabled === true,
+    approved_by: approved.value.trim(),
+    vat_status: vat.value.trim(),
+    api_prefix: prefix.value.trim(),
+    bank_account: bank.value.trim(),
+    accounts: {
+      rounding: rounding.value.trim(),
+      sales_by_vat: Object.fromEntries(SALES.map(([rate]) => [rate, salesInputs[rate].value.trim()])),
+      clearing_by_method: Object.fromEntries(METHODS.map(([code]) => [code, methodInputs[code].value.trim()])),
+    },
+  });
+  const save = h('button', { class: 'btn primary', type: 'button', text: procountorText('ui.admin.procountor.save'), 'data-testid': 'procountor-save', disabled: !isAdmin || null, onclick: (e) => run(e.target, async () => {
+    await rpc('admin_set_procountor_settings', { p: collect() });
+    toast(procountorText('ui.admin.procountor.saved'));
+    if (reload) await reload();
+  }) });
+  const preview = h('button', { class: 'btn', type: 'button', text: procountorText('ui.admin.procountor.preview'), 'data-testid': 'procountor-preview', onclick: (e) => run(e.target, async () => {
+    const res = await rpc('admin_procountor_preview_daily', { p_date: previewDate.value });
+    const missing = Array.isArray(res.missing) ? res.missing.join(', ') : '';
+    previewOut.textContent = `${procountorText('ui.admin.procountor.preview_receipts')} ${res.receipts ?? 0}. ${procountorText('ui.admin.procountor.preview_not_sent')}${missing ? ` ${procountorText('ui.admin.procountor.missing')}: ${missing}` : ''}`;
+  }) });
+  return h('section', { class: 'card', 'data-testid': 'procountor-settings' },
+    h('h2', { text: procountorText('ui.admin.procountor.edit_title') }),
+    h('p', { class: 'muted', text: procountorText('ui.admin.procountor.edit_lead') }),
+    h('div', { class: 'stack' },
+      field(procountorText('ui.admin.procountor.approved_by'), approved, procountorText('ui.admin.procountor.approved_by_hint')),
+      field(procountorText('ui.admin.procountor.vat_status'), vat),
+      field(procountorText('ui.admin.procountor.api_prefix'), prefix),
+      field(procountorText('ui.admin.procountor.bank_account'), bank, procountorText('ui.admin.procountor.bank_keep')),
+      field(procountorText('ui.admin.procountor.rounding'), rounding)),
+    h('h3', { text: procountorText('ui.admin.procountor.sales_title') }),
+    h('div', { class: 'stack' }, SALES.map(([rate, key]) => field(procountorText(`ui.admin.procountor.${key}`), salesInputs[rate]))),
+    h('h3', { text: procountorText('ui.admin.procountor.methods_title') }),
+    h('div', { class: 'stack' }, METHODS.map(([code, key]) => field(procountorText(`ui.admin.procountor.${key}`), methodInputs[code]))),
+    isAdmin ? save : null,
+    h('div', { class: 'row wrap' }, field(procountorText('ui.admin.procountor.preview_date'), previewDate), preview),
+    previewOut);
+}
+
 function homePanel(bundle, ctx) {
   const s = bundle.settings || {};
   const seller = s.seller && typeof s.seller === 'object' ? s.seller : {};
@@ -165,7 +230,7 @@ function businessPanel(bundle, reload) {
       }), reload, 'save-business')));
 }
 
-function bookingPanel(bundle, reload) {
+function bookingPanel(bundle, reload, calendarExport, calendarExportFailed, isAdmin) {
   const s = bundle.settings || {};
   const horizon = num(tx('win_sauna'), s.booking_horizon_days, tx('unit_days'), 1, 730, 'horizon-days');
   const treat = num(tx('win_treat'), s.public_treatment_horizon_days, tx('unit_days'), 1, 180);
@@ -191,7 +256,8 @@ function bookingPanel(bundle, reload) {
         checkout_group_threshold_persons: Number(group.input.value),
         checkout_group_hold_days: Number(days.input.value),
         annual_card_max_persons: Number(annual.input.value),
-      }), reload, 'save-group')));
+      }), reload, 'save-group')),
+    isAdmin ? renderCalendarExport({ state: calendarExport, failed: calendarExportFailed, isAdmin, reload }) : null);
 }
 
 function paymentsPanel(bundle, reload) {
@@ -294,7 +360,7 @@ function invoicePanel(bundle, reload) {
       read(tx('series_gift'), series.giftcard_info)));
 }
 
-function connectionsPanel(bundle, procountor, procountorFailed) {
+function connectionsPanel(bundle, procountor, procountorFailed, editor, isAdmin, reload) {
   const s = bundle.settings || {};
   return h('div', { class: 'stack', 'data-testid': 'panel-yhteydet' },
     h('p', { class: 'muted', text: tx('conn_lead') }),
@@ -304,6 +370,7 @@ function connectionsPanel(bundle, procountor, procountorFailed) {
       stat(tx('mail_mode'), modeBadge(bundle.resend?.mode)),
       stat(tx('mail_allow'), badge(bundle.resend?.allowlist_on ? 'warn' : '', bundle.resend?.allowlist_on ? tx('allowlist_on') : tx('allowlist_off')))),
     procountorCard(procountor, procountorFailed),
+    isAdmin ? procountorForm(editor, isAdmin, reload) : null,
     card(tx('conn_calendar'), tx('readonly_note'),
       stat(tx('conn_calendar'), modeBadge(bundle.booking_calendar?.mode)),
       h('p', { text: bundle.booking_calendar?.configured ? tx('conn_calendar_id') : tx('conn_calendar_missing') })),
@@ -341,6 +408,7 @@ function technicalPanel(bundle, reload) {
 export async function render({ ctx, rest, reload }) {
   await loadSettingsTexts(rpc);
   const seeSettings = ctx.can('settings.edit');
+  const isAdmin = ctx.role === 'admin';
   const tabs = visibleSettingTabs({ can: (p) => ctx.can(p), role: ctx.role });
   const tab = tabFromHash(location.hash || `#/asetukset/${rest || ''}`, tabs);
   if (tab && location.hash !== settingsHref(tab)) history.replaceState(null, '', settingsHref(tab));
@@ -352,9 +420,19 @@ export async function render({ ctx, rest, reload }) {
   }
   let procountor = null;
   let procountorFailed = false;
+  let editor = null;
   if (seeSettings && tab === 'yhteydet') {
     await loadProcountorTexts(rpc);
     try { procountor = await rpc('admin_procountor_status'); } catch { procountorFailed = true; }
+    if (isAdmin) {
+      try { editor = await rpc('admin_get_procountor_settings'); } catch { editor = null; }
+    }
+  }
+  let calendarExport = null;
+  let calendarExportFailed = false;
+  if (isAdmin && tab === 'varaukset') {
+    await loadCalendarExportTexts(rpc);
+    try { calendarExport = await rpc('admin_get_booking_calendar'); } catch { calendarExportFailed = true; }
   }
 
   const ctxReload = { role: ctx.role, roleLabel: ctx.roleLabel, can: (p) => ctx.can(p), reload };
@@ -364,12 +442,12 @@ export async function render({ ctx, rest, reload }) {
   else if (tab === 'qr') panel = await renderQrPanel();
   else if (tab === 'etusivu') panel = homePanel(bundle, ctxReload);
   else if (tab === 'yritys') panel = businessPanel(bundle, reload);
-  else if (tab === 'varaukset') panel = bookingPanel(bundle, reload);
+  else if (tab === 'varaukset') panel = bookingPanel(bundle, reload, calendarExport, calendarExportFailed, isAdmin);
   else if (tab === 'maksut') panel = paymentsPanel(bundle, reload);
   else if (tab === 'sahkoposti') panel = mailPanel(bundle, reload);
   else if (tab === 'lahjakortit') panel = giftPanel(bundle, reload);
   else if (tab === 'laskut') panel = invoicePanel(bundle, reload);
-  else if (tab === 'yhteydet') panel = connectionsPanel(bundle, procountor, procountorFailed);
+  else if (tab === 'yhteydet') panel = connectionsPanel(bundle, procountor, procountorFailed, editor, isAdmin, reload);
   else if (tab === 'tekninen') panel = technicalPanel(bundle, reload);
 
   const tablist = h('div', { class: 'set-tabs set-noprint', role: 'tablist', 'aria-label': tx('tabs'), 'data-testid': 'settings-tabs' },
