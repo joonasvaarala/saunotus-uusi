@@ -1,5 +1,6 @@
 name: Varmuuskopio (Tapio-havuhattu)
-# Yövarmuuskopio Supabasen ulkopuolelle (Google Drive). Ei PR-ajoa, ei sivujulkaisua.
+# Yövarmuuskopio Supabasen ulkopuolelle (Google Drive, ja Hetzner jos BACKUP_SSH_HOST on asetettu).
+# Ei PR-ajoa, ei sivujulkaisua.
 # Ajastus vain oletushaarassa (main), kun tämä tiedosto on siellä.
 # 00:15 UTC = 02:15 Suomen normaaliaikaa (EET) ja 03:15 Suomen kesäaikaa (EEST).
 # Yksi cron-lauseke ei seuraa kesäaikaa. 00:15 UTC on yöllä molempina vuodenaikoina,
@@ -105,7 +106,11 @@ jobs:
         run: bash scripts/backup/backup.sh --retention-dry-run
 
       - name: Dumppi, salaus ja lähetys
+        id: backup
         if: (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.retention_dry_run != true)) && steps.gate.outputs.ready == 'true'
+        env:
+          # Sama age-tiedosto seuraavalle vaiheelle. Ei muuta salausta eikä Drive-lähetystä.
+          BACKUP_OUTPUT_DIR: ${{ runner.temp }}/tapio-age
         run: |
           set -euo pipefail
           export PATH="/usr/lib/postgresql/17/bin:${PATH}"
@@ -146,3 +151,19 @@ jobs:
           }
           trap cleanup_pg EXIT
           bash scripts/backup/backup.sh
+
+      - name: Lähetä Hetznerille
+        if: steps.backup.outcome == 'success'
+        env:
+          BACKUP_AGE_DIR: ${{ runner.temp }}/tapio-age
+          BACKUP_SSH_KEY: ${{ secrets.BACKUP_SSH_KEY }}
+          BACKUP_SSH_KNOWN_HOSTS: ${{ secrets.BACKUP_SSH_KNOWN_HOSTS }}
+          BACKUP_SSH_HOST: ${{ vars.BACKUP_SSH_HOST }}
+          BACKUP_SSH_USER: ${{ vars.BACKUP_SSH_USER }}
+        run: |
+          set -euo pipefail
+          if [ -n "${BACKUP_SSH_HOST:-}" ] && ! command -v ssh >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y openssh-client
+          fi
+          bash scripts/backup/hetzner_upload.sh

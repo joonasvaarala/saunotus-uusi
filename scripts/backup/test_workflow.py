@@ -53,9 +53,37 @@ class WorkflowAndSqlTest(unittest.TestCase):
         self.assertIn("scripts/backup -p 'test_*.py'", text)
 
     def test_shell_syntax(self):
-        for name in ("backup.sh", "restore-test.sh"):
+        for name in ("backup.sh", "restore-test.sh", "hetzner_upload.sh"):
             path = Path(__file__).resolve().parent / name
             subprocess.check_call(["bash", "-n", str(path)])
+
+    def test_hetzner_step_follows_drive_and_does_not_change_schedule(self):
+        text = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("cron: '15 0 * * *'", text)
+        self.assertIn("id: backup", text)
+        self.assertIn("BACKUP_OUTPUT_DIR: ${{ runner.temp }}/tapio-age", text)
+        self.assertIn("name: Lähetä Hetznerille", text)
+        self.assertIn("if: steps.backup.outcome == 'success'", text)
+        self.assertIn("bash scripts/backup/hetzner_upload.sh", text)
+        self.assertLess(
+            text.rfind("bash scripts/backup/backup.sh"),
+            text.find("bash scripts/backup/hetzner_upload.sh"),
+        )
+        self.assertLess(
+            text.find("name: Dumppi, salaus ja lähetys"),
+            text.find("name: Lähetä Hetznerille"),
+        )
+        self.assertEqual(text.count("secrets.BACKUP_SSH_KEY"), 1)
+        self.assertEqual(text.count("secrets.BACKUP_SSH_KNOWN_HOSTS"), 1)
+        self.assertIn("vars.BACKUP_SSH_HOST", text)
+        self.assertIn("vars.BACKUP_SSH_USER", text)
+        self.assertNotIn("continue-on-error", text)
+        self.assertNotIn("StrictHostKeyChecking=no", text)
+        self.assertNotIn("scp ", text)
+        self.assertNotIn("rsync", text)
+        job_env = text.split("    steps:", 1)[0]
+        self.assertNotIn("BACKUP_SSH_KEY", job_env)
+        self.assertNotIn("BACKUP_SSH_KNOWN_HOSTS", job_env)
 
     def test_migration_has_no_password_and_stays_in_transaction(self):
         sql = MIGRATION.read_text(encoding="utf-8")
