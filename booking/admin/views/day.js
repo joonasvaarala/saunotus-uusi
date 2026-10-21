@@ -1,6 +1,6 @@
 // Päivänäkymä: vuorot kapasiteetteineen + varaukset vuoroittain + tapahtumat osallistujineen + päivän tuotto + sulut.
 import { rpc } from '../sb.js';
-import { h, helsinkiIso, fmtDay, fmtTime, todayHel, addDays, dayStartIso, statusBadge, payBadge, sourceBadge, badge, toast, run, dialog, field, fmtDT, empty, money } from '../ui.js';
+import { h, fmtDay, fmtTime, todayHel, addDays, dayStartIso, statusBadge, payBadge, sourceBadge, badge, toast, run, dialog, field, fmtDT, empty, money } from '../ui.js';
 import { reservationDialog } from './shared.js';
 import { icon } from '../icons.js';
 import { capacityButton, arrivalButton, addonItems, shiftsBar, prepCard } from './dayparts.js';
@@ -10,16 +10,28 @@ import { blockList, blockDialog } from './blocks.js';
 import { assignDayCards, canSeeDayRevenue, eventSortIso, eventTimeLabel, revenueView, isGiftCardReservation, slotTitle, sumPersons } from '../day-logic.js';
 import { dayLang, dayText, loadDayTexts } from '../day-texts.js';
 
-// admin_day_extras puuttuu kunnes migraatio booking_68 on ajettu: näytä selite, älä kaada päivänäkymää. 404:ää ei toisteta minuuttiin.
-let extrasMissing = 0;
-function extrasUnavailable(e) {
+// admin_day_bundle puuttuu tai kaatuu: vanhat kutsut. 404:ää ei toisteta minuuttiin.
+let bundleMissing = 0;
+function rpcMissing(e) {
   const msg = `${e?.status || ''} ${e?.code || ''} ${e?.message || ''}`;
   return e?.status === 404 || /PGRST202|could not find the function|schema cache/i.test(msg);
 }
+async function loadBundle(date) {
+  if (Date.now() - bundleMissing < 60000) return null;
+  try {
+    const bundle = await rpc('admin_day_bundle', { p_date: date });
+    return bundle && typeof bundle === 'object' ? bundle : null;
+  } catch (e) {
+    if (rpcMissing(e)) bundleMissing = Date.now();
+    return null;
+  }
+}
+// admin_day_extras puuttuu kunnes migraatio booking_68 on ajettu: näytä selite, älä kaada päivänäkymää. 404:ää ei toisteta minuuttiin.
+let extrasMissing = 0;
 async function loadExtras(date) {
   if (Date.now() - extrasMissing < 60000) return null;
   try { return await rpc('admin_day_extras', { p_date: date }); }
-  catch (e) { if (extrasUnavailable(e)) extrasMissing = Date.now(); return null; }
+  catch (e) { if (rpcMissing(e)) extrasMissing = Date.now(); return null; }
 }
 // Tuotto on erillinen pyyntö (booking_69). Sitä ei kutsuta eikä korttia piirretä muille kuin adminille ja managerille.
 // 404: funktiota ei ole vielä ajettu → ylläpitäjä voi käyttää booking_68:n lukuja extras-vastauksesta, kunnes migraatio on kannassa.
@@ -28,7 +40,7 @@ async function loadRevenue(date) {
   if (Date.now() - revenueMissing < 60000) return undefined;
   try { return await rpc('admin_day_revenue', { p_date: date }); }
   catch (e) {
-    if (extrasUnavailable(e)) { revenueMissing = Date.now(); return undefined; }
+    if (rpcMissing(e)) { revenueMissing = Date.now(); return undefined; }
     return null;
   }
 }
@@ -36,16 +48,30 @@ async function loadRevenue(date) {
 export async function render({ ctx, refs, reload, query }) {
   const date = /^\d{4}-\d\d-\d\d$/.test(query.get('d') || '') ? query.get('d') : todayHel();
   const seeMoney = canSeeDayRevenue(ctx.role);
-  const [view, resv, shifts, addonList, optNote, extras, revenueRpc] = await Promise.all([
-    rpc('admin_day_view', { p_date: date }),
-    rpc('admin_list_reservations', { p_from: dayStartIso(date), p_to: dayStartIso(addDays(date, 1)), p_limit: 200 }),
-    shiftsBar(date, ctx.can),   // työvuorot (admin_day_shifts tai admin_upcoming_shifts, vain luku); ei koskaan heitä: puuttuva tieto/oikeus → selitysteksti
-    rpc('admin_list_addons').catch(() => []),   // lisäpalvelun koodi addon_id:llä (ikonin tunnistus, jos admin_day_view ei anna code-kenttää)
-    optionReminder(),   // muistutus: tulevat hoitovaraukset ilman valittua hoitoa (booking_50); null jos ei muistutettavaa
-    loadExtras(date),   // tapahtumat (ja booking_68:ssa myös tuotto); null jos funktiota ei vielä ole
-    seeMoney ? loadRevenue(date) : null,   // tuottoluvut vain admin/manager; muille ei pyyntöä
-    loadDayTexts(rpc),  // ui.admin.day.* site_texts; epäonnistuminen jättää sanakirjan
-  ]);
+  const bundle = await loadBundle(date);
+  let view, resv, addonList, optNote, extras, revenueRpc;
+  if (bundle) {
+    view = bundle.view || { sessions: [], reservations: [], blocks: [], addon_totals: [], prep: [] };
+    resv = bundle.reservations || [];
+    addonList = bundle.addons || [];   // lisäpalvelun koodi addon_id:llä (ikonin tunnistus, jos admin_day_view ei anna code-kenttää)
+    optNote = await optionReminder(Array.isArray(bundle.options) ? bundle.options : null, bundle.site_texts?.texts || []);
+    extras = bundle.extras;   // tapahtumat + tuotto (admin/manager; muilla revenue = null)
+    revenueRpc = undefined;   // extras sisältää tuoton; erillistä admin_day_revenue-kutsua ei tarvita
+    await loadDayTexts(rpc, Array.isArray(bundle.site_texts?.texts) ? bundle.site_texts.texts : null);
+  } else {
+    [view, resv, addonList, optNote, extras, revenueRpc] = await Promise.all([
+      rpc('admin_day_view', { p_date: date }),
+      rpc('admin_list_reservations', { p_from: dayStartIso(date), p_to: dayStartIso(addDays(date, 1)), p_limit: 200 }),
+      rpc('admin_list_addons').catch(() => []),
+      optionReminder(),
+      loadExtras(date),   // tapahtumat (ja booking_68:ssa myös tuotto); null jos funktiota ei vielä ole
+      seeMoney ? loadRevenue(date) : null,   // tuottoluvut vain admin/manager; muille ei pyyntöä
+      loadDayTexts(rpc),  // ui.admin.day.* site_texts; epäonnistuminen jättää sanakirjan
+    ]);
+  }
+  // Nipun työvuorot tulevat admin_day_shifts-funktiosta (kaikille henkilöstölle, scope all).
+  // Ilman nippua shiftsBar hakee itse: admin_day_shifts tai oikeuden mukainen admin_upcoming_shifts (own/all).
+  const shifts = await shiftsBar(date, ctx.can, bundle && Array.isArray(bundle.shifts) ? { rows: bundle.shifts, scope: 'all', why: null } : null);
   const codes = new Map((addonList || []).map((a) => [a.id, a.code]));
   const go = (d) => { location.hash = `#/?d=${d}`; };
   const toolbar = h('div', { class: 'toolbar' },

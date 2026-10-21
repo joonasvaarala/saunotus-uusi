@@ -100,13 +100,11 @@ async function enter() {
   $('login-screen').hidden = !!s; $('shell').hidden = !s;
   if (!s) return;
   try {
-    const role = await rpc('current_staff_role');
+    const [role, me] = await Promise.all([rpc('current_staff_role'), rpc('admin_my_permissions'), loadFilterTexts(rpc)]);
     if (!role) { signOut(); showLogin('Tällä tunnuksella ei ole oikeutta hallintaan (ei henkilökuntaa).'); return; }
-    const me = await rpc('admin_my_permissions');
     ctx.role = role; ctx.name = s.user?.email || ''; ctx.perms = me?.permissions || []; ctx.roleLabel = me?.role_label || role;
     $('who').textContent = MOCK ? 'Kokeilutila: esimerkkidata, mikään ei tallennu' : `${ctx.name} · ${ctx.roleLabel}`;
     document.body.dataset.role = role;
-    await loadFilterTexts(rpc);
     route();
   } catch (e) { signOut(); showLogin(errMsg(e)); }
 }
