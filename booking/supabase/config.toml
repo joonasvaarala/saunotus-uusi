@@ -37,3 +37,8 @@ verify_jwt = false   # pg_cron kutsuu; tunnistus x-sync-secret (booking._cron_se
 # Varauskalenterin vienti (booking_114). Samat salaisuudet kuin booking-closure-sync: GOOGLE_SERVICE_ACCOUNT_JSON, SYNC_CRON_SECRET. Ei uusia salaisuuksia tähän.
 [functions.booking-calendar-sync]
 verify_jwt = false   # pg_cron kutsuu; tunnistus x-sync-secret. Ei JWT:tä. Oletustila off ei kirjoita kalenteriin.
+
+# Työvuorojen DB-first -synkka (calendar-sync v2). Samat salaisuudet kuin calendar-sync: GOOGLE_SERVICE_ACCOUNT_JSON, SYNC_CRON_SECRET.
+# Kirjoitus Googleen vain kun pyyntö sallii ja shift_sync_config.db_first_enabled && push_enabled. Oletus ei kirjoita. Ei deployata tästä haarasta.
+[functions.calendar-sync-v2]
+verify_jwt = false   # pg_cron kutsuu; tunnistus x-sync-secret. Ei JWT:tä.
