@@ -3,7 +3,7 @@
 // data = booking.email_outbox_claim()-rivi (ks. docs/talous-integraatiot.md): { kind, locale, to_name, order{order_no, order_url, total, items[], reservations[]}, receipt{receipt_no, kind, text_body, total, issued_at}, payment{amount, link_url, link_expires_at} }.
 // FI + EN, HTML (taulukkopohjainen, inline-tyylit, sähköpostiyhteensopiva) + tekstiversio. Ei ulkoisia riippuvuuksia (puhdas funktio, testattu node --test).
 // Tyyli: tumma vihreä + hiekka, ei sinistä. Logo: sivuston /img/logo-kuitti.png (osoite johdetaan tilauslinkistä; muuten LOGO_FALLBACK).
-export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify" | "invoice_pdf";
+export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify" | "invoice_pdf" | "product_message";
 export interface Rendered { subject: string; text: string; html: string }
 // Asiakasnäkyvät tekstit: texts.ts (repon oletukset = varateksti) tai tietokannasta (email.*-avaimet, _shared/site_texts.ts). render() ottaa valinnaisen tekstihaun (4. parametri).
 import { makeT, type TFn } from "../_shared/site_texts.ts";
@@ -28,6 +28,19 @@ const FONT = "Georgia,'Times New Roman',serif", SANS = "Arial,Helvetica,sans-ser
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 /** Tarjouspyynnön ilmoituksessa reply-to on asiakkaan osoite, jotta siihen voi vastata suoraan. Muissa lajeissa käytetään Resendin yhteistä reply_to-asetusta. */
+/** Tuoteviestiä ei lähetetä, jos pohja on pois päältä, tilaus on peruttu tai hyvitetty, tai teksti on tyhjä. null = saa renderöidä. Allowlistia tämä ei koske. */
+export function productMessageBlock(row: { kind?: string; order?: { status?: unknown }; product_message?: { active?: unknown; category?: unknown; marketing_consent?: unknown; order_status?: unknown; payment_status?: unknown; subject?: unknown; text?: unknown } } | null | undefined): string | null {
+  if (row?.kind !== "product_message") return null;
+  const pm = row.product_message || {};
+  const st = String(pm.order_status || row.order?.status || "");
+  const pay = String(pm.payment_status || "");
+  if (pm.active === false) return "tuoteviesti ei ole käytössä";
+  if (["cancelled", "expired", "draft"].includes(st)) return "tilaus ei ole lähetettävissä";
+  if (pay === "refunded") return "tilaus on hyvitetty";
+  if (pm.category === "after_marketing" && pm.marketing_consent !== true) return "ei markkinointilupaa";
+  if (!String(pm.subject || "").trim() && !String(pm.text || "").trim()) return "tuoteviesti on tyhjä";
+  return null;
+}
 export function outboundReplyTo(kind: string, row: { reply_to?: unknown; quote?: { email?: unknown } } | null | undefined, globalReply?: string | null): string | undefined {
   if (kind === "business_quote_notify") {
     for (const raw of [row?.reply_to, row?.quote?.email]) {
@@ -115,6 +128,19 @@ function orderBlock(d: any, en: boolean, X: X): Block {
 }
 
 const textBlock = (...parts: (string | undefined | false)[]) => parts.filter((x) => typeof x === "string" && x !== "").join("\n\n");
+function instructionNotes(list: unknown, title: string): { text: string; html: string } {
+  const rows = (Array.isArray(list) ? list : []).map((row) => {
+    const item = row as { title?: unknown; text?: unknown };
+    const text = String(item?.text ?? "").trim();
+    const head = String(item?.title ?? "").trim();
+    return text ? { head, text } : null;
+  }).filter((row): row is { head: string; text: string } => !!row);
+  if (!rows.length) return { text: "", html: "" };
+  const text = [title, ...rows.map((row) => [row.head, row.text].filter(Boolean).join("\n"))].join("\n\n");
+  const html = box(`<span style="font-family:${SANS};font-size:12px;color:${MUTED};text-transform:uppercase;letter-spacing:.04em">${esc(title)}</span><br><br>`
+    + rows.map((row) => `<span style="font-family:${SANS};font-size:14px;line-height:1.5;color:${INK}">${row.head ? `<b>${esc(row.head)}</b><br>` : ""}${esc(row.text).replace(/\n/g, "<br>")}</span>`).join("<br><br>"));
+  return { text, html };
+}
 
 
 // ---------- lahjakortit (gift_card_buyer / gift_card_recipient) ----------
@@ -318,8 +344,23 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const intro = X("email.order_confirmation.intro");
       const more = X("email.order_confirmation.more");
       const title = X("email.order_confirmation.title");
-      const text = textBlock(hello, intro, ob.text, orderUrl && `${more}\n${orderUrl}`, contact, sign) + "\n";
-      const html = mk(title, intro, h1(title) + helloRow + p(esc(intro)) + ob.html + (orderUrl ? p(esc(more)) + button(orderUrl, viewLabel) : "") + tail);
+      const notes = instructionNotes(d?.order?.instructions, X("email.order_confirmation.instructions_title"));
+      const text = textBlock(hello, intro, ob.text, notes.text, orderUrl && `${more}\n${orderUrl}`, contact, sign) + "\n";
+      const html = mk(title, intro, h1(title) + helloRow + p(esc(intro)) + ob.html + notes.html + (orderUrl ? p(esc(more)) + button(orderUrl, viewLabel) : "") + tail);
+      return { subject, text, html };
+    }
+    case "product_message": {
+      const pm = d?.product_message || {};
+      const subject = String(pm.subject || "").replace(/[<>]/g, "").replace(/\s+/g, " ").trim() || X("email.product_message.subject_fallback", { no });
+      const body = String(pm.text || "").trim();
+      const rawLink = String(pm.link_url || "").trim();
+      const link = /^https:\/\/\S+$/.test(rawLink) ? rawLink : "";
+      const linkLabel = X("email.product_message.open_link");
+      const rawUnsub = pm.category === "after_marketing" ? String(pm.unsubscribe_url || "").trim() : "";
+      const unsub = /^https:\/\/\S+$/.test(rawUnsub) ? rawUnsub : "";
+      const unsubLabel = unsub ? X("email.product_message.unsubscribe") : "";
+      const text = textBlock(hello, body, link, orderUrl && `${viewLabel}:\n${orderUrl}`, unsub && `${unsubLabel}\n${unsub}`, contact, sign) + "\n";
+      const html = mk(subject, body.slice(0, 140) || subject, h1(subject) + helloRow + (body ? p(esc(body).replace(/\n/g, "<br>")) : "") + (link ? button(link, linkLabel) : "") + (orderUrl ? button(orderUrl, viewLabel) : "") + (unsub ? p(`<a href="${esc(unsub)}" style="color:${MUTED};font-size:13px">${esc(unsubLabel)}</a>`, `color:${MUTED};font-size:13px`) : "") + tail);
       return { subject, text, html };
     }
     case "payment_link": {

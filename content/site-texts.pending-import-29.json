@@ -1,0 +1,286 @@
+[
+ {
+  "key": "ui.order.guide_title",
+  "lang": "fi",
+  "text": "Ohjeet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.guide_show",
+  "lang": "fi",
+  "text": "Näytä ohjeet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.guide_hide",
+  "lang": "fi",
+  "text": "Piilota ohjeet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.guide_lead",
+  "lang": "fi",
+  "text": "Tässä ovat tilauksen tuotteiden ohjeet. Avaa ne napista.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.guide_link",
+  "lang": "fi",
+  "text": "Avaa linkki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.treat_lead",
+  "lang": "fi",
+  "text": "Lisäpalvelun voi lisätä tähän tilaukseen valinnasta. Uuden käynnin aika valitaan varauskalenterissa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.guide_title",
+  "lang": "en",
+  "text": "Instructions",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.guide_show",
+  "lang": "en",
+  "text": "Show instructions",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.guide_hide",
+  "lang": "en",
+  "text": "Hide instructions",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.guide_lead",
+  "lang": "en",
+  "text": "These are the instructions for the products in your order. Open them with the button.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.guide_link",
+  "lang": "en",
+  "text": "Open the link",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.treat_lead",
+  "lang": "en",
+  "text": "An add-on can be added to this order from the selector. A time for a new visit is chosen in the booking calendar.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.unsub_title",
+  "lang": "fi",
+  "text": "Markkinointiviestit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.unsub_title",
+  "lang": "en",
+  "text": "Marketing messages",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.unsub_done",
+  "lang": "fi",
+  "text": "Markkinointiviestit on peruttu. Ohjeet ja palautepyynnöt voivat silti tulla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.unsub_done",
+  "lang": "en",
+  "text": "Marketing messages are stopped. Instructions and feedback requests may still be sent.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.unsub_missing",
+  "lang": "fi",
+  "text": "Linkki ei kelpaa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.unsub_missing",
+  "lang": "en",
+  "text": "This link is not valid.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.unsub_error",
+  "lang": "fi",
+  "text": "Peruutus ei onnistunut. Yritä hetken kuluttua uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.unsub_error",
+  "lang": "en",
+  "text": "Could not unsubscribe. Please try again in a moment.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.order_confirmation.instructions_title",
+  "lang": "fi",
+  "text": "Ohje",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.order_confirmation.instructions_title",
+  "lang": "en",
+  "text": "Instructions",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.product_message.subject_fallback",
+  "lang": "fi",
+  "text": "Viesti tilaukseen {{var:no}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.product_message.subject_fallback",
+  "lang": "en",
+  "text": "A message about order {{var:no}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.product_message.open_link",
+  "lang": "fi",
+  "text": "Avaa linkki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.product_message.open_link",
+  "lang": "en",
+  "text": "Open the link",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.product_message.unsubscribe",
+  "lang": "fi",
+  "text": "Peruuta markkinointiviestit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.product_message.unsubscribe",
+  "lang": "en",
+  "text": "Unsubscribe from marketing messages",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ }
+]

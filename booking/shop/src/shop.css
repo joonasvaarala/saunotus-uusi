@@ -239,6 +239,11 @@ a.bk-sd:hover{filter:brightness(.97)}
 
 /* ---- asiakkaan tilaussivu (/tilaus/) ---- */
 .ord{display:grid;gap:16px;max-width:720px;margin-inline:auto}
+.ord-extra{display:grid;gap:16px;align-items:start}
+@media(min-width:700px){.ord-extra{grid-template-columns:1fr 1fr}}
+.ord-guide-text{white-space:pre-wrap;margin:0 0 8px}
+.ord-guide + .ord-guide{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+#order-app .ord-btn,[data-testid=guide-toggle]{min-height:44px}
 .ord-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px}
 .ord-card h2,.ord-card h3{margin:0 0 8px}
 .ord-badges{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 8px}

@@ -82,6 +82,7 @@ test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-shop.mjs 
   const extra = new Set([
     ...J('content/site-texts.imported-pr71.json').map((r) => `${r.key}|${r.lang}`),
     ...J('content/site-texts.pending-import-28.json').filter((r) => r.key.startsWith('ui.vismapay.')).map((r) => `${r.key}|${r.lang}`),
+    ...J('content/site-texts.pending-import-29.json').filter((r) => r.key.startsWith('ui.order.')).map((r) => `${r.key}|${r.lang}`),
   ]);
   const imp = new Set(PENDING.map((r) => r.key));
   writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts.filter((r) => !imp.has(r.key)) }));   // tuotanto ennen #61:n tuontia
@@ -101,7 +102,8 @@ test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet ava
   assert.equal(r.status, 0, r.stderr);
   const rows = JSON.parse(readFileSync(out, 'utf8'));
   const vismaRows = R.collectDefaults().filter((r) => r.id === 'VT');
-  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length);
+  const msgOrder = J('content/site-texts.pending-import-29.json').filter((r) => r.key.startsWith('ui.order.'));
+  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length);
   assert.ok(!rows.some((x) => haveKeys.has(x.key)));
   for (const e of extraRows) assert.ok(!rows.some((x) => x.key === e.key), `${e.key}: jo tuotannossa, generaattori ei lisää`);
   const bad = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', join(work, 'ei-ole.json')], { encoding: 'utf8' });
