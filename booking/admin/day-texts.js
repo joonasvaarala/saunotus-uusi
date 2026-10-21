@@ -72,7 +72,9 @@ export async function loadDayTexts(rpcFn, rows = null) {
   if (typeof rpcFn !== 'function') return false;
   try {
     const t = await rpcFn('public_get_site_texts', { p_lang: null });
-    return primeDayTexts(t?.texts);
+    if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
+    if (!t.texts.length) { db = new Map(); loaded = true; return true; }
+    return primeDayTexts(t.texts);
   } catch {
     return false;
   }

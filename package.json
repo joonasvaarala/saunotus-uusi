@@ -23,7 +23,6 @@
     "texts:sync": "node scripts/site-texts-sync.mjs"
   },
   "devDependencies": {
-    "esbuild": "^0.28.2",
     "sharp": "^0.33.5"
   }
 }

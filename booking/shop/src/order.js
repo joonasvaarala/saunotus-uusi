@@ -100,12 +100,9 @@ async function main() {
   const gapi = createGiftApi({ rpc: api.mock ? api.rpc : rpc, mock: false });
   const gift = { redeem: false, cards: [], claims: [] };
   async function loadGift() {
-    const [pk, oc, vc] = await Promise.all([
-      gapi.packages().catch(() => null),
-      gapi.orderCards(token).catch(() => null),
-      gapi.orderClaims(token).catch(() => null),
-    ]);
+    const [pk, oc] = await Promise.all([gapi.packages().catch(() => null), gapi.orderCards(token).catch(() => null)]);
     gift.redeem = !!(pk?.ok && pk.redeem_enabled);
+    const vc = gift.redeem ? await gapi.orderClaims(token).catch(() => null) : null;   // pyyntöjä haetaan vain kun lunastus on käytössä (muuten ei ylimääräistä RPC-kutsua)
     gift.cards = oc?.ok && Array.isArray(oc.cards) ? oc.cards : [];
     gift.claims = vc?.ok && Array.isArray(vc.claims) ? vc.claims : [];   // kumppanilahjakortit (§13.12): puuttuva RPC / virhe → ei osiota
   }
