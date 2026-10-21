@@ -1,0 +1,22 @@
+[
+ {
+  "key": "ui.admin.day.gift_card_badge",
+  "lang": "fi",
+  "text": "Lahjakortti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "Hallinnan päivänäkymä: lahjakortilla tehdyn varauksen merkki vuoron varauslistassa. FI+EN. Ei migraatiota."
+ },
+ {
+  "key": "ui.admin.day.gift_card_badge",
+  "lang": "en",
+  "text": "Gift card",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "Hallinnan päivänäkymä: lahjakortilla tehdyn varauksen merkki vuoron varauslistassa. FI+EN. Ei migraatiota."
+ }
+]

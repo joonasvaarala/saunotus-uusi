@@ -7,7 +7,7 @@ import { capacityButton, arrivalButton, addonItems, shiftsBar, prepCard } from '
 import { legsList, resourceBadges, spaceBadge } from './legs.js';
 import { optionBadge, optionReminder } from '../options.js';
 import { blockList, blockDialog } from './blocks.js';
-import { assignDayCards, canSeeDayRevenue, eventSortIso, eventTimeLabel, revenueView } from '../day-logic.js';
+import { assignDayCards, canSeeDayRevenue, eventSortIso, eventTimeLabel, revenueView, isGiftCardReservation, slotTitle, sumPersons } from '../day-logic.js';
 import { dayLang, dayText, loadDayTexts } from '../day-texts.js';
 
 // admin_day_extras puuttuu kunnes migraatio booking_68 on ajettu: näytä selite, älä kaada päivänäkymää. 404:ää ei toisteta minuuttiin.
@@ -63,6 +63,8 @@ export async function render({ ctx, refs, reload, query }) {
   const active = rows.filter((r) => ACTIVE.includes(r.status));
   const RES_KEYS = ['lifecycle', 'space_code', 'legs', 'quota_exempt', 'override_reason', 'claim_offset_min', 'claim_minutes', 'parent_reservation_id', 'therapist_missing', 'therapist_missing_open', 'therapist_exception_at', 'therapist_exception_note', 'option', 'option_missing'];
   const merged = (r) => { const x = dv.get(r.reservation_id) || {}; const m = { ...r, source: r.source ?? x.source, external_id: r.external_id ?? x.external_id }; for (const k of RES_KEYS) if (x[k] !== undefined) m[k] = x[k]; return m; };
+  // Lahjakorttivaraus listataan tavallisen vuoron alle; pieni "Lahjakortti"-merkki (ui.admin.day.gift_card_badge, §18). Johku-merkki ennallaan.
+  const giftBadge = (r, x) => (isGiftCardReservation(r) || isGiftCardReservation(x) ? h('span', { class: 'badge gift', 'data-testid': 'gift-badge', text: dayText('ui.admin.day.gift_card_badge') }) : null);
   const open = (r) => reservationDialog(merged(r), { methods: refs.methods, onChange: reload, refs, can: ctx.can });
   const resRow = (r) => { const x = dv.get(r.reservation_id) || {}; const ad = (x.addons && x.addons.length) ? x.addons : (r.addons || []); const src = { source: r.source ?? x.source, external_id: r.external_id ?? x.external_id };
     const kind = x.customer_kind || r.customer_kind; const company = x.company || r.company; const legs = (x.legs && x.legs.length) ? x.legs : (r.legs || []); const space = x.space_code || r.space_code;
@@ -72,9 +74,8 @@ export async function render({ ctx, refs, reload, query }) {
     h('div', { class: 'resmain' }, h('button', { type: 'button', class: 'link', onclick: () => open(r) }, h('strong', { text: r.customer_name || '–' }), ` · ${r.persons} hlö`, kind === 'company' ? [' ', badge('warn', 'Yritys'), company ? ` ${company}` : ''] : null,
       (legs.length > 1 || (space && space !== 'savusauna')) ? legsList(legs, refs) : null),
     ad.length ? h('div', { class: 'addon-mark' }, addonItems(ad, codes)) : null,
-    h('span', { class: 'meta' }, optionBadge(x.option !== undefined ? x : r), spaceBadge(x, refs), resourceBadges(x), sourceBadge(src), stBadge, payBadge(r.payment_status), r.hold_expires_at ? badge('muted', `pito ${fmtTime(r.hold_expires_at)}`) : null, ` #${r.order_no}`)),
+    h('span', { class: 'meta' }, optionBadge(x.option !== undefined ? x : r), spaceBadge(x, refs), resourceBadges(x), sourceBadge(src), giftBadge(r, x), stBadge, payBadge(r.payment_status), r.hold_expires_at ? badge('muted', `pito ${fmtTime(r.hold_expires_at)}`) : null, ` #${r.order_no}`)),
     arrive); };
-  const sumPersons = (list) => list.reduce((a, r) => a + r.persons, 0);
   const card = ({ s, mine }) => {
     const booked = sumPersons(mine);
     const prod = refs.productById.get(s.product_id);
@@ -86,7 +87,7 @@ export async function render({ ctx, refs, reload, query }) {
   };
   const slotCard = (list) => { const r0 = list[0];
     return h('section', { class: 'card session slot', 'data-testid': 'slot', 'data-start': r0.starts_at },
-      h('header', {}, h('strong', { class: 'time', text: `${fmtTime(r0.starts_at)}–${fmtTime(r0.ends_at)}` }), h('span', { class: 'ttl', text: r0.product_name || refs.productById.get(r0.product_id)?.name || 'Varaus' }),
+      h('header', {}, h('strong', { class: 'time', text: `${fmtTime(r0.starts_at)}–${fmtTime(r0.ends_at)}` }), h('span', { class: 'ttl', text: slotTitle(list, refs.productById.get(r0.product_id)?.name) || 'Varaus' }),
         h('span', { class: 'hdr-right' }, h('span', { class: 'cnt', 'data-testid': 'session-persons', text: `${sumPersons(list)} hlö` }))),
       h('ul', { class: 'reslist' }, list.map(resRow))); };
   // Tapahtumat (kb.event_dates) samalla kortilla kuin vuorot. Osallistuja ei toistu slotissa. Ilman kelloa kortti menee päivän loppuun.

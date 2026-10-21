@@ -155,8 +155,31 @@ function shortestSession(list) {
   })[0];
 }
 
+// Lahjakortilla tehty varaus (Johku-tuonti: tilausrivin nimi "Yleinen vuoro - Lahjakorttivaraus", Johku-tuote 119).
+// Tuonti kirjasi rivin tuotteelle 1 (Yleinen vuoro) viikonpäivästä riippumatta ja usein 30 min saapumisikkunana.
+// Varaus on silti samassa kapasiteettipoolissa kuin sen hetken tavallinen vuoro, joten se kuuluu sen vuoron alle.
+const GIFT_SUFFIX = /\s*[-–—]\s*(?:lahjakorttivaraus|gift card (?:booking|reservation))\s*$/i;
+export function isGiftCardReservation(r) {
+  if (!r) return false;
+  if (r.gift_card === true || r.is_gift_card === true) return true;
+  return GIFT_SUFFIX.test(String(r.product_name || ''));
+}
+
+// Tuotteen nimi ilman "- Lahjakorttivaraus"-liitettä (tuotteen oikea nimi).
+export function cleanProductName(name) {
+  return String(name || '').replace(GIFT_SUFFIX, '').trim();
+}
+
+// Normalisoitu ryhmittelyavain: Helsingin päivä + alku + loppu (hetkinä, ei merkkijonoina) + tuote.
+export function dayGroupKey(r) {
+  const start = instantMs(r?.starts_at);
+  const end = instantMs(r?.ends_at);
+  return [start == null ? '' : helsinkiDate(r.starts_at), start ?? String(r?.starts_at ?? ''), end ?? String(r?.ends_at ?? ''), r?.product_id ?? ''].join('|');
+}
+
 // Samaan aikaan alkavat säännöt (eri ends_at) eivät jaa samaa varausta.
 // rule_id jos se on, muuten tarkka alku+loppu, muuten yksi kortti: lyhin samaan aikaan alkava vuoro.
+// Lahjakorttivaraus: jos saman tuotteen vuoroa ei ole, samaan aikaan alkava tavallinen yhteisvuoro (mode shared).
 function sessionForReservation(reservation, sessions) {
   const sameProduct = sessions.filter((s) => sameId(s.product_id, reservation.product_id));
   if (reservation.rule_id != null && reservation.rule_id !== '') {
@@ -167,6 +190,12 @@ function sessionForReservation(reservation, sessions) {
   if (bySpan.length) return shortestSession(bySpan);
   const byStart = sameProduct.filter((s) => sameInstant(s.starts_at, reservation.starts_at));
   if (byStart.length) return shortestSession(byStart);
+  if (isGiftCardReservation(reservation)) {
+    const shared = sessions.filter((s) => s.mode === 'shared' && sameInstant(s.starts_at, reservation.starts_at));
+    const sharedSpan = shared.filter((s) => sameInstant(s.ends_at, reservation.ends_at));
+    if (sharedSpan.length) return shortestSession(sharedSpan);
+    if (shared.length) return shortestSession(shared);
+  }
   return null;
 }
 
@@ -175,7 +204,16 @@ function sessionForReservation(reservation, sessions) {
 // Jokainen varaus kuuluu enintään yhteen vuorokorttiin. Tyhjä unavailable/closed -kortti pysyy piilossa.
 export function assignDayCards({ sessions, reservations, events, date }) {
   const list = sessions || [];
-  const active = (reservations || []).filter((r) => ACTIVE_STATUSES.includes(r.status));
+  // Sama varaus kahdesti syötteessä (esim. lista + päivänäkymä) lasketaan vain kerran.
+  const seen = new Set();
+  const active = (reservations || []).filter((r) => {
+    if (!r || !ACTIVE_STATUSES.includes(r.status)) return false;
+    if (r.reservation_id == null) return true;
+    const id = String(r.reservation_id);
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
   const eventCards = eventsOnDay(events, date).map((event) => ({
     event,
     participants: (event.participants || []).filter((p) => ACTIVE_STATUSES.includes(p.status)),
@@ -197,15 +235,30 @@ export function assignDayCards({ sessions, reservations, events, date }) {
   const slotMap = new Map();
   for (const r of active) {
     if (used.has(r.reservation_id)) continue;
-    const k = `${r.starts_at}|${r.product_id}`;
+    const k = dayGroupKey(r);   // lahjakorttivaraus samaan ryhmään kuin saman tuotteen tavallinen varaus
     if (!slotMap.has(k)) slotMap.set(k, []);
     slotMap.get(k).push(r);
   }
-  const slots = [...slotMap.values()];
+  const slots = [...slotMap.values()].map((g) => g.slice().sort((a, b) => Number(isGiftCardReservation(a)) - Number(isGiftCardReservation(b))));
   return {
     sessions: sessionCards,
     events: eventCards,
     slots,
     empty: sessionCards.length + eventCards.length + slots.length === 0,
   };
+}
+
+// Slot-ryhmän otsikko: tuotteen oikea nimi (kb), muuten tilausrivin nimi ilman "- Lahjakorttivaraus"-liitettä.
+export function slotTitle(list, productName) {
+  const own = String(productName || '').trim();
+  if (own) return own;
+  const plain = (list || []).find((r) => r && !isGiftCardReservation(r) && r.product_name);
+  if (plain) return plain.product_name;
+  const first = (list || []).find((r) => r && r.product_name);
+  return first ? cleanProductName(first.product_name) : '';
+}
+
+// Vuoron henkilömäärä: kaikki kortin varaukset (myös lahjakorttivaraukset) kerran. Vapaana tulee palvelimelta (pooli), ei lasketa tässä.
+export function sumPersons(list) {
+  return (list || []).reduce((a, r) => a + Math.max(0, Number(r?.persons) || 0), 0);
 }

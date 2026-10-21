@@ -10,7 +10,7 @@ import { roleLabel, shiftClass, NO_ASSIGNEE } from './calendar.js';
 export const newBookingHref = (date, s) => `#/uusi?d=${date}&r=${s.rule_id}&t=${encodeURIComponent(s.starts_at)}`;
 export function capacityButton(s, date, booked) {
   if (s.status === 'available') {
-    const txt = s.mode === 'exclusive' ? 'Vapaa' : `Vapaana: ${s.remaining}`;
+    const txt = s.mode === 'exclusive' ? 'Vapaa' : `Vapaana: ${s.remaining == null ? '' : Math.max(0, Number(s.remaining) || 0)}`;   // palvelimen poolilaskenta (sis. lahjakorttivaraukset); ei koskaan negatiivinen
     return h('a', { class: 'btn cap ok', href: newBookingHref(date, s), 'data-testid': 'cap-btn', 'aria-label': `${txt}. Uusi varaus klo ${new Date(s.starts_at).toLocaleTimeString('fi-FI', { timeZone: 'Europe/Helsinki', hour: '2-digit', minute: '2-digit' })}` }, txt);
   }
   if (s.status === 'full') return h('span', { class: 'btn cap full', role: 'status', 'data-testid': 'cap-full' }, s.mode === 'exclusive' ? 'Varattu' : 'Täynnä');

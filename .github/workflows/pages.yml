@@ -61,6 +61,8 @@ jobs:
       - run: node --test booking/tests/hoito-valitsematta.test.mjs
       # hallinnan päivänäkymä: päivän tuotto (käyntipäivä, brutto, perutut pois) ja tapahtumien sijoittelu
       - run: node --test booking/tests/paivanakyma-tuotto.test.mjs
+      # päivänäkymä: lahjakorttivaraus tavallisen vuoron alle (normalisoitu avain), henkilömäärä, Johku- ja Lahjakortti-merkit, pending-import-32
+      - run: node --test booking/tests/lahjakorttivaraus-paiva.test.mjs
       # Tarkista: sulkukonfliktin kuittaus (booking_73) ei muuta saatavuutta; tekstit ui.admin.review.*
       - run: node --test booking/tests/sulkukonflikti-kuittaus.test.mjs
       # kassan 15 min paikanpito (§17, booking_53/54): tekstit, tilat, palvelinaikalaskuri, virhekoodit, mock-moottori, migraatiot mukana
