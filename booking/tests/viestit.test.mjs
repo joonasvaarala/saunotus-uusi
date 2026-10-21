@@ -85,7 +85,7 @@ test('paikkamerkit ja lomake', () => {
 
 test('pending-import-29: tilaussivun ja sähköpostin kiinteät tekstit', () => {
   const seen = new Set();
-  assert.equal(pending.length, 18);
+  assert.equal(pending.length, 28);
   for (const r of pending) {
     const w = `${r.key} [${r.lang}]`;
     assert.match(r.key, KEY_RE, w);
@@ -101,7 +101,7 @@ test('pending-import-29: tilaussivun ja sähköpostin kiinteät tekstit', () => 
     assert.ok(!seen.has(`${r.key}|${r.lang}`), w);
     seen.add(`${r.key}|${r.lang}`);
   }
-  const keys = ['guide_title', 'guide_show', 'guide_hide', 'guide_lead', 'guide_link', 'treat_lead'];
+  const keys = ['guide_title', 'guide_show', 'guide_hide', 'guide_lead', 'guide_link', 'treat_lead', 'unsub_title', 'unsub_done', 'unsub_missing', 'unsub_error'];
   for (const row of collectDefaults().filter((r) => r.id === 'OT' && keys.some((k) => r.key === `ui.order.${k}`))) {
     const got = pending.find((r) => r.key === row.key && r.lang === row.lang);
     assert.ok(got, row.key);
@@ -126,8 +126,14 @@ test('migraatio ja hallinta', () => {
   assert.match(read('booking/admin/admin.js'), /messages\.edit/);
   assert.match(read('booking/admin/views/messages.js'), /Näytä ohjeet/);
   assert.match(read('booking/admin/views/messages.js'), /data-testid': 'messages-timed'/);
+  assert.match(migration, /v_cat is null or v_cat not in/);
+  assert.match(migration, /v_unit is null or v_unit not in/);
+  assert.match(migration, /no_consent/);
+  assert.match(migration, /public_marketing_unsubscribe/);
   assert.match(read('booking/shop/src/order.js'), /guide-toggle/);
   assert.match(read('booking/shop/src/order.js'), /upsell-treatments/);
+  assert.match(read('booking/shop/src/order.js'), /public_marketing_unsubscribe/);
+  assert.match(read('.github/workflows/pages.yml'), /booking\/tests\/viestit\.test\.mjs/);
   const allow = sendIndex.indexOf('const blocked = outboxAllowlistBlock');
   const skip = sendIndex.indexOf('const pmBlock = productMessageBlock');
   assert.ok(allow > 0 && skip > allow);
@@ -135,7 +141,7 @@ test('migraatio ja hallinta', () => {
 
 test('vahvistus ja tuoteviesti', { skip: skipTs }, async () => {
   const { EMAIL_TEXTS } = await import(pathToFileURL(join(root, 'booking/supabase/functions/send-emails/texts.ts')).href);
-  for (const key of ['email.order_confirmation.instructions_title', 'email.product_message.subject_fallback', 'email.product_message.open_link']) {
+  for (const key of ['email.order_confirmation.instructions_title', 'email.product_message.subject_fallback', 'email.product_message.open_link', 'email.product_message.unsubscribe']) {
     for (const lang of ['fi', 'en']) {
       const got = pending.find((r) => r.key === key && r.lang === lang);
       assert.equal(got.text, EMAIL_TEXTS[key][lang], key);
@@ -170,6 +176,19 @@ test('vahvistus ja tuoteviesti', { skip: skipTs }, async () => {
   assert.equal(templates.productMessageBlock({ kind: 'product_message', order: { status: 'cancelled' }, product_message: { active: true, subject: 'A', text: 'B' } }), 'tilaus ei ole lähetettävissä');
   assert.equal(templates.productMessageBlock({ kind: 'product_message', product_message: { active: true, subject: 'A', text: 'B', payment_status: 'refunded', order_status: 'confirmed' } }), 'tilaus on hyvitetty');
   assert.equal(templates.productMessageBlock({ kind: 'order_confirmation' }), null);
+  assert.equal(templates.productMessageBlock({ kind: 'product_message', product_message: { active: true, category: 'after_marketing', marketing_consent: false, subject: 'A', text: 'B', order_status: 'confirmed' } }), 'ei markkinointilupaa');
+  assert.equal(templates.productMessageBlock({ kind: 'product_message', product_message: { active: true, category: 'feedback', marketing_consent: false, subject: 'A', text: 'B', order_status: 'confirmed' } }), null);
+  const marketed = templates.render('product_message', {
+    locale: 'fi', to_name: 'Aada', order,
+    product_message: { category: 'after_marketing', subject: 'Kuulumisia', text: 'Hei', marketing_consent: true, unsubscribe_url: 'https://example.test/tilaus/?u=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c' },
+  }, 'fi');
+  assert.ok(marketed.text.includes('Peruuta markkinointiviestit'));
+  assert.ok(marketed.html.includes('https://example.test/tilaus/?u=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c'));
+  const service = templates.render('product_message', {
+    locale: 'fi', to_name: 'Aada', order,
+    product_message: { category: 'feedback', subject: 'Palaute', text: 'Kerro', unsubscribe_url: 'https://example.test/tilaus/?u=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c' },
+  }, 'fi');
+  assert.equal(service.text.includes('Peruuta markkinointiviestit'), false);
   const httpLink = templates.render('product_message', {
     locale: 'en', to_name: 'Ann', order, product_message: { subject: 'Hello', text: 'Body', link_url: 'http://example.test/x' },
   }, 'en');

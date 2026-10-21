@@ -238,21 +238,29 @@ declare
   v_vars jsonb;
   v_body text;
   v_subject text;
+  v_unsub text;
+  v_token uuid;
+  v_consent boolean := false;
 begin
   select * into e from booking.email_outbox where id = p_outbox_id;
   if not found then return jsonb_build_object('active', false); end if;
   select * into m from booking.messages where id = nullif(e.payload ->> 'message_id', '')::bigint;
   select * into o from booking.orders where id = e.order_id;
+  if o.customer_id is not null then
+    select cu.unsubscribe_token, cu.marketing_consent into v_token, v_consent
+      from booking.customers cu where cu.id = o.customer_id;
+  end if;
   v_loc := case when coalesce(nullif(e.locale, ''), o.locale, 'fi') = 'en' then 'en' else 'fi' end;
   if m.id is null then
     return jsonb_build_object('active', false, 'order_status', o.status, 'payment_status', o.payment_status);
   end if;
   v_vars := booking._message_vars(o.id, m.id, v_loc);
   v_subject := booking._message_fill(coalesce(booking._message_pick(m.subject_fi, m.subject_en, v_loc), ''), v_vars);
-  if m.category = 'instruction' then
-    v_body := booking._message_fill(coalesce(booking._message_pick(m.body_fi, m.body_en, v_loc), ''), v_vars);
-  else
-    v_body := booking._message_fill(coalesce(booking._message_pick(m.body_fi, m.body_en, v_loc), ''), v_vars);
+  v_body := booking._message_fill(coalesce(booking._message_pick(m.body_fi, m.body_en, v_loc), ''), v_vars);
+  if m.category = 'after_marketing' and v_token is not null then
+    v_unsub := coalesce(booking._setting('site_base_url') #>> '{}', '')
+      || case when v_loc = 'en' then '/en/order/' else coalesce(booking._setting('order_page_path') #>> '{}', '/tilaus/') end
+      || '?u=' || v_token::text;
   end if;
   return jsonb_build_object(
     'id', m.id,
@@ -261,6 +269,8 @@ begin
     'subject', v_subject,
     'text', v_body,
     'link_url', case when m.link_url ~ '^https://[^[:space:]]+$' then m.link_url end,
+    'unsubscribe_url', case when v_unsub ~ '^https://[^[:space:]]+$' then v_unsub end,
+    'marketing_consent', case when m.category = 'after_marketing' then coalesce(v_consent, false) else true end,
     'order_status', o.status,
     'payment_status', o.payment_status);
 end $$;
@@ -317,7 +327,7 @@ begin
   v_name := btrim(coalesce(p_data ->> 'name', ''));
   if char_length(v_name) < 1 or char_length(v_name) > 120 then perform booking._err('invalid_name', 'Nimi puuttuu tai on liian pitkä'); end if;
   v_cat := p_data ->> 'category';
-  if v_cat not in ('instruction', 'after_marketing', 'feedback') then perform booking._err('invalid_category', 'Tuntematon luokka'); end if;
+  if v_cat is null or v_cat not in ('instruction', 'after_marketing', 'feedback') then perform booking._err('invalid_category', 'Tuntematon luokka'); end if;
   v_sub_fi := nullif(btrim(coalesce(p_data ->> 'subject_fi', '')), '');
   v_sub_en := nullif(btrim(coalesce(p_data ->> 'subject_en', '')), '');
   v_short_fi := nullif(btrim(coalesce(p_data ->> 'short_fi', '')), '');
@@ -351,9 +361,9 @@ begin
     v_dir := p_data ->> 'send_direction';
     v_anchor := p_data ->> 'send_anchor';
     if v_amount is null or v_amount < 1 or v_amount > 3650
-       or v_unit not in ('minutes', 'hours', 'days')
-       or v_dir not in ('before', 'after')
-       or v_anchor not in ('booking', 'arrival') then
+       or v_unit is null or v_unit not in ('minutes', 'hours', 'days')
+       or v_dir is null or v_dir not in ('before', 'after')
+       or v_anchor is null or v_anchor not in ('booking', 'arrival') then
       perform booking._err('invalid_timing', 'Ajastus ei kelpaa');
     end if;
   end if;
@@ -425,7 +435,8 @@ begin
   end if;
   for r in
     with pairs as (
-      select m.id as message_id, o.id as order_id, o.created_at, o.status as order_status, o.payment_status, o.locale,
+      select m.id as message_id, m.category, o.id as order_id, o.customer_id, o.created_at, o.status as order_status, o.payment_status, o.locale,
+             coalesce(c.marketing_consent, false) as marketing_consent,
              m.send_amount, m.send_unit, m.send_direction, m.send_anchor,
              (select coalesce(array_agg(rv.starts_at order by rv.starts_at), '{}')
                 from booking.reservations rv
@@ -433,6 +444,7 @@ begin
                where rv.order_id = o.id and rv.status in ('confirmed', 'completed') and rv.hidden_at is null) as arrivals
         from booking.messages m
         join booking.orders o on o.status in ('confirmed', 'completed') and o.external_source is null
+        left join booking.customers c on c.id = o.customer_id
        where m.active
          and m.send_amount is not null
          and o.created_at > now() - interval '18 months'
@@ -455,7 +467,11 @@ begin
     v_action := r.decision ->> 'action';
     v_reason := coalesce(r.decision ->> 'reason', 'skip');
     v_dedupe := 'product_message:' || r.message_id::text || ':' || r.order_id::text;
-    if v_action = 'send' then
+    if v_action = 'send' and r.category = 'after_marketing' and r.customer_id is not null and r.marketing_consent is distinct from true then
+      insert into booking.email_outbox(kind, order_id, locale, dedupe_key, status, payload, last_error)
+      values ('product_message', r.order_id, coalesce(r.locale, 'fi'), v_dedupe, 'skipped', jsonb_build_object('message_id', r.message_id), 'no_consent')
+      on conflict (dedupe_key) do nothing;
+    elsif v_action = 'send' then
       v_ok := booking._enqueue_email('product_message', r.order_id, null, null, v_dedupe, jsonb_build_object('message_id', r.message_id));
       if not v_ok and not exists (select 1 from booking.email_outbox e where e.dedupe_key = v_dedupe) then
         insert into booking.email_outbox(kind, order_id, locale, dedupe_key, status, payload, last_error)
@@ -628,7 +644,39 @@ grant execute on function booking.admin_set_messages_timed(boolean) to authentic
 grant execute on function booking.messages_dispatch(integer) to service_role;
 
 comment on function booking.messages_dispatch(integer) is
-  'pg_cron kerran minuutissa. Ei tee mitään, jos messages.timed_enabled ei ole true. Kirjoittaa email_outbox-rivin product_message, dedupe product_message:<viesti>:<tilaus>.';
+  'pg_cron kerran minuutissa. Ei tee mitään, jos messages.timed_enabled ei ole true. Kirjoittaa email_outbox-rivin product_message, dedupe product_message:<viesti>:<tilaus>. Jälkimarkkinointi vaatii customers.marketing_consent = true (syy no_consent).';
+
+-- Peruutuslinkki jälkimarkkinoinnissa. Token on customers.unsubscribe_token (booking_02).
+-- Ohje ja palautepyyntö ovat palveluviestejä: tätä ei kutsuta niistä, eikä suostumus koske niitä.
+create function booking.public_marketing_unsubscribe(p_token uuid)
+returns jsonb language plpgsql volatile security definer set search_path = '' as $$
+declare c booking.customers;
+begin
+  if p_token is null then return jsonb_build_object('ok', false, 'code', 'not_found'); end if;
+  select * into c from booking.customers where unsubscribe_token = p_token;
+  if not found then return jsonb_build_object('ok', false, 'code', 'not_found'); end if;
+  if c.marketing_consent or c.marketing_unsubscribed_at is null then
+    update booking.customers set
+      marketing_consent = false,
+      marketing_unsubscribed_at = coalesce(marketing_unsubscribed_at, now()),
+      marketing_consent_source = case when marketing_consent then 'product_message_unsubscribe' else marketing_consent_source end
+     where id = c.id;
+  end if;
+  update booking.email_outbox e set status = 'skipped', last_error = 'unsubscribed'
+   where e.kind = 'product_message'
+     and e.status in ('pending', 'failed')
+     and e.order_id in (select o.id from booking.orders o where o.customer_id = c.id)
+     and exists (
+       select 1 from booking.messages m
+        where m.category = 'after_marketing'
+          and m.id = nullif(e.payload ->> 'message_id', '')::bigint);
+  return jsonb_build_object('ok', true);
+end $$;
+
+comment on function booking.public_marketing_unsubscribe(uuid) is
+  'Jälkimarkkinoinnin peruutus. customers.marketing_consent = false, marketing_unsubscribed_at täyttyy, jonossa olevat after_marketing-rivit skipped/unsubscribed. Ohje ja palautepyyntö eivät muutu.';
+revoke all on function booking.public_marketing_unsubscribe(uuid) from public;
+grant execute on function booking.public_marketing_unsubscribe(uuid) to anon, authenticated, service_role;
 
 -- Esimerkkipohjat ovat pois päältä eikä niillä ole tuotteita. Ei asiakkaalle näkyvää sisältöä.
 insert into booking.messages(name, category, subject_fi, subject_en, short_fi, short_en, body_fi, body_en, active, send_amount, send_unit, send_direction, send_anchor)

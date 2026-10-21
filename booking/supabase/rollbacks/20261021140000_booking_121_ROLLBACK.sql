@@ -150,6 +150,7 @@ begin
   return v_res;
 end $function$;
 
+drop function if exists booking.public_marketing_unsubscribe(uuid);
 drop function if exists booking.messages_dispatch(integer);
 drop function if exists booking.admin_save_message(bigint, jsonb);
 drop function if exists booking.admin_set_messages_timed(boolean);

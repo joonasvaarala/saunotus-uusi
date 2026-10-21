@@ -29,7 +29,7 @@ const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 /** Tarjouspyynnön ilmoituksessa reply-to on asiakkaan osoite, jotta siihen voi vastata suoraan. Muissa lajeissa käytetään Resendin yhteistä reply_to-asetusta. */
 /** Tuoteviestiä ei lähetetä, jos pohja on pois päältä, tilaus on peruttu tai hyvitetty, tai teksti on tyhjä. null = saa renderöidä. Allowlistia tämä ei koske. */
-export function productMessageBlock(row: { kind?: string; order?: { status?: unknown }; product_message?: { active?: unknown; order_status?: unknown; payment_status?: unknown; subject?: unknown; text?: unknown } } | null | undefined): string | null {
+export function productMessageBlock(row: { kind?: string; order?: { status?: unknown }; product_message?: { active?: unknown; category?: unknown; marketing_consent?: unknown; order_status?: unknown; payment_status?: unknown; subject?: unknown; text?: unknown } } | null | undefined): string | null {
   if (row?.kind !== "product_message") return null;
   const pm = row.product_message || {};
   const st = String(pm.order_status || row.order?.status || "");
@@ -37,6 +37,7 @@ export function productMessageBlock(row: { kind?: string; order?: { status?: unk
   if (pm.active === false) return "tuoteviesti ei ole käytössä";
   if (["cancelled", "expired", "draft"].includes(st)) return "tilaus ei ole lähetettävissä";
   if (pay === "refunded") return "tilaus on hyvitetty";
+  if (pm.category === "after_marketing" && pm.marketing_consent !== true) return "ei markkinointilupaa";
   if (!String(pm.subject || "").trim() && !String(pm.text || "").trim()) return "tuoteviesti on tyhjä";
   return null;
 }
@@ -355,8 +356,11 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const rawLink = String(pm.link_url || "").trim();
       const link = /^https:\/\/\S+$/.test(rawLink) ? rawLink : "";
       const linkLabel = X("email.product_message.open_link");
-      const text = textBlock(hello, body, link, orderUrl && `${viewLabel}:\n${orderUrl}`, contact, sign) + "\n";
-      const html = mk(subject, body.slice(0, 140) || subject, h1(subject) + helloRow + (body ? p(esc(body).replace(/\n/g, "<br>")) : "") + (link ? button(link, linkLabel) : "") + (orderUrl ? button(orderUrl, viewLabel) : "") + tail);
+      const rawUnsub = pm.category === "after_marketing" ? String(pm.unsubscribe_url || "").trim() : "";
+      const unsub = /^https:\/\/\S+$/.test(rawUnsub) ? rawUnsub : "";
+      const unsubLabel = unsub ? X("email.product_message.unsubscribe") : "";
+      const text = textBlock(hello, body, link, orderUrl && `${viewLabel}:\n${orderUrl}`, unsub && `${unsubLabel}\n${unsub}`, contact, sign) + "\n";
+      const html = mk(subject, body.slice(0, 140) || subject, h1(subject) + helloRow + (body ? p(esc(body).replace(/\n/g, "<br>")) : "") + (link ? button(link, linkLabel) : "") + (orderUrl ? button(orderUrl, viewLabel) : "") + (unsub ? p(`<a href="${esc(unsub)}" style="color:${MUTED};font-size:13px">${esc(unsubLabel)}</a>`, `color:${MUTED};font-size:13px`) : "") + tail);
       return { subject, text, html };
     }
     case "payment_link": {

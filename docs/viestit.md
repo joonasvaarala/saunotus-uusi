@@ -36,6 +36,17 @@ Viestiä ei poisteta. Se otetaan pois käytöstä.
 - **Jälkimarkkinointi ja palautepyyntö** lähtevät vain ajastettuna lajina `product_message`. Ohjeelle voi lisäksi asettaa ajastuksen (esimerkiksi muistutus 2 päivää ennen saapumista). Ajastettu ohje käyttää täyttä tekstiä ja tilauslinkkiä.
 - Jos viestillä on https-linkki, sähköpostiin tulee painike. Tilaussivun ohjeessa linkki on tekstin alla.
 
+## Markkinointilupa ja peruutus
+
+Kenttä on jo olemassa: `customers.marketing_consent` (oletus `false`), plus `marketing_unsubscribed_at` ja `unsubscribe_token` (booking_02). Uutta suostumuskenttää ei lisätä.
+
+- **Jälkimarkkinointi** lähtee vain, kun tilauksella on asiakas ja `marketing_consent` on tosi. Muuten jonoon kirjoitetaan `skipped` ja syy `no_consent`. Päätös on pysyvä tälle tilaus–viesti-parille: myöhempi luvan antaminen ei lähetä samaa viestiä uudestaan.
+- Tilaus ilman asiakasta ei ole suostumustapaus. Sille pätee yhä syy `no_email`.
+- **Ohje ja palautepyyntö ovat palveluviestejä.** Ne eivät katso lupaa eikä niissä ole peruutuslinkkiä. Lyhyt ohje vahvistuksessa ei myöskään katso lupaa.
+- Jälkimarkkinoinnin loppuun lisätään automaattisesti linkki `site_base_url` + tilaussivun polku + `?u=` + `unsubscribe_token` (englanniksi `/en/order/`). Se ei ole paikkamerkki, joten pohjan kirjoittajan ei tarvitse muistaa sitä. Linkki vaatii `site_base_url`-asetuksen https-osoitteeksi, samaan tapaan kuin tilauslinkki.
+- Linkki avaa tilaussivun, joka kutsuu `booking.public_marketing_unsubscribe`. Funktio asettaa `marketing_consent = false`, täyttää `marketing_unsubscribed_at` ja merkitsee saman asiakkaan jonossa olevat jälkimarkkinointirivit (`pending` / `failed`) tilaan `skipped`, syy `unsubscribed`. Toinen avaus onnistuu eikä muuta jo peruttua lupaa. Ohje ja palautepyyntö jäävät jonoon.
+- Lähetyshetkellä `send-emails` tarkistaa luvan vielä uudestaan. Jos asiakas peruutti sen jälkeen, kun rivi ehdittiin jonottaa, viestiä ei lähetetä (`ei markkinointilupaa`). Allowlist tarkistetaan yhä ensin.
+
 ## Paikkamerkit
 
 Samat nimet suomeksi ja englanniksi. Hallinta listaa ne lomakkeessa.
@@ -68,6 +79,7 @@ Päätös (`booking._message_decision`):
 | `external_import` | Johku- tai muu tuontitilaus (`external_source` ei ole tyhjä). Ei lähetetä. |
 | `order_status` | Tila ei ole `confirmed` tai `completed`. Peruttu, vanhentunut, luonnos ja odottava eivät lähde. Odotus ei saa ohitusriviä, jotta vahvistus voi vielä laukaista ajastuksen. |
 | `refunded` | `payment_status = refunded`. Ei lähetetä. `partially_refunded` lähtee yhä. |
+| `no_consent` | Vain jälkimarkkinointi, kun asiakas on olemassa ja `marketing_consent` ei ole tosi. Ohitus kirjoitetaan heti. |
 | `no_timing` / `invalid_timing` | Ajastus puuttuu tai ei kelpaa. |
 | `no_arrival` | Vertailukohta on saapuminen, mutta osuvaa varausta ei ole. |
 | `missed_at_booking` | Lähetyshetki on jo mennyt tai sama kuin tilauksen luonti. **Ei lähetetä heti.** Ohjeen lyhyt teksti on jo vahvistuksessa. Esimerkki: varaus tehdään huomenna, mutta muistutus on asetettu kahdeksi päiväksi ennen saapumista. |
@@ -102,7 +114,7 @@ Hoito- tai muu `public_slots`-tuote (`upsell.treatments`) näytetään nimellä.
 
 1. Aja migraatio `booking/supabase/migrations/20261021140000_booking_121_messages.sql` (versio booking_121). Älä aja tätä tuotantoon tästä reposita ilman tavallista julkaisua.
 2. Julkaise edge-funktio `send-emails` uudelleen (malli ja ohitus). Cron-työ syntyy migraatiossa, jos `pg_cron` on käytössä. Nimi: `booking_messages_dispatch`.
-3. Tuo sivutekstit tiedostosta `content/site-texts.pending-import-29.json` (18 riviä, 9 avainta × fi/en).
+3. Tuo sivutekstit tiedostosta `content/site-texts.pending-import-29.json` (28 riviä, 14 avainta × fi/en).
 4. Kirjoita pohjat hallinnassa, kytke tuotteet ja ota pohja käyttöön. Esimerkkipohjat eivät kelpaa asiakkaille.
 5. Kytke **Ajastetut viestit päällä** vasta, kun pohjat on tarkistettu. Ennen sitä ajastus ei jonota mitään. Lyhyt ohje vahvistuksessa toimii jo, kun pohja on käytössä.
 

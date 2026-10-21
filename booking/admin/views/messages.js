@@ -39,7 +39,7 @@ export async function render({ ctx, refs }) {
       h('span', { class: 'meta' }, badge(m.active ? 'ok' : 'muted', m.active ? 'Käytössä' : 'Pois'), badge('muted', catLabel(m.category)), h('small', { text: `${(m.product_ids || []).length} tuotetta` })))) : [empty('Ei viestejä. Lisää ensimmäinen pohja.')]);
     wrap.replaceChildren(
       h('div', { class: 'row between wrap' }, h('h1', { id: 'messages-h' }, icon('mail', 22), ' Viestit'), h('button', { type: 'button', class: 'btn', 'data-testid': 'message-new', onclick: () => edit(emptyMessage()) }, 'Uusi viesti')),
-      h('p', { class: 'muted', text: 'Ohjeen lyhyt teksti näkyy tilausvahvistuksessa ja täysi teksti tilaussivulla napin Näytä ohjeet takana. Jälkimarkkinointi ja palautepyyntö lähtevät vain ajastettuna. Sama viesti lähtee tilauksesta kerran, vaikka tuotteita olisi useita.' }),
+      h('p', { class: 'muted', text: 'Ohjeen lyhyt teksti näkyy tilausvahvistuksessa ja täysi teksti tilaussivulla napin Näytä ohjeet takana. Jälkimarkkinointi ja palautepyyntö lähtevät vain ajastettuna. Jälkimarkkinointi lähtee vain, jos asiakkaalla on markkinointilupa, ja viestin loppuun tulee peruutuslinkki. Ohje ja palautepyyntö ovat palveluviestejä. Sama viesti lähtee tilauksesta kerran, vaikka tuotteita olisi useita.' }),
       h('label', { class: 'check big', 'data-testid': 'messages-timed-label' }, sw, h('span', {}, h('strong', { text: 'Ajastetut viestit päällä' }), h('small', { text: 'Oletus pois. Ennen päälle kytkemistä tarkista pohjat. Lähetys kunnioittaa yhä sähköpostin tilaa (off, dry_run, live) ja vastaanottajarajausta. Kytkin ei lähetä yli 36 tuntia myöhässä olevia vanhoja viestejä.' }))),
       list);
   }
@@ -75,7 +75,8 @@ export async function render({ ctx, refs }) {
         h('p', { class: 'muted', text: 'Viesti koskee valittuja tuotteita. Yksi viesti voi olla monella tuotteella. Tilauksesta lähtee yksi sähköposti, ei yksi per tuote.' }),
         products.length ? productBox : h('p', { class: 'muted', text: 'Tuotteita ei löytynyt.' })),
       h('div', { class: 'box', 'data-testid': 'message-placeholders' }, h('strong', { text: 'Paikkamerkit' }),
-        h('ul', {}, PLACEHOLDERS.map((p) => h('li', {}, h('code', { text: `{${p.key}}` }), ` ${p.help}`)))),
+        h('ul', {}, PLACEHOLDERS.map((p) => h('li', {}, h('code', { text: `{${p.key}}` }), ` ${p.help}`))),
+        h('p', { class: 'muted', text: 'Jälkimarkkinointiin lisätään peruutuslinkki automaattisesti. Se ei ole paikkamerkki. Linkki asettaa markkinointiluvan pois ja estää myöhemmät jälkimarkkinointiviestit.' }))),
       h('button', { class: 'btn primary', type: 'submit', text: isNew ? 'Lisää viesti' : 'Tallenna' }));
     const syncCat = () => { shortBox.hidden = cat.value !== 'instruction'; };
     cat.addEventListener('change', syncCat);

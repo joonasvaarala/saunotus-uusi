@@ -34,6 +34,7 @@ export const EMAIL_TEXTS: TextTable = {
   "email.order_confirmation.instructions_title": { fi: "Ohje", en: "Instructions" },
   "email.product_message.subject_fallback": { fi: "Viesti tilaukseen {{var:no}}", en: "A message about order {{var:no}}" },
   "email.product_message.open_link": { fi: "Avaa linkki", en: "Open the link" },
+  "email.product_message.unsubscribe": { fi: "Peruuta markkinointiviestit", en: "Unsubscribe from marketing messages" },
   // ---- maksulinkki ----
   "email.payment_link.subject": { fi: `Maksulinkki tilaukseen {{var:no}} – ${SN}`, en: `Payment link for order {{var:no}} – ${SN}` },
   "email.payment_link.title": { fi: "Maksulinkki", en: "Payment link" },

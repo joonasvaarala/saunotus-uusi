@@ -33,8 +33,14 @@ declare
   mid_miss bigint;
   mid_off bigint;
   mid_guide bigint;
+  mid_fb bigint;
+  utok uuid;
+  eid bigint;
   c_id bigint;
+  c_no bigint;
   o_due bigint;
+  o_noconsent bigint;
+  o_after bigint;
   o_refund bigint;
   o_part bigint;
   o_ext bigint;
@@ -116,6 +122,7 @@ begin
   perform public.t121_ck(public.t121_try($q$select booking.admin_save_message(null, '{"name":"T121","category":"instruction","send_amount":1}'::jsonb)$q$) = 'invalid_timing', 'E6 ajastus kokonaan');
   perform public.t121_ck(public.t121_try($q$select booking.admin_save_message(null, '{"name":"T121","category":"instruction","slug":"x"}'::jsonb)$q$) = 'unknown_field', 'E7 tuntematon kenttä');
   perform public.t121_ck(public.t121_try($q$select booking.admin_save_message(null, '{"name":"T121","category":"instruction","product_ids":[999999999]}'::jsonb)$q$) = 'invalid_product', 'E8 tuntematon tuote');
+  perform public.t121_ck(public.t121_try($q$select booking.admin_save_message(null, '{"name":"T121"}'::jsonb)$q$) = 'invalid_category', 'E9 luokka puuttuu');
 
   res := booking.admin_product_create(jsonb_build_object('name', 'T121 viestituote', 'price', 1, 'vat_rate', 25.5, 'active', false));
   pid := (res ->> 'id')::bigint;
@@ -132,7 +139,9 @@ begin
     'product_ids', jsonb_build_array(pid, pid2)));
   mid := (res ->> 'id')::bigint;
   perform public.t121_ck(res ->> 'ok' = 'true' and mid is not null, 'P2 tallennus');
+  perform public.t121_logout();
   perform public.t121_ck((select count(*) from booking.message_products where message_id = mid) = 2, 'P3 kaksi tuotetta');
+  perform public.t121_login(u_mgr);
 
   res := booking.admin_save_message(null, jsonb_build_object(
     'name', 'T121 odotus', 'category', 'feedback', 'active', true,
@@ -170,11 +179,21 @@ begin
   mid_guide := (res ->> 'id')::bigint;
   perform public.t121_ck((res -> 'message' ->> 'send_amount') is null, 'P4 ohje ilman ajastusta');
 
+  res := booking.admin_save_message(null, jsonb_build_object(
+    'name', 'T121 palaute', 'category', 'feedback', 'active', true,
+    'subject_fi', 'Palaute palvelusta', 'body_fi', 'Kerro käynnistä',
+    'send_amount', 1, 'send_unit', 'minutes', 'send_direction', 'after', 'send_anchor', 'booking',
+    'product_ids', jsonb_build_array(pid)));
+  mid_fb := (res ->> 'id')::bigint;
+  perform public.t121_ck(mid_fb is not null, 'P5 palautepyyntö');
+
   perform public.t121_ck((booking.admin_set_messages_timed(false) ->> 'timed_enabled') = 'false', 'S4 kytkin tallentuu pois');
   perform public.t121_logout();
 
   insert into booking.resources(code, name, kind) values ('t121-space', 'T121 tila', 'space') returning id into space_id;
-  insert into booking.customers(name, email) values ('T121 Aada', 't121-aada@example.test') returning id into c_id;
+  insert into booking.customers(name, email, marketing_consent, marketing_consent_at, marketing_consent_source)
+  values ('T121 Aada', 't121-aada@example.test', true, now(), 'test') returning id into c_id;
+  insert into booking.customers(name, email) values ('T121 Ei lupaa', 't121-ei@example.test') returning id into c_no;
 
   insert into booking.orders(customer_id, status, payment_status, total_gross, source_channel, locale, created_at)
   values (c_id, 'completed', 'paid', 10, 'admin', 'fi', now() - interval '5 minutes') returning id, public_token into o_due, tok;
@@ -221,6 +240,11 @@ begin
   insert into booking.reservations(order_id, product_id, space_id, mode, starts_at, ends_at, persons, status)
   values (o_miss, pid, space_id, 'exclusive', now() + interval '1 hour', now() + interval '2 hours', 1, 'completed');
 
+  insert into booking.orders(customer_id, status, payment_status, total_gross, source_channel, locale, created_at)
+  values (c_no, 'completed', 'paid', 10, 'admin', 'fi', now() - interval '5 minutes') returning id into o_noconsent;
+  insert into booking.order_items(order_id, product_id, product_name, kind, quantity, unit_price_gross, line_total_gross, vat_rate)
+  values (o_noconsent, pid, 'T121 viestituote', 'product', 1, 10, 10, 25.5);
+
   insert into booking.orders(status, payment_status, total_gross, source_channel, locale, created_at)
   values ('completed', 'paid', 10, 'admin', 'fi', now() - interval '5 minutes') returning id into o_nomail;
   insert into booking.order_items(order_id, product_id, product_name, kind, quantity, unit_price_gross, line_total_gross, vat_rate)
@@ -232,7 +256,7 @@ begin
   perform public.t121_ck((select booking._setting('messages.timed_enabled') = 'false'::jsonb), 'S5 yhä pois');
 
   perform public.t121_ck(booking.messages_dispatch() = 0, 'J1 kytkin pois ei jonota');
-  perform public.t121_ck(not exists (select 1 from booking.email_outbox e where e.kind = 'product_message' and e.order_id in (o_due, o_refund, o_part, o_ext, o_cancel, o_wait, o_late, o_miss, o_nomail)), 'J2 ei rivejä');
+  perform public.t121_ck(not exists (select 1 from booking.email_outbox e where e.kind = 'product_message' and e.order_id in (o_due, o_refund, o_part, o_ext, o_cancel, o_wait, o_late, o_miss, o_nomail, o_noconsent)), 'J2 ei rivejä');
 
   perform public.t121_login(u_mgr);
   perform booking.admin_set_messages_timed(true);
@@ -259,6 +283,39 @@ begin
   n2 := booking.messages_dispatch();
   perform public.t121_ck(n2 = 0, 'J17 toinen ajo ei lisää');
   perform public.t121_ck((select count(*) from booking.email_outbox e where e.dedupe_key = 'product_message:' || mid::text || ':' || o_due::text) = 1, 'J18 dedupe');
+  perform public.t121_ck((select last_error from booking.email_outbox e where e.dedupe_key = 'product_message:' || mid::text || ':' || o_noconsent::text) = 'no_consent', 'J19 jälkimarkkinointi ilman lupaa');
+  perform public.t121_ck((select last_error from booking.email_outbox e where e.dedupe_key = 'product_message:' || mid_fb::text || ':' || o_noconsent::text) is null, 'J20 palautepyyntö ilman lupaa lähtee');
+
+  insert into booking.settings(key, value, is_public) values
+    ('site_base_url', to_jsonb('https://example.test'::text), false),
+    ('order_page_path', to_jsonb('/tilaus/'::text), false)
+  on conflict (key) do update set value = excluded.value;
+  select unsubscribe_token into utok from booking.customers where id = c_id;
+  select e.id into eid from booking.email_outbox e where e.dedupe_key = 'product_message:' || mid::text || ':' || o_due::text;
+  perform public.t121_ck((booking._product_message_mail(eid) ->> 'unsubscribe_url') = 'https://example.test/tilaus/?u=' || utok::text, 'U0 peruutuslinkki');
+  perform public.t121_ck((booking._product_message_mail(eid) ->> 'marketing_consent') = 'true', 'U0b lupa');
+  select e.id into eid from booking.email_outbox e where e.dedupe_key = 'product_message:' || mid_fb::text || ':' || o_due::text;
+  perform public.t121_ck(eid is not null, 'U0c palautepyyntö jonossa');
+  perform public.t121_ck((booking._product_message_mail(eid) ->> 'unsubscribe_url') is null, 'U0d palautteessa ei linkkiä');
+  perform public.t121_ck((booking.public_marketing_unsubscribe(utok) ->> 'ok') = 'true', 'U1 peruutus');
+  perform public.t121_ck((select marketing_consent from booking.customers where id = c_id) = false, 'U2 lupa pois');
+  perform public.t121_ck((select marketing_unsubscribed_at from booking.customers where id = c_id) is not null, 'U3 aika');
+  perform public.t121_ck((booking.public_marketing_unsubscribe(utok) ->> 'ok') = 'true', 'U4 toinen kerta');
+  perform public.t121_ck((booking.public_marketing_unsubscribe(gen_random_uuid()) ->> 'code') = 'not_found', 'U5 tuntematon');
+  perform public.t121_ck(not exists (
+    select 1 from booking.email_outbox e
+    join booking.orders o on o.id = e.order_id
+    join booking.messages m on m.id = nullif(e.payload ->> 'message_id', '')::bigint
+    where o.customer_id = c_id and m.category = 'after_marketing' and e.status in ('pending', 'failed')
+  ), 'U6 jonossa ei jälkimarkkinointia');
+
+  insert into booking.orders(customer_id, status, payment_status, total_gross, source_channel, locale, created_at)
+  values (c_id, 'completed', 'paid', 10, 'admin', 'fi', now() - interval '5 minutes') returning id into o_after;
+  insert into booking.order_items(order_id, product_id, product_name, kind, quantity, unit_price_gross, line_total_gross, vat_rate)
+  values (o_after, pid, 'T121 viestituote', 'product', 1, 10, 10, 25.5);
+  perform booking.messages_dispatch();
+  perform public.t121_ck((select last_error from booking.email_outbox e where e.dedupe_key = 'product_message:' || mid::text || ':' || o_after::text) = 'no_consent', 'U7 uusi jälkimarkkinointi ei lähde');
+  perform public.t121_ck((select last_error from booking.email_outbox e where e.dedupe_key = 'product_message:' || mid_fb::text || ':' || o_after::text) is null, 'U8 palautepyyntö lähtee yhä');
 
   res := booking.public_get_order(tok);
   perform public.t121_ck(exists (select 1 from jsonb_array_elements(res -> 'instructions') e where e ->> 'body' like '%T121 viestituote%'), 'I4 tilaussivu');

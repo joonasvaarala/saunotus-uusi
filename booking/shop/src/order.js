@@ -3,7 +3,7 @@
 import { rpc, functionUrl } from './sb.js';
 import { OT } from './order-texts.js';
 import { T } from './i18n.js';
-import { createOrderApi, validToken } from './order-api.js';
+import { createOrderApi, validToken, wantsMock } from './order-api.js';
 import { createGiftApi } from './gift-api.js';
 import { redeemSection, cardsSection, claimsSection } from './order-gift.js';
 import { createMobilepayApi } from './mobilepay-api.js';
@@ -65,9 +65,26 @@ function instructionsSection(list) {
     h('h3', { id: 'ord-g', text: t.guideTitle }), h('p', { class: 'bk-note', text: t.guideLead }), btn, panel);
 }
 
+async function unsubscribe(token) {
+  root.replaceChildren(h('p', { class: 'bk-loading', role: 'status', text: t.loading }));
+  let state = 'error';
+  if (wantsMock()) state = 'done';
+  else {
+    try {
+      const r = await rpc('public_marketing_unsubscribe', { p_token: token });
+      state = r?.ok ? 'done' : 'missing';
+    } catch { state = 'error'; }
+  }
+  const text = state === 'done' ? t.unsubDone : state === 'missing' ? t.unsubMissing : t.unsubError;
+  mount(h('section', { class: 'ord-card', role: 'status', 'data-testid': 'unsub-result', 'data-state': state },
+    h('h2', { text: t.unsubTitle }), h('p', { text }), phoneBox()));
+}
 async function main() {
   await applyShopTexts(S);   // sivutekstit tietokannasta (osa 3): puuttuva avain/tiedosto → repon oletus
-  const token = new URLSearchParams(location.search).get('t');
+  const params = new URLSearchParams(location.search);
+  const unsub = params.get('u');
+  if (validToken(unsub) && !validToken(params.get('t'))) return unsubscribe(unsub);
+  const token = params.get('t');
   if (!validToken(token)) return mount(h('p', { class: 'bk-error', role: 'alert', text: t.noToken }), phoneBox());
   const api = createOrderApi({ rpc, token });
   root.replaceChildren(h('p', { class: 'bk-loading', role: 'status', text: t.loading }));
