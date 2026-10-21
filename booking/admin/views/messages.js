@@ -53,8 +53,8 @@ export async function render({ ctx, refs }) {
     const sel = (name, options, current, placeholder) => h('select', { name }, h('option', { value: '', text: placeholder, selected: !current || null }), options.map((o) => h('option', { value: o.id, text: o.label, selected: o.id === current || null })));
     const cat = h('select', { name: 'category', required: true }, CATEGORIES.map((c) => h('option', { value: c.id, text: c.label, selected: c.id === (row.category || 'instruction') || null })));
     const shortBox = h('div', { class: 'stack', 'data-testid': 'message-short' },
-      field('Lyhyt ohje (FI)', inp('short_fi', row.short_fi, { area: true, 'data-rich': '1' }), `Näkyy tilausvahvistuksessa. ${richText('hint')}`),
-      field('Lyhyt ohje (EN)', inp('short_en', row.short_en, { area: true, 'data-rich': '1' }), richText('hint')));
+      field('Lyhyt ohje (FI)', inp('short_fi', row.short_fi, { area: true, 'data-rich': '1' }), `Näkyy tilausvahvistuksessa. ${richText('hint_message')}`),
+      field('Lyhyt ohje (EN)', inp('short_en', row.short_en, { area: true, 'data-rich': '1' }), richText('hint_message')));
     const productBox = h('div', { class: 'msg-products', 'data-testid': 'message-products' }, products.map((p) => h('label', { class: 'check' },
       h('input', { type: 'checkbox', name: 'product', value: String(p.id), checked: (row.product_ids || []).includes(p.id) || null }),
       ` ${p.name}${p.active === false ? ' (piilotettu)' : ''}`)));
@@ -64,8 +64,8 @@ export async function render({ ctx, refs }) {
       h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'active', checked: row.active === true || null }), ' Käytössä'),
       h('div', { class: 'row wrap' }, field('Aihe (FI)', inp('subject_fi', row.subject_fi, { maxlength: 200 })), field('Aihe (EN)', inp('subject_en', row.subject_en, { maxlength: 200 }))),
       shortBox,
-      field('Teksti (FI)', inp('body_fi', row.body_fi, { area: true, 'data-rich': '1' }), `Ohjeessa tämä on täysi ohje tilaussivulla. Muissa luokissa tämä on sähköpostin teksti. ${richText('hint')}`),
-      field('Teksti (EN)', inp('body_en', row.body_en, { area: true, 'data-rich': '1' }), `Jos englanti puuttuu, käytetään suomea. ${richText('hint')}`),
+      field('Teksti (FI)', inp('body_fi', row.body_fi, { area: true, 'data-rich': '1' }), `Ohjeessa tämä on täysi ohje tilaussivulla. Muissa luokissa tämä on sähköpostin teksti. ${richText('hint_message')}`),
+      field('Teksti (EN)', inp('body_en', row.body_en, { area: true, 'data-rich': '1' }), `Jos englanti puuttuu, käytetään suomea. ${richText('hint_message')}`),
       field('Linkki (https)', inp('link_url', row.link_url, { type: 'url', inputmode: 'url', placeholder: 'https://' }), 'Esimerkiksi Google-arvostelu. Painike sähköpostiin ja paikkamerkki {linkki}.'),
       h('fieldset', { class: 'box' }, h('legend', { text: 'Ajastus' }),
         h('p', { class: 'muted', text: 'Tyhjä määrä = ei ajastettua lähetystä. Ohjeen lyhyt teksti näkyy vahvistuksessa silti. Ennen saapumista: jos hetki oli jo ohi tilausta tehdessä, viestiä ei lähetetä. Usean tuotteen tilauksessa ennen = aikaisin saapuminen, jälkeen = myöhäisin.' }),

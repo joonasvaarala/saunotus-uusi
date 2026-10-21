@@ -81,19 +81,25 @@ test('sähköpostin teksti ja inline-HTML', () => {
   assert.equal(rt.emailHtml('pelkkä teksti'), null);
 });
 
-test('asiakkaan nimi ei pääse skriptiksi paikkamerkin kautta', () => {
+test('asiakkaan nimi ei pääse tagiksi paikkamerkin kautta', () => {
+  const attack = '<a href="https://evil.example/pay">Maksa lisämaksu</a>';
+  const plain = fillMessage('Hei {asiakas_nimi}', { asiakas_nimi: attack });
+  assert.equal(plain.includes('<'), false);
+  assert.equal(rt.isRichHtml('Hei {asiakas_nimi}'), false);
+  assert.equal(rt.isRichHtml(plain), false);
   const filled = fillMessage('<p>Hei {asiakas_nimi}</p>', { asiakas_nimi: 'A</p><script>alert(1)</script><p>' });
+  assert.equal(rt.isRichHtml('<p>Hei {asiakas_nimi}</p>'), true);
+  assert.equal(/<(script|a)\b/i.test(filled), false);
   const clean = rt.sanitizeRich(filled);
-  assert.equal(clean, '<p>Hei A</p>');
-  assert.equal(clean.includes('script'), false);
-  assert.equal(clean.includes('alert'), false);
+  assert.equal(clean.startsWith('<p>Hei A'), true);
+  assert.equal(/<(script|a)\b/i.test(clean), false);
 });
 
 test('pending-import-30: työkalurivin tekstit, 26 riviä, FI+EN, ei hintoja eikä osoitteita', async () => {
   const pending = JSON.parse(read('content/site-texts.pending-import-30.json'));
   const { RICH_TEXTS } = await import(pathToFileURL(join(root, 'booking/admin/rich-texts.js')).href);
   const keys = new Set();
-  assert.equal(pending.length, 26);
+  assert.equal(pending.length, 28);
   for (const row of pending) {
     assert.equal(row.class, 'normal');
     assert.equal(row.kind, 'plain');
@@ -116,12 +122,28 @@ test('migraatio 122 vaihtaa vain kuvauksen lajin ja pituuden', () => {
   assert.match(sql, /kind in \('plain', 'lite', 'rich'\)/);
   assert.match(sql, /booking\._rich_text_check/);
   assert.match(sql, /javascript/);
+  const check = sql.slice(sql.indexOf('function booking._rich_text_check'), sql.indexOf('revoke all on function booking._rich_text_check'));
+  assert.doesNotMatch(check, /p_text ~\* 'data/);
+  assert.match(check, /href\\s\*=\\s\*\[''"]\?\\s\*\(javascript\|vbscript\|data\)/);
+  assert.ok(sql.includes("translate(coalesce(p_vars ->> k, ''), '<>\"'"));
+  assert.match(sql, /function booking\.admin_update_product/i);
+  assert.match(sql, /function booking\.admin_product_create/i);
+  assert.match(sql, /position\('<' in/);
+  assert.match(sql, /booking\._message_is_rich/);
   assert.match(sql, /set kind = 'rich', max_len = 8000/);
   assert.match(sql, /source_column in \('description', 'description_en'\)/);
   assert.doesNotMatch(sql, /set published_text/i);
   assert.match(back, /set kind = 'plain', max_len = 4000/);
   assert.match(back, /kind in \('plain', 'lite'\)/);
   assert.match(back, /drop function if exists booking\._rich_text_check/);
+  assert.match(back, /comment on column booking\.site_texts\.kind is null;/);
+  assert.match(back, /coalesce\(p_vars ->> k, ''\)/);
+  assert.doesNotMatch(back, /translate\(coalesce\(p_vars/);
+  assert.match(read('booking/admin/vendor/trix/trix.esm.min.js'), /Trix 2\.1\.19/);
+  assert.match(read('booking/admin/rich-editor.js'), /2\.1\.19/);
+  assert.doesNotMatch(read('booking/admin/views/products.js'), /asiakas_nimi/);
+  assert.match(read('booking/admin/views/messages.js'), /hint_message/);
+  assert.doesNotMatch(read('booking/admin/rich-texts.js').match(/'ui\.admin\.rich\.hint': '([^']+)'/)[1], /asiakas_nimi/);
   assert.match(read('booking/shop/build.mjs'), /rich-text\.js/);
   assert.match(read('booking/shop/build.mjs'), /invoice-validate\.js/);
   assert.match(read('booking/shop/src/shop.js'), /richHost/);

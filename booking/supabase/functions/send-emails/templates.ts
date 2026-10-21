@@ -36,9 +36,14 @@ const RICH_EMAIL = {
   li: `margin:0 0 4px`,
   a: `color:${GREEN};text-decoration:underline`,
 };
-function customerHtml(raw: string): { text: string; html: string; rich: boolean } {
-  if (!isRichHtml(raw)) return { text: raw, html: esc(raw).replace(/\n/g, "<br>"), rich: false };
-  return { text: richToText(raw), html: emailHtml(raw, RICH_EMAIL) || "", rich: true };
+// rich === false: pohja on pelkkää tekstiä, vaikka täytetty merkkijono näyttäisi tagilta.
+// rich === true: pohja on rich. Puuttuva lippu (vanhat testit, ei viestipohjaa) päättelee merkkijonosta.
+function customerHtml(raw: string, templateRich?: unknown): { text: string; html: string; rich: boolean } {
+  const rich = templateRich === false ? false : templateRich === true ? true : isRichHtml(raw);
+  if (!rich) return { text: raw, html: esc(raw).replace(/\n/g, "<br>"), rich: false };
+  const html = emailHtml(raw, RICH_EMAIL);
+  if (!html) return { text: raw, html: esc(raw).replace(/\n/g, "<br>"), rich: false };
+  return { text: richToText(raw), html, rich: true };
 }
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 /** Tarjouspyynnön ilmoituksessa reply-to on asiakkaan osoite, jotta siihen voi vastata suoraan. Muissa lajeissa käytetään Resendin yhteistä reply_to-asetusta. */
@@ -144,11 +149,11 @@ function orderBlock(d: any, en: boolean, X: X): Block {
 const textBlock = (...parts: (string | undefined | false)[]) => parts.filter((x) => typeof x === "string" && x !== "").join("\n\n");
 function instructionNotes(list: unknown, title: string): { text: string; html: string } {
   const rows = (Array.isArray(list) ? list : []).map((row) => {
-    const item = row as { title?: unknown; text?: unknown };
+    const item = row as { title?: unknown; text?: unknown; rich?: unknown };
     const raw = String(item?.text ?? "").trim();
     const head = String(item?.title ?? "").trim();
     if (!raw) return null;
-    const body = customerHtml(raw);
+    const body = customerHtml(raw, item.rich);
     return { head, text: body.text, html: body.html };
   }).filter((row): row is { head: string; text: string; html: string } => !!row);
   if (!rows.length) return { text: "", html: "" };
@@ -369,7 +374,7 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const pm = d?.product_message || {};
       const subject = String(pm.subject || "").replace(/[<>]/g, "").replace(/\s+/g, " ").trim() || X("email.product_message.subject_fallback", { no });
       const body = String(pm.text || "").trim();
-      const shown = customerHtml(body);
+      const shown = customerHtml(body, pm.rich);
       const rawLink = String(pm.link_url || "").trim();
       const link = /^https:\/\/\S+$/.test(rawLink) ? rawLink : "";
       const linkLabel = X("email.product_message.open_link");

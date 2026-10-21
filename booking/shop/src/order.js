@@ -53,7 +53,7 @@ function instructionsSection(list) {
     const link = safeHttps(g.link_url);
     panel.append(h('article', { class: 'ord-guide', 'data-testid': 'guide-item' },
       g.title ? h('h4', { text: g.title }) : null,
-      richHost(h, g.body, 'ord-guide-text'),
+      richHost(h, g.body, 'ord-guide-text', g.rich),
       link ? h('p', {}, h('a', { href: link, target: '_blank', rel: 'noopener noreferrer', text: t.guideLink })) : null));
   }
   const btn = h('button', { type: 'button', class: 'btn light ord-btn', 'data-testid': 'guide-toggle', 'aria-expanded': 'false', text: t.guideShow, onclick: () => {

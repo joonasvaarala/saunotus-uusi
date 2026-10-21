@@ -1,4 +1,4 @@
-// Kevyt työkalurivi tuotekuvauksille ja Viestit-kentille. Trix 2.1.15 (MIT, 37signals),
+// Kevyt työkalurivi tuotekuvauksille ja Viestit-kentille. Trix 2.1.19 (MIT, 37signals),
 // vendoroitu booking/admin/vendor/trix/. Ei bundleria: ESM ladataan vasta kun lomake aukeaa.
 // Oletuslohko on p, otsikko on h2 ja alaotsikko h3. Liitteet estetään.
 import { plainToEditorHtml, normalizeStored } from './rich-text.js';

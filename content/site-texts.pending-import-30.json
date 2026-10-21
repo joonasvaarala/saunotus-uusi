@@ -242,7 +242,7 @@
   {
     "key": "ui.admin.rich.hint",
     "lang": "fi",
-    "text": "Voit lihavoida, kursivoida, lisätä otsikon, luettelon ja linkin. Paikkamerkit, kuten {asiakas_nimi}, kirjoitetaan tekstin sekaan.",
+    "text": "Voit lihavoida, kursivoida, lisätä otsikon, luettelon ja linkin.",
     "class": "normal",
     "kind": "plain",
     "max_len": 400,
@@ -251,6 +251,26 @@
   },
   {
     "key": "ui.admin.rich.hint",
+    "lang": "en",
+    "text": "You can use bold, italic, a heading, a list and a link.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.hint_message",
+    "lang": "fi",
+    "text": "Voit lihavoida, kursivoida, lisätä otsikon, luettelon ja linkin. Paikkamerkit, kuten {asiakas_nimi}, kirjoitetaan tekstin sekaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.hint_message",
     "lang": "en",
     "text": "You can use bold, italic, a heading, a list and a link. Placeholders such as {asiakas_nimi} stay in the text.",
     "class": "normal",

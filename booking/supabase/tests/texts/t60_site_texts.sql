@@ -106,6 +106,8 @@ begin
   perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k2, '<script>alert(1)</script>')) = 'html_not_allowed', 'B13b: script estetty rich-kuvauksessa');
   perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k2, '<p onclick="alert(1)">x</p>')) = 'html_not_allowed', 'B13c: onclick estetty rich-kuvauksessa');
   perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k2, '<p><a href="javascript:alert(1)">x</a></p>')) = 'html_not_allowed', 'B13d: javascript-linkki estetty rich-kuvauksessa');
+  perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k2, '<p><a href="data:text/html,hi">x</a></p>')) = 'html_not_allowed', 'B13f: data-linkki estetty rich-kuvauksessa');
+  perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k2, 'Henkilotietoja personal data: nimi')) <> 'html_not_allowed', 'B13e: personal data: ei ole href');
   perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k2, '   ')) = 'text_empty', 'B16: tyhjä estetty');
   perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k2, 'Hinta {{price:7}}')) = 'placeholder_mismatch', 'B17: ei-sallittu paikkamerkki estetty');
   perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k2, 'Rikki {{price')) = 'placeholder_invalid', 'B18: rikkinäinen paikkamerkki estetty');

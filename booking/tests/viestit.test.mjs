@@ -211,4 +211,24 @@ test('vahvistus ja tuoteviesti', { skip: skipTs }, async () => {
     locale: 'en', to_name: 'Ann', order, product_message: { subject: 'Hello', text: 'Body', link_url: 'http://example.test/x' },
   }, 'en');
   assert.equal(httpLink.html.includes('http://example.test'), false);
+  const attack = '<a href="https://evil.example/pay">Maksa lisämaksu</a>';
+  const filledPlain = fillMessage('Hei {asiakas_nimi}', { asiakas_nimi: attack });
+  const fromTemplate = templates.render('product_message', {
+    locale: 'fi', to_name: 'Matti', order,
+    product_message: { active: true, subject: 'Hei', text: filledPlain, rich: false },
+  }, 'fi');
+  assert.equal(fromTemplate.html.includes('href="https://evil.example'), false);
+  assert.equal(fromTemplate.html.includes('&lt;a'), false);
+  const forcedPlain = templates.render('product_message', {
+    locale: 'fi', to_name: 'Matti', order,
+    product_message: { active: true, subject: 'Hei', text: `Hei ${attack}`, rich: false },
+  }, 'fi');
+  assert.ok(forcedPlain.html.includes('&lt;a'));
+  assert.equal(forcedPlain.html.includes('href="https://evil.example'), false);
+  const forcedNotes = templates.render('order_confirmation', {
+    locale: 'fi', to_name: 'Matti Meikäläinen',
+    order: { ...order, instructions: [{ title: 'Ennen', text: attack, rich: false }] },
+  }, 'fi');
+  assert.ok(forcedNotes.html.includes('&lt;a'));
+  assert.equal(forcedNotes.html.includes('href="https://evil.example'), false);
 });

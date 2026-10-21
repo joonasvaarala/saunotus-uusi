@@ -19,7 +19,8 @@ export const RICH_TEXTS = {
     'ui.admin.rich.url_placeholder': 'Kirjoita osoite',
     'ui.admin.rich.undo': 'Kumoa',
     'ui.admin.rich.redo': 'Tee uudelleen',
-    'ui.admin.rich.hint': 'Voit lihavoida, kursivoida, lisätä otsikon, luettelon ja linkin. Paikkamerkit, kuten {asiakas_nimi}, kirjoitetaan tekstin sekaan.',
+    'ui.admin.rich.hint': 'Voit lihavoida, kursivoida, lisätä otsikon, luettelon ja linkin.',
+    'ui.admin.rich.hint_message': 'Voit lihavoida, kursivoida, lisätä otsikon, luettelon ja linkin. Paikkamerkit, kuten {asiakas_nimi}, kirjoitetaan tekstin sekaan.',
   },
   en: {
     'ui.admin.rich.bold': 'Bold',
@@ -34,7 +35,8 @@ export const RICH_TEXTS = {
     'ui.admin.rich.url_placeholder': 'Enter an address',
     'ui.admin.rich.undo': 'Undo',
     'ui.admin.rich.redo': 'Redo',
-    'ui.admin.rich.hint': 'You can use bold, italic, a heading, a list and a link. Placeholders such as {asiakas_nimi} stay in the text.',
+    'ui.admin.rich.hint': 'You can use bold, italic, a heading, a list and a link.',
+    'ui.admin.rich.hint_message': 'You can use bold, italic, a heading, a list and a link. Placeholders such as {asiakas_nimi} stay in the text.',
   },
 };
 

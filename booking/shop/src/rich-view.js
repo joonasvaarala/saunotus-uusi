@@ -7,9 +7,10 @@ export function visibleText(raw) {
   return isRichHtml(s) ? toPlainText(s) : s;
 }
 
-export function richHost(h, raw, className) {
+export function richHost(h, raw, className, rich) {
   const s = String(raw ?? '');
-  if (!isRichHtml(s)) return h('p', { class: className || null, text: s });
+  // rich === false tulee täyttämättömästä pohjasta. Täytetty arvo ei saa muuttaa pelkkää tekstiä HTML:ksi.
+  if (rich === false || (rich !== true && !isRichHtml(s))) return h('p', { class: className || null, text: s });
   const el = h('div', { class: className ? `${className} bk-rich` : 'bk-rich' });
   el.innerHTML = sanitizeRich(s);
   return el;

@@ -32,8 +32,13 @@ export const GRACE_MS = 36 * 60 * 60 * 1000;
 const UNIT_MS = { minutes: 60 * 1000, hours: 60 * 60 * 1000, days: 24 * 60 * 60 * 1000 };
 const KEYS = PLACEHOLDERS.map((p) => p.key);
 
+// Paikkamerkin arvo on dataa. < > " eivät saa avata tagia tai attribuuttia (sama kuvaus kuin booking._message_fill).
+function placeholderValue(value) {
+  return String(value ?? '').replace(/[<>"]/g, (c) => (c === '<' ? '\u2039' : c === '>' ? '\u203a' : '\u201d'));
+}
+
 export function fillMessage(template, vars = {}) {
-  return String(template ?? '').replace(/\{([a-z_]+)\}/g, (raw, key) => (KEYS.includes(key) ? String(vars[key] ?? '') : raw));
+  return String(template ?? '').replace(/\{([a-z_]+)\}/g, (raw, key) => (KEYS.includes(key) ? placeholderValue(vars[key]) : raw));
 }
 
 export function timingLabel(row) {
