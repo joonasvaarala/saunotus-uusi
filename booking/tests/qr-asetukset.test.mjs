@@ -12,7 +12,7 @@ import { drinksQrUrl, printSheetHtml, printSheetSvg, sheetHasQr, stickerPlace } 
 import { h } from '../admin/ui.js';
 import { placeLabel } from '../drinks/drinks-logic.js';
 import { parseAdminHash } from '../admin/reservation-query.js';
-import { groupSettingKey, tabFromHash, visibleSettingTabs } from '../admin/settings-tabs.js';
+import { tabFromHash, visibleSettingTabs } from '../admin/settings-tabs.js';
 import { SETTINGS_TEXTS } from '../admin/settings-texts.js';
 import { createDrinksMock, DRINKS_QR } from '../drinks/drinks-mock.js';
 import { DRINKS_EXTRA, DRINKS_TEXTS } from '../drinks/drinks-texts.js';
@@ -21,6 +21,7 @@ const read = (rel) => readFileSync(new URL(rel, import.meta.url), 'utf8');
 const pending16 = JSON.parse(read('../../content/site-texts.pending-import-16.json'));
 const pending12 = JSON.parse(read('../../content/site-texts.pending-import-12.json'));
 const pending24 = JSON.parse(read('../../content/site-texts.pending-import-24.json'));
+const pending31 = JSON.parse(read('../../content/site-texts.pending-import-31.json'));
 const URL_QR = 'https://uusi.saunotus.com/juomat/?laite=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
 test('QR-osoite on lukittu polku ja tuloste ei ole tyhjä', () => {
@@ -93,28 +94,23 @@ test('pikakassaan voi valita myös verkkokaupan ulkopuolisen tuotteen', () => {
 });
 
 test('asetusten välilehti tulee osoitteesta ja staff näkee vain QR:n', () => {
-  assert.equal(groupSettingKey('invoice_bank'), 'laskutus');
-  assert.equal(groupSettingKey('checkout_company_invoice_enabled'), 'laskutus');
-  assert.equal(groupSettingKey('public_payment_mode'), 'maksut');
-  assert.equal(groupSettingKey('business_quote_notify_email'), 'sahkoposti');
-  assert.equal(groupSettingKey('seller'), 'kirjanpito');
-  assert.equal(groupSettingKey('rl_ip_per_10min'), 'rajat');
-  assert.equal(groupSettingKey('timezone'), 'yleiset');
-  const staff = visibleSettingTabs({ can: (p) => p === 'pos.use', keys: ['timezone', 'invoice_bank', 'public_payment_mode'] });
+  const staff = visibleSettingTabs({ can: (p) => p === 'pos.use', role: 'staff' });
   assert.deepEqual(staff, ['qr']);
-  const admin = visibleSettingTabs({
-    can: (p) => p === 'settings.edit' || p === 'pos.use',
-    keys: ['timezone', 'public_payment_mode', 'invoice_bank', 'seller', 'business_quote_notify_name'],
-  });
-  assert.ok(admin.includes('kirjanpito'));
-  assert.ok(admin.includes('qr'));
-  assert.ok(admin.includes('laskutus'));
-  assert.ok(admin.includes('maksut'));
-  assert.equal(admin.includes('varaukset'), false);
+  const manager = visibleSettingTabs({ can: (p) => p === 'settings.edit' || p === 'pos.use', role: 'manager' });
+  assert.ok(manager.includes('etusivu'));
+  assert.ok(manager.includes('varaukset'));
+  assert.ok(manager.includes('maksut'));
+  assert.ok(manager.includes('laskut'));
+  assert.ok(manager.includes('yhteydet'));
+  assert.ok(manager.includes('qr'));
+  assert.equal(manager.includes('tekninen'), false);
+  const admin = visibleSettingTabs({ can: (p) => p === 'settings.edit' || p === 'pos.use', role: 'admin' });
+  assert.ok(admin.includes('tekninen'));
   assert.equal(parseAdminHash('#/asetukset/maksut').path, 'asetukset');
   assert.equal(parseAdminHash('#/asetukset/maksut').rest, 'maksut');
   assert.equal(tabFromHash('#/asetukset/maksut', admin), 'maksut');
   assert.equal(tabFromHash('#/asetukset/maksut', staff), 'qr');
+  assert.equal(tabFromHash('#/asetukset/tekninen', manager), manager[0]);
   assert.equal(tabFromHash('#/varaukset?filter=treatment_unassigned', admin), admin[0]);
 });
 
@@ -168,7 +164,12 @@ test('näkymät eivät avaa tyhjää ikkunaa ja Procountor-kortti säilyy', () =
   assert.match(pos, /admin_set_pos_product/);
   assert.match(pos, /data-testid': 'pos-add'|data-testid": "pos-add"/);
   assert.match(settings, /data-testid': 'procountor-status'/);
-  assert.match(settings, /panel-kirjanpito/);
+  assert.match(settings, /panel-yhteydet/);
+  assert.equal(settings.includes('admin_set_vismapay_mode'), false);
+  assert.match(settings, /admin_set_procountor_settings/);
+  assert.match(settings, /renderCalendarExport/);
+  assert.equal(settings.includes('admin_set_booking_calendar'), false);
+  assert.equal(settings.includes('admin_set_setting'), false);
   assert.equal(settings.includes('Harjoitusajo'), false);
   assert.equal(settings.includes('Tilit puuttuvat'), false);
   assert.match(panel, /qr-preview/);
@@ -209,10 +210,10 @@ test('pending-import-16: vain uudet avaimet, FI+EN, ei numeroita', () => {
   for (const lang of ['fi', 'en']) {
     for (const [key, text] of Object.entries(SETTINGS_TEXTS[lang])) {
       const row16 = pending16.find((r) => r.key === key && r.lang === lang);
-      const row = row16 || pending24.find((r) => r.key === key && r.lang === lang);
+      const row = row16 || pending24.find((r) => r.key === key && r.lang === lang) || pending31.find((r) => r.key === key && r.lang === lang);
       assert.ok(row, key);
       assert.equal(row.text, text);
-      if (!row16) assert.equal(pending24.some((r) => r.key === key && r.lang === lang), true, key);
+      if (!row16) assert.equal(pending24.some((r) => r.key === key && r.lang === lang) || pending31.some((r) => r.key === key && r.lang === lang), true, key);
     }
     for (const [key, text] of Object.entries(DRINKS_EXTRA[lang])) {
       assert.equal(DRINKS_TEXTS[lang][key], undefined);

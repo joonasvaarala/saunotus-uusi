@@ -132,6 +132,9 @@ jobs:
       # booking_114-migraation, kun booking.skip_cron = on, ja kumoaa kaiken.
       - run: node --test booking/tests/varauskalenteri.test.mjs
       - run: node --test booking/tests/qr-asetukset.test.mjs booking/tests/tuote-luonti.test.mjs
+      # t123 (booking/supabase/tests/talous/t123_settings_ui.sql) ei ole tässä ajossa:
+      # työnkulussa ei ole Postgresia. Bottiavustus ajaa t123:n psql:llä migraatioiden jälkeen.
+      - run: node --test booking/tests/asetukset.test.mjs
       # lahjakoodi §13.12: kaupan ja hallinnan lunastuspyyntölogiikka (mockatut RPC:t)
       - run: node --test booking/tests/voucher-claims.test.mjs booking/tests/voucher-claims-admin.test.mjs booking/tests/lahjakoodi-vieritys.test.mjs
       - uses: actions/upload-pages-artifact@v3
