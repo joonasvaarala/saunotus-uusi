@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#2B3A30">
+<title>Asetukset (luonnos) – hallinta</title>
+<link rel="stylesheet" href="../../booking/admin/admin.css">
+<style>
+  /* Luonnoksen lisätyylit. Värit ja napit tulevat hallinnan admin.css:stä. */
+  .draft-note{margin:0 0 12px}
+  .warnbox{background:var(--warnbg);border:1px solid rgba(107,75,0,.35);border-radius:12px;padding:12px 14px;color:var(--ink)}
+  .warnbox strong{display:block;margin-bottom:2px}
+  .switch-row{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+  .switch-row p{margin:2px 0 0}
+  .switch{position:relative;flex:none;width:52px;height:32px;margin-top:2px}
+  .switch input{position:absolute;inset:0;width:100%;height:100%;min-height:0;margin:0;opacity:0;cursor:pointer}
+  .switch i{display:block;width:52px;height:32px;border-radius:999px;background:#cfc6bb;border:1px solid #8b7f73;position:relative}
+  .switch i::after{content:"";position:absolute;top:2px;left:2px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  .switch input:checked+i{background:var(--green);border-color:var(--green)}
+  .switch input:checked+i::after{left:22px}
+  .switch input:focus-visible+i{outline:3px solid var(--gold);outline-offset:2px}
+  .switch input:disabled+i{opacity:.55}
+  .unit{display:flex;align-items:center;gap:8px}
+  .unit input{max-width:120px}
+  .unit span{font-weight:400;color:var(--muted)}
+  .stat{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+  .stat:first-of-type{border-top:0;padding-top:0}
+  .stat b{color:var(--ink);font-weight:600}
+  .summary{margin:0;color:var(--ink)}
+  .savebar{margin-top:4px}
+  .savebar .btn{width:100%}
+  .card h2{margin:0 0 6px}
+  .card h3{margin:14px 0 6px}
+  .linkrow{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:44px;text-decoration:none;color:var(--ink);font-weight:600}
+  .toast{bottom:88px}
+  @media(min-width:900px){.toast{bottom:24px}}
+  /* Kuvakaappaus: palkit asiakirjan virrassa, jotta koko puhelinsivu mahtuu yhteen kuvaan. */
+  body.shot #shell{display:flex;flex-direction:column;min-height:0}
+  body.shot .top{position:static;order:1}
+  body.shot main{order:2;padding-bottom:16px}
+  body.shot .nav{position:static;order:3;height:auto;border-top:1px solid var(--line);border-right:0}
+</style>
+</head>
+<body>
+<div id="shell">
+  <header class="top">
+    <a class="brand" href="#etusivu"><img src="../../booking/admin/logo-haalea.svg" alt="Sauna hallinta" width="26" height="36"></a>
+    <span class="who">Joonas</span>
+    <button class="btn ghost sm" type="button">Kirjaudu ulos</button>
+  </header>
+  <nav class="nav" aria-label="Päävalikko">
+    <a href="#paiva" data-elsewhere><span class="lbl">Päivä</span></a>
+    <a href="#varauslista" data-elsewhere><span class="lbl">Varaukset</span></a>
+    <a href="#talous" data-elsewhere><span class="lbl">Talous</span></a>
+    <a href="#viestit" data-elsewhere><span class="lbl">Viestit</span></a>
+    <a href="#etusivu" aria-current="page"><span class="lbl">Asetukset</span></a>
+  </nav>
+  <main id="view">
+    <h1>Asetukset</h1>
+    <p class="muted draft-note">Luonnos näkymästä. Tiedot ovat esimerkkejä. Tallenna ei kirjoita mihinkään.</p>
+    <div class="set-tabs" role="tablist" aria-label="Asetusten osiot" id="tabs">
+      <a class="set-tab" role="tab" href="#etusivu" data-tab="etusivu">Etusivu</a>
+      <a class="set-tab" role="tab" href="#yritys" data-tab="yritys">Yritys</a>
+      <a class="set-tab" role="tab" href="#varaukset" data-tab="varaukset">Varaukset</a>
+      <a class="set-tab" role="tab" href="#maksut" data-tab="maksut">Maksut</a>
+      <a class="set-tab" role="tab" href="#sahkoposti" data-tab="sahkoposti">Sähköposti</a>
+      <a class="set-tab" role="tab" href="#lahjakortit" data-tab="lahjakortit">Lahjakortit</a>
+      <a class="set-tab" role="tab" href="#laskut" data-tab="laskut">Laskut ja kuitit</a>
+      <a class="set-tab" role="tab" href="#yhteydet" data-tab="yhteydet">Yhteydet</a>
+    </div>
+
+    <div class="stack" data-panel="etusivu">
+      <div class="warnbox" role="status">
+        <strong>Verkkomaksu on testitilassa</strong>
+        Visma Pay ja MobilePay eivät veloita asiakkaalta oikeaa rahaa. Procountor on pois. Sähköpostit eivät lähde: lähetys on harjoitusajossa.
+      </div>
+
+      <section class="card">
+        <h2>Verkkovaraus</h2>
+        <div class="switch-row">
+          <div>
+            <b>Asiakas voi varata verkossa</b>
+            <p class="muted">Pois päältä kauppa sanoo, että verkkovaraus ei ole käytössä, ja näyttää puhelinnumeron. Jo tehdyt varaukset säilyvät.</p>
+          </div>
+          <label class="switch"><input type="checkbox" checked data-pause><i></i><span class="muted" style="position:absolute;width:1px;height:1px;overflow:hidden">Verkkovaraus käytössä</span></label>
+        </div>
+        <div class="savebar"><button class="btn primary" type="button" data-save>Tallenna</button></div>
+      </section>
+
+      <section class="card">
+        <h2>Yritys</h2>
+        <p class="summary"><b>Havuhattu Oy</b><br>Y-tunnus 3018112-1 · ALV FI30181121<br>Hindsbyntie 124, 04130 Sipoo<br>010 299 2866 · savusauna@saunotus.fi</p>
+        <p><a href="#yritys">Muokkaa yritystietoja</a></p>
+      </section>
+
+      <section class="card">
+        <h2>Maksut ja yhteydet</h2>
+        <p class="muted">Tilat luetaan järjestelmästä. Niitä ei kytketä päälle tältä sivulta.</p>
+        <div class="stat"><span>Visma Pay</span><span class="badge warn">Testi</span></div>
+        <div class="stat"><span>MobilePay</span><span class="badge warn">Testi</span></div>
+        <div class="stat"><span>Sähköposti</span><span class="badge warn">Harjoitusajo</span></div>
+        <div class="stat"><span>Procountor</span><span class="badge">Pois</span></div>
+        <div class="stat"><span>Google-kalenteri</span><span class="badge">Pois</span></div>
+        <div class="stat"><span>Saunabot</span><span class="badge">Pois</span></div>
+        <p><a href="#yhteydet">Näytä yhteydet</a></p>
+      </section>
+
+      <section class="card">
+        <h2>Sinun oikeutesi</h2>
+        <p class="summary">Pääkäyttäjä. Käyttäjiä ja rooleja hallitaan omalla sivullaan.</p>
+        <p><a href="#kayttajat" data-elsewhere>Avaa käyttäjät</a></p>
+      </section>
+
+      <section class="card">
+        <a class="linkrow" href="#qr">QR-tarrat juomille <span aria-hidden="true">→</span></a>
+        <p class="muted">Tulostettava koodi tuotteelle. Ei ole asetus. Näkyy myös henkilökunnalle, joka käyttää pikakassaa.</p>
+      </section>
+    </div>
+
+    <div class="stack" data-panel="yritys" hidden>
+      <section class="card">
+        <h2>Nimi ja yhteystiedot</h2>
+        <p class="muted">Nämä tulostuvat kuittiin ja näkyvät kaupassa. Kellonaika on Europe/Helsinki, eikä sitä vaihdeta tästä.</p>
+        <div class="stack">
+          <label class="fld">Nimi kaupassa<input value="Sipoonjoen Perinnesauna"><small>Nimi, jonka asiakas näkee varatessaan.</small></label>
+          <label class="fld">Nimi kuitissa<input value="Havuhattu Oy / Sipoonjoen Perinnesauna"><small>Kuitin ensimmäinen rivi.</small></label>
+          <label class="fld">Virallinen nimi<input value="Havuhattu Oy"></label>
+          <label class="fld">Toiminimi<input value="Sipoonjoen Perinnesauna"></label>
+          <label class="fld">Y-tunnus<input value="3018112-1" inputmode="numeric" autocomplete="off"><small>Muoto 1234567-8.</small></label>
+          <label class="fld">ALV-tunnus<input value="FI30181121" autocomplete="off"><small>Muoto FI ja kahdeksan numeroa. Tarkista, että tunnus on oikea.</small></label>
+          <label class="fld">Katuosoite<input value="Hindsbyntie 124"></label>
+          <label class="fld">Postinumero<input value="04130" inputmode="numeric"></label>
+          <label class="fld">Postitoimipaikka<input value="Sipoo"></label>
+          <label class="fld">Puhelin<input type="tel" value="010 299 2866"></label>
+          <label class="fld">Sähköposti<input type="email" value="savusauna@saunotus.fi"></label>
+          <label class="fld">Verkkosivu<input value="https://saunotus.fi"></label>
+          <label class="fld">Kuitin alatunniste<input value="Kiitos käynnistä!"></label>
+          <p class="muted">Kuittilogo on käytössä. Logon osoitetta ei vaihdeta tästä.</p>
+        </div>
+        <div class="savebar"><button class="btn primary" type="button" data-save>Tallenna yritystiedot</button></div>
+      </section>
+    </div>
+
+    <div class="stack" data-panel="varaukset" hidden>
+      <section class="card">
+        <h2>Kuinka pitkälle voi varata</h2>
+        <p class="muted">Kaksi eri ikkunaa. Savusaunan vuorot ja hoidot eivät käytä samaa lukua.</p>
+        <div class="stack">
+          <label class="fld">Savusauna ja yleiset vuorot<span class="unit"><input type="number" min="1" max="730" value="120"><span>päivää</span></span><small>Asiakas näkee ajat näin pitkälle.</small></label>
+          <label class="fld">Hoidot<span class="unit"><input type="number" min="1" max="180" value="14"><span>päivää</span></span><small>Hoitojen oma, lyhyempi ikkuna.</small></label>
+        </div>
+        <div class="savebar"><button class="btn primary" type="button" data-save>Tallenna</button></div>
+      </section>
+      <section class="card">
+        <h2>Milloin viimeistään</h2>
+        <div class="stack">
+          <label class="fld">Hoito varattava viimeistään<span class="unit"><input type="number" min="0" max="1440" value="120"><span>minuuttia ennen</span></span><small>Ei koske savusaunavuoroja.</small></label>
+          <label class="fld">Asiakas voi muuttaa varaustaan viimeistään<span class="unit"><input type="number" min="0" max="720" value="48"><span>tuntia ennen</span></span><small>Siirto toiseen vuoroon tai henkilömäärä. Vahvistettua varausta asiakas ei peru itse: peruutus tulee sähköpostilla.</small></label>
+          <p class="muted">Savusaunavuoron oma takaraja (esimerkiksi 15 minuuttia tai 12 tuntia ennen alkua) on kunkin vuoron säännössä, ei tässä.</p>
+        </div>
+        <div class="savebar"><button class="btn primary" type="button" data-save>Tallenna</button></div>
+      </section>
+      <section class="card">
+        <h2>Iso ryhmä ja vuosikortti</h2>
+        <div class="stack">
+          <label class="fld">Alustava varaus, kun henkilöitä vähintään<span class="unit"><input type="number" min="0" max="100" value="0"><span>henkilöä</span></span><small>0 = ei käytössä. Nyt jokainen verkkovaraus kulkee normaalin maksun kautta.</small></label>
+          <label class="fld">Vuosikortilla henkilöitä<input type="number" min="1" max="20" value="1" style="max-width:120px"><small>Ilmainen yleinen vuoro. Yksi tuleva varaus kerrallaan.</small></label>
+        </div>
+        <div class="savebar"><button class="btn primary" type="button" data-save>Tallenna</button></div>
+      </section>
+    </div>
+
+    <div class="stack" data-panel="maksut" hidden>
+      <section class="card">
+        <h2>Miten asiakas maksaa</h2>
+        <p class="muted">Näitä ei vaihdeta puhelimesta. Testi ei veloita oikeaa rahaa. Live kytketään erikseen.</p>
+        <div class="stat"><span>Maksutila</span><b>Maksetaan paikan päällä</b></div>
+        <div class="stat"><span>Visma Pay</span><span class="badge warn">Testi</span></div>
+        <div class="stat"><span>MobilePay</span><span class="badge warn">Testi</span></div>
+        <div class="stat"><span>Maksa myöhemmin -testi</span><span class="badge">Pois</span></div>
+      </section>
+      <section class="card">
+        <h2>Kun paikka odottaa maksua</h2>
+        <p class="muted">Nämä minuutit vaikuttavat vasta, kun maksutila on “pidä kunnes maksettu”. Nyt varaus vahvistuu heti ja maksetaan paikan päällä, joten lukujen muuttaminen ei muuta kauppaa.</p>
+        <div class="stack">
+          <label class="fld">Paikan pito<span class="unit"><input type="number" min="5" max="60" value="15"><span>minuuttia</span></span></label>
+          <label class="fld">Lisäaika, jos MobilePay on kesken<span class="unit"><input type="number" min="0" max="60" value="15"><span>minuuttia</span></span></label>
+          <label class="fld">Odotuksen katto<span class="unit"><input type="number" min="0" max="120" value="30"><span>minuuttia</span></span></label>
+        </div>
+        <div class="savebar"><button class="btn primary" type="button" data-save>Tallenna</button></div>
+      </section>
+      <section class="card">
+        <h2>Yrityslasku kassalla</h2>
+        <div class="switch-row">
+          <div>
+            <b>Yritys voi valita laskun</b>
+            <p class="muted">Varaus vahvistuu, maksu tulee laskulla. Tämä ei lähetä laskua Procountoriin.</p>
+          </div>
+          <label class="switch"><input type="checkbox" checked><i></i></label>
+        </div>
+        <div class="savebar"><button class="btn primary" type="button" data-save>Tallenna</button></div>
+      </section>
+      <section class="card">
+        <h2>Kun kirjaat maksun hallinnassa</h2>
+        <p class="muted">Nämä tavat näkyvät henkilökunnalle. Verkkomaksu ei ole tämä lista.</p>
+        <div class="stack">
+          <div class="switch-row"><div><b>Korttipääte</b></div><label class="switch"><input type="checkbox" checked><i></i></label></div>
+          <div class="switch-row"><div><b>Tilisiirto</b></div><label class="switch"><input type="checkbox" checked><i></i></label></div>
+          <div class="switch-row"><div><b>Lasku</b></div><label class="switch"><input type="checkbox" checked><i></i></label></div>
+          <div class="switch-row"><div><b>Lahjakortti</b></div><label class="switch"><input type="checkbox" checked><i></i></label></div>
+          <div class="switch-row"><div><b>Kumppanin lahjakortti</b></div><label class="switch"><input type="checkbox" checked><i></i></label></div>
+          <div class="switch-row"><div><b>Muu</b></div><label class="switch"><input type="checkbox" checked><i></i></label></div>
+          <div class="switch-row"><div><b>Käteinen</b><p class="muted">Ei käytössä. Ei voi kytkeä päälle tästä.</p></div><label class="switch"><input type="checkbox" disabled><i></i></label></div>
+        </div>
+        <div class="savebar"><button class="btn primary" type="button" data-save>Tallenna</button></div>
+      </section>
+    </div>
+
+    <div class="stack" data-panel="sahkoposti" hidden>
+      <section class="card">
+        <h2>Lähetys</h2>
+        <div class="stat"><span>Tila</span><span class="badge warn">Harjoitusajo</span></div>
+        <div class="stat"><span>Vastaanottajarajaus</span><b>Päällä</b></div>
+        <p class="muted">Harjoitusajossa viestiä ei lähetetä. Rajausta ei tyhjennetä eikä tilaa vaihdeta liveksi tältä sivulta. Jos lähetys on joskus live ja rajaus puuttuu, etusivu varoittaa.</p>
+      </section>
+      <section class="card">
+        <h2>Lähettäjä</h2>
+        <div class="stack">
+          <label class="fld">Nimi<input value="Sipoonjoen Perinnesauna"><small>Näkyy vastaanottajalle. Osoite ei vaihdu.</small></label>
+          <p class="muted">Lähettävä osoite: savusauna@saunotus.fi</p>
+          <label class="fld">Vastausosoite<input type="email" value="savusauna@saunotus.fi"><small>Asiakkaan vastaus tulee tähän. Tarjouspyynnössä vastaus menee silti asiakkaan osoitteeseen.</small></label>
+          <p class="muted">Allekirjoitus viestien lopussa: Tapio. Nimeä ei vaihdeta, ennen kuin siitä on päätetty.</p>
+        </div>
+        <div class="savebar"><button class="btn primary" type="button" data-save>Tallenna</button></div>
+      </section>
+      <section class="card">
+        <h2>Henkilökunnalle</h2>
+        <div class="stack">
+          <label class="fld">Tarjouspyynnöt osoitteeseen<input type="email" value="savusauna@saunotus.fi"><small>Tyhjä kenttä = tarjouspyynnöstä ei lähde sisäistä viestiä. Uudesta verkkovarauksesta ei lähde erillistä viestiä.</small></label>
+          <label class="fld">Tervehdysnimi<input value="Joonas"></label>
+        </div>
+        <div class="savebar"><button class="btn primary" type="button" data-save>Tallenna</button></div>
+      </section>
+      <section class="card">
+        <h2>Viestit</h2>
+        <div class="stat"><span>Ajastetut viestit</span><span class="badge">Pois</span></div>
+        <p class="muted">Kytkin on Viestit-sivulla. Lyhyt ohje tilausvahvistuksessa ei riipu siitä. Pohjat, palautepyyntö ja arvostelulinkki tehdään siellä.</p>
+        <p><a href="#viestit" data-elsewhere>Avaa Viestit</a></p>
+      </section>
+    </div>
+
+    <div class="stack" data-panel="lahjakortit" hidden>
+      <section class="card">
+        <h2>Omat lahjakortit</h2>
+        <div class="stack">
+          <div class="switch-row"><div><b>Myynti verkossa</b><p class="muted">Oletus pois. Päälle kytkeminen kysyy vahvistuksen.</p></div><label class="switch"><input type="checkbox" data-arm="lahjakorttien myynnin"><i></i></label></div>
+          <div class="switch-row"><div><b>Lunastus</b><p class="muted">Kassalla ja verkossa. Oletus pois.</p></div><label class="switch"><input type="checkbox" data-arm="lahjakorttien lunastuksen"><i></i></label></div>
+          <label class="fld">Kortteja yhdessä ostossa<input type="number" min="1" max="30" value="10" style="max-width:120px"></label>
+          <p class="muted">Voimassaolo on paketilla, nyt 6 kuukautta. Yksittäiselle kortille ajan voi antaa lahjakortin myynnissä (1–12 kk). Yhteistä aikaa ei ole.</p>
+        </div>
+        <div class="savebar"><button class="btn primary" type="button" data-save>Tallenna</button></div>
+      </section>
+      <section class="card">
+        <h2>Muut kortit</h2>
+        <div class="stat"><span>Johku-korttien lunastus</span><span class="badge">Pois</span></div>
+        <p class="muted">Pidetään pois, kunnes Johkun kortit on suljettu. Muuten saman kortin voi lunastaa kahdesti. Ei kytkintä.</p>
+        <div class="stat"><span>Kumppanikoodit verkossa</span><span class="badge">Pois</span></div>
+        <div class="stat"><span>Ongelmaviesti asiakkaalle</span><span class="badge">Pois</span></div>
+        <div class="stat"><span>Kumppanikoodi kuitille</span><span class="badge">Ei kuittia</span></div>
+        <div class="stack" style="margin-top:12px">
+          <label class="fld">Pyyntöjä yhdessä tilauksessa<input type="number" min="1" max="30" value="10" style="max-width:120px"></label>
+          <label class="fld">Muistutus, kun pyyntö on ollut auki<span class="unit"><input type="number" min="1" max="720" value="24"><span>tuntia</span></span><small>Pyyntö ei vanhene itsestään.</small></label>
+        </div>
+        <div class="savebar"><button class="btn primary" type="button" data-save>Tallenna</button></div>
+      </section>
+    </div>
+
+    <div class="stack" data-panel="laskut" hidden>
+      <section class="card">
+        <h2>Lasku</h2>
+        <div class="stack">
+          <label class="fld">Eräpäivä<span class="unit"><input type="number" min="1" max="90" value="14"><span>päivää</span></span></label>
+          <label class="fld">IBAN<input value="" placeholder="FI00 0000 0000 0000 00" autocomplete="off"><small>Tyhjä, kunnes tili on annettu. Välit saa jättää.</small></label>
+          <label class="fld">BIC<input value="" placeholder="NDEAFIHH" autocomplete="off"></label>
+          <label class="fld">Pankin nimi<input value=""></label>
+        </div>
+        <div class="savebar"><button class="btn primary" type="button" data-save>Tallenna</button></div>
+      </section>
+      <section class="card">
+        <h2>Lähetys ja kuitit</h2>
+        <div class="stat"><span>Lähetys Procountoriin</span><span class="badge warn">Harjoitusajo</span></div>
+        <p class="muted">Harjoitusajo ei lähetä laskua. Tuotantolähetystä ei kytketä tästä.</p>
+        <div class="stat"><span>Kuitti</span><b>K</b></div>
+        <div class="stat"><span>Hyvityskuitti</span><b>H</b></div>
+        <div class="stat"><span>Lahjakortin tiedoksi-kuitti</span><b>L</b></div>
+        <p class="muted">Kirjaimia ei vaihdeta. Kuitin nimi, y-tunnus ja ALV tulevat yritystiedoista.</p>
+      </section>
+    </div>
+
+    <div class="stack" data-panel="yhteydet" hidden>
+      <section class="card">
+        <h2>Visma Pay</h2>
+        <div class="stat"><span>Tila</span><span class="badge warn">Testi</span></div>
+        <p class="muted">Asiakas voi kokeilla maksua. Oikeaa veloitusta ei tehdä. Tuotantoon vaihtoa ei ole tällä sivulla.</p>
+      </section>
+      <section class="card">
+        <h2>MobilePay</h2>
+        <div class="stat"><span>Tila</span><span class="badge warn">Testi</span></div>
+        <p class="muted">Testisovellus, ei oikeaa rahaa.</p>
+      </section>
+      <section class="card">
+        <h2>Sähköposti</h2>
+        <div class="stat"><span>Tila</span><span class="badge warn">Harjoitusajo</span></div>
+        <div class="stat"><span>Vastaanottajarajaus</span><b>Päällä</b></div>
+        <p class="muted">Listaa ei näytetä eikä tyhjennetä tässä.</p>
+      </section>
+      <section class="card">
+        <h2>Procountor</h2>
+        <div class="stat"><span>Tila</span><span class="badge">Pois</span></div>
+        <div class="stat"><span>Ympäristö</span><b>Testi</b></div>
+        <div class="stat"><span>Päiväkirjaus</span><b>Pois</b></div>
+        <div class="stat"><span>Tilit</span><b>Puuttuvat</b></div>
+        <div class="stat"><span>Pankkitili</span><b>Puuttuu</b></div>
+        <p class="muted">Viimeisin ajo: ei ajoa. Tilikarttaa ja tuotantotilaa ei muokata tästä.</p>
+      </section>
+      <section class="card">
+        <h2>Google-kalenteri</h2>
+        <div class="stat"><span>Varausvienti</span><span class="badge">Pois</span></div>
+        <p class="muted">Ei kalenteritunnusta. Käyttöönotto tehdään erikseen. Sulkukalenterit synkronoituvat omalla tavallaan, eikä niitä säädetä tästä.</p>
+      </section>
+      <section class="card">
+        <h2>Muu</h2>
+        <div class="stat"><span>Saunabot</span><span class="badge">Pois</span></div>
+        <p class="muted">Ei tuotannossa. Sivuston arvostelut tulevat erillisestä tiedostosta. Palautepyyntö tehdään Viestit-sivulla.</p>
+        <div class="stat"><span>Sivuston osoite</span><b>uusi.saunotus.com</b></div>
+      </section>
+    </div>
+
+    <div class="stack" data-panel="qr" hidden>
+      <section class="card">
+        <h2>QR-tarrat</h2>
+        <p class="muted">Valitse tuote, johon koodi johtaa. Tuotteen ei tarvitse näkyä verkkokaupassa. Tämä on tulostustyökalu, ei asetus. Luonnoksessa listaa ei ladata.</p>
+        <p><a href="#etusivu">Takaisin etusivulle</a></p>
+      </section>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+(function () {
+  var tabs = ['etusivu', 'yritys', 'varaukset', 'maksut', 'sahkoposti', 'lahjakortit', 'laskut', 'yhteydet', 'qr'];
+  function show(id) {
+    if (tabs.indexOf(id) < 0) id = 'etusivu';
+    document.querySelectorAll('[data-panel]').forEach(function (p) {
+      p.hidden = p.getAttribute('data-panel') !== id;
+    });
+    document.querySelectorAll('[data-tab]').forEach(function (a) {
+      var on = a.getAttribute('data-tab') === id;
+      a.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    var active = document.querySelector('[data-tab="' + id + '"]');
+    if (active) active.scrollIntoView({ inline: 'center', block: 'nearest' });
+  }
+  function fromHash() {
+    var id = (location.hash || '#etusivu').slice(1);
+    show(id);
+  }
+  if (new URLSearchParams(location.search).get('shot') === '1') document.body.classList.add('shot');
+  window.addEventListener('hashchange', fromHash);
+  fromHash();
+  var toast = document.getElementById('toast');
+  var timer;
+  function say(text) {
+    toast.textContent = text;
+    toast.classList.add('show');
+    clearTimeout(timer);
+    timer = setTimeout(function () { toast.classList.remove('show'); }, 2400);
+  }
+  document.querySelectorAll('[data-elsewhere]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      say('Luonnos: tämä avautuu omalle sivulleen');
+    });
+  });
+  document.querySelectorAll('[data-save]').forEach(function (b) {
+    b.addEventListener('click', function () { say('Luonnos: mitään ei tallennettu'); });
+  });
+  document.querySelectorAll('[data-arm]').forEach(function (input) {
+    input.addEventListener('change', function () {
+      if (!input.checked) return;
+      var ok = window.confirm('Otetaanko ' + input.getAttribute('data-arm') + ' käyttöön? Oletus on pois.');
+      if (!ok) input.checked = false;
+    });
+  });
+  var pause = document.querySelector('[data-pause]');
+  pause.addEventListener('change', function () {
+    if (pause.checked) return;
+    var ok = window.confirm('Suljetaanko verkkovaraus? Asiakas ei voi tehdä uutta varausta. Jo tehdyt varaukset säilyvät.');
+    if (!ok) pause.checked = true;
+  });
+})();
+</script>
+</body>
+</html>
