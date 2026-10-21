@@ -102,6 +102,7 @@ begin
   perform public.t121_ck(dec ->> 'reason' = 'no_arrival', 'D13 ei saapumista');
   perform public.t121_ck(booking._message_fill('Hei {asiakas_nimi} {tuntematon}', '{"asiakas_nimi":"Aada"}'::jsonb) = 'Hei Aada {tuntematon}', 'F1 paikkamerkki');
   perform public.t121_ck(booking._message_fill('x {linkki}', '{}'::jsonb) = 'x ', 'F2 tyhjä merkki');
+  perform public.t121_ck(position('<' in booking._message_fill('Hei {asiakas_nimi}', jsonb_build_object('asiakas_nimi', '<a href="https://evil.example/pay">Maksa lisämaksu</a>'))) = 0, 'F3 nimi ei ole tagi');
 
   insert into auth.users(id, email) values (u_staff, 't121-staff@example.test'), (u_mgr, 't121-mgr@example.test');
   insert into booking.staff(user_id, email, name, role) values

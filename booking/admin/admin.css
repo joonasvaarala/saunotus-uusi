@@ -684,5 +684,24 @@ html.pos-modal-open,body.pos-modal-open{overflow:hidden}
   .qr-card{border:0}
   .qr-card svg{width:70mm;height:70mm}
 }
+/* Rich-teksti (Trix): työkalurivi rivittyy, kosketuskohde vähintään 44 px. Ei sinistä aktiiviväriä. */
+.rich-field{display:grid;gap:6px;min-width:0}
+.rich-field trix-toolbar{display:block}
+.rich-field .trix-button-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.rich-field .trix-button-group{display:flex;flex-wrap:wrap;gap:4px;margin:0;border:0;float:none}
+.rich-field trix-toolbar .trix-button{float:none;min-width:44px;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--green);font:600 13px/1.1 inherit;letter-spacing:0}
+.rich-field trix-toolbar .trix-button:not(:first-child){border-left:1px solid var(--line)}
+.rich-field trix-toolbar .trix-button.trix-active{background:#efe7d6;color:var(--green)}
+.rich-field trix-toolbar .trix-button:disabled{opacity:.45}
+.rich-field trix-editor{display:block;min-height:140px;max-height:50vh;overflow:auto;border:1px solid #8b7f73;border-radius:8px;padding:10px 12px;background:#fff;color:var(--ink);line-height:1.45}
+.rich-field trix-editor h2{font-size:1.3rem;margin:.35em 0;color:var(--ink)}
+.rich-field trix-editor h3{font-size:1.08rem;margin:.35em 0;color:var(--ink)}
+.rich-field trix-editor ul,.rich-field trix-editor ol{padding-left:1.2em;margin:.3em 0}
+.rich-field trix-editor a{color:var(--gold);text-decoration:underline}
+.rich-field .trix-dialog{border:1px solid var(--line);border-radius:8px;padding:8px;background:#fff}
+.rich-field .trix-dialog__link-fields{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.rich-field .trix-input--dialog{flex:1 1 180px;min-height:44px;min-width:0}
+.rich-field .trix-button--dialog{min-height:44px}
+@media(max-width:640px){.rich-field trix-toolbar .trix-button{flex:1 1 calc(50% - 4px)}}
 @media(min-width:700px){.pos-grid{grid-template-columns:repeat(3,1fr)}}
 @media(min-width:800px){.pos-layout{grid-template-columns:minmax(0,1fr) 280px}.pos-side{position:sticky;top:72px;bottom:auto}}

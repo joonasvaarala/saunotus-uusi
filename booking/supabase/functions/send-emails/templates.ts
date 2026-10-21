@@ -8,6 +8,7 @@ export interface Rendered { subject: string; text: string; html: string }
 // Asiakasnäkyvät tekstit: texts.ts (repon oletukset = varateksti) tai tietokannasta (email.*-avaimet, _shared/site_texts.ts). render() ottaa valinnaisen tekstihaun (4. parametri).
 import { makeT, type TFn } from "../_shared/site_texts.ts";
 import { EMAIL_TEXTS } from "./texts.ts";
+import { isRichHtml, richToText, emailHtml } from "../_shared/rich-text.js";
 export { EMAIL_TEXTS };
 const DEFAULT_T: TFn = makeT(EMAIL_TEXTS);
 type X = (key: string, vars?: Record<string, string | number | null | undefined>) => string;
@@ -26,6 +27,24 @@ const GREEN = "#1f3d2b", GREEN_SOFT = "#3d5c47", SAND = "#efe7d6", SAND_LIGHT = 
 const FONT = "Georgia,'Times New Roman',serif", SANS = "Arial,Helvetica,sans-serif";
 
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+const RICH_EMAIL = {
+  p: `margin:0 0 12px;font-family:${SANS};font-size:15px;line-height:1.5;color:${INK}`,
+  h2: `margin:16px 0 8px;font-family:${FONT};font-size:20px;line-height:1.3;color:${GREEN};font-weight:normal`,
+  h3: `margin:14px 0 6px;font-family:${SANS};font-size:16px;line-height:1.35;color:${GREEN};font-weight:bold`,
+  ul: `margin:0 0 12px;padding:0 0 0 20px;font-family:${SANS};font-size:15px;line-height:1.5;color:${INK}`,
+  ol: `margin:0 0 12px;padding:0 0 0 20px;font-family:${SANS};font-size:15px;line-height:1.5;color:${INK}`,
+  li: `margin:0 0 4px`,
+  a: `color:${GREEN};text-decoration:underline`,
+};
+// rich === false: pohja on pelkkää tekstiä, vaikka täytetty merkkijono näyttäisi tagilta.
+// rich === true: pohja on rich. Puuttuva lippu (vanhat testit, ei viestipohjaa) päättelee merkkijonosta.
+function customerHtml(raw: string, templateRich?: unknown): { text: string; html: string; rich: boolean } {
+  const rich = templateRich === false ? false : templateRich === true ? true : isRichHtml(raw);
+  if (!rich) return { text: raw, html: esc(raw).replace(/\n/g, "<br>"), rich: false };
+  const html = emailHtml(raw, RICH_EMAIL);
+  if (!html) return { text: raw, html: esc(raw).replace(/\n/g, "<br>"), rich: false };
+  return { text: richToText(raw), html, rich: true };
+}
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 /** Tarjouspyynnön ilmoituksessa reply-to on asiakkaan osoite, jotta siihen voi vastata suoraan. Muissa lajeissa käytetään Resendin yhteistä reply_to-asetusta. */
 /** Tuoteviestiä ei lähetetä, jos pohja on pois päältä, tilaus on peruttu tai hyvitetty, tai teksti on tyhjä. null = saa renderöidä. Allowlistia tämä ei koske. */
@@ -130,15 +149,17 @@ function orderBlock(d: any, en: boolean, X: X): Block {
 const textBlock = (...parts: (string | undefined | false)[]) => parts.filter((x) => typeof x === "string" && x !== "").join("\n\n");
 function instructionNotes(list: unknown, title: string): { text: string; html: string } {
   const rows = (Array.isArray(list) ? list : []).map((row) => {
-    const item = row as { title?: unknown; text?: unknown };
-    const text = String(item?.text ?? "").trim();
+    const item = row as { title?: unknown; text?: unknown; rich?: unknown };
+    const raw = String(item?.text ?? "").trim();
     const head = String(item?.title ?? "").trim();
-    return text ? { head, text } : null;
-  }).filter((row): row is { head: string; text: string } => !!row);
+    if (!raw) return null;
+    const body = customerHtml(raw, item.rich);
+    return { head, text: body.text, html: body.html };
+  }).filter((row): row is { head: string; text: string; html: string } => !!row);
   if (!rows.length) return { text: "", html: "" };
   const text = [title, ...rows.map((row) => [row.head, row.text].filter(Boolean).join("\n"))].join("\n\n");
   const html = box(`<span style="font-family:${SANS};font-size:12px;color:${MUTED};text-transform:uppercase;letter-spacing:.04em">${esc(title)}</span><br><br>`
-    + rows.map((row) => `<span style="font-family:${SANS};font-size:14px;line-height:1.5;color:${INK}">${row.head ? `<b>${esc(row.head)}</b><br>` : ""}${esc(row.text).replace(/\n/g, "<br>")}</span>`).join("<br><br>"));
+    + rows.map((row) => `<span style="font-family:${SANS};font-size:14px;line-height:1.5;color:${INK}">${row.head ? `<b>${esc(row.head)}</b><br>` : ""}${row.html}</span>`).join("<br><br>"));
   return { text, html };
 }
 
@@ -353,14 +374,17 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const pm = d?.product_message || {};
       const subject = String(pm.subject || "").replace(/[<>]/g, "").replace(/\s+/g, " ").trim() || X("email.product_message.subject_fallback", { no });
       const body = String(pm.text || "").trim();
+      const shown = customerHtml(body, pm.rich);
       const rawLink = String(pm.link_url || "").trim();
       const link = /^https:\/\/\S+$/.test(rawLink) ? rawLink : "";
       const linkLabel = X("email.product_message.open_link");
       const rawUnsub = pm.category === "after_marketing" ? String(pm.unsubscribe_url || "").trim() : "";
       const unsub = /^https:\/\/\S+$/.test(rawUnsub) ? rawUnsub : "";
       const unsubLabel = unsub ? X("email.product_message.unsubscribe") : "";
-      const text = textBlock(hello, body, link, orderUrl && `${viewLabel}:\n${orderUrl}`, unsub && `${unsubLabel}\n${unsub}`, contact, sign) + "\n";
-      const html = mk(subject, body.slice(0, 140) || subject, h1(subject) + helloRow + (body ? p(esc(body).replace(/\n/g, "<br>")) : "") + (link ? button(link, linkLabel) : "") + (orderUrl ? button(orderUrl, viewLabel) : "") + (unsub ? p(`<a href="${esc(unsub)}" style="color:${MUTED};font-size:13px">${esc(unsubLabel)}</a>`, `color:${MUTED};font-size:13px`) : "") + tail);
+      const pre = (shown.rich ? shown.text.replace(/\s+/g, " ").trim() : body).slice(0, 140);
+      const bodyRow = body ? (shown.rich ? `<tr><td style="padding:0 32px 14px 32px">${shown.html}</td></tr>` : p(shown.html)) : "";
+      const text = textBlock(hello, shown.text, link, orderUrl && `${viewLabel}:\n${orderUrl}`, unsub && `${unsubLabel}\n${unsub}`, contact, sign) + "\n";
+      const html = mk(subject, pre || subject, h1(subject) + helloRow + bodyRow + (link ? button(link, linkLabel) : "") + (orderUrl ? button(orderUrl, viewLabel) : "") + (unsub ? p(`<a href="${esc(unsub)}" style="color:${MUTED};font-size:13px">${esc(unsubLabel)}</a>`, `color:${MUTED};font-size:13px`) : "") + tail);
       return { subject, text, html };
     }
     case "payment_link": {

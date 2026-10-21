@@ -17,6 +17,8 @@ import { ht, holdError, methodList } from './hold-texts.js';
 import { normCheckout, isHoldView, holdModeOf, giftWasUsed } from './hold-logic.js';
 import { holdPanel } from './hold-ui.js';
 import { normBusinessId, validBusinessId, normOvt, validOvt, validOperator } from './invoice-validate.js';
+import { isRichHtml } from './rich-text.js';
+import { visibleText, richHost } from './rich-view.js';
 
 const S = window.BOOKING_SHOP;                   // build-aikainen konfiguraatio (kieli, polut, ei-verkossa-varattavat tuotteet)
 const t = T[S.lang] || T.fi;
@@ -80,7 +82,7 @@ const texts = createTexts({ lang: S.lang, format: { price: (n) => money(n), dura
 const state = { catalog: null, settings: null, images: new Map(), treatments: [], months: new Map(), busy: false };
 // tyhjät (null/false) lapset ohitetaan: replaceChildren(null) kirjoittaisi sivulle tekstin "null" (esim. tuotesivu ilman hoitovalitsinta)
 const mount = (...nodes) => { root.replaceChildren(...nodes.flat().filter((n) => n != null && n !== false)); root.setAttribute('aria-busy', 'false'); };
-const focusTop = () => { const el = root.querySelector('h2,h1') || document.querySelector('main .hero.page h1'); if (el) { el.setAttribute('tabindex', '-1'); el.focus({ preventScroll: false }); } };
+const focusTop = () => { const el = [...root.querySelectorAll('h2,h1')].find((n) => !n.closest('.bk-rich')) || document.querySelector('main .hero.page h1'); if (el) { el.setAttribute('tabindex', '-1'); el.focus({ preventScroll: false }); } };
 const spinner = () => mount(h('p', { class: 'bk-loading', role: 'status', text: t.loading }));
 const errorBox = (msg) => h('p', { class: 'bk-error', role: 'alert', text: msg });
 const phoneBox = () => h('p', { class: 'bk-contact' }, h('a', { href: `tel:${S.phoneTel}`, text: S.phone }), ' · ', h('a', { href: `mailto:${S.email}`, text: S.email }));
@@ -109,6 +111,9 @@ async function loadBase() {
   await applyShopTexts(S, { rows: siteTexts, data: { catalog, settings: settings || {}, format: { price: (n) => money(n), duration: (m) => fmtMinutes(m) } } });   // osa 3: sanakirjat DB-tekstein (puuttuva avain → repon oletus)
   const split = splitCatalog(catalog, stat);   // vuoropohjaiset tuotteet (rules) ja hoito-/rituaalituotteet (slots) erikseen
   state.catalog = split.rules; state.treatments = audience === 'business' ? [] : split.treatments; treatmentsReady = Promise.resolve(); state.settings = settings || {};
+  // ?mock=1&rich=1 ja window.BOOKING_RICH_SAMPLE: paikallinen kuvakaappaus. Ei tallenna, ei koske muita tuotteita.
+  const richDemo = MOCK && new URLSearchParams(location.search).get('rich') === '1' && typeof window.BOOKING_RICH_SAMPLE === 'string' ? window.BOOKING_RICH_SAMPLE : '';
+  if (richDemo) { const sample = [...state.catalog, ...state.treatments][0]; if (sample) { sample.description = richDemo; sample.description_en = richDemo; } }
   for (const i of Array.isArray(imgs) ? imgs : []) if (i?.path) state.images.set(+i.product_id, { url: storageUrl('product-images', i.path), alt: i.alt || '' });
 }
 // Tuotekuva: kiinteä kuvasuhde (varaa tilan → ei layout-hyppyä), lazy-lataus, alt = ylläpidon alt-teksti tai tuotteen nimi.
@@ -138,7 +143,8 @@ const dayState = (rows) => (!rows?.length ? 'none' : rows.some((r) => r.status =
 // Sivun oma hero (<section class="hero page">) on build-aikaista HTML:ää: oletus palautetaan kaikissa muissa näkymissä. Ei erillistä hero-kenttää: sama tuotekuva (object-fit: cover, keskitetty).
 // Lyhyt kuvaus: ensimmäinen virke (ei katkaista kellonaikojen pisteistä "16.30"), enintään ~130 merkkiä sanarajalta. Pitkä kuvaus pysyy sisältöosassa.
 const shortDesc = (p) => {
-  const d = (pdesc(p) || '').replace(/\s+/g, ' ').trim(); if (!d) return '';
+  const raw = pdesc(p) || '';
+  const d = (isRichHtml(raw) ? visibleText(raw) : raw).replace(/\s+/g, ' ').trim(); if (!d) return '';
   const m = d.match(/^.{20,}?[.!?](?=\s+[A-ZÅÄÖ])/u); let x = m ? m[0] : d;
   if (x.length > 130) x = `${x.slice(0, 130).replace(/\s+\S*$/, '')}…`;
   return x;
@@ -162,6 +168,12 @@ function setHero(p) {
   if (sub) { sub.textContent = p ? shortDesc(p) : hero.def.sub; sub.hidden = !sub.textContent; }
 }
 
+// Kortin ote: pelkkä teksti leikataan kuten ennen (ei välilyöntien tiivistystä). Rikas HTML tiivistetään näkyväksi tekstiksi, jotta tagi ei katkea.
+function cardExcerpt(p) {
+  const raw = pdesc(p) || '';
+  const plain = isRichHtml(raw) ? visibleText(raw).replace(/\s+/g, ' ').trim() : raw;
+  return plain.slice(0, 170) + (plain.length > 170 ? '…' : '');
+}
 // ---- näkymä 1: tuotelista ----
 function viewList(query) {
   const cat = [...state.catalog, ...state.treatments];
@@ -172,7 +184,7 @@ function viewList(query) {
   const cards = h('ul', { class: 'bk-cards' }, list.map((p) => p.treatment ? tv.card(p) : h('li', { class: 'bk-card' },
     pimg(p, 'card-img'),
     h('h3', {}, h('a', { href: bk(`/tuote/${p.slug}`), text: pname(p) })),
-    h('p', { class: 'bk-desc', text: (pdesc(p) || '').slice(0, 170) + ((pdesc(p) || '').length > 170 ? '…' : '') }),
+    h('p', { class: 'bk-desc', text: cardExcerpt(p) }),
     h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), p.duration_text ? ` · ${p.duration_text}` : ''),
     h('a', { class: 'btn sm', href: bk(`/tuote/${p.slug}`) }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) })))));
   mount(h('header', { class: 'bk-head' }, h('h2', { text: t.title }), h('p', { class: 'lead', text: t.lead })), modeSwitch('cat'), tabs, cards);
@@ -260,7 +272,7 @@ async function fillTreatments(box, results, ds, today, tmax, openSlug, onToggle,
 // tuotekortti (accordion): otsikkopainike → vain saatavilla olevat tuotteet; ajat näytetään vasta kun kortti avataan (yksi auki kerrallaan, tila URL:ssa ?tuote=<slug>)
 function prodCard(p, rs, ds, open, onToggle, treat = false) {
   const avail = rs.filter((x) => x.r.status === 'available'), id = `bk-pc-${p.id}`;
-  const desc = (pdesc(p) || '').replace(/\s+/g, ' ').trim(), short = desc.length > 90 ? `${desc.slice(0, 90).replace(/\s+\S*$/, '')}…` : desc;
+  const rawDesc = pdesc(p) || '', desc = (isRichHtml(rawDesc) ? visibleText(rawDesc) : rawDesc).replace(/\s+/g, ' ').trim(), short = desc.length > 90 ? `${desc.slice(0, 90).replace(/\s+\S*$/, '')}…` : desc;
   const panel = h('div', { id: `${id}-panel`, class: 'bk-pc-panel', role: 'region', 'aria-labelledby': `${id}-btn`, hidden: open ? null : true },
     treat && tv.timelineText(p) ? h('p', { class: 'bk-note bk-pc-tl', text: tv.timelineText(p) }) : null,
     h('ul', { class: 'bk-slotlist' }, rs.filter((x) => treat || x.r.status === 'available').map((x) => (treat ? treatItem(x, ds) : dayItem(x, ds)))),
@@ -362,7 +374,7 @@ async function viewProduct(slug, dateStr, query) {
     const calBox = h('div', { class: 'bk-cal' }), slotBox = h('div', { class: 'bk-slots', 'aria-live': 'polite' });
     wrap.replaceChildren(
       h('p', {}, h('a', { href: bk('/'), text: t.backList })),
-      h('p', { class: 'bk-desc', text: pdesc(p) || '' }),
+      richHost(h, pdesc(p) || '', 'bk-desc'),
       h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), p.duration_text ? ` · ${p.duration_text}` : ''),
       h('h3', { text: t.pickDate }), calBox, slotBox);
     let byDay = {};
