@@ -58,6 +58,16 @@ Käyttäjällä ei ole `booking.staff`-riviä eikä henkilöstöroolia. `kb`- ja
 
 Arkisto salataan ennen lähetystä [age](https://github.com/FiloSottile/age)-työkalulla. GitHubissa on vain julkinen avain (`BACKUP_AGE_PUBLIC_KEY`). Yksityinen avain jää Joonakselle salasananhallintaan. Sillä puretaan kopio hätätilanteessa. Ilman sitä Drive-tiedostoa ei voi lukea, eikä Actions pysty purkamaan tuotantokopiota.
 
+## Hetzner
+
+Drive-lähetyksen jälkeen sama age-tiedosto (tai tiedostot, jos niitä on useampi) lähetetään SSH:lla, jos muuttuja `BACKUP_SSH_HOST` on asetettu. Ilman sitä vaihe ohitetaan ja ajo jää vihreäksi. Drive-lähetys, salaus ja ajastus eivät riipu Hetzneristä.
+
+Palvelin ajaa vain pakotetun komennon `upload <nimi>.age` ja lukee tavut stdinistä. Vastaus on `ok <tavut>`. `scp` ja `rsync` eivät käy. Etänimi on alkuperäinen nimi, sekunnin UTC-aikaleima sekä ajon id ja yritys, esimerkiksi `tapio-havuhattu_YYYY-MM-DD_HHMM.dump.tar.YYYYMMDDTHHMMSSZ.r<ajo>.a<yritys>.age`. Näin uusinta ei ylikirjoita aiempaa kopiota.
+
+Yksityinen avain (`BACKUP_SSH_KEY`) kirjoitetaan tiedostoon oikeuksin 600, sitä ei tulosteta, ja se poistetaan vaiheen lopussa. `StrictHostKeyChecking` on päällä. known_hosts-rivi on secret `BACKUP_SSH_KNOWN_HOSTS`. Käyttäjä on muuttuja `BACKUP_SSH_USER`.
+
+Jos lataus epäonnistuu, ajo on punainen. Drive-kopio on tällöin jo perillä.
+
 ## Säilytys
 
 Vain backup-kansiossa, vain nimillä `tapio-havuhattu_YYYY-MM-DD_HHMM.dump.tar.age`:
@@ -109,7 +119,7 @@ Omalla koneella. Älä liitä avaimia, tokeneita, salasanoja tai osoitteita repo
    update auth.users set raw_app_meta_data = coalesce(raw_app_meta_data, '{}'::jsonb) || '{"backup_role":"storage_reader"}' where email = '<backup-käyttäjän sähköposti>';
    ```
    Muutos tulee voimaan seuraavassa kirjautumisessa. Varmuuskopio kirjautuu joka ajossa, joten erillistä uloskirjausta ei tarvita. Älä lisää `booking.staff`-riviä äläkä booking-roolia, jotta hallinta ei aukea. Aja `booking/supabase/migrations/20261019140100_ops_002_backup_storage_read.sql`. Secretit `BACKUP_STORAGE_EMAIL` ja `BACKUP_STORAGE_PASSWORD`. Muuttujat (eivät ole salaisuuksia): `SUPABASE_URL` = `https://sxbofnuisemspgquoxyv.supabase.co` ja `SUPABASE_ANON_KEY` = julkinen anon- tai publishable-avain (`sb_publishable_...` käy: kirjautuminen lähettää vain `apikey`-otsikon). Ilman näitä tietokantadumppi syntyy, mutta yksityiset kuitit ja laskut jäävät manifestin merkintään.
-6. **GitHub** (Settings → Secrets and variables → Actions). Secretit: `SUPABASE_BACKUP_DB_URL`, `BACKUP_AGE_PUBLIC_KEY`, `RCLONE_DRIVE_TOKEN`, `BACKUP_DRIVE_FOLDER_ID`, `BACKUP_STORAGE_EMAIL`, `BACKUP_STORAGE_PASSWORD`. Muuttujat: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, valinnainen `BACKUP_MIN_DUMP_BYTES` (oletus 1048576).
+6. **GitHub** (Settings → Secrets and variables → Actions). Secretit: `SUPABASE_BACKUP_DB_URL`, `BACKUP_AGE_PUBLIC_KEY`, `RCLONE_DRIVE_TOKEN`, `BACKUP_DRIVE_FOLDER_ID`, `BACKUP_STORAGE_EMAIL`, `BACKUP_STORAGE_PASSWORD`. Muuttujat: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, valinnainen `BACKUP_MIN_DUMP_BYTES` (oletus 1048576). Hetzner (valinnainen): secretit `BACKUP_SSH_KEY` (yksityinen avain, vain pakotettu `upload`-komento) ja `BACKUP_SSH_KNOWN_HOSTS`, muuttujat `BACKUP_SSH_HOST` ja `BACKUP_SSH_USER`. Ilman `BACKUP_SSH_HOST` Hetzner-vaihe ohitetaan.
 7. **Sähköposti.** Workflow ei lähetä omaa viestiä. Punainen ajo tulee, kun Notifications → Actions ja repon Watch → Custom → Actions ovat päällä.
 8. **Ensimmäinen ajo** vasta `main`-haarassa. Actions → Varmuuskopio (Tapio-havuhattu). Ensin vain `retention_dry_run` (ei dumppia, ei poistoa; riittää rclone-secretit). Sitten ajo ilman rastia. Tarkista tiedosto `tapio-havuhattu_....dump.tar.age`. Älä commitoi salaisuuksia. Rollback: `20261019140100_ops_002_ROLLBACK.sql` ja `20261019140000_ops_001_ROLLBACK.sql`.
 
