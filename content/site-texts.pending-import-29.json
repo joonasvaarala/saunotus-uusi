@@ -1,0 +1,186 @@
+[
+ {
+  "key": "ui.order.guide_title",
+  "lang": "fi",
+  "text": "Ohjeet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.guide_show",
+  "lang": "fi",
+  "text": "Näytä ohjeet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.guide_hide",
+  "lang": "fi",
+  "text": "Piilota ohjeet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.guide_lead",
+  "lang": "fi",
+  "text": "Tässä ovat tilauksen tuotteiden ohjeet. Avaa ne napista.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.guide_link",
+  "lang": "fi",
+  "text": "Avaa linkki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.treat_lead",
+  "lang": "fi",
+  "text": "Lisäpalvelun voi lisätä tähän tilaukseen valinnasta. Uuden käynnin aika valitaan varauskalenterissa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.guide_title",
+  "lang": "en",
+  "text": "Instructions",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.guide_show",
+  "lang": "en",
+  "text": "Show instructions",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.guide_hide",
+  "lang": "en",
+  "text": "Hide instructions",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.guide_lead",
+  "lang": "en",
+  "text": "These are the instructions for the products in your order. Open them with the button.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.guide_link",
+  "lang": "en",
+  "text": "Open the link",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.order.treat_lead",
+  "lang": "en",
+  "text": "An add-on can be added to this order from the selector. A time for a new visit is chosen in the booking calendar.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.order_confirmation.instructions_title",
+  "lang": "fi",
+  "text": "Ohje",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.order_confirmation.instructions_title",
+  "lang": "en",
+  "text": "Instructions",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.product_message.subject_fallback",
+  "lang": "fi",
+  "text": "Viesti tilaukseen {{var:no}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:no}}"
+  ],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.product_message.subject_fallback",
+  "lang": "en",
+  "text": "A message about order {{var:no}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:no}}"
+  ],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.product_message.open_link",
+  "lang": "fi",
+  "text": "Avaa linkki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "email.product_message.open_link",
+  "lang": "en",
+  "text": "Open the link",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ }
+]

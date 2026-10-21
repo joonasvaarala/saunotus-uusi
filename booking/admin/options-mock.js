@@ -4,6 +4,7 @@
 import { fiReference, validBusinessId, validOvt, validOperator, normBusinessId, normOvt } from '../shop/src/invoice-validate.js';
 import { storedLineFromInput } from './invoice-lines.js';
 import { calendarIdError } from './calendar-export-logic.js';
+import { validateMessage } from './messages-logic.js';
 const TZ = 'Europe/Helsinki';
 const todayHel = (now = new Date()) => now.toLocaleDateString('sv-SE', { timeZone: TZ });
 const addDays = (ds, n) => { const d = new Date(`${ds}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
@@ -89,13 +90,22 @@ function procountorStatus(cfg) {
     bank_account_configured: Boolean(cfg.bank_account), last: null, errors: [],
   };
 }
-const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'reports.view', 'settings.edit', 'pos.use', 'invoices.manage', 'giftcards.manage'];
+const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'reports.view', 'settings.edit', 'pos.use', 'invoices.manage', 'giftcards.manage', 'messages.edit'];
 const CODE_RE = /^[a-z0-9_]{1,40}$/;
 
 export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager' } = {}) {
   const today = todayHel(now);
   const st = {
     calls: [], perms: [...perms],
+    messagesTimed: false,
+    messageSeq: 2,
+    messages: [{
+      id: 1, name: '[ESIMERKKI EI KÄYTÖSSÄ] Ohje', category: 'instruction', active: false,
+      subject_fi: '[ESIMERKKI] Ohje', subject_en: '[EXAMPLE] Instructions',
+      short_fi: 'Esimerkkipohja, ei käytössä.', short_en: 'Example template, not in use.',
+      body_fi: 'Esimerkkipohja, ei käytössä. Täysi ohje.', body_en: 'Example template, not in use.',
+      link_url: null, send_amount: 2, send_unit: 'days', send_direction: 'before', send_anchor: 'arrival', product_ids: [],
+    }],
     generalSettings: [
       { key: 'business_name', value: 'Havuhattu Oy', is_public: true },
       { key: 'timezone', value: 'Europe/Helsinki', is_public: false },
@@ -761,6 +771,32 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     },
     admin_retry_invoice_dispatch: (a) => { need('invoices.manage'); const inv = st.invoices.find((i) => i.id === a.p_id); if (!inv) throw err('not_found', 'Laskua ei löydy'); inv.dispatch_status = 'dry_run'; return inv; },
     admin_list_invoice_dispatch: (a) => { need('invoices.manage'); return st.invLog.filter((d) => d.invoice_id === a.p_invoice_id); },
+    admin_list_messages: () => {
+      need('messages.edit');
+      return { timed_enabled: st.messagesTimed === true, messages: st.messages.map((m) => ({ ...m, product_ids: [...m.product_ids] })) };
+    },
+    admin_set_messages_timed: (a) => {
+      need('messages.edit');
+      if (typeof a.p_enabled !== 'boolean') throw err('invalid_timing', 'Kytkin puuttuu');
+      st.messagesTimed = a.p_enabled;
+      return { ok: true, timed_enabled: st.messagesTimed };
+    },
+    admin_save_message: (a) => {
+      need('messages.edit');
+      const v = validateMessage(a.p_data || {});
+      if (!v.ok) throw err(v.code, v.code);
+      const known = new Set(st.products.map((p) => p.id));
+      if (v.value.product_ids.some((id) => !known.has(id))) throw err('invalid_product', 'Tuntematon tuote');
+      if (a.p_id) {
+        const row = st.messages.find((m) => m.id === a.p_id);
+        if (!row) throw err('not_found', 'Viestiä ei löydy');
+        Object.assign(row, v.value);
+        return { ok: true, id: row.id, message: { ...row, product_ids: [...row.product_ids] } };
+      }
+      const row = { id: st.messageSeq++, ...v.value };
+      st.messages.push(row);
+      return { ok: true, id: row.id, message: { ...row, product_ids: [...row.product_ids] } };
+    },
     admin_create_invoice_from_order: (a) => {
       need('invoices.manage');
       const res = st.reservations.find((r) => r.order_id === a.p_order_id || r.order_no === a.p_order_id);

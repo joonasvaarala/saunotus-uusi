@@ -50,6 +50,7 @@ const ROUTES = [
   { path: 'uusi', label: 'Uusi varaus', icon: 'plus', mod: () => loadView('newbooking') },
   { path: 'asiakkaat', label: 'Asiakkaat', icon: 'users', mod: () => loadView('customers') },
   { path: 'tuotteet', label: 'Tuotteet', icon: 'tag', mod: () => loadView('products') },
+  { path: 'viestit', label: 'Viestit', icon: 'mail', any: ['messages.edit'], mod: () => loadView('messages') },
   { path: 'resurssit', label: 'Resurssit', icon: 'cabin', mod: () => loadView('resources') },
   { path: 'sulkukalenterit', label: 'Kalenterisulut', icon: 'lock', any: ['blocks.manage'], mod: () => loadView('closures') },
   { path: 'asetukset', label: 'Asetukset', icon: 'sliders', any: ['settings.edit', 'pos.use'], mod: () => loadView('settings') },

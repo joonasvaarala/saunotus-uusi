@@ -42,6 +42,28 @@ const nm = (x) => (L === 'en' && x.name_en) || x.name;
 const phoneBox = () => h('p', { class: 'bk-contact' }, h('span', { text: `${t.contact} ` }), h('a', { href: `tel:${S.phoneTel}`, text: S.phone }), ' · ', h('a', { href: `mailto:${S.email}`, text: S.email }));
 const mount = (...nodes) => { root.replaceChildren(...nodes.flat().filter(Boolean)); root.setAttribute('aria-busy', 'false'); };
 const badge = (kind, text) => h('span', { class: `ord-badge ${kind}`, text });
+function safeHttps(u) {
+  try { const x = new URL(String(u || '')); return x.protocol === 'https:' ? x.href : ''; } catch { return ''; }
+}
+function instructionsSection(list) {
+  if (!list?.length) return null;
+  const panel = h('div', { hidden: true, 'data-testid': 'guide-body' });
+  for (const g of list) {
+    const link = safeHttps(g.link_url);
+    panel.append(h('article', { class: 'ord-guide', 'data-testid': 'guide-item' },
+      g.title ? h('h4', { text: g.title }) : null,
+      h('p', { class: 'ord-guide-text', text: g.body }),
+      link ? h('p', {}, h('a', { href: link, target: '_blank', rel: 'noopener noreferrer', text: t.guideLink })) : null));
+  }
+  const btn = h('button', { type: 'button', class: 'btn light ord-btn', 'data-testid': 'guide-toggle', 'aria-expanded': 'false', text: t.guideShow, onclick: () => {
+    const open = panel.hidden;
+    panel.hidden = !open;
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.textContent = open ? t.guideHide : t.guideShow;
+  } });
+  return h('section', { class: 'ord-card', 'aria-labelledby': 'ord-g', 'data-testid': 'order-guides' },
+    h('h3', { id: 'ord-g', text: t.guideTitle }), h('p', { class: 'bk-note', text: t.guideLead }), btn, panel);
+}
 
 async function main() {
   await applyShopTexts(S);   // sivutekstit tietokannasta (osa 3): puuttuva avain/tiedosto → repon oletus
@@ -183,11 +205,14 @@ async function main() {
         h('span', { class: 'ord-l-sum' }, h('button', { type: 'button', class: 'btn light ord-btn', 'data-testid': 'receipt-dl', onclick: (ev) => download(ev.currentTarget, r.receipt_no), text: t.download }))))) : h('p', { class: 'bk-note', text: t.noReceipts }));
     const msg = h('div', { 'aria-live': 'polite', class: 'ord-msg', 'data-testid': 'order-msg' });
     const note = o.change_deadline ? h('p', { class: 'bk-note', 'data-testid': 'change-note', text: o.can_change ? t.changeNote.replace('{date}', dt(o.change_deadline)) : t.changeClosed }) : null;
-    const add = closedHold ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-a' }, h('h3', { id: 'ord-a', text: t.addTitle }), o.can_add && o.upsell_addons.length ? addForm(o) : h('p', { class: 'bk-note', text: t.addClosed }),
+    const guides = instructionsSection(o.instructions);
+    const treats = (o.upsell_treatments || []).length ? h('div', { 'data-testid': 'upsell-treatments' }, h('p', { class: 'bk-note', text: t.treatLead }), h('ul', { class: 'ord-lines' }, o.upsell_treatments.map((x) => h('li', { text: nm(x) })))) : null;
+    const add = closedHold ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-a' }, h('h3', { id: 'ord-a', text: t.addTitle }), o.can_add && o.upsell_addons.length ? addForm(o) : h('p', { class: 'bk-note', text: t.addClosed }), treats,
       h('p', { class: 'bk-note' }, `${t.addNewBooking} `, h('a', { href: S.shopHref, text: t.addNewBookingLink })));
+    const extra = guides || add ? h('div', { class: 'ord-extra', 'data-testid': 'order-extra' }, guides, add) : null;
     const cancel = closedHold ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), note,
       o.cancel_request ? h('p', { class: 'bk-ok', role: 'status', 'data-testid': 'cancel-pending', text: t[`cancel.${o.cancel_request.status}`] || t['cancel.open'] }) : cancelForm());
-    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, closedEl, resv, optSec, lines, giftCards, claimBox, pay, giftUse, receipts, add, cancel, msg, phoneBox()));
+    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, closedEl, resv, optSec, lines, giftCards, claimBox, pay, giftUse, receipts, extra, cancel, msg, phoneBox()));
   }
   async function download(btn, receiptNo) {
     btn.disabled = true;

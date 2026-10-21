@@ -25,7 +25,9 @@ export function normOrder(r) {
     receipts: (r.receipts || []).map((x) => ({ receipt_no: x.receipt_no, kind: x.kind || 'receipt', issued_at: x.issued_at ?? null, token: x.token ?? null, total: num(x.total) })),
     can_add: !!r.can_add, add_until: r.add_until ?? null, can_change: !!r.can_change, change_deadline: r.change_deadline ?? null, change_hours_before: r.change_hours_before ?? null,
     cancel_request: r.cancel_request ? { status: r.cancel_request.status, created_at: r.cancel_request.created_at } : null, online_payment_enabled: !!r.online_payment_enabled,
-    upsell_addons: (r.upsell?.addons || []).map((a) => ({ id: a.id, code: a.code, name: a.name, name_en: a.name_en ?? null, price: num(a.price), max: num(a.max, 20) })) };
+    instructions: (r.instructions || []).filter((g) => g && String(g.body || '').trim()).map((g) => ({ id: g.id ?? null, title: g.title || '', body: String(g.body), link_url: g.link_url || null })),
+    upsell_addons: (r.upsell?.addons || []).map((a) => ({ id: a.id, code: a.code, name: a.name, name_en: a.name_en ?? null, price: num(a.price), max: num(a.max, 20) })),
+    upsell_treatments: (r.upsell?.treatments || []).map((x) => ({ product_id: x.product_id ?? null, name: x.name || '', name_en: x.name_en ?? null })) };
 }
 export function rpcBackend(rpc, token) {
   return {

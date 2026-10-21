@@ -31,6 +31,9 @@ export const EMAIL_TEXTS: TextTable = {
   "email.order_confirmation.title": { fi: "Tilausvahvistus", en: "Order confirmation" },
   "email.order_confirmation.intro": { fi: "Kiitos tilauksestasi. Varauksesi on vahvistettu.", en: "Thank you for your order. Your booking is confirmed." },
   "email.order_confirmation.more": { fi: "Voit katsoa tilaustasi, lisätä siihen palveluita, pyytää muutoksia ja ladata kuitit täältä:", en: "You can view your order, add services, request changes and download receipts here:" },
+  "email.order_confirmation.instructions_title": { fi: "Ohje", en: "Instructions" },
+  "email.product_message.subject_fallback": { fi: "Viesti tilaukseen {{var:no}}", en: "A message about order {{var:no}}" },
+  "email.product_message.open_link": { fi: "Avaa linkki", en: "Open the link" },
   // ---- maksulinkki ----
   "email.payment_link.subject": { fi: `Maksulinkki tilaukseen {{var:no}} – ${SN}`, en: `Payment link for order {{var:no}} – ${SN}` },
   "email.payment_link.title": { fi: "Maksulinkki", en: "Payment link" },

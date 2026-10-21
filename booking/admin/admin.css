@@ -317,6 +317,8 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .check.big{align-items:flex-start;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#FBF8F2;min-height:44px;cursor:pointer}
 .check.big>input{margin-top:1px;flex:none}.check.big>span{display:grid;gap:2px}.check.big strong{color:var(--ink)}
 .check.big:has(input:checked){border-color:var(--green);background:#E4EBE5}
+.msg-products{max-height:240px;overflow:auto;display:grid;gap:4px;padding:4px}
+.msg-products .check{min-height:44px}
 .nb-price summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--green);font-weight:600;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(43,58,48,.4)}
 .nb-price[open] summary{margin-bottom:6px}
 /* hintayhteenveto + Tallenna: mobiilissa kiinni alapalkin (alanavigaatio) yläpuolella */

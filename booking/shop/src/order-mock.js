@@ -18,7 +18,8 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
     paid: 60, payments: [{ status: 'paid', amount: 60, paid_at: `${day(-2)}T09:40:00Z`, method_label: 'Korttimaksu', link_token: null, link_path: null }],
     receipts: [{ receipt_no: 'K-2026-000321', kind: 'receipt', issued_at: `${day(-2)}T09:40:00Z`, token: '9a8b7c6d-1111-4222-8333-444455556666', total: 60 }],
     can_add: true, add_until: `${day(3)}T14:00:00Z`, can_change: true, change_deadline: `${day(2)}T11:00:00Z`, change_hours_before: 24, cancel_request: null, online_payment_enabled: false,
-    upsell: { addons: ADDONS, treatments: [] },
+    upsell: { addons: ADDONS, treatments: [{ product_id: 10, name: 'Saunahoito', name_en: 'Sauna treatment' }] },
+    instructions: [],
   };
   const sync = () => { o.total = r2(o.items.reduce((s, i) => s + i.line_total, 0)); o.unpaid = r2(Math.max(0, o.total - o.paid)); o.payment_status = o.unpaid === 0 ? 'paid' : o.paid > 0 ? 'partially_paid' : 'unpaid'; };
   // Skenaariot lahjakorttinäkymille (?mock=1&scenario=gift|cards|cardspaid|cardsdelivery): gift = maksamatonta jäljellä (Käytä lahjakortti), cards = lahjakorttitilaus maksamatta, cardspaid = maksettu, cardsdelivery = maksettu + toimitusvalinnat (ostajalle / saajalle ajastettu / saajalle lähetetty)
@@ -60,6 +61,9 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
       option: hoito === 'hoito-valitsematta' ? null : optJson(OPTION_CHOICES[1]), option_choices: OPTION_CHOICES, ...OPTION_LABELS }];
     o.paid = 0; o.payments = []; o.receipts = []; o.add_until = `${day(5)}T14:00:00Z`; o.change_deadline = `${day(3)}T13:00:00Z`; o.change_hours_before = 48;
     if (hoito === 'hoito-lukittu') { o.can_change = false; o.change_deadline = `${day(-1)}T13:00:00Z`; }
+  }
+  if (o.reservations.length) {
+    o.instructions = [{ id: 1, title: locale === 'en' ? 'Before your visit' : 'Ennen käyntiä', body: locale === 'en' ? 'Sample instruction on the trial page. This is not a real customer message.' : 'Esimerkkiohje kokeilusivulla. Tämä ei ole oikea asiakasviesti.', link_url: null }];
   }
   const mp = { started: false, returning: false, polls: 0, settled: false };
   const mpMarkPaid = () => {

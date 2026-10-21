@@ -186,7 +186,7 @@ export async function render({ ctx, rest, reload }) {
     try { vismapay = await rpc('admin_get_vismapay_status'); } catch { vismapayFailed = true; }
     try { editor = await rpc('admin_get_procountor_settings'); } catch { editor = null; }
     try { calendarExport = await rpc('admin_get_booking_calendar'); } catch { calendarExportFailed = true; }
-    settings = await select('settings', { select: 'key,value,is_public', order: 'key.asc' });
+    settings = (await select('settings', { select: 'key,value,is_public', order: 'key.asc' })).filter((s) => !String(s.key).startsWith('messages.'));
   }
   const tabs = visibleSettingTabs({ can: (p) => ctx.can(p), keys: settings.map((s) => s.key) });
   const tab = tabFromHash(`#/asetukset/${rest || ''}`, tabs);
