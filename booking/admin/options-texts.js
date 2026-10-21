@@ -44,23 +44,28 @@ function applyLive(raw, vars) {
   return fillOptionText(raw, vars);
 }
 
+function primeOptionTexts(rows) {
+  if (!Array.isArray(rows) || !rows.length) return false;
+  const next = new Map();
+  for (const r of rows) {
+    if (!r || typeof r.key !== 'string' || !r.key.startsWith(PREFIX)) continue;
+    if (r.lang !== 'fi' && r.lang !== 'en') continue;
+    if (typeof r.text !== 'string' || !r.text.trim()) continue;
+    next.set(`${r.key}|${r.lang}`, r.text);
+  }
+  db = next;
+  loaded = true;
+  return true;
+}
+
 /** Lukee ui.admin.options.*-rivit. Virhe ei kaada näkymää: optionText käyttää silloin sanakirjaa. */
-export async function loadOptionTexts(rpcFn) {
+export async function loadOptionTexts(rpcFn, rows = null) {
+  if (primeOptionTexts(rows)) return true;
   if (loaded) return true;
   if (typeof rpcFn !== 'function') return false;
   try {
     const t = await rpcFn('public_get_site_texts', { p_lang: null });
-    if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
-    const next = new Map();
-    for (const r of t.texts) {
-      if (!r || typeof r.key !== 'string' || !r.key.startsWith(PREFIX)) continue;
-      if (r.lang !== 'fi' && r.lang !== 'en') continue;
-      if (typeof r.text !== 'string' || !r.text.trim()) continue;
-      next.set(`${r.key}|${r.lang}`, r.text);
-    }
-    db = next;
-    loaded = true;
-    return true;
+    return primeOptionTexts(t?.texts);
   } catch {
     return false;
   }

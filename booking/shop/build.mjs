@@ -19,6 +19,9 @@ const OUT = resolve(process.env.SHOP_DIST || join(here, 'dist'));
 process.env.SITE_ENV ||= 'test';
 process.env.SITE_URL ||= 'http://localhost:4180';
 
+let esbuild;
+try { ({ build: esbuild } = await import('esbuild')); } catch { /* optional devDependency */ }
+
 // 1) rakenna perussivusto omaan hakemistoonsa (alkuperäistä dist/-hakemistoa ei kosketa)
 rmSync(OUT, { recursive: true, force: true });
 execFileSync('node', ['scripts/build.mjs'], { env: { ...process.env, DIST: OUT }, stdio: 'inherit' });
@@ -34,6 +37,28 @@ const A = join(OUT, 'booking');
 mkdirSync(A, { recursive: true });
 for (const f of ['shop.js', 'rich-text.js', 'rich-view.js', 'invoice-validate.js', 'i18n.js', 'phone.js', 'shop.css', 'treatments.js', 'treatment-ui.js', 'order.js', 'order-texts.js', 'order-api.js', 'order-mock.js', 'order-gift.js', 'gift.js', 'gift-api.js', 'gift-logic.js', 'gift-mock.js', 'gift-texts.js', 'gift-ui.js', 'mobilepay-api.js', 'pay-choices.js', 'hold-texts.js', 'hold-logic.js', 'hold-ui.js', 'hold-mock.js', 'pay-choices-texts.js', 'mobilepay-logic.js', 'mobilepay-texts.js', 'mobilepay-ui.js', 'vismapay-api.js', 'vismapay-logic.js', 'vismapay-texts.js', 'vismapay-ui.js', 'options-logic.js', 'options-texts.js', 'options-ui.js', 'shop-mock.js', 'treatment-mock.js', 'treatment-addons.js', 'site-texts.js', 'site-texts-logic.js', 'text-registry.js', 'catalog-audience.js']) cpSync(join(here, 'src', f), join(A, f));
 cpSync(join(repo, 'booking/shared/sb.js'), join(A, 'sb.js'));
+if (esbuild) {
+  const bundleDir = join(OUT, '.shop-bundle');
+  rmSync(bundleDir, { recursive: true, force: true });
+  await esbuild({
+    absWorkingDir: A,
+    entryPoints: ['shop.js', 'order.js'],
+    bundle: true,
+    format: 'esm',
+    platform: 'browser',
+    target: ['es2022'],
+    minify: true,
+    legalComments: 'none',
+    sourcemap: false,
+    outdir: bundleDir,
+    entryNames: '[name]',
+    chunkNames: 'chunks/[name]-[hash]',
+    splitting: true,
+    treeShaking: true,
+    logLevel: 'silent',
+  });
+  for (const n of readdirSync(bundleDir)) cpSync(join(bundleDir, n), join(A, n), { recursive: true, force: true });
+}
 // Sivutekstit tietokannasta (§18, src/site-texts.mjs): kaupan avainalueet (ui.*) tiedostoon booking/site-texts.json; paikkamerkit täytetään kaupassa ajoajan datasta. Build on jo tarkistanut paikkamerkit (tuntematon → build kaatuu).
 const siteTexts = await ST.loadSiteTexts();
 ST.setSiteTexts(siteTexts);   // layout() hakee yläpalkin alarivin tx():llä

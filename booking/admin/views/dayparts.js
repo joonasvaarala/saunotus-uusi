@@ -80,11 +80,12 @@ async function loadShifts(date, can) {
   try { return { rows: await rpc('admin_upcoming_shifts', { p_from: from, p_to: to }), scope: can('shifts.view_all') ? 'all' : 'own' }; }
   catch { return { rows: null, why: 'Työvuoroja ei saatu haettua.' }; }
 }
-export async function shiftsBar(date, can) {
-  const { rows, scope, why } = await loadShifts(date, can);
-  if (!rows) return h('p', { class: 'muted dayshifts-none', 'data-testid': 'dayshifts' }, why);
+export async function shiftsBar(date, can, rows = null) {
+  const loaded = Array.isArray(rows) ? { rows, scope: 'all', why: null } : await loadShifts(date, can);
+  const { rows: loadedRows, scope, why } = loaded;
+  if (!loadedRows) return h('p', { class: 'muted dayshifts-none', 'data-testid': 'dayshifts' }, why);
   const byId = new Map();
-  for (const r of rows) { const x = byId.get(r.shift_id) || { ...r, names: [] }; if (r.staff_name) x.names.push(r.staff_name); byId.set(r.shift_id, x); }
+  for (const r of loadedRows) { const x = byId.get(r.shift_id) || { ...r, names: [] }; if (r.staff_name) x.names.push(r.staff_name); byId.set(r.shift_id, x); }
   const shifts = [...byId.values()].sort((a, c) => a.starts_at.localeCompare(c.starts_at));
   if (!shifts.length) return h('p', { class: 'muted dayshifts-none', 'data-testid': 'dayshifts' }, scope === 'own' ? 'Ei omia työvuoroja.' : 'Ei työvuoroja.');
   return h('section', { class: 'dayshifts', 'aria-label': 'Työvuorot', 'data-testid': 'dayshifts' },
