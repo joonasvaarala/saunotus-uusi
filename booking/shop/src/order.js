@@ -1,6 +1,7 @@
 // Asiakkaan tilaussivu: /tilaus/?t=<token> (sopimus: settings.order_page_path; EN-sivu /en/order/?t=<token>, tilauksen locale ohjaa oikeaan kieleen). Token on vain URL-parametrina (ei hashissa/polussa → ei Referer-vuotoa; sivulla meta referrer=no-referrer).
 // Näyttää tilauksen rivit, maksutilan, kuitit sekä ohjauksen lisäykseen ja peruutuspyyntöön. Data: order-api.js (mock kun ?mock=1; puuttuva RPC → "ei vielä käytössä").
 import { rpc, functionUrl } from './sb.js';
+import { richHost } from './rich-view.js';
 import { OT } from './order-texts.js';
 import { T } from './i18n.js';
 import { createOrderApi, validToken, wantsMock } from './order-api.js';
@@ -52,7 +53,7 @@ function instructionsSection(list) {
     const link = safeHttps(g.link_url);
     panel.append(h('article', { class: 'ord-guide', 'data-testid': 'guide-item' },
       g.title ? h('h4', { text: g.title }) : null,
-      h('p', { class: 'ord-guide-text', text: g.body }),
+      richHost(h, g.body, 'ord-guide-text', g.rich),
       link ? h('p', {}, h('a', { href: link, target: '_blank', rel: 'noopener noreferrer', text: t.guideLink })) : null));
   }
   const btn = h('button', { type: 'button', class: 'btn light ord-btn', 'data-testid': 'guide-toggle', 'aria-expanded': 'false', text: t.guideShow, onclick: () => {
