@@ -67,10 +67,10 @@ export function createOrdersTab({ api, ctx, gift = null }) {
   function openRefunds(o, p) {
     const rows = (p.refunds || []).filter((r) => ['requested', 'processing', 'failed'].includes(r.status));
     if (!rows.length) return null;
-    const canRetry = p.provider === 'mobilepay' && !api.isMock('refund') && ctx.can('payments.refund');
+    const canRetry = (p.provider === 'mobilepay' || p.provider === 'visma_pay') && !api.isMock('refund') && ctx.can('payments.refund');
     return h('ul', { class: 'tl-refunds', 'data-testid': 'order-open-refunds' }, rows.map((r) => h('li', { 'data-testid': 'open-refund', 'data-status': r.status },
       h('span', { class: `badge ${r.status === 'failed' ? 'st-cancelled' : 'st-pending'}`, text: t(r.status === 'failed' ? 'refund.failed' : 'refund.pending') }), ' ', h('span', { text: `${fmt.money(r.amount)}${r.reason ? ' · ' + r.reason : ''}` }),
-      canRetry && r.status !== 'failed' ? actionBtn({ key: 'refund-retry', label: t('refund.retry'), testid: 'btn-refund-retry', onClick: async () => { await processMobilepayRefund(r.id); afterChange(null, o.order_id); } }) : null)));
+      canRetry && r.status !== 'failed' ? actionBtn({ key: 'refund-retry', label: t('refund.retry'), testid: 'btn-refund-retry', onClick: async () => { if (p.provider === 'visma_pay') await processVismaRefund(r.id); else await processMobilepayRefund(r.id); afterChange(null, o.order_id); } }) : null)));
   }
   async function orderDetail(id) {
     const o = await api.getOrder(id);
@@ -195,26 +195,39 @@ export function createOrdersTab({ api, ctx, gift = null }) {
     const amount = h('input', { name: 'amount', type: 'number', step: '0.01', min: '0.01', max: left(refundable[0]), value: left(refundable[0]), inputmode: 'decimal', required: true });
     // MobilePay-verkkomaksu (provider 'mobilepay'): hyvitys lähtee MobilePayhin heti (§14.4); vihje näkyy vain sille maksulle
     const mpHint = h('p', { class: 'muted tl-hint', 'data-testid': 'refund-mp-hint', text: t('refund.mobilepay') });
-    const syncHint = () => { mpHint.hidden = refundable.find((p) => String(p.payment_id) === sel.value)?.provider !== 'mobilepay'; };
+    const vpHint = h('p', { class: 'muted tl-hint', 'data-testid': 'refund-vp-hint', text: t('refund.visma') });
+    const syncHint = () => {
+      const prov = refundable.find((p) => String(p.payment_id) === sel.value)?.provider;
+      mpHint.hidden = prov !== 'mobilepay';
+      vpHint.hidden = prov !== 'visma_pay';
+    };
     sel.addEventListener('change', syncHint); syncHint();
     formDialog(t('btn.refund'), [h('p', { class: 'muted', text: api.isMock('refund') ? t('mock.note') : t('live.note') }), fld(t('refund.payment'), sel), fld(t('refund.amount'), amount),
-      fld(t('refund.reason'), h('input', { name: 'reason', required: true, maxlength: 200 })), h('p', { class: 'muted tl-hint', text: t('refund.visma') }), mpHint], t('refund.submit'),
+      fld(t('refund.reason'), h('input', { name: 'reason', required: true, maxlength: 200 })), vpHint, mpHint], t('refund.submit'),
     async (fd) => {
       const amt = +fd.get('amount'), p = refundable.find((x) => String(x.payment_id) === fd.get('payment'));
       if (!(amt > 0) || amt > left(p)) throw new Error(t('refund.badAmount'));
       if (String(fd.get('reason') || '').trim().length < 3) throw new Error(t('refund.noReason'));
       const res = await api.refund({ paymentId: p.payment_id, amount: amt, reason: String(fd.get('reason')).trim() });
       doneToast(res, RPC.refund);
-      // MobilePay-verkkomaksu: rivi on 'requested' → käsittely heti (mobilepay-refund käyttäjän JWT:llä), tulos näkyviin
+      // Verkkomaksu: rivi on 'requested' → käsittely heti (käyttäjän JWT, payments.refund), tulos näkyviin
       if (res?.status === 'requested' && !res.mock && p.provider === 'mobilepay') await processMobilepayRefund(res.refund_id);
+      if (res?.status === 'requested' && !res.mock && p.provider === 'visma_pay') await processVismaRefund(res.refund_id);
       afterChange(res, o.order_id);
     });
   }
   const MP_KINDS = { done: 'ok', failed: 'err', retry_later: 'warn', unverified: 'warn', db_error: 'warn', none: 'warn', off: 'warn', forbidden: 'err', error: 'warn' };
+  const VP_KINDS = { done: 'ok', failed: 'err', retry_later: 'warn', awaiting_customer: 'warn', unverified: 'warn', db_error: 'warn', none: 'warn', off: 'warn', forbidden: 'err', error: 'warn', not_settled: 'err', not_configured: 'warn' };
   async function processMobilepayRefund(refundId) {
     const m = await api.mobilepayRefund(refundId);
     const key = `refund.mp.${m.result}`;
     toast(t(MP_KINDS[m.result] ? key : 'refund.mp.error'), MP_KINDS[m.result] || 'warn');
+    return m;
+  }
+  async function processVismaRefund(refundId) {
+    const m = await api.vismapayRefund(refundId);
+    const key = VP_KINDS[m.result] ? `refund.vp.${m.result}` : 'refund.vp.error';
+    toast(t(key), VP_KINDS[m.result] || 'warn');
     return m;
   }
   // ---- työkalupalkki ----

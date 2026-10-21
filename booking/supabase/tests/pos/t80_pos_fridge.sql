@@ -128,9 +128,9 @@ begin
 
   res := booking.vismapay_payment_prepare(tok);
   perform public.t80_ck(res->>'code' = 'vismapay_off', 'V1 off');
-  update booking.integration_config set mode = 'live' where key = 'vismapay';
+  update booking.integration_config set mode = 'live', settings = settings || '{"approved_by":"t80"}'::jsonb where key = 'vismapay';
   res := booking.vismapay_payment_prepare(tok);
-  perform public.t80_ck(res->>'code' = 'vismapay_live_not_implemented', 'V2 live ei toteudu');
+  perform public.t80_ck(res->>'ok' = 'true' and res->>'mode' = 'live' and res->>'status' = 'pending' and coalesce(res->>'dry_run', 'false') <> 'true', 'V2 live valmistelee pending-maksun');
   update booking.integration_config set mode = 'dry_run' where key = 'vismapay';
   res := booking.vismapay_payment_prepare(tok);
   perform public.t80_ck(res->>'ok' = 'true' and res->>'dry_run' = 'true' and res->>'status' = 'pending', 'V3 dry_run pending');

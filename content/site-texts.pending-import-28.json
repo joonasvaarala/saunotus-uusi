@@ -1,0 +1,1386 @@
+[
+ {
+  "key": "ui.vismapay.pay_title",
+  "lang": "fi",
+  "text": "Maksa Visma Paylla",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.pay_title",
+  "lang": "en",
+  "text": "Pay with Visma Pay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.pay_lead",
+  "lang": "fi",
+  "text": "Maksa maksamaton osa kortilla tai verkkopankissa. Siirryt Visma Payn sivulle ja palaat tälle sivulle maksun jälkeen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.pay_lead",
+  "lang": "en",
+  "text": "Pay the unpaid part by card or online bank. You go to the Visma Pay page and return to this page after payment.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.pay_btn",
+  "lang": "fi",
+  "text": "Maksa Visma Paylla",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.pay_btn",
+  "lang": "en",
+  "text": "Pay with Visma Pay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.pay_busy",
+  "lang": "fi",
+  "text": "Avataan Visma Payta…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.pay_busy",
+  "lang": "en",
+  "text": "Opening Visma Pay…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.pay_amount",
+  "lang": "fi",
+  "text": "Maksettava: {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.pay_amount",
+  "lang": "en",
+  "text": "Amount due: {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.test_note",
+  "lang": "fi",
+  "text": "Testitila: käytä Visma Payn testikorttia. Oikeaa rahaa ei veloiteta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.test_note",
+  "lang": "en",
+  "text": "Test mode: use a Visma Pay test card. No real money is charged.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.checking",
+  "lang": "fi",
+  "text": "Tarkistetaan maksua…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.checking",
+  "lang": "en",
+  "text": "Checking your payment…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.checking_lead",
+  "lang": "fi",
+  "text": "Älä sulje sivua. Vahvistus voi kestää hetken.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.checking_lead",
+  "lang": "en",
+  "text": "Please keep this page open. Confirmation may take a moment.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.paid_title",
+  "lang": "fi",
+  "text": "Maksu onnistui",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.paid_title",
+  "lang": "en",
+  "text": "Payment successful",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.paid_lead",
+  "lang": "fi",
+  "text": "Kiitos. Maksu on vastaanotettu ja tilaus on päivitetty. Kuitti ilmestyy tilaukseen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.paid_lead",
+  "lang": "en",
+  "text": "Thank you. The payment has been received and the order is updated. The receipt appears on the order.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.review_title",
+  "lang": "fi",
+  "text": "Maksu vastaanotettu tarkistettavaksi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.review_title",
+  "lang": "en",
+  "text": "Payment received for review",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.review_lead",
+  "lang": "fi",
+  "text": "Maksusi vaatii henkilökunnan tarkistuksen. Älä maksa uudelleen ennen kuin tilaus on päivittynyt.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.review_lead",
+  "lang": "en",
+  "text": "Your payment needs a check by our staff. Do not pay again before the order has updated.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.failed_title",
+  "lang": "fi",
+  "text": "Maksu keskeytyi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.failed_title",
+  "lang": "en",
+  "text": "Payment was interrupted",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.failed_lead",
+  "lang": "fi",
+  "text": "Maksua ei hyväksytty, eikä sinulta veloitettu mitään. Voit yrittää uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.failed_lead",
+  "lang": "en",
+  "text": "The payment was not approved, and you have not been charged. You can try again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.wait_title",
+  "lang": "fi",
+  "text": "Maksua ei ole vielä vahvistettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.wait_title",
+  "lang": "en",
+  "text": "The payment is not confirmed yet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.wait_lead",
+  "lang": "fi",
+  "text": "Jos maksoit juuri, vahvistus voi saapua vielä hetken kuluttua. Älä maksa uudelleen ennen kuin olet tarkistanut tilauksen tilan.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.wait_lead",
+  "lang": "en",
+  "text": "If you just paid, confirmation may still arrive in a moment. Do not pay again before you have checked the order status.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.none_title",
+  "lang": "fi",
+  "text": "Maksua ei löytynyt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.none_title",
+  "lang": "en",
+  "text": "No payment was found",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.none_lead",
+  "lang": "fi",
+  "text": "Tälle tilaukselle ei löytynyt avointa Visma Pay -maksua. Voit aloittaa maksun alusta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.none_lead",
+  "lang": "en",
+  "text": "There is no open Visma Pay payment for this order. You can start the payment again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.net_title",
+  "lang": "fi",
+  "text": "Maksun tilaa ei voitu tarkistaa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.net_title",
+  "lang": "en",
+  "text": "The payment status could not be checked",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.net_lead",
+  "lang": "fi",
+  "text": "Yhteys palvelimeen ei onnistunut. Jos ehdit jo maksaa, älä maksa uudelleen. Tarkista tilaus hetken kuluttua.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.net_lead",
+  "lang": "en",
+  "text": "The connection to the server failed. If you already paid, do not pay again. Check the order in a moment.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.recheck",
+  "lang": "fi",
+  "text": "Tarkista uudelleen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.recheck",
+  "lang": "en",
+  "text": "Check again",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.contact",
+  "lang": "fi",
+  "text": "Kysyttävää? Ota yhteyttä:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.contact",
+  "lang": "en",
+  "text": "Questions? Contact us:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.network",
+  "lang": "fi",
+  "text": "Yhteys Visma Payhin ei onnistunut. Tarkista verkkoyhteys ja yritä uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.network",
+  "lang": "en",
+  "text": "The connection to Visma Pay failed. Check your network and try again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.generic",
+  "lang": "fi",
+  "text": "Maksun aloitus epäonnistui. Yritä uudelleen tai ota yhteyttä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.generic",
+  "lang": "en",
+  "text": "The payment could not be started. Try again or contact us.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.vismapay_off",
+  "lang": "fi",
+  "text": "Verkkomaksu ei ole käytössä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.vismapay_off",
+  "lang": "en",
+  "text": "Online payment is not enabled.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.not_configured",
+  "lang": "fi",
+  "text": "Verkkomaksu ei ole juuri nyt käytettävissä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.not_configured",
+  "lang": "en",
+  "text": "Online payment is not available right now.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.rate_limited",
+  "lang": "fi",
+  "text": "Liian monta yritystä. Yritä hetken kuluttua uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.rate_limited",
+  "lang": "en",
+  "text": "Too many attempts. Please try again in a moment.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.already_paid",
+  "lang": "fi",
+  "text": "Tilaus on jo maksettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.already_paid",
+  "lang": "en",
+  "text": "The order is already paid.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.nothing_to_pay",
+  "lang": "fi",
+  "text": "Tilauksella ei ole maksettavaa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.nothing_to_pay",
+  "lang": "en",
+  "text": "There is nothing left to pay on this order.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.order_not_payable",
+  "lang": "fi",
+  "text": "Tätä tilausta ei voi maksaa verkossa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.order_not_payable",
+  "lang": "en",
+  "text": "This order cannot be paid online.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.provider_error",
+  "lang": "fi",
+  "text": "Visma Pay ei vastannut. Yritä hetken kuluttua uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.provider_error",
+  "lang": "en",
+  "text": "Visma Pay did not respond. Please try again in a moment.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.maintenance",
+  "lang": "fi",
+  "text": "Visma Pay on hetken pois käytöstä. Yritä myöhemmin uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.maintenance",
+  "lang": "en",
+  "text": "Visma Pay is briefly unavailable. Please try again later.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.invalid_param",
+  "lang": "fi",
+  "text": "Pyyntö oli virheellinen. Lataa sivu uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.invalid_param",
+  "lang": "en",
+  "text": "The request was invalid. Reload the page.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.not_found",
+  "lang": "fi",
+  "text": "Tilausta ei löytynyt.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.not_found",
+  "lang": "en",
+  "text": "The order was not found.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.payment_in_progress",
+  "lang": "fi",
+  "text": "Maksun avaus on jo käynnissä. Odota hetki ja yritä uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.vismapay.err.payment_in_progress",
+  "lang": "en",
+  "text": "A payment is already being opened. Wait a moment and try again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -verkkomaksu (booking_120). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
+ },
+ {
+  "key": "ui.admin.vismapay.title",
+  "lang": "fi",
+  "text": "Visma Pay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.title",
+  "lang": "en",
+  "text": "Visma Pay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.lead",
+  "lang": "fi",
+  "text": "Verkkomaksun tila. Tunnuksia ei näytetä eikä tallenneta tähän.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.lead",
+  "lang": "en",
+  "text": "Online payment mode. Credentials are not shown and cannot be saved here.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.mode",
+  "lang": "fi",
+  "text": "Tila",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.mode",
+  "lang": "en",
+  "text": "Mode",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.mode_off",
+  "lang": "fi",
+  "text": "Pois päältä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.mode_off",
+  "lang": "en",
+  "text": "Off",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.mode_dry_run",
+  "lang": "fi",
+  "text": "Harjoitusajo",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.mode_dry_run",
+  "lang": "en",
+  "text": "Dry run",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.mode_test",
+  "lang": "fi",
+  "text": "Testi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.mode_test",
+  "lang": "en",
+  "text": "Test",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.mode_live",
+  "lang": "fi",
+  "text": "Tuotanto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.mode_live",
+  "lang": "en",
+  "text": "Live",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.approved_by",
+  "lang": "fi",
+  "text": "Hyväksyjä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.approved_by",
+  "lang": "en",
+  "text": "Approved by",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.approved_hint",
+  "lang": "fi",
+  "text": "Nimi ja päivä. Vaaditaan testi- ja tuotantotilassa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.approved_hint",
+  "lang": "en",
+  "text": "Name and date. Required for test and live.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.approved_required",
+  "lang": "fi",
+  "text": "Testi- ja tuotantotila vaativat hyväksyjän nimen ja päivän.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.approved_required",
+  "lang": "en",
+  "text": "Test and live require the approver name and date.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.secrets",
+  "lang": "fi",
+  "text": "Tunnukset asetetaan palvelimen salaisuuksiin, ei tähän lomakkeeseen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.secrets",
+  "lang": "en",
+  "text": "Credentials are set as server secrets, not in this form.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.test_note",
+  "lang": "fi",
+  "text": "Testitilassa asiakas voi maksaa Visma Payn testikortilla. Oikeaa rahaa ei veloiteta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.test_note",
+  "lang": "en",
+  "text": "In test mode the customer can pay with a Visma Pay test card. No real money is charged.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.live_note",
+  "lang": "fi",
+  "text": "Tuotantotilassa veloitus on oikea. Kokeile ensin pienellä summalla omalla kortilla ja hyvitä se hallinnasta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.live_note",
+  "lang": "en",
+  "text": "Live mode charges real money. Try a small amount with your own card first, then refund it from admin.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.dry_note",
+  "lang": "fi",
+  "text": "Harjoitusajo ei lähetä maksua Visma Payhin eikä veloita.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.dry_note",
+  "lang": "en",
+  "text": "Dry run does not send the payment to Visma Pay and does not charge.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.off_note",
+  "lang": "fi",
+  "text": "Verkkomaksu on pois päältä. Asiakas ei näe Visma Pay -painiketta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.off_note",
+  "lang": "en",
+  "text": "Online payment is off. The customer does not see the Visma Pay button.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.save",
+  "lang": "fi",
+  "text": "Tallenna Visma Pay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.save",
+  "lang": "en",
+  "text": "Save Visma Pay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.saved",
+  "lang": "fi",
+  "text": "Visma Pay -tila tallennettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.saved",
+  "lang": "en",
+  "text": "Visma Pay mode saved.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.unavailable",
+  "lang": "fi",
+  "text": "Visma Pay -tilaa ei saatu haettua.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.unavailable",
+  "lang": "en",
+  "text": "The Visma Pay status could not be loaded.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.version",
+  "lang": "fi",
+  "text": "Rajapinta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.version",
+  "lang": "en",
+  "text": "API",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.online_on",
+  "lang": "fi",
+  "text": "Asiakkaan verkkomaksu on käytössä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.online_on",
+  "lang": "en",
+  "text": "Customer online payment is on.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.online_off",
+  "lang": "fi",
+  "text": "Asiakkaan verkkomaksu ei ole käytössä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.vismapay.online_off",
+  "lang": "en",
+  "text": "Customer online payment is off.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_visma",
+  "lang": "fi",
+  "text": "Visma Pay -verkkomaksun hyvitys lähtee Visma Payhin heti pyynnön jälkeen. Hyvityskuitti syntyy, kun Visma hyväksyy hyvityksen.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_visma",
+  "lang": "en",
+  "text": "A Visma Pay online payment refund is sent to Visma Pay right after the request. The refund receipt is created when Visma accepts the refund.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_awaiting_customer",
+  "lang": "fi",
+  "text": "Hyvitys odottaa Visma Payn vahvistusta. Kuitti syntyy, kun vahvistus saapuu.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_awaiting_customer",
+  "lang": "en",
+  "text": "The refund is waiting for Visma Pay to confirm it. The receipt is created when the confirmation arrives.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_db_error",
+  "lang": "fi",
+  "text": "Hyvitys lähti Visma Payhin, mutta kirjaus tietokantaan viivästyi. Käsittele uudelleen hetken kuluttua. Tuplahyvitystä ei synny.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_db_error",
+  "lang": "en",
+  "text": "The refund was sent to Visma Pay but recording it was delayed. Process again in a moment. A double refund is not created.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_done",
+  "lang": "fi",
+  "text": "Visma Pay -hyvitys tehty. Hyvityskuitti on luotu.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_done",
+  "lang": "en",
+  "text": "Visma Pay refund done. The refund receipt has been created.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_error",
+  "lang": "fi",
+  "text": "Visma Pay -hyvityksen käsittely epäonnistui. Hyvitys on jonossa: käsittele uudelleen hetken kuluttua.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_error",
+  "lang": "en",
+  "text": "Processing the Visma Pay refund failed. The refund is queued: process again in a moment.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_failed",
+  "lang": "fi",
+  "text": "Visma Pay hylkäsi hyvityksen. Syy on tallennettu hyvityksen tietoihin.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_failed",
+  "lang": "en",
+  "text": "Visma Pay rejected the refund. The reason is stored with the refund.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_forbidden",
+  "lang": "fi",
+  "text": "Hyvityksen käsittely Visma Payssa vaatii oikeuden payments.refund.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_forbidden",
+  "lang": "en",
+  "text": "Processing a Visma Pay refund requires the payments.refund permission.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_none",
+  "lang": "fi",
+  "text": "Hyvityspyyntö on kirjattu, mutta Visma Pay -käsittelyä ei ollut tehtävänä. Käsittele uudelleen tarvittaessa.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_none",
+  "lang": "en",
+  "text": "The refund request was recorded, but there was nothing for Visma Pay to process. Process again if needed.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_not_configured",
+  "lang": "fi",
+  "text": "Visma Payn tunnukset puuttuvat. Hyvitystä ei lähetetty. Aseta tunnukset ja käsittele uudelleen.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_not_configured",
+  "lang": "en",
+  "text": "Visma Pay credentials are missing. The refund was not sent. Set the credentials and process again.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_not_settled",
+  "lang": "fi",
+  "text": "Maksu ei ole Visma Payssa tilassa, jossa hyvitys onnistuu. Tarkista maksun tila.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_not_settled",
+  "lang": "en",
+  "text": "The payment is not in a Visma Pay state that can be refunded. Check the payment status.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_off",
+  "lang": "fi",
+  "text": "Visma Pay ei ole käytössä: hyvitys jäi odottamaan.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_off",
+  "lang": "en",
+  "text": "Visma Pay is switched off: the refund is waiting.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_retry_later",
+  "lang": "fi",
+  "text": "Visma Pay ei vastannut. Hyvitys on jonossa: yritä hetken kuluttua uudelleen (Käsittele uudelleen).",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_retry_later",
+  "lang": "en",
+  "text": "Visma Pay did not respond. The refund is queued: try again in a moment (Process again).",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_unverified",
+  "lang": "fi",
+  "text": "Hyvitystä ei voitu varmistaa Visma Payssa. Tarkista tilanne ennen uutta yritystä.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ },
+ {
+  "key": "ui.admin.talous.refund_vp_unverified",
+  "lang": "en",
+  "text": "The refund could not be verified in Visma Pay. Check the situation before trying again.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Visma Pay -hallinta (booking_120): tila ja hyvitys. FI+EN. Tunnuksia ei ole teksteissä."
+ }
+]

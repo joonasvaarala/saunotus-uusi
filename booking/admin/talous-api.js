@@ -283,6 +283,20 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
         return { result: code === 'forbidden' || e?.status === 403 ? 'forbidden' : 'error', code, status: e?.status ?? null };
       }
     },
+    // Visma Pay -hyvitys: admin_refund luo rivin status='requested' (provider='visma_pay'); sen jälkeen POST vismapay-refund {refund_id} käyttäjän JWT:llä (payments.refund).
+    // Palauttaa { result: done | failed | retry_later | awaiting_customer | not_settled | not_configured | db_error | none | off | forbidden | error }. Ei heitä.
+    async vismapayRefund(refundId) {
+      if (!real || !io.fn) return { result: 'done', mock: true };
+      try {
+        const j = await io.fn('vismapay-refund', { refund_id: refundId });
+        const x = (j?.processed || []).find((p) => +p.refund_id === +refundId);
+        if (x) return { result: String(x.result || 'error'), detail: x.detail ?? null };
+        return { result: j?.mode === 'off' || j?.mode === 'dry_run' ? 'off' : 'none' };
+      } catch (e) {
+        const code = e?.code || e?.details?.code || null;
+        return { result: code === 'forbidden' || e?.status === 403 ? 'forbidden' : 'error', code, status: e?.status ?? null };
+      }
+    },
     addToOrder: (a) => act('addToOrder', a), createPaymentLink: (a) => act('createPaymentLink', a), refund: (a) => act('refund', a), recordPayment: (a) => act('recordPayment', a),
     // ---- kuitit ----
     getReceipt: (id) => run('getReceipt', id, normReceipt),

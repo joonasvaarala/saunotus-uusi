@@ -9,6 +9,9 @@ import { redeemSection, cardsSection, claimsSection } from './order-gift.js';
 import { createMobilepayApi } from './mobilepay-api.js';
 import { normOptions, shouldShowButton, testUiEnabled } from './mobilepay-logic.js';
 import { payBlock, runReturn } from './mobilepay-ui.js';
+import { createVismapayApi } from './vismapay-api.js';
+import { normVisma, shouldShowVisma } from './vismapay-logic.js';
+import { vismaPayBlock, runVismaReturn } from './vismapay-ui.js';
 import { OPT } from './options-texts.js';
 import { optName, optionMissingOnOrder, optionChanged, rowLabel } from './options-logic.js';
 import { createOptionPicker } from './options-ui.js';
@@ -67,11 +70,18 @@ async function main() {
   const cfg = window.BOOKING_CONFIG || {}, search = new URLSearchParams(location.search);
   const mpEnv = { testUi: testUiEnabled(cfg, location.search), mock: api.mock, official: cfg.mobilepayOfficialButton !== false };
   const mp = createMobilepayApi({ rpc: api.mock ? api.rpc : rpc, token, functionUrl, anonKey: cfg.anonKey, fetchImpl: api.mock ? api.mpFetch : undefined });
+  const vp = createVismapayApi({ token, functionUrl, anonKey: cfg.anonKey, fetchImpl: api.mock ? api.mpFetch : undefined });
   const mpState = { opts: normOptions(null), show: false, checking: false };
+  const vpState = { opts: normVisma(null), show: false, checking: false };
   const mpHost = h('div', { 'data-testid': 'mp-result', 'aria-live': 'polite' });
   const num = (k) => { const v = +search.get(k); return Number.isFinite(v) && v > 0 ? v : undefined; };
   const mpTiming = api.mock ? { intervalMs: num('mpinterval'), maxMs: num('mpmax') } : {};   // vain mock-tilassa säädettävissä (testit/esittely)
-  async function loadMp() { try { mpState.opts = normOptions(await mp.options()); } catch { mpState.opts = normOptions(null); } mpState.show = shouldShowButton(mpState.opts, mpEnv); }
+  async function loadMp() {
+    let raw = null;
+    try { raw = await mp.options(); } catch { raw = null; }
+    mpState.opts = normOptions(raw); mpState.show = shouldShowButton(mpState.opts, mpEnv);
+    vpState.opts = normVisma(raw); vpState.show = shouldShowVisma(vpState.opts);
+  }
   await Promise.all([loadGift(), loadMp()]);
   // Pitotila (§17): pidon pituus (public_checkout_payment_options) ja lahjakortin käyttö (public_get_booking.payment_methods, myös perutut) haetaan vain kun tarvitaan
   const holdX = { minutes: 15, gift: false };
@@ -88,6 +98,8 @@ async function main() {
   await loadHold(o);
   let notice = null;   // vahvistusteksti lunastuspyynnön jälkeen (näytetään pyyntölistan yläosassa, kerran)
   let cur = o;
+  const payableStatus = ['unpaid', 'pending', 'partially_paid', 'paid', 'failed'].includes(o.payment_status);
+  if (search.get('pay') === 'vismapay' && payableStatus) vpState.checking = true;
   draw(o);
   const redraw = async (n) => { await loadMp(); await loadHold(n); draw(n); };
   async function reloadAfterGift(text) {
@@ -106,7 +118,11 @@ async function main() {
     getOrder: async () => { const n = await api.get(); return n?.ok ? n : null; },
     onState: (st) => { if (st === 'checking') { mpState.checking = true; draw(cur); } },
     onDone: async () => { mpState.checking = false; try { const f = await api.get(); if (f?.ok) cur = f; } catch { /* vanha näkymä */ } await loadMp(); draw(cur); } });
-  if (search.get('pay') === 'mobilepay' && ['unpaid', 'pending', 'partially_paid', 'paid', 'failed'].includes(o.payment_status)) returning();
+  if (search.get('pay') === 'vismapay' && payableStatus) {
+    runVismaReturn({ api: vp, host: mpHost, L,
+      getOrder: async () => { const n = await api.get(); return n?.ok ? n : null; },
+      onDone: async () => { vpState.checking = false; try { const f = await api.get(); if (f?.ok) cur = f; } catch { /* vanha näkymä */ } await loadMp(); draw(cur); } });
+  } else if (search.get('pay') === 'mobilepay' && payableStatus) returning();
 
   function draw(o) {
     cur = o; stopHold();
@@ -147,14 +163,16 @@ async function main() {
       h('dl', { class: 'ord-sums' }, h('div', {}, h('dt', { text: `${t.total} (${t.vatIncl})` }), h('dd', { 'data-testid': 'order-total', text: money(o.total) })), h('div', {}, h('dt', { text: t.paid }), h('dd', { text: money(o.paid) })),
         h('div', { class: unpaid > 0 ? 'due' : '' }, h('dt', { text: t.unpaid }), h('dd', { 'data-testid': 'order-unpaid', text: money(unpaid) }))));
     // maksulinkki: avoin (pending) maksu + verkkomaksu käytössä → linkki; muuten maksu paikan päällä
-    const link = o.online_payment_enabled ? o.payments.find((p) => p.status === 'pending' && p.link_path) : null;
-    const mpBlock = mpState.show && !mpState.checking && unpaid > 0 ? payBlock({ S, L, api: mp, opts: mpState.opts, env: mpEnv, amount: money(unpaid), onFail: (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) holdCtl?.poll(true); } }) : null;
+    const link = o.online_payment_enabled && !vpState.show ? o.payments.find((p) => p.status === 'pending' && p.link_path) : null;
+    const mpBlock = mpState.show && !mpState.checking && !vpState.checking && unpaid > 0 ? payBlock({ S, L, api: mp, opts: mpState.opts, env: mpEnv, amount: money(unpaid), onFail: (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) holdCtl?.poll(true); } }) : null;
+    const vpBlock = vpState.show && !vpState.checking && !mpState.checking && unpaid > 0 ? vismaPayBlock({ L, api: vp, opts: vpState.opts, amount: money(unpaid) }) : null;
     const payHidden = !!co && (co.preliminary || co.expired || co.cancelled || co.processing);   // alustavaa/vanhentunutta ei makseta; käsittelyn aikana ei toista maksua
+    const checking = mpState.checking || vpState.checking;
     const pay = unpaid > 0 && !payHidden ? h('section', { class: 'ord-card', 'aria-labelledby': 'ord-p' }, h('h3', { id: 'ord-p', text: t.paymentTitle }), co?.awaiting ? h('p', { class: 'bk-note', 'data-testid': 'ord-hold-choose', text: ht(L, 'choose') }) : null,
-      mpBlock,
-      mpState.checking ? null : link ? h('a', { class: 'btn ord-btn', 'data-testid': 'pay-link', href: S.base ? S.base + link.link_path : link.link_path, text: `${t.payRest} (${money(unpaid)})` })
+      vpBlock, mpBlock,
+      checking || vpState.show ? null : link ? h('a', { class: 'btn ord-btn', 'data-testid': 'pay-link', href: S.base ? S.base + link.link_path : link.link_path, text: `${t.payRest} (${money(unpaid)})` })
         : mpBlock ? null : h('button', { type: 'button', class: 'btn light ord-btn', disabled: true, 'data-testid': 'pay-rest', text: `${t.payRest} (${money(unpaid)})` }),
-      link || mpBlock || mpState.checking ? null : h('p', { class: 'bk-note', text: t.payRestSoon })) : null;
+      link || mpBlock || vpBlock || checking || vpState.show ? null : h('p', { class: 'bk-note', text: t.payRestSoon })) : null;
     const giftCards = gift.cards.length ? cardsSection({ S, L, api: gapi, cards: gift.cards }) : null;
     const giftUse = gift.redeem && unpaid > 0 && !payHidden && !gift.cards.length && ['confirmed', 'pending'].includes(o.status) ? redeemSection({ L, api: gapi, token, onApplied: reloadAfterGift, onClaimed: reloadAfterClaim, onFail: (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) holdCtl?.poll(true); } }) : null;
     const claimBox = gift.claims.length ? claimsSection({ S, L, api: gapi, token, claims: gift.claims, notice, onChanged: reloadAfterClaim }) : null;

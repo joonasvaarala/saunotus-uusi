@@ -7,7 +7,7 @@ Tila 17.10.2026. Kaikki integraatiot on rakennettu valmiiksi **ilman ulkoisia yh
 | key | mode nyt | merkitys |
 |---|---|---|
 | `resend` | `dry_run` | `off` = viestit merkitään `skipped`; `dry_run` = viestit renderöidään ja merkitään `dry_run`, **ei lähetetä**; `live` = lähetetään (`settings.transport`, oletus Resend). Epätyhjä `settings.test_recipients` rajaa live-vastaanottajat |
-| `vismapay` | `off` | `off` = ei verkkomaksua (`online_payment_enabled=false`, maksulinkkejä ei luoda asiakkaalle); `live` = maksulinkit/verkkomaksu käytössä |
+| `vismapay` | `off` | `off` = ei verkkomaksua; `dry_run` = paikallinen harjoitus ilman Vismaa; `test` ja `live` = oikea Paybyway-kutsu (testi- tai tuotantoavaimet). Kytkentä ja salaisuudet: `docs/vismapay-integraatio.md`. Migraatio ei laita testiä eikä tuotantoa päälle |
 | `procountor` | `off` | `off` = kuittijonoa ei kirjoiteta eikä päiväkirjausta tehdä. `dry_run`/`live` kopioi kuitit `accounting_outbox`-jonoon, mutta lähetys on päivän tosite (`daily_enabled`) ja laskun välitys. Ks. docs/procountor-integraatio.md. |
 
 Vaihto (ylläpitäjä, SQL-editori; kirjautuneena ei vielä admin-RPC:tä):
@@ -43,14 +43,11 @@ Jos salaisuuksia ei ole asetettu, viesti merkitään `failed` ja `last_error` on
 
 Rajat: Gmailin lähetyskiintiö on noin 500 viestiä vuorokaudessa. From on Gmail-osoite, ei `savusauna@saunotus.fi`. Roskapostiriski on suurempi kuin Resendillä. `reply_to`-osoitteen on oltava toimiva, jotta vastaukset tulevat perille.
 
-## 3. Visma Pay (verkkomaksu) – ei toteutettu, runko valmiina
-Valmiina: `payments`-rakenne (`provider='visma_pay'`, `provider_ref`, `provider_status`, `link_token`, `link_expires_at`, `raw`), maksulinkit (`/maksa/?p=<link_token>`), `payment_mark_paid(p_provider text, p_provider_ref text, p_amount numeric, p_raw jsonb)` (vanha, olemassa oleva; service_role; idempotentti `already:true`; hakee maksun `provider`+`provider_ref`-parilla – `vismapay-start` tallentaa Visma Payn palauttaman tokenin `provider_ref`iin maksun luonnin jälkeen; maksu → `paid` käynnistää kuitin ja kuittiviestin triggerillä), `admin_refund` (jää `pending`/kirjataan käsin, kunnes `vismapay-refund` toteutetaan), edge-funktiot `vismapay-start`, `vismapay-notify`, `vismapay-refund` (palauttavat nyt 501).
-Tarvitaan käyttöönottoon:
-- Visma Pay -kauppiastili ja **API-avain (`api_key`) + yksityinen avain (`private_key`)** → Edge-salaisuudet **`VISMAPAY_API_KEY`**, **`VISMAPAY_PRIVATE_KEY`**.
-- Visma Pay -kauppiasportaaliin: palautus-/ilmoitusosoitteet: success/cancel-paluu `https://<verkkokauppa>/maksa/` (Koodari päättää paluusivun), notify `{SUPABASE_URL}/functions/v1/vismapay-notify`.
-- Maksutavat sopimuksessa (kortti, verkkopankit, MobilePay) ja hyvitys-API (`create_refund`) otettava käyttöön tilillä.
-- Toteutus (vaihe E): Web Payment API w3.2: `auth_payment` (authcode = HMAC-SHA256(private_key, api_key|order_number-sidottu body)), notify-vahvistus `RETURN_CODE|ORDER_NUMBER|SETTLED|INCIDENT_ID` (HMAC-SHA256, vakioaikavertailu) + `check_payment_status`; `create_refund`. Testi: Visma Pay -testitunnukset (testiympäristö) ennen tuotantoavaimia.
-- Kun valmis: `vismapay.mode='live'` (silloin asiakkaan tilaussivu alkaa luoda maksulinkkejä lisäyksille).
+## 3. Visma Pay (verkkomaksu) – toteutettu, oletus `off`
+
+Käyttöönotto, salaisuudet, testikortit, oman kortin tuotantokoe ja rollback: **`docs/vismapay-integraatio.md`**. Vanha kuvaus (501-runko, paluu `/maksa/`, vain `VISMAPAY_API_KEY`) ei enää päde.
+
+Lyhyesti: testitila lukee `VISMAPAY_TEST_API_KEY` ja `VISMAPAY_TEST_PRIVATE_KEY`. Tuotanto lukee `VISMAPAY_LIVE_API_KEY` ja `VISMAPAY_LIVE_PRIVATE_KEY` (varanimet `VISMAPAY_API_KEY` ja `VISMAPAY_PRIVATE_KEY` vain tuotannossa). Paluu on `vismapay-return`, ilmoitus `vismapay-notify`. Hyvitys lähtee hallinnasta (`vismapay-refund`) ja tekee H-kuitin. Testi ja tuotanto vaativat `settings.approved_by`. Migraatio ei kytke niitä päälle.
 
 ## 3b. MobilePay (Vipps MobilePay ePayment API, suora integraatio) – valmis, kytketty pois (`mobilepay.mode = 'off'`)
 

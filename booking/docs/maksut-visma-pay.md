@@ -1,8 +1,10 @@
-# Maksut ja Visma Pay (RAJAPINTA, EI TOTEUTETTU)
+# Maksut ja Visma Pay
 
-> **MobilePay** on toteutettu erikseen suorana Vipps MobilePay ePayment -integraationa (kytketty pois, `mobilepay.mode='off'`): ks. `KOODARI_talous_A_D_fi.md` §14 ja `talous-integraatiot.md` §3b. Tämä dokumentti koskee Visma Pay -runkoa.
+> Käyttöönotto on kuvattu tiedostossa **`docs/vismapay-integraatio.md`**. Tämä tiedosto on vanha rajapintasuunnitelma. Jos teksti alla sanoo, että verkkomaksu puuttuu, että `vismapay-start` palauttaa 501 tai että paluu on `/maksa/`, noudata uutta ohjetta.
 
-**Maksupalveluntarjoaja on Visma Pay (ei Paytrail).** Verkkomaksua ei ole toteutettu: tämä on suunniteltu liitoskohta, jotta toteutus on myöhemmin pieni ja turvallinen. Mitään oikeaa maksua ei voi tehdä.
+> **MobilePay** on toteutettu erikseen suorana Vipps MobilePay ePayment -integraationa (kytketty pois, `mobilepay.mode='off'`): ks. `KOODARI_talous_A_D_fi.md` §14 ja `talous-integraatiot.md` §3b.
+
+**Maksupalveluntarjoaja on Visma Pay (ei Paytrail).** Toteutus on Paybyway REST w3.2. Oletustila on `off`, kunnes ylläpitäjä kytkee testin tai tuotannon hyväksyjämerkinnällä.
 
 ## Nykytila: kaksi maksutilaa (`booking.settings.public_payment_mode`)
 
