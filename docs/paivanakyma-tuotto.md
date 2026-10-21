@@ -35,6 +35,18 @@ Päivän listassa näkyvät `kb.event_dates`-rivit, jotka ovat voimassa (`active
 
 Koulutuksen viikonloppu (esim. tuote 35, luokka `training`) näkyy, jos sillä on rivi `kb.event_dates`-taulussa. Rajaus ei ole «vain luokka event».
 
+## Lahjakorttivaraukset vuoron alla
+
+Johku-tuonnissa lahjakortilla tehdyn varauksen tilausrivin nimi on «Yleinen vuoro - Lahjakorttivaraus» (Johku-tuote 119). Tuonti kirjasi sen tuotteelle 1 (Yleinen vuoro) viikonpäivästä riippumatta, ilman `rule_id`:tä ja usein 30 min saapumisikkunana (esim. ti 16:00–16:30). Kapasiteettipooli on silti saman hetken tavallisen vuoron pooli, joten palvelimen «Vapaana»-luku sisältää varauksen jo.
+
+Päivänäkymä (`day-logic.js`, `assignDayCards`) sijoittaa varauksen näin:
+
+1. Saman tuotteen vuoro: `rule_id`, sitten tarkka alku + loppu, sitten sama alku (kuten muillakin varauksilla).
+2. Vain lahjakorttivaraus: jos saman tuotteen vuoroa ei ole, samaan aikaan alkava tavallinen yhteisvuoro (`mode = 'shared'`, ei yksityisvuoro), esim. tiistaina Naisten sauna 16–19.
+3. Muuten oma ryhmä normalisoidulla avaimella (Helsingin päivä + alku + loppu hetkinä + tuote). Saman tuotteen ja ajan tavallinen varaus on samassa ryhmässä. Otsikko on tuotteen nimi ilman «- Lahjakorttivaraus»-liitettä.
+
+Vuoron henkilömäärä laskee kortin kaikki varaukset kerran (sama `reservation_id` vain kerran, perutut pois). «Vapaana» tulee palvelimelta sellaisenaan eikä ole koskaan negatiivinen. Rivillä on pieni «Lahjakortti»-merkki (`ui.admin.day.gift_card_badge`, tuonti `content/site-texts.pending-import-32.json`); Johku-merkki pysyy ennallaan. Ei migraatiota.
+
 ## Kun funktiota ei vielä ole
 
 Ennen kuin migraatio on ajettu, päivänäkymä toimii kuten ennen ja tuoton kohdalla lukee, ettei tieto ole vielä käytettävissä. Tyhjä onnistunut vastaus on 0,00 €, ei puuttuva tieto.

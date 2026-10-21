@@ -1,7 +1,7 @@
 // Hallinnan päivänäkymän tekstit (FI + EN). Avaimet: ui.admin.day.* (§18).
 // Sama mekanismi kuin muu hallinta, joka lukee site_texts: public_get_site_texts (rpc), kieli talous-i18n
 // (?lang= / localStorage booking.admin.lang). Sanakirja DAY_TEXTS on vain varalla: rivi puuttuu, haku
-// epäonnistuu tai paikkamerkki ei täyty. Tuonti: content/site-texts.imported-pr68.json.
+// epäonnistuu tai paikkamerkki ei täyty. Tuonti: content/site-texts.imported-pr68.json (gift_card_badge: pending-import-32).
 import { getLang } from './talous-i18n.js';
 
 export const DAY_TEXTS = {
@@ -13,6 +13,7 @@ export const DAY_TEXTS = {
     'ui.admin.day.revenue_unavailable': 'Päivän tuotto ja tapahtumat eivät ole vielä käytettävissä.',
     'ui.admin.day.event_badge': 'Tapahtuma',
     'ui.admin.day.event_all_day': 'Koko päivä',
+    'ui.admin.day.gift_card_badge': 'Lahjakortti',
   },
   en: {
     'ui.admin.day.revenue_title': "Day's revenue",
@@ -22,6 +23,7 @@ export const DAY_TEXTS = {
     'ui.admin.day.revenue_unavailable': "The day's revenue and events are not available yet.",
     'ui.admin.day.event_badge': 'Event',
     'ui.admin.day.event_all_day': 'All day',
+    'ui.admin.day.gift_card_badge': 'Gift card',
   },
 };
 
