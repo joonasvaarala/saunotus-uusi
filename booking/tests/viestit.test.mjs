@@ -172,6 +172,24 @@ test('vahvistus ja tuoteviesti', { skip: skipTs }, async () => {
   assert.equal(nasty.subject.includes('<'), false);
   assert.ok(nasty.html.includes('&lt;script&gt;'));
   assert.ok(nasty.html.includes('https://example.test/arvostelu'));
+  const rich = templates.render('product_message', {
+    locale: 'fi', to_name: 'Matti', order,
+    product_message: {
+      active: true, subject: 'Ohje',
+      text: '<p>Hei {asiakas_nimi}</p><h2>Mukaan</h2><ul><li>Pyyhe</li></ul><p><a href="https://example.com/ohje">ohje</a></p><script>alert(1)</script><img src=x onerror=alert(1)><p><a href="javascript:alert(1)">x</a></p>',
+    },
+  }, 'fi');
+  assert.equal(/<script|onerror|javascript:/i.test(rich.html), false);
+  assert.ok(rich.html.includes('font-family:Arial'));
+  assert.ok(rich.html.includes('Pyyhe') && rich.html.includes('{asiakas_nimi}') && rich.html.includes('https://example.com/ohje'));
+  assert.ok(rich.text.includes('Pyyhe') && rich.text.includes('{asiakas_nimi}'));
+  assert.equal(/<[a-z]/i.test(rich.text), false);
+  const richNotes = templates.render('order_confirmation', {
+    locale: 'fi', to_name: 'Matti Meikäläinen',
+    order: { ...order, instructions: [{ title: 'Ennen', text: '<p>Ota <strong>pyyhe</strong></p><script>alert(1)</script>' }] },
+  }, 'fi');
+  assert.ok(richNotes.text.includes('pyyhe') && richNotes.html.includes('pyyhe'));
+  assert.equal(/<script|onerror|javascript:/i.test(richNotes.html), false);
   assert.equal(templates.productMessageBlock({ kind: 'product_message', product_message: { active: false, subject: 'A', text: 'B', order_status: 'confirmed' } }), 'tuoteviesti ei ole käytössä');
   assert.equal(templates.productMessageBlock({ kind: 'product_message', order: { status: 'cancelled' }, product_message: { active: true, subject: 'A', text: 'B' } }), 'tilaus ei ole lähetettävissä');
   assert.equal(templates.productMessageBlock({ kind: 'product_message', product_message: { active: true, subject: 'A', text: 'B', payment_status: 'refunded', order_status: 'confirmed' } }), 'tilaus on hyvitetty');

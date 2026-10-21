@@ -8,6 +8,8 @@ import { h, dialog, field, toast, run, money, badge } from '../ui.js';
 import { filterDrawer } from '../filter-drawer.js';
 import { loadPosTexts, posText } from '../pos-texts.js';
 import { loadProductTexts, productText } from '../product-texts.js';
+import { loadRichTexts, richText } from '../rich-texts.js';
+import { mountRichFields, syncRichFields } from '../rich-editor.js';
 import { settingsHref } from '../settings-tabs.js';
 import { looksLikeAlcohol } from '../pos-logic.js';
 
@@ -33,6 +35,7 @@ const norm = (x) => String(x ?? '').toLocaleLowerCase('fi');   // kirjainkoolla 
 export async function render({ ctx, refs, reload, query }) {
   await loadPosTexts(rpc);
   await loadProductTexts(rpc);
+  await loadRichTexts(rpc);
   const isAdmin = ctx.can('catalog.edit');  // manager + admin
   const fresh = () => { ctx.refs = null; reload(); };   // tuotelista haetaan uudelleen (refs on välimuistissa; muuten uusi kuva/tiedot eivät näy listassa)
   const list = h('div', { class: 'list' });
@@ -90,18 +93,19 @@ export async function render({ ctx, refs, reload, query }) {
     drawer.refresh();
   }
   draw();
-  function edit(p) {
+  async function edit(p) {
     const inp = (name, v, { area, ...o } = {}) => h(area ? 'textarea' : 'input', { name, value: v ?? '', rows: area ? 5 : null, disabled: !isAdmin, ...o });
     const vat = h('select', { name: 'vat_rate', disabled: !isAdmin }, vatChoices(p.vat_rate).map((v) => h('option', { value: v, text: vatLabel(v), selected: +p.vat_rate === v || null })));
     const f = h('form', { class: 'stack' },
       field('Nimi (FI)', inp('name', p.name, { required: true })), field('Nimi (EN)', inp('name_en', p.name_en)),
-      field('Kuvaus (FI)', inp('description', p.description, { area: true })), field('Kuvaus (EN)', inp('description_en', p.description_en, { area: true })),
+      field('Kuvaus (FI)', inp('description', p.description, { area: true, 'data-rich': '1' }), richText('hint')), field('Kuvaus (EN)', inp('description_en', p.description_en, { area: true, 'data-rich': '1' }), richText('hint')),
       h('div', { class: 'row wrap' }, field('Hinta € (sis. ALV)', inp('price', p.price, { type: 'number', step: '0.01', min: '0' })), field('ALV', vat)),
       field('Hintateksti', inp('price_text', p.price_text), 'Näytetään kb:ssä; verkkokauppa laskee näytettävän hinnan hinta-kentästä. Päivitä teksti kun muutat hintaa.'),
       h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'active', disabled: !isAdmin }), ' Aktiivinen (näkyy kb:ssä)'),
       isAdmin ? h('button', { class: 'btn primary', type: 'submit', text: 'Tallenna tuote' }) : h('p', { class: 'muted', text: 'Tuotteiden, hintojen ja kuvausten muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }));
     f.active.checked = !!p.active;
     f.addEventListener('submit', (ev) => { ev.preventDefault(); run(f.querySelector('button'), async () => {
+      syncRichFields(f);
       const fd = new FormData(f);
       await rpc('admin_update_product', { p_product_id: p.id, p_patch: { name: fd.get('name'), name_en: fd.get('name_en'), description: fd.get('description'), description_en: fd.get('description_en'), price: +fd.get('price'), price_text: fd.get('price_text'), vat_rate: +fd.get('vat_rate'), active: f.active.checked } });
       toast('Tuote tallennettu'); d.close(); fresh();
@@ -145,8 +149,9 @@ export async function render({ ctx, refs, reload, query }) {
       h('p', { class: 'muted', text: productText('qr_hint') }),
       h('a', { class: 'btn', href: settingsHref('qr'), 'data-testid': 'product-open-qr', text: productText('link_qr'), onclick: () => d?.close() })) : null;
     d = dialog(p.name, h('div', { class: 'stack' }, f, img, cfg, next, vars), { wide: true });
+    try { await mountRichFields(f); } catch (e) { console.error(e); }
   }
-  function createProduct() {
+  async function createProduct() {
     const inp = (name, v, o = {}) => h(o.area ? 'textarea' : 'input', { name, value: v ?? '', rows: o.area ? 5 : null, ...o, area: null });
     const vat = h('select', { name: 'vat_rate', 'data-testid': 'product-create-vat' }, vatChoices(25.5).map((v) => h('option', { value: v, text: vatLabel(v), selected: v === 25.5 || null })));
     vat.value = '25.5';
@@ -155,7 +160,7 @@ export async function render({ ctx, refs, reload, query }) {
     const f = h('form', { class: 'stack', 'data-testid': 'product-create-form' },
       field(productText('name_fi'), inp('name', '', { required: true, maxlength: 200 })),
       field(productText('name_en'), inp('name_en', '', { maxlength: 200 }), productText('name_en_hint')),
-      field('Kuvaus (FI)', inp('description', '', { area: true })), field('Kuvaus (EN)', inp('description_en', '', { area: true })),
+      field('Kuvaus (FI)', inp('description', '', { area: true, 'data-rich': '1' }), richText('hint')), field('Kuvaus (EN)', inp('description_en', '', { area: true, 'data-rich': '1' }), richText('hint')),
       h('div', { class: 'row wrap' }, field(productText('price'), inp('price', '', { type: 'number', step: '0.01', min: '0', required: true, inputmode: 'decimal' })), field(productText('vat'), vat)),
       field(productText('price_text'), inp('price_text', '', { maxlength: 200 }), productText('price_text_hint')),
       field(productText('category'), cat),
@@ -167,6 +172,7 @@ export async function render({ ctx, refs, reload, query }) {
     f.active.checked = true;
     f.age_restricted.checked = false;
     f.addEventListener('submit', (ev) => { ev.preventDefault(); run(f.querySelector('button'), async () => {
+      syncRichFields(f);
       const fd = new FormData(f);
       const res = await rpc('admin_product_create', { p_data: {
         name: fd.get('name'), name_en: fd.get('name_en'), description: fd.get('description'), description_en: fd.get('description_en'),
@@ -178,6 +184,7 @@ export async function render({ ctx, refs, reload, query }) {
       fresh();
     }); });
     const d = dialog(productText('new_title'), f, { wide: true });
+    try { await mountRichFields(f); } catch (e) { console.error(e); }
   }
   const addonsSection = await addonsAdmin({ ctx });
   const optionsSection = await productOptionsAdmin({ ctx });   // tuotevalinnat (booking_50)

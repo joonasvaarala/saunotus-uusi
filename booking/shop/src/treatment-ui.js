@@ -8,6 +8,8 @@ import { createOptionPicker } from './options-ui.js';
 import { ht, holdError } from './hold-texts.js';
 import { fmtMinutes } from './site-texts-logic.js';
 import { createAddonPicker } from './treatment-addons.js';
+import { isRichHtml } from './rich-text.js';
+import { visibleText, richHost } from './rich-view.js';
 
 export function createTreatmentViews(c) {
   const { h, t, S, state, money, fmt, hm, dayLong, pad2, todayHel, addDays, pname, pdesc, pimg, setHero, mount, focusTop, errorBox, phoneBox, bk, customerFields, legalFields, holdInfo = async () => ({ on: false, minutes: 15, extra: () => [] }), tx = () => null, confirmUrl = (tok) => `${S.confirmHref}#${tok}` } = c;
@@ -50,7 +52,7 @@ export function createTreatmentViews(c) {
   const card = (p) => h('li', { class: 'bk-card' },
     pimg(p, 'card-img'),
     h('h3', {}, h('a', { href: bk(`/tuote/${p.slug}`), text: pname(p) })),
-    h('p', { class: 'bk-desc', text: (pdesc(p) || '').slice(0, 170) + ((pdesc(p) || '').length > 170 ? '…' : '') }),
+    h('p', { class: 'bk-desc', text: (() => { const raw = pdesc(p) || ''; const plain = isRichHtml(raw) ? visibleText(raw).replace(/\s+/g, ' ').trim() : raw; return plain.slice(0, 170) + (plain.length > 170 ? '…' : ''); })() }),
     metaP(p),
     timelineNode(p),
     h('a', { class: 'btn sm', href: bk(`/tuote/${p.slug}`) }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) })));
@@ -171,7 +173,7 @@ export function createTreatmentViews(c) {
       if (cur?.slot) location.hash = `#/hoito/${p.slug}/${cur.date}/${A.timeToken(cur.time)}?n=${cur.n}${optQ(opt)}`;
     });
     mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })),
-      h('p', { class: 'bk-desc', text: pdesc(p) || '' }), voucherNode(p),
+      richHost(h, pdesc(p) || '', 'bk-desc'), voucherNode(p),
       metaP(p), timelineNode(p),
       optStep, picker.node, h('div', { class: 'bk-continue' }, sum, go));
     await picker.ready;

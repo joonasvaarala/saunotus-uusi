@@ -1,0 +1,262 @@
+[
+  {
+    "key": "ui.admin.rich.bold",
+    "lang": "fi",
+    "text": "Lihavointi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.bold",
+    "lang": "en",
+    "text": "Bold",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.italic",
+    "lang": "fi",
+    "text": "Kursivointi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.italic",
+    "lang": "en",
+    "text": "Italic",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.heading",
+    "lang": "fi",
+    "text": "Otsikko",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.heading",
+    "lang": "en",
+    "text": "Heading",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.subheading",
+    "lang": "fi",
+    "text": "Alaotsikko",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.subheading",
+    "lang": "en",
+    "text": "Subheading",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.bullets",
+    "lang": "fi",
+    "text": "Luettelo",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.bullets",
+    "lang": "en",
+    "text": "Bullet list",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.numbers",
+    "lang": "fi",
+    "text": "Numerointi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.numbers",
+    "lang": "en",
+    "text": "Numbered list",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.link",
+    "lang": "fi",
+    "text": "Linkki",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.link",
+    "lang": "en",
+    "text": "Link",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.unlink",
+    "lang": "fi",
+    "text": "Poista linkki",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.unlink",
+    "lang": "en",
+    "text": "Remove link",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.url",
+    "lang": "fi",
+    "text": "Osoite",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.url",
+    "lang": "en",
+    "text": "Address",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.url_placeholder",
+    "lang": "fi",
+    "text": "Kirjoita osoite",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.url_placeholder",
+    "lang": "en",
+    "text": "Enter an address",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.undo",
+    "lang": "fi",
+    "text": "Kumoa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.undo",
+    "lang": "en",
+    "text": "Undo",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.redo",
+    "lang": "fi",
+    "text": "Tee uudelleen",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.redo",
+    "lang": "en",
+    "text": "Redo",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.hint",
+    "lang": "fi",
+    "text": "Voit lihavoida, kursivoida, lisätä otsikon, luettelon ja linkin. Paikkamerkit, kuten {asiakas_nimi}, kirjoitetaan tekstin sekaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.rich.hint",
+    "lang": "en",
+    "text": "You can use bold, italic, a heading, a list and a link. Placeholders such as {asiakas_nimi} stay in the text.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "Hallinnan rich-text-työkalurivi. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  }
+]

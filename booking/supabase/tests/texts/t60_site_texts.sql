@@ -98,9 +98,14 @@ begin
   perform public.t60_ck(public.t60_try(format('select booking.admin_texts_rollback(%L, ''fi'', 1)', k1)) = 'forbidden', 'B10: botti ei palauta versioita');
   perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', ''Uusi hinta'')', kl)) = 'text_locked', 'B11: lukittu price_text: ehdotus estetty');
   perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''all'', ''x'')', ks)) = 'text_locked', 'B12: lukittu slug: ehdotus estetty');
-  perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k2, '<b>Lihavoitu</b> teksti')) = 'html_not_allowed', 'B13: raaka HTML estetty');
-  perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k2, '<script>x</script>')) = 'html_not_allowed', 'B14: script estetty');
-  perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k2, repeat('a', 5000))) = 'too_long', 'B15: liian pitkä estetty');
+  -- booking_122: tuotekuvaus on kind rich (k2). Tavallinen kenttä (k3, tuotteen nimi) hylkää yhä HTML:n.
+  -- Rich-kuvaus hylkää skriptin, onclickin ja javascript-linkin. Onnistunutta rich-ehdotusta ei tehdä tässä, ettei päiväraja (B38) kulu.
+  perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k3, '<b>Lihavoitu</b> teksti')) = 'html_not_allowed', 'B13: raaka HTML estetty tavallisessa kentässä');
+  perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k3, '<script>x</script>')) = 'html_not_allowed', 'B14: script estetty');
+  perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k3, repeat('a', 5000))) = 'too_long', 'B15: liian pitkä estetty');
+  perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k2, '<script>alert(1)</script>')) = 'html_not_allowed', 'B13b: script estetty rich-kuvauksessa');
+  perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k2, '<p onclick="alert(1)">x</p>')) = 'html_not_allowed', 'B13c: onclick estetty rich-kuvauksessa');
+  perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k2, '<p><a href="javascript:alert(1)">x</a></p>')) = 'html_not_allowed', 'B13d: javascript-linkki estetty rich-kuvauksessa');
   perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k2, '   ')) = 'text_empty', 'B16: tyhjä estetty');
   perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k2, 'Hinta {{price:7}}')) = 'placeholder_mismatch', 'B17: ei-sallittu paikkamerkki estetty');
   perform public.t60_ck(public.t60_try(format('select booking.texts_propose(%L, ''fi'', %L)', k2, 'Rikki {{price')) = 'placeholder_invalid', 'B18: rikkinäinen paikkamerkki estetty');

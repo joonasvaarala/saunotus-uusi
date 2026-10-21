@@ -33,6 +33,7 @@ Viestiä ei poisteta. Se otetaan pois käytöstä.
 
 - **Ohjeen lyhyt teksti** lisätään tilausvahvistukseen (`order_confirmation`), kun viesti on käytössä, se on kytketty tilauksen tuotteeseen ja lyhyt teksti ei ole tyhjä. Tämä ei riipu ajastuskytkimestä. Usea ohje = usea lohko samassa viestissä, kukin kerran. Otsikko on sivuteksti `email.order_confirmation.instructions_title` (Ohje / Instructions).
 - **Ohjeen täysi teksti** tulee tilaussivulle (`/tilaus/`) osioon Ohjeet. Tekstit ovat kiinni, kunnes asiakas painaa **Näytä ohjeet**.
+- Lyhyt ohje, täysi ohje ja sähköpostin teksti voivat olla pelkkää tekstiä tai kapeaa rich-tekstiä (lihavointi, kursivointi, otsikko, luettelo, linkki). Vanha pelkkä teksti näytetään ennallaan. Puhdistus ja sähköposti: [rich-text.md](rich-text.md).
 - **Jälkimarkkinointi ja palautepyyntö** lähtevät vain ajastettuna lajina `product_message`. Ohjeelle voi lisäksi asettaa ajastuksen (esimerkiksi muistutus 2 päivää ennen saapumista). Ajastettu ohje käyttää täyttä tekstiä ja tilauslinkkiä.
 - Jos viestillä on https-linkki, sähköpostiin tulee painike. Tilaussivun ohjeessa linkki on tekstin alla.
 
