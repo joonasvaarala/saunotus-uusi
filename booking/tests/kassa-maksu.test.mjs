@@ -54,13 +54,13 @@ test('tekstit: lahjakortin saldotekstit (uudet o.*-avaimet) FI/EN-pariteetti', (
 
 test('offers: tarjotaan vain maksettavalle varaukselle, päätökset tulevat palvelimelta', () => {
   const m = model({ mpShow: true, redeem: true });
-  assert.deepEqual(offers(m, booking()), { mobilepay: true, gift: true, claims: false, payLater: false });
-  assert.deepEqual(offers(m, booking({ status: 'pending' })), { mobilepay: true, gift: true, claims: false, payLater: false });
-  assert.deepEqual(offers(m, booking({ payment_status: 'paid' })), { mobilepay: false, gift: false, claims: false, payLater: false });
-  assert.deepEqual(offers(m, booking({ status: 'cancelled' })), { mobilepay: false, gift: false, claims: false, payLater: false });
-  assert.deepEqual(offers(model(), booking()), { mobilepay: false, gift: false, claims: false, payLater: false }, 'ei oletettua maksutapaa');
+  assert.deepEqual(offers(m, booking()), { mobilepay: true, vismapay: false, gift: true, claims: false, payLater: false });
+  assert.deepEqual(offers(m, booking({ status: 'pending' })), { mobilepay: true, vismapay: false, gift: true, claims: false, payLater: false });
+  assert.deepEqual(offers(m, booking({ payment_status: 'paid' })), { mobilepay: false, vismapay: false, gift: false, claims: false, payLater: false });
+  assert.deepEqual(offers(m, booking({ status: 'cancelled' })), { mobilepay: false, vismapay: false, gift: false, claims: false, payLater: false });
+  assert.deepEqual(offers(model(), booking()), { mobilepay: false, vismapay: false, gift: false, claims: false, payLater: false }, 'ei oletettua maksutapaa');
   assert.deepEqual(offers(model({ claims: [{ id: 1 }] }), booking({ payment_status: 'paid' })).claims, true, 'lunastuspyynnöt näkyvät maksun jälkeenkin');
-  assert.deepEqual(offers(m, null), { mobilepay: false, gift: false, claims: false, payLater: false });
+  assert.deepEqual(offers(m, null), { mobilepay: false, vismapay: false, gift: false, claims: false, payLater: false });
 });
 
 test('dueAmount: palvelimen unpaid ensin, sitten varauksen kentät, muuten ei summaa', () => {

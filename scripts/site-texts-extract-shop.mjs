@@ -19,7 +19,7 @@ const prod = JSON.parse(readFileSync(prodFile, 'utf8'));
 if (!prod?.ok || !Array.isArray(prod.texts)) { console.error('tuotannon vastaus ei ole {ok:true, texts:[…]}'); process.exit(1); }
 const have = new Set(prod.texts.map((r) => `${r.key}|${r.lang}`));
 
-const FILES = { T: 'i18n.js', OT: 'order-texts.js', GT: 'gift-texts.js', HT: 'hold-texts.js', PT: 'pay-choices-texts.js', MT: 'mobilepay-texts.js', OPT: 'options-texts.js' };
+const FILES = { T: 'i18n.js', OT: 'order-texts.js', GT: 'gift-texts.js', HT: 'hold-texts.js', PT: 'pay-choices-texts.js', MT: 'mobilepay-texts.js', VT: 'vismapay-texts.js', OPT: 'options-texts.js' };
 const entries = collectDefaults().map((r) => ({ key: r.key, lang: r.lang, text: r.text, src: `booking/shop/src/${FILES[r.id]}` }));
 for (const p of SHOP_PAGE_TEXTS) for (const lang of ['fi', 'en']) entries.push({ key: p.key, lang, text: p[lang], src: 'booking/shop/build.mjs' });
 const fiText = new Map(entries.filter((e) => e.lang === 'fi').map((e) => [e.key, e.text]));

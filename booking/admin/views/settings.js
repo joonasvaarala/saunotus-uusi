@@ -4,6 +4,7 @@
 import { rpc, select } from '../sb.js';
 import { h, field, toast, run, todayHel } from '../ui.js';
 import { loadProcountorTexts, procountorText as pc } from '../procountor-texts.js';
+import { loadVismapayTexts, vismapayText as vp } from '../vismapay-texts.js';
 import { loadCalendarExportTexts } from '../calendar-export-texts.js';
 import { loadSettingsTexts, settingsText as st } from '../settings-texts.js';
 import { groupSettingKey, visibleSettingTabs, settingsHref, tabFromHash } from '../settings-tabs.js';
@@ -127,6 +128,36 @@ function procountorForm(cfg, isAdmin, reload) {
     previewOut);
 }
 
+function vismapayCard(state, failed, isAdmin, reload) {
+  if (failed || !state || state.ok === false) {
+    return h('section', { class: 'card', 'data-testid': 'vismapay-status' },
+      h('h2', { text: vp('ui.admin.vismapay.title') }),
+      h('p', { class: 'err', 'data-testid': 'vismapay-error', text: vp('ui.admin.vismapay.unavailable') }));
+  }
+  const mode = ['off', 'dry_run', 'test', 'live'].includes(state.mode) ? state.mode : 'off';
+  const noteKey = mode === 'live' ? 'live_note' : mode === 'test' ? 'test_note' : mode === 'dry_run' ? 'dry_note' : 'off_note';
+  const sel = h('select', { disabled: !isAdmin, 'data-testid': 'vismapay-mode' }, ['off', 'dry_run', 'test', 'live'].map((m) =>
+    h('option', { value: m, text: vp('ui.admin.vismapay.mode_' + m), selected: mode === m || null })));
+  const approved = h('input', { type: 'text', value: state.approved_by || '', disabled: !isAdmin, 'data-testid': 'vismapay-approved', autocomplete: 'off' });
+  return h('section', { class: 'card', 'data-testid': 'vismapay-status' },
+    h('h2', { text: vp('ui.admin.vismapay.title') }),
+    h('p', { class: 'muted', text: vp('ui.admin.vismapay.lead') }),
+    h('p', { 'data-testid': 'vismapay-online', text: state.online ? vp('ui.admin.vismapay.online_on') : vp('ui.admin.vismapay.online_off') }),
+    h('p', { text: `${vp('ui.admin.vismapay.version')}: ${state.version || 'w3.2'}` }),
+    h('p', { 'data-testid': 'vismapay-note', text: vp('ui.admin.vismapay.' + noteKey) }),
+    field(vp('ui.admin.vismapay.mode'), sel),
+    field(vp('ui.admin.vismapay.approved_by'), approved, vp('ui.admin.vismapay.approved_hint')),
+    h('p', { class: 'muted', text: vp('ui.admin.vismapay.secrets') }),
+    isAdmin ? h('button', { class: 'btn sm', type: 'button', 'data-testid': 'vismapay-save', text: vp('ui.admin.vismapay.save'), onclick: (e) => run(e.target, async () => {
+      const next = sel.value;
+      const by = approved.value.trim();
+      if ((next === 'test' || next === 'live') && !by) { toast(vp('ui.admin.vismapay.approved_required')); return; }
+      await rpc('admin_set_vismapay_mode', { p_mode: next, p_approved_by: by || null });
+      toast(vp('ui.admin.vismapay.saved'));
+      if (typeof reload === 'function') reload();
+    }) }) : null);
+}
+
 function settingCard(s, isAdmin) {
   const [label, type, hint] = META[s.key] || [s.key, 'text'];
   let input;
@@ -142,14 +173,17 @@ export async function render({ ctx, rest, reload }) {
   await loadSettingsTexts(rpc);
   if (isAdmin) {
     await loadProcountorTexts(rpc);
+    await loadVismapayTexts(rpc);
     await loadCalendarExportTexts(rpc);
   }
   let procountor = null, procountorFailed = false;
+  let vismapay = null, vismapayFailed = false;
   let editor = null;
   let calendarExport = null, calendarExportFailed = false;
   let settings = [];
   if (isAdmin) {
     try { procountor = await rpc('admin_procountor_status'); } catch { procountorFailed = true; }
+    try { vismapay = await rpc('admin_get_vismapay_status'); } catch { vismapayFailed = true; }
     try { editor = await rpc('admin_get_procountor_settings'); } catch { editor = null; }
     try { calendarExport = await rpc('admin_get_booking_calendar'); } catch { calendarExportFailed = true; }
     settings = await select('settings', { select: 'key,value,is_public', order: 'key.asc' });
@@ -168,6 +202,7 @@ export async function render({ ctx, rest, reload }) {
   let panel = null;
   if (tab === 'qr') panel = await renderQrPanel();
   else if (tab === 'kirjanpito') panel = h('div', { class: 'stack', 'data-testid': 'panel-kirjanpito' }, procountorCard(procountor, procountorFailed), procountorForm(editor, isAdmin, reload), ...(groups.get(tab) || []));
+  else if (tab === 'maksut') panel = h('div', { class: 'stack', 'data-testid': 'panel-maksut' }, isAdmin ? vismapayCard(vismapay, vismapayFailed, isAdmin, reload) : null, ...(groups.get(tab) || []));
   else if (tab === 'varaukset') panel = h('div', { class: 'stack', 'data-testid': 'panel-varaukset' }, renderCalendarExport({ state: calendarExport, failed: calendarExportFailed, isAdmin, reload }), ...(groups.get(tab) || []));
   else if (tab) panel = h('div', { class: 'stack', 'data-testid': `panel-${tab}` }, ...(groups.get(tab) || []));
 

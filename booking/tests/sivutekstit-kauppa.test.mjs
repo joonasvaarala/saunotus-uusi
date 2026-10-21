@@ -79,7 +79,10 @@ test('tuontitiedosto: yksi tuontikutsu enintään 500 riviä → jaettavissa eri
 });
 test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-shop.mjs tuottaa pr61-rivit (imported-pr71 on jo tuotannossa, joten se ei tule mukaan)', () => {
   const prod = join(work, 'prod.json'), out = join(work, 'out.json');
-  const extra = new Set(J('content/site-texts.imported-pr71.json').map((r) => `${r.key}|${r.lang}`));
+  const extra = new Set([
+    ...J('content/site-texts.imported-pr71.json').map((r) => `${r.key}|${r.lang}`),
+    ...J('content/site-texts.pending-import-28.json').filter((r) => r.key.startsWith('ui.vismapay.')).map((r) => `${r.key}|${r.lang}`),
+  ]);
   const imp = new Set(PENDING.map((r) => r.key));
   writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts.filter((r) => !imp.has(r.key)) }));   // tuotanto ennen #61:n tuontia
   const r = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', prod, '--out', out], { encoding: 'utf8' });
@@ -97,7 +100,8 @@ test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet ava
   const r = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', prod, '--out', out], { encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);
   const rows = JSON.parse(readFileSync(out, 'utf8'));
-  assert.equal(rows.length, PENDING.length - have.length);
+  const vismaRows = R.collectDefaults().filter((r) => r.id === 'VT');
+  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length);
   assert.ok(!rows.some((x) => haveKeys.has(x.key)));
   for (const e of extraRows) assert.ok(!rows.some((x) => x.key === e.key), `${e.key}: jo tuotannossa, generaattori ei lisää`);
   const bad = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', join(work, 'ei-ole.json')], { encoding: 'utf8' });
@@ -275,7 +279,7 @@ test('vartija: kaikki kaupan kielisanakirjat (export const X = { fi: {…}, en: 
   const { readdirSync } = await import('node:fs');
   const dir = join(root, 'booking/shop/src');
   const dictFiles = readdirSync(dir).filter((f) => f.endsWith('.js') && /^export const [A-Za-z]+ = \{\s*\n\s*fi: \{/m.test(readFileSync(join(dir, f), 'utf8')));
-  assert.deepEqual(dictFiles.sort(), ['gift-texts.js', 'hold-texts.js', 'i18n.js', 'mobilepay-texts.js', 'options-texts.js', 'order-texts.js', 'pay-choices-texts.js']);
+  assert.deepEqual(dictFiles.sort(), ['gift-texts.js', 'hold-texts.js', 'i18n.js', 'mobilepay-texts.js', 'options-texts.js', 'order-texts.js', 'pay-choices-texts.js', 'vismapay-texts.js']);
   const reg = rd('booking/shop/src/text-registry.js');
   for (const f of dictFiles) assert.ok(reg.includes(`./${f}`), `${f} puuttuu text-registry.js:stä`);
   // tunnetut poikkeukset (raportoitu): ICS-tiedoston osoite (shop.js) ja SOURCE_LABELS (gift-logic.js; palvelin antaa nimet)

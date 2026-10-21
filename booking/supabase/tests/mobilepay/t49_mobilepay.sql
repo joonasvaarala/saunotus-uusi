@@ -26,8 +26,11 @@ begin
   -- T2 guard
   begin update booking.integration_config set mode = 'test' where key = 'mobilepay'; insert into _t values (false, 'T2a testitilaa ei voi kytkeä ilman approved_by');
   exception when sqlstate 'BK001' then get stacked diagnostics v_detail = pg_exception_detail; insert into _t values (v_detail = 'approval_required', 'T2a ilman approved_by -> approval_required'); end;
-  begin update booking.integration_config set mode = 'test' where key = 'vismapay'; insert into _t values (false, 'T2b test-tila vain mobilepaylle');
-  exception when check_violation then insert into _t values (true, 'T2b vismapay ei voi olla test-tilassa (check)'); end;
+  begin update booking.integration_config set mode = 'test' where key = 'vismapay'; insert into _t values (false, 'T2b vismapay test ilman approved_by');
+  exception when sqlstate 'BK001' then get stacked diagnostics v_detail = pg_exception_detail; insert into _t values (v_detail = 'approval_required', 'T2b vismapay test ilman approved_by -> approval_required'); end;
+  update booking.integration_config set mode = 'test', settings = settings || '{"approved_by":"t49"}'::jsonb where key = 'vismapay';
+  insert into _t values ((select mode from booking.integration_config where key = 'vismapay') = 'test', 'T2b2 vismapay test onnistuu approved_bylla');
+  update booking.integration_config set mode = 'off' where key = 'vismapay';
   begin update booking.integration_config set mode = 'dry_run' where key = 'mobilepay'; insert into _t values (false, 'T2c mobilepay dry_run kielletty');
   exception when check_violation then insert into _t values (true, 'T2c mobilepay ei dry_run (check)'); end;
   update booking.integration_config set mode = 'test', settings = settings || '{"approved_by":"testi"}'::jsonb where key = 'mobilepay';

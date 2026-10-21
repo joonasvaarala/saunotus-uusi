@@ -16,11 +16,13 @@ verify_jwt = false   # kortin public_token (UUID) on salaisuus; maksamaton/mitä
 [functions.report-pdf]
 verify_jwt = true
 [functions.vismapay-start]
-verify_jwt = false   # asiakas tulee maksulinkistä (RUNKO, 501)
+verify_jwt = false   # asiakas tilaussivulta tai maksulinkistä (?p=); tilaus/linkki tarkistetaan RPC:ssä
+[functions.vismapay-return]
+verify_jwt = false   # asiakkaan paluu Visma Paysta; MAC tarkistetaan funktiossa, ohjaus vain tietokannan tilaussivulle
 [functions.vismapay-notify]
-verify_jwt = false   # Visma Payn palvelinkutsu (RUNKO, allekirjoitus tarkistetaan funktiossa)
+verify_jwt = false   # Visma Payn palvelinilmoitus (MAC) ja tilaussivun reconcile (order_token)
 [functions.vismapay-refund]
-verify_jwt = true
+verify_jwt = true    # henkilökunta (payments.refund tarkistetaan funktiossa) tai service role
 # Vipps MobilePay ePayment (suora integraatio). Salaisuudet: MOBILEPAY_CLIENT_ID, MOBILEPAY_CLIENT_SECRET, MOBILEPAY_SUBSCRIPTION_KEY, MOBILEPAY_MSN, MOBILEPAY_WEBHOOK_SECRET (vain Edge-salaisuuksina). Kytkin: integration_config 'mobilepay' (off/test/live).
 [functions.mobilepay-start]
 verify_jwt = false   # asiakas tilaussivulta/maksulinkistä; tunnistus: tilauksen public_token / linkin token (RPC tarkistaa)

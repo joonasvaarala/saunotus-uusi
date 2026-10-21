@@ -119,8 +119,10 @@ async function pay() {
     if (!mock && started && started.ok === false) note = started.message || started.code || '';
   } else {
     const started = await callFn('vismapay-start', { order_token: res.public_token });
+    const back = safeVisma(started?.redirect_url);
+    if (back) { location.href = back; return; }
     if (started?.code === 'vismapay_off') note = t('visma_off');
-    else if (started?.code === 'vismapay_live_not_implemented') note = t('visma_live');
+    else if (started?.code === 'vismapay_live_not_implemented' || started?.code === 'not_configured') note = t('visma_live');
     else if (started?.dry_run || mock) note = t('visma_dry');
     else if (started?.ok === false) note = started.message || t('visma_off');
   }
@@ -128,10 +130,18 @@ async function pay() {
   watch(res.public_token);
 }
 
+function safeVisma(url) {
+  try {
+    const u = new URL(String(url || ''));
+    if (u.protocol !== 'https:' || u.hostname !== 'www.vismapay.com' || !u.pathname.startsWith('/pbwapi/token/')) return null;
+    return u.href;
+  } catch { return null; }
+}
+
 function watch(token) {
   if (poll) clearInterval(poll);
   const tick = async () => {
-    if (!mock) await callFn('mobilepay-notify', { action: 'reconcile', order_token: token }).catch(() => {});
+    if (!mock) await callFn(method === 'visma_pay' ? 'vismapay-notify' : 'mobilepay-notify', { action: 'reconcile', order_token: token }).catch(() => {});
     const st = await rpc('public_drinks_status', { p_token: token });
     if (st?.payment_status === 'paid') {
       clearInterval(poll); phase = 'paid'; order = { ...order, ...st }; cart = []; draw();
