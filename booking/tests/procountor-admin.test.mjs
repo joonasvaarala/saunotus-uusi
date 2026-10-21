@@ -69,8 +69,9 @@ test('asetusnäkymä käyttää tekstifunktiota eikä upota Procountor-lauseita'
   assert.match(settings, /loadProcountorTexts/);
   assert.match(settings, /procountorText/);
   assert.match(settings, /data-testid": "procountor-status"|'data-testid': 'procountor-status'/);
-  assert.match(settings, /procountor-settings/);
-  assert.match(settings, /admin_set_procountor_settings/);
+  assert.equal(settings.includes('procountor-settings'), false);
+  assert.equal(settings.includes('admin_set_procountor_settings'), false);
+  assert.match(settings, /admin_procountor_status/);
   assert.equal(settings.includes('Harjoitusajo'), false);
   assert.equal(settings.includes('Tilit puuttuvat'), false);
   assert.match(migration, /live_incomplete/);

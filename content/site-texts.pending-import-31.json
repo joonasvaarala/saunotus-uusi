@@ -1,0 +1,3602 @@
+[
+ {
+  "key": "ui.admin.settings.allowlist_off",
+  "lang": "fi",
+  "text": "Ei rajausta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.allowlist_off",
+  "lang": "en",
+  "text": "No limit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.allowlist_on",
+  "lang": "fi",
+  "text": "Rajaus päällä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.allowlist_on",
+  "lang": "en",
+  "text": "Limit on",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.annual",
+  "lang": "fi",
+  "text": "Vuosikortilla henkilöitä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.annual",
+  "lang": "en",
+  "text": "People on an annual card",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.annual_help",
+  "lang": "fi",
+  "text": "Yksi tuleva varaus kerrallaan on erillinen sääntö.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.annual_help",
+  "lang": "en",
+  "text": "One upcoming booking at a time is a separate rule.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.bill_bank",
+  "lang": "fi",
+  "text": "Pankin nimi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.bill_bank",
+  "lang": "en",
+  "text": "Bank name",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.bill_bic",
+  "lang": "fi",
+  "text": "BIC",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.bill_bic",
+  "lang": "en",
+  "text": "BIC",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.bill_dispatch",
+  "lang": "fi",
+  "text": "Lähetys Procountoriin",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.bill_dispatch",
+  "lang": "en",
+  "text": "Send to Procountor",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.bill_due",
+  "lang": "fi",
+  "text": "Eräpäivä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.bill_due",
+  "lang": "en",
+  "text": "Due in",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.bill_help",
+  "lang": "fi",
+  "text": "Tili saa olla tyhjä, kunnes se on tiedossa. Kuitin nimi ja ALV tulevat Yritys-välilehdeltä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 115,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.bill_help",
+  "lang": "en",
+  "text": "The account can stay empty until it is known. The receipt name and VAT come from the Business tab.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 122,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.bill_iban",
+  "lang": "fi",
+  "text": "IBAN",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.bill_iban",
+  "lang": "en",
+  "text": "IBAN",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.bill_title",
+  "lang": "fi",
+  "text": "Lasku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.bill_title",
+  "lang": "en",
+  "text": "Invoice",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_city",
+  "lang": "fi",
+  "text": "Postitoimipaikka",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_city",
+  "lang": "en",
+  "text": "City",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_country",
+  "lang": "fi",
+  "text": "Maa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_country",
+  "lang": "en",
+  "text": "Country",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_email",
+  "lang": "fi",
+  "text": "Sähköposti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_email",
+  "lang": "en",
+  "text": "Email",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_footer",
+  "lang": "fi",
+  "text": "Kuitin alatunniste",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_footer",
+  "lang": "en",
+  "text": "Receipt footer",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_id",
+  "lang": "fi",
+  "text": "Y-tunnus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_id",
+  "lang": "en",
+  "text": "Business ID",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_lead",
+  "lang": "fi",
+  "text": "Nimi kaupassa ja kuitin myyjä. Kellonaika on Helsinki, eikä sitä vaihdeta tästä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 104,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_lead",
+  "lang": "en",
+  "text": "The shop name and the seller on receipts. The clock is Helsinki and is not changed here.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 112,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_legal",
+  "lang": "fi",
+  "text": "Virallinen nimi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_legal",
+  "lang": "en",
+  "text": "Legal name",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_logo_no",
+  "lang": "fi",
+  "text": "Kuittilogoa ei ole",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_logo_no",
+  "lang": "en",
+  "text": "No receipt logo",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_logo_yes",
+  "lang": "fi",
+  "text": "Kuittilogo on asetettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_logo_yes",
+  "lang": "en",
+  "text": "A receipt logo is set",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_phone",
+  "lang": "fi",
+  "text": "Puhelin",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_phone",
+  "lang": "en",
+  "text": "Phone",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_post",
+  "lang": "fi",
+  "text": "Postinumero",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_post",
+  "lang": "en",
+  "text": "Postal code",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_receipt",
+  "lang": "fi",
+  "text": "Nimi kuitissa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_receipt",
+  "lang": "en",
+  "text": "Name on the receipt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_shop",
+  "lang": "fi",
+  "text": "Nimi kaupassa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_shop",
+  "lang": "en",
+  "text": "Name in the shop",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_shop_help",
+  "lang": "fi",
+  "text": "Nimi, jonka asiakas näkee kaupassa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_shop_help",
+  "lang": "en",
+  "text": "The name the customer sees in the shop.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_street",
+  "lang": "fi",
+  "text": "Katuosoite",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_street",
+  "lang": "en",
+  "text": "Street",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_trade",
+  "lang": "fi",
+  "text": "Toiminimi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_trade",
+  "lang": "en",
+  "text": "Trade name",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_vat",
+  "lang": "fi",
+  "text": "ALV-tunnus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_vat",
+  "lang": "en",
+  "text": "VAT ID",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_vat_help",
+  "lang": "fi",
+  "text": "Muoto FI ja kahdeksan numeroa. Ei vaihdu y-tunnuksesta itsestään.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 89,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_vat_help",
+  "lang": "en",
+  "text": "FI and eight digits. It is not rewritten from the business ID.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 86,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_web",
+  "lang": "fi",
+  "text": "Verkkosivu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.biz_web",
+  "lang": "en",
+  "text": "Website",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.cash_locked",
+  "lang": "fi",
+  "text": "Käteistä ei oteta vastaan, eikä sitä voi laittaa päälle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.cash_locked",
+  "lang": "en",
+  "text": "Cash is not accepted and cannot be turned on.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.company_edit",
+  "lang": "fi",
+  "text": "Muokkaa yritystietoja",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.company_edit",
+  "lang": "en",
+  "text": "Edit business details",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.company_title",
+  "lang": "fi",
+  "text": "Yritys",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.company_title",
+  "lang": "en",
+  "text": "Business",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_accounts",
+  "lang": "fi",
+  "text": "Tilit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_accounts",
+  "lang": "en",
+  "text": "Accounts",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_accounts_no",
+  "lang": "fi",
+  "text": "Tilit puuttuvat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_accounts_no",
+  "lang": "en",
+  "text": "Accounts are missing",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_accounts_yes",
+  "lang": "fi",
+  "text": "Tilit on annettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_accounts_yes",
+  "lang": "en",
+  "text": "Accounts are set",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_bot",
+  "lang": "fi",
+  "text": "Saunabot on pois. Sitä ei kytketä tältä sivulta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_bot",
+  "lang": "en",
+  "text": "Saunabot is off. It is not switched on from this page.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_calendar",
+  "lang": "fi",
+  "text": "Google-kalenteri",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_calendar",
+  "lang": "en",
+  "text": "Google Calendar",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_calendar_id",
+  "lang": "fi",
+  "text": "Kalenteri valittu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_calendar_id",
+  "lang": "en",
+  "text": "A calendar is selected",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_calendar_missing",
+  "lang": "fi",
+  "text": "Kalenteria ei ole valittu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_calendar_missing",
+  "lang": "en",
+  "text": "No calendar selected",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_closure",
+  "lang": "fi",
+  "text": "Sulkukalenteri synkataan erikseen. Sitä ei säädetä tästä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 81,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_closure",
+  "lang": "en",
+  "text": "The closure calendar syncs on its own. It is not adjusted here.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 87,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_daily",
+  "lang": "fi",
+  "text": "Päiväkirjaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_daily",
+  "lang": "en",
+  "text": "Daily posting",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_env",
+  "lang": "fi",
+  "text": "Ympäristö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_env",
+  "lang": "en",
+  "text": "Environment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_lead",
+  "lang": "fi",
+  "text": "Yhteydet ovat vain tilatietoja. Salaisuuksia ei näytetä eikä kysytä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 92,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_lead",
+  "lang": "en",
+  "text": "Connections are status only. Secrets are not shown or asked for.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 88,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_reviews",
+  "lang": "fi",
+  "text": "Sivuston arvostelut tulevat tiedostosta. Palautepyyntö on Viesteissä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 93,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_reviews",
+  "lang": "en",
+  "text": "Reviews on the site come from a file. The review request is in Messages.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 96,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_site",
+  "lang": "fi",
+  "text": "Sivuston osoite",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.conn_site",
+  "lang": "en",
+  "text": "Site address",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.dead_change",
+  "lang": "fi",
+  "text": "Asiakas voi muuttaa viimeistään",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.dead_change",
+  "lang": "en",
+  "text": "Customer can change until",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.dead_help",
+  "lang": "fi",
+  "text": "Vahvistettua varausta asiakas ei peru itse. Peruutus tulee sähköpostilla. Vuorokohtainen takaraja on vuorosäännöissä, ei tässä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 151,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.dead_help",
+  "lang": "en",
+  "text": "A customer cannot cancel a confirmed booking. Cancellation is by email. A shift deadline lives on the shift rule, not here.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 147,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.dead_lead",
+  "lang": "fi",
+  "text": "Hoito varattava viimeistään",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.dead_lead",
+  "lang": "en",
+  "text": "Book a treatment at the latest",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.dead_title",
+  "lang": "fi",
+  "text": "Milloin viimeistään",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.dead_title",
+  "lang": "en",
+  "text": "Latest moment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_accounted",
+  "lang": "fi",
+  "text": "Kumppanikoodi kuitille",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_accounted",
+  "lang": "en",
+  "text": "Partner code on a receipt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_confirm_redeem",
+  "lang": "fi",
+  "text": "Asiakas voi sen jälkeen käyttää lahjakorttia. Otetaanko lunastus käyttöön?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 98,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_confirm_redeem",
+  "lang": "en",
+  "text": "A customer can then use a gift card. Turn redemption on?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_confirm_sale",
+  "lang": "fi",
+  "text": "Lahjakortteja voi sen jälkeen ostaa verkossa. Otetaanko myynti käyttöön?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 96,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_confirm_sale",
+  "lang": "en",
+  "text": "Gift cards can then be bought online. Turn sale on?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_flags_title",
+  "lang": "fi",
+  "text": "Kumppanit ja vanhat kortit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_flags_title",
+  "lang": "en",
+  "text": "Partners and old cards",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_help",
+  "lang": "fi",
+  "text": "Myynti ja lunastus ovat oletuksena pois. Päälle laittaminen kysyy vahvistuksen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 103,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_help",
+  "lang": "en",
+  "text": "Sale and redemption are off by default. Turning one on asks for confirmation.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 101,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_johku",
+  "lang": "fi",
+  "text": "Johku-korttien lunastus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_johku",
+  "lang": "en",
+  "text": "Johku card redemption",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_max",
+  "lang": "fi",
+  "text": "Kortteja yhdessä ostossa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_max",
+  "lang": "en",
+  "text": "Cards in one order",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_partner",
+  "lang": "fi",
+  "text": "Kumppanikoodit verkossa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_partner",
+  "lang": "en",
+  "text": "Partner codes online",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_problem",
+  "lang": "fi",
+  "text": "Ongelmaviestit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_problem",
+  "lang": "en",
+  "text": "Problem emails",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_redeem",
+  "lang": "fi",
+  "text": "Lunastus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_redeem",
+  "lang": "en",
+  "text": "Redemption",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_sale",
+  "lang": "fi",
+  "text": "Myynti verkossa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_sale",
+  "lang": "en",
+  "text": "Sale online",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_title",
+  "lang": "fi",
+  "text": "Omat lahjakortit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_title",
+  "lang": "en",
+  "text": "Own gift cards",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_valid_help",
+  "lang": "fi",
+  "text": "Aika on pakettikohtainen. Yksittäiselle kortille hallinnan myynti voi antaa oman ajan. Yhteistä kytkintä ei ole.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 136,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_valid_help",
+  "lang": "en",
+  "text": "The time belongs to each package. A card sold in the admin can get its own time. There is no shared switch.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 131,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_valid_title",
+  "lang": "fi",
+  "text": "Voimassaolo",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.gift_valid_title",
+  "lang": "en",
+  "text": "Validity",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.group_days",
+  "lang": "fi",
+  "text": "Alustava varaus vapautuu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.group_days",
+  "lang": "en",
+  "text": "Preliminary booking expires",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.group_help",
+  "lang": "fi",
+  "text": "Kynnys nolla pitää alustavan ryhmävarauksen pois. Vuorojen väliin ei lisätä tyhjää puskuria.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 116,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.group_help",
+  "lang": "en",
+  "text": "A threshold of zero keeps preliminary group bookings off. There is no extra gap between shifts.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 119,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.group_n",
+  "lang": "fi",
+  "text": "Alustava varaus, kun henkilöitä vähintään",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.group_n",
+  "lang": "en",
+  "text": "Preliminary booking from this many people",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.group_title",
+  "lang": "fi",
+  "text": "Iso ryhmä ja vuosikortti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.group_title",
+  "lang": "en",
+  "text": "Large group and annual card",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.hold_grace",
+  "lang": "fi",
+  "text": "MobilePayn lisäaika",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.hold_grace",
+  "lang": "en",
+  "text": "MobilePay extra time",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.hold_help",
+  "lang": "fi",
+  "text": "Nämä ajat vaikuttavat vasta, kun maksutila on pidä kunnes maksettu. Nyt varaus vahvistuu heti, jos tila on maksa paikan päällä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 151,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.hold_help",
+  "lang": "en",
+  "text": "These times apply only when the mode holds the place until it is paid. A booking confirms immediately while the mode is pay on site.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 156,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.hold_min",
+  "lang": "fi",
+  "text": "Paikan pito",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.hold_min",
+  "lang": "en",
+  "text": "Hold",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.hold_title",
+  "lang": "fi",
+  "text": "Kun paikka odottaa maksua",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.hold_title",
+  "lang": "en",
+  "text": "While a place waits for payment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.hold_wait",
+  "lang": "fi",
+  "text": "MobilePayn odotuksen katto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.hold_wait",
+  "lang": "en",
+  "text": "MobilePay wait limit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.inv_co_help",
+  "lang": "fi",
+  "text": "Tämä on kassan sääntö. Se ei kytke Procountoria päälle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.inv_co_help",
+  "lang": "en",
+  "text": "This is a checkout rule. It does not turn Procountor on.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.inv_co_label",
+  "lang": "fi",
+  "text": "Yritys voi valita laskun",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.inv_co_label",
+  "lang": "en",
+  "text": "A company can choose an invoice",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.inv_co_title",
+  "lang": "fi",
+  "text": "Yrityslasku kassalla",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.inv_co_title",
+  "lang": "en",
+  "text": "Company invoice at checkout",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_add",
+  "lang": "fi",
+  "text": "Lisäyksiä tilaukseen kymmenessä minuutissa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_add",
+  "lang": "en",
+  "text": "Additions to an order in ten minutes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_approvals",
+  "lang": "fi",
+  "text": "Tekstibotin hyväksyntöjä päivässä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_approvals",
+  "lang": "en",
+  "text": "Text bot approvals per day",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_attempts",
+  "lang": "fi",
+  "text": "Kumppanikoodin yrityksiä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_attempts",
+  "lang": "en",
+  "text": "Partner code attempts",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_avail",
+  "lang": "fi",
+  "text": "Saatavuuskyselyitä kymmenessä minuutissa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_avail",
+  "lang": "en",
+  "text": "Availability lookups in ten minutes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_change",
+  "lang": "fi",
+  "text": "Muutosyrityksiä samalla varauksella",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_change",
+  "lang": "en",
+  "text": "Change attempts on the same booking",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_email",
+  "lang": "fi",
+  "text": "Varausyrityksiä sähköpostista kymmenessä minuutissa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_email",
+  "lang": "en",
+  "text": "Booking attempts from one email in ten minutes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_gc_buy",
+  "lang": "fi",
+  "text": "Lahjakortin ostoja kymmenessä minuutissa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_gc_buy",
+  "lang": "en",
+  "text": "Gift card purchases in ten minutes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_gc_check",
+  "lang": "fi",
+  "text": "Lahjakortin tarkistuksia kymmenessä minuutissa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_gc_check",
+  "lang": "en",
+  "text": "Gift card checks in ten minutes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_gc_global",
+  "lang": "fi",
+  "text": "Lahjakortin epäonnistumisia yhteensä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_gc_global",
+  "lang": "en",
+  "text": "Gift card failures in total",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_get",
+  "lang": "fi",
+  "text": "Tilauksen avauksia kymmenessä minuutissa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_get",
+  "lang": "en",
+  "text": "Order opens in ten minutes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_hour",
+  "lang": "fi",
+  "text": "Hoitovarauksia tunnissa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_hour",
+  "lang": "en",
+  "text": "Treatment bookings in an hour",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_ip",
+  "lang": "fi",
+  "text": "Varausyrityksiä osoitteesta kymmenessä minuutissa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_ip",
+  "lang": "en",
+  "text": "Booking attempts from one address in ten minutes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_open",
+  "lang": "fi",
+  "text": "Avoimia hoitoja samalla sähköpostilla",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_open",
+  "lang": "en",
+  "text": "Open treatments on one email",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_quote_email",
+  "lang": "fi",
+  "text": "Tarjouspyyntöjä sähköpostista tunnissa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_quote_email",
+  "lang": "en",
+  "text": "Quote requests from one email in an hour",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_quote_ip",
+  "lang": "fi",
+  "text": "Tarjouspyyntöjä osoitteesta kymmenessä minuutissa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_quote_ip",
+  "lang": "en",
+  "text": "Quote requests from one address in ten minutes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_req",
+  "lang": "fi",
+  "text": "Muutospyyntöjä kymmenessä minuutissa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_req",
+  "lang": "en",
+  "text": "Change requests in ten minutes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_texts",
+  "lang": "fi",
+  "text": "Tekstiehdotuksia päivässä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.lim_texts",
+  "lang": "en",
+  "text": "Text proposals per day",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.links_help",
+  "lang": "fi",
+  "text": "Tilat luetaan järjestelmästä. Niitä ei kytketä päälle tältä sivulta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 92,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.links_help",
+  "lang": "en",
+  "text": "These states are read from the system. This page does not turn them on.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 95,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.links_open",
+  "lang": "fi",
+  "text": "Näytä yhteydet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.links_open",
+  "lang": "en",
+  "text": "Show connections",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.links_title",
+  "lang": "fi",
+  "text": "Maksut ja yhteydet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.links_title",
+  "lang": "en",
+  "text": "Payments and connections",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.load_failed",
+  "lang": "fi",
+  "text": "Asetuksia ei saatu ladattua. Yritä uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.load_failed",
+  "lang": "en",
+  "text": "Settings could not be loaded. Try again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mail_allow",
+  "lang": "fi",
+  "text": "Vastaanottajarajaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mail_allow",
+  "lang": "en",
+  "text": "Recipient limit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mail_allow_count",
+  "lang": "fi",
+  "text": "Sallittuja osoitteita",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mail_allow_count",
+  "lang": "en",
+  "text": "Allowed addresses",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mail_from",
+  "lang": "fi",
+  "text": "Lähettäjän nimi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mail_from",
+  "lang": "en",
+  "text": "Sender name",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mail_from_locked",
+  "lang": "fi",
+  "text": "Lähettävä osoite",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mail_from_locked",
+  "lang": "en",
+  "text": "Sending address",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mail_from_title",
+  "lang": "fi",
+  "text": "Lähettäjä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mail_from_title",
+  "lang": "en",
+  "text": "Sender",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mail_mode",
+  "lang": "fi",
+  "text": "Lähetys",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mail_mode",
+  "lang": "en",
+  "text": "Sending",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mail_reply",
+  "lang": "fi",
+  "text": "Vastausosoite",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mail_reply",
+  "lang": "en",
+  "text": "Reply address",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mail_status_help",
+  "lang": "fi",
+  "text": "Tilaa ja vastaanottajarajausta ei muuteta tästä. Listan osoitteita ei näytetä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 102,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mail_status_help",
+  "lang": "en",
+  "text": "The mode and the recipient limit are not changed here. Addresses on the list are not shown.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 115,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mail_status_title",
+  "lang": "fi",
+  "text": "Lähetyksen tila",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mail_status_title",
+  "lang": "en",
+  "text": "Sending state",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.methods_help",
+  "lang": "fi",
+  "text": "Näillä kirjataan maksu hallintaan. Visma Pay ja MobilePay eivät ole tässä listassa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 107,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.methods_help",
+  "lang": "en",
+  "text": "These are used when you record a payment in the admin. Visma Pay and MobilePay are not in this list.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 124,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.methods_title",
+  "lang": "fi",
+  "text": "Maksutavat hallinnassa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.methods_title",
+  "lang": "en",
+  "text": "Ways to record a payment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mode_dry",
+  "lang": "fi",
+  "text": "Harjoitusajo",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mode_dry",
+  "lang": "en",
+  "text": "Practice run",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mode_hold",
+  "lang": "fi",
+  "text": "Paikka pidetään, kunnes maksettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mode_hold",
+  "lang": "en",
+  "text": "Hold the place until paid",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mode_live",
+  "lang": "fi",
+  "text": "Käytössä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mode_live",
+  "lang": "en",
+  "text": "On",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mode_off",
+  "lang": "fi",
+  "text": "Pois",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mode_off",
+  "lang": "en",
+  "text": "Off",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mode_pay_later",
+  "lang": "fi",
+  "text": "Maksetaan paikan päällä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mode_pay_later",
+  "lang": "en",
+  "text": "Pay on site",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mode_test",
+  "lang": "fi",
+  "text": "Testi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.mode_test",
+  "lang": "en",
+  "text": "Test",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.off",
+  "lang": "fi",
+  "text": "Pois",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.off",
+  "lang": "en",
+  "text": "Off",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.on",
+  "lang": "fi",
+  "text": "Päällä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.on",
+  "lang": "en",
+  "text": "On",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.partner_max",
+  "lang": "fi",
+  "text": "Pyyntöjä yhdessä tilauksessa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.partner_max",
+  "lang": "en",
+  "text": "Requests in one order",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.partner_remind",
+  "lang": "fi",
+  "text": "Muistutus, kun pyyntö on vanha",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.partner_remind",
+  "lang": "en",
+  "text": "Reminder when a request is old",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.partner_title",
+  "lang": "fi",
+  "text": "Kumppanipyynnöt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.partner_title",
+  "lang": "en",
+  "text": "Partner requests",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.pause_confirm",
+  "lang": "fi",
+  "text": "Verkkovaraus sulkeutuu. Asiakas näkee ilmoituksen ja puhelinnumeron. Jo tehdyt varaukset säilyvät. Suljetaanko?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 135,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.pause_confirm",
+  "lang": "en",
+  "text": "Online booking will close. The customer sees a notice and the phone number. Existing bookings stay. Close it?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 133,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.pause_help",
+  "lang": "fi",
+  "text": "Pois päältä kauppa sanoo, että verkkovaraus ei ole käytössä, ja näyttää puhelinnumeron. Jo tehdyt varaukset säilyvät.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 141,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.pause_help",
+  "lang": "en",
+  "text": "When this is off, the shop says online booking is closed and shows the phone number. Existing bookings stay.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 132,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.pause_label",
+  "lang": "fi",
+  "text": "Asiakas voi varata verkossa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.pause_label",
+  "lang": "en",
+  "text": "Customers can book online",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.pause_title",
+  "lang": "fi",
+  "text": "Verkkovaraus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.pause_title",
+  "lang": "en",
+  "text": "Online booking",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.pay_later_test",
+  "lang": "fi",
+  "text": "Maksa myöhemmin -testi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.pay_later_test",
+  "lang": "en",
+  "text": "Pay later test",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.pay_mode",
+  "lang": "fi",
+  "text": "Verkkovarauksen maksu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.pay_mode",
+  "lang": "en",
+  "text": "Online booking payment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.pay_status_help",
+  "lang": "fi",
+  "text": "Näitä ei vaihdeta hallinnasta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.pay_status_help",
+  "lang": "en",
+  "text": "These are not changed from the admin.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.pay_status_title",
+  "lang": "fi",
+  "text": "Maksun tila",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.pay_status_title",
+  "lang": "en",
+  "text": "Payment state",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.qr_help",
+  "lang": "fi",
+  "text": "Tulostettava koodi tuotteelle. Ei ole asetus. Näkyy myös henkilökunnalle, joka käyttää pikakassaa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 122,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.qr_help",
+  "lang": "en",
+  "text": "A printable code for a product. It is not a setting. Staff who use the till can open it too.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 116,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.qr_open",
+  "lang": "fi",
+  "text": "QR-tarrat juomille",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.qr_open",
+  "lang": "en",
+  "text": "Drink QR stickers",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.quote_email",
+  "lang": "fi",
+  "text": "Osoite",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.quote_email",
+  "lang": "en",
+  "text": "Address",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.quote_help",
+  "lang": "fi",
+  "text": "Uudesta verkkovarauksesta ei lähde erillistä viestiä henkilökunnalle. Tyhjä osoite tarkoittaa, ettei tarjouspyyntöä lähetetä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 149,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.quote_help",
+  "lang": "en",
+  "text": "A new online booking does not email the staff separately. An empty address means a quote request is not sent.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 133,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.quote_name",
+  "lang": "fi",
+  "text": "Tervehdysnimi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.quote_name",
+  "lang": "en",
+  "text": "Greeting name",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.quote_title",
+  "lang": "fi",
+  "text": "Tarjouspyynnöt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.quote_title",
+  "lang": "en",
+  "text": "Quote requests",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.readonly_note",
+  "lang": "fi",
+  "text": "Vain luku.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.readonly_note",
+  "lang": "en",
+  "text": "Read only.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.role_help",
+  "lang": "fi",
+  "text": "Käyttäjiä ja rooleja hallitaan omalla sivullaan.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.role_help",
+  "lang": "en",
+  "text": "Users and roles are managed on their own page.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.role_open",
+  "lang": "fi",
+  "text": "Avaa käyttäjät",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.role_open",
+  "lang": "en",
+  "text": "Open users",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.role_title",
+  "lang": "fi",
+  "text": "Sinun oikeutesi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.role_title",
+  "lang": "en",
+  "text": "Your access",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.series_gift",
+  "lang": "fi",
+  "text": "Lahjakortin tieto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.series_gift",
+  "lang": "en",
+  "text": "Gift card note",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.series_help",
+  "lang": "fi",
+  "text": "Kirjaimia ei vaihdeta täällä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.series_help",
+  "lang": "en",
+  "text": "The letters are not changed here.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.series_receipt",
+  "lang": "fi",
+  "text": "Kuitti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.series_receipt",
+  "lang": "en",
+  "text": "Receipt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.series_refund",
+  "lang": "fi",
+  "text": "Hyvitys",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.series_refund",
+  "lang": "en",
+  "text": "Refund",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.series_title",
+  "lang": "fi",
+  "text": "Kuittisarjat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.series_title",
+  "lang": "en",
+  "text": "Receipt series",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.sign_help",
+  "lang": "fi",
+  "text": "Lähtevissä viesteissä lukee Tapio. Nimeä ei vaihdeta asetuksesta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 89,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.sign_help",
+  "lang": "en",
+  "text": "Outgoing mail is signed Tapio. The name is not a setting.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 81,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.sign_title",
+  "lang": "fi",
+  "text": "Allekirjoitus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.sign_title",
+  "lang": "en",
+  "text": "Signature",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tab_etusivu",
+  "lang": "fi",
+  "text": "Etusivu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tab_etusivu",
+  "lang": "en",
+  "text": "Overview",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tab_laskut",
+  "lang": "fi",
+  "text": "Laskut ja kuitit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tab_laskut",
+  "lang": "en",
+  "text": "Invoices and receipts",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tab_tekninen",
+  "lang": "fi",
+  "text": "Tekninen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tab_tekninen",
+  "lang": "en",
+  "text": "Technical",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tab_yhteydet",
+  "lang": "fi",
+  "text": "Yhteydet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tab_yhteydet",
+  "lang": "en",
+  "text": "Connections",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tab_yritys",
+  "lang": "fi",
+  "text": "Yritys",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tab_yritys",
+  "lang": "en",
+  "text": "Business",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_articles",
+  "lang": "fi",
+  "text": "Artikkelien polut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_articles",
+  "lang": "en",
+  "text": "Article paths",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_consent",
+  "lang": "fi",
+  "text": "Suostumustekstin versio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_consent",
+  "lang": "en",
+  "text": "Consent text version",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_functions",
+  "lang": "fi",
+  "text": "Toimintojen osoite",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_functions",
+  "lang": "en",
+  "text": "Functions address",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_help",
+  "lang": "fi",
+  "text": "Nämä rajoittavat, kuinka monta kertaa sama asiakas voi yrittää. Ne eivät ole aukioloaikoja. Vain pääkäyttäjä tallentaa ne.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 146,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_help",
+  "lang": "en",
+  "text": "These limit how many times the same customer can try. They are not opening hours. Only an admin saves them.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 131,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_hold",
+  "lang": "fi",
+  "text": "Vanha pitoaika",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_hold",
+  "lang": "en",
+  "text": "Older hold time",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_hold_help",
+  "lang": "fi",
+  "text": "Seuraa paikan pitoa, kun pidon kortti tallennetaan. Ei omaa kenttää.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 92,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_hold_help",
+  "lang": "en",
+  "text": "Follows the hold when that card is saved. It has no field of its own.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 93,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_order",
+  "lang": "fi",
+  "text": "Tilaussivun polku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_order",
+  "lang": "en",
+  "text": "Order page path",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_paths",
+  "lang": "fi",
+  "text": "Polut ja leimat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_paths",
+  "lang": "en",
+  "text": "Paths and stamps",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_paths_help",
+  "lang": "fi",
+  "text": "Väärä polku rikkoo linkit. Niitä ei muokata hallinnasta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_paths_help",
+  "lang": "en",
+  "text": "A wrong path breaks links. They are not edited in the admin.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 84,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_pay",
+  "lang": "fi",
+  "text": "Maksulinkin polku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_pay",
+  "lang": "en",
+  "text": "Payment link path",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_site",
+  "lang": "fi",
+  "text": "Sivusto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_site",
+  "lang": "en",
+  "text": "Site",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_title",
+  "lang": "fi",
+  "text": "Tekniset rajat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_title",
+  "lang": "en",
+  "text": "Technical limits",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_zone",
+  "lang": "fi",
+  "text": "Kellonaika",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.tech_zone",
+  "lang": "en",
+  "text": "Clock",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.timed_off",
+  "lang": "fi",
+  "text": "Ajastus on pois. Kytkin on Viestit-sivulla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.timed_off",
+  "lang": "en",
+  "text": "Scheduling is off. The switch is on the Messages page.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.timed_on",
+  "lang": "fi",
+  "text": "Ajastus on päällä Viestit-sivulla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.timed_on",
+  "lang": "en",
+  "text": "Scheduling is on. The switch is on the Messages page.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.timed_open",
+  "lang": "fi",
+  "text": "Avaa Viestit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.timed_open",
+  "lang": "en",
+  "text": "Open Messages",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.timed_title",
+  "lang": "fi",
+  "text": "Ajastetut viestit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.timed_title",
+  "lang": "en",
+  "text": "Scheduled messages",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.unit_cards",
+  "lang": "fi",
+  "text": "korttia",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.unit_cards",
+  "lang": "en",
+  "text": "cards",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.unit_days",
+  "lang": "fi",
+  "text": "päivää",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.unit_days",
+  "lang": "en",
+  "text": "days",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.unit_hours",
+  "lang": "fi",
+  "text": "tuntia",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.unit_hours",
+  "lang": "en",
+  "text": "hours",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.unit_minutes",
+  "lang": "fi",
+  "text": "minuuttia",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.unit_minutes",
+  "lang": "en",
+  "text": "minutes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.unit_months",
+  "lang": "fi",
+  "text": "kk",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.unit_months",
+  "lang": "en",
+  "text": "mo",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.unit_persons",
+  "lang": "fi",
+  "text": "henkilöä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.unit_persons",
+  "lang": "en",
+  "text": "people",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.warn_allowlist_open",
+  "lang": "fi",
+  "text": "Sähköposti on käytössä ilman vastaanottajarajausta. Rajausta ei poisteta tältä sivulta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 111,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.warn_allowlist_open",
+  "lang": "en",
+  "text": "Email is on without a recipient limit. This page does not clear that limit.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 99,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.warn_email_not_live",
+  "lang": "fi",
+  "text": "Sähköpostit eivät lähde asiakkaille, ennen kuin lähetys on erikseen käytössä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 101,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.warn_email_not_live",
+  "lang": "en",
+  "text": "Emails are not sent to customers until sending is turned on separately.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 95,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.warn_pay_live",
+  "lang": "fi",
+  "text": "Verkkomaksu on käytössä. Asiakkaalta voidaan veloittaa oikea raha. Tilaa ei vaihdeta tällä sivulla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 123,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.warn_pay_live",
+  "lang": "en",
+  "text": "Online payment is on. A customer can be charged real money. This page does not change that mode.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.warn_pay_test",
+  "lang": "fi",
+  "text": "Verkkomaksu on testitilassa. Asiakkaalta ei veloiteta oikeaa rahaa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 91,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.warn_pay_test",
+  "lang": "en",
+  "text": "Online payment is in test mode. The customer is not charged real money.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 95,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.win_help",
+  "lang": "fi",
+  "text": "Savusauna ja hoidot eivät jaa samaa ikkunaa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.win_help",
+  "lang": "en",
+  "text": "The smoke sauna and treatments do not share the same window.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 84,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.win_sauna",
+  "lang": "fi",
+  "text": "Savusauna ja yleiset vuorot",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.win_sauna",
+  "lang": "en",
+  "text": "Smoke sauna and public shifts",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.win_title",
+  "lang": "fi",
+  "text": "Kuinka pitkälle voi varata",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.win_title",
+  "lang": "en",
+  "text": "How far ahead",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.win_treat",
+  "lang": "fi",
+  "text": "Hoidot",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ },
+ {
+  "key": "ui.admin.settings.win_treat",
+  "lang": "en",
+  "text": "Treatments",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Asetussivu (booking_123). FI+EN. Hinnat, osoitteet ja tilat luetaan kannasta."
+ }
+]

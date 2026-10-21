@@ -5,6 +5,7 @@ import { fiReference, validBusinessId, validOvt, validOperator, normBusinessId, 
 import { storedLineFromInput } from './invoice-lines.js';
 import { calendarIdError } from './calendar-export-logic.js';
 import { validateMessage } from './messages-logic.js';
+import { applySection, exampleBundle } from './settings-logic.js';
 const TZ = 'Europe/Helsinki';
 const todayHel = (now = new Date()) => now.toLocaleDateString('sv-SE', { timeZone: TZ });
 const addDays = (ds, n) => { const d = new Date(`${ds}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
@@ -180,6 +181,8 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     businessId: 1,
   };
   if (role === 'staff') st.perms = st.perms.filter((p) => p !== 'settings.edit');
+  if (role === 'admin' && !st.perms.includes('staff.manage')) st.perms.push('staff.manage');
+  st.settingsUi = exampleBundle();
   const optJson = (id) => { const o = st.options.find((x) => x.id === id); return o ? { id: o.id, code: o.code, name: o.name, name_en: o.name_en } : null; };
   const activeOpts = (pid) => st.options.filter((o) => o.product_id === pid && o.active).sort((a, b) => a.sort_order - b.sort_order || a.id - b.id);
   const required = (pid) => !!st.settings[pid]?.option_required && activeOpts(pid).length > 0;
@@ -306,6 +309,20 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       need('settings.edit');
       const row = st.generalSettings.find((s) => s.key === a.p_key);
       if (row) row.value = a.p_value;
+      return { ok: true };
+    },
+    admin_settings_bundle: () => {
+      if (!st.perms.includes('settings.edit')) {
+        if (!st.perms.includes('pos.use')) throw err('forbidden', 'Ei oikeutta');
+        return { ok: true, role, qr_only: true };
+      }
+      return { ok: true, role, qr_only: false, ...st.settingsUi };
+    },
+    admin_save_settings: (a) => {
+      need('settings.edit');
+      if (a.p_section === 'technical' && role !== 'admin') throw err('forbidden', 'Tekniset rajat vain pääkäyttäjälle');
+      try { applySection(st.settingsUi, a.p_section, a.p || {}); }
+      catch (e) { throw err(e.code || 'invalid_value', e.message); }
       return { ok: true };
     },
     'select:settings': () => st.generalSettings.map((s) => ({ ...s })),

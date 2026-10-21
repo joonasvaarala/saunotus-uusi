@@ -86,9 +86,11 @@ test('mock: oletus pois, sulku ja salaisuus hylätään, esikatselu ei lähetä'
 });
 
 test('asetusnäkymä käyttää tekstifunktiota ja RPC:tä, vienti on oletuksena pois', () => {
-  assert.match(settings, /loadCalendarExportTexts/);
-  assert.match(settings, /renderCalendarExport/);
-  assert.match(settings, /admin_get_booking_calendar/);
+  assert.equal(settings.includes('loadCalendarExportTexts'), false);
+  assert.equal(settings.includes('renderCalendarExport'), false);
+  assert.equal(settings.includes('admin_get_booking_calendar'), false);
+  assert.equal(settings.includes('admin_set_booking_calendar'), false);
+  assert.match(settings, /booking_calendar/);
   assert.match(settings, /tab === 'varaukset'/);
   assert.equal(settings.includes('Varauskalenteri'), false);
   assert.match(view, /admin_set_booking_calendar/);

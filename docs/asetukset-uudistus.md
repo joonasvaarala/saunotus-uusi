@@ -1,10 +1,12 @@
 # Asetukset-sivun uudistus
 
-Tila: **suunnitelma**. Tätä ei ole toteutettu hallintaan, eikä tuotantoa tai tietokantaa ole muutettu. Luonnosnäkymä on tiedostossa [`docs/mockups/asetukset.html`](mockups/asetukset.html). Se ei tallenna mitään.
+Tila: **toteutettu** hallinnan kokeilunäkymässä ja tietokantakutsuna. Tuotantoa ei ole muutettu eikä tätä ole yhdistetty. Luonnos, josta ulkoasu lähti, on [`docs/mockups/asetukset.html`](mockups/asetukset.html). Toteutettu sivu on `booking/admin/views/settings.js`. Kuvat puhelimen leveydeltä: [etusivu](mockups/asetukset-toteutus-etusivu.png), [varaukset](mockups/asetukset-toteutus-varaukset.png), [maksut](mockups/asetukset-toteutus-maksut.png).
+
+Migraatio on `booking_123` (`20261021160000`), ei `booking_122`. Tekstit ovat `content/site-texts.pending-import-31.json`, ei `pending-import-30`. Rich-tekstin työ ehti käyttää `booking_122` ja `pending-import-30` aikaleimalla `20261021150000`, joten tämä tulee sen jälkeen.
 
 Sivu on Joonakselle, joka käyttää hallintaa enimmäkseen puhelimella. Tavoite on se, että asetuksista näkee yrityksen, varaussäännöt ja sen, onko maksu tai integraatio testissä, pois päältä vai oikeasti käytössä. Ulkoasua, värejä ja sivuston teemaa ei säädetä täällä.
 
-## Miten sivu toimii nyt
+## Miten sivu toimi ennen
 
 Hallinnan Asetukset (`booking/admin/views/settings.js`, välilehdet `booking/admin/settings-tabs.js`) listaa taulun `booking.settings` rivit. Oikeus on `settings.edit` (pääkäyttäjä ja ylläpitäjä). Peruskäyttäjä ei näe asetuksia. Jos käyttäjällä on vain `pos.use`, hän näkee välilehden QR-koodin tulostus.
 
@@ -388,7 +390,7 @@ Näitä ei saa tehdä kytkimiksi eikä pudotusvalikoiksi hallinnassa:
 - Sivuston osoite ja polut
 - Aikavyöhyke
 
-Nykyinen koodi antaa ylläpitäjälle (`settings.edit`) vaihtaa Visma Payn, Procountorin ja kalenterin live-tilaan. Uusi sivu sulkee sen reiän. Vanhat kutsut kannattaa myöhemmässä toteutuksessa rajata niin, ettei pelkkä vanha selainnäkymä kierrä tätä. Se on toteutuksen tehtävä, ei tämän luonnoksen.
+Vanhat kutsut `admin_set_vismapay_mode`, `admin_set_procountor_settings` ja `admin_set_booking_calendar` jäävät tietokantaan, koska aiemmat testit ja mahdollinen vanha selainistunto tuntevat ne. Uusi sivu ei kutsu niitä. Live-tilaa ei vaihdeta tästä näkymästä.
 
 QR-tarrat pysyvät kenellä on `pos.use`. Muu sivu vaatii `settings.edit`.
 
@@ -418,3 +420,18 @@ Vain päätökset, jotka muuttavat lomaketta tai sitä, mitä asiakas kokee. Tek
 6. **Henkilökunnan posti.** Tarjouspyyntö lähtee osoitteeseen savusauna@saunotus.fi, tervehdys Joonas. Uudesta verkkovarauksesta ei lähde erillistä viestiä henkilökunnalle. Riittääkö tarjouspyyntö?
 7. **Allekirjoitus.** Lähtevissä viesteissä lukee Tapio. Vaihdetaanko nimi asetuksesta, vai jääkö Tapio?
 8. **Kuka saa muokata y-tunnusta, ALV-tunnusta ja laskun IBAN-tiliä?** Nyt sekä pääkäyttäjä että ylläpitäjä (Otto, Laura). Rajataanko pankki ja y-tunnus vain pääkäyttäjälle?
+
+## Päätökset
+
+Nämä on lukittu toteutukseen. Peruste on se, ettei sivulle tule kytkintä, jota koodi ei lue, ja ettei vaarallista tilaa voi vaihtaa puhelimella.
+
+1. **Tauko.** Oma viestiä ei lisätä. Kaupassa on jo lause "Verkkovaraus ei ole tällä hetkellä käytössä" ja puhelinnumero. Pois kytkeminen kysyy vahvistuksen.
+2. **Peruutus.** Nykyinen käytös säilyy. `customer_change_hours_before` on vain muutosaika. Vahvistettua varausta asiakas ei peru itse. Uutta peruutusaikaa ei lisätä, koska se vaatisi varausmoottorin muutoksen.
+3. **Ajat.** Oletukset säilyvät ja kentät jäävät muokattaviksi: savusauna 120 päivää, hoidot 14 päivää, hoidon varoaika 120 minuuttia, muutos 48 tuntia. Puskuria vuorojen väliin ei lisätä. Vuoron oma takaraja jää vuorosääntöön.
+4. **Iso ryhmä.** Kynnys jää oletuksena nollaan (pois). Kentät ovat yhä muokattavissa. Kynnys on lomakkeella 0–100.
+5. **Lahjakortin voimassaolo.** Aika pysyy paketilla (`gift_card_packages.valid_months`). Sivulla on vain yhteenveto. Uutta yhteistä avainta ei ole.
+6. **Henkilökunnan posti.** Vain nykyinen tarjouspyynnön osoite ja tervehdysnimi. Uudesta varauksesta ei lähde erillistä viestiä, eikä sellaista kytkintä lisätä.
+7. **Allekirjoitus.** Jää Tapio, sivuteksteihin `email.*.sign_name`. Asetusta `email_sign_name` ei lisätä, koska lähetys ei lukisi sitä.
+8. **Oikeudet.** Y-tunnus, ALV-tunnus ja laskun tili pysyvät oikeudella `settings.edit` (pääkäyttäjä ja ylläpitäjä). Tekninen välilehti on vain roolille admin. Maksun live-tila, Procountorin tila ja päiväkirjaus sekä sähköpostin vastaanottajarajaus ovat vain luku kaikille, myös pääkäyttäjälle.
+
+Uusia `booking.settings`-avaimia ei ole. `seller` ja `invoice_bank` pysyvät JSON-objekteina ja lomake jakaa ne kenttiin. Kuittilogo ja tuntemattomat kentät säilyvät tallennuksessa. Paikan pito kirjoittaa saman luvun myös vanhaan `hold_minutes`-avaimeen, jotta kaksi pitoaikaa ei erkane. Käteistä ei voi laittaa päälle.
