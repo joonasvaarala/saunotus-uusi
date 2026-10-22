@@ -210,7 +210,7 @@ select ok((select body from public.shift_offer_messages m
 select is((select channel from public.shift_offer_messages m
             join public.shift_offers o on o.id = m.offer_id
            where o.shift_id = 'aaaaaaaa-0000-4000-8000-0000000000f1' and m.staff_id = 'aaaaaaaa-0000-4000-8000-0000000000a1'),
-          'email', 'kanava on sähköposti kun WhatsApp on pois');
+          'email', 'kanava on sähköposti kun numeroa ei ole');
 select is((select m.status from public.shift_offer_messages m
             join public.shift_offers o on o.id = m.offer_id
            where o.shift_id = 'aaaaaaaa-0000-4000-8000-0000000000f1' and m.staff_id = 'aaaaaaaa-0000-4000-8000-0000000000a1'),
@@ -342,12 +342,12 @@ select ok(exists (select 1 from public.shift_offer_messages where status = 'queu
 select is((select count(*)::int from public.shift_offer_messages where status = 'sent'), 0, 'lähettäjä pois ei merkitse sent');
 update public.shift_offer_engine_settings set sender_enabled = true where id;
 create temp table drain_out as select public.shift_offer_sender_drain(200) as j;
-select is((select j->>'transport' from drain_out), 'stub', 'kytkin päällä merkitsee jonon stubina');
-select is((select (j->>'sent')::int from drain_out), 0, 'stubi ei raportoi lähetyksiä');
-select ok((select (j->>'skipped')::int from drain_out) > 0, 'stubi merkitsee rivit skipped');
+select is((select j->>'transport' from drain_out), 'edge', 'kytkin päällä ei lähetä SQL:stä');
+select is((select (j->>'sent')::int from drain_out), 0, 'SQL-tyhjennys ei raportoi lähetyksiä');
+select is((select (j->>'skipped')::int from drain_out), 0, 'jonoa ei merkitä skipped-tilaan');
 select is((select count(*)::int from public.shift_offer_messages where status = 'sent'), 0, 'yksikään viesti ei ole sent');
-select is((select count(*)::int from public.shift_offer_messages where status = 'queued'), 0, 'jono tyhjenee stubissa');
-select ok((select count(*)::int from public.shift_offer_messages where status = 'skipped') > 0, 'viestit ovat skipped');
+select ok((select count(*)::int from public.shift_offer_messages where status = 'queued') > 0, 'jono jää edge-lähettäjälle');
+select is((select count(*)::int from public.shift_offer_messages where status = 'skipped'), 0, 'skipped-rivejä ei synny');
 
 -- ---------- la–su: kaikille-hetki hyppää suoraan all-kierrokseen ----------
 insert into public.shift_offer_rounds (role_type, scenario, weekdays, round_no, kind) values
@@ -453,6 +453,66 @@ insert into public.shift_service_date_overrides (service_code, on_date, mode, no
 values ('perinnesaunotus', date '2026-10-26', 'open', 'testi');
 select is((public.shift_service_closure_needed('perinnesaunotus', date '2026-10-26', null)->>'reason'),
           'date_override_open', '26.10.2026 override open ei sulje');
+
+-- ---------- WhatsApp-kanava: numero, lukko, wamid, puuttuva yhteystieto ----------
+select is(public.shift_offer_phone_e164('040 123 4567'), '+358401234567', '040 normalisoituu E.164-muotoon');
+select is(public.shift_offer_phone_e164('+358401234567'), '+358401234567', 'plus-358 pysyy');
+select is(public.shift_offer_phone_e164('00358401234567'), '+358401234567', '00-etuliite normalisoituu');
+select is(public.shift_offer_phone_e164('358401234567'), '+358401234567', 'maakoodi ilman plussaa');
+select is(public.shift_offer_phone_e164(''), null, 'tyhjä numero ei kelpaa');
+select is(public.shift_offer_phone_e164('091234567'), null, 'lankapuhelin ei kelpaa');
+select is((select whatsapp_enabled from public.shift_offer_engine_settings), false, 'whatsapp-kytkin on oletuksena pois');
+select is((select whatsapp_dry_run from public.shift_offer_engine_settings), true, 'whatsapp-kuivaharjoitus on oletuksena päällä');
+select is(cardinality((select whatsapp_allow_staff_ids from public.shift_offer_engine_settings)), 0, 'allowlist on oletuksena tyhjä');
+
+insert into public.staff (id, name, active, phone_e164) values
+  ('aaaaaaaa-0000-4000-8000-0000000000e2', 'Puhelin Testi', true, '040 123 4567');
+insert into public.staff (id, name, active) values
+  ('aaaaaaaa-0000-4000-8000-0000000000e1', 'Mona Testi', true);
+insert into public.staff (id, name, email, active) values
+  ('aaaaaaaa-0000-4000-8000-0000000000e3', 'Sähköposti Testi', 'sahkoposti@example.com', true);
+select ok(public.shift_offer_queue_message(null, null, 'aaaaaaaa-0000-4000-8000-0000000000e2', 'alert', 'x', 'dedupe-phone') is not null, 'numero jonottaa viestin');
+select is((select channel from public.shift_offer_messages where dedupe_key = 'dedupe-phone'), 'whatsapp', 'normalisoitu numero valitsee whatsapp-kanavan');
+select is((select to_address from public.shift_offer_messages where dedupe_key = 'dedupe-phone'), '+358401234567', 'jonon osoite on E.164');
+insert into public.shift_offer_messages (staff_id, kind, channel, body, dedupe_key, status)
+values ('aaaaaaaa-0000-4000-8000-0000000000e1', 'alert', 'none', 'ei yhteystietoja', 'dedupe-mona', 'queued');
+insert into public.shift_offer_messages (staff_id, kind, channel, to_address, body, dedupe_key, status)
+values ('aaaaaaaa-0000-4000-8000-0000000000e3', 'alert', 'email', 'sahkoposti@example.com', 'vain posti', 'dedupe-email', 'queued');
+select is((public.shift_offer_sender_complete(jsonb_build_object('id', (select id from public.shift_offer_messages where dedupe_key = 'dedupe-email'), 'action', 'sent', 'wamid', 'wamid.EARLY'))->>'error'),
+          'not_locked', 'lähetys ilman lukkoa ei onnistu');
+select is((select status from public.shift_offer_messages where dedupe_key = 'dedupe-email'), 'queued', 'lukitsematon rivi jää jonoon');
+select is((select wamid from public.shift_offer_messages where dedupe_key = 'dedupe-email'), null, 'lukitsemattomalle riville ei tallennu wamidia');
+update public.shift_offer_messages
+   set next_attempt_at = now() + interval '30 days'
+ where status = 'queued'
+   and dedupe_key not in ('dedupe-phone', 'dedupe-mona', 'dedupe-email');
+select is((public.shift_offer_sender_claim(50)->>'sender_enabled')::boolean, true, 'lähettäjä varaa jonon kun kytkin on päällä');
+select is((select status from public.shift_offer_messages where dedupe_key = 'dedupe-mona'), 'sending', 'ilman yhteystietoja oleva rivi lukitaan');
+select is((select status from public.shift_offer_messages where dedupe_key = 'dedupe-email'), 'queued', 'pelkkä sähköposti ei lähde whatsapp-varaukseen');
+select is((public.shift_offer_sender_complete(jsonb_build_object('id', (select id from public.shift_offer_messages where dedupe_key = 'dedupe-mona'), 'action', 'fail_no_contact'))->>'status'),
+          'failed_no_contact', 'puuttuva numero merkitään failed_no_contact');
+select is((select status from public.shift_offer_messages where dedupe_key = 'dedupe-mona'), 'failed_no_contact', 'failed_no_contact jää näkyviin');
+select is((select count(*)::int from public.shift_offer_messages where dedupe_key = 'dedupe-mona'), 1, 'riviä ei poisteta');
+select is((public.shift_offer_sender_complete(jsonb_build_object('id', (select id from public.shift_offer_messages where dedupe_key = 'dedupe-phone'), 'action', 'sent', 'wamid', 'wamid.ONE', 'channel', 'whatsapp', 'to', '+358401234567'))->>'status'),
+          'sent', 'lukittu rivi saa wamidin');
+select is((public.shift_offer_sender_complete(jsonb_build_object('id', (select id from public.shift_offer_messages where dedupe_key = 'dedupe-phone'), 'action', 'sent', 'wamid', 'wamid.TWO'))->>'duplicate'),
+          'true', 'toinen lähetys ei vaihda wamidia');
+select is((select wamid from public.shift_offer_messages where dedupe_key = 'dedupe-phone'), 'wamid.ONE', 'ensimmäinen wamid jää voimaan');
+select is((public.shift_offer_whatsapp_apply_status('wamid.ONE', 'delivered', null, timestamptz '2026-10-22 12:00+00')->>'status'), 'delivered', 'webhook kirjaa delivered');
+select is((public.shift_offer_whatsapp_apply_status('wamid.ONE', 'sent', null, now())->>'unchanged'), 'true', 'delivered ei peruudu sentiksi');
+select is((public.shift_offer_whatsapp_apply_status('wamid.ONE', 'read', null, timestamptz '2026-10-22 12:05+00')->>'status'), 'read', 'webhook kirjaa read');
+select is((public.shift_offer_whatsapp_apply_status('wamid.ONE', 'failed', 'x', now())->>'unchanged'), 'true', 'read ei peruudu failediksi');
+select is((public.shift_offer_whatsapp_apply_status('wamid.MISSING', 'delivered', null, now())->>'matched'), 'false', 'tuntematon wamid ei osu');
+select ok(not exists (
+  select 1 from jsonb_array_elements(public.shift_offer_sender_claim(50)->'messages') e
+   where e->>'staff_id' in ('aaaaaaaa-0000-4000-8000-0000000000e1', 'aaaaaaaa-0000-4000-8000-0000000000e2')
+), 'lähetettyä tai failed_no_contact-riviä ei varata uudelleen');
+
+set local role anon;
+select throws_ok('select public.shift_offer_sender_claim(1)', '42501', null, 'anon ei varaa lähetysjonoa');
+select throws_ok($$select public.shift_offer_sender_complete('{}'::jsonb)$$, '42501', null, 'anon ei kirjaa lähetystä');
+select throws_ok($$select public.shift_offer_whatsapp_apply_status('wamid.x','delivered',null,now())$$, '42501', null, 'anon ei kirjaa toimitusta');
+reset role;
 
 select * from finish();
 rollback;

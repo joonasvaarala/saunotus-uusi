@@ -99,10 +99,10 @@ export function parseAction(raw: string | null): ResponseAction | null {
   return null;
 }
 
-// Lähettäjä on stubi. Kytkin pois: jonoon ei kosketa eikä verkkoa ole.
-// Kytkin päällä: kutsuja ajaa shift_offer_sender_drainin, joka merkitsee rivit skipped (ei sent).
-export function senderDecision(enabled: boolean): "leave_queued" | "mark_stub" {
-  return enabled ? "mark_stub" : "leave_queued";
+// Yleinen lähettäjäkytkin. Pois: jonoa ei varata eikä Metalle soiteta.
+// Päällä: kutsuja ajaa kanavasovittimen. Oletus on pois.
+export function senderDecision(enabled: boolean): "leave_queued" | "deliver" {
+  return enabled ? "deliver" : "leave_queued";
 }
 
 // Päivämäärä YYYY-MM-DD kello 08:00 Europe/Helsinki, ISO-aikaleimana.

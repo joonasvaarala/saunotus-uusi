@@ -1,0 +1,103 @@
+{
+  "graph_api_version": "v25.0",
+  "language": "fi",
+  "category": "UTILITY",
+  "response_button_url": "https://sxbofnuisemspgquoxyv.supabase.co/functions/v1/shift-offer-engine?token={{1}}",
+  "response_button_text": "Avaa vastaus",
+  "kind_map": {
+    "offer": "vuorotarjous",
+    "reminder": "vuorotarjous",
+    "filled": "vuoro_taytetty",
+    "cancelled": "tarjous_peruttu",
+    "exhausted_ask": "joonas_tyhja_vuoro",
+    "alert": "joonas_tyhja_vuoro"
+  },
+  "templates": [
+    {
+      "name": "vuorotarjous",
+      "language": "fi",
+      "category": "UTILITY",
+      "allow_category_change": false,
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Sinulle on tarjolla {{1}} ajalle {{2}}. Vastaa viimeistään {{3}} mennessä.",
+          "example": {
+            "body_text": [["lämmitysvuoro", "la 24.10.2026 klo 16:00–20:00", "24.10.2026 klo 12:00"]]
+          }
+        },
+        { "type": "FOOTER", "text": "Tapio" },
+        {
+          "type": "BUTTONS",
+          "buttons": [
+            {
+              "type": "URL",
+              "text": "Avaa vastaus",
+              "url": "https://sxbofnuisemspgquoxyv.supabase.co/functions/v1/shift-offer-engine?token={{1}}",
+              "example": ["esimerkkitoken"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "vuoro_taytetty",
+      "language": "fi",
+      "category": "UTILITY",
+      "allow_category_change": false,
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Vuoro on täytetty. Kyseessä oli {{1}} ajalle {{2}}. Sinun ei tarvitse vastata.",
+          "example": {
+            "body_text": [["lämmitysvuoro", "la 24.10.2026 klo 16:00–20:00"]]
+          }
+        },
+        { "type": "FOOTER", "text": "Tapio" }
+      ]
+    },
+    {
+      "name": "tarjous_peruttu",
+      "language": "fi",
+      "category": "UTILITY",
+      "allow_category_change": false,
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Tarjous peruttiin, koska hoidot ovat kiinni sinä päivänä. Kyseessä oli {{1}} ajalle {{2}}.",
+          "example": {
+            "body_text": [["hoitajavuoro", "ke 28.10.2026 klo 16:00–20:00"]]
+          }
+        },
+        { "type": "FOOTER", "text": "Tapio" }
+      ]
+    },
+    {
+      "name": "joonas_tyhja_vuoro",
+      "language": "fi",
+      "category": "UTILITY",
+      "allow_category_change": false,
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Tyhjä vuoro odottaa päätöstä: {{1}} ajalle {{2}}. Ilmoitus {{3}}. Avaa linkki ja vastaa.",
+          "example": {
+            "body_text": [["hoitajavuoro", "ke 28.10.2026 klo 16:00–20:00", "1/3"]]
+          }
+        },
+        { "type": "FOOTER", "text": "Tapio" },
+        {
+          "type": "BUTTONS",
+          "buttons": [
+            {
+              "type": "URL",
+              "text": "Avaa vastaus",
+              "url": "https://sxbofnuisemspgquoxyv.supabase.co/functions/v1/shift-offer-engine?token={{1}}",
+              "example": ["esimerkkitoken"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
