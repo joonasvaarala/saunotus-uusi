@@ -34,6 +34,38 @@ $$;
 grant execute on function auth.uid(), auth.role(), auth.jwt() to anon, authenticated, service_role;
 create extension if not exists pgcrypto with schema extensions;
 
+-- pg_cron-mock. Myöhemmät migraatiot kutsuvat cron.schedulea suoraan (09 tarkistaa extensionin, uudemmat eivät).
+-- EI tuotantoon: oikea pg_cron jää voimaan siellä.
+create schema if not exists cron;
+create table if not exists cron.job (
+  jobid bigint generated always as identity primary key,
+  jobname text unique,
+  schedule text,
+  command text
+);
+create or replace function cron.schedule(p_jobname text, p_schedule text, p_command text) returns bigint
+language plpgsql as $$
+declare v bigint;
+begin
+  insert into cron.job (jobname, schedule, command) values (p_jobname, p_schedule, p_command)
+  on conflict (jobname) do update set schedule = excluded.schedule, command = excluded.command
+  returning jobid into v;
+  return v;
+end $$;
+create or replace function cron.unschedule(p_jobname text) returns boolean
+language plpgsql as $$
+begin
+  delete from cron.job where jobname = p_jobname;
+  return found;
+end $$;
+
+-- vault-mock: SQL-funktiot (esim. booking._cron_secret_ok) viittaavat tauluun luontihetkellä.
+create schema if not exists vault;
+create table if not exists vault.decrypted_secrets (
+  name text primary key,
+  decrypted_secret text
+);
+
 -- Storage-mock (vain testeihin): bucket-taulu ja objektitaulu RLS:llä kuten Supabasessa
 create schema if not exists storage;
 grant usage on schema storage to anon, authenticated, service_role;

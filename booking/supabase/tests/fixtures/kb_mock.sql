@@ -133,3 +133,41 @@ insert into kb.product_price_variants(id,product_id,label,price,duration_minutes
 select setval(pg_get_serial_sequence('kb.products','id'), (select max(id) from kb.products));
 select setval(pg_get_serial_sequence('kb.product_price_variants','id'), (select max(id) from kb.product_price_variants));
 select setval(pg_get_serial_sequence('kb.locations','id'), (select max(id) from kb.locations));
+
+-- Myöhemmät migraatiot lukevat näitä tuotannon kb-tauluja (tekstirekisteri, kuitti, päivänäkymä).
+-- Mockissa ne ovat tyhjiä paitsi yritysrivi, jota booking_29 kopioi settings.selleriin. EI tuotantoon.
+alter table kb.locations
+  add column if not exists language text,
+  add column if not exists directions text,
+  add column if not exists parking text,
+  add column if not exists public_transport text,
+  add column if not exists accessibility text;
+create table if not exists kb.faq (
+  id bigint generated always as identity primary key,
+  question text, answer text, language text, category text, active boolean not null default true
+);
+create table if not exists kb.policies (
+  id bigint generated always as identity primary key,
+  title text, body text, language text, status text, internal boolean not null default false
+);
+create table if not exists kb.opening_hours (
+  id bigint generated always as identity primary key,
+  session_name text, swimsuit_rule text, language text, active boolean not null default true
+);
+create table if not exists kb.event_dates (
+  id bigint generated always as identity primary key,
+  product_id bigint references kb.products(id),
+  starts_on date, ends_on date, time_text text, active boolean not null default true
+);
+create table if not exists kb.businesses (
+  id bigint primary key,
+  legal_name text, trade_name text, business_id text,
+  street_address text, postal_code text, city text, country text,
+  email text, phone text, website text,
+  description text, language text, active boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+insert into kb.businesses (id, legal_name, trade_name, business_id, street_address, postal_code, city, country, email, phone, website, description, language)
+values (1, 'Havuhattu Oy', 'Sipoonjoen perinnesauna', '3018112-1', 'Hindsbyntie 124', '04130', 'Sipoo', 'FI',
+        'savusauna@saunotus.fi', '010 299 2866', 'https://saunotus.fi', '', 'fi')
+on conflict (id) do nothing;
