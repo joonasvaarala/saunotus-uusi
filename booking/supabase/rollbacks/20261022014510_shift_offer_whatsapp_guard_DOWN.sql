@@ -1,4 +1,4 @@
--- PALUU: purkaa 20261022013534_shift_offer_whatsapp_guard.sql.
+-- PALUU: purkaa 20261022014510_shift_offer_whatsapp_guard.sql.
 -- Palauttaa lähettäjän versioon 20261022013104: vanha sending-lukko palaa jonoon,
 -- last_payload jää peittämättä ja WhatsApp-kanava valitaan numerosta ilman staff.whatsapp_enabled-ehtoa.
 -- Aja ennen 20261022013104_shift_offer_whatsapp_DOWN.sql.

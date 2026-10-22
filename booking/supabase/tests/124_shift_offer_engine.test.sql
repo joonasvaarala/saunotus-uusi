@@ -576,12 +576,89 @@ update public.shift_offer_messages set wamid = 'wamid.UNKNOWN' where dedupe_key 
 select is((public.shift_offer_whatsapp_apply_status('wamid.UNKNOWN', 'delivered', null, now())->>'unchanged'), 'true', 'webhook ei siirrä unknown-riviä');
 select is((select status from public.shift_offer_messages where dedupe_key = 'dedupe-stuck'), 'unknown', 'unknown pysyy webhookin jälkeen');
 
+-- ---------- vastaussivu: poletti oikeuttaa vain oman henkilön avoimiin tarjouksiin ----------
+select ok((select prosecdef and exists (select 1 from unnest(proconfig) c where c like 'search_path=%')
+            from pg_proc where pronamespace = 'public'::regnamespace and proname = 'shift_offer_open_for_token'),
+          'shift_offer_open_for_token on security definer ja search_path on kiinnitetty');
+select ok((select prosecdef and exists (select 1 from unnest(proconfig) c where c like 'search_path=%')
+            from pg_proc where pronamespace = 'public'::regnamespace and proname = 'shift_offer_respond_as_staff'),
+          'shift_offer_respond_as_staff on security definer ja search_path on kiinnitetty');
+select is((select pronargs from pg_proc where pronamespace = 'public'::regnamespace and proname = 'shift_offer_respond_as_staff'),
+          4::smallint, 'vastausfunktiolla ei ole erillistä henkilön parametria');
+select ok((select prosrc !~ 'p_staff_id' from pg_proc
+            where pronamespace = 'public'::regnamespace and proname = 'shift_offer_respond_as_staff'),
+          'henkilö luetaan vain poletista');
+
+insert into public.work_shifts (id, starts_at, ends_at, role_type, status, staffing_status) values
+  ('aaaaaaaa-0000-4000-8000-0000000000g1', timestamptz '2027-06-07 13:00+03', timestamptz '2027-06-07 17:00+03', 'heater', 'active', 'open'),
+  ('aaaaaaaa-0000-4000-8000-0000000000g2', timestamptz '2027-06-08 13:00+03', timestamptz '2027-06-08 17:00+03', 'heater', 'active', 'open'),
+  ('aaaaaaaa-0000-4000-8000-0000000000g3', timestamptz '2027-06-09 13:00+03', timestamptz '2027-06-09 17:00+03', 'heater', 'active', 'open'),
+  ('aaaaaaaa-0000-4000-8000-0000000000g4', timestamptz '2027-06-10 13:00+03', timestamptz '2027-06-10 17:00+03', 'heater', 'active', 'open'),
+  ('aaaaaaaa-0000-4000-8000-0000000000g5', timestamptz '2027-06-14 13:00+03', timestamptz '2027-06-14 17:00+03', 'heater', 'active', 'open'),
+  ('aaaaaaaa-0000-4000-8000-0000000000g6', timestamptz '2027-06-15 13:00+03', timestamptz '2027-06-15 17:00+03', 'heater', 'active', 'open');
+insert into public.shift_offers (id, shift_id, role_type, scenario, status, accepted_staff_id, accepted_at) values
+  ('aaaaaaaa-0000-4000-8000-0000000000h1', 'aaaaaaaa-0000-4000-8000-0000000000g1', 'heater', 'vacant_shift', 'active', null, null),
+  ('aaaaaaaa-0000-4000-8000-0000000000h2', 'aaaaaaaa-0000-4000-8000-0000000000g2', 'heater', 'vacant_shift', 'active', null, null),
+  ('aaaaaaaa-0000-4000-8000-0000000000h3', 'aaaaaaaa-0000-4000-8000-0000000000g3', 'heater', 'vacant_shift', 'cancelled', null, null),
+  ('aaaaaaaa-0000-4000-8000-0000000000h4', 'aaaaaaaa-0000-4000-8000-0000000000g4', 'heater', 'vacant_shift', 'active', null, null),
+  ('aaaaaaaa-0000-4000-8000-0000000000h5', 'aaaaaaaa-0000-4000-8000-0000000000g5', 'heater', 'vacant_shift', 'paused', null, null),
+  ('aaaaaaaa-0000-4000-8000-0000000000h6', 'aaaaaaaa-0000-4000-8000-0000000000g6', 'heater', 'vacant_shift', 'filled', 'aaaaaaaa-0000-4000-8000-0000000000e1', now());
+insert into public.shift_offer_recipients (offer_id, staff_id, round_no, round_kind, status, deadline_at, sent_at) values
+  ('aaaaaaaa-0000-4000-8000-0000000000h1', 'aaaaaaaa-0000-4000-8000-0000000000e2', 1, 'named', 'pending', now() + interval '5 days', now()),
+  ('aaaaaaaa-0000-4000-8000-0000000000h2', 'aaaaaaaa-0000-4000-8000-0000000000e1', 1, 'named', 'pending', now() + interval '5 days', now()),
+  ('aaaaaaaa-0000-4000-8000-0000000000h3', 'aaaaaaaa-0000-4000-8000-0000000000e2', 1, 'named', 'pending', now() + interval '5 days', now()),
+  ('aaaaaaaa-0000-4000-8000-0000000000h4', 'aaaaaaaa-0000-4000-8000-0000000000e2', 1, 'named', 'pending', now() - interval '1 hour', now()),
+  ('aaaaaaaa-0000-4000-8000-0000000000h5', 'aaaaaaaa-0000-4000-8000-0000000000e2', 1, 'named', 'pending', now() + interval '5 days', now()),
+  ('aaaaaaaa-0000-4000-8000-0000000000h6', 'aaaaaaaa-0000-4000-8000-0000000000e2', 1, 'named', 'pending', now() + interval '5 days', now());
+
+select public.shift_offer_sign_token(
+  'aaaaaaaa-0000-4000-8000-0000000000h1',
+  'aaaaaaaa-0000-4000-8000-0000000000e2',
+  now() + interval '20 days') as page_token \gset
+select public.shift_offer_open_for_token(:'page_token') as page_open \gset
+select is((:'page_open'::jsonb->>'ok')::boolean, true, 'avoimet tarjoukset löytyvät poletilla');
+select is(:'page_open'::jsonb->>'staff_id', 'aaaaaaaa-0000-4000-8000-0000000000e2', 'henkilö tulee poletista');
+select is(:'page_open'::jsonb->>'focus_offer_id', 'aaaaaaaa-0000-4000-8000-0000000000h1', 'linkin tarjous on focus');
+select is((select count(*)::int from jsonb_array_elements(:'page_open'::jsonb->'offers')), 2, 'vain omat avoimet tarjoukset');
+select is(:'page_open'::jsonb#>>'{offers,0,offer_id}', 'aaaaaaaa-0000-4000-8000-0000000000h1', 'linkin tarjous on listassa ensin');
+select is(:'page_open'::jsonb#>>'{offers,1,offer_id}', 'aaaaaaaa-0000-4000-8000-0000000000h5', 'tauolla oleva oma tarjous näkyy');
+select ok(not exists (
+  select 1 from jsonb_array_elements(:'page_open'::jsonb->'offers') e
+   where e->>'offer_id' in (
+     'aaaaaaaa-0000-4000-8000-0000000000h2',
+     'aaaaaaaa-0000-4000-8000-0000000000h3',
+     'aaaaaaaa-0000-4000-8000-0000000000h4',
+     'aaaaaaaa-0000-4000-8000-0000000000h6')
+), 'toisen tarjous, peruttu, vanhentunut ja täytetty eivät näy');
+
+select is((public.shift_offer_respond_as_staff(:'page_token', 'aaaaaaaa-0000-4000-8000-0000000000h2', 'decline', null)->>'result'),
+          'not_owner', 'toisen henkilön tarjoukseen ei voi vastata');
+select is((select status from public.shift_offer_recipients
+            where offer_id = 'aaaaaaaa-0000-4000-8000-0000000000h2'
+              and staff_id = 'aaaaaaaa-0000-4000-8000-0000000000e1'),
+          'pending', 'toisen rivi ei muutu');
+select is((public.shift_offer_respond_as_staff('bad.token', 'aaaaaaaa-0000-4000-8000-0000000000h1', 'decline', null)->>'result'),
+          'bad_token', 'huono token ei kirjaa vastausta');
+select is((select status from public.shift_offer_recipients
+            where offer_id = 'aaaaaaaa-0000-4000-8000-0000000000h1'
+              and staff_id = 'aaaaaaaa-0000-4000-8000-0000000000e2'),
+          'pending', 'huono token ei muuta omaa riviä');
+select is((public.shift_offer_respond_as_staff(:'page_token', 'aaaaaaaa-0000-4000-8000-0000000000h5', 'decline', null)->>'result'),
+          'declined', 'omaan toiseen tarjoukseen voi vastata');
+select is((select status from public.shift_offer_recipients
+            where offer_id = 'aaaaaaaa-0000-4000-8000-0000000000h5'
+              and staff_id = 'aaaaaaaa-0000-4000-8000-0000000000e2'),
+          'declined', 'oma rivi kieltäytyy');
+select is((public.shift_offer_open_for_token('bad.token')->>'ok')::boolean, false, 'huono token ei listaa tarjouksia');
+
 set local role anon;
 select throws_ok('select public.shift_offer_sender_claim(1)', '42501', null, 'anon ei varaa lähetysjonoa');
 select throws_ok($$select public.shift_offer_sender_complete('{}'::jsonb)$$, '42501', null, 'anon ei kirjaa lähetystä');
 select throws_ok($$select public.shift_offer_whatsapp_apply_status('wamid.x','delivered',null,now())$$, '42501', null, 'anon ei kirjaa toimitusta');
 select throws_ok($$select public.shift_offer_mask_phone('+358401234567')$$, '42501', null, 'anon ei peitä numeroa');
 select throws_ok($$select public.shift_offer_mask_payload('{}'::jsonb)$$, '42501', null, 'anon ei peitä runkoa');
+select throws_ok($$select public.shift_offer_open_for_token('x')$$, '42501', null, 'anon ei listaa tarjouksia');
+select throws_ok($$select public.shift_offer_respond_as_staff('x', null, 'decline', null)$$, '42501', null, 'anon ei kirjaa vastaussivun vastausta');
 reset role;
 
 select * from finish();

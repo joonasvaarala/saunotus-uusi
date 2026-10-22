@@ -73,7 +73,7 @@ Käyttöliittymän nimet liikkuvat. Oliot ovat samat: Business-portfolio, sovell
 
 ## Tietokanta ja kytkimet
 
-Tuotannossa moottorin migraatio on versio `20261022003917` ja WhatsApp-migraatio versio `20261022013104`. Repon tiedostot on nimetty samoiksi, jotta niitä ei ajeta uudelleen. Uusi, ajamatta oleva tiedosto on `booking/supabase/migrations/20261022013534_shift_offer_whatsapp_guard.sql`. Sitä ei ajeta tässä haarassa.
+Tuotannossa moottorin migraatio on versio `20261022003917`, WhatsApp-migraatio `20261022013104` ja tarkennus `20261022014510`. Repon tiedostot on nimetty samoiksi, jotta niitä ei ajeta uudelleen. Vastaussivun uusi, ajamatta oleva tiedosto on `booking/supabase/migrations/20261022022221_shift_offer_response_page.sql`.
 
 Kun se myöhemmin ajetaan, tauluun `public.shift_offer_engine_settings` tulee:
 
@@ -108,7 +108,7 @@ Roolien `shift_offer_settings.enabled` on eri kytkin. WhatsAppin kytkeminen ei l
 Tätä ei tehdä tässä haarassa.
 
 1. Mergeä tämä PR.
-2. Aja vain `20261022013534_shift_offer_whatsapp_guard.sql`. Älä aja uudelleen `20261022003917_shift_offer_engine.sql` tai `20261022013104_shift_offer_whatsapp.sql` äläkä sääntösiementä.
+2. Aja vain `20261022022221_shift_offer_response_page.sql`, jos vastaussivu halutaan käyttöön. Älä aja uudelleen `20261022003917`, `20261022013104` tai `20261022014510` äläkä sääntösiementä.
 3. Laita neljä `WHATSAPP_*`-salaisuutta edge-ympäristöön. Varmista holvin `shift_offer_token_secret`.
 4. `supabase functions deploy shift-offer-engine --project-ref sxbofnuisemspgquoxyv`. `verify_jwt` pysyy false: tick tunnistaa `x-sync-secret`, webhook allekirjoituksen, vastauslinkki poletin.
 5. Tee Metassa webhookin Verify and save ja tilaa `messages`.

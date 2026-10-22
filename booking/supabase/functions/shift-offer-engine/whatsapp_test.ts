@@ -472,7 +472,7 @@ Deno.test("a sending row without wamid is unknown after the lock timeout, not re
   assertEquals(staleSendingResolution("unknown", null, lockedAt - 1, NOW), "leave");
 
   const sql = await Deno.readTextFile(
-    new URL("../../migrations/20261022013534_shift_offer_whatsapp_guard.sql", import.meta.url),
+    new URL("../../migrations/20261022014510_shift_offer_whatsapp_guard.sql", import.meta.url),
   );
   const claimStart = sql.indexOf("function public.shift_offer_sender_claim");
   const completeStart = sql.indexOf("function public.shift_offer_sender_complete");

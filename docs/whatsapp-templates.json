@@ -64,7 +64,7 @@
       "components": [
         {
           "type": "BODY",
-          "text": "Tarjous peruttiin, koska hoidot ovat kiinni sinä päivänä. Kyseessä oli {{1}} ajalle {{2}}.",
+          "text": "Tarjous peruttiin, koska hoidot ovat kiinni sinä päivänä. Kyseessä oli {{1}} ajalle {{2}}. Sinun ei tarvitse tehdä mitään.",
           "example": {
             "body_text": [["hoitajavuoro", "ke 28.10.2026 klo 16:00–20:00"]]
           }
