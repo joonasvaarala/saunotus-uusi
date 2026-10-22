@@ -465,15 +465,24 @@ select is((select whatsapp_enabled from public.shift_offer_engine_settings), fal
 select is((select whatsapp_dry_run from public.shift_offer_engine_settings), true, 'whatsapp-kuivaharjoitus on oletuksena päällä');
 select is(cardinality((select whatsapp_allow_staff_ids from public.shift_offer_engine_settings)), 0, 'allowlist on oletuksena tyhjä');
 
-insert into public.staff (id, name, active, phone_e164) values
-  ('aaaaaaaa-0000-4000-8000-0000000000e2', 'Puhelin Testi', true, '040 123 4567');
+insert into public.staff (id, name, active, phone_e164, whatsapp_enabled) values
+  ('aaaaaaaa-0000-4000-8000-0000000000e2', 'Puhelin Testi', true, '040 123 4567', true);
 insert into public.staff (id, name, active) values
   ('aaaaaaaa-0000-4000-8000-0000000000e1', 'Mona Testi', true);
 insert into public.staff (id, name, email, active) values
   ('aaaaaaaa-0000-4000-8000-0000000000e3', 'Sähköposti Testi', 'sahkoposti@example.com', true);
+insert into public.staff (id, name, email, active, phone_e164, whatsapp_enabled) values
+  ('aaaaaaaa-0000-4000-8000-0000000000e4', 'Opt-out Testi', 'optout@example.com', true, '0407654321', false);
+insert into public.staff (id, name, active, phone_e164, whatsapp_enabled) values
+  ('aaaaaaaa-0000-4000-8000-0000000000e5', 'Numero ilman opt-inia', true, '0501234567', false);
 select ok(public.shift_offer_queue_message(null, null, 'aaaaaaaa-0000-4000-8000-0000000000e2', 'alert', 'x', 'dedupe-phone') is not null, 'numero jonottaa viestin');
-select is((select channel from public.shift_offer_messages where dedupe_key = 'dedupe-phone'), 'whatsapp', 'normalisoitu numero valitsee whatsapp-kanavan');
+select is((select channel from public.shift_offer_messages where dedupe_key = 'dedupe-phone'), 'whatsapp', 'opt-in ja numero valitsevat whatsapp-kanavan');
 select is((select to_address from public.shift_offer_messages where dedupe_key = 'dedupe-phone'), '+358401234567', 'jonon osoite on E.164');
+select ok(public.shift_offer_queue_message(null, null, 'aaaaaaaa-0000-4000-8000-0000000000e4', 'alert', 'x', 'dedupe-optout') is not null, 'opt-out jonottaa viestin');
+select is((select channel from public.shift_offer_messages where dedupe_key = 'dedupe-optout'), 'email', 'numero ilman opt-inia ei valitse whatsappia');
+select is((select to_address from public.shift_offer_messages where dedupe_key = 'dedupe-optout'), 'optout@example.com', 'opt-out jää sähköpostiosoitteeseen');
+select ok(public.shift_offer_queue_message(null, null, 'aaaaaaaa-0000-4000-8000-0000000000e5', 'alert', 'x', 'dedupe-nopt') is not null, 'pelkkä numero ilman opt-inia jonottaa');
+select is((select channel from public.shift_offer_messages where dedupe_key = 'dedupe-nopt'), 'none', 'ilman opt-inia ja sähköpostia kanava on none');
 insert into public.shift_offer_messages (staff_id, kind, channel, body, dedupe_key, status)
 values ('aaaaaaaa-0000-4000-8000-0000000000e1', 'alert', 'none', 'ei yhteystietoja', 'dedupe-mona', 'queued');
 insert into public.shift_offer_messages (staff_id, kind, channel, to_address, body, dedupe_key, status)
@@ -485,10 +494,17 @@ select is((select wamid from public.shift_offer_messages where dedupe_key = 'ded
 update public.shift_offer_messages
    set next_attempt_at = now() + interval '30 days'
  where status = 'queued'
-   and dedupe_key not in ('dedupe-phone', 'dedupe-mona', 'dedupe-email');
-select is((public.shift_offer_sender_claim(50)->>'sender_enabled')::boolean, true, 'lähettäjä varaa jonon kun kytkin on päällä');
+   and dedupe_key not in ('dedupe-phone', 'dedupe-mona', 'dedupe-email', 'dedupe-optout');
+create temp table wa_claim as select public.shift_offer_sender_claim(50) as j;
+select is((select (j->>'sender_enabled')::boolean from wa_claim), true, 'lähettäjä varaa jonon kun kytkin on päällä');
+select is((
+  select e->>'staff_whatsapp_enabled'
+    from wa_claim, lateral jsonb_array_elements(j->'messages') e
+   where e->>'staff_id' = 'aaaaaaaa-0000-4000-8000-0000000000e2'
+), 'true', 'varaus kertoo henkilön whatsapp-opt-inin');
 select is((select status from public.shift_offer_messages where dedupe_key = 'dedupe-mona'), 'sending', 'ilman yhteystietoja oleva rivi lukitaan');
 select is((select status from public.shift_offer_messages where dedupe_key = 'dedupe-email'), 'queued', 'pelkkä sähköposti ei lähde whatsapp-varaukseen');
+select is((select status from public.shift_offer_messages where dedupe_key = 'dedupe-optout'), 'queued', 'opt-out-numero ei lähde whatsapp-varaukseen');
 select is((public.shift_offer_sender_complete(jsonb_build_object('id', (select id from public.shift_offer_messages where dedupe_key = 'dedupe-mona'), 'action', 'fail_no_contact'))->>'status'),
           'failed_no_contact', 'puuttuva numero merkitään failed_no_contact');
 select is((select status from public.shift_offer_messages where dedupe_key = 'dedupe-mona'), 'failed_no_contact', 'failed_no_contact jää näkyviin');
@@ -503,15 +519,69 @@ select is((public.shift_offer_whatsapp_apply_status('wamid.ONE', 'sent', null, n
 select is((public.shift_offer_whatsapp_apply_status('wamid.ONE', 'read', null, timestamptz '2026-10-22 12:05+00')->>'status'), 'read', 'webhook kirjaa read');
 select is((public.shift_offer_whatsapp_apply_status('wamid.ONE', 'failed', 'x', now())->>'unchanged'), 'true', 'read ei peruudu failediksi');
 select is((public.shift_offer_whatsapp_apply_status('wamid.MISSING', 'delivered', null, now())->>'matched'), 'false', 'tuntematon wamid ei osu');
+select is(public.shift_offer_mask_phone('+358401234567'), '+358*******67', 'numero peitetään');
+select is(public.shift_offer_mask_phone('+358*******67'), '+358*******67', 'peitto on idempotentti');
+insert into public.shift_offer_messages (staff_id, kind, channel, to_address, body, dedupe_key, status, locked_at)
+values ('aaaaaaaa-0000-4000-8000-0000000000e2', 'offer', 'whatsapp', '+358401234567', 'peitto', 'dedupe-mask', 'sending', now());
+select is((public.shift_offer_sender_complete(jsonb_build_object(
+            'id', (select id from public.shift_offer_messages where dedupe_key = 'dedupe-mask'),
+            'action', 'release',
+            'error', 'dry_run',
+            'channel', 'whatsapp',
+            'to', '+358401234567',
+            'retry_at', now() + interval '30 days',
+            'payload', jsonb_build_object(
+              'messaging_product', 'whatsapp',
+              'to', '+358401234567',
+              'type', 'template',
+              'template', jsonb_build_object(
+                'name', 'vuorotarjous',
+                'language', jsonb_build_object('code', 'fi'),
+                'components', jsonb_build_array(
+                  jsonb_build_object('type', 'body', 'parameters', jsonb_build_array(jsonb_build_object('type', 'text', 'text', 'lämmitysvuoro'))),
+                  jsonb_build_object('type', 'button', 'sub_type', 'url', 'index', '0',
+                    'parameters', jsonb_build_array(jsonb_build_object('type', 'text', 'text', 'payload.sig')))
+                )
+              )
+            )
+          ))->>'status'), 'queued', 'peitetty runko kirjataan');
+select is((select last_payload->>'to' from public.shift_offer_messages where dedupe_key = 'dedupe-mask'), '+358*******67', 'last_payload peittää numeron');
+select is((select last_payload #>> '{template,components,1,parameters,0,text}' from public.shift_offer_messages where dedupe_key = 'dedupe-mask'), '***', 'last_payload peittää poletin');
+select is((select last_payload #>> '{template,components,0,parameters,0,text}' from public.shift_offer_messages where dedupe_key = 'dedupe-mask'), 'lämmitysvuoro', 'mallin teksti säilyy last_payloadissa');
+select ok((select last_payload::text not like '%+358401234567%' and last_payload::text not like '%payload.sig%'
+             from public.shift_offer_messages where dedupe_key = 'dedupe-mask'),
+          'last_payload ei sisällä numeroa eikä polettia');
+select is((select to_address from public.shift_offer_messages where dedupe_key = 'dedupe-mask'), '+358401234567', 'to_address jää oikeaksi numeroksi');
+
+insert into public.shift_offer_messages (staff_id, kind, channel, body, dedupe_key, status, locked_at) values
+  ('aaaaaaaa-0000-4000-8000-0000000000e2', 'alert', 'whatsapp', 'jumissa', 'dedupe-stuck', 'sending', now() - interval '11 minutes'),
+  ('aaaaaaaa-0000-4000-8000-0000000000e2', 'alert', 'whatsapp', 'tuore', 'dedupe-fresh', 'sending', now() - interval '1 minute');
+insert into public.shift_offer_messages (staff_id, kind, channel, body, dedupe_key, status, locked_at, wamid) values
+  ('aaaaaaaa-0000-4000-8000-0000000000e2', 'alert', 'whatsapp', 'tunnus', 'dedupe-keep', 'sending', now() - interval '11 minutes', 'wamid.KEEP');
+create temp table wa_claim2 as select public.shift_offer_sender_claim(50) as j;
 select ok(not exists (
-  select 1 from jsonb_array_elements(public.shift_offer_sender_claim(50)->'messages') e
+  select 1 from wa_claim2, lateral jsonb_array_elements(j->'messages') e
    where e->>'staff_id' in ('aaaaaaaa-0000-4000-8000-0000000000e1', 'aaaaaaaa-0000-4000-8000-0000000000e2')
-), 'lähetettyä tai failed_no_contact-riviä ei varata uudelleen');
+      or e->>'id' = (select id::text from public.shift_offer_messages where dedupe_key = 'dedupe-stuck')
+), 'lähetettyä, failed_no_contact- tai unknown-riviä ei varata uudelleen');
+select is((select status from public.shift_offer_messages where dedupe_key = 'dedupe-stuck'), 'unknown', 'vanha sending ilman wamidia on unknown');
+select is((select last_error from public.shift_offer_messages where dedupe_key = 'dedupe-stuck'), 'unknown_delivery', 'unknown vaatii käsintarkistuksen');
+select is((select wamid from public.shift_offer_messages where dedupe_key = 'dedupe-stuck'), null, 'unknown-riville ei keksitä wamidia');
+select is((select status from public.shift_offer_messages where dedupe_key = 'dedupe-fresh'), 'sending', 'tuore lukko jää sending-tilaan');
+select is((select status from public.shift_offer_messages where dedupe_key = 'dedupe-keep'), 'sending', 'wamidilla varustettua lukkoa ei merkitä unknowniksi');
+select is((select wamid from public.shift_offer_messages where dedupe_key = 'dedupe-keep'), 'wamid.KEEP', 'olemassa oleva wamid säilyy');
+select is((public.shift_offer_sender_claim(50)->>'ok')::boolean, true, 'toinen varaus onnistuu unknown-rivin jälkeen');
+select is((select status from public.shift_offer_messages where dedupe_key = 'dedupe-stuck'), 'unknown', 'unknown ei palaa jonoon');
+update public.shift_offer_messages set wamid = 'wamid.UNKNOWN' where dedupe_key = 'dedupe-stuck';
+select is((public.shift_offer_whatsapp_apply_status('wamid.UNKNOWN', 'delivered', null, now())->>'unchanged'), 'true', 'webhook ei siirrä unknown-riviä');
+select is((select status from public.shift_offer_messages where dedupe_key = 'dedupe-stuck'), 'unknown', 'unknown pysyy webhookin jälkeen');
 
 set local role anon;
 select throws_ok('select public.shift_offer_sender_claim(1)', '42501', null, 'anon ei varaa lähetysjonoa');
 select throws_ok($$select public.shift_offer_sender_complete('{}'::jsonb)$$, '42501', null, 'anon ei kirjaa lähetystä');
 select throws_ok($$select public.shift_offer_whatsapp_apply_status('wamid.x','delivered',null,now())$$, '42501', null, 'anon ei kirjaa toimitusta');
+select throws_ok($$select public.shift_offer_mask_phone('+358401234567')$$, '42501', null, 'anon ei peitä numeroa');
+select throws_ok($$select public.shift_offer_mask_payload('{}'::jsonb)$$, '42501', null, 'anon ei peitä runkoa');
 reset role;
 
 select * from finish();

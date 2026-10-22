@@ -73,7 +73,7 @@ Käyttöliittymän nimet liikkuvat. Oliot ovat samat: Business-portfolio, sovell
 
 ## Tietokanta ja kytkimet
 
-Tuotannossa moottorin migraatio on jo versio `20261022003917`. Repon tiedosto on nimetty samaksi, jotta sitä ei ajeta uudelleen. Uusi, ajamatta oleva tiedosto on `booking/supabase/migrations/20261022011013_shift_offer_whatsapp.sql`. Sitä ei ajeta tässä haarassa.
+Tuotannossa moottorin migraatio on versio `20261022003917` ja WhatsApp-migraatio versio `20261022013104`. Repon tiedostot on nimetty samoiksi, jotta niitä ei ajeta uudelleen. Uusi, ajamatta oleva tiedosto on `booking/supabase/migrations/20261022013534_shift_offer_whatsapp_guard.sql`. Sitä ei ajeta tässä haarassa.
 
 Kun se myöhemmin ajetaan, tauluun `public.shift_offer_engine_settings` tulee:
 
@@ -84,19 +84,22 @@ Kun se myöhemmin ajetaan, tauluun `public.shift_offer_engine_settings` tulee:
 | `whatsapp_dry_run` | `true` | Päällä: lokiin kirjoitetaan tarkka JSON-runko, Metalle ei soiteta. |
 | `whatsapp_allow_staff_ids` | tyhjä lista | Vain nämä `public.staff.id`-arvot voivat saada oikean viestin. |
 
-Oikea lähetys vaatii kaikki neljä: `sender_enabled = true`, `whatsapp_enabled = true`, `whatsapp_dry_run = false` ja henkilön id listalla. Tyhjä lista ei lähetä kenellekään, vaikka muut olisivat päällä.
+Oikea lähetys vaatii kaikki neljä: `sender_enabled = true`, `whatsapp_enabled = true`, `whatsapp_dry_run = false` ja henkilön id listalla. Lisäksi `public.staff.whatsapp_enabled` pitää olla päällä ja numeron pitää normalisoitua. Tyhjä lista ei lähetä kenellekään, vaikka muut olisivat päällä.
 
-Kuivaharjoitus (kolme ensimmäistä päällä, `whatsapp_dry_run` vielä true) lokittaa rungon tapahtumaan `whatsapp_dry_run`. Rungossa on vastaanottajan E.164-numero ja mallin muuttujat. Authorization-otsaketta ei lokiteta. Rivi jää jonoon (`last_error = dry_run`) eikä saa `wamid`-tunnusta.
+Kuivaharjoitus (kolme ensimmäistä päällä, `whatsapp_dry_run` vielä true) lokittaa peitetyn rungon tapahtumaan `whatsapp_dry_run`. Mallin tekstimuuttujat näkyvät. Puhelinnumero on muodossa `+358*******67` ja URL-painikkeen poletti on `***`. Sama peitetty runko tallennetaan sarakkeeseen `last_payload`. Authorization-otsaketta ei lokiteta. Rivi jää jonoon (`last_error = dry_run`) eikä saa `wamid`-tunnusta. Sarakkeessa `to_address` on edelleen oikea E.164-numero.
 
 Numero luetaan lähetyksessä uudelleen `public.staff.phone_e164`-sarakkeesta. `040 123 4567`, `0401234567`, `358401234567` ja `+358401234567` kelpaavat ja niistä tulee `+358401234567`. Vain suomalainen matkapuhelin (alku 4 tai 50). Lankapuhelin ei kelpaa.
 
-- Numero löytyy → kanava `whatsapp`.
+WhatsApp-kanava vaatii sekä kelvollisen numeron että `public.staff.whatsapp_enabled = true`. Allowlist on tämän lisäksi: opt-in ilman listaa ei lähetä, eikä lista ilman opt-inia lähetä.
+
+- Opt-in ja numero → kanava `whatsapp`.
+- Numero ilman opt-inia, sähköposti löytyy → kanava `email`.
 - Vain sähköposti → kanava `email`. WhatsApp-lähettäjä ei koske näihin riveihin eikä merkitse niitä epäonnistuneiksi. Sähköpostilähetystä ei ole tässä muutoksessa.
-- Ei numeroa eikä sähköpostia → tila `failed_no_contact`. Riviä ei poisteta. Mona on nyt tässä ryhmässä: hänellä ei ole puhelinta eikä sähköpostia. Lisää numero sarakkeeseen `phone_e164`, niin seuraava uusi viesti voi lähteä, kun hän on allowlistalla. Jo `failed_no_contact`-tilaan merkittyä riviä ei lähetetä uudelleen.
+- Ei numeroa eikä sähköpostia → tila `failed_no_contact`. Riviä ei poisteta. Mona on nyt tässä ryhmässä: hänellä ei ole puhelinta eikä sähköpostia. Lisää numero sarakkeeseen `phone_e164`, laita `whatsapp_enabled` päälle ja lisää id allowlistalle, niin seuraava uusi viesti voi lähteä. Jo `failed_no_contact`-tilaan merkittyä riviä ei lähetetä uudelleen.
 
 Henkilö, joka ei ole allowlistalla, jää jonoon (`last_error = not_allowlisted`) eikä saa viestiä. Kun id lisätään listaan, rivi yritetään uudelleen noin 15 minuutin kuluessa.
 
-Virhe 5xx tai 429 yritetään uudelleen viiveellä `yritykset²` minuuttia, enintään kahdeksan kertaa, sitten tila `failed`. Muu 4xx ei yritä uudelleen. Kun rivillä on `wamid`, sitä ei lähetetä toista kertaa. Webhook päivittää tilan `delivered` tai `read`. `read` ei peruudu. Jos prosessi kaatuu sen jälkeen, kun Meta on ottanut viestin vastaan, mutta ennen kuin `wamid` ehditään kirjoittaa, lukko vanhenee 10 minuutissa ja sama rivi voi lähteä uudelleen. Kun `wamid` on kannassa, toista lähetystä ei tehdä.
+Virhe 5xx tai 429 yritetään uudelleen viiveellä `yritykset²` minuuttia, enintään kahdeksan kertaa, sitten tila `failed`. Muu 4xx ei yritä uudelleen. Kun rivillä on `wamid`, sitä ei lähetetä toista kertaa. Webhook päivittää tilan `delivered` tai `read`. `read` ei peruudu. Jos rivi on `sending` eikä `wamid` ole tallessa 10 minuutin jälkeen, tilaksi tulee `unknown` ja `last_error` on `unknown_delivery`. Riviä ei palauteta jonoon eikä lähetetä uudelleen. Se pitää tarkistaa käsin: katso Metasta, lähtiikö viesti, ja päätä rivi itse. Webhook ei siirrä `unknown`-riviä. Kun `wamid` on kannassa, toista lähetystä ei tehdä.
 
 Roolien `shift_offer_settings.enabled` on eri kytkin. WhatsAppin kytkeminen ei laita tarjouksia liikkeelle, eikä tarjousten laittaminen päälle lähetä WhatsAppia, jos lähettäjä on pois.
 
@@ -105,14 +108,14 @@ Roolien `shift_offer_settings.enabled` on eri kytkin. WhatsAppin kytkeminen ei l
 Tätä ei tehdä tässä haarassa.
 
 1. Mergeä tämä PR.
-2. Aja vain `20261022011013_shift_offer_whatsapp.sql`. Älä aja uudelleen `20261022003917_shift_offer_engine.sql` äläkä sääntösiementä.
+2. Aja vain `20261022013534_shift_offer_whatsapp_guard.sql`. Älä aja uudelleen `20261022003917_shift_offer_engine.sql` tai `20261022013104_shift_offer_whatsapp.sql` äläkä sääntösiementä.
 3. Laita neljä `WHATSAPP_*`-salaisuutta edge-ympäristöön. Varmista holvin `shift_offer_token_secret`.
 4. `supabase functions deploy shift-offer-engine --project-ref sxbofnuisemspgquoxyv`. `verify_jwt` pysyy false: tick tunnistaa `x-sync-secret`, webhook allekirjoituksen, vastauslinkki poletin.
 5. Tee Metassa webhookin Verify and save ja tilaa `messages`.
 6. Lähetä neljä mallipohjaa ja odota Approved.
-7. Täytä `public.staff.phone_e164`.
+7. Täytä `public.staff.phone_e164` ja laita `public.staff.whatsapp_enabled` päälle vain niille, jotka saavat WhatsAppin.
 8. Lisää pilottiin otettavien id:t `whatsapp_allow_staff_ids`-listaan.
-9. Laita `sender_enabled` ja `whatsapp_enabled` päälle, jätä `whatsapp_dry_run` päälle. Katso funktion lokista `whatsapp_dry_run`-tapahtuma. Siinä on tarkka runko, eikä Metaa ole kutsuttu.
+9. Laita `sender_enabled` ja `whatsapp_enabled` päälle, jätä `whatsapp_dry_run` päälle. Katso funktion lokista `whatsapp_dry_run`-tapahtuma. Siinä on peitetty runko (numero ja poletti eivät näy), eikä Metaa ole kutsuttu.
 10. Sammuta `whatsapp_dry_run` vasta, kun yksi oikea lähetys on tarkoitus tehdä. Cron-ehdotus on funktion kommentissa; sitä ei ole luotu.
 
 Jonon tila:
