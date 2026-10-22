@@ -47,7 +47,8 @@ verify_jwt = false   # pg_cron kutsuu; tunnistus x-sync-secret. Ei JWT:tä.
 # Token tarkistetaan SQL:ssä (vault shift_offer_token_secret).
 # WhatsApp-webhook on sama funktio polussa /webhook (verify_jwt pois, allekirjoitus WHATSAPP_APP_SECRET).
 # Salaisuudet vain ympäristössä: WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_APP_SECRET, WHATSAPP_VERIFY_TOKEN.
-# Lähettäjä, WhatsApp-kanava ja allowlist ovat oletuksena pois; whatsapp_dry_run on oletuksena päällä. Ei deployata tästä haarasta.
+# Lähettäjä, WhatsApp-kanava ja allowlist ovat oletuksena pois; whatsapp_dry_run on oletuksena päällä.
+# Saapuvien viestien itsepalvelu (whatsapp_inbound_enabled) on oletuksena pois. Tuntemattomalle numerolle ei vastata. Ei deployata tästä haarasta.
 [functions.shift-offer-engine]
 verify_jwt = false
 

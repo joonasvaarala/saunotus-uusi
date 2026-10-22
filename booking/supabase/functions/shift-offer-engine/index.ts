@@ -16,6 +16,8 @@
 // Oikea lähetys vaatii kaikki kytkimet ja allowlistan. Kuivaharjoitus lokittaa peitetyn rungon eikä kutsu Metan.
 // sending ilman wamidia ei palaa jonoon: 10 min jälkeen tila on unknown (tarkistetaan käsin).
 // Webhook: GET/POST /webhook (WHATSAPP_VERIFY_TOKEN, X-Hub-Signature-256 / WHATSAPP_APP_SECRET).
+// Saapuva viesti tallennetaan aina public.whatsapp_messages-tauluun. Itsepalveluvastaus vain jos
+// whatsapp_inbound_enabled (oletus false). Tuntemattomalle numerolle ei vastata. Tarjousmallit eivät muutu.
 // Salaisuudet vain ympäristöstä: WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_APP_SECRET, WHATSAPP_VERIFY_TOKEN.
 //
 // Cron (EHDOTUS, ei luoda tässä). Salaisuus vaultista kuten calendar-sync-v2
@@ -43,7 +45,7 @@ import {
   shiftRoute,
   type TickBody,
 } from "./core.ts";
-import { deliverQueued, readWhatsappEnv, webhookResponse } from "./sender.ts";
+import { deliverInbound, deliverQueued, readWhatsappEnv, webhookResponse } from "./sender.ts";
 
 function db(): SupabaseClient {
   return createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
@@ -76,6 +78,8 @@ Deno.serve(async (req) => {
         p_at: update.at,
       });
       if (error) throw new Error("status_failed");
+    }, async (message) => {
+      await deliverInbound(supa, env, message, log);
     });
   }
   const token = url.searchParams.get("token");

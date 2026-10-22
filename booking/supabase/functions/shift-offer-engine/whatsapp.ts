@@ -559,6 +559,150 @@ export type StatusUpdate = {
   at: string | null;
 };
 
+export type ParsedInbound = {
+  wamid: string;
+  from: string;
+  type: string;
+  text: string | null;
+  buttonId: string | null;
+  at: string | null;
+};
+
+export type ReplyButton = { id: string; title: string };
+
+export type SessionPayload =
+  | {
+    messaging_product: "whatsapp";
+    recipient_type: "individual";
+    to: string;
+    type: "text";
+    text: { body: string; preview_url: false };
+  }
+  | {
+    messaging_product: "whatsapp";
+    recipient_type: "individual";
+    to: string;
+    type: "interactive";
+    interactive: {
+      type: "button";
+      body: { text: string };
+      action: { buttons: Array<{ type: "reply"; reply: { id: string; title: string } }> };
+    };
+  };
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : null;
+}
+
+function inboundText(raw: Record<string, unknown>): { type: string; text: string | null; buttonId: string | null } {
+  const type = typeof raw.type === "string" && raw.type ? raw.type.slice(0, 32) : "unknown";
+  if (type === "text") {
+    const text = asRecord(raw.text);
+    return { type, text: typeof text?.body === "string" ? text.body : "", buttonId: null };
+  }
+  if (type === "button") {
+    const button = asRecord(raw.button);
+    return {
+      type,
+      text: typeof button?.text === "string" ? button.text : "",
+      buttonId: typeof button?.payload === "string" ? button.payload : null,
+    };
+  }
+  if (type === "interactive") {
+    const interactive = asRecord(raw.interactive);
+    const button = asRecord(interactive?.button_reply) ?? asRecord(interactive?.list_reply);
+    return {
+      type,
+      text: typeof button?.title === "string" ? button.title : "",
+      buttonId: typeof button?.id === "string" ? button.id : null,
+    };
+  }
+  return { type, text: null, buttonId: null };
+}
+
+// Saapuvat viestit. Statukset ovat parseWebhookStatuses-funktiossa. Ei lokita numeroa eikä tekstiä.
+export function parseWebhookMessages(body: unknown): ParsedInbound[] {
+  const root = asRecord(body);
+  if (!root || !Array.isArray(root.entry)) return [];
+  const out: ParsedInbound[] = [];
+  for (const entry of root.entry) {
+    const changes = asRecord(entry)?.changes;
+    if (!Array.isArray(changes)) continue;
+    for (const change of changes) {
+      const value = asRecord(asRecord(change)?.value);
+      const messages = value && Array.isArray(value.messages) ? value.messages : [];
+      for (const raw of messages) {
+        const row = asRecord(raw);
+        if (!row || typeof row.id !== "string" || !row.id || typeof row.from !== "string" || !row.from) continue;
+        const parsed = inboundText(row);
+        const ts = typeof row.timestamp === "string" || typeof row.timestamp === "number" ? String(row.timestamp) : "";
+        const at = /^\d+$/.test(ts) ? new Date(Number(ts) * 1000).toISOString() : null;
+        out.push({
+          wamid: row.id.slice(0, 200),
+          from: row.from.slice(0, 32),
+          type: parsed.type,
+          text: parsed.text == null ? null : parsed.text.slice(0, 4000),
+          buttonId: parsed.buttonId ? parsed.buttonId.slice(0, 256) : null,
+          at,
+        });
+      }
+    }
+  }
+  return out;
+}
+
+export function sessionDestination(phone: string): string | null {
+  return normalizeFinnishPhone(phone) ?? (/^\+\d{6,20}$/.test(phone) ? phone : null);
+}
+
+// Istuntoviesti 24 h ikkunassa. Nappien otsikko enintään 20 merkkiä, enintään 3 nappia.
+// Yli 1024 merkin teksti lähtee tavallisena tekstinä, koska interaktiivisen rungon raja on 1024.
+export function buildSessionPayload(to: string, body: string, buttons: ReplyButton[] = []): SessionPayload | null {
+  const phone = sessionDestination(to);
+  const clean = body.replace(/\u0000/g, "").trim();
+  if (!phone || !clean) return null;
+  const usable = buttons
+    .map((b) => ({ id: b.id.trim().slice(0, 256), title: b.title.trim().slice(0, 20) }))
+    .filter((b) => b.id && b.title)
+    .slice(0, 3);
+  if (usable.length === 0 || clean.length > 1024) {
+    return {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: phone,
+      type: "text",
+      text: { body: clean.slice(0, 4000), preview_url: false },
+    };
+  }
+  return {
+    messaging_product: "whatsapp",
+    recipient_type: "individual",
+    to: phone,
+    type: "interactive",
+    interactive: {
+      type: "button",
+      body: { text: clean },
+      action: { buttons: usable.map((b) => ({ type: "reply", reply: { id: b.id, title: b.title } })) },
+    },
+  };
+}
+
+export async function postSession(
+  env: WhatsappEnv,
+  payload: SessionPayload,
+  fetchImpl: typeof fetch,
+): Promise<{ status: number; wamid: string | null; error: string | null }> {
+  const url = messagesUrl(env.phoneNumberId);
+  if (!url || !env.token) return { status: 0, wamid: null, error: "missing_credentials" };
+  const res = await fetchImpl(url, {
+    method: "POST",
+    headers: { authorization: `Bearer ${env.token}`, "content-type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const text = await res.text();
+  return { status: res.status, ...readSendResponse(res.status, text) };
+}
+
 export function parseWebhookStatuses(body: unknown): StatusUpdate[] {
   if (!body || typeof body !== "object") return [];
   const entries = (body as { entry?: unknown }).entry;
@@ -593,6 +737,7 @@ export async function handleWebhookRequest(
   req: Request,
   env: WhatsappEnv,
   apply: (update: StatusUpdate) => Promise<void>,
+  onMessage?: (message: ParsedInbound) => Promise<void>,
 ): Promise<Response> {
   const url = new URL(req.url);
   if (req.method === "GET") {
@@ -611,10 +756,14 @@ export async function handleWebhookRequest(
     return new Response("bad json", { status: 400 });
   }
   const updates = parseWebhookStatuses(body);
+  const messages = parseWebhookMessages(body);
   try {
     for (const update of updates) await apply(update);
+    if (onMessage) {
+      for (const message of messages) await onMessage(message);
+    }
   } catch {
     return Response.json({ ok: false }, { status: 500 });
   }
-  return Response.json({ ok: true, statuses: updates.length });
+  return Response.json({ ok: true, statuses: updates.length, messages: messages.length });
 }
