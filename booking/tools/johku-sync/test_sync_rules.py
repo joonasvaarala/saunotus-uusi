@@ -1,0 +1,218 @@
+"""SYNC_SAANNOT: kuiva ajo fixturellä, ei verkkoa eikä kantaa."""
+import json
+import os
+import sys
+import unittest
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+
+from fixtures.case_data import build  # noqa: E402
+from giftcards import detail_row, select_cards  # noqa: E402
+from johku_api import Client, JohkuError  # noqa: E402
+from rules import ExportRejected, build_plan, order_no_action, shrunk, summarize  # noqa: E402
+from sync import advance_baseline, chunks, db_state_from_remote  # noqa: E402
+
+ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+MIGRATION = os.path.join(ROOT, "supabase", "migrations", "20261022090000_booking_126_johku_sync.sql")
+
+
+def plan():
+    b = build()
+    return build_plan(b["prev"], b["next"], b["db_state"], b["now"], b["db_state"]["taken_order_nos"], b["db_state"]["sequence_last"])
+
+
+class RulesTest(unittest.TestCase):
+    def test_fixture_dry_run(self):
+        p = plan()
+        text = summarize(p)
+        self.assertNotIn("testi@example.test", text)
+        self.assertNotIn("0401234567", text)
+        self.assertNotIn("payments", " ".join(p.keys()))
+        for banned in ("payments", "receipts", "email_outbox", "accounting_outbox"):
+            self.assertNotIn(banned, p)
+
+        by_order = {o["external_id"]: o for o in p["orders"]}
+        self.assertTrue(by_order["11551"]["preserve_total"])
+        self.assertTrue(by_order["11552"]["preserve_total"])
+        self.assertEqual(by_order["11551"]["total_gross"], 203.0)
+        self.assertEqual(by_order["10007"]["order_no_mode"], "identity")
+        self.assertEqual(by_order["14021"]["order_no_mode"], "explicit_advance")
+
+        item_ids = {i["external_id"] for i in p["items"]}
+        self.assertNotIn("13620", item_ids)
+        addon = next(i for i in p["items"] if i["external_id"] == "20002")
+        self.assertEqual(addon["kind"], "addon")
+        self.assertEqual(addon["addon_code"], "turvenaamio_jalkakylpy")
+        self.assertTrue(any(i["external_id"] == "20101" and i["price_breakdown"]["johku_role"] == "side_shift" for i in p["items"]))
+        self.assertTrue(any(s["external_id"] == "13620" and s["code"] == "addon_row" for s in p["skips"]))
+        self.assertTrue(any(s["external_id"] == "502" and s["code"] == "anonymized" for s in p["skips"]))
+        self.assertTrue(any(r["external_id"] == "20400" and r["code"] == "ambiguous_parent" for r in p["review"]))
+
+        res = {r["external_id"]: r for r in p["reservations"]}
+        self.assertNotIn("10223", res)
+        self.assertNotIn("30002", res)
+        self.assertNotIn("10275", res)
+        self.assertIn("30001", res)
+        self.assertIn("30003", res)
+        self.assertIn("30004", res)
+        self.assertEqual(res["30001"]["pool_codes"], ["yleinen_vkp_1630"])
+        self.assertEqual(res["30001"]["claim_offset_min"], 30)
+        self.assertTrue(res["30005"]["ends_at"].startswith("2026-10-24T16:00:00"))
+        self.assertEqual(res["30005"]["pool_codes"], ["yleinen_vkp_1400"])
+        self.assertTrue(any(s["external_id"] == "10223" and s["code"] == "hidden" for s in p["skips"]))
+        self.assertTrue(any(s["external_id"] == "30002" and s["code"] == "side_shift" for s in p["skips"]))
+        self.assertIn("13941", p["cancel_orders"])
+        self.assertIn("18001", p["cancel_reservations"])
+        self.assertIn("30100", p["cancel_reservations"])
+        self.assertNotIn("10275", p["cancel_reservations"])
+        self.assertNotIn("10223", p["cancel_reservations"])
+        self.assertEqual(p["counts"]["customers_unchanged"], 1)
+        self.assertTrue(any(c["external_id"] == "501" for c in p["customers"]))
+        self.assertFalse(any(c["external_id"] == "502" for c in p["customers"]))
+
+    def test_shrink_and_order_numbers(self):
+        self.assertFalse(shrunk(10, 1))
+        self.assertTrue(shrunk(100, 90))
+        self.assertFalse(shrunk(100, 96))
+        prev = {"customers": [{"id": str(i)} for i in range(60)], "orders": [], "reservations": []}
+        nxt = {"customers": [{"id": "1"}], "orders": [], "reservations": []}
+        with self.assertRaises(ExportRejected) as ctx:
+            build_plan(prev, nxt, {}, datetime(2026, 10, 22, tzinfo=ZoneInfo("Europe/Helsinki")))
+        self.assertEqual(ctx.exception.code, "export_shrunk")
+        self.assertEqual(order_no_action(10007, {10007}, 14020), "identity")
+        self.assertEqual(order_no_action(14021, set(), 14020), "explicit_advance")
+        self.assertEqual(order_no_action(12000, set(), 14020), "explicit")
+
+    def test_summary_has_no_money_side_effects(self):
+        text = summarize(plan())
+        self.assertIn("does not write payments receipts email_outbox accounting_outbox", text)
+        self.assertIn("cancel order 13941 johku_removed", text)
+
+    def test_baseline_keeps_review_rows(self):
+        b = build()
+        p = plan()
+        result = {"review": [{"kind": "order", "external_id": "14021"}], "applied": {}}
+        out = advance_baseline(b["prev"], b["next"], p, result)
+        ids = {o["id"] for o in out["orders"]}
+        self.assertNotIn("14021", ids)
+        self.assertIn("13980", ids)
+        self.assertNotIn("13941", ids)
+
+    def test_chunks_respect_limits(self):
+        plan_big = {"customers": [{"external_id": str(i)} for i in range(401)], "orders": [], "items": [], "reservations": [], "cancel_orders": [], "cancel_reservations": []}
+        batches = list(chunks(plan_big))
+        self.assertEqual(len(batches), 2)
+        self.assertEqual(len(batches[0]["customers"]), 400)
+
+    def test_remote_state_has_no_contact_fields(self):
+        state = db_state_from_remote({
+            "hidden_reservations": ["10223"],
+            "merged_reservations": [],
+            "package_merged_reservations": ["10275"],
+            "frozen_orders": ["11551"],
+            "order_status": {"11551": "confirmed"},
+            "addon_items": ["13620"],
+            "moved_items": [],
+            "anonymized_customers": ["502"],
+            "taken_order_nos": [10007],
+            "sequence_last": 14020,
+            "hidden_count": 33,
+        })
+        self.assertTrue(state["reservations"]["10223"]["hidden"])
+        self.assertTrue(state["reservations"]["10275"]["merged_into_package"])
+        self.assertTrue(state["orders"]["11551"]["addon_merge"])
+        self.assertEqual(state["items"]["13620"]["kind"], "addon")
+        blob = json.dumps(state)
+        self.assertNotIn("email", blob)
+        self.assertNotIn("@", blob)
+
+
+class GiftTest(unittest.TestCase):
+    def test_select_active_and_changed_only(self):
+        now = 1_800_000_000
+        prev = [{"id": "1", "status": "1", "value": "50", "deleted": "0", "validto": "0"}]
+        nxt = [
+            {"id": "1", "status": "1", "value": "50", "deleted": "0", "validto": "0"},
+            {"id": "2", "status": "0", "value": "50", "deleted": "0", "validto": "0"},
+            {"id": "3", "status": "0", "value": "50", "deleted": "0", "validto": "0"},
+        ]
+        # 2 is new and inactive: list change, include. 1 is active, include. 3 is new too.
+        chosen = {r["id"] for r in select_cards(prev, nxt, "changed", now)}
+        self.assertEqual(chosen, {"1", "2", "3"})
+        stable = select_cards(nxt, nxt, "changed", now)
+        self.assertEqual({r["id"] for r in stable}, {"1"})
+        full = select_cards(nxt, nxt, "full", now)
+        self.assertEqual(len(full), 3)
+        row = detail_row({"id": "1", "created": "1700000000", "value": "50"}, {"id": "1", "code": "AAAA-BBBB-CCCC", "value": "50", "remainingvalue": "20", "validto": "1800000000"})
+        self.assertEqual(row["balance"], 20.0)
+        self.assertEqual(row["ledger"][0]["delta"], 20.0)
+        self.assertNotIn(row["code"], "printed")
+
+
+class ApiTest(unittest.TestCase):
+    def test_get_only_and_waf_retry(self):
+        calls = []
+
+        def transport(method, url, headers):
+            calls.append(method)
+            if method != "GET":
+                raise AssertionError(method)
+            if len(calls) == 1:
+                return 403, b""
+            return 200, b'[{"id":"1"}]'
+
+        clock = {"t": 0}
+
+        def now():
+            clock["t"] += 10
+            return clock["t"]
+
+        slept = []
+        client = Client("shop", "secret", transport=transport, sleep=slept.append, now=now)
+        data = client.get("orders.json", {"limit": "1"}, retries=2)
+        self.assertEqual(data, [{"id": "1"}])
+        self.assertEqual(calls, ["GET", "GET"])
+        self.assertIn(10, slept)
+        self.assertTrue(url_is_get(calls))
+
+    def test_refuses_non_json_path_without_calling(self):
+        def transport(method, url, headers):
+            raise AssertionError("called")
+        client = Client("shop", "secret", transport=transport, sleep=lambda s: None, now=lambda: 0)
+        with self.assertRaises(JohkuError):
+            client.get("orders", retries=0)
+
+
+def url_is_get(calls):
+    return set(calls) == {"GET"}
+
+
+class MigrationTextTest(unittest.TestCase):
+    def test_sql_enforces_rules(self):
+        with open(MIGRATION, encoding="utf-8") as f:
+            sql = f.read().lower()
+        for needle in (
+            "hidden_at is not null",
+            "addon_merge",
+            "johku_removed",
+            "merged_into",
+            "johku_sync_side_effect",
+            "johku_sync_unhide",
+            "skip_audit",
+            "103",
+            "179",
+        ):
+            self.assertIn(needle, sql)
+        self.assertNotIn("delete from", sql)
+        self.assertNotIn("insert into booking.payments", sql)
+        self.assertNotIn("insert into booking.receipts", sql)
+        self.assertNotIn("insert into booking.email_outbox", sql)
+        self.assertNotIn("insert into booking.accounting_outbox", sql)
+        self.assertNotIn("hidden_at =", sql)
+
+
+if __name__ == "__main__":
+    unittest.main()

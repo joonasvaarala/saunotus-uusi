@@ -1,0 +1,15 @@
+{
+  "addon_by_johku_product": {
+    "103": "saunavihta",
+    "126": "saunavihta",
+    "113": "turvenaamio_jalkakylpy",
+    "125": "turvenaamio_jalkakylpy"
+  },
+  "package_johku_products": ["179"],
+  "package_kb": 7,
+  "side_shift_kb": 1,
+  "side_shift_optiontype": "3",
+  "separate_ritual_kb": 8,
+  "normalize_30_to_120_kb": [1],
+  "fee_names": ["Maksutapalisä", "Lahjakortin erotus", "Matkakorvaus", "Payment processing fee"]
+}
