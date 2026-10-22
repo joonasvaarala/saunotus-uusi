@@ -12,6 +12,7 @@
 // Lähettäjä: sender_enabled oletus false (jono jää queued).
 // WhatsApp: whatsapp_enabled oletus false, whatsapp_dry_run oletus true, allowlist tyhjä.
 // Henkilö saa WhatsAppin vain jos staff.whatsapp_enabled on päällä ja numero normalisoituu.
+// Joonas ja Otto eivät saa WhatsAppia: rivi jää kanavalle bot, tilaan bot_channel.
 // Oikea lähetys vaatii kaikki kytkimet ja allowlistan. Kuivaharjoitus lokittaa peitetyn rungon eikä kutsu Metan.
 // sending ilman wamidia ei palaa jonoon: 10 min jälkeen tila on unknown (tarkistetaan käsin).
 // Webhook: GET/POST /webhook (WHATSAPP_VERIFY_TOKEN, X-Hub-Signature-256 / WHATSAPP_APP_SECRET).

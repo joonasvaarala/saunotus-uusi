@@ -62,6 +62,7 @@ export type ClaimedMessage = {
   ask_count: number | null;
   token: string | null;
   staff_whatsapp_enabled: boolean;
+  bot_channel: boolean;
 };
 
 export type Settings = {
@@ -80,7 +81,7 @@ export type WhatsappEnv = {
 
 export type CompleteResult = {
   id: number;
-  action: "sent" | "retry" | "fail" | "fail_no_contact" | "release" | "already_sent";
+  action: "sent" | "retry" | "fail" | "fail_no_contact" | "release" | "already_sent" | "bot_channel";
   channel?: "whatsapp" | "email" | "none";
   to?: string | null;
   wamid?: string | null;
@@ -102,9 +103,22 @@ export type Plan =
     payload: TemplatePayload | null;
     delayMinutes: number;
   }
-  | { action: "send"; payload: TemplatePayload; to: string };
+  | { action: "send"; payload: TemplatePayload; to: string }
+  | { action: "bot_channel" };
 
-const TERMINAL = new Set(["sent", "delivered", "read", "failed", "failed_no_contact", "skipped", "unknown"]);
+const TERMINAL = new Set(["sent", "delivered", "read", "failed", "failed_no_contact", "skipped", "unknown", "bot_channel"]);
+
+// Tuotannon staff.id. Vuoroviestit näille kahdelle eivät lähde WhatsAppiin, vaikka lippu olisi päällä.
+export const BOT_STAFF_IDS = [
+  "5ab2ba62-97b2-4712-b500-a47a898036a5",
+  "2975633f-c53f-48d6-8a38-41cae0be5a83",
+] as const;
+
+export function isBotStaff(msg: { staff_id: string | null; bot_channel?: boolean }): boolean {
+  if (msg.bot_channel) return true;
+  const id = msg.staff_id?.toLowerCase();
+  return !!id && BOT_STAFF_IDS.some((known) => known === id);
+}
 export const STALE_SEND_LOCK_MS = 10 * 60 * 1000;
 const enc = new TextEncoder();
 
@@ -292,6 +306,7 @@ function release(
 
 export function planMessage(msg: ClaimedMessage, settings: Settings): Plan {
   if (msg.wamid || TERMINAL.has(msg.status) || msg.status !== "sending") return { action: "already_sent" };
+  if (isBotStaff(msg) || msg.channel === "bot") return { action: "bot_channel" };
   const phone = normalizeFinnishPhone(msg.phone_raw);
   const email = msg.email?.trim() || null;
   if (!phone && !email) return { action: "fail_no_contact" };
@@ -314,6 +329,7 @@ function isoAfter(nowMs: number, minutes: number): string {
 }
 
 function fromPlan(msg: ClaimedMessage, plan: Plan, nowMs: number): CompleteResult {
+  if (plan.action === "bot_channel") return { id: msg.id, action: "bot_channel", to: null, payload: null };
   if (plan.action === "already_sent") return { id: msg.id, action: "already_sent" };
   if (plan.action === "fail_no_contact") {
     return { id: msg.id, action: "fail_no_contact", channel: "none", to: null, error: "no_phone", payload: null };

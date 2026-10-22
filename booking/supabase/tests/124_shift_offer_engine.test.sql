@@ -651,6 +651,53 @@ select is((select status from public.shift_offer_recipients
           'declined', 'oma rivi kieltäytyy');
 select is((public.shift_offer_open_for_token('bad.token')->>'ok')::boolean, false, 'huono token ei listaa tarjouksia');
 
+-- ---------- Joonas ja Otto: bot-kanava, ei WhatsAppia ----------
+insert into public.staff (id, name, active, phone_e164, whatsapp_enabled) values
+  ('aaaaaaaa-0000-4000-8000-0000000000b7', 'Joonas', true, '0401112233', true),
+  ('aaaaaaaa-0000-4000-8000-0000000000b8', 'Otto', true, '0501112233', true);
+select is((select whatsapp_enabled from public.staff where id = 'aaaaaaaa-0000-4000-8000-0000000000b7'),
+          false, 'Joonaksen whatsapp_enabled pakotetaan pois');
+select is((select bot_channel from public.staff where id = 'aaaaaaaa-0000-4000-8000-0000000000b7'),
+          true, 'Joonas on bot-kanavalla');
+select is((select whatsapp_enabled from public.staff where id = 'aaaaaaaa-0000-4000-8000-0000000000b8'),
+          false, 'Oton whatsapp_enabled pakotetaan pois');
+select is((select bot_channel from public.staff where id = 'aaaaaaaa-0000-4000-8000-0000000000b8'),
+          true, 'Otto on bot-kanavalla');
+update public.staff set whatsapp_enabled = true where id = 'aaaaaaaa-0000-4000-8000-0000000000b7';
+select is((select whatsapp_enabled from public.staff where id = 'aaaaaaaa-0000-4000-8000-0000000000b7'),
+          false, 'Joonaksen WhatsAppia ei voi kytkeä päälle');
+select ok(public.shift_offer_queue_message(null, null, 'aaaaaaaa-0000-4000-8000-0000000000b7', 'alert', 'botille', 'dedupe-bot-joonas') is not null,
+          'Joonaksen viesti jää outboxiin');
+select is((select channel from public.shift_offer_messages where dedupe_key = 'dedupe-bot-joonas'), 'bot', 'Joonaksen kanava on bot');
+select is((select status from public.shift_offer_messages where dedupe_key = 'dedupe-bot-joonas'), 'bot_channel', 'Joonaksen tila on bot_channel');
+select is((select to_address from public.shift_offer_messages where dedupe_key = 'dedupe-bot-joonas'), null, 'bot-riville ei tallennu numeroa');
+update public.shift_offer_messages
+   set status = 'queued', channel = 'whatsapp', to_address = '+358401112233'
+ where dedupe_key = 'dedupe-bot-joonas';
+select public.shift_offer_sender_claim(50) as bot_claim \gset
+select is((select status from public.shift_offer_messages where dedupe_key = 'dedupe-bot-joonas'),
+          'bot_channel', 'varaus palauttaa Joonaksen bot-kanavalle');
+select is((select channel from public.shift_offer_messages where dedupe_key = 'dedupe-bot-joonas'),
+          'bot', 'varaus ei jätä Joonasta whatsapp-kanavalle');
+select ok(not exists (
+  select 1 from jsonb_array_elements(coalesce(:'bot_claim'::jsonb->'messages', '[]'::jsonb)) e
+   where e->>'staff_id' in ('aaaaaaaa-0000-4000-8000-0000000000b7', 'aaaaaaaa-0000-4000-8000-0000000000b8')
+), 'Joonasta ja Ottoa ei varata lähetykseen');
+select is((public.shift_offer_sender_complete(jsonb_build_object(
+            'id', (select id from public.shift_offer_messages where dedupe_key = 'dedupe-bot-joonas'),
+            'action', 'sent',
+            'wamid', 'wamid.BOT',
+            'channel', 'whatsapp',
+            'to', '+358401112233'))->>'status'),
+          'bot_channel', 'complete ei merkitse Joonaksen viestiä lähetetyksi');
+select is((select wamid from public.shift_offer_messages where dedupe_key = 'dedupe-bot-joonas'), null, 'bot-riville ei tule wamidia');
+insert into public.staff (id, name, active, phone_e164, whatsapp_enabled) values
+  ('2975633f-c53f-48d6-8a38-41cae0be5a83', 'Joku Muu', true, '0409998877', true);
+select is((select bot_channel from public.staff where id = '2975633f-c53f-48d6-8a38-41cae0be5a83'),
+          true, 'Oton tuotanto-id on bot-kanavalla nimestä riippumatta');
+select is((select whatsapp_enabled from public.staff where id = '2975633f-c53f-48d6-8a38-41cae0be5a83'),
+          false, 'Oton tuotanto-id ei saa WhatsApp-lippua');
+
 set local role anon;
 select throws_ok('select public.shift_offer_sender_claim(1)', '42501', null, 'anon ei varaa lähetysjonoa');
 select throws_ok($$select public.shift_offer_sender_complete('{}'::jsonb)$$, '42501', null, 'anon ei kirjaa lähetystä');
@@ -659,6 +706,7 @@ select throws_ok($$select public.shift_offer_mask_phone('+358401234567')$$, '425
 select throws_ok($$select public.shift_offer_mask_payload('{}'::jsonb)$$, '42501', null, 'anon ei peitä runkoa');
 select throws_ok($$select public.shift_offer_open_for_token('x')$$, '42501', null, 'anon ei listaa tarjouksia');
 select throws_ok($$select public.shift_offer_respond_as_staff('x', null, 'decline', null)$$, '42501', null, 'anon ei kirjaa vastaussivun vastausta');
+select throws_ok($$select public.shift_offer_is_bot_staff(null)$$, '42501', null, 'anon ei lue bot-kanavaa');
 reset role;
 
 select * from finish();

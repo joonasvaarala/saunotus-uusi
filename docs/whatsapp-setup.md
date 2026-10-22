@@ -73,7 +73,9 @@ Käyttöliittymän nimet liikkuvat. Oliot ovat samat: Business-portfolio, sovell
 
 ## Tietokanta ja kytkimet
 
-Tuotannossa moottorin migraatio on versio `20261022003917`, WhatsApp-migraatio `20261022013104` ja tarkennus `20261022014510`. Repon tiedostot on nimetty samoiksi, jotta niitä ei ajeta uudelleen. Vastaussivun uusi, ajamatta oleva tiedosto on `booking/supabase/migrations/20261022022221_shift_offer_response_page.sql`.
+Tuotannossa moottorin migraatio on versio `20261022003917`, WhatsApp-migraatio `20261022013104` ja tarkennus `20261022014510`. Repon tiedostot on nimetty samoiksi, jotta niitä ei ajeta uudelleen. Ajamatta ovat vastaussivu `booking/supabase/migrations/20261022022221_shift_offer_response_page.sql` ja bot-kanava `booking/supabase/migrations/20261022024547_shift_offer_bot_channel.sql`.
+
+Joonas ja Otto eivät saa vuoroviestejä WhatsAppilla. Heidän `public.staff.bot_channel` on true ja `whatsapp_enabled` pysyy false, vaikka sen yrittäisi kytkeä päälle. Uloslähtevä rivi on kanavalla `bot` ja tilassa `bot_channel`. Lähettäjä ei poimi sitä eikä soita Metalle.
 
 Kun se myöhemmin ajetaan, tauluun `public.shift_offer_engine_settings` tulee:
 
@@ -108,7 +110,7 @@ Roolien `shift_offer_settings.enabled` on eri kytkin. WhatsAppin kytkeminen ei l
 Tätä ei tehdä tässä haarassa.
 
 1. Mergeä tämä PR.
-2. Aja vain `20261022022221_shift_offer_response_page.sql`, jos vastaussivu halutaan käyttöön. Älä aja uudelleen `20261022003917`, `20261022013104` tai `20261022014510` äläkä sääntösiementä.
+2. Aja vain `20261022022221_shift_offer_response_page.sql` ja `20261022024547_shift_offer_bot_channel.sql`, jos vastaussivu ja bot-kanava halutaan käyttöön. Älä aja uudelleen `20261022003917`, `20261022013104` tai `20261022014510` äläkä sääntösiementä.
 3. Laita neljä `WHATSAPP_*`-salaisuutta edge-ympäristöön. Varmista holvin `shift_offer_token_secret`.
 4. `supabase functions deploy shift-offer-engine --project-ref sxbofnuisemspgquoxyv`. `verify_jwt` pysyy false: tick tunnistaa `x-sync-secret`, webhook allekirjoituksen, vastauslinkki poletin.
 5. Tee Metassa webhookin Verify and save ja tilaa `messages`.

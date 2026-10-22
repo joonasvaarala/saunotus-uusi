@@ -147,8 +147,9 @@ export function escapeHtml(value: unknown): string {
     .replace(/'/g, "&#39;");
 }
 
-// Sama oven veistos kuin lahjakortin kaarikuvassa, sivuston julkinen osoite.
-export const DOOR_ARCH_URL = "https://uusi.saunotus.com/img/ovi-kaiverrus-1024.webp";
+// Sama oven veistos kuin lahjakortin kaarikuvassa (ovi-kaari.jpg / sivuston ovi-kaiverrus).
+// GitHub Pages palauttaa kuvan. uusi.saunotus.com/img/ ei sitä vielä tarjoa.
+export const DOOR_ARCH_URL = "https://joonasvaarala.github.io/saunotus-uusi/img/ovi-kaiverrus-1024.webp";
 
 export type ShiftOfferCard = {
   offerId: string;
@@ -259,8 +260,8 @@ body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.5 system-ui
 .top{display:flex;align-items:center;min-height:56px;padding:10px 14px;background:var(--green);color:#fff}
 .brand{font-weight:600;letter-spacing:.01em}
 main{padding:14px 14px 28px;max-width:480px;margin:0 auto}
-.arch{width:min(220px,62vw);margin:8px auto 16px;aspect-ratio:3/3.45;border-radius:999px 999px 8px 8px;overflow:hidden;border:1px solid #C49A6C;background:var(--green)}
-.arch img{width:100%;height:100%;object-fit:cover;object-position:center 40%;display:block}
+.arch{position:relative;width:min(220px,62vw);height:252px;margin:8px auto 16px;border-radius:999px 999px 8px 8px;overflow:hidden;border:1px solid #C49A6C;background:var(--green)}
+.arch img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 40%;display:block;font-size:0;color:transparent}
 h1{font-size:24px;margin:0 0 12px;color:var(--ink);font-weight:600}
 h2{font-size:19px;margin:0 0 6px;color:var(--ink);font-weight:600}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
@@ -273,8 +274,9 @@ h2{font-size:19px;margin:0 0 6px;color:var(--ink);font-weight:600}
 .banner.ok{background:var(--okbg);color:var(--ok);border-color:transparent}
 .banner.bad{background:var(--errbg);color:var(--err);border-color:transparent}
 form{display:grid;gap:8px}.snooze[open]{display:grid;gap:8px}
-.btn{font:600 16px/1.2 inherit;font-family:inherit;padding:12px 16px;min-height:48px;border-radius:8px;border:1px solid var(--green);background:#fff;color:var(--green);cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center}
-.btn.primary{background:var(--green);color:#fff}
+button,summary{appearance:none;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;font-weight:600;font-style:normal;line-height:1.2;letter-spacing:normal;text-transform:none}
+.btn,button.btn,summary.btn{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;font-weight:600;font-style:normal;line-height:1.2;letter-spacing:normal;text-transform:none;padding:12px 16px;min-height:48px;border-radius:8px;border:1px solid var(--green);background:#fff;color:var(--green);cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center}
+.btn.primary,button.btn.primary{background:var(--green);color:#fff}
 .btn.primary:hover{background:#1c2720}
 .fld{display:grid;gap:4px;font-size:14px;font-weight:600;color:var(--ink)}
 input{font:inherit;padding:10px 12px;border:1px solid #8b7f73;border-radius:8px;background:#fff;color:var(--ink);min-height:44px;width:100%}

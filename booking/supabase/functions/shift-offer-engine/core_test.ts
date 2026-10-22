@@ -138,7 +138,12 @@ Deno.test("accepted page keeps the shift and the other open offers", () => {
   assert(html.includes("Vuoro on sinun"));
   assert(html.includes("Hoitajavuoro"));
   assert(html.includes("Lämmitysvuoro"));
-  assert(html.includes("https://uusi.saunotus.com/img/ovi-kaiverrus-1024.webp"));
+  assert(html.includes("https://joonasvaarala.github.io/saunotus-uusi/img/ovi-kaiverrus-1024.webp"));
+  assert(html.includes(".arch{position:relative"));
+  assert(html.includes("height:252px"));
+  assert(html.includes("overflow:hidden"));
+  assert(html.includes("button.btn,summary.btn{font-family:system-ui"));
+  assert(html.includes("font-size:16px;font-weight:600"));
   assert(html.includes("--green:#2B3A30"));
   assert(html.includes("--bg:#F4EFE7"));
   assert(html.includes("btn primary"));
