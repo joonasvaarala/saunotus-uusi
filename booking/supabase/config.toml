@@ -50,3 +50,10 @@ verify_jwt = false   # pg_cron kutsuu; tunnistus x-sync-secret. Ei JWT:tä.
 # Lähettäjä, WhatsApp-kanava ja allowlist ovat oletuksena pois; whatsapp_dry_run on oletuksena päällä. Ei deployata tästä haarasta.
 [functions.shift-offer-engine]
 verify_jwt = false
+
+# Johku-synkka Varmistajalta (22.10.2026 asti, Johku sulkeutuu kirjanpidolta 1.11.2026).
+# Tunnistus: otsake x-johku-sync-secret. Salaisuus JOHKU_SYNC_SECRET vain Edge-ympäristössä.
+# Funktio saa kirjoittaa vain Johku-lähteisiä rivejä (svc_johku_sync_apply) ja lahjakorttien saldot
+# (svc_gift_cards_johku_upsert). service_role-avainta ei anneta palvelimelle.
+[functions.johku-sync]
+verify_jwt = false

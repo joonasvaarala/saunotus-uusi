@@ -1,0 +1,6 @@
+# Palvelimella syntyvä Johku-vienti ja tila. Älä commitoi (henkilötietoja).
+state/
+export/
+*.env
+__pycache__/
+.pytest_cache/
