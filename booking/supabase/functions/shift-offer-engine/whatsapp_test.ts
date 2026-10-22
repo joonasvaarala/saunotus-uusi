@@ -184,14 +184,15 @@ Deno.test("verify challenge returns the hub challenge only for the configured to
   assertEquals(await readChallenge(ok, ""), null);
 });
 
-Deno.test("webhook records delivery statuses and ignores incoming messages", async () => {
+Deno.test("webhook records delivery statuses and passes inbound messages", async () => {
   const applied: unknown[] = [];
+  const inbound: unknown[] = [];
   const body = JSON.stringify({
     object: "whatsapp_business_account",
     entry: [{
       changes: [{
         value: {
-          messages: [{ from: "358401234567", type: "text", text: { body: "ok" } }],
+          messages: [{ from: "358401234567", id: "wamid.IN", type: "text", text: { body: "ok" } }],
           statuses: [{
             id: "wamid.ABC",
             status: "delivered",
@@ -216,8 +217,11 @@ Deno.test("webhook records delivery statuses and ignores incoming messages", asy
   });
   const res = await handleWebhookRequest(post, env, async (update) => {
     applied.push(update);
+  }, async (message) => {
+    inbound.push({ from: message.from, type: message.type, text: message.text, wamid: message.wamid });
   });
   assertEquals(res.status, 200);
+  assertEquals(inbound, [{ from: "358401234567", type: "text", text: "ok", wamid: "wamid.IN" }]);
   assertEquals(applied, [{
     wamid: "wamid.ABC",
     status: "delivered",

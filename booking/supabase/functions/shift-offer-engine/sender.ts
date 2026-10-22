@@ -2,11 +2,17 @@
 // Salaisuudet tulevat kutsujalta (WHATSAPP_*). Tätä tiedostoa ei ajeta testeissä verkkoon.
 
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+import { processInboundMessage, type ActResult, type Intent, type StoreResult } from "./inbound.ts";
 import {
+  buildSessionPayload,
+  classifyHttp,
   handleClaimedMessage,
   handleWebhookRequest,
+  messagesUrl,
+  postSession,
   type ClaimedMessage,
   type CompleteResult,
+  type ParsedInbound,
   type SenderLog,
   type Settings,
   type StatusUpdate,
@@ -132,10 +138,127 @@ export async function deliverQueued(
   return summary;
 }
 
+function asStore(data: unknown): StoreResult | null {
+  if (!data || typeof data !== "object") return null;
+  const row = data as Record<string, unknown>;
+  if (!row.id) return null;
+  return {
+    id: String(row.id),
+    duplicate: row.duplicate === true,
+    handled: row.handled === true,
+    inboundEnabled: row.inbound_enabled === true,
+    staffId: row.staff_id == null ? null : String(row.staff_id),
+    replyTo: row.reply_to == null ? null : String(row.reply_to),
+  };
+}
+
+function asAct(data: unknown): ActResult {
+  const row = data && typeof data === "object" ? data as Record<string, unknown> : {};
+  const buttons = Array.isArray(row.buttons)
+    ? row.buttons.flatMap((raw) => {
+      if (!raw || typeof raw !== "object") return [];
+      const button = raw as { id?: unknown; title?: unknown };
+      if (typeof button.id !== "string" || typeof button.title !== "string") return [];
+      return [{ id: button.id, title: button.title }];
+    })
+    : [];
+  return {
+    replyBody: typeof row.reply_body === "string" ? row.reply_body : null,
+    buttons,
+    shiftId: row.shift_id == null ? null : String(row.shift_id),
+    suppressed: row.suppressed === true,
+  };
+}
+
+// Tallentaa saapuvan viestin aina. Vastaus vain jos whatsapp_inbound_enabled ja numero on henkilöstöä.
+// Tuntematon numero ei aiheuta Graph-kutsua. Lokissa ei ole numeroa, tekstiä eikä salaisuutta.
+export async function deliverInbound(
+  supa: SupabaseClient,
+  env: WhatsappEnv,
+  message: ParsedInbound,
+  log: SenderLog,
+  fetchImpl: typeof fetch = fetch,
+): Promise<void> {
+  await processInboundMessage(message, {
+    async store(inbound) {
+      const { data, error } = await supa.rpc("whatsapp_store_inbound", {
+        p_wamid: inbound.wamid,
+        p_from: inbound.from,
+        p_received_at: inbound.at,
+        p_message_type: inbound.type,
+        p_text: inbound.text,
+        p_button_id: inbound.buttonId,
+      });
+      if (error) {
+        log("whatsapp_inbound_failed", { step: "store" });
+        throw new Error("inbound_store_failed");
+      }
+      return asStore(data);
+    },
+    async act(messageId, intent: Intent) {
+      const { data, error } = await supa.rpc("whatsapp_inbound_act", {
+        p_message_id: messageId,
+        p_intent: intent,
+      });
+      if (error) {
+        log("whatsapp_inbound_failed", { step: "act" });
+        throw new Error("inbound_act_failed");
+      }
+      return asAct(data);
+    },
+    async send(to, body, buttons) {
+      const payload = buildSessionPayload(to, body, buttons);
+      if (!payload || !env.token || !messagesUrl(env.phoneNumberId)) {
+        log("whatsapp_inbound_missing_credentials", {});
+        return { ok: false, wamid: null };
+      }
+      let http: { status: number; wamid: string | null };
+      try {
+        http = await postSession(env, payload, fetchImpl);
+      } catch {
+        log("whatsapp_inbound_send_failed", { status: 0 });
+        throw new Error("inbound_send_retry");
+      }
+      if (classifyHttp(http.status) === "retry") {
+        log("whatsapp_inbound_send_failed", { status: http.status });
+        throw new Error("inbound_send_retry");
+      }
+      if (classifyHttp(http.status) !== "ok" || !http.wamid) {
+        log("whatsapp_inbound_send_failed", { status: http.status });
+        return { ok: false, wamid: null };
+      }
+      return { ok: true, wamid: http.wamid };
+    },
+    async markHandled(messageId, intentOp) {
+      const { error } = await supa.rpc("whatsapp_mark_handled", {
+        p_message_id: messageId,
+        p_by: "shift-offer-engine",
+        p_intent: intentOp,
+      });
+      if (error) {
+        log("whatsapp_inbound_failed", { step: "handled" });
+        throw new Error("inbound_handled_failed");
+      }
+    },
+    async storeOutbound(record) {
+      const { error } = await supa.rpc("whatsapp_store_outbound", {
+        p_staff_id: record.staffId,
+        p_phone: record.phone,
+        p_text: record.text,
+        p_wamid: record.wamid,
+        p_shift_id: record.shiftId,
+      });
+      if (error) log("whatsapp_inbound_failed", { step: "outbound" });
+    },
+    log,
+  });
+}
+
 export function webhookResponse(
   req: Request,
   env: WhatsappEnv,
   apply: (update: StatusUpdate) => Promise<void>,
+  onMessage?: (message: ParsedInbound) => Promise<void>,
 ): Promise<Response> {
-  return handleWebhookRequest(req, env, apply);
+  return handleWebhookRequest(req, env, apply, onMessage);
 }
