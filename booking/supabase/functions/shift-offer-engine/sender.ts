@@ -69,6 +69,7 @@ function asMessage(raw: Record<string, unknown>): ClaimedMessage {
     ask_count: num(raw.ask_count),
     token: raw.token == null ? null : String(raw.token),
     staff_whatsapp_enabled: raw.staff_whatsapp_enabled === true,
+    bot_channel: raw.bot_channel === true,
   };
 }
 

@@ -4,12 +4,17 @@ import {
   canonicalToken,
   dryRunRequested,
   helsinkiMorning,
+  escapeHtml,
+  formatDeadline,
+  formatShiftWhen,
   parseAction,
   requestIntent,
   respondPage,
+  roleTitle,
   senderDecision,
   signToken,
   verifyToken,
+  type ShiftOfferCard,
 } from "./core.ts";
 
 const OFFER = "11111111-1111-4111-8111-111111111111";
@@ -47,13 +52,138 @@ Deno.test("GET with a token does not mutate; POST without a token is a tick", ()
   assertEquals(parseAction("nope"), null);
 });
 
+const SHIFT: ShiftOfferCard = {
+  offerId: "aaaaaaaa-0000-4000-8000-0000000000aa",
+  role: "therapist",
+  startsAt: "2026-10-24T13:00:00.000Z",
+  endsAt: "2026-10-24T17:00:00.000Z",
+  deadlineAt: "2026-10-24T09:00:00.000Z",
+  snoozeAllowed: true,
+};
+
+const OTHER: ShiftOfferCard = {
+  offerId: "bbbbbbbb-0000-4000-8000-0000000000bb",
+  role: "heater",
+  startsAt: "2026-11-02T14:00:00.000Z",
+  endsAt: "2026-11-02T18:00:00.000Z",
+  deadlineAt: "2026-10-28T10:00:00.000Z",
+  snoozeAllowed: false,
+};
+
 Deno.test("confirmation page does not accept on its own", () => {
-  const html = respondPage(null, null);
+  const html = respondPage({
+    result: null,
+    acted: null,
+    offers: [OTHER, SHIFT],
+    focusOfferId: SHIFT.offerId,
+    snoozeOpenOfferId: null,
+  });
   assert(html.includes("Hyväksy"));
   assert(html.includes("method=\"POST\""));
   assert(html.includes("–Tapio"));
-  assert(!html.includes("result"));
-  assert(respondPage("accept", "already_taken").includes("Vuoro on jo täytetty."));
+  assert(html.includes("Vahvista vastauksesi"));
+  assert(!html.includes("Vuoro on sinun"));
+  assert(html.indexOf(SHIFT.offerId) < html.indexOf(OTHER.offerId));
+  assert(html.includes("Hoitajavuoro"));
+  assert(html.includes("Lauantai 24.10.2026 klo 16:00–20:00"));
+  assert(html.includes("Vastaa viimeistään 24.10.2026 klo 12:00"));
+  assert(html.includes("<details"));
+  assert(html.includes(".snooze[open]{display:grid"));
+  assert(!html.includes(".snooze{display:grid"));
+  assert(html.includes("Tämä tarjous"));
+  assert(html.split("method=\"POST\"").length - 1 === 2);
+  assert(!html.includes("kierros"));
+  const heater = html.slice(html.indexOf(OTHER.offerId));
+  assert(!heater.includes("<details"));
+  assert(respondPage({
+    result: "already_taken",
+    acted: SHIFT,
+    offers: [],
+    focusOfferId: SHIFT.offerId,
+    snoozeOpenOfferId: null,
+  }).includes("Vuoro on jo täytetty"));
+});
+
+Deno.test("response page escapes dynamic values", () => {
+  assertEquals(escapeHtml(`<img src=x onerror="alert(1)">`), "&lt;img src=x onerror=&quot;alert(1)&quot;&gt;");
+  const nasty: ShiftOfferCard = {
+    ...SHIFT,
+    offerId: `"><script>alert(1)</script>`,
+    role: "therapist",
+  };
+  const html = respondPage({
+    result: null,
+    acted: null,
+    offers: [nasty],
+    focusOfferId: nasty.offerId,
+    snoozeOpenOfferId: null,
+  });
+  assert(!html.includes("<script>"));
+  assert(html.includes("&lt;script&gt;"));
+  assert(html.includes("&quot;&gt;&lt;script&gt;"));
+  assert(html.includes("Hoitajavuoro"));
+  assertEquals(roleTitle("therapist"), "Hoitajavuoro");
+  assertEquals(formatShiftWhen(SHIFT.startsAt, SHIFT.endsAt), "Lauantai 24.10.2026 klo 16:00–20:00");
+  assertEquals(formatDeadline(SHIFT.deadlineAt), "24.10.2026 klo 12:00");
+});
+
+Deno.test("accepted page keeps the shift and the other open offers", () => {
+  const html = respondPage({
+    result: "accepted",
+    acted: SHIFT,
+    offers: [SHIFT, OTHER],
+    focusOfferId: SHIFT.offerId,
+    snoozeOpenOfferId: null,
+  });
+  assert(html.includes("Vuoro on sinun"));
+  assert(html.includes("Hoitajavuoro"));
+  assert(html.includes("Lämmitysvuoro"));
+  assert(html.includes("https://joonasvaarala.github.io/saunotus-uusi/img/ovi-kaiverrus-1024.webp"));
+  assert(html.includes(".arch{position:relative"));
+  assert(html.includes("height:252px"));
+  assert(html.includes("overflow:hidden"));
+  assert(html.includes("button.btn,summary.btn{font-family:system-ui"));
+  assert(html.includes("font-size:16px;font-weight:600"));
+  assert(html.includes("--green:#2B3A30"));
+  assert(html.includes("--bg:#F4EFE7"));
+  assert(html.includes("btn primary"));
+  const after = html.slice(html.indexOf("Lämmitysvuoro"));
+  assert(after.includes("Hyväksy"));
+  assert(!html.slice(html.indexOf("Vuoro on sinun"), html.indexOf("Lämmitysvuoro")).includes("name=\"r\""));
+});
+
+Deno.test("not_owner keeps the person's own offer buttons", () => {
+  const html = respondPage({
+    result: "not_owner",
+    acted: null,
+    offers: [OTHER, SHIFT],
+    focusOfferId: SHIFT.offerId,
+    snoozeOpenOfferId: null,
+  });
+  assert(html.includes("Tähän vuoroon ei voi vastata"));
+  assert(html.includes("Hyväksy"));
+  assert(html.includes("Kieltäydy"));
+  assert(html.split("method=\"POST\"").length - 1 === 2);
+  assert(html.indexOf(SHIFT.offerId) < html.indexOf(OTHER.offerId));
+});
+
+Deno.test("response page ownership sql refuses another staff id", async () => {
+  const sql = await Deno.readTextFile(
+    new URL("../../migrations/20261022022221_shift_offer_response_page.sql", import.meta.url),
+  );
+  const fn = sql.slice(
+    sql.indexOf("function public.shift_offer_respond_as_staff"),
+    sql.indexOf("revoke all on function"),
+  );
+  assert(fn.includes("p_token text, p_offer_id uuid"));
+  assert(!fn.includes("p_staff_id"));
+  assert(fn.includes("v_tok->>'staff_id'"));
+  assert(fn.includes("rec.staff_id = v_staff"));
+  assert(fn.includes("'not_owner'"));
+  const list = sql.slice(0, sql.indexOf("function public.shift_offer_respond_as_staff"));
+  assert(list.includes("rec.status = 'pending'"));
+  assert(list.includes("o.status in ('active', 'paused', 'escalated')"));
+  assert(list.includes("rec.deadline_at > now()"));
 });
 
 Deno.test("sender switch defaults to leaving the outbox alone", () => {

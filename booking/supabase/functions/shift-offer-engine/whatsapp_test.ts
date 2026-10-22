@@ -53,6 +53,7 @@ function msg(over: Partial<ClaimedMessage> = {}): ClaimedMessage {
     ask_count: null,
     token: "payload.sig",
     staff_whatsapp_enabled: true,
+    bot_channel: false,
     ...over,
   };
 }
@@ -439,6 +440,49 @@ Deno.test("phone and token redaction keeps the template text and is idempotent",
   assertEquals(bodyParams(once)[0], "lämmitysvuoro");
 });
 
+Deno.test("Joonas and Otto never get a WhatsApp send", async () => {
+  let calls = 0;
+  const fetchImpl: typeof fetch = async () => {
+    calls += 1;
+    return new Response(JSON.stringify({ messages: [{ id: "wamid.BOT" }] }), { status: 200 });
+  };
+  const joonas = "5ab2ba62-97b2-4712-b500-a47a898036a5";
+  const otto = "2975633f-c53f-48d6-8a38-41cae0be5a83";
+  for (const staffId of [joonas, otto]) {
+    const result = await handleClaimedMessage(
+      msg({ staff_id: staffId, staff_whatsapp_enabled: true, bot_channel: false, channel: "whatsapp" }),
+      settings({ allow_staff_ids: [staffId] }),
+      env,
+      fetchImpl,
+      () => {},
+      NOW,
+    );
+    assertEquals(result.action, "bot_channel");
+    assertEquals(result.payload, null);
+    assertEquals(result.to, null);
+  }
+  const flagged = await handleClaimedMessage(
+    msg({ bot_channel: true, staff_whatsapp_enabled: true }),
+    settings(),
+    env,
+    fetchImpl,
+    () => {},
+    NOW,
+  );
+  assertEquals(flagged.action, "bot_channel");
+  assertEquals(calls, 0);
+  const sql = await Deno.readTextFile(
+    new URL("../../migrations/20261022024547_shift_offer_bot_channel.sql", import.meta.url),
+  );
+  assert(sql.includes("'bot_channel'"));
+  assert(sql.includes("channel = 'bot'"));
+  assert(sql.includes("not public.shift_offer_is_bot_staff"));
+  assert(sql.includes("new.whatsapp_enabled := false"));
+  assert(sql.includes("'joonas', 'otto'"));
+  assert(sql.includes("5ab2ba62-97b2-4712-b500-a47a898036a5"));
+  assert(sql.includes("2975633f-c53f-48d6-8a38-41cae0be5a83"));
+});
+
 Deno.test("staff whatsapp opt-in is required in addition to the allowlist", async () => {
   let calls = 0;
   const fetchImpl: typeof fetch = async () => {
@@ -472,7 +516,7 @@ Deno.test("a sending row without wamid is unknown after the lock timeout, not re
   assertEquals(staleSendingResolution("unknown", null, lockedAt - 1, NOW), "leave");
 
   const sql = await Deno.readTextFile(
-    new URL("../../migrations/20261022013534_shift_offer_whatsapp_guard.sql", import.meta.url),
+    new URL("../../migrations/20261022014510_shift_offer_whatsapp_guard.sql", import.meta.url),
   );
   const claimStart = sql.indexOf("function public.shift_offer_sender_claim");
   const completeStart = sql.indexOf("function public.shift_offer_sender_complete");

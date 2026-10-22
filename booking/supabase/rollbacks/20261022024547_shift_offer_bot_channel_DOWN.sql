@@ -1,12 +1,23 @@
--- PALUU: purkaa 20261022013534_shift_offer_whatsapp_guard.sql.
--- Palauttaa lähettäjän versioon 20261022013104: vanha sending-lukko palaa jonoon,
--- last_payload jää peittämättä ja WhatsApp-kanava valitaan numerosta ilman staff.whatsapp_enabled-ehtoa.
--- Aja ennen 20261022013104_shift_offer_whatsapp_DOWN.sql.
+-- PALUU: purkaa 20261022024547_shift_offer_bot_channel.sql.
+-- Palauttaa jonon ja lähettäjän versioon 20261022014510. Ei lähetä viestejä.
+
+drop trigger if exists shift_offer_staff_bot_guard_trg on public.staff;
+drop function if exists public.shift_offer_staff_bot_guard();
+drop function if exists public.shift_offer_is_bot_staff(uuid);
+
+alter table public.staff drop constraint if exists staff_bot_channel_no_whatsapp;
+alter table public.staff drop column if exists bot_channel;
 
 update public.shift_offer_messages
-   set status = 'failed',
-       last_error = coalesce(last_error, 'unknown_delivery')
- where status = 'unknown';
+   set status = 'queued', channel = 'none', to_address = null
+ where status = 'bot_channel' or channel = 'bot';
+
+alter table public.shift_offer_messages drop constraint if exists shift_offer_messages_channel_check;
+alter table public.shift_offer_messages add constraint shift_offer_messages_channel_check
+  check (channel in ('whatsapp', 'email', 'none'));
+alter table public.shift_offer_messages drop constraint if exists shift_offer_messages_status_check;
+alter table public.shift_offer_messages add constraint shift_offer_messages_status_check
+  check (status in ('queued','sending','sent','delivered','read','skipped','failed','failed_no_contact','unknown'));
 
 create or replace function public.shift_offer_queue_message(
   p_offer uuid, p_recipient bigint, p_staff uuid, p_kind text, p_body text, p_dedupe text)
@@ -21,7 +32,7 @@ begin
     v_channel := 'none'; v_to := null;
   else
     v_phone := public.shift_offer_phone_e164(st.phone_e164);
-    if v_phone is not null then
+    if st.whatsapp_enabled and v_phone is not null then
       v_channel := 'whatsapp'; v_to := v_phone;
     elsif nullif(btrim(st.email), '') is not null then
       v_channel := 'email'; v_to := btrim(st.email);
@@ -36,20 +47,7 @@ begin
   return v_id;
 end $$;
 
--- Ei lähetä eikä merkitse rivejä skipped-tilaan. Edge-funktio tekee lähetyksen.
-create or replace function public.shift_offer_sender_drain(p_limit int default 50)
-returns jsonb
-language plpgsql security definer set search_path = '' as $$
-declare v_on boolean;
-begin
-  select sender_enabled into v_on from public.shift_offer_engine_settings where id;
-  if not coalesce(v_on, false) then
-    return jsonb_build_object('ok', true, 'sender_enabled', false, 'sent', 0, 'skipped', 0);
-  end if;
-  return jsonb_build_object('ok', true, 'sender_enabled', true, 'sent', 0, 'skipped', 0, 'transport', 'edge', 'limit', p_limit);
-end $$;
-
--- Lukitsee erääntyneet rivit (status sending). Riviä, jolla on wamid, ei varata.
+-- Lukitsee erääntyneet rivit. Vanhaa sending-lukkoa ilman wamidia ei palauteta jonoon.
 create or replace function public.shift_offer_sender_claim(p_limit int default 20)
 returns jsonb
 language plpgsql security definer set search_path = '' as $$
@@ -63,7 +61,9 @@ begin
     return jsonb_build_object('ok', true, 'sender_enabled', false, 'messages', '[]'::jsonb);
   end if;
   update public.shift_offer_messages
-     set status = 'queued', locked_at = null
+     set status = 'unknown',
+         locked_at = null,
+         last_error = 'unknown_delivery'
    where status = 'sending' and wamid is null and locked_at is not null
      and locked_at < now() - interval '10 minutes';
   v_limit := greatest(1, least(coalesce(p_limit, 20), 50));
@@ -73,8 +73,8 @@ begin
       left join public.staff st on st.id = m.staff_id
      where m.status = 'queued' and m.next_attempt_at <= now() and m.wamid is null
        and (
-         m.channel in ('whatsapp', 'none')
-         or public.shift_offer_phone_e164(st.phone_e164) is not null
+         m.channel = 'none'
+         or (coalesce(st.whatsapp_enabled, false) and public.shift_offer_phone_e164(st.phone_e164) is not null)
        )
      order by m.id
      limit v_limit
@@ -96,6 +96,7 @@ begin
     'status', u.status,
     'phone_raw', st.phone_e164,
     'email', st.email,
+    'staff_whatsapp_enabled', coalesce(st.whatsapp_enabled, false),
     'role_type', o.role_type,
     'starts_at', w.starts_at,
     'ends_at', w.ends_at,
@@ -121,7 +122,7 @@ begin
     'messages', v_messages);
 end $$;
 
--- Kirjaa yhden varatun rivin lopputulos. wamidia ei korvata, eikä sent onnistu ilman lukkoa.
+-- Kirjaa yhden varatun rivin lopputulos. wamidia ei korvata. last_payload peitetään.
 create or replace function public.shift_offer_sender_complete(p_result jsonb)
 returns jsonb
 language plpgsql security definer set search_path = '' as $$
@@ -154,6 +155,7 @@ begin
   v_to := nullif(p_result->>'to', '');
   v_payload := p_result->'payload';
   if jsonb_typeof(v_payload) = 'null' then v_payload := null; end if;
+  v_payload := public.shift_offer_mask_payload(v_payload);
   if coalesce(p_result->>'attempts', '') ~ '^[0-9]+$' then
     v_attempts := (p_result->>'attempts')::int;
   else
@@ -204,7 +206,7 @@ begin
   return jsonb_build_object('ok', true, 'status', v_status, 'wamid', case when v_action = 'sent' then v_wamid else null end);
 end $$;
 
--- Webhookin tila. Sama järjestys kuin edge-funktion nextOutboxStatus.
+-- Webhookin tila. unknown ei liiku, sama järjestys kuin nextOutboxStatus.
 create or replace function public.shift_offer_whatsapp_apply_status(
   p_wamid text, p_status text, p_error text, p_at timestamptz)
 returns jsonb
@@ -221,7 +223,7 @@ begin
   end if;
   select * into v from public.shift_offer_messages where wamid = p_wamid for update;
   if not found then return jsonb_build_object('ok', true, 'matched', false); end if;
-  if v.status in ('read', 'failed_no_contact', 'failed') then
+  if v.status in ('read', 'failed_no_contact', 'failed', 'unknown') then
     return jsonb_build_object('ok', true, 'matched', true, 'status', v.status, 'unchanged', true);
   end if;
   if p_status = 'failed' then
@@ -246,15 +248,3 @@ begin
    where id = v.id;
   return jsonb_build_object('ok', true, 'matched', true, 'status', v_next);
 end $$;
-
-drop function if exists public.shift_offer_mask_payload(jsonb);
-drop function if exists public.shift_offer_mask_phone(text);
-
-alter table public.shift_offer_messages drop constraint shift_offer_messages_status_check;
-alter table public.shift_offer_messages add constraint shift_offer_messages_status_check
-  check (status in ('queued','sending','sent','delivered','read','skipped','failed','failed_no_contact'));
-
-comment on column public.shift_offer_messages.status is
-  'queued/sending/sent/delivered/read/skipped/failed/failed_no_contact. failed_no_contact jää tauluun näkyviin: puuttuvaa puhelinnumeroa ei piiloteta eikä riviä poisteta.';
-comment on column public.shift_offer_messages.last_payload is
-  'Viimeisin Metalle tarkoitettu JSON-runko (kuivaharjoitus tai lähetys). Ei sisällä Authorization-otsaketta.';
