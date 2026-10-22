@@ -3,10 +3,10 @@
 //
 // Autentikointi:
 //   * tick (POST ilman tokenia): header x-sync-secret = env SYNC_CRON_SECRET (vakioaikavertailu)
-//   * vastaus (GET/POST ?token=): HMAC-token tarkistetaan tietokannassa (shift_offer_verify_token).
-//     Avain on vain vault-salaisuus shift_offer_token_secret. Edge-funktiolla ei ole omaa avainta.
-//     GET vain näyttää vahvistuksen; vastaus kirjataan POST-lomakkeella
-//     (selain ei hyväksy vuoroa linkin esihakuna).
+//   * vastauslinkki (GET ?token=): 302 sivulle SHIFT_OFFER_PAGE_BASE/vuoro/?token= (oletus GitHub Pages).
+//     Sivu hakee JSON:n GET /api/offers ja kirjaa vastauksen POST /api/respond.
+//     HMAC-token tarkistetaan tietokannassa (shift_offer_verify_token). Avain on vain vault-salaisuus
+//     shift_offer_token_secret. Edge-funktiolla ei ole omaa avainta. GET ei muuta rivejä.
 //   * tietokanta: SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY
 // Kuivaharjoitus: ?dry_run=1 tai JSON {"dryRun":true} tai shift_offer_engine_settings.dry_run.
 // Lähettäjä: sender_enabled oletus false (jono jää queued).
@@ -35,16 +35,12 @@
 // Token-avain (ei repoissa, ei edge-ympäristössä): vault-salaisuus shift_offer_token_secret.
 // Kuivaharjoitus käsin: sama kutsu, body {"dryRun":true} tai ?dry_run=1.
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
+import { handleOfferRequest, type OfferDb } from "./api.ts";
 import {
   dryRunRequested,
-  helsinkiMorning,
-  parseAction,
-  requestIntent,
-  respondPage,
   secretMatches,
   senderDecision,
-  type RespondPageInput,
-  type ShiftOfferCard,
+  shiftRoute,
   type TickBody,
 } from "./core.ts";
 import { deliverQueued, readWhatsappEnv, webhookResponse } from "./sender.ts";
@@ -55,42 +51,17 @@ function db(): SupabaseClient {
   });
 }
 
-const log = (event: string, data: Record<string, unknown> = {}) =>
-  console.log(JSON.stringify({ fn: "shift-offer-engine", event, ...data }));
-
-function cardFromRow(raw: Record<string, unknown>): ShiftOfferCard | null {
-  const id = raw.offer_id ? String(raw.offer_id) : "";
-  if (!id) return null;
+function offerDb(supa: SupabaseClient): OfferDb {
   return {
-    offerId: id,
-    role: raw.role_type == null ? "" : String(raw.role_type),
-    startsAt: raw.starts_at == null ? null : String(raw.starts_at),
-    endsAt: raw.ends_at == null ? null : String(raw.ends_at),
-    deadlineAt: raw.deadline_at == null ? null : String(raw.deadline_at),
-    snoozeAllowed: raw.snooze_allowed === true,
+    async rpc(name, args) {
+      const { data, error } = await supa.rpc(name, args);
+      return { data, error };
+    },
   };
 }
 
-async function loadOpenOffers(supa: SupabaseClient, token: string): Promise<
-  { ok: true; focusOfferId: string; offers: ShiftOfferCard[] } | { ok: false }
-> {
-  const { data, error } = await supa.rpc("shift_offer_open_for_token", { p_token: token });
-  if (error || !data || typeof data !== "object") return { ok: false };
-  const row = data as { ok?: boolean; focus_offer_id?: unknown; offers?: unknown };
-  if (row.ok !== true || typeof row.focus_offer_id !== "string" || !row.focus_offer_id) return { ok: false };
-  const offers = Array.isArray(row.offers)
-    ? row.offers.flatMap((item) => {
-      if (!item || typeof item !== "object") return [];
-      const card = cardFromRow(item as Record<string, unknown>);
-      return card ? [card] : [];
-    })
-    : [];
-  return { ok: true, focusOfferId: row.focus_offer_id, offers };
-}
-
-function page(html: string, status = 200): Response {
-  return new Response(html, { status, headers: { "content-type": "text/html; charset=utf-8" } });
-}
+const log = (event: string, data: Record<string, unknown> = {}) =>
+  console.log(JSON.stringify({ fn: "shift-offer-engine", event, ...data }));
 
 Deno.serve(async (req) => {
   const url = new URL(req.url);
@@ -108,58 +79,17 @@ Deno.serve(async (req) => {
     });
   }
   const token = url.searchParams.get("token");
-  const intent = requestIntent(req.method, token);
-  if (intent === "invalid") return new Response("method not allowed", { status: 405 });
-
-  if (intent === "respond") {
-    const supa = db();
-    const open = await loadOpenOffers(supa, token ?? "");
-    const blank = { result: "bad_token", acted: null, offers: [], focusOfferId: null, snoozeOpenOfferId: null };
-    if (!open.ok) return page(respondPage(blank), 400);
-    let action = parseAction(url.searchParams.get("r"));
-    let until = url.searchParams.get("until");
-    let postedOffer = "";
-    if (req.method === "POST") {
-      const form = await req.formData().catch(() => null);
-      action = parseAction(form?.get("r")?.toString() ?? url.searchParams.get("r"));
-      until = form?.get("until")?.toString() ?? until;
-      postedOffer = form?.get("offer_id")?.toString() ?? "";
+  const route = shiftRoute(req.method, url.pathname, token);
+  if (route === "invalid") return new Response("method not allowed", { status: 405 });
+  if (route !== "tick") {
+    const res = await handleOfferRequest(req, offerDb(db()), Deno.env.get("SHIFT_OFFER_PAGE_BASE"));
+    if (route === "respond") {
+      const copy = res.clone();
+      const body = await copy.json().catch(() => null);
+      const result = body && typeof body === "object" ? (body as { result?: unknown }).result : null;
+      if (typeof result === "string") log("responded", { result });
     }
-    const show = (extra: Partial<RespondPageInput> = {}, status = 200) => page(respondPage({
-      result: null,
-      acted: null,
-      offers: open.offers,
-      focusOfferId: open.focusOfferId,
-      snoozeOpenOfferId: null,
-      ...extra,
-    }), status);
-    // GET vain näyttää sivun. Vastaus kirjataan vasta POST-lomakkeella.
-    if (req.method === "GET" || !action) return show();
-    const target = postedOffer
-      ? (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(postedOffer) ? postedOffer : "")
-      : open.focusOfferId;
-    if (!target) return show({ result: "not_owner" });
-    const snooze = action === "snooze" ? helsinkiMorning(until ?? "") : null;
-    if (action === "snooze" && !snooze) return show({ snoozeOpenOfferId: target });
-    const { data, error } = await supa.rpc("shift_offer_respond_as_staff", {
-      p_token: token,
-      p_offer_id: target,
-      p_response: action,
-      p_snooze_until: snooze,
-    });
-    if (error || !data || typeof data !== "object") {
-      log("respond_failed", { error: "rpc" });
-      return show({ result: "bad_token" }, 400);
-    }
-    const row = data as Record<string, unknown>;
-    const result = typeof row.result === "string" ? row.result : "bad_token";
-    log("responded", { result });
-    const again = await loadOpenOffers(supa, token ?? "");
-    return show({
-      result,
-      acted: cardFromRow(row),
-      offers: again.ok ? again.offers : open.offers,
-    }, result === "bad_token" ? 400 : 200);
+    return res;
   }
 
   const expected = Deno.env.get("SYNC_CRON_SECRET") ?? "";

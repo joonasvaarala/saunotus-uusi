@@ -2,7 +2,7 @@
 
 Tämä ohje on Joonakselle. Tässä haarassa ei deployata edge-funktiota, ei ajeta migraatiota tuotantoon eikä lähetetä yhtään viestiä.
 
-Lähettäjä on Meta WhatsApp Business Cloud API (`POST https://graph.facebook.com/v25.0/{WHATSAPP_PHONE_NUMBER_ID}/messages`). Viestit ovat hyväksyttyjä Utility-mallipohjia suomeksi. Henkilökunta vastaa linkistä, ei WhatsAppin pikavastauksesta. Linkki avaa saman sivun kuin ennen (`shift-offer-engine`): GET näyttää Hyväksy / Kieltäydy / Palaan asiaan -lomakkeen eikä täytä vuoroa.
+Lähettäjä on Meta WhatsApp Business Cloud API (`POST https://graph.facebook.com/v25.0/{WHATSAPP_PHONE_NUMBER_ID}/messages`). Viestit ovat hyväksyttyjä Utility-mallipohjia suomeksi. Henkilökunta vastaa linkistä, ei WhatsAppin pikavastauksesta. Mallipohjan painikeosoite pysyy ennallaan. GET ohjaa selaimen staattiselle sivulle `/vuoro/`. Sivu näyttää Hyväksy / Kieltäydy / Palaan asiaan eikä täytä vuoroa ennen kuin henkilö painaa Hyväksy.
 
 Mallipohjat ovat tiedostossa [`docs/whatsapp-templates.json`](whatsapp-templates.json). Lähetyskoodi käyttää samoja nimiä ja samaa muuttujajärjestystä.
 
@@ -13,7 +13,7 @@ Mallipohjat ovat tiedostossa [`docs/whatsapp-templates.json`](whatsapp-templates
 | `cancelled` | `tarjous_peruttu` | hoidot-sulku perui tarjouksen |
 | `exhausted_ask`, `alert` | `joonas_tyhja_vuoro` | tyhjä vuoro, ilmoituksen numero tai sana hälytys, URL-painike |
 
-URL-painikkeen kiinteä alku on `https://sxbofnuisemspgquoxyv.supabase.co/functions/v1/shift-offer-engine?token=` ja dynaaminen loppu on allekirjoitettu vastauspoletti (ei koko osoitetta).
+URL-painikkeen osoite on edelleen `https://sxbofnuisemspgquoxyv.supabase.co/functions/v1/shift-offer-engine?token={{1}}`. Sitä ei vaihdeta: mallipohja on Metan tarkastuksessa. Funktio vastaa tähän GET-pyyntöön ohjauksella 302. Kohde kootaan asetuksesta `SHIFT_OFFER_PAGE_BASE` (oletus `https://joonasvaarala.github.io/saunotus-uusi`, ilman lopun kauttaviivaa) ja polusta `/vuoro/?token=`. Poletti URL-koodataan. Verkkotunnuksen vaihdossa riittää tämä yksi asetus. Staattinen sivu hakee avoimet tarjoukset funktiosta `GET /api/offers` ja kirjaa vastauksen `POST /api/respond`. Selain saa lukea JSON-vastauksen vain osoitteista `joonasvaarala.github.io`, `uusi.saunotus.com`, `saunotus.fi` ja `www.saunotus.fi`.
 
 ## Salaisuuksien nimet
 
@@ -73,7 +73,7 @@ Käyttöliittymän nimet liikkuvat. Oliot ovat samat: Business-portfolio, sovell
 
 ## Tietokanta ja kytkimet
 
-Tuotannossa moottorin migraatio on versio `20261022003917`, WhatsApp-migraatio `20261022013104` ja tarkennus `20261022014510`. Repon tiedostot on nimetty samoiksi, jotta niitä ei ajeta uudelleen. Ajamatta ovat vastaussivu `booking/supabase/migrations/20261022022221_shift_offer_response_page.sql` ja bot-kanava `booking/supabase/migrations/20261022024547_shift_offer_bot_channel.sql`.
+Tuotannossa moottorin migraatio on versio `20261022003917`, WhatsApp-migraatio `20261022013104`, tarkennus `20261022014510`, vastaussivu `20261022022221` ja bot-kanava `20261022024547`. Repon tiedostot on nimetty samoiksi, jotta niitä ei ajeta uudelleen. Kalenterin `apply_calendar_changes_v2` on tuotannossa versiona `20261021224956`; repon tiedosto on nimetty samaksi. Tässä haarassa ei ajeta migraatiota eikä deployata funktiota. Staattinen sivu julkaistaan sivuston mukana, kun tämä on mergattu.
 
 Joonas ja Otto eivät saa vuoroviestejä WhatsAppilla. Heidän `public.staff.bot_channel` on true ja `whatsapp_enabled` pysyy false, vaikka sen yrittäisi kytkeä päälle. Uloslähtevä rivi on kanavalla `bot` ja tilassa `bot_channel`. Lähettäjä ei poimi sitä eikä soita Metalle.
 
@@ -110,9 +110,9 @@ Roolien `shift_offer_settings.enabled` on eri kytkin. WhatsAppin kytkeminen ei l
 Tätä ei tehdä tässä haarassa.
 
 1. Mergeä tämä PR.
-2. Aja vain `20261022022221_shift_offer_response_page.sql` ja `20261022024547_shift_offer_bot_channel.sql`, jos vastaussivu ja bot-kanava halutaan käyttöön. Älä aja uudelleen `20261022003917`, `20261022013104` tai `20261022014510` äläkä sääntösiementä.
-3. Laita neljä `WHATSAPP_*`-salaisuutta edge-ympäristöön. Varmista holvin `shift_offer_token_secret`.
-4. `supabase functions deploy shift-offer-engine --project-ref sxbofnuisemspgquoxyv`. `verify_jwt` pysyy false: tick tunnistaa `x-sync-secret`, webhook allekirjoituksen, vastauslinkki poletin.
+2. Älä aja uudelleen `20261022003917`, `20261022013104`, `20261022014510`, `20261022022221`, `20261022024547` tai `20261021224956` äläkä sääntösiementä.
+3. Laita neljä `WHATSAPP_*`-salaisuutta edge-ympäristöön. Varmista holvin `shift_offer_token_secret`. `SHIFT_OFFER_PAGE_BASE` tarvitaan vain, jos sivu ei ole enää GitHub Pagesissa. Oletus on `https://joonasvaarala.github.io/saunotus-uusi`.
+4. `supabase functions deploy shift-offer-engine --project-ref sxbofnuisemspgquoxyv`. `verify_jwt` pysyy false: tick tunnistaa `x-sync-secret`, webhook allekirjoituksen, vastauslinkki poletin. Mallipohjan painikeosoitetta ei muuteta.
 5. Tee Metassa webhookin Verify and save ja tilaa `messages`.
 6. Lähetä neljä mallipohjaa ja odota Approved.
 7. Täytä `public.staff.phone_e164` ja laita `public.staff.whatsapp_enabled` päälle vain niille, jotka saavat WhatsAppin.

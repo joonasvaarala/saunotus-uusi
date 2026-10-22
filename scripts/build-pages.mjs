@@ -91,6 +91,12 @@ function publishDrinks(srcName, destRel) {
 publishDrinks('index.html', 'juomat');
 publishDrinks('index.en.html', 'en/drinks');
 
+// 3d) vuorotarjouksen vastaussivu → /vuoro/ (poletti on kyselyssä; ei sivustogeneraattorin linkkiä)
+const V = join(OUT, 'vuoro');
+rmSync(V, { recursive: true, force: true });
+mkdirSync(V, { recursive: true });
+for (const f of ['index.html', 'vuoro.css', 'vuoro.js']) cpSync(join('booking/vuoro', f), join(V, f));
+
 // 4) varmistukset
 const fail = (m) => { console.error('build-pages: VIRHE: ' + m); process.exit(1); };
 const adminHtml = readFileSync(join(A, 'index.html'), 'utf8');
@@ -101,9 +107,12 @@ for (const f of ['admin.js', 'ui.js', 'icons.js', 'sb.js', 'config.js', 'admin.c
 (function chkImports(d) { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) { chkImports(p); continue; } if (!n.endsWith('.js')) continue; for (const m of readFileSync(p, 'utf8').matchAll(/(?:from|import)\s*\(?\s*(['"])(\.{1,2}\/[^'"?]+\.js)(?:\?[^'"]*)?\1/g)) { if (!statSync(resolve(d, m[2]), { throwIfNoEntry: false })) fail(`${p}: tuotu moduuli puuttuu dististä: ${m[2]}`); } } })(A);
 if (process.env.SITE_ENV === 'test') {
   const noindex = (p) => /<meta name="robots" content="noindex/.test(readFileSync(p, 'utf8'));
-  for (const p of ['index.html', 'en/index.html', 'varaa/index.html', 'tilaus/index.html', 'en/order/index.html', 'hallinta/index.html', 'juomat/index.html', 'en/drinks/index.html']) { try { if (!noindex(join(OUT, p))) fail(`${p}: noindex puuttuu (SITE_ENV=test)`); } catch (e) { if (e.code === 'ENOENT') fail(`${p} puuttuu dististä`); else throw e; } }
+  for (const p of ['index.html', 'en/index.html', 'varaa/index.html', 'tilaus/index.html', 'en/order/index.html', 'hallinta/index.html', 'juomat/index.html', 'en/drinks/index.html', 'vuoro/index.html']) { try { if (!noindex(join(OUT, p))) fail(`${p}: noindex puuttuu (SITE_ENV=test)`); } catch (e) { if (e.code === 'ENOENT') fail(`${p} puuttuu dististä`); else throw e; } }
   if (!/Disallow: \//.test(readFileSync(join(OUT, 'robots.txt'), 'utf8'))) fail('robots.txt ei estä indeksointia');
 }
 // ei salaisuuksia: service_role/sb_secret ei saa esiintyä missään julkaistavassa tiedostossa (config.js, js, html)
 (function scan(d) { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) { scan(p); continue; } if (!/\.(js|mjs|html|json|css|txt)$/.test(n)) continue; const t = readFileSync(p, 'utf8'); if (/sb_secret_|"role"\s*:\s*"service_role"/.test(t)) fail(`salaisuuden näköinen sisältö: ${p.slice(OUT.length)}`); } })(OUT);
-console.log(`build-pages ok → ${OUT}  (perussivusto, ${BASE || ''}/varaa/, ${BASE || ''}/hallinta/, ${BASE || ''}/juomat/; Supabase ${new URL(SUPA).hostname})`);
+if (!statSync(join(OUT, 'img', 'ovi-kaiverrus-1024.webp'), { throwIfNoEntry: false })) fail('oven kuva puuttuu: img/ovi-kaiverrus-1024.webp');
+const vuoroHtml = readFileSync(join(OUT, 'vuoro', 'index.html'), 'utf8');
+if (!/src="\.\.\/img\/ovi-kaiverrus-1024\.webp"/.test(vuoroHtml)) fail('vuoro-sivun oven kuvan polku ei ole suhteellinen');
+console.log(`build-pages ok → ${OUT}  (perussivusto, ${BASE || ''}/varaa/, ${BASE || ''}/hallinta/, ${BASE || ''}/juomat/, ${BASE || ''}/vuoro/; Supabase ${new URL(SUPA).hostname})`);
