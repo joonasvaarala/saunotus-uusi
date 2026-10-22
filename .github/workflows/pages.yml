@@ -118,7 +118,7 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - run: deno test -A --no-lock --node-modules-dir=none booking/supabase/functions/pdf-golden.test.ts booking/supabase/functions/_tests/site_texts_test.ts booking/supabase/functions/_tests/mobilepay_test.ts booking/supabase/functions/_tests/procountor_test.ts booking/supabase/functions/_tests/vismapay_test.ts booking/supabase/functions/_tests/booking_calendar_sync_test.ts booking/supabase/functions/_tests/johku_sync_test.ts booking/supabase/functions/shift-offer-engine/core_test.ts booking/supabase/functions/shift-offer-engine/whatsapp_test.ts booking/supabase/functions/shift-offer-engine/api_test.ts booking/vuoro/vuoro_test.ts
+      - run: deno test -A --no-lock --node-modules-dir=none booking/supabase/functions/pdf-golden.test.ts booking/supabase/functions/_tests/site_texts_test.ts booking/supabase/functions/_tests/mobilepay_test.ts booking/supabase/functions/_tests/procountor_test.ts booking/supabase/functions/_tests/vismapay_test.ts booking/supabase/functions/_tests/service_role_auth_test.ts booking/supabase/functions/_tests/booking_calendar_sync_test.ts booking/supabase/functions/_tests/johku_sync_test.ts booking/supabase/functions/shift-offer-engine/core_test.ts booking/supabase/functions/shift-offer-engine/whatsapp_test.ts booking/supabase/functions/shift-offer-engine/api_test.ts booking/vuoro/vuoro_test.ts
       # Vuorotarjousmoottorin Deno-ydin (core_test.ts), WhatsApp-sovitin (whatsapp_test.ts),
       # JSON-rajapinta (api_test.ts) ja staattinen vastaussivu (vuoro_test.ts) ajetaan yllä.
       # pgTAP booking/supabase/tests/124_shift_offer_engine.test.sql ja

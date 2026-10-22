@@ -1,4 +1,4 @@
-// vismapay-refund: hallinnan hyvitys Visma Payhin (täysi tai osittainen). Vaatii payments.refund tai service role -avaimen.
+// vismapay-refund: hallinnan hyvitys Visma Payhin (täysi tai osittainen). Vaatii payments.refund, service role -avaimen tai portin varmentaman service_role-JWT:n.
 // create_refund ei ole idempotentti Vismassa: provider_refund_id leimataan heti, uusinta kysyy get_refund.
 import { CORS_HEADERS, dbError, type Db, type Env, type Fetch, jsonResponse } from "../_shared/mobilepay.ts";
 import { envOf, processRefund } from "../_shared/vismapay_flow.ts";
