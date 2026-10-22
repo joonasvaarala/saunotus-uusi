@@ -1,4 +1,4 @@
--- PALUU: purkaa 20261022011013_shift_offer_whatsapp.sql.
+-- PALUU: purkaa 20261022013104_shift_offer_whatsapp.sql.
 -- Palauttaa lähettäjän stubiksi (skipped, ei verkkoa) ja kanavavalinnan staff.whatsapp_enabled-lippuun.
 -- Aja ennen 20261022003917_shift_offer_engine_DOWN.sql jos koko moottori puretaan.
 

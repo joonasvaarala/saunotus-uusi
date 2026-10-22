@@ -12,11 +12,15 @@ import {
   lockForSend,
   messagesUrl,
   nextOutboxStatus,
+  maskPhoneE164,
   normalizeFinnishPhone,
   parseWebhookStatuses,
   planMessage,
   readChallenge,
+  redactTemplatePayload,
   retryPlan,
+  staleSendingResolution,
+  STALE_SEND_LOCK_MS,
   verifyHubSignature,
   webhookSignatureHex,
   type ClaimedMessage,
@@ -48,6 +52,7 @@ function msg(over: Partial<ClaimedMessage> = {}): ClaimedMessage {
     ask_no: null,
     ask_count: null,
     token: "payload.sig",
+    staff_whatsapp_enabled: true,
     ...over,
   };
 }
@@ -249,6 +254,9 @@ Deno.test("delivery status does not move backwards", () => {
   assertEquals(nextOutboxStatus("sent", "failed"), "failed");
   assertEquals(nextOutboxStatus("failed", "delivered"), null);
   assertEquals(nextOutboxStatus("failed_no_contact", "delivered"), null);
+  assertEquals(nextOutboxStatus("unknown", "delivered"), null);
+  assertEquals(nextOutboxStatus("unknown", "sent"), null);
+  assertEquals(nextOutboxStatus("unknown", "failed"), null);
 });
 
 Deno.test("missing phone is failed_no_contact and stays addressable", () => {
@@ -263,7 +271,7 @@ Deno.test("missing phone is failed_no_contact and stays addressable", () => {
   }
 });
 
-Deno.test("dry-run logs the exact API body and does not call Meta", async () => {
+Deno.test("dry-run logs a redacted API body and does not call Meta", async () => {
   const logs: unknown[] = [];
   let calls = 0;
   const fetchImpl: typeof fetch = async () => {
@@ -275,18 +283,26 @@ Deno.test("dry-run logs the exact API body and does not call Meta", async () => 
     settings({ whatsapp_dry_run: true }),
     env,
     fetchImpl,
-    (_event, data) => logs.push(data),
+    (_event, data) => logs.push({ event: _event, ...data }),
     NOW,
   );
   assertEquals(calls, 0);
   assertEquals(result.action, "release");
   assertEquals(result.error, "dry_run");
   assertEquals(logs.length, 1);
-  const logged = logs[0] as { body: TemplatePayload; url: string };
+  const logged = logs[0] as { event: string; body: TemplatePayload; url: string };
+  assertEquals(logged.event, "whatsapp_dry_run");
   assertEquals(logged.url, messagesUrl(env.phoneNumberId));
-  assertEquals(logged.body, buildTemplatePayload(msg(), "+358401234567"));
-  assert(!JSON.stringify(logs).includes("super-secret-token"));
-  assert(!JSON.stringify(logs).includes("Bearer"));
+  const redacted = redactTemplatePayload(buildTemplatePayload(msg(), "+358401234567")!);
+  assertEquals(logged.body, redacted);
+  assertEquals(result.payload, redacted);
+  assertEquals(logged.body.to, "+358*******67");
+  assertEquals(bodyParams(logged.body), ["lämmitysvuoro", "la 24.10.2026 klo 16:00–20:00", "24.10.2026 klo 12:00"]);
+  const dumped = JSON.stringify({ logs, payload: result.payload });
+  assert(!dumped.includes("+358401234567"));
+  assert(!dumped.includes("payload.sig"));
+  assert(!dumped.includes("super-secret-token"));
+  assert(!dumped.includes("Bearer"));
 });
 
 Deno.test("only an allowlisted staff id is sent, and a row is never posted twice", async () => {
@@ -327,6 +343,12 @@ Deno.test("only an allowlisted staff id is sent, and a row is never posted twice
   assertEquals(JSON.parse(calls[0].body), buildTemplatePayload(msg(), "+358401234567"));
   const actions = [first.action, second.action].sort();
   assertEquals(actions, ["already_sent", "sent"]);
+  const sent = first.action === "sent" ? first : second;
+  assertEquals(sent.payload?.to, "+358*******67");
+  assert(!JSON.stringify(sent.payload).includes("+358401234567"));
+  assert(!JSON.stringify(sent.payload).includes("payload.sig"));
+  assert(calls[0].body.includes("+358401234567"));
+  assert(calls[0].body.includes("payload.sig"));
   assertEquals(row.wamid, "wamid.ABC");
   const again = await handleClaimedMessage(row, settings(), env, fetchImpl, () => {}, NOW);
   assertEquals(again.action, "already_sent");
@@ -374,8 +396,9 @@ Deno.test("5xx and 429 retry with backoff, 4xx does not", async () => {
   assertEquals(limited.attempts, 8);
 });
 
-Deno.test("missing credentials do not call Meta", async () => {
+Deno.test("missing credentials do not call Meta and the log is redacted", async () => {
   let calls = 0;
+  const logs: unknown[] = [];
   const result = await handleClaimedMessage(
     msg(),
     settings(),
@@ -384,12 +407,87 @@ Deno.test("missing credentials do not call Meta", async () => {
       calls += 1;
       return new Response("no", { status: 200 });
     },
-    () => {},
+    (event, data) => logs.push({ event, ...data }),
     NOW,
   );
   assertEquals(calls, 0);
   assertEquals(result.action, "release");
   assertEquals(result.error, "missing_credentials");
+  assertEquals(logs.length, 1);
+  assertEquals((logs[0] as { event: string }).event, "whatsapp_missing_credentials");
+  assertEquals(result.payload?.to, "+358*******67");
+  const dumped = JSON.stringify({ logs, payload: result.payload });
+  assert(!dumped.includes("+358401234567"));
+  assert(!dumped.includes("payload.sig"));
+  assert(!dumped.includes("super-secret-token"));
+});
+
+Deno.test("phone and token redaction keeps the template text and is idempotent", () => {
+  assertEquals(maskPhoneE164("+358401234567"), "+358*******67");
+  assertEquals(maskPhoneE164("+358*******67"), "+358*******67");
+  assertEquals(maskPhoneE164("04012"), "***");
+  const raw = buildTemplatePayload(msg(), "+358401234567");
+  assert(raw);
+  const once = redactTemplatePayload(raw);
+  const twice = redactTemplatePayload(once);
+  assertEquals(twice, once);
+  assertEquals(raw.to, "+358401234567");
+  assertEquals(once.to, "+358*******67");
+  const button = once.template.components.find((c) => c.type === "button");
+  assert(button && button.type === "button");
+  assertEquals(button.parameters[0].text, "***");
+  assertEquals(bodyParams(once)[0], "lämmitysvuoro");
+});
+
+Deno.test("staff whatsapp opt-in is required in addition to the allowlist", async () => {
+  let calls = 0;
+  const fetchImpl: typeof fetch = async () => {
+    calls += 1;
+    return new Response(JSON.stringify({ messages: [{ id: "wamid.NO" }] }), { status: 200 });
+  };
+  const optedOut = await handleClaimedMessage(
+    msg({ staff_whatsapp_enabled: false }),
+    settings(),
+    env,
+    fetchImpl,
+    () => {},
+    NOW,
+  );
+  assertEquals(calls, 0);
+  assertEquals(optedOut.action, "release");
+  assertEquals(optedOut.error, "staff_whatsapp_disabled");
+  assertEquals(optedOut.payload, null);
+  const plan = planMessage(msg({ staff_whatsapp_enabled: false }), settings());
+  assertEquals(plan.action, "release");
+  if (plan.action === "release") assertEquals(plan.payload, null);
+});
+
+Deno.test("a sending row without wamid is unknown after the lock timeout, not requeued", async () => {
+  const lockedAt = NOW - STALE_SEND_LOCK_MS;
+  assertEquals(staleSendingResolution("sending", null, lockedAt - 1, NOW), "unknown");
+  assertEquals(staleSendingResolution("sending", null, NOW - 60_000, NOW), "leave");
+  assertEquals(staleSendingResolution("sending", "wamid.ABC", lockedAt - 1, NOW), "leave");
+  assertEquals(staleSendingResolution("sending", null, null, NOW), "leave");
+  assertEquals(staleSendingResolution("queued", null, lockedAt - 1, NOW), "leave");
+  assertEquals(staleSendingResolution("unknown", null, lockedAt - 1, NOW), "leave");
+
+  const sql = await Deno.readTextFile(
+    new URL("../../migrations/20261022013534_shift_offer_whatsapp_guard.sql", import.meta.url),
+  );
+  const claimStart = sql.indexOf("function public.shift_offer_sender_claim");
+  const completeStart = sql.indexOf("function public.shift_offer_sender_complete");
+  const claim = sql.slice(claimStart, completeStart);
+  const expire = claim.slice(claim.indexOf("update public.shift_offer_messages"), claim.indexOf("v_limit :="));
+  assert(expire.includes("status = 'unknown'"));
+  assert(expire.includes("unknown_delivery"));
+  assert(expire.includes("wamid is null"));
+  assert(expire.includes("interval '10 minutes'"));
+  assert(!expire.includes("'queued'"));
+  const queue = sql.slice(sql.indexOf("function public.shift_offer_queue_message"), claimStart);
+  assert(queue.includes("st.whatsapp_enabled"));
+  assert(queue.includes("shift_offer_phone_e164"));
+  const handled = planMessage(msg({ status: "unknown" }), settings());
+  assertEquals(handled.action, "already_sent");
 });
 
 Deno.test("a locked row cannot be locked again", () => {

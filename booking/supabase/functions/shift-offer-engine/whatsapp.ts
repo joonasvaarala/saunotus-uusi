@@ -1,6 +1,8 @@
 // WhatsApp Cloud API -sovitin vuorotarjousjonolle. Ei lue Deno.env:iä eikä soita verkkoon
-// itse: kutsuja antaa fetchin ja salaisuudet. Oikea lähetys vaatii kytkimet, allowlistan ja
-// whatsapp_dry_run = false. Kuivaharjoitus lokittaa JSON-rungon eikä kutsu Metan rajapintaa.
+// itse: kutsuja antaa fetchin ja salaisuudet. Oikea lähetys vaatii kytkimet, allowlistan,
+// staff.whatsapp_enabled ja whatsapp_dry_run = false. Kuivaharjoitus lokittaa peitetyn
+// JSON-rungon eikä kutsu Metan rajapintaa. Puhelinnumero ja vastauspoletti eivät jää lokiin
+// eikä last_payloadiin. Metalle lähtevä runko on peittämätön.
 
 import { secretMatches, timingSafeEqual } from "./core.ts";
 
@@ -59,6 +61,7 @@ export type ClaimedMessage = {
   ask_no: number | null;
   ask_count: number | null;
   token: string | null;
+  staff_whatsapp_enabled: boolean;
 };
 
 export type Settings = {
@@ -101,7 +104,8 @@ export type Plan =
   }
   | { action: "send"; payload: TemplatePayload; to: string };
 
-const TERMINAL = new Set(["sent", "delivered", "read", "failed", "failed_no_contact", "skipped"]);
+const TERMINAL = new Set(["sent", "delivered", "read", "failed", "failed_no_contact", "skipped", "unknown"]);
+export const STALE_SEND_LOCK_MS = 10 * 60 * 1000;
 const enc = new TextEncoder();
 
 // 040…, 00358…, 358… ja +358… → E.164. Vain suomalaiset matkapuhelimet (4… tai 50…).
@@ -119,6 +123,43 @@ export function normalizeFinnishPhone(input: unknown): string | null {
   if (national.length < 6 || national.length > 12) return null;
   if (!(national.startsWith("4") || national.startsWith("50"))) return null;
   return `+${digits}`;
+}
+
+// +358401234567 → +358*******67. Tähtiä sisältävä arvo jätetään, jotta peitto on idempotentti.
+export function maskPhoneE164(phone: string): string {
+  if (!phone) return "***";
+  if (phone.includes("*")) return phone;
+  if (phone.length < 6) return "***";
+  return `${phone.slice(0, 4)}${"*".repeat(phone.length - 6)}${phone.slice(-2)}`;
+}
+
+export function redactTemplatePayload(payload: TemplatePayload): TemplatePayload {
+  return {
+    ...payload,
+    to: maskPhoneE164(payload.to),
+    template: {
+      ...payload.template,
+      components: payload.template.components.map((component) => {
+        if (component.type !== "button") return component;
+        return {
+          ...component,
+          parameters: component.parameters.map((param) => ({ ...param, text: "***" })),
+        };
+      }),
+    },
+  };
+}
+
+// Sama sääntö kuin shift_offer_sender_claim: vanha sending-lukko ilman wamidia ei palaa jonoon.
+export function staleSendingResolution(
+  status: string,
+  wamid: string | null,
+  lockedAtMs: number | null,
+  nowMs: number,
+): "unknown" | "leave" {
+  if (status !== "sending" || wamid || lockedAtMs == null) return "leave";
+  if (nowMs - lockedAtMs < STALE_SEND_LOCK_MS) return "leave";
+  return "unknown";
 }
 
 export function messagesUrl(phoneNumberId: string): string | null {
@@ -255,6 +296,7 @@ export function planMessage(msg: ClaimedMessage, settings: Settings): Plan {
   const email = msg.email?.trim() || null;
   if (!phone && !email) return { action: "fail_no_contact" };
   if (!phone) return release("email_pending", "email", email, null, 360);
+  if (!msg.staff_whatsapp_enabled) return release("staff_whatsapp_disabled", "whatsapp", phone, null, 15);
   if (!settings.whatsapp_enabled) return release("whatsapp_disabled", "whatsapp", phone, null, 15);
   if (!allowlisted(settings, msg.staff_id)) return release("not_allowlisted", "whatsapp", phone, null, 15);
   const payload = buildTemplatePayload(msg, phone);
@@ -287,7 +329,7 @@ function fromPlan(msg: ClaimedMessage, plan: Plan, nowMs: number): CompleteResul
       to: plan.to,
       error: plan.reason,
       retry_at: isoAfter(nowMs, plan.delayMinutes),
-      payload: plan.payload,
+      payload: plan.payload ? redactTemplatePayload(plan.payload) : null,
     };
   }
   return { id: msg.id, action: "already_sent" };
@@ -365,12 +407,12 @@ export async function handleClaimedMessage(
       message_id: msg.id,
       url: messagesUrl(env.phoneNumberId) ??
         `https://graph.facebook.com/${GRAPH_API_VERSION}/{WHATSAPP_PHONE_NUMBER_ID}/messages`,
-      body: plan.payload,
+      body: redactTemplatePayload(plan.payload),
     });
   }
   if (plan.action !== "send") return fromPlan(msg, plan, nowMs);
   if (!env.token || !messagesUrl(env.phoneNumberId)) {
-    log("whatsapp_missing_credentials", { message_id: msg.id, body: plan.payload });
+    log("whatsapp_missing_credentials", { message_id: msg.id, body: redactTemplatePayload(plan.payload) });
     return fromPlan(msg, release("missing_credentials", "whatsapp", plan.to, plan.payload, 30), nowMs);
   }
   // Synkroninen varaus ennen ensimmäistä awaitia: sama olio ei lähde kahdesti.
@@ -383,7 +425,7 @@ export async function handleClaimedMessage(
     const again = retryPlan(msg.attempts, nowMs);
     if (!again.retry) {
       msg.status = "failed";
-      return { id: msg.id, action: "fail", channel: "whatsapp", to: plan.to, error: "network", attempts: again.attempts, payload: plan.payload };
+      return { id: msg.id, action: "fail", channel: "whatsapp", to: plan.to, error: "network", attempts: again.attempts, payload: redactTemplatePayload(plan.payload) };
     }
     return {
       id: msg.id,
@@ -393,7 +435,7 @@ export async function handleClaimedMessage(
       error: "network",
       retry_at: again.retryAt,
       attempts: again.attempts,
-      payload: plan.payload,
+      payload: redactTemplatePayload(plan.payload),
     };
   }
   const httpClass = classifyHttp(http.status);
@@ -409,7 +451,7 @@ export async function handleClaimedMessage(
       wamid: http.wamid,
       error: null,
       attempts: msg.attempts + 1,
-      payload: plan.payload,
+      payload: redactTemplatePayload(plan.payload),
     };
   }
   msg.wamid = null;
@@ -422,7 +464,7 @@ export async function handleClaimedMessage(
       to: plan.to,
       error: http.error ?? `http_${http.status}`,
       attempts: msg.attempts + 1,
-      payload: plan.payload,
+      payload: redactTemplatePayload(plan.payload),
     };
   }
   const again = retryPlan(msg.attempts, nowMs);
@@ -435,7 +477,7 @@ export async function handleClaimedMessage(
       to: plan.to,
       error: http.error ?? `http_${http.status}`,
       attempts: again.attempts,
-      payload: plan.payload,
+      payload: redactTemplatePayload(plan.payload),
     };
   }
   return {
@@ -446,14 +488,14 @@ export async function handleClaimedMessage(
     error: http.error ?? `http_${http.status}`,
     retry_at: again.retryAt,
     attempts: again.attempts,
-    payload: plan.payload,
+    payload: redactTemplatePayload(plan.payload),
   };
 }
 
-// Sama järjestys kuin shift_offer_whatsapp_apply_status: read ja failed_no_contact eivät peruudu,
-// failed ei nouse delivered/readiksi, sent < delivered < read.
+// Sama järjestys kuin shift_offer_whatsapp_apply_status: read, failed_no_contact, failed ja unknown
+// eivät peruudu. failed ei nouse delivered/readiksi, sent < delivered < read.
 export function nextOutboxStatus(current: string, incoming: "sent" | "delivered" | "read" | "failed"): string | null {
-  if (current === "read" || current === "failed_no_contact" || current === "failed") return null;
+  if (current === "read" || current === "failed_no_contact" || current === "failed" || current === "unknown") return null;
   if (incoming === "failed") return "failed";
   if (incoming === "read") return "read";
   if (incoming === "delivered" && (current === "queued" || current === "sending" || current === "sent")) return "delivered";

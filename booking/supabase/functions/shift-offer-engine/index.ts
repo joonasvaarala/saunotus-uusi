@@ -11,7 +11,9 @@
 // Kuivaharjoitus: ?dry_run=1 tai JSON {"dryRun":true} tai shift_offer_engine_settings.dry_run.
 // Lähettäjä: sender_enabled oletus false (jono jää queued).
 // WhatsApp: whatsapp_enabled oletus false, whatsapp_dry_run oletus true, allowlist tyhjä.
-// Oikea lähetys vaatii kaikki kytkimet ja allowlistan. Kuivaharjoitus lokittaa API-rungon eikä kutsu Metan.
+// Henkilö saa WhatsAppin vain jos staff.whatsapp_enabled on päällä ja numero normalisoituu.
+// Oikea lähetys vaatii kaikki kytkimet ja allowlistan. Kuivaharjoitus lokittaa peitetyn rungon eikä kutsu Metan.
+// sending ilman wamidia ei palaa jonoon: 10 min jälkeen tila on unknown (tarkistetaan käsin).
 // Webhook: GET/POST /webhook (WHATSAPP_VERIFY_TOKEN, X-Hub-Signature-256 / WHATSAPP_APP_SECRET).
 // Salaisuudet vain ympäristöstä: WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_APP_SECRET, WHATSAPP_VERIFY_TOKEN.
 //
