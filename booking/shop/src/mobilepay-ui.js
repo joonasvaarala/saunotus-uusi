@@ -56,7 +56,7 @@ export function buttonNode({ L, onActivate, official = true, loadOfficial = load
 }
 
 // Maksuosio: otsikko, ohje, (testitilan merkintä), painike, virheilmoitus. opts = normOptions(public_payment_options).
-export function payBlock({ S, L, api, opts, env = {}, amount = '', navigate = (u) => location.assign(u), showLead = true, onFail = null }) {
+export function payBlock({ S, L, api, opts, env = {}, amount = '', navigate = (u) => location.assign(u), showLead = true, showAmount = true, showTest = true, onFail = null }) {
   const tx = (k, v) => mt(L, k, v);
   const msg = h('div', { class: 'ord-msg mp-msg', 'aria-live': 'polite', 'data-testid': 'mp-msg' });
   const hasKey = (k) => mt(L, k) !== k;
@@ -76,11 +76,11 @@ export function payBlock({ S, L, api, opts, env = {}, amount = '', navigate = (u
   btn = buttonNode({ L, onActivate: activate, official: env.official !== false });
   if (typeof window !== 'undefined') window.addEventListener('pageshow', (e) => { if (e.persisted) { busy = false; btn.setBusy(false); } });   // paluu selaimen Takaisin-napilla (bfcache)
   return h('div', { class: 'mp-block', 'data-testid': 'mp-block' },
-    h('h4', { class: 'mp-title', text: tx('payTitle') }),
+    h('h4', { class: 'mp-title', text: tx('methodTitle') }),
     showLead ? h('p', { class: 'bk-note', text: tx('payLead') }) : null,
-    amount ? h('p', { class: 'mp-amount', text: tx('payAmount', { amount }) }) : null,
+    showAmount && amount ? h('p', { class: 'mp-amount', text: tx('payAmount', { amount }) }) : null,
     opts?.pending ? h('p', { class: 'bk-note', 'data-testid': 'mp-pending-hint', text: tx('pendingHint') }) : null,
-    opts?.method?.test ? h('p', { class: 'mp-test', role: 'note', 'data-testid': 'mp-test-note', text: tx('testNote') }) : null,
+    showTest && opts?.method?.test ? h('p', { class: 'mp-test', role: 'note', 'data-testid': 'mp-test-note', text: tx('testNote') }) : null,
     btn.node, msg);
 }
 
