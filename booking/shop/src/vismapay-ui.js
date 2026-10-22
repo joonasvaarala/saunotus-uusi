@@ -3,7 +3,7 @@ import { h } from './gift-ui.js';
 import { vt } from './vismapay-texts.js';
 import { classifyVisma, safeVismaRedirect } from './vismapay-logic.js';
 
-export function vismaPayBlock({ L, api, opts, amount = '', navigate = (u) => location.assign(u) }) {
+export function vismaPayBlock({ L, api, opts, amount = '', navigate = (u) => location.assign(u), showLead = true, showAmount = true, showTest = true }) {
   const tx = (k, v) => vt(L, k, v);
   const msg = h('div', { class: 'ord-msg', 'aria-live': 'polite', 'data-testid': 'vp-msg' });
   let busy = false;
@@ -20,10 +20,10 @@ export function vismaPayBlock({ L, api, opts, amount = '', navigate = (u) => loc
     busy = false; btn.disabled = false; btn.textContent = tx('payBtn');
   } });
   return h('div', { class: 'vp-block', 'data-testid': 'vp-block' },
-    h('h4', { text: tx('payTitle') }),
-    h('p', { class: 'bk-note', text: tx('payLead') }),
-    amount ? h('p', { class: 'mp-amount', 'data-testid': 'vp-amount', text: tx('payAmount', { amount }) }) : null,
-    opts?.method?.test === true ? h('p', { class: 'bk-note', 'data-testid': 'vp-test', text: tx('testNote') }) : null,
+    h('h4', { class: 'mp-title', text: tx('payTitle') }),
+    showLead ? h('p', { class: 'bk-note', text: tx('payLead') }) : null,
+    showAmount && amount ? h('p', { class: 'mp-amount', 'data-testid': 'vp-amount', text: tx('payAmount', { amount }) }) : null,
+    showTest && opts?.method?.test === true ? h('p', { class: 'bk-note', 'data-testid': 'vp-test', text: tx('testNote') }) : null,
     btn, msg);
 }
 

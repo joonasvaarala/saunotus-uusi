@@ -22,6 +22,7 @@ test('tekstit: avaimet samat FI/EN, ei tyhjiä, ei emojeita, muuttujat täsmää
   }
   for (const k of Object.keys(MT.fi)) assert.deepEqual((MT.fi[k].match(/\{\w+\}/g) || []).sort(), (MT.en[k].match(/\{\w+\}/g) || []).sort(), `muuttujat ${k}`);
   assert.equal(mt('fi', 'payBtn'), 'Maksa MobilePaylla'); assert.equal(mt('en', 'payBtn'), 'Pay with MobilePay');
+  assert.equal(mt('fi', 'methodTitle'), 'Maksa MobilePaylla'); assert.equal(mt('en', 'methodTitle'), 'Pay with MobilePay');
   assert.equal(mt('fi', 'payAmount', { amount: '40,00 €' }), 'Maksettava: 40,00 €');
   for (const code of ['mobilepay_off', 'not_configured', 'invalid_param', 'not_found', 'rate_limited', 'already_paid', 'nothing_to_pay', 'order_not_payable', 'payment_not_pending', 'other_provider_started', 'link_expired', 'link_stale', 'unsupported_currency', 'provider_error'])
     for (const l of ['fi', 'en']) assert.ok(MT[l][`err.${code}`], `virhekoodi ${code} (${l}) puuttuu`);   // §14.2:n kaikki koodit katettu

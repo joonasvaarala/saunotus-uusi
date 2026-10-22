@@ -10,9 +10,11 @@ import { redeemSection, cardsSection, claimsSection } from './order-gift.js';
 import { createMobilepayApi } from './mobilepay-api.js';
 import { normOptions, shouldShowButton, testUiEnabled } from './mobilepay-logic.js';
 import { payBlock, runReturn } from './mobilepay-ui.js';
+import { mt } from './mobilepay-texts.js';
 import { createVismapayApi } from './vismapay-api.js';
 import { normVisma, shouldShowVisma } from './vismapay-logic.js';
 import { vismaPayBlock, runVismaReturn } from './vismapay-ui.js';
+import { vt } from './vismapay-texts.js';
 import { OPT } from './options-texts.js';
 import { optName, optionMissingOnOrder, optionChanged, rowLabel } from './options-logic.js';
 import { createOptionPicker } from './options-ui.js';
@@ -204,12 +206,25 @@ async function main() {
         h('div', { class: unpaid > 0 ? 'due' : '' }, h('dt', { text: t.unpaid }), h('dd', { 'data-testid': 'order-unpaid', text: money(unpaid) }))));
     // maksulinkki: avoin (pending) maksu + verkkomaksu käytössä → linkki; muuten maksu paikan päällä
     const link = o.online_payment_enabled && !vpState.show ? o.payments.find((p) => p.status === 'pending' && p.link_path) : null;
-    const mpBlock = mpState.show && !mpState.checking && !vpState.checking && unpaid > 0 ? payBlock({ S, L, api: mp, opts: mpState.opts, env: mpEnv, amount: money(unpaid), onFail: (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) holdCtl?.poll(true); } }) : null;
-    const vpBlock = vpState.show && !vpState.checking && !mpState.checking && unpaid > 0 ? vismaPayBlock({ L, api: vp, opts: vpState.opts, amount: money(unpaid) }) : null;
     const payHidden = !!co && (co.preliminary || co.expired || co.cancelled || co.processing);   // alustavaa/vanhentunutta ei makseta; käsittelyn aikana ei toista maksua
     const checking = mpState.checking || vpState.checking;
-    const pay = unpaid > 0 && !payHidden ? h('section', { class: 'ord-card', 'aria-labelledby': 'ord-p' }, h('h3', { id: 'ord-p', text: t.paymentTitle }), co?.awaiting ? h('p', { class: 'bk-note', 'data-testid': 'ord-hold-choose', text: ht(L, 'choose') }) : null,
-      vpBlock, mpBlock,
+    const mpOn = mpState.show && !checking && unpaid > 0;
+    const vpOn = vpState.show && !checking && unpaid > 0;
+    const mpBlock = mpOn ? payBlock({ S, L, api: mp, opts: mpState.opts, env: mpEnv, showLead: false, showAmount: false, showTest: false, onFail: (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) holdCtl?.poll(true); } }) : null;
+    const vpBlock = vpOn ? vismaPayBlock({ L, api: vp, opts: vpState.opts, showLead: false, showAmount: false, showTest: false }) : null;
+    const due = money(unpaid);
+    const payLead = mpOn && vpOn ? t.payLeadBoth : mpOn ? mt(L, 'payLead') : vpOn ? vt(L, 'payLead') : '';
+    const payAmount = mpOn || vpOn ? (mpOn ? mt(L, 'payAmount', { amount: due }) : vt(L, 'payAmount', { amount: due })) : '';
+    const mpTest = mpOn && !!mpState.opts?.method?.test;
+    const vpTest = vpOn && vpState.opts?.method?.test === true;
+    const payTest = mpTest && vpTest ? t.payTestBoth : mpTest ? mt(L, 'testNote') : vpTest ? vt(L, 'testNote') : '';
+    const pay = unpaid > 0 && !payHidden ? h('section', { class: 'ord-card ord-pay', 'aria-labelledby': 'ord-p', 'data-testid': 'order-pay' },
+      h('h3', { id: 'ord-p', class: 'mp-title', text: t.paymentTitle }),
+      payLead ? h('p', { class: 'bk-note', 'data-testid': 'ord-pay-lead', text: payLead }) : null,
+      payAmount ? h('p', { class: 'mp-amount', 'data-testid': 'ord-pay-amount', text: payAmount }) : null,
+      payTest ? h('p', { class: 'mp-test', role: 'note', 'data-testid': mpTest && vpTest ? 'ord-pay-test' : mpTest ? 'mp-test-note' : 'vp-test', text: payTest }) : null,
+      co?.awaiting ? h('p', { class: 'bk-note', 'data-testid': 'ord-hold-choose', text: ht(L, 'choose') }) : null,
+      vpBlock || mpBlock ? h('div', { class: 'ord-pay-methods', 'data-testid': 'ord-pay-methods' }, vpBlock, mpBlock) : null,
       checking || vpState.show ? null : link ? h('a', { class: 'btn ord-btn', 'data-testid': 'pay-link', href: S.base ? S.base + link.link_path : link.link_path, text: `${t.payRest} (${money(unpaid)})` })
         : mpBlock ? null : h('button', { type: 'button', class: 'btn light ord-btn', disabled: true, 'data-testid': 'pay-rest', text: `${t.payRest} (${money(unpaid)})` }),
       link || mpBlock || vpBlock || checking || vpState.show ? null : h('p', { class: 'bk-note', text: t.payRestSoon })) : null;

@@ -1,0 +1,62 @@
+[
+ {
+  "key": "ui.mobilepay.method_title",
+  "lang": "fi",
+  "text": "Maksa MobilePaylla",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Tilaussivun MobilePay-otsikko. Vanhaa ui.mobilepay.pay_title ei ylikirjoiteta, koska tuonti ei päivitä olemassa olevaa riviä. FI+EN."
+ },
+ {
+  "key": "ui.mobilepay.method_title",
+  "lang": "en",
+  "text": "Pay with MobilePay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Tilaussivun MobilePay-otsikko. Vanhaa ui.mobilepay.pay_title ei ylikirjoiteta, koska tuonti ei päivitä olemassa olevaa riviä. FI+EN."
+ },
+ {
+  "key": "ui.order.pay_lead_both",
+  "lang": "fi",
+  "text": "Maksa maksamaton osa kortilla tai verkkopankissa Visma Paylla tai MobilePaylla. Siirryt maksusivulle ja palaat tälle sivulle maksun jälkeen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Tilaussivun maksutila: yhteinen ohje, kun Visma Pay ja MobilePay ovat molemmat tarjolla. FI+EN."
+ },
+ {
+  "key": "ui.order.pay_lead_both",
+  "lang": "en",
+  "text": "Pay the unpaid part by card or online bank with Visma Pay, or with MobilePay. You go to the payment page and return to this page afterwards.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Tilaussivun maksutila: yhteinen ohje, kun Visma Pay ja MobilePay ovat molemmat tarjolla. FI+EN."
+ },
+ {
+  "key": "ui.order.pay_test_both",
+  "lang": "fi",
+  "text": "Testitila: käytä Visma Payn testikorttia. MobilePay-maksu menee testipalvelimelle. Oikeaa rahaa ei veloiteta. Tämä näkyy vain testisivustolla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Tilaussivun maksutila: yhteinen testitilan huomio, kun molemmat tavat ovat testissä. FI+EN."
+ },
+ {
+  "key": "ui.order.pay_test_both",
+  "lang": "en",
+  "text": "Test mode: use a Visma Pay test card. The MobilePay payment goes to the test server and no real money is charged. This is only shown on the test site.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Tilaussivun maksutila: yhteinen testitilan huomio, kun molemmat tavat ovat testissä. FI+EN."
+ }
+]
