@@ -101,6 +101,7 @@ def build():
     o13941 = order("13941", "500", "29", [
         item("20500", "132", "Yleinen vuoro", "29", start=future, end=future_end),
     ])
+    o11553 = order("11553", "500", "216", [item("13630", "132", "Yleinen vuoro", "216")])
 
     r_pkg = reservation("30001", "20100", "179", sun_pkg, sun_pkg_end)
     r_side = reservation("30002", "20101", "132", sun_side, sun_side_end)
@@ -118,7 +119,7 @@ def build():
 
     prev = {
         "customers": [c500, c501_old, c502_old],
-        "orders": [o11551_old, o11552_old, o13941],
+        "orders": [o11551_old, o11552_old, o13941, o11553],
         "reservations": [r_hidden, r_pkg_hidden, r_gone, r_removed_order],
         "bills": [],
         "valuecards": [],
@@ -138,6 +139,7 @@ def build():
         "orders": {
             "11551": {"addon_merge": True, "status": "confirmed"},
             "11552": {"addon_merge": True, "status": "completed"},
+            "11553": {"addon_merge": True, "status": "confirmed"},
         },
         "items": {
             "13620": {"kind": "addon", "merged_from_order_id": "11552", "order_id": "11551"},

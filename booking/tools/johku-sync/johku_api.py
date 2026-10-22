@@ -84,8 +84,11 @@ class Client:
         if gap > 0:
             self.sleep(gap)
 
-    def list(self, name: str):
-        data = self.get(name + ".json", {"limit": "100000"})
+    def list(self, name: str, params=None):
+        query = {"limit": "100000"}
+        if params:
+            query.update(params)
+        data = self.get(name + ".json", query)
         if not isinstance(data, list):
             raise JohkuError("not_a_list")
         return data

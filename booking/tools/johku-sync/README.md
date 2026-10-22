@@ -53,26 +53,41 @@ chmod +x run_sync.sh
 ./run_sync.sh                    # inkrementaalinen kirjoitus
 ./run_sync.sh --cards            # lisäksi aktiiviset lahjakortit
 ./run_sync.sh --full --cards full
-./run_sync.sh --save-baseline    # tallentaa viennin, ei kirjoita kantaan
+./run_sync.sh --seed-baseline /polku/vientiin
+./run_sync.sh --save-baseline    # tallentaa tuoreen viennin pohjaksi, ei kirjoita kantaan
 ```
+
+Tilaukset haetaan `orders.json?items=true&limit=100000`. Ilman `items=true` Johku ei palauta `ownItem`-rivejä, ja synkka ylikirjoittaisi tilaukset ilman rivejä. Jos uusi vienti on rivitön vaikka edellinen ei ollut, tai isosta viennistä alle 5 %:lla tilauksista on rivejä, ajo keskeytyy (`export_missing_items`) eikä pohjaa päivitetä. Varauslista ei tarvitse samaa lippua: rivit tulevat tilauksesta. Lahjakortin saldo haetaan edelleen `valuecards/<koodi>.json?details=true`.
 
 Lukko: `~/.johku-sync.lock` (`flock`). Vertailupohja: `~/.johku-sync/state/baseline.json` (henkilötietoja, `chmod 600`, ei gitiin). Epäonnistuminen tulostaa koodin ja palauttaa arvon 1. Jos `~/valvonta/lib.sh` määrittelee funktion `alert`, sitä kutsutaan.
 
-Ensimmäinen käyttöönotto, kun kanta on jo tuotu: aja `--dry-run`, tarkista yhteenveto, sitten `--save-baseline`. Sen jälkeen cron lähettää vain muutokset. `--full` lähettää kaikki nykyiset rivit ja peruuttaa edelleen ne, jotka katosivat pohjaan nähden. Yli 5 % pudotus listassa (kun pohjassa on vähintään 50 riviä) keskeyttää ajon, jotta katkennut vastaus ei peruuta varauksia.
+Ensimmäinen käyttöönotto, kun kanta vastaa 17.10.2026 vientiä (11952 Johku-tilausta, viimeinen 17.10. 00:38): älä aja `--save-baseline` tuoreella haulla, se ohittaisi 17.–22.10. muutokset. Syötä pohja vanhasta vientihakemistosta, jossa on `customers.json`, `orders.json` (ownItem mukana), `reservations.json`, `bills.json` ja `valuecards.json`:
+
+```bash
+./run_sync.sh --seed-baseline /polku/johku-vienti-2026-10-17
+./run_sync.sh --dry-run
+./run_sync.sh
+```
+
+`--seed-baseline` ei soita Johkuun eikä edge-funktioon. Sen jälkeen normaali ajo lähettää vain eron. `--full` lähettää kaikki nykyiset rivit ja peruuttaa edelleen ne, jotka katosivat pohjaan nähden. Yli 5 % pudotus listassa (kun pohjassa on vähintään 50 riviä) keskeyttää ajon, jotta katkennut vastaus ei peruuta varauksia.
+
+Asiakkaan sähköpostia, puhelinta ja muita yhteystietoja ei ylikirjoiteta, jos hallinta on muuttanut ne tuonnin jälkeen: kenttä päivittyy vain jos se on tyhjä tai se on yhä sama kuin edellisessä viennissä. `addon_merge`-tilauksen summaa ei muuteta myöskään silloin, kun tilaus peruutetaan syyllä `johku_removed`. Rivikohtainen audit jää pois (henkilötiedot), mutta jokainen kirjoitus jättää `audit_log`-rivin, jonka `row_pk` on ajon id taulussa `johku_sync_runs`.
 
 Lahjakorttilista ei sisällä saldoa. Yöajo hakee kortin, jos listarivi muuttui tai kortti on yhä aktiivinen. `--cards full` hakee jokaisen kortin. Aktiivisia kortteja on noin tuhat, ja kutsujen väli on vähintään sekunti, joten yöajo kestää noin vartin. Johkuun lähtee vain GET.
 
 ## Crontab (Europe/Helsinki)
 
+Varmistajan käyttäjä on `joonas`, repo `~/saunotus-uusi`. Cron ajaa komennon `/bin/sh`:lla, joten `$HOME` aukeaa.
+
 ```
 CRON_TZ=Europe/Helsinki
-0 7-23 * * *  /home/box/saunotus-uusi/booking/tools/johku-sync/run_sync.sh >> /home/box/.johku-sync/cron.log 2>&1
-30 2 * * *    /home/box/saunotus-uusi/booking/tools/johku-sync/run_sync.sh --cards >> /home/box/.johku-sync/cron.log 2>&1
-35 19 31 10 * /home/box/saunotus-uusi/booking/tools/johku-sync/run_sync.sh >> /home/box/.johku-sync/cron.log 2>&1
-30 23 31 10 * /home/box/saunotus-uusi/booking/tools/johku-sync/run_sync.sh --full --cards full >> /home/box/.johku-sync/cron.log 2>&1
+0 7-23 * * *  "$HOME/saunotus-uusi/booking/tools/johku-sync/run_sync.sh" >> "$HOME/.johku-sync/cron.log" 2>&1
+30 2 * * *    "$HOME/saunotus-uusi/booking/tools/johku-sync/run_sync.sh" --cards >> "$HOME/.johku-sync/cron.log" 2>&1
+35 19 31 10 * "$HOME/saunotus-uusi/booking/tools/johku-sync/run_sync.sh" >> "$HOME/.johku-sync/cron.log" 2>&1
+30 23 31 10 * "$HOME/saunotus-uusi/booking/tools/johku-sync/run_sync.sh" --full --cards full >> "$HOME/.johku-sync/cron.log" 2>&1
 ```
 
-Polku on esimerkki. 31.10. rivit laukeavat joka vuosi; poista crontab, kun Johku on kiinni. Lokista näkee ajon yhteenvedon. Kannassa:
+31.10. rivit laukeavat joka vuosi; poista crontab, kun Johku on kiinni. Lokista näkee ajon yhteenvedon. Kannassa:
 
 ```sql
 select id, started_at, finished_at, status, mode, counts, error_summary

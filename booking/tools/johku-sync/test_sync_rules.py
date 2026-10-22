@@ -12,8 +12,8 @@ sys.path.insert(0, HERE)
 from fixtures.case_data import build  # noqa: E402
 from giftcards import detail_row, select_cards  # noqa: E402
 from johku_api import Client, JohkuError  # noqa: E402
-from rules import ExportRejected, build_plan, order_no_action, shrunk, summarize  # noqa: E402
-from sync import advance_baseline, chunks, db_state_from_remote  # noqa: E402
+from rules import ExportRejected, build_plan, order_no_action, orders_lack_items, shrunk, summarize  # noqa: E402
+from sync import advance_baseline, chunks, db_state_from_remote, fetch_export, main  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 MIGRATION = os.path.join(ROOT, "supabase", "migrations", "20261022090000_booking_126_johku_sync.sql")
@@ -65,6 +65,13 @@ class RulesTest(unittest.TestCase):
         self.assertTrue(any(s["external_id"] == "10223" and s["code"] == "hidden" for s in p["skips"]))
         self.assertTrue(any(s["external_id"] == "30002" and s["code"] == "side_shift" for s in p["skips"]))
         self.assertIn("13941", p["cancel_orders"])
+        self.assertIn("11553", p["cancel_orders"])
+        cust = next(c for c in p["customers"] if c["external_id"] == "501")
+        self.assertEqual(cust["phone"], "0400000002")
+        self.assertEqual(cust["email"], "toinen@example.test")
+        self.assertEqual(cust["prev"]["phone"], "0400000001")
+        self.assertEqual(cust["prev"]["email"], "toinen@example.test")
+        self.assertNotIn("toinen@example.test", text)
         self.assertIn("18001", p["cancel_reservations"])
         self.assertIn("30100", p["cancel_reservations"])
         self.assertNotIn("10275", p["cancel_reservations"])
@@ -85,6 +92,19 @@ class RulesTest(unittest.TestCase):
         self.assertEqual(order_no_action(10007, {10007}, 14020), "identity")
         self.assertEqual(order_no_action(14021, set(), 14020), "explicit_advance")
         self.assertEqual(order_no_action(12000, set(), 14020), "explicit")
+        self.assertFalse(orders_lack_items([{"id": "1", "ownItem": [{"id": "2"}]}], [{"id": "1", "ownItem": [{"id": "2"}]}]))
+        lined = [{"id": "1", "ownItem": [{"id": "9"}]}]
+        bare = [{"id": str(i)} for i in range(60)]
+        self.assertTrue(orders_lack_items(lined * 60, bare))
+        self.assertTrue(orders_lack_items([], bare))
+        with self.assertRaises(ExportRejected) as missing:
+            build_plan(
+                {"customers": [], "orders": lined * 60, "reservations": []},
+                {"customers": [], "orders": bare, "reservations": []},
+                {},
+                datetime(2026, 10, 22, tzinfo=ZoneInfo("Europe/Helsinki")),
+            )
+        self.assertEqual(missing.exception.code, "export_missing_items")
 
     def test_summary_has_no_money_side_effects(self):
         text = summarize(plan())
@@ -178,6 +198,56 @@ class ApiTest(unittest.TestCase):
         self.assertIn(10, slept)
         self.assertTrue(url_is_get(calls))
 
+    def test_orders_list_includes_items(self):
+        urls = []
+
+        def transport(method, url, headers):
+            urls.append(url)
+            if "orders.json" in url:
+                return 200, b'[{"id":"1","ownItem":[{"id":"9"}]}]'
+            return 200, b"[]"
+
+        clock = {"t": 0}
+
+        def now():
+            clock["t"] += 10
+            return clock["t"]
+
+        client = Client("shop", "secret", transport=transport, sleep=lambda _s: None, now=now)
+        data = fetch_export(client)
+        order_urls = [u for u in urls if "orders.json" in u]
+        self.assertEqual(len(order_urls), 1)
+        self.assertIn("items=true", order_urls[0])
+        self.assertIn("limit=100000", order_urls[0])
+        self.assertEqual(data["orders"][0]["ownItem"][0]["id"], "9")
+        for url in urls:
+            if "orders.json" not in url:
+                self.assertNotIn("items=", url)
+        self.assertEqual(len(urls), 5)
+
+    def test_seed_baseline_from_export_dir(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as src, tempfile.TemporaryDirectory() as state:
+            files = {
+                "customers": [{"id": "1"}],
+                "orders": [{"id": "10", "ownItem": [{"id": "11"}]}],
+                "reservations": [],
+                "bills": [],
+                "valuecards": [],
+            }
+            for name, rows in files.items():
+                with open(os.path.join(src, name + ".json"), "w", encoding="utf-8") as f:
+                    json.dump(rows, f)
+            self.assertEqual(main(["--seed-baseline", src, "--state-dir", state]), 0)
+            with open(os.path.join(state, "baseline.json"), encoding="utf-8") as f:
+                saved = json.load(f)
+            self.assertEqual(saved["orders"][0]["ownItem"][0]["id"], "11")
+            with open(os.path.join(src, "orders.json"), "w", encoding="utf-8") as f:
+                json.dump([{"id": str(i)} for i in range(60)], f)
+            self.assertEqual(main(["--seed-baseline", src, "--state-dir", state]), 1)
+            os.remove(os.path.join(src, "bills.json"))
+            self.assertEqual(main(["--seed-baseline", src, "--state-dir", state]), 1)
+
     def test_refuses_non_json_path_without_calling(self):
         def transport(method, url, headers):
             raise AssertionError("called")
@@ -202,10 +272,14 @@ class MigrationTextTest(unittest.TestCase):
             "johku_sync_side_effect",
             "johku_sync_unhide",
             "skip_audit",
+            "_johku_sync_text",
+            "addon_merge_total",
+            "'johku_sync'",
             "103",
             "179",
         ):
             self.assertIn(needle, sql)
+        self.assertNotIn("email = v_email", sql)
         self.assertNotIn("delete from", sql)
         self.assertNotIn("insert into booking.payments", sql)
         self.assertNotIn("insert into booking.receipts", sql)

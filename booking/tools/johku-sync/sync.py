@@ -4,7 +4,8 @@
   python3 sync.py --dry-run --fixture case
   python3 sync.py                      # inkrementaalinen, vaatii ~/.secrets
   python3 sync.py --full --cards full  # täysi ajo, myös lahjakortit
-  python3 sync.py --save-baseline      # tallentaa viennin vertailupohjaksi, ei kirjoita kantaan
+  python3 sync.py --seed-baseline DIR  # pohja vanhasta viennistä, ei Johku-kutsua eikä kirjoitusta
+  python3 sync.py --save-baseline      # tallentaa tuoreen viennin pohjaksi, ei kirjoita kantaan
 """
 from __future__ import annotations
 
@@ -24,7 +25,7 @@ if HERE not in sys.path:
 from giftcards import detail_row, select_cards  # noqa: E402
 from johku_api import Client, JohkuError, load_env  # noqa: E402
 from redact import redact  # noqa: E402
-from rules import TZ, ExportRejected, build_plan, summarize  # noqa: E402
+from rules import TZ, ExportRejected, build_plan, orders_lack_items, summarize  # noqa: E402
 
 KINDS = ("customers", "orders", "reservations", "bills", "valuecards")
 LIMITS = {"customers": 400, "orders": 200, "items": 800, "reservations": 400, "cancel_orders": 400, "cancel_reservations": 400}
@@ -163,19 +164,39 @@ def load_fixture(name: str):
 
 
 def fetch_export(client: Client) -> dict:
+    # JOHKU_GUIDE: orders.json jättää ownItem-rivit pois ilman items=true.
+    # Varauslista (reservations.json) sisältää varauksen kentät ilman lippua;
+    # rivit tulevat tilauksesta. Lahjakortin saldo on erillinen details=true -kutsu.
     return {
         "customers": client.list("customers"),
-        "orders": client.list("orders"),
+        "orders": client.list("orders", {"items": "true"}),
         "reservations": client.list("reservations"),
         "bills": client.list("bills"),
         "valuecards": client.list("valuecards"),
     }
 
 
-def push_plan(remote: Remote, plan: dict) -> dict:
+def load_export_dir(src: str) -> dict:
+    """Vanha vienti: customers.json, orders.json, reservations.json, bills.json, valuecards.json."""
+    out = {}
+    for key in KINDS:
+        path = os.path.join(src, key + ".json")
+        if not os.path.isfile(path):
+            raise JohkuError("seed_missing")
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        if not isinstance(data, list):
+            raise JohkuError("seed_not_list")
+        out[key] = data
+    return out
+
+
+def push_plan(remote: Remote, plan: dict, run_id=None) -> dict:
     applied = {k: [] for k in ("customers", "orders", "items", "reservations", "cancel_orders", "cancel_reservations")}
     skipped, review = [], []
     for batch in chunks(plan):
+        if run_id is not None:
+            batch["run_id"] = run_id
         res = remote.post({"action": "apply", "payload": batch})["result"]
         for k in applied:
             applied[k].extend(res.get("applied", {}).get(k) or [])
@@ -193,6 +214,15 @@ def run(args) -> int:
     remote = None
     run_id = None
     try:
+        if args.seed_baseline:
+            nxt = load_export_dir(args.seed_baseline)
+            if orders_lack_items([], nxt.get("orders") or []):
+                raise ExportRejected("export_missing_items", "orders")
+            baseline_path = os.path.join(args.state_dir, "baseline.json")
+            save_json(baseline_path, nxt)
+            print("baseline seeded customers=%s orders=%s reservations=%s" % (
+                len(nxt["customers"]), len(nxt["orders"]), len(nxt["reservations"])))
+            return 0
         if args.fixture:
             bundle = load_fixture(args.fixture)
             prev, nxt, db_state, now = bundle["prev"], bundle["next"], bundle["db_state"], bundle["now"]
@@ -202,6 +232,8 @@ def run(args) -> int:
             baseline_path = os.path.join(args.state_dir, "baseline.json")
             prev = load_baseline(baseline_path)
             nxt = fetch_export(client)
+            if orders_lack_items(prev.get("orders") or [], nxt.get("orders") or []):
+                raise ExportRejected("export_missing_items", "orders")
             if args.save_baseline:
                 save_json(baseline_path, nxt)
                 print("baseline saved %s" % baseline_path)
@@ -238,7 +270,7 @@ def run(args) -> int:
         if args.fixture:
             return 0
         run_id = remote.post({"action": "log", "row": {"status": "running", "mode": mode}})["result"]["id"]
-        result = push_plan(remote, plan)
+        result = push_plan(remote, plan, run_id)
         if card_rows:
             for i in range(0, len(card_rows), 100):
                 remote.post({"action": "gift_cards", "rows": card_rows[i:i + 100]})
@@ -288,6 +320,7 @@ def main(argv=None) -> int:
     p.add_argument("--full", action="store_true")
     p.add_argument("--cards", nargs="?", const="changed", choices=("changed", "full"))
     p.add_argument("--save-baseline", action="store_true")
+    p.add_argument("--seed-baseline", metavar="DIR", help="pohja vanhasta vientihakemistosta, ei verkkoa")
     p.add_argument("--fixture", help="fixtures/<name>.py ilman verkkoa, esim. case")
     p.add_argument("--state-dir", default=os.path.expanduser("~/.johku-sync/state"))
     p.add_argument("--johku-env", default=os.path.expanduser("~/.secrets/johku.env"))

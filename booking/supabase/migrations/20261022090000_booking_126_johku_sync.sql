@@ -7,11 +7,15 @@
 --   * piilotettua varausta ei päivitetä, ei aktivoida eikä piilotusta pureta
 --   * merged_into / merged_into_package ohitetaan
 --   * addon-riviä ja toiseen tilaukseen siirrettyä riviä ei kirjoiteta takaisin
---   * addon_merge-tilauksen total_gross säilyy
+--   * addon_merge-tilauksen total_gross säilyy myös peruutuksessa (johku_removed)
 --   * kb 44/45 (Johku-tuotteet 103, 126, 113, 125) ei saa omaa varausta
 --   * paketin (Johku 179) 0 € optiontype 3 -oheisvuoro ei saa omaa varausta
 --   * kadonnut rivi peruutetaan (cancel_reason johku_removed), ei poisteta
 --   * ei maksuja, kuitteja, sähköpostijonoa, hyvityksiä eikä Procountor-rivejä
+--   * asiakkaan jo täytettyä kenttää ei ylikirjoiteta, jos se poikkeaa edellisestä viennistä
+--     (hallinta on voinut muokata sitä tuonnin jälkeen)
+-- Rivikohtainen audit ohitetaan (henkilötietojen kopio). Jokainen apply kirjoittaa yhden
+-- audit_log-rivin, jonka row_pk on johku_sync_runs.id (payload.run_id), ilman henkilötietoja.
 -- Piilotusten, merged-avainten ja addon-rivien määrä ei saa laskea. Jos laskee, koko kutsu perutaan.
 
 set local lock_timeout = '5s';
@@ -133,6 +137,38 @@ begin
   return jsonb_build_object('ok', true, 'id', v_id);
 end $$;
 
+-- Tyhjä kenttä täytetään. Ilman edellistä vientiä täyttä kenttää ei muuteta.
+-- Jos tietokannan arvo on yhä sama kuin edellinen vienti, Johkun uusi arvo kirjoitetaan.
+create or replace function booking._johku_sync_text(p_current text, p_incoming text, p_prev text, p_has_prev boolean)
+returns text
+language sql
+immutable
+set search_path to ''
+as $$
+  select case
+    when nullif(btrim(coalesce(p_current, '')), '') is null then p_incoming
+    when not coalesce(p_has_prev, false) then p_current
+    when btrim(p_current) is not distinct from btrim(coalesce(p_prev, '')) then p_incoming
+    else p_current
+  end;
+$$;
+
+create or replace function booking._johku_sync_bool(p_current boolean, p_incoming boolean, p_prev boolean, p_has_prev boolean)
+returns boolean
+language sql
+immutable
+set search_path to ''
+as $$
+  select case
+    when not coalesce(p_has_prev, false) then p_current
+    when p_current is not distinct from p_prev then p_incoming
+    else p_current
+  end;
+$$;
+
+revoke all on function booking._johku_sync_text(text, text, text, boolean) from public, anon, authenticated;
+revoke all on function booking._johku_sync_bool(boolean, boolean, boolean, boolean) from public, anon, authenticated;
+
 -- ---------- kirjoitus ----------
 create or replace function booking.svc_johku_sync_apply(p_payload jsonb)
 returns jsonb
@@ -154,8 +190,15 @@ declare
   v_parent booking.order_items;
   v_name text;
   v_email text;
+  v_phone text;
+  v_country text;
   v_consent boolean;
+  v_consent_new boolean;
+  v_consent_prev boolean;
+  v_has_prev boolean;
+  v_prev jsonb;
   v_at timestamptz;
+  v_run text;
   v_bid text;
   v_kind text;
   v_locale text;
@@ -192,6 +235,10 @@ begin
   end if;
   if p_payload ?| array['payments','receipts','email_outbox','accounting_outbox','refunds','payment_lines','hidden_at'] then
     perform booking._err('forbidden_key', 'payload');
+  end if;
+  v_run := nullif(p_payload ->> 'run_id', '');
+  if v_run is not null and v_run !~ '^[0-9]{1,12}$' then
+    perform booking._err('invalid_param', 'run_id');
   end if;
   if jsonb_array_length(coalesce(p_payload -> 'customers', '[]'::jsonb)) > 400
      or jsonb_array_length(coalesce(p_payload -> 'orders', '[]'::jsonb)) > 200
@@ -241,29 +288,50 @@ begin
       if v_bid is not null and not booking._business_id_ok(v_bid) then v_bid := null; end if;
       v_kind := case when r ->> 'customer_kind' = 'company' then 'company' else 'private' end;
       v_locale := case when r ->> 'language' in ('fi', 'en', 'sv') then r ->> 'language' else 'fi' end;
+      v_phone := nullif(left(btrim(coalesce(r ->> 'phone', '')), 50), '');
+      v_country := coalesce(nullif(left(btrim(coalesce(r ->> 'country', '')), 80), ''), 'FI');
       select * into v_cust from booking.customers where external_source = 'johku' and external_id = v_ext;
       if found and v_cust.anonymized_at is not null then
         v_skipped := v_skipped || jsonb_build_array(jsonb_build_object('kind', 'customer', 'external_id', v_ext, 'code', 'anonymized'));
         continue;
       end if;
       if found then
+        v_has_prev := jsonb_typeof(r -> 'prev') = 'object';
+        v_prev := case when v_has_prev then r -> 'prev' else '{}'::jsonb end;
+        v_consent_prev := case
+          when v_has_prev and (v_prev ? 'marketing_consent') then (v_prev ->> 'marketing_consent')::boolean
+          else null
+        end;
+        v_consent_new := booking._johku_sync_bool(v_cust.marketing_consent, v_consent, v_consent_prev, v_consent_prev is not null);
         update booking.customers set
-          name = v_name,
-          email = v_email,
-          phone = nullif(left(btrim(coalesce(r ->> 'phone', '')), 50), ''),
-          company = nullif(btrim(coalesce(r ->> 'company', '')), ''),
-          address = nullif(r ->> 'address', ''),
-          zip = nullif(r ->> 'zip', ''),
-          city = nullif(r ->> 'city', ''),
-          country = coalesce(nullif(left(btrim(coalesce(r ->> 'country', '')), 2), ''), 'FI'),
-          language = v_locale,
-          customer_kind = v_kind,
-          business_id = v_bid,
-          einvoice_address = nullif(r ->> 'einvoice_address', ''),
-          einvoice_operator = nullif(r ->> 'einvoice_operator', ''),
-          marketing_consent = v_consent,
-          marketing_consent_at = case when v_consent then coalesce(v_cust.marketing_consent_at, v_at) else marketing_consent_at end,
-          marketing_consent_source = case when v_consent and not v_cust.marketing_consent then 'johku_import' else marketing_consent_source end
+          name = booking._johku_sync_text(name, v_name, v_prev ->> 'name', v_has_prev),
+          email = case
+            when nullif(btrim(coalesce(email, '')), '') is null then v_email
+            when not v_has_prev then email
+            when lower(btrim(email)) is not distinct from lower(btrim(coalesce(v_prev ->> 'email', ''))) then v_email
+            else email
+          end,
+          phone = booking._johku_sync_text(phone, v_phone, v_prev ->> 'phone', v_has_prev),
+          company = booking._johku_sync_text(company, nullif(btrim(coalesce(r ->> 'company', '')), ''), v_prev ->> 'company', v_has_prev),
+          address = booking._johku_sync_text(address, nullif(r ->> 'address', ''), v_prev ->> 'address', v_has_prev),
+          zip = booking._johku_sync_text(zip, nullif(r ->> 'zip', ''), v_prev ->> 'zip', v_has_prev),
+          city = booking._johku_sync_text(city, nullif(r ->> 'city', ''), v_prev ->> 'city', v_has_prev),
+          country = booking._johku_sync_text(country, v_country, v_prev ->> 'country', v_has_prev),
+          language = booking._johku_sync_text(language, v_locale, v_prev ->> 'language', v_has_prev),
+          customer_kind = booking._johku_sync_text(customer_kind, v_kind, v_prev ->> 'customer_kind', v_has_prev),
+          business_id = booking._johku_sync_text(business_id, v_bid, v_prev ->> 'business_id', v_has_prev),
+          einvoice_address = booking._johku_sync_text(einvoice_address, nullif(r ->> 'einvoice_address', ''), v_prev ->> 'einvoice_address', v_has_prev),
+          einvoice_operator = booking._johku_sync_text(einvoice_operator, nullif(r ->> 'einvoice_operator', ''), v_prev ->> 'einvoice_operator', v_has_prev),
+          marketing_consent = v_consent_new,
+          marketing_consent_at = case
+            when v_consent_new is not distinct from v_cust.marketing_consent then marketing_consent_at
+            when v_consent_new then coalesce(marketing_consent_at, v_at)
+            else marketing_consent_at
+          end,
+          marketing_consent_source = case
+            when v_consent_new and not v_cust.marketing_consent then 'johku_import'
+            else marketing_consent_source
+          end
         where id = v_cust.id and external_source = 'johku';
       else
         insert into booking.customers(
@@ -273,7 +341,7 @@ begin
         values (
           'johku', v_ext, v_name, v_email, nullif(left(btrim(coalesce(r ->> 'phone', '')), 50), ''),
           nullif(btrim(coalesce(r ->> 'company', '')), ''), nullif(r ->> 'address', ''), nullif(r ->> 'zip', ''),
-          nullif(r ->> 'city', ''), coalesce(nullif(left(btrim(coalesce(r ->> 'country', '')), 2), ''), 'FI'), v_locale,
+          nullif(r ->> 'city', ''), v_country, v_locale,
           v_kind, v_bid, nullif(r ->> 'einvoice_address', ''), nullif(r ->> 'einvoice_operator', ''),
           v_consent, case when v_consent then v_at else null end, case when v_consent then 'johku_import' else null end,
           coalesce(nullif(r ->> 'created_at', '')::timestamptz, now()));
@@ -371,6 +439,9 @@ begin
           invoice_reference = nullif(left(coalesce(r ->> 'invoice_reference', ''), 100), ''),
           external_meta = coalesce(external_meta, '{}'::jsonb) || jsonb_build_object('johku', coalesce(r -> 'johku_meta', '{}'::jsonb), 'content_hash', r ->> 'sync_hash', 'source', 'johku')
         where id = v_order.id and external_source = 'johku';
+        if v_freeze and (select o.total_gross from booking.orders o where o.id = v_order.id) is distinct from v_order.total_gross then
+          perform booking._err('johku_sync_side_effect', 'addon_merge_total');
+        end if;
       end if;
       v_applied := jsonb_set(v_applied, '{orders}', (v_applied -> 'orders') || to_jsonb(v_ext));
     exception when others then
@@ -649,11 +720,24 @@ begin
         v_applied := jsonb_set(v_applied, '{cancel_orders}', (v_applied -> 'cancel_orders') || to_jsonb(v_ext));
         continue;
       end if;
+      v_freeze := coalesce(v_order.external_meta, '{}'::jsonb) ? 'addon_merge';
+      v_total := v_order.total_gross;
+      -- Peruutus ei koske summaa. addon_merge-jäädytys säilyy (avain ja total_gross).
       update booking.orders
          set status = 'cancelled',
              cancelled_at = coalesce(cancelled_at, now()),
              external_meta = coalesce(external_meta, '{}'::jsonb) || jsonb_build_object('johku_removed', true)
-       where id = v_order.id and external_source = 'johku';
+       where id = v_order.id and external_source = 'johku'
+         and total_gross is not distinct from v_total;
+      if not found then
+        perform booking._err('johku_sync_side_effect', 'addon_merge_total');
+      end if;
+      if v_freeze and (
+           (select o.total_gross from booking.orders o where o.id = v_order.id) is distinct from v_total
+           or not ((select o.external_meta from booking.orders o where o.id = v_order.id) ? 'addon_merge')
+         ) then
+        perform booking._err('johku_sync_side_effect', 'addon_merge_total');
+      end if;
       v_applied := jsonb_set(v_applied, '{cancel_orders}', (v_applied -> 'cancel_orders') || to_jsonb(v_ext));
     exception when others then
       get stacked diagnostics v_state = returned_sqlstate, v_detail = pg_exception_detail;
@@ -677,6 +761,27 @@ begin
   if v_hidden2 < v_hidden or v_merged2 < v_merged or v_frozen2 < v_frozen or v_addon2 < v_addon_n then
     perform booking._err('johku_sync_unhide', 'guard count dropped');
   end if;
+
+  -- Yksi audit-rivi per apply. Ei vanhaa/uutta asiakas- tai tilausriviä (henkilötietoja).
+  insert into booking.audit_log(actor, actor_role, table_name, row_pk, action, new_data)
+  values (
+    null,
+    coalesce(booking._jwt_role(), 'service_role'),
+    'johku_sync_runs',
+    v_run,
+    'johku_sync',
+    jsonb_build_object(
+      'run_id', v_run,
+      'customers', jsonb_array_length(v_applied -> 'customers'),
+      'orders', jsonb_array_length(v_applied -> 'orders'),
+      'items', jsonb_array_length(v_applied -> 'items'),
+      'reservations', jsonb_array_length(v_applied -> 'reservations'),
+      'cancel_orders', jsonb_array_length(v_applied -> 'cancel_orders'),
+      'cancel_reservations', jsonb_array_length(v_applied -> 'cancel_reservations'),
+      'skipped', jsonb_array_length(v_skipped),
+      'review', jsonb_array_length(v_review)
+    )
+  );
 
   return jsonb_build_object('ok', true, 'applied', v_applied, 'skipped', v_skipped, 'review', v_review);
 end $$;

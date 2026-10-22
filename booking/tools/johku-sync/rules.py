@@ -74,6 +74,33 @@ def shrunk(prev_count: int | None, next_count: int) -> bool:
     return next_count < prev_count * SHRINK_RATIO
 
 
+def _orders_with_lines(orders) -> int:
+    n = 0
+    for o in orders or []:
+        items = o.get("ownItem") if isinstance(o, dict) else None
+        if isinstance(items, list) and items:
+            n += 1
+    return n
+
+
+def orders_lack_items(prev_orders, next_orders) -> bool:
+    """orders.json ilman items=true ei sisällä ownItem-rivejä.
+
+    Keskeytä, jos edellisessä viennissä oli rivejä ja uudessa ei, tai jos
+    isosta viennistä alle 5 %:lla tilauksista on rivejä. Tyhjä tilaus on
+    sallittu; kokonaan rivitön lista ei ole.
+    """
+    pw = _orders_with_lines(prev_orders)
+    nw = _orders_with_lines(next_orders)
+    nn = len(next_orders or [])
+    pn = len(prev_orders or [])
+    if pw > 0 and nw == 0 and nn >= 1 and (nn >= SHRINK_MIN_COUNT or pn >= SHRINK_MIN_COUNT):
+        return True
+    if nn >= SHRINK_MIN_COUNT and nw < nn * 0.05:
+        return True
+    return False
+
+
 def parse_ts(value):
     if value in (None, "", "0", 0):
         return None
@@ -204,6 +231,16 @@ def _biz(raw):
         return None
     check = 0 if r == 0 else 11 - r
     return s if check == int(s[8]) else None
+
+
+# Kentät, joita hallinta on voinut muokata tuonnin jälkeen. Palvelin vertaa
+# tietokannan arvoa edelliseen vientiin (prev) ja kirjoittaa Johkun arvon vain,
+# jos kenttä on tyhjä tai se on yhä sama kuin viimeksi synkattu.
+CONTACT_KEYS = (
+    "name", "email", "phone", "company", "address", "zip", "city", "country",
+    "language", "customer_kind", "business_id", "einvoice_address", "einvoice_operator",
+    "marketing_consent",
+)
 
 
 def _customer_row(c, orders_for_customer, now: datetime):
@@ -451,8 +488,11 @@ def build_plan(prev: dict, nxt: dict, db_state: dict | None, now: datetime, take
     for kind in ("customers", "orders", "reservations"):
         if shrunk(len(prev.get(kind) or []), len(nxt.get(kind) or [])):
             raise ExportRejected("export_shrunk", kind)
+    if orders_lack_items(prev.get("orders") or [], nxt.get("orders") or []):
+        raise ExportRejected("export_missing_items", "orders")
 
-    prev_c = {str(c["id"]): record_hash(c) for c in prev.get("customers") or []}
+    prev_customers = {str(c["id"]): c for c in prev.get("customers") or []}
+    prev_c = {cid: record_hash(c) for cid, c in prev_customers.items()}
     next_c = {str(c["id"]): c for c in nxt.get("customers") or []}
     prev_bills = {str(b.get("identifier")): b for b in (prev.get("bills") or []) if b.get("identifier")}
     next_bills = {str(b.get("identifier")): b for b in (nxt.get("bills") or []) if b.get("identifier")}
@@ -474,6 +514,10 @@ def build_plan(prev: dict, nxt: dict, db_state: dict | None, now: datetime, take
     for o in nxt.get("orders") or []:
         if o.get("customer_id"):
             orders_by_cust.setdefault(str(o["customer_id"]), []).append(o)
+    prev_orders_by_cust = {}
+    for o in prev.get("orders") or []:
+        if o.get("customer_id"):
+            prev_orders_by_cust.setdefault(str(o["customer_id"]), []).append(o)
 
     customers = []
     unchanged_c = 0
@@ -486,7 +530,14 @@ def build_plan(prev: dict, nxt: dict, db_state: dict | None, now: datetime, take
         if cid in anon:
             anon_changed.append(cid)
             continue
-        customers.append(_customer_row(c, orders_by_cust.get(cid, []), now))
+        row = _customer_row(c, orders_by_cust.get(cid, []), now)
+        old = prev_customers.get(cid)
+        if old is None:
+            row["prev"] = None
+        else:
+            prev_row = _customer_row(old, prev_orders_by_cust.get(cid, []), now)
+            row["prev"] = {k: prev_row.get(k) for k in CONTACT_KEYS}
+        customers.append(row)
 
     changed_orders = [oid for oid, o in next_o.items() if force or prev_o.get(oid) != order_fp(o, next_bills)]
     removed_orders = [oid for oid in prev_o if oid not in next_o]
@@ -664,6 +715,8 @@ def build_plan(prev: dict, nxt: dict, db_state: dict | None, now: datetime, take
 
     cancel_orders = []
     for oid in removed_orders:
+        if order_total_frozen(db_ord.get(oid)):
+            frozen += 1
         cancel_orders.append(oid)
 
     cancel_res = []
