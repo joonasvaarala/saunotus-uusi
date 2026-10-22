@@ -1,5 +1,5 @@
 // mobilepay-refund: käsittelee booking.refunds-rivit (provider='mobilepay', status='requested' / 10 min jumissa ollut 'processing').
-// Auth: verify_jwt=true (portin tarkistus) + funktiossa vaaditaan henkilökunnan oikeus payments.refund (booking.has_permission) tai service role -avain (cron/huolto).
+// Auth: verify_jwt=true (portin tarkistus) + funktiossa vaaditaan henkilökunnan oikeus payments.refund (booking.has_permission), service role -avain tai portin varmentama service_role-JWT (cron/huolto).
 // POST {} = kaikki odottavat, POST {refund_id} = yksittäinen. Vipps: POST /epayment/v1/payments/{reference}/refund (Idempotency-Key = sauna-refund-<id>).
 import { CORS_HEADERS, dbError, type Db, type Env, type Fetch, jsonResponse, type Mode, MobilePayApi, readCreds, VippsError, aggVal } from "../_shared/mobilepay.ts";
 
