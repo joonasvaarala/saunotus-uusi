@@ -44,6 +44,6 @@ verify_jwt = false   # pg_cron kutsuu; tunnistus x-sync-secret. Ei JWT:tä. Olet
 verify_jwt = false   # pg_cron kutsuu; tunnistus x-sync-secret. Ei JWT:tä.
 
 # Vuorotarjousmoottori. Tick: x-sync-secret (sama SYNC_CRON_SECRET). Vastauslinkki: allekirjoitettu token, ei JWT:tä.
-# Ei lähetä viestejä: outbox + lähettäjäkytkin oletuksena pois. Ei deployata tästä haarasta.
+# Token tarkistetaan SQL:ssä (vault shift_offer_token_secret). Ei lähetä viestejä: outbox + lähettäjäkytkin oletuksena pois. Ei deployata tästä haarasta.
 [functions.shift-offer-engine]
 verify_jwt = false

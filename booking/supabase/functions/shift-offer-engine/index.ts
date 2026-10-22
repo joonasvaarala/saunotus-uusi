@@ -3,12 +3,14 @@
 //
 // Autentikointi:
 //   * tick (POST ilman tokenia): header x-sync-secret = env SYNC_CRON_SECRET (vakioaikavertailu)
-//   * vastaus (GET/POST ?token=): HMAC-token, ei cron-salaisuutta. GET vain näyttää vahvistuksen;
-//     vastaus kirjataan POST-lomakkeella (selain ei hyväksy vuoroa linkin esihakuna).
+//   * vastaus (GET/POST ?token=): HMAC-token tarkistetaan tietokannassa (shift_offer_verify_token).
+//     Avain on vain vault-salaisuus shift_offer_token_secret. Edge-funktiolla ei ole omaa avainta.
+//     GET vain näyttää vahvistuksen; vastaus kirjataan POST-lomakkeella
+//     (selain ei hyväksy vuoroa linkin esihakuna).
 //   * tietokanta: SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY
 // Kuivaharjoitus: ?dry_run=1 tai JSON {"dryRun":true} tai shift_offer_engine_settings.dry_run.
-// Lähettäjä: shift_offer_engine_settings.sender_enabled oletus false. Päälläkin vain stubi
-// (shift_offer_sender_drain), ei WhatsAppia eikä sähköpostia.
+// Lähettäjä: shift_offer_engine_settings.sender_enabled oletus false (jono jää queued).
+// Päälläkin vain stubi, joka merkitsee rivit skipped — ei sent, ei WhatsAppia eikä sähköpostia.
 //
 // Cron (EHDOTUS, ei luoda tässä). Salaisuus vaultista kuten calendar-sync-v2
 // (vault.decrypted_secrets.name = calendar_sync_cron_secret). Aja muutaman minuutin välein:
@@ -24,17 +26,17 @@
 //       timeout_milliseconds := 50000);
 //   $cron$);
 //
-// Token-avain (ei repoissa): vault-salaisuus shift_offer_token_secret.
+// Token-avain (ei repoissa, ei edge-ympäristössä): vault-salaisuus shift_offer_token_secret.
 // Kuivaharjoitus käsin: sama kutsu, body {"dryRun":true} tai ?dry_run=1.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import {
   dryRunRequested,
+  helsinkiMorning,
   parseAction,
   requestIntent,
   respondPage,
   secretMatches,
   senderDecision,
-  verifyToken,
   type TickBody,
 } from "./core.ts";
 
@@ -52,9 +54,14 @@ Deno.serve(async (req) => {
   if (intent === "invalid") return new Response("method not allowed", { status: 405 });
 
   if (intent === "respond") {
-    const key = Deno.env.get("SHIFT_OFFER_TOKEN_SECRET") ?? "";
-    const checked = await verifyToken(key, token ?? "", Math.floor(Date.now() / 1000));
-    if (!checked.ok) return page(respondPage(null, "bad_token"), 400);
+    const supa = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data: verified, error: verifyError } = await supa.rpc("shift_offer_verify_token", { p_token: token });
+    const tok = verified && typeof verified === "object"
+      ? verified as { ok?: boolean; offer_id?: string; staff_id?: string }
+      : null;
+    if (verifyError || tok?.ok !== true || !tok.offer_id || !tok.staff_id) return page(respondPage(null, "bad_token"), 400);
     let action = parseAction(url.searchParams.get("r"));
     let until = url.searchParams.get("until");
     if (req.method === "POST") {
@@ -63,13 +70,11 @@ Deno.serve(async (req) => {
       until = form?.get("until")?.toString() ?? until;
     }
     if (req.method === "GET" || !action) return page(respondPage(action, null));
-    const supa = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-    const snooze = action === "snooze" && until ? new Date(`${until}T08:00:00+02:00`).toISOString() : null;
+    const snooze = action === "snooze" ? helsinkiMorning(until ?? "") : null;
+    if (action === "snooze" && !snooze) return page(respondPage(action, null));
     const { data, error } = await supa.rpc("shift_offer_engine_respond", {
-      p_offer_id: checked.offerId,
-      p_staff_id: checked.staffId,
+      p_offer_id: tok.offer_id,
+      p_staff_id: tok.staff_id,
       p_response: action,
       p_snooze_until: snooze,
       p_token: token,

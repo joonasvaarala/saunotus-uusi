@@ -100,9 +100,42 @@ export function parseAction(raw: string | null): ResponseAction | null {
 }
 
 // Lähettäjä on stubi. Kytkin pois: jonoon ei kosketa eikä verkkoa ole.
-// Kytkin päällä: kutsuja saa merkitä jonon stubiksi, ei lähettää.
+// Kytkin päällä: kutsuja ajaa shift_offer_sender_drainin, joka merkitsee rivit skipped (ei sent).
 export function senderDecision(enabled: boolean): "leave_queued" | "mark_stub" {
   return enabled ? "mark_stub" : "leave_queued";
+}
+
+// Päivämäärä YYYY-MM-DD kello 08:00 Europe/Helsinki, ISO-aikaleimana.
+// Kesä- ja talviaika tulevat vyöhykkeestä; kiinteää +02:00-siirtoa ei käytetä.
+export function helsinkiMorning(isoDate: string): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) return null;
+  const year = Number(isoDate.slice(0, 4));
+  const month = Number(isoDate.slice(5, 7));
+  const day = Number(isoDate.slice(8, 10));
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  const utcGuess = Date.UTC(year, month - 1, day, 8, 0, 0);
+  const guess = new Date(utcGuess);
+  if (guess.getUTCFullYear() !== year || guess.getUTCMonth() !== month - 1 || guess.getUTCDate() !== day) return null;
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Europe/Helsinki",
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+  const wallOffset = (at: Date) => {
+    const parts = fmt.formatToParts(at);
+    const n = (t: string) => Number(parts.find((p) => p.type === t)?.value);
+    return Date.UTC(n("year"), n("month") - 1, n("day"), n("hour"), n("minute"), n("second")) - at.getTime();
+  };
+  const result = new Date(utcGuess - wallOffset(guess));
+  const check = fmt.formatToParts(result);
+  const n = (t: string) => Number(check.find((p) => p.type === t)?.value);
+  if (n("year") !== year || n("month") !== month || n("day") !== day || n("hour") !== 8 || n("minute") !== 0) return null;
+  return result.toISOString();
 }
 
 export function respondPage(action: ResponseAction | null, result: string | null): string {

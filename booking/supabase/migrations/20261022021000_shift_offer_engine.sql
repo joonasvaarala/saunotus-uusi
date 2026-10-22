@@ -3,6 +3,9 @@
 -- Viestit vain public.shift_offer_messages -jonoon. Lähettäjäkytkin sender_enabled oletus false: mitään ei lähde.
 -- Uutta: all_by_quiet = previous_evening (oletus, odottaa Joonaksen vahvistusta). Jos "kaikille viimeistään
 -- all_by_before" osuu hiljaiseen aikaan 21:00–08:00, lähetys siirtyy edellisen illan quiet_startiin (21:00).
+-- exact ei siirrä illalle, mutta hiljaiseen aikaan osuva hetki siirtyy silti shift_add_active_timella (seuraava 08:00).
+-- all_round_wait (oletus 6 h) on kaikille-kierroksen vastausaika. Kun all_by_at on ohitettu eikä kaikille-kierrosta
+-- ole vielä lähetetty, eteneminen hyppää suoraan sinne (pick_staff direct + named_last), ei kierros kerrallaan.
 -- Hoidot kiinni -kalenteri (booking.closure_events, code hoidot) estää hoitaja- ja heidän vastaanottovuoronsa
 -- tarjouksen. Myöhemmin ilmestynyt sulku peruu avoimen tarjouksen ja jonottaa ilmoituksen.
 
@@ -12,7 +15,15 @@ alter table public.shift_offer_settings
   add constraint shift_offer_settings_all_by_quiet_chk
   check (all_by_quiet in ('previous_evening', 'exact'));
 comment on column public.shift_offer_settings.all_by_quiet is
-  'Kaikille-hetki (vuoro − all_by_before). previous_evening (oletus, Joonaksen vahvistus kesken): jos hetki osuu [quiet_start, quiet_end) eli 21:00–08:00, lähetys on edellisen illan quiet_start (21:00). exact = ei siirtoa.';
+  'Kaikille-hetki (vuoro − all_by_before). previous_evening (oletus, Joonaksen vahvistus kesken): jos hetki osuu [quiet_start, quiet_end) eli 21:00–08:00, lähetys on edellisen illan quiet_start (21:00). exact = ei iltasiirtoa; hiljaiseen aikaan osuva hetki siirtyy silti shift_add_active_timella seuraavaan quiet_endiin (08:00).';
+
+alter table public.shift_offer_settings
+  add column all_round_wait interval not null default interval '6 hours';
+alter table public.shift_offer_settings
+  add constraint shift_offer_settings_all_round_wait_chk
+  check (all_round_wait > interval '0');
+comment on column public.shift_offer_settings.all_round_wait is
+  'Kaikille-kierroksen vastausaika, kun porras on direct_to_all tai ei anna takarajaa. Oletus 6 tuntia. Hiljainen aika siirtää takarajan shift_add_active_timella.';
 
 alter table public.shift_offers
   add column exhausted_asks smallint not null default 0 check (exhausted_asks >= 0);
@@ -20,13 +31,13 @@ alter table public.shift_offers
 create table public.shift_offer_engine_settings (
   id               boolean primary key default true check (id),
   dry_run          boolean not null default false,   -- true = tick ei kirjoita, vaikka kutsu ei pyydä dry_runia
-  sender_enabled   boolean not null default false,   -- lähettäjästubi. false = viestit jäävät jonoon, mitään ei lähetetä
+  sender_enabled   boolean not null default false,   -- lähettäjästubi. false = viestit jäävät queued; true = stubi merkitsee skipped, ei sent
   public_base_url  text not null default 'https://sxbofnuisemspgquoxyv.supabase.co',
   updated_at       timestamptz not null default now()
 );
 insert into public.shift_offer_engine_settings default values;
 comment on table public.shift_offer_engine_settings is
-  'Tarjousmoottorin kytkimet. dry_run ja sender_enabled ovat oletuksena pois päältä kirjoituksen ja lähetyksen osalta: dry_run pakottaa kuivaharjoituksen, sender_enabled päästää vain stubin merkitsemään jonon (ei verkkoa).';
+  'Tarjousmoottorin kytkimet. dry_run ja sender_enabled ovat oletuksena pois päältä kirjoituksen ja lähetyksen osalta: dry_run pakottaa kuivaharjoituksen, sender_enabled päästää vain stubin merkitsemään jonon skipped-tilaan (ei sent, ei verkkoa).';
 
 create table public.shift_offer_messages (
   id              bigint generated always as identity primary key,
@@ -74,8 +85,10 @@ begin
     elsif v::time < s.quiet_end then
       v := (v::date - 1) + s.quiet_start;
     end if;
+    return v at time zone s.timezone;
   end if;
-  return v at time zone s.timezone;
+  -- exact: ei iltasiirtoa, mutta hetki ei saa jäädä hiljaiseen aikaan
+  return public.shift_add_active_time(v at time zone s.timezone, interval '0', p_role);
 end $$;
 
 -- Korvaa tuotannon shift_offer_wait: direct_to_all ja kierroksen katto käyttävät siirrettyä kaikille-hetkeä.
@@ -133,7 +146,7 @@ begin
   return v_via = 'therapist';
 end $$;
 
--- ---------- token (HMAC, canonical JSON). Avain: set_config sipoo.shift_offer_token_key tai vault shift_offer_token_secret. ----------
+-- ---------- token (HMAC, canonical JSON). Avain vain vaultissa: shift_offer_token_secret. Ei GUC-ylikirjoitusta. ----------
 create or replace function public.shift_offer_b64url(p_data bytea)
 returns text
 language sql immutable set search_path = '' as $$
@@ -145,8 +158,6 @@ returns text
 language plpgsql stable security definer set search_path = '' as $$
 declare v text;
 begin
-  v := nullif(current_setting('sipoo.shift_offer_token_key', true), '');
-  if v is not null then return v; end if;
   begin
     execute 'select decrypted_secret from vault.decrypted_secrets where name = $1'
       into v using 'shift_offer_token_secret';
@@ -154,6 +165,26 @@ begin
     v := null;
   end;
   return nullif(v, '');
+end $$;
+
+-- Allekirjoituksen vertailu ilman varhaista paluuta ensimmäisestä erosta.
+create or replace function public.shift_offer_ct_eq(p_a text, p_b text)
+returns boolean
+language plpgsql immutable set search_path = '' as $$
+declare
+  a bytea; b bytea; n int; i int; diff int := 0;
+begin
+  a := convert_to(coalesce(p_a, ''), 'utf8');
+  b := convert_to(coalesce(p_b, ''), 'utf8');
+  if octet_length(a) = 0 or octet_length(b) = 0 then
+    return octet_length(a) = 0 and octet_length(b) = 0;
+  end if;
+  n := greatest(octet_length(a), octet_length(b));
+  if octet_length(a) <> octet_length(b) then diff := 1; end if;
+  for i in 0 .. n - 1 loop
+    diff := diff | (get_byte(a, least(i, octet_length(a) - 1)) # get_byte(b, least(i, octet_length(b) - 1)));
+  end loop;
+  return diff = 0;
 end $$;
 
 create or replace function public.shift_offer_sign_token(p_offer_id uuid, p_staff_id uuid, p_exp timestamptz)
@@ -183,11 +214,12 @@ begin
   if v_key is null then return jsonb_build_object('ok', false, 'error', 'no_key'); end if;
   v_payload := split_part(p_token, '.', 1);
   v_sig := split_part(p_token, '.', 2);
-  if v_payload = '' or v_sig = '' or split_part(p_token, '.', 3) <> '' then
+  if v_payload = '' or v_sig = '' or split_part(p_token, '.', 3) <> ''
+     or length(v_payload) > 512 or length(v_sig) > 128 then
     return jsonb_build_object('ok', false, 'error', 'bad_token');
   end if;
   v_expect := public.shift_offer_b64url(extensions.hmac(convert_to(v_payload, 'utf8'), convert_to(v_key, 'utf8'), 'sha256'));
-  if v_expect is distinct from v_sig then return jsonb_build_object('ok', false, 'error', 'bad_token'); end if;
+  if not public.shift_offer_ct_eq(v_expect, v_sig) then return jsonb_build_object('ok', false, 'error', 'bad_token'); end if;
   begin
     v_raw := convert_from(decode(rpad(translate(v_payload, '-_', '+/'), (4 - length(translate(v_payload, '-_', '+/')) % 4) % 4 + length(translate(v_payload, '-_', '+/')), '='), 'base64'), 'utf8');
     v_json := v_raw::jsonb;
@@ -365,7 +397,7 @@ begin
   select * into s from public.shift_offer_settings x where x.role_type = p_role;
   select * into t from public.shift_offer_wait(p_role, p_starts, p_now, p_last) w;
   if t.direct_to_all or t.deadline_at is null then
-    v_wait := least(interval '6 hours', greatest(p_starts - p_now, interval '1 hour'));
+    v_wait := least(coalesce(s.all_round_wait, interval '6 hours'), greatest(p_starts - p_now, interval '1 hour'));
     v_dl := public.shift_add_active_time(p_now, v_wait, p_role);
   else
     v_dl := t.deadline_at;
@@ -383,11 +415,18 @@ returns int
 language plpgsql security definer set search_path = '' as $$
 declare
   i int; v_dl timestamptz; v_last boolean; v_id bigint; v_n int := 0; v_max int;
+  v_tz text; v_date date;
 begin
-  select max(r.round_no) into v_max from public.shift_offer_rounds r
+  select s.timezone into v_tz from public.shift_offer_settings s where s.role_type = p_role;
+  if v_tz is null then
+    raise exception 'Roolille % ei ole shift_offer_settings-riviä', p_role using errcode = 'P0002';
+  end if;
+  v_date := (p_starts at time zone v_tz)::date;
+  select max(rnd.round_no) into v_max from public.shift_offer_rounds rnd
     join public.shift_offers o on o.id = p_offer
-   where r.role_type = o.role_type and r.scenario = o.scenario
-     and extract(isodow from (p_starts at time zone 'Europe/Helsinki'))::smallint = any (r.weekdays);
+   where rnd.role_type = o.role_type and rnd.scenario = o.scenario
+     and extract(isodow from v_date)::smallint = any (rnd.weekdays)
+     and v_date >= rnd.valid_from and (rnd.valid_to is null or v_date <= rnd.valid_to);
   v_last := p_kind = 'all' or p_round >= coalesce(v_max, p_round);
   v_dl := public.shift_offer_round_deadline(p_role, p_starts, p_now, p_kind, v_last);
   for i in 1 .. coalesce(cardinality(p_staff), 0) loop
@@ -572,6 +611,34 @@ begin
       'offer:' || o.id::text || ':staff:' || r.staff_id::text || ':reminder:' || to_char(p_now at time zone 'UTC', 'YYYYMMDDHH24MI'));
   end loop;
 
+  -- Kaikille-hetki on ohitettu: älä etene kierros kerrallaan (se saisi 6 h / all_round_wait jokaiselle).
+  -- Hyppää suoraan all-kierrokseen ja named_lastiin, jätä aiemmat vastaanottajat voimaan.
+  if o.all_sent_at is null and public.shift_offer_all_by_at(w.role_type, w.starts_at) <= p_now then
+    v_staff := null; v_names := null; v_sorts := null; v_round := null; v_kind := null;
+    select array_agg(p.staff_id order by p.sort_order, p.staff_name),
+           array_agg(p.staff_name order by p.sort_order, p.staff_name),
+           array_agg(p.sort_order order by p.sort_order, p.staff_name),
+           min(p.round_no), min(p.round_kind)
+      into v_staff, v_names, v_sorts, v_round, v_kind
+      from public.shift_offer_pick_staff(w.role_type, v_date, 1, o.scenario, w.starts_at, w.ends_at, true) p
+     where not exists (
+       select 1 from public.shift_offer_recipients x where x.offer_id = o.id and x.staff_id = p.staff_id);
+    if coalesce(cardinality(v_staff), 0) > 0 then
+      if p_dry then
+        return jsonb_build_object('action', 'would_advance', 'offer_id', o.id, 'shift_id', w.id,
+          'round_no', v_round, 'round_kind', coalesce(v_kind, 'all'), 'staff_ids', to_jsonb(v_staff));
+      end if;
+      v_n := public.shift_offer_issue_recipients(o.id, w.role_type, w.starts_at, w.ends_at, p_now,
+        v_round, coalesce(v_kind, 'all'), v_staff, v_names, v_sorts);
+      return jsonb_build_object('action', 'advanced', 'offer_id', o.id, 'shift_id', w.id,
+        'round_no', v_round, 'round_kind', coalesce(v_kind, 'all'), 'recipients', v_n);
+    end if;
+    if not p_dry then
+      update public.shift_offers set all_sent_at = p_now, updated_at = p_now where id = o.id and all_sent_at is null;
+    end if;
+    o.all_sent_at := p_now;
+  end if;
+
   select count(*) filter (where status = 'pending'), min(snooze_until) filter (where status = 'snoozed' and snooze_until > p_now)
     into v_pending, v_snooze
     from public.shift_offer_recipients where offer_id = o.id and round_no = o.current_round_no;
@@ -646,7 +713,7 @@ begin
   return v;
 end $$;
 
--- Lähettäjästubi: ei verkkoa. Kytkin pois -> ei tee mitään. Kytkin päällä -> merkitsee jonon lähetetyksi stubina.
+-- Lähettäjästubi: ei verkkoa. Kytkin pois -> jono jää queued. Kytkin päällä -> status skipped, ei sent.
 create or replace function public.shift_offer_sender_drain(p_limit int default 50)
 returns jsonb
 language plpgsql security definer set search_path = '' as $$
@@ -654,18 +721,18 @@ declare v_on boolean; v_n int;
 begin
   select sender_enabled into v_on from public.shift_offer_engine_settings where id;
   if not coalesce(v_on, false) then
-    return jsonb_build_object('ok', true, 'sender_enabled', false, 'sent', 0);
+    return jsonb_build_object('ok', true, 'sender_enabled', false, 'sent', 0, 'skipped', 0);
   end if;
   with u as (
-    update public.shift_offer_messages set status = case when channel = 'none' then 'skipped' else 'sent' end,
-           sent_at = now(), last_error = 'stub', attempts = attempts + 1
+    update public.shift_offer_messages set status = 'skipped',
+           last_error = 'stub', attempts = attempts + 1
      where id in (
        select m.id from public.shift_offer_messages m where m.status = 'queued' and m.next_attempt_at <= now()
         order by m.id limit greatest(1, least(coalesce(p_limit, 50), 200))
      )
     returning 1)
   select count(*) into v_n from u;
-  return jsonb_build_object('ok', true, 'sender_enabled', true, 'sent', v_n, 'transport', 'stub');
+  return jsonb_build_object('ok', true, 'sender_enabled', true, 'sent', 0, 'skipped', v_n, 'transport', 'stub');
 end $$;
 
 create or replace function public.shift_offer_cancel_for_closure(p_now timestamptz, p_dry boolean)
@@ -761,7 +828,8 @@ begin
   return jsonb_build_object('ok', true, 'dry_run', v_dry, 'now', v_now, 'cancel', v_cancel, 'service_closures', v_svc, 'actions', v_actions);
 end $$;
 
-revoke all on function public.shift_offer_b64url(bytea), public.shift_offer_token_key(), public.shift_offer_sign_token(uuid, uuid, timestamptz),
+revoke all on function public.shift_offer_b64url(bytea), public.shift_offer_token_key(), public.shift_offer_ct_eq(text, text),
+  public.shift_offer_sign_token(uuid, uuid, timestamptz),
   public.shift_offer_verify_token(text), public.shift_offer_role_label(text), public.shift_offer_queue_message(uuid, bigint, uuid, text, text, text),
   public.shift_offer_link(uuid, uuid, timestamptz, text), public.shift_offer_compose(text, uuid, uuid, text, timestamptz, timestamptz, timestamptz, int),
   public.shift_offer_all_by_at(text, timestamptz), public.shift_offer_wait(text, timestamptz, timestamptz, boolean),
@@ -773,7 +841,8 @@ revoke all on function public.shift_offer_b64url(bytea), public.shift_offer_toke
   public.shift_offer_cancel_for_closure(timestamptz, boolean), public.shift_offer_service_closures(timestamptz, boolean),
   public.shift_offer_tick(boolean, timestamptz)
   from public, anon, authenticated;
-grant execute on function public.shift_offer_b64url(bytea), public.shift_offer_token_key(), public.shift_offer_sign_token(uuid, uuid, timestamptz),
+grant execute on function public.shift_offer_b64url(bytea), public.shift_offer_token_key(), public.shift_offer_ct_eq(text, text),
+  public.shift_offer_sign_token(uuid, uuid, timestamptz),
   public.shift_offer_verify_token(text), public.shift_offer_role_label(text), public.shift_offer_queue_message(uuid, bigint, uuid, text, text, text),
   public.shift_offer_link(uuid, uuid, timestamptz, text), public.shift_offer_compose(text, uuid, uuid, text, timestamptz, timestamptz, timestamptz, int),
   public.shift_offer_all_by_at(text, timestamptz), public.shift_offer_wait(text, timestamptz, timestamptz, boolean),

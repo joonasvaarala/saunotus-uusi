@@ -3,7 +3,10 @@
 begin;
 set local search_path = extensions, public;
 select no_plan();
-select set_config('sipoo.shift_offer_token_key', 'test-key', true);
+insert into vault.decrypted_secrets (name, decrypted_secret)
+values ('shift_offer_token_secret', 'test-key')
+on conflict (name) do update set decrypted_secret = excluded.decrypted_secret;
+select set_config('sipoo.shift_offer_token_key', 'other-key', true);
 
 -- ---------- oikeudet ----------
 select ok((select prosecdef and exists (select 1 from unnest(proconfig) c where c like 'search_path=%')
@@ -24,10 +27,15 @@ select lives_ok('select public.shift_offer_tick(true, now())', 'service_role aja
 reset role;
 
 -- ---------- token ----------
+select ok((select prosrc !~ 'sipoo.shift_offer_token_key' from pg_proc
+            where pronamespace = 'public'::regnamespace and proname = 'shift_offer_token_key'),
+          'token-avain ei lue GUC-ylikirjoitusta');
 select is(
   public.shift_offer_sign_token('11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', to_timestamp(2000000000)),
   'eyJvIjoiMTExMTExMTEtMTExMS00MTExLTgxMTEtMTExMTExMTExMTExIiwicyI6IjIyMjIyMjIyLTIyMjItNDIyMi04MjIyLTIyMjIyMjIyMjIyMiIsImUiOjIwMDAwMDAwMDB9.pVV62_nGcsqs9VobW5n0oSq2sY92eZqw2BHCrPGbg48',
-  'HMAC-token vastaa tunnettua vektoria');
+  'HMAC-token vastaa tunnettua vektoria, GUC ei vaihda vault-avainta');
+select ok(public.shift_offer_ct_eq('abc', 'abc') and not public.shift_offer_ct_eq('abc', 'abd') and not public.shift_offer_ct_eq('abc', 'ab'),
+          'vakioaikavertailu täsmää vain saman tavujonon');
 select is(
   (public.shift_offer_verify_token('eyJvIjoiMTExMTExMTEtMTExMS00MTExLTgxMTEtMTExMTExMTExMTExIiwicyI6IjIyMjIyMjIyLTIyMjItNDIyMi04MjIyLTIyMjIyMjIyMjIyMiIsImUiOjIwMDAwMDAwMDB9.pVV62_nGcsqs9VobW5n0oSq2sY92eZqw2BHCrPGbg48')->>'ok')::boolean,
   true, 'vektori kelpaa');
@@ -55,11 +63,19 @@ select is((select direct_to_all from public.shift_offer_wait('heater', timestamp
 select is((select direct_to_all from public.shift_offer_wait('heater', timestamptz '2027-03-02 06:00+02', timestamptz '2027-02-26 22:00+02', false)),
           true, 'illan 21:00 jälkeen kaikille');
 update public.shift_offer_settings set all_by_quiet = 'exact' where role_type = 'heater';
-select is(public.shift_offer_all_by_at('heater', timestamptz '2027-03-02 06:00+02'), timestamptz '2027-02-27 06:00+02',
-          'exact ei siirrä kaikille-hetkeä');
+select is(public.shift_offer_all_by_at('heater', timestamptz '2027-03-02 06:00+02'), timestamptz '2027-02-27 08:00+02',
+          'exact siirtää hiljaisen 06:00 saman päivän 08:00');
+select is(public.shift_offer_all_by_at('heater', timestamptz '2027-03-02 12:00+02'), timestamptz '2027-02-27 12:00+02',
+          'exact jättää päivähetken 12:00 ennalleen');
 select is((select direct_to_all from public.shift_offer_wait('heater', timestamptz '2027-03-02 06:00+02', timestamptz '2027-02-27 01:00+02', false)),
           false, 'exact-tilassa 01:00 ei ole vielä kaikille-hetki');
 update public.shift_offer_settings set all_by_quiet = 'previous_evening' where role_type = 'heater';
+update public.shift_offer_settings set all_round_wait = interval '2 hours' where role_type = 'heater';
+select is(
+  public.shift_offer_round_deadline('heater', now() + interval '30 hours', now(), 'named', true),
+  public.shift_add_active_time(now(), interval '2 hours', 'heater'),
+  'kaikille-kierroksen vastausaika tulee asetuksesta');
+update public.shift_offer_settings set all_round_wait = interval '6 hours' where role_type = 'heater';
 
 insert into public.staff (id, name, email, active, whatsapp_enabled) values
   ('aaaaaaaa-0000-4000-8000-0000000000a1', 'Aino', 'aino@example.com', true, false),
@@ -323,9 +339,98 @@ select is((public.shift_offer_engine_respond(
 -- ---------- lähettäjä ----------
 select is((public.shift_offer_sender_drain(50)->>'sent')::int, 0, 'lähettäjä pois: mitään ei merkitä lähetetyksi');
 select ok(exists (select 1 from public.shift_offer_messages where status = 'queued'), 'viestit ovat yhä jonossa');
+select is((select count(*)::int from public.shift_offer_messages where status = 'sent'), 0, 'lähettäjä pois ei merkitse sent');
 update public.shift_offer_engine_settings set sender_enabled = true where id;
-select is(public.shift_offer_sender_drain(200)->>'transport', 'stub', 'kytkin päällä merkitsee jonon stubina');
+create temp table drain_out as select public.shift_offer_sender_drain(200) as j;
+select is((select j->>'transport' from drain_out), 'stub', 'kytkin päällä merkitsee jonon stubina');
+select is((select (j->>'sent')::int from drain_out), 0, 'stubi ei raportoi lähetyksiä');
+select ok((select (j->>'skipped')::int from drain_out) > 0, 'stubi merkitsee rivit skipped');
+select is((select count(*)::int from public.shift_offer_messages where status = 'sent'), 0, 'yksikään viesti ei ole sent');
 select is((select count(*)::int from public.shift_offer_messages where status = 'queued'), 0, 'jono tyhjenee stubissa');
+select ok((select count(*)::int from public.shift_offer_messages where status = 'skipped') > 0, 'viestit ovat skipped');
+
+-- ---------- la–su: kaikille-hetki hyppää suoraan all-kierrokseen ----------
+insert into public.shift_offer_rounds (role_type, scenario, weekdays, round_no, kind) values
+  ('heater', 'vacant_shift', '{6,7}', 1, 'named'),
+  ('heater', 'vacant_shift', '{6,7}', 2, 'named'),
+  ('heater', 'vacant_shift', '{6,7}', 3, 'all'),
+  ('heater', 'vacant_shift', '{6,7}', 4, 'named_last');
+insert into public.shift_offer_round_members (round_id, staff_id, sort_order)
+select r.id, m.staff_id, m.sort_order
+  from (values
+    (1::smallint, 'aaaaaaaa-0000-4000-8000-0000000000a1'::uuid, 1::smallint),
+    (2, 'aaaaaaaa-0000-4000-8000-0000000000a2', 1),
+    (4, 'aaaaaaaa-0000-4000-8000-0000000000a4', 1)
+  ) m(round_no, staff_id, sort_order)
+  join public.shift_offer_rounds r
+    on r.role_type = 'heater' and r.scenario = 'vacant_shift' and r.weekdays = '{6,7}' and r.round_no = m.round_no;
+insert into public.work_shifts (id, starts_at, ends_at, role_type, status, staffing_status) values
+  ('aaaaaaaa-0000-4000-8000-0000000000fb',
+   (:'mon'::date + 5 + time '10:00') at time zone 'Europe/Helsinki',
+   (:'mon'::date + 5 + time '18:00') at time zone 'Europe/Helsinki',
+   'heater', 'active', 'open');
+select is((public.shift_offer_ensure('aaaaaaaa-0000-4000-8000-0000000000fb', :'tick_now'::timestamptz, false)->>'action'),
+          'offered', 'lauantain ketju alkaa ensimmäisestä kierroksesta');
+select is((select r.staff_id from public.shift_offer_recipients r
+            join public.shift_offers o on o.id = r.offer_id
+           where o.shift_id = 'aaaaaaaa-0000-4000-8000-0000000000fb'),
+          'aaaaaaaa-0000-4000-8000-0000000000a1'::uuid, 'ennen kaikille-hetkeä vain Aino');
+create temp table jump_out as
+  select public.shift_offer_ensure(
+           'aaaaaaaa-0000-4000-8000-0000000000fb',
+           ((:'mon'::date + 5 + time '10:00') at time zone 'Europe/Helsinki' - interval '2 days'),
+           false) as j;
+select is((select j->>'action' from jump_out), 'advanced', 'kaikille-hetken jälkeen edetään yhdellä kutsulla');
+select is((select (j->>'round_no')::int from jump_out), 3, 'hyppy osuu all-kierrokseen, ei kierrokseen 2');
+select is((select j->>'round_kind' from jump_out), 'all', 'kierroksen laji on all');
+select is((select (j->>'recipients')::int from jump_out), 3, 'Bertta, Cecilia ja Dora samassa aallossa');
+select is((select count(*)::int from public.shift_offer_recipients r
+            join public.shift_offers o on o.id = r.offer_id
+           where o.shift_id = 'aaaaaaaa-0000-4000-8000-0000000000fb' and r.round_no = 2),
+          0, 'välikierrosta 2 ei lähetetä');
+select is((select count(*)::int from public.shift_offer_recipients r
+            join public.shift_offers o on o.id = r.offer_id
+           where o.shift_id = 'aaaaaaaa-0000-4000-8000-0000000000fb'
+             and r.round_kind = 'all' and r.round_no = 3
+             and r.staff_id in ('aaaaaaaa-0000-4000-8000-0000000000a2',
+                                'aaaaaaaa-0000-4000-8000-0000000000a3',
+                                'aaaaaaaa-0000-4000-8000-0000000000a4')),
+          3, 'all-aaltoon kuuluvat Bertta, Cecilia ja Dora');
+select ok((select o.all_sent_at is not null from public.shift_offers o
+           where o.shift_id = 'aaaaaaaa-0000-4000-8000-0000000000fb'),
+          'all_sent_at kirjataan hypyssä');
+select is((select o.current_round_no::int from public.shift_offers o
+           where o.shift_id = 'aaaaaaaa-0000-4000-8000-0000000000fb'),
+          3, 'nykyinen kierros on all-kierros');
+
+-- ---------- viimeinen kierros: voimassaolo ja settings.timezone ----------
+select ok((select prosrc !~ 'Europe/Helsinki' from pg_proc
+            where pronamespace = 'public'::regnamespace and proname = 'shift_offer_issue_recipients'),
+          'issue_recipients ei kovakoodaa aikavyöhykettä');
+insert into public.shift_offer_rounds (role_type, scenario, weekdays, round_no, kind, valid_to) values
+  ('heater', 'vacant_shift', '{1}', 8, 'named', date '2026-01-01'),
+  ('heater', 'vacant_shift', '{2}', 5, 'named', null);
+insert into public.shift_offer_round_members (round_id, staff_id, sort_order)
+select r.id, 'aaaaaaaa-0000-4000-8000-0000000000a2', 1
+  from public.shift_offer_rounds r
+ where r.role_type = 'heater' and r.weekdays = '{2}' and r.round_no = 5;
+update public.shift_offer_settings set timezone = 'UTC' where role_type = 'heater';
+insert into public.work_shifts (id, starts_at, ends_at, role_type, status, staffing_status) values
+  ('aaaaaaaa-0000-4000-8000-0000000000fc',
+   timestamptz '2027-02-02 01:30+02', timestamptz '2027-02-02 09:30+02', 'heater', 'active', 'open');
+select is((public.shift_offer_ensure('aaaaaaaa-0000-4000-8000-0000000000fc', timestamptz '2027-01-28 10:00+02', false)->>'action'),
+          'offered', 'UTC-asetus näkee vuoron maanantaina');
+select is((select min(r.deadline_at) from public.shift_offer_recipients r
+            join public.shift_offers o on o.id = r.offer_id
+           where o.shift_id = 'aaaaaaaa-0000-4000-8000-0000000000fc'),
+          public.shift_add_active_time(timestamptz '2027-01-28 10:00+02', interval '12 hours', 'heater'),
+          'viimeinen voimassa oleva kierros saa 12 tunnin vastausajan');
+select ok((select min(r.deadline_at) from public.shift_offer_recipients r
+            join public.shift_offers o on o.id = r.offer_id
+           where o.shift_id = 'aaaaaaaa-0000-4000-8000-0000000000fc')
+          is distinct from public.shift_add_active_time(timestamptz '2027-01-28 10:00+02', interval '6 hours', 'heater'),
+          'vanhentunut tai väärän päivän kierros ei lyhennä vastausaikaa kuuteen tuntiin');
+update public.shift_offer_settings set timezone = 'Europe/Helsinki' where role_type = 'heater';
 
 -- ---------- sääntö 9: perjantai ei sulkeudu, koska allow-listalla ei ole perjantaita ----------
 update public.shift_offer_settings set start_before = interval '8 days' where role_type = 'therapist';

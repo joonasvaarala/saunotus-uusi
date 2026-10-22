@@ -3,6 +3,7 @@ import { assert, assertEquals } from "jsr:@std/assert@1";
 import {
   canonicalToken,
   dryRunRequested,
+  helsinkiMorning,
   parseAction,
   requestIntent,
   respondPage,
@@ -58,4 +59,11 @@ Deno.test("confirmation page does not accept on its own", () => {
 Deno.test("sender switch defaults to leaving the outbox alone", () => {
   assertEquals(senderDecision(false), "leave_queued");
   assertEquals(senderDecision(true), "mark_stub");
+});
+
+Deno.test("snooze morning is 08:00 Europe/Helsinki in winter and summer", () => {
+  assertEquals(helsinkiMorning("2027-01-15"), "2027-01-15T06:00:00.000Z");
+  assertEquals(helsinkiMorning("2027-07-15"), "2027-07-15T05:00:00.000Z");
+  assertEquals(helsinkiMorning("15.1.2027"), null);
+  assertEquals(helsinkiMorning("2027-02-31"), null);
 });

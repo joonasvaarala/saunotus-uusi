@@ -19,6 +19,7 @@ drop function if exists public.shift_offer_queue_message(uuid, bigint, uuid, tex
 drop function if exists public.shift_offer_role_label(text);
 drop function if exists public.shift_offer_verify_token(text);
 drop function if exists public.shift_offer_sign_token(uuid, uuid, timestamptz);
+drop function if exists public.shift_offer_ct_eq(text, text);
 drop function if exists public.shift_offer_token_key();
 drop function if exists public.shift_offer_b64url(bytea);
 drop function if exists public.shift_offer_blocked_by_closure(text, timestamptz, timestamptz, text);
@@ -55,5 +56,7 @@ drop table if exists public.shift_offer_messages;
 drop table if exists public.shift_offer_engine_settings;
 
 alter table public.shift_offers drop column if exists exhausted_asks;
+alter table public.shift_offer_settings drop constraint if exists shift_offer_settings_all_round_wait_chk;
+alter table public.shift_offer_settings drop column if exists all_round_wait;
 alter table public.shift_offer_settings drop constraint if exists shift_offer_settings_all_by_quiet_chk;
 alter table public.shift_offer_settings drop column if exists all_by_quiet;
