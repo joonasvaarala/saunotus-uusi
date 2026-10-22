@@ -31,6 +31,9 @@ done
 echo "== kilpailutilannetesti (rinnakkaiset yhteydet)"
 if ./race.sh; then echo "ok race"; else fail=1; fi
 
+echo "== vuorotarjouksen kilpailutilanne (ensimmäinen hyväksyjä)"
+if ./shift_offer_race.sh; then echo "ok shift-offer race"; else fail=1; fi
+
 echo "Testejä läpi: $total (pgTAP) + kilpailutesti"
 if [ "$fail" = 1 ]; then echo "TESTIT EPÄONNISTUIVAT"; exit 1; fi
 echo "KAIKKI TESTIT OK"
