@@ -1,4 +1,4 @@
--- PALUU: purkaa 20261022021000_shift_offer_engine.sql.
+-- PALUU: purkaa 20261022003917_shift_offer_engine.sql.
 -- Palauttaa shift_offer_waitin tuotantoversioon (20261021234616): kaikille-hetki on vuoro − all_by_before, ilman previous_evening-siirtoa.
 -- Ei koske sääntötauluja, tarjouksia eikä closure-mallia. Aja ennen 20261021234616_shift_offer_rules_DOWN.sql jos koko tarjousmalli puretaan.
 

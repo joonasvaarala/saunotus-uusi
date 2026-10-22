@@ -9,8 +9,11 @@
 //     (selain ei hyväksy vuoroa linkin esihakuna).
 //   * tietokanta: SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY
 // Kuivaharjoitus: ?dry_run=1 tai JSON {"dryRun":true} tai shift_offer_engine_settings.dry_run.
-// Lähettäjä: shift_offer_engine_settings.sender_enabled oletus false (jono jää queued).
-// Päälläkin vain stubi, joka merkitsee rivit skipped — ei sent, ei WhatsAppia eikä sähköpostia.
+// Lähettäjä: sender_enabled oletus false (jono jää queued).
+// WhatsApp: whatsapp_enabled oletus false, whatsapp_dry_run oletus true, allowlist tyhjä.
+// Oikea lähetys vaatii kaikki kytkimet ja allowlistan. Kuivaharjoitus lokittaa API-rungon eikä kutsu Metan.
+// Webhook: GET/POST /webhook (WHATSAPP_VERIFY_TOKEN, X-Hub-Signature-256 / WHATSAPP_APP_SECRET).
+// Salaisuudet vain ympäristöstä: WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_APP_SECRET, WHATSAPP_VERIFY_TOKEN.
 //
 // Cron (EHDOTUS, ei luoda tässä). Salaisuus vaultista kuten calendar-sync-v2
 // (vault.decrypted_secrets.name = calendar_sync_cron_secret). Aja muutaman minuutin välein:
@@ -28,7 +31,7 @@
 //
 // Token-avain (ei repoissa, ei edge-ympäristössä): vault-salaisuus shift_offer_token_secret.
 // Kuivaharjoitus käsin: sama kutsu, body {"dryRun":true} tai ?dry_run=1.
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
 import {
   dryRunRequested,
   helsinkiMorning,
@@ -39,6 +42,13 @@ import {
   senderDecision,
   type TickBody,
 } from "./core.ts";
+import { deliverQueued, readWhatsappEnv, webhookResponse } from "./sender.ts";
+
+function db(): SupabaseClient {
+  return createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
 
 const log = (event: string, data: Record<string, unknown> = {}) =>
   console.log(JSON.stringify({ fn: "shift-offer-engine", event, ...data }));
@@ -49,14 +59,25 @@ function page(html: string, status = 200): Response {
 
 Deno.serve(async (req) => {
   const url = new URL(req.url);
+  if (url.pathname.endsWith("/webhook")) {
+    const env = readWhatsappEnv(Deno.env);
+    const supa = db();
+    return webhookResponse(req, env, async (update) => {
+      const { error } = await supa.rpc("shift_offer_whatsapp_apply_status", {
+        p_wamid: update.wamid,
+        p_status: update.status,
+        p_error: update.error,
+        p_at: update.at,
+      });
+      if (error) throw new Error("status_failed");
+    });
+  }
   const token = url.searchParams.get("token");
   const intent = requestIntent(req.method, token);
   if (intent === "invalid") return new Response("method not allowed", { status: 405 });
 
   if (intent === "respond") {
-    const supa = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
+    const supa = db();
     const { data: verified, error: verifyError } = await supa.rpc("shift_offer_verify_token", { p_token: token });
     const tok = verified && typeof verified === "object"
       ? verified as { ok?: boolean; offer_id?: string; staff_id?: string }
@@ -102,9 +123,7 @@ Deno.serve(async (req) => {
     body = {};
   }
 
-  const supa = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  const supa = db();
   const { data: cfg } = await supa.from("shift_offer_engine_settings").select("dry_run, sender_enabled").eq("id", true).maybeSingle();
   const dryRun = dryRunRequested(url, body, cfg?.dry_run === true);
   const { data, error } = await supa.rpc("shift_offer_tick", { p_dry_run: dryRun });
@@ -113,9 +132,8 @@ Deno.serve(async (req) => {
     return Response.json({ ok: false, error: "tick_failed" }, { status: 500 });
   }
   let sender: unknown = { sender_enabled: false, sent: 0 };
-  if (!dryRun && senderDecision(cfg?.sender_enabled === true) === "mark_stub") {
-    const drained = await supa.rpc("shift_offer_sender_drain", { p_limit: 50 });
-    sender = drained.data ?? { ok: false };
+  if (!dryRun && senderDecision(cfg?.sender_enabled === true) === "deliver") {
+    sender = await deliverQueued(supa, readWhatsappEnv(Deno.env), log);
   }
   log("tick", { dryRun, actions: Array.isArray((data as { actions?: unknown })?.actions) ? (data as { actions: unknown[] }).actions.length : 0 });
   return Response.json({ ok: true, dryRun, tick: data, sender });

@@ -58,7 +58,7 @@ Deno.test("confirmation page does not accept on its own", () => {
 
 Deno.test("sender switch defaults to leaving the outbox alone", () => {
   assertEquals(senderDecision(false), "leave_queued");
-  assertEquals(senderDecision(true), "mark_stub");
+  assertEquals(senderDecision(true), "deliver");
 });
 
 Deno.test("snooze morning is 08:00 Europe/Helsinki in winter and summer", () => {
