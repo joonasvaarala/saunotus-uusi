@@ -15,7 +15,7 @@
 -- Ei muuta hintoja, ALV:tä, kortin myöntämissääntöjä (booking_142/143), lähetystilaa (off / dry_run / live) eikä public-skeemaa.
 -- Edge: booking/supabase/functions/send-emails (templates.ts, texts.ts, index.ts) – uusi pohja annual_card_code.
 -- Uudelleenajettava: create or replace / drop if exists / vartioitu nimenvaihto.
--- Rollback: ../rollbacks/20261024185000_booking_146_ROLLBACK.sql
+-- Rollback: ../rollbacks/20261024124037_booking_146_ROLLBACK.sql
 -- =============================================================================
 set local lock_timeout = '5s';
 
