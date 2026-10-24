@@ -51,7 +51,11 @@ Deno.test("tarjous: varapohja vuorotarjous kunnes tyovuoro_kysely on hyväksytty
   assert(p2.action === "send" && p2.payload.type === "template");
   assertEquals(p2.payload.template.name, "tyovuoro_kysely");
   const body = p2.payload.template.components[0];
-  assertEquals(body.type === "body" ? body.parameters.map((x) => x.text) : [], ["lämmitysvuoro", "la 24.10.2026 klo 16:00–20:00", "24.10.2026 klo 12:00"]);
+  // booking_155: tyovuoro_kysely saa lyhyet muodot (Metan live-teksti "Vuoro: {{1}}, aika {{2}} ... viimeistään {{3}} mennessä")
+  const got = body.type === "body" ? body.parameters.map((x) => x.text) : [];
+  assertEquals(got[0], "Lämmitys");
+  assert(/^la 24\.10\.(2026)? klo 16–20$/.test(got[1]), got[1]);
+  assert(/^la 24\.10\.(2026)? klo 12$/.test(got[2]), got[2]);
   const button = p2.payload.template.components[1];
   assertEquals(button.type === "button" ? button.parameters[0].text : "", "payload.sig");
 });

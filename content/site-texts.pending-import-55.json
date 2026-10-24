@@ -1,0 +1,22 @@
+[
+ {
+  "key": "shift_offer.already_taken.email_subject",
+  "lang": "fi",
+  "text": "Vuoro on jo mennyt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_155: \"vuoro on jo mennyt\" -ilmoituksen sähköpostikopion otsikko (Joonaksen päätös 4; ' – Tapio' lisätään perään; uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "shift_offer.already_taken.email_subject",
+  "lang": "en",
+  "text": "The shift has already been taken",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_155: \"vuoro on jo mennyt\" -ilmoituksen sähköpostikopion otsikko (Joonaksen päätös 4; ' – Tapio' lisätään perään; uusi teksti, ei vielä tuotannossa)"
+ }
+]

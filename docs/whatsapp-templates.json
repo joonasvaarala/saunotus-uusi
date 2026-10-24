@@ -110,13 +110,13 @@
       "components": [
         {
           "type": "BODY",
-          "text": "Hei! Vapaa {{1}} olisi tarjolla ajalla {{2}}. Kerro, otatko vuoron, viimeistään {{3}} mennessä painikkeesta.",
+          "text": "Hei, työvuoroon tarvitaan tekijää. Vuoro: {{1}}, aika {{2}}. Voitko tulla töihin? Vastaathan viimeistään {{3}} mennessä alla olevasta painikkeesta.",
           "example": {
             "body_text": [
               [
-                "lämmitysvuoro",
-                "la 24.10.2026 klo 16:00–20:00",
-                "22.10.2026 klo 12:00"
+                "Lämmitys",
+                "la 31.10. klo 12–18",
+                "to 29.10. klo 12"
               ]
             ]
           }
@@ -239,5 +239,12 @@
         }
       ]
     }
-  ]
+  ],
+  "booking_153_meta_submissions": {
+    "note": "Metalle lähetetyt pohjat (tila 24.10.2026). Tunnisteet eivät kuulu pohjan lähetyssisältöön. approved-kytkin (booking.settings shift_offer.wa_templates) pysyy false, kunnes Joonas kääntää sen hyväksynnän jälkeen.",
+    "tyovuoro_kysely": { "id": "1794385658497521", "status": "PENDING" },
+    "tyovuoro_muistutus": { "id": "1534095558743771", "status": "PENDING" },
+    "tyovuoro_jo_mennyt": { "id": "2100154127266819", "status": "PENDING" },
+    "tyovuoro_paivan_kooste": { "id": "1810762233406994", "status": "PENDING" }
+  }
 }

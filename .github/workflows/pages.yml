@@ -122,7 +122,7 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - run: deno test -A --no-lock --node-modules-dir=none booking/supabase/functions/pdf-golden.test.ts booking/supabase/functions/_tests/site_texts_test.ts booking/supabase/functions/_tests/mobilepay_test.ts booking/supabase/functions/_tests/procountor_test.ts booking/supabase/functions/_tests/vismapay_test.ts booking/supabase/functions/_tests/service_role_auth_test.ts booking/supabase/functions/_tests/booking_calendar_sync_test.ts booking/supabase/functions/_tests/johku_sync_test.ts booking/supabase/functions/shift-offer-engine/core_test.ts booking/supabase/functions/shift-offer-engine/whatsapp_test.ts booking/supabase/functions/shift-offer-engine/inbound_test.ts booking/supabase/functions/shift-offer-engine/api_test.ts booking/supabase/functions/shift-offer-engine/booking153_test.ts booking/supabase/functions/send-emails/staff_notice_test.ts booking/vuoro/vuoro_test.ts booking/vuoro/oma/oma_test.ts
+      - run: deno test -A --no-lock --node-modules-dir=none booking/supabase/functions/pdf-golden.test.ts booking/supabase/functions/_tests/site_texts_test.ts booking/supabase/functions/_tests/mobilepay_test.ts booking/supabase/functions/_tests/procountor_test.ts booking/supabase/functions/_tests/vismapay_test.ts booking/supabase/functions/_tests/service_role_auth_test.ts booking/supabase/functions/_tests/booking_calendar_sync_test.ts booking/supabase/functions/_tests/johku_sync_test.ts booking/supabase/functions/shift-offer-engine/core_test.ts booking/supabase/functions/shift-offer-engine/whatsapp_test.ts booking/supabase/functions/shift-offer-engine/inbound_test.ts booking/supabase/functions/shift-offer-engine/api_test.ts booking/supabase/functions/shift-offer-engine/booking153_test.ts booking/supabase/functions/shift-offer-engine/booking155_test.ts booking/supabase/functions/send-emails/staff_notice_test.ts booking/vuoro/vuoro_test.ts booking/vuoro/oma/oma_test.ts
       # Vuorotarjousmoottorin Deno-ydin (core_test.ts), WhatsApp-sovitin (whatsapp_test.ts),
       # saapuvien viestien itsepalvelu (inbound_test.ts),
       # JSON-rajapinta (api_test.ts) ja staattinen vastaussivu (vuoro_test.ts) ajetaan yllä.
@@ -239,6 +239,10 @@ jobs:
       # kieltäytyjälle ei enää viestejä), henkilökunnan oma sivu /vuoro/oma/ (pysyvä token-linkki), WhatsApp-pohjat ja tervetuloviesti (oletus pois).
       # Tekstit content/site-texts.pending-import-53.json. SQL: t153 PG17:ssä (ketju + 153 + rollback + uudelleenajo). Moottori pysyy pois päältä.
       - run: node --test booking/tests/vuorotarjous-153.test.mjs
+      # booking_155: jatkopaketti. "Vuoro on jo mennyt" WhatsAppilla ja sähköpostilla (oletus päällä, sähköposti vain email_enabled-asetuksella),
+      # toiselle mennyt vuoro katoaa omalta sivulta, oma sivu ohjaa Joonakselle tai Otolle, tyovuoro_kysely-live-teksti ja lyhyet parametrit,
+      # tick-ajastuksen käsiskripti. Tekstit pending-import-55. SQL: t155 PG17:ssä (153 + 155 + rollback + uudelleenajo). Moottori pysyy pois päältä.
+      - run: node --test booking/tests/vuorotarjous-155.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
