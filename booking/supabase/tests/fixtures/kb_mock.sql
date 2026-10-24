@@ -171,3 +171,5 @@ insert into kb.businesses (id, legal_name, trade_name, business_id, street_addre
 values (1, 'Havuhattu Oy', 'Sipoonjoen perinnesauna', '3018112-1', 'Hindsbyntie 124', '04130', 'Sipoo', 'FI',
         'savusauna@saunotus.fi', '010 299 2866', 'https://saunotus.fi', '', 'fi')
 on conflict (id) do nothing;
+-- kb_products_duration_text_en (Bottiavustus, tuotanto 24.10.2026, versio 20261024121904): EN-kestoteksti. Tarvitaan booking_147:lle (public_catalog / admin_list_products).
+alter table kb.products add column if not exists duration_text_en text;
