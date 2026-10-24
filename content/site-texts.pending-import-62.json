@@ -1,0 +1,460 @@
+[
+ {
+  "key": "ui.shop.error_ritual_addon_full",
+  "lang": "fi",
+  "text": "Valittu rituaaliaika ei ole enää vapaana. Valitse toinen aika tai jatka ilman rituaalia.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.error_ritual_addon_full",
+  "lang": "en",
+  "text": "The ritual time you chose is no longer available. Choose another time or continue without the ritual.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.error_ritual_addon_time",
+  "lang": "fi",
+  "text": "Rituaalin aika ei sovi valitulle vuorolle. Valitse jokin tarjolla olevista ajoista.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.error_ritual_addon_time",
+  "lang": "en",
+  "text": "This ritual time does not fit the selected session. Choose one of the times shown.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.error_ritual_addon_persons",
+  "lang": "fi",
+  "text": "Tarkista rituaalin osallistujamäärä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.error_ritual_addon_persons",
+  "lang": "en",
+  "text": "Please check the number of ritual guests.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.error_ritual_addon_unavailable",
+  "lang": "fi",
+  "text": "Saunotusrituaali ei ole juuri nyt varattavissa. Jatka ilman rituaalia.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.error_ritual_addon_unavailable",
+  "lang": "en",
+  "text": "The sauna ritual cannot be booked right now. Please continue without the ritual.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.error_ritual_addon_not_allowed",
+  "lang": "fi",
+  "text": "Rituaalia ei voi lisätä tähän vuoroon.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.error_ritual_addon_not_allowed",
+  "lang": "en",
+  "text": "A ritual cannot be added to this session.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.error_ritual_addon_invalid",
+  "lang": "fi",
+  "text": "Rituaalin valinta on virheellinen. Valitse aika uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.error_ritual_addon_invalid",
+  "lang": "en",
+  "text": "The ritual selection is not valid. Please choose the time again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_title",
+  "lang": "fi",
+  "text": "Saunotusrituaali vuoron yhteyteen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_title",
+  "lang": "en",
+  "text": "Add a sauna ritual to your session",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_lead",
+  "lang": "fi",
+  "text": "Saunottajan ohjaama {{var:min}} minuutin rituaali hoitosauna Raunissa pienryhmässä. Valitse aika ennen vuoroa, sen aikana tai lopuksi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [
+   "{{var:min}}"
+  ],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_lead",
+  "lang": "en",
+  "text": "A {{var:min}}-minute ritual led by a sauna host in the healing sauna Rauni, in a small group. Choose a time before, during or at the end of your session.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:min}}"
+  ],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_price",
+  "lang": "fi",
+  "text": "{{var:price}} / hlö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:price}}"
+  ],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_price",
+  "lang": "en",
+  "text": "{{var:price}} / person",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:price}}"
+  ],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_none",
+  "lang": "fi",
+  "text": "Ei rituaalia",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_none",
+  "lang": "en",
+  "text": "No ritual",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_before",
+  "lang": "fi",
+  "text": "ennen vuoroa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_before",
+  "lang": "en",
+  "text": "before the session",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_start",
+  "lang": "fi",
+  "text": "vuoron alussa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_start",
+  "lang": "en",
+  "text": "at the start",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_during",
+  "lang": "fi",
+  "text": "vuoron aikana",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_during",
+  "lang": "en",
+  "text": "during the session",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_end",
+  "lang": "fi",
+  "text": "vuoron päätteeksi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_end",
+  "lang": "en",
+  "text": "at the end",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_spots",
+  "lang": "fi",
+  "text": "enintään {{var:n}} hlö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_spots",
+  "lang": "en",
+  "text": "up to {{var:n}} guests",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_qty",
+  "lang": "fi",
+  "text": "Rituaaliin osallistuu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_qty",
+  "lang": "en",
+  "text": "Ritual guests",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_fewer",
+  "lang": "fi",
+  "text": "Vähemmän osallistujia",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_fewer",
+  "lang": "en",
+  "text": "Fewer guests",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_more",
+  "lang": "fi",
+  "text": "Enemmän osallistujia",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_more",
+  "lang": "en",
+  "text": "More guests",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_summary",
+  "lang": "fi",
+  "text": "klo {{var:time}} · {{var:n}} hlö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:time}}",
+   "{{var:n}}"
+  ],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_summary",
+  "lang": "en",
+  "text": "{{var:time}} · {{var:n}} guests",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:time}}",
+   "{{var:n}}"
+  ],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_lost",
+  "lang": "fi",
+  "text": "Valitsemasi rituaaliaika ei ole enää vapaana tälle henkilömäärälle. Valitse toinen aika.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_lost",
+  "lang": "en",
+  "text": "The ritual time you chose is no longer available for this number of guests. Please choose another time.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_annual",
+  "lang": "fi",
+  "text": "Vuosikorttivaraukseen ei voi lisätä rituaalia.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_annual",
+  "lang": "en",
+  "text": "A ritual cannot be added to an annual card booking.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_conf_note",
+  "lang": "fi",
+  "text": "Varaukseen kuuluu saunotusrituaali. Muutokset ja peruutukset sähköpostilla, niin siirrämme vuoron ja rituaalin yhdessä:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_conf_note",
+  "lang": "en",
+  "text": "Your booking includes a sauna ritual. For changes and cancellations please email us and we will move the session and the ritual together:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "booking_166 (saunarituaali yleisen vuoron lisäpalveluna, Joonas 24.10.2026): uusi avain, FI+EN. Bottiavustus tuo admin_texts_importilla migraation 20261024380000_booking_166_ritual_addon.sql jälkeen. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ }
+]

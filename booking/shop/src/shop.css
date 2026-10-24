@@ -557,3 +557,19 @@ button.bk-cell.quiet.sel{box-shadow:inset 0 -4px 0 #F4EFE7}
 .bk-quiet-line .bk-quiet-badge{margin-right:4px}
 .bk-quiet-note{border-left:4px solid #7A5530;background:#F4EFE7;color:#2B3A30;padding:8px 12px;border-radius:6px}
 @media (forced-colors:active){.bk-quiet-badge{border:1px solid CanvasText}button.bk-cell.quiet{outline:2px solid CanvasText}}
+/* booking_166: saunarituaali yleisen vuoron lisäpalveluna (värit #2B3A30 / #F4EFE7 / #7A5530; toimii 390 px) */
+.bk-ritual>.bk-hint{font-size:14px;margin:0 0 12px}
+.bk-ritual-price{color:#7A5530;white-space:nowrap}
+.bk-ritual-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.bk-ritual-opt{display:flex;align-items:center;gap:12px;padding:10px 14px;min-height:48px;border:1px solid var(--line);border-radius:12px;background:#fff;color:#2B3A30}
+.bk-ritual-opt input{width:22px;height:22px;flex:none;margin:0;accent-color:#2B3A30}
+.bk-ritual-opt label{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;flex:1;min-width:0;cursor:pointer}
+.bk-ritual-opt:has(input:checked){border-color:#2B3A30;background:#F4EFE7;box-shadow:inset 0 0 0 1px #2B3A30}
+.bk-ritual-opt:has(input:disabled){opacity:.6}
+.bk-ritual-opt:focus-within{outline:2px solid #7A5530;outline-offset:2px}
+.bk-ritual-pos{font-size:14px;color:#6B5E52}
+.bk-ritual-qty{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;margin-top:12px}
+.bk-ritual-qty[hidden]{display:none}
+.bk-ritual-qty .bk-stepper input{width:64px}
+.bk-ritual-msg:empty{display:none}
+.bk-ritual [hidden]{display:none}

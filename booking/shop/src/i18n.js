@@ -4,6 +4,7 @@ import { PHONE_DISPLAY_FI, PHONE_DISPLAY_EN } from './phone.js';
 import { WAITLIST_TEXTS } from './waitlist-texts.js';
 import { DISCOUNT_TEXTS } from './discount-texts.js';
 import { QUIET_TEXTS } from './quiet-texts.js';
+import { RITUAL_TEXTS, RITUAL_ERRORS } from './ritual-addon-texts.js';
 export const T = {
   fi: {
     title: 'Varaa saunaelämys', lead: 'Valitse kokemus, päivä ja vuoro. Varaus vahvistetaan heti.',
@@ -136,3 +137,7 @@ Object.assign(T.fi, DISCOUNT_TEXTS.fi);   // paketti 10 / booking_142: alennus- 
 Object.assign(T.en, DISCOUNT_TEXTS.en);
 Object.assign(T.fi, QUIET_TEXTS.fi);   // booking_162: hiljaisten aikojen ale (ui.shop.quiet_*)
 Object.assign(T.en, QUIET_TEXTS.en);
+Object.assign(T.fi, RITUAL_TEXTS.fi);   // booking_166: saunarituaali yleisen vuoron lisäpalveluna (ui.shop.ritual_*)
+Object.assign(T.en, RITUAL_TEXTS.en);
+Object.assign(T.fi.errors, RITUAL_ERRORS.fi);   // booking_166: ui.shop.error_ritual_addon_*
+Object.assign(T.en.errors, RITUAL_ERRORS.en);

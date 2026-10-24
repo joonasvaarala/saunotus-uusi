@@ -9,6 +9,7 @@ import { createOrderMock } from './order-mock.js';
 import { isHoldScenario, holdMockParams, HOLD_ERRORS } from './hold-mock.js';
 import { pickCatalog } from './catalog-audience.js';
 import { mockQuietOffers } from './quiet-offers-mock.js';
+import { createRitualMock, SHARED_PRODUCT } from './ritual-addon-mock.js';
 
 const KEY = 'booking.shopmock.v1';
 const MUTATING = new Set(['public_create_treatment_booking', 'public_change_treatment_booking']);
@@ -23,6 +24,8 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
   const saveWaitlist = () => { try { storage?.setItem(waitlistKey, JSON.stringify([...waitlist.values()])); } catch { /* storage pois */ } };
   const annualSale = /[?&]annual=1(&|$)/.test(globalThis.location?.search || '');
   const quietOn = /[?&]quiet=1(&|$)/.test(globalThis.location?.search || '');   // booking_162
+  // booking_166: ?ritual=1 → yleinen vuoro (kb 1) + saunarituaali lisäpalveluna (ritual-addon-mock.js); oletus pois (muut mockit ennallaan)
+  const ritual = /[?&]ritual=1(&|$)/.test(globalThis.location?.search || '') ? createRitualMock({ storage, now, fail }) : null;
   const noTimes = fail === 'notimes';   // ?mock=1&fail=notimes: public_treatment_availability palauttaa aina tyhjän ("Ei vapaita aikoja" -tila)
   let failOnce = ['option_required', 'invalid_option', 'online_payment_unavailable', 'too_many_pending'].includes(fail) ? fail : null;
   try { restoreBookings(JSON.parse(storage?.getItem(KEY) || 'null')); } catch { /* tyhjä alku */ }
@@ -39,7 +42,15 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
       const CK = ['checkout_state', 'awaiting_payment', 'hold_kind', 'hold_expires_at', 'seconds_left', 'server_now', 'remaining_amount', 'payment_in_progress'];
       return { ...b, status: po.status, payment_status: po.payment_status, total: po.total, paid: po.paid, unpaid: po.unpaid, ...(pay.hold ? { ...Object.fromEntries(CK.map((k) => [k, po[k]])), payment_methods: pay.hold.methods() } : {}) };
     }
+    if (ritual) {
+      const rr = ritual(name, args);
+      if (rr !== undefined) return rr;
+      if (name === 'public_catalog' || name === 'public_catalog_for') return [SHARED_PRODUCT, ...(await rpc(name === 'public_catalog' ? '__catalog' : '__catalog_for', args))];
+      if (name === 'public_availability_all') return [...ritual('public_availability', { ...args, p_product_id: 1 }).map((r) => ({ ...r, product_id: 1 })), ...(await rpc('__availability_all', args))];
+    }
     switch (name) {
+      case '__catalog': return catalogEntries();
+      case '__catalog_for': return pickCatalog(catalogEntries(), args.p_audience);
       case 'public_join_waitlist': {
         const token = globalThis.crypto?.randomUUID?.() || '11111111-1111-4111-8111-' + String(waitlist.size + 1).padStart(12, '0');
         const old = [...waitlist.values()].find((x) => x.rule_id === +args.p_rule_id && x.date === args.p_date && x.email === String(args.p_email || '').toLowerCase() && x.status !== 'cancelled');
@@ -64,6 +75,7 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
       case 'public_buy_annual_card': return annualSale ? { ok: true, order_no: 9142, token: '00000000-0000-4000-8000-000000000142', status: 'pending', total: 290, payment_mode: 'pay_later' } : { ok: false, code: 'sale_disabled', message: 'Vuosikorttien verkkomyynti ei ole käytössä' };
       case 'public_catalog': return catalogEntries();
       case 'public_catalog_for': return pickCatalog(catalogEntries(), args.p_audience);
+      case '__availability_all':
       case 'public_availability_all': {
         const catalog = pickCatalog(catalogEntries(), args.p_audience);
         return catalog.filter((p) => p.booking_kind !== 'slots').flatMap((p) => {
