@@ -240,12 +240,12 @@ async function main() {
     const note = o.change_deadline ? h('p', { class: 'bk-note', 'data-testid': 'change-note', text: o.can_change ? t.changeNote.replace('{date}', dt(o.change_deadline)) : t.changeClosed }) : null;
     const guides = instructionsSection(o.instructions);
     const treats = (o.upsell_treatments || []).length ? h('div', { 'data-testid': 'upsell-treatments' }, h('p', { class: 'bk-note', text: t.treatLead }), h('ul', { class: 'ord-lines' }, o.upsell_treatments.map((x) => h('li', { text: nm(x) })))) : null;
-    const add = closedHold ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-a' }, h('h3', { id: 'ord-a', text: t.addTitle }), o.can_add && o.upsell_addons.length ? addForm(o) : h('p', { class: 'bk-note', text: t.addClosed }), treats,
+    const add = closedHold || o.reservations.length === 0 ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-a' }, h('h3', { id: 'ord-a', text: t.addTitle }), o.can_add && o.upsell_addons.length ? addForm(o) : h('p', { class: 'bk-note', text: t.addClosed }), treats,
       h('p', { class: 'bk-note' }, `${t.addNewBooking} `, h('a', { href: S.shopHref, text: t.addNewBookingLink })));
     const extra = guides || add ? h('div', { class: 'ord-extra', 'data-testid': 'order-extra' }, guides, add) : null;
-    const cancel = closedHold ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), note,
+    const cancel = closedHold || o.reservations.length === 0 ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), note,
       o.cancel_request ? h('p', { class: 'bk-ok', role: 'status', 'data-testid': 'cancel-pending', text: t[`cancel.${o.cancel_request.status}`] || t['cancel.open'] }) : cancelForm());
-    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, closedEl, resv, optSec, lines, giftCards, claimBox, pay, giftUse, receipts, extra, cancel, msg, phoneBox()));
+    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, closedEl, resv, optSec, lines, pay, giftCards, claimBox, giftUse, receipts, extra, cancel, msg, phoneBox()));
   }
   async function download(btn, receiptNo) {
     btn.disabled = true;

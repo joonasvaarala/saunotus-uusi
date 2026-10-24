@@ -12,7 +12,7 @@ export function normCheckout(r) {
     confirmed: s === 'confirmed' || s === 'confirmed_unpaid', holdKind: r.hold_kind ?? null, expiresAt: ms(r.hold_expires_at), serverNow: ms(r.server_now), secondsLeft: num(r.seconds_left), remaining: num(r.remaining_amount ?? r.unpaid),
     inProgress: r.payment_in_progress === true || s === 'processing_payment', cancelReason: typeof r.cancel_reason === 'string' && r.cancel_reason ? r.cancel_reason : null };
 }
-export const isHoldView = (co) => !!co && HOLD_VIEWS.includes(co.state);
+export const isHoldView = (co) => !!co && HOLD_VIEWS.includes(co.state) && (co.state !== 'awaiting_payment' || co.expiresAt != null || co.secondsLeft != null);
 // Pitotila (kassa): palvelimen public_checkout_payment_options().hold_until_paid; jos RPC ei vastaa, vanha asetus public_payment_mode (vain lukeminen)
 export function holdModeOf(checkout, settings) {
   const fromSettings = settings?.public_payment_mode === 'hold_until_paid', sm = +settings?.hold_minutes || 15;
@@ -51,7 +51,10 @@ export const POLL = { awaitingMs: 30000, processingMs: 3000, processingLongAfter
 export function nextPollIn(co, { leftMs = 0, processingElapsed = 0 } = {}) {
   if (!co) return null;
   if (co.processing) return processingElapsed >= POLL.processingLongAfterMs ? POLL.processingSlowMs : POLL.processingMs;
-  if (co.state === 'awaiting_payment') return leftMs <= 0 ? POLL.zeroRetryMs : Math.min(POLL.awaitingMs, Math.max(500, leftMs));
+  if (co.state === 'awaiting_payment') {
+    if (!isHoldView(co)) return null; // Lahjakortilla ei ole paikkavarausta eikä ajastettua uudelleenkyselyä.
+    return leftMs <= 0 ? POLL.zeroRetryMs : Math.min(POLL.awaitingMs, Math.max(500, leftMs));
+  }
   return null;
 }
 // Näkymä pitää piirtää uudelleen kun tila vaihtuu (tai maksu/loppusumma muuttuu)

@@ -58,7 +58,7 @@ test('järjestys + kompakti banneri: otsikko + tilabadge → pitopaneeli → tii
   assert.ok(shop.includes('holdHost, mpHost, dl,'), 'vahvistussivu: pitopaneeli ennen yhteenvetoa');
   assert.ok(shop.includes('dl.after(secEl)'), 'vahvistussivu: maksuosio yhteenvedon alle');
   assert.equal((shop.match(/dl\.dataset\.testid = 'conf-summary'/g) || []).length, 1, 'vahvistussivun yhteenveto rakennetaan vain kerran (ei duplikaattia)');
-  assert.ok(/head, holdEl, closedEl, resv, optSec, lines, giftCards, claimBox, pay,/.test(ord), 'tilaussivu: pitopaneeli → peruutusviesti → varaus + summat → maksuosio');
+  assert.ok(/head, holdEl, closedEl, resv, optSec, lines, pay, giftCards, claimBox,/.test(ord), 'tilaussivu: pitopaneeli → peruutusviesti → varaus + summat → maksuosio (booking_131: maksuosio ennen lahjakortteja)');
   assert.ok(ui.includes("class: kind === 'awaiting' ? 'sr-only' : ''"), 'awaiting: "Maksa varaus vahvistaaksesi" -otsikko vain ruudunlukijalle (toisto h2:n ja tilabadgen kanssa)');
   assert.ok(css.includes('.bk-hold-awaiting{display:flex'), 'kompakti banneri (lause + laskuri samalla rivillä)');
   assert.equal(ht('fi', 'summary.remaining'), 'Maksettavaa jäljellä'); assert.equal(ht('en', 'summary.remaining'), 'Amount left to pay');
@@ -107,7 +107,9 @@ test('normCheckout: kaikki 7 tilaa; vanha backend (ei checkout_state) → null',
   assert.equal(c.awaiting, true); assert.equal(c.processing, false); assert.equal(c.remaining, 40); assert.equal(c.holdKind, 'checkout'); assert.equal(c.secondsLeft, 600);
   assert.equal(normCheckout({ checkout_state: 'processing_payment' }).processing, true); assert.equal(normCheckout({ checkout_state: 'processing_payment' }).inProgress, true);
   assert.equal(normCheckout({ checkout_state: 'preliminary' }).preliminary, true); assert.equal(normCheckout({ checkout_state: 'expired' }).expired, true); assert.equal(normCheckout({ checkout_state: 'confirmed_unpaid' }).confirmed, true);
-  assert.deepEqual(STATES.filter((s) => isHoldView(normCheckout({ checkout_state: s }))), ['awaiting_payment', 'processing_payment', 'preliminary', 'expired']);
+  assert.deepEqual(STATES.filter((s) => isHoldView(normCheckout({ checkout_state: s, seconds_left: 600 }))), ['awaiting_payment', 'processing_payment', 'preliminary', 'expired']);
+  // booking_131: varaukseton lahjakorttitilaus (awaiting_payment ilman hold_expires_at/seconds_left) ei ole pitonäkymä
+  assert.deepEqual(STATES.filter((s) => isHoldView(normCheckout({ checkout_state: s }))), ['processing_payment', 'preliminary', 'expired']);
   assert.equal(normCheckout({ checkout_state: 'expired', seconds_left: null }).secondsLeft, null);
   assert.equal(normCheckout({ checkout_state: 'cancelled', cancel_reason: 'hold_expired' }).cancelReason, 'hold_expired');
   assert.equal(normCheckout({ checkout_state: 'cancelled' }).cancelReason, null);
@@ -169,7 +171,8 @@ test('ilmoitusportaat: vain 5 min / 2 min / 1 min / 30 s, kukin kerran; ei joka 
   assert.equal(spoken('fi', 300000, ht), '5 minuuttia'); assert.equal(spoken('en', 60000, ht), '1 minute'); assert.equal(spoken('fi', 30000, ht), '30 sekuntia');
 });
 test('kyselyaikataulu: käsittely 3 s (hidastuu 2 min jälkeen), odotus ≤30 s ja nollalla 3 s; muut tilat ei kyselyä', () => {
-  const st = (s) => normCheckout({ checkout_state: s });
+  const st = (s) => normCheckout({ checkout_state: s, ...(s === 'awaiting_payment' ? { seconds_left: 600 } : {}) });
+  assert.equal(nextPollIn(normCheckout({ checkout_state: 'awaiting_payment' }), { leftMs: 600000 }), null, 'booking_131: lahjakortti ilman pitoa → ei kyselyä');
   assert.equal(nextPollIn(st('processing_payment'), { processingElapsed: 0 }), POLL.processingMs);
   assert.equal(nextPollIn(st('processing_payment'), { processingElapsed: 130000 }), POLL.processingSlowMs);
   assert.equal(nextPollIn(st('awaiting_payment'), { leftMs: 600000 }), POLL.awaitingMs);
