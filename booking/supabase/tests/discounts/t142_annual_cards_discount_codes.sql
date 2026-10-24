@@ -80,7 +80,8 @@ begin
   perform pg_temp.ck((select kind = 'percent' and value = 100 and usage_type = 'permanent' and target_scope = 'product' and product_ids = '{1,2,3,4,6}'::bigint[]
                         from booking.discount_codes where code = 'VUOSI-TESTI'), 'A7: yhteinen vuosikorttikoodi: 100 %, pysyvä, tuotteet 1,2,3,4,6');
   j := booking.admin_create_annual_card(v_cust, v_today, v_today + 364, null, 'testi');
-  perform pg_temp.ck(j ->> 'code' ~ '^[A-Z]+[0-9]{1,3}$', 'A8: vuosikortin koodi SANA+numero: ' || (j ->> 'code'));
+  -- booking_143: generoitu koodi on 10 satunnaismerkkiä (ennen SANA+numero), ks. t143
+  perform pg_temp.ck(j ->> 'code' ~ '^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{10}$', 'A8: vuosikortin koodi generoitu (booking_143: 10 satunnaismerkkiä): ' || (j ->> 'code'));
   v_code := j ->> 'code';
   perform pg_temp.ck(pg_temp.err(format($$select booking.admin_create_annual_card(%s, %L, %L, 'KESA20')$$, v_cust2, v_today, v_today + 30)) = 'code_exists', 'A9: alennuskoodia ei voi käyttää vuosikortin koodina');
   perform pg_temp.ck(pg_temp.err(format($$select booking.admin_save_discount_code(null, '{"code":"%s","kind":"percent","value":"5"}')$$, v_code)) = 'code_exists', 'A10: vuosikortin koodia ei voi käyttää alennuskoodina');
@@ -170,7 +171,8 @@ begin
   -- ===== Kassa: vuosikortti =====
   perform pg_temp.ck((pg_temp.prev(v_code, r_men, d_mon, 1, null, 'kortti142@example.test') ->> 'type') = 'annual_card'
     and (pg_temp.prev(v_code, r_men, d_mon, 1, null, 'kortti142@example.test') ->> 'total')::numeric = 0, 'K1: esikatselu vuosikortille 0 €');
-  perform pg_temp.ck(pg_temp.prev(v_code, r_men, d_mon, 1, null, 'joku@example.test') ->> 'code' = 'annual_card_customer_mismatch', 'K2: väärä sähköposti');
+  -- booking_143: väärä omistaja → sama geneerinen virhe kuin tuntemattomalla koodilla (ennen annual_card_customer_mismatch)
+  perform pg_temp.ck(pg_temp.prev(v_code, r_men, d_mon, 1, null, 'joku@example.test') ->> 'code' = 'invalid_code', 'K2: väärä sähköposti → invalid_code');
   perform pg_temp.ck(pg_temp.book(r_peat, d_thu, 1, 'k3a142@example.test', v_code, null, '0401112222') ->> 'code' = 'annual_card_product'
     and pg_temp.book(r_priv, d_mon, 1, 'k3b142@example.test', v_code, null, '0401112222') ->> 'code' = 'annual_card_product', 'K3: Turvetorstai ja yksityisvuoro eivät käy');
   perform pg_temp.ck(pg_temp.book(r_men, d_mon, 2, 'k4a142@example.test', v_code, null, '0401112222') ->> 'code' = 'annual_card_persons'

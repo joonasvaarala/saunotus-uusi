@@ -4,9 +4,10 @@
 // jako riveille suhteessa riviin, viimeinen rivi saa pyöristyserotuksen).
 import { DISCOUNT_TEXTS } from './discount-texts.js';
 
-export const NATURE_WORDS = Object.freeze(['HIRVI', 'NORPPA', 'KARHU', 'KUUSI', 'KOIVU', 'HONKA', 'HALTI', 'AALTO', 'USVA', 'KALLIO', 'SAMMAL', 'HAVU', 'KANTO',
-  'JOUTSEN', 'ILVES', 'KETTU', 'ORAVA', 'PIHLAJA', 'KATAJA', 'SUO', 'LAMPI', 'KOSKI']);
 export const DISCOUNT_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+// vuosikortin koodi (booking_143, sama kuin booking._generate_annual_card_code): 10 satunnaismerkkiä ilman 0/O, 1/I/L
+export const ANNUAL_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+export const ANNUAL_CODE_LENGTH = 10;
 export const CODE_RE = /^[A-Z0-9-]{3,40}$/;
 // sama kuin booking._norm_code: välilyönnit pois, isot kirjaimet
 export const normalizeCode = (code) => String(code ?? '').replace(/\s/g, '').toUpperCase();
@@ -14,8 +15,16 @@ export const validCodeFormat = (code) => CODE_RE.test(normalizeCode(code));
 export function generatedDiscountCode(random = Math.random) {
   return Array.from({ length: 6 }, () => DISCOUNT_ALPHABET[Math.floor(random() * DISCOUNT_ALPHABET.length)]).join('');
 }
-export function generatedAnnualCardCode(random = Math.random) {
-  return `${NATURE_WORDS[Math.floor(random() * NATURE_WORDS.length)]}${1 + Math.floor(random() * 999)}`;
+export function generatedAnnualCardCode(random) {
+  const n = ANNUAL_ALPHABET.length;
+  if (random) return Array.from({ length: ANNUAL_CODE_LENGTH }, () => ANNUAL_ALPHABET[Math.floor(random() * n)]).join('');
+  let out = '';
+  while (out.length < ANNUAL_CODE_LENGTH) {   // kryptografinen satunnaisuus, hylkäysotanta (248 = 8 × 31) → tasajakauma
+    for (const v of globalThis.crypto.getRandomValues(new Uint8Array(16))) {
+      if (v < 248 && out.length < ANNUAL_CODE_LENGTH) out += ANNUAL_ALPHABET[v % n];
+    }
+  }
+  return out;
 }
 const r2 = (n) => Math.round(Number(n) * 100) / 100;
 // lines: [{ key, product_id, kind: 'reservation'|'addon'|'product', gross }]
