@@ -1,4 +1,5 @@
 -- t134: jonotuslistan henkilömäärä ja mahtuvuuteen perustuva jako (booking_134).
+-- booking_139: vuoro on 5 viikon päässä (≥ 48 h) → vain yksi pito kerrallaan; pidon aikana muut eivät saa ilmoitusta.
 -- Ajetaan migraatioiden ja fixtures/10_test_helpers.sql:n JÄLKEEN (mock-data: Miesten sauna ma, kapasiteetti 16).
 -- Yksi DO-lohko; tahallinen poikkeus kumoaa kaiken. Tulos: TESTRESULT pass=… fail=…
 set local lock_timeout = '3s';
@@ -10,6 +11,8 @@ create function pg_temp.rid(p_email text) returns bigint language sql as $$
   select r.id from booking.reservations r join booking.orders o on o.id = r.order_id join booking.customers c on c.id = o.customer_id where c.email = p_email order by r.id limit 1 $$;
 create function pg_temp.mails(p_email text) returns int language sql as $$
   select count(*)::int from booking.email_outbox where kind = 'waitlist_spot_freed' and payload ->> 'to_email' = p_email $$;
+create function pg_temp.expire_hold(p_email text) returns void language sql as $$
+  update booking.waitlist_entries set notified_at = now() - interval '121 minutes', hold_expires_at = now() - interval '1 minute' where customer_email = p_email $$;
 do $t$
 declare
   v_rule bigint := test.rule('Miesten sauna%'); d date := test.next_dow(1) + 35;
@@ -56,19 +59,30 @@ begin
   perform pg_temp.ck(c3 ->> 'code' = 'not_found', 'D3: tuntematon token');
   perform pg_temp.ck(not (c ? 'customer_email') and not (c ? 'customer_name') and not (c ? 'token'), 'D4: ei henkilötietoja');
 
-  -- Vapautuu 5 paikkaa (6 vapaana): järjestyksessä 2 hengen (mahtuu) ja 1 hengen; 6 hengen ei mahdu jäljelle jääviin.
+  -- Vapautuu 5 paikkaa (6 vapaana) yksi-jonon pidon aikana (booking_139: yksi pito kerrallaan → muut eivät saa mitään).
   update booking.reservations set status = 'cancelled' where id = pg_temp.rid('viisi@t134.example');
-  perform pg_temp.ck(pg_temp.st('kaksi@t134.example') = 'notified', 'E1: 2 hengen jonovaraus saa ilmoituksen');
-  perform pg_temp.ck(pg_temp.st('toinen@t134.example') = 'notified', 'E2: jäljelle jääneet paikat seuraavalle mahtuvalle');
-  perform pg_temp.ck(pg_temp.st('kuusi@t134.example') = 'waiting', 'E3: 6 hengen ei mahdu jäljelle jääviin (6 - 2 - 1)');
+  perform pg_temp.ck(pg_temp.st('kaksi@t134.example') = 'waiting' and pg_temp.mails('kaksi@t134.example') = 0, 'E1: pito voimassa → 2 hengen jonovaraus ei saa vielä ilmoitusta');
+  perform pg_temp.ck(pg_temp.st('toinen@t134.example') = 'waiting' and pg_temp.st('kuusi@t134.example') = 'waiting', 'E2: pidon aikana muut eivät saa ilmoitusta');
+  -- Pito vanhenee; pidon aikana vapautuneet 5 paikkaa ovat uusi vapautuminen → yksi pito ensimmäiselle mahtuvalle (2 hlöä).
+  perform pg_temp.expire_hold('yksi-jono@t134.example');
+  perform booking.waitlist_sweep();
+  perform pg_temp.ck(pg_temp.st('kaksi@t134.example') = 'notified' and (select hold_expires_at > now() from booking.waitlist_entries where customer_email = 'kaksi@t134.example'), 'E3: uusi vapautuminen → 2 hengen jonovaraus saa pidon');
+  perform pg_temp.ck(pg_temp.st('toinen@t134.example') = 'waiting' and pg_temp.st('kuusi@t134.example') = 'waiting', 'E3b: vain yksi pito, muut odottavat');
 
-  -- Paikat täyttyvät ennen lunastusta → lunastus estyy ja jonovaraus palaa jonoon.
-  b := test.pub_book(v_rule, d, 6, 'ehti@t134.example'); perform pg_temp.ck((b ->> 'ok')::boolean, 'F1: joku muu varaa 6 paikkaa');
+  -- booking_139: pidon aikana pidetyt 2 paikkaa eivät ole julkisessa myynnissä (6 vapaata, 4 myynnissä).
+  b := test.pub_book(v_rule, d, 6, 'liikaa@t134.example'); perform pg_temp.ck(not (b ->> 'ok')::boolean and b ->> 'code' = 'capacity_exceeded', 'F0: pidetyt paikat eivät ole myynnissä (6 ei mahdu)');
+  b := test.pub_book(v_rule, d, 4, 'ehti@t134.example'); perform pg_temp.ck((b ->> 'ok')::boolean, 'F1: joku muu varaa 4 myynnissä olevaa paikkaa');
+  -- Pito vanhenee → paikat palaavat myyntiin ja ne myydään ennen lunastusta → lunastus estyy ja jonovaraus palaa jonoon.
+  perform pg_temp.expire_hold('kaksi@t134.example');
+  b := test.pub_book(v_rule, d, 2, 'ehti2@t134.example'); perform pg_temp.ck((b ->> 'ok')::boolean, 'F1b: vanhentuneen pidon paikat myydään');
+  perform booking.waitlist_sweep();   -- minuutin ajo kirjaa vapaan kapasiteetin laskun (offered_free = 0)
   perform test.anon(); c := booking.public_waitlist_claim((ja ->> 'token')::uuid); perform test.logout();
   perform pg_temp.ck((c ->> 'ok')::boolean and not (c ->> 'enough')::boolean, 'F2: lunastus estyy, kun paikat eivät enää riitä');
   perform pg_temp.ck(pg_temp.st('kaksi@t134.example') = 'waiting', 'F3: jonovaraus palaa jonoon');
   update booking.reservations set status = 'cancelled' where id = pg_temp.rid('ehti@t134.example');
-  perform pg_temp.ck(pg_temp.st('kaksi@t134.example') = 'notified' and pg_temp.mails('kaksi@t134.example') = 2, 'F4: uusi vapautuminen ilmoittaa uudelleen');
+  -- booking_139: uusi vapautuminen → pito ensimmäiselle mahtuvalle, jolla ei ole ollut pitoa (kaksi on jo ollut pidossa).
+  perform pg_temp.ck(pg_temp.st('toinen@t134.example') = 'notified' and (select hold_expires_at > now() from booking.waitlist_entries where customer_email = 'toinen@t134.example'), 'F4: uusi vapautuminen → pito seuraavalle, jolla ei ole ollut pitoa');
+  perform pg_temp.ck(pg_temp.st('kaksi@t134.example') = 'waiting' and pg_temp.mails('kaksi@t134.example') = 1 and pg_temp.st('kuusi@t134.example') = 'waiting', 'F4b: aiemmin pidossa ollut ei saa uutta pitoa; ei muita ilmoituksia pidon aikana');
 
   perform pg_temp.ck(has_function_privilege('anon', 'booking.public_waitlist_claim(uuid)', 'execute'), 'G1: anon saa lunastaa');
   perform pg_temp.ck(not has_function_privilege('anon', 'booking._notify_waitlist_for_window(bigint,timestamptz,timestamptz)', 'execute'), 'G2: sisäinen funktio ei anonille');

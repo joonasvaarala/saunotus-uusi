@@ -507,7 +507,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
   }
   setHero(p);
   if (!s) { mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })), errorBox(t.noSlots)); focusTop(); return; }
-  const max = Math.max(s.min_persons, Math.min(s.max_persons || 50, s.remaining));
+  let max = Math.max(s.min_persons, Math.min(s.max_persons || 50, s.remaining));
   const qs = new URLSearchParams(location.hash.split('?')[1] || '');
   let n = Math.min(Math.max(+qs.get('n') || s.min_persons, s.min_persons), max);
   // Jonotuslinkki (?wl=token, booking_134): lunastus vain, jos paikkoja on yhä jonovarauksen henkilömäärälle; määrä lukitaan siihen.
@@ -516,8 +516,13 @@ async function viewCheckout(ruleId, ds, productId, via) {
   const wl = qs.get('wl');
   if (wl && /^[0-9a-f-]{36}$/i.test(wl)) {
     const c = await rpc('public_waitlist_claim', { p_token: wl }).catch(() => null);
+    // booking_139: pidon aikana pidetyt paikat eivät näy julkisessa haussa (kuukausidata); haltijalle lunastus palauttaa
+    // remaining-arvon, jossa oma pito on mukana → raja nostetaan siihen (vanha backend ilman remaining-kenttää → ennallaan).
+    if (c?.ok && +c.rule_id === s.rule_id && c.session_date === ds && c.enough && !c.hold_expired && c.remaining != null && Number.isFinite(+c.remaining)) max = Math.max(max, Math.min(s.max_persons || 50, +c.remaining));
     // booking_137: ilmoituksen pito (120 min, kun vuoroon oli ≥ 48 h) päättyi → oma teksti (offer_expired).
     if (c && (!c.ok || +c.rule_id !== s.rule_id || c.session_date !== ds)) wlNote = h('p', { class: 'bk-note', role: 'status', text: c.code === 'offer_expired' ? t.waitlistClaimExpired : t.waitlistClaimInvalid });
+    // booking_139: pito vanheni (hold_expired) → sama teksti, mutta tavallinen varaus ilman lukitusta tai estoa.
+    else if (c?.ok && c.hold_expired) wlNote = h('p', { class: 'bk-note', role: 'status', text: t.waitlistClaimExpired });
     else if (c?.ok && (!c.enough || +c.persons > max || +c.persons < s.min_persons)) {
       mount(h('h2', { text: t.bookTitle }), errorBox(t.waitlistClaimNotEnough),
         h('p', {}, h('a', { href: via === 'day' ? bk(`/paiva/${ds}?tuote=${p.slug}`) : bk(`/tuote/${p.slug}/${ds}`), text: t.waitlistBack })));
