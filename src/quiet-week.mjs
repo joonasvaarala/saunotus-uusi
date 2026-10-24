@@ -17,9 +17,11 @@ const KEEP = { pct: '{pct}', was: '{was}', now: '{now}' };
 const varTokens = (s) => String(s).replace(/\{\{var:(\w+)\}\}/g, '{$1}');
 export const quietSiteText = (key, lang) => tx(key, lang, { fallback: varTokens(QUIET_SITE_TEXTS[key][lang] ?? QUIET_SITE_TEXTS[key].fi), vars: KEEP, log: quiet });
 
+// Yksityisvuorotuotteet: kb.products.category = 'private_sauna' (booking_163:n jälkeen booking_url osoittaa uuteen kauppaan,
+// joten vanha Johku-polku /yksityisvuorot/ on vain varalla).
 /** Viikko-ohjelman <ol>-elementin attribuutit (HTML-escapattuina). products = kb.products, name = (p) => nimi kielellä. */
 export function quietWeekAttrs(lang, { esc, products, reserve }) {
-  const map = Object.fromEntries((products || []).filter((p) => /\/yksityisvuorot\//.test(p.booking_url || '') && p.slug)
+  const map = Object.fromEntries((products || []).filter((p) => (p.category === 'private_sauna' || /\/yksityisvuorot\//.test(p.booking_url || '')) && p.slug)
     .map((p) => [p.id, { n: (lang === 'en' && p.name_en) || p.name, s: p.slug }]));
   const a = { badge: quietSiteText('ui.site.quiet_badge', lang), sr: quietSiteText('ui.site.quiet_sr', lang), note: quietSiteText('ui.site.quiet_note', lang), reserve, products: JSON.stringify(map) };
   return ` data-quiet-week${Object.entries(a).map(([k, v]) => ` data-quiet-${k}="${esc(v)}"`).join('')}`;
