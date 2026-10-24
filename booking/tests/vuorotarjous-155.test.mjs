@@ -10,8 +10,8 @@ import { resolve, dirname } from 'node:path';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const rd = (p) => readFileSync(resolve(root, p), 'utf8');
-const MIG = 'booking/supabase/migrations/20261024270000_booking_155_shift_offer_followup.sql';
-const RB = 'booking/supabase/rollbacks/20261024270000_booking_155_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024143157_booking_155_shift_offer_followup.sql';
+const RB = 'booking/supabase/rollbacks/20261024143157_booking_155_ROLLBACK.sql';
 const SQLT = 'booking/supabase/tests/vuorotarjous/t155_shift_offer_followup.sql';
 const P55 = 'content/site-texts.pending-import-55.json';
 const LIVE = 'Hei, työvuoroon tarvitaan tekijää. Vuoro: {{1}}, aika {{2}}. Voitko tulla töihin? Vastaathan viimeistään {{3}} mennessä alla olevasta painikkeesta.';
@@ -30,7 +30,7 @@ test('tiedostot olemassa, yksi booking_155-migraatio booking_153:n jälkeen', ()
     'booking/supabase/functions/shift-offer-engine/booking155_test.ts']) assert.ok(existsSync(resolve(root, p)), p);
   assert.equal(migs.filter((f) => /booking_155/.test(f)).length, 1);
   assert.ok(m153, 'booking_153-migraatio löytyy');
-  assert.ok(migs.indexOf(m153) < migs.indexOf('20261024270000_booking_155_shift_offer_followup.sql'));
+  assert.ok(migs.indexOf(m153) < migs.indexOf('20261024143157_booking_155_shift_offer_followup.sql'));
   assert.ok(!existsSync(resolve(root, 'booking/supabase/manual/booking_153_otto_allowlist.sql')), 'allowlista-skripti poistettu');
 });
 

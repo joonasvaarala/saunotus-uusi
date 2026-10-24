@@ -1,4 +1,4 @@
--- booking_155: vuorotarjousmoottorin jatkopaketti booking_153:n päälle (väliaikainen versio 20261024270000).
+-- booking_155: vuorotarjousmoottorin jatkopaketti booking_153:n päälle (tuotannon versio 20261024143157).
 -- Joonaksen päätös 4: myöhäinen hyväksyjä saa "vuoro on jo mennyt" -ilmoituksen SEKÄ WhatsAppilla ETTÄ sähköpostilla, oletus päällä.
 --   * asetus booking.settings shift_offer.already_taken_message: false → true (vain jos arvo on yhä booking_153:n oletus false)
 --   * sähköpostikopio: trigger booking.shift_offer_notices (stage 'already_taken') → booking.shift_offer_email (email_outbox staff_shift_notice).
@@ -7,7 +7,7 @@
 --   * toiselle mennyt vuoro katoaa omalta sivulta (booking.shift_staff_page). Jos sivu oli auki ja henkilö painaa Hyväksy,
 --     vastaus on already_taken ja sivu näyttää "Vuoro on jo mennyt toiselle" (booking_153:n shift_staff_page_respond, ennallaan).
 -- Ei muuta public-skeeman rakennetta eikä public-funktioita. Moottori pysyy pois päältä, email_enabled false, whatsapp_enabled ennallaan.
--- Uudelleenajettava. Rollback: booking/supabase/rollbacks/20261024270000_booking_155_ROLLBACK.sql
+-- Uudelleenajettava. Rollback: booking/supabase/rollbacks/20261024143157_booking_155_ROLLBACK.sql
 set local lock_timeout = '5s';
 
 update booking.settings
