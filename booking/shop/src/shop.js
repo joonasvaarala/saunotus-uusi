@@ -26,7 +26,7 @@ import { isRichHtml } from './rich-text.js';
 import { visibleText, richHost } from './rich-view.js';
 import { revealForm, revealIfHidden } from './gift-ui.js';
 import { normalizeCode, quoteSignature, isAnnualQuote, isCodeError } from './discount-code-logic.js';
-import { createQuietOfferCache, indexOffers, findOffer, dayMaxPercent, productMaxPercent, quietPrices, quietCheckout, pctText, fillText, quietWindow, offerKey } from './quiet-offers-logic.js';
+import { createQuietOfferCache, indexOffers, findOffer, dayMaxPercent, productMaxPercent, quietPrices, quietCheckout, quietBase, pctText, fillText, quietWindow, offerKey } from './quiet-offers-logic.js';
 import { normalizeOffer, ritualPrice, ritualMax, cardQty, reconcileCard, ritualAddonArg, ritualSig, splitItems, isRitualError } from './ritual-addon-logic.js';
 import { RITUAL_TEXTS, RITUAL_ERRORS } from './ritual-addon-texts.js';
 import { eventText, occurrenceText, occurrenceLabel, findEvent, saleState, upcoming, isMultiDay } from './event-sale.js';
@@ -750,7 +750,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
     if (s.mode === 'shared' && rit.n !== n) { rit.n = n; clearTimeout(rit.timer); rit.timer = setTimeout(loadRitual, 350); }   // henkilömäärä muuttui → vapaat ajat uudelleen
     if (code.quote && !annualOn() && code.sig !== sig()) recheckCode();
     const fresh = code.quote && code.sig === sig();
-    const qv = quietCheckout({ quote: fresh ? code.quote : null, offer: annualOn() || (code.quote && !fresh) ? null : qOffer, sessionTotal: priceFor(s, n) });
+    const qv = quietCheckout({ quote: fresh ? code.quote : null, offer: annualOn() || (code.quote && !fresh) ? null : qOffer, sessionTotal: priceFor(s, n), discountBase: quietBase(s, n) });
     total.textContent = money(fresh ? +code.quote.total : priceFor(s, n) - (qv.source === 'quiet' ? qv.amount : 0) + addonsSum() + ritualSum());
     qNote.hidden = qv.source !== 'quiet';
     sumList.replaceChildren(h('dt', { text: t.what }), h('dd', { text: pname(p) }), h('dt', { text: t.when }), h('dd', { text: `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(n) }),

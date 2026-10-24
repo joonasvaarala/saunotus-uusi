@@ -34,21 +34,38 @@ export const findOffer = (idx, productId, ruleId, startsAt) => idx?.byKey.get(of
 export const dayMaxPercent = (idx, ds, productId = null) => Math.max(0, ...(idx?.byDay.get(productId == null ? ds : `${ds}|${Number(productId)}`) || []).map((o) => +o.percent));
 export const productMaxPercent = (idx, productId) => Math.max(0, ...[...(idx?.byKey.values() || [])].filter((o) => +o.product_id === +productId).map((o) => +o.percent));
 
-/** Vuoron hintateksti alennettuna, sama rakenne kuin kaupan alkuperäinen (hinta / alk. hinta / sis. n hlö + lisähenkilö). */
+/**
+ * Vuoron hintateksti alennettuna, sama rakenne kuin kaupan alkuperäinen (hinta / alk. hinta / sis. n hlö + lisähenkilö).
+ * Ale koskee vain vuoron perushintaa (discounted_price palvelimelta); lisähenkilö on aina täyshintainen (esim. kb 26: +10 €, ei +8 €).
+ */
 export function quietPrices(offer) {
   const pct = +offer.percent;
   return {
     pct, was: +offer.base_price, now: +offer.discounted_price,
-    extraNow: offer.extra_person_price != null ? discountPrice(offer.extra_person_price, pct) : null,
+    extraNow: offer.extra_person_price != null && Number.isFinite(+offer.extra_person_price) ? +offer.extra_person_price : null,
   };
+}
+
+/**
+ * Alennettava osa vuoron hinnasta: perushinta ilman lisähenkilöitä (fixed_plus_extra), kiinteä hinta (fixed) tai
+ * henkilöhinta × henkilöt (per_person). Lisähenkilöt ja lisäpalvelut eivät alennu. s = kaupan vuoro (_sessions-rivi), n = henkilöt.
+ */
+export function quietBase(s, n) {
+  if (!s) return 0;
+  if (s.price_mode === 'per_person') return roundMoney((+s.unit_price || 0) * (+n || 0));
+  const base = +s.base_price || 0;
+  if (s.price_mode === 'fixed') return base;
+  const total = base + Math.max(0, (+n || 0) - (+s.included_persons || 0)) * (+s.extra_person_price || 0);
+  return Math.min(base, total);
 }
 
 /**
  * Kassan tila: mikä etu näytetään. quote = public_check_code-vastaus (tuore) tai null; offer = tämän vuoron tarjous tai null.
  * Palvelimen vastaus menee aina paikallisen arvion edelle: discount_source 'quiet' → hiljaisen ajan ale (koodia ei käytetä),
- * 'code' / vuosikortti → koodi. Ilman koodia: tarjous, alennus lasketaan vuoron hinnasta (ilman lisäpalveluita, kuten palvelimella).
+ * 'code' / vuosikortti → koodi. Ilman koodia: tarjous, alennus lasketaan vuoron perushinnasta (discountBase: ilman lisähenkilöitä ja
+ * lisäpalveluita; lisähenkilö aina täyshintainen).
  */
-export function quietCheckout({ quote = null, offer = null, sessionTotal = 0 } = {}) {
+export function quietCheckout({ quote = null, offer = null, sessionTotal = 0, discountBase = null } = {}) {
   if (quote) {
     if (quote.discount_source === 'quiet') {
       const pct = +(quote.quiet?.percent ?? offer?.percent ?? 0);
@@ -58,7 +75,8 @@ export function quietCheckout({ quote = null, offer = null, sessionTotal = 0 } =
     return { source: 'code' };
   }
   if (!validOffer(offer)) return { source: 'none' };
-  const amount = quietAmount(sessionTotal, offer.percent);
+  // ale lasketaan vain perushinnasta (discountBase, ks. quietBase); ilman sitä koko vuoron hinnasta (vanha kutsu)
+  const amount = quietAmount(Math.min(+sessionTotal || 0, discountBase == null ? Infinity : +discountBase || 0), offer.percent);
   return amount > 0 ? { source: 'quiet', percent: +offer.percent, amount, codeNotUsed: false } : { source: 'none' };
 }
 
