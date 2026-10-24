@@ -7,6 +7,7 @@ import { calendarIdError } from './calendar-export-logic.js';
 import { validateMessage } from './messages-logic.js';
 import { applySection, exampleBundle } from './settings-logic.js';
 import { analyticsMock } from './analytics-mock.js';
+import { createEventsMock, EVENT_MOCK_RESOURCES } from './events-mock.js';
 import { generatedAnnualCardCode, generatedDiscountCode, normalizeCode } from '../shop/src/discount-code-logic.js';
 const TZ = 'Europe/Helsinki';
 const todayHel = (now = new Date()) => now.toLocaleDateString('sv-SE', { timeZone: TZ });
@@ -145,6 +146,9 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       { id: 8, name: 'Rituaali 90 min', price: 64, vat_rate: 25.5, active: true, category: 'ritual', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 90, min_persons: 1, max_persons: 6, bookable: true, shop_visible: true, public_slots: true, public_weekdays: [6, 7], time_window_class: 'ritual', audience: 'consumer' } },
       { id: 7, name: 'Saunarituaali ja savusaunavuoro (la & su)', name_en: 'Sauna Ritual & Smoke Sauna Session', price: 49, price_type: 'per_person', vat_rate: 25.5, active: true, category: 'ritual', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 120, min_persons: 1, max_persons: 6, bookable: true, shop_visible: true, public_slots: true, public_weekdays: [6, 7], time_window_class: 'ritual', required_skill: 'yleinen', audience: 'consumer' } },
       { id: 3, name: 'Yleinen saunavuoro', price: 18, vat_rate: 25.5, active: true, category: 'public_sauna', config: { resource_class: 'shift', lifecycle: 'current', sale_kind: 'slots', bookable: true, shop_visible: true, audience: 'consumer' } },
+      { id: 31, slug: 'perinnesaunotusilta', name: 'Perinnesaunotusilta', name_en: 'Traditional sauna evening', price: 69, vat_rate: 25.5, active: true, category: 'event', config: { resource_class: 'shift', lifecycle: 'current', sale_kind: 'other', duration_minutes: 180, min_persons: 1, max_persons: 10, bookable: true, shop_visible: true, audience: 'consumer' } },
+      { id: 32, slug: 'naisten-joulusauna', name: 'Naisten joulusauna', name_en: 'Women’s Christmas sauna', price: 59, vat_rate: 25.5, active: true, category: 'event', config: { resource_class: 'shift', lifecycle: 'current', sale_kind: 'other', duration_minutes: 150, min_persons: 1, max_persons: 12, bookable: true, shop_visible: true, audience: 'consumer' } },
+      { id: 33, slug: 'saunottajakoulutus', name: 'Saunottajakoulutus', name_en: 'Sauna host training', price: 390, vat_rate: 25.5, active: true, category: 'training', config: { resource_class: 'shift', lifecycle: 'current', sale_kind: 'other', duration_minutes: 1980, min_persons: 1, max_persons: 8, bookable: true, shop_visible: false, audience: 'consumer' } },
       { id: 101, name: 'Vichy', name_en: 'Vichy', price: 3, vat_rate: 13.5, active: true, category: 'other', config: { sale_kind: 'other', pos_enabled: true, pos_sort: 10, fridge_sale: true, age_restricted: false, bookable: false, shop_visible: false, audience: 'consumer' } },
       { id: 102, name: 'Sipsit', name_en: 'Crisps', price: 3, vat_rate: 13.5, active: true, category: 'other', config: { sale_kind: 'other', pos_enabled: true, pos_sort: 20, fridge_sale: false, age_restricted: false, bookable: false, shop_visible: false, audience: 'consumer' } },
       { id: 103, name: 'Pyyhevuokra', name_en: 'Towel rental', price: 5, vat_rate: 25.5, active: true, category: 'product_rental', config: { sale_kind: 'other', pos_enabled: true, pos_sort: 30, fridge_sale: false, age_restricted: false, bookable: false, shop_visible: false, audience: 'consumer' } },
@@ -323,7 +327,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     admin_my_permissions: () => ({ role, role_label: role === 'staff' ? 'Työntekijä (esimerkki)' : role === 'admin' ? 'Pääkäyttäjä (esimerkki)' : 'Päällikkö (esimerkki)', permissions: st.perms }),
     admin_list_products: () => st.products.map((p) => ({ ...p })),
     'select:payment_methods': () => [{ code: 'pay_later', label: 'Maksu myöhemmin', is_manual: true, active: true }, { code: 'cash', label: 'Käteinen', is_manual: false, active: false }, { code: 'card_terminal', label: 'Korttipääte', is_manual: true, active: true }],
-    'select:resources': () => [{ id: 1, code: 'rauni', name: 'Rauni', active: true }, { id: 2, code: 'lovi', name: 'Lovi', active: true }],
+    'select:resources': () => EVENT_MOCK_RESOURCES.map((r) => ({ ...r })),   // booking_158: kind (space/person/capacity_pool) Tapahtumat-näkymän resurssivalintaan
     'select:product_space_rules': () => [10, 8, 7].map((pid) => ({ product_id: pid, leg_no: 1, priority: 1, space_id: 1, mode: 'exclusive', min_persons: 1, max_persons: 6, selection: 'auto', active: true })),
     admin_list_addons: () => [],
     admin_list_customers: (a) => st.customers.filter((c) => !a.p_search || `${c.name} ${c.email} ${c.phone}`.toLowerCase().includes(String(a.p_search).toLowerCase())).slice(0, a.p_limit || 5),
@@ -968,6 +972,18 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       return inv;
     },
   };
+  // booking_158: tapahtumat ja koulutukset (events-mock.js) + tuotteen kopio (admin_product_copy: 'Kopio: nimi', piilotettu, ei myynnissä)
+  const eventsMock = createEventsMock({ today, products: st.products });
+  Object.assign(handlers, eventsMock.handlers, {
+    admin_product_copy: (a) => {
+      const src = st.products.find((p) => p.id === +a.p_product_id);
+      if (!src) throw err('not_found', 'Tuotetta ei löydy');
+      const id = Math.max(...st.products.map((p) => p.id), 700) + 1;
+      st.products.push({ ...structuredClone(src), id, name: `Kopio: ${src.name}`.slice(0, 200), slug: `${src.slug || 'tuote'}-kopio-${id}`, active: false, config: src.config ? { ...structuredClone(src.config), bookable: false, shop_visible: false } : src.config });
+      return { product_id: id, slug: `${src.slug || 'tuote'}-kopio-${id}` };
+    },
+  });
+  st.events = eventsMock.state;
   async function rpc(name, args = {}) {
     st.calls.push({ name, args });
     if (delay) await new Promise((r) => setTimeout(r, delay));

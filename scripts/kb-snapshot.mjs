@@ -35,5 +35,13 @@ for (const [k, keys] of Object.entries(EN)) {
   out[k] = out[k].map((r) => ({ ...r, ...pick(byId.get(r.id) || {}, keys) }));
 }
 Object.assign(out.business, pick(raw.businesses[0], ['description_en']));
+// booking_158: events_shop (booking.public_events(current_date, 'shop')) etusivun tapahtumakortteihin (src/event-cards.mjs).
+// Vain julkiset kentät; puuttuu viennistä (vanha kanta) → kenttä jää pois ja sivusto käyttää vanhaa events-polkua.
+if (Array.isArray(raw.events_shop)) {
+  out.events_shop = raw.events_shop.map((ev) => ({
+    ...pick(ev, ['product_id','slug','name','name_en','description_short','description_short_en','price','price_text','image_path','image_alt','category','sale_open']),
+    occurrences: (ev.occurrences || []).map((o) => pick(o, ['rule_id','starts_at','ends_at','label','label_en','time_text','time_text_en','status'])),
+  }));
+}
 writeFileSync('content/kb/kb.json', JSON.stringify(out, null, 1) + '\n');
 console.log('kirjoitettu content/kb/kb.json', Object.fromEntries(Object.entries(out).filter(([, v]) => Array.isArray(v)).map(([k, v]) => [k, v.length])));

@@ -11,6 +11,7 @@ import { posText } from './pos-texts.js';
 import { resolveAdminPath, compactIdentity, toggleMobileNav } from './admin-navigation.js';
 import { setupQuickSearch } from './quick-search.js';
 import { loadNavTexts, navText } from './nav-texts.js';
+import { evText } from './events-texts.js';
 
 const $ = (id) => document.getElementById(id);
 // Kokeilutila: osoite /hallinta/?mock=1 → keinoistunto + selaimen oma mock-data (options-mock.js). EI verkkokutsuja eikä kirjautumista; mikään ei tallennu. Ilman parametria ennallaan.
@@ -56,6 +57,7 @@ const ROUTES = [
   { path: 'asiakkaat', label: 'Asiakkaat', icon: 'users', mod: () => loadView('customers') },
   { path: 'alennuskoodit', label: 'Alennuskoodit', icon: 'percent', any: ['catalog.edit', 'annual_cards.manage'], mod: () => loadView('discounts') },
   { path: 'tuotteet', label: 'Tuotteet', icon: 'tag', mod: () => loadView('products') },
+  { path: 'tapahtumat', label: 'Tapahtumat', labelFn: () => evText('nav'), icon: 'leaf', mod: () => loadView('events') },   // booking_158: tapahtumat ja koulutukset (henkilökunta lukee, catalog.edit muokkaa)
   { path: 'viestit', label: 'Viestit', icon: 'mail', any: ['messages.edit'], mod: () => loadView('messages') },
   { path: 'resurssit', label: 'Resurssit', icon: 'cabin', mod: () => loadView('resources') },
   { path: 'sulkukalenterit', label: 'Kalenterisulut', icon: 'lock', any: ['blocks.manage'], mod: () => loadView('closures') },
