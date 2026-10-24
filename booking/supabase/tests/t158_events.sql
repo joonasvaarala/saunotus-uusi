@@ -1,4 +1,4 @@
--- t158: tapahtumat ja koulutukset (booking_158, migraatio 20261024300000, väliaikainen versio).
+-- t158: tapahtumat ja koulutukset (booking_158, migraatio 20261024185009, tuotannon versio).
 -- A skeema ja oikeudet, B myyntikytkin (oletus pois), C oikeudet (catalog.edit / henkilökunta luku), D kerran luonti ja pooli,
 -- E resurssivaraukset materialisoituvat heti ilman lippuja (ei sulkukalenterin outbox-rivejä), F blokit estävät yleisen vuoron, yksityisvuoron ja Raunin,
 -- G myynti kiinni, H myynti auki: oma lippu, kapasiteetti, jono, has_reservations, I ristiriidat (conflict + details), J suojaus (event_managed),
@@ -45,7 +45,7 @@ create temp table t158_before as select
   (select count(*) from booking.m158_lovi_rows) n_lovi,
   (select count(*) from booking.settings where key = 'events.sale_enabled') n_set,
   (select count(*) from pg_constraint where conrelid = 'booking.schedule_rules'::regclass and conname like 'schedule_rules_%kind%') n_con;
-\ir ../migrations/20261024300000_booking_158_events.sql
+\ir ../migrations/20261024185009_booking_158_events.sql
 
 -- kiinteät testipäivät (helmi–maaliskuu 2027) varaushorisontin sisään vain tässä transaktiossa (tuotannossa 180 pv)
 update booking.settings set value = '400'::jsonb where key = 'booking_horizon_days';
@@ -295,8 +295,8 @@ begin
 end $t$;
 
 -- P: rollback (kahdesti) ja md5-tarkistus (rollback keskeyttää itse, jos md5 ei täsmää)
-\ir ../rollbacks/20261024300000_booking_158_ROLLBACK.sql
-\ir ../rollbacks/20261024300000_booking_158_ROLLBACK.sql
+\ir ../rollbacks/20261024185009_booking_158_ROLLBACK.sql
+\ir ../rollbacks/20261024185009_booking_158_ROLLBACK.sql
 do $t$
 begin
   perform pg_temp.ck((select count(*) from pg_proc p where p.pronamespace = 'booking'::regnamespace and (
@@ -319,7 +319,7 @@ begin
                      and exists (select 1 from booking.product_space_rules s where s.space_id = (select id from booking.resources where code = 'lovi') and s.active and s.product_id not in (10, 11, 12, 23, 24)) and (select count(*) from booking.product_space_rules s where s.space_id = (select id from booking.resources where code = 'lovi') and s.active) = 14, 'P4: Lovi-rivit aktivoitu takaisin (14)');
 end $t$;
 -- migraatio uudelleen rollbackin jälkeen (koko kierros)
-\ir ../migrations/20261024300000_booking_158_events.sql
+\ir ../migrations/20261024185009_booking_158_events.sql
 do $t$
 begin
   perform pg_temp.ck(to_regclass('booking.event_resource_blocks') is not null and to_regprocedure('booking.public_events(date, text)') is not null, 'P5: migraatio ajettavissa uudelleen rollbackin jälkeen');

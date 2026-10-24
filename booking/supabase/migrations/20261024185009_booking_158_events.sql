@@ -1,5 +1,5 @@
 -- booking_158: tapahtumat ja koulutukset (tietokantaosa).
--- Versio 20261024300000 on väliaikainen; Bottiavustus vaihtaa sen tuotannon migraatioversioksi ajon yhteydessä.
+-- Versio 20261024185009 = tuotannon migraatioversio (ajettu tuotannossa 24.10.2026).
 -- Uudelleenajettava: toinen ajo ei muuta mitään (if not exists / create or replace / on conflict do nothing / idempotentit päivitykset).
 -- Joonaksen päätökset 24.10.2026 (sitovat): kerrat ovat erillisiä alkuaikoja (ei toistuvuutta), monipäiväinen yksi lippu vain koulutuksille,
 -- tapahtuma voi varata yhden tai useamman resurssin (tila tai saunottaja), hoitojen varauslogiikkaa ei muuteta, myynti omaan kauppaan 1.11.2026
@@ -27,7 +27,7 @@
 --     saunahoito opiskelijatyönä (tuotteet 10, 11, 12, 23, 24, kun Rauni on suljettu). Muiden tuotteiden (tuotannossa 14–22, 9 riviä) aktiiviset
 --     Lovi-rivit passivoidaan (active = false); muutetut rivit tallennetaan booking.m158_lovi_rows (rollback).
 -- Ei hintoja, ALV:tä, slugeja, URL:eja, maksuja eikä public-skeemaa. Ei sähköposteja.
--- Rollback: rollbacks/20261024300000_booking_158_ROLLBACK.sql
+-- Rollback: rollbacks/20261024185009_booking_158_ROLLBACK.sql
 -- Tuotannon funktioiden md5(pg_get_functiondef) ennen tätä migraatiota (rollback palauttaa nämä täsmälleen):
 --   booking._sessions: 872ef0fc6a9d38726ea2438f11ba3f01
 --   booking._check_claim: bf875a55f4d73bfdcbaf107c29f09f45

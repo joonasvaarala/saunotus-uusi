@@ -1,4 +1,4 @@
--- ROLLBACK booking_158 (migraatio 20261024300000_booking_158_events.sql). Uudelleenajettava (toinen ajo ei tee mitään).
+-- ROLLBACK booking_158 (migraatio 20261024185009_booking_158_events.sql). Uudelleenajettava (toinen ajo ei tee mitään).
 -- HUOM: poistaa pysyvästi tapahtumien resurssivaraukset (booking.event_resource_blocks) ja niistä syntyneet sulut (space_blocks.event_block_id),
 -- sarakkeet schedule_rules.kind ja product_config.channels sekä asetuksen events.sale_enabled.
 -- Tapahtumakerrat (schedule_rules) ja niiden kapasiteettipoolit (resources 'event_rule_<id>') jäävät tavallisiksi yhden päivän vuoroiksi.
