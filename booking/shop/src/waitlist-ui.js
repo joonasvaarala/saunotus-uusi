@@ -1,7 +1,8 @@
 // Julkinen jonotuslista rakentuu samoista h(), bk-pick, bk-form ja bk-checkout -osista kuin viewCheckout.
+import { waitlistParty } from './waitlist-logic.js';
 export function createWaitlistView({ h, t, S, state, loadMonth, setHero, mount, focusTop, errorBox, phoneBox, bk, rpc, pname, dayLong, hm }) {
   const backFor = (p, ds, via) => via === 'day' ? bk(`/paiva/${ds}?tuote=${p.slug}`) : bk(`/tuote/${p.slug}/${ds}`);
-  const err = (code) => t.waitlistErrors?.[code] || t.errorGeneric;
+  const err = (code, kind) => (code === 'invalid_persons' && kind === 'event' && t.waitlistInvalidPersonsEvent) || t.waitlistErrors?.[code] || t.errorGeneric;
 
   async function viewWaitlist(ruleId, ds, productId, via = null) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(ds || '')) {
@@ -25,9 +26,12 @@ export function createWaitlistView({ h, t, S, state, loadMonth, setHero, mount, 
       mount(h('h2', { text: t.waitlistTitle }), pick, h('p', { class: 'bk-ok', role: 'status', text: t.waitlistNotFull }),
         h('a', { class: 'btn gold', href: bk(`/varaa/${s.rule_id}/${ds}/${p.id}`), text: t.waitlistBookNow })); focusTop(); return;
     }
-    // Jonovarauksen henkilömäärä 1–6 (booking_134; palvelin tarkistaa saman). Vuoron oma min/max rajaa lisäksi.
-    let n = Math.max(1, s.min_persons || 1);
-    const max = Math.max(n, Math.min(6, s.max_persons || 6));
+    // booking_148: henkilömäärä palvelutyypin mukaan (palvelin tarkistaa saman): yleinen 1–6 (booking_134, vuoron oma min/max
+    // rajaa lisäksi), tapahtuma 1..kapasiteetti, yksityisvuoro ilman henkilömäärää (koko vuoro vapautuu kerralla).
+    const party = waitlistParty(s, p);
+    const priv = party.kind === 'private';
+    let n = priv ? 1 : party.min;
+    const max = priv ? 1 : party.max;
     const num = h('input', { id: 'bk-wl-n', type: 'number', min: n, max, inputmode: 'numeric', value: n, 'aria-label': t.persons });
     const dec = h('button', { type: 'button', class: 'bk-step', 'aria-label': '−' }, '−');
     const inc = h('button', { type: 'button', class: 'bk-step', 'aria-label': '+' }, '+');
@@ -49,15 +53,15 @@ export function createWaitlistView({ h, t, S, state, loadMonth, setHero, mount, 
       const f = new FormData(form);
       try {
         const r = await rpc('public_join_waitlist', {
-          p_rule_id: s.rule_id, p_date: ds, p_persons: n,
+          p_rule_id: s.rule_id, p_date: ds, p_persons: priv ? null : n,
           p_name: String(f.get('name') || '').trim(), p_email: String(f.get('email') || '').trim(),
           p_phone: String(f.get('phone') || '').trim() || null, p_locale: S.lang, p_whatsapp_opt_in: false,
         });
-        if (!r?.ok) throw Object.assign(new Error(err(r?.code)), { mapped: true });
+        if (!r?.ok) throw Object.assign(new Error(err(r?.code, party.kind)), { mapped: true });
         const done = h('section', { class: 'bk-conf', tabindex: '-1', role: 'status' },
           h('span', { class: 'bk-status', text: t.waitlistTitle }),
           h('h2', { text: t.waitlistDone }),
-          h('p', { text: `${pname(p)} · ${dayLong(s.starts_at)} · ${hm(s.starts_at)}–${hm(s.ends_at)} · ${r.persons} ${t.person}` }),
+          h('p', { text: `${pname(p)} · ${dayLong(s.starts_at)} · ${hm(s.starts_at)}–${hm(s.ends_at)}${priv || r.persons == null ? '' : ` · ${r.persons} ${t.person}`}` }),
           h('p', { class: 'bk-note', text: t.waitlistDoneText }),
           h('div', { class: 'bk-actions' },
             h('button', { type: 'button', class: 'btn sm light', text: t.waitlistLeave, onclick: async (ev) => {
@@ -70,8 +74,9 @@ export function createWaitlistView({ h, t, S, state, loadMonth, setHero, mount, 
       } catch (e) { msg.append(errorBox(e?.mapped ? e.message : t.errorGeneric)); btn.disabled = false; btn.textContent = t.waitlistJoin; }
     } },
       h('p', { class: 'bk-note', text: t.waitlistIntro }),
-      h('fieldset', { class: 'bk-section' }, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, dec, num, inc),
-        h('small', { class: 'bk-hint', text: t.waitlistPersonsHint })),
+      priv ? h('p', { class: 'bk-note', 'data-testid': 'wl-private-note', text: t.waitlistPrivateNote })
+        : h('fieldset', { class: 'bk-section' }, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, dec, num, inc),
+          h('small', { class: 'bk-hint', text: party.kind === 'event' ? t.waitlistPersonsHintEvent : t.waitlistPersonsHint })),
       input('name', t.name, { required: true, maxlength: 120, autocomplete: 'name' }),
       input('email', t.email, { required: true, type: 'email', maxlength: 200, autocomplete: 'email' }),
       input('phone', t.phone, { type: 'tel', maxlength: 30, autocomplete: 'tel' }),

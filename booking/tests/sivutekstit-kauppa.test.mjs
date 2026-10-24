@@ -88,6 +88,7 @@ test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-shop.mjs 
     ...J('content/site-texts.pending-import-36.json').map((r) => `${r.key}|${r.lang}`),
     ...J('content/site-texts.pending-import-39.json').map((r) => `${r.key}|${r.lang}`),
     ...J('content/site-texts.pending-import-42.json').map((r) => `${r.key}|${r.lang}`),
+    ...J('content/site-texts.pending-import-48.json').filter((r) => r.key.startsWith('ui.shop.')).map((r) => `${r.key}|${r.lang}`),
     ...J('content/site-texts.pending-import-49.json').map((r) => `${r.key}|${r.lang}`),
   ]);
   const imp = new Set(PENDING.map((r) => r.key));
@@ -114,8 +115,9 @@ test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet ava
   const waitParty = J('content/site-texts.pending-import-36.json');
   const waitOffer = J('content/site-texts.pending-import-39.json');
   const codeUi = J('content/site-texts.pending-import-42.json');
+  const partyType = J('content/site-texts.pending-import-48.json').filter((r) => r.key.startsWith('ui.shop.'));
   const cancelUi = J('content/site-texts.pending-import-49.json');
-  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length + waitUi.length + waitParty.length + waitOffer.length + codeUi.length + cancelUi.length);
+  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length + waitUi.length + waitParty.length + waitOffer.length + codeUi.length + partyType.length + cancelUi.length);
   assert.ok(!rows.some((x) => haveKeys.has(x.key)));
   for (const e of extraRows) assert.ok(!rows.some((x) => x.key === e.key), `${e.key}: jo tuotannossa, generaattori ei lisää`);
   const bad = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', join(work, 'ei-ole.json')], { encoding: 'utf8' });
@@ -373,6 +375,34 @@ test('pending-import-36: jonotuslistan henkilömäärä (booking_134) FI+EN, sam
   for (const k of keys) assert.ok(!p34.has(k), `${k}: ei päällekkäin pending-import-34:n kanssa`);
 });
 
+test('pending-import-48: jonotuslistan henkilömäärä palvelutyypin mukaan (booking_148) FI+EN, sama kuin koodin oletus, ei vielä tuotannossa, ei <-merkkiä', () => {
+  const rows = J('content/site-texts.pending-import-48.json');
+  const defaults = new Map(R.collectDefaults().map((r) => [`${r.key}|${r.lang}`, r.text]));
+  const have = new Set(FALLBACK.texts.map((r) => `${r.key}|${r.lang}`));
+  const seen = new Set();
+  for (const r of rows) {
+    const w = `${r.key} [${r.lang}]`;
+    assert.ok(['fi', 'en'].includes(r.lang), w);
+    assert.equal(r.kind, 'plain', w);
+    assert.equal(r.class, 'normal', w);
+    assert.equal(have.has(`${r.key}|${r.lang}`), false, `${w}: ei vielä tuotannossa`);
+    assert.ok(r.max_len >= r.text.length, w);
+    assert.doesNotMatch(r.text, /[<>]|https?:\/\/|www\./, w);
+    assert.ok(!seen.has(`${r.key}|${r.lang}`), w); seen.add(`${r.key}|${r.lang}`);
+    if (r.key.startsWith('ui.shop.')) {
+      assert.equal(r.text, defaults.get(`${r.key}|${r.lang}`), w);
+      assert.deepEqual(r.placeholders, [], w);
+    } else {
+      assert.equal(r.key, 'email.waitlist.session_private', w);   // sähköpostirivi: sivutekstit-funktiot.test.mjs vertaa texts.ts:ään
+      assert.deepEqual(r.placeholders, ['{{var:what}}', '{{var:when}}'], w);
+    }
+  }
+  assert.deepEqual([...seen].sort(), ['email.waitlist.session_private|en', 'email.waitlist.session_private|fi', 'ui.shop.waitlist_invalid_persons_event|en', 'ui.shop.waitlist_invalid_persons_event|fi', 'ui.shop.waitlist_persons_hint_event|en', 'ui.shop.waitlist_persons_hint_event|fi', 'ui.shop.waitlist_private_note|en', 'ui.shop.waitlist_private_note|fi']);
+  for (const f of ['34', '36', '39', '42']) {
+    const other = new Set(J(`content/site-texts.pending-import-${f}.json`).map((r) => r.key));
+    for (const k of new Set(rows.map((r) => r.key))) assert.ok(!other.has(k), `${k}: ei päällekkäin pending-import-${f}:n kanssa`);
+  }
+});
 test('pending-import-39: jonotusilmoituksen tarjousaika päättyi (booking_137) FI+EN, sama kuin koodin oletus, ei vielä tuotannossa, ei <-merkkiä', () => {
   const rows = J('content/site-texts.pending-import-39.json');
   const defaults = new Map(R.collectDefaults().map((r) => [`${r.key}|${r.lang}`, r.text]));
