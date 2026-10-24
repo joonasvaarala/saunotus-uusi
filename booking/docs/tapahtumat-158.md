@@ -1,6 +1,6 @@
 # booking_158: tapahtumat ja koulutukset (tietokantaosa)
 
-Migraatio `supabase/migrations/20261024300000_booking_158_events.sql`, rollback `supabase/rollbacks/20261024300000_booking_158_ROLLBACK.sql`,
+Migraatio `supabase/migrations/20261024185009_booking_158_events.sql`, rollback `supabase/rollbacks/20261024185009_booking_158_ROLLBACK.sql`,
 SQL-testi `supabase/tests/t158_events.sql`, rakenteen testi `tests/tapahtumat-158.test.mjs`.
 
 Joonaksen päätökset 24.10.2026 (sitovat): kerrat ovat erillisiä alkuaikoja (ei toistuvuutta), monipäiväinen yksi lippu vain koulutuksille,
@@ -61,7 +61,7 @@ Muut virheet: `not_found`, `not_event`, `invalid_param`, `unknown_field`, `bad_t
 
 ## Rollback
 
-`supabase/rollbacks/20261024300000_booking_158_ROLLBACK.sql` palauttaa funktiot täsmälleen ja tarkistaa md5:t (virhe → koko transaktio perutaan):
+`supabase/rollbacks/20261024185009_booking_158_ROLLBACK.sql` palauttaa funktiot täsmälleen ja tarkistaa md5:t (virhe → koko transaktio perutaan):
 
 ```
 booking._sessions                  872ef0fc6a9d38726ea2438f11ba3f01

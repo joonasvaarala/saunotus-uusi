@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p) => readFileSync(join(root, p), 'utf8');
-const V = '20261024300000';
+const V = '20261024185009';
 const MIG = `booking/supabase/migrations/${V}_booking_158_events.sql`;
 const RB = `booking/supabase/rollbacks/${V}_booking_158_ROLLBACK.sql`;
 const T = 'booking/supabase/tests/t158_events.sql';
@@ -90,8 +90,8 @@ test('Lovi: tuotteet 10, 11, 12, 23, 24 jäävät Loviin, muut (14–22) suljeta
 test('SQL-testi tarkistaa rollbackin ja uudelleenajon', () => {
   const t = read(T);
   assert.match(t, /TESTRESULT/);
-  assert.match(t, /20261024300000_booking_158_ROLLBACK\.sql/);
-  assert.match(t, /20261024300000_booking_158_events\.sql/);
+  assert.match(t, /20261024185009_booking_158_ROLLBACK\.sql/);
+  assert.match(t, /20261024185009_booking_158_events\.sql/);
 });
 
 test('aikavyöhyke: hallinnan ISO-aika ilman poikkeamaa = Europe/Helsinki istunnosta riippumatta; t158 ajetaan UTC-istunnossa', () => {
