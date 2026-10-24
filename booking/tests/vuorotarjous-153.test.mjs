@@ -21,7 +21,7 @@ const code = (sql) => sql.split('\n').filter((l) => !/^\s*--/.test(l)).join('\n'
 
 test('tiedostot olemassa, yksi booking_153-migraatio ja rollback', () => {
   for (const p of [MIG, RB, SQLT, P53, 'META-POHJAT.md', 'booking/vuoro/oma/index.html', 'booking/vuoro/oma/oma.js', 'booking/vuoro/oma/oma.css',
-    'booking/vuoro/oma/oma_test.ts', 'booking/admin/views/shift-staff-panel.js', 'booking/supabase/manual/booking_153_otto_allowlist.sql']) assert.ok(existsSync(resolve(root, p)), p);
+    'booking/vuoro/oma/oma_test.ts', 'booking/admin/views/shift-staff-panel.js', 'booking/supabase/manual/booking_153_otto_allowlist.md']) assert.ok(existsSync(resolve(root, p)), p);
   assert.equal(readdirSync(resolve(root, 'booking/supabase/migrations')).filter((f) => /booking_153/.test(f)).length, 1);
 });
 
@@ -34,9 +34,11 @@ test('migraatio: moottori pysyy pois päältä, ei whatsapp_enabled-muutosta, ei
   assert.doesNotMatch(c, /(update|insert into|delete from)\s+booking\.integration_config/i);
   assert.match(c, /'shift_offer\.email_enabled', 'false'/);
   assert.match(c, /'shift_offer\.welcome_enabled', 'false'/);
-  const manual = rd('booking/supabase/manual/booking_153_otto_allowlist.sql');
-  assert.match(manual, /VAIN JOONAKSEN LUVALLA/);
+  // booking_155: Otto on jo tuotannon allowlistalla; käsin ajettava skripti korvattiin muistiinpanolla
+  const manual = rd('booking/supabase/manual/booking_153_otto_allowlist.md');
   assert.ok(manual.includes(OTTO));
+  assert.match(manual, /shift_offer\.email_enabled = false/);
+  assert.ok(!existsSync(resolve(root, 'booking/supabase/manual/booking_153_otto_allowlist.sql')));
 });
 
 test('migraatio: public-skeeman taulujen rakenne ennallaan, booking_154:n funktioita ei määritellä uudelleen', () => {

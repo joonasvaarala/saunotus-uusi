@@ -65,11 +65,15 @@ begin
 
   -- ---------------- oletukset
   perform pg_temp.ck(not booking.shift_offer_cfg_bool('email_enabled', true) and not booking.shift_offer_cfg_bool('offer_uncertain_shifts', true)
-                     and not booking.shift_offer_cfg_bool('welcome_enabled', true) and not booking.shift_offer_cfg_bool('already_taken_message', true)
-                     and booking.shift_offer_cfg_bool('unavailability_frees_shift', false), 'D1: oletukset (sähköposti, ?-vuorot, tervetulo, jo mennyt -viesti pois; poissaolo päällä)');
+                     and not booking.shift_offer_cfg_bool('welcome_enabled', true) and (not booking.shift_offer_cfg_bool('already_taken_message', true)
+                          -- booking_155 kääntää oletuksen päälle (Joonaksen päätös 4)
+                          or exists (select 1 from pg_proc where oid = to_regprocedure('booking._shift_offer_already_taken_mail()')))
+                     and booking.shift_offer_cfg_bool('unavailability_frees_shift', false), 'D1: oletukset (sähköposti, ?-vuorot, tervetulo, jo mennyt -viesti pois ennen booking_155:ttä; poissaolo päällä)');
   perform pg_temp.ck((booking.shift_offer_cfg('wa_templates') #>> '{offer,name}') = 'tyovuoro_kysely' and (booking.shift_offer_cfg('wa_templates') #>> '{offer,approved}') = 'false'
                      and (booking.shift_offer_cfg('wa_templates') #>> '{offer,fallback}') = 'vuorotarjous', 'D2: pääpohja tyovuoro_kysely (ei hyväksytty), varapohja vuorotarjous');
-  perform pg_temp.ck(not exists (select 1 from booking.integration_config c where c.key = 'resend' and c.settings::text like '%otto%'), 'a: Otto ei ole sähköpostin allowlistalla');
+  -- a: Otto voi jo olla Resendin allowlistalla (tuotannossa on); sähköpostit estää shift_offer.email_enabled = false, ei allowlista
+  perform pg_temp.ck(booking.shift_offer_email(OT, 't153 a', 'x', 't153-a') is null
+                     and not exists (select 1 from booking.email_outbox e where e.dedupe_key = 'b153:t153-a'), 'a: email_enabled=false → ei sähköpostia Otolle allowlistasta riippumatta');
   perform pg_temp.ck((select p.prosecdef and p.proconfig @> array['search_path=""'] from pg_proc p where p.oid = 'booking.shift_staff_page(text)'::regprocedure)
                      and not has_function_privilege('anon', 'booking.shift_staff_page(text)', 'execute')
                      and not has_function_privilege('authenticated', 'booking.shift_staff_page(text)', 'execute')

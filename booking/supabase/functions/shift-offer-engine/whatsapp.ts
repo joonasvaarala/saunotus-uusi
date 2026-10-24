@@ -279,6 +279,43 @@ export function formatDeadline(deadlineAt: string | null): string {
   return `${String(w.d).padStart(2, "0")}.${String(w.m).padStart(2, "0")}.${w.y} klo ${w.hh}:${w.mi}`;
 }
 
+// booking_155: tyovuoro_kysely (Metan live-teksti): "Hei, työvuoroon tarvitaan tekijää. Vuoro: {{1}}, aika {{2}}.
+// Voitko tulla töihin? Vastaathan viimeistään {{3}} mennessä alla olevasta painikkeesta."
+// → {{1}} lyhyt rooli isolla alkukirjaimella (Lämmitys), {{2}} "la 31.10. klo 12–18", {{3}} "to 29.10. klo 12".
+// Vuosi näytetään vain, jos ajankohta ei ole kuluvana vuonna (Helsinki). Minuutit vain, jos ne eivät ole :00.
+export function roleShort(role: string | null): string {
+  if (role === "heater") return "Lämmitys";
+  if (role === "reception") return "Vastaanotto";
+  if (role === "therapist") return "Hoitaja";
+  return "Työvuoro";
+}
+
+function shortClock(w: { hh: string; mi: string }): string {
+  const h = String(Number(w.hh));
+  return w.mi === "00" ? h : `${h}.${w.mi}`;
+}
+
+function shortDate(w: { y: number; m: number; d: number }, nowMs: number): string {
+  const wd = WD[new Date(Date.UTC(w.y, w.m - 1, w.d)).getUTCDay()];
+  const nowY = helsinkiWall(new Date(nowMs).toISOString())?.y ?? w.y;
+  return `${wd} ${w.d}.${w.m}.${w.y === nowY ? "" : String(w.y)}`;
+}
+
+export function formatShiftWhenShort(startsAt: string | null, endsAt: string | null, nowMs = Date.now()): string {
+  const start = startsAt ? helsinkiWall(startsAt) : null;
+  if (!start) return "ajankohta puuttuu";
+  const end = endsAt ? helsinkiWall(endsAt) : null;
+  return `${shortDate(start, nowMs)} klo ${shortClock(start)}${end ? `–${shortClock(end)}` : ""}`;
+}
+
+export function formatDeadlineShort(deadlineAt: string | null, nowMs = Date.now()): string {
+  const w = deadlineAt ? helsinkiWall(deadlineAt) : null;
+  if (!w) return "pian";
+  return `${shortDate(w, nowMs)} klo ${shortClock(w)}`;
+}
+
+export const OFFER_TEMPLATE_SHORT = "tyovuoro_kysely";
+
 export function templateForKind(kind: string): TemplateName | null {
   if (kind in KIND_TEMPLATE) return KIND_TEMPLATE[kind as MessageKind];
   return null;
@@ -359,6 +396,10 @@ export function resolveTemplate(msg: ClaimedMessage, templates: TemplateSettings
     const t = templates.offer;
     const fallback = t?.fallback && /^[a-z0-9_]+$/.test(t.fallback) ? t.fallback : KIND_TEMPLATE.offer;
     const name = approved(t) ? t!.name! : fallback;
+    if (name === OFFER_TEMPLATE_SHORT) {
+      const params = [roleShort(msg.role_type), formatShiftWhenShort(msg.starts_at, msg.ends_at), formatDeadlineShort(msg.deadline_at)].map(templateText);
+      return { kind: "template", name, params, buttonToken: msg.token, needsButton: true };
+    }
     return { kind: "template", name, params: [role, when, deadline], buttonToken: msg.token, needsButton: true };
   }
   return { kind: "legacy" };

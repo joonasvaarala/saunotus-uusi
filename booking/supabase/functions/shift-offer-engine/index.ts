@@ -1,5 +1,5 @@
 // shift-offer-engine: vapaiden vuorojen tarjoaminen (SPEC.md).
-// EI deployata tästä haarasta. EI lähetä viestejä. EI aja migraatioita.
+// EI aja migraatioita. Viestit lähtevät vain, kun lähettäjä on kytketty päälle (sender_enabled).
 //
 // Autentikointi:
 //   * tick (POST ilman tokenia): header x-sync-secret = env SYNC_CRON_SECRET (vakioaikavertailu)
