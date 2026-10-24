@@ -19,7 +19,7 @@ Merkinnät: 🗄️ = tuotantotietokannan muutos, 🖥️ = palvelin-, DNS- tai 
 
 ## A. Nyt (ennen siirtoa): koodi ja tietokanta samaan aikaan
 
-1. 🗄️ **Aja `booking/supabase/migrations/20261024194500_booking_170_osoite_saunotus_fi.sql` tuotantoon, kun tämä PR yhdistetään.**
+1. 🗄️ **`booking/supabase/migrations/20261024201634_booking_170_osoite_saunotus_fi.sql` ajettu tuotantoon 24.10.2026 (versio 20261024201634) tämän PR:n yhdistämisen yhteydessä.**
    Koodin kanoninen osoite on tämän jälkeen `https://saunotus.fi` (`booking/shop/src/johku-links.js` CANONICAL, `src/lib.mjs` SHOP_CANON).
    Koodi tunnistaa myös vanhan kehitysosoitteen ja ohjaa sen sivuston omaan polkuun, joten ajojärjestys ei riko linkkejä. Tietokannan
    tekstit on silti tarkoitus korjata samana päivänä.
@@ -32,7 +32,7 @@ Merkinnät: 🗄️ = tuotantotietokannan muutos, 🖥️ = palvelin-, DNS- tai 
      liput talteen ennen päivitystä ja palauttaa ne täsmälleen päivityksen jälkeen. Palautus koskee vain tuotteita, joiden kenttiä ajo
      muutti, ja vain rivejä, joiden julkaistu teksti on täsmälleen tämän migraation tulos. Muuten migraatio pysähtyy, eikä mitään muuteta.
      Lopputulos: kaikkien rivien `needs_translation` on sama kuin ennen ajoa. Rollback tekee saman.
-   - Rollback: `booking/supabase/rollbacks/20261024194500_booking_170_ROLLBACK.sql` palauttaa tekstit täsmälleen, ja liput jäävät ennalleen.
+   - Rollback: `booking/supabase/rollbacks/20261024201634_booking_170_ROLLBACK.sql` palauttaa tekstit täsmälleen, ja liput jäävät ennalleen.
    - SQL-testi `booking/supabase/tests/kb/t170_osoite_saunotus_fi.sql` (paikallinen PG17, tuotannon tekstit ja liput 24.10.2026):
      ajo, uudelleenajo, rollback (md5 täsmää alkuperäiseen), rollbackin uudelleenajo, vartijat (poikkeava teksti → pysähtyy, ei muutoksia)
      ja `needs_translation` ennallaan jokaisen vaiheen jälkeen. Tulos: pass=26 fail=0.

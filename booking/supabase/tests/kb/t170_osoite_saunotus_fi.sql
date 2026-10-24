@@ -65,7 +65,7 @@ select set_config('booking.text_apply', 'on', true);
 update kb.products set description = description || ' ' where id = 38;
 select set_config('booking.text_apply', '', true);
 savepoint b;
-\ir ../../migrations/20261024194500_booking_170_osoite_saunotus_fi.sql
+\ir ../../migrations/20261024201634_booking_170_osoite_saunotus_fi.sql
 select nextval('t170_noerr');
 rollback to savepoint b;
 select pg_temp.ck((select last_value from t170_noerr) = 1, 'B0: vartija – poikkeus tuli (ei muutoksia)');
@@ -75,7 +75,7 @@ select set_config('booking.text_apply', '', true);
 select pg_temp.ck(pg_temp.state(false) and pg_temp.nver() = (select n from t170_n where step = 'A') and (select ok from t170_nt_same), 'B1: poikkeama → ei muutoksia (tekstit, versiot, liput)');
 
 -- C: migraatio
-\ir ../../migrations/20261024194500_booking_170_osoite_saunotus_fi.sql
+\ir ../../migrations/20261024201634_booking_170_osoite_saunotus_fi.sql
 select pg_temp.ck(pg_temp.state(true), 'C1: kaikki 11 kenttää = odotettu uusi teksti (md5)');
 select pg_temp.ck(not exists (select 1 from kb.products where concat_ws(' ', description, description_en, short_description, short_description_en, booking_url, source_url) like '%uusi.saunotus.com%'), 'C2: ei vanhaa osoitetta kb.productsissa');
 select pg_temp.ck(pg_temp.nver() = (select n from t170_n where step = 'A') + 10, 'C3: 10 uutta sivutekstiversiota (tuotteet 1, 7, 25, 26, 38 × fi/en)');
@@ -85,11 +85,11 @@ select pg_temp.ck((select needs_translation from booking.site_texts where key = 
 insert into t170_n values ('C', pg_temp.nver());
 
 -- D: uudelleenajo – ei muutoksia
-\ir ../../migrations/20261024194500_booking_170_osoite_saunotus_fi.sql
+\ir ../../migrations/20261024201634_booking_170_osoite_saunotus_fi.sql
 select pg_temp.ck(pg_temp.state(true) and pg_temp.nver() = (select n from t170_n where step = 'C') and (select ok from t170_nt_same), 'D1: uudelleenajo ei muuta mitään');
 
 -- E: rollback
-\ir ../../rollbacks/20261024194500_booking_170_ROLLBACK.sql
+\ir ../../rollbacks/20261024201634_booking_170_ROLLBACK.sql
 select pg_temp.ck(pg_temp.state(false), 'E1: rollback = täsmälleen alkuperäiset tekstit (md5)');
 select pg_temp.ck((select count(*) from kb.products where concat_ws(' ', description, description_en, short_description, short_description_en, booking_url, source_url) like '%uusi.saunotus.com%') = 6, 'E2: 6 tuotetta taas vanhalla osoitteella');
 select pg_temp.ck((select ok from t170_nt_same), 'E3: needs_translation täsmälleen sama kuin ennen booking_170:tä');
@@ -98,16 +98,16 @@ select pg_temp.ck(not exists (select 1 from booking.site_texts st join kb.produc
 insert into t170_n values ('E', pg_temp.nver());
 
 -- F: rollbackin uudelleenajo – ei muutoksia
-\ir ../../rollbacks/20261024194500_booking_170_ROLLBACK.sql
+\ir ../../rollbacks/20261024201634_booking_170_ROLLBACK.sql
 select pg_temp.ck(pg_temp.state(false) and pg_temp.nver() = (select n from t170_n where step = 'E') and (select ok from t170_nt_same), 'F1: rollbackin uudelleenajo ei muuta mitään');
 
 -- G: rollbackin vartija – migraation jälkeen muokattu kenttä → exception
-\ir ../../migrations/20261024194500_booking_170_osoite_saunotus_fi.sql
+\ir ../../migrations/20261024201634_booking_170_osoite_saunotus_fi.sql
 select set_config('booking.text_apply', 'on', true);
 update kb.products set description_en = description_en || ' ' where id = 25;
 select set_config('booking.text_apply', '', true);
 savepoint g;
-\ir ../../rollbacks/20261024194500_booking_170_ROLLBACK.sql
+\ir ../../rollbacks/20261024201634_booking_170_ROLLBACK.sql
 select nextval('t170_noerr');
 rollback to savepoint g;
 select pg_temp.ck((select last_value from t170_noerr) = 1, 'G0: rollbackin vartija – poikkeus tuli (ei muutoksia)');
@@ -120,7 +120,7 @@ select set_config('booking.text_apply', '', true);
 select pg_temp.ck(pg_temp.state(true) and (select ok from t170_nt_same), 'H1: rollback → migraatio uudelleen: tekstit ja liput oikein');
 
 -- I: needs_translation-vartija – lippu muuttui, mutta rivin julkaistu teksti ei ole tämän migraation tulos → exception
-\ir ../../rollbacks/20261024194500_booking_170_ROLLBACK.sql
+\ir ../../rollbacks/20261024201634_booking_170_ROLLBACK.sql
 select pg_temp.ck(pg_temp.state(false) and (select ok from t170_nt_same), 'I0: rollback ennen I-testiä');
 savepoint i;
 -- testin sisäinen tynkä (peruuntuu): trigger, joka nostaa toisen kielen lipun mutta ei synkkaa tekstiä → lipun palautus ei saa tapahtua
@@ -129,7 +129,7 @@ begin
   update booking.site_texts set needs_translation = true where source_table = 'kb.products' and source_pk = new.id::text and key = 'product.' || new.id || '.description' and lang = 'fi';
   return null;
 end $f$;
-\ir ../../migrations/20261024194500_booking_170_osoite_saunotus_fi.sql
+\ir ../../migrations/20261024201634_booking_170_osoite_saunotus_fi.sql
 select nextval('t170_noerr');
 rollback to savepoint i;
 select pg_temp.ck((select last_value from t170_noerr) = 1, 'I1: needs_translation-vartija – poikkeus tuli (ei muutoksia)');

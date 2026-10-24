@@ -15,7 +15,7 @@
 -- vain niille tuotteille, joiden kenttiä tämä ajo muutti, ja vain jos rivin julkaistu teksti on täsmälleen tämän migraation tulos (md5 = to_md5).
 -- Muuten exception (koko migraatio peruuntuu). Lopputulos: needs_translation on kaikilla riveillä sama kuin ennen ajoa.
 -- Historia (kb.change_log, booking.audit_log, booking.site_text_versions) jätetään ennalleen.
--- Rollback: booking/supabase/rollbacks/20261024194500_booking_170_ROLLBACK.sql
+-- Rollback: booking/supabase/rollbacks/20261024201634_booking_170_ROLLBACK.sql
 set local lock_timeout = '5s';
 set local statement_timeout = '60s';
 

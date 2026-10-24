@@ -15,8 +15,8 @@ import { join, dirname } from 'node:path';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const OLD = ['uusi', 'saunotus', 'com'].join('.');
-const MIG = 'booking/supabase/migrations/20261024194500_booking_170_osoite_saunotus_fi.sql';
-const RB = 'booking/supabase/rollbacks/20261024194500_booking_170_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024201634_booking_170_osoite_saunotus_fi.sql';
+const RB = 'booking/supabase/rollbacks/20261024201634_booking_170_ROLLBACK.sql';
 const SELF = 'booking/tests/osoite-saunotus-fi-170.test.mjs', RUNBOOK = 'docs/siirto-saunotus-fi.md';
 const T170 = 'booking/supabase/tests/kb/t170_osoite_saunotus_fi.sql';
 // ajetut migraatiot ovat muuttumatonta historiaa: booking_29/161/163 ja niiden rollbackit/testit pysyvät sellaisinaan (ei muokata tätä PR:ää varten)
@@ -76,8 +76,8 @@ test('booking_170: needs_translation palautetaan ennalleen (migraatio ja rollbac
   const t = readFileSync(join(root, T170), 'utf8');
   for (const l of ['A1', 'A4', 'B1', 'C1', 'C3', 'C5', 'D1', 'E1', 'E3', 'F1', 'G1', 'H1', 'I2']) assert.match(t, new RegExp(`'${l}: `));
   assert.match(t, /TESTRESULT pass=% fail=%/);
-  assert.match(t, /\\ir \.\.\/\.\.\/migrations\/20261024194500_booking_170_osoite_saunotus_fi\.sql/);
-  assert.match(t, /\\ir \.\.\/\.\.\/rollbacks\/20261024194500_booking_170_ROLLBACK\.sql/);
+  assert.match(t, /\\ir \.\.\/\.\.\/migrations\/20261024201634_booking_170_osoite_saunotus_fi\.sql/);
+  assert.match(t, /\\ir \.\.\/\.\.\/rollbacks\/20261024201634_booking_170_ROLLBACK\.sql/);
 });
 
 test('ajetut migraatiot booking_161/163 ennallaan: kirjoittavat yhä vanhan osoitteen (historia), booking_170 korjaa', () => {
