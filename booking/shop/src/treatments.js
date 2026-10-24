@@ -41,6 +41,10 @@ export const POLICY = {
   cacheMs: 3 * 60e3,                            // saatavuuden välimuisti (haku 0,3–1,7 s; ei pollausta)
 };
 export const KB_IDS = [10, 11, 12, 8, 7];        // näytetään tässä järjestyksessä (tuntematon id → loppuun, ks. splitCatalog)
+// Tuotteet, joita ei näytetä kaupan listoilla (tuotelista, päivänäkymän hoidot), mutta joiden tuotesivu (#/tuote/<slug>) ja varaus toimivat ennallaan.
+// Saunotusrituaali (kb 8): ei myydä erikseen listalta, vaan se jää lisätuotteeksi (Joonas 24.10.2026, booking_159). Hinta, slug ja URL ennallaan.
+export const LISTING_HIDDEN_SLUGS = ['saunotusrituaali'];
+export const isListed = (p) => !LISTING_HIDDEN_SLUGS.includes(p?.slug);
 // Pakettituote kb 7 "Saunarituaali ja savusaunavuoro (la & su)" (booking_58, sopimus §17.11): sama aikavarauspolku kuin hoidoilla (slots, ruudukko 30 min), EI hoitovalitsinta.
 // Aikajana tulee KANNASTA (booking_61, §18.11): public_catalog().timeline = [{ seq, kind, label, label_en, minutes, start_min, end_min }] sekä timeline_text(_en).
 // Ei kovakoodattua aikajanaa: jos kenttää ei ole (vanha kanta / mock ilman kenttiä) tuote on tavallinen aikavaraustuote (ei aikajanaa eikä aikataulurivejä).

@@ -9,7 +9,7 @@ import { pt } from './pay-choices-texts.js';
 import { T } from './i18n.js';
 import { createWaitlistView } from './waitlist-ui.js';
 import { visibleWaitlistSlots, fullyBooked, hasWaitlistSlots } from './waitlist-logic.js';
-import { loadProducts as loadTreatmentProducts, splitCatalog, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
+import { loadProducts as loadTreatmentProducts, splitCatalog, isListed as treatmentListed, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
 import { pickCatalog } from './catalog-audience.js';
 import { heroShort, cardShort, fallbackDesc } from './short-desc.js';
 import { createTreatmentViews } from './treatment-ui.js';
@@ -180,7 +180,7 @@ function setHero(p) {
 const cardExcerpt = (p) => cardShort(h, p, S.lang, pdesc(p));
 // ---- näkymä 1: tuotelista ----
 function viewList(query) {
-  const cat = [...state.catalog, ...state.treatments];
+  const cat = [...state.catalog, ...state.treatments.filter(treatmentListed)];   // lisätuotteet (LISTING_HIDDEN_SLUGS) eivät näy listalla; tuotesivu toimii
   const kinds = ['all', ...new Set(cat.map(kindOf))];
   const k = kinds.includes(query.get('k')) ? query.get('k') : 'all';
   const list = cat.filter((p) => k === 'all' || kindOf(p) === k);
@@ -309,7 +309,7 @@ async function fillTreatments(box, results, ds, today, tmax, openSlug, onToggle,
   const from = ds < today ? today : ds;
   const end = addDays(ds, 13);
   const until = end < tmax ? end : tmax;
-  await Promise.all(state.treatments.map(async (p, ord) => {
+  await Promise.all(state.treatments.filter(treatmentListed).map(async (p, ord) => {
     let by;
     try { by = await loadTreatmentSlots(p, 1, from, until); } catch (e) { failed = failed || e; return; }
     if (token !== treatDayToken || !box.isConnected) return;
@@ -403,7 +403,7 @@ async function viewDay(dateStr, keep, openSlug) {
     groups.flatMap(([k, g]) => [h('h4', { class: 'bk-kindh', text: t['k_' + k] }),
       h('ul', { class: 'bk-prods' }, g.map(([p, rs]) => prodCard(p, rs, ds, p.id === openId, toggle)))]));
   const tmax = addDays(today, treatmentHorizon(state.settings)) < maxDs ? addDays(today, treatmentHorizon(state.settings)) : maxDs;
-  const treatBox = state.treatments.length && ds <= tmax ? h('section', { class: 'bk-treat-day', 'aria-label': t.k_hoito }, h('h4', { class: 'bk-kindh', text: t.k_hoito }), h('p', { class: 'bk-loading bk-treat-status', role: 'status', text: t.loading }), h('ul', { class: 'bk-prods' })) : null;
+  const treatBox = state.treatments.some(treatmentListed) && ds <= tmax ? h('section', { class: 'bk-treat-day', 'aria-label': t.k_hoito }, h('h4', { class: 'bk-kindh', text: t.k_hoito }), h('p', { class: 'bk-loading bk-treat-status', role: 'status', text: t.loading }), h('ul', { class: 'bk-prods' })) : null;
   if (treatBox) results.append(treatBox);
   mount(h('header', { class: 'bk-head' }, h('h2', { text: t.dayTitle }), h('p', { class: 'lead', text: t.dayLead })), modeSwitch('day', ds),
     h('section', { class: 'bk-daypick', 'aria-label': t.pickDay }, nav, strip,
