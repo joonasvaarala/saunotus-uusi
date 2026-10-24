@@ -1,5 +1,5 @@
 -- booking_157: tietosuojan säilytysraportti TUOTANNON LUKUAJOON (pelkkä SELECT, ei kirjoituksia, ei uusia funktioita).
--- Sama ehdokaslohko kuin booking._privacy_candidates (migraatio 20261024290000); node-testi tietosuoja-sailytys.test.mjs varmistaa, että ne ovat identtiset.
+-- Sama ehdokaslohko kuin booking._privacy_candidates (migraatio 20261024165608); node-testi tietosuoja-sailytys.test.mjs varmistaa, että ne ovat identtiset.
 -- Tulostaa vain määrät luokittain ja estosyittäin (ei id:itä eikä henkilötietoja). Päivä = tänään (Europe/Helsinki).
 -- Ajo: Supabase MCP execute_sql (read-only) tai SQL-editori. Ei vaadi booking_157-migraatiota.
 with p0 as (select (now() at time zone 'Europe/Helsinki')::date as as_of),

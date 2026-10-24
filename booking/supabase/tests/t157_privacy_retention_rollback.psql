@@ -4,16 +4,16 @@
 -- Ajo hakemistosta booking/supabase/tests:  psql -X -v ON_ERROR_STOP=1 -d booking_test -f t157_privacy_retention_rollback.psql
 \set ON_ERROR_STOP 1
 begin;
-\i ../rollbacks/20261024290000_booking_157_ROLLBACK.sql
-\i ../rollbacks/20261024290000_booking_157_ROLLBACK.sql
+\i ../rollbacks/20261024165608_booking_157_ROLLBACK.sql
+\i ../rollbacks/20261024165608_booking_157_ROLLBACK.sql
 do $$ begin
   if to_regprocedure('booking.privacy_retention_report(date)') is not null or to_regclass('booking.analytics_monthly') is not null
      or exists (select 1 from booking.settings where key like 'privacy_retention.%') then
     raise exception 't157 rollback: booking_157-objekteja jäi';
   end if;
 end $$;
-\i ../migrations/20261024290000_booking_157_privacy_retention.sql
-\i ../migrations/20261024290000_booking_157_privacy_retention.sql
+\i ../migrations/20261024165608_booking_157_privacy_retention.sql
+\i ../migrations/20261024165608_booking_157_privacy_retention.sql
 do $$ begin
   if to_regprocedure('booking.privacy_retention_run()') is null or to_regclass('booking.analytics_monthly') is null then
     raise exception 't157 rollback: migraatio ei palautunut';

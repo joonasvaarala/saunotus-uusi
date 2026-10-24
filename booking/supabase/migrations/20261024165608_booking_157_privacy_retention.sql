@@ -1,4 +1,4 @@
--- booking_157: tietosuojan säilytysajat (tietosuojaseloste §6, tarkistukset.md huomio 1 ja 2). Väliaikainen versio 20261024290000.
+-- booking_157: tietosuojan säilytysajat (tietosuojaseloste §6, tarkistukset.md huomio 1 ja 2). Väliaikainen versio 20261024165608.
 -- 1) Kävijämittaus: booking.analytics_monthly (kuukausikooste ilman session_key-, order_id- ja UTM-tekstisarakkeita).
 --    booking.analytics_cleanup() koostaa poistettavat (yli 13 kk) raakatapahtumat SAMASSA lauseessa ennen poistoa (delete ... returning),
 --    joten jokainen tapahtuma on joko raakana tai koosteessa, ei molemmissa. Alle 5 tapahtuman ryhmät yhdistetään: ensin polku → '/muu',
@@ -17,7 +17,7 @@
 -- Kirjanpitolukot (receipts_guard_trg, invoices_lock_trg) sallivat vain kapean poikkeuksen: GUC booking.privacy_retention = 'on'
 --    JA tosite on jo yli 6 v säilytysajan JA vain henkilökentät muuttuvat. Muuten lukot toimivat kuten ennen.
 -- Ei muuta public-skeemaa eikä kb.products/public_catalog-rakenteita. Uudelleenajettava.
--- Rollback: booking/supabase/rollbacks/20261024290000_booking_157_ROLLBACK.sql (palauttaa 4 funktiota tuotannon md5:n mukaisiksi).
+-- Rollback: booking/supabase/rollbacks/20261024165608_booking_157_ROLLBACK.sql (palauttaa 4 funktiota tuotannon md5:n mukaisiksi).
 set local lock_timeout = '5s';
 
 -- ===== asetukset =====

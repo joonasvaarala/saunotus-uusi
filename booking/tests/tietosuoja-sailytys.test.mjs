@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p) => readFileSync(join(root, p), 'utf8');
-const V = '20261024290000';
+const V = '20261024165608';
 const MIG = `booking/supabase/migrations/${V}_booking_157_privacy_retention.sql`;
 const RB = `booking/supabase/rollbacks/${V}_booking_157_ROLLBACK.sql`;
 const RO = 'booking/supabase/manual/booking_157_retention_report_readonly.sql';
@@ -23,8 +23,8 @@ const block = (s) => {
   return s.slice(a, b);
 };
 
-test('versio: booking_157 lajittuu booking_156:n (20261024280000) jälkeen ja on uniikki', () => {
-  assert.ok(V > '20261024280000');
+test('versio: booking_157 lajittuu booking_156:n (20261024163053) jälkeen ja on uniikki', () => {
+  assert.ok(V > '20261024163053');
   const all = readdirSync(join(root, 'booking/supabase/migrations')).filter((f) => f.endsWith('.sql')).sort();
   assert.equal(all[all.length - 1].slice(0, 14), V, 'booking_157 on viimeinen migraatio');
   const files = readdirSync(join(root, 'booking/supabase/migrations')).filter((f) => f.startsWith(V));
