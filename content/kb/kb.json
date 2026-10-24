@@ -1,6 +1,6 @@
 {
  "_doc": "Snapshot kb-tietokannasta (vain julkiset kentät, active=true, internal=false). Päivitä: docs/kb-export.sql + scripts/kb-snapshot.mjs",
- "snapshot_at": "2026-10-18T12:25:35.242Z",
+ "snapshot_at": "2026-10-24T13:09:24.740Z",
  "business": {
   "trade_name": "Sipoonjoen Perinnesauna",
   "legal_name": "Havuhattu Oy",
@@ -17,14 +17,17 @@
    "facebook": "https://www.facebook.com/Perinnesauna/",
    "instagram": "https://www.instagram.com/perinnesauna/",
    "training_site": "https://saunakoulutus.fi"
-  }
+  },
+  "description_en": "Saunotus means smoke sauna experiences, rituals and tradition on the banks of the Sipoonjoki river. Sipoonjoen Perinnesauna is a smoke sauna built into the ground in Hindsby, Sipoo, next to Sipoonkorpi National Park. The sauna was completed in 2021; public sessions opened in January 2022."
  },
  "locations": [
   {
    "id": 2,
    "name": "Savusauna (maasavusauna)",
    "location_type": "sauna",
-   "description": "Maan sisälle rakennettu savusauna, joka jättää erityisen puhdistuneen ja raikkaan olon. Valmistui vuonna 2021. Vanhan sivuston mukaan yksi harvoista vuoden jokaisena päivänä lämpiävistä savusaunoista."
+   "description": "Maan sisälle rakennettu savusauna, joka jättää erityisen puhdistuneen ja raikkaan olon. Valmistui vuonna 2021. Vanhan sivuston mukaan yksi harvoista vuoden jokaisena päivänä lämpiävistä savusaunoista.",
+   "name_en": "Smoke sauna (earthen smoke sauna)",
+   "description_en": "A smoke sauna built into the ground that leaves you feeling especially cleansed and refreshed. Completed in 2021. According to our old website, one of the few smoke saunas heated every day of the year."
   },
   {
    "id": 3,
@@ -35,35 +38,9 @@
     "pukukoppi",
     "suihku",
     "huussi"
-   ]
-  },
-  {
-   "id": 4,
-   "name": "Kylmä- ja lämminvesialtaat",
-   "location_type": "pool",
-   "description": "Saunan edustalla kylmävesiallas ja lämminvesiallas (palju). Altaiden lämpötila vaihtelee jonkin verran sääolosuhteiden mukaan. Lämpimästä altaasta näkymä Sipoonjokilaaksoon ja vanhaan metsään. Pääsy altaisiin kuuluu yleisten saunavuorojen ja yksityisvuorojen hintaan, ei erillisiin saunahoitoihin."
-  },
-  {
-   "id": 5,
-   "name": "Hirsimökki",
-   "location_type": "building",
-   "description": "Sauna-alueella sijaitseva hirsimökki, jossa suihku. Mökin lähistöllä perinteinen huussi.",
-   "amenities": [
-    "suihku",
-    "huussi lähistöllä"
-   ]
-  },
-  {
-   "id": 6,
-   "name": "Laavu",
-   "location_type": "outdoor",
-   "description": "Laavu on asiakkaiden vapaasti käytettävissä sauna-ajan puitteissa; omia makkaroita voi paistaa. Jälkilöylyjen alussa laavulla voi olla vielä yleisen vuoron asiakkaita klo 19–20."
-  },
-  {
-   "id": 7,
-   "name": "Hoitosauna Lovi",
-   "location_type": "treatment_sauna",
-   "description": "Vanha, hyvin pieni hoitosauna sauna-alueella. Ei enää käytössä saunahoidoissa – kaikki hoidot tehdään hoitosauna Raunissa (omistajan päätös 9.10.2026). Vanhoissa teksteissä taivutusmuodot 'Lovessa'/'Loven'; 'Love' on kirjoitusvirhe."
+   ],
+   "name_en": "Rauni healing sauna",
+   "description_en": "A treatment and ritual sauna in the sauna area where all sauna treatments, sauna rituals and sauna ceremonies are held (owner's decision 9.10.2026). Wide benches. In front of the sauna there is a small area for cooling down and relaxing. Treatment guests have access to a changing cubicle, a shower and an outdoor toilet. Treatment prices do not include entrance to the smoke sauna or hot tubs."
   },
   {
    "id": 1,
@@ -83,7 +60,49 @@
     "huussi",
     "laavu",
     "ilmainen pysäköinti"
-   ]
+   ],
+   "name_en": "Sipoonjoen Perinnesauna",
+   "description_en": "A sauna area on the banks of the Sipoonjoki river in Hindsby, Sipoo, next to Sipoonkorpi National Park. You move partly outdoors in the area all year round. The area includes the smoke sauna, the Rauni healing sauna, cold and warm water pools (hot tubs), a log cabin with a shower, an outdoor toilet, a lean-to shelter, a terrace path and a patio. Sipoonkorpi National Park is a few kilometres away.",
+   "directions_en": "Please arrive no earlier than about 10 minutes before your booking starts. There are often private sessions at the sauna, so please wait for staff on the terrace near the car park and let them show you around the sauna surroundings. Directions: https://maps.app.goo.gl/jBZSyW6mm8XWQMxF6",
+   "parking_en": "Parking is free for guests. Follow the parking signs and leave your car in the designated parking area. Please park as closely as possible, but keep the passageways clear. From the parking area you continue on foot to the sauna area. In winter and in wet weather, roads and paths may be slippery.",
+   "public_transport_en": "Bus 841 from Itäkeskus to Broböle; from the stop it is about a kilometre to the sauna (HSL Journey Planner). You can also get here by car or bike.",
+   "accessibility_en": "The sauna area is not accessible: there are some stairs in the area. If you need help getting around the sauna area, please let us know in advance by email."
+  },
+  {
+   "id": 4,
+   "name": "Kylmä- ja lämminvesialtaat",
+   "location_type": "pool",
+   "description": "Saunan edustalla kylmävesiallas ja lämminvesiallas (palju). Altaiden lämpötila vaihtelee jonkin verran sääolosuhteiden mukaan. Lämpimästä altaasta näkymä Sipoonjokilaaksoon ja vanhaan metsään. Pääsy altaisiin kuuluu yleisten saunavuorojen ja yksityisvuorojen hintaan, ei erillisiin saunahoitoihin.",
+   "name_en": "Cold and warm water pools",
+   "description_en": "A cold water pool and a warm water pool (hot tub) in front of the sauna. The temperature of the pools varies somewhat depending on the weather. The warm pool offers a view of the Sipoonjoki river valley and the old forest. Access to the pools is included in the price of public and private sauna sessions, but not in separate sauna treatments."
+  },
+  {
+   "id": 5,
+   "name": "Hirsimökki",
+   "location_type": "building",
+   "description": "Sauna-alueella sijaitseva hirsimökki, jossa suihku. Mökin lähistöllä perinteinen huussi.",
+   "amenities": [
+    "suihku",
+    "huussi lähistöllä"
+   ],
+   "name_en": "Log cabin",
+   "description_en": "A log cabin with a shower in the sauna area. A traditional outdoor toilet is located near the cabin."
+  },
+  {
+   "id": 6,
+   "name": "Laavu",
+   "location_type": "outdoor",
+   "description": "Laavu on asiakkaiden vapaasti käytettävissä sauna-ajan puitteissa; omia makkaroita voi paistaa. Jälkilöylyjen alussa laavulla voi olla vielä yleisen vuoron asiakkaita klo 19–20.",
+   "name_en": "Lean-to shelter (laavu)",
+   "description_en": "The lean-to shelter is free for guests to use during their sauna time; you can grill your own sausages. At the start of the After Session Sauna, guests from the public session may still be at the lean-to shelter 19–20."
+  },
+  {
+   "id": 7,
+   "name": "Hoitosauna Lovi",
+   "location_type": "treatment_sauna",
+   "description": "Vanha, hyvin pieni hoitosauna sauna-alueella. Ei enää käytössä saunahoidoissa – kaikki hoidot tehdään hoitosauna Raunissa (omistajan päätös 9.10.2026). Vanhoissa teksteissä taivutusmuodot 'Lovessa'/'Loven'; 'Love' on kirjoitusvirhe.",
+   "name_en": "Lovi healing sauna",
+   "description_en": "An old, very small healing sauna in the sauna area. No longer used for sauna treatments – all treatments are given in the Rauni healing sauna (owner's decision 9.10.2026)."
   }
  ],
  "products": [
@@ -98,6 +117,7 @@
    "price_text": "29,00 € / hlö",
    "duration_minutes": 120,
    "duration_text": "la–su klo 14–19 (saunomisaika 2 h); to klo 17–19",
+   "duration_text_en": "Sat–Sun 14–19 (sauna time 2 h); Thu 17–19",
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/yleinen-sauna/yleinensauna",
    "includes_smoke_sauna": true,
    "location_id": 2,
@@ -114,6 +134,7 @@
    "price_text": "29,00 € / hlö",
    "duration_minutes": 180,
    "duration_text": "ma klo 16–19",
+   "duration_text_en": "Mon 16–19",
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/yleinen-sauna/miestensauna-2",
    "includes_smoke_sauna": true,
    "location_id": 2,
@@ -130,6 +151,7 @@
    "price_text": "29,00 € / hlö",
    "duration_minutes": 180,
    "duration_text": "ti klo 16–19",
+   "duration_text_en": "Tue 16–19",
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/yleinen-sauna/naistensauna",
    "includes_smoke_sauna": true,
    "location_id": 2,
@@ -146,6 +168,7 @@
    "price_text": "29,00 € / hlö",
    "duration_minutes": 180,
    "duration_text": "ke klo 16–19",
+   "duration_text_en": "Wed 16–19",
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/yleinen-sauna/hiljainen-sauna",
    "includes_smoke_sauna": true,
    "location_id": 2,
@@ -162,6 +185,7 @@
    "price_text": "35,00 € / hlö",
    "duration_minutes": 180,
    "duration_text": "to klo 16–19",
+   "duration_text_en": "Thu 16–19",
    "capacity_min": 1,
    "capacity_max": 8,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/yleinen-sauna/turvetorstai",
@@ -173,12 +197,14 @@
    "id": 6,
    "slug": "tunnin-vuoro",
    "name": "Tunnin saunavuoro (la-su)",
+   "name_en": "One-hour sauna session (Sat–Sun)",
    "category": "public_sauna",
    "price": 18,
    "price_type": "per_person",
    "price_text": "18,00 € / hlö",
    "duration_minutes": 60,
    "duration_text": "1 h, la–su klo 14 tai 18",
+   "duration_text_en": "1 h, Sat–Sun at 14 or 18",
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/yleinen-sauna/tunnin-vuoro",
    "includes_smoke_sauna": true,
    "location_id": 2,
@@ -195,6 +221,7 @@
    "price_text": "49 € / hlö",
    "duration_minutes": 120,
    "duration_text": "rituaali 20 min + savusauna 1 h 30 min (yhteensä 2 h)",
+   "duration_text_en": "ritual 20 min + smoke sauna 1 h 30 min (2 h in total)",
    "capacity_min": 1,
    "capacity_max": 6,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/yleinen-sauna/saunarituaali-ja-savusaunavuoro",
@@ -213,6 +240,7 @@
    "price_text": "20,00 €",
    "duration_minutes": 20,
    "duration_text": "20 min",
+   "duration_text_en": "20 min",
    "capacity_min": 1,
    "capacity_max": 6,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/hoidot/saunotusrituaali",
@@ -231,6 +259,7 @@
    "price_text": "59,00 € / hlö",
    "duration_minutes": 90,
    "duration_text": "1 h 30 min",
+   "duration_text_en": "1 h 30 min",
    "capacity_min": 1,
    "capacity_max": 8,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/tapahtumat/perinnesaunotusilta",
@@ -251,6 +280,7 @@
    "extra_person_price": 35,
    "duration_minutes": 60,
    "duration_text": "1 h",
+   "duration_text_en": "1 h",
    "capacity_min": 1,
    "capacity_max": 4,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/hoidot/saunahoito-2",
@@ -271,6 +301,7 @@
    "extra_person_price": 60,
    "duration_minutes": 120,
    "duration_text": "2 h",
+   "duration_text_en": "2 h",
    "capacity_min": 1,
    "capacity_max": 2,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/hoidot/saunotus-2",
@@ -291,6 +322,7 @@
    "extra_person_price": 70,
    "duration_minutes": 180,
    "duration_text": "3 h",
+   "duration_text_en": "3 h",
    "capacity_min": 1,
    "capacity_max": 2,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/hoidot/syvasaunotus",
@@ -302,12 +334,14 @@
    "id": 13,
    "slug": "perinnesaunotus-ryhmalle",
    "name": "Perinnesaunotus ryhmälle",
+   "name_en": "Traditional sauna ceremony for groups",
    "category": "treatment",
    "price": 499,
    "price_type": "fixed",
    "price_text": "499,00 €",
    "duration_minutes": 180,
    "duration_text": "noin 3 h",
+   "duration_text_en": "approx. 3 h",
    "capacity_min": 3,
    "capacity_max": 6,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/saunaseremoniat/perinnesaunotus-ryhmalle",
@@ -319,12 +353,14 @@
    "id": 24,
    "slug": "vihtahoito-opiskelijatyona",
    "name": "Saunahoito opiskelijatyönä",
+   "name_en": "Sauna treatment by students",
    "category": "treatment",
    "price": 20,
    "price_type": "fixed",
    "price_text": "20,00 € / 30 min",
    "duration_minutes": 30,
    "duration_text": "30 min",
+   "duration_text_en": "30 min",
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/hoidot/vihtahoito-opiskelijatyona",
    "includes_smoke_sauna": false,
    "location_id": 3,
@@ -342,6 +378,7 @@
    "extra_person_price": 10,
    "duration_minutes": 120,
    "duration_text": "1–7 h vaihtoehdot",
+   "duration_text_en": "1–7 h options",
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/yksityisvuorot/oma-saunavuoro",
    "includes_smoke_sauna": true,
    "location_id": 1,
@@ -360,6 +397,7 @@
    "extra_person_price": 10,
    "duration_minutes": 120,
    "duration_text": "2 h (ma–to klo 19–21), 3 h (pe–su klo 19–22)",
+   "duration_text_en": "2 h (Mon–Thu 19–21), 3 h (Fri–Sun 19–22)",
    "capacity_min": 1,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/yksityisvuorot/jalkiloylyt",
    "includes_smoke_sauna": true,
@@ -370,12 +408,14 @@
    "id": 27,
    "slug": "perinnesaunotus-jalkiloylyille",
    "name": "Perinnesaunotus jälkilöylyille",
+   "name_en": "Traditional sauna ceremony for After Session Sauna",
    "category": "ceremony",
    "price": 150,
    "price_type": "per_hour",
    "price_text": "150,00 € / h",
    "duration_minutes": 60,
    "duration_text": "1 h",
+   "duration_text_en": "1 h",
    "capacity_min": 1,
    "capacity_max": 8,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/saunaseremoniat/perinnesaunotus-jalkiloylyille",
@@ -387,12 +427,14 @@
    "id": 28,
    "slug": "perinnesaunotus-yksityisvuorolle",
    "name": "Perinnesaunotus yksityisvuorolle",
+   "name_en": "Traditional sauna ceremony for private sauna sessions",
    "category": "ceremony",
    "price": 350,
    "price_type": "from",
    "price_text": "Alkaen 350,00 € / h",
    "duration_minutes": 90,
    "duration_text": "n. 1,5 h (1–8 hlö), 2 h (9–16 hlö)",
+   "duration_text_en": "approx. 1.5 h (1–8 people), 2 h (9–16 people)",
    "capacity_min": 1,
    "capacity_max": 16,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/saunaseremoniat/perinnesaunotus-yksityisvuorolle",
@@ -411,6 +453,7 @@
    "price_text": "Alkaen 390,00 € / 3 h",
    "duration_minutes": 180,
    "duration_text": "seremonia n. 1 h, varaus 3 h",
+   "duration_text_en": "ceremony approx. 1 h, booking 3 h",
    "capacity_min": 1,
    "capacity_max": 8,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/saunaseremoniat/morsiussauna",
@@ -429,6 +472,7 @@
    "price_text": "Alkaen 350,00 € / 2 h",
    "duration_minutes": 120,
    "duration_text": "seremonia n. 1 h; varaus 2–3 h",
+   "duration_text_en": "ceremony approx. 1 h; booking 2–3 h",
    "capacity_min": 1,
    "capacity_max": 8,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/saunaseremoniat/synttarisauna",
@@ -447,6 +491,7 @@
    "price_text": "Alkaen 330,00 € / 2 h",
    "duration_minutes": 120,
    "duration_text": "seremonia n. 1 h; varaus 2–3 h",
+   "duration_text_en": "ceremony approx. 1 h; booking 2–3 h",
    "capacity_min": 1,
    "capacity_max": 8,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/saunaseremoniat/turvesauna",
@@ -458,12 +503,14 @@
    "id": 32,
    "slug": "naisten-joulusauna",
    "name": "Naisten jouluinen saunailta",
+   "name_en": "Women's Christmas sauna evening",
    "category": "event",
    "price": 69,
    "price_type": "per_person",
    "price_text": "69,00 € / hlö",
    "duration_minutes": 180,
    "duration_text": "pe 18.12.2026 klo 16–19",
+   "duration_text_en": "Fri 18.12.2026 16–19",
    "capacity_min": 1,
    "capacity_max": 8,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/tapahtumat/naisten-joulusauna",
@@ -475,12 +522,14 @@
    "id": 33,
    "slug": "sipoonjoen-kekri",
    "name": "Sipoonjoen Kekri",
+   "name_en": "Sipoonjoki Kekri harvest festival",
    "category": "event",
    "price": 79,
    "price_type": "per_person",
    "price_text": "79,00 € / hlö",
    "duration_minutes": 240,
    "duration_text": "31.10.2026, n. 4 h",
+   "duration_text_en": "31.10.2026, approx. 4 h",
    "capacity_min": 1,
    "capacity_max": 8,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/tapahtumat/sipoonjoen-kekri",
@@ -492,12 +541,14 @@
    "id": 34,
    "slug": "saunottajien-yhteisopaiva-2",
    "name": "Saunottajien yhteisöpäivä",
+   "name_en": "Sauna practitioners' community day",
    "category": "event",
    "price": 69,
    "price_type": "per_person",
    "price_text": "69 € / hlö",
    "duration_minutes": 540,
    "duration_text": "20.2.2027 klo 11–20",
+   "duration_text_en": "20.2.2027 11–20",
    "capacity_max": 8,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/tapahtumat/saunottajien-yhteisopaiva-2",
    "includes_smoke_sauna": true,
@@ -508,11 +559,13 @@
    "id": 35,
    "slug": "saunottajakoulutus-syksy-2026",
    "name": "Saunottajakoulutus - Syksy 2026 (varausmaksu)",
+   "name_en": "Sauna practitioner training – Autumn 2026 (reservation fee)",
    "category": "training",
    "price": 200,
    "price_type": "deposit",
    "price_text": "200,00 € varausmaksu (koulutus 2400 €)",
    "duration_text": "6 viikonloppua 4.9.2026–16.5.2027",
+   "duration_text_en": "6 weekends 4.9.2026–16.5.2027",
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/koulutukset/saunottajakoulutus-syksy-2026",
    "includes_smoke_sauna": false,
    "location_id": 1,
@@ -522,6 +575,7 @@
    "id": 36,
    "slug": "saunottajakoulutus-kevat-syksy-2027",
    "name": "Saunottajakoulutus - kevät & syksy 2027 (varausmaksu)",
+   "name_en": "Sauna practitioner training – Spring & Autumn 2027 (reservation fee)",
    "category": "training",
    "price": 200,
    "price_type": "deposit",
@@ -547,6 +601,7 @@
    "id": 39,
    "slug": "savusaunaelamys-ja-koivuvihta",
    "name": "Savusaunaelämys ja koivuvihta -lahjakortti",
+   "name_en": "Smoke sauna experience and birch whisk – gift card",
    "category": "gift_card",
    "price": 42,
    "price_type": "fixed",
@@ -561,6 +616,7 @@
    "id": 40,
    "slug": "paikka-yleiselle-vuorolle-ja-saunahoito",
    "name": "Savusaunaelämys ja saunahoito -lahjakortti",
+   "name_en": "Smoke sauna experience and sauna treatment – gift card",
    "category": "gift_card",
    "price": 128,
    "price_type": "fixed",
@@ -576,6 +632,7 @@
    "id": 41,
    "slug": "savusaunaelamys-ja-vihtahoito-kahdelle-lahjakortti",
    "name": "Savusaunaelämys ja saunahoito kahdelle -lahjakortti",
+   "name_en": "Smoke sauna experience and sauna treatment for two – gift card",
    "category": "gift_card",
    "price": 192,
    "price_type": "fixed",
@@ -591,6 +648,7 @@
    "id": 42,
    "slug": "savusaunaelamys-turvenaamiolla-ja-jalkakylvylla-kahdelle",
    "name": "Savusaunaelämys turvenaamiolla ja jalkakylvyllä kahdelle",
+   "name_en": "Smoke sauna experience with peat mask and foot bath for two",
    "category": "gift_card",
    "price": 88,
    "price_type": "fixed",
@@ -605,11 +663,13 @@
    "id": 43,
    "slug": "vuosikortti",
    "name": "Vuosikortti",
+   "name_en": "Annual pass",
    "category": "season_card",
    "price": 290,
    "price_type": "fixed",
    "price_text": "290,00 €",
    "duration_text": "1 vuosi",
+   "duration_text_en": "1 year",
    "capacity_min": 1,
    "capacity_max": 1,
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/sarja-ja-lahjakortit/vuosikortti",
@@ -633,6 +693,7 @@
    "id": 45,
    "slug": "jalkakylpy-ja-turvenaamio",
    "name": "Jalkakylpy ja turvenaamio",
+   "name_en": "Foot bath and peat mask",
    "category": "product_rental",
    "price": 15,
    "price_type": "per_unit",
@@ -656,6 +717,7 @@
    "id": 47,
    "slug": "tossut-saunatakki-vuokra",
    "name": "Tossujen tai saunatakin vuokra (paikan päällä)",
+   "name_en": "Slipper or sauna robe rental (on site)",
    "category": "product_rental",
    "price": 5,
    "price_type": "per_unit",
@@ -667,12 +729,14 @@
    "id": 48,
    "slug": "saunavuoro-yrityksille",
    "name": "Savusaunavuoro yrityksille",
+   "name_en": "Private smoke sauna for companies",
    "category": "corporate",
    "price": 350,
    "price_type": "from",
    "price_text": "Alkaen 350,00 € / 2 h",
    "duration_minutes": 120,
    "duration_text": "2 h / 5 h / 9 h",
+   "duration_text_en": "2 h / 5 h / 9 h",
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/yrityksille/saunavuoro-yrityksille",
    "includes_smoke_sauna": true,
    "location_id": 1,
@@ -682,6 +746,7 @@
    "id": 49,
    "slug": "jalkiloylyt-yrityksille",
    "name": "Savusaunan jälkilöylyt yrityksille",
+   "name_en": "After Session Sauna for companies",
    "category": "corporate",
    "price": 250,
    "price_type": "from",
@@ -689,6 +754,7 @@
    "extra_person_price": 10,
    "duration_minutes": 120,
    "duration_text": "2–3 h",
+   "duration_text_en": "2–3 h",
    "booking_url": "https://sipoonjoenperinnesauna.johku.com/fi_FI/yrityksille/jalkiloylyt-yrityksille",
    "includes_smoke_sauna": true,
    "location_id": 1,
@@ -704,6 +770,16 @@
    "price_text": "Pyydä tarjous",
    "location_id": 1,
    "description": "Savusauna tarjoaa ympäristön työhyvinvointipäiville, pienryhmille ja yhteisille saunailloille. Saunavuorojen, rituaalien ja hoitojen lisäksi päivään voidaan yhdistää esim. metsäkävely, metsäjooga, eräruokailu laavulla tai vihdansidontatyöpaja. Hinnat tarjouspyynnöstä."
+  },
+  {
+   "id": 82,
+   "slug": "virvoitusjuoma",
+   "name": "Virvoitusjuoma",
+   "name_en": "Soft drink",
+   "category": "product_rental",
+   "price": 3.5,
+   "price_type": "per_unit",
+   "price_text": "3,50 €"
   }
  ],
  "variants": [
@@ -1114,7 +1190,9 @@
    "session_name": "Miestenvuoro",
    "session_type": "men",
    "swimsuit_rule": "Uima-asu vapaaehtoinen",
-   "product_id": 2
+   "product_id": 2,
+   "session_name_en": "Men's session",
+   "swimsuit_rule_en": "Swimwear optional"
   },
   {
    "id": 2,
@@ -1124,7 +1202,9 @@
    "session_name": "Naistenvuoro",
    "session_type": "women",
    "swimsuit_rule": "Uima-asu vapaaehtoinen",
-   "product_id": 3
+   "product_id": 3,
+   "session_name_en": "Women's session",
+   "swimsuit_rule_en": "Swimwear optional"
   },
   {
    "id": 3,
@@ -1134,7 +1214,9 @@
    "session_name": "Hiljainen vuoro",
    "session_type": "silent",
    "swimsuit_rule": "Uima-asu vapaaehtoinen",
-   "product_id": 4
+   "product_id": 4,
+   "session_name_en": "Silent session",
+   "swimsuit_rule_en": "Swimwear optional"
   },
   {
    "id": 4,
@@ -1143,7 +1225,8 @@
    "closes": "17:00:00",
    "session_name": "Turvetorstai",
    "session_type": "peat",
-   "product_id": 5
+   "product_id": 5,
+   "session_name_en": "Peat Thursday"
   },
   {
    "id": 5,
@@ -1153,13 +1236,16 @@
    "session_name": "Yleinen vuoro",
    "session_type": "public",
    "swimsuit_rule": "Uima-asu tai pyyhe (vanha sivusto: torstain yleinen vuoro on sekavuoro)",
-   "product_id": 1
+   "product_id": 1,
+   "session_name_en": "Public session",
+   "swimsuit_rule_en": "Swimwear or a towel (old website: the Thursday public session is mixed)"
   },
   {
    "id": 6,
    "weekday": 5,
    "session_name": "Yksityisvuorot ja tapahtumat – ei yleistä vuoroa",
-   "session_type": "private_only"
+   "session_type": "private_only",
+   "session_name_en": "Private sessions and events – no public session"
   },
   {
    "id": 7,
@@ -1169,7 +1255,9 @@
    "session_name": "Yleinen savusauna",
    "session_type": "public",
    "swimsuit_rule": "Uima-asu (sekavuoro)",
-   "product_id": 1
+   "product_id": 1,
+   "session_name_en": "Public smoke sauna",
+   "swimsuit_rule_en": "Swimwear (mixed session)"
   },
   {
    "id": 8,
@@ -1179,7 +1267,9 @@
    "session_name": "Yleinen savusauna",
    "session_type": "public",
    "swimsuit_rule": "Uima-asu (sekavuoro)",
-   "product_id": 1
+   "product_id": 1,
+   "session_name_en": "Public smoke sauna",
+   "swimsuit_rule_en": "Swimwear (mixed session)"
   },
   {
    "id": 9,
@@ -1187,7 +1277,9 @@
    "session_name": "Saunarituaali-ilta",
    "session_type": "ritual",
    "swimsuit_rule": "Alaston sallittu rituaalissa; uima-asu savusaunassa ja altailla",
-   "product_id": 7
+   "product_id": 7,
+   "session_name_en": "Sauna ritual evening",
+   "swimsuit_rule_en": "Nudity allowed in the ritual; swimwear in the smoke sauna and the pools"
   },
   {
    "id": 10,
@@ -1195,7 +1287,9 @@
    "session_name": "Saunarituaali-ilta",
    "session_type": "ritual",
    "swimsuit_rule": "Alaston sallittu rituaalissa; uima-asu savusaunassa ja altailla",
-   "product_id": 7
+   "product_id": 7,
+   "session_name_en": "Sauna ritual evening",
+   "swimsuit_rule_en": "Nudity allowed in the ritual; swimwear in the smoke sauna and the pools"
   }
  ],
  "events": [
@@ -1213,7 +1307,8 @@
    "id": 4,
    "product_id": 32,
    "starts_on": "2026-12-18",
-   "time_text": "klo 16–19 (saunotus alkaa klo 17)"
+   "time_text": "klo 16–19 (saunotus alkaa klo 17)",
+   "time_text_en": "16–19 (the sauna ceremony starts at 17)"
   },
   {
    "id": 5,
@@ -1224,49 +1319,56 @@
    "id": 6,
    "product_id": 34,
    "starts_on": "2027-02-20",
-   "time_text": "klo 11–20"
+   "time_text": "klo 11–20",
+   "time_text_en": "11–20"
   },
   {
    "id": 7,
    "product_id": 35,
    "starts_on": "2027-05-14",
    "ends_on": "2027-05-16",
-   "time_text": "pe 19–22, la–su 9–16"
+   "time_text": "pe 19–22, la–su 9–16",
+   "time_text_en": "Fri 19–22, Sat–Sun 9–16"
   },
   {
    "id": 8,
    "product_id": 35,
    "starts_on": "2027-03-12",
    "ends_on": "2027-03-14",
-   "time_text": "pe 19–22, la–su 9–16"
+   "time_text": "pe 19–22, la–su 9–16",
+   "time_text_en": "Fri 19–22, Sat–Sun 9–16"
   },
   {
    "id": 9,
    "product_id": 35,
    "starts_on": "2027-01-29",
    "ends_on": "2027-01-31",
-   "time_text": "pe 19–22, la–su 9–16"
+   "time_text": "pe 19–22, la–su 9–16",
+   "time_text_en": "Fri 19–22, Sat–Sun 9–16"
   },
   {
    "id": 10,
    "product_id": 35,
    "starts_on": "2026-11-13",
    "ends_on": "2026-11-15",
-   "time_text": "pe 19–22, la–su 9–16"
+   "time_text": "pe 19–22, la–su 9–16",
+   "time_text_en": "Fri 19–22, Sat–Sun 9–16"
   },
   {
    "id": 11,
    "product_id": 35,
    "starts_on": "2026-10-02",
    "ends_on": "2026-10-04",
-   "time_text": "pe 19–22, la–su 9–16"
+   "time_text": "pe 19–22, la–su 9–16",
+   "time_text_en": "Fri 19–22, Sat–Sun 9–16"
   },
   {
    "id": 12,
    "product_id": 35,
    "starts_on": "2026-09-04",
    "ends_on": "2026-09-06",
-   "time_text": "pe 19–22, la–su 9–16"
+   "time_text": "pe 19–22, la–su 9–16",
+   "time_text_en": "Fri 19–22, Sat–Sun 9–16"
   }
  ],
  "policies": [
@@ -1460,7 +1562,9 @@
    "answer": "Yleisillä saunavuoroilla sauna on avoinna kaikille varanneille. Viikko-ohjelma (uusi sivusto): ma klo 16–19 miestenvuoro, ti klo 16–19 naistenvuoro, ke klo 16–19 hiljainen vuoro, to klo 16–17 turvetorstai ja klo 17–19 yleinen vuoro, pe vain yksityisvuorot ja tapahtumat, la ja su klo 14–19 yleinen savusauna.",
    "language": "fi",
    "category": "aukioloajat",
-   "sort_order": 10
+   "sort_order": 10,
+   "question_en": "What are the public sauna sessions and when are they?",
+   "answer_en": "During public sessions the sauna is open to everyone who has booked. Weekly programme (new website): Mon 16–19 men's session, Tue 16–19 women's session, Wed 16–19 silent session, Thu 16–17 Peat Thursday and 17–19 public session, Fri private sessions and events only, Sat and Sun 14–19 public smoke sauna."
   },
   {
    "id": 2,
@@ -1468,7 +1572,9 @@
    "answer": "Vanhan sivuston mukaan yleiset saunavuorot kestävät viikonloppuisin kaksi tuntia ja viikolla kolme tuntia. Torstaina voi osallistua turvetorstain seremoniaan klo 16–17 ja jäädä yleiselle vuorolle klo 17–19, tai tulla vain yleiselle vuorolle.",
    "language": "fi",
    "category": "aukioloajat",
-   "sort_order": 20
+   "sort_order": 20,
+   "question_en": "How long do the public sessions last?",
+   "answer_en": "According to our old website, public sauna sessions last two hours at weekends and three hours on weekdays. On Thursdays you can join the Peat Thursday ceremony 16–17 and stay on for the public session 17–19, or come for the public session only."
   },
   {
    "id": 3,
@@ -1476,7 +1582,9 @@
    "answer": "Kyllä, yleiseen vuoroon voi saapua myös sen alkamisen jälkeen.",
    "language": "fi",
    "category": "saapuminen",
-   "sort_order": 30
+   "sort_order": 30,
+   "question_en": "Can I arrive late for my session?",
+   "answer_en": "Yes, you can also arrive at a public session after it has started."
   },
   {
    "id": 4,
@@ -1484,7 +1592,9 @@
    "answer": "Kaikki varaukset tehdään verkkovarausjärjestelmässä (sipoonjoenperinnesauna.johku.com). Valitse vuorotyyppi (yleinen, yksityinen, jälkilöylyt jne.), päivämäärä ja osallistujamäärä. Vahvistus ja lisäohjeet tulevat sähköpostitse.",
    "language": "fi",
    "category": "varaaminen",
-   "sort_order": 40
+   "sort_order": 40,
+   "question_en": "How do I book a public or private session?",
+   "answer_en": "All bookings are made in our online booking system (sipoonjoenperinnesauna.johku.com). Choose the session type (public, private, After Session Sauna etc.), the date and the number of participants. You will receive a confirmation and further instructions by email."
   },
   {
    "id": 5,
@@ -1492,7 +1602,9 @@
    "answer": "Saunavuoron lisäksi voit varata saunottajan hoidon. Tarjolla olevat hoidot ovat saunahoito 1 h (99 €), saunotus 2 h (210 €) ja syväsaunotus 3 h (290 €); hoidot toteutetaan hoitosauna Raunissa. Saunahoidossa hoito valitaan kassalla: hunaja-, vihta-, suola- tai turvehoito. Hoitojen hintaan ei sisälly pääsyä savusaunaan tai paljuihin, vaan saunavuoro varataan erikseen. Vuoron yhteyteen voi ostaa myös valmiiksi liotetun saunavihdan (13 €).",
    "language": "fi",
    "category": "palvelut",
-   "sort_order": 50
+   "sort_order": 50,
+   "question_en": "What services can I combine with a sauna session?",
+   "answer_en": "In addition to a sauna session, you can book a treatment with a sauna practitioner. The treatments available are a sauna treatment 1 h (99 €), a sauna ritual (saunotus) 2 h (210 €) and a deep sauna ritual 3 h (290 €); treatments are held in the Rauni healing sauna. For the sauna treatment, you choose the treatment at checkout: honey, birch whisk, salt or peat treatment. Treatment prices do not include entrance to the smoke sauna or hot tubs; the sauna session is booked separately. You can also buy a pre-soaked birch whisk (13 €) with your session."
   },
   {
    "id": 6,
@@ -1500,7 +1612,9 @@
    "answer": "Jälkilöyly on yksityinen saunavuoro yleisten vuorojen jälkeen (klo 19 alkaen), jolloin savusaunan löylyt ovat erityisen pehmeät. Yksityisvuorolla koko sauna-alue (savusauna, lämmin- ja kylmävesialtaat, laavu ja mökki) on omalla porukalla käytössä. Hinnat: jälkilöylyt alkaen 180 € / 2 h (6 hlö, lisählöt 10 €), oma saunavuoro alkaen 250 € / 2 h.",
    "language": "fi",
    "category": "palvelut",
-   "sort_order": 60
+   "sort_order": 60,
+   "question_en": "What is the After Session Sauna or a private session?",
+   "answer_en": "The After Session Sauna is a private sauna session after the public sessions (from 19 onwards), when the smoke sauna's löyly is especially soft. In a private session, the whole sauna area (smoke sauna, warm and cold water pools, lean-to shelter and cabin) is reserved for your own group. Prices: After Session Sauna from 180 € / 2 h (6 people, additional people 10 €), private sauna session from 250 € / 2 h."
   },
   {
    "id": 7,
@@ -1508,7 +1622,9 @@
    "answer": "Kyllä. Sauna-alueen hirsimökissä on suihku ja mökin läheisyydessä huussi. Hoitosauna Raunin asiakkailla on käytössä suihku, pukukoppi ja huussi.",
    "language": "fi",
    "category": "tilat",
-   "sort_order": 70
+   "sort_order": 70,
+   "question_en": "Is there a shower or toilet at the sauna?",
+   "answer_en": "Yes. The log cabin in the sauna area has a shower, and there is an outdoor toilet near the cabin. Guests of the Rauni healing sauna have access to a shower, a changing cubicle and an outdoor toilet."
   },
   {
    "id": 8,
@@ -1516,7 +1632,9 @@
    "answer": "Uima-asu tarvittaessa, pyyhe, juomapullo sekä säänmukaiset vaatteet ja jalkineet; talvella pipo/saunahattu. Pyyhkeen, saunatakin tai tossut voi vuokrata paikan päältä (5 €).",
    "language": "fi",
    "category": "käytännöt",
-   "sort_order": 80
+   "sort_order": 80,
+   "question_en": "What should I bring?",
+   "answer_en": "Swimwear if needed, a towel, a water bottle and clothes and footwear suitable for the weather; in winter a beanie or sauna hat. Towels, sauna robes and slippers can be rented on site (5 €)."
   },
   {
    "id": 9,
@@ -1524,7 +1642,9 @@
    "answer": "Yleisillä sekavuoroilla käytetään uima-asua. Maanantain miestenvuorolla, tiistain naistenvuorolla ja keskiviikon hiljaisella vuorolla uima-asu on vapaaehtoinen. Saunahoidoissa voi olla kokonaan tai osittain ilman uima-asua.",
    "language": "fi",
    "category": "käytännöt",
-   "sort_order": 90
+   "sort_order": 90,
+   "question_en": "Do I need to wear swimwear?",
+   "answer_en": "Swimwear is worn at the mixed public sessions. At the Monday men's session, the Tuesday women's session and the Wednesday silent session, swimwear is optional. During sauna treatments you may be fully or partly without swimwear."
   },
   {
    "id": 10,
@@ -1532,7 +1652,9 @@
    "answer": "Yleisen vuoron voi perua maksutta tai siirtää vähintään 48 h ennen (siirto vain kerran, viimeistään 2 vrk ennen). Yksityisvuorot, tapahtumat ja perinnesaunotusillat: maksutta vähintään 14 vrk ennen, 14–7 vrk ennen 50 % tai siirto, alle 7 vrk koko hinta. Ota yhteyttä mahdollisimman ajoissa.",
    "language": "fi",
    "category": "varaaminen",
-   "sort_order": 100
+   "sort_order": 100,
+   "question_en": "Can I cancel or change my booking?",
+   "answer_en": "A public session can be cancelled free of charge or rescheduled at least 48 h in advance (rescheduling only once, no later than 2 days before). Private sessions, events and traditional sauna evenings: free of charge at least 14 days before, 14–7 days before 50 % or rescheduling, less than 7 days before the full price. Please contact us as early as possible."
   },
   {
    "id": 11,
@@ -1540,7 +1662,9 @@
    "answer": "Osoite Hindsbyntie 124, 04130 Sipoo. Parhaiten omalla autolla tai pyörällä; bussi 841 Itäkeskuksesta Broböleen, josta noin kilometri kävelyä. Pysäköinti on maksuton saunan omalla alueella; pukuhuoneilta saunalle on noin 40 metriä. Saavu aikaisintaan noin 10 min ennen varausta ja odota henkilökuntaa parkkipaikan läheisellä terassilla.",
    "language": "fi",
    "category": "saapuminen",
-   "sort_order": 110
+   "sort_order": 110,
+   "question_en": "How do I get there and where can I park?",
+   "answer_en": "The address is Hindsbyntie 124, 04130 Sipoo. The best way to get here is by car or bike; bus 841 runs from Itäkeskus to Broböle, from where it is about a kilometre on foot. Parking is free in the sauna's own area; it is about 40 metres from the changing rooms to the sauna. Please arrive no earlier than about 10 min before your booking and wait for staff on the terrace near the car park."
   },
   {
    "id": 12,
@@ -1548,7 +1672,9 @@
    "answer": "Ei täysin – alueella on portaita. Jos tarvitset apua liikkumiseen, kerro siitä etukäteen sähköpostitse savusauna@saunotus.fi.",
    "language": "fi",
    "category": "saapuminen",
-   "sort_order": 120
+   "sort_order": 120,
+   "question_en": "Is the sauna area accessible?",
+   "answer_en": "Not fully – there are stairs in the area. If you need help getting around, please let us know in advance by email at savusauna@saunotus.fi."
   },
   {
    "id": 13,
@@ -1556,7 +1682,9 @@
    "answer": "Sauna- ja saunotuselämykset korostavat hiljaisuutta, luonnonläheisyyttä ja rauhaa. Sipoonjoen Perinnesauna on maan sisälle rakennettu savusauna, joka lämpeää vuoden jokaisena päivänä.",
    "language": "fi",
    "category": "yleinen",
-   "sort_order": 130
+   "sort_order": 130,
+   "question_en": "What is the atmosphere like at the sauna?",
+   "answer_en": "Our sauna and sauna ritual experiences emphasise silence, closeness to nature and peace. Sipoonjoen Perinnesauna is a smoke sauna built into the ground, and it is heated every day of the year."
   },
   {
    "id": 14,
@@ -1564,7 +1692,9 @@
    "answer": "Saunahoidoista ja saunotuksista vastaavat Sipoonjoen Perinnesaunan saunottajat Laura Foon, Joonas Vaarala ja Saara Mäntykoski. Tiistaisin naisten vuorolla saatavilla on naispuolinen saunottaja.",
    "language": "fi",
    "category": "yleinen",
-   "sort_order": 140
+   "sort_order": 140,
+   "question_en": "Who are the sauna practitioners?",
+   "answer_en": "Sauna treatments and sauna rituals are provided by the Sipoonjoen Perinnesauna sauna practitioners Laura Foon, Joonas Vaarala and Saara Mäntykoski. On Tuesdays, a female sauna practitioner is available during the women's session."
   },
   {
    "id": 15,
@@ -1572,7 +1702,9 @@
    "answer": "Sauna valmistui vuonna 2021 ja ensimmäiset tapahtumat pidettiin samana syksynä. Yleiset vuorot avattiin tammikuussa 2022, keskiviikon vuorot loppuvuodesta 2023, ja vuonna 2024 alkoivat koulutukset ja sauna alkoi lämmetä joka päivä. \"Viime vuonna\" valmistui uusi hoitoalue hoitosaunoineen.",
    "language": "fi",
    "category": "yleinen",
-   "sort_order": 150
+   "sort_order": 150,
+   "question_en": "When was the sauna built?",
+   "answer_en": "The sauna was completed in 2021, and the first events were held the same autumn. Public sessions opened in January 2022, the Wednesday sessions at the end of 2023, and in 2024 the training courses began and the sauna started to be heated every day. A new treatment area with treatment saunas was completed \"last year\"."
   },
   {
    "id": 16,
@@ -1580,7 +1712,9 @@
    "answer": "Omat makkarat voi ottaa mukaan paistettavaksi laavulla. Saunalla on saatavilla alkoholittomia virvokkeita. Alkoholikäytännöstä lähteissä ei ole mainintaa.",
    "language": "fi",
    "category": "käytännöt",
-   "sort_order": 160
+   "sort_order": 160,
+   "question_en": "Can I bring my own snacks or drinks to the sauna?",
+   "answer_en": "You can bring your own sausages to grill at the lean-to shelter. Non-alcoholic soft drinks are available at the sauna. Our sources do not mention an alcohol policy."
   },
   {
    "id": 17,
@@ -1588,7 +1722,9 @@
    "answer": "Saunavuorot maksetaan etukäteen verkkokaupassa varauksen yhteydessä. Ostoksia, kuten lahjakortteja, voi vanhan sivuston mukaan maksaa myös paikan päällä kortilla. Laskulla vain yritykset ja yhteisöt.",
    "language": "fi",
    "category": "maksaminen",
-   "sort_order": 170
+   "sort_order": 170,
+   "question_en": "How do I pay?",
+   "answer_en": "Sauna sessions are paid in advance in the online shop when booking. According to our old website, purchases such as gift cards can also be paid on site by card. Invoicing is available to companies and organisations only."
   },
   {
    "id": 18,
@@ -1596,7 +1732,9 @@
    "answer": "Yleinen saunavuoro (ma miesten, ti naisten, ke hiljainen, to sekä la–su yleinen vuoro) maksaa 29 € / hlö ja sisältää pääsyn sauna-alueelle, kylmä- ja lämminvesialtaisiin sekä laavun vapaan käytön. Turvetorstai 35 € / hlö, saunarituaali ja savusaunavuoro (la & su) 49 € / hlö, perinnesaunotusilta 59 € / hlö. Ajantasaiset hinnat verkkokaupassa.",
    "language": "fi",
    "category": "hinnat",
-   "sort_order": 180
+   "sort_order": 180,
+   "question_en": "How much does a public sauna session cost?",
+   "answer_en": "A public sauna session (Mon men's, Tue women's, Wed silent, Thu and Sat–Sun public session) costs 29 € / person and includes access to the sauna area, the cold and warm water pools and free use of the lean-to shelter. Peat Thursday 35 € / person, sauna ritual and smoke sauna session (Sat & Sun) 49 € / person, traditional sauna evening 59 € / person. Up-to-date prices in the online shop."
   },
   {
    "id": 19,
