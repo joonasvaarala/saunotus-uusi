@@ -1,4 +1,4 @@
--- booking_171 ROLLBACK (migraatio 20261024210635_booking_171_quiet_extra_person.sql).
+-- booking_171 ROLLBACK (migraatio 20261024212241_booking_171_quiet_extra_person.sql).
 -- Palauttaa _quiet_apply- ja public_preview_code-funktiot tuotannon määrittelyiksi täsmälleen (md5 alla) ja poistaa _quiet_base-funktion.
 -- Jo tehdyt varaukset ennallaan (price_breakdown.quiet.discount_base jää riveille). Vartija: md5 on oltava booking_171:n tai tuotannon.
 set local lock_timeout = '5s';

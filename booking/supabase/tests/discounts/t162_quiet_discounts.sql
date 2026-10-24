@@ -4,31 +4,50 @@
 -- F alennuskoodi: ei pinoudu, suurempi etu voittaa (tasatilanteessa hiljainen ale, koodin käyttökertaa ei kuluteta), G siirto poistaa alen
 -- (E:n varaus vahvistetaan ensin testin sisällä, koska tuotannossa verkkovaraus on maksamaton pito),
 -- H hallinnan säännöt (validointi, päällekkäisyys, poisto), I migraation uudelleenajo, J rollback (tuotannon md5) + rollbackin uudelleenajo.
--- Ajo (psql, paikallinen PG17, migraatiot ja fixtures/10_test_helpers.sql ajettu):
+-- Ajo (psql, paikallinen PG17 tai tuotanto testitransaktiona; migraatiot ja fixtures/10_test_helpers.sql ajettu). Testi luo omat asetukset,
+-- portaat ja vuorosäännöt transaktion sisällä, joten tuotannon kytkin (esim. päällä), portaat (esim. 46 h) ja vapaat vuorot eivät vaikuta:
 --   cd booking/supabase/tests/discounts && psql -X -v ON_ERROR_STOP=0 -f t162_quiet_discounts.sql
--- Kaikki yhdessä transaktiossa; lopussa tahallinen poikkeus "TESTRESULT pass=… fail=…" kumoaa kaiken. Kaikki data feikkiä (@example.test). Ei tuotantoon.
+-- Kaikki yhdessä transaktiossa; lopussa tahallinen poikkeus "TESTRESULT pass=… fail=…" kumoaa kaiken. Kaikki data feikkiä (@example.test). Tuotannossa vain kumottavana kuivaharjoituksena.
 begin;
 set local lock_timeout = '3s';
 set local statement_timeout = '120s';
 create temp table t162_r(ok boolean, label text);
 grant all on t162_r to public;
 create function pg_temp.ck(p_ok boolean, p_label text) returns void language sql as $$ insert into t162_r values (coalesce(p_ok, false), p_label) $$;
--- tuotteen 26 vapaat vuorot seuraavalle 14 päivälle (alkuun yli 3 h), järjestyksessä
+-- ===== fixture: oma lähtötila tämän transaktion sisällä (ei riipu tuotannon asetuksista, portaista eikä vapaista vuoroista; kumoutuu lopussa)
+-- kytkin pois ja ei julkinen, portaat = siemen (26: 72 h −20 %, 36 h −30 %), omat joka päivän vuorosäännöt klo 04.00 tuotteille 26 ja 49
+-- (kopiot kummankin tuotteen ensimmäisestä aktiivisesta säännöstä: sama tila, hinnat kb:stä)
+update booking.settings set value = 'false'::jsonb, is_public = false where key = 'quiet_discounts.enabled';
+delete from booking.quiet_discount_rules;
+insert into booking.quiet_discount_rules(label, label_en, product_ids, hours_before, percent)
+values ('Hiljainen aika 72 h', 'Quiet time 72 h', array[26]::bigint[], 72, 20.00), ('Hiljainen aika 36 h', 'Quiet time 36 h', array[26]::bigint[], 36, 30.00);
+create temp table t162_fx(product_id bigint, rule_id bigint, tpl_id bigint);
+with tpl as (select distinct on (product_id) * from booking.schedule_rules where product_id in (26, 49) and active order by product_id, id),
+ins as (
+  insert into booking.schedule_rules(product_id, label, mode, space_id, weekdays, start_time, duration_minutes, valid_from, valid_to, min_persons, max_persons,
+                                     price_mode, price_variant_id, included_persons, extra_person_price, deadline_minutes, active, sort_order, notes)
+  select product_id, 't162 testivuoro (fixture)', mode, space_id, array[1,2,3,4,5,6,7]::smallint[], time '04:00', duration_minutes, null, null, 1, greatest(coalesce(max_persons, 20), 8),
+         price_mode, price_variant_id, included_persons, extra_person_price, deadline_minutes, true, 999, 't162 fixture ' || id from tpl
+  returning id, product_id, notes)
+insert into t162_fx select product_id, id, split_part(notes, ' ', 3)::bigint from ins;
+insert into booking.schedule_rule_pools(rule_id, pool_id) select f.rule_id, p.pool_id from t162_fx f join booking.schedule_rule_pools p on p.rule_id = f.tpl_id;
+grant all on t162_fx to public;
+-- fixture-säännön (tuote 26) vapaat vuorot seuraavalle 14 päivälle (alkuun yli 3 h), järjestyksessä
 create temp table t162_s as
   select row_number() over (order by s.starts_at) n, s.rule_id, s.session_date, s.starts_at, s.ends_at, s.base_price,
          extract(epoch from (s.starts_at - now())) / 3600 h
     from booking._sessions((now() at time zone 'Europe/Helsinki')::date, (now() at time zone 'Europe/Helsinki')::date + 14, 26, true) s
-   where s.status = 'available' and s.starts_at > now() + interval '3 hours';
+   where s.rule_id = (select rule_id from t162_fx where product_id = 26) and s.status = 'available' and s.starts_at > now() + interval '3 hours';
 grant all on t162_s to public;
 
 -- A0: oletukset ennen muutoksia
 do $t$ begin
   perform pg_temp.ck((select value from booking.settings where key = 'quiet_discounts.enabled') = 'false'::jsonb
-    and not (select is_public from booking.settings where key = 'quiet_discounts.enabled'), 'A1: quiet_discounts.enabled = false, ei julkinen');
+    and not (select is_public from booking.settings where key = 'quiet_discounts.enabled'), 'A1: quiet_discounts.enabled = false, ei julkinen (fixture)');
   perform pg_temp.ck((select array_agg(hours_before || ':' || percent::numeric(5,0) order by hours_before) from booking.quiet_discount_rules where 26 = any(product_ids) and active)
-    = array['36:30', '72:20'], 'A2: siemenportaat tuotteelle 26: 72 h −20 %, 36 h −30 %');
+    = array['36:30', '72:20'], 'A2: siemenportaat tuotteelle 26: 72 h −20 %, 36 h −30 % (fixture)');
   perform pg_temp.ck(not exists (select 1 from booking.quiet_discount_rules where 49 = any(product_ids)), 'A3: tuote 49 ei mukana');
-  perform pg_temp.ck((select count(*) from t162_s) >= 6, 'A4: testivuoroja riittää (' || (select count(*) from t162_s) || ')');
+  perform pg_temp.ck((select count(*) from t162_s) >= 8, 'A4: fixture-vuoroja riittää (' || (select count(*) from t162_s) || ')');
 end $t$;
 
 -- I: migraation uudelleenajo
@@ -114,9 +133,9 @@ begin
   perform test.login(u_adm); perform booking.admin_quiet_rule_upsert(v_q2, '{"hours_before":1}'); perform test.logout();   -- jatkossa kaikki testivuorot −20 %
   -- tuote 49 samassa saunassa → vuoro ei tyhjä
   insert into booking.customers(name, email) values ('Yritys T162', 't162-b2b@example.test') returning id into v_cust;
-  v_r49 := (select sr.id from booking.schedule_rules sr where sr.product_id = 49 and sr.active and extract(isodow from s2.session_date)::int = any(sr.weekdays) limit 1);
+  v_r49 := (select rule_id from t162_fx where product_id = 49);   -- fixture: sama tila ja aika kuin tuotteen 26 fixture-vuoroilla
   if v_r49 is null then
-    perform pg_temp.ck(true, 'D10: tuotteella 49 ei vuoroa samana viikonpäivänä → ohitettu');
+    perform pg_temp.ck(true, 'D10: tuotetta 49 ei ole → ohitettu');
   else
     perform booking._create_booking_core(v_r49, s2.session_date, 2, v_cust, 'admin', null, 'fi', null, 'confirmed', null, false);
     perform pg_temp.ck(booking._quiet_for_rule(s2.rule_id, s2.session_date) is null

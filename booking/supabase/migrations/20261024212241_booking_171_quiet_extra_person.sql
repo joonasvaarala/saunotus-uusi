@@ -1,5 +1,5 @@
 -- booking_171: hiljaisen ajan ale (booking_162) vain vuoron perushinnasta; lisähenkilö aina täyshintainen.
--- Väliaikainen versio 20261024210635 (tuotannon versio voi olla eri; Bottiavustus ajaa). Ei public-skeemaa. Hinnat, ALV, slugit ennallaan.
+-- Tuotannossa versio 20261024212241 (booking_171_quiet_extra_person, Bottiavustus 25.10.2026). Ei public-skeemaa. Hinnat, ALV, slugit ennallaan.
 --
 -- Virhe (Joonas 25.10.): kb 26 jälkilöylyt ma 26.10. 19–21, −20 %: 180 € → 144 € (sis. 6 hlö), mutta lisähenkilö näkyi +8 € ja palvelin
 --   alensi myös lisähenkilöt: _quiet_apply laski alen koko varausrivistä (line_total_gross = perushinta + lisähenkilöt) ja
@@ -15,7 +15,7 @@
 --   booking._quiet_apply(bigint,jsonb): 92d6a01979c46e9f12b5edb2f9dacd2a -> dd2139dc889d981e6623ef1fceaeec3d
 --   booking.public_preview_code(text,bigint,date,integer,jsonb,text,text): 4816fbaf5149e501a128aed40f2bf505 -> e8fe514b4ec9db4043d388e5547f94ad
 -- Uusi: booking._quiet_base(jsonb,numeric) (ei anon/authenticated-oikeuksia).
--- Rollback: rollbacks/20261024210635_booking_171_ROLLBACK.sql. Testi: tests/discounts/t171_quiet_extra_person.sql (paikallinen PG17).
+-- Rollback: rollbacks/20261024212241_booking_171_ROLLBACK.sql. Testi: tests/discounts/t171_quiet_extra_person.sql (paikallinen PG17).
 set local lock_timeout = '5s';
 
 do $g$

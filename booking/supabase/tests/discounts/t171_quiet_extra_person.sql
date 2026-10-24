@@ -1,27 +1,47 @@
--- t171: hiljaisen ajan ale vain vuoron perushinnasta, lisähenkilö täyshintainen (booking_171, migraatio 20261024210635, väliaikainen versio).
+-- t171: hiljaisen ajan ale vain vuoron perushinnasta, lisähenkilö täyshintainen (booking_171, migraatio 20261024212241, tuotannossa).
 -- A rakenne ja md5, B _quiet_base, C tarjous (144 €, lisähenkilö 10 €), D varaus 7 hlö = 154 € (ei 152 €), E 6 / 3 / 10 hlö,
 -- F alennuskoodin esikatselu (hiljainen ale perushinnasta, suurempi koodi voittaa), G varaus koodilla, H migraation uudelleenajo,
 -- I rollback kahdesti (tuotannon md5, vanha käytös 152 €) + migraatio uudelleen.
--- Ajo (psql, paikallinen PG17, migraatiot ja fixtures/10_test_helpers.sql ajettu; kb 26: 180 €, sis. 6 hlö, lisähenkilö 10 €):
+-- Ajo (psql, paikallinen PG17 tai tuotanto testitransaktiona; migraatiot ja fixtures/10_test_helpers.sql ajettu; kb 26 perushinta 180 €).
+-- Testi luo omat asetukset, portaat ja vuorosäännön transaktion sisällä, joten tuotannon kytkin, portaat ja vapaat vuorot eivät vaikuta:
 --   cd booking/supabase/tests/discounts && psql -X -v ON_ERROR_STOP=0 -f t171_quiet_extra_person.sql
--- Kaikki yhdessä transaktiossa; lopussa tahallinen poikkeus "TESTRESULT pass=… fail=…" kumoaa kaiken. Data feikkiä (@example.test). Ei tuotantoon.
+-- Kaikki yhdessä transaktiossa; lopussa tahallinen poikkeus "TESTRESULT pass=… fail=…" kumoaa kaiken. Data feikkiä (@example.test). Tuotannossa vain kumottavana kuivaharjoituksena.
 begin;
 set local lock_timeout = '3s';
 set local statement_timeout = '120s';
 create temp table t171_r(ok boolean, label text);
 grant all on t171_r to public;
 create function pg_temp.ck(p_ok boolean, p_label text) returns void language sql as $$ insert into t171_r values (coalesce(p_ok, false), p_label) $$;
--- tuotteen 26 vapaat 180 €:n vuorot (sis. 6 hlö, lisähenkilö 10 €) seuraavalle 14 päivälle, alkuun yli 3 h
+-- ===== fixture: oma lähtötila tämän transaktion sisällä (ei riipu tuotannon asetuksista, portaista eikä vapaista vuoroista; kumoutuu lopussa)
+-- kytkin pois (testi kytkee itse), portaat = siemen (26: 72 h −20 %, 36 h −30 %), oma joka päivän vuorosääntö tuotteelle 26 klo 04.00
+-- (kopio tuotteen 26 ensimmäisestä fixed_plus_extra-säännöstä: sama tila, hinta kb:stä 180 €, sis. 6 hlö, lisähenkilö 10 €)
+update booking.settings set value = 'false'::jsonb where key = 'quiet_discounts.enabled';
+delete from booking.quiet_discount_rules;
+insert into booking.quiet_discount_rules(label, label_en, product_ids, hours_before, percent)
+values ('Hiljainen aika 72 h', 'Quiet time 72 h', array[26]::bigint[], 72, 20.00), ('Hiljainen aika 36 h', 'Quiet time 36 h', array[26]::bigint[], 36, 30.00);
+create temp table t171_fx(rule_id bigint);
+with tpl as (select * from booking.schedule_rules where product_id = 26 and active and price_mode = 'fixed_plus_extra' order by id limit 1),
+ins as (
+  insert into booking.schedule_rules(product_id, label, mode, space_id, weekdays, start_time, duration_minutes, valid_from, valid_to, min_persons, max_persons,
+                                     price_mode, price_variant_id, included_persons, extra_person_price, deadline_minutes, active, sort_order, notes)
+  select product_id, 't171 testivuoro (fixture)', mode, space_id, array[1,2,3,4,5,6,7]::smallint[], time '04:00', duration_minutes, null, null, 1, greatest(coalesce(max_persons, 20), 10),
+         price_mode, price_variant_id, 6, 10, deadline_minutes, true, 999, 't171 fixture' from tpl
+  returning id)
+insert into t171_fx select id from ins;
+insert into booking.schedule_rule_pools(rule_id, pool_id)
+  select f.rule_id, p.pool_id from t171_fx f, booking.schedule_rule_pools p
+   where p.rule_id = (select id from booking.schedule_rules where product_id = 26 and active and price_mode = 'fixed_plus_extra' and id <> f.rule_id order by id limit 1);
+-- fixture-säännön vapaat 180 €:n vuorot (sis. 6 hlö, lisähenkilö 10 €) seuraavalle 14 päivälle, alkuun yli 3 h
 create temp table t171_s as
   select row_number() over (order by s.starts_at) n, s.rule_id, s.session_date, s.starts_at, s.base_price, s.included_persons, s.extra_person_price
     from booking._sessions((now() at time zone 'Europe/Helsinki')::date, (now() at time zone 'Europe/Helsinki')::date + 14, 26, true) s
-   where s.status = 'available' and s.starts_at > now() + interval '3 hours' and s.price_mode = 'fixed_plus_extra'
+   where s.rule_id = (select rule_id from t171_fx) and s.status = 'available' and s.starts_at > now() + interval '3 hours' and s.price_mode = 'fixed_plus_extra'
      and s.base_price = 180 and s.included_persons = 6 and s.extra_person_price = 10;
 grant all on t171_s to public;
 
 -- ===== A: rakenne
 do $t$ begin
-  perform pg_temp.ck((select count(*) from t171_s) >= 8, 'A1: testivuoroja riittää (' || (select count(*) from t171_s) || ')');
+  perform pg_temp.ck((select count(*) from t171_s) >= 8, 'A1: fixture-vuoroja riittää (' || (select count(*) from t171_s) || ')');
   perform pg_temp.ck(md5(pg_get_functiondef('booking._quiet_apply(bigint,jsonb)'::regprocedure)) = 'dd2139dc889d981e6623ef1fceaeec3d'
     and md5(pg_get_functiondef('booking.public_preview_code(text,bigint,date,integer,jsonb,text,text)'::regprocedure)) = 'e8fe514b4ec9db4043d388e5547f94ad', 'A2: booking_171:n md5');
   perform pg_temp.ck(not has_function_privilege('anon', 'booking._quiet_base(jsonb,numeric)', 'execute')
@@ -125,15 +145,15 @@ begin
 end $t$;
 
 -- ===== H: migraation uudelleenajo
-\ir ../../migrations/20261024210635_booking_171_quiet_extra_person.sql
+\ir ../../migrations/20261024212241_booking_171_quiet_extra_person.sql
 do $t$ begin
   perform pg_temp.ck(md5(pg_get_functiondef('booking._quiet_apply(bigint,jsonb)'::regprocedure)) = 'dd2139dc889d981e6623ef1fceaeec3d'
     and md5(pg_get_functiondef('booking.public_preview_code(text,bigint,date,integer,jsonb,text,text)'::regprocedure)) = 'e8fe514b4ec9db4043d388e5547f94ad', 'H1: uudelleenajo: md5 ennallaan');
 end $t$;
 
 -- ===== I: rollback kahdesti → tuotannon md5 ja vanha käytös; sitten migraatio uudelleen
-\ir ../../rollbacks/20261024210635_booking_171_ROLLBACK.sql
-\ir ../../rollbacks/20261024210635_booking_171_ROLLBACK.sql
+\ir ../../rollbacks/20261024212241_booking_171_ROLLBACK.sql
+\ir ../../rollbacks/20261024212241_booking_171_ROLLBACK.sql
 do $t$
 declare j jsonb; s t171_s;
 begin
@@ -147,7 +167,7 @@ begin
   perform test.logout();
   perform pg_temp.ck((j ->> 'ok')::boolean and (j ->> 'total')::numeric = 152, 'I2: rollbackin jälkeen vanha käytös (lisähenkilö alennettu, 152 €): ' || j::text);
 end $t$;
-\ir ../../migrations/20261024210635_booking_171_quiet_extra_person.sql
+\ir ../../migrations/20261024212241_booking_171_quiet_extra_person.sql
 do $t$
 declare j jsonb; s t171_s;
 begin
