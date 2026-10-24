@@ -45,14 +45,14 @@ select pg_temp.ck((select count(*) from kb.products where id in (1, 2, 3, 4, 7, 
 -- B: vartija – tuotteen 38 teksti poikkeaa yhdellä välilyönnillä → exception ennen yhtään muutosta
 update kb.products set description = description || ' ' where id = 38;
 savepoint b;
-\ir ../../migrations/20261024320000_booking_161_kb_johku_linkit.sql
+\ir ../../migrations/20261024182650_booking_161_kb_johku_linkit.sql
 rollback to savepoint b;
 select pg_temp.ck((select md5(description) from kb.products where id = 1) = 'f10f1e9846d545f7566cabd465f7093c' and (select md5(description_en) from kb.products where id = 1) = '6e24d3fa812ccd7f14bc6e3776893676' and (select md5(description) from kb.products where id = 2) = '692e70149b9c1e2328d70f4449d6d66a' and (select md5(description) from kb.products where id = 3) = '2bc4b827fb5cd490719fd1fbd633f6e0' and (select md5(description) from kb.products where id = 4) = '3d1fc04ff2db46e35d26d0c850499758' and (select md5(description) from kb.products where id = 7) = 'a2ea1ebf2a3a458d06dc9a8da7c0e6e2' and (select md5(description) from kb.products where id = 25) = '8e574081d3773efd0aeec79535a72806' and (select md5(description) from kb.products where id = 26) = '5d821f1f33b5a8ac4cafb31ea5b7612a', 'B1: poikkeama → muita kenttiä ei muutettu (tuote 1 jne. ennallaan)');
 update kb.products set description = left(description, -1) where id = 38;
 select pg_temp.ck((select md5(description) from kb.products where id = 1) = 'f10f1e9846d545f7566cabd465f7093c' and (select md5(description_en) from kb.products where id = 1) = '6e24d3fa812ccd7f14bc6e3776893676' and (select md5(description) from kb.products where id = 2) = '692e70149b9c1e2328d70f4449d6d66a' and (select md5(description) from kb.products where id = 3) = '2bc4b827fb5cd490719fd1fbd633f6e0' and (select md5(description) from kb.products where id = 4) = '3d1fc04ff2db46e35d26d0c850499758' and (select md5(description) from kb.products where id = 7) = 'a2ea1ebf2a3a458d06dc9a8da7c0e6e2' and (select md5(description) from kb.products where id = 25) = '8e574081d3773efd0aeec79535a72806' and (select md5(description) from kb.products where id = 26) = '5d821f1f33b5a8ac4cafb31ea5b7612a' and (select md5(description) from kb.products where id = 38) = '99e398094f811d730e78162fcf19cb8b', 'B2: lähtötila palautettu');
 
 -- C: migraatio
-\ir ../../migrations/20261024320000_booking_161_kb_johku_linkit.sql
+\ir ../../migrations/20261024182650_booking_161_kb_johku_linkit.sql
 select pg_temp.ck((select md5(description) from kb.products where id = 1) = '11149833e5ce908e89c6be0c7e7c13d3' and (select md5(description_en) from kb.products where id = 1) = '46ce16e779d09215dc3f961dac1355f6' and (select md5(description) from kb.products where id = 2) = '0e0eaf5c2eeb59809eb0990a7f22e970' and (select md5(description) from kb.products where id = 3) = '3c2993703e5027f8625a2ae5caf44766' and (select md5(description) from kb.products where id = 4) = '94a6ff81297c6d69c9b4b72d82b9784e' and (select md5(description) from kb.products where id = 7) = '9ff385282f1b10efb9e4c97ff50f38e2' and (select md5(description) from kb.products where id = 25) = 'f800f8b84a5ff1a2644c33c8b5a5dbdd' and (select md5(description) from kb.products where id = 26) = '490ffeeab40a101ac87bbe1c6c22d511' and (select md5(description) from kb.products where id = 38) = '0e47f8a74ccee20838ab89fbc903d035', 'C1: kaikki 9 kenttää = odotettu uusi teksti (md5)');
 select pg_temp.ck(not exists (select 1 from kb.products where id in (1, 2, 3, 4, 7, 25, 26, 38) and (description ~* 'johku\.com' or coalesce(description_en, '') ~* 'johku\.com')), 'C2: ei Johku-linkkejä tuotteissa');
 select pg_temp.ck((select count(*) from kb.products where id = 38 and description like '%href="https://uusi.saunotus.com/varaa/#/tuote/saunahoito-2"%') = 1, 'C3: lahjakortti → saunahoito-2 kaupan tuotesivu');
@@ -63,28 +63,28 @@ select pg_temp.ck(not exists (select 1 from booking.site_texts t join kb.product
                   'C5: sivutekstit (zz_site_text_sync) samassa tilassa kuin kb.products');
 
 -- D: uudelleenajo ei muuta mitään
-\ir ../../migrations/20261024320000_booking_161_kb_johku_linkit.sql
+\ir ../../migrations/20261024182650_booking_161_kb_johku_linkit.sql
 select pg_temp.ck((select md5(description) from kb.products where id = 1) = '11149833e5ce908e89c6be0c7e7c13d3' and (select md5(description_en) from kb.products where id = 1) = '46ce16e779d09215dc3f961dac1355f6' and (select md5(description) from kb.products where id = 2) = '0e0eaf5c2eeb59809eb0990a7f22e970' and (select md5(description) from kb.products where id = 3) = '3c2993703e5027f8625a2ae5caf44766' and (select md5(description) from kb.products where id = 4) = '94a6ff81297c6d69c9b4b72d82b9784e' and (select md5(description) from kb.products where id = 7) = '9ff385282f1b10efb9e4c97ff50f38e2' and (select md5(description) from kb.products where id = 25) = 'f800f8b84a5ff1a2644c33c8b5a5dbdd' and (select md5(description) from kb.products where id = 26) = '490ffeeab40a101ac87bbe1c6c22d511' and (select md5(description) from kb.products where id = 38) = '0e47f8a74ccee20838ab89fbc903d035', 'D1: uudelleenajo: tekstit ennallaan');
 
 -- E: rollback palauttaa alkuperäiset täsmälleen
-\ir ../../rollbacks/20261024320000_booking_161_ROLLBACK.sql
+\ir ../../rollbacks/20261024182650_booking_161_ROLLBACK.sql
 select pg_temp.ck((select md5(description) from kb.products where id = 1) = 'f10f1e9846d545f7566cabd465f7093c' and (select md5(description_en) from kb.products where id = 1) = '6e24d3fa812ccd7f14bc6e3776893676' and (select md5(description) from kb.products where id = 2) = '692e70149b9c1e2328d70f4449d6d66a' and (select md5(description) from kb.products where id = 3) = '2bc4b827fb5cd490719fd1fbd633f6e0' and (select md5(description) from kb.products where id = 4) = '3d1fc04ff2db46e35d26d0c850499758' and (select md5(description) from kb.products where id = 7) = 'a2ea1ebf2a3a458d06dc9a8da7c0e6e2' and (select md5(description) from kb.products where id = 25) = '8e574081d3773efd0aeec79535a72806' and (select md5(description) from kb.products where id = 26) = '5d821f1f33b5a8ac4cafb31ea5b7612a' and (select md5(description) from kb.products where id = 38) = '99e398094f811d730e78162fcf19cb8b', 'E1: rollback → alkuperäiset tekstit (md5)');
 -- F: rollbackin uudelleenajo ei tee mitään
-\ir ../../rollbacks/20261024320000_booking_161_ROLLBACK.sql
+\ir ../../rollbacks/20261024182650_booking_161_ROLLBACK.sql
 select pg_temp.ck((select md5(description) from kb.products where id = 1) = 'f10f1e9846d545f7566cabd465f7093c' and (select md5(description_en) from kb.products where id = 1) = '6e24d3fa812ccd7f14bc6e3776893676' and (select md5(description) from kb.products where id = 2) = '692e70149b9c1e2328d70f4449d6d66a' and (select md5(description) from kb.products where id = 3) = '2bc4b827fb5cd490719fd1fbd633f6e0' and (select md5(description) from kb.products where id = 4) = '3d1fc04ff2db46e35d26d0c850499758' and (select md5(description) from kb.products where id = 7) = 'a2ea1ebf2a3a458d06dc9a8da7c0e6e2' and (select md5(description) from kb.products where id = 25) = '8e574081d3773efd0aeec79535a72806' and (select md5(description) from kb.products where id = 26) = '5d821f1f33b5a8ac4cafb31ea5b7612a' and (select md5(description) from kb.products where id = 38) = '99e398094f811d730e78162fcf19cb8b', 'F1: rollbackin uudelleenajo: ennallaan');
 
 -- G: rollbackin vartija – kenttää muokattu migraation jälkeen → exception, ei muutoksia
-\ir ../../migrations/20261024320000_booking_161_kb_johku_linkit.sql
+\ir ../../migrations/20261024182650_booking_161_kb_johku_linkit.sql
 update kb.products set description = description || 'x' where id = 25;
 savepoint g;
-\ir ../../rollbacks/20261024320000_booking_161_ROLLBACK.sql
+\ir ../../rollbacks/20261024182650_booking_161_ROLLBACK.sql
 rollback to savepoint g;
 select pg_temp.ck((select md5(description) from kb.products where id = 1) = '11149833e5ce908e89c6be0c7e7c13d3' and (select md5(description_en) from kb.products where id = 1) = '46ce16e779d09215dc3f961dac1355f6' and (select md5(description) from kb.products where id = 2) = '0e0eaf5c2eeb59809eb0990a7f22e970' and (select md5(description) from kb.products where id = 3) = '3c2993703e5027f8625a2ae5caf44766' and (select md5(description) from kb.products where id = 4) = '94a6ff81297c6d69c9b4b72d82b9784e' and (select md5(description) from kb.products where id = 7) = '9ff385282f1b10efb9e4c97ff50f38e2' and (select md5(description) from kb.products where id = 26) = '490ffeeab40a101ac87bbe1c6c22d511' and (select md5(description) from kb.products where id = 38) = '0e47f8a74ccee20838ab89fbc903d035', 'G1: rollbackin vartija: muut kentät pysyivät uusina');
 update kb.products set description = left(description, -1) where id = 25;
 
 -- H: rollback ja migraatio uudelleen
-\ir ../../rollbacks/20261024320000_booking_161_ROLLBACK.sql
-\ir ../../migrations/20261024320000_booking_161_kb_johku_linkit.sql
+\ir ../../rollbacks/20261024182650_booking_161_ROLLBACK.sql
+\ir ../../migrations/20261024182650_booking_161_kb_johku_linkit.sql
 select pg_temp.ck((select md5(description) from kb.products where id = 1) = '11149833e5ce908e89c6be0c7e7c13d3' and (select md5(description_en) from kb.products where id = 1) = '46ce16e779d09215dc3f961dac1355f6' and (select md5(description) from kb.products where id = 2) = '0e0eaf5c2eeb59809eb0990a7f22e970' and (select md5(description) from kb.products where id = 3) = '3c2993703e5027f8625a2ae5caf44766' and (select md5(description) from kb.products where id = 4) = '94a6ff81297c6d69c9b4b72d82b9784e' and (select md5(description) from kb.products where id = 7) = '9ff385282f1b10efb9e4c97ff50f38e2' and (select md5(description) from kb.products where id = 25) = 'f800f8b84a5ff1a2644c33c8b5a5dbdd' and (select md5(description) from kb.products where id = 26) = '490ffeeab40a101ac87bbe1c6c22d511' and (select md5(description) from kb.products where id = 38) = '0e47f8a74ccee20838ab89fbc903d035' and not exists (select 1 from kb.products where id in (1, 2, 3, 4, 7, 25, 26, 38) and (description ~* 'johku\.com' or coalesce(description_en, '') ~* 'johku\.com')), 'H1: rollback + migraatio uudelleen → uudet tekstit');
 
 do $t$ begin

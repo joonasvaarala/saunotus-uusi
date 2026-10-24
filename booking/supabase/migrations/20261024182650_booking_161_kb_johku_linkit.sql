@@ -5,7 +5,7 @@
 -- Vartijat: jokaisen kentän nykyisen tekstin on oltava TÄSMÄLLEEN odotettu alkuperäinen teksti (koko teksti upotettu tähän, md5 alla), muuten
 -- exception ennen yhtään muutosta. Jo päivitetty kenttä ohitetaan (uudelleenajettava). Muut tuotteen kentät, hinnat, slugit ja osoitteet ennallaan.
 -- Lähdetauluun sidottu sivuteksti (booking.site_texts product.<id>.description) saa uuden version triggeristä zz_site_text_sync (kuten booking_65).
--- Rollback: booking/supabase/rollbacks/20261024320000_booking_161_ROLLBACK.sql palauttaa alkuperäiset tekstit samalla tarkalla vartijalla.
+-- Rollback: booking/supabase/rollbacks/20261024182650_booking_161_ROLLBACK.sql palauttaa alkuperäiset tekstit samalla tarkalla vartijalla.
 -- Linkit (tuote, kenttä, määrä, Johku-polku → uusi polku):
 --     1 yleinensauna                     description     ×2  /fi_FI/yleinen-lahjakorttivaraus → /varaa/#/
 --     1 yleinensauna                     description     ×1  /fi_FI/yksityisvuorot/jalkiloylyt → /varaa/#/tuote/jalkiloylyt

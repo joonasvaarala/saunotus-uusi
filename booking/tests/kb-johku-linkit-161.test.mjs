@@ -9,8 +9,8 @@ import test from 'node:test';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(root, p), 'utf8');
-const MIG = read('supabase/migrations/20261024320000_booking_161_kb_johku_linkit.sql');
-const RB = read('supabase/rollbacks/20261024320000_booking_161_ROLLBACK.sql');
+const MIG = read('supabase/migrations/20261024182650_booking_161_kb_johku_linkit.sql');
+const RB = read('supabase/rollbacks/20261024182650_booking_161_ROLLBACK.sql');
 const md5 = (s) => createHash('md5').update(s, 'utf8').digest('hex');
 const rows = (sql) => [...sql.matchAll(/\((\d+), '(description(?:_en)?)', '([0-9a-f]{32})', '([0-9a-f]{32})',\n\s+\$k161\$([\s\S]*?)\$k161\$,\n\s+\$k161\$([\s\S]*?)\$k161\$\)/g)]
   .map((m) => ({ id: +m[1], col: m[2], fromMd5: m[3], toMd5: m[4], from: m[5], to: m[6] }));
