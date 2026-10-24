@@ -9,8 +9,8 @@ select is(
   (select pg_get_function_identity_arguments(p.oid)
      from pg_proc p join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'booking' and p.proname = 'admin_list_reservations'),
-  'p_from timestamp with time zone, p_to timestamp with time zone, p_search text, p_status text, p_product_id bigint, p_limit integer, p_offset integer, p_source text, p_option_missing boolean',
-  'funktio on 9-argumenttinen, viimeinen p_option_missing');
+  'p_from timestamp with time zone, p_to timestamp with time zone, p_search text, p_status text, p_product_id bigint, p_limit integer, p_offset integer, p_source text, p_option_missing boolean, p_sort text, p_reservation_id bigint',
+  'funktio on 11-argumenttinen: p_option_missing, sitten booking_138:n p_sort ja p_reservation_id');
 
 select is(
   (select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
@@ -23,15 +23,15 @@ select ok(
   '8-argumenttinen allekirjoitus on poistettu');
 
 select ok(
-  not has_function_privilege('anon', 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text,boolean)', 'execute'),
+  not has_function_privilege('anon', 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text,boolean,text,bigint)', 'execute'),
   'anon ei saa kutsua listaa');
 
 select ok(
-  has_function_privilege('authenticated', 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text,boolean)', 'execute'),
+  has_function_privilege('authenticated', 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text,boolean,text,bigint)', 'execute'),
   'authenticated saa kutsua listaa');
 
 select ok(
-  has_function_privilege('service_role', 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text,boolean)', 'execute'),
+  has_function_privilege('service_role', 'booking.admin_list_reservations(timestamptz,timestamptz,text,text,bigint,integer,integer,text,boolean,text,bigint)', 'execute'),
   'service_role saa kutsua listaa');
 
 select test.logout();

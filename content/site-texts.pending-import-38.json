@@ -1,0 +1,590 @@
+[
+ {
+  "key": "ui.admin.nav.orders",
+  "lang": "fi",
+  "text": "Tilaukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.reservations",
+  "lang": "fi",
+  "text": "Varaukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.orders_tabs",
+  "lang": "fi",
+  "text": "Tilaukset ja varaukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.loading",
+  "lang": "fi",
+  "text": "Ladataan…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.load_failed",
+  "lang": "fi",
+  "text": "Näkymän lataus epäonnistui: {{var:error}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 82,
+  "placeholders": [
+   "{{var:error}}"
+  ],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.search_label",
+  "lang": "fi",
+  "text": "Pikahaku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.search_open",
+  "lang": "fi",
+  "text": "Avaa pikahaku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.search_placeholder",
+  "lang": "fi",
+  "text": "Hae nimeä, numeroa tai koodia",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.search_results",
+  "lang": "fi",
+  "text": "Pikahaun tulokset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.searching",
+  "lang": "fi",
+  "text": "Haetaan…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.no_results",
+  "lang": "fi",
+  "text": "Ei hakutuloksia.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.kind_customer",
+  "lang": "fi",
+  "text": "Asiakas",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.kind_reservation",
+  "lang": "fi",
+  "text": "Varaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.kind_order",
+  "lang": "fi",
+  "text": "Tilaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.kind_giftcard",
+  "lang": "fi",
+  "text": "Lahjakortti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.new_reservation",
+  "lang": "fi",
+  "text": "Uusi varaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.review",
+  "lang": "fi",
+  "text": "Tarkista",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.user_menu",
+  "lang": "fi",
+  "text": "Käyttäjävalikko",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.user_fallback",
+  "lang": "fi",
+  "text": "Käyttäjä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.role",
+  "lang": "fi",
+  "text": "Rooli: {{var:role}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:role}}"
+  ],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.open_shop",
+  "lang": "fi",
+  "text": "Avaa kauppa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.new_tab",
+  "lang": "fi",
+  "text": "(avautuu uuteen välilehteen)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.expand",
+  "lang": "fi",
+  "text": "Laajenna valikko",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.collapse",
+  "lang": "fi",
+  "text": "Pienennä valikko",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.sort_legend",
+  "lang": "fi",
+  "text": "Lajittelujärjestys",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.sort_soon",
+  "lang": "fi",
+  "text": "Varausaika (tulevat lähin ensin)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.sort_newest",
+  "lang": "fi",
+  "text": "Uusin tilaus ensin",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.sort_oldest",
+  "lang": "fi",
+  "text": "Vanhin tilaus ensin",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.customer_not_found",
+  "lang": "fi",
+  "text": "Asiakasta ei löytynyt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.orders",
+  "lang": "en",
+  "text": "Orders",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.reservations",
+  "lang": "en",
+  "text": "Reservations",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.orders_tabs",
+  "lang": "en",
+  "text": "Orders and reservations",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.loading",
+  "lang": "en",
+  "text": "Loading…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.load_failed",
+  "lang": "en",
+  "text": "Could not load the view: {{var:error}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:error}}"
+  ],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.search_label",
+  "lang": "en",
+  "text": "Quick search",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.search_open",
+  "lang": "en",
+  "text": "Open quick search",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.search_placeholder",
+  "lang": "en",
+  "text": "Search by name, number or code",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.search_results",
+  "lang": "en",
+  "text": "Quick search results",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.searching",
+  "lang": "en",
+  "text": "Searching…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.no_results",
+  "lang": "en",
+  "text": "No results.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.kind_customer",
+  "lang": "en",
+  "text": "Customer",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.kind_reservation",
+  "lang": "en",
+  "text": "Reservation",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.kind_order",
+  "lang": "en",
+  "text": "Order",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.kind_giftcard",
+  "lang": "en",
+  "text": "Gift card",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.new_reservation",
+  "lang": "en",
+  "text": "New reservation",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.review",
+  "lang": "en",
+  "text": "Review",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.user_menu",
+  "lang": "en",
+  "text": "User menu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.user_fallback",
+  "lang": "en",
+  "text": "User",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.role",
+  "lang": "en",
+  "text": "Role: {{var:role}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:role}}"
+  ],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.open_shop",
+  "lang": "en",
+  "text": "Open shop",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.new_tab",
+  "lang": "en",
+  "text": "(opens in a new tab)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.expand",
+  "lang": "en",
+  "text": "Expand menu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.collapse",
+  "lang": "en",
+  "text": "Collapse menu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.sort_legend",
+  "lang": "en",
+  "text": "Sort order",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.sort_soon",
+  "lang": "en",
+  "text": "Reservation time (upcoming soonest first)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 82,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.sort_newest",
+  "lang": "en",
+  "text": "Newest order first",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.sort_oldest",
+  "lang": "en",
+  "text": "Oldest order first",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.customer_not_found",
+  "lang": "en",
+  "text": "Customer not found",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 05: hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän uudet tekstit (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ }
+]

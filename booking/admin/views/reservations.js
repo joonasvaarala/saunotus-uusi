@@ -13,15 +13,22 @@ import { reservationDialog } from './shared.js';
 import { resourceBadges, spaceBadge } from './legs.js';
 import { optionBadge } from '../options.js';
 import { loadOptionTexts, optionText } from '../options-texts.js';
-import { TREATMENT_UNASSIGNED, reservationsHref, stateFromQuery, loadReservationPage } from '../reservation-query.js';
+import { TREATMENT_UNASSIGNED, reservationsHref, stateFromQuery, loadReservationPage, reservationSortParam } from '../reservation-query.js';
 import { reviewAttentionCount } from '../review-logic.js';
+import { navText } from '../nav-texts.js';
 
-export async function render({ ctx, refs, reload, query }) {
+export const SORT_KEYS = [['soon', 'ui.admin.nav.sort_soon'], ['newest', 'ui.admin.nav.sort_newest'], ['oldest', 'ui.admin.nav.sort_oldest']];
+export async function render({ ctx, refs, reload, query, routePath = 'varaukset' }) {
   const PAGE = 50;
   const init = stateFromQuery(query || '');
+  const SORTS = SORT_KEYS.map(([k, key]) => [k, navText(key)]);
+  // Tilaukset-reitti alkaa tulevista; vanha #/varaukset-osoite säilyttää entisen oletuksen (kaikki ajat).
+  // Suora haku-, id- tai hoitolinkki kattaa aina myös vanhat varaukset.
+  const defaultPeriod = routePath === 'tilaukset' ? 'upcoming' : 'all';
+  const initialPeriod = query?.has?.('period') ? init.period : (init.search || init.id || init.treatment ? 'all' : defaultPeriod);
   const f = {
     search: init.search, status: STATUS[init.status] ? init.status : '', product: init.product, source: ['', 'native', 'johku'].includes(init.source) ? init.source : '',
-    period: init.period, treatment: init.treatment, from: init.from || addDays(todayHel(), -7), to: init.to || addDays(todayHel(), 60),
+    period: initialPeriod, sort: init.sort, id: init.id, treatment: init.treatment, from: init.from || addDays(todayHel(), -7), to: init.to || addDays(todayHel(), 60),
   };
   await loadOptionTexts(rpc);
   // valittu ajanjakso → { from: alkupäivä | null, toExcl: päättymispäivän jälkeinen päivä | null } (null = ei rajaa)
@@ -38,9 +45,9 @@ export async function render({ ctx, refs, reload, query }) {
   const list = h('div', { class: 'list' }); const more = h('div', { class: 'row center' }); const count = h('p', { class: 'muted' });
   const activeBar = h('div', { class: 'active-filters', 'data-testid': 'active-filters', hidden: true });
   const cache = { all: null };
-  let offset = 0;
+  let offset = 0, openedDeepLink = false;
   const syncHash = () => {
-    const next = reservationsHref(f);
+    const next = reservationsHref(f, routePath);
     if (next !== location.hash) history.replaceState(null, '', next);   // ei hashchangea → ei uudelleenpiirtoa
   };
   let drawer;
@@ -49,7 +56,8 @@ export async function render({ ctx, refs, reload, query }) {
     const chips = [];
     const chip = (key, label, clear) => h('span', { class: 'chip', 'data-testid': `active-filter-${key}` }, h('span', { text: label }), h('button', { type: 'button', class: 'btn', 'data-testid': `clear-filter-${key}`, 'aria-label': `${optionText('ui.admin.options.filter_clear')}: ${label}`, onclick: clear }, optionText('ui.admin.options.filter_clear')));
     if (f.treatment === TREATMENT_UNASSIGNED) chips.push(chip('treatment', optionText('ui.admin.options.filter_unassigned'), () => setTreatment('')));
-    if (f.period !== 'all') chips.push(chip('period', periodLabel(), () => setPeriod('all')));
+    if (f.period !== defaultPeriod) chips.push(chip('period', periodLabel(), () => setPeriod(defaultPeriod)));
+    if (f.sort !== 'soon') chips.push(chip('sort', SORTS.find(([k]) => k === f.sort)?.[1] || f.sort, () => setSort('soon')));
     if (f.status) chips.push(chip('status', STATUS[f.status] || f.status, () => { f.status = ''; const sel = root?.querySelector('[data-testid=status-filter]'); if (sel) sel.value = ''; syncHash(); load(true); }));
     if (f.product) { const p = refs.products.find((x) => String(x.id) === String(f.product)); chips.push(chip('product', p?.name || f.product, () => { f.product = ''; const sel = root?.querySelector('[data-testid=product-filter]'); if (sel) sel.value = ''; syncHash(); load(true); })); }
     if (f.source) chips.push(chip('source', SOURCE_FILTERS.find(([k]) => k === f.source)?.[1] || f.source, () => setSource('')));
@@ -64,6 +72,10 @@ export async function render({ ctx, refs, reload, query }) {
     const args = {
       p_from: rg.from ? dayStartIso(rg.from) : null, p_to: rg.toExcl ? dayStartIso(rg.toExcl) : null, p_search: f.search || null,
       p_status: f.status || null, p_product_id: f.product ? +f.product : null };
+    // p_sort ja p_reservation_id vain kun tarpeen: oletusnäkymä toimii myös ennen migraatiota booking_138.
+    const sortParam = reservationSortParam(f.sort, f.period);
+    if (sortParam) args.p_sort = sortParam;
+    if (f.id) { args.p_reservation_id = +f.id; args.p_from = null; args.p_to = null; }
     if (f.source) args.p_source = f.source;   // Kaikki: ei parametria (toimii myös ennen migraatiota 12)
     let rows, total;
     try {
@@ -79,6 +91,10 @@ export async function render({ ctx, refs, reload, query }) {
       h('span', { class: 'rc-what' }, h('strong', { text: r.customer_name || '–' }), h('small', { text: ` ${r.product_name} · ${r.persons} hlö` })),
       h('span', { class: 'meta rc-badges' }, optionBadge(r), spaceBadge(r, refs), resourceBadges(r), sourceBadge(r), statusBadge(r.status), payBadge(r.payment_status)),
       h('span', { class: 'rc-price', text: money(r.total_gross) })));
+    if (f.id && !openedDeepLink) {
+      const target = rows.find((row) => String(row.reservation_id) === String(f.id));
+      if (target) { openedDeepLink = true; reservationDialog(target, { methods: refs.methods, onChange: () => load(true), refs, can: ctx.can }); }
+    }
     offset += rows.length; count.textContent = `${Math.min(offset, total)} / ${total} varausta · ${periodLabel()}${f.treatment === TREATMENT_UNASSIGNED ? ` · ${optionText('ui.admin.options.filter_unassigned')}` : ''}`;
     more.replaceChildren(offset < total ? h('button', { type: 'button', class: 'btn ghost', onclick: () => load(false) }, 'Näytä lisää') : '');
     paintActive();
@@ -90,11 +106,13 @@ export async function render({ ctx, refs, reload, query }) {
   const mark = (set, value) => { for (const r of set.querySelectorAll('input')) r.checked = r.value === value; };
   const dates = h('div', { class: 'perdates', hidden: f.period !== 'custom' },
     field('Alkaen', bind(h('input', { type: 'date', value: f.from }), 'from', 'change')), field('Päättyen', bind(h('input', { type: 'date', value: f.to }), 'to', 'change')));
-  let periodSet, sourceSet, treatmentSet;
-  const setPeriod = (v) => { f.period = v; dates.hidden = v !== 'custom'; mark(periodSet, v); syncHash(); load(true); };
+  let periodSet, sortSet, sourceSet, treatmentSet;
+  const setPeriod = (v) => { f.period = v; f.id = ''; dates.hidden = v !== 'custom'; mark(periodSet, v); syncHash(); load(true); };
+  const setSort = (v) => { f.sort = v; f.id = ''; mark(sortSet, v); syncHash(); load(true); };
   const setSource = (v) => { f.source = v; mark(sourceSet, v); syncHash(); load(true); };
   const setTreatment = (v) => { f.treatment = v; mark(treatmentSet, v); syncHash(); load(true); };
   periodSet = seg('Ajanjakso', 'period', PERIODS, f.period, setPeriod, 'period-filter');
+  sortSet = seg(navText('ui.admin.nav.sort_legend'), 'sort', SORTS, f.sort, setSort, 'reservation-sort-filter');
   sourceSet = seg('Lähde', 'source', SOURCE_FILTERS, f.source, setSource, 'source-filter');
   treatmentSet = seg(optionText('ui.admin.options.filter_legend'), 'treatment', [['', optionText('ui.admin.options.filter_all')], [TREATMENT_UNASSIGNED, optionText('ui.admin.options.filter_unassigned')]], f.treatment, setTreatment, 'treatment-filter');
   drawer = filterDrawer({
@@ -102,11 +120,11 @@ export async function render({ ctx, refs, reload, query }) {
     testid: 'reservations-filters',
     search: field('Haku', bind(h('input', { type: 'search', value: f.search, placeholder: 'Nimi, sähköposti, puhelin tai tilausnumero', 'data-testid': 'reservations-search' }), 'search')),
     status: activeBar,
-    activeCount: () => [f.status, f.product, f.source, f.treatment].filter(Boolean).length + (f.period !== 'all' ? 1 : 0),
+    activeCount: () => [f.status, f.product, f.source, f.treatment].filter(Boolean).length + (f.period !== defaultPeriod ? 1 : 0) + (f.sort !== 'soon' ? 1 : 0),
     filters: [
       field('Tila', bind(h('select', { 'data-testid': 'status-filter' }, h('option', { value: '', text: 'Kaikki', selected: !f.status || null }), Object.entries(STATUS).map(([k, v]) => h('option', { value: k, text: v, selected: k === f.status || null }))), 'status', 'change')),
       field('Tuote', bind(h('select', { 'data-testid': 'product-filter' }, h('option', { value: '', text: 'Kaikki', selected: !f.product || null }), refs.products.filter((p) => p.config?.bookable).map((p) => h('option', { value: p.id, text: p.name, selected: String(p.id) === String(f.product) || null }))), 'product', 'change')),
-      h('div', { class: 'filter-groups' }, periodSet, dates, sourceSet, treatmentSet),
+      h('div', { class: 'filter-groups' }, periodSet, sortSet, dates, sourceSet, treatmentSet),
     ],
   });
   syncHash();

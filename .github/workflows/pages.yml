@@ -161,6 +161,12 @@ jobs:
       - run: node --test booking/tests/jonotuslista-ilmoitetut-paikat.test.mjs
       # booking_133: päivänippu + kuukauden saatavuus yhdellä RPC:llä (SQL-vertailu booking_125:een: booking/tests/paiva-ja-saatavuus-nopeutus-regressio.sql, ajetaan testikannassa)
       - run: node --test booking/tests/paiva-ja-saatavuus-nopeutus.test.mjs
+      # Paketti 05 / booking_138: hallinnan päänavigaatio (Tilaukset + Varaukset-välilehti, vanhat #/varaukset-linkit), yläpalkin pikahaku ja
+      # käyttäjävalikko, mobiilin 54 px ikonisivupalkki, varauslistan palvelinpuolinen lajittelu (p_sort) ja suora linkki (p_reservation_id),
+      # tekstit ui.admin.nav.* (content/site-texts.pending-import-38.json); migraatio + rollback olemassa.
+      # t138 (booking/supabase/tests/hallinta/t138_reservations_nav.sql) ajetaan paikallisessa PG17:ssä t135:n tapaan (työnkulussa ei ole Postgresia).
+      # Selaintesti booking/scripts/e2e-hallinta-nav.mjs (390 px ja työpöytä, mock-tila) vaatii Chromen, ajetaan paikallisesti.
+      - run: node --test booking/tests/hallinta-nav-ylapalkki.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

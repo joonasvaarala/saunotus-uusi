@@ -43,6 +43,8 @@ export const ICONS = {
   tick: [P('M5 12.5l4.5 4.5L19 7.5')],                                                         // Saapunut: valintamerkki
   close: [P('M18 6L6 18M6 6l12 12')],                                                         // Sulje
   trash: [P('M3 6h18'), P('M8 6V4h8v2'), P('M19 6l-1 14H6L5 6'), P('M10 11v6M14 11v6')],       // Poista rivi
+  search: [C(11, 11, 7), P('M20 20l-4.2-4.2')],                                              // Pikahaku: suurennuslasi
+  external: [P('M14 4h6v6'), P('M10 14L20 4'), P('M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5')], // Avautuu uuteen välilehteen
 };
 const NS = 'http://www.w3.org/2000/svg';
 export function icon(name, size = 24) {
