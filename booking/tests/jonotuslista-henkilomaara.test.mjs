@@ -1,6 +1,6 @@
 // booking_134: jonotuslistan henkilömäärä 1–6 ja mahtuvuuteen perustuva jako.
 // Kaupan jonolomakkeen määrävalitsin (aiemmin painikkeet eivät muuttaneet määrää → aina 1 hlö), lunastuslinkin käsittely
-// kassalla, migraation ja rollbackin rakenne sekä pending-import-35-tekstit. SQL-käytös: booking/supabase/tests/waitlist/t134_waitlist_party_size.sql
+// kassalla, migraation ja rollbackin rakenne sekä pending-import-36-tekstit. SQL-käytös: booking/supabase/tests/waitlist/t134_waitlist_party_size.sql
 // (ajetaan paikallisessa PG17:ssä migraatioiden ja fixtures/10_test_helpers.sql:n jälkeen; työnkulussa ei ole Postgresia).
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -89,8 +89,8 @@ test('jonolomake: ohjeteksti henkilömäärästä FI ja EN', async () => {
     assert.ok(find(v.mounted, (n) => n.tag === 'small' && n.attrs.text === WAITLIST_TEXTS[lang].waitlistPersonsHint), lang);
   }
 });
-test('tekstit: uudet avaimet FI+EN, ei <-merkkiä; pending-import-35 vastaa oletuksia', () => {
-  const rows = JSON.parse(rd('content/site-texts.pending-import-35.json'));
+test('tekstit: uudet avaimet FI+EN, ei <-merkkiä; pending-import-36 vastaa oletuksia', () => {
+  const rows = JSON.parse(rd('content/site-texts.pending-import-36.json'));
   const map = { waitlistPersonsHint: 'ui.shop.waitlist_persons_hint', waitlistClaimNotEnough: 'ui.shop.waitlist_claim_not_enough', waitlistClaimInvalid: 'ui.shop.waitlist_claim_invalid' };
   for (const lang of ['fi', 'en']) {
     for (const [k, key] of Object.entries(map)) {

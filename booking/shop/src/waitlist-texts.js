@@ -1,5 +1,5 @@
 // Jonotuslistan FI/EN-tekstit (repon oletus). Tuodaan i18n.js:n T-objektiin → avaimet ui.shop.waitlist_* (text-registry);
-// tuotannon tekstit tulevat site_textsistä (content/site-texts.pending-import-34.json; booking_134: pending-import-35).
+// tuotannon tekstit tulevat site_textsistä (content/site-texts.pending-import-34.json; booking_134: pending-import-36).
 export const WAITLIST_TEXTS = {
   fi: {
     waitlistSoldOut: 'Loppuunmyyty – liity jonoon',
