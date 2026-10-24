@@ -1,4 +1,5 @@
 -- booking_159: paketin "Saunarituaali ja savusaunavuoro (la & su)" (kb 7) mainosotsikko "Saunarituaali-ilta" → "Saunarituaali ja savusaunavuoro" (FI) ja
+-- Versio 20261024171947 = tuotannon migraatioversio (ajettu tuotantoon 24.10.2026 Bottiavustus: 8 tekstiä + kb.opening_hours 9/10).
 -- "Sauna ritual evening" → "Sauna ritual and smoke sauna session" (EN; sama muoto kuin paketin muissa EN-teksteissä, esim. page.booking_info.rec.1.title ja faq.18).
 -- Joonas 24.10.2026. Vain sivutekstejä (booking.site_texts) tekstijärjestelmän omalla polulla: booking.texts_propose → booking.admin_texts_approve(…, true),
 -- eli versiohistoria, audit-loki ja hours.*-riveillä lähdetaulun (kb.opening_hours.session_name / session_name_en, rivit 9 ja 10) päivitys kuten hallinnan Tekstit-näkymästä.
@@ -13,7 +14,7 @@
 -- (_text_publish nostaisi muuten vastakielen lipun).
 -- Ei hintoja, ALV:tä, slugeja, URL:eja, tuotteita eikä public-skeemaa. Ei skeemamuutoksia.
 -- Saunotusrituaalin (kb 8) poisto hoito- ja rituaalilistoilta tehdään koodissa (src/render.mjs, booking/shop/src/treatments.js), ei tässä.
--- Rollback: rollbacks/20261024310000_booking_159_ROLLBACK.sql
+-- Rollback: rollbacks/20261024171947_booking_159_ROLLBACK.sql
 set local lock_timeout = '5s';
 
 do $m$

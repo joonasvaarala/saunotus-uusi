@@ -34,7 +34,7 @@ do $$ begin
     raise exception 't159 A0: hours.* ei protected'; end if;
 end $$;
 
-\ir ../../migrations/20261024310000_booking_159_rituaali_lista.sql
+\ir ../../migrations/20261024171947_booking_159_rituaali_lista.sql
 
 do $$ declare n int; begin
   select count(*) into n from booking.site_texts s join t159_keys k using (key, lang) join t159_before b using (key, lang)
@@ -55,7 +55,7 @@ end $$;
 
 -- b) toinen ajo: ei muutoksia
 create temp table t159_after on commit drop as select key, lang, published_text, published_version, needs_translation from booking.site_texts;
-\ir ../../migrations/20261024310000_booking_159_rituaali_lista.sql
+\ir ../../migrations/20261024171947_booking_159_rituaali_lista.sql
 do $$ begin
   if exists (select 1 from booking.site_texts s full join t159_after a using (key, lang)
              where (s.published_text, s.published_version, s.needs_translation) is distinct from (a.published_text, a.published_version, a.needs_translation)) then
@@ -63,8 +63,8 @@ do $$ begin
 end $$;
 
 -- d) rollback + toinen rollback-ajo
-\ir ../../rollbacks/20261024310000_booking_159_ROLLBACK.sql
-\ir ../../rollbacks/20261024310000_booking_159_ROLLBACK.sql
+\ir ../../rollbacks/20261024171947_booking_159_ROLLBACK.sql
+\ir ../../rollbacks/20261024171947_booking_159_ROLLBACK.sql
 do $$ declare n int; begin
   select count(*) into n from booking.site_texts s join t159_keys k using (key, lang) join t159_before b using (key, lang)
    where s.published_text = k.old_text and s.published_version = b.published_version + 2 and s.needs_translation = b.needs_translation;
@@ -82,7 +82,7 @@ update booking.site_texts set published_text = 'Joku muu' where key = 'hours.10.
 create temp table t159_pre_c on commit drop as select key, lang, published_text, published_version from booking.site_texts;
 savepoint c;
 \set ON_ERROR_STOP 0
-\ir ../../migrations/20261024310000_booking_159_rituaali_lista.sql
+\ir ../../migrations/20261024171947_booking_159_rituaali_lista.sql
 \set ON_ERROR_STOP 1
 rollback to savepoint c;
 do $$ begin

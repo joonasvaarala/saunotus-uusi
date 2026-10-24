@@ -1,4 +1,4 @@
--- ROLLBACK booking_159 (migraatio 20261024310000_booking_159_rituaali_lista.sql). Palauttaa paketin otsikon "Saunarituaali-ilta" / "Sauna ritual evening"
+-- ROLLBACK booking_159 (migraatio 20261024171947_booking_159_rituaali_lista.sql). Palauttaa paketin otsikon "Saunarituaali-ilta" / "Sauna ritual evening"
 -- samalla tekstijärjestelmän polulla (texts_propose → admin_texts_approve), joten versiohistoria ja audit säilyvät ja hours.*-riveillä myös
 -- kb.opening_hours 9/10 session_name / session_name_en palautuvat. Uudelleenajettava: rivi, jonka teksti on jo vanha, ohitetaan.
 -- Jos julkaistu teksti on jokin muu kuin booking_159:n uusi tai vanha, ajo keskeytyy eikä mitään muuteta.

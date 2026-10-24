@@ -17,8 +17,8 @@ const A = await import(pathToFileURL(join(tmp, 'treatments.js')));
 const FX61 = JSON.parse(readFileSync(new URL('./fixtures/prod-catalog-61.json', import.meta.url), 'utf8'));
 delete process.env.SITE_ENV; process.env.SITE_URL = 'https://uusi.saunotus.com';
 const R = await import('../../src/render.mjs');
-const MIG = read('booking/supabase/migrations/20261024310000_booking_159_rituaali_lista.sql');
-const RB = read('booking/supabase/rollbacks/20261024310000_booking_159_ROLLBACK.sql');
+const MIG = read('booking/supabase/migrations/20261024171947_booking_159_rituaali_lista.sql');
+const RB = read('booking/supabase/rollbacks/20261024171947_booking_159_ROLLBACK.sql');
 const sqlCode = (s) => s.split('\n').filter((l) => !l.trimStart().startsWith('--')).join('\n');
 
 test('kauppa: Saunotusrituaali piilotetaan vain listoilta (isListed), tuote 8 säilyy hoitotuotteena (tuotesivu ja varaus toimivat)', () => {
