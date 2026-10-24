@@ -53,14 +53,21 @@ test('rollback on migraation peilikuva', () => {
   m.forEach((x, i) => assert.deepEqual(r[i], { id: x.id, slug: x.slug, from: x.to, to: x.from, fromMd5: x.toMd5, toMd5: x.fromMd5 }));
 });
 
-test('kb.json-snapshot vastaa ajon jälkeistä tilaa; tuotteet olemassa ja muut ennallaan', () => {
+// booking_163 peruttiin tuotannossa 24.10.2026 (rollback; migraatio jää kirjatuksi ajetuksi). Snapshot saa olla joko ennen
+// 163:a (Johku) tai 163:n jälkeen (kauppa) – kunhan kaikki 16 samassa tilassa – kunnes 1.11. siirron jälkeen tehdään uusi versio
+// lopullisella domainilla. Sivusto ei silti näytä Johku-linkkejä (build-vartija, src/lib.mjs).
+test('kb.json-snapshot: 16 tuotetta joko ennen 163:a (Johku) tai sen jälkeen (kauppa), yhtenäisesti; muut ennallaan', () => {
   const m = new Map(rows(MIG).map((x) => [x.id, x]));
+  const states = new Set();
   for (const id of IDS) {
     const p = kb.products.find((x) => x.id === id);
     assert.ok(p, `kb.json tuote ${id}`);
     assert.equal(p.slug, m.get(id).slug);
-    assert.equal(p.booking_url, m.get(id).to);
+    const { from, to } = m.get(id);
+    assert.ok(p.booking_url === from || p.booking_url === to, `${id}: booking_url on 163:n alku- tai loppuarvo (${p.booking_url})`);
+    states.add(p.booking_url === to ? 'shop' : 'johku');
   }
+  assert.equal(states.size, 1, 'kaikki 16 tuotetta samassa tilassa (ajettu tai peruttu)');
   const p47 = kb.products.find((x) => x.id === 47);
   if (p47) assert.ok(p47.booking_url.startsWith(JOHKU), '47 ei kaupan tuote: ennallaan');
 });
