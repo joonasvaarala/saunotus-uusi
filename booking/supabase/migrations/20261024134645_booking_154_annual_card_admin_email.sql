@@ -19,7 +19,7 @@
 -- EI takautuvaa lähetystä: migraatio ei lisää outbox-rivejä olemassa oleville korteille (trigger koskee vain uusia).
 -- Ei muuta hintoja, ALV:tä, kortin myöntämissääntöjä, admin_annual_card_for_order-funktiota eikä public-skeemaa.
 -- Uudelleenajettava: create or replace / drop if exists.
--- Rollback: ../rollbacks/20261024260000_booking_154_ROLLBACK.sql
+-- Rollback: ../rollbacks/20261024134645_booking_154_ROLLBACK.sql
 -- =============================================================================
 set local lock_timeout = '5s';
 

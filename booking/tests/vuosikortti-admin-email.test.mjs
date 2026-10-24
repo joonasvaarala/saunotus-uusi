@@ -14,8 +14,8 @@ import { createAdminMock } from '../admin/options-mock.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const rd = (p) => readFileSync(resolve(root, p), 'utf8');
-const MIG = 'booking/supabase/migrations/20261024260000_booking_154_annual_card_admin_email.sql';
-const RB = 'booking/supabase/rollbacks/20261024260000_booking_154_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024134645_booking_154_annual_card_admin_email.sql';
+const RB = 'booking/supabase/rollbacks/20261024134645_booking_154_ROLLBACK.sql';
 const M146 = 'booking/supabase/migrations/20261024124037_booking_146_annual_card_email.sql';
 const SQLT = 'booking/supabase/tests/discounts/t154_annual_card_admin_email.sql';
 const PRE = 'booking/supabase/tests/discounts/pre154_existing_cards.sql';
