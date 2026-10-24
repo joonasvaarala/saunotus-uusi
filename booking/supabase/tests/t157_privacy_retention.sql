@@ -138,7 +138,16 @@ begin
   perform pg_temp.ck(exists (select 1 from booking._privacy_candidates(current_date) c where c.category = 'orders_6y' and c.id = 915721 and c.blocked = 'future_reservation'), 'R10 tuleva varaus estää 6 v tilauksen');
   perform pg_temp.ck(exists (select 1 from booking._privacy_candidates('2027-01-01') c where c.category = 'orders_6y' and c.id = 915720)
                      and not exists (select 1 from booking._privacy_candidates('2026-12-31') c where c.category = 'orders_6y' and c.id = 915720), 'R11 6 v raja 31.12.2026 / 1.1.2027');
-  perform pg_temp.ck((r #> '{categories,customers,sample_ids}') @> '[915701]'::jsonb and not ((r #> '{categories,customers,sample_ids}') @> '[915702]'::jsonb)
+  -- R12 ei riipu tietokannan muusta datasta (tuotannossa pienemmät asiakas-id:t täyttävät 5 esimerkin otoksen): raportin määrä vastaa
+  -- ehdokasjoukkoa, testiasiakas kuuluu siihen, ja otos on joukon 5 pienintä id:tä (ei testiasiakkaan läsnäoloa otoksessa).
+  perform pg_temp.ck((r #>> '{categories,customers,due}')::int
+                       = (select count(*) from booking._privacy_candidates(current_date) c where c.category = 'customers' and c.blocked is null)
+                     and (r #>> '{categories,customers,due}')::int >= 1
+                     and (r #> '{categories,customers,sample_ids}')
+                       = (select coalesce(jsonb_agg(s.id order by s.id), '[]'::jsonb) from (select c.id from booking._privacy_candidates(current_date) c
+                            where c.category = 'customers' and c.blocked is null order by c.id limit 5) s)
+                     and exists (select 1 from booking._privacy_candidates(current_date) c where c.category = 'customers' and c.id = 915701 and c.blocked is null)
+                     and not ((r #> '{categories,customers,sample_ids}') @> '[915702]'::jsonb)
                      and (r #>> '{categories,gift_cards_3y,blocked,active_gift_card}')::int >= 1 and (r #>> '{categories,customers,blocked,marketing_consent}')::int >= 1, 'R12 raportin luokat, esteet ja esimerkki-id:t');
   perform test.login(u_user);
   perform pg_temp.ck(pg_temp.err('select booking.privacy_retention_report(current_date)') is not null, 'R13 tavallinen käyttäjä ei saa raporttia');
@@ -170,6 +179,10 @@ begin
 
   -- ===== E: ajo päällä =====
   update booking.settings set value = 'true' where key = 'privacy_retention.enabled';
+  -- booking_160 lisää privacy_retention.dry_run (oletus true → ajo vain laskee). Varsinainen ajo vaatii dry_run = false; ilman 160:tä
+  -- asetusta ei lueta. Muutos perutaan testin transaktion mukana.
+  insert into booking.settings(key, value, description) values ('privacy_retention.dry_run', 'false', 't157')
+    on conflict (key) do update set value = excluded.value;
   perform test.service();
   j := booking.privacy_retention_run();
   perform test.logout();
@@ -221,6 +234,7 @@ begin
   perform test.logout();
   perform pg_temp.ck(coalesce((j #>> '{counts,customers}')::int, -1) = 0 and coalesce((j #>> '{counts,receipts_6y}')::int, -1) = 0, 'E27 uusinta-ajo: ei uusia muutoksia');
   update booking.settings set value = 'false' where key = 'privacy_retention.enabled';
+  update booking.settings set value = 'true' where key = 'privacy_retention.dry_run';
 
   -- ===== K: kävijämittauksen kuukausikooste =====
   perform test.service();
