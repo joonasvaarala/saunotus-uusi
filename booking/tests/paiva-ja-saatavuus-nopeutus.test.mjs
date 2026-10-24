@@ -5,7 +5,7 @@ import { cachedDayBundle, seedDayBundle, clearDayBundles } from '../admin/day-bu
 import { getSiteTexts, primeSiteTexts, clearSiteTextsCache } from '../admin/site-texts-cache.js';
 import { ensureAllMonths, resetMonthAvailabilityLoader } from '../shop/src/availability-months.js';
 
-const migration = new URL('../supabase/migrations/20261024070000_booking_133_day_and_availability_speedup.sql', import.meta.url);
+const migration = new URL('../supabase/migrations/20261024064158_booking_133_day_and_availability_speedup.sql', import.meta.url);
 const read = (url) => readFile(url, 'utf8');
 
 test('admin_day_bundle käyttää 9 argumenttia ja sisältää alkulatauksen', async () => {

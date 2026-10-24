@@ -25,7 +25,7 @@ create temp table new_pool_peak_133 on commit drop as
     from probes p;
 
 -- Palautetaan booking_125:n originaalifunktiot transaktion sisällä.
-\ir ../supabase/rollbacks/20261024070000_booking_133_ROLLBACK.sql
+\ir ../supabase/rollbacks/20261024064158_booking_133_ROLLBACK.sql
 
 do $assert$
 begin
