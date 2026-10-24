@@ -85,7 +85,8 @@ test('kauppa: EN-sivu näyttää duration_text_en, puuttuessa duration_text; FI 
   assert.equal(pdur({ lang: 'fi' })(p), 'noin 1 h');
   assert.equal(pdur({ lang: 'en' })({ duration_text: 'noin 1 h', duration_text_en: null }), 'noin 1 h');
   assert.equal(pdur({ lang: 'en' })({ duration_text: 'noin 1 h', duration_text_en: '' }), 'noin 1 h');
-  assert.equal((shop.match(/pdur\(p\) \? ` · \$\{pdur\(p\)\}` : ''/g) || []).length, 2, 'listakortti + tuotesivu');
+  assert.equal((shop.match(/pdur\(p\) \? ` · \$\{pdur\(p\)\}` : ''/g) || []).length, 1, 'tuotesivu (listakortti: oma rivi hinnan yläpuolella, card-meta.js)');
+  assert.match(shop, /cardMeta\(h, priceText\(p\), pdur\(p\)\)/, 'listakortti: pdur omalla rivillään');
   assert.doesNotMatch(shop, /p\.duration_text \?/, 'ei suoraa duration_text-näyttöä');
   const tui = read('booking/shop/src/treatment-ui.js');
   assert.match(tui, /const durText = \(p\) => \(A\.isPackage\(p\) \? fmtMin\(totalMin\(p\)\) : \(S\.lang === 'en' && p\.duration_text_en\) \|\| p\.duration_text \|\| ''\);/);
