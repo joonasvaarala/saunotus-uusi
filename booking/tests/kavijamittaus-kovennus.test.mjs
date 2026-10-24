@@ -10,8 +10,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p) => readFileSync(join(root, p), 'utf8');
-const MIG = 'booking/supabase/migrations/20261024220000_booking_150_analytics_hardening.sql';
-const RB = 'booking/supabase/rollbacks/20261024220000_booking_150_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024120719_booking_150_analytics_hardening.sql';
+const RB = 'booking/supabase/rollbacks/20261024120719_booking_150_ROLLBACK.sql';
 const M144 = 'booking/supabase/migrations/20261024113416_booking_144_cookieless_analytics.sql';
 const mig = read(MIG), rb = read(RB), m144 = read(M144);
 const code = (s) => s.replace(/--[^\n]*/g, '');

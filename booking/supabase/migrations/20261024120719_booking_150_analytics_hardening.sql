@@ -1,5 +1,5 @@
 -- booking_150: kävijämittauksen (booking_144) kovennus ennen päälle kytkemistä. Mittaus pysyy pois päältä (SITE_ANALYTICS ei muutu).
--- Rollback: rollbacks/20261024220000_booking_150_ROLLBACK.sql (palauttaa booking_144:n määritelmät täsmälleen).
+-- Rollback: rollbacks/20261024120719_booking_150_ROLLBACK.sql (palauttaa booking_144:n määritelmät täsmälleen).
 -- 1) Tulvimisen esto public_track_event-funktiossa:
 --    * IP-kohtainen raja olemassa olevalla booking._rate_limit-mekanismilla (IP booking._client_ip(): cf-connecting-ip / x-forwarded-for
 --      kuten muissa public-funktioissa). IP:tä ei tallenneta selväkielisenä: ämpäri on 'analytics:ip:' || md5(päivä || ip), rate_limit_hits
