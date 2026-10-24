@@ -8,6 +8,8 @@ import { loadCalendarExportTexts } from '../calendar-export-texts.js';
 import { loadSettingsTexts, settingsText as st } from '../settings-texts.js';
 import { visibleSettingTabs, settingsHref, tabFromHash } from '../settings-tabs.js';
 import { renderQrPanel } from '../qr-panel.js';
+import { loadVcrTexts, vcrText } from '../voucher-redeem-texts.js';
+import { VCR_SELLERS, VCR_RPC, VCR_URL_MAX, sellerLabel, checkRedeemUrls } from '../voucher-redeem-logic.js';
 import { renderCalendarExport } from './calendar-export.js';
 import { TECHNICAL_LIMITS, modeBadgeKind, modeTextKey, overviewNotices, splitFrom, validateSection } from '../settings-logic.js';
 
@@ -108,7 +110,7 @@ function procountorCard(state, failed) {
 }
 
 const SALES = [['25.5', 'sales_25_5'], ['13.5', 'sales_13_5'], ['0', 'sales_0'], ['14', 'sales_14'], ['24', 'sales_24'], ['10', 'sales_10']];
-const METHODS = [['cash', 'method_cash'], ['card_terminal', 'method_card_terminal'], ['mobilepay', 'method_mobilepay'], ['bank_transfer', 'method_bank_transfer'], ['invoice', 'method_invoice'], ['gift_card', 'method_gift_card'], ['partner_voucher', 'method_partner_voucher'], ['visma_pay', 'method_visma_pay'], ['annual_card', 'method_annual_card'], ['pay_later', 'method_pay_later'], ['other', 'method_other']];
+const METHODS = [['cash', 'method_cash'], ['card_terminal', 'method_card_terminal'], ['mobilepay', 'method_mobilepay'], ['bank_transfer', 'method_bank_transfer'], ['invoice', 'method_invoice'], ['gift_card', 'method_gift_card'], ['partner_voucher_kokemuskauppa', 'method_partner_voucher_kokemuskauppa'], ['partner_voucher_offerilla', 'method_partner_voucher_offerilla'], ['partner_voucher_elamyslahjat', 'method_partner_voucher_elamyslahjat'], ['partner_voucher', 'method_partner_voucher_fallback'], ['visma_pay', 'method_visma_pay'], ['annual_card', 'method_annual_card'], ['pay_later', 'method_pay_later'], ['other', 'method_other']];
 
 function procountorForm(cfg, isAdmin, reload) {
   if (!cfg) {
@@ -164,6 +166,7 @@ function procountorForm(cfg, isAdmin, reload) {
     h('h3', { text: procountorText('ui.admin.procountor.sales_title') }),
     h('div', { class: 'stack' }, SALES.map(([rate, key]) => field(procountorText(`ui.admin.procountor.${key}`), salesInputs[rate]))),
     h('h3', { text: procountorText('ui.admin.procountor.methods_title') }),
+    h('p', { class: 'muted', 'data-testid': 'procountor-partner-hint', text: procountorText('ui.admin.procountor.methods_partner_hint') }),
     h('div', { class: 'stack' }, METHODS.map(([code, key]) => field(procountorText(`ui.admin.procountor.${key}`), methodInputs[code]))),
     isAdmin ? save : null,
     h('div', { class: 'row wrap' }, field(procountorText('ui.admin.procountor.preview_date'), previewDate), preview),
@@ -338,7 +341,27 @@ function giftPanel(bundle, reload) {
       stat(tx('gift_accounted'), onOff(s['voucher_claims.partner_voucher_accounted'] === true))),
     card(tx('partner_title'), null, per.node, remind.node, saveBar('gift_partner', () => ({
       max_per_order: Number(per.input.value), remind_after_hours: Number(remind.input.value),
-    }), reload, 'save-partner')));
+    }), reload, 'save-partner')),
+    redeemUrlsCard());
+}
+
+// booking_173: kumppanien lunastussivut (asetus voucher_claims.redeem_urls; admin_set_voucher_redeem_urls, settings.edit). Arvot luetaan Tarkista-listan rajapinnasta.
+function redeemUrlsCard() {
+  const inputs = Object.fromEntries(VCR_SELLERS.map((k) => [k, h('input', { type: 'url', inputmode: 'url', autocomplete: 'off', maxlength: String(VCR_URL_MAX), placeholder: 'https://', 'data-testid': `redeem-url-${k}` })]));
+  const err = h('p', { class: 'err', role: 'alert', hidden: true, 'data-testid': 'redeem-urls-err' });
+  const save = h('button', { type: 'button', class: 'btn primary', 'data-testid': 'save-redeem-urls', text: vcrText('ui.admin.vcr.urls_save') });
+  save.addEventListener('click', () => run(save, async () => {
+    const chk = checkRedeemUrls(Object.fromEntries(VCR_SELLERS.map((k) => [k, inputs[k].value])));
+    if (!chk.ok) { err.textContent = vcrText('ui.admin.vcr.urls_bad', { sources: chk.bad.map((k) => sellerLabel(k)).join(', ') }); err.hidden = false; return; }
+    err.hidden = true;
+    const res = await rpc(VCR_RPC.setUrls, { p: chk.value });
+    for (const k of VCR_SELLERS) inputs[k].value = res?.redeem_urls?.[k] || '';
+    toast(vcrText('ui.admin.vcr.urls_saved'));
+  }));
+  const node = card(vcrText('ui.admin.vcr.urls_title'), vcrText('ui.admin.vcr.urls_lead'),
+    h('div', { class: 'stack', 'data-testid': 'redeem-urls' }, VCR_SELLERS.map((k) => field(sellerLabel(k), inputs[k]))), err, save);
+  rpc(VCR_RPC.unredeemed, { p_limit: 1 }).then((v) => { for (const k of VCR_SELLERS) if (!inputs[k].value) inputs[k].value = v?.redeem_urls?.[k] || ''; }).catch(() => { /* vanha tietokanta: kentät tyhjinä */ });
+  return node;
 }
 
 function invoicePanel(bundle, reload) {
@@ -445,7 +468,7 @@ export async function render({ ctx, rest, reload }) {
   else if (tab === 'varaukset') panel = bookingPanel(bundle, reload, calendarExport, calendarExportFailed, isAdmin);
   else if (tab === 'maksut') panel = paymentsPanel(bundle, reload);
   else if (tab === 'sahkoposti') panel = mailPanel(bundle, reload);
-  else if (tab === 'lahjakortit') panel = giftPanel(bundle, reload);
+  else if (tab === 'lahjakortit') { await loadVcrTexts(rpc); panel = giftPanel(bundle, reload); }
   else if (tab === 'laskut') panel = invoicePanel(bundle, reload);
   else if (tab === 'yhteydet') panel = connectionsPanel(bundle, procountor, procountorFailed, editor, isAdmin, reload);
   else if (tab === 'tekninen') panel = technicalPanel(bundle, reload);

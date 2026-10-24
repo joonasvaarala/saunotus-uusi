@@ -924,3 +924,23 @@ body.shot #shell .nav .lbl{display:inline}
 .ev-tl-bar.shared{background:repeating-linear-gradient(45deg,var(--gold) 0 6px,var(--heaterbar) 6px 12px)}
 .ev-conflicts ul{margin:6px 0 0;padding-left:20px}
 @media (max-width:600px){.ev-tl-row{grid-template-columns:1fr}.ev-block-row .row>*{flex:1 1 100%}}
+/* booking_173: kumppanilahjakortin lunastus (tilauksen laatikko + Tarkista-osio). Tiivis rivi; vain teeman muuttujat (vihreä, hiekka, kulta). */
+.vcr-row{display:grid;gap:4px;padding:10px 0;border-top:1px solid var(--line)}
+.vcr-row:first-of-type{border-top:0}
+.vcr-line{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.vcr-code{font:700 16px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.05em;color:var(--ink);overflow-wrap:anywhere;user-select:all}
+.vcr-kv{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px;color:var(--text)}
+.vcr-k{color:var(--muted);font-size:14px}
+.vcr-sel{min-height:36px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
+.vcr-meta{margin:0;font-size:14px}
+.vcr-meta a{color:var(--gold);font-weight:600}
+.vcr-warn{margin:0;padding:6px 10px;border-left:4px solid var(--gold);background:var(--warnbg);color:var(--ink);font-size:14px}
+.vcr-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.vcr-actions .btn{text-decoration:none}
+.vcr-nourl{font-size:14px}
+.vcr-confirm{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.vcr-confirm p{margin:0 0 6px}
+.vcr-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px}
+.vcr-chip.on{background:var(--green);color:var(--card);border-color:var(--green)}
+.vcr-group h3{margin:10px 0 2px;font-size:15px}
+.vcr-box h3{display:flex;align-items:center;gap:6px}

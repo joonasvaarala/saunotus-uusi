@@ -308,7 +308,8 @@ async function shopSuite() {
     expect(JSON.stringify(rpcCalls(page, 'public_resolve_gift_code').at(-1).args) === '{"p_code":"ZXQW98765432"}', `${name}: resolve: vain p_code, normalisoitu`);
     expect(!rpcCalls(page, 'public_submit_voucher_claim').length && !rpcCalls(page, 'public_apply_gift_card').length, `${name}: ei kirjausta ennen valintaa`);
     const radios = page.locator('[data-testid=vc-choose] input[name=vc-source]');
-    expect(await radios.count() === 4, `${name}: 4 myyjää (Elämyslahjat, Kokemuskauppa, Kiitoskauppa, Offerilla)`);
+    expect(await radios.count() === 3 && !/Kiitoskauppa/.test(await page.locator('[data-testid=vc-choose]').innerText()), `${name}: 3 myyjää (Kokemuskauppa, Offerilla, Elämyslahjat), ei Kiitoskauppaa (booking_173)`);
+    expect(!/null|undefined/.test(await page.locator('[data-testid=vc-choose]').innerText()), `${name}: ei "null"-tekstiä (booking_173)`);
     expect((await page.locator('[data-testid=vc-choose]').innerText()).match(/Elämyslahjat/g)?.length >= 1 && !/Muu kumppani|Other partner|partner_other/.test(await page.locator('[data-testid=vc-choose]').innerText()), `${name}: julkiset lähteet, ei partner_other`);
     expect(await page.locator('[data-testid=vc-choose] input[name=vc-source]:checked').inputValue() === 'elamyslahjat' && await page.locator('[data-testid=vc-suggest]').count() === 1, `${name}: ehdotettu myyjä esivalittu + vihje`);
     expect(/ZXQW98765432/.test(await page.locator('[data-testid=vc-codeis]').innerText()), `${name}: koodi näytetään tarkistettavaksi`);
@@ -316,11 +317,11 @@ async function shopSuite() {
     await layoutChecks(page, `${name} lähdevalinta`, '.ord');
     if (lang === 'fi' && [360, 390, 430, 1280].includes(vp)) await shotShop(page, `kauppa-lahjakoodi-valinta-${vp}`);
     if (lang === 'en' && vp === 390) await shotShop(page, 'kauppa-lahjakoodi-valinta-390-en');
-    await page.locator('[data-testid=vc-choose] label[for=vc-src-2]').click();   // Kiitoskauppa (tuntematon muoto → ei ehdotusta, käyttäjä valitsee)
-    expect(await radios.nth(2).isChecked(), `${name}: valinta vaihtuu`);
+    await page.locator('[data-testid=vc-choose] label.vc-opt').nth(1).click();   // asiakas vaihtaa ehdotuksen (Elämyslahjat) → Offerilla ennen maksua (booking_173)
+    expect(await radios.nth(1).isChecked(), `${name}: valinta vaihtuu`);
     await page.click('[data-testid=vc-submit]'); await page.waitForSelector('[data-testid=vc-notice]');
     const sc = rpcCalls(page, 'public_submit_voucher_claim').at(-1)?.args;
-    expect(sc && sc.p_token === ORDER_TOKEN && sc.p_code === 'ZXQW98765432' && sc.p_source === 'kiitoskauppa' && !('p_order_item_id' in sc), `${name}: submit-parametrit (${JSON.stringify(sc)})`);
+    expect(sc && sc.p_token === ORDER_TOKEN && sc.p_code === 'ZXQW98765432' && sc.p_source === 'offerilla' && !('p_order_item_id' in sc), `${name}: submit-parametrit (${JSON.stringify(sc)})`);
     const notice = await page.locator('[data-testid=vc-notice]').innerText();
     expect(notice.includes(G['vc.done']), `${name}: vahvistusteksti sopimuksen mukaan`);
     expect(await page.locator('[data-testid=vc-claim][data-state=received]').count() === 1 && /…5432/.test(await page.locator('[data-testid=vc-claims]').innerText()), `${name}: pyyntö tilassa received, koodi maskattuna`);

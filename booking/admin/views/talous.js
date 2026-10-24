@@ -53,7 +53,7 @@ export async function render({ ctx, reload, query }) {
   const dirty = new Set();
   api.onChanged(() => { for (const k of ['payments', 'reports', 'analytics', 'giftcards', 'vouchers']) if (tabs[k]) dirty.add(k); });
   const factories = {
-    orders: () => createOrdersTab({ api, ctx, gift }),
+    orders: () => createOrdersTab({ api, ctx, gift, rpc }),   // booking_173: rpc kumppanilahjakortin laatikolle
     payments: () => createPaymentsTab({ api, ctx, onOpenOrder: (no) => { select('orders'); tabs.orders.setSearch(String(no)); } }),
     reports: () => createReportsTab({ api, canFull }),
     analytics: () => createAnalyticsTab(),   // Paketti 11: Kävijät (reports.daily/reports.view), admin_analytics_summary

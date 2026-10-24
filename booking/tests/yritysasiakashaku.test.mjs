@@ -83,7 +83,7 @@ test('booking_172 migraatio: md5-vahdit, oikeudet, ei public-skeemaa', () => {
   assert.match(s, /grant execute on function booking\.admin_search_customers\(text, integer\) to authenticated, service_role;/);
   assert.doesNotMatch(s, /public\./);
   assert.doesNotMatch(s, /admin_list_customers\s*\(/i, 'admin_list_customers ei muutu');
-  assert.ok(!readdirSync(join(root, '../supabase/migrations')).some((f) => /booking_17[2-9]/.test(f) && f !== MIG.split('/').pop()));
+  assert.ok(!readdirSync(join(root, '../supabase/migrations')).some((f) => /booking_172_/.test(f) && f !== MIG.split('/').pop()), 'vain yksi booking_172-migraatio');   // booking_173 lisää oman migraationsa
 });
 
 test('booking_172 rollback palauttaa tuotannon admin_search_invoice_customers-määrittelyn sellaisenaan', () => {

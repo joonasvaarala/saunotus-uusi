@@ -49,7 +49,7 @@ export function createVoucherMock({ now = new Date(), delay = 0, remindHours = 2
       const c = find(p_id);
       return { ok: true, claim: json(c, true), order: { order_no: c.order_no, status: 'confirmed', payment_status: c.status === 'redeemed' && c.amount > 0 ? 'paid' : 'unpaid', total: 82, balance: { total: 82, net_paid: 20, unpaid: c.status === 'redeemed' && c.amount > 0 ? 82 - 20 - c.amount : orderUnpaid } },
         reservations: [{ id: c.reservation_id, starts_at: new Date(now.getTime() + 3 * 86400000).toISOString(), ends_at: new Date(now.getTime() + 3 * 86400000 + 5400000).toISOString(), persons: 2, status: 'confirmed', hold_expires_at: null, product_name: 'Yleinen saunavuoro' }],
-        payment: c.payment_id ? { id: c.payment_id, method: 'partner_voucher', status: 'paid', amount: c.amount, paid_at: c.resolved_at, note: `Kumppanin lahjakortti (${LABEL[c.source]}) ${mask(c.code)} | pyyntö #${c.id}` } : null,
+        payment: c.payment_id ? { id: c.payment_id, method: ['kokemuskauppa', 'offerilla', 'elamyslahjat'].includes(c.source) ? `partner_voucher_${c.source}` : 'partner_voucher', status: 'paid', amount: c.amount, paid_at: c.resolved_at, note: `Kumppanin lahjakortti (${LABEL[c.source]}) ${mask(c.code)} | pyyntö #${c.id}` } : null,
         source_guess: guess(c.code), sources: Object.keys(LABEL).filter((k) => k !== 'partner_other').map((code) => ({ code, label: LABEL[code], label_en: LABEL[code] })) };
     },
     admin_resolve_voucher_claim: ({ p_id, p_status, p_problem_code = null, p_note = null, p_amount = null, p_partner_ref = null }) => {

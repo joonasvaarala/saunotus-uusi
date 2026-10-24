@@ -43,7 +43,7 @@ test('tiedot: koko koodi vain admin_get_voucher_claim:ssa; arvaus muodosta', asy
   const d = await api.get({ id: 42 });
   assert.equal(d.claim.code, 'KK12345ABCDEF'); assert.equal(d.source_guess.source, 'kokemuskauppa');
   assert.equal(d.order.balance.unpaid, 62); assert.equal(d.reservations.length, 1); assert.equal(d.payment, null);
-  const p = await api.get({ id: 46 }); assert.equal(p.payment.method, 'partner_voucher'); assert.match(p.payment.note, /…[A-Z0-9]{4}/); assert.ok(!p.payment.note.includes('OK19456DEF'), 'maksumuistiinpanossa vain maskattu');
+  const p = await api.get({ id: 46 }); assert.equal(p.payment.method, 'partner_voucher_offerilla', 'booking_173: myyjäkohtainen maksutapa'); assert.match(p.payment.note, /…[A-Z0-9]{4}/); assert.ok(!p.payment.note.includes('OK19456DEF'), 'maksumuistiinpanossa vain maskattu');
   assert.deepEqual(guess('KK12345ABCDEF'), { source: 'kokemuskauppa', confidence: 'high' });
   assert.deepEqual(guess('OK19123ABC'), { source: 'offerilla', confidence: 'high' });
   assert.deepEqual(guess('ZXQW98765432'), { source: 'elamyslahjat', confidence: 'medium' });

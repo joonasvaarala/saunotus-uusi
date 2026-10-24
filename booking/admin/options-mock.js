@@ -2,6 +2,7 @@
 // sopimuksen §14/§15 mukaan, rivit samassa muodossa kuin migraatiossa booking_50). KEKSITTYÄ DATAA: mikään ei mene verkkoon eikä tallennu (tila on vain muistissa).
 // Puhdas moduuli (ei DOM:ia) → node --test voi ajaa sen. Tuntematon RPC → virhe (ei koskaan verkkokutsua).
 import { quietMockHandlers } from './quiet-mock.js';
+import { voucherRedeemMockHandlers } from './voucher-redeem-mock.js';
 import { fiReference, validBusinessId, validOvt, validOperator, normBusinessId, normOvt } from '../shop/src/invoice-validate.js';
 import { storedLineFromInput } from './invoice-lines.js';
 import { calendarIdError } from './calendar-export-logic.js';
@@ -37,7 +38,7 @@ function maskEmail(raw) {
 }
 const SECRET_KEYS = new Set(['client_id', 'client_secret', 'api_key', 'password', 'token', 'refresh_token', 'access_token', 'secret', 'private_key', 'authorization', 'redirect_uri']);
 const SALES_RATES = ['25.5', '13.5', '0', '14', '24', '10'];
-const METHODS = ['cash', 'card_terminal', 'mobilepay', 'bank_transfer', 'invoice', 'gift_card', 'partner_voucher', 'visma_pay', 'annual_card', 'pay_later', 'other'];
+const METHODS = ['cash', 'card_terminal', 'mobilepay', 'bank_transfer', 'invoice', 'gift_card', 'partner_voucher_kokemuskauppa', 'partner_voucher_offerilla', 'partner_voucher_elamyslahjat', 'partner_voucher', 'visma_pay', 'annual_card', 'pay_later', 'other'];
 const hasSecret = (p) => {
   if (p == null || typeof p !== 'object') return false;
   if (Array.isArray(p)) return p.some(hasSecret);
@@ -279,6 +280,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     admin_analytics_summary: (a) => { needAny('reports.view', 'reports.daily'); return analyticsMock(a.p_from || today, a.p_to || today); },   // Paketti 11 / booking_144
     // booking_142: alennuskoodit ja vuosikortit (samat tarkistukset pääpiirteissään kuin palvelimella)
     ...quietMockHandlers({ st, need, needAny, err, today }),   // booking_162: Hiljaiset ajat
+    ...voucherRedeemMockHandlers({ st, need, err, now }),   // booking_173: kumppanilahjakorttien lunastus
     admin_list_discount_codes: () => { needAny('catalog.edit', 'annual_cards.manage'); return st.discountCodes.map((d) => ({ ...d })); },
     admin_save_discount_code: (a) => {
       need('catalog.edit');

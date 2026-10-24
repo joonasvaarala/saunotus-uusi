@@ -12,6 +12,7 @@ import { h, dialog, toast, run, fmtDay, fmtTime, fmtDT, money, statusBadge, payB
 import { legsList, resName, resourceBadges, hasLegs } from './legs.js';
 import { missingOpen, grantButton } from './therapist.js';
 import { optionBadge, optionOf, optionPicker, ot, optErr } from '../options.js';
+import { orderVoucherBox } from './voucher-redeem.js';
 
 export function reservationDialog(r, { methods, onChange, refs, can = () => true }) {
   const body = h('div', { class: 'stack' });
@@ -152,6 +153,9 @@ export function reservationDialog(r, { methods, onChange, refs, can = () => true
     kids.push(h('div', { class: 'box addons-box' }, h('h3', {}, icon('leaf', 20), ' Lisäpalvelut'),
       ad.length ? h('ul', { class: 'reslist' }, ad.map((a) => h('li', { class: 'resrow' }, h('span', { text: `${a.quantity} × ${a.name}` }), h('span', { class: 'meta', text: money(a.line_total) })))) : h('p', { class: 'muted', text: 'Ei lisäpalveluita.' }),
       editable ? h('button', { type: 'button', class: 'btn sm', text: 'Muokkaa lisäpalveluita', onclick: () => editAddons(ad) }) : null));
+    // booking_173: kumppanin lahjakortti (koodi + Kopioi, arvaus vs. valinta, myyjän vaihto, Lunasta, Merkitse lunastetuksi)
+    const vbox = await orderVoucherBox({ rpc, orderId: r.order_id, onChanged: () => { drawOrder(); onChange?.(); } }).catch(() => null);
+    if (vbox) kids.unshift(vbox);
     orderBox.replaceChildren(...kids);
   };
   const editAddons = async (current) => {

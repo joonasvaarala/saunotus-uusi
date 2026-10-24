@@ -4,7 +4,7 @@ import { h, dialog, toast, badge } from '../ui.js';
 import { icon } from '../icons.js';
 import { t, fmt } from '../talous-i18n.js';
 import { VC_STATUSES, VC_SORTS, VC_PROBLEM_CODES, VC_NOTE_MAX, VC_ACTIVE, fmtAge } from '../vouchers-api.js';
-import { payLabel, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, searchFld, expandRow, actionBtn, formDialog, friendly } from './talous-ui.js';
+import { payLabel, methodLabel, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, searchFld, expandRow, actionBtn, formDialog, friendly } from './talous-ui.js';
 import { countActive, filterDrawer } from '../filter-drawer.js';
 
 const fld = (label, ...kids) => h('label', { class: 'fld' }, h('span', { text: label }), ...kids);
@@ -67,7 +67,7 @@ export function createVouchersTab({ api, vouchers, ctx, onOpenOrder = () => {} }
     const d = await vouchers.get({ id }), c = d.claim;
     const dl = (rows) => h('dl', { class: 'gc-dl' }, rows.filter(Boolean).flatMap(([k, v]) => [h('dt', { text: k }), h('dd', { text: v })]));
     const copy = h('button', { type: 'button', class: 'btn tl-rc-btn', 'data-testid': 'vcl-copy', onclick: async () => { try { await navigator.clipboard.writeText(c.code); toast(t('vcl.d.copied'), 'ok'); } catch { /* leikepöytä ei käytössä */ } } }, icon('copy', 18), h('span', { text: t('vcl.d.copy') }));
-    const gs = d.source_guess.source, mismatch = !!gs && gs !== c.source && c.source !== 'partner_other';
+    const gs = d.source_guess.source, mismatch = !!gs && gs !== c.source && c.source !== 'partner_other' && ['high', 'medium'].includes(d.source_guess.confidence ?? 'high');   // booking_173: pelkkä Offerilla-ehdotus (low) ei ole ristiriita
     const by = c.resolved_by ? (['bot', 'staff', 'customer', 'system'].includes(c.resolved_by) ? t(`vcl.by.${c.resolved_by}`) : c.resolved_by) : null;
     const info = h('section', { class: 'tl-sec' }, h('h3', { text: t('vcl.d.info') }),
       h('p', { class: 'gc-bigcode', 'data-testid': 'vcl-detail-code' }, h('strong', { text: c.code || c.code_masked }), c.code ? copy : null),
@@ -83,7 +83,7 @@ export function createVouchersTab({ api, vouchers, ctx, onOpenOrder = () => {} }
       c.order_no ? h('p', {}, h('button', { type: 'button', class: 'btn', 'data-testid': 'vcl-open-order', onclick: () => onOpenOrder(c.order_no) }, t('vcl.d.openOrder', { no: c.order_no }))) : null);
     const sub = (title, items, none, tid) => h('section', { class: 'tl-sec' }, h('h3', { text: title }), items.length ? h('ul', { class: 'tl-sub', 'data-testid': tid }, items) : emptyBox(none));
     const res = sub(t('vcl.d.reservations'), d.reservations.map((x) => h('li', {}, h('span', { class: 'tl-sub-main', text: x.product_name || `#${x.id}` }), h('span', { class: 'tl-sub-meta', text: [fmt.dt(x.starts_at), t('vcl.d.persons', { n: x.persons })].join(' · ') }), h('span', { class: 'tl-sub-sum' }))), t('vcl.d.noReservations'), 'vcl-reservations');
-    const pay = sub(t('vcl.d.payment'), d.payment ? [h('li', {}, h('span', { class: 'tl-sub-main', text: t('method.partner_voucher') }), h('span', { class: 'tl-sub-meta', text: [d.payment.paid_at ? fmt.dt(d.payment.paid_at) : null, d.payment.note].filter(Boolean).join(' · ') }), h('span', { class: 'tl-sub-sum', text: fmt.money(d.payment.amount) }))] : [], t('vcl.d.noPayment'), 'vcl-payment');
+    const pay = sub(t('vcl.d.payment'), d.payment ? [h('li', {}, h('span', { class: 'tl-sub-main', text: methodLabel(d.payment.method || 'partner_voucher', d.payment.method_label) }), h('span', { class: 'tl-sub-meta', text: [d.payment.paid_at ? fmt.dt(d.payment.paid_at) : null, d.payment.note].filter(Boolean).join(' · ') }), h('span', { class: 'tl-sub-sum', text: fmt.money(d.payment.amount) }))] : [], t('vcl.d.noPayment'), 'vcl-payment');
     const notes = c.notes ? h('section', { class: 'tl-sec' }, h('h3', { text: t('vcl.d.notes') }), h('p', { class: 'vcl-notes', 'data-testid': 'vcl-notes', text: c.notes })) : null;
     const fin = !c.active, noRight = t('vcl.a.noRight'), off = !canResolve ? noRight : fin ? t('vcl.a.final') : null;
     const actions = h('div', { class: 'tl-actions', 'data-testid': 'vcl-actions' },
