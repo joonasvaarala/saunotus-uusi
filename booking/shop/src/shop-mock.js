@@ -8,6 +8,7 @@ import { treatmentRpc, catalogEntries, snapshotBookings, restoreBookings, ADDONS
 import { createOrderMock } from './order-mock.js';
 import { isHoldScenario, holdMockParams, HOLD_ERRORS } from './hold-mock.js';
 import { pickCatalog } from './catalog-audience.js';
+import { mockQuietOffers } from './quiet-offers-mock.js';
 
 const KEY = 'booking.shopmock.v1';
 const MUTATING = new Set(['public_create_treatment_booking', 'public_change_treatment_booking']);
@@ -21,6 +22,7 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
   try { for (const row of JSON.parse(storage?.getItem(waitlistKey) || '[]')) waitlist.set(row.token, row); } catch { /* mock toimii myös ilman sessionStoragea */ }
   const saveWaitlist = () => { try { storage?.setItem(waitlistKey, JSON.stringify([...waitlist.values()])); } catch { /* storage pois */ } };
   const annualSale = /[?&]annual=1(&|$)/.test(globalThis.location?.search || '');
+  const quietOn = /[?&]quiet=1(&|$)/.test(globalThis.location?.search || '');   // booking_162
   const noTimes = fail === 'notimes';   // ?mock=1&fail=notimes: public_treatment_availability palauttaa aina tyhjän ("Ei vapaita aikoja" -tila)
   let failOnce = ['option_required', 'invalid_option', 'online_payment_unavailable', 'too_many_pending'].includes(fail) ? fail : null;
   try { restoreBookings(JSON.parse(storage?.getItem(KEY) || 'null')); } catch { /* tyhjä alku */ }
@@ -68,6 +70,12 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
           const response = treatmentRpc('public_availability', { p_product_id: p.id, p_from: args.p_from, p_to: args.p_to }, now());
           return Array.isArray(response?.body) ? response.body.map((r) => ({ ...r, product_id: +p.id })) : [];
         });
+      }
+      // booking_162: hiljaisten aikojen ale vain ?quiet=1 (oletus pois kuten tuotannossa)
+      case 'public_quiet_offers': {
+        if (!quietOn) return [];
+        const rows = await rpc('public_availability_all', { p_from: args.p_from, p_to: args.p_to, p_audience: args.p_audience });
+        return mockQuietOffers(rows, now());
       }
       case 'public_settings': return { public_booking_enabled: true, public_treatment_horizon_days: 14 };
       case 'public_product_images': return [];

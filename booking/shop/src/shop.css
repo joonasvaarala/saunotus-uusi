@@ -542,3 +542,18 @@ a.bk-sd:hover{filter:brightness(.97)}
 .bk-annual p{margin:0 0 4px}
 .ord-annual{border-left:5px solid var(--gold)}
 .ord-annual-code{font:700 26px/1.2 var(--body);letter-spacing:.08em;color:var(--ink);margin:4px 0 6px;word-break:break-all;user-select:all}
+/* booking_162: hiljaisten aikojen ale. Paletti #2B3A30 / #F4EFE7 / #7A5530 (kontrasti: merkki 10,5:1; yliviivattu hinta valkoisella 6,6:1, vihreällä 5,8:1). */
+.bk-quiet-badge{display:inline-block;font:700 12px/1 var(--label);letter-spacing:.02em;color:#F4EFE7;background:#2B3A30;border-radius:999px;padding:4px 8px;white-space:nowrap;vertical-align:middle}
+.bk-price.bk-quiet del{color:#7A5530;text-decoration-thickness:1px}
+.bk-quiet-now{font-weight:700;color:#2B3A30}
+.bk-slot.full .bk-quiet-now{color:var(--muted)}
+.bk-sd .bk-quiet-badge{font-size:10px;padding:2px 5px;margin-top:1px}
+.bk-sd.sel .bk-quiet-badge{background:#F4EFE7;color:#2B3A30}
+button.bk-cell.quiet{box-shadow:inset 0 -4px 0 #7A5530}
+button.bk-cell.quiet.sel{box-shadow:inset 0 -4px 0 #F4EFE7}
+.bk-quiet-dot{display:inline-block;width:14px;height:4px;background:#7A5530;border-radius:2px;margin:0 6px 2px 4px;vertical-align:middle}
+.bk-pc-meta .bk-quiet-badge{margin-left:6px}
+.bk-quiet-line{margin:4px 0 8px;font-size:14px;color:#2B3A30}
+.bk-quiet-line .bk-quiet-badge{margin-right:4px}
+.bk-quiet-note{border-left:4px solid #7A5530;background:#F4EFE7;color:#2B3A30;padding:8px 12px;border-radius:6px}
+@media (forced-colors:active){.bk-quiet-badge{border:1px solid CanvasText}button.bk-cell.quiet{outline:2px solid CanvasText}}

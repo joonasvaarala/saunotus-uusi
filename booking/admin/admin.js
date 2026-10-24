@@ -55,6 +55,7 @@ const ROUTES = [
   { path: 'uusi', label: 'Uusi varaus', icon: 'plus', mod: () => loadView('newbooking') },
   { path: 'asiakkaat', label: 'Asiakkaat', icon: 'users', mod: () => loadView('customers') },
   { path: 'alennuskoodit', label: 'Alennuskoodit', icon: 'percent', any: ['catalog.edit', 'annual_cards.manage'], mod: () => loadView('discounts') },
+  { path: 'hiljaiset-ajat', label: 'Hiljaiset ajat', icon: 'leaf', any: ['catalog.edit', 'settings.edit'], mod: () => loadView('quiet') },   // booking_162
   { path: 'tuotteet', label: 'Tuotteet', icon: 'tag', mod: () => loadView('products') },
   { path: 'viestit', label: 'Viestit', icon: 'mail', any: ['messages.edit'], mod: () => loadView('messages') },
   { path: 'resurssit', label: 'Resurssit', icon: 'cabin', mod: () => loadView('resources') },

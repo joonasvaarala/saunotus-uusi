@@ -7,6 +7,7 @@ import { tx } from './site-texts.mjs';
 import { seoSchemaForPage, jsonLdScript } from './seo-enhance.mjs';
 import { privacyAnalyticsHtml } from './privacy-analytics.mjs';
 import { shopProductsHtml } from './shop-products.mjs';
+import { quietWeekAttrs } from './quiet-week.mjs';
 import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
@@ -125,9 +126,10 @@ export function week(lang) {
     const none = rows.some((h) => h.session_type === 'private_only')
       ? `<p class="none">${e(u.noPublic)}</p><ul class="alt"><li><a href="${e(jk('private', lang))}" target="_blank" rel="noopener">${e(u.privateLink)}${NEW(lang)}</a></li><li><a href="${e(jk('events', lang))}" target="_blank" rel="noopener">${e(u.eventsLink)}${NEW(lang)}</a></li></ul>` : '';
     const cls = [d >= 6 ? 'we' : '', none && !sess.length && !ritual.length ? 'off' : ''].filter(Boolean).join(' ');
-    li.push(`<li${cls ? ` class="${cls}"` : ''}><h3>${e(u.daysLong[d - 1])}<span class="today">${e(u.today)}</span></h3>${sess.length + ritual.length ? `<ul class="sl">${sess.join('')}${ritual.join('')}</ul>` : ''}${none}</li>`);
+    li.push(`<li data-wd="${d}"${cls ? ` class="${cls}"` : ''}><h3>${e(u.daysLong[d - 1])}<span class="today">${e(u.today)}</span></h3>${sess.length + ritual.length ? `<ul class="sl">${sess.join('')}${ritual.join('')}</ul>` : ''}${none}</li>`);
   }
-  return `<ol class="week" aria-label="${e(u.weekTitle)}">${li.join('')}</ol>`;
+  // booking_162: data-quiet-* → hiljaisten aikojen ale lisätään selaimessa (booking/shop/src/quiet-week.js); ilman tarjouksia ei muutosta
+  return `<ol class="week" aria-label="${e(u.weekTitle)}"${quietWeekAttrs(lang, { esc: e, products: kb.products, reserve: u.reserve })}>${li.join('')}</ol>`;
 }
 
 // ---- tapahtumat (kb.event_dates) ----
