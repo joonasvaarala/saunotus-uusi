@@ -1,5 +1,5 @@
 -- booking_163 ROLLBACK: palauttaa kb.products.booking_url-arvot Johku-osoitteiksi (16 tuotetta), tarkka vartija peilikuvana.
--- Ajo: vain jos 20261024350000_booking_163_booking_url_kauppaan.sql on ajettu. Jo palautettu arvo ohitetaan; muu poikkeama → exception, ei muutoksia.
+-- Ajo: vain jos 20261024185115_booking_163_booking_url_kauppaan.sql on ajettu. Jo palautettu arvo ohitetaan; muu poikkeama → exception, ei muutoksia.
 set local lock_timeout = '5s';
 set local statement_timeout = '60s';
 

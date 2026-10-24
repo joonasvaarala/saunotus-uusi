@@ -1,5 +1,5 @@
 -- booking_163_booking_url_kauppaan: kb.products.booking_url (Johku-tuotesivut) → uuden kaupan tuotesivu, kun tuote on uudessa kaupassa.
--- VÄLIAIKAINEN versio 20261024350000 (Bottiavustus antaa lopullisen version tuotantoajossa). Projektin oletus (Joonas 24.10.2026): ei Johku-linkkejä.
+-- Tuotannon versio 20261024185115 (ajettu tuotannossa 24.10.2026). Projektin oletus (Joonas 24.10.2026): ei Johku-linkkejä.
 -- Miksi: booking_url on kb.productsissa anon/authenticated-luettava sarake, ja sivuston build (src/render.mjs bookingUrl) käyttää sitä korttien,
 -- aukioloaikojen ja rituaalirivien linkkeinä. #162 ohjaa Johku-osoitteet buildissa kauppaan, mutta lähdedata osoitti yhä Johkuun.
 -- Uusi arvo on kanoninen absoluuttinen osoite (FI): https://uusi.saunotus.com/varaa/#/tuote/<slug> (vuosikortti: /varaa/#/vuosikortti).
@@ -7,7 +7,7 @@
 -- Vain tuotteet, jotka ovat uuden kaupan katalogissa (booking.public_catalog, 15 kpl tuotannossa 24.10.2026) + vuosikortti (kaupan oma sivu).
 -- Vartijat: slug ja nykyinen booking_url TÄSMÄLLEEN odotetut, muuten exception ennen yhtään muutosta; jo uusi arvo ohitetaan (uudelleenajettava).
 -- Hinnat, ALV, slugit ja muut kentät ennallaan. Lukittu sivuteksti product.<id>.booking_url saa uuden version triggeristä zz_site_text_sync.
--- Rollback: booking/supabase/rollbacks/20261024350000_booking_163_ROLLBACK.sql (sama vartija peilikuvana).
+-- Rollback: booking/supabase/rollbacks/20261024185115_booking_163_ROLLBACK.sql (sama vartija peilikuvana).
 -- Muutettavat (tuote, slug, Johku-polku → uusi polku), 16 kpl:
 --     1 yleinensauna                     /fi_FI/yleinen-sauna/yleinensauna → /varaa/#/tuote/yleinensauna
 --     2 miestensauna-2                   /fi_FI/yleinen-sauna/miestensauna-2 → /varaa/#/tuote/miestensauna-2

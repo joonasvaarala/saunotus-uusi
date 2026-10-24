@@ -10,8 +10,8 @@ import { shopTarget } from '../shop/src/johku-links.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(root, p), 'utf8');
-const MIG = read('supabase/migrations/20261024350000_booking_163_booking_url_kauppaan.sql');
-const RB = read('supabase/rollbacks/20261024350000_booking_163_ROLLBACK.sql');
+const MIG = read('supabase/migrations/20261024185115_booking_163_booking_url_kauppaan.sql');
+const RB = read('supabase/rollbacks/20261024185115_booking_163_ROLLBACK.sql');
 const T = read('supabase/tests/kb/t163_booking_url_kauppaan.sql');
 const md5 = (s) => createHash('md5').update(s, 'utf8').digest('hex');
 const rows = (sql) => [...sql.matchAll(/^\s+\((\d+), '([a-z0-9-]+)', '([^']+)', '([^']+)', '([0-9a-f]{32})', '([0-9a-f]{32})'\)/gm)]
@@ -44,7 +44,7 @@ test('vartijat: slug + tarkka arvo ennen muutoksia, uudelleenajettava, row_count
     assert.doesNotMatch(sql, /\bpublic\./);
     assert.doesNotMatch(sql, /set\s+(price|vat|slug)\b/i);
   }
-  assert.match(MIG, /VÄLIAIKAINEN versio 20261024350000/);
+  assert.match(MIG, /Tuotannon versio 20261024185115/);
 });
 
 test('rollback on migraation peilikuva', () => {
