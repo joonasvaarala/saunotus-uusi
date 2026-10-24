@@ -17,3 +17,13 @@ export function privacyAnalyticsHtml(lang, esc, para) {
   const t = (k) => tx(k, lang, { fallback: PRIVACY_ANALYTICS_TEXTS[k][lang] ?? PRIVACY_ANALYTICS_TEXTS[k].fi, log: quiet });
   return `<h2>${esc(t('ui.site.privacy_analytics_title'))}</h2>${para(t('ui.site.privacy_analytics_text'))}`;
 }
+
+// Tietosuojaseloste v4 (content/site-texts.pending-propose-61.json): kb.policies 7 -tekstissä on oma kohta "7. Evästeetön kävijämittaus".
+// Kun julkaistu teksti sisältää kohdan, erillistä ui.site.privacy_analytics_* -kohtaa ei lisätä, ettei sama kohta näy kahdesti.
+const SECTION_TITLES = Object.values(PRIVACY_ANALYTICS_TEXTS['ui.site.privacy_analytics_title']);
+export function policyHasAnalyticsSection(body) {
+  return String(body ?? '').split(/\n+/).some((l) => {
+    const h = l.trim().replace(/^[0-9]{1,2}\.\s*/, '').toLowerCase();
+    return l.trim() !== h && SECTION_TITLES.some((t) => h === t.toLowerCase());
+  });
+}

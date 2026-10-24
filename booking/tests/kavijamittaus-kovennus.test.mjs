@@ -211,7 +211,8 @@ test('tietosuojaseloste: evästeettömän mittauksen kohta vastaa toteutusta (FI
   for (const re of [/without cookies/, /not stored/, /legitimate interest/, /utm/, /session identifier/, /linked to the order/]) assert.match(en, re);
   // sivu: sama rakenne kuin muut kohdat (h2 + p), vain tietosuojasivulla; EN-sivu (/en/privacy/) vain kb:n _en-teksteillä (tietosuoja-en.test.mjs)
   assert.equal(JSON.parse(read('content/site.json')).pages.privacy.en, '/en/privacy/');
-  assert.match(read('src/render.mjs'), /\$\{name === 'privacy' \? privacyAnalyticsHtml\(lang, e, txt\) : ''\}/);
+  // pending-propose-61: kohta jätetään pois vain, jos kb-tekstissä on jo oma "N. Evästeetön kävijämittaus" -kohta (ei kahdesti).
+  assert.match(read('src/render.mjs'), /\$\{name === 'privacy' && !items\.some\(\(p\) => policyHasAnalyticsSection\(p\.body\)\) \? privacyAnalyticsHtml\(lang, e, txt\) : ''\}/);
   const html = P.privacyAnalyticsHtml('fi', (s) => s, (s) => s.split(/\n+/).map((l) => `<p>${l}</p>`).join(''));
   assert.match(html, /^<h2>Evästeetön kävijämittaus<\/h2>(<p>[^<]+<\/p>){6}$/);
 });
