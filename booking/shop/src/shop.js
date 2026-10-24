@@ -23,6 +23,7 @@ import { normBusinessId, validBusinessId, normOvt, validOvt, validOperator } fro
 import { isRichHtml } from './rich-text.js';
 import { visibleText, richHost } from './rich-view.js';
 import { revealForm, revealIfHidden } from './gift-ui.js';
+import { normalizeCode, quoteSignature, isAnnualQuote, isCodeError } from './discount-code-logic.js';
 
 const S = window.BOOKING_SHOP;                   // build-aikainen konfiguraatio (kieli, polut, ei-verkossa-varattavat tuotteet)
 const t = T[S.lang] || T.fi;
@@ -83,7 +84,7 @@ const stopHold = () => { if (holdCtl) { holdCtl.stop(); holdCtl = null; } };
 
 // Sivutekstit tietokannasta (§18; build → booking/site-texts.json, paikkamerkit täytetään tässä ajoajan katalogista). tx(key) → teksti tai null (kutsuja päättää varatekstin).
 const texts = createTexts({ lang: S.lang, format: { price: (n) => money(n), duration: (m) => fmtMinutes(m) } });
-const state = { catalog: null, settings: null, images: new Map(), treatments: [], months: new Map(), busy: false };
+const state = { catalog: null, settings: null, images: new Map(), treatments: [], months: new Map(), busy: false, annualOffer: null };
 // tyhjät (null/false) lapset ohitetaan: replaceChildren(null) kirjoittaisi sivulle tekstin "null" (esim. tuotesivu ilman hoitovalitsinta)
 const mount = (...nodes) => { root.replaceChildren(...nodes.flat().filter((n) => n != null && n !== false)); root.setAttribute('aria-busy', 'false'); };
 const focusTop = () => { const el = [...root.querySelectorAll('h2,h1')].find((n) => !n.closest('.bk-rich')) || document.querySelector('main .hero.page h1'); if (el) { el.setAttribute('tabindex', '-1'); el.focus({ preventScroll: false }); } };
@@ -191,7 +192,58 @@ function viewList(query) {
     h('p', { class: 'bk-desc', text: cardExcerpt(p) }),
     h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), p.duration_text ? ` · ${p.duration_text}` : ''),
     h('a', { class: 'btn sm', href: bk(`/tuote/${p.slug}`) }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) })))));
-  mount(h('header', { class: 'bk-head' }, h('h2', { text: t.title }), h('p', { class: 'lead', text: t.lead })), modeSwitch('cat'), tabs, cards);
+  const annual = annualPromo();
+  mount(h('header', { class: 'bk-head' }, h('h2', { text: t.title }), h('p', { class: 'lead', text: t.lead })), modeSwitch('cat'), tabs, cards, annual);
+}
+
+// Vuosikortti (booking_142): myynti näkyy vain, kun palvelin sanoo available (asetus annual_card_sale_enabled, oletus pois);
+// hinta tulee tuotteesta (kb.products), ei koodista. Virhe tai vanha backend ilman RPC:tä → ei mitään.
+const annualOffer = () => (state.annualOffer ||= rpc('public_annual_card_offer').catch(() => null));
+function annualPromo() {
+  if (S.audience === 'business') return null;
+  const host = h('div', { class: 'bk-annual-host' });
+  annualOffer().then((o) => {
+    if (!o?.available || !host.isConnected) return;
+    host.replaceChildren(h('section', { class: 'bk-annual', 'aria-labelledby': 'bk-annual-h', 'data-testid': 'annual-promo' },
+      h('div', { class: 'bk-annual-main' }, h('h3', { id: 'bk-annual-h', text: t.annualTitle }), h('p', { text: t.annualLead }),
+        h('p', { class: 'bk-meta' }, `${t.annualPrice} `, h('strong', { text: money(o.price) }), ` ${t.vatIncl}`)),
+      h('a', { class: 'btn sm', href: bk('/vuosikortti'), text: t.annualBuy })));
+  });
+  return host;
+}
+async function viewAnnualPurchase() {
+  const o = await annualOffer();
+  const back = h('p', {}, h('a', { href: bk('/'), text: t.annualBack }));
+  if (!o?.available) { mount(back, h('h2', { text: t.annualBuyTitle }), h('div', { class: 'bk-notice' }, h('p', { text: t.annualUnavailable }), phoneBox())); focusTop(); return; }
+  const msg = h('div', { id: 'bk-msg' });
+  const fld = (name, label, type, auto) => h('div', { class: 'bk-field' }, h('label', { for: `bk-ac-${name}`, text: `${label} *` }), h('input', { id: `bk-ac-${name}`, name, type, autocomplete: auto, required: true, maxlength: name === 'name' ? 120 : 160 }));
+  const legal = legalFields();
+  const submit = h('button', { type: 'submit', class: 'btn gold', 'data-testid': 'annual-submit', text: t.annualBuySubmit });
+  const form = h('form', { class: 'bk-form', novalidate: true, onsubmit: async (ev) => {
+    ev.preventDefault(); msg.replaceChildren();
+    const f = new FormData(form), val = (k) => String(f.get(k) || '').trim();
+    const need = ['name', 'email', 'phone'].filter((k) => !val(k));
+    if (need.length || !form.email.checkValidity()) { msg.append(errorBox(t.required)); form[need[0] || 'email'].focus(); return; }
+    if (!legal.terms.checked) { msg.append(errorBox(t.acceptTermsErr)); legal.terms.focus(); return; }
+    submit.disabled = true; submit.textContent = t.annualBuying;
+    try {
+      const r = await rpc('public_buy_annual_card', { p_name: val('name'), p_email: val('email'), p_phone: val('phone'), p_marketing_consent: legal.consent.checked, p_locale: S.lang });
+      if (!r?.ok) throw Object.assign(new Error((r?.code === 'sale_disabled' ? t.annualUnavailable : t.codeErrors[r?.code] || t.errors[r?.code]) || t.errorGeneric), { mapped: true });
+      const orderHref = S.orderHref?.[S.lang] || (S.lang === 'en' ? '/en/order/' : '/tilaus/');
+      location.assign(`${orderHref}?t=${encodeURIComponent(r.token)}${MOCK ? '&mock=1&scenario=annual' : ''}`);
+    } catch (e) {
+      submit.disabled = false; submit.textContent = t.annualBuySubmit;
+      msg.replaceChildren(errorBox(e.mapped ? e.message : t.errorGeneric)); revealIfHidden(msg);
+    }
+  } },
+    fld('name', t.name, 'text', 'name'), fld('email', t.email, 'email', 'email'), fld('phone', t.phone, 'tel', 'tel'),
+    legal.nodes.slice(1), msg, submit);
+  mount(back, h('h2', { text: t.annualBuyTitle }), h('p', { class: 'lead', text: t.annualBuyLead }),
+    h('div', { class: 'bk-checkout' }, form,
+      h('aside', { class: 'bk-aside', 'aria-label': t.summary }, h('h3', { text: t.summary }),
+        h('dl', { class: 'bk-sum' }, h('dt', { text: t.what }), h('dd', { text: S.lang === 'en' && o.name_en ? o.name_en : o.name })),
+        h('p', { class: 'bk-totalrow' }, t.total + ': ', h('strong', { class: 'bk-total', text: money(o.price) }), ' ', h('small', { text: t.vatIncl })))));
+  focusTop();
 }
 
 // ---- näkymä 1b: selaa päivän mukaan (#/paiva/<YYYY-MM-DD>) ----
@@ -536,15 +588,27 @@ async function viewCheckout(ruleId, ds, productId, via) {
   const addons = ((await rpc('public_addons').catch(() => [])) || []).filter((a) => (a.applies_modes || []).includes(s.mode));
   const qty = new Map(addons.map((a) => [a.id, 0]));
   const addonsSum = () => addons.reduce((x, a) => x + qty.get(a.id) * +a.price, 0);
+  // Alennus- / vuosikorttikoodi (booking_142): palvelin laskee hinnan (public_check_code); quote = viimeisin hyväksytty vastaus
+  // ja sig = henkilömäärä + lisäpalvelut, joille se laskettiin. Vuosikortti lukitsee henkilömäärän ja poistaa lisäpalvelut.
+  const code = { value: '', quote: null, sig: '', timer: null };
+  const sig = () => quoteSignature(n, addons.map((a) => qty.get(a.id)));
+  const annualOn = () => isAnnualQuote(code.quote);
+  const locked = () => wlLock || annualOn();
   const upd = () => {
+    if (annualOn()) { n = +code.quote.persons || 1; for (const a of addons) qty.set(a.id, 0); }
     for (const a of addons) qty.set(a.id, Math.min(qty.get(a.id), addonLimit(a, n)));
-    total.textContent = money(priceFor(s, n) + addonsSum());
+    if (code.quote && !annualOn() && code.sig !== sig()) recheckCode();
+    const fresh = code.quote && code.sig === sig();
+    total.textContent = money(fresh ? +code.quote.total : priceFor(s, n) + addonsSum());
     sumList.replaceChildren(h('dt', { text: t.what }), h('dd', { text: pname(p) }), h('dt', { text: t.when }), h('dd', { text: `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(n) }),
-      ...addons.filter((a) => qty.get(a.id) > 0).flatMap((a) => [h('dt', { text: aname(a) }), h('dd', { text: `${qty.get(a.id)} × ${money(a.price)}` })]));
-    num.value = n; minus.disabled = wlLock || n <= s.min_persons; plus.disabled = wlLock || n >= max; num.readOnly = wlLock;
+      ...addons.filter((a) => qty.get(a.id) > 0).flatMap((a) => [h('dt', { text: aname(a) }), h('dd', { text: `${qty.get(a.id)} × ${money(a.price)}` })]),
+      ...(fresh && +code.quote.discount > 0 ? [h('dt', { text: annualOn() ? t.annualTitle : t.codeDiscountRow }), h('dd', { 'data-testid': 'checkout-discount', text: `${code.quote.code} · −${money(code.quote.discount)}` })] : []));
+    num.value = n; minus.disabled = wlLock || annualOn() || n <= s.min_persons; plus.disabled = wlLock || annualOn() || n >= max; num.readOnly = wlLock || annualOn();
     for (const r of addonRows) r.sync();
+    submitLabel();
+    payNote.hidden = payExtra.hidden = free();   // maksuton varaus: ei maksuohjetta
   };
-  const num = h('input', { id: 'bk-n', type: 'number', min: s.min_persons, max, inputmode: 'numeric', 'aria-label': t.persons, onchange: () => { if (wlLock) { upd(); return; } n = Math.min(Math.max(+num.value || s.min_persons, s.min_persons), max); upd(); } });
+  const num = h('input', { id: 'bk-n', type: 'number', min: s.min_persons, max, inputmode: 'numeric', 'aria-label': t.persons, onchange: () => { if (locked()) { upd(); return; } n = Math.min(Math.max(+num.value || s.min_persons, s.min_persons), max); upd(); } });
   const minus = h('button', { type: 'button', class: 'bk-step', 'aria-label': '−', onclick: () => { n--; upd(); } }, '−');
   const plus = h('button', { type: 'button', class: 'bk-step', 'aria-label': '+', onclick: () => { n++; upd(); } }, '+');
   const cf = customerFields();
@@ -553,7 +617,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
     const q = h('input', { id: `bk-a-${a.id}`, type: 'number', min: 0, inputmode: 'numeric', 'aria-label': `${aname(a)}: ${t.addonQty}`, onchange: () => { qty.set(a.id, Math.max(0, Math.min(Math.floor(+q.value) || 0, addonLimit(a, n)))); upd(); } });
     const dec = h('button', { type: 'button', class: 'bk-step', 'aria-label': `${aname(a)} −`, onclick: () => { qty.set(a.id, qty.get(a.id) - 1); upd(); } }, '−');
     const inc = h('button', { type: 'button', class: 'bk-step', 'aria-label': `${aname(a)} +`, onclick: () => { qty.set(a.id, qty.get(a.id) + 1); upd(); } }, '+');
-    const sync = () => { const lim = addonLimit(a, n); q.max = lim; q.value = qty.get(a.id); dec.disabled = qty.get(a.id) <= 0; inc.disabled = qty.get(a.id) >= lim; };
+    const sync = () => { const lim = annualOn() ? 0 : addonLimit(a, n); q.max = lim; q.value = qty.get(a.id); q.disabled = annualOn(); dec.disabled = qty.get(a.id) <= 0; inc.disabled = qty.get(a.id) >= lim; };
     const node = h('li', { class: 'bk-addon' }, h('div', { class: 'bk-addon-info' }, h('label', { for: `bk-a-${a.id}` }, h('strong', { text: aname(a) }), ' ', h('span', { class: 'bk-addon-price', text: money(a.price) })), adesc(a) ? h('small', { text: adesc(a) }) : null),
       h('div', { class: 'bk-stepper' }, dec, q, inc));
     return { node, sync, a };
@@ -563,20 +627,64 @@ async function viewCheckout(ruleId, ds, productId, via) {
   const hmode = { on: false, minutes: hm0.minutes };   // uusi pitotila vain kun palvelin sanoo (hold_until_paid); asetus ohjaa vain vanhaa ohjetekstiä
   const submit = h('button', { type: 'submit', class: 'btn gold', 'data-testid': 'checkout-submit', text: hmode.on ? ht(S.lang, 'checkout.button') : t.book });
   const legal = legalFields(), { terms, consent } = legal;
+  // Ilmainen (vuosikortti tai 100 % koodi) → "Vahvista varaus"; muuten ennallaan.
+  const free = () => !!code.quote && code.sig === sig() && +code.quote.total === 0;
+  const submitLabel = () => { if (!submit.disabled) submit.textContent = free() ? t.codeConfirm : hmode.on ? ht(S.lang, 'checkout.button') : t.book; };
+  const codeInput = h('input', { id: 'bk-code', name: 'discount_code', maxlength: 40, autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false', 'aria-describedby': 'bk-code-status',
+    oninput: (e) => { const v = normalizeCode(e.target.value); if (v !== e.target.value) e.target.value = v; },
+    onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); if (!codeInput.readOnly) applyCode(normalizeCode(codeInput.value)); } } });
+  const codeStatus = h('p', { id: 'bk-code-status', class: 'bk-code-status', role: 'status', 'aria-live': 'polite' });
+  const codeApply = h('button', { type: 'button', class: 'btn sm', 'data-testid': 'code-apply', text: t.codeApply, onclick: () => applyCode(normalizeCode(codeInput.value)) });
+  const codeRemove = h('button', { type: 'button', class: 'bk-code-remove', 'data-testid': 'code-remove', hidden: true, text: t.codeRemove, onclick: () => clearCode(true) });
+  const codeBox = h('details', { class: 'bk-section bk-code', 'data-testid': 'checkout-code' }, h('summary', { text: t.codeToggle }),
+    h('div', { class: 'bk-code-body' }, h('label', { for: 'bk-code', text: t.codeLabel }), h('div', { class: 'bk-code-row' }, codeInput, codeApply), codeStatus, codeRemove));
+  const setStatus = (text, ok) => { codeStatus.textContent = text || ''; codeStatus.classList.toggle('ok', !!ok); codeStatus.classList.toggle('err', !!text && !ok); };
+  function clearCode(focus) {
+    code.value = ''; code.quote = null; code.sig = ''; clearTimeout(code.timer);
+    codeInput.readOnly = false; codeApply.hidden = false; codeRemove.hidden = true; setStatus('');
+    upd(); if (focus) codeInput.focus();
+  }
+  async function applyCode(v, quiet = false) {
+    if (!v) { setStatus(t.codeEmpty, false); codeInput.focus(); return; }
+    codeApply.disabled = true; if (!quiet) setStatus(t.codeChecking, true);
+    const fd = new FormData(form);
+    const chosen = addons.filter((a) => qty.get(a.id) > 0).map((a) => ({ id: a.id, quantity: qty.get(a.id) }));
+    let r = null;
+    try {
+      r = await rpc('public_check_code', { p_code: v, p_rule_id: s.rule_id, p_date: ds, p_persons: n, p_addons: chosen.length ? chosen : null,
+        p_email: String(fd.get('email') || '').trim() || null, p_phone: String(fd.get('phone') || '').trim() || null });
+    } catch { r = { ok: false, code: 'generic' }; }
+    codeApply.disabled = false;
+    if (!r?.ok) { code.value = ''; code.quote = null; code.sig = ''; codeInput.readOnly = false; codeApply.hidden = false; codeRemove.hidden = true; setStatus(t.codeErrors[r?.code] || t.codeErrors.generic, false); upd(); return; }
+    code.value = v; code.quote = r;
+    if (isAnnualQuote(r)) { n = +r.persons || 1; for (const a of addons) qty.set(a.id, 0); }
+    code.sig = sig();
+    codeInput.readOnly = true; codeApply.hidden = true; codeRemove.hidden = false;
+    setStatus(isAnnualQuote(r) ? `${t.codeAnnualApplied} ${t.codeAnnualLocked}${r.type === 'annual_card' ? ' ' + t.codeAnnualOwner : ''}` : `${t.codeApplied}: ${r.code} · −${money(r.discount)}`, true);
+    upd();
+  }
+  // Henkilömäärä tai lisäpalvelut muuttuivat → sama koodi tarkistetaan uudelleen palvelimella (viive: ei kutsua joka napautuksesta).
+  function recheckCode() {
+    clearTimeout(code.timer); setStatus(t.codeRecheck, true);
+    code.timer = setTimeout(() => { if (code.value && code.sig !== sig()) applyCode(code.value, true); }, 600);
+  }
   const form = h('form', { class: 'bk-form', novalidate: true, onsubmit: async (ev) => {
     ev.preventDefault(); msg.replaceChildren();
     const f = new FormData(form), cust = cf.read(form, msg); if (!cust) { revealIfHidden(msg); return; }
     if (!terms.checked) { msg.append(errorBox(t.acceptTermsErr)); revealIfHidden(msg); terms.focus({ preventScroll: true }); return; }
-    submit.disabled = true; submit.textContent = hmode.on ? ht(S.lang, 'checkout.creating') : t.booking;
+    const wasFree = free();
+    submit.disabled = true; submit.textContent = wasFree ? t.codeConfirming : hmode.on ? ht(S.lang, 'checkout.creating') : t.booking;
     try {
       const chosen = addons.filter((a) => qty.get(a.id) > 0).map((a) => ({ id: a.id, quantity: qty.get(a.id) }));
-      const r = await rpc('public_create_booking', { p_rule_id: s.rule_id, p_date: ds, p_persons: n, p_name: cust.name, p_email: cust.email, p_phone: cust.phone, p_marketing_consent: consent.checked, p_locale: S.lang, p_note: (f.get('note') || '').trim() || null,
-        p_customer_kind: cust.kind, p_company: cust.company, p_addons: chosen.length ? chosen : null });
-      if (!r.ok) throw Object.assign(new Error(holdError(S.lang, r.code) || t.errors[r.code] || t.errorGeneric), { code: r.code, mapped: true });
+      const args = { p_rule_id: s.rule_id, p_date: ds, p_persons: n, p_name: cust.name, p_email: cust.email, p_phone: cust.phone, p_marketing_consent: consent.checked, p_locale: S.lang, p_note: (f.get('note') || '').trim() || null,
+        p_customer_kind: cust.kind, p_company: cust.company, p_addons: chosen.length ? chosen : null };
+      // Koodi vain kun se on hyväksytty: muuten sama public_create_booking kuin ennen (booking_142 ei muuta sitä).
+      const r = code.value ? await rpc('public_create_booking_code', { ...args, p_code: code.value }) : await rpc('public_create_booking', args);
+      if (!r.ok) throw Object.assign(new Error((isCodeError(r.code) && t.codeErrors[r.code]) || holdError(S.lang, r.code) || t.errors[r.code] || t.errorGeneric), { code: r.code, mapped: true });
       state.months.clear();
       location.assign(`${S.confirmHref}${mockQs()}#${r.token}`);
     } catch (e) {
-      submit.disabled = false; submit.textContent = hmode.on ? ht(S.lang, 'checkout.button') : t.book;
+      submit.disabled = false; submitLabel();
       msg.replaceChildren(errorBox(e.mapped ? e.message : t.errorGeneric));   // palvelimen raaka message ei koskaan asiakkaalle (ui.shop.error_generic)
       if (['capacity_exceeded', 'private_booked', 'public_shift_booked', 'space_closed'].includes(e.code)) state.months.clear();
       msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true });
@@ -586,7 +694,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
     // Järjestys: henkilömäärä → asiakastyyppi ja yhteystiedot → lisäpalvelut → lisätiedot, ehdot ja varaus
     cf.node,
     addonRows.length ? h('fieldset', { class: 'bk-section bk-addons' }, h('legend', { text: t.addonsTitle }), h('p', { class: 'bk-hint', text: t.addonsHint }), h('ul', { class: 'bk-addonlist' }, addonRows.map((r) => r.node))) : null,
-    legal.nodes,
+    codeBox, legal.nodes,
     msg, submit);
   form.addEventListener('input', () => msg.replaceChildren());   // vanha virheilmoitus pois kun käyttäjä korjaa tietoja
   // Lyhyt yhteenveto otsikon alla (tuote, päivä, kellonaika) + linkki takaisin valintaan (korvaa erillisen "Takaisin"-linkin):
@@ -603,7 +711,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
   holdInfo().then((hi) => {
     hmode.on = hi.on; hmode.minutes = hi.minutes;
     if (hi.on) {   // pitotila (§17): paikanpito, maksutapa valitaan seuraavassa vaiheessa, varaus vahvistuu vasta maksun jälkeen
-      if (!submit.disabled) submit.textContent = ht(S.lang, 'checkout.button');
+      submitLabel();
       payNote.textContent = ht(S.lang, 'checkout.lead', { minutes: hi.minutes });
       payExtra.replaceChildren(...hi.extra(S.lang));
       return;
@@ -833,7 +941,8 @@ async function route(keep = false) {
     const parts = path.split('/').filter(Boolean);
     const q = new URLSearchParams(qs || '');
     if (!(parts[0] === 'tuote' && parts[1]) && !(parts[0] === 'varaa' && parts[1] && parts[2]) && !(parts[0] === 'hoito' && parts[1])) setHero(null);   // tuote- ja lomakenäkymä asettavat heron itse
-    if (parts[0] === 'paiva') await viewDay(parts[1], keep, q.get('tuote'));
+    if (parts[0] === 'vuosikortti') await viewAnnualPurchase();
+    else if (parts[0] === 'paiva') await viewDay(parts[1], keep, q.get('tuote'));
     else if (parts[0] === 'tuote' && parts[1]) await viewProduct(parts[1], /^\d{4}-\d\d-\d\d$/.test(parts[2] || '') ? parts[2] : null, q);
     else if (parts[0] === 'hoito' && parts[1]) { const tp = state.treatments.find((x) => x.slug === parts[1]); if (tp) await tv.viewCheckout(tp, parts[2], parts[3], q); else await viewProduct(parts[1], null, q); }
     else if (parts[0] === 'varaa' && parts[1] && parts[2]) await viewCheckout(parts[1], parts[2], parts[3], q.get('via'));

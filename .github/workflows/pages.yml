@@ -192,6 +192,9 @@ jobs:
       # yhteiset apurit revealForm/revealSection (block start, reduced-motion → auto, fokus preventScroll) ja revealIfHidden (vain jos ei näkyvissä),
       # scroll-margin-top 84 px kiinteän yläpalkin alle. Ei migraatiota eikä tekstejä.
       - run: node --test booking/tests/sivuston-vieritys.test.mjs
+      # Paketti 10 / booking_142: alennus- ja vuosikorttikoodit kassalla, vuosikortin verkko-osto (oletuksena pois), hallinnan Alennuskoodit-näkymä.
+      # t142 (booking/supabase/tests/discounts/t142_annual_cards_discount_codes.sql) ajetaan paikallisessa PG17:ssä t140:n tapaan (työnkulussa ei ole Postgresia).
+      - run: node --test booking/tests/vuosikortit-alennuskoodit.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

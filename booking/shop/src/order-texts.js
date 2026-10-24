@@ -28,6 +28,8 @@ export const OT = {
     closedHoldExpiredGift: 'Lahjakortin käytetty osuus on palautettu kortille.',
     closedCancelled: 'Tämä varaus on peruttu. Paikka on vapautettu. Voit tehdä uuden varauksen Sipoonjoen Perinnesaunaan.',
     closedNewBooking: 'Tee uusi varaus',
+    annualCodeTitle: 'Vuosikorttisi koodi', annualCodeLead: 'Varaa yleisiä saunavuoroja varauskalenterissa: kirjoita koodi kassalla kohtaan Alennus- tai vuosikorttikoodi ja käytä samaa sähköpostia tai puhelinnumeroa kuin tässä tilauksessa.',
+    annualCodeValid: 'Voimassa', annualCodePending: 'Vuosikortin henkilökohtainen koodi näkyy tässä, kun tilaus on maksettu.', annualCodeBook: 'Avaa varauskalenteri',
   },
   en: {
     title: 'Your order', lead: 'Here you can see your order, payment status and receipts. You can add extras or request a cancellation.',
@@ -57,5 +59,7 @@ export const OT = {
     closedHoldExpiredGift: 'Any gift card amount you applied has been returned to the card.',
     closedCancelled: 'This booking has been cancelled. The time has been released. You can make a new booking at Sipoonjoen Perinnesauna.',
     closedNewBooking: 'Make a new booking',
+    annualCodeTitle: 'Your annual card code', annualCodeLead: 'Book public sauna sessions in the booking calendar: enter the code at checkout under Discount or annual card code and use the same email address or phone number as in this order.',
+    annualCodeValid: 'Valid', annualCodePending: 'Your personal annual card code is shown here once the order is paid.', annualCodeBook: 'Open the booking calendar',
   },
 };

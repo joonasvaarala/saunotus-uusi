@@ -2,6 +2,7 @@
 // Puhelinnumero tulee vakiosta (phone.js): fi "010 299 2866", en "+358 10 299 2866".
 import { PHONE_DISPLAY_FI, PHONE_DISPLAY_EN } from './phone.js';
 import { WAITLIST_TEXTS } from './waitlist-texts.js';
+import { DISCOUNT_TEXTS } from './discount-texts.js';
 export const T = {
   fi: {
     title: 'Varaa saunaelämys', lead: 'Valitse kokemus, päivä ja vuoro. Varaus vahvistetaan heti.',
@@ -130,3 +131,5 @@ export const T = {
 
 Object.assign(T.fi, WAITLIST_TEXTS.fi);
 Object.assign(T.en, WAITLIST_TEXTS.en);
+Object.assign(T.fi, DISCOUNT_TEXTS.fi);   // paketti 10 / booking_142: alennus- ja vuosikorttikoodit (ui.shop.code_* / ui.shop.annual_*)
+Object.assign(T.en, DISCOUNT_TEXTS.en);

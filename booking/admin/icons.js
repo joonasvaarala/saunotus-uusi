@@ -9,6 +9,7 @@ export const ICONS = {
   list: [R(8, 2, 8, 4, 1), P('M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M9 12h6M9 16h6')], // Varaukset: leikepöytä + lista
   calendar: [...CAL, P('M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01')],        // Kalenteri: kuukausiruudukko
   plus: [C(12, 12, 10), P('M8 12h8M12 8v8')],                                                 // Uusi varaus
+  percent: [P('M19 5L5 19'), C(6.5, 6.5, 2.5), C(17.5, 17.5, 2.5)],                          // Alennuskoodit
   users: [P('M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'), C(9, 7, 4), P('M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75')], // Asiakkaat
   tag: [P('M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z'), P('M7.5 7.5h.01')], // Tuotteet
   cabin: [P('M3 11l9-8 9 8M5 9.5V20h14V9.5M10 20v-6h4v6')],                                  // Resurssit: sauna/mökki

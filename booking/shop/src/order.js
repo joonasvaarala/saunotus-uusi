@@ -132,7 +132,10 @@ async function main() {
     mpState.opts = normOptions(raw); mpState.show = shouldShowButton(mpState.opts, mpEnv);
     vpState.opts = normVisma(raw); vpState.show = shouldShowVisma(vpState.opts);
   }
-  await Promise.all([loadGift(), loadMp()]);
+  // Vuosikortin osto (booking_142): koodi näkyy vasta kun kortti on myönnetty (tilaus maksettu). Puuttuva RPC / virhe → ei osiota.
+  let annual = null;
+  const loadAnnual = async () => { const r = await (api.mock ? api.rpc : rpc)('public_annual_card_purchase_code', { p_token: token }).catch(() => null); annual = r?.ok && r.has_card ? r : null; };
+  await Promise.all([loadGift(), loadMp(), loadAnnual()]);
   // Pitotila (§17): pidon pituus (public_checkout_payment_options) ja lahjakortin käyttö (public_get_booking.payment_methods, myös perutut) haetaan vain kun tarvitaan
   const holdX = { minutes: 15, gift: false };
   const giftKey = `bk-gift-${token}`;
@@ -151,7 +154,7 @@ async function main() {
   const payableStatus = ['unpaid', 'pending', 'partially_paid', 'paid', 'failed'].includes(o.payment_status);
   if (search.get('pay') === 'vismapay' && payableStatus) vpState.checking = true;
   draw(o);
-  const redraw = async (n) => { await loadMp(); await loadHold(n); draw(n); };
+  const redraw = async (n) => { await Promise.all([loadMp(), loadAnnual()]); await loadHold(n); draw(n); };
   async function reloadAfterGift(text) {
     try { if (cur.checkout?.awaiting) sessionStorage.setItem(giftKey, '1'); } catch { /* ei sessionStorage */ }
     try { const n = await api.get(); if (n?.ok) { await loadGift(); await redraw(n); } } catch { /* näkymä jää ennalleen */ }
@@ -183,6 +186,12 @@ async function main() {
       h('h2', { id: 'ord-h', 'data-testid': 'order-title', text: `${t.order} #${o.order_no}` }),
       h('div', { class: 'ord-badges' }, badge(`st-${stKey}`, holdV ? ht(L, { awaiting_payment: 'status.awaiting', processing_payment: 'status.processing', preliminary: 'status.preliminary', expired: 'status.expired' }[co.state]) : t[`st.${stKey}`] || stKey), badge(`pay-${o.payment_status}`, t[`pay.${o.payment_status}`] || o.payment_status)),
       o.created_at ? h('p', { class: 'bk-meta', text: `${t.created}: ${dt(o.created_at)}` }) : null);
+    const dOnly = (ds) => df({ day: 'numeric', month: 'numeric', year: 'numeric' }).format(new Date(`${ds}T12:00:00Z`));
+    const annualEl = annual ? h('section', { class: 'ord-card ord-annual', 'aria-labelledby': 'ord-ac', 'data-testid': 'annual-card-code' }, h('h3', { id: 'ord-ac', text: t.annualCodeTitle }),
+      annual.code ? [h('p', { class: 'ord-annual-code', text: annual.code }),
+        annual.valid_from && annual.valid_to ? h('p', { class: 'bk-meta', text: `${t.annualCodeValid}: ${dOnly(annual.valid_from)} – ${dOnly(annual.valid_to)}` }) : null,
+        h('p', { text: t.annualCodeLead }), S.shopHref ? h('p', {}, h('a', { href: S.shopHref, text: t.annualCodeBook })) : null]
+        : h('p', { class: 'bk-note', text: t.annualCodePending })) : null;
     const resv = o.reservations.length ? h('section', { class: 'ord-card', 'aria-labelledby': 'ord-rv' }, h('h3', { id: 'ord-rv', text: t.reservationsTitle }),
       h('ul', { class: 'ord-lines', 'data-testid': 'order-reservations' }, o.reservations.map((r) => h('li', {},
         h('span', { class: 'ord-l-main' }, h('strong', { text: r.product_name }), r.status === 'cancelled' ? ' ' : null, r.status === 'cancelled' ? badge('st-cancelled', t.cancelledRow) : null,
@@ -253,7 +262,7 @@ async function main() {
     const extra = guides || add ? h('div', { class: 'ord-extra', 'data-testid': 'order-extra' }, guides, add) : null;
     const cancel = closedHold || o.reservations.length === 0 ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), note,
       o.cancel_request ? h('p', { class: 'bk-ok', role: 'status', 'data-testid': 'cancel-pending', text: t[`cancel.${o.cancel_request.status}`] || t['cancel.open'] }) : cancelForm());
-    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, closedEl, resv, optSec, lines, pay, giftCards, claimBox, giftUse, receipts, extra, cancel, msg, phoneBox()));
+    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, closedEl, resv, optSec, lines, pay, giftCards, claimBox, annualEl, giftUse, receipts, extra, cancel, msg, phoneBox()));
   }
   async function download(btn, receiptNo) {
     btn.disabled = true;
