@@ -210,7 +210,12 @@ function buildSale(pk) {
     submitBtn.disabled = true; submitBtn.textContent = tx('submitting');
     try {
       const r = await api.buy(G.buyArgs({ lines, pkgs, buyer, locale: L }));
-      if (r?.ok) return done(r);
+      if (r?.ok) {
+        // Verkkomaksuun suoraan; maksusivu avautuu heti myös silloin, kun erillistä maksulinkkiä ei palauteta.
+        if (r.payment_url) { location.assign(r.payment_url); return; }
+        if (r.token) { location.assign(orderHref(r.token)); return; }
+        return done(r); // Vanhan/poikkeavan RPC-vastauksen varavahvistus ilman tilauslinkkiä.
+      }
       if (!r?.notReady && G.SERVER_FIELD[r?.code] && serverFieldError(r.code)) { msg.append(h('p', { class: 'bk-error', text: tx('err.fix') })); }
       else msg.append(h('p', { class: 'bk-error', text: r?.notReady ? tx('notReady') : errText(r, { n: pk.max_cards, min: open?.min_amount, max: open?.max_amount }) }));
     } catch { msg.append(h('p', { class: 'bk-error', text: tx('err.generic') }), phoneBox(S, tx)); }
