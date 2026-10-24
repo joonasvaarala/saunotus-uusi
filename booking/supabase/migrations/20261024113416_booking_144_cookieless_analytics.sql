@@ -6,7 +6,7 @@
 -- HUOM: ostotapahtuma (purchase) liittää satunnaisen session_key:n tilaukseen -> tieto on pseudonyymiä, ei anonyymiä.
 -- Sivuston seuranta-skripti on OLETUKSENA POIS (scripts/build-pages.mjs: vain SITE_ANALYTICS=on ja SITE_ENV != test).
 -- Ei käyttöön tuotannossa ennen tietosuojaselosteen päivitystä ja suostumus-/oikeusperustepäätöstä.
--- Ei koske vuosikortti- tai alennuskoodifunktioihin (booking_142/143). Rollback: rollbacks/20261024170000_booking_144_ROLLBACK.sql
+-- Ei koske vuosikortti- tai alennuskoodifunktioihin (booking_142/143). Rollback: rollbacks/20261024113416_booking_144_ROLLBACK.sql
 create table if not exists booking.analytics_events (
   id bigint generated always as identity primary key,
   created_at timestamptz not null default now(),
