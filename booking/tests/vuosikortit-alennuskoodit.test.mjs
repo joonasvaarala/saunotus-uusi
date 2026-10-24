@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { resolve, dirname } from 'node:path';
 import {
-  normalizeCode, validCodeFormat, generatedDiscountCode, generatedAnnualCardCode, NATURE_WORDS, DISCOUNT_ALPHABET,
+  normalizeCode, validCodeFormat, generatedDiscountCode, generatedAnnualCardCode, ANNUAL_ALPHABET, DISCOUNT_ALPHABET,
   discountSplit, quoteSignature, isAnnualQuote, codeError, CODE_ERROR_CODES, isCodeError,
 } from '../shop/src/discount-code-logic.js';
 import { DISCOUNT_TEXTS } from '../shop/src/discount-texts.js';
@@ -21,6 +21,7 @@ const rd = (p) => readFileSync(resolve(root, p), 'utf8');
 const SQL = rd('booking/supabase/migrations/20261024104958_booking_142_annual_cards_discount_codes.sql');
 const RB = rd('booking/supabase/rollbacks/20261024104958_booking_142_ROLLBACK.sql');
 const T142 = rd('booking/supabase/tests/discounts/t142_annual_cards_discount_codes.sql');
+const SQL143 = rd('booking/supabase/migrations/20261024160000_booking_143_annual_code_hardening.sql');
 const SHOP = rd('booking/shop/src/shop.js'), ORDER = rd('booking/shop/src/order.js'), ADMIN = rd('booking/admin/admin.js');
 const DISC = rd('booking/admin/views/discounts.js'), CUST = rd('booking/admin/views/customers.js'), CSS = rd('booking/shop/src/shop.css');
 
@@ -32,17 +33,18 @@ test('koodin normalisointi vastaa palvelimen _norm_code-funktiota (välilyönnit
   assert.match(SQL, /function booking\._norm_code\(p_code text\)[\s\S]*?upper\(regexp_replace\(coalesce\(p_code, ''\), '\\s', '', 'g'\)\)/);
 });
 
-test('arvotut koodit: alennuskoodi 6 merkkiä ilman sekoittuvia merkkejä, vuosikorttikoodi = luontosana + 1–999', () => {
+test('arvotut koodit: alennuskoodi 6 merkkiä ilman sekoittuvia merkkejä, vuosikorttikoodi 10 satunnaismerkkiä (booking_143)', () => {
   for (let i = 0; i < 300; i++) {
     const c = generatedDiscountCode();
     assert.match(c, /^[A-HJ-NP-Z2-9]{6}$/);
     assert.ok([...c].every((x) => DISCOUNT_ALPHABET.includes(x)));
-    const a = generatedAnnualCardCode(), w = NATURE_WORDS.find((x) => a.startsWith(x));
-    assert.ok(w, a); const n = Number(a.slice(w.length)); assert.ok(Number.isInteger(n) && n >= 1 && n <= 999, a);
+    const a = generatedAnnualCardCode();
+    assert.match(a, /^[A-HJKMNP-Z2-9]{10}$/, a);
+    assert.ok([...a].every((x) => ANNUAL_ALPHABET.includes(x)));
     assert.ok(validCodeFormat(a) && validCodeFormat(c));
   }
   assert.match(SQL, /'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'/);
-  for (const w of NATURE_WORDS) assert.ok(SQL.includes(`'${w}'`), `luontosana ${w} puuttuu palvelimelta`);
+  assert.match(SQL143, /alphabet constant text := 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'/);
 });
 
 test('alennuksen jako riveille: summa täsmää sentilleen, jokainen rivi ≤ oma hinta, kohdistus tuotteisiin', () => {
@@ -176,7 +178,7 @@ test('hallinta: Alennuskoodit-reitti (oikeus catalog.edit tai annual_cards.manag
   const g = await m.rpc('admin_save_discount_code', { p_id: null, p_data: { code: '', kind: 'fixed', value: '5', usage_type: 'permanent' } });
   assert.match(g.code, /^[A-HJ-NP-Z2-9]{6}$/);
   const c = await m.rpc('admin_create_annual_card', { p_customer_id: 1, p_valid_from: '2026-11-01', p_valid_to: '2027-10-31', p_code: null, p_notes: null });
-  assert.ok(NATURE_WORDS.some((w) => c.code.startsWith(w)));
+  assert.match(c.code, /^[A-HJKMNP-Z2-9]{10}$/);
   const staff = createAdminMock({ role: 'staff' });
   await assert.rejects(staff.rpc('admin_list_annual_cards_details'), /annual_cards\.manage/);
 });
