@@ -242,7 +242,8 @@ cand_all as (
                            + case when to_char((a.at at time zone 'Europe/Helsinki')::date, 'MM-DD') <= p.fye then 0 else 1 end <= p.max_acct_year)
           or exists (select 1 from ent where ent.tbl = a.table_name and ent.id::text = a.row_pk))
 )
--- </privacy-candidates>,
+-- </privacy-candidates>
+,
 leads as (
   select 'kb_leads_3y'::text as category, l.id, case when l.marketing_consent then 'marketing_consent' end as blocked
     from kb.leads l cross join p
