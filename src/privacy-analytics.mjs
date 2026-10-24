@@ -20,7 +20,8 @@ export function privacyAnalyticsHtml(lang, esc, para) {
 
 // Tietosuojaseloste v4 (content/site-texts.pending-propose-61.json): kb.policies 7 -tekstissä on oma kohta "7. Evästeetön kävijämittaus".
 // Kun julkaistu teksti sisältää kohdan, erillistä ui.site.privacy_analytics_* -kohtaa ei lisätä, ettei sama kohta näy kahdesti.
-const SECTION_TITLES = Object.values(PRIVACY_ANALYTICS_TEXTS['ui.site.privacy_analytics_title']);
+// Julkaistu EN-seloste (policy.7.body [en] v1, 24.10.2026) käyttää otsikkoa "7. Cookie-free visitor analytics", joten se hyväksytään myös.
+const SECTION_TITLES = [...Object.values(PRIVACY_ANALYTICS_TEXTS['ui.site.privacy_analytics_title']), 'Cookie-free visitor analytics'];
 export function policyHasAnalyticsSection(body) {
   return String(body ?? '').split(/\n+/).some((l) => {
     const h = l.trim().replace(/^[0-9]{1,2}\.\s*/, '').toLowerCase();
