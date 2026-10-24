@@ -10,8 +10,8 @@ import { dirname, join } from 'node:path';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const repo = join(root, '..');
 const read = (rel) => readFileSync(join(repo, rel), 'utf8');
-const MIG = 'booking/supabase/migrations/20261024210000_booking_149_customer_cancel_48h.sql';
-const RB = 'booking/supabase/rollbacks/20261024210000_booking_149_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024115808_booking_149_customer_cancel_48h.sql';
+const RB = 'booking/supabase/rollbacks/20261024115808_booking_149_ROLLBACK.sql';
 const { OT } = await import(pathToFileURL(join(root, 'shop/src/order-texts.js')));
 const { normOrder, createOrderApi } = await import(pathToFileURL(join(root, 'shop/src/order-api.js')));
 const { createOrderMock } = await import(pathToFileURL(join(root, 'shop/src/order-mock.js')));
@@ -20,7 +20,7 @@ const fnNames = (sql) => [...sql.matchAll(/create or replace function\s+booking\
 
 test('migraatio: yksi booking_149, vain peruutuksen funktiot, ei public-skeemaa eikä muiden avointen töiden funktioita', () => {
   const names = readdirSync(join(repo, 'booking/supabase/migrations')).filter((n) => /booking_149_/.test(n));
-  assert.deepEqual(names, ['20261024210000_booking_149_customer_cancel_48h.sql']);
+  assert.deepEqual(names, ['20261024115808_booking_149_customer_cancel_48h.sql']);
   const sql = read(MIG);
   assert.deepEqual(fnNames(sql), ['_customer_cancel_deadline', 'public_get_order', 'public_request_cancel']);
   assert.doesNotMatch(sql, /\bpublic\.\w+/i, 'ei public-skeemaa');

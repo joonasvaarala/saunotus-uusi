@@ -10,7 +10,7 @@
 -- Ennallaan: public_cancel_booking (vain maksamaton, pending-tilainen tilaus: pidon vapautus, ei rahaa), hallinnan peruutus ja hyvitys
 -- (admin_cancel_reservation, admin_refund, admin_refund_order, admin_resolve_order_request, admin_set_reservation_status, admin_change_booking)
 -- eivät katso takarajaa. Ei taulumuutoksia, ei public-skeemaa, ei jonotuslistan, lahjakorttilistan eikä kassan vuosikorttikoodin funktioita.
--- Uudelleenajettava. Rollback: booking/supabase/rollbacks/20261024210000_booking_149_ROLLBACK.sql
+-- Uudelleenajettava. Rollback: booking/supabase/rollbacks/20261024115808_booking_149_ROLLBACK.sql
 set local lock_timeout = '5s';
 
 insert into booking.settings(key, value, description, is_public)
