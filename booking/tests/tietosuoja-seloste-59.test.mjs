@@ -24,9 +24,13 @@ test('tiedosto: vain policy.7.body fi, protected/plain, ehdotus (ei tuontia), po
   assert.equal(row.apply, 'texts_propose');
   assert.deepEqual(row.placeholders, []);
   assert.ok(t.length <= row.max_len && row.max_len === 20000);
+  // Ehdotus on julkaistu tuotannossa versiona 3 (md5 f1fd3bc0…). kb.json voi olla vielä pohjaversio (v2), tämä teksti (v3)
+  // tai jo seuraava ehdotus (pending-propose-61, v4) sen mukaan, milloin kb-snapshot on päivitetty.
+  assert.equal(row.base_md5, '89ffef08347494f4c524e6ffb0ada93d');
+  assert.equal(md5(t), 'f1fd3bc09b7021c500d295f1ba60d317');
   const cur = J('content/kb/kb.json').policies.find((p) => p.id === 7);
-  assert.equal(row.base_md5, md5(cur.body), 'ehdotuksen pohja ei ole nykyinen julkaistu teksti');
-  assert.notEqual(t, cur.body);
+  const next = J('content/site-texts.pending-propose-61.json')[0];
+  assert.ok([row.base_md5, md5(t), next.new_md5].includes(md5(cur.body)), 'kb.json:n policy 7 ei ole mikään tunnettu versio');
 });
 
 test('teksti on pelkkää tekstiä (_text_validate plain): ei <, ei linkkimerkintää, ei paikkamerkkejä, ei ohjausmerkkejä', () => {

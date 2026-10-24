@@ -5,7 +5,7 @@ import { cards, alts, pageDoc } from './content-texts.mjs';
 import { articlesNav, homeSection } from './articles/runtime.mjs';
 import { tx } from './site-texts.mjs';
 import { seoSchemaForPage, jsonLdScript } from './seo-enhance.mjs';
-import { privacyAnalyticsHtml } from './privacy-analytics.mjs';
+import { privacyAnalyticsHtml, policyHasAnalyticsSection } from './privacy-analytics.mjs';
 import { policyText, privacyDocFor, linkContacts } from './policy-lang.mjs';
 import { shopProductsHtml } from './shop-products.mjs';
 import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
@@ -441,7 +441,7 @@ export function policyPage(name, key, lang) {
   const para = (l) => (name === 'privacy' ? linkContacts(e(l), site.contact) : e(l));
   const txt = (s) => clean(s).split(/\n+/).map((l) => `<p>${para(l)}</p>`).join('');
   const body = pageHero(d.hero, lang, key)
-    + sec('', `<div class="narrow prose">${d.note ? `<p class="note-box">${e(d.note)}</p>` : ''}${items.map((p) => p.lang && p.lang !== lang ? `<div lang="${e(p.lang)}"><h2>${e(p.title)}</h2>${txt(p.body)}</div>` : `<h2>${e(p.title)}</h2>${txt(p.body)}`).join('')}${name === 'privacy' ? privacyAnalyticsHtml(lang, e, txt) : ''}</div>`);
+    + sec('', `<div class="narrow prose">${d.note ? `<p class="note-box">${e(d.note)}</p>` : ''}${items.map((p) => p.lang && p.lang !== lang ? `<div lang="${e(p.lang)}"><h2>${e(p.title)}</h2>${txt(p.body)}</div>` : `<h2>${e(p.title)}</h2>${txt(p.body)}`).join('')}${name === 'privacy' && !items.some((p) => policyHasAnalyticsSection(p.body)) ? privacyAnalyticsHtml(lang, e, txt) : ''}</div>`);
   return layout({ lang, key, meta: d.meta, body });
 }
 
