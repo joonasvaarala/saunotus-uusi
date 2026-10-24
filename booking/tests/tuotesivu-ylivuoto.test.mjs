@@ -53,11 +53,12 @@ test('richHost (pelkkä teksti) ja heroShort normalisoivat; kaikki kaupan kuvaus
   assert.match(read('booking/shop/src/shop.js'), /const pname = \(p\) => softenSpaces\(/);
 });
 
-test('shop.css: rivitys- ja leveysvarmistukset, ei overflow-x:hidden-piilotusta', () => {
+test('shop.css + styles.css: rivitys- ja leveysvarmistukset, leveyslukko varmistuksena', () => {
   const css = read('booking/shop/src/shop.css');
   assert.match(css, /\.bk-rich,\.bk-desc,\.bk-hero-short,\.hero\.page \.in p[^{]*\{overflow-wrap:anywhere\}/);
   assert.match(css, /\.hero\.page \.in>p\{max-width:min\(30em,100%\)\}/);
   assert.match(css, /#booking-app :is\(img,video,iframe,embed,object,svg,table\)[^{]*\{max-width:100%\}/);
   assert.match(css, /\.bk-grid\{grid-template-columns:repeat\(7,minmax\(0,1fr\)\)\}/, 'kalenteri mahtuu 320 px:iin');
-  assert.doesNotMatch(css + read('src/styles.css'), /(?:html|body)\s*\{[^}]*overflow-x\s*:\s*hidden/);
+  const st = read('src/styles.css');
+  assert.match(st, /html,body\{max-width:100%;overflow-x:hidden\}\n@supports \(overflow-x:clip\)\{html,body\{overflow-x:clip\}\}/, 'leveyslukko varmistuksena (juurisyyt korjattu erikseen)');
 });
