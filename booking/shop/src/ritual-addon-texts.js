@@ -47,6 +47,15 @@ export const RITUAL_TEXTS = {
     ritualConfNote: 'Your booking includes a sauna ritual. For changes and cancellations please email us and we will move the session and the ritual together:',
   },
 };
+// Yksikkömuodot (plural.js oneKey): käytetään kun lukumäärä on 1; puuttuu → monikkoavain (julkaistu teksti ennallaan). Tuonti: content/site-texts.pending-import-64.json.
+Object.assign(RITUAL_TEXTS.fi, {
+  ritualSpotsOne: "enintään {n} hlö",
+  ritualSummaryOne: "klo {time} · {n} hlö",
+});
+Object.assign(RITUAL_TEXTS.en, {
+  ritualSpotsOne: "up to {n} guest",
+  ritualSummaryOne: "{time} · {n} guest",
+});
 // Palvelimen virhekoodit (BK001 detail, _ritual_addon_attach) → T.errors (ui.shop.error_ritual_addon_*)
 export const RITUAL_ERRORS = {
   fi: {

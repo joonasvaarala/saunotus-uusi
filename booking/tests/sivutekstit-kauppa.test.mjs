@@ -93,6 +93,7 @@ test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-shop.mjs 
     ...J('content/site-texts.pending-import-59.json').filter((r) => r.key.startsWith('ui.shop.')).map((r) => `${r.key}|${r.lang}`),   // booking_162
     ...J('content/site-texts.pending-import-62.json').map((r) => `${r.key}|${r.lang}`),   // booking_166
     ...J('content/site-texts.pending-import-63.json').map((r) => `${r.key}|${r.lang}`),   // booking_166 korjaus: rituaalikortti
+    ...J('content/site-texts.pending-import-64.json').map((r) => `${r.key}|${r.lang}`),   // monikkokorjaus: yksikköavaimet *_one
   ]);
   const imp = new Set(PENDING.map((r) => r.key));
   writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts.filter((r) => !imp.has(r.key)) }));   // tuotanto ennen #61:n tuontia
@@ -123,7 +124,8 @@ test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet ava
   const quietUi = J('content/site-texts.pending-import-59.json').filter((r) => r.key.startsWith('ui.shop.'));   // booking_162
   const ritualUi = J('content/site-texts.pending-import-62.json');   // booking_166
   const ritualCard = J('content/site-texts.pending-import-63.json');   // booking_166 korjaus: rituaalikortti
-  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length + waitUi.length + waitParty.length + waitOffer.length + codeUi.length + partyType.length + cancelUi.length + quietUi.length + ritualUi.length + ritualCard.length);
+  const oneUi = J('content/site-texts.pending-import-64.json');   // monikkokorjaus
+  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length + waitUi.length + waitParty.length + waitOffer.length + codeUi.length + partyType.length + cancelUi.length + quietUi.length + ritualUi.length + ritualCard.length + oneUi.length);
   assert.ok(!rows.some((x) => haveKeys.has(x.key)));
   for (const e of extraRows) assert.ok(!rows.some((x) => x.key === e.key), `${e.key}: jo tuotannossa, generaattori ei lisää`);
   const bad = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', join(work, 'ei-ole.json')], { encoding: 'utf8' });
@@ -202,7 +204,7 @@ test('avainnimeäminen: tr.errors.<koodi> → ui.checkout.error_<koodi>, errors.
   assert.ok(k.has('ui.checkout.error_generic'));
 });
 test('funktiolehdet: jokaisella mallipohjalla on FI+EN ja malli tuottaa saman tekstin kuin alkuperäinen funktio (monikon molemmat haarat)', () => {
-  const sample = { n: [1, 2, 7], m: [15], p: ['5 €'], h: [48], dl: ['pe 10.10. klo 12.00'], when: ['ma 5.10. klo 18.00'], price: ['49 €'] };
+  const sample = { n: [1, 2, 7], m: [1, 15], p: ['5 €'], h: [1, 48], dl: ['pe 10.10. klo 12.00'], when: ['ma 5.10. klo 18.00'], price: ['49 €'] };
   const render = (tpl, names, args) => tpl.replace(/\{\{var:(\w+)\}\}/g, (_, k) => String(args[names.indexOf(k)]));
   const cases = Object.entries(R.FN_SPECS);
   assert.equal(cases.length, 11);
@@ -213,7 +215,8 @@ test('funktiolehdet: jokaisella mallipohjalla on FI+EN ja malli tuottaa saman te
       const grid = spec.args.map((a) => sample[a] || ['x']);
       const combos = grid.reduce((acc, vs) => acc.flatMap((c) => vs.map((v) => [...c, v])), [[]]);
       for (const args of combos) {
-        const tpl = spec.plural ? spec[lang][+args[0] === 1 ? 'one' : 'other'] : spec[lang];
+        const one = spec.one && +args[spec.args.indexOf(spec.one.arg)] === 1;
+        const tpl = one ? spec.one[lang] : spec.plural ? spec[lang][+args[0] === 1 ? 'one' : 'other'] : spec[lang];
         assert.equal(render(tpl, spec.args, args), fn(...args), `${id} ${lang} ${JSON.stringify(args)}`);
       }
     }

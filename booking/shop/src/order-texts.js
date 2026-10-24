@@ -70,3 +70,14 @@ export const OT = {
     annualCodeValid: 'Valid', annualCodePending: 'Your personal annual card code is shown here once the order is paid.', annualCodeBook: 'Open the booking calendar',
   },
 };
+// Yksikkömuodot (plural.js oneKey): käytetään kun lukumäärä on 1; puuttuu → monikkoavain (julkaistu teksti ennallaan). Tuonti: content/site-texts.pending-import-64.json.
+Object.assign(OT.fi, {
+  cancelRuleOne: "Peruutuspyynnön voi lähettää viimeistään {hours} tunti ennen vuoron alkua, eli viimeistään {date}. Alle {hours} tunti ennen vuoroa peruutus ei ole enää mahdollinen.",
+  cancelClosedOne: "Peruutus ei ole enää mahdollinen, koska vuoron alkuun on alle {hours} tunti. Jos sinulla on kysyttävää, soita meille: {phone}.",
+  closedHoldExpiredOne: "Tämä varaus on peruttu, koska maksua ei saatu {minutes} minuutin kuluessa. Paikka on vapautettu muille. Mitään ei ole veloitettu. Voit tehdä uuden varauksen Sipoonjoen Perinnesaunaan.",
+});
+Object.assign(OT.en, {
+  cancelRuleOne: "You can send a cancellation request up to {hours} hour before your session starts, that is by {date}. Less than {hours} hour before the session, cancellation is no longer possible.",
+  cancelClosedOne: "Cancellation is no longer possible because your session starts in less than {hours} hour. If you have any questions, please call us: {phone}.",
+  closedHoldExpiredOne: "This booking was cancelled because payment was not received within {minutes} minute. The time has been released for others. You have not been charged. You can make a new booking at Sipoonjoen Perinnesauna.",
+});
