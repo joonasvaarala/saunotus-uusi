@@ -180,3 +180,8 @@ test('hallinta: Alennuskoodit-reitti (oikeus catalog.edit tai annual_cards.manag
   const staff = createAdminMock({ role: 'staff' });
   await assert.rejects(staff.rpc('admin_list_annual_cards_details'), /annual_cards\.manage/);
 });
+
+test('build-pages kopioi hallinnan tuomat koodimoduulit dist/shop/src:iin', () => {
+  const b = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../../scripts/build-pages.mjs'), 'utf8');
+  for (const f of ['discount-code-logic.js', 'discount-texts.js']) assert.ok(b.includes(`cpSync('booking/shop/src/${f}', join(OUT, 'shop', 'src', '${f}'))`), f);
+});
