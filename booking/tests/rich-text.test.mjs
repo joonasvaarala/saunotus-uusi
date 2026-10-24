@@ -139,8 +139,8 @@ test('migraatio 122 vaihtaa vain kuvauksen lajin ja pituuden', () => {
   assert.match(back, /comment on column booking\.site_texts\.kind is null;/);
   assert.match(back, /coalesce\(p_vars ->> k, ''\)/);
   assert.doesNotMatch(back, /translate\(coalesce\(p_vars/);
-  assert.match(read('booking/admin/vendor/trix/trix.esm.min.js'), /Trix 2\.1\.19/);
-  assert.match(read('booking/admin/rich-editor.js'), /2\.1\.19/);
+  assert.match(read('booking/admin/vendor/quill/quill.js.LICENSE.txt'), /Quill Editor v2\.0\.3/);
+  assert.match(read('booking/admin/rich-editor.js'), /Quill 2/);
   assert.doesNotMatch(read('booking/admin/views/products.js'), /asiakas_nimi/);
   assert.match(read('booking/admin/views/messages.js'), /hint_message/);
   assert.doesNotMatch(read('booking/admin/rich-texts.js').match(/'ui\.admin\.rich\.hint': '([^']+)'/)[1], /asiakas_nimi/);
@@ -150,4 +150,153 @@ test('migraatio 122 vaihtaa vain kuvauksen lajin ja pituuden', () => {
   assert.match(read('booking/shop/src/order.js'), /richHost/);
   assert.match(read('booking/admin/views/messages.js'), /data-rich/);
   assert.match(read('booking/admin/views/products.js'), /data-rich/);
+});
+
+test('Quill 2 on vendoroitu paikallisesti BSD-3-Clause-lisenssillä, eikä Trixiä tarvita', () => {
+  assert.match(read('booking/admin/vendor/quill/quill.js.LICENSE.txt'), /Quill Editor v2\.0\.3/);
+  assert.match(read('booking/admin/vendor/quill/LICENSE'), /Redistribution and use in source and binary forms/);
+  assert.match(read('booking/admin/vendor/quill/quill.snow.css'), /\.ql-editor/);
+  assert.match(read('booking/admin/vendor/quill/quill.js'), /sourceMappingURL|function/);
+  const editor = read('booking/admin/rich-editor.js');
+  assert.match(editor, /vendor\/quill\/quill\.js/);
+  assert.match(editor, /vendor\/quill\/quill\.snow\.css/);
+  assert.match(editor, /plainToEditorHtml/);
+  assert.match(editor, /normalizeStored/);
+  assert.doesNotMatch(editor, /vendor\/trix|https?:\/\/cdn/);
+});
+
+test('Quill-editori ladataan vain aktiiviseen kenttään; tallennus käyttää piilokenttää', async () => {
+  const { mountRichFields, syncRichFields } = await import(pathToFileURL(join(root, 'booking/admin/rich-editor.js')).href);
+  const oldDoc = globalThis.document;
+  const oldQuill = globalThis.Quill;
+  const created = [];
+  const mounted = [];
+  class Element {
+    constructor(name) {
+      this.tagName = name.toUpperCase();
+      this.children = []; this.parentNode = null; this.listeners = {};
+      this.dataset = {}; this.attributes = {}; this.className = '';
+      this.classList = { toggle() {} };
+      this.isConnected = true; this.value = '';
+      created.push(this);
+    }
+    append(...items) {
+      for (const item of items) {
+        if (item.parentNode) item.parentNode.children.splice(item.parentNode.children.indexOf(item), 1);
+        this.children.push(item); item.parentNode = this;
+      }
+    }
+    get firstChild() { return this.children[0] || null; }
+    replaceWith(item) {
+      const p = this.parentNode;
+      if (p) { p.children.splice(p.children.indexOf(this), 1, item); item.parentNode = p; }
+      this.isConnected = false;
+    }
+    closest(selector) {
+      if (selector === 'label' || selector === 'label, .fld') return this.label || null;
+      return null;
+    }
+    querySelector(selector) { return selector === ':scope > span' ? { textContent: 'Kuvaus' } : null; }
+    setAttribute(name, value) { this.attributes[name] = String(value); }
+    getAttribute(name) { return this.attributes[name] || ''; }
+    addEventListener(name, listener) { this.listeners[name] = listener; }
+    focus() {}
+    setCustomValidity() {}
+    reportValidity() { return true; }
+  }
+  class MockLink { static sanitize(href) { return href; } }
+  class MockQuill {
+    static import(key) { return key === 'delta' ? class Delta {} : MockLink; }
+    static register() {}
+    constructor(host, options) {
+      mounted.push(this);
+      this.host = host; this.options = options; this.handlers = {};
+      this.history = { clear() {}, undo() {}, redo() {} };
+      this.clipboard = { addMatcher() {}, dangerouslyPasteHTML: (html) => { this.html = html; } };
+      this.html = '<p><br></p>';
+    }
+    getSemanticHTML() { return this.html; }
+    on(name, cb) { this.handlers[name] = cb; }
+    getFormat() { return {}; }
+    getSelection() { return { index: 0, length: 1 }; }
+    format() {}
+    focus() {}
+    setSelection() {}
+  }
+  const head = new Element('head');
+  head.append = (...nodes) => {
+    for (const node of nodes) {
+      head.children.push(node);
+      if (node.tagName === 'SCRIPT') queueMicrotask(() => node.listeners.load());
+    }
+  };
+  globalThis.document = {
+    head,
+    createElement: (name) => new Element(name),
+    querySelector: (selector) => selector === 'link[data-quill-css]' ? head.children.find((node) => node.dataset.quillCss) : null,
+  };
+  globalThis.Quill = MockQuill;
+  try {
+    const noFields = { querySelectorAll: () => [] };
+    await mountRichFields(noFields);
+    assert.equal(head.children.length, 0, 'Ei tiedostoja ilman aktiivista textarea-kenttää');
+    const disabled = new Element('textarea'); disabled.disabled = true;
+    await mountRichFields({ querySelectorAll: () => [disabled] });
+    assert.equal(head.children.length, 0, 'Pois käytöstä oleva textarea ei lataa editoria');
+
+    const form = new Element('form');
+    const label = new Element('label'); label.className = 'fld';
+    const area = new Element('textarea'); area.name = 'description'; area.value = 'Moi {asiakas_nimi}'; area.label = label;
+    label.append(area); form.append(label);
+    await mountRichFields({ querySelectorAll: () => [area] });
+    assert.equal(mounted.length, 1);
+    assert.deepEqual(head.children.map((el) => el.tagName).sort(), ['LINK', 'SCRIPT']);
+    assert.deepEqual(mounted[0].options.formats, ['bold', 'italic', 'header', 'list', 'link']);
+    const hidden = created.find((el) => el.tagName === 'INPUT' && el.dataset.richValue === '1');
+    assert.equal(hidden.name, 'description');
+    assert.equal(hidden.type, 'hidden');
+    assert.equal(hidden.value, '<p>Moi {asiakas_nimi}</p>');
+    mounted[0].html = '<p><strong>Moi</strong> <img src=x> {tilaus_linkki}</p>';
+    syncRichFields({ querySelectorAll: () => [hidden] });
+    assert.equal(hidden.value, '<p><strong>Moi</strong>  {tilaus_linkki}</p>');
+    mounted[0].html = '<p><br></p>';
+    syncRichFields({ querySelectorAll: () => [hidden] });
+    assert.equal(hidden.value, '');
+    // Uusi mount ei saa ladata skriptiä tai CSS:ää uudelleen.
+    const other = new Element('textarea'); other.name = 'body'; other.label = label;
+    label.append(other);
+    await mountRichFields({ querySelectorAll: () => [other] });
+    assert.equal(head.children.length, 2);
+  } finally {
+    if (oldDoc === undefined) delete globalThis.document; else globalThis.document = oldDoc;
+    if (oldQuill === undefined) delete globalThis.Quill; else globalThis.Quill = oldQuill;
+  }
+});
+
+test('Quill: työkalurivin tila ei siirrä kursoria kirjoittaessa (getFormat vain annetulla alueella)', async () => {
+  // Regressio: quill.getFormat() ilman aluetta kutsuu getSelection(true), joka palauttaa vanhan valinnan
+  // kesken text-change-tapahtuman ja hukkaa merkkejä. Mock heittää virheen, jos niin käy.
+  const editor = read('booking/admin/rich-editor.js');
+  assert.match(editor, /quill\.getSelection\(false\)/);
+  assert.doesNotMatch(editor, /const format = quill\.getFormat\(\);/);
+  for (const tag of ['IMG', 'IFRAME', 'SCRIPT', 'STYLE', 'SVG']) assert.match(editor, new RegExp(`'${tag}'`));
+  assert.doesNotMatch(editor, /formats: \[[^\]]*(image|video|formula|code-block|color|background)/);
+});
+
+test('Quill-vendor: versioitu 2.0.3, ei source mapia eikä ulkoisia osoitteita, hallinnan build tarkistaa tiedostot', () => {
+  const js = read('booking/admin/vendor/quill/quill.js');
+  const css = read('booking/admin/vendor/quill/quill.snow.css');
+  assert.doesNotMatch(js, /sourceMappingURL/);
+  assert.doesNotMatch(css, /sourceMappingURL/);
+  assert.match(css, /Quill Editor v2\.0\.3/);
+  assert.match(read('booking/admin/vendor/quill/LICENSE'), /Slab/);
+  const pages = read('scripts/build-pages.mjs');
+  for (const f of ['rich-editor.js', 'vendor/quill/quill.js', 'vendor/quill/quill.snow.css', 'vendor/quill/LICENSE']) assert.ok(pages.includes(`'${f}'`), f);
+  const doc = read('docs/rich-text.md');
+  assert.match(doc, /BSD-3-Clause/);
+  assert.match(doc, /CVE-2025-15056/);
+  // Hallinnan CSS: linkki ruskea, ei Quillin sinistä oletusta.
+  const adminCss = read('booking/admin/admin.css');
+  assert.match(adminCss, /\.rich-field \.ql-editor a\{color:var\(--gold\)/);
+  assert.doesNotMatch(adminCss.slice(adminCss.indexOf('/* Rich-teksti (Quill 2)'), adminCss.indexOf('@media(min-width:700px){.pos-grid')), /#06c|blue/i);
 });

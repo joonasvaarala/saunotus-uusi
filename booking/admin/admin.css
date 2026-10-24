@@ -684,25 +684,24 @@ html.pos-modal-open,body.pos-modal-open{overflow:hidden}
   .qr-card{border:0}
   .qr-card svg{width:70mm;height:70mm}
 }
-/* Rich-teksti (Trix): työkalurivi rivittyy, kosketuskohde vähintään 44 px. Ei sinistä aktiiviväriä. */
+/* Rich-teksti (Quill 2): laiskasti ladattu Snow-teema, suomalais-/englanninkieliset painikkeet. */
 .rich-field{display:grid;gap:6px;min-width:0}
-.rich-field trix-toolbar{display:block}
-.rich-field .trix-button-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.rich-field .trix-button-group{display:flex;flex-wrap:wrap;gap:4px;margin:0;border:0;float:none}
-.rich-field trix-toolbar .trix-button{float:none;min-width:44px;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--green);font:600 13px/1.1 inherit;letter-spacing:0}
-.rich-field trix-toolbar .trix-button:not(:first-child){border-left:1px solid var(--line)}
-.rich-field trix-toolbar .trix-button.trix-active{background:#efe7d6;color:var(--green)}
-.rich-field trix-toolbar .trix-button:disabled{opacity:.45}
-.rich-field trix-editor{display:block;min-height:140px;max-height:50vh;overflow:auto;border:1px solid #8b7f73;border-radius:8px;padding:10px 12px;background:#fff;color:var(--ink);line-height:1.45}
-.rich-field trix-editor h2{font-size:1.3rem;margin:.35em 0;color:var(--ink)}
-.rich-field trix-editor h3{font-size:1.08rem;margin:.35em 0;color:var(--ink)}
-.rich-field trix-editor ul,.rich-field trix-editor ol{padding-left:1.2em;margin:.3em 0}
-.rich-field trix-editor a{color:var(--gold);text-decoration:underline}
-.rich-field .trix-dialog{border:1px solid var(--line);border-radius:8px;padding:8px;background:#fff}
-.rich-field .trix-dialog__link-fields{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.rich-field .trix-input--dialog{flex:1 1 180px;min-height:44px;min-width:0}
-.rich-field .trix-button--dialog{min-height:44px}
-@media(max-width:640px){.rich-field trix-toolbar .trix-button{flex:1 1 calc(50% - 4px)}}
+.rich-field .rich-toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.rich-field .rich-button-group{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.rich-field .rich-btn{min-width:44px;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--green);font:600 13px/1.2 system-ui,sans-serif;cursor:pointer}
+.rich-field .rich-btn.active{background:#efe7d6;color:var(--green)}
+.rich-field .rich-btn:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.rich-field .ql-container.ql-snow{border:1px solid #8b7f73;border-radius:8px;background:#fff;color:var(--ink);font-family:inherit;font-size:inherit}
+.rich-field .ql-editor{min-height:140px;max-height:50vh;overflow-y:auto;padding:10px 12px;line-height:1.45}
+.rich-field .ql-container.ql-snow:focus-within{border-color:var(--green);box-shadow:0 0 0 2px rgba(43,58,48,.25)}
+.rich-field .ql-snow .ql-editor h2{font-size:1.3rem;margin:.35em 0;color:var(--ink)}
+.rich-field .ql-snow .ql-editor h3{font-size:1.08rem;margin:.35em 0;color:var(--ink)}
+.rich-field .ql-editor ul,.rich-field .ql-editor ol{padding-left:1.2em;margin:.3em 0}
+.rich-field .ql-editor a{color:var(--gold);text-decoration:underline}
+.rich-field .rich-link-dialog{display:flex;flex-wrap:wrap;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:8px;background:#fff}
+.rich-field .rich-link-dialog[hidden]{display:none}
+.rich-field .rich-link-dialog input{flex:1 1 180px;min-width:0;min-height:44px;padding:8px}
+@media(max-width:640px){.rich-field .rich-toolbar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}.rich-field .rich-button-group{display:contents}.rich-field .rich-btn{padding:8px 4px}}
 @media(min-width:700px){.pos-grid{grid-template-columns:repeat(3,1fr)}}
 @media(min-width:800px){.pos-layout{grid-template-columns:minmax(0,1fr) 280px}.pos-side{position:sticky;top:72px;bottom:auto}}
 .set-page .card h2{margin:0 0 6px}
