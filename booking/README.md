@@ -434,6 +434,7 @@ Vaatii PostgreSQL + pgTAP. Luo kannan `booking_test`, lataa mock-Supabasen (rool
 * `19_product_images` – tuotekuvat: rajoitteet, bucket + storage-politiikat (anon/staff/manager), `admin_set_product_image` (oikeudet, validointi, audit, polkuhyökkäykset), `public_product_images` (ei vuotoja, piilotettu tuote ei näy)
 * `race.sh` – rinnakkaiset yhteydet yrittävät varata samaa aikaa yhtä aikaa (advisory-lock-portti); invariantit: ei yksityisen ja yleisen päällekkäisyyttä, kapasiteetti ei ylity (ma–to 16, la–su 6 / alkamisaika, 1 h vuoro 10, poolit riippumattomia), vuosikortilla vain yksi tuleva varaus, asiakkaan rinnakkaiset muutokset eivät ylitä kapasiteettia eivätkä riko päällekkäisyyssääntöä
 * `mutation_check.sh` – todistaa että kilpailutesti on herkkä: poistaa lukon testikannasta ja odottaa `race.sh`:n epäonnistuvan
+* `t158_events.sql` – tapahtumat ja koulutukset (booking_158): kerrat, resurssivaraukset ja sulut, oma lippu ohittaa oman kerran sulut, konfliktit, myyntikytkin (`sale_closed`), kanavat, kopiointi, `public_events`, Lovi-sääntö, rollback kahdesti + md5 ja uudelleenajo; ajetaan `psql -f` (tulos `TESTRESULT pass=N fail=0`). Kuvaus: [docs/tapahtumat-158.md](docs/tapahtumat-158.md)
 
 ## Sääntöjen muuttaminen
 
@@ -469,6 +470,11 @@ Hinnat ja tuotetekstit **eivät** ole sääntöjä: ne muokataan hallinnan Tuott
 * Kaupan EN-käännökset tuotteille (`name_en`/`description_en` kb:ssä osin tyhjiä)
 
 ## Avoimet kysymykset
+
+### Tapahtumat ja koulutukset (booking_158)
+
+Kuvaus: [docs/tapahtumat-158.md](docs/tapahtumat-158.md). Avoinna: saunottajan varaukset tallennetaan mutta eivät vielä estä hoitoja;
+Raunin tapahtumasulku ohjaa tuotteet 10–12 Loviin; tuotteet 23 (Perinnesaunotus yhdelle) ja 24 (Saunahoito opiskelijatyönä) eivät enää ohjaudu Loviin.
 
 Ks. [docs/ristiriidat-ja-tulkinnat.md](docs/ristiriidat-ja-tulkinnat.md) (yhteenveto raportissa).
 

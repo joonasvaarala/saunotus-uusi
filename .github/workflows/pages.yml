@@ -248,6 +248,10 @@ jobs:
       # booking_156: tuotteen lyhyt kuvaus (kb.products.short_description(_en), rikas teksti, sama allowlist kuin kuvauksella) korvaa johdetun otteen
       # kortissa ja yläbannerissa (tyhjä → ote), tuntemattoman tuotteen varasivu puhdistettuna. Tekstit pending-import-56. SQL: t156 PG17:ssä.
       - run: node --test booking/tests/lyhyt-kuvaus.test.mjs
+      # booking_158: tapahtumat ja koulutukset (tietokantaosa): tapahtumakerrat (schedule_rules.kind = 'event'), resurssivaraukset
+      # (event_resource_blocks -> space_blocks), myyntikanavat, kopiointi, public_events, Lovi-sääntö. Myynti pois (events.sale_enabled = false).
+      # SQL: t158 PG17:ssä (migraatio + rollback x2 + md5 + uudelleenajo).
+      - run: node --test booking/tests/tapahtumat-158.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

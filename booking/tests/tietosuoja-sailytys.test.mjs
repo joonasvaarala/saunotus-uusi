@@ -26,7 +26,7 @@ const block = (s) => {
 test('versio: booking_157 lajittuu booking_156:n (20261024163053) jälkeen ja on uniikki', () => {
   assert.ok(V > '20261024163053');
   const all = readdirSync(join(root, 'booking/supabase/migrations')).filter((f) => f.endsWith('.sql')).sort();
-  assert.equal(all[all.length - 1].slice(0, 14), V, 'booking_157 on viimeinen migraatio');
+  assert.ok(all[all.length - 1].slice(0, 14) >= V, 'booking_157 lajittuu aiempien jälkeen');
   const files = readdirSync(join(root, 'booking/supabase/migrations')).filter((f) => f.startsWith(V));
   assert.equal(files.length, 1);
   assert.ok(readdirSync(join(root, 'booking/supabase/rollbacks')).some((f) => f.startsWith(V)));
