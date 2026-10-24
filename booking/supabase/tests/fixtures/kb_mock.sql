@@ -150,6 +150,8 @@ create table if not exists kb.policies (
   id bigint generated always as identity primary key,
   title text, body text, language text, status text, internal boolean not null default false
 );
+-- kb.policies.category (tuotannossa text not null): tarvitaan kb_policies_en_source-migraation (20261024123109) rekisteröintiehdossa
+alter table kb.policies add column if not exists category text;
 create table if not exists kb.opening_hours (
   id bigint generated always as identity primary key,
   session_name text, swimsuit_rule text, language text, active boolean not null default true
