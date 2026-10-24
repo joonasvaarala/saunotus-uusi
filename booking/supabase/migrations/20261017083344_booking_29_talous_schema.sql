@@ -208,7 +208,7 @@ select 'seller', jsonb_build_object('name', 'Havuhattu Oy / Sipoonjoen perinnesa
   from kb.businesses b where b.id = 1
 on conflict (key) do nothing;
 insert into booking.settings(key, value, description, is_public) values
-  ('site_base_url', to_jsonb('https://uusi.saunotus.com'::text), 'Verkkokaupan osoite (linkit viesteihin); vahvista lopullinen osoite', false),
+  ('site_base_url', to_jsonb('https://saunotus.fi'::text), 'Verkkokaupan osoite (linkit viesteihin); vahvista lopullinen osoite', false),
   ('payment_link_path', to_jsonb('/maksa/'::text), 'Maksulinkin polku (?p=<link_token>)', false),
   ('order_page_path', to_jsonb('/tilaus/'::text), 'Asiakkaan tilaussivun polku (?t=<public_token>)', false)
 on conflict (key) do nothing;

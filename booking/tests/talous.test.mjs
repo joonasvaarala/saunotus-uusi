@@ -179,9 +179,9 @@ test('Datakerros: kirjoittavat toiminnot – ei käyttöönottolippuja, parametr
   // ALV-huomautus: normalisointi; virhe → null (ei mock-varaa); linkin isäntä order_page_path:sta (täysi osoite tai polku)
   assert.deepEqual((await m.listVatRates()).missing.map((x) => x.id), [47]);
   assert.equal(await A.createTalousApi({ rpc: async () => { throw bk; }, mock: false }).listVatRates(), null);
-  assert.equal(A.siteOrigin({ order_page_path: 'https://uusi.saunotus.com/tilaus/?t=abc' }, 'https://admin.x'), 'https://uusi.saunotus.com');
+  assert.equal(A.siteOrigin({ order_page_path: 'https://saunotus.fi/tilaus/?t=abc' }, 'https://admin.x'), 'https://saunotus.fi');
   assert.equal(A.siteOrigin({ order_page_path: '/tilaus/?t=abc' }, 'https://admin.x'), 'https://admin.x');
-  assert.equal(A.absLink('/maksa/?p=1', { order_page_path: 'https://uusi.saunotus.com/tilaus/?t=abc' }), 'https://uusi.saunotus.com/maksa/?p=1');
+  assert.equal(A.absLink('/maksa/?p=1', { order_page_path: 'https://saunotus.fi/tilaus/?t=abc' }), 'https://saunotus.fi/maksa/?p=1');
 });
 test('Datakerros: puuttuva RPC → vain se toiminto mockiin + ilmoitus; muu virhe ei piilotu', async () => {
   const miss = Object.assign(new Error('Could not find the function booking.admin_report_daily in the schema cache'), { status: 404, code: 'PGRST202' });

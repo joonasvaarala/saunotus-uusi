@@ -35,10 +35,10 @@ test('shopTarget: ei yhtään Johku-linkkiä – lahjakortit, lahjakorttivaraus 
   assert.equal(JL.shopTarget(`${J}/en_US/info/privacyPolicy`, EN), '/saunotus-uusi/tietosuoja/');
   assert.equal(JL.shopTarget(`${J}/fi_FI/info/`, FI), '/saunotus-uusi/info/');
   assert.equal(JL.shopTarget(J, FI), '/saunotus-uusi/varaa/#/');
-  assert.equal(JL.shopTarget('https://uusi.saunotus.com/varaa/#/tuote/jalkiloylyt', FI), '/saunotus-uusi/varaa/#/tuote/jalkiloylyt');
-  assert.equal(JL.shopTarget('https://uusi.saunotus.com/en/book/#/?k=yleinen', { ...EN, base: '' }), '/en/book/#/?k=yleinen');
-  assert.equal(JL.shopTarget('https://uusi.saunotus.com.evil.example/varaa/', FI), null);
-  assert.equal(JL.shopTarget('https://uusi.saunotus.com/varaa/', { ...FI, base: undefined }), null, 'ilman base-tietoa kanoninen jää');
+  assert.equal(JL.shopTarget('https://saunotus.fi/varaa/#/tuote/jalkiloylyt', FI), '/saunotus-uusi/varaa/#/tuote/jalkiloylyt');
+  assert.equal(JL.shopTarget('https://saunotus.fi/en/book/#/?k=yleinen', { ...EN, base: '' }), '/en/book/#/?k=yleinen');
+  assert.equal(JL.shopTarget('https://saunotus.fi.evil.example/varaa/', FI), null);
+  assert.equal(JL.shopTarget('https://saunotus.fi/varaa/', { ...FI, base: undefined }), null, 'ilman base-tietoa kanoninen jää');
   for (const u of ['https://example.com/fi_FI/hoidot/saunahoito-2', 'https://johku.com/customer', '', null, 'javascript:alert(1)']) assert.equal(JL.shopTarget(u, FI), null);
   assert.equal(JL.shopTarget(`${J}/fi_FI/hoidot/saunahoito-2`, {}), null, 'ilman kaupan polkua ei muutosta');
   assert.equal('KEEP' in JL, false, 'KEEP-listaa ei enää ole');
@@ -47,14 +47,14 @@ test('shopTarget: ei yhtään Johku-linkkiä – lahjakortit, lahjakorttivaraus 
 test('johkuHrefs (build-vartija): löytää hrefit HTML:stä ja JSON-merkkijonoista, ei tekstimainintoja', () => {
   assert.deepEqual(JL.johkuHrefs(`<a href="${J}/fi_FI/">x</a> sipoonjoenperinnesauna.johku.com`), [`${J}/fi_FI/`]);
   assert.deepEqual(JL.johkuHrefs(JSON.stringify({ d: `<a href="${J}/fi_FI/yleinen-lahjakorttivaraus">x</a>` })), [`${J}/fi_FI/yleinen-lahjakorttivaraus`]);
-  assert.deepEqual(JL.johkuHrefs('<a href="https://uusi.saunotus.com/varaa/">x</a>'), []);
+  assert.deepEqual(JL.johkuHrefs('<a href="https://saunotus.fi/varaa/">x</a>'), []);
   const b = readFileSync(join(root, 'shop/build.mjs'), 'utf8');
   assert.match(b, /JL\.johkuHrefs\(readFileSync\(p, 'utf8'\)\)/);
   assert.match(b, /Johku-linkkejä jäi/);
 });
 
 test('rewriteHtml: href vaihtuu, target/rel ja uuteen välilehteen -merkintä pois, muut linkit ennallaan', () => {
-  const html = `<p><a class="btn" href="${J}/fi_FI/hoidot/saunahoito-2" target="_blank" rel="noopener">Varaa<span class="sr"> (avautuu uuteen välilehteen)</span></a> <a href="${J}/fi_FI/yleinen-lahjakorttivaraus" target="_blank" rel="noopener">Lahjakortti</a> <a href="https://uusi.saunotus.com/en/book/#/tuote/naistensauna">N</a> <a href="https://example.com/">x</a></p>`;
+  const html = `<p><a class="btn" href="${J}/fi_FI/hoidot/saunahoito-2" target="_blank" rel="noopener">Varaa<span class="sr"> (avautuu uuteen välilehteen)</span></a> <a href="${J}/fi_FI/yleinen-lahjakorttivaraus" target="_blank" rel="noopener">Lahjakortti</a> <a href="https://saunotus.fi/en/book/#/tuote/naistensauna">N</a> <a href="https://example.com/">x</a></p>`;
   const out = JL.rewriteHtml(html, FI);
   assert.match(out, /<a class="btn" href="\/saunotus-uusi\/varaa\/#\/tuote\/saunahoito-2">Varaa<\/a>/);
   assert.ok(out.includes('<a href="/saunotus-uusi/varaa/#/">Lahjakortti</a>'));

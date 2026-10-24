@@ -37,14 +37,14 @@ export const pageHref = (key, lang, hash = '') => href(pagePath(key, lang) + (ha
 export const abs = (p) => SITE_URL + p;
 
 export const johku = (key, lang) => site.booking.base + (site.booking[key] || '').replace('{loc}', site.ui[lang].johkuLoc);
-// kb:n booking_url kielen mukaan. Uuden kaupan kanoninen osoite (booking_163: https://uusi.saunotus.com/varaa/#/tuote/<slug>) on FI;
+// kb:n booking_url kielen mukaan. Uuden kaupan kanoninen osoite (booking_163: https://saunotus.fi/varaa/#/tuote/<slug>) on FI;
 // EN-sivuilla /en/book/#/…. Build (booking/shop/src/johku-links.js) ohjaa kanonisen osoitteen sivuston BASE-polkuun.
 // Vanha Johku-osoite (fi_FI) → kielen Johku-lokaali; build ohjaa senkin kauppaan (#162).
-const SHOP_CANON = /^https:\/\/uusi\.saunotus\.com\/varaa\/(#.*)?$/;
+const SHOP_CANON = /^https:\/\/saunotus\.fi\/varaa\/(#.*)?$/;
 export const bookingUrl = (url, lang) => {
   if (!url) return johku('home', lang);
   const m = SHOP_CANON.exec(url);
-  if (m) return lang === 'en' ? `https://uusi.saunotus.com/en/book/${m[1] || ''}` : url;
+  if (m) return lang === 'en' ? `https://saunotus.fi/en/book/${m[1] || ''}` : url;
   return url.replace('/fi_FI/', `/${site.ui[lang].johkuLoc}/`);
 };
 

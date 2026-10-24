@@ -1,6 +1,6 @@
 {
  "_doc": "Sivuston yleiset asetukset ja UI-tekstit. Hinnat/ajat tulevat content/kb/kb.json:sta, sivujen tekstit content/pages/*.json:sta.",
- "canonicalBase": "https://uusi.saunotus.com",
+ "canonicalBase": "https://saunotus.fi",
  "testBase": "https://joonasvaarala.github.io/saunotus-uusi",
  "booking": {
   "base": "https://sipoonjoenperinnesauna.johku.com",

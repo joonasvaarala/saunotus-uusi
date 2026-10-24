@@ -6,7 +6,7 @@ import { mkdtempSync, rmSync, readFileSync, existsSync, writeFileSync, cpSync } 
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
-delete process.env.SITE_ENV; process.env.SITE_URL = 'https://uusi.saunotus.com';
+delete process.env.SITE_ENV; process.env.SITE_URL = 'https://saunotus.fi';
 const { pickHomeItems, homeSectionHtml } = await import('../../src/articles/pages.mjs');
 const { loadArticles, makeFixtureRpc } = await import('../../src/articles/source.mjs');
 const { setHomeSections, homeSection } = await import('../../src/articles/runtime.mjs');

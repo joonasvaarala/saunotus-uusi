@@ -10,7 +10,7 @@ import { join, resolve } from 'node:path';
 const root = resolve(new URL('../..', import.meta.url).pathname);
 const work = mkdtempSync(join(tmpdir(), 'art-build-'));
 const SECTIONS = { fi: '/saunatietoa/', en: '/en/sauna-knowledge/' };
-const T_URL = 'https://joonasvaarala.github.io/saunotus-uusi', P_URL = 'https://uusi.saunotus.com';
+const T_URL = 'https://joonasvaarala.github.io/saunotus-uusi', P_URL = 'https://saunotus.fi';
 const { checkDist } = await import('../../scripts/check-articles.mjs');
 
 function build(name, env) {
@@ -41,10 +41,10 @@ test('tuotanto (fixture): tarkistus läpi; canonicalit tuotantoon, indeksoitavat
   const r = check(prodDist, false);
   assert.deepEqual(r.errors, []);
   const sm = read(prodDist, 'sitemap.xml');
-  assert.match(sm, /<loc>https:\/\/uusi\.saunotus\.com\/saunatietoa\/miten-saunotaan-oikein\/<\/loc>/);
-  assert.match(sm, /<xhtml:link rel="alternate" hreflang="en" href="https:\/\/uusi\.saunotus\.com\/en\/sauna-knowledge\/how-to-sauna\/"\/>/);
+  assert.match(sm, /<loc>https:\/\/saunotus\.fi\/saunatietoa\/miten-saunotaan-oikein\/<\/loc>/);
+  assert.match(sm, /<xhtml:link rel="alternate" hreflang="en" href="https:\/\/saunotus\.fi\/en\/sauna-knowledge\/how-to-sauna\/"\/>/);
   assert.doesNotMatch(sm, /noindex-testiartikkeli|vanha-nimi|\/tagi\//);
-  assert.match(read(prodDist, 'robots.txt'), /Allow: \/\n[\s\S]*Sitemap: https:\/\/uusi\.saunotus\.com\/sitemap\.xml/);
+  assert.match(read(prodDist, 'robots.txt'), /Allow: \/\n[\s\S]*Sitemap: https:\/\/saunotus\.fi\/sitemap\.xml/);
   assert.doesNotMatch(read(prodDist, 'saunatietoa/miten-saunotaan-oikein/index.html'), /<meta name="robots" content="noindex/);
   assert.match(read(prodDist, 'saunatietoa/noindex-testiartikkeli/index.html'), /<meta name="robots" content="noindex,follow">/);
 });
@@ -78,7 +78,7 @@ const caught = (name, base, isTest, edits, re) => test(`tarkistus havaitsee: ${n
 });
 const P = () => prodDist;
 caught('puuttuva canonical', P(), false, [[ART, (h) => h.replace(/<link rel="canonical"[^>]*>/, '')]], /canonical-linkkejä 0/);
-caught('canonical ≠ mainEntityOfPage', P(), false, [[ART, (h) => h.replace(/<link rel="canonical" href="[^"]*"/, '<link rel="canonical" href="https://uusi.saunotus.com/muu/"')]], /mainEntityOfPage/);
+caught('canonical ≠ mainEntityOfPage', P(), false, [[ART, (h) => h.replace(/<link rel="canonical" href="[^"]*"/, '<link rel="canonical" href="https://saunotus.fi/muu/"')]], /mainEntityOfPage/);
 caught('rikkinäinen JSON-LD', P(), false, [[ART, (h) => h.replace('"@type":"Article"', '"@type":"Article",')]], /ei ole kelvollista JSONia/);
 caught('Article.image puuttuu', P(), false, [[ART, (h) => h.replace(/"image":\["[^"]*"\],?/, '')]], /Article\.image/);
 caught('Article.datePublished virheellinen', P(), false, [[ART, (h) => h.replace(/"datePublished":"[^"]*"/, '"datePublished":"eilen"')]], /datePublished ei ole ISO/);
@@ -86,18 +86,18 @@ caught('BreadcrumbList puuttuu', P(), false, [[ART, (h) => h.replace(/<script ty
 caught('hreflang ei molemminpuolinen', P(), false, [[ART_EN, (h) => h.replace(/<link rel="alternate" hreflang="fi"[^>]*>/, '')]], /hreflang/);
 caught('hreflang ilman x-default', P(), false, [[ART, (h) => h.replace(/<link rel="alternate" hreflang="x-default"[^>]*>/, '')]], /x-default/);
 caught('hreflang viittaa olemattomaan sivuun', P(), false, [[ART, (h) => h.replace('/en/sauna-knowledge/how-to-sauna/"', '/en/sauna-knowledge/ei-ole/"')]], /ei löydy dististä/);
-caught('sitemapissa noindex-sivu', P(), false, [['sitemap.xml', (x) => x.replace('</urlset>', '<url><loc>https://uusi.saunotus.com/saunatietoa/noindex-testiartikkeli/</loc><lastmod>2026-10-18</lastmod></url></urlset>')]], /noindex/);
-caught('sitemapista puuttuu indeksoitava artikkeli', P(), false, [['sitemap.xml', (x) => x.replace(/<url><loc>https:\/\/uusi\.saunotus\.com\/saunatietoa\/savusauna-lampiaminen\/<\/loc>.*?<\/url>\n?/, '')]], /puuttuu sitemapista/);
-caught('sitemap-loc ei vastaa sivua', P(), false, [['sitemap.xml', (x) => x.replace('</urlset>', '<url><loc>https://uusi.saunotus.com/saunatietoa/haamu/</loc><lastmod>2026-10-18</lastmod></url></urlset>')]], /ei vastaa dististä sivua/);
+caught('sitemapissa noindex-sivu', P(), false, [['sitemap.xml', (x) => x.replace('</urlset>', '<url><loc>https://saunotus.fi/saunatietoa/noindex-testiartikkeli/</loc><lastmod>2026-10-18</lastmod></url></urlset>')]], /noindex/);
+caught('sitemapista puuttuu indeksoitava artikkeli', P(), false, [['sitemap.xml', (x) => x.replace(/<url><loc>https:\/\/saunotus\.fi\/saunatietoa\/savusauna-lampiaminen\/<\/loc>.*?<\/url>\n?/, '')]], /puuttuu sitemapista/);
+caught('sitemap-loc ei vastaa sivua', P(), false, [['sitemap.xml', (x) => x.replace('</urlset>', '<url><loc>https://saunotus.fi/saunatietoa/haamu/</loc><lastmod>2026-10-18</lastmod></url></urlset>')]], /ei vastaa dististä sivua/);
 caught('sitemap rikki', P(), false, [['sitemap.xml', (x) => x.replace('</urlset>', '')]], /urlset ei sulkeudu/);
 caught('tuotannossa noindex-meta artikkelilla joka on sitemapissa', P(), false, [[ART, (h) => h.replace('<meta name="robots" content="index,follow">', '<meta name="robots" content="noindex,follow">')]], /on noindex/);
 caught('testiympäristössä noindex puuttuu', testDist, true, [[ART, (h) => h.replace('<meta name="robots" content="noindex,nofollow">', '')]], /noindex/);
 caught('img ilman width/height', P(), false, [[ART, (h) => h.replace(/ width="1200" height="800"/, '')]], /ilman width\/height/);
 caught('img ilman alt', P(), false, [[ART, (h) => h.replace(/ alt="Vihta ja vesisanko lauteilla"/, '')]], /ilman alt/);
 caught('ohjaussivun kohde puuttuu', P(), false, [['saunatietoa/savusauna-vanha-nimi/index.html', (h) => h.replace('url=/saunatietoa/savusauna-lampiaminen/', 'url=/saunatietoa/ei-ole/')]], /ohjauksen kohdetta ei löydy/);
-caught('ohjaussivun canonical väärin', P(), false, [['saunatietoa/savusauna-vanha-nimi/index.html', (h) => h.replace(/<link rel="canonical" href="[^"]*"/, '<link rel="canonical" href="https://uusi.saunotus.com/saunatietoa/savusauna-vanha-nimi/"')]], /canonical/);
+caught('ohjaussivun canonical väärin', P(), false, [['saunatietoa/savusauna-vanha-nimi/index.html', (h) => h.replace(/<link rel="canonical" href="[^"]*"/, '<link rel="canonical" href="https://saunotus.fi/saunatietoa/savusauna-vanha-nimi/"')]], /canonical/);
 caught('tagisivu ilman noindexia', P(), false, [['saunatietoa/tagi/loyly/index.html', (h) => h.replace('<meta name="robots" content="noindex,follow">', '<meta name="robots" content="index,follow">')]], /tagisivun pitää olla noindex/);
-caught('og:url ≠ canonical', P(), false, [[ART, (h) => h.replace(/<meta property="og:url" content="[^"]*"/, '<meta property="og:url" content="https://uusi.saunotus.com/x/"')]], /og:url/);
+caught('og:url ≠ canonical', P(), false, [[ART, (h) => h.replace(/<meta property="og:url" content="[^"]*"/, '<meta property="og:url" content="https://saunotus.fi/x/"')]], /og:url/);
 caught('vanhan EN-polun ohjaus osoittaa olemattomaan sivuun', P(), false, [['en/sauna-guide/index.html', (h) => h.replace('url=/en/sauna-knowledge/', 'url=/en/sauna-knowledge/ei-ole/')]], /ohjauksen kohdetta ei löydy/);
 caught('vanha EN-polku ei ole ohjaus vaan sivu', P(), false, [['en/sauna-guide/index.html', (h) => h.replace(/<meta http-equiv="refresh"[^>]*>/, '')]], /vanha osion polku/);
 caught('CTA puuttuu', P(), false, [[ART, (h) => h.replace(/<aside class="article-cta">.*?<\/aside>/s, '')]], /CTA/);

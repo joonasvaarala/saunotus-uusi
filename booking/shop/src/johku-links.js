@@ -1,11 +1,11 @@
 // Johku-linkit → oma sivusto. Projektin oletus (Joonas 24.10.2026): sivustolla EI ole yhtään Johku-linkkiä; kaikki asiakkaille näkyvät linkit
 // osoittavat uuden kaupan sisälle: FI /varaa/#/tuote/<slug>, EN /en/book/#/tuote/<slug> (yritystuotteet /yritykset/, lahjakortit /lahjakortti/).
-// Lisäksi tietokannan kuvauksiin tallennetut kanoniset osoitteet (https://uusi.saunotus.com/…, booking_161) ohjataan sivuston omaan BASE-polkuun.
+// Lisäksi tietokannan kuvauksiin tallennetut kanoniset osoitteet (https://saunotus.fi/…, booking_161) ohjataan sivuston omaan BASE-polkuun.
 // Käyttö: booking/shop/build.mjs (perussivuston HTML ja static-products.json build-aikana + vartija: dististä ei saa löytyä Johku-hrefiä) ja
 // rich-view.js (tietokannan rikkaat kuvaukset ajonaikana, window.BOOKING_SHOP.links). Puhdas moduuli, ei DOM-riippuvuutta.
 // Testit: booking/tests/linkit-kauppaan.test.mjs.
 export const JOHKU_URL = /^https:\/\/sipoonjoenperinnesauna\.johku\.com(?:\/([^/?#]+))?\/?([^?#]*)/;
-export const CANONICAL = 'https://uusi.saunotus.com';
+export const CANONICAL = 'https://saunotus.fi';
 // Johkun lahjakorttipaketit: avoin lahjakortti → lahjakorttisivun #avoin, muut paketit → #paketit (gift.js säilyttää id:t myynnin ollessa auki).
 const GIFT_OPEN = new Set(['lahjakortti']);
 
@@ -45,7 +45,7 @@ export function shopTarget(url, ctx = {}) {
 }
 
 /** HTML-merkkijonon <a href="johku…|kanoninen…"> → sivuston osoite (build-aika). Uuteen välilehteen -merkinnät ja target poistetaan. */
-const ANCHOR = /<a\b([^>]*?)href="((?:https:\/\/sipoonjoenperinnesauna\.johku\.com|https:\/\/uusi\.saunotus\.com)(?:[/#][^"]*)?)"([^>]*)>([\s\S]*?)<\/a>/g;
+const ANCHOR = /<a\b([^>]*?)href="((?:https:\/\/sipoonjoenperinnesauna\.johku\.com|https:\/\/saunotus\.fi)(?:[/#][^"]*)?)"([^>]*)>([\s\S]*?)<\/a>/g;
 const NOTE = /<span class="sr"> \((?:avautuu uuteen välilehteen|opens in a new tab)\)<\/span>/g;
 const attr = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 export function rewriteHtml(html, ctx) {

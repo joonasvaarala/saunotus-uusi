@@ -245,7 +245,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       id: row.id, code: row.code, product_id: row.product_id, name: p?.name || '', price: p?.price ?? null,
       label: row.label, active: row.active,
       path: `/juomat/?laite=${row.code}`, path_en: `/en/drinks/?laite=${row.code}`,
-      print_url: `https://uusi.saunotus.com/juomat/?laite=${row.code}`,
+      print_url: `https://saunotus.fi/juomat/?laite=${row.code}`,
     };
   };
   const inRange = (r, a) => (!a.p_from || r.starts_at >= a.p_from) && (!a.p_to || r.starts_at < a.p_to);
@@ -581,7 +581,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     },
     admin_pos_tenders: () => {
       need('pos.use');
-      return { mobilepay_mode: st.posModes.mobilepay_mode, vismapay_mode: st.posModes.vismapay_mode, site_base_url: 'https://uusi.saunotus.com', drinks_path: '/juomat/', drinks_path_en: '/en/drinks/', tenders: [
+      return { mobilepay_mode: st.posModes.mobilepay_mode, vismapay_mode: st.posModes.vismapay_mode, site_base_url: 'https://saunotus.fi', drinks_path: '/juomat/', drinks_path_en: '/en/drinks/', tenders: [
         { code: 'payment_link', handler: 'payment_link', channels: ['pos'], active: true, sort_order: 10, unavailable_reason: null },
         { code: 'mobilepay', handler: 'mobilepay', channels: ['pos', 'drinks'], active: true, sort_order: 20, unavailable_reason: null },
         { code: 'visma_pay', handler: 'visma_pay', channels: ['drinks'], active: true, sort_order: 30, unavailable_reason: null },

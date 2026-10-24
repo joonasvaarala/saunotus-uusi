@@ -9,7 +9,7 @@ import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 
 const root = resolve(new URL('../..', import.meta.url).pathname);
-delete process.env.SITE_ENV; process.env.SITE_URL = 'https://uusi.saunotus.com';
+delete process.env.SITE_ENV; process.env.SITE_URL = 'https://saunotus.fi';
 const PL = await import('../../src/policy-lang.mjs');
 const J = (f) => JSON.parse(readFileSync(resolve(root, f), 'utf8'));
 const rows = J('content/site-texts.pending-propose-59.json');

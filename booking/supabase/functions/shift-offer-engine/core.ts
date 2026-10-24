@@ -81,7 +81,6 @@ export type ShiftRoute = "offers" | "respond" | "redirect" | "options" | "tick" 
 // Sivut, joilta selain saa kutsua JSON-rajapintaa. Origin on skeema + isäntä, ei polkua.
 export const SHIFT_OFFER_PAGE_ORIGINS = [
   "https://joonasvaarala.github.io",
-  "https://uusi.saunotus.com",
   "https://saunotus.fi",
   "https://www.saunotus.fi",
 ];

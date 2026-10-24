@@ -35,14 +35,14 @@ test('migraatio: 9 kenttää 8 tuotteessa, upotetut tekstit vastaavat md5:iä (t
   assert.equal(n, 25);
 });
 
-test('linkkikohteet: kanoninen uusi.saunotus.com, tuotelinkit olemassa olevaan slugiin (FI /varaa/, EN /en/book/), muut sallitulla listalla', () => {
+test('linkkikohteet: kanoninen saunotus.fi, tuotelinkit olemassa olevaan slugiin (FI /varaa/, EN /en/book/), muut sallitulla listalla', () => {
   for (const x of rows(MIG)) {
-    const before = new Set([...x.from.matchAll(/href="(https:\/\/uusi\.saunotus\.com[^"]*)"/g)].map((m) => m[1]));
-    for (const [, h] of x.to.matchAll(/href="(https:\/\/uusi\.saunotus\.com[^"]*)"/g)) {
+    const before = new Set([...x.from.matchAll(/href="(https:\/\/saunotus\.fi[^"]*)"/g)].map((m) => m[1]));
+    for (const [, h] of x.to.matchAll(/href="(https:\/\/saunotus\.fi[^"]*)"/g)) {
       if (before.has(h)) continue;
-      const m = /^https:\/\/uusi\.saunotus\.com\/(varaa|en\/book)\/#\/tuote\/([a-z0-9-]+)$/.exec(h);
+      const m = /^https:\/\/saunotus\.fi\/(varaa|en\/book)\/#\/tuote\/([a-z0-9-]+)$/.exec(h);
       if (m) { assert.ok(slugs.has(m[2]), h); assert.equal(m[1] === 'en/book', x.col === 'description_en', `${h}: kieli = kenttä`); continue; }
-      assert.ok(['https://uusi.saunotus.com/varaa/#/', 'https://uusi.saunotus.com/varaa/#/?k=yleinen', 'https://uusi.saunotus.com/yritykset/'].includes(h), h);
+      assert.ok(['https://saunotus.fi/varaa/#/', 'https://saunotus.fi/varaa/#/?k=yleinen', 'https://saunotus.fi/yritykset/'].includes(h), h);
     }
   }
 });

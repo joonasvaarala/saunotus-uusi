@@ -28,7 +28,7 @@ test('migraatio: 16 tuotetta, Johku → /varaa/#/tuote/<oma slug> (vuosikortti #
     assert.equal(md5(x.to), x.toMd5, `${x.id} uusi`);
     assert.ok(x.from.startsWith(JOHKU), `${x.id} alkuperäinen on Johku-osoite`);
     assert.ok(x.from.endsWith('/' + x.slug), `${x.id} Johku-polku päättyy slugiin`);
-    assert.equal(x.to, 'https://uusi.saunotus.com/varaa/#/' + (x.slug === 'vuosikortti' ? 'vuosikortti' : 'tuote/' + x.slug));
+    assert.equal(x.to, 'https://saunotus.fi/varaa/#/' + (x.slug === 'vuosikortti' ? 'vuosikortti' : 'tuote/' + x.slug));
     assert.match(MIG, new RegExp(`--\\s+${x.id} ${x.fromMd5} → ${x.toMd5}`));
   }
 });
@@ -67,12 +67,12 @@ test('kb.json-snapshot vastaa ajon jälkeistä tilaa; tuotteet olemassa ja muut 
 
 test('sivusto: kanoninen kauppaosoite → EN /en/book/, build ohjaa BASE-polkuun', async () => {
   const L = await import('../../src/lib.mjs');
-  const u = 'https://uusi.saunotus.com/varaa/#/tuote/naistensauna';
+  const u = 'https://saunotus.fi/varaa/#/tuote/naistensauna';
   assert.equal(L.bookingUrl(u, 'fi'), u);
-  assert.equal(L.bookingUrl(u, 'en'), 'https://uusi.saunotus.com/en/book/#/tuote/naistensauna');
-  assert.equal(L.bookingUrl('https://uusi.saunotus.com/varaa/#/vuosikortti', 'en'), 'https://uusi.saunotus.com/en/book/#/vuosikortti');
+  assert.equal(L.bookingUrl(u, 'en'), 'https://saunotus.fi/en/book/#/tuote/naistensauna');
+  assert.equal(L.bookingUrl('https://saunotus.fi/varaa/#/vuosikortti', 'en'), 'https://saunotus.fi/en/book/#/vuosikortti');
   assert.equal(L.bookingUrl(JOHKU + 'hoidot/x', 'en'), 'https://sipoonjoenperinnesauna.johku.com/en_US/hoidot/x');
-  assert.equal(shopTarget('https://uusi.saunotus.com/en/book/#/tuote/naistensauna', { shop: '/b/en/book/', base: '/b' }), '/b/en/book/#/tuote/naistensauna');
+  assert.equal(shopTarget('https://saunotus.fi/en/book/#/tuote/naistensauna', { shop: '/b/en/book/', base: '/b' }), '/b/en/book/#/tuote/naistensauna');
 });
 
 test('SQL-testi t163 kattaa vartijat, synkan, rollbackin ja uudelleenajon', () => {

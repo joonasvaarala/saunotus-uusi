@@ -21,7 +21,7 @@ console.log("ALL OK");
 
 // ---- voucher_claim_received / voucher_claim_problem (tuotannon send-emails v6) ----
 {
-  const vcd = (o: any = {}) => ({ to_name: "Matti Meikäläinen", order: { order_no: 15321, order_url: "https://uusi.saunotus.com/tilaus/?t=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c", total: 0, items: [], reservations: [] }, voucher_claim: { claim_id: 7, status: "received", source: "elamyslahjat", code_masked: "…1234", problem_code: "invalid_code", ...o } });
+  const vcd = (o: any = {}) => ({ to_name: "Matti Meikäläinen", order: { order_no: 15321, order_url: "https://saunotus.fi/tilaus/?t=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c", total: 0, items: [], reservations: [] }, voucher_claim: { claim_id: 7, status: "received", source: "elamyslahjat", code_masked: "…1234", problem_code: "invalid_code", ...o } });
   const vout: any[] = [];
   for (const [k, d, l] of [
     ["voucher_claim_received", vcd(), "fi"], ["voucher_claim_received", vcd(), "en"],
