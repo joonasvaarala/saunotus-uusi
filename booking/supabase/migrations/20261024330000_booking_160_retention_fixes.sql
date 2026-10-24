@@ -7,8 +7,8 @@
 -- 2) Yrityksen nimi ja Y-tunnus säilyvät: orders.billing (company, business_id, business_id_raw, kun customer_kind <> 'private'),
 --    kuitin snapshot.buyer (company, business_id), laskun customer_snapshot (name, company_name, business_id, vat_id, kun Y-/ALV-tunnus on),
 --    yritystarjouksen company_name. Laskutusasiakas ilman Y-/ALV-tunnusta on henkilö: nimi ja osoite anonymisoidaan 6 v jälkeen.
--- 3) email_outbox: rivit POISTETAAN 12 kk (coalesce(sent_at, created_at)) jälkeen (157 vain tyhjensi payloadin).
---    Avoimet (pending, sending) ja uudelleenyritettävät (failed, attempts < max_attempts) rivit eivät käy.
+-- 3) email_outbox: EI muutoksia booking_157:ään (Joonas 24.10.2026: lähetettyjä sähköposteja ei saa poistaa). Rivejä ei koskaan poisteta;
+--    ehdokasehto ja ajon käsittely ovat tavu tavulta booking_157:n (payload → {"anonymized": true} 12 kk jälkeen, avoimet eivät käy).
 -- 4) PDF:t: kuitti- ja lasku-PDF 6 v (sama kirjanpitovuosilaskenta kuin tositteilla), lahjakortti-PDF 3 v. Ajo merkitsee pdf_deleted_at,
 --    jolloin receipt_by_token / invoice_by_token / svc_get_gift_card_pdf_data eivät enää palauta tietoja (PDF:ää ei muodosteta uudelleen).
 --    Tiedostot poistetaan Storage-API:lla (Edge Function privacy-storage-cleanup, lista booking.privacy_storage_due) — EI SQL:llä
@@ -25,8 +25,6 @@ insert into booking.settings(key, value, description) values
  ('privacy_retention.dry_run', 'true'::jsonb, 'booking_160: true (oletus) = privacy_retention_run vain laskee ja kirjaa määrät (status dry_run), ei muuta mitään, vaikka enabled = true. Myös Storage-siivous vain listaa.'),
  ('privacy_retention.gift_card_pdf_years', '3'::jsonb, 'booking_160: lahjakortin PDF poistetaan näin monen vuoden kuluttua kortin viimeisestä tapahtumasta/voimassaolosta.')
 on conflict (key) do nothing;
-update booking.settings set description = 'booking_157/160: lähetetyt/päättyneet sähköpostijonon rivit POISTETAAN näin monen kuukauden jälkeen (booking_160).'
- where key = 'privacy_retention.email_outbox_months';
 
 -- ===== sarakkeet ja taulut =====
 alter table booking.receipts add column if not exists pdf_deleted_at timestamptz;
@@ -316,10 +314,9 @@ cand as (
    cross join lateral (select (l.at at time zone 'Europe/Helsinki')::date as d) x
    where l.note is not null and extract(year from x.d)::integer + case when to_char(x.d, 'MM-DD') <= p.fye then 0 else 1 end <= p.max_acct_year
   union all
-  select 'email_outbox', e.id,
-         case when e.status in ('pending', 'sending') or (e.status = 'failed' and e.attempts < e.max_attempts) then 'open_email' end
+  select 'email_outbox', e.id, case when e.status in ('pending', 'sending') then 'open_email' end
     from booking.email_outbox e cross join p
-   where coalesce(e.sent_at, e.created_at) < p.cut_mail
+   where e.created_at < p.cut_mail and e.payload <> '{"anonymized": true}'::jsonb
   union all
   select 'analytics_events', a.id, null from booking.analytics_events a cross join p where a.event_date < p.cut_analytics
   -- booking_160: kuitti- ja lasku-PDF:t 6 v (kirjanpito), lahjakortti-PDF:t 3 v; PDF ensin pois jaosta (pdf_deleted_at), tiedosto Storage-API:lla
@@ -697,11 +694,12 @@ begin
   exception when others then v_errors := v_errors || jsonb_build_object('category', 'gift_card_ledger_6y', 'error', sqlstate || ' ' || left(sqlerrm, 200));
   end;
 
-  -- --- sähköpostijono: päättyneet rivit POISTETAAN (booking_160) ---
+  -- --- sähköpostijono: vain päättyneet rivit ---
   begin
-    delete from booking.email_outbox e
-     where e.id in (select x.id from pg_temp._privacy_cand x where x.category = 'email_outbox')
-       and e.status not in ('pending', 'sending') and not (e.status = 'failed' and e.attempts < e.max_attempts);
+    update booking.email_outbox e
+       set payload = '{"anonymized": true}'::jsonb,
+           last_error = regexp_replace(e.last_error, '[^[:space:]<>"'',;:]+@[^[:space:]<>"'',;:]+', '[poistettu]', 'g')
+     where e.id in (select x.id from pg_temp._privacy_cand x where x.category = 'email_outbox') and e.status not in ('pending', 'sending');
     get diagnostics v_n = row_count; v_counts := v_counts || jsonb_build_object('email_outbox', v_n);
   exception when others then v_errors := v_errors || jsonb_build_object('category', 'email_outbox', 'error', sqlstate || ' ' || left(sqlerrm, 200));
   end;

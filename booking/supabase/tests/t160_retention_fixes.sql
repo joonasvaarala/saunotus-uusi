@@ -1,6 +1,6 @@
 -- t160: tietosuojan säilytysajan korjaukset (booking_160). Säännöt 24.10.2026:
 -- 1) markkinointilupa: voimassa oleva lupa estää, peruminen on tapahtuma (3 v perumisesta); 2) yrityksen nimi ja Y-tunnus säilyvät
--- tilauksella, kuitilla, laskulla ja laskutusasiakkaalla; 3) sähköpostijonon rivit poistetaan 12 kk jälkeen (avoimet/uudelleenyritettävät eivät);
+-- tilauksella, kuitilla, laskulla ja laskutusasiakkaalla; 3) sähköpostijono: EI poistoja, käsittely täsmälleen kuten booking_157 (payload anonymisoidaan 12 kk jälkeen);
 -- 4) kuitti-/lasku-PDF 6 v, lahjakortti-PDF 3 v: merkintä + ei uudelleenmuodostusta + Storage-lista (ei SQL-poistoa storage.objects-riveistä);
 -- 5) anonymisoidun asiakkaan auth.users-tili poistetaan, henkilökunnan ei koskaan. Ehto: tilaus-/maksu-/varausrivit säilyvät.
 -- Lisäksi dry_run (oletus true): ajo ei kirjoita mitään. Kaikki data feikkiä (id-alue 916000–916099).
@@ -109,14 +109,14 @@ insert into storage.objects(bucket_id, name) values
 set local session_replication_role = origin;
 
 do $t$
-declare j jsonb; r jsonb; v_fp text; v_n int; v_cnt int; v_tok uuid; v_itok uuid; v_gtok uuid; v_tok3 uuid; v_orders int; v_pay int; v_res int;
+declare j jsonb; r jsonb; v_fp text; v_n int; v_cnt int; v_tok uuid; v_itok uuid; v_gtok uuid; v_tok3 uuid; v_orders int; v_pay int; v_res int; v_mail int;
         u_admin uuid := (select id from t160_u where k = 'admin'); u_user uuid := (select id from t160_u where k = 'user');
 begin
   select public_token into v_tok from booking.receipts where id = 916051;
   select public_token into v_tok3 from booking.receipts where id = 916053;
   select public_token into v_itok from booking.invoices where id = 916071;
   select public_token into v_gtok from booking.gift_cards where id = 916081;
-  select count(*) into v_orders from booking.orders; select count(*) into v_pay from booking.payments; select count(*) into v_res from booking.reservations;
+  select count(*) into v_orders from booking.orders; select count(*) into v_pay from booking.payments; select count(*) into v_res from booking.reservations; select count(*) into v_mail from booking.email_outbox;
 
   -- ===== A: asetukset ja rakenne =====
   perform pg_temp.ck((select value from booking.settings where key = 'privacy_retention.enabled') = 'false'::jsonb, 'A1 ajo yhä pois päältä (enabled=false)');
@@ -128,6 +128,8 @@ begin
   perform pg_temp.ck(booking._privacy_invoice_snapshot('{"name":"Oy","company_name":"Oy","business_id":"1-2","email":"a@b"}') = '{"anonymized":true,"name":"Oy","company_name":"Oy","business_id":"1-2"}'
                      and booking._privacy_invoice_snapshot('{"name":"Matti","email":"a@b"}') = '{"anonymized":true}'
                      and booking._privacy_invoice_snapshot('{"anonymized":true,"name":"Oy","business_id":"1-2"}') = '{"anonymized":true,"name":"Oy","business_id":"1-2"}', 'A6 laskun snapshot: idempotentti');
+  perform pg_temp.ck(not exists (select 1 from pg_proc p where p.pronamespace = 'booking'::regnamespace
+                                   and p.prosrc ~* 'delete\s+from\s+(booking\.)?email_outbox'), 'A7 mikään booking-funktio ei poista email_outbox-rivejä');
 
   -- ===== R: ehdokkaat (sääntö 1) =====
   perform pg_temp.ck(exists (select 1 from booking._privacy_candidates(current_date) c where c.category = 'customers' and c.id = 916001 and c.blocked = 'marketing_consent'), 'R1 voimassa oleva lupa estää');
@@ -145,9 +147,8 @@ begin
   perform pg_temp.ck(exists (select 1 from booking._privacy_candidates(current_date) c where c.category = 'auth_users' and c.id = 916003 and c.blocked is null)
                      and exists (select 1 from booking._privacy_candidates(current_date) c where c.category = 'auth_users' and c.id = 916008 and c.blocked = 'staff_account'), 'R9 auth-tili: asiakas erääntynyt, henkilökunta estetty');
   perform pg_temp.ck(exists (select 1 from booking._privacy_candidates(current_date) c where c.category = 'email_outbox' and c.id = 916091 and c.blocked is null)
-                     and exists (select 1 from booking._privacy_candidates(current_date) c where c.category = 'email_outbox' and c.id = 916092 and c.blocked = 'open_email')
                      and exists (select 1 from booking._privacy_candidates(current_date) c where c.category = 'email_outbox' and c.id = 916094 and c.blocked = 'open_email')
-                     and not exists (select 1 from booking._privacy_candidates(current_date) c where c.category = 'email_outbox' and c.id in (916095, 916096)), 'R10 sähköpostijono: 12 kk lähetyksestä, avoin/uudelleenyritettävä estää');
+                     and not exists (select 1 from booking._privacy_candidates(current_date) c where c.category = 'email_outbox' and c.id = 916095), 'R10 sähköpostijono: kuten booking_157 (12 kk luonnista, pending/sending estää)');
   -- raportti
   v_fp := pg_temp.fp();
   perform test.service();
@@ -225,8 +226,9 @@ begin
   perform pg_temp.ck((select company_name = 'Anonymisoitu' and street is null and city is null and contact_name is null from booking.invoice_customers where id = 916062), 'E12 henkilölaskutusasiakas: nimi ja osoite pois');
   perform pg_temp.ck((select company = 'T160 Oy' and business_id = '7654321-2' and email is null from booking.customers where id = 916006), 'E13 yritysasiakas: yritystiedot jäävät');
   -- sääntö 3
-  perform pg_temp.ck((select count(*) from booking.email_outbox where id in (916091, 916093, 916097, 916098)) = 0, 'E14 vanhat päättyneet sähköpostit poistettu');
-  perform pg_temp.ck((select count(*) from booking.email_outbox where id in (916092, 916094, 916095, 916096) and payload ? 'to') = 4, 'E15 uudelleenyritettävä, odottava ja tuoreet ennallaan');
+  perform pg_temp.ck((select count(*) from booking.email_outbox) = v_mail and (select count(*) from booking.email_outbox where id between 916091 and 916098) = 8, 'E14 sähköpostijonosta ei poistettu yhtään riviä');
+  perform pg_temp.ck((select count(*) from booking.email_outbox where id in (916091, 916092, 916093, 916096, 916097, 916098) and payload = '{"anonymized": true}'::jsonb) = 6
+                     and (select count(*) from booking.email_outbox where id in (916094, 916095) and payload ? 'to') = 2, 'E15 kuten booking_157: vanhat päättyneet anonymisoitu, odottava ja tuore ennallaan');
   -- sääntö 4
   perform pg_temp.ck((select pdf_deleted_at is not null from booking.receipts where id = 916051) and (select pdf_deleted_at is null from booking.receipts where id = 916053)
                      and (select pdf_deleted_at is not null from booking.invoices where id = 916071)
@@ -255,7 +257,7 @@ begin
   -- ehto
   perform pg_temp.ck((select count(*) from booking.orders) = v_orders and (select count(*) from booking.payments) = v_pay and (select count(*) from booking.reservations) = v_res
                      and exists (select 1 from booking.reservations where id = 916031) and exists (select 1 from booking.payments where id = 916041 and amount = 200), 'E27 tilaus-, maksu- ja varausrivit säilyvät');
-  perform pg_temp.ck((select (counts ->> 'auth_users')::int >= 1 and (counts ->> 'auth_users_skipped')::int >= 3 and (counts ->> 'email_outbox')::int >= 4 from booking.privacy_retention_runs order by id desc limit 1), 'E28 ajoloki: uudet määrät');
+  perform pg_temp.ck((select (counts ->> 'auth_users')::int >= 1 and (counts ->> 'auth_users_skipped')::int >= 3 and (counts ->> 'email_outbox')::int >= 6 from booking.privacy_retention_runs order by id desc limit 1), 'E28 ajoloki: uudet määrät');
   -- uusinta
   v_fp := pg_temp.fp();
   perform test.service(); j := booking.privacy_retention_run(); perform test.logout();

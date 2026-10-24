@@ -212,10 +212,9 @@ cand as (
    cross join lateral (select (l.at at time zone 'Europe/Helsinki')::date as d) x
    where l.note is not null and extract(year from x.d)::integer + case when to_char(x.d, 'MM-DD') <= p.fye then 0 else 1 end <= p.max_acct_year
   union all
-  select 'email_outbox', e.id,
-         case when e.status in ('pending', 'sending') or (e.status = 'failed' and e.attempts < e.max_attempts) then 'open_email' end
+  select 'email_outbox', e.id, case when e.status in ('pending', 'sending') then 'open_email' end
     from booking.email_outbox e cross join p
-   where coalesce(e.sent_at, e.created_at) < p.cut_mail
+   where e.created_at < p.cut_mail and e.payload <> '{"anonymized": true}'::jsonb
   union all
   select 'analytics_events', a.id, null from booking.analytics_events a cross join p where a.event_date < p.cut_analytics
   -- booking_160: kuitti- ja lasku-PDF:t 6 v (kirjanpito), lahjakortti-PDF:t 3 v; PDF ensin pois jaosta (pdf_deleted_at), tiedosto Storage-API:lla

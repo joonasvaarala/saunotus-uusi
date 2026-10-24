@@ -689,8 +689,6 @@ do $$ begin
 end $$;
 
 delete from booking.settings where key in ('privacy_retention.dry_run', 'privacy_retention.gift_card_pdf_years');
-update booking.settings set description = 'booking_157: lähetettyjen/päättyneiden sähköpostien payload (vastaanottaja, linkit) tyhjennetään näin monen kuukauden jälkeen.'
- where key = 'privacy_retention.email_outbox_months';
 
 -- Tarkistus: funktiot ovat täsmälleen tuotannon booking_160:tä edeltävät määrittelyt.
 do $$

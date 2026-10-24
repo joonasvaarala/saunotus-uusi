@@ -221,7 +221,7 @@ jobs:
       - run: node --test booking/tests/kavijamittaus-kovennus.test.mjs
       # booking_157: tietosuojan säilytysajat ja kävijämittauksen kuukausikooste (rakenne; SQL-testit t157 paikallisesti PG17:llä)
       - run: node --test booking/tests/tietosuoja-sailytys.test.mjs
-      # booking_160: säilytysajan korjaukset (markkinointilupa, yrityksen nimi/Y-tunnus, sähköpostijonon poisto, PDF:t 6 v / 3 v Storage-API:lla, asiakkaiden auth-tilit;
+      # booking_160: säilytysajan korjaukset (markkinointilupa, yrityksen nimi/Y-tunnus, sähköpostijono ennallaan eikä poistoja, PDF:t 6 v / 3 v Storage-API:lla, asiakkaiden auth-tilit;
       # rakenne; SQL-testit t160 paikallisesti PG17:llä)
       - run: node --test booking/tests/tietosuoja-160.test.mjs
       # booking_149: asiakkaan peruutuspyyntö (ja sen kautta hyvitys) vain, jos vuoron alkuun on vähintään customer_change_hours_before (48) h;

@@ -92,11 +92,31 @@ test('sääntö 2: yrityksen nimi ja Y-tunnus säilyvät', () => {
   assert.ok(c.includes("_privacy_keep("));
 });
 
-test('sääntö 3: lähetetyt sähköpostit poistetaan jonosta (ei vain anonymisoida)', () => {
-  const r = fnBody('privacy_retention_run()');
-  assert.match(r, /delete from booking\.email_outbox e/);
-  assert.ok(!/update booking\.email_outbox/.test(r));
-  assert.match(block(mig), /'email_outbox'/);
+test('sääntö 3 (Joonas 24.10.2026): sähköpostijonosta ei koskaan poisteta rivejä; käsittely täsmälleen kuten booking_157', () => {
+  const files = [
+    'booking/supabase/migrations/20261024165608_booking_157_privacy_retention.sql',
+    'booking/supabase/rollbacks/20261024165608_booking_157_ROLLBACK.sql',
+    'booking/supabase/manual/booking_157_retention_report_readonly.sql',
+    'booking/supabase/manual/booking_157_retention_cron.sql',
+    'booking/supabase/tests/t157_privacy_retention.sql',
+    MIG, RB, RO, CRON,
+    'booking/supabase/tests/t160_retention_fixes.sql',
+    'booking/supabase/tests/t160_retention_fixes_rollback.psql',
+  ];
+  for (const f of files) {
+    const c = code(read(f));
+    assert.ok(!/delete\s+from\s+(booking\.)?email_outbox/i.test(c), `${f}: DELETE email_outbox`);
+    assert.ok(!/truncate\s+(table\s+)?(booking\.)?email_outbox/i.test(c), `${f}: TRUNCATE email_outbox`);
+  }
+  for (const p of [`${FN}/index.ts`, `${FN}/core.ts`]) assert.ok(!/email_outbox/.test(read(p)), p);
+  // ehdokasehto ja ajon käsittely tavu tavulta booking_157:n
+  const m157 = read('booking/supabase/migrations/20261024165608_booking_157_privacy_retention.sql');
+  const cand = (s) => { const i = s.indexOf("  select 'email_outbox', e.id"); assert.ok(i > 0); return s.slice(i, s.indexOf('  union all', i)); };
+  assert.equal(cand(mig), cand(m157));
+  assert.equal(cand(ro), cand(m157));
+  const run = (s) => { const i = s.indexOf('  -- --- sähköpostijono'); assert.ok(i > 0); return s.slice(i, s.indexOf('\n  end;', i)); };
+  assert.equal(run(mig), run(m157));
+  assert.ok(!/privacy_retention\.email_outbox_months/.test(code(mig).replace(/s\.key = 'privacy_retention\.email_outbox_months'|_privacy_int\('privacy_retention\.email_outbox_months'/g, '')), 'asetusta ei muuteta');
 });
 
 test('sääntö 4: PDF:t merkitään SQL:ssä, tiedostot poistetaan vain Storage-API:lla', () => {
