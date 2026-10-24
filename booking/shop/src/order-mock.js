@@ -63,7 +63,10 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
     if (hoito === 'hoito-lukittu') { o.can_change = false; o.change_deadline = `${day(-1)}T13:00:00Z`; }
   }
   if (o.reservations.length) {
-    o.instructions = [{ id: 1, title: locale === 'en' ? 'Before your visit' : 'Ennen käyntiä', body: locale === 'en' ? 'Sample instruction on the trial page. This is not a real customer message.' : 'Esimerkkiohje kokeilusivulla. Tämä ei ole oikea asiakasviesti.', link_url: null }];
+    o.instructions = [{ id: 1, title: locale === 'en' ? 'Before your visit' : 'Ennen käyntiä',
+      short_text: locale === 'en' ? 'Bring a towel.' : 'Ota mukaan pyyhe.', short_rich: false,
+      body: locale === 'en' ? 'Sample instruction on the trial page. This is not a real customer message.' : 'Esimerkkiohje kokeilusivulla. Tämä ei ole oikea asiakasviesti.',
+      rich: false, delivery_mode: 'order_only', link_url: null }];
   }
   const mp = { started: false, returning: false, polls: 0, settled: false };
   const mpMarkPaid = () => {

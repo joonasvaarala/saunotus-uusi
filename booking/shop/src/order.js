@@ -51,8 +51,14 @@ function safeHttps(u) {
 }
 function instructionsSection(list) {
   if (!list?.length) return null;
+  // Otsikko ja lyhyt ohje ovat aina näkyvissä; vain pitkä ohje avataan napista.
+  const previews = h('div', { class: 'ord-guide-previews', 'data-testid': 'guide-previews' });
   const panel = h('div', { hidden: true, 'data-testid': 'guide-body' });
   for (const g of list) {
+    const short = String(g.short_text ?? '').trim();
+    previews.append(h('article', { class: 'ord-guide', 'data-testid': 'guide-preview' },
+      g.title ? h('h4', { text: g.title }) : null,
+      short ? richHost(h, short, 'ord-guide-short', g.short_rich === true) : null));
     const link = safeHttps(g.link_url);
     panel.append(h('article', { class: 'ord-guide', 'data-testid': 'guide-item' },
       g.title ? h('h4', { text: g.title }) : null,
@@ -67,7 +73,7 @@ function instructionsSection(list) {
     if (open) revealIfHidden(panel);
   } });
   return h('section', { class: 'ord-card', 'aria-labelledby': 'ord-g', 'data-testid': 'order-guides' },
-    h('h3', { id: 'ord-g', text: t.guideTitle }), h('p', { class: 'bk-note', text: t.guideLead }), btn, panel);
+    h('h3', { id: 'ord-g', text: t.guideTitle }), h('p', { class: 'bk-note', text: t.guideLead }), previews, btn, panel);
 }
 
 async function unsubscribe(token) {

@@ -102,7 +102,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     messagesTimed: false,
     messageSeq: 2,
     messages: [{
-      id: 1, name: '[ESIMERKKI EI KÄYTÖSSÄ] Ohje', category: 'instruction', active: false,
+      id: 1, name: '[ESIMERKKI EI KÄYTÖSSÄ] Ohje', category: 'instruction', delivery_mode: 'scheduled', active: false,
       subject_fi: '[ESIMERKKI] Ohje', subject_en: '[EXAMPLE] Instructions',
       short_fi: 'Esimerkkipohja, ei käytössä.', short_en: 'Example template, not in use.',
       body_fi: 'Esimerkkipohja, ei käytössä. Täysi ohje.', body_en: 'Example template, not in use.',
@@ -855,7 +855,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     admin_list_invoice_dispatch: (a) => { need('invoices.manage'); return st.invLog.filter((d) => d.invoice_id === a.p_invoice_id); },
     admin_list_messages: () => {
       need('messages.edit');
-      return { timed_enabled: st.messagesTimed === true, messages: st.messages.map((m) => ({ ...m, product_ids: [...m.product_ids] })) };
+      return { timed_enabled: st.messagesTimed === true, messages: st.messages.map((m) => ({ ...m, delivery_mode: m.delivery_mode || 'scheduled', product_ids: [...m.product_ids] })) };
     },
     admin_set_messages_timed: (a) => {
       need('messages.edit');
@@ -865,7 +865,11 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     },
     admin_save_message: (a) => {
       need('messages.edit');
-      const v = validateMessage(a.p_data || {});
+      // booking_141: puuttuva delivery_mode → olemassa oleva viesti säilyttää tapansa (kuten tietokanta).
+      const prev = a.p_id ? st.messages.find((m) => m.id === a.p_id) : null;
+      const data = { ...(a.p_data || {}) };
+      if (prev && data.delivery_mode == null) data.delivery_mode = prev.delivery_mode || 'scheduled';
+      const v = validateMessage(data);
       if (!v.ok) throw err(v.code, v.code);
       const known = new Set(st.products.map((p) => p.id));
       if (v.value.product_ids.some((id) => !known.has(id))) throw err('invalid_product', 'Tuntematon tuote');
