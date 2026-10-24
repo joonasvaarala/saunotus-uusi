@@ -14,8 +14,8 @@ import { NB } from '../admin/nb-texts.js';
 const root = dirname(fileURLToPath(import.meta.url));
 const repo = join(root, '../..');
 const read = (p) => readFileSync(join(root, '..', p), 'utf8');
-const MIG = 'supabase/migrations/20261025010500_booking_172_company_customer_search.sql';
-const RB = 'supabase/rollbacks/20261025010500_booking_172_ROLLBACK.sql';
+const MIG = 'supabase/migrations/20261024222000_booking_172_company_customer_search.sql';
+const RB = 'supabase/rollbacks/20261024222000_booking_172_ROLLBACK.sql';
 
 test('mock admin_search_customers: yritys löytyy nimellä, y-tunnuksella, yhteyshenkilöllä ja sähköpostilla', async () => {
   const mock = createAdminMock({ delay: 0 });

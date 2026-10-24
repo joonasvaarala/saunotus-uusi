@@ -1,6 +1,6 @@
 -- booking_172: yritysasiakkaat löytyvät hallinnan asiakashausta (Uusi varaus ja Uusi lasku).
--- VÄLIAIKAINEN versio 20261025010500: EI ajettu tuotantoon. Bottiavustus ajaa (apply_migration nimellä booking_172_company_customer_search)
--- ja nimeää tiedoston tuotannon version mukaan. Ei public-skeemaa. Ei muuta dataa (vain funktioita).
+-- Tuotannossa versio 20261024222000 (apply_migration booking_172_company_customer_search, Bottiavustus 25.10.2026).
+-- Ei public-skeemaa. Ei muuta dataa (vain funktioita).
 --
 -- Virhe (Joonas 25.10.): haku löytää henkilöasiakkaat, mutta yritysasiakkaat eivät näy Uusi varaus- eikä Uusi lasku -haussa.
 -- Juurisyy: Johku-tuonnissa yritystilauksen yritystiedot (yritys, y-tunnus, osoite, verkkolasku) ovat vain tilauksella (orders.billing);
@@ -22,7 +22,7 @@
 --   booking.admin_search_invoice_customers(text,integer): 3d8de7f0154e173583efa97a04616ea7 -> 0b6a95a0bb492fe96632c719ff72e42c
 --   uusi booking._order_company_hits(text,integer): 007c407a3fb71e6ee9098796ca34f57c
 --   uusi booking.admin_search_customers(text,integer): 6ab4f8a588a792ca3af0614a20ceb659
--- Rollback: rollbacks/20261025010500_booking_172_ROLLBACK.sql. Testi: tests/customers/t172_company_customer_search.sql (paikallinen PG17).
+-- Rollback: rollbacks/20261024222000_booking_172_ROLLBACK.sql. Testi: tests/customers/t172_company_customer_search.sql (paikallinen PG17).
 set local lock_timeout = '5s';
 
 do $g$

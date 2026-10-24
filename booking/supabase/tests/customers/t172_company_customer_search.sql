@@ -1,4 +1,4 @@
--- t172: yritysasiakkaat löytyvät Uusi varaus- ja Uusi lasku -hausta (booking_172, väliaikainen versio 20261025010500, EI tuotannossa).
+-- t172: yritysasiakkaat löytyvät Uusi varaus- ja Uusi lasku -hausta (booking_172, tuotannossa versio 20261024222000).
 -- A rakenne, md5 ja oikeudet, B tilausten yritykset (_order_company_hits), C Uusi varaus -haku (admin_search_customers),
 -- D Uusi lasku -haku (admin_search_invoice_customers), E oikeudet (forbidden), F vartija (väärä md5 → keskeytys, ei muutoksia).
 -- Ajo paikallisessa PG17:ssä migraation jälkeen (pohja: tuotannon tarkat funktiomäärittelyt + minimitaulut, ks. raportti):
