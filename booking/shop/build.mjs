@@ -56,7 +56,8 @@ const STATIC_KEYS = ['id', 'name', 'name_en', 'description', 'description_en', '
 // Johku-linkit kuvauksissa → kauppa (johku-links.js): FI-kentät FI-kauppaan, *_en EN-kauppaan
 const PATHS = { fi: { shop: site.pages.book.fi, confirm: site.pages.book.fi + 'vahvistus/', order: '/tilaus/' }, en: { shop: site.pages.book.en, confirm: site.pages.book.en + 'confirmation/', order: '/en/order/' } };
 const SLUGS = kb.products.map((p) => p.slug);
-const LINKS = (lang) => ({ shop: BASE + PATHS[lang].shop, companies: BASE + site.pages.companies[lang], slugs: SLUGS });
+const LINKS = (lang) => ({ shop: BASE + PATHS[lang].shop, companies: BASE + site.pages.companies[lang], gift: BASE + site.pages.gift[lang], info: BASE + site.pages.info[lang],
+  terms: BASE + site.pages.terms[lang], privacy: BASE + (site.pages.privacy[lang] || site.pages.privacy.fi), base: BASE, slugs: SLUGS });
 const linkVal = (k, v) => (typeof v === 'string' && /^(short_)?description(_en)?$/.test(k) ? JL.rewriteHtml(v, LINKS(k.endsWith('_en') ? 'en' : 'fi')) : v);
 writeFileSync(join(A, 'static-products.json'), JSON.stringify(Object.fromEntries(kb.products.map((p) => [p.slug, Object.fromEntries(STATIC_KEYS.filter((k) => p[k] != null).map((k) => [k, linkVal(k, p[k])])) ]))));
 
@@ -134,8 +135,9 @@ for (const lang of ['fi', 'en']) {
   writeFileSync(f, html);
 }
 
-// 4) Johku-linkit → sisäinen varauskalenteri (johku-links.js: tuote → /varaa/#/tuote/<slug>, EN /en/book/#/tuote/<slug>; yrityksille → yrityssivu;
-//    vuosikortti → #/vuosikortti; jää Johkuun vain johku-links.js:n KEEP-lista: lahjakorttivaraus, lahja-/sarjakortit, Johkun info)
+// 4) Johku-linkit → oma sivusto (johku-links.js: tuote → /varaa/#/tuote/<slug>, EN /en/book/#/tuote/<slug>; yrityksille → yrityssivu;
+//    vuosikortti → #/vuosikortti; lahja-/sarjakortit → /lahjakortti/#avoin|#paketit; lahjakorttivaraus → kauppa; info → omat info-/ehto-/tietosuojasivut).
+//    Ei yhtään Johku-linkkiä: vartija alla kaataa buildin, jos distin HTML:ssä tai static-products.json:ssa on Johku-href.
 const rewrite = (html, lang) => JL.rewriteHtml(html, LINKS(lang));
 let changed = 0;
 (function walk(dir) {
@@ -149,6 +151,19 @@ let changed = 0;
     if (out !== src) { writeFileSync(p, out); changed++; }
   }
 })(OUT);
+// Vartija (Joonas 24.10.2026): sivustolla ei saa olla yhtään Johku-linkkiä (href). Tekstimaininnat eivät ole linkkejä.
+{
+  const bad = [];
+  (function scan(dir) {
+    for (const n of readdirSync(dir)) {
+      const p = join(dir, n);
+      if (statSync(p).isDirectory()) { scan(p); continue; }
+      if (!(n.endsWith('.html') || n === 'static-products.json')) continue;
+      for (const h of JL.johkuHrefs(readFileSync(p, 'utf8'))) bad.push(`${p.slice(OUT.length)}: ${h}`);
+    }
+  })(OUT);
+  if (bad.length) { console.error(`shop build: VIRHE: Johku-linkkejä jäi (${bad.length}):\n  ${[...new Set(bad)].slice(0, 30).join('\n  ')}`); process.exit(1); }
+}
 // Varmistus: jokainen kaupan distin relatiivinen import löytyy dististä (sama tarkistus kuin hallinnalla build-pages.mjs:ssä).
 (function chkImports(d) { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) continue; if (!n.endsWith('.js')) continue; for (const m of readFileSync(p, 'utf8').matchAll(/(?:from|import)\s*\(?\s*(['"])(\.{1,2}\/[^'"?]+\.js)(?:\?[^'"]*)?\1/g)) { if (!statSync(resolve(d, m[2]), { throwIfNoEntry: false })) { console.error(`shop build: VIRHE: ${p}: tuotu moduuli puuttuu dististä: ${m[2]}`); process.exit(1); } } } })(A);
 console.log(`shop build ok → ${OUT} (${changed} sivun Johku-linkit korvattu)`);
