@@ -168,4 +168,18 @@ export const EMAIL_TEXTS: TextTable = {
   "email.waitlist.book_button": { fi: "Varaa paikka", en: "Book your place" },
   "email.waitlist.leave": { fi: "Etkö enää tarvitse ilmoituksia tästä vuorosta?", en: "No longer need notifications for this session?" },
   "email.waitlist.leave_link": { fi: "Poistu jonotuslistalta", en: "Leave the waiting list" },
+  // ---- vuosikortin koodi (booking_146) ----
+  "email.annual_card.subject": { fi: `Vuosikorttisi koodi – ${SN}`, en: `Your annual card code – ${SN}` },
+  "email.annual_card.title": { fi: "Vuosikorttisi on valmis", en: "Your annual card is ready" },
+  "email.annual_card.intro": { fi: "Kiitos vuosikortin ostosta. Tällä koodilla varaat saunavuorosi verkossa.", en: "Thank you for buying an annual card. Use this code to book your sauna sessions online." },
+  "email.annual_card.code_label": { fi: "Vuosikorttikoodi", en: "Annual card code" },
+  "email.annual_card.valid": { fi: "Voimassa {{var:from}}–{{var:to}}", en: "Valid {{var:from}}–{{var:to}}" },
+  "email.annual_card.how_title": { fi: "Näin varaat vuoron", en: "How to book" },
+  "email.annual_card.how_1": { fi: "Avaa varauskalenteri ja valitse yleinen saunavuoro.", en: "Open the booking calendar and choose a public sauna session." },
+  "email.annual_card.how_2": { fi: "Varaa yhdelle hengelle. Vuosikorttivaraukseen ei lisätä lisäpalveluja.", en: "Book for one person. Extras are not added to an annual card booking.", cls: "protected" },
+  "email.annual_card.how_3": { fi: "Kirjoita koodi kassalla kohtaan Alennus- tai vuosikorttikoodi. Käytä samaa sähköpostiosoitetta tai puhelinnumeroa kuin vuosikortin ostossa.", en: "At checkout, enter the code in the Discount or annual card code field. Use the same email address or phone number as when you bought the annual card.", cls: "protected" },
+  "email.annual_card.how_4": { fi: "Kortilla voi olla yksi tuleva varaus kerrallaan.", en: "The card can have one upcoming booking at a time.", cls: "protected" },
+  "email.annual_card.book_button": { fi: "Avaa varauskalenteri", en: "Open the booking calendar" },
+  "email.annual_card.keep": { fi: "Säilytä tämä viesti. Koodi on henkilökohtainen, älä jaa sitä muille.", en: "Keep this message. The code is personal, so please do not share it." },
+  "email.annual_card.sign_name": { fi: "Tapio", en: "Tapio" },
 };

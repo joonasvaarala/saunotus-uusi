@@ -15,6 +15,7 @@ import { createSalesChart } from './talous-sales-chart.js';
 import { loadOrderTexts } from '../orders-texts.js';
 import { loadReportTexts } from '../reports-texts.js';
 import { loadRcTexts } from '../refund-cancel-texts.js';
+import { loadAcTexts } from '../annual-card-texts.js';
 
 const ALL_TABS = [['orders', 'tab.orders'], ['payments', 'tab.payments'], ['reports', 'tab.reports'], ['analytics', 'tab.analytics'], ['giftcards', 'tab.giftcards'], ['vouchers', 'tab.vouchers']];
 
@@ -23,6 +24,7 @@ export async function render({ ctx, reload, query }) {
   await loadOrderTexts(rpc);
   await loadReportTexts(rpc);
   await loadRcTexts(rpc);
+  await loadAcTexts(rpc);
   // Raportit (sopimus §11): välilehti ja päiväraportti = reports.daily TAI reports.view; kuukausi + CSV = vain reports.view (muuten selkeä ilmoitus). Oikeudet luetaan aina oikealta käyttäjältä (myös ?mock=1).
   const canFull = !!ctx.can('reports.view'), canDaily = canFull || !!ctx.can('reports.daily');
   // Lahjakortit-välilehti: giftcards.manage. Tilaukset/Maksut: payments.manage (nav-kohta aukeaa myös pelkällä giftcards.manage → silloin vain Lahjakortit).

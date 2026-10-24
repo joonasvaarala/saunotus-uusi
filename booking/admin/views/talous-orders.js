@@ -12,9 +12,13 @@ import { effectivePaymentFilter, PAYMENT_FILTERS } from '../orders-filter.js';
 import { orderText } from '../orders-texts.js';
 import { rcText } from '../refund-cancel-texts.js';
 import { yesNo } from './refund-cancel.js';
+import { annualCardPanel, showAnnualCardDialog } from './annual-card-panel.js';
+import { acText } from '../annual-card-texts.js';
 
 export const ORDER_SORTS = ['created', 'order_no', 'total', 'payment_status', 'first_reservation'];
 const VAT_CHOICES = [25.5, 13.5, 0];
+
+const annualSec = (info, sec) => { const panel = annualCardPanel(info); return panel ? h('div', { 'data-testid': 'order-annual-card' }, sec(acText('ui.admin.annual_card.title'), panel)) : null; };
 
 export function createOrdersTab({ api, ctx, gift = null }) {
   const st = { search: '', paymentFilter: 'paid', source: '', native: '', dateField: '', from: '', to: '', sortBy: 'created', sortDir: 'desc', limit: 25, offset: 0 };
@@ -75,7 +79,8 @@ export function createOrdersTab({ api, ctx, gift = null }) {
       canRetry && r.status !== 'failed' ? actionBtn({ key: 'refund-retry', label: t('refund.retry'), testid: 'btn-refund-retry', onClick: async () => { if (p.provider === 'visma_pay') await processVismaRefund(r.id); else await processMobilepayRefund(r.id); afterChange(null, o.order_id); } }) : null)));
   }
   async function orderDetail(id) {
-    const o = await api.getOrder(id);
+    // booking_146: vuosikorttitilauksen koodi, voimassaolo ja sähköpostin tila (virhe tai puuttuva RPC → osio jää pois)
+    const [o, annual] = await Promise.all([api.getOrder(id), api.annualCardForOrder ? api.annualCardForOrder(id).catch(() => null) : null]);
     const b = o.balance, unpaid = b.unpaid;
     const sec = (title, ...kids) => h('section', { class: 'tl-sec' }, h('h3', { text: title }), ...kids);
     const payments = o.payments.length
@@ -107,7 +112,7 @@ export function createOrdersTab({ api, ctx, gift = null }) {
       actionBtn({ key: 'recordPayment', label: t('btn.record'), ico: 'plus', testid: 'btn-record', extraDisabled: !o.is_native ? t('btn.addJohku') : unpaid > 0 ? null : t('btn.recordNone'), onClick: () => recordDialog(o) }),
       actionBtn({ key: 'refund', label: t('btn.refund'), ico: 'undo', testid: 'btn-refund', extraDisabled: !canRefund ? t('btn.refundNoPerm') : refundable.length ? null : t('btn.refundNone'), onClick: () => refundDialog(o, refundable) }));
     const receipts = sec(`${t('receipts.title')} (${o.receipts.length})`, receiptsList({ api, ctx, receipts: o.receipts }), o.receipts.length ? h('p', { class: 'muted tl-hint', text: t('receipts.emailNote') }) : null);
-    return h('div', { class: 'tl-detail' }, meta, ...notes, sums, sec(t('order.payments'), payments), !o.is_native && !o.receipts.length ? null : receipts,   // Johku-tilaukselle ei synny kuittia (booking_41)
+    return h('div', { class: 'tl-detail' }, meta, ...notes, sums, annualSec(annual, sec), sec(t('order.payments'), payments), !o.is_native && !o.receipts.length ? null : receipts,   // Johku-tilaukselle ei synny kuittia (booking_41)
        sec(t('order.reservations'), reservations), actions);
   }
 
@@ -188,6 +193,8 @@ export function createOrdersTab({ api, ctx, gift = null }) {
       if (!(amt > 0) || amt > o.balance.unpaid + 0.005) throw new Error(t('refund.badAmount'));
       const res = await api.recordPayment({ orderId: o.order_id, method: fd.get('method'), amount: amt, note: String(fd.get('note') || '').trim() || null });
       doneToast(res, RPC.recordPayment); afterChange(res, o.order_id);
+      // booking_146: maksu loi vuosikortin → koodi heti näkyviin (iso koodi, kopiointi, voimassaolo, sähköpostin tila)
+      if (api.annualCardForOrder) api.annualCardForOrder(o.order_id).then((ac) => showAnnualCardDialog(ac)).catch(() => {});
     });
   }
   function refundDialog(o, refundable) {

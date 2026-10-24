@@ -314,3 +314,42 @@ test('business_quote_notify: reply-to on asiakas, muut lajit pitävät yhteisen 
   assert.equal(T.outboundReplyTo('order_confirmation', {}, 'savusauna@saunotus.fi'), 'savusauna@saunotus.fi');
   assert.equal(T.outboundReplyTo('order_confirmation', {}, ''), undefined);
 });
+
+// ---- booking_146: vuosikortin koodi ----
+const CARD = (locale, extra = {}) => ({ id: 77, kind: 'annual_card_code', locale, to: 'aada@example.com', to_name: 'Aada Testi', order: { order_no: 15400, order_url: ORDER_URL, total: 290, status: 'confirmed' },
+  annual_card: { card_id: 9, code: 'VK7QK9TXM3', valid_from: '2026-10-24', valid_to: '2027-10-23', active: true, revoked: false, booking_url: locale === 'en' ? `${SITE}/en/book/` : `${SITE}/varaa/`, ...extra } });
+test('annual_card_code: koodi isona, voimassaolo, kalenterilinkki, ohjeet ja Tapion allekirjoitus (FI)', { skip }, () => {
+  const m = R('annual_card_code', CARD('fi'), 'fi');
+  assert.equal(m.subject, 'Vuosikorttisi koodi – Sipoonjoen Perinnesauna');
+  assert.match(m.text, /Vuosikorttikoodi: VK7QK9TXM3/);
+  assert.match(m.text, /Voimassa 24\.10\.2026–23\.10\.2027/);
+  assert.match(m.text, /yhdelle hengelle/);
+  assert.match(m.text, /kohtaan Alennus- tai vuosikorttikoodi/);
+  assert.match(m.text, /https:\/\/uusi\.saunotus\.com\/varaa\//);
+  assert.match(m.text, /Ystävällisin terveisin,\nTapio\nSipoonjoen Perinnesauna\n$/);
+  assert.match(m.html, /font-size:28px[^>]*>VK7QK9TXM3</);
+  assert.match(m.html, /href="https:\/\/uusi\.saunotus\.com\/varaa\/"/);
+  assert.match(m.html, /Tapio<br>Sipoonjoen Perinnesauna/);
+  assert.doesNotMatch(m.html + m.text, /whatsapp/i);
+  assert.doesNotMatch(m.html, /#(?:00f|0000ff|1a73e8|0066cc|007bff)\b/i, 'ei sinistä');
+});
+test('annual_card_code: EN-versio ja /en/book/-linkki; koodi ja linkki escapoidaan', { skip }, () => {
+  const m = R('annual_card_code', CARD('en'), 'en');
+  assert.equal(m.subject, 'Your annual card code – Sipoonjoen Perinnesauna');
+  assert.match(m.text, /Annual card code: VK7QK9TXM3/);
+  assert.match(m.text, /Book for one person/);
+  assert.match(m.text, /Discount or annual card code/);
+  assert.match(m.text, /\/en\/book\//);
+  assert.match(m.text, /Kind regards,\nTapio\nSipoonjoen Perinnesauna\n$/);
+  const x = R('annual_card_code', CARD('fi', { code: 'A<b>"', booking_url: 'javascript:alert(1)' }), 'fi');
+  assert.doesNotMatch(x.html, /A<b>/); assert.match(x.html, /A&lt;b&gt;&quot;/);
+  assert.doesNotMatch(x.html, /javascript:/); assert.doesNotMatch(x.text, /javascript:/);
+});
+test('annualCardBlock: puuttuva, peruttu, pois käytöstä tai tyhjä koodi → ei lähetetä; muut lajit null', { skip }, () => {
+  assert.equal(T.annualCardBlock(CARD('fi')), null);
+  assert.equal(T.annualCardBlock({ kind: 'annual_card_code', annual_card: null }), 'vuosikorttia ei löydy');
+  assert.equal(T.annualCardBlock(CARD('fi', { revoked: true })), 'vuosikortti on peruttu');
+  assert.equal(T.annualCardBlock(CARD('fi', { active: false })), 'vuosikortti ei ole käytössä');
+  assert.equal(T.annualCardBlock(CARD('fi', { code: ' ' })), 'vuosikortin koodi puuttuu');
+  assert.equal(T.annualCardBlock({ kind: 'order_confirmation' }), null);
+});
