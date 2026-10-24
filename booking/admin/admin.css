@@ -840,3 +840,9 @@ body.shot #shell .nav .lbl{display:inline}
 [data-testid="resource-booking-form"], [data-testid="old-booking-form"],
 [data-testid="availability"], .ok-box, .slotpick, .err, .card.nb-sec, .nbform .row,
 .vc-notice { scroll-margin-top: 84px; }
+/* Paketti 11: Kävijät-välilehti (talous-analytics.js) */
+.tl-arange[aria-pressed=true]{background:var(--green);color:var(--card)}
+.tl-table-scroll{overflow-x:auto;margin:0 0 10px}
+.tl-analytics-step{margin:0 0 10px}.tl-analytics-bar{background:var(--line);border-radius:5px;margin:4px 0}
+.tl-analytics-fill{display:block;height:12px;border-radius:5px;background:var(--green)}
+.tl-analytics-kpi{margin:8px 0 0;font-weight:600}

@@ -99,22 +99,46 @@ rmSync(V, { recursive: true, force: true });
 mkdirSync(V, { recursive: true });
 for (const f of ['index.html', 'vuoro.css', 'vuoro.js']) cpSync(join('booking/vuoro', f), join(V, f));
 
+// 3e) Paketti 11 / booking_144: evästeetön kävijämittaus. OLETUKSENA POIS.
+//     Skripti lisätään sivuille VAIN, kun SITE_ANALYTICS=on JA SITE_ENV != test. Testisivulla (GitHub Pages, SITE_ENV=test) ei koskaan.
+//     Ei mittaus-ID:itä eikä uusia avaimia: käyttää samaa julkista anon/publishable-avainta kuin kauppa. Ei hallintaan, /vuoro/-linkkeihin,
+//     kylmälaitesivuille eikä vanhojen osoitteiden ohjaussivuille. Ennen päälle kytkemistä: tietosuojaseloste + suostumus-/oikeusperustepäätös.
+const ANALYTICS_ON = process.env.SITE_ANALYTICS === 'on' && process.env.SITE_ENV !== 'test';
+let nAnalytics = 0;
+if (ANALYTICS_ON) {
+  (function inject(d) {
+    for (const n of readdirSync(d)) {
+      const p = join(d, n);
+      if (statSync(p).isDirectory()) { if (!['hallinta', 'vuoro', 'juomat', 'drinks', 'booking'].includes(n)) inject(p); continue; }
+      if (n !== 'index.html') continue;
+      const content = readFileSync(p, 'utf8');
+      if (!content.includes('</head>') || content.includes('SAUNA_ANALYTICS_CONFIG') || /data-redirect="legacy"/.test(content)) continue;
+      const setup = '<script>window.SAUNA_ANALYTICS_CONFIG=' + JSON.stringify({ enabled: true, url: SUPA, anonKey: KEY }) + '</script>'
+        + '<script type="module" src="' + BASE + '/js/analytics.js' + VER + '"></script>';
+      writeFileSync(p, content.replace('</head>', setup + '</head>'));
+      nAnalytics++;
+    }
+  })(OUT);
+}
+
 // 4) varmistukset
 const fail = (m) => { console.error('build-pages: VIRHE: ' + m); process.exit(1); };
 const adminHtml = readFileSync(join(A, 'index.html'), 'utf8');
 if (!/<meta name="robots" content="noindex/.test(adminHtml)) fail('hallinnan index.html:stä puuttuu noindex');
 if (!nImports || (adminHtml.match(/\?v=/g) || []).length !== 4) fail('hallinnan versiotunnus ei tullut kaikkiin resursseihin');
 (function chk(d) { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) { chk(p); continue; } if (n.endsWith('.js') && /(?:from|import)\s*['"]\.{1,2}\/[^'"?]+\.js['"]/.test(readFileSync(p, 'utf8'))) fail(`${p}: versioimaton relatiivinen import`); } })(A);
-for (const f of ['admin.js', 'ui.js', 'icons.js', 'sb.js', 'config.js', 'admin.css', 'calendar.css', 'views/users.js', 'views/calendar.js', 'views/customerform.js', 'views/addons.js', 'views/productimage.js', 'views/talous.js', 'views/talous-orders.js', 'views/talous-payments.js', 'views/talous-reports.js', 'views/talous-ui.js', 'views/talous-receipts.js', 'views/talous-giftcards.js', 'views/pos.js', 'pos-screen.js', 'pos-logic.js', 'pos-texts.js', 'phone-fi.js', 'qrsvg.js', 'qrcode-generator.js', 'settings-tabs.js', 'settings-texts.js', 'qr-print.js', 'qr-panel.js', 'options.js', 'options-logic.js', 'options-mock.js', 'talous-api.js', 'talous-mock.js', 'giftcards-api.js', 'giftcards-mock.js', 'giftcards-texts.js', 'talous-i18n.js', 'talous-texts.js', 'csv.js', 'day-texts.js', 'refund-cancel-texts.js', 'views/refund-cancel.js', 'filter-texts.js', 'nav-texts.js', 'admin-navigation.js', 'quick-search.js', 'views/orders.js', 'day-bundle-cache.js', 'site-texts-cache.js', 'views/day.js', 'day-memos-texts.js', 'day-memos-logic.js', 'views/day-memos.js', 'logo-haalea.svg', 'rich-editor.js', 'vendor/quill/quill.js', 'vendor/quill/quill.snow.css', 'vendor/quill/LICENSE']) if (!statSync(join(A, f), { throwIfNoEntry: false })) fail(`hallinnasta puuttuu ${f}`);
+for (const f of ['admin.js', 'ui.js', 'icons.js', 'sb.js', 'config.js', 'admin.css', 'calendar.css', 'views/users.js', 'views/calendar.js', 'views/customerform.js', 'views/addons.js', 'views/productimage.js', 'views/talous.js', 'views/talous-orders.js', 'views/talous-payments.js', 'views/talous-reports.js', 'views/talous-analytics.js', 'analytics-mock.js', 'views/talous-ui.js', 'views/talous-receipts.js', 'views/talous-giftcards.js', 'views/pos.js', 'pos-screen.js', 'pos-logic.js', 'pos-texts.js', 'phone-fi.js', 'qrsvg.js', 'qrcode-generator.js', 'settings-tabs.js', 'settings-texts.js', 'qr-print.js', 'qr-panel.js', 'options.js', 'options-logic.js', 'options-mock.js', 'talous-api.js', 'talous-mock.js', 'giftcards-api.js', 'giftcards-mock.js', 'giftcards-texts.js', 'talous-i18n.js', 'talous-texts.js', 'csv.js', 'day-texts.js', 'refund-cancel-texts.js', 'views/refund-cancel.js', 'filter-texts.js', 'nav-texts.js', 'admin-navigation.js', 'quick-search.js', 'views/orders.js', 'day-bundle-cache.js', 'site-texts-cache.js', 'views/day.js', 'day-memos-texts.js', 'day-memos-logic.js', 'views/day-memos.js', 'logo-haalea.svg', 'rich-editor.js', 'vendor/quill/quill.js', 'vendor/quill/quill.snow.css', 'vendor/quill/LICENSE']) if (!statSync(join(A, f), { throwIfNoEntry: false })) fail(`hallinnasta puuttuu ${f}`);
 (function chkImports(d) { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) { chkImports(p); continue; } if (!n.endsWith('.js')) continue; for (const m of readFileSync(p, 'utf8').matchAll(/(?:from|import)\s*\(?\s*(['"])(\.{1,2}\/[^'"?]+\.js)(?:\?[^'"]*)?\1/g)) { if (!statSync(resolve(d, m[2]), { throwIfNoEntry: false })) fail(`${p}: tuotu moduuli puuttuu dististä: ${m[2]}`); } } })(A);
 if (process.env.SITE_ENV === 'test') {
   const noindex = (p) => /<meta name="robots" content="noindex/.test(readFileSync(p, 'utf8'));
   for (const p of ['index.html', 'en/index.html', 'varaa/index.html', 'tilaus/index.html', 'en/order/index.html', 'hallinta/index.html', 'juomat/index.html', 'en/drinks/index.html', 'vuoro/index.html']) { try { if (!noindex(join(OUT, p))) fail(`${p}: noindex puuttuu (SITE_ENV=test)`); } catch (e) { if (e.code === 'ENOENT') fail(`${p} puuttuu dististä`); else throw e; } }
   if (!/Disallow: \//.test(readFileSync(join(OUT, 'robots.txt'), 'utf8'))) fail('robots.txt ei estä indeksointia');
 }
+// Paketti 11: seuranta ei saa olla millään sivulla, ellei sitä ole erikseen kytketty päälle (SITE_ANALYTICS=on, ei testissä).
+if (!ANALYTICS_ON) (function noTracking(d) { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) { noTracking(p); continue; } if (n.endsWith('.html') && /SAUNA_ANALYTICS_CONFIG|js\/analytics\.js/.test(readFileSync(p, 'utf8'))) fail(`${p.slice(OUT.length)}: kävijämittaus mukana, vaikka se on pois päältä`); } })(OUT);
 // ei salaisuuksia: service_role/sb_secret ei saa esiintyä missään julkaistavassa tiedostossa (config.js, js, html)
 (function scan(d) { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) { scan(p); continue; } if (!/\.(js|mjs|html|json|css|txt)$/.test(n)) continue; const t = readFileSync(p, 'utf8'); if (/sb_secret_|"role"\s*:\s*"service_role"/.test(t)) fail(`salaisuuden näköinen sisältö: ${p.slice(OUT.length)}`); } })(OUT);
 if (!statSync(join(OUT, 'img', 'ovi-kaiverrus-1024.webp'), { throwIfNoEntry: false })) fail('oven kuva puuttuu: img/ovi-kaiverrus-1024.webp');
 const vuoroHtml = readFileSync(join(OUT, 'vuoro', 'index.html'), 'utf8');
 if (!/src="\.\.\/img\/ovi-kaiverrus-1024\.webp"/.test(vuoroHtml)) fail('vuoro-sivun oven kuvan polku ei ole suhteellinen');
-console.log(`build-pages ok → ${OUT}  (perussivusto, ${BASE || ''}/varaa/, ${BASE || ''}/hallinta/, ${BASE || ''}/juomat/, ${BASE || ''}/vuoro/; Supabase ${new URL(SUPA).hostname})`);
+console.log(`build-pages ok → ${OUT}  (kävijämittaus ${ANALYTICS_ON ? `PÄÄLLÄ ${nAnalytics} sivulla` : 'pois'}; perussivusto, ${BASE || ''}/varaa/, ${BASE || ''}/hallinta/, ${BASE || ''}/juomat/, ${BASE || ''}/vuoro/; Supabase ${new URL(SUPA).hostname})`);

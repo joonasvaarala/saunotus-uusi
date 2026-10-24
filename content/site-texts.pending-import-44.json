@@ -1,0 +1,62 @@
+[
+ {
+  "key": "ui.site.redirect_title",
+  "lang": "fi",
+  "text": "Sivu on siirtynyt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 11 / booking_144: vanhojen WordPress-osoitteiden ohjaussivut (src/seo-enhance.mjs redirectHtml, noindex); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.site.redirect_title",
+  "lang": "en",
+  "text": "This page has moved",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 11 / booking_144: vanhojen WordPress-osoitteiden ohjaussivut (src/seo-enhance.mjs redirectHtml, noindex); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.site.redirect_text",
+  "lang": "fi",
+  "text": "Tämä vanha osoite ohjaa sivuston uuteen osoitteeseen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 11 / booking_144: vanhojen WordPress-osoitteiden ohjaussivut (src/seo-enhance.mjs redirectHtml, noindex); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.site.redirect_text",
+  "lang": "en",
+  "text": "This old address redirects to the new address of the website.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 11 / booking_144: vanhojen WordPress-osoitteiden ohjaussivut (src/seo-enhance.mjs redirectHtml, noindex); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.site.redirect_link",
+  "lang": "fi",
+  "text": "Siirry uuteen osoitteeseen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 11 / booking_144: vanhojen WordPress-osoitteiden ohjaussivut (src/seo-enhance.mjs redirectHtml, noindex); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.site.redirect_link",
+  "lang": "en",
+  "text": "Go to the new address",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 11 / booking_144: vanhojen WordPress-osoitteiden ohjaussivut (src/seo-enhance.mjs redirectHtml, noindex); sama kuin koodin oletus, ei vielä tuotannossa"
+ }
+]
