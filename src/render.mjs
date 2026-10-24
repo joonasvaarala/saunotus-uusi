@@ -6,6 +6,7 @@ import { articlesNav, homeSection } from './articles/runtime.mjs';
 import { tx } from './site-texts.mjs';
 import { seoSchemaForPage, jsonLdScript } from './seo-enhance.mjs';
 import { privacyAnalyticsHtml } from './privacy-analytics.mjs';
+import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
   johku, bookingUrl, phoneDisplay, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
@@ -147,11 +148,11 @@ export function eventsHtml(lang, empty) {
   if (!ev.length) return `<p class="center">${e(empty)}</p>`;
   return `<ul class="events">${ev.map(({ c, p, dates }) => {
     const t = c[lang];
-    const times = [...new Set(dates.map((d) => d.time_text).filter(Boolean))];
+    const times = [...new Set(dates.map((d) => eventTimeFor(d, lang, enTime)).filter(Boolean))];
     const dl = dates.slice(0, 6).map((d) => fmtDate(d.starts_on, lang)).join(' · ');
     return `<li class="card ev"><div class="im">${pic(c.img, lang, { sizes: '(min-width:1100px) 280px, 90vw', alt: '' })}<span class="badge">${e(money(p.price, lang))}</span></div>
 <div class="bd"><h3><a href="${e(bookingUrl(p.booking_url, lang))}" target="_blank" rel="noopener">${e(t.title)}${NEW(lang)}</a></h3>
-<p class="dates">${e(dl)}${times.length ? ' · ' + e(lang === 'en' ? enTime(times[0]) : times[0]) : ''}</p><p>${e(t.text)}</p></div><div class="cta" aria-hidden="true">${e(ui(lang).reserveArrow)}</div></li>`;
+<p class="dates">${e(dl)}${times.length ? ' · ' + e(times[0]) : ''}</p><p>${e(t.text)}</p></div><div class="cta" aria-hidden="true">${e(ui(lang).reserveArrow)}</div></li>`;
   }).join('')}</ul>`;
 }
 
@@ -365,7 +366,6 @@ export function book(lang) {
   return layout({ lang, key: 'book', meta: d.meta, body });
 }
 
-const faqOf = (id) => kb.faq.find((x) => x.id === id);
 const clean = (s) => s.replace(/lisählöt/g, 'lisähenkilöt').replace(/\s*Vanhan sivuston mukaan[^.]*\./g, '').replace(/\s+$/g, '');
 export function info(lang) {
   const d = P('info')[lang], u = ui(lang);
@@ -377,7 +377,7 @@ export function info(lang) {
     return '';
   }).join('');
   const secs = d.sections.map((s) => `<div class="info-sec" id="${s.id}"><div>${icon(s.icon, 40)}<h2>${e(s.title)}</h2><p class="tag">${e(s.tag)}</p></div><div>${blocks(s.blocks)}</div></div>`).join('');
-  const faqs = d.faq.map(faqOf).filter(Boolean).map((f) => `<details><summary>${e(f.question)}</summary><p>${e(clean(f.answer))}</p></details>`).join('');
+  const faqs = d.faq.map((id) => faqFor(id, lang)).filter(Boolean).map((f) => `<details${f.lang !== lang ? ` lang="${e(f.lang)}"` : ''}><summary>${e(f.question)}</summary><p>${e(clean(f.answer))}</p></details>`).join('');
   const body = pageHero(d.hero, lang, 'info')
     + `<div class="wrap"><nav class="quick" aria-label="${e(d.hero.title)}">${d.sections.map((s) => `<a href="#${s.id}">${e(s.title)}</a>`).join('')}</nav></div>`
     + sec('', `<div class="infogrid">${secs}</div>`)
@@ -427,10 +427,13 @@ ${messages}
 
 export function policyPage(name, key, lang) {
   const d = P(name)[lang];
-  const items = d.policies.map((id) => kb.policies.find((p) => p.id === id)).filter((p) => p && !p.internal);
+  // Tietosuojaseloste (privacy.json) pysyy ennallaan: aina listattu rivi sellaisenaan. Muut (ehdot): suomenkieliset id:t + _en (kb-en.mjs).
+  const items = name === 'privacy'
+    ? d.policies.map((id) => kb.policies.find((p) => p.id === id)).filter((p) => p && !p.internal)
+    : d.policies.map((id) => policyFor(id, lang)).filter(Boolean);
   const txt = (s) => clean(s).split(/\n+/).map((l) => `<p>${e(l)}</p>`).join('');
   const body = pageHero(d.hero, lang, key)
-    + sec('', `<div class="narrow prose">${d.note ? `<p class="note-box">${e(d.note)}</p>` : ''}${items.map((p) => `<h2>${e(p.title)}</h2>${txt(p.body)}`).join('')}${name === 'privacy' ? privacyAnalyticsHtml(lang, e, txt) : ''}</div>`);
+    + sec('', `<div class="narrow prose">${d.note ? `<p class="note-box">${e(d.note)}</p>` : ''}${items.map((p) => p.lang && p.lang !== lang ? `<div lang="${e(p.lang)}"><h2>${e(p.title)}</h2>${txt(p.body)}</div>` : `<h2>${e(p.title)}</h2>${txt(p.body)}`).join('')}${name === 'privacy' ? privacyAnalyticsHtml(lang, e, txt) : ''}</div>`);
   return layout({ lang, key, meta: d.meta, body });
 }
 

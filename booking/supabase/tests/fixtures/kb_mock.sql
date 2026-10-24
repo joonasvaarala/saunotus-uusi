@@ -175,3 +175,12 @@ values (1, 'Havuhattu Oy', 'Sipoonjoen perinnesauna', '3018112-1', 'Hindsbyntie 
 on conflict (id) do nothing;
 -- kb_products_duration_text_en (Bottiavustus, tuotanto 24.10.2026, versio 20261024121904): EN-kestoteksti. Tarvitaan booking_147:lle (public_catalog / admin_list_products).
 alter table kb.products add column if not exists duration_text_en text;
+-- kb_texts_en_sources (20261024122952) + kb_policies_en_source (20261024123109), Bottiavustus, tuotanto 24.10.2026: englanninkieliset lähdesarakkeet
+-- (nullable, SELECT-tarkistus 24.10.2026). Migraatiot lisäävät ne myös itse (add column if not exists); booking.schedule_rules.label_en tulee migraatiosta.
+alter table kb.faq add column if not exists question_en text, add column if not exists answer_en text;
+alter table kb.policies add column if not exists title_en text, add column if not exists body_en text;
+alter table kb.event_dates add column if not exists time_text_en text;
+alter table kb.opening_hours add column if not exists session_name_en text, add column if not exists swimsuit_rule_en text;
+alter table kb.locations add column if not exists name_en text, add column if not exists description_en text, add column if not exists directions_en text,
+  add column if not exists parking_en text, add column if not exists public_transport_en text, add column if not exists accessibility_en text;
+alter table kb.businesses add column if not exists description_en text;

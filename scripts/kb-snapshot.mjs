@@ -19,5 +19,21 @@ const out = {
   policies: raw.policies.filter((p) => p.status === 'active' && !p.internal).map((p) => pick(p, ['id','category','title','body','language'])),
   faq: raw.faq.filter((f) => f.active).map((f) => pick(f, ['id','question','answer','language','category','sort_order']))
 };
+// Englanninkieliset lähdekentät (kb_texts_en_sources 20261024122952, kb_policies_en_source 20261024123109): nullable _en-sarake
+// suomenkielisellä rivillä; Kääntäjä täyttää ne site_texts-putken kautta. Tyhjät jätetään pois (pick). Lisätään rivin id:n perusteella,
+// joten yllä olevat suodatukset ja kenttälistat pysyvät ennallaan. Sivusto käyttää: faq, policies, events (render.mjs);
+// locations, hours, business tallennetaan snapshotiin, mutta niitä ei vielä renderöidä.
+const EN = {
+  faq: ['question_en', 'answer_en'],
+  policies: ['title_en', 'body_en'],
+  events: ['time_text_en'],
+  hours: ['session_name_en', 'swimsuit_rule_en'],
+  locations: ['name_en', 'description_en', 'directions_en', 'parking_en', 'public_transport_en', 'accessibility_en'],
+};
+for (const [k, keys] of Object.entries(EN)) {
+  const byId = new Map((raw[k] || []).map((r) => [r.id, r]));
+  out[k] = out[k].map((r) => ({ ...r, ...pick(byId.get(r.id) || {}, keys) }));
+}
+Object.assign(out.business, pick(raw.businesses[0], ['description_en']));
 writeFileSync('content/kb/kb.json', JSON.stringify(out, null, 1) + '\n');
 console.log('kirjoitettu content/kb/kb.json', Object.fromEntries(Object.entries(out).filter(([, v]) => Array.isArray(v)).map(([k, v]) => [k, v.length])));
