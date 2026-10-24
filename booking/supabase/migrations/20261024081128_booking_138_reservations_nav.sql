@@ -9,7 +9,7 @@
 -- Yhdeksän paikallista argumenttia toimii yhä (admin_day_bundle, booking_133). Vanha 9-argumenttinen
 -- ylikuorma poistetaan, jotta PostgREST ei jää PGRST203-tilaan. Runko on booking_72:n funktio + yksi
 -- WHERE-ehto + ORDER BY. Ei taulu-, data- eikä public-skeeman muutoksia.
--- Rollback: rollbacks/20261024110000_booking_138_ROLLBACK.sql (palauttaa booking_72:n funktion sellaisenaan).
+-- Rollback: rollbacks/20261024081128_booking_138_ROLLBACK.sql (palauttaa booking_72:n funktion sellaisenaan).
 -- =============================================================================
 
 set local lock_timeout = '5s';

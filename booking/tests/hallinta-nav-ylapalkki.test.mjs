@@ -63,8 +63,8 @@ test('varauslista n채ytt채채 tulevat l채hin ensin ja tarjoaa palvelinpuoliset j�
   assert.doesNotMatch(view, /p_sort: reservationSortParam/);
   assert.match(view, /periodSet = seg\('Ajanjakso'/);
   assert.match(view, /p_reservation_id/);
-  assert.match(src('supabase/migrations/20261024110000_booking_138_reservations_nav.sql'), /case when p_sort = 'start_asc' then r.starts_at end asc/);
-  assert.match(src('supabase/migrations/20261024110000_booking_138_reservations_nav.sql'), /limit least\(greatest\(p_limit, 1\), 500\) offset/);
+  assert.match(src('supabase/migrations/20261024081128_booking_138_reservations_nav.sql'), /case when p_sort = 'start_asc' then r.starts_at end asc/);
+  assert.match(src('supabase/migrations/20261024081128_booking_138_reservations_nav.sql'), /limit least\(greatest\(p_limit, 1\), 500\) offset/);
 });
 
 test('mobiilipalkin nuoli laajentaa, pienent채채 ja p채ivitt채채 aria-expanded-tilan', () => {
@@ -188,8 +188,8 @@ test('pikahaku: lahjakorttikoodi normalisoidaan, nimihaku ei', () => {
 });
 
 test('PG-testi ja rollback booking_138: tiedostot olemassa, rollback palauttaa booking_72-version', () => {
-  const mig = src('supabase/migrations/20261024110000_booking_138_reservations_nav.sql');
-  const rb = src('supabase/rollbacks/20261024110000_booking_138_ROLLBACK.sql');
+  const mig = src('supabase/migrations/20261024081128_booking_138_reservations_nav.sql');
+  const rb = src('supabase/rollbacks/20261024081128_booking_138_ROLLBACK.sql');
   assert.match(mig, /p_sort text default null,\s+p_reservation_id bigint default null/);
   assert.match(mig, /revoke all on function booking\.admin_list_reservations[\s\S]{0,200}from public, anon/);
   assert.doesNotMatch(mig, /(insert into|update|delete from|alter table|create table) public\./i);
