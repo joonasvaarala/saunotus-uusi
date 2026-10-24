@@ -4,9 +4,23 @@ Hallinnan Viestit-kentät ja tuotekuvaukset käyttävät pientä työkaluriviä.
 
 ## Kirjasto
 
-[Trix](https://github.com/basecamp/trix) 2.1.19 (37signals, MIT). Tiedostot ovat `booking/admin/vendor/trix/` (`trix.esm.min.js` 207 593 tavua, gzip 52 012; `trix.css` 19 638 tavua, gzip 4 274). Versio 2.1.15 jätettiin pois tunnettujen XSS-aukkojen takia (GHSA-g9jg-w8vm-g96v, GHSA-53g2-mvcc-q9x3, GHSA-53p3-c7vp-4mcc). Editori ladataan vasta, kun tuotteen tai viestin lomake aukeaa. Sivustolla ei ole bundleria, joten TipTap (ProseMirror-nippu) ja Quill eivät sovi yhtä kevyesti. Trix on yksi ESM-tiedosto ja oma CSS.
+[Quill](https://quilljs.com) 2.0.3 (Slab, **BSD-3-Clause**, ei MIT). Tiedostot ovat `booking/admin/vendor/quill/`: `quill.js` (UMD-nippu npm-paketin `dist/`-hakemistosta, 209 241 tavua, gzip 58 986), `quill.snow.css` (24 565 tavua, gzip 3 729), `LICENSE` ja `quill.js.LICENSE.txt`. Source map -viittaukset on poistettu, muuten tiedostot ovat npm-paketin `quill@2.0.3` tavut. Ei CDN:ää: hallinta lataa skriptin ja CSS:n omasta kansiostaan vasta, kun tuotteen tai viestin lomake, jossa on aktiivinen `textarea[data-rich]`, aukeaa. Tyhjä lomake tai pois käytöstä oleva kenttä ei lataa mitään. Aiempi Trix 2.1.19 (`vendor/trix/`) on poistettu (paketti 08).
 
-Trix 2 puhdistaa liimauksen mukana tulevalla DOMPurifylla ja hylkää `javascript:`-osoitteet linkkivalinnassa. Sama kapea allowlist ajetaan vielä tallennuksessa, kaupan renderöinnissä ja sähköpostissa. Sähköpostipohja ei voi ottaa DOM-kirjastoa, joten palvelin käyttää funktiota `booking/shared/rich-text.js`. Sama tiedosto on kopioitu hallintaan, kauppaan ja `send-emails`-funktion `_shared`-kansioon. Testi vaatii, että kopiot ovat tavulleen samat.
+Päivitys: `npm pack quill@<versio>`, kopioi `dist/quill.js`, `dist/quill.snow.css`, `dist/quill.js.LICENSE.txt` ja `LICENSE`, poista `sourceMappingURL`-rivit ja päivitä testi `booking/tests/rich-text.test.mjs`.
+
+### XSS ja sanitointi
+
+Quill 2.0.3:ssa on julkaistu haavoittuvuus CVE-2025-15056 (GHSA-v3m3-f69x-jf25): `getSemanticHTML()` ei escapeta formula- ja video-upotusten arvoja. Korjattua versiota ei ole. Tässä käytössä:
+
+- Editori sallii vain formaatit `bold`, `italic`, `header`, `list` ja `link` (`formats`-lista). Formula, video, kuva, koodilohko, värit ja tyylit eivät ole käytössä.
+- Liimauksessa `img`, `video`, `audio`, `iframe`, `object`, `embed`, `script`, `style`, `template`, `noscript`, `svg` ja `math` hylätään. Tiedostojen pudotus ja liitteiden liimaus estetään.
+- Linkin osoite tarkistetaan samalla allowlistilla kuin tallennus (`http`, `https`, `mailto`, tarkka `{tilaus_linkki}` tai `{linkki}`). Muut osoitteet Quill muuttaa muotoon `about:blank`, ja allowlist poistaa ne.
+- Editorin HTML ei koskaan mene sellaisenaan eteenpäin: `getSemanticHTML()` → `normalizeStored()` (sama allowlist kuin alla) → piilokenttä → FormData. Palvelin tarkistaa vielä tallennuksessa (`booking._rich_text_check`), ja kauppa sekä sähköposti puhdistavat näytettäessä.
+- Quill muuttaa välilyönnit muotoon `&nbsp;`. Allowlist muuttaa ne takaisin tavallisiksi välilyönneiksi, joten teksti rivittyy kaupassa ja sähköpostissa kuten ennen.
+
+Sama kapea allowlist ajetaan tallennuksessa, kaupan renderöinnissä ja sähköpostissa. Sähköpostipohja ei voi ottaa DOM-kirjastoa, joten palvelin käyttää funktiota `booking/shared/rich-text.js`. Sama tiedosto on kopioitu hallintaan, kauppaan ja `send-emails`-funktion `_shared`-kansioon. Testi vaatii, että kopiot ovat tavulleen samat. (Kopioiden kommentti mainitsee vielä Trixin. Sitä ei muutettu, jotta edge-funktion `_shared`-kopio ei muutu.)
+
+Rich-teksti tallentuu tuotteen kuvaukseen ja viestipohjiin, ei `site_texts`-tauluun. Työkalurivin sanat ovat `ui.admin.rich.*`-avaimia (`pending-import-30`), eikä niissä ole `<`-merkkiä.
 
 ## Kentät
 
