@@ -23,6 +23,10 @@
 .bk-card .btn{align-self:flex-start;margin-top:6px}
 .bk-meta{margin:0;color:var(--muted)}
 .bk-meta strong{color:var(--ink)}
+/* kortin alaosa: ajankohta omalla rivillään hinnan yläpuolella; kääre alas → hinta ja painike samalla korkeudella rivin korteissa */
+.bk-card-meta{margin-top:auto;display:flex;flex-direction:column;gap:2px;padding-top:4px}
+.bk-card-meta .bk-card-when{font-size:15px;line-height:1.45}
+.bk-card-meta .bk-card-price{line-height:1.4}
 /* kalenteri */
 .bk-cal{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;max-width:460px}
 .bk-calnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
@@ -195,6 +199,11 @@ a.bk-sd:hover{filter:brightness(.97)}
 .hero.page.has-prod::after{background:linear-gradient(180deg,rgba(20,14,8,.72),rgba(20,14,8,.82))}
 .hero.page.has-prod h1,.hero.page.has-prod p{text-shadow:0 1px 8px rgba(0,0,0,.45)}
 .hero.page.has-prod .in p{max-width:34em}
+/* booking_156: rikas lyhyt kuvaus yläbannerissa (puhdistettu div, ei <p>:n sisällä): sama ilme kuin tiivis kuvaus, otsikot/listat/linkit perivät värin */
+.hero.page .bk-hero-short{max-width:34em;font-size:19px;color:#f3ece2;margin:0}
+.hero.page .bk-hero-short :is(h2,h3,li,a,strong,em){color:inherit}
+.hero.page .bk-hero-short p{margin:0 0 .4em}
+.hero.page.has-prod .bk-hero-short{text-shadow:0 1px 8px rgba(0,0,0,.45)}
 .bk-hero-wait .hero.page picture,.bk-hero-wait .hero.page .in>*{visibility:hidden}
 
 /* Hoito- ja rituaalivaraukset (treatment-ui.js): vaiheet 1–3 (henkilömäärä, päivä, kellonaika), jatka-palkki, tarkistusvaihe. Kalenteri-, stepper-, lomake- ja valintapalkkityylit ovat yllä. */

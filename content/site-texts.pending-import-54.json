@@ -1,0 +1,206 @@
+[
+  {
+    "key": "email.annual_card_granted.intro",
+    "lang": "fi",
+    "text": "Sinulle on myönnetty vuosikortti. Tällä koodilla varaat saunavuorosi verkossa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 250,
+    "placeholders": [],
+    "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+  },
+  {
+    "key": "email.annual_card_granted.intro",
+    "lang": "en",
+    "text": "You have been given an annual card. Use this code to book your sauna sessions online.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 250,
+    "placeholders": [],
+    "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+  },
+  {
+    "key": "email.annual_card_granted.how_3",
+    "lang": "fi",
+    "text": "Kirjoita koodi kassalla kohtaan Alennus- tai vuosikorttikoodi. Käytä samaa sähköpostiosoitetta, johon tämä viesti lähetettiin, tai asiakastiedoissasi olevaa puhelinnumeroa.",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 450,
+    "placeholders": [],
+    "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+  },
+  {
+    "key": "email.annual_card_granted.how_3",
+    "lang": "en",
+    "text": "At checkout, enter the code in the Discount or annual card code field. Use the email address this message was sent to, or the phone number in your customer details.",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 450,
+    "placeholders": [],
+    "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+  },
+  {
+    "key": "ui.admin.annual_manage.created",
+    "lang": "fi",
+    "text": "Vuosikortti myönnetty. Koodi: {{var:code}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:code}}"
+    ],
+    "reason": "booking_154: hallinnasta myönnetyn vuosikortin koodin lähetys (Myönnä-dialogin valinta ja ilmoitus; uusi teksti, ei vielä tuotannossa)"
+  },
+  {
+    "key": "ui.admin.annual_manage.created",
+    "lang": "en",
+    "text": "Annual card granted. Code: {{var:code}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:code}}"
+    ],
+    "reason": "booking_154: hallinnasta myönnetyn vuosikortin koodin lähetys (Myönnä-dialogin valinta ja ilmoitus; uusi teksti, ei vielä tuotannossa)"
+  },
+  {
+    "key": "ui.admin.annual_manage.email_no_email",
+    "lang": "fi",
+    "text": "Asiakkaalla ei ole sähköpostiosoitetta, joten koodia ei lähetetty.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 100,
+    "placeholders": [],
+    "reason": "booking_154: hallinnasta myönnetyn vuosikortin koodin lähetys (Myönnä-dialogin valinta ja ilmoitus; uusi teksti, ei vielä tuotannossa)"
+  },
+  {
+    "key": "ui.admin.annual_manage.email_no_email",
+    "lang": "en",
+    "text": "The customer has no email address, so the code was not sent.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 90,
+    "placeholders": [],
+    "reason": "booking_154: hallinnasta myönnetyn vuosikortin koodin lähetys (Myönnä-dialogin valinta ja ilmoitus; uusi teksti, ei vielä tuotannossa)"
+  },
+  {
+    "key": "ui.admin.annual_manage.email_not_queued",
+    "lang": "fi",
+    "text": "Koodia ei lähetetty. Tarkista kortin tila.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_154: hallinnasta myönnetyn vuosikortin koodin lähetys (Myönnä-dialogin valinta ja ilmoitus; uusi teksti, ei vielä tuotannossa)"
+  },
+  {
+    "key": "ui.admin.annual_manage.email_not_queued",
+    "lang": "en",
+    "text": "The code was not sent. Check the card status.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_154: hallinnasta myönnetyn vuosikortin koodin lähetys (Myönnä-dialogin valinta ja ilmoitus; uusi teksti, ei vielä tuotannossa)"
+  },
+  {
+    "key": "ui.admin.annual_manage.email_not_requested",
+    "lang": "fi",
+    "text": "Koodia ei lähetetty asiakkaalle.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_154: hallinnasta myönnetyn vuosikortin koodin lähetys (Myönnä-dialogin valinta ja ilmoitus; uusi teksti, ei vielä tuotannossa)"
+  },
+  {
+    "key": "ui.admin.annual_manage.email_not_requested",
+    "lang": "en",
+    "text": "The code was not sent to the customer.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_154: hallinnasta myönnetyn vuosikortin koodin lähetys (Myönnä-dialogin valinta ja ilmoitus; uusi teksti, ei vielä tuotannossa)"
+  },
+  {
+    "key": "ui.admin.annual_manage.email_pending",
+    "lang": "fi",
+    "text": "Koodi lähetetään asiakkaan sähköpostiin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_154: hallinnasta myönnetyn vuosikortin koodin lähetys (Myönnä-dialogin valinta ja ilmoitus; uusi teksti, ei vielä tuotannossa)"
+  },
+  {
+    "key": "ui.admin.annual_manage.email_pending",
+    "lang": "en",
+    "text": "The code will be sent to the customer’s email.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_154: hallinnasta myönnetyn vuosikortin koodin lähetys (Myönnä-dialogin valinta ja ilmoitus; uusi teksti, ei vielä tuotannossa)"
+  },
+  {
+    "key": "ui.admin.annual_manage.email_skipped",
+    "lang": "fi",
+    "text": "Sähköpostin lähetys on pois päältä, joten koodia ei lähetetty.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 100,
+    "placeholders": [],
+    "reason": "booking_154: hallinnasta myönnetyn vuosikortin koodin lähetys (Myönnä-dialogin valinta ja ilmoitus; uusi teksti, ei vielä tuotannossa)"
+  },
+  {
+    "key": "ui.admin.annual_manage.email_skipped",
+    "lang": "en",
+    "text": "Email sending is turned off, so the code was not sent.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 90,
+    "placeholders": [],
+    "reason": "booking_154: hallinnasta myönnetyn vuosikortin koodin lähetys (Myönnä-dialogin valinta ja ilmoitus; uusi teksti, ei vielä tuotannossa)"
+  },
+  {
+    "key": "ui.admin.annual_manage.send_email",
+    "lang": "fi",
+    "text": "Lähetä koodi asiakkaalle",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_154: hallinnasta myönnetyn vuosikortin koodin lähetys (Myönnä-dialogin valinta ja ilmoitus; uusi teksti, ei vielä tuotannossa)"
+  },
+  {
+    "key": "ui.admin.annual_manage.send_email",
+    "lang": "en",
+    "text": "Send the code to the customer",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_154: hallinnasta myönnetyn vuosikortin koodin lähetys (Myönnä-dialogin valinta ja ilmoitus; uusi teksti, ei vielä tuotannossa)"
+  },
+  {
+    "key": "ui.admin.annual_manage.send_email_hint",
+    "lang": "fi",
+    "text": "Koodi lähetetään asiakkaan sähköpostiin kerran. Kortin muokkaus tai uudelleenaktivointi ei lähetä uutta viestiä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 170,
+    "placeholders": [],
+    "reason": "booking_154: hallinnasta myönnetyn vuosikortin koodin lähetys (Myönnä-dialogin valinta ja ilmoitus; uusi teksti, ei vielä tuotannossa)"
+  },
+  {
+    "key": "ui.admin.annual_manage.send_email_hint",
+    "lang": "en",
+    "text": "The code is sent to the customer’s email once. Editing or reactivating the card does not send a new message.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 170,
+    "placeholders": [],
+    "reason": "booking_154: hallinnasta myönnetyn vuosikortin koodin lähetys (Myönnä-dialogin valinta ja ilmoitus; uusi teksti, ei vielä tuotannossa)"
+  }
+]

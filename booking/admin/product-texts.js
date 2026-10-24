@@ -1,5 +1,5 @@
 // Hallinnan tuotelistan "Lisää tuote" -tekstit (FI+EN). Tuotannossa sama sisältö tuodaan site_texts-tauluun
-// (content/site-texts.pending-import-19.json). Sanakirja on varalla, kunnes tuonti on ajettu.
+// (content/site-texts.pending-import-19.json; lyhyt kuvaus booking_156: pending-import-56.json). Sanakirja on varalla, kunnes tuonti on ajettu.
 // public_get_site_texts peittää ui.admin.product.*-avaimet. Haku epäonnistuu tai rivi puuttuu → sanakirja.
 // Hintoja ja ALV-kantoja ei ole näissä teksteissä.
 import { getLang } from './talous-i18n.js';
@@ -31,6 +31,9 @@ export const PRODUCT_TEXTS = {
     'ui.admin.product.pos_hint': 'Rastita pikakassa ja tallenna asetukset.',
     'ui.admin.product.qr_hint': 'QR-koodi tehdään asetusten tulostusnäkymässä.',
     'ui.admin.product.duplicate': 'Samanniminen aktiivinen tuote on jo olemassa',
+    'ui.admin.product.short_fi': 'Lyhyt kuvaus (suomi)',
+    'ui.admin.product.short_en': 'Lyhyt kuvaus (englanti)',
+    'ui.admin.product.short_hint': 'Näkyy tuotekortissa ja tuotesivun yläosassa. Pidä se muutaman virkkeen mittaisena. Tyhjä kenttä näyttää otteen kuvauksesta.',
   },
   en: {
     'ui.admin.product.add': 'Add product',
@@ -56,6 +59,9 @@ export const PRODUCT_TEXTS = {
     'ui.admin.product.pos_hint': 'Tick the quick till box and save the settings.',
     'ui.admin.product.qr_hint': 'The QR code is created in settings, under QR printing.',
     'ui.admin.product.duplicate': 'An active product with this name already exists',
+    'ui.admin.product.short_fi': 'Short description in Finnish',
+    'ui.admin.product.short_en': 'Short description in English',
+    'ui.admin.product.short_hint': 'Shown on the product card and at the top of the product page. Keep it to a few sentences. If empty, an excerpt of the description is shown.',
   },
 };
 

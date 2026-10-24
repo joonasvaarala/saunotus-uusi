@@ -9,9 +9,11 @@ import { pt } from './pay-choices-texts.js';
 import { T } from './i18n.js';
 import { createWaitlistView } from './waitlist-ui.js';
 import { visibleWaitlistSlots, fullyBooked, hasWaitlistSlots } from './waitlist-logic.js';
-import { loadProducts as loadTreatmentProducts, splitCatalog, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
+import { loadProducts as loadTreatmentProducts, splitCatalog, isListed as treatmentListed, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
 import { pickCatalog } from './catalog-audience.js';
+import { heroShort, cardShort, fallbackDesc } from './short-desc.js';
 import { createTreatmentViews } from './treatment-ui.js';
+import { cardMeta } from './card-meta.js';
 import { createTexts, loadShopTexts, applyShopTexts } from './site-texts.js';
 import { fmtMinutes } from './site-texts-logic.js';
 import { OPT } from './options-texts.js';
@@ -56,6 +58,10 @@ const aname = (a) => (S.lang === 'en' && a.name_en) || a.name;
 const adesc = (a) => (S.lang === 'en' && a.description_en) || a.description;
 const pname = (p) => (S.lang === 'en' && p.name_en) || p.name;
 const pdesc = (p) => (S.lang === 'en' && p.description_en) || p.description;
+// kesto (booking_147): EN-kesto kb.products.duration_text_en, puuttuu → suomenkielinen duration_text (sama malli kuin pname/pdesc)
+const pdur = (p) => (S.lang === 'en' && p.duration_text_en) || p.duration_text;
+// vuoron nimi (booking_151): EN schedule_rules.label_en (public_availability/_all.label_en), puuttuu → suomenkielinen label
+const rlabel = (r) => (S.lang === 'en' && r.label_en) || r.label;
 const priceText = (p) => {
   // Näytettävä hinta lasketaan aina hinnasta (price_text voi vanhentua hintamuutoksessa).
   const v = money(p.price);
@@ -63,6 +69,8 @@ const priceText = (p) => {
   if (p.price_type === 'from' || p.price_type === 'variable') return `${t.from} ${v}`;
   return v;
 };
+// Päivänäkymän ryhmäjärjestys: yksityisvuorot ensin, sitten yleiset vuorot (hoidot ja rituaalit erillisenä osiona näiden jälkeen).
+const DAY_KIND_ORDER = ['yksityinen', 'yleinen', 'muut'];
 const kindOf = (p) => (p.treatment ? 'hoito' : p.sale_kind === 'public_shift' ? 'yleinen' : p.sale_kind === 'private_shift' ? 'yksityinen' : 'muut');
 // ?mock=1: kokeilutila (EI palvelinta): kaikki RPC-kutsut vastataan selaimessa (shop-mock.js; ei tallenna mitään palvelimelle). Lippu säilytetään linkeissä.
 const MOCK = new URLSearchParams(location.search).get('mock') === '1';
@@ -146,14 +154,7 @@ const dayState = (rows) => (!rows?.length ? 'none' : rows.some((r) => r.status =
 
 // ---- sivun yläbanneri (hero): tuotesivulla ja varauslomakkeella tuotteen kuva taustana + otsikko = tuotteen nimi + tiivis kuvaus ----
 // Sivun oma hero (<section class="hero page">) on build-aikaista HTML:ää: oletus palautetaan kaikissa muissa näkymissä. Ei erillistä hero-kenttää: sama tuotekuva (object-fit: cover, keskitetty).
-// Lyhyt kuvaus: ensimmäinen virke (ei katkaista kellonaikojen pisteistä "16.30"), enintään ~130 merkkiä sanarajalta. Pitkä kuvaus pysyy sisältöosassa.
-const shortDesc = (p) => {
-  const raw = pdesc(p) || '';
-  const d = (isRichHtml(raw) ? visibleText(raw) : raw).replace(/\s+/g, ' ').trim(); if (!d) return '';
-  const m = d.match(/^.{20,}?[.!?](?=\s+[A-ZÅÄÖ])/u); let x = m ? m[0] : d;
-  if (x.length > 130) x = `${x.slice(0, 130).replace(/\s+\S*$/, '')}…`;
-  return x;
-};
+// Lyhyt kuvaus (booking_156): tuotteen oma short_description(_en) korvaa johdetun otteen; tyhjä → ensimmäinen virke kuvauksesta (heroShort, short-desc.js). Pitkä kuvaus pysyy sisältöosassa.
 const hero = { def: null };
 function setHero(p) {
   const el = document.querySelector('main .hero.page'); document.documentElement.classList.remove('bk-hero-wait');
@@ -170,18 +171,19 @@ function setHero(p) {
   if (cur !== next) cur.replaceWith(next);
   el.classList.toggle('has-prod', !!i);
   h1.textContent = p ? pname(p) : hero.def.h1;
-  if (sub) { sub.textContent = p ? shortDesc(p) : hero.def.sub; sub.hidden = !sub.textContent; }
+  el.querySelector('.bk-hero-short')?.remove();
+  if (sub) {
+    const hs = p ? heroShort(h, p, S.lang, pdesc(p)) : { node: null, text: hero.def.sub };
+    sub.textContent = hs.text; sub.hidden = !sub.textContent;
+    if (hs.node) sub.after(hs.node);   // rikas lyhyt kuvaus: puhdistettu <div class="bk-hero-short bk-rich"> (ei <p>:n sisään)
+  }
 }
 
-// Kortin ote: pelkkä teksti leikataan kuten ennen (ei välilyöntien tiivistystä). Rikas HTML tiivistetään näkyväksi tekstiksi, jotta tagi ei katkea.
-function cardExcerpt(p) {
-  const raw = pdesc(p) || '';
-  const plain = isRichHtml(raw) ? visibleText(raw).replace(/\s+/g, ' ').trim() : raw;
-  return plain.slice(0, 170) + (plain.length > 170 ? '…' : '');
-}
+// Kortin kuvaus (booking_156): lyhyt kuvaus puhdistettuna, tyhjä → johdettu ote 170 merkkiä (short-desc.js).
+const cardExcerpt = (p) => cardShort(h, p, S.lang, pdesc(p));
 // ---- näkymä 1: tuotelista ----
 function viewList(query) {
-  const cat = [...state.catalog, ...state.treatments];
+  const cat = [...state.catalog, ...state.treatments.filter(treatmentListed)];   // lisätuotteet (LISTING_HIDDEN_SLUGS) eivät näy listalla; tuotesivu toimii
   const kinds = ['all', ...new Set(cat.map(kindOf))];
   const k = kinds.includes(query.get('k')) ? query.get('k') : 'all';
   const list = cat.filter((p) => k === 'all' || kindOf(p) === k);
@@ -189,8 +191,8 @@ function viewList(query) {
   const cards = h('ul', { class: 'bk-cards' }, list.map((p) => p.treatment ? tv.card(p) : h('li', { class: 'bk-card' },
     pimg(p, 'card-img'),
     h('h3', {}, h('a', { href: bk(`/tuote/${p.slug}`), text: pname(p) })),
-    h('p', { class: 'bk-desc', text: cardExcerpt(p) }),
-    h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), p.duration_text ? ` · ${p.duration_text}` : ''),
+    cardExcerpt(p),
+    cardMeta(h, priceText(p), pdur(p)),   // ajankohta omalla rivillään hinnan yläpuolella (card-meta.js)
     h('a', { class: 'btn sm', href: bk(`/tuote/${p.slug}`) }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) })))));
   const annual = annualPromo();
   mount(h('header', { class: 'bk-head' }, h('h2', { text: t.title }), h('p', { class: 'lead', text: t.lead })), modeSwitch('cat'), tabs, cards, annual);
@@ -284,7 +286,7 @@ async function findNextFree(ds, maxDs) {   // seuraava päivä, jolla on vapaita
 function dayItem({ r, p }, ds, withName = false) {
   const ok = r.status === 'available';
   const title = `${hm(r.starts_at)}–${hm(r.ends_at)}`;
-  const cl = cleanLabel(r.label), sub = cl && !pname(p).toLowerCase().includes(cl.toLowerCase()) ? cl : '';   // ei toisteta tuotteen nimeä
+  const cl = cleanLabel(rlabel(r)), sub = cl && !pname(p).toLowerCase().includes(cl.toLowerCase()) ? cl : '';   // ei toisteta tuotteen nimeä
   const price = r.price_mode === 'per_person' ? `${money(r.unit_price)} ${t.perPerson}` : r.price_mode === 'fixed' ? money(r.base_price) : `${t.from} ${money(r.base_price)}`;
   return h('li', { class: `bk-slot ${r.status}` },
     h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }),
@@ -310,7 +312,7 @@ async function fillTreatments(box, results, ds, today, tmax, openSlug, onToggle,
   const from = ds < today ? today : ds;
   const end = addDays(ds, 13);
   const until = end < tmax ? end : tmax;
-  await Promise.all(state.treatments.map(async (p, ord) => {
+  await Promise.all(state.treatments.filter(treatmentListed).map(async (p, ord) => {
     let by;
     try { by = await loadTreatmentSlots(p, 1, from, until); } catch (e) { failed = failed || e; return; }
     if (token !== treatDayToken || !box.isConnected) return;
@@ -397,14 +399,15 @@ async function viewDay(dateStr, keep, openSlug) {
     .sort((a, b) => Number(fullyBooked(a[1])) - Number(fullyBooked(b[1])));
   const bySlug = new Map(prods.map(([p]) => [p.slug, p]));
   const openId = prods.length === 1 ? prods[0][0].id : bySlug.get(openSlug)?.id ?? null;
-  const groups = ['yleinen', 'yksityinen', 'muut'].map((k) => [k, prods.filter(([p]) => kindOf(p) === k)])
+  // järjestys: yksityisvuorot → yleiset vuorot → muut; hoidot ja rituaalit (treatBox) aina viimeisenä
+  const groups = DAY_KIND_ORDER.map((k) => [k, prods.filter(([p]) => kindOf(p) === k)])
     .filter(([, g]) => g.length);
   results = h('div', { class: 'bk-dayresults', 'data-date': ds }, heading, notice,
     prods.length ? h('p', { class: 'bk-note bk-pickhint', text: t.pickProduct }) : null,
     groups.flatMap(([k, g]) => [h('h4', { class: 'bk-kindh', text: t['k_' + k] }),
       h('ul', { class: 'bk-prods' }, g.map(([p, rs]) => prodCard(p, rs, ds, p.id === openId, toggle)))]));
   const tmax = addDays(today, treatmentHorizon(state.settings)) < maxDs ? addDays(today, treatmentHorizon(state.settings)) : maxDs;
-  const treatBox = state.treatments.length && ds <= tmax ? h('section', { class: 'bk-treat-day', 'aria-label': t.k_hoito }, h('h4', { class: 'bk-kindh', text: t.k_hoito }), h('p', { class: 'bk-loading bk-treat-status', role: 'status', text: t.loading }), h('ul', { class: 'bk-prods' })) : null;
+  const treatBox = state.treatments.some(treatmentListed) && ds <= tmax ? h('section', { class: 'bk-treat-day', 'aria-label': t.k_hoito }, h('h4', { class: 'bk-kindh', text: t.k_hoito }), h('p', { class: 'bk-loading bk-treat-status', role: 'status', text: t.loading }), h('ul', { class: 'bk-prods' })) : null;
   if (treatBox) results.append(treatBox);
   mount(h('header', { class: 'bk-head' }, h('h2', { text: t.dayTitle }), h('p', { class: 'lead', text: t.dayLead })), modeSwitch('day', ds),
     h('section', { class: 'bk-daypick', 'aria-label': t.pickDay }, nav, strip,
@@ -424,7 +427,7 @@ async function viewProduct(slug, dateStr, query) {
   if (!p) {
     const st = (await fetch(S.staticProductsUrl).then((r) => r.json()).catch(() => ({})))[slug];
     mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })),
-      h('h2', { text: st ? st.name : t.unknownProduct }), st ? h('p', { text: st.description || '' }) : null,
+      h('h2', { text: st ? st.name : t.unknownProduct }), st ? fallbackDesc(h, st, S.lang) : null,   // kuvaus voi olla rikasta: puhdistettuna (rich-view.js), ei raakana tekstinä
       st ? h('div', { class: 'bk-notice' }, h('p', { text: t.contactUs }), phoneBox()) : null);
     focusTop(); return;
   }
@@ -438,7 +441,7 @@ async function viewProduct(slug, dateStr, query) {
     wrap.replaceChildren(
       h('p', {}, h('a', { href: bk('/'), text: t.backList })),
       richHost(h, pdesc(p) || '', 'bk-desc'),
-      h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), p.duration_text ? ` · ${p.duration_text}` : ''),
+      h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), pdur(p) ? ` · ${pdur(p)}` : ''),
       h('h3', { text: t.pickDate }), calBox, slotBox);
     let byDay = {};
     try { byDay = await loadMonth(p.id, y, m); } catch (e) { calBox.append(errorBox(t.loadError)); return; }
@@ -480,7 +483,7 @@ async function viewProduct(slug, dateStr, query) {
 function slotItem(r, ds, p) {
   const ok = r.status === 'available';
   const title = `${hm(r.starts_at)}–${hm(r.ends_at)}`;
-  const sub = cleanLabel(r.label);
+  const sub = cleanLabel(rlabel(r));
   const price = r.price_mode === 'per_person' ? `${money(r.unit_price)} ${t.perPerson}` : r.price_mode === 'fixed' ? money(r.base_price)
     : `${money(r.base_price)} (${t.included(r.included_persons)}, ${t.extra(money(r.extra_person_price))})`;
   return h('li', { class: `bk-slot ${r.status}` },
@@ -884,7 +887,7 @@ async function viewChange(token, b) {
         const title = `${hm(r.starts_at)}–${hm(r.ends_at)}`;
         const btn = h('button', { type: 'button', role: 'radio', class: 'btn sm', 'aria-checked': (st.session ? st.session === r : cur) ? 'true' : 'false', disabled: !ok || null, onclick: () => {
           st.session = cur ? null : r; sessionsBox.querySelectorAll('[role=radio]').forEach((x) => x.setAttribute('aria-checked', 'false')); btn.setAttribute('aria-checked', 'true'); upd(); } }, cur ? t.currentSlot : t.choose, h('span', { class: 'sr', text: ` ${title}` }));
-        return h('li', { class: `bk-slot ${ok ? 'available' : r.status}` }, h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }), cleanLabel(r.label) ? h('span', { class: 'bk-sub', text: cleanLabel(r.label) }) : null),
+        return h('li', { class: `bk-slot ${ok ? 'available' : r.status}` }, h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }), cleanLabel(rlabel(r)) ? h('span', { class: 'bk-sub', text: cleanLabel(rlabel(r)) }) : null),
           h('div', { class: 'bk-slot-side' }, h('span', { class: `bk-badge ${ok ? 'free' : late ? 'unavail' : r.status}`, text: late ? t.tooLate(hours) : ok ? t.freeSpots(cur ? r.remaining + it.persons : r.remaining) : r.status === 'full' ? t.full : t.unavailable }), btn));
       })) : h('p', { text: t.noSlots }));
     upd();

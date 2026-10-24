@@ -31,7 +31,8 @@ declare u uuid;
 begin
   select id into u from auth.users where email = p_email limit 1;
   if u is not null then return u; end if;
-  insert into auth.users(email) values (p_email) returning id into u;
+  -- id annetaan itse: tuotannon/testiprojektin auth.users.id:llä ei ole oletusarvoa (paikallisessa mockissa on)
+  insert into auth.users(id, email) values (gen_random_uuid(), p_email) returning id into u;
   return u;
 end $$;
 create or replace function test.mk_staff(p_email text, p_role text) returns uuid language plpgsql as $$

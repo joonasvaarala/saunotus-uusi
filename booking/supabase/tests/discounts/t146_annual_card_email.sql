@@ -117,8 +117,14 @@ begin
   perform test.login(v_adm);
   j := booking.admin_create_annual_card(v_cust, current_date, current_date + 30, null, 'testi');
   perform test.logout();
-  perform pg_temp.ck(not exists (select 1 from booking.email_outbox e2 where e2.dedupe_key = 'annual_card_code:' || (select id from booking.annual_cards where customer_id = v_cust)),
-    'E12: hallinnassa käsin luotu kortti ei lähetä viestiä');
+  -- booking_154 muutti tämän: hallinnasta myönnetty kortti saa yhden oman viestin (tilaukseton rivi, source admin); t154 testaa tarkemmin.
+  if to_regprocedure('booking._annual_card_admin_to(bigint)') is null then
+    perform pg_temp.ck(not exists (select 1 from booking.email_outbox e2 where e2.dedupe_key = 'annual_card_code:' || (select id from booking.annual_cards where customer_id = v_cust)),
+      'E12: hallinnassa käsin luotu kortti ei lähetä viestiä (ennen booking_154)');
+  else
+    perform pg_temp.ck((select count(*) from booking.email_outbox e2 where e2.dedupe_key = 'annual_card_code:' || (select id from booking.annual_cards where customer_id = v_cust)
+      and e2.order_id is null and e2.payload ->> 'source' = 'admin') = 1, 'E12: hallinnassa käsin luotu kortti → yksi tilaukseton viesti (booking_154)');
+  end if;
 
   -- ===== oikeudet ja tilaus ilman korttia =====
   perform test.login(v_ed);

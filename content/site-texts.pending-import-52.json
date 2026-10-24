@@ -1,0 +1,270 @@
+[
+ {
+  "key": "ui.admin.annual_manage.code_hint",
+  "lang": "fi",
+  "text": "Tyhjä = palvelin arpoo 10 merkin satunnaiskoodin (esim. TS5DSYAH2X). Sallitut merkit A–Z, 0–9 ja väliviiva.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 170,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.code_hint",
+  "lang": "en",
+  "text": "Empty = the server generates a random 10-character code (e.g. TS5DSYAH2X). Allowed characters A–Z, 0–9 and hyphen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 180,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.code_label",
+  "lang": "fi",
+  "text": "Oma koodi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.code_label",
+  "lang": "en",
+  "text": "Own code",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.code_label_optional",
+  "lang": "fi",
+  "text": "Oma koodi (valinnainen)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.code_label_optional",
+  "lang": "en",
+  "text": "Own code (optional)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.delete",
+  "lang": "fi",
+  "text": "Poista",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.delete",
+  "lang": "en",
+  "text": "Delete",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.delete_confirm",
+  "lang": "fi",
+  "text": "Poistetaanko vuosikortti {{var:code}} pysyvästi? Korttia ei ole käytetty. Poisto kirjataan muutoslokiin.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [
+   "{{var:code}}"
+  ],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.delete_confirm",
+  "lang": "en",
+  "text": "Delete annual card {{var:code}} permanently? The card has not been used. The deletion is recorded in the audit log.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 180,
+  "placeholders": [
+   "{{var:code}}"
+  ],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.deleted",
+  "lang": "fi",
+  "text": "Vuosikortti poistettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.deleted",
+  "lang": "en",
+  "text": "Annual card deleted",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.generate",
+  "lang": "fi",
+  "text": "Arvo koodi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.generate",
+  "lang": "en",
+  "text": "Generate code",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.revoke",
+  "lang": "fi",
+  "text": "Peru",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.revoke",
+  "lang": "en",
+  "text": "Revoke",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.revoke_confirm",
+  "lang": "fi",
+  "text": "Perutaanko vuosikortti?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.revoke_confirm",
+  "lang": "en",
+  "text": "Revoke the annual card?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.revoke_future_confirm",
+  "lang": "fi",
+  "text": "Perutaanko myös kortin tulevat varaukset? (OK = peru, Peruuta = säilytä)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 110,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.revoke_future_confirm",
+  "lang": "en",
+  "text": "Also cancel the card’s future bookings? (OK = cancel them, Cancel = keep them)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.revoked",
+  "lang": "fi",
+  "text": "Vuosikortti peruttu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.revoked",
+  "lang": "en",
+  "text": "Annual card revoked",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.revoked_with_bookings",
+  "lang": "fi",
+  "text": "Vuosikortti peruttu, {{var:count}} varausta peruttu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:count}}"
+  ],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.revoked_with_bookings",
+  "lang": "en",
+  "text": "Annual card revoked, {{var:count}} bookings cancelled",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:count}}"
+  ],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.section_note",
+  "lang": "fi",
+  "text": "Vuosikortilla saa yhden maksuttoman yleisen saunavuoron kerrallaan yhdelle hengelle ilman lisäpalveluita. Peru-nappi poistaa kortin käytöstä. Poista-nappi näkyy vain käyttämättömällä hallinnasta myönnetyllä kortilla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 330,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.annual_manage.section_note",
+  "lang": "en",
+  "text": "An annual card gives one free public sauna session at a time for one person without extras. The Revoke button takes the card out of use. The Delete button is shown only for an unused card granted in admin.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 310,
+  "placeholders": [],
+  "reason": "booking_152: hallinnan vuosikorttien koodin arvonta, Peru- ja Poista-napit (uusi teksti, ei vielä tuotannossa)"
+ }
+]

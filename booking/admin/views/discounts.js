@@ -1,10 +1,12 @@
 // Alennuskoodit ja vuosikortit (booking_142). Kaikki muutokset palvelimen RPC:illä (ei suoria taulukirjoituksia):
 //   admin_list_discount_codes / admin_save_discount_code / admin_delete_discount_code  (catalog.edit; yhteinen vuosikorttikoodi lisäksi annual_cards.manage)
 //   admin_list_annual_cards_details / admin_create_annual_card                          (annual_cards.manage)
+//   admin_revoke_annual_card / admin_delete_annual_card (booking_152)                   (annual_cards.manage; poisto vain käyttämättömälle hallinnasta myönnetylle kortille, palvelin tarkistaa aina)
 // Arvo lähetetään merkkijonona (palvelin tarkistaa muodon ^\d{1,6}(\.\d{1,2})?$), jotta liukuluvut eivät pyöristy matkalla.
 import { rpc } from '../sb.js';
 import { h, field, toast, run, dialog, empty, money, badge, fmtDate, todayHel } from '../ui.js';
-import { normalizeCode, generatedDiscountCode } from '../../shop/src/discount-code-logic.js';
+import { normalizeCode, generatedDiscountCode, generatedAnnualCardCode } from '../../shop/src/discount-code-logic.js';
+import { amText, loadAmTexts, amCreatedMessage } from '../annual-manage-texts.js';
 
 const STATE = { active: ['ok', 'Voimassa'], inactive: ['muted', 'Pois käytöstä'], not_started: ['warn', 'Ei vielä alkanut'], expired: ['muted', 'Vanhentunut'], used_up: ['muted', 'Käytetty loppuun'] };
 const dOnly = (ds) => (ds ? fmtDate(`${ds}T12:00:00Z`) : '');
@@ -18,7 +20,7 @@ export async function render({ ctx, refs, reload }) {
   const canCodes = ctx.can('catalog.edit'), canCards = ctx.can('annual_cards.manage');
   const products = [...(refs?.products || [])].filter((p) => p.active !== false).sort((a, b) => String(a.name).localeCompare(String(b.name), 'fi'));
   const pname = (id) => products.find((p) => p.id === id)?.name || `#${id}`;
-  const [codes, cards] = await Promise.all([rpc('admin_list_discount_codes'), canCards ? rpc('admin_list_annual_cards_details') : Promise.resolve(null)]);
+  const [codes, cards] = await Promise.all([rpc('admin_list_discount_codes'), canCards ? rpc('admin_list_annual_cards_details') : Promise.resolve(null), canCards ? loadAmTexts(rpc) : null]);
   const root = h('section', { class: 'stack', 'data-testid': 'discounts-page', 'aria-labelledby': 'disc-h' }, h('h1', { id: 'disc-h', text: 'Alennuskoodit ja vuosikortit' }),
     h('p', { class: 'muted', text: 'Asiakas syöttää koodin verkkokaupan kassalla. Alennus lasketaan palvelimella ja jaetaan tilausriveille, joten jokainen rivi säilyttää oman ALV-kantansa.' }));
 
@@ -42,12 +44,30 @@ export async function render({ ctx, refs, reload }) {
     const cl = h('div', { class: 'list', 'data-testid': 'annual-list' }, (cards || []).length ? cards.map((a) => h('div', { class: 'card stack' },
       h('div', { class: 'row between wrap' }, h('strong', { class: 'code', text: a.code || '(ei koodia)' }), a.revoked_at ? badge('muted', 'Peruttu') : a.active ? badge('ok', 'Voimassa') : badge('muted', 'Pois käytöstä')),
       h('span', { text: [a.customer_name, a.customer_email].filter(Boolean).join(' · ') }),
-      h('small', { class: 'muted', text: [`${dOnly(a.valid_from)} – ${dOnly(a.valid_to)}`, a.purchase_order_no ? `ostettu tilauksella #${a.purchase_order_no}` : 'myönnetty hallinnasta', a.future_bookings ? `${a.future_bookings} tuleva varaus` : null, a.notes].filter(Boolean).join(' · ') }))) : empty('Ei vuosikortteja.'));
+      h('small', { class: 'muted', text: [`${dOnly(a.valid_from)} – ${dOnly(a.valid_to)}`, a.purchase_order_no ? `ostettu tilauksella #${a.purchase_order_no}` : 'myönnetty hallinnasta', a.future_bookings ? `${a.future_bookings} tuleva varaus` : null, a.notes].filter(Boolean).join(' · ') }),
+      cardActions(a))) : empty('Ei vuosikortteja.'));
     root.append(h('div', { class: 'row between wrap' }, h('h2', { text: 'Vuosikortit' }),
       h('button', { type: 'button', class: 'btn primary', 'data-testid': 'annual-new', onclick: () => createCard() }, 'Myönnä vuosikortti')),
-      h('p', { class: 'muted', text: 'Vuosikortilla saa yhden maksuttoman yleisen saunavuoron kerrallaan yhdelle hengelle ilman lisäpalveluita. Peruutus tehdään asiakaskortilta.' }), cl);
+      h('p', { class: 'muted', text: amText('ui.admin.annual_manage.section_note') }), cl);
   }
   return root;
+
+  // Peru: sama kuin asiakaskortilla (kaksi vahvistusta, tulevat varaukset valinnaisesti). Poista: vain kun palvelin merkitsee kortin
+  // poistettavaksi (deletable = ei ostotilausta eikä varauksia); palvelin tarkistaa ehdot silti aina (annual_card_used / annual_card_purchased).
+  function cardActions(a) {
+    const revoke = a.active && !a.revoked_at ? h('button', { type: 'button', class: 'btn sm', 'data-testid': `annual-revoke-${a.id}`, onclick: (e) => run(e.currentTarget, async () => {
+      if (!confirm(amText('ui.admin.annual_manage.revoke_confirm'))) return;
+      const cancelFuture = confirm(amText('ui.admin.annual_manage.revoke_future_confirm'));
+      const r = await rpc('admin_revoke_annual_card', { p_id: a.id, p_cancel_future: cancelFuture });
+      toast(r?.cancelled ? amText('ui.admin.annual_manage.revoked_with_bookings', { count: r.cancelled }) : amText('ui.admin.annual_manage.revoked')); reload();
+    }) }, amText('ui.admin.annual_manage.revoke')) : null;
+    const del = a.deletable === true ? h('button', { type: 'button', class: 'btn danger sm', 'data-testid': `annual-delete-${a.id}`, onclick: (e) => run(e.currentTarget, async () => {
+      if (!confirm(amText('ui.admin.annual_manage.delete_confirm', { code: a.code || `#${a.id}` }))) return;
+      await rpc('admin_delete_annual_card', { p_id: a.id });
+      toast(amText('ui.admin.annual_manage.deleted')); reload();
+    }) }, amText('ui.admin.annual_manage.delete')) : null;
+    return revoke || del ? h('div', { class: 'row wrap' }, revoke, del) : null;
+  }
 
   function editCode(d) {
     const annual = !!d?.is_annual_card_code;
@@ -107,20 +127,25 @@ export async function render({ ctx, refs, reload }) {
       if (rows.length === 1) sel.value = String(rows[0].id);
     }, 300); });
     const from = h('input', { type: 'date', name: 'valid_from', value: todayHel(), required: true }), to = h('input', { type: 'date', name: 'valid_to' });
-    const code = h('input', { name: 'code', maxlength: 40, autocomplete: 'off' });
+    const code = h('input', { name: 'code', maxlength: 40, autocomplete: 'off', spellcheck: 'false', 'data-testid': 'annual-code' });
     code.addEventListener('input', () => { code.value = normalizeCode(code.value); });
+    const gen = h('button', { type: 'button', class: 'btn sm', 'data-testid': 'annual-code-generate', onclick: () => { code.value = generatedAnnualCardCode(); } }, amText('ui.admin.annual_manage.generate'));
     const notes = h('input', { name: 'notes', maxlength: 300 });
+    // booking_154: "Lähetä koodi asiakkaalle" (oletuksena päällä) → p_send_email
+    const send = h('input', { type: 'checkbox', name: 'send_email', checked: true, 'data-testid': 'annual-send-email' });
     const form = h('form', { class: 'stack', novalidate: true }, field('Asiakas', h('div', { class: 'stack' }, q, sel)),
       h('div', { class: 'row wrap' }, field('Alkaa', from), field('Päättyy', to, 'Tyhjä = vuoden päästä')),
-      field('Oma koodi', code, 'Tyhjä = palvelin luo koodin (luontosana ja numerot).'), field('Muistiinpano', notes),
+      field(amText('ui.admin.annual_manage.code_label'), h('div', { class: 'row wrap' }, code, gen), amText('ui.admin.annual_manage.code_hint')), field('Muistiinpano', notes),
+      h('label', { class: 'check' }, send, ' ', amText('ui.admin.annual_manage.send_email')),
+      h('p', { class: 'muted', text: amText('ui.admin.annual_manage.send_email_hint') }),
       h('button', { type: 'submit', class: 'btn primary' }, 'Myönnä vuosikortti'));
     const dlg = dialog('Myönnä vuosikortti', form);
     form.addEventListener('submit', (ev) => {
       ev.preventDefault();
       run(form.querySelector('[type=submit]'), async () => {
         if (!sel.value) throw new Error('Valitse asiakas.');
-        const r = await rpc('admin_create_annual_card', { p_customer_id: +sel.value, p_valid_from: from.value, p_valid_to: to.value || yearAfter(from.value), p_code: normalizeCode(code.value) || null, p_notes: notes.value.trim() || null });
-        toast(`Vuosikortti myönnetty. Koodi: ${r.code}`); dlg.close(); reload();
+        const r = await rpc('admin_create_annual_card', { p_customer_id: +sel.value, p_valid_from: from.value, p_valid_to: to.value || yearAfter(from.value), p_code: normalizeCode(code.value) || null, p_notes: notes.value.trim() || null, p_send_email: send.checked });
+        toast(amCreatedMessage(r)); dlg.close(); reload();
       });
     });
   }

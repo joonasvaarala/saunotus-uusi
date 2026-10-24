@@ -7,6 +7,8 @@ import { tx } from './site-texts.mjs';
 import { seoSchemaForPage, jsonLdScript } from './seo-enhance.mjs';
 import { privacyAnalyticsHtml } from './privacy-analytics.mjs';
 import { policyText, privacyDocFor } from './policy-lang.mjs';
+import { shopProductsHtml } from './shop-products.mjs';
+import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
   johku, bookingUrl, phoneDisplay, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
@@ -148,11 +150,11 @@ export function eventsHtml(lang, empty) {
   if (!ev.length) return `<p class="center">${e(empty)}</p>`;
   return `<ul class="events">${ev.map(({ c, p, dates }) => {
     const t = c[lang];
-    const times = [...new Set(dates.map((d) => d.time_text).filter(Boolean))];
+    const times = [...new Set(dates.map((d) => eventTimeFor(d, lang, enTime)).filter(Boolean))];
     const dl = dates.slice(0, 6).map((d) => fmtDate(d.starts_on, lang)).join(' · ');
     return `<li class="card ev"><div class="im">${pic(c.img, lang, { sizes: '(min-width:1100px) 280px, 90vw', alt: '' })}<span class="badge">${e(money(p.price, lang))}</span></div>
 <div class="bd"><h3><a href="${e(bookingUrl(p.booking_url, lang))}" target="_blank" rel="noopener">${e(t.title)}${NEW(lang)}</a></h3>
-<p class="dates">${e(dl)}${times.length ? ' · ' + e(lang === 'en' ? enTime(times[0]) : times[0]) : ''}</p><p>${e(t.text)}</p></div><div class="cta" aria-hidden="true">${e(ui(lang).reserveArrow)}</div></li>`;
+<p class="dates">${e(dl)}${times.length ? ' · ' + e(times[0]) : ''}</p><p>${e(t.text)}</p></div><div class="cta" aria-hidden="true">${e(ui(lang).reserveArrow)}</div></li>`;
   }).join('')}</ul>`;
 }
 
@@ -303,7 +305,9 @@ export function home(lang, opt = {}) {
   const feat = sec('', `${head('', d.featured.title, '', { orn: true })}<ul class="cards five">${d.featured.items.map((it) => card({ kb: it.kb, img: it.img, show: it.show, exact: it.exact, over: it.over ? Object.fromEntries(Object.entries(it.over).map(([k, v]) => [k, { [lang]: v }])) : {}, note: it.note, extra: false, fi: { kicker: it.pill, title: it.title, text: it.text, cta: it.cta }, en: { kicker: it.pill, title: it.title, text: it.text, cta: it.cta } }, lang, { url: it.to ? link(it.to, lang, 'home') : undefined, sizes: '(min-width:1100px) 220px, (min-width:640px) 45vw, 100vw' }).replace(/ target="_blank"/, '').replace(NEW(lang), '')).join('')}</ul>`);
   const a = d.about;
   const about = sec('tint', `<div class="about"><div><p class="kicker">${e(a.kicker)}</p><h2 class="sec-title">${e(a.title)}</h2><p>${e(a.text)}</p><ul class="elements">${a.elements.map((x) => `<li>${icon(x.icon, 32)}<b>${e(x.title)}</b>${e(x.text)}</li>`).join('')}</ul><a class="btn light" href="${e(site.trainingUrl)}" rel="noopener">${e(a.cta)}${NEW(lang)}</a></div><div class="im">${pic(a.img, lang, { sizes: '(min-width:900px) 560px, 100vw' })}</div></div>`);
-  const ev = sec('', `${head('', d.events.title, u.eventsIntro, { orn: true })}${eventsHtml(lang, d.events.empty)}<p class="center" style="margin-top:28px"><a class="btn light sm" href="${e(jk('events', lang))}" target="_blank" rel="noopener">${e(u.allEvents)}${NEW(lang)}</a></p>`, 'tapahtumat');
+  const ev = sec('', `${head('', d.events.title, u.eventsIntro, { orn: true })}${eventsHtml(lang, d.events.empty)}<p class="center" style="margin-top:28px"><a class="btn light sm" href="${pageHref('book', lang)}">${e(u.allEvents)}</a></p>`, 'tapahtumat');
+  // Varaa verkosta: kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille (src/shop-products.mjs)
+  const shopList = sec('tint', shopProductsHtml(lang, { esc: e, pageHref, head, product: (s) => kb.products.find((x) => x.slug === s) || null }), 'varaa-verkosta');
   const co = d.company;
   const comp = sec('tint', `<div class="company"><div><p class="kicker">${e(co.kicker)}</p><h2 class="sec-title">${e(co.title)}</h2><p>${e(co.text)}</p><div class="actions" style="display:flex;gap:12px;flex-wrap:wrap">${mailBtn(co.cta, co.mailSubject)}<a class="btn light" href="${pageHref('companies', lang)}">${e(co.cta2)}</a></div></div><div class="im">${pic(co.img, lang, { sizes: '(min-width:900px) 520px, 100vw' })}</div></div>`);
   const s = d.story;
@@ -311,7 +315,7 @@ export function home(lang, opt = {}) {
   const pre = heroPreload();
   // Saunatietoa-osio: esirenderöity buildissa (src/articles/pages.mjs homeSectionHtml); tyhjä merkkijono = ei artikkeleita / haku epäonnistui → osio pois kokonaan
   const arts = opt.articlesHtml ?? homeSection(lang);
-  const body = (opt.previewNote ? `<p class="prev-note" role="note">${e(opt.previewNote)}</p>` : '') + hero + tiles + wk + ritual + feat + arts + reviewsSection(lang) + about + ev + comp + story;
+  const body = (opt.previewNote ? `<p class="prev-note" role="note">${e(opt.previewNote)}</p>` : '') + hero + tiles + wk + shopList + ritual + feat + arts + reviewsSection(lang) + about + ev + comp + story;
   return layout({ lang, key: 'home', meta: opt.meta || d.meta, preload: pre, body, extraCss: arts ? homeArticlesCss : '', seo: opt.seo || null });
 }
 
@@ -333,7 +337,8 @@ export function treatments(lang) {
   const body = pageHero(d.hero, lang, 'treatments')
     + sec('', `<div class="narrow center"><p class="kicker">${e(d.intro.kicker)}</p><h2 class="sec-title">${e(d.intro.title)}</h2><p class="lead">${e(d.intro.text)}</p><p class="note-box" style="text-align:left">${e(d.intro.note)}</p></div>`)
     + sec('tint', `${head('', d.s1.title, d.s1.text, { orn: true })}${cardList(T(['saunahoito', 'saunotus', 'syvasaunotus', 'ryhma']), lang, 'two')}<p class="center" style="margin-top:20px">${e(d.s1.note)}</p>`, d.s1.id)
-    + sec('', `${head('', d.s2.title, d.s2.text, { orn: true })}${cardList(T(['avoin-rituaali', 'turvetorstai', 'perinnesaunotusilta', 'rituaali-lisa']), lang)}`, d.s2.id)
+    // rituaalit: Saunotusrituaali (kortti rituaali-lisa, kb 8) ei ole listalla, vaan jää lisätuotteeksi (booking_159); tuotesivu /varaa/#/tuote/saunotusrituaali toimii ennallaan
+    + sec('', `${head('', d.s2.title, d.s2.text, { orn: true })}${cardList(T(['avoin-rituaali', 'turvetorstai', 'perinnesaunotusilta']), lang)}`, d.s2.id)
     + sec('tint', `${head('', d.s3.title, d.s3.text, { orn: true })}${cardList(T(['morsiussauna', 'turvesauna', 'synttarisauna']), lang, 'three')}<p class="center" style="margin-top:22px">${e(d.s3.note)} ${mailBtn(site.contact.email, d.s3.title, 'btn light sm')}</p>`, d.s3.id)
     + sec('', `${head('', d.s4.title, d.s4.text, { orn: true })}${cardList(T(['opiskelija']), lang, 'two')}`)
     + sec('tint', `<div class="narrow center"><h2 class="sec-title">${e(tb.title)}</h2><p>${e(tb.text)}</p><a class="btn" href="${e(site.trainingUrl)}" rel="noopener">${e(tb.cta)}${NEW(lang)}</a></div>`);
@@ -366,7 +371,6 @@ export function book(lang) {
   return layout({ lang, key: 'book', meta: d.meta, body });
 }
 
-const faqOf = (id) => kb.faq.find((x) => x.id === id);
 const clean = (s) => s.replace(/lisählöt/g, 'lisähenkilöt').replace(/\s*Vanhan sivuston mukaan[^.]*\./g, '').replace(/\s+$/g, '');
 export function info(lang) {
   const d = P('info')[lang], u = ui(lang);
@@ -378,7 +382,7 @@ export function info(lang) {
     return '';
   }).join('');
   const secs = d.sections.map((s) => `<div class="info-sec" id="${s.id}"><div>${icon(s.icon, 40)}<h2>${e(s.title)}</h2><p class="tag">${e(s.tag)}</p></div><div>${blocks(s.blocks)}</div></div>`).join('');
-  const faqs = d.faq.map(faqOf).filter(Boolean).map((f) => `<details><summary>${e(f.question)}</summary><p>${e(clean(f.answer))}</p></details>`).join('');
+  const faqs = d.faq.map((id) => faqFor(id, lang)).filter(Boolean).map((f) => `<details${f.lang !== lang ? ` lang="${e(f.lang)}"` : ''}><summary>${e(f.question)}</summary><p>${e(clean(f.answer))}</p></details>`).join('');
   const body = pageHero(d.hero, lang, 'info')
     + `<div class="wrap"><nav class="quick" aria-label="${e(d.hero.title)}">${d.sections.map((s) => `<a href="#${s.id}">${e(s.title)}</a>`).join('')}</nav></div>`
     + sec('', `<div class="infogrid">${secs}</div>`)
@@ -428,10 +432,14 @@ ${messages}
 
 export function policyPage(name, key, lang) {
   const d = name === 'privacy' ? privacyDocFor(P(name).fi, kb.policies, lang) : P(name)[lang];
-  const items = d.policies.map((id) => kb.policies.find((p) => p.id === id)).filter((p) => p && !p.internal);
+  // Tietosuojaseloste: privacy.json-listan rivit, EN vain title_en+body_en (policy-lang.mjs; muuten EN-sivua ei rakenneta).
+  // Muut (ehdot): suomenkieliset id:t + _en (kb-en.mjs).
+  const items = name === 'privacy'
+    ? d.policies.map((id) => kb.policies.find((p) => p.id === id)).filter((p) => p && !p.internal).map((p) => policyText(p, lang) ?? policyText(p, 'fi'))
+    : d.policies.map((id) => policyFor(id, lang)).filter(Boolean);
   const txt = (s) => clean(s).split(/\n+/).map((l) => `<p>${e(l)}</p>`).join('');
   const body = pageHero(d.hero, lang, key)
-    + sec('', `<div class="narrow prose">${d.note ? `<p class="note-box">${e(d.note)}</p>` : ''}${items.map((p) => name === 'privacy' ? policyText(p, lang) ?? policyText(p, 'fi') : p).map((p) => `<h2>${e(p.title)}</h2>${txt(p.body)}`).join('')}${name === 'privacy' ? privacyAnalyticsHtml(lang, e, txt) : ''}</div>`);
+    + sec('', `<div class="narrow prose">${d.note ? `<p class="note-box">${e(d.note)}</p>` : ''}${items.map((p) => p.lang && p.lang !== lang ? `<div lang="${e(p.lang)}"><h2>${e(p.title)}</h2>${txt(p.body)}</div>` : `<h2>${e(p.title)}</h2>${txt(p.body)}`).join('')}${name === 'privacy' ? privacyAnalyticsHtml(lang, e, txt) : ''}</div>`);
   return layout({ lang, key, meta: d.meta, body });
 }
 

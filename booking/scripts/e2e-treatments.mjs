@@ -139,15 +139,16 @@ if (OFF) {
     const tabs = await page.locator('.bk-tabs a').allInnerTexts();
     expect(tabs.some((x) => /hoidot ja rituaalit/i.test(x)), `${name}: Hoidot ja rituaalit -välilehti puuttuu (${tabs})`);
     const names = await page.locator('.bk-card h3').allInnerTexts();
-    expect(names.join('|') === 'Saunahoito|Saunotus|Syväsaunotus|Saunotusrituaali|Saunarituaali ja savusaunavuoro (la & su)', `${name}: hoitokortit ${names}`);
-    expect(names.length === 5, `${name}: hoitokortteja pitää olla 5 (4 + paketti kb 7), nyt ${names.length}`);
+    // Saunotusrituaali (kb 8) ei ole listalla (booking_159: vain lisätuote); tuotesivu #/tuote/saunotusrituaali toimii (alla HERO-silmukka)
+    expect(names.join('|') === 'Saunahoito|Saunotus|Syväsaunotus|Saunarituaali ja savusaunavuoro (la & su)', `${name}: hoitokortit ${names}`);
+    expect(names.length === 4, `${name}: hoitokortteja pitää olla 4 (3 + paketti kb 7), nyt ${names.length}`);
     await page.evaluate(async () => { for (const i of document.querySelectorAll('.bk-card img')) { i.scrollIntoView(); if (!i.complete) await new Promise((r) => { i.onload = i.onerror = r; }); } window.scrollTo(0, 0); });
-    expect((await page.locator('.bk-card .card-img img').evaluateAll((els) => els.filter((e) => e.complete && e.naturalWidth > 0).length)) === 4, `${name}: hoitokorttien kuvat (4 kuvallista; paketilla ei kuvaa) eivät ole kaikki ladattu`);
+    expect((await page.locator('.bk-card .card-img img').evaluateAll((els) => els.filter((e) => e.complete && e.naturalWidth > 0).length)) === 3, `${name}: hoitokorttien kuvat (3 kuvallista; paketilla ei kuvaa) eivät ole kaikki ladattu`);
     await hscroll(page, `${name} hoitolista`);
     await shot(page, `shop-${name}-9-hoidot-lista.png`);
     // kategorialistan "Kaikki" sisältää myös hoidot ja vanhat vuorotuotteet säilyvät
     await fresh(page, `${shop('fi')}#/?k=all`); await page.waitForSelector('.bk-cards');
-    expect((await page.locator('.bk-card').count()) > 4 && (await page.locator('.bk-card h3', { hasText: 'Saunotusrituaali' }).count()) === 1, `${name}: Kaikki-listalla pitää olla vuorotuotteet ja hoidot`);
+    expect((await page.locator('.bk-card').count()) > 4 && (await page.locator('.bk-card h3', { hasText: 'Syväsaunotus' }).count()) === 1 && (await page.locator('.bk-card h3', { hasText: 'Saunotusrituaali' }).count()) === 0, `${name}: Kaikki-listalla pitää olla vuorotuotteet ja hoidot (ei Saunotusrituaalia, booking_159)`);
 
     for (const slug of Object.keys(HERO)) {
       await fresh(page, `${shop('fi')}#/tuote/${slug}`);
@@ -318,6 +319,7 @@ if (OFF) {
       if (i > 0) { await page.evaluate((x) => { location.hash = `#/paiva/${x}`; }, d); await page.waitForSelector(`.bk-dayresults[data-date="${d}"]`); await settle(); }
       const slugs = await page.locator('.bk-treat-day .bk-pc').evaluateAll((e) => e.map((x) => x.dataset.slug));
       for (const s of slugs) (seen[s] ||= []).push(d);
+      expect(!slugs.includes('saunotusrituaali'), `päivä ${lang} ${w} ${d}: Saunotusrituaali päivänäkymän hoitolistalla (booking_159: vain lisätuote)`);
       expect(dow(d) !== 5 || slugs.length === 0, `päivä ${lang} ${w} ${d}: perjantaille tarjotaan hoitoja (${slugs})`);
       if (RITUAL_SLUGS.some((x) => slugs.includes(x))) expect([0, 6].includes(dow(d)), `päivä ${d}: rituaali/paketti arkipäivänä`);
       if (slugs.length) {

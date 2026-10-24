@@ -8,8 +8,9 @@ import { createOptionPicker } from './options-ui.js';
 import { ht, holdError } from './hold-texts.js';
 import { fmtMinutes } from './site-texts-logic.js';
 import { createAddonPicker } from './treatment-addons.js';
-import { isRichHtml } from './rich-text.js';
-import { visibleText, richHost } from './rich-view.js';
+import { richHost } from './rich-view.js';
+import { cardShort } from './short-desc.js';
+import { cardMeta } from './card-meta.js';
 import { revealForm, revealIfHidden } from './gift-ui.js';
 
 export function createTreatmentViews(c) {
@@ -36,8 +37,8 @@ export function createTreatmentViews(c) {
   const totalMin = (p) => p.duration_minutes || A.timelineMinutes(p);
   // jakson sisällä sitova väli (NBSP): rivinvaihto vain jaksojen välissä ("savusauna 1 h 30 min" ei katkea)
   const timelineText = (p) => A.timelineText(p, S.lang);
-  // kesto hintarivillä: paketilla kieliversio (palvelimen duration_text on suomea ja pitkä), muilla palvelimen teksti
-  const durText = (p) => (A.isPackage(p) ? fmtMin(totalMin(p)) : p.duration_text || '');
+  // kesto hintarivillä: paketilla kieliversio (palvelimen duration_text on suomea ja pitkä), muilla palvelimen teksti (EN: duration_text_en, puuttuu → duration_text; booking_147)
+  const durText = (p) => (A.isPackage(p) ? fmtMin(totalMin(p)) : (S.lang === 'en' && p.duration_text_en) || p.duration_text || '');
   // lahjakorttihuomautus (booking_61: voucher_note / voucher_note_en): erillinen huomautus, ei osa tuotekuvausta; en puuttuu → fi
   const voucherNote = (p) => ((S.lang === 'en' && p.voucher_note_en) || p.voucher_note || '').trim();
   const voucherNode = (p) => (voucherNote(p) ? h('aside', { class: 'bk-voucher-note', 'data-testid': 'voucher-note', role: 'note' }, h('p', { text: voucherNote(p) })) : null);
@@ -53,8 +54,8 @@ export function createTreatmentViews(c) {
   const card = (p) => h('li', { class: 'bk-card' },
     pimg(p, 'card-img'),
     h('h3', {}, h('a', { href: bk(`/tuote/${p.slug}`), text: pname(p) })),
-    h('p', { class: 'bk-desc', text: (() => { const raw = pdesc(p) || ''; const plain = isRichHtml(raw) ? visibleText(raw).replace(/\s+/g, ' ').trim() : raw; return plain.slice(0, 170) + (plain.length > 170 ? '…' : ''); })() }),
-    metaP(p),
+    cardShort(h, p, S.lang, pdesc(p)),   // booking_156: lyhyt kuvaus puhdistettuna, tyhjä → johdettu ote (short-desc.js)
+    cardMeta(h, priceText(p), durText(p)),   // kesto/ajankohta omalla rivillään hinnan yläpuolella (card-meta.js)
     timelineNode(p),
     h('a', { class: 'btn sm', href: bk(`/tuote/${p.slug}`) }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) })));
 

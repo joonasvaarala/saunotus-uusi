@@ -40,6 +40,12 @@ export const RICH_TEXTS = {
   },
 };
 
+// Kuvakerivin lisänimet (aria-label/title). Eivät ole site_texts-tuonnissa: oletusteksti riittää.
+export const RICH_EXTRA_TEXTS = {
+  fi: { 'ui.admin.rich.clean': 'Poista muotoilu', 'ui.admin.rich.toolbar': 'Tekstin muotoilu' },
+  en: { 'ui.admin.rich.clean': 'Clear formatting', 'ui.admin.rich.toolbar': 'Text formatting' },
+};
+
 let db = new Map();
 let loaded = false;
 
@@ -73,5 +79,5 @@ export function richText(key, lang = getLang()) {
   const full = key.startsWith(PREFIX) ? key : PREFIX + key;
   const live = db.get(`${full}|${lang}`);
   if (live) return live;
-  return RICH_TEXTS[lang]?.[full] || RICH_TEXTS.fi[full] || key;
+  return RICH_TEXTS[lang]?.[full] || RICH_EXTRA_TEXTS[lang]?.[full] || RICH_TEXTS.fi[full] || RICH_EXTRA_TEXTS.fi[full] || key;
 }

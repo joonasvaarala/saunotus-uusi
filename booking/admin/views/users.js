@@ -1,6 +1,7 @@
 // Käyttäjät (vain staff.manage = admin): lista, kutsu sähköpostilla (Edge Function admin-users), roolin vaihto, käyttöönotto/poisto käytöstä, linkitys työntekijään (työvuorot).
 import { rpc, fn, getSession } from '../sb.js';
 import { h, field, toast, run, badge, dialog, empty, errMsg } from '../ui.js';
+import { renderShiftStaffPanel } from './shift-staff-panel.js';
 
 const INVITE_ROLES = ['admin', 'manager', 'staff'];   // sama sallittulista kuin Edge Functionissa; asiakasrooleja ei voi kutsua
 const ROLE_HELP = 'admin = kaikki, myös käyttäjähallinta; manager (ylläpitäjä) = varaukset, hinnat, asetukset, resurssit ja sulut + kaikkien työvuorot, ei käyttäjähallintaa; staff (peruskäyttäjä) = varaukset, asiakkaat, maksujen kirjaus ja omat työvuorot.';
@@ -34,7 +35,8 @@ export async function render({ ctx, reload }) {
     h('p', { class: 'muted', text: ROLE_HELP }),
     pubErr ? h('p', { class: 'notice', role: 'status', text: 'Työntekijälistaa (public-skeema) ei voitu lukea, joten linkitys työvuoroihin on pois käytöstä. Muu käyttäjähallinta toimii.' }) : null,
     h('div', { class: 'toolbar' }, h('button', { class: 'btn primary', type: 'button', onclick: () => invite(reload, roles) }, '+ Kutsu käyttäjä')),
-    h('div', { class: 'stack' }, rows.length ? rows : empty('Ei käyttäjiä.'))];
+    h('div', { class: 'stack' }, rows.length ? rows : empty('Ei käyttäjiä.')),
+    await renderShiftStaffPanel({ reload })];   // booking_153: vuorotarjousten omat sivut (ei kaada näkymää, jos RPC puuttuu)
 }
 
 function invite(reload, roles) {

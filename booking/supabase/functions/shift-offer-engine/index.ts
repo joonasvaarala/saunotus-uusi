@@ -1,5 +1,5 @@
 // shift-offer-engine: vapaiden vuorojen tarjoaminen (SPEC.md).
-// EI deployata tästä haarasta. EI lähetä viestejä. EI aja migraatioita.
+// EI aja migraatioita. Viestit lähtevät vain, kun lähettäjä on kytketty päälle (sender_enabled).
 //
 // Autentikointi:
 //   * tick (POST ilman tokenia): header x-sync-secret = env SYNC_CRON_SECRET (vakioaikavertailu)
@@ -34,6 +34,11 @@
 //       timeout_milliseconds := 50000);
 //   $cron$);
 //
+// booking_153: oma sivu GET /api/my?token= ja POST /api/my/respond (mypage.ts). Saman päivän kooste,
+// kierroksen loppumuistutus ja "jo mennyt" -viesti käyttävät pohjia vain, kun shift_offer.wa_templates
+// merkitsee ne hyväksytyiksi; muuten vapaamuotoinen viesti 24 h ikkunassa tai sähköposti. WhatsApp vain 08–21.
+// Tervetuloviesti henkilökunnan ensimmäiseen viestiin: booking.shift_staff_welcome (asetus, oletus pois).
+//
 // Token-avain (ei repoissa, ei edge-ympäristössä): vault-salaisuus shift_offer_token_secret.
 // Kuivaharjoitus käsin: sama kutsu, body {"dryRun":true} tai ?dry_run=1.
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
@@ -45,6 +50,7 @@ import {
   shiftRoute,
   type TickBody,
 } from "./core.ts";
+import { handleMyPageRequest, myRoute, type MyPageDb } from "./mypage.ts";
 import { deliverInbound, deliverQueued, readWhatsappEnv, webhookResponse } from "./sender.ts";
 
 function db(): SupabaseClient {
@@ -57,6 +63,16 @@ function offerDb(supa: SupabaseClient): OfferDb {
   return {
     async rpc(name, args) {
       const { data, error } = await supa.rpc(name, args);
+      return { data, error };
+    },
+  };
+}
+
+// booking_153: oma sivu käyttää booking-skeeman funktioita (vain service_role).
+function myPageDb(supa: SupabaseClient): MyPageDb {
+  return {
+    async rpc(name, args) {
+      const { data, error } = await supa.schema("booking").rpc(name, args);
       return { data, error };
     },
   };
@@ -82,6 +98,7 @@ Deno.serve(async (req) => {
       await deliverInbound(supa, env, message, log);
     });
   }
+  if (myRoute(req.method, url.pathname)) return handleMyPageRequest(req, myPageDb(db()));
   const token = url.searchParams.get("token");
   const route = shiftRoute(req.method, url.pathname, token);
   if (route === "invalid") return new Response("method not allowed", { status: 405 });

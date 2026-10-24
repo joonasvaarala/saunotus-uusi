@@ -166,7 +166,8 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       { id: 1, code: 'KESA15', description: 'Esimerkki: kesäkampanja', kind: 'percent', value: 15, valid_from: null, valid_to: addDays(today, 60), max_uses: null, used_count: 3, product_ids: null, active: true, target_scope: 'order', usage_type: 'permanent', is_annual_card_code: false, state: 'active' },
       { id: 2, code: 'X7KQ2M', description: 'Esimerkki: hyvitys asiakkaalle', kind: 'fixed', value: 10, valid_from: null, valid_to: null, max_uses: 1, used_count: 0, product_ids: [1], active: true, target_scope: 'product', usage_type: 'single', is_annual_card_code: false, state: 'active' },
       { id: 3, code: 'KUMPPANI-VK', description: 'Esimerkki: yhteinen vuosikorttikoodi', kind: 'percent', value: 100, valid_from: null, valid_to: addDays(today, 200), max_uses: null, used_count: 12, product_ids: [1], active: true, target_scope: 'product', usage_type: 'permanent', is_annual_card_code: true, state: 'active' }],
-    annualCards: [{ id: 1, code: 'HONKA417', customer_id: 2, customer_name: 'Eero Esimerkki', customer_email: 'eero@example.com', valid_from: addDays(today, -30), valid_to: addDays(today, 334), active: true, revoked_at: null, notes: null, purchase_order_no: 7001, future_bookings: 1 }],
+    annualCards: [{ id: 1, code: 'HONKA417', customer_id: 2, customer_name: 'Eero Esimerkki', customer_email: 'eero@example.com', valid_from: addDays(today, -30), valid_to: addDays(today, 334), active: true, revoked_at: null, notes: null, purchase_order_no: 7001, future_bookings: 1, reservations_count: 1, deletable: false },
+      { id: 2, code: 'TS5DSYAH2X', customer_id: 3, customer_name: 'Helmi Hiljainen', customer_email: 'helmi@example.com', valid_from: today, valid_to: addDays(today, 364), active: true, revoked_at: null, notes: 'Esimerkki: myönnetty hallinnasta, käyttämätön', purchase_order_no: null, future_bookings: 0, reservations_count: 0, deletable: true }],
     // Sulkukonflikti (booking_73). Kuittaus ei koske availabilityBlocked-lippua.
     availabilityBlocked: true,
     blockConflicts: [{
@@ -280,8 +281,28 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       if (!a.p_valid_from || !a.p_valid_to || a.p_valid_to < a.p_valid_from) throw err('invalid_dates', 'Virheellinen voimassaoloaika');
       const code = normalizeCode(a.p_code) || generatedAnnualCardCode();
       if (st.annualCards.some((x) => x.code === code) || st.discountCodes.some((x) => x.code === code)) throw err('code_exists', 'Koodi on jo käytössä');
-      const row = { id: ++st.seq.card, code, customer_id: c.id, customer_name: c.name, customer_email: c.email, valid_from: a.p_valid_from, valid_to: a.p_valid_to, active: true, revoked_at: null, notes: a.p_notes || null, purchase_order_no: null, future_bookings: 0 };
-      st.annualCards.push(row); return { ok: true, id: row.id, code };
+      const row = { id: ++st.seq.card, code, customer_id: c.id, customer_name: c.name, customer_email: c.email, valid_from: a.p_valid_from, valid_to: a.p_valid_to, active: true, revoked_at: null, notes: a.p_notes || null, purchase_order_no: null, future_bookings: 0, reservations_count: 0, deletable: true };
+      st.annualCards.push(row);
+      // booking_154: 6-parametrinen kutsu (p_send_email) palauttaa sähköpostin tilan kuten palvelin; 5-parametrinen ennallaan
+      if (a.p_send_email === undefined) return { ok: true, id: row.id, code };
+      const status = a.p_send_email === false ? 'not_requested' : (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c.email || '') ? 'pending' : 'no_email');
+      if (status === 'pending') st.annualEmails = [...(st.annualEmails || []), { dedupe_key: `annual_card_code:${row.id}`, card_id: row.id, source: 'admin' }];
+      return { ok: true, id: row.id, code, email: { status } };
+    },
+    // booking_152: peruminen (kuten admin_revoke_annual_card) ja poisto vain käyttämättömälle hallinnasta myönnetylle kortille (kuten admin_delete_annual_card)
+    admin_revoke_annual_card: (a) => {
+      need('annual_cards.manage');
+      const c = st.annualCards.find((x) => x.id === +a.p_id); if (!c) throw err('not_found', 'Vuosikorttia ei löydy');
+      const cancelled = a.p_cancel_future ? c.future_bookings || 0 : 0;
+      Object.assign(c, { active: false, revoked_at: c.revoked_at || new Date().toISOString(), future_bookings: a.p_cancel_future ? 0 : c.future_bookings });
+      return { ok: true, future_reservations: cancelled || c.future_bookings || 0, cancelled };
+    },
+    admin_delete_annual_card: (a) => {
+      need('annual_cards.manage');
+      const c = st.annualCards.find((x) => x.id === +a.p_id); if (!c) throw err('not_found', 'Vuosikorttia ei löydy');
+      if (c.purchase_order_no) throw err('annual_card_purchased', 'Kortti on ostettu tilauksella, joten sitä ei voi poistaa. Peru kortti poistamisen sijaan.');
+      if (c.reservations_count > 0) throw err('annual_card_used', 'Kortilla on varauksia, joten sitä ei voi poistaa. Peru kortti poistamisen sijaan.');
+      st.annualCards = st.annualCards.filter((x) => x !== c); return { ok: true, deleted: true, id: c.id, customer_id: c.customer_id, code: c.code };
     },
     // booking_136: varauksen osuus maksuista + peruutus (valinnainen hyvitys). Kokeilutila: maksettu varaus = koko summa hyvitettävissä.
     admin_reservation_refund_preview: (a) => {
@@ -706,7 +727,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     admin_product_create: (a) => {
       need('catalog.edit');
       const d = a.p_data || {};
-      const allowed = new Set(['name', 'name_en', 'description', 'description_en', 'price', 'price_text', 'vat_rate', 'category', 'active', 'age_restricted']);
+      const allowed = new Set(['name', 'name_en', 'description', 'description_en', 'short_description', 'short_description_en', 'price', 'price_text', 'vat_rate', 'category', 'active', 'age_restricted']);
       for (const k of Object.keys(d)) if (!allowed.has(k)) throw err('unknown_field', 'Kenttää ei saa muokata: ' + k);
       const name = String(d.name ?? '').trim();
       if (!name || name.length > 200) throw err('invalid_name', 'Nimi ei voi olla tyhjä');
@@ -741,6 +762,8 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
         id, business_id: st.businessId, slug, name, name_en: nameEn,
         description: String(d.description || '').trim() || null,
         description_en: String(d.description_en || '').trim() || null,
+        short_description: String(d.short_description || '').trim() || null,   // booking_156 (mock ei tarkista allowlistia; kanta tarkistaa)
+        short_description_en: String(d.short_description_en || '').trim() || null,
         category, price, price_type: 'per_unit', price_text: priceText, vat_rate: vat, active,
         external_system: null, external_id: null,
         config: {

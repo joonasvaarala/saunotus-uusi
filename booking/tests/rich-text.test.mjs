@@ -216,6 +216,9 @@ test('Quill-editori ladataan vain aktiiviseen kenttään; tallennus käyttää p
       this.html = '<p><br></p>';
     }
     getSemanticHTML() { return this.html; }
+    hasFocus() { return !!this.focused; }
+    get selection() { return { savedRange: { index: 0, length: 3 } }; }
+    getModule(name) { return name === 'toolbar' ? { update: (range) => { this.updated = range; } } : null; }
     on(name, cb) { this.handlers[name] = cb; }
     getFormat() { return {}; }
     getSelection() { return { index: 0, length: 1 }; }
@@ -252,6 +255,33 @@ test('Quill-editori ladataan vain aktiiviseen kenttään; tallennus käyttää p
     assert.equal(mounted.length, 1);
     assert.deepEqual(head.children.map((el) => el.tagName).sort(), ['LINK', 'SCRIPT']);
     assert.deepEqual(mounted[0].options.formats, ['bold', 'italic', 'header', 'list', 'link']);
+    // Snow-teema ja Quillin oma kuvakerivi (ei omia tekstipainikkeita, ei toolbar: false).
+    const opts = mounted[0].options;
+    assert.equal(opts.theme, 'snow');
+    const tb = opts.modules.toolbar.container;
+    assert.ok(tb && tb.tagName === 'DIV', 'toolbar-kontti annetaan Quillille');
+    assert.equal(tb.attributes.role, 'toolbar');
+    assert.equal(tb.attributes['aria-label'], 'Tekstin muotoilu');
+    const btns = tb.children.flatMap((g) => { assert.equal(g.className, 'ql-formats'); return g.children; });
+    assert.deepEqual(btns.map((b) => `${b.className}${b.value ? '=' + b.value : ''}`),
+      ['ql-bold', 'ql-italic', 'ql-link', 'ql-header=2', 'ql-header=3', 'ql-list=bullet', 'ql-list=ordered', 'ql-clean', 'ql-undo', 'ql-redo']);
+    assert.deepEqual(btns.map((b) => b.attributes['aria-label']),
+      ['Lihavointi', 'Kursivointi', 'Linkki', 'Otsikko', 'Alaotsikko', 'Luettelo', 'Numerointi', 'Poista muotoilu', 'Kumoa', 'Tee uudelleen']);
+    for (const b of btns) { assert.equal(b.title, b.attributes['aria-label']); assert.equal(b.type, 'button'); assert.ok(!b.textContent, 'kuvake, ei tekstiä'); }
+    assert.ok(btns.find((b) => b.className === 'ql-undo').innerHTML.includes('<svg'));
+    assert.deepEqual(Object.keys(opts.modules.toolbar.handlers).sort(), ['link', 'redo', 'undo']);
+    // Toggle-regressio (#154): painike ei vie fokusta (mousedown preventDefault), ja jos fokus silti lähti,
+    // ql-active päivitetään tallennetusta valinnasta ennen Quillin click-käsittelyä (capture).
+    for (const b of btns) {
+      let prevented = false;
+      b.listeners.mousedown({ preventDefault() { prevented = true; } });
+      assert.ok(prevented, `${b.className} mousedown ei saa viedä fokusta`);
+    }
+    mounted[0].focused = true; tb.listeners.click();
+    assert.equal(mounted[0].updated, undefined, 'fokuksessa Quill hoitaa tilan itse');
+    mounted[0].focused = false; tb.listeners.click();
+    assert.deepEqual(mounted[0].updated, { index: 0, length: 3 });
+    assert.ok(opts.modules.history);
     const hidden = created.find((el) => el.tagName === 'INPUT' && el.dataset.richValue === '1');
     assert.equal(hidden.name, 'description');
     assert.equal(hidden.type, 'hidden');
@@ -267,6 +297,9 @@ test('Quill-editori ladataan vain aktiiviseen kenttään; tallennus käyttää p
     label.append(other);
     await mountRichFields({ querySelectorAll: () => [other] });
     assert.equal(head.children.length, 2);
+    assert.equal(mounted.length, 2, 'viestikenttä saa oman Quill-editorin');
+    assert.equal(mounted[1].options.theme, 'snow');
+    assert.ok(mounted[1].options.modules.toolbar.container !== mounted[0].options.modules.toolbar.container);
   } finally {
     if (oldDoc === undefined) delete globalThis.document; else globalThis.document = oldDoc;
     if (oldQuill === undefined) delete globalThis.Quill; else globalThis.Quill = oldQuill;
@@ -275,10 +308,11 @@ test('Quill-editori ladataan vain aktiiviseen kenttään; tallennus käyttää p
 
 test('Quill: työkalurivin tila ei siirrä kursoria kirjoittaessa (getFormat vain annetulla alueella)', async () => {
   // Regressio: quill.getFormat() ilman aluetta kutsuu getSelection(true), joka palauttaa vanhan valinnan
-  // kesken text-change-tapahtuman ja hukkaa merkkejä. Mock heittää virheen, jos niin käy.
+  // kesken text-change-tapahtuman ja hukkaa merkkejä. Aktiivitilan päivittää nyt Quillin oma toolbar-moduuli
+  // (getFormat(range)); omassa koodissa getFormat kutsutaan vain annetulla alueella.
   const editor = read('booking/admin/rich-editor.js');
-  assert.match(editor, /quill\.getSelection\(false\)/);
-  assert.doesNotMatch(editor, /const format = quill\.getFormat\(\);/);
+  assert.doesNotMatch(editor, /quill\.getFormat\(\)/);
+  assert.doesNotMatch(editor, /on\('text-change', updateButtons\)/);
   for (const tag of ['IMG', 'IFRAME', 'SCRIPT', 'STYLE', 'SVG']) assert.match(editor, new RegExp(`'${tag}'`));
   assert.doesNotMatch(editor, /formats: \[[^\]]*(image|video|formula|code-block|color|background)/);
 });
@@ -299,4 +333,62 @@ test('Quill-vendor: versioitu 2.0.3, ei source mapia eikä ulkoisia osoitteita, 
   const adminCss = read('booking/admin/admin.css');
   assert.match(adminCss, /\.rich-field \.ql-editor a\{color:var\(--gold\)/);
   assert.doesNotMatch(adminCss.slice(adminCss.indexOf('/* Rich-teksti (Quill 2)'), adminCss.indexOf('@media(min-width:700px){.pos-grid')), /#06c|blue/i);
+});
+
+test('Quill alustetaan tuotekuvauksille (FI+EN) ja viestiteksteille; ei omaa tekstipainikeriviä', () => {
+  const products = read('booking/admin/views/products.js');
+  const messages = read('booking/admin/views/messages.js');
+  for (const name of ['description', 'description_en']) assert.ok(products.includes(`inp('${name}', p.${name}, { area: true, 'data-rich': '1' })`), name);
+  for (const name of ['short_fi', 'short_en', 'body_fi', 'body_en']) assert.ok(messages.includes(`inp('${name}', row.${name}, { area: true, 'data-rich': '1' })`), name);
+  for (const src of [products, messages]) assert.match(src, /await mountRichFields\(f\)/);
+  const editor = read('booking/admin/rich-editor.js');
+  assert.doesNotMatch(editor, /toolbar: false/);
+  assert.match(editor, /theme: 'snow'/);
+  assert.doesNotMatch(editor, /rich-button-group|data-rich-action/);
+  // Ei omia format(x, true) -käsittelijöitä: bold/italic/header/list/clean jäävät Quillin toggle-logiikalle.
+  assert.doesNotMatch(editor, /handlers: \{[^}]*\b(bold|italic|header|list|clean)\s*:/);
+  assert.doesNotMatch(editor, /\.format\('(bold|italic|header|list)', true/);
+  assert.match(editor, /addEventListener\('mousedown', \(event\) => event\.preventDefault\(\)\)/);
+  assert.match(editor, /savedRange/);
+});
+
+test('Quill-kuvakerivi: kompakti myös mobiilissa, talon värit, ei Quillin sinistä', () => {
+  const css = read('booking/admin/admin.css');
+  const block = css.slice(css.indexOf('/* Rich-teksti (Quill 2)'), css.indexOf('@media(min-width:700px){.pos-grid'));
+  assert.doesNotMatch(block, /#06c|blue|grid-template-columns:repeat\(3/i);
+  assert.match(block, /\.ql-toolbar\.ql-snow\{display:flex;flex-wrap:wrap/);
+  assert.match(block, /button:hover \.ql-stroke[^{]*\{stroke:var\(--gold\)\}/);
+  assert.match(block, /button\.ql-active\{color:#fff;background:var\(--green\)\}/);
+  assert.match(block, /\.ql-tooltip\{display:none!important\}/);
+  // Spesifisyys voittaa Quillin touch-säännön .ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke (CSS ladataan myöhemmin).
+  assert.match(block, /\.rich-field \.rich-toolbar\.ql-toolbar\.ql-snow button:hover \.ql-stroke/);
+  assert.match(block, /@media\(max-width:480px\)\{.*ql-snow button\{width:30px/);
+  // Kontrasti >= 4,5:1: #2B3A30 ja #7A5530 hiekkaa #F4EFE7 ja valkoista vasten, valkoinen #2B3A30:aa vasten.
+  const lum = (hex) => { const c = hex.match(/\w\w/g).map((x) => parseInt(x, 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+  const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+  for (const [fg, bg] of [['2B3A30', 'F4EFE7'], ['7A5530', 'F4EFE7'], ['7A5530', 'FFFFFF'], ['FFFFFF', '2B3A30']]) assert.ok(ratio(fg, bg) >= 4.5, `${fg}/${bg}`);
+  assert.match(css, /--green:#2B3A30/); assert.match(css, /--gold:#7A5530/); assert.match(css, /--bg:#F4EFE7/);
+});
+
+test('Varapolku vain, jos Quill ei lataudu: textarea jää, matala, eikä muotoiluohjetta näytetä', async () => {
+  const { mountRichFields } = await import(pathToFileURL(join(root, 'booking/admin/rich-editor.js')).href + '?varapolku');
+  const { richText } = await import(pathToFileURL(join(root, 'booking/admin/rich-texts.js')).href);
+  const oldDoc = globalThis.document;
+  const added = [];
+  const head = { append: (node) => { added.push(node); queueMicrotask(() => node.listeners.error?.()); } };
+  const mk = (tag) => ({ tagName: tag.toUpperCase(), dataset: {}, listeners: {}, addEventListener(n, f) { this.listeners[n] = f; } });
+  globalThis.document = { head, createElement: mk, querySelector: () => null };
+  try {
+    const hint = { textContent: richText('hint'), hidden: false };
+    const fld = { querySelector: (sel) => (sel === ':scope > small' ? hint : null) };
+    const classes = new Set();
+    const area = { disabled: false, isConnected: true, rows: 5, classList: { add: (c) => classes.add(c) }, closest: () => fld };
+    await assert.rejects(mountRichFields({ querySelectorAll: () => [area] }), /Quill-lataus epäonnistui/);
+    assert.equal(added.filter((n) => n.tagName === 'SCRIPT').length, 1);
+    assert.ok(classes.has('rich-fallback'));
+    assert.equal(area.rows, 4);
+    assert.equal(hint.hidden, true);
+  } finally {
+    if (oldDoc === undefined) delete globalThis.document; else globalThis.document = oldDoc;
+  }
 });

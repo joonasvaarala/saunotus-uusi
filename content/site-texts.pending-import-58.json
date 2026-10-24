@@ -1,0 +1,232 @@
+[
+ {
+  "key": "ui.site.shop_products_title",
+  "lang": "fi",
+  "text": "Varaa verkosta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Etusivun \"Varaa verkosta\" -osio (Joonas 24.10.2026): kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille, ei Johku-linkkejä. Uusi avain, FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.site.shop_products_title",
+  "lang": "en",
+  "text": "Book online",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Etusivun \"Varaa verkosta\" -osio (Joonas 24.10.2026): kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille, ei Johku-linkkejä. Uusi avain, FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.site.shop_products_lead",
+  "lang": "fi",
+  "text": "Kaikki verkossa varattavat saunavuorot, rituaalit ja hoidot. Valitse tuote, niin pääset suoraan varaamaan.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Etusivun \"Varaa verkosta\" -osio (Joonas 24.10.2026): kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille, ei Johku-linkkejä. Uusi avain, FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.site.shop_products_lead",
+  "lang": "en",
+  "text": "All sauna sessions, rituals and treatments you can book online. Choose one to go straight to booking.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Etusivun \"Varaa verkosta\" -osio (Joonas 24.10.2026): kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille, ei Johku-linkkejä. Uusi avain, FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.site.shop_products_group_public_sauna",
+  "lang": "fi",
+  "text": "Yleiset saunavuorot",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Etusivun \"Varaa verkosta\" -osio (Joonas 24.10.2026): kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille, ei Johku-linkkejä. Uusi avain, FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.site.shop_products_group_public_sauna",
+  "lang": "en",
+  "text": "Public sauna sessions",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Etusivun \"Varaa verkosta\" -osio (Joonas 24.10.2026): kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille, ei Johku-linkkejä. Uusi avain, FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.site.shop_products_group_private_sauna",
+  "lang": "fi",
+  "text": "Yksityisvuorot",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Etusivun \"Varaa verkosta\" -osio (Joonas 24.10.2026): kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille, ei Johku-linkkejä. Uusi avain, FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.site.shop_products_group_private_sauna",
+  "lang": "en",
+  "text": "Private sessions",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Etusivun \"Varaa verkosta\" -osio (Joonas 24.10.2026): kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille, ei Johku-linkkejä. Uusi avain, FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.site.shop_products_group_ritual",
+  "lang": "fi",
+  "text": "Rituaalit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Etusivun \"Varaa verkosta\" -osio (Joonas 24.10.2026): kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille, ei Johku-linkkejä. Uusi avain, FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.site.shop_products_group_ritual",
+  "lang": "en",
+  "text": "Rituals",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Etusivun \"Varaa verkosta\" -osio (Joonas 24.10.2026): kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille, ei Johku-linkkejä. Uusi avain, FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.site.shop_products_group_treatment",
+  "lang": "fi",
+  "text": "Hoidot",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Etusivun \"Varaa verkosta\" -osio (Joonas 24.10.2026): kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille, ei Johku-linkkejä. Uusi avain, FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.site.shop_products_group_treatment",
+  "lang": "en",
+  "text": "Treatments",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Etusivun \"Varaa verkosta\" -osio (Joonas 24.10.2026): kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille, ei Johku-linkkejä. Uusi avain, FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.site.shop_products_group_corporate",
+  "lang": "fi",
+  "text": "Yrityksille",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Etusivun \"Varaa verkosta\" -osio (Joonas 24.10.2026): kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille, ei Johku-linkkejä. Uusi avain, FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.site.shop_products_group_corporate",
+  "lang": "en",
+  "text": "For companies",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Etusivun \"Varaa verkosta\" -osio (Joonas 24.10.2026): kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille, ei Johku-linkkejä. Uusi avain, FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.site.shop_products_all",
+  "lang": "fi",
+  "text": "Kaikki varattavat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Etusivun \"Varaa verkosta\" -osio (Joonas 24.10.2026): kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille, ei Johku-linkkejä. Uusi avain, FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.site.shop_products_all",
+  "lang": "en",
+  "text": "Everything bookable",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Etusivun \"Varaa verkosta\" -osio (Joonas 24.10.2026): kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille, ei Johku-linkkejä. Uusi avain, FI+EN, luokka normal. Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "faq.4.answer",
+  "lang": "fi",
+  "text": "Kaikki varaukset tehdään verkkokaupassamme (Varaa-sivu). Valitse vuorotyyppi (yleinen, yksityinen, jälkilöylyt jne.), päivämäärä ja osallistujamäärä. Vahvistus ja lisäohjeet tulevat sähköpostitse.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 600,
+  "placeholders": [],
+  "reason": "Johku-maininnan korvaus (Joonas 24.10.2026: sivustolla ei Johku-linkkejä, varaukset ja maksut uudessa verkkokaupassa). Olemassa oleva avain: uusi versio korvaa nykyisen tekstin, kun Bottiavustus tuo tiedoston. Sama versio on varatekstinä vasta tuonnin jälkeen."
+ },
+ {
+  "key": "page.booking_info.note",
+  "lang": "fi",
+  "text": "Varaukset ja maksu tehdään verkkokaupassamme.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Johku-maininnan korvaus (Joonas 24.10.2026: sivustolla ei Johku-linkkejä, varaukset ja maksut uudessa verkkokaupassa). Olemassa oleva avain: uusi versio korvaa nykyisen tekstin, kun Bottiavustus tuo tiedoston. Sama versio on varatekstinä vasta tuonnin jälkeen."
+ },
+ {
+  "key": "page.booking_info.note",
+  "lang": "en",
+  "text": "Bookings and payment are made in our online shop.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Johku-maininnan korvaus (Joonas 24.10.2026: sivustolla ei Johku-linkkejä, varaukset ja maksut uudessa verkkokaupassa). Olemassa oleva avain: uusi versio korvaa nykyisen tekstin, kun Bottiavustus tuo tiedoston. Sama versio on varatekstinä vasta tuonnin jälkeen."
+ },
+ {
+  "key": "page.terms.note",
+  "lang": "fi",
+  "text": "Varaukset ja maksut tehdään verkkokaupassamme, jonka ehdot ovat voimassa ostohetkellä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Johku-maininnan korvaus (Joonas 24.10.2026: sivustolla ei Johku-linkkejä, varaukset ja maksut uudessa verkkokaupassa). Olemassa oleva avain: uusi versio korvaa nykyisen tekstin, kun Bottiavustus tuo tiedoston. Sama versio on varatekstinä vasta tuonnin jälkeen."
+ },
+ {
+  "key": "page.terms.note",
+  "lang": "en",
+  "text": "Bookings and payments are made in our online shop, whose terms apply at the time of purchase.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Johku-maininnan korvaus (Joonas 24.10.2026: sivustolla ei Johku-linkkejä, varaukset ja maksut uudessa verkkokaupassa). Olemassa oleva avain: uusi versio korvaa nykyisen tekstin, kun Bottiavustus tuo tiedoston. Sama versio on varatekstinä vasta tuonnin jälkeen."
+ },
+ {
+  "key": "seo.booking_info.description",
+  "lang": "fi",
+  "text": "Varaa yleinen saunavuoro, avoin rituaali, saunahoito, saunotus tai yksityisvuoro Sipoonjoen Perinnesaunalle. Varaukset tehdään verkkokaupassamme.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Johku-maininnan korvaus (Joonas 24.10.2026: sivustolla ei Johku-linkkejä, varaukset ja maksut uudessa verkkokaupassa). Olemassa oleva avain: uusi versio korvaa nykyisen tekstin, kun Bottiavustus tuo tiedoston. Sama versio on varatekstinä vasta tuonnin jälkeen."
+ },
+ {
+  "key": "seo.booking_info.description",
+  "lang": "en",
+  "text": "Book a public sauna session, open ritual, sauna treatment, saunotus or private session at Sipoonjoen Perinnesauna. Bookings are made in our online shop.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Johku-maininnan korvaus (Joonas 24.10.2026: sivustolla ei Johku-linkkejä, varaukset ja maksut uudessa verkkokaupassa). Olemassa oleva avain: uusi versio korvaa nykyisen tekstin, kun Bottiavustus tuo tiedoston. Sama versio on varatekstinä vasta tuonnin jälkeen."
+ }
+]

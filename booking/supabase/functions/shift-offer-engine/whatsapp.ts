@@ -38,7 +38,8 @@ export type TemplatePayload = {
   to: string;
   type: "template";
   template: {
-    name: TemplateName;
+    // booking_153: nimi voi tulla asetuksesta (shift_offer.wa_templates), esim. tyovuoro_kysely.
+    name: TemplateName | string;
     language: { code: typeof TEMPLATE_LANGUAGE };
     components: Array<BodyComponent | ButtonComponent>;
   };
@@ -63,6 +64,21 @@ export type ClaimedMessage = {
   token: string | null;
   staff_whatsapp_enabled: boolean;
   bot_channel: boolean;
+  // booking_153 (valinnaiset; vanha claim ei anna näitä → vanha käytös)
+  subkind?: string | null;
+  body?: string | null;
+  session_open?: boolean;
+  page_token?: string | null;
+  digest?: { date_label?: string | null; items?: string | null } | null;
+};
+
+// booking_153: Metan pohjat asetuksesta shift_offer.wa_templates. Pohjaa käytetään vain, kun approved = true.
+export type TemplateSetting = { name?: string; approved?: boolean; fallback?: string };
+export type TemplateSettings = {
+  offer?: TemplateSetting;
+  round_reminder?: TemplateSetting;
+  already_taken?: TemplateSetting;
+  day_digest?: TemplateSetting;
 };
 
 export type Settings = {
@@ -70,6 +86,9 @@ export type Settings = {
   whatsapp_enabled: boolean;
   whatsapp_dry_run: boolean;
   allow_staff_ids: string[];
+  templates?: TemplateSettings;
+  // booking_153 (d): WhatsApp vain 08–21 Europe/Helsinki. false = ei lähetetä nyt.
+  whatsapp_hours_open?: boolean;
 };
 
 export type WhatsappEnv = {
@@ -88,7 +107,7 @@ export type CompleteResult = {
   error?: string | null;
   retry_at?: string | null;
   attempts?: number;
-  payload?: TemplatePayload | null;
+  payload?: TemplatePayload | SessionPayload | null;
 };
 
 export type Plan =
@@ -100,10 +119,10 @@ export type Plan =
     reason: string;
     channel: "whatsapp" | "email" | "none";
     to: string | null;
-    payload: TemplatePayload | null;
+    payload: TemplatePayload | SessionPayload | null;
     delayMinutes: number;
   }
-  | { action: "send"; payload: TemplatePayload; to: string }
+  | { action: "send"; payload: TemplatePayload | SessionPayload; to: string }
   | { action: "bot_channel" };
 
 const TERMINAL = new Set(["sent", "delivered", "read", "failed", "failed_no_contact", "skipped", "unknown", "bot_channel"]);
@@ -147,7 +166,11 @@ export function maskPhoneE164(phone: string): string {
   return `${phone.slice(0, 4)}${"*".repeat(phone.length - 6)}${phone.slice(-2)}`;
 }
 
-export function redactTemplatePayload(payload: TemplatePayload): TemplatePayload {
+export function redactTemplatePayload(payload: TemplatePayload): TemplatePayload;
+export function redactTemplatePayload(payload: SessionPayload): SessionPayload;
+export function redactTemplatePayload(payload: TemplatePayload | SessionPayload): TemplatePayload | SessionPayload;
+export function redactTemplatePayload(payload: TemplatePayload | SessionPayload): TemplatePayload | SessionPayload {
+  if (payload.type !== "template") return redactSessionPayload(payload);
   return {
     ...payload,
     to: maskPhoneE164(payload.to),
@@ -161,6 +184,19 @@ export function redactTemplatePayload(payload: TemplatePayload): TemplatePayload
         };
       }),
     },
+  };
+}
+
+// Istuntoviestin teksti sisältää linkkipoletteja: ne peitetään ennen lokia ja last_payloadia.
+export function redactSessionPayload(payload: SessionPayload): SessionPayload {
+  const hide = (text: string) => text.replace(/token=[^&\s]+/g, "token=***");
+  if (payload.type === "text") {
+    return { ...payload, to: maskPhoneE164(payload.to), text: { ...payload.text, body: hide(payload.text.body) } };
+  }
+  return {
+    ...payload,
+    to: maskPhoneE164(payload.to),
+    interactive: { ...payload.interactive, body: { text: hide(payload.interactive.body.text) } },
   };
 }
 
@@ -243,6 +279,43 @@ export function formatDeadline(deadlineAt: string | null): string {
   return `${String(w.d).padStart(2, "0")}.${String(w.m).padStart(2, "0")}.${w.y} klo ${w.hh}:${w.mi}`;
 }
 
+// booking_155: tyovuoro_kysely (Metan live-teksti): "Hei, työvuoroon tarvitaan tekijää. Vuoro: {{1}}, aika {{2}}.
+// Voitko tulla töihin? Vastaathan viimeistään {{3}} mennessä alla olevasta painikkeesta."
+// → {{1}} lyhyt rooli isolla alkukirjaimella (Lämmitys), {{2}} "la 31.10. klo 12–18", {{3}} "to 29.10. klo 12".
+// Vuosi näytetään vain, jos ajankohta ei ole kuluvana vuonna (Helsinki). Minuutit vain, jos ne eivät ole :00.
+export function roleShort(role: string | null): string {
+  if (role === "heater") return "Lämmitys";
+  if (role === "reception") return "Vastaanotto";
+  if (role === "therapist") return "Hoitaja";
+  return "Työvuoro";
+}
+
+function shortClock(w: { hh: string; mi: string }): string {
+  const h = String(Number(w.hh));
+  return w.mi === "00" ? h : `${h}.${w.mi}`;
+}
+
+function shortDate(w: { y: number; m: number; d: number }, nowMs: number): string {
+  const wd = WD[new Date(Date.UTC(w.y, w.m - 1, w.d)).getUTCDay()];
+  const nowY = helsinkiWall(new Date(nowMs).toISOString())?.y ?? w.y;
+  return `${wd} ${w.d}.${w.m}.${w.y === nowY ? "" : String(w.y)}`;
+}
+
+export function formatShiftWhenShort(startsAt: string | null, endsAt: string | null, nowMs = Date.now()): string {
+  const start = startsAt ? helsinkiWall(startsAt) : null;
+  if (!start) return "ajankohta puuttuu";
+  const end = endsAt ? helsinkiWall(endsAt) : null;
+  return `${shortDate(start, nowMs)} klo ${shortClock(start)}${end ? `–${shortClock(end)}` : ""}`;
+}
+
+export function formatDeadlineShort(deadlineAt: string | null, nowMs = Date.now()): string {
+  const w = deadlineAt ? helsinkiWall(deadlineAt) : null;
+  if (!w) return "pian";
+  return `${shortDate(w, nowMs)} klo ${shortClock(w)}`;
+}
+
+export const OFFER_TEMPLATE_SHORT = "tyovuoro_kysely";
+
 export function templateForKind(kind: string): TemplateName | null {
   if (kind in KIND_TEMPLATE) return KIND_TEMPLATE[kind as MessageKind];
   return null;
@@ -288,6 +361,67 @@ export function buildTemplatePayload(msg: ClaimedMessage, phoneE164: string): Te
   };
 }
 
+// booking_153: mikä pohja viestille. "legacy" = vanha KIND_TEMPLATE-käytös (ei pohja-asetuksia tai
+// vanha viestilaji), "session" = ei hyväksyttyä pohjaa → vapaamuotoinen viesti 24 h ikkunassa tai sähköposti.
+export type TemplateChoice =
+  | { kind: "legacy" }
+  | { kind: "template"; name: string; params: string[]; buttonToken: string | null; needsButton: boolean }
+  | { kind: "session" };
+
+const NOTICE_SUBKINDS = /^(vacant|th_)/;
+
+export function resolveTemplate(msg: ClaimedMessage, templates: TemplateSettings | undefined): TemplateChoice {
+  if (!templates) return { kind: "legacy" };
+  const role = templateText(roleLabel(msg.role_type));
+  const when = templateText(formatShiftWhen(msg.starts_at, msg.ends_at));
+  const deadline = templateText(formatDeadline(msg.deadline_at));
+  const sub = msg.subkind ?? null;
+  const approved = (t: TemplateSetting | undefined) => !!t && t.approved === true && !!t.name && /^[a-z0-9_]+$/.test(t.name);
+  if (sub === "round_reminder") {
+    const t = templates.round_reminder;
+    return approved(t) ? { kind: "template", name: t!.name!, params: [role, when, deadline], buttonToken: msg.token, needsButton: true } : { kind: "session" };
+  }
+  if (sub === "already_taken") {
+    const t = templates.already_taken;
+    return approved(t) ? { kind: "template", name: t!.name!, params: [role, when], buttonToken: null, needsButton: false } : { kind: "session" };
+  }
+  if (sub === "day_digest") {
+    const t = templates.day_digest;
+    const date = templateText(msg.digest?.date_label ?? "");
+    const items = templateText(msg.digest?.items ?? "");
+    return approved(t) ? { kind: "template", name: t!.name!, params: [date, items], buttonToken: msg.page_token ?? null, needsButton: true } : { kind: "session" };
+  }
+  if (sub && NOTICE_SUBKINDS.test(sub)) return { kind: "session" };
+  if (msg.kind === "offer" || msg.kind === "reminder") {
+    const t = templates.offer;
+    const fallback = t?.fallback && /^[a-z0-9_]+$/.test(t.fallback) ? t.fallback : KIND_TEMPLATE.offer;
+    const name = approved(t) ? t!.name! : fallback;
+    if (name === OFFER_TEMPLATE_SHORT) {
+      const params = [roleShort(msg.role_type), formatShiftWhenShort(msg.starts_at, msg.ends_at), formatDeadlineShort(msg.deadline_at)].map(templateText);
+      return { kind: "template", name, params, buttonToken: msg.token, needsButton: true };
+    }
+    return { kind: "template", name, params: [role, when, deadline], buttonToken: msg.token, needsButton: true };
+  }
+  return { kind: "legacy" };
+}
+
+export function buildChosenTemplate(choice: Extract<TemplateChoice, { kind: "template" }>, phoneE164: string): TemplatePayload | null {
+  const components: Array<BodyComponent | ButtonComponent> = [
+    { type: "body", parameters: choice.params.map((text) => ({ type: "text", text: templateText(text) })) },
+  ];
+  if (choice.needsButton) {
+    if (!choice.buttonToken) return null;
+    components.push({ type: "button", sub_type: "url", index: "0", parameters: [{ type: "text", text: choice.buttonToken }] });
+  }
+  return {
+    messaging_product: "whatsapp",
+    recipient_type: "individual",
+    to: phoneE164,
+    type: "template",
+    template: { name: choice.name, language: { code: TEMPLATE_LANGUAGE }, components },
+  };
+}
+
 function allowlisted(settings: Settings, staffId: string | null): boolean {
   if (!staffId) return false;
   const want = staffId.toLowerCase();
@@ -298,7 +432,7 @@ function release(
   reason: string,
   channel: "whatsapp" | "email" | "none",
   to: string | null,
-  payload: TemplatePayload | null,
+  payload: TemplatePayload | SessionPayload | null,
   delayMinutes: number,
 ): Plan {
   return { action: "release", reason, channel, to, payload, delayMinutes };
@@ -314,6 +448,23 @@ export function planMessage(msg: ClaimedMessage, settings: Settings): Plan {
   if (!msg.staff_whatsapp_enabled) return release("staff_whatsapp_disabled", "whatsapp", phone, null, 15);
   if (!settings.whatsapp_enabled) return release("whatsapp_disabled", "whatsapp", phone, null, 15);
   if (!allowlisted(settings, msg.staff_id)) return release("not_allowlisted", "whatsapp", phone, null, 15);
+  if (settings.whatsapp_hours_open === false) return release("quiet_hours", "whatsapp", phone, null, 30);
+  const choice = resolveTemplate(msg, settings.templates);
+  if (choice.kind === "session") {
+    // Ei hyväksyttyä pohjaa: vapaamuotoinen viesti vain avoimessa 24 h ikkunassa, muuten sähköposti (tai odotus).
+    const session = msg.session_open && msg.body ? buildSessionPayload(phone, msg.body) : null;
+    if (!session) return release("template_not_approved", email ? "email" : "whatsapp", email ?? phone, null, 360);
+    if (!settings.sender_enabled) return release("sender_disabled", "whatsapp", phone, null, 15);
+    if (settings.whatsapp_dry_run) return release("dry_run", "whatsapp", phone, session, 15);
+    return { action: "send", payload: session, to: phone };
+  }
+  if (choice.kind === "template") {
+    const chosen = buildChosenTemplate(choice, phone);
+    if (!chosen) return release("no_token", "whatsapp", phone, null, 60);
+    if (!settings.sender_enabled) return release("sender_disabled", "whatsapp", phone, null, 15);
+    if (settings.whatsapp_dry_run) return release("dry_run", "whatsapp", phone, chosen, 15);
+    return { action: "send", payload: chosen, to: phone };
+  }
   const payload = buildTemplatePayload(msg, phone);
   if (!payload) {
     if (!templateForKind(msg.kind)) return { action: "fail", error: "unknown_kind" };
@@ -435,7 +586,9 @@ export async function handleClaimedMessage(
   msg.wamid = "pending";
   let http: { status: number; wamid: string | null; error: string | null };
   try {
-    http = await postTemplate(env, plan.payload, fetchImpl);
+    http = plan.payload.type === "template"
+      ? await postTemplate(env, plan.payload, fetchImpl)
+      : await postSession(env, plan.payload, fetchImpl);
   } catch {
     msg.wamid = null;
     const again = retryPlan(msg.attempts, nowMs);

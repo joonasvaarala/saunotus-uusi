@@ -1,0 +1,62 @@
+[
+ {
+  "key": "ui.admin.product.short_fi",
+  "lang": "fi",
+  "text": "Lyhyt kuvaus (suomi)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_156: tuotteen lyhyt kuvaus, hallinnan tuotelomakkeen kenttä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.product.short_fi",
+  "lang": "en",
+  "text": "Short description in Finnish",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_156: tuotteen lyhyt kuvaus, hallinnan tuotelomakkeen kenttä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.product.short_en",
+  "lang": "fi",
+  "text": "Lyhyt kuvaus (englanti)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_156: tuotteen lyhyt kuvaus, hallinnan tuotelomakkeen kenttä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.product.short_en",
+  "lang": "en",
+  "text": "Short description in English",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_156: tuotteen lyhyt kuvaus, hallinnan tuotelomakkeen kenttä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.product.short_hint",
+  "lang": "fi",
+  "text": "Näkyy tuotekortissa ja tuotesivun yläosassa. Pidä se muutaman virkkeen mittaisena. Tyhjä kenttä näyttää otteen kuvauksesta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_156: tuotteen lyhyt kuvaus, hallinnan tuotelomakkeen kenttä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.product.short_hint",
+  "lang": "en",
+  "text": "Shown on the product card and at the top of the product page. Keep it to a few sentences. If empty, an excerpt of the description is shown.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_156: tuotteen lyhyt kuvaus, hallinnan tuotelomakkeen kenttä (uusi teksti, ei vielä tuotannossa)"
+ }
+]

@@ -74,9 +74,13 @@ jobs:
       - run: node --test booking/tests/pay-later.test.mjs
       # pakettituote Saunarituaali ja savusaunavuoro (kb 7, booking_58, §17.11): aikajana, loppuaika +2 h, la/su, mock, tuotantofixture
       - run: node --test booking/tests/saunarituaali.test.mjs
+      # booking_159: Saunotusrituaali (kb 8) pois hoito-/rituaalilistoilta (tuotesivu ja lisätuote ennallaan) + paketin otsikon tekstimigraatio ja rollback
+      - run: node --test booking/tests/rituaali-lista.test.mjs
       # Sivutekstit tietokannasta (§18) + tuote 7 kentät (booking_61): paikkamerkit, build-haku/välimuisti/varateksti, p_addons, virhekoodit (fixture, ei verkkoa)
       # puhelinnumero: yksi vakio (booking/shop/src/phone.js), kielikohtainen näkyvä muoto (fi/en), tel-linkki kaikkialla samoin; ei käsin kirjoitettuja numeroita lähdekoodissa
       - run: node --test booking/tests/puhelin.test.mjs
+      # linkit kaupan sisälle (Joonas 24.10.2026): Johku-tuotelinkit → /varaa/#/tuote/<slug> (EN /en/book/#/tuote/<slug>); build + kuvaukset
+      - run: node --test booking/tests/linkit-kauppaan.test.mjs
       - run: node --test booking/tests/sivutekstit.test.mjs
       # Sivutekstit osa 3 / PR 1: kaupan sanakirjat avaimiksi, tuontitiedosto (ei ylikirjoita tuotantoa, generoitu koodista), DB-peitto + repon oletukset (ei verkkoa)
       - run: node --test booking/tests/sivutekstit-kauppa.test.mjs
@@ -122,7 +126,7 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - run: deno test -A --no-lock --node-modules-dir=none booking/supabase/functions/pdf-golden.test.ts booking/supabase/functions/_tests/site_texts_test.ts booking/supabase/functions/_tests/mobilepay_test.ts booking/supabase/functions/_tests/procountor_test.ts booking/supabase/functions/_tests/vismapay_test.ts booking/supabase/functions/_tests/service_role_auth_test.ts booking/supabase/functions/_tests/booking_calendar_sync_test.ts booking/supabase/functions/_tests/johku_sync_test.ts booking/supabase/functions/shift-offer-engine/core_test.ts booking/supabase/functions/shift-offer-engine/whatsapp_test.ts booking/supabase/functions/shift-offer-engine/inbound_test.ts booking/supabase/functions/shift-offer-engine/api_test.ts booking/vuoro/vuoro_test.ts
+      - run: deno test -A --no-lock --node-modules-dir=none booking/supabase/functions/pdf-golden.test.ts booking/supabase/functions/_tests/site_texts_test.ts booking/supabase/functions/_tests/mobilepay_test.ts booking/supabase/functions/_tests/procountor_test.ts booking/supabase/functions/_tests/vismapay_test.ts booking/supabase/functions/_tests/service_role_auth_test.ts booking/supabase/functions/_tests/booking_calendar_sync_test.ts booking/supabase/functions/_tests/johku_sync_test.ts booking/supabase/functions/shift-offer-engine/core_test.ts booking/supabase/functions/shift-offer-engine/whatsapp_test.ts booking/supabase/functions/shift-offer-engine/inbound_test.ts booking/supabase/functions/shift-offer-engine/api_test.ts booking/supabase/functions/shift-offer-engine/booking153_test.ts booking/supabase/functions/shift-offer-engine/booking155_test.ts booking/supabase/functions/send-emails/staff_notice_test.ts booking/vuoro/vuoro_test.ts booking/vuoro/oma/oma_test.ts
       # Vuorotarjousmoottorin Deno-ydin (core_test.ts), WhatsApp-sovitin (whatsapp_test.ts),
       # saapuvien viestien itsepalvelu (inbound_test.ts),
       # JSON-rajapinta (api_test.ts) ja staattinen vastaussivu (vuoro_test.ts) ajetaan yllä.
@@ -215,10 +219,43 @@ jobs:
       # booking_150: kävijämittauksen kovennus (IP-raja + päiväkatto, 13 kk säilytys pg_cronilla, tunnetut polut, tiukemmat UTM:t, lähde palvelimella, kooste GROUP BY:llä, ei fetch-käärettä).
       # SQL: booking/supabase/tests/analytics/t150_analytics_hardening.sql ajetaan paikallisessa PG17:ssä (koko ketju + rollback + uudelleenajo).
       - run: node --test booking/tests/kavijamittaus-kovennus.test.mjs
+      # booking_157: tietosuojan säilytysajat ja kävijämittauksen kuukausikooste (rakenne; SQL-testit t157 paikallisesti PG17:llä)
+      - run: node --test booking/tests/tietosuoja-sailytys.test.mjs
       # booking_149: asiakkaan peruutuspyyntö (ja sen kautta hyvitys) vain, jos vuoron alkuun on vähintään customer_change_hours_before (48) h;
       # palvelin pakottaa (cancel_too_late), tilaussivu piilottaa lomakkeen ja näyttää puhelinnumeron; hallinnan peruutus/hyvitys aina. Tekstit pending-import-49.
       # t149 (booking/supabase/tests/peruutus/t149_customer_cancel_48h.sql) ajetaan paikallisessa PG17:ssä t143:n tapaan (työnkulussa ei ole Postgresia).
       - run: node --test booking/tests/peruutusraja-48h.test.mjs
+      # booking_147: tuotteen kesto englanniksi (kb.products.duration_text_en, Bottiavustuksen tuotantomigraatio kb_products_duration_text_en):
+      # public_catalog() ja admin_list_products() palauttavat duration_text_en; kauppa näyttää EN-sivulla sen, puuttuessa duration_text. Migraatio + rollback olemassa.
+      # t147 + r147 (booking/supabase/tests/kesto/) ajetaan paikallisessa PG17:ssä (pre147 → migraatio → t147 → paluu → r147); työnkulussa ei ole Postgresia.
+      - run: node --test booking/tests/kesto-en.test.mjs
+      # booking_152: vuosikortin Peru/Poista Alennuskoodit ja vuosikortit -näkymässä (poisto vain käyttämättömälle hallinnasta myönnetylle kortille),
+      # Arvo koodi -nappi ja 10 merkin koodin vihje; tekstit ui.admin.annual_manage.* (content/site-texts.pending-import-52.json). SQL: t152 PG17:ssä.
+      - run: node --test booking/tests/vuosikortti-poisto.test.mjs
+      # booking_151 + Kääntäjän en_sources: EN-sivut käyttävät suomenkielisten kb-rivien _en-kenttiä (UKK, ehdot, tapahtuman aika; kb-snapshot myös
+      # aukiolo/sijainnit/kuvaus), vanhat erilliset EN-rivit (UKK 19–23, ehdot 16–24/26) varalla, suomi viimeisenä; privacy ennallaan.
+      # _sessions/public_availability/_all palauttavat label_en, kauppa näyttää EN-sivulla label_en || label. Migraatio + rollback olemassa.
+      # t151 (booking/supabase/tests/texts/t151_session_label_en.sql) ajetaan paikallisessa PG17:ssä (ketju + 151 + rollback + uudelleenajo).
+      - run: node --test booking/tests/en-lahteet.test.mjs
+      # booking_154: hallinnasta myönnetyn vuosikortin koodi sähköpostiin (tilaukseton outbox-rivi, dedupe annual_card_code:<id>, vain uusille korteille,
+      # ostetun kortin polku ennallaan), Myönnä-dialogin "Lähetä koodi asiakkaalle"; tekstit content/site-texts.pending-import-54.json.
+      # t154 (booking/supabase/tests/discounts/t154_annual_card_admin_email.sql, pre154 ennen migraatiota) ajetaan paikallisessa PG17:ssä.
+      - run: node --test booking/tests/vuosikortti-admin-email.test.mjs
+      # booking_153: vuorotarjousmoottorin säännöt (takarajat, ilmoitukset Otolle/Joonakselle/Lauralle, saman päivän kooste, kierroksen muistutus,
+      # kieltäytyjälle ei enää viestejä), henkilökunnan oma sivu /vuoro/oma/ (pysyvä token-linkki), WhatsApp-pohjat ja tervetuloviesti (oletus pois).
+      # Tekstit content/site-texts.pending-import-53.json. SQL: t153 PG17:ssä (ketju + 153 + rollback + uudelleenajo). Moottori pysyy pois päältä.
+      - run: node --test booking/tests/vuorotarjous-153.test.mjs
+      # booking_155: jatkopaketti. "Vuoro on jo mennyt" WhatsAppilla ja sähköpostilla (oletus päällä, sähköposti vain email_enabled-asetuksella),
+      # toiselle mennyt vuoro katoaa omalta sivulta, oma sivu ohjaa Joonakselle tai Otolle, tyovuoro_kysely-live-teksti ja lyhyet parametrit,
+      # tick-ajastuksen käsiskripti. Tekstit pending-import-55. SQL: t155 PG17:ssä (153 + 155 + rollback + uudelleenajo). Moottori pysyy pois päältä.
+      - run: node --test booking/tests/vuorotarjous-155.test.mjs
+      # booking_156: tuotteen lyhyt kuvaus (kb.products.short_description(_en), rikas teksti, sama allowlist kuin kuvauksella) korvaa johdetun otteen
+      # kortissa ja yläbannerissa (tyhjä → ote), tuntemattoman tuotteen varasivu puhdistettuna. Tekstit pending-import-56. SQL: t156 PG17:ssä.
+      - run: node --test booking/tests/lyhyt-kuvaus.test.mjs
+      # Kauppa: tuotekortin ajankohta omalla rivillään hinnan yläpuolella (card-meta.js); päivänäkymä yksityisvuorot → yleiset → hoidot (FI/EN)
+      - run: node --test booking/tests/kortit-jarjestys.test.mjs
+      # booking_161: kb.products-kuvausten Johku-linkit → uuden kaupan osoitteet (migraatio + rollback, md5-vartijat). SQL: t161 PG17:ssä.
+      - run: node --test booking/tests/kb-johku-linkit-161.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
