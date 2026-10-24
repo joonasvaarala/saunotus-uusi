@@ -163,16 +163,16 @@ $('login').addEventListener('submit', async (ev) => {
 // Yläpalkin ja sivupalkin painikkeiden ikonit (icons.js, currentColor) ja tekstit (nav-texts.js, ui.admin.nav.*).
 for (const el of document.querySelectorAll('#shell [data-icon]')) el.replaceChildren(icon(el.dataset.icon, el.closest('.nav-toggle') ? 26 : 20));
 function paintTopBarTexts() {
-  const t = (k) => navText(`ui.admin.nav.${k}`);
-  const attr = (id, a, k) => $(id)?.setAttribute(a, t(k));
+  const tn = (k) => navText(`ui.admin.nav.${k}`);
+  const attr = (id, a, k) => $(id)?.setAttribute(a, tn(k));
   attr('quick-search-toggle', 'aria-label', 'search_open');
   attr('quick-search-input', 'placeholder', 'search_placeholder'); attr('quick-search-input', 'aria-label', 'search_label');
   attr('quick-search-results', 'aria-label', 'search_results');
-  document.querySelector('label[for=quick-search-input]').textContent = t('search_label');
-  for (const [id, k] of [['quick-new', 'new_reservation'], ['quick-review', 'review']]) { attr(id, 'aria-label', k); $(id).querySelector('.action-label').textContent = t(k); }
+  document.querySelector('label[for=quick-search-input]').textContent = tn('search_label');
+  for (const [id, k] of [['quick-new', 'new_reservation'], ['quick-review', 'review']]) { attr(id, 'aria-label', k); $(id).querySelector('.action-label').textContent = tn(k); }
   attr('user-menu-toggle', 'aria-label', 'user_menu');
-  $('open-shop-label').textContent = t('open_shop'); $('open-shop-hint').textContent = t('new_tab');
-  const nt = $('nav-toggle'); nt.setAttribute('aria-label', t(nt.getAttribute('aria-expanded') === 'true' ? 'collapse' : 'expand'));
+  $('open-shop-label').textContent = tn('open_shop'); $('open-shop-hint').textContent = tn('new_tab');
+  const nt = $('nav-toggle'); nt.setAttribute('aria-label', tn(nt.getAttribute('aria-expanded') === 'true' ? 'collapse' : 'expand'));
 }
 const mobileToggle = $('nav-toggle');
 mobileToggle.addEventListener('click', () => toggleMobileNav($('shell'), mobileToggle));
