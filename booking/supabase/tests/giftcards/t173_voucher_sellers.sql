@@ -1,4 +1,4 @@
--- t173: kumppanilahjakorttien myyjät (booking_173, versio 20261025013500): Kokemuskauppa / Offerilla / Elämyslahjat omina maksutapoinaan ja Procountor-tileinään,
+-- t173: kumppanilahjakorttien myyjät (booking_173, versio 20261024231514): Kokemuskauppa / Offerilla / Elämyslahjat omina maksutapoinaan ja Procountor-tileinään,
 -- tunnistus (^KK → Kokemuskauppa), Kiitoskauppa pois valinnoista (vanhat rivit toimivat), myyjän vaihto (asiakas + henkilökunta, audit),
 -- hallinnan lunastusnäkymät (tilaus + Tarkista), lunastussivujen asetus ja idempotentti "merkitse lunastetuksi" (staff + tuleva botti).
 -- TUOTANTOKELPOINEN: yksi transaktio (BEGIN … lopussa tahallinen poikkeus "TESTRESULT pass=… fail=…" + ROLLBACK), ei kiinteitä id-arvoja (RETURNING),

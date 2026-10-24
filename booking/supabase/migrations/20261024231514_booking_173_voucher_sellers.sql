@@ -1,5 +1,5 @@
 -- booking_173: kumppanilahjakortit myyjittäin (Kokemuskauppa, Offerilla, Elämyslahjat) + Kiitoskauppa pois valinnoista.
--- Väliaikainen versio 20261025013500 (tuotannon versio voi olla eri; Bottiavustus ajaa). Ei public-skeemaa. Hinnat, ALV, slugit ennallaan.
+-- Tuotannossa versiona 20261024231514 (Bottiavustus ajoi 25.10.2026). Ei public-skeemaa. Hinnat, ALV, slugit ennallaan.
 -- Procountor pysyy testitilassa: mode / daily_enabled / environment ennallaan. Ei sähköposteja.
 --
 -- Tunnistus (_vc_guess, kaupan gift-logic.js guessSource peilaa): KK-alku (isot/pienet, välilyönnit ja viivat pois) → Kokemuskauppa (high),
@@ -35,7 +35,7 @@
 -- Uudet: _vc_method, _is_partner_method, _pm_partner_sync + trigger payment_methods_partner_sync, _vc_redeem_url, _vc_admin_row, _vc_mark_redeemed,
 --   admin_set_voucher_claim_source, admin_unredeemed_voucher_claims, admin_order_voucher_claims, admin_mark_voucher_claim_redeemed,
 --   svc_mark_voucher_claim_redeemed, admin_set_voucher_redeem_urls.
--- Rollback: rollbacks/20261025013500_booking_173_ROLLBACK.sql. Testi: tests/giftcards/t173_voucher_sellers.sql (tuotannossa ajettava, BEGIN … ROLLBACK).
+-- Rollback: rollbacks/20261024231514_booking_173_ROLLBACK.sql. Testi: tests/giftcards/t173_voucher_sellers.sql (tuotannossa ajettava, BEGIN … ROLLBACK).
 set local lock_timeout = '5s';
 
 
