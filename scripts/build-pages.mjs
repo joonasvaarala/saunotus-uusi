@@ -98,6 +98,9 @@ const V = join(OUT, 'vuoro');
 rmSync(V, { recursive: true, force: true });
 mkdirSync(V, { recursive: true });
 for (const f of ['index.html', 'vuoro.css', 'vuoro.js']) cpSync(join('booking/vuoro', f), join(V, f));
+// booking_153: henkilökunnan oma sivu → /vuoro/oma/ (pysyvä henkilökohtainen linkki ?token=, noindex)
+mkdirSync(join(V, 'oma'), { recursive: true });
+for (const f of ['index.html', 'oma.css', 'oma.js']) cpSync(join('booking/vuoro/oma', f), join(V, 'oma', f));
 
 // 3e) Paketti 11 / booking_144: evästeetön kävijämittaus. OLETUKSENA POIS.
 //     Skripti lisätään sivuille VAIN, kun SITE_ANALYTICS=on JA SITE_ENV != test. Testisivulla (GitHub Pages, SITE_ENV=test) ei koskaan.

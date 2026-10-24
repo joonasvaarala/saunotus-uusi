@@ -1,0 +1,8 @@
+/* booking_153: oma sivu. Värit vuoro.css:stä (#2B3A30, #F4EFE7, #7A5530). Ei sinistä. */
+.top{justify-content:space-between}
+.lang{color:#fff;text-decoration:underline;font-weight:600}
+.section{margin:18px 0 8px}
+.intro,.help{color:var(--muted);margin:0 0 8px}
+.status{margin:0 0 8px;font-weight:600;color:var(--green)}
+.status.declined,.status.closed,.status.filled_other,.status.expired{color:var(--gold)}
+.offer form{margin-top:4px}
