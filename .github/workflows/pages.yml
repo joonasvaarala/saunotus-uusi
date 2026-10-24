@@ -215,6 +215,8 @@ jobs:
       # booking_150: kävijämittauksen kovennus (IP-raja + päiväkatto, 13 kk säilytys pg_cronilla, tunnetut polut, tiukemmat UTM:t, lähde palvelimella, kooste GROUP BY:llä, ei fetch-käärettä).
       # SQL: booking/supabase/tests/analytics/t150_analytics_hardening.sql ajetaan paikallisessa PG17:ssä (koko ketju + rollback + uudelleenajo).
       - run: node --test booking/tests/kavijamittaus-kovennus.test.mjs
+      # booking_157: tietosuojan säilytysajat ja kävijämittauksen kuukausikooste (rakenne; SQL-testit t157 paikallisesti PG17:llä)
+      - run: node --test booking/tests/tietosuoja-sailytys.test.mjs
       # booking_149: asiakkaan peruutuspyyntö (ja sen kautta hyvitys) vain, jos vuoron alkuun on vähintään customer_change_hours_before (48) h;
       # palvelin pakottaa (cancel_too_late), tilaussivu piilottaa lomakkeen ja näyttää puhelinnumeron; hallinnan peruutus/hyvitys aina. Tekstit pending-import-49.
       # t149 (booking/supabase/tests/peruutus/t149_customer_cancel_48h.sql) ajetaan paikallisessa PG17:ssä t143:n tapaan (työnkulussa ei ole Postgresia).

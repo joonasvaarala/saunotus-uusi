@@ -76,14 +76,14 @@ export function createAnalyticsTab({ rpcCall = rpc, mock = wantsMock() } = {}) {
   }
   async function load() {
     const thisGen=++generation;
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to) || from>to || (new Date(to)-new Date(from))>366*864e5) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to) || from>to || (new Date(to)-new Date(from))>(to<=helDay() ? 3660 : 366)*864e5) {
       status.textContent=t('a.badDates');results.replaceChildren(); return;
     }
     status.textContent=t('loading');
     try {
       const r=mock ? analyticsMock(from,to) : await rpcCall('admin_analytics_summary',{p_from:from,p_to:to});
       if (thisGen!==generation) return;
-      status.textContent=mock ? t('a.mock') : ''; draw(r);
+      status.textContent=mock ? t('a.mock') : (r?.aggregated_months?.length ? t('a.aggregated') : ''); draw(r);
     } catch(e) {
       if (thisGen!==generation) return;
       status.textContent=t('a.error')+(e?.message ? ': '+e.message : ''); results.replaceChildren();
