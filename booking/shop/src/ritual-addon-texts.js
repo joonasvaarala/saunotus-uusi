@@ -1,5 +1,7 @@
 // Saunarituaali yleisen vuoron lisäpalveluna (booking_166): kaupan tekstit FI + EN. Yhdistetään T-sanakirjaan (i18n.js) → sivutekstiavaimet
-// ui.shop.ritual_* ja virheet ui.shop.error_ritual_addon_* (text-registry.js: camelCase → snake_case). Tuonti: content/site-texts.pending-import-62.json.
+// ui.shop.ritual_* ja virheet ui.shop.error_ritual_addon_* (text-registry.js: camelCase → snake_case). Tuonti: content/site-texts.pending-import-62.json
+// (julkaistu) + kortin uudet avaimet ritualTimeLabel/ritualChoose/ritualTimeRequired: content/site-texts.pending-import-63.json. shop.js käyttää näitä
+// oletuksia suoraan varalla, jos T:stä puuttuu avain (tyhjää otsikkoa ei näytetä koskaan).
 // {min}/{price}/{n}/{time} täytetään kutsuhetkellä (fillText). Ei hintoja tekstissä: hinta tulee palvelimelta (public_ritual_addon).
 export const RITUAL_TEXTS = {
   fi: {
@@ -18,6 +20,9 @@ export const RITUAL_TEXTS = {
     ritualSummary: 'klo {time} · {n} hlö',
     ritualLost: 'Valitsemasi rituaaliaika ei ole enää vapaana tälle henkilömäärälle. Valitse toinen aika.',
     ritualAnnual: 'Vuosikorttivaraukseen ei voi lisätä rituaalia.',
+    ritualTimeLabel: 'Rituaalin kellonaika',
+    ritualChoose: 'Valitse kellonaika',
+    ritualTimeRequired: 'Valitse rituaalille kellonaika tai aseta määräksi 0.',
     ritualConfNote: 'Varaukseen kuuluu saunotusrituaali. Muutokset ja peruutukset sähköpostilla, niin siirrämme vuoron ja rituaalin yhdessä:',
   },
   en: {
@@ -36,6 +41,9 @@ export const RITUAL_TEXTS = {
     ritualSummary: '{time} · {n} guests',
     ritualLost: 'The ritual time you chose is no longer available for this number of guests. Please choose another time.',
     ritualAnnual: 'A ritual cannot be added to an annual card booking.',
+    ritualTimeLabel: 'Ritual time',
+    ritualChoose: 'Choose a time',
+    ritualTimeRequired: 'Choose a time for the ritual or set the quantity to 0.',
     ritualConfNote: 'Your booking includes a sauna ritual. For changes and cancellations please email us and we will move the session and the ritual together:',
   },
 };

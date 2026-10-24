@@ -1,0 +1,62 @@
+[
+ {
+  "key": "ui.shop.ritual_time_label",
+  "lang": "fi",
+  "text": "Rituaalin kellonaika",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 korjaus (saunarituaali lisäpalvelukorttina LISÄPALVELUT-osiossa, aika alasvetovalikosta, Joonas 24.10.2026): uusi avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää oletusta siihen asti. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_time_label",
+  "lang": "en",
+  "text": "Ritual time",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 korjaus (saunarituaali lisäpalvelukorttina LISÄPALVELUT-osiossa, aika alasvetovalikosta, Joonas 24.10.2026): uusi avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää oletusta siihen asti. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_choose",
+  "lang": "fi",
+  "text": "Valitse kellonaika",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 korjaus (saunarituaali lisäpalvelukorttina LISÄPALVELUT-osiossa, aika alasvetovalikosta, Joonas 24.10.2026): uusi avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää oletusta siihen asti. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_choose",
+  "lang": "en",
+  "text": "Choose a time",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 korjaus (saunarituaali lisäpalvelukorttina LISÄPALVELUT-osiossa, aika alasvetovalikosta, Joonas 24.10.2026): uusi avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää oletusta siihen asti. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_time_required",
+  "lang": "fi",
+  "text": "Valitse rituaalille kellonaika tai aseta määräksi 0.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 korjaus (saunarituaali lisäpalvelukorttina LISÄPALVELUT-osiossa, aika alasvetovalikosta, Joonas 24.10.2026): uusi avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää oletusta siihen asti. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ },
+ {
+  "key": "ui.shop.ritual_time_required",
+  "lang": "en",
+  "text": "Choose a time for the ritual or set the quantity to 0.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_166 korjaus (saunarituaali lisäpalvelukorttina LISÄPALVELUT-osiossa, aika alasvetovalikosta, Joonas 24.10.2026): uusi avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää oletusta siihen asti. Kauppa: booking/shop/src/ritual-addon-texts.js."
+ }
+]

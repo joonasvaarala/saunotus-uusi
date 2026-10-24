@@ -161,7 +161,7 @@ test('kauppa-build: booking/site-texts.json (vain ui.*), siteTextsUrl sivulle, u
   const j = JSON.parse(readFileSync(join(dist, 'booking/site-texts.json'), 'utf8'));
   assert.ok(j.texts.length >= 10 && j.texts.every((x) => x.key.startsWith('ui.'))); assert.equal(j.source, 'fixture');
   for (const f of ['treatment-addons.js', 'site-texts.js', 'site-texts-logic.js']) assert.ok(existsSync(join(dist, 'booking', f)), `${f} kopioitu`);
-  for (const p of ['varaa/index.html', 'en/book/index.html']) assert.match(readFileSync(join(dist, p), 'utf8'), /"siteTextsUrl":"\/booking\/site-texts\.json"/);
+  for (const p of ['varaa/index.html', 'en/book/index.html']) assert.match(readFileSync(join(dist, p), 'utf8'), /"siteTextsUrl":"\/booking\/site-texts\.json\?v=[0-9a-f]{10}"/);
   const dist2 = join(work, 'shop-dist2');
   const r2 = run(['booking/shop/build.mjs'], { SHOP_DIST: dist2, SITE_ENV: 'test', SITE_URL: 'http://localhost:4180', BOOKING_SUPABASE_URL: 'http://localhost:1', BOOKING_ANON_KEY: 'sb_publishable_x', ARTICLES_CACHE_DIR: join(work, 'ac4'), SITE_TEXTS_CACHE_DIR: join(work, 'sc4') });
   assert.equal(r2.status, 0, 'haku epäonnistuu → varateksti, build ei kaadu\n' + r2.stderr);

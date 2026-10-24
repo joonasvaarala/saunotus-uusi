@@ -23,6 +23,7 @@ const MIG = rd('booking/supabase/migrations/20261024202015_booking_166_ritual_ad
 const RB = rd('booking/supabase/rollbacks/20261024202015_booking_166_ROLLBACK.sql');
 const SQLT = rd('booking/supabase/tests/t166_ritual_addon.sql');
 const PENDING = JSON.parse(rd('content/site-texts.pending-import-62.json'));
+const PENDING63 = JSON.parse(rd('content/site-texts.pending-import-63.json'));   // kassakortin korjaus: 3 uutta avainta (ei SQL:ää)
 const MD5 = { _attach_addons: '6a780e8e00229ff273a321591f197541', _reservation_refund_plan: 'cb44c682ac0095617fe20b297b0cdac3', public_get_booking: 'a155cd472c356c09e595cbda46b4dada',
   public_preview_code: 'fec859d04960f42d79412bbdf7dc6561', reservations_time_window: '023b689b0366602ab32738b7821dcc16' };
 const hel = (ms) => new Intl.DateTimeFormat('fi-FI', { timeZone: 'Europe/Helsinki', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(ms)).replace('.', ':');
@@ -123,7 +124,8 @@ test('tekstit FI/EN: kaikki avaimet molemmilla kielillä, ei "<", yhdistetty i18
   for (const s of [...Object.values(RITUAL_TEXTS.fi), ...Object.values(RITUAL_TEXTS.en), ...Object.values(RITUAL_ERRORS.fi), ...Object.values(RITUAL_ERRORS.en)]) assert.ok(!s.includes('<'), s);
 });
 test('content/site-texts.pending-import-62.json = koodin oletukset (22 avainta, 44 riviä, FI+EN), ei "<", ei kaksoisrivejä', () => {
-  const want = collectDefaults().filter((r) => /^ui\.shop\.(ritual_|error_ritual_addon_)/.test(r.key));
+  const keys62 = new Set(PENDING.map((r) => r.key));
+  const want = collectDefaults().filter((r) => /^ui\.shop\.(ritual_|error_ritual_addon_)/.test(r.key) && keys62.has(r.key));
   assert.equal(PENDING.length, 44); assert.equal(new Set(PENDING.map((r) => r.key)).size, 22);
   assert.equal(new Set(PENDING.map((r) => `${r.key}|${r.lang}`)).size, PENDING.length);
   for (const w of want) {
@@ -133,6 +135,19 @@ test('content/site-texts.pending-import-62.json = koodin oletukset (22 avainta, 
     assert.deepEqual(p.placeholders, [...new Set(p.text.match(/\{\{var:[a-z_]+\}\}/g) || [])]);
   }
   assert.equal(want.length, PENDING.length);
+});
+
+test('content/site-texts.pending-import-63.json = kassakortin uudet avaimet (3 avainta, 6 riviä, FI+EN); 62 + 63 kattavat kaikki rituaaliavaimet', () => {
+  const all = collectDefaults().filter((r) => /^ui\.shop\.(ritual_|error_ritual_addon_)/.test(r.key));
+  assert.deepEqual([...new Set(PENDING63.map((r) => r.key))].sort(), ['ui.shop.ritual_choose', 'ui.shop.ritual_time_label', 'ui.shop.ritual_time_required']);
+  assert.equal(PENDING63.length, 6);
+  for (const p of PENDING63) {
+    const w = all.find((r) => r.key === p.key && r.lang === p.lang);
+    assert.ok(w, `${p.key}|${p.lang}`); assert.equal(p.text, w.text); assert.equal(p.kind, 'plain'); assert.ok(!p.text.includes('<')); assert.match(p.reason, /booking_166/);
+    assert.ok(!PENDING.some((r) => r.key === p.key), 'ei päällekkäin 62:n kanssa');
+  }
+  assert.equal(all.length, PENDING.length + PENDING63.length);
+  assert.equal(RITUAL_TEXTS.fi.ritualChoose, 'Valitse kellonaika'); assert.equal(RITUAL_TEXTS.en.ritualChoose, 'Choose a time');
 });
 
 // ---------------------------------------------------------------- migraatio, rollback, SQL-testi
@@ -152,7 +167,8 @@ test('ei innerHTML:ää uusissa/muutetuissa tiedostoissa; ei sinistä eikä emoj
   for (const f of ['booking/shop/src/ritual-addon-logic.js', 'booking/shop/src/ritual-addon-texts.js', 'booking/shop/src/ritual-addon-mock.js', 'booking/shop/src/shop.js'])
     assert.ok(!/innerHTML|outerHTML|insertAdjacentHTML/.test(rd(f).replace(/^\s*\/\/.*$/gm, '')), f);
   const css = rd('booking/shop/src/shop.css'), part = css.slice(css.indexOf('/* booking_166'));
-  assert.ok(part.length > 100 && part.includes('.bk-ritual-opt'));
+  assert.ok(part.length > 100 && part.includes('.bk-addon-ritual .bk-rit-select'));
+  for (const sel of part.match(/^[^{}\n/][^{]*(?=\{)/gm)) for (const one of sel.split(',')) assert.match(one.trim(), /^\.bk-(addon-ritual|addons|ritual-msg)\b/, `vain kortin tyylit: ${one}`);
   assert.ok(!/blue|#00f|#0000ff|#1e90ff|#2563eb|#3b82f6/i.test(part));
   assert.ok(!/\p{Extended_Pictographic}/u.test(part + JSON.stringify(RITUAL_TEXTS) + JSON.stringify(RITUAL_ERRORS)));
   for (const c of part.match(/#[0-9a-f]{6}\b/gi)) assert.ok(['#2B3A30', '#F4EFE7', '#7A5530', '#6B5E52'].includes(c.toUpperCase()), c);
@@ -169,4 +185,35 @@ test('kassa: lisäpalvelu piilossa ilman tarjousta, kutsuu public_ritual_addon; 
   assert.match(s, /data-testid': 'checkout-ritual'/);
   assert.match(s, /ritualAddonArg\(/);
   assert.match(s, /'fail', 'ritual'\]/);
+});
+
+// ---------------------------------------------------------------- kassakortti (Joonas 24.10.2026)
+test('kortti: ritualMax / cardQty / reconcileCard (määrä 0 = ei rituaalia, yläraja min(henkilöt, max 6, ajan vapaat))', () => {
+  const o = L.normalizeOffer({ ok: true, available: true, min_persons: 1, max_persons: 6, unit_price: 20, prices: { 1: 20, 2: 40, 3: 60 }, times: [
+    { starts_at: '2026-10-31T13:30:00Z', max_persons: 3, position: 'before' }, { starts_at: '2026-10-31T14:30:00Z', max_persons: 2, position: 'during' }] });
+  const [a, b] = o.times.map((x) => x.key);
+  assert.equal(L.ritualMax(o, null, 3), 3); assert.equal(L.ritualMax(o, b, 3), 2); assert.equal(L.ritualMax(o, a, 1), 1); assert.equal(L.ritualMax(o, 'x', 3), 0); assert.equal(L.ritualMax(null, null, 3), 0);
+  assert.equal(L.cardQty(0, o, null, 3), 0); assert.equal(L.cardQty(5, o, null, 3), 3); assert.equal(L.cardQty(3, o, b, 3), 2); assert.equal(L.cardQty(-1, o, a, 3), 0);
+  assert.deepEqual(L.reconcileCard({ key: null, qty: 2 }, o, 3), { key: null, qty: 2, lost: false });
+  assert.deepEqual(L.reconcileCard({ key: b, qty: 3 }, o, 3), { key: b, qty: 2, lost: false });
+  assert.deepEqual(L.reconcileCard({ key: 'gone', qty: 2 }, o, 3), { key: null, qty: 2, lost: true });
+  assert.deepEqual(L.reconcileCard({ key: a, qty: 2 }, null, 3), { key: null, qty: 0, lost: true });
+  assert.deepEqual(L.reconcileCard({ key: null, qty: 0 }, o, 3), { key: null, qty: 0, lost: false });
+});
+test('kassa: rituaali on kortti LISÄPALVELUT-listassa (.bk-addon), aika alasvetovalikosta vasta määrällä ≥ 1, pakollinen; tekstien varaoletukset', () => {
+  const js = rd('booking/shop/src/shop.js');
+  assert.match(js, /h\('li', \{ class: 'bk-addon bk-addon-ritual', 'data-testid': 'checkout-ritual'/);
+  assert.match(js, /h\('ul', \{ class: 'bk-addonlist' \}, ritCard, addonRows\.map/);
+  assert.ok(!/type: 'radio', name: 'bk-ritual'/.test(js), 'ei radiolistaa');
+  assert.match(js, /h\('select', \{ id: 'bk-rit-time'/); assert.match(js, /h\('option', \{ value: '', text: rtx\('ritualChoose'\) \}\)/);
+  assert.match(js, /timeBox\.hidden = !\(rit\.sel\.qty > 0\)/);
+  assert.match(js, /ritErr\(rtx\('ritualTimeRequired'\)\); rit\.ui\.card\.scrollIntoView/);
+  assert.match(js, /const rtx = \(k, v\) => fillText\(t\[k\] \|\| RITUAL_TEXTS\[S\.lang\]\?\.\[k\] \|\| RITUAL_TEXTS\.fi\[k\] \|\| ''/);
+  assert.ok(!/\bt\.ritual[A-Z]/.test(js), 'rituaalitekstit vain rtx():n kautta');
+});
+test('kaupan build: versiotunnus ?v= kaikkiin kaupan moduuleihin ja sivujen /booking/-viittauksiin (ei vanhan välimuistin sekoitusta)', () => {
+  const b = rd('booking/shop/build.mjs');
+  assert.match(b, /const SHOP_VER = '\?v=' \+/);
+  assert.match(b, /versioimaton relatiivinen import/);
+  assert.match(b, /\/booking\/\[\\\\w\.-\]\+\\\\\.\(\?:js\|css\|json\)/);
 });

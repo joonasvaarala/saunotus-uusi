@@ -92,6 +92,7 @@ test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-shop.mjs 
     ...J('content/site-texts.pending-import-49.json').map((r) => `${r.key}|${r.lang}`),
     ...J('content/site-texts.pending-import-59.json').filter((r) => r.key.startsWith('ui.shop.')).map((r) => `${r.key}|${r.lang}`),   // booking_162
     ...J('content/site-texts.pending-import-62.json').map((r) => `${r.key}|${r.lang}`),   // booking_166
+    ...J('content/site-texts.pending-import-63.json').map((r) => `${r.key}|${r.lang}`),   // booking_166 korjaus: rituaalikortti
   ]);
   const imp = new Set(PENDING.map((r) => r.key));
   writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts.filter((r) => !imp.has(r.key)) }));   // tuotanto ennen #61:n tuontia
@@ -121,7 +122,8 @@ test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet ava
   const cancelUi = J('content/site-texts.pending-import-49.json');
   const quietUi = J('content/site-texts.pending-import-59.json').filter((r) => r.key.startsWith('ui.shop.'));   // booking_162
   const ritualUi = J('content/site-texts.pending-import-62.json');   // booking_166
-  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length + waitUi.length + waitParty.length + waitOffer.length + codeUi.length + partyType.length + cancelUi.length + quietUi.length + ritualUi.length);
+  const ritualCard = J('content/site-texts.pending-import-63.json');   // booking_166 korjaus: rituaalikortti
+  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length + waitUi.length + waitParty.length + waitOffer.length + codeUi.length + partyType.length + cancelUi.length + quietUi.length + ritualUi.length + ritualCard.length);
   assert.ok(!rows.some((x) => haveKeys.has(x.key)));
   for (const e of extraRows) assert.ok(!rows.some((x) => x.key === e.key), `${e.key}: jo tuotannossa, generaattori ei lisää`);
   const bad = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', join(work, 'ei-ole.json')], { encoding: 'utf8' });
