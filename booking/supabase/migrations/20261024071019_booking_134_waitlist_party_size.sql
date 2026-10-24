@@ -4,7 +4,7 @@
 --   säilyy, mutta mahtuvuus ratkaisee: iso jonovaraus ei estä pienempää, ja samassa ajossa ilmoitetut vähennetään
 --   vapaista paikoista (yksi vapaa paikka ei enää ilmoita kahdelle 1 hengen jonottajalle).
 -- * public_waitlist_claim: varauslinkin lunastus vain, jos paikkoja on yhä riittävästi; määrä = jonovarauksen henkilömäärä.
--- Ei taulumuutoksia. Uudelleenajettava (create or replace). Rollback: booking/supabase/rollbacks/20261024070000_booking_134_ROLLBACK.sql
+-- Ei taulumuutoksia. Uudelleenajettava (create or replace). Rollback: booking/supabase/rollbacks/20261024071019_booking_134_ROLLBACK.sql
 set local lock_timeout = '5s';
 
 create or replace function booking.public_join_waitlist(

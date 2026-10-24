@@ -11,8 +11,8 @@ import { WAITLIST_TEXTS } from '../shop/src/waitlist-texts.js';
 
 const repo = resolve(new URL('../..', import.meta.url).pathname);
 const rd = (p) => readFileSync(resolve(repo, p), 'utf8');
-const MIG = 'booking/supabase/migrations/20261024070000_booking_134_waitlist_party_size.sql';
-const RB = 'booking/supabase/rollbacks/20261024070000_booking_134_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024071019_booking_134_waitlist_party_size.sql';
+const RB = 'booking/supabase/rollbacks/20261024071019_booking_134_ROLLBACK.sql';
 const sql = rd(MIG), rollback = rd(RB);
 
 // Pieni DOM-korvike: kuuntelijat toimivat, value on merkkijono kuten selaimessa.
@@ -116,7 +116,7 @@ test('mock: public_join_waitlist hylkää 0 ja 7 hlöä, public_waitlist_claim p
   assert.match(mock, /case 'public_waitlist_claim':/);
 });
 test('migraatio booking_134: aikaleima > booking_133, henkilömäärä 1–6, mahtuvuusbudjetti, lunastus', () => {
-  assert.ok('20261024070000' > '20261024064158');
+  assert.ok('20261024071019' > '20261024064158');
   assert.match(sql, /p_persons is null or p_persons not between 1 and 6 then\s+return jsonb_build_object\('ok',false,'code','invalid_persons'\)/);
   assert.match(sql, /p_persons > least\(6,coalesce\(v_rule\.max_persons,6\)\)/);
   // jonon järjestys säilyy (created_at,id), liian iso ohitetaan (continue), jäljelle jäävät paikat seuraavalle mahtuvalle
