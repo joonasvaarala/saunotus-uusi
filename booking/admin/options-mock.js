@@ -282,7 +282,12 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       const code = normalizeCode(a.p_code) || generatedAnnualCardCode();
       if (st.annualCards.some((x) => x.code === code) || st.discountCodes.some((x) => x.code === code)) throw err('code_exists', 'Koodi on jo käytössä');
       const row = { id: ++st.seq.card, code, customer_id: c.id, customer_name: c.name, customer_email: c.email, valid_from: a.p_valid_from, valid_to: a.p_valid_to, active: true, revoked_at: null, notes: a.p_notes || null, purchase_order_no: null, future_bookings: 0, reservations_count: 0, deletable: true };
-      st.annualCards.push(row); return { ok: true, id: row.id, code };
+      st.annualCards.push(row);
+      // booking_154: 6-parametrinen kutsu (p_send_email) palauttaa sähköpostin tilan kuten palvelin; 5-parametrinen ennallaan
+      if (a.p_send_email === undefined) return { ok: true, id: row.id, code };
+      const status = a.p_send_email === false ? 'not_requested' : (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c.email || '') ? 'pending' : 'no_email');
+      if (status === 'pending') st.annualEmails = [...(st.annualEmails || []), { dedupe_key: `annual_card_code:${row.id}`, card_id: row.id, source: 'admin' }];
+      return { ok: true, id: row.id, code, email: { status } };
     },
     // booking_152: peruminen (kuten admin_revoke_annual_card) ja poisto vain käyttämättömälle hallinnasta myönnetylle kortille (kuten admin_delete_annual_card)
     admin_revoke_annual_card: (a) => {

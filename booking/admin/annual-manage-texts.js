@@ -1,6 +1,6 @@
 // Hallinnan vuosikorttien hallinnan tekstit (FI + EN): koodin arvonta, Peru- ja Poista-napit (booking_152). Avaimet: ui.admin.annual_manage.*.
 // Sama mekanismi kuin annual-card-texts.js: public_get_site_texts (rpc), kieli talous-i18n (?lang= / localStorage booking.admin.lang).
-// Sanakirja ANNUAL_MANAGE_TEXTS on vain varalla: rivi puuttuu, haku epäonnistuu tai paikkamerkki ei täyty. Tuonti: content/site-texts.pending-import-52.json.
+// Sanakirja ANNUAL_MANAGE_TEXTS on vain varalla: rivi puuttuu, haku epäonnistuu tai paikkamerkki ei täyty. Tuonti: content/site-texts.pending-import-52.json (booking_152) ja pending-import-54.json (booking_154).
 import { getLang } from './talous-i18n.js';
 import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
@@ -19,6 +19,15 @@ export const ANNUAL_MANAGE_TEXTS = {
     'ui.admin.annual_manage.delete': 'Poista',
     'ui.admin.annual_manage.delete_confirm': 'Poistetaanko vuosikortti {{var:code}} pysyvästi? Korttia ei ole käytetty. Poisto kirjataan muutoslokiin.',
     'ui.admin.annual_manage.deleted': 'Vuosikortti poistettu',
+    // booking_154: Myönnä-dialogin valinta ja ilmoitus sähköpostin tilasta (tuonti: content/site-texts.pending-import-54.json)
+    'ui.admin.annual_manage.send_email': 'Lähetä koodi asiakkaalle',
+    'ui.admin.annual_manage.send_email_hint': 'Koodi lähetetään asiakkaan sähköpostiin kerran. Kortin muokkaus tai uudelleenaktivointi ei lähetä uutta viestiä.',
+    'ui.admin.annual_manage.created': 'Vuosikortti myönnetty. Koodi: {{var:code}}',
+    'ui.admin.annual_manage.email_pending': 'Koodi lähetetään asiakkaan sähköpostiin.',
+    'ui.admin.annual_manage.email_skipped': 'Sähköpostin lähetys on pois päältä, joten koodia ei lähetetty.',
+    'ui.admin.annual_manage.email_not_requested': 'Koodia ei lähetetty asiakkaalle.',
+    'ui.admin.annual_manage.email_no_email': 'Asiakkaalla ei ole sähköpostiosoitetta, joten koodia ei lähetetty.',
+    'ui.admin.annual_manage.email_not_queued': 'Koodia ei lähetetty. Tarkista kortin tila.',
   },
   en: {
     'ui.admin.annual_manage.code_label': 'Own code',
@@ -34,6 +43,14 @@ export const ANNUAL_MANAGE_TEXTS = {
     'ui.admin.annual_manage.delete': 'Delete',
     'ui.admin.annual_manage.delete_confirm': 'Delete annual card {{var:code}} permanently? The card has not been used. The deletion is recorded in the audit log.',
     'ui.admin.annual_manage.deleted': 'Annual card deleted',
+    'ui.admin.annual_manage.send_email': 'Send the code to the customer',
+    'ui.admin.annual_manage.send_email_hint': 'The code is sent to the customer’s email once. Editing or reactivating the card does not send a new message.',
+    'ui.admin.annual_manage.created': 'Annual card granted. Code: {{var:code}}',
+    'ui.admin.annual_manage.email_pending': 'The code will be sent to the customer’s email.',
+    'ui.admin.annual_manage.email_skipped': 'Email sending is turned off, so the code was not sent.',
+    'ui.admin.annual_manage.email_not_requested': 'The code was not sent to the customer.',
+    'ui.admin.annual_manage.email_no_email': 'The customer has no email address, so the code was not sent.',
+    'ui.admin.annual_manage.email_not_queued': 'The code was not sent. Check the card status.',
   },
 };
 
@@ -95,4 +112,12 @@ export function amText(key, vars, lang = getLang()) {
   if (filled != null) return filled;
   const raw = ANNUAL_MANAGE_TEXTS[lang]?.[key] ?? ANNUAL_MANAGE_TEXTS.fi[key] ?? key;
   return vars ? fillAmText(raw, vars) : raw;
+}
+
+/** booking_154: myönnön ilmoitus. r = admin_create_annual_card-vastaus ({code, email: {status}}). */
+export function amCreatedMessage(r) {
+  const base = amText('ui.admin.annual_manage.created', { code: r?.code ?? '' });
+  const st = r?.email?.status;
+  const key = { pending: 'email_pending', dry_run: 'email_pending', skipped: 'email_skipped', not_requested: 'email_not_requested', no_email: 'email_no_email', not_queued: 'email_not_queued' }[st];
+  return key ? `${base}. ${amText('ui.admin.annual_manage.' + key)}` : base;
 }

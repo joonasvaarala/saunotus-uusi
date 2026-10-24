@@ -6,7 +6,7 @@
 import { rpc } from '../sb.js';
 import { h, field, toast, run, dialog, empty, money, badge, fmtDate, todayHel } from '../ui.js';
 import { normalizeCode, generatedDiscountCode, generatedAnnualCardCode } from '../../shop/src/discount-code-logic.js';
-import { amText, loadAmTexts } from '../annual-manage-texts.js';
+import { amText, loadAmTexts, amCreatedMessage } from '../annual-manage-texts.js';
 
 const STATE = { active: ['ok', 'Voimassa'], inactive: ['muted', 'Pois käytöstä'], not_started: ['warn', 'Ei vielä alkanut'], expired: ['muted', 'Vanhentunut'], used_up: ['muted', 'Käytetty loppuun'] };
 const dOnly = (ds) => (ds ? fmtDate(`${ds}T12:00:00Z`) : '');
@@ -131,17 +131,21 @@ export async function render({ ctx, refs, reload }) {
     code.addEventListener('input', () => { code.value = normalizeCode(code.value); });
     const gen = h('button', { type: 'button', class: 'btn sm', 'data-testid': 'annual-code-generate', onclick: () => { code.value = generatedAnnualCardCode(); } }, amText('ui.admin.annual_manage.generate'));
     const notes = h('input', { name: 'notes', maxlength: 300 });
+    // booking_154: "Lähetä koodi asiakkaalle" (oletuksena päällä) → p_send_email
+    const send = h('input', { type: 'checkbox', name: 'send_email', checked: true, 'data-testid': 'annual-send-email' });
     const form = h('form', { class: 'stack', novalidate: true }, field('Asiakas', h('div', { class: 'stack' }, q, sel)),
       h('div', { class: 'row wrap' }, field('Alkaa', from), field('Päättyy', to, 'Tyhjä = vuoden päästä')),
       field(amText('ui.admin.annual_manage.code_label'), h('div', { class: 'row wrap' }, code, gen), amText('ui.admin.annual_manage.code_hint')), field('Muistiinpano', notes),
+      h('label', { class: 'check' }, send, ' ', amText('ui.admin.annual_manage.send_email')),
+      h('p', { class: 'muted', text: amText('ui.admin.annual_manage.send_email_hint') }),
       h('button', { type: 'submit', class: 'btn primary' }, 'Myönnä vuosikortti'));
     const dlg = dialog('Myönnä vuosikortti', form);
     form.addEventListener('submit', (ev) => {
       ev.preventDefault();
       run(form.querySelector('[type=submit]'), async () => {
         if (!sel.value) throw new Error('Valitse asiakas.');
-        const r = await rpc('admin_create_annual_card', { p_customer_id: +sel.value, p_valid_from: from.value, p_valid_to: to.value || yearAfter(from.value), p_code: normalizeCode(code.value) || null, p_notes: notes.value.trim() || null });
-        toast(`Vuosikortti myönnetty. Koodi: ${r.code}`); dlg.close(); reload();
+        const r = await rpc('admin_create_annual_card', { p_customer_id: +sel.value, p_valid_from: from.value, p_valid_to: to.value || yearAfter(from.value), p_code: normalizeCode(code.value) || null, p_notes: notes.value.trim() || null, p_send_email: send.checked });
+        toast(amCreatedMessage(r)); dlg.close(); reload();
       });
     });
   }

@@ -182,4 +182,7 @@ export const EMAIL_TEXTS: TextTable = {
   "email.annual_card.book_button": { fi: "Avaa varauskalenteri", en: "Open the booking calendar" },
   "email.annual_card.keep": { fi: "Säilytä tämä viesti. Koodi on henkilökohtainen, älä jaa sitä muille.", en: "Keep this message. The code is personal, so please do not share it." },
   "email.annual_card.sign_name": { fi: "Tapio", en: "Tapio" },
+  // booking_154: hallinnasta myönnetty vuosikortti (ei ostoa) → oma johdanto ja ohje 3
+  "email.annual_card_granted.intro": { fi: "Sinulle on myönnetty vuosikortti. Tällä koodilla varaat saunavuorosi verkossa.", en: "You have been given an annual card. Use this code to book your sauna sessions online." },
+  "email.annual_card_granted.how_3": { fi: "Kirjoita koodi kassalla kohtaan Alennus- tai vuosikorttikoodi. Käytä samaa sähköpostiosoitetta, johon tämä viesti lähetettiin, tai asiakastiedoissasi olevaa puhelinnumeroa.", en: "At checkout, enter the code in the Discount or annual card code field. Use the email address this message was sent to, or the phone number in your customer details.", cls: "protected" },
 };
