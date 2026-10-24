@@ -8,6 +8,10 @@ import { makeT, type TFn } from "../_shared/site_texts.ts";
 import { INVOICE_PDF_TEXTS } from "./texts.ts";
 export { INVOICE_PDF_TEXTS };
 
+// EPC kenttä 3 ilmoittaa UTF-8:n. qrcode-generatorin oletus on yksitavuinen,
+// joten monibyte-koodaus on valittava ennen yhtäkään addData-kutsua.
+qrcode.stringToBytes = qrcode.stringToBytesFuncs["UTF-8"];
+
 export const san = pdfSan;
 const money = (n: number, loc: string) => (loc === "en" ? Number(n).toFixed(2) : Number(n).toFixed(2).replace(".", ",")) + " EUR";
 // Veroton á-hinta voi olla neljän desimaalin johdettu luku (verollinen peruste). Näytä 2–4 desimaalia, rivisumma pysyy kahdessa.
@@ -195,12 +199,15 @@ export async function buildInvoicePdf(inv: any, tfn: TFn = makeT(INVOICE_PDF_TEX
     right(TX("email.invoice_pdf.gross"), columns.gross - 8, y, 7.4, bold, PDF_BRAND.white);
     y -= 22;
   };
-  const continuationPage = () => {
+  const addContinuationPage = () => {
     page = pdf.addPage([PAGE_W, PAGE_H]);
     page.drawRectangle({ x: 0, y: 814, width: PAGE_W, height: 28, color: PDF_BRAND.green });
     text(seller.legal_name || seller.name, M, 824, 9, bold, PDF_BRAND.white);
     right(`${title} ${present(inv.invoice_no)}`, PAGE_W - M, 824, 9, bold, PDF_BRAND.white);
     y = 780;
+  };
+  const continuationPage = () => {
+    addContinuationPage();
     drawTableHeader();
   };
 
@@ -219,11 +226,7 @@ export async function buildInvoicePdf(inv: any, tfn: TFn = makeT(INVOICE_PDF_TEX
   }
 
   if (y < 345) {
-    page = pdf.addPage([PAGE_W, PAGE_H]);
-    page.drawRectangle({ x: 0, y: 814, width: PAGE_W, height: 28, color: PDF_BRAND.green });
-    text(seller.legal_name || seller.name, M, 824, 9, bold, PDF_BRAND.white);
-    right(`${title} ${present(inv.invoice_no)}`, PAGE_W - M, 824, 9, bold, PDF_BRAND.white);
-    y = 780;
+    addContinuationPage();
   } else y -= 8;
 
   // ALV-erittely käyttää valmiiksi laskettua snapshotia; laskenta tai pyöristys ei muutu.
@@ -246,18 +249,25 @@ export async function buildInvoicePdf(inv: any, tfn: TFn = makeT(INVOICE_PDF_TEX
   page.drawRectangle({ x: 347, y: totalTop - 50, width: PAGE_W - M - 347, height: 50, color: PDF_BRAND.green });
   text(TX("email.invoice_pdf.payable").toUpperCase(), 359, totalTop - 18, 7.3, bold, PDF_BRAND.cream);
   right(money(inv.total_gross || 0, loc), PAGE_W - M - 12, totalTop - 38, 16, bold, PDF_BRAND.white);
+  let notesContinued = false;
   if (present(inv.notes)) {
-    const notes = wrapPdfText(inv.notes, font, 8, W);
+    // Vasen palsta ei saa kulkea summalaatikon alle. Pitkä, sallittu 2 000 merkin
+    // huomautus jatkuu tarvittaessa omalle sivulle ennen maksuosaa.
+    const notes = wrapPdfText(inv.notes, font, 8, 285);
     y -= 9;
-    notes.forEach((value) => { text(value, M, y, 8, font, PDF_BRAND.muted); y -= 11; });
+    notes.forEach((value) => {
+      if (y < 62) {
+        addContinuationPage();
+        notesContinued = true;
+      }
+      text(value, M, y, 8, font, PDF_BRAND.muted);
+      y -= 11;
+    });
   }
-  y = Math.min(y - 20, totalTop - 68);
+  y = notesContinued ? y - 20 : Math.min(y - 20, totalTop - 68);
 
   if (y < 255) {
-    page = pdf.addPage([PAGE_W, PAGE_H]);
-    page.drawRectangle({ x: 0, y: 814, width: PAGE_W, height: 28, color: PDF_BRAND.green });
-    text(seller.legal_name || seller.name, M, 824, 9, bold, PDF_BRAND.white);
-    right(`${title} ${present(inv.invoice_no)}`, PAGE_W - M, 824, 9, bold, PDF_BRAND.white);
+    addContinuationPage();
     y = 775;
   }
 

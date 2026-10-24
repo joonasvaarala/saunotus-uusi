@@ -56,14 +56,14 @@ test('maksukoodit jäävät pois virheellisillä tai puuttuvilla tiedoilla', () 
 test('EPC SCT QR sisältää laskun maksutiedot eikä synny ilman IBANia tai BICiä', () => {
   const payload = buildEpcQrPayload({
     bic: 'TESTFIHH',
-    beneficiary: 'Havuhattu Oy',
+    beneficiary: 'Höyry & Löyly Oy',
     iban: 'FI21 1234 5600 0007 85',
     amount: 550,
     reference: '55958 22432 94671',
     fallbackRemittance: 'L000123',
   });
   assert.equal(payload, [
-    'BCD', '002', '1', 'SCT', 'TESTFIHH', 'Havuhattu Oy', 'FI2112345600000785',
+    'BCD', '002', '1', 'SCT', 'TESTFIHH', 'Höyry & Löyly Oy', 'FI2112345600000785',
     'EUR550.00', '', '', '559582243294671',
   ].join('\n'));
   assert.equal(buildEpcQrPayload({ bic: '', beneficiary: 'Havuhattu Oy', iban: 'FI21 1234 5600 0007 85', amount: 10 }), null);
@@ -102,6 +102,9 @@ test('laskupohja käyttää brändipalettia ja piilottaa puuttuvat pankkitiedot'
   assert.match(shared, /#7A5530/);
   assert.match(render, /isValidIban\(seller\.iban\) && isValidBic\(seller\.bic\)/);
   assert.doesNotMatch(render, /seller\.(iban|bic|bank_name) \|\| ["']—/);
+  assert.match(render, /qrcode\.stringToBytes = qrcode\.stringToBytesFuncs\["UTF-8"\]/);
+  assert.match(render, /wrapPdfText\(inv\.notes, font, 8, 285\)/);
+  assert.match(render, /if \(y < 62\) \{\s*addContinuationPage\(\)/s);
   assert.match(render, /buildVirtualBarcode/);
   assert.match(render, /buildEpcQrPayload/);
 });
