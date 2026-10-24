@@ -263,8 +263,14 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       if (a.p_product_id) rows = rows.filter((r) => r.product_id === a.p_product_id);
       if (a.p_source) rows = rows.filter((r) => r.source === a.p_source);
       if (a.p_option_missing === true) rows = rows.filter((r) => missing(r));   // booking_72: vain hoito valitsematta (option_missing)
+      if (a.p_reservation_id != null) rows = rows.filter((r) => String(r.reservation_id) === String(a.p_reservation_id));
       if (a.p_search) { const q = String(a.p_search).toLowerCase(); rows = rows.filter((r) => `${r.customer_name} ${r.customer_email} ${r.customer_phone} ${r.order_no}`.toLowerCase().includes(q)); }
-      rows = rows.sort((x, y) => x.starts_at.localeCompare(y.starts_at));
+      rows = rows.sort((x, y) => {
+        if (a.p_sort === 'created_desc') return y.created_at.localeCompare(x.created_at) || y.reservation_id - x.reservation_id;
+        if (a.p_sort === 'created_asc') return x.created_at.localeCompare(y.created_at) || x.reservation_id - y.reservation_id;
+        if (a.p_sort === 'start_asc') return x.starts_at.localeCompare(y.starts_at) || x.reservation_id - y.reservation_id;
+        return x.starts_at.localeCompare(y.starts_at) || x.reservation_id - y.reservation_id;
+      });
       const total = rows.length; rows = rows.slice(a.p_offset || 0, (a.p_offset || 0) + (a.p_limit || 50));
       return rows.map((r) => ({ ...view(r), total_count: total }));
     },

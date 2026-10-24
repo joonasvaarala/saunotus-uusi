@@ -1,10 +1,11 @@
 // Asiakasrekisteri: lista + haku, asiakaskortti (tilaushistoria, markkinointisuostumus, vuosikortti), muokkaus.
 import { rpc } from '../sb.js';
 import { customerForm, validBusinessId, normBusinessId } from './customerform.js';
+import { navText } from '../nav-texts.js';
 import { h, fmtDT, fmtDate, todayHel, addDays, money, dialog, field, toast, run, empty, payBadge, statusBadge, badge } from '../ui.js';
 
-export async function render({ ctx, reload }) {
-  const PAGE = 50; let offset = 0, search = '';
+export async function render({ ctx, reload, query = new URLSearchParams() }) {
+  const PAGE = 50; let offset = 0, search = query.get('q') || '';
   const list = h('div', { class: 'list' }), more = h('div', { class: 'row center' }), count = h('p', { class: 'muted' });
   async function load(reset) {
     if (reset) { offset = 0; list.replaceChildren(); }
@@ -80,8 +81,10 @@ export async function render({ ctx, reload }) {
             toast(`Vuosikortti peruttu${r.cancelled ? `, ${r.cancelled} varausta peruttu` : ''}`); document.querySelector('dialog')?.close(); load(true); }) }, 'Peru kortti') : null)))) : empty('Ei vuosikorttia.'),
       can ? grant : null);
   }
-  let t; const q = h('input', { type: 'search', placeholder: 'Hae nimellä, sähköpostilla tai puhelimella', 'aria-label': 'Hae asiakkaita', oninput: (e) => { search = e.target.value; clearTimeout(t); t = setTimeout(() => load(true), 250); } });
+  let t; const q = h('input', { type: 'search', value: search, placeholder: 'Hae nimellä, sähköpostilla tai puhelimella', 'aria-label': 'Hae asiakkaita', oninput: (e) => { search = e.target.value; clearTimeout(t); t = setTimeout(() => load(true), 250); } });
   await load(true);
+  const directId = query.get('id');
+  if (/^\d+$/.test(directId || '')) card(Number(directId)).catch((e) => toast(e?.message || navText('ui.admin.nav.customer_not_found'), 'err'));
   const canAdd = ctx.can('customers.manage');
   return [h('div', { class: 'row between wrap' }, h('h1', { text: 'Asiakkaat' }), canAdd ? h('button', { type: 'button', class: 'btn primary sm', onclick: addDialog }, 'Lisää asiakas') : null), h('div', { class: 'card' }, q), count, list, more];
 }

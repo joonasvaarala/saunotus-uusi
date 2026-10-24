@@ -83,5 +83,7 @@ export async function render({ ctx, reload, query }) {
   select(tab);
   const deepOrder = (query.get('order') || '').trim();   // #/talous?tab=orders&order=<tilausnumero> (esim. Uusi varaus → Avaa tilaus ja maksut): haku + tilaus auki
   if (deepOrder && tab === 'orders') tabs.orders.setSearch(deepOrder, { open: true });
+  const deepGift = (query.get('code') || '').trim();
+  if (deepGift && tab === 'giftcards') tabs.giftcards.setSearch(deepGift);
   return root;
 }

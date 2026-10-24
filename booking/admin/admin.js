@@ -8,6 +8,9 @@ import { loadFilterTexts } from './filter-texts.js';
 import { primeSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 import { needsManualRoute, parseAdminHash } from './reservation-query.js';
 import { posText } from './pos-texts.js';
+import { resolveAdminPath, compactIdentity, toggleMobileNav } from './admin-navigation.js';
+import { setupQuickSearch } from './quick-search.js';
+import { loadNavTexts, navText } from './nav-texts.js';
 
 const $ = (id) => document.getElementById(id);
 // Kokeilutila: osoite /hallinta/?mock=1 → keinoistunto + selaimen oma mock-data (options-mock.js). EI verkkokutsuja eikä kirjautumista; mikään ei tallennu. Ilman parametria ennallaan.
@@ -43,7 +46,7 @@ const loadErrorView = () => h('div', { class: 'pad', role: 'alert' },
 
 const ROUTES = [
   { path: '', label: 'Päivä', icon: 'day', mod: () => loadView('day') },
-  { path: 'varaukset', label: 'Varaukset', icon: 'list', mod: () => loadView('reservations') },
+  { path: 'tilaukset', label: 'Tilaukset', labelFn: () => navText('ui.admin.nav.orders'), icon: 'list', mod: () => loadView('orders') },
   { path: 'talous', label: 'Talous', labelFn: () => tl('nav'), icon: 'euro', any: ['payments.manage', 'giftcards.manage'], mod: () => loadView('talous') },
   { path: 'pikakassa', label: 'Pikakassa', labelFn: () => posText('nav', 'fi'), icon: 'till', any: ['pos.use'], mod: () => loadView('pos') },
   { path: 'laskut', label: 'Laskut', icon: 'receipt', any: ['invoices.manage'], mod: () => loadView('invoices') },
@@ -69,10 +72,10 @@ export async function refs(force = false) {
 
 const allowed = (r) => !r.any || r.any.some((p) => ctx.can(p));
 function drawNav(current) {
-  $('nav').replaceChildren(...ROUTES.filter(allowed).map((r) => h('a', { href: `#/${r.path}`, 'aria-current': r.path === current ? 'page' : null }, h('span', { class: 'ico', 'aria-hidden': 'true' }, icon(r.icon)), h('span', { class: 'lbl', text: r.labelFn ? r.labelFn() : r.label }))));
-  // Mobiilin vaakavieritettävä alapalkki: aktiivinen kohta vieritetään näkyviin (keskelle), koska palkki piirretään joka reitillä uudelleen
+  $('nav').replaceChildren(...ROUTES.filter(allowed).map((r) => h('a', { href: `#/${r.path}`, 'aria-label': r.labelFn ? r.labelFn() : r.label, title: r.labelFn ? r.labelFn() : r.label, 'aria-current': r.path === current ? 'page' : null }, h('span', { class: 'ico', 'aria-hidden': 'true' }, icon(r.icon)), h('span', { class: 'lbl', text: r.labelFn ? r.labelFn() : r.label }))));
+  // Pystypalkissa aktiivinen navigaatiolinkki pysyy näkyvillä ilman vaakavieritystä.
   const nav = $('nav'), cur = nav.querySelector('[aria-current]');
-  if (cur && nav.scrollWidth > nav.clientWidth + 1 && nav.scrollHeight <= nav.clientHeight + 1) nav.scrollLeft = Math.max(0, cur.offsetLeft - (nav.clientWidth - cur.offsetWidth) / 2);
+  if (cur && !nav.contains(document.activeElement)) cur.scrollIntoView?.({ block: 'nearest' });
 }
 let dayModule = null;
 let lastPath = null;   // toisesta näkymästä Päivään palattaessa päivänippu haetaan aina tuoreena (muutokset muissa näkymissä)
@@ -81,7 +84,8 @@ async function route() {
   if (!getSession()) return;
   const seq = ++routeSeq;
   const { path, rest, query } = parseAdminHash(location.hash);
-  const r = ROUTES.find((x) => x.path === path && allowed(x)) || ROUTES[0];
+  const resolved = resolveAdminPath(path);
+  const r = ROUTES.find((x) => x.path === resolved.path && allowed(x)) || ROUTES[0];
   drawNav(r.path);
   const view = $('view');
   view.replaceChildren(h('p', { class: 'muted pad', text: 'Ladataan…' }));
@@ -90,7 +94,7 @@ async function route() {
     if (r.path === '') { dayModule = m; if (lastPath !== null && lastPath !== '') m.clearDayBundleCache?.(); }
     lastPath = r.path;
     await refs();
-    const out = await m.render({ ctx, refs: ctx.refs, reload: () => { dayModule?.clearDayBundleCache?.(); route(); }, query, rest });
+    const out = await m.render({ ctx, refs: ctx.refs, reload: () => { dayModule?.clearDayBundleCache?.(); route(); }, query, rest, legacyReservations: resolved.legacyReservations });
     if (seq !== routeSeq) return;
     view.replaceChildren(...[].concat(out).filter(Boolean));
     document.title = `${r.labelFn ? r.labelFn() : r.label} – hallinta`;
@@ -125,16 +129,24 @@ async function enter() {
         productById: new Map(products.map((p) => [p.id, p])) };
       dm?.primeDayBundle?.(date, bundle);
       primeSiteTexts(bundle.site_texts);
-      await loadFilterTexts(rpc);  // muistissa oleva vastaus: ei verkkokutsua
+      await Promise.all([loadFilterTexts(rpc), loadNavTexts(rpc)]);  // muistissa oleva vastaus: ei verkkokutsua
     } else {
       // Vanha kanta tai mock ilman bootstrappia: kolme vanhaa hakua yhtä aikaa.
       [role, me] = await Promise.all([rpc('current_staff_role'), rpc('admin_my_permissions'),
-        refs(), loadFilterTexts(rpc)]);
+        refs(), loadFilterTexts(rpc), loadNavTexts(rpc)]);
       if (bundle) dm?.primeDayBundle?.(date, bundle);
     }
     if (!role) { signOut(); showLogin('Tällä tunnuksella ei ole oikeutta hallintaan (ei henkilökuntaa).'); return; }
     ctx.role = role; ctx.name = s.user?.email || ''; ctx.perms = me?.permissions || []; ctx.roleLabel = me?.role_label || role;
+    const identity = compactIdentity(ctx.name, ctx.roleLabel);
     $('who').textContent = MOCK ? 'Kokeilutila: esimerkkidata, mikään ei tallennu' : `${ctx.name} · ${ctx.roleLabel}`;
+    $('who').classList.toggle('is-mock', MOCK);
+    $('user-short').textContent = identity.name;
+    $('user-initial').textContent = identity.initial;
+    $('user-role').textContent = identity.role;
+    $('user-email').textContent = ctx.name;
+    $('user-role-full').textContent = navText('ui.admin.nav.role', { role: ctx.roleLabel });
+    paintTopBarTexts();
     document.body.dataset.role = role;
     void route();
   } catch (e) { signOut(); showLogin(errMsg(e)); }
@@ -148,6 +160,36 @@ $('login').addEventListener('submit', async (ev) => {
   const btn = ev.target.querySelector('button'); btn.disabled = true; showLogin('');
   try { await signIn($('email').value.trim(), $('password').value); await enter(); } catch (e) { showLogin(errMsg(e)); } finally { btn.disabled = false; }
 });
+// Yläpalkin ja sivupalkin painikkeiden ikonit (icons.js, currentColor) ja tekstit (nav-texts.js, ui.admin.nav.*).
+for (const el of document.querySelectorAll('#shell [data-icon]')) el.replaceChildren(icon(el.dataset.icon, el.closest('.nav-toggle') ? 26 : 20));
+function paintTopBarTexts() {
+  const tn = (k) => navText(`ui.admin.nav.${k}`);
+  const attr = (id, a, k) => $(id)?.setAttribute(a, tn(k));
+  attr('quick-search-toggle', 'aria-label', 'search_open');
+  attr('quick-search-input', 'placeholder', 'search_placeholder'); attr('quick-search-input', 'aria-label', 'search_label');
+  attr('quick-search-results', 'aria-label', 'search_results');
+  document.querySelector('label[for=quick-search-input]').textContent = tn('search_label');
+  for (const [id, k] of [['quick-new', 'new_reservation'], ['quick-review', 'review']]) { attr(id, 'aria-label', k); $(id).querySelector('.action-label').textContent = tn(k); }
+  attr('user-menu-toggle', 'aria-label', 'user_menu');
+  $('open-shop-label').textContent = tn('open_shop'); $('open-shop-hint').textContent = tn('new_tab');
+  const nt = $('nav-toggle'); nt.setAttribute('aria-label', tn(nt.getAttribute('aria-expanded') === 'true' ? 'collapse' : 'expand'));
+}
+const mobileToggle = $('nav-toggle');
+mobileToggle.addEventListener('click', () => toggleMobileNav($('shell'), mobileToggle));
+const userToggle = $('user-menu-toggle'), userDropdown = $('user-dropdown');
+function setUserOpen(open) {
+  userToggle.setAttribute('aria-expanded', String(open));
+  userDropdown.hidden = !open;
+}
+userToggle.addEventListener('click', () => setUserOpen(userDropdown.hidden));
+document.addEventListener('click', (e) => {
+  if (!e.target?.closest?.('.user-menu')) setUserOpen(false);
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { setUserOpen(false); }
+});
+setupQuickSearch({ input: $('quick-search-input'), panel: $('quick-search-results'),
+  toggle: $('quick-search-toggle'), box: $('quick-search-box'), ctx, rpc });
 $('logout').addEventListener('click', () => { if (MOCK) { location.href = location.pathname; return; }
    signOut(); ctx.refs = null; ctx.role = null; ctx.perms = []; dayModule?.clearDayBundleCache?.(); clearSiteTextsCache(); showLogin(''); });
 window.addEventListener('hashchange', route);

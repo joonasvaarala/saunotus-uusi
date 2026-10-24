@@ -25,7 +25,7 @@ test('linkki avaa tulevat varaukset, joilla hoito on valitsematta', () => {
   assert.equal(reservationsHref(st), UNASSIGNED_HREF);
   assert.equal(stateFromQuery('filter=treatment_unassigned').period, 'all', 'pelkkä suodatin ei pakota jaksoa');
   assert.equal(stateFromQuery('period=eilen').period, 'all');
-  const custom = { treatment: '', period: 'custom', status: 'confirmed', product: '10', source: 'native', search: 'aino', from: '2026-10-01', to: '2026-10-18' };
+  const custom = { treatment: '', period: 'custom', status: 'confirmed', product: '10', source: 'native', search: 'aino', sort: 'soon', id: '', from: '2026-10-01', to: '2026-10-18' };
   assert.equal(reservationsHref(custom), '#/varaukset?period=custom&status=confirmed&product=10&source=native&q=aino&from=2026-10-01&to=2026-10-18');
   assert.deepEqual(stateFromQuery(reservationsHref(custom).split('?')[1]), custom);
   assert.equal(reservationsHref({ period: 'custom', from: 'eilen', to: '20.10.2026' }), '#/varaukset?period=custom');

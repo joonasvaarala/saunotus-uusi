@@ -165,6 +165,12 @@ jobs:
       - run: node --test booking/tests/jonotuslista-tarjousaika.test.mjs
       # booking_133: päivänippu + kuukauden saatavuus yhdellä RPC:llä (SQL-vertailu booking_125:een: booking/tests/paiva-ja-saatavuus-nopeutus-regressio.sql, ajetaan testikannassa)
       - run: node --test booking/tests/paiva-ja-saatavuus-nopeutus.test.mjs
+      # Paketti 05 / booking_138: hallinnan päänavigaatio (Tilaukset + Varaukset-välilehti, vanhat #/varaukset-linkit), yläpalkin pikahaku ja
+      # käyttäjävalikko, mobiilin 54 px ikonisivupalkki, varauslistan palvelinpuolinen lajittelu (p_sort) ja suora linkki (p_reservation_id),
+      # tekstit ui.admin.nav.* (content/site-texts.pending-import-38.json); migraatio + rollback olemassa.
+      # t138 (booking/supabase/tests/hallinta/t138_reservations_nav.sql) ajetaan paikallisessa PG17:ssä t135:n tapaan (työnkulussa ei ole Postgresia).
+      # Selaintesti booking/scripts/e2e-hallinta-nav.mjs (390 px ja työpöytä, mock-tila) vaatii Chromen, ajetaan paikallisesti.
+      - run: node --test booking/tests/hallinta-nav-ylapalkki.test.mjs
       # booking_136: hallinnan hyvitys ↔ peruutus (oletus Ei, oikeudet payments.refund / bookings.manage, tekstit pending-import-37, migraation ja rollbackin rakenne).
       # t136 (booking/supabase/tests/talous/t136_refund_cancel.sql) ajetaan testikannassa psql:llä migraatioiden ja fixtures/10_test_helpers.sql:n jälkeen.
       - run: node --test booking/tests/hyvitys-peruutus.test.mjs

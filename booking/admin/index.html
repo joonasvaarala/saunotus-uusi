@@ -35,10 +35,30 @@
   <div id="shell" hidden>
     <header class="top">
       <a class="brand" href="#/"><img src="logo-haalea.svg" alt="Sauna hallinta" width="26" height="36"></a>
-      <span id="who" class="who"></span>
-      <button id="logout" class="btn ghost sm" type="button">Kirjaudu ulos</button>
+      <div id="quick-search" class="quick-search">
+        <button id="quick-search-toggle" class="btn ghost quick-search-toggle" type="button" aria-label="Avaa pikahaku" aria-expanded="false" aria-controls="quick-search-box"><span data-icon="search" aria-hidden="true"></span></button>
+        <div id="quick-search-box" class="quick-search-box">
+          <label for="quick-search-input" class="sr">Pikahaku</label>
+          <input id="quick-search-input" type="search" placeholder="Hae nimeä, numeroa tai koodia" autocomplete="off" aria-label="Pikahaku">
+          <div id="quick-search-results" class="quick-search-results" role="region" aria-label="Pikahaun tulokset" hidden></div>
+        </div>
+      </div>
+      <a class="btn ghost quick-action" id="quick-new" href="#/uusi" aria-label="Uusi varaus"><span data-icon="add" aria-hidden="true"></span><span class="action-label">Uusi varaus</span></a>
+      <a class="btn ghost quick-action" id="quick-review" href="#/tarkista" aria-label="Tarkista"><span data-icon="tick" aria-hidden="true"></span><span class="action-label">Tarkista</span></a>
+      <div class="user-menu">
+        <span id="who" class="who" role="status"></span>
+        <button id="user-menu-toggle" type="button" class="btn ghost user-toggle" aria-expanded="false" aria-controls="user-dropdown" aria-label="Käyttäjävalikko">
+          <span id="user-short">Käyttäjä</span><span id="user-initial" aria-hidden="true">K</span><small id="user-role"></small><span data-icon="chev" aria-hidden="true"></span>
+        </button>
+        <div id="user-dropdown" class="user-dropdown" hidden>
+          <p id="user-email"></p><p id="user-role-full"></p>
+          <a id="open-shop" href="../varaa/" target="_blank" rel="noopener noreferrer"><span id="open-shop-label">Avaa kauppa</span> <span data-icon="external" aria-hidden="true"></span><span id="open-shop-hint" class="sr">(avautuu uuteen välilehteen)</span></a>
+          <button id="logout" class="btn ghost sm" type="button">Kirjaudu ulos</button>
+        </div>
+      </div>
     </header>
     <nav id="nav" class="nav" aria-label="Päävalikko"></nav>
+    <button id="nav-toggle" class="nav-toggle" type="button" aria-label="Laajenna valikko" aria-expanded="false" aria-controls="nav"><span data-icon="pgnext" aria-hidden="true"></span></button>
     <main id="view" tabindex="-1"></main>
   </div>
 </div>

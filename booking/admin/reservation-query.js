@@ -4,6 +4,12 @@
 
 export const TREATMENT_UNASSIGNED = 'treatment_unassigned';
 export const PERIODS = ['all', 'upcoming', 'past', 'month', 'custom'];
+export const RESERVATION_SORTS = ['soon', 'newest', 'oldest'];
+// Palvelimen p_sort (booking_138). 'soon' = varausaika: aikaikkunassa (tulevat, kuukausi, oma) lähin ensin; kaikki ajat ja menneet
+// ennallaan (null = alkamisaika laskevasti). null jätetään RPC-kutsusta pois, jolloin lista toimii myös ennen migraatiota 138.
+export const SOON_ASC_PERIODS = ['upcoming', 'month', 'custom'];
+export const reservationSortParam = (sort, period = 'upcoming') => (sort === 'newest' ? 'created_desc' : sort === 'oldest' ? 'created_asc'
+  : SOON_ASC_PERIODS.includes(period) ? 'start_asc' : null);
 const DAY = /^\d{4}-\d\d-\d\d$/;
 
 export function normalizeHash(hash) {
@@ -26,10 +32,12 @@ export function parseAdminHash(hash) {
   return { path: parts[0] || '', rest: parts.slice(1).join('/'), query: new URLSearchParams(query) };
 }
 
-export function reservationSearch({ treatment = '', period = 'all', status = '', product = '', source = '', search = '', from = '', to = '' } = {}) {
+export function reservationSearch({ treatment = '', period = 'all', sort = 'soon', id = '', status = '', product = '', source = '', search = '', from = '', to = '' } = {}) {
   const q = new URLSearchParams();
   if (treatment === TREATMENT_UNASSIGNED) q.set('filter', TREATMENT_UNASSIGNED);
   if (PERIODS.includes(period) && period !== 'all') q.set('period', period);
+  if (RESERVATION_SORTS.includes(sort) && sort !== 'soon') q.set('sort', sort);
+  if (/^\d+$/.test(String(id))) q.set('id', String(id));
   if (status) q.set('status', status);
   if (product) q.set('product', String(product));
   if (source) q.set('source', source);
@@ -41,9 +49,15 @@ export function reservationSearch({ treatment = '', period = 'all', status = '',
   return q;
 }
 
-export function reservationsHref(state) {
-  const s = reservationSearch(state).toString();
-  return `#/varaukset${s ? `?${s}` : ''}`;
+export function reservationsHref(state, routePath = 'varaukset') {
+  const q = reservationSearch(state);
+  if (routePath === 'tilaukset') {
+    // Tilaukset-reitin oletusjakso on 'upcoming', joten 'Kaikki ajat' kirjoitetaan näkyviin (päivitys säilyttää valinnan).
+    if ((state?.period ?? 'all') === 'all') q.set('period', 'all');
+    q.set('tab', 'reservations');
+  }
+  const s = q.toString();
+  return `#/${routePath === 'tilaukset' ? 'tilaukset' : 'varaukset'}${s ? `?${s}` : ''}`;
 }
 
 export const UNASSIGNED_HREF = reservationsHref({ treatment: TREATMENT_UNASSIGNED, period: 'upcoming' });
@@ -54,6 +68,8 @@ export function stateFromQuery(params) {
   return {
     treatment: q.get('filter') === TREATMENT_UNASSIGNED ? TREATMENT_UNASSIGNED : '',
     period: PERIODS.includes(periodRaw) ? periodRaw : 'all',
+    sort: RESERVATION_SORTS.includes(q.get('sort')) ? q.get('sort') : 'soon',
+    id: /^\d+$/.test(q.get('id') || '') ? q.get('id') : '',
     status: q.get('status') || '',
     product: q.get('product') || '',
     source: q.get('source') || '',
