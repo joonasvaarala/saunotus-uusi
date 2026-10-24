@@ -1,0 +1,22 @@
+[
+ {
+  "key": "ui.shop.waitlist_claim_expired",
+  "lang": "fi",
+  "text": "Jonotusilmoituksen varausaika on päättynyt. Voit varata vuoron normaalisti, jos paikkoja on vielä vapaana.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_137: jonotusilmoituksen tarjousaika päättyi (public_waitlist_claim → offer_expired, booking/shop/src/waitlist-texts.js); uusi asiakasnäkyvä teksti, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.waitlist_claim_expired",
+  "lang": "en",
+  "text": "The booking time for your waiting list notification has expired. You can book the session normally if places are still available.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_137: jonotusilmoituksen tarjousaika päättyi (public_waitlist_claim → offer_expired, booking/shop/src/waitlist-texts.js); uusi asiakasnäkyvä teksti, ei vielä tuotannossa"
+ }
+]

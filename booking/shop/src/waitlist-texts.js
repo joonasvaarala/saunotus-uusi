@@ -1,5 +1,5 @@
 // Jonotuslistan FI/EN-tekstit (repon oletus). Tuodaan i18n.js:n T-objektiin → avaimet ui.shop.waitlist_* (text-registry);
-// tuotannon tekstit tulevat site_textsistä (content/site-texts.pending-import-34.json; booking_134: pending-import-36).
+// tuotannon tekstit tulevat site_textsistä (content/site-texts.pending-import-34.json; booking_134: pending-import-36; booking_137: pending-import-39).
 export const WAITLIST_TEXTS = {
   fi: {
     waitlistSoldOut: 'Loppuunmyyty – liity jonoon',
@@ -20,6 +20,7 @@ export const WAITLIST_TEXTS = {
     waitlistPersonsHint: 'Valitse 1–6 henkilöä. Ilmoitamme, kun vuorolle vapautuu vähintään näin monta paikkaa.',
     waitlistClaimNotEnough: 'Vapaita paikkoja ei ole enää riittävästi jonotusvarauksesi henkilömäärälle. Pysyt jonotuslistalla, ja ilmoitamme, jos paikkoja vapautuu.',
     waitlistClaimInvalid: 'Jonotuslinkki ei ole enää voimassa. Voit varata vuoron normaalisti, jos paikkoja on vapaana.',
+    waitlistClaimExpired: 'Jonotusilmoituksen varausaika on päättynyt. Voit varata vuoron normaalisti, jos paikkoja on vielä vapaana.',
     waitlistErrors: {
       rate_limited: 'Liian monta yritystä. Yritä myöhemmin uudelleen.',
       invalid_name: 'Anna etu- ja sukunimi.', invalid_email: 'Tarkista sähköpostiosoite.',
@@ -47,6 +48,7 @@ export const WAITLIST_TEXTS = {
     waitlistPersonsHint: 'Choose 1–6 people. We will let you know when at least this many places open up.',
     waitlistClaimNotEnough: 'There are no longer enough free places for your waiting list party size. You stay on the waiting list and we will let you know if places open up.',
     waitlistClaimInvalid: 'This waiting list link is no longer valid. You can book the session normally if places are available.',
+    waitlistClaimExpired: 'The booking time for your waiting list notification has expired. You can book the session normally if places are still available.',
     waitlistErrors: {
       rate_limited: 'Too many attempts. Please try again later.',
       invalid_name: 'Please enter your name.', invalid_email: 'Please check your email address.',
