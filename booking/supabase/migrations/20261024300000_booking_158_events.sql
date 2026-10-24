@@ -23,8 +23,9 @@
 --  6) Uudet RPC:t (security definer, search_path ''): admin_event_list, admin_event_rule_upsert, admin_event_rule_delete, admin_event_blocks_set,
 --     admin_event_set_channels, admin_product_copy, admin_event_copy, admin_event_rule_copy (catalog.edit; admin_event_list: henkilökunta luku),
 --     public_events (anon). Virheet {code,message}; konfliktin tiedot (details) JSON-taulukkona virheen hint-kentässä.
---  7) Lovi-sääntö (product_space_rules): Loviin saa ohjautua vain yhden hengen saunahoito, saunotus ja syväsaunous (tuotteet 10, 11, 12, kun Rauni
---     on suljettu). Muiden tuotteiden aktiiviset Lovi-rivit passivoidaan (active = false); muutetut rivit tallennetaan booking.m158_lovi_rows (rollback).
+--  7) Lovi-sääntö (product_space_rules): Loviin saa ohjautua vain yhden hengen saunahoito, saunotus, syväsaunous, perinnesaunotus yhdelle ja
+--     saunahoito opiskelijatyönä (tuotteet 10, 11, 12, 23, 24, kun Rauni on suljettu). Muiden tuotteiden (tuotannossa 14–22, 9 riviä) aktiiviset
+--     Lovi-rivit passivoidaan (active = false); muutetut rivit tallennetaan booking.m158_lovi_rows (rollback).
 -- Ei hintoja, ALV:tä, slugeja, URL:eja, maksuja eikä public-skeemaa. Ei sähköposteja.
 -- Rollback: rollbacks/20261024300000_booking_158_ROLLBACK.sql
 -- Tuotannon funktioiden md5(pg_get_functiondef) ennen tätä migraatiota (rollback palauttaa nämä täsmälleen):
@@ -1254,17 +1255,21 @@ begin
   select id into v_lovi from booking.resources where code = 'lovi';
   select id into v_rauni from booking.resources where code = 'rauni';
   if v_lovi is null then raise notice 'booking_158: Lovi-resurssia ei löydy, Lovi-sääntöä ei muutettu'; return; end if;
-  -- sallitut: 10 = yhden hengen saunahoito, 11 = saunotus, 12 = syväsaunous (vain kun Rauni suljettu, 1 hlö)
+  -- sallitut (Joonas 24.10.2026): 10 = yhden hengen saunahoito, 11 = saunotus, 12 = syväsaunous, 23 = perinnesaunotus yhdelle,
+  -- 24 = saunahoito opiskelijatyönä (vain kun Rauni suljettu, 1 hlö). Aiemman version (vain 10–12) passivoimat 23/24 aktivoidaan takaisin.
+  update booking.product_space_rules s set active = true
+    from booking.m158_lovi_rows m where m.psr_id = s.id and m.product_id in (10, 11, 12, 23, 24) and not s.active;
+  delete from booking.m158_lovi_rows m where m.product_id in (10, 11, 12, 23, 24);
   insert into booking.m158_lovi_rows(psr_id, product_id)
   select s.id, s.product_id from booking.product_space_rules s
-   where s.space_id = v_lovi and s.active and s.product_id not in (10, 11, 12)
+   where s.space_id = v_lovi and s.active and s.product_id not in (10, 11, 12, 23, 24)
   on conflict (psr_id) do nothing;
   update booking.product_space_rules s set active = false
     from booking.m158_lovi_rows m where m.psr_id = s.id and s.active;
   get diagnostics v_n = row_count;
   raise notice 'booking_158: Lovi-rivejä passivoitu %', v_n;
-  if exists (select 1 from booking.product_space_rules s where s.space_id = v_lovi and s.active and s.product_id in (10, 11, 12)
+  if exists (select 1 from booking.product_space_rules s where s.space_id = v_lovi and s.active and s.product_id in (10, 11, 12, 23, 24)
               and (s.selection <> 'auto_if_blocked' or s.requires_blocked_space_id is distinct from v_rauni or coalesce(s.max_persons, 99) <> 1)) then
-    raise notice 'booking_158: HUOM tuotteiden 10–12 Lovi-rivi poikkeaa odotetusta (auto_if_blocked, Rauni, 1 hlö) – tarkista';
+    raise notice 'booking_158: HUOM tuotteiden 10–12, 23, 24 Lovi-rivi poikkeaa odotetusta (auto_if_blocked, Rauni, 1 hlö) – tarkista';
   end if;
 end $$;

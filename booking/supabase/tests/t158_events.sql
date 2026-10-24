@@ -263,9 +263,11 @@ begin
   perform pg_temp.ck(not (res ->> 'active')::boolean, 'M3: myymätön kerta passivoituu');
 
   -- N: Lovi
-  perform pg_temp.ck(not exists (select 1 from booking.product_space_rules s where s.space_id = (select id from booking.resources where code = 'lovi') and s.active and s.product_id not in (10, 11, 12)), 'N1: Loviin vain tuotteet 10–12');
-  perform pg_temp.ck((select count(*) from booking.product_space_rules s where s.space_id = (select id from booking.resources where code = 'lovi') and s.active and s.product_id in (10, 11, 12)
-                       and s.selection = 'auto_if_blocked' and s.requires_blocked_space_id = v_rauni and s.max_persons = 1) = 3, 'N2: hoitojen 10–12 Lovi-säännöt ennallaan (Rauni suljettu, 1 hlö)');
+  perform pg_temp.ck(not exists (select 1 from booking.product_space_rules s where s.space_id = (select id from booking.resources where code = 'lovi') and s.active and s.product_id not in (10, 11, 12, 23, 24)), 'N1: Loviin vain tuotteet 10–12, 23, 24');
+  perform pg_temp.ck((select count(*) from booking.product_space_rules s where s.space_id = (select id from booking.resources where code = 'lovi') and s.active and s.product_id in (10, 11, 12, 23, 24)
+                       and s.selection = 'auto_if_blocked' and s.requires_blocked_space_id = v_rauni and s.max_persons = 1) = 5, 'N2: tuotteiden 10–12, 23, 24 Lovi-säännöt aktiivisina ennallaan (Rauni suljettu, 1 hlö)');
+  perform pg_temp.ck((select count(*) from booking.m158_lovi_rows) = 9 and not exists (select 1 from booking.m158_lovi_rows where product_id in (10, 11, 12, 23, 24))
+                     and (select array_agg(product_id order by product_id) from booking.m158_lovi_rows) = array[14, 15, 16, 17, 18, 19, 20, 21, 22]::bigint[], 'N3: suljettu 9 riviä (tuotteet 14–22)');
   perform pg_temp.ck((select n_lovi from t158_before) = (select count(*) from booking.m158_lovi_rows), 'O2: uudelleenajo ei muuttanut Lovi-taulua');
 
   -- myynti takaisin pois: kerrat katoavat saatavuudesta
@@ -295,7 +297,7 @@ begin
   perform pg_temp.ck(to_regprocedure('booking.public_events(date, text)') is null and to_regprocedure('booking.admin_event_rule_upsert(bigint, bigint, jsonb)') is null
                      and not exists (select 1 from booking.settings where key = 'events.sale_enabled'), 'P3: uudet funktiot ja asetus poistettu');
   perform pg_temp.ck((select count(*) from booking.product_space_rules s where s.space_id = (select id from booking.resources where code = 'lovi') and s.active) >= 3
-                     and exists (select 1 from booking.product_space_rules s where s.space_id = (select id from booking.resources where code = 'lovi') and s.active and s.product_id not in (10, 11, 12)), 'P4: Lovi-rivit aktivoitu takaisin');
+                     and exists (select 1 from booking.product_space_rules s where s.space_id = (select id from booking.resources where code = 'lovi') and s.active and s.product_id not in (10, 11, 12, 23, 24)) and (select count(*) from booking.product_space_rules s where s.space_id = (select id from booking.resources where code = 'lovi') and s.active) = 14, 'P4: Lovi-rivit aktivoitu takaisin (14)');
 end $t$;
 -- migraatio uudelleen rollbackin jälkeen (koko kierros)
 \ir ../migrations/20261024300000_booking_158_events.sql

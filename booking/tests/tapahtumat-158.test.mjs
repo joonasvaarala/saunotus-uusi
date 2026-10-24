@@ -77,8 +77,14 @@ test('rollback poistaa uudet funktiot, taulut ja sarakkeet', () => {
   assert.match(rb, /m158_lovi_rows/);
 });
 
-test('Lovi: vain tuotteet 10, 11, 12 jäävät Loviin', () => {
-  assert.match(mig, /s\.space_id = v_lovi and s\.active and s\.product_id not in \(10, 11, 12\)/);
+test('Lovi: tuotteet 10, 11, 12, 23, 24 jäävät Loviin, muut (14–22) suljetaan; vanhan version passivoimat 23/24 takaisin', () => {
+  assert.match(mig, /s\.space_id = v_lovi and s\.active and s\.product_id not in \(10, 11, 12, 23, 24\)/);
+  assert.match(mig, /m\.product_id in \(10, 11, 12, 23, 24\) and not s\.active/);
+  assert.match(mig, /delete from booking\.m158_lovi_rows m where m\.product_id in \(10, 11, 12, 23, 24\)/);
+  assert.doesNotMatch(mig, /not in \(10, 11, 12\)/);
+  const t = read(T);
+  assert.match(t, /array\[14, 15, 16, 17, 18, 19, 20, 21, 22\]::bigint\[\]/);
+  assert.match(t, /\) = 5, 'N2:/);
 });
 
 test('SQL-testi tarkistaa rollbackin ja uudelleenajon', () => {

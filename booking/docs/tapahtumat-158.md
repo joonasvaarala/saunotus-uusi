@@ -22,8 +22,8 @@ myynti siirtyy omaan kauppaan 1.11.2026 → ominaisuus valmiina, **myynti pois p
 - **Myyntikytkin** `booking.settings 'events.sale_enabled'` (oletus `false`). Kun false: kerrat eivät näy julkisessa saatavuudessa,
   asiakkaan varaus hylätään (`sale_closed`), `public_catalog` piilottaa event/training-tuotteet, `public_events` palauttaa kerrat tilassa `closed`.
   Henkilökunta voi tehdä käsivarauksen. Avaus 1.11.2026: `update booking.settings set value = 'true' where key = 'events.sale_enabled';`
-- **Lovi**: Loviin ohjautuvat (Rauni varattu) vain tuotteet 10 Saunahoito, 11 Saunotus ja 12 Syväsaunotus. Muiden tuotteiden aktiiviset
-  Lovi-rivit passivoidaan; muutetut rivit tallennetaan `booking.m158_lovi_rows` (rollback palauttaa).
+- **Lovi**: Loviin ohjautuvat (Rauni varattu) vain tuotteet 10 Saunahoito, 11 Saunotus, 12 Syväsaunotus, 23 Perinnesaunotus yhdelle ja
+  24 Saunahoito opiskelijatyönä (Joonas 24.10.2026). Muiden tuotteiden aktiiviset Lovi-rivit (tuotannossa 14–22, 9 riviä) passivoidaan; muutetut rivit tallennetaan `booking.m158_lovi_rows` (rollback palauttaa).
 
 ## RPC:t
 
@@ -78,7 +78,7 @@ Rollback poistaa tapahtumien resurssivaraukset ja niiden sulut pysyvästi; tapah
 
 ## Testit
 
-`psql -X -d <testikanta> -f supabase/tests/t158_events.sql` (hakemistosta `supabase/tests`, fixtures ladattu) → `TESTRESULT pass=86 fail=0`.
+`psql -X -d <testikanta> -f supabase/tests/t158_events.sql` (hakemistosta `supabase/tests`, fixtures ladattu) → `TESTRESULT pass=87 fail=0`.
 Testi ajaa migraation uudelleen, rollbackin kahdesti (md5-tarkistus) ja migraation uudelleen.
 
 ## Käyttöliittymä (PR cursor/tapahtumat-158-ui)
