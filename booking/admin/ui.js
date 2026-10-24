@@ -122,3 +122,20 @@ export function dialog(title, content, { wide = false } = {}) {
 }
 export const field = (label, input, hint) => h('label', { class: 'fld' }, h('span', { text: label }), input, hint ? h('small', { text: hint }) : null);
 export const empty = (text) => h('p', { class: 'empty', text });
+
+// Vaiheiden, onnistumis- ja virheilmoitusten hallittu vieritys.
+export const prefersReducedMotion = (win = globalThis) => !!win?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+export function revealSection(el, focusEl = el, win = globalThis) {
+  if (!el) return false;
+  el.scrollIntoView?.({ block: 'start', behavior: prefersReducedMotion(win) ? 'auto' : 'smooth' });
+  if (focusEl && !focusEl.matches?.('a[href],button,input,select,textarea,[tabindex]')) focusEl.setAttribute?.('tabindex', '-1');
+  focusEl?.focus?.({ preventScroll: true });
+  return true;
+}
+export function revealIfHidden(el, win = globalThis) {
+  if (!el?.getBoundingClientRect || !el.scrollIntoView) return false;
+  const r = el.getBoundingClientRect(), height = win.innerHeight || win.document?.documentElement?.clientHeight || 0;
+  if (r.top >= 80 && r.bottom <= height) return false;
+  el.scrollIntoView({ block: 'nearest', behavior: prefersReducedMotion(win) ? 'auto' : 'smooth' });
+  return true;
+}

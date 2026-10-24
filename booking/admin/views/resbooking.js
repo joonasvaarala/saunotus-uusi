@@ -9,7 +9,7 @@ import { stepper } from '../stepper.js';
 import { availabilityPanel, isSlotProduct } from './availability.js';
 import { resName, catLabel } from './legs.js';
 import { loadOptionConfig, configLabel, optionPicker, optErr, optName, ot } from '../options.js';
-import { h, field, toast, run, fmtDay, fmtTime, money, todayHel, helsinkiIso, errMsg, dayStartIso, addDays, fmtDT } from '../ui.js';
+import { h, field, toast, run, fmtDay, fmtTime, money, todayHel, helsinkiIso, errMsg, dayStartIso, addDays, fmtDT, revealSection, revealIfHidden } from '../ui.js';
 
 export const BOOKING_TYPES = [['', 'Vuoro'], ['resurssi', 'Resurssivaraus'], ['vanha', 'Vanha varaus']];
 // Varaustyypin valinta (radiogroup; nuolinäppäimet): vuoropohjainen / resurssivaraus / vanha varaus. Vaihto tallentuu URL:iin (#/uusi?tyyppi=…).
@@ -61,7 +61,7 @@ export async function render({ ctx, refs, query, kind }) {
   // saatavuus (migraatio 25): hoidot ja rituaali näyttävät vapaat ajat; muut tuotteet ja Vanha varaus syöttävät ajan käsin
   let availFrom = date.value; let availTimer = null;
   const avail = old ? null : availabilityPanel({ getQuery: () => (isSlotProduct(st.product) ? { productId: st.product.id, from: availFrom, persons: +persons.value || 1, override: canOverride && ovr.checked, reason: ovrReason.value } : null),
-    onPick: (r) => { date.value = r.session_date; time.value = fmtTime(r.starts_at); errBox.hidden = true; sync(false); } });
+    onPick: (r) => { date.value = r.session_date; time.value = fmtTime(r.starts_at); errBox.hidden = true; sync(false); const next = f.querySelector('[name=date]')?.closest('.row') || f; revealSection(next); } });
   if (avail) avail.node.hidden = true;
   const loadAvail = () => { if (!avail) return; avail.node.hidden = !isSlotProduct(st.product); avail.load(); };
   const reloadSoon = () => { clearTimeout(availTimer); availTimer = setTimeout(loadAvail, 400); };
@@ -143,8 +143,8 @@ export async function render({ ctx, refs, query, kind }) {
     result.replaceChildren(...[warningBox(r, { ctx, onDone: () => { result.replaceChildren(); } }), h('div', { class: 'card ok-box', role: 'status' }, h('h3', { text: `Varaus luotu – tilaus #${r.order_no}` }),
       h('p', { text: `${r.product_name}${r.option ? ` – ${optName(r.option)}` : ''}, ${fmtDay(r.starts_at)} ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)} · ${money(r.total)}${r.legs ? ` · ${r.legs} lisäresurssia` : ''}` }),
       h('div', { class: 'row wrap' }, h('a', { class: 'btn', href: `#/?d=${date.value}`, text: 'Näytä päivänäkymä' }), h('a', { class: 'btn ghost', href: '#/varaukset', text: 'Varaukset' })))].filter(Boolean));
-    result.scrollIntoView?.({ block: 'nearest' });
-  } catch (e) { errBox.textContent = optErr(e); errBox.hidden = false; errBox.scrollIntoView?.({ block: 'nearest' }); } }); });
+    revealSection(result, result.querySelector('h3'));
+  } catch (e) { errBox.textContent = optErr(e); errBox.hidden = false; revealIfHidden(errBox); } }); });
   const body = products.length ? [f, result] : [h('p', { class: 'empty', text: old ? 'Ei vanhoja tuotteita, joille voisi kirjata varauksen.' : 'Ei resurssituotteita, joille voisi luoda varauksen.' })];
   if (products.length) sync();
   return [h('h1', { text: old ? 'Vanha varaus' : 'Resurssivaraus' }), typeSwitch(kind), ...body];

@@ -5,7 +5,7 @@ import { rpc } from './sb.js';
 import { GT } from './gift-texts.js';
 import { createGiftApi } from './gift-api.js';
 import { applyShopTexts } from './site-texts.js';
-import { h, makeFmt, phoneBox, field } from './gift-ui.js';
+import { h, makeFmt, phoneBox, field, revealForm, revealIfHidden } from './gift-ui.js';
 import * as G from './gift-logic.js';
 
 const S = window.BOOKING_SHOP;
@@ -39,7 +39,7 @@ function buildSale(pk) {
     if (cap() < 1) { live.textContent = tx('maxCardsReached', { n: pk.max_cards }); return false; }
     if (lines.length >= 10) { live.textContent = tx('maxCardsReached', { n: pk.max_cards }); return false; }
     lines.push({ id: ++seq, pkg: code, amount: amount ?? '', qty: 1, recipientName: '', recipientEmail: '', greeting: '', deliveryTo: 'buyer', coverMessage: '', sendMode: 'now', deliverOn: '', deliverTime: '' });
-    renderCart(); live.textContent = `${tx('added')}: ${pick(p, 'name')}`;
+    renderCart(); revealForm(cartHost, cartHost.querySelector('legend')); live.textContent = `${tx('added')}: ${pick(p, 'name')}`;
     return true;
   };
   const tile = (p) => {
@@ -188,7 +188,7 @@ function buildSale(pk) {
       target.setError(tx(`err.${code}`, { months, max: key === 'cover' ? G.COVER_MAX : G.GREETING_MAX })); first ||= target.control; n++;
     }
     if (!n && code === 'invalid_email') { buyerFields.email.setError(tx('err.invalid_email')); first = buyerFields.email.control; n++; }   // ostajan sähköposti (ei saajariviä)
-    first?.focus(); return n > 0;
+    if (first) { revealIfHidden(first); first.focus({ preventScroll: true }); } return n > 0;
   }
   async function onSubmit(ev) {
     ev.preventDefault(); if (submitBtn.disabled) return;
@@ -206,7 +206,7 @@ function buildSale(pk) {
     const be = G.validateBuyer(buyer);
     for (const k of ['name', 'email', 'phone']) if (be[k]) mark(buyerFields[k], tx(`err.${k}`));
     if (be.terms) { buyerFields.termsErr.textContent = tx('err.terms'); if (!firstBad) firstBad = buyerFields.terms; }
-    if (firstBad) { msg.append(h('p', { class: 'bk-error', text: tx('err.fix') })); firstBad.focus(); return; }
+    if (firstBad) { msg.append(h('p', { class: 'bk-error', text: tx('err.fix') })); revealIfHidden(firstBad); firstBad.focus({ preventScroll: true }); return; }
     submitBtn.disabled = true; submitBtn.textContent = tx('submitting');
     try {
       const r = await api.buy(G.buyArgs({ lines, pkgs, buyer, locale: L }));
@@ -219,6 +219,7 @@ function buildSale(pk) {
       if (!r?.notReady && G.SERVER_FIELD[r?.code] && serverFieldError(r.code)) { msg.append(h('p', { class: 'bk-error', text: tx('err.fix') })); }
       else msg.append(h('p', { class: 'bk-error', text: r?.notReady ? tx('notReady') : errText(r, { n: pk.max_cards, min: open?.min_amount, max: open?.max_amount }) }));
     } catch { msg.append(h('p', { class: 'bk-error', text: tx('err.generic') }), phoneBox(S, tx)); }
+    revealIfHidden(msg);
     submitBtn.disabled = false; submitBtn.textContent = tx('submit');
   }
   // Valinnan kuittaus vahvistuksessa (kortin delivery_to / deliver_on / deliver_time public_buy_gift_card-vastauksesta)
@@ -232,8 +233,8 @@ function buildSale(pk) {
       h('h3', { id: 'gc-done-h', text: tx('doneTitle') }), h('span', { class: 'bk-status', text: tx('doneStatus') }),
       h('dl', { class: 'bk-sum' }, h('dt', { text: tx('doneOrder') }), h('dd', { text: `#${r.order_no}` }), h('dt', { text: tx('doneTotal') }), h('dd', { text: money(r.total) })), list,
       h('p', { text: tx('doneNote') }), r.payment_url ? h('p', {}, h('a', { class: 'btn', href: r.payment_url, text: tx('donePay') })) : h('p', { class: 'bk-pay', text: tx('donePayLater') }),
-      h('div', { class: 'bk-actions' }, r.token ? h('a', { class: 'btn', href: orderHref(r.token), text: tx('doneOpen') }) : null, h('button', { type: 'button', class: 'btn light', text: tx('doneNew'), onclick: () => { lines.length = 0; buyerFields = null; Object.assign(buyer, { name: '', email: '', phone: '', marketing: false, terms: false }); renderCart(); cartHost.scrollIntoView({ block: 'start' }); } })), phoneBox(S, tx));
-    cartHost.replaceChildren(box); box.focus(); box.scrollIntoView({ block: 'start' });
+      h('div', { class: 'bk-actions' }, r.token ? h('a', { class: 'btn', href: orderHref(r.token), text: tx('doneOpen') }) : null, h('button', { type: 'button', class: 'btn light', text: tx('doneNew'), onclick: () => { lines.length = 0; buyerFields = null; Object.assign(buyer, { name: '', email: '', phone: '', marketing: false, terms: false }); renderCart(); revealForm(cartHost); } })), phoneBox(S, tx));
+    cartHost.replaceChildren(box); revealForm(box, box.querySelector('h3'));
   }
   renderCart();
   return h('div', { class: 'gc' },
@@ -265,6 +266,7 @@ function buildBalance() {
       } else if (r?.notReady) out.append(h('p', { class: 'bk-error', text: tx('notReady') }));
       else out.append(h('p', { class: 'bk-error', role: 'alert', text: errText(r) }));
     } catch { out.append(h('p', { class: 'bk-error', role: 'alert', text: tx('err.generic') })); }
+    revealIfHidden(out);
     btn.disabled = false; btn.textContent = tx('balBtn');
   }
   return h('div', { class: 'gc gc-bal' },

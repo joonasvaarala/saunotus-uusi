@@ -835,3 +835,9 @@ body.shot #shell .nav .lbl{display:inline}
 .day-note-form textarea{flex:1 1 240px;min-height:64px;max-width:100%}
 .res-note{display:block;margin:2px 0;padding:2px 0 2px 8px;font-size:13px;color:var(--text);white-space:pre-wrap;overflow-wrap:anywhere;border-left:2px solid var(--gold)}
 .res-note-editor textarea{width:100%}
+
+/* Yhteinen vieritysankkurien offset: hallinnan kiinteä yläpalkki. */
+.nbform, .nb-result, .nb-err, .nb-slots, [data-testid="booking-form"],
+[data-testid="resource-booking-form"], [data-testid="old-booking-form"],
+[data-testid="availability"], .ok-box, .slotpick, .err, .card.nb-sec, .nbform .row,
+.vc-notice { scroll-margin-top: 84px; }

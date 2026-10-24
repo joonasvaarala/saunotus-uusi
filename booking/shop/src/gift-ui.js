@@ -35,6 +35,7 @@ export const prefersReducedMotion = (win = globalThis) => !!win?.matchMedia?.('(
 export function revealForm(el, focusEl = el, win = globalThis) {
   if (!el) return false;
   el.scrollIntoView?.({ block: 'start', behavior: prefersReducedMotion(win) ? 'auto' : 'smooth' });
+  if (focusEl && !focusEl.matches?.('a[href],button,input,select,textarea,[tabindex]')) focusEl.setAttribute?.('tabindex', '-1');
   focusEl?.focus?.({ preventScroll: true });
   return true;
 }
