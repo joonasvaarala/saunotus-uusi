@@ -557,19 +557,20 @@ button.bk-cell.quiet.sel{box-shadow:inset 0 -4px 0 #F4EFE7}
 .bk-quiet-line .bk-quiet-badge{margin-right:4px}
 .bk-quiet-note{border-left:4px solid #7A5530;background:#F4EFE7;color:#2B3A30;padding:8px 12px;border-radius:6px}
 @media (forced-colors:active){.bk-quiet-badge{border:1px solid CanvasText}button.bk-cell.quiet{outline:2px solid CanvasText}}
-/* booking_166: saunarituaali yleisen vuoron lisäpalveluna (värit #2B3A30 / #F4EFE7 / #7A5530; toimii 390 px) */
-.bk-ritual>.bk-hint{font-size:14px;margin:0 0 12px}
-.bk-ritual-price{color:#7A5530;white-space:nowrap}
-.bk-ritual-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.bk-ritual-opt{display:flex;align-items:center;gap:12px;padding:10px 14px;min-height:48px;border:1px solid var(--line);border-radius:12px;background:#fff;color:#2B3A30}
-.bk-ritual-opt input{width:22px;height:22px;flex:none;margin:0;accent-color:#2B3A30}
-.bk-ritual-opt label{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;flex:1;min-width:0;cursor:pointer}
-.bk-ritual-opt:has(input:checked){border-color:#2B3A30;background:#F4EFE7;box-shadow:inset 0 0 0 1px #2B3A30}
-.bk-ritual-opt:has(input:disabled){opacity:.6}
-.bk-ritual-opt:focus-within{outline:2px solid #7A5530;outline-offset:2px}
-.bk-ritual-pos{font-size:14px;color:#6B5E52}
-.bk-ritual-qty{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;margin-top:12px}
-.bk-ritual-qty[hidden]{display:none}
-.bk-ritual-qty .bk-stepper input{width:64px}
+/* booking_166: saunarituaali lisäpalvelukorttina LISÄPALVELUT-osiossa (.bk-addon-muoto; vain tämän kortin tyylit; värit #2B3A30 / #F4EFE7 / #7A5530 / #6B5E52) */
+.bk-addon-ritual[hidden],.bk-addon-ritual [hidden],.bk-addons[hidden]{display:none}
+.bk-addon-ritual .bk-rit-annual{color:#6B5E52}
+.bk-addon-ritual .bk-rit-time{flex:1 0 100%;min-width:0;display:grid;gap:6px;padding-top:12px;border-top:1px solid var(--line)}
+.bk-addon-ritual .bk-rit-time>label{font-size:14px;font-weight:600;color:#2B3A30}
+.bk-addon-ritual .bk-rit-selectwrap{position:relative;min-width:0}
+.bk-addon-ritual .bk-rit-selectwrap::after{content:"";position:absolute;right:16px;top:50%;width:9px;height:9px;margin-top:-7px;border-right:2px solid #2B3A30;border-bottom:2px solid #2B3A30;transform:rotate(45deg);pointer-events:none}
+.bk-addon-ritual .bk-rit-select{-webkit-appearance:none;appearance:none;display:block;width:100%;max-width:100%;min-height:48px;margin:0;padding:10px 44px 10px 14px;border:1px solid #2B3A30;border-radius:12px;background:#F4EFE7;color:#2B3A30;font:500 16px var(--body);text-overflow:ellipsis;cursor:pointer}
+.bk-addon-ritual .bk-rit-select.is-empty{color:#6B5E52}
+.bk-addon-ritual .bk-rit-select option{color:#2B3A30;background:#fff}
+.bk-addon-ritual .bk-rit-select:focus,.bk-addon-ritual .bk-rit-select:focus-visible{outline:3px solid #7A5530;outline-offset:2px}
+.bk-addon-ritual .bk-rit-select[aria-invalid="true"]{border-color:#7A5530;box-shadow:inset 0 0 0 1px #7A5530}
+.bk-addon-ritual .bk-rit-err{margin:0;font-size:14px;font-weight:600;color:#7A5530}
+.bk-addons .bk-ritual-msg{margin:10px 0 0}
 .bk-ritual-msg:empty{display:none}
-.bk-ritual [hidden]{display:none}
+.bk-addon-ritual .bk-rit-time[hidden],.bk-addon-ritual .bk-rit-err[hidden],.bk-addon-ritual .bk-rit-annual[hidden]{display:none}
+.bk-addon-ritual .bk-rit-select option:checked{background:#2B3A30 linear-gradient(#2B3A30,#2B3A30);color:#F4EFE7}

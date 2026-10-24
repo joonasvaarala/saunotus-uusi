@@ -73,6 +73,33 @@ export function reconcile(sel, offer, persons) {
   const qty = clampQty(sel.qty, offer, sel.key, persons);
   return qty > 0 ? { key: sel.key, qty, lost: false } : { key: null, qty: 0, lost: true };
 }
+/**
+ * Kassan lisäpalvelukortti (Joonas 24.10.2026): määrävalitsin 0 … yläraja, aika valitaan alasvetovalikosta vasta kun määrä ≥ 1.
+ * Yläraja = min(vuoron henkilömäärä, rituaalin max_persons, valitun ajan vapaat paikat); ennen ajan valintaa suurin yli tarjolla olevien aikojen.
+ */
+export function ritualMax(offer, key, persons) {
+  if (!offer?.times?.length) return 0;
+  const tm = key ? findTime(offer, key) : null;
+  if (key && !tm) return 0;
+  const cap = tm ? tm.max : Math.max(...offer.times.map((x) => x.max));
+  const hi = Math.min(cap, Math.max(1, +persons || 1), offer.max_persons ?? cap);
+  return hi < (offer.min_persons || 1) ? 0 : hi;
+}
+/** Kortin määrä: 0 = ei rituaalia; muuten min_persons … ritualMax (aika voi olla vielä valitsematta → key null). */
+export function cardQty(q, offer, key, persons) {
+  const v = int(q) ?? 0;
+  if (v <= 0) return 0;
+  const hi = ritualMax(offer, key, persons);
+  return hi ? Math.min(Math.max(v, offer.min_persons || 1), hi) : 0;
+}
+/** Kortin valinnan sovitus uuteen vastaukseen: määrä säilyy (rajattuna); aika säilyy jos yhä tarjolla, muuten key = null ja lost. */
+export function reconcileCard(sel, offer, persons) {
+  const want = int(sel?.qty) ?? 0;
+  if (want <= 0) return { key: null, qty: 0, lost: false };
+  if (!offer) return { key: null, qty: 0, lost: true };
+  const key = sel?.key && ritualMax(offer, sel.key, persons) > 0 ? sel.key : null;
+  return { key, qty: cardQty(want, offer, key, persons), lost: !!sel?.key && !key };
+}
 /** p_addons-alkio palvelimelle: aika aikavyöhykkeen kanssa (UTC 'Z'), ei hintaa (palvelin hinnoittelee). */
 export const ritualAddonArg = (sel) => (sel?.key && sel.qty > 0 ? { ritual_start: sel.key, quantity: sel.qty } : null);
 /** Kassan koodin allekirjoitukseen: valinta mukaan → muutos tarkistaa koodin uudelleen. */

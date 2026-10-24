@@ -11,6 +11,7 @@ import { readFileSync, writeFileSync, mkdirSync, cpSync, readdirSync, statSync, 
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, '../..');
@@ -171,6 +172,29 @@ let changed = 0;
   })(OUT);
   if (bad.length) { console.error(`shop build: VIRHE: Johku-linkkejä jäi (${bad.length}):\n  ${[...new Set(bad)].slice(0, 30).join('\n  ')}`); process.exit(1); }
 }
+// Versiotunnus (Joonas 24.10.2026, booking_166-kassa): GitHub Pages välimuistittaa tiedostot ~10 min (max-age=600) → ilman tunnusta selain
+// saattoi yhdistää uuden shop.js:n vanhaan i18n.js:ään ja shop.css:ään (rituaalin otsikko ja tekstit tyhjinä, lista muotoilematta).
+// Kaikki kaupan moduulit, CSS ja JSON saavat SAMAN tunnuksen (kuten hallinta build-pages.mjs:ssä) → yksi instanssi / moduuli ja sama versio.
+const SHOP_VER = '?v=' + ((process.env.GITHUB_SHA || '').slice(0, 10) || createHash('sha256').update(readdirSync(A).filter((n) => /\.(js|css)$/.test(n)).sort().map((n) => readFileSync(join(A, n), 'utf8')).join('\n')).digest('hex').slice(0, 10));
+let nShopImports = 0, nShopRefs = 0;
+for (const n of readdirSync(A)) {
+  if (!n.endsWith('.js') || n === 'config.js') continue;
+  const p = join(A, n), src = readFileSync(p, 'utf8');
+  const out = src.replace(/(\b(?:from|import)\s*\(?\s*)(['"])(\.\/[^'"?]+\.js)\2/g, (_, a, q, u) => { nShopImports++; return `${a}${q}${u}${SHOP_VER}${q}`; });
+  if (out !== src) writeFileSync(p, out);
+}
+(function verHtml(dir) {
+  for (const n of readdirSync(dir)) {
+    const p = join(dir, n);
+    if (statSync(p).isDirectory()) { verHtml(p); continue; }
+    if (!n.endsWith('.html')) continue;
+    const src = readFileSync(p, 'utf8');
+    const out = src.replace(new RegExp(`(${BASE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/booking/[\\w.-]+\\.(?:js|css|json))(")`, 'g'), (_, u, q) => { nShopRefs++; return `${u}${SHOP_VER}${q}`; });
+    if (out !== src) writeFileSync(p, out);
+  }
+})(OUT);
+if (!nShopImports || !nShopRefs) { console.error('shop build: VIRHE: versiotunnus ei tullut kaupan moduuleihin / sivuille'); process.exit(1); }
+for (const n of readdirSync(A)) if (n.endsWith('.js') && /(?:from|import)\s*\(?\s*['"]\.\/[^'"?]+\.js['"]/.test(readFileSync(join(A, n), 'utf8'))) { console.error(`shop build: VIRHE: ${n}: versioimaton relatiivinen import`); process.exit(1); }
 // Varmistus: jokainen kaupan distin relatiivinen import löytyy dististä (sama tarkistus kuin hallinnalla build-pages.mjs:ssä).
 (function chkImports(d) { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) continue; if (!n.endsWith('.js')) continue; for (const m of readFileSync(p, 'utf8').matchAll(/(?:from|import)\s*\(?\s*(['"])(\.{1,2}\/[^'"?]+\.js)(?:\?[^'"]*)?\1/g)) { if (!statSync(resolve(d, m[2]), { throwIfNoEntry: false })) { console.error(`shop build: VIRHE: ${p}: tuotu moduuli puuttuu dististä: ${m[2]}`); process.exit(1); } } } })(A);
-console.log(`shop build ok → ${OUT} (${changed} sivun Johku-linkit korvattu)`);
+console.log(`shop build ok → ${OUT} (${changed} sivun Johku-linkit korvattu; versiotunnus ${SHOP_VER}: ${nShopImports} importtia, ${nShopRefs} sivuviittausta)`);
