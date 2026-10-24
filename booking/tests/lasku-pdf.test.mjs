@@ -105,6 +105,11 @@ test('laskupohja käyttää brändipalettia ja piilottaa puuttuvat pankkitiedot'
   assert.match(render, /qrcode\.stringToBytes = qrcode\.stringToBytesFuncs\["UTF-8"\]/);
   assert.match(render, /wrapPdfText\(inv\.notes, font, 8, 285\)/);
   assert.match(render, /if \(y < 62\) \{\s*addContinuationPage\(\)/s);
+  assert.equal((render.match(/TX\("email\.invoice_pdf\.payable"\)/g) || []).length, 1);
+  const paymentFields = render.slice(render.indexOf('const paymentFields'), render.indexOf('const hasAccount'));
+  assert.doesNotMatch(paymentFields, /invoice_pdf\.(reference|due|payable)|total_gross/);
+  assert.match(render, /wrapPdfText\(buyer\.company_name \|\| buyer\.name, bold, 11\.5, 245\)/);
+  assert.match(render, /wrapPdfText\(value, font, 8\.2, PAGE_W - M - 325\)/);
   assert.match(render, /buildVirtualBarcode/);
   assert.match(render, /buildEpcQrPayload/);
 });

@@ -169,25 +169,43 @@ export async function buildInvoicePdf(inv: any, tfn: TFn = makeT(INVOICE_PDF_TEX
   // Ostaja
   y = 660;
   text(TX("email.invoice_pdf.buyer").toUpperCase(), M, y, 7.5, bold, PDF_BRAND.brown);
-  y -= 17;
-  text(buyer.company_name || buyer.name, M, y, 11.5, bold, PDF_BRAND.green);
-  addressLines(buyer).forEach((value, i) => text(value, M, y - 15 - i * 12, 8.8));
+  const buyerTop = y - 17;
+  let buyerLeftY = buyerTop;
+  const buyerNameLines = wrapPdfText(buyer.company_name || buyer.name, bold, 11.5, 245);
+  buyerNameLines.forEach((value) => {
+    text(value, M, buyerLeftY, 11.5, bold, PDF_BRAND.green);
+    buyerLeftY -= 13;
+  });
+  buyerLeftY -= 2;
+  for (const address of addressLines(buyer)) {
+    for (const value of wrapPdfText(address, font, 8.8, 245)) {
+      text(value, M, buyerLeftY, 8.8);
+      buyerLeftY -= 11;
+    }
+  }
   const buyerRight: [string, string][] = [
     [TX("email.invoice_pdf.business_id"), present(buyer.business_id)],
     [TX("email.invoice_pdf.vat_id"), present(buyer.vat_id)],
     [TX("email.invoice_pdf.einvoice"), [buyer.einvoice_address, buyer.einvoice_operator].map(present).filter(Boolean).join(" / ")],
   ];
+  let buyerRightY = buyerTop;
   buyerRight.forEach(([label, value], i) => {
     if (!value) return;
     if (i === 2) {
-      text(label.toUpperCase(), 325, y - 31, 6.6, bold, PDF_BRAND.brown);
-      text(value, 325, y - 43, 8.2, font, PDF_BRAND.text);
+      buyerRightY -= 3;
+      text(label.toUpperCase(), 325, buyerRightY, 6.6, bold, PDF_BRAND.brown);
+      buyerRightY -= 12;
+      for (const part of wrapPdfText(value, font, 8.2, PAGE_W - M - 325)) {
+        text(part, 325, buyerRightY, 8.2, font, PDF_BRAND.text);
+        buyerRightY -= 11;
+      }
     } else {
-      text(label.toUpperCase(), 325, y - i * 15, 6.6, bold, PDF_BRAND.brown);
-      text(value, 425, y - i * 15, 8.5, bold, PDF_BRAND.text);
+      text(label.toUpperCase(), 325, buyerRightY, 6.6, bold, PDF_BRAND.brown);
+      text(value, 425, buyerRightY, 8.5, bold, PDF_BRAND.text);
+      buyerRightY -= 15;
     }
   });
-  y = 575;
+  y = Math.min(575, buyerLeftY - 16, buyerRightY - 16);
 
   const columns = { desc: M, qty: 314, unit: 405, vat: 463, gross: PAGE_W - M };
   const drawTableHeader = () => {
@@ -277,18 +295,7 @@ export async function buildInvoicePdf(inv: any, tfn: TFn = makeT(INVOICE_PDF_TEX
     [TX("email.invoice_pdf.bank"), present(seller.bank_name)],
     [TX("email.invoice_pdf.iban"), present(seller.iban)],
     [TX("email.invoice_pdf.bic"), present(seller.bic)],
-    [TX("email.invoice_pdf.reference"), present(inv.reference_no)],
-    [TX("email.invoice_pdf.due"), dateText(inv.due_date)],
   ];
-  page.drawRectangle({ x: M, y: paymentTop - 110, width: W, height: 110, color: PDF_BRAND.cream });
-  text(TX("email.invoice_pdf.payment_details").toUpperCase(), M + 12, paymentTop - 19, 7.5, bold, PDF_BRAND.brown);
-  paymentFields.filter(([, value]) => value).forEach(([label, value], i) => {
-    text(label.toUpperCase(), M + 12, paymentTop - 38 - i * 13, 6.5, bold, PDF_BRAND.brown);
-    text(value, M + 97, paymentTop - 38 - i * 13, 8.4, label === "IBAN" ? bold : font, PDF_BRAND.green);
-  });
-  text(TX("email.invoice_pdf.payable").toUpperCase(), 351, paymentTop - 20, 6.8, bold, PDF_BRAND.brown);
-  right(money(inv.total_gross || 0, loc), PAGE_W - M - 12, paymentTop - 39, 14, bold, PDF_BRAND.green);
-
   const hasAccount = isValidIban(seller.iban) && isValidBic(seller.bic);
   const barcode = hasAccount ? buildVirtualBarcode({
     iban: seller.iban,
@@ -304,11 +311,21 @@ export async function buildInvoicePdf(inv: any, tfn: TFn = makeT(INVOICE_PDF_TEX
     reference: inv.reference_no,
     fallbackRemittance: inv.invoice_no,
   }) : null;
-  if (epc && drawQr(page, epc, PAGE_W - M - 58, paymentTop - 103, 52, PDF_BRAND.green)) {
-    right(TX("email.invoice_pdf.scan_to_pay"), PAGE_W - M - 4, paymentTop - 49, 5.8, bold, PDF_BRAND.brown);
+  const visiblePaymentFields = paymentFields.filter(([, value]) => value);
+  const showPaymentBlock = visiblePaymentFields.length > 0;
+  if (showPaymentBlock) {
+    page.drawRectangle({ x: M, y: paymentTop - 92, width: W, height: 92, color: PDF_BRAND.cream });
+    text(TX("email.invoice_pdf.payment_details").toUpperCase(), M + 12, paymentTop - 19, 7.5, bold, PDF_BRAND.brown);
+    visiblePaymentFields.forEach(([label, value], i) => {
+      text(label.toUpperCase(), M + 12, paymentTop - 38 - i * 14, 6.5, bold, PDF_BRAND.brown);
+      text(value, M + 97, paymentTop - 38 - i * 14, 8.4, label === "IBAN" ? bold : font, PDF_BRAND.green);
+    });
+    if (epc && drawQr(page, epc, PAGE_W - M - 58, paymentTop - 83, 52, PDF_BRAND.green)) {
+      right(TX("email.invoice_pdf.scan_to_pay"), PAGE_W - M - 4, paymentTop - 23, 5.8, bold, PDF_BRAND.brown);
+    }
   }
 
-  let footerY = paymentTop - 127;
+  let footerY = showPaymentBlock ? paymentTop - 109 : paymentTop - 12;
   if (barcode) {
     text(`${TX("email.invoice_pdf.quick_payment").toUpperCase()} · ${TX("email.invoice_pdf.virtual_barcode")} v${barcode.version}`, M, footerY, 6.7, bold, PDF_BRAND.brown);
     footerY -= 41;
