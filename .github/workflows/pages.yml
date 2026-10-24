@@ -125,6 +125,8 @@ jobs:
         with:
           node-version: 22
       - run: node --test booking/supabase/functions/send-emails/templates.test.mjs
+      # booking_174: kumppanilahjakortin arvo käsin + erotus maksulinkkinä, kuitti vain kirjanpitoon (pending-import-69). SQL-testi t174 ajetaan psql:llä.
+      - run: node --test booking/tests/lahjakortti-arvo-erotus-174.test.mjs
       # Tuoteviestit (booking_121): ajastus, tuontitiedosto 29, vahvistuksen ohje ja jälkimarkkinoinnin peruutus. TypeScript-mallit → Node 22.
       - run: node --test booking/tests/rich-text.test.mjs booking/tests/viestit.test.mjs
       # Viestin toimitustapa (booking_141): ajastettu lähetys tai ohjeet tilauksen yhteydessä. SQL-testi t141 ajetaan psql:llä (Bottiavustus).

@@ -353,3 +353,30 @@ test('annualCardBlock: puuttuva, peruttu, pois käytöstä tai tyhjä koodi → 
   assert.equal(T.annualCardBlock(CARD('fi', { code: ' ' })), 'vuosikortin koodi puuttuu');
   assert.equal(T.annualCardBlock({ kind: 'order_confirmation' }), null);
 });
+
+// booking_174: kumppanilahjakortin erotus maksulinkillä (email_outbox_claim liittää voucher_difference-lohkon)
+const vdData = (locale) => ({ ...base(locale), payment: { ...base(locale).payment, amount: 30 }, voucher_difference: { total: 80, voucher_value: 50, difference: 30 } });
+test('payment_link + voucher_difference FI: summa, lahjakortin arvo ja erotus, maksulinkki, allekirjoitus Tapio', { skip }, () => {
+  const m = R('payment_link', vdData('fi'), 'fi');
+  assert.ok(m.text.includes('Lahjakorttivarauksesi summa oli 80,00 €, lahjakortin arvo oli 50,00 €. Voit maksaa erotuksen 30,00 € alla olevasta linkistä.'), m.text);
+  assert.ok(m.subject.startsWith('Lahjakorttivarauksesi erotuksen maksu 15321') && !/[<>]/.test(m.subject));
+  assert.ok(m.text.includes(PAY_URL) && m.html.includes(`href="${PAY_URL}"`));
+  assert.ok(m.html.includes('Maksettava erotus') && m.html.includes('30,00 €'));
+  assert.ok(/\nTapio\n/.test(m.text) && m.html.includes('Tapio'));
+  assert.ok(!/undefined|\bnull\b|NaN/.test(m.text + m.html + m.subject));
+});
+test('payment_link + voucher_difference EN', { skip }, () => {
+  const m = R('payment_link', vdData('en'), 'en');
+  assert.ok(m.text.includes('The total of your gift card booking was 80.00 € and the value of the gift card was 50.00 €. You can pay the difference of 30.00 € using the link below.'), m.text);
+  assert.ok(m.subject.startsWith('Pay the difference for your gift card booking 15321'));
+  assert.ok(m.html.includes('Difference to pay') && m.text.includes(PAY_URL) && /\nTapio\n/.test(m.text));
+});
+test('payment_link: puutteellinen voucher_difference → tavallinen maksulinkkiviesti (sama kuin ilman lohkoa)', { skip }, () => {
+  for (const l of ['fi', 'en']) {
+    const plain = R('payment_link', base(l), l);
+    for (const bad of [null, {}, { total: 80, voucher_value: 50 }, { total: 'x', voucher_value: 50, difference: 30 }, { total: 80, voucher_value: 80, difference: 0 }]) {
+      const m = R('payment_link', { ...base(l), voucher_difference: bad }, l);
+      assert.deepEqual(m, plain);
+    }
+  }
+});

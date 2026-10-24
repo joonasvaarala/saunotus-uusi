@@ -2,7 +2,7 @@
 // Tuotannossa tekstit luetaan tietokannasta (booking.site_texts; haku _shared/site_texts.ts); tämä taulukko on sama sisältö (tuotu admin_texts_import:lla,
 // content/site-texts.imported-pr66.json) ja toimii, jos haku epäonnistuu tai rivi puuttuu. Paikkamerkit: {{var:nimi}} (koodi täyttää), {{setting:business_name}}.
 // Muuttujat: name (etunimi), no (tilaus-/kuittinumero), amount (summa), date (päivä), phone, email (yhteystiedot), from (lahjan antaja), who (saaja: nimi, sähköposti),
-//   when (toimituspäivä [+ klo]), time (kellonaika), n (lukumäärä), label (kumppanin nimi), what (kumppani + koodi), code (maskattu koodi).
+//   when (toimituspäivä [+ klo]), time (kellonaika), n (lukumäärä), label (kumppanin nimi), what (kumppani + koodi), code (maskattu koodi), total / voucher / difference (lahjakorttivarauksen summa, lahjakortin arvo, erotus; booking_174).
 // Luokka: protected = yhteystiedot, käyttöohjeet/ehdot, peruutus- ja lunastusviestit (hyväksyjinä Joonas ja Otto, §18.6); muut normal. Teksti on yksirivistä (paitsi missä \n), ei HTML:ää (booking_60 hylkää '<').
 import type { TextTable } from "../_shared/site_texts.ts";
 
@@ -43,6 +43,10 @@ export const EMAIL_TEXTS: TextTable = {
   "email.payment_link.amount_label": { fi: "Maksettava", en: "Amount to pay" },
   "email.payment_link.pay_button": { fi: "Maksa nyt", en: "Pay now" },
   "email.payment_link.sign_name": { fi: "Tapio", en: "Tapio" },
+  // booking_174: kumppanilahjakortin arvo pienempi kuin varauksen summa → erotus maksulinkillä (payload voucher_difference)
+  "email.payment_link.voucher_subject": { fi: `Lahjakorttivarauksesi erotuksen maksu {{var:no}} – ${SN}`, en: `Pay the difference for your gift card booking {{var:no}} – ${SN}` },
+  "email.payment_link.voucher_intro": { fi: "Lahjakorttivarauksesi summa oli {{var:total}}, lahjakortin arvo oli {{var:voucher}}. Voit maksaa erotuksen {{var:difference}} alla olevasta linkistä.", en: "The total of your gift card booking was {{var:total}} and the value of the gift card was {{var:voucher}}. You can pay the difference of {{var:difference}} using the link below." },
+  "email.payment_link.voucher_amount_label": { fi: "Maksettava erotus", en: "Difference to pay" },
   // ---- kuitti / hyvityskuitti ----
   "email.receipt.subject": { fi: `Kuitti {{var:no}} – ${SN}`, en: `Receipt {{var:no}} – ${SN}` },
   "email.receipt.title": { fi: "Kuitti", en: "Receipt" },

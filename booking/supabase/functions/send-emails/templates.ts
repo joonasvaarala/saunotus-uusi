@@ -401,11 +401,15 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const url = safeUrl(d?.payment?.link_url) || orderUrl;
       const amount = eur(d?.payment?.amount, en);
       const expires = d?.payment?.link_expires_at ? day(d.payment.link_expires_at, en) : "";
-      const subject = X("email.payment_link.subject", { no });
-      const intro = X("email.payment_link.intro", { amount });
+      // booking_174: kumppanilahjakortin erotus (email_outbox_claim → voucher_difference {total, voucher_value, difference}); muuten tavallinen maksulinkki
+      const vd = d?.voucher_difference;
+      const vdOk = !!vd && [vd.total, vd.voucher_value, vd.difference].every((v: unknown) => v != null && v !== "" && Number.isFinite(Number(v))) && Number(vd.difference) > 0;
+      const vdVars = vdOk ? { no, total: eur(vd.total, en), voucher: eur(vd.voucher_value, en), difference: eur(vd.difference, en) } : null;
+      const subject = vdVars ? X("email.payment_link.voucher_subject", vdVars) : X("email.payment_link.subject", { no });
+      const intro = vdVars ? X("email.payment_link.voucher_intro", vdVars) : X("email.payment_link.intro", { amount });
       const exp = expires ? X("email.payment_link.expires", { date: expires }) : "";
       const title = X("email.payment_link.title");
-      const lab = X("email.payment_link.amount_label");
+      const lab = vdVars ? X("email.payment_link.voucher_amount_label") : X("email.payment_link.amount_label");
       const pay = X("email.payment_link.pay_button");
       const linkSign = `${X("email.common.closing")}\n${X("email.payment_link.sign_name")}\n${SELLER}`;
       const linkTail = `${p(esc(contact), `color:${MUTED};font-size:13px`)}${p(esc(linkSign).replace(/\n/g, "<br>"))}`;
