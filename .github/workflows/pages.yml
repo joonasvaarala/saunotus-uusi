@@ -172,6 +172,11 @@ jobs:
       # Pidon aikana paikka ei ole julkisessa myynnissä (_pool_peak vähentää voimassa olevat pidot; haltija, henkilökunta ja service_role ohittavat):
       # t139_waitlist_hold_off_sale.sql samassa paikallisessa ajossa.
       - run: node --test booking/tests/jonotuslista-yksi-pito.test.mjs
+      # booking_148: jonotuslistan henkilömäärä palvelutyypin mukaan (schedule_rules.mode = 'exclusive' → yksityisvuoro, ei henkilömäärää;
+      # kb.products.category = 'event' → tapahtuma, 1..kapasiteetti; muuten yleinen vuoro 1–6). 48 h -sääntö ja 120 min pito ennallaan.
+      # Tekstit content/site-texts.pending-import-48.json. t148 (booking/supabase/tests/waitlist/t148_waitlist_party_size_by_type.sql)
+      # ajetaan paikallisessa PG17:ssä t139:n tapaan (työnkulussa ei ole Postgresia).
+      - run: node --test booking/tests/jonotuslista-ryhmakoko-tyyppi.test.mjs
       # booking_133: päivänippu + kuukauden saatavuus yhdellä RPC:llä (SQL-vertailu booking_125:een: booking/tests/paiva-ja-saatavuus-nopeutus-regressio.sql, ajetaan testikannassa)
       - run: node --test booking/tests/paiva-ja-saatavuus-nopeutus.test.mjs
       # Paketti 05 / booking_138: hallinnan päänavigaatio (Tilaukset + Varaukset-välilehti, vanhat #/varaukset-linkit), yläpalkin pikahaku ja
@@ -198,12 +203,22 @@ jobs:
       # Paketti 10 jatko / booking_143: 10 merkin satunnainen vuosikorttikoodi, rate limit ilman IP:tä, vuosikorttivarauksen alennus, peruutus palauttaa koodin käytön.
       # t143 (booking/supabase/tests/discounts/t143_annual_code_hardening.sql) ajetaan paikallisessa PG17:ssä t142:n tapaan (työnkulussa ei ole Postgresia).
       - run: node --test booking/tests/vuosikortti-koodi-kovennus.test.mjs
+      # Lahjakorttilista (booking_145): haku myös tuotteella, aakkosjärjestys, 20 kerrallaan, Johku-kortit samassa listassa. SQL-testi t145 ajetaan paikallisessa PG17:ssä.
+      - run: node --test booking/tests/lahjakorttilista.test.mjs
+      - run: node --test booking/tests/giftcards.test.mjs
       # Paketti 11 / booking_144: Schema.org-lisäykset, vanhojen osoitteiden noindex-ohjaukset, evästeetön kävijämittaus (OLETUKSENA POIS, ei testisivulla), hallinnan Kävijät-välilehti.
       # SQL: booking/supabase/tests/analytics/t144_cookieless_analytics.sql ajetaan paikallisessa PG17:ssä (koko ketju + rollback + uudelleenajo).
       - run: node --test booking/tests/seo-ja-kavijatilastot.test.mjs
       # booking_146: vuosikortin koodi sähköpostiin (annual_card_code, kerran per kortti, ei WhatsAppia) ja näkyviin kassalla (iso koodi, kopiointi, voimassaolo, sähköpostin tila).
       # t146 (booking/supabase/tests/discounts/t146_annual_card_email.sql) ajetaan paikallisessa PG17:ssä t143:n tapaan (työnkulussa ei ole Postgresia). TypeScript-pohja → Node 22.
       - run: node --test booking/tests/vuosikortti-sahkoposti.test.mjs
+      # booking_150: kävijämittauksen kovennus (IP-raja + päiväkatto, 13 kk säilytys pg_cronilla, tunnetut polut, tiukemmat UTM:t, lähde palvelimella, kooste GROUP BY:llä, ei fetch-käärettä).
+      # SQL: booking/supabase/tests/analytics/t150_analytics_hardening.sql ajetaan paikallisessa PG17:ssä (koko ketju + rollback + uudelleenajo).
+      - run: node --test booking/tests/kavijamittaus-kovennus.test.mjs
+      # booking_149: asiakkaan peruutuspyyntö (ja sen kautta hyvitys) vain, jos vuoron alkuun on vähintään customer_change_hours_before (48) h;
+      # palvelin pakottaa (cancel_too_late), tilaussivu piilottaa lomakkeen ja näyttää puhelinnumeron; hallinnan peruutus/hyvitys aina. Tekstit pending-import-49.
+      # t149 (booking/supabase/tests/peruutus/t149_customer_cancel_48h.sql) ajetaan paikallisessa PG17:ssä t143:n tapaan (työnkulussa ei ole Postgresia).
+      - run: node --test booking/tests/peruutusraja-48h.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

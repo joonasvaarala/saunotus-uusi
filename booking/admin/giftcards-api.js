@@ -10,7 +10,7 @@ export const GC_RPC = {
   resolve: 'public_resolve_gift_code',   // §13.12: yksi koodikenttä (anon+authenticated saavat kutsua): kind 'own' | 'unknown' (+ suggested_source). Hallinnassa vain luokitteluun; kirjaukset menevät admin_*-RPC:illä.
 };
 export const GC_STATUSES = ['active', 'used', 'expired', 'cancelled', 'pending_verification', 'pending_payment'];
-export const GC_SORTS = ['created_desc', 'created_asc', 'valid_to_asc', 'valid_to_desc', 'balance_desc', 'balance_asc', 'initial_desc', 'initial_asc'];
+export const GC_SORTS = ['created_desc', 'created_asc', 'name_asc', 'valid_to_asc', 'valid_to_desc', 'balance_desc', 'balance_asc', 'initial_desc', 'initial_asc'];
 export const GC_PAY_METHODS = ['card_terminal', 'mobilepay', 'bank_transfer', 'invoice', 'pay_later', 'other'];   // admin_create_gift_card: p_payment_method. Käteinen ei ole käytössä (booking_119).
 export const GC_GREETING_MAX = 300;
 

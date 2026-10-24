@@ -493,7 +493,10 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const subject = X("email.waitlist.subject");
       const title = X("email.waitlist.title");
       const intro = X("email.waitlist.intro");
-      const session = X("email.waitlist.session", { what: String(w.product_name ?? "").trim(), when: dt(w.starts_at, en), n: String(Number(w.persons) || 1) });
+      // booking_148: yksityisvuoron jonovarauksella ei ole henkilömäärää (payload persons null) → rivi ilman henkilömäärää.
+      const session = w.persons == null
+        ? X("email.waitlist.session_private", { what: String(w.product_name ?? "").trim(), when: dt(w.starts_at, en) })
+        : X("email.waitlist.session", { what: String(w.product_name ?? "").trim(), when: dt(w.starts_at, en), n: String(Number(w.persons) || 1) });
       const notice = X("email.waitlist.notice");
       const bookLabel = X("email.waitlist.book_button");
       const leaveLead = X("email.waitlist.leave");

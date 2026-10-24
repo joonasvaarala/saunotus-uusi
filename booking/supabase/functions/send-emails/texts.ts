@@ -163,6 +163,7 @@ export const EMAIL_TEXTS: TextTable = {
   "email.waitlist.title": { fi: "Paikka vapautui", en: "A place is available" },
   "email.waitlist.intro": { fi: "Vuorolle, jonka jonotuslistalle liityit, on vapautunut paikka.", en: "A place has become available on the session you joined the waiting list for." },
   "email.waitlist.session": { fi: "{{var:what}}, {{var:when}}, {{var:n}} hlö", en: "{{var:what}}, {{var:when}}, {{var:n}} guests" },
+  "email.waitlist.session_private": { fi: "{{var:what}}, {{var:when}}", en: "{{var:what}}, {{var:when}}" },
   "email.waitlist.notice": { fi: "Tämä ilmoitus ei varaa paikkaa. Paikat täyttyvät varausjärjestyksessä, joten varaa pian, jos vuoro sopii sinulle.", en: "This message does not reserve a place. Places are filled in booking order, so book soon if the session suits you.", cls: "protected" },
   "email.waitlist.book_button": { fi: "Varaa paikka", en: "Book your place" },
   "email.waitlist.leave": { fi: "Etkö enää tarvitse ilmoituksia tästä vuorosta?", en: "No longer need notifications for this session?" },
