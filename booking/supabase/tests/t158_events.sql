@@ -4,9 +4,16 @@
 -- G myynti kiinni, H myynti auki: oma lippu, kapasiteetti, jono, has_reservations, I ristiriidat (conflict + details), J suojaus (event_managed),
 -- K kopiot, L koulutus ei kaupassa mutta varaa resurssit, M poisto, N Lovi-sääntö, O migraation uudelleenajo, P rollback (md5) + uudelleenajo.
 -- Ajo (psql, paikallinen PG17 tai testikanta, migraatiot ja fixtures/10_test_helpers.sql ajettu):
---   cd booking/supabase/tests && psql -X -v ON_ERROR_STOP=0 -f t158_events.sql
+--   cd booking/supabase/tests && psql -X -v ON_ERROR_STOP=0 -f t158_events.sql                 (istunnon TimeZone = UTC, kuten tuotannossa)
+--   cd booking/supabase/tests && psql -X -v ON_ERROR_STOP=0 -v tz=Europe/Helsinki -f t158_events.sql   (sama Helsingin ajassa; molempien on mentävä läpi)
+-- Testipäivät kiinteät (ma 22.2.2027 ja ma 1.3.2027), jotta ne eivät osu oikeisiin varauksiin (14.11.2026 törmäsi tuotannossa Savusaunan varaukseen).
 -- Kaikki yhdessä transaktiossa; lopussa tahallinen poikkeus "TESTRESULT pass=… fail=…" kumoaa kaiken (myös rollbackin). Ei tuotantoon.
+\if :{?tz}
+\else
+\set tz UTC
+\endif
 begin;
+set local timezone = :'tz';
 set local lock_timeout = '3s';
 set local statement_timeout = '180s';
 create temp table t158_r(ok boolean, label text);
@@ -40,12 +47,15 @@ create temp table t158_before as select
   (select count(*) from pg_constraint where conrelid = 'booking.schedule_rules'::regclass and conname like 'schedule_rules_%kind%') n_con;
 \ir ../migrations/20261024300000_booking_158_events.sql
 
+-- kiinteät testipäivät (helmi–maaliskuu 2027) varaushorisontin sisään vain tässä transaktiossa (tuotannossa 180 pv)
+update booking.settings set value = '400'::jsonb where key = 'booking_horizon_days';
+
 do $t$
 declare
   u_mgr uuid := test.mk_staff('t158-mgr@example.test', 'manager');
   u_staff uuid := test.mk_staff('t158-staff@example.test', 'staff');
-  d date := test.next_dow(1, 10);           -- maanantai (Miesten sauna ma 16–19 savusaunassa)
-  d2 date := test.next_dow(1, 10) + 7;
+  d date := date '2027-02-22';              -- maanantai (Miesten sauna ma 16–19 savusaunassa); kiinteä, ei oikeiden varausten päälle
+  d2 date := date '2027-03-01';
   v_savu bigint := (select id from booking.resources where code = 'savusauna');
   v_rauni bigint := (select id from booking.resources where code = 'rauni');
   v_person bigint := (select id from booking.resources where code = 'saunottaja');
@@ -233,7 +243,16 @@ begin
     jsonb_build_object('resource_id', v_savu, 'starts_at', to_char(d + 3, 'YYYY-MM-DD') || 'T09:00:00+03:00', 'ends_at', to_char(d + 3, 'YYYY-MM-DD') || 'T18:00:00+03:00'),
     jsonb_build_object('resource_id', v_savu, 'starts_at', to_char(d + 5, 'YYYY-MM-DD') || 'T09:00', 'ends_at', to_char(d + 5, 'YYYY-MM-DD') || 'T16:00')));
   perform pg_temp.ck((res -> 1 ->> 'start_day')::int = 2 and (res -> 1 ->> 'start_clock') = '09:00', 'L2: ISO-aika muunnetaan päivä+kello');
+  -- L2b: ilman poikkeamaa annettu aika = Helsingin aika istunnon TimeZonesta riippumatta; oma poikkeama säilyy (09:00+03:00 = 08:00 talviaikaan)
+  perform pg_temp.ck((res -> 1 ->> 'end_clock') = '16:00' and (res -> 0 ->> 'start_day')::int = 0 and (res -> 0 ->> 'start_clock') = '08:00'
+                     and (res -> 0 ->> 'end_clock') = '17:00'
+                     and (res -> 1 ->> 'starts_at')::timestamptz = timestamptz '2027-02-27 09:00:00+02', 'L2b: aikavyöhyke: ilman poikkeamaa Helsinki (' || current_setting('TimeZone') || '), poikkeama säilyy');
   perform test.logout();
+  perform pg_temp.ck(booking._event_local_ts('2027-02-22T09:00') = timestamp '2027-02-22 09:00' and booking._event_local_ts('2027-02-22 09:00:00') = timestamp '2027-02-22 09:00'
+                     and booking._event_local_ts('2027-02-22T07:00:00Z') = timestamp '2027-02-22 09:00'
+                     and booking._event_local_ts('2027-02-22T07:00:00.000Z') = timestamp '2027-02-22 09:00' /* hallinnan UI: toISOString() */ and booking._event_local_ts('2027-07-01T09:00+00:00') = timestamp '2027-07-01 12:00'
+                     and booking._event_local_ts('2027-07-01T09:00') = timestamp '2027-07-01 09:00'
+                     and pg_temp.err($q$select booking._event_local_ts('2027-02-22T09:00 UTC')$q$) ->> 'code' <> 'ok', 'L2c: _event_local_ts (talvi/kesä, Z, +00:00, vyöhykenimi hylätään)');
   update booking.product_config set bookable = true, shop_visible = true where product_id = 36;
   perform pg_temp.ck(not exists (select 1 from jsonb_array_elements(booking.public_catalog()) x where (x ->> 'id')::int = 36), 'L3: koulutus ei näy kaupassa (kanava widget)');
   perform pg_temp.ck(not exists (select 1 from jsonb_array_elements(booking.public_events(null, 'shop')) x where (x ->> 'product_id')::int = 36)
@@ -304,6 +323,6 @@ end $t$;
 do $t$
 begin
   perform pg_temp.ck(to_regclass('booking.event_resource_blocks') is not null and to_regprocedure('booking.public_events(date, text)') is not null, 'P5: migraatio ajettavissa uudelleen rollbackin jälkeen');
-  raise exception 'TESTRESULT pass=% fail=% :: %', (select count(*) from t158_r where ok), (select count(*) from t158_r where not ok),
+  raise exception 'TESTRESULT pass=% fail=% tz=% :: %', (select count(*) from t158_r where ok), (select count(*) from t158_r where not ok), current_setting('TimeZone'),
     coalesce((select string_agg(label, ' | ') from t158_r where not ok), 'ALL OK');
 end $t$;

@@ -250,6 +250,8 @@ address{font-style:normal;background:var(--card);border:1px solid var(--line);bo
 @supports not selector(:has(*)){.rv.long .rv-q p{display:block;overflow:visible}.rv-more{display:none}}
 @media (max-width:720px){.rv-grid{grid-template-columns:1fr}.rv{padding:20px}}
 /* chips (book) */
+.shopgrps{display:grid;grid-template-columns:repeat(5,1fr);gap:22px;margin-top:8px}.shopgrp h3{font-family:var(--head);font-size:24px;color:var(--ink);margin:0 0 10px}.shopgrp ul{list-style:none;padding:0;margin:0}.shopgrp li{margin:0 0 8px}.shopgrp a{color:var(--green);text-decoration:underline;text-underline-offset:3px}
+@media (max-width:1100px){.shopgrps{grid-template-columns:repeat(2,1fr)}}@media (max-width:640px){.shopgrps{grid-template-columns:1fr}}
 .chips{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:34px 0 0;padding:0;list-style:none}
 .chips .btn{background:var(--green)}
 /* terms */

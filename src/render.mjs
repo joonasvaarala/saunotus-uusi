@@ -6,6 +6,7 @@ import { articlesNav, homeSection } from './articles/runtime.mjs';
 import { tx } from './site-texts.mjs';
 import { seoSchemaForPage, jsonLdScript } from './seo-enhance.mjs';
 import { privacyAnalyticsHtml } from './privacy-analytics.mjs';
+import { shopProductsHtml } from './shop-products.mjs';
 import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
 import { selectShopEvents, shopEventsHtml, shopHash } from './event-cards.mjs';
 import {
@@ -320,7 +321,9 @@ export function home(lang, opt = {}) {
   const feat = sec('', `${head('', d.featured.title, '', { orn: true })}<ul class="cards five">${d.featured.items.map((it) => card({ kb: it.kb, img: it.img, show: it.show, exact: it.exact, over: it.over ? Object.fromEntries(Object.entries(it.over).map(([k, v]) => [k, { [lang]: v }])) : {}, note: it.note, extra: false, fi: { kicker: it.pill, title: it.title, text: it.text, cta: it.cta }, en: { kicker: it.pill, title: it.title, text: it.text, cta: it.cta } }, lang, { url: it.to ? link(it.to, lang, 'home') : undefined, sizes: '(min-width:1100px) 220px, (min-width:640px) 45vw, 100vw' }).replace(/ target="_blank"/, '').replace(NEW(lang), '')).join('')}</ul>`);
   const a = d.about;
   const about = sec('tint', `<div class="about"><div><p class="kicker">${e(a.kicker)}</p><h2 class="sec-title">${e(a.title)}</h2><p>${e(a.text)}</p><ul class="elements">${a.elements.map((x) => `<li>${icon(x.icon, 32)}<b>${e(x.title)}</b>${e(x.text)}</li>`).join('')}</ul><a class="btn light" href="${e(site.trainingUrl)}" rel="noopener">${e(a.cta)}${NEW(lang)}</a></div><div class="im">${pic(a.img, lang, { sizes: '(min-width:900px) 560px, 100vw' })}</div></div>`);
-  const ev = sec('', `${head('', d.events.title, u.eventsIntro, { orn: true })}${eventsHtml(lang, d.events.empty)}<p class="center" style="margin-top:28px"><a class="btn light sm" href="${e(jk('events', lang))}" target="_blank" rel="noopener">${e(u.allEvents)}${NEW(lang)}</a></p>`, 'tapahtumat');
+  const ev = sec('', `${head('', d.events.title, u.eventsIntro, { orn: true })}${eventsHtml(lang, d.events.empty)}<p class="center" style="margin-top:28px"><a class="btn light sm" href="${pageHref('book', lang)}">${e(u.allEvents)}</a></p>`, 'tapahtumat');
+  // Varaa verkosta: kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille (src/shop-products.mjs)
+  const shopList = sec('tint', shopProductsHtml(lang, { esc: e, pageHref, head, product: (s) => kb.products.find((x) => x.slug === s) || null }), 'varaa-verkosta');
   const co = d.company;
   const comp = sec('tint', `<div class="company"><div><p class="kicker">${e(co.kicker)}</p><h2 class="sec-title">${e(co.title)}</h2><p>${e(co.text)}</p><div class="actions" style="display:flex;gap:12px;flex-wrap:wrap">${mailBtn(co.cta, co.mailSubject)}<a class="btn light" href="${pageHref('companies', lang)}">${e(co.cta2)}</a></div></div><div class="im">${pic(co.img, lang, { sizes: '(min-width:900px) 520px, 100vw' })}</div></div>`);
   const s = d.story;
@@ -328,7 +331,7 @@ export function home(lang, opt = {}) {
   const pre = heroPreload();
   // Saunatietoa-osio: esirenderöity buildissa (src/articles/pages.mjs homeSectionHtml); tyhjä merkkijono = ei artikkeleita / haku epäonnistui → osio pois kokonaan
   const arts = opt.articlesHtml ?? homeSection(lang);
-  const body = (opt.previewNote ? `<p class="prev-note" role="note">${e(opt.previewNote)}</p>` : '') + hero + tiles + wk + ritual + feat + arts + reviewsSection(lang) + about + ev + comp + story;
+  const body = (opt.previewNote ? `<p class="prev-note" role="note">${e(opt.previewNote)}</p>` : '') + hero + tiles + wk + shopList + ritual + feat + arts + reviewsSection(lang) + about + ev + comp + story;
   return layout({ lang, key: 'home', meta: opt.meta || d.meta, preload: pre, body, extraCss: arts ? homeArticlesCss : '', seo: opt.seo || null });
 }
 

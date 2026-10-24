@@ -14,6 +14,8 @@ myynti siirtyy omaan kauppaan 1.11.2026 → ominaisuus valmiina, **myynti pois p
   Oletusotsikko `DD.MM.YYYY klo HH.MI`. Yli vuorokauden kesto vain koulutuksille (`multi_day_training_only`).
 - **Resurssivaraus** = `booking.event_resource_blocks` (kerran sisällä). Ajoitus joko suhteellinen (`offset_min` + `minutes` kerran alusta)
   tai kellonaika (`starts_at`/`ends_at` HH:MM tai ISO; tallennetaan päivä + kello suhteessa kerran päivään).
+  ISO-aika ilman poikkeamaa (`2027-02-22T09:00`) tulkitaan aina Europe/Helsinki-ajaksi istunnon TimeZonesta riippumatta
+  (`booking._event_local_ts`; tuotannon istunto on UTC). Poikkeamallinen aika (`…+02:00`, `…Z`) säilyttää poikkeamansa. Vyöhykenimet hylätään.
   Tilan `exclusive`-varaus materialisoituu heti `booking.space_blocks`-riviksi (`event_block_id`), vaikka lippuja ei olisi myyty.
   Kerran passivointi tai poisto poistaa sulut, uudelleenaktivointi luo ne. Oma lippu ohittaa oman kerran sulut.
   Saunottajan (person) ja shared-tilan varaukset tallennetaan, mutta niitä ei materialisoida (päätös 3: hoitojen logiikka ennallaan).
@@ -78,7 +80,9 @@ Rollback poistaa tapahtumien resurssivaraukset ja niiden sulut pysyvästi; tapah
 
 ## Testit
 
-`psql -X -d <testikanta> -f supabase/tests/t158_events.sql` (hakemistosta `supabase/tests`, fixtures ladattu) → `TESTRESULT pass=87 fail=0`.
+`psql -X -d <testikanta> -f supabase/tests/t158_events.sql` (hakemistosta `supabase/tests`, fixtures ladattu) → `TESTRESULT pass=89 fail=0 tz=UTC`;
+sama `-v tz=Europe/Helsinki` → `pass=89 fail=0 tz=Europe/Helsinki`. Istunnon TimeZone on oletuksena UTC kuten tuotannossa.
+Testipäivät ovat kiinteät (ma 22.2.2027 ja ma 1.3.2027, horisontti nostetaan testitransaktiossa), jotta ne eivät osu oikeisiin varauksiin.
 Testi ajaa migraation uudelleen, rollbackin kahdesti (md5-tarkistus) ja migraation uudelleen.
 
 ## Käyttöliittymä (PR cursor/tapahtumat-158-ui)
