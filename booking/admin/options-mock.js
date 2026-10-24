@@ -727,7 +727,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     admin_product_create: (a) => {
       need('catalog.edit');
       const d = a.p_data || {};
-      const allowed = new Set(['name', 'name_en', 'description', 'description_en', 'price', 'price_text', 'vat_rate', 'category', 'active', 'age_restricted']);
+      const allowed = new Set(['name', 'name_en', 'description', 'description_en', 'short_description', 'short_description_en', 'price', 'price_text', 'vat_rate', 'category', 'active', 'age_restricted']);
       for (const k of Object.keys(d)) if (!allowed.has(k)) throw err('unknown_field', 'Kenttää ei saa muokata: ' + k);
       const name = String(d.name ?? '').trim();
       if (!name || name.length > 200) throw err('invalid_name', 'Nimi ei voi olla tyhjä');
@@ -762,6 +762,8 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
         id, business_id: st.businessId, slug, name, name_en: nameEn,
         description: String(d.description || '').trim() || null,
         description_en: String(d.description_en || '').trim() || null,
+        short_description: String(d.short_description || '').trim() || null,   // booking_156 (mock ei tarkista allowlistia; kanta tarkistaa)
+        short_description_en: String(d.short_description_en || '').trim() || null,
         category, price, price_type: 'per_unit', price_text: priceText, vat_rate: vat, active,
         external_system: null, external_id: null,
         config: {

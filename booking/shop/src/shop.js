@@ -11,6 +11,7 @@ import { createWaitlistView } from './waitlist-ui.js';
 import { visibleWaitlistSlots, fullyBooked, hasWaitlistSlots } from './waitlist-logic.js';
 import { loadProducts as loadTreatmentProducts, splitCatalog, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
 import { pickCatalog } from './catalog-audience.js';
+import { heroShort, cardShort, fallbackDesc } from './short-desc.js';
 import { createTreatmentViews } from './treatment-ui.js';
 import { createTexts, loadShopTexts, applyShopTexts } from './site-texts.js';
 import { fmtMinutes } from './site-texts-logic.js';
@@ -150,14 +151,7 @@ const dayState = (rows) => (!rows?.length ? 'none' : rows.some((r) => r.status =
 
 // ---- sivun yläbanneri (hero): tuotesivulla ja varauslomakkeella tuotteen kuva taustana + otsikko = tuotteen nimi + tiivis kuvaus ----
 // Sivun oma hero (<section class="hero page">) on build-aikaista HTML:ää: oletus palautetaan kaikissa muissa näkymissä. Ei erillistä hero-kenttää: sama tuotekuva (object-fit: cover, keskitetty).
-// Lyhyt kuvaus: ensimmäinen virke (ei katkaista kellonaikojen pisteistä "16.30"), enintään ~130 merkkiä sanarajalta. Pitkä kuvaus pysyy sisältöosassa.
-const shortDesc = (p) => {
-  const raw = pdesc(p) || '';
-  const d = (isRichHtml(raw) ? visibleText(raw) : raw).replace(/\s+/g, ' ').trim(); if (!d) return '';
-  const m = d.match(/^.{20,}?[.!?](?=\s+[A-ZÅÄÖ])/u); let x = m ? m[0] : d;
-  if (x.length > 130) x = `${x.slice(0, 130).replace(/\s+\S*$/, '')}…`;
-  return x;
-};
+// Lyhyt kuvaus (booking_156): tuotteen oma short_description(_en) korvaa johdetun otteen; tyhjä → ensimmäinen virke kuvauksesta (heroShort, short-desc.js). Pitkä kuvaus pysyy sisältöosassa.
 const hero = { def: null };
 function setHero(p) {
   const el = document.querySelector('main .hero.page'); document.documentElement.classList.remove('bk-hero-wait');
@@ -174,15 +168,16 @@ function setHero(p) {
   if (cur !== next) cur.replaceWith(next);
   el.classList.toggle('has-prod', !!i);
   h1.textContent = p ? pname(p) : hero.def.h1;
-  if (sub) { sub.textContent = p ? shortDesc(p) : hero.def.sub; sub.hidden = !sub.textContent; }
+  el.querySelector('.bk-hero-short')?.remove();
+  if (sub) {
+    const hs = p ? heroShort(h, p, S.lang, pdesc(p)) : { node: null, text: hero.def.sub };
+    sub.textContent = hs.text; sub.hidden = !sub.textContent;
+    if (hs.node) sub.after(hs.node);   // rikas lyhyt kuvaus: puhdistettu <div class="bk-hero-short bk-rich"> (ei <p>:n sisään)
+  }
 }
 
-// Kortin ote: pelkkä teksti leikataan kuten ennen (ei välilyöntien tiivistystä). Rikas HTML tiivistetään näkyväksi tekstiksi, jotta tagi ei katkea.
-function cardExcerpt(p) {
-  const raw = pdesc(p) || '';
-  const plain = isRichHtml(raw) ? visibleText(raw).replace(/\s+/g, ' ').trim() : raw;
-  return plain.slice(0, 170) + (plain.length > 170 ? '…' : '');
-}
+// Kortin kuvaus (booking_156): lyhyt kuvaus puhdistettuna, tyhjä → johdettu ote 170 merkkiä (short-desc.js).
+const cardExcerpt = (p) => cardShort(h, p, S.lang, pdesc(p));
 // ---- näkymä 1: tuotelista ----
 function viewList(query) {
   const cat = [...state.catalog, ...state.treatments];
@@ -193,7 +188,7 @@ function viewList(query) {
   const cards = h('ul', { class: 'bk-cards' }, list.map((p) => p.treatment ? tv.card(p) : h('li', { class: 'bk-card' },
     pimg(p, 'card-img'),
     h('h3', {}, h('a', { href: bk(`/tuote/${p.slug}`), text: pname(p) })),
-    h('p', { class: 'bk-desc', text: cardExcerpt(p) }),
+    cardExcerpt(p),
     h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), pdur(p) ? ` · ${pdur(p)}` : ''),
     h('a', { class: 'btn sm', href: bk(`/tuote/${p.slug}`) }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) })))));
   const annual = annualPromo();
@@ -428,7 +423,7 @@ async function viewProduct(slug, dateStr, query) {
   if (!p) {
     const st = (await fetch(S.staticProductsUrl).then((r) => r.json()).catch(() => ({})))[slug];
     mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })),
-      h('h2', { text: st ? st.name : t.unknownProduct }), st ? h('p', { text: st.description || '' }) : null,
+      h('h2', { text: st ? st.name : t.unknownProduct }), st ? fallbackDesc(h, st, S.lang) : null,   // kuvaus voi olla rikasta: puhdistettuna (rich-view.js), ei raakana tekstinä
       st ? h('div', { class: 'bk-notice' }, h('p', { text: t.contactUs }), phoneBox()) : null);
     focusTop(); return;
   }
