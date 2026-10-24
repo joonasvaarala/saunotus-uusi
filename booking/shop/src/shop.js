@@ -26,6 +26,7 @@ import { isRichHtml } from './rich-text.js';
 import { visibleText, richHost } from './rich-view.js';
 import { revealForm, revealIfHidden } from './gift-ui.js';
 import { normalizeCode, quoteSignature, isAnnualQuote, isCodeError } from './discount-code-logic.js';
+import { createQuietOfferCache, indexOffers, findOffer, dayMaxPercent, productMaxPercent, quietPrices, quietCheckout, pctText, fillText, quietWindow, offerKey } from './quiet-offers-logic.js';
 import { eventText, occurrenceText, occurrenceLabel, findEvent, saleState, upcoming, isMultiDay } from './event-sale.js';
 
 const S = window.BOOKING_SHOP;                   // build-aikainen konfiguraatio (kieli, polut, ei-verkossa-varattavat tuotteet)
@@ -73,6 +74,49 @@ const priceText = (p) => {
 // Päivänäkymän ryhmäjärjestys: yksityisvuorot ensin, sitten yleiset vuorot (hoidot ja rituaalit erillisenä osiona näiden jälkeen).
 const DAY_KIND_ORDER = ['yksityinen', 'yleinen', 'muut'];
 const kindOf = (p) => (p.treatment ? 'hoito' : p.sale_kind === 'public_shift' ? 'yleinen' : p.sale_kind === 'private_shift' ? 'yksityinen' : 'muut');
+
+// ---- hiljaisten aikojen ale (booking_162) ----
+// public_quiet_offers palauttaa tyhjät vuorot alennettuina (palvelin päättää ja lukitsee hinnan varauksessa; pois päältä → []).
+// Näkymät merkitsevät solmut data-q*-attribuuteilla ja quietDecorate() täydentää ne, kun tarjoukset on haettu (MutationObserver:
+// myös myöhemmin piirretyt kalenterit ja vuorolistat). Ei tarjouksia tai virhe → näkymä pysyy täsmälleen ennallaan.
+const quietCache = createQuietOfferCache({ rpc, audience: S.audience === 'business' ? 'business' : 'consumer' });
+const quietIdx = async () => { const from = todayHel(); return indexOffers(await quietCache.load(from, quietWindow(from))); };
+const qPct = (pct) => fillText(t.quietBadge, { pct: pctText(pct, S.lang) });
+const qBadge = (pct) => h('span', { class: 'bk-quiet-badge', 'aria-hidden': 'true', text: qPct(pct) });
+const qAttrs = (ok, p, r, kind) => (ok && r.rule_id != null && r.starts_at ? { 'data-qk': offerKey(p.id, r.rule_id, r.starts_at), 'data-qkind': kind } : {});
+function quietPriceNode(el, o, kind) {
+  const q = quietPrices(o), m = o.price_mode;
+  const sr = h('span', { class: 'sr', text: fillText(t.quietSr, { pct: pctText(q.pct, S.lang), was: money(q.was), now: money(q.now) }) });
+  el.classList.add('bk-quiet');
+  if (m === 'per_person') { el.append(' ', qBadge(q.pct), sr); return; }   // henkilöhinta: vain merkki (palvelin laskee summan)
+  const now = m === 'fixed' ? money(q.now) : kind === 'day' ? `${t.from} ${money(q.now)}`
+    : `${money(q.now)}${o.included_persons != null && q.extraNow != null ? ` (${t.included(o.included_persons)}, ${t.extra(money(q.extraNow))})` : ''}`;
+  el.replaceChildren(qBadge(q.pct), ' ', h('del', { 'aria-hidden': 'true', text: money(q.was) }), ' ', h('span', { class: 'bk-quiet-now', 'aria-hidden': 'true', text: now }), sr);
+}
+async function quietDecorate() {
+  const nodes = [...root.querySelectorAll('[data-qk]:not([data-qdone]), [data-qmark]:not([data-qdone])')];
+  if (!nodes.length) return;
+  const idx = await quietIdx();
+  if (!idx.byKey.size) return;
+  let marked = false;
+  for (const el of nodes) {
+    if (!el.isConnected || el.dataset.qdone) continue;
+    el.dataset.qdone = '1';
+    if (el.dataset.qk) { const o = idx.byKey.get(el.dataset.qk); if (o) quietPriceNode(el, o, el.dataset.qkind); continue; }
+    const mark = el.dataset.qmark;
+    const pct = mark === 'list' ? productMaxPercent(idx, el.dataset.qp) : dayMaxPercent(idx, el.dataset.qday, el.dataset.qp ?? null);
+    if (!(pct > 0)) continue;
+    const label = `${t.quietDay} ${qPct(pct)}`;
+    if (mark === 'strip' || mark === 'cal') {
+      el.classList.add('quiet'); marked = true;
+      if (el.getAttribute('aria-label')) el.setAttribute('aria-label', `${el.getAttribute('aria-label')}, ${label}`);
+      if (mark === 'strip') el.append(qBadge(pct));
+    } else if (mark === 'card') el.append(qBadge(pct), h('span', { class: 'sr', text: ` ${label}` }));
+    else if (mark === 'list') { el.replaceChildren(qBadge(pct), ' ', t.quietList); el.hidden = false; }
+  }
+  if (marked) root.querySelectorAll('[data-qlegend]').forEach((x) => { x.hidden = false; });
+}
+const qLegend = () => h('span', { class: 'bk-qlegend', hidden: true, 'data-qlegend': '' }, ' ', h('span', { class: 'bk-quiet-dot', 'aria-hidden': 'true' }), t.quietDay);
 // ?mock=1: kokeilutila (EI palvelinta): kaikki RPC-kutsut vastataan selaimessa (shop-mock.js; ei tallenna mitään palvelimelle). Lippu säilytetään linkeissä.
 const MOCK = new URLSearchParams(location.search).get('mock') === '1';
 let MOCK_FETCH;   // ?mock=1&scenario=pay: mobilepay-start / mobilepay-notify -funktioiden mock (fetch-yhteensopiva)
@@ -194,6 +238,7 @@ function viewList(query) {
     h('h3', {}, h('a', { href: bk(`/tuote/${p.slug}`), text: pname(p) })),
     cardExcerpt(p),
     cardMeta(h, priceText(p), pdur(p)),   // ajankohta omalla rivillään hinnan yläpuolella (card-meta.js)
+    h('p', { class: 'bk-quiet-line', hidden: true, 'data-qp': p.id, 'data-qmark': 'list' }),   // booking_162: täyttyy vain, jos tuotteella on hiljaisen ajan ale
     h('a', { class: 'btn sm', href: bk(`/tuote/${p.slug}`) }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) })))));
   const annual = annualPromo();
   mount(h('header', { class: 'bk-head' }, h('h2', { text: t.title }), h('p', { class: 'lead', text: t.lead })), modeSwitch('cat'), tabs, cards, annual);
@@ -291,7 +336,7 @@ function dayItem({ r, p }, ds, withName = false) {
   const price = r.price_mode === 'per_person' ? `${money(r.unit_price)} ${t.perPerson}` : r.price_mode === 'fixed' ? money(r.base_price) : `${t.from} ${money(r.base_price)}`;
   return h('li', { class: `bk-slot ${r.status}` },
     h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }),
-      withName ? h('span', { class: 'bk-prodname' }, h('a', { href: bk(`/tuote/${p.slug}/${ds}`), text: pname(p) })) : null, sub ? h('span', { class: 'bk-sub', text: sub }) : null, h('span', { class: 'bk-price', text: price })),
+      withName ? h('span', { class: 'bk-prodname' }, h('a', { href: bk(`/tuote/${p.slug}/${ds}`), text: pname(p) })) : null, sub ? h('span', { class: 'bk-sub', text: sub }) : null, h('span', { class: 'bk-price', text: price, ...qAttrs(ok, p, r, 'day') })),
     h('div', { class: 'bk-slot-side' },
       ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: 'bk-badge full', text: t.waitlistSessionSoldOut }),
       ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}?via=day`) }, t.choose, h('span', { class: 'sr', text: ` ${title}, ${pname(p)}` })) : h('a', { class: 'btn sm light bk-waitlist-link', href: bk(`/jono/${r.rule_id}/${ds}/${p.id}?via=day`), text: t.waitlistJoinShort })));
@@ -342,7 +387,7 @@ function prodCard(p, rs, ds, open, onToggle, treat = false) {
   const btn = h('button', { type: 'button', id: `${id}-btn`, class: 'bk-pc-head', 'aria-expanded': open ? 'true' : 'false', 'aria-controls': `${id}-panel`, onclick: () => onToggle(p, li) },
     pimg(p, 'pc-img', { alt: false, w: 160, hgt: 160 }),
     h('span', { class: 'bk-pc-main' }, h('strong', { class: 'bk-pc-name', text: pname(p) }), short ? h('span', { class: 'bk-pc-desc', text: short }) : null,
-      h('span', { class: 'bk-pc-meta' }, h('span', { class: 'bk-price', text: priceText(p) }), fullOnly ? h('span', { class: 'bk-badge full', text: t.waitlistSoldOut }) : h('span', { class: 'bk-badge free', text: `${t.timesFree(avail.length)}${avail.length ? ` · ${t.firstAt} ${hm(avail[0].r.starts_at)}` : ''}` }))),
+      h('span', { class: 'bk-pc-meta', ...(treat || !avail.length ? {} : { 'data-qp': p.id, 'data-qday': ds, 'data-qmark': 'card' }) }, h('span', { class: 'bk-price', text: priceText(p) }), fullOnly ? h('span', { class: 'bk-badge full', text: t.waitlistSoldOut }) : h('span', { class: 'bk-badge free', text: `${t.timesFree(avail.length)}${avail.length ? ` · ${t.firstAt} ${hm(avail[0].r.starts_at)}` : ''}` }))),
     h('span', { class: 'bk-pc-chev', 'aria-hidden': 'true' }));
   const li = h('li', { class: `bk-pc${fullOnly ? ' full' : ''}${open ? ' open' : ''}`, 'data-slug': p.slug }, btn, panel);
   return li;
@@ -368,7 +413,7 @@ async function viewDay(dateStr, keep, openSlug) {
     const label = st === 'free' ? `${long}, ${t.daySessions(n)}` : st === 'full' ? `${long}, ${t.full}` : st === 'unavail' ? `${long}, ${t.unavailable}` : st === 'none' ? `${long}, ${t.noSessions}` : long;
     const inner = [h('span', { class: 'bk-sd-wd', 'aria-hidden': 'true', text: fmt(`${x}T12:00:00Z`, { weekday: 'short' }) }), h('span', { class: 'bk-sd-n', 'aria-hidden': 'true', text: String(+x.slice(8)) }), h('span', { class: `dot ${st}`, 'aria-hidden': 'true' })];
     return h('li', {}, !inRange ? h('span', { class: 'bk-sd off', 'aria-label': long }, inner)
-      : h('a', { class: `bk-sd ${st}${x === today ? ' today' : ''}${x === ds ? ' sel' : ''}`, href: bk(`/paiva/${x}`), 'aria-label': label, 'aria-current': x === ds ? 'date' : null }, inner));
+      : h('a', { class: `bk-sd ${st}${x === today ? ' today' : ''}${x === ds ? ' sel' : ''}`, href: bk(`/paiva/${x}`), 'aria-label': label, 'aria-current': x === ds ? 'date' : null, ...(st === 'free' ? { 'data-qday': x, 'data-qmark': 'strip' } : {}) }, inner));
   }));
   const picker = h('input', { type: 'date', id: 'bk-day-pick', value: ds, min: today, max: maxDs, onchange: (e) => { if (e.target.value) go(e.target.value); } });
   const prevOk = addDays(ws, -1) >= today, nextOk = addDays(we, 1) <= maxDs;
@@ -412,7 +457,7 @@ async function viewDay(dateStr, keep, openSlug) {
   if (treatBox) results.append(treatBox);
   mount(h('header', { class: 'bk-head' }, h('h2', { text: t.dayTitle }), h('p', { class: 'lead', text: t.dayLead })), modeSwitch('day', ds),
     h('section', { class: 'bk-daypick', 'aria-label': t.pickDay }, nav, strip,
-      h('p', { class: 'bk-legend' }, h('span', { class: 'dot free' }), t.free, ' ', h('span', { class: 'dot full' }), t.full, ' ', h('span', { class: 'dot unavail' }), t.unavailable), tools),
+      h('p', { class: 'bk-legend' }, h('span', { class: 'dot free' }), t.free, ' ', h('span', { class: 'dot full' }), t.full, ' ', h('span', { class: 'dot unavail' }), t.unavailable, qLegend()), tools),
     h('div', { class: 'bk-slots', 'aria-live': 'polite' }, results));
   if (keep) { const el = document.getElementById('bk-day-h'); if (el) { revealIfHidden(el); el.focus({ preventScroll: true }); } } else focusTop();
   if (!keep && openSlug) document.querySelector('.bk-pc.open')?.scrollIntoView({ block: 'start' });   // Takaisin lomakkeelta → sama tuote auki ja näkyvissä
@@ -468,10 +513,10 @@ async function viewProduct(slug, dateStr, query) {
       const label = st === 'free' ? `${long}, ${free}` : st === 'full' ? `${long}, ${t.full}` : st === 'unavail' ? `${long}, ${t.unavailable}` : null;
       cells.push(st === 'none'
         ? h('span', { class: 'bk-cell off', 'aria-hidden': 'true', text: d })
-        : h('button', { type: 'button', class: `bk-cell ${st}${ds === today ? ' today' : ''}${ds === sel ? ' sel' : ''}`, 'aria-pressed': ds === sel ? 'true' : 'false', 'aria-label': label, onclick: () => { sel = ds; history.replaceState(null, '', bk(`/tuote/${slug}/${ds}`)); drawSlots(); markSel(); revealForm(slotBox, slotBox.querySelector('h3')); } }, d));
+        : h('button', { type: 'button', class: `bk-cell ${st}${ds === today ? ' today' : ''}${ds === sel ? ' sel' : ''}`, 'aria-pressed': ds === sel ? 'true' : 'false', 'aria-label': label, ...(st === 'free' ? { 'data-qday': ds, 'data-qp': p.id, 'data-qmark': 'cal' } : {}), onclick: () => { sel = ds; history.replaceState(null, '', bk(`/tuote/${slug}/${ds}`)); drawSlots(); markSel(); revealForm(slotBox, slotBox.querySelector('h3')); } }, d));
     }
     calBox.append(nav, h('div', { class: 'bk-grid', role: 'group', 'aria-label': monthName }, wd, cells),
-      h('p', { class: 'bk-legend' }, h('span', { class: 'dot free' }), t.free, ' ', h('span', { class: 'dot full' }), t.full, ' ', h('span', { class: 'dot unavail' }), t.unavailable),
+      h('p', { class: 'bk-legend' }, h('span', { class: 'dot free' }), t.free, ' ', h('span', { class: 'dot full' }), t.full, ' ', h('span', { class: 'dot unavail' }), t.unavailable, qLegend()),
       ...(any ? [] : [h('p', { class: 'bk-note', text: t.noSlotsMonth })]));
     const markSel = () => calBox.querySelectorAll('.bk-cell[aria-pressed]').forEach((b) => { const on = b.textContent === String(+sel?.slice(8)) && sel?.startsWith(`${y}-${pad2(m + 1)}`); b.classList.toggle('sel', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
     const drawSlots = () => {
@@ -492,7 +537,7 @@ function slotItem(r, ds, p) {
   const price = r.price_mode === 'per_person' ? `${money(r.unit_price)} ${t.perPerson}` : r.price_mode === 'fixed' ? money(r.base_price)
     : `${money(r.base_price)} (${t.included(r.included_persons)}, ${t.extra(money(r.extra_person_price))})`;
   return h('li', { class: `bk-slot ${r.status}` },
-    h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }), sub ? h('span', { class: 'bk-sub', text: sub }) : null, h('span', { class: 'bk-price', text: price })),
+    h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }), sub ? h('span', { class: 'bk-sub', text: sub }) : null, h('span', { class: 'bk-price', text: price, ...qAttrs(ok, p, r, 'slot') })),
     h('div', { class: 'bk-slot-side' },
       ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: 'bk-badge full', text: t.waitlistSessionSoldOut }),
       ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}`) }, t.choose, h('span', { class: 'sr', text: ` ${title}` })) : h('a', { class: 'btn sm light bk-waitlist-link', href: bk(`/jono/${r.rule_id}/${ds}/${p.id}`), text: t.waitlistJoinShort })));
@@ -624,6 +669,9 @@ async function viewCheckout(ruleId, ds, productId, via) {
   // lisäpalvelut (public_addons): vain tämän vuorotyypin lisäpalvelut; virhe tai puuttuva funktio → ei lisäpalveluita
   const addons = ((await rpc('public_addons').catch(() => [])) || []).filter((a) => (a.applies_modes || []).includes(s.mode));
   const qty = new Map(addons.map((a) => [a.id, 0]));
+  // booking_162: hiljaisen ajan ale tälle vuorolle (arvio näyttöön; palvelin laskee ja lukitsee hinnan varauksessa). Virhe → ei alea.
+  const qOffer = findOffer(await quietIdx().catch(() => null), p.id, s.rule_id, s.starts_at);
+  const qNote = h('p', { class: 'bk-note bk-quiet-note', 'data-testid': 'checkout-quiet-note', hidden: true, text: t.quietNote });
   const addonsSum = () => addons.reduce((x, a) => x + qty.get(a.id) * +a.price, 0);
   // Alennus- / vuosikorttikoodi (booking_142): palvelin laskee hinnan (public_check_code); quote = viimeisin hyväksytty vastaus
   // ja sig = henkilömäärä + lisäpalvelut, joille se laskettiin. Vuosikortti lukitsee henkilömäärän ja poistaa lisäpalvelut.
@@ -636,10 +684,13 @@ async function viewCheckout(ruleId, ds, productId, via) {
     for (const a of addons) qty.set(a.id, Math.min(qty.get(a.id), addonLimit(a, n)));
     if (code.quote && !annualOn() && code.sig !== sig()) recheckCode();
     const fresh = code.quote && code.sig === sig();
-    total.textContent = money(fresh ? +code.quote.total : priceFor(s, n) + addonsSum());
+    const qv = quietCheckout({ quote: fresh ? code.quote : null, offer: annualOn() || (code.quote && !fresh) ? null : qOffer, sessionTotal: priceFor(s, n) });
+    total.textContent = money(fresh ? +code.quote.total : priceFor(s, n) - (qv.source === 'quiet' ? qv.amount : 0) + addonsSum());
+    qNote.hidden = qv.source !== 'quiet';
     sumList.replaceChildren(h('dt', { text: t.what }), h('dd', { text: pname(p) }), h('dt', { text: t.when }), h('dd', { text: `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(n) }),
       ...addons.filter((a) => qty.get(a.id) > 0).flatMap((a) => [h('dt', { text: aname(a) }), h('dd', { text: `${qty.get(a.id)} × ${money(a.price)}` })]),
-      ...(fresh && +code.quote.discount > 0 ? [h('dt', { text: annualOn() ? t.annualTitle : t.codeDiscountRow }), h('dd', { 'data-testid': 'checkout-discount', text: `${code.quote.code} · −${money(code.quote.discount)}` })] : []));
+      ...(qv.source === 'quiet' ? [h('dt', { text: fillText(t.quietCheckout, { pct: pctText(qv.percent, S.lang) }) }), h('dd', { 'data-testid': 'checkout-quiet', text: `−${money(qv.amount)}` })] : []),
+      ...(fresh && qv.source === 'code' && +code.quote.discount > 0 ? [h('dt', { text: annualOn() ? t.annualTitle : t.codeDiscountRow }), h('dd', { 'data-testid': 'checkout-discount', text: `${code.quote.code} · −${money(code.quote.discount)}` })] : []));
     num.value = n; minus.disabled = wlLock || annualOn() || n <= s.min_persons; plus.disabled = wlLock || annualOn() || n >= max; num.readOnly = wlLock || annualOn();
     for (const r of addonRows) r.sync();
     submitLabel();
@@ -697,7 +748,8 @@ async function viewCheckout(ruleId, ds, productId, via) {
     if (isAnnualQuote(r)) { n = +r.persons || 1; for (const a of addons) qty.set(a.id, 0); }
     code.sig = sig();
     codeInput.readOnly = true; codeApply.hidden = true; codeRemove.hidden = false;
-    setStatus(isAnnualQuote(r) ? `${t.codeAnnualApplied} ${t.codeAnnualLocked}${r.type === 'annual_card' ? ' ' + t.codeAnnualOwner : ''}` : `${t.codeApplied}: ${r.code} · −${money(r.discount)}`, true);
+    if (r.discount_source === 'quiet') setStatus(t.quietCodeNote, true);   // booking_162: ale on edullisempi → koodia ei käytetä (etuja ei yhdistetä)
+    else setStatus(isAnnualQuote(r) ? `${t.codeAnnualApplied} ${t.codeAnnualLocked}${r.type === 'annual_card' ? ' ' + t.codeAnnualOwner : ''}` : `${t.codeApplied}: ${r.code} · −${money(r.discount)}`, true);
     upd();
   }
   // Henkilömäärä tai lisäpalvelut muuttuivat → sama koodi tarkistetaan uudelleen palvelimella (viive: ei kutsua joka napautuksesta).
@@ -758,7 +810,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
   mount(h('h2', { text: t.bookTitle }), pick, wlNote,
     h('div', { class: 'bk-checkout' }, form,
       h('aside', { class: 'bk-aside', 'aria-label': t.summary }, h('h3', { text: t.summary }), sumList,
-        h('p', { class: 'bk-totalrow' }, t.total + ': ', total, ' ', h('small', { text: t.vatIncl })),
+        h('p', { class: 'bk-totalrow' }, t.total + ': ', total, ' ', h('small', { text: t.vatIncl })), qNote,
         payNote, payExtra)));
   upd(); focusTop();
 }
@@ -999,4 +1051,7 @@ window.addEventListener('hashchange', () => {
   }
 });
 last = location.hash;
+// booking_162: hiljaisten aikojen ale -merkinnät jokaisen piirron jälkeen (ks. quietDecorate). Ei tarjouksia → ei muutoksia.
+let quietTimer = null;
+if (root && typeof MutationObserver === 'function') new MutationObserver(() => { clearTimeout(quietTimer); quietTimer = setTimeout(() => { quietDecorate().catch(() => {}); }, 0); }).observe(root, { childList: true, subtree: true });
 route();

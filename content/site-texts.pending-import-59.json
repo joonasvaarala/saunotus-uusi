@@ -1,0 +1,1176 @@
+[
+ {
+  "key": "ui.shop.quiet_badge",
+  "lang": "fi",
+  "text": "−{{var:pct}} %",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:pct}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Kauppa: booking/shop/src/quiet-texts.js."
+ },
+ {
+  "key": "ui.shop.quiet_badge",
+  "lang": "en",
+  "text": "−{{var:pct}}%",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:pct}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Kauppa: booking/shop/src/quiet-texts.js."
+ },
+ {
+  "key": "ui.shop.quiet_sr",
+  "lang": "fi",
+  "text": "Hiljaisen ajan ale {{var:pct}} %: normaalihinta {{var:was}}, nyt {{var:now}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:pct}}",
+   "{{var:was}}",
+   "{{var:now}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Kauppa: booking/shop/src/quiet-texts.js."
+ },
+ {
+  "key": "ui.shop.quiet_sr",
+  "lang": "en",
+  "text": "Quiet-time discount {{var:pct}}%: regular price {{var:was}}, now {{var:now}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:pct}}",
+   "{{var:was}}",
+   "{{var:now}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Kauppa: booking/shop/src/quiet-texts.js."
+ },
+ {
+  "key": "ui.shop.quiet_day",
+  "lang": "fi",
+  "text": "hiljaisen ajan ale",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Kauppa: booking/shop/src/quiet-texts.js."
+ },
+ {
+  "key": "ui.shop.quiet_day",
+  "lang": "en",
+  "text": "quiet-time discount",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Kauppa: booking/shop/src/quiet-texts.js."
+ },
+ {
+  "key": "ui.shop.quiet_list",
+  "lang": "fi",
+  "text": "Hiljaisen ajan ale: vapaita vuoroja lähipäivinä alennettuun hintaan.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Kauppa: booking/shop/src/quiet-texts.js."
+ },
+ {
+  "key": "ui.shop.quiet_list",
+  "lang": "en",
+  "text": "Quiet-time discount: available sessions in the next few days at a reduced price.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Kauppa: booking/shop/src/quiet-texts.js."
+ },
+ {
+  "key": "ui.shop.quiet_checkout",
+  "lang": "fi",
+  "text": "Hiljaisen ajan ale −{{var:pct}} %",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:pct}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Kauppa: booking/shop/src/quiet-texts.js."
+ },
+ {
+  "key": "ui.shop.quiet_checkout",
+  "lang": "en",
+  "text": "Quiet-time discount −{{var:pct}}%",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:pct}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Kauppa: booking/shop/src/quiet-texts.js."
+ },
+ {
+  "key": "ui.shop.quiet_note",
+  "lang": "fi",
+  "text": "Vuoro on vielä vapaa, joten saat sen hiljaisen ajan alennuksella. Hinta lukitaan, kun teet varauksen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Kauppa: booking/shop/src/quiet-texts.js."
+ },
+ {
+  "key": "ui.shop.quiet_note",
+  "lang": "en",
+  "text": "This session is still available, so you get it at a quiet-time discount. The price is locked when you book.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Kauppa: booking/shop/src/quiet-texts.js."
+ },
+ {
+  "key": "ui.shop.quiet_code_note",
+  "lang": "fi",
+  "text": "Hiljaisen ajan ale on koodia edullisempi, joten koodia ei käytetä tässä varauksessa. Etuja ei voi yhdistää.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Kauppa: booking/shop/src/quiet-texts.js."
+ },
+ {
+  "key": "ui.shop.quiet_code_note",
+  "lang": "en",
+  "text": "The quiet-time discount is better than the code, so the code is not used for this booking. Benefits cannot be combined.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Kauppa: booking/shop/src/quiet-texts.js."
+ },
+ {
+  "key": "ui.site.quiet_badge",
+  "lang": "fi",
+  "text": "−{{var:pct}} %",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:pct}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: src/quiet-week.mjs (etusivun viikko-ohjelma)."
+ },
+ {
+  "key": "ui.site.quiet_badge",
+  "lang": "en",
+  "text": "−{{var:pct}}%",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:pct}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: src/quiet-week.mjs (etusivun viikko-ohjelma)."
+ },
+ {
+  "key": "ui.site.quiet_sr",
+  "lang": "fi",
+  "text": "Hiljaisen ajan ale {{var:pct}} %: normaalihinta {{var:was}}, nyt {{var:now}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:pct}}",
+   "{{var:was}}",
+   "{{var:now}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: src/quiet-week.mjs (etusivun viikko-ohjelma)."
+ },
+ {
+  "key": "ui.site.quiet_sr",
+  "lang": "en",
+  "text": "Quiet-time discount {{var:pct}}%: regular price {{var:was}}, now {{var:now}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:pct}}",
+   "{{var:was}}",
+   "{{var:now}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: src/quiet-week.mjs (etusivun viikko-ohjelma)."
+ },
+ {
+  "key": "ui.site.quiet_note",
+  "lang": "fi",
+  "text": "Hiljaisen ajan ale: vielä vapaat yksityisvuorot lähipäivinä alennettuun hintaan. Hinta lukitaan, kun teet varauksen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: src/quiet-week.mjs (etusivun viikko-ohjelma)."
+ },
+ {
+  "key": "ui.site.quiet_note",
+  "lang": "en",
+  "text": "Quiet-time discount: private sessions still available in the next few days at a reduced price. The price is locked when you book.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: src/quiet-week.mjs (etusivun viikko-ohjelma)."
+ },
+ {
+  "key": "ui.admin.quiet.title",
+  "lang": "fi",
+  "text": "Hiljaiset ajat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.title",
+  "lang": "en",
+  "text": "Quiet times",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.intro",
+  "lang": "fi",
+  "text": "Hiljaisten aikojen ale laskee vielä tyhjän vuoron hintaa, kun vuoron alkuun on vähän aikaa. Ale koskee vain verkkokaupan varauksia ja koko vuoron hintaa lisähenkilöineen. Sitä ei yhdistetä alennuskoodiin tai vuosikorttiin: edullisempi etu voittaa. Hinta lukitaan varaushetkellä, ja vuoron siirto poistaa alen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 800,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.intro",
+  "lang": "en",
+  "text": "The quiet-time discount lowers the price of a session that is still empty when its start is near. It applies only to online shop bookings and to the whole session price including extra guests. It is not combined with a discount code or an annual card: the better benefit wins. The price is locked when booking, and moving the booking removes the discount.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 900,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.status_on",
+  "lang": "fi",
+  "text": "Käytössä: ale näkyy asiakkaille",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.status_on",
+  "lang": "en",
+  "text": "On: customers see the discount",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.status_off",
+  "lang": "fi",
+  "text": "Pois päältä: ale ei näy asiakkaille",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.status_off",
+  "lang": "en",
+  "text": "Off: customers do not see the discount",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.enable",
+  "lang": "fi",
+  "text": "Ota käyttöön",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.enable",
+  "lang": "en",
+  "text": "Turn on",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.disable",
+  "lang": "fi",
+  "text": "Poista käytöstä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.disable",
+  "lang": "en",
+  "text": "Turn off",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.enable_confirm",
+  "lang": "fi",
+  "text": "Otetaanko hiljaisten aikojen ale käyttöön? Ale alkaa näkyä verkkokaupassa, etusivulla ja viikko-ohjelmassa heti.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.enable_confirm",
+  "lang": "en",
+  "text": "Turn on the quiet-time discount? It appears in the online shop, on the front page and in the weekly programme right away.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.disable_confirm",
+  "lang": "fi",
+  "text": "Poistetaanko hiljaisten aikojen ale käytöstä? Jo tehdyt varaukset säilyttävät lukitun hintansa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.disable_confirm",
+  "lang": "en",
+  "text": "Turn off the quiet-time discount? Existing bookings keep their locked price.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.status_saved",
+  "lang": "fi",
+  "text": "Tila tallennettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.status_saved",
+  "lang": "en",
+  "text": "Status saved.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.toggle_readonly",
+  "lang": "fi",
+  "text": "Alen kytkeminen päälle tai pois vaatii asetusten muokkausoikeuden.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.toggle_readonly",
+  "lang": "en",
+  "text": "Turning the discount on or off requires permission to edit settings.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.rules",
+  "lang": "fi",
+  "text": "Portaat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.rules",
+  "lang": "en",
+  "text": "Tiers",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.new",
+  "lang": "fi",
+  "text": "Uusi porras",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.new",
+  "lang": "en",
+  "text": "New tier",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.edit",
+  "lang": "fi",
+  "text": "Muokkaa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.edit",
+  "lang": "en",
+  "text": "Edit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.delete",
+  "lang": "fi",
+  "text": "Poista",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.delete",
+  "lang": "en",
+  "text": "Delete",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.delete_confirm",
+  "lang": "fi",
+  "text": "Poistetaanko porras {{var:name}}?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:name}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.delete_confirm",
+  "lang": "en",
+  "text": "Delete tier {{var:name}}?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:name}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.deleted",
+  "lang": "fi",
+  "text": "Porras poistettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.deleted",
+  "lang": "en",
+  "text": "Tier deleted.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.saved",
+  "lang": "fi",
+  "text": "Porras tallennettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.saved",
+  "lang": "en",
+  "text": "Tier saved.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.no_rules",
+  "lang": "fi",
+  "text": "Ei portaita.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.no_rules",
+  "lang": "en",
+  "text": "No tiers.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.readonly",
+  "lang": "fi",
+  "text": "Portaiden muokkaus vaatii tuotteiden muokkausoikeuden.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.readonly",
+  "lang": "en",
+  "text": "Editing tiers requires permission to edit products.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.active",
+  "lang": "fi",
+  "text": "Aktiivinen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.active",
+  "lang": "en",
+  "text": "Active",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.inactive",
+  "lang": "fi",
+  "text": "Ei käytössä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.inactive",
+  "lang": "en",
+  "text": "Not in use",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.rule_line",
+  "lang": "fi",
+  "text": "{{var:products}} · enintään {{var:hours}} h ennen alkua · −{{var:pct}} %",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:products}}",
+   "{{var:hours}}",
+   "{{var:pct}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.rule_line",
+  "lang": "en",
+  "text": "{{var:products}} · up to {{var:hours}} h before start · −{{var:pct}}%",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:products}}",
+   "{{var:hours}}",
+   "{{var:pct}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.condition",
+  "lang": "fi",
+  "text": "Vain kokonaan tyhjä vuoro (ei varauksia samassa tilassa eikä sulkua), vain verkkokauppa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.condition",
+  "lang": "en",
+  "text": "Only a completely empty session (no bookings in the same space and no closure), online shop only.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.valid_from",
+  "lang": "fi",
+  "text": "alkaa {{var:date}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.valid_from",
+  "lang": "en",
+  "text": "starts {{var:date}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.valid_to",
+  "lang": "fi",
+  "text": "päättyy {{var:date}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.valid_to",
+  "lang": "en",
+  "text": "ends {{var:date}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.name",
+  "lang": "fi",
+  "text": "Nimi (suomi)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.name",
+  "lang": "en",
+  "text": "Name (Finnish)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.name_en",
+  "lang": "fi",
+  "text": "Nimi (englanti)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.name_en",
+  "lang": "en",
+  "text": "Name (English)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.products",
+  "lang": "fi",
+  "text": "Tuotteet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.products",
+  "lang": "en",
+  "text": "Products",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.hours",
+  "lang": "fi",
+  "text": "Tunteja ennen vuoron alkua (enintään)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.hours",
+  "lang": "en",
+  "text": "Hours before the session starts (at most)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.percent",
+  "lang": "fi",
+  "text": "Ale (%)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.percent",
+  "lang": "en",
+  "text": "Discount (%)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.from",
+  "lang": "fi",
+  "text": "Voimassa alkaen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.from",
+  "lang": "en",
+  "text": "Valid from",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.to",
+  "lang": "fi",
+  "text": "Voimassa asti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.to",
+  "lang": "en",
+  "text": "Valid until",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.save",
+  "lang": "fi",
+  "text": "Tallenna",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.save",
+  "lang": "en",
+  "text": "Save",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.cancel",
+  "lang": "fi",
+  "text": "Peruuta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.cancel",
+  "lang": "en",
+  "text": "Cancel",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.v_name",
+  "lang": "fi",
+  "text": "Anna nimi (enintään 80 merkkiä).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.v_name",
+  "lang": "en",
+  "text": "Enter a name (at most 80 characters).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.v_percent",
+  "lang": "fi",
+  "text": "Ale on 0,01–90 % (enintään kaksi desimaalia).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.v_percent",
+  "lang": "en",
+  "text": "The discount is 0.01–90% (at most two decimals).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.v_hours",
+  "lang": "fi",
+  "text": "Tunnit ovat kokonaisluku 1–336.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.v_hours",
+  "lang": "en",
+  "text": "Hours must be a whole number 1–336.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.v_products",
+  "lang": "fi",
+  "text": "Valitse vähintään yksi tuote.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.v_products",
+  "lang": "en",
+  "text": "Select at least one product.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.v_dates",
+  "lang": "fi",
+  "text": "Voimassaolon loppu on ennen alkua.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.v_dates",
+  "lang": "en",
+  "text": "The end of validity is before the start.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.v_overlap",
+  "lang": "fi",
+  "text": "Samalle tuotteelle on jo aktiivinen porras samalla tuntimäärällä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.v_overlap",
+  "lang": "en",
+  "text": "This product already has an active tier with the same number of hours.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.preview",
+  "lang": "fi",
+  "text": "Esikatselu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.preview",
+  "lang": "en",
+  "text": "Preview",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.preview_intro",
+  "lang": "fi",
+  "text": "Vuorot, jotka saisivat alen nyt. Esikatselu näkyy myös, kun ale on pois päältä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.preview_intro",
+  "lang": "en",
+  "text": "Sessions that would get the discount now. The preview works even when the discount is off.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.days",
+  "lang": "fi",
+  "text": "Päiviä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.days",
+  "lang": "en",
+  "text": "Days",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.refresh",
+  "lang": "fi",
+  "text": "Päivitä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.refresh",
+  "lang": "en",
+  "text": "Refresh",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.no_preview",
+  "lang": "fi",
+  "text": "Ei alennettavia vuoroja valitulla aikavälillä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.no_preview",
+  "lang": "en",
+  "text": "No sessions to discount in the selected period.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.preview_line",
+  "lang": "fi",
+  "text": "Porras {{var:hours}} h · −{{var:pct}} %",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:hours}}",
+   "{{var:pct}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ },
+ {
+  "key": "ui.admin.quiet.preview_line",
+  "lang": "en",
+  "text": "Tier {{var:hours}} h · −{{var:pct}}%",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:hours}}",
+   "{{var:pct}}"
+  ],
+  "reason": "booking_162 (hiljaisten aikojen ale, Joonas 24.10.2026): uusi avain, FI+EN. Ale on pois päältä (quiet_discounts.enabled=false), kunnes Joonas kytkee sen. Bottiavustus tuo admin_texts_importilla. Lähde: booking/admin/quiet-texts.js (hallinta, Hiljaiset ajat)."
+ }
+]

@@ -1,6 +1,7 @@
 // Hallinnan kokeilutila (?mock=1) ja testien mock: vastaa selaimessa Päivä-, Varaukset-, Uusi varaus (resurssi)- ja Tuotevalinnat-näkymien RPC:ihin (nimet ja p_-parametrit
 // sopimuksen §14/§15 mukaan, rivit samassa muodossa kuin migraatiossa booking_50). KEKSITTYÄ DATAA: mikään ei mene verkkoon eikä tallennu (tila on vain muistissa).
 // Puhdas moduuli (ei DOM:ia) → node --test voi ajaa sen. Tuntematon RPC → virhe (ei koskaan verkkokutsua).
+import { quietMockHandlers } from './quiet-mock.js';
 import { fiReference, validBusinessId, validOvt, validOperator, normBusinessId, normOvt } from '../shop/src/invoice-validate.js';
 import { storedLineFromInput } from './invoice-lines.js';
 import { calendarIdError } from './calendar-export-logic.js';
@@ -252,6 +253,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     current_staff_role: () => role,
     admin_analytics_summary: (a) => { needAny('reports.view', 'reports.daily'); return analyticsMock(a.p_from || today, a.p_to || today); },   // Paketti 11 / booking_144
     // booking_142: alennuskoodit ja vuosikortit (samat tarkistukset pääpiirteissään kuin palvelimella)
+    ...quietMockHandlers({ st, need, needAny, err, today }),   // booking_162: Hiljaiset ajat
     admin_list_discount_codes: () => { needAny('catalog.edit', 'annual_cards.manage'); return st.discountCodes.map((d) => ({ ...d })); },
     admin_save_discount_code: (a) => {
       need('catalog.edit');
