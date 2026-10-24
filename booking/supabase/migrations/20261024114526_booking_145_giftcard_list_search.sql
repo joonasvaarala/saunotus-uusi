@@ -13,7 +13,7 @@
 --     Muut järjestykset ennallaan (oletus created_desc = uusin ensin, created_asc = vanhin ensin; created_asc:n tasatilanteet nyt id:n
 --     mukaan nousevasti, ennen laskevasti).
 -- Staff-tarkistus (booking.is_staff()), SECURITY DEFINER ja search_path '' kuten ennen.
--- Rollback: rollbacks/20261024180000_booking_145_ROLLBACK.sql (palauttaa booking_44:n määritelmän täsmälleen).
+-- Rollback: rollbacks/20261024114526_booking_145_ROLLBACK.sql (palauttaa booking_44:n määritelmän täsmälleen).
 -- =============================================================================
 set local lock_timeout = '5s';
 

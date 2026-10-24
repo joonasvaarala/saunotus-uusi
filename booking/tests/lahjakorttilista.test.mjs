@@ -12,7 +12,7 @@ const G = await imp('admin/giftcards-api.js');
 const { GC_FI, GC_EN } = await imp('admin/giftcards-texts.js');
 const TODAY = '2026-10-24';
 const R = (m, a = {}) => m.rpc('admin_list_gift_cards', a);
-const MIG = 'supabase/migrations/20261024180000_booking_145_giftcard_list_search.sql', RB = 'supabase/rollbacks/20261024180000_booking_145_ROLLBACK.sql';
+const MIG = 'supabase/migrations/20261024114526_booking_145_giftcard_list_search.sql', RB = 'supabase/rollbacks/20261024114526_booking_145_ROLLBACK.sql';
 
 test('Mock: ~45 korttia, joista Johku-kortteja; jokaisella rivillä tuotteen nimi', async () => {
   const m = createGiftMock({ today: TODAY }), all = await R(m, { p_limit: 200 });

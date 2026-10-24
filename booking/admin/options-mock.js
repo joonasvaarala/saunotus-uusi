@@ -6,6 +6,7 @@ import { storedLineFromInput } from './invoice-lines.js';
 import { calendarIdError } from './calendar-export-logic.js';
 import { validateMessage } from './messages-logic.js';
 import { applySection, exampleBundle } from './settings-logic.js';
+import { analyticsMock } from './analytics-mock.js';
 import { generatedAnnualCardCode, generatedDiscountCode, normalizeCode } from '../shop/src/discount-code-logic.js';
 const TZ = 'Europe/Helsinki';
 const todayHel = (now = new Date()) => now.toLocaleDateString('sv-SE', { timeZone: TZ });
@@ -244,6 +245,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
   const inRange = (r, a) => (!a.p_from || r.starts_at >= a.p_from) && (!a.p_to || r.starts_at < a.p_to);
   const handlers = {
     current_staff_role: () => role,
+    admin_analytics_summary: (a) => { needAny('reports.view', 'reports.daily'); return analyticsMock(a.p_from || today, a.p_to || today); },   // Paketti 11 / booking_144
     // booking_142: alennuskoodit ja vuosikortit (samat tarkistukset pääpiirteissään kuin palvelimella)
     admin_list_discount_codes: () => { needAny('catalog.edit', 'annual_cards.manage'); return st.discountCodes.map((d) => ({ ...d })); },
     admin_save_discount_code: (a) => {
