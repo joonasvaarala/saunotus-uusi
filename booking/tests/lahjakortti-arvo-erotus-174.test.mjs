@@ -131,8 +131,8 @@ test('CSS ja näkymä: vain teeman muuttujat (ei sinistä, ei heksoja), ei emoje
 });
 
 test('migraatio + rollback: vartijat, kuittisähköposti pois kumppanimaksulta, erotus maksulinkkinä olemassa olevalla mekanismilla; rollback palauttaa tuotannon md5:t', () => {
-  const mig = rd('supabase/migrations/20261024234000_booking_174_partner_receipt_no_email.sql');
-  const rb = rd('supabase/rollbacks/20261024234000_booking_174_ROLLBACK.sql');
+  const mig = rd('supabase/migrations/20261024235019_booking_174_partner_receipt_no_email.sql');
+  const rb = rd('supabase/rollbacks/20261024235019_booking_174_ROLLBACK.sql');
   for (const md of ['86338dfa031158ffc12b0e7025f0a68f', 'e14d131d428518ec88581fd3e473af90', '4620f0d7531b524a6a5cfa322fc0e7a7', '4796edc6ebadaf599fd78287a75d29e8']) assert.ok(mig.includes(md), md);
   assert.match(mig, /if booking\._is_partner_method\(v_method\) then return; end if;\s*perform booking\._enqueue_email\('receipt'/);
   assert.match(mig, /booking\._create_link_payment\(o\.id, 14,/); assert.match(mig, /_enqueue_email\('payment_link'/); assert.match(mig, /'variant', 'voucher_difference'/);

@@ -23,7 +23,7 @@
 --   riippuvuudet (ei muuteta): _is_partner_method(text) 4796edc6ebadaf599fd78287a75d29e8, _vc_mark_redeemed b394cc612bcce278b66f57122aff4ff9,
 --     _create_link_payment(bigint,integer,text) 533ac9af831c0c11e1f504e377a17827, _vc_pay 3c24fd721b0e8bc6f1bdfb8a800c5a0e
 -- Uusi: booking._vc_due(booking.orders, booking.voucher_claims) (sama maksettavan laskenta kuin _vc_pay). Uudelleenajettava.
--- Rollback: rollbacks/20261024234000_booking_174_ROLLBACK.sql. Testi: tests/giftcards/t174_partner_receipt_no_email.sql (BEGIN … ROLLBACK).
+-- Rollback: rollbacks/20261024235019_booking_174_ROLLBACK.sql. Testi: tests/giftcards/t174_partner_receipt_no_email.sql (BEGIN … ROLLBACK).
 set local lock_timeout = '5s';
 
 do $g$

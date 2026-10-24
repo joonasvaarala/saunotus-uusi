@@ -1,4 +1,4 @@
--- t174: booking_174 (väliaikainen versio 20261024234000).
+-- t174: booking_174 (tuotantoversio 20261024235019).
 --   1) Kumppanilahjakortin maksu (partner_voucher + kolme myyjäkohtaista) → K-kuitti kirjanpitoon (+ accounting_outbox, kun Procountor ei ole off),
 --      EI kuittisähköpostia. Tavallinen maksu (korttipääte) → kuitti + kuittisähköposti kuten ennen.
 --   2) Lahjakortin arvo käsin ennen hyväksyntää (admin_mark_voucher_claim_redeemed p_amount): arvo < maksettava → kumppanimaksu arvon suuruisena,
