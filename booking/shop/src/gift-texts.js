@@ -1,3 +1,4 @@
+import { oneKey } from './plural.js';
 import { HT } from './hold-texts.js';
 // Lahjakorttien kauppatekstit (FI/EN): myyntisivu, saldotarkistus, "Käytä lahjakortti" tilaussivulla. Avaimet samat molemmilla kielillä (node --test tarkistaa).
 // Virhekoodit = KOODARI_talous_A_D_fi.md §13.2/13.3. Tuntematon koodi → 'err.generic'.
@@ -122,5 +123,24 @@ export const GT = {
     'vc.err.claim_not_editable': 'This gift code can no longer be changed.', 'vc.err.invalid_item': 'Order line not found.',
   },
 };
+// Yksikkömuodot (plural.js oneKey): käytetään kun lukumäärä on 1; puuttuu → monikkoavain (julkaistu teksti ennallaan). Tuonti: content/site-texts.pending-import-64.json.
+Object.assign(GT.fi, {
+  buyLeadOne: "Valitse avoin lahjakortti tai valmis paketti kahdelle. Kortti on voimassa {months} kuukauden ajan maksun jälkeen.",
+  personsOne: "{n} henkilölle",
+  validOne: "Voimassa {months} kk",
+  maxCardsOne: "Tilaukseen mahtuu enintään {n} kortti.",
+  "err.too_many_cards_one": "Tilaukseen mahtuu enintään {n} kortti.",
+  deliverOnHintOne: "Aikaisintaan tänään, enintään {months} kk päässä ({max} asti).",
+  "err.deliver_on_too_far_one": "Ajankohta voi olla enintään {months} kk päässä.",
+});
+Object.assign(GT.en, {
+  buyLeadOne: "Choose an open-value gift card or a ready-made package for two. The card is valid for {months} month after payment.",
+  personsOne: "For {n} person",
+  validOne: "Valid for {months} month",
+  maxCardsOne: "An order can include up to {n} card.",
+  "err.too_many_cards_one": "An order can include up to {n} card.",
+  deliverOnHintOne: "From today, up to {months} month ahead (until {max}).",
+  "err.deliver_on_too_far_one": "The date can be at most {months} month ahead.",
+});
 export const gtFill = (s, v = {}) => String(s ?? '').replace(/\{(\w+)\}/g, (_, k) => (v[k] ?? `{${k}}`));
-export const gtText = (lang, key, v) => gtFill((GT[lang] || GT.fi)[key] ?? GT.fi[key] ?? key, v);
+export const gtText = (lang, key, v) => { const k = oneKey(key, lang, v, GT[lang] || GT.fi, GT.fi); return gtFill((GT[lang] || GT.fi)[k] ?? GT.fi[k] ?? (GT[lang] || GT.fi)[key] ?? GT.fi[key] ?? key, v); };   // yksikkö: <avain>One (plural.js)

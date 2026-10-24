@@ -1,0 +1,496 @@
+[
+ {
+  "key": "ui.shop.pay_hold_one",
+  "lang": "fi",
+  "text": "Paikkaa pidetään {{var:m}} minuutin ajan maksun odottaessa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:m}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.shop.pay_hold_one",
+  "lang": "en",
+  "text": "Your spot is held for {{var:m}} minute while payment is pending.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:m}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.shop.change_info_one",
+  "lang": "fi",
+  "text": "Voit siirtää varauksen toiselle vapaalle vuorolle tai muuttaa henkilömäärää viimeistään {{var:h}} tunti ennen vuoron alkua (nyt viimeistään {{var:dl}}). Varauksen peruutus: ota yhteyttä sähköpostilla, niin henkilökunta peruu varauksen.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 600,
+  "placeholders": [
+   "{{var:h}}",
+   "{{var:dl}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.shop.change_info_one",
+  "lang": "en",
+  "text": "You can move your booking to another available session or change the number of guests up to {{var:h}} hour before the session starts (currently by {{var:dl}} at the latest). To cancel, please email us and our staff will cancel the booking.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 600,
+  "placeholders": [
+   "{{var:h}}",
+   "{{var:dl}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.treatment.max_persons_one",
+  "lang": "fi",
+  "text": "Enintään {{var:n}} henkilö.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.treatment.max_persons_one",
+  "lang": "en",
+  "text": "Up to {{var:n}} guest.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.treatment.selected_one",
+  "lang": "fi",
+  "text": "Valittu: {{var:when}} · {{var:n}} hlö · {{var:price}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:when}}",
+   "{{var:n}}",
+   "{{var:price}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.treatment.selected_one",
+  "lang": "en",
+  "text": "Selected: {{var:when}} · {{var:n}} guest · {{var:price}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:when}}",
+   "{{var:n}}",
+   "{{var:price}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.shop.ritual_spots_one",
+  "lang": "fi",
+  "text": "enintään {{var:n}} hlö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.shop.ritual_spots_one",
+  "lang": "en",
+  "text": "up to {{var:n}} guest",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.shop.ritual_summary_one",
+  "lang": "fi",
+  "text": "klo {{var:time}} · {{var:n}} hlö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:time}}",
+   "{{var:n}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.shop.ritual_summary_one",
+  "lang": "en",
+  "text": "{{var:time}} · {{var:n}} guest",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:time}}",
+   "{{var:n}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.order.cancel_rule_one",
+  "lang": "fi",
+  "text": "Peruutuspyynnön voi lähettää viimeistään {{var:hours}} tunti ennen vuoron alkua, eli viimeistään {{var:date}}. Alle {{var:hours}} tunti ennen vuoroa peruutus ei ole enää mahdollinen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [
+   "{{var:hours}}",
+   "{{var:date}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.order.cancel_rule_one",
+  "lang": "en",
+  "text": "You can send a cancellation request up to {{var:hours}} hour before your session starts, that is by {{var:date}}. Less than {{var:hours}} hour before the session, cancellation is no longer possible.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [
+   "{{var:hours}}",
+   "{{var:date}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.order.cancel_closed_one",
+  "lang": "fi",
+  "text": "Peruutus ei ole enää mahdollinen, koska vuoron alkuun on alle {{var:hours}} tunti. Jos sinulla on kysyttävää, soita meille: {{var:phone}}.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [
+   "{{var:hours}}",
+   "{{var:phone}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.order.cancel_closed_one",
+  "lang": "en",
+  "text": "Cancellation is no longer possible because your session starts in less than {{var:hours}} hour. If you have any questions, please call us: {{var:phone}}.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:hours}}",
+   "{{var:phone}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.order.closed_hold_expired_one",
+  "lang": "fi",
+  "text": "Tämä varaus on peruttu, koska maksua ei saatu {{var:minutes}} minuutin kuluessa. Paikka on vapautettu muille. Mitään ei ole veloitettu. Voit tehdä uuden varauksen Sipoonjoen Perinnesaunaan.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [
+   "{{var:minutes}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.order.closed_hold_expired_one",
+  "lang": "en",
+  "text": "This booking was cancelled because payment was not received within {{var:minutes}} minute. The time has been released for others. You have not been charged. You can make a new booking at Sipoonjoen Perinnesauna.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 550,
+  "placeholders": [
+   "{{var:minutes}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.gift.buy_lead_one",
+  "lang": "fi",
+  "text": "Valitse avoin lahjakortti tai valmis paketti kahdelle. Kortti on voimassa {{var:months}} kuukauden ajan maksun jälkeen.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:months}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.gift.buy_lead_one",
+  "lang": "en",
+  "text": "Choose an open-value gift card or a ready-made package for two. The card is valid for {{var:months}} month after payment.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [
+   "{{var:months}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.gift.persons_one",
+  "lang": "fi",
+  "text": "{{var:n}} henkilölle",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.gift.persons_one",
+  "lang": "en",
+  "text": "For {{var:n}} person",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.gift.valid_one",
+  "lang": "fi",
+  "text": "Voimassa {{var:months}} kk",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:months}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.gift.valid_one",
+  "lang": "en",
+  "text": "Valid for {{var:months}} month",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:months}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.gift.max_cards_one",
+  "lang": "fi",
+  "text": "Tilaukseen mahtuu enintään {{var:n}} kortti.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.gift.max_cards_one",
+  "lang": "en",
+  "text": "An order can include up to {{var:n}} card.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.gift.err.too_many_cards_one",
+  "lang": "fi",
+  "text": "Tilaukseen mahtuu enintään {{var:n}} kortti.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.gift.err.too_many_cards_one",
+  "lang": "en",
+  "text": "An order can include up to {{var:n}} card.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.gift.deliver_on_hint_one",
+  "lang": "fi",
+  "text": "Aikaisintaan tänään, enintään {{var:months}} kk päässä ({{var:max}} asti).",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:months}}",
+   "{{var:max}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.gift.deliver_on_hint_one",
+  "lang": "en",
+  "text": "From today, up to {{var:months}} month ahead (until {{var:max}}).",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:months}}",
+   "{{var:max}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.gift.err.deliver_on_too_far_one",
+  "lang": "fi",
+  "text": "Ajankohta voi olla enintään {{var:months}} kk päässä.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:months}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.gift.err.deliver_on_too_far_one",
+  "lang": "en",
+  "text": "The date can be at most {{var:months}} month ahead.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:months}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.hold.must_pay_one",
+  "lang": "fi",
+  "text": "Varaus täytyy maksaa {{var:minutes}} minuutin sisään, muuten se peruuntuu ja paikka vapautuu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{var:minutes}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.hold.must_pay_one",
+  "lang": "en",
+  "text": "The booking must be paid within {{var:minutes}} minute, otherwise it is cancelled and your spot is released.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:minutes}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.hold.expired_one",
+  "lang": "fi",
+  "text": "Paikkavaraus vanheni, koska maksua ei saatu {{var:minutes}} minuutin kuluessa. Mitään ei ole veloitettu. Voit tehdä uuden varauksen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [
+   "{{var:minutes}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.hold.expired_one",
+  "lang": "en",
+  "text": "Your spot hold expired because payment was not received within {{var:minutes}} minute. You have not been charged. You can make a new booking.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:minutes}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.hold.checkout.lead_one",
+  "lang": "fi",
+  "text": "Paikka varataan {{var:minutes}} minuutiksi, kun jatkat maksamaan. Valitset maksutavan seuraavassa vaiheessa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:minutes}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.hold.checkout.lead_one",
+  "lang": "en",
+  "text": "Your spot is held for {{var:minutes}} minute when you continue to payment. You choose how to pay in the next step.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:minutes}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.hold.checkout.review_one",
+  "lang": "fi",
+  "text": "Tarkista tiedot. Paikka varataan {{var:minutes}} minuutiksi, kun painat \"Jatka maksamaan\". Varaus vahvistuu vasta maksun jälkeen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [
+   "{{var:minutes}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ },
+ {
+  "key": "ui.hold.checkout.review_one",
+  "lang": "en",
+  "text": "Please check the details. Your spot is held for {{var:minutes}} minute when you press \"Continue to payment\". The booking is confirmed only after payment.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:minutes}}"
+  ],
+  "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
+ }
+]
