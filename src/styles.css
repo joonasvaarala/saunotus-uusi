@@ -333,3 +333,8 @@ html.co-js.co-show-sauna #yritysvuorot,html.co-js.co-show-day #tarjous{display:b
 .quiet-week-note{margin:12px 0 0;padding:10px 14px;border-left:4px solid #7A5530;background:#F4EFE7;color:#2B3A30;border-radius:8px;font-size:15px}
 @media (min-width:1000px){.sess.quiet{grid-template-areas:"t" "n" "q" "b"}.sess.quiet .qp{margin:0 0 12px}}
 @media (forced-colors:active){.sess.quiet .qb{border:1px solid CanvasText}}
+/* Leveyslukko (varmistus, Joonas 25.10.2026): sivu ei koskaan vieritä sivusuunnassa puhelimella. Juurisyyt (&nbsp;-kuvaukset, kalenteri, vuorolista) on korjattu erikseen;
+   clip ei luo vierityssäiliötä (position:sticky toimii), hidden on vara vanhoille selaimille. */
+html,body{max-width:100%;overflow-x:hidden}
+@supports (overflow-x:clip){html,body{overflow-x:clip}}
+img,video,iframe,embed,object,table{max-width:100%}

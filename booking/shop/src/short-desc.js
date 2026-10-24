@@ -3,6 +3,7 @@
 // Tyhjä (myös pelkkä tyhjä editori "<p><br></p>") → nykyinen ote kuvauksesta. Rikas HTML näytetään vain rich-view.js:n (allowlist-puhdistus) kautta.
 import { isRichHtml } from './rich-text.js';
 import { visibleText, richHost } from './rich-view.js';
+import { softenSpaces } from './text-spaces.js';   // &nbsp; sanaväleissä → rivittyy myös pelkässä tekstissä
 
 const has = (v) => !!visibleText(String(v ?? '')).trim();
 
@@ -15,7 +16,7 @@ export function shortRaw(p, lang) {
 /** Johdettu ote yläbanneriin: ensimmäinen virke (ei katkaista kellonaikojen pisteistä "16.30"), enintään ~130 merkkiä sanarajalta. */
 export function derivedShort(raw) {
   const s = String(raw ?? '');
-  const d = (isRichHtml(s) ? visibleText(s) : s).replace(/\s+/g, ' ').trim(); if (!d) return '';
+  const d = (isRichHtml(s) ? visibleText(s) : softenSpaces(s)).replace(/\s+/g, ' ').trim(); if (!d) return '';
   const m = d.match(/^.{20,}?[.!?](?=\s+[A-ZÅÄÖ])/u); let x = m ? m[0] : d;
   if (x.length > 130) x = `${x.slice(0, 130).replace(/\s+\S*$/, '')}…`;
   return x;
@@ -24,7 +25,7 @@ export function derivedShort(raw) {
 /** Johdettu kortin ote: pelkkä teksti leikataan kuten ennen (ei välilyöntien tiivistystä), rikas HTML tiivistetään näkyväksi tekstiksi. */
 export function derivedExcerpt(raw) {
   const s = String(raw ?? '');
-  const plain = isRichHtml(s) ? visibleText(s).replace(/\s+/g, ' ').trim() : s;
+  const plain = isRichHtml(s) ? visibleText(s).replace(/\s+/g, ' ').trim() : softenSpaces(s);
   return plain.slice(0, 170) + (plain.length > 170 ? '…' : '');
 }
 
@@ -32,7 +33,7 @@ export function derivedExcerpt(raw) {
 export function heroShort(h, p, lang, desc) {
   const s = shortRaw(p, lang);
   if (s && isRichHtml(s)) return { node: richHost(h, s, 'bk-hero-short', true), text: '' };
-  return { node: null, text: s || derivedShort(desc) };
+  return { node: null, text: softenSpaces(s) || derivedShort(desc) };
 }
 
 /** Tuotekortin kuvausosa (.bk-desc): lyhyt kuvaus kokonaan (puhdistettuna), muuten johdettu ote. */
