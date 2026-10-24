@@ -1,5 +1,5 @@
 -- booking_165: tietosuojaselosteen (kb.policies id 7) EN-tekstiavaimet + needs_translation pois neljältä fi-tekstiltä.
--- Väliaikainen versio 20261024370000 (tuotannon versio voi olla eri; Bottiavustus ajaa). Ei public-skeemaa, ei skeemamuutoksia, ei julkaise tekstejä.
+-- Väliaikainen versio 20261024192515 (tuotannon versio voi olla eri; Bottiavustus ajaa). Ei public-skeemaa, ei skeemamuutoksia, ei julkaise tekstejä.
 --
 -- 1) policy.7.title [en] -> kb.policies.title_en ja policy.7.body [en] -> kb.policies.body_en tekstijärjestelmään (class protected, max 300 / 20000).
 --    kb_policies_en_source (20261024123109) rajasi tietosuojaselosteen pois (s.id <> 7, category privacy, otsikko tietosuoja/privacy), koska
@@ -20,7 +20,7 @@
 --   booking._texts_register_sources: 6e5d43c7dbbc13c75830cd492d94eddd
 -- Tämän migraation jälkeen: booking._texts_register_sources: ff8a4cb6fd632d1d967f03c16b0101b1
 -- Muita funktioita ei korvata (_texts_reg 028865c7d39e267063c336dcd8b54c11, texts_propose, texts_submit, admin_texts_approve, _text_publish ennallaan).
--- Rollback: rollbacks/20261024370000_booking_165_ROLLBACK.sql. Testi: tests/t165_policy_en_keys.sql (paikallinen PG17).
+-- Rollback: rollbacks/20261024192515_booking_165_ROLLBACK.sql. Testi: tests/t165_policy_en_keys.sql (paikallinen PG17).
 set local lock_timeout = '5s';
 
 do $g$

@@ -1,4 +1,4 @@
--- t165: tietosuojaselosteen EN-avaimet + needs_translation (booking_165, väliaikainen versio 20261024370000).
+-- t165: tietosuojaselosteen EN-avaimet + needs_translation (booking_165, väliaikainen versio 20261024192515).
 -- A lähtötila = tuotanto (rollback palauttaa _texts_register_sources-funktion tuotannon md5:een): policy.7.title/body [en] puuttuvat, texts_propose -> not_found,
 -- B migraatio: funktion md5, tyhjät protected-rivit vain id 7:lle (muut privacy-rivit edelleen pois), ei julkista tekstiä, kb.policies ennallaan,
 --   needs_translation pois vain vartijat täyttäviltä fi-riveiltä (en vanhempi tai teksti muuttunut -> ei), muut site_texts-rivit ennallaan,
@@ -63,7 +63,7 @@ update booking.site_texts set published_at = (select ts from t165_ts) - interval
 update booking.site_texts set published_version = 3, latest_version = 3 where key = 'seo.booking_info.description' and lang = 'fi';
 
 -- ---------- A: tuotannon lähtötila ----------
-\ir ../rollbacks/20261024370000_booking_165_ROLLBACK.sql
+\ir ../rollbacks/20261024192515_booking_165_ROLLBACK.sql
 select booking._texts_register_sources();
 do $a$
 begin
@@ -77,7 +77,7 @@ end $a$;
 create temp table t165_before as select pg_temp.fp_texts() fp, pg_temp.fp_kb() kb;
 
 -- ---------- B: migraatio ----------
-\ir ../migrations/20261024370000_booking_165_policy_en_keys.sql
+\ir ../migrations/20261024192515_booking_165_policy_en_keys.sql
 do $b$
 declare t booking.site_texts; e jsonb;
 begin
@@ -106,7 +106,7 @@ end $b$;
 update booking.site_texts set published_at = (select ts from t165_ts) where key = 'page.terms.note' and lang = 'en';
 update booking.site_texts set published_version = 2, latest_version = 2 where key = 'seo.booking_info.description' and lang = 'fi';
 create temp table t165_c as select count(*) n, pg_temp.fp_texts() fp from booking.site_texts;
-\ir ../migrations/20261024370000_booking_165_policy_en_keys.sql
+\ir ../migrations/20261024192515_booking_165_policy_en_keys.sql
 do $c$
 begin
   perform pg_temp.ck(pg_temp.nt('page.terms.note', 'fi') = false and pg_temp.nt('seo.booking_info.description', 'fi') = false, 'C1: uudelleenajo poisti loputkin liput (en = fi-aika)');
@@ -115,8 +115,8 @@ begin
 end $c$;
 
 -- ---------- D: rollback x2 + migraatio uudelleen ----------
-\ir ../rollbacks/20261024370000_booking_165_ROLLBACK.sql
-\ir ../rollbacks/20261024370000_booking_165_ROLLBACK.sql
+\ir ../rollbacks/20261024192515_booking_165_ROLLBACK.sql
+\ir ../rollbacks/20261024192515_booking_165_ROLLBACK.sql
 do $d$
 begin
   perform pg_temp.ck(pg_temp.fmd5() = '6e5d43c7dbbc13c75830cd492d94eddd', 'D1: rollback palauttaa tuotannon md5:n 6e5d43c7dbbc13c75830cd492d94eddd');
@@ -125,7 +125,7 @@ begin
   perform pg_temp.ck(pg_temp.fp_texts() = (select fp from t165_c) and pg_temp.fp_kb() = (select kb from t165_before), 'D4: muut tekstit ja kb.policies ennallaan');
   perform pg_temp.ck((select count(*) from booking.site_texts where key in ('policy.7.title', 'policy.7.body') and lang = 'fi') = 2, 'D5: fi-rivit ennallaan');
 end $d$;
-\ir ../migrations/20261024370000_booking_165_policy_en_keys.sql
+\ir ../migrations/20261024192515_booking_165_policy_en_keys.sql
 
 -- ---------- E: propose -> submit -> approve ----------
 create temp table t165_e(version_id bigint, body_vid bigint);
@@ -144,7 +144,7 @@ begin
   insert into t165_e values ((v ->> 'version_id')::bigint, (w ->> 'version_id')::bigint);
 end $e1$;
 savepoint t165_rb1;
-\ir ../rollbacks/20261024370000_booking_165_ROLLBACK.sql
+\ir ../rollbacks/20261024192515_booking_165_ROLLBACK.sql
 select nextval('t165_after_rb');
 rollback to savepoint t165_rb1;
 do $e2$
@@ -166,7 +166,7 @@ begin
 end $e2$;
 select setval('t165_after_rb', 1, false);
 savepoint t165_rb2;
-\ir ../rollbacks/20261024370000_booking_165_ROLLBACK.sql
+\ir ../rollbacks/20261024192515_booking_165_ROLLBACK.sql
 select nextval('t165_after_rb');
 rollback to savepoint t165_rb2;
 do $f$

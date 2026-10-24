@@ -1,4 +1,4 @@
--- ROLLBACK booking_165 (migraatio 20261024370000_booking_165_policy_en_keys.sql). Uudelleenajettava (toinen ajo ei tee mitään).
+-- ROLLBACK booking_165 (migraatio 20261024192515_booking_165_policy_en_keys.sql). Uudelleenajettava (toinen ajo ei tee mitään).
 -- 1) Poistaa site_texts-rivit policy.7.title [en] ja policy.7.body [en] (ja niiden versiot). Keskeytyy eikä muuta mitään, jos jompikumpi
 --    on jo julkaistu (published_version > 0: kb.policies 7 title_en/body_en on kirjoitettu -> päätetään erikseen) tai sillä on avoin
 --    luonnos/ehdotus/hyväksytty versio (hylkää ensin: booking.admin_texts_reject).

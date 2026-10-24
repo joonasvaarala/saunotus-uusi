@@ -9,8 +9,8 @@ import { dirname, join } from 'node:path';
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const read = (rel) => readFileSync(join(repo, rel), 'utf8');
-const MIG = 'booking/supabase/migrations/20261024370000_booking_165_policy_en_keys.sql';
-const RB = 'booking/supabase/rollbacks/20261024370000_booking_165_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024192515_booking_165_policy_en_keys.sql';
+const RB = 'booking/supabase/rollbacks/20261024192515_booking_165_ROLLBACK.sql';
 const T = 'booking/supabase/tests/t165_policy_en_keys.sql';
 const PROD = '6e5d43c7dbbc13c75830cd492d94eddd'; // tuotannon md5(pg_get_functiondef(booking._texts_register_sources)) ennen booking_165:tä
 const NEW = 'ff8a4cb6fd632d1d967f03c16b0101b1'; // booking_165:n jälkeen
@@ -26,7 +26,7 @@ const count = (s, sub) => s.split(sub).length - 1;
 const code = (s) => s.replace(/--[^\n]*/g, '');
 
 test('booking_165: tiedostot olemassa, yksi migraatio, ei public-skeemaa eikä skeemamuutoksia', () => {
-  assert.deepEqual(readdirSync(join(repo, 'booking/supabase/migrations')).filter((n) => /booking_165_/.test(n)), ['20261024370000_booking_165_policy_en_keys.sql']);
+  assert.deepEqual(readdirSync(join(repo, 'booking/supabase/migrations')).filter((n) => /booking_165_/.test(n)), ['20261024192515_booking_165_policy_en_keys.sql']);
   for (const f of [MIG, RB]) {
     const s = code(read(f));
     assert.doesNotMatch(s, /\bpublic\./i, `${f}: ei public-skeemaa`);
@@ -78,8 +78,8 @@ test('rollback: funktio täsmälleen tuotannon muodossa (md5 kommentissa), kielt
 
 test('SQL-testi t165 ajaa migraation ja rollbackin, md5:t yhtenevät; CI ajaa tämän testin', () => {
   const t = read(T);
-  assert.match(t, /\\ir \.\.\/migrations\/20261024370000_booking_165_policy_en_keys\.sql/);
-  assert.match(t, /\\ir \.\.\/rollbacks\/20261024370000_booking_165_ROLLBACK\.sql/);
+  assert.match(t, /\\ir \.\.\/migrations\/20261024192515_booking_165_policy_en_keys\.sql/);
+  assert.match(t, /\\ir \.\.\/rollbacks\/20261024192515_booking_165_ROLLBACK\.sql/);
   assert.ok(t.includes(`'${PROD}'`) && t.includes(`'${NEW}'`));
   assert.match(t, /TESTRESULT pass=% fail=%/);
   assert.match(read('.github/workflows/pages.yml'), /node --test booking\/tests\/tietosuoja-en-avaimet\.test\.mjs/);
