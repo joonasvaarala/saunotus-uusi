@@ -19,7 +19,7 @@
 --   admin_quiet_rules_list, admin_quiet_rule_upsert, admin_quiet_rule_delete, admin_quiet_set_enabled, admin_quiet_preview, public_quiet_offers,
 --   trigger order_items_quiet_reset, asetus quiet_discounts.enabled.
 -- Ajojärjestys: booking_159:n ja booking_161:n (20261024182650) jälkeen; ei riipu booking_161:stä. Yksi transaktio. Uudelleenajettava.
--- Rollback: rollbacks/20261024213000_booking_162_ROLLBACK.sql
+-- Rollback: rollbacks/20261024184729_booking_162_ROLLBACK.sql
 set local lock_timeout = '5s';
 
 do $g$

@@ -1,7 +1,8 @@
--- t162: hiljaisten aikojen ale (booking_162, migraatio 20261024213000).
+-- t162: hiljaisten aikojen ale (booking_162, migraatio 20261024184729).
 -- A rakenne, oikeudet ja oletukset (pois päältä), B pois päältä kaikki kuten ennen, C kytkin ja oikeudet, D tarjoukset (tyhjä vuoro, portaat,
 -- rajat ≤, tuote 49 samassa saunassa, tilasulku), E varaus lukitsee alennetun hinnan (koko vuoron hinta lisähenkilöineen, ei lisäpalveluita),
--- F alennuskoodi: ei pinoudu, suurempi etu voittaa (tasatilanteessa hiljainen ale, koodin käyttökertaa ei kuluteta), G siirto poistaa alen,
+-- F alennuskoodi: ei pinoudu, suurempi etu voittaa (tasatilanteessa hiljainen ale, koodin käyttökertaa ei kuluteta), G siirto poistaa alen
+-- (E:n varaus vahvistetaan ensin testin sisällä, koska tuotannossa verkkovaraus on maksamaton pito),
 -- H hallinnan säännöt (validointi, päällekkäisyys, poisto), I migraation uudelleenajo, J rollback (tuotannon md5) + rollbackin uudelleenajo.
 -- Ajo (psql, paikallinen PG17, migraatiot ja fixtures/10_test_helpers.sql ajettu):
 --   cd booking/supabase/tests/discounts && psql -X -v ON_ERROR_STOP=0 -f t162_quiet_discounts.sql
@@ -31,7 +32,7 @@ do $t$ begin
 end $t$;
 
 -- I: migraation uudelleenajo
-\ir ../../migrations/20261024213000_booking_162_quiet_discounts.sql
+\ir ../../migrations/20261024184729_booking_162_quiet_discounts.sql
 
 do $t$
 declare
@@ -175,6 +176,12 @@ begin
 
   -- ===== G: siirto poistaa alen
   v_res := (select id from booking.reservations where order_id = (select id from booking.orders where public_token = v_tok));
+  -- E:n verkkovaraus on tuotannon asetuksilla maksamaton pito (pending), jota ei voi siirtää (BK001 not_changeable).
+  -- Vahvistetaan testin tilaus ja varaus tässä transaktiossa kuten maksun vahvistus tekee (sama päivitys kuin booking_162:n
+  -- vahvistuspolussa); tyhjällä paikalliskannalla varaus on jo vahvistettu, jolloin päivitykset eivät muuta mitään.
+  update booking.reservations set status = 'confirmed', hold_expires_at = null where id = v_res and status = 'pending';
+  update booking.orders set status = 'confirmed', confirmed_at = coalesce(confirmed_at, now()), hold_kind = null
+   where public_token = v_tok and status = 'pending';
   perform test.login(u_adm);
   j := booking.admin_change_booking(v_res, s6.rule_id, s6.session_date, null);
   perform test.logout();
@@ -204,8 +211,8 @@ begin
 end $t$;
 
 -- J: rollback (ajetaan kahdesti)
-\ir ../../rollbacks/20261024213000_booking_162_ROLLBACK.sql
-\ir ../../rollbacks/20261024213000_booking_162_ROLLBACK.sql
+\ir ../../rollbacks/20261024184729_booking_162_ROLLBACK.sql
+\ir ../../rollbacks/20261024184729_booking_162_ROLLBACK.sql
 do $t$
 declare v_md5 jsonb := (select jsonb_object_agg(p.proname, md5(pg_get_functiondef(p.oid))) from pg_proc p where p.pronamespace = 'booking'::regnamespace
   and p.proname in ('public_create_booking', 'public_create_booking_code', 'public_preview_code')); j jsonb;

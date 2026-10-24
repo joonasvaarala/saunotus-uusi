@@ -1,4 +1,4 @@
--- ROLLBACK booking_162 (migraatio 20261024213000_booking_162_quiet_discounts.sql). Uudelleenajettava (toinen ajo ei tee mitään).
+-- ROLLBACK booking_162 (migraatio 20261024184729_booking_162_quiet_discounts.sql). Uudelleenajettava (toinen ajo ei tee mitään).
 -- HUOM: poistaa taulun booking.quiet_discount_rules (säännöt) ja asetuksen quiet_discounts.enabled pysyvästi.
 -- Jo tehtyjen varausten lukitut hinnat (order_items.line_total_gross / discount_amount / price_breakdown.quiet) jäävät ennalleen.
 -- Ota ennen ajoa talteen: select * from booking.quiet_discount_rules; select * from booking.settings where key = 'quiet_discounts.enabled';
