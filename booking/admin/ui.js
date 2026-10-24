@@ -42,9 +42,20 @@ export const isJohku = (r) => r?.source === 'johku';
 export const sourceBadge = (r) => (isJohku(r) ? h('span', { class: 'badge src-johku', title: 'Tuotu Johku-varausjärjestelmästä', text: 'Johku' }) : null);
 
 let toastTimer;
+// Avoin modaali-dialogi (showModal) on selaimen ylimmällä tasolla: body-elementissä oleva ilmoitus jäisi sen alle näkymättömiin.
+// Siksi ilmoitus siirretään päällimmäisen avoimen dialogin sisään (ja takaisin bodyyn, kun dialogia ei ole).
+export function toastHost(doc = globalThis.document) {
+  const isModal = (d) => { try { return !d.matches || d.matches(':modal'); } catch { return true; } };
+  const open = [...(doc?.querySelectorAll?.('dialog[open]') || [])].filter(isModal);
+  return open.length ? open[open.length - 1] : doc?.body;
+}
 export function toast(msg, kind = 'ok') {
   let el = document.getElementById('toast');
-  if (!el) { el = h('div', { id: 'toast', role: 'status', 'aria-live': 'polite' }); document.body.append(el); }
+  if (!el) el = h('div', { id: 'toast' });
+  const host = toastHost(document);
+  if (host && el.parentNode !== host) host.append(el);
+  el.setAttribute('role', kind === 'err' ? 'alert' : 'status');
+  el.setAttribute('aria-live', kind === 'err' ? 'assertive' : 'polite');
   el.className = `toast ${kind} show`; el.textContent = msg;
   clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), kind === 'err' ? 6000 : kind === 'warn' ? 7000 : 2800);
 }

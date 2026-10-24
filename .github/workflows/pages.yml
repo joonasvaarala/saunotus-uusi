@@ -102,6 +102,8 @@ jobs:
       - run: node --test booking/tests/tilaussuodatin.test.mjs
       # Laskutus (booking_90–93): viite, OVT, invoiced-suodatin, tuontitekstit, dry_run-provider
       - run: node --test booking/tests/laskutus.test.mjs
+      # Uusi lasku › Tallenna luonnos ei jää hiljaiseksi: kenttävirheet, palvelinvirheen kohdekenttä, ilmoitus modaalin päällä, tekstit FI+EN + pending-import-65
+      - run: node --test booking/tests/lasku-luonnos-tallennus.test.mjs
       # Hiljaisten aikojen ale (booking_162): logiikka, tekstit FI/EN + pending-import-59, migraatio/rollback-rakenne, mockit, viikko-ohjelma
       - run: node --test booking/tests/hiljaiset-ajat.test.mjs
       # Saunarituaali yleisen vuoron lisäpalveluna (booking_166): aikasääntö, kassan logiikka, mock, tekstit FI/EN + pending-import-62, migraatio/rollback-rakenne

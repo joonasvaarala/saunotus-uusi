@@ -1,12 +1,13 @@
 // Hallinta › Laskut: haku näkyvissä, muut suodattimet kiinni. Luonnos, lähetys, hyvitys, itse tehty lasku tai tilauksesta.
 import { rpc, functionUrl, select } from '../sb.js';
-import { h, money, toast, dialog, field, empty, todayHel, addDays } from '../ui.js';
+import { h, money, toast, dialog, field, empty, todayHel, addDays, errMsg } from '../ui.js';
 import { countActive, filterDrawer } from '../filter-drawer.js';
 import { invoiceText, loadInvoiceTexts } from '../invoices-texts.js';
 import { lookupSearch } from './customerform.js';
 import { customerDirty, routeSearchTerm } from '../invoice-customer-search.js';
 import { fetchYtj } from '../ytj.js';
 import { mountInvoiceLines } from '../invoice-line-form.js';
+import { serverErrorField, validateInvoiceHeader } from '../invoice-header-validate.js';
 
 const STATUSES = ['draft', 'sent', 'paid', 'overdue', 'credited', 'voided'];
 const tx = (k) => invoiceText(k);
@@ -162,7 +163,34 @@ export async function render() {
     const f = {};
     const cust = { row: null, snap: null, bookingId: null };
     const box = h('form', { id: 'invoice-new-form', class: 'form inv-editor', 'data-testid': 'invoice-new-form', novalidate: true });
-    const add = (key, label, attrs = {}) => { f[key] = input({ name: key, ...attrs }); return field(label, f[key]); };
+    const fErr = {};
+    const add = (key, label, attrs = {}) => {
+      f[key] = input({ name: key, ...attrs });
+      fErr[key] = h('span', { class: 'fld-err', role: 'alert', 'data-testid': `invoice-err-${key}` });
+      f[key].addEventListener('input', () => setFieldError(key, ''));
+      const node = field(label, f[key]);
+      node.append(fErr[key]);
+      return node;
+    };
+    function setFieldError(key, msg) {
+      if (!f[key] || !fErr[key]) return;
+      fErr[key].textContent = msg || '';
+      if (msg) f[key].setAttribute('aria-invalid', 'true'); else f[key].removeAttribute('aria-invalid');
+    }
+    function clearErrors() {
+      for (const k of Object.keys(fErr)) setFieldError(k, '');
+      linesUi.setServerError('');
+      saveErr.textContent = ''; saveErr.hidden = true;
+    }
+    // Virhe näkyy tallennusnapin yläpuolella (role=alert), ei erillisenä ilmoituksena: sama viesti ei toistu kahdesti.
+    function showSaveError(msg) {
+      saveErr.textContent = msg; saveErr.hidden = false;
+    }
+    function reveal(el) {
+      if (!el) return;
+      el.scrollIntoView?.({ block: 'center' });
+      el.focus?.({ preventScroll: true });
+    }
     const today = todayHel();
     const readFields = () => ({
       company_name: f.company_name.value, business_id: f.business_id.value, contact_name: f.contact_name.value, email: f.email.value, phone: f.phone.value,
@@ -318,25 +346,60 @@ export async function render() {
       add('notes', tx('ui.admin.invoices.notes')),
       linesUi.node);
     const dlg = dialog(tx('ui.admin.invoices.new'), box, { wide: true });
-    dlg.append(h('div', { class: 'inv-savebar' }, h('button', { class: 'btn primary', type: 'submit', form: 'invoice-new-form', 'data-testid': 'invoice-save' }, tx('ui.admin.invoices.save'))));
+    const saveLabel = tx('ui.admin.invoices.save');
+    const saveBtn = h('button', { class: 'btn primary', type: 'submit', form: 'invoice-new-form', 'data-testid': 'invoice-save' }, saveLabel);
+    const saveErr = h('p', { class: 'inv-save-err', role: 'alert', 'data-testid': 'invoice-save-error', hidden: true });
+    dlg.append(h('div', { class: 'inv-savebar' }, saveErr, saveBtn));
+    let saving = false;
+    function setBusy(on) {
+      saving = on;
+      saveBtn.disabled = on;
+      if (on) {
+        saveBtn.setAttribute('aria-busy', 'true');
+        saveBtn.replaceChildren(h('span', { class: 'spinner', 'aria-hidden': 'true' }), ` ${tx('ui.admin.invoices.saving')}`);
+      } else {
+        saveBtn.removeAttribute('aria-busy');
+        saveBtn.replaceChildren(saveLabel);
+      }
+    }
     box.onsubmit = async (ev) => {
       ev.preventDefault();
+      if (saving) return;
+      clearErrors();
       if (!cust.row) applyMoved(cs.input.value);
       const payload = payloadOf();
-      const lines = linesUi.validateAndPayload();
-      if (!lines) return;
-      if (!payload.company_name || payload.company_name.length < 2) { toast(tx('ui.admin.invoices.need_company')); f.company_name.focus(); return; }
+      const headerErrs = validateInvoiceHeader({ ...payload, invoice_date: f.invoice_date.value, due_date: f.due_date.value, notes: f.notes.value });
+      for (const er of headerErrs) setFieldError(er.key, tx(`ui.admin.invoices.${er.code}`));
+      const lines = linesUi.validateAndPayload({ focus: false });
+      if (headerErrs.length || !lines) {
+        // Lomakkeen ensimmäinen virhe (asiakaskentät ovat rivien yläpuolella) näkyviin ja fokukseen, ja näkyvä yhteenveto tallennusnapin yläpuolelle.
+        if (headerErrs.length) reveal(f[headerErrs[0].key]); else linesUi.focusFirstError();
+        showSaveError(tx('ui.admin.invoices.check_fields'));
+        return;
+      }
+      setBusy(true);
       try {
         const linked = await persistCustomer(payload);
-        if (!linked) return;
+        if (!linked) { setBusy(false); return; }
         const inv = await rpc('admin_save_invoice', { p_id: existing, p: {
           customer_id: linked.id, snapshot_mode: linked.mode, customer_override: linked.mode === 'invoice' ? payload : null,
           invoice_date: f.invoice_date.value || today, due_date: f.due_date.value || addDays(today, dueDays),
           buyer_reference: payload.buyer_reference, notes: f.notes.value.trim() || null,
           lines,
         } });
-        dlg.close(); toast(tx('ui.admin.invoices.saved')); await draw(); detail.replaceChildren(preview(inv));
-      } catch (e) { toast(e.message || String(e)); }
+        setBusy(false);
+        dlg.close();
+        toast(tx('ui.admin.invoices.saved'));
+        try { await draw(); } catch { /* lista näyttää oman virheensä */ }
+        detail.replaceChildren(preview(inv));
+        detail.scrollIntoView?.({ block: 'start' });
+      } catch (e) {
+        setBusy(false);
+        const msg = errMsg(e) || tx('ui.admin.invoices.save_failed');
+        const target = serverErrorField(e?.code);
+        if (target === 'lines') { linesUi.setServerError(msg); linesUi.focusFirstError(); } else if (target && f[target]) { setFieldError(target, msg); reveal(f[target]); }
+        showSaveError(`${tx('ui.admin.invoices.save_failed')} ${msg}`);
+      }
     };
   }
 }

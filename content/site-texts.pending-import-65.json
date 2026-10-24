@@ -1,0 +1,262 @@
+[
+ {
+  "key": "ui.admin.invoices.saving",
+  "lang": "fi",
+  "text": "Tallennetaan…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.saving",
+  "lang": "en",
+  "text": "Saving…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.check_fields",
+  "lang": "fi",
+  "text": "Tarkista merkityt kentät. Luonnosta ei tallennettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.check_fields",
+  "lang": "en",
+  "text": "Check the highlighted fields. The draft was not saved.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.save_failed",
+  "lang": "fi",
+  "text": "Tallennus epäonnistui:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.save_failed",
+  "lang": "en",
+  "text": "Saving failed:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_business_id",
+  "lang": "fi",
+  "text": "Tarkista Y-tunnus (muoto 1234567-8).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_business_id",
+  "lang": "en",
+  "text": "Check the business ID (format 1234567-8).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_email",
+  "lang": "fi",
+  "text": "Tarkista sähköpostiosoite.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_email",
+  "lang": "en",
+  "text": "Check the email address.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_ovt",
+  "lang": "fi",
+  "text": "Tarkista verkkolaskuosoite. OVT alkaa 0037 ja sisältää Y-tunnuksen numerot.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_ovt",
+  "lang": "en",
+  "text": "Check the e-invoice address. OVT starts with 0037 and contains the business ID digits.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_ovt_missing",
+  "lang": "fi",
+  "text": "Anna myös verkkolaskuosoite.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_ovt_missing",
+  "lang": "en",
+  "text": "Enter the e-invoice address too.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_operator",
+  "lang": "fi",
+  "text": "Tarkista välittäjätunnus.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_operator",
+  "lang": "en",
+  "text": "Check the operator ID.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_operator_missing",
+  "lang": "fi",
+  "text": "Anna myös välittäjätunnus.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_operator_missing",
+  "lang": "en",
+  "text": "Enter the operator ID too.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_reference",
+  "lang": "fi",
+  "text": "Viite on liian pitkä (enintään 100 merkkiä).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_reference",
+  "lang": "en",
+  "text": "The reference is too long (max 100 characters).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_date",
+  "lang": "fi",
+  "text": "Tarkista päivämäärä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_date",
+  "lang": "en",
+  "text": "Check the date.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_due",
+  "lang": "fi",
+  "text": "Eräpäivä ei voi olla ennen laskun päivää.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_due",
+  "lang": "en",
+  "text": "The due date cannot be before the invoice date.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_notes",
+  "lang": "fi",
+  "text": "Lisätiedot ovat liian pitkät (enintään 2000 merkkiä).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.invoices.err_notes",
+  "lang": "en",
+  "text": "Additional info is too long (max 2000 characters).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Uusi lasku: tallennuksen tila, kenttäkohtaiset virheet ja virheilmoitus (Tallenna luonnos ei enää jää hiljaiseksi). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+ }
+]
