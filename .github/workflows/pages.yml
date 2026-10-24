@@ -167,6 +167,8 @@ jobs:
       # pg_cron booking_waitlist_sweep (minuutin välein) ilmoittaa kaikille mahtuville; vanhentuneen pidon haltija varaa normaalisti (hold_expired).
       # Uusi vapautuminen = vapaa kapasiteetti > waitlist_session_state.offered_free → yksi pito ensimmäiselle, jolla ei ole ollut pitoa.
       # t139 (booking/supabase/tests/waitlist/t139_waitlist_single_hold.sql) ajetaan paikallisessa PG17:ssä t137:n tapaan.
+      # Pidon aikana paikka ei ole julkisessa myynnissä (_pool_peak vähentää voimassa olevat pidot; haltija, henkilökunta ja service_role ohittavat):
+      # t139_waitlist_hold_off_sale.sql samassa paikallisessa ajossa.
       - run: node --test booking/tests/jonotuslista-yksi-pito.test.mjs
       # booking_133: päivänippu + kuukauden saatavuus yhdellä RPC:llä (SQL-vertailu booking_125:een: booking/tests/paiva-ja-saatavuus-nopeutus-regressio.sql, ajetaan testikannassa)
       - run: node --test booking/tests/paiva-ja-saatavuus-nopeutus.test.mjs

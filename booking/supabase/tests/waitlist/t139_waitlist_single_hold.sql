@@ -147,11 +147,14 @@ begin
   update booking.reservations set status = 'cancelled' where id = pg_temp.rid('muu3@t139.example');
   perform pg_temp.ck(pg_temp.held('w3@t139.example') and pg_temp.mails('w3@t139.example') = 2, 'D14: uusi vapautuminen → pito W3:lle (uusi ilmoitus uudesta vapautumisesta)');
   -- Uusi vapautuminen, kun mahtuvilla jonottajilla on kaikilla jo ollut pito → ei pitoa, ilmoitus kaikille mahtuville.
+  -- Pidon aikana pidetyt 2 paikkaa eivät ole myynnissä; vanhenemisen jälkeen ne myydään.
+  b := test.pub_book(v_rule, d3, 1, 'muu4@t139.example');
+  perform pg_temp.ck(not (b ->> 'ok')::boolean and b ->> 'code' = 'capacity_exceeded', 'D15a: W3:n pidon aikana viimeisiä pidettyjä paikkoja ei voi varata');
+  perform pg_temp.expire('w3@t139.example');
   b := test.pub_book(v_rule, d3, 2, 'muu4@t139.example'); m := booking.waitlist_sweep();
-  perform pg_temp.ck((b ->> 'ok')::boolean and pg_temp.offered(v_rule, d3) = 0, 'D15: täynnä taas, pidon aikana kirjattu lasku (offered_free 0)');
+  perform pg_temp.ck((b ->> 'ok')::boolean and pg_temp.offered(v_rule, d3) = 0, 'D15: pito vanheni → paikat myynnissä, varattu täyteen (offered_free 0)');
   c := pg_temp.claim(jp ->> 'token');
   perform pg_temp.ck(not (c ->> 'enough')::boolean and pg_temp.st('w1@t139.example') = 'waiting', 'D16: W1 (vanhentunut pito) takaisin jonoon');
-  perform pg_temp.expire('w3@t139.example');
   c := pg_temp.claim(jr ->> 'token');
   perform pg_temp.ck(not (c ->> 'enough')::boolean and (c ->> 'hold_expired')::boolean and pg_temp.st('w3@t139.example') = 'waiting', 'D17: W3 (vanhentunut pito) takaisin jonoon');
   update booking.reservations set status = 'cancelled' where id = pg_temp.rid('muu4@t139.example');

@@ -16,15 +16,17 @@ const code = (s) => s.replace(/--[^\n]*/g, '');
 const MIG = 'booking/supabase/migrations/20261024115000_booking_139_waitlist_single_hold.sql';
 const RB = 'booking/supabase/rollbacks/20261024115000_booking_139_ROLLBACK.sql';
 const T139 = 'booking/supabase/tests/waitlist/t139_waitlist_single_hold.sql';
+const T139H = 'booking/supabase/tests/waitlist/t139_waitlist_hold_off_sale.sql';
 const MIG137 = 'booking/supabase/migrations/20261024080249_booking_137_waitlist_offer_window.sql';
+const fnU = (sql, name) => { const i = sql.indexOf(`CREATE OR REPLACE FUNCTION booking.${name}(`); assert.ok(i >= 0, name); const j = sql.indexOf('$function$', sql.indexOf('$function$', i) + 10); return sql.slice(i, j); };
 const fn = (sql, name) => { const i = sql.indexOf(`create or replace function booking.${name}(`); assert.ok(i >= 0, name); const j = sql.indexOf('end $$;', i); return sql.slice(i, j); };
 
-test('booking_139: migraatio, rollback ja SQL-testi olemassa, aikaleima booking_137:n ja booking_138:n jälkeen, ei numeroa 140', () => {
-  for (const p of [MIG, RB, T139]) assert.ok(existsSync(resolve(repo, p)), p);
+test('booking_139: migraatio, rollback ja SQL-testit olemassa, aikaleima booking_137:n ja booking_138:n jälkeen, numero 139 ainoa', () => {
+  for (const p of [MIG, RB, T139, T139H]) assert.ok(existsSync(resolve(repo, p)), p);
   const migs = readdirSync(resolve(repo, 'booking/supabase/migrations')).filter((f) => f.endsWith('.sql')).sort();
   const i = migs.indexOf('20261024115000_booking_139_waitlist_single_hold.sql');
   assert.ok(i > migs.findIndex((f) => /_booking_138_/.test(f)) && i > migs.indexOf('20261024080249_booking_137_waitlist_offer_window.sql'));
-  assert.ok(!migs.some((f) => /_booking_140_/.test(f)), 'booking_140 on varattu toiselle työlle');
+  assert.equal(migs.filter((f) => /_booking_139_/.test(f)).length, 1, 'vain yksi booking_139 (numero 140 on toisen työn)');
 });
 
 test('migraatio booking_139: pidon historia ja vuorokohtainen tarjottu kapasiteetti, taulu suljettu', () => {
@@ -72,7 +74,7 @@ test('rollback booking_139: booking_137:n funktiot takaisin, uudet oliot pois oi
   for (const s of ["return jsonb_build_object('ok',false,'code','offer_expired');", 'and booking._waitlist_offer_expires_at(coalesce(o.notified_at,o.updated_at),o.starts_at) > now()'])
     assert.ok(rb.includes(s) && m137.includes(s), s);
   const fns = code(rb.slice(0, rb.indexOf('drop function')));
-  assert.doesNotMatch(fns, /hold_expires_at|waitlist_session_state|_waitlist_process_session|_waitlist_notify_entry/);
+  assert.doesNotMatch(fns, /(?<![.'])hold_expires_at|waitlist_session_state|_waitlist_process_session|_waitlist_notify_entry/);
   const iDrop = rb.indexOf('drop function if exists booking.waitlist_sweep();');
   assert.ok(iDrop > rb.lastIndexOf('CREATE OR REPLACE FUNCTION'));
   assert.ok(rb.indexOf('drop table if exists booking.waitlist_session_state;') > iDrop);
@@ -96,4 +98,63 @@ test('kauppa: hold_expired → oma teksti, tavallinen varaus (ei lukitusta, ei e
   assert.ok(shop.indexOf('c?.ok && c.hold_expired') < shop.indexOf('t.waitlistClaimNotEnough'), 'ennen ei mahdu -estoa');
   assert.match(shop, /c\.code === 'offer_expired' \? t\.waitlistClaimExpired/);
   assert.ok(!existsSync(resolve(repo, 'content/site-texts.pending-import-40.json')), 'ei uusia tekstejä (teksti ui.shop.waitlist_claim_expired on pending-import-39:ssä)');
+});
+
+test('migraatio booking_139: pidon aikana paikka ei ole julkisessa myynnissä (_pool_peak), haltija, henkilökunta ja lukitus', () => {
+  const sql = rd(MIG);
+  const peak = code(fnU(sql, '_pool_peak'));
+  assert.match(peak, /from booking\.waitlist_entries w/);
+  assert.match(peak, /w\.status = 'notified' and w\.hold_expires_at > now\(\)/, 'vanheneminen palauttaa myyntiin now()-ehdolla');
+  assert.match(peak, /booking\._waitlist_hold_counts\(w\.id\)/);
+  const hc = code(sql.slice(sql.indexOf('create or replace function booking._waitlist_hold_counts('), sql.indexOf('create index if not exists waitlist_entries_active_hold_idx')));
+  assert.match(hc, /current_setting\('booking\.waitlist_hold_exempt', true\)/);
+  assert.match(hc, /when 'all' then false\s+when p_id::text then false/, 'jonon sisäinen laskenta ja haltijan oma pito');
+  assert.match(hc, /'service_role' or booking\.is_staff\(\)/, 'henkilökunta ja service_role ohittavat pidon');
+  assert.match(sql, /revoke all on function booking\._waitlist_hold_counts\(bigint\) from public,anon,authenticated;/);
+  assert.match(sql, /create index if not exists waitlist_entries_active_hold_idx on booking\.waitlist_entries \(starts_at\)\s+where status = 'notified' and hold_expires_at is not null;/);
+  const pcb = code(fnU(sql, 'public_create_booking'));
+  assert.match(pcb, /set_config\('booking\.waitlist_hold_exempt'/, 'haltijan oma pito ei vähennä');
+  assert.match(pcb, /lower\(w\.customer_email\) = v_email/);
+  const claim = code(fn(sql, 'public_waitlist_claim'));
+  assert.match(claim, /set_config\('booking\.waitlist_hold_exempt', ?w\.id::text, ?true\)/);
+  assert.match(claim, /'remaining',/);
+  const proc = code(fn(sql, '_waitlist_process_session'));
+  assert.match(proc, /pg_try_advisory_xact_lock\(hashtextextended\('booking:space:' \|\| v_space::text, 0\)\)/, 'sama tilalukko kuin varaustarkistuksella');
+  assert.match(code(fnU(sql, 'admin_day_view')), /'waitlist_holds'/);
+});
+
+test('rollback booking_139: saatavuuspolut takaisin booking_138-tilaan, indeksi ja apufunktio pois', () => {
+  const rb = rd(RB);
+  for (const f of ['_pool_peak(', 'public_create_booking(', 'admin_day_view('])
+    assert.ok(rb.includes(`CREATE OR REPLACE FUNCTION booking.${f}`), f);
+  const fns = code(rb.slice(0, rb.indexOf('drop function')));
+  assert.doesNotMatch(fns, /waitlist_hold_exempt|_waitlist_hold_counts|waitlist_holds/);
+  assert.match(rb, /drop function if exists booking\._waitlist_hold_counts\(bigint\);/);
+  assert.match(rb, /drop index if exists booking\.waitlist_entries_active_hold_idx;/);
+  assert.ok(rb.indexOf('drop function if exists booking._waitlist_hold_counts(bigint);') > rb.lastIndexOf('CREATE OR REPLACE FUNCTION'));
+});
+
+test('t139 osa 2: pidon aikana ei julkisessa myynnissä — skenaariot', () => {
+  const t = rd(T139H);
+  for (const l of ['A3: julkinen haku', 'A6: viimeiseen pidettyyn paikkaan ei voi varata', 'A7: ajanmuutos pidettyyn paikkaan ei onnistu',
+    'B1: haltijan lunastus', 'B2: haltija varaa pidetyt 2 paikkaa', 'B3: varaus vapauttaa pidon heti', 'B4: ei ylivarausta',
+    'C2: pito vanheni → kaikki 4 heti myynnissä', 'C3: sweep ilmoittaa', 'D2: jonosta poistuminen vapauttaa pidetyt paikat heti',
+    'E2: alle 48 h: kaikki 4 julkisesti myynnissä', 'F3: saman poolin toinen vuoro', 'G3: admin_day_view.waitlist_holds', 'G4: henkilökunta voi ohittaa pidon'])
+    assert.ok(t.includes(l), l);
+  assert.match(t, /raise exception 'TESTRESULT pass=% fail=%/);
+});
+
+test('kauppa ja hallinta: haltijan raja lunastuksen remaining-arvosta, hallinta näyttää pidon (FI+EN)', () => {
+  const shop = rd('booking/shop/src/shop.js');
+  assert.match(shop, /let max = Math\.max\(s\.min_persons, Math\.min\(s\.max_persons \|\| 50, s\.remaining\)\);/);
+  assert.match(shop, /c\.enough && !c\.hold_expired && c\.remaining != null && Number\.isFinite\(\+c\.remaining\)\) max = Math\.max\(max, Math\.min\(s\.max_persons \|\| 50, \+c\.remaining\)\);/);
+  assert.ok(shop.indexOf('max = Math.max(max,') < shop.indexOf('t.waitlistClaimNotEnough'));
+  const nb = rd('booking/admin/views/newbooking.js');
+  assert.match(nb, /v\.waitlist_holds \|\| \[\]/);
+  assert.match(nb, /T\('nb\.hold', /);
+  assert.match(nb, /T\('nb\.holdHint', /);
+  const tx = rd('booking/admin/nb-texts.js');
+  assert.equal((tx.match(/'nb\.hold':/g) || []).length, 2, 'FI + EN');
+  assert.equal((tx.match(/'nb\.holdHint':/g) || []).length, 2, 'FI + EN');
+  assert.doesNotMatch(tx.slice(tx.indexOf("'nb.hold'")), /'nb\.hold[^']*': '[^']*</);
 });

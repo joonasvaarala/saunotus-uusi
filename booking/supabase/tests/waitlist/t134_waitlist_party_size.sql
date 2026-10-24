@@ -69,8 +69,12 @@ begin
   perform pg_temp.ck(pg_temp.st('kaksi@t134.example') = 'notified' and (select hold_expires_at > now() from booking.waitlist_entries where customer_email = 'kaksi@t134.example'), 'E3: uusi vapautuminen → 2 hengen jonovaraus saa pidon');
   perform pg_temp.ck(pg_temp.st('toinen@t134.example') = 'waiting' and pg_temp.st('kuusi@t134.example') = 'waiting', 'E3b: vain yksi pito, muut odottavat');
 
-  -- Paikat täyttyvät ennen lunastusta → lunastus estyy ja jonovaraus palaa jonoon.
-  b := test.pub_book(v_rule, d, 6, 'ehti@t134.example'); perform pg_temp.ck((b ->> 'ok')::boolean, 'F1: joku muu varaa 6 paikkaa');
+  -- booking_139: pidon aikana pidetyt 2 paikkaa eivät ole julkisessa myynnissä (6 vapaata, 4 myynnissä).
+  b := test.pub_book(v_rule, d, 6, 'liikaa@t134.example'); perform pg_temp.ck(not (b ->> 'ok')::boolean and b ->> 'code' = 'capacity_exceeded', 'F0: pidetyt paikat eivät ole myynnissä (6 ei mahdu)');
+  b := test.pub_book(v_rule, d, 4, 'ehti@t134.example'); perform pg_temp.ck((b ->> 'ok')::boolean, 'F1: joku muu varaa 4 myynnissä olevaa paikkaa');
+  -- Pito vanhenee → paikat palaavat myyntiin ja ne myydään ennen lunastusta → lunastus estyy ja jonovaraus palaa jonoon.
+  perform pg_temp.expire_hold('kaksi@t134.example');
+  b := test.pub_book(v_rule, d, 2, 'ehti2@t134.example'); perform pg_temp.ck((b ->> 'ok')::boolean, 'F1b: vanhentuneen pidon paikat myydään');
   perform booking.waitlist_sweep();   -- minuutin ajo kirjaa vapaan kapasiteetin laskun (offered_free = 0)
   perform test.anon(); c := booking.public_waitlist_claim((ja ->> 'token')::uuid); perform test.logout();
   perform pg_temp.ck((c ->> 'ok')::boolean and not (c ->> 'enough')::boolean, 'F2: lunastus estyy, kun paikat eivät enää riitä');
