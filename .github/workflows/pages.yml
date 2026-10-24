@@ -152,6 +152,8 @@ jobs:
       # t132 (booking/supabase/tests/waitlist/t132_waitlist.sql) ei ole tässä ajossa: työnkulussa ei ole Postgresia.
       # Bottiavustus ajaa t132:n psql:llä migraatioiden ja fixtures/10_test_helpers.sql:n jälkeen.
       - run: node --test booking/tests/jonotuslista.test.mjs
+      # booking_133: päivänippu + kuukauden saatavuus yhdellä RPC:llä (SQL-vertailu booking_125:een: booking/tests/paiva-ja-saatavuus-nopeutus-regressio.sql, ajetaan testikannassa)
+      - run: node --test booking/tests/paiva-ja-saatavuus-nopeutus.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

@@ -2,6 +2,7 @@
 // Data tulee vain julkisista RPC-funktioista (public_catalog / public_product_images / public_availability / public_create_booking / public_get_booking / public_change_booking).
 // Asiakas ei voi itse perua vahvistettua varausta (peruutukset sähköpostilla henkilökunnalle); hän voi MUUTTAA varausta (toinen vuoro / henkilömäärä) asetuksen mukaan vähintään 48 h ennen vuoroa.
 import { rpc, storageUrl, setRpcOverride } from './sb.js';
+import { ensureAllMonths } from './availability-months.js';
 import { runReturn } from './mobilepay-ui.js';
 import { loadPayChoices, payChoicesSection, payNotice, onlineAvailable, onlineAtCheckout } from './pay-choices.js';
 import { pt } from './pay-choices-texts.js';
@@ -203,11 +204,9 @@ function modeSwitch(active, ds) {
     h('a', { href: bk('/'), 'aria-current': active === 'cat' ? 'page' : null, text: t.modeCat }),
     h('a', { href: bk(`/paiva/${ds || state.lastDay || todayHel()}`), 'aria-current': active === 'day' ? 'page' : null, text: t.modeDay }));
 }
-async function ensureMonths(pairs) {   // pairs: [[y, m0], …] → kaikki tuotteet rinnakkain; epäonnistuneet tuotteet jätetään pois (ei välimuistiin)
-  const jobs = [];
-  for (const [y, m] of pairs) for (const p of state.catalog) jobs.push(loadMonth(p.id, y, m));
-  const res = await Promise.allSettled(jobs);
-  if (jobs.length && res.every((x) => x.status === 'rejected')) throw res[0].reason;
+async function ensureMonths(pairs) { // yksi public_availability_all-kutsu / kuukausi, kaikille tuotteille
+  return ensureAllMonths({ pairs, catalog: state.catalog, months: state.months, rpc,
+    fallback: loadMonth, audience: S.audience === 'business' ? 'business' : 'consumer' });
 }
 const dayRows = (ds) => {
   const [y, m] = monthOf(ds);
@@ -248,24 +247,29 @@ function treatItem({ r, p }, ds) {
     h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }), h('span', { class: 'bk-price', text: priceText(p) })),
     h('div', { class: 'bk-slot-side' }, h('a', { class: 'btn sm', href: bk(`/tuote/${p.slug}?n=1&d=${ds}&t=${treatmentTimeToken(r.time)}`) }, t.choose, h('span', { class: 'sr', text: ` ${title}, ${pname(p)}` }))));
 }
-// Hoidot päivänäkymässä: vain tuotteet joilla on vapaita aikoja valittuna päivänä (public_treatment_availability, 1 hlö; yksi haku / tuote koko varausikkunalle = välimuistista kaikille päiville,
-// haut jonossa, ei pollausta). Kortit lisätään sitä mukaa kun haku valmistuu; ajat näytetään vasta kun kortti avataan (kuten yleisillä vuoroilla).
+// Hoidot päivänäkymässä: vain tuotteet joilla on vapaita aikoja valittuna päivänä (public_treatment_availability, 1 hlö; yksi haku / tuote valitun päivän 14 pv ikkunalle,
+// enintään kaksi hakua kerrallaan, ei pollausta). Kortit lisätään sitä mukaa kun haku valmistuu, mutta aina tuotejärjestyksessä; ajat näytetään vasta kun kortti avataan.
 let treatDayToken = 0;
 async function fillTreatments(box, results, ds, today, tmax, openSlug, onToggle, rulesFree) {
   const token = ++treatDayToken, list = box.querySelector('ul'), status = box.querySelector('.bk-treat-status');
   let shown = 0, failed = null;
-  for (const p of state.treatments) {
+  // Valitun päivän 14 pv ikkuna, ei koko 120 pv varausjaksoa joka tuotteelle.
+  const from = ds < today ? today : ds;
+  const end = addDays(ds, 13);
+  const until = end < tmax ? end : tmax;
+  await Promise.all(state.treatments.map(async (p, ord) => {
     let by;
-    try { by = await loadTreatmentSlots(p, 1, today, tmax); } catch (e) { failed = failed || e; continue; }
+    try { by = await loadTreatmentSlots(p, 1, from, until); } catch (e) { failed = failed || e; return; }
     if (token !== treatDayToken || !box.isConnected) return;
     const slots = by.get(ds) || [];
-    if (!slots.length) continue;
+    if (!slots.length) return;
     const rs = slots.map((s) => ({ r: { status: 'available', starts_at: s.start, ends_at: s.end, time: s.time }, p }));
     const li = prodCard(p, rs, ds, p.slug === openSlug, onToggle, true);
-    list.append(li); shown++;
+    li.dataset.ord = String(ord);   // rinnakkaiset haut valmistuvat satunnaisessa järjestyksessä → kortti oikealle paikalleen
+    list.insertBefore(li, [...list.children].find((x) => +x.dataset.ord > ord) || null); shown++;
     if (!rulesFree) results.querySelector('.bk-notice')?.remove();
     if (p.slug === openSlug) li.scrollIntoView({ block: 'nearest' });
-  }
+  }));
   if (token !== treatDayToken || !box.isConnected) return;
   status.remove();
   if (!shown && !failed) box.remove();

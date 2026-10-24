@@ -3,6 +3,7 @@
 // (?lang= / localStorage booking.admin.lang). Sanakirja DAY_TEXTS on vain varalla: rivi puuttuu, haku
 // epäonnistuu tai paikkamerkki ei täyty. Tuonti: content/site-texts.imported-pr68.json (gift_card_badge: pending-import-32).
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
 export const DAY_TEXTS = {
   fi: {
@@ -53,7 +54,7 @@ function applyLive(raw, vars) {
  * dayText käyttää silloin sanakirjaa. Onnistunut haku pysyy muistissa sivulatauksen ajan.
  */
 function primeDayTexts(rows) {
-  if (!Array.isArray(rows) || !rows.length) return false;
+  if (!Array.isArray(rows)) return false;
   const next = new Map();
   for (const r of rows) {
     if (!r || typeof r.key !== 'string' || !r.key.startsWith(PREFIX)) continue;
@@ -71,7 +72,7 @@ export async function loadDayTexts(rpcFn, rows = null) {
   if (loaded) return true;
   if (typeof rpcFn !== 'function') return false;
   try {
-    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    const t = await getSiteTexts(rpcFn);
     if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
     if (!t.texts.length) { db = new Map(); loaded = true; return true; }
     return primeDayTexts(t.texts);
@@ -83,6 +84,7 @@ export async function loadDayTexts(rpcFn, rows = null) {
 export function clearDayTextCache() {
   db = new Map();
   loaded = false;
+  clearSiteTextsCache(); // tyhjennys hakee seuraavalla kerralla uudelleen (jaettu lupaus ei saa jäädä voimaan)
 }
 
 export function dayText(key, vars, lang = getLang()) {
