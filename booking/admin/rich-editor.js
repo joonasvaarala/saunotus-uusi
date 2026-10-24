@@ -84,6 +84,44 @@ function allowedHref(href) {
   return normalizeStored(sample) === sample;
 }
 
+// Kumoa/Tee uudelleen -kuvakkeet Quillin omaan tyyliin (18×18, ql-stroke → sama väri kuin muut kuvakkeet).
+const UNDO_ICON = '<svg viewBox="0 0 18 18" aria-hidden="true"><polyline class="ql-stroke" points="5 4 2 7 5 10"></polyline><path class="ql-stroke" d="M2.5,7H11a4,4,0,0,1,0,8H7"></path></svg>';
+const REDO_ICON = '<svg viewBox="0 0 18 18" aria-hidden="true"><polyline class="ql-stroke" points="13 4 16 7 13 10"></polyline><path class="ql-stroke" d="M15.5,7H7a4,4,0,0,0,0,8h4"></path></svg>';
+
+// Yksi kompakti kuvakerivi (Quill Snow): [luokka, arvo, tekstiavain]. Rivitys hoituu flex-wrapilla.
+export const TOOLBAR_GROUPS = [
+  [['bold', null, 'bold'], ['italic', null, 'italic'], ['link', null, 'link']],
+  [['header', '2', 'heading'], ['header', '3', 'subheading']],
+  [['list', 'bullet', 'bullets'], ['list', 'ordered', 'numbers']],
+  [['clean', null, 'clean']],
+  [['undo', null, 'undo'], ['redo', null, 'redo']],
+];
+
+function buildToolbar() {
+  const toolbar = document.createElement('div');
+  toolbar.className = 'rich-toolbar';
+  toolbar.setAttribute('role', 'toolbar');
+  toolbar.setAttribute('aria-label', richText('toolbar'));
+  for (const group of TOOLBAR_GROUPS) {
+    const span = document.createElement('span');
+    span.className = 'ql-formats';
+    for (const [format, value, key] of group) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `ql-${format}`;
+      if (value != null) button.value = value;
+      button.title = richText(key);
+      button.setAttribute('aria-label', richText(key));
+      button.setAttribute('aria-pressed', 'false');
+      if (format === 'undo') button.innerHTML = UNDO_ICON;
+      if (format === 'redo') button.innerHTML = REDO_ICON;
+      span.append(button);
+    }
+    toolbar.append(span);
+  }
+  return toolbar;
+}
+
 function mountOne(textarea, Quill) {
   const id = `rich-${++seq}`;
   const input = document.createElement('input');
@@ -93,28 +131,7 @@ function mountOne(textarea, Quill) {
   input.dataset.richValue = '1';
   input.value = plainToEditorHtml(textarea.value);
 
-  const toolbar = document.createElement('div');
-  toolbar.className = 'rich-toolbar';
-  toolbar.setAttribute('role', 'toolbar');
-  const buttons = new Map();
-  const groups = [['bold', 'italic', 'link', 'unlink'], ['heading', 'subheading', 'bullets', 'numbers'], ['undo', 'redo']];
-  for (const actions of groups) {
-    const group = document.createElement('span');
-    group.className = 'rich-button-group';
-    for (const action of actions) {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'rich-btn';
-      button.dataset.richAction = action;
-      button.textContent = richText(action);
-      button.title = richText(action);
-      button.setAttribute('aria-label', richText(action));
-      button.addEventListener('mousedown', (event) => event.preventDefault());
-      buttons.set(action, button);
-      group.append(button);
-    }
-    toolbar.append(group);
-  }
+  const toolbar = buildToolbar();
 
   const linkDialog = document.createElement('div');
   linkDialog.className = 'rich-link-dialog';
@@ -127,7 +144,12 @@ function mountOne(textarea, Quill) {
   apply.type = 'button';
   apply.className = 'rich-btn';
   apply.textContent = richText('link');
-  linkDialog.append(url, apply);
+  const remove = document.createElement('button');
+  remove.type = 'button';
+  remove.className = 'rich-btn';
+  remove.textContent = richText('unlink');
+  remove.hidden = true;
+  linkDialog.append(url, apply, remove);
 
   const editorHost = document.createElement('div');
   editorHost.className = 'rich-editor';
@@ -143,13 +165,38 @@ function mountOne(textarea, Quill) {
     div.className = label.className;
     while (label.firstChild) div.append(label.firstChild);
     label.replaceWith(div);
+    // Pelkkä työkaluriviohje on turha kuvakerivin kanssa (varatekstikentässä se jää näkyviin).
+    const hint = div.querySelector?.(':scope > small');
+    if (hint && hint.textContent === richText('hint')) hint.hidden = true;
   }
 
-  const quill = new Quill(editorHost, {
+  let quill = null;
+  let selection = null;
+  function openLink() {
+    selection = quill.getSelection() || selection;
+    const range = linkRange(quill, selection);
+    const current = range ? quill.getFormat(range.index, range.length).link : null;
+    url.value = current || '';
+    remove.hidden = !current;
+    linkDialog.hidden = false;
+    url.focus();
+  }
+  quill = new Quill(editorHost, {
     theme: 'snow',
-    modules: { toolbar: false, history: { delay: 500, maxStack: 100, userOnly: true } },
+    modules: {
+      toolbar: {
+        container: toolbar,
+        handlers: {
+          link: () => openLink(),
+          undo: () => quill.history.undo(),
+          redo: () => quill.history.redo(),
+        },
+      },
+      history: { delay: 500, maxStack: 100, userOnly: true },
+    },
     formats: ['bold', 'italic', 'header', 'list', 'link'],
   });
+  wrap.classList?.add?.('rich-ready');
   const Delta = Quill.import('delta');
   for (const tag of ['IMG', 'VIDEO', 'AUDIO', 'IFRAME', 'OBJECT', 'EMBED', 'SCRIPT', 'STYLE', 'TEMPLATE', 'NOSCRIPT', 'SVG', 'MATH']) {
     quill.clipboard.addMatcher(tag, () => new Delta());
@@ -168,7 +215,6 @@ function mountOne(textarea, Quill) {
     if ([...(event.clipboardData?.items || [])].some((item) => item.kind === 'file')) event.preventDefault();
   }, true);
 
-  let selection = null;
   function restoreSelection() {
     if (selection) quill.setSelection(selection.index, selection.length, 'silent');
     quill.focus();
@@ -192,64 +238,40 @@ function mountOne(textarea, Quill) {
     linkDialog.hidden = true;
     sync();
   }
+  function removeLink() {
+    restoreSelection();
+    const range = linkRange(quill, selection || quill.getSelection());
+    if (range) quill.formatText(range.index, range.length, 'link', false, 'user');
+    linkDialog.hidden = true;
+    sync();
+  }
   apply.addEventListener('click', applyLink);
+  remove.addEventListener('click', removeLink);
   url.addEventListener('input', () => url.setCustomValidity(''));
   url.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') { event.preventDefault(); applyLink(); }
     if (event.key === 'Escape') { event.preventDefault(); linkDialog.hidden = true; restoreSelection(); }
   });
-
-  function updateButtons() {
-    // Ei quill.getFormat() ilman aluetta: se kutsuu getSelection(true), joka palauttaa vanhan valinnan
-    // kesken kirjoituksen (text-change) ja hukkaa tai siirtää merkkejä.
-    const range = quill.getSelection(false);
-    const format = range ? quill.getFormat(range.index, range.length) : {};
-    for (const [action, active] of [
-      ['bold', !!format.bold], ['italic', !!format.italic],
-      ['heading', format.header === 2], ['subheading', format.header === 3],
-      ['bullets', format.list === 'bullet'], ['numbers', format.list === 'ordered'],
-      ['link', !!format.link],
-    ]) {
-      buttons.get(action).classList.toggle('active', active);
-      buttons.get(action).setAttribute('aria-pressed', String(active));
-    }
-  }
-  function onAction(action) {
-    if (action === 'link') {
-      selection = quill.getSelection() || selection;
-      url.value = quill.getFormat().link || '';
-      linkDialog.hidden = false;
-      url.focus();
-      return;
-    }
-    linkDialog.hidden = true;
-    if (action === 'undo' || action === 'redo') quill.history[action]();
-    else if (action === 'unlink') {
-      const range = linkRange(quill, quill.getSelection() || selection);
-      if (range) quill.formatText(range.index, range.length, 'link', false, 'user');
-    }
-    else if (action === 'bold' || action === 'italic') quill.format(action, !quill.getFormat()[action], 'user');
-    else if (action === 'heading' || action === 'subheading') {
-      const level = action === 'heading' ? 2 : 3;
-      quill.format('header', quill.getFormat().header === level ? false : level, 'user');
-    } else if (action === 'bullets' || action === 'numbers') {
-      const list = action === 'bullets' ? 'bullet' : 'ordered';
-      quill.format('list', quill.getFormat().list === list ? false : list, 'user');
-    }
-    quill.focus();
-    updateButtons();
-  }
-  for (const [action, button] of buttons) button.addEventListener('click', () => onAction(action));
-  quill.on('selection-change', (range) => { if (range) selection = range; updateButtons(); });
-  quill.on('text-change', updateButtons);
-  updateButtons();
+  quill.on('selection-change', (range) => { if (range) selection = range; });
 }
 
 /** Korvaa vain käytössä olevat data-rich-tekstikentät. Ei lataa Quillia tyhjällä lomakkeella. */
 export async function mountRichFields(root) {
   const areas = [...(root?.querySelectorAll?.('textarea[data-rich]') || [])].filter((el) => !el.disabled);
   if (!areas.length || !canHostEditor()) return;
-  const Quill = await loadQuill();
+  let Quill;
+  try {
+    Quill = await loadQuill();
+  } catch (error) {
+    // Varapolku vain, jos Quill ei lataudu: tavallinen, matala tekstikenttä ilman harhaanjohtavaa muotoiluohjetta.
+    for (const area of areas) {
+      area.classList?.add?.('rich-fallback');
+      area.rows = 4;
+      const hint = area.closest?.('label, .fld')?.querySelector?.(':scope > small');
+      if (hint && hint.textContent === richText('hint')) hint.hidden = true;
+    }
+    throw error;
+  }
   for (const area of areas) if (area.isConnected !== false) mountOne(area, Quill);
 }
 

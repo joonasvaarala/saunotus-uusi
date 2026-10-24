@@ -1,6 +1,6 @@
 # Rich-teksti hallinnassa
 
-Hallinnan Viestit-kentät ja tuotekuvaukset käyttävät pientä työkaluriviä. Omistaja voi lihavoida, kursivoida, lisätä otsikon tai alaotsikon, luettelon ja linkin. Muita muotoiluja ei ole.
+Hallinnan Viestit-kentät ja tuotekuvaukset (FI ja EN) käyttävät Quillin Snow-teeman omaa kompaktia kuvakeriviä (yksi rivi myös 390 px leveällä puhelimella; rivittyy ryhmittäin tarvittaessa). Omistaja voi lihavoida, kursivoida, lisätä otsikon tai alaotsikon, luettelon ja linkin, poistaa muotoilun sekä kumota ja tehdä uudelleen. Jokaisella kuvakkeella on suomenkielinen aria-label ja title. Muita muotoiluja ei ole. Linkki lisätään ja poistetaan omassa suomenkielisessä osoitekentässä (Quillin englanninkielinen tooltip on piilotettu). Värit #2B3A30 / #F4EFE7 / #7A5530; Quillin oletussininen #06c ohitetaan. Jos Quill ei lataudu, kenttä jää tavalliseksi tekstikentäksi ohjeteksteineen. Tallennusmuoto (puhdistettu HTML) ei muuttunut.
 
 ## Kirjasto
 
@@ -49,6 +49,6 @@ Ei ajeta tästä haarasta tuotantoon.
 
 1. Aja migraatio `booking_122`.
 2. Julkaise edge-funktio `send-emails` uudelleen (pohja puhdistaa rich-tekstin ennen lähetystä).
-3. Tuo `content/site-texts.pending-import-30.json` (28 riviä, 14 avainta × fi/en). Ne ovat vain hallinnan työkalurivin sanoja. Tuotekuvauksen ohje ei mainitse paikkamerkkejä. Tuonti ei ylikirjoita olemassa olevia rivejä. Ennen tuontia hallinta käyttää repon sanakirjaa.
+3. Tuo `content/site-texts.pending-import-30.json` (28 riviä, 14 avainta × fi/en). Ne ovat vain hallinnan työkalurivin sanoja. Uudet kuvakenimet `ui.admin.rich.clean` ja `ui.admin.rich.toolbar` tulevat repon oletuksista (`RICH_EXTRA_TEXTS`), eivät tästä tuonnista. Tuotekuvauksen ohje ei mainitse paikkamerkkejä. Tuonti ei ylikirjoita olemassa olevia rivejä. Ennen tuontia hallinta käyttää repon sanakirjaa.
 
 Kaupan build kopioi `invoice-validate.js` julkaisuun, koska `shop.js` tuo sen. Ilman tiedostoa kaupan moduuli ei lataudu.
