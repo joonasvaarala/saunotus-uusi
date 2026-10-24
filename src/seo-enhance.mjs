@@ -3,7 +3,8 @@
 // (priceOf), ja tuote merkitään vain, jos sen kortti (otsikko) näkyy samalla sivulla. Hintoja ei muuteta.
 // Ei aggregateRating-merkintää: arviot ovat Googlen (kolmannen osapuolen) arvioita, eikä niitä saa merkitä omaksi rakenteiseksi dataksi.
 import { kb, abs, e, priceOf, fromMode, site } from './lib.mjs';
-import { cards } from './content-texts.mjs';
+import { cards, pageDoc } from './content-texts.mjs';
+import { faqFor } from './kb-en.mjs';
 import { tx } from './site-texts.mjs';
 
 // Sivut, joiden kortit saavat Product/Offer-merkinnän (sivuavain → korttiryhmät, joista kortteja voi näkyä)
@@ -31,8 +32,10 @@ export function seoSchemaForPage({ lang, key, url, body = '' }) {
     }
   }
   if (key === 'info') {
-    // UKK näkyy infosivulla <details><summary>…; vain samaa kieliversiota vastaavat, sivulla näkyvät kysymykset.
-    const all = kb.faq.filter((x) => x.language === lang && x.question && x.answer && body.includes(`<summary>${e(x.question)}</summary>`)).slice(0, 30);
+    // UKK näkyy infosivulla <details><summary>…; sivun omat (suomenkieliset) id:t ratkaistaan kielelle kuten sivulla (kb-en.mjs),
+    // ja mukaan vain samankieliset (ei suomenkielistä varatekstiä EN-sivun skeemaan), sivulla näkyvät kysymykset.
+    const ids = pageDoc('info')?.[lang]?.faq || [];
+    const all = ids.map((id) => faqFor(id, lang)).filter((x) => x && x.lang === lang && x.question && x.answer && body.includes(`<summary>${e(x.question)}</summary>`)).slice(0, 30);
     if (all.length) out.push({ '@context': 'https://schema.org', '@type': 'FAQPage', '@id': `${url}#ukk`,
       mainEntity: all.map((x) => ({ '@type': 'Question', name: x.question, acceptedAnswer: { '@type': 'Answer', text: x.answer } })) });
   }

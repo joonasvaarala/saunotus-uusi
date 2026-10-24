@@ -58,6 +58,8 @@ const pname = (p) => (S.lang === 'en' && p.name_en) || p.name;
 const pdesc = (p) => (S.lang === 'en' && p.description_en) || p.description;
 // kesto (booking_147): EN-kesto kb.products.duration_text_en, puuttuu → suomenkielinen duration_text (sama malli kuin pname/pdesc)
 const pdur = (p) => (S.lang === 'en' && p.duration_text_en) || p.duration_text;
+// vuoron nimi (booking_151): EN schedule_rules.label_en (public_availability/_all.label_en), puuttuu → suomenkielinen label
+const rlabel = (r) => (S.lang === 'en' && r.label_en) || r.label;
 const priceText = (p) => {
   // Näytettävä hinta lasketaan aina hinnasta (price_text voi vanhentua hintamuutoksessa).
   const v = money(p.price);
@@ -286,7 +288,7 @@ async function findNextFree(ds, maxDs) {   // seuraava päivä, jolla on vapaita
 function dayItem({ r, p }, ds, withName = false) {
   const ok = r.status === 'available';
   const title = `${hm(r.starts_at)}–${hm(r.ends_at)}`;
-  const cl = cleanLabel(r.label), sub = cl && !pname(p).toLowerCase().includes(cl.toLowerCase()) ? cl : '';   // ei toisteta tuotteen nimeä
+  const cl = cleanLabel(rlabel(r)), sub = cl && !pname(p).toLowerCase().includes(cl.toLowerCase()) ? cl : '';   // ei toisteta tuotteen nimeä
   const price = r.price_mode === 'per_person' ? `${money(r.unit_price)} ${t.perPerson}` : r.price_mode === 'fixed' ? money(r.base_price) : `${t.from} ${money(r.base_price)}`;
   return h('li', { class: `bk-slot ${r.status}` },
     h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }),
@@ -482,7 +484,7 @@ async function viewProduct(slug, dateStr, query) {
 function slotItem(r, ds, p) {
   const ok = r.status === 'available';
   const title = `${hm(r.starts_at)}–${hm(r.ends_at)}`;
-  const sub = cleanLabel(r.label);
+  const sub = cleanLabel(rlabel(r));
   const price = r.price_mode === 'per_person' ? `${money(r.unit_price)} ${t.perPerson}` : r.price_mode === 'fixed' ? money(r.base_price)
     : `${money(r.base_price)} (${t.included(r.included_persons)}, ${t.extra(money(r.extra_person_price))})`;
   return h('li', { class: `bk-slot ${r.status}` },
@@ -886,7 +888,7 @@ async function viewChange(token, b) {
         const title = `${hm(r.starts_at)}–${hm(r.ends_at)}`;
         const btn = h('button', { type: 'button', role: 'radio', class: 'btn sm', 'aria-checked': (st.session ? st.session === r : cur) ? 'true' : 'false', disabled: !ok || null, onclick: () => {
           st.session = cur ? null : r; sessionsBox.querySelectorAll('[role=radio]').forEach((x) => x.setAttribute('aria-checked', 'false')); btn.setAttribute('aria-checked', 'true'); upd(); } }, cur ? t.currentSlot : t.choose, h('span', { class: 'sr', text: ` ${title}` }));
-        return h('li', { class: `bk-slot ${ok ? 'available' : r.status}` }, h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }), cleanLabel(r.label) ? h('span', { class: 'bk-sub', text: cleanLabel(r.label) }) : null),
+        return h('li', { class: `bk-slot ${ok ? 'available' : r.status}` }, h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }), cleanLabel(rlabel(r)) ? h('span', { class: 'bk-sub', text: cleanLabel(rlabel(r)) }) : null),
           h('div', { class: 'bk-slot-side' }, h('span', { class: `bk-badge ${ok ? 'free' : late ? 'unavail' : r.status}`, text: late ? t.tooLate(hours) : ok ? t.freeSpots(cur ? r.remaining + it.persons : r.remaining) : r.status === 'full' ? t.full : t.unavailable }), btn));
       })) : h('p', { text: t.noSlots }));
     upd();
