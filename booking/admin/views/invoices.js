@@ -244,7 +244,7 @@ export async function render() {
         return Array.isArray(rows) ? rows : [];
       },
       hitTitle: (c) => c.company_name || c.name || '',
-      hitMeta: (c) => [c.business_id, c.email, tx(c.source === 'booking' ? 'ui.admin.invoices.src_booking' : 'ui.admin.invoices.src_invoice')].filter(Boolean).join(' · '),
+      hitMeta: (c) => [c.business_id, c.email, tx(c.origin === 'orders' ? 'ui.admin.invoices.src_orders' : c.source === 'booking' ? 'ui.admin.invoices.src_booking' : 'ui.admin.invoices.src_invoice')].filter(Boolean).join(' · '),
       onPick: (c) => { fillFromCustomer(c); orLine.hidden = true; },
       pickedTitle: (c) => c.company_name || c.name || '',
       pickedMeta: (c) => {

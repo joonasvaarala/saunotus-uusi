@@ -5,6 +5,10 @@ import { rpc } from '../sb.js';
 import { h } from '../ui.js';
 import { icon } from '../icons.js';
 import { nbt } from '../nb-texts.js';
+import { isOrderCompany, searchCustomers as searchCustomersWith, customerHitTitle, customerHitMeta } from '../customer-hits.js';
+
+export { isOrderCompany, customerHitTitle, customerHitMeta };
+export const searchCustomers = (term, rpcFn = rpc) => searchCustomersWith(term, rpcFn);
 
 export const KINDS = [['private', 'cu.private'], ['company', 'cu.company']];   // [arvo, tekstiavain] (nb-texts.js; FI/EN)
 
@@ -143,6 +147,11 @@ export function customerForm({ initialKind = 'private', contact = true, id = 'cf
       name.value = c.name || ''; email.value = c.email || ''; phone.value = c.phone || '';
       setKind(c.customer_kind === 'company' ? 'company' : 'private');
       company.value = c.company || ''; bid.value = c.business_id || '';
+      // booking_172: haku palauttaa myös osoitteen ja verkkolaskutiedot (rekisteri / aiempi tilaus) → yritystiedot valmiiksi
+      street.value = c.street || ''; zip.value = c.zip || ''; city.value = c.city || '';
+      ei.value = c.einvoice_address || ''; op.value = c.einvoice_operator || '';
+      if (bid.value && validBusinessId(bid.value)) bid.value = normBusinessId(bid.value);
+      bidMsg();
     },
   };
 }
@@ -193,15 +202,21 @@ export function lookupSearch({
 
 // Asiakashaku (Uusi varaus + resurssi-/vanha varaus -lomake). Sama ulkoasu kuin lookupSearch.
 // st.customer = valittu asiakas; onChange() kutsutaan valinnan/nollauksen jälkeen.
+// booking_172: admin_search_customers palauttaa rekisterin asiakkaat (source customer) ja yritykset aiempien tilausten laskutustiedoista
+// (source orders: Johku-tuonnissa yritys on vain tilauksella). Ennen migraatiota (funktio puuttuu) käytetään admin_list_customers-hakua.
+// Tilauksen yritys ei ole rekisterissä: se täytetään lomakkeelle yritysasiakkaana (st.customer = null) → varaus luo/yhdistää yritysasiakkaan.
 export function customerSearch({ cf, st, onChange = () => {} }) {
   return lookupSearch({
     placeholder: nbt('cu.searchPh'), ariaLabel: nbt('cu.searchAria'), buttonLabel: nbt('cu.searchBtn'),
-    search: (term) => rpc('admin_list_customers', { p_search: term, p_limit: 5, p_offset: 0 }).catch(() => []),
-    hitTitle: (c) => (c.customer_kind === 'company' && c.company ? `${c.company} (${c.name})` : c.name),
-    hitMeta: (c) => `${c.email || ''} ${c.phone || ''}`,
-    onPick: (c) => { st.customer = c; cf.fill(c); cf.existing(true); onChange(); },
-    pickedTitle: (c) => (c.customer_kind === 'company' ? `${c.company || c.name} (${c.business_id || nbt('cu.company')}), ${nbt('cu.contact')} ${c.name}` : c.name),
-    pickedMeta: (c) => [c.email, c.phone].filter(Boolean).join(' · ') || nbt('cu.selectedNote'),
+    search: (term) => searchCustomers(term),
+    hitTitle: customerHitTitle,
+    hitMeta: customerHitMeta,
+    onPick: (c) => {
+      if (isOrderCompany(c)) { st.customer = null; cf.fill(c); cf.existing(false); onChange(); return; }
+      st.customer = c; cf.fill(c); cf.existing(true); onChange();
+    },
+    pickedTitle: (c) => (c.customer_kind === 'company' ? `${c.company || c.name} (${c.business_id || nbt('cu.company')})${c.name ? `, ${nbt('cu.contact')} ${c.name}` : ''}` : c.name),
+    pickedMeta: (c) => (isOrderCompany(c) ? nbt('cu.fromOrdersNote') : [c.email, c.phone].filter(Boolean).join(' · ') || nbt('cu.selectedNote')),
     newLabel: nbt('cu.new'),
     onReset: () => { st.customer = null; cf.existing(false); onChange(); },
     onExplicitMiss: (term) => {

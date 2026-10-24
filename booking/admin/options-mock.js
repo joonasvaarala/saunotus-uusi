@@ -165,6 +165,11 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     ],
     settings: { 10: { option_required: true, option_label: 'Valitse hoito', option_label_en: 'Choose your treatment' } },
     customers: [{ id: 1, name: 'Aino Testaaja', email: 'aino@example.com', phone: '+358401110001' }, { id: 2, name: 'Eero Esimerkki', email: 'eero@example.com', phone: '+358401110002' }, { id: 3, name: 'Helmi Hiljainen', email: 'helmi@example.com', phone: '+358401110003' }, { id: 4, name: 'Ilmari Iltavuoro', email: 'ilmari@example.com', phone: '+358401110004' }, { id: 5, name: 'Liisa Lasku', email: 'liisa@t112.test', phone: '0401234567', company: 'Koivutesti Oy', customer_kind: 'company', business_id: '1000000-4', address: 'Koivukuja 2', zip: '01300', city: 'Vantaa', marketing_consent: true }],
+    // booking_172: Johku-tyyppinen yritystilaus (yhteyshenkilö rekisterissä yksityisenä, yritys vain tilauksen laskutustiedoissa; feikki)
+    companyOrders: [
+      { customer_id: 2, created_at: '2026-09-01T10:00:00Z', billing: { company: 'Saunaseura Testi Oy', business_id: '1234560-4', name: 'Eero Esimerkki', email: 'laskut@saunaseura.example.test', address: 'Uusi katu 5', zip: '00210', city: 'Helsinki', country: 'FI', einvoice_address: '003712345604', einvoice_operator: 'E204503' } },
+      { customer_id: 3, created_at: '2026-08-01T10:00:00Z', billing: { company: 'Nimetön Kioski Ky', name: 'Helmi Hiljainen', address: 'Torikatu 3', zip: '33100', city: 'Tampere', country: 'FI' } },
+    ],
     reservations: [], seq: { res: 900, order: 7000, pay: 4000, disc: 10, card: 10 },
     // booking_142: keksityt esimerkkikoodit ja -vuosikortti (vain muistissa)
     discountCodes: [
@@ -249,6 +254,26 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     };
   };
   const inRange = (r, a) => (!a.p_from || r.starts_at >= a.p_from) && (!a.p_to || r.starts_at < a.p_to);
+  // booking_172: yritykset tilausten laskutustiedoista (peilaa booking._order_company_hits; yksi rivi / y-tunnus tai nimi, uusin tilaus)
+  function mockOrderCompanyHits(q, lim) {
+    const digits = q.replace(/\D/g, '');
+    const byKey = new Map();
+    for (const o of [...st.companyOrders].sort((x, y) => String(y.created_at).localeCompare(String(x.created_at)))) {
+      const b = o.billing || {}; const cust = st.customers.find((c) => c.id === o.customer_id);
+      if (!cust || cust.anonymized_at || String(b.company || '').trim().length < 2) continue;
+      const bid = b.business_id && validBusinessId(normBusinessId(b.business_id)) ? normBusinessId(b.business_id) : null;
+      const key = bid || `n:${b.company.trim().toLowerCase()}`;
+      const blob = [b.company, b.business_id, b.contact_name, b.name, cust.name, b.contact_email, b.email, cust.email].filter(Boolean).join(' ').toLowerCase();
+      const hit = blob.includes(q) || (digits.length >= 2 && String(bid || '').replace(/\D/g, '').includes(digits));
+      const prev = byKey.get(key);
+      if (prev) { prev.orders_count += 1; prev.hit ||= hit; continue; }
+      byKey.set(key, { hit, company_key: key, customer_id: o.customer_id, company: b.company.trim(), business_id: bid || b.business_id || null,
+        contact_name: b.contact_name || b.name || cust.name || null, email: b.contact_email || b.email || cust.email || null, phone: b.contact_phone || cust.phone || null,
+        street: b.street || b.address || null, zip: b.zip || null, city: b.city || null, country: b.country || null,
+        einvoice_address: b.einvoice_address || null, einvoice_operator: b.einvoice_operator || null, orders_count: 1, last_order_at: o.created_at });
+    }
+    return [...byKey.values()].filter((h) => h.hit).slice(0, lim).map(({ hit, ...h }) => h);
+  }
   const handlers = {
     current_staff_role: () => role,
     admin_analytics_summary: (a) => { needAny('reports.view', 'reports.daily'); return analyticsMock(a.p_from || today, a.p_to || today); },   // Paketti 11 / booking_144
@@ -802,6 +827,19 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       return { ok: true, product_id: a.p_product_id, option_required: !!a.p_required };
     },
     admin_list_vat_rates: () => ({ rates: st.vatRates.map((r) => ({ ...r, products: 0, addons: 0 })), missing: [], quote_only: [] }),
+    // booking_172: peilaa booking._order_company_hits + admin_search_customers (rekisteri + tilausten yritykset)
+    admin_search_customers: (a) => {
+      const q = String(a.p_search || '').trim().toLowerCase();
+      if (q.length < 2) return [];
+      const lim = Math.min(Math.max(Number(a.p_limit) || 8, 1), 20);
+      const digits = q.replace(/\D/g, '');
+      const match = (blob, bid) => String(blob).toLowerCase().includes(q) || (digits.length >= 2 && String(bid || '').replace(/\D/g, '').includes(digits));
+      const cust = st.customers.filter((c) => !c.anonymized_at && match(`${c.name || ''} ${c.email || ''} ${c.phone || ''} ${c.company || ''} ${c.business_id || ''}`, c.business_id)).slice(0, lim)
+        .map((c) => ({ source: 'customer', id: c.id, customer_id: c.id, name: c.name, email: c.email || null, phone: c.phone || null, company: c.company || null, business_id: c.business_id || null, customer_kind: c.customer_kind || 'private', customer_type: c.customer_type || 'customer', street: c.address || null, zip: c.zip || null, city: c.city || null, einvoice_address: c.einvoice_address || null, einvoice_operator: c.einvoice_operator || null }));
+      const taken = (h) => cust.some((x) => (h.business_id && x.business_id && normBusinessId(x.business_id) === normBusinessId(h.business_id)) || (x.company && x.company.toLowerCase() === h.company.toLowerCase()));
+      const comp = mockOrderCompanyHits(q, lim).filter((h) => !taken(h)).map((h) => ({ source: 'orders', id: null, customer_kind: 'company', customer_type: null, name: h.contact_name, ...h }));
+      return [...cust, ...comp];
+    },
     admin_list_invoice_customers: (a) => {
       need('invoices.manage');
       const q = String(a.p_search || '').toLowerCase();
@@ -828,7 +866,13 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
           const name = String(c.name || '').trim();
           return { source: 'booking', id: null, customer_id: c.id, company_name: company || name, contact_name: company ? name : null, business_id: c.business_id || null, email: c.email || null, phone: c.phone || null, street: c.address || null, zip: c.zip || null, city: c.city || null, einvoice_address: c.einvoice_address || null, einvoice_operator: c.einvoice_operator || null, buyer_reference: c.invoice_reference || null };
         });
-      return [...invoice, ...booking];
+      const bookingAll = booking;
+      const ord = mockOrderCompanyHits(q, lim)
+        .filter((h) => !invoice.some((c) => (h.business_id && c.business_id && normBusinessId(c.business_id) === normBusinessId(h.business_id)) || String(c.company_name || '').toLowerCase() === h.company.toLowerCase()))
+        .filter((h) => !bookingAll.some((c) => c.contact_name && ((h.business_id && c.business_id && normBusinessId(c.business_id) === normBusinessId(h.business_id)) || c.company_name.toLowerCase() === h.company.toLowerCase())))
+        .slice(0, Math.max(lim - invoice.length, 0))
+        .map((h) => ({ source: 'booking', origin: 'orders', id: null, customer_id: h.customer_id, company_name: h.company, contact_name: h.contact_name, business_id: h.business_id, email: h.email, phone: h.phone, street: h.street, zip: h.zip, city: h.city, country: h.country, einvoice_address: h.einvoice_address, einvoice_operator: h.einvoice_operator, buyer_reference: null }));
+      return [...invoice, ...ord, ...booking.slice(0, Math.max(lim - invoice.length - ord.length, 0))];
     },
     admin_save_invoice_customer: (a) => {
       need('invoices.manage');

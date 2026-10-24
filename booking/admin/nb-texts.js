@@ -29,7 +29,7 @@ export const NB = {
     'nb.toast': 'Varaus luotu (tilaus #{no})', 'nb.warnMissing': 'Varaus tehty, mutta saunottaja puuttuu työvuorosta',
     // asiakas
     'cu.search': 'Hae olemassa olevaa asiakasta', 'cu.searchPh': 'Nimi, sähköposti tai puhelin', 'cu.searchAria': 'Hae asiakas', 'cu.searchBtn': 'Hae',
-    'cu.or': 'Tai syötä uuden asiakkaan tiedot:', 'cu.selected': 'Valittu asiakas', 'cu.selectedNote': 'Tietoja voi muuttaa Asiakkaat-näkymässä.', 'cu.new': 'Uusi asiakas', 'cu.contact': 'yhteyshenkilö',
+    'cu.or': 'Tai syötä uuden asiakkaan tiedot:', 'cu.selected': 'Valittu asiakas', 'cu.selectedNote': 'Tietoja voi muuttaa Asiakkaat-näkymässä.', 'cu.new': 'Uusi asiakas', 'cu.contact': 'yhteyshenkilö', 'cu.fromOrders': 'aiempi tilaus', 'cu.fromOrdersNote': 'Yrityksen tiedot aiemmalta tilaukselta. Tarkista ja täydennä tarvittaessa alla; yritys tallentuu asiakasrekisteriin varauksen mukana.',
     'cu.notFound': 'Ei löytynyt – luo uusi asiakas', 'cu.prefilled': 'Hakusana siirrettiin kenttään: {what}.', 'cu.notOverwritten': 'Kenttä "{what}" oli jo täytetty, sitä ei ylikirjoitettu.',
     'cu.notFoundKept': 'Ei löytynyt. Valittu asiakas säilyy – paina "Uusi asiakas" luodaksesi uuden.',
     'cu.what.email': 'sähköposti', 'cu.what.phone': 'puhelin', 'cu.what.name': 'nimi', 'cu.what.company': 'yrityksen nimi',
@@ -64,7 +64,7 @@ export const NB = {
     'nb.openBooking': 'Open booking', 'nb.openOrder': 'Open order and payments', 'nb.orderLink': 'Order {no} / Payments', 'nb.another': 'Create another booking', 'nb.dayView': 'Show day view',
     'nb.toast': 'Booking created (order #{no})', 'nb.warnMissing': 'Booking made, but no therapist is on shift',
     'cu.search': 'Find an existing customer', 'cu.searchPh': 'Name, email or phone', 'cu.searchAria': 'Find customer', 'cu.searchBtn': 'Search',
-    'cu.or': 'Or enter the new customer’s details:', 'cu.selected': 'Selected customer', 'cu.selectedNote': 'Details can be edited in the Customers view.', 'cu.new': 'New customer', 'cu.contact': 'contact',
+    'cu.or': 'Or enter the new customer’s details:', 'cu.selected': 'Selected customer', 'cu.selectedNote': 'Details can be edited in the Customers view.', 'cu.new': 'New customer', 'cu.contact': 'contact', 'cu.fromOrders': 'earlier order', 'cu.fromOrdersNote': 'Company details from an earlier order. Check and complete them below if needed; the company is saved to the customer register with the booking.',
     'cu.notFound': 'Not found – create a new customer', 'cu.prefilled': 'The search term was moved to: {what}.', 'cu.notOverwritten': 'The "{what}" field was already filled, so it was not overwritten.',
     'cu.notFoundKept': 'Not found. The selected customer stays – press "New customer" to create one.',
     'cu.what.email': 'email', 'cu.what.phone': 'phone', 'cu.what.name': 'name', 'cu.what.company': 'company name',
