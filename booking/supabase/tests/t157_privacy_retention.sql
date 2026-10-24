@@ -89,7 +89,7 @@ overriding system value values
   (915792, 915701, current_date - interval '5 years', current_date - interval '4 years', 'T157-VK-2', false, 'T157 vanha vuosikortti', now() - interval '5 years');
 insert into booking.email_outbox(id, kind, dedupe_key, status, payload, created_at)
 overriding system value values
-  (915795, 'receipt', 't157-1', 'sent', '{"to":"t157-vanha@example.invalid","name":"T157"}', now() - interval '13 months'),
+  (915795, 'receipt', 't157-1', 'sent', '{"to":"t157-vanha@example.invalid","name":"T157"}', now() - interval '37 months'),  -- booking_160: 3 v
   (915796, 'receipt', 't157-2', 'pending', '{"to":"t157-odottaa@example.invalid"}', now() - interval '13 months'),
   (915797, 'receipt', 't157-3', 'sent', '{"to":"t157-tuore@example.invalid"}', now() - interval '11 months');
 insert into booking.audit_log(id, table_name, action, row_pk, old_data, new_data, at)
@@ -138,7 +138,16 @@ begin
   perform pg_temp.ck(exists (select 1 from booking._privacy_candidates(current_date) c where c.category = 'orders_6y' and c.id = 915721 and c.blocked = 'future_reservation'), 'R10 tuleva varaus estää 6 v tilauksen');
   perform pg_temp.ck(exists (select 1 from booking._privacy_candidates('2027-01-01') c where c.category = 'orders_6y' and c.id = 915720)
                      and not exists (select 1 from booking._privacy_candidates('2026-12-31') c where c.category = 'orders_6y' and c.id = 915720), 'R11 6 v raja 31.12.2026 / 1.1.2027');
-  perform pg_temp.ck((r #> '{categories,customers,sample_ids}') @> '[915701]'::jsonb and not ((r #> '{categories,customers,sample_ids}') @> '[915702]'::jsonb)
+  -- R12 ei riipu tietokannan muusta datasta (tuotannossa pienemmät asiakas-id:t täyttävät 5 esimerkin otoksen): raportin määrä vastaa
+  -- ehdokasjoukkoa, testiasiakas kuuluu siihen, ja otos on joukon 5 pienintä id:tä (ei testiasiakkaan läsnäoloa otoksessa).
+  perform pg_temp.ck((r #>> '{categories,customers,due}')::int
+                       = (select count(*) from booking._privacy_candidates(current_date) c where c.category = 'customers' and c.blocked is null)
+                     and (r #>> '{categories,customers,due}')::int >= 1
+                     and (r #> '{categories,customers,sample_ids}')
+                       = (select coalesce(jsonb_agg(s.id order by s.id), '[]'::jsonb) from (select c.id from booking._privacy_candidates(current_date) c
+                            where c.category = 'customers' and c.blocked is null order by c.id limit 5) s)
+                     and exists (select 1 from booking._privacy_candidates(current_date) c where c.category = 'customers' and c.id = 915701 and c.blocked is null)
+                     and not ((r #> '{categories,customers,sample_ids}') @> '[915702]'::jsonb)
                      and (r #>> '{categories,gift_cards_3y,blocked,active_gift_card}')::int >= 1 and (r #>> '{categories,customers,blocked,marketing_consent}')::int >= 1, 'R12 raportin luokat, esteet ja esimerkki-id:t');
   perform test.login(u_user);
   perform pg_temp.ck(pg_temp.err('select booking.privacy_retention_report(current_date)') is not null, 'R13 tavallinen käyttäjä ei saa raporttia');
@@ -170,6 +179,10 @@ begin
 
   -- ===== E: ajo päällä =====
   update booking.settings set value = 'true' where key = 'privacy_retention.enabled';
+  -- booking_160 lisää privacy_retention.dry_run (oletus true → ajo vain laskee). Varsinainen ajo vaatii dry_run = false; ilman 160:tä
+  -- asetusta ei lueta. Muutos perutaan testin transaktion mukana.
+  insert into booking.settings(key, value, description) values ('privacy_retention.dry_run', 'false', 't157')
+    on conflict (key) do update set value = excluded.value;
   perform test.service();
   j := booking.privacy_retention_run();
   perform test.logout();
@@ -209,7 +222,8 @@ begin
   perform pg_temp.ck((select contact_name is null and email is null and company_name = 'T157 Kirjanpito Tmi' and business_id = '1234567-1' from booking.invoice_customers where id = 915773), 'E23b 6 v laskutusasiakas: yhteyshenkilö pois, yritystiedot säilyvät');
   perform pg_temp.ck((select payload = '{"anonymized": true}' from booking.email_outbox where id = 915795)
                      and (select payload ->> 'to' is not null from booking.email_outbox where id = 915796)
-                     and (select payload ->> 'to' is not null from booking.email_outbox where id = 915797), 'E24 sähköpostijono: vanha lähetetty tyhjennetty, odottava ja tuore ennallaan');
+                     and (select payload ->> 'to' is not null from booking.email_outbox where id = 915797), 'E24 sähköpostijono: yli 3 v vanha lähetetty tyhjennetty, odottava ja tuore ennallaan');
+  perform pg_temp.ck((select count(*) from booking.email_outbox where id in (915795, 915796, 915797)) = 3, 'E24b sähköpostijonon rivejä ei poisteta');
   perform pg_temp.ck((select not (old_data ? 'name') and not (old_data ? 'email') and old_data ->> 'language' = 'fi' and not (new_data ? 'name') from booking.audit_log where id = 915798)
                      and (select old_data ? 'name' from booking.audit_log where id = 915799), 'E25 audit_log: yli 3 v henkilöavaimet pois, tuore ennallaan');
   perform pg_temp.ck(not exists (select 1 from booking.audit_log a where a.id > 915799 and a.table_name = 'customers' and a.row_pk = '915701'
@@ -220,6 +234,7 @@ begin
   perform test.logout();
   perform pg_temp.ck(coalesce((j #>> '{counts,customers}')::int, -1) = 0 and coalesce((j #>> '{counts,receipts_6y}')::int, -1) = 0, 'E27 uusinta-ajo: ei uusia muutoksia');
   update booking.settings set value = 'false' where key = 'privacy_retention.enabled';
+  update booking.settings set value = 'true' where key = 'privacy_retention.dry_run';
 
   -- ===== K: kävijämittauksen kuukausikooste =====
   perform test.service();

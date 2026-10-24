@@ -126,7 +126,7 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - run: deno test -A --no-lock --node-modules-dir=none booking/supabase/functions/pdf-golden.test.ts booking/supabase/functions/_tests/site_texts_test.ts booking/supabase/functions/_tests/mobilepay_test.ts booking/supabase/functions/_tests/procountor_test.ts booking/supabase/functions/_tests/vismapay_test.ts booking/supabase/functions/_tests/service_role_auth_test.ts booking/supabase/functions/_tests/booking_calendar_sync_test.ts booking/supabase/functions/_tests/johku_sync_test.ts booking/supabase/functions/shift-offer-engine/core_test.ts booking/supabase/functions/shift-offer-engine/whatsapp_test.ts booking/supabase/functions/shift-offer-engine/inbound_test.ts booking/supabase/functions/shift-offer-engine/api_test.ts booking/supabase/functions/shift-offer-engine/booking153_test.ts booking/supabase/functions/shift-offer-engine/booking155_test.ts booking/supabase/functions/send-emails/staff_notice_test.ts booking/vuoro/vuoro_test.ts booking/vuoro/oma/oma_test.ts
+      - run: deno test -A --no-lock --node-modules-dir=none booking/supabase/functions/pdf-golden.test.ts booking/supabase/functions/_tests/site_texts_test.ts booking/supabase/functions/_tests/mobilepay_test.ts booking/supabase/functions/_tests/procountor_test.ts booking/supabase/functions/_tests/vismapay_test.ts booking/supabase/functions/_tests/service_role_auth_test.ts booking/supabase/functions/_tests/booking_calendar_sync_test.ts booking/supabase/functions/_tests/johku_sync_test.ts booking/supabase/functions/shift-offer-engine/core_test.ts booking/supabase/functions/shift-offer-engine/whatsapp_test.ts booking/supabase/functions/shift-offer-engine/inbound_test.ts booking/supabase/functions/shift-offer-engine/api_test.ts booking/supabase/functions/shift-offer-engine/booking153_test.ts booking/supabase/functions/shift-offer-engine/booking155_test.ts booking/supabase/functions/send-emails/staff_notice_test.ts booking/supabase/functions/privacy-storage-cleanup/core_test.ts booking/vuoro/vuoro_test.ts booking/vuoro/oma/oma_test.ts
       # Vuorotarjousmoottorin Deno-ydin (core_test.ts), WhatsApp-sovitin (whatsapp_test.ts),
       # saapuvien viestien itsepalvelu (inbound_test.ts),
       # JSON-rajapinta (api_test.ts) ja staattinen vastaussivu (vuoro_test.ts) ajetaan yllä.
@@ -221,6 +221,9 @@ jobs:
       - run: node --test booking/tests/kavijamittaus-kovennus.test.mjs
       # booking_157: tietosuojan säilytysajat ja kävijämittauksen kuukausikooste (rakenne; SQL-testit t157 paikallisesti PG17:llä)
       - run: node --test booking/tests/tietosuoja-sailytys.test.mjs
+      # booking_160: säilytysajan korjaukset (markkinointilupa, yrityksen nimi/Y-tunnus, sähköpostijonon rivit säilyvät, henkilötiedot pois 3 v, PDF:t 6 v / 3 v Storage-API:lla, asiakkaiden auth-tilit;
+      # rakenne; SQL-testit t160 paikallisesti PG17:llä)
+      - run: node --test booking/tests/tietosuoja-160.test.mjs
       # booking_149: asiakkaan peruutuspyyntö (ja sen kautta hyvitys) vain, jos vuoron alkuun on vähintään customer_change_hours_before (48) h;
       # palvelin pakottaa (cancel_too_late), tilaussivu piilottaa lomakkeen ja näyttää puhelinnumeron; hallinnan peruutus/hyvitys aina. Tekstit pending-import-49.
       # t149 (booking/supabase/tests/peruutus/t149_customer_cancel_48h.sql) ajetaan paikallisessa PG17:ssä t143:n tapaan (työnkulussa ei ole Postgresia).
