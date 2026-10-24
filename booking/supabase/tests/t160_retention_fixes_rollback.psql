@@ -1,0 +1,27 @@
+-- t160: booking_160:n rollback palauttaa funktiot tuotannon muotoon (md5) ja on ajettavissa uudelleen; migraatio taas päälle ja uudelleen.
+-- Rollback-tiedosto tarkistaa itse md5(pg_get_functiondef):n kahdeksalle palautetulle funktiolle ja keskeyttää, jos ne eivät täsmää.
+-- Kaikki tehdään yhdessä transaktiossa, joka perutaan lopuksi (tietokanta jää ennalleen).
+-- Ajo hakemistosta booking/supabase/tests:  psql -X -v ON_ERROR_STOP=1 -d booking_test -f t160_retention_fixes_rollback.psql
+\set ON_ERROR_STOP 1
+begin;
+\i ../rollbacks/20261024330000_booking_160_ROLLBACK.sql
+\i ../rollbacks/20261024330000_booking_160_ROLLBACK.sql
+do $$ begin
+  if to_regprocedure('booking.privacy_storage_due(integer)') is not null or to_regclass('booking.privacy_auth_deletions') is not null
+     or exists (select 1 from booking.settings where key in ('privacy_retention.dry_run', 'privacy_retention.gift_card_pdf_years'))
+     or exists (select 1 from information_schema.columns where table_schema = 'booking' and column_name = 'pdf_deleted_at') then
+    raise exception 't160 rollback: booking_160-objekteja jäi';
+  end if;
+  if to_regprocedure('booking.privacy_retention_run()') is null then raise exception 't160 rollback: booking_157 katosi'; end if;
+end $$;
+\i ../migrations/20261024330000_booking_160_retention_fixes.sql
+\i ../migrations/20261024330000_booking_160_retention_fixes.sql
+do $$ begin
+  if to_regprocedure('booking.privacy_storage_due(integer)') is null or to_regclass('booking.privacy_auth_deletions') is null
+     or (select value from booking.settings where key = 'privacy_retention.enabled') <> 'false'::jsonb
+     or (select value from booking.settings where key = 'privacy_retention.dry_run') <> 'true'::jsonb then
+    raise exception 't160 rollback: migraatio ei palautunut';
+  end if;
+  raise notice 't160 rollback: OK';
+end $$;
+rollback;
