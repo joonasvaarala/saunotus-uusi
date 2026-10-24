@@ -36,8 +36,8 @@ export function createTreatmentViews(c) {
   const totalMin = (p) => p.duration_minutes || A.timelineMinutes(p);
   // jakson sisällä sitova väli (NBSP): rivinvaihto vain jaksojen välissä ("savusauna 1 h 30 min" ei katkea)
   const timelineText = (p) => A.timelineText(p, S.lang);
-  // kesto hintarivillä: paketilla kieliversio (palvelimen duration_text on suomea ja pitkä), muilla palvelimen teksti
-  const durText = (p) => (A.isPackage(p) ? fmtMin(totalMin(p)) : p.duration_text || '');
+  // kesto hintarivillä: paketilla kieliversio (palvelimen duration_text on suomea ja pitkä), muilla palvelimen teksti (EN: duration_text_en, puuttuu → duration_text; booking_147)
+  const durText = (p) => (A.isPackage(p) ? fmtMin(totalMin(p)) : (S.lang === 'en' && p.duration_text_en) || p.duration_text || '');
   // lahjakorttihuomautus (booking_61: voucher_note / voucher_note_en): erillinen huomautus, ei osa tuotekuvausta; en puuttuu → fi
   const voucherNote = (p) => ((S.lang === 'en' && p.voucher_note_en) || p.voucher_note || '').trim();
   const voucherNode = (p) => (voucherNote(p) ? h('aside', { class: 'bk-voucher-note', 'data-testid': 'voucher-note', role: 'note' }, h('p', { text: voucherNote(p) })) : null);

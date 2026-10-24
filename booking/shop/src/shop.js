@@ -56,6 +56,8 @@ const aname = (a) => (S.lang === 'en' && a.name_en) || a.name;
 const adesc = (a) => (S.lang === 'en' && a.description_en) || a.description;
 const pname = (p) => (S.lang === 'en' && p.name_en) || p.name;
 const pdesc = (p) => (S.lang === 'en' && p.description_en) || p.description;
+// kesto (booking_147): EN-kesto kb.products.duration_text_en, puuttuu → suomenkielinen duration_text (sama malli kuin pname/pdesc)
+const pdur = (p) => (S.lang === 'en' && p.duration_text_en) || p.duration_text;
 const priceText = (p) => {
   // Näytettävä hinta lasketaan aina hinnasta (price_text voi vanhentua hintamuutoksessa).
   const v = money(p.price);
@@ -190,7 +192,7 @@ function viewList(query) {
     pimg(p, 'card-img'),
     h('h3', {}, h('a', { href: bk(`/tuote/${p.slug}`), text: pname(p) })),
     h('p', { class: 'bk-desc', text: cardExcerpt(p) }),
-    h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), p.duration_text ? ` · ${p.duration_text}` : ''),
+    h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), pdur(p) ? ` · ${pdur(p)}` : ''),
     h('a', { class: 'btn sm', href: bk(`/tuote/${p.slug}`) }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) })))));
   const annual = annualPromo();
   mount(h('header', { class: 'bk-head' }, h('h2', { text: t.title }), h('p', { class: 'lead', text: t.lead })), modeSwitch('cat'), tabs, cards, annual);
@@ -438,7 +440,7 @@ async function viewProduct(slug, dateStr, query) {
     wrap.replaceChildren(
       h('p', {}, h('a', { href: bk('/'), text: t.backList })),
       richHost(h, pdesc(p) || '', 'bk-desc'),
-      h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), p.duration_text ? ` · ${p.duration_text}` : ''),
+      h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), pdur(p) ? ` · ${pdur(p)}` : ''),
       h('h3', { text: t.pickDate }), calBox, slotBox);
     let byDay = {};
     try { byDay = await loadMonth(p.id, y, m); } catch (e) { calBox.append(errorBox(t.loadError)); return; }

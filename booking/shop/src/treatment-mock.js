@@ -208,7 +208,7 @@ export const snapshotBookings = () => ({ orderNo, bookings: [...bookings.values(
 export const restoreBookings = (snap) => { bookings.clear(); for (const b of snap?.bookings || []) bookings.set(b.token, b); if (snap?.orderNo > orderNo) orderNo = snap.orderNo; };
 // public_catalog()-lisäys: hoito-/rituaalituotteet (booking_kind 'slots'); vain kun liput olisi päällä → demossa aina. Kuvaus ja lisähenkilön hinta tulevat kaupan staattisesta kb-datasta.
 export const catalogEntries = () => Object.entries(PRODUCTS).map(([id, p]) => ({ id: +id, slug: ({ 7: 'saunarituaali-ja-savusaunavuoro', 8: 'saunotusrituaali', 10: 'saunahoito-2', 11: 'saunotus-2', 12: 'syvasaunotus' })[id], name: p.name,
-  ...(p.name_en ? { name_en: p.name_en } : {}), ...(p.category ? { category: p.category } : {}), ...(p.duration_text ? { duration_text: p.duration_text } : {}),
+  ...(p.name_en ? { name_en: p.name_en } : {}), ...(p.category ? { category: p.category } : {}), ...(p.duration_text ? { duration_text: p.duration_text } : {}), ...(p.duration_text_en ? { duration_text_en: p.duration_text_en } : {}),
   ...(p.description ? { description: p.description } : {}), ...(p.description_en ? { description_en: p.description_en } : {}), ...(p.voucher_note ? { voucher_note: p.voucher_note, voucher_note_en: p.voucher_note_en } : {}),
   addons_enabled: !!p.addons_enabled, allowed_addons: p.allowed_addons || [],
   ...(p.timeline ? { timeline: p.timeline, timeline_text: p.timeline_text, timeline_text_en: p.timeline_text_en } : {}),

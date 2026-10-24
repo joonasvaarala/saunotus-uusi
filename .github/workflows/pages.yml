@@ -213,6 +213,10 @@ jobs:
       # palvelin pakottaa (cancel_too_late), tilaussivu piilottaa lomakkeen ja näyttää puhelinnumeron; hallinnan peruutus/hyvitys aina. Tekstit pending-import-49.
       # t149 (booking/supabase/tests/peruutus/t149_customer_cancel_48h.sql) ajetaan paikallisessa PG17:ssä t143:n tapaan (työnkulussa ei ole Postgresia).
       - run: node --test booking/tests/peruutusraja-48h.test.mjs
+      # booking_147: tuotteen kesto englanniksi (kb.products.duration_text_en, Bottiavustuksen tuotantomigraatio kb_products_duration_text_en):
+      # public_catalog() ja admin_list_products() palauttavat duration_text_en; kauppa näyttää EN-sivulla sen, puuttuessa duration_text. Migraatio + rollback olemassa.
+      # t147 + r147 (booking/supabase/tests/kesto/) ajetaan paikallisessa PG17:ssä (pre147 → migraatio → t147 → paluu → r147); työnkulussa ei ole Postgresia.
+      - run: node --test booking/tests/kesto-en.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
