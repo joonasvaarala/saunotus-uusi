@@ -11,14 +11,14 @@ import { resolve } from 'node:path';
 const repo = resolve(new URL('../..', import.meta.url).pathname);
 const rd = (p) => readFileSync(resolve(repo, p), 'utf8');
 const code = (s) => s.replace(/--[^\n]*/g, ''); // ilman SQL-kommentteja
-const MIG = 'booking/supabase/migrations/20261024080000_booking_135_waitlist_notified_capacity.sql';
-const RB = 'booking/supabase/rollbacks/20261024080000_booking_135_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024073352_booking_135_waitlist_notified_capacity.sql';
+const RB = 'booking/supabase/rollbacks/20261024073352_booking_135_ROLLBACK.sql';
 const T135 = 'booking/supabase/tests/waitlist/t135_waitlist_notified_capacity.sql';
 const MIG134 = 'booking/supabase/migrations/20261024071019_booking_134_waitlist_party_size.sql';
 
 test('booking_135: migraatio, rollback ja SQL-testi ovat olemassa', () => {
   for (const p of [MIG, RB, T135]) assert.ok(existsSync(resolve(repo, p)), p);
-  assert.ok('20261024080000' > '20261024071019', 'aikaleima booking_134:n jälkeen');
+  assert.ok('20261024073352' > '20261024071019', 'aikaleima booking_134:n jälkeen');
 });
 
 test('migraatio booking_135: voimassa olevat ilmoitukset vähennetään, poolit mukana, tarjous vanhenee', () => {

@@ -14,7 +14,7 @@
 --   satunnainen token palauttaa not_found ilman rate_limit_hits-riviä. Tunnetulle tokenille lisäksi kutsujan IP-raja
 --   (booking._client_ip, kun pyyntöotsakkeet ovat saatavilla), kuten muissa julkisissa RPC:issä.
 -- Ei taulumuutoksia, ei public-skeemaa. Uudelleenajettava (create or replace).
--- Rollback: booking/supabase/rollbacks/20261024080000_booking_135_ROLLBACK.sql (palauttaa booking_134-tilan).
+-- Rollback: booking/supabase/rollbacks/20261024073352_booking_135_ROLLBACK.sql (palauttaa booking_134-tilan).
 set local lock_timeout = '5s';
 
 create or replace function booking._notify_waitlist_for_window(p_space_id bigint,p_starts_at timestamptz,p_ends_at timestamptz)
