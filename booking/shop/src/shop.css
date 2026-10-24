@@ -557,3 +557,21 @@ button.bk-cell.quiet.sel{box-shadow:inset 0 -4px 0 #F4EFE7}
 .bk-quiet-line .bk-quiet-badge{margin-right:4px}
 .bk-quiet-note{border-left:4px solid #7A5530;background:#F4EFE7;color:#2B3A30;padding:8px 12px;border-radius:6px}
 @media (forced-colors:active){.bk-quiet-badge{border:1px solid CanvasText}button.bk-cell.quiet{outline:2px solid CanvasText}}
+/* Vaakaylivuodon esto kapealla puhelimella (320–430 px, Joonas 24.10.2026): tietokannan teksti rivittyy aina.
+   Juurisyy (&nbsp; joka sanavälissä) korjataan renderöinnissä (text-spaces.js); nämä säännöt varmistavat, ettei
+   yksittäinen pitkä sana, osoite tai upotus levitä sivua. Ei overflow-x:hidden-piilotusta. */
+#booking-app,.hero.page .in{overflow-wrap:break-word}
+.bk-rich,.bk-desc,.bk-hero-short,.hero.page .in p,.bk-meta,.bk-notice,.ord-guide-text,.ord-guide-short{overflow-wrap:anywhere}
+.hero.page .in>h1{max-width:100%}
+.hero.page .in>p{max-width:min(30em,100%)}
+.hero.page.has-prod .in p,.hero.page .bk-hero-short{max-width:min(34em,100%)}
+#booking-app :is(img,video,iframe,embed,object,svg,table),.bk-rich :is(img,video,iframe,table){max-width:100%}
+#booking-app :is(.bk-prod,.bk-slots,.bk-cal,.bk-checkout>*,.bk-aside,.bk-form){min-width:0}
+/* kalenteri 320 px: 7 saraketta mahtuu (solun leveys saa joustaa alle 44 px, korkeus pysyy ≥ 44 px kosketusta varten) */
+.bk-grid{grid-template-columns:repeat(7,minmax(0,1fr))}
+.bk-cell{min-width:0}
+@media(max-width:359px){.bk-cal{padding:10px}.bk-grid{gap:3px}}
+/* vuorolista 320 px: rivi ei saa levittää listaa (tila-merkki + Valitse/Liity jonoon rivittyvät tarvittaessa) */
+.bk-slotlist{grid-template-columns:minmax(0,1fr)}
+.bk-slot>*{min-width:0}
+.bk-slot-side{flex-wrap:wrap}

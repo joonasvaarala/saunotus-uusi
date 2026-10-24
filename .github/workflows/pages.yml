@@ -81,6 +81,8 @@ jobs:
       - run: node --test booking/tests/puhelin.test.mjs
       # linkit kaupan sisälle (Joonas 24.10.2026): Johku-tuotelinkit → /varaa/#/tuote/<slug> (EN /en/book/#/tuote/<slug>); build + kuvaukset
       - run: node --test booking/tests/linkit-kauppaan.test.mjs
+      # kaupan vaakaylivuoto 320–430 px (Joonas 24.10.2026): &nbsp;-sanavälit normalisoidaan näytössä (text-spaces.js), rivitys-/leveysvarmistukset shop.css:ssä
+      - run: node --test booking/tests/tuotesivu-ylivuoto.test.mjs
       - run: node --test booking/tests/sivutekstit.test.mjs
       # Sivutekstit osa 3 / PR 1: kaupan sanakirjat avaimiksi, tuontitiedosto (ei ylikirjoita tuotantoa, generoitu koodista), DB-peitto + repon oletukset (ei verkkoa)
       - run: node --test booking/tests/sivutekstit-kauppa.test.mjs
