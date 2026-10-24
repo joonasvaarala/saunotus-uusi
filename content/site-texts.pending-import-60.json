@@ -1,0 +1,12 @@
+[
+  {
+    "key": "faq.4.answer",
+    "lang": "en",
+    "text": "All bookings are made in our online shop (Book page). Choose the session type (public, private, After Session Sauna etc.), the date and the number of participants. You will receive a confirmation and further instructions by email.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "Johku-maininnan korvaus EN (Joonas 24.10.2026: sivustolla ei Johku-linkkejä tai -mainintoja, varaukset ja maksut uudessa verkkokaupassa). Vastaa julkaistua FI-tekstiä (pending-import-58, faq.4.answer fi v2). Olemassa oleva avain: uusi versio korvaa nykyisen EN-tekstin (v1, mainitsee sipoonjoenperinnesauna.johku.com), kun Bottiavustus tuo tiedoston admin_texts_importilla."
+  }
+]
