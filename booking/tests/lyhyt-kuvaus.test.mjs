@@ -13,8 +13,8 @@ import { dirname, join } from 'node:path';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const repo = join(root, '..');
 const read = (rel) => readFileSync(join(repo, rel), 'utf8');
-const MIG = 'booking/supabase/migrations/20261024280000_booking_156_product_short_description.sql';
-const RB = 'booking/supabase/rollbacks/20261024280000_booking_156_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024163053_booking_156_product_short_description.sql';
+const RB = 'booking/supabase/rollbacks/20261024163053_booking_156_ROLLBACK.sql';
 const T156 = 'booking/supabase/tests/t156_product_short_description.sql';
 const P56 = 'content/site-texts.pending-import-56.json';
 
@@ -152,7 +152,7 @@ test('tekstit pending-import-56: FI+EN, ei <, täsmää sanakirjaan, ei päälle
 });
 
 test('migraatio + rollback + SQL-testi: rakenne, ei public-skeemaa, md5-listat yhtenevät', () => {
-  assert.deepEqual(readdirSync(join(repo, 'booking/supabase/migrations')).filter((n) => /booking_156_/.test(n)), ['20261024280000_booking_156_product_short_description.sql']);
+  assert.deepEqual(readdirSync(join(repo, 'booking/supabase/migrations')).filter((n) => /booking_156_/.test(n)), ['20261024163053_booking_156_product_short_description.sql']);
   const sql = read(MIG), rb = read(RB), t = read(T156);
   for (const s of [sql, rb]) assert.doesNotMatch(s.replace(/--[^\n]*/g, ''), /\bpublic\./i, 'ei public-skeemaa');
   assert.match(sql, /add column if not exists short_description text/);
@@ -165,7 +165,7 @@ test('migraatio + rollback + SQL-testi: rakenne, ei public-skeemaa, md5-listat y
   // rollbackin md5:t (tuotannon pg_get_functiondef ennen booking_156:ta) = SQL-testin H1-odotus
   const PROD = { _texts_reg: '957899c59fa87e65994a9ffacb59ab8f', _texts_register_sources: '288af591eefb49d9ad48a7958c44ef14', admin_list_products: 'a78891b910ae65a7ea7583979ede71d4', admin_product_create: '0516c7f53b7eae66b04522382ed1c1fb', admin_update_product: '3cca4125054a32111235a25a5b8402de', public_catalog: 'a55b3a8bf0d3e8820f83b139b58f6057' };
   for (const [fn, md5] of Object.entries(PROD)) { assert.match(rb, new RegExp(`${fn}\\W[^\\n]*${md5}`), `rollback: ${fn}`); assert.match(t, new RegExp(`"${fn}":"${md5}"`), `t156: ${fn}`); }
-  assert.match(t, /\\ir \.\.\/rollbacks\/20261024280000_booking_156_ROLLBACK\.sql/);
-  assert.match(t, /\\ir \.\.\/migrations\/20261024280000_booking_156_product_short_description\.sql/);
+  assert.match(t, /\\ir \.\.\/rollbacks\/20261024163053_booking_156_ROLLBACK\.sql/);
+  assert.match(t, /\\ir \.\.\/migrations\/20261024163053_booking_156_product_short_description\.sql/);
   assert.match(read('.github/workflows/pages.yml'), /node --test booking\/tests\/lyhyt-kuvaus\.test\.mjs/);
 });

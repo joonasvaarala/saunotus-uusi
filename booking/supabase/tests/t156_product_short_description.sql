@@ -1,4 +1,4 @@
--- t156: tuotteen lyhyt kuvaus (booking_156, migraatio 20261024280000).
+-- t156: tuotteen lyhyt kuvaus (booking_156, migraatio 20261024163053).
 -- A sarakkeet + rajoite, B rajoite hylkää kielletyt tagit / hyväksyy sallitut (sama allowlist kuin kuvauksella, booking._rich_text_check),
 -- C admin_update_product, D admin_product_create, E public_catalog (anon), F tekstijärjestelmä (product.<id>.short_description fi/en),
 -- G migraation uudelleenajo, H rollback (funktiot täsmälleen tuotannon pg_get_functiondef-md5:llä, sarakkeet ja tekstirivit pois) + rollbackin uudelleenajo.
@@ -14,7 +14,7 @@ create function pg_temp.ck(p_ok boolean, p_label text) returns void language sql
 
 -- G: migraatio ajetaan uudelleen (uudelleenajettavuus)
 create temp table t156_before as select (select count(*) from booking.site_texts where source_table = 'kb.products' and source_column in ('short_description', 'short_description_en')) n_texts;
-\ir ../migrations/20261024280000_booking_156_product_short_description.sql
+\ir ../migrations/20261024163053_booking_156_product_short_description.sql
 
 do $t$
 declare
@@ -110,8 +110,8 @@ begin
 end $t$;
 
 -- H: rollback (ajetaan kahdesti)
-\ir ../rollbacks/20261024280000_booking_156_ROLLBACK.sql
-\ir ../rollbacks/20261024280000_booking_156_ROLLBACK.sql
+\ir ../rollbacks/20261024163053_booking_156_ROLLBACK.sql
+\ir ../rollbacks/20261024163053_booking_156_ROLLBACK.sql
 do $t$
 declare v_md5 jsonb := (select jsonb_object_agg(p.proname, md5(pg_get_functiondef(p.oid))) from pg_proc p where p.pronamespace = 'booking'::regnamespace
   and p.proname in ('_texts_reg', '_texts_register_sources', 'admin_update_product', 'admin_product_create', 'admin_list_products', 'public_catalog'));

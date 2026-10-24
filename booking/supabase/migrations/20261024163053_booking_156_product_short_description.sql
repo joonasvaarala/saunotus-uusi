@@ -1,19 +1,41 @@
--- ROLLBACK booking_156 (migraatio 20261024280000_booking_156_product_short_description.sql). Uudelleenajettava (toinen ajo ei tee mitään).
--- HUOM: poistaa sarakkeet kb.products.short_description / short_description_en sekä niiden site_texts-rivit ja versiot pysyvästi.
--- Ota ennen ajoa talteen: select id, short_description, short_description_en from kb.products where short_description is not null or short_description_en is not null;
--- Palauttaa funktiot täsmälleen tuotannon muotoon ennen booking_156:ta (pg_get_functiondef-tuloste sellaisenaan). Odotetut md5(pg_get_functiondef) ajon jälkeen:
+-- booking_156: tuotteen lyhyt kuvaus (Johku "short description") kb.products-tauluun, FI + EN.
+-- Versio 20261024163053 = tuotannon migraatioversio (ajettu tuotantoon 24.10.2026). Uudelleenajettava: toinen ajo ei muuta mitään (if not exists / create or replace / on conflict do nothing).
+-- 1) kb.products.short_description + short_description_en (text, nullable, ei oletusarvoa, ei datamuutoksia)
+-- 2) sama tagien allowlist kuin kuvauksella: booking._rich_text_check (p, br, strong/b, em/i, h2/h3, ul/ol/li, a; ei style/on*/javascript:).
+--    Tarkistus kuten kuvauksella vain, kun tekstissä on '<'. Enintään 1000 merkkiä. Uusi apufunktio booking._short_description_check,
+--    jota käyttävät CHECK-rajoite (kb_products_short_description_rich_check) sekä admin_update_product ja admin_product_create.
+-- 3) tekstijärjestelmä: product.<id>.short_description [fi] -> short_description, [en] -> short_description_en (kind rich, max 1000, normal)
+--    samalla tavalla kuin product.<id>.description (_texts_reg + _texts_register_sources). Rivit luodaan aktiivisille tuotteille (tyhjä = status empty).
+-- 4) public_catalog() ja admin_list_products() palauttavat short_description / short_description_en. Muut kentät ennallaan.
+-- Ei hintoja, ALV:tä, slugeja, URL:eja eikä public-skeemaa. Rollback: rollbacks/20261024163053_booking_156_ROLLBACK.sql
+-- Tuotannon funktioiden md5(pg_get_functiondef) ennen tätä migraatiota (rollback palauttaa nämä täsmälleen):
 --   booking._texts_reg: 957899c59fa87e65994a9ffacb59ab8f
 --   booking._texts_register_sources: 288af591eefb49d9ad48a7958c44ef14
 --   booking.admin_update_product: 3cca4125054a32111235a25a5b8402de
 --   booking.admin_product_create: 0516c7f53b7eae66b04522382ed1c1fb
 --   booking.admin_list_products: a78891b910ae65a7ea7583979ede71d4
 --   booking.public_catalog: a55b3a8bf0d3e8820f83b139b58f6057
--- Tarkistus: select p.proname, md5(pg_get_functiondef(p.oid)) from pg_proc p where p.pronamespace = 'booking'::regnamespace
---   and p.proname in ('_texts_reg','_texts_register_sources','admin_update_product','admin_product_create','admin_list_products','public_catalog') order by 1;
 set local lock_timeout = '5s';
 
-delete from booking.site_text_versions where text_id in (select id from booking.site_texts where source_table = 'kb.products' and source_column in ('short_description', 'short_description_en'));
-delete from booking.site_texts where source_table = 'kb.products' and source_column in ('short_description', 'short_description_en');
+alter table kb.products add column if not exists short_description text;
+alter table kb.products add column if not exists short_description_en text;
+comment on column kb.products.short_description is 'booking_156: lyhyt kuvaus (rich, sama allowlist kuin description, max 1000). site_texts product.<id>.short_description [fi]';
+comment on column kb.products.short_description_en is 'booking_156: lyhyt kuvaus englanniksi (rich, max 1000). site_texts product.<id>.short_description [en]';
+
+create or replace function booking._short_description_check(p_text text) returns boolean
+language plpgsql immutable set search_path = '' as $$
+begin
+  if p_text is null then return true; end if;
+  if char_length(p_text) > 1000 then perform booking._err('too_long', 'Lyhyt kuvaus on liian pitkä (enintään 1000 merkkiä)'); end if;
+  if position('<' in p_text) > 0 then perform booking._rich_text_check(p_text); end if;
+  return true;
+end $$;
+revoke all on function booking._short_description_check(text) from public, anon, authenticated;
+grant execute on function booking._short_description_check(text) to service_role;
+
+alter table kb.products drop constraint if exists kb_products_short_description_rich_check;
+alter table kb.products add constraint kb_products_short_description_rich_check
+  check (booking._short_description_check(short_description) and booking._short_description_check(short_description_en));
 
 CREATE OR REPLACE FUNCTION booking._texts_reg(p_table text, p_pk_col text, p_prefix text, p_field text, p_column text, p_lang_sql text, p_class_sql text, p_where text, p_max integer)
  RETURNS integer
@@ -23,7 +45,9 @@ CREATE OR REPLACE FUNCTION booking._texts_reg(p_table text, p_pk_col text, p_pre
 AS $function$
 declare n integer; v_kind text := 'plain'; v_max integer;
 begin
-  if p_table = 'kb.products' and p_field = 'description' then v_kind := 'rich'; v_max := 8000; else v_max := p_max; end if;
+  if p_table = 'kb.products' and p_field = 'description' then v_kind := 'rich'; v_max := 8000;
+  elsif p_table = 'kb.products' and p_field = 'short_description' then v_kind := 'rich'; v_max := 1000;  -- booking_156
+  else v_max := p_max; end if;
   execute format($q$insert into booking.site_texts(key, lang, class, kind, max_len, source_table, source_pk_col, source_pk, source_column, published_text, published_version, latest_version, status)
     select %1$L || '.' || s.%2$I::text || '.' || %3$L, %4$s, %5$s, %10$L, %6$s, %7$L, %2$L, s.%2$I::text, %8$L, coalesce(s.%8$I, ''),
            case when btrim(coalesce(s.%8$I, '')) <> '' then 1 else 0 end, case when btrim(coalesce(s.%8$I, '')) <> '' then 1 else 0 end,
@@ -46,6 +70,8 @@ begin
   n := n + booking._texts_reg('kb.products', 'id', 'product', 'name', 'name_en', $$'en'$$, $$'normal'$$, 's.active', 200);
   n := n + booking._texts_reg('kb.products', 'id', 'product', 'description', 'description', $$'fi'$$, $$'normal'$$, 's.active', 4000);
   n := n + booking._texts_reg('kb.products', 'id', 'product', 'description', 'description_en', $$'en'$$, $$'normal'$$, 's.active', 4000);
+  n := n + booking._texts_reg('kb.products', 'id', 'product', 'short_description', 'short_description', $$'fi'$$, $$'normal'$$, 's.active', 1000);  -- booking_156
+  n := n + booking._texts_reg('kb.products', 'id', 'product', 'short_description', 'short_description_en', $$'en'$$, $$'normal'$$, 's.active', 1000);  -- booking_156
   n := n + booking._texts_reg('kb.products', 'id', 'product', 'duration_text', 'duration_text', $$'fi'$$, $$'protected'$$, 's.active', 200);
   n := n + booking._texts_reg('kb.products', 'id', 'product', 'duration_text', 'duration_text_en', $$'en'$$, $$'protected'$$, 's.active', 200);  -- kb_products_duration_text_en
   n := n + booking._texts_reg('kb.products', 'id', 'product', 'price_text', 'price_text', $$'fi'$$, $$'locked'$$, 's.active', 200);
@@ -105,7 +131,7 @@ CREATE OR REPLACE FUNCTION booking.admin_update_product(p_product_id bigint, p_p
  SET search_path TO ''
 AS $function$
 declare
-  allowed text[] := array['name','name_en','description','description_en','price','price_text','vat_rate','active'];
+  allowed text[] := array['name','name_en','description','description_en','short_description','short_description_en','price','price_text','vat_rate','active'];
   k text; o kb.products; n kb.products; v_price numeric; v_vat numeric;
 begin
   perform booking._require_permission('catalog.edit');
@@ -129,11 +155,16 @@ begin
   if p_patch ? 'description_en' and position('<' in coalesce(p_patch ->> 'description_en', '')) > 0 then
     perform booking._rich_text_check(p_patch ->> 'description_en');
   end if;
+  -- booking_156: lyhyt kuvaus, sama allowlist kuin kuvauksella (_rich_text_check), enintään 1000 merkkiä
+  if p_patch ? 'short_description' then perform booking._short_description_check(p_patch ->> 'short_description'); end if;
+  if p_patch ? 'short_description_en' then perform booking._short_description_check(p_patch ->> 'short_description_en'); end if;
   update kb.products set
     name           = case when p_patch ? 'name' then btrim(p_patch ->> 'name') else name end,
     name_en        = case when p_patch ? 'name_en' then nullif(btrim(p_patch ->> 'name_en'), '') else name_en end,
     description    = case when p_patch ? 'description' then nullif(p_patch ->> 'description', '') else description end,
     description_en = case when p_patch ? 'description_en' then nullif(p_patch ->> 'description_en', '') else description_en end,
+    short_description    = case when p_patch ? 'short_description' then nullif(btrim(p_patch ->> 'short_description'), '') else short_description end,
+    short_description_en = case when p_patch ? 'short_description_en' then nullif(btrim(p_patch ->> 'short_description_en'), '') else short_description_en end,
     price          = case when p_patch ? 'price' then v_price else price end,
     price_text     = case when p_patch ? 'price_text' then nullif(p_patch ->> 'price_text', '') else price_text end,
     vat_rate       = case when p_patch ? 'vat_rate' then v_vat else vat_rate end,
@@ -154,13 +185,15 @@ CREATE OR REPLACE FUNCTION booking.admin_product_create(p_data jsonb)
  SET search_path TO ''
 AS $function$
 declare
-  allowed text[] := array['name','name_en','description','description_en','price','price_text','vat_rate','category','active','age_restricted'];
+  allowed text[] := array['name','name_en','description','description_en','short_description','short_description_en','price','price_text','vat_rate','category','active','age_restricted'];
   cats text[] := array['public_sauna','treatment','ritual','private_sauna','ceremony','event','training','gift_card','season_card','add_on','product_rental','corporate','other'];
   k text;
   v_name text;
   v_name_en text;
   v_desc text;
   v_desc_en text;
+  v_short text;
+  v_short_en text;
   v_price numeric;
   v_vat numeric;
   v_price_text text;
@@ -199,6 +232,11 @@ begin
   if v_desc_en is not null and char_length(v_desc_en) > 4000 then perform booking._err('invalid_param', 'Kuvaus on liian pitkä'); end if;
   if v_desc is not null and position('<' in v_desc) > 0 then perform booking._rich_text_check(v_desc); end if;
   if v_desc_en is not null and position('<' in v_desc_en) > 0 then perform booking._rich_text_check(v_desc_en); end if;
+  -- booking_156: lyhyt kuvaus (sama allowlist kuin kuvauksella)
+  v_short := nullif(btrim(coalesce(p_data ->> 'short_description', '')), '');
+  v_short_en := nullif(btrim(coalesce(p_data ->> 'short_description_en', '')), '');
+  perform booking._short_description_check(v_short);
+  perform booking._short_description_check(v_short_en);
 
   if jsonb_typeof(p_data -> 'price') not in ('number', 'string')
      or coalesce(p_data ->> 'price', '') !~ '^\d{1,6}([.,]\d{1,2})?$' then
@@ -269,11 +307,11 @@ begin
   select coalesce(max(pc.sort_order), 100) + 10 into v_sort from booking.product_config pc;
 
   insert into kb.products (
-    business_id, name, name_en, description, description_en, category,
+    business_id, name, name_en, description, description_en, short_description, short_description_en, category,
     price, price_type, price_text, vat_rate, price_includes_vat,
     slug, active, external_system, external_id
   ) values (
-    v_biz, v_name, v_name_en, v_desc, v_desc_en, v_cat,
+    v_biz, v_name, v_name_en, v_desc, v_desc_en, v_short, v_short_en, v_cat,
     v_price, 'per_unit', v_price_text, v_vat, true,
     v_slug, v_active, null, null
   ) returning * into n;
@@ -310,6 +348,7 @@ begin
     'product', jsonb_build_object(
       'id', n.id, 'slug', n.slug, 'name', n.name, 'name_en', n.name_en,
       'description', n.description, 'description_en', n.description_en, 'category', n.category,
+      'short_description', n.short_description, 'short_description_en', n.short_description_en,
       'price', n.price, 'price_type', n.price_type, 'price_text', n.price_text, 'vat_rate', n.vat_rate,
       'active', n.active,
       'config', (select to_jsonb(pc) - 'updated_at' from booking.product_config pc where pc.product_id = n.id),
@@ -331,6 +370,7 @@ begin
     select jsonb_agg(jsonb_build_object(
       'id', p.id, 'external_id', p.external_id, 'slug', p.slug, 'name', p.name, 'name_en', p.name_en,
       'description', p.description, 'description_en', p.description_en, 'category', p.category,
+      'short_description', p.short_description, 'short_description_en', p.short_description_en,
       'price', p.price, 'price_type', p.price_type, 'price_text', p.price_text, 'vat_rate', p.vat_rate,
       'duration_minutes', p.duration_minutes, 'duration_text', p.duration_text, 'duration_text_en', p.duration_text_en,
       'active', p.active, 'updated_at', p.updated_at,
@@ -353,6 +393,7 @@ AS $function$
   select coalesce(jsonb_agg(jsonb_build_object(
       'id', p.id, 'slug', p.slug, 'name', p.name, 'name_en', p.name_en,
       'description', p.description, 'description_en', p.description_en,
+      'short_description', p.short_description, 'short_description_en', p.short_description_en,
       'category', p.category, 'sale_kind', pc.sale_kind,
       'price', p.price, 'price_type', p.price_type, 'price_text', p.price_text,
       'duration_text', p.duration_text, 'duration_text_en', p.duration_text_en, 'duration_minutes', p.duration_minutes,
@@ -369,7 +410,6 @@ AS $function$
   where pc.bookable and pc.shop_visible and pc.lifecycle = 'current'
     and (pc.public_slots or exists (select 1 from booking.schedule_rules r where r.product_id = p.id and r.active)) $function$;
 
-alter table kb.products drop constraint if exists kb_products_short_description_rich_check;
-drop function if exists booking._short_description_check(text);
-alter table kb.products drop column if exists short_description;
-alter table kb.products drop column if exists short_description_en;
+-- tekstijärjestelmän rivit aktiivisille tuotteille (olemassa olevia ei kosketa)
+select booking._texts_reg('kb.products', 'id', 'product', 'short_description', 'short_description', $$'fi'$$, $$'normal'$$, 's.active', 1000);
+select booking._texts_reg('kb.products', 'id', 'product', 'short_description', 'short_description_en', $$'en'$$, $$'normal'$$, 's.active', 1000);
