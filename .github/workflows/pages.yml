@@ -198,6 +198,9 @@ jobs:
       # Paketti 10 jatko / booking_143: 10 merkin satunnainen vuosikorttikoodi, rate limit ilman IP:tä, vuosikorttivarauksen alennus, peruutus palauttaa koodin käytön.
       # t143 (booking/supabase/tests/discounts/t143_annual_code_hardening.sql) ajetaan paikallisessa PG17:ssä t142:n tapaan (työnkulussa ei ole Postgresia).
       - run: node --test booking/tests/vuosikortti-koodi-kovennus.test.mjs
+      # Lahjakorttilista (booking_145): haku myös tuotteella, aakkosjärjestys, 20 kerrallaan, Johku-kortit samassa listassa. SQL-testi t145 ajetaan paikallisessa PG17:ssä.
+      - run: node --test booking/tests/lahjakorttilista.test.mjs
+      - run: node --test booking/tests/giftcards.test.mjs
       # Paketti 11 / booking_144: Schema.org-lisäykset, vanhojen osoitteiden noindex-ohjaukset, evästeetön kävijämittaus (OLETUKSENA POIS, ei testisivulla), hallinnan Kävijät-välilehti.
       # SQL: booking/supabase/tests/analytics/t144_cookieless_analytics.sql ajetaan paikallisessa PG17:ssä (koko ketju + rollback + uudelleenajo).
       - run: node --test booking/tests/seo-ja-kavijatilastot.test.mjs
