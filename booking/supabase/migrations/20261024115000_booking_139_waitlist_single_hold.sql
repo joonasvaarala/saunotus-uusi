@@ -271,13 +271,18 @@ create index if not exists waitlist_entries_active_hold_idx on booking.waitlist_
 -- Kaikki pooli-saatavuus kulkee _pool_peakin kautta: _pools_remaining → _sessions (public_availability, public_availability_all,
 -- päivänäkymät, ajanmuutos, jonotuslistan tarkistukset) ja _check_claim (reservations_validate / reservation_legs_validate:
 -- julkinen ja hallinnan varauksen luonti, muutos, lisäys tilaukseen, hoitovaraukset). Lukitus ennallaan (booking:space).
+-- Suorituskyky: SQL-kielinen security definer -funktio suunnitellaan joka kutsulla uudelleen; pitohaara kasvatti suunnittelua
+-- (kk-saatavuus ~50 → ~69 ms paikallisesti). Sama kysely plpgsql-kääreessä käyttää istunnon välimuistiin tallennettua suunnitelmaa
+-- (~6 ms). Kysely ja tulos ovat samat; rollback palauttaa booking_138:n SQL-version.
 CREATE OR REPLACE FUNCTION booking._pool_peak(p_pool bigint, p_from timestamp with time zone, p_to timestamp with time zone, p_exclude bigint DEFAULT NULL::bigint)
  RETURNS integer
- LANGUAGE sql
+ LANGUAGE plpgsql
  STABLE SECURITY DEFINER
  SET search_path TO ''
 AS $function$
-  with rs as materialized (
+begin
+  return (
+with rs as materialized (
     select r.starts_at + make_interval(mins => r.claim_offset_min) as s,
            case when r.claim_minutes is null then r.ends_at
                 else r.starts_at + make_interval(mins => r.claim_offset_min + r.claim_minutes) end as e,
@@ -323,6 +328,8 @@ AS $function$
     select (select n from base) + sum(d) over (order by t) as load from step
   )
   select coalesce(greatest((select n from base), (select max(load) from run)), 0)::integer
+  );
+end
 $function$;
 
 CREATE OR REPLACE FUNCTION booking.public_create_booking(p_rule_id bigint, p_date date, p_persons integer, p_name text, p_email text, p_phone text, p_marketing_consent boolean DEFAULT false, p_locale text DEFAULT 'fi'::text, p_note text DEFAULT NULL::text, p_customer_kind text DEFAULT 'private'::text, p_company jsonb DEFAULT NULL::jsonb, p_addons jsonb DEFAULT NULL::jsonb)

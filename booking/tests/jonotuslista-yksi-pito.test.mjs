@@ -103,6 +103,8 @@ test('kauppa: hold_expired → oma teksti, tavallinen varaus (ei lukitusta, ei e
 test('migraatio booking_139: pidon aikana paikka ei ole julkisessa myynnissä (_pool_peak), haltija, henkilökunta ja lukitus', () => {
   const sql = rd(MIG);
   const peak = code(fnU(sql, '_pool_peak'));
+  assert.match(peak, /LANGUAGE plpgsql/, 'suunnitelma välimuistiin (booking_133-nopeutus säilyy)');
+  assert.match(peak, /begin\s+return \(\s+with rs as materialized \(/);
   assert.match(peak, /from booking\.waitlist_entries w/);
   assert.match(peak, /w\.status = 'notified' and w\.hold_expires_at > now\(\)/, 'vanheneminen palauttaa myyntiin now()-ehdolla');
   assert.match(peak, /booking\._waitlist_hold_counts\(w\.id\)/);
