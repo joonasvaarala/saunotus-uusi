@@ -46,7 +46,10 @@ begin
   v := md5(pg_get_functiondef('booking.public_get_booking(uuid)'::regprocedure));
   if v not in ('a155cd472c356c09e595cbda46b4dada', '778f1024006308d0dcd879ef9428ed00') then ok := false; msg := msg || ' public_get_booking=' || v; end if;
   v := md5(pg_get_functiondef('booking.public_preview_code(text,bigint,date,integer,jsonb,text,text)'::regprocedure));
-  if v not in ('fec859d04960f42d79412bbdf7dc6561', '4816fbaf5149e501a128aed40f2bf505') then ok := false; msg := msg || ' public_preview_code=' || v; end if;
+  -- e8fe514b… = booking_171 (tuotannossa 20261024212241) on jo ajettu: hyväksytään, ja uudelleenajo palauttaa booking_171:n määrittelyn lopussa
+  if v not in ('fec859d04960f42d79412bbdf7dc6561', '4816fbaf5149e501a128aed40f2bf505', 'e8fe514b4ec9db4043d388e5547f94ad') then ok := false; msg := msg || ' public_preview_code=' || v; end if;
+  perform set_config('booking.m166_keep_preview', case when v = 'e8fe514b4ec9db4043d388e5547f94ad'
+    then pg_get_functiondef('booking.public_preview_code(text,bigint,date,integer,jsonb,text,text)'::regprocedure) else '' end, true);
   v := md5(pg_get_functiondef('booking.reservations_time_window()'::regprocedure));
   if v not in ('023b689b0366602ab32738b7821dcc16', '4bff7a9af49ade40e5a953eaeea03547') then ok := false; msg := msg || ' reservations_time_window=' || v; end if;
   if not ok then raise exception 'booking_166: korvattavien funktioiden md5 ei vastaa tuotantoa (%); mitään ei muutettu', msg; end if;
@@ -702,3 +705,16 @@ begin
   revoke all on function booking.public_ritual_addon(bigint, date, integer) from public;
   grant execute on function booking.public_ritual_addon(bigint, date, integer) to anon, authenticated, service_role;
 end $p$;
+
+-- Uudelleenajo booking_171:n jälkeen: palautetaan booking_171:n public_preview_code (md5 e8fe514b…) täsmälleen, jottei hiljaisen ajan korjaus kumoudu.
+do $k$
+declare d text := nullif(current_setting('booking.m166_keep_preview', true), '');
+begin
+  if d is not null then
+    execute d;
+    if md5(pg_get_functiondef('booking.public_preview_code(text,bigint,date,integer,jsonb,text,text)'::regprocedure)) <> 'e8fe514b4ec9db4043d388e5547f94ad' then
+      raise exception 'booking_166: booking_171:n public_preview_code ei palautunut';
+    end if;
+    perform set_config('booking.m166_keep_preview', '', true);
+  end if;
+end $k$;

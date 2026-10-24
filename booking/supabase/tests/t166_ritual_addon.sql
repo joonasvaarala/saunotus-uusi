@@ -55,8 +55,12 @@ begin
 end $$;
 grant execute on all functions in schema pg_temp to public;
 
--- L1: migraatio ajetaan uudelleen heti alussa (uudelleenajettavuus)
+-- booking_171 (hiljainen ale perushinnasta, tuotannossa 20261024212241) muuttaa public_preview_coden md5:ksi e8fe514b…; testi toimii kummassakin tilassa
+select md5(pg_get_functiondef('booking.public_preview_code(text,bigint,date,integer,jsonb,text,text)'::regprocedure)) = 'e8fe514b4ec9db4043d388e5547f94ad' as has171 \gset
+-- L1: migraatio ajetaan uudelleen heti alussa (uudelleenajettavuus); booking_171:n public_preview_code säilyy
 \ir ../migrations/20261024202015_booking_166_ritual_addon.sql
+select pg_temp.ck(md5(pg_get_functiondef('booking.public_preview_code(text,bigint,date,integer,jsonb,text,text)'::regprocedure))
+  = case when :'has171'::boolean then 'e8fe514b4ec9db4043d388e5547f94ad' else '4816fbaf5149e501a128aed40f2bf505' end, 'L1b: uudelleenajo: public_preview_code ennallaan (booking_171: ' || :'has171' || ')');
 
 update booking.settings set value = '900'::jsonb where key = 'booking_horizon_days';   -- vain tässä transaktiossa (tuotannossa 180)
 update booking.settings set value = '"pay_later"'::jsonb where key = 'public_payment_mode';
@@ -275,6 +279,10 @@ begin
 end $t$;
 
 -- ---------- L rollback (md5) + migraatio uudelleen ----------
+-- booking_171 rakentuu booking_166:n päälle: se kumotaan ensin (ja ajetaan lopuksi uudelleen)
+\if :has171
+\ir ../rollbacks/20261024212241_booking_171_ROLLBACK.sql
+\endif
 \ir ../rollbacks/20261024202015_booking_166_ROLLBACK.sql
 select pg_temp.ck((select string_agg(md5(pg_get_functiondef(x::regprocedure)), ',' order by x) from unnest(array[
   'booking._attach_addons(bigint,jsonb)', 'booking._reservation_refund_plan(bigint)', 'booking.public_get_booking(uuid)',
@@ -287,6 +295,11 @@ select pg_temp.ck(to_regprocedure('booking.public_ritual_addon(bigint,date,integ
 \ir ../migrations/20261024202015_booking_166_ritual_addon.sql
 select pg_temp.ck(to_regprocedure('booking.public_ritual_addon(bigint,date,integer)') is not null and has_function_privilege('anon', 'booking.public_ritual_addon(bigint,date,integer)', 'execute')
                   and not has_function_privilege('anon', 'booking._ritual_addon_attach(bigint,jsonb)', 'execute'), 'L4: migraatio uudelleen + oikeudet');
+\if :has171
+\ir ../migrations/20261024212241_booking_171_quiet_extra_person.sql
+select pg_temp.ck(md5(pg_get_functiondef('booking.public_preview_code(text,bigint,date,integer,jsonb,text,text)'::regprocedure)) = 'e8fe514b4ec9db4043d388e5547f94ad'
+                  and md5(pg_get_functiondef('booking._quiet_apply(bigint,jsonb)'::regprocedure)) = 'dd2139dc889d981e6623ef1fceaeec3d', 'L5: booking_171 ajettu uudelleen');
+\endif
 
 select label from t166_r where not ok;
 do $$ declare p int; f int; begin
