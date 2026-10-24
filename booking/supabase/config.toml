@@ -13,6 +13,8 @@ verify_jwt = false   # laskun public_token on salaisuus; numeroitu lasku välimu
 verify_jwt = false   # pg_cron kutsuu; tunnistus x-sync-secret (booking._cron_secret_ok)
 [functions.gift-card-pdf]
 verify_jwt = false   # kortin public_token (UUID) on salaisuus; maksamaton/mitätöity kortti → 409; ei välimuistia
+[functions.privacy-storage-cleanup]
+verify_jwt = false   # booking_160: pg_cron kutsuu; tunnistus x-sync-secret (booking._cron_secret_ok). Poistaa vain booking.privacy_storage_due():n listaamat PDF:t Storage-API:lla, ja vain kun enabled ja ei dry_run.
 [functions.report-pdf]
 verify_jwt = true
 [functions.vismapay-start]

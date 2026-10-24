@@ -79,6 +79,16 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
       }
       case 'public_settings': return { public_booking_enabled: true, public_treatment_horizon_days: 14 };
       case 'public_product_images': return [];
+      // booking_158: tapahtumat myynti suljettuna (events.sale_enabled = false) → kaikki kerrat 'closed'; ?mock=1 → #/tuote/perinnesaunotusilta
+      case 'public_events': {
+        const at = (d, hh, mm = 0) => { const x = new Date(now()); x.setUTCDate(x.getUTCDate() + d); x.setUTCHours(hh - 2, mm, 0, 0); return x.toISOString(); };
+        return [
+          { product_id: 31, slug: 'perinnesaunotusilta', name: 'Perinnesaunotusilta', name_en: 'Traditional sauna evening', description_short: 'Perinteinen saunotusilta savusaunassa.', description_short_en: 'A traditional sauna evening in the smoke sauna.', price: 69, price_text: null, image_path: null, image_alt: null, category: 'event', sale_open: false,
+            occurrences: [{ rule_id: 9001, starts_at: at(21, 16), ends_at: at(21, 19), label: null, label_en: null, status: 'closed', remaining: null, price: 69 }, { rule_id: 9002, starts_at: at(49, 16), ends_at: at(49, 19), label: 'Joulun perinnesaunotus', label_en: 'Christmas sauna evening', status: 'closed', remaining: null, price: 69 }] },
+          { product_id: 33, slug: 'saunottajakoulutus', name: 'Saunottajakoulutus', name_en: 'Sauna host training', description_short: null, description_short_en: null, price: 390, price_text: null, image_path: null, image_alt: null, category: 'training', sale_open: false,
+            occurrences: [{ rule_id: 9003, starts_at: at(35, 9), ends_at: at(36, 16), label: null, label_en: null, status: 'closed', remaining: null, price: 390 }] },
+        ];
+      }
       case 'public_addons': return ADDONS;   // lisäpalvelut (booking_61: pyyhe resurssivaraukselle, tuote 7); sama muoto kuin tuotannon public_addons()
       case 'public_payment_options': return { ok: true, online_enabled: false, methods: [] };
       case 'public_checkout_payment_options': return { ok: true, mobilepay_enabled: false, gift_card_redeem_enabled: false, methods: [] };

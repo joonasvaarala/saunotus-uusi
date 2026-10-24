@@ -5,10 +5,12 @@ import { cards, alts, pageDoc } from './content-texts.mjs';
 import { articlesNav, homeSection } from './articles/runtime.mjs';
 import { tx } from './site-texts.mjs';
 import { seoSchemaForPage, jsonLdScript } from './seo-enhance.mjs';
-import { privacyAnalyticsHtml } from './privacy-analytics.mjs';
+import { privacyAnalyticsHtml, policyHasAnalyticsSection } from './privacy-analytics.mjs';
+import { policyText, privacyDocFor, linkContacts } from './policy-lang.mjs';
 import { shopProductsHtml } from './shop-products.mjs';
 import { quietWeekAttrs } from './quiet-week.mjs';
 import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
+import { selectShopEvents, shopEventsHtml, shopHash } from './event-cards.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
   johku, bookingUrl, phoneDisplay, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
@@ -146,7 +148,23 @@ export function upcomingEvents(lang) {
   }
   return out.sort((a, b) => a.dates[0].starts_on.localeCompare(b.dates[0].starts_on));
 }
+// booking_158: uuden kaupan tapahtumat (kb.json events_shop = booking.public_events(current_date, 'shop')), kun niissä on tulevia kertoja
+// (myyntitilasta riippumatta). Kortti linkittää kaupan tuotesivulle (FI /varaa/#/tuote/<slug>, EN /en/book/#/tuote/<slug>), ei Johkuun.
+// Muuten (ei events_shop-dataa, esim. migraatio ajamatta) vanha data (kb.event_dates + cards.json), linkki silti kaupan tuotesivulle.
+function shopEventsSection(lang) {
+  const list = selectShopEvents(kb.events_shop, Date.now());
+  if (!list.length) return null;
+  const cardOf = (ev) => Object.entries(cards.events).find(([id, c]) => !id.startsWith('_') && (c.kb || id) === ev.slug)?.[1] || null;
+  const fallbackImg = Object.entries(cards.events).find(([id, c]) => !id.startsWith('_') && c.img)?.[1]?.img;
+  return shopEventsHtml(list, lang, {
+    e, money, card: cardOf, arrow: ui(lang).reserveArrow,
+    link: (ev) => pageHref('book', lang, shopHash(ev.slug)),
+    img: (ev) => { const id = cardOf(ev)?.img || fallbackImg; return id ? pic(id, lang, { sizes: '(min-width:1100px) 280px, 90vw', alt: '' }) : ''; },
+  });
+}
 export function eventsHtml(lang, empty) {
+  const shop = shopEventsSection(lang);
+  if (shop) return shop;
   const ev = upcomingEvents(lang);
   if (!ev.length) return `<p class="center">${e(empty)}</p>`;
   return `<ul class="events">${ev.map(({ c, p, dates }) => {
@@ -154,7 +172,7 @@ export function eventsHtml(lang, empty) {
     const times = [...new Set(dates.map((d) => eventTimeFor(d, lang, enTime)).filter(Boolean))];
     const dl = dates.slice(0, 6).map((d) => fmtDate(d.starts_on, lang)).join(' · ');
     return `<li class="card ev"><div class="im">${pic(c.img, lang, { sizes: '(min-width:1100px) 280px, 90vw', alt: '' })}<span class="badge">${e(money(p.price, lang))}</span></div>
-<div class="bd"><h3><a href="${e(bookingUrl(p.booking_url, lang))}" target="_blank" rel="noopener">${e(t.title)}${NEW(lang)}</a></h3>
+<div class="bd"><h3><a href="${e(p.slug ? pageHref('book', lang, shopHash(p.slug)) : bookingUrl(p.booking_url, lang))}"${p.slug ? '' : ' target="_blank" rel="noopener"'}>${e(t.title)}${p.slug ? '' : NEW(lang)}</a></h3>
 <p class="dates">${e(dl)}${times.length ? ' · ' + e(times[0]) : ''}</p><p>${e(t.text)}</p></div><div class="cta" aria-hidden="true">${e(ui(lang).reserveArrow)}</div></li>`;
   }).join('')}</ul>`;
 }
@@ -284,7 +302,7 @@ ${body}
 <div><h2>${e(u.footerInfo)}</h2><ul>${u.infoLinks.map(([id, l]) => `<li><a href="${pageHref('info', lang, id)}">${e(l)}</a></li>`).join('')}</ul></div>
 <div><h2>${e(u.footerContact)}</h2><ul><li><address style="all:unset">${e(site.contact.street)}<br>${e(site.contact.postal)} ${e(site.contact.city)}</address></li><li><a href="tel:${site.contact.phoneTel}">${e(phoneDisplay(lang))}</a></li><li><a href="mailto:${site.contact.email}">${e(site.contact.email)}</a></li><li><a href="${e(site.contact.mapsUrl)}" rel="noopener">${e(ui(lang).directions)}${NEW(lang)}</a></li>${site.social.map((s) => `<li><a href="${e(s.url)}" rel="noopener">${e(s.name)}${NEW(lang)}</a></li>`).join('')}</ul></div>
 </div>
-<div class="fbottom"><span>© ${new Date().getFullYear()} ${e(kb.business.legal_name)} · ${e(ui(lang).businessId)} ${e(kb.business.business_id)}</span><ul><li><a href="${fl('terms', lang)}">${e(u.legal)}</a></li><li><a href="${pageHref('privacy', 'fi')}"${lang === 'en' ? ' hreflang="fi" lang="fi"' : ''}>${e(u.privacy)}</a></li></ul></div>
+<div class="fbottom"><span>© ${new Date().getFullYear()} ${e(kb.business.legal_name)} · ${e(ui(lang).businessId)} ${e(kb.business.business_id)}</span><ul><li><a href="${fl('terms', lang)}">${e(u.legal)}</a></li><li>${pagePath('privacy', lang) ? `<a href="${fl('privacy', lang)}">${e(lang === 'en' ? privacyDocFor(P('privacy').fi, kb.policies, 'en')?.hero.title || u.privacy : u.privacy)}` : `<a href="${pageHref('privacy', 'fi')}"${lang === 'en' ? ' hreflang="fi" lang="fi"' : ''}>${e(u.privacy)}`}</a></li></ul></div>
 </div></footer>
 ${chat}
 <script>(function(){var d=new Intl.DateTimeFormat('en-US',{weekday:'short',timeZone:'Europe/Helsinki'}).format(new Date()),i={Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6}[d],l=document.querySelectorAll('.week>li');if(l[i]){l[i].classList.add('is-today');l[i].setAttribute('aria-current','date')}})()</script>
@@ -432,14 +450,17 @@ ${messages}
 }
 
 export function policyPage(name, key, lang) {
-  const d = P(name)[lang];
-  // Tietosuojaseloste (privacy.json) pysyy ennallaan: aina listattu rivi sellaisenaan. Muut (ehdot): suomenkieliset id:t + _en (kb-en.mjs).
+  const d = name === 'privacy' ? privacyDocFor(P(name).fi, kb.policies, lang) : P(name)[lang];
+  // Tietosuojaseloste: privacy.json-listan rivit, EN vain title_en+body_en (policy-lang.mjs; muuten EN-sivua ei rakenneta).
+  // Muut (ehdot): suomenkieliset id:t + _en (kb-en.mjs).
   const items = name === 'privacy'
-    ? d.policies.map((id) => kb.policies.find((p) => p.id === id)).filter((p) => p && !p.internal)
+    ? d.policies.map((id) => kb.policies.find((p) => p.id === id)).filter((p) => p && !p.internal).map((p) => policyText(p, lang) ?? policyText(p, 'fi'))
     : d.policies.map((id) => policyFor(id, lang)).filter(Boolean);
-  const txt = (s) => clean(s).split(/\n+/).map((l) => `<p>${e(l)}</p>`).join('');
+  // Tietosuojasivulla puhelin (tel:) ja sähköposti (mailto:) linkeiksi escapoidusta tekstistä (policy-lang.mjs linkContacts).
+  const para = (l) => (name === 'privacy' ? linkContacts(e(l), site.contact) : e(l));
+  const txt = (s) => clean(s).split(/\n+/).map((l) => `<p>${para(l)}</p>`).join('');
   const body = pageHero(d.hero, lang, key)
-    + sec('', `<div class="narrow prose">${d.note ? `<p class="note-box">${e(d.note)}</p>` : ''}${items.map((p) => p.lang && p.lang !== lang ? `<div lang="${e(p.lang)}"><h2>${e(p.title)}</h2>${txt(p.body)}</div>` : `<h2>${e(p.title)}</h2>${txt(p.body)}`).join('')}${name === 'privacy' ? privacyAnalyticsHtml(lang, e, txt) : ''}</div>`);
+    + sec('', `<div class="narrow prose">${d.note ? `<p class="note-box">${e(d.note)}</p>` : ''}${items.map((p) => p.lang && p.lang !== lang ? `<div lang="${e(p.lang)}"><h2>${e(p.title)}</h2>${txt(p.body)}</div>` : `<h2>${e(p.title)}</h2>${txt(p.body)}`).join('')}${name === 'privacy' && !items.some((p) => policyHasAnalyticsSection(p.body)) ? privacyAnalyticsHtml(lang, e, txt) : ''}</div>`);
   return layout({ lang, key, meta: d.meta, body });
 }
 
