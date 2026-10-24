@@ -5,6 +5,7 @@ import { cards, alts, pageDoc } from './content-texts.mjs';
 import { articlesNav, homeSection } from './articles/runtime.mjs';
 import { tx } from './site-texts.mjs';
 import { seoSchemaForPage, jsonLdScript } from './seo-enhance.mjs';
+import { privacyAnalyticsHtml } from './privacy-analytics.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
   johku, bookingUrl, phoneDisplay, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
@@ -429,7 +430,7 @@ export function policyPage(name, key, lang) {
   const items = d.policies.map((id) => kb.policies.find((p) => p.id === id)).filter((p) => p && !p.internal);
   const txt = (s) => clean(s).split(/\n+/).map((l) => `<p>${e(l)}</p>`).join('');
   const body = pageHero(d.hero, lang, key)
-    + sec('', `<div class="narrow prose">${d.note ? `<p class="note-box">${e(d.note)}</p>` : ''}${items.map((p) => `<h2>${e(p.title)}</h2>${txt(p.body)}`).join('')}</div>`);
+    + sec('', `<div class="narrow prose">${d.note ? `<p class="note-box">${e(d.note)}</p>` : ''}${items.map((p) => `<h2>${e(p.title)}</h2>${txt(p.body)}`).join('')}${name === 'privacy' ? privacyAnalyticsHtml(lang, e, txt) : ''}</div>`);
   return layout({ lang, key, meta: d.meta, body });
 }
 
