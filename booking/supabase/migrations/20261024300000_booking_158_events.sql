@@ -279,6 +279,22 @@ begin
 end $$;
 
 -- muuttuneet tapahtumakerrat (myös muiden RPC:iden kautta, esim. admin_update_rule): blokit ja pooli ajan tasalle
+-- Hallinnan antama aikaleima paikalliseksi (Helsingin) seinäkelloajaksi. Ilman aikavyöhykettä annettu aika ('2027-02-22T09:00')
+-- tulkitaan AINA Europe/Helsinki-ajaksi istunnon TimeZone-asetuksesta riippumatta (tuotannon istunto on UTC). Aikaleima, jossa on
+-- oma poikkeama ('…+02:00', '…Z'), säilyttää poikkeamansa ja muunnetaan Helsingin ajaksi.
+create or replace function booking._event_local_ts(p_val text) returns timestamp
+language plpgsql stable set search_path = '' as $$
+begin
+  p_val := btrim(p_val);
+  if p_val ~* '^\d{4}-\d{2}-\d{2}[t ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?(z|[+-]\d{2}(:?\d{2})?)$' then
+    return (p_val::timestamptz) at time zone 'Europe/Helsinki';
+  end if;
+  if p_val ~* '^\d{4}-\d{2}-\d{2}[t ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?$' then
+    return (p_val::timestamp at time zone 'Europe/Helsinki') at time zone 'Europe/Helsinki';
+  end if;
+  raise exception 'invalid local timestamp: %', p_val;
+end $$;
+
 create or replace function booking._event_rule_changed_trg() returns trigger
 language plpgsql security definer set search_path = '' as $$
 begin
@@ -312,7 +328,7 @@ begin
     'booking._event_block_range(date, time without time zone, booking.event_resource_blocks)', 'booking._event_block_is_own(bigint, bigint, bigint[])',
     'booking._event_block_json(booking.event_resource_blocks)', 'booking._event_rule_json(bigint)', 'booking._event_rule_pool_sync(bigint)',
     'booking._event_sync_blocks(bigint)', 'booking._event_rule_conflicts(bigint)', 'booking._event_raise_conflicts(bigint)',
-    'booking._event_jint(jsonb, text, integer, integer)', 'booking._event_jbool(jsonb, text)',
+    'booking._event_jint(jsonb, text, integer, integer)', 'booking._event_jbool(jsonb, text)', 'booking._event_local_ts(text)',
     'booking._event_rule_changed_trg()', 'booking._event_blocks_changed_trg()'] loop
     execute format('revoke all on function %s from public, anon, authenticated', f);
     execute format('grant execute on function %s to service_role', f);
@@ -913,7 +929,7 @@ returns jsonb language plpgsql volatile security definer set search_path = '' as
 declare
   r booking.schedule_rules; b jsonb; k text; res booking.resources;
   v_mode text; v_off integer; v_min integer; v_sd smallint; v_sc time; v_ed smallint; v_ec time; v_note text; v_i integer := 0;
-  v_s text; v_e text; v_ts timestamptz; v_local timestamp; v_occ tstzrange; v_prev text := coalesce(current_setting('booking.event_sync', true), '');
+  v_s text; v_e text; v_local timestamp; v_occ tstzrange; v_prev text := coalesce(current_setting('booking.event_sync', true), '');
   allowed text[] := array['resource_id','mode','offset_min','minutes','starts_at','ends_at','note','id','resource_name','resource_code','resource_kind',
                           'timing','start_day','start_clock','end_day','end_clock','sort_order','materialized','rule_id'];
 begin
@@ -955,14 +971,16 @@ begin
       -- 'HH:MM' = kerran päivä; ISO-aikaleima (VVVV-KK-PPTHH:MM[+TZ]) = mikä tahansa päivä (monipäiväinen koulutus)
       if v_s ~ '^\d{1,2}[:.]\d{2}(:00)?$' then v_sd := 0; v_sc := replace(v_s, '.', ':')::time;
       elsif v_s ~ '^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}' then
-        begin v_ts := v_s::timestamptz; exception when others then perform booking._err('invalid_param', 'Virheellinen starts_at'); end;
-        v_local := v_ts at time zone booking._tz(); v_sd := (v_local::date - r.valid_from); v_sc := v_local::time;
+        -- ilman poikkeamaa = Helsingin aika (ei istunnon TimeZone), poikkeama säilyy
+        begin v_local := booking._event_local_ts(v_s); exception when others then perform booking._err('invalid_param', 'Virheellinen starts_at'); end;
+        v_sd := (v_local::date - r.valid_from); v_sc := v_local::time;
       else perform booking._err('invalid_param', 'starts_at muodossa HH:MM tai ISO-aikaleima'); end if;
       if v_e ~ '^\d{1,2}[:.]\d{2}(:00)?$' then v_ed := 0; v_ec := replace(v_e, '.', ':')::time;
         if v_e ~ '^24[:.]00' then v_ed := 1; v_ec := '00:00'; end if;
       elsif v_e ~ '^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}' then
-        begin v_ts := v_e::timestamptz; exception when others then perform booking._err('invalid_param', 'Virheellinen ends_at'); end;
-        v_local := v_ts at time zone booking._tz(); v_ed := (v_local::date - r.valid_from); v_ec := v_local::time;
+        -- ilman poikkeamaa = Helsingin aika (ei istunnon TimeZone), poikkeama säilyy
+        begin v_local := booking._event_local_ts(v_e); exception when others then perform booking._err('invalid_param', 'Virheellinen ends_at'); end;
+        v_ed := (v_local::date - r.valid_from); v_ec := v_local::time;
       else perform booking._err('invalid_param', 'ends_at muodossa HH:MM tai ISO-aikaleima'); end if;
       if v_sd not between -1 and 14 or v_ed not between -1 and 14 then perform booking._err('invalid_param', 'Varaus on liian kaukana kerrasta'); end if;
       if not (v_ed > v_sd or (v_ed = v_sd and v_ec > v_sc)) then perform booking._err('invalid_param', 'Loppu on ennen alkua'); end if;

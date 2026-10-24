@@ -466,6 +466,7 @@ drop function if exists booking._event_rule_pool_sync(bigint);
 drop function if exists booking._event_rule_json(bigint);
 drop function if exists booking._event_jint(jsonb, text, integer, integer);
 drop function if exists booking._event_jbool(jsonb, text);
+drop function if exists booking._event_local_ts(text);
 drop function if exists booking._event_block_is_own(bigint, bigint, bigint[]);
 drop function if exists booking._channels_effective(text[], text);
 drop function if exists booking._events_sale_enabled();

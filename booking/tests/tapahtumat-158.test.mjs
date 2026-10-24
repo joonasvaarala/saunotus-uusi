@@ -93,3 +93,23 @@ test('SQL-testi tarkistaa rollbackin ja uudelleenajon', () => {
   assert.match(t, /20261024300000_booking_158_ROLLBACK\.sql/);
   assert.match(t, /20261024300000_booking_158_events\.sql/);
 });
+
+test('aikavyöhyke: hallinnan ISO-aika ilman poikkeamaa = Europe/Helsinki istunnosta riippumatta; t158 ajetaan UTC-istunnossa', () => {
+  const c = code(mig);
+  // ei yhtään tekstin suoraa ::timestamptz-tulkintaa (riippuisi istunnon TimeZonesta) muualla kuin poikkeamallisen ajan haarassa
+  assert.equal((c.match(/::timestamptz/g) || []).length, 1);
+  assert.match(c, /if p_val ~\* '\^[^']*\(z\|\[\+-\]\\d\{2\}\(:\?\\d\{2\}\)\?\)\$' then\s+return \(p_val::timestamptz\) at time zone 'Europe\/Helsinki';/);
+  assert.match(c, /return \(p_val::timestamp at time zone 'Europe\/Helsinki'\) at time zone 'Europe\/Helsinki';/);
+  assert.equal((c.match(/v_local := booking\._event_local_ts\(v_[se]\)/g) || []).length, 2);
+  assert.match(c, /'booking\._event_local_ts\(text\)'/);
+  assert.match(rb, /drop function if exists booking\._event_local_ts\(text\);/);
+  const t = read(T);
+  assert.match(t, /\\set tz UTC/);
+  assert.match(t, /set local timezone = :'tz';/);
+  assert.match(t, /'L2b: /);
+  assert.match(t, /'L2c: /);
+  // kiinteät testipäivät, ei 14.11.2026 (törmäsi tuotannossa oikeaan Savusaunan varaukseen)
+  assert.match(t, /d date := date '2027-02-22';/);
+  assert.match(t, /d2 date := date '2027-03-01';/);
+  assert.doesNotMatch(t, /next_dow|2026-11-14/);
+});
