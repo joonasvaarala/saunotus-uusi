@@ -21,6 +21,7 @@ declare
   v_rule bigint := test.rule('Miesten sauna%');
   d date := test.next_dow(1) + 14;
   v_label text; r0 jsonb; r1 jsonb; v_day jsonb;
+  v_others jsonb := (select coalesce(jsonb_object_agg(id, label_en), '{}'::jsonb) from booking.schedule_rules where id <> test.rule('Miesten sauna%'));
 begin
   perform pg_temp.ck(v_rule is not null, 'A0: testivuoro (Miesten sauna) löytyy');
   perform pg_temp.ck(pg_get_function_result('booking._sessions(date,date,bigint,boolean)'::regprocedure)
@@ -43,7 +44,11 @@ begin
   perform pg_temp.ck(r1 #>> '{one,label}' = v_label, 'B5: label ei muutu label_en:n mukana');
   perform pg_temp.ck((r1 -> 'one') - 'label_en' = (r0 -> 'one') - 'label_en' and (r1 -> 'all') - 'label_en' = (r0 -> 'all') - 'label_en', 'C1: muut kentät (tila, jäljellä, hinnat) identtiset');
   perform pg_temp.ck(exists (select 1 from booking._sessions(d, d, null, true) s where s.rule_id = v_rule and s.label_en = 'Men''s sauna (test)'), 'C2: _sessions palauttaa label_en');
-  perform pg_temp.ck((select count(*) from booking._sessions(d, d, null, true)) = (select count(*) from booking._sessions(d, d, null, true) s where s.label_en is null or s.rule_id = v_rule), 'C3: muiden vuorojen label_en null (ei sivuvaikutuksia)');
+  -- C3 ei riipu datasta: muilla säännöillä label_en voi olla null, tyhjä tai käännös (tuotannossa kaikilla on). Tarkistetaan, että
+  -- jokaisen vuoron label_en = sen säännön schedule_rules.label_en sellaisenaan (null → null) ja että muiden sääntöjen label_en ei muuttunut.
+  perform pg_temp.ck(not exists (select 1 from booking._sessions(d, d, null, true) s join booking.schedule_rules r on r.id = s.rule_id
+      where s.label_en is distinct from r.label_en)
+    and (select coalesce(jsonb_object_agg(id, label_en), '{}'::jsonb) from booking.schedule_rules where id <> v_rule) = v_others, 'C3: vuorojen label_en = schedule_rules.label_en, muut säännöt ennallaan (ei sivuvaikutuksia)');
 
   perform test.login(test.mk_staff('t151@example.com', 'admin'));
   v_day := booking.admin_day_view(d);

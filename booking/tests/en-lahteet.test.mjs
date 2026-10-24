@@ -18,8 +18,8 @@ process.env.ARTICLES_FIXTURE ||= '1';
 const repo = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const read = (rel) => readFileSync(join(repo, rel), 'utf8');
 const json = (rel) => JSON.parse(read(rel));
-const MIG = 'booking/supabase/migrations/20261024233000_booking_151_session_label_en.sql';
-const RB = 'booking/supabase/rollbacks/20261024233000_booking_151_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024130120_booking_151_session_label_en.sql';
+const RB = 'booking/supabase/rollbacks/20261024130120_booking_151_ROLLBACK.sql';
 const M148 = 'booking/supabase/migrations/20261024120446_booking_148_waitlist_party_size_by_type.sql';
 const FNS = ['_sessions', 'public_availability', 'public_availability_all'];
 // funktion otsikko (RETURNS TABLE …) ja runko $function$ … $function$, välilyönnit normalisoitu
@@ -36,7 +36,7 @@ const { faqFor, policyFor, eventTimeFor, LEGACY_FAQ_EN, LEGACY_POLICY_EN } = awa
 const { kb } = await import('../../src/lib.mjs');
 
 test('migraatio booking_151: vain 3 funktiota, lisäys = label_en viimeisenä sarakkeena, muuten booking_148 sellaisenaan', () => {
-  assert.deepEqual(readdirSync(join(repo, 'booking/supabase/migrations')).filter((n) => /booking_151_/.test(n)), ['20261024233000_booking_151_session_label_en.sql']);
+  assert.deepEqual(readdirSync(join(repo, 'booking/supabase/migrations')).filter((n) => /booking_151_/.test(n)), ['20261024130120_booking_151_session_label_en.sql']);
   const sql = read(MIG), base = read(M148);
   const created = [...sql.matchAll(/create function\s+booking\.(\w+)\(/gi)].map((m) => m[1]).sort();
   assert.deepEqual(created, [...FNS].sort());

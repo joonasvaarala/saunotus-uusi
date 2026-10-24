@@ -6,7 +6,7 @@
 -- RETURNS TABLE muuttuu → drop + create. Riippuvuudet: ei pg_depend-riippuvuuksia (näkymiä tms. ei ole). plpgsql-kutsujat sidotaan ajossa:
 --   admin_day_view (to_jsonb(s) → päivän sessions-riveihin tulee lisäavain label_en), public_join_waitlist, public_waitlist_claim,
 --   _waitlist_process_session (select * into record, käyttävät nimettyjä kenttiä) – toimivat ennallaan.
--- Ei hintojen, ALV:n, URLien eikä public-skeeman muutoksia. Rollback: booking/supabase/rollbacks/20261024233000_booking_151_ROLLBACK.sql
+-- Ei hintojen, ALV:n, URLien eikä public-skeeman muutoksia. Rollback: booking/supabase/rollbacks/20261024130120_booking_151_ROLLBACK.sql
 set local lock_timeout = '5s';
 drop function booking.public_availability_all(date, date, text);
 drop function booking.public_availability(bigint, date, date);
