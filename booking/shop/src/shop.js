@@ -508,7 +508,21 @@ async function viewCheckout(ruleId, ds, productId, via) {
   setHero(p);
   if (!s) { mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })), errorBox(t.noSlots)); focusTop(); return; }
   const max = Math.max(s.min_persons, Math.min(s.max_persons || 50, s.remaining));
-  let n = Math.min(Math.max(+new URLSearchParams(location.hash.split('?')[1] || '').get('n') || s.min_persons, s.min_persons), max);
+  const qs = new URLSearchParams(location.hash.split('?')[1] || '');
+  let n = Math.min(Math.max(+qs.get('n') || s.min_persons, s.min_persons), max);
+  // Jonotuslinkki (?wl=token, booking_134): lunastus vain, jos paikkoja on yhä jonovarauksen henkilömäärälle; määrä lukitaan siihen.
+  // Virheellinen tai vanhentunut linkki → ilmoitus ja tavallinen varaus. RPC-virhe (esim. vanha backend) → tavallinen varaus.
+  let wlLock = false, wlNote = null;
+  const wl = qs.get('wl');
+  if (wl && /^[0-9a-f-]{36}$/i.test(wl)) {
+    const c = await rpc('public_waitlist_claim', { p_token: wl }).catch(() => null);
+    if (c && (!c.ok || +c.rule_id !== s.rule_id || c.session_date !== ds)) wlNote = h('p', { class: 'bk-note', role: 'status', text: t.waitlistClaimInvalid });
+    else if (c?.ok && (!c.enough || +c.persons > max || +c.persons < s.min_persons)) {
+      mount(h('h2', { text: t.bookTitle }), errorBox(t.waitlistClaimNotEnough),
+        h('p', {}, h('a', { href: via === 'day' ? bk(`/paiva/${ds}?tuote=${p.slug}`) : bk(`/tuote/${p.slug}/${ds}`), text: t.waitlistBack })));
+      focusTop(); return;
+    } else if (c?.ok) { n = +c.persons; wlLock = true; }
+  }
   const total = h('strong', { class: 'bk-total', 'aria-live': 'polite' });
   const sumList = h('dl', { class: 'bk-sum' });
   // lisäpalvelut (public_addons): vain tämän vuorotyypin lisäpalvelut; virhe tai puuttuva funktio → ei lisäpalveluita
@@ -520,10 +534,10 @@ async function viewCheckout(ruleId, ds, productId, via) {
     total.textContent = money(priceFor(s, n) + addonsSum());
     sumList.replaceChildren(h('dt', { text: t.what }), h('dd', { text: pname(p) }), h('dt', { text: t.when }), h('dd', { text: `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(n) }),
       ...addons.filter((a) => qty.get(a.id) > 0).flatMap((a) => [h('dt', { text: aname(a) }), h('dd', { text: `${qty.get(a.id)} × ${money(a.price)}` })]));
-    num.value = n; minus.disabled = n <= s.min_persons; plus.disabled = n >= max;
+    num.value = n; minus.disabled = wlLock || n <= s.min_persons; plus.disabled = wlLock || n >= max; num.readOnly = wlLock;
     for (const r of addonRows) r.sync();
   };
-  const num = h('input', { id: 'bk-n', type: 'number', min: s.min_persons, max, inputmode: 'numeric', 'aria-label': t.persons, onchange: () => { n = Math.min(Math.max(+num.value || s.min_persons, s.min_persons), max); upd(); } });
+  const num = h('input', { id: 'bk-n', type: 'number', min: s.min_persons, max, inputmode: 'numeric', 'aria-label': t.persons, onchange: () => { if (wlLock) { upd(); return; } n = Math.min(Math.max(+num.value || s.min_persons, s.min_persons), max); upd(); } });
   const minus = h('button', { type: 'button', class: 'bk-step', 'aria-label': '−', onclick: () => { n--; upd(); } }, '−');
   const plus = h('button', { type: 'button', class: 'bk-step', 'aria-label': '+', onclick: () => { n++; upd(); } }, '+');
   const cf = customerFields();
@@ -589,7 +603,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
     }
     if (hi.onlineSite) payNote.textContent = hi.legacyHold ? `${t.payHold(hi.minutes)} ${pt(S.lang, 'checkoutHoldOnline')}` : pt(S.lang, 'checkoutOnlineSite');   // vanha käytös ennallaan
   });
-  mount(h('h2', { text: t.bookTitle }), pick,
+  mount(h('h2', { text: t.bookTitle }), pick, wlNote,
     h('div', { class: 'bk-checkout' }, form,
       h('aside', { class: 'bk-aside', 'aria-label': t.summary }, h('h3', { text: t.summary }), sumList,
         h('p', { class: 'bk-totalrow' }, t.total + ': ', total, ' ', h('small', { text: t.vatIncl })),

@@ -25,15 +25,17 @@ export function createWaitlistView({ h, t, S, state, loadMonth, setHero, mount, 
       mount(h('h2', { text: t.waitlistTitle }), pick, h('p', { class: 'bk-ok', role: 'status', text: t.waitlistNotFull }),
         h('a', { class: 'btn gold', href: bk(`/varaa/${s.rule_id}/${ds}/${p.id}`), text: t.waitlistBookNow })); focusTop(); return;
     }
+    // Jonovarauksen henkilömäärä 1–6 (booking_134; palvelin tarkistaa saman). Vuoron oma min/max rajaa lisäksi.
     let n = Math.max(1, s.min_persons || 1);
-    const max = Math.min(50, s.max_persons || 50);
+    const max = Math.max(n, Math.min(6, s.max_persons || 6));
     const num = h('input', { id: 'bk-wl-n', type: 'number', min: n, max, inputmode: 'numeric', value: n, 'aria-label': t.persons });
     const dec = h('button', { type: 'button', class: 'bk-step', 'aria-label': '−' }, '−');
     const inc = h('button', { type: 'button', class: 'bk-step', 'aria-label': '+' }, '+');
     const min = n;
     const update = () => { n = Math.min(max, Math.max(min, Math.trunc(Number(num.value) || min))); num.value = n; dec.disabled = n <= min; inc.disabled = n >= max; };
-    dec.addEventListener('click', () => { n--; update(); });
-    inc.addEventListener('click', () => { n++; update(); });
+    // update() lukee arvon kentästä, joten painikkeet päivittävät kentän ensin (aiemmin n-- kumoutui ja määrä jäi 1:een).
+    dec.addEventListener('click', () => { num.value = n - 1; update(); });
+    inc.addEventListener('click', () => { num.value = n + 1; update(); });
     num.addEventListener('change', update); update();
     const input = (key, label, attrs = {}) => h('div', { class: 'bk-field' }, h('label', { for: `bk-wl-${key}`, text: label }),
       h('input', { id: `bk-wl-${key}`, name: key, ...attrs }),
@@ -68,7 +70,8 @@ export function createWaitlistView({ h, t, S, state, loadMonth, setHero, mount, 
       } catch (e) { msg.append(errorBox(e?.mapped ? e.message : t.errorGeneric)); btn.disabled = false; btn.textContent = t.waitlistJoin; }
     } },
       h('p', { class: 'bk-note', text: t.waitlistIntro }),
-      h('fieldset', { class: 'bk-section' }, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, dec, num, inc)),
+      h('fieldset', { class: 'bk-section' }, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, dec, num, inc),
+        h('small', { class: 'bk-hint', text: t.waitlistPersonsHint })),
       input('name', t.name, { required: true, maxlength: 120, autocomplete: 'name' }),
       input('email', t.email, { required: true, type: 'email', maxlength: 200, autocomplete: 'email' }),
       input('phone', t.phone, { type: 'tel', maxlength: 30, autocomplete: 'tel' }),

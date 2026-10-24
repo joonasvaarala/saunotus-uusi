@@ -85,6 +85,7 @@ test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-shop.mjs 
     ...J('content/site-texts.pending-import-29.json').filter((r) => r.key.startsWith('ui.order.')).map((r) => `${r.key}|${r.lang}`),
     ...J('content/site-texts.pending-import-33.json').map((r) => `${r.key}|${r.lang}`),
     ...J('content/site-texts.pending-import-34.json').filter((r) => r.key.startsWith('ui.shop.')).map((r) => `${r.key}|${r.lang}`),
+    ...J('content/site-texts.pending-import-35.json').map((r) => `${r.key}|${r.lang}`),
   ]);
   const imp = new Set(PENDING.map((r) => r.key));
   writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts.filter((r) => !imp.has(r.key)) }));   // tuotanto ennen #61:n tuontia
@@ -107,7 +108,8 @@ test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet ava
   const msgOrder = J('content/site-texts.pending-import-29.json').filter((r) => r.key.startsWith('ui.order.'));
   const payUi = J('content/site-texts.pending-import-33.json');
   const waitUi = J('content/site-texts.pending-import-34.json').filter((r) => r.key.startsWith('ui.shop.'));
-  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length + waitUi.length);
+  const waitParty = J('content/site-texts.pending-import-35.json');
+  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length + waitUi.length + waitParty.length);
   assert.ok(!rows.some((x) => haveKeys.has(x.key)));
   for (const e of extraRows) assert.ok(!rows.some((x) => x.key === e.key), `${e.key}: jo tuotannossa, generaattori ei lisää`);
   const bad = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', join(work, 'ei-ole.json')], { encoding: 'utf8' });
@@ -339,4 +341,28 @@ test('pending-import-34: jonotuslistan tekstit (kauppa ui.shop.waitlist_* + säh
   const keys = new Set(rows.map((r) => r.key));
   for (const k of keys) assert.ok(seen.has(`${k}|fi`) && seen.has(`${k}|en`), `${k}: FI+EN`);
   assert.ok(keys.has('ui.shop.waitlist_errors.not_full') && keys.has('email.waitlist.subject'));
+});
+
+test('pending-import-35: jonotuslistan henkilömäärä (booking_134) FI+EN, sama kuin koodin oletus, ei vielä tuotannossa, ei <-merkkiä', () => {
+  const rows = J('content/site-texts.pending-import-35.json');
+  const defaults = new Map(R.collectDefaults().map((r) => [`${r.key}|${r.lang}`, r.text]));
+  const have = new Set(FALLBACK.texts.map((r) => `${r.key}|${r.lang}`));
+  const seen = new Set();
+  for (const r of rows) {
+    const w = `${r.key} [${r.lang}]`;
+    assert.ok(/^ui\.shop\.waitlist_/.test(r.key), w);
+    assert.ok(['fi', 'en'].includes(r.lang), w);
+    assert.equal(r.kind, 'plain', w);
+    assert.equal(r.class, 'normal', w);
+    assert.equal(r.text, defaults.get(`${r.key}|${r.lang}`), w);
+    assert.equal(have.has(`${r.key}|${r.lang}`), false, `${w}: ei vielä tuotannossa`);
+    assert.ok(r.max_len >= r.text.length, w);
+    assert.doesNotMatch(r.text, /[<>]|https?:\/\/|www\./, w);
+    assert.ok(!seen.has(`${r.key}|${r.lang}`), w); seen.add(`${r.key}|${r.lang}`);
+  }
+  const keys = new Set(rows.map((r) => r.key));
+  for (const k of keys) assert.ok(seen.has(`${k}|fi`) && seen.has(`${k}|en`), `${k}: FI+EN`);
+  assert.deepEqual([...keys].sort(), ['ui.shop.waitlist_claim_invalid', 'ui.shop.waitlist_claim_not_enough', 'ui.shop.waitlist_errors.invalid_persons', 'ui.shop.waitlist_persons_hint']);
+  const p34 = new Set(J('content/site-texts.pending-import-34.json').map((r) => r.key));
+  for (const k of keys) assert.ok(!p34.has(k), `${k}: ei päällekkäin pending-import-34:n kanssa`);
 });
