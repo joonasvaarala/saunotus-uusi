@@ -1,5 +1,5 @@
 // booking_158: etusivun tapahtumakortit (src/event-cards.mjs + render.mjs eventsHtml). Uusi data (kb.json events_shop = public_events)
-// vs. vanha (kb.event_dates + cards.json), menneet ja suljetut pois, linkki kaupan tuotesivulle FI/EN, Johku-lippu, XSS.
+// vs. vanha (kb.event_dates + cards.json), menneet pois, suljetut mukana (myyntitilasta riippumatta), linkki aina kaupan tuotesivulle FI/EN, XSS.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -7,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import test from 'node:test';
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), '../..');
-delete process.env.SITE_URL; delete process.env.SITE_ENV; delete process.env.EVENT_LINK_TARGET;
+delete process.env.SITE_URL; delete process.env.SITE_ENV;
 const C = await import(pathToFileURL(join(repo, 'src/event-cards.mjs')).href);
 const lib = await import(pathToFileURL(join(repo, 'src/lib.mjs')).href);
 const R = await import(pathToFileURL(join(repo, 'src/render.mjs')).href);
@@ -16,7 +16,7 @@ const NOW = Date.parse('2026-10-24T12:00:00Z');
 const ev = (over = {}, occ = []) => ({ product_id: 31, slug: 'perinnesaunotusilta', name: 'Perinnesaunotusilta', name_en: 'Traditional sauna evening', category: 'event', price: 69, sale_open: true, occurrences: occ, ...over });
 const o = (starts_at, ends_at, status = 'available') => ({ rule_id: 1, starts_at, ends_at, status });
 
-test('selectShopEvents: vain tapahtumat, tulevat ja ei-suljetut kerrat; tyhjä/virheellinen → [] (vanha polku)', () => {
+test('selectShopEvents: vain tapahtumat ja tulevat kerrat myyntitilasta riippumatta (myös closed/full); tyhjä/virheellinen → [] (vanha data)', () => {
   const list = [
     ev({}, [o('2026-11-14T14:00:00Z', '2026-11-14T17:00:00Z'), o('2026-10-01T14:00:00Z', '2026-10-01T17:00:00Z'), o('2026-11-21T14:00:00Z', '2026-11-21T17:00:00Z', 'closed')]),
     ev({ product_id: 32, slug: 'naisten-joulusauna', name: 'Naisten joulusauna' }, [o('2026-11-07T14:00:00Z', '2026-11-07T17:00:00Z', 'full')]),
@@ -25,11 +25,12 @@ test('selectShopEvents: vain tapahtumat, tulevat ja ei-suljetut kerrat; tyhjä/v
     ev({ product_id: 35, slug: 'kiinni', name: 'Kiinni', sale_open: false }, [o('2026-12-01T14:00:00Z', '2026-12-01T17:00:00Z', 'closed')]),
   ];
   const sel = C.selectShopEvents(list, NOW);
-  assert.deepEqual(sel.map((x) => x.slug), ['naisten-joulusauna', 'perinnesaunotusilta']);
-  assert.equal(sel[1].occurrences.length, 1);
+  assert.deepEqual(sel.map((x) => x.slug), ['naisten-joulusauna', 'perinnesaunotusilta', 'kiinni']);
+  assert.equal(sel[1].occurrences.length, 2, 'mennyt kerta pois, suljettu kerta mukana');
+  assert.equal(C.linkTarget, undefined, 'Johku-linkkivaihtoehto poistettu');
   for (const bad of [undefined, null, {}, 'x', []]) assert.deepEqual(C.selectShopEvents(bad, NOW), []);
-  // myynti pois (1.11.2026 asti): kaikki closed → etusivu pysyy vanhana
-  assert.deepEqual(C.selectShopEvents([ev({ sale_open: false }, [o('2026-11-14T14:00:00Z', '2026-11-14T17:00:00Z', 'closed')])], NOW), []);
+  // myynti pois (events.sale_enabled = false): kerrat 'closed', kortit näkyvät silti
+  assert.equal(C.selectShopEvents([ev({ sale_open: false }, [o('2026-11-14T14:00:00Z', '2026-11-14T17:00:00Z', 'closed')])], NOW).length, 1);
 });
 
 test('päivät ja kellonajat: yksipäiväinen ja monipäiväinen FI/EN', () => {
@@ -42,38 +43,38 @@ test('päivät ja kellonajat: yksipäiväinen ja monipäiväinen FI/EN', () => {
   assert.equal(C.occTime(two, 'fi'), '');
 });
 
-test('linkki: oletus kaupan tuotesivu FI /varaa/#/tuote/<slug>, EN /en/book/#/tuote/<slug>; EVENT_LINK_TARGET=johku → Johku', () => {
-  assert.equal(C.linkTarget({}), 'shop');
-  assert.equal(C.linkTarget({ EVENT_LINK_TARGET: 'johku' }), 'johku');
-  assert.equal(C.linkTarget({ EVENT_LINK_TARGET: 'muu' }), 'shop');
+const soon = (d, h = 3, status = 'available') => o(new Date(Date.now() + d * 864e5).toISOString(), new Date(Date.now() + d * 864e5 + h * 36e5).toISOString(), status);
+
+test('linkki: aina kaupan tuotesivu FI /varaa/#/tuote/<slug>, EN /en/book/#/tuote/<slug>, samaan välilehteen; myös myynnin ollessa pois', () => {
   assert.equal(lib.pageHref('book', 'fi', C.shopHash('perinnesaunotusilta')), '/varaa/#/tuote/perinnesaunotusilta');
   assert.equal(lib.pageHref('book', 'en', C.shopHash('perinnesaunotusilta')), '/en/book/#/tuote/perinnesaunotusilta');
   assert.equal(C.shopHash('a b/"x'), '/tuote/a%20b%2F%22x');
   const saved = lib.kb.events_shop;
   try {
-    lib.kb.events_shop = [ev({}, [o(new Date(Date.now() + 5 * 864e5).toISOString(), new Date(Date.now() + 5 * 864e5 + 3 * 36e5).toISOString())])];
+    process.env.EVENT_LINK_TARGET = 'johku';   // vanha lippu ei enää vaikuta
+    lib.kb.events_shop = [ev({ sale_open: false }, [soon(5, 3, 'closed')])];
     const fi = R.eventsHtml('fi', 'tyhjä'), en = R.eventsHtml('en', 'empty');
     assert.match(fi, /href="\/varaa\/#\/tuote\/perinnesaunotusilta"/);
     assert.match(en, /href="\/en\/book\/#\/tuote\/perinnesaunotusilta"/);
-    assert.doesNotMatch(fi, /target="_blank"/, 'oma kauppa samaan välilehteen');
+    assert.doesNotMatch(fi + en, /johku\.com|target="_blank"/, 'ei Johkua, oma kauppa samaan välilehteen');
     assert.match(fi, /Perinnesaunotusilta/);
-    process.env.EVENT_LINK_TARGET = 'johku';
-    const jk = R.eventsHtml('fi', 'tyhjä');
-    const url = lib.kb.products.find((p) => p.slug === 'perinnesaunotusilta')?.booking_url;
-    if (url) assert.ok(jk.includes(`href="${lib.e(lib.bookingUrl(url, 'fi'))}"`), 'Johku-linkki');
+    assert.match(en, /Traditional sauna evening|Perinnesaunotusilta/);
   } finally { lib.kb.events_shop = saved; delete process.env.EVENT_LINK_TARGET; }
 });
 
-test('vanha polku ennallaan, kun events_shop puuttuu tai ei ole myynnissä olevia kertoja', () => {
+test('vanha data (events_shop puuttuu tai tyhjä): kortit kb.event_dates + cards.json, linkki silti kaupan tuotesivulle', () => {
   const saved = lib.kb.events_shop;
   try {
     delete lib.kb.events_shop;
-    const legacy = R.eventsHtml('fi', 'tyhjä');
-    lib.kb.events_shop = [ev({ sale_open: false }, [o(new Date(Date.now() + 864e5).toISOString(), new Date(Date.now() + 864e5 + 36e5).toISOString(), 'closed')])];
-    assert.equal(R.eventsHtml('fi', 'tyhjä'), legacy);
+    const legacy = R.eventsHtml('fi', 'tyhjä'), legacyEn = R.eventsHtml('en', 'empty');
     lib.kb.events_shop = [];
     assert.equal(R.eventsHtml('fi', 'tyhjä'), legacy);
-    assert.doesNotMatch(legacy, /#\/tuote\//, 'vanha polku ei vaihda linkkejä');
+    assert.doesNotMatch(legacy + legacyEn, /johku\.com|target="_blank"/, 'vanha data ei linkitä Johkuun');
+    const ups = R.upcomingEvents('fi');
+    for (const { p } of ups) {
+      assert.ok(legacy.includes(`href="${lib.e(lib.pageHref('book', 'fi', C.shopHash(p.slug)))}"`), `FI ${p.slug}`);
+      assert.ok(legacyEn.includes(`href="${lib.e(lib.pageHref('book', 'en', C.shopHash(p.slug)))}"`), `EN ${p.slug}`);
+    }
   } finally { if (saved === undefined) delete lib.kb.events_shop; else lib.kb.events_shop = saved; }
 });
 

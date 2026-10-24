@@ -7,7 +7,7 @@ import { tx } from './site-texts.mjs';
 import { seoSchemaForPage, jsonLdScript } from './seo-enhance.mjs';
 import { privacyAnalyticsHtml } from './privacy-analytics.mjs';
 import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
-import { selectShopEvents, shopEventsHtml, linkTarget, shopHash } from './event-cards.mjs';
+import { selectShopEvents, shopEventsHtml, shopHash } from './event-cards.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
   johku, bookingUrl, phoneDisplay, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
@@ -144,19 +144,17 @@ export function upcomingEvents(lang) {
   }
   return out.sort((a, b) => a.dates[0].starts_on.localeCompare(b.dates[0].starts_on));
 }
-// booking_158: uuden kaupan tapahtumat (kb.json events_shop = booking.public_events(current_date, 'shop')), kun niissä on myynnissä olevia
-// tulevia kertoja; kortti linkittää kaupan tuotesivulle (FI /varaa/#/tuote/<slug>, EN /en/book/#/tuote/<slug>; EVENT_LINK_TARGET=johku → Johku).
-// Muuten (ei events_shop-dataa, myynti pois, kaikki kerrat suljettuja tai menneitä) alla oleva vanha polku sellaisenaan.
+// booking_158: uuden kaupan tapahtumat (kb.json events_shop = booking.public_events(current_date, 'shop')), kun niissä on tulevia kertoja
+// (myyntitilasta riippumatta). Kortti linkittää kaupan tuotesivulle (FI /varaa/#/tuote/<slug>, EN /en/book/#/tuote/<slug>), ei Johkuun.
+// Muuten (ei events_shop-dataa, esim. migraatio ajamatta) vanha data (kb.event_dates + cards.json), linkki silti kaupan tuotesivulle.
 function shopEventsSection(lang) {
   const list = selectShopEvents(kb.events_shop, Date.now());
   if (!list.length) return null;
-  const johkuLinks = linkTarget(process.env) === 'johku';
   const cardOf = (ev) => Object.entries(cards.events).find(([id, c]) => !id.startsWith('_') && (c.kb || id) === ev.slug)?.[1] || null;
   const fallbackImg = Object.entries(cards.events).find(([id, c]) => !id.startsWith('_') && c.img)?.[1]?.img;
-  const kbUrl = (ev) => kb.products.find((p) => p.slug === ev.slug)?.booking_url;
   return shopEventsHtml(list, lang, {
-    e, money, card: cardOf, external: johkuLinks, newTab: NEW, arrow: ui(lang).reserveArrow,
-    link: (ev) => (johkuLinks && kbUrl(ev) ? bookingUrl(kbUrl(ev), lang) : pageHref('book', lang, shopHash(ev.slug))),
+    e, money, card: cardOf, arrow: ui(lang).reserveArrow,
+    link: (ev) => pageHref('book', lang, shopHash(ev.slug)),
     img: (ev) => { const id = cardOf(ev)?.img || fallbackImg; return id ? pic(id, lang, { sizes: '(min-width:1100px) 280px, 90vw', alt: '' }) : ''; },
   });
 }
@@ -170,7 +168,7 @@ export function eventsHtml(lang, empty) {
     const times = [...new Set(dates.map((d) => eventTimeFor(d, lang, enTime)).filter(Boolean))];
     const dl = dates.slice(0, 6).map((d) => fmtDate(d.starts_on, lang)).join(' · ');
     return `<li class="card ev"><div class="im">${pic(c.img, lang, { sizes: '(min-width:1100px) 280px, 90vw', alt: '' })}<span class="badge">${e(money(p.price, lang))}</span></div>
-<div class="bd"><h3><a href="${e(bookingUrl(p.booking_url, lang))}" target="_blank" rel="noopener">${e(t.title)}${NEW(lang)}</a></h3>
+<div class="bd"><h3><a href="${e(p.slug ? pageHref('book', lang, shopHash(p.slug)) : bookingUrl(p.booking_url, lang))}"${p.slug ? '' : ' target="_blank" rel="noopener"'}>${e(t.title)}${p.slug ? '' : NEW(lang)}</a></h3>
 <p class="dates">${e(dl)}${times.length ? ' · ' + e(times[0]) : ''}</p><p>${e(t.text)}</p></div><div class="cta" aria-hidden="true">${e(ui(lang).reserveArrow)}</div></li>`;
   }).join('')}</ul>`;
 }
