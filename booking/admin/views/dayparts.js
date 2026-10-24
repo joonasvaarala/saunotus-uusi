@@ -3,6 +3,7 @@ import { rpc } from '../sb.js';
 import { icon } from '../icons.js';
 import { h, toast, errMsg, dayStartIso, addDays } from '../ui.js';
 import { roleLabel, shiftClass, NO_ASSIGNEE } from './calendar.js';
+import { memoText } from '../day-memos-texts.js';
 
 // ---- kapasiteettinappi ----
 // Vapaana-nappi vie suoraan Uusi varaus -lomakkeelle (päivä, vuoro ja alkamisaika esivalittuina: ?d=…&r=<rule_id>&t=<alkamisaika>).
@@ -89,7 +90,7 @@ export async function shiftsBar(date, can, preloaded = null) {
   const byId = new Map();
   for (const r of loadedRows) { const x = byId.get(r.shift_id) || { ...r, names: [] }; if (r.staff_name) x.names.push(r.staff_name); byId.set(r.shift_id, x); }
   const shifts = [...byId.values()].sort((a, c) => a.starts_at.localeCompare(c.starts_at));
-  if (!shifts.length) return h('p', { class: 'muted dayshifts-none', 'data-testid': 'dayshifts' }, scope === 'own' ? 'Ei omia työvuoroja.' : 'Ei työvuoroja.');
+  if (!shifts.length) return h('p', { class: 'muted dayshifts-none', 'data-testid': 'dayshifts' }, memoText('ui.admin.day_memos.shifts_none'));
   return h('section', { class: 'dayshifts', 'aria-label': 'Työvuorot', 'data-testid': 'dayshifts' },
     h('ul', {}, shifts.map((s) => h('li', { class: `dshift ${shiftClass(s)}`, 'data-testid': 'dayshift' }, h('strong', { text: roleLabel(s) }), ` ${hh(s.starts_at)}–${hh(s.ends_at)} `, h('span', { class: 'who', text: s.names.length ? s.names.join(', ') : NO_ASSIGNEE.toLowerCase() })))),
     scope === 'own' ? h('p', { class: 'muted dayshifts-note' }, 'Näytetään vain omat vuorosi (muiden vuorot vaativat oikeuden shifts.view_all).') : null);

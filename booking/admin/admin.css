@@ -812,3 +812,26 @@ body.shot #shell .nav .lbl{display:inline}
 .rc-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
 .rc-actions .btn{flex:1 1 140px;min-width:0;white-space:normal;line-height:1.25;text-align:center}
 .dlg .stack,.dlg form{min-width:0}
+/* Päivän muistiinpanot ja henkilöstötiedotteet (paketti 04, booking_140). Vain teeman muuttujat (vihreä, hiekka, kullanruskea), ei uusia värejä. */
+.day-bulletins,.day-notes{max-width:760px;min-width:0;margin:0 0 12px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card)}
+.day-bulletins{border-left:6px solid var(--gold)}
+.day-memos-heading{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
+.day-bulletins h2,.day-notes h2{margin:0 0 6px;font-size:15px;font-weight:600;color:var(--green)}
+.day-memos-heading h2{margin:0}
+.day-bulletins .btn .icon,.day-notes .btn .icon{width:18px;height:18px}
+.bulletin-list,.day-note-list{list-style:none;padding:0;margin:6px 0 0}
+.bulletin-item,.day-note-entry{padding:8px 0;border-top:1px solid var(--line);min-width:0}
+.bulletin-item:first-child,.day-note-entry:first-child{border-top:0}
+.bulletin-head{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.bulletin-toggle{display:inline-flex;align-items:center;gap:4px;min-height:44px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer;text-align:left;background:transparent;border:0;padding:4px 0;text-decoration:underline;text-decoration-color:var(--gold);text-underline-offset:3px}
+.bulletin-toggle .icon{color:var(--gold);transition:transform .15s}.bulletin-toggle.open .icon{transform:rotate(180deg)}
+.bulletin-preview{font-weight:600;color:var(--ink);padding:4px 0}
+.bulletin-actions{display:flex;gap:6px;flex-wrap:wrap}
+.bulletin-period{display:block}
+.bulletin-full,.day-note-body{white-space:pre-wrap;overflow-wrap:anywhere;margin:4px 0;color:var(--text)}
+.day-note-entry{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
+.day-note-main{min-width:0;flex:1}
+.day-note-form{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:10px}
+.day-note-form textarea{flex:1 1 240px;min-height:64px;max-width:100%}
+.res-note{display:block;margin:2px 0;padding:2px 0 2px 8px;font-size:13px;color:var(--text);white-space:pre-wrap;overflow-wrap:anywhere;border-left:2px solid var(--gold)}
+.res-note-editor textarea{width:100%}

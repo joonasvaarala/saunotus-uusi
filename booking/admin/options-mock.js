@@ -98,6 +98,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
   const today = todayHel(now);
   const st = {
     calls: [], perms: [...perms],
+    dayNotes: [], dayBulletins: [], dayMemoSeq: 1, dayBulletinSeq: 1, ownShifts: [], staffShifts: [],
     messagesTimed: false,
     messageSeq: 2,
     messages: [{
@@ -182,6 +183,8 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
   };
   if (role === 'staff') st.perms = st.perms.filter((p) => p !== 'settings.edit');
   if (role === 'admin' && !st.perms.includes('staff.manage')) st.perms.push('staff.manage');
+  // booking_140: manager/admin näkevät kaikki vuorot ja hallitsevat tiedotteita (kuten tuotannon role_permissions); staff ei.
+  if (perms === PERMS && role !== 'staff' && !st.perms.includes('shifts.view_all')) st.perms.push('shifts.view_all');
   st.settingsUi = exampleBundle();
   const optJson = (id) => { const o = st.options.find((x) => x.id === id); return o ? { id: o.id, code: o.code, name: o.name, name_en: o.name_en } : null; };
   const activeOpts = (pid) => st.options.filter((o) => o.product_id === pid && o.active).sort((a, b) => a.sort_order - b.sort_order || a.id - b.id);
@@ -256,7 +259,37 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     'select:product_space_rules': () => [10, 8, 7].map((pid) => ({ product_id: pid, leg_no: 1, priority: 1, space_id: 1, mode: 'exclusive', min_persons: 1, max_persons: 6, selection: 'auto', active: true })),
     admin_list_addons: () => [],
     admin_list_customers: (a) => st.customers.filter((c) => !a.p_search || `${c.name} ${c.email} ${c.phone}`.toLowerCase().includes(String(a.p_search).toLowerCase())).slice(0, a.p_limit || 5),
-    admin_day_shifts: () => [], admin_upcoming_shifts: () => [],
+    admin_day_shifts: (a) => { const ownToday = st.ownShifts.some((s) => s.date === a.p_date && s.status !== 'cancelled');
+      if (role === 'staff' && !st.perms.includes('shifts.view_all') && !ownToday) return [];
+      return (st.staffShifts.length ? st.staffShifts : st.ownShifts).filter((s) => s.date === a.p_date && s.status !== 'cancelled'); },
+    admin_upcoming_shifts: () => st.ownShifts,
+    admin_next_own_shift_date: (a) => st.ownShifts.filter((s) => s.date >= (a.p_from_date || today) && s.status !== 'cancelled').map((s) => s.date).sort()[0] || null,
+    admin_list_day_notes: (a) => ({
+      day_notes: st.dayNotes.filter((n) => n.note_date === a.p_date),
+      bulletins: st.dayBulletins.filter((b) => b.active && a.p_date >= b.start_date && a.p_date <= b.end_date),
+    }),
+    admin_save_day_note: (a) => {
+      const body = String(a.p_body || '').trim();
+      if (!a.p_date || !body || body.length > 2000) throw err('invalid_note');
+      let note = st.dayNotes.find((n) => n.id === a.p_id);
+      if (a.p_id && !note) throw err('not_found');
+      if (note) { note.body = body; note.updated_at = now.toISOString(); }
+      else { note = { id: st.dayMemoSeq++, note_date: a.p_date, body, author_name: 'Kokeilukäyttäjä', created_by: 'mock-user', created_at: now.toISOString(), updated_at: now.toISOString() }; st.dayNotes.push(note); }
+      return { ok: true, note };
+    },
+    admin_delete_day_note: (a) => { const i = st.dayNotes.findIndex((n) => n.id === a.p_id); if (i < 0) throw err('not_found'); st.dayNotes.splice(i, 1); return { ok: true, id: a.p_id }; },
+    admin_save_bulletin: (a) => {
+      need('shifts.view_all');
+      const body = String(a.p_body || '').trim();
+      if (!body || body.length > 4000 || !a.p_start_date || !a.p_end_date || a.p_end_date < a.p_start_date) throw err('invalid_bulletin');
+      let bulletin = st.dayBulletins.find((b) => b.id === a.p_id);
+      if (a.p_id && !bulletin) throw err('not_found');
+      if (bulletin) Object.assign(bulletin, { start_date: a.p_start_date, end_date: a.p_end_date, body, active: a.p_active !== false, updated_at: now.toISOString() });
+      else { bulletin = { id: st.dayBulletinSeq++, start_date: a.p_start_date, end_date: a.p_end_date, body, active: a.p_active !== false, author_name: 'Kokeilukäyttäjä', created_by: 'mock-user', created_at: now.toISOString(), updated_at: now.toISOString() }; st.dayBulletins.push(bulletin); }
+      return { ok: true, bulletin };
+    },
+    admin_delete_bulletin: (a) => { need('shifts.view_all'); const i = st.dayBulletins.findIndex((b) => b.id === a.p_id); if (i < 0) throw err('not_found'); st.dayBulletins.splice(i, 1); return { ok: true, id: a.p_id }; },
+    admin_set_reservation_note: (a) => { const r = st.reservations.find((x) => x.reservation_id === a.p_reservation_id); if (!r) throw err('not_found'); const note = String(a.p_notes || '').trim(); if (note.length > 1000) throw err('invalid_note'); r.notes = note || null; return { ok: true, reservation_id: r.reservation_id, notes: r.notes }; },
     admin_list_reservations: (a) => {
       let rows = st.reservations.filter((r) => inRange(r, a));
       if (a.p_status === 'active') rows = rows.filter((r) => ['pending', 'confirmed'].includes(r.status)); else if (a.p_status) rows = rows.filter((r) => r.status === a.p_status);
@@ -376,20 +409,20 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
         reservations: handlers.admin_list_reservations({ p_from: from, p_to: to, p_limit: 200 }),
         shifts: handlers.admin_day_shifts(a), addons: handlers.admin_list_addons(),
         options: handlers.admin_list_product_options({}), extras: handlers.admin_day_extras(a),
-        site_texts: handlers.public_get_site_texts() };
+        site_texts: handlers.public_get_site_texts(), notes_bundle: handlers.admin_list_day_notes(a) };
     },
     admin_day_view: (a) => {
       const rs = st.reservations.filter((r) => r.starts_at >= helIso(a.p_date, '00:00') && r.starts_at < helIso(addDays(a.p_date, 1), '00:00'));
       return { date: a.p_date, sessions: [], blocks: [], prep: [], addon_totals: [],
         reservations: rs.map((r) => ({ reservation_id: r.reservation_id, order_id: r.order_id, order_no: r.order_no, status: r.status, payment_status: r.payment_status, product_name: r.product_name, mode: r.mode, starts_at: r.starts_at, ends_at: r.ends_at, persons: r.persons,
           customer_name: r.customer_name, customer_phone: r.customer_phone, source: 'native', external_id: null, customer_kind: 'private', company: null, space_code: r.space_code, lifecycle: r.lifecycle, quota_exempt: false, override_reason: null,
-          therapist_missing: false, therapist_missing_open: false, legs: r.legs, addons: [], option: optJson(r.option_id), option_missing: missing(r) })) };
+          therapist_missing: false, therapist_missing_open: false, notes: r.notes, legs: r.legs, addons: [], option: optJson(r.option_id), option_missing: missing(r) })) };
     },
     admin_get_order: (a) => {
       const r = st.reservations.find((x) => x.order_id === a.p_order_id); if (!r) throw err('not_found', 'Tilausta ei löydy');
       return { order_id: r.order_id, order_no: r.order_no, status: r.order_status, payment_status: r.payment_status, total: r.total_gross, source_channel: 'web', created_at: r.created_at, customer_kind: 'private', billing: null, invoice_reference: null,
         customer: { id: r.customer_id, name: r.customer_name, email: r.customer_email, phone: r.customer_phone },
-        reservations: [{ id: r.reservation_id, status: r.status, product_name: r.product_name, mode: r.mode, starts_at: r.starts_at, ends_at: r.ends_at, persons: r.persons, notes: null, item_total: r.total_gross, product_id: r.product_id,
+        reservations: [{ id: r.reservation_id, status: r.status, product_name: r.product_name, mode: r.mode, starts_at: r.starts_at, ends_at: r.ends_at, persons: r.persons, notes: r.notes, item_total: r.total_gross, product_id: r.product_id,
           option: optJson(r.option_id), option_choices: choicesJson(r.product_id), option_missing: missing(r), addons: [] }], items: [], payments: [], balance: 0, is_native: true };
     },
     admin_set_reservation_option: (a) => {

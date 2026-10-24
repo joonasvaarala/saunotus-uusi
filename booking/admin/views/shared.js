@@ -5,6 +5,7 @@ import { loadRcTexts } from '../refund-cancel-texts.js';
 import { cancelReservationDialog } from './refund-cancel.js';
 import { addonPicker } from './addons.js';
 import { nbt } from '../nb-texts.js';
+import { memoText } from '../day-memos-texts.js';
 import { stepper } from '../stepper.js';
 import { icon } from '../icons.js';
 import { h, dialog, toast, run, fmtDay, fmtTime, fmtDT, money, statusBadge, payBadge, sourceBadge, isJohku, field, badge, empty, errMsg } from '../ui.js';
@@ -36,6 +37,12 @@ export function reservationDialog(r, { methods, onChange, refs, can = () => true
       h('dt', { text: 'Luotu' }), h('dd', { text: fmtDT(r.created_at) }), r.notes ? [h('dt', { text: 'Huomio' }), h('dd', { text: r.notes })] : null),
     can('payments.manage') ? h('a', { class: 'btn ghost order-link', 'data-testid': 'order-link', href: `#/talous?tab=orders&order=${encodeURIComponent(r.order_no)}`, onclick: () => d.close(), text: nbt('nb.orderLink', { no: r.order_no }) }) : null,   // Talous → Tilaukset: tilaus auki (maksut, kuitit)
     resBox,
+    // booking_140: varauksen sisäinen muistiinpano (reservations.notes, enintään 1000 merkkiä). Oikeus bookings.manage (sama kuin RPC:ssä).
+    can('bookings.manage') ? (() => { const notes = h('textarea', { name: 'reservation_note', rows: 3, maxlength: 1000, value: r.notes || '' });
+      const save = h('button', { type: 'button', class: 'btn sm', 'data-testid': 'res-note-save', text: memoText('ui.admin.day_memos.res_note_save'), onclick: () => run(save, async () => {
+        const updated = await rpc('admin_set_reservation_note', { p_reservation_id: r.reservation_id, p_notes: notes.value });
+        r.notes = updated?.notes ?? null; toast(memoText('ui.admin.day_memos.res_note_saved')); d.close(); onChange?.();
+      }) }); return h('div', { class: 'box res-note-editor', 'data-testid': 'res-note-editor' }, field(memoText('ui.admin.day_memos.res_note_label'), notes), save); })() : null,
     optBox,
     orderBox,
     h('div', { class: 'row wrap' },
