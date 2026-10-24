@@ -60,7 +60,7 @@ test('indexOffers / findOffer / dayMaxPercent / productMaxPercent; virheelliset 
   assert.equal(L.dayMaxPercent(idx, '2026-10-26', 26), 0);
   assert.equal(L.dayMaxPercent(idx, '2026-10-26', 25), 20);
   assert.equal(L.productMaxPercent(idx, 26), 30);
-  assert.deepEqual(L.quietPrices(offer()), { pct: 30, was: 200, now: 140, extraNow: 17.5 });
+  assert.deepEqual(L.quietPrices(offer()), { pct: 30, was: 200, now: 140, extraNow: 25 });   // lisähenkilö täyshintainen
 });
 test('quietCheckout: palvelimen vastaus voittaa; ei pinoamista; ilman koodia alennus vuoron hinnasta', () => {
   assert.deepEqual(L.quietCheckout({ offer: offer(), sessionTotal: 250 }), { source: 'quiet', percent: 30, amount: 75, codeNotUsed: false });
@@ -70,6 +70,35 @@ test('quietCheckout: palvelimen vastaus voittaa; ei pinoamista; ilman koodia ale
   assert.deepEqual(L.quietCheckout({ quote: { ok: true, discount: 10 }, offer: offer() }), { source: 'code' });   // vanha backend: koodi
   assert.deepEqual(L.quietCheckout({ offer: null, sessionTotal: 250 }), { source: 'none' });
   assert.deepEqual(L.quietCheckout({ offer: offer(), sessionTotal: 0 }), { source: 'none' });
+});
+test('lisähenkilö aina täyshintainen: kb 26 ma 26.10. 19–21 −20 % 180 € → 144 € (sis. 6 hlö, lisähenkilö +10 €)', () => {
+  const o = offer({ percent: 20, base_price: 180, discounted_price: 144, included_persons: 6, extra_person_price: 10, price_mode: 'fixed_plus_extra' });
+  assert.deepEqual(L.quietPrices(o), { pct: 20, was: 180, now: 144, extraNow: 10 });
+  assert.equal(L.quietPrices({ ...o, extra_person_price: null }).extraNow, null);
+  const s = { price_mode: 'fixed_plus_extra', base_price: 180, included_persons: 6, extra_person_price: 10, unit_price: 180 };
+  // alennettava osa = perushinta, lisähenkilöt eivät alennu
+  assert.equal(L.quietBase(s, 6), 180);
+  assert.equal(L.quietBase(s, 7), 180);
+  assert.equal(L.quietBase(s, 10), 180);
+  assert.equal(L.quietBase(s, 3), 180);
+  assert.equal(L.quietBase({ price_mode: 'fixed', base_price: 150 }, 9), 150);
+  assert.equal(L.quietBase({ price_mode: 'per_person', unit_price: 25 }, 4), 100);
+  assert.equal(L.quietBase(null, 4), 0);
+  // 7 henkeä: 180 + 10 = 190, ale 20 % perushinnasta = 36 → yhteensä 154 (ei 152)
+  const total7 = 190;
+  const qv = L.quietCheckout({ offer: o, sessionTotal: total7, discountBase: L.quietBase(s, 7) });
+  assert.deepEqual(qv, { source: 'quiet', percent: 20, amount: 36, codeNotUsed: false });
+  assert.equal(total7 - qv.amount, 154);
+  assert.equal(180 + 4 * 10 - L.quietCheckout({ offer: o, sessionTotal: 220, discountBase: L.quietBase(s, 10) }).amount, 184);
+  // perushinta yksin: 144 €
+  assert.equal(180 - L.quietCheckout({ offer: o, sessionTotal: 180, discountBase: L.quietBase(s, 6) }).amount, 144);
+});
+test('kauppa käyttää perushintaa alennuksen pohjana ja täyttä lisähenkilöhintaa kortissa', () => {
+  const src = readFileSync(join(root, 'shop/src/shop.js'), 'utf8');
+  assert.match(src, /quietCheckout\(\{[^}]*sessionTotal: priceFor\(s, n\), discountBase: quietBase\(s, n\)/);
+  assert.match(src, /t\.extra\(money\(q\.extraNow\)\)/);
+  const logic = readFileSync(join(root, 'shop/src/quiet-offers-logic.js'), 'utf8');
+  assert.doesNotMatch(logic, /discountPrice\(offer\.extra_person_price/);
 });
 test('createQuietOfferCache: yksi kutsu / ikkuna, 60 s tai next_change_at, virhe → [] 10 s, ikkuna ≤ 14 pv', async () => {
   let t = Date.parse('2026-10-24T12:00:00Z'), calls = 0, fail = false;
