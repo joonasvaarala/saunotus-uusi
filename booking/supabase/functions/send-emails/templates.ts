@@ -3,7 +3,7 @@
 // data = booking.email_outbox_claim()-rivi (ks. docs/talous-integraatiot.md): { kind, locale, to_name, order{order_no, order_url, total, items[], reservations[]}, receipt{receipt_no, kind, text_body, total, issued_at}, payment{amount, link_url, link_expires_at} }.
 // FI + EN, HTML (taulukkopohjainen, inline-tyylit, sähköpostiyhteensopiva) + tekstiversio. Ei ulkoisia riippuvuuksia (puhdas funktio, testattu node --test).
 // Tyyli: tumma vihreä + hiekka, ei sinistä. Logo: sivuston /img/logo-kuitti.png (osoite johdetaan tilauslinkistä; muuten LOGO_FALLBACK).
-export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify" | "invoice_pdf" | "product_message";
+export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify" | "invoice_pdf" | "product_message" | "waitlist_spot_freed";
 export interface Rendered { subject: string; text: string; html: string }
 // Asiakasnäkyvät tekstit: texts.ts (repon oletukset = varateksti) tai tietokannasta (email.*-avaimet, _shared/site_texts.ts). render() ottaa valinnaisen tekstihaun (4. parametri).
 import { makeT, type TFn } from "../_shared/site_texts.ts";
@@ -450,6 +450,25 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const ref = inv?.reference_no ? `${X("email.receipt.meta_no")}: ${inv.reference_no}` : "";
       const text = textBlock(hello, intro, attach, ref, terms, contact, sign) + "\n";
       const html = mk(title, intro, h1(title) + helloRow + p(esc(intro)) + p(esc(attach)) + (ref ? p(esc(ref)) : "") + p(esc(terms)) + tail);
+      return { subject, text, html };
+    }
+    case "waitlist_spot_freed": {
+      // booking_132: jonotuslistan vapautumisilmoitus. Payload tulee claimin 'waitlist'-kentästä; ei tilausta.
+      const w = d?.waitlist || {};
+      const book = safeUrl(w.book_url);
+      const leaveUrl = safeUrl(w.leave_url);
+      const subject = X("email.waitlist.subject");
+      const title = X("email.waitlist.title");
+      const intro = X("email.waitlist.intro");
+      const session = X("email.waitlist.session", { what: String(w.product_name ?? "").trim(), when: dt(w.starts_at, en), n: String(Number(w.persons) || 1) });
+      const notice = X("email.waitlist.notice");
+      const bookLabel = X("email.waitlist.book_button");
+      const leaveLead = X("email.waitlist.leave");
+      const leaveLabel = X("email.waitlist.leave_link");
+      const text = textBlock(hello, intro, session, notice, book && `${bookLabel}:\n${book}`, leaveUrl && `${leaveLead}\n${leaveUrl}`, contact, sign) + "\n";
+      const html = mk(title, intro, h1(title) + helloRow + p(esc(intro)) + box(`<span style="font-family:${SANS};font-size:15px;line-height:1.5;color:${INK}">${esc(session)}</span>`) + p(esc(notice))
+        + (book ? button(book, bookLabel) : "")
+        + (leaveUrl ? p(`${esc(leaveLead)} <a href="${esc(leaveUrl)}" style="color:${GREEN_SOFT}">${esc(leaveLabel)}</a>`, `color:${MUTED};font-size:13px`) : "") + tail);
       return { subject, text, html };
     }
     case "order_change":

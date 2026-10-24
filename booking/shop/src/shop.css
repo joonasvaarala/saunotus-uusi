@@ -487,3 +487,12 @@ a.bk-sd:hover{filter:brightness(.97)}
 .bk-rich li{margin:.15em 0}
 .bk-rich a{text-decoration:underline}
 .ord-guide-text.bk-rich{white-space:normal}
+
+/* booking_132: täysi vuoro näkyy hillittynä (ei läpinäkyvyyttä, jotta jonotuslinkin kontrasti säilyy). */
+.bk-slot.full{border-left:3px solid var(--line);background:var(--card)}
+.bk-slot.full .bk-time,.bk-slot.full .bk-sub,.bk-slot.full .bk-price{color:var(--muted)}
+.bk-slot.full .bk-waitlist-link{border-color:var(--gold);color:var(--ink)}
+.bk-slot.full .bk-waitlist-link:hover,.bk-slot.full .bk-waitlist-link:focus-visible{color:var(--green)}
+.bk-pc.full{background:var(--card);border-color:var(--line);border-radius:var(--r)}
+.bk-pc.full .bk-pc-name{color:var(--muted)}
+.bk-pick .bk-badge.full{display:inline-flex;align-self:flex-start;margin-top:.4rem}

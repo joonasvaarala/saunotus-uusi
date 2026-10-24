@@ -1,0 +1,614 @@
+[
+ {
+  "key": "ui.shop.waitlist_sold_out",
+  "lang": "fi",
+  "text": "Loppuunmyyty – liity jonoon",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_sold_out",
+  "lang": "en",
+  "text": "Sold out – join the waiting list",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_session_sold_out",
+  "lang": "fi",
+  "text": "Vuoro on loppuunmyyty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_session_sold_out",
+  "lang": "en",
+  "text": "Session sold out",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_join_short",
+  "lang": "fi",
+  "text": "Liity jonoon",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_join_short",
+  "lang": "en",
+  "text": "Join waiting list",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_join",
+  "lang": "fi",
+  "text": "Liity jonotuslistalle",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_join",
+  "lang": "en",
+  "text": "Join the waiting list",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_title",
+  "lang": "fi",
+  "text": "Jonotuslista",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_title",
+  "lang": "en",
+  "text": "Waiting list",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_intro",
+  "lang": "fi",
+  "text": "Liity jonotuslistalle maksutta. Jos vuorolle vapautuu paikkoja, lähetämme sinulle heti sähköpostilla ilmoituksen ja suoran varauslinkin.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_intro",
+  "lang": "en",
+  "text": "Join the waiting list for free. If places open up, we will email you right away with a direct booking link.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_phone_hint",
+  "lang": "fi",
+  "text": "Vapaaehtoinen. Käytämme numeroa vain tähän vuoroon liittyvään yhteydenottoon.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_phone_hint",
+  "lang": "en",
+  "text": "Optional. We use the number only to contact you about this session.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_done",
+  "lang": "fi",
+  "text": "Olet jonotuslistalla!",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_done",
+  "lang": "en",
+  "text": "You are on the waiting list!",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_done_text",
+  "lang": "fi",
+  "text": "Lähetämme sähköpostin, jos paikkoja vapautuu. Ilmoitus ei vielä varaa paikkaa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_done_text",
+  "lang": "en",
+  "text": "We will email you if places become available. The notification does not reserve a place.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_leave",
+  "lang": "fi",
+  "text": "Poistu jonotuslistalta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_leave",
+  "lang": "en",
+  "text": "Leave the waiting list",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_left",
+  "lang": "fi",
+  "text": "Sinut on poistettu tämän vuoron jonotuslistalta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_left",
+  "lang": "en",
+  "text": "You have been removed from this session’s waiting list.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_back",
+  "lang": "fi",
+  "text": "Takaisin varauskalenteriin",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_back",
+  "lang": "en",
+  "text": "Back to booking calendar",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_submitting",
+  "lang": "fi",
+  "text": "Liitytään…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_submitting",
+  "lang": "en",
+  "text": "Joining…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_not_full",
+  "lang": "fi",
+  "text": "Vuoro ei ole enää loppuunmyyty. Voit tehdä varauksen normaalisti.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_not_full",
+  "lang": "en",
+  "text": "This session is no longer sold out. You can book now.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_book_now",
+  "lang": "fi",
+  "text": "Varaa paikka",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_book_now",
+  "lang": "en",
+  "text": "Book a place",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_errors.rate_limited",
+  "lang": "fi",
+  "text": "Liian monta yritystä. Yritä myöhemmin uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_errors.rate_limited",
+  "lang": "en",
+  "text": "Too many attempts. Please try again later.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_errors.invalid_name",
+  "lang": "fi",
+  "text": "Anna etu- ja sukunimi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_errors.invalid_name",
+  "lang": "en",
+  "text": "Please enter your name.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_errors.invalid_email",
+  "lang": "fi",
+  "text": "Tarkista sähköpostiosoite.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_errors.invalid_email",
+  "lang": "en",
+  "text": "Please check your email address.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_errors.invalid_phone",
+  "lang": "fi",
+  "text": "Tarkista puhelinnumero.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_errors.invalid_phone",
+  "lang": "en",
+  "text": "Please check your phone number.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_errors.invalid_session",
+  "lang": "fi",
+  "text": "Vuoroa ei löytynyt.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_errors.invalid_session",
+  "lang": "en",
+  "text": "Session not found.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_errors.not_full",
+  "lang": "fi",
+  "text": "Vuoro ei ole enää loppuunmyyty.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_errors.not_full",
+  "lang": "en",
+  "text": "This session is no longer sold out.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_errors.disabled",
+  "lang": "fi",
+  "text": "Jonotuslista ei ole käytössä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.shop.waitlist_errors.disabled",
+  "lang": "en",
+  "text": "The waiting list is not in use.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/i18n.js); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist.subject",
+  "lang": "fi",
+  "text": "Paikka vapautui jonottamallesi vuorolle – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist.subject",
+  "lang": "en",
+  "text": "A place is available on the session you are waiting for – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist.title",
+  "lang": "fi",
+  "text": "Paikka vapautui",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist.title",
+  "lang": "en",
+  "text": "A place is available",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist.intro",
+  "lang": "fi",
+  "text": "Vuorolle, jonka jonotuslistalle liityit, on vapautunut paikka.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist.intro",
+  "lang": "en",
+  "text": "A place has become available on the session you joined the waiting list for.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist.session",
+  "lang": "fi",
+  "text": "{{var:what}}, {{var:when}}, {{var:n}} hlö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:what}}",
+   "{{var:when}}",
+   "{{var:n}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist.session",
+  "lang": "en",
+  "text": "{{var:what}}, {{var:when}}, {{var:n}} guests",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:what}}",
+   "{{var:when}}",
+   "{{var:n}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist.notice",
+  "lang": "fi",
+  "text": "Tämä ilmoitus ei varaa paikkaa. Paikat täyttyvät varausjärjestyksessä, joten varaa pian, jos vuoro sopii sinulle.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist.notice",
+  "lang": "en",
+  "text": "This message does not reserve a place. Places are filled in booking order, so book soon if the session suits you.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist.book_button",
+  "lang": "fi",
+  "text": "Varaa paikka",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist.book_button",
+  "lang": "en",
+  "text": "Book your place",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist.leave",
+  "lang": "fi",
+  "text": "Etkö enää tarvitse ilmoituksia tästä vuorosta?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist.leave",
+  "lang": "en",
+  "text": "No longer need notifications for this session?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist.leave_link",
+  "lang": "fi",
+  "text": "Poistu jonotuslistalta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist.leave_link",
+  "lang": "en",
+  "text": "Leave the waiting list",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ }
+]

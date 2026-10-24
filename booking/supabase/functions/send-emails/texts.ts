@@ -158,4 +158,13 @@ export const EMAIL_TEXTS: TextTable = {
   "email.invoice.intro": { fi: "Lasku {{var:no}} on liitteenä. Summa {{var:amount}}, eräpäivä {{var:date}}.", en: "Invoice {{var:no}} is attached. Amount {{var:amount}}, due {{var:date}}." },
   "email.invoice.attach": { fi: "PDF-lasku on tämän viestin liitteenä.", en: "The invoice PDF is attached to this message." },
   "email.invoice.terms": { fi: "Maksuehto 14 päivää netto. Viivästyskorko korkolain mukaan. Maksu viitenumerolla.", en: "Payment terms: 14 days net. Late interest according to the Interest Act. Pay with the reference number.", cls: "protected" },
+  // ---- jonotuslista (booking_132) ----
+  "email.waitlist.subject": { fi: `Paikka vapautui jonottamallesi vuorolle – ${SN}`, en: `A place is available on the session you are waiting for – ${SN}` },
+  "email.waitlist.title": { fi: "Paikka vapautui", en: "A place is available" },
+  "email.waitlist.intro": { fi: "Vuorolle, jonka jonotuslistalle liityit, on vapautunut paikka.", en: "A place has become available on the session you joined the waiting list for." },
+  "email.waitlist.session": { fi: "{{var:what}}, {{var:when}}, {{var:n}} hlö", en: "{{var:what}}, {{var:when}}, {{var:n}} guests" },
+  "email.waitlist.notice": { fi: "Tämä ilmoitus ei varaa paikkaa. Paikat täyttyvät varausjärjestyksessä, joten varaa pian, jos vuoro sopii sinulle.", en: "This message does not reserve a place. Places are filled in booking order, so book soon if the session suits you.", cls: "protected" },
+  "email.waitlist.book_button": { fi: "Varaa paikka", en: "Book your place" },
+  "email.waitlist.leave": { fi: "Etkö enää tarvitse ilmoituksia tästä vuorosta?", en: "No longer need notifications for this session?" },
+  "email.waitlist.leave_link": { fi: "Poistu jonotuslistalta", en: "Leave the waiting list" },
 };
