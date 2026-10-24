@@ -6,7 +6,7 @@ import { articlesNav, homeSection } from './articles/runtime.mjs';
 import { tx } from './site-texts.mjs';
 import { seoSchemaForPage, jsonLdScript } from './seo-enhance.mjs';
 import { privacyAnalyticsHtml } from './privacy-analytics.mjs';
-import { policyText, privacyDocFor } from './policy-lang.mjs';
+import { policyText, privacyDocFor, linkContacts } from './policy-lang.mjs';
 import { shopProductsHtml } from './shop-products.mjs';
 import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
 import {
@@ -437,7 +437,9 @@ export function policyPage(name, key, lang) {
   const items = name === 'privacy'
     ? d.policies.map((id) => kb.policies.find((p) => p.id === id)).filter((p) => p && !p.internal).map((p) => policyText(p, lang) ?? policyText(p, 'fi'))
     : d.policies.map((id) => policyFor(id, lang)).filter(Boolean);
-  const txt = (s) => clean(s).split(/\n+/).map((l) => `<p>${e(l)}</p>`).join('');
+  // Tietosuojasivulla puhelin (tel:) ja sähköposti (mailto:) linkeiksi escapoidusta tekstistä (policy-lang.mjs linkContacts).
+  const para = (l) => (name === 'privacy' ? linkContacts(e(l), site.contact) : e(l));
+  const txt = (s) => clean(s).split(/\n+/).map((l) => `<p>${para(l)}</p>`).join('');
   const body = pageHero(d.hero, lang, key)
     + sec('', `<div class="narrow prose">${d.note ? `<p class="note-box">${e(d.note)}</p>` : ''}${items.map((p) => p.lang && p.lang !== lang ? `<div lang="${e(p.lang)}"><h2>${e(p.title)}</h2>${txt(p.body)}</div>` : `<h2>${e(p.title)}</h2>${txt(p.body)}`).join('')}${name === 'privacy' ? privacyAnalyticsHtml(lang, e, txt) : ''}</div>`);
   return layout({ lang, key, meta: d.meta, body });

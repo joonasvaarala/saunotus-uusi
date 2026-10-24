@@ -32,3 +32,14 @@ export function privacyDocFor(fiDoc, policies, lang) {
     policies: fiDoc.policies,
   };
 }
+
+// Tietosuojasivun teksteissä (kb.policies body / body_en, kävijämittauksen kohta) puhelinnumero ja sähköpostiosoite linkeiksi.
+// Teksti on pelkkää tekstiä (site_texts kind plain, ei '<'); linkit lisätään vasta ESCAPOITUUN kappaleeseen, joten tekstiin ei tule merkintöjä.
+// c = site.contact ({ phone: '010 299 2866', phoneEn: '+358 10 299 2866', phoneTel: '+358102992866', email }).
+const reEsc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+export function linkContacts(escHtml, c) {
+  const parts = [c?.phone, c?.phoneEn, c?.email].filter((s) => typeof s === 'string' && s.trim()).map(reEsc);
+  if (!parts.length) return escHtml;
+  return String(escHtml).replace(new RegExp(`(?<![\\w@.+-])(${parts.join('|')})(?![\\w@-])`, 'g'), (m) =>
+    m === c.email ? `<a href="mailto:${c.email}">${m}</a>` : `<a href="tel:${c.phoneTel}">${m}</a>`);
+}

@@ -43,7 +43,8 @@ test('policiesReady / resolvePrivacyPages: puuttuva, sisäinen tai tyhjä kohta 
 test('sisältö: site.json /en/privacy/, ei privacy.json-EN-lohkoa (ei uusia tekstiavaimia), kb-snapshot vie title_en/body_en', () => {
   assert.equal(J('content/site.json').pages.privacy.en, '/en/privacy/');
   assert.deepEqual(Object.keys(J('content/pages/privacy.json')), ['fi']);
-  assert.match(readFileSync(resolve(root, 'scripts/kb-snapshot.mjs'), 'utf8'), /'title','body','title_en','body_en'/);
+  // main (booking_151/#147): kb-snapshot vie _en-kentät EN-taulukon kautta (policies: ['title_en', 'body_en']).
+  assert.match(readFileSync(resolve(root, 'scripts/kb-snapshot.mjs'), 'utf8'), /policies: \['title_en', 'body_en'\]/);
 });
 
 test('privacyDocFor: EN-meta/hero kb:n EN-tekstistä, kuvat FI-sivulta; ilman EN-tekstiä null; FI ennallaan', () => {
@@ -78,7 +79,7 @@ test('EN-tekstit olemassa: /en/privacy/ näyttää title_en/body_en, alatunniste
   try {
     assert.equal(lib.site.pages.privacy.en, '/en/privacy/');
     const html = quiet(() => R.policyPage('privacy', 'privacy', 'en'));
-    assert.match(html, /<h2>Privacy policy \(EN\)<\/h2><p>Controller: Havuhattu Oy\.<\/p><p>Contact: savusauna@saunotus\.fi<\/p>/);
+    assert.match(html, /<h2>Privacy policy \(EN\)<\/h2><p>Controller: Havuhattu Oy\.<\/p><p>Contact: <a href=\"mailto:savusauna@saunotus\.fi\">savusauna@saunotus\.fi<\/a><\/p>/);
     assert.doesNotMatch(html, new RegExp(`<h2>${p.title.replace(/[()]/g, '\\$&')}</h2>`));
     assert.match(footer(html), /<a href="\/en\/privacy\/">Privacy policy \(EN\)<\/a>/);
     assert.match(html, /<h1>Privacy policy \(EN\)<\/h1>/);
