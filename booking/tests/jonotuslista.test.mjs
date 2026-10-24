@@ -9,8 +9,8 @@ import { WAITLIST_TEXTS } from '../shop/src/waitlist-texts.js';
 import { createWaitlistView } from '../shop/src/waitlist-ui.js';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(HERE, '../..');
-const sql = readFileSync(resolve(repo, 'booking/supabase/migrations/20261024060000_booking_132_waitlist.sql'), 'utf8');
-const rollback = readFileSync(resolve(repo, 'booking/supabase/rollbacks/20261024060000_booking_132_ROLLBACK.sql'), 'utf8');
+const sql = readFileSync(resolve(repo, 'booking/supabase/migrations/20261024061231_booking_132_waitlist.sql'), 'utf8');
+const rollback = readFileSync(resolve(repo, 'booking/supabase/rollbacks/20261024061231_booking_132_ROLLBACK.sql'), 'utf8');
 
 const rows = [
   { rule_id: 1, status: 'full', starts_at: '2026-11-02T16:00:00Z' },

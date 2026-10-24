@@ -1,7 +1,7 @@
 -- booking_132: jonotuslista täysiin vuoroihin; sähköpostit nyt, WhatsApp vain tietomalli/ajastus (oletuksena pois).
 -- Ei varaa kapasiteettia. Jonotusilmoitus ei takaa paikkaa; varaus tehdään normaalisti.
 -- Uudelleenajettava: toinen ajo ei muuta mitään (if not exists / create or replace / vartioitu nimenvaihto).
--- Rollback: booking/supabase/rollbacks/20261024060000_booking_132_ROLLBACK.sql
+-- Rollback: booking/supabase/rollbacks/20261024061231_booking_132_ROLLBACK.sql
 set local lock_timeout = '5s';
 
 -- Uusi viestityyppi email_outboxiin (booking_121:n lista + waitlist_spot_freed). Ilman tätä jonoilmoituksen
