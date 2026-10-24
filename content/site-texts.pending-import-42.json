@@ -1,0 +1,902 @@
+[
+ {
+  "key": "ui.shop.code_toggle",
+  "lang": "fi",
+  "text": "Onko sinulla alennus- tai vuosikorttikoodi?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_toggle",
+  "lang": "en",
+  "text": "Do you have a discount or annual card code?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_label",
+  "lang": "fi",
+  "text": "Alennus- tai vuosikorttikoodi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_label",
+  "lang": "en",
+  "text": "Discount or annual card code",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_apply",
+  "lang": "fi",
+  "text": "Käytä koodi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_apply",
+  "lang": "en",
+  "text": "Apply code",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_checking",
+  "lang": "fi",
+  "text": "Tarkistetaan…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_checking",
+  "lang": "en",
+  "text": "Checking…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_remove",
+  "lang": "fi",
+  "text": "Poista koodi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_remove",
+  "lang": "en",
+  "text": "Remove code",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_empty",
+  "lang": "fi",
+  "text": "Kirjoita koodi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_empty",
+  "lang": "en",
+  "text": "Enter a code.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_applied",
+  "lang": "fi",
+  "text": "Koodi käytössä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_applied",
+  "lang": "en",
+  "text": "Code applied",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_discount_row",
+  "lang": "fi",
+  "text": "Alennus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_discount_row",
+  "lang": "en",
+  "text": "Discount",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_annual_applied",
+  "lang": "fi",
+  "text": "Vuosikortti hyväksytty. Varaus on maksuton.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_annual_applied",
+  "lang": "en",
+  "text": "Annual card accepted. This booking is free of charge.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_annual_locked",
+  "lang": "fi",
+  "text": "Vuosikorttivaraus on yhdelle henkilölle ilman lisäpalveluita.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_annual_locked",
+  "lang": "en",
+  "text": "An annual card booking is for one person without extras.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_annual_owner",
+  "lang": "fi",
+  "text": "Käytä samaa sähköpostia tai puhelinnumeroa, jolla vuosikortti on tehty.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_annual_owner",
+  "lang": "en",
+  "text": "Use the same email address or phone number as on the annual card.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_recheck",
+  "lang": "fi",
+  "text": "Varauksen tiedot muuttuivat. Koodi tarkistetaan uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_recheck",
+  "lang": "en",
+  "text": "Your booking details changed. The code is checked again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_confirm",
+  "lang": "fi",
+  "text": "Vahvista varaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_confirm",
+  "lang": "en",
+  "text": "Confirm booking",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_confirming",
+  "lang": "fi",
+  "text": "Vahvistetaan…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_confirming",
+  "lang": "en",
+  "text": "Confirming…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.invalid_code",
+  "lang": "fi",
+  "text": "Koodia ei löytynyt. Tarkista kirjoitusasu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.invalid_code",
+  "lang": "en",
+  "text": "Code not found. Please check the spelling.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.code_inactive",
+  "lang": "fi",
+  "text": "Koodi ei ole käytössä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.code_inactive",
+  "lang": "en",
+  "text": "This code is not active.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.code_not_started",
+  "lang": "fi",
+  "text": "Koodi ei ole vielä voimassa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.code_not_started",
+  "lang": "en",
+  "text": "This code is not valid yet.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.code_expired",
+  "lang": "fi",
+  "text": "Koodi on vanhentunut.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.code_expired",
+  "lang": "en",
+  "text": "This code has expired.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.code_used_up",
+  "lang": "fi",
+  "text": "Koodi on jo käytetty.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.code_used_up",
+  "lang": "en",
+  "text": "This code has already been used.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.code_not_applicable",
+  "lang": "fi",
+  "text": "Koodi ei koske valittua palvelua.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.code_not_applicable",
+  "lang": "en",
+  "text": "This code does not apply to the selected service.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.annual_card_product",
+  "lang": "fi",
+  "text": "Vuosikortilla voi varata vain yleisiä saunavuoroja.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.annual_card_product",
+  "lang": "en",
+  "text": "The annual card is valid for public sauna sessions only.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.annual_card_expired",
+  "lang": "fi",
+  "text": "Vuosikortti ei ole voimassa valittuna päivänä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.annual_card_expired",
+  "lang": "en",
+  "text": "The annual card is not valid on the selected date.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.annual_card_inactive",
+  "lang": "fi",
+  "text": "Vuosikortti ei ole voimassa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.annual_card_inactive",
+  "lang": "en",
+  "text": "The annual card is not valid.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.annual_card_customer_mismatch",
+  "lang": "fi",
+  "text": "Koodi ei täsmää annettuihin yhteystietoihin. Käytä samaa sähköpostia tai puhelinnumeroa kuin vuosikortissa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.annual_card_customer_mismatch",
+  "lang": "en",
+  "text": "The code does not match the contact details. Use the same email address or phone number as on the annual card.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.annual_card_limit",
+  "lang": "fi",
+  "text": "Vuosikortilla voi olla yksi tuleva varaus kerrallaan. Voit varata seuraavan, kun nykyinen vuoro on käytetty.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.annual_card_limit",
+  "lang": "en",
+  "text": "An annual card can have one upcoming booking at a time. You can book the next one after the current session.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.annual_card_persons",
+  "lang": "fi",
+  "text": "Vuosikorttivaraus on yhdelle henkilölle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.annual_card_persons",
+  "lang": "en",
+  "text": "An annual card booking is for one person.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.annual_card_no_addons",
+  "lang": "fi",
+  "text": "Vuosikorttivaraukseen ei voi lisätä lisäpalveluita.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.annual_card_no_addons",
+  "lang": "en",
+  "text": "Extras cannot be added to an annual card booking.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.annual_card_private_only",
+  "lang": "fi",
+  "text": "Vuosikortti on henkilökohtainen. Valitse asiakastyypiksi yksityishenkilö.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.annual_card_private_only",
+  "lang": "en",
+  "text": "The annual card is personal. Choose private person as the customer type.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.rate_limited",
+  "lang": "fi",
+  "text": "Liian monta yritystä. Yritä hetken kuluttua uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.rate_limited",
+  "lang": "en",
+  "text": "Too many attempts. Please try again in a moment.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.generic",
+  "lang": "fi",
+  "text": "Koodin tarkistus epäonnistui. Yritä uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.code_errors.generic",
+  "lang": "en",
+  "text": "Could not check the code. Please try again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_title",
+  "lang": "fi",
+  "text": "Vuosikortti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_title",
+  "lang": "en",
+  "text": "Annual card",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_lead",
+  "lang": "fi",
+  "text": "Yleiset saunavuorot koko vuoden yhdelle henkilölle. Yksi tuleva varaus kerrallaan.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_lead",
+  "lang": "en",
+  "text": "Public sauna sessions all year round for one person. One upcoming booking at a time.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_price",
+  "lang": "fi",
+  "text": "Hinta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_price",
+  "lang": "en",
+  "text": "Price",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_buy",
+  "lang": "fi",
+  "text": "Osta vuosikortti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_buy",
+  "lang": "en",
+  "text": "Buy an annual card",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_buy_title",
+  "lang": "fi",
+  "text": "Osta vuosikortti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_buy_title",
+  "lang": "en",
+  "text": "Buy an annual card",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_buy_lead",
+  "lang": "fi",
+  "text": "Vuosikortti on henkilökohtainen ja voimassa vuoden maksupäivästä. Henkilökohtainen koodi näkyy tilaussivulla, kun tilaus on maksettu. Varaa vuorot koodilla varauskalenterissa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 450,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_buy_lead",
+  "lang": "en",
+  "text": "The annual card is personal and valid for one year from the payment date. Your personal code is shown on the order page once the order is paid. Book sessions with the code in the booking calendar.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_buy_submit",
+  "lang": "fi",
+  "text": "Siirry tilaukseen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_buy_submit",
+  "lang": "en",
+  "text": "Continue to order",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_buying",
+  "lang": "fi",
+  "text": "Luodaan tilausta…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_buying",
+  "lang": "en",
+  "text": "Creating order…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_unavailable",
+  "lang": "fi",
+  "text": "Vuosikorttien verkkomyynti ei ole juuri nyt käytössä. Kysy vuosikorttia henkilökunnalta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_unavailable",
+  "lang": "en",
+  "text": "Annual cards are not sold online at the moment. Please ask our staff.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_back",
+  "lang": "fi",
+  "text": "Takaisin varauskalenteriin",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.annual_back",
+  "lang": "en",
+  "text": "Back to the booking calendar",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/discount-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.order.annual_code_title",
+  "lang": "fi",
+  "text": "Vuosikorttisi koodi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/order-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.order.annual_code_title",
+  "lang": "en",
+  "text": "Your annual card code",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/order-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.order.annual_code_lead",
+  "lang": "fi",
+  "text": "Varaa yleisiä saunavuoroja varauskalenterissa: kirjoita koodi kassalla kohtaan Alennus- tai vuosikorttikoodi ja käytä samaa sähköpostia tai puhelinnumeroa kuin tässä tilauksessa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 450,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/order-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.order.annual_code_lead",
+  "lang": "en",
+  "text": "Book public sauna sessions in the booking calendar: enter the code at checkout under Discount or annual card code and use the same email address or phone number as in this order.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 450,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/order-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.order.annual_code_valid",
+  "lang": "fi",
+  "text": "Voimassa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/order-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.order.annual_code_valid",
+  "lang": "en",
+  "text": "Valid",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/order-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.order.annual_code_pending",
+  "lang": "fi",
+  "text": "Vuosikortin henkilökohtainen koodi näkyy tässä, kun tilaus on maksettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/order-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.order.annual_code_pending",
+  "lang": "en",
+  "text": "Your personal annual card code is shown here once the order is paid.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/order-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.order.annual_code_book",
+  "lang": "fi",
+  "text": "Avaa varauskalenteri",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/order-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.order.annual_code_book",
+  "lang": "en",
+  "text": "Open the booking calendar",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Paketti 10 / booking_142: alennus- ja vuosikorttikoodin kassateksti, vuosikortin verkko-osto ja tilaussivun koodi (booking/shop/src/order-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ }
+]

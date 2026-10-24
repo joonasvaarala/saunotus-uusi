@@ -506,3 +506,30 @@ a.bk-sd:hover{filter:brightness(.97)}
 [data-testid="booking-form"], [data-testid="availability"], .ok-box,
 .vc-choose, .vc-notice, .ord-msg, .ord-pay, .ord-card, .bk-dayresults,
 #bk-day-h, .bk-pc, .bk-review, .bk-checkout { scroll-margin-top: 84px; }
+/* Alennus- ja vuosikorttikoodi (booking_142): suljettava osio kassalla, ei vie tilaa oletuksena. Tekstit --ink / --muted (kontrasti ≥ 4,5:1). */
+.bk-code{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:0;margin:0 0 18px}
+.bk-code>summary{cursor:pointer;min-height:48px;display:flex;align-items:center;gap:10px;padding:10px 16px;font-weight:700;font-size:15px;color:var(--ink);list-style:none}
+.bk-code>summary::-webkit-details-marker{display:none}
+.bk-code>summary::before{content:"";flex:none;width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s}
+.bk-code[open]>summary::before{transform:rotate(45deg)}
+.bk-code>summary:focus-visible{outline:3px solid var(--ink);outline-offset:2px;border-radius:var(--r)}
+.bk-code-body{padding:0 16px 16px}
+.bk-code-body label{display:block;font-weight:700;margin-bottom:4px;font-size:15px}
+.bk-code-row{display:flex;gap:8px;flex-wrap:wrap}
+.bk-code-row input{flex:1 1 160px;min-width:0;font:600 17px var(--body);letter-spacing:.06em;text-transform:uppercase;padding:12px 14px;border:1px solid #8b7f73;border-radius:10px;background:#fff;color:var(--ink);min-height:48px}
+.bk-code-row input:focus{outline:3px solid var(--ink);outline-offset:1px}
+.bk-code-row input[readonly]{background:var(--tint)}
+.bk-form .bk-code-row .btn{width:auto;flex:none;padding:12px 18px;min-height:48px}
+.bk-code-status{margin:8px 0 0;font-size:15px;color:var(--muted);min-height:1.2em}
+.bk-code-status.ok{color:#1d4d2b;font-weight:600}
+.bk-code-status.err{color:#7b1d12;font-weight:600}
+.bk-code-remove{margin-top:6px;min-height:44px;padding:0;border:0;background:none;font:600 15px var(--body);color:var(--gold);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.bk-code-remove:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.bk-addon input:disabled{background:var(--tint)}
+/* vuosikortin myynti tuotelistan alla (vain kun palvelin sanoo available) */
+.bk-annual{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;margin:26px 0 0;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:var(--r);padding:18px 20px}
+.bk-annual-main{flex:1 1 260px;min-width:0}
+#booking-app .bk-annual h3{margin:0 0 4px}
+.bk-annual p{margin:0 0 4px}
+.ord-annual{border-left:5px solid var(--gold)}
+.ord-annual-code{font:700 26px/1.2 var(--body);letter-spacing:.08em;color:var(--ink);margin:4px 0 6px;word-break:break-all;user-select:all}

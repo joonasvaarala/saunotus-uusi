@@ -20,6 +20,7 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
   const waitlist = new Map();
   try { for (const row of JSON.parse(storage?.getItem(waitlistKey) || '[]')) waitlist.set(row.token, row); } catch { /* mock toimii myös ilman sessionStoragea */ }
   const saveWaitlist = () => { try { storage?.setItem(waitlistKey, JSON.stringify([...waitlist.values()])); } catch { /* storage pois */ } };
+  const annualSale = /[?&]annual=1(&|$)/.test(globalThis.location?.search || '');
   const noTimes = fail === 'notimes';   // ?mock=1&fail=notimes: public_treatment_availability palauttaa aina tyhjän ("Ei vapaita aikoja" -tila)
   let failOnce = ['option_required', 'invalid_option', 'online_payment_unavailable', 'too_many_pending'].includes(fail) ? fail : null;
   try { restoreBookings(JSON.parse(storage?.getItem(KEY) || 'null')); } catch { /* tyhjä alku */ }
@@ -56,6 +57,9 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
         if (row) { row.status = 'cancelled'; saveWaitlist(); }
         return { ok: true, cancelled: !!row };
       }
+      // vuosikortti (booking_142): ?mock=1&annual=1 näyttää myynnin (oletus pois kuten tuotannossa); osto ohjaa tilaussivun mockiin (scenario=annual)
+      case 'public_annual_card_offer': return annualSale ? { available: true, product_id: 43, name: 'Vuosikortti', name_en: 'Annual card', price: 290, vat_rate: 25.5, valid_months: 12 } : { available: false };
+      case 'public_buy_annual_card': return annualSale ? { ok: true, order_no: 9142, token: '00000000-0000-4000-8000-000000000142', status: 'pending', total: 290, payment_mode: 'pay_later' } : { ok: false, code: 'sale_disabled', message: 'Vuosikorttien verkkomyynti ei ole käytössä' };
       case 'public_catalog': return catalogEntries();
       case 'public_catalog_for': return pickCatalog(catalogEntries(), args.p_audience);
       case 'public_availability_all': {

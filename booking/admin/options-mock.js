@@ -6,6 +6,7 @@ import { storedLineFromInput } from './invoice-lines.js';
 import { calendarIdError } from './calendar-export-logic.js';
 import { validateMessage } from './messages-logic.js';
 import { applySection, exampleBundle } from './settings-logic.js';
+import { generatedAnnualCardCode, generatedDiscountCode, normalizeCode } from '../shop/src/discount-code-logic.js';
 const TZ = 'Europe/Helsinki';
 const todayHel = (now = new Date()) => now.toLocaleDateString('sv-SE', { timeZone: TZ });
 const addDays = (ds, n) => { const d = new Date(`${ds}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
@@ -158,7 +159,13 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     ],
     settings: { 10: { option_required: true, option_label: 'Valitse hoito', option_label_en: 'Choose your treatment' } },
     customers: [{ id: 1, name: 'Aino Testaaja', email: 'aino@example.com', phone: '+358401110001' }, { id: 2, name: 'Eero Esimerkki', email: 'eero@example.com', phone: '+358401110002' }, { id: 3, name: 'Helmi Hiljainen', email: 'helmi@example.com', phone: '+358401110003' }, { id: 4, name: 'Ilmari Iltavuoro', email: 'ilmari@example.com', phone: '+358401110004' }, { id: 5, name: 'Liisa Lasku', email: 'liisa@t112.test', phone: '0401234567', company: 'Koivutesti Oy', customer_kind: 'company', business_id: '1000000-4', address: 'Koivukuja 2', zip: '01300', city: 'Vantaa', marketing_consent: true }],
-    reservations: [], seq: { res: 900, order: 7000, pay: 4000 },
+    reservations: [], seq: { res: 900, order: 7000, pay: 4000, disc: 10, card: 10 },
+    // booking_142: keksityt esimerkkikoodit ja -vuosikortti (vain muistissa)
+    discountCodes: [
+      { id: 1, code: 'KESA15', description: 'Esimerkki: kesäkampanja', kind: 'percent', value: 15, valid_from: null, valid_to: addDays(today, 60), max_uses: null, used_count: 3, product_ids: null, active: true, target_scope: 'order', usage_type: 'permanent', is_annual_card_code: false, state: 'active' },
+      { id: 2, code: 'X7KQ2M', description: 'Esimerkki: hyvitys asiakkaalle', kind: 'fixed', value: 10, valid_from: null, valid_to: null, max_uses: 1, used_count: 0, product_ids: [1], active: true, target_scope: 'product', usage_type: 'single', is_annual_card_code: false, state: 'active' },
+      { id: 3, code: 'KUMPPANI-VK', description: 'Esimerkki: yhteinen vuosikorttikoodi', kind: 'percent', value: 100, valid_from: null, valid_to: addDays(today, 200), max_uses: null, used_count: 12, product_ids: [1], active: true, target_scope: 'product', usage_type: 'permanent', is_annual_card_code: true, state: 'active' }],
+    annualCards: [{ id: 1, code: 'HONKA417', customer_id: 2, customer_name: 'Eero Esimerkki', customer_email: 'eero@example.com', valid_from: addDays(today, -30), valid_to: addDays(today, 334), active: true, revoked_at: null, notes: null, purchase_order_no: 7001, future_bookings: 1 }],
     // Sulkukonflikti (booking_73). Kuittaus ei koske availabilityBlocked-lippua.
     availabilityBlocked: true,
     blockConflicts: [{
@@ -185,6 +192,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
   if (role === 'admin' && !st.perms.includes('staff.manage')) st.perms.push('staff.manage');
   // booking_140: manager/admin näkevät kaikki vuorot ja hallitsevat tiedotteita (kuten tuotannon role_permissions); staff ei.
   if (perms === PERMS && role !== 'staff' && !st.perms.includes('shifts.view_all')) st.perms.push('shifts.view_all');
+  if (perms === PERMS && role !== 'staff' && !st.perms.includes('annual_cards.manage')) st.perms.push('annual_cards.manage');   // booking_142: kuten tuotannon manager/admin
   st.settingsUi = exampleBundle();
   const optJson = (id) => { const o = st.options.find((x) => x.id === id); return o ? { id: o.id, code: o.code, name: o.name, name_en: o.name_en } : null; };
   const activeOpts = (pid) => st.options.filter((o) => o.product_id === pid && o.active).sort((a, b) => a.sort_order - b.sort_order || a.id - b.id);
@@ -236,6 +244,43 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
   const inRange = (r, a) => (!a.p_from || r.starts_at >= a.p_from) && (!a.p_to || r.starts_at < a.p_to);
   const handlers = {
     current_staff_role: () => role,
+    // booking_142: alennuskoodit ja vuosikortit (samat tarkistukset pääpiirteissään kuin palvelimella)
+    admin_list_discount_codes: () => { needAny('catalog.edit', 'annual_cards.manage'); return st.discountCodes.map((d) => ({ ...d })); },
+    admin_save_discount_code: (a) => {
+      need('catalog.edit');
+      const p = a.p_data || {}, old = a.p_id != null ? st.discountCodes.find((d) => d.id === a.p_id) : null;
+      if (a.p_id != null && !old) throw err('not_found', 'Koodia ei löydy');
+      const annual = !!p.is_annual_card_code;
+      if (annual || old?.is_annual_card_code) need('annual_cards.manage');
+      const code = normalizeCode(p.code) || generatedDiscountCode();
+      if (!/^[A-Z0-9-]{3,40}$/.test(code)) throw err('invalid_code', 'Koodissa saa olla 3–40 merkkiä: kirjaimia A–Z, numeroita ja väliviivoja');
+      if (!/^\d{1,6}(\.\d{1,2})?$/.test(String(p.value ?? ''))) throw err('invalid_value', 'Tarkista alennuksen määrä');
+      if (st.discountCodes.some((d) => d.code === code && d.id !== a.p_id)) throw err('code_exists', 'Koodi on jo käytössä');
+      const usage = annual ? 'permanent' : p.usage_type || 'single';
+      const row = { ...(old || { id: ++st.seq.disc, used_count: 0 }), code, description: p.description || null, kind: annual ? 'percent' : p.kind || 'percent', value: annual ? 100 : +p.value,
+        valid_from: p.valid_from || null, valid_to: p.valid_to || null, usage_type: usage, max_uses: usage === 'single' ? 1 : usage === 'multi' ? +p.max_uses : null,
+        target_scope: annual ? 'product' : p.target_scope || 'order', product_ids: annual ? [1] : p.target_scope === 'product' ? p.product_ids || [] : null, active: p.active !== false, is_annual_card_code: annual };
+      row.state = !row.active ? 'inactive' : row.valid_to && row.valid_to < today ? 'expired' : row.valid_from && row.valid_from > today ? 'not_started' : row.max_uses && row.used_count >= row.max_uses ? 'used_up' : 'active';
+      if (old) Object.assign(old, row); else st.discountCodes.push(row);
+      return { ok: true, id: row.id, code };
+    },
+    admin_delete_discount_code: (a) => {
+      need('catalog.edit');
+      const d = st.discountCodes.find((x) => x.id === a.p_id); if (!d) throw err('not_found', 'Koodia ei löydy');
+      if (d.is_annual_card_code) need('annual_cards.manage');
+      if (d.used_count > 0) { d.active = false; d.state = 'inactive'; return { ok: true, deactivated: true }; }
+      st.discountCodes = st.discountCodes.filter((x) => x !== d); return { ok: true, deleted: true };
+    },
+    admin_list_annual_cards_details: () => { need('annual_cards.manage'); return st.annualCards.map((c) => ({ ...c })); },
+    admin_create_annual_card: (a) => {
+      need('annual_cards.manage');
+      const c = st.customers.find((x) => x.id === a.p_customer_id); if (!c) throw err('customer_not_found', 'Asiakasta ei löydy');
+      if (!a.p_valid_from || !a.p_valid_to || a.p_valid_to < a.p_valid_from) throw err('invalid_dates', 'Virheellinen voimassaoloaika');
+      const code = normalizeCode(a.p_code) || generatedAnnualCardCode();
+      if (st.annualCards.some((x) => x.code === code) || st.discountCodes.some((x) => x.code === code)) throw err('code_exists', 'Koodi on jo käytössä');
+      const row = { id: ++st.seq.card, code, customer_id: c.id, customer_name: c.name, customer_email: c.email, valid_from: a.p_valid_from, valid_to: a.p_valid_to, active: true, revoked_at: null, notes: a.p_notes || null, purchase_order_no: null, future_bookings: 0 };
+      st.annualCards.push(row); return { ok: true, id: row.id, code };
+    },
     // booking_136: varauksen osuus maksuista + peruutus (valinnainen hyvitys). Kokeilutila: maksettu varaus = koko summa hyvitettävissä.
     admin_reservation_refund_preview: (a) => {
       need('payments.refund');

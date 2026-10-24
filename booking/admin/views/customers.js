@@ -2,6 +2,7 @@
 import { rpc } from '../sb.js';
 import { customerForm, validBusinessId, normBusinessId } from './customerform.js';
 import { navText } from '../nav-texts.js';
+import { normalizeCode } from '../../shop/src/discount-code-logic.js';
 import { h, fmtDT, fmtDate, todayHel, addDays, money, dialog, field, toast, run, empty, payBadge, statusBadge, badge } from '../ui.js';
 
 export async function render({ ctx, reload, query = new URLSearchParams() }) {
@@ -69,10 +70,10 @@ export async function render({ ctx, reload, query = new URLSearchParams() }) {
     const can = ctx.can('annual_cards.manage');
     const cards = c.annual_cards || [];
     const grant = h('form', { class: 'row wrap box' }, field('Alkaa', h('input', { type: 'date', name: 'vf', value: todayHel(), required: true })), field('Päättyy', h('input', { type: 'date', name: 'vt', value: addDays(todayHel(), 365), required: true })),
-      field('Muistiinpano', h('input', { name: 'vn' })), h('button', { class: 'btn', type: 'submit', text: 'Myönnä vuosikortti' }));
-    grant.addEventListener('submit', (ev) => { ev.preventDefault(); run(grant.querySelector('button'), async () => { await rpc('admin_grant_annual_card', { p_customer_id: c.id, p_valid_from: grant.vf.value, p_valid_to: grant.vt.value, p_notes: grant.vn.value || null }); toast('Vuosikortti myönnetty'); document.querySelector('dialog')?.close(); load(true); }); });
+      field('Muistiinpano', h('input', { name: 'vn' })), field('Oma koodi (valinnainen)', h('input', { name: 'vcode', maxlength: 40, autocomplete: 'off', oninput: (e) => { e.target.value = normalizeCode(e.target.value); } }), 'Tyhjä = palvelin luo koodin.'), h('button', { class: 'btn', type: 'submit', text: 'Myönnä vuosikortti' }));
+    grant.addEventListener('submit', (ev) => { ev.preventDefault(); run(grant.querySelector('button'), async () => { const created = await rpc('admin_create_annual_card', { p_customer_id: c.id, p_valid_from: grant.vf.value, p_valid_to: grant.vt.value || null, p_code: normalizeCode(grant.vcode.value) || null, p_notes: grant.vn.value || null }); toast(`Vuosikortti myönnetty. Koodi: ${created.code}`); document.querySelector('dialog')?.close(); load(true); }); });
     return h('div', { class: 'stack' }, h('h3', { text: 'Vuosikortti' }),
-      cards.length ? h('ul', { class: 'reslist' }, cards.map((a) => h('li', { class: 'resrow' }, h('span', {}, `${fmtDate(a.valid_from + 'T12:00:00Z')} – ${fmtDate(a.valid_to + 'T12:00:00Z')}${a.notes ? ' · ' + a.notes : ''}`),
+      cards.length ? h('ul', { class: 'reslist' }, cards.map((a) => h('li', { class: 'resrow' }, h('span', {}, `${a.code ? a.code + ' · ' : ''}${fmtDate(a.valid_from + 'T12:00:00Z')} – ${fmtDate(a.valid_to + 'T12:00:00Z')}${a.notes ? ' · ' + a.notes : ''}`),
         h('span', { class: 'meta' }, a.active ? badge('ok', 'Voimassa') : badge('muted', 'Peruttu'),
           can && a.active ? h('button', { type: 'button', class: 'btn danger sm', onclick: (e) => run(e.target, async () => {
             if (!confirm('Perutaanko vuosikortti?')) return;

@@ -94,7 +94,18 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
     o.status = 'confirmed'; sync();   // pito poistuu, paikka säilyy, maksamatta
     return { ...hold.json(), ok: true, pay_later: true, idempotent: false, order_id: 15321, order_no: o.order_no, status: o.status, payment_status: o.payment_status };
   }
+  // Vuosikortti (booking_142), skenaariot ?mock=1&scenario=annual | annualpending: vuosikortin ostotilaus; annual = maksettu ja koodi myönnetty, annualpending = maksamatta (koodi näkyy maksun jälkeen)
+  const annualSc = /^annual(pending)?$/.test(scenario) ? scenario : '';
+  if (annualSc) {
+    const paid = annualSc === 'annual';
+    o.items = [{ id: 1, name: 'Vuosikortti', name_en: 'Annual card', quantity: 1, line_total: 290, vat_rate: 25.5 }];
+    o.reservations = []; o.can_add = false; o.can_change = false; o.change_deadline = null; o.add_until = null; o.upsell = { addons: [], treatments: [] };
+    o.paid = paid ? 290 : 0; o.payments = paid ? [{ status: 'paid', amount: 290, paid_at: `${day(-1)}T10:00:00Z`, method_label: 'Korttimaksu', link_token: null, link_path: null }] : [];
+    o.receipts = paid ? [{ receipt_no: 'K-2026-000142', kind: 'receipt', issued_at: `${day(-1)}T10:00:00Z`, token: '9a8b7c6d-1111-4222-8333-444455550142', total: 290 }] : [];
+  }
   const handlers = {
+    public_annual_card_purchase_code: () => !annualSc ? { ok: true, has_card: false, code: null }
+      : annualSc === 'annual' ? { ok: true, has_card: true, code: 'KUUSI482', valid_from: day(-1), valid_to: day(363), active: true } : { ok: true, has_card: true, code: null },
     public_get_order: ({ p_token }) => {
       if (mp.returning && mpResult === 'netfail') throw new TypeError('Failed to fetch');
       if (mp.returning && !mp.settled && ['paid', 'review'].includes(mpResult || 'paid') && ++mp.polls >= 3) mpMarkPaid();
