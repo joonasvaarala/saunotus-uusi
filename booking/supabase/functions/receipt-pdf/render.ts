@@ -2,12 +2,13 @@
 // Logo haetaan seller.logo_url:sta; jos hakeminen epäonnistuu tai osoite puuttuu, PDF tehdään ilman logoa.
 import { PDFDocument, StandardFonts, rgb, PDFFont, PDFPage } from "npm:pdf-lib@1.17.1";
 import { makeT, type TFn } from "../_shared/site_texts.ts";
+import { fetchPdfLogo, pdfSan, wrapPdfText } from "../_shared/pdf-layout.ts";
 import { RECEIPT_PDF_TEXTS } from "./texts.ts";
 export { RECEIPT_PDF_TEXTS };
 const DEFAULT_T: TFn = makeT(RECEIPT_PDF_TEXTS);
 
 // pdf-lib StandardFonts = WinAnsi: poistetaan merkit joita ei voi koodata
-export const san = (s: unknown): string => String(s ?? "").replace(/[^\u0020-\u007E\u00A0-\u00FF\u20AC\u2013\u2014\u2018\u2019\u201C\u201D\u2022\u2026]/g, "?");
+export const san = pdfSan;
 const money = (n: number, loc: string) => (loc === "en" ? round2(n).toFixed(2) : round2(n).toFixed(2).replace(".", ",")) + " €";
 /** Puolikas pois nollasta, kuten PostgreSQL numeric round. */
 export function round2(n: number): number {
@@ -35,17 +36,6 @@ export function lineAmounts(l: { line_gross?: unknown; line_net?: unknown; vat_r
 const rate = (n: number, loc: string) => (loc === "en" ? String(n) : String(n).replace(".", ",")) + " %";
 const fmtLocal = (iso: string) => new Intl.DateTimeFormat("fi-FI", { timeZone: "Europe/Helsinki", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(iso)).replace(",", "");
 
-async function fetchLogo(url?: string | null): Promise<Uint8Array | null> {
-  if (!url) return null;
-  try {
-    const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 4000);
-    const r = await fetch(url, { signal: ctl.signal }); clearTimeout(to);
-    if (!r.ok) return null;
-    const b = new Uint8Array(await r.arrayBuffer());
-    return b.length > 0 && b.length < 2_000_000 ? b : null;
-  } catch { return null; }
-}
-
 export async function buildReceiptPdf(s: any, tfn: TFn = DEFAULT_T): Promise<Uint8Array> {
   const loc = s.locale === "en" ? "en" : "fi";
   const en = loc === "en";
@@ -59,15 +49,11 @@ export async function buildReceiptPdf(s: any, tfn: TFn = DEFAULT_T): Promise<Uin
   const black = rgb(0.1, 0.1, 0.1); const grey = rgb(0.4, 0.4, 0.4);
   const text = (p: PDFPage, t: string, x: number, yy: number, size = 10, f: PDFFont = font, color = black) => p.drawText(san(t), { x, y: yy, size, font: f, color });
   const right = (p: PDFPage, t: string, xr: number, yy: number, size = 10, f: PDFFont = font) => { const w = f.widthOfTextAtSize(san(t), size); p.drawText(san(t), { x: xr - w, y: yy, size, font: f, color: black }); };
-  const wrap = (t: string, f: PDFFont, size: number, maxW: number): string[] => {
-    const out: string[] = []; let cur = "";
-    for (const w of san(t).split(/\s+/)) { const tt = cur ? cur + " " + w : w; if (f.widthOfTextAtSize(tt, size) > maxW && cur) { out.push(cur); cur = w; } else cur = tt; }
-    if (cur) out.push(cur); return out;
-  };
+  const wrap = wrapPdfText;
   const need = (h: number) => { if (y - h < M) { page = pdf.addPage([595.28, 841.89]); y = 841.89 - M; } };
 
   // logo
-  const logoBytes = await fetchLogo(s.seller?.logo_url);
+  const logoBytes = await fetchPdfLogo(s.seller?.logo_url);
   let logoH = 0;
   if (logoBytes) {
     try {
