@@ -16,7 +16,7 @@ const out = {
   variants: raw.variants.filter((v) => v.active).map((v) => pick(v, ['id','product_id','label','price','duration_minutes','weekdays','time_start','time_end','included_persons','extra_person_price','valid_from','valid_to'])),
   hours: raw.hours.filter((h) => h.active).map((h) => pick(h, ['id','weekday','opens','closes','session_name','session_type','swimsuit_rule','product_id'])),
   events: raw.events.filter((e) => e.active).map((e) => pick(e, ['id','product_id','starts_on','ends_on','time_text'])),
-  policies: raw.policies.filter((p) => p.status === 'active' && !p.internal).map((p) => pick(p, ['id','category','title','body','language'])),
+  policies: raw.policies.filter((p) => p.status === 'active' && !p.internal).map((p) => pick(p, ['id','category','title','body','title_en','body_en','language'])),
   faq: raw.faq.filter((f) => f.active).map((f) => pick(f, ['id','question','answer','language','category','sort_order']))
 };
 writeFileSync('content/kb/kb.json', JSON.stringify(out, null, 1) + '\n');

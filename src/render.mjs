@@ -6,6 +6,7 @@ import { articlesNav, homeSection } from './articles/runtime.mjs';
 import { tx } from './site-texts.mjs';
 import { seoSchemaForPage, jsonLdScript } from './seo-enhance.mjs';
 import { privacyAnalyticsHtml } from './privacy-analytics.mjs';
+import { policyText, privacyDocFor } from './policy-lang.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
   johku, bookingUrl, phoneDisplay, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
@@ -280,7 +281,7 @@ ${body}
 <div><h2>${e(u.footerInfo)}</h2><ul>${u.infoLinks.map(([id, l]) => `<li><a href="${pageHref('info', lang, id)}">${e(l)}</a></li>`).join('')}</ul></div>
 <div><h2>${e(u.footerContact)}</h2><ul><li><address style="all:unset">${e(site.contact.street)}<br>${e(site.contact.postal)} ${e(site.contact.city)}</address></li><li><a href="tel:${site.contact.phoneTel}">${e(phoneDisplay(lang))}</a></li><li><a href="mailto:${site.contact.email}">${e(site.contact.email)}</a></li><li><a href="${e(site.contact.mapsUrl)}" rel="noopener">${e(ui(lang).directions)}${NEW(lang)}</a></li>${site.social.map((s) => `<li><a href="${e(s.url)}" rel="noopener">${e(s.name)}${NEW(lang)}</a></li>`).join('')}</ul></div>
 </div>
-<div class="fbottom"><span>© ${new Date().getFullYear()} ${e(kb.business.legal_name)} · ${e(ui(lang).businessId)} ${e(kb.business.business_id)}</span><ul><li><a href="${fl('terms', lang)}">${e(u.legal)}</a></li><li><a href="${pageHref('privacy', 'fi')}"${lang === 'en' ? ' hreflang="fi" lang="fi"' : ''}>${e(u.privacy)}</a></li></ul></div>
+<div class="fbottom"><span>© ${new Date().getFullYear()} ${e(kb.business.legal_name)} · ${e(ui(lang).businessId)} ${e(kb.business.business_id)}</span><ul><li><a href="${fl('terms', lang)}">${e(u.legal)}</a></li><li>${pagePath('privacy', lang) ? `<a href="${fl('privacy', lang)}">${e(lang === 'en' ? privacyDocFor(P('privacy').fi, kb.policies, 'en')?.hero.title || u.privacy : u.privacy)}` : `<a href="${pageHref('privacy', 'fi')}"${lang === 'en' ? ' hreflang="fi" lang="fi"' : ''}>${e(u.privacy)}`}</a></li></ul></div>
 </div></footer>
 ${chat}
 <script>(function(){var d=new Intl.DateTimeFormat('en-US',{weekday:'short',timeZone:'Europe/Helsinki'}).format(new Date()),i={Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6}[d],l=document.querySelectorAll('.week>li');if(l[i]){l[i].classList.add('is-today');l[i].setAttribute('aria-current','date')}})()</script>
@@ -426,11 +427,11 @@ ${messages}
 }
 
 export function policyPage(name, key, lang) {
-  const d = P(name)[lang];
+  const d = name === 'privacy' ? privacyDocFor(P(name).fi, kb.policies, lang) : P(name)[lang];
   const items = d.policies.map((id) => kb.policies.find((p) => p.id === id)).filter((p) => p && !p.internal);
   const txt = (s) => clean(s).split(/\n+/).map((l) => `<p>${e(l)}</p>`).join('');
   const body = pageHero(d.hero, lang, key)
-    + sec('', `<div class="narrow prose">${d.note ? `<p class="note-box">${e(d.note)}</p>` : ''}${items.map((p) => `<h2>${e(p.title)}</h2>${txt(p.body)}`).join('')}${name === 'privacy' ? privacyAnalyticsHtml(lang, e, txt) : ''}</div>`);
+    + sec('', `<div class="narrow prose">${d.note ? `<p class="note-box">${e(d.note)}</p>` : ''}${items.map((p) => name === 'privacy' ? policyText(p, lang) ?? policyText(p, 'fi') : p).map((p) => `<h2>${e(p.title)}</h2>${txt(p.body)}`).join('')}${name === 'privacy' ? privacyAnalyticsHtml(lang, e, txt) : ''}</div>`);
   return layout({ lang, key, meta: d.meta, body });
 }
 
