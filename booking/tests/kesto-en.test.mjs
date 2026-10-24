@@ -12,8 +12,8 @@ import { dirname, join } from 'node:path';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const repo = join(root, '..');
 const read = (rel) => readFileSync(join(repo, rel), 'utf8');
-const MIG = 'booking/supabase/migrations/20261024230000_booking_147_catalog_duration_text_en.sql';
-const RB = 'booking/supabase/rollbacks/20261024230000_booking_147_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024123142_booking_147_catalog_duration_text_en.sql';
+const RB = 'booking/supabase/rollbacks/20261024123142_booking_147_ROLLBACK.sql';
 const M64 = 'booking/supabase/migrations/20261018112116_booking_64_catalog_texts_admin.sql';
 const M06 = 'booking/supabase/migrations/20261016150006_booking_06_admin_api.sql';
 const fnNames = (sql) => [...sql.matchAll(/create or replace function\s+booking\.(\w+)/gi)].map((m) => m[1]).sort();
@@ -32,7 +32,7 @@ cpSync(join(root, 'shared/sb.js'), join(tmp, 'sb.js'));
 const { splitCatalog } = await import(pathToFileURL(join(tmp, 'treatments.js')));
 
 test('migraatio: vain public_catalog ja admin_list_products, lisäys = duration_text_en, muuten booking_64/06 sellaisenaan', () => {
-  assert.deepEqual(readdirSync(join(repo, 'booking/supabase/migrations')).filter((n) => /booking_147_/.test(n)), ['20261024230000_booking_147_catalog_duration_text_en.sql']);
+  assert.deepEqual(readdirSync(join(repo, 'booking/supabase/migrations')).filter((n) => /booking_147_/.test(n)), ['20261024123142_booking_147_catalog_duration_text_en.sql']);
   const sql = read(MIG);
   assert.deepEqual(fnNames(sql), ['admin_list_products', 'public_catalog']);
   assert.doesNotMatch(sql, /\bpublic\.\w+/i, 'ei public-skeemaa');

@@ -6,7 +6,7 @@
 -- tarkistettu 24.10.2026 pg_get_functiondef-vertailulla, että tuotanto = repo. Muutos: vain uusi avain 'duration_text_en' heti 'duration_text':n jälkeen.
 -- Ei hintojen, ALV:n, slugien, URL:ien eikä rivijoukon muutoksia. CREATE OR REPLACE säilyttää omistajan ja oikeudet (public_catalog: anon, authenticated,
 -- service_role; admin_list_products: authenticated, service_role); security definer + search_path = '' ennallaan.
--- Paluu: booking/supabase/rollbacks/20261024230000_booking_147_ROLLBACK.sql.
+-- Paluu: booking/supabase/rollbacks/20261024123142_booking_147_ROLLBACK.sql.
 set local lock_timeout = '5s';
 
 do $$

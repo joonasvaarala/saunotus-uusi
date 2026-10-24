@@ -1,4 +1,4 @@
--- r147: ajetaan booking_147:n paluun (rollbacks/20261024230000_booking_147_ROLLBACK.sql) jälkeen samassa istunnossa kuin pre147.
+-- r147: ajetaan booking_147:n paluun (rollbacks/20261024123142_booking_147_ROLLBACK.sql) jälkeen samassa istunnossa kuin pre147.
 -- Tarkistaa, että määritelmät ovat tavu tavulta tuotannon/booking_64+06:n mukaiset ja katalogi = ennen booking_147:ää. Tulos: TESTRESULT …
 create temp table r147_r(ok boolean, label text) on commit drop;
 create function pg_temp.ck(p_ok boolean, p_label text) returns void language sql as $$ insert into r147_r values (coalesce(p_ok, false), p_label) $$;
