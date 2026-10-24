@@ -143,7 +143,7 @@ export function splitCatalog(catalog, staticById) {
     if (r?.booking_kind !== 'slots') { rules.push(r); continue; }
     const id = +r.id, st = staticById.get(id) || {};
     // booking_61 (§18.11): voucher_note(_en) = lahjakorttihuomautus (erillinen huomautus, ei kuvauksessa), timeline / timeline_text(_en) = aikajana kannasta, description_en = EN-kuvaus
-    const o = Object.fromEntries(Object.entries({ name: r.name, name_en: r.name_en, description: r.description, description_en: r.description_en, price: num(r.price), price_type: r.price_type,
+    const o = Object.fromEntries(Object.entries({ name: r.name, name_en: r.name_en, description: r.description, description_en: r.description_en, short_description: r.short_description, short_description_en: r.short_description_en, price: num(r.price), price_type: r.price_type,
       duration_minutes: num(r.duration_minutes), duration_text: r.duration_text, duration_text_en: r.duration_text_en, capacity_min: num(r.min_persons), capacity_max: num(r.max_persons), category: r.category, slug: r.slug,
       voucher_note: r.voucher_note, voucher_note_en: r.voucher_note_en, addons_enabled: r.addons_enabled === true ? true : null, allowed_addons: Array.isArray(r.allowed_addons) && r.allowed_addons.length ? r.allowed_addons : null, timeline: Array.isArray(r.timeline) && r.timeline.length ? r.timeline : null, timeline_text: r.timeline_text, timeline_text_en: r.timeline_text_en })
       .filter(([, v]) => v != null && v !== ''));

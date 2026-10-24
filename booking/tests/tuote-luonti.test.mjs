@@ -7,7 +7,8 @@ import test from 'node:test';
 const href = (rel) => new URL(rel, import.meta.url);
 const read = (rel) => readFileSync(href(rel), 'utf8');
 
-const pending = JSON.parse(read('../../content/site-texts.pending-import-19.json'));
+// booking_156: lyhyen kuvauksen kenttätekstit tuodaan erikseen (pending-import-56), samat säännöt
+const pending = [...JSON.parse(read('../../content/site-texts.pending-import-19.json')), ...JSON.parse(read('../../content/site-texts.pending-import-56.json'))];
 const migration = read('../supabase/migrations/20261019081000_booking_111_admin_product_create.sql');
 const rollback = read('../supabase/rollbacks/20261019081000_booking_111_ROLLBACK.sql');
 const sqlTest = read('../supabase/tests/products/t111_admin_product_create.sql');
@@ -213,7 +214,7 @@ async function flush() {
   for (let i = 0; i < 20; i++) await new Promise((r) => setTimeout(r, 0));
 }
 
-test('pending-import-19 vastaa sanakirjaa, FI+EN, normal, ilman hintoja', async () => {
+test('pending-import-19 + 56 vastaa sanakirjaa, FI+EN, normal, ilman hintoja', async () => {
   const { PRODUCT_TEXTS } = await import(href('../admin/product-texts.js'));
   const keys = new Set();
   for (const row of pending) {

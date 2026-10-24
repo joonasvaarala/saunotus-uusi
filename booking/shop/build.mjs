@@ -32,7 +32,7 @@ const { site, kb, BASE, e } = L;
 // 2) varausohjelman tiedostot
 const A = join(OUT, 'booking');
 mkdirSync(A, { recursive: true });
-for (const f of ['shop.js', 'rich-text.js', 'rich-view.js', 'invoice-validate.js', 'i18n.js', 'phone.js', 'shop.css', 'treatments.js', 'treatment-ui.js', 'order.js', 'order-texts.js', 'order-api.js', 'order-mock.js', 'order-gift.js', 'gift.js', 'gift-api.js', 'gift-logic.js', 'gift-mock.js', 'gift-texts.js', 'gift-ui.js', 'mobilepay-api.js', 'pay-choices.js', 'hold-texts.js', 'hold-logic.js', 'hold-ui.js', 'hold-mock.js', 'pay-choices-texts.js', 'mobilepay-logic.js', 'mobilepay-texts.js', 'mobilepay-ui.js', 'vismapay-api.js', 'vismapay-logic.js', 'vismapay-texts.js', 'vismapay-ui.js', 'options-logic.js', 'options-texts.js', 'options-ui.js', 'shop-mock.js', 'treatment-mock.js', 'treatment-addons.js', 'site-texts.js', 'site-texts-logic.js', 'text-registry.js', 'catalog-audience.js', 'waitlist-logic.js', 'waitlist-texts.js', 'waitlist-ui.js', 'availability-months.js']) cpSync(join(here, 'src', f), join(A, f));
+for (const f of ['shop.js', 'rich-text.js', 'rich-view.js', 'short-desc.js', 'invoice-validate.js', 'i18n.js', 'phone.js', 'shop.css', 'treatments.js', 'treatment-ui.js', 'order.js', 'order-texts.js', 'order-api.js', 'order-mock.js', 'order-gift.js', 'gift.js', 'gift-api.js', 'gift-logic.js', 'gift-mock.js', 'gift-texts.js', 'gift-ui.js', 'mobilepay-api.js', 'pay-choices.js', 'hold-texts.js', 'hold-logic.js', 'hold-ui.js', 'hold-mock.js', 'pay-choices-texts.js', 'mobilepay-logic.js', 'mobilepay-texts.js', 'mobilepay-ui.js', 'vismapay-api.js', 'vismapay-logic.js', 'vismapay-texts.js', 'vismapay-ui.js', 'options-logic.js', 'options-texts.js', 'options-ui.js', 'shop-mock.js', 'treatment-mock.js', 'treatment-addons.js', 'site-texts.js', 'site-texts-logic.js', 'text-registry.js', 'catalog-audience.js', 'waitlist-logic.js', 'waitlist-texts.js', 'waitlist-ui.js', 'availability-months.js']) cpSync(join(here, 'src', f), join(A, f));
 // Lisäksi kaikki muut src/*.js automaattisesti, ettei uusi moduuli jää julkaisusta pois (#121: waitlist-*.js puuttui → /varaa/ ei auennut).
 for (const f of readdirSync(join(here, 'src'))) if (f.endsWith('.js')) cpSync(join(here, 'src', f), join(A, f));
 cpSync(join(repo, 'booking/shared/sb.js'), join(A, 'sb.js'));
@@ -51,7 +51,7 @@ const cfg = {
 };
 writeFileSync(join(A, 'config.js'), `// Muokkaa tätä tiedostoa julkaisussa (ei vaadi uudelleenrakennusta). anon-avain saa olla julkinen.\nwindow.BOOKING_CONFIG=${JSON.stringify(cfg, null, 2)};\n`);
 // Staattinen tuotedata: tuntemattoman tuotteen "ota yhteyttä" -sivu + hoitotuotteiden kortit (hinta, kesto, henkilömäärät; ks. treatments.js loadProducts)
-const STATIC_KEYS = ['id', 'name', 'name_en', 'description', 'description_en', 'category', 'price', 'price_type', 'included_persons', 'extra_person_price', 'duration_minutes', 'duration_text', 'duration_text_en', 'capacity_min', 'capacity_max'];
+const STATIC_KEYS = ['id', 'name', 'name_en', 'description', 'description_en', 'short_description', 'short_description_en', 'category', 'price', 'price_type', 'included_persons', 'extra_person_price', 'duration_minutes', 'duration_text', 'duration_text_en', 'capacity_min', 'capacity_max'];
 writeFileSync(join(A, 'static-products.json'), JSON.stringify(Object.fromEntries(kb.products.map((p) => [p.slug, Object.fromEntries(STATIC_KEYS.filter((k) => p[k] != null).map((k) => [k, p[k]])) ]))));
 
 // 3) varaussivut (FI/EN) + vahvistussivut: sivuston oma layout

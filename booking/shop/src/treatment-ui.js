@@ -8,8 +8,8 @@ import { createOptionPicker } from './options-ui.js';
 import { ht, holdError } from './hold-texts.js';
 import { fmtMinutes } from './site-texts-logic.js';
 import { createAddonPicker } from './treatment-addons.js';
-import { isRichHtml } from './rich-text.js';
-import { visibleText, richHost } from './rich-view.js';
+import { richHost } from './rich-view.js';
+import { cardShort } from './short-desc.js';
 import { revealForm, revealIfHidden } from './gift-ui.js';
 
 export function createTreatmentViews(c) {
@@ -53,7 +53,7 @@ export function createTreatmentViews(c) {
   const card = (p) => h('li', { class: 'bk-card' },
     pimg(p, 'card-img'),
     h('h3', {}, h('a', { href: bk(`/tuote/${p.slug}`), text: pname(p) })),
-    h('p', { class: 'bk-desc', text: (() => { const raw = pdesc(p) || ''; const plain = isRichHtml(raw) ? visibleText(raw).replace(/\s+/g, ' ').trim() : raw; return plain.slice(0, 170) + (plain.length > 170 ? '…' : ''); })() }),
+    cardShort(h, p, S.lang, pdesc(p)),   // booking_156: lyhyt kuvaus puhdistettuna, tyhjä → johdettu ote (short-desc.js)
     metaP(p),
     timelineNode(p),
     h('a', { class: 'btn sm', href: bk(`/tuote/${p.slug}`) }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) })));

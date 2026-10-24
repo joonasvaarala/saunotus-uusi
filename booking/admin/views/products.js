@@ -99,6 +99,8 @@ export async function render({ ctx, refs, reload, query }) {
     const f = h('form', { class: 'stack' },
       field('Nimi (FI)', inp('name', p.name, { required: true })), field('Nimi (EN)', inp('name_en', p.name_en)),
       field('Kuvaus (FI)', inp('description', p.description, { area: true, 'data-rich': '1' }), richText('hint')), field('Kuvaus (EN)', inp('description_en', p.description_en, { area: true, 'data-rich': '1' }), richText('hint')),
+      // booking_156: lyhyt kuvaus (rikas teksti, sama allowlist kuin kuvauksella) → tuotekortti ja tuotesivun yläosa; tyhjä → ote kuvauksesta
+      field(productText('short_fi'), inp('short_description', p.short_description, { area: true, 'data-rich': '1', 'data-testid': 'product-short-fi' }), productText('short_hint')), field(productText('short_en'), inp('short_description_en', p.short_description_en, { area: true, 'data-rich': '1', 'data-testid': 'product-short-en' }), productText('short_hint')),
       h('div', { class: 'row wrap' }, field('Hinta € (sis. ALV)', inp('price', p.price, { type: 'number', step: '0.01', min: '0' })), field('ALV', vat)),
       field('Hintateksti', inp('price_text', p.price_text), 'Näytetään kb:ssä; verkkokauppa laskee näytettävän hinnan hinta-kentästä. Päivitä teksti kun muutat hintaa.'),
       h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'active', disabled: !isAdmin }), ' Aktiivinen (näkyy kb:ssä)'),
@@ -107,7 +109,7 @@ export async function render({ ctx, refs, reload, query }) {
     f.addEventListener('submit', (ev) => { ev.preventDefault(); run(f.querySelector('button'), async () => {
       syncRichFields(f);
       const fd = new FormData(f);
-      await rpc('admin_update_product', { p_product_id: p.id, p_patch: { name: fd.get('name'), name_en: fd.get('name_en'), description: fd.get('description'), description_en: fd.get('description_en'), price: +fd.get('price'), price_text: fd.get('price_text'), vat_rate: +fd.get('vat_rate'), active: f.active.checked } });
+      await rpc('admin_update_product', { p_product_id: p.id, p_patch: { name: fd.get('name'), name_en: fd.get('name_en'), description: fd.get('description'), description_en: fd.get('description_en'), short_description: fd.get('short_description'), short_description_en: fd.get('short_description_en'), price: +fd.get('price'), price_text: fd.get('price_text'), vat_rate: +fd.get('vat_rate'), active: f.active.checked } });
       toast('Tuote tallennettu'); d.close(); fresh();
     }); });
     // verkkokaupan asetukset
@@ -161,6 +163,7 @@ export async function render({ ctx, refs, reload, query }) {
       field(productText('name_fi'), inp('name', '', { required: true, maxlength: 200 })),
       field(productText('name_en'), inp('name_en', '', { maxlength: 200 }), productText('name_en_hint')),
       field('Kuvaus (FI)', inp('description', '', { area: true, 'data-rich': '1' }), richText('hint')), field('Kuvaus (EN)', inp('description_en', '', { area: true, 'data-rich': '1' }), richText('hint')),
+      field(productText('short_fi'), inp('short_description', '', { area: true, 'data-rich': '1', 'data-testid': 'product-create-short-fi' }), productText('short_hint')), field(productText('short_en'), inp('short_description_en', '', { area: true, 'data-rich': '1', 'data-testid': 'product-create-short-en' }), productText('short_hint')),
       h('div', { class: 'row wrap' }, field(productText('price'), inp('price', '', { type: 'number', step: '0.01', min: '0', required: true, inputmode: 'decimal' })), field(productText('vat'), vat)),
       field(productText('price_text'), inp('price_text', '', { maxlength: 200 }), productText('price_text_hint')),
       field(productText('category'), cat),
@@ -176,6 +179,7 @@ export async function render({ ctx, refs, reload, query }) {
       const fd = new FormData(f);
       const res = await rpc('admin_product_create', { p_data: {
         name: fd.get('name'), name_en: fd.get('name_en'), description: fd.get('description'), description_en: fd.get('description_en'),
+        short_description: fd.get('short_description'), short_description_en: fd.get('short_description_en'),
         price: fd.get('price'), price_text: fd.get('price_text'), vat_rate: fd.get('vat_rate'), category: fd.get('category'),
         active: f.active.checked, age_restricted: f.age_restricted.checked,
       } });
