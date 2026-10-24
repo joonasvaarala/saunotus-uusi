@@ -3,7 +3,7 @@
 -- Public-skeeman TAULUJEN rakennetta ei muuteta. Uusi tila on booking-skeemassa. Public-moottorin funktioista
 -- korvataan create or replace -lauseella: shift_offer_round_deadline, shift_offer_respond, shift_offer_compose,
 -- shift_offer_on_exhausted, shift_offer_ensure, shift_offer_issue_recipients, shift_offer_tick, shift_offer_sender_claim.
--- Rollback: booking/supabase/rollbacks/20261024250000_booking_153_ROLLBACK.sql palauttaa ne tuotantomuotoon.
+-- Rollback: booking/supabase/rollbacks/20261024141356_booking_153_ROLLBACK.sql palauttaa ne tuotantomuotoon.
 --
 -- Säännöt:
 --  1 Täytetystä vuorosta ei viestiä muille (respond palauttaa notify_filled_staff_ids = []). Myöhäinen hyväksyjä saa
