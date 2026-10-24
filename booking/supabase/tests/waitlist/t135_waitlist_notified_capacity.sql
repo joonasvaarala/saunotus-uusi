@@ -2,6 +2,7 @@
 -- kapasiteettipoolin jakavat säännöt, tarjouksen vanheneminen ja claim-rate limit ilman rivejä tuntemattomalle tokenille.
 -- Ajetaan migraatioiden ja fixtures/10_test_helpers.sql:n JÄLKEEN (mock-data: Miesten sauna ma, kapasiteetti 16;
 -- to: Turvetorstai 16–19 (poolit yleinen_arki + turve) ja Yleinen vuoro 17–19 (yleinen_arki) jakavat poolin).
+-- booking_137: pito 120 min, kun vuoroon on ilmoitushetkellä ≥ 48 h (alle 48 h ei pitoa); tämän testin vuorot ovat 6 viikon päässä → pito 120 min.
 -- Yksi DO-lohko; tahallinen poikkeus kumoaa kaiken. Tulos: TESTRESULT pass=… fail=…
 set local lock_timeout = '3s';
 set local statement_timeout = '60s';
@@ -51,15 +52,15 @@ begin
   n := booking._notify_waitlist_for_window(v_space, v_s, v_e);
   perform pg_temp.ck(n = 0 and pg_temp.mails('c@t135.example') = 0, 'C4: 3. ajo sama tulos');
 
-  -- ===== Tarjouksen vanheneminen: asetus waitlist_offer_minutes (oletus 60) =====
-  perform pg_temp.age('b@t135.example', interval '2 hours'); perform pg_temp.age('d@t135.example', interval '2 hours');
-  insert into booking.settings(key, value) values ('waitlist_offer_minutes', '180'::jsonb)
+  -- ===== Tarjouksen vanheneminen: asetus waitlist_offer_minutes (booking_137: oletus 120, vuoroon yli 48 h) =====
+  perform pg_temp.age('b@t135.example', interval '3 hours'); perform pg_temp.age('d@t135.example', interval '3 hours');
+  insert into booking.settings(key, value) values ('waitlist_offer_minutes', '240'::jsonb)
     on conflict (key) do update set value = excluded.value;
   n := booking._notify_waitlist_for_window(v_space, v_s, v_e);
-  perform pg_temp.ck(n = 0 and pg_temp.st('c@t135.example') = 'waiting', 'D1: 180 min tarjous: 2 h vanhat ilmoitukset yhä voimassa');
+  perform pg_temp.ck(n = 0 and pg_temp.st('c@t135.example') = 'waiting', 'D1: 240 min tarjous: 3 h vanhat ilmoitukset yhä voimassa');
   update booking.settings set value = '"ei-numero"'::jsonb where key = 'waitlist_offer_minutes';
-  n := booking._notify_waitlist_for_window(v_space, v_s, v_e);   -- virheellinen arvo → oletus 60 min, ei poikkeusta
-  perform pg_temp.ck(n = 1, 'D2: virheellinen asetus → oletus 60 min, vanhentuneet tarjoukset vapauttavat paikat');
+  n := booking._notify_waitlist_for_window(v_space, v_s, v_e);   -- virheellinen arvo → oletus 120 min, ei poikkeusta
+  perform pg_temp.ck(n = 1, 'D2: virheellinen asetus → oletus 120 min, 3 h vanhat tarjoukset vapauttavat paikat');
   perform pg_temp.ck(pg_temp.st('c@t135.example') = 'notified' and pg_temp.mails('c@t135.example') = 1, 'D3: C saa vapautuneet 4 paikkaa');
   perform pg_temp.ck(pg_temp.st('a@t135.example') = 'waiting', 'D4: A5 ei edelleenkään mahdu');
   perform pg_temp.ck(pg_temp.st('b@t135.example') = 'notified' and pg_temp.st('d@t135.example') = 'notified', 'D5: vanhentunut tarjous ei muuta B:n/D:n tilaa');
@@ -67,9 +68,9 @@ begin
   perform pg_temp.ck(n = 0 and pg_temp.mails('c@t135.example') = 1, 'D6: C:n tarjous voimassa → ei uusia ilmoituksia');
   delete from booking.settings where key = 'waitlist_offer_minutes';
   -- Vanhentunut tarjous ei estä uusintailmoitusta: C:n tarjous vanhenee, mutta C on 'notified' (ei uudelleen jonossa).
-  perform pg_temp.age('c@t135.example', interval '61 minutes');
+  perform pg_temp.age('c@t135.example', interval '121 minutes');
   n := booking._notify_waitlist_for_window(v_space, v_s, v_e);
-  perform pg_temp.ck(n = 0 and pg_temp.st('a@t135.example') = 'waiting', 'D7: oletus 60 min; A5 ei mahdu 4 paikkaan');
+  perform pg_temp.ck(n = 0 and pg_temp.st('a@t135.example') = 'waiting', 'D7: oletus 120 min (asetusrivi poistettu); A5 ei mahdu 4 paikkaan');
 
   -- ===== Kapasiteettipooli: Turvetorstai (poolit 2+3) ja Yleinen vuoro to 17–19 (pooli 2) =====
   b := test.pub_book(v_yl, dt, 13, 'to-iso@t135.example'); perform pg_temp.ck((b ->> 'ok')::boolean, 'E1: to 13 hlöä');
@@ -85,7 +86,7 @@ begin
   select space_id, starts_at, ends_at into v_sp2, v_s2, v_e2 from booking.waitlist_entries where customer_email = 'q@t135.example';
   n := booking._notify_waitlist_for_window(v_sp2, v_s2, v_e2);
   perform pg_temp.ck(n = 0 and pg_temp.st('q@t135.example') = 'waiting', 'E6: 2. ajo: P:n tarjous poolissa voimassa → Q ei');
-  perform pg_temp.age('p@t135.example', interval '2 hours');
+  perform pg_temp.age('p@t135.example', interval '3 hours');
   n := booking._notify_waitlist_for_window(v_sp2, v_s2, v_e2);
   perform pg_temp.ck(n = 1 and pg_temp.st('q@t135.example') = 'notified', 'E7: P:n tarjous vanheni → Q saa ilmoituksen');
 
@@ -103,14 +104,17 @@ begin
   perform booking.public_leave_waitlist((ja ->> 'token')::uuid);
   perform test.anon('203.0.113.7'); c := booking.public_waitlist_claim((ja ->> 'token')::uuid); perform test.logout();
   perform pg_temp.ck(c ->> 'code' = 'not_found' and pg_temp.rl() = v_rl0, 'F4: peruttu jonovaraus → not_found ilman riviä');
-  perform test.anon('203.0.113.7'); c := booking.public_waitlist_claim((jc ->> 'token')::uuid); perform test.logout();
-  perform pg_temp.ck((c ->> 'ok')::boolean and (c ->> 'persons')::int = 4, 'F5: tunnettu token lunastetaan');
+  -- booking_137: C:n tarjous vanheni (D7), joten lunastus testataan Q:lla (ilmoitettu juuri, 2 hlöä).
+  perform test.anon('203.0.113.7'); c := booking.public_waitlist_claim((jq ->> 'token')::uuid); perform test.logout();
+  perform pg_temp.ck((c ->> 'ok')::boolean and (c ->> 'persons')::int = 2, 'F5: tunnettu token lunastetaan');
   perform pg_temp.ck(pg_temp.rl() = v_rl0 + 2
-    and exists (select 1 from booking.rate_limit_hits where bucket = 'waitlist:claim:' || (jc ->> 'token'))
+    and exists (select 1 from booking.rate_limit_hits where bucket = 'waitlist:claim:' || (jq ->> 'token'))
     and exists (select 1 from booking.rate_limit_hits where bucket = 'waitlist:claim:ip:203.0.113.7'), 'F6: tunnettu token → token- ja IP-rivi');
+  perform test.anon(); c := booking.public_waitlist_claim((jc ->> 'token')::uuid); perform test.logout();
+  perform pg_temp.ck(c ->> 'code' = 'offer_expired' and pg_temp.st('c@t135.example') = 'notified', 'F6b: C:n vanhentunut tarjous → offer_expired, tila ennallaan');
   perform test.anon();
-  for i in 2..30 loop c := booking.public_waitlist_claim((jc ->> 'token')::uuid); end loop;
-  jp := booking.public_waitlist_claim((jc ->> 'token')::uuid);
+  for i in 2..30 loop c := booking.public_waitlist_claim((jq ->> 'token')::uuid); end loop;
+  jp := booking.public_waitlist_claim((jq ->> 'token')::uuid);
   perform test.logout();
   perform pg_temp.ck((c ->> 'ok')::boolean, 'F7: 30 lunastusta sallitaan');
   c := jp;

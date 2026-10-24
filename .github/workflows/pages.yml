@@ -159,6 +159,10 @@ jobs:
       # tarjouksen voimassaolo (waitlist_offer_minutes) ja lunastuksen rate limit vain tunnetulle tokenille; migraatio + rollback olemassa.
       # t135 (booking/supabase/tests/waitlist/t135_waitlist_notified_capacity.sql) ajetaan paikallisessa PG17:ssä t132:n ja t134:n tapaan.
       - run: node --test booking/tests/jonotuslista-ilmoitetut-paikat.test.mjs
+      # booking_137: vuoroon ≥ 48 h → ensimmäinen mahtuva saa ilmoituksen ja 120 min pidon (vanhentunut → offer_expired, oma kauppateksti
+      # pending-import-39); alle 48 h → ei pitoa, ilmoitus kaikille mahtuville. Asetukset waitlist_offer_minutes ja waitlist_hold_min_hours_before.
+      # t137 (booking/supabase/tests/waitlist/t137_waitlist_offer_window.sql) ajetaan paikallisessa PG17:ssä t135:n tapaan.
+      - run: node --test booking/tests/jonotuslista-tarjousaika.test.mjs
       # booking_133: päivänippu + kuukauden saatavuus yhdellä RPC:llä (SQL-vertailu booking_125:een: booking/tests/paiva-ja-saatavuus-nopeutus-regressio.sql, ajetaan testikannassa)
       - run: node --test booking/tests/paiva-ja-saatavuus-nopeutus.test.mjs
       # booking_136: hallinnan hyvitys ↔ peruutus (oletus Ei, oikeudet payments.refund / bookings.manage, tekstit pending-import-37, migraation ja rollbackin rakenne).
