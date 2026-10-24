@@ -45,6 +45,9 @@ test('resurssivaraukset: suhteellinen ja kellonaika → RPC-muoto, validointi ja
   assert.deepEqual(pay[0], { resource_id: 1, mode: 'exclusive', offset_min: 0, minutes: 120 });
   assert.equal(pay[1].starts_at, '2026-11-14T16:00:00.000Z');
   assert.equal(pay[1].ends_at, '2026-11-14T17:00:00.000Z');
+  // kellonaikalohkot lähtevät aina poikkeaman kanssa (Z), joten palvelin ei tulkitse niitä istunnon aikavyöhykkeessä (booking._event_local_ts)
+  for (const b of pay.filter((x) => x.starts_at)) { assert.match(b.starts_at, /Z$/); assert.match(b.ends_at, /Z$/); }
+  assert.equal(L.blocksPayload([{ ...clock, start: '2027-07-01T09:00', end: '2027-07-01T10:00' }])[0].starts_at, '2027-07-01T06:00:00.000Z');
   assert.equal(L.validateBlock(occ, { ...rel, resource_id: null }).error, 'no_resource');
   assert.equal(L.validateBlock(occ, { ...rel, minutes: -10 }).error, 'end_before_start');
   assert.equal(L.validateBlock(occ, { ...clock, end: '2026-11-14T17:00' }).error, 'end_before_start');
