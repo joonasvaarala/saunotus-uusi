@@ -34,7 +34,7 @@
 --    (cancelled), jolloin paikat palaavat myyntiin heti. Pitoa ei anneta, jos vuoron tilan lukko (booking:space) on varattu
 --    (pg_try_advisory_xact_lock), joten pito ja rinnakkainen varaus eivät voi ottaa samoja paikkoja.
 -- Ei public-skeemaa. Uudelleenajettava. Sähköpostit ja edge-funktiot ennallaan (viesti ei lupaa pitoa).
--- Rollback: booking/supabase/rollbacks/20261024115000_booking_139_ROLLBACK.sql (booking_137-tila).
+-- Rollback: booking/supabase/rollbacks/20261024090441_booking_139_ROLLBACK.sql (booking_137-tila).
 set local lock_timeout = '5s';
 
 alter table booking.waitlist_entries add column if not exists hold_expires_at timestamptz;

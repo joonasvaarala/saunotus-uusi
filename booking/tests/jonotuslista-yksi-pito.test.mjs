@@ -13,8 +13,8 @@ import { resolve } from 'node:path';
 const repo = resolve(new URL('../..', import.meta.url).pathname);
 const rd = (p) => readFileSync(resolve(repo, p), 'utf8');
 const code = (s) => s.replace(/--[^\n]*/g, '');
-const MIG = 'booking/supabase/migrations/20261024115000_booking_139_waitlist_single_hold.sql';
-const RB = 'booking/supabase/rollbacks/20261024115000_booking_139_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024090441_booking_139_waitlist_single_hold.sql';
+const RB = 'booking/supabase/rollbacks/20261024090441_booking_139_ROLLBACK.sql';
 const T139 = 'booking/supabase/tests/waitlist/t139_waitlist_single_hold.sql';
 const T139H = 'booking/supabase/tests/waitlist/t139_waitlist_hold_off_sale.sql';
 const MIG137 = 'booking/supabase/migrations/20261024080249_booking_137_waitlist_offer_window.sql';
@@ -24,7 +24,7 @@ const fn = (sql, name) => { const i = sql.indexOf(`create or replace function bo
 test('booking_139: migraatio, rollback ja SQL-testit olemassa, aikaleima booking_137:n ja booking_138:n jälkeen, numero 139 ainoa', () => {
   for (const p of [MIG, RB, T139, T139H]) assert.ok(existsSync(resolve(repo, p)), p);
   const migs = readdirSync(resolve(repo, 'booking/supabase/migrations')).filter((f) => f.endsWith('.sql')).sort();
-  const i = migs.indexOf('20261024115000_booking_139_waitlist_single_hold.sql');
+  const i = migs.indexOf('20261024090441_booking_139_waitlist_single_hold.sql');
   assert.ok(i > migs.findIndex((f) => /_booking_138_/.test(f)) && i > migs.indexOf('20261024080249_booking_137_waitlist_offer_window.sql'));
   assert.equal(migs.filter((f) => /_booking_139_/.test(f)).length, 1, 'vain yksi booking_139 (numero 140 on toisen työn)');
 });
