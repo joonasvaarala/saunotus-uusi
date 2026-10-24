@@ -3,13 +3,27 @@
 // Seuranta on best-effort, eikä koskaan estä varaamista tai maksamista.
 // OLETUKSENA POIS: skripti latautuu sivuille vain, jos julkaisussa SITE_ANALYTICS=on ja SITE_ENV != test (scripts/build-pages.mjs),
 // ja silloinkin vain kun konfiguraatiossa enabled === true. Selaimen Do Not Track / Global Privacy Control estää mittauksen.
+// booking_150: EI fetch-käärettä. Sivun fetch jää koskemattomaksi; ostotapahtuma lähetetään eksplisiittisesti tilaus- ja
+// vahvistussivulla URL:n tilaustunnisteella, ja palvelin tarkistaa maksun itse (not_paid → yritetään muutaman kerran uudelleen).
 const cfg = typeof window === 'undefined' ? null : window.SAUNA_ANALYTICS_CONFIG;
 const optedOut = () => navigator.globalPrivacyControl === true || navigator.doNotTrack === '1' || window.doNotTrack === '1';
 const blocked = () => typeof window === 'undefined' || cfg?.enabled !== true || optedOut() || navigator.webdriver === true ||
   /(^|\/)(hallinta|admin)(\/|$)/.test(location.pathname) ||
   new URLSearchParams(location.search).get('mock') === '1' ||
   new URLSearchParams(location.hash.split('?')[1] || '').get('mock') === '1';
-const norm = (x, max) => /^[a-z0-9_.-]+$/.test(String(x || '').toLowerCase()) ? String(x).toLowerCase().slice(0, max) : undefined;
+// UTM: samat säännöt kuin palvelimella (booking._analytics_utm_ok). Kelvoton arvo jätetään pois, jotta käynti kirjautuu silti.
+export function normUtm(x, max) {
+  const v = String(x ?? '').trim().toLowerCase();
+  if (!v || v.length > max || !/^[a-z0-9][a-z0-9_.-]*$/.test(v) || /[0-9]{5,}/.test(v) || v.replace(/[^0-9]/g, '').length >= 9) return undefined;
+  return v;
+}
+// Polku ilman julkaisun BASE-etuliitettä (GitHub Pages -alipolku) ja ilman queryä/fragmenttia.
+export function sitePath(pathname, basePath = '') {
+  let p = String(pathname || '/').replace(/\/+/g, '/');
+  if (basePath && (p === basePath || p.startsWith(basePath + '/'))) p = p.slice(basePath.length) || '/';
+  return p.slice(0, 160);
+}
+const BASE_PATH = (() => { try { return new URL(import.meta.url).pathname.replace(/\/js\/analytics\.js$/, '').replace(/\/$/, ''); } catch { return ''; } })();
 export function classifySource({ referrer_domain = '', utm_source, utm_campaign } = {}) {
   const d = String(referrer_domain).toLowerCase();
   if (utm_source || utm_campaign) return 'campaign';
@@ -20,7 +34,8 @@ export function classifySource({ referrer_domain = '', utm_source, utm_campaign 
   return 'referral';
 }
 export function deviceType(width) { return width < 700 ? 'mobile' : width < 1024 ? 'tablet' : 'desktop'; }
-let sessionKey = null, lastProduct = '', lastCheckout = '', recordedPaid = new Set();
+let sessionKey = null, lastProduct = '', lastCheckout = '';
+const purchaseTried = new Set();
 function uuid() {
   if (typeof crypto === 'undefined') return null;
   if (crypto.randomUUID) return crypto.randomUUID();
@@ -37,13 +52,13 @@ function base() {
   // URL-polku ja referrer query eivät koskaan lähde palvelimelle.
   return {
     session_key: sessionKey,
-    path: location.pathname.replace(/\/+/g, '/').slice(0, 160),
+    path: sitePath(location.pathname, BASE_PATH),
     locale: document.documentElement.lang?.startsWith('en') ? 'en' : 'fi',
     device_type: deviceType(window.innerWidth),
     referrer_domain: referrer_domain || undefined,
-    utm_source: norm(query.get('utm_source'), 80),
-    utm_medium: norm(query.get('utm_medium'), 80),
-    utm_campaign: norm(query.get('utm_campaign'), 100),
+    utm_source: normUtm(query.get('utm_source'), 40),
+    utm_medium: normUtm(query.get('utm_medium'), 40),
+    utm_campaign: normUtm(query.get('utm_campaign'), 60),
   };
 }
 export function track(event_type, detail = {}) {
@@ -55,12 +70,17 @@ export function track(event_type, detail = {}) {
   if (/^[a-z0-9-]{1,100}$/.test(detail.product_slug || '')) payload.product_slug = detail.product_slug;
   if (event_type === 'purchase' && /^[0-9a-f-]{36}$/i.test(detail.order_token || '')) payload.order_token = detail.order_token;
   if (event_type === 'purchase' && !payload.order_token) return;
-  // Nimenomaan credentials: omit, jotta muut palvelut eivät saa selaimen evästeitä.
-  try { void fetch(cfg.url.replace(/\/$/, '') + '/rest/v1/rpc/public_track_event', {
-    method: 'POST', credentials: 'omit', keepalive: true,
-    headers: { apikey: cfg.anonKey, 'Content-Type':'application/json', 'Content-Profile':'booking','Accept-Profile':'booking' },
-    body: JSON.stringify({ p_payload: payload })
-  }).catch(() => {}); } catch {} // analytics ei saa koskaan vaikuttaa kauppaan
+  return send(payload);
+}
+// Nimenomaan credentials: omit, jotta muut palvelut eivät saa selaimen evästeitä. Palauttaa vastauksen JSONin tai null; ei koskaan heitä.
+function send(payload) {
+  try {
+    return fetch(cfg.url.replace(/\/$/, '') + '/rest/v1/rpc/public_track_event', {
+      method: 'POST', credentials: 'omit', keepalive: true,
+      headers: { apikey: cfg.anonKey, 'Content-Type':'application/json', 'Content-Profile':'booking','Accept-Profile':'booking' },
+      body: JSON.stringify({ p_payload: payload })
+    }).then(r => r.json()).catch(() => null);
+  } catch { return Promise.resolve(null); } // analytics ei saa koskaan vaikuttaa kauppaan
 }
 function route() {
   const m = /^#\/(tuote|hoito|varaa)\/([a-z0-9-]+)/i.exec(location.hash);
@@ -73,45 +93,34 @@ function route() {
     }
   }
 }
-// Tilaussivulla tarkistetaan serverivahvistuksesta maksu, ei tilaussivun URL:stä tai tilaustapahtumasta.
-function paidResponse(json, token) {
-  if (!json || typeof json !== 'object') return;
-  const paid = json.payment_status === 'paid' && json.ok !== false;
-  if (paid && /^[0-9a-f-]{36}$/i.test(token || '') && !recordedPaid.has(token)) {
-    recordedPaid.add(token); track('purchase', { order_token: token, product_slug: lastProduct || undefined });
-  }
+// Ostotapahtuma: tilaussivun ?t=<token> tai vahvistussivun #<token>. Palvelin hyväksyy vain maksetun tilauksen (muuten not_paid)
+// ja tallentaa saman tilauksen vain kerran. Maksu voi vahvistua hetken viiveellä (MobilePay-paluu), joten not_paid → uusi yritys.
+export const PURCHASE_RETRY_MS = [15000, 45000, 120000];
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export function orderTokenFrom(loc, basePath = BASE_PATH) {
+  const path = sitePath(loc.pathname, basePath);
+  const q = new URLSearchParams(loc.search || '').get('t') || '';
+  if (/^\/(tilaus|en\/order)\/?$/.test(path) && UUID_RE.test(q)) return q.toLowerCase();
+  const h = /^#([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:[/?]|$)/i.exec(loc.hash || '');
+  return h ? h[1].toLowerCase() : null;
 }
-function installNetworkListener() {
-  const original = window.fetch;
-  if (typeof original !== 'function') return;
-  window.fetch = function(input, init) {
-    const request = original.apply(this, arguments);
-    try {
-      const url = new URL(typeof input === 'string' ? input : input.url, location.href);
-      const fn = url.pathname.match(/\/rpc\/(public_get_booking|public_get_order|public_buy_gift_card|public_create_booking|public_create_treatment_booking)$/)?.[1];
-      if (fn && !url.pathname.endsWith('public_track_event')) {
-        const args = typeof init?.body === 'string' ? JSON.parse(init.body) : {};
-        request.then(async res => {
-          if (!res.ok) return;
-          const j = await res.clone().json().catch(() => null);
-          if (!j) return;
-          // Varaus/vahvistus voi olla maksamaton; sen perusteella EI tehdä purchase-merkintää.
-          if (fn === 'public_get_booking' || fn === 'public_get_order') paidResponse(j, args.p_token);
-          if (fn === 'public_create_booking' || fn === 'public_create_treatment_booking') {
-            if (j.ok !== false && j.token) paidResponse(j, j.token);
-          }
-          if (fn === 'public_buy_gift_card') paidResponse(j, j.token);
-        }).catch(() => {});
-      }
-    } catch {} // Ei koskaan muuta alkuperäisen fetchin onnistumista/virhettä.
-    return request;
+function watchPurchase() {
+  const token = orderTokenFrom(location);
+  if (!token || purchaseTried.has(token)) return;
+  purchaseTried.add(token);
+  let i = 0;
+  const attempt = () => {
+    const p = track('purchase', { order_token: token, product_slug: lastProduct || undefined });
+    if (!p) return;
+    p.then(j => { if (j?.code === 'not_paid' && i < PURCHASE_RETRY_MS.length) setTimeout(attempt, PURCHASE_RETRY_MS[i++]); });
   };
+  attempt();
 }
 if (!blocked() && cfg?.url && cfg?.anonKey) {
   sessionKey = uuid();
   if (sessionKey) {
-    track('page_view'); route();
-    window.addEventListener('hashchange', route);
+    track('page_view'); route(); watchPurchase();
+    window.addEventListener('hashchange', () => { route(); watchPurchase(); });
     // Shop/gift-sivut: checkout_start vain oikealle kassalle siirtymisestä tai lähetyksestä.
     document.addEventListener('submit', (event) => {
       if (event.target?.closest('#gift-app') || event.target?.closest('#booking-app')) {
@@ -138,6 +147,5 @@ if (!blocked() && cfg?.url && cfg?.anonKey) {
         if (lastCheckout!==key) { lastCheckout=key; track('checkout_start',{product_slug:lastProduct||undefined}); }
       }
     });
-    installNetworkListener();
   }
 }

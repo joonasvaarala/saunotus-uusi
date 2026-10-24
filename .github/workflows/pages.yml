@@ -204,6 +204,9 @@ jobs:
       # Paketti 11 / booking_144: Schema.org-lisäykset, vanhojen osoitteiden noindex-ohjaukset, evästeetön kävijämittaus (OLETUKSENA POIS, ei testisivulla), hallinnan Kävijät-välilehti.
       # SQL: booking/supabase/tests/analytics/t144_cookieless_analytics.sql ajetaan paikallisessa PG17:ssä (koko ketju + rollback + uudelleenajo).
       - run: node --test booking/tests/seo-ja-kavijatilastot.test.mjs
+      # booking_150: kävijämittauksen kovennus (IP-raja + päiväkatto, 13 kk säilytys pg_cronilla, tunnetut polut, tiukemmat UTM:t, lähde palvelimella, kooste GROUP BY:llä, ei fetch-käärettä).
+      # SQL: booking/supabase/tests/analytics/t150_analytics_hardening.sql ajetaan paikallisessa PG17:ssä (koko ketju + rollback + uudelleenajo).
+      - run: node --test booking/tests/kavijamittaus-kovennus.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
