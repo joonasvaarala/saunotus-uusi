@@ -113,6 +113,8 @@ jobs:
       - run: node --test booking/supabase/functions/send-emails/templates.test.mjs
       # Tuoteviestit (booking_121): ajastus, tuontitiedosto 29, vahvistuksen ohje ja jälkimarkkinoinnin peruutus. TypeScript-mallit → Node 22.
       - run: node --test booking/tests/rich-text.test.mjs booking/tests/viestit.test.mjs
+      # Viestin toimitustapa (booking_141): ajastettu lähetys tai ohjeet tilauksen yhteydessä. SQL-testi t141 ajetaan psql:llä (Bottiavustus).
+      - run: node --test booking/tests/viestit-toimitustapa.test.mjs
       - run: node --test booking/supabase/functions/send-emails/mailer.test.mjs
       # sivutekstit osa 3 / PR 3: sähköpostien/PDF:ien/maksusivun tekstit avaimiksi (tuontitiedosto, tavu tavulta samat viestit; TypeScript-taulukot → Node 22)
       - run: node --test booking/tests/sivutekstit-funktiot.test.mjs

@@ -242,6 +242,9 @@ a.bk-sd:hover{filter:brightness(.97)}
 .ord-extra{display:grid;gap:16px;align-items:start}
 @media(min-width:700px){.ord-extra{grid-template-columns:1fr 1fr}}
 .ord-guide-text{white-space:pre-wrap;margin:0 0 8px}
+/* booking_141: lyhyt ohje näkyy aina, täysi ohje napin takana. */
+.ord-guide-previews{margin:0 0 12px}
+.ord-guide-short{white-space:pre-wrap;margin:0 0 8px}
 .ord-guide + .ord-guide{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 #order-app .ord-btn,[data-testid=guide-toggle]{min-height:44px}
 .ord-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px}
@@ -486,7 +489,7 @@ a.bk-sd:hover{filter:brightness(.97)}
 .bk-rich ul,.bk-rich ol{margin:.2em 0 .7em;padding-left:1.25em}
 .bk-rich li{margin:.15em 0}
 .bk-rich a{text-decoration:underline}
-.ord-guide-text.bk-rich{white-space:normal}
+.ord-guide-text.bk-rich,.ord-guide-short.bk-rich{white-space:normal}
 
 /* booking_132: täysi vuoro näkyy hillittynä (ei läpinäkyvyyttä, jotta jonotuslinkin kontrasti säilyy). */
 .bk-slot.full{border-left:3px solid var(--line);background:var(--card)}

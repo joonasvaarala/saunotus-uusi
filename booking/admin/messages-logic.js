@@ -42,6 +42,7 @@ export function fillMessage(template, vars = {}) {
 }
 
 export function timingLabel(row) {
+  if (row?.delivery_mode === 'order_only') return 'Ohjeet tilauksen yhteydessä';
   if (row?.send_amount == null || !row.send_unit || !row.send_direction || !row.send_anchor) return 'Ei ajastettua lähetystä';
   const unit = UNITS.find((u) => u.id === row.send_unit)?.label || row.send_unit;
   const dir = DIRECTIONS.find((d) => d.id === row.send_direction)?.label || row.send_direction;
@@ -98,7 +99,10 @@ export function validateMessage(raw = {}) {
   const link = trim(raw.link_url, 600);
   if (link && (link.length > 500 || !/^https:\/\/\S+$/.test(link))) return { ok: false, code: 'invalid_link' };
   const active = raw.active === true;
-  const timingTouched = [raw.send_amount, raw.send_unit, raw.send_direction, raw.send_anchor].some((v) => v != null && v !== '');
+  const deliveryMode = raw.delivery_mode ?? 'scheduled';
+  if (!['scheduled', 'order_only'].includes(deliveryMode)) return { ok: false, code: 'invalid_delivery_mode' };
+  if (deliveryMode === 'order_only' && raw.category !== 'instruction') return { ok: false, code: 'invalid_delivery_mode' };
+  const timingTouched = deliveryMode === 'scheduled' && [raw.send_amount, raw.send_unit, raw.send_direction, raw.send_anchor].some((v) => v != null && v !== '');
   let sendAmount = null; let sendUnit = null; let sendDirection = null; let sendAnchor = null;
   if (timingTouched) {
     const n = Number(raw.send_amount);
@@ -124,7 +128,7 @@ export function validateMessage(raw = {}) {
   return {
     ok: true,
     value: {
-      name, category: raw.category, active,
+      name, category: raw.category, active, delivery_mode: deliveryMode,
       subject_fi: emptyToNull(subjectFi), subject_en: emptyToNull(subjectEn),
       short_fi: instruction ? emptyToNull(shortFi) : null,
       short_en: instruction ? emptyToNull(shortEn) : null,
@@ -138,7 +142,7 @@ export function validateMessage(raw = {}) {
 
 export function emptyMessage() {
   return {
-    id: null, name: '', category: 'instruction', active: false,
+    id: null, name: '', category: 'instruction', active: false, delivery_mode: 'scheduled',
     subject_fi: '', subject_en: '', short_fi: '', short_en: '', body_fi: '', body_en: '', link_url: '',
     send_amount: '', send_unit: '', send_direction: '', send_anchor: '', product_ids: [],
   };
