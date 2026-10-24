@@ -7,7 +7,7 @@ import { t, fmt, getLang } from '../talous-i18n.js';
 import { deliveryErrors, SERVER_FIELD, deliverMaxDate, helsinkiNow, coverState, COVER_MAX } from '../giftcards-delivery.js';
 import { GC_STATUSES, GC_SORTS, GC_PAY_METHODS, GC_GREETING_MAX, normalizeGiftCode, formatGiftCode, giftCodeValid } from '../giftcards-api.js';
 import { reportText } from '../reports-texts.js';
-import { loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, searchFld, expandRow, actionBtn, formDialog, friendly, methodLabel } from './talous-ui.js';
+import { loading, emptyBox, errorBox, pager, selectFld, searchFld, expandRow, actionBtn, formDialog, friendly, methodLabel } from './talous-ui.js';
 import { countActive, filterDrawer } from '../filter-drawer.js';
 
 const fld = (label, ...kids) => h('label', { class: 'fld' }, h('span', { text: label }), ...kids);
@@ -70,8 +70,10 @@ export async function redeemSubmit({ gift, order, code, amount, note }) {
 }
 
 // ---- välilehti ----
+export const GC_PAGE = 20;   // Joonas: tiheät rivit, 20 kerrallaan (palvelimen sivutus)
+const prodOf = (c) => c.product_name || c.package_name || '';   // booking_145: product_name = paketti / Johkun tuote / malli
 export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
-  const st = { search: '', status: '', source: '', package: '', sort: 'created_desc', balance: '', expiring: '', unverified: '', limit: 25, offset: 0 };
+  const st = { search: '', status: '', source: '', package: '', sort: 'created_desc', balance: '', expiring: '', unverified: '', limit: GC_PAGE, offset: 0 };   // booking_145: 20 korttia kerrallaan
   const canAdmin = !!ctx.can('giftcards.admin'), canPay = !!ctx.can('payments.manage');
   const list = h('ul', { class: 'tl-list gc', 'data-testid': 'gc-list' }), count = h('p', { class: 'muted tl-count', role: 'status', 'data-testid': 'gc-count' }), pagers = [h('div'), h('div')];
   const sums = h('p', { class: 'muted tl-count', 'data-testid': 'gc-sums' }), switches = h('div', { class: 'gc-switches', 'data-testid': 'gc-switches' });
@@ -107,12 +109,16 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
   function deliveryBadge(c) { const s = deliveryStatus(c); return s && s[0] !== 'waiting' ? Object.assign(badge(s[0] === 'delivered' ? 'muted' : 'pay-pending', t(`gc.row.${s[0]}`)), { title: s[1] }) : null; }
   function cardRow(c) {
     const st2 = c.effective_status;
+    // Tiheä rivi (booking_145): koodi · saaja/ostaja · tuote · saldo/arvo · voimassa · tila · lähde. Kapealla 3 riviä, leveällä yksi.
+    const nm = who(c), prod = prodOf(c) || '–';
     const head = [
-      h('span', { class: 'tl-c tl-main' }, h('strong', { class: 'gc-code', text: c.code }), ' ', h('span', { class: 'tl-name', text: who(c) })),
-      h('span', { class: 'tl-c tl-date' }, h('small', { class: 'tl-lab', text: t('gc.col.valid') }), h('span', { text: c.valid_to ? t('gc.validTo', { date: fmtDay(c.valid_to) }) : t('gc.noValid') })),
-      h('span', { class: 'tl-c tl-first' }, h('small', { class: 'tl-lab', text: t('gc.f.package') }), h('span', { text: c.package_name || '–' })),
-      h('span', { class: 'tl-c tl-sum' }, h('strong', { text: fmt.money(c.balance) }), h('small', { class: 'muted', text: `/ ${fmt.money(c.initial_amount)}` })),
-      h('span', { class: 'tl-c tl-badges' }, gcStatusBadge(st2), c.source === 'johku' ? badge('src-johku', t('gcsrc.johku')) : null, !c.balance_verified ? badge('pay-pending', t('gc.verified.no')) : null, deliveryBadge(c)),
+      h('span', { class: 'tl-c tl-main' }, h('strong', { class: 'gc-code', text: c.code })),
+      h('span', { class: 'tl-c gc-who', title: nm }, h('small', { class: 'tl-lab', text: `${t('gc.col.who')}: ` }), h('span', { class: 'tl-name', text: nm })),
+      h('span', { class: 'tl-c gc-prod', title: prod }, h('small', { class: 'tl-lab', text: `${t('gc.col.product')}: ` }), h('span', { text: prod })),
+      h('span', { class: 'tl-c tl-sum' }, h('small', { class: 'tl-lab', text: `${t('gc.col.balance')}: ` }), h('strong', { text: fmt.money(c.balance) }), h('small', { class: 'muted', text: ` / ${fmt.money(c.initial_amount)}` })),
+      h('span', { class: 'tl-c tl-date' }, h('small', { class: 'tl-lab', text: `${t('gc.col.valid')}: ` }), h('span', { text: c.valid_to ? t('gc.validTo', { date: fmtDay(c.valid_to) }) : t('gc.noValid') })),
+      h('span', { class: 'tl-c tl-badges' }, gcStatusBadge(st2), !c.balance_verified ? badge('pay-pending', t('gc.verified.no')) : null, deliveryBadge(c)),
+      h('span', { class: 'tl-c gc-src', 'data-source': c.source }, h('small', { class: 'tl-lab', text: `${t('gc.col.source')}: ` }), c.source === 'johku' ? badge('src-johku', t('gcsrc.johku')) : h('span', { class: 'gc-src-own', text: t('gcsrc.native') })),
     ];
     const row = expandRow({ id: `gc${c.id}`, head, testid: 'gc', build: () => detail(c.id) });
     row.dataset.cardId = String(c.id); row.dataset.status = st2;
@@ -132,7 +138,7 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
     const buyer = [c.buyer_name, c.buyer_email].filter(Boolean).join(' · '), rec = [c.recipient_name, c.recipient_email].filter(Boolean).join(' · ');
     const info = h('section', { class: 'tl-sec' }, h('h3', { text: t('gc.d.info') }),
       h('p', { class: 'gc-bigcode', 'data-testid': 'gc-detail-code' }, h('strong', { text: c.code }), codeBtn),
-      dl([[t('gc.d.balance'), `${fmt.money(c.balance)} / ${fmt.money(c.initial_amount)}`], [t('gc.d.package'), c.package_name || '–'], [t('gc.d.kind'), t(`gc.kind.${c.kind}`)], [t('gc.d.valid'), c.valid_from || c.valid_to ? `${fmtDay(c.valid_from)} – ${fmtDay(c.valid_to)}` : '–'],
+      dl([[t('gc.d.balance'), `${fmt.money(c.balance)} / ${fmt.money(c.initial_amount)}`], [t('gc.d.package'), prodOf(c) || '–'], [t('gc.d.kind'), t(`gc.kind.${c.kind}`)], [t('gc.d.valid'), c.valid_from || c.valid_to ? `${fmtDay(c.valid_from)} – ${fmtDay(c.valid_to)}` : '–'],
         buyer && [t('gc.d.buyer'), buyer], rec && [t('gc.d.recipient'), rec], c.greeting && [t('gc.d.greeting'), c.greeting], ...deliveryRows(c), c.note && [t('gc.d.note'), c.note],
         [t('gc.d.vat'), t(`gc.vat.${c.vat_treatment || 'at_sale'}`)], [t('gc.d.origin'), t(`gcsrc.${c.source}`)], c.single_order && [t('gc.single'), '✓'],
         [t('gc.d.created'), fmt.dt(c.created_at)], c.activated_at && [t('gc.d.activated'), fmt.dt(c.activated_at)], c.last_used_at && [t('gc.d.lastUsed'), fmt.dt(c.last_used_at)]]),
@@ -288,19 +294,19 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
   const simple = (label, testid, opts, key) => { const el = h('label', { class: 'fld' }, h('span', { text: label }), h('select', { 'data-testid': testid, onchange: (e) => change({ [key]: e.target.value }) }, opts.map(([v, tx]) => h('option', { value: v, text: tx })))); el.querySelector('select').value = st[key] || ''; return el; };
   function buildToolbar() {
     const ss = searchFld(t('gc.search'), 'gc-search', (v) => change({ search: v })); ss.input.value = st.search;
-    const sort = h('label', { class: 'fld' }, h('span', { text: t('gc.f.sort') }), h('select', { 'data-testid': 'gc-f-sort', onchange: (e) => change({ sort: e.target.value }) }, GC_SORTS.map((s) => h('option', { value: s, text: t(`gcsort.${s}`) }))));
+    const sort = h('label', { class: 'fld gc-sort' }, h('span', { text: t('gc.f.sort') }), h('select', { 'data-testid': 'gc-f-sort', onchange: (e) => change({ sort: e.target.value }) }, GC_SORTS.map((s) => h('option', { value: s, text: t(`gcsort.${s}`) }))));
     sort.querySelector('select').value = st.sort;
     const drawer = filterDrawer({
       search: ss.node,
+      status: sort,   // järjestys näkyy aina (uusin ensin / aakkoset / vanhin ensin)
       testid: 'gc-filters',
-      activeCount: () => countActive(st, { status: '', source: '', package: '', sort: 'created_desc', balance: '', expiring: '', unverified: '', limit: 25 }),
+      activeCount: () => countActive(st, { status: '', source: '', package: '', sort: 'created_desc', balance: '', expiring: '', unverified: '', limit: GC_PAGE }),
       filters: [
         selectFld(t('gc.f.status'), 'gc-f-status', GC_STATUSES, gcStatusLabel, st.status, (v) => change({ status: v })),
-        selectFld(t('gc.f.source'), 'gc-f-source', ['native', 'johku'], (c) => t(`gcsrc.${c}`), st.source, (v) => change({ source: v })), buildPkgSel(), sort,
+        selectFld(t('gc.f.source'), 'gc-f-source', ['native', 'johku'], (c) => t(`gcsrc.${c}`), st.source, (v) => change({ source: v })), buildPkgSel(),
         simple(t('gc.f.balance'), 'gc-f-balance', [['', t('gc.f.balance.any')], ['yes', t('gc.f.balance.yes')], ['no', t('gc.f.balance.no')]], 'balance'),
         simple(t('gc.f.expiring'), 'gc-f-expiring', [['', t('gc.f.expiring.any')], ['30', t('gc.f.expiring.30')], ['90', t('gc.f.expiring.90')]], 'expiring'),
         simple(t('gc.f.unverified'), 'gc-f-unverified', [['', t('gc.f.unverified.any')], ['yes', t('gc.f.unverified.yes')]], 'unverified'),
-        pageSizeSelect(st.limit, (n) => change({ limit: n })),
         h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'gc-reset', onclick: () => { Object.assign(st, { search: '', status: '', source: '', package: '', sort: 'created_desc', balance: '', expiring: '', unverified: '' }); buildToolbar(); load(); } }, t('filters.reset')),
       ],
     });
@@ -310,7 +316,7 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
   }
   buildToolbar();
   const newBtn = h('button', { type: 'button', class: 'btn primary gc-new', 'data-testid': 'gc-new', onclick: () => createDialog().catch((e) => toast(friendly(e), 'err')) }, icon('gift', 20), h('span', { text: t('gc.new') }));
-  const cols = h('div', { class: 'tl-cols gc', 'aria-hidden': 'true' }, h('span', { text: t('gc.col.code') }), h('span', { text: t('gc.col.valid') }), h('span', { text: t('gc.f.package') }), h('span', { class: 'r', text: t('gc.col.balance') }), h('span', { text: t('gc.col.status') }), h('span'));
+  const cols = h('div', { class: 'tl-cols gc', 'aria-hidden': 'true' }, ...[['code'], ['who'], ['product'], ['balance', 'r'], ['valid'], ['status'], ['source']].map(([k, cl]) => h('span', { class: cl || null, text: t(`gc.col.${k}`) })), h('span'));
   const node = h('div', { class: 'tl-tab', 'data-testid': 'tab-giftcards' }, h('div', { class: 'row between wrap gc-top' }, switches, newBtn), toolbar, count, sums, pagers[0], cols, list, pagers[1]);
   return { node, load() { loadSettings(); return load(); }, setSearch(q) { st.search = q; st.offset = 0; buildToolbar(); load(); } };
 }

@@ -142,11 +142,11 @@ async function adminSuite() {
     expect(await page.locator('[data-testid=gc-sw-sale]').getAttribute('data-on') === 'false' && await page.locator('[data-testid=gc-sw-redeem]').getAttribute('data-on') === 'true', `${name}: kytkimet luetaan palvelimelta`);
     expect((await page.locator('[data-testid=gc-sw-sale]').innerText()).includes(T['gc.set.off']), `${name}: kytkimen tila tekstinä`);
     const rows = () => page.locator('[data-testid=gc-list] > [data-testid=gc]');
-    expect(await rows().count() === 25, `${name}: 25 korttia oletuksena (${await rows().count()})`);
-    expect(/32/.test(await page.locator('[data-testid=gc-count]').innerText()), `${name}: kokonaismäärä 32 (${await page.locator('[data-testid=gc-count]').innerText()})`);
+    expect(await rows().count() === 20, `${name}: 20 korttia oletuksena (${await rows().count()})`);
+    expect(/45/.test(await page.locator('[data-testid=gc-count]').innerText()), `${name}: kokonaismäärä 45 (${await page.locator('[data-testid=gc-count]').innerText()})`);
     expect((await page.locator('[data-testid=gc-sums]').innerText()).length > 10, `${name}: summarivi`);
     const l0 = calls(page, 'admin_list_gift_cards')[0]?.args;
-    expect(l0 && l0.p_sort === 'created_desc' && l0.p_limit === 25 && l0.p_offset === 0 && !('p_status' in l0), `${name}: oletuskutsu p_sort/p_limit/p_offset (${JSON.stringify(l0)})`);
+    expect(l0 && l0.p_sort === 'created_desc' && l0.p_limit === 20 && l0.p_offset === 0 && !('p_status' in l0), `${name}: oletuskutsu p_sort/p_limit/p_offset (${JSON.stringify(l0)})`);
     await layoutChecks(page, `${name} lista`);
     if ([360, 768, 1280].includes(vp)) await shot(page, `lahjakortit-hallinta-lista-${vp}-${lang}`);
     // haku: koodin osa, nimi, tilausnumero
@@ -154,23 +154,25 @@ async function adminSuite() {
     await page.fill('[data-testid=gc-search]', code0.slice(5).toLowerCase().replace('-', ' ')); await page.keyboard.press('Enter');
     await page.waitForFunction((c) => { const r = document.querySelectorAll('[data-testid=gc-list] > [data-testid=gc]'); return r.length >= 1 && [...r].some((x) => x.textContent.includes(c)); }, code0);
     expect(calls(page, 'admin_list_gift_cards').at(-1).args.p_search === code0.slice(5).toLowerCase().replace('-', ' '), `${name}: haku p_search`);
-    await page.click('[data-testid=gc-reset]'); await page.waitForFunction(() => document.querySelectorAll('[data-testid=gc-list] > [data-testid=gc]').length === 25);
+    await page.click('[data-testid=gc-reset]'); await page.waitForFunction(() => document.querySelectorAll('[data-testid=gc-list] > [data-testid=gc]').length === 20);
     // suodattimet
     await page.selectOption('[data-testid=gc-f-status]', 'expired'); await page.waitForTimeout(150);
     expect(await rows().count() >= 1 && (await rows().evaluateAll((els) => els.every((e) => e.dataset.status === 'expired'))), `${name}: suodatin vanhentunut`);
     await page.click('[data-testid=gc-reset]'); await page.waitForTimeout(150);
     await page.selectOption('[data-testid=gc-f-source]', 'johku'); await page.waitForTimeout(150);
-    expect(await rows().count() === 18, `${name}: Johku-lähde 18 (${await rows().count()})`);
+    expect(await rows().count() === 20 && /31/.test(await page.locator('[data-testid=gc-count]').innerText()), `${name}: Johku-lähde 31 (20 sivulla) (${await rows().count()})`);
     await page.selectOption('[data-testid=gc-f-unverified]', 'yes'); await page.waitForTimeout(150);
-    const un = await rows().count(); expect(un >= 1 && un < 18 && calls(page, 'admin_list_gift_cards').at(-1).args.p_unverified === true, `${name}: varmistamattomat (${un})`);
+    const un = await rows().count(); expect(un >= 1 && un < 20 && calls(page, 'admin_list_gift_cards').at(-1).args.p_unverified === true, `${name}: varmistamattomat (${un})`);
     await page.click('[data-testid=gc-reset]'); await page.waitForTimeout(150);
     await page.selectOption('[data-testid=gc-f-sort]', 'balance_desc'); await page.waitForTimeout(150);
     const bals = (await rows().locator('.tl-sum strong').allInnerTexts()).map(num);
     expect(bals.every((x, i) => i === 0 || x <= bals[i - 1]), `${name}: lajittelu saldo laskeva (${bals.slice(0, 4)})`);
     await page.click('[data-testid=gc-reset]'); await page.waitForTimeout(150);
-    // sivutus: 25 + 7
-    await page.locator('[data-testid=pg-next]').first().click(); await page.waitForFunction(() => document.querySelectorAll('[data-testid=gc-list] > [data-testid=gc]').length === 7);
-    await page.locator('[data-testid=pg-first]').first().click(); await page.waitForFunction(() => document.querySelectorAll('[data-testid=gc-list] > [data-testid=gc]').length === 25);
+    // sivutus (booking_145): 20 + 20 + 5
+    await page.locator('[data-testid=pg-next]').first().click(); await page.waitForFunction(() => document.querySelectorAll('[data-testid=gc-list] > [data-testid=gc]').length === 20);
+    await page.locator('[data-testid=pg-next]').first().click(); await page.waitForFunction(() => document.querySelectorAll('[data-testid=gc-list] > [data-testid=gc]').length === 5);
+    expect(calls(page, 'admin_list_gift_cards').at(-1).args.p_offset === 40, `${name}: 3. sivu offset 40`);
+    await page.locator('[data-testid=pg-first]').first().click(); await page.waitForFunction(() => document.querySelectorAll('[data-testid=gc-list] > [data-testid=gc]').length === 20);
     // laajennus: tiedot + tapahtumat
     await page.selectOption('[data-testid=gc-f-status]', 'used'); await page.selectOption('[data-testid=gc-f-source]', 'native'); await page.waitForTimeout(200);
     await rows().first().locator('.tl-head').click(); await page.waitForSelector('[data-testid=gc-detail]');

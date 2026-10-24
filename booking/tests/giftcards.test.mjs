@@ -69,15 +69,15 @@ test('Datakerros: normalisointi (luvut, tilat, varmistus)', () => {
 test('Mock: lista, haku (koodin osa/nimi/tilausnumero), suodattimet, lajittelu, sivutus', async () => {
   const m = mk(), R = (n, a) => m.rpc(n, a);
   const all = await R('admin_list_gift_cards', {});
-  assert.equal(all.total, 32); assert.equal(all.rows.length, 32 > 50 ? 50 : 32);
+  assert.equal(all.total, 45); assert.equal(all.rows.length, 45);   // booking_145: 14 omaa + 31 Johku
   const p1 = await R('admin_list_gift_cards', { p_limit: 25 }), p2 = await R('admin_list_gift_cards', { p_limit: 25, p_offset: 25 });
-  assert.equal(p1.rows.length + p2.rows.length, 32); assert.equal(new Set([...p1.rows, ...p2.rows].map((r) => r.id)).size, 32);
+  assert.equal(p1.rows.length + p2.rows.length, 45); assert.equal(new Set([...p1.rows, ...p2.rows].map((r) => r.id)).size, 45);
   const c = all.rows[5];
   assert.ok((await R('admin_list_gift_cards', { p_search: c.code.toLowerCase().replace(/-/g, ' ').slice(0, 9) })).rows.some((r) => r.id === c.id), 'koodin osa pienillä kirjaimilla ja välilyönnillä');
   assert.equal((await R('admin_list_gift_cards', { p_search: 'zzzz-ei-löydy' })).total, 0);
   assert.ok((await R('admin_list_gift_cards', { p_search: 'ostaja1@example' })).total >= 1);
   const ex = await R('admin_list_gift_cards', { p_status: 'expired' }); assert.ok(ex.total >= 1 && ex.rows.every((r) => r.effective_status === 'expired'), 'vanhentunut huomioi päivän (status active + valid_to < tänään)');
-  assert.equal((await R('admin_list_gift_cards', { p_source: 'johku' })).total, 18);
+  assert.equal((await R('admin_list_gift_cards', { p_source: 'johku' })).total, 31);
   const un = await R('admin_list_gift_cards', { p_unverified: true }); assert.ok(un.total > 0 && un.rows.every((r) => r.balance_verified === false));
   const soon = await R('admin_list_gift_cards', { p_expiring_days: 30 }); assert.ok(soon.rows.every((r) => r.valid_to >= TODAY && r.valid_to <= '2026-11-16'));
   const bal = (await R('admin_list_gift_cards', { p_sort: 'balance_desc' })).rows.map((r) => r.balance); assert.deepEqual(bal, [...bal].sort((a, b) => b - a));
