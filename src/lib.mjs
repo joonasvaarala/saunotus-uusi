@@ -5,12 +5,15 @@ export const read = (p) => JSON.parse(readFileSync(new URL('../' + p, import.met
 
 import { PHONE_DISPLAY_FI, PHONE_DISPLAY_EN, PHONE_TEL, phoneDisplay } from '../booking/shop/src/phone.js';
 export { phoneDisplay };
+import { resolvePrivacyPages } from './policy-lang.mjs';
 
 // Puhelinnumero tulee yhdestä vakiosta (booking/shop/src/phone.js), ei site.json:sta: näkyvä muoto kielen mukaan (phoneDisplay(lang): fi "010 299 2866", en "+358 10 299 2866"), linkki tel:+358102992866.
 // contact.phone = suomenkielinen muoto (oletus), contact.phoneEn = englanninkielinen; sivupohjat käyttävät phoneDisplay(lang).
 const siteJson = read('content/site.json');
 export const site = { ...siteJson, contact: { ...siteJson.contact, phone: PHONE_DISPLAY_FI, phoneEn: PHONE_DISPLAY_EN, phoneTel: PHONE_TEL } };
 export const kb = read('content/kb/kb.json');
+// /en/privacy/ vain kun kb.policies-kohdilla on title_en + body_en (src/policy-lang.mjs); muuten privacy.en = null.
+site.pages = resolvePrivacyPages(site.pages, kb.policies, read('content/pages/privacy.json').fi.policies);
 export const images = read('content/images.json');
 export const hero = read('content/hero.json');
 // Google-arvostelut (content/reviews.json); REVIEWS_FILE ohittaa tiedoston (testaukseen). Puuttuva tiedosto = ei arvosteluja.
