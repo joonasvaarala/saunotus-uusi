@@ -323,3 +323,13 @@ html.co-js.co-show-sauna #yritysvuorot,html.co-js.co-show-day #tarjous{display:b
 [data-testid="booking-form"], [data-testid="availability"], .ok-box,
 .vc-choose, .vc-notice, .ord-msg, .ord-pay, .ord-card, .bk-dayresults,
 #bk-day-h, .bk-pc, .bk-review, .bk-checkout { scroll-margin-top: 84px; }
+/* booking_162: hiljaisten aikojen ale viikko-ohjelmassa (booking/shop/src/quiet-week.js). Paletti #2B3A30 / #F4EFE7 / #7A5530; ei sinistä.
+   Kontrastit: merkki #F4EFE7/#2B3A30 10,5:1; yliviivattu #7A5530 kortilla ≥ 5,3:1; uusi hinta #2B3A30 ≥ 9:1. */
+.sess.quiet{grid-template-areas:"t b" "n b" "q b"}
+.sess.quiet .qp{grid-area:q;display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:4px;font:500 16px/1.2 var(--body);color:#2B3A30}
+.sess.quiet .qb{font:700 12px/1 var(--label);letter-spacing:.04em;color:#F4EFE7;background:#2B3A30;border-radius:999px;padding:5px 9px}
+.sess.quiet del{color:#7A5530}
+.sess.quiet strong{color:#2B3A30;font-weight:700}
+.quiet-week-note{margin:12px 0 0;padding:10px 14px;border-left:4px solid #7A5530;background:#F4EFE7;color:#2B3A30;border-radius:8px;font-size:15px}
+@media (min-width:1000px){.sess.quiet{grid-template-areas:"t" "n" "q" "b"}.sess.quiet .qp{margin:0 0 12px}}
+@media (forced-colors:active){.sess.quiet .qb{border:1px solid CanvasText}}

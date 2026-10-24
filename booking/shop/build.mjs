@@ -147,8 +147,15 @@ let changed = 0;
     if (!n.endsWith('.html')) continue;
     const rel = p.slice(OUT.length);
     const lang = rel.startsWith('/en/') ? 'en' : 'fi';
-    const src = readFileSync(p, 'utf8'), out = rewrite(src, lang);
-    if (out !== src) { writeFileSync(p, out); changed++; }
+    const src = readFileSync(p, 'utf8');
+    let out = rewrite(src, lang);
+    if (out !== src) changed++;
+    // booking_162: viikko-ohjelma (data-quiet-week) → hiljaisten aikojen ale selaimessa (quiet-week.js; pois päältä → ei muutosta)
+    if (out.includes('data-quiet-week') && !out.includes('/booking/quiet-week.js')) {
+      const Q = { lang, shopHref: BASE + PATHS[lang].shop };
+      out = out.replace('</body>', `${out.includes('/booking/config.js') ? '' : `<script src="${BASE}/booking/config.js"></script>`}<script>window.BOOKING_QUIET=${JSON.stringify(Q)}</script><script type="module" src="${BASE}/booking/quiet-week.js"></script></body>`);
+    }
+    if (out !== src) writeFileSync(p, out);
   }
 })(OUT);
 // Vartija (Joonas 24.10.2026): sivustolla ei saa olla yhtään Johku-linkkiä (href). Tekstimaininnat eivät ole linkkejä.
