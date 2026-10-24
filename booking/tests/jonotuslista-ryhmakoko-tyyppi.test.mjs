@@ -12,8 +12,8 @@ import { resolve } from 'node:path';
 const repo = resolve(new URL('../..', import.meta.url).pathname);
 const rd = (p) => readFileSync(resolve(repo, p), 'utf8');
 const code = (s) => s.replace(/--[^\n]*/g, '');
-const MIG = 'booking/supabase/migrations/20261024200000_booking_148_waitlist_party_size_by_type.sql';
-const RB = 'booking/supabase/rollbacks/20261024200000_booking_148_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024120446_booking_148_waitlist_party_size_by_type.sql';
+const RB = 'booking/supabase/rollbacks/20261024120446_booking_148_ROLLBACK.sql';
 const T148 = 'booking/supabase/tests/waitlist/t148_waitlist_party_size_by_type.sql';
 const PEND = 'content/site-texts.pending-import-48.json';
 const FNS = ['_sessions', '_check_claim', 'public_availability', 'public_availability_all', 'public_join_waitlist', 'public_waitlist_claim', '_waitlist_notify_entry', '_waitlist_process_session'];
@@ -23,7 +23,7 @@ test('booking_148: migraatio, rollback ja SQL-testi olemassa, numero 148 ainoa j
   for (const p of [MIG, RB, T148, PEND]) assert.ok(existsSync(resolve(repo, p)), p);
   const migs = readdirSync(resolve(repo, 'booking/supabase/migrations')).filter((f) => f.endsWith('.sql')).sort();
   assert.equal(migs.filter((f) => /_booking_148_/.test(f)).length, 1);
-  assert.ok(migs.indexOf('20261024200000_booking_148_waitlist_party_size_by_type.sql') > migs.findIndex((f) => /_booking_139_/.test(f)));
+  assert.ok(migs.indexOf('20261024120446_booking_148_waitlist_party_size_by_type.sql') > migs.findIndex((f) => /_booking_139_/.test(f)));
 });
 
 test('migraatio: palvelutyyppi olemassa olevista sarakkeista, apufunktiot suljettu, ei public-skeemaa', () => {

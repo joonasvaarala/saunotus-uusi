@@ -14,7 +14,7 @@
 --    kapasiteettipoolien capacity (booking.resources), enintään 50 (waitlist_entries.persons-tarkistus).
 -- 48 h -sääntö ja 120 min pito ennallaan (booking_139). Yksityisvuoron pito varaa koko tilan kuten exclusive-varaus:
 -- _sessions (julkinen saatavuus) ja _check_claim (varauksen luonti) huomioivat sen; poikkeukset _waitlist_hold_counts (haltija, henkilökunta).
--- Paluu: booking/supabase/rollbacks/20261024200000_booking_148_ROLLBACK.sql.
+-- Paluu: booking/supabase/rollbacks/20261024120446_booking_148_ROLLBACK.sql.
 
 create or replace function booking._waitlist_party(p_rule_id bigint)
 returns table (kind text, min_persons integer, max_persons integer)
