@@ -155,6 +155,10 @@ jobs:
       # booking_134: jonotuslistan henkilömäärä 1–6, mahtuvuuteen perustuva jako ja lunastus.
       # t134 (booking/supabase/tests/waitlist/t134_waitlist_party_size.sql) ajetaan paikallisessa PG17:ssä t132:n tapaan.
       - run: node --test booking/tests/jonotuslista-henkilomaara.test.mjs
+      # booking_135: voimassa olevat jonoilmoitukset vähennetään vapaista paikoista myös seuraavissa ajoissa (sama vuoro + jaettu kapasiteettipooli),
+      # tarjouksen voimassaolo (waitlist_offer_minutes) ja lunastuksen rate limit vain tunnetulle tokenille; migraatio + rollback olemassa.
+      # t135 (booking/supabase/tests/waitlist/t135_waitlist_notified_capacity.sql) ajetaan paikallisessa PG17:ssä t132:n ja t134:n tapaan.
+      - run: node --test booking/tests/jonotuslista-ilmoitetut-paikat.test.mjs
       # booking_133: päivänippu + kuukauden saatavuus yhdellä RPC:llä (SQL-vertailu booking_125:een: booking/tests/paiva-ja-saatavuus-nopeutus-regressio.sql, ajetaan testikannassa)
       - run: node --test booking/tests/paiva-ja-saatavuus-nopeutus.test.mjs
       # booking_136: hallinnan hyvitys ↔ peruutus (oletus Ei, oikeudet payments.refund / bookings.manage, tekstit pending-import-37, migraation ja rollbackin rakenne).

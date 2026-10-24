@@ -8,8 +8,8 @@ import { normCheckout, isHoldView, nextPollIn } from '../shop/src/hold-logic.js'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const file = (path) => readFileSync(resolve(root, path), 'utf8');
-const mig = file('booking/supabase/migrations/20261024050000_booking_131_giftcard_checkout_fix.sql');
-const rollback = file('booking/supabase/rollbacks/20261024050000_booking_131_ROLLBACK.sql');
+const mig = file('booking/supabase/migrations/20261024054738_booking_131_giftcard_checkout_fix.sql');
+const rollback = file('booking/supabase/rollbacks/20261024054738_booking_131_ROLLBACK.sql');
 // Paketti sisältää git apply -korjaukset; asennuksen jälkeen testeissä luetaan varsinaiset .js-tiedostot.
 const giftSrc = existsSync(resolve(root, 'booking/shop/src/gift.js'))
   ? file('booking/shop/src/gift.js') : null;
