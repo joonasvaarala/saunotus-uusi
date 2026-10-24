@@ -52,6 +52,13 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
       }
       case 'public_catalog': return catalogEntries();
       case 'public_catalog_for': return pickCatalog(catalogEntries(), args.p_audience);
+      case 'public_availability_all': {
+        const catalog = pickCatalog(catalogEntries(), args.p_audience);
+        return catalog.filter((p) => p.booking_kind !== 'slots').flatMap((p) => {
+          const response = treatmentRpc('public_availability', { p_product_id: p.id, p_from: args.p_from, p_to: args.p_to }, now());
+          return Array.isArray(response?.body) ? response.body.map((r) => ({ ...r, product_id: +p.id })) : [];
+        });
+      }
       case 'public_settings': return { public_booking_enabled: true, public_treatment_horizon_days: 14 };
       case 'public_product_images': return [];
       case 'public_addons': return ADDONS;   // lisäpalvelut (booking_61: pyyhe resurssivaraukselle, tuote 7); sama muoto kuin tuotannon public_addons()

@@ -1,10 +1,11 @@
 // Hallinnan kuori: kirjautuminen (Supabase Auth), reititys (hash), roolien mukainen valikko. Näkymät ovat tiedostoissa views/*.js.
 import { signIn, signOut, getSession, onAuthChange, rpc, select, adoptSessionFromHash, setPassword, setRpcOverride, setMockSession } from './sb.js';
-import { h, toast, errMsg } from './ui.js';
+import { h, toast, errMsg, todayHel } from './ui.js';
 import { icon } from './icons.js';
 import { t as tl } from './talous-i18n.js';
 import { createAdminMock } from './options-mock.js';
 import { loadFilterTexts } from './filter-texts.js';
+import { primeSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 import { needsManualRoute, parseAdminHash } from './reservation-query.js';
 import { posText } from './pos-texts.js';
 
@@ -73,6 +74,8 @@ function drawNav(current) {
   const nav = $('nav'), cur = nav.querySelector('[aria-current]');
   if (cur && nav.scrollWidth > nav.clientWidth + 1 && nav.scrollHeight <= nav.clientHeight + 1) nav.scrollLeft = Math.max(0, cur.offsetLeft - (nav.clientWidth - cur.offsetWidth) / 2);
 }
+let dayModule = null;
+let lastPath = null;   // toisesta näkymästä Päivään palattaessa päivänippu haetaan aina tuoreena (muutokset muissa näkymissä)
 let routeSeq = 0;   // nopea navigointi: vain viimeisin reitti saa piirtää näkymän (vanhentuneet vastaukset hylätään)
 async function route() {
   if (!getSession()) return;
@@ -84,11 +87,14 @@ async function route() {
   view.replaceChildren(h('p', { class: 'muted pad', text: 'Ladataan…' }));
   try {
     const m = await r.mod();
+    if (r.path === '') { dayModule = m; if (lastPath !== null && lastPath !== '') m.clearDayBundleCache?.(); }
+    lastPath = r.path;
     await refs();
-    const out = await m.render({ ctx, refs: ctx.refs, reload: route, query, rest });
+    const out = await m.render({ ctx, refs: ctx.refs, reload: () => { dayModule?.clearDayBundleCache?.(); route(); }, query, rest });
     if (seq !== routeSeq) return;
     view.replaceChildren(...[].concat(out).filter(Boolean));
     document.title = `${r.labelFn ? r.labelFn() : r.label} – hallinta`;
+    if (r.path === '') setTimeout(() => m.prefetchAdjacentDay?.(query.get('d') || todayHel()), 0);
   } catch (e) {
     if (seq !== routeSeq) return;
     console.warn(e);
@@ -100,12 +106,37 @@ async function enter() {
   $('login-screen').hidden = !!s; $('shell').hidden = !s;
   if (!s) return;
   try {
-    const [role, me] = await Promise.all([rpc('current_staff_role'), rpc('admin_my_permissions'), loadFilterTexts(rpc)]);
+    const { query } = parseAdminHash(location.hash);
+    const date = /^\d{4}-\d\d-\d\d$/.test(query.get('d') || '') ? query.get('d') : todayHel();
+    // Yksi SQL-RPC hakee myös roolin, käyttöoikeudet, tuotteet, maksutavat ja resurssit.
+    // Import ja tietokantakutsu käynnistyvät samaan aikaan, eivät peräkkäin.
+    const viewJob = loadView('day').then((m) => { dayModule = m; return m; }).catch(() => null);
+    const bootstrapJob = rpc('admin_day_bundle', { p_date: date }).then((bundle) => ({ bundle }), (error) => ({ error }));
+    const [dm, boot] = await Promise.all([viewJob, bootstrapJob]);
+    const bundle = boot.bundle;
+    if (boot.error) dm?.rememberDayBundleError?.(boot.error);
+    let role, me;
+    if (bundle && bundle.role && Array.isArray(bundle.products) && Array.isArray(bundle.resources)
+        && Array.isArray(bundle.payment_methods) && bundle.permissions) {
+      role = bundle.role;
+      me = bundle.permissions;
+      const products = bundle.products;
+      ctx.refs = { products, methods: bundle.payment_methods, resources: bundle.resources,
+        productById: new Map(products.map((p) => [p.id, p])) };
+      dm?.primeDayBundle?.(date, bundle);
+      primeSiteTexts(bundle.site_texts);
+      await loadFilterTexts(rpc);  // muistissa oleva vastaus: ei verkkokutsua
+    } else {
+      // Vanha kanta tai mock ilman bootstrappia: kolme vanhaa hakua yhtä aikaa.
+      [role, me] = await Promise.all([rpc('current_staff_role'), rpc('admin_my_permissions'),
+        refs(), loadFilterTexts(rpc)]);
+      if (bundle) dm?.primeDayBundle?.(date, bundle);
+    }
     if (!role) { signOut(); showLogin('Tällä tunnuksella ei ole oikeutta hallintaan (ei henkilökuntaa).'); return; }
     ctx.role = role; ctx.name = s.user?.email || ''; ctx.perms = me?.permissions || []; ctx.roleLabel = me?.role_label || role;
     $('who').textContent = MOCK ? 'Kokeilutila: esimerkkidata, mikään ei tallennu' : `${ctx.name} · ${ctx.roleLabel}`;
     document.body.dataset.role = role;
-    route();
+    void route();
   } catch (e) { signOut(); showLogin(errMsg(e)); }
 }
 function showLogin(msg) {
@@ -118,7 +149,7 @@ $('login').addEventListener('submit', async (ev) => {
   try { await signIn($('email').value.trim(), $('password').value); await enter(); } catch (e) { showLogin(errMsg(e)); } finally { btn.disabled = false; }
 });
 $('logout').addEventListener('click', () => { if (MOCK) { location.href = location.pathname; return; }
-   signOut(); ctx.refs = null; ctx.role = null; ctx.perms = []; showLogin(''); });
+   signOut(); ctx.refs = null; ctx.role = null; ctx.perms = []; dayModule?.clearDayBundleCache?.(); clearSiteTextsCache(); showLogin(''); });
 window.addEventListener('hashchange', route);
 // Sama fragmentti (esim. muistutuslinkki kun lista on jo auki samalla suodattimella) ei laukaise hashchangea,
 // jolloin näkymä jäisi piirtämättä ("ei avaa mitään"). Eri fragmentti vaihtuu selaimen hashchange-tapahtumalla.
@@ -131,7 +162,7 @@ document.addEventListener('click', (ev) => {
   if (!href || href === '#') return;
   if (needsManualRoute(location.hash, href)) { ev.preventDefault(); route(); }
 });
-onAuthChange((s) => { if (!s) showLogin(''); });
+onAuthChange((s) => { if (!s) { dayModule?.clearDayBundleCache?.(); clearSiteTextsCache(); showLogin(''); } });
 // Kutsulinkki (#access_token=…&type=invite): istunto otetaan käyttöön ja käyttäjä asettaa salasanan ennen hallintaan siirtymistä
 if (adoptSessionFromHash()) {
   $('login-screen').hidden = true; $('shell').hidden = true; $('setpw-screen').hidden = false;

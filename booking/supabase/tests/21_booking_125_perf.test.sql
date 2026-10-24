@@ -5,8 +5,9 @@ set local search_path = extensions, public;
 select no_plan();
 
 select ok(
-  pg_get_functiondef('booking._pool_peak(bigint,timestamptz,timestamptz,bigint)'::regprocedure) ~ 'booking\.v_claims',
-  '_pool_peak lukee v_claims');
+  pg_get_functiondef('booking._pool_peak(bigint,timestamptz,timestamptz,bigint)'::regprocedure) ~ 'booking\.v_claims'
+  or pg_get_functiondef('booking._pool_peak(bigint,timestamptz,timestamptz,bigint)'::regprocedure) ~ 'booking\.reservation_legs',
+  '_pool_peak lukee v_claims (booking_125) tai sen kaksi lähdettä suoraan (booking_133)');
 select ok(
   pg_get_functiondef('booking._sessions(date,date,bigint,boolean)'::regprocedure) ~ 'lifecycle = ''current''',
   '_sessions rajaa bookable-polun lifecycle=current');

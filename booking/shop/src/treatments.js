@@ -171,12 +171,20 @@ const cache = new Map();
 export const clearCache = () => cache.clear();
 const addDay = (ds, n) => { const d = new Date(`${ds}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 // Palvelin sallii vain yhden raskaan haun kerrallaan (rinnakkaiset haut → 'busy'): kaikki haut jonotetaan, 'busy' yritetään kerran uudelleen.
-let queue = Promise.resolve();
-const serial = (fn) => { const r = queue.then(fn, fn); queue = r.catch(() => {}); return r; };
+let activeRequests = 0;
+const requestWaiters = [];
+const concurrent = async (fn) => {
+  if (activeRequests >= 2) await new Promise((resolve) => requestWaiters.push(resolve));
+  activeRequests++;
+  try { return await fn(); }
+  finally { activeRequests--; requestWaiters.shift()?.(); }
+};
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const callAvailability = (p, persons, from, to) => serial(async () => {
-  try { return await rpc(RPC.availability, args.availability(p, persons, from, to)); }
-  catch (e) { if (apiCode(e) !== 'busy') throw e; await sleep(1500); return rpc(RPC.availability, args.availability(p, persons, from, to)); }
+const callAvailability = (p, persons, from, to) => concurrent(async () => {
+  for (let tries = 0; ; tries++) {
+    try { return await rpc(RPC.availability, args.availability(p, persons, from, to)); }
+    catch (e) { if (apiCode(e) !== 'busy' || tries >= 3) throw e; await sleep(750 * (tries + 1)); }
+  }
 });
 function fetchChunk(p, persons, from, to) {
   const k = `${p.id}|${persons}|${from}|${to}`, hit = cache.get(k);

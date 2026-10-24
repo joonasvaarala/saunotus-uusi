@@ -346,6 +346,16 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     admin_day_extras: (a) => ({ date: a.p_date, tz: 'Europe/Helsinki', events: [],
       revenue_rows: role === 'admin' || role === 'manager' ? [] : null,
       revenue: role === 'admin' || role === 'manager' ? { basis: 'visit_start', vat_basis: 'gross_incl_vat', currency: 'EUR', gross: 0, vat: 0, net: 0, count: 0, pending_gross: 0, pending_count: 0, unpaid_gross: 0, unpaid_count: 0 } : null }),
+    admin_day_bundle: (a) => {
+      const from = helIso(a.p_date, '00:00'), to = helIso(addDays(a.p_date, 1), '00:00');
+      return { date: a.p_date, role, permissions: handlers.admin_my_permissions(),
+        products: handlers.admin_list_products(), payment_methods: handlers['select:payment_methods'](),
+        resources: handlers['select:resources'](), view: handlers.admin_day_view(a),
+        reservations: handlers.admin_list_reservations({ p_from: from, p_to: to, p_limit: 200 }),
+        shifts: handlers.admin_day_shifts(a), addons: handlers.admin_list_addons(),
+        options: handlers.admin_list_product_options({}), extras: handlers.admin_day_extras(a),
+        site_texts: handlers.public_get_site_texts() };
+    },
     admin_day_view: (a) => {
       const rs = st.reservations.filter((r) => r.starts_at >= helIso(a.p_date, '00:00') && r.starts_at < helIso(addDays(a.p_date, 1), '00:00'));
       return { date: a.p_date, sessions: [], blocks: [], prep: [], addon_totals: [],

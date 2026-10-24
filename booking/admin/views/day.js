@@ -9,23 +9,33 @@ import { optionBadge, optionReminder } from '../options.js';
 import { blockList, blockDialog } from './blocks.js';
 import { assignDayCards, canSeeDayRevenue, eventSortIso, eventTimeLabel, revenueView, isGiftCardReservation, slotTitle, sumPersons } from '../day-logic.js';
 import { dayLang, dayText, loadDayTexts } from '../day-texts.js';
+import { cachedDayBundle, seedDayBundle, clearDayBundles } from '../day-bundle-cache.js';
 
-// admin_day_bundle puuttuu tai kaatuu: vanhat kutsut. 404:ää ei toisteta minuuttiin.
+// Vanha kanta / väärällä allekirjoituksella julkaistu bundle: 42883, PGRST202 -> varapolku 60 s.
 let bundleMissing = 0;
 function rpcMissing(e) {
   const msg = `${e?.status || ''} ${e?.code || ''} ${e?.message || ''}`;
-  return e?.status === 404 || /PGRST202|could not find the function|schema cache/i.test(msg);
+  return e?.status === 404 || /42883|PGRST202|could not find the function|function .* does not exist|schema cache/i.test(msg);
 }
 async function loadBundle(date) {
   if (Date.now() - bundleMissing < 60000) return null;
   try {
-    const bundle = await rpc('admin_day_bundle', { p_date: date });
+    const bundle = await cachedDayBundle(date, (d) => rpc('admin_day_bundle', { p_date: d }));
     return bundle && typeof bundle === 'object' ? bundle : null;
   } catch (e) {
     if (rpcMissing(e)) bundleMissing = Date.now();
     return null;
   }
 }
+export const primeDayBundle = (date, bundle) => seedDayBundle(date, bundle);
+export const rememberDayBundleError = (e) => { if (rpcMissing(e)) bundleMissing = Date.now(); };
+export const clearDayBundleCache = () => { clearDayBundles(); bundleMissing = 0; };
+export const prefetchAdjacentDay = (date) => {
+  if (Date.now() - bundleMissing < 60000) return;
+  for (const d of [addDays(date, -1), addDays(date, 1)]) {
+    void loadBundle(d);  // errors swallowed by loadBundle; no forced redraw
+  }
+};
 // admin_day_extras puuttuu kunnes migraatio booking_68 on ajettu: näytä selite, älä kaada päivänäkymää. 404:ää ei toisteta minuuttiin.
 let extrasMissing = 0;
 async function loadExtras(date) {
@@ -95,7 +105,7 @@ export async function render({ ctx, refs, reload, query }) {
   const resRow = (r) => { const x = dv.get(r.reservation_id) || {}; const ad = (x.addons && x.addons.length) ? x.addons : (r.addons || []); const src = { source: r.source ?? x.source, external_id: r.external_id ?? x.external_id };
     const kind = x.customer_kind || r.customer_kind; const company = x.company || r.company; const legs = (x.legs && x.legs.length) ? x.legs : (r.legs || []); const space = x.space_code || r.space_code;
     let stBadge = statusBadge(r.status);
-    const arrive = arrivalButton(r, { can: ctx.can, onState: (st) => { const nb = statusBadge(st); stBadge.replaceWith(nb); stBadge = nb; } });
+    const arrive = arrivalButton(r, { can: ctx.can, onState: (st) => { clearDayBundleCache(); const nb = statusBadge(st); stBadge.replaceWith(nb); stBadge = nb; } });
     return h('li', { class: `resrow ${r.status}${ad.length ? ' has-addons' : ''}${arrive ? ' has-arrive' : ''}` },
     h('div', { class: 'resmain' }, h('button', { type: 'button', class: 'link', onclick: () => open(r) }, h('strong', { text: r.customer_name || '–' }), ` · ${r.persons} hlö`, kind === 'company' ? [' ', badge('warn', 'Yritys'), company ? ` ${company}` : ''] : null,
       (legs.length > 1 || (space && space !== 'savusauna')) ? legsList(legs, refs) : null),

@@ -2,6 +2,7 @@
 // public_get_site_texts peittää sanakirjan. Haku epäonnistuu, rivi puuttuu tai paikkamerkki ei täyty → FILTER_TEXTS.
 // Tuonti: content/site-texts.pending-import-4.json (sama tiedosto kuin myyntikäyrä; ei ylikirjoita olemassa olevia).
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
 export const PREFIX = 'ui.admin.filters.';
 
@@ -40,7 +41,7 @@ export async function loadFilterTexts(rpcFn) {
   if (loaded) return true;
   if (typeof rpcFn !== 'function') return false;
   try {
-    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    const t = await getSiteTexts(rpcFn);
     if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
     const next = new Map();
     for (const r of t.texts) {
@@ -60,6 +61,7 @@ export async function loadFilterTexts(rpcFn) {
 export function clearFilterTextCache() {
   db = new Map();
   loaded = false;
+  clearSiteTextsCache(); // tyhjennys hakee seuraavalla kerralla uudelleen (jaettu lupaus ei saa jäädä voimaan)
 }
 
 export function filterText(key, vars, lang = getLang()) {
