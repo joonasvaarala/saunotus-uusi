@@ -1,12 +1,19 @@
 -- booking_170_osoite_saunotus_fi: kb.productsin tallennetut osoitteet vanhasta kehitysosoitteesta → https://saunotus.fi.
 -- Joonas 24.10.2026: uusi sivusto on 1.11.2026 alkaen osoitteessa saunotus.fi; vanha kehityssivusto ei kuulu uuteen sivustoon.
--- Koodi (booking/shop/src/johku-links.js CANONICAL, src/lib.mjs SHOP_CANON) tunnistaa tämän PR:n jälkeen vain https://saunotus.fi -osoitteet,
--- joten tämä migraatio ajetaan SAMAAN AIKAAN kuin PR yhdistetään (ks. docs/siirto-saunotus-fi.md, vaihe A).
--- Kohteet tuotannossa 24.10.2026 (SELECT): 11 kenttää 7 tuotteessa, 31 osoitetta. Mikään kentistä ei sisällä ennestään saunotus.fi-merkkijonoa,
+-- Koodin kanoninen osoite on tämän PR:n jälkeen https://saunotus.fi (booking/shop/src/johku-links.js CANONICAL, src/lib.mjs SHOP_CANON);
+-- vanha osoite tunnistetaan yhä (LEGACY_CANONICAL) ja ohjataan sivuston omaan polkuun. Ajetaan, kun PR yhdistetään (docs/siirto-saunotus-fi.md, vaihe A).
+-- Jo ajettuja migraatioita booking_161/163 (jotka kirjoittivat vanhan osoitteen) ei muuteta: tämä migraatio korjaa niiden kirjoittamat arvot.
+-- Kohteet tuotannossa 24.10.2026 (SELECT): 11 kenttää 6 tuotteessa (1, 7, 25, 26, 38, 50), 31 osoitetta. Mikään kentistä ei sisällä ennestään saunotus.fi-merkkijonoa,
 -- joten rollback voi palauttaa täsmälleen (sama vartija peilikuvana).
 -- Vartija: jos kentässä on vanha osoite, sen md5 on oltava täsmälleen odotettu, muuten exception ennen yhtään muutosta. Kenttä, jossa vanhaa
 -- osoitetta ei ole (jo ajettu tai tyhjä kanta), ohitetaan (uudelleenajettava). Lopuksi tarkistetaan, ettei kb.productsiin jäänyt vanhaa osoitetta.
--- Lukitut sivutekstit (booking.site_texts product.<id>.description) saavat uuden version triggeristä zz_site_text_sync (kuten booking_161).
+-- Lähdetauluun sidotut sivutekstit (booking.site_texts product.<id>.description) saavat uuden version triggeristä zz_site_text_sync (kuten booking_161).
+-- needs_translation: trigger booking._text_source_changed nollaa muutetun kieliversion lipun ja nostaa toisen kieliversion lipun (fi ↔ en).
+-- Tässä molemmat kielet muuttuvat samalla osoitevaihdolla (sisältö ei muutu), joten käännöstarvetta ei synny: tuotannossa 24.10.2026
+-- trigger nostaisi tuotteiden 1, 7 ja 38 fi-lipun (false → true) ja nollaisi niiden en-lipun (true → false). Siksi migraatio ottaa
+-- product.<id>.description [fi/en] -rivien needs_translation-arvot talteen ennen päivitystä ja palauttaa ne täsmälleen päivityksen jälkeen,
+-- vain niille tuotteille, joiden kenttiä tämä ajo muutti, ja vain jos rivin julkaistu teksti on täsmälleen tämän migraation tulos (md5 = to_md5).
+-- Muuten exception (koko migraatio peruuntuu). Lopputulos: needs_translation on kaikilla riveillä sama kuin ennen ajoa.
 -- Historia (kb.change_log, booking.audit_log, booking.site_text_versions) jätetään ennalleen.
 -- Rollback: booking/supabase/rollbacks/20261024194500_booking_170_ROLLBACK.sql
 set local lock_timeout = '5s';
@@ -16,7 +23,11 @@ do $mfi$
 declare
   old_base constant text := 'https://uusi.saunotus.com';
   new_base constant text := 'https://saunotus.fi';
-  r record; cur text; cnt int; n int := 0; skip int := 0; left_n int;
+  r record; t record; cur text; cnt int; n int := 0; skip int := 0; left_n int;
+  todo jsonb := '{}';         -- muutettavat kentät: '<tuote>:<sarake>' → to_md5
+  pids int[] := '{}';         -- tuotteet, joiden kenttiä tämä ajo muuttaa
+  nt_before jsonb := '{}';    -- product.<id>.description [fi/en]: site_texts.id → needs_translation ennen päivitystä
+  nt_n int := 0;
 begin
   for r in select * from (values
     (1, 'description', 1, '75312781e1c3861c69c0112428ebf5f1', 'f0561a9145ea81e3854f1123fa714f0e'),
@@ -43,7 +54,16 @@ begin
       raise exception 'booking_170: tuote % %: % osoitetta (odotettu %) tai jo uutta osoitetta', r.product_id, r.col, cnt, r.occurrences;
     end if;
     if md5(replace(cur, old_base, new_base)) <> r.to_md5 then raise exception 'booking_170: sisäinen md5-virhe (tuote %, %)', r.product_id, r.col; end if;
+    todo := todo || jsonb_build_object(r.product_id || ':' || r.col, r.to_md5);
+    if not r.product_id = any(pids) then pids := pids || r.product_id; end if;
   end loop;
+
+  -- needs_translation talteen (vain tämän ajon muuttamien tuotteiden kuvausrivit; rivit lukitaan)
+  select coalesce(jsonb_object_agg(x.id::text, x.needs_translation), '{}') into nt_before
+    from (select st.id, st.needs_translation from booking.site_texts st
+           where st.source_table = 'kb.products' and st.source_pk = any(select p::text from unnest(pids) p)
+             and st.key = 'product.' || st.source_pk || '.description' and st.lang in ('fi', 'en')
+           for update) x;
 
   for r in select * from (values
     (1, 'description', 1, '75312781e1c3861c69c0112428ebf5f1', 'f0561a9145ea81e3854f1123fa714f0e'),
@@ -64,9 +84,26 @@ begin
     n := n + cnt;
   end loop;
 
+  -- needs_translation takaisin ennalleen niille riveille, joiden lipun trigger muutti tämän osoitevaihdon takia
+  for t in select st.id, st.key, st.lang, st.source_pk, st.source_column, st.needs_translation, st.published_text
+             from booking.site_texts st where st.id::text in (select jsonb_object_keys(nt_before)) order by st.id loop
+    continue when t.needs_translation = (nt_before ->> t.id::text)::boolean;
+    if todo ->> (t.source_pk || ':' || t.source_column) is null and not exists (
+         select 1 from booking.site_texts o where o.key = t.key and o.lang in ('fi', 'en') and o.lang <> t.lang
+            and todo ->> (o.source_pk || ':' || o.source_column) is not null) then
+      raise exception 'booking_170: % [%] needs_translation muuttui, mutta kumpaakaan kieliversiota ei muutettu tässä ajossa – ei muutoksia', t.key, t.lang;
+    end if;
+    if md5(t.published_text) is distinct from (select md5(coalesce(to_jsonb(p) ->> t.source_column, '')) from kb.products p where p.id::text = t.source_pk)
+       or (todo ->> (t.source_pk || ':' || t.source_column) is not null and md5(t.published_text) <> todo ->> (t.source_pk || ':' || t.source_column)) then
+      raise exception 'booking_170: % [%] julkaistu teksti ei ole tämän migraation tulos (md5 %) – ei muutoksia', t.key, t.lang, md5(t.published_text);
+    end if;
+    update booking.site_texts set needs_translation = (nt_before ->> t.id::text)::boolean where id = t.id;
+    nt_n := nt_n + 1;
+  end loop;
+
   select count(*) into left_n from kb.products
    where concat_ws(' ', description, description_en, short_description, short_description_en, booking_url, source_url) like '%' || old_base || '%';
   if left_n > 0 then raise exception 'booking_170: kb.productsiin jäi % riviä vanhalla osoitteella', left_n; end if;
-  raise notice 'booking_170: päivitetty % kenttää, ohitettu % (jo ajettu)', n, skip;
+  raise notice 'booking_170: päivitetty % kenttää, ohitettu % (jo ajettu); needs_translation palautettu ennalleen % rivillä', n, skip, nt_n;
 end
 $mfi$;

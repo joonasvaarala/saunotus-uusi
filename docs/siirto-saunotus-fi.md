@@ -4,29 +4,42 @@
 ohjataan sinne (301). Vanha WordPress-kehityssivusto (`uusi.saunotus.com`) oli olemassa jo ennen tätä projektia, eikä se kuulu uuteen
 sivustoon. Se poistetaan käytöstä vasta vaiheessa C, ja vain Joonasin erillisellä luvalla.
 
-Tämän PR:n jälkeen repossa ei ole yhtään viittausta vanhaan kehitysosoitteeseen. Poikkeuksena ovat booking_170-migraatio ja sen rollback,
-koska ne korvaavat juuri sen osoitteen tietokannassa, sekä tämä ajokirja. Vartijatesti on `booking/tests/osoite-saunotus-fi-170.test.mjs`.
+Tämän PR:n jälkeen repossa ei ole viittauksia vanhaan kehitysosoitteeseen seuraavia poikkeuksia lukuun ottamatta (lista ja perustelut:
+vartijatesti `booking/tests/osoite-saunotus-fi-170.test.mjs`):
+- booking_170-migraatio, sen rollback ja SQL-testi t170, koska ne korvaavat juuri sen osoitteen tietokannassa, sekä tämä ajokirja.
+- Jo ajetut migraatiot booking_161 ja booking_163, niiden rollbackit ja testit. Ajetut migraatiot ovat muuttumatonta historiaa, joten niitä
+  ei muuteta (ne ovat identtiset mainin kanssa).
+- `content/kb/kb.json`: tuotannon tilannekuva. Se päivittyy seuraavassa tilannekuvassa booking_170:n ajon jälkeen.
+- `booking/shop/src/johku-links.js` (`LEGACY_CANONICAL`) ja `src/lib.mjs` (`SHOP_CANON`): koodi tunnistaa vanhan osoitteen ja ohjaa sen
+  sivuston omaan polkuun. Näin sivustolle ei päädy linkkiä vanhalle kehityssivulle, vaikka tiedoissa olisi vielä vanha osoite.
 
 Merkinnät: 🗄️ = tuotantotietokannan muutos, 🖥️ = palvelin-, DNS- tai hosting-muutos. Kumpikin tarvitsee Joonasin OK:n ennen ajoa.
 
 ## A. Nyt (ennen siirtoa): koodi ja tietokanta samaan aikaan
 
-1. 🗄️ **Aja `booking/supabase/migrations/20261024194500_booking_170_osoite_saunotus_fi.sql` tuotantoon samana päivänä, kun tämä PR yhdistetään.**
-   Koodi tunnistaa tämän jälkeen kanonisiksi vain `https://saunotus.fi/…`-osoitteet (`booking/shop/src/johku-links.js` CANONICAL,
-   `src/lib.mjs` SHOP_CANON). Siksi tietokannan kuvauksissa olevat vanhat osoitteet täytyy päivittää samaan aikaan. Muuten testisivun
-   tuotekuvausten linkit ohjautuisivat vanhalle kehityssivulle.
-   - Kohde (tuotanto 24.10.2026, SELECT): 11 kenttää 7 tuotteessa (1, 7, 25, 26, 38: `description`/`description_en`; 50: `source_url`), yhteensä 31 osoitetta.
+1. 🗄️ **Aja `booking/supabase/migrations/20261024194500_booking_170_osoite_saunotus_fi.sql` tuotantoon, kun tämä PR yhdistetään.**
+   Koodin kanoninen osoite on tämän jälkeen `https://saunotus.fi` (`booking/shop/src/johku-links.js` CANONICAL, `src/lib.mjs` SHOP_CANON).
+   Koodi tunnistaa myös vanhan kehitysosoitteen ja ohjaa sen sivuston omaan polkuun, joten ajojärjestys ei riko linkkejä. Tietokannan
+   tekstit on silti tarkoitus korjata samana päivänä.
+   - Kohde (tuotanto 24.10.2026, SELECT): 11 kenttää 6 tuotteessa (1, 7, 25, 26, 38: `description`/`description_en`; 50: `source_url`), yhteensä 31 osoitetta.
    - Vartija: jokaisen kentän md5 on oltava täsmälleen odotettu, muuten migraatio pysähtyy ennen yhtään muutosta. Migraation voi ajaa uudelleen.
-   - Lukitut sivutekstit (`product.<id>.description`) päivittyvät triggerin `zz_site_text_sync` kautta.
-   - Rollback: `booking/supabase/rollbacks/20261024194500_booking_170_ROLLBACK.sql` palauttaa tekstit täsmälleen. Paikallisesti testattu
-     tuotannon teksteillä: ajo, uudelleenajo, rollback (md5 täsmää alkuperäiseen) ja poikkeava teksti (pysähtyy, ei muutoksia).
+   - Lähdetauluun sidotut sivutekstit (`product.<id>.description` [fi/en]) saavat uuden version triggerin `zz_site_text_sync` kautta
+     (tuotannossa 10 versiota: tuotteet 1, 7, 25, 26, 38 × fi/en).
+   - `needs_translation`: trigger nollaisi muutetun kieliversion lipun ja nostaisi toisen kieliversion lipun. Tuotannossa se nostaisi
+     tuotteiden 1, 7 ja 38 fi-lipun ja nollaisi niiden en-lipun. Osoitevaihto ei muuta sisältöä, joten migraatio ottaa näiden rivien
+     liput talteen ennen päivitystä ja palauttaa ne täsmälleen päivityksen jälkeen. Palautus koskee vain tuotteita, joiden kenttiä ajo
+     muutti, ja vain rivejä, joiden julkaistu teksti on täsmälleen tämän migraation tulos. Muuten migraatio pysähtyy, eikä mitään muuteta.
+     Lopputulos: kaikkien rivien `needs_translation` on sama kuin ennen ajoa. Rollback tekee saman.
+   - Rollback: `booking/supabase/rollbacks/20261024194500_booking_170_ROLLBACK.sql` palauttaa tekstit täsmälleen, ja liput jäävät ennalleen.
+   - SQL-testi `booking/supabase/tests/kb/t170_osoite_saunotus_fi.sql` (paikallinen PG17, tuotannon tekstit ja liput 24.10.2026):
+     ajo, uudelleenajo, rollback (md5 täsmää alkuperäiseen), rollbackin uudelleenajo, vartijat (poikkeava teksti → pysähtyy, ei muutoksia)
+     ja `needs_translation` ennallaan jokaisen vaiheen jälkeen. Tulos: pass=26 fail=0.
    - Tarkistus ajon jälkeen (pelkkä SELECT):
-     `select count(*) from kb.products where concat_ws(' ', description, description_en, booking_url, source_url) like '%uusi.saunotus%';` → 0
-2. Repoon jo ajetut migraatiot booking_161 ja booking_163 (sekä niiden rollbackit ja testit t161/t163) on päivitetty kirjoittamaan suoraan
-   `https://saunotus.fi`-osoitteita, ja niiden md5-vartijat on laskettu uudelleen. Tyhjässä kannassa tulos on siis heti oikea. Tuotannossa
-   booking_170 korjaa jo kirjoitetut arvot, ja tämän jälkeen 161/163-rollbackien vartijat vastaavat taas tuotannon tilaa.
-   Huom: booking_163 näkyy ajettujen migraatioiden listassa, mutta `kb.products.booking_url` oli 24.10.2026 klo 22.40 (UTC+3) taas
-   Johku-osoitteissa (163:n rollback ajettu?). Jos 163 ajetaan uudelleen, se kirjoittaa nyt suoraan `https://saunotus.fi/varaa/#/…`.
+     `select count(*) from kb.products where concat_ws(' ', description, description_en, short_description, short_description_en, booking_url, source_url) like '%uusi.saunotus%';` → 0
+2. Jo ajettuja migraatioita booking_161 ja booking_163 (sekä niiden rollbackeja ja testejä t161/t163) ei muuteta, koska ajetut migraatiot
+   ovat muuttumatonta historiaa. Ne kirjoittavat vanhan kehitysosoitteen, ja booking_170 korjaa sen tuotannossa. Huom: booking_163 on
+   peruttu tuotannossa (`kb.products.booking_url` on taas Johku-osoitteissa), ja se jätetään sellaiseksi. Jos 163 joskus ajetaan uudelleen,
+   se kirjoittaa vanhan kehitysosoitteen. Koodi ohjaa sen sivuston omaan polkuun, mutta osoite on silloin korjattava uudella migraatiolla.
 
 ## B. Siirtopäivä 1.11.2026
 
@@ -56,5 +69,6 @@ ennen kuin Joonas on erikseen kirjoittanut OK:n juuri tälle muutokselle. Ennen 
 3. Tietokannan historia- ja lähdetiedot viittaavat yhä vanhaan osoitteeseen. Ne eivät näy asiakkaalle, eikä booking_170 muuta niitä:
    `kb.sources.url` (12), `kb.faq/opening_hours/policies/locations/businesses.source_url` (10/10/9/2/1), `kb.review_items.fix_url` (28),
    `booking.site_text_versions` (versiohistoria) ja audit-/change-logit. Päätettävä erikseen, jätetäänkö ne historiaksi.
-4. Tarkistus: `rg 'uusi\.saunotus\.com'` repossa löytää vain booking_170-migraation, sen rollbackin ja tämän ajokirjan.
+4. Tarkistus: `rg 'uusi\.saunotus\.com'` repossa löytää vain yllä luetellut poikkeukset (`booking/tests/osoite-saunotus-fi-170.test.mjs`).
+   Kun kehityssivu poistetaan, `LEGACY_CANONICAL`-tunnistus voidaan poistaa vasta, kun tietokannassa ei ole vanhaa osoitetta.
 5. Joonas valitsee: poistetaanko kehityssivu kokonaan vai ohjataanko `uusi.saunotus.com` → `https://saunotus.fi` (301) siirtymäajan.

@@ -6,6 +6,11 @@
 // Testit: booking/tests/linkit-kauppaan.test.mjs.
 export const JOHKU_URL = /^https:\/\/sipoonjoenperinnesauna\.johku\.com(?:\/([^/?#]+))?\/?([^?#]*)/;
 export const CANONICAL = 'https://saunotus.fi';
+// Vanha kehitysosoite: jo ajetut migraatiot booking_161/163 kirjoittivat sen tietokantaan (ajettuja migraatioita ei muuteta). booking_170
+// korvaa sen, mutta ennen 170:n ajoa tai sen rollbackin jälkeen se on yhä kuvauksissa → ohjataan samoin sivuston BASE-polkuun
+// (sivustolle ei koskaan päädy linkkiä vanhalle kehityssivulle). Testit: booking/tests/osoite-saunotus-fi-170.test.mjs.
+export const LEGACY_CANONICAL = 'https://uusi.saunotus.com';
+const CANON_BASES = [CANONICAL, LEGACY_CANONICAL];
 // Johkun lahjakorttipaketit: avoin lahjakortti → lahjakorttisivun #avoin, muut paketit → #paketit (gift.js säilyttää id:t myynnin ollessa auki).
 const GIFT_OPEN = new Set(['lahjakortti']);
 
@@ -18,7 +23,10 @@ const join = (a, b) => (a || '') + (b || '');
 export function shopTarget(url, ctx = {}) {
   const u = String(url || '').trim();
   if (!ctx.shop) return null;
-  if (ctx.base != null && (u === CANONICAL || u.startsWith(CANONICAL + '/') || u.startsWith(CANONICAL + '#'))) return join(ctx.base, u.slice(CANONICAL.length) || '/');
+  if (ctx.base != null) {
+    const c = CANON_BASES.find((b) => u === b || u.startsWith(b + '/') || u.startsWith(b + '#'));
+    if (c) return join(ctx.base, u.slice(c.length) || '/');
+  }
   const m = JOHKU_URL.exec(u);
   if (!m) return null;
   const parts = (m[2] || '').replace(/\/+$/, '').split('/').filter(Boolean);
@@ -45,7 +53,7 @@ export function shopTarget(url, ctx = {}) {
 }
 
 /** HTML-merkkijonon <a href="johku…|kanoninen…"> → sivuston osoite (build-aika). Uuteen välilehteen -merkinnät ja target poistetaan. */
-const ANCHOR = /<a\b([^>]*?)href="((?:https:\/\/sipoonjoenperinnesauna\.johku\.com|https:\/\/saunotus\.fi)(?:[/#][^"]*)?)"([^>]*)>([\s\S]*?)<\/a>/g;
+const ANCHOR = /<a\b([^>]*?)href="((?:https:\/\/sipoonjoenperinnesauna\.johku\.com|https:\/\/saunotus\.fi|https:\/\/uusi\.saunotus\.com)(?:[/#][^"]*)?)"([^>]*)>([\s\S]*?)<\/a>/g;
 const NOTE = /<span class="sr"> \((?:avautuu uuteen välilehteen|opens in a new tab)\)<\/span>/g;
 const attr = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 export function rewriteHtml(html, ctx) {

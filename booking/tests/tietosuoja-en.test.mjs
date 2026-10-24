@@ -62,18 +62,33 @@ test('privacyDocFor: EN-meta/hero kb:n EN-tekstistä, kuvat FI-sivulta; ilman EN
   assert.ok(long.meta.description.endsWith('…'));
 });
 
-test('varalla (kb.json ilman _en-tekstejä): ei EN-sivua, EN-alatunniste linkittää suomenkieliseen sivuun', () => {
+test('snapshot (kb.json 24.10.2026): policy 7 title_en/body_en tuotannosta → /en/privacy/ käytössä', () => {
   const p = lib.kb.policies.find((x) => x.id === 7);
-  assert.ok(p && !p.body_en, 'testi olettaa, että snapshotissa ei vielä ole body_en');
-  assert.equal(lib.site.pages.privacy.en, null);
+  assert.ok(p && p.title_en && p.body_en, 'snapshotissa on tietosuojaselosteen EN-teksti (booking_165)');
+  assert.equal(lib.site.pages.privacy.en, '/en/privacy/');
   assert.equal(lib.site.pages.privacy.fi, '/tietosuoja/');
-  const f = footer(quiet(() => R.layout({ lang: 'en', key: 'home', meta: { title: 't', description: 'd' }, body: '' })));
-  assert.match(f, /<a href="\/tietosuoja\/" hreflang="fi" lang="fi">/);
-  assert.doesNotMatch(f, /\/en\/privacy\//);
+});
+
+test('varalla (policy 7 ilman _en-tekstejä): ei EN-sivua, EN-alatunniste linkittää suomenkieliseen sivuun', () => {
+  const p = lib.kb.policies.find((x) => x.id === 7);
+  const saved = { title_en: p.title_en, body_en: p.body_en }, pages = lib.site.pages;
+  delete p.title_en; delete p.body_en;
+  lib.site.pages = PL.resolvePrivacyPages(J('content/site.json').pages, lib.kb.policies, J('content/pages/privacy.json').fi.policies);
+  try {
+    assert.equal(lib.site.pages.privacy.en, null);
+    assert.equal(lib.site.pages.privacy.fi, '/tietosuoja/');
+    const f = footer(quiet(() => R.layout({ lang: 'en', key: 'home', meta: { title: 't', description: 'd' }, body: '' })));
+    assert.match(f, /<a href="\/tietosuoja\/" hreflang="fi" lang="fi">/);
+    assert.doesNotMatch(f, /\/en\/privacy\//);
+  } finally {
+    for (const [k, v] of Object.entries(saved)) if (v === undefined) delete p[k]; else p[k] = v;
+    lib.site.pages = pages;
+  }
 });
 
 test('EN-tekstit olemassa: /en/privacy/ näyttää title_en/body_en, alatunniste ja kielivalitsin osoittavat EN-sivuun', () => {
   const p = lib.kb.policies.find((x) => x.id === 7);
+  const saved = { title_en: p.title_en, body_en: p.body_en }, pages = lib.site.pages;
   Object.assign(p, { title_en: 'Privacy policy (EN)', body_en: 'Controller: Havuhattu Oy.\nContact: savusauna@saunotus.fi' });
   lib.site.pages = PL.resolvePrivacyPages(J('content/site.json').pages, lib.kb.policies, J('content/pages/privacy.json').fi.policies);
   try {
@@ -88,5 +103,21 @@ test('EN-tekstit olemassa: /en/privacy/ näyttää title_en/body_en, alatunniste
     const fi = quiet(() => R.policyPage('privacy', 'privacy', 'fi'));
     assert.match(fi, new RegExp(`<h2>${p.title.replace(/[()]/g, '\\$&')}</h2>`));
     assert.match(fi, /href="\/en\/privacy\/"/);
-  } finally { delete p.title_en; delete p.body_en; }
+  } finally {
+    for (const [k, v] of Object.entries(saved)) if (v === undefined) delete p[k]; else p[k] = v;
+    lib.site.pages = pages;
+  }
+});
+
+test('EN-sivu: julkaistun EN-selosteen kohta 7 "Cookie-free visitor analytics" → erillistä analytiikkakohtaa ei näytetä kahdesti', async () => {
+  const PA = await import('../../src/privacy-analytics.mjs');
+  assert.equal(PA.policyHasAnalyticsSection('7. Cookie-free visitor analytics'), true);
+  assert.equal(PA.policyHasAnalyticsSection('Cookie-free visitor analytics is described in section 7.'), false);
+  const p = lib.kb.policies.find((x) => x.id === 7);
+  assert.ok(PA.policyHasAnalyticsSection(p.body_en), 'snapshotin body_en sisältää kohdan 7');
+  const html = quiet(() => R.policyPage('privacy', 'privacy', 'en'));
+  assert.equal((html.match(/<h2>Cookieless visitor analytics<\/h2>/g) || []).length, 0);
+  assert.equal((html.match(/<p>7\. Cookie-free visitor analytics<\/p>/g) || []).length, 1);
+  const fi = quiet(() => R.policyPage('privacy', 'privacy', 'fi'));
+  assert.equal((fi.match(/<h2>Evästeetön kävijämittaus<\/h2>/g) || []).length, 0);
 });

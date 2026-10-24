@@ -28,7 +28,7 @@ test('migraatio: 16 tuotetta, Johku → /varaa/#/tuote/<oma slug> (vuosikortti #
     assert.equal(md5(x.to), x.toMd5, `${x.id} uusi`);
     assert.ok(x.from.startsWith(JOHKU), `${x.id} alkuperäinen on Johku-osoite`);
     assert.ok(x.from.endsWith('/' + x.slug), `${x.id} Johku-polku päättyy slugiin`);
-    assert.equal(x.to, 'https://saunotus.fi/varaa/#/' + (x.slug === 'vuosikortti' ? 'vuosikortti' : 'tuote/' + x.slug));
+    assert.equal(x.to, 'https://uusi.saunotus.com/varaa/#/' + (x.slug === 'vuosikortti' ? 'vuosikortti' : 'tuote/' + x.slug));
     assert.match(MIG, new RegExp(`--\\s+${x.id} ${x.fromMd5} → ${x.toMd5}`));
   }
 });
@@ -53,26 +53,33 @@ test('rollback on migraation peilikuva', () => {
   m.forEach((x, i) => assert.deepEqual(r[i], { id: x.id, slug: x.slug, from: x.to, to: x.from, fromMd5: x.toMd5, toMd5: x.fromMd5 }));
 });
 
-test('kb.json-snapshot vastaa ajon jälkeistä tilaa; tuotteet olemassa ja muut ennallaan', () => {
+// booking_163 peruttiin tuotannossa 24.10.2026 (rollback; migraatio jää kirjatuksi ajetuksi). Snapshot saa olla joko ennen
+// 163:a (Johku) tai 163:n jälkeen (kauppa) – kunhan kaikki 16 samassa tilassa – kunnes 1.11. siirron jälkeen tehdään uusi versio
+// lopullisella domainilla. Sivusto ei silti näytä Johku-linkkejä (build-vartija, src/lib.mjs).
+test('kb.json-snapshot: 16 tuotetta joko ennen 163:a (Johku) tai sen jälkeen (kauppa), yhtenäisesti; muut ennallaan', () => {
   const m = new Map(rows(MIG).map((x) => [x.id, x]));
+  const states = new Set();
   for (const id of IDS) {
     const p = kb.products.find((x) => x.id === id);
     assert.ok(p, `kb.json tuote ${id}`);
     assert.equal(p.slug, m.get(id).slug);
-    assert.equal(p.booking_url, m.get(id).to);
+    const { from, to } = m.get(id);
+    assert.ok(p.booking_url === from || p.booking_url === to, `${id}: booking_url on 163:n alku- tai loppuarvo (${p.booking_url})`);
+    states.add(p.booking_url === to ? 'shop' : 'johku');
   }
+  assert.equal(states.size, 1, 'kaikki 16 tuotetta samassa tilassa (ajettu tai peruttu)');
   const p47 = kb.products.find((x) => x.id === 47);
   if (p47) assert.ok(p47.booking_url.startsWith(JOHKU), '47 ei kaupan tuote: ennallaan');
 });
 
 test('sivusto: kanoninen kauppaosoite → EN /en/book/, build ohjaa BASE-polkuun', async () => {
   const L = await import('../../src/lib.mjs');
-  const u = 'https://saunotus.fi/varaa/#/tuote/naistensauna';
+  const u = 'https://uusi.saunotus.com/varaa/#/tuote/naistensauna';
   assert.equal(L.bookingUrl(u, 'fi'), u);
-  assert.equal(L.bookingUrl(u, 'en'), 'https://saunotus.fi/en/book/#/tuote/naistensauna');
-  assert.equal(L.bookingUrl('https://saunotus.fi/varaa/#/vuosikortti', 'en'), 'https://saunotus.fi/en/book/#/vuosikortti');
+  assert.equal(L.bookingUrl(u, 'en'), 'https://uusi.saunotus.com/en/book/#/tuote/naistensauna');
+  assert.equal(L.bookingUrl('https://uusi.saunotus.com/varaa/#/vuosikortti', 'en'), 'https://uusi.saunotus.com/en/book/#/vuosikortti');
   assert.equal(L.bookingUrl(JOHKU + 'hoidot/x', 'en'), 'https://sipoonjoenperinnesauna.johku.com/en_US/hoidot/x');
-  assert.equal(shopTarget('https://saunotus.fi/en/book/#/tuote/naistensauna', { shop: '/b/en/book/', base: '/b' }), '/b/en/book/#/tuote/naistensauna');
+  assert.equal(shopTarget('https://uusi.saunotus.com/en/book/#/tuote/naistensauna', { shop: '/b/en/book/', base: '/b' }), '/b/en/book/#/tuote/naistensauna');
 });
 
 test('SQL-testi t163 kattaa vartijat, synkan, rollbackin ja uudelleenajon', () => {

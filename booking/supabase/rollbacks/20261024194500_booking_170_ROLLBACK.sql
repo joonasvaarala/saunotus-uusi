@@ -1,6 +1,9 @@
 -- ROLLBACK booking_170_osoite_saunotus_fi: palauttaa kb.productsin 11 kenttään vanhan kehitysosoitteen täsmälleen.
--- Ajetaan vain, jos myös koodimuutos (CANONICAL https://saunotus.fi) perutaan; muuten sivuston linkit osoittavat vanhaan kehityssivuun.
+-- Ajetaan vain, jos booking_170 halutaan perua. Koodi (LEGACY_CANONICAL) ohjaa vanhan osoitteen silloinkin sivuston omaan polkuun.
 -- Vartija: jokaisen kentän md5 on oltava migraation kirjoittama (tai jo alkuperäinen → ohitetaan), muuten exception ennen yhtään muutosta.
+-- needs_translation: kuten migraatiossa, product.<id>.description [fi/en] -rivien liput otetaan talteen ennen palautusta ja palautetaan
+-- täsmälleen sen jälkeen (trigger zz_site_text_sync muuttaisi ne). Koska migraatio ei muuttanut lippuja, tila on ajon jälkeen sama kuin
+-- ennen booking_170:tä. Vartija: rivin julkaistu teksti on oltava täsmälleen palautettu alkuperäinen (md5 = from_md5), muuten exception.
 set local lock_timeout = '5s';
 set local statement_timeout = '60s';
 
@@ -8,7 +11,11 @@ do $rfi$
 declare
   old_base constant text := 'https://uusi.saunotus.com';
   new_base constant text := 'https://saunotus.fi';
-  r record; cur text; cnt int; n int := 0; skip int := 0;
+  r record; t record; cur text; cnt int; n int := 0; skip int := 0;
+  todo jsonb := '{}';         -- palautettavat kentät: '<tuote>:<sarake>' → from_md5
+  pids int[] := '{}';
+  nt_before jsonb := '{}';    -- site_texts.id → needs_translation ennen palautusta
+  nt_n int := 0;
 begin
   for r in select * from (values
     (1, 'description', 1, '75312781e1c3861c69c0112428ebf5f1', 'f0561a9145ea81e3854f1123fa714f0e'),
@@ -33,7 +40,15 @@ begin
     if cnt <> r.occurrences or md5(replace(cur, new_base, old_base)) <> r.from_md5 then
       raise exception 'rollback booking_170: tuote % %: palautus ei tuottaisi alkuperäistä tekstiä', r.product_id, r.col;
     end if;
+    todo := todo || jsonb_build_object(r.product_id || ':' || r.col, r.from_md5);
+    if not r.product_id = any(pids) then pids := pids || r.product_id; end if;
   end loop;
+
+  select coalesce(jsonb_object_agg(x.id::text, x.needs_translation), '{}') into nt_before
+    from (select st.id, st.needs_translation from booking.site_texts st
+           where st.source_table = 'kb.products' and st.source_pk = any(select p::text from unnest(pids) p)
+             and st.key = 'product.' || st.source_pk || '.description' and st.lang in ('fi', 'en')
+           for update) x;
 
   for r in select * from (values
     (1, 'description', 1, '75312781e1c3861c69c0112428ebf5f1', 'f0561a9145ea81e3854f1123fa714f0e'),
@@ -53,6 +68,22 @@ begin
     get diagnostics cnt = row_count;
     n := n + cnt;
   end loop;
-  raise notice 'rollback booking_170: palautettu % kenttää, ohitettu %', n, skip;
+
+  for t in select st.id, st.key, st.lang, st.source_pk, st.source_column, st.needs_translation, st.published_text
+             from booking.site_texts st where st.id::text in (select jsonb_object_keys(nt_before)) order by st.id loop
+    continue when t.needs_translation = (nt_before ->> t.id::text)::boolean;
+    if todo ->> (t.source_pk || ':' || t.source_column) is null and not exists (
+         select 1 from booking.site_texts o where o.key = t.key and o.lang in ('fi', 'en') and o.lang <> t.lang
+            and todo ->> (o.source_pk || ':' || o.source_column) is not null) then
+      raise exception 'rollback booking_170: % [%] needs_translation muuttui, mutta kumpaakaan kieliversiota ei palautettu – ei muutoksia', t.key, t.lang;
+    end if;
+    if md5(t.published_text) is distinct from (select md5(coalesce(to_jsonb(p) ->> t.source_column, '')) from kb.products p where p.id::text = t.source_pk)
+       or (todo ->> (t.source_pk || ':' || t.source_column) is not null and md5(t.published_text) <> todo ->> (t.source_pk || ':' || t.source_column)) then
+      raise exception 'rollback booking_170: % [%] julkaistu teksti ei ole palautettu alkuperäinen (md5 %) – ei muutoksia', t.key, t.lang, md5(t.published_text);
+    end if;
+    update booking.site_texts set needs_translation = (nt_before ->> t.id::text)::boolean where id = t.id;
+    nt_n := nt_n + 1;
+  end loop;
+  raise notice 'rollback booking_170: palautettu % kenttää, ohitettu %; needs_translation palautettu ennalleen % rivillä', n, skip, nt_n;
 end
 $rfi$;
