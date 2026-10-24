@@ -1,6 +1,6 @@
 -- booking_131: varauksettomat lahjakorttitilaukset ovat maksettavissa ilman paikkavarausta.
 -- Paikkavarausten (booking.reservations) 15 minuutin vanhenemislogiikka säilyy.
--- Rollback: booking/supabase/rollbacks/20261024050000_booking_131_ROLLBACK.sql
+-- Rollback: booking/supabase/rollbacks/20261024054738_booking_131_ROLLBACK.sql
 set local lock_timeout = '5s';
 
 create or replace function booking._checkout_state_json(p_order bigint)
