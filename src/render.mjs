@@ -4,6 +4,7 @@ import { sortReviews } from './reviews-sort.mjs';
 import { cards, alts, pageDoc } from './content-texts.mjs';
 import { articlesNav, homeSection } from './articles/runtime.mjs';
 import { tx } from './site-texts.mjs';
+import { seoSchemaForPage, jsonLdScript } from './seo-enhance.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
   johku, bookingUrl, phoneDisplay, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
@@ -217,10 +218,10 @@ function jsonLd(lang) {
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const spec = kb.hours.filter((h) => h.opens && ['public', 'men', 'women', 'silent'].includes(h.session_type)).map((h) => ({ '@type': 'OpeningHoursSpecification', dayOfWeek: days[h.weekday - 1], opens: hm(h.opens).includes(':') ? hm(h.opens) : hm(h.opens) + ':00', closes: hm(h.closes).includes(':') ? hm(h.closes) : hm(h.closes) + ':00' }));
   return JSON.stringify({
-    '@context': 'https://schema.org', '@type': ['HealthAndBeautyBusiness', 'LocalBusiness'], name: b.trade_name, legalName: b.legal_name,
+    '@context': 'https://schema.org', '@type': ['DaySpa', 'HealthAndBeautyBusiness'], '@id': abs('/#business'), name: b.trade_name, legalName: b.legal_name,
     url: SITE_URL + '/', telephone: site.contact.phoneTel, email: site.contact.email, image: abs('/img/og-hero-ovi-uusi.jpg'),
     address: { '@type': 'PostalAddress', streetAddress: b.street_address, postalCode: b.postal_code, addressLocality: b.city, addressCountry: 'FI' },
-    openingHoursSpecification: spec, sameAs: site.social.map((s) => s.url), inLanguage: lang,
+    openingHoursSpecification: spec, sameAs: site.social.map((s) => s.url), priceRange: '€€', inLanguage: lang,
   });
 }
 export function layout({ lang, key, meta, body, preload = '', robotsOnly = false, seo = null, extraCss = '' }) {
@@ -253,11 +254,11 @@ export function layout({ lang, key, meta, body, preload = '', robotsOnly = false
 ${isTest ? '<meta name="robots" content="noindex,nofollow">' : (seo?.robots ? `<meta name="robots" content="${e(seo.robots)}">` : '')}
 <link rel="canonical" href="${e(url)}">${hl}${xdef}${seo?.extraHead || ''}
 <meta property="og:type" content="${seo?.ogType || 'website'}"><meta property="og:site_name" content="${e(u.siteName)}"><meta property="og:title" content="${e(meta.title)}"><meta property="og:description" content="${e(meta.description)}"><meta property="og:url" content="${e(url)}"><meta property="og:image" content="${e(og)}">${ogSize}<meta property="og:locale" content="${u.locale}">${seo?.ogExtra || ''}
-<meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#2B3A30">
+${alt_[o] && !seo ? `<meta property="og:locale:alternate" content="${ui(o).locale}">` : ''}<meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#2B3A30">
 <link rel="icon" href="${href('/img/favicon.svg')}" type="image/svg+xml">
 <link rel="preload" href="${href('/fonts/Lato-normal-400.woff2')}" as="font" type="font/woff2" crossorigin>${preload}
 <style>${css}${seo?.extraCss || ''}${extraCss}</style>
-<script type="application/ld+json">${jsonLd(lang)}</script>${(seo?.jsonLd || []).map((j) => `<script type="application/ld+json">${JSON.stringify(j).replace(/</g, '\\u003c')}</script>`).join('')}
+<script type="application/ld+json">${jsonLd(lang)}</script>${(seo?.jsonLd || []).map((j) => `<script type="application/ld+json">${JSON.stringify(j).replace(/</g, '\\u003c')}</script>`).join('')}${seo ? '' : seoSchemaForPage({ lang, key, url, body }).map(jsonLdScript).join('')}
 </head><body>
 ${isTest ? `<div class="testbar" role="note">${e(u.siteTestNote)}</div>` : ''}
 <a class="skip" href="#main">${e(u.skip)}</a>

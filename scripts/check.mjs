@@ -25,6 +25,8 @@ let nLinks = 0, nImgs = 0;
 for (const f of files) {
   const h = htmlOf.get(f);
   const where = f.replace(DIST + '/', '');
+  // Paketti 11: vanhojen WordPress-osoitteiden ohjaussivut (data-redirect="legacy" + meta refresh) eivät ole sisältösivuja: ei title-/description-/h1-vertailua, mutta noindex pakollinen.
+  if (/<html[^>]*data-redirect="legacy"/.test(h) && /<meta http-equiv="refresh"/i.test(h)) { if (!/<meta name="robots" content="noindex/.test(h)) errs.push(`${where}: ohjaussivulta puuttuu noindex`); continue; }
   const t = /<title>([^<]*)/.exec(h)?.[1], d = /<meta name="description" content="([^"]*)"/.exec(h)?.[1];
   if (f !== join(DIST, '404.html')) {
     if (!t) errs.push(`${where}: title puuttuu`); else if (titles.has(t)) warns.push(`${where}: sama title kuin ${titles.get(t)}`); else titles.set(t, where);
