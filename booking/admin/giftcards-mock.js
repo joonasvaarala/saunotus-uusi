@@ -25,7 +25,7 @@ export function createGiftMock({ today = new Date().toLocaleDateString('sv-SE', 
   const log = (id, e) => { const l = ledgers.get(id) || []; l.push({ id: ledgerId++, at: `${today}T09:00:00Z`, meta: null, note: null, order_id: null, order_no: null, payment_id: null, old_valid_to: null, new_valid_to: null, created_by: null, ...e }); ledgers.set(id, l); };
   function add(o) {
     const id = cards.length + 1, pkg = MOCK_PACKAGES.find((p) => p.code === (o.package_code || 'open')), n = norm(o.rawCode || mkCode());
-    const c = { id, code: fmtCode(n), code_last4: n.slice(-4), source: 'native', issuer: 'own', kind: pkg.kind, package_code: pkg.code, package_name: pkg.name, product_id: null, initial_amount: o.initial, balance: o.balance ?? o.initial,
+    const c = { id, code: fmtCode(n), code_last4: n.slice(-4), source: 'native', issuer: 'own', kind: pkg.kind, package_code: pkg.code, package_name: pkg.name, product_name: pkg.name, product_id: null, initial_amount: o.initial, balance: o.balance ?? o.initial,
       currency: 'EUR', status: 'active', valid_from: o.valid_from || today, valid_to: o.valid_to || monthsAdd(today, 6), balance_verified: true, balance_source: 'native', vat_treatment: pkg.vat_treatment || 'at_sale', sale_vat_rate: 25.5, accounting_origin: 'native',
       single_order: false, buyer_customer_id: null, buyer_name: null, buyer_email: null, recipient_name: null, recipient_email: null, greeting: null, locale: 'fi', purchase_order_id: null, order_no: null,
       delivery_to: 'buyer', cover_message: null, deliver_on: null, deliver_time: null, delivered_at: null,   // §13.11
@@ -45,10 +45,14 @@ export function createGiftMock({ today = new Date().toLocaleDateString('sv-SE', 
   add({ package_code: 'entry_2', initial: 58, created: dayAdd(today, -170), valid_to: dayAdd(today, 12), over: { recipient_name: 'Pian Vanhenevat' } });
   add({ package_code: 'open', initial: 100, balance: 100, created: dayAdd(today, -2), over: { status: 'cancelled', recipient_name: 'Mitätöity Esimerkki', note: 'Mitätöity: väärä summa' } });
   add({ package_code: 'saunotus_2', initial: 328, balance: 0, created: dayAdd(today, -1), ledger: false, over: { status: 'pending_payment', activated_at: null, valid_to: null, buyer_name: 'Maksuton Ostaja', buyer_email: 'odottaa@example.invalid', recipient_name: 'Odottava Saaja', order_no: 15099, purchase_order_id: 7099 } });
-  for (let i = 0; i < 18; i++) {
+  // Johku-kortit (31 kpl; booking_145): ei pakettia, tuotteen nimi tulee Johkun tuotteesta tai mallista (kuten _gc_product_name tuotannossa).
+  const JOHKU_PRODUCTS = ['Avoin lahjakortti', 'Savusaunaelämys ja saunahoito -lahjakortti', 'Avoin lahjakortti', 'Savusaunaelämys ja koivuvihta -lahjakortti', 'Arkivuoro kahdelle'];
+  const JOHKU_BUYERS = ['Ville Ahonen', 'Öhman Testi', 'Åsa Lindqvist', 'Emma Lehtonen', 'Jari Peltonen', 'Ärje Esimerkki', 'Riikka Kallio'];
+  for (let i = 0; i < 31; i++) {
     const init = [25, 40, 60, 80, 100, 150][i % 6], bal = [init, init, Math.round(init / 2), 0][i % 4];
     const c = add({ rawCode: `JK${String(100000000 + i * 7919).slice(0, 10)}`, package_code: 'open', initial: init, balance: bal, created: dayAdd(today, -300 + i * 9), valid_to: dayAdd(today, 30 + i * 11),
-      over: { source: 'johku', issuer: 'johku', accounting_origin: 'johku', vat_treatment: 'at_sale', balance_source: 'johku_api', buyer_name: NAMES[i % 6][1], buyer_email: `johku${i + 1}@example.invalid`, single_order: i % 9 === 4, balance_verified: i % 7 !== 3, status: bal === 0 ? 'used' : i % 7 === 3 ? 'pending_verification' : 'active' } });
+      over: { source: 'johku', issuer: 'johku', accounting_origin: 'johku', vat_treatment: 'at_sale', balance_source: 'johku_api', package_code: null, package_name: null, product_name: JOHKU_PRODUCTS[i % 5],
+        buyer_name: i < 18 ? NAMES[i % 6][1] : JOHKU_BUYERS[i % 7], buyer_email: `johku${i + 1}@example.invalid`, single_order: i % 9 === 4, balance_verified: i % 7 !== 3, status: bal === 0 ? 'used' : i % 7 === 3 ? 'pending_verification' : 'active' } });
     if (bal < init) log(c.id, { delta: bal - init, reason: 'johku_usage', balance_after: bal });
   }
   const err = (code, message) => Object.assign(new Error(message || code), { code, status: 400 });
@@ -56,14 +60,17 @@ export function createGiftMock({ today = new Date().toLocaleDateString('sv-SE', 
   const view = (c) => ({ ...c, effective_status: eff(c) });
   const find = (a) => { const c = a.p_id != null ? cards.find((x) => x.id === +a.p_id) : cards.find((x) => norm(x.code) === norm(a.p_code)); if (!c) throw err('gift_card_not_found', 'Lahjakorttia ei löydy'); return c; };
   const ledgerSum = (id) => round2((ledgers.get(id) || []).reduce((s, x) => s + x.delta, 0));
-  const SORTS = { created_desc: (a, b) => b.id - a.id, created_asc: (a, b) => a.id - b.id, valid_to_asc: (a, b) => String(a.valid_to || '9999').localeCompare(String(b.valid_to || '9999')) || b.id - a.id, valid_to_desc: (a, b) => String(b.valid_to || '').localeCompare(String(a.valid_to || '')) || b.id - a.id,
+  const who = (c) => String(c.recipient_name || '').trim() || String(c.buyer_name || '').trim();
+  const fiCmp = new Intl.Collator('fi', { sensitivity: 'base' }).compare;
+  const SORTS = { created_desc: (a, b) => String(b.created_at).localeCompare(String(a.created_at)) || b.id - a.id, created_asc: (a, b) => String(a.created_at).localeCompare(String(b.created_at)) || a.id - b.id,
+    name_asc: (a, b) => (!who(a) - !who(b)) || fiCmp(who(a), who(b)) || a.code.localeCompare(b.code),   // booking_145: saaja, muuten ostaja; fi-aakkoset; nimettömät viimeisenä valid_to_asc: (a, b) => String(a.valid_to || '9999').localeCompare(String(b.valid_to || '9999')) || b.id - a.id, valid_to_desc: (a, b) => String(b.valid_to || '').localeCompare(String(a.valid_to || '')) || b.id - a.id,
     balance_desc: (a, b) => b.balance - a.balance || b.id - a.id, balance_asc: (a, b) => a.balance - b.balance || b.id - a.id, initial_desc: (a, b) => b.initial_amount - a.initial_amount || b.id - a.id, initial_asc: (a, b) => a.initial_amount - b.initial_amount || b.id - a.id };
   const handlers = {
     admin_list_gift_card_packages: () => ({ packages: MOCK_PACKAGES.map((p) => ({ ...p, updated_at: `${today}T00:00:00Z`, kb_product_id: null })), settings: { redeem_enabled: sett.redeem_enabled, johku_cards_redeemable: sett.johku_cards_redeemable, sale_enabled: sett.sale_enabled } }),
     admin_list_gift_cards: (a) => {
       const sort = a.p_sort || 'created_desc'; if (!SORTS[sort]) throw err('invalid_sort', 'Tuntematon lajittelu');
       const s = String(a.p_search || '').trim().toLowerCase(), ns = norm(s);
-      let rows = cards.filter((c) => !s || (ns.length >= 4 && norm(c.code).includes(ns)) || [c.buyer_name, c.buyer_email, c.recipient_name, c.recipient_email].some((v) => v && v.toLowerCase().includes(s)) || (/^\d{1,10}$/.test(s) && String(c.order_no) === s));
+      let rows = cards.filter((c) => !s || (ns.length >= 4 && norm(c.code).includes(ns)) || [c.buyer_name, c.buyer_email, c.recipient_name, c.recipient_email, c.product_name].some((v) => v && v.toLowerCase().includes(s)) || (/^\d{1,10}$/.test(s) && String(c.order_no) === s));
       if (a.p_status) rows = rows.filter((c) => (a.p_status === 'expired' ? eff(c) === 'expired' : a.p_status === 'active' ? eff(c) === 'active' : c.status === a.p_status));
       if (a.p_source) rows = rows.filter((c) => c.source === a.p_source); if (a.p_kind) rows = rows.filter((c) => c.kind === a.p_kind); if (a.p_package) rows = rows.filter((c) => c.package_code === a.p_package);
       if (a.p_unverified != null) rows = rows.filter((c) => c.balance_verified === !a.p_unverified);
