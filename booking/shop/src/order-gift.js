@@ -98,7 +98,7 @@ export function redeemSection({ L, api, token, onApplied, onClaimed, bare = fals
     btn.disabled = false; btn.textContent = tx('o.apply');
   } }, fc.wrap, fa.wrap, h('div', { class: 'gc-btnrow' }, btn, chk), msg);
   if (bare) return h('div', { class: 'gc-redeem-bare', role: 'group', 'aria-label': tx('o.useTitle'), 'data-testid': 'gc-redeem' }, h('p', { class: 'bk-note', text: tx('o.useLead') }), form, choose);
-  return h('section', { class: 'ord-card', 'aria-labelledby': 'ord-gc', 'data-testid': 'gc-redeem' }, h('h3', { id: 'ord-gc', text: tx('o.useTitle') }), h('p', { class: 'bk-note', text: tx('o.useLead') }), form, choose);
+  return h('section', { class: 'ord-card', 'aria-labelledby': 'ord-gc', 'data-testid': 'gc-redeem' }, h('h3', { id: 'ord-gc', class: 'ord-card-title', text: tx('o.useTitle') }), h('p', { class: 'bk-note', text: tx('o.useLead') }), form, choose);
 }
 
 // Tilaussivun lunastuspyynnöt (public_get_order_voucher_claims): tila, ongelmatekstit ja koodin korjaus (public_update_voucher_claim_code, kun can_update_code=true).
@@ -141,41 +141,49 @@ export function claimsSection({ S, L, api, token, claims, notice = null, onChang
       v.state === 'problem' && ['already_used', 'other'].includes(v.problemCode) ? phoneBox(S, tx) : null, fix);
   });
   const note = notice ? h('div', { class: `vc-notice ${notice.ok ? 'ok' : 'bad'}`, role: 'status', tabindex: '-1', 'data-testid': 'vc-notice' }, h('p', { class: 'vc-notice-main', text: notice.text }), notice.extra ? h('p', { class: 'vc-notice-extra', text: notice.extra }) : null) : null;
-  return h('section', { class: 'ord-card', 'aria-labelledby': 'ord-vc', 'data-testid': 'vc-claims' }, h('h3', { id: 'ord-vc', text: tx('vc.title') }), note, h('p', { class: 'bk-note', text: tx('vc.lead') }), h('ul', { class: 'ord-lines vc-list' }, items));
+  return h('section', { class: 'ord-card', 'aria-labelledby': 'ord-vc', 'data-testid': 'vc-claims' }, h('h3', { id: 'ord-vc', class: 'ord-card-title', text: tx('vc.title') }), note, h('p', { class: 'bk-note', text: tx('vc.lead') }), h('ul', { class: 'ord-lines vc-list' }, items));
 }
 
-// Ostetut kortit + koodin näyttö
-export function cardsSection({ S, L, api, cards }) {
+// Ostetut kortit + koodin näyttö. quiet = lahjakorttitilaus: sivun yksi tila riittää, ei toista merkkia kortilla.
+// Valmis ostajalle tuleva kortti avaa koodin ja PDF-napin itse (ei erillistä "näytä koodi" -askelta).
+export function cardsSection({ S, L, api, cards, lead = '', quiet = false }) {
   const F = makeFmt(L), { tx, money, date } = F;
   const items = cards.map((c) => {
     const panel = h('div', { class: 'gc-reveal', hidden: true, 'data-testid': 'gc-reveal' });
     const status = GT[L][`cst.${c.status}`] ? tx(`cst.${c.status}`) : c.status;
+    const showBadge = !quiet || !['pending_payment', 'active'].includes(c.status);
     // Toimitusvalinta (sopimus §13.11): suoraan saajalle toimitettavan kortin koodia ja PDF-linkkiä ei näytetä ostajalle (yllätyslahja)
     const rec = c.delivery_to === 'recipient', hhmm = (t) => String(t || '09:00').replace(/^0/, '');
     const dlvNote = rec ? (c.delivered_at ? tx('o.dlvRecipientSent', { date: date(G.helsinkiNow(new Date(c.delivered_at)).date) }) : c.deliver_on ? tx('o.dlvRecipientAt', { date: date(c.deliver_on), time: hhmm(c.deliver_time) }) : tx('o.dlvRecipientNow'))
-      : (c.delivered_at ? tx('o.dlvBuyerSent', { date: date(G.helsinkiNow(new Date(c.delivered_at)).date) }) : !c.ready ? tx('o.dlvBuyer') : '');
-    const btn = h('button', { type: 'button', class: 'btn light ord-btn', 'data-testid': 'gc-show', text: tx('o.showCode'), 'aria-expanded': 'false', onclick: async () => {
-      if (!panel.hidden) { panel.hidden = true; btn.textContent = tx('o.showCode'); btn.setAttribute('aria-expanded', 'false'); return; }
-      btn.disabled = true;
+      : (c.delivered_at ? tx('o.dlvBuyerSent', { date: date(G.helsinkiNow(new Date(c.delivered_at)).date) }) : c.ready ? tx('o.emailReady') : tx('o.dlvBuyer'));
+    const autoOpen = c.ready && !rec;
+    let busy = false;
+    async function reveal() {
+      if (busy) return;
+      busy = true;
       try {
         const r = await api.card(c.token);
         if (!r?.ok) { panel.replaceChildren(h('p', { class: r?.code === 'not_ready' ? 'bk-note' : 'bk-error', role: 'alert', text: r?.code === 'not_ready' ? tx('o.codeNotReady') : tx('o.codeError') })); }
         else {
           const pdf = pdfHref(S, c.token, functionUrl, L);
-          panel.replaceChildren(h('p', { class: 'gc-code', 'data-testid': 'gc-codetext', text: r.code }), h('dl', { class: 'bk-sum' }, h('dt', { text: tx('o.codeBalance') }), h('dd', { text: money(r.balance) }), r.greeting ? [h('dt', { text: tx('o.codeGreeting') }), h('dd', { class: 'gc-greet', text: r.greeting })] : []),
-            h('div', { class: 'bk-actions' }, h('button', { type: 'button', class: 'btn light ord-btn', text: tx('o.copy'), onclick: async (ev) => { try { await navigator.clipboard.writeText(r.code); ev.currentTarget.textContent = tx('o.copied'); } catch { /* leikepöytä ei käytettävissä: koodi on näkyvissä */ } } }),
+          const code = G.formatCode(r.code) || r.code;
+          panel.replaceChildren(h('p', { class: 'gc-code', 'data-testid': 'gc-codetext', text: code }), h('dl', { class: 'bk-sum' }, h('dt', { text: tx('o.codeBalance') }), h('dd', { text: money(r.balance) }), r.greeting ? [h('dt', { text: tx('o.codeGreeting') }), h('dd', { class: 'gc-greet', text: r.greeting })] : []),
+            h('div', { class: 'bk-actions' }, h('button', { type: 'button', class: 'btn light ord-btn', text: tx('o.copy'), onclick: async (ev) => { try { await navigator.clipboard.writeText(code); ev.currentTarget.textContent = tx('o.copied'); } catch { /* leikepöytä ei käytettävissä: koodi on näkyvissä */ } } }),
               pdf ? h('a', { class: 'btn ord-btn', 'data-testid': 'gc-pdf', href: pdf, target: '_blank', rel: 'noopener', text: tx('o.pdf') }) : null));
         }
-        panel.hidden = false; btn.textContent = tx('o.hideCode'); btn.setAttribute('aria-expanded', 'true');
+        panel.hidden = false;
       } catch { panel.replaceChildren(h('p', { class: 'bk-error', role: 'alert', text: tx('o.codeError') })); panel.hidden = false; }
-      finally { btn.disabled = false; }
-    } });
+      finally { busy = false; }
+    }
+    if (c.ready && !rec) reveal(true);
+    const who = [c.recipient_name ? `${tx('o.cardTo')}: ${c.recipient_name}` : '', c.valid_to ? `${tx('o.cardValidTo')}: ${date(c.valid_to)}` : (!c.ready ? tx('o.cardNotReady') : '')].filter(Boolean).join(' · ');
     return h('li', { class: 'gc-ocard', 'data-testid': 'gc-card' },
-      h('span', { class: 'ord-l-main' }, h('strong', { text: c.package_name || c.package_code }), ' ', h('span', { class: `ord-badge ${badgeClass(c.status)}`, text: status })),
-      h('span', { class: 'ord-l-sum', text: money(c.amount) }),
-      h('span', { class: 'ord-l-meta', text: [c.recipient_name ? `${tx('o.cardTo')}: ${c.recipient_name}` : '', c.valid_to ? `${tx('o.cardValidTo')}: ${date(c.valid_to)}` : tx('o.cardNotReady')].filter(Boolean).join(' · ') }),
-      dlvNote ? h('span', { class: 'ord-l-meta gc-dlvnote', 'data-testid': 'gc-delivery', text: dlvNote }) : null,
-      rec ? (c.ready ? h('span', { class: 'ord-l-meta gc-dlvnote', text: tx('o.dlvSurprise') }) : null) : (c.ready ? h('div', { class: 'gc-oact' }, btn, panel) : null));
+      h('div', { class: 'gc-top' },
+        h('span', { class: 'ord-l-main' }, h('strong', { text: c.package_name || c.package_code }), showBadge ? [' ', h('span', { class: `ord-badge ${badgeClass(c.status)}`, text: status })] : null),
+        h('span', { class: 'ord-l-sum', text: money(c.amount) })),
+      who ? h('p', { class: 'ord-l-meta', text: who }) : null,
+      dlvNote ? h('p', { class: 'ord-l-meta gc-dlvnote', 'data-testid': 'gc-delivery', text: dlvNote }) : null,
+      rec ? (c.ready ? h('p', { class: 'ord-l-meta gc-dlvnote', text: tx('o.dlvSurprise') }) : null) : (autoOpen ? h('div', { class: 'gc-oact' }, panel) : null));
   });
-  return h('section', { class: 'ord-card', 'aria-labelledby': 'ord-gcs', 'data-testid': 'gc-cards' }, h('h3', { id: 'ord-gcs', text: tx('o.cardsTitle') }), h('p', { class: 'bk-note', text: tx('o.cardsLead') }), h('ul', { class: 'ord-lines gc-olist' }, items));
+  return h('section', { class: 'ord-card', 'aria-labelledby': 'ord-gcs', 'data-testid': 'gc-cards' }, h('h3', { id: 'ord-gcs', class: 'ord-card-title', text: tx('o.cardsTitle') }), h('p', { class: 'bk-note', text: lead || tx('o.cardsLead') }), h('ul', { class: 'ord-lines gc-olist' }, items));
 }

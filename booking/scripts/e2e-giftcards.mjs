@@ -638,11 +638,12 @@ async function shopSuite() {
       expect(await page.locator('[data-testid=gc-show]').count() === 0 && await page.locator('[data-testid=gc-pdf]').count() === 0 && /Odottaa maksua/.test(await page.locator('[data-testid=gc-cards]').innerText()), `${name}: koodia ei näytetä maksamattomalle`);
       await shot(page, 'kauppa-tilaus-kortit-maksamatta-fi-390');
     } else {
-      await page.locator('[data-testid=gc-show]').first().click(); await page.waitForSelector('[data-testid=gc-codetext]');
-      expect(await page.locator('[data-testid=gc-codetext]').innerText() === 'HH3A-7CEF-HJKL' && /Hyvää syntymäpäivää/.test(await page.locator('[data-testid=gc-reveal]').first().innerText()), `${name}: koodi ja tervehdys`);
-      expect(rpcCalls(page, 'public_get_gift_card').at(-1).args.p_public_token === '00000000-0000-4000-8000-000000000001', `${name}: public_get_gift_card kortin tokenilla`);
+      await page.waitForFunction(() => document.querySelectorAll('[data-testid=gc-codetext]').length >= 2);
+      expect(await page.locator('[data-testid=gc-show]').count() === 0, `${name}: koodi aukeaa ilman erillistä nappia`);
+      expect(await page.locator('[data-testid=gc-codetext]').first().innerText() === 'HH3A-7CEF-HJKL' && /Hyvää syntymäpäivää/.test(await page.locator('[data-testid=gc-reveal]').first().innerText()), `${name}: koodi ja tervehdys`);
+      expect(rpcCalls(page, 'public_get_gift_card').some((c) => c.args.p_public_token === '00000000-0000-4000-8000-000000000001'), `${name}: public_get_gift_card kortin tokenilla`);
       const hasPdf = await page.locator('[data-testid=gc-pdf]').count();
-      expect(hasPdf === (pdf ? 1 : 0), `${name}: PDF-nappi ${pdf ? 'näkyy' : 'EI näy'} (${hasPdf})`);
+      expect(hasPdf === (pdf ? 2 : 0), `${name}: PDF-nappi molemmilla ostajan korteilla ${pdf ? 'näkyy' : 'EI näy'} (${hasPdf})`);
       if (pdf) { const a = page.locator('[data-testid=gc-pdf]'); expect(new RegExp(`/functions/v1/gift-card-pdf\\?t=00000000-0000-4000-8000-000000000001&lang=${lang}$`).test(await a.getAttribute('href')) && await a.getAttribute('target') === '_blank' && /Lataa PDF|Download PDF/i.test(await a.innerText()), `${name}: PDF-linkki lang=${lang}, uusi välilehti (${await a.getAttribute('href')} | ${await a.getAttribute('target')} | ${await a.innerText()})`); }
       expect(!(await page.locator('body').innerText()).match(/tulee myöhemmin|coming later|tulossa/i), `${name}: ei "tulee myöhemmin" -tekstiä`);
       await page.mouse.move(0, 0); await page.waitForTimeout(500);   // hover-siirtymä loppuun ennen kontrastimittausta
@@ -745,12 +746,12 @@ async function shopSuite() {
     await page.goto(`${ORIGIN}${lang === 'fi' ? '/tilaus/' : '/en/order/'}?t=${ORDER_TOKEN}`); await page.waitForSelector('[data-testid=gc-cards]');
     const cards = page.locator('[data-testid=gc-card]');
     expect(await cards.count() === 4, `${name}: 4 korttia (${await cards.count()})`);
-    expect(await cards.nth(0).locator('[data-testid=gc-show]').count() === 1, `${name}: ostajalle menevällä kortilla Näytä koodi`);
+    await page.waitForSelector('[data-testid=gc-codetext]');
+    expect(await cards.nth(0).locator('[data-testid=gc-show]').count() === 0 && await cards.nth(0).locator('[data-testid=gc-codetext]').count() === 1, `${name}: ostajalle menevän kortin koodi näkyy`);
     for (const i of [2, 3]) expect(await cards.nth(i).locator('[data-testid=gc-show], [data-testid=gc-pdf], a[href*="gift-card-pdf"]').count() === 0 && !/HH5KLMNPQRST|HH6UVWXYZ234/.test(await cards.nth(i).innerText()), `${name}: saajalle menevällä kortilla ${i + 1} ei koodia/PDF-linkkiä`);
     const notes = await page.locator('[data-testid=gc-delivery]').allInnerTexts();
     expect(notes.length >= 2 && notes.some((x) => (lang === 'fi' ? /saajalle/ : /recipient/).test(x)), `${name}: toimitusviestit (${notes.join(' | ')})`);
-    await cards.nth(0).locator('[data-testid=gc-show]').click(); await page.waitForSelector('[data-testid=gc-codetext]');
-    expect(await page.locator('[data-testid=gc-pdf]').count() === 1, `${name}: ostajalle menevällä kortilla Avaa PDF säilyy`);
+    expect(await page.locator('[data-testid=gc-pdf]').count() === 2, `${name}: PDF vain ostajalle menevillä korteilla`);
     expect(!(await page.locator('[data-testid=gc-cards]').innerText()).includes('HH5K'), `${name}: saajan koodi ei missään`);
     await page.mouse.move(0, 0); await page.waitForTimeout(500); await layoutChecks(page, name, '.ord'); await shot(page, `kauppa-tilaus-toimitus-${lang}-${vp}`);
     await page.context().close();

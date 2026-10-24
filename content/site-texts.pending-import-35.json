@@ -1,0 +1,210 @@
+[
+ {
+  "key": "ui.order.gift_pay_title",
+  "lang": "fi",
+  "text": "Maksa lahjakortti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.order.gift_pay_title",
+  "lang": "en",
+  "text": "Pay for the gift card",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.order.gift_thanks",
+  "lang": "fi",
+  "text": "Kiitos! Lahjakorttisi on valmis",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.order.gift_thanks",
+  "lang": "en",
+  "text": "Thank you! Your gift card is ready",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.order.gift_summary_lead",
+  "lang": "fi",
+  "text": "Tarkista kenelle kortti menee, ja maksa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.order.gift_summary_lead",
+  "lang": "en",
+  "text": "Check who the card is for, then pay.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.order.gift_paid_lead",
+  "lang": "fi",
+  "text": "Koodi ja voimassaolo ovat alla. PDF-linkki lähtee myös sähköpostiisi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.order.gift_paid_lead",
+  "lang": "en",
+  "text": "The code and validity are below. The PDF link is also sent to your email.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.order.gift_pay_lead",
+  "lang": "fi",
+  "text": "Maksun jälkeen koodi ja PDF-linkki näkyvät tällä sivulla, ja lähetämme ne sähköpostiisi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.order.gift_pay_lead",
+  "lang": "en",
+  "text": "After payment the code and PDF link appear on this page, and we email them to you.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.order.gift_pay_btn",
+  "lang": "fi",
+  "text": "Maksa {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.order.gift_pay_btn",
+  "lang": "en",
+  "text": "Pay {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.order.gift_hold_must",
+  "lang": "fi",
+  "text": "Lahjakorttitilaus täytyy maksaa {{var:minutes}} minuutin sisään, muuten se peruuntuu. Mitään ei veloiteta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:minutes}}"
+  ],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.order.gift_hold_must",
+  "lang": "en",
+  "text": "The gift card order must be paid within {{var:minutes}} minutes, otherwise it is cancelled. You will not be charged.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:minutes}}"
+  ],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.gift.submit_pay",
+  "lang": "fi",
+  "text": "Jatka maksamaan",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.gift.submit_pay",
+  "lang": "en",
+  "text": "Continue to payment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.gift.done_next",
+  "lang": "fi",
+  "text": "Seuraavaksi maksat tilauksen. Maksun jälkeen näet lahjakortin koodin ja voit ladata PDF-tiedoston.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.gift.done_next",
+  "lang": "en",
+  "text": "Next you pay for the order. After payment you will see the gift card code and can download the PDF.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.gift.o.email_ready",
+  "lang": "fi",
+  "text": "Lähetämme lahjakortin ja PDF-linkin sähköpostiisi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ },
+ {
+  "key": "ui.gift.o.email_ready",
+  "lang": "en",
+  "text": "We will email the gift card and the PDF link to you.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Lahjakortin ostoketju: tilaussivun ja kassan uudet selkokieliset tekstit. Vanhoja avaimia ei ylikirjoiteta. FI+EN."
+ }
+]

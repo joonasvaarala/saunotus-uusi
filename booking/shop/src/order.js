@@ -21,6 +21,7 @@ import { createOptionPicker } from './options-ui.js';
 import { ht, holdError } from './hold-texts.js';
 import { applyShopTexts } from './site-texts.js';
 import { isHoldView, giftWasUsed } from './hold-logic.js';
+import { orderChrome } from './order-view.js';
 import { holdPanel } from './hold-ui.js';
 import { normCheckoutOptions } from './mobilepay-logic.js';
 
@@ -65,7 +66,7 @@ function instructionsSection(list) {
     btn.textContent = open ? t.guideHide : t.guideShow;
   } });
   return h('section', { class: 'ord-card', 'aria-labelledby': 'ord-g', 'data-testid': 'order-guides' },
-    h('h3', { id: 'ord-g', text: t.guideTitle }), h('p', { class: 'bk-note', text: t.guideLead }), btn, panel);
+    h('h3', { id: 'ord-g', class: 'ord-card-title', text: t.guideTitle }), h('p', { class: 'bk-note', text: t.guideLead }), btn, panel);
 }
 
 async function unsubscribe(token) {
@@ -80,7 +81,7 @@ async function unsubscribe(token) {
   }
   const text = state === 'done' ? t.unsubDone : state === 'missing' ? t.unsubMissing : t.unsubError;
   mount(h('section', { class: 'ord-card', role: 'status', 'data-testid': 'unsub-result', 'data-state': state },
-    h('h2', { text: t.unsubTitle }), h('p', { text }), phoneBox()));
+    h('h2', { class: 'ord-card-title', text: t.unsubTitle }), h('p', { text }), phoneBox()));
 }
 async function main() {
   await applyShopTexts(S);   // sivutekstit tietokannasta (osa 3): puuttuva avain/tiedosto → repon oletus
@@ -169,13 +170,21 @@ async function main() {
   function draw(o) {
     cur = o; stopHold();
     const co = o.checkout, holdV = isHoldView(co), closedHold = !!co && (co.expired || co.cancelled);   // closedHold: vanhentunutta/peruttua tilausta ei lisätä eikä peruta   // co = null → vanha näkymä muuttumattomana
-    const stKey = o.cancel_request?.status === 'open' ? 'cancel_requested' : o.status;
     const unpaid = o.unpaid;
+    const view = orderChrome({
+      reservations: o.reservations, giftCards: gift.cards, paid: o.paid, unpaid, paymentStatus: o.payment_status, status: o.status,
+      receipts: o.receipts, cancelRequest: o.cancel_request, holdView: holdV,
+    });
+    const titleText = view.heading === 'thanks' ? t.giftThanks : view.heading === 'pay' ? t.giftPayTitle : `${t.order} #${o.order_no}`;
+    const holdBadge = holdV ? ht(L, { awaiting_payment: 'status.awaiting', processing_payment: 'status.processing', preliminary: 'status.preliminary', expired: 'status.expired' }[co.state]) : '';
+    const meta = view.heading === 'order'
+      ? (o.created_at ? `${t.created}: ${dt(o.created_at)}` : '')
+      : [`${t.order} #${o.order_no}`, o.created_at ? dt(o.created_at) : ''].filter(Boolean).join(' · ');
     const head = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-h' },
-      h('h2', { id: 'ord-h', 'data-testid': 'order-title', text: `${t.order} #${o.order_no}` }),
-      h('div', { class: 'ord-badges' }, badge(`st-${stKey}`, holdV ? ht(L, { awaiting_payment: 'status.awaiting', processing_payment: 'status.processing', preliminary: 'status.preliminary', expired: 'status.expired' }[co.state]) : t[`st.${stKey}`] || stKey), badge(`pay-${o.payment_status}`, t[`pay.${o.payment_status}`] || o.payment_status)),
-      o.created_at ? h('p', { class: 'bk-meta', text: `${t.created}: ${dt(o.created_at)}` }) : null);
-    const resv = o.reservations.length ? h('section', { class: 'ord-card', 'aria-labelledby': 'ord-rv' }, h('h3', { id: 'ord-rv', text: t.reservationsTitle }),
+      h('h2', { id: 'ord-h', class: 'ord-card-title', 'data-testid': 'order-title', text: titleText }),
+      h('div', { class: 'ord-badges' }, holdV ? badge(`st-${co.state}`, holdBadge) : view.badge ? badge(view.badge.kind, t[view.badge.key] || view.badge.key) : null),
+      meta ? h('p', { class: 'bk-meta', text: meta }) : null);
+    const resv = o.reservations.length ? h('section', { class: 'ord-card', 'aria-labelledby': 'ord-rv' }, h('h3', { id: 'ord-rv', class: 'ord-card-title', text: t.reservationsTitle }),
       h('ul', { class: 'ord-lines', 'data-testid': 'order-reservations' }, o.reservations.map((r) => h('li', {},
         h('span', { class: 'ord-l-main' }, h('strong', { text: r.product_name }), r.status === 'cancelled' ? ' ' : null, r.status === 'cancelled' ? badge('st-cancelled', t.cancelledRow) : null,
           r.option ? h('span', { class: 'ord-l-opt', 'data-testid': 'res-option' }, ` – ${ox.what}: `, h('strong', { text: optName(r.option, L) })) : optionMissingOnOrder(r) && r.status !== 'cancelled' ? [' ', h('span', { class: 'ord-badge opt-missing', 'data-testid': 'res-option-missing', text: `${ox.what}: ${ox.notChosen}` })] : null),
@@ -183,7 +192,7 @@ async function main() {
     const optSec = co && (co.expired || co.cancelled) ? null : optionSection(o);
     let holdEl = null;
     if (holdV && !co.expired) {
-      holdCtl = holdPanel({ L, co, minutes: holdX.minutes, giftUsed: holdX.gift, newHref: `${S.shopHref}${api.mock ? '?mock=1' : ''}`,
+      holdCtl = holdPanel({ L, co, minutes: holdX.minutes, giftUsed: holdX.gift, mustText: view.giftOnly ? t.giftHoldMust.replace('{minutes}', String(holdX.minutes)) : '', newHref: `${S.shopHref}${api.mock ? '?mock=1' : ''}`,
         fmtDate: (ms) => df({ day: 'numeric', month: 'numeric', year: 'numeric' }).format(new Date(ms)),
         refresh: co.awaiting ? async () => { const n = await api.get(); if (n?.ok) cur = n; return n?.ok ? n.checkout : null; } : null,
         onChange: async () => { try { const n = await api.get(); if (n?.ok) { await redraw(n); root.querySelector('[data-testid=hold-panel] h3')?.focus(); return; } } catch { /* vanha näkymä */ } draw(cur); } });   // fokus uuden tilan otsikkoon
@@ -198,12 +207,16 @@ async function main() {
         holdExp && holdX.gift ? h('p', { 'data-testid': 'order-closed-gift', text: t.closedHoldExpiredGift }) : null,
         h('p', { class: 'bk-actions' }, h('a', { class: 'btn gold', href: newHref, 'data-testid': 'order-closed-new', text: t.closedNewBooking })));
     }
-    const lines = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-l' }, h('h3', { id: 'ord-l', text: t.linesTitle }),
+    const totalBox = h('div', {}, h('dt', { text: `${t.total} (${t.vatIncl})` }), h('dd', { 'data-testid': 'order-total', text: money(o.total) }));
+    const sumBlock = view.sums === 'partial'
+      ? h('dl', { class: 'ord-sums', 'data-testid': 'order-sums' }, totalBox, h('div', {}, h('dt', { text: t.paid }), h('dd', { 'data-testid': 'order-paid', text: money(o.paid) })),
+        h('div', { class: unpaid > 0 ? 'due' : '' }, h('dt', { text: t.unpaid }), h('dd', { 'data-testid': 'order-unpaid', text: money(unpaid) })))
+      : h('dl', { class: 'ord-sums ord-sums-one', 'data-testid': 'order-sums' }, totalBox);
+    const lines = !view.showLines ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-l' }, h('h3', { id: 'ord-l', class: 'ord-card-title', text: t.linesTitle }),
       h('ul', { class: 'ord-lines', 'data-testid': 'order-lines' }, o.items.map((i) => h('li', {},
         h('span', { class: 'ord-l-main' }, h('strong', { text: i.quantity > 1 ? `${nm(i)} × ${i.quantity}` : nm(i) })),
         h('span', { class: 'ord-l-sum', text: money(i.line_total) })))),
-      h('dl', { class: 'ord-sums' }, h('div', {}, h('dt', { text: `${t.total} (${t.vatIncl})` }), h('dd', { 'data-testid': 'order-total', text: money(o.total) })), h('div', {}, h('dt', { text: t.paid }), h('dd', { text: money(o.paid) })),
-        h('div', { class: unpaid > 0 ? 'due' : '' }, h('dt', { text: t.unpaid }), h('dd', { 'data-testid': 'order-unpaid', text: money(unpaid) }))));
+      sumBlock);
     // maksulinkki: avoin (pending) maksu + verkkomaksu käytössä → linkki; muuten maksu paikan päällä
     const link = o.online_payment_enabled && !vpState.show ? o.payments.find((p) => p.status === 'pending' && p.link_path) : null;
     const payHidden = !!co && (co.preliminary || co.expired || co.cancelled || co.processing);   // alustavaa/vanhentunutta ei makseta; käsittelyn aikana ei toista maksua
@@ -213,37 +226,40 @@ async function main() {
     const mpBlock = mpOn ? payBlock({ S, L, api: mp, opts: mpState.opts, env: mpEnv, showLead: false, showAmount: false, showTest: false, onFail: (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) holdCtl?.poll(true); } }) : null;
     const vpBlock = vpOn ? vismaPayBlock({ L, api: vp, opts: vpState.opts, showLead: false, showAmount: false, showTest: false }) : null;
     const due = money(unpaid);
-    const payLead = mpOn && vpOn ? t.payLeadBoth : mpOn ? mt(L, 'payLead') : vpOn ? vt(L, 'payLead') : '';
-    const payAmount = mpOn || vpOn ? (mpOn ? mt(L, 'payAmount', { amount: due }) : vt(L, 'payAmount', { amount: due })) : '';
+    const payLead = view.giftOnly ? (unpaid > 0 ? t.giftPayLead : '') : (mpOn && vpOn ? t.payLeadBoth : mpOn ? mt(L, 'payLead') : vpOn ? vt(L, 'payLead') : '');
+    const payAmount = view.giftOnly ? '' : (mpOn || vpOn ? (mpOn ? mt(L, 'payAmount', { amount: due }) : vt(L, 'payAmount', { amount: due })) : '');
     const mpTest = mpOn && !!mpState.opts?.method?.test;
     const vpTest = vpOn && vpState.opts?.method?.test === true;
     const payTest = mpTest && vpTest ? t.payTestBoth : mpTest ? mt(L, 'testNote') : vpTest ? vt(L, 'testNote') : '';
+    const payLabel = view.giftOnly ? t.giftPayBtn.replace('{amount}', due) : `${t.payRest} (${due})`;
     const pay = unpaid > 0 && !payHidden ? h('section', { class: 'ord-card ord-pay', 'aria-labelledby': 'ord-p', 'data-testid': 'order-pay' },
-      h('h3', { id: 'ord-p', class: 'mp-title', text: t.paymentTitle }),
+      h('h3', { id: 'ord-p', class: 'ord-card-title', text: t.paymentTitle }),
       payLead ? h('p', { class: 'bk-note', 'data-testid': 'ord-pay-lead', text: payLead }) : null,
       payAmount ? h('p', { class: 'mp-amount', 'data-testid': 'ord-pay-amount', text: payAmount }) : null,
       payTest ? h('p', { class: 'mp-test', role: 'note', 'data-testid': mpTest && vpTest ? 'ord-pay-test' : mpTest ? 'mp-test-note' : 'vp-test', text: payTest }) : null,
-      co?.awaiting ? h('p', { class: 'bk-note', 'data-testid': 'ord-hold-choose', text: ht(L, 'choose') }) : null,
+      co?.awaiting && view.explainGiftPay ? h('p', { class: 'bk-note', 'data-testid': 'ord-hold-choose', text: ht(L, 'choose') }) : null,
       vpBlock || mpBlock ? h('div', { class: 'ord-pay-methods', 'data-testid': 'ord-pay-methods' }, vpBlock, mpBlock) : null,
-      checking || vpState.show ? null : link ? h('a', { class: 'btn ord-btn', 'data-testid': 'pay-link', href: S.base ? S.base + link.link_path : link.link_path, text: `${t.payRest} (${money(unpaid)})` })
-        : mpBlock ? null : h('button', { type: 'button', class: 'btn light ord-btn', disabled: true, 'data-testid': 'pay-rest', text: `${t.payRest} (${money(unpaid)})` }),
+      checking || vpState.show ? null : link ? h('a', { class: 'btn ord-btn', 'data-testid': 'pay-link', href: S.base ? S.base + link.link_path : link.link_path, text: payLabel })
+        : mpBlock ? null : h('button', { type: 'button', class: 'btn light ord-btn', disabled: true, 'data-testid': 'pay-rest', text: payLabel }),
       link || mpBlock || vpBlock || checking || vpState.show ? null : h('p', { class: 'bk-note', text: t.payRestSoon })) : null;
-    const giftCards = gift.cards.length ? cardsSection({ S, L, api: gapi, cards: gift.cards }) : null;
+    if (view.giftOnly && pay) { pay.classList.add('ord-pay-gift'); pay.querySelector('#ord-p')?.classList.add('sr-only'); }
+    const giftCards = gift.cards.length ? cardsSection({ S, L, api: gapi, cards: gift.cards, lead: view.giftOnly ? (unpaid > 0 ? t.giftSummaryLead : t.giftPaidLead) : '', quiet: view.giftOnly }) : null;
+    if (view.giftOnly && giftCards) giftCards.append(sumBlock);
     const giftUse = gift.redeem && unpaid > 0 && !payHidden && !gift.cards.length && ['confirmed', 'pending'].includes(o.status) ? redeemSection({ L, api: gapi, token, onApplied: reloadAfterGift, onClaimed: reloadAfterClaim, onFail: (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) holdCtl?.poll(true); } }) : null;
     const claimBox = gift.claims.length ? claimsSection({ S, L, api: gapi, token, claims: gift.claims, notice, onChanged: reloadAfterClaim }) : null;
     notice = null;
-    const receipts = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-r' }, h('h3', { id: 'ord-r', text: t.receiptsTitle }),
-      o.receipts.length ? h('ul', { class: 'ord-lines', 'data-testid': 'receipts' }, o.receipts.map((r) => h('li', {},
+    const receipts = !view.showReceipts ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-r' }, h('h3', { id: 'ord-r', class: 'ord-card-title', text: t.receiptsTitle }),
+      h('ul', { class: 'ord-lines', 'data-testid': 'receipts' }, o.receipts.map((r) => h('li', {},
         h('span', { class: 'ord-l-main' }, h('strong', { text: r.receipt_no }), ' ', badge('', t[r.kind] || r.kind)), h('span', { class: 'ord-l-meta', text: `${r.issued_at ? dt(r.issued_at) : ''}${r.total ? ' · ' + money(r.total) : ''}` }),
-        h('span', { class: 'ord-l-sum' }, h('button', { type: 'button', class: 'btn light ord-btn', 'data-testid': 'receipt-dl', onclick: (ev) => download(ev.currentTarget, r.receipt_no), text: t.download }))))) : h('p', { class: 'bk-note', text: t.noReceipts }));
+        h('span', { class: 'ord-l-sum' }, h('button', { type: 'button', class: 'btn light ord-btn', 'data-testid': 'receipt-dl', onclick: (ev) => download(ev.currentTarget, r.receipt_no), text: t.download }))))));
     const msg = h('div', { 'aria-live': 'polite', class: 'ord-msg', 'data-testid': 'order-msg' });
     const note = o.change_deadline ? h('p', { class: 'bk-note', 'data-testid': 'change-note', text: o.can_change ? t.changeNote.replace('{date}', dt(o.change_deadline)) : t.changeClosed }) : null;
     const guides = instructionsSection(o.instructions);
     const treats = (o.upsell_treatments || []).length ? h('div', { 'data-testid': 'upsell-treatments' }, h('p', { class: 'bk-note', text: t.treatLead }), h('ul', { class: 'ord-lines' }, o.upsell_treatments.map((x) => h('li', { text: nm(x) })))) : null;
-    const add = closedHold ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-a' }, h('h3', { id: 'ord-a', text: t.addTitle }), o.can_add && o.upsell_addons.length ? addForm(o) : h('p', { class: 'bk-note', text: t.addClosed }), treats,
+    const add = closedHold || !view.showAdd ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-a' }, h('h3', { id: 'ord-a', class: 'ord-card-title', text: t.addTitle }), o.can_add && o.upsell_addons.length ? addForm(o) : h('p', { class: 'bk-note', text: t.addClosed }), treats,
       h('p', { class: 'bk-note' }, `${t.addNewBooking} `, h('a', { href: S.shopHref, text: t.addNewBookingLink })));
     const extra = guides || add ? h('div', { class: 'ord-extra', 'data-testid': 'order-extra' }, guides, add) : null;
-    const cancel = closedHold ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), note,
+    const cancel = closedHold || !view.showCancel ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c' }, h('h3', { id: 'ord-c', class: 'ord-card-title', text: t.cancelTitle }), note,
       o.cancel_request ? h('p', { class: 'bk-ok', role: 'status', 'data-testid': 'cancel-pending', text: t[`cancel.${o.cancel_request.status}`] || t['cancel.open'] }) : cancelForm());
     mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, closedEl, resv, optSec, lines, giftCards, claimBox, pay, giftUse, receipts, extra, cancel, msg, phoneBox()));
   }
@@ -286,7 +302,7 @@ async function main() {
   function optionSection(o) {
     const list = o.reservations.filter((r) => r.status !== 'cancelled' && r.option_choices.length);
     if (!list.length) return null;
-    return h('section', { class: 'ord-card', 'aria-labelledby': 'ord-o', 'data-testid': 'option-section' }, h('h3', { id: 'ord-o', text: ox.changeTitle }),
+    return h('section', { class: 'ord-card', 'aria-labelledby': 'ord-o', 'data-testid': 'option-section' }, h('h3', { id: 'ord-o', class: 'ord-card-title', text: ox.changeTitle }),
       o.change_deadline ? h('p', { class: 'bk-note', text: o.can_change ? ox.changeLead.replace('{date}', dt(o.change_deadline)) : ox.changeClosed }) : null,
       list.map((r, i) => {
         const missing = !r.option;

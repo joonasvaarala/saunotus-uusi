@@ -86,7 +86,7 @@ export function payChoicesSection({ S, L, token, model, booking, onApplied, onCl
   if (!of.mobilepay && !of.vismapay && !of.gift && !of.claims && !of.payLater) return null;
   const due = dueAmount(model, booking);
   const id = `pc-${++seq}`;
-  const kids = [h('h3', { id: `${id}-t`, text: tx('title') })];
+  const kids = [h('h3', { id: `${id}-t`, class: 'ord-card-title', text: tx('title') })];
   if (of.mobilepay || of.vismapay || of.gift) {
     if (due != null && due > 0) kids.push(h('p', { class: 'mp-amount', 'data-testid': 'pc-due', text: tx('amountDue', { amount: F.money(due) }) }));
     kids.push(h('p', { class: 'bk-note', 'data-testid': 'pc-lead', text: hold ? ht(L, 'choose') : booking.status === 'confirmed' ? tx('leadConfirmed') : tx('leadPending') }));   // pitotilassa ei mainita "maksu paikan päällä": varaus vahvistuu vasta maksun jälkeen

@@ -8,7 +8,7 @@ import { createHoldClock, clockText, createAnnouncer, spoken, nextPollIn, change
 let seq = 0;
 // opts: { L, co (normCheckout), minutes, giftUsed, newHref, refresh(): Promise<co|null> | null, onChange(co), fmtDate(ms), mono, timers }
 // → { node, stop() }. refresh = null → ei kyselyitä (esim. MobilePay-paluun pollaus hoitaa tilan).
-export function holdPanel({ L = 'fi', co, minutes = 15, giftUsed = false, newHref = '#', refresh = null, onChange = () => {}, fmtDate = (t) => new Date(t).toLocaleDateString(L === 'en' ? 'en-GB' : 'fi-FI'), mono, timers = { setTimeout: (f, ms) => setTimeout(f, ms), clearTimeout: (id) => clearTimeout(id), setInterval: (f, ms) => setInterval(f, ms), clearInterval: (id) => clearInterval(id) } } = {}) {
+export function holdPanel({ L = 'fi', co, minutes = 15, giftUsed = false, mustText = '', newHref = '#', refresh = null, onChange = () => {}, fmtDate = (t) => new Date(t).toLocaleDateString(L === 'en' ? 'en-GB' : 'fi-FI'), mono, timers = { setTimeout: (f, ms) => setTimeout(f, ms), clearTimeout: (id) => clearTimeout(id), setInterval: (f, ms) => setInterval(f, ms), clearInterval: (id) => clearInterval(id) } } = {}) {
   const tx = (k, v) => ht(L, k, v), id = `hold-${++seq}`;
   const kind = co.expired ? 'expired' : co.preliminary ? 'preliminary' : co.processing ? 'processing' : 'awaiting';
   let cur = co, stopped = false, pollT = null, tickT = null, longShown = false;
@@ -19,7 +19,7 @@ export function holdPanel({ L = 'fi', co, minutes = 15, giftUsed = false, newHre
   const kids = [h('h3', { id: `${id}-t`, tabindex: '-1', class: kind === 'awaiting' ? 'sr-only' : '', text: tx(`title.${kind}`) })];   // awaiting: otsikko vain ruudunlukijalle (sivun h2 + tilabadge sanovat saman) → kompakti banneri; muut tilat: näkyvä pieni otsikko   // tabindex -1: tilan vaihtuessa fokus siirretään otsikkoon (ruudunlukija lukee uuden tilan)
   let timeEl = null, labelEl = null, announce = null, msgEl = null, recheckBtn = null;
   if (kind === 'awaiting') {
-    kids.push(h('p', { class: 'bk-hold-must', 'data-testid': 'hold-must', text: tx('mustPay', { minutes }) }));   // selkeä 15 min -ohje (mustPay); ei toistavaa lead-tekstiä (poistettu)
+    kids.push(h('p', { class: 'bk-hold-must', 'data-testid': 'hold-must', text: mustText || tx('mustPay', { minutes }) }));   // selkeä 15 min -ohje (mustPay); lahjakorttitilaus voi tuoda oman lauseen. Ei toistavaa lead-tekstiä.
     labelEl = h('span', { class: 'bk-hold-label', id: `${id}-l`, text: tx('timerLabel') });
     timeEl = h('span', { class: 'bk-hold-time', role: 'timer', 'aria-live': 'off', 'aria-labelledby': `${id}-l`, 'data-testid': 'hold-timer', text: clockText(clock.left()) });
     announce = h('p', { class: 'sr-only', role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true', 'data-testid': 'hold-announce' });

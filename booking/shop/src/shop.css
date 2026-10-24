@@ -239,6 +239,10 @@ a.bk-sd:hover{filter:brightness(.97)}
 
 /* ---- asiakkaan tilaussivu (/tilaus/) ---- */
 .ord{display:grid;gap:16px;max-width:720px;margin-inline:auto}
+/* Yhteinen typografia: tilaussivu ja vahvistussivun maksuvalinta. */
+.ord,.bk-paychoices{font:400 16px/1.55 var(--body);color:var(--ink)}
+.ord .bk-note,.bk-paychoices .bk-note{font-size:15px;line-height:1.5}
+.ord .btn:not(.mp-fallback),.bk-paychoices .btn:not(.mp-fallback){min-height:48px;padding:12px 20px;border-radius:var(--r);font:600 15px/1.25 var(--body);letter-spacing:normal;text-transform:none}
 .ord-extra{display:grid;gap:16px;align-items:start}
 @media(min-width:700px){.ord-extra{grid-template-columns:1fr 1fr}}
 .ord-guide-text{white-space:pre-wrap;margin:0 0 8px}
@@ -246,6 +250,10 @@ a.bk-sd:hover{filter:brightness(.97)}
 #order-app .ord-btn,[data-testid=guide-toggle]{min-height:44px}
 .ord-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px}
 .ord-card h2,.ord-card h3{margin:0 0 8px}
+/* Kaikkien varsinaisten korttien otsikot; maksukortti ei saa omaa otsikkotyyliä. */
+.ord-card>.ord-card-title{margin:0 0 12px;font:600 22px/1.3 var(--head);letter-spacing:normal;text-transform:none;color:var(--ink)}
+.ord-card>h2.ord-card-title{font-size:28px;line-height:1.2}
+.ord .ord-guide h4,.ord .ord-opt-sec h4,.ord .vc-ctitle{margin:0 0 8px;font:600 16px/1.4 var(--body);letter-spacing:normal;text-transform:none;color:var(--ink)}
 .ord-badges{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 8px}
 .ord-badge{display:inline-block;font:600 13px var(--label);padding:6px 12px;border-radius:30px;background:#ece8e3;color:#4F443A}
 .ord-badge.st-confirmed,.ord-badge.pay-paid{background:#e8f3ea;color:#1d4d2b}
@@ -315,9 +323,21 @@ a.bk-sd:hover{filter:brightness(.97)}
 .gc-code{margin:0 0 6px;font:700 clamp(22px,6vw,30px) ui-monospace,Menlo,Consolas,monospace;letter-spacing:.08em;color:var(--ink);overflow-wrap:anywhere}
 .gc-greet{white-space:pre-wrap;font-weight:400}
 
-.ord-lines li.gc-ocard{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"m s" "t s" "a a";gap:2px 12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
-.gc-ocard .gc-oact{grid-area:a;margin-top:8px}
-.gc-ocard .ord-l-meta{grid-area:t}
+.ord-lines li.gc-ocard{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.gc-ocard .gc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.gc-ocard .ord-l-main{min-width:0}
+.gc-ocard .ord-l-sum{flex:none;align-self:flex-start;white-space:nowrap}
+.gc-ocard .ord-l-meta{margin:0}
+.gc-ocard .gc-oact{margin-top:4px}
+.ord-sums-one>div{flex:1 1 100%;display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 14px}
+.ord-sums-one dd{font-size:22px}
+.ord-pay .btn.ord-btn{width:100%;max-width:440px}
+.ord-pay-gift .btn.ord-btn{max-width:none;min-height:52px;font-size:17px;letter-spacing:normal;text-transform:none}
+.gc-submit,.gc-done a.btn{width:100%;max-width:440px;min-height:52px;padding:14px 22px;font:600 16px/1.25 var(--body);letter-spacing:normal;text-transform:none}
+body:has(#order-app) .hero.page .in{min-height:0;padding:28px 0 24px}
+body:has(#order-app) .hero.page h1{font-size:clamp(32px,6vw,44px);line-height:1.15}
+body:has(#order-app) .hero.page p{display:none}
+body:has(#order-app) .section{padding:28px 0 56px}
 .ord-form .gc-field label{font-weight:700}
 @media(min-width:760px){.gc-open .gc-tile{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(220px,1fr);column-gap:28px;align-items:start}.gc-open .gc-tile>.kicker,.gc-open .gc-tile>h3,.gc-open .gc-tile>.gc-desc,.gc-open .gc-tile>.gc-meta{grid-column:1}.gc-open .gc-tile>.bk-field,.gc-open .gc-tile>.gc-btn{grid-column:2}}
 .gc .bk-stepper input{width:64px;height:48px}
@@ -365,9 +385,10 @@ a.bk-sd:hover{filter:brightness(.97)}
 /* MobilePay-maksu (§14): painike (virallinen Vipps MobilePay -komponentti tai varapainike) ja paluutilan paneeli. Paneelien värit: hillitty hiekka/vihreä; punainen vain virheille. */
 .mp-block,.vp-block{display:grid;gap:10px}.mp-block{margin:0 0 14px}.mp-block p,.vp-block p{margin:0}
 .mp-title{margin:0;font:600 13px var(--label);letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+/* Maksutavat ovat pääkortin alaotsikoita, eivät eri näköisiä korttiotsikoita. */
+.ord .ord-method-title,.bk-paychoices .ord-method-title{margin:0;font:600 16px/1.4 var(--body);letter-spacing:normal;text-transform:none;color:var(--ink)}
 .ord-pay{display:grid;gap:12px}.ord-pay p{margin:0}
-/* Tilaussivu on #order-appissa: .ord-card h3 ei saa voittaa. Maksutila käyttää samaa pientä versaaliotsikkoa kuin maksutavat. */
-.ord-pay>h3.mp-title{margin:0;font:600 13px/1.3 var(--label);letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+/* Maksutilan ulkoreunus, sisämarginaalit ja otsikko tulevat yhteisestä .ord-card-tyylistä. */
 .ord-pay-methods{display:grid}
 .ord-pay-methods>.vp-block,.ord-pay-methods>.mp-block{margin:0;padding-top:16px;border-top:1px solid var(--line)}
 .ord-pay-methods>.vp-block+.mp-block,.ord-pay-methods>.mp-block+.vp-block{margin-top:16px}
@@ -382,7 +403,7 @@ a.bk-sd:hover{filter:brightness(.97)}
 .mp-msg:empty{display:none}
 [data-testid=mp-result]:empty{display:none}
 .mp-result{border-width:2px}
-.mp-result h3{margin:0 0 6px;font-size:24px;color:var(--ink)}
+.mp-result h3{margin:0 0 6px;color:var(--ink)}
 .mp-result p{margin:0 0 10px}
 .mp-result .ord-btn{margin:2px 10px 6px 0}
 .mp-result.ok{background:#e8f3ea;border-color:#2f7a45;color:#1d4d2b}.mp-result.ok h3{color:#1d4d2b}
@@ -438,6 +459,8 @@ a.bk-sd:hover{filter:brightness(.97)}
 .pc-gift-panel[hidden]{display:none}
 .gc-redeem-bare{display:grid;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:#fff}
 .gc-redeem-bare .bk-note{margin:0}
+/* Vahvistussivun avattu lahjakorttilomake kuuluu samaan korttiin, ei sisäkkäiseen laatikkoon. */
+.bk-paychoices .gc-redeem-bare{padding:0;border:0;border-radius:0;background:transparent}
 .gc-btnrow{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
 .gc-btnrow .ord-btn{width:100%}
 

@@ -76,7 +76,7 @@ export function payBlock({ S, L, api, opts, env = {}, amount = '', navigate = (u
   btn = buttonNode({ L, onActivate: activate, official: env.official !== false });
   if (typeof window !== 'undefined') window.addEventListener('pageshow', (e) => { if (e.persisted) { busy = false; btn.setBusy(false); } });   // paluu selaimen Takaisin-napilla (bfcache)
   return h('div', { class: 'mp-block', 'data-testid': 'mp-block' },
-    h('h4', { class: 'mp-title', text: tx('methodTitle') }),
+    h('h4', { class: 'mp-title ord-method-title', text: tx('methodTitle') }),
     showLead ? h('p', { class: 'bk-note', text: tx('payLead') }) : null,
     showAmount && amount ? h('p', { class: 'mp-amount', text: tx('payAmount', { amount }) }) : null,
     opts?.pending ? h('p', { class: 'bk-note', 'data-testid': 'mp-pending-hint', text: tx('pendingHint') }) : null,
@@ -93,7 +93,7 @@ export function resultPanel({ S, L, state, orderNo, onRecheck }) {
   const contact = ['review', 'contact', 'wait', 'net', 'slot_lost'].includes(state);
   return h('section', { class: `ord-card mp-result ${kind}`, 'data-testid': 'mp-result-panel', 'data-state': state, role: kind === 'err' ? 'alert' : 'status', 'aria-busy': state === 'checking' ? 'true' : null },
     state === 'checking' ? h('span', { class: 'mp-spin', 'aria-hidden': 'true' }) : null,
-    h('h3', { 'data-testid': 'mp-result-title', text: tx(title) }), h('p', { text: tx(lead) }),
+    h('h3', { class: 'ord-card-title', 'data-testid': 'mp-result-title', text: tx(title) }), h('p', { text: tx(lead) }),
     orderNo ? h('p', { class: 'bk-meta' }, `${tx('orderNo')} #${orderNo}`) : null,
     state === 'wait' || state === 'net' ? h('button', { type: 'button', class: 'btn ord-btn', 'data-testid': 'mp-recheck', onclick: onRecheck, text: tx('recheck') }) : null,
     state === 'slot_lost' && S?.shopHref ? h('a', { class: 'btn ord-btn', href: S.shopHref, 'data-testid': 'mp-calendar', text: tx('openCalendar') }) : null,

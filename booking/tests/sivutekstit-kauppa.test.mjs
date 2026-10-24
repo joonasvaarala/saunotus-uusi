@@ -84,6 +84,7 @@ test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-shop.mjs 
     ...J('content/site-texts.pending-import-28.json').filter((r) => r.key.startsWith('ui.vismapay.')).map((r) => `${r.key}|${r.lang}`),
     ...J('content/site-texts.pending-import-29.json').filter((r) => r.key.startsWith('ui.order.')).map((r) => `${r.key}|${r.lang}`),
     ...J('content/site-texts.pending-import-33.json').map((r) => `${r.key}|${r.lang}`),
+    ...J('content/site-texts.pending-import-35.json').map((r) => `${r.key}|${r.lang}`),
   ]);
   const imp = new Set(PENDING.map((r) => r.key));
   writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts.filter((r) => !imp.has(r.key)) }));   // tuotanto ennen #61:n tuontia
@@ -105,7 +106,8 @@ test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet ava
   const vismaRows = R.collectDefaults().filter((r) => r.id === 'VT');
   const msgOrder = J('content/site-texts.pending-import-29.json').filter((r) => r.key.startsWith('ui.order.'));
   const payUi = J('content/site-texts.pending-import-33.json');
-  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length);
+  const giftUx = J('content/site-texts.pending-import-35.json');
+  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length + giftUx.length);
   assert.ok(!rows.some((x) => haveKeys.has(x.key)));
   for (const e of extraRows) assert.ok(!rows.some((x) => x.key === e.key), `${e.key}: jo tuotannossa, generaattori ei lisää`);
   const bad = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', join(work, 'ei-ole.json')], { encoding: 'utf8' });
@@ -160,6 +162,32 @@ test('pending-import-33: tilaussivun maksutilan uudet tekstit FI+EN, sama teksti
   }
   for (const k of want) assert.ok(seen.has(`${k}|fi`) && seen.has(`${k}|en`), k);
   assert.equal(defaults.get('ui.mobilepay.pay_title|fi'), 'Maksa verkossa', 'julkaistu otsikko jää ennalleen; uusi otsikko on method_title');
+});
+
+test('pending-import-35: lahjakortin ostoketjun uudet tekstit FI+EN, sama teksti kuin koodin oletus, ei vielä varatekstissä', () => {
+  const rows = J('content/site-texts.pending-import-35.json');
+  const defaults = new Map(R.collectDefaults().map((r) => [`${r.key}|${r.lang}`, r.text]));
+  const have = new Map(FALLBACK.texts.map((r) => [`${r.key}|${r.lang}`, r.text]));
+  const want = ['ui.order.gift_pay_title', 'ui.order.gift_thanks', 'ui.order.gift_summary_lead', 'ui.order.gift_paid_lead', 'ui.order.gift_pay_lead', 'ui.order.gift_pay_btn', 'ui.order.gift_hold_must', 'ui.gift.submit_pay', 'ui.gift.done_next', 'ui.gift.o.email_ready'];
+  const seen = new Set();
+  assert.equal(rows.length, want.length * 2);
+  for (const r of rows) {
+    const w = `${r.key} [${r.lang}]`;
+    assert.ok(want.includes(r.key), w);
+    assert.ok(['fi', 'en'].includes(r.lang), w);
+    assert.equal(r.kind, 'plain', w);
+    assert.equal(r.text, defaults.get(`${r.key}|${r.lang}`), w);
+    assert.equal(r.class, R.classFor(r.key, defaults.get(`${r.key}|fi`)), w);
+    assert.equal(have.has(`${r.key}|${r.lang}`), false, `${w}: ei vielä tuotannossa`);
+    assert.ok(r.max_len >= r.text.length && r.max_len <= 100000, w);
+    assert.deepEqual([...r.placeholders].sort(), [...L.tokensOf(r.text)].sort(), w);
+    assert.doesNotMatch(r.text, /[<>]|https?:\/\/|www\./, w);
+    assert.ok(r.reason && r.reason.length <= 300, w);
+    assert.ok(!seen.has(`${r.key}|${r.lang}`)); seen.add(`${r.key}|${r.lang}`);
+  }
+  for (const k of want) assert.ok(seen.has(`${k}|fi`) && seen.has(`${k}|en`), k);
+  assert.equal(defaults.get('ui.gift.submit|fi'), 'Tilaa lahjakortti', 'julkaistu tilausnappi jää ennalleen');
+  assert.equal(defaults.get('ui.order.payment_title|fi'), 'Maksutila', 'julkaistu maksutilan otsikko jää ennalleen');
 });
 
 // ================= avaimet =================

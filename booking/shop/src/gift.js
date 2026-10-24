@@ -5,7 +5,7 @@ import { rpc } from './sb.js';
 import { GT } from './gift-texts.js';
 import { createGiftApi } from './gift-api.js';
 import { applyShopTexts } from './site-texts.js';
-import { h, makeFmt, phoneBox, field } from './gift-ui.js';
+import { h, makeFmt, phoneBox, field, prefersReducedMotion } from './gift-ui.js';
 import * as G from './gift-logic.js';
 
 const S = window.BOOKING_SHOP;
@@ -40,6 +40,7 @@ function buildSale(pk) {
     if (lines.length >= 10) { live.textContent = tx('maxCardsReached', { n: pk.max_cards }); return false; }
     lines.push({ id: ++seq, pkg: code, amount: amount ?? '', qty: 1, recipientName: '', recipientEmail: '', greeting: '', deliveryTo: 'buyer', coverMessage: '', sendMode: 'now', deliverOn: '', deliverTime: '' });
     renderCart(); live.textContent = `${tx('added')}: ${pick(p, 'name')}`;
+    cartHost.scrollIntoView?.({ block: 'start', behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
     return true;
   };
   const tile = (p) => {
@@ -164,7 +165,7 @@ function buildSale(pk) {
     void keep;
     totalEl = h('div', { class: 'gc-total' }, h('span', { class: 'gc-cnt' }), h('span', { class: 'gc-tl' }, h('span', { text: `${tx('total')} ` }), h('strong', { class: 'gc-sum' }), h('span', { class: 'bk-note', text: ` (${tx('vatIncl')})` })));
     msg = h('div', { class: 'gc-msg', role: 'alert' });
-    submitBtn = h('button', { type: 'submit', class: 'btn gc-submit', text: tx('submit') });
+    submitBtn = h('button', { type: 'submit', class: 'btn gc-submit', text: tx('submitPay') });
     const form = h('form', { class: 'bk-form gc-form', novalidate: true, 'aria-label': tx('cartTitle'), onsubmit: onSubmit },
       h('fieldset', { class: 'gc-card' }, h('legend', { text: tx('cartTitle') }), h('ul', { class: 'gc-lines' }, lines.map(lineView))),
       h('fieldset', { class: 'gc-card' }, h('legend', { text: tx('buyerTitle') }), buyerFields.name.wrap, buyerFields.email.wrap, buyerFields.phone.wrap,
@@ -214,7 +215,7 @@ function buildSale(pk) {
       if (!r?.notReady && G.SERVER_FIELD[r?.code] && serverFieldError(r.code)) { msg.append(h('p', { class: 'bk-error', text: tx('err.fix') })); }
       else msg.append(h('p', { class: 'bk-error', text: r?.notReady ? tx('notReady') : errText(r, { n: pk.max_cards, min: open?.min_amount, max: open?.max_amount }) }));
     } catch { msg.append(h('p', { class: 'bk-error', text: tx('err.generic') }), phoneBox(S, tx)); }
-    submitBtn.disabled = false; submitBtn.textContent = tx('submit');
+    submitBtn.disabled = false; submitBtn.textContent = tx('submitPay');
   }
   // Valinnan kuittaus vahvistuksessa (kortin delivery_to / deliver_on / deliver_time public_buy_gift_card-vastauksesta)
   const deliveryNote = (c) => (c.delivery_to === 'recipient'
@@ -223,11 +224,13 @@ function buildSale(pk) {
   function done(r) {
     const cards = (r.cards || []);
     const list = cards.length ? h('ul', { class: 'gc-donecards' }, cards.map((c) => h('li', {}, h('strong', { text: c.package_name ? (L === 'en' ? (by.get(c.package_code)?.name_en || c.package_name) : c.package_name) : c.package_code }), ` · ${money(c.amount)}`, c.recipient_name ? ` · ${c.recipient_name}` : '', h('br'), h('span', { class: 'bk-note gc-dlvnote', 'data-testid': 'done-delivery', text: deliveryNote(c) })))) : null;
+    const payHref = r.payment_url || (r.token ? orderHref(r.token) : '');
     const box = h('section', { class: 'bk-conf pending gc-done', 'aria-labelledby': 'gc-done-h', tabindex: '-1' },
       h('h3', { id: 'gc-done-h', text: tx('doneTitle') }), h('span', { class: 'bk-status', text: tx('doneStatus') }),
       h('dl', { class: 'bk-sum' }, h('dt', { text: tx('doneOrder') }), h('dd', { text: `#${r.order_no}` }), h('dt', { text: tx('doneTotal') }), h('dd', { text: money(r.total) })), list,
-      h('p', { text: tx('doneNote') }), r.payment_url ? h('p', {}, h('a', { class: 'btn', href: r.payment_url, text: tx('donePay') })) : h('p', { class: 'bk-pay', text: tx('donePayLater') }),
-      h('div', { class: 'bk-actions' }, r.token ? h('a', { class: 'btn', href: orderHref(r.token), text: tx('doneOpen') }) : null, h('button', { type: 'button', class: 'btn light', text: tx('doneNew'), onclick: () => { lines.length = 0; buyerFields = null; Object.assign(buyer, { name: '', email: '', phone: '', marketing: false, terms: false }); renderCart(); cartHost.scrollIntoView({ block: 'start' }); } })), phoneBox(S, tx));
+      h('p', { text: tx('doneNext') }),
+      payHref ? h('p', {}, h('a', { class: 'btn', href: payHref, text: r.payment_url ? tx('donePay') : tx('submitPay') })) : h('p', { class: 'bk-pay', text: tx('donePayLater') }),
+      h('div', { class: 'bk-actions' }, h('button', { type: 'button', class: 'btn light', text: tx('doneNew'), onclick: () => { lines.length = 0; buyerFields = null; Object.assign(buyer, { name: '', email: '', phone: '', marketing: false, terms: false }); renderCart(); cartHost.scrollIntoView({ block: 'start' }); } })), phoneBox(S, tx));
     cartHost.replaceChildren(box); box.focus(); box.scrollIntoView({ block: 'start' });
   }
   renderCart();

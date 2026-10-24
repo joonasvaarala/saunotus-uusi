@@ -336,10 +336,11 @@ async function shopGiftSuite() {
   for (const pdf of [false, true]) {
     globalThis.__cfgExtra = { giftCardPdf: pdf };
     const name = `live kauppa tilaus maksettu${pdf ? ' +pdf' : ' pdf pois'}`, page = await openShop(name, `/tilaus/?t=${order.token}`);
-    await page.waitForSelector('[data-testid=gc-show]', { timeout: 15000 });
-    await page.locator('[data-testid=gc-card]').filter({ hasText: 'Avoin' }).locator('[data-testid=gc-show]').click(); await page.waitForSelector('[data-testid=gc-codetext]');
-    expect(await page.locator('[data-testid=gc-codetext]').innerText() === code && /E2E-feikkidata/.test(await page.locator('[data-testid=gc-reveal]').first().innerText()), `${name}: koodi ja tervehdys näkyvät`);
-    expect(await page.locator('[data-testid=gc-pdf]').count() === (pdf ? 1 : 0), `${name}: PDF-nappi ${pdf ? 'näkyy' : 'ei näy'}`);
+    await page.waitForFunction(() => document.querySelectorAll('[data-testid=gc-codetext]').length >= 2, null, { timeout: 15000 });
+    expect(await page.locator('[data-testid=gc-show]').count() === 0, `${name}: koodi aukeaa ilman erillistä nappia`);
+    const openCard = page.locator('[data-testid=gc-card]').filter({ hasText: 'Avoin' });
+    expect(await openCard.locator('[data-testid=gc-codetext]').innerText() === code && /E2E-feikkidata/.test(await openCard.innerText()), `${name}: koodi ja tervehdys näkyvät`);
+    expect(await page.locator('[data-testid=gc-pdf]').count() === (pdf ? 2 : 0), `${name}: PDF-nappi ${pdf ? 'näkyy' : 'ei näy'}`);
     if (pdf) { const a = page.locator('a[data-testid=gc-pdf]'), href = await a.getAttribute('href'); expect(href.startsWith(`${E.LIVE_URL}/functions/v1/gift-card-pdf?t=`) && /^[0-9a-f-]{36}&lang=fi$/.test(href.split('?t=')[1]) && await a.getAttribute('target') === '_blank', `${name}: PDF-linkin muoto (lang=fi, uusi välilehti)`); await shot(page, 'live-kauppa-tilaus-lataa-pdf-fi-390'); }
     expect(await page.locator('[data-testid=gc-redeem]').count() === 0, `${name}: lahjakorttitilauksella ei lunastuslomaketta`);
     if (!pdf) { await page.mouse.move(0, 0); await shot(page, 'live-kauppa-tilaus-kortit-koodi-fi-390'); }
@@ -461,8 +462,8 @@ async function deliveryLiveSuite() {
       const recCard = cards.filter({ hasText: 'Sanna Saaja' }), buyCard = cards.filter({ hasNotText: 'Sanna Saaja' });
       expect(await recCard.locator('[data-testid=gc-show], [data-testid=gc-pdf], a[href*="gift-card-pdf"]').count() === 0 && !(await recCard.innerText()).includes(ord.code.slice(0, 4) + '-') , `${name}: saajalle menevällä kortilla ei koodia eikä PDF-linkkiä`);
       expect(/18:30/.test(await recCard.locator('[data-testid=gc-delivery]').innerText()), `${name}: toimituksen ajankohta näkyy (${await recCard.locator('[data-testid=gc-delivery]').innerText()})`);
-      expect(await buyCard.locator('[data-testid=gc-show]').count() === 1, `${name}: ostajalle menevällä kortilla Näytä koodi (${(await cards.allInnerTexts()).join(' || ').replace(/\n/g, ' ').slice(0, 400)})`);
-      await buyCard.locator('[data-testid=gc-show]').click(); await page.waitForSelector('[data-testid=gc-codetext]');
+      await page.waitForSelector('[data-testid=gc-codetext]', { timeout: 15000 });
+      expect(await buyCard.locator('[data-testid=gc-show]').count() === 0 && await buyCard.locator('[data-testid=gc-codetext]').count() === 1, `${name}: ostajalle menevän kortin koodi näkyy (${(await cards.allInnerTexts()).join(' || ').replace(/\n/g, ' ').slice(0, 400)})`);
       expect(await page.locator('a[data-testid=gc-pdf]').count() === 1, `${name}: ostajalle menevällä kortilla PDF-linkki`);
       await page.mouse.move(0, 0); await shot(page, `live-toimitus-tilaus-${lang}-390`); await page.context().close();
     }
