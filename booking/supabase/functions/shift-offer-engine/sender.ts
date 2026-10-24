@@ -16,6 +16,7 @@ import {
   type SenderLog,
   type Settings,
   type StatusUpdate,
+  type TemplateSettings,
   type WhatsappEnv,
 } from "./whatsapp.ts";
 
@@ -37,6 +38,8 @@ type ClaimResponse = {
   whatsapp_dry_run?: boolean;
   allow_staff_ids?: unknown;
   messages?: unknown;
+  templates?: unknown;
+  whatsapp_hours_open?: unknown;
 };
 
 export type SenderSummary = {
@@ -76,7 +79,33 @@ function asMessage(raw: Record<string, unknown>): ClaimedMessage {
     token: raw.token == null ? null : String(raw.token),
     staff_whatsapp_enabled: raw.staff_whatsapp_enabled === true,
     bot_channel: raw.bot_channel === true,
+    subkind: raw.subkind == null ? null : String(raw.subkind),
+    body: raw.body == null ? null : String(raw.body),
+    session_open: raw.session_open === true,
+    page_token: raw.page_token == null ? null : String(raw.page_token),
+    digest: raw.digest && typeof raw.digest === "object"
+      ? {
+        date_label: (raw.digest as Record<string, unknown>).date_label == null ? null : String((raw.digest as Record<string, unknown>).date_label),
+        items: (raw.digest as Record<string, unknown>).items == null ? null : String((raw.digest as Record<string, unknown>).items),
+      }
+      : null,
   };
+}
+
+export function readTemplateSettings(raw: unknown): TemplateSettings | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const out: TemplateSettings = {};
+  for (const key of ["offer", "round_reminder", "already_taken", "day_digest"] as const) {
+    const v = (raw as Record<string, unknown>)[key];
+    if (!v || typeof v !== "object") continue;
+    const r = v as Record<string, unknown>;
+    out[key] = {
+      name: typeof r.name === "string" ? r.name : undefined,
+      approved: r.approved === true,
+      fallback: typeof r.fallback === "string" ? r.fallback : undefined,
+    };
+  }
+  return out;
 }
 
 function tally(summary: SenderSummary, result: CompleteResult) {
@@ -111,6 +140,8 @@ export async function deliverQueued(
     whatsapp_enabled: claim.whatsapp_enabled === true,
     whatsapp_dry_run: claim.whatsapp_dry_run !== false,
     allow_staff_ids: allow,
+    templates: readTemplateSettings(claim.templates),
+    whatsapp_hours_open: claim.whatsapp_hours_open === false ? false : undefined,
   };
   const summary: SenderSummary = {
     ok: true,
@@ -239,6 +270,15 @@ export async function deliverInbound(
         log("whatsapp_inbound_failed", { step: "handled" });
         throw new Error("inbound_handled_failed");
       }
+    },
+    async welcome(messageId) {
+      const { data, error } = await supa.schema("booking").rpc("shift_staff_welcome", { p_message_id: messageId });
+      if (error || !data || typeof data !== "object") {
+        if (error) log("whatsapp_inbound_failed", { step: "welcome" });
+        return { send: false, body: null };
+      }
+      const row = data as Record<string, unknown>;
+      return { send: row.send === true, body: typeof row.body === "string" ? row.body : null };
     },
     async storeOutbound(record) {
       const { error } = await supa.rpc("whatsapp_store_outbound", {

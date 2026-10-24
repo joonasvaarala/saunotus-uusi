@@ -50,7 +50,12 @@ export type InboundDeps = {
   markHandled: (messageId: string, intentOp: string) => Promise<void>;
   storeOutbound: (record: OutboundRecord) => Promise<void>;
   log: (event: string, data: Record<string, unknown>) => void;
+  // booking_153: tervetuloviesti henkilökunnan ensimmäiseen viestiin (booking.shift_staff_welcome).
+  // Tietokanta päättää: asetus, vain kerran, vain 24 h ikkunassa, ei tuntemattomalle eikä bottikanavalle.
+  welcome?: (messageId: string) => Promise<WelcomeResult>;
 };
+
+export type WelcomeResult = { send: boolean; body: string | null };
 
 const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 
@@ -159,6 +164,17 @@ export async function processInboundMessage(message: ParsedInbound, deps: Inboun
     type: message.type,
   });
   if (stored.duplicate && stored.handled) return;
+  if (!stored.duplicate && stored.staffId && deps.welcome) {
+    const welcome = await deps.welcome(stored.id).catch(() => ({ send: false, body: null } as WelcomeResult));
+    const text = welcome.send ? welcome.body?.trim() ?? "" : "";
+    if (text && stored.replyTo) {
+      const sent = await deps.send(stored.replyTo, text, []);
+      if (sent.ok) {
+        await deps.storeOutbound({ staffId: stored.staffId, phone: stored.replyTo, text, wamid: sent.wamid, shiftId: null });
+      }
+      deps.log("whatsapp_welcome", { sent: sent.ok });
+    }
+  }
   if (!stored.inboundEnabled || !stored.staffId) return;
 
   const intent = parseIntent(message.text, message.buttonId);
