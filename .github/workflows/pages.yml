@@ -226,6 +226,9 @@ jobs:
       # booking_160: säilytysajan korjaukset (markkinointilupa, yrityksen nimi/Y-tunnus, sähköpostijonon rivit säilyvät, henkilötiedot pois 3 v, PDF:t 6 v / 3 v Storage-API:lla, asiakkaiden auth-tilit;
       # rakenne; SQL-testit t160 paikallisesti PG17:llä)
       - run: node --test booking/tests/tietosuoja-160.test.mjs
+      # booking_165: tietosuojaselosteen EN-tekstiavaimet policy.7.title/body [en] (kb.policies title_en/body_en) ja needs_translation pois neljältä fi-tekstiltä
+      # (rakenne; SQL-testi t165 paikallisesti PG17:llä, työnkulussa ei ole Postgresia)
+      - run: node --test booking/tests/tietosuoja-en-avaimet.test.mjs
       # booking_149: asiakkaan peruutuspyyntö (ja sen kautta hyvitys) vain, jos vuoron alkuun on vähintään customer_change_hours_before (48) h;
       # palvelin pakottaa (cancel_too_late), tilaussivu piilottaa lomakkeen ja näyttää puhelinnumeron; hallinnan peruutus/hyvitys aina. Tekstit pending-import-49.
       # t149 (booking/supabase/tests/peruutus/t149_customer_cancel_48h.sql) ajetaan paikallisessa PG17:ssä t143:n tapaan (työnkulussa ei ole Postgresia).
