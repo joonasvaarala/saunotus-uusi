@@ -250,6 +250,8 @@ jobs:
       # booking_156: tuotteen lyhyt kuvaus (kb.products.short_description(_en), rikas teksti, sama allowlist kuin kuvauksella) korvaa johdetun otteen
       # kortissa ja yläbannerissa (tyhjä → ote), tuntemattoman tuotteen varasivu puhdistettuna. Tekstit pending-import-56. SQL: t156 PG17:ssä.
       - run: node --test booking/tests/lyhyt-kuvaus.test.mjs
+      # Kauppa: tuotekortin ajankohta omalla rivillään hinnan yläpuolella (card-meta.js); päivänäkymä yksityisvuorot → yleiset → hoidot (FI/EN)
+      - run: node --test booking/tests/kortit-jarjestys.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

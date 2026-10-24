@@ -13,6 +13,7 @@ import { loadProducts as loadTreatmentProducts, splitCatalog, isListed as treatm
 import { pickCatalog } from './catalog-audience.js';
 import { heroShort, cardShort, fallbackDesc } from './short-desc.js';
 import { createTreatmentViews } from './treatment-ui.js';
+import { cardMeta } from './card-meta.js';
 import { createTexts, loadShopTexts, applyShopTexts } from './site-texts.js';
 import { fmtMinutes } from './site-texts-logic.js';
 import { OPT } from './options-texts.js';
@@ -68,6 +69,8 @@ const priceText = (p) => {
   if (p.price_type === 'from' || p.price_type === 'variable') return `${t.from} ${v}`;
   return v;
 };
+// Päivänäkymän ryhmäjärjestys: yksityisvuorot ensin, sitten yleiset vuorot (hoidot ja rituaalit erillisenä osiona näiden jälkeen).
+const DAY_KIND_ORDER = ['yksityinen', 'yleinen', 'muut'];
 const kindOf = (p) => (p.treatment ? 'hoito' : p.sale_kind === 'public_shift' ? 'yleinen' : p.sale_kind === 'private_shift' ? 'yksityinen' : 'muut');
 // ?mock=1: kokeilutila (EI palvelinta): kaikki RPC-kutsut vastataan selaimessa (shop-mock.js; ei tallenna mitään palvelimelle). Lippu säilytetään linkeissä.
 const MOCK = new URLSearchParams(location.search).get('mock') === '1';
@@ -189,7 +192,7 @@ function viewList(query) {
     pimg(p, 'card-img'),
     h('h3', {}, h('a', { href: bk(`/tuote/${p.slug}`), text: pname(p) })),
     cardExcerpt(p),
-    h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), pdur(p) ? ` · ${pdur(p)}` : ''),
+    cardMeta(h, priceText(p), pdur(p)),   // ajankohta omalla rivillään hinnan yläpuolella (card-meta.js)
     h('a', { class: 'btn sm', href: bk(`/tuote/${p.slug}`) }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) })))));
   const annual = annualPromo();
   mount(h('header', { class: 'bk-head' }, h('h2', { text: t.title }), h('p', { class: 'lead', text: t.lead })), modeSwitch('cat'), tabs, cards, annual);
@@ -396,7 +399,8 @@ async function viewDay(dateStr, keep, openSlug) {
     .sort((a, b) => Number(fullyBooked(a[1])) - Number(fullyBooked(b[1])));
   const bySlug = new Map(prods.map(([p]) => [p.slug, p]));
   const openId = prods.length === 1 ? prods[0][0].id : bySlug.get(openSlug)?.id ?? null;
-  const groups = ['yleinen', 'yksityinen', 'muut'].map((k) => [k, prods.filter(([p]) => kindOf(p) === k)])
+  // järjestys: yksityisvuorot → yleiset vuorot → muut; hoidot ja rituaalit (treatBox) aina viimeisenä
+  const groups = DAY_KIND_ORDER.map((k) => [k, prods.filter(([p]) => kindOf(p) === k)])
     .filter(([, g]) => g.length);
   results = h('div', { class: 'bk-dayresults', 'data-date': ds }, heading, notice,
     prods.length ? h('p', { class: 'bk-note bk-pickhint', text: t.pickProduct }) : null,
