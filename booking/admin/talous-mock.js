@@ -406,6 +406,26 @@ const PREPAID_ON = '2026-10-15';
     if (!(a.p_amount > 0) || a.p_amount > round2(p.amount - p.refunded_amount)) throw fail('amount_exceeds_refundable', 'Summa ylittää hyvitettävän');
     return { ok: true, mock: true, refund_id: 9e6, status: 'done', balance: balanceOf(byId.get(p.order_id)), receipt_id: null, receipt_no: null };
   }
+  // booking_136: hyvitys + valinnainen varausten peruutus (mock: vain vastaus, ei tilamuutosta)
+  function adminRefundOrder(a = {}) {
+    const res = adminRefund(a), o = byId.get(payById.get(+a.p_payment_id).order_id);
+    const n = a.p_cancel_reservations === true ? o.reservations.filter((r) => ['pending', 'confirmed'].includes(r.status)).length : 0;
+    return { ...res, cancelled_reservations: n };
+  }
+  const resById = (id) => { for (const o of byId.values()) { const r = o.reservations.find((x) => x.id === +id); if (r) return { o, r }; } return null; };
+  function adminReservationRefundPreview(a = {}) {
+    const f = resById(a.p_reservation_id); if (!f) throw fail('not_found', 'Varausta ei löydy', 404);
+    const pays = f.o.payments.filter((p) => ['paid', 'partially_refunded'].includes(p.status) && !p.is_johku);
+    const share = round2((f.r.item_total || 0) + (f.r.addons || []).reduce((s, x) => s + (x.line_total || 0), 0));
+    let left = share; const out = [];
+    for (const p of pays) { const amt = round2(Math.min(left, p.amount - p.refunded_amount)); if (amt <= 0) continue; out.push({ payment_id: p.payment_id, provider: 'manual', method: p.method, gift_card: false, online_off: false, amount: amt, lines: [] }); left = round2(left - amt); }
+    return { ok: true, mock: true, reservation_id: f.r.id, order_id: f.o.order_id, status: f.r.status, total: round2(share - left), unallocated: 0, payments: out };
+  }
+  function adminCancelReservation(a = {}) {
+    const f = resById(a.p_reservation_id); if (!f) throw fail('not_found', 'Varausta ei löydy', 404);
+    const pv = a.p_refund === true ? adminReservationRefundPreview(a) : { payments: [], total: 0 };
+    return { ok: true, mock: true, cancelled: true, order_id: f.o.order_id, refunds: pv.payments.map((p) => ({ payment_id: p.payment_id, provider: p.provider, amount: p.amount, refund_id: 9e6, status: 'done' })), refunded_total: pv.total };
+  }
   function adminRecordPayment(a = {}) {
     const o = byId.get(+a.p_order_id); if (!o) throw fail('not_found', 'Tilausta ei löydy', 404);
     if (!o.is_native) throw fail('order_not_editable', 'Tilaukseen ei voi kirjata maksua');
@@ -423,7 +443,7 @@ const PREPAID_ON = '2026-10-15';
   const ADDON_LIST = [{ id: 1, code: 'saunavihta', name: 'Saunavihta', name_en: 'Sauna whisk (vihta)', price: 5, vat_rate: 25.5, max_per_person: 1, active: true }, { id: 2, code: 'pyyhe', name: 'Pyyhe', name_en: 'Towel', price: 5, vat_rate: 25.5, max_per_person: 1, active: true },
     { id: 3, code: 'turvenaamio_jalkakylpy', name: 'Turvenaamio ja jalkakylpy', name_en: 'Peat mask and foot bath', price: 12, vat_rate: 25.5, max_per_person: 1, active: true }];
   const HANDLERS = { admin_list_orders: adminListOrders, admin_get_order: adminGetOrder, admin_list_payments: adminListPayments, admin_list_addons: () => ADDON_LIST, admin_add_to_order: adminAddToOrder, admin_create_payment_link: adminCreatePaymentLink,
-    admin_refund: adminRefund, admin_record_payment: adminRecordPayment, admin_list_vat_rates: adminListVatRates, admin_report_daily: adminReportDaily, admin_report_month: adminReportMonth, admin_report_range: adminReportRange, admin_report_csv: adminReportCsv, admin_report_gift_cards: adminReportGiftCards, admin_sales_chart: adminSalesChart, admin_get_receipt: adminGetReceipt, admin_resend_receipt: adminResendReceipt };
+    admin_refund: adminRefund, admin_refund_order: adminRefundOrder, admin_reservation_refund_preview: adminReservationRefundPreview, admin_cancel_reservation: adminCancelReservation, admin_record_payment: adminRecordPayment, admin_list_vat_rates: adminListVatRates, admin_report_daily: adminReportDaily, admin_report_month: adminReportMonth, admin_report_range: adminReportRange, admin_report_csv: adminReportCsv, admin_report_gift_cards: adminReportGiftCards, admin_sales_chart: adminSalesChart, admin_get_receipt: adminGetReceipt, admin_resend_receipt: adminResendReceipt };
   // sama kutsutapa kuin sb.js:n rpc(): rpc(nimi, parametrit) → Promise. Tuntematon nimi = puuttuva RPC (404 / PGRST202) kuten PostgRESTissä.
   async function rpc(name, args = {}) {
     await wait();

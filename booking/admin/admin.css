@@ -803,3 +803,12 @@ body.shot #shell .nav-toggle{display:none!important}
 body.shot #shell main{margin-left:0}
 body.shot #shell .nav{position:static;width:auto;height:auto;display:flex;flex-direction:row;overflow:auto;padding:0;border-right:0;border-top:1px solid var(--line);box-shadow:none}
 body.shot #shell .nav .lbl{display:inline}
+/* Hyvitys ↔ peruutus (booking_136): kyllä/ei-valinta, mobiilissa ei vaakavieritystä (390 px) */
+.rc-choice{display:grid;gap:8px;min-width:0;margin:0;padding:0;border:0}
+.rc-choice legend{font-weight:600;padding:0;margin-bottom:4px}
+.rc-choice .rc-hint,.rc-note{margin:0;overflow-wrap:anywhere}
+.rc-opt{min-width:0}.rc-opt>span{min-width:0;overflow-wrap:anywhere}
+.rc-opt input[type=radio]{width:22px;height:22px;min-height:0;padding:0;margin:1px 0 0;flex:none;accent-color:var(--green)}
+.rc-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.rc-actions .btn{flex:1 1 140px;min-width:0;white-space:normal;line-height:1.25;text-align:center}
+.dlg .stack,.dlg form{min-width:0}

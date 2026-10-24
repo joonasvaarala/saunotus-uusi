@@ -10,6 +10,8 @@ import { johkuBadge, SOURCES, sourceLabel, payBadge, sourceBadge, loading, empty
 import { countActive, filterDrawer } from '../filter-drawer.js';
 import { effectivePaymentFilter, PAYMENT_FILTERS } from '../orders-filter.js';
 import { orderText } from '../orders-texts.js';
+import { rcText } from '../refund-cancel-texts.js';
+import { yesNo } from './refund-cancel.js';
 
 export const ORDER_SORTS = ['created', 'order_no', 'total', 'payment_status', 'first_reservation'];
 const VAT_CHOICES = [25.5, 13.5, 0];
@@ -202,14 +204,22 @@ export function createOrdersTab({ api, ctx, gift = null }) {
       vpHint.hidden = prov !== 'visma_pay';
     };
     sel.addEventListener('change', syncHint); syncHint();
+    // booking_136: perutaanko myös tilauksen varaukset? Näkyy vain, kun voimassa olevia varauksia on ja käyttäjällä on bookings.manage (palvelin tarkistaa saman). Oletus Ei.
+    const active = o.reservations.filter((r) => ['pending', 'confirmed'].includes(r.status)).length;
+    const cancelQ = o.is_native && active > 0 && (api.isMock('refundOrder') || ctx.can('bookings.manage'))
+      ? yesNo({ name: 'cancel_reservations', testid: 'refund-cancel-res', legend: rcText('ui.admin.refund_cancel.order_question'), hint: rcText('ui.admin.refund_cancel.order_count', { count: active }),
+        no: rcText('ui.admin.refund_cancel.order_no'), yes: rcText('ui.admin.refund_cancel.order_yes') }) : null;
     formDialog(t('btn.refund'), [h('p', { class: 'muted', text: api.isMock('refund') ? t('mock.note') : t('live.note') }), fld(t('refund.payment'), sel), fld(t('refund.amount'), amount),
-      fld(t('refund.reason'), h('input', { name: 'reason', required: true, maxlength: 200 })), vpHint, mpHint], t('refund.submit'),
+      fld(t('refund.reason'), h('input', { name: 'reason', required: true, maxlength: 200 })), vpHint, mpHint, cancelQ ? cancelQ.node : null], t('refund.submit'),
     async (fd) => {
       const amt = +fd.get('amount'), p = refundable.find((x) => String(x.payment_id) === fd.get('payment'));
       if (!(amt > 0) || amt > left(p)) throw new Error(t('refund.badAmount'));
       if (String(fd.get('reason') || '').trim().length < 3) throw new Error(t('refund.noReason'));
-      const res = await api.refund({ paymentId: p.payment_id, amount: amt, reason: String(fd.get('reason')).trim() });
-      doneToast(res, RPC.refund);
+      const cancelRes = fd.get('cancel_reservations') === 'yes';
+      const args = { paymentId: p.payment_id, amount: amt, reason: String(fd.get('reason')).trim() };
+      const res = cancelRes ? await api.refundOrder({ ...args, cancelReservations: true }) : await api.refund(args);
+      doneToast(res, cancelRes ? RPC.refundOrder : RPC.refund);
+      if (cancelRes && +res?.cancelled_reservations > 0) toast(rcText('ui.admin.refund_cancel.order_cancelled', { count: res.cancelled_reservations }));
       // Verkkomaksu: rivi on 'requested' → käsittely heti (käyttäjän JWT, payments.refund), tulos näkyviin
       if (res?.status === 'requested' && !res.mock && p.provider === 'mobilepay') await processMobilepayRefund(res.refund_id);
       if (res?.status === 'requested' && !res.mock && p.provider === 'visma_pay') await processVismaRefund(res.refund_id);
