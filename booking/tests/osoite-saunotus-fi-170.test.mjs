@@ -4,7 +4,8 @@
 //   (ne kirjoittivat vanhan osoitteen tuotantoon; booking_170 korjaa tiedot, booking_163 on tuotannossa peruttu);
 // - content/kb/kb.json: tuotannon tilannekuva (scripts/kb-snapshot.mjs), päivittyy booking_170:n ajon jälkeen seuraavassa tilannekuvassa;
 // - booking/shop/src/johku-links.js (LEGACY_CANONICAL) ja src/lib.mjs (SHOP_CANON): tunnistavat vanhan osoitteen ja ohjaavat sen sivuston
-//   omaan BASE-polkuun (tiedot ennen booking_170:tä tai sen rollbackin jälkeen), jotta sivustolle ei päädy linkkiä vanhalle kehityssivulle.
+//   omaan BASE-polkuun (tiedot ennen booking_170:tä tai sen rollbackin jälkeen), jotta sivustolle ei päädy linkkiä vanhalle kehityssivulle;
+// - send-emails/golden-cases.mjs: sähköpostien kultaisten tiivisteiden (golden-email.json) syöte, otettu ennen siirtoa; ei muuteta.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -30,7 +31,9 @@ const APPLIED = [
   'booking/tests/booking-url-kauppaan-163.test.mjs',
 ];
 const SNAPSHOT = 'content/kb/kb.json', LEGACY = ['booking/shop/src/johku-links.js', 'src/lib.mjs'];
-const ALLOW = [MIG, RB, T170, SELF, RUNBOOK, ...APPLIED, SNAPSHOT, ...LEGACY];
+// sähköpostien kultaiset tapaukset: syöte, jolla golden-email.json:n sha256-tiivisteet otettiin ennen tekstien siirtoa; osoitteen muutos rikkoisi vertailun
+const GOLDEN = 'booking/supabase/functions/send-emails/golden-cases.mjs';
+const ALLOW = [MIG, RB, T170, SELF, RUNBOOK, ...APPLIED, SNAPSHOT, ...LEGACY, GOLDEN];
 
 test('repossa ei viittauksia vanhaan kehitysosoitteeseen (paitsi sallitut poikkeukset)', () => {
   const files = execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8' }).split('\n').filter(Boolean);

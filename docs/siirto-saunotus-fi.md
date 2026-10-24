@@ -12,6 +12,8 @@ vartijatesti `booking/tests/osoite-saunotus-fi-170.test.mjs`):
 - `content/kb/kb.json`: tuotannon tilannekuva. Se päivittyy seuraavassa tilannekuvassa booking_170:n ajon jälkeen.
 - `booking/shop/src/johku-links.js` (`LEGACY_CANONICAL`) ja `src/lib.mjs` (`SHOP_CANON`): koodi tunnistaa vanhan osoitteen ja ohjaa sen
   sivuston omaan polkuun. Näin sivustolle ei päädy linkkiä vanhalle kehityssivulle, vaikka tiedoissa olisi vielä vanha osoite.
+- `booking/supabase/functions/send-emails/golden-cases.mjs`: sähköpostien kultaisten tiivisteiden (`golden-email.json`) syöte,
+  joka otettiin ennen tekstien siirtoa. Osoitteen vaihto muuttaisi tiivisteet, joten tiedostoa ei muuteta.
 
 Merkinnät: 🗄️ = tuotantotietokannan muutos, 🖥️ = palvelin-, DNS- tai hosting-muutos. Kumpikin tarvitsee Joonasin OK:n ennen ajoa.
 

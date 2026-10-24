@@ -1,7 +1,7 @@
 // Sähköpostipohjien "kultaiset" tapaukset (booking-osa 3 / PR 3): render(kind, data, locale) -syötteet, joilla varmistetaan että
 // tekstien siirto tietokantaan (email.*-avaimet) ei muuta viestien sisältöä tavuakaan, kun DB-rivit vastaavat repon oletuksia.
 // Käyttö: golden.test.mjs (sha256-tiivisteet tiedostossa golden-email.json, otettu ennen siirtoa vanhalla templates.ts:llä).
-const SITE = 'https://saunotus.fi';
+const SITE = 'https://uusi.saunotus.com';
 const ORDER_URL = `${SITE}/tilaus/?t=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c`;
 const PAY_URL = `${SITE}/maksa/?p=9d8c7b6a-1111-4222-8333-444455556666`;
 const GTOK = '0654361d-a2b1-43f4-a25c-8c7223907dd0';
