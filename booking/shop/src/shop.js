@@ -24,6 +24,7 @@ import { holdPanel } from './hold-ui.js';
 import { normBusinessId, validBusinessId, normOvt, validOvt, validOperator } from './invoice-validate.js';
 import { isRichHtml } from './rich-text.js';
 import { visibleText, richHost } from './rich-view.js';
+import { softenSpaces } from './text-spaces.js';
 import { revealForm, revealIfHidden } from './gift-ui.js';
 import { normalizeCode, quoteSignature, isAnnualQuote, isCodeError } from './discount-code-logic.js';
 import { createQuietOfferCache, indexOffers, findOffer, dayMaxPercent, productMaxPercent, quietPrices, quietCheckout, quietBase, pctText, fillText, quietWindow, offerKey } from './quiet-offers-logic.js';
@@ -64,7 +65,7 @@ const priceFor = (s, n) => (s.price_mode === 'per_person' ? s.unit_price * n : s
 const addonLimit = (a, n) => Math.min((a.max_per_person ?? 99) * Math.max(1, n), 99);
 const aname = (a) => (S.lang === 'en' && a.name_en) || a.name;
 const adesc = (a) => (S.lang === 'en' && a.description_en) || a.description;
-const pname = (p) => (S.lang === 'en' && p.name_en) || p.name;
+const pname = (p) => softenSpaces((S.lang === 'en' && p.name_en) || p.name);   // &nbsp; nimessä → rivittyy (text-spaces.js)
 const pdesc = (p) => (S.lang === 'en' && p.description_en) || p.description;
 // kesto (booking_147): EN-kesto kb.products.duration_text_en, puuttuu → suomenkielinen duration_text (sama malli kuin pname/pdesc)
 const pdur = (p) => (S.lang === 'en' && p.duration_text_en) || p.duration_text;
