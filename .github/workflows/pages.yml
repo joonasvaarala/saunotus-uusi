@@ -257,6 +257,8 @@ jobs:
       - run: node --test booking/tests/lyhyt-kuvaus.test.mjs
       # Kauppa: tuotekortin ajankohta omalla rivillään hinnan yläpuolella (card-meta.js); päivänäkymä yksityisvuorot → yleiset → hoidot (FI/EN)
       - run: node --test booking/tests/kortit-jarjestys.test.mjs
+      # booking_161: kb.products-kuvausten Johku-linkit → uuden kaupan osoitteet (migraatio + rollback, md5-vartijat). SQL: t161 PG17:ssä.
+      - run: node --test booking/tests/kb-johku-linkit-161.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
