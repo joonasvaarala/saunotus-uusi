@@ -148,6 +148,10 @@ jobs:
       - run: node --test booking/tests/asetukset.test.mjs
       # lahjakoodi §13.12: kaupan ja hallinnan lunastuspyyntölogiikka (mockatut RPC:t)
       - run: node --test booking/tests/voucher-claims.test.mjs booking/tests/voucher-claims-admin.test.mjs booking/tests/lahjakoodi-vieritys.test.mjs
+      # jonotuslista (booking_132): kaupan näkymä, tekstit, sähköpostipohja ja migraation rakenne.
+      # t132 (booking/supabase/tests/waitlist/t132_waitlist.sql) ei ole tässä ajossa: työnkulussa ei ole Postgresia.
+      # Bottiavustus ajaa t132:n psql:llä migraatioiden ja fixtures/10_test_helpers.sql:n jälkeen.
+      - run: node --test booking/tests/jonotuslista.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

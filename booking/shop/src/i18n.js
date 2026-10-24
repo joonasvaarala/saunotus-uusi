@@ -1,6 +1,7 @@
 // Kaupan tekstit (FI/EN). Lisää uusi kieli lisäämällä avain tähän ja <html lang> -sivulle.
 // Puhelinnumero tulee vakiosta (phone.js): fi "010 299 2866", en "+358 10 299 2866".
 import { PHONE_DISPLAY_FI, PHONE_DISPLAY_EN } from './phone.js';
+import { WAITLIST_TEXTS } from './waitlist-texts.js';
 export const T = {
   fi: {
     title: 'Varaa saunaelämys', lead: 'Valitse kokemus, päivä ja vuoro. Varaus vahvistetaan heti.',
@@ -126,3 +127,6 @@ export const T = {
     errors: { rate_limited: 'Too many attempts. Please try again shortly.', capacity_exceeded: 'Not enough free places left for this session.', private_booked: 'This time is reserved for a private session.', public_shift_booked: 'There are already bookings for public sessions at this time.', space_closed: 'The sauna is closed at the selected time.', change_too_late: 'This booking can no longer be changed online. Please contact us by email.', not_changeable: 'This booking cannot be changed online. Please contact us by email.', price_change_requires_staff: 'The price of a paid booking cannot change online. Please contact us by email.', product_mismatch: 'Please pick a session of the same service.', invalid_change: 'Pick a new session and/or number of guests.', annual_card_limit: 'An annual card allows only one upcoming booking at a time.', invalid_business_id: 'Please check the business ID (format 1234567-8).', invalid_company: 'Please enter the company details.', invalid_company_name: 'Please enter the company name.', invalid_address: 'Please enter the billing address.', invalid_zip: 'The postcode must be 5 digits.', invalid_city: 'Please enter the city.', invalid_einvoice_address: 'Please check the e-invoice address.', invalid_einvoice_operator: 'Please check the e-invoice operator ID.', einvoice_incomplete: 'Give the e-invoice address and the operator ID together, or leave both empty.', invalid_reference: 'The reference is too long.', invalid_customer_kind: 'Please choose a customer type.', invalid_email: 'Please check the email address.', invalid_phone: 'Please check the phone number.', invalid_name: 'Please check the name.', addon_quantity: 'Please check the add-on quantities (limited by the number of guests).', addon_not_found: 'The selected add-on was not found. Please reload the page.', addon_inactive: 'The selected add-on is no longer available.', addon_not_allowed: 'The add-on is not available for this session.', invalid_addons: 'Please check the add-ons.', },
   },
 };
+
+Object.assign(T.fi, WAITLIST_TEXTS.fi);
+Object.assign(T.en, WAITLIST_TEXTS.en);

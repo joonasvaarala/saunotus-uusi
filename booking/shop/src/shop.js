@@ -6,6 +6,8 @@ import { runReturn } from './mobilepay-ui.js';
 import { loadPayChoices, payChoicesSection, payNotice, onlineAvailable, onlineAtCheckout } from './pay-choices.js';
 import { pt } from './pay-choices-texts.js';
 import { T } from './i18n.js';
+import { createWaitlistView } from './waitlist-ui.js';
+import { visibleWaitlistSlots, fullyBooked, hasWaitlistSlots } from './waitlist-logic.js';
 import { loadProducts as loadTreatmentProducts, splitCatalog, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
 import { pickCatalog } from './catalog-audience.js';
 import { createTreatmentViews } from './treatment-ui.js';
@@ -236,8 +238,8 @@ function dayItem({ r, p }, ds, withName = false) {
     h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }),
       withName ? h('span', { class: 'bk-prodname' }, h('a', { href: bk(`/tuote/${p.slug}/${ds}`), text: pname(p) })) : null, sub ? h('span', { class: 'bk-sub', text: sub }) : null, h('span', { class: 'bk-price', text: price })),
     h('div', { class: 'bk-slot-side' },
-      ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: `bk-badge ${r.status}`, text: r.status === 'full' ? t.full : t.unavailable, title: r.status === 'unavailable' ? t.unavailableHint : null }),
-      ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}?via=day`) }, t.choose, h('span', { class: 'sr', text: ` ${title}, ${pname(p)}` })) : null));
+      ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: 'bk-badge full', text: t.waitlistSessionSoldOut }),
+      ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}?via=day`) }, t.choose, h('span', { class: 'sr', text: ` ${title}, ${pname(p)}` })) : h('a', { class: 'btn sm light bk-waitlist-link', href: bk(`/jono/${r.rule_id}/${ds}/${p.id}?via=day`), text: t.waitlistJoinShort })));
 }
 // hoito-/rituaaliajan rivi päivänäkymässä: valinta vie hoitovarausvirtaan (tuotesivu) esivalitulla päivällä ja ajalla (henkilömäärä 1, vaihdettavissa)
 function treatItem({ r, p }, ds) {
@@ -271,18 +273,18 @@ async function fillTreatments(box, results, ds, today, tmax, openSlug, onToggle,
 }
 // tuotekortti (accordion): otsikkopainike → vain saatavilla olevat tuotteet; ajat näytetään vasta kun kortti avataan (yksi auki kerrallaan, tila URL:ssa ?tuote=<slug>)
 function prodCard(p, rs, ds, open, onToggle, treat = false) {
-  const avail = rs.filter((x) => x.r.status === 'available'), id = `bk-pc-${p.id}`;
+  const avail = rs.filter((x) => x.r.status === 'available'), fullOnly = !treat && fullyBooked(rs), id = `bk-pc-${p.id}`;
   const rawDesc = pdesc(p) || '', desc = (isRichHtml(rawDesc) ? visibleText(rawDesc) : rawDesc).replace(/\s+/g, ' ').trim(), short = desc.length > 90 ? `${desc.slice(0, 90).replace(/\s+\S*$/, '')}…` : desc;
   const panel = h('div', { id: `${id}-panel`, class: 'bk-pc-panel', role: 'region', 'aria-labelledby': `${id}-btn`, hidden: open ? null : true },
     treat && tv.timelineText(p) ? h('p', { class: 'bk-note bk-pc-tl', text: tv.timelineText(p) }) : null,
-    h('ul', { class: 'bk-slotlist' }, rs.filter((x) => treat || x.r.status === 'available').map((x) => (treat ? treatItem(x, ds) : dayItem(x, ds)))),
+    h('ul', { class: 'bk-slotlist' }, (treat ? rs : visibleWaitlistSlots(rs)).map((x) => (treat ? treatItem(x, ds) : dayItem(x, ds)))),
     h('p', { class: 'bk-pc-more' }, h('a', { href: treat ? bk(`/tuote/${p.slug}?n=1&d=${ds}`) : bk(`/tuote/${p.slug}/${ds}`), text: t.productInfo })));
   const btn = h('button', { type: 'button', id: `${id}-btn`, class: 'bk-pc-head', 'aria-expanded': open ? 'true' : 'false', 'aria-controls': `${id}-panel`, onclick: () => onToggle(p, li) },
     pimg(p, 'pc-img', { alt: false, w: 160, hgt: 160 }),
     h('span', { class: 'bk-pc-main' }, h('strong', { class: 'bk-pc-name', text: pname(p) }), short ? h('span', { class: 'bk-pc-desc', text: short }) : null,
-      h('span', { class: 'bk-pc-meta' }, h('span', { class: 'bk-price', text: priceText(p) }), h('span', { class: 'bk-badge free', text: `${t.timesFree(avail.length)} · ${t.firstAt} ${hm(avail[0].r.starts_at)}` }))),
+      h('span', { class: 'bk-pc-meta' }, h('span', { class: 'bk-price', text: priceText(p) }), fullOnly ? h('span', { class: 'bk-badge full', text: t.waitlistSoldOut }) : h('span', { class: 'bk-badge free', text: `${t.timesFree(avail.length)}${avail.length ? ` · ${t.firstAt} ${hm(avail[0].r.starts_at)}` : ''}` }))),
     h('span', { class: 'bk-pc-chev', 'aria-hidden': 'true' }));
-  const li = h('li', { class: `bk-pc${open ? ' open' : ''}`, 'data-slug': p.slug }, btn, panel);
+  const li = h('li', { class: `bk-pc${fullOnly ? ' full' : ''}${open ? ' open' : ''}`, 'data-slug': p.slug }, btn, panel);
   return li;
 }
 async function viewDay(dateStr, keep, openSlug) {
@@ -326,20 +328,24 @@ async function viewDay(dateStr, keep, openSlug) {
     history.replaceState(null, '', bk(`/paiva/${ds}${wasOpen ? '' : `?tuote=${p.slug}`}`)); last = location.hash;   // tila URL:ssa, ei uudelleenpiirtoa
   };
   const heading = h('h3', { id: 'bk-day-h', text: `${t.slotsFor} – ${longDate}`, tabindex: '-1' });
-  if (!free.length) {   // ei yhtään saatavilla olevaa tuotetta: tyhjän päivän viesti + ehdotus seuraavasta vapaasta päivästä
+  let notice = null;
+  if (!free.length) {
     const nextDs = await findNextFree(ds, maxDs);
-    results = h('div', { class: 'bk-dayresults', 'data-date': ds }, heading,
-      h('div', { class: 'bk-notice', role: 'status' }, h('p', { text: t.noSlotsDay }),
-        nextDs ? h('p', {}, t.nextFree + ' ', h('a', { class: 'btn sm', href: bk(`/paiva/${nextDs}`), text: dayLong(`${nextDs}T12:00:00Z`) })) : h('p', { text: t.noNextFree })));
-  } else {
-    // vain tuotteet, joilla on vähintään yksi varattavissa oleva vuoro (täynnä / ei varattavissa olevat tuotteet jätetään pois)
-    const prods = state.catalog.map((p) => [p, rows.filter((x) => x.p.id === p.id)]).filter(([, rs]) => rs.some((x) => x.r.status === 'available'));
-    const bySlug = new Map(prods.map(([p]) => [p.slug, p]));
-    let openId = prods.length === 1 ? prods[0][0].id : bySlug.get(openSlug)?.id ?? null;   // yksi tuote → valmiiksi auki
-    const groups = ['yleinen', 'yksityinen', 'muut'].map((k) => [k, prods.filter(([p]) => kindOf(p) === k)]).filter(([, g]) => g.length);
-    results = h('div', { class: 'bk-dayresults', 'data-date': ds }, heading, h('p', { class: 'bk-note bk-pickhint', text: t.pickProduct }),
-      groups.flatMap(([k, g]) => [h('h4', { class: 'bk-kindh', text: t['k_' + k] }), h('ul', { class: 'bk-prods' }, g.map(([p, rs]) => prodCard(p, rs, ds, p.id === openId, toggle)))]));
+    notice = h('div', { class: 'bk-notice', role: 'status' }, h('p', { text: t.noSlotsDay }),
+      nextDs ? h('p', {}, t.nextFree + ' ', h('a', { class: 'btn sm', href: bk(`/paiva/${nextDs}`), text: dayLong(`${nextDs}T12:00:00Z`) })) : h('p', { text: t.noNextFree }));
   }
+  // Näytetään myös kokonaan loppuunmyydyt tuotteet; "unavailable" on aina piilossa.
+  const prods = state.catalog.map((p) => [p, rows.filter((x) => x.p.id === p.id)])
+    .filter(([, rs]) => hasWaitlistSlots(rs))
+    .sort((a, b) => Number(fullyBooked(a[1])) - Number(fullyBooked(b[1])));
+  const bySlug = new Map(prods.map(([p]) => [p.slug, p]));
+  const openId = prods.length === 1 ? prods[0][0].id : bySlug.get(openSlug)?.id ?? null;
+  const groups = ['yleinen', 'yksityinen', 'muut'].map((k) => [k, prods.filter(([p]) => kindOf(p) === k)])
+    .filter(([, g]) => g.length);
+  results = h('div', { class: 'bk-dayresults', 'data-date': ds }, heading, notice,
+    prods.length ? h('p', { class: 'bk-note bk-pickhint', text: t.pickProduct }) : null,
+    groups.flatMap(([k, g]) => [h('h4', { class: 'bk-kindh', text: t['k_' + k] }),
+      h('ul', { class: 'bk-prods' }, g.map(([p, rs]) => prodCard(p, rs, ds, p.id === openId, toggle)))]));
   const tmax = addDays(today, treatmentHorizon(state.settings)) < maxDs ? addDays(today, treatmentHorizon(state.settings)) : maxDs;
   const treatBox = state.treatments.length && ds <= tmax ? h('section', { class: 'bk-treat-day', 'aria-label': t.k_hoito }, h('h4', { class: 'bk-kindh', text: t.k_hoito }), h('p', { class: 'bk-loading bk-treat-status', role: 'status', text: t.loading }), h('ul', { class: 'bk-prods' })) : null;
   if (treatBox) results.append(treatBox);
@@ -406,7 +412,7 @@ async function viewProduct(slug, dateStr, query) {
     const markSel = () => calBox.querySelectorAll('.bk-cell[aria-pressed]').forEach((b) => { const on = b.textContent === String(+sel?.slice(8)) && sel?.startsWith(`${y}-${pad2(m + 1)}`); b.classList.toggle('sel', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
     const drawSlots = () => {
       if (!sel) { slotBox.replaceChildren(); return; }
-      const rows = (byDay[sel] || []).filter((r) => r.status === 'available');   // vain vapaat vuorot asiakkaalle
+      const rows = visibleWaitlistSlots(byDay[sel] || []);   // vapaat ensin, loppuunmyydyt lopuksi
       slotBox.replaceChildren(h('h3', { text: `${t.pickSlot} – ${dayLong(`${sel}T12:00:00Z`)}` }),
         rows.length ? h('ul', { class: 'bk-slotlist' }, rows.map((r) => slotItem(r, sel, p))) : h('p', { text: t.noSlots }));
     };
@@ -423,8 +429,8 @@ function slotItem(r, ds, p) {
   return h('li', { class: `bk-slot ${r.status}` },
     h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }), sub ? h('span', { class: 'bk-sub', text: sub }) : null, h('span', { class: 'bk-price', text: price })),
     h('div', { class: 'bk-slot-side' },
-      ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: `bk-badge ${r.status}`, text: r.status === 'full' ? t.full : t.unavailable, title: r.status === 'unavailable' ? t.unavailableHint : null }),
-      ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}`) }, t.choose, h('span', { class: 'sr', text: ` ${title}` })) : null));
+      ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: 'bk-badge full', text: t.waitlistSessionSoldOut }),
+      ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}`) }, t.choose, h('span', { class: 'sr', text: ` ${title}` })) : h('a', { class: 'btn sm light bk-waitlist-link', href: bk(`/jono/${r.rule_id}/${ds}/${p.id}`), text: t.waitlistJoinShort })));
 }
 
 // ---- jaetut lomakeosat (vuorovaraus + hoitovaraus) ----
@@ -772,6 +778,8 @@ async function viewChange(token, b) {
 // ---- hoito- ja rituaalivaraukset: käyttöliittymä saa tarvitsemansa apurit täältä (luodaan vasta kun kaikki on määritelty) ----
 const tv = createTreatmentViews({ h, t, S, state, money, fmt, hm, dayLong, pad2, todayHel, addDays, pname, pdesc, pimg, setHero, mount, focusTop, errorBox, phoneBox, bk, customerFields, legalFields, setLast: () => { last = location.hash; }, holdInfo, tx: texts.tx, confirmUrl: (token) => `${S.confirmHref}${mockQs()}#${token}` });
 
+const wv = createWaitlistView({ h, t, S, state, loadMonth, setHero, mount, focusTop, errorBox, phoneBox, bk, rpc, pname, dayLong, hm });
+
 // ---- reititin ----
 async function route(keep = false) {
   stopHold();
@@ -780,6 +788,21 @@ async function route(keep = false) {
     if (S.page === 'confirm') return await viewConfirmation();
     if (!keep) spinner();
     await loadBase();
+    // Jonotuslistalta poistuminen sähköpostin linkistä (?poistu_jonosta=<token>). Ajetaan loadBase:n jälkeen,
+    // jotta sivutekstit ovat käytössä; parametri poistetaan osoitteesta, ettei poisto toistu seuraavilla reiteillä.
+    const sp = new URLSearchParams(location.search), leaveToken = sp.get('poistu_jonosta');
+    if (leaveToken !== null) {
+      sp.delete('poistu_jonosta');
+      history.replaceState(null, '', `${location.pathname}${sp.toString() ? `?${sp}` : ''}${location.hash}`);
+      if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(leaveToken)) {
+        try {
+          const ans = await rpc('public_leave_waitlist', { p_token: leaveToken });
+          mount(h('div', { class: ans?.ok ? 'bk-ok' : 'bk-error', role: 'status', text: ans?.ok ? t.waitlistLeft : t.errorGeneric }),
+            h('p', {}, h('a', { href: bk('/'), text: t.waitlistBack })));
+        } catch { mount(errorBox(t.errorGeneric)); }
+        focusTop(); last = location.hash; return;
+      }
+    }
     if (state.settings.public_booking_enabled === false) { mount(h('div', { class: 'bk-notice' }, h('p', { text: t.disabled }), phoneBox())); return; }
     const [path, qs] = location.hash.slice(1).split('?');
     const parts = path.split('/').filter(Boolean);
@@ -789,6 +812,7 @@ async function route(keep = false) {
     else if (parts[0] === 'tuote' && parts[1]) await viewProduct(parts[1], /^\d{4}-\d\d-\d\d$/.test(parts[2] || '') ? parts[2] : null, q);
     else if (parts[0] === 'hoito' && parts[1]) { const tp = state.treatments.find((x) => x.slug === parts[1]); if (tp) await tv.viewCheckout(tp, parts[2], parts[3], q); else await viewProduct(parts[1], null, q); }
     else if (parts[0] === 'varaa' && parts[1] && parts[2]) await viewCheckout(parts[1], parts[2], parts[3], q.get('via'));
+    else if (parts[0] === 'jono' && parts[1] && parts[2] && parts[3]) await wv.viewWaitlist(parts[1], parts[2], parts[3], q.get('via'));
     else { viewList(q); focusTop(); }
   } catch (e) {
     console.warn('booking route error', e);

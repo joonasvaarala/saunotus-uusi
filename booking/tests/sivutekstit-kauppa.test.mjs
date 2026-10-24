@@ -84,6 +84,7 @@ test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-shop.mjs 
     ...J('content/site-texts.pending-import-28.json').filter((r) => r.key.startsWith('ui.vismapay.')).map((r) => `${r.key}|${r.lang}`),
     ...J('content/site-texts.pending-import-29.json').filter((r) => r.key.startsWith('ui.order.')).map((r) => `${r.key}|${r.lang}`),
     ...J('content/site-texts.pending-import-33.json').map((r) => `${r.key}|${r.lang}`),
+    ...J('content/site-texts.pending-import-34.json').filter((r) => r.key.startsWith('ui.shop.')).map((r) => `${r.key}|${r.lang}`),
   ]);
   const imp = new Set(PENDING.map((r) => r.key));
   writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts.filter((r) => !imp.has(r.key)) }));   // tuotanto ennen #61:n tuontia
@@ -105,7 +106,8 @@ test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet ava
   const vismaRows = R.collectDefaults().filter((r) => r.id === 'VT');
   const msgOrder = J('content/site-texts.pending-import-29.json').filter((r) => r.key.startsWith('ui.order.'));
   const payUi = J('content/site-texts.pending-import-33.json');
-  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length);
+  const waitUi = J('content/site-texts.pending-import-34.json').filter((r) => r.key.startsWith('ui.shop.'));
+  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length + waitUi.length);
   assert.ok(!rows.some((x) => haveKeys.has(x.key)));
   for (const e of extraRows) assert.ok(!rows.some((x) => x.key === e.key), `${e.key}: jo tuotannossa, generaattori ei lisää`);
   const bad = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', join(work, 'ei-ole.json')], { encoding: 'utf8' });
@@ -313,4 +315,28 @@ test('vartija: kaikki kaupan kielisanakirjat (export const X = { fi: {…}, en: 
   for (const f of dictFiles) assert.ok(reg.includes(`./${f}`), `${f} puuttuu text-registry.js:stä`);
   // tunnetut poikkeukset (raportoitu): ICS-tiedoston osoite (shop.js) ja SOURCE_LABELS (gift-logic.js; palvelin antaa nimet)
   assert.match(rd('booking/shop/src/shop.js'), /LOCATION:Hindsbyntie 124/);
+});
+
+test('pending-import-34: jonotuslistan tekstit (kauppa ui.shop.waitlist_* + sähköposti email.waitlist.*) FI+EN, sama kuin koodin oletus, ei vielä tuotannossa', async () => {
+  const rows = J('content/site-texts.pending-import-34.json');
+  const { EMAIL_TEXTS } = await import(new URL('../supabase/functions/send-emails/texts.ts', import.meta.url).href).catch(() => ({ EMAIL_TEXTS: null }));
+  const defaults = new Map(R.collectDefaults().map((r) => [`${r.key}|${r.lang}`, r.text]));
+  const have = new Set(FALLBACK.texts.map((r) => `${r.key}|${r.lang}`));
+  const seen = new Set();
+  for (const r of rows) {
+    const w = `${r.key} [${r.lang}]`;
+    assert.ok(/^ui\.shop\.waitlist_|^email\.waitlist\./.test(r.key), w);
+    assert.ok(['fi', 'en'].includes(r.lang), w);
+    assert.equal(r.kind, 'plain', w);
+    if (r.key.startsWith('ui.shop.')) assert.equal(r.text, defaults.get(`${r.key}|${r.lang}`), w);
+    else if (EMAIL_TEXTS) assert.equal(r.text, EMAIL_TEXTS[r.key][r.lang], w);
+    assert.equal(have.has(`${r.key}|${r.lang}`), false, `${w}: ei vielä tuotannossa`);
+    assert.ok(r.max_len >= r.text.length, w);
+    assert.doesNotMatch(r.text, /[<>]|https?:\/\/|www\./, w);
+    assert.doesNotMatch(r.text, /Sipoonjoen Perinnesauna/, `${w}: yritysnimi paikkamerkillä`);
+    assert.ok(!seen.has(`${r.key}|${r.lang}`), w); seen.add(`${r.key}|${r.lang}`);
+  }
+  const keys = new Set(rows.map((r) => r.key));
+  for (const k of keys) assert.ok(seen.has(`${k}|fi`) && seen.has(`${k}|en`), `${k}: FI+EN`);
+  assert.ok(keys.has('ui.shop.waitlist_errors.not_full') && keys.has('email.waitlist.subject'));
 });

@@ -16,6 +16,10 @@ const MUTATING = new Set(['public_create_treatment_booking', 'public_change_trea
 const PAY_RPC = new Set(['public_payment_options', 'public_checkout_payment_options', 'public_confirm_pay_later', 'public_gift_card_packages', 'public_check_gift_card', 'public_apply_gift_card', 'public_get_order_gift_cards', 'public_resolve_gift_code', 'public_submit_voucher_claim', 'public_get_order_voucher_claims', 'public_update_voucher_claim_code']);
 export function createShopMock({ storage = globalThis.sessionStorage, now = () => Date.now(), fail = null, scenario = '', mpResult = '' } = {}) {
   const pay = /^pay(-prod|-off)?$/.test(scenario) || isHoldScenario(scenario) ? createOrderMock({ scenario, mpResult, ...holdMockParams() }) : null;   // hold* = kassan paikanpito (hold-mock.js)
+  const waitlistKey = 'booking.shopmock.waitlist.v1';
+  const waitlist = new Map();
+  try { for (const row of JSON.parse(storage?.getItem(waitlistKey) || '[]')) waitlist.set(row.token, row); } catch { /* mock toimii myös ilman sessionStoragea */ }
+  const saveWaitlist = () => { try { storage?.setItem(waitlistKey, JSON.stringify([...waitlist.values()])); } catch { /* storage pois */ } };
   const noTimes = fail === 'notimes';   // ?mock=1&fail=notimes: public_treatment_availability palauttaa aina tyhjän ("Ei vapaita aikoja" -tila)
   let failOnce = ['option_required', 'invalid_option', 'online_payment_unavailable', 'too_many_pending'].includes(fail) ? fail : null;
   try { restoreBookings(JSON.parse(storage?.getItem(KEY) || 'null')); } catch { /* tyhjä alku */ }
@@ -33,6 +37,19 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
       return { ...b, status: po.status, payment_status: po.payment_status, total: po.total, paid: po.paid, unpaid: po.unpaid, ...(pay.hold ? { ...Object.fromEntries(CK.map((k) => [k, po[k]])), payment_methods: pay.hold.methods() } : {}) };
     }
     switch (name) {
+      case 'public_join_waitlist': {
+        const token = globalThis.crypto?.randomUUID?.() || '11111111-1111-4111-8111-' + String(waitlist.size + 1).padStart(12, '0');
+        const old = [...waitlist.values()].find((x) => x.rule_id === +args.p_rule_id && x.date === args.p_date && x.email === String(args.p_email || '').toLowerCase() && x.status !== 'cancelled');
+        const row = old || { token, rule_id: +args.p_rule_id, date: args.p_date, email: String(args.p_email || '').toLowerCase() };
+        row.persons = +args.p_persons || 1; row.status = 'waiting';
+        waitlist.set(row.token, row); saveWaitlist();
+        return { ok: true, token: row.token, persons: row.persons, starts_at: `${args.p_date}T12:00:00+03:00`, ends_at: `${args.p_date}T14:00:00+03:00` };
+      }
+      case 'public_leave_waitlist': {
+        const row = waitlist.get(args.p_token);
+        if (row) { row.status = 'cancelled'; saveWaitlist(); }
+        return { ok: true, cancelled: !!row };
+      }
       case 'public_catalog': return catalogEntries();
       case 'public_catalog_for': return pickCatalog(catalogEntries(), args.p_audience);
       case 'public_settings': return { public_booking_enabled: true, public_treatment_horizon_days: 14 };
