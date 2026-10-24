@@ -33,9 +33,11 @@ export function mountInvoiceLines({ rates, products, tx }) {
   const state = { showErrors: false, lines: [blank()] };
   const lineBox = h('div', { class: 'inv-lines', 'data-testid': 'invoice-lines' });
   const totals = h('div', { class: 'inv-totals', 'data-testid': 'invoice-totals' });
+  const blockErr = h('p', { class: 'fld-err', role: 'alert', 'data-testid': 'invoice-lines-error' });
   const block = h('div', { class: 'inv-lineblock' },
     h('h3', { class: 'inv-lines-h', text: tx('ui.admin.invoices.lines') }),
     h('p', { class: 'inv-price-note', text: tx('ui.admin.invoices.price_either') }),
+    blockErr,
     lineBox,
     h('button', { type: 'button', class: 'inv-add', 'data-testid': 'invoice-add-line', onclick: () => addLine() }, `+ ${tx('ui.admin.invoices.add_line')}`),
     totals);
@@ -261,8 +263,10 @@ export function mountInvoiceLines({ rates, products, tx }) {
   paint();
   return {
     node: block,
-    validateAndPayload() {
+    // focus: false → vain merkitään virheet; kutsuja päättää, mikä kenttä saa fokuksen (lomakkeen ensimmäinen virhe).
+    validateAndPayload({ focus = true } = {}) {
       state.showErrors = true;
+      blockErr.textContent = '';
       for (const ln of state.lines) {
         const a = lineAmounts(ln);
         if (a && ln.basis === 'net') ln.price_gross = formatFiScaled(a.gross10000, 4, 2);
@@ -277,19 +281,22 @@ export function mountInvoiceLines({ rates, products, tx }) {
       const bad = all.findIndex((e) => Object.keys(e).length);
       paint();
       if (bad >= 0) {
-        const cardEl = lineBox.querySelectorAll('[data-testid=invoice-line]')[bad];
-        const key = Object.keys(all[bad])[0];
-        const sel = {
-          description: '[data-testid=invoice-line-desc]',
-          quantity: '[data-testid=invoice-line-qty]',
-          price_net: '[data-testid=invoice-line-price-net]',
-          price_gross: '[data-testid=invoice-line-price-gross]',
-          vat: '[data-testid=invoice-line-vat]',
-        }[key];
-        cardEl?.querySelector(sel)?.focus();
+        if (focus) this.focusFirstError();
         return null;
       }
       return state.lines.map((ln) => lineToPayload(ln));
+    },
+    /** Ensimmäinen virheellinen rivikenttä näkyviin ja fokukseen. Palauttaa elementin tai null. */
+    focusFirstError() {
+      const el = lineBox.querySelector('[aria-invalid=true]') || (blockErr.textContent ? lineBox.querySelector('[data-testid=invoice-line-desc]') : null);
+      if (!el) return null;
+      el.scrollIntoView?.({ block: 'center' });
+      el.focus?.({ preventScroll: true });
+      return el;
+    },
+    /** Palvelimen rivivirhe (invalid_lines, invalid_vat): näkyvä viesti rivien yläpuolella. */
+    setServerError(msg) {
+      blockErr.textContent = msg || '';
     },
   };
 }

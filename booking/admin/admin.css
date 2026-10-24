@@ -289,6 +289,12 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .dlg:has(> .inv-savebar) .dlg-body{flex:1 1 auto;min-height:0;overflow:auto}
 .inv-savebar{flex:none;background:#fff;margin:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line);box-shadow:0 -8px 16px rgba(43,58,48,.08)}
 .inv-savebar .btn{width:100%;min-height:48px;font-size:16px}
+.inv-save-err{margin:0 0 8px;padding:8px 10px;border-radius:8px;background:var(--errbg);color:var(--err);font-weight:600;font-size:14px}
+.inv-save-err[hidden]{display:none}
+.inv-savebar .btn[aria-busy=true]{opacity:.85;cursor:progress}
+.spinner{display:inline-block;width:1em;height:1em;margin-right:.4em;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;vertical-align:-2px;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spinner{animation-duration:2.4s}}
 @media(min-width:800px){
   .inv-line{grid-template-columns:minmax(8rem,1.45fr) minmax(3.2rem,.42fr) minmax(3.4rem,.45fr) minmax(5.6rem,.8fr) minmax(5.6rem,.8fr) minmax(3.8rem,.5fr) auto 44px;align-items:end;column-gap:8px}
   .inv-nums,.inv-prices,.inv-line-foot{display:contents}
