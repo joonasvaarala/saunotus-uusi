@@ -74,6 +74,8 @@ jobs:
       - run: node --test booking/tests/pay-later.test.mjs
       # pakettituote Saunarituaali ja savusaunavuoro (kb 7, booking_58, §17.11): aikajana, loppuaika +2 h, la/su, mock, tuotantofixture
       - run: node --test booking/tests/saunarituaali.test.mjs
+      # booking_159: Saunotusrituaali (kb 8) pois hoito-/rituaalilistoilta (tuotesivu ja lisätuote ennallaan) + paketin otsikon tekstimigraatio ja rollback
+      - run: node --test booking/tests/rituaali-lista.test.mjs
       # Sivutekstit tietokannasta (§18) + tuote 7 kentät (booking_61): paikkamerkit, build-haku/välimuisti/varateksti, p_addons, virhekoodit (fixture, ei verkkoa)
       # puhelinnumero: yksi vakio (booking/shop/src/phone.js), kielikohtainen näkyvä muoto (fi/en), tel-linkki kaikkialla samoin; ei käsin kirjoitettuja numeroita lähdekoodissa
       - run: node --test booking/tests/puhelin.test.mjs
@@ -252,6 +254,8 @@ jobs:
       # (event_resource_blocks -> space_blocks), myyntikanavat, kopiointi, public_events, Lovi-sääntö. Myynti pois (events.sale_enabled = false).
       # SQL: t158 PG17:ssä (migraatio + rollback x2 + md5 + uudelleenajo).
       - run: node --test booking/tests/tapahtumat-158.test.mjs
+      # Kauppa: tuotekortin ajankohta omalla rivillään hinnan yläpuolella (card-meta.js); päivänäkymä yksityisvuorot → yleiset → hoidot (FI/EN)
+      - run: node --test booking/tests/kortit-jarjestys.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

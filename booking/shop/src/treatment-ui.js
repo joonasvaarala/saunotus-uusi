@@ -10,6 +10,7 @@ import { fmtMinutes } from './site-texts-logic.js';
 import { createAddonPicker } from './treatment-addons.js';
 import { richHost } from './rich-view.js';
 import { cardShort } from './short-desc.js';
+import { cardMeta } from './card-meta.js';
 import { revealForm, revealIfHidden } from './gift-ui.js';
 
 export function createTreatmentViews(c) {
@@ -54,7 +55,7 @@ export function createTreatmentViews(c) {
     pimg(p, 'card-img'),
     h('h3', {}, h('a', { href: bk(`/tuote/${p.slug}`), text: pname(p) })),
     cardShort(h, p, S.lang, pdesc(p)),   // booking_156: lyhyt kuvaus puhdistettuna, tyhjä → johdettu ote (short-desc.js)
-    metaP(p),
+    cardMeta(h, priceText(p), durText(p)),   // kesto/ajankohta omalla rivillään hinnan yläpuolella (card-meta.js)
     timelineNode(p),
     h('a', { class: 'btn sm', href: bk(`/tuote/${p.slug}`) }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) })));
 
