@@ -1,7 +1,7 @@
 // booking_170 / Joonas 24.10.2026: uusi sivusto on saunotus.fi; vanha kehitysosoite ei saa esiintyä repossa. Poikkeukset (ALLOW):
 // - booking_170-migraatio, sen rollback ja SQL-testi t170, jotka korvaavat osoitteen tietokannassa, sekä siirron ajokirja (poisto on vaihe C);
-// - jo ajetut migraatiot booking_161 ja booking_163, niiden rollbackit ja testit: ajetut migraatiot ovat muuttumatonta historiaa
-//   (ne kirjoittivat vanhan osoitteen tuotantoon; booking_170 korjaa tiedot, booking_163 on tuotannossa peruttu);
+// - jo ajetut migraatiot booking_29, booking_161 ja booking_163, niiden rollbackit ja testit: ajetut migraatiot ovat muuttumatonta historiaa
+//   (booking_29:n site_base_url-oletus ei korvaa olemassa olevaa arvoa, ajokirjan vaihe B3 asettaa sen; 161/163 kirjoittivat vanhan osoitteen tuotantoon; booking_170 korjaa tiedot, booking_163 on tuotannossa peruttu);
 // - content/kb/kb.json: tuotannon tilannekuva (scripts/kb-snapshot.mjs), päivittyy booking_170:n ajon jälkeen seuraavassa tilannekuvassa;
 // - booking/shop/src/johku-links.js (LEGACY_CANONICAL) ja src/lib.mjs (SHOP_CANON): tunnistavat vanhan osoitteen ja ohjaavat sen sivuston
 //   omaan BASE-polkuun (tiedot ennen booking_170:tä tai sen rollbackin jälkeen), jotta sivustolle ei päädy linkkiä vanhalle kehityssivulle;
@@ -19,8 +19,9 @@ const MIG = 'booking/supabase/migrations/20261024194500_booking_170_osoite_sauno
 const RB = 'booking/supabase/rollbacks/20261024194500_booking_170_ROLLBACK.sql';
 const SELF = 'booking/tests/osoite-saunotus-fi-170.test.mjs', RUNBOOK = 'docs/siirto-saunotus-fi.md';
 const T170 = 'booking/supabase/tests/kb/t170_osoite_saunotus_fi.sql';
-// ajetut migraatiot ovat muuttumatonta historiaa: booking_161/163 ja niiden rollbackit/testit pysyvät sellaisinaan (ei muokata tätä PR:ää varten)
+// ajetut migraatiot ovat muuttumatonta historiaa: booking_29/161/163 ja niiden rollbackit/testit pysyvät sellaisinaan (ei muokata tätä PR:ää varten)
 const APPLIED = [
+  'booking/supabase/migrations/20261017083344_booking_29_talous_schema.sql',
   'booking/supabase/migrations/20261024182650_booking_161_kb_johku_linkit.sql',
   'booking/supabase/rollbacks/20261024182650_booking_161_ROLLBACK.sql',
   'booking/supabase/tests/kb/t161_kb_johku_linkit.sql',

@@ -7,7 +7,7 @@ sivustoon. Se poistetaan käytöstä vasta vaiheessa C, ja vain Joonasin erillis
 Tämän PR:n jälkeen repossa ei ole viittauksia vanhaan kehitysosoitteeseen seuraavia poikkeuksia lukuun ottamatta (lista ja perustelut:
 vartijatesti `booking/tests/osoite-saunotus-fi-170.test.mjs`):
 - booking_170-migraatio, sen rollback ja SQL-testi t170, koska ne korvaavat juuri sen osoitteen tietokannassa, sekä tämä ajokirja.
-- Jo ajetut migraatiot booking_161 ja booking_163, niiden rollbackit ja testit. Ajetut migraatiot ovat muuttumatonta historiaa, joten niitä
+- Jo ajetut migraatiot booking_29, booking_161 ja booking_163 sekä 161:n ja 163:n rollbackit ja testit. Ajetut migraatiot ovat muuttumatonta historiaa, joten niitä
   ei muuteta (ne ovat identtiset mainin kanssa).
 - `content/kb/kb.json`: tuotannon tilannekuva. Se päivittyy seuraavassa tilannekuvassa booking_170:n ajon jälkeen.
 - `booking/shop/src/johku-links.js` (`LEGACY_CANONICAL`) ja `src/lib.mjs` (`SHOP_CANON`): koodi tunnistaa vanhan osoitteen ja ohjaa sen
@@ -38,7 +38,7 @@ Merkinnät: 🗄️ = tuotantotietokannan muutos, 🖥️ = palvelin-, DNS- tai 
      ja `needs_translation` ennallaan jokaisen vaiheen jälkeen. Tulos: pass=26 fail=0.
    - Tarkistus ajon jälkeen (pelkkä SELECT):
      `select count(*) from kb.products where concat_ws(' ', description, description_en, short_description, short_description_en, booking_url, source_url) like '%uusi.saunotus%';` → 0
-2. Jo ajettuja migraatioita booking_161 ja booking_163 (sekä niiden rollbackeja ja testejä t161/t163) ei muuteta, koska ajetut migraatiot
+2. Jo ajettuja migraatioita booking_29, booking_161 ja booking_163 (sekä niiden rollbackeja ja testejä t161/t163) ei muuteta, koska ajetut migraatiot
    ovat muuttumatonta historiaa. Ne kirjoittavat vanhan kehitysosoitteen, ja booking_170 korjaa sen tuotannossa. Huom: booking_163 on
    peruttu tuotannossa (`kb.products.booking_url` on taas Johku-osoitteissa), ja se jätetään sellaiseksi. Jos 163 joskus ajetaan uudelleen,
    se kirjoittaa vanhan kehitysosoitteen. Koodi ohjaa sen sivuston omaan polkuun, mutta osoite on silloin korjattava uudella migraatiolla.
