@@ -1,9 +1,11 @@
 // Kaupan tekstit (FI/EN). Lisää uusi kieli lisäämällä avain tähän ja <html lang> -sivulle.
 // Puhelinnumero tulee vakiosta (phone.js): fi "010 299 2866", en "+358 10 299 2866".
 import { PHONE_DISPLAY_FI, PHONE_DISPLAY_EN } from './phone.js';
+import { pl } from './plural.js';   // yksikkö/monikko (1 guest / 2 guests, 1 henkilö / 2 henkilöä)
 import { WAITLIST_TEXTS } from './waitlist-texts.js';
 import { DISCOUNT_TEXTS } from './discount-texts.js';
 import { QUIET_TEXTS } from './quiet-texts.js';
+import { RITUAL_TEXTS, RITUAL_ERRORS } from './ritual-addon-texts.js';
 export const T = {
   fi: {
     title: 'Varaa saunaelämys', lead: 'Valitse kokemus, päivä ja vuoro. Varaus vahvistetaan heti.',
@@ -33,7 +35,7 @@ export const T = {
     acceptTerms: 'Hyväksyn', termsLink: 'varaus- ja peruutusehdot', acceptTermsErr: 'Hyväksy ehdot jatkaaksesi.',
     summary: 'Yhteenveto', total: 'Yhteensä', vatIncl: 'sis. ALV', book: 'Vahvista varaus', booking: 'Varataan…',
     payLater: 'Maksu paikan päällä. Verkkomaksu (Visma Pay) otetaan käyttöön myöhemmin.',
-    payHold: (m) => `Paikkaa pidetään ${m} minuuttia maksun odottaessa.`,
+    payHold: (m) => pl('fi', m, `Paikkaa pidetään ${m} minuutin ajan maksun odottaessa.`, `Paikkaa pidetään ${m} minuuttia maksun odottaessa.`),
     contactUs: 'Tämä palvelu ei ole vielä varattavissa verkossa. Varaa soittamalla tai sähköpostilla:',
     unknownProduct: 'Tuotetta ei löytynyt.', disabled: 'Verkkovaraus ei ole tällä hetkellä käytössä. Soita ' + PHONE_DISPLAY_FI + '.',
     required: 'Täytä kaikki pakolliset kentät.', until: 'asti', included: (n) => `sis. ${n} hlö`, extra: (p) => `lisähenkilö +${p}`,
@@ -44,13 +46,13 @@ export const T = {
     confNote: 'Tallenna tämä sivu tai tilausnumero. Vahvistus näkyy myös tällä osoitteella.', notFound: 'Varausta ei löytynyt. Tarkista linkki.',
     emailNote: 'Sähköpostivahvistus lähetetään, kun viestipalvelu otetaan käyttöön – tallenna siihen asti tämä sivu.',
     changeBooking: 'Muuta varausta', changeTitle: 'Muuta varausta', saveChange: 'Tallenna muutos', saving: 'Tallennetaan…', currentSlot: 'Nykyinen vuoro',
-    changeInfo: (h, dl) => `Voit siirtää varauksen toiselle vapaalle vuorolle tai muuttaa henkilömäärää viimeistään ${h} tuntia ennen vuoron alkua (nyt viimeistään ${dl}). Varauksen peruutus: ota yhteyttä sähköpostilla, niin henkilökunta peruu varauksen.`,
+    changeInfo: (h, dl) => `Voit siirtää varauksen toiselle vapaalle vuorolle tai muuttaa henkilömäärää viimeistään ${h} ${pl('fi', h, 'tunti', 'tuntia')} ennen vuoron alkua (nyt viimeistään ${dl}). Varauksen peruutus: ota yhteyttä sähköpostilla, niin henkilökunta peruu varauksen.`,
     changeLocked: (h) => `Varausta ei voi enää muuttaa verkossa (muutos vähintään ${h} h ennen vuoron alkua). Peruutukset ja muutokset: ota yhteyttä sähköpostilla`,
     tooLate: (h) => `Alkaa alle ${h} h päästä`, changePaidPrice: 'Maksetun varauksen hinta ei voi muuttua verkossa. Valitse sama hintainen vaihtoehto tai ota yhteyttä sähköpostilla.',
     directions: 'Reittiohje ja käytännön tiedot', directionsUrl: 'info/',
     k_hoito: 'Hoidot ja rituaalit',
     tr: {
-      step1: 'Henkilömäärä', step2: 'Valitse päivä', step3: 'Valitse kellonaika', maxPersons: (n) => `Enintään ${n} henkilöä.`, onePerson: 'Tämä palvelu varataan yhdelle henkilölle.',
+      step1: 'Henkilömäärä', step2: 'Valitse päivä', step3: 'Valitse kellonaika', maxPersons: (n) => `Enintään ${n} ${pl('fi', n, 'henkilö', 'henkilöä')}.`, onePerson: 'Tämä palvelu varataan yhdelle henkilölle.',
       fewer: 'Vähemmän henkilöitä', more: 'Enemmän henkilöitä', legendFree: 'vapaita aikoja', noFreeMonth: 'Tässä kuussa ei ole vapaita aikoja valitulla henkilömäärällä. Kokeile toista kuukautta tai pienempää henkilömäärää.',
       pickDayFirst: 'Valitse ensin päivä kalenterista.', startTimes: 'vapaat alkuajat',
       // pakettituote (kb 7, booking_58): aikajana ja aikataulu; ei vapaita aikoja -viesti
@@ -95,7 +97,7 @@ export const T = {
     acceptTerms: 'I accept the', termsLink: 'booking and cancellation terms', acceptTermsErr: 'Please accept the terms to continue.',
     summary: 'Summary', total: 'Total', vatIncl: 'incl. VAT', book: 'Confirm booking', booking: 'Booking…',
     payLater: 'Payment on site. Online payment (Visma Pay) will be introduced later.',
-    payHold: (m) => `Your spot is held for ${m} minutes while payment is pending.`,
+    payHold: (m) => `Your spot is held for ${m} ${pl('en', m, 'minute', 'minutes')} while payment is pending.`,
     contactUs: 'This service cannot be booked online yet. Please book by phone or email:',
     unknownProduct: 'Product not found.', disabled: 'Online booking is currently unavailable. Please call ' + PHONE_DISPLAY_EN + '.',
     required: 'Please fill in all required fields.', until: 'until', included: (n) => `incl. ${n} guest${n === 1 ? '' : 's'}`, extra: (p) => `extra guest +${p}`,
@@ -105,20 +107,20 @@ export const T = {
     confNote: 'Save this page or your order number. The confirmation is also available at this address.', notFound: 'Booking not found. Please check the link.',
     emailNote: 'An email confirmation will be sent once the messaging service is enabled – until then please save this page.',
     changeBooking: 'Change booking', changeTitle: 'Change your booking', saveChange: 'Save change', saving: 'Saving…', currentSlot: 'Current session',
-    changeInfo: (h, dl) => `You can move your booking to another available session or change the number of guests up to ${h} hours before the session starts (currently by ${dl} at the latest). To cancel, please email us and our staff will cancel the booking.`,
+    changeInfo: (h, dl) => `You can move your booking to another available session or change the number of guests up to ${h} ${pl('en', h, 'hour', 'hours')} before the session starts (currently by ${dl} at the latest). To cancel, please email us and our staff will cancel the booking.`,
     changeLocked: (h) => `This booking can no longer be changed online (changes up to ${h} h before the start). For cancellations and changes please email us at`,
     tooLate: (h) => `Starts in under ${h} h`, changePaidPrice: 'The price of a paid booking cannot change online. Pick an option with the same price or contact us by email.',
     directions: 'Directions and practical information', directionsUrl: 'en/info/',
     k_hoito: 'Treatments and rituals',
     tr: {
-      step1: 'Guests', step2: 'Pick a date', step3: 'Pick a time', maxPersons: (n) => `Up to ${n} guests.`, onePerson: 'This service is booked for one guest.',
+      step1: 'Guests', step2: 'Pick a date', step3: 'Pick a time', maxPersons: (n) => `Up to ${n} ${pl('en', n, 'guest', 'guests')}.`, onePerson: 'This service is booked for one guest.',
       fewer: 'Fewer guests', more: 'More guests', legendFree: 'times available', noFreeMonth: 'No available times this month for the selected number of guests. Try another month or fewer guests.',
       pickDayFirst: 'Pick a date in the calendar first.', startTimes: 'available start times',
       // package product (kb 7, booking_58): timeline and schedule; no-times message
       tlTitle: 'Schedule', tlDuration: 'Duration', ends: 'ends',
       noTimes: 'No available times', noTimesHint: 'Try another month or fewer guests.',
       retry: 'Try again',
-      continue: 'Continue to your details', selected: (when, n, price) => `Selected: ${when} · ${n} guests · ${price}`,
+      continue: 'Continue to your details', selected: (when, n, price) => `Selected: ${when} · ${n} ${pl('en', n, 'guest', 'guests')} · ${price}`,
       date: 'Date', time: 'Time', picked: 'Selected time', pickAnother: 'Pick another time', toReview: 'Review booking', edit: 'Edit details',
       reviewTitle: 'Review and confirm your booking', reviewLead: 'Please check the details. The booking is made when you press "Confirm booking".',
       errors: { time_window: 'The selected time is outside the booking hours for this treatment. Please pick another time.', ritual_start: 'This start time is not allowed for the ritual. Please pick one of the offered times.',
@@ -136,3 +138,7 @@ Object.assign(T.fi, DISCOUNT_TEXTS.fi);   // paketti 10 / booking_142: alennus- 
 Object.assign(T.en, DISCOUNT_TEXTS.en);
 Object.assign(T.fi, QUIET_TEXTS.fi);   // booking_162: hiljaisten aikojen ale (ui.shop.quiet_*)
 Object.assign(T.en, QUIET_TEXTS.en);
+Object.assign(T.fi, RITUAL_TEXTS.fi);   // booking_166: saunarituaali yleisen vuoron lisäpalveluna (ui.shop.ritual_*)
+Object.assign(T.en, RITUAL_TEXTS.en);
+Object.assign(T.fi.errors, RITUAL_ERRORS.fi);   // booking_166: ui.shop.error_ritual_addon_*
+Object.assign(T.en.errors, RITUAL_ERRORS.en);
