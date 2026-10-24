@@ -187,3 +187,29 @@ test('analytics.js valeselaimessa: maksettu osto kerran; verkkovirhe ei heitä; 
   const dnt = await browser({ path: '/', dnt: '1', tag: 'dnt' });
   try { assert.equal(dnt.calls.length, 0); } finally { dnt.restore(); }
 });
+
+test('tietosuojaseloste: evästeettömän mittauksen kohta vastaa toteutusta (FI+EN pending-import-50 = koodin oletus, ei <, ei uutta sivua)', async () => {
+  const P = await import(pathToFileURL(join(root, 'src/privacy-analytics.mjs')).href);
+  const rows = JSON.parse(read('content/site-texts.pending-import-50.json'));
+  assert.equal(rows.length, 4);
+  for (const r of rows) {
+    assert.ok(r.key in P.PRIVACY_ANALYTICS_TEXTS, r.key);
+    assert.ok(['fi', 'en'].includes(r.lang));
+    assert.doesNotMatch(r.text, /</);
+    assert.equal(r.class, 'protected');
+    assert.ok(r.text.length <= r.max_len);
+    assert.equal(r.text, P.PRIVACY_ANALYTICS_TEXTS[r.key][r.lang]);
+  }
+  for (const k of Object.keys(P.PRIVACY_ANALYTICS_TEXTS)) for (const l of ['fi', 'en']) assert.ok(rows.some((r) => r.key === k && r.lang === l), `${k} ${l}`);
+  const fi = P.PRIVACY_ANALYTICS_TEXTS['ui.site.privacy_analytics_text'].fi, en = P.PRIVACY_ANALYTICS_TEXTS['ui.site.privacy_analytics_text'].en;
+  const retention = /\('analytics_retention_months', '(\d+)'::jsonb/.exec(mig)[1];
+  assert.match(fi, new RegExp(`Säilytys: ${retention} kuukautta`));
+  assert.match(en, new RegExp(`Retention: ${retention} months`));
+  for (const re of [/ilman evästeitä/, /IP-osoitetta ei tallenneta/, /oikeutettu etu/, /utm/, /istuntotunniste/, /tilaukseen/, /Do Not Track/, /tietosuojavaltuutetulle/]) assert.match(fi, re);
+  for (const re of [/without cookies/, /not stored/, /legitimate interest/, /utm/, /session identifier/, /linked to the order/]) assert.match(en, re);
+  // sivu: sama rakenne kuin muut kohdat (h2 + p), vain tietosuojasivulla; ei uutta EN-sivua
+  assert.equal(JSON.parse(read('content/site.json')).pages.privacy.en, null);
+  assert.match(read('src/render.mjs'), /\$\{name === 'privacy' \? privacyAnalyticsHtml\(lang, e, txt\) : ''\}/);
+  const html = P.privacyAnalyticsHtml('fi', (s) => s, (s) => s.split(/\n+/).map((l) => `<p>${l}</p>`).join(''));
+  assert.match(html, /^<h2>Evästeetön kävijämittaus<\/h2>(<p>[^<]+<\/p>){6}$/);
+});
