@@ -3,6 +3,7 @@ import { rpc } from '../sb.js';
 import { customerForm, validBusinessId, normBusinessId } from './customerform.js';
 import { navText } from '../nav-texts.js';
 import { normalizeCode } from '../../shop/src/discount-code-logic.js';
+import { amText, loadAmTexts } from '../annual-manage-texts.js';
 import { h, fmtDT, fmtDate, todayHel, addDays, money, dialog, field, toast, run, empty, payBadge, statusBadge, badge } from '../ui.js';
 
 export async function render({ ctx, reload, query = new URLSearchParams() }) {
@@ -70,7 +71,7 @@ export async function render({ ctx, reload, query = new URLSearchParams() }) {
     const can = ctx.can('annual_cards.manage');
     const cards = c.annual_cards || [];
     const grant = h('form', { class: 'row wrap box' }, field('Alkaa', h('input', { type: 'date', name: 'vf', value: todayHel(), required: true })), field('Päättyy', h('input', { type: 'date', name: 'vt', value: addDays(todayHel(), 365), required: true })),
-      field('Muistiinpano', h('input', { name: 'vn' })), field('Oma koodi (valinnainen)', h('input', { name: 'vcode', maxlength: 40, autocomplete: 'off', oninput: (e) => { e.target.value = normalizeCode(e.target.value); } }), 'Tyhjä = palvelin luo koodin.'), h('button', { class: 'btn', type: 'submit', text: 'Myönnä vuosikortti' }));
+      field('Muistiinpano', h('input', { name: 'vn' })), field(amText('ui.admin.annual_manage.code_label_optional'), h('input', { name: 'vcode', maxlength: 40, autocomplete: 'off', oninput: (e) => { e.target.value = normalizeCode(e.target.value); } }), amText('ui.admin.annual_manage.code_hint')), h('button', { class: 'btn', type: 'submit', text: 'Myönnä vuosikortti' }));
     grant.addEventListener('submit', (ev) => { ev.preventDefault(); run(grant.querySelector('button'), async () => { const created = await rpc('admin_create_annual_card', { p_customer_id: c.id, p_valid_from: grant.vf.value, p_valid_to: grant.vt.value || null, p_code: normalizeCode(grant.vcode.value) || null, p_notes: grant.vn.value || null }); toast(`Vuosikortti myönnetty. Koodi: ${created.code}`); document.querySelector('dialog')?.close(); load(true); }); });
     return h('div', { class: 'stack' }, h('h3', { text: 'Vuosikortti' }),
       cards.length ? h('ul', { class: 'reslist' }, cards.map((a) => h('li', { class: 'resrow' }, h('span', {}, `${a.code ? a.code + ' · ' : ''}${fmtDate(a.valid_from + 'T12:00:00Z')} – ${fmtDate(a.valid_to + 'T12:00:00Z')}${a.notes ? ' · ' + a.notes : ''}`),
@@ -83,7 +84,7 @@ export async function render({ ctx, reload, query = new URLSearchParams() }) {
       can ? grant : null);
   }
   let t; const q = h('input', { type: 'search', value: search, placeholder: 'Hae nimellä, sähköpostilla tai puhelimella', 'aria-label': 'Hae asiakkaita', oninput: (e) => { search = e.target.value; clearTimeout(t); t = setTimeout(() => load(true), 250); } });
-  await load(true);
+  await Promise.all([load(true), ctx.can('annual_cards.manage') ? loadAmTexts(rpc) : null]);   // booking_152: koodivihje (ui.admin.annual_manage.*)
   const directId = query.get('id');
   if (/^\d+$/.test(directId || '')) card(Number(directId)).catch((e) => toast(e?.message || navText('ui.admin.nav.customer_not_found'), 'err'));
   const canAdd = ctx.can('customers.manage');
