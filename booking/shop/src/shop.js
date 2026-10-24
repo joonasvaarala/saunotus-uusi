@@ -26,6 +26,7 @@ import { isRichHtml } from './rich-text.js';
 import { visibleText, richHost } from './rich-view.js';
 import { revealForm, revealIfHidden } from './gift-ui.js';
 import { normalizeCode, quoteSignature, isAnnualQuote, isCodeError } from './discount-code-logic.js';
+import { eventText, occurrenceText, occurrenceLabel, findEvent, saleState, upcoming, isMultiDay } from './event-sale.js';
 
 const S = window.BOOKING_SHOP;                   // build-aikainen konfiguraatio (kieli, polut, ei-verkossa-varattavat tuotteet)
 const t = T[S.lang] || T.fi;
@@ -425,6 +426,9 @@ async function viewProduct(slug, dateStr, query) {
   const p = state.catalog.find((x) => x.slug === slug);
   setHero(p || null);
   if (!p) {
+    // booking_158: tapahtuma/koulutus, jonka myynti on suljettu (public_catalog ei näytä sitä): tiedot ja ajankohdat public_eventsistä, ei ostoa
+    const ev = findEvent(await publicEvents(), slug);
+    if (ev) { viewEventClosed(ev); return; }
     const st = (await fetch(S.staticProductsUrl).then((r) => r.json()).catch(() => ({})))[slug];
     mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })),
       h('h2', { text: st ? st.name : t.unknownProduct }), st ? fallbackDesc(h, st, S.lang) : null,   // kuvaus voi olla rikasta: puhdistettuna (rich-view.js), ei raakana tekstinä
@@ -482,7 +486,8 @@ async function viewProduct(slug, dateStr, query) {
 }
 function slotItem(r, ds, p) {
   const ok = r.status === 'available';
-  const title = `${hm(r.starts_at)}–${hm(r.ends_at)}`;
+  // monipäiväinen kerta (koulutus, booking_158): alku- ja loppupäivä näkyviin
+  const title = isMultiDay(r) ? occurrenceText(r, S.lang) : `${hm(r.starts_at)}–${hm(r.ends_at)}`;
   const sub = cleanLabel(rlabel(r));
   const price = r.price_mode === 'per_person' ? `${money(r.unit_price)} ${t.perPerson}` : r.price_mode === 'fixed' ? money(r.base_price)
     : `${money(r.base_price)} (${t.included(r.included_persons)}, ${t.extra(money(r.extra_person_price))})`;
@@ -491,6 +496,28 @@ function slotItem(r, ds, p) {
     h('div', { class: 'bk-slot-side' },
       ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: 'bk-badge full', text: t.waitlistSessionSoldOut }),
       ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}`) }, t.choose, h('span', { class: 'sr', text: ` ${title}` })) : h('a', { class: 'btn sm light bk-waitlist-link', href: bk(`/jono/${r.rule_id}/${ds}/${p.id}`), text: t.waitlistJoinShort })));
+}
+
+// booking_158: tapahtumat (public_events, kanava shop). Virhe tai vanha kanta ilman RPC:tä → [] (vanha käytös).
+let eventsCache = null;
+const publicEvents = () => (eventsCache ||= rpc('public_events', { p_from: todayHel(), p_channel: 'shop' }).then((r) => (Array.isArray(r) ? r : [])).catch(() => []));
+// Suljettu myynti: tapahtuman nimi, lyhyt kuvaus, hinta ja tulevat ajankohdat ilman varauspainiketta + yhteystiedot. Kaikki nimet textContentina.
+function viewEventClosed(ev) {
+  const L = S.lang, tx = (k) => eventText(k, L, texts.tx);
+  const occ = upcoming(ev), state = saleState(ev);
+  const desc = (L === 'en' && ev.description_short_en) || ev.description_short || '';
+  const price = ev.price != null ? money(ev.price) : null;
+  mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })),
+    h('h2', { text: (L === 'en' && ev.name_en) || ev.name }),
+    desc ? richHost(h, desc, 'bk-desc') : null,
+    price ? h('p', { class: 'bk-meta' }, h('strong', { text: price })) : null,
+    h('div', { class: 'bk-notice', role: 'status', 'data-testid': 'event-sale-closed' }, h('p', {}, h('strong', { text: tx(state === 'full' ? 'ui.shop.event.status_full' : 'ui.shop.event.sale_closed_title') })), h('p', { text: tx('ui.shop.event.sale_closed_text') }), phoneBox()),
+    h('h3', { text: tx('ui.shop.event.dates') }),
+    occ.length ? h('ul', { class: 'bk-slotlist', 'data-testid': 'event-dates' }, occ.map((o) => h('li', { class: `bk-slot ${o.status === 'full' ? 'full' : 'unavailable'}` },
+      h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: occurrenceText(o, L) }), occurrenceLabel(o, L) ? h('span', { class: 'bk-sub', text: occurrenceLabel(o, L) }) : null),
+      h('div', { class: 'bk-slot-side' }, h('span', { class: `bk-badge ${o.status === 'full' ? 'full' : 'unavailable'}`, text: tx(o.status === 'full' ? 'ui.shop.event.status_full' : 'ui.shop.event.status_closed') })))))
+      : h('p', { text: tx('ui.shop.event.no_dates') }));
+  focusTop();
 }
 
 // ---- jaetut lomakeosat (vuorovaraus + hoitovaraus) ----

@@ -894,3 +894,27 @@ body.shot #shell .nav .lbl{display:inline}
 .ac-mail.warn{background:var(--warnbg);color:var(--ink);border-color:var(--gold)}
 .ac-mail.err{background:var(--errbg);color:var(--err);border-color:var(--err)}
 .ac-tell{margin:0;font-size:14px}
+/* booking_158: Tapahtumat-näkymä. Vain teeman muuttujat (vihreä, hiekka, kullanruskea), ei uusia värejä. */
+.ev-list,.ev-occ,.ev-occ-mini,.ev-block-list,.ev-block-ro{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.ev-card{display:grid;gap:8px}.ev-name{margin:0;font-size:1.15rem;overflow-wrap:anywhere}.ev-name a{color:var(--green)}
+.ev-occ-mini li{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;font-size:.95rem}
+.ev-note{background:var(--bg);border-left:4px solid var(--gold);color:var(--ink);padding:10px 12px;border-radius:8px;margin:8px 0}
+.ev-warn{background:var(--warnbg);color:var(--ink);padding:6px 10px;border-radius:8px;margin:4px 0 0;font-size:.92rem}
+.ev-filters{gap:12px;align-items:center;margin:8px 0 12px}
+.ev-chan{border:1px solid var(--line);margin:12px 0}.ev-chan legend{font-weight:600;color:var(--ink);padding:0 4px}
+.ev-add{margin:12px 0}.ev-add h2{margin:0;font-size:1.05rem}
+.ev-occ-item{display:grid;gap:8px}.ev-occ-item.off{opacity:.85;border-style:dashed}.ev-occ-label{color:var(--ink);overflow-wrap:anywhere}
+.ev-occ-actions{gap:6px}
+.ev-blocks{border-top:1px solid var(--line);padding-top:10px}.ev-blocks h3{margin:0;font-size:1rem}
+.ev-block-row{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--card)}.ev-block-row.bad{border-color:var(--err)}
+.ev-block-row .row{gap:8px;align-items:flex-end}
+.ev-tl{display:grid;gap:4px;margin:6px 0;max-width:720px}
+.ev-tl-scale{display:flex;justify-content:space-between;font-size:.85rem}
+.ev-tl-row{display:grid;grid-template-columns:minmax(90px,30%) 1fr;gap:8px;align-items:center;font-size:.9rem}
+.ev-tl-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.ev-tl-track{position:relative;height:14px;background:var(--bg);border-radius:7px;border:1px solid var(--line)}
+.ev-tl-bar{position:absolute;top:0;bottom:0;border-radius:7px}
+.ev-tl-bar.occ{background:var(--green)}.ev-tl-bar.excl{background:var(--gold)}
+.ev-tl-bar.shared{background:repeating-linear-gradient(45deg,var(--gold) 0 6px,var(--heaterbar) 6px 12px)}
+.ev-conflicts ul{margin:6px 0 0;padding-left:20px}
+@media (max-width:600px){.ev-tl-row{grid-template-columns:1fr}.ev-block-row .row>*{flex:1 1 100%}}

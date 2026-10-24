@@ -84,3 +84,21 @@ Rollback poistaa tapahtumien resurssivaraukset ja niiden sulut pysyvästi; tapah
 sama `-v tz=Europe/Helsinki` → `pass=89 fail=0 tz=Europe/Helsinki`. Istunnon TimeZone on oletuksena UTC kuten tuotannossa.
 Testipäivät ovat kiinteät (ma 22.2.2027 ja ma 1.3.2027, horisontti nostetaan testitransaktiossa), jotta ne eivät osu oikeisiin varauksiin.
 Testi ajaa migraation uudelleen, rollbackin kahdesti (md5-tarkistus) ja migraation uudelleen.
+
+## Käyttöliittymä (PR cursor/tapahtumat-158-ui)
+
+**Hallinta, `#/tapahtumat`** (`admin/views/events.js`, logiikka `admin/events-logic.js`, tekstit `admin/events-texts.js`, mock `admin/events-mock.js`):
+- Lista: tapahtumat ja koulutukset (suodatin Kaikki / Tapahtumat / Koulutukset, "Näytä menneet kerrat"), merkit *Ei myynnissä* (events.sale_enabled = false) ja *Piilotettu*, kanavat, tulevat kerrat myytyine määrineen ja jonoineen.
+- Tapahtuma (`#/tapahtumat?tapahtuma=<id>`): Muokkaa tuotetietoja (`#/tuotteet?muokkaa=<id>`), Kopioi tapahtuma (valinnaisesti tulevat kerrat siirrettynä N päivällä; `admin_event_copy`), myyntikanavat (Verkkokauppa = `shop`, Koulutussivun widget = `widget`; `admin_event_set_channels`).
+- Kertojen lisäys: yksi päivä ja aika tai monivalinta (päivät pilkulla / kalenterista × alkuajat, enintään 60 kerralla), kesto, osallistujia enintään/vähintään, myynnin päättyminen, nimi FI/EN (tyhjä → palvelimen "DD.MM.YYYY klo HH.MI"). Tallennus `admin_event_rule_upsert` kerta kerrallaan; osittainen onnistuminen kerrotaan.
+- Kerta: muokkaus (osallistujamäärä ≥ myyty), kopio toiselle päivälle (`admin_event_rule_copy`), poisto (varauksia/jonottajia → selkeä virhe, ohje poistaa käytöstä).
+- Resurssivaraukset: tilat ja saunottajat (henkilöresurssit) erikseen ryhmiteltyinä, kapasiteettipoolit ja `event_rule_*` piilossa. Ajoitus *suhteellinen* (alku/loppu minuutteina kerran alusta → `offset_min` + `minutes`) tai *kellonaika* (→ ISO-aikaleimat Helsingin ajassa). Validointi ennen tallennusta (resurssi, alku < loppu, ±1 vrk), varoitus kerran ulkopuolisesta varauksesta, aikajana. Palvelimen `conflict` näytetään listana (hint-JSON).
+- Henkilökunta (ei catalog.edit) näkee kaiken lukutilassa.
+
+**Tuotteet**: muokkausdialogissa *Kopioi* → vahvistus "Kopio: [nimi]" → `admin_product_copy` → kopio avautuu muokattavaksi (piilotettu, ei myynnissä, hinnat/ALV/slugit alkuperäisessä ennallaan).
+
+**Kauppa**: kun tapahtuma ei ole `public_catalog`issa (myynti pois), `#/tuote/<slug>` hakee `public_events(p_channel => 'shop')` ja näyttää nimen, lyhyen kuvauksen, hinnan, tulevat ajankohdat (monipäiväinen alku–loppu) ja "Myynti avautuu pian" + yhteystiedot, ei varauspainiketta (`shop/src/event-sale.js`). RPC-virhe → vanha varasivu. Monipäiväisen koulutuskerran aika näkyy alku- ja loppupäivineen myös vuorolistassa.
+
+**Etusivu**: `docs/kb-export.sql` vie `events_shop` = `booking.public_events(current_date, 'shop')`, `scripts/kb-snapshot.mjs` tallentaa sen julkiset kentät. `src/event-cards.mjs` käyttää sitä aina, kun siinä on tulevia `event`-kertoja, myyntitilasta riippumatta (Joonas 24.10.2026: testisivu rakennetaan valmiiksi, linkit kaupan sisälle). Kortti linkittää kaupan tuotesivulle (FI `/varaa/#/tuote/<slug>`, EN `/en/book/#/tuote/<slug>`, sama välilehti); myynnin ollessa pois tuotesivu näyttää suljetun tilan. Jos `events_shop` puuttuu (migraatio ajamatta), käytetään vanhaa dataa (kb.event_dates + cards.json), mutta linkki on silti kaupan tuotesivu (Johku vain, jos tuotteella ei ole slugia). Johku-vaihtoehto (`EVENT_LINK_TARGET`) on poistettu.
+
+**Tekstit**: `content/site-texts.pending-import-57.json` (FI+EN, 127 avainta, ei `<`-merkkiä). **Testit**: `booking/tests/tapahtumat-158-ui.test.mjs`, `booking/tests/tapahtumakortit.test.mjs`.
