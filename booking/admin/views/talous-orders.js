@@ -14,13 +14,14 @@ import { rcText } from '../refund-cancel-texts.js';
 import { yesNo } from './refund-cancel.js';
 import { annualCardPanel, showAnnualCardDialog } from './annual-card-panel.js';
 import { acText } from '../annual-card-texts.js';
+import { orderVoucherBox } from './voucher-redeem.js';
 
 export const ORDER_SORTS = ['created', 'order_no', 'total', 'payment_status', 'first_reservation'];
 const VAT_CHOICES = [25.5, 13.5, 0];
 
 const annualSec = (info, sec) => { const panel = annualCardPanel(info); return panel ? h('div', { 'data-testid': 'order-annual-card' }, sec(acText('ui.admin.annual_card.title'), panel)) : null; };
 
-export function createOrdersTab({ api, ctx, gift = null }) {
+export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
   const st = { search: '', paymentFilter: 'paid', source: '', native: '', dateField: '', from: '', to: '', sortBy: 'created', sortDir: 'desc', limit: 25, offset: 0 };
   const list = h('ul', { class: 'tl-list', 'data-testid': 'orders-list' }), count = h('p', { class: 'muted tl-count', role: 'status', 'data-testid': 'orders-count' }), pagers = [h('div'), h('div')];
   let seq = 0, reopen = null, autoOpen = false;
@@ -80,7 +81,9 @@ export function createOrdersTab({ api, ctx, gift = null }) {
   }
   async function orderDetail(id) {
     // booking_146: vuosikorttitilauksen koodi, voimassaolo ja sähköpostin tila (virhe tai puuttuva RPC → osio jää pois)
-    const [o, annual] = await Promise.all([api.getOrder(id), api.annualCardForOrder ? api.annualCardForOrder(id).catch(() => null) : null]);
+    // booking_173: kumppanin lahjakortti (koodi, arvaus vs. valinta, myyjän vaihto, Lunasta, Merkitse lunastetuksi); virhe tai puuttuva RPC → osio jää pois
+    const [o, annual, vbox] = await Promise.all([api.getOrder(id), api.annualCardForOrder ? api.annualCardForOrder(id).catch(() => null) : null,
+      !rpc || api.isMock() ? null : orderVoucherBox({ rpc, orderId: id, onChanged: () => afterChange({}, id) }).catch(() => null)]);
     const b = o.balance, unpaid = b.unpaid;
     const sec = (title, ...kids) => h('section', { class: 'tl-sec' }, h('h3', { text: title }), ...kids);
     const payments = o.payments.length
@@ -112,7 +115,7 @@ export function createOrdersTab({ api, ctx, gift = null }) {
       actionBtn({ key: 'recordPayment', label: t('btn.record'), ico: 'plus', testid: 'btn-record', extraDisabled: !o.is_native ? t('btn.addJohku') : unpaid > 0 ? null : t('btn.recordNone'), onClick: () => recordDialog(o) }),
       actionBtn({ key: 'refund', label: t('btn.refund'), ico: 'undo', testid: 'btn-refund', extraDisabled: !canRefund ? t('btn.refundNoPerm') : refundable.length ? null : t('btn.refundNone'), onClick: () => refundDialog(o, refundable) }));
     const receipts = sec(`${t('receipts.title')} (${o.receipts.length})`, receiptsList({ api, ctx, receipts: o.receipts }), o.receipts.length ? h('p', { class: 'muted tl-hint', text: t('receipts.emailNote') }) : null);
-    return h('div', { class: 'tl-detail' }, meta, ...notes, sums, annualSec(annual, sec), sec(t('order.payments'), payments), !o.is_native && !o.receipts.length ? null : receipts,   // Johku-tilaukselle ei synny kuittia (booking_41)
+    return h('div', { class: 'tl-detail' }, meta, ...notes, sums, annualSec(annual, sec), sec(t('order.payments'), payments), vbox, !o.is_native && !o.receipts.length ? null : receipts,   // Johku-tilaukselle ei synny kuittia (booking_41)
        sec(t('order.reservations'), reservations), actions);
   }
 
@@ -164,10 +167,12 @@ export function createOrdersTab({ api, ctx, gift = null }) {
     const sel = h('select', { name: 'method', 'data-testid': 'record-method' }, methods.map((m) => h('option', { value: m.code, text: methodLabel(m.code, m.label) })), gift && ctx.can('payments.manage') ? h('option', { value: 'gift_card', text: methodLabel('gift_card') }) : null);
     const noteInput = h('input', { name: 'note', maxlength: 200 });
     // Tuntematon koodi (§13.12): oikotie maksutapaan Kumppanin lahjakortti (ei kuittia); muistiinpanoon maskattu koodi
-    const usePartner = ({ note }) => {
-      const opt = [...sel.options].find((x) => x.value === 'partner_voucher');
+    // booking_173: myyjäkohtainen maksutapa (Lahjakortti – Kokemuskauppa / Offerilla / Elämyslahjat), muuten vanha partner_voucher
+    const usePartner = ({ note, source }) => {
+      const want = [source ? `partner_voucher_${source}` : null, 'partner_voucher'].filter(Boolean);
+      const opt = want.map((c) => [...sel.options].find((x) => x.value === c)).find(Boolean);
       if (!opt) { toast(t('gc.o.partnerOff'), 'warn'); return; }
-      sel.value = 'partner_voucher'; sync(); if (!noteInput.value) noteInput.value = note; amount.focus();
+      sel.value = opt.value; sync(); if (!noteInput.value) noteInput.value = note; amount.focus();
     };
     const rf = gift ? redeemFields({ gift, order: o, amountInput: amount, onPartner: usePartner }) : null;
     if (rf) rf.node.hidden = true;

@@ -9,7 +9,7 @@ export const VC_SORTS = ['oldest_open', 'newest'];
 export const VC_PROBLEM_CODES = ['invalid_code', 'expired_code', 'already_used', 'other'];
 export const VC_RESOLVE_STATUSES = ['redeemed', 'problem', 'cancelled', 'open'];   // admin_resolve_voucher_claim.p_status; lähtötila open/processing/problem
 export const VC_ACTIVE = ['open', 'processing', 'problem'];
-export const VC_SOURCES = ['elamyslahjat', 'kokemuskauppa', 'kiitoskauppa', 'offerilla', 'partner_other'];
+export const VC_SOURCES = ['kokemuskauppa', 'offerilla', 'elamyslahjat', 'partner_other', 'kiitoskauppa'];   // booking_173: Kiitoskauppa vain vanhoilla riveillä
 export const VC_NOTE_MAX = 1000;
 
 const num = (v, d = 0) => (v == null || v === '' || !Number.isFinite(+v) ? d : +v);

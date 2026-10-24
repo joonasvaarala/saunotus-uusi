@@ -117,9 +117,10 @@ Kuitin y-tunnus, ALV ja osoite tulevat `seller`-objektista. ALV-kannat ovat taul
 | `gift_cards.rl_check_fail_per_10min` | 10 | Arvausten raja. | piilota teknisenä | |
 | `gift_cards.rl_global_fail_per_10min` | 200 | Sama, yhteensä. | piilota teknisenä | |
 | `gift_cards.rl_buy_per_10min` | 6 | Ostoja / IP. | piilota teknisenä | |
-| `voucher_claims.enabled` | false | Kumppanikoodin jättö verkossa (Elämyslahjat, Kokemuskauppa, Kiitoskauppa, Offerilla). | vain tila | Oletus pois, kunnes käyttöönotto. Ei kytkintä puhelimessa. |
+| `voucher_claims.enabled` | false | Kumppanikoodin jättö verkossa (Kokemuskauppa, Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista booking_173). | vain tila | Oletus pois, kunnes käyttöönotto. Ei kytkintä puhelimessa. |
 | `voucher_claims.problem_emails_enabled` | false | Ongelmaviesti asiakkaalle vasta, kun true ja pohja on hyväksytty. | vain tila | Vois lähetä asiakaspostia, kun sähköposti on joskus livessä. |
 | `voucher_claims.partner_voucher_accounted` | false | false = kumppanikoodi ei tee kuittia eikä kassaraporttia. true = kuten muu käsin kirjattu maksu. | vain tila | Kirjanpitosääntö, ei arkinen kytkin. |
+| `voucher_claims.redeem_urls` | {Elämyslahjat, Kokemuskauppa, Offerilla -osoitteet} | Kumppanin lunastussivu myyjittäin (Lunasta-nappi hallinnassa, uusi välilehti). Vain https, enintään 300 merkkiä; tyhjä poistaa linkin. | Asetukset › Lahjakortit › Lunastussivut | booking_173. |
 | `voucher_claims.max_per_order` | 10 | Avoimia pyyntöjä / tilaus. | pidä | |
 | `voucher_claims.remind_after_hours` | 24 | Pyyntö nousee vanhojen listalle. Raja koodissa 1–720. Mikään ei vanhene automaattisesti. | pidä | |
 | `voucher_claims.max_attempts` | 6 | Botin yritykset, sen jälkeen tapaus henkilökunnalle. | piilota teknisenä | |

@@ -124,8 +124,8 @@ export function createGiftMock({ today = new Date().toLocaleDateString('sv-SE', 
     public_resolve_gift_code: (a) => {
       const n = norm(a.p_code); if (n.length < 6 || n.length > 24) throw err('invalid_code', 'Tarkista koodi');
       if (cards.some((c) => norm(c.code) === n && c.status !== 'cancelled' && c.status !== 'pending_payment')) return { ok: true, kind: 'own' };
-      const g = /^KK[0-9]{5}[A-Z]{6}$/.test(n) ? ['kokemuskauppa', 'high'] : /^OK[0-9]{5}[A-Z]{3}$/.test(n) ? ['offerilla', 'high'] : /^[A-Z0-9]{12}$/.test(n) && /[^3479ACEFHJKLMNPRTUVWXY]/.test(n) ? ['elamyslahjat', 'medium'] : [null, null];
-      return { ok: true, kind: 'unknown', partner_claims_enabled: sett.claims_enabled !== false, suggested_source: g[0], suggestion_confidence: g[1], sources: ['elamyslahjat', 'kokemuskauppa', 'kiitoskauppa', 'offerilla'].map((code) => ({ code, label: code, label_en: code })) };
+      const g = /^KK/.test(n) ? ['kokemuskauppa', 'high'] : /^OK[0-9]{5}[A-Z]{3}$/.test(n) ? ['offerilla', 'high'] : /^[A-Z0-9]{12}$/.test(n) && /[^3479ACEFHJKLMNPRTUVWXY]/.test(n) ? ['elamyslahjat', 'medium'] : ['offerilla', 'low'];   // booking_173: KK… aina Kokemuskauppa, muut ehdotuksena Offerilla
+      return { ok: true, kind: 'unknown', partner_claims_enabled: sett.claims_enabled !== false, suggested_source: g[0], suggestion_confidence: g[1], sources: ['kokemuskauppa', 'offerilla', 'elamyslahjat'].map((code) => ({ code, label: code, label_en: code })) };
     },
     admin_redeem_gift_card: (a) => {
       if (!sett.redeem_enabled) throw err('redeem_disabled', 'Lunastus ei ole käytössä'); const c = cards.find((x) => norm(x.code) === norm(a.p_code)); if (!c) throw err('gift_card_not_found', 'Lahjakorttia ei löydy');

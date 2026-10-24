@@ -88,7 +88,7 @@ export const TEXTS = {
     'pstat.paid': 'Maksettu', 'pstat.pending': 'Kesken', 'pstat.failed': 'Epäonnistui',
     'src.web': 'Verkkokauppa', 'src.admin': 'Hallinta', 'src.phone': 'Puhelin', 'src.email': 'Sähköposti', 'src.walk_in': 'Paikan päällä', 'src.johku_import': 'Johku', 'src.pikakassa': 'Pikakassa', 'src.kylmalaite': 'Kylmälaite',
     'method.cash': 'Käteinen', 'method.card_terminal': 'Korttipääte', 'method.mobilepay': 'MobilePay', 'method.visma_pay': 'Verkkomaksu', 'method.bank_transfer': 'Tilisiirto', 'method.invoice': 'Lasku', 'method.gift_card': 'Lahjakortti',
-    'method.partner_voucher': 'Kumppanin lahjakortti', 'method.other': 'Muu', 'method.pay_later': 'Maksa myöhemmin', 'method.annual_card': 'Vuosikortti',
+    'method.partner_voucher': 'Kumppanin lahjakortti', 'method.partner_voucher_kokemuskauppa': 'Lahjakortti – Kokemuskauppa', 'method.partner_voucher_offerilla': 'Lahjakortti – Offerilla', 'method.partner_voucher_elamyslahjat': 'Lahjakortti – Elämyslahjat', 'method.other': 'Muu', 'method.pay_later': 'Maksa myöhemmin', 'method.annual_card': 'Vuosikortti',
     'group.public': 'Yleiset vuorot', 'group.private': 'Yksityisvuorot', 'group.treatment': 'Hoidot ja rituaalit', 'group.addon': 'Lisäpalvelut', 'group.giftcard': 'Lahjakortit', 'group.event': 'Tapahtumat', 'group.other': 'Muut',
 
     done: 'Tehty ({rpc}).', 'err.nothing_to_pay': 'Tilauksella ei ole maksettavaa.', 'err.order_not_editable': 'Tilausta ei voi enää muokata.', 'err.amount_exceeds_refundable': 'Summa ylittää hyvitettävän määrän.', 'err.amount_exceeds_unpaid': 'Summa ylittää maksamattoman osan.',
@@ -213,7 +213,7 @@ export const TEXTS = {
     'pstat.paid': 'Paid', 'pstat.pending': 'Pending', 'pstat.failed': 'Failed',
     'src.web': 'Web shop', 'src.admin': 'Admin', 'src.phone': 'Phone', 'src.email': 'Email', 'src.walk_in': 'Walk-in', 'src.johku_import': 'Johku', 'src.pikakassa': 'Quick till', 'src.kylmalaite': 'Fridge',
     'method.cash': 'Cash', 'method.card_terminal': 'Card terminal', 'method.mobilepay': 'MobilePay', 'method.visma_pay': 'Online payment', 'method.bank_transfer': 'Bank transfer', 'method.invoice': 'Invoice', 'method.gift_card': 'Gift card',
-    'method.partner_voucher': 'Partner gift card', 'method.other': 'Other', 'method.pay_later': 'Pay later', 'method.annual_card': 'Annual card',
+    'method.partner_voucher': 'Partner gift card', 'method.partner_voucher_kokemuskauppa': 'Gift card – Kokemuskauppa', 'method.partner_voucher_offerilla': 'Gift card – Offerilla', 'method.partner_voucher_elamyslahjat': 'Gift card – Elämyslahjat', 'method.other': 'Other', 'method.pay_later': 'Pay later', 'method.annual_card': 'Annual card',
     'group.public': 'Public sessions', 'group.private': 'Private sessions', 'group.treatment': 'Treatments and rituals', 'group.addon': 'Add-ons', 'group.giftcard': 'Gift cards', 'group.event': 'Events', 'group.other': 'Other',
 
     done: 'Done ({rpc}).', 'err.nothing_to_pay': 'The order has nothing to pay.', 'err.order_not_editable': 'The order can no longer be edited.', 'err.amount_exceeds_refundable': 'The amount exceeds the refundable amount.', 'err.amount_exceeds_unpaid': 'The amount exceeds the unpaid part.',

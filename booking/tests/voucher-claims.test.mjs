@@ -22,12 +22,20 @@ test('koodin kelpoisuus: 6–24 merkkiä normalisoituna (viivat, välilyönnit, 
   assert.ok(!G.codeValid('ABCDE') && !G.codeValid('A'.repeat(25)) && !G.codeValid('--- ---') && !G.codeValid(''));
 });
 
-test('lähde koodin muodosta (peilaa palvelimen _vc_guess): Kokemuskauppa, Offerilla, Elämyslahjat; Kiitoskaupalle ei ehdotusta', () => {
+test('lähde koodin muodosta (peilaa palvelimen _vc_guess, booking_173): KK-alku → Kokemuskauppa, muu → Offerilla ehdotuksena', () => {
   assert.deepEqual(G.guessSource('KK12 345 ABC DEF'), { source: 'kokemuskauppa', confidence: 'high' });
+  assert.deepEqual(G.guessSource('KK534536G5'), { source: 'kokemuskauppa', confidence: 'high' }, 'omistajan esimerkki KK534536G5');
+  assert.deepEqual(G.guessSource('  kk-534 536g5 '), { source: 'kokemuskauppa', confidence: 'high' }, 'pienet kirjaimet, välit ja viivat');
+  assert.deepEqual(G.guessSource('kk1'), { source: 'kokemuskauppa', confidence: 'high' }, 'mikä tahansa KK-alku');
   assert.deepEqual(G.guessSource('OK19-123ABC'), { source: 'offerilla', confidence: 'high' });
   assert.deepEqual(G.guessSource('ZXQW98765432'), { source: 'elamyslahjat', confidence: 'medium' });
-  assert.deepEqual(G.guessSource('HH3A7CEFHJKL'), { source: null, confidence: null }, 'Johku-merkistön 12 merkkiä: ei ehdotusta (voi olla kirjoitusvirhe omasta kortista)');
-  assert.deepEqual(G.guessSource('ABCDEFGHIJ'), { source: null, confidence: null });
+  assert.deepEqual(G.guessSource('HH3A7CEFHJKL'), { source: 'offerilla', confidence: 'low' }, 'muu muoto → Offerilla vain ehdotuksena');
+  assert.deepEqual(G.guessSource('ABCDEFGHIJ'), { source: 'offerilla', confidence: 'low' });
+  assert.deepEqual(G.guessSource(''), { source: null, confidence: null }); assert.deepEqual(G.guessSource(null), { source: null, confidence: null });
+  assert.equal(G.isMismatch('ABCDEFGHIJ', 'elamyslahjat'), false, 'heikko ehdotus ei varoita'); assert.equal(G.isMismatch('KK534536G5', 'offerilla'), true);
+  assert.deepEqual(G.CLAIM_SOURCES, ['kokemuskauppa', 'offerilla', 'elamyslahjat'], 'Kiitoskauppa ei valinnoissa');
+  assert.equal(G.SOURCE_LABELS.kiitoskauppa, 'Kiitoskauppa', 'vanhat rivit näkyvät nimellä');
+  assert.deepEqual(['kokemuskauppa', 'offerilla', 'elamyslahjat', 'kiitoskauppa'].map(G.claimMethod), ['partner_voucher_kokemuskauppa', 'partner_voucher_offerilla', 'partner_voucher_elamyslahjat', 'partner_voucher']);
 });
 
 test('RPC-nimet ja p_-parametrit ovat sopimuksen mukaiset (voucher_claims: resolve, submit, get, update)', async () => {
@@ -39,8 +47,8 @@ test('RPC-nimet ja p_-parametrit ovat sopimuksen mukaiset (voucher_claims: resol
   assert.deepEqual(last('public_submit_voucher_claim').args, { p_token: TOKEN, p_code: 'KK12345ABCDEF', p_source: 'kokemuskauppa' }, 'p_order_item_id jätetään pois = koko tilaus');
   await api.orderClaims(TOKEN);
   assert.deepEqual(last('public_get_order_voucher_claims').args, { p_token: TOKEN });
-  await api.updateClaimCode({ token: TOKEN, claimNo: sub.claim_no, code: 'KK98765ZYXWVU', source: 'kiitoskauppa' });
-  assert.deepEqual(last('public_update_voucher_claim_code').args, { p_token: TOKEN, p_claim_id: sub.claim_no, p_code: 'KK98765ZYXWVU', p_source: 'kiitoskauppa' });
+  await api.updateClaimCode({ token: TOKEN, claimNo: sub.claim_no, code: 'KK98765ZYXWVU', source: 'offerilla' });
+  assert.deepEqual(last('public_update_voucher_claim_code').args, { p_token: TOKEN, p_claim_id: sub.claim_no, p_code: 'KK98765ZYXWVU', p_source: 'offerilla' });
   await api.updateClaimCode({ token: TOKEN, claimNo: sub.claim_no, code: 'KK11111AAAAAA' });
   assert.ok(!('p_source' in last('public_update_voucher_claim_code').args), 'ilman lähdettä p_source puuttuu (= nykyinen myyjä)');
 });
@@ -68,16 +76,18 @@ test('oma kortti ei lunastettavissa: selite ennen lunastusta (Johku-kortti, vanh
   assert.equal((await G.resolveCode({ api: off.api, token: TOKEN, code: 'HH7MRTUVWXY3' })).reason, 'redeem_disabled');
 });
 
-test('tuntematon koodi: lähdevalinta neljällä myyjällä ja esivalinta suggested_source', async () => {
+test('tuntematon koodi: myyjän vahvistus kolmella myyjällä ja esivalinta suggested_source', async () => {
   const { api, calls } = setup();
   const out = await G.resolveCode({ api, token: TOKEN, code: 'ok19-123abc' });
   assert.equal(out.type, 'choose_source');
-  assert.deepEqual(out.sources.map((s) => s.code), ['elamyslahjat', 'kokemuskauppa', 'kiitoskauppa', 'offerilla']);
-  assert.deepEqual(out.sources.map((s) => s.label), ['Elämyslahjat', 'Kokemuskauppa', 'Kiitoskauppa', 'Offerilla']);
+  assert.deepEqual(out.sources.map((s) => s.code), ['kokemuskauppa', 'offerilla', 'elamyslahjat']);
+  assert.deepEqual(out.sources.map((s) => s.label), ['Kokemuskauppa', 'Offerilla', 'Elämyslahjat']);
   assert.equal(out.suggested, 'offerilla'); assert.equal(out.confidence, 'high');
   assert.ok(!calls.some((c) => c.name === 'public_apply_gift_card' || c.name === 'public_submit_voucher_claim'), 'valinta ei lähetä mitään ennen vahvistusta');
   const none = await G.resolveCode({ api, token: TOKEN, code: 'ABCDEFGHIJ' });
-  assert.equal(none.type, 'choose_source'); assert.equal(none.suggested, null, 'ei ehdotusta → ei esivalintaa');
+  assert.equal(none.type, 'choose_source'); assert.deepEqual([none.suggested, none.confidence], ['offerilla', 'low'], 'muu muoto → Offerilla esivalittuna ehdotuksena');
+  const kk = await G.resolveCode({ api, token: TOKEN, code: 'KK534536G5' });
+  assert.deepEqual([kk.suggested, kk.confidence], ['kokemuskauppa', 'high']);
 });
 
 test('kumppanilunastus pois (voucher_claims.enabled=false): tuntematon koodi = "Koodia ei löytynyt"; submit palauttaa voucher_claims_disabled', async () => {
@@ -91,6 +101,7 @@ test('lunastuspyyntö: vahvistus, idempotentti toisto, tila tilaussivulla, ei ka
   const { api } = setup();
   const r = await G.submitClaim({ api, token: TOKEN, code: 'kk12345abcdef', source: 'kokemuskauppa' });
   assert.equal(r.type, 'claimed'); assert.equal(r.already, false); assert.equal(r.sourceLabel, 'Kokemuskauppa'); assert.equal(r.codeMasked, '…CDEF'); assert.equal(r.mismatch, false);
+  assert.equal(r.method, 'partner_voucher_kokemuskauppa'); assert.equal(r.methodLabel, 'Lahjakortti – Kokemuskauppa');
   const again = await G.submitClaim({ api, token: TOKEN, code: 'KK12345ABCDEF', source: 'kokemuskauppa' });
   assert.equal(again.type, 'claimed'); assert.equal(again.already, true); assert.equal(again.claimNo, r.claimNo);
   const list = await api.orderClaims(TOKEN);
@@ -100,6 +111,9 @@ test('lunastuspyyntö: vahvistus, idempotentti toisto, tila tilaussivulla, ei ka
   assert.ok(!JSON.stringify(list).includes('KK12345ABCDEF'), 'koko koodi ei koskaan julkisessa vastauksessa');
   const mism = await G.submitClaim({ api, token: TOKEN, code: 'OK19-123ABC', source: 'elamyslahjat' });
   assert.equal(mism.mismatch, true, 'source_mismatch kun valinta poikkeaa ehdotuksesta');
+  const low = await G.submitClaim({ api, token: TOKEN, code: 'ABCD1234EF', source: 'elamyslahjat' });
+  assert.equal(low.mismatch, false, 'heikko Offerilla-ehdotus ei varoita');
+  assert.equal((await G.submitClaim({ api, token: TOKEN, code: 'ABCD1234XY', source: 'kiitoskauppa' })).code, 'invalid_source', 'Kiitoskauppa ei enää valittavissa');
 });
 
 test('lunastuspyynnön virheet: invalid_source, use_own_card, code_already_claimed, nothing_to_pay, too_many_claims, rate_limited', async () => {
@@ -110,8 +124,8 @@ test('lunastuspyynnön virheet: invalid_source, use_own_card, code_already_claim
   assert.equal((await G.submitClaim({ api, token: TOKEN, code: 'OK19123ABC', source: 'offerilla' })).code, 'code_already_claimed', 'koodi on jo lunastettu');
   assert.equal((await api.submitClaim({ token: TOKEN, code: 'AB1', source: 'offerilla' })).code, 'invalid_code');
   const full = setup({ scenario: 'gift' });
-  for (let i = 0; i < 10; i++) assert.equal((await G.submitClaim({ api: full.api, token: TOKEN, code: `CODE${String(i).padStart(4, '0')}XY`, source: 'kiitoskauppa' })).type, 'claimed');
-  assert.equal((await G.submitClaim({ api: full.api, token: TOKEN, code: 'CODE9999XY', source: 'kiitoskauppa' })).code, 'too_many_claims');
+  for (let i = 0; i < 10; i++) assert.equal((await G.submitClaim({ api: full.api, token: TOKEN, code: `CODE${String(i).padStart(4, '0')}XY`, source: 'offerilla' })).type, 'claimed');
+  assert.equal((await G.submitClaim({ api: full.api, token: TOKEN, code: 'CODE9999XY', source: 'offerilla' })).code, 'too_many_claims');
   const rl = setup({ scenario: 'gift' });
   for (let i = 0; i < 10; i++) await rl.api.resolve(`ZZ${i}ZZZZZZZ`);   // tuntemattomat koodit kasvattavat yhteistä virhelaskuria (kuten palvelimella)
   const lim = await G.resolveCode({ api: rl.api, token: TOKEN, code: 'ZZZZZZZZ' });
@@ -128,8 +142,12 @@ test('tilaussivun tilat: vastaanotettu / lunastettu (summa) / ongelma (invalid_c
   // ongelma → uusi koodi ja myyjä → takaisin vastaanotetuksi
   const fix = await G.updateClaimCode({ api, token: TOKEN, claimNo: claims[1].claimNo, code: 'zxqw-9876-5432', source: 'elamyslahjat' });
   assert.deepEqual([fix.type, fix.codeMasked], ['error', undefined], 'sama koodi ja myyjä → unchanged'); assert.equal(fix.code, 'unchanged');
-  const ok = await G.updateClaimCode({ api, token: TOKEN, claimNo: claims[1].claimNo, code: 'qqww-1111-2222', source: 'kiitoskauppa' });
-  assert.equal(ok.type, 'updated'); assert.equal(ok.sourceLabel, 'Kiitoskauppa'); assert.equal(ok.codeMasked, '…2222');
+  const ok = await G.updateClaimCode({ api, token: TOKEN, claimNo: claims[1].claimNo, code: 'qqww-1111-2222', source: 'offerilla' });
+  assert.equal(ok.type, 'updated'); assert.equal(ok.sourceLabel, 'Offerilla'); assert.equal(ok.codeMasked, '…2222'); assert.equal(ok.methodLabel, 'Lahjakortti – Offerilla');
+  const only = await G.updateClaimCode({ api, token: TOKEN, claimNo: claims[1].claimNo, code: '', source: 'kokemuskauppa', current: 'offerilla' });
+  assert.equal(only.type, 'updated', 'tyhjä koodi = vain myyjän vaihto'); assert.equal(only.sourceLabel, 'Kokemuskauppa'); assert.equal(only.codeMasked, '…2222', 'koodi ennallaan');
+  assert.equal((await G.updateClaimCode({ api, token: TOKEN, claimNo: claims[1].claimNo, code: '', source: 'kokemuskauppa', current: 'kokemuskauppa' })).code, 'invalid_code', 'tyhjä koodi ja sama myyjä → ei lähetetä');
+  assert.equal((await G.updateClaimCode({ api, token: TOKEN, claimNo: claims[1].claimNo, code: 'QQWW11113333', source: 'kiitoskauppa', current: 'kokemuskauppa' })).code, 'invalid_source', 'vaihto Kiitoskauppaan estetty');
   const after = (await api.orderClaims(TOKEN)).claims.map(G.claimView).find((c) => c.claimNo === claims[1].claimNo);
   assert.equal(after.state, 'received'); assert.equal(after.problemCode, null);
   assert.equal((await G.updateClaimCode({ api, token: TOKEN, claimNo: claims[2].claimNo, code: 'NEWCODE123', source: 'offerilla' })).code, 'claim_not_editable');
@@ -189,13 +207,13 @@ test('mock vastaa sopimuksen vastausmuotoja (avaimet)', async () => {
   const r = await api.resolve('KK12345ABCDEF');
   assert.deepEqual(Object.keys(r).sort(), ['kind', 'ok', 'partner_claims_enabled', 'sources', 'suggested_source', 'suggestion_confidence'].sort());
   assert.deepEqual(Object.keys(r.sources[0]).sort(), ['code', 'label', 'label_en']);
-  const s = await api.submitClaim({ token: TOKEN, code: 'NEWCODE12345', source: 'kiitoskauppa' });
-  assert.deepEqual(Object.keys(s).sort(), ['claim_no', 'code_masked', 'hold_until', 'ok', 'source', 'source_label', 'source_mismatch', 'status'].sort());
+  const s = await api.submitClaim({ token: TOKEN, code: 'NEWCODE12345', source: 'offerilla' });
+  assert.deepEqual(Object.keys(s).sort(), ['claim_no', 'code_masked', 'hold_until', 'ok', 'payment_method', 'payment_method_label', 'source', 'source_label', 'source_mismatch', 'status'].sort());
   assert.equal(s.hold_until, null);
   const g = await api.orderClaims(TOKEN);
   assert.deepEqual(Object.keys(g.claims[0]).sort(), ['amount', 'can_update_code', 'claim_no', 'code_masked', 'created_at', 'hold_until', 'problem_code', 'public_status', 'source', 'source_label', 'status'].sort());
-  const u = await api.updateClaimCode({ token: TOKEN, claimNo: s.claim_no, code: 'OTHERCODE999', source: 'kiitoskauppa' });
-  assert.deepEqual(Object.keys(u).sort(), ['claim_no', 'code_masked', 'ok', 'public_status', 'source', 'source_label', 'source_mismatch', 'status'].sort());
+  const u = await api.updateClaimCode({ token: TOKEN, claimNo: s.claim_no, code: 'OTHERCODE999', source: 'offerilla' });
+  assert.deepEqual(Object.keys(u).sort(), ['claim_no', 'code_masked', 'ok', 'payment_method', 'payment_method_label', 'public_status', 'source', 'source_label', 'source_mismatch', 'status'].sort());
 });
 
 test('gift-mock yksinään (ilman tilausta): lunastuspyyntö vaatii tilauksen → not_found', async () => {

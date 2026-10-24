@@ -156,17 +156,26 @@ export const itemLabels = (p, lang) => (Array.isArray(p?.items) ? p.items : []).
 export const CODE_MIN = 6;
 export const CODE_MAX = 24;
 export const codeValid = (s) => { const n = normalizeCode(s).length; return n >= CODE_MIN && n <= CODE_MAX; };
-// Julkiset lähteet (public_submit_voucher_claim: vain nämä 4; partner_other ei julkisesti). Järjestys kuten _vc_sources().
-export const CLAIM_SOURCES = ['elamyslahjat', 'kokemuskauppa', 'kiitoskauppa', 'offerilla'];
+// Julkiset lähteet (public_submit_voucher_claim, booking_173: Kokemuskauppa, Offerilla, Elämyslahjat; Kiitoskauppa = käytännössä oma lahjakortti → ei valinnoissa,
+// vanhat Kiitoskauppa-rivit näkyvät edelleen nimellä). partner_other ei julkisesti. Järjestys kuten _vc_sources().
+export const CLAIM_SOURCES = ['kokemuskauppa', 'offerilla', 'elamyslahjat'];
 export const SOURCE_LABELS = { elamyslahjat: 'Elämyslahjat', kokemuskauppa: 'Kokemuskauppa', kiitoskauppa: 'Kiitoskauppa', offerilla: 'Offerilla', partner_other: 'Muu kumppani' };
-// Lähde koodin muodosta (peilaa booking._vc_guess; vain aineistosta todetut muodot, Kiitoskauppaa ei tunneta)
+// Myyjäkohtainen maksutapa (booking.payment_methods, booking_173): partner_voucher_<myyjä>; vanhat/muut → partner_voucher
+export const claimMethod = (source) => (CLAIM_SOURCES.includes(source) ? `partner_voucher_${source}` : 'partner_voucher');
+// Lähde koodin muodosta (peilaa booking._vc_guess, booking_173): KK-alku → Kokemuskauppa (varma), OK-muoto → Offerilla (varma),
+// Elämyslahjat-muoto → Elämyslahjat (todennäköinen), muu → Offerilla ehdotuksena (low). Tyhjä → ei arvausta.
 export function guessSource(code) {
   const n = normalizeCode(code);
-  if (/^KK[0-9]{5}[A-Z]{6}$/.test(n)) return { source: 'kokemuskauppa', confidence: 'high' };
+  if (!n) return { source: null, confidence: null };
+  if (/^KK/.test(n)) return { source: 'kokemuskauppa', confidence: 'high' };
   if (/^OK[0-9]{5}[A-Z]{3}$/.test(n)) return { source: 'offerilla', confidence: 'high' };
   if (/^[A-Z0-9]{12}$/.test(n) && /[^3479ACEFHJKLMNPRTUVWXY]/.test(n)) return { source: 'elamyslahjat', confidence: 'medium' };
-  return { source: null, confidence: null };
+  return { source: 'offerilla', confidence: 'low' };
 }
+// DOM-lapset ilman tyhjiä: replaceChildren/append muuttaa null/undefined tekstiksi "null"/"undefined" → suodatetaan aina ennen (booking_173-korjaus)
+export const kids = (...a) => a.flat(Infinity).filter((x) => x != null && x !== false && x !== '');
+// Varoitus "koodi näyttää toisen myyjän koodilta" vain varmalla / todennäköisellä tunnistuksella (ei pelkästä Offerilla-ehdotuksesta)
+export const isMismatch = (code, source) => { const g = guessSource(code); return !!g.source && g.source !== source && (g.confidence === 'high' || g.confidence === 'medium'); };
 // Lunastuspyynnön näyttötila tilaussivulla (public_get_order_voucher_claims): received | redeemed | problem | cancelled | expired.
 // Teksti-avain: vc.st.<tila> tai ongelmassa vc.problem.<problem_code> (tuntematon koodi → other). Ei aikarajoja (booking_48).
 export const PROBLEM_CODES = ['invalid_code', 'expired_code', 'already_used', 'other'];
@@ -174,7 +183,7 @@ export function claimView(c) {
   const st = ['received', 'redeemed', 'problem', 'cancelled', 'expired'].includes(c?.public_status) ? c.public_status : 'received';
   const pc = st === 'problem' ? (PROBLEM_CODES.includes(c.problem_code) ? c.problem_code : 'other') : null;
   return { claimNo: c?.claim_no, state: st, textKey: st === 'problem' ? `vc.problem.${pc}` : `vc.st.${st}`, problemCode: pc, canUpdate: c?.can_update_code === true && (st === 'received' || st === 'problem'),
-    source: c?.source ?? null, sourceLabel: c?.source_label || SOURCE_LABELS[c?.source] || '', codeMasked: c?.code_masked || '', amount: st === 'redeemed' && c?.amount != null ? +c.amount : null };
+    source: c?.source ?? null, sourceLabel: c?.source_label || SOURCE_LABELS[c?.source] || '', methodLabel: c?.payment_method_label || '', codeMasked: c?.code_masked || '', amount: st === 'redeemed' && c?.amount != null ? +c.amount : null };
 }
 // Virhekoodi → tekstiavain: kumppanipolun omat (vc.err.*) ensin, muuten tavallinen lahjakorttivirhe (err.*), muuten err.generic
 export function errorKey(code, has) {
@@ -203,12 +212,17 @@ export async function submitClaim({ api, token, code, source }) {
   if (!CLAIM_SOURCES.includes(source)) return { type: 'error', code: 'invalid_source' };
   const r = await api.submitClaim({ token, code, source });
   if (r?.notReady) return { type: 'error', code: 'notReady' };
-  return r?.ok ? { type: 'claimed', claimNo: r.claim_no, already: r.already === true, sourceLabel: r.source_label || SOURCE_LABELS[source], codeMasked: r.code_masked || '', mismatch: r.source_mismatch === true } : { type: 'error', code: r?.code || 'generic' };
+  return r?.ok ? { type: 'claimed', claimNo: r.claim_no, already: r.already === true, sourceLabel: r.source_label || SOURCE_LABELS[source], codeMasked: r.code_masked || '', mismatch: r.source_mismatch === true,
+    source: r.source || source, method: r.payment_method || claimMethod(r.source || source), methodLabel: r.payment_method_label || '' } : { type: 'error', code: r?.code || 'generic' };
 }
-export async function updateClaimCode({ api, token, claimNo, code, source }) {
-  if (source && !CLAIM_SOURCES.includes(source)) return { type: 'error', code: 'invalid_source' };
-  if (!codeValid(code)) return { type: 'error', code: 'invalid_code' };
+// Koodin ja/tai myyjän korjaus ennen lunastusta. Tyhjä koodi = vain myyjän vaihto (palvelin pitää vanhan koodin, booking_173).
+// current = pyynnön nykyinen myyjä: vanha (esim. Kiitoskauppa) kelpaa vain, jos sitä ei vaihdeta.
+export async function updateClaimCode({ api, token, claimNo, code, source, current = null }) {
+  if (source && !CLAIM_SOURCES.includes(source) && source !== current) return { type: 'error', code: 'invalid_source' };
+  const empty = !normalizeCode(code);
+  if (empty && (!source || source === current)) return { type: 'error', code: 'invalid_code' };
+  if (!empty && !codeValid(code)) return { type: 'error', code: 'invalid_code' };
   const r = await api.updateClaimCode({ token, claimNo, code, source });
   if (r?.notReady) return { type: 'error', code: 'notReady' };
-  return r?.ok ? { type: 'updated', claimNo: r.claim_no, sourceLabel: r.source_label || '', codeMasked: r.code_masked || '', mismatch: r.source_mismatch === true } : { type: 'error', code: r?.code || 'generic' };
+  return r?.ok ? { type: 'updated', claimNo: r.claim_no, sourceLabel: r.source_label || '', codeMasked: r.code_masked || '', mismatch: r.source_mismatch === true, methodLabel: r.payment_method_label || '' } : { type: 'error', code: r?.code || 'generic' };
 }

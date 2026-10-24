@@ -1,12 +1,14 @@
 // Tarkista-lista (admin_review_list): ei saunottajaa (migraatio 22; poikkeuksen myöntö oikeudella bookings.override),
 // saunottajakonfliktit, sulkukonfliktit (kuittaus booking_73: blocks.manage tai bookings.override, ei muuta saatavuutta),
 // kuitatut sulkukonfliktit, ylitykset ja orvot lisäpalvelut.
+// booking_173: lunastamattomat kumppanilahjakortit (admin_unredeemed_voucher_claims; views/voucher-redeem.js).
 // Tyhjä lista on hyvä uutinen; rivistä pääsee päivänäkymään tai varauksen tietoihin.
 import { rpc } from '../sb.js';
 import { h, fmtDay, fmtTime, errMsg, empty, badge, sourceBadge, toast, run } from '../ui.js';
 import { resName, SKILL_FI } from './legs.js';
 import { grantButton } from './therapist.js';
 import { loadReviewTexts, reviewText as rt } from '../review-texts.js';
+import { unredeemedSection } from './voucher-redeem.js';
 import { canAckBlockConflict, conflictReason, nextAckStep, nextUnackStep, ackArgs, unackArgs, reviewAttentionCount } from '../review-logic.js';
 
 const day = (iso) => new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
@@ -109,6 +111,8 @@ export async function render({ ctx, refs, reload }) {
       (x) => [link(x.reservation_id, x.starts_at)]],
   ];
   const total = reviewAttentionCount(v);
+  let vouchers = null;
+  try { vouchers = await unredeemedSection({ rpc }); } catch { vouchers = null; }   // rajapinta puuttuu (vanha tietokanta) → osio jää pois
   const sec = ([k, title, hint, row, opt = {}]) => {
     const rows = Array.isArray(v[k]) ? v[k] : [];
     const kind = opt.badge ? opt.badge(rows.length) : (rows.length ? 'warn' : 'ok');
@@ -119,5 +123,6 @@ export async function render({ ctx, refs, reload }) {
   return [h('h1', { text: 'Tarkista' }),
     h('p', { class: 'muted', role: 'status', 'data-testid': 'review-total', text: total ? `${total} tarkistettavaa. Lista päivittyy tietokannasta joka kerta kun avaat sivun.` : 'Ei tarkistettavaa – kaikki tulevat varaukset ovat kunnossa.' }),
     h('button', { type: 'button', class: 'btn ghost sm', text: 'Päivitä', onclick: () => reload() }),
+    vouchers,   // booking_173: lunastamattomat kumppanilahjakortit (Kokemuskauppa, Offerilla, Elämyslahjat)
     ...SECTIONS.map(sec)];
 }

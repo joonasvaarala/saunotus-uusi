@@ -1,7 +1,7 @@
 // Lunastuspyynnöt-välilehden (Talous › Lahjakoodit) tekstit FI/EN. Yhdistetään talous-texts.js:ssä TEXTS-olioon (avainpariteetti testataan). Sopimus: KOODARI_talous_A_D_fi.md §13.12 / §13.12.1.
 export const VC_FI = {
   'tab.vouchers': 'Lahjakoodit',
-  'vcl.title': 'Lunastuspyynnöt', 'vcl.lead': 'Muiden myyjien lahjakortit (Elämyslahjat, Kokemuskauppa, Kiitoskauppa, Offerilla), jotka asiakas on syöttänyt kauppaan. Varaus pysyy voimassa ilman aikarajaa; pyyntö pysyy listalla, kunnes se käsitellään.',
+  'vcl.title': 'Lunastuspyynnöt', 'vcl.lead': 'Muiden myyjien lahjakortit (Kokemuskauppa, Offerilla, Elämyslahjat; vanhat myös Kiitoskauppa), jotka asiakas on syöttänyt kauppaan. Varaus pysyy voimassa ilman aikarajaa; pyyntö pysyy listalla, kunnes se käsitellään.',
   'vcl.refresh': 'Päivitä', 'vcl.search': 'Nimi, sähköposti, tilaus tai koodin osa',
   'vcl.f.status': 'Tila', 'vcl.f.sort': 'Järjestys', 'vcl.st.all': 'Kaikki',
   'vcl.st.active': 'Aktiiviset (avoin, käsittelyssä, ongelma)', 'vcl.st.open': 'Avoin', 'vcl.st.processing': 'Käsittelyssä', 'vcl.st.problem': 'Ongelma', 'vcl.st.redeemed': 'Lunastettu', 'vcl.st.cancelled': 'Peruttu', 'vcl.st.expired': 'Vanhentunut', 'vcl.st.needs_review': 'Tarkistettavat',
@@ -35,7 +35,7 @@ export const VC_FI = {
 };
 export const VC_EN = {
   'tab.vouchers': 'Gift codes',
-  'vcl.title': 'Redemption requests', 'vcl.lead': 'Gift cards from other sellers (Elämyslahjat, Kokemuskauppa, Kiitoskauppa, Offerilla) that customers have entered in the shop. The booking stays valid with no time limit; the request stays on the list until it is handled.',
+  'vcl.title': 'Redemption requests', 'vcl.lead': 'Gift cards from other sellers (Kokemuskauppa, Offerilla, Elämyslahjat; older ones also Kiitoskauppa) that customers have entered in the shop. The booking stays valid with no time limit; the request stays on the list until it is handled.',
   'vcl.refresh': 'Refresh', 'vcl.search': 'Name, email, order or part of the code',
   'vcl.f.status': 'Status', 'vcl.f.sort': 'Order', 'vcl.st.all': 'All',
   'vcl.st.active': 'Active (open, processing, problem)', 'vcl.st.open': 'Open', 'vcl.st.processing': 'Processing', 'vcl.st.problem': 'Problem', 'vcl.st.redeemed': 'Redeemed', 'vcl.st.cancelled': 'Cancelled', 'vcl.st.expired': 'Expired', 'vcl.st.needs_review': 'Needs review',

@@ -54,7 +54,7 @@ export async function render({ ctx, refs, reload, query, legacyReservations = fa
         if (seq !== sequence) return;
         const api = createTalousApi({ rpc, io: { select: dbSelect, functionUrl, fnBlob, fn } });
         const gift = createGiftApi({ rpc, io: { functionUrl } });
-        const view = createOrdersTab({ api, ctx, gift });
+        const view = createOrdersTab({ api, ctx, gift, rpc });   // rpc: lahjakorttilaatikko (booking_173)
         panel.replaceChildren(view.node);
         panel.dataset.ready = '1';
         await view.load();

@@ -10,6 +10,7 @@ const repo = join(root, '..');
 const texts = await import(pathToFileURL(join(root, 'admin/procountor-texts.js')));
 const imported = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-11.json'), 'utf8'));
 const pending = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-15.json'), 'utf8'));
+const sellers = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-68.json'), 'utf8'));   // booking_173: myyjäkohtaiset tilit
 const settings = readFileSync(join(root, 'admin/views/settings.js'), 'utf8');
 const migration = readFileSync(join(root, 'supabase/migrations/20261019010300_booking_103_procountor_settings.sql'), 'utf8');
 const ACCOUNTS = { rounding: '3740', sales_by_vat: { '25.5': '3000' }, clearing_by_method: { cash: '1910' } };
@@ -18,6 +19,12 @@ test('sanakirjan avaimet ovat joko tuodussa 11:ssä tai vain uudessa 15:ssä', (
   const oldKeys = new Set(imported.filter((r) => r.key.startsWith('ui.admin.procountor.')).map((r) => r.key));
   for (const lang of ['fi', 'en']) {
     for (const [key, text] of Object.entries(texts.PROCOUNTOR_TEXTS[lang])) {
+      const s173 = sellers.find((r) => r.key === key && r.lang === lang);
+      if (s173) {   // booking_173: uusi avain vain 68:ssa
+        assert.equal(s173.text, text); assert.equal(s173.class, 'normal'); assert.deepEqual(s173.placeholders, []); assert.equal(s173.text.includes('http'), false);
+        assert.equal(imported.some((r) => r.key === key) || pending.some((r) => r.key === key), false, key);
+        continue;
+      }
       const pool = oldKeys.has(key) ? imported : pending;
       const row = pool.find((r) => r.key === key && r.lang === lang);
       assert.ok(row, key + ' ' + lang);

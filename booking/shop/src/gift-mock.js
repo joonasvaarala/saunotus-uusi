@@ -1,7 +1,7 @@
 // Lahjakorttien MOCK-PALVELIN (kauppa): keksityt kortit muistissa; vain kun osoitteessa on ?mock=1 (sekä testit). Ei kosketa palvelinta.
 // Vastaa KOODARI_talous_A_D_fi.md §13.2: nimet, p_-parametrit, vastausrakenteet, virheet {ok:false, code, message}.
 // public_gift_card_packages-vastauksen sisältö (testiprojekti = tuotannon siemendata, 17.10.2026): nimet, hinnat, kuvaukset ja items-rakenne ({label, label_en, persons, kb_product_id} | {label, label_en, persons, addon_code}; label_en lisätty migraatiossa booking_45)
-import { resolveDelivery, guessSource, CLAIM_SOURCES, SOURCE_LABELS } from './gift-logic.js';
+import { resolveDelivery, guessSource, isMismatch, claimMethod, CLAIM_SOURCES, SOURCE_LABELS } from './gift-logic.js';
 export const MOCK_PACKAGES = [
   {
     code: 'open',
@@ -219,7 +219,8 @@ export function createGiftMock({ delay = 0, settings = {}, today = new Date().to
       if (claims.filter((c) => ['open', 'processing', 'problem'].includes(c.status)).length >= 10) return bad('too_many_claims', 'Liian monta lahjakoodia tilauksella');
       claims.filter((c) => c.status === 'problem').forEach((c) => { c.status = 'cancelled'; c.by = 'customer'; });
       const c = { claim_no: ++claimSeq, source: src, status: 'open', problem_code: null, amount: null, code: n, created_at: new Date().toISOString(), suggested: guessSource(n).source }; claims.push(c);
-      return { ok: true, claim_no: c.claim_no, status: 'open', source: c.source, source_label: SOURCE_LABELS[c.source], code_masked: mask(c.code), hold_until: null, source_mismatch: !!c.suggested && c.suggested !== c.source };
+      return { ok: true, claim_no: c.claim_no, status: 'open', source: c.source, source_label: SOURCE_LABELS[c.source], code_masked: mask(c.code), hold_until: null, source_mismatch: isMismatch(c.code, c.source),
+        payment_method: claimMethod(c.source), payment_method_label: `Lahjakortti – ${SOURCE_LABELS[c.source]}` };
     },
     public_get_order_voucher_claims: ({ p_token }) => {
       if (!p_token) return bad('not_found', 'not_found');
@@ -233,14 +234,15 @@ export function createGiftMock({ delay = 0, settings = {}, today = new Date().to
       const c = claims.find((x) => x.claim_no === +p_claim_id); if (!c) return bad('not_found', 'Lunastuspyyntöä ei löydy');
       if (c.status === 'processing') return bad('busy', 'Botti käsittelee juuri');
       if (!['open', 'problem'].includes(c.status)) return bad('claim_not_editable', 'Pyyntöä ei voi enää muuttaa');
-      const src = p_source == null ? c.source : String(p_source).trim().toLowerCase(), n = norm(p_code);
-      if (!CLAIM_SOURCES.includes(src)) return bad('invalid_source', 'Valitse lahjakortin myyjä');
+      const src = p_source == null || String(p_source).trim() === '' ? c.source : String(p_source).trim().toLowerCase(), n = norm(p_code) || c.code;   // tyhjä koodi = vain myyjän vaihto (booking_173)
+      if (!CLAIM_SOURCES.includes(src) && src !== c.source) return bad('invalid_source', 'Valitse lahjakortin myyjä');
       if (!/^[A-Z0-9]{6,24}$/.test(n)) { fails.push(1); return bad('invalid_code', 'Tarkista koodi'); }
       if (n === c.code && src === c.source) return bad('unchanged', 'Koodi ja myyjä ovat samat');
       if (cards.some((x) => x.code === n && x.status !== 'cancelled' && x.status !== 'pending_payment')) return bad('use_own_card', 'Koodi on oma lahjakortti');
       if (claims.some((x) => x !== c && x.code === n && ['open', 'processing', 'redeemed'].includes(x.status))) return bad('code_already_claimed', 'Koodi on jo käytössä');
       Object.assign(c, { code: n, source: src, status: 'open', problem_code: null, suggested: guessSource(n).source });
-      return { ok: true, claim_no: c.claim_no, status: 'open', public_status: 'received', source: c.source, source_label: SOURCE_LABELS[c.source], code_masked: mask(c.code), source_mismatch: !!c.suggested && c.suggested !== c.source };
+      return { ok: true, claim_no: c.claim_no, status: 'open', public_status: 'received', source: c.source, source_label: SOURCE_LABELS[c.source], code_masked: mask(c.code), source_mismatch: isMismatch(c.code, c.source),
+        payment_method: claimMethod(c.source), payment_method_label: `Lahjakortti – ${SOURCE_LABELS[c.source]}` };
     },
     public_buy_gift_card: (a) => {
       const err = validateBuy(a, cfg); if (err) return err;

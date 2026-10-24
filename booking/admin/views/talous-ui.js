@@ -7,7 +7,7 @@ import { FeatureNotReady } from '../talous-api.js';
 export const PAY = ['unpaid', 'pending', 'paid', 'partially_paid', 'refunded', 'partially_refunded', 'failed', 'invoiced'];
 export const PSTAT = ['pending', 'paid', 'partially_refunded', 'refunded', 'failed', 'cancelled'];
 export const SOURCES = ['web', 'admin', 'phone', 'email', 'walk_in', 'johku_import', 'pikakassa', 'kylmalaite', 'other'];
-export const METHODS = ['cash', 'card_terminal', 'mobilepay', 'visma_pay', 'bank_transfer', 'invoice', 'gift_card', 'partner_voucher', 'other', 'pay_later'];
+export const METHODS = ['cash', 'card_terminal', 'mobilepay', 'visma_pay', 'bank_transfer', 'invoice', 'gift_card', 'partner_voucher_kokemuskauppa', 'partner_voucher_offerilla', 'partner_voucher_elamyslahjat', 'partner_voucher', 'other', 'pay_later'];
 export const PAGE_SIZES = [25, 50, 100];
 const lab = (prefix, code) => (has(`${prefix}.${code}`) ? t(`${prefix}.${code}`) : code || '–');
 export const payLabel = (c) => lab('pay', c);

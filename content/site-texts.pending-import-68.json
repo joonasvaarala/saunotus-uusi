@@ -1,0 +1,1282 @@
+[
+ {
+  "key": "ui.gift.o.use_lead_sellers",
+  "lang": "fi",
+  "text": "Kirjoita lahjakortin koodi. Tunnistamme sen automaattisesti: oma lahjakorttimme vähennetään tilauksesta heti, ja Kokemuskauppa-, Offerilla- tai Elämyslahjat-lahjakortti lähetetään lunastettavaksi. Jos kortin saldo ei riitä, loppuosa maksetaan muuten.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 650,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Kauppa: booking/shop/src/gift-texts.js (order-gift.js myyjän vahvistus)."
+ },
+ {
+  "key": "ui.gift.o.use_lead_sellers",
+  "lang": "en",
+  "text": "Enter the gift card code. We recognise it automatically: our own gift card is deducted from the order right away, and a gift card from Kokemuskauppa, Offerilla or Elämyslahjat is sent in for redemption. If the card balance is not enough, the rest is paid another way.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 700,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Kauppa: booking/shop/src/gift-texts.js (order-gift.js myyjän vahvistus)."
+ },
+ {
+  "key": "ui.gift.vc.detected",
+  "lang": "fi",
+  "text": "Tunnistimme lahjakortin: {{var:source}}. Vahvista valinta tai vaihda myyjä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:source}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Kauppa: booking/shop/src/gift-texts.js (order-gift.js myyjän vahvistus)."
+ },
+ {
+  "key": "ui.gift.vc.detected",
+  "lang": "en",
+  "text": "We recognised the gift card: {{var:source}}. Confirm the choice or change the seller.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{var:source}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Kauppa: booking/shop/src/gift-texts.js (order-gift.js myyjän vahvistus)."
+ },
+ {
+  "key": "ui.gift.vc.detected_low",
+  "lang": "fi",
+  "text": "Ehdotus: {{var:source}}. Koodin perusteella myyjä on vain arvaus – tarkista valinta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{var:source}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Kauppa: booking/shop/src/gift-texts.js (order-gift.js myyjän vahvistus)."
+ },
+ {
+  "key": "ui.gift.vc.detected_low",
+  "lang": "en",
+  "text": "Suggestion: {{var:source}}. Based on the code the seller is only a guess – please check the choice.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{var:source}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Kauppa: booking/shop/src/gift-texts.js (order-gift.js myyjän vahvistus)."
+ },
+ {
+  "key": "ui.gift.vc.no_guess",
+  "lang": "fi",
+  "text": "Valitse lahjakortin myyjä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Kauppa: booking/shop/src/gift-texts.js (order-gift.js myyjän vahvistus)."
+ },
+ {
+  "key": "ui.gift.vc.no_guess",
+  "lang": "en",
+  "text": "Please choose the gift card seller.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Kauppa: booking/shop/src/gift-texts.js (order-gift.js myyjän vahvistus)."
+ },
+ {
+  "key": "ui.gift.vc.selected",
+  "lang": "fi",
+  "text": "Maksutapa: {{var:method}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:method}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Kauppa: booking/shop/src/gift-texts.js (order-gift.js myyjän vahvistus)."
+ },
+ {
+  "key": "ui.gift.vc.selected",
+  "lang": "en",
+  "text": "Payment method: {{var:method}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:method}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Kauppa: booking/shop/src/gift-texts.js (order-gift.js myyjän vahvistus)."
+ },
+ {
+  "key": "ui.gift.vc.method",
+  "lang": "fi",
+  "text": "Lahjakortti – {{var:source}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:source}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Kauppa: booking/shop/src/gift-texts.js (order-gift.js myyjän vahvistus)."
+ },
+ {
+  "key": "ui.gift.vc.method",
+  "lang": "en",
+  "text": "Gift card – {{var:source}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:source}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Kauppa: booking/shop/src/gift-texts.js (order-gift.js myyjän vahvistus)."
+ },
+ {
+  "key": "ui.gift.vc.confirm_submit",
+  "lang": "fi",
+  "text": "Vahvista ja lähetä lunastettavaksi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Kauppa: booking/shop/src/gift-texts.js (order-gift.js myyjän vahvistus)."
+ },
+ {
+  "key": "ui.gift.vc.confirm_submit",
+  "lang": "en",
+  "text": "Confirm and send for redemption",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Kauppa: booking/shop/src/gift-texts.js (order-gift.js myyjän vahvistus)."
+ },
+ {
+  "key": "ui.gift.vc.fix_source_hint",
+  "lang": "fi",
+  "text": "Jos vain myyjä oli väärin, jätä koodi tyhjäksi ja valitse oikea myyjä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Kauppa: booking/shop/src/gift-texts.js (order-gift.js myyjän vahvistus)."
+ },
+ {
+  "key": "ui.gift.vc.fix_source_hint",
+  "lang": "en",
+  "text": "If only the seller was wrong, leave the code empty and choose the correct seller.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Kauppa: booking/shop/src/gift-texts.js (order-gift.js myyjän vahvistus)."
+ },
+ {
+  "key": "ui.admin.vcr.box_title",
+  "lang": "fi",
+  "text": "Kumppanin lahjakortti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.code",
+  "lang": "fi",
+  "text": "Asiakkaan antama koodi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.copy",
+  "lang": "fi",
+  "text": "Kopioi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.copied",
+  "lang": "fi",
+  "text": "Koodi kopioitu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.copy_failed",
+  "lang": "fi",
+  "text": "Kopiointi ei onnistunut – valitse koodi ja kopioi käsin.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.guess",
+  "lang": "fi",
+  "text": "Järjestelmän arvaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.choice",
+  "lang": "fi",
+  "text": "Asiakkaan valinta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.seller",
+  "lang": "fi",
+  "text": "Myyjä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.no_guess",
+  "lang": "fi",
+  "text": "ei arvausta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.conf_high",
+  "lang": "fi",
+  "text": "varma",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.conf_medium",
+  "lang": "fi",
+  "text": "todennäköinen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.conf_low",
+  "lang": "fi",
+  "text": "arvaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.differs",
+  "lang": "fi",
+  "text": "Asiakkaan valinta eroaa järjestelmän arvauksesta. Tarkista myyjä ennen lunastusta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.method",
+  "lang": "fi",
+  "text": "Maksutapa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.amount",
+  "lang": "fi",
+  "text": "Summa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.unpaid",
+  "lang": "fi",
+  "text": "Maksamatta {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.change_seller",
+  "lang": "fi",
+  "text": "Vaihda myyjä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.seller_saved",
+  "lang": "fi",
+  "text": "Myyjä vaihdettu: {{var:source}}. Maksutapa ja Procountor-tili seuraavat valintaa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:source}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.redeem",
+  "lang": "fi",
+  "text": "Lunasta ({{var:source}})",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:source}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.redeem_title",
+  "lang": "fi",
+  "text": "Avaa myyjän lunastussivu uuteen välilehteen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.no_url",
+  "lang": "fi",
+  "text": "Lunastussivua ei ole asetettu (Asetukset › Lahjakortit › Lunastussivut).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.mark",
+  "lang": "fi",
+  "text": "Merkitse lunastetuksi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.mark_confirm",
+  "lang": "fi",
+  "text": "Lunastitko koodin myyjän sivulla? Kirjataan maksu {{var:amount}} maksutavalla {{var:method}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:amount}}",
+   "{{var:method}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.mark_yes",
+  "lang": "fi",
+  "text": "Kyllä, merkitse lunastetuksi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.cancel",
+  "lang": "fi",
+  "text": "Peru",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.marked",
+  "lang": "fi",
+  "text": "Merkitty lunastetuksi: {{var:method}} {{var:amount}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:method}}",
+   "{{var:amount}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.already",
+  "lang": "fi",
+  "text": "Oli jo merkitty lunastetuksi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.redeemed",
+  "lang": "fi",
+  "text": "Lunastettu {{var:when}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:when}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.by_staff",
+  "lang": "fi",
+  "text": "henkilökunta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.by_bot",
+  "lang": "fi",
+  "text": "botti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.order",
+  "lang": "fi",
+  "text": "Tilaus #{{var:no}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.reservation",
+  "lang": "fi",
+  "text": "Varaus {{var:when}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:when}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.no_right",
+  "lang": "fi",
+  "text": "Muutokset vaativat oikeuden giftcards.manage.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.section_title",
+  "lang": "fi",
+  "text": "Lunastamattomat kumppanilahjakortit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.section_hint",
+  "lang": "fi",
+  "text": "Asiakkaiden antamat Kokemuskauppa-, Offerilla- ja Elämyslahjat-koodit, joita ei ole vielä lunastettu myyjän sivulla. Kopioi koodi, avaa lunastussivu, lunasta ja merkitse lunastetuksi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.filter_all",
+  "lang": "fi",
+  "text": "Kaikki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.filter_label",
+  "lang": "fi",
+  "text": "Näytä myyjä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.empty",
+  "lang": "fi",
+  "text": "Ei lunastamattomia kumppanilahjakortteja.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.load_failed",
+  "lang": "fi",
+  "text": "Lunastamattomia lahjakortteja ei saatu haettua: {{var:error}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:error}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.urls_title",
+  "lang": "fi",
+  "text": "Lunastussivut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.urls_lead",
+  "lang": "fi",
+  "text": "Kumppanin sivu, jolla koodi lunastetaan. Lunasta-nappi avaa osoitteen uuteen välilehteen. Vain https-osoitteet; tyhjä kenttä poistaa linkin.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.urls_save",
+  "lang": "fi",
+  "text": "Tallenna lunastussivut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.urls_saved",
+  "lang": "fi",
+  "text": "Lunastussivut tallennettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.urls_bad",
+  "lang": "fi",
+  "text": "Tarkista osoite: {{var:sources}}. Osoitteen pitää olla https-osoite.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:sources}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.err_invalid_state",
+  "lang": "fi",
+  "text": "Lahjakortti on jo käsitelty – päivitä näkymä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.err_forbidden",
+  "lang": "fi",
+  "text": "Ei oikeutta tähän toimintoon.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.err_unchanged",
+  "lang": "fi",
+  "text": "Myyjä on jo sama.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.legacy",
+  "lang": "fi",
+  "text": "Vanha myyjä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.box_title",
+  "lang": "en",
+  "text": "Partner gift card",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.code",
+  "lang": "en",
+  "text": "Code entered by the customer",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.copy",
+  "lang": "en",
+  "text": "Copy",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.copied",
+  "lang": "en",
+  "text": "Code copied",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.copy_failed",
+  "lang": "en",
+  "text": "Copying failed – select the code and copy it manually.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.guess",
+  "lang": "en",
+  "text": "System guess",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.choice",
+  "lang": "en",
+  "text": "Customer’s choice",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.seller",
+  "lang": "en",
+  "text": "Seller",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.no_guess",
+  "lang": "en",
+  "text": "no guess",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.conf_high",
+  "lang": "en",
+  "text": "certain",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.conf_medium",
+  "lang": "en",
+  "text": "likely",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.conf_low",
+  "lang": "en",
+  "text": "guess",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.differs",
+  "lang": "en",
+  "text": "The customer’s choice differs from the system guess. Check the seller before redeeming.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.method",
+  "lang": "en",
+  "text": "Payment method",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.amount",
+  "lang": "en",
+  "text": "Amount",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.unpaid",
+  "lang": "en",
+  "text": "Unpaid {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.change_seller",
+  "lang": "en",
+  "text": "Change seller",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.seller_saved",
+  "lang": "en",
+  "text": "Seller changed: {{var:source}}. The payment method and Procountor account follow the choice.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:source}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.redeem",
+  "lang": "en",
+  "text": "Redeem ({{var:source}})",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:source}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.redeem_title",
+  "lang": "en",
+  "text": "Open the seller’s redemption page in a new tab",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.no_url",
+  "lang": "en",
+  "text": "No redemption page set (Settings › Gift cards › Redemption pages).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.mark",
+  "lang": "en",
+  "text": "Mark as redeemed",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.mark_confirm",
+  "lang": "en",
+  "text": "Did you redeem the code on the seller’s page? A payment of {{var:amount}} is recorded with the method {{var:method}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:amount}}",
+   "{{var:method}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.mark_yes",
+  "lang": "en",
+  "text": "Yes, mark as redeemed",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.cancel",
+  "lang": "en",
+  "text": "Cancel",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.marked",
+  "lang": "en",
+  "text": "Marked as redeemed: {{var:method}} {{var:amount}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:method}}",
+   "{{var:amount}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.already",
+  "lang": "en",
+  "text": "It was already marked as redeemed.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.redeemed",
+  "lang": "en",
+  "text": "Redeemed {{var:when}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:when}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.by_staff",
+  "lang": "en",
+  "text": "staff",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.by_bot",
+  "lang": "en",
+  "text": "bot",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.order",
+  "lang": "en",
+  "text": "Order #{{var:no}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.reservation",
+  "lang": "en",
+  "text": "Booking {{var:when}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:when}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.no_right",
+  "lang": "en",
+  "text": "Changes require the giftcards.manage permission.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.section_title",
+  "lang": "en",
+  "text": "Unredeemed partner gift cards",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.section_hint",
+  "lang": "en",
+  "text": "Kokemuskauppa, Offerilla and Elämyslahjat codes entered by customers that have not yet been redeemed on the seller’s page. Copy the code, open the redemption page, redeem it and mark it as redeemed.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.filter_all",
+  "lang": "en",
+  "text": "All",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.filter_label",
+  "lang": "en",
+  "text": "Show seller",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.empty",
+  "lang": "en",
+  "text": "No unredeemed partner gift cards.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.load_failed",
+  "lang": "en",
+  "text": "Could not load the unredeemed gift cards: {{var:error}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:error}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.urls_title",
+  "lang": "en",
+  "text": "Redemption pages",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.urls_lead",
+  "lang": "en",
+  "text": "The partner page where the code is redeemed. The Redeem button opens the address in a new tab. Only https addresses; an empty field removes the link.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.urls_save",
+  "lang": "en",
+  "text": "Save redemption pages",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.urls_saved",
+  "lang": "en",
+  "text": "Redemption pages saved",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.urls_bad",
+  "lang": "en",
+  "text": "Check the address: {{var:sources}}. It must be an https address.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:sources}}"
+  ],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.err_invalid_state",
+  "lang": "en",
+  "text": "The gift card has already been handled – refresh the view.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.err_forbidden",
+  "lang": "en",
+  "text": "You do not have permission for this action.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.err_unchanged",
+  "lang": "en",
+  "text": "The seller is already the same.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.vcr.legacy",
+  "lang": "en",
+  "text": "Former seller",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko, Tarkista › Lunastamattomat kumppanilahjakortit, Asetukset › Lunastussivut)."
+ },
+ {
+  "key": "ui.admin.procountor.method_partner_voucher_kokemuskauppa",
+  "lang": "fi",
+  "text": "Lahjakortti – Kokemuskauppa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/procountor-texts.js (Procountor-tilit myyjittäin)."
+ },
+ {
+  "key": "ui.admin.procountor.method_partner_voucher_offerilla",
+  "lang": "fi",
+  "text": "Lahjakortti – Offerilla",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/procountor-texts.js (Procountor-tilit myyjittäin)."
+ },
+ {
+  "key": "ui.admin.procountor.method_partner_voucher_elamyslahjat",
+  "lang": "fi",
+  "text": "Lahjakortti – Elämyslahjat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/procountor-texts.js (Procountor-tilit myyjittäin)."
+ },
+ {
+  "key": "ui.admin.procountor.method_partner_voucher_fallback",
+  "lang": "fi",
+  "text": "Muut kumppanilahjakortit (varatili)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/procountor-texts.js (Procountor-tilit myyjittäin)."
+ },
+ {
+  "key": "ui.admin.procountor.methods_partner_hint",
+  "lang": "fi",
+  "text": "Kumppanilahjakortit kirjataan myyjän omalle tilille. Jos myyjän tili on tyhjä, käytetään varatiliä. Omat lahjakortit: Lahjakortti.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/procountor-texts.js (Procountor-tilit myyjittäin)."
+ },
+ {
+  "key": "ui.admin.procountor.method_partner_voucher_kokemuskauppa",
+  "lang": "en",
+  "text": "Gift card – Kokemuskauppa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/procountor-texts.js (Procountor-tilit myyjittäin)."
+ },
+ {
+  "key": "ui.admin.procountor.method_partner_voucher_offerilla",
+  "lang": "en",
+  "text": "Gift card – Offerilla",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/procountor-texts.js (Procountor-tilit myyjittäin)."
+ },
+ {
+  "key": "ui.admin.procountor.method_partner_voucher_elamyslahjat",
+  "lang": "en",
+  "text": "Gift card – Elämyslahjat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/procountor-texts.js (Procountor-tilit myyjittäin)."
+ },
+ {
+  "key": "ui.admin.procountor.method_partner_voucher_fallback",
+  "lang": "en",
+  "text": "Other partner gift cards (fallback)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/procountor-texts.js (Procountor-tilit myyjittäin)."
+ },
+ {
+  "key": "ui.admin.procountor.methods_partner_hint",
+  "lang": "en",
+  "text": "Partner gift cards are booked to the seller’s own account. If the seller’s account is empty, the fallback account is used. Own gift cards: Gift card.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_173 (Joonas 25.10.2026): lahjakortin myyjät erikseen – Kokemuskauppa (koodi alkaa KK), Offerilla, Elämyslahjat; Kiitoskauppa pois valinnoista. Uusi valinnainen avain FI+EN; koodissa sama varateksti, joten näkymä toimii ennen tuontia. Hallinta: booking/admin/procountor-texts.js (Procountor-tilit myyjittäin)."
+ }
+]
