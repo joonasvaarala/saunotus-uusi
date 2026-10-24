@@ -1,0 +1,182 @@
+[
+  {
+    "key": "email.invoice_pdf.payment_term",
+    "lang": "fi",
+    "text": "Maksuehto",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lasku-PDF:n uudistettu FI/EN-asettelu."
+  },
+  {
+    "key": "email.invoice_pdf.payment_term",
+    "lang": "en",
+    "text": "Payment term",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lasku-PDF:n uudistettu FI/EN-asettelu."
+  },
+  {
+    "key": "email.invoice_pdf.payment_term_value",
+    "lang": "fi",
+    "text": "{{var:days}} päivää netto",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": ["{{var:days}}"],
+    "reason": "Lasku-PDF:n uudistettu FI/EN-asettelu."
+  },
+  {
+    "key": "email.invoice_pdf.payment_term_value",
+    "lang": "en",
+    "text": "{{var:days}} days net",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": ["{{var:days}}"],
+    "reason": "Lasku-PDF:n uudistettu FI/EN-asettelu."
+  },
+  {
+    "key": "email.invoice_pdf.einvoice",
+    "lang": "fi",
+    "text": "Verkkolaskuosoite / operaattori",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lasku-PDF:n uudistettu FI/EN-asettelu."
+  },
+  {
+    "key": "email.invoice_pdf.einvoice",
+    "lang": "en",
+    "text": "E-invoice address / operator",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lasku-PDF:n uudistettu FI/EN-asettelu."
+  },
+  {
+    "key": "email.invoice_pdf.payable",
+    "lang": "fi",
+    "text": "Maksettava yhteensä",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lasku-PDF:n uudistettu FI/EN-asettelu."
+  },
+  {
+    "key": "email.invoice_pdf.payable",
+    "lang": "en",
+    "text": "Total amount due",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lasku-PDF:n uudistettu FI/EN-asettelu."
+  },
+  {
+    "key": "email.invoice_pdf.payment_details",
+    "lang": "fi",
+    "text": "Maksutiedot",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lasku-PDF:n uudistettu FI/EN-asettelu."
+  },
+  {
+    "key": "email.invoice_pdf.payment_details",
+    "lang": "en",
+    "text": "Payment details",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lasku-PDF:n uudistettu FI/EN-asettelu."
+  },
+  {
+    "key": "email.invoice_pdf.quick_payment",
+    "lang": "fi",
+    "text": "Pikamaksaminen",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lasku-PDF:n pankkiviivakoodi ja EPC QR."
+  },
+  {
+    "key": "email.invoice_pdf.quick_payment",
+    "lang": "en",
+    "text": "Quick payment",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lasku-PDF:n pankkiviivakoodi ja EPC QR."
+  },
+  {
+    "key": "email.invoice_pdf.virtual_barcode",
+    "lang": "fi",
+    "text": "Virtuaaliviivakoodi",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lasku-PDF:n pankkiviivakoodi ja EPC QR."
+  },
+  {
+    "key": "email.invoice_pdf.virtual_barcode",
+    "lang": "en",
+    "text": "Virtual bank barcode",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lasku-PDF:n pankkiviivakoodi ja EPC QR."
+  },
+  {
+    "key": "email.invoice_pdf.scan_to_pay",
+    "lang": "fi",
+    "text": "Skannaa maksaaksesi",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lasku-PDF:n pankkiviivakoodi ja EPC QR."
+  },
+  {
+    "key": "email.invoice_pdf.scan_to_pay",
+    "lang": "en",
+    "text": "Scan to pay",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lasku-PDF:n pankkiviivakoodi ja EPC QR."
+  },
+  {
+    "key": "email.invoice_pdf.late_interest",
+    "lang": "fi",
+    "text": "Viivästyskorko korkolain mukaan.",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lasku-PDF:n uudistettu FI/EN-alatunniste."
+  },
+  {
+    "key": "email.invoice_pdf.late_interest",
+    "lang": "en",
+    "text": "Late interest according to the Interest Act.",
+    "class": "protected",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lasku-PDF:n uudistettu FI/EN-alatunniste."
+  }
+]
