@@ -11,8 +11,8 @@ import { SHIFT_STAFF_TEXTS, ssText, primeSsTexts, clearSsTextCache } from '../ad
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const rd = (p) => readFileSync(resolve(root, p), 'utf8');
-const MIG = 'booking/supabase/migrations/20261024250000_booking_153_shift_offer_rules.sql';
-const RB = 'booking/supabase/rollbacks/20261024250000_booking_153_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024141356_booking_153_shift_offer_rules.sql';
+const RB = 'booking/supabase/rollbacks/20261024141356_booking_153_ROLLBACK.sql';
 const SQLT = 'booking/supabase/tests/vuorotarjous/t153_shift_offer_rules.sql';
 const P53 = 'content/site-texts.pending-import-53.json';
 const OTTO = '2975633f-c53f-48d6-8a38-41cae0be5a83';
@@ -51,7 +51,7 @@ test('migraatio: public-skeeman taulujen rakenne ennallaan, booking_154:n funkti
     assert.doesNotMatch(code(rb), new RegExp(`function\\s+booking\\.${f}\\(`), f);
   }
   assert.ok(readdirSync(resolve(root, 'booking/supabase/migrations')).sort().indexOf('20261024134645_booking_154_annual_card_admin_email.sql') <
-    readdirSync(resolve(root, 'booking/supabase/migrations')).sort().indexOf('20261024250000_booking_153_shift_offer_rules.sql'));
+    readdirSync(resolve(root, 'booking/supabase/migrations')).sort().indexOf('20261024141356_booking_153_shift_offer_rules.sql'));
 });
 
 test('asetukset ja oletukset', () => {
