@@ -1,0 +1,688 @@
+[
+ {
+  "key": "ui.admin.day_memos.bulletins_title",
+  "lang": "fi",
+  "text": "Tiedotteet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletins_aria",
+  "lang": "fi",
+  "text": "Henkilöstötiedotteet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_add",
+  "lang": "fi",
+  "text": "Lisää tiedote",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_none",
+  "lang": "fi",
+  "text": "Ei voimassa olevia tiedotteita.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_period",
+  "lang": "fi",
+  "text": "Voimassa {{var:start}}–{{var:end}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:start}}",
+   "{{var:end}}"
+  ],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_edit",
+  "lang": "fi",
+  "text": "Muokkaa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_delete",
+  "lang": "fi",
+  "text": "Poista",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_delete_confirm",
+  "lang": "fi",
+  "text": "Poistetaanko tiedote?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_deleted",
+  "lang": "fi",
+  "text": "Tiedote poistettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_saved",
+  "lang": "fi",
+  "text": "Tiedote tallennettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_dialog_new",
+  "lang": "fi",
+  "text": "Lisää tiedote",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_dialog_edit",
+  "lang": "fi",
+  "text": "Muokkaa tiedotetta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_start",
+  "lang": "fi",
+  "text": "Alkamispäivä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_end",
+  "lang": "fi",
+  "text": "Päättymispäivä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_body",
+  "lang": "fi",
+  "text": "Viesti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_save",
+  "lang": "fi",
+  "text": "Tallenna tiedote",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_invalid",
+  "lang": "fi",
+  "text": "Tarkista päivämäärät ja viesti.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.notes_title",
+  "lang": "fi",
+  "text": "Päivän muistiinpanot",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.notes_none",
+  "lang": "fi",
+  "text": "Ei muistiinpanoja tälle päivälle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.note_label",
+  "lang": "fi",
+  "text": "Uusi muistiinpano",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.note_placeholder",
+  "lang": "fi",
+  "text": "Kirjoita sisäinen muistiinpano seuraavaa vuoroa varten",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 108,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.note_add",
+  "lang": "fi",
+  "text": "Lisää muistiinpano",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.note_added",
+  "lang": "fi",
+  "text": "Muistiinpano lisätty.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.note_delete",
+  "lang": "fi",
+  "text": "Poista",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.note_delete_confirm",
+  "lang": "fi",
+  "text": "Poistetaanko muistiinpano?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.note_deleted",
+  "lang": "fi",
+  "text": "Muistiinpano poistettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.note_author_fallback",
+  "lang": "fi",
+  "text": "Henkilöstö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.next_own_shift",
+  "lang": "fi",
+  "text": "Seuraava oma vuoro",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.next_own_shift_none",
+  "lang": "fi",
+  "text": "Ei tulevia omia työvuoroja.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.next_own_shift_failed",
+  "lang": "fi",
+  "text": "Seuraavaa omaa vuoroa ei saatu haettua.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.res_note_label",
+  "lang": "fi",
+  "text": "Muistiinpano / huomio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.res_note_save",
+  "lang": "fi",
+  "text": "Tallenna muistiinpano",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.res_note_saved",
+  "lang": "fi",
+  "text": "Muistiinpano tallennettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.shifts_none",
+  "lang": "fi",
+  "text": "Ei näytettäviä työvuoroja tälle päivälle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 82,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletins_title",
+  "lang": "en",
+  "text": "Notices",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletins_aria",
+  "lang": "en",
+  "text": "Staff notices",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_add",
+  "lang": "en",
+  "text": "Add notice",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_none",
+  "lang": "en",
+  "text": "No current notices.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_period",
+  "lang": "en",
+  "text": "Valid {{var:start}}–{{var:end}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:start}}",
+   "{{var:end}}"
+  ],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_edit",
+  "lang": "en",
+  "text": "Edit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_delete",
+  "lang": "en",
+  "text": "Delete",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_delete_confirm",
+  "lang": "en",
+  "text": "Delete this notice?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_deleted",
+  "lang": "en",
+  "text": "Notice deleted.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_saved",
+  "lang": "en",
+  "text": "Notice saved.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_dialog_new",
+  "lang": "en",
+  "text": "Add notice",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_dialog_edit",
+  "lang": "en",
+  "text": "Edit notice",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_start",
+  "lang": "en",
+  "text": "Start date",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_end",
+  "lang": "en",
+  "text": "End date",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_body",
+  "lang": "en",
+  "text": "Message",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_save",
+  "lang": "en",
+  "text": "Save notice",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.bulletin_invalid",
+  "lang": "en",
+  "text": "Check the dates and the message.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.notes_title",
+  "lang": "en",
+  "text": "Notes for the day",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.notes_none",
+  "lang": "en",
+  "text": "No notes for this day.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.note_label",
+  "lang": "en",
+  "text": "New note",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.note_placeholder",
+  "lang": "en",
+  "text": "Write an internal note for the next shift",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 82,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.note_add",
+  "lang": "en",
+  "text": "Add note",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.note_added",
+  "lang": "en",
+  "text": "Note added.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.note_delete",
+  "lang": "en",
+  "text": "Delete",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.note_delete_confirm",
+  "lang": "en",
+  "text": "Delete this note?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.note_deleted",
+  "lang": "en",
+  "text": "Note deleted.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.note_author_fallback",
+  "lang": "en",
+  "text": "Staff",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.next_own_shift",
+  "lang": "en",
+  "text": "My next shift",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.next_own_shift_none",
+  "lang": "en",
+  "text": "You have no upcoming shifts.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.next_own_shift_failed",
+  "lang": "en",
+  "text": "Your next shift could not be loaded.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.res_note_label",
+  "lang": "en",
+  "text": "Note",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.res_note_save",
+  "lang": "en",
+  "text": "Save note",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.res_note_saved",
+  "lang": "en",
+  "text": "Note saved.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.day_memos.shifts_none",
+  "lang": "en",
+  "text": "No shifts to show for this day.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Paketti 04 / booking_140: päivän muistiinpanojen, henkilöstötiedotteiden, oman vuoron ja varausmuistiinpanon tekstit (booking/admin/day-memos-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ }
+]
