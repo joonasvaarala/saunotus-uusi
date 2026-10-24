@@ -1,0 +1,22 @@
+[
+  {
+    "key": "ui.admin.invoices.src_orders",
+    "lang": "fi",
+    "text": "Aiempi tilaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "Uusi lasku -asiakashaku: yritys löytyi aiemman tilauksen laskutustiedoista (booking_172). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.invoices.src_orders",
+    "lang": "en",
+    "text": "Earlier order",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "Uusi lasku -asiakashaku: yritys löytyi aiemman tilauksen laskutustiedoista (booking_172). FI+EN, luokka normal. Koodissa varateksti; Bottiavustus tuo admin_texts_importilla."
+  }
+]
