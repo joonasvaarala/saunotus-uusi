@@ -216,6 +216,9 @@ test('Quill-editori ladataan vain aktiiviseen kenttään; tallennus käyttää p
       this.html = '<p><br></p>';
     }
     getSemanticHTML() { return this.html; }
+    hasFocus() { return !!this.focused; }
+    get selection() { return { savedRange: { index: 0, length: 3 } }; }
+    getModule(name) { return name === 'toolbar' ? { update: (range) => { this.updated = range; } } : null; }
     on(name, cb) { this.handlers[name] = cb; }
     getFormat() { return {}; }
     getSelection() { return { index: 0, length: 1 }; }
@@ -267,6 +270,17 @@ test('Quill-editori ladataan vain aktiiviseen kenttään; tallennus käyttää p
     for (const b of btns) { assert.equal(b.title, b.attributes['aria-label']); assert.equal(b.type, 'button'); assert.ok(!b.textContent, 'kuvake, ei tekstiä'); }
     assert.ok(btns.find((b) => b.className === 'ql-undo').innerHTML.includes('<svg'));
     assert.deepEqual(Object.keys(opts.modules.toolbar.handlers).sort(), ['link', 'redo', 'undo']);
+    // Toggle-regressio (#154): painike ei vie fokusta (mousedown preventDefault), ja jos fokus silti lähti,
+    // ql-active päivitetään tallennetusta valinnasta ennen Quillin click-käsittelyä (capture).
+    for (const b of btns) {
+      let prevented = false;
+      b.listeners.mousedown({ preventDefault() { prevented = true; } });
+      assert.ok(prevented, `${b.className} mousedown ei saa viedä fokusta`);
+    }
+    mounted[0].focused = true; tb.listeners.click();
+    assert.equal(mounted[0].updated, undefined, 'fokuksessa Quill hoitaa tilan itse');
+    mounted[0].focused = false; tb.listeners.click();
+    assert.deepEqual(mounted[0].updated, { index: 0, length: 3 });
     assert.ok(opts.modules.history);
     const hidden = created.find((el) => el.tagName === 'INPUT' && el.dataset.richValue === '1');
     assert.equal(hidden.name, 'description');
@@ -331,6 +345,11 @@ test('Quill alustetaan tuotekuvauksille (FI+EN) ja viestiteksteille; ei omaa tek
   assert.doesNotMatch(editor, /toolbar: false/);
   assert.match(editor, /theme: 'snow'/);
   assert.doesNotMatch(editor, /rich-button-group|data-rich-action/);
+  // Ei omia format(x, true) -käsittelijöitä: bold/italic/header/list/clean jäävät Quillin toggle-logiikalle.
+  assert.doesNotMatch(editor, /handlers: \{[^}]*\b(bold|italic|header|list|clean)\s*:/);
+  assert.doesNotMatch(editor, /\.format\('(bold|italic|header|list)', true/);
+  assert.match(editor, /addEventListener\('mousedown', \(event\) => event\.preventDefault\(\)\)/);
+  assert.match(editor, /savedRange/);
 });
 
 test('Quill-kuvakerivi: kompakti myös mobiilissa, talon värit, ei Quillin sinistä', () => {

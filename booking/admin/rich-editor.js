@@ -115,6 +115,9 @@ function buildToolbar() {
       button.setAttribute('aria-pressed', 'false');
       if (format === 'undo') button.innerHTML = UNDO_ICON;
       if (format === 'redo') button.innerHTML = REDO_ICON;
+      // Painike ei saa viedä fokusta editorilta: muuten valinta katoaa, Quill poistaa ql-active-tilan
+      // ennen click-käsittelyä ja toinen painallus lisää muotoilun uudelleen poistamisen sijaan.
+      button.addEventListener('mousedown', (event) => event.preventDefault());
       span.append(button);
     }
     toolbar.append(span);
@@ -197,6 +200,14 @@ function mountOne(textarea, Quill) {
     formats: ['bold', 'italic', 'header', 'list', 'link'],
   });
   wrap.classList?.add?.('rich-ready');
+  // Varmistus (esim. kosketuslaitteet, joissa fokus ehti lähteä): ennen Quillin click-käsittelyä
+  // päivitetään ql-active todellisesta muotoilusta tallennetulla valinnalla, jotta painallus vaihtaa tilaa.
+  toolbar.addEventListener('click', () => {
+    if (quill.hasFocus?.()) return;
+    const range = quill.selection?.savedRange;
+    const module = quill.getModule?.('toolbar');
+    if (range && module?.update) module.update(range);
+  }, true);
   const Delta = Quill.import('delta');
   for (const tag of ['IMG', 'VIDEO', 'AUDIO', 'IFRAME', 'OBJECT', 'EMBED', 'SCRIPT', 'STYLE', 'TEMPLATE', 'NOSCRIPT', 'SVG', 'MATH']) {
     quill.clipboard.addMatcher(tag, () => new Delta());
