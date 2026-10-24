@@ -3,7 +3,7 @@
 // data = booking.email_outbox_claim()-rivi (ks. docs/talous-integraatiot.md): { kind, locale, to_name, order{order_no, order_url, total, items[], reservations[]}, receipt{receipt_no, kind, text_body, total, issued_at}, payment{amount, link_url, link_expires_at} }.
 // FI + EN, HTML (taulukkopohjainen, inline-tyylit, sähköpostiyhteensopiva) + tekstiversio. Ei ulkoisia riippuvuuksia (puhdas funktio, testattu node --test).
 // Tyyli: tumma vihreä + hiekka, ei sinistä. Logo: sivuston /img/logo-kuitti.png (osoite johdetaan tilauslinkistä; muuten LOGO_FALLBACK).
-export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify" | "invoice_pdf" | "product_message" | "waitlist_spot_freed";
+export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify" | "invoice_pdf" | "product_message" | "waitlist_spot_freed" | "annual_card_code";
 export interface Rendered { subject: string; text: string; html: string }
 // Asiakasnäkyvät tekstit: texts.ts (repon oletukset = varateksti) tai tietokannasta (email.*-avaimet, _shared/site_texts.ts). render() ottaa valinnaisen tekstihaun (4. parametri).
 import { makeT, type TFn } from "../_shared/site_texts.ts";
@@ -47,6 +47,16 @@ function customerHtml(raw: string, templateRich?: unknown): { text: string; html
 }
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 /** Tarjouspyynnön ilmoituksessa reply-to on asiakkaan osoite, jotta siihen voi vastata suoraan. Muissa lajeissa käytetään Resendin yhteistä reply_to-asetusta. */
+/** Vuosikortin koodiviestiä ei lähetetä, jos korttia ei löydy, se on peruttu tai pois käytöstä tai koodi puuttuu (booking_146). null = saa renderöidä. */
+export function annualCardBlock(row: { kind?: string; annual_card?: { code?: unknown; active?: unknown; revoked?: unknown } | null } | null | undefined): string | null {
+  if (row?.kind !== "annual_card_code") return null;
+  const c = row.annual_card;
+  if (!c) return "vuosikorttia ei löydy";
+  if (c.revoked === true) return "vuosikortti on peruttu";
+  if (c.active === false) return "vuosikortti ei ole käytössä";
+  if (!String(c.code ?? "").trim()) return "vuosikortin koodi puuttuu";
+  return null;
+}
 /** Tuoteviestiä ei lähetetä, jos pohja on pois päältä, tilaus on peruttu tai hyvitetty, tai teksti on tyhjä. null = saa renderöidä. Allowlistia tämä ei koske. */
 export function productMessageBlock(row: { kind?: string; order?: { status?: unknown }; product_message?: { active?: unknown; category?: unknown; marketing_consent?: unknown; order_status?: unknown; payment_status?: unknown; subject?: unknown; text?: unknown } } | null | undefined): string | null {
   if (row?.kind !== "product_message") return null;
@@ -450,6 +460,29 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const ref = inv?.reference_no ? `${X("email.receipt.meta_no")}: ${inv.reference_no}` : "";
       const text = textBlock(hello, intro, attach, ref, terms, contact, sign) + "\n";
       const html = mk(title, intro, h1(title) + helloRow + p(esc(intro)) + p(esc(attach)) + (ref ? p(esc(ref)) : "") + p(esc(terms)) + tail);
+      return { subject, text, html };
+    }
+    case "annual_card_code": {
+      // booking_146: vuosikortin koodi ostajalle (verkko tai kassa). Payload tulee claimin 'annual_card'-kentästä; tilaus antaa vain tervehdyksen nimen.
+      const c = d?.annual_card || {};
+      const code = String(c.code ?? "").trim();
+      const book = safeUrl(c.booking_url);
+      const subject = X("email.annual_card.subject");
+      const title = X("email.annual_card.title");
+      const intro = X("email.annual_card.intro");
+      const codeLabel = X("email.annual_card.code_label");
+      const valid = X("email.annual_card.valid", { from: day(c.valid_from, en), to: day(c.valid_to, en) });
+      const howTitle = X("email.annual_card.how_title");
+      const how = [X("email.annual_card.how_1"), X("email.annual_card.how_2"), X("email.annual_card.how_3"), X("email.annual_card.how_4")];
+      const bookLabel = X("email.annual_card.book_button");
+      const keep = X("email.annual_card.keep");
+      const cardSign = `${X("email.common.closing")}\n${X("email.annual_card.sign_name")}\n${SELLER}`;
+      const cardTail = `${p(esc(contact), `color:${MUTED};font-size:13px`)}${p(esc(cardSign).replace(/\n/g, "<br>"))}`;
+      const text = textBlock(hello, intro, `${codeLabel}: ${code}`, valid, `${howTitle}:\n${how.map((x, i) => `${i + 1}. ${x}`).join("\n")}`, book && `${bookLabel}:\n${book}`, keep, contact, cardSign) + "\n";
+      const html = mk(title, intro, h1(title) + helloRow + p(esc(intro))
+        + box(`<span style="font-family:${SANS};font-size:12px;color:${MUTED};text-transform:uppercase;letter-spacing:.04em">${esc(codeLabel)}</span><br><span style="font-family:Consolas,Menlo,monospace;font-size:28px;line-height:1.3;letter-spacing:.08em;color:${GREEN};font-weight:bold">${esc(code)}</span><br><span style="font-family:${SANS};font-size:14px;color:${INK}">${esc(valid)}</span>`)
+        + p(`<strong>${esc(howTitle)}</strong>`, "padding-bottom:6px") + p(how.map((x, i) => `${i + 1}. ${esc(x)}`).join("<br>"))
+        + (book ? button(book, bookLabel) : "") + p(esc(keep), `color:${MUTED};font-size:13px`) + cardTail);
       return { subject, text, html };
     }
     case "waitlist_spot_freed": {

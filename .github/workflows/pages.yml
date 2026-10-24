@@ -201,6 +201,9 @@ jobs:
       # Paketti 11 / booking_144: Schema.org-lisäykset, vanhojen osoitteiden noindex-ohjaukset, evästeetön kävijämittaus (OLETUKSENA POIS, ei testisivulla), hallinnan Kävijät-välilehti.
       # SQL: booking/supabase/tests/analytics/t144_cookieless_analytics.sql ajetaan paikallisessa PG17:ssä (koko ketju + rollback + uudelleenajo).
       - run: node --test booking/tests/seo-ja-kavijatilastot.test.mjs
+      # booking_146: vuosikortin koodi sähköpostiin (annual_card_code, kerran per kortti, ei WhatsAppia) ja näkyviin kassalla (iso koodi, kopiointi, voimassaolo, sähköpostin tila).
+      # t146 (booking/supabase/tests/discounts/t146_annual_card_email.sql) ajetaan paikallisessa PG17:ssä t143:n tapaan (työnkulussa ei ole Postgresia). TypeScript-pohja → Node 22.
+      - run: node --test booking/tests/vuosikortti-sahkoposti.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

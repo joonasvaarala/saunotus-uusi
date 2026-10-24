@@ -1,0 +1,730 @@
+[
+ {
+  "key": "email.annual_card.subject",
+  "lang": "fi",
+  "text": "Vuosikorttisi koodi – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.subject",
+  "lang": "en",
+  "text": "Your annual card code – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.title",
+  "lang": "fi",
+  "text": "Vuosikorttisi on valmis",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.title",
+  "lang": "en",
+  "text": "Your annual card is ready",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.intro",
+  "lang": "fi",
+  "text": "Kiitos vuosikortin ostosta. Tällä koodilla varaat saunavuorosi verkossa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.intro",
+  "lang": "en",
+  "text": "Thank you for buying an annual card. Use this code to book your sauna sessions online.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.code_label",
+  "lang": "fi",
+  "text": "Vuosikorttikoodi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.code_label",
+  "lang": "en",
+  "text": "Annual card code",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.valid",
+  "lang": "fi",
+  "text": "Voimassa {{var:from}}–{{var:to}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:from}}",
+   "{{var:to}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.valid",
+  "lang": "en",
+  "text": "Valid {{var:from}}–{{var:to}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:from}}",
+   "{{var:to}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.how_title",
+  "lang": "fi",
+  "text": "Näin varaat vuoron",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.how_title",
+  "lang": "en",
+  "text": "How to book",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.how_1",
+  "lang": "fi",
+  "text": "Avaa varauskalenteri ja valitse yleinen saunavuoro.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.how_1",
+  "lang": "en",
+  "text": "Open the booking calendar and choose a public sauna session.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.how_2",
+  "lang": "fi",
+  "text": "Varaa yhdelle hengelle. Vuosikorttivaraukseen ei lisätä lisäpalveluja.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.how_2",
+  "lang": "en",
+  "text": "Book for one person. Extras are not added to an annual card booking.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.how_3",
+  "lang": "fi",
+  "text": "Kirjoita koodi kassalla kohtaan Alennus- tai vuosikorttikoodi. Käytä samaa sähköpostiosoitetta tai puhelinnumeroa kuin vuosikortin ostossa.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.how_3",
+  "lang": "en",
+  "text": "At checkout, enter the code in the Discount or annual card code field. Use the same email address or phone number as when you bought the annual card.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.how_4",
+  "lang": "fi",
+  "text": "Kortilla voi olla yksi tuleva varaus kerrallaan.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.how_4",
+  "lang": "en",
+  "text": "The card can have one upcoming booking at a time.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.book_button",
+  "lang": "fi",
+  "text": "Avaa varauskalenteri",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.book_button",
+  "lang": "en",
+  "text": "Open the booking calendar",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.keep",
+  "lang": "fi",
+  "text": "Säilytä tämä viesti. Koodi on henkilökohtainen, älä jaa sitä muille.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.keep",
+  "lang": "en",
+  "text": "Keep this message. The code is personal, so please do not share it.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.sign_name",
+  "lang": "fi",
+  "text": "Tapio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.annual_card.sign_name",
+  "lang": "en",
+  "text": "Tapio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.admin.annual_card.title",
+  "lang": "fi",
+  "text": "Vuosikortti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.title",
+  "lang": "en",
+  "text": "Annual card",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.created",
+  "lang": "fi",
+  "text": "Vuosikortti on luotu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.created",
+  "lang": "en",
+  "text": "Annual card created",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.code_label",
+  "lang": "fi",
+  "text": "Vuosikorttikoodi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.code_label",
+  "lang": "en",
+  "text": "Annual card code",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.copy",
+  "lang": "fi",
+  "text": "Kopioi koodi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.copy",
+  "lang": "en",
+  "text": "Copy code",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.copied",
+  "lang": "fi",
+  "text": "Koodi kopioitu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.copied",
+  "lang": "en",
+  "text": "Code copied.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.copy_failed",
+  "lang": "fi",
+  "text": "Kopiointi ei onnistunut. Valitse koodi ja kopioi se käsin.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.copy_failed",
+  "lang": "en",
+  "text": "Copying failed. Select the code and copy it manually.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.valid",
+  "lang": "fi",
+  "text": "Voimassa {{var:from}}–{{var:to}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:from}}",
+   "{{var:to}}"
+  ],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.valid",
+  "lang": "en",
+  "text": "Valid {{var:from}}–{{var:to}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:from}}",
+   "{{var:to}}"
+  ],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.revoked",
+  "lang": "fi",
+  "text": "Kortti on peruttu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.revoked",
+  "lang": "en",
+  "text": "The card has been revoked.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.inactive",
+  "lang": "fi",
+  "text": "Kortti ei ole käytössä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.inactive",
+  "lang": "en",
+  "text": "The card is not active.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.email_sent",
+  "lang": "fi",
+  "text": "Koodi lähetetty sähköpostiin {{var:to}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:to}}"
+  ],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.email_sent",
+  "lang": "en",
+  "text": "The code was sent to {{var:to}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:to}}"
+  ],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.email_pending",
+  "lang": "fi",
+  "text": "Koodi lähtee sähköpostiin {{var:to}} hetken kuluttua.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:to}}"
+  ],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.email_pending",
+  "lang": "en",
+  "text": "The code will be sent to {{var:to}} shortly.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:to}}"
+  ],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.email_dry_run",
+  "lang": "fi",
+  "text": "Sähköposti on testitilassa, joten koodia ei lähetetty asiakkaalle. Anna koodi asiakkaalle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.email_dry_run",
+  "lang": "en",
+  "text": "Email is in test mode, so the code was not sent to the customer. Give the code to the customer.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.email_skipped",
+  "lang": "fi",
+  "text": "Sähköpostien lähetys on pois päältä, joten koodia ei lähetetty. Anna koodi asiakkaalle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.email_skipped",
+  "lang": "en",
+  "text": "Email sending is turned off, so the code was not sent. Give the code to the customer.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.email_failed",
+  "lang": "fi",
+  "text": "Koodin lähetys sähköpostiin {{var:to}} epäonnistui. Anna koodi asiakkaalle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:to}}"
+  ],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.email_failed",
+  "lang": "en",
+  "text": "Sending the code to {{var:to}} failed. Give the code to the customer.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:to}}"
+  ],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.email_no_email",
+  "lang": "fi",
+  "text": "Asiakkaalla ei ole sähköpostiosoitetta, joten koodia ei lähetetty. Anna koodi asiakkaalle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.email_no_email",
+  "lang": "en",
+  "text": "The customer has no email address, so the code was not sent. Give the code to the customer.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.email_not_queued",
+  "lang": "fi",
+  "text": "Koodia ei ole lähetetty sähköpostilla. Anna koodi asiakkaalle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.email_not_queued",
+  "lang": "en",
+  "text": "The code has not been sent by email. Give the code to the customer.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.tell",
+  "lang": "fi",
+  "text": "Kerro asiakkaalle: varaus tehdään verkossa yhdelle hengelle, ja koodi kirjoitetaan kassalla kohtaan Alennus- tai vuosikorttikoodi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.tell",
+  "lang": "en",
+  "text": "Tell the customer: book online for one person and enter the code at checkout in the Discount or annual card code field.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.waiting_payment",
+  "lang": "fi",
+  "text": "Vuosikortti ja koodi luodaan, kun tilaus on maksettu kokonaan.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.waiting_payment",
+  "lang": "en",
+  "text": "The annual card and its code are created when the order is fully paid.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.no_customer",
+  "lang": "fi",
+  "text": "Tilauksella ei ole asiakasta, joten vuosikorttia ei luotu. Luo kortti Alennuskoodit ja vuosikortit -näkymässä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.no_customer",
+  "lang": "en",
+  "text": "The order has no customer, so no annual card was created. Create the card in the Discount codes and annual cards view.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.missing",
+  "lang": "fi",
+  "text": "Vuosikorttia ei löytynyt. Tarkista Alennuskoodit ja vuosikortit -näkymä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.missing",
+  "lang": "en",
+  "text": "No annual card was found. Check the Discount codes and annual cards view.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.load_error",
+  "lang": "fi",
+  "text": "Vuosikortin tietoja ei saatu haettua. Tarkista kortti Alennuskoodit ja vuosikortit -näkymästä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.load_error",
+  "lang": "en",
+  "text": "The annual card details could not be loaded. Check the card in the Discount codes and annual cards view.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.close",
+  "lang": "fi",
+  "text": "Valmis",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ },
+ {
+  "key": "ui.admin.annual_card.close",
+  "lang": "en",
+  "text": "Done",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta: vuosikorttikoodin näyttö kassalla maksun jälkeen (koodi, kopiointi, voimassaolo, sähköpostin tila). FI+EN. Varateksti booking/admin/annual-card-texts.js. booking_146."
+ }
+]

@@ -15,6 +15,7 @@ export const RPC = {
   addToOrder: 'admin_add_to_order', createPaymentLink: 'admin_create_payment_link', refund: 'admin_refund', refundOrder: 'admin_refund_order', reservationRefundPreview: 'admin_reservation_refund_preview', cancelReservation: 'admin_cancel_reservation', recordPayment: 'admin_record_payment', listVatRates: 'admin_list_vat_rates',
   reportDaily: 'admin_report_daily', reportMonthly: 'admin_report_month', reportRange: 'admin_report_range', reportTransactions: 'admin_report_transactions', reportGiftCards: 'admin_report_gift_cards', reportCsv: 'admin_report_csv', salesChart: 'admin_sales_chart',
   getReceipt: 'admin_get_receipt', resendReceipt: 'admin_resend_receipt',
+  annualCardForOrder: 'admin_annual_card_for_order',   // booking_146: tilauksen vuosikortti + koodin sähköpostin tila
 };
 export class FeatureNotReady extends Error {
   constructor(rpc) { super(`Ominaisuus ei vielä käytössä (${rpc})`); this.name = 'FeatureNotReady'; this.code = 'feature_not_ready'; this.rpc = rpc; }
@@ -204,6 +205,7 @@ export function rpcBackend(rpc) {
     salesChart: (year) => call('salesChart', { p_year: year }),
     getReceipt: (id) => call('getReceipt', { p_receipt_id: id }),
     resendReceipt: (id) => call('resendReceipt', { p_receipt_id: id }),
+    annualCardForOrder: (id) => call('annualCardForOrder', { p_order_id: id }),
   };
 }
 
@@ -303,6 +305,12 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
     },
     addToOrder: (a) => act('addToOrder', a), createPaymentLink: (a) => act('createPaymentLink', a), refund: (a) => act('refund', a), refundOrder: (a) => act('refundOrder', a), recordPayment: (a) => act('recordPayment', a),
     reservationRefundPreview: (id) => act('reservationRefundPreview', id), cancelReservation: (a) => act('cancelReservation', a),
+    // booking_146: tilauksen vuosikortti (koodi, voimassaolo, sähköpostin tila). Oikeassa tilassa EI mock-varaa: puuttuva RPC → null (näkymä ei näytä mitään keksittyä koodia).
+    annualCardForOrder: async (id) => {
+      if (!real) return getMock().annualCardForOrder(id);
+      if (missing.has('annualCardForOrder')) return null;
+      try { return await real.annualCardForOrder(id); } catch (e) { if (isMissingRpc(e)) { missing.add('annualCardForOrder'); return null; } throw e; }
+    },
     // ---- kuitit ----
     getReceipt: (id) => run('getReceipt', id, normReceipt),
     // admin_resend_receipt → { ok, email_queued }: jonoon vain jos asiakkaalla on kelvollinen sähköposti; oikeus payments.manage
