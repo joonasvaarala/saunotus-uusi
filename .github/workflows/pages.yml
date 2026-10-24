@@ -223,6 +223,11 @@ jobs:
       # public_catalog() ja admin_list_products() palauttavat duration_text_en; kauppa näyttää EN-sivulla sen, puuttuessa duration_text. Migraatio + rollback olemassa.
       # t147 + r147 (booking/supabase/tests/kesto/) ajetaan paikallisessa PG17:ssä (pre147 → migraatio → t147 → paluu → r147); työnkulussa ei ole Postgresia.
       - run: node --test booking/tests/kesto-en.test.mjs
+      # booking_151 + Kääntäjän en_sources: EN-sivut käyttävät suomenkielisten kb-rivien _en-kenttiä (UKK, ehdot, tapahtuman aika; kb-snapshot myös
+      # aukiolo/sijainnit/kuvaus), vanhat erilliset EN-rivit (UKK 19–23, ehdot 16–24/26) varalla, suomi viimeisenä; privacy ennallaan.
+      # _sessions/public_availability/_all palauttavat label_en, kauppa näyttää EN-sivulla label_en || label. Migraatio + rollback olemassa.
+      # t151 (booking/supabase/tests/texts/t151_session_label_en.sql) ajetaan paikallisessa PG17:ssä (ketju + 151 + rollback + uudelleenajo).
+      - run: node --test booking/tests/en-lahteet.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
