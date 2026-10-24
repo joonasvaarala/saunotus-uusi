@@ -202,7 +202,7 @@ SITE_URL=https://<julkinen-osoite> \
 node booking/shop/build.mjs        # → booking/shop/dist/  (koko sivusto + varauskauppa)
 ```
 
-Kauppa on sivuston kopio: `scripts/build.mjs` ajetaan erilliseen hakemistoon ja Johku-linkit (`*.johku.com/<kieli>/<kategoria>/<tuote>`) korvataan sisäisillä (`/varaa/#/tuote/<slug>`). Lahjakortti-, yritys- ja info-linkit jäävät toistaiseksi Johkuun (ei vielä toteutettu). Perussivuston tiedostoihin ei kosketa; `booking/shop/dist` on `.gitignore`ssa (`dist/`).
+Kauppa on sivuston kopio: `scripts/build.mjs` ajetaan erilliseen hakemistoon ja Johku-linkit (`*.johku.com/<kieli>/<kategoria>/<tuote>`) korvataan sisäisillä (`/varaa/#/tuote/<slug>`, EN `/en/book/#/tuote/<slug>`; yrityslinkit → `/yritykset/`, vuosikortti → `#/vuosikortti`). Sama logiikka (`shop/src/johku-links.js`) koskee `static-products.json`-kuvauksia ja ajonaikana tietokannan rikkaita kuvauksia (`rich-view.js`). Projektin oletus (Joonas 24.10.2026): kaikki linkit kaupan sisälle, kun tuote on varattavissa uudessa järjestelmässä. Johkuun jäävät vain lahjakorttivaraus (`yleinen-lahjakorttivaraus`), lahja-/sarjakortit (myynti `/lahjakortti/`-sivulla kytkimen takana) ja Johkun info-sivut. Perussivuston tiedostoihin ei kosketa; `booking/shop/dist` on `.gitignore`ssa (`dist/`).
 Ajonaikainen konfiguraatio on tiedostossa `dist/booking/config.js` (voi vaihtaa ilman uudelleenrakennusta).
 
 #### Kaksi tapaa selata: kategorioittain ja päivän mukaan
