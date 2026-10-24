@@ -1,0 +1,88 @@
+[
+ {
+  "key": "ui.shop.waitlist_persons_hint_event",
+  "lang": "fi",
+  "text": "Valitse henkilömäärä tapahtuman osallistujamäärän rajoissa. Ilmoitamme, kun tapahtumaan vapautuu vähintään näin monta paikkaa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_148: jonotuslistan henkilömäärä palvelutyypin mukaan, tapahtuman jonotuslomakkeen henkilömäärän ohje (1..tapahtuman kapasiteetti) (booking/shop/src/waitlist-texts.js); uusi asiakasnäkyvä teksti, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.waitlist_persons_hint_event",
+  "lang": "en",
+  "text": "Choose the number of people within the event’s participant limit. We will let you know when at least this many places open up.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_148: jonotuslistan henkilömäärä palvelutyypin mukaan, tapahtuman jonotuslomakkeen henkilömäärän ohje (1..tapahtuman kapasiteetti) (booking/shop/src/waitlist-texts.js); uusi asiakasnäkyvä teksti, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.waitlist_invalid_persons_event",
+  "lang": "fi",
+  "text": "Henkilömäärä ylittää tapahtuman osallistujamäärän.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_148: jonotuslistan henkilömäärä palvelutyypin mukaan, tapahtuman jonotus: henkilömäärä yli kapasiteetin (invalid_persons) (booking/shop/src/waitlist-texts.js); uusi asiakasnäkyvä teksti, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.waitlist_invalid_persons_event",
+  "lang": "en",
+  "text": "The number of people exceeds the event’s participant limit.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_148: jonotuslistan henkilömäärä palvelutyypin mukaan, tapahtuman jonotus: henkilömäärä yli kapasiteetin (invalid_persons) (booking/shop/src/waitlist-texts.js); uusi asiakasnäkyvä teksti, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.waitlist_private_note",
+  "lang": "fi",
+  "text": "Yksityisvuorossa koko sauna on teidän, joten henkilömäärää ei kysytä jonotuksessa. Ilmoitamme, kun vuoro vapautuu, ja valitset henkilömäärän varatessasi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_148: jonotuslistan henkilömäärä palvelutyypin mukaan, yksityisvuoron jonotuslomake: henkilömäärää ei kysytä (booking/shop/src/waitlist-texts.js); uusi asiakasnäkyvä teksti, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.shop.waitlist_private_note",
+  "lang": "en",
+  "text": "A private session gives your group the whole sauna, so no party size is needed for the waiting list. We will let you know when the session becomes free, and you choose the number of people when booking.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_148: jonotuslistan henkilömäärä palvelutyypin mukaan, yksityisvuoron jonotuslomake: henkilömäärää ei kysytä (booking/shop/src/waitlist-texts.js); uusi asiakasnäkyvä teksti, ei vielä tuotannossa"
+ },
+ {
+  "key": "email.waitlist.session_private",
+  "lang": "fi",
+  "text": "{{var:what}}, {{var:when}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:what}}",
+   "{{var:when}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist.session_private",
+  "lang": "en",
+  "text": "{{var:what}}, {{var:when}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:what}}",
+   "{{var:when}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ }
+]

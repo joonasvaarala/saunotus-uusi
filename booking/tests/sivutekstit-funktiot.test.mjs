@@ -112,7 +112,7 @@ test('tiedosto on generoitu koodista (texts.ts) eikä voi poiketa oletuksista', 
     } else assert.deepEqual(f, got, `${f.key}: tiedosto ≠ generaattori`);
   }
   const fb = new Set(FALLBACK.texts.map((x) => `${x.key}|${x.lang}`));
-  const extraKnown = new Map([...J('content/site-texts.pending-import-4.json'), ...J('content/site-texts.imported-pr75.json'), ...J('content/site-texts.pending-import-12.json'), ...J('content/site-texts.pending-import-14.json'), ...J('content/site-texts.pending-import-18.json'), ...J('content/site-texts.pending-import-29.json').filter((r) => r.key.startsWith('email.')), ...J('content/site-texts.pending-import-34.json').filter((r) => r.key.startsWith('email.'))].map((r) => [`${r.key}|${r.lang}`, r]));
+  const extraKnown = new Map([...J('content/site-texts.pending-import-4.json'), ...J('content/site-texts.imported-pr75.json'), ...J('content/site-texts.pending-import-12.json'), ...J('content/site-texts.pending-import-14.json'), ...J('content/site-texts.pending-import-18.json'), ...J('content/site-texts.pending-import-29.json').filter((r) => r.key.startsWith('email.')), ...J('content/site-texts.pending-import-34.json').filter((r) => r.key.startsWith('email.')), ...J('content/site-texts.pending-import-48.json').filter((r) => r.key.startsWith('email.'))].map((r) => [`${r.key}|${r.lang}`, r]));
   for (const [k, x] of g) if (!PENDING.some((f) => `${f.key}|${f.lang}` === k)) {
     const row = extraKnown.get(k);
     if (row) assert.deepEqual(row, x, `${k}: tuontitiedosto ≠ generaattori`);
@@ -152,12 +152,24 @@ test('sähköpostit: jokainen email.*-avain on käytössä ja jokaisella käytet
     TPL.render('business_quote_ack', { to_name: 'Maija Meikäläinen', locale }, locale, spy);
     TPL.render('business_quote_notify', { ...quoteNotify, locale }, locale, spy);
     TPL.render('waitlist_spot_freed', { locale, to_name: 'Aada Testi', waitlist: { product_name: 'Yleinen vuoro', starts_at: '2026-11-02T14:00:00Z', ends_at: '2026-11-02T17:00:00Z', persons: 2, book_url: 'https://example.test/varaa/#/varaa/1/2026-11-02/2?n=2', leave_url: 'https://example.test/varaa/?poistu_jonosta=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c' } }, locale, spy);
+    // booking_148: yksityisvuoron jonopaikka → persons null, vuororivi ilman henkilömäärää
+    TPL.render('waitlist_spot_freed', { locale, to_name: 'Aada Testi', waitlist: { product_name: 'Yksityissauna', starts_at: '2026-11-02T14:00:00Z', ends_at: '2026-11-02T17:00:00Z', persons: null, book_url: 'https://example.test/varaa/#/varaa/1/2026-11-02/2?wl=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c', leave_url: 'https://example.test/varaa/?poistu_jonosta=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c' } }, locale, spy);
     TPL.render('product_message', { locale, to_name: 'Aada', order: { order_no: 1, order_url: 'https://example.test/tilaus/?t=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c' }, product_message: { category: 'after_marketing', text: 'Hei', link_url: 'https://example.test/a', unsubscribe_url: 'https://example.test/tilaus/?u=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c', marketing_consent: true } }, locale, spy);
   }
   const all = Object.keys(TPL.EMAIL_TEXTS);
   assert.deepEqual(all.filter((k) => !used.has(k)), [], 'käyttämättömiä avaimia');
   assert.deepEqual([...used].filter((k) => !TPL.EMAIL_TEXTS[k]), []);
   assert.ok(all.every((k) => /^email\.[a-z0-9_]+\.[a-z0-9_]+$/.test(k)));
+});
+test('sähköpostit: yksityisvuoron jonoilmoitus (booking_148, persons null) ei näytä henkilömäärää; yleinen näyttää', { skip }, () => {
+  const t = ST.makeT(TPL.EMAIL_TEXTS);
+  const w = (persons) => ({ product_name: 'Yksityissauna', starts_at: '2026-11-02T14:00:00Z', ends_at: '2026-11-02T17:00:00Z', persons, book_url: 'https://example.test/varaa/#/varaa/1/2026-11-02/2', leave_url: 'https://example.test/varaa/?poistu_jonosta=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c' });
+  for (const locale of ['fi', 'en']) {
+    const p = TPL.render('waitlist_spot_freed', { locale, to_name: 'Aada', waitlist: w(null) }, locale, t);
+    assert.ok(p.text.includes('Yksityissauna') && !/hlö|guests/.test(p.text), `${locale}: yksityisvuorolla ei henkilömäärää`);
+    const g = TPL.render('waitlist_spot_freed', { locale, to_name: 'Aada', waitlist: w(3) }, locale, t);
+    assert.ok(locale === 'fi' ? g.text.includes('3 hlö') : g.text.includes('3 guests'), `${locale}: yleisellä vuorolla henkilömäärä`);
+  }
 });
 const rowsFor = (o) => Object.entries(o).flatMap(([k, v]) => ['fi', 'en'].map((l) => ({ key: k, lang: l, text: v[l] })));
 test('sähköpostit: DB-teksti näkyy viestissä (teksti, HTML escapattuna, aihe, yritysnimi asetuksesta)', { skip }, () => {
