@@ -9,8 +9,8 @@ import { dirname, join } from 'node:path';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const repo = join(root, '..');
 const read = (rel) => readFileSync(join(repo, rel), 'utf8');
-const MIG = 'booking/supabase/migrations/20261024090000_booking_136_refund_cancel_link.sql';
-const RB = 'booking/supabase/rollbacks/20261024090000_booking_136_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024073642_booking_136_refund_cancel_link.sql';
+const RB = 'booking/supabase/rollbacks/20261024073642_booking_136_ROLLBACK.sql';
 const T = await import(pathToFileURL(join(root, 'admin/refund-cancel-texts.js')));
 const A = await import(pathToFileURL(join(root, 'admin/talous-api.js')));
 const { createMock } = await import(pathToFileURL(join(root, 'admin/talous-mock.js')));
@@ -52,8 +52,8 @@ test('rollback: poistaa kaikki uudet funktiot, ei koske olemassa oleviin', () =>
   }
   assert.doesNotMatch(rb, /create or replace|public\./);
   const names = readdirSync(join(repo, 'booking/supabase/migrations')).filter((n) => /booking_136/.test(n));
-  assert.deepEqual(names, ['20261024090000_booking_136_refund_cancel_link.sql'], 'yksi booking_136-migraatio');
-  assert.equal(readdirSync(join(repo, 'booking/supabase/migrations')).filter((n) => /booking_135/.test(n)).length, 0, 'booking_135 on varattu muualle');
+  assert.deepEqual(names, ['20261024073642_booking_136_refund_cancel_link.sql'], 'yksi booking_136-migraatio');
+  assert.ok(readdirSync(join(repo, 'booking/supabase/migrations')).filter((n) => /booking_135/.test(n)).length <= 1, 'booking_135 enintään yksi (jonotuslista)');
 });
 
 test('tekstit: FI+EN samat avaimet, pending-import-37 vastaa sanakirjaa, ei emojeja eikä HTML:ää', () => {

@@ -6,7 +6,7 @@
 --   admin_refundilla (rivijako p_lines) samassa transaktiossa.
 -- Hyvitysoikeus ennallaan: payments.refund (admin, manager); peruutus: bookings.manage. Olemassa olevia funktioita ei muuteta,
 -- ei taulumuutoksia, ei public-skeemaa, ei jonotuslistan funktioita. Uudelleenajettava.
--- Rollback: booking/supabase/rollbacks/20261024090000_booking_136_ROLLBACK.sql
+-- Rollback: booking/supabase/rollbacks/20261024073642_booking_136_ROLLBACK.sql
 set local lock_timeout = '5s';
 
 -- Varauksen osuus maksuista. Palauttaa { reservation_id, order_id, status, total, unallocated, payments:[{payment_id, provider, method,
