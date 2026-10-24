@@ -204,6 +204,10 @@ jobs:
       # Paketti 11 / booking_144: Schema.org-lisäykset, vanhojen osoitteiden noindex-ohjaukset, evästeetön kävijämittaus (OLETUKSENA POIS, ei testisivulla), hallinnan Kävijät-välilehti.
       # SQL: booking/supabase/tests/analytics/t144_cookieless_analytics.sql ajetaan paikallisessa PG17:ssä (koko ketju + rollback + uudelleenajo).
       - run: node --test booking/tests/seo-ja-kavijatilastot.test.mjs
+      # booking_149: asiakkaan peruutuspyyntö (ja sen kautta hyvitys) vain, jos vuoron alkuun on vähintään customer_change_hours_before (48) h;
+      # palvelin pakottaa (cancel_too_late), tilaussivu piilottaa lomakkeen ja näyttää puhelinnumeron; hallinnan peruutus/hyvitys aina. Tekstit pending-import-49.
+      # t149 (booking/supabase/tests/peruutus/t149_customer_cancel_48h.sql) ajetaan paikallisessa PG17:ssä t143:n tapaan (työnkulussa ei ole Postgresia).
+      - run: node --test booking/tests/peruutusraja-48h.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
