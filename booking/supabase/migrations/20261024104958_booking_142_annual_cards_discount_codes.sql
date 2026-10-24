@@ -27,7 +27,7 @@
 --  7) Hallinta: admin_list_discount_codes / admin_save_discount_code / admin_delete_discount_code (catalog.edit;
 --     yhteinen vuosikorttikoodi vaatii annual_cards.manage), admin_list_annual_cards_details / admin_create_annual_card
 --     (annual_cards.manage).
--- Rollback: rollbacks/20261024150000_booking_142_ROLLBACK.sql (poistaa kaiken yllä olevan; HUOM: poistaa koodit
+-- Rollback: rollbacks/20261024104958_booking_142_ROLLBACK.sql (poistaa kaiken yllä olevan; HUOM: poistaa koodit
 -- vuosikorteista ja alennuskoodien uudet kentät).
 -- =============================================================================
 set local lock_timeout = '5s';
