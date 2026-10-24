@@ -28,11 +28,12 @@ const ST = await import(resolve(repo, 'src/site-texts.mjs'));
 const R = await import(resolve(repo, 'src/render.mjs'));
 const { pageDefault } = await import(resolve(here, 'src/shop-page-texts.js'));
 const { site, kb, BASE, e } = L;
+const JL = await import(resolve(here, 'src/johku-links.js'));
 
 // 2) varausohjelman tiedostot
 const A = join(OUT, 'booking');
 mkdirSync(A, { recursive: true });
-for (const f of ['shop.js', 'rich-text.js', 'rich-view.js', 'short-desc.js', 'invoice-validate.js', 'i18n.js', 'phone.js', 'shop.css', 'treatments.js', 'treatment-ui.js', 'order.js', 'order-texts.js', 'order-api.js', 'order-mock.js', 'order-gift.js', 'gift.js', 'gift-api.js', 'gift-logic.js', 'gift-mock.js', 'gift-texts.js', 'gift-ui.js', 'mobilepay-api.js', 'pay-choices.js', 'hold-texts.js', 'hold-logic.js', 'hold-ui.js', 'hold-mock.js', 'pay-choices-texts.js', 'mobilepay-logic.js', 'mobilepay-texts.js', 'mobilepay-ui.js', 'vismapay-api.js', 'vismapay-logic.js', 'vismapay-texts.js', 'vismapay-ui.js', 'options-logic.js', 'options-texts.js', 'options-ui.js', 'shop-mock.js', 'treatment-mock.js', 'treatment-addons.js', 'site-texts.js', 'site-texts-logic.js', 'text-registry.js', 'catalog-audience.js', 'waitlist-logic.js', 'waitlist-texts.js', 'waitlist-ui.js', 'availability-months.js']) cpSync(join(here, 'src', f), join(A, f));
+for (const f of ['shop.js', 'rich-text.js', 'rich-view.js', 'short-desc.js', 'invoice-validate.js', 'i18n.js', 'phone.js', 'shop.css', 'treatments.js', 'treatment-ui.js', 'order.js', 'order-texts.js', 'order-api.js', 'order-mock.js', 'order-gift.js', 'gift.js', 'gift-api.js', 'gift-logic.js', 'gift-mock.js', 'gift-texts.js', 'gift-ui.js', 'mobilepay-api.js', 'pay-choices.js', 'hold-texts.js', 'hold-logic.js', 'hold-ui.js', 'hold-mock.js', 'pay-choices-texts.js', 'mobilepay-logic.js', 'mobilepay-texts.js', 'mobilepay-ui.js', 'vismapay-api.js', 'vismapay-logic.js', 'vismapay-texts.js', 'vismapay-ui.js', 'options-logic.js', 'options-texts.js', 'options-ui.js', 'shop-mock.js', 'treatment-mock.js', 'treatment-addons.js', 'site-texts.js', 'site-texts-logic.js', 'text-registry.js', 'catalog-audience.js', 'waitlist-logic.js', 'waitlist-texts.js', 'waitlist-ui.js', 'availability-months.js', 'johku-links.js']) cpSync(join(here, 'src', f), join(A, f));
 // Lisäksi kaikki muut src/*.js automaattisesti, ettei uusi moduuli jää julkaisusta pois (#121: waitlist-*.js puuttui → /varaa/ ei auennut).
 for (const f of readdirSync(join(here, 'src'))) if (f.endsWith('.js')) cpSync(join(here, 'src', f), join(A, f));
 cpSync(join(repo, 'booking/shared/sb.js'), join(A, 'sb.js'));
@@ -52,10 +53,15 @@ const cfg = {
 writeFileSync(join(A, 'config.js'), `// Muokkaa tätä tiedostoa julkaisussa (ei vaadi uudelleenrakennusta). anon-avain saa olla julkinen.\nwindow.BOOKING_CONFIG=${JSON.stringify(cfg, null, 2)};\n`);
 // Staattinen tuotedata: tuntemattoman tuotteen "ota yhteyttä" -sivu + hoitotuotteiden kortit (hinta, kesto, henkilömäärät; ks. treatments.js loadProducts)
 const STATIC_KEYS = ['id', 'name', 'name_en', 'description', 'description_en', 'short_description', 'short_description_en', 'category', 'price', 'price_type', 'included_persons', 'extra_person_price', 'duration_minutes', 'duration_text', 'duration_text_en', 'capacity_min', 'capacity_max'];
-writeFileSync(join(A, 'static-products.json'), JSON.stringify(Object.fromEntries(kb.products.map((p) => [p.slug, Object.fromEntries(STATIC_KEYS.filter((k) => p[k] != null).map((k) => [k, p[k]])) ]))));
+// Johku-linkit kuvauksissa → kauppa (johku-links.js): FI-kentät FI-kauppaan, *_en EN-kauppaan
+const PATHS = { fi: { shop: site.pages.book.fi, confirm: site.pages.book.fi + 'vahvistus/', order: '/tilaus/' }, en: { shop: site.pages.book.en, confirm: site.pages.book.en + 'confirmation/', order: '/en/order/' } };
+const SLUGS = kb.products.map((p) => p.slug);
+const LINKS = (lang) => ({ shop: BASE + PATHS[lang].shop, companies: BASE + site.pages.companies[lang], gift: BASE + site.pages.gift[lang], info: BASE + site.pages.info[lang],
+  terms: BASE + site.pages.terms[lang], privacy: BASE + (site.pages.privacy[lang] || site.pages.privacy.fi), base: BASE, slugs: SLUGS });
+const linkVal = (k, v) => (typeof v === 'string' && /^(short_)?description(_en)?$/.test(k) ? JL.rewriteHtml(v, LINKS(k.endsWith('_en') ? 'en' : 'fi')) : v);
+writeFileSync(join(A, 'static-products.json'), JSON.stringify(Object.fromEntries(kb.products.map((p) => [p.slug, Object.fromEntries(STATIC_KEYS.filter((k) => p[k] != null).map((k) => [k, linkVal(k, p[k])])) ]))));
 
 // 3) varaussivut (FI/EN) + vahvistussivut: sivuston oma layout
-const PATHS = { fi: { shop: site.pages.book.fi, confirm: site.pages.book.fi + 'vahvistus/', order: '/tilaus/' }, en: { shop: site.pages.book.en, confirm: site.pages.book.en + 'confirmation/', order: '/en/order/' } };
 const write = (urlPath, html) => { const f = join(OUT, urlPath, 'index.html'); mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, html); };
 // Sivutekstit (§18, osa 3): avaimet page.*/seo.* tietokannasta (tx), repon oletus shop-page-texts.js kunnes avaimet on tuotu (varatekstien käyttö lasketaan ja raportoidaan).
 let pageFallbacks = 0;
@@ -69,7 +75,7 @@ for (const lang of ['fi', 'en']) {
       lang, page: page === 'shop' ? 'shop' : 'confirm', shopHref: BASE + PATHS[lang].shop, confirmHref: BASE + PATHS[lang].confirm,
       orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order },   // vuosikortin osto → tilaussivu (booking_142)
       termsHref: L.pageHref('terms', lang), infoHref: L.pageHref('info', lang), phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email,
-      staticProductsUrl: `${BASE}/booking/static-products.json`, siteTextsUrl: `${BASE}/booking/site-texts.json`,
+      staticProductsUrl: `${BASE}/booking/static-products.json`, siteTextsUrl: `${BASE}/booking/site-texts.json`, links: LINKS(lang),
     };
     const body = R.pageHero({ title: page === 'shop' ? t.title : t.ctitle, text: page === 'shop' ? t.text : '', img: 'ovi-kaiverrus' }, lang, 'book')
       + `<section class="section"><div class="wrap"><div id="booking-app" aria-busy="true"><noscript><p>${e(t.noscript)}: <a href="tel:${site.contact.phoneTel}">${e(L.phoneDisplay(lang))}</a></p></noscript></div></div></section>`
@@ -87,7 +93,7 @@ const OT = { fi: orderSet('fi'), en: orderSet('en') };
 if (pageFallbacks) console.log(`site-texts: ${pageFallbacks} varaus-/tilaussivun tekstiä käyttää repon varatekstiä (avain ei vielä tietokannassa)`);
 for (const lang of ['fi', 'en']) {
   const t = OT[lang];
-  const S = { lang, page: 'order', base: BASE, siteTextsUrl: `${BASE}/booking/site-texts.json`, orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order }, shopHref: BASE + PATHS[lang].shop, phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email };
+  const S = { lang, page: 'order', base: BASE, links: LINKS(lang), siteTextsUrl: `${BASE}/booking/site-texts.json`, orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order }, shopHref: BASE + PATHS[lang].shop, phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email };
   const body = R.pageHero({ title: t.title, text: t.text, img: 'ovi-kaiverrus' }, lang, 'book')
     + `<section class="section"><div class="wrap"><div id="order-app" aria-busy="true"><noscript><p>${e(t.noscript)}: <a href="tel:${site.contact.phoneTel}">${e(L.phoneDisplay(lang))}</a></p></noscript></div></div></section>`
     + `<script src="${BASE}/booking/config.js"></script><script>window.BOOKING_SHOP=${JSON.stringify(S)}</script><script type="module" src="${BASE}/booking/order.js"></script>`;
@@ -101,7 +107,7 @@ for (const lang of ['fi', 'en']) {
 for (const lang of ['fi', 'en']) {
   const f = join(OUT, site.pages.gift[lang], 'index.html');
   let html = readFileSync(f, 'utf8');
-  const S = { lang, page: 'gift', base: BASE, siteTextsUrl: `${BASE}/booking/site-texts.json`, orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order }, termsHref: L.pageHref('terms', lang), phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email };
+  const S = { lang, page: 'gift', base: BASE, links: LINKS(lang), siteTextsUrl: `${BASE}/booking/site-texts.json`, orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order }, termsHref: L.pageHref('terms', lang), phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email };
   const sale = `<section class="section" hidden><div class="wrap"><div id="gift-app" aria-busy="true"></div></div></section>`;
   const bal = `<section class="section tint" id="saldo" hidden><div class="wrap"><div id="gift-balance" aria-busy="true"></div></div></section>`;
   const a = html.indexOf('<section class="section " id="avoin"'), b = html.indexOf('<section class="section tint" id="jatkaminen"');
@@ -122,33 +128,17 @@ for (const lang of ['fi', 'en']) {
     lang, page: 'shop', audience: 'business', shopHref: BASE + urlPath, confirmHref: BASE + PATHS[lang].confirm,
     orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order },
     termsHref: L.pageHref('terms', lang), infoHref: L.pageHref('info', lang), phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email,
-    staticProductsUrl: `${BASE}/booking/static-products.json`, siteTextsUrl: `${BASE}/booking/site-texts.json`,
+    staticProductsUrl: `${BASE}/booking/static-products.json`, siteTextsUrl: `${BASE}/booking/site-texts.json`, links: LINKS(lang),
   };
   html = html.replace('</head>', `<link rel="stylesheet" href="${BASE}/booking/shop.css"></head>`)
     .replace('</body>', `<script src="${BASE}/booking/config.js"></script><script>window.BOOKING_SHOP=${JSON.stringify(S)}</script><script type="module" src="${BASE}/booking/shop.js"></script></body>`);
   writeFileSync(f, html);
 }
 
-// 4) Johku-linkit → sisäinen varauskalenteri
-const slugs = new Set(kb.products.map((p) => p.slug));
-const JOHKU = /<a\b([^>]*?)href="https:\/\/sipoonjoenperinnesauna\.johku\.com\/[^/"]+\/([^"]*)"([^>]*)>([\s\S]*?)<\/a>/g;
-const NOTE = /<span class="sr"> \((?:avautuu uuteen välilehteen|opens in a new tab)\)<\/span>/g;
-const GIFT_KEEP = /^(yleinen-lahjakorttivaraus|sarja-ja-lahjakortit|yrityksille|info\/)/;   // ei vielä toteutettu uudessa järjestelmässä → jää Johkuun
-function rewrite(html, lang) {
-  const shop = BASE + PATHS[lang].shop;
-  return html.replace(JOHKU, (m, a, path, b, inner) => {
-    if (GIFT_KEEP.test(path)) return m;
-    const parts = path.split('/');
-    const slug = parts[parts.length - 1];
-    let target;
-    if (slugs.has(slug) && parts.length > 1) target = `${shop}#/tuote/${slug}`;
-    else if (parts[0] === 'yleinen-sauna') target = `${shop}#/?k=yleinen`;
-    else if (parts[0] === 'yksityisvuorot') target = `${shop}#/?k=yksityinen`;
-    else target = `${shop}#/`;
-    const attrs = (a + b).replace(/\s*target="_blank"/g, '').replace(/\s*rel="noopener"/g, '');
-    return `<a${attrs ? ' ' + attrs.trim() : ''} href="${target}">${inner.replace(NOTE, '')}</a>`;
-  });
-}
+// 4) Johku-linkit → oma sivusto (johku-links.js: tuote → /varaa/#/tuote/<slug>, EN /en/book/#/tuote/<slug>; yrityksille → yrityssivu;
+//    vuosikortti → #/vuosikortti; lahja-/sarjakortit → /lahjakortti/#avoin|#paketit; lahjakorttivaraus → kauppa; info → omat info-/ehto-/tietosuojasivut).
+//    Ei yhtään Johku-linkkiä: vartija alla kaataa buildin, jos distin HTML:ssä tai static-products.json:ssa on Johku-href.
+const rewrite = (html, lang) => JL.rewriteHtml(html, LINKS(lang));
 let changed = 0;
 (function walk(dir) {
   for (const n of readdirSync(dir)) {
@@ -161,6 +151,19 @@ let changed = 0;
     if (out !== src) { writeFileSync(p, out); changed++; }
   }
 })(OUT);
+// Vartija (Joonas 24.10.2026): sivustolla ei saa olla yhtään Johku-linkkiä (href). Tekstimaininnat eivät ole linkkejä.
+{
+  const bad = [];
+  (function scan(dir) {
+    for (const n of readdirSync(dir)) {
+      const p = join(dir, n);
+      if (statSync(p).isDirectory()) { scan(p); continue; }
+      if (!(n.endsWith('.html') || n === 'static-products.json')) continue;
+      for (const h of JL.johkuHrefs(readFileSync(p, 'utf8'))) bad.push(`${p.slice(OUT.length)}: ${h}`);
+    }
+  })(OUT);
+  if (bad.length) { console.error(`shop build: VIRHE: Johku-linkkejä jäi (${bad.length}):\n  ${[...new Set(bad)].slice(0, 30).join('\n  ')}`); process.exit(1); }
+}
 // Varmistus: jokainen kaupan distin relatiivinen import löytyy dististä (sama tarkistus kuin hallinnalla build-pages.mjs:ssä).
 (function chkImports(d) { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) continue; if (!n.endsWith('.js')) continue; for (const m of readFileSync(p, 'utf8').matchAll(/(?:from|import)\s*\(?\s*(['"])(\.{1,2}\/[^'"?]+\.js)(?:\?[^'"]*)?\1/g)) { if (!statSync(resolve(d, m[2]), { throwIfNoEntry: false })) { console.error(`shop build: VIRHE: ${p}: tuotu moduuli puuttuu dististä: ${m[2]}`); process.exit(1); } } } })(A);
 console.log(`shop build ok → ${OUT} (${changed} sivun Johku-linkit korvattu)`);
