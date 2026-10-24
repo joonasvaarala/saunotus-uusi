@@ -60,13 +60,13 @@
      "featured": true,
      "alternates": [
       {
-       "url": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+       "url": "https://saunotus.fi/en/sauna-knowledge/how-to-sauna/",
        "lang": "en",
        "path": "/en/sauna-knowledge/how-to-sauna/",
        "slug": "how-to-sauna"
       },
       {
-       "url": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+       "url": "https://saunotus.fi/saunatietoa/miten-saunotaan-oikein/",
        "lang": "fi",
        "path": "/saunatietoa/miten-saunotaan-oikein/",
        "slug": "miten-saunotaan-oikein"
@@ -101,7 +101,7 @@
      "featured": false,
      "alternates": [
       {
-       "url": "https://uusi.saunotus.com/saunatietoa/noindex-testiartikkeli/",
+       "url": "https://saunotus.fi/saunatietoa/noindex-testiartikkeli/",
        "lang": "fi",
        "path": "/saunatietoa/noindex-testiartikkeli/",
        "slug": "noindex-testiartikkeli"
@@ -137,7 +137,7 @@
      "featured": false,
      "alternates": [
       {
-       "url": "https://uusi.saunotus.com/saunatietoa/savusauna-lampiaminen/",
+       "url": "https://saunotus.fi/saunatietoa/savusauna-lampiaminen/",
        "lang": "fi",
        "path": "/saunatietoa/savusauna-lampiaminen/",
        "slug": "savusauna-lampiaminen"
@@ -200,13 +200,13 @@
      "featured": true,
      "alternates": [
       {
-       "url": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+       "url": "https://saunotus.fi/en/sauna-knowledge/how-to-sauna/",
        "lang": "en",
        "path": "/en/sauna-knowledge/how-to-sauna/",
        "slug": "how-to-sauna"
       },
       {
-       "url": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+       "url": "https://saunotus.fi/saunatietoa/miten-saunotaan-oikein/",
        "lang": "fi",
        "path": "/saunatietoa/miten-saunotaan-oikein/",
        "slug": "miten-saunotaan-oikein"
@@ -251,7 +251,7 @@
      "datePublished": "2026-10-15T06:38:30.521934+00:00",
      "articleSection": "saunominen",
      "mainEntityOfPage": {
-      "@id": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "@id": "https://saunotus.fi/saunatietoa/miten-saunotaan-oikein/",
       "@type": "WebPage"
      }
     },
@@ -267,18 +267,18 @@
      "height": 900,
      "caption": "Savusaunan lauteet"
     },
-    "canonical": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+    "canonical": "https://saunotus.fi/saunatietoa/miten-saunotaan-oikein/",
     "alternates": [
      {
-      "href": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+      "href": "https://saunotus.fi/en/sauna-knowledge/how-to-sauna/",
       "hreflang": "en"
      },
      {
-      "href": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "href": "https://saunotus.fi/saunatietoa/miten-saunotaan-oikein/",
       "hreflang": "fi"
      },
      {
-      "href": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "href": "https://saunotus.fi/saunatietoa/miten-saunotaan-oikein/",
       "hreflang": "x-default"
      }
     ],
@@ -346,13 +346,13 @@
     "featured": true,
     "alternates": [
      {
-      "url": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+      "url": "https://saunotus.fi/en/sauna-knowledge/how-to-sauna/",
       "lang": "en",
       "path": "/en/sauna-knowledge/how-to-sauna/",
       "slug": "how-to-sauna"
      },
      {
-      "url": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "url": "https://saunotus.fi/saunatietoa/miten-saunotaan-oikein/",
       "lang": "fi",
       "path": "/saunatietoa/miten-saunotaan-oikein/",
       "slug": "miten-saunotaan-oikein"
@@ -391,7 +391,7 @@
      "datePublished": "2026-10-17T06:38:30.521934+00:00",
      "articleSection": "hoidot",
      "mainEntityOfPage": {
-      "@id": "https://uusi.saunotus.com/saunatietoa/noindex-testiartikkeli/",
+      "@id": "https://saunotus.fi/saunatietoa/noindex-testiartikkeli/",
       "@type": "WebPage"
      }
     },
@@ -407,7 +407,7 @@
      "height": 900,
      "caption": null
     },
-    "canonical": "https://uusi.saunotus.com/saunatietoa/noindex-testiartikkeli/",
+    "canonical": "https://saunotus.fi/saunatietoa/noindex-testiartikkeli/",
     "alternates": [],
     "description": "Noindex-testiartikkeli: ei hakukoneille, ei sitemapissa. Vain rakennuksen testausta varten, feikkidataa."
    },
@@ -449,7 +449,7 @@
     "featured": false,
     "alternates": [
      {
-      "url": "https://uusi.saunotus.com/saunatietoa/noindex-testiartikkeli/",
+      "url": "https://saunotus.fi/saunatietoa/noindex-testiartikkeli/",
       "lang": "fi",
       "path": "/saunatietoa/noindex-testiartikkeli/",
       "slug": "noindex-testiartikkeli"
@@ -488,7 +488,7 @@
      "datePublished": "2026-10-16T06:38:30.521934+00:00",
      "articleSection": "perinne",
      "mainEntityOfPage": {
-      "@id": "https://uusi.saunotus.com/saunatietoa/savusauna-lampiaminen/",
+      "@id": "https://saunotus.fi/saunatietoa/savusauna-lampiaminen/",
       "@type": "WebPage"
      }
     },
@@ -504,7 +504,7 @@
      "height": 900,
      "caption": null
     },
-    "canonical": "https://uusi.saunotus.com/saunatietoa/savusauna-lampiaminen/",
+    "canonical": "https://saunotus.fi/saunatietoa/savusauna-lampiaminen/",
     "alternates": [],
     "description": "Savusauna on perinteinen tapa saunoa. Lue miten savusauna lämpiää ja miksi löyly on erilainen. Varaa vuoro."
    },
@@ -547,7 +547,7 @@
     "featured": false,
     "alternates": [
      {
-      "url": "https://uusi.saunotus.com/saunatietoa/savusauna-lampiaminen/",
+      "url": "https://saunotus.fi/saunatietoa/savusauna-lampiaminen/",
       "lang": "fi",
       "path": "/saunatietoa/savusauna-lampiaminen/",
       "slug": "savusauna-lampiaminen"
@@ -586,7 +586,7 @@
      "datePublished": "2026-10-15T06:38:30.521934+00:00",
      "articleSection": "saunominen",
      "mainEntityOfPage": {
-      "@id": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+      "@id": "https://saunotus.fi/en/sauna-knowledge/how-to-sauna/",
       "@type": "WebPage"
      }
     },
@@ -602,18 +602,18 @@
      "height": 900,
      "caption": "Smoke sauna benches"
     },
-    "canonical": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+    "canonical": "https://saunotus.fi/en/sauna-knowledge/how-to-sauna/",
     "alternates": [
      {
-      "href": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+      "href": "https://saunotus.fi/en/sauna-knowledge/how-to-sauna/",
       "hreflang": "en"
      },
      {
-      "href": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "href": "https://saunotus.fi/saunatietoa/miten-saunotaan-oikein/",
       "hreflang": "fi"
      },
      {
-      "href": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "href": "https://saunotus.fi/saunatietoa/miten-saunotaan-oikein/",
       "hreflang": "x-default"
      }
     ],
@@ -681,13 +681,13 @@
     "featured": true,
     "alternates": [
      {
-      "url": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+      "url": "https://saunotus.fi/en/sauna-knowledge/how-to-sauna/",
       "lang": "en",
       "path": "/en/sauna-knowledge/how-to-sauna/",
       "slug": "how-to-sauna"
      },
      {
-      "url": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "url": "https://saunotus.fi/saunatietoa/miten-saunotaan-oikein/",
       "lang": "fi",
       "path": "/saunatietoa/miten-saunotaan-oikein/",
       "slug": "miten-saunotaan-oikein"
@@ -720,21 +720,21 @@
   "ok": true,
   "items": [
    {
-    "loc": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+    "loc": "https://saunotus.fi/en/sauna-knowledge/how-to-sauna/",
     "lang": "en",
     "path": "/en/sauna-knowledge/how-to-sauna/",
     "slug": "how-to-sauna",
     "alternates": [
      {
-      "href": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+      "href": "https://saunotus.fi/en/sauna-knowledge/how-to-sauna/",
       "hreflang": "en"
      },
      {
-      "href": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "href": "https://saunotus.fi/saunatietoa/miten-saunotaan-oikein/",
       "hreflang": "fi"
      },
      {
-      "href": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "href": "https://saunotus.fi/saunatietoa/miten-saunotaan-oikein/",
       "hreflang": "x-default"
      }
     ],
@@ -742,7 +742,7 @@
     "published_at": "2026-10-15T06:38:30.521934+00:00"
    },
    {
-    "loc": "https://uusi.saunotus.com/saunatietoa/savusauna-lampiaminen/",
+    "loc": "https://saunotus.fi/saunatietoa/savusauna-lampiaminen/",
     "lang": "fi",
     "path": "/saunatietoa/savusauna-lampiaminen/",
     "slug": "savusauna-lampiaminen",
@@ -751,21 +751,21 @@
     "published_at": "2026-10-16T06:38:30.521934+00:00"
    },
    {
-    "loc": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+    "loc": "https://saunotus.fi/saunatietoa/miten-saunotaan-oikein/",
     "lang": "fi",
     "path": "/saunatietoa/miten-saunotaan-oikein/",
     "slug": "miten-saunotaan-oikein",
     "alternates": [
      {
-      "href": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+      "href": "https://saunotus.fi/en/sauna-knowledge/how-to-sauna/",
       "hreflang": "en"
      },
      {
-      "href": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "href": "https://saunotus.fi/saunatietoa/miten-saunotaan-oikein/",
       "hreflang": "fi"
      },
      {
-      "href": "https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/",
+      "href": "https://saunotus.fi/saunatietoa/miten-saunotaan-oikein/",
       "hreflang": "x-default"
      }
     ],
@@ -794,20 +794,20 @@
    {
     "lang": "en",
     "status": 301,
-    "to_loc": "https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/",
+    "to_loc": "https://saunotus.fi/en/sauna-knowledge/how-to-sauna/",
     "to_path": "/en/sauna-knowledge/how-to-sauna/",
     "to_slug": "how-to-sauna",
-    "from_loc": "https://uusi.saunotus.com/en/sauna-knowledge/sauna-how-to/",
+    "from_loc": "https://saunotus.fi/en/sauna-knowledge/sauna-how-to/",
     "from_path": "/en/sauna-knowledge/sauna-how-to/",
     "from_slug": "sauna-how-to"
    },
    {
     "lang": "fi",
     "status": 301,
-    "to_loc": "https://uusi.saunotus.com/saunatietoa/savusauna-lampiaminen/",
+    "to_loc": "https://saunotus.fi/saunatietoa/savusauna-lampiaminen/",
     "to_path": "/saunatietoa/savusauna-lampiaminen/",
     "to_slug": "savusauna-lampiaminen",
-    "from_loc": "https://uusi.saunotus.com/saunatietoa/savusauna-vanha-nimi/",
+    "from_loc": "https://saunotus.fi/saunatietoa/savusauna-vanha-nimi/",
     "from_path": "/saunatietoa/savusauna-vanha-nimi/",
     "from_slug": "savusauna-vanha-nimi"
    }

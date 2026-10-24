@@ -132,7 +132,7 @@ Maksuton hallintokortti on sarake `gift_cards.complimentary` (`booking_117`), ei
 
 | Avain | Oletus | Missä koodi käyttää | Päätös | Perustelu |
 |---|---|---|---|---|
-| `site_base_url` | https://uusi.saunotus.com | Sähköpostien, tilaussivun, QR-koodin ja kalenterin linkit. | vain tila | Väärä osoite rikkoo viestit. Ei tekstikenttää. |
+| `site_base_url` | https://saunotus.fi | Sähköpostien, tilaussivun, QR-koodin ja kalenterin linkit. | vain tila | Väärä osoite rikkoo viestit. Ei tekstikenttää. |
 | `order_page_path` | /tilaus/ | Tilaussivun polku. Päätetty 17.10.2026. | siirrä | Polku on sivuston reitti, ei liiketoiminta-asetus. |
 | `payment_link_path` | /maksa/ | Maksulinkki. Visma-ohje: älä vaihda oletuspolkua migraatiolla. | siirrä | Sama. |
 | `functions_base_url` | Edge-funktioiden osoite | Kuitti-PDF ja ajastetut kutsut. | piilota teknisenä | |

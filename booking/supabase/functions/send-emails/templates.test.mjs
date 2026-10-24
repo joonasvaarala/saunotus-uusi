@@ -9,7 +9,7 @@ try { T = await import('./templates.ts'); } catch (e) { if (!/ERR_UNKNOWN_FILE_E
 const R = (...a) => { const m = T.render(...a); return Object.fromEntries(Object.entries(m).map(([k, v]) => [k, v.replaceAll('\u00a0', ' ')])); };   // NBSP → väli vertailua varten
 const skip = T ? false : 'Node ei tue .ts-tuontia (tarvitaan Node >= 22.18)';
 
-const SITE = 'https://uusi.saunotus.com';
+const SITE = 'https://saunotus.fi';
 const ORDER_URL = `${SITE}/tilaus/?t=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c`;
 const PAY_URL = `${SITE}/maksa/?p=9d8c7b6a-1111-4222-8333-444455556666`;
 const base = (locale) => ({
@@ -123,7 +123,7 @@ test('puuttuvat tiedot eivät kaada eikä jätä tyhjää: ei tilausta, ei nime�
 
 test('siteBase / logoUrl: alipolku ja tuotanto', { skip }, () => {
   assert.equal(T.siteBase({ order: { order_url: 'https://joonasvaarala.github.io/saunotus-uusi/tilaus/?t=x' } }), 'https://joonasvaarala.github.io/saunotus-uusi');
-  assert.equal(T.logoUrl({ payment: { link_url: 'https://uusi.saunotus.com/maksa/?p=1' } }), 'https://uusi.saunotus.com/img/logo-kuitti.png');
+  assert.equal(T.logoUrl({ payment: { link_url: 'https://saunotus.fi/maksa/?p=1' } }), 'https://saunotus.fi/img/logo-kuitti.png');
   assert.equal(T.logoUrl({}), T.LOGO_FALLBACK);
 });
 
@@ -325,10 +325,10 @@ test('annual_card_code: koodi isona, voimassaolo, kalenterilinkki, ohjeet ja Tap
   assert.match(m.text, /Voimassa 24\.10\.2026–23\.10\.2027/);
   assert.match(m.text, /yhdelle hengelle/);
   assert.match(m.text, /kohtaan Alennus- tai vuosikorttikoodi/);
-  assert.match(m.text, /https:\/\/uusi\.saunotus\.com\/varaa\//);
+  assert.match(m.text, /https:\/\/saunotus\.fi\/varaa\//);
   assert.match(m.text, /Ystävällisin terveisin,\nTapio\nSipoonjoen Perinnesauna\n$/);
   assert.match(m.html, /font-size:28px[^>]*>VK7QK9TXM3</);
-  assert.match(m.html, /href="https:\/\/uusi\.saunotus\.com\/varaa\/"/);
+  assert.match(m.html, /href="https:\/\/saunotus\.fi\/varaa\/"/);
   assert.match(m.html, /Tapio<br>Sipoonjoen Perinnesauna/);
   assert.doesNotMatch(m.html + m.text, /whatsapp/i);
   assert.doesNotMatch(m.html, /#(?:00f|0000ff|1a73e8|0066cc|007bff)\b/i, 'ei sinistä');

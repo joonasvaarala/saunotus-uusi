@@ -424,7 +424,7 @@ export function exampleBundle() {
       'messages.timed_enabled': false,
       timezone: 'Europe/Helsinki',
       marketing_consent_text_version: 'v1',
-      site_base_url: 'https://uusi.saunotus.com',
+      site_base_url: 'https://saunotus.fi',
       functions_base_url: 'https://example.supabase.co/functions/v1',
       order_page_path: '/tilaus/',
       payment_link_path: '/maksa/',

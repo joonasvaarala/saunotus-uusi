@@ -9,7 +9,7 @@ import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 
 const root = resolve(new URL('../..', import.meta.url).pathname);
-delete process.env.SITE_ENV; process.env.SITE_URL = 'https://uusi.saunotus.com';
+delete process.env.SITE_ENV; process.env.SITE_URL = 'https://saunotus.fi';
 const J = (f) => JSON.parse(readFileSync(resolve(root, f), 'utf8'));
 const R0 = (f) => readFileSync(resolve(root, f), 'utf8');
 const md5 = (s) => createHash('md5').update(s).digest('hex');

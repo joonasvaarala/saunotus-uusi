@@ -150,7 +150,7 @@ test('vahvistus ja tuoteviesti', { skip: skipTs }, async () => {
   }
   const order = {
     order_no: 15321,
-    order_url: 'https://uusi.saunotus.com/tilaus/?t=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c',
+    order_url: 'https://saunotus.fi/tilaus/?t=3f2b8c1e-7a4d-4e9b-9c55-1d2e3f4a5b6c',
     total: 36,
     items: [{ name: 'Yleinen vuoro', quantity: 1, line_total: 36 }],
     reservations: [],

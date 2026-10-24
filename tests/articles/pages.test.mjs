@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-delete process.env.SITE_ENV; process.env.SITE_URL = 'https://uusi.saunotus.com';
+delete process.env.SITE_ENV; process.env.SITE_URL = 'https://saunotus.fi';
 const { buildArticleSite } = await import('../../src/articles/pages.mjs');
 const { loadArticles, makeFixtureRpc, emptyData } = await import('../../src/articles/source.mjs');
 const { parsePage } = await import('../../scripts/check-articles.mjs');
@@ -26,7 +26,7 @@ test('tagSlug: diakriitit pois, ASCII, ei tyhjää', () => {
 
 test('osoitteet lasketaan repon asetuksista, ei tietokannan palauttamista poluista/isäntänimistä', async () => {
   // tietokannan polku poikkeaa repon asetuksesta (/en/sauna-knowledge/ → /en/sauna-xyz/): sivusto käyttää silti repon polkua ja varoittaa
-  const odd = JSON.parse(JSON.stringify(fx).replaceAll('/en/sauna-knowledge/', '/en/sauna-xyz/').replaceAll('https://uusi.saunotus.com/', 'https://db.example/'));
+  const odd = JSON.parse(JSON.stringify(fx).replaceAll('/en/sauna-knowledge/', '/en/sauna-xyz/').replaceAll('https://saunotus.fi/', 'https://db.example/'));
   const warns = [];
   const w0 = console.warn; console.warn = (m) => warns.push(String(m));
   let r; try { r = buildArticleSite(await load(odd), new Map()); } finally { console.warn = w0; }
@@ -36,7 +36,7 @@ test('osoitteet lasketaan repon asetuksista, ei tietokannan palauttamista poluis
   assert.ok(paths.includes('/saunatietoa/miten-saunotaan-oikein/'));
   const html = page(r, '/en/sauna-knowledge/how-to-sauna/').html;
   assert.doesNotMatch(html, /sauna-xyz|db\.example/);
-  assert.match(html, /<link rel="canonical" href="https:\/\/uusi\.saunotus\.com\/en\/sauna-knowledge\/how-to-sauna\/">/);
+  assert.match(html, /<link rel="canonical" href="https:\/\/saunotus\.fi\/en\/sauna-knowledge\/how-to-sauna\/">/);
   assert.ok(warns.some((m) => /articles_path_en/.test(m)), 'poikkeava tietokannan polku varoittaa');
 });
 test('oletusfixture vastaa tuotannon asetuksia: ei polku-/nimivaroituksia (EN: Sauna knowledge, /en/sauna-knowledge/)', async () => {
@@ -51,11 +51,11 @@ test('vanha EN-polku (/en/sauna-guide/): listaus ja jokainen EN-artikkeli ohjata
   const list = page(r, '/en/sauna-guide/');
   assert.equal(list.kind, 'redirect');
   assert.deepEqual(parsePage(list.html).refresh, ['0; url=/en/sauna-knowledge/']);
-  assert.deepEqual(parsePage(list.html).canonicals, ['https://uusi.saunotus.com/en/sauna-knowledge/']);
+  assert.deepEqual(parsePage(list.html).canonicals, ['https://saunotus.fi/en/sauna-knowledge/']);
   const art = page(r, '/en/sauna-guide/how-to-sauna/');
   assert.equal(art.kind, 'redirect');
   assert.deepEqual(parsePage(art.html).refresh, ['0; url=/en/sauna-knowledge/how-to-sauna/']);
-  assert.deepEqual(parsePage(art.html).canonicals, ['https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/']);
+  assert.deepEqual(parsePage(art.html).canonicals, ['https://saunotus.fi/en/sauna-knowledge/how-to-sauna/']);
   const oldSlug = page(r, '/en/sauna-guide/sauna-how-to/');   // vanha EN-slug vanhalla polulla → suoraan nykyiseen (yksi hyppy)
   assert.deepEqual(parsePage(oldSlug.html).refresh, ['0; url=/en/sauna-knowledge/how-to-sauna/']);
   assert.ok(!r.sitemap.some((u) => /sauna-guide/.test(u.loc) || u.alternates.some((a) => /sauna-guide/.test(a.href))));
@@ -66,9 +66,9 @@ test('hreflang: itseviittaus + toinen kieli + x-default (=fi) vain kun molemmat 
   const r = await build(await load());
   const both = parsePage(page(r, '/saunatietoa/miten-saunotaan-oikein/').html).hreflangs;
   assert.deepEqual(both, [
-    { hreflang: 'fi', href: 'https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/' },
-    { hreflang: 'en', href: 'https://uusi.saunotus.com/en/sauna-knowledge/how-to-sauna/' },
-    { hreflang: 'x-default', href: 'https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/' },
+    { hreflang: 'fi', href: 'https://saunotus.fi/saunatietoa/miten-saunotaan-oikein/' },
+    { hreflang: 'en', href: 'https://saunotus.fi/en/sauna-knowledge/how-to-sauna/' },
+    { hreflang: 'x-default', href: 'https://saunotus.fi/saunatietoa/miten-saunotaan-oikein/' },
   ]);
   assert.deepEqual(parsePage(page(r, '/saunatietoa/savusauna-lampiaminen/').html).hreflangs, []);
 });
@@ -89,12 +89,12 @@ test('JSON-LD: Article + BreadcrumbList, URL:t tämän ympäristön osoitteita, 
   const p = parsePage(html);
   const lds = p.ld.map((j) => JSON.parse(j));
   const a = lds.find((x) => x['@type'] === 'Article');
-  assert.equal(a.mainEntityOfPage['@id'], 'https://uusi.saunotus.com/saunatietoa/miten-saunotaan-oikein/');
-  assert.equal(a.publisher.url, 'https://uusi.saunotus.com/');
+  assert.equal(a.mainEntityOfPage['@id'], 'https://saunotus.fi/saunatietoa/miten-saunotaan-oikein/');
+  assert.equal(a.publisher.url, 'https://saunotus.fi/');
   assert.equal(a.headline.startsWith('Otsikko </script>'), true);
   const b = lds.find((x) => x['@type'] === 'BreadcrumbList');
   assert.deepEqual(b.itemListElement.map((x) => x.position), [1, 2, 3]);
-  assert.equal(b.itemListElement[1].item, 'https://uusi.saunotus.com/saunatietoa/');
+  assert.equal(b.itemListElement[1].item, 'https://saunotus.fi/saunatietoa/');
 });
 test('canonical-ohitus (oma canonical_fi) säilyy, hreflang pois, ei sitemapissa', async () => {
   const d = await load();
@@ -110,8 +110,8 @@ test('canonical-ohitus (oma canonical_fi) säilyy, hreflang pois, ei sitemapissa
 test('sitemap: vain indeksoitavat (noindex pois), listaukset mukana, alternates vain kaksikielisille', async () => {
   const r = await build(await load());
   const locs = r.sitemap.map((s) => s.loc);
-  assert.ok(locs.includes('https://uusi.saunotus.com/saunatietoa/'));
-  assert.ok(locs.includes('https://uusi.saunotus.com/en/sauna-knowledge/'));
+  assert.ok(locs.includes('https://saunotus.fi/saunatietoa/'));
+  assert.ok(locs.includes('https://saunotus.fi/en/sauna-knowledge/'));
   assert.ok(!locs.some((l) => l.includes('noindex-testiartikkeli')));
   assert.ok(!locs.some((l) => l.includes('/tagi/') || l.includes('vanha-nimi')));
   assert.equal(r.sitemap.find((s) => s.loc.endsWith('savusauna-lampiaminen/')).alternates.length, 0);
@@ -130,7 +130,7 @@ test('moved-slug: ohjaussivu meta refresh + canonical kohteeseen; kohde puuttuu 
   const r = await build(await load());
   const p = parsePage(page(r, '/saunatietoa/savusauna-vanha-nimi/').html);
   assert.deepEqual(p.refresh, ['0; url=/saunatietoa/savusauna-lampiaminen/']);
-  assert.deepEqual(p.canonicals, ['https://uusi.saunotus.com/saunatietoa/savusauna-lampiaminen/']);
+  assert.deepEqual(p.canonicals, ['https://saunotus.fi/saunatietoa/savusauna-lampiaminen/']);
   const d = await load();
   d.lang.fi.items = d.lang.fi.items.filter((x) => x.slug !== 'savusauna-lampiaminen');
   const r2 = await build(d);
@@ -156,7 +156,7 @@ test('sivutus: pageSize ylittyessä /sivu/2/ canonical itseensä, ei sitemapissa
   const r = await build(d);
   const p2 = page(r, '/saunatietoa/sivu/2/');
   assert.ok(p2);
-  assert.deepEqual(parsePage(p2.html).canonicals, ['https://uusi.saunotus.com/saunatietoa/sivu/2/']);
+  assert.deepEqual(parsePage(p2.html).canonicals, ['https://saunotus.fi/saunatietoa/sivu/2/']);
   assert.match(page(r, '/saunatietoa/').html, /rel="next" href="\/saunatietoa\/sivu\/2\/"/);
   assert.ok(page(r, '/saunatietoa/tagi/sauna/sivu/2/'));
   assert.ok(!r.sitemap.some((s) => s.loc.includes('/sivu/')));

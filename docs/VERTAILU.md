@@ -1,4 +1,4 @@
-# Vertailu: alkuperäinen (uusi.saunotus.com) vs. uusi staattinen sivusto
+# Vertailu: alkuperäinen (saunotus.fi) vs. uusi staattinen sivusto
 
 Mitattu 16.10.2026 (Lighthouse 13.5, Chrome headless; uusi sivusto paikallisesta tuotantotyylisestä rakennuksesta, alkuperäinen livenä).
 

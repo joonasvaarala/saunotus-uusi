@@ -38,7 +38,7 @@ for (const f of files) {
   for (const m of h.matchAll(/\s(?:href|src)="([^"]*)"/g)) {
     const u = m[1]; nLinks++;
     if (/^(mailto:|tel:|data:)/.test(u) || u === '') continue;
-    if (/^https?:/.test(u)) { if (!u.startsWith('http://localhost') && !/\/\/(uusi\.saunotus\.com|joonasvaarala\.github\.io)/.test(u)) externals.set(u, where); else if (/\/\/(uusi\.saunotus\.com|joonasvaarala\.github\.io)/.test(u) && /<link/.test(m.input.slice(m.index - 30, m.index))) {} continue; }
+    if (/^https?:/.test(u)) { if (!u.startsWith('http://localhost') && !/\/\/(saunotus\.fi|joonasvaarala\.github\.io)/.test(u)) externals.set(u, where); else if (/\/\/(saunotus\.fi|joonasvaarala\.github\.io)/.test(u) && /<link/.test(m.input.slice(m.index - 30, m.index))) {} continue; }
     if (u.startsWith('#')) { if (u.length > 1 && !/^#[/?]/.test(u) && !ids.get(f).has(u.slice(1))) errs.push(`${where}: ankkuri ${u} puuttuu`); continue; }
     if (!exists(u)) { errs.push(`${where}: rikki ${u}`); continue; }
     const hash = u.split('#')[1];
