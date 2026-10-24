@@ -7,7 +7,7 @@
   "kind": "plain",
   "max_len": 300,
   "placeholders": [],
-  "reason": "booking_137: jonotusilmoituksen tarjousaika päättyi (public_waitlist_claim → offer_expired, booking/shop/src/waitlist-texts.js); uusi asiakasnäkyvä teksti, ei vielä tuotannossa"
+  "reason": "booking_137: jonotusilmoituksen pito (120 min, vuoroon ≥ 48 h) päättyi (public_waitlist_claim → offer_expired, booking/shop/src/waitlist-texts.js); uusi asiakasnäkyvä teksti, ei vielä tuotannossa"
  },
  {
   "key": "ui.shop.waitlist_claim_expired",
@@ -17,6 +17,6 @@
   "kind": "plain",
   "max_len": 300,
   "placeholders": [],
-  "reason": "booking_137: jonotusilmoituksen tarjousaika päättyi (public_waitlist_claim → offer_expired, booking/shop/src/waitlist-texts.js); uusi asiakasnäkyvä teksti, ei vielä tuotannossa"
+  "reason": "booking_137: jonotusilmoituksen pito (120 min, vuoroon ≥ 48 h) päättyi (public_waitlist_claim → offer_expired, booking/shop/src/waitlist-texts.js); uusi asiakasnäkyvä teksti, ei vielä tuotannossa"
  }
 ]

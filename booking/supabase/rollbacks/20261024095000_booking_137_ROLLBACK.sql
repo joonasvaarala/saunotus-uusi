@@ -1,8 +1,8 @@
 -- Rollback booking_137: palauttaa _notify_waitlist_for_window- ja public_waitlist_claim-funktiot täsmälleen
 -- booking_135-tilaan (pg_get_functiondef booking_135:n jälkeisestä kannasta), poistaa apufunktion
 -- booking._waitlist_offer_expires_at ja poistaa booking_137:n asetusrivit vain, jos ne ovat yhä oletusarvoissaan
--- (waitlist_offer_minutes_same_day = 30, waitlist_offer_minutes = 120). Käsin muutettu arvo jää paikalleen; booking_135
--- lukee waitlist_offer_minutes-asetuksen (oletus 60). Ei taulumuutoksia. Voidaan ajaa useasti.
+-- (waitlist_offer_minutes = 120, waitlist_hold_min_hours_before = 48). Käsin muutettu arvo jää paikalleen, ja
+-- booking_135 käyttää waitlist_offer_minutes-arvoa (ilman riviä oletus 60). Ei taulumuutoksia. Voidaan ajaa useasti.
 set local lock_timeout = '5s';
 
 CREATE OR REPLACE FUNCTION booking._notify_waitlist_for_window(p_space_id bigint, p_starts_at timestamp with time zone, p_ends_at timestamp with time zone)
@@ -129,5 +129,5 @@ revoke all on function booking._notify_waitlist_for_window(bigint,timestamptz,ti
 -- Funktiot eivät enää viittaa apufunktioon, joten sen voi poistaa.
 drop function if exists booking._waitlist_offer_expires_at(timestamptz,timestamptz);
 
-delete from booking.settings where key = 'waitlist_offer_minutes_same_day' and value = '30'::jsonb;
+delete from booking.settings where key = 'waitlist_hold_min_hours_before' and value = '48'::jsonb;
 delete from booking.settings where key = 'waitlist_offer_minutes' and value = '120'::jsonb;

@@ -1,36 +1,44 @@
--- booking_137: jonotuslistan tarjousaika (Joonaksen päätös).
--- * Jos vuoro alkaa samana päivänä kuin ilmoitus lähtee (päivä Europe/Helsinki-ajassa), paikkoja pidetään 30 min
---   (asetus waitlist_offer_minutes_same_day); muuten (seuraava päivä tai myöhemmin) 120 min (asetus waitlist_offer_minutes).
---   Puuttuva tai virheellinen asetus (ei kokonaisluku ≥ 1) → oletukset 30 / 120.
--- * Uusi sisäinen booking._waitlist_offer_expires_at(notified_at, starts_at): yksi totuus voimassaololle.
--- * _notify_waitlist_for_window: voimassa olevien tarjousten vähennys käyttää uutta voimassaoloa (booking_135: 60 min kaikille).
--- * public_waitlist_claim: ilmoitetun jonovarauksen vanhentunut tarjous → {ok:false, code:'offer_expired'}.
+-- booking_137: jonotuslistan tarjousaika ja pito (Joonaksen päätös t161u).
+-- * Vuoron alkuun vähintään waitlist_hold_min_hours_before (oletus 48) tuntia ilmoitushetkellä → pito: booking_135:n logiikka
+--   (jonon järjestys, ensimmäinen mahtuva), ilmoitetun paikat pidetään waitlist_offer_minutes (oletus 120) min eikä niitä
+--   tarjota muille. Vanhentunut pito → claim palauttaa offer_expired; seuraava ajo tarjoaa paikat seuraavalle.
+-- * Alle 48 h → ei pitoa: ilmoitus kaikille jonossa oleville, jotka mahtuvat vapaisiin paikkoihin. Nämä ilmoitukset eivät
+--   vähennä vapaita paikkoja eivätkä estä toisia ilmoituksia; paikka on myynnissä, ensimmäinen varaaja saa sen. Claim
+--   tarkistaa vain mahtuvuuden (enough=false kuten ennen).
+-- * Ilmoitus lähtee jonovaraukselle vain tilasta 'waiting' (idempotenssi ennallaan: 'notified' ei saa uutta ilmoitusta).
+-- * Uusi sisäinen booking._waitlist_offer_expires_at(notified_at, starts_at): pidon päättymisaika tai null, jos pitoa ei ole.
+--   _notify_waitlist_for_window vähentää vain voimassa olevat pidot (myös alle 48 h:n ajossa: aiemmin alkanut pito kunnioitetaan
+--   loppuun); booking_135:ssä kaikki ilmoitukset pidettiin 60 min.
 -- * Asetusrivit lisätään idempotentisti (on conflict do nothing): olemassa olevaa arvoa ei ylikirjoiteta.
+--   Puuttuva tai virheellinen asetus → oletukset 120 min / 48 h.
 -- Ei taulumuutoksia, ei public-skeemaa. Uudelleenajettava.
 -- Rollback: booking/supabase/rollbacks/20261024095000_booking_137_ROLLBACK.sql (booking_135-tila).
 set local lock_timeout = '5s';
 
 insert into booking.settings(key, value, description) values
- ('waitlist_offer_minutes_same_day', '30'::jsonb, 'Jonotuslista: tarjouksen voimassaolo minuutteina, kun vuoro alkaa ilmoituspäivänä (Europe/Helsinki). Oletus 30.'),
- ('waitlist_offer_minutes', '120'::jsonb, 'Jonotuslista: tarjouksen voimassaolo minuutteina, kun vuoro on seuraavana päivänä tai myöhemmin. Oletus 120.')
+ ('waitlist_offer_minutes', '120'::jsonb, 'Jonotuslista: pidon kesto minuutteina, kun vuoroon on ilmoitushetkellä vähintään waitlist_hold_min_hours_before tuntia. Oletus 120.'),
+ ('waitlist_hold_min_hours_before', '48'::jsonb, 'Jonotuslista: alle tämän tuntimäärän ennen vuoroa paikkoja ei pidetä, vaan ilmoitus lähtee kaikille mahtuville. Oletus 48.')
 on conflict (key) do nothing;
 
--- Tarjouksen päättymisaika. Sama päivä = ilmoituksen Helsingin päivä ≥ vuoron alun Helsingin päivä.
--- Ei kaada kutsujaa virheellisellä asetuksella (laukeaa varaustriggereistä _notify_waitlist_for_window-funktion kautta).
+-- Pidon päättymisaika: notified_at + waitlist_offer_minutes, jos starts_at - notified_at >= waitlist_hold_min_hours_before;
+-- muuten null (ei pitoa). Ei kaada kutsujaa virheellisellä asetuksella (laukeaa varaustriggereistä notify-funktion kautta).
 create or replace function booking._waitlist_offer_expires_at(p_notified_at timestamptz, p_starts_at timestamptz)
 returns timestamptz language plpgsql stable security definer set search_path = '' as $$
 declare
-  v_same boolean;
-  v_def integer;
   v_raw text;
+  v_hours integer := 48;
+  v_mins integer := 120;
 begin
   if p_notified_at is null or p_starts_at is null then return null; end if;
-  v_same := (p_notified_at at time zone 'Europe/Helsinki')::date >= (p_starts_at at time zone 'Europe/Helsinki')::date;
-  v_def := case when v_same then 30 else 120 end;
-  v_raw := booking._setting(case when v_same then 'waitlist_offer_minutes_same_day' else 'waitlist_offer_minutes' end) #>> '{}';
-  -- Sisäkkäinen case: ::int-muunnos vasta, kun arvo on varmasti 1–6 numeroa (AND-ehtojen järjestystä ei taata).
-  return p_notified_at + make_interval(mins => case when v_raw ~ '^[0-9]{1,6}$' then
-    case when v_raw::int >= 1 then v_raw::int else v_def end else v_def end);
+  -- Sisäkkäinen case/if: ::int-muunnos vasta, kun arvo on varmasti numeroita (AND-ehtojen järjestystä ei taata).
+  v_raw := booking._setting('waitlist_hold_min_hours_before') #>> '{}';
+  if v_raw ~ '^[0-9]{1,5}$' then v_hours := v_raw::int; end if;
+  if p_starts_at - p_notified_at < make_interval(hours => v_hours) then return null; end if;
+  v_raw := booking._setting('waitlist_offer_minutes') #>> '{}';
+  if v_raw ~ '^[0-9]{1,6}$' then
+    if v_raw::int >= 1 then v_mins := v_raw::int; end if;
+  end if;
+  return p_notified_at + make_interval(mins => v_mins);
 end $$;
 revoke all on function booking._waitlist_offer_expires_at(timestamptz,timestamptz) from public,anon,authenticated;
 
@@ -65,7 +73,8 @@ begin
     -- booking_134: jonon järjestys säilyy, mutta mahtuvuus ratkaisee; liian iso jonovaraus ohitetaan.
     -- booking_135: vapaista paikoista vähennetään kaikki voimassa olevat ilmoitukset (myös aiemmista ajoista ja
     -- samassa ajossa juuri ilmoitetut) samasta vuorosta sekä päällekkäisistä vuoroista, jotka jakavat kapasiteettipoolin.
-    -- booking_137: tarjouksen voimassaolo _waitlist_offer_expires_at: sama päivä (Helsinki) 30 min, muuten 120 min.
+    -- booking_137: vain voimassa olevat pidot (_waitlist_offer_expires_at; alle 48 h ennen vuoroa tehdyt ilmoitukset eivät pidä
+    -- paikkoja → kaikki mahtuvat saavat ilmoituksen, eikä tämän ajon ilmoitus vähennä seuraavien vapaita paikkoja).
     select coalesce(sum(o.persons),0)::int into v_held
       from booking.waitlist_entries o
      where o.status='notified' and o.id<>w.id and o.starts_at>now()
@@ -113,7 +122,7 @@ begin
 end $$;
 
 -- booking_135: rate limit vasta, kun token vastaa aktiivista jonovarausta (tuntematon token → not_found ilman riviä).
--- booking_137: vanhentunut tarjous → offer_expired. Muuten sama kuin booking_135.
+-- booking_137: vanhentunut pito → offer_expired. Muuten sama kuin booking_135.
 create or replace function booking.public_waitlist_claim(p_token uuid) returns jsonb
 language plpgsql security definer set search_path = '' as $$
 declare
@@ -121,6 +130,7 @@ declare
   v_s record;
   v_enough boolean;
   v_ip text := booking._client_ip();
+  v_exp timestamptz;
 begin
   if p_token is null then return jsonb_build_object('ok',false,'code','not_found'); end if;
   select * into w from booking.waitlist_entries where public_token = p_token and status in ('waiting','notified') for update;
@@ -130,9 +140,11 @@ begin
     return jsonb_build_object('ok',false,'code','rate_limited');
   end if;
   if w.starts_at <= now() then return jsonb_build_object('ok',false,'code','expired'); end if;
-  -- booking_137: ilmoitetun jonovarauksen tarjous on vanhentunut → selkeä koodi. Tila pysyy 'notified' (ei palaa jonon
-  -- kärkeen eikä saa uutta ilmoitusta samoista paikoista); varauksen voi silti tehdä normaalisti, jos paikkoja on.
-  if w.status = 'notified' and booking._waitlist_offer_expires_at(coalesce(w.notified_at,w.updated_at),w.starts_at) <= now() then
+  -- booking_137: ilmoitetun jonovarauksen pito on vanhentunut → selkeä koodi. Tila pysyy 'notified' (ei palaa jonon
+  -- kärkeen eikä saa uutta ilmoitusta); varauksen voi silti tehdä normaalisti, jos paikkoja on. Ilman pitoa (alle 48 h)
+  -- päättymisaika on null → vain mahtuvuus ratkaisee.
+  v_exp := booking._waitlist_offer_expires_at(coalesce(w.notified_at,w.updated_at),w.starts_at);
+  if w.status = 'notified' and v_exp is not null and v_exp <= now() then
     return jsonb_build_object('ok',false,'code','offer_expired');
   end if;
   select * into v_s from booking._sessions(w.session_date,w.session_date,w.product_id,true) s

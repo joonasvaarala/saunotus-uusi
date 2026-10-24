@@ -2,7 +2,7 @@
 -- kapasiteettipoolin jakavat säännöt, tarjouksen vanheneminen ja claim-rate limit ilman rivejä tuntemattomalle tokenille.
 -- Ajetaan migraatioiden ja fixtures/10_test_helpers.sql:n JÄLKEEN (mock-data: Miesten sauna ma, kapasiteetti 16;
 -- to: Turvetorstai 16–19 (poolit yleinen_arki + turve) ja Yleinen vuoro 17–19 (yleinen_arki) jakavat poolin).
--- booking_137: tarjousaika 30 min (sama päivä) / 120 min (myöhempi päivä); tämän testin vuorot ovat 6 viikon päässä → 120 min.
+-- booking_137: pito 120 min, kun vuoroon on ilmoitushetkellä ≥ 48 h (alle 48 h ei pitoa); tämän testin vuorot ovat 6 viikon päässä → pito 120 min.
 -- Yksi DO-lohko; tahallinen poikkeus kumoaa kaiken. Tulos: TESTRESULT pass=… fail=…
 set local lock_timeout = '3s';
 set local statement_timeout = '60s';
@@ -52,7 +52,7 @@ begin
   n := booking._notify_waitlist_for_window(v_space, v_s, v_e);
   perform pg_temp.ck(n = 0 and pg_temp.mails('c@t135.example') = 0, 'C4: 3. ajo sama tulos');
 
-  -- ===== Tarjouksen vanheneminen: asetus waitlist_offer_minutes (booking_137: oletus 120, vuoro myöhempänä päivänä) =====
+  -- ===== Tarjouksen vanheneminen: asetus waitlist_offer_minutes (booking_137: oletus 120, vuoroon yli 48 h) =====
   perform pg_temp.age('b@t135.example', interval '3 hours'); perform pg_temp.age('d@t135.example', interval '3 hours');
   insert into booking.settings(key, value) values ('waitlist_offer_minutes', '240'::jsonb)
     on conflict (key) do update set value = excluded.value;

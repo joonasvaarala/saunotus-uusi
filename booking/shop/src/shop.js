@@ -516,7 +516,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
   const wl = qs.get('wl');
   if (wl && /^[0-9a-f-]{36}$/i.test(wl)) {
     const c = await rpc('public_waitlist_claim', { p_token: wl }).catch(() => null);
-    // booking_137: ilmoituksen tarjousaika (30 min samana päivänä, muuten 120 min) päättyi → oma teksti (offer_expired).
+    // booking_137: ilmoituksen pito (120 min, kun vuoroon oli ≥ 48 h) päättyi → oma teksti (offer_expired).
     if (c && (!c.ok || +c.rule_id !== s.rule_id || c.session_date !== ds)) wlNote = h('p', { class: 'bk-note', role: 'status', text: c.code === 'offer_expired' ? t.waitlistClaimExpired : t.waitlistClaimInvalid });
     else if (c?.ok && (!c.enough || +c.persons > max || +c.persons < s.min_persons)) {
       mount(h('h2', { text: t.bookTitle }), errorBox(t.waitlistClaimNotEnough),
