@@ -41,9 +41,15 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
         const token = globalThis.crypto?.randomUUID?.() || '11111111-1111-4111-8111-' + String(waitlist.size + 1).padStart(12, '0');
         const old = [...waitlist.values()].find((x) => x.rule_id === +args.p_rule_id && x.date === args.p_date && x.email === String(args.p_email || '').toLowerCase() && x.status !== 'cancelled');
         const row = old || { token, rule_id: +args.p_rule_id, date: args.p_date, email: String(args.p_email || '').toLowerCase() };
-        row.persons = +args.p_persons || 1; row.status = 'waiting';
+        if (!Number.isInteger(+args.p_persons) || +args.p_persons < 1 || +args.p_persons > 6) return { ok: false, code: 'invalid_persons' };   // booking_134: 1–6
+        row.persons = +args.p_persons; row.status = 'waiting';
         waitlist.set(row.token, row); saveWaitlist();
         return { ok: true, token: row.token, persons: row.persons, starts_at: `${args.p_date}T12:00:00+03:00`, ends_at: `${args.p_date}T14:00:00+03:00` };
+      }
+      case 'public_waitlist_claim': {   // booking_134: mockissa paikkoja riittää aina, jos jonovaraus on voimassa
+        const row = waitlist.get(args.p_token);
+        if (!row || row.status === 'cancelled') return { ok: false, code: 'not_found' };
+        return { ok: true, rule_id: row.rule_id, product_id: row.product_id ?? null, session_date: row.date, persons: row.persons, enough: true };
       }
       case 'public_leave_waitlist': {
         const row = waitlist.get(args.p_token);
