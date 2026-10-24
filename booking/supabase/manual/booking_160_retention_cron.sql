@@ -4,7 +4,7 @@
 --
 -- Järjestys:
 --   0) Ennen migraatiota (pelkkä SELECT, tuotanto): manual/booking_160_retention_report_readonly.sql → määrät luokittain ja estosyittäin.
---   1) Migraatio 20261024330000_booking_160_retention_fixes.sql. Tarkista:
+--   1) Migraatio 20261024183447_booking_160_retention_fixes.sql. Tarkista:
 --        select key, value from booking.settings where key like 'privacy_retention.%' order by 1;   -- enabled=false, dry_run=true, email_outbox_months=36
 --        (sähköpostijonon rivejä ei koskaan poisteta; henkilötiedot tyhjennetään 3 v lähetyksestä)
 --   2) Kuivaharjoitus funktiolla (ei kirjoita):  select booking.privacy_retention_report();

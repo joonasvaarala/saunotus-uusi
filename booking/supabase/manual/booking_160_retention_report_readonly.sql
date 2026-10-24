@@ -1,5 +1,5 @@
 -- booking_160: tietosuojan säilytysraportti TUOTANNON LUKUAJOON (pelkkä SELECT, ei kirjoituksia, ei uusia funktioita).
--- Sama ehdokaslohko kuin booking._privacy_candidates (migraatio 20261024330000, booking_160); node-testi tietosuoja-160.test.mjs varmistaa, että ne ovat identtiset.
+-- Sama ehdokaslohko kuin booking._privacy_candidates (migraatio 20261024183447, booking_160); node-testi tietosuoja-160.test.mjs varmistaa, että ne ovat identtiset.
 -- Uudet sarakkeet (pdf_deleted_at) luetaan to_jsonb(rivi) ->> 'pdf_deleted_at', joten raportti toimii myös ENNEN booking_160-migraatiota.
 -- Tulostaa vain määrät luokittain ja estosyittäin (ei id:itä eikä henkilötietoja). Päivä = tänään (Europe/Helsinki).
 -- Ajo: Supabase MCP execute_sql (read-only) tai SQL-editori. Ei vaadi booking_157- eikä booking_160-migraatiota.

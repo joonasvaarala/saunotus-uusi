@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p) => readFileSync(join(root, p), 'utf8');
 const md5 = (p) => createHash('md5').update(readFileSync(join(root, p))).digest('hex');
-const V = '20261024330000';
+const V = '20261024183447';
 const MIG = `booking/supabase/migrations/${V}_booking_160_retention_fixes.sql`;
 const RB = `booking/supabase/rollbacks/${V}_booking_160_ROLLBACK.sql`;
 const RO = 'booking/supabase/manual/booking_160_retention_report_readonly.sql';

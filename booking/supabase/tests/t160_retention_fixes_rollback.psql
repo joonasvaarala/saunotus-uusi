@@ -4,8 +4,8 @@
 -- Ajo hakemistosta booking/supabase/tests:  psql -X -v ON_ERROR_STOP=1 -d booking_test -f t160_retention_fixes_rollback.psql
 \set ON_ERROR_STOP 1
 begin;
-\i ../rollbacks/20261024330000_booking_160_ROLLBACK.sql
-\i ../rollbacks/20261024330000_booking_160_ROLLBACK.sql
+\i ../rollbacks/20261024183447_booking_160_ROLLBACK.sql
+\i ../rollbacks/20261024183447_booking_160_ROLLBACK.sql
 do $$ begin
   if to_regprocedure('booking.privacy_storage_due(integer)') is not null or to_regclass('booking.privacy_auth_deletions') is not null
      or exists (select 1 from booking.settings where key in ('privacy_retention.dry_run', 'privacy_retention.gift_card_pdf_years'))
@@ -15,8 +15,8 @@ do $$ begin
   if to_regprocedure('booking.privacy_retention_run()') is null then raise exception 't160 rollback: booking_157 katosi'; end if;
   if (select value from booking.settings where key = 'privacy_retention.email_outbox_months') <> '12'::jsonb then raise exception 't160 rollback: email_outbox_months ei palautunut 12:ksi'; end if;
 end $$;
-\i ../migrations/20261024330000_booking_160_retention_fixes.sql
-\i ../migrations/20261024330000_booking_160_retention_fixes.sql
+\i ../migrations/20261024183447_booking_160_retention_fixes.sql
+\i ../migrations/20261024183447_booking_160_retention_fixes.sql
 do $$ begin
   if to_regprocedure('booking.privacy_storage_due(integer)') is null or to_regclass('booking.privacy_auth_deletions') is null
      or (select value from booking.settings where key = 'privacy_retention.enabled') <> 'false'::jsonb

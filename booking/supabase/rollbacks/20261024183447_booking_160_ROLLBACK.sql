@@ -1,4 +1,4 @@
--- ROLLBACK booking_160: tietosuojan säilytysajan korjaukset (migraatio 20261024330000).
+-- ROLLBACK booking_160: tietosuojan säilytysajan korjaukset (migraatio 20261024183447).
 -- Palauttaa kahdeksan uudelleenmääriteltyä funktiota TÄSMÄLLEEN tuotannon nykyiseen (booking_157 jälkeiseen) muotoon
 -- (pg_get_functiondef-teksti sellaisenaan; CREATE OR REPLACE säilyttää oikeudet) ja tarkistaa lopuksi md5(pg_get_functiondef):n —
 -- jos jokin ei täsmää, koko rollback perutaan. Poistaa booking_160:n uudet funktiot ja asetukset (dry_run, gift_card_pdf_years).

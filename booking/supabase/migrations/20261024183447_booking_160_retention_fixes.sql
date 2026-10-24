@@ -1,4 +1,4 @@
--- booking_160: tietosuojan säilytysajan korjaukset (Joonaksen hyväksymät säännöt 24.10.2026). Väliaikainen versio 20261024330000.
+-- booking_160: tietosuojan säilytysajan korjaukset (Joonaksen hyväksymät säännöt 24.10.2026). Väliaikainen versio 20261024183447.
 -- Korjaa booking_157:n (20261024165608) puutteet. Ajo pysyy pois päältä: privacy_retention.enabled = false (ei muuteta) ja uusi
 -- privacy_retention.dry_run = true (oletus). Ei ajastusta (pg_cron) tässä migraatiossa.
 -- 1) Markkinointilupa: voimassa oleva lupa (marketing_consent ja ei perumista luvan antamisen jälkeen) estää anonymisoinnin. Luvan antaminen
@@ -19,7 +19,7 @@
 --    booking.staff, booking.text_bots, linkitetty anonymisoimaton asiakas, app_metadata-rooli, super admin tai mikä tahansa viittaus
 --    auth-skeeman ulkopuolelta (pg_constraint) → ohitus (skipped_reason).
 -- Ehto: tilaus-, maksu-, varaus- ja käyntirivejä ei poisteta (vain anonymisoidaan). Kirjanpito 6 v tilikauden päättymisvuoden lopusta.
--- Rollback: booking/supabase/rollbacks/20261024330000_booking_160_ROLLBACK.sql (palauttaa 8 funktiota tuotannon md5:n mukaisiksi).
+-- Rollback: booking/supabase/rollbacks/20261024183447_booking_160_ROLLBACK.sql (palauttaa 8 funktiota tuotannon md5:n mukaisiksi).
 set local lock_timeout = '5s';
 
 -- ===== asetukset (enabled ei muutu) =====
