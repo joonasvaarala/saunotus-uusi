@@ -32,7 +32,9 @@ const { site, kb, BASE, e } = L;
 // 2) varausohjelman tiedostot
 const A = join(OUT, 'booking');
 mkdirSync(A, { recursive: true });
-for (const f of ['shop.js', 'rich-text.js', 'rich-view.js', 'invoice-validate.js', 'i18n.js', 'phone.js', 'shop.css', 'treatments.js', 'treatment-ui.js', 'order.js', 'order-texts.js', 'order-api.js', 'order-mock.js', 'order-gift.js', 'gift.js', 'gift-api.js', 'gift-logic.js', 'gift-mock.js', 'gift-texts.js', 'gift-ui.js', 'mobilepay-api.js', 'pay-choices.js', 'hold-texts.js', 'hold-logic.js', 'hold-ui.js', 'hold-mock.js', 'pay-choices-texts.js', 'mobilepay-logic.js', 'mobilepay-texts.js', 'mobilepay-ui.js', 'vismapay-api.js', 'vismapay-logic.js', 'vismapay-texts.js', 'vismapay-ui.js', 'options-logic.js', 'options-texts.js', 'options-ui.js', 'shop-mock.js', 'treatment-mock.js', 'treatment-addons.js', 'site-texts.js', 'site-texts-logic.js', 'text-registry.js', 'catalog-audience.js']) cpSync(join(here, 'src', f), join(A, f));
+for (const f of ['shop.js', 'rich-text.js', 'rich-view.js', 'invoice-validate.js', 'i18n.js', 'phone.js', 'shop.css', 'treatments.js', 'treatment-ui.js', 'order.js', 'order-texts.js', 'order-api.js', 'order-mock.js', 'order-gift.js', 'gift.js', 'gift-api.js', 'gift-logic.js', 'gift-mock.js', 'gift-texts.js', 'gift-ui.js', 'mobilepay-api.js', 'pay-choices.js', 'hold-texts.js', 'hold-logic.js', 'hold-ui.js', 'hold-mock.js', 'pay-choices-texts.js', 'mobilepay-logic.js', 'mobilepay-texts.js', 'mobilepay-ui.js', 'vismapay-api.js', 'vismapay-logic.js', 'vismapay-texts.js', 'vismapay-ui.js', 'options-logic.js', 'options-texts.js', 'options-ui.js', 'shop-mock.js', 'treatment-mock.js', 'treatment-addons.js', 'site-texts.js', 'site-texts-logic.js', 'text-registry.js', 'catalog-audience.js', 'waitlist-logic.js', 'waitlist-texts.js', 'waitlist-ui.js']) cpSync(join(here, 'src', f), join(A, f));
+// Lisäksi kaikki muut src/*.js automaattisesti, ettei uusi moduuli jää julkaisusta pois (#121: waitlist-*.js puuttui → /varaa/ ei auennut).
+for (const f of readdirSync(join(here, 'src'))) if (f.endsWith('.js')) cpSync(join(here, 'src', f), join(A, f));
 cpSync(join(repo, 'booking/shared/sb.js'), join(A, 'sb.js'));
 // Sivutekstit tietokannasta (§18, src/site-texts.mjs): kaupan avainalueet (ui.*) tiedostoon booking/site-texts.json; paikkamerkit täytetään kaupassa ajoajan datasta. Build on jo tarkistanut paikkamerkit (tuntematon → build kaatuu).
 const siteTexts = await ST.loadSiteTexts();
@@ -157,4 +159,6 @@ let changed = 0;
     if (out !== src) { writeFileSync(p, out); changed++; }
   }
 })(OUT);
+// Varmistus: jokainen kaupan distin relatiivinen import löytyy dististä (sama tarkistus kuin hallinnalla build-pages.mjs:ssä).
+(function chkImports(d) { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) continue; if (!n.endsWith('.js')) continue; for (const m of readFileSync(p, 'utf8').matchAll(/(?:from|import)\s*\(?\s*(['"])(\.{1,2}\/[^'"?]+\.js)(?:\?[^'"]*)?\1/g)) { if (!statSync(resolve(d, m[2]), { throwIfNoEntry: false })) { console.error(`shop build: VIRHE: ${p}: tuotu moduuli puuttuu dististä: ${m[2]}`); process.exit(1); } } } })(A);
 console.log(`shop build ok → ${OUT} (${changed} sivun Johku-linkit korvattu)`);
