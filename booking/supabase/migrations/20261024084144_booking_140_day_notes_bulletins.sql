@@ -14,7 +14,7 @@
 --  6) admin_day_bundle(date): booking_133:n versio sellaisenaan (rooli, oikeudet, tuotteet, maksutavat, resurssit, näkymä,
 --     9 argumentin admin_list_reservations, työvuorot, lisäpalvelut, hoitovalinnat, extras, sivutekstit) + 'notes_bundle'.
 -- Uudelleenajettava (if not exists / drop trigger if exists). Ei datamuutoksia olemassa oleviin tauluihin.
--- Rollback: rollbacks/20261024130000_booking_140_ROLLBACK.sql (palauttaa booking_27:n admin_day_shifts- ja booking_133:n
+-- Rollback: rollbacks/20261024084144_booking_140_ROLLBACK.sql (palauttaa booking_27:n admin_day_shifts- ja booking_133:n
 -- admin_day_bundle-funktiot täsmälleen ja poistaa uudet funktiot ja taulut; HUOM: poistaa myös tallennetut muistiinpanot/tiedotteet).
 -- =============================================================================
 

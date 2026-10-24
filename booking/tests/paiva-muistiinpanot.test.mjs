@@ -9,8 +9,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p) => readFileSync(join(root, p), 'utf8');
-const MIG = 'booking/supabase/migrations/20261024130000_booking_140_day_notes_bulletins.sql';
-const RB = 'booking/supabase/rollbacks/20261024130000_booking_140_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024084144_booking_140_day_notes_bulletins.sql';
+const RB = 'booking/supabase/rollbacks/20261024084144_booking_140_ROLLBACK.sql';
 const migration = read(MIG);
 const rollback = read(RB);
 const { firstSentence } = await import(pathToFileURL(join(root, 'booking/admin/day-memos-logic.js')).href);
@@ -45,8 +45,8 @@ const allText = (node) => walk(node, (x) => typeof x.props?.text === 'string').m
 
 test('numerointi: vain booking_140 + pending-import-41, ei 139:ää eikä pending-import-40:tä tästä paketista', () => {
   const migs = readdirSync(join(root, 'booking/supabase/migrations'));
-  assert.deepEqual(migs.filter((f) => f.includes('booking_140')), ['20261024130000_booking_140_day_notes_bulletins.sql']);
-  assert.deepEqual(readdirSync(join(root, 'booking/supabase/rollbacks')).filter((f) => f.includes('booking_140')), ['20261024130000_booking_140_ROLLBACK.sql']);
+  assert.deepEqual(migs.filter((f) => f.includes('booking_140')), ['20261024084144_booking_140_day_notes_bulletins.sql']);
+  assert.deepEqual(readdirSync(join(root, 'booking/supabase/rollbacks')).filter((f) => f.includes('booking_140')), ['20261024084144_booking_140_ROLLBACK.sql']);
   for (const f of migs.filter((x) => x.includes('booking_139'))) assert.doesNotMatch(read(`booking/supabase/migrations/${f}`), /day_notes|staff_bulletins/);
   assert.doesNotMatch(migration, /booking_128/);
 });
