@@ -469,11 +469,13 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const book = safeUrl(c.booking_url);
       const subject = X("email.annual_card.subject");
       const title = X("email.annual_card.title");
-      const intro = X("email.annual_card.intro");
+      // booking_154: hallinnasta myönnetty kortti (source 'admin', ei tilausta) → johdanto ilman ostoa
+      const granted = c.source === "admin";
+      const intro = X(granted ? "email.annual_card_granted.intro" : "email.annual_card.intro");
       const codeLabel = X("email.annual_card.code_label");
       const valid = X("email.annual_card.valid", { from: day(c.valid_from, en), to: day(c.valid_to, en) });
       const howTitle = X("email.annual_card.how_title");
-      const how = [X("email.annual_card.how_1"), X("email.annual_card.how_2"), X("email.annual_card.how_3"), X("email.annual_card.how_4")];
+      const how = [X("email.annual_card.how_1"), X("email.annual_card.how_2"), X(granted ? "email.annual_card_granted.how_3" : "email.annual_card.how_3"), X("email.annual_card.how_4")];
       const bookLabel = X("email.annual_card.book_button");
       const keep = X("email.annual_card.keep");
       const cardSign = `${X("email.common.closing")}\n${X("email.annual_card.sign_name")}\n${SELLER}`;

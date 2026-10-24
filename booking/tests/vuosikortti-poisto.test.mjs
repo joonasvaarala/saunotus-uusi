@@ -113,7 +113,9 @@ test('Myönnä vuosikortti -dialogi: Arvo koodi (generatedAnnualCardCode) ja aja
 test('tekstit: ui.admin.annual_manage.* FI+EN, pending-import-52 täsmää sanakirjaan, ei < eikä emojeja, ei päällekkäin muiden tuontien kanssa', () => {
   const rows = JSON.parse(rd(P52));
   assert.deepEqual(Object.keys(ANNUAL_MANAGE_TEXTS.fi).sort(), Object.keys(ANNUAL_MANAGE_TEXTS.en).sort());
-  assert.equal(rows.length, Object.keys(ANNUAL_MANAGE_TEXTS.fi).length * 2);
+  // booking_154 lisäsi sanakirjaan avaimia, jotka tuodaan pending-import-54:llä (testi: vuosikortti-admin-email.test.mjs)
+  const p54 = new Set(JSON.parse(rd('content/site-texts.pending-import-54.json')).map((r) => r.key));
+  assert.equal(rows.length, Object.keys(ANNUAL_MANAGE_TEXTS.fi).filter((k) => !p54.has(k)).length * 2);
   const seen = new Set();
   for (const r of rows) {
     const w = `${r.key} [${r.lang}]`;
