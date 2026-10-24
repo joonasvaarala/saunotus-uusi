@@ -14,8 +14,8 @@ import { createTalousApi } from '../admin/talous-api.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const rd = (p) => readFileSync(resolve(root, p), 'utf8');
-const MIG = 'booking/supabase/migrations/20261024185000_booking_146_annual_card_email.sql';
-const RB = 'booking/supabase/rollbacks/20261024185000_booking_146_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024124037_booking_146_annual_card_email.sql';
+const RB = 'booking/supabase/rollbacks/20261024124037_booking_146_ROLLBACK.sql';
 const SQLT = 'booking/supabase/tests/discounts/t146_annual_card_email.sql';
 const P46 = 'content/site-texts.pending-import-46.json';
 let TPL = null, ET = null;
@@ -25,7 +25,7 @@ const tsSkip = TPL ? false : 'Node ei tue .ts-tuontia (tarvitaan Node >= 22.18)'
 test('numerointi: booking_146 ja pending-import-46; booking_144/145-tiedostoihin ei kosketa', () => {
   for (const f of [MIG, RB, SQLT, P46]) assert.ok(existsSync(resolve(root, f)), f);
   const mine = readdirSync(resolve(root, 'booking/supabase/migrations')).filter((f) => /booking_146/.test(f));
-  assert.deepEqual(mine, ['20261024185000_booking_146_annual_card_email.sql']);
+  assert.deepEqual(mine, ['20261024124037_booking_146_annual_card_email.sql']);
   for (const f of readdirSync(resolve(root, 'booking/supabase/migrations')).filter((x) => /booking_14[45]/.test(x))) assert.doesNotMatch(rd(`booking/supabase/migrations/${f}`), /annual_card_code/, `${f}: ei tämän paketin muutoksia`);
 });
 
