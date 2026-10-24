@@ -3,7 +3,7 @@
 // ja varaus lukitaan palvelimella (_ritual_addon_attach: aika, kapasiteetti ja hinta tarkistetaan uudelleen).
 //
 // AIKASÄÄNTÖ – yksi paikka: tietokannan asetus booking.settings.ritual_addon (oletus migraatiossa
-// 20261024380000_booking_166_ritual_addon.sql) ja sen lukeva funktio booking._ritual_addon_starts(alku, loppu).
+// 20261024202015_booking_166_ritual_addon.sql) ja sen lukeva funktio booking._ritual_addon_starts(alku, loppu).
 // Muutos: päivitä asetusta, esim. { "before_min": 30, "at_start": true, "first_after_min": 30, "step_min": 60, "at_end": true }.
 // RITUAL_RULE_DEFAULTS + ritualStarts() alla ovat saman säännön peili mockia ja testejä varten (testi vertaa migraation oletukseen).
 // Esimerkki: vuoro 16.00–18.00 → 15.30, 16.00, 16.30, 17.30, 18.00.

@@ -1,4 +1,4 @@
--- t166: saunarituaali yleisen vuoron lisäpalveluna (booking_166, migraatio 20261024380000, väliaikainen versio).
+-- t166: saunarituaali yleisen vuoron lisäpalveluna (booking_166, migraatio 20261024202015, väliaikainen versio).
 -- A aikasääntö (16.00–18.00 → 15.30, 16.00, 16.30, 17.30, 18.00) ja asetus, B saatavuus (public_ritual_addon), C kapasiteetti (täysi aika piiloon,
 -- osittain täysi → max_persons), D ei vapaita aikoja / pois päältä / arkivuoro / ei kelpaa → available=false, E Helsinki vs UTC (aika aina
 -- aikavyöhykkeen kanssa), F palvelimen hinta + lukitus (asiakkaan hinta ohitetaan, väärä aika / henkilömäärä / täysi → koko varaus kumoutuu),
@@ -56,7 +56,7 @@ end $$;
 grant execute on all functions in schema pg_temp to public;
 
 -- L1: migraatio ajetaan uudelleen heti alussa (uudelleenajettavuus)
-\ir ../migrations/20261024380000_booking_166_ritual_addon.sql
+\ir ../migrations/20261024202015_booking_166_ritual_addon.sql
 
 update booking.settings set value = '900'::jsonb where key = 'booking_horizon_days';   -- vain tässä transaktiossa (tuotannossa 180)
 update booking.settings set value = '"pay_later"'::jsonb where key = 'public_payment_mode';
@@ -275,7 +275,7 @@ begin
 end $t$;
 
 -- ---------- L rollback (md5) + migraatio uudelleen ----------
-\ir ../rollbacks/20261024380000_booking_166_ROLLBACK.sql
+\ir ../rollbacks/20261024202015_booking_166_ROLLBACK.sql
 select pg_temp.ck((select string_agg(md5(pg_get_functiondef(x::regprocedure)), ',' order by x) from unnest(array[
   'booking._attach_addons(bigint,jsonb)', 'booking._reservation_refund_plan(bigint)', 'booking.public_get_booking(uuid)',
   'booking.public_preview_code(text,bigint,date,integer,jsonb,text,text)', 'booking.reservations_time_window()']) x)
@@ -283,8 +283,8 @@ select pg_temp.ck((select string_agg(md5(pg_get_functiondef(x::regprocedure)), '
   'L2: rollback palautti tuotannon md5:t');
 select pg_temp.ck(to_regprocedure('booking.public_ritual_addon(bigint,date,integer)') is null and not exists (select 1 from booking.settings where key = 'ritual_addon')
                   and not exists (select 1 from pg_trigger where tgname = 'reservations_ritual_addon_parent'), 'L3: rollback poisti uudet');
-\ir ../rollbacks/20261024380000_booking_166_ROLLBACK.sql
-\ir ../migrations/20261024380000_booking_166_ritual_addon.sql
+\ir ../rollbacks/20261024202015_booking_166_ROLLBACK.sql
+\ir ../migrations/20261024202015_booking_166_ritual_addon.sql
 select pg_temp.ck(to_regprocedure('booking.public_ritual_addon(bigint,date,integer)') is not null and has_function_privilege('anon', 'booking.public_ritual_addon(bigint,date,integer)', 'execute')
                   and not has_function_privilege('anon', 'booking._ritual_addon_attach(bigint,jsonb)', 'execute'), 'L4: migraatio uudelleen + oikeudet');
 

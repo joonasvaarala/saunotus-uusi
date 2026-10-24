@@ -1,5 +1,5 @@
 -- booking_166: saunarituaali yleisen vuoron lisäpalveluna (kauppa: lisäpalvelut-vaihe).
--- Väliaikainen versio 20261024380000 (tuotannon versio voi olla eri; Bottiavustus ajaa). Ei public-skeemaa. Hinnat, ALV, slugit ja URLit ennallaan.
+-- Väliaikainen versio 20261024202015 (tuotannon versio voi olla eri; Bottiavustus ajaa). Ei public-skeemaa. Hinnat, ALV, slugit ja URLit ennallaan.
 --
 -- Tuote: kb.products 8 'Saunotusrituaali' (pelkkä rituaali, 20 €/hlö, ALV 25,5 %, 20 min, 1–6 hlö; product_config: Rauni + rituaalipooli).
 --   Ei kb 7:ää (paketti: rituaali + savusaunavuoro). Tuote vaihdettavissa asetuksella ritual_addon.product_id.
@@ -32,7 +32,7 @@
 --   booking.reservations_time_window(): 023b689b0366602ab32738b7821dcc16 -> 4bff7a9af49ade40e5a953eaeea03547
 -- Uudet: _ritual_addon_cfg, _ritual_addon_starts, _is_ritual_addon_item, _ritual_addon_session_ok, _ritual_addon_fit, _ritual_addon_start_ok,
 --   _ritual_addon_attach, _ritual_addon_move, _ritual_addon_parent_trg, public_ritual_addon (anon/authenticated); trigger reservations_ritual_addon_parent.
--- Rollback: rollbacks/20261024380000_booking_166_ROLLBACK.sql. Testi: tests/t166_ritual_addon.sql (paikallinen PG17).
+-- Rollback: rollbacks/20261024202015_booking_166_ROLLBACK.sql. Testi: tests/t166_ritual_addon.sql (paikallinen PG17).
 set local lock_timeout = '5s';
 
 

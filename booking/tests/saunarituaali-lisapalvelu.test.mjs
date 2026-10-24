@@ -19,8 +19,8 @@ writeFileSync(join(tmp, 'package.json'), '{"type":"module"}');
 const { createRitualMock } = await import(pathToFileURL(join(tmp, 'ritual-addon-mock.js')).href);
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const rd = (p) => readFileSync(join(root, '..', p), 'utf8');
-const MIG = rd('booking/supabase/migrations/20261024380000_booking_166_ritual_addon.sql');
-const RB = rd('booking/supabase/rollbacks/20261024380000_booking_166_ROLLBACK.sql');
+const MIG = rd('booking/supabase/migrations/20261024202015_booking_166_ritual_addon.sql');
+const RB = rd('booking/supabase/rollbacks/20261024202015_booking_166_ROLLBACK.sql');
 const SQLT = rd('booking/supabase/tests/t166_ritual_addon.sql');
 const PENDING = JSON.parse(rd('content/site-texts.pending-import-62.json'));
 const MD5 = { _attach_addons: '6a780e8e00229ff273a321591f197541', _reservation_refund_plan: 'cb44c682ac0095617fe20b297b0cdac3', public_get_booking: 'a155cd472c356c09e595cbda46b4dada',

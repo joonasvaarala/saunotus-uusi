@@ -1,4 +1,4 @@
--- booking_166 ROLLBACK (migraatio 20261024380000_booking_166_ritual_addon.sql).
+-- booking_166 ROLLBACK (migraatio 20261024202015_booking_166_ritual_addon.sql).
 -- Palauttaa korvatut funktiot tuotannon määrittelyiksi täsmälleen (md5 alla), poistaa triggerin, uudet funktiot ja asetuksen.
 -- Jo tehdyt rituaalivaraukset jäävät tavallisiksi kb 8 -varauksiksi (parent_reservation_id säilyy, tilausrivin price_breakdown.ritual_addon säilyy);
 -- niitä ei peruta eikä poisteta. Vartija: funktioiden md5 on oltava booking_166:n tai tuotannon; muuten mitään ei muuteta.
