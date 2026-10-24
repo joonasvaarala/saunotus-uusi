@@ -231,6 +231,10 @@ jobs:
       # _sessions/public_availability/_all palauttavat label_en, kauppa näyttää EN-sivulla label_en || label. Migraatio + rollback olemassa.
       # t151 (booking/supabase/tests/texts/t151_session_label_en.sql) ajetaan paikallisessa PG17:ssä (ketju + 151 + rollback + uudelleenajo).
       - run: node --test booking/tests/en-lahteet.test.mjs
+      # booking_154: hallinnasta myönnetyn vuosikortin koodi sähköpostiin (tilaukseton outbox-rivi, dedupe annual_card_code:<id>, vain uusille korteille,
+      # ostetun kortin polku ennallaan), Myönnä-dialogin "Lähetä koodi asiakkaalle"; tekstit content/site-texts.pending-import-54.json.
+      # t154 (booking/supabase/tests/discounts/t154_annual_card_admin_email.sql, pre154 ennen migraatiota) ajetaan paikallisessa PG17:ssä.
+      - run: node --test booking/tests/vuosikortti-admin-email.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
