@@ -79,6 +79,8 @@ jobs:
       # Sivutekstit tietokannasta (§18) + tuote 7 kentät (booking_61): paikkamerkit, build-haku/välimuisti/varateksti, p_addons, virhekoodit (fixture, ei verkkoa)
       # puhelinnumero: yksi vakio (booking/shop/src/phone.js), kielikohtainen näkyvä muoto (fi/en), tel-linkki kaikkialla samoin; ei käsin kirjoitettuja numeroita lähdekoodissa
       - run: node --test booking/tests/puhelin.test.mjs
+      # linkit kaupan sisälle (Joonas 24.10.2026): Johku-tuotelinkit → /varaa/#/tuote/<slug> (EN /en/book/#/tuote/<slug>); build + kuvaukset
+      - run: node --test booking/tests/linkit-kauppaan.test.mjs
       - run: node --test booking/tests/sivutekstit.test.mjs
       # Sivutekstit osa 3 / PR 1: kaupan sanakirjat avaimiksi, tuontitiedosto (ei ylikirjoita tuotantoa, generoitu koodista), DB-peitto + repon oletukset (ei verkkoa)
       - run: node --test booking/tests/sivutekstit-kauppa.test.mjs
