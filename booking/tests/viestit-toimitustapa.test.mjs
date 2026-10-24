@@ -9,8 +9,8 @@ import { emptyMessage, timingLabel, validateMessage } from '../admin/messages-lo
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p) => readFileSync(join(root, p), 'utf8');
-const MIG = 'booking/supabase/migrations/20261024140000_booking_141_message_delivery_mode.sql';
-const RB = 'booking/supabase/rollbacks/20261024140000_booking_141_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024100050_booking_141_message_delivery_mode.sql';
+const RB = 'booking/supabase/rollbacks/20261024100050_booking_141_ROLLBACK.sql';
 const message = { name: 'Ennen käyntiä', category: 'instruction', active: true,
   subject_fi: 'Hei {asiakas_nimi}', short_fi: '<p>Ota pyyhe</p>', body_fi: '<h2>Tulo-ohje</h2>', product_ids: [7] };
 

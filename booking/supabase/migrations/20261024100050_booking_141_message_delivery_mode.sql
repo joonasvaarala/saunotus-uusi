@@ -10,7 +10,7 @@
 -- Tilaussivu/vahvistus saa lisäksi kentät short_text, short_rich, delivery_mode; vanhat text/body/rich ennallaan.
 -- Ei muuta sähköpostin lähetystilaa (off / dry_run / live), allowlistia eikä messages.timed_enabled-kytkintä.
 -- Ei edge-funktiomuutoksia: mailer ohittaa jo product_messagen, jonka active=false.
--- Rollback: ../rollbacks/20261024140000_booking_141_ROLLBACK.sql
+-- Rollback: ../rollbacks/20261024100050_booking_141_ROLLBACK.sql
 -- Tätä tiedostoa ei ajeta tästä repossa. Bottiavustus ajaa migraation.
 -- ============================================================
 set local lock_timeout = '5s';
