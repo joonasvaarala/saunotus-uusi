@@ -54,7 +54,8 @@ begin
   perform pg_temp.ck(pg_temp.tr(jsonb_build_object('session_key', 'abc', 'event_type', 'page_view', 'path', '/')) ->> 'code' = 'invalid_event', 'V2: virheellinen session_key');
   perform pg_temp.ck(pg_temp.tr(jsonb_build_object('session_key', s1, 'event_type', 'click', 'path', '/')) ->> 'code' = 'invalid_event', 'V3: tuntematon tapahtuma');
   perform pg_temp.ck(pg_temp.tr(jsonb_build_object('session_key', s1, 'event_type', 'page_view', 'path', '/hallinta/')) ->> 'code' = 'invalid_path', 'V4: hallinta ei mitattava');
-  perform pg_temp.ck(pg_temp.tr(jsonb_build_object('session_key', s1, 'event_type', 'page_view', 'path', '/?email=x')) ->> 'code' = 'invalid_path', 'V5: kysely ei kelpaa polkuun');
+  -- booking_150 normalisoi polun (query pois, tuntematon -> /muu): ks. t150 N1–N3. Tämä tarkistus pätee kumpaankin versioon.
+  perform pg_temp.ck(pg_temp.tr(jsonb_build_object('session_key', s1, 'event_type', 'page_view', 'path', '/hallinta/?email=x')) ->> 'code' = 'invalid_path', 'V5: kysely ei tee hallinnasta mitattavaa');
   perform pg_temp.ck(pg_temp.tr(jsonb_build_object('session_key', s1, 'event_type', 'page_view', 'path', '/', 'utm_campaign', 'Kampanja <x>')) ->> 'code' = 'invalid_utm', 'V6: UTM rajattu');
   perform pg_temp.ck(pg_temp.tr(jsonb_build_object('session_key', s1, 'event_type', 'page_view', 'path', '/', 'referrer_domain', 'a@b.fi')) ->> 'code' = 'invalid_referrer', 'V7: referrer rajattu');
   perform pg_temp.ck(pg_temp.tr(jsonb_build_object('session_key', s1, 'event_type', 'page_view', 'path', '/', 'bot', 'true')) ->> 'code' = 'bot'
