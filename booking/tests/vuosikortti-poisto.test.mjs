@@ -13,8 +13,8 @@ import { generatedAnnualCardCode, validCodeFormat } from '../shop/src/discount-c
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const rd = (p) => readFileSync(resolve(root, p), 'utf8');
-const MIG = 'booking/supabase/migrations/20261024240000_booking_152_annual_card_delete.sql';
-const RB = 'booking/supabase/rollbacks/20261024240000_booking_152_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024130658_booking_152_annual_card_delete.sql';
+const RB = 'booking/supabase/rollbacks/20261024130658_booking_152_ROLLBACK.sql';
 const SQLT = 'booking/supabase/tests/discounts/t152_annual_card_delete.sql';
 const P52 = 'content/site-texts.pending-import-52.json';
 const M142 = 'booking/supabase/migrations/20261024104958_booking_142_annual_cards_discount_codes.sql';
@@ -24,7 +24,7 @@ const norm = (s) => s.replace(/\s+/g, ' ').trim();
 
 test('numerointi: booking_152 ja pending-import-52 olemassa, yksi migraatio', () => {
   for (const f of [MIG, RB, SQLT, P52]) assert.ok(existsSync(resolve(root, f)), f);
-  assert.deepEqual(readdirSync(resolve(root, 'booking/supabase/migrations')).filter((f) => /booking_152/.test(f)), ['20261024240000_booking_152_annual_card_delete.sql']);
+  assert.deepEqual(readdirSync(resolve(root, 'booking/supabase/migrations')).filter((f) => /booking_152/.test(f)), ['20261024130658_booking_152_annual_card_delete.sql']);
 });
 
 test('migraatio: admin_delete_annual_card – oikeus, ehdot (ei ostotilausta, ei varauksia), selkeät virheet, FK-kilpa, security definer', () => {

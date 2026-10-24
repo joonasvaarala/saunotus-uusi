@@ -10,7 +10,7 @@
 -- 2) booking.admin_list_annual_cards_details(): lisäkentät reservations_count (kaikki kortin varaukset) ja deletable
 --    (näkymä näyttää Poista-napin vain silloin). Muut kentät ja järjestys ennallaan (booking_142).
 -- Ei muuta hintoja, ALV:tä, kortin myöntämis- tai perumissääntöjä eikä public-skeemaa.
--- Uudelleenajettava: create or replace. Rollback: ../rollbacks/20261024240000_booking_152_ROLLBACK.sql
+-- Uudelleenajettava: create or replace. Rollback: ../rollbacks/20261024130658_booking_152_ROLLBACK.sql
 -- =============================================================================
 set local lock_timeout = '5s';
 

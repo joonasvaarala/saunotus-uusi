@@ -15,13 +15,18 @@ create function pg_temp.msg(p_sql text) returns text language plpgsql as $$
 begin execute p_sql; return 'NO ERROR'; exception when others then return sqlerrm; end $$;
 do $t$
 declare
-  v_adm uuid := test.mk_staff('adm152@example.test', 'admin');
-  v_mgr uuid := test.mk_staff('mgr152@example.test', 'manager');
-  v_staff uuid := test.mk_staff('staff152@example.test', 'staff');
+  v_adm uuid; v_mgr uuid; v_staff uuid;
   v_rule bigint := test.rule('Naisten sauna%');
   v_day date := test.next_dow(2, 6);
   v_c1 bigint; v_c2 bigint; v_c3 bigint; v_a1 bigint; v_a2 bigint; v_a3 bigint; v_a4 bigint; v_o bigint; j jsonb; v_list jsonb; v_audit int; v_price43 numeric;
 begin
+  -- auth.users.id:llä ei ole tuotannossa oletusarvoa → id annetaan itse; test.mk_user löytää valmiin rivin sähköpostilla
+  insert into auth.users(id, email)
+    select gen_random_uuid(), e from unnest(array['adm152@example.test', 'mgr152@example.test', 'staff152@example.test']) e
+     where not exists (select 1 from auth.users u where u.email = e);
+  v_adm := test.mk_staff('adm152@example.test', 'admin');
+  v_mgr := test.mk_staff('mgr152@example.test', 'manager');
+  v_staff := test.mk_staff('staff152@example.test', 'staff');
   insert into booking.customers(name, email, phone) values ('Poisto Pekka', 'poisto1@example.test', '0405550001') returning id into v_c1;
   insert into booking.customers(name, email, phone) values ('Poisto Paula', 'poisto2@example.test', '0405550002') returning id into v_c2;
   insert into booking.customers(name, email, phone) values ('Poisto Piia', 'poisto3@example.test', '0405550003') returning id into v_c3;
