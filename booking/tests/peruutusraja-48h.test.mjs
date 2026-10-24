@@ -79,7 +79,7 @@ test('tilaussivu: lomake vain kun palvelin sallii; rajan jälkeen teksti + tel-l
   const js = read('booking/shop/src/order.js');
   assert.match(js, /function cancelBody\(o, note\)/);
   assert.match(js, /if \(o\.can_request_cancel == null\) return \[note, cancelForm\(\)\];/, 'vanha backend kuten ennen');
-  assert.match(js, /if \(o\.cancel_closed\) return \[phoneText\(t\.cancelClosed/);
+  assert.match(js, /if \(o\.cancel_closed\) return \[phoneText\(t\[oneKey\('cancelClosed', L, \{ hours \}, t\)\]/);
   assert.match(js, /if \(!o\.can_request_cancel\) return \[note\];/, 'ei lomaketta kun peruutus ei ole sallittu');
   assert.match(js, /href: `tel:\$\{S\.phoneTel\}`/);
   assert.match(js, /r\.code === 'cancel_too_late'/);

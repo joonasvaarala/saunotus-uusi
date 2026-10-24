@@ -24,6 +24,7 @@ const RB = rd('booking/supabase/rollbacks/20261024202015_booking_166_ROLLBACK.sq
 const SQLT = rd('booking/supabase/tests/t166_ritual_addon.sql');
 const PENDING = JSON.parse(rd('content/site-texts.pending-import-62.json'));
 const PENDING63 = JSON.parse(rd('content/site-texts.pending-import-63.json'));   // kassakortin korjaus: 3 uutta avainta (ei SQL:ää)
+const PENDING64R = JSON.parse(rd('content/site-texts.pending-import-64.json')).filter((r) => /^ui\.shop\.ritual_/.test(r.key));   // monikkokorjaus: ritual_*_one
 const MD5 = { _attach_addons: '6a780e8e00229ff273a321591f197541', _reservation_refund_plan: 'cb44c682ac0095617fe20b297b0cdac3', public_get_booking: 'a155cd472c356c09e595cbda46b4dada',
   public_preview_code: 'fec859d04960f42d79412bbdf7dc6561', reservations_time_window: '023b689b0366602ab32738b7821dcc16' };
 const hel = (ms) => new Intl.DateTimeFormat('fi-FI', { timeZone: 'Europe/Helsinki', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(ms)).replace('.', ':');
@@ -146,7 +147,7 @@ test('content/site-texts.pending-import-63.json = kassakortin uudet avaimet (3 a
     assert.ok(w, `${p.key}|${p.lang}`); assert.equal(p.text, w.text); assert.equal(p.kind, 'plain'); assert.ok(!p.text.includes('<')); assert.match(p.reason, /booking_166/);
     assert.ok(!PENDING.some((r) => r.key === p.key), 'ei päällekkäin 62:n kanssa');
   }
-  assert.equal(all.length, PENDING.length + PENDING63.length);
+  assert.equal(all.length, PENDING.length + PENDING63.length + PENDING64R.length, 'yksikköavaimet (ritual_*_one) tulevat 64:stä');
   assert.equal(RITUAL_TEXTS.fi.ritualChoose, 'Valitse kellonaika'); assert.equal(RITUAL_TEXTS.en.ritualChoose, 'Choose a time');
 });
 
@@ -208,7 +209,7 @@ test('kassa: rituaali on kortti LISÄPALVELUT-listassa (.bk-addon), aika alasvet
   assert.match(js, /h\('select', \{ id: 'bk-rit-time'/); assert.match(js, /h\('option', \{ value: '', text: rtx\('ritualChoose'\) \}\)/);
   assert.match(js, /timeBox\.hidden = !\(rit\.sel\.qty > 0\)/);
   assert.match(js, /ritErr\(rtx\('ritualTimeRequired'\)\); rit\.ui\.card\.scrollIntoView/);
-  assert.match(js, /const rtx = \(k, v\) => fillText\(t\[k\] \|\| RITUAL_TEXTS\[S\.lang\]\?\.\[k\] \|\| RITUAL_TEXTS\.fi\[k\] \|\| ''/);
+  assert.match(js, /const rtx = \(k, v\) => \{ const k1 = oneKey\(k, S\.lang, v, t, RITUAL_TEXTS\[S\.lang\], RITUAL_TEXTS\.fi\); return fillText\(t\[k1\] \|\| RITUAL_TEXTS\[S\.lang\]\?\.\[k1\] \|\| RITUAL_TEXTS\.fi\[k1\] \|\| t\[k\] \|\| RITUAL_TEXTS\[S\.lang\]\?\.\[k\] \|\| RITUAL_TEXTS\.fi\[k\] \|\| ''/);
   assert.ok(!/\bt\.ritual[A-Z]/.test(js), 'rituaalitekstit vain rtx():n kautta');
 });
 test('kaupan build: versiotunnus ?v= kaikkiin kaupan moduuleihin ja sivujen /booking/-viittauksiin (ei vanhan välimuistin sekoitusta)', () => {
