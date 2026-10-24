@@ -19,8 +19,8 @@ p as (
                              from booking.settings s where s.key = 'privacy_retention.customer_years'), 3) as cy,
                  coalesce((select case when s.value #>> '{}' ~ '^\d{1,4}$' and (s.value #>> '{}')::integer between 1 and 50 then (s.value #>> '{}')::integer end
                              from booking.settings s where s.key = 'privacy_retention.accounting_years'), 6) as ay,
-                 coalesce((select case when s.value #>> '{}' ~ '^\d{1,4}$' and (s.value #>> '{}')::integer between 1 and 600 then (s.value #>> '{}')::integer end
-                             from booking.settings s where s.key = 'privacy_retention.email_outbox_months'), 12) as em,
+                 greatest(coalesce((select case when s.value #>> '{}' ~ '^\d{1,4}$' and (s.value #>> '{}')::integer between 1 and 600 then (s.value #>> '{}')::integer end
+                             from booking.settings s where s.key = 'privacy_retention.email_outbox_months'), 36), 36) as em,  -- booking_160: vähintään 3 v
                  coalesce((select case when s.value #>> '{}' ~ '^\d{1,4}$' and (s.value #>> '{}')::integer between 1 and 50 then (s.value #>> '{}')::integer end
                              from booking.settings s where s.key = 'privacy_retention.gift_card_pdf_years'), 3) as gy,
                  coalesce((select case when s.value #>> '{}' ~ '^\d{1,4}$' and (s.value #>> '{}')::integer >= 1 then (s.value #>> '{}')::integer end
@@ -212,9 +212,11 @@ cand as (
    cross join lateral (select (l.at at time zone 'Europe/Helsinki')::date as d) x
    where l.note is not null and extract(year from x.d)::integer + case when to_char(x.d, 'MM-DD') <= p.fye then 0 else 1 end <= p.max_acct_year
   union all
-  select 'email_outbox', e.id, case when e.status in ('pending', 'sending') then 'open_email' end
+  -- booking_160: rivit säilyvät aina; henkilötiedot (payload, last_error-osoitteet) tyhjennetään 3 v lähetyksestä (lähettämättömät: luonnista)
+  select 'email_outbox', e.id,
+         case when e.status in ('pending', 'sending') or (e.status = 'failed' and e.attempts < e.max_attempts) then 'open_email' end
     from booking.email_outbox e cross join p
-   where e.created_at < p.cut_mail and e.payload <> '{"anonymized": true}'::jsonb
+   where coalesce(e.sent_at, e.created_at) < p.cut_mail and e.payload <> '{"anonymized": true}'::jsonb
   union all
   select 'analytics_events', a.id, null from booking.analytics_events a cross join p where a.event_date < p.cut_analytics
   -- booking_160: kuitti- ja lasku-PDF:t 6 v (kirjanpito), lahjakortti-PDF:t 3 v; PDF ensin pois jaosta (pdf_deleted_at), tiedosto Storage-API:lla

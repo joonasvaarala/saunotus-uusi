@@ -13,13 +13,15 @@ do $$ begin
     raise exception 't160 rollback: booking_160-objekteja jäi';
   end if;
   if to_regprocedure('booking.privacy_retention_run()') is null then raise exception 't160 rollback: booking_157 katosi'; end if;
+  if (select value from booking.settings where key = 'privacy_retention.email_outbox_months') <> '12'::jsonb then raise exception 't160 rollback: email_outbox_months ei palautunut 12:ksi'; end if;
 end $$;
 \i ../migrations/20261024330000_booking_160_retention_fixes.sql
 \i ../migrations/20261024330000_booking_160_retention_fixes.sql
 do $$ begin
   if to_regprocedure('booking.privacy_storage_due(integer)') is null or to_regclass('booking.privacy_auth_deletions') is null
      or (select value from booking.settings where key = 'privacy_retention.enabled') <> 'false'::jsonb
-     or (select value from booking.settings where key = 'privacy_retention.dry_run') <> 'true'::jsonb then
+     or (select value from booking.settings where key = 'privacy_retention.dry_run') <> 'true'::jsonb
+     or (select value from booking.settings where key = 'privacy_retention.email_outbox_months') <> '36'::jsonb then
     raise exception 't160 rollback: migraatio ei palautunut';
   end if;
   raise notice 't160 rollback: OK';

@@ -7,8 +7,10 @@
 -- 2) Yrityksen nimi ja Y-tunnus säilyvät: orders.billing (company, business_id, business_id_raw, kun customer_kind <> 'private'),
 --    kuitin snapshot.buyer (company, business_id), laskun customer_snapshot (name, company_name, business_id, vat_id, kun Y-/ALV-tunnus on),
 --    yritystarjouksen company_name. Laskutusasiakas ilman Y-/ALV-tunnusta on henkilö: nimi ja osoite anonymisoidaan 6 v jälkeen.
--- 3) email_outbox: EI muutoksia booking_157:ään (Joonas 24.10.2026: lähetettyjä sähköposteja ei saa poistaa). Rivejä ei koskaan poisteta;
---    ehdokasehto ja ajon käsittely ovat tavu tavulta booking_157:n (payload → {"anonymized": true} 12 kk jälkeen, avoimet eivät käy).
+-- 3) email_outbox (Joonas 24.10.2026): lähetettyjä sähköposteja EI koskaan poisteta. Rivi säilyy, mutta sen henkilötiedot
+--    (payload: vastaanottaja, nimet, sisältö → {"anonymized": true}; last_error-osoitteet → [poistettu]) tyhjennetään 3 v lähetyksestä
+--    (coalesce(sent_at, created_at)); 157: 12 kk luonnista. Asetus email_outbox_months 12 → 36, ja alaraja 36 kk on koodissa.
+--    Avoimet (pending, sending) ja uudelleenyritettävät (failed, attempts < max_attempts) rivit eivät käy.
 -- 4) PDF:t: kuitti- ja lasku-PDF 6 v (sama kirjanpitovuosilaskenta kuin tositteilla), lahjakortti-PDF 3 v. Ajo merkitsee pdf_deleted_at,
 --    jolloin receipt_by_token / invoice_by_token / svc_get_gift_card_pdf_data eivät enää palauta tietoja (PDF:ää ei muodosteta uudelleen).
 --    Tiedostot poistetaan Storage-API:lla (Edge Function privacy-storage-cleanup, lista booking.privacy_storage_due) — EI SQL:llä
@@ -25,6 +27,9 @@ insert into booking.settings(key, value, description) values
  ('privacy_retention.dry_run', 'true'::jsonb, 'booking_160: true (oletus) = privacy_retention_run vain laskee ja kirjaa määrät (status dry_run), ei muuta mitään, vaikka enabled = true. Myös Storage-siivous vain listaa.'),
  ('privacy_retention.gift_card_pdf_years', '3'::jsonb, 'booking_160: lahjakortin PDF poistetaan näin monen vuoden kuluttua kortin viimeisestä tapahtumasta/voimassaolosta.')
 on conflict (key) do nothing;
+update booking.settings set value = '36'::jsonb,
+       description = 'booking_160: lähetettyjen/päättyneiden sähköpostien henkilötiedot (payload, last_error-osoitteet) tyhjennetään näin monen kuukauden kuluttua lähetyksestä (vähintään 36). Rivejä ei koskaan poisteta.'
+ where key = 'privacy_retention.email_outbox_months' and value = '12'::jsonb;
 
 -- ===== sarakkeet ja taulut =====
 alter table booking.receipts add column if not exists pdf_deleted_at timestamptz;
@@ -121,8 +126,8 @@ p as (
                              from booking.settings s where s.key = 'privacy_retention.customer_years'), 3) as cy,
                  coalesce((select case when s.value #>> '{}' ~ '^\d{1,4}$' and (s.value #>> '{}')::integer between 1 and 50 then (s.value #>> '{}')::integer end
                              from booking.settings s where s.key = 'privacy_retention.accounting_years'), 6) as ay,
-                 coalesce((select case when s.value #>> '{}' ~ '^\d{1,4}$' and (s.value #>> '{}')::integer between 1 and 600 then (s.value #>> '{}')::integer end
-                             from booking.settings s where s.key = 'privacy_retention.email_outbox_months'), 12) as em,
+                 greatest(coalesce((select case when s.value #>> '{}' ~ '^\d{1,4}$' and (s.value #>> '{}')::integer between 1 and 600 then (s.value #>> '{}')::integer end
+                             from booking.settings s where s.key = 'privacy_retention.email_outbox_months'), 36), 36) as em,  -- booking_160: vähintään 3 v
                  coalesce((select case when s.value #>> '{}' ~ '^\d{1,4}$' and (s.value #>> '{}')::integer between 1 and 50 then (s.value #>> '{}')::integer end
                              from booking.settings s where s.key = 'privacy_retention.gift_card_pdf_years'), 3) as gy,
                  coalesce((select case when s.value #>> '{}' ~ '^\d{1,4}$' and (s.value #>> '{}')::integer >= 1 then (s.value #>> '{}')::integer end
@@ -314,9 +319,11 @@ cand as (
    cross join lateral (select (l.at at time zone 'Europe/Helsinki')::date as d) x
    where l.note is not null and extract(year from x.d)::integer + case when to_char(x.d, 'MM-DD') <= p.fye then 0 else 1 end <= p.max_acct_year
   union all
-  select 'email_outbox', e.id, case when e.status in ('pending', 'sending') then 'open_email' end
+  -- booking_160: rivit säilyvät aina; henkilötiedot (payload, last_error-osoitteet) tyhjennetään 3 v lähetyksestä (lähettämättömät: luonnista)
+  select 'email_outbox', e.id,
+         case when e.status in ('pending', 'sending') or (e.status = 'failed' and e.attempts < e.max_attempts) then 'open_email' end
     from booking.email_outbox e cross join p
-   where e.created_at < p.cut_mail and e.payload <> '{"anonymized": true}'::jsonb
+   where coalesce(e.sent_at, e.created_at) < p.cut_mail and e.payload <> '{"anonymized": true}'::jsonb
   union all
   select 'analytics_events', a.id, null from booking.analytics_events a cross join p where a.event_date < p.cut_analytics
   -- booking_160: kuitti- ja lasku-PDF:t 6 v (kirjanpito), lahjakortti-PDF:t 3 v; PDF ensin pois jaosta (pdf_deleted_at), tiedosto Storage-API:lla
@@ -447,7 +454,7 @@ begin
        'customer_years', booking._privacy_int('privacy_retention.customer_years', 3, 1, 50),
        'accounting_years', booking._privacy_int('privacy_retention.accounting_years', 6, 1, 50),
        'fiscal_year_end', booking._privacy_fy_end_mmdd(),
-       'email_outbox_months', booking._privacy_int('privacy_retention.email_outbox_months', 12, 1, 600),
+       'email_outbox_months', greatest(booking._privacy_int('privacy_retention.email_outbox_months', 36, 1, 600), 36),
        'gift_card_pdf_years', booking._privacy_int('privacy_retention.gift_card_pdf_years', 3, 1, 50),
        'analytics_retention_months', booking._privacy_int('analytics_retention_months', 13, 1, 9999)),
     'categories', coalesce((select jsonb_object_agg(cats.category, jsonb_build_object('due', cats.due, 'blocked', cats.blocked, 'sample_ids', cats.sample_ids)) from cats), '{}'::jsonb),
@@ -694,12 +701,13 @@ begin
   exception when others then v_errors := v_errors || jsonb_build_object('category', 'gift_card_ledger_6y', 'error', sqlstate || ' ' || left(sqlerrm, 200));
   end;
 
-  -- --- sähköpostijono: vain päättyneet rivit ---
+  -- --- sähköpostijono: vain päättyneet rivit; rivejä EI poisteta, vain henkilötiedot tyhjennetään (booking_160: 3 v lähetyksestä) ---
   begin
     update booking.email_outbox e
        set payload = '{"anonymized": true}'::jsonb,
            last_error = regexp_replace(e.last_error, '[^[:space:]<>"'',;:]+@[^[:space:]<>"'',;:]+', '[poistettu]', 'g')
-     where e.id in (select x.id from pg_temp._privacy_cand x where x.category = 'email_outbox') and e.status not in ('pending', 'sending');
+     where e.id in (select x.id from pg_temp._privacy_cand x where x.category = 'email_outbox')
+       and e.status not in ('pending', 'sending') and not (e.status = 'failed' and e.attempts < e.max_attempts);
     get diagnostics v_n = row_count; v_counts := v_counts || jsonb_build_object('email_outbox', v_n);
   exception when others then v_errors := v_errors || jsonb_build_object('category', 'email_outbox', 'error', sqlstate || ' ' || left(sqlerrm, 200));
   end;

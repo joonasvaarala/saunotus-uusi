@@ -60,7 +60,10 @@ test('migraatio: ei public-skeemaa, ei ajastusta, enabled ei päälle, dry_run o
   assert.ok(!/\bpublic\./.test(c), 'public-skeemaa ei saa koskea');
   assert.ok(!/cron\.(schedule|unschedule)|net\.http/.test(c));
   assert.ok(!/privacy_retention\.enabled'\s*,\s*'true'/.test(c));
-  assert.ok(!/update booking\.settings set value/.test(c), 'migraatio ei muuta olemassa olevia asetusarvoja');
+  // ainoa asetusarvon muutos: sähköpostien henkilötietojen säilytys 12 → 36 kk (vain jos oletus 12 on voimassa)
+  const upd = [...c.matchAll(/update booking\.settings set value[^;]*;/g)].map((m) => m[0]);
+  assert.equal(upd.length, 1);
+  assert.match(upd[0], /set value = '36'::jsonb,[\s\S]*where key = 'privacy_retention\.email_outbox_months' and value = '12'::jsonb;$/);
   assert.match(c, /\('privacy_retention\.dry_run', 'true'::jsonb,/);
   assert.match(c, /\('privacy_retention\.gift_card_pdf_years', '3'::jsonb,/);
   assert.match(c, /on conflict \(key\) do nothing/);
@@ -92,7 +95,7 @@ test('sääntö 2: yrityksen nimi ja Y-tunnus säilyvät', () => {
   assert.ok(c.includes("_privacy_keep("));
 });
 
-test('sääntö 3 (Joonas 24.10.2026): sähköpostijonosta ei koskaan poisteta rivejä; käsittely täsmälleen kuten booking_157', () => {
+test('sääntö 3 (Joonas 24.10.2026): sähköpostijonosta ei koskaan poisteta rivejä; henkilötiedot pois 3 v lähetyksestä', () => {
   const files = [
     'booking/supabase/migrations/20261024165608_booking_157_privacy_retention.sql',
     'booking/supabase/rollbacks/20261024165608_booking_157_ROLLBACK.sql',
@@ -109,14 +112,19 @@ test('sääntö 3 (Joonas 24.10.2026): sähköpostijonosta ei koskaan poisteta r
     assert.ok(!/truncate\s+(table\s+)?(booking\.)?email_outbox/i.test(c), `${f}: TRUNCATE email_outbox`);
   }
   for (const p of [`${FN}/index.ts`, `${FN}/core.ts`]) assert.ok(!/email_outbox/.test(read(p)), p);
-  // ehdokasehto ja ajon käsittely tavu tavulta booking_157:n
-  const m157 = read('booking/supabase/migrations/20261024165608_booking_157_privacy_retention.sql');
-  const cand = (s) => { const i = s.indexOf("  select 'email_outbox', e.id"); assert.ok(i > 0); return s.slice(i, s.indexOf('  union all', i)); };
-  assert.equal(cand(mig), cand(m157));
-  assert.equal(cand(ro), cand(m157));
-  const run = (s) => { const i = s.indexOf('  -- --- sähköpostijono'); assert.ok(i > 0); return s.slice(i, s.indexOf('\n  end;', i)); };
-  assert.equal(run(mig), run(m157));
-  assert.ok(!/privacy_retention\.email_outbox_months/.test(code(mig).replace(/s\.key = 'privacy_retention\.email_outbox_months'|_privacy_int\('privacy_retention\.email_outbox_months'/g, '')), 'asetusta ei muuteta');
+  // rivi säilyy; henkilötiedot tyhjennetään 3 v lähetyksestä (vähintään 36 kk), avoimet/uudelleenyritettävät eivät käy
+  for (const src of [mig, ro]) {
+    const b = block(src);
+    assert.match(b, /greatest\(coalesce\(\(select case when s\.value #>> '\{\}' ~ '\^\\d\{1,4\}\$' and \(s\.value #>> '\{\}'\)::integer between 1 and 600 then \(s\.value #>> '\{\}'\)::integer end\s+from booking\.settings s where s\.key = 'privacy_retention\.email_outbox_months'\), 36\), 36\) as em/);
+    assert.match(b, /case when e\.status in \('pending', 'sending'\) or \(e\.status = 'failed' and e\.attempts < e\.max_attempts\) then 'open_email' end\s+from booking\.email_outbox e cross join p\s+where coalesce\(e\.sent_at, e\.created_at\) < p\.cut_mail and e\.payload <> '\{"anonymized": true\}'::jsonb/);
+  }
+  const r = mig.slice(mig.indexOf('function booking.privacy_retention_run()'));
+  const i = r.indexOf('  -- --- sähköpostijono'), e = r.slice(i, r.indexOf('\n  end;', i));
+  assert.ok(i > 0 && !/delete/i.test(code(e)));
+  assert.match(e, /update booking\.email_outbox e\s+set payload = '\{"anonymized": true\}'::jsonb,\s+last_error = regexp_replace/);
+  assert.match(e, /e\.status not in \('pending', 'sending'\) and not \(e\.status = 'failed' and e\.attempts < e\.max_attempts\)/);
+  assert.match(fnBody('privacy_retention_report('), /greatest\(booking\._privacy_int\('privacy_retention\.email_outbox_months', 36, 1, 600\), 36\)/);
+  assert.match(rb, /set value = '12'::jsonb,[\s\S]*where key = 'privacy_retention\.email_outbox_months' and value = '36'::jsonb;/);
 });
 
 test('sääntö 4: PDF:t merkitään SQL:ssä, tiedostot poistetaan vain Storage-API:lla', () => {

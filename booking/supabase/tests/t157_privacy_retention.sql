@@ -89,7 +89,7 @@ overriding system value values
   (915792, 915701, current_date - interval '5 years', current_date - interval '4 years', 'T157-VK-2', false, 'T157 vanha vuosikortti', now() - interval '5 years');
 insert into booking.email_outbox(id, kind, dedupe_key, status, payload, created_at)
 overriding system value values
-  (915795, 'receipt', 't157-1', 'sent', '{"to":"t157-vanha@example.invalid","name":"T157"}', now() - interval '13 months'),
+  (915795, 'receipt', 't157-1', 'sent', '{"to":"t157-vanha@example.invalid","name":"T157"}', now() - interval '37 months'),  -- booking_160: 3 v
   (915796, 'receipt', 't157-2', 'pending', '{"to":"t157-odottaa@example.invalid"}', now() - interval '13 months'),
   (915797, 'receipt', 't157-3', 'sent', '{"to":"t157-tuore@example.invalid"}', now() - interval '11 months');
 insert into booking.audit_log(id, table_name, action, row_pk, old_data, new_data, at)
@@ -209,7 +209,8 @@ begin
   perform pg_temp.ck((select contact_name is null and email is null and company_name = 'T157 Kirjanpito Tmi' and business_id = '1234567-1' from booking.invoice_customers where id = 915773), 'E23b 6 v laskutusasiakas: yhteyshenkilö pois, yritystiedot säilyvät');
   perform pg_temp.ck((select payload = '{"anonymized": true}' from booking.email_outbox where id = 915795)
                      and (select payload ->> 'to' is not null from booking.email_outbox where id = 915796)
-                     and (select payload ->> 'to' is not null from booking.email_outbox where id = 915797), 'E24 sähköpostijono: vanha lähetetty tyhjennetty, odottava ja tuore ennallaan');
+                     and (select payload ->> 'to' is not null from booking.email_outbox where id = 915797), 'E24 sähköpostijono: yli 3 v vanha lähetetty tyhjennetty, odottava ja tuore ennallaan');
+  perform pg_temp.ck((select count(*) from booking.email_outbox where id in (915795, 915796, 915797)) = 3, 'E24b sähköpostijonon rivejä ei poisteta');
   perform pg_temp.ck((select not (old_data ? 'name') and not (old_data ? 'email') and old_data ->> 'language' = 'fi' and not (new_data ? 'name') from booking.audit_log where id = 915798)
                      and (select old_data ? 'name' from booking.audit_log where id = 915799), 'E25 audit_log: yli 3 v henkilöavaimet pois, tuore ennallaan');
   perform pg_temp.ck(not exists (select 1 from booking.audit_log a where a.id > 915799 and a.table_name = 'customers' and a.row_pk = '915701'
