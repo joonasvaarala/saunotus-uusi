@@ -25,7 +25,7 @@
 --     olevat varaukset (_res_active), joten peruttu vuosikorttivaraus vapauttaa kortin jo nyt (testattu t143:ssa).
 -- EI muuteta: maksettu tuotteen 43 tilaus luo vuosikortin myös kassalla/POSissa asetuksesta annual_card_sale_enabled
 -- riippumatta (odottaa omistajan päätöstä).
--- Rollback: rollbacks/20261024160000_booking_143_ROLLBACK.sql (palauttaa booking_142:n määritelmät täsmälleen).
+-- Rollback: rollbacks/20261024111622_booking_143_ROLLBACK.sql (palauttaa booking_142:n määritelmät täsmälleen).
 -- =============================================================================
 set local lock_timeout = '5s';
 

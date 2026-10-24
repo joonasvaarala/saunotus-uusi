@@ -11,9 +11,9 @@ import { DISCOUNT_TEXTS } from '../shop/src/discount-texts.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const rd = (p) => readFileSync(resolve(root, p), 'utf8');
-const MIG = 'booking/supabase/migrations/20261024160000_booking_143_annual_code_hardening.sql';
+const MIG = 'booking/supabase/migrations/20261024111622_booking_143_annual_code_hardening.sql';
 const SQL = rd(MIG);
-const RB = rd('booking/supabase/rollbacks/20261024160000_booking_143_ROLLBACK.sql');
+const RB = rd('booking/supabase/rollbacks/20261024111622_booking_143_ROLLBACK.sql');
 const SQL142 = rd('booking/supabase/migrations/20261024104958_booking_142_annual_cards_discount_codes.sql');
 const T143 = rd('booking/supabase/tests/discounts/t143_annual_code_hardening.sql');
 const fn = (src, name) => {

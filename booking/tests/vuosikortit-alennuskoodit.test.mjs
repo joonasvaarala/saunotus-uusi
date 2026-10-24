@@ -21,7 +21,7 @@ const rd = (p) => readFileSync(resolve(root, p), 'utf8');
 const SQL = rd('booking/supabase/migrations/20261024104958_booking_142_annual_cards_discount_codes.sql');
 const RB = rd('booking/supabase/rollbacks/20261024104958_booking_142_ROLLBACK.sql');
 const T142 = rd('booking/supabase/tests/discounts/t142_annual_cards_discount_codes.sql');
-const SQL143 = rd('booking/supabase/migrations/20261024160000_booking_143_annual_code_hardening.sql');
+const SQL143 = rd('booking/supabase/migrations/20261024111622_booking_143_annual_code_hardening.sql');
 const SHOP = rd('booking/shop/src/shop.js'), ORDER = rd('booking/shop/src/order.js'), ADMIN = rd('booking/admin/admin.js');
 const DISC = rd('booking/admin/views/discounts.js'), CUST = rd('booking/admin/views/customers.js'), CSS = rd('booking/shop/src/shop.css');
 
