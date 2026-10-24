@@ -27,6 +27,7 @@ import { visibleText, richHost } from './rich-view.js';
 import { revealForm, revealIfHidden } from './gift-ui.js';
 import { normalizeCode, quoteSignature, isAnnualQuote, isCodeError } from './discount-code-logic.js';
 import { createQuietOfferCache, indexOffers, findOffer, dayMaxPercent, productMaxPercent, quietPrices, quietCheckout, pctText, fillText, quietWindow, offerKey } from './quiet-offers-logic.js';
+import { normalizeOffer, ritualPrice, findTime, clampQty, reconcile, ritualAddonArg, ritualSig, splitItems, isRitualError } from './ritual-addon-logic.js';
 import { eventText, occurrenceText, occurrenceLabel, findEvent, saleState, upcoming, isMultiDay } from './event-sale.js';
 
 const S = window.BOOKING_SHOP;                   // build-aikainen konfiguraatio (kieli, polut, ei-verkossa-varattavat tuotteet)
@@ -122,7 +123,7 @@ const MOCK = new URLSearchParams(location.search).get('mock') === '1';
 let MOCK_FETCH;   // ?mock=1&scenario=pay: mobilepay-start / mobilepay-notify -funktioiden mock (fetch-yhteensopiva)
 if (MOCK) { const sm = (await import('./shop-mock.js')).createShopMock({ fail: new URLSearchParams(location.search).get('fail'), scenario: new URLSearchParams(location.search).get('scenario') || '', mpResult: new URLSearchParams(location.search).get('mpresult') || '' }); setRpcOverride(sm.rpc); MOCK_FETCH = sm.mpFetch; }
 // Mock-tilan parametrit säilyvät linkeissä ja ohjauksissa (scenario=hold… toimii koko kulun läpi kassalta vahvistussivulle)
-const mockQs = () => { if (!MOCK) return ''; const cur = new URLSearchParams(location.search), q = new URLSearchParams({ mock: '1' }); for (const k of ['scenario', 'mpresult', 'mpinterval', 'mpmax', 'holdsec', 'fail']) if (cur.has(k)) q.set(k, cur.get(k)); return `?${q}`; };
+const mockQs = () => { if (!MOCK) return ''; const cur = new URLSearchParams(location.search), q = new URLSearchParams({ mock: '1' }); for (const k of ['scenario', 'mpresult', 'mpinterval', 'mpmax', 'holdsec', 'fail', 'ritual']) if (cur.has(k)) q.set(k, cur.get(k)); return `?${q}`; };
 const bk = (hash) => `${S.shopHref}${mockQs()}#${hash}`;
 // Kassan pitotila ja maksutavat yhdestä paikasta (vuoro- ja hoitokassa): palvelin (public_checkout_payment_options) päättää, ei kovakoodata. Virhe → vanha käytös.
 const holdInfo = () => loadPayChoices({ rpc, fetchImpl: MOCK_FETCH }).then((m) => {
@@ -673,26 +674,80 @@ async function viewCheckout(ruleId, ds, productId, via) {
   const qOffer = findOffer(await quietIdx().catch(() => null), p.id, s.rule_id, s.starts_at);
   const qNote = h('p', { class: 'bk-note bk-quiet-note', 'data-testid': 'checkout-quiet-note', hidden: true, text: t.quietNote });
   const addonsSum = () => addons.reduce((x, a) => x + qty.get(a.id) * +a.price, 0);
+  // booking_166: saunarituaali lisäpalveluna (vain yleinen vuoro). Ajat, vapaat paikat ja hinnat palvelimelta (public_ritual_addon);
+  // ei aikoja / vanha backend / virhe → osio piilossa. Valinta = { key: alkuaika ISO (UTC), qty }; palvelin lukitsee ajan ja hinnan varauksessa.
+  const rit = { offer: null, sel: { key: null, qty: 0 }, seq: 0, timer: null, n, rows: [] };
+  const ritBox = h('fieldset', { class: 'bk-section bk-ritual', 'data-testid': 'checkout-ritual', hidden: true });
+  const ritMsg = h('p', { class: 'bk-note bk-ritual-msg', role: 'status', 'aria-live': 'polite', 'data-testid': 'ritual-msg' });
+  const ritOn = () => !!rit.offer && !!rit.sel.key && rit.sel.qty > 0 && !annualOn();
+  const ritualSum = () => (ritOn() ? ritualPrice(rit.offer, rit.sel.qty) : 0);
+  const rtm = (iso) => fmt(iso, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).replace('.', ':');
+  const ritName = () => (S.lang === 'en' && rit.offer?.name_en) || rit.offer?.name || t.ritualTitle;
+  async function loadRitual() {
+    if (s.mode !== 'shared') return;
+    const my = ++rit.seq; rit.n = n;
+    let r = null;
+    try { r = await rpc('public_ritual_addon', { p_rule_id: s.rule_id, p_date: ds, p_persons: n }); } catch { r = null; }
+    if (my !== rit.seq) return;
+    const offer = normalizeOffer(r), rc = reconcile(rit.sel, offer, n);
+    rit.offer = offer; rit.sel = { key: rc.key, qty: rc.qty };
+    ritMsg.textContent = rc.lost ? t.ritualLost : '';
+    renderRitual(); upd();
+  }
+  function renderRitual() {
+    const o = rit.offer;
+    ritBox.hidden = !o;
+    if (!o) { ritBox.replaceChildren(); rit.rows = []; return; }
+    const pos = { before: t.ritualBefore, start: t.ritualStart, during: t.ritualDuring, end: t.ritualEnd };
+    const pick = (key) => { rit.sel = { key, qty: key ? clampQty(rit.sel.qty || n, o, key, n) : 0 }; ritMsg.textContent = ''; upd(); };
+    const radio = (key, id, label, extra) => {
+      const inp = h('input', { type: 'radio', name: 'bk-ritual', id, value: key || '', onchange: () => pick(key) });
+      return { key, inp, node: h('li', { class: 'bk-ritual-opt' }, inp, h('label', { for: id }, h('strong', { text: label }), extra ? h('span', { class: 'bk-ritual-pos', text: extra }) : null)) };
+    };
+    rit.rows = [radio(null, 'bk-rit-none', t.ritualNone, null),
+      ...o.times.map((x, i) => radio(x.key, `bk-rit-${i}`, rtm(x.starts_at), [pos[x.position || ''] || '', x.max < n ? fillText(t.ritualSpots, { n: x.max }) : ''].filter(Boolean).join(' · ')))];
+    const rq = h('input', { id: 'bk-rit-n', type: 'number', min: o.min_persons, inputmode: 'numeric', 'aria-label': t.ritualQty, onchange: () => { rit.sel.qty = clampQty(Math.floor(+rq.value) || o.min_persons, o, rit.sel.key, n); upd(); } });
+    const rdec = h('button', { type: 'button', class: 'bk-step', 'aria-label': t.ritualFewer, onclick: () => { rit.sel.qty = clampQty(rit.sel.qty - 1, o, rit.sel.key, n); upd(); } }, '−');
+    const rinc = h('button', { type: 'button', class: 'bk-step', 'aria-label': t.ritualMore, onclick: () => { rit.sel.qty = clampQty(rit.sel.qty + 1, o, rit.sel.key, n); upd(); } }, '+');
+    const qtyRow = h('div', { class: 'bk-ritual-qty', 'data-testid': 'ritual-qty' }, h('label', { for: 'bk-rit-n', text: t.ritualQty }), h('div', { class: 'bk-stepper' }, rdec, rq, rinc));
+    const annualNote = h('p', { class: 'bk-hint', 'data-testid': 'ritual-annual', text: t.ritualAnnual });
+    rit.sync = () => {
+      const lock = annualOn(), tm0 = findTime(o, rit.sel.key);
+      for (const r of rit.rows) { r.inp.checked = (r.key || null) === (ritOn() ? rit.sel.key : null); r.inp.disabled = lock && !!r.key; }
+      qtyRow.hidden = !ritOn(); annualNote.hidden = !lock;
+      if (tm0) { const hi = Math.min(tm0.max, n); rq.max = hi; rq.value = rit.sel.qty; rdec.disabled = rit.sel.qty <= o.min_persons; rinc.disabled = rit.sel.qty >= hi; }
+    };
+    ritBox.replaceChildren(h('legend', { text: t.ritualTitle }),
+      h('p', { class: 'bk-hint' }, fillText(t.ritualLead, { min: o.duration_minutes || 20 }), ' ', h('strong', { class: 'bk-ritual-price', text: fillText(t.ritualPrice, { price: money(o.unit_price ?? ritualPrice(o, 1)) }) })),
+      annualNote, h('ul', { class: 'bk-ritual-list' }, rit.rows.map((r) => r.node)), qtyRow);
+    rit.sync();
+  }
   // Alennus- / vuosikorttikoodi (booking_142): palvelin laskee hinnan (public_check_code); quote = viimeisin hyväksytty vastaus
   // ja sig = henkilömäärä + lisäpalvelut, joille se laskettiin. Vuosikortti lukitsee henkilömäärän ja poistaa lisäpalvelut.
   const code = { value: '', quote: null, sig: '', timer: null };
-  const sig = () => quoteSignature(n, addons.map((a) => qty.get(a.id)));
+  const sig = () => `${quoteSignature(n, addons.map((a) => qty.get(a.id)))}|${ritualSig(ritOn() ? rit.sel : null)}`;
+  const chosenAddons = () => { const c = addons.filter((a) => qty.get(a.id) > 0).map((a) => ({ id: a.id, quantity: qty.get(a.id) })), ra = ritualAddonArg(ritOn() ? rit.sel : null); if (ra) c.push(ra); return c; };
   const annualOn = () => isAnnualQuote(code.quote);
   const locked = () => wlLock || annualOn();
   const upd = () => {
     if (annualOn()) { n = +code.quote.persons || 1; for (const a of addons) qty.set(a.id, 0); }
     for (const a of addons) qty.set(a.id, Math.min(qty.get(a.id), addonLimit(a, n)));
+    if (annualOn()) rit.sel = { key: null, qty: 0 };   // vuosikortti: ei lisäpalveluita (annual_card_no_addons)
+    else if (rit.sel.key) rit.sel.qty = clampQty(rit.sel.qty, rit.offer, rit.sel.key, n);
+    if (s.mode === 'shared' && rit.n !== n) { rit.n = n; clearTimeout(rit.timer); rit.timer = setTimeout(loadRitual, 350); }   // henkilömäärä muuttui → vapaat ajat uudelleen
     if (code.quote && !annualOn() && code.sig !== sig()) recheckCode();
     const fresh = code.quote && code.sig === sig();
     const qv = quietCheckout({ quote: fresh ? code.quote : null, offer: annualOn() || (code.quote && !fresh) ? null : qOffer, sessionTotal: priceFor(s, n) });
-    total.textContent = money(fresh ? +code.quote.total : priceFor(s, n) - (qv.source === 'quiet' ? qv.amount : 0) + addonsSum());
+    total.textContent = money(fresh ? +code.quote.total : priceFor(s, n) - (qv.source === 'quiet' ? qv.amount : 0) + addonsSum() + ritualSum());
     qNote.hidden = qv.source !== 'quiet';
     sumList.replaceChildren(h('dt', { text: t.what }), h('dd', { text: pname(p) }), h('dt', { text: t.when }), h('dd', { text: `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(n) }),
       ...addons.filter((a) => qty.get(a.id) > 0).flatMap((a) => [h('dt', { text: aname(a) }), h('dd', { text: `${qty.get(a.id)} × ${money(a.price)}` })]),
+      ...(ritOn() ? [h('dt', { text: ritName() }), h('dd', { 'data-testid': 'checkout-ritual-sum', text: `${fillText(t.ritualSummary, { time: rtm(rit.sel.key), n: rit.sel.qty })} · ${money(ritualSum())}` })] : []),
       ...(qv.source === 'quiet' ? [h('dt', { text: fillText(t.quietCheckout, { pct: pctText(qv.percent, S.lang) }) }), h('dd', { 'data-testid': 'checkout-quiet', text: `−${money(qv.amount)}` })] : []),
       ...(fresh && qv.source === 'code' && +code.quote.discount > 0 ? [h('dt', { text: annualOn() ? t.annualTitle : t.codeDiscountRow }), h('dd', { 'data-testid': 'checkout-discount', text: `${code.quote.code} · −${money(code.quote.discount)}` })] : []));
     num.value = n; minus.disabled = wlLock || annualOn() || n <= s.min_persons; plus.disabled = wlLock || annualOn() || n >= max; num.readOnly = wlLock || annualOn();
     for (const r of addonRows) r.sync();
+    rit.sync?.();
     submitLabel();
     payNote.hidden = payExtra.hidden = free();   // maksuton varaus: ei maksuohjetta
   };
@@ -736,7 +791,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
     if (!v) { setStatus(t.codeEmpty, false); codeInput.focus(); return; }
     codeApply.disabled = true; if (!quiet) setStatus(t.codeChecking, true);
     const fd = new FormData(form);
-    const chosen = addons.filter((a) => qty.get(a.id) > 0).map((a) => ({ id: a.id, quantity: qty.get(a.id) }));
+    const chosen = chosenAddons();
     let r = null;
     try {
       r = await rpc('public_check_code', { p_code: v, p_rule_id: s.rule_id, p_date: ds, p_persons: n, p_addons: chosen.length ? chosen : null,
@@ -745,7 +800,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
     codeApply.disabled = false;
     if (!r?.ok) { code.value = ''; code.quote = null; code.sig = ''; codeInput.readOnly = false; codeApply.hidden = false; codeRemove.hidden = true; setStatus(t.codeErrors[r?.code] || t.codeErrors.generic, false); upd(); return; }
     code.value = v; code.quote = r;
-    if (isAnnualQuote(r)) { n = +r.persons || 1; for (const a of addons) qty.set(a.id, 0); }
+    if (isAnnualQuote(r)) { n = +r.persons || 1; for (const a of addons) qty.set(a.id, 0); rit.sel = { key: null, qty: 0 }; }
     code.sig = sig();
     codeInput.readOnly = true; codeApply.hidden = true; codeRemove.hidden = false;
     if (r.discount_source === 'quiet') setStatus(t.quietCodeNote, true);   // booking_162: ale on edullisempi → koodia ei käytetä (etuja ei yhdistetä)
@@ -764,7 +819,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
     const wasFree = free();
     submit.disabled = true; submit.textContent = wasFree ? t.codeConfirming : hmode.on ? ht(S.lang, 'checkout.creating') : t.booking;
     try {
-      const chosen = addons.filter((a) => qty.get(a.id) > 0).map((a) => ({ id: a.id, quantity: qty.get(a.id) }));
+      const chosen = chosenAddons();
       const args = { p_rule_id: s.rule_id, p_date: ds, p_persons: n, p_name: cust.name, p_email: cust.email, p_phone: cust.phone, p_marketing_consent: consent.checked, p_locale: S.lang, p_note: (f.get('note') || '').trim() || null,
         p_customer_kind: cust.kind, p_company: cust.company, p_addons: chosen.length ? chosen : null };
       // Koodi vain kun se on hyväksytty: muuten sama public_create_booking kuin ennen (booking_142 ei muuta sitä).
@@ -776,12 +831,14 @@ async function viewCheckout(ruleId, ds, productId, via) {
       submit.disabled = false; submitLabel();
       msg.replaceChildren(errorBox(e.mapped ? e.message : t.errorGeneric));   // palvelimen raaka message ei koskaan asiakkaalle (ui.shop.error_generic)
       if (['capacity_exceeded', 'private_booked', 'public_shift_booked', 'space_closed'].includes(e.code)) state.months.clear();
+      if (isRitualError(e.code)) loadRitual();   // booking_166: rituaaliaika ehti täyttyä → vapaat ajat uudelleen
       msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true });
     }
   } },
     h('fieldset', { class: 'bk-section' }, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, minus, num, plus)),
     // Järjestys: henkilömäärä → asiakastyyppi ja yhteystiedot → lisäpalvelut → lisätiedot, ehdot ja varaus
     cf.node,
+    ritBox, ritMsg,
     addonRows.length ? h('fieldset', { class: 'bk-section bk-addons' }, h('legend', { text: t.addonsTitle }), h('p', { class: 'bk-hint', text: t.addonsHint }), h('ul', { class: 'bk-addonlist' }, addonRows.map((r) => r.node))) : null,
     codeBox, legal.nodes,
     msg, submit);
@@ -813,13 +870,15 @@ async function viewCheckout(ruleId, ds, productId, via) {
         h('p', { class: 'bk-totalrow' }, t.total + ': ', total, ' ', h('small', { text: t.vatIncl })), qNote,
         payNote, payExtra)));
   upd(); focusTop();
+  loadRitual();
 }
 
 // ---- vahvistussivu ----
 const ics = (b) => {
-  const it = b.items[0], z = (iso) => new Date(iso).toISOString().replace(/[-:]|\.\d{3}/g, '');
-  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Sipoonjoen Perinnesauna//Varaus//FI', 'BEGIN:VEVENT', `UID:${b.order_no}@saunotus.fi`, `DTSTAMP:${z(new Date().toISOString())}`,
-    `DTSTART:${z(it.starts_at)}`, `DTEND:${z(it.ends_at)}`, `SUMMARY:${it.product_name}`, 'LOCATION:Hindsbyntie 124\\, 04130 Sipoo', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+  const { main, ritual } = splitItems(b.items), z = (iso) => new Date(iso).toISOString().replace(/[-:]|\.\d{3}/g, '');
+  // booking_166: vuoron mukana varattu saunarituaali omana tapahtumanaan (UID-pääte -r1 …), vuoro ensin
+  const ev = (it, uid) => ['BEGIN:VEVENT', `UID:${uid}@saunotus.fi`, `DTSTAMP:${z(new Date().toISOString())}`, `DTSTART:${z(it.starts_at)}`, `DTEND:${z(it.ends_at)}`, `SUMMARY:${it.product_name}`, 'LOCATION:Hindsbyntie 124\\, 04130 Sipoo', 'END:VEVENT'];
+  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Sipoonjoen Perinnesauna//Varaus//FI', ...ev(main, b.order_no), ...ritual.flatMap((it, i) => ev(it, `${b.order_no}-r${i + 1}`)), 'END:VCALENDAR'].join('\r\n');
 };
 // Vahvistussivu. refresh = päivitys maksun/lahjakortin jälkeen (ei spinneriä, ei fokuksen hyppyä); notice = ilmoitus maksusta; host = paluutilan paneeli (säilyy päivityksessä); noReturn = älä käynnistä ?pay=mobilepay-paluuta uudelleen.
 async function viewConfirmation({ refresh = false, notice = null, host = null, noReturn = false } = {}) {
@@ -830,8 +889,9 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   let b; try { b = await rpc('public_get_booking', { p_token: token }); } catch { mount(errorBox(t.loadError), phoneBox()); return; }
   if (!b?.ok) { mount(errorBox(t.notFound), phoneBox()); return; }
   if (sub === 'muuta' && b.can_change) return isTreatmentBooking(b) ? viewTreatmentChange(token, b) : viewChange(token, b);
-  const it = b.items[0];
-  const sp = (await loadStatic()).get(+it.product_id), prodName = (S.lang === 'en' && sp?.name_en) || it.product_name;   // englanniksi kb-nimi (palvelin palauttaa suomenkielisen)
+  const { main: it, ritual: ritItems } = splitItems(b.items);   // booking_166: vuoron rivi ensin, rituaali omana rivinään
+  const stMap = await loadStatic(), ritEn = new Map(ritItems.map((x) => [+x.product_id, stMap.get(+x.product_id)?.name_en || null]));
+  const sp = stMap.get(+it.product_id), prodName = (S.lang === 'en' && sp?.name_en) || it.product_name;   // englanniksi kb-nimi (palvelin palauttaa suomenkielisen)
   const co = normCheckout(b);   // §17: null = vanha backend / ei pitotilaa → vanha näkymä muuttumattomana
   const holdV = isHoldView(co);
   const head = holdV ? ht(S.lang, { awaiting_payment: 'status.awaiting', processing_payment: 'status.processing', preliminary: 'status.preliminary', expired: 'status.expired' }[co.state]) : { confirmed: t.confConfirmed, pending: t.confPending, cancelled: t.confCancelled, expired: t.confExpired }[b.status] || b.status;
@@ -859,6 +919,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     optRow ? [h('dt', { text: ox.what }), h('dd', { 'data-testid': 'conf-option', class: it.option ? '' : 'bk-opt-missing', text: optRow })] : null,
     h('dt', { text: t.when }), h('dd', { text: `${dayLong(it.starts_at)}, ${hm(it.starts_at)}–${hm(it.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(it.persons) }),
     (b.addons || []).flatMap((a) => [h('dt', { text: (S.lang === 'en' && a.name_en) || a.name }), h('dd', { text: `${a.quantity} × ${money(a.unit_price)}` })]),
+    ritItems.flatMap((x) => [h('dt', { text: (S.lang === 'en' && (x.name_en || ritEn.get(+x.product_id))) || x.product_name }), h('dd', { 'data-testid': 'conf-ritual', text: `${dayLong(x.starts_at)}, ${fillText(t.ritualSummary, { time: fmt(x.starts_at, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).replace('.', ':'), n: x.persons })} · ${money(x.line_total)}` })]),
     h('dt', { text: t.total }), h('dd', { text: `${money(b.total)} (${t.vatIncl})` }), h('dt', { text: t.payStatus }), h('dd', { text: pay }),
     holdV && co.awaiting && co.remaining > 0 ? [h('dt', { text: ht(S.lang, 'summary.remaining') }), h('dd', { 'data-testid': 'conf-remaining', text: money(co.remaining) })] : null);   // pitotilassa: maksettavaa jäljellä (lahjakorttiosuuden jälkeen)
   dl.dataset.testid = 'conf-summary';
@@ -877,7 +938,8 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { 'data-testid': 'conf-title', text: b.status === 'cancelled' ? t.confCancelled : b.status === 'expired' ? t.confExpired : b.status === 'pending' || (co && co.awaiting) ? ht(S.lang, 'h2.awaiting') : t.confTitle }), h('p', { class: 'bk-status', role: 'status', 'data-testid': 'conf-status', text: head }), holdHost, mpHost, dl,   // pitotilassa: otsikko + tilabadge → pitopaneeli → tiivis tilausyhteenveto → maksuosio (secEl lisätään yhteenvedon jälkeen)
     b.status === 'confirmed' && b.customer_kind === 'company' && b.payment_status !== 'paid' ? h('p', { class: 'bk-pay', text: t.companyInvoiceNote }) : null,
     b.status === 'confirmed' && b.payment_status !== 'paid' && b.payment_status !== 'invoiced' && b.customer_kind !== 'company' && !isTreatmentBooking(b) && !online ? h('p', { class: 'bk-pay', text: t.payLater }) : null, optNote && b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-option-note', text: optNote }) : null, actions, out,
-    b.status === 'confirmed' ? h('p', { class: 'bk-note', text: b.can_change ? t.changeInfo(b.change_hours_before, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) : t.changeLocked(b.change_hours_before) }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })) : null,
+    b.status === 'confirmed' && (b.has_ritual_addon || ritItems.length) ? h('p', { class: 'bk-note', 'data-testid': 'conf-ritual-note', text: t.ritualConfNote }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email }))
+      : b.status === 'confirmed' ? h('p', { class: 'bk-note', text: b.can_change ? t.changeInfo(b.change_hours_before, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) : t.changeLocked(b.change_hours_before) }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })) : null,
     h('p', { class: 'bk-note', text: t.emailNote }), h('p', {}, h('a', { href: S.infoHref, text: t.directions }))));
   // Maksuosio (MobilePay + lahjakortti) toimintojen alle; ei näytetä kun paluu MobilePaysta on kesken (tulos näkyy sivun yläosassa)
   const again = (n) => viewConfirmation({ refresh: true, notice: n, host: mpHost, noReturn: true });
