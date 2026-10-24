@@ -75,3 +75,26 @@ export const markArgs = (row, { amount, ref, note } = {}) => {
   if (note && String(note).trim()) a.p_note = String(note).trim().slice(0, 500);
   return a;
 };
+
+/** booking_174: lahjakortin arvo käsin ennen hyväksyntää. input = kentän teksti ("50", "50,5", "50.50"), due = maksettava (row.unpaid).
+ *  Palauttaa { ok, value, difference, error } (sentit kokonaislukuina → ei liukulukuvirheitä). Säännöt kuten palvelimella:
+ *  arvo > 0 ja enintään 2 desimaalia (muuten invalid_amount), arvo ≤ maksettava (muuten voucher_exceeds_total). Erotus > 0 → maksulinkki asiakkaalle. */
+export function voucherValueCheck(input, due) {
+  const s = String(input ?? '').trim().replace(/\s|\u00a0/g, '').replace('€', '').replace(',', '.');
+  const dueC = Math.round(Number(due) * 100);
+  if (!/^\d+(\.\d{1,2})?$/.test(s)) return { ok: false, error: 'invalid_amount' };
+  const c = Math.round(Number(s) * 100);
+  if (!(c > 0)) return { ok: false, error: 'invalid_amount' };
+  if (Number.isFinite(dueC) && c > dueC) return { ok: false, error: 'voucher_exceeds_total', value: c / 100 };
+  const diff = Number.isFinite(dueC) ? dueC - c : 0;
+  return { ok: true, value: c / 100, difference: diff / 100, partial: diff > 0 };
+}
+
+/** Kentän oletusarvo maksettavasta summasta (suomalainen desimaalipilkku, aina 2 desimaalia). */
+export const voucherValueDefault = (due) => (due != null && Number.isFinite(Number(due)) ? Number(due).toFixed(2).replace('.', ',') : '');
+
+/** Lunastuksen argumentit arvokentästä: arvo sama kuin maksettava → ei p_amount (koko summa, kuten ennen); muuten p_amount. */
+export function markArgsWithValue(row, check, due) {
+  if (!check?.ok || Math.round(check.value * 100) === Math.round(Number(due) * 100)) return markArgs(row);
+  return markArgs(row, { amount: check.value });
+}

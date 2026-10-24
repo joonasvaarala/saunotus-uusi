@@ -73,10 +73,17 @@ export function voucherRedeemMockHandlers({ st, need, err, now = new Date() }) {
       const c = find(a.p_id);
       if (c.status === 'redeemed') return { ok: true, already: true, id: c.id, payment_id: c.payment_id, amount: c.amount, redeemed_via: c.resolved_by, resolved_at: c.resolved_at, payment_method: METHOD(c.source), payment_method_label: METHOD_LABEL(c.source) };
       if (!['open', 'processing', 'problem'].includes(c.status)) throw err('invalid_state', 'Pyyntö on jo käsitelty');
-      const r = res(c), amount = a.p_amount != null ? +a.p_amount : Number(r.total_gross ?? 0);
+      // booking_174: arvo käsin (> 0, ≤ maksettava); pienempi → erotus maksulinkkinä (kuten palvelin: payment_link + sähköposti, ei kuittisähköpostia)
+      const r = res(c), due = Number(r.total_gross ?? 0);
+      if (a.p_amount != null && (!(+a.p_amount > 0) || Math.round(+a.p_amount * 100) !== +a.p_amount * 100)) throw err('invalid_amount', 'Lahjakortin arvon pitää olla yli 0 €');
+      if (a.p_amount != null && +a.p_amount > due) throw err('voucher_exceeds_total', 'Lahjakortin arvo ylittää maksettavan summan');
+      const amount = a.p_amount != null ? +a.p_amount : due;
+      const difference = Math.round((due - amount) * 100) / 100;
       Object.assign(c, { status: 'redeemed', resolved_at: new Date().toISOString(), resolved_by: 'staff', amount, payment_id: 70000 + c.id });
-      if (r.reservation_id) r.payment_status = 'paid';
-      return { ok: true, already: false, id: c.id, payment_id: c.payment_id, amount, redeemed_via: 'staff', resolved_at: c.resolved_at, payment_method: METHOD(c.source), payment_method_label: METHOD_LABEL(c.source) };
+      if (r.reservation_id) r.payment_status = difference > 0 ? 'partial' : 'paid';
+      const link = difference > 0 ? { payment_id: 80000 + c.id, amount: difference, link_token: `mock-${c.id}`, link_path: `/maksa/?p=mock-${c.id}`, link_expires_at: new Date(now.getTime() + 14 * 864e5).toISOString(), status: 'pending', online_payment_enabled: true } : null;
+      return { ok: true, already: false, id: c.id, payment_id: c.payment_id, amount, redeemed_via: 'staff', resolved_at: c.resolved_at, payment_method: METHOD(c.source), payment_method_label: METHOD_LABEL(c.source),
+        voucher_value: amount, due, difference: link ? difference : null, payment_link: link, email_queued: !!link };
     },
     admin_set_voucher_redeem_urls: (a) => {
       need('settings.edit'); seed();

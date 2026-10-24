@@ -1,12 +1,13 @@
 // booking_173: kumppanilahjakortin lunastus hallinnassa. Sama rivi tilauksen/varauksen ikkunassa (orderVoucherBox) ja Tarkista-sivulla (unredeemedSection).
 // Rivi: asiakkaan antama koodi + Kopioi, järjestelmän arvaus ja asiakkaan valinta erikseen nimettyinä, myyjän vaihto (audit; maksutapa ja Procountor-tili seuraavat),
 // Lunasta (myyjän sivu uuteen välilehteen, osoite asetuksista) ja Merkitse lunastetuksi (kaksivaiheinen vahvistus, idempotentti palvelimella).
+// booking_174: vahvistuksessa lahjakortin arvo käsin; pienempi arvo kuin maksettava → erotus asiakkaalle maksulinkkinä (palvelin), kuittia ei lähetetä sähköpostilla.
 import { h, toast, run, badge, money, fmtDT, errMsg } from '../ui.js';
 import { icon } from '../icons.js';
 import { vcrText as vt, loadVcrTexts } from '../voucher-redeem-texts.js';
-import { VCR_CHOICES, VCR_RPC, sellerLabel, safeRedeemUrl, guessDiffers, groupBySource, filterChips, orderHref, reservationHref, setSourceArgs, markArgs } from '../voucher-redeem-logic.js';
+import { VCR_CHOICES, VCR_RPC, sellerLabel, safeRedeemUrl, guessDiffers, groupBySource, filterChips, orderHref, reservationHref, setSourceArgs, markArgs, markArgsWithValue, voucherValueCheck, voucherValueDefault } from '../voucher-redeem-logic.js';
 
-const errText = (e) => (e?.code && ['invalid_state', 'forbidden', 'unchanged'].includes(e.code) ? vt(`ui.admin.vcr.err_${e.code}`) : errMsg(e));
+const errText = (e) => (e?.code && ['invalid_state', 'forbidden', 'unchanged', 'invalid_amount', 'voucher_exceeds_total'].includes(e.code) ? vt(`ui.admin.vcr.err_${e.code}`) : errMsg(e));
 const conf = (c) => (['high', 'medium', 'low'].includes(c) ? vt(`ui.admin.vcr.conf_${c}`) : null);
 const methodOf = (row) => String(row.payment_method_label || '').trim() || vt('ui.admin.vcr.method');
 const amountOf = (row) => (row.unpaid != null && Number(row.unpaid) > 0 ? row.unpaid : row.voucher_value ?? row.amount ?? null);
@@ -69,17 +70,51 @@ export function claimRow(row, { rpc, canManage = false, showOrder = true, onChan
     if (canManage && row.can_redeem !== false) {
       const mark = h('button', { type: 'button', class: 'btn sm primary', 'data-testid': 'vcr-mark' }, icon('check', 16), h('span', { text: vt('ui.admin.vcr.mark') }));
       mark.addEventListener('click', () => {
+        // booking_174: lahjakortin arvo käsin (oletus = maksettava). Pienempi arvo → erotus asiakkaalle maksulinkkinä (palvelin luo linkin ja sähköpostin).
+        const due = row.unpaid != null && Number(row.unpaid) > 0 ? Number(row.unpaid) : null;
         const yes = h('button', { type: 'button', class: 'btn sm primary', 'data-testid': 'vcr-mark-yes', text: vt('ui.admin.vcr.mark_yes') });
         const no = h('button', { type: 'button', class: 'btn sm ghost', 'data-testid': 'vcr-mark-no', text: vt('ui.admin.vcr.cancel'), onclick: () => { confirmBox.hidden = true; mark.hidden = false; mark.focus(); } });
+        const ask = h('p', { 'data-testid': 'vcr-ask' });
+        const note = h('p', { class: 'vcr-diff', 'aria-live': 'polite', 'data-testid': 'vcr-diff' });
+        const bad = h('p', { class: 'vcr-bad', role: 'alert', 'data-testid': 'vcr-value-err', hidden: true });
+        let input = null, check = null;
+        const refresh = () => {
+          check = due != null ? voucherValueCheck(input.value, due) : null;
+          const amount = check?.ok ? check.value : amt;
+          ask.textContent = vt('ui.admin.vcr.mark_confirm_value', { amount: money(amount), method: methodOf(row) });
+          if (check && !check.ok) {
+            bad.textContent = vt(`ui.admin.vcr.err_${check.error}`); bad.hidden = false; note.textContent = '';
+            input.setAttribute('aria-invalid', 'true'); yes.disabled = true; ask.hidden = true;
+          } else {
+            bad.textContent = ''; bad.hidden = true; ask.hidden = false; if (input) input.removeAttribute?.('aria-invalid'); yes.disabled = false;
+            note.textContent = check ? (check.partial ? vt('ui.admin.vcr.value_partial', { value: money(check.value), due: money(due), difference: money(check.difference) }) : vt('ui.admin.vcr.value_full', { due: money(due) })) : '';
+          }
+          note.hidden = !note.textContent;
+        };
+        let field = null;
+        if (due != null) {
+          const fid = `vcr-value-${row.id}`;
+          input = h('input', { id: fid, class: 'vcr-value', type: 'text', inputmode: 'decimal', autocomplete: 'off', 'data-testid': 'vcr-value', 'aria-describedby': `${fid}-hint` });
+          input.value = voucherValueDefault(due);
+          input.addEventListener('input', refresh);
+          field = h('div', { class: 'vcr-field' },
+            h('label', { for: fid, class: 'vcr-k', text: vt('ui.admin.vcr.value_label') }), input,
+            h('span', { id: `${fid}-hint`, class: 'vcr-hint muted', text: vt('ui.admin.vcr.value_hint', { due: money(due) }) }));
+        }
         yes.addEventListener('click', () => run(yes, async () => {
+          if (check && !check.ok) { input.focus(); return; }
           try {
-            const res = await rpc(VCR_RPC.markRedeemed, markArgs(row));
-            toast(res?.already ? vt('ui.admin.vcr.already') : vt('ui.admin.vcr.marked', { method: String(res?.payment_method_label || methodOf(row)), amount: money(res?.amount ?? amt) }));
+            const res = await rpc(VCR_RPC.markRedeemed, check ? markArgsWithValue(row, check, due) : markArgs(row));
+            const base = { method: String(res?.payment_method_label || methodOf(row)), amount: money(res?.amount ?? (check?.value ?? amt)) };
+            toast(res?.already ? vt('ui.admin.vcr.already')
+              : res?.payment_link ? vt(res.email_queued ? 'ui.admin.vcr.marked_link' : 'ui.admin.vcr.marked_link_nomail', { ...base, difference: money(res.difference ?? res.payment_link.amount) })
+                : vt('ui.admin.vcr.marked', base), res?.payment_link && !res.email_queued ? 'warn' : 'ok');
             onChanged();
           } catch (e) { toast(errText(e), 'err'); }
         }));
-        confirmBox.replaceChildren(h('p', { text: vt('ui.admin.vcr.mark_confirm', { amount: money(amt), method: methodOf(row) }) }), h('div', { class: 'row wrap' }, yes, no));
-        confirmBox.hidden = false; mark.hidden = true; yes.focus();
+        confirmBox.replaceChildren(...[field, note, bad, ask, h('div', { class: 'row wrap' }, yes, no)].filter(Boolean));
+        refresh();
+        confirmBox.hidden = false; mark.hidden = true; (input || yes).focus();
       });
       actions.append(mark);
     }

@@ -1,6 +1,6 @@
 // booking_173: kumppanilahjakorttien lunastus hallinnassa (FI + EN). Avaimet ui.admin.vcr.* (§18).
 // Sama mekanismi kuin Tarkista-sivu (review-texts.js): public_get_site_texts, kieli talous-i18n. Sanakirja on varalla.
-// Tuonti: content/site-texts.pending-import-68.json. Arvoissa ei '<'-merkkiä.
+// Tuonti: content/site-texts.pending-import-68.json (booking_174: arvo käsin + erotuksen maksulinkki → pending-import-69). Arvoissa ei '<'-merkkiä.
 import { getLang } from './talous-i18n.js';
 
 export const VCR_TEXTS = {
@@ -53,6 +53,15 @@ export const VCR_TEXTS = {
     'ui.admin.vcr.err_forbidden': 'Ei oikeutta tähän toimintoon.',
     'ui.admin.vcr.err_unchanged': 'Myyjä on jo sama.',
     'ui.admin.vcr.legacy': 'Vanha myyjä',
+    'ui.admin.vcr.value_label': 'Lahjakortin arvo (€)',
+    'ui.admin.vcr.value_hint': 'Tarkista arvo myyjän sivulta. Maksettava {{var:due}}.',
+    'ui.admin.vcr.value_full': 'Lahjakortti kattaa koko summan {{var:due}}.',
+    'ui.admin.vcr.value_partial': 'Lahjakortti {{var:value}}, varauksen summa {{var:due}}. Erotus {{var:difference}} lähetetään asiakkaalle maksulinkkinä sähköpostilla.',
+    'ui.admin.vcr.mark_confirm_value': 'Lunastitko koodin myyjän sivulla? Kirjataan maksu {{var:amount}} maksutavalla {{var:method}}. Kuitti tehdään kirjanpitoon, asiakkaalle ei lähetetä kuittia.',
+    'ui.admin.vcr.marked_link': 'Merkitty lunastetuksi: {{var:method}} {{var:amount}}. Erotus {{var:difference}} lähetetty asiakkaalle maksulinkkinä.',
+    'ui.admin.vcr.marked_link_nomail': 'Merkitty lunastetuksi: {{var:method}} {{var:amount}}. Erotuksen {{var:difference}} maksulinkki luotiin, mutta sähköpostia ei voitu lähettää. Lähetä linkki tilaukselta.',
+    'ui.admin.vcr.err_invalid_amount': 'Anna lahjakortin arvo euroina, yli 0 € (enintään 2 desimaalia).',
+    'ui.admin.vcr.err_voucher_exceeds_total': 'Lahjakortin arvo ei voi olla suurempi kuin maksettava summa.',
   },
   en: {
     'ui.admin.vcr.box_title': 'Partner gift card',
@@ -103,6 +112,15 @@ export const VCR_TEXTS = {
     'ui.admin.vcr.err_forbidden': 'You do not have permission for this action.',
     'ui.admin.vcr.err_unchanged': 'The seller is already the same.',
     'ui.admin.vcr.legacy': 'Former seller',
+    'ui.admin.vcr.value_label': 'Gift card value (€)',
+    'ui.admin.vcr.value_hint': 'Check the value on the seller’s page. Amount due {{var:due}}.',
+    'ui.admin.vcr.value_full': 'The gift card covers the full amount of {{var:due}}.',
+    'ui.admin.vcr.value_partial': 'Gift card {{var:value}}, booking total {{var:due}}. The difference of {{var:difference}} is sent to the customer as a payment link by email.',
+    'ui.admin.vcr.mark_confirm_value': 'Did you redeem the code on the seller’s page? A payment of {{var:amount}} is recorded with the method {{var:method}}. The receipt is made for accounting; no receipt is emailed to the customer.',
+    'ui.admin.vcr.marked_link': 'Marked as redeemed: {{var:method}} {{var:amount}}. The difference of {{var:difference}} was sent to the customer as a payment link.',
+    'ui.admin.vcr.marked_link_nomail': 'Marked as redeemed: {{var:method}} {{var:amount}}. A payment link for the difference of {{var:difference}} was created, but the email could not be sent. Send the link from the order.',
+    'ui.admin.vcr.err_invalid_amount': 'Enter the gift card value in euros, more than 0 € (at most 2 decimals).',
+    'ui.admin.vcr.err_voucher_exceeds_total': 'The gift card value cannot be greater than the amount due.',
   },
 };
 

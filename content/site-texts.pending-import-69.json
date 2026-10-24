@@ -1,0 +1,294 @@
+[
+ {
+  "key": "ui.admin.vcr.value_label",
+  "lang": "fi",
+  "text": "Lahjakortin arvo (€)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_174 (Joonas 25.10.2026): kumppanilahjakortin arvo käsin ennen hyväksyntää; pienempi arvo kuin varauksen summa → erotus asiakkaalle maksulinkkinä (Visma Pay). Kuitti vain kirjanpitoon, ei kuittisähköpostia. Uusi avain FI+EN; koodissa sama varateksti. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko ja Tarkista › Lunastamattomat, Merkitse lunastetuksi -vahvistus)."
+ },
+ {
+  "key": "ui.admin.vcr.value_label",
+  "lang": "en",
+  "text": "Gift card value (€)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_174 (Joonas 25.10.2026): kumppanilahjakortin arvo käsin ennen hyväksyntää; pienempi arvo kuin varauksen summa → erotus asiakkaalle maksulinkkinä (Visma Pay). Kuitti vain kirjanpitoon, ei kuittisähköpostia. Uusi avain FI+EN; koodissa sama varateksti. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko ja Tarkista › Lunastamattomat, Merkitse lunastetuksi -vahvistus)."
+ },
+ {
+  "key": "ui.admin.vcr.value_hint",
+  "lang": "fi",
+  "text": "Tarkista arvo myyjän sivulta. Maksettava {{var:due}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:due}}"
+  ],
+  "reason": "booking_174 (Joonas 25.10.2026): kumppanilahjakortin arvo käsin ennen hyväksyntää; pienempi arvo kuin varauksen summa → erotus asiakkaalle maksulinkkinä (Visma Pay). Kuitti vain kirjanpitoon, ei kuittisähköpostia. Uusi avain FI+EN; koodissa sama varateksti. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko ja Tarkista › Lunastamattomat, Merkitse lunastetuksi -vahvistus)."
+ },
+ {
+  "key": "ui.admin.vcr.value_hint",
+  "lang": "en",
+  "text": "Check the value on the seller’s page. Amount due {{var:due}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:due}}"
+  ],
+  "reason": "booking_174 (Joonas 25.10.2026): kumppanilahjakortin arvo käsin ennen hyväksyntää; pienempi arvo kuin varauksen summa → erotus asiakkaalle maksulinkkinä (Visma Pay). Kuitti vain kirjanpitoon, ei kuittisähköpostia. Uusi avain FI+EN; koodissa sama varateksti. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko ja Tarkista › Lunastamattomat, Merkitse lunastetuksi -vahvistus)."
+ },
+ {
+  "key": "ui.admin.vcr.value_full",
+  "lang": "fi",
+  "text": "Lahjakortti kattaa koko summan {{var:due}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:due}}"
+  ],
+  "reason": "booking_174 (Joonas 25.10.2026): kumppanilahjakortin arvo käsin ennen hyväksyntää; pienempi arvo kuin varauksen summa → erotus asiakkaalle maksulinkkinä (Visma Pay). Kuitti vain kirjanpitoon, ei kuittisähköpostia. Uusi avain FI+EN; koodissa sama varateksti. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko ja Tarkista › Lunastamattomat, Merkitse lunastetuksi -vahvistus)."
+ },
+ {
+  "key": "ui.admin.vcr.value_full",
+  "lang": "en",
+  "text": "The gift card covers the full amount of {{var:due}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:due}}"
+  ],
+  "reason": "booking_174 (Joonas 25.10.2026): kumppanilahjakortin arvo käsin ennen hyväksyntää; pienempi arvo kuin varauksen summa → erotus asiakkaalle maksulinkkinä (Visma Pay). Kuitti vain kirjanpitoon, ei kuittisähköpostia. Uusi avain FI+EN; koodissa sama varateksti. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko ja Tarkista › Lunastamattomat, Merkitse lunastetuksi -vahvistus)."
+ },
+ {
+  "key": "ui.admin.vcr.value_partial",
+  "lang": "fi",
+  "text": "Lahjakortti {{var:value}}, varauksen summa {{var:due}}. Erotus {{var:difference}} lähetetään asiakkaalle maksulinkkinä sähköpostilla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:difference}}",
+   "{{var:due}}",
+   "{{var:value}}"
+  ],
+  "reason": "booking_174 (Joonas 25.10.2026): kumppanilahjakortin arvo käsin ennen hyväksyntää; pienempi arvo kuin varauksen summa → erotus asiakkaalle maksulinkkinä (Visma Pay). Kuitti vain kirjanpitoon, ei kuittisähköpostia. Uusi avain FI+EN; koodissa sama varateksti. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko ja Tarkista › Lunastamattomat, Merkitse lunastetuksi -vahvistus)."
+ },
+ {
+  "key": "ui.admin.vcr.value_partial",
+  "lang": "en",
+  "text": "Gift card {{var:value}}, booking total {{var:due}}. The difference of {{var:difference}} is sent to the customer as a payment link by email.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:difference}}",
+   "{{var:due}}",
+   "{{var:value}}"
+  ],
+  "reason": "booking_174 (Joonas 25.10.2026): kumppanilahjakortin arvo käsin ennen hyväksyntää; pienempi arvo kuin varauksen summa → erotus asiakkaalle maksulinkkinä (Visma Pay). Kuitti vain kirjanpitoon, ei kuittisähköpostia. Uusi avain FI+EN; koodissa sama varateksti. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko ja Tarkista › Lunastamattomat, Merkitse lunastetuksi -vahvistus)."
+ },
+ {
+  "key": "ui.admin.vcr.mark_confirm_value",
+  "lang": "fi",
+  "text": "Lunastitko koodin myyjän sivulla? Kirjataan maksu {{var:amount}} maksutavalla {{var:method}}. Kuitti tehdään kirjanpitoon, asiakkaalle ei lähetetä kuittia.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:amount}}",
+   "{{var:method}}"
+  ],
+  "reason": "booking_174 (Joonas 25.10.2026): kumppanilahjakortin arvo käsin ennen hyväksyntää; pienempi arvo kuin varauksen summa → erotus asiakkaalle maksulinkkinä (Visma Pay). Kuitti vain kirjanpitoon, ei kuittisähköpostia. Uusi avain FI+EN; koodissa sama varateksti. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko ja Tarkista › Lunastamattomat, Merkitse lunastetuksi -vahvistus)."
+ },
+ {
+  "key": "ui.admin.vcr.mark_confirm_value",
+  "lang": "en",
+  "text": "Did you redeem the code on the seller’s page? A payment of {{var:amount}} is recorded with the method {{var:method}}. The receipt is made for accounting; no receipt is emailed to the customer.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:amount}}",
+   "{{var:method}}"
+  ],
+  "reason": "booking_174 (Joonas 25.10.2026): kumppanilahjakortin arvo käsin ennen hyväksyntää; pienempi arvo kuin varauksen summa → erotus asiakkaalle maksulinkkinä (Visma Pay). Kuitti vain kirjanpitoon, ei kuittisähköpostia. Uusi avain FI+EN; koodissa sama varateksti. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko ja Tarkista › Lunastamattomat, Merkitse lunastetuksi -vahvistus)."
+ },
+ {
+  "key": "ui.admin.vcr.marked_link",
+  "lang": "fi",
+  "text": "Merkitty lunastetuksi: {{var:method}} {{var:amount}}. Erotus {{var:difference}} lähetetty asiakkaalle maksulinkkinä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:amount}}",
+   "{{var:difference}}",
+   "{{var:method}}"
+  ],
+  "reason": "booking_174 (Joonas 25.10.2026): kumppanilahjakortin arvo käsin ennen hyväksyntää; pienempi arvo kuin varauksen summa → erotus asiakkaalle maksulinkkinä (Visma Pay). Kuitti vain kirjanpitoon, ei kuittisähköpostia. Uusi avain FI+EN; koodissa sama varateksti. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko ja Tarkista › Lunastamattomat, Merkitse lunastetuksi -vahvistus)."
+ },
+ {
+  "key": "ui.admin.vcr.marked_link",
+  "lang": "en",
+  "text": "Marked as redeemed: {{var:method}} {{var:amount}}. The difference of {{var:difference}} was sent to the customer as a payment link.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:amount}}",
+   "{{var:difference}}",
+   "{{var:method}}"
+  ],
+  "reason": "booking_174 (Joonas 25.10.2026): kumppanilahjakortin arvo käsin ennen hyväksyntää; pienempi arvo kuin varauksen summa → erotus asiakkaalle maksulinkkinä (Visma Pay). Kuitti vain kirjanpitoon, ei kuittisähköpostia. Uusi avain FI+EN; koodissa sama varateksti. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko ja Tarkista › Lunastamattomat, Merkitse lunastetuksi -vahvistus)."
+ },
+ {
+  "key": "ui.admin.vcr.marked_link_nomail",
+  "lang": "fi",
+  "text": "Merkitty lunastetuksi: {{var:method}} {{var:amount}}. Erotuksen {{var:difference}} maksulinkki luotiin, mutta sähköpostia ei voitu lähettää. Lähetä linkki tilaukselta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:amount}}",
+   "{{var:difference}}",
+   "{{var:method}}"
+  ],
+  "reason": "booking_174 (Joonas 25.10.2026): kumppanilahjakortin arvo käsin ennen hyväksyntää; pienempi arvo kuin varauksen summa → erotus asiakkaalle maksulinkkinä (Visma Pay). Kuitti vain kirjanpitoon, ei kuittisähköpostia. Uusi avain FI+EN; koodissa sama varateksti. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko ja Tarkista › Lunastamattomat, Merkitse lunastetuksi -vahvistus)."
+ },
+ {
+  "key": "ui.admin.vcr.marked_link_nomail",
+  "lang": "en",
+  "text": "Marked as redeemed: {{var:method}} {{var:amount}}. A payment link for the difference of {{var:difference}} was created, but the email could not be sent. Send the link from the order.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:amount}}",
+   "{{var:difference}}",
+   "{{var:method}}"
+  ],
+  "reason": "booking_174 (Joonas 25.10.2026): kumppanilahjakortin arvo käsin ennen hyväksyntää; pienempi arvo kuin varauksen summa → erotus asiakkaalle maksulinkkinä (Visma Pay). Kuitti vain kirjanpitoon, ei kuittisähköpostia. Uusi avain FI+EN; koodissa sama varateksti. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko ja Tarkista › Lunastamattomat, Merkitse lunastetuksi -vahvistus)."
+ },
+ {
+  "key": "ui.admin.vcr.err_invalid_amount",
+  "lang": "fi",
+  "text": "Anna lahjakortin arvo euroina, yli 0 € (enintään 2 desimaalia).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_174 (Joonas 25.10.2026): kumppanilahjakortin arvo käsin ennen hyväksyntää; pienempi arvo kuin varauksen summa → erotus asiakkaalle maksulinkkinä (Visma Pay). Kuitti vain kirjanpitoon, ei kuittisähköpostia. Uusi avain FI+EN; koodissa sama varateksti. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko ja Tarkista › Lunastamattomat, Merkitse lunastetuksi -vahvistus)."
+ },
+ {
+  "key": "ui.admin.vcr.err_invalid_amount",
+  "lang": "en",
+  "text": "Enter the gift card value in euros, more than 0 € (at most 2 decimals).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_174 (Joonas 25.10.2026): kumppanilahjakortin arvo käsin ennen hyväksyntää; pienempi arvo kuin varauksen summa → erotus asiakkaalle maksulinkkinä (Visma Pay). Kuitti vain kirjanpitoon, ei kuittisähköpostia. Uusi avain FI+EN; koodissa sama varateksti. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko ja Tarkista › Lunastamattomat, Merkitse lunastetuksi -vahvistus)."
+ },
+ {
+  "key": "ui.admin.vcr.err_voucher_exceeds_total",
+  "lang": "fi",
+  "text": "Lahjakortin arvo ei voi olla suurempi kuin maksettava summa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_174 (Joonas 25.10.2026): kumppanilahjakortin arvo käsin ennen hyväksyntää; pienempi arvo kuin varauksen summa → erotus asiakkaalle maksulinkkinä (Visma Pay). Kuitti vain kirjanpitoon, ei kuittisähköpostia. Uusi avain FI+EN; koodissa sama varateksti. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko ja Tarkista › Lunastamattomat, Merkitse lunastetuksi -vahvistus)."
+ },
+ {
+  "key": "ui.admin.vcr.err_voucher_exceeds_total",
+  "lang": "en",
+  "text": "The gift card value cannot be greater than the amount due.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_174 (Joonas 25.10.2026): kumppanilahjakortin arvo käsin ennen hyväksyntää; pienempi arvo kuin varauksen summa → erotus asiakkaalle maksulinkkinä (Visma Pay). Kuitti vain kirjanpitoon, ei kuittisähköpostia. Uusi avain FI+EN; koodissa sama varateksti. Hallinta: booking/admin/voucher-redeem-texts.js (tilauksen lahjakorttilaatikko ja Tarkista › Lunastamattomat, Merkitse lunastetuksi -vahvistus)."
+ },
+ {
+  "key": "email.payment_link.voucher_subject",
+  "lang": "fi",
+  "text": "Lahjakorttivarauksesi erotuksen maksu {{var:no}} – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{var:no}}",
+   "{{setting:business_name}}"
+  ],
+  "reason": "booking_174 (Joonas 25.10.2026): maksulinkkiviesti kumppanilahjakortin erotukselle (summa, lahjakortin arvo, erotus), allekirjoitus Tapio (email.payment_link.sign_name). Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.payment_link.voucher_subject",
+  "lang": "en",
+  "text": "Pay the difference for your gift card booking {{var:no}} – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{var:no}}",
+   "{{setting:business_name}}"
+  ],
+  "reason": "booking_174 (Joonas 25.10.2026): maksulinkkiviesti kumppanilahjakortin erotukselle (summa, lahjakortin arvo, erotus), allekirjoitus Tapio (email.payment_link.sign_name). Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.payment_link.voucher_intro",
+  "lang": "fi",
+  "text": "Lahjakorttivarauksesi summa oli {{var:total}}, lahjakortin arvo oli {{var:voucher}}. Voit maksaa erotuksen {{var:difference}} alla olevasta linkistä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 450,
+  "placeholders": [
+   "{{var:total}}",
+   "{{var:voucher}}",
+   "{{var:difference}}"
+  ],
+  "reason": "booking_174 (Joonas 25.10.2026): maksulinkkiviesti kumppanilahjakortin erotukselle (summa, lahjakortin arvo, erotus), allekirjoitus Tapio (email.payment_link.sign_name). Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.payment_link.voucher_intro",
+  "lang": "en",
+  "text": "The total of your gift card booking was {{var:total}} and the value of the gift card was {{var:voucher}}. You can pay the difference of {{var:difference}} using the link below.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 450,
+  "placeholders": [
+   "{{var:total}}",
+   "{{var:voucher}}",
+   "{{var:difference}}"
+  ],
+  "reason": "booking_174 (Joonas 25.10.2026): maksulinkkiviesti kumppanilahjakortin erotukselle (summa, lahjakortin arvo, erotus), allekirjoitus Tapio (email.payment_link.sign_name). Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.payment_link.voucher_amount_label",
+  "lang": "fi",
+  "text": "Maksettava erotus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_174 (Joonas 25.10.2026): maksulinkkiviesti kumppanilahjakortin erotukselle (summa, lahjakortin arvo, erotus), allekirjoitus Tapio (email.payment_link.sign_name). Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.payment_link.voucher_amount_label",
+  "lang": "en",
+  "text": "Difference to pay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_174 (Joonas 25.10.2026): maksulinkkiviesti kumppanilahjakortin erotukselle (summa, lahjakortin arvo, erotus), allekirjoitus Tapio (email.payment_link.sign_name). Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ }
+]
