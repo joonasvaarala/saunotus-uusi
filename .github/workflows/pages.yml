@@ -186,6 +186,10 @@ jobs:
       # tekstit ui.admin.day_memos.* (content/site-texts.pending-import-41.json); migraatio + rollback olemassa.
       # t140 (booking/supabase/tests/day/t140_day_notes_bulletins.sql) ajetaan paikallisessa PG17:ssä t138:n tapaan (työnkulussa ei ole Postgresia).
       - run: node --test booking/tests/paiva-muistiinpanot.test.mjs
+      # Paketti 07: yhdenmukainen siirtymävieritys (kauppa, lahjakortit, tilaussivu, hallinnan uusi varaus / resurssivaraus):
+      # yhteiset apurit revealForm/revealSection (block start, reduced-motion → auto, fokus preventScroll) ja revealIfHidden (vain jos ei näkyvissä),
+      # scroll-margin-top 84 px kiinteän yläpalkin alle. Ei migraatiota eikä tekstejä.
+      - run: node --test booking/tests/sivuston-vieritys.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

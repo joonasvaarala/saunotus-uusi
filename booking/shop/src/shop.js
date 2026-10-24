@@ -22,6 +22,7 @@ import { holdPanel } from './hold-ui.js';
 import { normBusinessId, validBusinessId, normOvt, validOvt, validOperator } from './invoice-validate.js';
 import { isRichHtml } from './rich-text.js';
 import { visibleText, richHost } from './rich-view.js';
+import { revealForm, revealIfHidden } from './gift-ui.js';
 
 const S = window.BOOKING_SHOP;                   // build-aikainen konfiguraatio (kieli, polut, ei-verkossa-varattavat tuotteet)
 const t = T[S.lang] || T.fi;
@@ -328,7 +329,7 @@ async function viewDay(dateStr, keep, openSlug) {
   const toggle = (p, li) => {
     const wasOpen = li.classList.contains('open');
     for (const el of results.querySelectorAll('.bk-pc')) { el.classList.remove('open'); el.querySelector('.bk-pc-head').setAttribute('aria-expanded', 'false'); el.querySelector('.bk-pc-panel').hidden = true; }
-    if (!wasOpen) { li.classList.add('open'); li.querySelector('.bk-pc-head').setAttribute('aria-expanded', 'true'); li.querySelector('.bk-pc-panel').hidden = false; li.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+    if (!wasOpen) { li.classList.add('open'); li.querySelector('.bk-pc-head').setAttribute('aria-expanded', 'true'); li.querySelector('.bk-pc-panel').hidden = false; revealForm(li, li.querySelector('.bk-pc-head')); }
     history.replaceState(null, '', bk(`/paiva/${ds}${wasOpen ? '' : `?tuote=${p.slug}`}`)); last = location.hash;   // tila URL:ssa, ei uudelleenpiirtoa
   };
   const heading = h('h3', { id: 'bk-day-h', text: `${t.slotsFor} – ${longDate}`, tabindex: '-1' });
@@ -357,7 +358,7 @@ async function viewDay(dateStr, keep, openSlug) {
     h('section', { class: 'bk-daypick', 'aria-label': t.pickDay }, nav, strip,
       h('p', { class: 'bk-legend' }, h('span', { class: 'dot free' }), t.free, ' ', h('span', { class: 'dot full' }), t.full, ' ', h('span', { class: 'dot unavail' }), t.unavailable), tools),
     h('div', { class: 'bk-slots', 'aria-live': 'polite' }, results));
-  if (keep) { const el = document.getElementById('bk-day-h'); if (el) el.focus({ preventScroll: true }); } else focusTop();
+  if (keep) { const el = document.getElementById('bk-day-h'); if (el) { revealIfHidden(el); el.focus({ preventScroll: true }); } } else focusTop();
   if (!keep && openSlug) document.querySelector('.bk-pc.open')?.scrollIntoView({ block: 'start' });   // Takaisin lomakkeelta → sama tuote auki ja näkyvissä
   if (treatBox) fillTreatments(treatBox, results, ds, today, tmax, openSlug, toggle, free.length > 0);
 }
@@ -408,7 +409,7 @@ async function viewProduct(slug, dateStr, query) {
       const label = st === 'free' ? `${long}, ${free}` : st === 'full' ? `${long}, ${t.full}` : st === 'unavail' ? `${long}, ${t.unavailable}` : null;
       cells.push(st === 'none'
         ? h('span', { class: 'bk-cell off', 'aria-hidden': 'true', text: d })
-        : h('button', { type: 'button', class: `bk-cell ${st}${ds === today ? ' today' : ''}${ds === sel ? ' sel' : ''}`, 'aria-pressed': ds === sel ? 'true' : 'false', 'aria-label': label, onclick: () => { sel = ds; history.replaceState(null, '', bk(`/tuote/${slug}/${ds}`)); drawSlots(); markSel(); } }, d));
+        : h('button', { type: 'button', class: `bk-cell ${st}${ds === today ? ' today' : ''}${ds === sel ? ' sel' : ''}`, 'aria-pressed': ds === sel ? 'true' : 'false', 'aria-label': label, onclick: () => { sel = ds; history.replaceState(null, '', bk(`/tuote/${slug}/${ds}`)); drawSlots(); markSel(); revealForm(slotBox, slotBox.querySelector('h3')); } }, d));
     }
     calBox.append(nav, h('div', { class: 'bk-grid', role: 'group', 'aria-label': monthName }, wd, cells),
       h('p', { class: 'bk-legend' }, h('span', { class: 'dot free' }), t.free, ' ', h('span', { class: 'dot full' }), t.full, ' ', h('span', { class: 'dot unavail' }), t.unavailable),
@@ -455,7 +456,7 @@ function customerFields() {
     opt('reference', t.buyerReference, { maxlength: 100 }),
     h('p', { class: 'bk-note', text: t.companyInvoiceNote }));
   function setKind(k) {
-    kind = k; companyBox.hidden = k !== 'company'; nameLabel.textContent = k === 'company' ? t.contactName : t.name;
+    kind = k; companyBox.hidden = k !== 'company'; if (k === 'company') revealIfHidden(companyBox); nameLabel.textContent = k === 'company' ? t.contactName : t.name;
     for (const id of ['company_name', 'business_id', 'street', 'zip', 'city', 'einvoice_address', 'einvoice_operator']) { const el = document.getElementById(id); if (el) el.required = k === 'company'; }
   }
   const node = h('fieldset', { class: 'bk-section bk-contact' }, h('legend', { text: t.details }),
@@ -564,8 +565,8 @@ async function viewCheckout(ruleId, ds, productId, via) {
   const legal = legalFields(), { terms, consent } = legal;
   const form = h('form', { class: 'bk-form', novalidate: true, onsubmit: async (ev) => {
     ev.preventDefault(); msg.replaceChildren();
-    const f = new FormData(form), cust = cf.read(form, msg); if (!cust) return;
-    if (!terms.checked) { msg.append(errorBox(t.acceptTermsErr)); terms.focus(); return; }
+    const f = new FormData(form), cust = cf.read(form, msg); if (!cust) { revealIfHidden(msg); return; }
+    if (!terms.checked) { msg.append(errorBox(t.acceptTermsErr)); revealIfHidden(msg); terms.focus({ preventScroll: true }); return; }
     submit.disabled = true; submit.textContent = hmode.on ? ht(S.lang, 'checkout.creating') : t.booking;
     try {
       const chosen = addons.filter((a) => qty.get(a.id) > 0).map((a) => ({ id: a.id, quantity: qty.get(a.id) }));
@@ -578,7 +579,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
       submit.disabled = false; submit.textContent = hmode.on ? ht(S.lang, 'checkout.button') : t.book;
       msg.replaceChildren(errorBox(e.mapped ? e.message : t.errorGeneric));   // palvelimen raaka message ei koskaan asiakkaalle (ui.shop.error_generic)
       if (['capacity_exceeded', 'private_booked', 'public_shift_booked', 'space_closed'].includes(e.code)) state.months.clear();
-      msg.firstChild.setAttribute('tabindex', '-1'); msg.firstChild.focus();
+      msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true });
     }
   } },
     h('fieldset', { class: 'bk-section' }, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, minus, num, plus)),
@@ -775,7 +776,7 @@ async function viewChange(token, b) {
   }
   const horizon = state.settings?.booking_horizon_days || 120;
   const maxDate = new Date(Date.now() + horizon * 864e5).toLocaleDateString('sv-SE', { timeZone: TZ });
-  const dateIn = h('input', { id: 'bk-date', type: 'date', value: st.date, min: today, max: maxDate, onchange: (e) => { if (!e.target.value) return; st.date = e.target.value; st.session = null; loadSessions(); } });
+  const dateIn = h('input', { id: 'bk-date', type: 'date', value: st.date, min: today, max: maxDate, onchange: async (e) => { if (!e.target.value) return; st.date = e.target.value; st.session = null; await loadSessions(); revealForm(sessionsBox, sessionsBox.querySelector('h3') || sessionsBox); } });
   const form = h('form', { class: 'bk-form', novalidate: true, onsubmit: async (ev) => {
     ev.preventDefault(); msg.replaceChildren(); submit.disabled = true; submit.textContent = t.saving;
     try {
@@ -788,7 +789,7 @@ async function viewChange(token, b) {
       location.hash = token; window.scrollTo({ top: 0 });
     } catch (e) {
       submit.textContent = t.saveChange; upd();
-      msg.replaceChildren(errorBox(e.mapped ? e.message : t.errorGeneric)); msg.firstChild.setAttribute('tabindex', '-1'); msg.firstChild.focus();
+      msg.replaceChildren(errorBox(e.mapped ? e.message : t.errorGeneric)); msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true });
       if (['capacity_exceeded', 'private_booked', 'public_shift_booked', 'space_closed'].includes(e.code)) loadSessions();
     }
   } }, h('fieldset', {}, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, minus, num, plus)), summary, msg, submit);

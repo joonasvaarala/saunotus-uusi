@@ -130,6 +130,7 @@ export function claimsSection({ S, L, api, token, claims, notice = null, onChang
           if (r.type === 'updated') return onChanged({ ok: true, text: tx('vc.updated'), extra: r.mismatch ? tx('vc.mismatch') : '' });
           fmsg.append(h('p', { class: 'bk-error', role: 'alert', text: errText(r.code) }));
         } catch { fmsg.append(h('p', { class: 'bk-error', role: 'alert', text: tx('err.generic') })); }
+        revealIfHidden(fmsg);
         go.disabled = false; go.textContent = tx('vc.fixSubmit');
       } }, fcode.wrap, fsrc.wrap, go, fmsg);
       // ongelmatilassa lomake on auki valmiiksi; vastaanotetulla pyynnöllä korjaus on napin takana
@@ -168,7 +169,7 @@ export function cardsSection({ S, L, api, cards }) {
         }
         panel.hidden = false; btn.textContent = tx('o.hideCode'); btn.setAttribute('aria-expanded', 'true');
       } catch { panel.replaceChildren(h('p', { class: 'bk-error', role: 'alert', text: tx('o.codeError') })); panel.hidden = false; }
-      finally { btn.disabled = false; }
+      finally { btn.disabled = false; if (!panel.hidden) revealIfHidden(panel); }
     } });
     return h('li', { class: 'gc-ocard', 'data-testid': 'gc-card' },
       h('span', { class: 'ord-l-main' }, h('strong', { text: c.package_name || c.package_code }), ' ', h('span', { class: `ord-badge ${badgeClass(c.status)}`, text: status })),

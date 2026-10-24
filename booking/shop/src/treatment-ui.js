@@ -10,6 +10,7 @@ import { fmtMinutes } from './site-texts-logic.js';
 import { createAddonPicker } from './treatment-addons.js';
 import { isRichHtml } from './rich-text.js';
 import { visibleText, richHost } from './rich-view.js';
+import { revealForm, revealIfHidden } from './gift-ui.js';
 
 export function createTreatmentViews(c) {
   const { h, t, S, state, money, fmt, hm, dayLong, pad2, todayHel, addDays, pname, pdesc, pimg, setHero, mount, focusTop, errorBox, phoneBox, bk, customerFields, legalFields, holdInfo = async () => ({ on: false, minutes: 15, extra: () => [] }), tx = () => null, confirmUrl = (tok) => `${S.confirmHref}#${tok}` } = c;
@@ -90,7 +91,7 @@ export function createTreatmentViews(c) {
     // 3) kellonaika
     const timeBox = h('section', { class: 'bk-step-box', 'aria-labelledby': 'tr-h3' });
     const setN = (n) => { n = Math.min(Math.max(n, minN), maxN); if (n === st.n) { syncN(); return; } st.n = n; syncN(); st.time = null; st.slots = new Map(); st.seq++; calBox.replaceChildren(h('p', { class: 'bk-loading', role: 'status', text: t.loading })); clearTimeout(st.tm); st.tm = setTimeout(refresh, 350); };   // viive: nopea +/+ ei tee rinnakkaisia hakuja
-    const choose = (ds) => { st.date = ds; st.time = null; drawCal(false); drawTimes(); emit(); };
+    const choose = (ds) => { st.date = ds; st.time = null; drawCal(false); drawTimes(); emit(); revealForm(timeBox, timeBox.querySelector('#tr-h3')); };
     async function drawCal(load = true) {
       const seq = ++st.seq;
       if (load) calBox.replaceChildren(h('p', { class: 'bk-loading', role: 'status', text: t.loading }));
@@ -135,7 +136,7 @@ export function createTreatmentViews(c) {
         !st.date ? h('p', { class: 'bk-note', text: tr.pickDayFirst }) : !st.ready ? h('p', { class: 'bk-loading', role: 'status', text: t.loading })
           : h('div', { 'aria-live': 'polite' }, h('p', { class: 'bk-note', text: `${dayLong(`${st.date}T12:00:00Z`)} – ${tr.startTimes}` }),
             list.length ? h('ul', { class: 'bk-times' }, list.map((s) => h('li', {}, h('button', { type: 'button', class: 'bk-time-btn', 'aria-pressed': s.time === st.time ? 'true' : 'false',
-              onclick: () => { st.time = s.time; drawTimes(); emit(); timeBox.querySelector('[aria-pressed="true"]')?.focus(); } },
+              onclick: () => { st.time = s.time; drawTimes(); emit(); revealIfHidden(timeBox.closest('.bk-picker')?.parentElement?.querySelector('.bk-continue')); timeBox.querySelector('[aria-pressed="true"]')?.focus({ preventScroll: true }); } },
               h('strong', { text: s.time }), s.end ? h('span', { class: 'bk-time-end', text: `–${tm(s.end)}` }) : null))))
               : h('p', { class: 'bk-note', text: A.isPackage(p) ? tr.noTimes : t.noSlots })));
     }
@@ -238,7 +239,7 @@ export function createTreatmentViews(c) {
       const hi = { on: false, minutes: 15, extra: () => [] };   // pitotila (§17) selviää palvelimelta kun vaihe avautuu; oletus = vanha käytös
       const bookText = () => (hi.on ? ht(S.lang, 'checkout.button') : t.book);
       const ok = h('button', { type: 'button', class: 'btn', 'data-testid': 'review-submit', text: t.book });
-      const edit = h('button', { type: 'button', class: 'btn light', text: tr.edit, onclick: () => { topBox.hidden = false; holder.replaceChildren(formView); form.querySelector('input,textarea')?.focus(); window.scrollTo({ top: 0 }); } });
+      const edit = h('button', { type: 'button', class: 'btn light', text: tr.edit, onclick: () => { topBox.hidden = false; holder.replaceChildren(formView); revealForm(formView, form.querySelector('input,textarea')); } });
       const dl = h('dl', { class: 'bk-sum' }, h('dt', { text: t.what }), h('dd', { text: pname(p) }), showOpt ? [h('dt', { text: ot.what }), h('dd', { 'data-testid': 'review-option', text: optText() })] : null, h('dt', { text: tr.date }), h('dd', { text: dayLong(slot.start) }), h('dt', { text: tr.time }),
         h('dd', { text: slot.end ? `${tm(slot.start)}–${tm(slot.end)}` : tm(slot.start) }), scheduleRows(p, slot.start), h('dt', { text: t.persons }), h('dd', { text: String(n) }), addonRows(),
         h('dt', { text: cust.kind === 'company' ? t.contactName : t.name }), h('dd', { text: cust.name }), cust.company ? [h('dt', { text: t.companyName }), h('dd', { text: cust.company.company_name })] : null,
@@ -260,14 +261,14 @@ export function createTreatmentViews(c) {
         }
         const lost = A.isSlotLost(r.code);
         err.replaceChildren(...[errorBox(r.ok ? tr.errors.generic : errMsg(r)), lost ? h('p', {}, h('a', { class: 'btn sm', href: back, text: tr.pickAnother })) : null].filter(Boolean));   // replaceChildren(null) kirjoittaisi tekstin "null"
-        err.firstChild.setAttribute('tabindex', '-1'); err.firstChild.focus();
+        err.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(err); err.firstChild.focus({ preventScroll: true });
       });
       const lead = h('p', { class: 'bk-note', 'data-testid': 'review-lead', text: tr.reviewLead }), holdExtra = h('div', { 'data-testid': 'review-hold-extra' });
       holdInfo().then((x) => { Object.assign(hi, x); if (!hi.on) return; if (!ok.disabled) ok.textContent = bookText(); lead.textContent = ht(S.lang, 'checkout.review', { minutes: hi.minutes }); holdExtra.replaceChildren(...hi.extra(S.lang)); });
       holder.replaceChildren(h('div', { class: 'bk-review' }, head, lead, holdExtra, dl,
         h('p', { class: 'bk-totalrow' }, t.total + ': ', h('strong', { class: 'bk-total', 'data-testid': 'review-total', text: money(totalNow()) }), ' ', h('small', { text: t.vatIncl })),
         cust.kind === 'company' ? h('p', { class: 'bk-pay bk-paynow', text: t.companyInvoiceNote }) : null, err, h('div', { class: 'bk-actions' }, edit, ok)));
-      topBox.hidden = true; head.focus(); window.scrollTo({ top: 0 });
+      topBox.hidden = true; revealForm(holder, head);
     }
     holder.append(formView);
     topBox.append(h('h2', { text: t.bookTitle }), pick);
@@ -302,7 +303,7 @@ export function createTreatmentViews(c) {
       if (r.ok) { state.months.clear(); location.hash = token; window.scrollTo({ top: 0 }); return; }
       save.textContent = t.saveChange; save.disabled = false;
       if (O.isOptionError(r.code) && optP) { if (r.code === 'invalid_option') { opt = curOpt; optP.set(curOpt); } optP.setError(errMsg(r)); optP.focus(); refresh(); return; }
-      msg.replaceChildren(errorBox(errMsg(r))); msg.firstChild.setAttribute('tabindex', '-1'); msg.firstChild.focus();
+      msg.replaceChildren(errorBox(errMsg(r))); msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true });
     });
     mount(h('p', {}, h('a', { href: `#${token}`, text: t.back })), h('h2', { text: t.changeTitle }),
       h('p', { class: 'bk-note', text: t.changeInfo(hours, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) }),

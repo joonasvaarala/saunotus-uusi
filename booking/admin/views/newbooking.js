@@ -6,7 +6,7 @@ import { customerForm, customerSearch } from './customerform.js';
 import { warningBox, hasWarning } from './therapist.js';
 import { addonPicker } from './addons.js';
 import { reservationDialog } from './shared.js';
-import { h, toast, errMsg, fmtTime, fmtDay, money, todayHel, addDays, empty } from '../ui.js';
+import { h, toast, errMsg, fmtTime, fmtDay, money, todayHel, addDays, empty, revealSection, revealIfHidden } from '../ui.js';
 import { icon } from '../icons.js';
 import { stepper } from '../stepper.js';
 import { nbt as T, nbLang } from '../nb-texts.js';
@@ -45,15 +45,10 @@ export async function render({ ctx, refs, query, reload }) {
       return b;
     })) : empty(T('nb.noSlots')));
   }
-  // Vuoron valinnan (tai vaihdon) jälkeen näkymä vierittyy varauslomakkeeseen ja fokus siirretään lomakkeen otsikkoon: ei avaa mobiilinäppäimistöä,
-  // ruudunlukija lukee valitun vuoron. Vieritys on pehmeä vain jos käyttäjä ei ole pyytänyt vähennettyä liikettä; sticky-yläpalkki huomioidaan (scroll-margin).
+  // Esivalittu vuoro voi piirtyä ennen kuin sivu on liitetty DOMiin.
   function revealForm(f, tries = 0) {
-    if (!f.isConnected) { if (tries < 20) setTimeout(() => revealForm(f, tries + 1), 60); return; }   // esivalinta: lomake liitetään sivulle vasta renderöinnin jälkeen
-    const title = f.querySelector('h3'); title.tabIndex = -1;
-    f.style.scrollMarginTop = `${(document.querySelector('.top')?.offsetHeight || 56) + 12}px`;
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    f.scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' });
-    title.focus({ preventScroll: true });
+    if (!f.isConnected) { if (tries < 20) setTimeout(() => revealForm(f, tries + 1), 60); return; }
+    revealSection(f, f.querySelector('h3'));
   }
   // Osio: numeroitu otsikko (CSS-laskuri .nb-h::before; piilotetut osiot eivät kuluta numeroa)
   const section = (title, ...kids) => h('section', { class: 'card nb-sec' }, h('h3', { class: 'nb-h', text: title }), ...kids);
@@ -136,7 +131,7 @@ export async function render({ ctx, refs, query, reload }) {
       if (!card && !pp.ok) { showFieldErr(priceIn, priceErr, T('nb.errPrice')); priceBox.open = true; bad.push(priceIn); count++; }
       if (bad.length) {
         errBox.textContent = T('nb.errSummary', { n: count }); errBox.hidden = false;
-        bad[0].focus(); return;
+        revealIfHidden(bad[0]); bad[0].focus({ preventScroll: true }); return;
       }
       saveBtn.disabled = true; saveBtn.textContent = T('nb.saving');
       try {
@@ -148,7 +143,7 @@ export async function render({ ctx, refs, query, reload }) {
         showCreated(r);
         formBox.replaceChildren(); st.session = null; loadSessions();
       } catch (e) {
-        errBox.textContent = T('nb.errServer', { msg: errMsg(e) }); errBox.hidden = false;
+        errBox.textContent = T('nb.errServer', { msg: errMsg(e) }); errBox.hidden = false; revealIfHidden(errBox);
         saveBtn.disabled = false; saveBtn.textContent = T('nb.save');
       }
     } },
@@ -178,7 +173,7 @@ export async function render({ ctx, refs, query, reload }) {
         openBooking,
         h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'another-booking', text: T('nb.another'), onclick: () => { result.replaceChildren(); dateIn.focus(); root.scrollIntoView({ block: 'start' }); } }),
         h('a', { class: 'btn ghost', href: `#/?d=${st.date}`, text: T('nb.dayView') })))].filter(Boolean));
-    result.scrollIntoView({ block: 'start', behavior: 'auto' }); title.focus({ preventScroll: true });
+    revealSection(result, title);
   }
 
   const langs = h('div', { class: 'nb-langs', role: 'group', 'aria-label': T('nb.lang') }, LANGS.map((l) => h('button', { type: 'button', class: 'nb-lang', 'aria-pressed': String(getLang() === l), lang: l, 'data-testid': `nb-lang-${l}`, onclick: () => { if (getLang() === l) return; setLang(l); reload?.(); } }, l.toUpperCase())));

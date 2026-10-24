@@ -7,6 +7,7 @@ import { T } from './i18n.js';
 import { createOrderApi, validToken, wantsMock } from './order-api.js';
 import { createGiftApi } from './gift-api.js';
 import { redeemSection, cardsSection, claimsSection } from './order-gift.js';
+import { revealForm, revealIfHidden } from './gift-ui.js';
 import { createMobilepayApi } from './mobilepay-api.js';
 import { normOptions, shouldShowButton, testUiEnabled } from './mobilepay-logic.js';
 import { payBlock, runReturn } from './mobilepay-ui.js';
@@ -63,6 +64,7 @@ function instructionsSection(list) {
     panel.hidden = !open;
     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
     btn.textContent = open ? t.guideHide : t.guideShow;
+    if (open) revealIfHidden(panel);
   } });
   return h('section', { class: 'ord-card', 'aria-labelledby': 'ord-g', 'data-testid': 'order-guides' },
     h('h3', { id: 'ord-g', text: t.guideTitle }), h('p', { class: 'bk-note', text: t.guideLead }), btn, panel);
@@ -153,7 +155,7 @@ async function main() {
   async function reloadAfterClaim(n) {
     notice = { ok: true, ...n };
     try { const fresh = await api.get(); if (fresh?.ok) { await loadGift(); await redraw(fresh); } else draw(cur); } catch { draw(cur); }
-    const el = root.querySelector('[data-testid=vc-notice]'); if (el) { el.scrollIntoView({ block: 'center' }); el.focus({ preventScroll: true }); }
+    const el = root.querySelector('[data-testid=vc-notice]'); if (el) revealForm(el);
   }
   // Paluu MobilePaysta (?pay=mobilepay): reconcile + public_get_order 2,5 s välein enintään ~60 s, lopputulos näkyy sivun yläreunassa (§14.3)
   const returning = () => runReturn({ mp, host: mpHost, S, L, orderNo: o.order_no, timing: mpTiming,
@@ -256,7 +258,7 @@ async function main() {
       const a = h('a', { href: url, download: r.pdf_url ? null : `${receiptNo}.txt`, target: r.pdf_url ? '_blank' : null, rel: 'noopener' }); document.body.append(a); a.click(); a.remove();
     } catch { flash(false, t.error); } finally { btn.disabled = false; }
   }
-  const flash = (ok, text) => { const m = root.querySelector('[data-testid=order-msg]'); if (m) m.replaceChildren(h('p', { class: ok ? 'bk-ok' : 'bk-error', role: ok ? 'status' : 'alert', text })); };
+  const flash = (ok, text) => { const m = root.querySelector('[data-testid=order-msg]'); if (m) { m.replaceChildren(h('p', { class: ok ? 'bk-ok' : 'bk-error', role: ok ? 'status' : 'alert', text })); revealIfHidden(m); } };
   // palvelimen virhe {ok:false, code, message}: tunnetut koodit omilla teksteillään, muuten palvelimen (suomenkielinen) viesti
   const failText = (r) => (r?.code && (t[`err.${r.code}`] || holdError(L, r.code))) || (T[L] || T.fi).errorGeneric;   // palvelimen raaka message ei asiakkaalle (ui.shop.error_generic)
   function addForm(o) {

@@ -496,3 +496,10 @@ a.bk-sd:hover{filter:brightness(.97)}
 .bk-pc.full{background:var(--card);border-color:var(--line);border-radius:var(--r)}
 .bk-pc.full .bk-pc-name{color:var(--muted)}
 .bk-pick .bk-badge.full{display:inline-flex;align-self:flex-start;margin-top:.4rem}
+
+/* Käyttäjän avaamat lomakkeet ja tulososiot jäävät kiinteän yläpalkin alapuolelle. */
+#gc-cart, .gc-line, .gc-result, .gc-balout, .gc-msg, .bk-slots, .bk-step-box,
+.bk-continue, .bk-form, .bk-conf, .bk-error, .bk-notice, .bk-company,
+[data-testid="booking-form"], [data-testid="availability"], .ok-box,
+.vc-choose, .vc-notice, .ord-msg, .ord-pay, .ord-card, .bk-dayresults,
+#bk-day-h, .bk-pc, .bk-review, .bk-checkout { scroll-margin-top: 84px; }
