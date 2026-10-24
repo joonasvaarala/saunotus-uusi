@@ -37,11 +37,13 @@ export async function render({ ctx, refs, query, reload }) {
     for (const w of v.waitlist_holds || []) { const k = `${w.rule_id}|${Date.parse(w.starts_at)}`; const o = holds.get(k) || { n: 0, until: w.hold_expires_at }; o.n += +w.persons || 0; if (w.hold_expires_at > o.until) o.until = w.hold_expires_at; holds.set(k, o); }
     for (const s of list) s.wlHold = holds.get(`${s.rule_id}|${Date.parse(s.starts_at)}`) || null;
     const holdTxt = (s) => (s.wlHold ? ` · ${T('nb.hold', { n: s.wlHold.n, time: fmtTime(s.wlHold.until) })}` : '');
+    // booking_148: yksityisvuoron pito koskee koko vuoroa → ei henkilömäärää.
+    const holdPrivTxt = (s) => (s.wlHold ? ` · ${T('nb.holdPriv', { time: fmtTime(s.wlHold.until) })}` : '');
     if (st.pre) { const m = list.find((s) => String(s.rule_id) === st.pre.r && s.starts_at === st.pre.t && s.status === 'available'); st.pre = null; if (m) st.session = m; }   // Vapaana-napista (päivänäkymä): esivalittu vuoro
     sessionsBox.replaceChildren(list.length ? h('div', { class: 'slotpick', role: 'radiogroup', 'aria-label': T('nb.slots') }, list.map((s) => {
       const ok = s.status === 'available';
       const b = h('button', { type: 'button', role: 'radio', 'aria-checked': st.session?.rule_id === s.rule_id ? 'true' : 'false', class: `slotbtn ${s.status}`, disabled: !ok || null, onclick: () => { st.session = s; sessionsBox.querySelectorAll('.slotbtn').forEach((x) => x.setAttribute('aria-checked', 'false')); b.setAttribute('aria-checked', 'true'); drawForm(true); } },
-        h('strong', { text: `${fmtTime(s.starts_at)}–${fmtTime(s.ends_at)}` }), h('span', { text: slotName(s) }), h('small', { text: ok ? (s.mode === 'exclusive' ? T('nb.privFree') : T('nb.free', { n: s.remaining }) + holdTxt(s)) : s.status === 'full' ? T('nb.full') : T('nb.na') }));
+        h('strong', { text: `${fmtTime(s.starts_at)}–${fmtTime(s.ends_at)}` }), h('span', { text: slotName(s) }), h('small', { text: ok ? (s.mode === 'exclusive' ? T('nb.privFree') + holdPrivTxt(s) : T('nb.free', { n: s.remaining }) + holdTxt(s)) : s.status === 'full' ? T('nb.full') : T('nb.na') }));
       return b;
     })) : empty(T('nb.noSlots')));
   }
@@ -61,7 +63,7 @@ export async function render({ ctx, refs, query, reload }) {
     if (!s) { formBox.replaceChildren(h('p', { class: 'muted nb-hint', text: T('nb.pickSlot') })); return; }
     const rng = personsRange(s);
     const pers = stepper({ label: T('nb.persons'), value: rng.min, min: rng.min, max: Math.max(rng.min, rng.max), inputName: 'n', size: 'lg', onChange: () => upd() });
-    const persHint = h('small', { class: 'fld-hint', text: s.mode === 'exclusive' ? T('nb.personsHintMin', { min: rng.min, max: rng.max }) : T('nb.personsHint', { free: s.remaining, min: rng.min }) + (s.wlHold ? ` ${T('nb.holdHint', { n: s.wlHold.n, time: fmtTime(s.wlHold.until) })}` : '') });
+    const persHint = h('small', { class: 'fld-hint', text: s.mode === 'exclusive' ? T('nb.personsHintMin', { min: rng.min, max: rng.max }) + (s.wlHold ? ` ${T('nb.holdHintPriv', { time: fmtTime(s.wlHold.until) })}` : '') : T('nb.personsHint', { free: s.remaining, min: rng.min }) + (s.wlHold ? ` ${T('nb.holdHint', { n: s.wlHold.n, time: fmtTime(s.wlHold.until) })}` : '') });
     const persErr = fieldErr();
     const priceIn = h('input', { type: 'text', inputmode: 'decimal', name: 'price', autocomplete: 'off', placeholder: T('nb.priceAuto') });
     const priceErr = fieldErr(); priceIn.addEventListener('input', () => { clearFieldErr(priceIn, priceErr); upd(); });

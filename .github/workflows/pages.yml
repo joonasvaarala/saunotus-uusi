@@ -172,6 +172,11 @@ jobs:
       # Pidon aikana paikka ei ole julkisessa myynnissä (_pool_peak vähentää voimassa olevat pidot; haltija, henkilökunta ja service_role ohittavat):
       # t139_waitlist_hold_off_sale.sql samassa paikallisessa ajossa.
       - run: node --test booking/tests/jonotuslista-yksi-pito.test.mjs
+      # booking_148: jonotuslistan henkilömäärä palvelutyypin mukaan (schedule_rules.mode = 'exclusive' → yksityisvuoro, ei henkilömäärää;
+      # kb.products.category = 'event' → tapahtuma, 1..kapasiteetti; muuten yleinen vuoro 1–6). 48 h -sääntö ja 120 min pito ennallaan.
+      # Tekstit content/site-texts.pending-import-48.json. t148 (booking/supabase/tests/waitlist/t148_waitlist_party_size_by_type.sql)
+      # ajetaan paikallisessa PG17:ssä t139:n tapaan (työnkulussa ei ole Postgresia).
+      - run: node --test booking/tests/jonotuslista-ryhmakoko-tyyppi.test.mjs
       # booking_133: päivänippu + kuukauden saatavuus yhdellä RPC:llä (SQL-vertailu booking_125:een: booking/tests/paiva-ja-saatavuus-nopeutus-regressio.sql, ajetaan testikannassa)
       - run: node --test booking/tests/paiva-ja-saatavuus-nopeutus.test.mjs
       # Paketti 05 / booking_138: hallinnan päänavigaatio (Tilaukset + Varaukset-välilehti, vanhat #/varaukset-linkit), yläpalkin pikahaku ja
