@@ -1,5 +1,5 @@
--- t172-pohja paikalliseen PG17:ään (ei tuotantoon!): minimitaulut + tuotannon tarkat funktiomäärittelyt (luettu SELECTillä sxbofnuisemspgquoxyv 25.10.2026, md5 = tuotanto).
--- Ajo: psql -f t172_fixture_local.sql && psql -1 -f ../../migrations/20261024222000_booking_172_company_customer_search.sql && psql -f t172_company_customer_search.sql
+-- t172-minipohja paikalliseen PG17:ään (EI tuotantoon!): minimitaulut + tuotannon tarkat funktiomäärittelyt (luettu SELECTillä sxbofnuisemspgquoxyv 25.10.2026, md5 = tuotanto).
+-- Vain md5-vertailuun (tests/yritysasiakashaku.test.mjs). t172_company_customer_search.sql EI käytä tätä: se ajetaan koko migraatioketjun päällä (booking.staff, auth.users, roolit) tai tuotannossa.
 drop schema if exists booking cascade;
 create schema booking;
 do $$ begin create role anon nologin; exception when duplicate_object then null; end $$;
