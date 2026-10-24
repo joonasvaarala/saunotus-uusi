@@ -266,6 +266,8 @@ jobs:
       - run: node --test booking/tests/kortit-jarjestys.test.mjs
       # booking_161: kb.products-kuvausten Johku-linkit → uuden kaupan osoitteet (migraatio + rollback, md5-vartijat). SQL: t161 PG17:ssä.
       - run: node --test booking/tests/kb-johku-linkit-161.test.mjs
+      # booking_163: kb.products.booking_url Johku → uuden kaupan tuotesivu (migraatio + rollback, vartijat). SQL: t163 PG17:ssä.
+      - run: node --test booking/tests/booking-url-kauppaan-163.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
