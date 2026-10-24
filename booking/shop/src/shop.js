@@ -9,10 +9,11 @@ import { pt } from './pay-choices-texts.js';
 import { T } from './i18n.js';
 import { createWaitlistView } from './waitlist-ui.js';
 import { visibleWaitlistSlots, fullyBooked, hasWaitlistSlots } from './waitlist-logic.js';
-import { loadProducts as loadTreatmentProducts, splitCatalog, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
+import { loadProducts as loadTreatmentProducts, splitCatalog, isListed as treatmentListed, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
 import { pickCatalog } from './catalog-audience.js';
 import { heroShort, cardShort, fallbackDesc } from './short-desc.js';
 import { createTreatmentViews } from './treatment-ui.js';
+import { cardMeta } from './card-meta.js';
 import { createTexts, loadShopTexts, applyShopTexts } from './site-texts.js';
 import { fmtMinutes } from './site-texts-logic.js';
 import { OPT } from './options-texts.js';
@@ -69,6 +70,8 @@ const priceText = (p) => {
   if (p.price_type === 'from' || p.price_type === 'variable') return `${t.from} ${v}`;
   return v;
 };
+// Päivänäkymän ryhmäjärjestys: yksityisvuorot ensin, sitten yleiset vuorot (hoidot ja rituaalit erillisenä osiona näiden jälkeen).
+const DAY_KIND_ORDER = ['yksityinen', 'yleinen', 'muut'];
 const kindOf = (p) => (p.treatment ? 'hoito' : p.sale_kind === 'public_shift' ? 'yleinen' : p.sale_kind === 'private_shift' ? 'yksityinen' : 'muut');
 // ?mock=1: kokeilutila (EI palvelinta): kaikki RPC-kutsut vastataan selaimessa (shop-mock.js; ei tallenna mitään palvelimelle). Lippu säilytetään linkeissä.
 const MOCK = new URLSearchParams(location.search).get('mock') === '1';
@@ -181,7 +184,7 @@ function setHero(p) {
 const cardExcerpt = (p) => cardShort(h, p, S.lang, pdesc(p));
 // ---- näkymä 1: tuotelista ----
 function viewList(query) {
-  const cat = [...state.catalog, ...state.treatments];
+  const cat = [...state.catalog, ...state.treatments.filter(treatmentListed)];   // lisätuotteet (LISTING_HIDDEN_SLUGS) eivät näy listalla; tuotesivu toimii
   const kinds = ['all', ...new Set(cat.map(kindOf))];
   const k = kinds.includes(query.get('k')) ? query.get('k') : 'all';
   const list = cat.filter((p) => k === 'all' || kindOf(p) === k);
@@ -190,7 +193,7 @@ function viewList(query) {
     pimg(p, 'card-img'),
     h('h3', {}, h('a', { href: bk(`/tuote/${p.slug}`), text: pname(p) })),
     cardExcerpt(p),
-    h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), pdur(p) ? ` · ${pdur(p)}` : ''),
+    cardMeta(h, priceText(p), pdur(p)),   // ajankohta omalla rivillään hinnan yläpuolella (card-meta.js)
     h('a', { class: 'btn sm', href: bk(`/tuote/${p.slug}`) }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) })))));
   const annual = annualPromo();
   mount(h('header', { class: 'bk-head' }, h('h2', { text: t.title }), h('p', { class: 'lead', text: t.lead })), modeSwitch('cat'), tabs, cards, annual);
@@ -310,7 +313,7 @@ async function fillTreatments(box, results, ds, today, tmax, openSlug, onToggle,
   const from = ds < today ? today : ds;
   const end = addDays(ds, 13);
   const until = end < tmax ? end : tmax;
-  await Promise.all(state.treatments.map(async (p, ord) => {
+  await Promise.all(state.treatments.filter(treatmentListed).map(async (p, ord) => {
     let by;
     try { by = await loadTreatmentSlots(p, 1, from, until); } catch (e) { failed = failed || e; return; }
     if (token !== treatDayToken || !box.isConnected) return;
@@ -397,14 +400,15 @@ async function viewDay(dateStr, keep, openSlug) {
     .sort((a, b) => Number(fullyBooked(a[1])) - Number(fullyBooked(b[1])));
   const bySlug = new Map(prods.map(([p]) => [p.slug, p]));
   const openId = prods.length === 1 ? prods[0][0].id : bySlug.get(openSlug)?.id ?? null;
-  const groups = ['yleinen', 'yksityinen', 'muut'].map((k) => [k, prods.filter(([p]) => kindOf(p) === k)])
+  // järjestys: yksityisvuorot → yleiset vuorot → muut; hoidot ja rituaalit (treatBox) aina viimeisenä
+  const groups = DAY_KIND_ORDER.map((k) => [k, prods.filter(([p]) => kindOf(p) === k)])
     .filter(([, g]) => g.length);
   results = h('div', { class: 'bk-dayresults', 'data-date': ds }, heading, notice,
     prods.length ? h('p', { class: 'bk-note bk-pickhint', text: t.pickProduct }) : null,
     groups.flatMap(([k, g]) => [h('h4', { class: 'bk-kindh', text: t['k_' + k] }),
       h('ul', { class: 'bk-prods' }, g.map(([p, rs]) => prodCard(p, rs, ds, p.id === openId, toggle)))]));
   const tmax = addDays(today, treatmentHorizon(state.settings)) < maxDs ? addDays(today, treatmentHorizon(state.settings)) : maxDs;
-  const treatBox = state.treatments.length && ds <= tmax ? h('section', { class: 'bk-treat-day', 'aria-label': t.k_hoito }, h('h4', { class: 'bk-kindh', text: t.k_hoito }), h('p', { class: 'bk-loading bk-treat-status', role: 'status', text: t.loading }), h('ul', { class: 'bk-prods' })) : null;
+  const treatBox = state.treatments.some(treatmentListed) && ds <= tmax ? h('section', { class: 'bk-treat-day', 'aria-label': t.k_hoito }, h('h4', { class: 'bk-kindh', text: t.k_hoito }), h('p', { class: 'bk-loading bk-treat-status', role: 'status', text: t.loading }), h('ul', { class: 'bk-prods' })) : null;
   if (treatBox) results.append(treatBox);
   mount(h('header', { class: 'bk-head' }, h('h2', { text: t.dayTitle }), h('p', { class: 'lead', text: t.dayLead })), modeSwitch('day', ds),
     h('section', { class: 'bk-daypick', 'aria-label': t.pickDay }, nav, strip,
