@@ -1,0 +1,74 @@
+[
+ {
+  "key": "ui.order.cancel_rule",
+  "lang": "fi",
+  "text": "Peruutuspyynnön voi lähettää viimeistään {{var:hours}} tuntia ennen vuoron alkua, eli viimeistään {{var:date}}. Alle {{var:hours}} tuntia ennen vuoroa peruutus ei ole enää mahdollinen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [
+   "{{var:hours}}",
+   "{{var:date}}"
+  ],
+  "reason": "booking_149 (Joonaksen päätös 24.10.2026): asiakkaan itse tekemä peruutus ja hyvitys ei ole sallittu alle 48 h ennen vuoron alkua; tilaussivun peruutuskohdan teksti (booking/shop/src/order-texts.js). {{var:hours}} = asetus customer_change_hours_before, {{var:phone}} = sivuston puhelinnumero. Sama kuin koodin oletus, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.order.cancel_rule",
+  "lang": "en",
+  "text": "You can send a cancellation request up to {{var:hours}} hours before your session starts, that is by {{var:date}}. Less than {{var:hours}} hours before the session, cancellation is no longer possible.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [
+   "{{var:hours}}",
+   "{{var:date}}"
+  ],
+  "reason": "booking_149 (Joonaksen päätös 24.10.2026): asiakkaan itse tekemä peruutus ja hyvitys ei ole sallittu alle 48 h ennen vuoron alkua; tilaussivun peruutuskohdan teksti (booking/shop/src/order-texts.js). {{var:hours}} = asetus customer_change_hours_before, {{var:phone}} = sivuston puhelinnumero. Sama kuin koodin oletus, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.order.cancel_closed",
+  "lang": "fi",
+  "text": "Peruutus ei ole enää mahdollinen, koska vuoron alkuun on alle {{var:hours}} tuntia. Jos sinulla on kysyttävää, soita meille: {{var:phone}}.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [
+   "{{var:hours}}",
+   "{{var:phone}}"
+  ],
+  "reason": "booking_149 (Joonaksen päätös 24.10.2026): asiakkaan itse tekemä peruutus ja hyvitys ei ole sallittu alle 48 h ennen vuoron alkua; tilaussivun peruutuskohdan teksti (booking/shop/src/order-texts.js). {{var:hours}} = asetus customer_change_hours_before, {{var:phone}} = sivuston puhelinnumero. Sama kuin koodin oletus, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.order.cancel_closed",
+  "lang": "en",
+  "text": "Cancellation is no longer possible because your session starts in less than {{var:hours}} hours. If you have any questions, please call us: {{var:phone}}.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:hours}}",
+   "{{var:phone}}"
+  ],
+  "reason": "booking_149 (Joonaksen päätös 24.10.2026): asiakkaan itse tekemä peruutus ja hyvitys ei ole sallittu alle 48 h ennen vuoron alkua; tilaussivun peruutuskohdan teksti (booking/shop/src/order-texts.js). {{var:hours}} = asetus customer_change_hours_before, {{var:phone}} = sivuston puhelinnumero. Sama kuin koodin oletus, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.order.err.cancel_too_late",
+  "lang": "fi",
+  "text": "Peruutusaika on päättynyt. Peruutus ei ole enää mahdollinen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_149 (Joonaksen päätös 24.10.2026): asiakkaan itse tekemä peruutus ja hyvitys ei ole sallittu alle 48 h ennen vuoron alkua; tilaussivun peruutuskohdan teksti (booking/shop/src/order-texts.js). {{var:hours}} = asetus customer_change_hours_before, {{var:phone}} = sivuston puhelinnumero. Sama kuin koodin oletus, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.order.err.cancel_too_late",
+  "lang": "en",
+  "text": "The cancellation deadline has passed. Cancellation is no longer possible.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_149 (Joonaksen päätös 24.10.2026): asiakkaan itse tekemä peruutus ja hyvitys ei ole sallittu alle 48 h ennen vuoron alkua; tilaussivun peruutuskohdan teksti (booking/shop/src/order-texts.js). {{var:hours}} = asetus customer_change_hours_before, {{var:phone}} = sivuston puhelinnumero. Sama kuin koodin oletus, ei vielä tuotannossa."
+ }
+]

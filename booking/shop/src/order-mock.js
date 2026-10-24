@@ -76,7 +76,21 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
   sync();
   // Kassan paikanpito (§17): hold* -skenaariot (hold-mock.js) lisäävät checkout_state-kentät vastauksiin
   const hold = isHoldScenario(scenario) ? createHoldEngine({ scenario, holdSeconds, skew: serverSkew, procSeconds, storage, ctx: { o, sync, mp, mpMarkPaid, r2 } }) : null;
-  const snap = () => { hold?.tick(); return JSON.parse(JSON.stringify({ ok: true, ...o, ...(hold ? hold.json() : {}) })); };
+  // booking_149: asiakkaan peruutuspyynnön takaraja kuten palvelimella (aikaisin tuleva vahvistettu varaus − 48 h). ?scenario=peruutus-suljettu = vuoroon alle 48 h (30 h).
+  const CANCEL_H = 48;
+  if (scenario === 'peruutus-suljettu') {
+    const st = Date.now() + 30 * 36e5, len = Date.parse(o.reservations[0].ends_at) - Date.parse(o.reservations[0].starts_at);
+    o.reservations = o.reservations.slice(0, 1).map((r) => ({ ...r, starts_at: new Date(st).toISOString(), ends_at: new Date(st + len).toISOString() }));
+    o.can_change = false; o.change_deadline = new Date(st - CANCEL_H * 36e5).toISOString(); o.change_hours_before = CANCEL_H;
+  }
+  const cancelState = () => {
+    const act = o.reservations.filter((r) => r.status !== 'cancelled' && Date.parse(r.ends_at) > Date.now());
+    const first = act.length ? Math.min(...act.map((r) => Date.parse(r.starts_at))) : null;
+    const dl = first == null ? null : first - CANCEL_H * 36e5;
+    const open = o.status === 'confirmed' && !o.cancel_request && act.length > 0;
+    return { can_request_cancel: open && dl >= Date.now(), cancel_deadline: dl == null ? null : new Date(dl).toISOString(), cancel_hours_before: CANCEL_H, cancel_closed: open && dl < Date.now() };
+  };
+  const snap = () => { hold?.tick(); return JSON.parse(JSON.stringify({ ok: true, ...o, ...cancelState(), ...(hold ? hold.json() : {}) })); };
   const bad = (code, message) => ({ ok: false, code, message });
   const plOffered = () => !!hold && payLaterTest && hold.json().checkout_state === 'awaiting_payment';
   const withPayLater = (r) => (plOffered() ? { ...r, methods: [...(r.methods || []), PAY_LATER_METHOD] } : r);
@@ -160,7 +174,7 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
       res.option = optJson(c);
       return { ok: true, mock: true, order_no: o.order_no, starts_at: res.starts_at, ends_at: res.ends_at, persons: res.persons, total: o.total, price_diff: 0, payment: null, balance: { total: o.total, paid: o.paid, unpaid: o.unpaid }, online_payment_enabled: false, option: res.option };
     },
-    public_request_cancel: ({ p_reason }) => { if (o.cancel_request) return bad('request_exists', 'Peruutuspyyntö on jo lähetetty'); o.cancel_request = { status: 'open', created_at: new Date().toISOString(), reason: p_reason || null }; return { ok: true, mock: true }; },
+    public_request_cancel: ({ p_reason }) => { if (o.cancel_request) return bad('request_exists', 'Peruutuspyyntö on jo lähetetty'); if (cancelState().cancel_closed) return bad('cancel_too_late', `Peruutus ei ole enää mahdollinen, koska vuoron alkuun on alle ${CANCEL_H} tuntia.`); o.cancel_request = { status: 'open', created_at: new Date().toISOString(), reason: p_reason || null }; return { ok: true, mock: true }; },
     public_get_receipt: ({ p_order_token, p_receipt_no }) => {
       const r = o.receipts.find((x) => x.receipt_no === p_receipt_no); if (!r) return bad('receipt_not_found', 'Kuittia ei löytynyt');
       return { ok: true, mock: true, id: 1, receipt_no: r.receipt_no, kind: r.kind, issued_at: r.issued_at, total_gross: r.total, snapshot: null, public_token: r.token, pdf_url: null, sent_at: r.issued_at,

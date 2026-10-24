@@ -260,8 +260,7 @@ async function main() {
     const add = closedHold || o.reservations.length === 0 ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-a' }, h('h3', { id: 'ord-a', text: t.addTitle }), o.can_add && o.upsell_addons.length ? addForm(o) : h('p', { class: 'bk-note', text: t.addClosed }), treats,
       h('p', { class: 'bk-note' }, `${t.addNewBooking} `, h('a', { href: S.shopHref, text: t.addNewBookingLink })));
     const extra = guides || add ? h('div', { class: 'ord-extra', 'data-testid': 'order-extra' }, guides, add) : null;
-    const cancel = closedHold || o.reservations.length === 0 ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), note,
-      o.cancel_request ? h('p', { class: 'bk-ok', role: 'status', 'data-testid': 'cancel-pending', text: t[`cancel.${o.cancel_request.status}`] || t['cancel.open'] }) : cancelForm());
+    const cancel = closedHold || o.reservations.length === 0 ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c', 'data-testid': 'cancel-section' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), ...cancelBody(o, note));
     mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, closedEl, resv, optSec, lines, pay, giftCards, claimBox, annualEl, giftUse, receipts, extra, cancel, msg, phoneBox()));
   }
   async function download(btn, receiptNo) {
@@ -325,6 +324,24 @@ async function main() {
         return h('div', { class: 'ord-opt-sec' }, head, h('div', { class: 'ord-opt' }, pk.node, btn));
       }));
   }
+  // booking_149: palvelin kertoo, saako asiakas vielä pyytää peruutusta (vähintään cancel_hours_before h ennen vuoron alkua). Rajan jälkeen lomaketta ei näytetä,
+  // vaan teksti + puhelinnumero (tel-linkki). Vanha backend (can_request_cancel puuttuu) → kuten ennen: muutosnote + lomake.
+  function cancelBody(o, note) {
+    if (o.cancel_request) return [note, h('p', { class: 'bk-ok', role: 'status', 'data-testid': 'cancel-pending', text: t[`cancel.${o.cancel_request.status}`] || t['cancel.open'] })];
+    if (o.can_request_cancel == null) return [note, cancelForm()];
+    const hours = String(o.cancel_hours_before ?? 48);
+    if (o.cancel_closed) return [phoneText(t.cancelClosed.split('{hours}').join(hours), { class: 'bk-note ord-cancel-closed', role: 'status', 'data-testid': 'cancel-closed' })];
+    if (!o.can_request_cancel) return [note];
+    const rule = o.cancel_deadline ? h('p', { class: 'bk-note', 'data-testid': 'cancel-rule', text: t.cancelRule.split('{hours}').join(hours).replace('{date}', dt(o.cancel_deadline)) }) : note;
+    return [rule, cancelForm()];
+  }
+  // {phone} (repon oletus) tai jo täytetty numero (sivuteksti {{var:phone}} → S.phone) → tel-linkki
+  function phoneText(text, attrs) {
+    const mark = text.includes('{phone}') ? '{phone}' : S.phone && text.includes(S.phone) ? S.phone : null;
+    if (!mark) return h('p', attrs, text, ' ', h('a', { href: `tel:${S.phoneTel}`, text: S.phone }));
+    const [a, ...rest] = text.split(mark);
+    return h('p', attrs, a, h('a', { href: `tel:${S.phoneTel}`, 'data-testid': 'cancel-phone', text: S.phone }), rest.join(mark));
+  }
   function cancelForm() {
     const reason = h('textarea', { id: 'ord-reason', rows: 3, maxlength: 500, 'data-testid': 'cancel-reason' });
     const btn = h('button', { type: 'submit', class: 'btn light ord-btn', 'data-testid': 'cancel-submit', text: t.cancelSubmit });
@@ -333,6 +350,7 @@ async function main() {
       try {
         const r = await api.requestCancel({ reason: reason.value.trim() });
         if (r?.notReady) throw new Error('cancel');
+        if (r?.ok === false && r.code === 'cancel_too_late') { const fresh = await api.get(); if (fresh?.ok) await redraw(fresh); flash(false, failText(r)); return; }   // booking_149: raja ylittyi sivun ollessa auki
         if (r?.ok === false && r.code !== 'request_exists') { flash(false, failText(r)); btn.disabled = false; return; }
         const fresh = await api.get(); if (!fresh?.ok) throw new Error('get'); await redraw(fresh); flash(true, r?.ok === false ? t['cancel.open'] : t.cancelDone);
       } catch { flash(false, t.error); btn.disabled = false; }
