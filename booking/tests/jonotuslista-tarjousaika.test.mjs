@@ -12,15 +12,15 @@ import { WAITLIST_TEXTS } from '../shop/src/waitlist-texts.js';
 const repo = resolve(new URL('../..', import.meta.url).pathname);
 const rd = (p) => readFileSync(resolve(repo, p), 'utf8');
 const code = (s) => s.replace(/--[^\n]*/g, ''); // ilman SQL-kommentteja
-const MIG = 'booking/supabase/migrations/20261024095000_booking_137_waitlist_offer_window.sql';
-const RB = 'booking/supabase/rollbacks/20261024095000_booking_137_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261024080249_booking_137_waitlist_offer_window.sql';
+const RB = 'booking/supabase/rollbacks/20261024080249_booking_137_ROLLBACK.sql';
 const T137 = 'booking/supabase/tests/waitlist/t137_waitlist_offer_window.sql';
 const MIG135 = 'booking/supabase/migrations/20261024073352_booking_135_waitlist_notified_capacity.sql';
 const fn = (sql, name) => { const i = sql.indexOf(`create or replace function booking.${name}(`); assert.ok(i >= 0, name); const j = sql.indexOf('end $$;', i); return sql.slice(i, j); };
 
 test('booking_137: migraatio, rollback ja SQL-testi ovat olemassa, aikaleima booking_135:n ja booking_136:n (20261024073642) jälkeen', () => {
   for (const p of [MIG, RB, T137]) assert.ok(existsSync(resolve(repo, p)), p);
-  assert.ok('20261024095000' > '20261024073642' && '20261024095000' > '20261024073352');
+  assert.ok('20261024080249' > '20261024073642' && '20261024080249' > '20261024073352');
 });
 
 test('migraatio booking_137: apufunktio: pito vain, kun vuoroon ≥ 48 h, kesto 120 min, virheellinen asetus → oletus', () => {

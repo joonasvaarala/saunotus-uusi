@@ -12,7 +12,7 @@
 -- * Asetusrivit lisätään idempotentisti (on conflict do nothing): olemassa olevaa arvoa ei ylikirjoiteta.
 --   Puuttuva tai virheellinen asetus → oletukset 120 min / 48 h.
 -- Ei taulumuutoksia, ei public-skeemaa. Uudelleenajettava.
--- Rollback: booking/supabase/rollbacks/20261024095000_booking_137_ROLLBACK.sql (booking_135-tila).
+-- Rollback: booking/supabase/rollbacks/20261024080249_booking_137_ROLLBACK.sql (booking_135-tila).
 set local lock_timeout = '5s';
 
 insert into booking.settings(key, value, description) values
