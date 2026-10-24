@@ -24,7 +24,7 @@ Lisäasetukset (eivät ole salaisuuksia):
 ## 2. Resend (sähköposti) – tarvitaan ennen live-tilaa
 1. Resend-tili (resend.com) ja **verkkotunnus** `saunotus.fi` lisättynä Resendiin; DNS-tietueet (SPF, DKIM, suositus DMARC) lisätty verkkotunnuksen DNS:ään ja tunnus merkitty Resendissä *Verified*. Lähettäjäosoite oltava vahvistetulla verkkotunnuksella (`savusauna@saunotus.fi`).
 2. API-avain (Sending access) → Edge-salaisuus **`RESEND_API_KEY`**.
-3. Tarkista `settings.site_base_url` (nyt `https://uusi.saunotus.com`; vaihda varsinaiseksi osoitteeksi ennen live-tilaa, koska viestien linkit rakentuvat siitä): `update booking.settings set value = to_jsonb('https://…'::text) where key = 'site_base_url';`
+3. Tarkista `settings.site_base_url` (siirrossa 1.11.2026 `https://saunotus.fi`, ks. docs/siirto-saunotus-fi.md; vaihda ennen live-tilaa, koska viestien linkit rakentuvat siitä): `update booking.settings set value = to_jsonb('https://…'::text) where key = 'site_base_url';`
 4. Testilähetys: aseta ensin `test_recipients` (omat osoitteet), sitten `resend.mode='live'`. Tarkista viestit ja PDF-liite ja että `email_outbox.status='sent'`. Osoite, joka ei ole listalla, merkitään `skipped` (`ei allowlistissa`) eikä lähde.
 5. Live-tilassa viestit lähtevät: tilausvahvistus (45 s viiveellä), kuitti ja hyvityskuitti (PDF liitteenä), maksulinkki, peruutuspyynnön vastaanottoviesti, tilausmuutosviesti. Virheet: uudelleenyritys (`attempts²` min), `dead` kun `max_attempts` täynnä; seuranta: `select kind,status,last_error,count(*) from booking.email_outbox group by 1,2,3;`
 6. `send-emails` ajetaan pg_cronilla (`booking_send_emails`, 1 min); tunnistus `x-sync-secret` = Vault-salaisuus `calendar_sync_cron_secret` (jo olemassa; ei lisäsalaisuutta).

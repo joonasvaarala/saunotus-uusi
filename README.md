@@ -1,6 +1,6 @@
 # Sipoonjoen Perinnesauna – uusi sivusto (staattinen, FI/EN)
 
-Kevyt staattinen kopio sivustosta https://uusi.saunotus.com (alkuperäinen on WordPress + Kadence + Elementor, ei Nuxt). Sisältöä ylläpitää Koodari. **Tämä on testiversio – ei tuotantokäytössä, ei hakukoneille (noindex).**
+Kevyt staattinen kopio sivustosta https://saunotus.fi (alkuperäinen on WordPress + Kadence + Elementor, ei Nuxt). Sisältöä ylläpitää Koodari. **Tämä on testiversio – ei tuotantokäytössä, ei hakukoneille (noindex).**
 
 ## Teknologiavalinta ja perustelut
 
@@ -52,7 +52,7 @@ KORJAUSRAPORTTI.md     korjauslistan käsittely
 npm install                 # vain jos kuvat ajetaan uudelleen (sharp)
 npm run preview             # rakentaa testiversion → dist/, palvelee http://localhost:4173/
 npm run build:test          # GitHub Pages -testi (SITE_ENV=test, osoite https://joonasvaarala.github.io/saunotus-uusi)
-npm run build:prod          # tuotanto (canonical https://uusi.saunotus.com, indeksoitavissa, ei noindexia)
+npm run build:prod          # tuotanto (canonical https://saunotus.fi, indeksoitavissa, ei noindexia)
 npm run check               # linkki-/resurssitarkistus dist/-kansioon (check:external tarkistaa myös ulkoiset)
 ```
 

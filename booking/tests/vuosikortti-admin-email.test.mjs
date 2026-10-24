@@ -115,7 +115,7 @@ test('SQL-testi t154 kattaa: yksi rivi, toistuva päivitys, peruttu / ei käytö
 });
 
 test('sähköposti: hallinnan kortti (source admin) → oma johdanto ja ohje ilman ostoa; ostettu kortti ennallaan', { skip: tsSkip }, () => {
-  const row = (locale, source) => ({ kind: 'annual_card_code', locale, to_name: 'Aada Testi', annual_card: { code: 'K7QX9MZ3TA', valid_from: '2026-10-24', valid_to: '2027-10-23', active: true, revoked: false, source, booking_url: 'https://uusi.saunotus.com/varaa/' } });
+  const row = (locale, source) => ({ kind: 'annual_card_code', locale, to_name: 'Aada Testi', annual_card: { code: 'K7QX9MZ3TA', valid_from: '2026-10-24', valid_to: '2027-10-23', active: true, revoked: false, source, booking_url: 'https://saunotus.fi/varaa/' } });
   const ET = TPL.EMAIL_TEXTS;
   for (const l of ['fi', 'en']) {
     const g = TPL.render('annual_card_code', row(l, 'admin'), l), p = TPL.render('annual_card_code', row(l, 'purchase'), l), old = TPL.render('annual_card_code', row(l, undefined), l);

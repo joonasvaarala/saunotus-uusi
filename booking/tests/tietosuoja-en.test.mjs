@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const root = resolve(new URL('../..', import.meta.url).pathname);
-delete process.env.SITE_ENV; process.env.SITE_URL = 'https://uusi.saunotus.com';
+delete process.env.SITE_ENV; process.env.SITE_URL = 'https://saunotus.fi';
 const PL = await import('../../src/policy-lang.mjs');
 const lib = await import('../../src/lib.mjs');
 const R = await import('../../src/render.mjs');

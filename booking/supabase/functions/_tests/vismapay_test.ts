@@ -136,7 +136,7 @@ function payDb(apply: (args: Record<string, unknown>) => unknown, extra: Record<
     rpc: async (name, args) => {
       calls.push([name, args]);
       if (name === "vismapay_payment_lookup" || name === "vismapay_order_refs") {
-        return { data: { found: true, ok: true, env: "test", amount: 40, order_token: TOK, site_base_url: "https://uusi.saunotus.com", order_page_path: "/tilaus/", payment_status: "pending", refs: [{ order_number: ORDER, env: "test" }], ...extra }, error: null };
+        return { data: { found: true, ok: true, env: "test", amount: 40, order_token: TOK, site_base_url: "https://saunotus.fi", order_page_path: "/tilaus/", payment_status: "pending", refs: [{ order_number: ORDER, env: "test" }], ...extra }, error: null };
       }
       if (name === "vismapay_payment_apply") return { data: apply(args ?? {}), error: null };
       return { data: { ok: true }, error: null };
@@ -202,7 +202,7 @@ Deno.test("paluu: väärä MAC ei muuta tilaa eikä ohjaa kyselyn osoitteeseen",
   const good = await ret(new Request(`https://f/vismapay-return?RETURN_CODE=0&ORDER_NUMBER=${ORDER}&SETTLED=1&AUTHCODE=${mac}&next=https://evil.example/phish`), { db, env: testEnv(), fetch: vismaFetch({ amount: 4000, status: 4 }) });
   assertEquals(good.status, 302);
   const loc = good.headers.get("location") || "";
-  assertEquals(loc.startsWith("https://uusi.saunotus.com/tilaus/"), true);
+  assertEquals(loc.startsWith("https://saunotus.fi/tilaus/"), true);
   assertEquals(loc.includes("pay=vismapay"), true);
   assertEquals(loc.includes("evil.example"), false);
 });

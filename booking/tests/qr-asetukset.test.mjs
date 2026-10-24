@@ -22,14 +22,14 @@ const pending16 = JSON.parse(read('../../content/site-texts.pending-import-16.js
 const pending12 = JSON.parse(read('../../content/site-texts.pending-import-12.json'));
 const pending24 = JSON.parse(read('../../content/site-texts.pending-import-24.json'));
 const pending31 = JSON.parse(read('../../content/site-texts.pending-import-31.json'));
-const URL_QR = 'https://uusi.saunotus.com/juomat/?laite=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+const URL_QR = 'https://saunotus.fi/juomat/?laite=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
 test('QR-osoite on lukittu polku ja tuloste ei ole tyhjä', () => {
-  assert.equal(drinksQrUrl('https://uusi.saunotus.com', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), URL_QR);
-  assert.equal(drinksQrUrl('https://uusi.saunotus.com/', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), URL_QR);
+  assert.equal(drinksQrUrl('https://saunotus.fi', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), URL_QR);
+  assert.equal(drinksQrUrl('https://saunotus.fi/', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), URL_QR);
   const html = printSheetHtml([
     { name: 'Vichy', priceText: '3,00 €', url: URL_QR, label: 'Pukuhuone' },
-    { name: 'Käsipyyhe', priceText: '4,00 €', url: 'https://uusi.saunotus.com/juomat/?laite=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', label: '' },
+    { name: 'Käsipyyhe', priceText: '4,00 €', url: 'https://saunotus.fi/juomat/?laite=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', label: '' },
   ], { scan: 'Skannaa ja osta' });
   assert.ok(html.length > 200);
   assert.match(html, /<svg/);
@@ -127,7 +127,7 @@ test('mock: tuote kassaan, ikäraja ei saa QR-koodia, juomasivu näyttää vain 
   const missing = await admin.rpc('admin_create_product_qr', { p_product_id: 105, p_label: null });
   assert.equal(missing.label, null);
   assert.equal(printSheetHtml([{ name: blank.name, priceText: '4,00 €', url: blank.print_url, label: blank.label }]).includes('qr-where'), false);
-  assert.equal(qr.print_url, `https://uusi.saunotus.com/juomat/?laite=${qr.code}`);
+  assert.equal(qr.print_url, `https://saunotus.fi/juomat/?laite=${qr.code}`);
   assert.equal(qr.name, 'Käsipyyhe');
   assert.equal(qr.price, 4);
   const staffBlocked = createAdminMock({ role: 'staff', perms: ['bookings.manage'] });

@@ -52,7 +52,7 @@ begin
   select id into v_biz from kb.businesses where id = 1;
   perform public.t104_ck(v_biz is not null, 'B0 yritystunnus');
   insert into booking.settings(key, value, description, is_public)
-  values ('site_base_url', to_jsonb('https://uusi.saunotus.com'::text), 'Testi asettaa osoitteen; transaktion peruutus palauttaa tuotannon arvon', false)
+  values ('site_base_url', to_jsonb('https://saunotus.fi'::text), 'Testi asettaa osoitteen; transaktion peruutus palauttaa tuotannon arvon', false)
   on conflict (key) do update set value = excluded.value;
 
   insert into kb.products(business_id, name, category, price, vat_rate, active) values (v_biz, 'Vichy', 'other', 3.00, 13.5, true) returning id into p_vichy;
@@ -91,7 +91,7 @@ begin
   v_id := (rowj ->> 'id')::bigint;
   perform public.t104_ck(code ~ '^[a-f0-9]{32}$' and length(code) = 32, 'Q1 koodi on 32 heksaa');
   perform public.t104_ck(code <> p_vichy::text, 'Q2 koodi ei ole tuotetunnus');
-  perform public.t104_ck(rowj ->> 'print_url' = 'https://uusi.saunotus.com/juomat/?laite=' || code, 'Q3 tulostusosoite');
+  perform public.t104_ck(rowj ->> 'print_url' = 'https://saunotus.fi/juomat/?laite=' || code, 'Q3 tulostusosoite');
   perform public.t104_ck(rowj ->> 'path' = '/juomat/?laite=' || code, 'Q4 polku');
   perform public.t104_ck(rowj ->> 'path_en' = '/en/drinks/?laite=' || code, 'Q5 englannin polku');
   perform public.t104_ck((rowj ->> 'price')::numeric = 3, 'Q6 hinta tuotteesta');

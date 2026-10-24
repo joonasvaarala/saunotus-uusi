@@ -79,14 +79,14 @@ test('sähköpostipohja: index.ts ohittaa perutun / puuttuvan kortin ennen rende
 });
 
 test('sähköposti: koodi, voimassaolo, kalenterilinkki, ohjeet (1 hlö, koodi kassalla) ja Tapion allekirjoitus FI + EN', { skip: tsSkip }, () => {
-  const row = (locale) => ({ kind: 'annual_card_code', locale, to_name: 'Aada Testi', annual_card: { code: 'K7QX9MZ3TA', valid_from: '2026-10-24', valid_to: '2027-10-23', active: true, revoked: false, booking_url: `https://uusi.saunotus.com${locale === 'en' ? '/en/book/' : '/varaa/'}` } });
+  const row = (locale) => ({ kind: 'annual_card_code', locale, to_name: 'Aada Testi', annual_card: { code: 'K7QX9MZ3TA', valid_from: '2026-10-24', valid_to: '2027-10-23', active: true, revoked: false, booking_url: `https://saunotus.fi${locale === 'en' ? '/en/book/' : '/varaa/'}` } });
   const fi = TPL.render('annual_card_code', row('fi'), 'fi'), en = TPL.render('annual_card_code', row('en'), 'en');
   for (const [m, l] of [[fi, 'fi'], [en, 'en']]) {
     assert.match(m.text, /K7QX9MZ3TA/); assert.match(m.html, />K7QX9MZ3TA</);
     assert.match(m.text, l === 'fi' ? /Voimassa 24\.10\.2026–23\.10\.2027/ : /Valid 24\/10\/2026–23\/10\/2027/);
     assert.match(m.text, l === 'fi' ? /yhdelle hengelle/ : /one person/);
     assert.match(m.text, l === 'fi' ? /Alennus- tai vuosikorttikoodi/ : /Discount or annual card code/);
-    assert.match(m.html, l === 'fi' ? /href="https:\/\/uusi\.saunotus\.com\/varaa\/"/ : /href="https:\/\/uusi\.saunotus\.com\/en\/book\/"/);
+    assert.match(m.html, l === 'fi' ? /href="https:\/\/saunotus\.fi\/varaa\/"/ : /href="https:\/\/saunotus\.fi\/en\/book\/"/);
     assert.match(m.text, /\nTapio\nSipoonjoen Perinnesauna\n$/);
     assert.match(m.text, /010 299 2866|\+358 10 299 2866/);
   }

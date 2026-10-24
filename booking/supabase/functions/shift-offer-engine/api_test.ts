@@ -261,7 +261,6 @@ Deno.test("a bad token does not call the respond rpc", async () => {
 Deno.test("CORS echoes only the configured site origins", async () => {
   const allowed = [
     "https://joonasvaarala.github.io",
-    "https://uusi.saunotus.com",
     "https://saunotus.fi",
     "https://www.saunotus.fi",
   ];

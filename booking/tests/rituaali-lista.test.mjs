@@ -15,7 +15,7 @@ cpSync(new URL('../shop/src/', import.meta.url), tmp, { recursive: true });
 cpSync(new URL('../shared/sb.js', import.meta.url), join(tmp, 'sb.js'));
 const A = await import(pathToFileURL(join(tmp, 'treatments.js')));
 const FX61 = JSON.parse(readFileSync(new URL('./fixtures/prod-catalog-61.json', import.meta.url), 'utf8'));
-delete process.env.SITE_ENV; process.env.SITE_URL = 'https://uusi.saunotus.com';
+delete process.env.SITE_ENV; process.env.SITE_URL = 'https://saunotus.fi';
 const R = await import('../../src/render.mjs');
 const MIG = read('booking/supabase/migrations/20261024171947_booking_159_rituaali_lista.sql');
 const RB = read('booking/supabase/rollbacks/20261024171947_booking_159_ROLLBACK.sql');

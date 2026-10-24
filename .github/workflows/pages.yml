@@ -275,6 +275,9 @@ jobs:
       - run: node --test booking/tests/kb-johku-linkit-161.test.mjs
       # booking_163: kb.products.booking_url Johku → uuden kaupan tuotesivu (migraatio + rollback, vartijat). SQL: t163 PG17:ssä.
       - run: node --test booking/tests/booking-url-kauppaan-163.test.mjs
+      # booking_170: sivuston osoite saunotus.fi – vanhaa kehitysosoitetta ei repossa (poikkeukset listattu testissä), kb.products-osoitteet
+      # (migraatio + rollback, md5-vartijat, needs_translation ennallaan). SQL: t170 PG17:ssä tuotannon teksteillä (Bottiavustus).
+      - run: node --test booking/tests/osoite-saunotus-fi-170.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

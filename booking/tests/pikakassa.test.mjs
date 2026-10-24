@@ -21,7 +21,7 @@ test('suomalainen matkapuhelin: MSISDN ilman plus-merkkiä, kiinteä ei kelpaa',
 });
 
 test('QR-matriisi syntyy paikallisesti ja on neliö', () => {
-  const rows = qrMatrix('https://uusi.saunotus.com/juomat/?laite=pukuhuone-abcdef1234');
+  const rows = qrMatrix('https://saunotus.fi/juomat/?laite=pukuhuone-abcdef1234');
   assert.ok(rows.length >= 21);
   assert.ok(rows.every((r) => r.length === rows.length));
   assert.ok(rows.some((r) => r.includes('1')));

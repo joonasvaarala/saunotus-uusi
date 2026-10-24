@@ -13,7 +13,7 @@ Mallipohjat ovat tiedostossa [`docs/whatsapp-templates.json`](whatsapp-templates
 | `cancelled` | `tarjous_peruttu` | hoidot-sulku perui tarjouksen |
 | `exhausted_ask`, `alert` | `joonas_tyhja_vuoro` | tyhjä vuoro, ilmoituksen numero tai sana hälytys, URL-painike |
 
-URL-painikkeen osoite on edelleen `https://sxbofnuisemspgquoxyv.supabase.co/functions/v1/shift-offer-engine?token={{1}}`. Sitä ei vaihdeta: mallipohja on Metan tarkastuksessa. Funktio vastaa tähän GET-pyyntöön ohjauksella 302. Kohde kootaan asetuksesta `SHIFT_OFFER_PAGE_BASE` (oletus `https://joonasvaarala.github.io/saunotus-uusi`, ilman lopun kauttaviivaa) ja polusta `/vuoro/?token=`. Poletti URL-koodataan. Verkkotunnuksen vaihdossa riittää tämä yksi asetus. Staattinen sivu hakee avoimet tarjoukset funktiosta `GET /api/offers` ja kirjaa vastauksen `POST /api/respond`. Selain saa lukea JSON-vastauksen vain osoitteista `joonasvaarala.github.io`, `uusi.saunotus.com`, `saunotus.fi` ja `www.saunotus.fi`.
+URL-painikkeen osoite on edelleen `https://sxbofnuisemspgquoxyv.supabase.co/functions/v1/shift-offer-engine?token={{1}}`. Sitä ei vaihdeta: mallipohja on Metan tarkastuksessa. Funktio vastaa tähän GET-pyyntöön ohjauksella 302. Kohde kootaan asetuksesta `SHIFT_OFFER_PAGE_BASE` (oletus `https://joonasvaarala.github.io/saunotus-uusi`, ilman lopun kauttaviivaa) ja polusta `/vuoro/?token=`. Poletti URL-koodataan. Verkkotunnuksen vaihdossa riittää tämä yksi asetus. Staattinen sivu hakee avoimet tarjoukset funktiosta `GET /api/offers` ja kirjaa vastauksen `POST /api/respond`. Selain saa lukea JSON-vastauksen vain osoitteista `joonasvaarala.github.io`, `saunotus.fi` ja `www.saunotus.fi`.
 
 ## Salaisuuksien nimet
 
@@ -34,7 +34,7 @@ Paikka Supabasessa: projekti Tapio-havuhattu (`sxbofnuisemspgquoxyv`) → Edge F
 
 Käyttöliittymän nimet liikkuvat. Oliot ovat samat: Business-portfolio, sovellus, WhatsApp-tuote, puhelinnumero, näyttönimi, system user, mallipohja, webhook.
 
-1. **Business-portfolio.** Avaa [business.facebook.com](https://business.facebook.com). Käytä olemassa olevaa portfoliota tai luo uusi yritykselle (esimerkiksi Sipoonjoen Perinnesauna). Settings → Business info: virallinen nimi, osoite ja verkkosivu `https://uusi.saunotus.com` tai se osoite, jonka Meta saa tarkistaa.
+1. **Business-portfolio.** Avaa [business.facebook.com](https://business.facebook.com). Käytä olemassa olevaa portfoliota tai luo uusi yritykselle (esimerkiksi Sipoonjoen Perinnesauna). Settings → Business info: virallinen nimi, osoite ja verkkosivu `https://saunotus.fi` tai se osoite, jonka Meta saa tarkistaa.
 
 2. **Sovellus.** Avaa [developers.facebook.com/apps](https://developers.facebook.com/apps) → Create app. Valitse käyttötapaukseksi WhatsApp, jos se on listalla. Muuten tyyppi Business. Lisää tuotteeksi WhatsApp, jos se ei tullut mukana.
 
