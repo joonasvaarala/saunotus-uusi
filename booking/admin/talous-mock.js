@@ -435,16 +435,35 @@ const PREPAID_ON = '2026-10-15';
     if (!(a.p_amount > 0)) throw fail('invalid_amount', 'Summa pitää olla positiivinen');
     if (a.p_amount > o.unpaid_amount + 0.005) throw fail('amount_exceeds_unpaid', `Summa ylittää maksamattoman osuuden (${o.unpaid_amount} €)`);
     const b = balanceOf(o), paid = round2(b.paid + a.p_amount);
+    if (paid >= b.total - 0.005) annualPaid.add(o.order_id);   // booking_146: täysi maksu luo vuosikortin (mock)
     return { ok: true, mock: true, payment_id: 9e6, receipt_id: 9e6, receipt_no: 'K-MOCK-000001', rounding: 0, balance: { ...b, paid, unpaid: round2(b.total - paid), net_paid: paid } };
   }
   function adminListVatRates() {
     return { rates: [{ rate: 25.5, label: 'ALV 25,5 % (yleinen)', active: true, products: 46, addons: 3 }, { rate: 13.5, label: 'ALV 13,5 %', active: true, products: 2, addons: 0 }, { rate: 0, label: 'ALV 0 %', active: true, products: 0, addons: 0 }],
       missing: [{ kind: 'product', id: 47, name: 'Tossujen tai saunatakin vuokra (paikan päällä)' }], quote_only: [{ id: 50, name: 'Työhyvinvointipäivät ja ryhmät (tarjouspyyntö)' }] };
   }
+  // ---- admin_annual_card_for_order(p_order_id) (booking_146) ----
+  // Mock: joka 25. oma tilaus on vuosikorttitilaus. Kortti on olemassa, kun tilaus on maksettu tai sille kirjattiin mock-maksu (annualPaid).
+  // Sähköpostin tila kiertää tilausnumeron mukaan → kaikki näkymän tilat nähtävissä ilman tuotantokantaa.
+  const annualPaid = new Set();
+  const MOCK_MAIL = ['sent', 'dry_run', 'no_email', 'pending', 'skipped', 'failed'];
+  function adminAnnualCardForOrder(a = {}) {
+    const o = byId.get(+a.p_order_id); if (!o) throw fail('not_found', 'Tilausta ei löydy', 404);
+    const season = o.is_native && o.order_id % 25 === 0;
+    const paid = o.payment_status === 'paid' || annualPaid.has(o.order_id);
+    if (!season || !paid) return { ok: true, mock: true, has_season_card: season, payment_status: annualPaid.has(o.order_id) ? 'paid' : o.payment_status, has_customer: true, card: null };
+    const from = annualPaid.has(o.order_id) ? today : String(o.payments.filter((p) => p.paid_at).map((p) => p.paid_at).sort().pop() || o.created_at || today).slice(0, 10), to = dayAdd(`${Number(from.slice(0, 4)) + 1}${from.slice(4)}`, -1);
+    const A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789', cr = rng(o.order_id); let code = '';   // sama aakkosto kuin booking._generate_annual_card_code
+    for (let i = 0; i < 10; i++) code += A[Math.floor(cr() * A.length)];
+    const status = annualPaid.has(o.order_id) ? 'dry_run' : MOCK_MAIL[Math.floor(o.order_id / 25) % MOCK_MAIL.length];
+    return { ok: true, mock: true, has_season_card: true, payment_status: 'paid', has_customer: true,
+      card: { id: 400000 + o.order_id, code, valid_from: from, valid_to: to, active: true, revoked: false },
+      email: { status, to: status === 'no_email' ? null : o.email, queued_at: status === 'no_email' ? null : `${from}T10:00:00Z`, sent_at: status === 'sent' ? `${from}T10:01:00Z` : null } };
+  }
   const ADDON_LIST = [{ id: 1, code: 'saunavihta', name: 'Saunavihta', name_en: 'Sauna whisk (vihta)', price: 5, vat_rate: 25.5, max_per_person: 1, active: true }, { id: 2, code: 'pyyhe', name: 'Pyyhe', name_en: 'Towel', price: 5, vat_rate: 25.5, max_per_person: 1, active: true },
     { id: 3, code: 'turvenaamio_jalkakylpy', name: 'Turvenaamio ja jalkakylpy', name_en: 'Peat mask and foot bath', price: 12, vat_rate: 25.5, max_per_person: 1, active: true }];
   const HANDLERS = { admin_analytics_summary: (a) => analyticsMock(a.p_from || today, a.p_to || today), admin_list_orders: adminListOrders, admin_get_order: adminGetOrder, admin_list_payments: adminListPayments, admin_list_addons: () => ADDON_LIST, admin_add_to_order: adminAddToOrder, admin_create_payment_link: adminCreatePaymentLink,
-    admin_refund: adminRefund, admin_refund_order: adminRefundOrder, admin_reservation_refund_preview: adminReservationRefundPreview, admin_cancel_reservation: adminCancelReservation, admin_record_payment: adminRecordPayment, admin_list_vat_rates: adminListVatRates, admin_report_daily: adminReportDaily, admin_report_month: adminReportMonth, admin_report_range: adminReportRange, admin_report_csv: adminReportCsv, admin_report_gift_cards: adminReportGiftCards, admin_sales_chart: adminSalesChart, admin_get_receipt: adminGetReceipt, admin_resend_receipt: adminResendReceipt };
+    admin_refund: adminRefund, admin_refund_order: adminRefundOrder, admin_reservation_refund_preview: adminReservationRefundPreview, admin_cancel_reservation: adminCancelReservation, admin_record_payment: adminRecordPayment, admin_list_vat_rates: adminListVatRates, admin_report_daily: adminReportDaily, admin_report_month: adminReportMonth, admin_report_range: adminReportRange, admin_report_csv: adminReportCsv, admin_report_gift_cards: adminReportGiftCards, admin_sales_chart: adminSalesChart, admin_get_receipt: adminGetReceipt, admin_resend_receipt: adminResendReceipt, admin_annual_card_for_order: adminAnnualCardForOrder };
   // sama kutsutapa kuin sb.js:n rpc(): rpc(nimi, parametrit) → Promise. Tuntematon nimi = puuttuva RPC (404 / PGRST202) kuten PostgRESTissä.
   async function rpc(name, args = {}) {
     await wait();

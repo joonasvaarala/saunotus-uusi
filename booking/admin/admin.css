@@ -866,3 +866,14 @@ body.shot #shell .nav .lbl{display:inline}
 .tl-analytics-step{margin:0 0 10px}.tl-analytics-bar{background:var(--line);border-radius:5px;margin:4px 0}
 .tl-analytics-fill{display:block;height:12px;border-radius:5px;background:var(--green)}
 .tl-analytics-kpi{margin:8px 0 0;font-weight:600}
+/* vuosikorttikoodi kassalla (booking_146): koodi isona, ei sinistä; tekstien kontrasti ≥ 4,5:1 */
+.ac-panel{display:grid;gap:8px}
+.ac-label{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.ac-code{display:block;font:700 30px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.12em;color:var(--green);background:var(--bg);border:1px solid var(--green);border-radius:8px;padding:12px 14px;user-select:all;-webkit-user-select:all;overflow-wrap:anywhere}
+.ac-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.ac-valid{margin:0;font-weight:600;color:var(--ink)}
+.ac-mail{margin:0;padding:8px 10px;border-radius:8px;border-left:4px solid}
+.ac-mail.ok{background:var(--okbg);color:var(--ok);border-color:var(--ok)}
+.ac-mail.warn{background:var(--warnbg);color:var(--ink);border-color:var(--gold)}
+.ac-mail.err{background:var(--errbg);color:var(--err);border-color:var(--err)}
+.ac-tell{margin:0;font-size:14px}
