@@ -1,0 +1,2600 @@
+[
+ {
+  "key": "ui.admin.events.nav",
+  "lang": "fi",
+  "text": "Tapahtumat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.nav",
+  "lang": "en",
+  "text": "Events",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.title",
+  "lang": "fi",
+  "text": "Tapahtumat ja koulutukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.title",
+  "lang": "en",
+  "text": "Events and trainings",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.lead",
+  "lang": "fi",
+  "text": "Tapahtumien ja koulutusten kerrat, osallistujamäärät, resurssivaraukset ja myyntikanavat. Tuotetiedot ja hinnat muokataan Tuotteet-sivulla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 240,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.lead",
+  "lang": "en",
+  "text": "Occurrences, participant limits, resource bookings and sales channels of events and trainings. Product details and prices are edited on the Products page.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 240,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.lead_staff",
+  "lang": "fi",
+  "text": "Näet tapahtumat ja niiden kerrat. Muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 140,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.lead_staff",
+  "lang": "en",
+  "text": "You can see events and their occurrences. Editing requires manager or admin rights.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 140,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.filter_all",
+  "lang": "fi",
+  "text": "Kaikki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.filter_all",
+  "lang": "en",
+  "text": "All",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.filter_event",
+  "lang": "fi",
+  "text": "Tapahtumat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.filter_event",
+  "lang": "en",
+  "text": "Events",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.filter_training",
+  "lang": "fi",
+  "text": "Koulutukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.filter_training",
+  "lang": "en",
+  "text": "Trainings",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.show_past",
+  "lang": "fi",
+  "text": "Näytä menneet kerrat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.show_past",
+  "lang": "en",
+  "text": "Show past occurrences",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.cat_event",
+  "lang": "fi",
+  "text": "Tapahtuma",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.cat_event",
+  "lang": "en",
+  "text": "Event",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.cat_training",
+  "lang": "fi",
+  "text": "Koulutus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.cat_training",
+  "lang": "en",
+  "text": "Training",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.empty",
+  "lang": "fi",
+  "text": "Ei tapahtumia valitulla suodattimella.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.empty",
+  "lang": "en",
+  "text": "No events match the filter.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.no_occurrences",
+  "lang": "fi",
+  "text": "Ei tulevia kertoja.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.no_occurrences",
+  "lang": "en",
+  "text": "No upcoming occurrences.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.badge_sale_off",
+  "lang": "fi",
+  "text": "Ei myynnissä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.badge_sale_off",
+  "lang": "en",
+  "text": "Not on sale",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.badge_hidden",
+  "lang": "fi",
+  "text": "Piilotettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.badge_hidden",
+  "lang": "en",
+  "text": "Hidden",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.badge_inactive",
+  "lang": "fi",
+  "text": "Ei käytössä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.badge_inactive",
+  "lang": "en",
+  "text": "Inactive",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.badge_full",
+  "lang": "fi",
+  "text": "Täynnä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.badge_full",
+  "lang": "en",
+  "text": "Full",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.badge_past",
+  "lang": "fi",
+  "text": "Mennyt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.badge_past",
+  "lang": "en",
+  "text": "Past",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.sale_off_note",
+  "lang": "fi",
+  "text": "Tapahtumien myynti on vielä suljettu. Kerrat näkyvät kaupassa vasta kun myynti avataan.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 140,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.sale_off_note",
+  "lang": "en",
+  "text": "Event sales are still closed. Occurrences appear in the shop only after sales are opened.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 140,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.sold",
+  "lang": "fi",
+  "text": "{{var:sold}} / {{var:max}} myyty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [
+   "{{var:sold}}",
+   "{{var:max}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.sold",
+  "lang": "en",
+  "text": "{{var:sold}} / {{var:max}} sold",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [
+   "{{var:sold}}",
+   "{{var:max}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.sold_nomax",
+  "lang": "fi",
+  "text": "{{var:sold}} myyty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [
+   "{{var:sold}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.sold_nomax",
+  "lang": "en",
+  "text": "{{var:sold}} sold",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [
+   "{{var:sold}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.waitlist",
+  "lang": "fi",
+  "text": "jonossa {{var:n}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.waitlist",
+  "lang": "en",
+  "text": "{{var:n}} on waiting list",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.open",
+  "lang": "fi",
+  "text": "Avaa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.open",
+  "lang": "en",
+  "text": "Open",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.edit_product",
+  "lang": "fi",
+  "text": "Muokkaa tuotetietoja",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.edit_product",
+  "lang": "en",
+  "text": "Edit product details",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.channels",
+  "lang": "fi",
+  "text": "Myyntikanavat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.channels",
+  "lang": "en",
+  "text": "Sales channels",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.channel_shop",
+  "lang": "fi",
+  "text": "Verkkokauppa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.channel_shop",
+  "lang": "en",
+  "text": "Online shop",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.channel_widget",
+  "lang": "fi",
+  "text": "Koulutussivun widget",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.channel_widget",
+  "lang": "en",
+  "text": "Training page widget",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.channels_saved",
+  "lang": "fi",
+  "text": "Myyntikanavat tallennettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.channels_saved",
+  "lang": "en",
+  "text": "Sales channels saved",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.channels_none",
+  "lang": "fi",
+  "text": "Ei myyntikanavia",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.channels_none",
+  "lang": "en",
+  "text": "No sales channels",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.occurrences",
+  "lang": "fi",
+  "text": "Kerrat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.occurrences",
+  "lang": "en",
+  "text": "Occurrences",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_title",
+  "lang": "fi",
+  "text": "Lisää kertoja",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_title",
+  "lang": "en",
+  "text": "Add occurrences",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_hint",
+  "lang": "fi",
+  "text": "Yksi päivä ja yksi aika lisää yhden kerran. Usea päivä tai aika (pilkulla erotettuna) lisää kerran jokaiselle yhdistelmälle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_hint",
+  "lang": "en",
+  "text": "One date and one time adds one occurrence. Several dates or times (separated by commas) add an occurrence for every combination.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_dates",
+  "lang": "fi",
+  "text": "Päivät",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_dates",
+  "lang": "en",
+  "text": "Dates",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_dates_hint",
+  "lang": "fi",
+  "text": "Esim. 14.11.2026 tai 2026-11-14, useampi pilkulla erotettuna.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 100,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_dates_hint",
+  "lang": "en",
+  "text": "For example 14.11.2026 or 2026-11-14, several separated by commas.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 100,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_pick_date",
+  "lang": "fi",
+  "text": "Lisää päivä kalenterista",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_pick_date",
+  "lang": "en",
+  "text": "Add a date from the calendar",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_times",
+  "lang": "fi",
+  "text": "Alkuajat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_times",
+  "lang": "en",
+  "text": "Start times",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_times_hint",
+  "lang": "fi",
+  "text": "Esim. 17:00, useampi pilkulla erotettuna.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_times_hint",
+  "lang": "en",
+  "text": "For example 17:00, several separated by commas.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.duration",
+  "lang": "fi",
+  "text": "Kesto (min)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.duration",
+  "lang": "en",
+  "text": "Duration (min)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.max_persons",
+  "lang": "fi",
+  "text": "Osallistujia enintään",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.max_persons",
+  "lang": "en",
+  "text": "Maximum participants",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.max_hint",
+  "lang": "fi",
+  "text": "Tyhjä = tuotteen oletus.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.max_hint",
+  "lang": "en",
+  "text": "Empty = product default.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.min_persons",
+  "lang": "fi",
+  "text": "Osallistujia vähintään",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.min_persons",
+  "lang": "en",
+  "text": "Minimum participants",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.deadline",
+  "lang": "fi",
+  "text": "Myynti päättyy (min ennen alkua)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.deadline",
+  "lang": "en",
+  "text": "Sales end (min before start)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.label_fi",
+  "lang": "fi",
+  "text": "Kerran nimi (FI)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.label_fi",
+  "lang": "en",
+  "text": "Occurrence name (FI)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.label_en",
+  "lang": "fi",
+  "text": "Kerran nimi (EN)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.label_en",
+  "lang": "en",
+  "text": "Occurrence name (EN)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.label_hint",
+  "lang": "fi",
+  "text": "Tyhjä = päivä ja kellonaika, esim. {{var:example}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:example}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.label_hint",
+  "lang": "en",
+  "text": "Empty = date and time, for example {{var:example}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:example}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_preview",
+  "lang": "fi",
+  "text": "Lisätään {{var:n}} kertaa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_preview",
+  "lang": "en",
+  "text": "{{var:n}} occurrences will be added.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_submit",
+  "lang": "fi",
+  "text": "Lisää kerrat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_submit",
+  "lang": "en",
+  "text": "Add occurrences",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.added",
+  "lang": "fi",
+  "text": "Lisätty {{var:n}} kertaa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.added",
+  "lang": "en",
+  "text": "{{var:n}} occurrences added",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_partial",
+  "lang": "fi",
+  "text": "Lisätty {{var:ok}} / {{var:n}} kertaa. Virhe: {{var:error}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 100,
+  "placeholders": [
+   "{{var:ok}}",
+   "{{var:n}}",
+   "{{var:error}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.add_partial",
+  "lang": "en",
+  "text": "{{var:ok}} / {{var:n}} occurrences added. Error: {{var:error}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 100,
+  "placeholders": [
+   "{{var:ok}}",
+   "{{var:n}}",
+   "{{var:error}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.edit_occurrence",
+  "lang": "fi",
+  "text": "Muokkaa kertaa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.edit_occurrence",
+  "lang": "en",
+  "text": "Edit occurrence",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.save",
+  "lang": "fi",
+  "text": "Tallenna",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.save",
+  "lang": "en",
+  "text": "Save",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.saved",
+  "lang": "fi",
+  "text": "Tallennettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.saved",
+  "lang": "en",
+  "text": "Saved",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.active",
+  "lang": "fi",
+  "text": "Käytössä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.active",
+  "lang": "en",
+  "text": "Active",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.delete",
+  "lang": "fi",
+  "text": "Poista kerta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.delete",
+  "lang": "en",
+  "text": "Delete occurrence",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.delete_confirm",
+  "lang": "fi",
+  "text": "Poistetaanko kerta {{var:label}}? Kertaa ei voi poistaa, jos sillä on varauksia tai jonottajia.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 150,
+  "placeholders": [
+   "{{var:label}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.delete_confirm",
+  "lang": "en",
+  "text": "Delete occurrence {{var:label}}? An occurrence with bookings or a waiting list cannot be deleted.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 150,
+  "placeholders": [
+   "{{var:label}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.deleted",
+  "lang": "fi",
+  "text": "Kerta poistettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.deleted",
+  "lang": "en",
+  "text": "Occurrence deleted",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.copy_to_date",
+  "lang": "fi",
+  "text": "Kopioi toiselle päivälle",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.copy_to_date",
+  "lang": "en",
+  "text": "Copy to another date",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.copy_date",
+  "lang": "fi",
+  "text": "Uusi päivä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.copy_date",
+  "lang": "en",
+  "text": "New date",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.copied_rule",
+  "lang": "fi",
+  "text": "Kerta kopioitu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.copied_rule",
+  "lang": "en",
+  "text": "Occurrence copied",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.blocks",
+  "lang": "fi",
+  "text": "Resurssivaraukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.blocks",
+  "lang": "en",
+  "text": "Resource bookings",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.blocks_hint",
+  "lang": "fi",
+  "text": "Suhteellinen aika lasketaan kerran alusta minuutteina (esim. 0 ja 120). Kellonaika sopii esim. savusaunan varaukseen kiinteään kellonaikaan asti.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.blocks_hint",
+  "lang": "en",
+  "text": "Relative time is counted in minutes from the start of the occurrence (for example 0 and 120). Clock time suits for example a smoke sauna booking until a fixed time.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_resource",
+  "lang": "fi",
+  "text": "Resurssi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_resource",
+  "lang": "en",
+  "text": "Resource",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_spaces",
+  "lang": "fi",
+  "text": "Tilat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_spaces",
+  "lang": "en",
+  "text": "Spaces",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_persons",
+  "lang": "fi",
+  "text": "Saunottajat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_persons",
+  "lang": "en",
+  "text": "Sauna hosts",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_timing",
+  "lang": "fi",
+  "text": "Ajoitus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_timing",
+  "lang": "en",
+  "text": "Timing",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.timing_relative",
+  "lang": "fi",
+  "text": "Suhteellinen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.timing_relative",
+  "lang": "en",
+  "text": "Relative",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.timing_clock",
+  "lang": "fi",
+  "text": "Kellonaika",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.timing_clock",
+  "lang": "en",
+  "text": "Clock time",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_from_min",
+  "lang": "fi",
+  "text": "Alku (min)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_from_min",
+  "lang": "en",
+  "text": "Start (min)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_to_min",
+  "lang": "fi",
+  "text": "Loppu (min)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_to_min",
+  "lang": "en",
+  "text": "End (min)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_start",
+  "lang": "fi",
+  "text": "Alkaa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_start",
+  "lang": "en",
+  "text": "Starts",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_end",
+  "lang": "fi",
+  "text": "Päättyy",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_end",
+  "lang": "en",
+  "text": "Ends",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_mode",
+  "lang": "fi",
+  "text": "Varaustapa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_mode",
+  "lang": "en",
+  "text": "Booking type",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.mode_exclusive",
+  "lang": "fi",
+  "text": "Yksinoikeus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.mode_exclusive",
+  "lang": "en",
+  "text": "Exclusive",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.mode_shared",
+  "lang": "fi",
+  "text": "Jaettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.mode_shared",
+  "lang": "en",
+  "text": "Shared",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_note",
+  "lang": "fi",
+  "text": "Muistiinpano",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_note",
+  "lang": "en",
+  "text": "Note",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_add",
+  "lang": "fi",
+  "text": "Lisää resurssi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_add",
+  "lang": "en",
+  "text": "Add resource",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_remove",
+  "lang": "fi",
+  "text": "Poista rivi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.block_remove",
+  "lang": "en",
+  "text": "Remove row",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.blocks_save",
+  "lang": "fi",
+  "text": "Tallenna resurssivaraukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.blocks_save",
+  "lang": "en",
+  "text": "Save resource bookings",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.blocks_saved",
+  "lang": "fi",
+  "text": "Resurssivaraukset tallennettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.blocks_saved",
+  "lang": "en",
+  "text": "Resource bookings saved",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.blocks_none",
+  "lang": "fi",
+  "text": "Ei resurssivarauksia.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.blocks_none",
+  "lang": "en",
+  "text": "No resource bookings.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.timeline",
+  "lang": "fi",
+  "text": "Aikajana",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.timeline",
+  "lang": "en",
+  "text": "Timeline",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.timeline_occurrence",
+  "lang": "fi",
+  "text": "Kerta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.timeline_occurrence",
+  "lang": "en",
+  "text": "Occurrence",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.warn_outside",
+  "lang": "fi",
+  "text": "Varaus on osittain kerran ulkopuolella. Tarkista, että tämä on tarkoitus.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.warn_outside",
+  "lang": "en",
+  "text": "The booking is partly outside the occurrence. Check that this is intended.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_no_resource",
+  "lang": "fi",
+  "text": "Valitse resurssi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_no_resource",
+  "lang": "en",
+  "text": "Choose a resource.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_missing",
+  "lang": "fi",
+  "text": "Anna varauksen alku ja loppu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_missing",
+  "lang": "en",
+  "text": "Enter the start and end of the booking.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_end_before_start",
+  "lang": "fi",
+  "text": "Loppu on ennen alkua.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_end_before_start",
+  "lang": "en",
+  "text": "The end is before the start.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_too_far",
+  "lang": "fi",
+  "text": "Varaus saa alkaa enintään vuorokauden ennen kertaa ja päättyä vuorokauden sen jälkeen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 140,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_too_far",
+  "lang": "en",
+  "text": "A booking may start at most one day before the occurrence and end at most one day after it.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 140,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_bad_mode",
+  "lang": "fi",
+  "text": "Valitse varaustapa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_bad_mode",
+  "lang": "en",
+  "text": "Choose a booking type.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_bad_date",
+  "lang": "fi",
+  "text": "Tarkista päivät: {{var:list}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [
+   "{{var:list}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_bad_date",
+  "lang": "en",
+  "text": "Check the dates: {{var:list}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [
+   "{{var:list}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_bad_time",
+  "lang": "fi",
+  "text": "Tarkista alkuajat: {{var:list}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [
+   "{{var:list}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_bad_time",
+  "lang": "en",
+  "text": "Check the start times: {{var:list}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [
+   "{{var:list}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_no_dates",
+  "lang": "fi",
+  "text": "Anna vähintään yksi päivä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_no_dates",
+  "lang": "en",
+  "text": "Enter at least one date.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_no_times",
+  "lang": "fi",
+  "text": "Anna vähintään yksi alkuaika.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_no_times",
+  "lang": "en",
+  "text": "Enter at least one start time.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_bad_duration",
+  "lang": "fi",
+  "text": "Kesto on 15–20160 minuuttia.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_bad_duration",
+  "lang": "en",
+  "text": "Duration is 15–20160 minutes.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_bad_max",
+  "lang": "fi",
+  "text": "Osallistujamäärä on 1–500.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_bad_max",
+  "lang": "en",
+  "text": "Participant limit is 1–500.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_bad_min",
+  "lang": "fi",
+  "text": "Vähimmäismäärä on 1–500.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_bad_min",
+  "lang": "en",
+  "text": "Minimum is 1–500.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_min_over_max",
+  "lang": "fi",
+  "text": "Vähimmäismäärä on suurempi kuin enimmäismäärä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 70,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_min_over_max",
+  "lang": "en",
+  "text": "The minimum is larger than the maximum.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 70,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_bad_deadline",
+  "lang": "fi",
+  "text": "Myynnin päättymisaika on 0–20160 minuuttia.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 70,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_bad_deadline",
+  "lang": "en",
+  "text": "Sales end time is 0–20160 minutes.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 70,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_too_many",
+  "lang": "fi",
+  "text": "Liian monta kertaa kerralla ({{var:n}}). Enintään 60.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_too_many",
+  "lang": "en",
+  "text": "Too many occurrences at once ({{var:n}}). At most 60.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_bad_shift",
+  "lang": "fi",
+  "text": "Siirto on −3650…3650 päivää.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_bad_shift",
+  "lang": "en",
+  "text": "The shift is −3650…3650 days.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_conflict",
+  "lang": "fi",
+  "text": "Resurssi on jo varattu tälle ajalle:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 70,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_conflict",
+  "lang": "en",
+  "text": "The resource is already booked for this time:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 70,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_has_reservations",
+  "lang": "fi",
+  "text": "Kerralla on varauksia, joten sitä ei voi poistaa. Poista kerta käytöstä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_has_reservations",
+  "lang": "en",
+  "text": "The occurrence has bookings, so it cannot be deleted. Deactivate it instead.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_has_waitlist",
+  "lang": "fi",
+  "text": "Kerralla on jonottajia, joten sitä ei voi poistaa. Poista kerta käytöstä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 130,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_has_waitlist",
+  "lang": "en",
+  "text": "The occurrence has a waiting list, so it cannot be deleted. Deactivate it instead.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 130,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_max_below_sold",
+  "lang": "fi",
+  "text": "Osallistujamäärä ei voi olla pienempi kuin jo myyty määrä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 110,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_max_below_sold",
+  "lang": "en",
+  "text": "The participant limit cannot be lower than the number already sold.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 110,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_multi_day_training_only",
+  "lang": "fi",
+  "text": "Yli vuorokauden kerta on mahdollinen vain koulutuksella.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 100,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_multi_day_training_only",
+  "lang": "en",
+  "text": "Occurrences longer than a day are only possible for trainings.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 100,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_invalid_resource",
+  "lang": "fi",
+  "text": "Valitse aktiivinen tila tai saunottaja.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_invalid_resource",
+  "lang": "en",
+  "text": "Choose an active space or sauna host.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_not_event",
+  "lang": "fi",
+  "text": "Tuote ei ole tapahtuma tai koulutus.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_not_event",
+  "lang": "en",
+  "text": "The product is not an event or training.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_event_managed",
+  "lang": "fi",
+  "text": "Tätä sääntöä hallitaan Tapahtumat-sivulla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 70,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.err_event_managed",
+  "lang": "en",
+  "text": "This rule is managed on the Events page.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 70,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.reason_reservation",
+  "lang": "fi",
+  "text": "varaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.reason_reservation",
+  "lang": "en",
+  "text": "booking",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.reason_space_block",
+  "lang": "fi",
+  "text": "tilan esto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.reason_space_block",
+  "lang": "en",
+  "text": "space block",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.reason_event_block",
+  "lang": "fi",
+  "text": "toinen tapahtuma",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.reason_event_block",
+  "lang": "en",
+  "text": "another event",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.copy_event",
+  "lang": "fi",
+  "text": "Kopioi tapahtuma",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.copy_event",
+  "lang": "en",
+  "text": "Copy event",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.copy_include_rules",
+  "lang": "fi",
+  "text": "Kopioi myös tulevat kerrat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.copy_include_rules",
+  "lang": "en",
+  "text": "Also copy upcoming occurrences",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 50,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.copy_shift",
+  "lang": "fi",
+  "text": "Siirrä kertoja (päivää)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.copy_shift",
+  "lang": "en",
+  "text": "Shift occurrences (days)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.copy_shift_hint",
+  "lang": "fi",
+  "text": "Esim. 7 siirtää kerrat viikolla eteenpäin. Kopioidut kerrat ovat aluksi pois käytöstä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 140,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.copy_shift_hint",
+  "lang": "en",
+  "text": "For example 7 moves the occurrences one week later. Copied occurrences start as inactive.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 140,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.copied_event",
+  "lang": "fi",
+  "text": "Tapahtuma kopioitu ({{var:n}} kertaa)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.copied_event",
+  "lang": "en",
+  "text": "Event copied ({{var:n}} occurrences)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.read_only",
+  "lang": "fi",
+  "text": "Vain luku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.events.read_only",
+  "lang": "en",
+  "text": "Read only",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.product.copy",
+  "lang": "fi",
+  "text": "Kopioi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.product.copy",
+  "lang": "en",
+  "text": "Copy",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.product.copy_title",
+  "lang": "fi",
+  "text": "Kopioi tuote",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.product.copy_title",
+  "lang": "en",
+  "text": "Copy product",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.product.copy_confirm",
+  "lang": "fi",
+  "text": "Luodaanko kopio nimellä {{var:name}}? Kopio on aluksi piilotettu eikä ole myynnissä. Hinnat ja ALV kopioituvat sellaisinaan.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 190,
+  "placeholders": [
+   "{{var:name}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.product.copy_confirm",
+  "lang": "en",
+  "text": "Create a copy named {{var:name}}? The copy starts hidden and is not on sale. Prices and VAT are copied as they are.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 190,
+  "placeholders": [
+   "{{var:name}}"
+  ],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.product.copy_submit",
+  "lang": "fi",
+  "text": "Luo kopio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.product.copy_submit",
+  "lang": "en",
+  "text": "Create copy",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.product.copied",
+  "lang": "fi",
+  "text": "Kopio luotu. Muokkaa tiedot ja julkaise, kun valmis.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 90,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.product.copied",
+  "lang": "en",
+  "text": "Copy created. Edit the details and publish when ready.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 90,
+  "placeholders": [],
+  "reason": "booking_158: hallinnan Tapahtumat-näkymä (kerrat, osallistujamäärät, resurssivaraukset, kanavat) ja tuotteen/tapahtuman kopiointi (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.shop.event.sale_closed_title",
+  "lang": "fi",
+  "text": "Myynti avautuu pian",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: kaupan tapahtumasivu, kun tapahtuman myynti on suljettu (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.shop.event.sale_closed_title",
+  "lang": "en",
+  "text": "Tickets on sale soon",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: kaupan tapahtumasivu, kun tapahtuman myynti on suljettu (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.shop.event.sale_closed_text",
+  "lang": "fi",
+  "text": "Tämän tapahtuman liput tulevat myyntiin verkkokauppaamme pian. Kysy lisätietoja tai varaa paikka ottamalla yhteyttä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 180,
+  "placeholders": [],
+  "reason": "booking_158: kaupan tapahtumasivu, kun tapahtuman myynti on suljettu (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.shop.event.sale_closed_text",
+  "lang": "en",
+  "text": "Tickets for this event will be available in our online shop soon. Contact us for more information or to reserve a place.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 180,
+  "placeholders": [],
+  "reason": "booking_158: kaupan tapahtumasivu, kun tapahtuman myynti on suljettu (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.shop.event.dates",
+  "lang": "fi",
+  "text": "Tulevat ajankohdat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: kaupan tapahtumasivu, kun tapahtuman myynti on suljettu (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.shop.event.dates",
+  "lang": "en",
+  "text": "Upcoming dates",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: kaupan tapahtumasivu, kun tapahtuman myynti on suljettu (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.shop.event.no_dates",
+  "lang": "fi",
+  "text": "Uusia ajankohtia julkaistaan pian.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_158: kaupan tapahtumasivu, kun tapahtuman myynti on suljettu (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.shop.event.no_dates",
+  "lang": "en",
+  "text": "New dates will be published soon.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_158: kaupan tapahtumasivu, kun tapahtuman myynti on suljettu (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.shop.event.status_closed",
+  "lang": "fi",
+  "text": "Ei vielä myynnissä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: kaupan tapahtumasivu, kun tapahtuman myynti on suljettu (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.shop.event.status_closed",
+  "lang": "en",
+  "text": "Not on sale yet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: kaupan tapahtumasivu, kun tapahtuman myynti on suljettu (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.shop.event.status_full",
+  "lang": "fi",
+  "text": "Täynnä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: kaupan tapahtumasivu, kun tapahtuman myynti on suljettu (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.shop.event.status_full",
+  "lang": "en",
+  "text": "Full",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: kaupan tapahtumasivu, kun tapahtuman myynti on suljettu (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.shop.event.status_available",
+  "lang": "fi",
+  "text": "Paikkoja vapaana",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: kaupan tapahtumasivu, kun tapahtuman myynti on suljettu (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.shop.event.status_available",
+  "lang": "en",
+  "text": "Places available",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_158: kaupan tapahtumasivu, kun tapahtuman myynti on suljettu (uusi teksti, ei vielä tuotannossa)"
+ }
+]

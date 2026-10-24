@@ -7,6 +7,7 @@ import { tx } from './site-texts.mjs';
 import { seoSchemaForPage, jsonLdScript } from './seo-enhance.mjs';
 import { privacyAnalyticsHtml } from './privacy-analytics.mjs';
 import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
+import { selectShopEvents, shopEventsHtml, linkTarget, shopHash } from './event-cards.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
   johku, bookingUrl, phoneDisplay, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
@@ -143,7 +144,25 @@ export function upcomingEvents(lang) {
   }
   return out.sort((a, b) => a.dates[0].starts_on.localeCompare(b.dates[0].starts_on));
 }
+// booking_158: uuden kaupan tapahtumat (kb.json events_shop = booking.public_events(current_date, 'shop')), kun niissä on myynnissä olevia
+// tulevia kertoja; kortti linkittää kaupan tuotesivulle (FI /varaa/#/tuote/<slug>, EN /en/book/#/tuote/<slug>; EVENT_LINK_TARGET=johku → Johku).
+// Muuten (ei events_shop-dataa, myynti pois, kaikki kerrat suljettuja tai menneitä) alla oleva vanha polku sellaisenaan.
+function shopEventsSection(lang) {
+  const list = selectShopEvents(kb.events_shop, Date.now());
+  if (!list.length) return null;
+  const johkuLinks = linkTarget(process.env) === 'johku';
+  const cardOf = (ev) => Object.entries(cards.events).find(([id, c]) => !id.startsWith('_') && (c.kb || id) === ev.slug)?.[1] || null;
+  const fallbackImg = Object.entries(cards.events).find(([id, c]) => !id.startsWith('_') && c.img)?.[1]?.img;
+  const kbUrl = (ev) => kb.products.find((p) => p.slug === ev.slug)?.booking_url;
+  return shopEventsHtml(list, lang, {
+    e, money, card: cardOf, external: johkuLinks, newTab: NEW, arrow: ui(lang).reserveArrow,
+    link: (ev) => (johkuLinks && kbUrl(ev) ? bookingUrl(kbUrl(ev), lang) : pageHref('book', lang, shopHash(ev.slug))),
+    img: (ev) => { const id = cardOf(ev)?.img || fallbackImg; return id ? pic(id, lang, { sizes: '(min-width:1100px) 280px, 90vw', alt: '' }) : ''; },
+  });
+}
 export function eventsHtml(lang, empty) {
+  const shop = shopEventsSection(lang);
+  if (shop) return shop;
   const ev = upcomingEvents(lang);
   if (!ev.length) return `<p class="center">${e(empty)}</p>`;
   return `<ul class="events">${ev.map(({ c, p, dates }) => {

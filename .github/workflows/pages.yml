@@ -252,6 +252,9 @@ jobs:
       # (event_resource_blocks -> space_blocks), myyntikanavat, kopiointi, public_events, Lovi-sääntö. Myynti pois (events.sale_enabled = false).
       # SQL: t158 PG17:ssä (migraatio + rollback x2 + md5 + uudelleenajo).
       - run: node --test booking/tests/tapahtumat-158.test.mjs
+      # booking_158 (käyttöliittymä): hallinnan Tapahtumat-näkymä (kerrat yksitellen/monivalinta, osallistujamäärät, resurssivaraukset suhteellinen/kellonaika,
+      # saunottajat, kanavat, kopio 'Kopio: nimi'), kaupan suljettu tapahtumasivu, etusivun tapahtumakortit (events_shop → /varaa/#/tuote/<slug>), XSS. Tekstit pending-import-57.
+      - run: node --test booking/tests/tapahtumat-158-ui.test.mjs booking/tests/tapahtumakortit.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

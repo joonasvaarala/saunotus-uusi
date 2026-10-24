@@ -12,6 +12,8 @@ import { loadRichTexts, richText } from '../rich-texts.js';
 import { mountRichFields, syncRichFields } from '../rich-editor.js';
 import { settingsHref } from '../settings-tabs.js';
 import { looksLikeAlcohol } from '../pos-logic.js';
+import { loadEventsTexts, evText } from '../events-texts.js';
+import { copyArgs, copyName } from '../events-logic.js';
 
 const VAT_ACTIVE = [25.5, 13.5, 0];
 const CATEGORY_ORDER = ['product_rental', 'add_on', 'public_sauna', 'private_sauna', 'corporate', 'treatment', 'ritual', 'ceremony', 'event', 'gift_card', 'season_card', 'training', 'other'];
@@ -36,6 +38,7 @@ export async function render({ ctx, refs, reload, query }) {
   await loadPosTexts(rpc);
   await loadProductTexts(rpc);
   await loadRichTexts(rpc);
+  await loadEventsTexts(rpc);   // booking_158: Kopioi-tekstit (ui.admin.product.copy*)
   const isAdmin = ctx.can('catalog.edit');  // manager + admin
   const fresh = () => { ctx.refs = null; reload(); };   // tuotelista haetaan uudelleen (refs on välimuistissa; muuten uusi kuva/tiedot eivät näy listassa)
   const list = h('div', { class: 'list' });
@@ -150,8 +153,21 @@ export async function render({ ctx, refs, reload, query }) {
       h('a', { class: 'btn', href: '#/pikakassa', 'data-testid': 'product-open-pos', text: productText('link_pos'), onclick: () => d?.close() }),
       h('p', { class: 'muted', text: productText('qr_hint') }),
       h('a', { class: 'btn', href: settingsHref('qr'), 'data-testid': 'product-open-qr', text: productText('link_qr'), onclick: () => d?.close() })) : null;
-    d = dialog(p.name, h('div', { class: 'stack' }, f, img, cfg, next, vars), { wide: true });
+    // booking_158: tuotteen kopio (admin_product_copy): 'Kopio: nimi', uusi slug palvelimelta, piilotettu eikä myynnissä; avataan heti muokattavaksi
+    const copyBtn = isAdmin ? h('div', { class: 'row wrap' }, h('button', { type: 'button', class: 'btn', 'data-testid': 'product-copy', text: evText('ui.admin.product.copy'), onclick: () => copyProduct(p, d) })) : null;
+    d = dialog(p.name, h('div', { class: 'stack' }, copyBtn, f, img, cfg, next, vars), { wide: true });
     try { await mountRichFields(f); } catch (e) { console.error(e); }
+  }
+  function copyProduct(p, parent) {
+    const a = copyArgs({ product_id: p.id });
+    const f = h('form', { class: 'stack', 'data-testid': 'product-copy-form' }, h('p', { text: evText('ui.admin.product.copy_confirm', { name: copyName(p.name) }) }),
+      h('button', { type: 'submit', class: 'btn primary', 'data-testid': 'product-copy-submit', text: evText('ui.admin.product.copy_submit') }));
+    const cd = dialog(evText('ui.admin.product.copy_title'), f);
+    f.addEventListener('submit', (ev) => { ev.preventDefault(); if (!a.ok) return; run(f.querySelector('button'), async () => {
+      const out = await rpc(a.fn, a.args);
+      toast(evText('ui.admin.product.copied')); cd.close(); parent?.close(); ctx.refs = null;
+      if (out?.product_id) location.hash = `#/tuotteet?muokkaa=${out.product_id}`; else fresh();
+    }); });
   }
   async function createProduct() {
     const inp = (name, v, o = {}) => h(o.area ? 'textarea' : 'input', { name, value: v ?? '', rows: o.area ? 5 : null, ...o, area: null });
@@ -190,6 +206,9 @@ export async function render({ ctx, refs, reload, query }) {
     const d = dialog(productText('new_title'), f, { wide: true });
     try { await mountRichFields(f); } catch (e) { console.error(e); }
   }
+  // #/tuotteet?muokkaa=<id>: avaa tuotteen muokkauksen (Tapahtumat-näkymän linkki ja kopion avaus)
+  const openId = Number(q0.get('muokkaa')) || null;
+  if (openId) { const op = all.find((x) => x.id === openId); if (op) setTimeout(() => edit(op), 0); }
   const addonsSection = await addonsAdmin({ ctx });
   const optionsSection = await productOptionsAdmin({ ctx });   // tuotevalinnat (booking_50)
   const addBtn = isAdmin ? h('button', { type: 'button', class: 'btn primary prod-add', 'data-testid': 'product-add', text: productText('add'), onclick: () => createProduct() }) : null;
