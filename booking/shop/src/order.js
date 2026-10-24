@@ -3,6 +3,7 @@
 import { rpc, functionUrl } from './sb.js';
 import { richHost } from './rich-view.js';
 import { OT } from './order-texts.js';
+import { oneKey } from './plural.js';   // yksikkö: {hours}/{minutes} = 1 → <avain>One
 import { T } from './i18n.js';
 import { createOrderApi, validToken, wantsMock } from './order-api.js';
 import { createGiftApi } from './gift-api.js';
@@ -211,7 +212,7 @@ async function main() {
       const holdExp = !!(co.expired || co.cancelReason === 'hold_expired');
       const newHref = `${S.shopHref}${api.mock ? '?mock=1' : ''}`;
       closedEl = h('section', { class: 'ord-card', role: 'status', 'data-testid': 'order-closed', 'data-reason': holdExp ? 'hold_expired' : 'cancelled' },
-        h('p', { 'data-testid': 'order-closed-msg', text: holdExp ? t.closedHoldExpired.replace('{minutes}', String(holdX.minutes)) : t.closedCancelled }),
+        h('p', { 'data-testid': 'order-closed-msg', text: holdExp ? t[oneKey('closedHoldExpired', L, { minutes: holdX.minutes }, t)].replace('{minutes}', String(holdX.minutes)) : t.closedCancelled }),
         holdExp && holdX.gift ? h('p', { 'data-testid': 'order-closed-gift', text: t.closedHoldExpiredGift }) : null,
         h('p', { class: 'bk-actions' }, h('a', { class: 'btn gold', href: newHref, 'data-testid': 'order-closed-new', text: t.closedNewBooking })));
     }
@@ -330,9 +331,9 @@ async function main() {
     if (o.cancel_request) return [note, h('p', { class: 'bk-ok', role: 'status', 'data-testid': 'cancel-pending', text: t[`cancel.${o.cancel_request.status}`] || t['cancel.open'] })];
     if (o.can_request_cancel == null) return [note, cancelForm()];
     const hours = String(o.cancel_hours_before ?? 48);
-    if (o.cancel_closed) return [phoneText(t.cancelClosed.split('{hours}').join(hours), { class: 'bk-note ord-cancel-closed', role: 'status', 'data-testid': 'cancel-closed' })];
+    if (o.cancel_closed) return [phoneText(t[oneKey('cancelClosed', L, { hours }, t)].split('{hours}').join(hours), { class: 'bk-note ord-cancel-closed', role: 'status', 'data-testid': 'cancel-closed' })];
     if (!o.can_request_cancel) return [note];
-    const rule = o.cancel_deadline ? h('p', { class: 'bk-note', 'data-testid': 'cancel-rule', text: t.cancelRule.split('{hours}').join(hours).replace('{date}', dt(o.cancel_deadline)) }) : note;
+    const rule = o.cancel_deadline ? h('p', { class: 'bk-note', 'data-testid': 'cancel-rule', text: t[oneKey('cancelRule', L, { hours }, t)].split('{hours}').join(hours).replace('{date}', dt(o.cancel_deadline)) }) : note;
     return [rule, cancelForm()];
   }
   // {phone} (repon oletus) tai jo täytetty numero (sivuteksti {{var:phone}} → S.phone) → tel-linkki

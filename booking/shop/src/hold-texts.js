@@ -1,3 +1,4 @@
+import { oneKey } from './plural.js';
 // Kassan paikanpito (§17): KAIKKI asiakkaalle näytettävät pitotekstit FI + EN yhdessä paikassa. Tekstit ovat VÄLIAIKAISIA (lopullinen Joonaksen hyväksyntään; docs/KASSA_pito_asiakasteksti_fi.md).
 // Avaimet samat molemmilla kielillä (node --test tarkistaa); muuttujat {minutes} {time} {amount} {date} {methods}. Ei emojeita. Pidon pituus tulee palvelimelta (hold_minutes), oletus 15.
 export const HT = {
@@ -79,8 +80,21 @@ export const HT = {
     'err.not_charged': 'You were not charged. Please try again.',
   },
 };
+// Yksikkömuodot (plural.js oneKey): käytetään kun lukumäärä on 1; puuttuu → monikkoavain (julkaistu teksti ennallaan). Tuonti: content/site-texts.pending-import-64.json.
+Object.assign(HT.fi, {
+  mustPayOne: "Varaus täytyy maksaa {minutes} minuutin sisään, muuten se peruuntuu ja paikka vapautuu.",
+  expiredOne: "Paikkavaraus vanheni, koska maksua ei saatu {minutes} minuutin kuluessa. Mitään ei ole veloitettu. Voit tehdä uuden varauksen.",
+  "checkout.lead_one": "Paikka varataan {minutes} minuutiksi, kun jatkat maksamaan. Valitset maksutavan seuraavassa vaiheessa.",
+  "checkout.review_one": "Tarkista tiedot. Paikka varataan {minutes} minuutiksi, kun painat \"Jatka maksamaan\". Varaus vahvistuu vasta maksun jälkeen.",
+});
+Object.assign(HT.en, {
+  mustPayOne: "The booking must be paid within {minutes} minute, otherwise it is cancelled and your spot is released.",
+  expiredOne: "Your spot hold expired because payment was not received within {minutes} minute. You have not been charged. You can make a new booking.",
+  "checkout.lead_one": "Your spot is held for {minutes} minute when you continue to payment. You choose how to pay in the next step.",
+  "checkout.review_one": "Please check the details. Your spot is held for {minutes} minute when you press \"Continue to payment\". The booking is confirmed only after payment.",
+});
 const fill = (s, v) => String(s).replace(/\{(\w+)\}/g, (_, k) => (v && v[k] != null ? v[k] : `{${k}}`));
-export const ht = (lang, key, vars) => fill((HT[lang] || HT.fi)[key] ?? HT.fi[key] ?? key, vars);
+export const ht = (lang, key, vars) => { const k = oneKey(key, lang, vars, HT[lang] || HT.fi, HT.fi); return fill((HT[lang] || HT.fi)[k] ?? HT.fi[k] ?? (HT[lang] || HT.fi)[key] ?? HT.fi[key] ?? key, vars); };   // yksikkö: <avain>One / <avain>_one (plural.js)
 // booking_57: pay_later-virhekoodi → ystävällinen viesti (tuntematon koodi / verkkovirhe → yleisviesti)
 export const PAY_LATER_ERRORS = ['pay_later_unavailable', 'payment_in_progress', 'order_expired', 'order_cancelled', 'not_found', 'rate_limited'];
 export const payLaterError = (lang, code) => ht(lang, PAY_LATER_ERRORS.includes(code) ? `payLater.err.${code}` : 'payLater.err.generic');
