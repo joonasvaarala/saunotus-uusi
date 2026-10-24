@@ -94,7 +94,7 @@ test('t137: kattaa 47 h (kaikki mahtuvat, ei pitoa), 49 h (ensimmäinen, pito 11
   const t = rd(T137);
   for (const l of ['B1: vuoro 47 h päässä → ei pitoa', 'B3: 49 h, 119 min → pito voimassa', 'B4: 49 h, 121 min → pito vanhentunut',
     'D4: alle 48 h: kaikki mahtuvat', 'D5: isompi C5 ei mahdu → ei ilmoitusta', 'D8: uusi ajo → ei uusia ilmoituksia samoille (idempotenssi)',
-    'E3: yli 48 h: vain ensimmäinen mahtuva P4 saa ilmoituksen', 'E4: isompi R5', 'E6: 119 min → pito voimassa', 'E8: 121 min → offer_expired',
+    'E3: yli 48 h: vain ensimmäinen mahtuva P4 saa ilmoituksen', 'E4: isompi R5', 'E6: 119 min → pito voimassa', 'E8: 121 min → pito vanhentunut (hold_expired), ei offer_expired',
     'F5: X:n pito vanheni alle 48 h ennen vuoroa → Y2 ja Z3 molemmat saavat ilmoituksen']) assert.ok(t.includes(l), l);
   assert.match(t, /raise exception 'TESTRESULT pass=% fail=%/);
 });

@@ -4,6 +4,8 @@
 -- Kiinteät rajat (47 h / 49 h / 48 h, 119 / 121 min) testataan booking._waitlist_offer_expires_at-funktiolla kiinteillä
 -- aikaleimoilla (now() on transaktiossa vakio). Kokonaisuudessa vuorot ovat viikkojen päässä, joten "47 h" ja "49 h"
 -- simuloidaan asettamalla waitlist_hold_min_hours_before = vuoron etäisyys tunteina ±1 (vuoro 0–1 h rajan alla / 1–2 h yli).
+-- booking_139: vanhentuneen pidon jälkeen ei uutta pitoa (ilmoitus kaikille mahtuville ilman pitoa), eikä lunastus palauta
+-- enää offer_expired-koodia (hold_expired=true, varaus normaalisti). Pitosääntö kokonaisuudessaan: t139_waitlist_single_hold.sql.
 -- Ajetaan migraatioiden ja fixtures/10_test_helpers.sql:n JÄLKEEN (mock-data: Miesten sauna ma, kapasiteetti 16).
 -- Yksi DO-lohko; tahallinen poikkeus kumoaa kaiken. Tulos: TESTRESULT pass=… fail=…
 set local lock_timeout = '3s';
@@ -16,7 +18,9 @@ create function pg_temp.rid(p_email text) returns bigint language sql as $$
 create function pg_temp.mails(p_email text) returns int language sql as $$
   select count(*)::int from booking.email_outbox where kind = 'waitlist_spot_freed' and payload ->> 'to_email' = p_email $$;
 create function pg_temp.age(p_email text, p_age interval) returns void language sql as $$
-  update booking.waitlist_entries set notified_at = now() - p_age where customer_email = p_email $$;
+  -- booking_139: pidon päättymisaika (hold_expires_at) siirtyy samalla määrällä kuin notified_at.
+  update booking.waitlist_entries set hold_expires_at = hold_expires_at - (coalesce(notified_at, now()) - (now() - p_age)),
+    notified_at = now() - p_age where customer_email = p_email $$;
 create function pg_temp.valid(p_n timestamptz, p_s timestamptz, p_after interval) returns boolean language sql as $$
   select coalesce(booking._waitlist_offer_expires_at(p_n, p_s) > p_n + p_after, false) $$;
 create function pg_temp.mins(p_n timestamptz, p_s timestamptz) returns numeric language sql as $$
@@ -120,12 +124,14 @@ begin
   perform pg_temp.ck((c ->> 'ok')::boolean and (c ->> 'enough')::boolean, 'E7: P lunastaa 119 min kohdalla');
   perform pg_temp.age('p@t137.example', interval '121 minutes');
   c := pg_temp.claim(jp ->> 'token');
-  perform pg_temp.ck(c ->> 'code' = 'offer_expired' and not (c ->> 'ok')::boolean and pg_temp.st('p@t137.example') = 'notified', 'E8: 121 min → offer_expired, tila ennallaan');
+  perform pg_temp.ck((c ->> 'ok')::boolean and (c ->> 'enough')::boolean and (c ->> 'hold_expired')::boolean and pg_temp.st('p@t137.example') = 'notified',
+    'E8: 121 min → pito vanhentunut (hold_expired), ei offer_expired: P voi varata normaalisti, tila ennallaan (booking_139)');
   n := booking._notify_waitlist_for_window(v_space, v_s, v_e);
-  perform pg_temp.ck(n = 1 and pg_temp.st('q@t137.example') = 'notified' and pg_temp.mails('q@t137.example') = 1, 'E9: pito vanheni (vuoroon yhä yli 48 h) → seuraava mahtuva Q saa ilmoituksen');
+  perform pg_temp.ck(n = 1 and pg_temp.st('q@t137.example') = 'notified' and pg_temp.mails('q@t137.example') = 1, 'E9: pito vanheni (vuoroon yhä yli 48 h) → mahtuva Q saa ilmoituksen');
+  perform pg_temp.ck((select hold_expires_at is null from booking.waitlist_entries where customer_email = 'q@t137.example'), 'E9b: ei uutta pitoa vanhentuneen jälkeen (booking_139)');
   perform pg_temp.ck(pg_temp.st('r@t137.example') = 'waiting' and pg_temp.mails('p@t137.example') = 1, 'E10: R ei, P ei saa uutta ilmoitusta');
   n := booking._notify_waitlist_for_window(v_space, v_s, v_e);
-  perform pg_temp.ck(n = 0, 'E11: Q:n pito voimassa → ei muita');
+  perform pg_temp.ck(n = 0 and pg_temp.mails('q@t137.example') = 1, 'E11: uusi ajo → ei tuplailmoitusta, R5 ei mahdu');
 
   -- ===== Pito vanhenee, kun vuoroon on alle 48 h → kaikki mahtuvat saavat ilmoituksen (vuoro d3) =====
   b := test.pub_book(v_rule, d3, 12, 'iso3@t137.example');  perform pg_temp.ck((b ->> 'ok')::boolean, 'F1: 12 hlöä');
@@ -145,7 +151,7 @@ begin
   perform pg_temp.ck(n = 2 and pg_temp.st('y@t137.example') = 'notified' and pg_temp.st('z@t137.example') = 'notified', 'F5: X:n pito vanheni alle 48 h ennen vuoroa → Y2 ja Z3 molemmat saavat ilmoituksen');
   perform pg_temp.ck(pg_temp.mails('x@t137.example') = 1 and pg_temp.mails('y@t137.example') = 1 and pg_temp.mails('z@t137.example') = 1, 'F6: yksi ilmoitus kullekin');
   c := pg_temp.claim(jx ->> 'token');
-  perform pg_temp.ck(c ->> 'code' = 'offer_expired', 'F7: X:n vanhentunut pito → offer_expired');
+  perform pg_temp.ck((c ->> 'ok')::boolean and (c ->> 'hold_expired')::boolean and c ->> 'code' is null, 'F7: X:n vanhentunut pito → hold_expired, ei offer_expired (booking_139)');
   c := pg_temp.claim(jz ->> 'token');
   perform pg_temp.ck((c ->> 'ok')::boolean and (c ->> 'enough')::boolean, 'F8: Z lunastaa (ei pitoa, paikat riittävät)');
   -- Voimassa oleva pito kunnioitetaan loppuun myös alle 48 h:n ajossa: X ilmoitettiin 60 min sitten, jolloin vuoroon oli

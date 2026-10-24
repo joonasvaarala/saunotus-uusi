@@ -78,7 +78,7 @@ test('rollback booking_135: palauttaa booking_134:n funktiot', () => {
 test('t135: kattaa tuotannon tapauksen, vanhenemisen, poolin ja rate limitin', () => {
   const t = rd(T135);
   assert.match(t, /C2: C ei saa samoja 4 paikkaa/);
-  assert.match(t, /D3: C saa vapautuneet 4 paikkaa/);
+  assert.match(t, /D3: pito vanheni → C4 ja D3 saavat ilmoituksen/); // booking_139: vanhentunut pito → kaikille mahtuville
   assert.match(t, /E5: Q \(toinen sääntö, sama pooli\)/);
   assert.match(t, /F2: tuntemattomat tokenit eivät luo rate limit -rivejä/);
   assert.match(t, /raise exception 'TESTRESULT pass=% fail=%/);
