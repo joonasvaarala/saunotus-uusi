@@ -1,5 +1,8 @@
 // Jaetut komponentit: varauksen tiedot -dialogi (tilamuutokset, varauksen muutos, maksun kirjaus, maksulinkki-placeholder).
-import { rpc } from '../sb.js';
+import { rpc, fn } from '../sb.js';
+import { createTalousApi } from '../talous-api.js';
+import { loadRcTexts } from '../refund-cancel-texts.js';
+import { cancelReservationDialog } from './refund-cancel.js';
 import { addonPicker } from './addons.js';
 import { nbt } from '../nb-texts.js';
 import { stepper } from '../stepper.js';
@@ -40,7 +43,14 @@ export function reservationDialog(r, { methods, onChange, refs, can = () => true
       r.status === 'confirmed' ? act('Merkitse saapuneeksi', () => status('completed')) : null,
       r.status === 'confirmed' ? act('Ei saapunut', () => status('no_show')) : null,
       ['pending', 'confirmed'].includes(r.status) ? h('button', { type: 'button', class: 'btn', onclick: () => { d.close(); changeDialog(r, onChange); } }, 'Muuta varausta') : null,
-      ['pending', 'confirmed'].includes(r.status) ? act('Peru varaus', () => { if (!confirm('Perutaanko varaus?')) throw new Error('Peruutus keskeytetty'); return status('cancelled', 'henkilökunta'); }, 'btn danger') : null),
+      // booking_136: peruutus omassa dialogissa; payments.refund-oikeudella kysytään, hyvitetäänkö varauksen osuus maksuista (oletus Ei)
+      ['pending', 'confirmed'].includes(r.status) ? h('button', { type: 'button', class: 'btn danger', 'data-testid': 'res-cancel', onclick: async (ev) => {
+        const b = ev.currentTarget; b.disabled = true;
+        try {
+          await loadRcTexts(rpc);
+          await cancelReservationDialog(r, { rpc, canRefund: !!can('payments.refund'), online: createTalousApi({ rpc, io: { fn } }), onDone: () => { d.close(); onChange?.(); } });
+        } finally { b.disabled = false; }
+      } }, 'Peru varaus') : null),
     r.payment_status !== 'paid' ? h('fieldset', { class: 'box' }, h('legend', { text: 'Kirjaa maksu (käteinen / kortti / lasku …)' }),
       h('div', { class: 'row wrap' }, field('Maksutapa', method), field('Summa €', amount),
         act('Kirjaa maksu', () => rpc('admin_record_payment', { p_order_id: r.order_id, p_method: method.value, p_amount: +amount.value }), 'btn primary'))) : null,

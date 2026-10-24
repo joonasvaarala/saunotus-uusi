@@ -91,7 +91,7 @@ function procountorStatus(cfg) {
     bank_account_configured: Boolean(cfg.bank_account), last: null, errors: [],
   };
 }
-const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'reports.view', 'settings.edit', 'pos.use', 'invoices.manage', 'giftcards.manage', 'messages.edit'];
+const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'payments.refund', 'reports.view', 'settings.edit', 'pos.use', 'invoices.manage', 'giftcards.manage', 'messages.edit'];
 const CODE_RE = /^[a-z0-9_]{1,40}$/;
 
 export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager' } = {}) {
@@ -233,6 +233,22 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
   const inRange = (r, a) => (!a.p_from || r.starts_at >= a.p_from) && (!a.p_to || r.starts_at < a.p_to);
   const handlers = {
     current_staff_role: () => role,
+    // booking_136: varauksen osuus maksuista + peruutus (valinnainen hyvitys). Kokeilutila: maksettu varaus = koko summa hyvitettävissä.
+    admin_reservation_refund_preview: (a) => {
+      need('payments.refund');
+      const r = st.reservations.find((x) => x.reservation_id === +a.p_reservation_id); if (!r) throw err('not_found', 'Varausta ei löydy');
+      const amt = r.payment_status === 'paid' && !r.refunded ? +r.total_gross : 0;
+      return { ok: true, reservation_id: r.reservation_id, order_id: r.order_id, status: r.status, total: amt, unallocated: 0,
+        payments: amt > 0 ? [{ payment_id: r.reservation_id + 7000, provider: 'manual', method: 'card_terminal', gift_card: false, online_off: false, amount: amt, lines: [] }] : [] };
+    },
+    admin_cancel_reservation: (a) => {
+      need('bookings.manage'); if (a.p_refund === true) need('payments.refund');
+      const r = st.reservations.find((x) => x.reservation_id === +a.p_reservation_id); if (!r) throw err('not_found', 'Varausta ei löydy');
+      if (!['pending', 'confirmed'].includes(r.status)) throw err('invalid_status', 'Vain voimassa olevan varauksen voi perua');
+      const pv = a.p_refund === true ? handlers.admin_reservation_refund_preview(a) : { payments: [], total: 0 };
+      r.status = 'cancelled'; if (pv.total > 0) r.refunded = true;
+      return { ok: true, cancelled: true, order_id: r.order_id, refunds: pv.payments.map((p) => ({ payment_id: p.payment_id, provider: p.provider, amount: p.amount, refund_id: 9e6, status: 'done' })), refunded_total: pv.total };
+    },
     admin_my_permissions: () => ({ role, role_label: role === 'staff' ? 'Työntekijä (esimerkki)' : role === 'admin' ? 'Pääkäyttäjä (esimerkki)' : 'Päällikkö (esimerkki)', permissions: st.perms }),
     admin_list_products: () => st.products.map((p) => ({ ...p })),
     'select:payment_methods': () => [{ code: 'pay_later', label: 'Maksu myöhemmin', is_manual: true, active: true }, { code: 'cash', label: 'Käteinen', is_manual: false, active: false }, { code: 'card_terminal', label: 'Korttipääte', is_manual: true, active: true }],

@@ -159,12 +159,13 @@ function plot(data, hostW, pin) {
 function table(data) {
   const future = (m) => data.year > helYear() || (data.year === helYear() && m > helMonth());
   const head = [chartText('ui.admin.sales_chart.year'), chartText('ui.admin.sales_chart.legend_net'), chartText('ui.admin.sales_chart.legend_vat'), chartText('ui.admin.sales_chart.legend_unsplit'), chartText('ui.admin.sales_chart.total_gross')];
-  return h('table', { class: 'sr', 'data-testid': 'sales-chart-table' },
+  // booking_136: taulukko .sr-kääreen sisällä – taulukko ei noudata width:1px:ää, joten pelkkä table.sr levensi mobiilissa (390 px) koko sivun ~865 px:iin
+  return h('div', { class: 'sr' }, h('table', { 'data-testid': 'sales-chart-table' },
     h('caption', { text: chartText('ui.admin.sales_chart.chart_label') }),
     h('thead', {}, h('tr', {}, ...head.map((t) => h('th', { scope: 'col', text: t })))),
     h('tbody', {}, ...data.months.map((m) => h('tr', {},
       h('th', { scope: 'row', text: monthName(data.year, m.month, 'long') + (future(m.month) ? ` (${chartText('ui.admin.sales_chart.future')})` : '') }),
-      h('td', { text: fmt.money(m.net) }), h('td', { text: fmt.money(m.vat) }), h('td', { text: fmt.money(m.unsplit_gross) }), h('td', { text: fmt.money(m.gross) })))));
+      h('td', { text: fmt.money(m.net) }), h('td', { text: fmt.money(m.vat) }), h('td', { text: fmt.money(m.unsplit_gross) }), h('td', { text: fmt.money(m.gross) }))))));
 }
 
 export function createSalesChart({ api, rpc }) {

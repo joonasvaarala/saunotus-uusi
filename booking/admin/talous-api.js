@@ -12,7 +12,7 @@ import { createMock } from './talous-mock.js';
 
 export const RPC = {
   listOrders: 'admin_list_orders', getOrder: 'admin_get_order', listPayments: 'admin_list_payments', listAddons: 'admin_list_addons',
-  addToOrder: 'admin_add_to_order', createPaymentLink: 'admin_create_payment_link', refund: 'admin_refund', recordPayment: 'admin_record_payment', listVatRates: 'admin_list_vat_rates',
+  addToOrder: 'admin_add_to_order', createPaymentLink: 'admin_create_payment_link', refund: 'admin_refund', refundOrder: 'admin_refund_order', reservationRefundPreview: 'admin_reservation_refund_preview', cancelReservation: 'admin_cancel_reservation', recordPayment: 'admin_record_payment', listVatRates: 'admin_list_vat_rates',
   reportDaily: 'admin_report_daily', reportMonthly: 'admin_report_month', reportRange: 'admin_report_range', reportTransactions: 'admin_report_transactions', reportGiftCards: 'admin_report_gift_cards', reportCsv: 'admin_report_csv', salesChart: 'admin_sales_chart',
   getReceipt: 'admin_get_receipt', resendReceipt: 'admin_resend_receipt',
 };
@@ -189,6 +189,10 @@ export function rpcBackend(rpc) {
     addToOrder: (a) => call('addToOrder', compact({ p_order_id: a.orderId, p_items: a.items, p_create_link: a.createLink ? true : undefined, p_send_email: a.sendEmail ? true : undefined, p_note: a.note })),
     createPaymentLink: (a) => call('createPaymentLink', compact({ p_order_id: a.orderId, p_send_email: a.sendEmail ? true : undefined, p_expires_days: a.expiresDays, p_note: a.note })),
     refund: (a) => call('refund', compact({ p_payment_id: a.paymentId, p_amount: a.amount, p_reason: a.reason, p_lines: a.lines })),
+    // booking_136: hyvitys + valinnainen tilauksen varausten peruutus (oletus Ei); varauksen osuus maksuista; varauksen peruutus + valinnainen osuuden hyvitys (oletus Ei)
+    refundOrder: (a) => call('refundOrder', compact({ p_payment_id: a.paymentId, p_amount: a.amount, p_reason: a.reason, p_lines: a.lines, p_cancel_reservations: a.cancelReservations === true ? true : undefined })),
+    reservationRefundPreview: (id) => call('reservationRefundPreview', { p_reservation_id: id }),
+    cancelReservation: (a) => call('cancelReservation', compact({ p_reservation_id: a.reservationId, p_reason: a.reason, p_refund: a.refund === true ? true : undefined, p_refund_reason: a.refundReason })),
     recordPayment: (a) => call('recordPayment', compact({ p_order_id: a.orderId, p_method: a.method, p_amount: a.amount, p_note: a.note, p_lines: a.lines })),
     listVatRates: () => call('listVatRates'),
     reportDaily: (date) => call('reportDaily', { p_date: date }),
@@ -297,7 +301,8 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
         return { result: code === 'forbidden' || e?.status === 403 ? 'forbidden' : 'error', code, status: e?.status ?? null };
       }
     },
-    addToOrder: (a) => act('addToOrder', a), createPaymentLink: (a) => act('createPaymentLink', a), refund: (a) => act('refund', a), recordPayment: (a) => act('recordPayment', a),
+    addToOrder: (a) => act('addToOrder', a), createPaymentLink: (a) => act('createPaymentLink', a), refund: (a) => act('refund', a), refundOrder: (a) => act('refundOrder', a), recordPayment: (a) => act('recordPayment', a),
+    reservationRefundPreview: (id) => act('reservationRefundPreview', id), cancelReservation: (a) => act('cancelReservation', a),
     // ---- kuitit ----
     getReceipt: (id) => run('getReceipt', id, normReceipt),
     // admin_resend_receipt → { ok, email_queued }: jonoon vain jos asiakkaalla on kelvollinen sähköposti; oikeus payments.manage

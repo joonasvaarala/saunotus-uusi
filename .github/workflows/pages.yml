@@ -157,6 +157,9 @@ jobs:
       - run: node --test booking/tests/jonotuslista-henkilomaara.test.mjs
       # booking_133: päivänippu + kuukauden saatavuus yhdellä RPC:llä (SQL-vertailu booking_125:een: booking/tests/paiva-ja-saatavuus-nopeutus-regressio.sql, ajetaan testikannassa)
       - run: node --test booking/tests/paiva-ja-saatavuus-nopeutus.test.mjs
+      # booking_136: hallinnan hyvitys ↔ peruutus (oletus Ei, oikeudet payments.refund / bookings.manage, tekstit pending-import-37, migraation ja rollbackin rakenne).
+      # t136 (booking/supabase/tests/talous/t136_refund_cancel.sql) ajetaan testikannassa psql:llä migraatioiden ja fixtures/10_test_helpers.sql:n jälkeen.
+      - run: node --test booking/tests/hyvitys-peruutus.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

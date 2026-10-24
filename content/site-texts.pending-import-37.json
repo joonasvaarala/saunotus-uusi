@@ -1,0 +1,442 @@
+[
+ {
+  "key": "ui.admin.refund_cancel.order_question",
+  "lang": "fi",
+  "text": "Perutaanko myös tilauksen varaukset?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.order_question",
+  "lang": "en",
+  "text": "Also cancel the order's bookings?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.order_count",
+  "lang": "fi",
+  "text": "Tilauksessa on voimassa olevia varauksia: {{var:count}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 90,
+  "placeholders": [
+   "{{var:count}}"
+  ],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.order_count",
+  "lang": "en",
+  "text": "Active bookings on the order: {{var:count}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:count}}"
+  ],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.order_no",
+  "lang": "fi",
+  "text": "Ei, varaukset jäävät voimaan",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.order_no",
+  "lang": "en",
+  "text": "No, keep the bookings",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.order_yes",
+  "lang": "fi",
+  "text": "Kyllä, peru tilauksen varaukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.order_yes",
+  "lang": "en",
+  "text": "Yes, cancel the order's bookings",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.order_cancelled",
+  "lang": "fi",
+  "text": "Varauksia peruttu: {{var:count}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:count}}"
+  ],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.order_cancelled",
+  "lang": "en",
+  "text": "Bookings cancelled: {{var:count}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:count}}"
+  ],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.cancel_title",
+  "lang": "fi",
+  "text": "Peru varaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.cancel_title",
+  "lang": "en",
+  "text": "Cancel booking",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.cancel_confirm",
+  "lang": "fi",
+  "text": "Perutaanko varaus?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.cancel_confirm",
+  "lang": "en",
+  "text": "Cancel this booking?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_question",
+  "lang": "fi",
+  "text": "Hyvitetäänkö varauksen maksut?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_question",
+  "lang": "en",
+  "text": "Refund this booking's payments?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_share",
+  "lang": "fi",
+  "text": "Varauksen osuus maksuista: {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_share",
+  "lang": "en",
+  "text": "This booking's share of the payments: {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_share_note",
+  "lang": "fi",
+  "text": "Summa on varauksen rivi ja sen lisäpalvelut. Aiemmat hyvitykset on vähennetty.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_share_note",
+  "lang": "en",
+  "text": "The amount is the booking line and its add-ons. Earlier refunds have been deducted.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 130,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_no",
+  "lang": "fi",
+  "text": "Ei, peru ilman hyvitystä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_no",
+  "lang": "en",
+  "text": "No, cancel without a refund",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_yes",
+  "lang": "fi",
+  "text": "Kyllä, hyvitä {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_yes",
+  "lang": "en",
+  "text": "Yes, refund {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_reason",
+  "lang": "fi",
+  "text": "Hyvityksen syy",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_reason",
+  "lang": "en",
+  "text": "Refund reason",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_none",
+  "lang": "fi",
+  "text": "Varaukselle ei ole hyvitettävää maksua.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_none",
+  "lang": "en",
+  "text": "There is no payment to refund for this booking.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_online_off",
+  "lang": "fi",
+  "text": "Verkkomaksun hyvitys ei ole vielä käytössä. Peru ilman hyvitystä ja hyvitä maksu maksupalvelun kautta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_online_off",
+  "lang": "en",
+  "text": "Online payment refunds are not in use yet. Cancel without a refund and refund the payment through the payment provider.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 180,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_unallocated",
+  "lang": "fi",
+  "text": "Osa maksuista on kirjattu ilman rivierittelyä. Hyvitä ne tarvittaessa Talous-näkymässä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 140,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_unallocated",
+  "lang": "en",
+  "text": "Some payments were recorded without line details. Refund them in the Finance view if needed.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 140,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_unavailable",
+  "lang": "fi",
+  "text": "Hyvitystietoja ei saatu. Voit perua varauksen ilman hyvitystä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 100,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.refund_unavailable",
+  "lang": "en",
+  "text": "Refund details could not be loaded. You can cancel the booking without a refund.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.submit",
+  "lang": "fi",
+  "text": "Peru varaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.submit",
+  "lang": "en",
+  "text": "Cancel booking",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.back",
+  "lang": "fi",
+  "text": "Takaisin",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.back",
+  "lang": "en",
+  "text": "Back",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.done_cancelled",
+  "lang": "fi",
+  "text": "Varaus peruttu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.done_cancelled",
+  "lang": "en",
+  "text": "Booking cancelled.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.done_refunded",
+  "lang": "fi",
+  "text": "Varaus peruttu ja hyvitetty {{var:amount}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ },
+ {
+  "key": "ui.admin.refund_cancel.done_refunded",
+  "lang": "en",
+  "text": "Booking cancelled and {{var:amount}} refunded.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinta: hyvityksen ja varauksen peruutuksen kysymykset (tilauksen hyvitys: perutaanko varaukset; varauksen peruutus: hyvitetäänkö varauksen osuus). FI+EN. Varateksti booking/admin/refund-cancel-texts.js. booking_136."
+ }
+]
