@@ -1,0 +1,406 @@
+[
+ {
+  "key": "ui.admin.shift_staff.title",
+  "lang": "fi",
+  "text": "Vuorotarjousten omat sivut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.title",
+  "lang": "en",
+  "text": "Personal shift offer pages",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.intro",
+  "lang": "fi",
+  "text": "Jokaisella työntekijällä on pysyvä oma linkki, josta hän näkee omat avoimet ja vastatut vuorotarjouksensa ja voi muuttaa vastaustaan. Linkki ei vaadi kirjautumista, joten jaa se vain henkilölle itselleen. Uusi linkki mitätöi vanhan.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 310,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.intro",
+  "lang": "en",
+  "text": "Each staff member has a permanent personal link showing their own open and answered shift offers, where they can change their answer. The link needs no login, so share it only with the person themselves. A new link invalidates the old one.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 320,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.link_none",
+  "lang": "fi",
+  "text": "Ei linkkiä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.link_none",
+  "lang": "en",
+  "text": "No link",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.link_active",
+  "lang": "fi",
+  "text": "Linkki käytössä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.link_active",
+  "lang": "en",
+  "text": "Link active",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.link_revoked",
+  "lang": "fi",
+  "text": "Linkki peruttu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.link_revoked",
+  "lang": "en",
+  "text": "Link revoked",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.create",
+  "lang": "fi",
+  "text": "Luo linkki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.create",
+  "lang": "en",
+  "text": "Create link",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.renew",
+  "lang": "fi",
+  "text": "Uusi linkki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.renew",
+  "lang": "en",
+  "text": "New link",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.revoke",
+  "lang": "fi",
+  "text": "Peru linkki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.revoke",
+  "lang": "en",
+  "text": "Revoke link",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.revoke_confirm",
+  "lang": "fi",
+  "text": "Perutaanko henkilön {{var:name}} oma linkki? Vanha linkki lakkaa toimimasta heti.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 110,
+  "placeholders": [
+   "{{var:name}}"
+  ],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.revoke_confirm",
+  "lang": "en",
+  "text": "Revoke the personal link of {{var:name}}? The old link stops working immediately.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 110,
+  "placeholders": [
+   "{{var:name}}"
+  ],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.renew_confirm",
+  "lang": "fi",
+  "text": "Luodaanko henkilölle {{var:name}} uusi linkki? Vanha linkki lakkaa toimimasta heti.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 110,
+  "placeholders": [
+   "{{var:name}}"
+  ],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.renew_confirm",
+  "lang": "en",
+  "text": "Create a new link for {{var:name}}? The old link stops working immediately.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 100,
+  "placeholders": [
+   "{{var:name}}"
+  ],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.copied",
+  "lang": "fi",
+  "text": "Linkki kopioitu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.copied",
+  "lang": "en",
+  "text": "Link copied",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.link_label",
+  "lang": "fi",
+  "text": "Oma linkki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.link_label",
+  "lang": "en",
+  "text": "Personal link",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.revoked",
+  "lang": "fi",
+  "text": "Linkki peruttu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.revoked",
+  "lang": "en",
+  "text": "Link revoked",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.last_used",
+  "lang": "fi",
+  "text": "Käytetty viimeksi {{var:when}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [
+   "{{var:when}}"
+  ],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.last_used",
+  "lang": "en",
+  "text": "Last used {{var:when}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [
+   "{{var:when}}"
+  ],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.suggest_whatsapp",
+  "lang": "fi",
+  "text": "{{var:name}} lähetti viestin Tapion WhatsApp-numeroon {{var:when}}. Viesti on kirjattu suostumukseksi. Voit ottaa WhatsApp-viestit käyttöön hänelle Työvuoro-Tapiossa (whatsapp_enabled).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{var:name}}",
+   "{{var:when}}"
+  ],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.suggest_whatsapp",
+  "lang": "en",
+  "text": "{{var:name}} sent a message to Tapio’s WhatsApp number on {{var:when}}. The message has been recorded as consent. You can enable WhatsApp messages for them in Työvuoro-Tapio (whatsapp_enabled).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 260,
+  "placeholders": [
+   "{{var:name}}",
+   "{{var:when}}"
+  ],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.dismiss",
+  "lang": "fi",
+  "text": "Piilota ehdotus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.dismiss",
+  "lang": "en",
+  "text": "Hide suggestion",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.unavailable",
+  "lang": "fi",
+  "text": "Omia sivuja ei voitu ladata. Muu käyttäjähallinta toimii.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.unavailable",
+  "lang": "en",
+  "text": "Personal pages could not be loaded. The rest of user management works.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 100,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.empty",
+  "lang": "fi",
+  "text": "Ei työntekijöitä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "ui.admin.shift_staff.empty",
+  "lang": "en",
+  "text": "No staff members.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_153: vuorotarjousten omat sivut ja WhatsApp-suostumusehdotus hallinnan Käyttäjät-näkymässä (uusi teksti, ei vielä tuotannossa)"
+ },
+ {
+  "key": "shift_offer.whatsapp.welcome",
+  "lang": "fi",
+  "text": "Hei {{var:name}}. Tässä Tapio, Saunotuksen työvuorojen apuri. Kun sinulle on vapaa vuoro, saat viestin, johon vastaat painikkeella tai linkillä. Omat avoimet ja vastatut vuorosi näet täältä: {{var:link}}\n\n–Tapio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 280,
+  "placeholders": [
+   "{{var:name}}",
+   "{{var:link}}"
+  ],
+  "reason": "booking_153: tervetuloviesti työntekijän ensimmäiseen WhatsApp-viestiin (24 h vapaamuotoinen ikkuna, asetus shift_offer.welcome_enabled oletus pois). Moottori lukee vain fi-rivin."
+ },
+ {
+  "key": "shift_offer.whatsapp.welcome",
+  "lang": "en",
+  "text": "Hi {{var:name}}. This is Tapio, the shift assistant of Saunotus. When a shift is available for you, you will get a message that you can answer with a button or a link. You can see your open and answered shifts here: {{var:link}}\n\n–Tapio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 310,
+  "placeholders": [
+   "{{var:name}}",
+   "{{var:link}}"
+  ],
+  "reason": "booking_153: tervetuloviesti työntekijän ensimmäiseen WhatsApp-viestiin (24 h vapaamuotoinen ikkuna, asetus shift_offer.welcome_enabled oletus pois). Moottori lukee vain fi-rivin."
+ }
+]

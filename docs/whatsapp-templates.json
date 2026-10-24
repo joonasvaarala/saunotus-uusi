@@ -99,5 +99,145 @@
         }
       ]
     }
+  ],
+  "booking_153_note": "booking_153: uudet pohjat (odottavat Metan hyväksyntää). Käyttöön asetuksella booking.settings shift_offer.wa_templates (approved = true). Ennen hyväksyntää tarjous lähtee varapohjalla vuorotarjous ja muut vapaamuotoisena 24 h ikkunassa tai sähköpostina.",
+  "booking_153_templates": [
+    {
+      "name": "tyovuoro_kysely",
+      "language": "fi",
+      "category": "UTILITY",
+      "allow_category_change": false,
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Hei! Vapaa {{1}} olisi tarjolla ajalla {{2}}. Kerro, otatko vuoron, viimeistään {{3}} mennessä painikkeesta.",
+          "example": {
+            "body_text": [
+              [
+                "lämmitysvuoro",
+                "la 24.10.2026 klo 16:00–20:00",
+                "22.10.2026 klo 12:00"
+              ]
+            ]
+          }
+        },
+        {
+          "type": "FOOTER",
+          "text": "Tapio"
+        },
+        {
+          "type": "BUTTONS",
+          "buttons": [
+            {
+              "type": "URL",
+              "text": "Avaa vastaus",
+              "url": "https://sxbofnuisemspgquoxyv.supabase.co/functions/v1/shift-offer-engine?token={{1}}",
+              "example": [
+                "esimerkkitoken"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tyovuoro_muistutus",
+      "language": "fi",
+      "category": "UTILITY",
+      "allow_category_change": false,
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Muistutus: {{1}} ajalla {{2}} odottaa vielä vastaustasi. Vastausaika päättyy {{3}}, joten vastaathan sitä ennen.",
+          "example": {
+            "body_text": [
+              [
+                "lämmitysvuoro",
+                "la 24.10.2026 klo 16:00–20:00",
+                "22.10.2026 klo 12:00"
+              ]
+            ]
+          }
+        },
+        {
+          "type": "FOOTER",
+          "text": "Tapio"
+        },
+        {
+          "type": "BUTTONS",
+          "buttons": [
+            {
+              "type": "URL",
+              "text": "Avaa vastaus",
+              "url": "https://sxbofnuisemspgquoxyv.supabase.co/functions/v1/shift-offer-engine?token={{1}}",
+              "example": [
+                "esimerkkitoken"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tyovuoro_jo_mennyt",
+      "language": "fi",
+      "category": "UTILITY",
+      "allow_category_change": false,
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Kiitos vastauksestasi. Tarjottu {{1}} ajalla {{2}} on jo saanut tekijän, joten sinun ei tarvitse tehdä mitään.",
+          "example": {
+            "body_text": [
+              [
+                "lämmitysvuoro",
+                "la 24.10.2026 klo 16:00–20:00"
+              ]
+            ]
+          }
+        },
+        {
+          "type": "FOOTER",
+          "text": "Tapio"
+        }
+      ]
+    },
+    {
+      "name": "tyovuoro_paivan_kooste",
+      "language": "fi",
+      "category": "UTILITY",
+      "allow_category_change": false,
+      "components": [
+        {
+          "type": "BODY",
+          "text": "Hei! Sinulle on useampi vuoroasia päivälle {{1}}: {{2}}. Näet ne kaikki ja voit vastata omalla sivullasi.",
+          "example": {
+            "body_text": [
+              [
+                "27.11.2026",
+                "lämmitysvuoro klo 10:00–14:00 (vastaa 28.10. klo 12:00); lämmitysvuoro klo 16:00–20:00 (vastaa 28.10. klo 12:00)"
+              ]
+            ]
+          }
+        },
+        {
+          "type": "FOOTER",
+          "text": "Tapio"
+        },
+        {
+          "type": "BUTTONS",
+          "buttons": [
+            {
+              "type": "URL",
+              "text": "Avaa oma sivu",
+              "url": "https://joonasvaarala.github.io/saunotus-uusi/vuoro/oma/?token={{1}}",
+              "example": [
+                "esimerkkitoken"
+              ]
+            }
+          ]
+        }
+      ]
+    }
   ]
 }
