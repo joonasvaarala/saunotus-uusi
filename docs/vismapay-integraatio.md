@@ -39,7 +39,7 @@ Ilmoitusosoite lähtee jokaisessa `auth_payment`- ja `create_refund`-kutsussa. E
 
 ## Käyttöönotto (testi)
 
-1. Aja migraatio `booking/supabase/migrations/20261021120000_booking_120_vismapay.sql`. Se ei vaihda tilaa pois `off`-tilasta.
+1. Aja migraatio `booking/supabase/migrations/20261021121725_booking_120_vismapay.sql`. Se ei vaihda tilaa pois `off`-tilasta.
 2. Aseta testisalaisuudet.
 3. Julkaise edge-funktiot: `vismapay-start`, `vismapay-return`, `vismapay-notify`, `vismapay-refund`.
 4. Tuo tekstit tiedostosta `content/site-texts.pending-import-28.json` (FI+EN). Ennen tuontia kauppa ja hallinta käyttävät koodin oletustekstejä.
@@ -126,7 +126,7 @@ Kassaperuste ennallaan. Maksu → K-kuitti (`K-{vuosi}-{juokseva}`). Hyvitys →
 ## Peruutus
 
 1. Aseta tila `off` hallinnasta tai SQL:llä. Avoimet hyvitykset jäävät jonoon eivätkä lähde Vismaan.
-2. Aja `booking/supabase/rollbacks/20261021120000_booking_120_ROLLBACK.sql`. Se palauttaa tilan `off`, jos se oli `test` tai `live`, ja palauttaa vanhat RPC:t. `dry_run` jätetään `dry_run`-tilaan.
+2. Aja `booking/supabase/rollbacks/20261021121725_booking_120_ROLLBACK.sql`. Se palauttaa tilan `off`, jos se oli `test` tai `live`, ja palauttaa vanhat RPC:t. `dry_run` jätetään `dry_run`-tilaan.
 3. Vanhat edge-funktiot voi jättää julkaistuksi: ilman uusia RPC:itä ne eivät merkitse maksua maksetuksi. Halutessa julkaise edellinen versio funktioista `vismapay-start`, `vismapay-notify` ja `vismapay-refund`, ja poista `vismapay-return`.
 
 Rollbackin jälkeen verkkomaksu on taas poissa. Jo syntyneitä K- ja H-kuitteja rollback ei poista.

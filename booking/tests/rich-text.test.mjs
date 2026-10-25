@@ -117,8 +117,8 @@ test('pending-import-30: työkalurivin tekstit, 26 riviä, FI+EN, ei hintoja eik
 });
 
 test('migraatio 122 vaihtaa vain kuvauksen lajin ja pituuden', () => {
-  const sql = read('booking/supabase/migrations/20261021150000_booking_122_rich_text.sql');
-  const back = read('booking/supabase/rollbacks/20261021150000_booking_122_ROLLBACK.sql');
+  const sql = read('booking/supabase/migrations/20261021171915_booking_122_rich_text.sql');
+  const back = read('booking/supabase/rollbacks/20261021171915_booking_122_ROLLBACK.sql');
   assert.match(sql, /kind in \('plain', 'lite', 'rich'\)/);
   assert.match(sql, /booking\._rich_text_check/);
   assert.match(sql, /javascript/);

@@ -39,9 +39,9 @@ Sähköpostissa rich-teksti saa inline-tyylit (Arial, tumma vihreä). Tekstivers
 
 ## Tietokanta
 
-Migraatio `20261021150000_booking_122_rich_text.sql` lisää lajin `rich` ja asettaa olemassa olevien tuotekuvausten (`kb.products.description` / `description_en`) lajiksi `rich` ja enimmäispituudeksi 8000. Julkaistua tekstiä, hintoja, ALV:tä ja osoitteita ei muuteta. Uusi tuotekuvaus rekisteröityy samalla lajilla. `admin_update_product` ja `admin_product_create` kutsuvat samaa tarkistusta, kun kuvauksessa on `<`. Muut tekstikentät hylkäävät HTML:n kuten ennen. Rich-kenttä hylkää skriptin, `on*`-attribuutin, allowlistin ulkopuolisen tagin ja `javascript:`- tai `data:`-osoitteen href-attribuutissa. Pelkkä teksti `personal data:` on sallittu.
+Migraatio `20261021171915_booking_122_rich_text.sql` lisää lajin `rich` ja asettaa olemassa olevien tuotekuvausten (`kb.products.description` / `description_en`) lajiksi `rich` ja enimmäispituudeksi 8000. Julkaistua tekstiä, hintoja, ALV:tä ja osoitteita ei muuteta. Uusi tuotekuvaus rekisteröityy samalla lajilla. `admin_update_product` ja `admin_product_create` kutsuvat samaa tarkistusta, kun kuvauksessa on `<`. Muut tekstikentät hylkäävät HTML:n kuten ennen. Rich-kenttä hylkää skriptin, `on*`-attribuutin, allowlistin ulkopuolisen tagin ja `javascript:`- tai `data:`-osoitteen href-attribuutissa. Pelkkä teksti `personal data:` on sallittu.
 
-Rollback: `booking/supabase/rollbacks/20261021150000_booking_122_ROLLBACK.sql`.
+Rollback: `booking/supabase/rollbacks/20261021171915_booking_122_ROLLBACK.sql`.
 
 ## Käyttöönotto
 

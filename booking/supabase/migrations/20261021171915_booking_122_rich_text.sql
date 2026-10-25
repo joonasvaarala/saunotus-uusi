@@ -1,7 +1,7 @@
 -- booking_122: tuotekuvaukset saavat rich-tekstin (p, br, strong/b, em/i, h2/h3, ul/ol/li, a).
 -- Ei kirjoita published_text-arvoja uudelleen. Hinnat, ALV ja osoitteet ennallaan.
 -- Uudet kb.products-kuvaukset rekisteröidään kind=rich, max 8000. Muut kentät pysyvät plain.
--- Rollback: rollbacks/20261021150000_booking_122_ROLLBACK.sql
+-- Rollback: rollbacks/20261021171915_booking_122_ROLLBACK.sql
 
 set local lock_timeout = '5s';
 
