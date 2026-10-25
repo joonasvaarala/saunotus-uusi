@@ -110,6 +110,8 @@ jobs:
       - run: node --test booking/tests/hiljaiset-ajat.test.mjs
       # Saunarituaali yleisen vuoron lisäpalveluna (booking_166): aikasääntö, kassan logiikka, mock, tekstit FI/EN + pending-import-62, migraatio/rollback-rakenne
       - run: node --test booking/tests/saunarituaali-lisapalvelu.test.mjs
+      # booking_180: maksettujen lisäpalvelurivien käyttöliittymän lukituslogiikka
+      - run: node --test booking/tests/addon-lock-logic.test.mjs
       # .cache/articles: edellinen artikkelisnapshot (RPC-katkon varalta + siirrettyjen slugien tunnistus)
       - uses: actions/cache@v4
         with:

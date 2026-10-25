@@ -6,6 +6,7 @@ import { icon } from '../icons.js';
 import { stepper } from '../stepper.js';
 import { addonLimit } from '../nb-logic.js';
 import { nbt, nbLang, descRedundant, cleanDesc } from '../nb-texts.js';
+import { alt } from '../addon-lock-texts.js';
 
 export { addonLimit };   // nb-logic.js (puhdas, testattava)
 export const MODE_LABEL = { shared: 'Yleinen vuoro', exclusive: 'Yksityisvuoro', resource: 'Hoito / saunotus' };
@@ -13,16 +14,19 @@ const VAT = [25.5, 24, 14, 13.5, 10, 0];
 
 // Valitsin: addons = aktiiviset (admin_list_addons), getPersons() = nykyinen henkilömäärä, getMode() = 'shared'|'exclusive'|'resource' (resource = hoito, saunotus, rituaali, tapahtuma).
 // Rivi: nimi + hinta + (tiivis) kuvaus vasemmalla, "− [ 0 ] +" -stepper oikealla (jaettu stepper.js). Enimmäismäärä = addonLimit (henkilömäärä × max/hlö, enintään 99).
-export function addonPicker(addons, { getPersons, getMode, onChange }) {
+export function addonPicker(addons, { getPersons, getMode, onChange, locks = new Map() }) {
   const box = h('fieldset', { class: 'box addon-picker' }, h('legend', {}, icon('leaf', 18), ' ', nbt('addons.title')));
   const rows = [];
   const total = h('strong', { class: 'addon-total' });
   const en = nbLang() === 'en';
-  for (const a of addons.filter((x) => x.active)) {
+  for (const a of addons.filter((x) => x.active || (locks.get(x.id)?.quantity || 0) > 0)) {
     const name = (en && a.name_en) || a.name, desc = (en && a.description_en) || a.description;
     const q = stepper({ label: name, value: 0, min: 0, max: 0, onChange: () => { sync(); onChange?.(); } });
     const info = h('div', { class: 'addon-info' }, h('strong', { class: 'addon-name', text: name }), h('span', { class: 'addon-price', text: nbt('addons.perPiece', { price: money(a.price) }) }),
       desc && !descRedundant(name, desc) ? h('small', { class: 'addon-desc', text: cleanDesc(desc) }) : null);
+    const lock = locks.get(a.id);
+    if (lock?.paid) info.append(h('small', { class: 'addon-desc', text: alt('paid', { n: lock.paid }) }));
+    if (lock?.linked) info.append(h('small', { class: 'addon-desc', text: alt('link', { n: lock.linked }) }));
     const row = h('div', { class: 'addonrow', 'data-addon': a.code || a.id }, info, q.node);
     rows.push({ a, q, row });
     box.append(row);
@@ -32,8 +36,9 @@ export function addonPicker(addons, { getPersons, getMode, onChange }) {
     const mode = getMode(); const n = getPersons();
     let sum = 0, any = false;
     for (const { a, q, row } of rows) {
-      const ok = (a.applies_modes || []).includes(mode); row.hidden = !ok;
-      q.setRange(0, ok ? addonLimit(a, n) : 0);
+      const locked = locks.get(a.id)?.quantity || 0;
+      const ok = (a.applies_modes || []).includes(mode) || locked > 0; row.hidden = !ok;
+      q.setRange(locked, ok ? Math.max(locked, addonLimit(a, n)) : locked);
       if (ok) any = true; sum += ok ? q.get() * a.price : 0;
     }
     box.hidden = !any; total.textContent = money(sum);

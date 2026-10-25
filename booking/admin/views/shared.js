@@ -4,6 +4,8 @@ import { createTalousApi } from '../talous-api.js';
 import { loadRcTexts } from '../refund-cancel-texts.js';
 import { cancelReservationDialog } from './refund-cancel.js';
 import { addonPicker } from './addons.js';
+import { reservationAddonLocks, addonReductionError } from '../addon-lock-logic.js';
+import { alt } from '../addon-lock-texts.js';
 import { nbt } from '../nb-texts.js';
 import { memoText } from '../day-memos-texts.js';
 import { stepper } from '../stepper.js';
@@ -152,20 +154,39 @@ export function reservationDialog(r, { methods, onChange, refs, can = () => true
     const editable = ['pending', 'confirmed'].includes(r.status);
     kids.push(h('div', { class: 'box addons-box' }, h('h3', {}, icon('leaf', 20), ' Lisäpalvelut'),
       ad.length ? h('ul', { class: 'reslist' }, ad.map((a) => h('li', { class: 'resrow' }, h('span', { text: `${a.quantity} × ${a.name}` }), h('span', { class: 'meta', text: money(a.line_total) })))) : h('p', { class: 'muted', text: 'Ei lisäpalveluita.' }),
-      editable ? h('button', { type: 'button', class: 'btn sm', text: 'Muokkaa lisäpalveluita', onclick: () => editAddons(ad) }) : null));
+      editable ? h('button', { type: 'button', class: 'btn sm', text: 'Muokkaa lisäpalveluita', onclick: () => editAddons(ad, o) }) : null));
     // booking_173: kumppanin lahjakortti (koodi + Kopioi, arvaus vs. valinta, myyjän vaihto, Lunasta, Merkitse lunastetuksi)
     const vbox = await orderVoucherBox({ rpc, orderId: r.order_id, onChanged: () => { drawOrder(); onChange?.(); } }).catch(() => null);
     if (vbox) kids.unshift(vbox);
     orderBox.replaceChildren(...kids);
   };
-  const editAddons = async (current) => {
+  const editAddons = async (current, order) => {
+    const state = reservationAddonLocks(order, r.reservation_id);
     const all = await rpc('admin_list_addons');
-    const picker = addonPicker(all, { getPersons: () => r.persons, getMode: () => r.mode });
+    const picker = addonPicker(all, { getPersons: () => r.persons, getMode: () => r.mode, locks: state.locks });
     picker.set(current);
+    const error = h('p', { class: 'err', role: 'alert', tabindex: '-1', hidden: state.complete || null,
+      text: state.complete ? '' : alt('error_unknown') });
     const f = h('form', { class: 'stack', onsubmit: (ev) => { ev.preventDefault(); run(f.querySelector('button[type=submit]'), async () => {
-      await rpc('admin_set_reservation_addons', { p_reservation_id: r.reservation_id, p_addons: picker.value() });
-      toast('Lisäpalvelut tallennettu'); dd.close(); d.close(); onChange?.();
-    }); } }, h('p', { class: 'muted', text: `Enimmäismäärä = henkilömäärä (${r.persons}) × lisäpalvelun enimmäismäärä / hlö. Tilauksen summa päivittyy; odottava maksu päivitetään.` }), picker.node, h('button', { class: 'btn primary', type: 'submit', text: 'Tallenna lisäpalvelut' }));
+      const code = addonReductionError(state, picker.value());
+      if (code) {
+        error.textContent = alt(code === 'addon_paid' ? 'error_paid' : code === 'addon_link_open' ? 'error_link' : 'error_unknown');
+        error.hidden = false; error.focus(); return;
+      }
+      try {
+        await rpc('admin_set_reservation_addons', { p_reservation_id: r.reservation_id, p_addons: picker.value() });
+        toast('Lisäpalvelut tallennettu'); dd.close(); d.close(); onChange?.();
+      } catch (e) {
+        const c = e?.code || (e?.message || '').match(/addon_paid|addon_link_open/)?.[0];
+        error.textContent = c === 'addon_paid' ? alt('error_paid') : c === 'addon_link_open' ? alt('error_link') : errMsg(e);
+        error.hidden = false; error.focus();
+      }
+    }); } },
+      h('p', { class: 'muted', text: `Enimmäismäärä = henkilömäärä (${r.persons}) × lisäpalvelun enimmäismäärä / hlö. Tilauksen summa päivittyy; odottava maksu päivitetään.` }),
+      [...state.locks.values()].some((x) => x.paid) ? h('p', { class: 'muted', text: alt('hint') }) : null,
+      [...state.locks.values()].some((x) => x.linked) ? h('p', { class: 'muted', text: alt('link_hint') }) : null,
+      picker.node, error,
+      h('button', { class: 'btn primary', type: 'submit', disabled: !state.complete || null, text: 'Tallenna lisäpalvelut' }));
     const dd = dialog(`Lisäpalvelut – tilaus #${r.order_no}`, f);
   };
   drawOrder();
