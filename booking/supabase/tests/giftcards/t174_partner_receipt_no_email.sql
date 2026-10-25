@@ -60,9 +60,9 @@ begin
   insert into booking.staff(user_id, email, name, role) values (u_adm, 't174-admin-' || run || '@example.test', 't174 admin', 'admin');
 
   -- ===== A rakenne
-  perform pg_temp.ck(md5(pg_get_functiondef('booking._on_payment_paid(bigint)'::regprocedure)) = 'de9084871640d213d10527a045157bf2', 'A1 _on_payment_paid = booking_174');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text)'::regprocedure)) = '525d1fa96fd7c37df4d7e502edf1bf71', 'A2 admin_mark_voucher_claim_redeemed = booking_174');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.email_outbox_claim(integer)'::regprocedure)) = '2db9a1233a06e6293d0877f17de1ab72', 'A3 email_outbox_claim = booking_174');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking._on_payment_paid(bigint)'::regprocedure)) in ('de9084871640d213d10527a045157bf2', 'af7f99e87ba7e00e0d5e3d5b6cbf2400'), 'A1 _on_payment_paid = booking_174 (tai booking_176)');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text)'::regprocedure)) in ('525d1fa96fd7c37df4d7e502edf1bf71', 'a4e69cb26eb44b72eacce7c167342884'), 'A2 admin_mark_voucher_claim_redeemed = booking_174 (tai booking_176)');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking.email_outbox_claim(integer)'::regprocedure)) in ('2db9a1233a06e6293d0877f17de1ab72', '70602f6500703e8750e1539ae8809d38'), 'A3 email_outbox_claim = booking_174 (tai booking_176)');
   perform pg_temp.ck(not has_function_privilege('authenticated', 'booking._vc_due(booking.orders,booking.voucher_claims)', 'execute')
       and not has_function_privilege('anon', 'booking._vc_due(booking.orders,booking.voucher_claims)', 'execute')
       and has_function_privilege('authenticated', 'booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text)', 'execute')
@@ -147,11 +147,16 @@ begin
   else
     perform pg_temp.skip('E10 email_outbox_claim ohitettu: jonossa muita lähetettäviä viestejä');
   end if;
-  -- asiakas maksaa erotuksen → tavallinen kuittipolku (kuitti + kuittisähköposti)
+  -- asiakas maksaa erotuksen → kuitti (booking_174: + kuittisähköposti; booking_176: ei kuittisähköpostia, kuitti tilaussivulla)
   update booking.payments set status = 'paid', paid_at = now() where id = lnk;
   select id into rc from booking.receipts where payment_id = lnk and kind = 'receipt';
-  perform pg_temp.ck(rc is not null and exists (select 1 from booking.email_outbox where kind = 'receipt' and receipt_id = rc), 'E11 erotuksen maksu: kuitti + kuittisähköposti');
-  perform pg_temp.ck((select count(*) from booking.email_outbox where order_id = o and kind = 'receipt') = 1, 'E12 tilauksella vain erotuksen kuittisähköposti');
+  if to_regclass('booking.vc_difference_payments') is null then
+    perform pg_temp.ck(rc is not null and exists (select 1 from booking.email_outbox where kind = 'receipt' and receipt_id = rc), 'E11 erotuksen maksu: kuitti + kuittisähköposti');
+    perform pg_temp.ck((select count(*) from booking.email_outbox where order_id = o and kind = 'receipt') = 1, 'E12 tilauksella vain erotuksen kuittisähköposti');
+  else
+    perform pg_temp.ck(rc is not null and not exists (select 1 from booking.email_outbox where kind = 'receipt' and receipt_id = rc), 'E11 erotuksen maksu: kuitti, ei kuittisähköpostia (booking_176)');
+    perform pg_temp.ck((select count(*) from booking.email_outbox where order_id = o and kind = 'receipt') = 0, 'E12 tilauksella ei kuittisähköpostia (booking_176)');
+  end if;
 
   -- ===== F täysi arvo → ei maksulinkkiä; arvo tyhjä (vanha tapa) → ei maksulinkkiä
   o := pg_temp.mkorder(cu, 40, 'fi', 'T174 täysi');

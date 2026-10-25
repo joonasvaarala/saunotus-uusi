@@ -189,11 +189,11 @@ test('gift_card_recipient: saateteksti näkyy, kortin tervehdys ei; ostajan nimi
 // ---------- kumppanilahjakorttien lunastuspyynnöt (voucher_claim_received / voucher_claim_problem) ----------
 const vcData = (locale, vc = {}) => ({ ...base(locale), voucher_claim: { claim_id: 7, status: 'received', source: 'elamyslahjat', code_masked: '…1234', problem_code: 'invalid_code', customer_name: 'Matti Meikäläinen', ...vc } });
 for (const locale of ['fi', 'en']) {
-  test(`voucher_claim_received ${locale}: koodi maskattuna, tilauslinkki, ei puhelinnumeroa eikä aikarajaa`, { skip }, () => {
+  test(`voucher_claim_received ${locale}: koodi maskattuna, tilauslinkki, puhelin näkyy (booking_176), ei aikarajaa`, { skip }, () => {
     const m = R('voucher_claim_received', vcData(locale), locale);
     assert.ok(m.subject.includes('Sipoonjoen Perinnesauna') && !/undefined|\bnull\b|NaN/.test(m.subject + m.text + m.html));
     assert.ok(m.text.includes('Elämyslahjat') && m.text.includes('…1234') && m.text.includes(ORDER_URL) && hrefs(m.html).includes(ORDER_URL));
-    assert.ok(!/tel:/.test(m.html) && !m.html.includes('+358') && hrefs(m.html).includes('mailto:savusauna@saunotus.fi'), 'ei puhelinnumeroa');
+    assert.ok(hrefs(m.html).includes('tel:+358102992866') && m.text.includes(locale === 'fi' ? '010 299 2866' : '+358 10 299 2866'), 'puhelin näkyy');
     assert.ok(!/\basti\b|\buntil\b|\bhold\b|pidetty/i.test(m.text), 'ei aikarajaa');
     assert.ok(m.text.includes('Tapio') && m.text.endsWith('\n'));
   });
@@ -210,8 +210,9 @@ test('voucher_claim_problem: eri ongelmakoodeilla eri aiheet; tuntematon kumppan
   const m = R('voucher_claim_received', vcData('fi', { source: 'tuntematon', code_masked: '' }), 'fi');
   assert.ok(m.text.includes('kumppani') && !/koodi\s*[,)]/.test(m.text) && !/undefined|\bnull\b/.test(m.text));
 });
-test('muiden pohjien alatunniste sisältää edelleen puhelinnumeron (noPhone vain voucher_claim-viesteissä)', { skip }, () => {
+test('muiden pohjien alatunniste sisältää edelleen puhelinnumeron (noPhone vain voucher_claim_problem-viestissä)', { skip }, () => {
   assert.ok(hrefs(R('order_confirmation', base('fi'), 'fi').html).some((h) => h.startsWith('tel:')));
+  assert.ok(!hrefs(R('voucher_claim_problem', vcData('fi', { status: 'problem' }), 'fi').html).some((h) => h.startsWith('tel:')));
 });
 test('puhelin: näkyvä muoto kielen mukaan (fi 010 299 2866, en +358 10 299 2866), linkki tel:+358102992866 (sama vakio kuin sivusto/kauppa, booking/shop/src/phone.js)', { skip }, async () => {
   const P = await import('../../../shop/src/phone.js');
@@ -378,5 +379,44 @@ test('payment_link: puutteellinen voucher_difference → tavallinen maksulinkkiv
       const m = R('payment_link', { ...base(l), voucher_difference: bad }, l);
       assert.deepEqual(m, plain);
     }
+  }
+});
+
+// booking_176: kumppanilahjakorttivarauksen viestit yhteen
+const vc176 = (locale, instr = true) => { const d = vcData(locale, { status: 'open', source: 'kokemuskauppa' }); if (instr) d.order.instructions = [{ title: locale === 'fi' ? 'Saapuminen' : 'Arrival', text: locale === 'fi' ? 'Saavu 15 min ennen.' : 'Arrive 15 min early.' }]; return d; };
+for (const locale of ['fi', 'en']) {
+  test(`booking_176 varausvahvistus ${locale}: aika varattu, lahjakortti tarkistetaan, pakollinen yhteydenottolause, ohjelaatikko, koko ohje + tilaussivu, Tapio, puhelin`, { skip }, () => {
+    const m = R('voucher_claim_received', vc176(locale), locale);
+    const fi = locale === 'fi';
+    assert.ok(m.subject.startsWith(fi ? 'Varausvahvistus 15321' : 'Booking confirmation 15321') && !/[<>\n]/.test(m.subject));
+    assert.ok(m.text.includes(fi ? 'Olemme sinuun yhteydessä, jos lahjakortin tai varauksen kanssa ilmenee ongelmia' : 'We will contact you if any problems come up with the gift card or the booking'));
+    assert.ok(m.html.includes(fi ? 'Olemme sinuun yhteydessä, jos lahjakortin tai varauksen kanssa ilmenee ongelmia' : 'We will contact you if any problems come up with the gift card or the booking'));
+    assert.ok(m.text.includes(fi ? 'Aikasi on varattu' : 'Your time is booked') && m.text.includes(fi ? 'Tarkistamme lahjakortin' : 'We will still check the gift card'));
+    assert.ok(m.text.includes(fi ? 'Saavu 15 min ennen.' : 'Arrive 15 min early.') && m.html.includes(fi ? 'Hyvä tietää ennen saunaa' : 'Good to know before your visit'));
+    assert.ok(hrefs(m.html).includes(`${ORDER_URL}#ord-g`) && hrefs(m.html).includes(ORDER_URL), 'koko ohje + tilaussivu');
+    assert.ok(m.html.includes(fi ? 'Lue koko ohje' : 'Read the full instructions') && m.html.includes(fi ? 'Avaa tilauksesi' : 'Open your order'));
+    assert.ok(/\nTapio\nSipoonjoen Perinnesauna\n$/.test(m.text) && m.text.includes(fi ? 'soita 010 299 2866' : 'call +358 10 299 2866'));
+    assert.ok(!/Kiitos lahjakorttivarauksesta|Thank you for your gift card booking/.test(m.subject + m.text), 'vanha viesti korvattu');
+    assert.ok(!/undefined|\bnull\b|NaN|\{\{/.test(m.subject + m.text + m.html) && !/<[a-z!]/i.test(m.text));
+  });
+  test(`booking_176 varausvahvistus ${locale}: ilman ohjeita ei ohjelaatikkoa eikä koko ohje -linkkiä, tilaussivu silti`, { skip }, () => {
+    const m = R('voucher_claim_received', vc176(locale, false), locale);
+    assert.ok(!hrefs(m.html).includes(`${ORDER_URL}#ord-g`) && hrefs(m.html).includes(ORDER_URL) && !/Hyvä tietää|Good to know/.test(m.text));
+  });
+  test(`booking_176 erotusviesti ${locale}: lunastettu + vahvistettu, summa / arvo / erotus, Maksa nyt, kuitti tilaussivulla`, { skip }, () => {
+    const m = R('payment_link', vdData(locale), locale);
+    const fi = locale === 'fi';
+    assert.ok(m.text.includes(fi ? 'Lahjakorttisi on lunastettu ja varauksesi on vahvistettu.' : 'Your gift card has been redeemed and your booking is confirmed.'));
+    assert.ok(m.text.includes(fi ? 'Varauksen summa: 80,00 €\nLahjakortin arvo: 50,00 €\nMaksettava erotus: 30,00 €' : 'Booking total: 80.00 €\nGift card value: 50.00 €\nDifference to pay: 30.00 €'), m.text);
+    assert.ok(m.html.includes(fi ? 'Maksa nyt' : 'Pay now') && hrefs(m.html).includes(PAY_URL));
+    assert.ok(m.text.includes(fi ? 'Kuitti erotuksen maksusta näkyy maksun jälkeen tilaussivullasi.' : 'The receipt for the difference will be shown on your order page after payment.'));
+    assert.ok(m.html.includes(fi ? 'Lahjakortti lunastettu – maksa erotus' : 'Gift card redeemed – pay the difference') && /\nTapio\n/.test(m.text));
+    assert.ok(!/undefined|\bnull\b|NaN|\{\{/.test(m.subject + m.text + m.html));
+  });
+}
+test('booking_176: tavallinen maksulinkki ennallaan (ei voucher_difference-lohkoa)', { skip }, () => {
+  for (const l of ['fi', 'en']) {
+    const m = R('payment_link', base(l), l);
+    assert.ok(m.subject.startsWith(l === 'fi' ? 'Maksulinkki tilaukseen 15321' : 'Payment link for order 15321') && !/lunastettu|redeemed/i.test(m.text));
   }
 });

@@ -1,0 +1,272 @@
+[
+ {
+  "key": "email.voucher.confirm_subject",
+  "lang": "fi",
+  "text": "Varausvahvistus {{var:no}} – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}",
+   "{{setting:business_name}}"
+  ],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.confirm_subject",
+  "lang": "en",
+  "text": "Booking confirmation {{var:no}} – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:no}}",
+   "{{setting:business_name}}"
+  ],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.confirm_title",
+  "lang": "fi",
+  "text": "Aikasi on varattu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.confirm_title",
+  "lang": "en",
+  "text": "Your time is booked",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.confirm_reserved",
+  "lang": "fi",
+  "text": "Kiitos varauksestasi! Aikasi on varattu ja olemme vastaanottaneet lahjakorttisi ({{var:what}}).",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{var:what}}"
+  ],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.confirm_reserved",
+  "lang": "en",
+  "text": "Thank you for your booking! Your time is booked and we have received your gift card ({{var:what}}).",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{var:what}}"
+  ],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.confirm_check",
+  "lang": "fi",
+  "text": "Tarkistamme lahjakortin vielä erikseen, sinun ei tarvitse tehdä mitään.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.confirm_check",
+  "lang": "en",
+  "text": "We will still check the gift card separately, there is nothing you need to do.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.confirm_problem",
+  "lang": "fi",
+  "text": "Olemme sinuun yhteydessä, jos lahjakortin tai varauksen kanssa ilmenee ongelmia.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.confirm_problem",
+  "lang": "en",
+  "text": "We will contact you if any problems come up with the gift card or the booking.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.confirm_guide_title",
+  "lang": "fi",
+  "text": "Hyvä tietää ennen saunaa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.confirm_guide_title",
+  "lang": "en",
+  "text": "Good to know before your visit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.confirm_guide",
+  "lang": "fi",
+  "text": "Lue koko ohje",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.confirm_guide",
+  "lang": "en",
+  "text": "Read the full instructions",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.confirm_more",
+  "lang": "fi",
+  "text": "Varauksesi tiedot ja tilan näet tilaussivulta:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.confirm_more",
+  "lang": "en",
+  "text": "You can see your booking details and status on your order page:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.difference_title",
+  "lang": "fi",
+  "text": "Lahjakortti lunastettu – maksa erotus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.difference_title",
+  "lang": "en",
+  "text": "Gift card redeemed – pay the difference",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.difference_confirmed",
+  "lang": "fi",
+  "text": "Lahjakorttisi on lunastettu ja varauksesi on vahvistettu.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.difference_confirmed",
+  "lang": "en",
+  "text": "Your gift card has been redeemed and your booking is confirmed.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.difference_total_label",
+  "lang": "fi",
+  "text": "Varauksen summa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.difference_total_label",
+  "lang": "en",
+  "text": "Booking total",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.difference_voucher_label",
+  "lang": "fi",
+  "text": "Lahjakortin arvo",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.difference_voucher_label",
+  "lang": "en",
+  "text": "Gift card value",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.difference_receipt",
+  "lang": "fi",
+  "text": "Kuitti erotuksen maksusta näkyy maksun jälkeen tilaussivullasi.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ },
+ {
+  "key": "email.voucher.difference_receipt",
+  "lang": "en",
+  "text": "The receipt for the difference will be shown on your order page after payment.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_176 (Joonas 25.10.2026): kumppanilahjakorttivarauksen viestit yhteen. Heti varauksen jälkeen YKSI varausvahvistus (korvaa Kiitos lahjakorttivarauksesta -viestin, tilausvahvistuksen ja erillisen ohjeviestin; tiivis ohjelaatikko, linkki koko ohjeeseen ja tilaussivulle); lahjakortti kattaa osan → yksi yhdistetty viesti (summa, lahjakortin arvo, erotus, Maksa nyt); erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla). Allekirjoitus Tapio. Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+ }
+]
