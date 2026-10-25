@@ -15,7 +15,7 @@ declare
   v_source bigint; v_ids bigint[]; v_failed boolean; v_result jsonb; v_def text;
   v_slot timestamptz; v_day date; v_extra timestamptz; v_made jsonb; v_tok uuid; v_oid bigint; v_sid uuid;
   v_total numeric; v_pay numeric; v_n int; v_total2 numeric; v_pay2 numeric; v_n2 int; v_base int; v_hits int; v_hits2 int;
-  v_mode text; v_dc bigint; v_ok boolean;
+  v_mode text; v_dc bigint; v_ok boolean; v_extra_pid bigint;
 begin
   select id into v_source from kb.products where id = 1;
   select array_agg(id order by id) into v_ids from (select id from kb.products where id in (2, 3, 4) order by id) s;
@@ -96,7 +96,7 @@ begin
   select q.starts_at, q.session_date into v_slot, v_day
     from booking.public_treatment_availability(11, current_date, current_date + 14, 1) q
    where q.status = 'available' and q.starts_at > now() + interval '3 hours' and extract(isodow from q.session_date) in (6, 7)
-   order by q.starts_at limit 1;
+   order by q.starts_at desc limit 1; -- viimeisin viikonloppuaika, jotta samalle päivälle jää tilaa lisähoidolle
   perform pg_temp.ck(v_slot is not null, 'B0 viikonlopun hoitoaika');
 
   if v_slot is not null then
@@ -120,14 +120,18 @@ begin
       perform pg_temp.ck(v_total2 = v_total and v_n2 = v_n and v_pay2 is not distinct from v_pay, 'B3 perusvaraus ja maksu ennallaan');
       perform pg_temp.ck((select status from booking.orders where id = v_oid) in ('pending', 'confirmed'), 'B4 tilauksen tila ehjä');
 
-      select q.starts_at into v_extra
-        from booking.public_treatment_availability(12, v_day, v_day, 1) q
-       where q.status = 'available' and q.starts_at > now() + interval '3 hours'
-       order by q.starts_at limit 1;
+      -- Tuotannossa tuotteet 11 ja 12 jakavat saman hoitajan; jos tuotteelle 12 ei jää aikaa, käytetään tuotetta 8 (sama koodipolku).
+      select x.pid, x.starts_at into v_extra_pid, v_extra from (
+        select 12::bigint pid, q.starts_at, 0 ord from booking.public_treatment_availability(12, v_day, v_day, 1) q
+         where q.status = 'available' and q.starts_at > now() + interval '3 hours'
+        union all
+        select 8::bigint, q.starts_at, 1 from booking.public_treatment_availability(8, v_day, v_day, 1) q
+         where q.status = 'available' and q.starts_at > now() + interval '3 hours') x
+       order by x.ord, x.starts_at limit 1;
       if v_extra is null then
         perform pg_temp.ck(false, 'B5 samalle päivälle ei jäänyt toista aikaa');
       else
-        v_result := booking.public_upsell_checkout_attach(v_tok, jsonb_build_array(jsonb_build_object('product_id', 12, 'persons', 1, 'start', v_extra)), v_sid);
+        v_result := booking.public_upsell_checkout_attach(v_tok, jsonb_build_array(jsonb_build_object('product_id', v_extra_pid, 'persons', 1, 'start', v_extra)), v_sid);
         select count(*) into v_base from booking.reservations where order_id = v_oid and product_id = 11 and booking._res_active(status, hold_expires_at);
         select total_gross into v_total2 from booking.orders where id = v_oid;
         perform pg_temp.ck(v_result->>'ok' = 'true' and (v_result->>'added_count')::int = 1 and not (v_result ? 'token'), 'B5 liitos onnistui (' || coalesce(v_result->>'code', v_result::text) || ')');

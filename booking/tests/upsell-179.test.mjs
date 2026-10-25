@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (rel) => readFileSync(resolve(root, rel), 'utf8');
-const mig = 'booking/supabase/migrations/20261025211000_booking_179_upsell_suggestions.sql';
-const rollback = 'booking/supabase/rollbacks/20261025211000_booking_179_ROLLBACK.sql';
+const mig = 'booking/supabase/migrations/20261025212331_booking_179_upsell_suggestions.sql';
+const rollback = 'booking/supabase/rollbacks/20261025212331_booking_179_ROLLBACK.sql';
 const texts = 'content/site-texts.pending-import-75.json';
 
 test('migraatio ei määritä olemassa olevia funktioita uudelleen', () => {
