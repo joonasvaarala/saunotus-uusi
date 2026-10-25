@@ -22,17 +22,15 @@ Deno.test("live-teksti luetaan luontevasti, kun pohja on hyväksytty", () => {
     role_type: "heater", starts_at: "2026-10-31T10:00:00Z", ends_at: "2026-10-31T16:00:00Z", deadline_at: "2026-10-29T10:00:00Z",
     ask_no: null, ask_count: null, token: "tok.sig", staff_whatsapp_enabled: true, bot_channel: false,
   } as ClaimedMessage;
-  const c = resolveTemplate(m, { offer: { name: "tyovuoro_kysely", approved: true, fallback: "vuorotarjous" } });
+  const c = resolveTemplate(m, { offer: { name: "tyovuoro_kysely", approved: true } });
   assert(c.kind === "template");
   assertEquals(c.name, "tyovuoro_kysely");
   assertEquals(c.params[0], "Lämmitys");
   const text = LIVE.replace("{{1}}", c.params[0]).replace("{{2}}", c.params[1]).replace("{{3}}", c.params[2]);
   assert(/^Hei, työvuoroon tarvitaan tekijää\. Vuoro: Lämmitys, aika la 31\.10\.(2026)? klo 12–18\. Voitko tulla töihin\? Vastaathan viimeistään to 29\.10\.(2026)? klo 12 mennessä/.test(text), text);
-  // varapohja vuorotarjous pitää vanhat muodot
-  const f = resolveTemplate(m, { offer: { name: "tyovuoro_kysely", approved: false, fallback: "vuorotarjous" } });
-  assert(f.kind === "template");
-  assertEquals(f.name, "vuorotarjous");
-  assertEquals(f.params[0], "lämmitysvuoro");
+  // soefix B4: ei varapohjaa – hyväksymätön pohja → unapproved (sähköposti)
+  const f = resolveTemplate(m, { offer: { name: "tyovuoro_kysely", approved: false } });
+  assertEquals(f, { kind: "unapproved" });
 });
 
 Deno.test("docs/whatsapp-templates.json: tyovuoro_kysely = Metan live-teksti sellaisenaan", () => {

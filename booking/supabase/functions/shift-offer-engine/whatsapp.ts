@@ -73,7 +73,8 @@ export type ClaimedMessage = {
 };
 
 // booking_153: Metan pohjat asetuksesta shift_offer.wa_templates. Pohjaa käytetään vain, kun approved = true.
-export type TemplateSetting = { name?: string; approved?: boolean; fallback?: string };
+// soefix B4: ei varapohjaa (vanha "vuorotarjous" ja fallback-kenttä poistettu) – hyväksymätön pohja → sähköposti.
+export type TemplateSetting = { name?: string; approved?: boolean };
 export type TemplateSettings = {
   offer?: TemplateSetting;
   round_reminder?: TemplateSetting;
@@ -89,6 +90,8 @@ export type Settings = {
   templates?: TemplateSettings;
   // booking_153 (d): WhatsApp vain 08–21 Europe/Helsinki. false = ei lähetetä nyt.
   whatsapp_hours_open?: boolean;
+  // soefix C1: claim kertoo, onko sähköpostikanava päällä (shift_offer.email_enabled). false = sähköpostiin ei siirretä.
+  email_enabled?: boolean;
 };
 
 export type WhatsappEnv = {
@@ -112,7 +115,7 @@ export type CompleteResult = {
 
 export type Plan =
   | { action: "already_sent" }
-  | { action: "fail_no_contact" }
+  | { action: "fail_no_contact"; error: string }
   | { action: "fail"; error: string }
   | {
     action: "release";
@@ -363,15 +366,18 @@ export function buildTemplatePayload(msg: ClaimedMessage, phoneE164: string): Te
 
 // booking_153: mikä pohja viestille. "legacy" = vanha KIND_TEMPLATE-käytös (ei pohja-asetuksia tai
 // vanha viestilaji), "session" = ei hyväksyttyä pohjaa → vapaamuotoinen viesti 24 h ikkunassa tai sähköposti.
+// soefix B4: "unapproved" = tarjous/muistutus ilman hyväksyttyä offer-pohjaa → sähköposti heti, ei koskaan vanhaa pohjaa.
 export type TemplateChoice =
   | { kind: "legacy" }
+  | { kind: "unapproved" }
   | { kind: "template"; name: string; params: string[]; buttonToken: string | null; needsButton: boolean }
   | { kind: "session" };
 
 const NOTICE_SUBKINDS = /^(vacant|th_)/;
 
 export function resolveTemplate(msg: ClaimedMessage, templates: TemplateSettings | undefined): TemplateChoice {
-  if (!templates) return { kind: "legacy" };
+  const isOffer = msg.kind === "offer" || msg.kind === "reminder";
+  if (!templates) return isOffer ? { kind: "unapproved" } : { kind: "legacy" };
   const role = templateText(roleLabel(msg.role_type));
   const when = templateText(formatShiftWhen(msg.starts_at, msg.ends_at));
   const deadline = templateText(formatDeadline(msg.deadline_at));
@@ -392,10 +398,10 @@ export function resolveTemplate(msg: ClaimedMessage, templates: TemplateSettings
     return approved(t) ? { kind: "template", name: t!.name!, params: [date, items], buttonToken: msg.page_token ?? null, needsButton: true } : { kind: "session" };
   }
   if (sub && NOTICE_SUBKINDS.test(sub)) return { kind: "session" };
-  if (msg.kind === "offer" || msg.kind === "reminder") {
+  if (isOffer) {
     const t = templates.offer;
-    const fallback = t?.fallback && /^[a-z0-9_]+$/.test(t.fallback) ? t.fallback : KIND_TEMPLATE.offer;
-    const name = approved(t) ? t!.name! : fallback;
+    if (!approved(t)) return { kind: "unapproved" };
+    const name = t!.name!;
     if (name === OFFER_TEMPLATE_SHORT) {
       const params = [roleShort(msg.role_type), formatShiftWhenShort(msg.starts_at, msg.ends_at), formatDeadlineShort(msg.deadline_at)].map(templateText);
       return { kind: "template", name, params, buttonToken: msg.token, needsButton: true };
@@ -438,22 +444,38 @@ function release(
   return { action: "release", reason, channel, to, payload, delayMinutes };
 }
 
+export const NO_WORKING_CHANNEL = "no_working_channel";
+const EMAIL_RE = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
+
+export function usableEmail(msg: ClaimedMessage, settings: Settings): string | null {
+  const email = msg.email?.trim() || null;
+  if (!email || settings.email_enabled === false || !EMAIL_RE.test(email)) return null;
+  return email;
+}
+
+// soefix C1/C2: WhatsApp ei toimi → sähköposti heti (viive 0), muuten failed_no_contact / no_working_channel.
+function toEmail(reason: string, email: string | null, detail?: string): Plan {
+  if (email) return release(detail ?? reason, "email", email, null, 0);
+  return { action: "fail_no_contact", error: detail ? `${NO_WORKING_CHANNEL}:${detail}` : NO_WORKING_CHANNEL };
+}
+
 export function planMessage(msg: ClaimedMessage, settings: Settings): Plan {
   if (msg.wamid || TERMINAL.has(msg.status) || msg.status !== "sending") return { action: "already_sent" };
   if (isBotStaff(msg) || msg.channel === "bot") return { action: "bot_channel" };
   const phone = normalizeFinnishPhone(msg.phone_raw);
-  const email = msg.email?.trim() || null;
-  if (!phone && !email) return { action: "fail_no_contact" };
-  if (!phone) return release("email_pending", "email", email, null, 360);
-  if (!msg.staff_whatsapp_enabled) return release("staff_whatsapp_disabled", "whatsapp", phone, null, 15);
-  if (!settings.whatsapp_enabled) return release("whatsapp_disabled", "whatsapp", phone, null, 15);
-  if (!allowlisted(settings, msg.staff_id)) return release("not_allowlisted", "whatsapp", phone, null, 15);
-  if (settings.whatsapp_hours_open === false) return release("quiet_hours", "whatsapp", phone, null, 30);
+  const email = usableEmail(msg, settings);
+  if (!phone) return toEmail("no_phone", email);
+  if (!msg.staff_whatsapp_enabled) return toEmail("staff_whatsapp_disabled", email);
+  if (!settings.whatsapp_enabled) return toEmail("whatsapp_disabled", email);
+  if (!allowlisted(settings, msg.staff_id)) return toEmail("not_allowlisted", email);
   const choice = resolveTemplate(msg, settings.templates);
+  // B4: hyväksymätön offer-pohja → sähköposti heti (myös hiljaisina tunteina; sähköposti ei odota 08–21:tä)
+  if (choice.kind === "unapproved") return toEmail("template_not_approved", email);
+  if (settings.whatsapp_hours_open === false) return release("quiet_hours", "whatsapp", phone, null, 30);
   if (choice.kind === "session") {
-    // Ei hyväksyttyä pohjaa: vapaamuotoinen viesti vain avoimessa 24 h ikkunassa, muuten sähköposti (tai odotus).
+    // Ei hyväksyttyä pohjaa: vapaamuotoinen viesti vain avoimessa 24 h ikkunassa, muuten sähköposti / no_working_channel.
     const session = msg.session_open && msg.body ? buildSessionPayload(phone, msg.body) : null;
-    if (!session) return release("template_not_approved", email ? "email" : "whatsapp", email ?? phone, null, 360);
+    if (!session) return toEmail("template_not_approved", email);
     if (!settings.sender_enabled) return release("sender_disabled", "whatsapp", phone, null, 15);
     if (settings.whatsapp_dry_run) return release("dry_run", "whatsapp", phone, session, 15);
     return { action: "send", payload: session, to: phone };
@@ -483,7 +505,7 @@ function fromPlan(msg: ClaimedMessage, plan: Plan, nowMs: number): CompleteResul
   if (plan.action === "bot_channel") return { id: msg.id, action: "bot_channel", to: null, payload: null };
   if (plan.action === "already_sent") return { id: msg.id, action: "already_sent" };
   if (plan.action === "fail_no_contact") {
-    return { id: msg.id, action: "fail_no_contact", channel: "none", to: null, error: "no_phone", payload: null };
+    return { id: msg.id, action: "fail_no_contact", channel: "none", to: null, error: plan.error, payload: null };
   }
   if (plan.action === "fail") {
     return { id: msg.id, action: "fail", channel: "whatsapp", to: normalizeFinnishPhone(msg.phone_raw), error: plan.error, payload: null };
@@ -530,10 +552,21 @@ export function readSendResponse(status: number, body: string): { wamid: string 
   const err = json && typeof json === "object" && json && "error" in json
     ? (json as { error?: { message?: unknown; code?: unknown } }).error
     : null;
-  const error = err && typeof err === "object"
-    ? `${err.code ?? ""} ${typeof err.message === "string" ? err.message : ""}`.trim().slice(0, 500)
-    : status >= 400 ? body.slice(0, 300) : null;
-  return { wamid: typeof id === "string" && id ? id : null, error: error || null };
+  // soefix: vain virhekoodi talteen (Metan viestiteksti voi sisältää puhelinnumeron) → "wa_<koodi>" tai "http_<status>"
+  const code = err && typeof err === "object" ? String(err.code ?? "").replace(/[^0-9]/g, "").slice(0, 10) : "";
+  const error = code ? `wa_${code}` : status >= 400 || (err && typeof err === "object") ? `http_${status}` : null;
+  return { wamid: typeof id === "string" && id ? id : null, error };
+}
+
+// soefix C1: Metan 4xx-koodit, joissa WhatsApp ei tälle viestille toimi (pohja: 132000–132999; vastaanottaja:
+// 131026 ei toimitettavissa, 131030 ei sallittu numero, 131047 24 h ikkuna, 131049 Meta ei toimittanut, 131050 vastaanottaja esti,
+// 131021 lähettäjä = vastaanottaja) → sähköposti / no_working_channel. Muut 4xx → failed.
+const CHANNEL_CODES = new Set(["131026", "131030", "131047", "131049", "131050", "131021"]);
+export function channelUnusable(error: string | null): boolean {
+  const m = /^wa_([0-9]+)$/.exec(error ?? "");
+  if (!m) return false;
+  const n = Number(m[1]);
+  return (n >= 132000 && n <= 132999) || CHANNEL_CODES.has(m[1]);
 }
 
 export async function postTemplate(
@@ -624,6 +657,11 @@ export async function handleClaimedMessage(
     };
   }
   msg.wamid = null;
+  if (kind === "fail" && channelUnusable(http.error)) {
+    const alt = toEmail("wa_unusable", usableEmail(msg, settings), http.error!);
+    msg.status = alt.action === "release" ? "queued" : "failed_no_contact";
+    return { ...fromPlan(msg, alt, nowMs), attempts: msg.attempts + 1 };
+  }
   if (kind === "fail") {
     msg.status = "failed";
     return {

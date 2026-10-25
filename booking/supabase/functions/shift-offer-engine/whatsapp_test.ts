@@ -4,6 +4,7 @@ import templates from "../../../../docs/whatsapp-templates.json" with { type: "j
 import {
   GRAPH_API_VERSION,
   KIND_TEMPLATE,
+  buildChosenTemplate,
   buildTemplatePayload,
   classifyHttp,
   formatShiftWhen,
@@ -18,6 +19,7 @@ import {
   planMessage,
   readChallenge,
   redactTemplatePayload,
+  resolveTemplate,
   retryPlan,
   staleSendingResolution,
   STALE_SEND_LOCK_MS,
@@ -64,8 +66,17 @@ function settings(over: Partial<Settings> = {}): Settings {
     whatsapp_enabled: true,
     whatsapp_dry_run: false,
     allow_staff_ids: [STAFF],
+    // soefix B4: tarjous lähtee WhatsAppina vain hyväksytyllä tyovuoro_kysely-pohjalla (ei vuorotarjous-varapohjaa)
+    templates: OK_TPL,
     ...over,
   };
+}
+
+const OK_TPL = { offer: { name: "tyovuoro_kysely", approved: true } };
+function chosen(m: ClaimedMessage, phone: string): TemplatePayload {
+  const c = resolveTemplate(m, OK_TPL);
+  assert(c.kind === "template");
+  return buildChosenTemplate(c, phone)!;
 }
 
 const env: WhatsappEnv = {
@@ -270,7 +281,8 @@ Deno.test("missing phone is failed_no_contact and stays addressable", () => {
   const email = planMessage(msg({ phone_raw: " ", email: "aino@example.com", channel: "email" }), settings());
   assertEquals(email.action, "release");
   if (email.action === "release") {
-    assertEquals(email.reason, "email_pending");
+    assertEquals(email.reason, "no_phone");
+    assertEquals(email.delayMinutes, 0);
     assertEquals(email.channel, "email");
     assertEquals(email.payload, null);
   }
@@ -298,11 +310,12 @@ Deno.test("dry-run logs a redacted API body and does not call Meta", async () =>
   const logged = logs[0] as { event: string; body: TemplatePayload; url: string };
   assertEquals(logged.event, "whatsapp_dry_run");
   assertEquals(logged.url, messagesUrl(env.phoneNumberId));
-  const redacted = redactTemplatePayload(buildTemplatePayload(msg(), "+358401234567")!);
+  const redacted = redactTemplatePayload(chosen(msg(), "+358401234567"));
   assertEquals(logged.body, redacted);
   assertEquals(result.payload, redacted);
   assertEquals(logged.body.to, "+358*******67");
-  assertEquals(bodyParams(logged.body), ["lämmitysvuoro", "la 24.10.2026 klo 16:00–20:00", "24.10.2026 klo 12:00"]);
+  assertEquals(logged.body.template.name, "tyovuoro_kysely");
+  assertEquals(bodyParams(logged.body)[0], "Lämmitys");
   const dumped = JSON.stringify({ logs, payload: result.payload });
   assert(!dumped.includes("+358401234567"));
   assert(!dumped.includes("payload.sig"));
@@ -321,8 +334,11 @@ Deno.test("only an allowlisted staff id is sent, and a row is never posted twice
     });
     return new Response(JSON.stringify({ messages: [{ id: "wamid.ABC" }] }), { status: 200 });
   };
+  // soefix C1/C2: WhatsApp ei käytössä → sähköposti, jos osoite on; muuten no_working_channel
+  const noChannel = await handleClaimedMessage(msg(), settings({ allow_staff_ids: [] }), env, fetchImpl, () => {}, NOW);
+  assertEquals([noChannel.action, noChannel.error], ["fail_no_contact", "no_working_channel"]);
   const blocked = await handleClaimedMessage(
-    msg(),
+    msg({ email: "aino@example.com" }),
     settings({ allow_staff_ids: [] }),
     env,
     fetchImpl,
@@ -333,7 +349,7 @@ Deno.test("only an allowlisted staff id is sent, and a row is never posted twice
   assertEquals(blocked.error, "not_allowlisted");
   assertEquals(calls.length, 0);
 
-  const off = await handleClaimedMessage(msg(), settings({ whatsapp_enabled: false }), env, fetchImpl, () => {}, NOW);
+  const off = await handleClaimedMessage(msg({ email: "aino@example.com" }), settings({ whatsapp_enabled: false }), env, fetchImpl, () => {}, NOW);
   assertEquals(off.error, "whatsapp_disabled");
   assertEquals(calls.length, 0);
 
@@ -345,7 +361,7 @@ Deno.test("only an allowlisted staff id is sent, and a row is never posted twice
   assertEquals(calls.length, 1);
   assertEquals(calls[0].url, "https://graph.facebook.com/v25.0/123456789012345/messages");
   assertEquals(calls[0].authorization, "Bearer super-secret-token");
-  assertEquals(JSON.parse(calls[0].body), buildTemplatePayload(msg(), "+358401234567"));
+  assertEquals(JSON.parse(calls[0].body), chosen(msg(), "+358401234567"));
   const actions = [first.action, second.action].sort();
   assertEquals(actions, ["already_sent", "sent"]);
   const sent = first.action === "sent" ? first : second;
@@ -385,12 +401,13 @@ Deno.test("5xx and 429 retry with backoff, 4xx does not", async () => {
   let calls = 0;
   const failFetch: typeof fetch = async () => {
     calls += 1;
-    return new Response(JSON.stringify({ error: { code: 131026, message: "undeliverable" } }), { status: 400 });
+    return new Response(JSON.stringify({ error: { code: 131009, message: "Parameter value is not valid +358401234567" } }), { status: 400 });
   };
   const failing = msg();
   const failed = await handleClaimedMessage(failing, settings(), env, failFetch, () => {}, NOW);
   assertEquals(failed.action, "fail");
-  assertEquals(failed.error, "131026 undeliverable");
+  // soefix: vain koodi talteen (Metan teksti voi sisältää numeron)
+  assertEquals(failed.error, "wa_131009");
   assertEquals(failing.status, "failed");
   const ignored = await handleClaimedMessage(failing, settings(), env, failFetch, () => {}, NOW);
   assertEquals(ignored.action, "already_sent");
@@ -494,7 +511,7 @@ Deno.test("staff whatsapp opt-in is required in addition to the allowlist", asyn
     return new Response(JSON.stringify({ messages: [{ id: "wamid.NO" }] }), { status: 200 });
   };
   const optedOut = await handleClaimedMessage(
-    msg({ staff_whatsapp_enabled: false }),
+    msg({ staff_whatsapp_enabled: false, email: "aino@example.com" }),
     settings(),
     env,
     fetchImpl,
@@ -505,7 +522,7 @@ Deno.test("staff whatsapp opt-in is required in addition to the allowlist", asyn
   assertEquals(optedOut.action, "release");
   assertEquals(optedOut.error, "staff_whatsapp_disabled");
   assertEquals(optedOut.payload, null);
-  const plan = planMessage(msg({ staff_whatsapp_enabled: false }), settings());
+  const plan = planMessage(msg({ staff_whatsapp_enabled: false, email: "aino@example.com" }), settings());
   assertEquals(plan.action, "release");
   if (plan.action === "release") assertEquals(plan.payload, null);
 });
