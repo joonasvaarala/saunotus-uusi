@@ -40,6 +40,7 @@ type ClaimResponse = {
   messages?: unknown;
   templates?: unknown;
   whatsapp_hours_open?: unknown;
+  email_enabled?: unknown;
 };
 
 export type SenderSummary = {
@@ -102,7 +103,6 @@ export function readTemplateSettings(raw: unknown): TemplateSettings | undefined
     out[key] = {
       name: typeof r.name === "string" ? r.name : undefined,
       approved: r.approved === true,
-      fallback: typeof r.fallback === "string" ? r.fallback : undefined,
     };
   }
   return out;
@@ -142,6 +142,7 @@ export async function deliverQueued(
     allow_staff_ids: allow,
     templates: readTemplateSettings(claim.templates),
     whatsapp_hours_open: claim.whatsapp_hours_open === false ? false : undefined,
+    email_enabled: claim.email_enabled === false ? false : undefined,
   };
   const summary: SenderSummary = {
     ok: true,
@@ -278,7 +279,20 @@ export async function deliverInbound(
         return { send: false, body: null };
       }
       const row = data as Record<string, unknown>;
-      return { send: row.send === true, body: typeof row.body === "string" ? row.body : null };
+      return {
+        send: row.send === true,
+        body: typeof row.body === "string" ? row.body : null,
+        staffId: typeof row.staff_id === "string" ? row.staff_id : null,
+      };
+    },
+    // soefix B9: welcome_sent_at vasta onnistuneesta lähetyksestä (wamid); epäonnistunut → varaus pois
+    async welcomeSent(staffId, wamid) {
+      const { error } = await supa.schema("booking").rpc("shift_staff_welcome_mark_sent", { p_staff: staffId, p_wamid: wamid });
+      if (error) log("whatsapp_inbound_failed", { step: "welcome_sent" });
+    },
+    async welcomeRelease(staffId) {
+      const { error } = await supa.schema("booking").rpc("shift_staff_welcome_release", { p_staff: staffId });
+      if (error) log("whatsapp_inbound_failed", { step: "welcome_release" });
     },
     async storeOutbound(record) {
       const { error } = await supa.rpc("whatsapp_store_outbound", {

@@ -23,7 +23,7 @@ const PAGE_TOKEN = "eyJwIjoiYWFhYWFhYWEtMDAwMC00MDAwIiwibiI6IngifQ.abcdefghijklm
 const ENV: WhatsappEnv = { token: "t", phoneNumberId: "123456", appSecret: "s", verifyToken: "v" };
 
 const TPL: TemplateSettings = {
-  offer: { name: "tyovuoro_kysely", approved: false, fallback: "vuorotarjous" },
+  offer: { name: "tyovuoro_kysely", approved: false },
   round_reminder: { name: "tyovuoro_muistutus", approved: false },
   already_taken: { name: "tyovuoro_jo_mennyt", approved: false },
   day_digest: { name: "tyovuoro_paivan_kooste", approved: false },
@@ -42,10 +42,10 @@ function settings(over: Partial<Settings> = {}): Settings {
   return { sender_enabled: true, whatsapp_enabled: true, whatsapp_dry_run: false, allow_staff_ids: [STAFF], templates: TPL, ...over };
 }
 
-Deno.test("tarjous: varapohja vuorotarjous kunnes tyovuoro_kysely on hyväksytty", () => {
+Deno.test("tarjous: soefix B4 – hyväksymätön tyovuoro_kysely → sähköposti heti, ei vuorotarjous-pohjaa", () => {
   const p1 = planMessage(msg(), settings());
-  assert(p1.action === "send" && p1.payload.type === "template");
-  assertEquals(p1.payload.template.name, "vuorotarjous");
+  assert(p1.action === "release");
+  assertEquals([p1.reason, p1.channel, p1.to, p1.delayMinutes], ["template_not_approved", "email", "testi@example.test", 0]);
   const approved = { ...TPL, offer: { ...TPL.offer, approved: true } };
   const p2 = planMessage(msg({ kind: "reminder" }), settings({ templates: approved }));
   assert(p2.action === "send" && p2.payload.type === "template");
@@ -60,10 +60,9 @@ Deno.test("tarjous: varapohja vuorotarjous kunnes tyovuoro_kysely on hyväksytty
   assertEquals(button.type === "button" ? button.parameters[0].text : "", "payload.sig");
 });
 
-Deno.test("ilman pohja-asetuksia vanha käytös säilyy", () => {
+Deno.test("ilman pohja-asetuksia: tarjous ei koskaan vanhalla pohjalla (soefix B4), muut lajit vanha käytös", () => {
   const p = planMessage(msg(), settings({ templates: undefined }));
-  assert(p.action === "send" && p.payload.type === "template");
-  assertEquals(p.payload.template.name, "vuorotarjous");
+  assert(p.action === "release" && p.channel === "email" && p.reason === "template_not_approved");
   assertEquals(resolveTemplate(msg({ kind: "filled" }), undefined), { kind: "legacy" });
 });
 
@@ -73,7 +72,7 @@ Deno.test("hyväksymätön uusi pohja: 24 h ikkunassa vapaamuotoinen, muuten sä
   assert(closed.action === "release");
   assertEquals([closed.reason, closed.channel], ["template_not_approved", "email"]);
   const noEmail = planMessage({ ...reminder, email: null }, settings());
-  assert(noEmail.action === "release" && noEmail.channel === "whatsapp");
+  assert(noEmail.action === "fail_no_contact" && noEmail.error === "no_working_channel");
   const open = planMessage({ ...reminder, session_open: true }, settings());
   assert(open.action === "send" && open.payload.type === "text");
   assert(open.payload.type === "text" && open.payload.text.body.includes("–Tapio"));
@@ -111,7 +110,8 @@ Deno.test("koosteviesti ei koskaan lähde vanhalla joonas_tyhja_vuoro-pohjalla; 
 Deno.test("WhatsApp-ikkunan ulkopuolella ei lähetetä", async () => {
   let called = 0;
   const fetchImpl = (() => { called += 1; return Promise.resolve(new Response("{}")); }) as typeof fetch;
-  const res = await handleClaimedMessage(msg(), settings({ whatsapp_hours_open: false }), ENV, fetchImpl, () => {}, NOW);
+  const approved = { ...TPL, offer: { ...TPL.offer, approved: true } };
+  const res = await handleClaimedMessage(msg(), settings({ whatsapp_hours_open: false, templates: approved }), ENV, fetchImpl, () => {}, NOW);
   assertEquals([res.action, res.error, called], ["release", "quiet_hours", 0]);
 });
 
@@ -130,9 +130,9 @@ Deno.test("vapaamuotoinen viesti lähtee postSessionilla", async () => {
 Deno.test("pohja-asetukset luetaan claimista turvallisesti", () => {
   assertEquals(readTemplateSettings(null), undefined);
   const t = readTemplateSettings({ offer: { name: "tyovuoro_kysely", approved: "true", fallback: "vuorotarjous" } });
-  assertEquals(t?.offer, { name: "tyovuoro_kysely", approved: false, fallback: "vuorotarjous" });
-  const bad = resolveTemplate(msg(), { offer: { name: "Bad Name!", approved: true, fallback: "vuorotarjous" } });
-  assert(bad.kind === "template" && bad.name === "vuorotarjous");
+  assertEquals(t?.offer, { name: "tyovuoro_kysely", approved: false });
+  const bad = resolveTemplate(msg(), { offer: { name: "Bad Name!", approved: true } });
+  assertEquals(bad, { kind: "unapproved" });
 });
 
 Deno.test("META-pohjat on kirjattu docs/whatsapp-templates.json:iin (UTILITY, fi, ei emojeja, muuttuja ei alussa/lopussa)", () => {
@@ -180,9 +180,10 @@ Deno.test("tervetulo: asetus pois / jo lähetetty → ei viestiä; tuntematon nu
   const unknown = inboundDeps({ ...STORED, staffId: null }, { send: true, body: "x" });
   await processInboundMessage(INBOUND, unknown.deps);
   assertEquals([unknown.sent.length, unknown.calls()], [0, 0]);
-  const dup = inboundDeps({ ...STORED, duplicate: true }, { send: true, body: "x" });
+  // soefix B9: Metan uudelleentoimitus kysyy tietokannalta (se päättää: already_sent → send=false)
+  const dup = inboundDeps({ ...STORED, duplicate: true }, { send: false, body: null });
   await processInboundMessage(INBOUND, dup.deps);
-  assertEquals([dup.sent.length, dup.calls()], [0, 0]);
+  assertEquals([dup.sent.length, dup.calls()], [0, 1]);
 });
 
 // ---------------- oma sivu

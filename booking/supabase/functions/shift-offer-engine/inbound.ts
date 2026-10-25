@@ -53,9 +53,12 @@ export type InboundDeps = {
   // booking_153: tervetuloviesti henkilökunnan ensimmäiseen viestiin (booking.shift_staff_welcome).
   // Tietokanta päättää: asetus, vain kerran, vain 24 h ikkunassa, ei tuntemattomalle eikä bottikanavalle.
   welcome?: (messageId: string) => Promise<WelcomeResult>;
+  // soefix B9: tervetuloviesti kirjataan lähetetyksi vasta wamidilla; epäonnistunut lähetys vapauttaa varauksen.
+  welcomeSent?: (staffId: string, wamid: string) => Promise<void>;
+  welcomeRelease?: (staffId: string) => Promise<void>;
 };
 
-export type WelcomeResult = { send: boolean; body: string | null };
+export type WelcomeResult = { send: boolean; body: string | null; staffId?: string | null };
 
 const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 
@@ -164,15 +167,30 @@ export async function processInboundMessage(message: ParsedInbound, deps: Inboun
     type: message.type,
   });
   if (stored.duplicate && stored.handled) return;
-  if (!stored.duplicate && stored.staffId && deps.welcome) {
+  // soefix B9: myös Metan uudelleentoimitus (duplicate) saa yrittää – tietokanta päättää (already_sent / claimed / not_first).
+  if (stored.staffId && deps.welcome) {
     const welcome = await deps.welcome(stored.id).catch(() => ({ send: false, body: null } as WelcomeResult));
     const text = welcome.send ? welcome.body?.trim() ?? "" : "";
+    const welcomeStaff = welcome.staffId ?? stored.staffId;
+    const release = () => deps.welcomeRelease ? deps.welcomeRelease(welcomeStaff).catch(() => undefined) : Promise.resolve();
     if (text && stored.replyTo) {
-      const sent = await deps.send(stored.replyTo, text, []);
-      if (sent.ok) {
-        await deps.storeOutbound({ staffId: stored.staffId, phone: stored.replyTo, text, wamid: sent.wamid, shiftId: null });
+      let sent: { ok: boolean; wamid: string | null };
+      try {
+        sent = await deps.send(stored.replyTo, text, []);
+      } catch (e) {
+        await release();
+        throw e;
       }
-      deps.log("whatsapp_welcome", { sent: sent.ok });
+      const ok = sent.ok && !!sent.wamid;
+      if (ok) {
+        if (deps.welcomeSent) await deps.welcomeSent(welcomeStaff, sent.wamid!);
+        await deps.storeOutbound({ staffId: stored.staffId, phone: stored.replyTo, text, wamid: sent.wamid, shiftId: null });
+      } else {
+        await release();
+      }
+      deps.log("whatsapp_welcome", { sent: ok });
+    } else if (welcome.send) {
+      await release();
     }
   }
   if (!stored.inboundEnabled || !stored.staffId) return;
