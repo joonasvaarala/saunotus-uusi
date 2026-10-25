@@ -210,15 +210,25 @@ Deno.test("patch ilman etagia ei lähetä If-Matchia", async () => {
   assertEquals(seen[0].ifMatch, null);
 });
 
-Deno.test("412 on conflict eikä uutta yritystä samassa pyynnössä", async () => {
+Deno.test("412 ilman peilitilaa (vanha claim): GET, ei uutta kirjoitusta, conflict", async () => {
   const { fetchImpl, seen } = scriptedFetch([
     () => jsonResponse(412, { error: { errors: [{ reason: "conditionNotMet" }] } }),
+    () =>
+      jsonResponse(200, {
+        id: INSTANCE,
+        status: "confirmed",
+        summary: "Joku muu",
+        etag: '"etag-2"',
+        updated: "2026-10-22T01:30:00.000Z",
+        start: { dateTime: "2026-10-22T05:00:00Z" },
+        end: { dateTime: "2026-10-22T08:00:00Z" },
+      }),
   ]);
   const rec = recordingDb([item()], enabled);
   const out = await pushWith(fetchImpl, rec.db);
-  assertEquals(seen.length, 1);
+  assertEquals(seen.map((s) => s.method), ["PATCH", "GET"]);
   assertEquals(out.conflicts, 1);
-  assertEquals(rec.fails, [{ id: 11, error: "google_http_412", blocked: false, conflict: true, missing: false }]);
+  assertEquals(rec.fails, [{ id: 11, error: "google_http_412_human_edit", blocked: false, conflict: true, missing: false }]);
   assertEquals(rec.completes, []);
 });
 

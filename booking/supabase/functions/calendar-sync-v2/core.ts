@@ -63,6 +63,16 @@ export interface OutboxItem {
   reactivate: boolean;
   recurring: boolean;
   attempt: number;
+  /** Peilitila (mitä viimeksi luimme tai kirjoitimme), shift_outbox_claim 20261025160000 alkaen. Puuttuu vanhalta claimilta. */
+  mirror?: Mirror | null;
+}
+
+export interface Mirror {
+  title: string | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  status: string | null;
+  updated: string | null;
 }
 
 export interface PushPlanItem {
@@ -80,7 +90,15 @@ export interface WriteOutcome {
   reason: string;
 }
 
+export interface ReadOutcome {
+  status: number;
+  event: GEvent | null;
+  reason: string;
+}
+
 export interface GoogleWrites {
+  /** Yksittäisen tapahtuman/instanssin tuore tila ja oma etag (vain 412-polku ja toistuvien instanssien esitarkistus). */
+  get(calendarId: string, eventId: string): Promise<ReadOutcome>;
   insert(calendarId: string, body: Record<string, unknown>): Promise<WriteOutcome>;
   patch(calendarId: string, eventId: string, body: Record<string, unknown>, etag: string | null): Promise<WriteOutcome>;
   delete(calendarId: string, eventId: string, etag: string | null): Promise<WriteOutcome>;
@@ -98,7 +116,7 @@ export interface TokenSource {
 export interface PushDb {
   config(): Promise<{ db_first_enabled?: boolean; push_enabled?: boolean } | null>;
   claim(sourceId: string, dryRun: boolean): Promise<OutboxItem[]>;
-  complete(id: number, result: "created" | "patched" | "deleted" | "gone", updated: string | null, etag: string | null): Promise<void>;
+  complete(id: number, result: "created" | "patched" | "deleted" | "gone" | "converged", updated: string | null, etag: string | null): Promise<void>;
   fail(id: number, error: string, blocked?: boolean, conflict?: boolean, missing?: boolean): Promise<void>;
 }
 
@@ -118,6 +136,7 @@ export interface PushResult {
   patched: number;
   deleted: number;
   gone: number;
+  converged: number;
   blocked: number;
   conflicts: number;
   missing: number;
@@ -342,6 +361,7 @@ interface ItemCount {
   patched?: number;
   deleted?: number;
   gone?: number;
+  converged?: number;
   blocked?: number;
   conflicts?: number;
   missing?: number;
@@ -369,6 +389,157 @@ async function settleHttp(item: OutboxItem, res: WriteOutcome, db: PushDb, kind:
   return { failed: 1 };
 }
 
+// ---------- 412 / etag ----------
+// Toistuvan sarjan muuttamattomat instanssit jakavat Googlessa sarjan etagin (tuotanto 25.10.2026: 53 instanssia, 1 etag),
+// joten tallennettu etag ei ole instanssin oma: jokainen instanssi-PATCH vaihtaa sisarten etagin ja ne saavat 412:n.
+// Siksi toistuvalle instanssille (ja kun etagia ei ole, esim. 412:n jälkeen tyhjennetty) haetaan ensin instanssin tuore tila
+// ja etag (GET), verrataan peilitilaan ja kirjoitetaan tällä tuoreella etagilla. 412 kirjoituksessa -> GET ja:
+//   * jo tavoitetilassa -> done (converged) tuoreella etagilla, ei kirjoitusta
+//   * ihmisen muutos (kentät eroavat sekä peilistä että tavoitteesta) -> nykyinen conflict-polku (shift_outbox_fail p_conflict)
+//   * muuten (vain etag vaihtui, esim. sisarinstanssin PATCH) -> yksi uusi yritys tuoreella etagilla
+
+export type LiveVerdict = "at_target" | "human_edit" | "clean";
+
+/** Sama kuin public._shift_title_norm: tyhjä / '-' -> '-', muuten btrim ja '&' välilyönneillä. */
+export function titleNorm(t: string | null | undefined): string {
+  const b = (t ?? "").replace(/^\s+|\s+$/g, "");
+  if (b === "" || b === "-") return "-";
+  return b.replace(/\s*&\s*/g, " & ");
+}
+
+function helsinkiMidnight(date: string): number | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+  if (!m) return null;
+  const guess = Date.UTC(+m[1], +m[2] - 1, +m[3]);
+  // Europe/Helsinki-poikkeama tuolla hetkellä (UTC+2 / UTC+3)
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Europe/Helsinki",
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).formatToParts(new Date(guess));
+  const get = (k: string) => Number(parts.find((p) => p.type === k)?.value);
+  const asUtc = Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"));
+  return guess - (asUtc - guess);
+}
+
+export function instantOf(v: { dateTime?: string; date?: string } | string | null | undefined): number | null {
+  if (v == null) return null;
+  if (typeof v === "string") {
+    const t = Date.parse(v);
+    return Number.isNaN(t) ? null : t;
+  }
+  if (v.dateTime) {
+    const t = Date.parse(v.dateTime);
+    return Number.isNaN(t) ? null : t;
+  }
+  if (v.date) return helsinkiMidnight(v.date);
+  return null;
+}
+
+function liveActive(ev: GEvent): boolean {
+  return ev.status !== "cancelled";
+}
+
+/** Tuore tapahtuma vs. tavoite (item) ja peili (item.mirror). Ilman peiliä ihmisen muutosta ei voi erottaa -> human_edit (ei kirjoitusta). */
+export function classifyLive(item: OutboxItem, ev: GEvent): LiveVerdict {
+  const live = {
+    active: liveActive(ev),
+    title: titleNorm(ev.summary),
+    start: instantOf(ev.start),
+    end: instantOf(ev.end),
+  };
+  if (item.op === "delete") {
+    if (!live.active) return "at_target";
+  } else if (
+    live.active && live.title === titleNorm(item.summary) &&
+    live.start === instantOf(item.starts_at) && live.end === instantOf(item.ends_at)
+  ) {
+    return "at_target";
+  }
+  const m = item.mirror;
+  if (!m) return "human_edit";
+  const mirrorActive = (m.status ?? "active") !== "cancelled";
+  if (live.active !== mirrorActive) return "human_edit";
+  if (!live.active) return "clean"; // peruttu kuten peilissä (reactivate-polku): sisältökentät eivät ratkaise
+  if (live.title !== titleNorm(m.title)) return "human_edit";
+  if (live.start !== instantOf(m.starts_at) || live.end !== instantOf(m.ends_at)) return "human_edit";
+  return "clean";
+}
+
+/** Esitarkistus ennen PATCH/DELETEä: toistuva instanssi (jaettu sarjan etag) tai etag puuttuu. Vaatii peilin (uusi claim). */
+export function needsPrecheck(item: OutboxItem): boolean {
+  return item.mirror != null && (item.recurring === true || etagOrNull(item) === null);
+}
+
+type Writer = (etag: string | null) => Promise<WriteOutcome>;
+
+async function settleLive(
+  item: OutboxItem,
+  db: PushDb,
+  live: ReadOutcome,
+  kind: "patch" | "delete",
+  reason: string,
+): Promise<{ done: ItemCount } | { etag: string | null }> {
+  if (!okStatus(live.status) || !live.event) {
+    return { done: await settleHttp(item, { status: live.status, updated: null, etag: null, reason: live.reason }, db, kind) };
+  }
+  const verdict = classifyLive(item, live.event);
+  if (verdict === "at_target") {
+    const ev = live.event;
+    if (kind === "delete") {
+      await db.complete(item.id, "gone", ev.updated ?? null, ev.etag ?? null);
+      return { done: { gone: 1 } };
+    }
+    await db.complete(item.id, "converged", ev.updated ?? null, ev.etag ?? null);
+    return { done: { converged: 1 } };
+  }
+  if (verdict === "human_edit") {
+    await db.fail(item.id, reason, false, true, false);
+    return { done: { conflicts: 1 } };
+  }
+  return { etag: live.event.etag ?? null };
+}
+
+async function finishWrite(item: OutboxItem, res: WriteOutcome, db: PushDb, kind: "patch" | "delete"): Promise<ItemCount> {
+  if (okStatus(res.status)) {
+    if (kind === "delete") {
+      await db.complete(item.id, "deleted", res.updated, res.etag);
+      return { deleted: 1 };
+    }
+    await db.complete(item.id, "patched", res.updated, res.etag);
+    return { patched: 1 };
+  }
+  return await settleHttp(item, res, db, kind);
+}
+
+/** PATCH/DELETE: (esitarkistus) -> kirjoitus -> 412: GET + luokittelu + korkeintaan yksi uusi yritys tuoreella etagilla. */
+async function conditionalWrite(
+  item: OutboxItem,
+  google: GoogleWrites,
+  db: PushDb,
+  kind: "patch" | "delete",
+  write: Writer,
+  initialEtag: string | null,
+): Promise<ItemCount> {
+  let etag = initialEtag;
+  if (needsPrecheck(item)) {
+    const pre = await settleLive(item, db, await google.get(item.google_calendar_id, item.event_id), kind, "google_human_edit");
+    if ("done" in pre) return pre.done;
+    etag = pre.etag;
+  }
+  const res = await write(etag);
+  if (res.status !== 412) return await finishWrite(item, res, db, kind);
+
+  const after = await settleLive(item, db, await google.get(item.google_calendar_id, item.event_id), kind, "google_http_412_human_edit");
+  if ("done" in after) return after.done;
+  const retry = await write(after.etag);
+  return await finishWrite(item, retry, db, kind); // toinen 412 -> conflict-polku (shift_outbox_fail), ei silmukkaa
+}
+
 async function applyItem(item: OutboxItem, google: GoogleWrites, db: PushDb): Promise<ItemCount> {
   try {
     if (!item.google_calendar_id || !item.event_id) {
@@ -382,30 +553,22 @@ async function applyItem(item: OutboxItem, google: GoogleWrites, db: PushDb): Pr
         return { created: 1 };
       }
       if (res.status === 409) {
-        const patched = await google.patch(item.google_calendar_id, item.event_id, insertPatchBody(item), etagOrNull(item));
-        if (okStatus(patched.status)) {
-          await db.complete(item.id, "patched", patched.updated, patched.etag);
-          return { patched: 1 };
-        }
-        return await settleHttp(item, patched, db, "patch");
+        // Tapahtuma on jo olemassa (aiempi oma insert ilman kuittausta). Ei esitarkistusta: insertillä ei ole peiliä.
+        // 412 (vain jos etag oli asetettu) käsitellään kuten patchissa.
+        const body = insertPatchBody(item);
+        const w: Writer = (etag) => google.patch(item.google_calendar_id, item.event_id, body, etag);
+        return await conditionalWrite({ ...item, mirror: null }, google, db, "patch", w, etagOrNull(item));
       }
       return await settleHttp(item, res, db, "insert");
     }
     if (item.op === "patch") {
-      const res = await google.patch(item.google_calendar_id, item.event_id, patchBody(item), etagOrNull(item));
-      if (okStatus(res.status)) {
-        await db.complete(item.id, "patched", res.updated, res.etag);
-        return { patched: 1 };
-      }
-      return await settleHttp(item, res, db, "patch");
+      const body = patchBody(item);
+      const w: Writer = (etag) => google.patch(item.google_calendar_id, item.event_id, body, etag);
+      return await conditionalWrite(item, google, db, "patch", w, etagOrNull(item));
     }
     if (item.op === "delete") {
-      const res = await google.delete(item.google_calendar_id, item.event_id, etagOrNull(item));
-      if (okStatus(res.status)) {
-        await db.complete(item.id, "deleted", res.updated, res.etag);
-        return { deleted: 1 };
-      }
-      return await settleHttp(item, res, db, "delete");
+      const w: Writer = (etag) => google.delete(item.google_calendar_id, item.event_id, etag);
+      return await conditionalWrite(item, google, db, "delete", w, etagOrNull(item));
     }
     await db.fail(item.id, "unknown_op");
     return { failed: 1 };
@@ -441,6 +604,7 @@ export async function runPush(opts: {
     patched: 0,
     deleted: 0,
     gone: 0,
+    converged: 0,
     blocked: 0,
     conflicts: 0,
     missing: 0,
@@ -456,6 +620,7 @@ export async function runPush(opts: {
     out.patched += c.patched ?? 0;
     out.deleted += c.deleted ?? 0;
     out.gone += c.gone ?? 0;
+    out.converged += c.converged ?? 0;
     out.blocked += c.blocked ?? 0;
     out.conflicts += c.conflicts ?? 0;
     out.missing += c.missing ?? 0;
@@ -562,6 +727,37 @@ async function gget(
   }
 }
 
+/** Yksittäisen tapahtuman GET. 404/410/403 palautetaan tilana (ei poikkeusta), 429/5xx/rate limit uusitaan kuten gget. */
+async function gread(
+  fetchImpl: typeof fetch,
+  tokens: TokenSource,
+  sleepFn: (ms: number) => Promise<void>,
+  url: URL,
+): Promise<ReadOutcome> {
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetchImpl(url, { headers: { authorization: `Bearer ${await tokens.token()}` } });
+    const parsed = await readJson(res);
+    if (res.ok) {
+      const ev = parsed.json as GEvent | null;
+      return { status: res.status, event: ev && typeof ev === "object" ? slim(ev) : null, reason: "" };
+    }
+    const reason = reasonOf(parsed.json);
+    if (res.status === 401 && attempt === 0) {
+      tokens.invalidate?.();
+      continue;
+    }
+    if (res.status === 404 || res.status === 410) return { status: res.status, event: null, reason };
+    const rateLimited = res.status === 403 && (reason === "rateLimitExceeded" || reason === "userRateLimitExceeded");
+    const retryable = res.status === 429 || res.status >= 500 || rateLimited;
+    if (retryable && attempt < 4) {
+      await sleepFn(Math.min(16000, 500 * 2 ** attempt) + Math.floor(Math.random() * 250));
+      continue;
+    }
+    if (res.status === 403 && !rateLimited) return { status: 403, event: null, reason };
+    throw new HttpError(res.status, reason);
+  }
+}
+
 export function createGoogle(
   fetchImpl: typeof fetch,
   tokens: TokenSource,
@@ -582,6 +778,9 @@ export function createGoogle(
         }
       }
       throw new Error("pagination_limit_exceeded");
+    },
+    get(calendarId, eventId) {
+      return gread(fetchImpl, tokens, sleepFn, eventUrl(calendarId, eventId));
     },
     insert(calendarId, body) {
       return gwrite(fetchImpl, tokens, sleepFn, "POST", eventUrl(calendarId), body, null);
