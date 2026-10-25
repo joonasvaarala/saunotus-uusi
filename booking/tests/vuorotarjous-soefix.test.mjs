@@ -72,7 +72,12 @@ test('rollback: md5-vahti ja palautus tuotannon määrittelyihin', () => {
 
 test('SQL-testi: kirjautumismalli, SQLSTATE-tarkistukset, purkaa itsensä', () => {
   const t = rd(SQLT);
-  assert.ok(t.includes('test.login'));
+  // itsenäinen: ei test-skeemaa, ei insert vault-näkymään (tuotannossa ei kirjoitettava), olemassa oleva avain tai vault.create_secret
+  assert.ok(t.includes("set_config('request.jwt.claims'") && t.includes('set local role authenticated'));
+  assert.ok(!/\btest\.[a-z_]+\(/.test(code(t)));
+  assert.ok(!/insert\s+into\s+vault\./i.test(code(t)));
+  assert.ok(t.includes('vault.create_secret') && t.includes('psql'));
+  assert.ok(MIGF[0].startsWith('20261025153700_'));
   assert.ok(t.includes("'42501'"));
   assert.match(t, /errcode\s*=\s*'TRBK0'/);
 });

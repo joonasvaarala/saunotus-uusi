@@ -1,4 +1,4 @@
--- ROLLBACK 20261025200000_soefix_engine_fixes.sql: palauttaa tuotannon määrittelyt tavu tavulta (pg_get_functiondef, luettu SELECTillä 25.10.2026),
+-- ROLLBACK 20261025153700_soefix_engine_fixes.sql: palauttaa tuotannon määrittelyt tavu tavulta (pg_get_functiondef, luettu SELECTillä 25.10.2026),
 -- poistaa uudet funktiot, triggerin, sarakkeet, taulun booking.shift_offer_skips, palauttaa wa_templates.offer.fallbackin ja
 -- tervetulotekstin version 1 (versio 2 poistetaan). Moottorin kytkimiin ei kosketa. Ajetaan vain, jos migraatio on ajettu.
 -- HUOM: poistaa uusien sarakkeiden arvot (deadline_extended_at, bot_acked_at, resent_message_id, bot_email_outbox_id, welcome_claimed_at,

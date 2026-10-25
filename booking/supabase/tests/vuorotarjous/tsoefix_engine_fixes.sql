@@ -1,8 +1,15 @@
--- tsoefix: vuorotarjousmoottorin korjaukset (migraatio *_soefix_engine_fixes.sql): B2, B4/C1, C2, B3, B7/B8, B9, T1.
+-- tsoefix: vuorotarjousmoottorin korjaukset (migraatio 20261025153700_soefix_engine_fixes.sql): B2, B4/C1, C2, B3, B7/B8, B9, T1.
 -- Puhdas SQL, kaikki data feikkiä (@example.test), mitään ei lähetetä (ei WhatsAppia, ei sähköpostia: email_outbox-rivit vain
--- tarkistetaan ja kumotaan). Ajetaan paikalliseen kantaan, jossa on tuotannon määrittelyt:
---   fixtures/10_test_helpers.sql, tests/vuorotarjous/tsoefix_prep_local.sql, migraatio. Yksi DO-lohko; lopun poikkeus kumoaa kaiken
---   (myös testin ajaksi päälle laitetut sender_enabled/whatsapp_enabled-kytkimet, jotka ovat vain tässä transaktiossa).
+-- tarkistetaan ja kumotaan). Itsenäinen: ei tarvitse test-skeemaa (fixtures/10_test_helpers.sql) – kirjautuminen on
+-- pg_temp.as_auth-apufunktiossa (request.jwt.claims + set local role authenticated). Yksi DO-lohko; lopun poikkeus
+-- (SQLSTATE TRBK0, viesti 'TESTRESULT pass=N fail=M :: ...') kumoaa kaiken, myös testin ajaksi päälle laitetut
+-- sender_enabled/whatsapp_enabled-kytkimet ja mahdollisesti luodun vault-avaimen (vain tässä transaktiossa).
+--
+-- AJO (tuotanto tai paikallinen; postgres-roolina, yhtenä transaktiona, migraation jälkeen):
+--   psql "$DB_URL" -X -v ON_ERROR_STOP=1 -1 -f booking/supabase/tests/vuorotarjous/tsoefix_engine_fixes.sql
+-- Odotettu tulos: ERROR:  TESTRESULT pass=52 fail=0 :: -   (SQLSTATE TRBK0; psql:n exit-koodi on 3 – se on tarkoitus,
+-- virhe kumoaa transaktion). Mikä tahansa muu virhe tai fail>0 = testi ei mennyt läpi; myös silloin kaikki kumoutuu.
+-- Paikallinen kanta tarvitsee lisäksi ensin tests/vuorotarjous/tsoefix_prep_local.sql (tuotannon tervetulotekstit ja asetukset).
 set local lock_timeout = '3s';
 set local statement_timeout = '120s';
 create temp table tsoefix_r(ok boolean, label text) on commit drop;
@@ -13,13 +20,19 @@ begin execute p_sql; return 'ok'; exception when others then return sqlstate; en
 create function pg_temp.as_auth(p_user uuid, p_sql text) returns text language plpgsql as $$
 declare v text := 'ok';
 begin
-  perform test.login(p_user);
+  perform set_config('request.jwt.claims', json_build_object('sub', p_user, 'role', 'authenticated')::text, true);
+  set local role authenticated;
   begin execute p_sql; exception when others then v := sqlstate; end;
-  perform test.logout();
+  reset role;
+  perform set_config('request.jwt.claims', '', true);
   return v;
 end $$;
-insert into vault.decrypted_secrets (name, decrypted_secret) values ('shift_offer_token_secret', 'test-key-soefix')
-on conflict (name) do update set decrypted_secret = excluded.decrypted_secret;
+-- tokenien allekirjoitusavain: käytetään olemassa olevaa (tuotanto); puuttuessa luodaan vain tämän transaktion ajaksi
+do $v$ begin
+  if not exists (select 1 from vault.secrets where name = 'shift_offer_token_secret') then
+    perform vault.create_secret('test-key-soefix', 'shift_offer_token_secret', 'tsoefix (kumoutuu)');
+  end if;
+end $v$;
 do $t$
 declare
   CS uuid; H1 uuid; H2 uuid; H3 uuid; H4 uuid; JO uuid; TT uuid; PA uuid; PP uuid;
@@ -263,7 +276,9 @@ begin
                      and booking.shift_staff_welcome(v_wm)->>'reason' = 'already_sent', 'B9f: lähetetty kirjattu, ei uudelleen');
 
   -- ---------------- oikeudet (oikea auth/staff-malli) ja SQLSTATE
-  v_adm := test.mk_staff('adm.soefix@example.test', 'admin');
+  -- hallinnan käyttäjä: auth.users + booking.staff (sama kuin fixtures test.mk_staff, inline – ei test-skeemaa)
+  insert into auth.users (id, email) values (gen_random_uuid(), 'adm.soefix@example.test') returning id into v_adm;
+  insert into booking.staff (user_id, email, name, role) values (v_adm, 'adm.soefix@example.test', 'adm.soefix@example.test', 'admin');
   perform pg_temp.ck(pg_temp.as_auth(v_adm, 'select public.shift_offer_bot_ack(array[1]::bigint[])') = '42501'
                      and pg_temp.as_auth(v_adm, 'select booking.shift_offer_report_issues()') = '42501'
                      and pg_temp.as_auth(v_adm, format('select booking.shift_staff_welcome_mark_sent(%L, %L)', H1, 'x')) = '42501'

@@ -1,4 +1,4 @@
--- soefix (20261025200000, VÄLIAIKAINEN aikaleima; Bottiavustus antaa todellisen version ajon yhteydessä): vuorotarjousmoottorin korjaukset
+-- soefix (20261025153700 = tuotannon versio, Bottiavustus ajoi 25.10.2026): vuorotarjousmoottorin korjaukset
 -- (/workspace/soe_review/koodari_fixes.md: B2, B4, C1, C2, B3, B7+B8, B9, T1 osin). EI B6:ta (Joonas 25.10. 16:59: alkuperäiset aikataulut;
 -- hoitajavuoron 6 h lasketaan edelleen varoituksen luonnista). EI bot-gateway-edgeä. Moottori pysyy POIS: tämä ei koske
 -- shift_offer_engine_settings-lippuihin (sender_enabled, whatsapp_enabled, whatsapp_dry_run, whatsapp_allow_staff_ids, dry_run,
@@ -67,7 +67,7 @@
 --     booking.shift_staff_welcome_mark_sent(uuid,text) 5a5bdaa5020efbc5b7a5f54587fd41b4
 --     booking.shift_staff_welcome_release(uuid) 836d7590612932497a3571875d8a5ea8
 --     booking.shift_offer_report_issues(timestamptz) edc1f3bda7fcd6c40e7ed9767a0c895a
--- Rollback: rollbacks/20261025200000_soefix_engine_fixes_ROLLBACK.sql. Testi: tests/vuorotarjous/tsoefix_engine_fixes.sql (BEGIN … ROLLBACK).
+-- Rollback: rollbacks/20261025153700_soefix_engine_fixes_ROLLBACK.sql. Testi: tests/vuorotarjous/tsoefix_engine_fixes.sql (BEGIN … ROLLBACK).
 -- Ajojärjestys: (moottori pois) tämä migraatio -> shift-offer-engine deploy (sama PR) -> moottori pysyy pois, kunnes Joonas päättää.
 set local lock_timeout = '5s';
 
