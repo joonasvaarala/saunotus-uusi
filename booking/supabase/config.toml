@@ -60,3 +60,9 @@ verify_jwt = false
 # (svc_gift_cards_johku_upsert). service_role-avainta ei anneta palvelimelle.
 [functions.johku-sync]
 verify_jwt = false
+
+# Oton botin yhdyskäytävä (koodari_otto.md §1, migraatiot 20261025145539 + 20261025151402). Tunnistus: otsake x-bot-key,
+# jonka sha256-tiiviste tarkistetaan tietokannassa (botgw.bot_clients). Ei JWT:tä. Kytkin BOTGW_DISABLED=1 -> 503.
+# Ainoat RPC:t: public.botgw_call ja public.botgw_log_failure (vain service_role). Ei deployata tästä haarasta.
+[functions.bot-gateway]
+verify_jwt = false
