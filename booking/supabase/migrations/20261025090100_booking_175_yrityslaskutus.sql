@@ -1,6 +1,6 @@
 -- booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF), verkkokaupan PDF-lasku automaattisesti sähköpostiin, verkkolasku luonnokseksi
 --   (automaattinen jonotus asetuksen invoice_einvoice_auto_send takana, oletus pois), viitenumeron etuliite 7310.
--- Omistajan päätös (Joonas, 25.10.2026). Versio on väliaikainen (tuotannon versio kirjataan ajossa). Ei public-skeemaa. Hinnat, ALV, slugit ennallaan.
+-- Omistajan päätös (Joonas, 25.10.2026). Ajettu tuotantoon versiona 20261025090100. Ei public-skeemaa. Hinnat, ALV, slugit ennallaan.
 -- 1) _clean_company: company.invoice_method = 'einvoice' | 'pdf' (verkkokauppa). einvoice → OVT + välittäjä pakollisia (kuten ennen require_einvoice);
 --    pdf → OVT-tiedot jätetään pois. Ilman invoice_methodia: require_einvoice = true → einvoice (vanha kauppa välimuistissa); muuten ennallaan
 --    (hallinnan kutsujat admin_create_booking / _admin_create_legs / admin_create_customer: OVT valinnainen, laskutustapaa ei kirjata).
@@ -54,7 +54,7 @@
 --     email_outbox_claim_base_132 0b10986533285645d8592449a90a1e0c
 --     email_outbox_claim_base_146 9c63ce8c8b6f46347692859a117d110d
 --     email_outbox_mark 2ba0222fdfee71942fb09053bd7ea803
--- Rollback: rollbacks/20261025070000_booking_175_ROLLBACK.sql. Testi: tests/invoices/t175_yrityslaskutus.sql (BEGIN … ROLLBACK).
+-- Rollback: rollbacks/20261025090100_booking_175_ROLLBACK.sql. Testi: tests/invoices/t175_yrityslaskutus.sql (BEGIN … ROLLBACK).
 set local lock_timeout = '5s';
 
 do $g$
