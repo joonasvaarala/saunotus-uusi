@@ -54,7 +54,7 @@ test('logiikka: normLinkInfo hyväksyy vain ok-vastauksen tunnetulla tilalla; li
   const n = normLinkInfo(OPEN);
   assert.equal(n.status, 'open'); assert.equal(n.amount, 4); assert.equal(n.order_no, 15655); assert.equal(n.items.length, 2); assert.equal(n.items[0].start, '17:00');
   assert.equal(normLinkInfo({ ...OPEN, items: [{ name: 'x', date: '13.11.2026', start: '5pm' }] }).items[0].date, null, 'vain YYYY-MM-DD / HH:MI kelpaa');
-  assert.deepEqual(linkInfoView(null), { pay: true, msgKey: null, amountKey: null, showSummary: false, validKey: null }, 'RPC puuttuu → kuten ennen');
+  assert.deepEqual(linkInfoView(null), { pay: true, msgKey: null, amountKey: null, showSummary: false, validKey: null, retryKey: null }, 'RPC puuttuu → kuten ennen');
   assert.equal(linkInfoView(n).pay, true); assert.equal(linkInfoView(n).validKey, 'sum.valid');
   const cases = [['paid', 'link_paid', 'info.paid', 'sum.paid'], ['paid', 'order_paid', 'info.order_paid', 'sum.link'], ['expired', 'link_expired', 'info.expired', 'sum.link'],
     ['expired', 'payment_cancelled', 'info.cancelled'], ['expired', 'payment_not_pending', 'info.expired'], ['replaced', 'replaced', 'info.replaced'], ['replaced', 'link_stale', 'info.stale'],

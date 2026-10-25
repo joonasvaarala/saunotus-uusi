@@ -66,6 +66,8 @@ export function payLinkView({ L, token, api, loadInfo = null, phone = '', phoneT
     if (v.pay) {
       lead.textContent = tx('leadOpen');
       if (sum) lead.before(sum);
+      // booking_178: edellinen yritys peruttiin / keskeytyi → linkki on yhä voimassa, kerrotaan ettei veloitettu
+      if (v.retryKey) lead.before(h('p', { class: 'bk-note pl-retry', role: 'status', 'data-testid': 'pl-retry', 'data-code': info.last_attempt, text: tx(v.retryKey) }));
       return;
     }
     btn.remove(); lead.remove();

@@ -46,7 +46,9 @@ export function normLinkInfo(r) {
   })) : [];
   return { status: r.status, reason: String(r.reason || r.status), can_pay: r.status === 'open' && r.can_pay !== false,
     amount: num(r.amount), currency: String(r.currency || 'EUR'), order_no: r.order_no ?? null,
-    expires_date: ymd(r.expires_date), expires_time: hm(r.expires_time), items };
+    expires_date: ymd(r.expires_date), expires_time: hm(r.expires_time), items,
+    // booking_178: peruttu / keskeytynyt yritys ei kuluta linkkiä → status open + last_attempt (cancelled | failed), muuten null
+    last_attempt: r.status === 'open' && (r.last_attempt === 'cancelled' || r.last_attempt === 'failed') ? r.last_attempt : null };
 }
 
 const INFO_MSG = {
@@ -55,13 +57,14 @@ const INFO_MSG = {
 };
 const STATUS_MSG = { paid: 'info.paid', expired: 'info.expired', replaced: 'info.replaced', not_payable: 'err.not_payable', not_found: 'err.not_found' };
 
-/** Mallin tila → { pay: näytetäänkö painike, msgKey: tilaviesti (null kun avoin), amountKey: summan otsikko, showSummary, validKey }. */
+/** Mallin tila → { pay: näytetäänkö painike, msgKey: tilaviesti (null kun avoin), amountKey: summan otsikko, showSummary, validKey, retryKey: uusintaviesti (booking_178) }. */
 export function linkInfoView(info) {
-  if (!info) return { pay: true, msgKey: null, amountKey: null, showSummary: false, validKey: null };
-  if (info.status === 'open') return { pay: true, msgKey: null, amountKey: 'sum.due', showSummary: true, validKey: info.expires_date ? 'sum.valid' : null };
+  if (!info) return { pay: true, msgKey: null, amountKey: null, showSummary: false, validKey: null, retryKey: null };
+  if (info.status === 'open') return { pay: true, msgKey: null, amountKey: 'sum.due', showSummary: true, validKey: info.expires_date ? 'sum.valid' : null,
+    retryKey: info.last_attempt ? 'info.retry' : null };
   const msgKey = INFO_MSG[info.reason] || STATUS_MSG[info.status] || 'err.generic';
   return { pay: false, msgKey, amountKey: info.status === 'paid' && info.reason === 'link_paid' ? 'sum.paid' : 'sum.link', showSummary: info.status !== 'not_found' && info.amount != null,
-    validKey: info.reason === 'link_expired' && info.expires_date ? 'sum.expiredAt' : null };
+    validKey: info.reason === 'link_expired' && info.expires_date ? 'sum.expiredAt' : null, retryKey: null };
 }
 
 /** 2026-12-04 → FI "pe 4.12.2026", EN "Fri 4 Dec 2026" (päivämäärä on jo Helsingin aikaa; ei aikavyöhykemuunnosta). */
