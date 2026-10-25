@@ -2,7 +2,7 @@
 
 Tila: **toteutettu** hallinnan kokeilunäkymässä ja tietokantakutsuna. Tuotantoa ei ole muutettu eikä tätä ole yhdistetty. Luonnos, josta ulkoasu lähti, on [`docs/mockups/asetukset.html`](mockups/asetukset.html). Toteutettu sivu on `booking/admin/views/settings.js`. Kuvat puhelimen leveydeltä: [etusivu](mockups/asetukset-toteutus-etusivu.png), [varaukset](mockups/asetukset-toteutus-varaukset.png), [maksut](mockups/asetukset-toteutus-maksut.png).
 
-Migraatio on `booking_123` (`20261021160000`), ei `booking_122`. Tekstit ovat `content/site-texts.pending-import-31.json`, ei `pending-import-30`. Rich-tekstin työ ehti käyttää `booking_122` ja `pending-import-30` aikaleimalla `20261021150000`, joten tämä tulee sen jälkeen.
+Migraatio on `booking_123` (`20261021175349`), ei `booking_122`. Tekstit ovat `content/site-texts.pending-import-31.json`, ei `pending-import-30`. Rich-tekstin työ ehti käyttää `booking_122` ja `pending-import-30` aikaleimalla `20261021171915`, joten tämä tulee sen jälkeen.
 
 Sivu on Joonakselle, joka käyttää hallintaa enimmäkseen puhelimella. Tavoite on se, että asetuksista näkee yrityksen, varaussäännöt ja sen, onko maksu tai integraatio testissä, pois päältä vai oikeasti käytössä. Ulkoasua, värejä ja sivuston teemaa ei säädetä täällä.
 

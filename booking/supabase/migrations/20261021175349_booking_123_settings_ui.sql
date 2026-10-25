@@ -1,7 +1,7 @@
 -- booking_123: asetussivun luku ja korttikohtainen tallennus.
 -- Ei uusia booking.settings-avaimia eikä poistoja. Live-tilat, Procountor, vastaanottajarajaus
 -- ja polut eivät ole kirjoitettavissa tällä kutsulla. Vanha admin_set_setting jää ennalleen.
--- Rollback: rollbacks/20261021160000_booking_123_ROLLBACK.sql
+-- Rollback: rollbacks/20261021175349_booking_123_ROLLBACK.sql
 -- Numerointi 123 (ei 122) ja tekstit pending-import-31, jotta rinnakkainen työ ei osu samaan tiedostoon.
 
 set local lock_timeout = '5s';

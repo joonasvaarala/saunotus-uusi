@@ -16,7 +16,7 @@ from rules import ExportRejected, build_plan, order_no_action, orders_lack_items
 from sync import advance_baseline, chunks, db_state_from_remote, fetch_export, main  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-MIGRATION = os.path.join(ROOT, "supabase", "migrations", "20261022090000_booking_126_johku_sync.sql")
+MIGRATION = os.path.join(ROOT, "supabase", "migrations", "20261022091609_booking_126_johku_sync.sql")
 
 
 def plan():

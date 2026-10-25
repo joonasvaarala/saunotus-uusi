@@ -19,8 +19,8 @@ catch (e) { if (!/ERR_UNKNOWN_FILE_EXTENSION|Unknown file extension/.test(String
 const skipTs = templates ? false : 'Node ei tue .ts-tuontia (tarvitaan Node >= 22.18)';
 
 const pending = JSON.parse(read('content/site-texts.pending-import-29.json'));
-const migration = read('booking/supabase/migrations/20261021140000_booking_121_messages.sql');
-const rollback = read('booking/supabase/rollbacks/20261021140000_booking_121_ROLLBACK.sql');
+const migration = read('booking/supabase/migrations/20261021145208_booking_121_messages.sql');
+const rollback = read('booking/supabase/rollbacks/20261021145208_booking_121_ROLLBACK.sql');
 const sendIndex = read('booking/supabase/functions/send-emails/index.ts');
 
 const at = (iso) => new Date(iso).toISOString();
