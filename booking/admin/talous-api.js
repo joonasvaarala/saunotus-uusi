@@ -90,7 +90,13 @@ export function siteOrigin(order, fallback = typeof location !== 'undefined' ? l
   try { const u = new URL(order?.order_page_path || '', 'http://x.invalid'); if (u.origin !== 'http://x.invalid') return u.origin; } catch { /* ei osoite */ }
   return fallback;
 }
-export const absLink = (path, order) => (path ? new URL(path, siteOrigin(order)).href : '');
+// Sivuston juuri polkuineen (GitHub Pages -testi: https://…github.io/saunotus-uusi/, tuotanto: https://saunotus.fi/): order_page_path ilman viimeistä
+// polkuosaa (/tilaus/). Pelkkä origin pudotti testisivuston polkuetuliitteen → …github.io/maksa/?p=… (404).
+export function siteBase(order, fallback = typeof location !== 'undefined' ? location.origin + '/' : '') {
+  try { const u = new URL(order?.order_page_path || '', 'http://x.invalid'); if (u.origin !== 'http://x.invalid') return u.origin + u.pathname.replace(/[^/]+\/?$/, ''); } catch { /* ei osoite */ }
+  return fallback;
+}
+export const absLink = (path, order) => { if (!path) return ''; try { return new URL(String(path).replace(/^\/+/, ''), siteBase(order)).href; } catch { return String(path); } };
 // booking_41: ylätason statistics.johku (EI kirjanpitoon, ei totals-lukuihin). Puuttuessa (vanha palvelin) → null = lohkoa ei näytetä.
 export function normJohkuStats(j) {
   if (!j || typeof j !== 'object') return null;

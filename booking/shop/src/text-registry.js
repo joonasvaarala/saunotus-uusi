@@ -16,12 +16,13 @@ import { PT } from './pay-choices-texts.js';
 import { MT } from './mobilepay-texts.js';
 import { VT } from './vismapay-texts.js';
 import { OPT } from './options-texts.js';
+import { PLT } from './pay-link-texts.js';
 import { makeContext, fillPlaceholders, indexTexts, PlaceholderError, LANGS } from './site-texts-logic.js';
 
 export const PHONE_LITERAL = PHONE_DISPLAY_FI;   // fi-oletuksen numero → {{var:phone}} (en-oletuksessa kansainvälinen muoto jää kirjoitettuna, kuten tietokannassa)
 const DICTS = [
   { id: 'T', area: 'shop', dict: T }, { id: 'OT', area: 'order', dict: OT }, { id: 'GT', area: 'gift', dict: GT }, { id: 'HT', area: 'hold', dict: HT },
-  { id: 'PT', area: 'paychoice', dict: PT }, { id: 'MT', area: 'mobilepay', dict: MT }, { id: 'VT', area: 'vismapay', dict: VT }, { id: 'OPT', area: 'option', dict: OPT },
+  { id: 'PT', area: 'paychoice', dict: PT }, { id: 'MT', area: 'mobilepay', dict: MT }, { id: 'VT', area: 'vismapay', dict: VT }, { id: 'OPT', area: 'option', dict: OPT }, { id: 'PLT', area: 'paylink', dict: PLT },
 ];
 // Ei tuoda: tekninen URL-polku (ei asiakasnäkyvä teksti). gift-logic.js SOURCE_LABELS on vain varaetiketti: nimet tulevat palvelimelta (public_resolve/_vc_sources: source_label, label_en) – jää koodiin.
 export const EXCLUDED = new Set(['T:directionsUrl']);
