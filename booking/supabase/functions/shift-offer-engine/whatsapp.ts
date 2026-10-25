@@ -367,6 +367,8 @@ export function buildTemplatePayload(msg: ClaimedMessage, phoneE164: string): Te
 // booking_153: mikä pohja viestille. "legacy" = vanha KIND_TEMPLATE-käytös (ei pohja-asetuksia tai
 // vanha viestilaji), "session" = ei hyväksyttyä pohjaa → vapaamuotoinen viesti 24 h ikkunassa tai sähköposti.
 // soefix B4: "unapproved" = tarjous/muistutus ilman hyväksyttyä offer-pohjaa → sähköposti heti, ei koskaan vanhaa pohjaa.
+// digestfix #3: päivän kooste (day_digest) ilman hyväksyttyä day_digest-pohjaa → "unapproved" kuten tarjous (sähköposti heti,
+// myös hiljaisina tunteina; ei vapaamuotoista 24 h -viestiä). Vastaa SQL:n booking.shift_offer_wa_ready('day_digest').
 export type TemplateChoice =
   | { kind: "legacy" }
   | { kind: "unapproved" }
@@ -377,7 +379,8 @@ const NOTICE_SUBKINDS = /^(vacant|th_)/;
 
 export function resolveTemplate(msg: ClaimedMessage, templates: TemplateSettings | undefined): TemplateChoice {
   const isOffer = msg.kind === "offer" || msg.kind === "reminder";
-  if (!templates) return isOffer ? { kind: "unapproved" } : { kind: "legacy" };
+  const isDigest = msg.subkind === "day_digest";
+  if (!templates) return isOffer || isDigest ? { kind: "unapproved" } : { kind: "legacy" };
   const role = templateText(roleLabel(msg.role_type));
   const when = templateText(formatShiftWhen(msg.starts_at, msg.ends_at));
   const deadline = templateText(formatDeadline(msg.deadline_at));
@@ -395,7 +398,7 @@ export function resolveTemplate(msg: ClaimedMessage, templates: TemplateSettings
     const t = templates.day_digest;
     const date = templateText(msg.digest?.date_label ?? "");
     const items = templateText(msg.digest?.items ?? "");
-    return approved(t) ? { kind: "template", name: t!.name!, params: [date, items], buttonToken: msg.page_token ?? null, needsButton: true } : { kind: "session" };
+    return approved(t) ? { kind: "template", name: t!.name!, params: [date, items], buttonToken: msg.page_token ?? null, needsButton: true } : { kind: "unapproved" };
   }
   if (sub && NOTICE_SUBKINDS.test(sub)) return { kind: "session" };
   if (isOffer) {

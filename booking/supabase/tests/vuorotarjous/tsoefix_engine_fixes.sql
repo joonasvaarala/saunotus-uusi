@@ -9,6 +9,7 @@
 --   psql "$DB_URL" -X -v ON_ERROR_STOP=1 -1 -f booking/supabase/tests/vuorotarjous/tsoefix_engine_fixes.sql
 -- Odotettu tulos: ERROR:  TESTRESULT pass=52 fail=0 :: -   (SQLSTATE TRBK0; psql:n exit-koodi on 3 – se on tarkoitus,
 -- virhe kumoaa transaktion). Mikä tahansa muu virhe tai fail>0 = testi ei mennyt läpi; myös silloin kaikki kumoutuu.
+-- HUOM: 20261025173107_day_digest_fixes.sql:n jälkeen C1a odottaa, että hyväksymätön day_digest-pohja ei kelpaa (ennen sitä C1a epäonnistuu).
 -- Paikallinen kanta tarvitsee lisäksi ensin tests/vuorotarjous/tsoefix_prep_local.sql (tuotannon tervetulotekstit ja asetukset).
 set local lock_timeout = '3s';
 set local statement_timeout = '120s';
@@ -140,9 +141,10 @@ begin
   select id into v_r1 from public.shift_offer_recipients where offer_id = v_o and staff_id = H1;
   select id into v_r2 from public.shift_offer_recipients where offer_id = v_o and staff_id = H2;
   select next_action_at into v_na from public.shift_offers where id = v_o;
-  perform pg_temp.ck(not booking.shift_offer_wa_ready(H1, 'offer', null) and booking.shift_offer_wa_ready(H1, 'alert', 'day_digest')
+  -- digestfix #3 (20261025173107_day_digest_fixes): kooste tarkistaa day_digest-pohjan kuten tarjous → hyväksymätön ei kelpaa (ennen: kelpasi aina)
+  perform pg_temp.ck(not booking.shift_offer_wa_ready(H1, 'offer', null) and not booking.shift_offer_wa_ready(H1, 'alert', 'day_digest')
                      and not booking.shift_offer_wa_ready(H2, 'offer', null) and not booking.shift_offer_wa_ready(H4, 'alert', null),
-                     'C1a: wa_ready: hyväksymätön offer-pohja ei kelpaa, kooste kelpaa, ei puhelinta / deaktivoitu ei');
+                     'C1a: wa_ready: hyväksymätön offer- tai day_digest-pohja ei kelpaa, ei puhelinta / deaktivoitu ei');
   j := public.shift_offer_sender_claim(20);
   perform pg_temp.ck((j->>'emailed')::int >= 1 and (j->>'email_enabled')::boolean and (j->>'resent')::int = 0, 'B2a: claim ajoi sähköpostin: ' || left(j::text, 200));
   perform pg_temp.ck(exists (select 1 from jsonb_array_elements(j->'messages') x where (x->>'id')::bigint = v_m1
