@@ -279,6 +279,7 @@ const MAPPINGS: { name: string; error: RpcError; status: number; body: string; l
     body: "calendar_managed: tämä este tulee kalenterista, muuta se kalenterissa",
     logCode: "42501:calendar_managed",
   },
+  { name: "42501 not_claimable (backlog_claim)", error: { code: "42501", message: "not_claimable" }, status: 403, body: "not_claimable", logCode: "42501:not_claimable" },
   { name: "42501 muu viesti -> 401", error: { code: "42501", message: "permission denied for function botgw_call" }, status: 401, body: "unauthorized", logCode: "42501:unauthorized" },
   { name: "22023 viesti sellaisenaan", error: { code: "22023", message: "Vuoro voi olla enintään 24 h" }, status: 400, body: "Vuoro voi olla enintään 24 h", logCode: "22023" },
   { name: "22023 bad_time (toistaa syötteen; ei lokiin)", error: { code: "22023", message: "bad_time:ARGVALUE-123" }, status: 400, body: "bad_time:ARGVALUE-123", logCode: "22023" },
@@ -360,11 +361,24 @@ const SUCCESS: Record<string, Record<string, unknown>> = {
   unavailability_delete: { id: U2, request_id: RID },
   proposal_add: { area: "shift_offers", title: "Ehdotus", body: "ARGVALUE-123", proposed_change: { key: "x" }, request_id: RID },
   proposal_list: {},
+  // v2 (koodari_otto.md §1b)
+  backlog_claim: { item_id: 7, note: "ARGVALUE-123", request_id: RID },
+  backlog_task_add: { item_id: 7, title: "ARGVALUE-123", due_date: "2026-11-15", request_id: RID },
+  own_absence_sync: {
+    from: "2026-11-01",
+    to: "2026-12-31",
+    events: [
+      { ref: "ARGVALUE-123", starts: "2026-11-03T08:00", ends: "2026-11-03T18:00" },
+      { ref: "terveystieto-xyz", starts: "2026-11-10T08:00:00+02:00", ends: "2026-11-12T08:00:00+02:00" },
+    ],
+    request_id: RID,
+  },
+  own_shift_release: { shift_id: U1, absence_id: U2, reason: "terveystieto-xyz", confirmed: true, request_id: RID },
 };
 
 Deno.test("jokaiselle spec-toiminnolle on onnistumistesti", () => {
   assertEquals(Object.keys(SUCCESS).sort(), Object.keys(ACTIONS).sort());
-  assertEquals(Object.keys(ACTIONS).length, 23);
+  assertEquals(Object.keys(ACTIONS).length, 27); // 23 (v1) + 4 (v2 §1b)
 });
 
 for (const [action, args] of Object.entries(SUCCESS)) {
@@ -477,4 +491,85 @@ Deno.test("lähde: vain botgw_call/botgw_log_failure, ei .from()-taulukutsuja ei
 Deno.test("config.toml: bot-gateway verify_jwt = false", async () => {
   const toml = await Deno.readTextFile(new URL("../../config.toml", import.meta.url));
   assertMatch(toml, /\[functions\.bot-gateway\]\s*\nverify_jwt = false/);
+});
+
+// ---------- v2-toiminnot (koodari_otto.md §1b) ----------
+Deno.test("v2 validointi: backlog_claim / backlog_task_add / own_absence_sync / own_shift_release", () => {
+  const ev = { ref: "a", starts: "2026-11-03T08:00", ends: "2026-11-03T18:00" };
+  const cases: [string, Record<string, unknown>, string | null][] = [
+    ["backlog_claim", {}, "missing_arg:item_id"],
+    ["backlog_claim", { item_id: "7" }, "bad_arg:item_id"],
+    ["backlog_claim", { item_id: 7, note: "x".repeat(1001) }, "too_long:note"],
+    ["backlog_claim", { item_id: 7, owner: "joonas" }, "unknown_arg:owner"],
+    ["backlog_claim", { item_id: 7 }, null],
+    ["backlog_task_add", { item_id: 7 }, "missing_arg:title"],
+    ["backlog_task_add", { item_id: 7, title: "  " }, "missing_arg:title"],
+    ["backlog_task_add", { item_id: 7, title: "x".repeat(301) }, "too_long:title"],
+    ["backlog_task_add", { item_id: 7, title: "t", due_date: "15.11.2026" }, "bad_arg:due_date"],
+    ["backlog_task_add", { item_id: 7, title: "t" }, null],
+    ["own_absence_sync", { to: "2026-11-30", events: [] }, "missing_arg:from"],
+    ["own_absence_sync", { from: "2026-11-01", to: "2026-11-30" }, "missing_arg:events"],
+    ["own_absence_sync", { from: "2026-11-01", to: "2026-11-30", events: { ref: "a" } }, "events pitää olla lista"],
+    ["own_absence_sync", { from: "2026-11-01", to: "2026-11-30", events: Array(301).fill(ev) }, "Enintään 300 tapahtumaa kerralla"],
+    ["own_absence_sync", { from: "2026-11-01", to: "2026-11-30", events: Array(300).fill(ev) }, null],
+    ["own_absence_sync", { from: "2026-11-01", to: "2026-11-30", events: [] }, null],
+    ["own_shift_release", { shift_id: U1, absence_id: U2 }, "missing_arg:reason"],
+    ["own_shift_release", { shift_id: U1, absence_id: "x", reason: "r" }, "bad_arg:absence_id"],
+    ["own_shift_release", { shift_id: U1, absence_id: U2, reason: "x".repeat(301) }, "too_long:reason"],
+    ["own_shift_release", { shift_id: U1, absence_id: U2, reason: "r", confirmed: "true" }, "bad_arg:confirmed"],
+    ["own_shift_release", { shift_id: U1, absence_id: U2, reason: "r" }, null],
+  ];
+  for (const [action, args, want] of cases) assertEquals(validateArgs(action, args), want, `${action} ${JSON.stringify(args).slice(0, 80)}`);
+});
+
+Deno.test("v2: own_absence_sync events-virhe -> 400 ilman botgw_callia, log_failure edge:validation", async () => {
+  const { res, body, calls, out } = await run(req({ action: "own_absence_sync", args: { from: "2026-11-01", to: "2026-11-30", events: "ARGVALUE-123" } }));
+  assertEquals(res.status, 400);
+  assertEquals(body.error, "events pitää olla lista");
+  assertEquals(calls.map((c) => c.fn), ["botgw_log_failure"]);
+  assert(!out.includes("ARGVALUE-123"));
+});
+
+Deno.test("v2: not_claimable backlog_claimista -> 403 + log_failure 42501:not_claimable", async () => {
+  const { res, body, calls } = await run(req({ action: "backlog_claim", args: { item_id: 7, request_id: RID } }), {
+    error: { code: "42501", message: "not_claimable" },
+  });
+  assertEquals(res.status, 403);
+  assertEquals(body, { ok: false, error: "not_claimable" });
+  assertEquals(calls[1], { fn: "botgw_log_failure", args: { p_key_hash: await sha256Hex(KEY), p_action: "backlog_claim", p_error: "42501:not_claimable" } });
+});
+
+Deno.test("v2: own_shift_release confirm_required (22023) -> 400 viesti sellaisenaan", async () => {
+  const msg = "confirm_required: vuoro alkaa alle 12 tunnin päästä; kysy Otolta vahvistus ja lähetä confirmed: true";
+  const { res, body } = await run(req({ action: "own_shift_release", args: { shift_id: U1, absence_id: U2, reason: "r" } }), {
+    error: { code: "22023", message: msg },
+  });
+  assertEquals(res.status, 400);
+  assertEquals(body.error, msg);
+});
+
+Deno.test("v2: backlog_claim already_own välitetään sellaisenaan", async () => {
+  // botgw.call palauttaa {ok, data: v, request_id}; v = {ok, item_id, result: 'already_own'}
+  const inner = { ok: true, item_id: 7, result: "already_own" };
+  const { res, body } = await run(req({ action: "backlog_claim", args: { item_id: 7, request_id: RID } }), {
+    data: { ok: true, data: inner, request_id: RID },
+  });
+  assertEquals(res.status, 200);
+  assertEquals(body, { ok: true, data: inner, request_id: RID });
+});
+
+Deno.test("v2: own_absence_sync runkoraja 16 kB (300 tapahtumaa ei mahdu; ~230 lyhyellä refillä mahtuu)", async () => {
+  const mk = (n: number) =>
+    JSON.stringify({
+      action: "own_absence_sync",
+      args: {
+        from: "2026-11-01",
+        to: "2027-02-28",
+        events: Array.from({ length: n }, (_, i) => ({ ref: String(i), starts: "2026-11-03T08:00", ends: "2026-11-03T18:00" })),
+      },
+    });
+  const ok = await run(req(mk(230)));
+  assertEquals(ok.res.status, 200, `230 tapahtumaa = ${mk(230).length} tavua`);
+  const big = await run(req(mk(300)));
+  assertEquals(big.res.status, 413, `300 tapahtumaa = ${mk(300).length} tavua`);
 });

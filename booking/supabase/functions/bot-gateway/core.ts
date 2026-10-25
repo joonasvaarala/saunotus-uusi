@@ -153,6 +153,20 @@ export const ACTIONS: Record<string, ActionSpec> = {
     write: true,
     fields: { title: f(str(300), REQ), description: f(str(4000)), category: f(str(100), REQ), kind: f(enm(BACKLOG_KINDS)), request_id },
   },
+  // v2 (koodari_otto.md §1b; tietokanta botgw_otto_backlog_claim + botgw_otto_calendar_guard)
+  backlog_claim: { write: true, fields: { item_id: f(int, REQ), note: f(str(1000)), request_id } },
+  backlog_task_add: { write: true, fields: { item_id: f(int, REQ), title: f(str(300), REQ), due_date: f(date), request_id } },
+  own_absence_sync: {
+    write: true,
+    fields: { from: f(date, REQ), to: f(date, REQ), events: f({ t: "passthrough" }, REQ), request_id },
+    // events: lista {ref ≤200, starts, ends}, enintään 300; sisältö tarkistetaan tietokannassa
+    check: (a) =>
+      !Array.isArray(a.events) ? "events pitää olla lista" : (a.events as unknown[]).length > 300 ? "Enintään 300 tapahtumaa kerralla" : null,
+  },
+  own_shift_release: {
+    write: true,
+    fields: { shift_id: f(uuid, REQ), absence_id: f(uuid, REQ), reason: f(str(300), REQ), confirmed: f(bool), request_id },
+  },
   // vuorot
   shifts_list: {
     write: false,
@@ -294,7 +308,7 @@ export interface Mapped {
   logCode: string; // lokiin ja botgw_log_failureen (ei viestisisältöä)
 }
 
-const FORBIDDEN_403 = ["forbidden", "not_editable", "field_not_editable", "calendar_managed"];
+const FORBIDDEN_403 = ["forbidden", "not_editable", "field_not_editable", "calendar_managed", "not_claimable"];
 
 export function mapDbError(e: RpcError | null | undefined): Mapped {
   const code = String(e?.code ?? "");

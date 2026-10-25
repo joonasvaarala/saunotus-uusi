@@ -4,7 +4,8 @@ Lähde: `/workspace/otto_bot/koodari_otto.md` (Joonaksen hyväksyntä 25.10.2026
 Tämä PR **ei** deployaa, **ei** myönnä avainta eikä luo cron-jobia. Kaikki alla olevat vaiheet tehdään vasta Joonaksen luvalla.
 
 ## Tila tämän PR:n jälkeen
-- Tietokanta (jo tuotannossa): migraatiot `20261025145539_botgw_otto_disabled` ja `20261025151402_botgw_otto_scope_v2`.
+- Tietokanta (jo tuotannossa): migraatiot `20261025145539_botgw_otto_disabled`, `20261025151402_botgw_otto_scope_v2`,
+  `20261025160316_botgw_otto_backlog_claim` ja `20261025160701_botgw_otto_calendar_guard`.
   Oton rivi `otto-grok-bot`: `active=false`, `key_hash` null. `wake_targets('tyovuoro-tapio').active=false`.
 - Edge-funktio `booking/supabase/functions/bot-gateway` (repossa, ei deployattu). `verify_jwt = false` (config.toml).
 
@@ -38,7 +39,9 @@ select cron.schedule('botgw-wake-retry-5m', '*/5 * * * *', $$select botgw.wake_r
 ## Hätäkatkaisu ja peruutus
 - Edge: `supabase secrets set BOTGW_DISABLED=1` (503 heti, ei tietokantaa).
 - Tietokanta: `booking/supabase/manual/botgw_disable.sql` (kaikki avaimet ja herätys pois).
-- v2 peruutus: `booking/supabase/rollbacks/20261025151402_botgw_otto_scope_v2_ROLLBACK.sql`.
+- Peruutus käänteisessä järjestyksessä: `rollbacks/20261025160701_botgw_otto_calendar_guard_ROLLBACK.sql`
+  → `rollbacks/20261025160316_botgw_otto_backlog_claim_ROLLBACK.sql` → `rollbacks/20261025151402_botgw_otto_scope_v2_ROLLBACK.sql`.
+  Edge v2 tuntee uudet toiminnot; jos tietokanta perutaan, ne palauttavat 400 `unknown_action` (tietokannasta).
 - Koko botgw pois: `booking/supabase/rollbacks/20261025145539_botgw_otto_disabled_ROLLBACK.sql` (poista ensin funktio tai kytkin päälle).
 
 ## Rajapinta
@@ -64,3 +67,11 @@ Edge tarkistaa lisäksi toimintokohtaisesti argumenttien nimet ja muodot (core.t
 Virheen jälkeen `botgw_log_failure(p_key_hash, p_action, p_error)` lyhyellä koodilla (esim. `22023`, `42501:forbidden`,
 `edge:validation`); ei viestisisältöä. Edge-tason 401 (ei avainta), 405, 413 (otsikko), 429 ja 503 eivät kutsu tietokantaa.
 Lokiin vain `{fn, action, status, result, request_id}`.
+
+## Edge v2 (koodari_otto.md §1b)
+Uudet toiminnot ACTIONS-listassa: `backlog_claim {item_id, note ≤1000}`, `backlog_task_add {item_id, title ≤300, due_date}`,
+`own_absence_sync {from, to, events[≤300]}`, `own_shift_release {shift_id, absence_id, reason ≤300, confirmed}`.
+`not_claimable` (42501) → 403. `confirm_required: …` (22023) → 400 viesti sellaisenaan.
+Huom: rungon 16 kB raja rajaa own_absence_syncin käytännössä noin 240 tapahtumaan (ISO-ajat ilman sekunteja, lyhyt ref);
+300 tapahtumaa ei mahdu yhteen kutsuun → 413. Otto jakaa synkan useampaan väliin (from/to), tai raja nostetaan erikseen.
+Deploy kuten yllä (BOTGW_DISABLED=1 pysyy), `supabase functions deploy bot-gateway --no-verify-jwt`.
