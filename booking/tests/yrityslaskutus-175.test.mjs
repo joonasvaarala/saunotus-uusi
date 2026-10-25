@@ -10,8 +10,8 @@ import { fileURLToPath } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const rd = (p) => readFileSync(join(here, '..', p), 'utf8');
 const md5 = (s) => createHash('md5').update(s).digest('hex');
-const MIG = 'supabase/migrations/20261025070000_booking_175_yrityslaskutus.sql';
-const RB = 'supabase/rollbacks/20261025070000_booking_175_ROLLBACK.sql';
+const MIG = 'supabase/migrations/20261025090100_booking_175_yrityslaskutus.sql';
+const RB = 'supabase/rollbacks/20261025090100_booking_175_ROLLBACK.sql';
 // tuotanto (sxbofnuisemspgquoxyv, pg_get_functiondef 25.10.2026) → booking_175
 const REPLACED = {
   'booking._clean_company': ['4e8d9dddda117bdc208f3b1bb281f97a', '53fa5a8a98e98aeb4a97000d2f6b37ec'],

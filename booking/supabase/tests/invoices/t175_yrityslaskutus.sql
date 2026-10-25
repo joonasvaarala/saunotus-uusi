@@ -1,4 +1,4 @@
--- t175: booking_175 yrityslaskutus (väliaikainen migraatio 20261025070000).
+-- t175: booking_175 yrityslaskutus (migraatio 20261025090100, ajettu tuotantoon).
 --   A rakenne: md5 (4 korvattua funktiota = booking_175, riippuvuudet + booking_173/174 + sähköpostijono = tuotanto), asetukset
 --     invoice_reference_prefix ("7310") ja invoice_einvoice_auto_send (false), oikeudet.
 --   B _clean_company: laskutustapa einvoice / pdf / puuttuu (vanha käytös) / virheellinen → BK001 invalid_invoice_method; PDF ei vaadi eikä tallenna OVT:tä.
