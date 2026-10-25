@@ -3,6 +3,7 @@
 import { rpc, storageUrl, uploadObject, removeObject } from '../sb.js';
 import { prepareImage, IMG_TYPES, IMG_MAX_INPUT } from './productimage.js';
 import { addonsAdmin } from './addons.js';
+import { productSuggestionsEditor } from './product-suggestions.js';
 import { productOptionsAdmin } from './productoptions.js';
 import { h, dialog, field, toast, run, money, badge } from '../ui.js';
 import { filterDrawer } from '../filter-drawer.js';
@@ -155,7 +156,8 @@ export async function render({ ctx, refs, reload, query }) {
       h('a', { class: 'btn', href: settingsHref('qr'), 'data-testid': 'product-open-qr', text: productText('link_qr'), onclick: () => d?.close() })) : null;
     // booking_158: tuotteen kopio (admin_product_copy): 'Kopio: nimi', uusi slug palvelimelta, piilotettu eikä myynnissä; avataan heti muokattavaksi
     const copyBtn = isAdmin ? h('div', { class: 'row wrap' }, h('button', { type: 'button', class: 'btn', 'data-testid': 'product-copy', text: evText('ui.admin.product.copy'), onclick: () => copyProduct(p, d) })) : null;
-    d = dialog(p.name, h('div', { class: 'stack' }, copyBtn, f, img, cfg, next, vars), { wide: true });
+    const suggested = await productSuggestionsEditor({ product: p, all, canEdit: isAdmin && ctx.role === 'admin' });
+    d = dialog(p.name, h('div', { class: 'stack' }, copyBtn, f, img, cfg, suggested, next, vars), { wide: true });
     try { await mountRichFields(f); } catch (e) { console.error(e); }
   }
   function copyProduct(p, parent) {
