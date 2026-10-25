@@ -49,7 +49,7 @@
 --     booking._invoice_allocate(bigint) 46a3326812f896077fc2614ba783ff3d
 --     booking.orders_invoice_draft_trg() a48fe50340cff5f6e9709ad46055ecb9
 --     booking._vc_mask(text) 9e612ee37728ef0971d428765ab47e1a
--- Rollback: rollbacks/20261025100000_booking_176_ROLLBACK.sql. Testi: tests/giftcards/t176_kumppanilahjakortti_viestit.sql (BEGIN … ROLLBACK).
+-- Rollback: rollbacks/20261025093156_booking_176_ROLLBACK.sql. Testi: tests/giftcards/t176_kumppanilahjakortti_viestit.sql (BEGIN … ROLLBACK).
 set local lock_timeout = '5s';
 
 do $g$

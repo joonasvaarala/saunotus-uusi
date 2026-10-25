@@ -9,8 +9,8 @@ import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const rd = (p) => readFileSync(join(here, '..', p), 'utf8');
-const MIG = 'supabase/migrations/20261025100000_booking_176_kumppanilahjakortti_viestit.sql';
-const RB = 'supabase/rollbacks/20261025100000_booking_176_ROLLBACK.sql';
+const MIG = 'supabase/migrations/20261025093156_booking_176_kumppanilahjakortti_viestit.sql';
+const RB = 'supabase/rollbacks/20261025093156_booking_176_ROLLBACK.sql';
 const PROD = { _on_payment_paid: 'de9084871640d213d10527a045157bf2', email_outbox_claim: '2db9a1233a06e6293d0877f17de1ab72', orders_confirmed_mail_trg: '85e59930421bf098d24d7fcebd50507d',
   public_submit_voucher_claim: 'de84e5ce9b1062111c4248e7c582fdb8', messages_dispatch: '11a25a5f1e02fe5e635a92d8fea3a69f', _vc_notify_problem: '85f500444e3af880009fc3b6c0e3a402',
   admin_mark_voucher_claim_redeemed: '525d1fa96fd7c37df4d7e502edf1bf71', svc_mark_voucher_claim_redeemed: 'ed28a9a7240b2ae62f5abef66885bc5d',
