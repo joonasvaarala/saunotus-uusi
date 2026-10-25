@@ -24,9 +24,7 @@ test('yksi soefix-migraatio, rollback ja SQL-testi olemassa', () => {
   for (const p of [MIG, RB, SQLT, `${ENG}/soefix_test.ts`]) assert.ok(existsSync(resolve(root, p)), p);
 });
 
-test('bot-gateway ei kuulu tähän PR:ään', () => {
-  const all = readdirSync(resolve(root, migDir));
-  assert.ok(!all.some((f) => f.includes('botgw_otto_disabled')));
+test('soefix-migraatio ei koske bot-gatewayhin (se on erillisessä PR:ssä #192)', () => {
   assert.ok(!/create\s+(schema|table)\s+(if not exists\s+)?botgw/i.test(code(rd(MIG))));
 });
 
