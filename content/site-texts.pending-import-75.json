@@ -1,0 +1,702 @@
+[
+ {
+  "key": "ui.upsell.title",
+  "lang": "fi",
+  "text": "Täydennä käyntiäsi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.title",
+  "lang": "en",
+  "text": "Make more of your visit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.lead",
+  "lang": "fi",
+  "text": "Voit halutessasi lisätä sopivan hoidon tai palvelun samaan tilaukseen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.lead",
+  "lang": "en",
+  "text": "If you wish, add a suitable treatment or extra to your existing order.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.checkout_title",
+  "lang": "fi",
+  "text": "Täydennä käyntiäsi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.checkout_title",
+  "lang": "en",
+  "text": "Complete your visit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.from",
+  "lang": "fi",
+  "text": "Alkaen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.from",
+  "lang": "en",
+  "text": "From",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.choose_time",
+  "lang": "fi",
+  "text": "Valitse vapaa aika",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.choose_time",
+  "lang": "en",
+  "text": "Choose an available time",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.before",
+  "lang": "fi",
+  "text": "Sopii vuorosi ennen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.before",
+  "lang": "en",
+  "text": "Fits before your session",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.after",
+  "lang": "fi",
+  "text": "Sopii vuorosi jälkeen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.after",
+  "lang": "en",
+  "text": "Fits after your session",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.read_more",
+  "lang": "fi",
+  "text": "Lue lisää",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.read_more",
+  "lang": "en",
+  "text": "Read more",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.close",
+  "lang": "fi",
+  "text": "Sulje",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.close",
+  "lang": "en",
+  "text": "Close",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.no_longer_available",
+  "lang": "fi",
+  "text": "Aika ei ole enää varattavissa. Kokeile toista aikaa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.no_longer_available",
+  "lang": "en",
+  "text": "That time is no longer available. Please choose another.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.added",
+  "lang": "fi",
+  "text": "Lisäys tehty.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.added",
+  "lang": "en",
+  "text": "Added to your order.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.pay_separately",
+  "lang": "fi",
+  "text": "Lisäosa maksetaan erikseen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.pay_separately",
+  "lang": "en",
+  "text": "Additional services are paid for separately.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.code_conflict",
+  "lang": "fi",
+  "text": "Poista ensin alennus- tai vuosikorttikoodi, jos haluat lisätä hoidon samalla kertaa. Voit myös lisätä hoidon tilaussivulla varauksen jälkeen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.code_conflict",
+  "lang": "en",
+  "text": "Remove the discount or annual card code before adding a treatment in this checkout. You can also add it from your order page after booking.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_title",
+  "lang": "fi",
+  "text": "Ehdotetut tuotteet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_title",
+  "lang": "en",
+  "text": "Suggested products",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_help",
+  "lang": "fi",
+  "text": "Valitse ja järjestä enintään kolme ehdotusta tälle tuotteelle. Poista valinta tai kytke se pois päältä tarvittaessa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_help",
+  "lang": "en",
+  "text": "Choose and order up to three suggestions for this product. Disable or remove a suggestion whenever needed.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_item",
+  "lang": "fi",
+  "text": "Ehdotus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_item",
+  "lang": "en",
+  "text": "Suggestion",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_enabled",
+  "lang": "fi",
+  "text": "Käytössä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_enabled",
+  "lang": "en",
+  "text": "Enabled",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_up",
+  "lang": "fi",
+  "text": "Ylemmäs",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_up",
+  "lang": "en",
+  "text": "Move up",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_down",
+  "lang": "fi",
+  "text": "Alemmas",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_down",
+  "lang": "en",
+  "text": "Move down",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_remove",
+  "lang": "fi",
+  "text": "Poista",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_remove",
+  "lang": "en",
+  "text": "Remove",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_add",
+  "lang": "fi",
+  "text": "Lisää ehdotus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_add",
+  "lang": "en",
+  "text": "Add suggestion",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_save",
+  "lang": "fi",
+  "text": "Tallenna ehdotukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_save",
+  "lang": "en",
+  "text": "Save suggestions",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_saved",
+  "lang": "fi",
+  "text": "Ehdotukset tallennettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_saved",
+  "lang": "en",
+  "text": "Suggestions saved",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_duplicate",
+  "lang": "fi",
+  "text": "Samaa ehdotusta ei voi lisätä kahdesti.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.admin_duplicate",
+  "lang": "en",
+  "text": "The same suggestion cannot be selected twice.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.report_title",
+  "lang": "fi",
+  "text": "Lisämyynnin seuranta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.report_title",
+  "lang": "en",
+  "text": "Upsell reporting",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.report_load",
+  "lang": "fi",
+  "text": "Näytä viimeiset 30 päivää",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.report_load",
+  "lang": "en",
+  "text": "Show last 30 days",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.report_product",
+  "lang": "fi",
+  "text": "Tuote",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.report_product",
+  "lang": "en",
+  "text": "Product",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.report_shown",
+  "lang": "fi",
+  "text": "Näytöt",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.report_shown",
+  "lang": "en",
+  "text": "Impressions",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.report_opened",
+  "lang": "fi",
+  "text": "Avaukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.report_opened",
+  "lang": "en",
+  "text": "Opens",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.report_added",
+  "lang": "fi",
+  "text": "Lisäykset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.report_added",
+  "lang": "en",
+  "text": "Adds",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.report_paid",
+  "lang": "fi",
+  "text": "Maksetut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.report_paid",
+  "lang": "en",
+  "text": "Paid",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.report_eur",
+  "lang": "fi",
+  "text": "Maksettu €",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.report_eur",
+  "lang": "en",
+  "text": "Paid €",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.report_error",
+  "lang": "fi",
+  "text": "Raporttia ei saatu ladattua.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.report_error",
+  "lang": "en",
+  "text": "Could not load the report.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_179: upsell UI; import before activating"
+ },
+ {
+  "key": "ui.upsell.attach_failed",
+  "lang": "fi",
+  "text": "Varaus on luotu, mutta lisähoitoa ei voitu liittää. Avaa tilauksesi ja tarkista varauksen tiedot ennen uutta yritystä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "booking_179 checkout attach fallback"
+ },
+ {
+  "key": "ui.upsell.attach_failed",
+  "lang": "en",
+  "text": "Your booking was created, but the extra treatment could not be added. Open your order to check it before trying again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "booking_179 checkout attach fallback"
+ },
+ {
+  "key": "ui.upsell.open_order",
+  "lang": "fi",
+  "text": "Avaa tilauksesi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "booking_179 checkout attach fallback"
+ },
+ {
+  "key": "ui.upsell.open_order",
+  "lang": "en",
+  "text": "Open your order",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "booking_179 checkout attach fallback"
+ }
+]

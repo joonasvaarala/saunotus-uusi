@@ -15,6 +15,7 @@ import { heroShort, cardShort, fallbackDesc } from './short-desc.js';
 import { createTreatmentViews } from './treatment-ui.js';
 import { cardMeta } from './card-meta.js';
 import { createTexts, loadShopTexts, applyShopTexts } from './site-texts.js';
+import { checkoutUpsellSection, orderUpsellSection, confirmationUpsellOrder } from './upsell-ui.js';
 import { fmtMinutes } from './site-texts-logic.js';
 import { OPT } from './options-texts.js';
 import { optName, needsOption, findOption } from './options-logic.js';
@@ -760,6 +761,8 @@ async function viewCheckout(ruleId, ds, productId, via) {
   const chosenAddons = () => { const c = addons.filter((a) => qty.get(a.id) > 0).map((a) => ({ id: a.id, quantity: qty.get(a.id) })), ra = ritualAddonArg(ritOn() ? rit.sel : null); if (ra) c.push(ra); return c; };
   const annualOn = () => isAnnualQuote(code.quote);
   const locked = () => wlLock || annualOn();
+  // booking_179: lisähoidon hinta tulee vasta valinnan jälkeen (ei esivalintaa). Paikkamerkki, kunnes osio on luotu.
+  let upsellUI = { total: () => 0, items: () => [], hasSuggestedAddon: () => false, session: '', text: () => '', node: null, reset() {} };
   const upd = () => {
     if (annualOn()) { n = +code.quote.persons || 1; for (const a of addons) qty.set(a.id, 0); }
     for (const a of addons) qty.set(a.id, Math.min(qty.get(a.id), addonLimit(a, n)));
@@ -769,13 +772,14 @@ async function viewCheckout(ruleId, ds, productId, via) {
     if (code.quote && !annualOn() && code.sig !== sig()) recheckCode();
     const fresh = code.quote && code.sig === sig();
     const qv = quietCheckout({ quote: fresh ? code.quote : null, offer: annualOn() || (code.quote && !fresh) ? null : qOffer, sessionTotal: priceFor(s, n), discountBase: quietBase(s, n) });
-    total.textContent = money(fresh ? +code.quote.total : priceFor(s, n) - (qv.source === 'quiet' ? qv.amount : 0) + addonsSum() + ritualSum());
+    total.textContent = money((fresh ? +code.quote.total : priceFor(s, n) - (qv.source === 'quiet' ? qv.amount : 0) + addonsSum() + ritualSum()) + upsellUI.total());
     qNote.hidden = qv.source !== 'quiet';
     sumList.replaceChildren(h('dt', { text: t.what }), h('dd', { text: pname(p) }), h('dt', { text: t.when }), h('dd', { text: `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(n) }),
       ...addons.filter((a) => qty.get(a.id) > 0).flatMap((a) => [h('dt', { text: aname(a) }), h('dd', { text: `${qty.get(a.id)} × ${money(a.price)}` })]),
       ...(ritWant() ? [h('dt', { text: ritName() }), h('dd', { 'data-testid': 'checkout-ritual-sum', text: rit.sel.key ? `${rtx('ritualSummary', { time: rtm(rit.sel.key), n: rit.sel.qty })} · ${money(ritualSum())}` : `${rit.sel.qty} × ${money(rit.offer.unit_price ?? ritualPrice(rit.offer, 1))}` })] : []),
       ...(qv.source === 'quiet' ? [h('dt', { text: fillText(t.quietCheckout, { pct: pctText(qv.percent, S.lang) }) }), h('dd', { 'data-testid': 'checkout-quiet', text: `−${money(qv.amount)}` })] : []),
-      ...(fresh && qv.source === 'code' && +code.quote.discount > 0 ? [h('dt', { text: annualOn() ? t.annualTitle : t.codeDiscountRow }), h('dd', { 'data-testid': 'checkout-discount', text: `${code.quote.code} · −${money(code.quote.discount)}` })] : []));
+      ...(fresh && qv.source === 'code' && +code.quote.discount > 0 ? [h('dt', { text: annualOn() ? t.annualTitle : t.codeDiscountRow }), h('dd', { 'data-testid': 'checkout-discount', text: `${code.quote.code} · −${money(code.quote.discount)}` })] : []),
+      ...(upsellUI.total() > 0 ? [h('dt', { text: upsellUI.text('checkout_title') }), h('dd', { 'data-testid': 'checkout-upsell', text: money(upsellUI.total()) })] : []));
     num.value = n; minus.disabled = wlLock || annualOn() || n <= s.min_persons; plus.disabled = wlLock || annualOn() || n >= max; num.readOnly = wlLock || annualOn();
     for (const r of addonRows) r.sync();
     rit.sync?.();
@@ -799,6 +803,8 @@ async function viewCheckout(ruleId, ds, productId, via) {
   // LISÄPALVELUT: rituaalikortti ensimmäisenä, sitten muut lisäpalvelut. Osio näkyy, kun on lisäpalveluita tai rituaali tarjolla.
   const addonsBox = h('fieldset', { class: 'bk-section bk-addons', 'data-testid': 'checkout-addons', hidden: !addonRows.length }, h('legend', { text: t.addonsTitle }), h('p', { class: 'bk-hint', text: t.addonsHint }),
     h('ul', { class: 'bk-addonlist' }, ritCard, addonRows.map((r) => r.node)), ritMsg);
+  // booking_179: ei esivalintaa eikä erillistä maksuvirtaa. Lisähoito liittyy samaan tilaukseen varauksen jälkeen.
+  upsellUI = checkoutUpsellSection({ S, L: S.lang, productId: p.id, date: ds, visitStart: s.starts_at, persons: n, rpc, addons, onChange: upd });
   const msg = h('div', { id: 'bk-msg' });
   const hm0 = holdModeOf(null, state.settings);   // oletus asetuksesta (vain luku); palvelimen public_checkout_payment_options päivittää alla
   const hmode = { on: false, minutes: hm0.minutes };   // uusi pitotila vain kun palvelin sanoo (hold_until_paid); asetus ohjaa vain vanhaa ohjetekstiä
@@ -859,10 +865,24 @@ async function viewCheckout(ruleId, ds, productId, via) {
       const chosen = chosenAddons();
       const args = { p_rule_id: s.rule_id, p_date: ds, p_persons: n, p_name: cust.name, p_email: cust.email, p_phone: cust.phone, p_marketing_consent: consent.checked, p_locale: S.lang, p_note: (f.get('note') || '').trim() || null,
         p_customer_kind: cust.kind, p_company: cust.company, p_addons: chosen.length ? chosen : null };
+      const extras = upsellUI.items();
+      // Alennus- tai vuosikorttikoodi säilyttää oman RPC:nsä. Lisähoitoa ei lähetetä sen kanssa (palvelin hylkää myös).
+      if (code.value && extras.length) throw Object.assign(new Error(upsellUI.text('code_conflict') || t.errorGeneric), { mapped: true });
       // Koodi vain kun se on hyväksytty: muuten sama public_create_booking kuin ennen (booking_142 ei muuta sitä).
       const r = code.value ? await rpc('public_create_booking_code', { ...args, p_code: code.value }) : await rpc('public_create_booking', args);
       if (!r.ok) throw Object.assign(new Error((isCodeError(r.code) && t.codeErrors[r.code]) || holdError(S.lang, r.code) || t.errors[r.code] || RITUAL_ERRORS[S.lang]?.[r.code] || t.errorGeneric), { code: r.code, mapped: true });
       state.months.clear();
+      if (extras.length || upsellUI.hasSuggestedAddon(chosen)) {
+        const attached = await rpc('public_upsell_checkout_attach', { p_token: r.token, p_upsell: extras, p_session_id: upsellUI.session }).catch(() => null);
+        if (!attached?.ok) {
+          submit.textContent = wasFree ? t.codeConfirm : hmode.on ? ht(S.lang, 'checkout.button') : t.book;
+          const href = `${S.confirmHref}${mockQs()}#${r.token}`;
+          msg.replaceChildren(errorBox(upsellUI.text('attach_failed') || t.errorGeneric),
+            h('p', {}, h('a', { href, text: upsellUI.text('open_order') || href })));
+          revealIfHidden(msg);
+          return; // perusvaraus on jo olemassa: ei toista public_create_booking-kutsua
+        }
+      }
       location.assign(`${S.confirmHref}${mockQs()}#${r.token}`);
     } catch (e) {
       submit.disabled = false; submitLabel();
@@ -875,6 +895,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
     h('fieldset', { class: 'bk-section' }, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, minus, num, plus)),
     // Järjestys: henkilömäärä → asiakastyyppi ja yhteystiedot → lisäpalvelut → lisätiedot, ehdot ja varaus
     cf.node,
+    upsellUI.node,
     addonsBox,
     codeBox, legal.nodes,
     msg, submit);
@@ -977,6 +998,12 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     b.status === 'confirmed' && (b.has_ritual_addon || ritItems.length) ? h('p', { class: 'bk-note', 'data-testid': 'conf-ritual-note', text: rtx('ritualConfNote') }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email }))
       : b.status === 'confirmed' ? h('p', { class: 'bk-note', text: b.can_change ? t.changeInfo(b.change_hours_before, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) : t.changeLocked(b.change_hours_before) }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })) : null,
     h('p', { class: 'bk-note', text: t.emailNote }), h('p', {}, h('a', { href: S.infoHref, text: t.directions }))));
+  if (b.status === 'confirmed') {
+    root.querySelector('.bk-conf')?.append(orderUpsellSection({
+      S, L, token, order: confirmationUpsellOrder(b), rpc,
+      onAdded: () => viewConfirmation({ refresh: true, host: mpHost, noReturn: true }),
+    }));
+  }
   // Maksuosio (MobilePay + lahjakortti) toimintojen alle; ei näytetä kun paluu MobilePaysta on kesken (tulos näkyy sivun yläosassa)
   const again = (n) => viewConfirmation({ refresh: true, notice: n, host: mpHost, noReturn: true });
   let secEl = null;

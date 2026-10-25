@@ -301,6 +301,9 @@ jobs:
       # booking_170: sivuston osoite saunotus.fi – vanhaa kehitysosoitetta ei repossa (poikkeukset listattu testissä), kb.products-osoitteet
       # (migraatio + rollback, md5-vartijat, needs_translation ennallaan). SQL: t170 PG17:ssä tuotannon teksteillä (Bottiavustus).
       - run: node --test booking/tests/osoite-saunotus-fi-170.test.mjs
+      # booking_179: ehdotetut tuotteet (enintään 3 / päätuote). Kassa ja vahvistussivu, seurantataulu.
+      # Tekstit content/site-texts.pending-import-75.json. SQL: t179 paikallisessa PG:ssä (migraatio + testi + rollback + uudelleenajo).
+      - run: node --test booking/tests/upsell-logic.test.mjs booking/tests/upsell-179.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

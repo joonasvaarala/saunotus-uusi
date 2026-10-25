@@ -2,6 +2,7 @@
 // Näyttää tilauksen rivit, maksutilan, kuitit sekä ohjauksen lisäykseen ja peruutuspyyntöön. Data: order-api.js (mock kun ?mock=1; puuttuva RPC → "ei vielä käytössä").
 import { rpc, functionUrl } from './sb.js';
 import { richHost } from './rich-view.js';
+import { orderUpsellSection } from './upsell-ui.js';
 import { OT } from './order-texts.js';
 import { oneKey } from './plural.js';   // yksikkö: {hours}/{minutes} = 1 → <avain>One
 import { T } from './i18n.js';
@@ -259,9 +260,18 @@ async function main() {
     const note = o.change_deadline ? h('p', { class: 'bk-note', 'data-testid': 'change-note', text: o.can_change ? t.changeNote.replace('{date}', dt(o.change_deadline)) : t.changeClosed }) : null;
     const guides = instructionsSection(o.instructions);
     const treats = (o.upsell_treatments || []).length ? h('div', { 'data-testid': 'upsell-treatments' }, h('p', { class: 'bk-note', text: t.treatLead }), h('ul', { class: 'ord-lines' }, o.upsell_treatments.map((x) => h('li', { text: nm(x) })))) : null;
+    const upsell = !closedHold && o.can_add && o.reservations.length ? orderUpsellSection({
+      S, L, token, order: o, rpc: api.mock ? api.rpc : rpc,
+      onAdded: async () => {
+        const fresh = await api.get(); if (!fresh?.ok) return;
+        await redraw(fresh);
+        const link = fresh.online_payment_enabled && fresh.payments?.find(p => p.status === 'pending' && p.link_path);
+        if (link) location.assign(S.base ? S.base + link.link_path : link.link_path);
+      },
+    }) : null;
     const add = closedHold || o.reservations.length === 0 ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-a' }, h('h3', { id: 'ord-a', text: t.addTitle }), o.can_add && o.upsell_addons.length ? addForm(o) : h('p', { class: 'bk-note', text: t.addClosed }), treats,
       h('p', { class: 'bk-note' }, `${t.addNewBooking} `, h('a', { href: S.shopHref, text: t.addNewBookingLink })));
-    const extra = guides || add ? h('div', { class: 'ord-extra', 'data-testid': 'order-extra' }, guides, add) : null;
+    const extra = guides || add || upsell ? h('div', { class: 'ord-extra', 'data-testid': 'order-extra' }, guides, upsell, add) : null;
     const cancel = closedHold || o.reservations.length === 0 ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c', 'data-testid': 'cancel-section' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), ...cancelBody(o, note));
     mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, closedEl, resv, optSec, lines, pay, giftCards, claimBox, annualEl, giftUse, receipts, extra, cancel, msg, phoneBox()));
   }
