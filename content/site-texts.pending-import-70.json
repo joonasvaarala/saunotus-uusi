@@ -1,0 +1,182 @@
+[
+ {
+  "key": "ui.shop.invoice_method_label",
+  "lang": "fi",
+  "text": "Laskutustapa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF) ja tilauksen tila Laskutettu; uusi avain (vanhoja avaimia ei muuteta, tuonti ei ylikirjoita)"
+ },
+ {
+  "key": "ui.shop.invoice_method_label",
+  "lang": "en",
+  "text": "Billing method",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF) ja tilauksen tila Laskutettu; uusi avain (vanhoja avaimia ei muuteta, tuonti ei ylikirjoita)"
+ },
+ {
+  "key": "ui.shop.invoice_method_einvoice",
+  "lang": "fi",
+  "text": "Verkkolasku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF) ja tilauksen tila Laskutettu; uusi avain (vanhoja avaimia ei muuteta, tuonti ei ylikirjoita)"
+ },
+ {
+  "key": "ui.shop.invoice_method_einvoice",
+  "lang": "en",
+  "text": "E-invoice",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF) ja tilauksen tila Laskutettu; uusi avain (vanhoja avaimia ei muuteta, tuonti ei ylikirjoita)"
+ },
+ {
+  "key": "ui.shop.invoice_method_pdf",
+  "lang": "fi",
+  "text": "PDF-lasku sähköpostiin",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF) ja tilauksen tila Laskutettu; uusi avain (vanhoja avaimia ei muuteta, tuonti ei ylikirjoita)"
+ },
+ {
+  "key": "ui.shop.invoice_method_pdf",
+  "lang": "en",
+  "text": "PDF invoice by email",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF) ja tilauksen tila Laskutettu; uusi avain (vanhoja avaimia ei muuteta, tuonti ei ylikirjoita)"
+ },
+ {
+  "key": "ui.shop.einvoice_details_title",
+  "lang": "fi",
+  "text": "Verkkolaskun tiedot",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF) ja tilauksen tila Laskutettu; uusi avain (vanhoja avaimia ei muuteta, tuonti ei ylikirjoita)"
+ },
+ {
+  "key": "ui.shop.einvoice_details_title",
+  "lang": "en",
+  "text": "E-invoice details",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF) ja tilauksen tila Laskutettu; uusi avain (vanhoja avaimia ei muuteta, tuonti ei ylikirjoita)"
+ },
+ {
+  "key": "ui.shop.einvoice_details_hint",
+  "lang": "fi",
+  "text": "Anna OVT-tunnus (0037 ja y-tunnus) sekä operaattorin välittäjätunnus.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF) ja tilauksen tila Laskutettu; uusi avain (vanhoja avaimia ei muuteta, tuonti ei ylikirjoita)"
+ },
+ {
+  "key": "ui.shop.einvoice_details_hint",
+  "lang": "en",
+  "text": "Enter the OVT address (0037 and your business ID) and the operator ID.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF) ja tilauksen tila Laskutettu; uusi avain (vanhoja avaimia ei muuteta, tuonti ei ylikirjoita)"
+ },
+ {
+  "key": "ui.shop.einvoice_details_required",
+  "lang": "fi",
+  "text": "Verkkolaskua varten anna OVT-tunnus ja välittäjätunnus.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF) ja tilauksen tila Laskutettu; uusi avain (vanhoja avaimia ei muuteta, tuonti ei ylikirjoita)"
+ },
+ {
+  "key": "ui.shop.einvoice_details_required",
+  "lang": "en",
+  "text": "For an e-invoice, enter the OVT address and the operator ID.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF) ja tilauksen tila Laskutettu; uusi avain (vanhoja avaimia ei muuteta, tuonti ei ylikirjoita)"
+ },
+ {
+  "key": "ui.shop.company_invoice_method_note",
+  "lang": "fi",
+  "text": "Varaus vahvistetaan ja lasku lähetetään valitsemallasi tavalla. Tilausta ei ole vielä maksettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF) ja tilauksen tila Laskutettu; uusi avain (vanhoja avaimia ei muuteta, tuonti ei ylikirjoita)"
+ },
+ {
+  "key": "ui.shop.company_invoice_method_note",
+  "lang": "en",
+  "text": "Your booking is confirmed and the invoice will be sent by the method you chose. The order is not paid yet.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF) ja tilauksen tila Laskutettu; uusi avain (vanhoja avaimia ei muuteta, tuonti ei ylikirjoita)"
+ },
+ {
+  "key": "ui.shop.error_invalid_invoice_method",
+  "lang": "fi",
+  "text": "Valitse laskutustapa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF) ja tilauksen tila Laskutettu; uusi avain (vanhoja avaimia ei muuteta, tuonti ei ylikirjoita)"
+ },
+ {
+  "key": "ui.shop.error_invalid_invoice_method",
+  "lang": "en",
+  "text": "Please choose a billing method.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF) ja tilauksen tila Laskutettu; uusi avain (vanhoja avaimia ei muuteta, tuonti ei ylikirjoita)"
+ },
+ {
+  "key": "ui.order.pay.invoiced",
+  "lang": "fi",
+  "text": "Laskutettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF) ja tilauksen tila Laskutettu; uusi avain (vanhoja avaimia ei muuteta, tuonti ei ylikirjoita)"
+ },
+ {
+  "key": "ui.order.pay.invoiced",
+  "lang": "en",
+  "text": "Invoiced",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF) ja tilauksen tila Laskutettu; uusi avain (vanhoja avaimia ei muuteta, tuonti ei ylikirjoita)"
+ }
+]

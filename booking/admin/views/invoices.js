@@ -8,6 +8,7 @@ import { customerDirty, routeSearchTerm } from '../invoice-customer-search.js';
 import { fetchYtj } from '../ytj.js';
 import { mountInvoiceLines } from '../invoice-line-form.js';
 import { serverErrorField, validateInvoiceHeader } from '../invoice-header-validate.js';
+import { invoiceIdFromQuery } from '../invoice-link.js';
 
 const STATUSES = ['draft', 'sent', 'paid', 'overdue', 'credited', 'voided'];
 const tx = (k) => invoiceText(k);
@@ -20,7 +21,7 @@ function statusLabel(s) {
   return tx(`ui.admin.invoices.st_${s}`);
 }
 
-export async function render() {
+export async function render({ query } = {}) {
   await loadInvoiceTexts(rpc);
   const st = { search: '', status: '', kind: '', from: '', to: '' };
   const list = h('div', { class: 'list', 'data-testid': 'invoices-list' });
@@ -64,7 +65,7 @@ export async function render() {
     const lines = inv.lines || [];
     const locked = inv.status !== 'draft';
     const pdf = inv.public_token && inv.invoice_no ? h('a', { class: 'btn', href: `${functionUrl('invoice-pdf')}?t=${inv.public_token}`, target: '_blank', rel: 'noopener', text: tx('ui.admin.invoices.pdf') }) : null;
-    const actions = h('div', { class: 'row' },
+    const actions = h('div', { class: 'row wrap' },   // booking_175: napit rivittyvät 390 px:n näytöllä (ei sivuttaisvieritystä)
       inv.status === 'draft' ? h('button', { class: 'btn primary', type: 'button', onclick: () => send(inv.id, true, false) }, tx('ui.admin.invoices.send_einvoice')) : null,
       inv.status === 'draft' || inv.status === 'sent' || inv.status === 'overdue' ? h('button', { class: 'btn', type: 'button', onclick: () => send(inv.id, false, true) }, tx('ui.admin.invoices.send_email')) : null,
       inv.status === 'sent' || inv.status === 'overdue' ? h('button', { class: 'btn', type: 'button', onclick: () => act('admin_mark_invoice_paid', inv.id) }, tx('ui.admin.invoices.mark_paid')) : null,
@@ -107,6 +108,9 @@ export async function render() {
     h('button', { class: 'btn primary', type: 'button', onclick: () => editor(null) }, tx('ui.admin.invoices.new')),
     h('button', { class: 'btn', type: 'button', onclick: fromOrder }, tx('ui.admin.invoices.from_order')));
   await draw();
+  // booking_175: #/laskut?invoice=<id> avaa laskun (esim. Uusi varaus → laskumaksu). Vain näyttö: lähetys edelleen napeista.
+  const linked = invoiceIdFromQuery(query);
+  if (linked) { try { await open(linked); } catch (e) { toast(errMsg(e)); } }
   return h('section', { class: 'pad' }, h('h1', { text: tx('ui.admin.invoices.title') }), bar, drawer.node, list, detail);
 
   async function fromOrder() {

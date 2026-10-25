@@ -83,8 +83,10 @@ test('migraatiot 90–93 ja rollbackit ovat paikallaan', () => {
 
 test('kauppa vaatii verkkolaskun vain uudella avaimella', () => {
   const shop = read('shop/src/shop.js');
-  assert.match(shop, /require_einvoice: true/);
-  assert.match(shop, /einvoiceTitleRequired/);
+  // booking_175: yritysasiakas valitsee verkkolaskun (OVT pakollinen) tai PDF:n; uudet avaimet, vanhat avaimet jäävät sanakirjaan
+  assert.match(shop, /require_einvoice: ei/);
+  assert.match(shop, /invoice_method: invoiceMethod/);
+  assert.match(shop, /einvoiceDetailsTitle/);
   const i18n = read('shop/src/i18n.js');
   assert.match(i18n, /einvoiceTitle: 'Verkkolaskutus \(valinnainen\)'/);
   assert.match(i18n, /einvoiceTitleRequired: 'Verkkolaskutus'/);
@@ -132,7 +134,7 @@ test('mock: luonnos, verkkolasku dry_run, hyvitys ja virheellinen y-tunnus', asy
   assert.equal(draft.total_gross, 200.8);
   const sent = await mock.rpc('admin_send_invoice', { p_id: draft.id, p_einvoice: true, p_email: false });
   assert.equal(sent.invoice_no, 'L000001');
-  assert.equal(sent.reference_no, '0013');
+  assert.equal(sent.reference_no, '731010');   // booking_175: 7310 + 1 + tarkiste
   assert.equal(sent.status, 'sent');
   assert.equal(sent.dispatch_status, 'dry_run');
   const paid = await mock.rpc('admin_mark_invoice_paid', { p_id: sent.id });

@@ -268,7 +268,7 @@ export function createTreatmentViews(c) {
       holdInfo().then((x) => { Object.assign(hi, x); if (!hi.on) return; if (!ok.disabled) ok.textContent = bookText(); lead.textContent = ht(S.lang, 'checkout.review', { minutes: hi.minutes }); holdExtra.replaceChildren(...hi.extra(S.lang)); });
       holder.replaceChildren(h('div', { class: 'bk-review' }, head, lead, holdExtra, dl,
         h('p', { class: 'bk-totalrow' }, t.total + ': ', h('strong', { class: 'bk-total', 'data-testid': 'review-total', text: money(totalNow()) }), ' ', h('small', { text: t.vatIncl })),
-        cust.kind === 'company' ? h('p', { class: 'bk-pay bk-paynow', text: t.companyInvoiceNote }) : null, err, h('div', { class: 'bk-actions' }, edit, ok)));
+        cust.kind === 'company' ? h('p', { class: 'bk-pay bk-paynow', text: t.companyInvoiceMethodNote }) : null, err, h('div', { class: 'bk-actions' }, edit, ok)));
       topBox.hidden = true; revealForm(holder, head);
     }
     holder.append(formView);

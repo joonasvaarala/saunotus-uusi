@@ -13,6 +13,7 @@ import { nbt as T, nbLang } from '../nb-texts.js';
 import { setLang, LANGS, getLang } from '../talous-i18n.js';
 import { priceFor, personsRange, effectiveKind, invoiceRefFor, paidDefault, parsePrice, summary } from '../nb-logic.js';
 import { typeSwitch, render as renderResource } from './resbooking.js';
+import { invoiceHref, openInvoiceAfterBooking } from '../invoice-link.js';
 
 export async function render({ ctx, refs, query, reload }) {
   const kind = query.get('tyyppi');   // migraatio 17: resurssivaraus / vanha varaus omalla lomakkeellaan
@@ -142,6 +143,13 @@ export async function render({ ctx, refs, query, reload }) {
         const r = card ? await rpc('admin_create_annual_card_booking', { p_customer_id: st.customer.id, p_rule_id: s.rule_id, p_date: st.date, p_note: f.elements.note.value || null })
           : await rpc('admin_create_booking', { p_rule_id: s.rule_id, p_date: st.date, p_persons: n, ...cust, p_payment_method: method.value, p_paid: paid.checked, p_note: f.elements.note.value || null, p_price: pp.value, p_addons: addonsSel.length ? addonsSel : null, p_invoice_reference: invoiceRefFor(kindNow(), invRef.value) });
         if (hasWarning(r)) toast(T('nb.warnMissing'), 'warn'); else toast(T('nb.toast', { no: r.order_no }));
+        // booking_175: yrityksen laskumaksu → luonnoslasku auki Laskut-näkymään (ei lähetystä; "Lähetä verkkolasku" / "Lähetä PDF sähköpostilla" napista)
+        if (openInvoiceAfterBooking({ card, method: method.value, kind: kindNow(), canInvoices: ctx.can('invoices.manage'), orderId: r.order_id })) {
+          try {
+            const inv = await rpc('admin_create_invoice_from_order', { p_order_id: r.order_id });
+            if (inv?.id) { location.hash = invoiceHref(inv.id); return; }
+          } catch (e) { toast(errMsg(e), 'err'); }
+        }
         showCreated(r);
         formBox.replaceChildren(); st.session = null; loadSessions();
       } catch (e) {
