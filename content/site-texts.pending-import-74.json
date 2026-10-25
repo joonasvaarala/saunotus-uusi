@@ -1,0 +1,22 @@
+[
+ {
+  "key": "ui.paylink.info.retry",
+  "lang": "fi",
+  "text": "Edellinen maksuyritys jäi kesken, eikä sinulta veloitettu mitään. Voit maksaa uudelleen samalla linkillä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "booking_178: peruttu tai keskeytetty Visma Pay -maksu ei kuluta maksulinkkiä; maksulinkkisivu kertoo, ettei veloitettu ja että samalla linkillä voi maksaa uudelleen; uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.info.retry",
+  "lang": "en",
+  "text": "Your previous payment attempt was not completed and you were not charged. You can pay again with this same link.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "booking_178: peruttu tai keskeytetty Visma Pay -maksu ei kuluta maksulinkkiä; maksulinkkisivu kertoo, ettei veloitettu ja että samalla linkillä voi maksaa uudelleen; uusi avain, tuonti ei ylikirjoita vanhoja"
+ }
+]

@@ -162,7 +162,8 @@ test('tekstit: pending-import-72 = ui.paylink.* FI+EN koodin oletuksista, uudet 
   // booking_177b lisäsi avaimia (yhteenveto) → pending-import-73; yhdessä tiedostot kattavat PLT:n täsmälleen, ei päällekkäisyyksiä
   const rows = JSON.parse(rd('content/site-texts.pending-import-72.json'));
   const rows73 = JSON.parse(rd('content/site-texts.pending-import-73.json'));
-  assert.equal(rows.length, 42); assert.equal(rows.length + rows73.length, def.size); assert.equal(def.size, Object.keys(PLT.fi).length * 2);
+  const rows74 = JSON.parse(rd('content/site-texts.pending-import-74.json'));   // booking_178: uusintaviesti
+  assert.equal(rows.length, 42); assert.equal(rows.length + rows73.length + rows74.length, def.size); assert.equal(def.size, Object.keys(PLT.fi).length * 2);
   assert.ok(!rows73.some((r) => rows.some((x) => x.key === r.key)), 'import-72 ja -73 eivät mene päällekkäin');
   for (const r of rows) { assert.ok(r.key.startsWith('ui.paylink.')); assert.equal(r.text, def.get(`${r.key}|${r.lang}`), `${r.key} ${r.lang}`); assert.ok(r.max_len >= r.text.length); }
   const keys = new Set(rows.map((r) => r.key));
