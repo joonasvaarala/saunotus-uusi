@@ -159,11 +159,14 @@ test('tekstit: pending-import-72 = ui.paylink.* FI+EN koodin oletuksista, uudet 
   const { readdirSync } = await import('node:fs');
   const R = await import(pathToFileURL(join(root, 'booking/shop/src/text-registry.js')).href);
   const def = new Map(R.collectDefaults().filter((r) => r.id === 'PLT').map((r) => [`${r.key}|${r.lang}`, r.text]));
+  // booking_177b lisäsi avaimia (yhteenveto) → pending-import-73; yhdessä tiedostot kattavat PLT:n täsmälleen, ei päällekkäisyyksiä
   const rows = JSON.parse(rd('content/site-texts.pending-import-72.json'));
-  assert.equal(rows.length, def.size); assert.equal(rows.length, Object.keys(PLT.fi).length * 2);
+  const rows73 = JSON.parse(rd('content/site-texts.pending-import-73.json'));
+  assert.equal(rows.length, 42); assert.equal(rows.length + rows73.length, def.size); assert.equal(def.size, Object.keys(PLT.fi).length * 2);
+  assert.ok(!rows73.some((r) => rows.some((x) => x.key === r.key)), 'import-72 ja -73 eivät mene päällekkäin');
   for (const r of rows) { assert.ok(r.key.startsWith('ui.paylink.')); assert.equal(r.text, def.get(`${r.key}|${r.lang}`), `${r.key} ${r.lang}`); assert.ok(r.max_len >= r.text.length); }
   const keys = new Set(rows.map((r) => r.key));
-  for (const f of readdirSync(join(root, 'content')).filter((f) => /^site-texts\.(pending-import|imported).*\.json$/.test(f) && f !== 'site-texts.pending-import-72.json')) {
+  for (const f of readdirSync(join(root, 'content')).filter((f) => /^site-texts\.(pending-import|imported).*\.json$/.test(f) && f !== 'site-texts.pending-import-72.json' && f !== 'site-texts.pending-import-73.json')) {
     const rs = JSON.parse(rd(`content/${f}`)); if (Array.isArray(rs)) for (const r of rs) assert.ok(!keys.has(r?.key), `${r?.key} jo tiedostossa ${f}`);
   }
   for (const r of JSON.parse(rd('content/site-texts.fallback.json')).texts) assert.ok(!keys.has(r.key), `${r.key} jo tuotannossa`);

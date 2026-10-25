@@ -106,6 +106,7 @@ for (const lang of ['fi', 'en']) {
 
 // 3b2) maksulinkkisivu /maksa/?p=<link_token> (settings.payment_link_path = '/maksa/'; sähköpostin, hallinnan ja pikakassan maksulinkit) + EN /en/pay/.
 //      Ei indeksointia, ei Referer-vuotoa; pay-link.js kutsuu vismapay-start {link_token} ja ohjaa Visma Payhin. Kielivalinta säilyttää ?p=.
+//      booking_177b: latauksessa vain luku -RPC public_payment_link_info → yhteenveto (summa, tilausnumero, rivit, voimassaolo) tai tila ennen painiketta.
 const PAY_PATHS = { fi: '/maksa/', en: '/en/pay/' };
 for (const lang of ['fi', 'en']) {
   const o = lang === 'fi' ? 'en' : 'fi';

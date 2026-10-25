@@ -131,6 +131,7 @@ jobs:
       - run: node --test booking/tests/lahjakortti-arvo-erotus-174.test.mjs
       # booking_177: maksulinkkisivu /maksa/?p= (+ /en/pay/) → vismapay-start {link_token} (pending-import-72)
       - run: node --test booking/tests/maksulinkki-sivu-177.test.mjs
+      - run: node --test booking/tests/maksulinkki-info-177b.test.mjs
       # Tuoteviestit (booking_121): ajastus, tuontitiedosto 29, vahvistuksen ohje ja jälkimarkkinoinnin peruutus. TypeScript-mallit → Node 22.
       - run: node --test booking/tests/rich-text.test.mjs booking/tests/viestit.test.mjs
       # Viestin toimitustapa (booking_141): ajastettu lähetys tai ohjeet tilauksen yhteydessä. SQL-testi t141 ajetaan psql:llä (Bottiavustus).

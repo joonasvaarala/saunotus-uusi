@@ -30,3 +30,47 @@ export function switchHref(otherPath, search) {
   const t = linkTokenFrom(search);
   return t ? `${otherPath}?p=${t}` : otherPath;
 }
+
+// ---- booking_177b: yhteenveto ennen maksua (RPC public_payment_link_info) ----
+const STATUSES = new Set(['open', 'paid', 'expired', 'replaced', 'not_payable', 'not_found']);
+const num = (v) => (v == null || v === '' || !Number.isFinite(+v) ? null : +v);
+const ymd = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? String(v) : null);
+const hm = (v) => (/^\d{2}:\d{2}$/.test(String(v || '')) ? String(v) : null);
+
+/** RPC-vastaus → sivun malli. null = ei käyttökelpoista tietoa (RPC puuttuu / verkko / nopeusraja) → sivu toimii kuten ennen (yleinen kortti + painike). */
+export function normLinkInfo(r) {
+  if (!r || typeof r !== 'object' || r.ok !== true || !STATUSES.has(r.status)) return null;
+  const items = Array.isArray(r.items) ? r.items.filter((i) => i && typeof i === 'object' && String(i.name || '').trim()).map((i) => ({
+    kind: String(i.kind || ''), name: String(i.name), name_en: i.name_en ? String(i.name_en) : null, quantity: num(i.quantity) ?? 1,
+    date: ymd(i.date), start: hm(i.start), end: hm(i.end), end_date: ymd(i.end_date),
+  })) : [];
+  return { status: r.status, reason: String(r.reason || r.status), can_pay: r.status === 'open' && r.can_pay !== false,
+    amount: num(r.amount), currency: String(r.currency || 'EUR'), order_no: r.order_no ?? null,
+    expires_date: ymd(r.expires_date), expires_time: hm(r.expires_time), items };
+}
+
+const INFO_MSG = {
+  link_paid: 'info.paid', order_paid: 'info.order_paid', link_expired: 'info.expired', payment_cancelled: 'info.cancelled', payment_not_pending: 'info.expired',
+  replaced: 'info.replaced', link_stale: 'info.stale', other_provider_started: 'err.other', order_not_payable: 'err.not_payable', vismapay_off: 'err.off', not_found: 'err.not_found',
+};
+const STATUS_MSG = { paid: 'info.paid', expired: 'info.expired', replaced: 'info.replaced', not_payable: 'err.not_payable', not_found: 'err.not_found' };
+
+/** Mallin tila → { pay: näytetäänkö painike, msgKey: tilaviesti (null kun avoin), amountKey: summan otsikko, showSummary, validKey }. */
+export function linkInfoView(info) {
+  if (!info) return { pay: true, msgKey: null, amountKey: null, showSummary: false, validKey: null };
+  if (info.status === 'open') return { pay: true, msgKey: null, amountKey: 'sum.due', showSummary: true, validKey: info.expires_date ? 'sum.valid' : null };
+  const msgKey = INFO_MSG[info.reason] || STATUS_MSG[info.status] || 'err.generic';
+  return { pay: false, msgKey, amountKey: info.status === 'paid' && info.reason === 'link_paid' ? 'sum.paid' : 'sum.link', showSummary: info.status !== 'not_found' && info.amount != null,
+    validKey: info.reason === 'link_expired' && info.expires_date ? 'sum.expiredAt' : null };
+}
+
+/** 2026-12-04 → FI "pe 4.12.2026", EN "Fri 4 Dec 2026" (päivämäärä on jo Helsingin aikaa; ei aikavyöhykemuunnosta). */
+export function fmtDate(L, d) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(d || ''));
+  if (!m) return '';
+  const dt = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], 12));
+  try {
+    const wd = new Intl.DateTimeFormat(L === 'en' ? 'en-GB' : 'fi-FI', { weekday: 'short', timeZone: 'UTC' }).format(dt).replace(/\.$/, '');
+    return L === 'en' ? `${wd} ${+m[3]} ${new Intl.DateTimeFormat('en-GB', { month: 'short', timeZone: 'UTC' }).format(dt)} ${m[1]}` : `${wd} ${+m[3]}.${+m[2]}.${m[1]}`;
+  } catch { return L === 'en' ? `${+m[3]}/${+m[2]}/${m[1]}` : `${+m[3]}.${+m[2]}.${m[1]}`; }
+}
