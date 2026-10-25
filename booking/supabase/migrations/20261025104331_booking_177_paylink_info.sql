@@ -18,7 +18,7 @@
 --     booking._order_balance(bigint) a6b31f93559de53d75a52d8a285f1170
 --     booking._vismapay_mode() 6d7d56a83470d01e954a78e8767e8366
 --     booking._setting(text,jsonb) 70fcfa245e9e7d070dae7a6c1e90ce4d
--- Rollback: rollbacks/20261025110000_booking_177_ROLLBACK.sql. Testi: tests/checkout/t177_payment_link_info.sql (BEGIN … ROLLBACK).
+-- Rollback: rollbacks/20261025104331_booking_177_ROLLBACK.sql. Testi: tests/checkout/t177_payment_link_info.sql (BEGIN … ROLLBACK).
 set local lock_timeout = '5s';
 
 do $g$

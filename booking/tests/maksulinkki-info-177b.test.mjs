@@ -162,8 +162,8 @@ test('tekstit: pending-import-73 = uudet ui.paylink.* -avaimet FI+EN koodin olet
 });
 
 test('migraatio booking_177: SECURITY DEFINER, search_path, vain anon/authenticated/service_role, ei henkilötietoja, vartijat; rollback poistaa', () => {
-  const M = rd('booking/supabase/migrations/20261025110000_booking_177_paylink_info.sql');
-  const RB = rd('booking/supabase/rollbacks/20261025110000_booking_177_ROLLBACK.sql');
+  const M = rd('booking/supabase/migrations/20261025104331_booking_177_paylink_info.sql');
+  const RB = rd('booking/supabase/rollbacks/20261025104331_booking_177_ROLLBACK.sql');
   const T = rd('booking/supabase/tests/checkout/t177_payment_link_info.sql');
   const fn = M.slice(M.indexOf('create function booking.public_payment_link_info'), M.indexOf('end $function$;'));
   assert.match(fn, /security definer\nset search_path to ''/);
