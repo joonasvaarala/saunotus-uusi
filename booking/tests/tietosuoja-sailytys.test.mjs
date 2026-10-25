@@ -27,8 +27,9 @@ test('versio: booking_157 lajittuu booking_156:n (20261024163053) jälkeen ja on
   assert.ok(V > '20261024163053');
   const all = readdirSync(join(root, 'booking/supabase/migrations')).filter((f) => f.endsWith('.sql')).sort();
   // booking_157:n jälkeen saa tulla vain myöhempiä booking-migraatioita (esim. booking_159); ei aiempia numeroita sen perään
-  const after = all.filter((f) => f.slice(0, 14) > V);
-  assert.ok(after.every((f) => +(f.match(/_booking_(\d+)_/)?.[1] ?? 0) > 157), `booking_157:n jälkeen vain myöhempiä migraatioita: ${after}`);
+  // ei-booking-migraatiot (esim. history-sync 20261025113918_ops_health_light) eivät kuulu numerojärjestykseen
+  const after = all.filter((f) => f.slice(0, 14) > V && /_booking_\d+_/.test(f));
+  assert.ok(after.every((f) => +f.match(/_booking_(\d+)_/)[1] > 157), `booking_157:n jälkeen vain myöhempiä migraatioita: ${after}`);
   const files = readdirSync(join(root, 'booking/supabase/migrations')).filter((f) => f.startsWith(V));
   assert.equal(files.length, 1);
   assert.ok(readdirSync(join(root, 'booking/supabase/rollbacks')).some((f) => f.startsWith(V)));
