@@ -1,0 +1,150 @@
+[
+  {
+    "key": "ui.admin.addon_lock.paid",
+    "lang": "fi",
+    "text": "maksettu {{var:n}} kpl",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_180: maksettujen lisäpalvelurivien suojaus hallinnassa"
+  },
+  {
+    "key": "ui.admin.addon_lock.paid",
+    "lang": "en",
+    "text": "{{var:n}} paid",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_180: maksettujen lisäpalvelurivien suojaus hallinnassa"
+  },
+  {
+    "key": "ui.admin.addon_lock.link",
+    "lang": "fi",
+    "text": "maksulinkillä {{var:n}} kpl",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_180: maksettujen lisäpalvelurivien suojaus hallinnassa"
+  },
+  {
+    "key": "ui.admin.addon_lock.link",
+    "lang": "en",
+    "text": "{{var:n}} on payment link",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_180: maksettujen lisäpalvelurivien suojaus hallinnassa"
+  },
+  {
+    "key": "ui.admin.addon_lock.hint",
+    "lang": "fi",
+    "text": "Maksettuja lisäpalveluita ei voi vähentää tästä. Tee hyvitys tilausnäkymässä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_180: maksettujen lisäpalvelurivien suojaus hallinnassa"
+  },
+  {
+    "key": "ui.admin.addon_lock.hint",
+    "lang": "en",
+    "text": "Paid add-ons cannot be reduced here. Refund them from the order view.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_180: maksettujen lisäpalvelurivien suojaus hallinnassa"
+  },
+  {
+    "key": "ui.admin.addon_lock.link_hint",
+    "lang": "fi",
+    "text": "Avoimella maksulinkillä olevia lisäpalveluita voi vähentää, kun maksu on valmistunut tai linkki on vanhentunut.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_180: maksettujen lisäpalvelurivien suojaus hallinnassa"
+  },
+  {
+    "key": "ui.admin.addon_lock.link_hint",
+    "lang": "en",
+    "text": "Add-ons on open payment links can be reduced after payment is completed or the link expires.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_180: maksettujen lisäpalvelurivien suojaus hallinnassa"
+  },
+  {
+    "key": "ui.admin.addon_lock.error_paid",
+    "lang": "fi",
+    "text": "Lisäpalvelu on jo maksettu. Hyvitä se ensin tilausnäkymässä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_180: maksettujen lisäpalvelurivien suojaus hallinnassa"
+  },
+  {
+    "key": "ui.admin.addon_lock.error_paid",
+    "lang": "en",
+    "text": "An add-on has already been paid. Refund it from the order view first.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_180: maksettujen lisäpalvelurivien suojaus hallinnassa"
+  },
+  {
+    "key": "ui.admin.addon_lock.error_link",
+    "lang": "fi",
+    "text": "Lisäpalvelu on avoimella maksulinkillä. Odota maksua tai linkin vanhenemista.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_180: maksettujen lisäpalvelurivien suojaus hallinnassa"
+  },
+  {
+    "key": "ui.admin.addon_lock.error_link",
+    "lang": "en",
+    "text": "An add-on is on an open payment link. Wait for payment or for the link to expire.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_180: maksettujen lisäpalvelurivien suojaus hallinnassa"
+  },
+  {
+    "key": "ui.admin.addon_lock.error_unknown",
+    "lang": "fi",
+    "text": "Lisäpalvelujen maksutilaa ei voitu varmistaa. Muokkaus on estetty turvallisuussyistä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_180: maksettujen lisäpalvelurivien suojaus hallinnassa"
+  },
+  {
+    "key": "ui.admin.addon_lock.error_unknown",
+    "lang": "en",
+    "text": "The payment status of the add-ons could not be verified. Editing is blocked for safety.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_180: maksettujen lisäpalvelurivien suojaus hallinnassa"
+  }
+]
