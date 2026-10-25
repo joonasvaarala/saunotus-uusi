@@ -22,8 +22,8 @@ const rd = (p) => readFileSync(join(root, '..', p), 'utf8');
 const MIG = rd('booking/supabase/migrations/20261024202015_booking_166_ritual_addon.sql');
 const RB = rd('booking/supabase/rollbacks/20261024202015_booking_166_ROLLBACK.sql');
 const SQLT = rd('booking/supabase/tests/t166_ritual_addon.sql');
-const MIG181 = rd('booking/supabase/migrations/20261026100000_booking_181_ritual_start_times.sql');
-const RB181 = rd('booking/supabase/rollbacks/20261026100000_booking_181_ROLLBACK.sql');
+const MIG181 = rd('booking/supabase/migrations/20261025230602_booking_181_ritual_start_times.sql');
+const RB181 = rd('booking/supabase/rollbacks/20261025230602_booking_181_ROLLBACK.sql');
 const SQLT181 = rd('booking/supabase/tests/t181_ritual_start_times.sql');
 const PENDING = JSON.parse(rd('content/site-texts.pending-import-62.json'));
 const PENDING63 = JSON.parse(rd('content/site-texts.pending-import-63.json'));   // kassakortin korjaus: 3 uutta avainta (ei SQL:ää)

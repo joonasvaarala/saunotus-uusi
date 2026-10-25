@@ -6,7 +6,7 @@
 // 20261024202015_booking_166_ritual_addon.sql) ja sen lukeva funktio booking._ritual_addon_starts(alku, loppu).
 // Muutos: päivitä asetusta, esim. { "before_min": 30, "at_start": true, "first_after_min": 30, "step_min": 60, "at_end": true }.
 // RITUAL_RULE_DEFAULTS + ritualStarts() alla ovat saman säännön peili mockia ja testejä varten (testi vertaa migraation oletukseen).
-// booking_181 (20261026100000): rituaali alkaa vain klo 16.00, 16.30 tai 17.00 (time_window_rules 'ritual'.allowed_starts, sama kuin paketilla kb 7):
+// booking_181 (20261025230602): rituaali alkaa vain klo 16.00, 16.30 tai 17.00 (time_window_rules 'ritual'.allowed_starts, sama kuin paketilla kb 7):
 // ajat ovat näistä ne, jotka osuvat ikkunaan [alku − before_min, loppu) (+ loppu, jos at_end). Ilman listaa (allowed = null) vanha sääntö.
 // Esimerkki: vuoro 16.00–18.00 → 16.00, 16.30, 17.00; vuoro 14.00–16.00 → 16.00; vuoro 17.00–19.00 → 16.30, 17.00.
 export const RITUAL_ALLOWED_STARTS = Object.freeze(['16:00', '16:30', '17:00']);

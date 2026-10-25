@@ -1,4 +1,4 @@
--- booking_181 ROLLBACK (migraatio 20261026100000_booking_181_ritual_start_times.sql).
+-- booking_181 ROLLBACK (migraatio 20261025230602_booking_181_ritual_start_times.sql).
 -- Palauttaa booking._ritual_addon_starts(timestamptz,timestamptz) tuotannon määrittelyksi täsmälleen (md5 622d94213b88d532b415e9d548785019).
 -- Jo tehdyt varaukset ennallaan. Vartija: md5 on oltava booking_181:n tai tuotannon; muuten mitään ei muuteta. Oikeudet ennallaan.
 set local lock_timeout = '5s';
