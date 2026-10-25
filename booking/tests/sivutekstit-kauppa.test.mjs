@@ -96,6 +96,7 @@ test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-shop.mjs 
     ...J('content/site-texts.pending-import-64.json').map((r) => `${r.key}|${r.lang}`),   // monikkokorjaus: yksikköavaimet *_one
     ...J('content/site-texts.pending-import-68.json').filter((r) => r.key.startsWith('ui.gift.')).map((r) => `${r.key}|${r.lang}`),   // booking_173: lahjakortin myyjät
     ...J('content/site-texts.pending-import-70.json').map((r) => `${r.key}|${r.lang}`),   // booking_175: laskutustapa + Laskutettu
+    ...J('content/site-texts.pending-import-72.json').map((r) => `${r.key}|${r.lang}`),   // booking_177: maksulinkkisivu
   ]);
   const imp = new Set(PENDING.map((r) => r.key));
   writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts.filter((r) => !imp.has(r.key)) }));   // tuotanto ennen #61:n tuontia
@@ -129,7 +130,8 @@ test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet ava
   const oneUi = J('content/site-texts.pending-import-64.json');   // monikkokorjaus
   const sellersUi = J('content/site-texts.pending-import-68.json').filter((r) => r.key.startsWith('ui.gift.'));   // booking_173
   const invoiceUi = J('content/site-texts.pending-import-70.json');   // booking_175: laskutustapa + Laskutettu
-  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length + waitUi.length + waitParty.length + waitOffer.length + codeUi.length + partyType.length + cancelUi.length + quietUi.length + ritualUi.length + ritualCard.length + oneUi.length + sellersUi.length + invoiceUi.length);
+  const payLinkUi = J('content/site-texts.pending-import-72.json');   // booking_177: maksulinkkisivu
+  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length + waitUi.length + waitParty.length + waitOffer.length + codeUi.length + partyType.length + cancelUi.length + quietUi.length + ritualUi.length + ritualCard.length + oneUi.length + sellersUi.length + invoiceUi.length + payLinkUi.length);
   assert.ok(!rows.some((x) => haveKeys.has(x.key)));
   for (const e of extraRows) assert.ok(!rows.some((x) => x.key === e.key), `${e.key}: jo tuotannossa, generaattori ei lisää`);
   const bad = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', join(work, 'ei-ole.json')], { encoding: 'utf8' });
@@ -333,7 +335,7 @@ test('vartija: kaikki kaupan kielisanakirjat (export const X = { fi: {…}, en: 
   const { readdirSync } = await import('node:fs');
   const dir = join(root, 'booking/shop/src');
   const dictFiles = readdirSync(dir).filter((f) => f.endsWith('.js') && /^export const [A-Za-z]+ = \{\s*\n\s*fi: \{/m.test(readFileSync(join(dir, f), 'utf8')));
-  assert.deepEqual(dictFiles.sort(), ['gift-texts.js', 'hold-texts.js', 'i18n.js', 'mobilepay-texts.js', 'options-texts.js', 'order-texts.js', 'pay-choices-texts.js', 'vismapay-texts.js']);
+  assert.deepEqual(dictFiles.sort(), ['gift-texts.js', 'hold-texts.js', 'i18n.js', 'mobilepay-texts.js', 'options-texts.js', 'order-texts.js', 'pay-choices-texts.js', 'pay-link-texts.js', 'vismapay-texts.js']);
   const reg = rd('booking/shop/src/text-registry.js');
   for (const f of dictFiles) assert.ok(reg.includes(`./${f}`), `${f} puuttuu text-registry.js:stä`);
   // tunnetut poikkeukset (raportoitu): ICS-tiedoston osoite (shop.js) ja SOURCE_LABELS (gift-logic.js; palvelin antaa nimet)

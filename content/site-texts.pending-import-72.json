@@ -1,0 +1,426 @@
+[
+ {
+  "key": "ui.paylink.title",
+  "lang": "fi",
+  "text": "Maksulinkki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.title",
+  "lang": "en",
+  "text": "Payment link",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.lead",
+  "lang": "fi",
+  "text": "Maksa tilauksesi kortilla tai verkkopankissa. Siirryt Visma Payn sivulle, jossa näet maksettavan summan ja tilauksen viitteen ennen maksua. Maksun jälkeen palaat tilaukseesi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 450,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.lead",
+  "lang": "en",
+  "text": "Pay for your order by card or online bank. You go to the Visma Pay page, where you see the amount and the order reference before paying. After payment you return to your order.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 450,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.btn",
+  "lang": "fi",
+  "text": "Siirry maksamaan",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.btn",
+  "lang": "en",
+  "text": "Go to payment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.busy",
+  "lang": "fi",
+  "text": "Avataan Visma Payta…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.busy",
+  "lang": "en",
+  "text": "Opening Visma Pay…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.redirecting",
+  "lang": "fi",
+  "text": "Siirrytään Visma Payhin…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.redirecting",
+  "lang": "en",
+  "text": "Taking you to Visma Pay…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.amount",
+  "lang": "fi",
+  "text": "Maksettava: {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.amount",
+  "lang": "en",
+  "text": "Amount due: {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.dry_run",
+  "lang": "fi",
+  "text": "Testitila: maksua ei veloiteta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.dry_run",
+  "lang": "en",
+  "text": "Test mode: no payment is charged.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.contact",
+  "lang": "fi",
+  "text": "Kysyttävää? Soita meille:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.contact",
+  "lang": "en",
+  "text": "Questions? Call us:",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.invalid",
+  "lang": "fi",
+  "text": "Maksulinkki on virheellinen. Tarkista, että avasit koko linkin sähköpostista.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.invalid",
+  "lang": "en",
+  "text": "The payment link is invalid. Check that you opened the whole link from the email.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.not_found",
+  "lang": "fi",
+  "text": "Maksulinkkiä ei löytynyt. Tarkista linkki tai ota yhteyttä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.not_found",
+  "lang": "en",
+  "text": "The payment link was not found. Check the link or contact us.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.expired",
+  "lang": "fi",
+  "text": "Maksulinkki on vanhentunut tai korvattu uudella. Pyydä meiltä uusi linkki.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.expired",
+  "lang": "en",
+  "text": "The payment link has expired or has been replaced by a new one. Ask us for a new link.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.stale",
+  "lang": "fi",
+  "text": "Tilauksen maksettava summa on muuttunut. Pyydä meiltä uusi maksulinkki.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.stale",
+  "lang": "en",
+  "text": "The amount due on the order has changed. Ask us for a new payment link.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.paid",
+  "lang": "fi",
+  "text": "Tämä maksu on jo maksettu. Kiitos.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.paid",
+  "lang": "en",
+  "text": "This payment has already been paid. Thank you.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.other",
+  "lang": "fi",
+  "text": "Maksu on jo aloitettu toisella maksutavalla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.other",
+  "lang": "en",
+  "text": "The payment has already been started with another payment method.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.not_payable",
+  "lang": "fi",
+  "text": "Tätä tilausta ei voi maksaa verkossa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.not_payable",
+  "lang": "en",
+  "text": "This order cannot be paid online.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.off",
+  "lang": "fi",
+  "text": "Verkkomaksu ei ole juuri nyt käytössä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.off",
+  "lang": "en",
+  "text": "Online payment is not available right now.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.busy",
+  "lang": "fi",
+  "text": "Maksun avaus on jo käynnissä. Odota hetki ja yritä uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.busy",
+  "lang": "en",
+  "text": "A payment is already being opened. Wait a moment and try again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.rate",
+  "lang": "fi",
+  "text": "Liian monta yritystä. Yritä hetken kuluttua uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.rate",
+  "lang": "en",
+  "text": "Too many attempts. Please try again in a moment.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.provider",
+  "lang": "fi",
+  "text": "Visma Pay ei vastannut. Yritä hetken kuluttua uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.provider",
+  "lang": "en",
+  "text": "Visma Pay did not respond. Please try again in a moment.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.network",
+  "lang": "fi",
+  "text": "Yhteys ei onnistunut. Tarkista verkkoyhteys ja yritä uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.network",
+  "lang": "en",
+  "text": "The connection failed. Check your network and try again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.generic",
+  "lang": "fi",
+  "text": "Maksun aloitus epäonnistui. Yritä uudelleen tai ota yhteyttä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.err.generic",
+  "lang": "en",
+  "text": "The payment could not be started. Try again or contact us.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177: maksulinkkisivu /maksa/ ja /en/pay/ (sähköpostin, hallinnan ja pikakassan maksulinkit); uusi avain, tuonti ei ylikirjoita vanhoja"
+ }
+]

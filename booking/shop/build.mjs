@@ -104,6 +104,26 @@ for (const lang of ['fi', 'en']) {
   write(PATHS[lang].order, html);   // polku = sopimus: settings.order_page_path = '/tilaus/' (linkki …/tilaus/?t=<public_token>); EN-sivu /en/order/ (tilauksen locale ohjaa oikeaan kieleen, ks. order.js)
 }
 
+// 3b2) maksulinkkisivu /maksa/?p=<link_token> (settings.payment_link_path = '/maksa/'; sähköpostin, hallinnan ja pikakassan maksulinkit) + EN /en/pay/.
+//      Ei indeksointia, ei Referer-vuotoa; pay-link.js kutsuu vismapay-start {link_token} ja ohjaa Visma Payhin. Kielivalinta säilyttää ?p=.
+const PAY_PATHS = { fi: '/maksa/', en: '/en/pay/' };
+for (const lang of ['fi', 'en']) {
+  const o = lang === 'fi' ? 'en' : 'fi';
+  const title = lang === 'fi' ? 'Maksulinkki' : 'Payment link';
+  const lead = lang === 'fi' ? 'Maksa tilauksesi turvallisesti Visma Payn kautta.' : 'Pay for your order securely with Visma Pay.';
+  const noscript = lang === 'fi' ? 'Maksaminen vaatii JavaScriptin. Voit myös soittaa meille' : 'Payment requires JavaScript. You can also call us';
+  const S = { lang, page: 'paylink', base: BASE, links: LINKS(lang), siteTextsUrl: `${BASE}/booking/site-texts.json`, orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order }, otherHref: BASE + PAY_PATHS[o], phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email };
+  const body = R.pageHero({ title, text: lead, img: 'ovi-kaiverrus' }, lang, 'book')
+    + `<section class="section"><div class="wrap"><div id="pay-link-app" aria-busy="true"><noscript><p>${e(noscript)}: <a href="tel:${site.contact.phoneTel}">${e(L.phoneDisplay(lang))}</a></p></noscript></div></div></section>`
+    + `<script src="${BASE}/booking/config.js"></script><script>window.BOOKING_SHOP=${JSON.stringify(S)}</script><script type="module" src="${BASE}/booking/pay-link.js"></script>`;
+  let html = R.layout({ lang, key: 'book', meta: { title: `${title} | Sipoonjoen Perinnesauna`, description: lead, og: 'ovi-kaiverrus' }, body });
+  html = html.replace('</head>', `<meta name="referrer" content="no-referrer"><link rel="stylesheet" href="${BASE}/booking/shop.css"></head>`);
+  html = html.replace(/<link rel="canonical"[^>]*>(<link rel="alternate"[^>]*>)*/, '').replace(/<meta name="robots" content="[^"]*">/, '').replace('<meta name="description"', '<meta name="robots" content="noindex,nofollow"><meta name="description"');
+  html = html.replace(/(<div class="lang"[^>]*>(?:(?!<\/div>).)*?<a href=")[^"]*(")/s, `$1${BASE + PAY_PATHS[o]}$2`);   // kielivalinta → toisen kielen maksusivu (JS lisää ?p=)
+  if (!html.includes('id="pay-link-app"') || !html.includes('noindex')) throw new Error(`maksulinkkisivu ${PAY_PATHS[lang]} ei rakentunut oikein`);
+  write(PAY_PATHS[lang], html);
+}
+
 // 3c) lahjakorttisivu (/lahjakortti/, /en/gift-card/): myynti- ja saldolohkot piilossa kunnes gift.js näkee sale_enabled / redeem_enabled = true (muuten sivu on ennallaan: Johku-linkit)
 for (const lang of ['fi', 'en']) {
   const f = join(OUT, site.pages.gift[lang], 'index.html');

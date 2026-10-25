@@ -1,5 +1,5 @@
 // Visma Pay: vismapay-start ja vismapay-notify (reconcile). Virheet palautetaan, ei heitetä.
-export function createVismapayApi({ token, functionUrl, anonKey = '', fetchImpl = (typeof fetch === 'function' ? fetch.bind(globalThis) : null), timeoutMs = 20000 } = {}) {
+export function createVismapayApi({ token, linkToken = null, functionUrl, anonKey = '', fetchImpl = (typeof fetch === 'function' ? fetch.bind(globalThis) : null), timeoutMs = 20000 } = {}) {
   async function post(name, body) {
     if (!fetchImpl || !functionUrl) return { ok: false, code: 'network' };
     const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
@@ -20,7 +20,7 @@ export function createVismapayApi({ token, functionUrl, anonKey = '', fetchImpl 
     } finally { if (timer) clearTimeout(timer); }
   }
   return {
-    start: () => post('vismapay-start', { order_token: token }),
+    start: () => post('vismapay-start', linkToken ? { link_token: linkToken } : { order_token: token }),   // linkToken: maksulinkkisivu /maksa/?p=<link_token>
     reconcile: () => post('vismapay-notify', { action: 'reconcile', order_token: token }),
   };
 }
