@@ -219,6 +219,7 @@ function publicPush(push: PushResult) {
     patched: push.patched,
     deleted: push.deleted,
     gone: push.gone,
+    converged: push.converged,
     blocked: push.blocked,
     conflicts: push.conflicts,
     missing: push.missing,
@@ -327,6 +328,8 @@ async function syncCalendar(
       writes: push.writes,
       writeSkip: push.writeSkip,
       claimed: push.claimed,
+      converged: push.converged,
+      conflicts: push.conflicts,
       failed: push.failed,
     });
     if (pullError) {
