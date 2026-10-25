@@ -4,7 +4,7 @@
 -- Ajastettu lähetys on oletuksena POIS (settings messages.timed_enabled = false).
 -- Lyhyt ohje tilausvahvistuksessa ei riipu tästä kytkimestä.
 -- Sähköpostin lähetystilaa (off / dry_run / live) ja allowlistia ei muuteta.
--- Rollback: rollbacks/20261021140000_booking_121_ROLLBACK.sql
+-- Rollback: rollbacks/20261021145208_booking_121_ROLLBACK.sql
 -- Tätä tiedostoa ei ajeta tästä repossa. Bottiavustus ajaa migraation. Ei tuotantoon tästä.
 -- ============================================================
 set local lock_timeout = '5s';

@@ -113,10 +113,10 @@ Hoito- tai muu `public_slots`-tuote (`upsell.treatments`) näytetään nimellä.
 
 ## Käyttöönotto
 
-1. Aja migraatio `booking/supabase/migrations/20261021140000_booking_121_messages.sql` (versio booking_121). Älä aja tätä tuotantoon tästä reposita ilman tavallista julkaisua.
+1. Aja migraatio `booking/supabase/migrations/20261021145208_booking_121_messages.sql` (versio booking_121). Älä aja tätä tuotantoon tästä reposita ilman tavallista julkaisua.
 2. Julkaise edge-funktio `send-emails` uudelleen (malli ja ohitus). Cron-työ syntyy migraatiossa, jos `pg_cron` on käytössä. Nimi: `booking_messages_dispatch`.
 3. Tuo sivutekstit tiedostosta `content/site-texts.pending-import-29.json` (28 riviä, 14 avainta × fi/en).
 4. Kirjoita pohjat hallinnassa, kytke tuotteet ja ota pohja käyttöön. Esimerkkipohjat eivät kelpaa asiakkaille.
 5. Kytke **Ajastetut viestit päällä** vasta, kun pohjat on tarkistettu. Ennen sitä ajastus ei jonota mitään. Lyhyt ohje vahvistuksessa toimii jo, kun pohja on käytössä.
 
-Peruutusskripti: `booking/supabase/rollbacks/20261021140000_booking_121_ROLLBACK.sql`. Se poistaa `product_message`-jonorivit, palauttaa `public_get_order`- ja `email_outbox_claim`-funktiot ja poistaa taulut.
+Peruutusskripti: `booking/supabase/rollbacks/20261021145208_booking_121_ROLLBACK.sql`. Se poistaa `product_message`-jonorivit, palauttaa `public_get_order`- ja `email_outbox_claim`-funktiot ja poistaa taulut.

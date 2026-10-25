@@ -277,8 +277,8 @@ test('migraatio on vain luku ja noudattaa samaa sääntöä', () => {
   const parts = readFileSync(new URL('../admin/views/dayparts.js', import.meta.url), 'utf8');
   assert.match(parts, /can\('shifts\.view_all'\) \? 'all' : 'own'/);
   assert.match(parts, /preloaded && Array\.isArray\(preloaded\.rows\) \? preloaded : await loadShifts/);
-  const sql125 = readFileSync(new URL('../supabase/migrations/20261021182000_booking_125_perf.sql', import.meta.url), 'utf8');
-  const rb125 = readFileSync(new URL('../supabase/rollbacks/20261021182000_booking_125_ROLLBACK.sql', import.meta.url), 'utf8');
+  const sql125 = readFileSync(new URL('../supabase/migrations/20261021230213_booking_125_perf.sql', import.meta.url), 'utf8');
+  const rb125 = readFileSync(new URL('../supabase/rollbacks/20261021230213_booking_125_ROLLBACK.sql', import.meta.url), 'utf8');
   assert.match(sql125, /from booking\.v_claims c/);
   assert.match(sql125, /pc\.lifecycle = 'current'/);
   assert.match(sql125, /admin_list_reservations/);

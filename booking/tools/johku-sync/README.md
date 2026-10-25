@@ -6,7 +6,7 @@ Säännöt ovat samat kuin `SYNC_SAANNOT.md`: piilotettuja varauksia ei herätet
 
 ## Migraatio
 
-`booking/supabase/migrations/20261022090000_booking_126_johku_sync.sql`
+`booking/supabase/migrations/20261022091609_booking_126_johku_sync.sql`
 
 Funktiot (vain `service_role`):
 

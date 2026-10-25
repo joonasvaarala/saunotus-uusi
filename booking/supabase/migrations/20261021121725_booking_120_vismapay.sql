@@ -2,7 +2,7 @@
 -- Visma Pay (Paybyway REST w3.2): test/live-valmistelu, ilmoituksen kirjaus, hyvitys.
 -- Migraatio EI kytke test- eikä live-tilaa. Oletus säilyy off.
 -- Avaimet ovat vain Edge-salaisuuksia (VISMAPAY_TEST_* / VISMAPAY_LIVE_*). Ei salaisuuksia tähän.
--- Rollback: rollbacks/20261021120000_booking_120_ROLLBACK.sql
+-- Rollback: rollbacks/20261021121725_booking_120_ROLLBACK.sql
 
 set local lock_timeout = '5s';
 

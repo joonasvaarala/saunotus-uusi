@@ -104,8 +104,8 @@ test('pending-import-31: uudet asetustekstit, FI+EN, ei päällekkäin', () => {
 });
 
 test('migraatio ei poista avaimia eikä kirjoita live-tilaa', () => {
-  const sql = read('../supabase/migrations/20261021160000_booking_123_settings_ui.sql');
-  const rb = read('../supabase/rollbacks/20261021160000_booking_123_ROLLBACK.sql');
+  const sql = read('../supabase/migrations/20261021175349_booking_123_settings_ui.sql');
+  const rb = read('../supabase/rollbacks/20261021175349_booking_123_ROLLBACK.sql');
   assert.match(sql, /admin_settings_bundle/);
   assert.match(sql, /admin_save_settings/);
   assert.match(sql, /current_staff_role\(\) is distinct from 'admin'/);
