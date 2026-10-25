@@ -60,9 +60,9 @@ begin
   insert into booking.staff(user_id, email, name, role) values (u_adm, 't174-admin-' || run || '@example.test', 't174 admin', 'admin');
 
   -- ===== A rakenne
-  perform pg_temp.ck(md5(pg_get_functiondef('booking._on_payment_paid(bigint)'::regprocedure)) in ('de9084871640d213d10527a045157bf2', '6abd248cb10998be8c97f3373dcb3504'), 'A1 _on_payment_paid = booking_174 (tai booking_176)');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking._on_payment_paid(bigint)'::regprocedure)) in ('de9084871640d213d10527a045157bf2', 'af7f99e87ba7e00e0d5e3d5b6cbf2400'), 'A1 _on_payment_paid = booking_174 (tai booking_176)');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text)'::regprocedure)) in ('525d1fa96fd7c37df4d7e502edf1bf71', 'a4e69cb26eb44b72eacce7c167342884'), 'A2 admin_mark_voucher_claim_redeemed = booking_174 (tai booking_176)');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.email_outbox_claim(integer)'::regprocedure)) in ('2db9a1233a06e6293d0877f17de1ab72', 'd355fb47a5c19f90bdcb28615fa54b95'), 'A3 email_outbox_claim = booking_174 (tai booking_176)');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking.email_outbox_claim(integer)'::regprocedure)) in ('2db9a1233a06e6293d0877f17de1ab72', '70602f6500703e8750e1539ae8809d38'), 'A3 email_outbox_claim = booking_174 (tai booking_176)');
   perform pg_temp.ck(not has_function_privilege('authenticated', 'booking._vc_due(booking.orders,booking.voucher_claims)', 'execute')
       and not has_function_privilege('anon', 'booking._vc_due(booking.orders,booking.voucher_claims)', 'execute')
       and has_function_privilege('authenticated', 'booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text)', 'execute')

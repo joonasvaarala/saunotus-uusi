@@ -2,25 +2,29 @@
 -- Koskee vain kumppanilahjakorttivarauksia (voucher_claims; maksutavat partner_voucher, partner_voucher_kokemuskauppa, partner_voucher_offerilla, partner_voucher_elamyslahjat).
 --   1) Varauksen jälkeen YKSI varausvahvistus (voucher_claim_received, uusi sisältö send-emailsissä): ei erillistä tilausvahvistusta (order_confirmation)
 --      eikä ajastettua ohjeviestiä (product_message, kategoria instruction). Ohjeet tulevat vahvistukseen (email_outbox_claim → order.instructions).
---      Useampi koodi samalle tilaukselle → ei uutta vahvistusta, jos edellinen on jonossa tai lähetetty.
+--      Useampi koodi samalle tilaukselle → ei uutta vahvistusta, jos edellinen on jonossa tai lähetetty. Jos jonotuksen pyyntö perutaan/vanhenee ennen lähetystä,
+--      mutta tilauksella on voimassa oleva pyyntö, sama viesti lähtee sen tiedoilla (email_outbox_claim) → tilaus saa vahvistuksen tasan kerran.
 --   2) Lahjakortti kattaa koko summan → lunastuksesta ei viestiä (ennallaan: kumppanimaksun kuitti ilman sähköpostia, booking_174).
 --   3) Lahjakortti kattaa osan → yksi yhdistetty viesti (payment_link / voucher_difference: lunastettu ja vahvistettu, summa, arvo, erotus, Maksa nyt).
---      Sama logiikka nyt myös botille (svc_mark_voucher_claim_redeemed) yhteisen _vc_redeem-funktion kautta.
---   4) Erotus maksettu → ei kuittisähköpostia (vc_difference_payments); kuitti näkyy tilaussivulla (public_get_order.receipts).
+--      Sama logiikka nyt myös botille (svc_mark_voucher_claim_redeemed) ja vanhalle polulle (admin_/svc_resolve_voucher_claim tila 'redeemed') yhteisen _vc_redeem-funktion kautta.
+--   4) Erotus maksettu → ei kuittisähköpostia (vc_difference_payments, seuranta tilauksen/pyynnön mukaan: myös korvaava linkki tai muu tilaussivun maksu erotuslinkin jälkeen);
+--      kuitti näkyy tilaussivulla (public_get_order.receipts).
 --   5) Lunastus epäonnistuu → ei automaattista viestiä (_vc_notify_problem palauttaa aina false).
 --   6) Muiden varausten viestit ennallaan.
 --   korvataan (tuotanto -> booking_176):
---     booking._on_payment_paid(bigint): de9084871640d213d10527a045157bf2 -> 6abd248cb10998be8c97f3373dcb3504
---     booking.email_outbox_claim(integer): 2db9a1233a06e6293d0877f17de1ab72 -> d355fb47a5c19f90bdcb28615fa54b95
+--     booking._on_payment_paid(bigint): de9084871640d213d10527a045157bf2 -> af7f99e87ba7e00e0d5e3d5b6cbf2400
+--     booking.email_outbox_claim(integer): 2db9a1233a06e6293d0877f17de1ab72 -> 70602f6500703e8750e1539ae8809d38
 --     booking.orders_confirmed_mail_trg(): 85e59930421bf098d24d7fcebd50507d -> de9df39ff7972a951e61684f8f2db87b
 --     booking.public_submit_voucher_claim(uuid,text,text,bigint): de84e5ce9b1062111c4248e7c582fdb8 -> d28a31d27147f4cf7bceb12150c9e77c
 --     booking.messages_dispatch(integer): 11a25a5f1e02fe5e635a92d8fea3a69f -> 4b1f94601e23d9dc3eec34bcd5b4dc08
 --     booking._vc_notify_problem(bigint): 85f500444e3af880009fc3b6c0e3a402 -> 3414022269f6db113f1085208eb6f040
 --     booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text): 525d1fa96fd7c37df4d7e502edf1bf71 -> a4e69cb26eb44b72eacce7c167342884
 --     booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text): ed28a9a7240b2ae62f5abef66885bc5d -> 673f26a88054b2b31dcbab872557e383
+--     booking.admin_resolve_voucher_claim(bigint,text,text,text,numeric,text): b7d61783b74032374626c25ea60397b0 -> 41a4f3cc89e802f18e5131f849394188
+--     booking.svc_resolve_voucher_claim(bigint,text,text,text,numeric,text): 96bf311a66fb5292f141bcc86621254f -> cc67ebd8ce012211eb603b7f2b1c3ef4
 --   uudet funktiot:
 --     booking._vc_partner_order(bigint): 9221478413d1e3869021d9e20c20e567
---     booking._vc_redeem(bigint,numeric,text,text,text): f420202b18a6d05d1f3a5a0d809fd644
+--     booking._vc_redeem(bigint,numeric,text,text,text): 6f52789346960d95370169446a61451b
 --   riippuvuudet, ei muuteta (tuotanto = vaadittu):
 --     booking._issue_receipt(bigint) ae8b663945b78d1849b0028987689c8e
 --     booking.email_outbox_claim_base_146(integer) 9c63ce8c8b6f46347692859a117d110d
@@ -44,6 +48,7 @@
 --     booking._stamp_order_billing(bigint,bigint,jsonb) 693f24abfe0dddfbf4a2e345e1596e73
 --     booking._invoice_allocate(bigint) 46a3326812f896077fc2614ba783ff3d
 --     booking.orders_invoice_draft_trg() a48fe50340cff5f6e9709ad46055ecb9
+--     booking._vc_mask(text) 9e612ee37728ef0971d428765ab47e1a
 -- Rollback: rollbacks/20261025100000_booking_176_ROLLBACK.sql. Testi: tests/giftcards/t176_kumppanilahjakortti_viestit.sql (BEGIN … ROLLBACK).
 set local lock_timeout = '5s';
 
@@ -51,9 +56,9 @@ do $g$
 declare v text; ok boolean := true; msg text := '';
 begin
   v := md5(pg_get_functiondef(to_regprocedure('booking._on_payment_paid(bigint)')));
-  if v is null or v not in ('de9084871640d213d10527a045157bf2', '6abd248cb10998be8c97f3373dcb3504') then ok := false; msg := msg || ' _on_payment_paid=' || coalesce(v, 'puuttuu'); end if;
+  if v is null or v not in ('de9084871640d213d10527a045157bf2', 'af7f99e87ba7e00e0d5e3d5b6cbf2400') then ok := false; msg := msg || ' _on_payment_paid=' || coalesce(v, 'puuttuu'); end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking.email_outbox_claim(integer)')));
-  if v is null or v not in ('2db9a1233a06e6293d0877f17de1ab72', 'd355fb47a5c19f90bdcb28615fa54b95') then ok := false; msg := msg || ' email_outbox_claim=' || coalesce(v, 'puuttuu'); end if;
+  if v is null or v not in ('2db9a1233a06e6293d0877f17de1ab72', '70602f6500703e8750e1539ae8809d38') then ok := false; msg := msg || ' email_outbox_claim=' || coalesce(v, 'puuttuu'); end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking.orders_confirmed_mail_trg()')));
   if v is null or v not in ('85e59930421bf098d24d7fcebd50507d', 'de9df39ff7972a951e61684f8f2db87b') then ok := false; msg := msg || ' orders_confirmed_mail_trg=' || coalesce(v, 'puuttuu'); end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking.public_submit_voucher_claim(uuid,text,text,bigint)')));
@@ -66,10 +71,14 @@ begin
   if v is null or v not in ('525d1fa96fd7c37df4d7e502edf1bf71', 'a4e69cb26eb44b72eacce7c167342884') then ok := false; msg := msg || ' admin_mark_voucher_claim_redeemed=' || coalesce(v, 'puuttuu'); end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text)')));
   if v is null or v not in ('ed28a9a7240b2ae62f5abef66885bc5d', '673f26a88054b2b31dcbab872557e383') then ok := false; msg := msg || ' svc_mark_voucher_claim_redeemed=' || coalesce(v, 'puuttuu'); end if;
+  v := md5(pg_get_functiondef(to_regprocedure('booking.admin_resolve_voucher_claim(bigint,text,text,text,numeric,text)')));
+  if v is null or v not in ('b7d61783b74032374626c25ea60397b0', '41a4f3cc89e802f18e5131f849394188') then ok := false; msg := msg || ' admin_resolve_voucher_claim=' || coalesce(v, 'puuttuu'); end if;
+  v := md5(pg_get_functiondef(to_regprocedure('booking.svc_resolve_voucher_claim(bigint,text,text,text,numeric,text)')));
+  if v is null or v not in ('96bf311a66fb5292f141bcc86621254f', 'cc67ebd8ce012211eb603b7f2b1c3ef4') then ok := false; msg := msg || ' svc_resolve_voucher_claim=' || coalesce(v, 'puuttuu'); end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking._vc_partner_order(bigint)')));
   if v is not null and v <> '9221478413d1e3869021d9e20c20e567' then ok := false; msg := msg || ' _vc_partner_order=' || v; end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking._vc_redeem(bigint,numeric,text,text,text)')));
-  if v is not null and v <> 'f420202b18a6d05d1f3a5a0d809fd644' then ok := false; msg := msg || ' _vc_redeem=' || v; end if;
+  if v is not null and v <> '6f52789346960d95370169446a61451b' then ok := false; msg := msg || ' _vc_redeem=' || v; end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking._issue_receipt(bigint)')));
   if v is distinct from 'ae8b663945b78d1849b0028987689c8e' then ok := false; msg := msg || ' _issue_receipt=' || coalesce(v, 'puuttuu'); end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking.email_outbox_claim_base_146(integer)')));
@@ -114,6 +123,8 @@ begin
   if v is distinct from '46a3326812f896077fc2614ba783ff3d' then ok := false; msg := msg || ' _invoice_allocate=' || coalesce(v, 'puuttuu'); end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking.orders_invoice_draft_trg()')));
   if v is distinct from 'a48fe50340cff5f6e9709ad46055ecb9' then ok := false; msg := msg || ' orders_invoice_draft_trg=' || coalesce(v, 'puuttuu'); end if;
+  v := md5(pg_get_functiondef(to_regprocedure('booking._vc_mask(text)')));
+  if v is distinct from '9e612ee37728ef0971d428765ab47e1a' then ok := false; msg := msg || ' _vc_mask=' || coalesce(v, 'puuttuu'); end if;
   if not exists (select 1 from pg_trigger t where t.tgrelid = 'booking.orders'::regclass and t.tgname = 'orders_confirmed_upd'
                   and t.tgfoid = 'booking.orders_confirmed_mail_trg()'::regprocedure and not t.tgisinternal) then
     ok := false; msg := msg || ' trigger orders_confirmed_upd puuttuu';
@@ -123,24 +134,27 @@ end $g$;
 
 -- Kumppanilahjakortin erotuksen maksulinkit (booking_174/176). Näiden maksujen kuitista ei lähetetä sähköpostia; kuitti näkyy tilaussivulla.
 create table if not exists booking.vc_difference_payments(
-  payment_id bigint primary key references booking.payments(id) on delete cascade,
+  id bigint generated always as identity primary key,
+  order_id bigint not null references booking.orders(id) on delete cascade,
   claim_id bigint references booking.voucher_claims(id) on delete set null,
+  payment_id bigint unique references booking.payments(id) on delete set null,
   created_at timestamptz not null default now()
 );
-comment on table booking.vc_difference_payments is 'booking_176: kumppanilahjakortin erotuksen maksulinkit (payments.id). _on_payment_paid ei jonota näiden maksujen kuittisähköpostia; kuitti näkyy tilaussivulla.';
+create index if not exists vc_difference_payments_order_idx on booking.vc_difference_payments(order_id);
+comment on table booking.vc_difference_payments is 'booking_176: kumppanilahjakortin erotuksen maksulinkit (tilaus, pyyntö, payments.id). _on_payment_paid ei jonota kuittisähköpostia tämän linkin eikä sen jälkeen luodun saman tilauksen maksun (korvaava linkki, tilaussivu) kuitista, kun pyyntö on yhä lunastettu; kuitti näkyy tilaussivulla.';
 alter table booking.vc_difference_payments enable row level security;
 revoke all on table booking.vc_difference_payments from public, anon, authenticated;
 -- jo luodut booking_174-erotuslinkit (jono ja audit)
-insert into booking.vc_difference_payments(payment_id, claim_id)
-select x.pid, max(x.cid) from (
+insert into booking.vc_difference_payments(order_id, claim_id, payment_id, created_at)
+select max(p.order_id), max(x.cid), x.pid, min(p.created_at) from (
   select e.payment_id as pid, nullif(e.payload ->> 'claim_id', '')::bigint as cid
     from booking.email_outbox e where e.kind = 'payment_link' and e.payload ->> 'variant' = 'voucher_difference' and e.payment_id is not null
   union all
   select (a.new_data ->> 'link_payment_id')::bigint, a.row_pk::bigint
     from booking.audit_log a where a.action = 'VOUCHER_DIFFERENCE_LINK' and a.table_name = 'booking.voucher_claims' and a.new_data ->> 'link_payment_id' ~ '^[0-9]+$' and a.row_pk ~ '^[0-9]+$'
 ) x
-where exists (select 1 from booking.payments p where p.id = x.pid)
-  and (x.cid is null or exists (select 1 from booking.voucher_claims vc where vc.id = x.cid))
+join booking.payments p on p.id = x.pid
+where (x.cid is null or exists (select 1 from booking.voucher_claims vc where vc.id = x.cid))
 group by x.pid
 on conflict (payment_id) do nothing;
 
@@ -187,7 +201,7 @@ begin
                 jsonb_build_object('variant', 'voucher_difference', 'claim_id', p_id, 'voucher_value', (v ->> 'amount')::numeric, 'difference', v_diff,
                                    'total', (v ->> 'amount')::numeric + v_diff));
     -- booking_176: erotuksen maksusta ei kuittisähköpostia (_on_payment_paid)
-    insert into booking.vc_difference_payments(payment_id, claim_id) values (v_pid, p_id) on conflict (payment_id) do nothing;
+    insert into booking.vc_difference_payments(order_id, claim_id, payment_id) values (o.id, p_id, v_pid) on conflict (payment_id) do nothing;
     insert into booking.audit_log(actor, actor_role, table_name, row_pk, action, old_data, new_data)
     values (auth.uid(), booking._jwt_role(), 'booking.voucher_claims', p_id::text, 'VOUCHER_DIFFERENCE_LINK', null,
             jsonb_build_object('voucher_value', (v ->> 'amount')::numeric, 'due', v_due, 'difference', v_diff, 'link_payment_id', v_pid, 'email_queued', v_mail, 'by', p_by));
@@ -211,8 +225,15 @@ begin
     select order_id, method into v_order, v_method from booking.payments where id = p_payment_id;
     -- booking_174: kumppanilahjakortti → kuitti vain kirjanpitoon, ei kuittisähköpostia
     if booking._is_partner_method(v_method) then return; end if;
-    -- booking_176: kumppanilahjakortin erotuksen maksu → kuitti näkyy tilaussivulla, ei kuittisähköpostia
-    if exists (select 1 from booking.vc_difference_payments d where d.payment_id = p_payment_id) then return; end if;
+    -- booking_176: kumppanilahjakortin erotuksen maksu → kuitti näkyy tilaussivulla, ei kuittisähköpostia. Seuranta tilauksen/pyynnön mukaan: myös korvaava linkki
+    -- (uusi payments.id) tai muu tapa maksaa erotus (tilaussivu) erotuslinkin luonnin jälkeen, kun lunastettu pyyntö on yhä voimassa.
+    if exists (select 1 from booking.vc_difference_payments d
+                where d.payment_id = p_payment_id
+                   or (d.order_id = v_order
+                       and d.created_at <= (select pp.created_at from booking.payments pp where pp.id = p_payment_id)
+                       and (d.claim_id is null or exists (select 1 from booking.voucher_claims vc where vc.id = d.claim_id and vc.status = 'redeemed')))) then
+      return;
+    end if;
     perform booking._enqueue_email('receipt', v_order, v_id, p_payment_id, 'receipt:' || v_id);
   end if;
 end $function$;
@@ -230,9 +251,16 @@ AS $function$
     when z.item->>'kind' = 'payment_link'
     then z.item || coalesce((select jsonb_build_object('voucher_difference', jsonb_build_object('total', e.payload -> 'total', 'voucher_value', e.payload -> 'voucher_value', 'difference', e.payload -> 'difference'))
                                from booking.email_outbox e where e.id = (z.item->>'id')::bigint and e.payload ->> 'variant' = 'voucher_difference'), '{}'::jsonb)
-    when z.item->>'kind' = 'voucher_claim_received' and jsonb_typeof(z.item->'order') = 'object'
+    when z.item->>'kind' = 'voucher_claim_received'
     then z.item || coalesce((select jsonb_build_object('order', (z.item->'order') || jsonb_build_object('instructions', booking._order_short_instructions(e.order_id, coalesce(nullif(e.locale, ''), o.locale, 'fi'))))
-                               from booking.email_outbox e join booking.orders o on o.id = e.order_id where e.id = (z.item->>'id')::bigint), '{}'::jsonb)
+                               from booking.email_outbox e join booking.orders o on o.id = e.order_id where e.id = (z.item->>'id')::bigint and jsonb_typeof(z.item->'order') = 'object'), '{}'::jsonb)
+                -- booking_176: vahvistus tilausta kohden; jos jonotuksen pyyntö on peruttu/vanhentunut mutta tilauksella on voimassa oleva pyyntö, viesti lähtee sen tiedoilla (send-emails ohittaa vain, jos voimassa olevaa ei ole)
+                || coalesce((select jsonb_build_object('voucher_claim', jsonb_build_object('claim_id', vc.id, 'status', vc.status, 'source', vc.source, 'code_masked', booking._vc_mask(vc.code), 'problem_code', vc.problem_code,
+                                   'hold_until', vc.hold_until, 'created_at', vc.created_at, 'customer_name', vc.customer_name))
+                               from booking.email_outbox e join booking.voucher_claims vc on vc.order_id = e.order_id
+                              where e.id = (z.item->>'id')::bigint and coalesce(z.item #>> '{voucher_claim,status}', 'cancelled') in ('cancelled', 'expired')
+                                and vc.status in ('open', 'processing', 'problem', 'redeemed')
+                              order by vc.created_at, vc.id limit 1), '{}'::jsonb)
     else z.item end order by z.ord), '[]'::jsonb)
   from jsonb_array_elements(booking.email_outbox_claim_base_146(p_limit)) with ordinality as z(item, ord);
 $function$;
@@ -452,19 +480,52 @@ begin
   return booking._vc_redeem(p_id, p_amount, p_partner_ref, p_note, 'bot');
 end $function$;
 
+-- 11) booking.admin_resolve_voucher_claim(bigint,text,text,text,numeric,text)
+CREATE OR REPLACE FUNCTION booking.admin_resolve_voucher_claim(p_id bigint, p_status text, p_problem_code text DEFAULT NULL::text, p_note text DEFAULT NULL::text, p_amount numeric DEFAULT NULL::numeric, p_partner_ref text DEFAULT NULL::text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+begin
+  perform booking._require_permission('giftcards.manage');
+  -- booking_176: lunastus ('redeemed') samaa polkua kuin admin_mark_voucher_claim_redeemed: arvon tarkistus ja osittaisesta arvosta erotuksen maksulinkki (_vc_redeem)
+  if p_status = 'redeemed' and exists (select 1 from booking.voucher_claims vc where vc.id = p_id and vc.status in ('open', 'processing', 'problem')) then
+    return booking._vc_redeem(p_id, p_amount, p_partner_ref, p_note, 'staff');
+  end if;
+  return booking._vc_resolve(p_id, p_status, p_problem_code, p_note, p_amount, p_partner_ref, 'staff');
+end $function$;
+
+-- 12) booking.svc_resolve_voucher_claim(bigint,text,text,text,numeric,text)
+CREATE OR REPLACE FUNCTION booking.svc_resolve_voucher_claim(p_id bigint, p_status text, p_problem_code text DEFAULT NULL::text, p_note text DEFAULT NULL::text, p_amount numeric DEFAULT NULL::numeric, p_partner_ref text DEFAULT NULL::text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+begin
+  -- booking_176: lunastus ('redeemed') samaa polkua kuin svc_mark_voucher_claim_redeemed: arvon tarkistus ja osittaisesta arvosta erotuksen maksulinkki (_vc_redeem)
+  if p_status = 'redeemed' and exists (select 1 from booking.voucher_claims vc where vc.id = p_id and vc.status in ('open', 'processing')) then
+    return booking._vc_redeem(p_id, p_amount, p_partner_ref, p_note, 'bot');
+  end if;
+  return booking._vc_resolve(p_id, p_status, p_problem_code, p_note, p_amount, p_partner_ref, 'bot');
+end $function$;
+
 revoke all on function booking._vc_partner_order(bigint) from public, anon, authenticated;
 revoke all on function booking._vc_redeem(bigint,numeric,text,text,text) from public, anon, authenticated;
 
 do $v$
 begin
   if md5(pg_get_functiondef('booking._vc_partner_order(bigint)'::regprocedure)) <> '9221478413d1e3869021d9e20c20e567' then raise exception 'booking_176: _vc_partner_order md5 ei vastaa odotettua'; end if;
-  if md5(pg_get_functiondef('booking._vc_redeem(bigint,numeric,text,text,text)'::regprocedure)) <> 'f420202b18a6d05d1f3a5a0d809fd644' then raise exception 'booking_176: _vc_redeem md5 ei vastaa odotettua'; end if;
-  if md5(pg_get_functiondef('booking._on_payment_paid(bigint)'::regprocedure)) <> '6abd248cb10998be8c97f3373dcb3504' then raise exception 'booking_176: _on_payment_paid md5 ei vastaa odotettua'; end if;
-  if md5(pg_get_functiondef('booking.email_outbox_claim(integer)'::regprocedure)) <> 'd355fb47a5c19f90bdcb28615fa54b95' then raise exception 'booking_176: email_outbox_claim md5 ei vastaa odotettua'; end if;
+  if md5(pg_get_functiondef('booking._vc_redeem(bigint,numeric,text,text,text)'::regprocedure)) <> '6f52789346960d95370169446a61451b' then raise exception 'booking_176: _vc_redeem md5 ei vastaa odotettua'; end if;
+  if md5(pg_get_functiondef('booking._on_payment_paid(bigint)'::regprocedure)) <> 'af7f99e87ba7e00e0d5e3d5b6cbf2400' then raise exception 'booking_176: _on_payment_paid md5 ei vastaa odotettua'; end if;
+  if md5(pg_get_functiondef('booking.email_outbox_claim(integer)'::regprocedure)) <> '70602f6500703e8750e1539ae8809d38' then raise exception 'booking_176: email_outbox_claim md5 ei vastaa odotettua'; end if;
   if md5(pg_get_functiondef('booking.orders_confirmed_mail_trg()'::regprocedure)) <> 'de9df39ff7972a951e61684f8f2db87b' then raise exception 'booking_176: orders_confirmed_mail_trg md5 ei vastaa odotettua'; end if;
   if md5(pg_get_functiondef('booking.public_submit_voucher_claim(uuid,text,text,bigint)'::regprocedure)) <> 'd28a31d27147f4cf7bceb12150c9e77c' then raise exception 'booking_176: public_submit_voucher_claim md5 ei vastaa odotettua'; end if;
   if md5(pg_get_functiondef('booking.messages_dispatch(integer)'::regprocedure)) <> '4b1f94601e23d9dc3eec34bcd5b4dc08' then raise exception 'booking_176: messages_dispatch md5 ei vastaa odotettua'; end if;
   if md5(pg_get_functiondef('booking._vc_notify_problem(bigint)'::regprocedure)) <> '3414022269f6db113f1085208eb6f040' then raise exception 'booking_176: _vc_notify_problem md5 ei vastaa odotettua'; end if;
   if md5(pg_get_functiondef('booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text)'::regprocedure)) <> 'a4e69cb26eb44b72eacce7c167342884' then raise exception 'booking_176: admin_mark_voucher_claim_redeemed md5 ei vastaa odotettua'; end if;
   if md5(pg_get_functiondef('booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text)'::regprocedure)) <> '673f26a88054b2b31dcbab872557e383' then raise exception 'booking_176: svc_mark_voucher_claim_redeemed md5 ei vastaa odotettua'; end if;
+  if md5(pg_get_functiondef('booking.admin_resolve_voucher_claim(bigint,text,text,text,numeric,text)'::regprocedure)) <> '41a4f3cc89e802f18e5131f849394188' then raise exception 'booking_176: admin_resolve_voucher_claim md5 ei vastaa odotettua'; end if;
+  if md5(pg_get_functiondef('booking.svc_resolve_voucher_claim(bigint,text,text,text,numeric,text)'::regprocedure)) <> 'cc67ebd8ce012211eb603b7f2b1c3ef4' then raise exception 'booking_176: svc_resolve_voucher_claim md5 ei vastaa odotettua'; end if;
 end $v$;

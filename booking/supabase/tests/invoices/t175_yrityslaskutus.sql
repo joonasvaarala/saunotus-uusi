@@ -108,8 +108,8 @@ begin
       and md5(pg_get_functiondef('booking.admin_send_invoice(bigint,boolean,boolean)'::regprocedure)) = '7ea29743e8e199c74ced1d62c730b27f'
       and md5(pg_get_functiondef('booking.orders_invoice_status_trg()'::regprocedure)) = '9ec5c212604145e284fa07d2fd2686f6'
       and md5(pg_get_functiondef('booking.invoices_lock_trg()'::regprocedure)) = '63f39183d475f2b04bcc7a9e9aaf251e', 'A5 laskutuksen riippuvuudet = tuotanto (ei muutettu)');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking._on_payment_paid(bigint)'::regprocedure)) in ('de9084871640d213d10527a045157bf2', '6abd248cb10998be8c97f3373dcb3504')
-      and md5(pg_get_functiondef('booking.email_outbox_claim(integer)'::regprocedure)) in ('2db9a1233a06e6293d0877f17de1ab72', 'd355fb47a5c19f90bdcb28615fa54b95')
+  perform pg_temp.ck(md5(pg_get_functiondef('booking._on_payment_paid(bigint)'::regprocedure)) in ('de9084871640d213d10527a045157bf2', 'af7f99e87ba7e00e0d5e3d5b6cbf2400')
+      and md5(pg_get_functiondef('booking.email_outbox_claim(integer)'::regprocedure)) in ('2db9a1233a06e6293d0877f17de1ab72', '70602f6500703e8750e1539ae8809d38')
       and md5(pg_get_functiondef('booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text)'::regprocedure)) in ('525d1fa96fd7c37df4d7e502edf1bf71', 'a4e69cb26eb44b72eacce7c167342884')
       and md5(pg_get_functiondef('booking._vc_due(booking.orders,booking.voucher_claims)'::regprocedure)) = 'bea9cd9a32eb273ee72caed0aedd1e2e', 'A6 booking_173/174 ennallaan (tai booking_176)');
   perform pg_temp.ck(md5(pg_get_functiondef('booking._enqueue_email(text,bigint,bigint,bigint,text,jsonb)'::regprocedure)) = '350304b26e7240c42a6cf38f604eb689'

@@ -8,7 +8,7 @@ import { T } from './i18n.js';
 import { createOrderApi, validToken, wantsMock } from './order-api.js';
 import { createGiftApi } from './gift-api.js';
 import { redeemSection, cardsSection, claimsSection } from './order-gift.js';
-import { revealForm, revealIfHidden } from './gift-ui.js';
+import { revealForm, revealIfHidden, revealHashOnce } from './gift-ui.js';
 import { createMobilepayApi } from './mobilepay-api.js';
 import { normOptions, shouldShowButton, testUiEnabled } from './mobilepay-logic.js';
 import { payBlock, runReturn } from './mobilepay-ui.js';
@@ -45,7 +45,8 @@ const dt = (iso) => `${df({ weekday: 'short', day: 'numeric', month: 'numeric', 
 const hm = (iso) => df({ hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(iso)).replace('.', ':');
 const nm = (x) => (L === 'en' && x.name_en) || x.name;
 const phoneBox = () => h('p', { class: 'bk-contact' }, h('span', { text: `${t.contact} ` }), h('a', { href: `tel:${S.phoneTel}`, text: S.phone }), ' · ', h('a', { href: `mailto:${S.email}`, text: S.email }));
-const mount = (...nodes) => { root.replaceChildren(...nodes.flat().filter(Boolean)); root.setAttribute('aria-busy', 'false'); };
+const hashState = { done: false };   // booking_176: #ord-g yms. vieritetään näkyviin kerran, kun osio on renderöity
+const mount = (...nodes) => { root.replaceChildren(...nodes.flat().filter(Boolean)); root.setAttribute('aria-busy', 'false'); revealHashOnce(document, hashState); if (root.querySelector('[data-testid=order-page]')) hashState.done = true; };
 const badge = (kind, text) => h('span', { class: `ord-badge ${kind}`, text });
 function safeHttps(u) {
   try { const x = new URL(String(u || '')); return x.protocol === 'https:' ? x.href : ''; } catch { return ''; }
@@ -106,7 +107,7 @@ async function main() {
   if (!o?.ok) return mount(h('p', { class: 'bk-error', role: 'alert', text: t.notFound }), phoneBox());
   // sopimuksen linkki on yksi (/tilaus/?t=…): jos tilauksen kieli (locale) on toinen kuin sivun, siirrytään saman tilauksen toiskieliseen sivuun (token säilyy)
   const want = ['fi', 'en'].includes(o.locale) ? o.locale : L;
-  if (want !== L && S.orderHref?.[want] && !new URLSearchParams(location.search).has('mock')) { location.replace(`${S.orderHref[want]}${location.search}`); return; }
+  if (want !== L && S.orderHref?.[want] && !new URLSearchParams(location.search).has('mock')) { location.replace(`${S.orderHref[want]}${location.search}${/^#ord-[a-z0-9-]{1,40}$/i.test(location.hash) ? location.hash : ''}`); return; }
   // Lahjakortit (§13): "Käytä lahjakortti" vain kun redeem_enabled; ostetut kortit vain jos tilauksella on niitä. Puuttuva RPC / virhe → ei mitään näkyviin.
   const gapi = createGiftApi({ rpc: api.mock ? api.rpc : rpc, mock: false });
   const gift = { redeem: false, cards: [], claims: [] };

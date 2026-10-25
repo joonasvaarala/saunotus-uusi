@@ -358,6 +358,7 @@ a.bk-sd:hover{filter:brightness(.97)}
 .vc-choose{margin-top:16px;padding:16px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;background:#fff;display:grid;gap:10px}
 .vc-choose[hidden]{display:none}
 .vc-choose{scroll-margin-top:84px}.gc-msg,.vc-choose .ord-msg{scroll-margin:84px 0 24px}   /* sticky-yläpalkki (69 px) ei peitä lomaketta eikä viestiä vieritettäessä */
+.ord-card[aria-labelledby=ord-g]{scroll-margin-top:84px}   /* booking_176: sähköpostin #ord-g-linkki (revealHashOnce) */
 .vc-ctitle{margin:0;font:600 22px var(--head);color:var(--ink)}.vc-ctitle:focus{outline:none}.vc-ctitle:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .vc-code{margin:0;font:700 17px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;color:var(--ink);overflow-wrap:anywhere}
 .vc-src>legend{font:700 16px var(--body);color:var(--ink)}

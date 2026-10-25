@@ -39,6 +39,18 @@ export function revealForm(el, focusEl = el, win = globalThis) {
   focusEl?.focus?.({ preventScroll: true });
   return true;
 }
+// booking_176: sähköpostin linkki tilaussivun osioon (esim. /tilaus/?t=…#ord-g "Lue koko ohje"). Selaimen oma ankkurihyppy ei toimi, koska order.js renderöi sivun
+// vasta datan latauduttua → kutsutaan jokaisen renderöinnin jälkeen; vieritys tehdään kerran (state.done), kun hashin osoittama #ord-*-elementti on DOMissa.
+// Vain muotoa #ord-<tunniste> hyväksytään (ei mielivaltaista selektoria). Elementti puuttuu (esim. tilauksella ei ohjeita) → ei vieritystä, odotetaan seuraavaa renderöintiä.
+export function revealHashOnce(doc, state, win = globalThis) {
+  if (!state || state.done) return false;
+  const m = /^#(ord-[a-z0-9-]{1,40})$/i.exec(String(win?.location?.hash || ''));
+  if (!m) { state.done = true; return false; }
+  const el = doc?.getElementById?.(m[1]);
+  if (!el) return false;
+  state.done = true;
+  return revealForm(el.closest?.('section') || el, el, win);
+}
 // revealIfHidden: virhe-/tulosviesti vieritetään näkyviin vain jos se ei ole kokonaan ruudulla (block:'nearest', ei turhaa liikettä).
 export function revealIfHidden(el, win = globalThis) {
   if (!el?.getBoundingClientRect || !el.scrollIntoView) return false;

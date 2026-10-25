@@ -1,22 +1,24 @@
 -- booking_176 ROLLBACK: palauttaa tuotannon määrittelyt tavu tavulta (pg_get_functiondef, luettu sxbofnuisemspgquoxyv 25.10.2026), poistaa _vc_redeem, _vc_partner_order ja taulun vc_difference_payments.
 -- Aja yhdessä transaktiossa. Jo jonotetut / lähetetyt viestit jäävät ennalleen. Rollbackin jälkeen erotuksen maksusta lähtee taas kuittisähköposti (booking_174:n käytös).
---   booking._on_payment_paid(bigint): 6abd248cb10998be8c97f3373dcb3504 -> de9084871640d213d10527a045157bf2
---   booking.email_outbox_claim(integer): d355fb47a5c19f90bdcb28615fa54b95 -> 2db9a1233a06e6293d0877f17de1ab72
+--   booking._on_payment_paid(bigint): af7f99e87ba7e00e0d5e3d5b6cbf2400 -> de9084871640d213d10527a045157bf2
+--   booking.email_outbox_claim(integer): 70602f6500703e8750e1539ae8809d38 -> 2db9a1233a06e6293d0877f17de1ab72
 --   booking.orders_confirmed_mail_trg(): de9df39ff7972a951e61684f8f2db87b -> 85e59930421bf098d24d7fcebd50507d
 --   booking.public_submit_voucher_claim(uuid,text,text,bigint): d28a31d27147f4cf7bceb12150c9e77c -> de84e5ce9b1062111c4248e7c582fdb8
 --   booking.messages_dispatch(integer): 4b1f94601e23d9dc3eec34bcd5b4dc08 -> 11a25a5f1e02fe5e635a92d8fea3a69f
 --   booking._vc_notify_problem(bigint): 3414022269f6db113f1085208eb6f040 -> 85f500444e3af880009fc3b6c0e3a402
 --   booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text): a4e69cb26eb44b72eacce7c167342884 -> 525d1fa96fd7c37df4d7e502edf1bf71
 --   booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text): 673f26a88054b2b31dcbab872557e383 -> ed28a9a7240b2ae62f5abef66885bc5d
+--   booking.admin_resolve_voucher_claim(bigint,text,text,text,numeric,text): 41a4f3cc89e802f18e5131f849394188 -> b7d61783b74032374626c25ea60397b0
+--   booking.svc_resolve_voucher_claim(bigint,text,text,text,numeric,text): cc67ebd8ce012211eb603b7f2b1c3ef4 -> 96bf311a66fb5292f141bcc86621254f
 set local lock_timeout = '5s';
 
 do $g$
 declare v text; ok boolean := true; msg text := '';
 begin
   v := md5(pg_get_functiondef('booking._on_payment_paid(bigint)'::regprocedure));
-  if v not in ('6abd248cb10998be8c97f3373dcb3504', 'de9084871640d213d10527a045157bf2') then ok := false; msg := msg || ' _on_payment_paid=' || v; end if;
+  if v not in ('af7f99e87ba7e00e0d5e3d5b6cbf2400', 'de9084871640d213d10527a045157bf2') then ok := false; msg := msg || ' _on_payment_paid=' || v; end if;
   v := md5(pg_get_functiondef('booking.email_outbox_claim(integer)'::regprocedure));
-  if v not in ('d355fb47a5c19f90bdcb28615fa54b95', '2db9a1233a06e6293d0877f17de1ab72') then ok := false; msg := msg || ' email_outbox_claim=' || v; end if;
+  if v not in ('70602f6500703e8750e1539ae8809d38', '2db9a1233a06e6293d0877f17de1ab72') then ok := false; msg := msg || ' email_outbox_claim=' || v; end if;
   v := md5(pg_get_functiondef('booking.orders_confirmed_mail_trg()'::regprocedure));
   if v not in ('de9df39ff7972a951e61684f8f2db87b', '85e59930421bf098d24d7fcebd50507d') then ok := false; msg := msg || ' orders_confirmed_mail_trg=' || v; end if;
   v := md5(pg_get_functiondef('booking.public_submit_voucher_claim(uuid,text,text,bigint)'::regprocedure));
@@ -29,6 +31,10 @@ begin
   if v not in ('a4e69cb26eb44b72eacce7c167342884', '525d1fa96fd7c37df4d7e502edf1bf71') then ok := false; msg := msg || ' admin_mark_voucher_claim_redeemed=' || v; end if;
   v := md5(pg_get_functiondef('booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text)'::regprocedure));
   if v not in ('673f26a88054b2b31dcbab872557e383', 'ed28a9a7240b2ae62f5abef66885bc5d') then ok := false; msg := msg || ' svc_mark_voucher_claim_redeemed=' || v; end if;
+  v := md5(pg_get_functiondef('booking.admin_resolve_voucher_claim(bigint,text,text,text,numeric,text)'::regprocedure));
+  if v not in ('41a4f3cc89e802f18e5131f849394188', 'b7d61783b74032374626c25ea60397b0') then ok := false; msg := msg || ' admin_resolve_voucher_claim=' || v; end if;
+  v := md5(pg_get_functiondef('booking.svc_resolve_voucher_claim(bigint,text,text,text,numeric,text)'::regprocedure));
+  if v not in ('cc67ebd8ce012211eb603b7f2b1c3ef4', '96bf311a66fb5292f141bcc86621254f') then ok := false; msg := msg || ' svc_resolve_voucher_claim=' || v; end if;
   if not ok then raise exception 'booking_176 rollback: md5 ei vastaa booking_176:tta eikä tuotannon alkuperäistä (%); mitään ei muutettu', msg; end if;
 end $g$;
 
@@ -294,6 +300,24 @@ begin
   return booking._vc_mark_redeemed(p_id, p_amount, p_partner_ref, p_note, 'bot');
 end $function$;
 
+CREATE OR REPLACE FUNCTION booking.admin_resolve_voucher_claim(p_id bigint, p_status text, p_problem_code text DEFAULT NULL::text, p_note text DEFAULT NULL::text, p_amount numeric DEFAULT NULL::numeric, p_partner_ref text DEFAULT NULL::text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+begin
+  perform booking._require_permission('giftcards.manage');
+  return booking._vc_resolve(p_id, p_status, p_problem_code, p_note, p_amount, p_partner_ref, 'staff');
+end $function$;
+
+CREATE OR REPLACE FUNCTION booking.svc_resolve_voucher_claim(p_id bigint, p_status text, p_problem_code text DEFAULT NULL::text, p_note text DEFAULT NULL::text, p_amount numeric DEFAULT NULL::numeric, p_partner_ref text DEFAULT NULL::text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$ begin return booking._vc_resolve(p_id, p_status, p_problem_code, p_note, p_amount, p_partner_ref, 'bot'); end $function$;
+
 drop function if exists booking._vc_partner_order(bigint);
 drop function if exists booking._vc_redeem(bigint,numeric,text,text,text);
 drop table if exists booking.vc_difference_payments;
@@ -308,6 +332,8 @@ begin
   if md5(pg_get_functiondef('booking._vc_notify_problem(bigint)'::regprocedure)) <> '85f500444e3af880009fc3b6c0e3a402' then raise exception 'booking_176 rollback: _vc_notify_problem ei palautunut tuotannon määrittelyyn'; end if;
   if md5(pg_get_functiondef('booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text)'::regprocedure)) <> '525d1fa96fd7c37df4d7e502edf1bf71' then raise exception 'booking_176 rollback: admin_mark_voucher_claim_redeemed ei palautunut tuotannon määrittelyyn'; end if;
   if md5(pg_get_functiondef('booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text)'::regprocedure)) <> 'ed28a9a7240b2ae62f5abef66885bc5d' then raise exception 'booking_176 rollback: svc_mark_voucher_claim_redeemed ei palautunut tuotannon määrittelyyn'; end if;
+  if md5(pg_get_functiondef('booking.admin_resolve_voucher_claim(bigint,text,text,text,numeric,text)'::regprocedure)) <> 'b7d61783b74032374626c25ea60397b0' then raise exception 'booking_176 rollback: admin_resolve_voucher_claim ei palautunut tuotannon määrittelyyn'; end if;
+  if md5(pg_get_functiondef('booking.svc_resolve_voucher_claim(bigint,text,text,text,numeric,text)'::regprocedure)) <> '96bf311a66fb5292f141bcc86621254f' then raise exception 'booking_176 rollback: svc_resolve_voucher_claim ei palautunut tuotannon määrittelyyn'; end if;
   if to_regprocedure('booking._vc_partner_order(bigint)') is not null then raise exception 'booking_176 rollback: _vc_partner_order jäi'; end if;
   if to_regprocedure('booking._vc_redeem(bigint,numeric,text,text,text)') is not null then raise exception 'booking_176 rollback: _vc_redeem jäi'; end if;
   if to_regclass('booking.vc_difference_payments') is not null then raise exception 'booking_176 rollback: vc_difference_payments jäi'; end if;
