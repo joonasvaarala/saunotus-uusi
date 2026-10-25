@@ -1,4 +1,4 @@
--- tcalsync412: shift_outbox_fail 412 / konflikti (migraatio 20261025160000_calsync412_outbox_412, väliaikainen versio).
+-- tcalsync412: shift_outbox_fail 412 / konflikti (migraatio 20261025140422_calsync412_outbox_412).
 -- Kanta: paikallinen PG17, jossa tuotannon määrittelyt (repo-migraatiot; md5:t tarkistetaan alussa tuotannon SELECT-arvoja vastaan) + tämä migraatio.
 -- A 412 ei kuluta yrityksiä (attempts palautuu, conflict_attempts kasvaa, google_etag tyhjenee, ei konfliktiriviä), B porrastus 1 min x3 -> 10 min
 -- ja turvaraja 24 -> error + push_failed (conflict_cap), C konflikti yrityskaton (8) kohdalla ei enää ole error, D tavalliset virheet kuluttavat
@@ -202,7 +202,7 @@ select pg_temp.ck(pg_temp.state('select public.shift_outbox_fail(-1, ''x'')') = 
 select pg_temp.ck(pg_temp.state('select public.shift_outbox_claim(''41200000-0000-0000-0000-0000000000ff'', 25, false)') = 'P0001', 'I claim tuntematon lähde -> P0001');
 
 -- J rollback -> tuotannon md5:t, sarake pois; migraatio uudelleen -> uudet md5:t; toinen ajo -> guard P0001
-\ir ../../rollbacks/20261025160000_calsync412_outbox_412_ROLLBACK.sql
+\ir ../../rollbacks/20261025140422_calsync412_outbox_412_ROLLBACK.sql
 select pg_temp.ck(md5(pg_get_functiondef('public.shift_outbox_fail(bigint,text,boolean,boolean,boolean)'::regprocedure)) = '18ff3b26879cbd1a271dd5d4ab43f164', 'J rollback: fail = tuotanto');
 select pg_temp.ck(md5(pg_get_functiondef('public.shift_outbox_claim(uuid,integer,boolean)'::regprocedure)) = '68a6d646f7606faef829b8990ce84031', 'J rollback: claim = tuotanto');
 select pg_temp.ck(not exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'shift_outbox' and column_name = 'conflict_attempts'), 'J rollback: sarake poistettu');
@@ -210,12 +210,12 @@ select pg_temp.ck(not exists (select 1 from information_schema.columns where tab
 select pg_temp.claim_one((select ob from ids where k = 'b'));
 select public.shift_outbox_fail((select ob from ids where k = 'b'), 'google_http_412', false, true, false);
 select pg_temp.ck((pg_temp.ob((select ob from ids where k = 'b'))).status = 'error', 'J rollback: vanha käytös (412 8. yrityksellä -> error)');
-\ir ../../migrations/20261025160000_calsync412_outbox_412.sql
+\ir ../../migrations/20261025140422_calsync412_outbox_412.sql
 select pg_temp.ck(md5(pg_get_functiondef('public.shift_outbox_fail(bigint,text,boolean,boolean,boolean)'::regprocedure)) = '4058beac69368354d2ff55aebc491653', 'J migraatio uudelleen: fail');
 select pg_temp.ck(md5(pg_get_functiondef('public.shift_outbox_claim(uuid,integer,boolean)'::regprocedure)) = '72f2467fa9561a727795e16564bf4496', 'J migraatio uudelleen: claim');
 -- guard-lohkot tiedostoista sellaisenaan (ensimmäinen do $g$ … end $g$; -lohko)
-\set mig_guard `awk '/^do \$g\$/{f=1} f{print} /^end \$g\$;/{if(f)exit}' ../../migrations/20261025160000_calsync412_outbox_412.sql`
-\set rb_guard `awk '/^do \$g\$/{f=1} f{print} /^end \$g\$;/{if(f)exit}' ../../rollbacks/20261025160000_calsync412_outbox_412_ROLLBACK.sql`
+\set mig_guard `awk '/^do \$g\$/{f=1} f{print} /^end \$g\$;/{if(f)exit}' ../../migrations/20261025140422_calsync412_outbox_412.sql`
+\set rb_guard `awk '/^do \$g\$/{f=1} f{print} /^end \$g\$;/{if(f)exit}' ../../rollbacks/20261025140422_calsync412_outbox_412_ROLLBACK.sql`
 select pg_temp.ck(pg_temp.state(:'mig_guard') = 'P0001', 'J migraation guard toisella ajolla -> P0001 (ei muutoksia)');
 select pg_temp.ck(pg_temp.state(:'rb_guard') = '00000', 'J rollbackin guard hyväksyy migraation jälkeisen tilan');
 select pg_temp.ck(position('md5(pg_get_functiondef' in :'mig_guard') > 0 and position('18ff3b26879cbd1a271dd5d4ab43f164' in :'mig_guard') > 0, 'J guard-lohko luettu tiedostosta');

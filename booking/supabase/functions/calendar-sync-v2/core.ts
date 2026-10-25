@@ -63,7 +63,7 @@ export interface OutboxItem {
   reactivate: boolean;
   recurring: boolean;
   attempt: number;
-  /** Peilitila (mitä viimeksi luimme tai kirjoitimme), shift_outbox_claim 20261025160000 alkaen. Puuttuu vanhalta claimilta. */
+  /** Peilitila (mitä viimeksi luimme tai kirjoitimme), shift_outbox_claim 20261025140422 alkaen. Puuttuu vanhalta claimilta. */
   mirror?: Mirror | null;
 }
 

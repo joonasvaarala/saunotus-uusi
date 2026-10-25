@@ -1,10 +1,10 @@
--- calsync412 ROLLBACK: palauttaa shift_outbox_claim- ja shift_outbox_fail-funktiot täsmälleen tuotannon tilaan ennen 20261025160000:aa
+-- calsync412 ROLLBACK: palauttaa shift_outbox_claim- ja shift_outbox_fail-funktiot täsmälleen tuotannon tilaan ennen 20261025140422:aa
 -- ja poistaa sarakkeen public.shift_outbox.conflict_attempts (laskurin arvot häviävät).
 --   public.shift_outbox_claim(uuid,integer,boolean): 72f2467fa9561a727795e16564bf4496 -> 68a6d646f7606faef829b8990ce84031
 --   public.shift_outbox_fail(bigint,text,boolean,boolean,boolean): 4058beac69368354d2ff55aebc491653 -> 18ff3b26879cbd1a271dd5d4ab43f164
 -- Huom: shift_outbox.request-jsoniin jo tallennettu 'mirror'-avain jää riveille (vanha koodi ei lue sitä). Tyhjennettyjä google_etag-arvoja
--- ei palauteta: seuraava lukusynkka kirjoittaa ne uudelleen. Jos edge v6 on jo tuotannossa, palauta ensin v5 (tai pidä SHIFT_PUSH_DISABLED=1):
--- v6 toimii myös vanhan claimin kanssa (ilman peiliä ei esitarkistusta; 412 -> GET -> vain tavoitetila kuitataan, muuten conflict).
+-- ei palauteta: seuraava lukusynkka kirjoittaa ne uudelleen. Jos uusi edge (v7) on jo tuotannossa, palauta ensin v5 (tai pidä SHIFT_PUSH_DISABLED=1):
+-- v7 toimii myös vanhan claimin kanssa (ilman peiliä ei esitarkistusta; 412 -> GET -> vain tavoitetila kuitataan, muuten conflict).
 set local lock_timeout = '5s';
 
 do $g$
@@ -17,7 +17,7 @@ begin
   if not exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'shift_outbox' and column_name = 'conflict_attempts') then
     ok := false; msg := msg || ' shift_outbox.conflict_attempts puuttuu';
   end if;
-  if not ok then raise exception 'calsync412 ROLLBACK: määrittelyt eivät vastaa 20261025160000:aa:%. Ei muutoksia.', msg; end if;
+  if not ok then raise exception 'calsync412 ROLLBACK: määrittelyt eivät vastaa 20261025140422:aa:%. Ei muutoksia.', msg; end if;
 end $g$;
 
 CREATE OR REPLACE FUNCTION public.shift_outbox_claim(p_calendar_source_id uuid, p_limit integer DEFAULT 25, p_dry_run boolean DEFAULT false)

@@ -1,5 +1,5 @@
--- calsync412 (25.10.2026): Google 412 / jaettu sarjan etag ei saa kuluttaa vientiyrityksiä. VÄLIAIKAINEN versio 20261025160000:
--- tuotantoon ajon jälkeen tiedosto nimetään todelliseen schema_migrations-versioon (history sync).
+-- calsync412 (25.10.2026): Google 412 / jaettu sarjan etag ei saa kuluttaa vientiyrityksiä. versio 20261025140422:
+-- ajettu tuotantoon 25.10.2026 (schema_migrations 20261025140422, guardit täsmäsivät); tiedosto nimetty todelliseen versioon (history sync).
 -- Tausta: toistuvan sarjan muuttamattomat instanssit jakavat sarjan etagin (tuotanto: 887 tulevaa instanssia, 29 etagia; 53 instanssin sarja,
 -- 1 etag). Jokainen instanssi-PATCH vaihtaa sisarten etagin -> 412 -> shift_outbox_fail(p_conflict) -> 1 min ja attempts kasvaa -> 8. yrityksen
 -- jälkeen error (25.10.: 48/52 maanantaivuoroa, outbox 126–175, shift_sync_conflicts 1–48).
@@ -9,7 +9,7 @@
 --     päivittää peilin ja etagin). Turvaraja: 24. konflikti -> error + shift_sync_conflicts push_failed (details.reason = conflict_cap),
 --     n. 3 + 21 x 10 min = ~3,5 h ja yli 20 lukusynkkaa: jos konflikti ei ratkea niissä, vika on systemaattinen (esim. jatkuva ulkoinen kirjoittaja)
 --     eikä sitä pidä yrittää loputtomiin. p_conflict tyhjentää work_shifts.google_etag (ei lähetetä samaa vanhaa etagia uudelleen;
---     edge v6 hakee tuoreen etagin ennen kirjoitusta). p_blocked / p_missing / muut virheet: kuten ennen.
+--     edge (v7, head 258872ad) hakee tuoreen etagin ennen kirjoitusta). p_blocked / p_missing / muut virheet: kuten ennen.
 --   * shift_outbox_claim: itemiin lisätään 'mirror' (calendar_title, cal_starts_at, cal_ends_at, cal_status, google_updated_at),
 --     jotta edge erottaa ihmisen muutoksen (kentät eroavat peilistä ja tavoitteesta) pelkästä etagin vaihtumisesta. Muuten ennallaan.
 --     Vanha edge (v5) ohittaa tuntemattoman avaimen.
@@ -22,8 +22,8 @@
 --     public._shift_desired_title(uuid) 7d374c0c379f4e70a281570dfcdf5599
 --     public._shift_title_norm(text) ef6a215bdbbbfaa7773482109de590cb
 --     public.apply_calendar_changes_v2(uuid,jsonb,text,text,jsonb,text,boolean) db79abf5bbc39404752ff4de400da105
--- Rollback: rollbacks/20261025160000_calsync412_outbox_412_ROLLBACK.sql. Testi: tests/calendar/tcalsync412_shift_outbox_fail.sql (BEGIN … ROLLBACK).
--- Ajojärjestys: SHIFT_PUSH_DISABLED=1 -> tämä migraatio -> calendar-sync-v2 v6 deploy -> SHIFT_PUSH_DISABLED pois (ks. PR).
+-- Rollback: rollbacks/20261025140422_calsync412_outbox_412_ROLLBACK.sql. Testi: tests/calendar/tcalsync412_shift_outbox_fail.sql (BEGIN … ROLLBACK).
+-- Ajojärjestys: SHIFT_PUSH_DISABLED=1 -> tämä migraatio -> calendar-sync-v2 deploy (tuotannossa v7) -> SHIFT_PUSH_DISABLED pois (ks. PR).
 set local lock_timeout = '5s';
 
 do $g$
