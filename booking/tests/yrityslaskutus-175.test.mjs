@@ -17,13 +17,15 @@ const REPLACED = {
   'booking._clean_company': ['4e8d9dddda117bdc208f3b1bb281f97a', '53fa5a8a98e98aeb4a97000d2f6b37ec'],
   'booking._stamp_order_billing': ['709b28b59f549df7be252b2942e77256', '693f24abfe0dddfbf4a2e345e1596e73'],
   'booking._invoice_allocate': ['ad7dbbd30a6b3362bf4011d4e8ff296e', '46a3326812f896077fc2614ba783ff3d'],
-  'booking.orders_invoice_draft_trg': ['a9a389358507c2dca37acbacdcfd3d61', 'df1d0ebf036380495f6730d1fa93de7a'],
+  'booking.orders_invoice_draft_trg': ['a9a389358507c2dca37acbacdcfd3d61', 'a48fe50340cff5f6e9709ad46055ecb9'],
 };
 const DEPS = {
   _invoice_queue_dispatch: 'f3cfdb0e2d484ab6f63c6286c4ff8560', _ensure_draft_invoice: 'eefa8e82c7aab1a148bdb3e319ae65ae', _fi_reference: 'f7c4076dcc85d8efc97e7335c349da2c',
   _setting: '70fcfa245e9e7d070dae7a6c1e90ce4d', invoices_lock_trg: '63f39183d475f2b04bcc7a9e9aaf251e', orders_invoice_status_trg: '9ec5c212604145e284fa07d2fd2686f6',
   admin_send_invoice: '7ea29743e8e199c74ced1d62c730b27f', public_create_booking: 'befba768679c4e414c4f3966ac4aa136', admin_create_booking: '7ac1ba613b8db0ae6a4c2e6d9b3ce5c7',
   _on_payment_paid: 'de9084871640d213d10527a045157bf2', email_outbox_claim: '2db9a1233a06e6293d0877f17de1ab72', admin_mark_voucher_claim_redeemed: '525d1fa96fd7c37df4d7e502edf1bf71', _vc_due: 'bea9cd9a32eb273ee72caed0aedd1e2e',
+  _enqueue_email: '350304b26e7240c42a6cf38f604eb689', _valid_email: '6775eff3f255a0388b3da493a4d730be', email_outbox_claim_base_132: '0b10986533285645d8592449a90a1e0c',
+  email_outbox_claim_base_146: '9c63ce8c8b6f46347692859a117d110d', email_outbox_mark: '2ba0222fdfee71942fb09053bd7ea803',
 };
 // funktiorungot tiedostosta: CREATE OR REPLACE … end $function$ (+ rivinvaihto = pg_get_functiondef-muoto)
 const bodies = (sql) => Object.fromEntries([...sql.matchAll(/CREATE OR REPLACE FUNCTION (booking\.[a-z_]+)\([\s\S]*?\nend \$function\$/g)].map((m) => [m[1], m[0] + '\n']));
@@ -42,11 +44,23 @@ test('migraatio: korvattujen funktioiden rungot = booking_175-md5, vartija hyvä
   assert.match(sql, /insert into booking\.settings\(key, value, description, is_public\)[\s\S]*'invoice_reference_prefix', '"7310"'[\s\S]*on conflict \(key\) do nothing/);
   assert.doesNotMatch(sql, /\bpublic\./i, 'ei public-skeemaa');
   assert.doesNotMatch(code(sql), /integration_config|daily_enabled|update booking\./i, 'ei Procountor- tai lähetystilan muutoksia');
-  assert.doesNotMatch(sql, /insert into booking\.email_outbox|_enqueue_email|send_email/i, 'ei sähköposteja');
+  assert.match(sql, /'invoice_einvoice_auto_send', 'false'::jsonb,[\s\S]*?false\)\s*on conflict \(key\) do nothing/, 'asetus oletuksena false, ei julkinen');
+  assert.doesNotMatch(sql, /insert into booking\.email_outbox|send_email/i, 'ei suoria sähköpostirivejä (vain _enqueue_email)');
+  const trgEmails = [...b['booking.orders_invoice_draft_trg'].matchAll(/_enqueue_email\(/g)].length;
+  assert.equal(trgEmails, 1, 'yksi jonotuskohta');
+  for (const [fn, body] of Object.entries(b)) if (fn !== 'booking.orders_invoice_draft_trg') assert.doesNotMatch(body, /_enqueue_email|email_outbox/, `${fn}: ei sähköposteja`);
   assert.doesNotMatch(sql.replace(/--.*$/gm, ''), /price|vat_rate|slug/i, 'hinnat, ALV, slugit ennallaan');
   // automaattinen jonotus vain verkkokaupan verkkolaskulle, virhe ei kaada tilausta
-  assert.match(b['booking.orders_invoice_draft_trg'], /new\.source_channel = 'web' and new\.status = 'confirmed' and new\.billing ->> 'invoice_method' = 'einvoice'/);
-  assert.match(b['booking.orders_invoice_draft_trg'], /perform booking\._invoice_allocate\(v_inv\);\s*perform booking\._invoice_queue_dispatch\(v_inv\);/);
+  const trg = b['booking.orders_invoice_draft_trg'].replace(/--.*$/gm, '');
+  assert.match(trg, /new\.source_channel = 'web' and new\.status = 'confirmed' and new\.billing ->> 'invoice_method' in \('einvoice', 'pdf'\)/);
+  // verkkolasku: jonotus vain asetuksen takana (oletus false) → muuten luonnos
+  assert.match(trg, /if booking\._setting\('invoice_einvoice_auto_send', 'false'::jsonb\) = 'true'::jsonb then\s*perform booking\._invoice_allocate\(v_inv\);\s*perform booking\._invoice_queue_dispatch\(v_inv\);\s*end if;/);
+  assert.equal([...trg.matchAll(/_invoice_queue_dispatch/g)].length, 1, 'jonotus vain asetuksen takana');
+  // PDF: numerointi kuten admin_send_invoice + yksi invoice_pdf-viesti laskua kohden (dedupe)
+  assert.match(trg, /perform booking\._invoice_allocate\(v_inv\);\s*if not booking\._enqueue_email\('invoice_pdf', new\.id, null, null, 'invoice_pdf:auto:' \|\| v_inv,/);
+  assert.match(trg, /'to_email', \(select lower\(btrim\(c\.email\)\) from booking\.customers c where c\.id = new\.customer_id\)/, 'varaajan osoite');
+  assert.match(trg, /booking\._err\('invalid_email'/, 'ei "lähetetty" ilman viestiä');
+  assert.match(trg, /kind = 'debit' and status = 'draft'/, 'vain luonnos → toisto ei jonota uudelleen');
   assert.match(b['booking.orders_invoice_draft_trg'], /exception when others then[\s\S]*'invoice_auto_send_failed'/);
   assert.match(b['booking._invoice_allocate'], /invoice_reference_prefix/); assert.match(b['booking._invoice_allocate'], /char_length\(v_ref\) > 20/);
   assert.match(b['booking._invoice_allocate'], /customer_snapshot_locked/, 'tuotannon lukitus säilyy');
@@ -59,7 +73,7 @@ test('rollback: palauttaa tuotannon rungot tavu tavulta (md5) ja poistaa asetuks
     assert.equal(md5(b[fn]), prod, `${fn} = tuotanto`);
     assert.ok(sql.includes(prod) && sql.includes(after), fn);
   }
-  assert.match(sql, /delete from booking\.settings where key = 'invoice_reference_prefix';/);
+  assert.match(sql, /delete from booking\.settings where key in \('invoice_reference_prefix', 'invoice_einvoice_auto_send'\);/);
   assert.doesNotMatch(sql, /\bpublic\./i);
   assert.doesNotMatch(code(sql), /update booking\.|reference_no/, 'jo syntyneitä viitteitä ei muuteta');
 });
@@ -71,8 +85,9 @@ test('SQL-testi t175: tuotantokelpoinen rakenne (yksi transaktio, ei psql-metako
   assert.doesNotMatch(t, /\bpublic\.t175|create function public\./i);
   assert.match(t, /insert into auth\.users/); assert.match(t, /insert into booking\.staff/); assert.match(t, /set local role authenticated/); assert.match(t, /request\.jwt\.claims/);
   assert.doesNotMatch(t, /\bid\s*=\s*\d{2,}\b|values \(\d{3,},/, 'ei kiinteitä id-arvoja');
+  assert.match(t, /'invoice_pdf:auto:' \|\| i\.id/); assert.match(t, /set value = 'true'::jsonb where key = 'invoice_einvoice_auto_send'/);
   for (const code of ['invalid_invoice_method', 'einvoice_incomplete', 'invalid_setting', 'already_sent', '42501']) assert.ok(t.includes(code), code);
-  for (const lbl of ['C4 ', 'C8 ', 'D1 ', 'E2 ', 'E3 ', 'F1 ', 'F2 ', 'H1 ']) assert.ok(t.includes(`'${lbl}`), lbl);
+  for (const lbl of ['A7b ', 'C3 ', 'C4 ', 'C6 ', 'C8 ', 'D1 ', 'D4 ', 'D8 ', 'E1b ', 'E2 ', 'E3 ', 'E5 ', 'F1 ', 'F2 ', 'G4 ', 'H1 ', 'H2 ']) assert.ok(t.includes(`'${lbl}`), lbl);
 });
 
 test('viite: 7310 + järjestysnumero + 7-3-1-tarkiste (kuten _fi_reference), kokeilutila samoin', async () => {

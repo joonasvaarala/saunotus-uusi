@@ -1,10 +1,10 @@
--- booking_175 ROLLBACK: palauttaa tuotannon määrittelyt tavu tavulta (pg_get_functiondef, luettu sxbofnuisemspgquoxyv 25.10.2026) ja poistaa asetuksen invoice_reference_prefix.
--- Aja yhdessä transaktiossa. Jo lähetettyjen laskujen viitenumerot, jonossa olevat verkkolaskut ja tilausten billing.invoice_method jäävät ennalleen
+-- booking_175 ROLLBACK: palauttaa tuotannon määrittelyt tavu tavulta (pg_get_functiondef, luettu sxbofnuisemspgquoxyv 25.10.2026) ja poistaa asetukset invoice_reference_prefix ja invoice_einvoice_auto_send.
+-- Aja yhdessä transaktiossa. Jo lähetettyjen laskujen viitenumerot, jonossa olevat verkkolaskut, jonotetut PDF-laskusähköpostit ja tilausten billing.invoice_method jäävät ennalleen
 -- (vanha koodi ei lue billing.invoice_methodia; uudet viitteet palaavat muotoon järjestysnumero + tarkiste).
 --   booking._clean_company(jsonb): 53fa5a8a98e98aeb4a97000d2f6b37ec -> 4e8d9dddda117bdc208f3b1bb281f97a
 --   booking._stamp_order_billing(bigint,bigint,jsonb): 693f24abfe0dddfbf4a2e345e1596e73 -> 709b28b59f549df7be252b2942e77256
 --   booking._invoice_allocate(bigint): 46a3326812f896077fc2614ba783ff3d -> ad7dbbd30a6b3362bf4011d4e8ff296e
---   booking.orders_invoice_draft_trg(): df1d0ebf036380495f6730d1fa93de7a -> a9a389358507c2dca37acbacdcfd3d61
+--   booking.orders_invoice_draft_trg(): a48fe50340cff5f6e9709ad46055ecb9 -> a9a389358507c2dca37acbacdcfd3d61
 set local lock_timeout = '5s';
 
 do $g$
@@ -17,7 +17,7 @@ begin
   v := md5(pg_get_functiondef('booking._invoice_allocate(bigint)'::regprocedure));
   if v not in ('46a3326812f896077fc2614ba783ff3d', 'ad7dbbd30a6b3362bf4011d4e8ff296e') then ok := false; msg := msg || ' _invoice_allocate=' || v; end if;
   v := md5(pg_get_functiondef('booking.orders_invoice_draft_trg()'::regprocedure));
-  if v not in ('df1d0ebf036380495f6730d1fa93de7a', 'a9a389358507c2dca37acbacdcfd3d61') then ok := false; msg := msg || ' orders_invoice_draft_trg=' || v; end if;
+  if v not in ('a48fe50340cff5f6e9709ad46055ecb9', 'a9a389358507c2dca37acbacdcfd3d61') then ok := false; msg := msg || ' orders_invoice_draft_trg=' || v; end if;
   if not ok then raise exception 'booking_175 rollback: md5 ei vastaa booking_175:ttä eikä tuotannon alkuperäistä (%); mitään ei muutettu', msg; end if;
 end $g$;
 
@@ -122,7 +122,7 @@ begin
   return null;
 end $function$;
 
-delete from booking.settings where key = 'invoice_reference_prefix';
+delete from booking.settings where key in ('invoice_reference_prefix', 'invoice_einvoice_auto_send');
 
 do $v$
 begin

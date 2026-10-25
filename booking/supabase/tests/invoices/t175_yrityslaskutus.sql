@@ -1,12 +1,14 @@
 -- t175: booking_175 yrityslaskutus (väliaikainen migraatio 20261025070000).
---   A rakenne: md5 (4 korvattua funktiota = booking_175, riippuvuudet + booking_173/174 = tuotanto), asetus invoice_reference_prefix, oikeudet.
+--   A rakenne: md5 (4 korvattua funktiota = booking_175, riippuvuudet + booking_173/174 + sähköpostijono = tuotanto), asetukset
+--     invoice_reference_prefix ("7310") ja invoice_einvoice_auto_send (false), oikeudet.
 --   B _clean_company: laskutustapa einvoice / pdf / puuttuu (vanha käytös) / virheellinen → BK001 invalid_invoice_method; PDF ei vaadi eikä tallenna OVT:tä.
---   C verkkokaupan yritystilaus + verkkolasku → lasku numeroidaan ja menee lähetysjonoon automaattisesti (dry_run-tilassa dispatch_status dry_run,
---     live-tilassa queued; tila muutetaan vain tämän transaktion sisällä). Asiakkaan OVT + välittäjä laskun asiakaskuvaan, rekisteri ennallaan.
---   D verkkokaupan PDF-tilaus → luonnos, ei jonoa. E hallinnan tilaus (admin_create_booking, laskutustapa verkkolasku) → luonnos, ei jonoa,
---     kunnes "Lähetä verkkolasku" (admin_send_invoice). F viite: etuliite 7310, 7-3-1-tarkiste, enintään 20 merkkiä, vanhat viitteet ennallaan,
---     asetuksen muutos huomioidaan, virheellinen etuliite → BK001 invalid_setting. G automaattilähetyksen virhe ei kaada tilausta (audit_log).
---   H Procountor-asetukset (integration_config) ennallaan, ei sähköposteja tässä polussa, ei jäänteitä.
+--   C verkkokaupan yritystilaus + verkkolasku → LUONNOS (ei numeroa, ei jonoa, ei sähköpostia); myöhemmin "Lähetä verkkolasku" -napista jonoon.
+--     invoice_einvoice_auto_send = true (vain tässä transaktiossa) → lähetys heti kuten ennen (dry_run / live → queued). OVT laskun asiakaskuvaan, rekisteri ennallaan.
+--   D verkkokaupan PDF-tilaus → numero + viite kuten "Lähetä PDF sähköpostilla", tasan yksi invoice_pdf-rivi email_outboxiin varaajan osoitteeseen,
+--     myös kun trigger ajetaan uudelleen tai jonotus toistetaan (dedupe_key). E hallinnan tilaus → luonnos, ei jonoa eikä sähköpostia, kunnes nappi.
+--   F viite: etuliite 7310, 7-3-1-tarkiste, enintään 20 merkkiä, vanhat viitteet ennallaan, asetuksen muutos huomioidaan, virheellinen etuliite → BK001 invalid_setting.
+--   G automaattilähetyksen virhe ei kaada tilausta (audit_log, ei sähköpostia). H Procountor-asetukset ennallaan, sähköpostit vain verkkokaupan PDF-laskuille.
+-- Sähköpostirivit syntyvät vain tämän transaktion sisällä (ROLLBACK) → send-emails ei näe niitä; mitään ei lähetetä.
 -- TUOTANTOKELPOINEN: yksi transaktio (BEGIN … lopussa tahallinen poikkeus "TESTRESULT pass=… fail=… skip=…" + ROLLBACK), ei kiinteitä id-arvoja (RETURNING),
 -- testikäyttäjät luodaan transaktion sisällä (auth.users + booking.staff, gen_random_uuid), ei psql-metakomentoja → toimii myös pelkällä SQL-työkalulla.
 -- Apufunktiot pg_temp-skeemassa (ei public-skeemaa). Virheet tarkistetaan SQLSTATE + BK001-detail -koodeilla, ei virhetekstein.
@@ -82,13 +84,14 @@ do $t$
 declare
   run text := lower(substr(md5(random()::text), 1, 8));
   u_adm uuid := gen_random_uuid();
-  cfg0 jsonb; mode0 jsonb; pre0 jsonb; mail0 bigint; ref_old jsonb;
+  cfg0 jsonb; mode0 jsonb; pre0 jsonb; auto0 jsonb; mail0 bigint; ref_old jsonb; em record;
   r jsonb; o bigint; i booking.invoices; i2 booking.invoices; b1 text; b2 text; b3 text; b4 text; b5 text; ic0 jsonb; ic1 jsonb;
   d date; rl record; cnt int; m text; logt text; np int; nf int; ns int;
 begin
   select to_jsonb(c) into cfg0 from booking.integration_config c where key = 'procountor';
   select value into mode0 from booking.settings where key = 'invoice_dispatch_mode';
   select value into pre0 from booking.settings where key = 'invoice_reference_prefix';
+  select value into auto0 from booking.settings where key = 'invoice_einvoice_auto_send';
   select count(*) into mail0 from booking.email_outbox;
   select coalesce(jsonb_object_agg(id, reference_no), '{}') into ref_old from booking.invoices where reference_no is not null;
   insert into auth.users(id, email) values (u_adm, 't175-admin-' || run || '@example.test');
@@ -98,7 +101,7 @@ begin
   perform pg_temp.ck(md5(pg_get_functiondef('booking._clean_company(jsonb)'::regprocedure)) = '53fa5a8a98e98aeb4a97000d2f6b37ec', 'A1 _clean_company = booking_175');
   perform pg_temp.ck(md5(pg_get_functiondef('booking._stamp_order_billing(bigint,bigint,jsonb)'::regprocedure)) = '693f24abfe0dddfbf4a2e345e1596e73', 'A2 _stamp_order_billing = booking_175');
   perform pg_temp.ck(md5(pg_get_functiondef('booking._invoice_allocate(bigint)'::regprocedure)) = '46a3326812f896077fc2614ba783ff3d', 'A3 _invoice_allocate = booking_175');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.orders_invoice_draft_trg()'::regprocedure)) = 'df1d0ebf036380495f6730d1fa93de7a', 'A4 orders_invoice_draft_trg = booking_175');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking.orders_invoice_draft_trg()'::regprocedure)) = 'a48fe50340cff5f6e9709ad46055ecb9', 'A4 orders_invoice_draft_trg = booking_175');
   perform pg_temp.ck(md5(pg_get_functiondef('booking._invoice_queue_dispatch(bigint)'::regprocedure)) = 'f3cfdb0e2d484ab6f63c6286c4ff8560'
       and md5(pg_get_functiondef('booking._ensure_draft_invoice(bigint)'::regprocedure)) = 'eefa8e82c7aab1a148bdb3e319ae65ae'
       and md5(pg_get_functiondef('booking._fi_reference(text)'::regprocedure)) = 'f7c4076dcc85d8efc97e7335c349da2c'
@@ -109,7 +112,11 @@ begin
       and md5(pg_get_functiondef('booking.email_outbox_claim(integer)'::regprocedure)) = '2db9a1233a06e6293d0877f17de1ab72'
       and md5(pg_get_functiondef('booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text)'::regprocedure)) = '525d1fa96fd7c37df4d7e502edf1bf71'
       and md5(pg_get_functiondef('booking._vc_due(booking.orders,booking.voucher_claims)'::regprocedure)) = 'bea9cd9a32eb273ee72caed0aedd1e2e', 'A6 booking_173/174 ennallaan');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking._enqueue_email(text,bigint,bigint,bigint,text,jsonb)'::regprocedure)) = '350304b26e7240c42a6cf38f604eb689'
+      and md5(pg_get_functiondef('booking.email_outbox_claim_base_132(integer)'::regprocedure)) = '0b10986533285645d8592449a90a1e0c'
+      and md5(pg_get_functiondef('booking.email_outbox_mark(bigint,text,text,text)'::regprocedure)) = '2ba0222fdfee71942fb09053bd7ea803', 'A6b sähköpostijono ennallaan (_enqueue_email, claim, mark)');
   perform pg_temp.ck(pre0 = '"7310"'::jsonb and not (select is_public from booking.settings where key = 'invoice_reference_prefix'), 'A7 asetus invoice_reference_prefix = "7310", ei julkinen');
+  perform pg_temp.ck(auto0 = 'false'::jsonb and not (select is_public from booking.settings where key = 'invoice_einvoice_auto_send'), 'A7b asetus invoice_einvoice_auto_send = false (oletus), ei julkinen');
   perform pg_temp.ck(not has_function_privilege('anon', 'booking._clean_company(jsonb)', 'execute')
       and not has_function_privilege('authenticated', 'booking._invoice_allocate(bigint)', 'execute')
       and not has_function_privilege('anon', 'booking._stamp_order_billing(bigint,bigint,jsonb)', 'execute'), 'A8 sisäiset funktiot eivät ole suoraan kutsuttavissa');
@@ -135,22 +142,35 @@ begin
   r := pg_temp.call(format('booking._clean_company(%L::jsonb)', pg_temp.company(b1, null, false) || '{"require_einvoice":true}'));
   perform pg_temp.ck(r ->> 'err' = 'einvoice_incomplete', 'B7 vanha require_einvoice ilman OVT:tä → einvoice_incomplete kuten ennen');
 
-  -- ===== C verkkokauppa + verkkolasku → automaattisesti jonoon
+  -- ===== C verkkokauppa + verkkolasku → luonnos (oletus), lähetys napista; asetus true → automaattisesti
   o := pg_temp.web_order(b2, 'einvoice', true, 'web');
   select * into i from booking.invoices where order_id = o and kind = 'debit';
   perform pg_temp.ck((select payment_status from booking.orders where id = o) = 'invoiced', 'C1 tilaus laskutettu (payment_status invoiced → tagi Laskutettu)');
   perform pg_temp.ck((select billing ->> 'invoice_method' from booking.orders where id = o) = 'einvoice', 'C2 tilauksen billing.invoice_method = einvoice');
-  perform pg_temp.ck(i.status = 'sent' and i.invoice_no is not null, 'C3 lasku numeroitu ilman lähetysnappia');
-  perform pg_temp.ck(i.dispatch_status = 'dry_run' and (select count(*) from booking.invoice_dispatch_log where invoice_id = i.id and status = 'dry_run') = 1, 'C4 dry_run-tilassa: dispatch_status dry_run + yksi lokirivi (ei lähetystä)');
-  perform pg_temp.ck(i.customer_snapshot ->> 'einvoice_address' = '0037' || replace(b2, '-', '') and i.customer_snapshot ->> 'einvoice_operator' = '003723327487' and i.customer_snapshot_locked, 'C5 laskun asiakaskuvassa tilauksen OVT + välittäjä, kuva lukittu');
-  perform pg_temp.ck(left(i.reference_no, 4) = '7310' and pg_temp.ref_ok(i.reference_no) and char_length(i.reference_no) <= 20, 'C6 viite 7310…, 7-3-1-tarkiste oikein, enintään 20 merkkiä');
-  perform pg_temp.ck(i.reference_no = booking._fi_reference('7310' || (substring(i.invoice_no from '[0-9]+$'))::bigint::text), 'C7 viite = _fi_reference(7310 || laskun järjestysnumero)');
+  perform pg_temp.ck(i.status = 'draft' and i.invoice_no is null and i.reference_no is null, 'C3 verkkolasku jää luonnokseksi (ei numeroa, ei viitettä)');
+  perform pg_temp.ck(i.dispatch_status = 'none' and not exists (select 1 from booking.invoice_dispatch_log where invoice_id = i.id)
+                     and not exists (select 1 from booking.email_outbox where order_id = o and kind = 'invoice_pdf'), 'C4 ei jonoa, ei lokiriviä, ei sähköpostia');
+  perform pg_temp.ck(i.customer_snapshot ->> 'einvoice_address' = '0037' || replace(b2, '-', '') and i.customer_snapshot ->> 'einvoice_operator' = '003723327487' and i.customer_snapshot_locked, 'C5 luonnoksen asiakaskuvassa tilauksen OVT + välittäjä, kuva lukittu');
+  perform pg_temp.login(u_adm);
+  r := pg_temp.call(format('booking.admin_send_invoice(%s, true, false)', i.id));
+  perform pg_temp.logout();
+  select * into i from booking.invoices where id = i.id;
+  perform pg_temp.ck(i.status = 'sent' and i.dispatch_status = 'dry_run' and (select count(*) from booking.invoice_dispatch_log where invoice_id = i.id and status = 'dry_run') = 1
+                     and i.customer_snapshot ->> 'einvoice_address' = '0037' || replace(b2, '-', ''), 'C6 luonnos lähtee myöhemmin "Lähetä verkkolasku" -napista (dry_run + lokirivi, tilauksen OVT säilyy)');
+  perform pg_temp.ck(left(i.reference_no, 4) = '7310' and pg_temp.ref_ok(i.reference_no) and char_length(i.reference_no) <= 20
+                     and i.reference_no = booking._fi_reference('7310' || (substring(i.invoice_no from '[0-9]+$'))::bigint::text), 'C7 viite = _fi_reference(7310 || järjestysnumero), 7-3-1, ≤ 20');
+  -- asetus päälle (vain tässä transaktiossa) → sama polku kuin ennen
+  update booking.settings set value = 'true'::jsonb where key = 'invoice_einvoice_auto_send';
+  o := pg_temp.web_order(pg_temp.bid(), 'einvoice', true, 'web');
+  select * into i from booking.invoices where order_id = o and kind = 'debit';
+  perform pg_temp.ck(i.status = 'sent' and i.dispatch_status = 'dry_run' and (select count(*) from booking.invoice_dispatch_log where invoice_id = i.id and status = 'dry_run') = 1
+                     and pg_temp.ref_ok(i.reference_no) and i.customer_snapshot_locked, 'C8 invoice_einvoice_auto_send = true → numeroitu ja jonoon automaattisesti (dry_run + lokirivi)');
   -- live-tila (vain transaktiossa): sama polku → queued (cron/edge ei näe kommitoimatonta riviä; edge-provider on dry-run)
   update booking.settings set value = '"live"'::jsonb where key = 'invoice_dispatch_mode';
   o := pg_temp.web_order(b3, 'einvoice', true, 'web');
   select * into i2 from booking.invoices where order_id = o and kind = 'debit';
-  perform pg_temp.ck(i2.status = 'sent' and i2.dispatch_status = 'queued' and (select count(*) from booking.invoice_dispatch_log where invoice_id = i2.id and status = 'queued') = 1, 'C8 live-tilassa verkkolasku menee jonoon (queued)');
-  perform pg_temp.ck(i2.reference_no <> i.reference_no and pg_temp.ref_ok(i2.reference_no), 'C9 seuraava lasku saa oman viitteen');
+  perform pg_temp.ck(i2.status = 'sent' and i2.dispatch_status = 'queued' and (select count(*) from booking.invoice_dispatch_log where invoice_id = i2.id and status = 'queued') = 1, 'C9 asetus true + live-tila → queued');
+  perform pg_temp.ck(i2.reference_no <> i.reference_no and pg_temp.ref_ok(i2.reference_no), 'C9b seuraava lasku saa oman viitteen');
   update booking.settings set value = '"dry_run"'::jsonb where key = 'invoice_dispatch_mode';
   -- rekisterissä vanhat (tyhjät) OVT-tiedot → laskulle silti tilauksen tiedot, rekisteri ennallaan
   insert into booking.invoice_customers(company_name, business_id, email) values ('T175 Rekisteri Oy', b5, 'rek-' || run || '@example.test');
@@ -160,6 +180,7 @@ begin
   select to_jsonb(x) - 'updated_at' into ic1 from booking.invoice_customers x where business_id = b5;
   perform pg_temp.ck(i.dispatch_status = 'dry_run' and i.customer_snapshot ->> 'einvoice_address' = '0037' || replace(b5, '-', ''), 'C10 rekisteriasiakas ilman OVT:tä: lasku saa tilauksen OVT:n ja menee jonoon');
   perform pg_temp.ck(ic0 = ic1, 'C11 laskuasiakasrekisteri ei muutu');
+  update booking.settings set value = 'false'::jsonb where key = 'invoice_einvoice_auto_send';
   -- oikea verkkokaupan varaus (public_create_booking, anon), jos vapaa yleinen vuoro löytyy
   r := null;
   <<haku>>
@@ -180,27 +201,58 @@ begin
     perform pg_temp.skip('C13 public_create_booking PDF');
   else
     select * into i from booking.invoices iv join booking.orders od on od.id = iv.order_id where od.public_token = (r ->> 'token')::uuid and iv.kind = 'debit';
-    perform pg_temp.ck(i.status = 'sent' and i.dispatch_status = 'dry_run' and left(i.reference_no, 4) = '7310' and pg_temp.ref_ok(i.reference_no)
-                       and (select source_channel from booking.orders where id = i.order_id) = 'web', 'C12 public_create_booking + verkkolasku → lasku numeroitu ja jonossa automaattisesti');
+    perform pg_temp.ck(i.status = 'draft' and i.dispatch_status = 'none' and i.reference_no is null
+                       and (select source_channel from booking.orders where id = i.order_id) = 'web', 'C12 public_create_booking + verkkolasku → luonnos, ei jonoa');
     execute 'set local role anon';
     r := pg_temp.call(format($q$booking.public_create_booking(%s, %L::date, 2, 'T175 Pdf', %L, '0401234567', false, 'fi', null, 'company', %L::jsonb, null)$q$,
            rl.id, d, 't175-pdf-' || run || '@example.test', pg_temp.company(pg_temp.bid(), 'pdf', false)));
     execute 'reset role';
     select * into i from booking.invoices iv join booking.orders od on od.id = iv.order_id where od.public_token = (r ->> 'token')::uuid and iv.kind = 'debit';
-    perform pg_temp.ck(coalesce((r ->> 'ok')::boolean, false) and i.status = 'draft' and i.dispatch_status = 'none' and i.reference_no is null, 'C13 public_create_booking + PDF → luonnos, ei jonoa');
+    perform pg_temp.ck(coalesce((r ->> 'ok')::boolean, false) and i.status = 'sent' and i.dispatch_status = 'none' and pg_temp.ref_ok(i.reference_no)
+                       and (select count(*) from booking.email_outbox x where x.order_id = i.order_id and x.kind = 'invoice_pdf') = 1
+                       and (select payload ->> 'to_email' from booking.email_outbox x where x.order_id = i.order_id and x.kind = 'invoice_pdf') = 't175-pdf-' || run || '@example.test',
+                       'C13 public_create_booking + PDF → lasku numeroitu, yksi PDF-sähköposti varaajalle, ei verkkolaskujonoa');
   end if;
 
-  -- ===== D verkkokauppa + PDF → luonnos
-  o := pg_temp.web_order(pg_temp.bid(), 'pdf', false, 'web');
+  -- ===== D verkkokauppa + PDF → numero + PDF sähköpostiin automaattisesti, tasan yksi viesti
+  b1 := pg_temp.bid();
+  o := pg_temp.web_order(b1, 'pdf', false, 'web');
   select * into i from booking.invoices where order_id = o and kind = 'debit';
-  perform pg_temp.ck(i.status = 'draft' and i.invoice_no is null and i.reference_no is null, 'D1 PDF-laskutapa: lasku jää luonnokseksi');
-  perform pg_temp.ck(i.dispatch_status = 'none' and not exists (select 1 from booking.invoice_dispatch_log where invoice_id = i.id), 'D2 PDF: ei lähetysjonoa');
+  perform pg_temp.ck(i.status = 'sent' and i.invoice_no is not null and left(i.reference_no, 4) = '7310' and pg_temp.ref_ok(i.reference_no) and i.sent_at is not null,
+                     'D1 PDF-laskutapa: lasku numeroidaan ja merkitään lähetetyksi kuten "Lähetä PDF sähköpostilla" (status sent, viite 7310)');
+  perform pg_temp.ck(i.dispatch_status = 'none' and not exists (select 1 from booking.invoice_dispatch_log where invoice_id = i.id), 'D2 PDF: ei verkkolaskujonoa');
   perform pg_temp.ck((select billing ->> 'invoice_method' from booking.orders where id = o) = 'pdf' and (select billing ->> 'einvoice_address' from booking.orders where id = o) is null, 'D3 PDF: billing.invoice_method pdf, ei OVT:tä');
+  select count(*) into cnt from booking.email_outbox where order_id = o and kind = 'invoice_pdf';
+  select x.* into em from booking.email_outbox x where x.order_id = o and x.kind = 'invoice_pdf';
+  perform pg_temp.ck(cnt = 1 and em.dedupe_key = 'invoice_pdf:auto:' || i.id and (em.payload ->> 'invoice_id')::bigint = i.id
+                     and em.payload ->> 'to_email' = 't175-' || replace(b1, '-', '') || '@example.test' and em.locale = 'fi'
+                     and em.status = case when coalesce((select mode from booking.integration_config where key = 'resend'), 'off') = 'off' then 'skipped' else 'pending' end,
+                     'D4 tasan yksi invoice_pdf-rivi: varaajan osoite, laskun id, dedupe invoice_pdf:auto:<id>, tila resend.moden mukaan');
+  perform pg_temp.ck(em.payload ->> 'to_name' = 'T175 Yhteys', 'D5 vastaanottajan nimi = yhteyshenkilö');
+  -- trigger uudelleen (payment_status pois ja takaisin invoiced) + jonotus uudelleen samalla avaimella → edelleen yksi rivi, lasku ennallaan
+  update booking.orders set payment_status = 'pending' where id = o;
+  update booking.orders set payment_status = 'unpaid' where id = o;
+  perform pg_temp.ck((select payment_status from booking.orders where id = o) = 'invoiced', 'D6 trigger ajettu uudelleen (invoiced → pending → invoiced)');
+  perform pg_temp.ck(not booking._enqueue_email('invoice_pdf', o, null, null, 'invoice_pdf:auto:' || i.id, jsonb_build_object('invoice_id', i.id)), 'D7 sama dedupe-avain uudelleen → ei uutta riviä');
+  select * into i2 from booking.invoices where id = i.id;
+  perform pg_temp.ck((select count(*) from booking.email_outbox where order_id = o and kind = 'invoice_pdf') = 1 and i2.invoice_no = i.invoice_no and i2.reference_no = i.reference_no
+                     and (select count(*) from booking.invoices where order_id = o and kind = 'debit') = 1, 'D8 toisto: edelleen yksi sähköposti, yksi lasku, numero ja viite ennallaan');
+  -- claim näkee rivin oikein (vastaanottaja + lasku), jos rivi on jonossa (pending); vain tässä transaktiossa
+  if em.status = 'pending' then
+    perform pg_temp.ck(exists (select 1 from jsonb_array_elements(booking.email_outbox_claim_base_132(1000)) z
+                               where (z ->> 'id')::bigint = em.id and z ->> 'to' = em.payload ->> 'to_email' and (z -> 'invoice' ->> 'id')::bigint = i.id
+                                 and z -> 'invoice' ->> 'public_token' is not null and z -> 'invoice' ->> 'reference_no' = i.reference_no), 'D9 send-emailsin claim: vastaanottaja varaaja, lasku + public_token (PDF-liite)');
+  else
+    perform pg_temp.skip('D9 resend.mode = off → rivi skipped, claimia ei ajeta');
+  end if;
 
   -- ===== E hallinnan tilaus → luonnos, jonoon vasta napista
   o := pg_temp.web_order(pg_temp.bid(), 'einvoice', true, 'admin');
   select * into i from booking.invoices where order_id = o and kind = 'debit';
   perform pg_temp.ck(i.status = 'draft' and i.dispatch_status = 'none', 'E1 hallinnan kanava + verkkolasku: luonnos, ei jonoa');
+  o := pg_temp.web_order(pg_temp.bid(), 'pdf', false, 'admin');
+  select * into i from booking.invoices where order_id = o and kind = 'debit';
+  perform pg_temp.ck(i.status = 'draft' and i.invoice_no is null and not exists (select 1 from booking.email_outbox where order_id = o and kind = 'invoice_pdf'), 'E1b hallinnan kanava + PDF: luonnos, ei sähköpostia');
   perform pg_temp.login(u_adm);
   r := null;
   for rl in select sr.id, sr.weekdays from booking.schedule_rules sr where sr.active and sr.mode = 'shared' and sr.kind = 'regular' order by sr.id loop
@@ -231,12 +283,13 @@ begin
     r := pg_temp.call(format('booking.admin_send_invoice(%s, true, false)', i.id));
     perform pg_temp.logout();
     perform pg_temp.ck(r ->> 'state' = 'BK001' and r ->> 'err' = 'already_sent', 'E4 toinen lähetys → BK001 already_sent');
+    perform pg_temp.ck(not exists (select 1 from booking.email_outbox where order_id = i.order_id and kind = 'invoice_pdf'), 'E5 hallinnan tilauksesta ei sähköpostia ilman nappia');
   end if;
 
   -- ===== F viite ja asetus
   perform pg_temp.ck(not exists (select 1 from jsonb_each_text(ref_old) e join booking.invoices x on x.id = e.key::bigint where x.reference_no is distinct from e.value), 'F1 vanhat viitteet ennallaan');
   update booking.settings set value = '"123456789"'::jsonb where key = 'invoice_reference_prefix';
-  o := pg_temp.web_order(pg_temp.bid(), 'einvoice', true, 'web');
+  o := pg_temp.web_order(pg_temp.bid(), 'pdf', false, 'web');
   select * into i from booking.invoices where order_id = o and kind = 'debit';
   perform pg_temp.ck(left(i.reference_no, 9) = '123456789' and pg_temp.ref_ok(i.reference_no) and char_length(i.reference_no) <= 20, 'F2 asetuksen muutos huomioidaan (etuliite 123456789, tarkiste oikein, ≤ 20)');
   update booking.settings set value = '"0731"'::jsonb where key = 'invoice_reference_prefix';
@@ -261,15 +314,35 @@ begin
 
   -- ===== G automaattilähetyksen virhe ei kaada tilausta
   update booking.settings set value = '"0"'::jsonb where key = 'invoice_reference_prefix';
+  o := pg_temp.web_order(pg_temp.bid(), 'pdf', false, 'web');
+  select * into i from booking.invoices where order_id = o and kind = 'debit';
+  perform pg_temp.ck(i.status = 'draft' and i.invoice_no is null and (select payment_status from booking.orders where id = o) = 'invoiced'
+                     and not exists (select 1 from booking.email_outbox where order_id = o and kind = 'invoice_pdf'), 'G1 PDF + virhe (virheellinen etuliite): tilaus syntyy, lasku luonnos, ei sähköpostia');
+  perform pg_temp.ck(exists (select 1 from booking.audit_log where row_pk = o::text and action = 'invoice_auto_send_failed' and new_data ->> 'sqlstate' = 'BK001' and new_data ->> 'method' = 'pdf'), 'G2 virhe kirjataan audit_logiin (invoice_auto_send_failed, pdf)');
+  update booking.settings set value = 'true'::jsonb where key = 'invoice_einvoice_auto_send';
   o := pg_temp.web_order(pg_temp.bid(), 'einvoice', true, 'web');
   select * into i from booking.invoices where order_id = o and kind = 'debit';
-  perform pg_temp.ck(i.status = 'draft' and i.dispatch_status = 'none' and (select payment_status from booking.orders where id = o) = 'invoiced', 'G1 virhe (virheellinen etuliite): tilaus syntyy, lasku jää luonnokseksi');
-  perform pg_temp.ck(exists (select 1 from booking.audit_log where row_pk = o::text and action = 'invoice_auto_send_failed' and new_data ->> 'sqlstate' = 'BK001'), 'G2 virhe kirjataan audit_logiin (invoice_auto_send_failed)');
+  perform pg_temp.ck(i.status = 'draft' and i.dispatch_status = 'none' and exists (select 1 from booking.audit_log where row_pk = o::text and action = 'invoice_auto_send_failed' and new_data ->> 'method' = 'einvoice'),
+                     'G3 verkkolasku + asetus true + virhe: tilaus syntyy, lasku luonnos, audit_log');
+  update booking.settings set value = 'false'::jsonb where key = 'invoice_einvoice_auto_send';
   update booking.settings set value = pre0 where key = 'invoice_reference_prefix';
+  -- varaajan osoite puuttuu / virheellinen → ei sähköpostia, lasku luonnos (ei "lähetetty" ilman viestiä)
+  o := pg_temp.web_order(pg_temp.bid(), 'pdf', false, 'admin');
+  update booking.customers set email = 'ei-osoite' where id = (select customer_id from booking.orders where id = o);
+  update booking.orders set payment_status = 'pending', source_channel = 'web' where id = o;
+  update booking.orders set payment_status = 'unpaid' where id = o;
+  select * into i from booking.invoices where order_id = o and kind = 'debit';
+  perform pg_temp.ck((i.status = 'draft' and (select payment_status from booking.orders where id = o) = 'invoiced' and not exists (select 1 from booking.email_outbox where order_id = o and kind = 'invoice_pdf')
+                     and exists (select 1 from booking.audit_log where row_pk = o::text and action = 'invoice_auto_send_failed' and new_data ->> 'sqlstate' = 'BK001')),
+                     'G4 virheellinen varaajan osoite → ei sähköpostia, lasku jää luonnokseksi + audit_log');
 
   -- ===== H ei sivuvaikutuksia
   perform pg_temp.ck((select to_jsonb(c) from booking.integration_config c where key = 'procountor') = cfg0, 'H1 Procountor-asetukset ennallaan (mode, daily_enabled)');
-  perform pg_temp.ck(not exists (select 1 from booking.email_outbox where kind = 'invoice_pdf' and created_at >= now()), 'H2 PDF-laskusähköpostia ei jonotettu');
+  perform pg_temp.ck(not exists (select 1 from booking.email_outbox x left join booking.orders od on od.id = x.order_id
+                                 where x.created_at >= now() and x.kind = 'invoice_pdf' and (x.dedupe_key not like 'invoice_pdf:auto:%' or od.source_channel is distinct from 'web'))
+                     and exists (select 1 from booking.email_outbox x where x.created_at >= now() and x.kind = 'invoice_pdf'),
+                     'H2 PDF-laskusähköpostit vain verkkokaupan PDF-tilauksista (invoice_pdf:auto), ei hallinnan tilauksista');
+  perform pg_temp.ck((select value from booking.settings where key = 'invoice_einvoice_auto_send') = auto0, 'H4 invoice_einvoice_auto_send palautettu (false)');
   update booking.settings set value = mode0 where key = 'invoice_dispatch_mode';
   perform pg_temp.ck((select value from booking.settings where key = 'invoice_dispatch_mode') is not distinct from mode0, 'H3 invoice_dispatch_mode palautettu');
 

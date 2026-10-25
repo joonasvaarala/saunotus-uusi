@@ -1,25 +1,29 @@
--- booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF), verkkokaupan verkkolaskun automaattinen jonotus, viitenumeron etuliite 7310.
+-- booking_175: yritysasiakkaan laskutustapa (verkkolasku / PDF), verkkokaupan PDF-lasku automaattisesti sähköpostiin, verkkolasku luonnokseksi
+--   (automaattinen jonotus asetuksen invoice_einvoice_auto_send takana, oletus pois), viitenumeron etuliite 7310.
 -- Omistajan päätös (Joonas, 25.10.2026). Versio on väliaikainen (tuotannon versio kirjataan ajossa). Ei public-skeemaa. Hinnat, ALV, slugit ennallaan.
 -- 1) _clean_company: company.invoice_method = 'einvoice' | 'pdf' (verkkokauppa). einvoice → OVT + välittäjä pakollisia (kuten ennen require_einvoice);
 --    pdf → OVT-tiedot jätetään pois. Ilman invoice_methodia: require_einvoice = true → einvoice (vanha kauppa välimuistissa); muuten ennallaan
 --    (hallinnan kutsujat admin_create_booking / _admin_create_legs / admin_create_customer: OVT valinnainen, laskutustapaa ei kirjata).
 -- 2) _stamp_order_billing: orders.billing.invoice_method (vain kun annettu); pdf → billingissä ei OVT-tietoja.
--- 3) orders_invoice_draft_trg: luonnos syntyy kuten ennen. Lisäksi verkkokaupan tilaus (source_channel = 'web', status confirmed) ja
---    billing.invoice_method = 'einvoice' → lasku lähetetään heti samalla polulla kuin hallinnan "Lähetä verkkolasku"
---    (_invoice_allocate + _invoice_queue_dispatch → invoices.dispatch_status + invoice_dispatch_log). invoice_dispatch_mode ratkaisee:
---    live → 'queued' (invoice-dispatch-jono), muuten 'dry_run' (kirjataan, ei lähetetä). Tuotannossa dry_run, Procountor mode=off, daily_enabled=false:
---    mitään ei lähetetä. Virhe ei estä varausta: lasku jää luonnokseksi + audit_log 'invoice_auto_send_failed'.
---    PDF-laskutapa ja hallinnassa luodut laskut jäävät luonnokseksi; lähetys napista kuten ennen (ei automaattista sähköpostia).
+-- 3) orders_invoice_draft_trg: luonnos syntyy kuten ennen. Verkkokaupan yritystilaus (source_channel = 'web', status confirmed):
+--    * billing.invoice_method = 'einvoice' → lasku jää LUONNOKSEKSI (asiakaskuvaan tilauksen OVT + välittäjä, lukittu); lähetys hallinnan
+--      "Lähetä verkkolasku" -napista. Automaattinen jonotus vain, kun booking.settings invoice_einvoice_auto_send = true (oletus false,
+--      kytketään myöhemmin ilman migraatiota): sama polku kuin napissa (_invoice_allocate + _invoice_queue_dispatch; invoice_dispatch_mode
+--      ratkaisee queued / dry_run). Tuotannossa dry_run, Procountor mode=off, daily_enabled=false.
+--    * billing.invoice_method = 'pdf' → lasku numeroidaan kuten "Lähetä PDF sähköpostilla" (_invoice_allocate: status sent, viite) ja PDF-lasku
+--      jonotetaan varaajan sähköpostiin: _enqueue_email('invoice_pdf', …, dedupe_key 'invoice_pdf:auto:<laskun id>') → yksi viesti laskua kohden
+--      (email_outbox.dedupe_key unique). send-emails (ennallaan) noudattaa resend.mode- ja test_recipients-rajausta. Ei edge-muutoksia.
+--    Virhe ei estä varausta: lasku jää luonnokseksi + audit_log 'invoice_auto_send_failed'. Hallinnassa luodut laskut: vain napista, kuten ennen.
 -- 4) _invoice_allocate: viitenumero = booking.settings.invoice_reference_prefix (oletus "7310") + järjestysnumero + tarkiste 7-3-1 (_fi_reference),
 --    enintään 20 merkkiä. Jo lähetettyjen laskujen viitteet eivät muutu (invoices_lock_trg estää). customer_snapshot_locked säilyy kuten tuotannossa.
--- Procountor-asetuksiin, invoice_dispatch_modeen ja edge-funktioihin ei kosketa.
+-- Procountor-asetuksiin, invoice_dispatch_modeen, resend-asetuksiin ja edge-funktioihin ei kosketa.
 --
 -- Vartija: md5(pg_get_functiondef) luettu tuotannosta sxbofnuisemspgquoxyv 25.10.2026. Ajo keskeytyy eikä mitään muuteta, jos ei vastaa.
 --   korvataan (tuotanto -> booking_175):
 --     booking._clean_company(jsonb): 4e8d9dddda117bdc208f3b1bb281f97a -> 53fa5a8a98e98aeb4a97000d2f6b37ec
 --     booking._stamp_order_billing(bigint,bigint,jsonb): 709b28b59f549df7be252b2942e77256 -> 693f24abfe0dddfbf4a2e345e1596e73
 --     booking._invoice_allocate(bigint): ad7dbbd30a6b3362bf4011d4e8ff296e -> 46a3326812f896077fc2614ba783ff3d
---     booking.orders_invoice_draft_trg(): a9a389358507c2dca37acbacdcfd3d61 -> df1d0ebf036380495f6730d1fa93de7a
+--     booking.orders_invoice_draft_trg(): a9a389358507c2dca37acbacdcfd3d61 -> a48fe50340cff5f6e9709ad46055ecb9
 --   riippuvuudet, ei muuteta (tuotanto = vaadittu):
 --     _invoice_queue_dispatch f3cfdb0e2d484ab6f63c6286c4ff8560
 --     _ensure_draft_invoice eefa8e82c7aab1a148bdb3e319ae65ae
@@ -45,6 +49,11 @@
 --     email_outbox_claim 2db9a1233a06e6293d0877f17de1ab72
 --     admin_mark_voucher_claim_redeemed 525d1fa96fd7c37df4d7e502edf1bf71
 --     _vc_due bea9cd9a32eb273ee72caed0aedd1e2e
+--     _enqueue_email 350304b26e7240c42a6cf38f604eb689
+--     _valid_email 6775eff3f255a0388b3da493a4d730be
+--     email_outbox_claim_base_132 0b10986533285645d8592449a90a1e0c
+--     email_outbox_claim_base_146 9c63ce8c8b6f46347692859a117d110d
+--     email_outbox_mark 2ba0222fdfee71942fb09053bd7ea803
 -- Rollback: rollbacks/20261025070000_booking_175_ROLLBACK.sql. Testi: tests/invoices/t175_yrityslaskutus.sql (BEGIN … ROLLBACK).
 set local lock_timeout = '5s';
 
@@ -58,7 +67,7 @@ begin
   v := md5(pg_get_functiondef(to_regprocedure('booking._invoice_allocate(bigint)')));
   if v is null or v not in ('ad7dbbd30a6b3362bf4011d4e8ff296e', '46a3326812f896077fc2614ba783ff3d') then ok := false; msg := msg || ' _invoice_allocate=' || coalesce(v, 'puuttuu'); end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking.orders_invoice_draft_trg()')));
-  if v is null or v not in ('a9a389358507c2dca37acbacdcfd3d61', 'df1d0ebf036380495f6730d1fa93de7a') then ok := false; msg := msg || ' orders_invoice_draft_trg=' || coalesce(v, 'puuttuu'); end if;
+  if v is null or v not in ('a9a389358507c2dca37acbacdcfd3d61', 'a48fe50340cff5f6e9709ad46055ecb9') then ok := false; msg := msg || ' orders_invoice_draft_trg=' || coalesce(v, 'puuttuu'); end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking._invoice_queue_dispatch(bigint)')));
   if v is distinct from 'f3cfdb0e2d484ab6f63c6286c4ff8560' then ok := false; msg := msg || ' _invoice_queue_dispatch=' || coalesce(v, 'puuttuu'); end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking._ensure_draft_invoice(bigint)')));
@@ -107,6 +116,16 @@ begin
   if v is distinct from '525d1fa96fd7c37df4d7e502edf1bf71' then ok := false; msg := msg || ' admin_mark_voucher_claim_redeemed=' || coalesce(v, 'puuttuu'); end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking._vc_due(booking.orders,booking.voucher_claims)')));
   if v is distinct from 'bea9cd9a32eb273ee72caed0aedd1e2e' then ok := false; msg := msg || ' _vc_due=' || coalesce(v, 'puuttuu'); end if;
+  v := md5(pg_get_functiondef(to_regprocedure('booking._enqueue_email(text,bigint,bigint,bigint,text,jsonb)')));
+  if v is distinct from '350304b26e7240c42a6cf38f604eb689' then ok := false; msg := msg || ' _enqueue_email=' || coalesce(v, 'puuttuu'); end if;
+  v := md5(pg_get_functiondef(to_regprocedure('booking._valid_email(text)')));
+  if v is distinct from '6775eff3f255a0388b3da493a4d730be' then ok := false; msg := msg || ' _valid_email=' || coalesce(v, 'puuttuu'); end if;
+  v := md5(pg_get_functiondef(to_regprocedure('booking.email_outbox_claim_base_132(integer)')));
+  if v is distinct from '0b10986533285645d8592449a90a1e0c' then ok := false; msg := msg || ' email_outbox_claim_base_132=' || coalesce(v, 'puuttuu'); end if;
+  v := md5(pg_get_functiondef(to_regprocedure('booking.email_outbox_claim_base_146(integer)')));
+  if v is distinct from '9c63ce8c8b6f46347692859a117d110d' then ok := false; msg := msg || ' email_outbox_claim_base_146=' || coalesce(v, 'puuttuu'); end if;
+  v := md5(pg_get_functiondef(to_regprocedure('booking.email_outbox_mark(bigint,text,text,text)')));
+  if v is distinct from '2ba0222fdfee71942fb09053bd7ea803' then ok := false; msg := msg || ' email_outbox_mark=' || coalesce(v, 'puuttuu'); end if;
   if not exists (select 1 from pg_trigger t where t.tgrelid = 'booking.orders'::regclass and t.tgname = 'orders_invoice_draft'
                   and t.tgfoid = 'booking.orders_invoice_draft_trg()'::regprocedure and not t.tgisinternal) then
     ok := false; msg := msg || ' trigger orders_invoice_draft puuttuu';
@@ -118,6 +137,12 @@ end $g$;
 insert into booking.settings(key, value, description, is_public)
 values ('invoice_reference_prefix', '"7310"'::jsonb,
         'Laskun viitenumeron etuliite (1–9 numeroa, ei alkunollaa). Viite = etuliite + laskun järjestysnumero + tarkiste (7-3-1), enintään 20 merkkiä. Muutos koskee vain tämän jälkeen lähetettäviä laskuja.',
+        false)
+on conflict (key) do nothing;
+-- Verkkokaupan verkkolaskun automaattinen lähetys (oletus pois: verkkolasku jää luonnokseksi, lähetys napista). true = lähetys heti tilauksesta.
+insert into booking.settings(key, value, description, is_public)
+values ('invoice_einvoice_auto_send', 'false'::jsonb,
+        'Verkkokaupan yritystilauksen verkkolasku: false = jää luonnokseksi (lähetys hallinnan napista), true = lähetetään automaattisesti verkkolaskujonoon. PDF-lasku lähtee sähköpostiin aina automaattisesti.',
         false)
 on conflict (key) do nothing;
 
@@ -242,25 +267,40 @@ begin
       values (auth.uid(), booking._jwt_role(), 'orders', new.id::text, 'invoice_draft_failed',
               jsonb_build_object('order_id', new.id, 'sqlstate', sqlstate, 'error', left(sqlerrm, 500)));
     end;
-    -- booking_175: verkkokaupan yritystilaus, laskutustapa verkkolasku → lasku lähetetään heti verkkolaskujonoon
-    -- (sama polku kuin hallinnan "Lähetä verkkolasku": _invoice_allocate + _invoice_queue_dispatch; invoice_dispatch_mode ratkaisee queued / dry_run).
-    -- Laskun asiakaskuvaan tilauksella annettu OVT + välittäjä (vain tämä lasku, customer_snapshot_locked). Rekisteriä ei muuteta.
-    -- PDF-laskutapa ja hallinnan / muiden kanavien tilaukset jäävät luonnokseksi (lähetysnappi). Virhe ei estä varausta: lasku jää luonnokseksi + audit_log.
-    if v_inv is not null and new.source_channel = 'web' and new.status = 'confirmed' and new.billing ->> 'invoice_method' = 'einvoice' then
+    -- booking_175: verkkokaupan yritystilaus (source_channel web, confirmed), laskutustapa tilauksen billing.invoice_method:
+    --  * einvoice: laskun asiakaskuvaan tilauksella annettu OVT + välittäjä (vain tämä lasku, customer_snapshot_locked; rekisteri ennallaan).
+    --    Lasku jää LUONNOKSEKSI ja lähetetään hallinnan "Lähetä verkkolasku" -napista. Automaattinen lähetys vain, kun
+    --    booking.settings invoice_einvoice_auto_send = true (oletus false): sama polku kuin napissa (_invoice_allocate + _invoice_queue_dispatch).
+    --  * pdf: lasku numeroidaan kuten hallinnan "Lähetä PDF sähköpostilla" (_invoice_allocate) ja PDF-lasku jonotetaan varaajan sähköpostiin
+    --    (email_outbox kind invoice_pdf, _enqueue_email; dedupe_key invoice_pdf:auto:<laskun id> → yksi viesti laskua kohden).
+    -- Hallinnan / muiden kanavien tilaukset jäävät luonnokseksi (napit). Virhe ei estä varausta: lasku jää luonnokseksi + audit_log.
+    if v_inv is not null and new.source_channel = 'web' and new.status = 'confirmed' and new.billing ->> 'invoice_method' in ('einvoice', 'pdf') then
       begin
         if exists (select 1 from booking.invoices where id = v_inv and kind = 'debit' and status = 'draft') then
-          update booking.invoices set
-            customer_snapshot = customer_snapshot || jsonb_build_object('einvoice_address', upper(new.billing ->> 'einvoice_address'), 'einvoice_operator', upper(new.billing ->> 'einvoice_operator')),
-            customer_snapshot_locked = true
-           where id = v_inv and nullif(new.billing ->> 'einvoice_address', '') is not null and nullif(new.billing ->> 'einvoice_operator', '') is not null;
-          perform booking._invoice_allocate(v_inv);
-          perform booking._invoice_queue_dispatch(v_inv);
+          if new.billing ->> 'invoice_method' = 'einvoice' then
+            update booking.invoices set
+              customer_snapshot = customer_snapshot || jsonb_build_object('einvoice_address', upper(new.billing ->> 'einvoice_address'), 'einvoice_operator', upper(new.billing ->> 'einvoice_operator')),
+              customer_snapshot_locked = true
+             where id = v_inv and nullif(new.billing ->> 'einvoice_address', '') is not null and nullif(new.billing ->> 'einvoice_operator', '') is not null;
+            if booking._setting('invoice_einvoice_auto_send', 'false'::jsonb) = 'true'::jsonb then
+              perform booking._invoice_allocate(v_inv);
+              perform booking._invoice_queue_dispatch(v_inv);
+            end if;
+          else
+            perform booking._invoice_allocate(v_inv);
+            if not booking._enqueue_email('invoice_pdf', new.id, null, null, 'invoice_pdf:auto:' || v_inv,
+                     jsonb_build_object('to_email', (select lower(btrim(c.email)) from booking.customers c where c.id = new.customer_id),
+                                        'to_name', coalesce(nullif(new.billing ->> 'contact_name', ''), new.billing ->> 'company'), 'invoice_id', v_inv))
+               and not exists (select 1 from booking.email_outbox e where e.dedupe_key = 'invoice_pdf:auto:' || v_inv) then
+              perform booking._err('invalid_email', 'Varaajalla ei ole kelvollista sähköpostiosoitetta');
+            end if;
+          end if;
         end if;
       exception when others then
-        raise warning 'orders_invoice_draft: tilaus % verkkolaskun automaattinen lähetys epäonnistui: %', new.id, sqlerrm;
+        raise warning 'orders_invoice_draft: tilaus % laskun automaattinen lähetys epäonnistui: %', new.id, sqlerrm;
         insert into booking.audit_log(actor, actor_role, table_name, row_pk, action, new_data)
         values (auth.uid(), booking._jwt_role(), 'orders', new.id::text, 'invoice_auto_send_failed',
-                jsonb_build_object('order_id', new.id, 'invoice_id', v_inv, 'sqlstate', sqlstate, 'error', left(sqlerrm, 500)));
+                jsonb_build_object('order_id', new.id, 'invoice_id', v_inv, 'method', new.billing ->> 'invoice_method', 'sqlstate', sqlstate, 'error', left(sqlerrm, 500)));
       end;
     end if;
   end if;
@@ -272,5 +312,5 @@ begin
   if md5(pg_get_functiondef('booking._clean_company(jsonb)'::regprocedure)) <> '53fa5a8a98e98aeb4a97000d2f6b37ec' then raise exception 'booking_175: _clean_company md5 ei vastaa odotettua'; end if;
   if md5(pg_get_functiondef('booking._stamp_order_billing(bigint,bigint,jsonb)'::regprocedure)) <> '693f24abfe0dddfbf4a2e345e1596e73' then raise exception 'booking_175: _stamp_order_billing md5 ei vastaa odotettua'; end if;
   if md5(pg_get_functiondef('booking._invoice_allocate(bigint)'::regprocedure)) <> '46a3326812f896077fc2614ba783ff3d' then raise exception 'booking_175: _invoice_allocate md5 ei vastaa odotettua'; end if;
-  if md5(pg_get_functiondef('booking.orders_invoice_draft_trg()'::regprocedure)) <> 'df1d0ebf036380495f6730d1fa93de7a' then raise exception 'booking_175: orders_invoice_draft_trg md5 ei vastaa odotettua'; end if;
+  if md5(pg_get_functiondef('booking.orders_invoice_draft_trg()'::regprocedure)) <> 'a48fe50340cff5f6e9709ad46055ecb9' then raise exception 'booking_175: orders_invoice_draft_trg md5 ei vastaa odotettua'; end if;
 end $v$;
