@@ -32,7 +32,7 @@
 --     booking._client_ip() 8c8e7d145566db576d33037a941ce81f
 --     booking._setting(text,jsonb) 70fcfa245e9e7d070dae7a6c1e90ce4d
 --     booking.is_staff() 40d8b86aa41ab71f29ef4e6c5257aa77
--- Rollback: rollbacks/20261025120000_booking_178_ROLLBACK.sql. Testi: tests/checkout/t178_paylink_retry.sql (BEGIN … ROLLBACK).
+-- Rollback: rollbacks/20261025115820_booking_178_ROLLBACK.sql. Testi: tests/checkout/t178_paylink_retry.sql (BEGIN … ROLLBACK).
 set local lock_timeout = '5s';
 
 do $g$

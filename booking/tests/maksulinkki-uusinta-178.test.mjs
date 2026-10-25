@@ -95,8 +95,8 @@ test('tekstit: pending-import-74 = ui.paylink.info.retry FI+EN koodin oletuksist
 });
 
 test('migraatio booking_178: vartijat, uudelleenyritys vain linkeille, tuplamaksusuoja, oikeudet; rollback palauttaa täsmälleen; t178 sama md5', () => {
-  const M = rd('booking/supabase/migrations/20261025120000_booking_178_paylink_retry.sql');
-  const RB = rd('booking/supabase/rollbacks/20261025120000_booking_178_ROLLBACK.sql');
+  const M = rd('booking/supabase/migrations/20261025115820_booking_178_paylink_retry.sql');
+  const RB = rd('booking/supabase/rollbacks/20261025115820_booking_178_ROLLBACK.sql');
   const T = rd('booking/supabase/tests/checkout/t178_paylink_retry.sql');
   const orig = { vismapay_payment_apply: 'e5ae519184809a5bc47202a4cd6e787d', vismapay_payment_lookup: '413368e58d3f85eb437814ee836ccf1f', public_payment_link_info: '1fb6153b39daa6f1055c93cac7cb4563' };
   for (const [n, m] of Object.entries(orig)) {
