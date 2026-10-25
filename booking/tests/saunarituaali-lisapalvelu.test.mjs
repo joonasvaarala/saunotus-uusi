@@ -22,6 +22,9 @@ const rd = (p) => readFileSync(join(root, '..', p), 'utf8');
 const MIG = rd('booking/supabase/migrations/20261024202015_booking_166_ritual_addon.sql');
 const RB = rd('booking/supabase/rollbacks/20261024202015_booking_166_ROLLBACK.sql');
 const SQLT = rd('booking/supabase/tests/t166_ritual_addon.sql');
+const MIG181 = rd('booking/supabase/migrations/20261025230602_booking_181_ritual_start_times.sql');
+const RB181 = rd('booking/supabase/rollbacks/20261025230602_booking_181_ROLLBACK.sql');
+const SQLT181 = rd('booking/supabase/tests/t181_ritual_start_times.sql');
 const PENDING = JSON.parse(rd('content/site-texts.pending-import-62.json'));
 const PENDING63 = JSON.parse(rd('content/site-texts.pending-import-63.json'));   // kassakortin korjaus: 3 uutta avainta (ei SQL:ää)
 const PENDING64R = JSON.parse(rd('content/site-texts.pending-import-64.json')).filter((r) => /^ui\.shop\.ritual_/.test(r.key));   // monikkokorjaus: ritual_*_one
@@ -30,16 +33,26 @@ const MD5 = { _attach_addons: '6a780e8e00229ff273a321591f197541', _reservation_r
 const hel = (ms) => new Intl.DateTimeFormat('fi-FI', { timeZone: 'Europe/Helsinki', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(ms)).replace('.', ':');
 
 // ---------------------------------------------------------------- aikasääntö
-test('aikasääntö: vuoro 16.00–18.00 → 15.30, 16.00, 16.30, 17.30, 18.00 (Helsinki, kesä- ja talviaika)', () => {
+test('aikasääntö (booking_181): rituaali alkaa vain 16.00, 16.30 tai 17.00 vuoron ikkunassa (Helsinki, kesä- ja talviaika)', () => {
+  assert.deepEqual(L.RITUAL_ALLOWED_STARTS, ['16:00', '16:30', '17:00']);
   for (const [s, e] of [['2027-06-05T16:00:00+03:00', '2027-06-05T18:00:00+03:00'], ['2027-01-09T16:00:00+02:00', '2027-01-09T18:00:00+02:00'], ['2027-01-09T14:00:00Z', '2027-01-09T16:00:00Z']])
-    assert.deepEqual(L.ritualStarts(s, e).map(hel), ['15:30', '16:00', '16:30', '17:30', '18:00'], s);
-  assert.deepEqual(L.ritualStarts('2027-06-05T14:00:00+03:00', '2027-06-05T17:00:00+03:00').map(hel), ['13:30', '14:00', '14:30', '15:30', '16:30', '17:00']);
-  assert.deepEqual(L.ritualStarts('2027-06-05T16:00:00+03:00', '2027-06-05T18:00:00+03:00', { at_start: false }).map(hel), ['15:30', '16:30', '17:30', '18:00']);
-  assert.deepEqual(L.ritualStarts('2027-06-05T16:00:00+03:00', '2027-06-05T18:00:00+03:00', { before_min: 0, at_end: false }).map(hel), ['16:00', '16:30', '17:30']);
+    assert.deepEqual(L.ritualStarts(s, e).map(hel), ['16:00', '16:30', '17:00'], s);
+  const want = { '14:00': ['16:00'], '14:30': ['16:00', '16:30'], '15:00': ['16:00', '16:30', '17:00'], '16:30': ['16:00', '16:30', '17:00'], '17:00': ['16:30', '17:00'] };
+  for (const [hm, w] of Object.entries(want)) {
+    const s = Date.parse(`2027-06-05T${hm}:00+03:00`);
+    assert.deepEqual(L.ritualStarts(s, s + 2 * 36e5).map(hel), w, `vuoro ${hm}`);
+  }
+  assert.deepEqual(L.ritualStarts('2027-06-05T14:00:00+03:00', '2027-06-05T15:00:00+03:00'), [], 'tunnin vuoro 14.00');
+  assert.deepEqual(L.ritualStarts('2027-06-05T18:00:00+03:00', '2027-06-05T19:00:00+03:00'), [], 'tunnin vuoro 18.00');
+  assert.deepEqual(L.ritualStarts('2027-03-28T16:00:00+03:00', '2027-03-28T18:00:00+03:00').map(hel), ['16:00', '16:30', '17:00'], 'kesäajan vaihtopäivä');
+  assert.deepEqual(L.ritualStarts('2027-06-05T14:30:00+03:00', '2027-06-05T16:30:00+03:00', { at_end: false }).map(hel), ['16:00'], 'at_end false');
+  assert.deepEqual(L.ritualStarts('2027-06-05T16:30:00+03:00', '2027-06-05T18:30:00+03:00', { before_min: 0 }).map(hel), ['16:30', '17:00'], 'before_min 0');
+  // ilman allowed-listaa vanha sääntö (sama kuin SQL, kun time_window_rules-listaa ei ole)
+  assert.deepEqual(L.ritualStarts('2027-06-05T16:00:00+03:00', '2027-06-05T18:00:00+03:00', undefined, null).map(hel), ['15:30', '16:00', '16:30', '17:30', '18:00']);
   assert.deepEqual(L.ritualStarts('x', 'y'), []);
   assert.deepEqual(L.ritualStarts('2027-06-05T18:00:00+03:00', '2027-06-05T16:00:00+03:00'), []);
   const s = Date.parse('2027-06-05T16:00:00+03:00'), e = s + 2 * 36e5;
-  assert.deepEqual(L.ritualStarts(s, e).map((t) => L.positionOf(t, s, e)), ['before', 'start', 'during', 'during', 'end']);
+  assert.deepEqual(L.ritualStarts(s, e).map((t) => L.positionOf(t, s, e)), ['start', 'during', 'during']);
 });
 test('aikasääntö yhdessä paikassa: JS-peilin oletus = migraation asetus ritual_addon; SQL-funktio _ritual_addon_starts lukee asetusta', () => {
   const m = MIG.match(/'(\{"enabled": true, "product_id": 8[^']*\})'::jsonb/);
@@ -92,11 +105,13 @@ test('mock: saatavuus → tarjous (täysi aika piilossa, vajaa rajattu) → vara
   const r = rows.find((x) => x.rule_id === 9 && x.session_date === '2027-06-05');
   assert.equal(hel(Date.parse(r.starts_at)), '16:00'); assert.equal(r.mode, 'shared'); assert.equal(r.unit_price, 29);
   const o = L.normalizeOffer(rpc('public_ritual_addon', { p_rule_id: 9, p_date: '2027-06-05', p_persons: 3 }));
-  assert.deepEqual(o.times.map((x) => hel(Date.parse(x.starts_at))), ['15:30', '16:00', '16:30', '18:00'], '17.30 täynnä → ei näy');
+  assert.deepEqual(o.times.map((x) => hel(Date.parse(x.starts_at))), ['16:00', '16:30'], '17.00 täynnä → ei näy');
   assert.equal(o.times.find((x) => hel(Date.parse(x.starts_at)) === '16:30').max, 2);
   assert.equal(o.unit_price, 20);
-  const t = o.times[1].key;
-  assert.equal(rpc('public_create_booking', { p_rule_id: 9, p_date: '2027-06-05', p_persons: 3, p_name: 'Testi', p_addons: [{ ritual_start: o.times[2].key, quantity: 3 }] }).code, 'ritual_addon_full');
+  const t = o.times[0].key;
+  assert.equal(rpc('public_create_booking', { p_rule_id: 9, p_date: '2027-06-05', p_persons: 3, p_name: 'Testi', p_addons: [{ ritual_start: o.times[1].key, quantity: 3 }] }).code, 'ritual_addon_full');
+  for (const x of ['2027-06-05T15:30:00+03:00', '2027-06-05T17:30:00+03:00', '2027-06-05T18:00:00+03:00'])
+    assert.equal(rpc('public_create_booking', { p_rule_id: 9, p_date: '2027-06-05', p_persons: 3, p_name: 'Testi', p_addons: [{ ritual_start: x, quantity: 1 }] }).code, 'ritual_addon_time', `${x} ei ole sallittu (booking_181)`);
   assert.equal(rpc('public_create_booking', { p_rule_id: 9, p_date: '2027-06-05', p_persons: 3, p_name: 'Testi', p_addons: [{ ritual_start: '2027-06-05T13:15:00Z', quantity: 1 }] }).code, 'ritual_addon_time', '16.15 ei ole säännön aika');
   assert.equal(rpc('public_create_booking', { p_rule_id: 9, p_date: '2027-06-05', p_persons: 3, p_name: 'Testi', p_addons: [{ ritual_start: t, quantity: 4 }] }).code, 'ritual_addon_persons');
   const ok = rpc('public_create_booking', { p_rule_id: 9, p_date: '2027-06-05', p_persons: 3, p_name: 'Testi', p_addons: [{ ritual_start: t, quantity: 2, price: 0 }] });
@@ -152,6 +167,18 @@ test('content/site-texts.pending-import-63.json = kassakortin uudet avaimet (3 a
 });
 
 // ---------------------------------------------------------------- migraatio, rollback, SQL-testi
+test('booking_181: vain _ritual_addon_starts muuttuu (md5-vartija), rollback palauttaa tuotannon, SQL-testi kattaa lisäpalvelun ja paketin', () => {
+  const prod = '622d94213b88d532b415e9d548785019', neu = 'acbdc2afdf6412c547067aec78f03414';
+  for (const x of [MIG181, RB181]) { assert.ok(x.includes(prod) && x.includes(neu)); assert.match(x, /set local lock_timeout/); }
+  const code = MIG181.replace(/--.*$/gm, '');
+  assert.deepEqual([...code.matchAll(/create or replace function (booking\.\w+)/gi)].map((m) => m[1]), ['booking._ritual_addon_starts']);
+  assert.match(code, /allowed_starts = array\['16:00', '16:30', '17:00'\]::time\[\]/);
+  assert.ok(!/\b(insert|update|delete|drop|alter|grant|revoke)\b/i.test(code), 'ei datamuutoksia eikä oikeusmuutoksia');
+  assert.ok(!/schema public|public\./i.test(code.replace(/booking\.public_\w+/g, '')), 'ei public-skeemaa');
+  assert.match(RB181.replace(/--.*$/gm, ''), /create or replace function booking\._ritual_addon_starts/i);
+  for (const k of ['public_ritual_addon', '_ritual_addon_starts', 'ritual_addon_time', 'ritual_start', '_treatment_slot_check', '_upsell_day_slots', 'admin_change_booking', 'Europe/Helsinki', 'TESTRESULT'])
+    assert.ok(SQLT181.includes(k), `t181: ${k}`);
+});
 test('migraatio: md5-vartija tuotannon funktioille, kytkin, palvelimen hinta; rollback palauttaa tuotannon funktiot; SQL-testi kattaa vaaditut kohdat', () => {
   for (const [f, h] of Object.entries(MD5)) { assert.ok(MIG.includes(h), `migraatio: ${f}`); assert.ok(RB.includes(h), `rollback: ${f}`); }
   assert.match(MIG, /raise exception 'booking_166: korvattavien funktioiden md5/);

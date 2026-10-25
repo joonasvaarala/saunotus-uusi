@@ -1,14 +1,19 @@
 -- t166: saunarituaali yleisen vuoron lisäpalveluna (booking_166, migraatio 20261024202015, väliaikainen versio).
--- A aikasääntö (16.00–18.00 → 15.30, 16.00, 16.30, 17.30, 18.00) ja asetus, B saatavuus (public_ritual_addon), C kapasiteetti (täysi aika piiloon,
+-- A aikasääntö (booking_181: vain rituaalin sallitut alkuajat 16.00, 16.30, 17.00 ikkunassa vuoron alku − 30 min … vuoron loppu;
+-- esim. 16.00–18.00 → 16.00, 16.30, 17.00) ja asetus, B saatavuus (public_ritual_addon), C kapasiteetti (täysi aika piiloon,
 -- osittain täysi → max_persons), D ei vapaita aikoja / pois päältä / arkivuoro / ei kelpaa → available=false, E Helsinki vs UTC (aika aina
 -- aikavyöhykkeen kanssa), F palvelimen hinta + lukitus (asiakkaan hinta ohitetaan, väärä aika / henkilömäärä / täysi → koko varaus kumoutuu),
 -- G public_get_booking (vuoro ensin, ritual_addon, can_change false) + asiakkaan muutos estetty, H peruutus (henkilökunta, asiakkaan pito,
 -- vanhentunut pito) + palautussuunnitelma, I siirto (rituaali seuraa; ei mahdu → koko siirto kumoutuu) + henkilömäärä, J alennuskoodin esikatselu,
 -- K aikaikkuna-trigger (ilman vanhempaa ennallaan), L migraatio uudelleen + rollback (md5) + migraatio uudelleen.
+-- booking_181 (20261025230602) muuttaa aikasäännön; testi ajaa sen booking_166:n uudelleenajon jälkeen (tuotannon tila) ja L-osassa
+-- kumoaa sen ensin ja ajaa lopuksi uudelleen.
 -- Ajo (psql, paikallinen PG17 tai testikanta; migraatiot ja fixtures/10_test_helpers.sql ajettu):
 --   cd booking/supabase/tests && psql -X -v ON_ERROR_STOP=0 -f t166_ritual_addon.sql                       (istunnon TimeZone = UTC, kuten tuotannossa)
 --   cd booking/supabase/tests && psql -X -v ON_ERROR_STOP=0 -v tz=Europe/Helsinki -f t166_ritual_addon.sql  (sama Helsingin ajassa; molempien on mentävä läpi)
 -- Testipäivät 2027 (la 6.3., la 13.3., la 20.3., la 27.3., ma 8.3.); booking_horizon_days nostetaan vain tämän transaktion sisällä.
+-- Testi ei poista eikä muuta olemassa olevia sulkuja (space_blocks; kalenterisulkuja ei voi poistaa, closure_managed): d1 on ensimmäinen
+-- lauantai alkaen 6.3.2027, jonka testipäiville (pe d1−1, la d1, ma d1+2, la d1+7, +14, +21) ei osu aktiivista sulkua eikä varausta.
 -- Kaikki yhdessä transaktiossa; lopussa tahallinen poikkeus "TESTRESULT pass=… fail=…" kumoaa kaiken. Ei tuotantoon.
 \if :{?tz}
 \else
@@ -53,6 +58,18 @@ begin
   v := booking._create_legs_booking('current', 8, p_start, null, p_persons, null, 'admin', null, null, null, null, false, null, false, null);
   return (v ->> 'reservation_id')::bigint;
 end $$;
+-- ensimmäinen lauantai p_from:sta (7 pv välein, enintään vuosi), jonka päiville p_from + p_offsets ei osu aktiivista sulkua
+-- (space_blocks, myös kalenterisulut) eikä aktiivista varausta ja jonka päivät ovat samassa UTC-poikkeamassa (ei kesäajan vaihdetta välissä);
+-- testi ei siis poista mitään, mikä ei ole sen omaa
+create function pg_temp.free_sat(p_from date, p_offsets int[]) returns date language sql stable as $$
+  select s::date from generate_series(p_from::timestamp, (p_from + 364)::timestamp, interval '7 days') s
+   where not exists (select 1 from unnest(p_offsets) o join booking.space_blocks b
+                       on b.active and b.during && tstzrange(pg_temp.hel(s::date + o, '00:00'), pg_temp.hel(s::date + o + 1, '00:00')))
+     and not exists (select 1 from unnest(p_offsets) o join booking.reservations r
+                       on booking._res_active(r.status, r.hold_expires_at)
+                      and r.starts_at < pg_temp.hel(s::date + o + 1, '00:00') and r.ends_at > pg_temp.hel(s::date + o, '00:00'))
+     and (select count(distinct (s::date + o + time '12:00') - (pg_temp.hel(s::date + o, '12:00') at time zone 'UTC')) from unnest(p_offsets) o) = 1
+   order by s limit 1 $$;
 grant execute on all functions in schema pg_temp to public;
 
 -- booking_171 (hiljainen ale perushinnasta, tuotannossa 20261024212241) muuttaa public_preview_coden md5:ksi e8fe514b…; testi toimii kummassakin tilassa
@@ -61,50 +78,60 @@ select md5(pg_get_functiondef('booking.public_preview_code(text,bigint,date,inte
 \ir ../migrations/20261024202015_booking_166_ritual_addon.sql
 select pg_temp.ck(md5(pg_get_functiondef('booking.public_preview_code(text,bigint,date,integer,jsonb,text,text)'::regprocedure))
   = case when :'has171'::boolean then 'e8fe514b4ec9db4043d388e5547f94ad' else '4816fbaf5149e501a128aed40f2bf505' end, 'L1b: uudelleenajo: public_preview_code ennallaan (booking_171: ' || :'has171' || ')');
+-- booking_166:n uudelleenajo palauttaa vanhan _ritual_addon_starts-säännön → booking_181 (tuotannossa 20261025230602) uudelleen päälle
+\ir ../migrations/20261025230602_booking_181_ritual_start_times.sql
+select pg_temp.ck(md5(pg_get_functiondef('booking._ritual_addon_starts(timestamptz,timestamptz)'::regprocedure)) = 'acbdc2afdf6412c547067aec78f03414', 'L1c: booking_181 ajettu (md5 acbdc2af…)');
 
 update booking.settings set value = '900'::jsonb where key = 'booking_horizon_days';   -- vain tässä transaktiossa (tuotannossa 180)
 update booking.settings set value = '"pay_later"'::jsonb where key = 'public_payment_mode';
-delete from booking.space_blocks where during && tstzrange('2027-03-01', '2027-04-01');
 
 do $t$
 declare
   r16 bigint := test.rule('Yleinen vuoro la–su 16:00%'); r1630 bigint := test.rule('Yleinen vuoro la–su 16:30%'); r14 bigint := test.rule('Tunnin saunavuoro la–su 14:00%');
-  rmon bigint := test.rule('Miesten sauna%');
-  d1 date := '2027-03-06'; d2 date := '2027-03-13'; d3 date := '2027-03-20'; d4 date := '2027-03-27'; dmon date := '2027-03-08';
+  rmon bigint := test.rule('Miesten sauna%'); r1430 bigint := test.rule('Yleinen vuoro la–su 14:30%'); r17 bigint := test.rule('Yleinen vuoro la–su 17:00%');
+  d1 date := pg_temp.free_sat('2027-03-06', array[-1, 0, 2, 7, 14, 21]); d2 date := d1 + 7; d3 date := d1 + 14; d4 date := d1 + 21; dmon date := d1 + 2;
   u_adm uuid := test.mk_staff('adm@t166.example', 'admin');
   v jsonb; w jsonb; b jsonb; tok uuid; o booking.orders; pr booking.reservations; ch booking.reservations; it booking.order_items;
   v_sess numeric; v_n int; v_txt text; v_id bigint; v_start timestamptz;
 begin
-  -- ---------- A aikasääntö ----------
+  perform pg_temp.ck(d1 is not null and extract(isodow from d1) = 6, 'P0: testipäivät ilman sulkuja ja varauksia: d1 = ' || coalesce(d1::text, 'ei löytynyt'));
+  -- ---------- A aikasääntö (booking_181: sallitut 16.00, 16.30, 17.00 ikkunassa [alku − 30 min, loppu]) ----------
   select string_agg(to_char(t at time zone 'Europe/Helsinki', 'HH24:MI'), ',' order by t) into v_txt
     from booking._ritual_addon_starts(pg_temp.hel(d1, '16:00'), pg_temp.hel(d1, '18:00')) t;
-  perform pg_temp.ck(v_txt = '15:30,16:00,16:30,17:30,18:00', 'A1: 16.00–18.00 → 15.30, 16.00, 16.30, 17.30, 18.00 (' || coalesce(v_txt, '') || ')');
+  perform pg_temp.ck(v_txt = '16:00,16:30,17:00', 'A1: 16.00–18.00 → 16.00, 16.30, 17.00 (' || coalesce(v_txt, '') || ')');
   select string_agg(to_char(t at time zone 'Europe/Helsinki', 'HH24:MI'), ',' order by t) into v_txt
     from booking._ritual_addon_starts(pg_temp.hel(d1, '14:00'), pg_temp.hel(d1, '15:00')) t;
-  perform pg_temp.ck(v_txt = '13:30,14:00,14:30,15:00', 'A2: 14.00–15.00 → 13.30, 14.00, 14.30, 15.00 (' || coalesce(v_txt, '') || ')');
+  perform pg_temp.ck(v_txt is null, 'A2: tunnin vuoro 14.00–15.00 → ei aikoja (' || coalesce(v_txt, '') || ')');
   select string_agg(to_char(t at time zone 'Europe/Helsinki', 'HH24:MI'), ',' order by t) into v_txt
     from booking._ritual_addon_starts(pg_temp.hel(d1, '17:00'), pg_temp.hel(d1, '20:00')) t;
-  perform pg_temp.ck(v_txt = '16:30,17:00,17:30,18:30,19:30,20:00', 'A3: 3 h vuoro tunnin välein (' || coalesce(v_txt, '') || ')');
+  perform pg_temp.ck(v_txt = '16:30,17:00', 'A3: 3 h vuoro 17.00–20.00 → 16.30 (30 min ennen), 17.00 (' || coalesce(v_txt, '') || ')');
+  select string_agg(to_char(t at time zone 'Europe/Helsinki', 'HH24:MI'), ',' order by t) into v_txt
+    from booking._ritual_addon_starts(pg_temp.hel(d1, '14:30'), pg_temp.hel(d1, '16:30')) t;
+  perform pg_temp.ck(v_txt = '16:00,16:30', 'A3b: 14.30–16.30 → 16.00, 16.30 (lopussa) (' || coalesce(v_txt, '') || ')');
   -- kesäaika vaihtuu su 28.3.2027: Helsingin kellonajat säilyvät
   select string_agg(to_char(t at time zone 'Europe/Helsinki', 'HH24:MI'), ',' order by t) into v_txt
     from booking._ritual_addon_starts(pg_temp.hel('2027-03-28', '16:00'), pg_temp.hel('2027-03-28', '18:00')) t;
-  perform pg_temp.ck(v_txt = '15:30,16:00,16:30,17:30,18:00', 'A4: kesäajan vaihtopäivä (' || coalesce(v_txt, '') || ')');
+  perform pg_temp.ck(v_txt = '16:00,16:30,17:00', 'A4: kesäajan vaihtopäivä (' || coalesce(v_txt, '') || ')');
   perform pg_temp.ck((booking._ritual_addon_cfg() ->> 'product_id')::bigint = 8 and (booking._ritual_addon_cfg() ->> 'enabled')::boolean, 'A5: asetus: tuote 8, päällä');
   update booking.settings set value = value || '{"at_start": false, "before_min": null}'::jsonb where key = 'ritual_addon';
   select string_agg(to_char(t at time zone 'Europe/Helsinki', 'HH24:MI'), ',' order by t) into v_txt
-    from booking._ritual_addon_starts(pg_temp.hel(d1, '16:00'), pg_temp.hel(d1, '18:00')) t;
-  perform pg_temp.ck(v_txt = '16:30,17:30,18:00', 'A6: asetus muuttaa listaa (' || coalesce(v_txt, '') || ')');
+    from booking._ritual_addon_starts(pg_temp.hel(d1, '16:30'), pg_temp.hel(d1, '18:30')) t;
+  perform pg_temp.ck(v_txt = '16:30,17:00', 'A6: asetus (before_min) muuttaa listaa: 16.30–18.30 ilman 16.00 (' || coalesce(v_txt, '') || ')');
   update booking.settings set value = value || '{"at_start": true, "before_min": 30}'::jsonb where key = 'ritual_addon';
   perform pg_temp.ck(not exists (select 1 from booking._ritual_addon_starts(pg_temp.hel(d1, '16:00'), pg_temp.hel(d1, '16:00'))), 'A7: virheellinen vuoro → ei aikoja');
 
   -- ---------- B saatavuus ----------
   v := booking.public_ritual_addon(r16, d1, 3);
-  perform pg_temp.ck((v ->> 'available')::boolean and pg_temp.labels(v) = '15:30,16:00,16:30,17:30,18:00', 'B1: la 16.00-vuoro: 5 aikaa (' || pg_temp.labels(v) || ')');
+  perform pg_temp.ck((v ->> 'available')::boolean and pg_temp.labels(v) = '16:00,16:30,17:00', 'B1: la 16.00-vuoro: 3 aikaa (' || pg_temp.labels(v) || ')');
   perform pg_temp.ck((v ->> 'product_id')::bigint = 8 and (v ->> 'unit_price')::numeric = 20 and (v ->> 'vat_rate')::numeric = 25.5 and (v -> 'prices' ->> '3')::numeric = 60,
                      'B2: tuote 8, 20 €/hlö, ALV 25,5 %, 3 hlö = 60 €');
-  perform pg_temp.ck(pg_temp.maxp(v, '15:30') = 3 and (v ->> 'max_persons')::int = 3, 'B3: max_persons rajattu vuoron henkilömäärään');
+  perform pg_temp.ck(pg_temp.maxp(v, '16:00') = 3 and (v ->> 'max_persons')::int = 3, 'B3: max_persons rajattu vuoron henkilömäärään');
   perform pg_temp.ck((select bool_and((x ->> 'ends_at')::timestamptz = (x ->> 'starts_at')::timestamptz + interval '20 minutes') from jsonb_array_elements(v -> 'times') x), 'B4: kesto 20 min');
-  perform pg_temp.ck((select string_agg(x ->> 'position', ',' order by (x ->> 'starts_at')::timestamptz) from jsonb_array_elements(v -> 'times') x) = 'before,start,during,during,end', 'B5: positiot');
+  perform pg_temp.ck((select string_agg(x ->> 'position', ',' order by (x ->> 'starts_at')::timestamptz) from jsonb_array_elements(v -> 'times') x) = 'start,during,during', 'B5: positiot');
+  v := booking.public_ritual_addon(r1630, d1, 3);
+  perform pg_temp.ck((select string_agg(x ->> 'position', ',' order by (x ->> 'starts_at')::timestamptz) from jsonb_array_elements(v -> 'times') x) = 'before,start,during', 'B5b: positiot vuoro 16.30 (' || pg_temp.labels(v) || ')');
+  v := booking.public_ritual_addon(r1430, d1, 3);
+  perform pg_temp.ck((select string_agg(x ->> 'position', ',' order by (x ->> 'starts_at')::timestamptz) from jsonb_array_elements(v -> 'times') x) = 'during,end', 'B5c: positiot vuoro 14.30 (' || pg_temp.labels(v) || ')');
   update booking.product_config set max_persons = 4 where product_id = 8;
   v := booking.public_ritual_addon(r16, d1, 6);
   perform pg_temp.ck(pg_temp.maxp(v, '16:00') = 4 and (v ->> 'max_persons')::int = 4, 'B6: rituaalin oma enimmäismäärä rajaa (6 hlö vuoro, tuote max 4)');
@@ -112,19 +139,21 @@ begin
   v := booking.public_ritual_addon(r16, d1, 6);
   perform pg_temp.ck(pg_temp.maxp(v, '16:00') = 6, 'B6b: 6 hlö vuoro → 6');
   perform test.anon();
-  v := booking.public_ritual_addon(r14, d1, 2);
+  v := booking.public_ritual_addon(r1430, d1, 2);
+  w := booking.public_ritual_addon(r14, d1, 2);
   perform test.logout();
-  perform pg_temp.ck((v ->> 'available')::boolean and pg_temp.labels(v) = '13:30,14:00,14:30,15:00', 'B7: anon, tunnin vuoro 14.00 (' || pg_temp.labels(v) || ')');
+  perform pg_temp.ck((v ->> 'available')::boolean and pg_temp.labels(v) = '16:00,16:30', 'B7: anon, vuoro 14.30 (' || pg_temp.labels(v) || ')');
+  perform pg_temp.ck(not (w ->> 'available')::boolean and jsonb_array_length(w -> 'times') = 0, 'B7b: anon, tunnin vuoro 14.00 → ei aikoja (' || coalesce(w ->> 'reason', '') || ')');
 
   -- ---------- C kapasiteetti ----------
   perform pg_temp.fill(pg_temp.hel(d2, '16:30'), 6);             -- 16.30 täynnä (pooli 6)
-  perform pg_temp.fill(pg_temp.hel(d2, '17:00'), 2);             -- 17.00 2 hlö (ei ole vuoron listalla; Raunin puskuri estää 16.30? ei koske 17.30)
+  perform pg_temp.fill(pg_temp.hel(d2, '17:00'), 2);             -- 17.00 2/6
   v := booking.public_ritual_addon(r16, d2, 4);
   perform pg_temp.ck(position('16:30' in pg_temp.labels(v)) = 0, 'C1: täysi aika 16.30 piilossa (' || pg_temp.labels(v) || ')');
-  perform pg_temp.ck(position('15:30' in pg_temp.labels(v)) > 0 and position('18:00' in pg_temp.labels(v)) > 0, 'C2: muut ajat näkyvät');
+  perform pg_temp.ck(pg_temp.labels(v) = '16:00,17:00' and pg_temp.maxp(v, '17:00') = 4, 'C2: muut ajat näkyvät (17.00: 2/6 → max 4) (' || pg_temp.labels(v) || ')');
   perform pg_temp.fill(pg_temp.hel(d3, '16:00'), 4);             -- 16.00 4/6
   v := booking.public_ritual_addon(r16, d3, 5);
-  perform pg_temp.ck(pg_temp.maxp(v, '16:00') = 2 and pg_temp.maxp(v, '15:30') = 5, 'C3: osittain täysi 16.00 → max 2; 15.30 → 5 (' || coalesce(pg_temp.maxp(v, '16:00'), -1) || ')');
+  perform pg_temp.ck(pg_temp.maxp(v, '16:00') = 2 and pg_temp.maxp(v, '16:30') = 5, 'C3: osittain täysi 16.00 → max 2; 16.30 → 5 (' || coalesce(pg_temp.maxp(v, '16:00'), -1) || ')');
 
   -- ---------- D ei vapaita aikoja ----------
   insert into booking.space_blocks(space_id, starts_at, ends_at, reason, active)
@@ -141,8 +170,12 @@ begin
   b := pg_temp.book(r16, d1, 2, jsonb_build_array(jsonb_build_object('ritual_start', pg_temp.hel(d1, '16:00'), 'quantity', 1)));
   perform pg_temp.ck(b ->> 'code' = 'ritual_addon_unavailable', 'D5: kytkin pois → varaus hylätään (' || coalesce(b ->> 'code', 'ok') || ')');
   update booking.settings set value = value || '{"enabled": true, "session_product_ids": [6]}'::jsonb where key = 'ritual_addon';
-  perform pg_temp.ck(not (booking.public_ritual_addon(r16, d1, 2) ->> 'available')::boolean and (booking.public_ritual_addon(r14, d1, 2) ->> 'available')::boolean,
-                     'D6: session_product_ids rajaa vuorot');
+  -- tunnin vuoro (tuote 6) kelpaa, mutta sille ei ole sallittua aikaa (reason full); yleinen vuoro (tuote 1) ei kelpaa
+  perform pg_temp.ck(booking.public_ritual_addon(r16, d1, 2) ->> 'reason' = 'not_eligible' and booking.public_ritual_addon(r14, d1, 2) ->> 'reason' = 'full',
+                     'D6: session_product_ids rajaa vuorot (6)');
+  update booking.settings set value = value || '{"session_product_ids": [1]}'::jsonb where key = 'ritual_addon';
+  perform pg_temp.ck((booking.public_ritual_addon(r16, d1, 2) ->> 'available')::boolean and booking.public_ritual_addon(r14, d1, 2) ->> 'reason' = 'not_eligible',
+                     'D6b: session_product_ids rajaa vuorot (1)');
   update booking.settings set value = value || '{"session_product_ids": null}'::jsonb where key = 'ritual_addon';
   v := booking.public_ritual_addon(r16, d1 - 1, 2);
   perform pg_temp.ck(not (v ->> 'available')::boolean and v ->> 'reason' = 'no_session', 'D7: päivällä ei vuoroa → ei näy');
@@ -153,9 +186,10 @@ begin
   perform pg_temp.ck(booking._ritual_addon_fit(now() + interval '30 minutes', 1, true) is null, 'D9: lead-aika (120 min) estää');
 
   -- ---------- E + F varaus, hinta ja lukitus ----------
-  b := pg_temp.book(r16, d1, 3, jsonb_build_array(jsonb_build_object('ritual_start', to_char(pg_temp.hel(d1, '15:30') at time zone 'Europe/Helsinki', 'YYYY-MM-DD"T"HH24:MI:SS') || '+02:00',
-                                                                     'quantity', 2, 'price', 1, 'unit_price', 0)));
-  perform pg_temp.ck((b ->> 'ok')::boolean, 'F1: varaus + rituaali 15.30 (Helsingin aika +02:00) ' || coalesce(b ->> 'code', '') || coalesce(b ->> 'message', ''));
+  -- vuoro 16.30, rituaali 16.00 (30 min ennen vuoroa); aika Helsingin paikallisaikana + UTC-poikkeama (talvella +02:00)
+  v_txt := to_char(d1 + time '16:00', 'YYYY-MM-DD"T"HH24:MI:SS') || '+' || to_char((d1 + time '16:00') - (pg_temp.hel(d1, '16:00') at time zone 'UTC'), 'HH24:MI');
+  b := pg_temp.book(r1630, d1, 3, jsonb_build_array(jsonb_build_object('ritual_start', v_txt, 'quantity', 2, 'price', 1, 'unit_price', 0)));
+  perform pg_temp.ck((b ->> 'ok')::boolean, 'F1: vuoro 16.30 + rituaali 16.00 (' || v_txt || ') ' || coalesce(b ->> 'code', '') || coalesce(b ->> 'message', ''));
   tok := (b ->> 'token')::uuid;
   select * into o from booking.orders where public_token = tok;
   select * into pr from booking.reservations where order_id = o.id and parent_reservation_id is null;
@@ -163,20 +197,22 @@ begin
   select * into it from booking.order_items where id = ch.order_item_id;
   perform pg_temp.ck(ch.id is not null and ch.product_id = 8 and ch.parent_reservation_id = pr.id and ch.persons = 2 and ch.status = pr.status,
                      'F2: rituaalivaraus kb 8, vanhempi = vuoro, 2 hlö, sama tila');
-  perform pg_temp.ck(ch.starts_at = pg_temp.hel(d1, '15:30') and ch.ends_at = pg_temp.hel(d1, '15:50') and test.hel_hm(ch.starts_at) = '15:30', 'E1: 15.30 Helsingin aikaa (' || current_setting('TimeZone') || ')');
+  perform pg_temp.ck(ch.starts_at = pg_temp.hel(d1, '16:00') and ch.ends_at = pg_temp.hel(d1, '16:20') and test.hel_hm(ch.starts_at) = '16:00', 'E1: 16.00 Helsingin aikaa (' || current_setting('TimeZone') || ')');
   perform pg_temp.ck(it.line_total_gross = 40 and it.vat_rate = 25.5 and it.kind = 'reservation' and (it.price_breakdown ->> 'ritual_addon')::boolean and it.parent_item_id is null,
                      'F3: palvelimen hinta 2 × 20 = 40 € (asiakkaan hinta ohitettu)');
   select line_total_gross into v_sess from booking.order_items where id = pr.order_item_id;
   perform pg_temp.ck(o.total_gross = v_sess + 40 and (b ->> 'total')::numeric = v_sess + 40, 'F4: tilauksen summa = vuoro + rituaali');
   perform pg_temp.ck((select amount from booking.payments where order_id = o.id order by id limit 1) = v_sess + 40, 'F5: maksun summa sisältää rituaalin');
   perform pg_temp.ck(exists (select 1 from booking.reservation_legs l where l.reservation_id = ch.id) or ch.therapist_missing, 'F6: saunottajaleg tai therapist_missing');
-  v := booking.public_ritual_addon(r16, d1, 6);
-  perform pg_temp.ck(pg_temp.maxp(v, '15:30') = 4, 'F7: varattu rituaali vie poolista (15.30 jäljellä 4, ' || coalesce(pg_temp.maxp(v, '15:30'), -1) || ')');
+  v := booking.public_ritual_addon(r1630, d1, 6);
+  perform pg_temp.ck(pg_temp.maxp(v, '16:00') = 4, 'F7: varattu rituaali vie poolista (16.00 jäljellä 4, ' || coalesce(pg_temp.maxp(v, '16:00'), -1) || ')');
   -- virheet: koko varaus kumoutuu
   select count(*) into v_n from booking.reservations;
   b := pg_temp.book(r16, d1, 2, jsonb_build_array(jsonb_build_object('ritual_start', pg_temp.hel(d1, '16:15'), 'quantity', 1)));
   perform pg_temp.ck(b ->> 'code' = 'ritual_addon_time', 'F8: listan ulkopuolinen aika hylätään (' || coalesce(b ->> 'code', 'ok') || ')');
-  b := pg_temp.book(r16, d1, 2, jsonb_build_array(jsonb_build_object('ritual_start', '2027-03-06T15:30:00', 'quantity', 1)));
+  b := pg_temp.book(r16, d1, 2, jsonb_build_array(jsonb_build_object('ritual_start', pg_temp.hel(d1, '15:30'), 'quantity', 1)));
+  perform pg_temp.ck(b ->> 'code' = 'ritual_addon_time', 'F8b: vanha aika 15.30 (ennen booking_181:tä) hylätään (' || coalesce(b ->> 'code', 'ok') || ')');
+  b := pg_temp.book(r16, d1, 2, jsonb_build_array(jsonb_build_object('ritual_start', to_char(d1, 'YYYY-MM-DD') || 'T16:00:00', 'quantity', 1)));
   perform pg_temp.ck(b ->> 'code' = 'ritual_addon_time', 'E2: aika ilman aikavyöhykettä hylätään (' || coalesce(b ->> 'code', 'ok') || ')');
   b := pg_temp.book(r16, d1, 2, jsonb_build_array(jsonb_build_object('ritual_start', pg_temp.hel(d1, '16:00'), 'quantity', 3)));
   perform pg_temp.ck(b ->> 'code' = 'ritual_addon_persons', 'F9: rituaaliin enemmän kuin vuoroon hylätään (' || coalesce(b ->> 'code', 'ok') || ')');
@@ -195,25 +231,26 @@ begin
   perform pg_temp.ck(jsonb_array_length(v -> 'items') = 2 and not (v -> 'items' -> 0 ->> 'ritual_addon')::boolean and (v -> 'items' -> 1 ->> 'ritual_addon')::boolean
                      and (v -> 'items' -> 0 ->> 'product_id')::bigint = pr.product_id, 'G1: items[0] = vuoro, items[1] = rituaali (vaikka rituaali alkaa ensin)');
   perform pg_temp.ck((v ->> 'has_ritual_addon')::boolean and not (v ->> 'can_change')::boolean, 'G2: has_ritual_addon, can_change = false');
-  v := booking.public_change_booking(tok, r1630, d1, 3);
+  v := booking.public_change_booking(tok, r16, d1, 3);
   perform pg_temp.ck(v ->> 'code' = 'not_changeable', 'G3: asiakkaan verkkomuutos estetty (' || coalesce(v ->> 'code', 'ok') || ')');
 
   -- ---------- I siirto (henkilökunta) ----------
-  v := pg_temp.as_(u_adm, format('select booking.admin_change_booking(%s, %s, %L, null)', pr.id, r1630, d1));
+  v := pg_temp.as_(u_adm, format('select booking.admin_change_booking(%s, %s, %L, null)', pr.id, r17, d1));
   select * into ch from booking.reservations where id = ch.id;
-  perform pg_temp.ck(coalesce(v ->> 'err', '') = '' and test.hel_hm(ch.starts_at) = '16:00' and test.hel_hm(ch.ends_at) = '16:20' and ch.status = 'confirmed',
-                     'I1: vuoro 16.00 → 16.30, rituaali 15.30 → 16.00 ' || coalesce(v ->> 'msg', ''));
+  perform pg_temp.ck(coalesce(v ->> 'err', '') = '' and test.hel_hm(ch.starts_at) = '16:30' and test.hel_hm(ch.ends_at) = '16:50' and ch.status = 'confirmed',
+                     'I1: vuoro 16.30 → 17.00, rituaali 16.00 → 16.30 ' || coalesce(v ->> 'msg', ''));
   perform pg_temp.ck(not exists (select 1 from booking.reservation_legs l where l.reservation_id = ch.id and l.starts_at < ch.starts_at), 'I2: rituaalin legit siirtyivät');
   v := pg_temp.as_(u_adm, format('select booking.admin_change_booking(%s, null, null, %s)', pr.id, 4));
   select * into ch from booking.reservations where id = ch.id;
-  perform pg_temp.ck(coalesce(v ->> 'err', '') = '' and ch.persons = 2 and test.hel_hm(ch.starts_at) = '16:00', 'I3: henkilömäärän muutos ei muuta rituaalia ' || coalesce(v ->> 'msg', ''));
+  perform pg_temp.ck(coalesce(v ->> 'err', '') = '' and ch.persons = 2 and test.hel_hm(ch.starts_at) = '16:30', 'I3: henkilömäärän muutos ei muuta rituaalia ' || coalesce(v ->> 'msg', ''));
   -- siirto aikaan, jossa rituaali ei mahdu → koko siirto kumoutuu
-  perform pg_temp.fill(pg_temp.hel(d3, '16:30'), 6);
-  v := pg_temp.as_(u_adm, format('select booking.admin_change_booking(%s, %s, %L, null)', pr.id, r1630, d3));   -- rituaali 16.00 → la 20.3. 16.00 (4/6 täynnä, 2 hlö mahtuu)
+  perform pg_temp.fill(pg_temp.hel(d3, '17:00'), 6);             -- viereinen 17.00 täynnä (ei estä)
+  perform pg_temp.fill(pg_temp.hel(d3, '16:30'), 4);
+  v := pg_temp.as_(u_adm, format('select booking.admin_change_booking(%s, %s, %L, null)', pr.id, r17, d3));   -- rituaali 16.30 → d3 16.30 (4/6 täynnä, 2 hlö mahtuu)
   select * into ch from booking.reservations where id = ch.id;
-  perform pg_temp.ck(coalesce(v ->> 'err', '') = '' and test.hel_date(ch.starts_at) = d3 and test.hel_hm(ch.starts_at) = '16:00', 'I4: siirto toiselle päivälle, rituaali mukana ' || coalesce(v ->> 'msg', ''));
-  perform pg_temp.fill(pg_temp.hel(d2, '16:00'), 5);
-  v := pg_temp.as_(u_adm, format('select booking.admin_change_booking(%s, %s, %L, null)', pr.id, r1630, d2));   -- la 13.3. 16.00: 5/6 → 2 hlö ei mahdu
+  perform pg_temp.ck(coalesce(v ->> 'err', '') = '' and test.hel_date(ch.starts_at) = d3 and test.hel_hm(ch.starts_at) = '16:30', 'I4: siirto toiselle päivälle, rituaali mukana ' || coalesce(v ->> 'msg', ''));
+  -- d2 16.30 on jo täynnä (C1: 6/6)
+  v := pg_temp.as_(u_adm, format('select booking.admin_change_booking(%s, %s, %L, null)', pr.id, r17, d2));   -- d2 16.30: 6/6 → 2 hlö ei mahdu
   select * into ch from booking.reservations where id = ch.id;
   select * into pr from booking.reservations where id = pr.id;
   perform pg_temp.ck(v ->> 'err' = 'ritual_addon_move' and test.hel_date(pr.starts_at) = d3 and test.hel_date(ch.starts_at) = d3,
@@ -235,7 +272,7 @@ begin
                      'H6: rituaali ei enää varaa resursseja');
 
   -- vain rituaalin peruutus: vuoro jää
-  b := pg_temp.book(r16, d1, 2, jsonb_build_array(jsonb_build_object('ritual_start', pg_temp.hel(d1, '18:00'), 'quantity', 2)));
+  b := pg_temp.book(r16, d1, 2, jsonb_build_array(jsonb_build_object('ritual_start', pg_temp.hel(d1, '17:00'), 'quantity', 2)));
   select * into o from booking.orders where public_token = (b ->> 'token')::uuid;
   select * into ch from booking.reservations where order_id = o.id and parent_reservation_id is not null;
   v := pg_temp.as_(u_adm, format('select booking.admin_set_reservation_status(%s, %L, %L)', ch.id, 'cancelled', 't166 vain rituaali'));
@@ -245,19 +282,19 @@ begin
   -- asiakkaan pito (hold_until_paid): rituaali odottaa samaa pitoa; asiakas perii → molemmat; pito vanhenee → molemmat
   update booking.settings set value = '"hold_until_paid"'::jsonb where key = 'public_payment_mode';
   update booking.integration_config set mode = 'test', settings = settings || '{"approved_by":"testi"}'::jsonb where key = 'mobilepay';
-  b := pg_temp.book(r16, d1, 2, jsonb_build_array(jsonb_build_object('ritual_start', pg_temp.hel(d1, '17:30'), 'quantity', 1)));
+  b := pg_temp.book(r16, d1, 2, jsonb_build_array(jsonb_build_object('ritual_start', pg_temp.hel(d1, '16:30'), 'quantity', 1)));
   select * into o from booking.orders where public_token = (b ->> 'token')::uuid;
   select * into pr from booking.reservations where order_id = o.id and parent_reservation_id is null;
   select * into ch from booking.reservations where order_id = o.id and parent_reservation_id is not null;
   perform pg_temp.ck((b ->> 'ok')::boolean and pr.status = 'pending' and ch.status = 'pending' and ch.hold_expires_at = pr.hold_expires_at, 'H8: pito: rituaali pending samalla pidolla ' || coalesce(b ->> 'code', ''));
   v := booking.public_cancel_booking((b ->> 'token')::uuid);
   perform pg_temp.ck((v ->> 'ok')::boolean and (select count(*) from booking.reservations where order_id = o.id and status = 'cancelled') = 2, 'H9: asiakkaan peruutus perui molemmat');
-  b := pg_temp.book(r16, d1, 2, jsonb_build_array(jsonb_build_object('ritual_start', pg_temp.hel(d1, '17:30'), 'quantity', 1)));
+  b := pg_temp.book(r16, d1, 2, jsonb_build_array(jsonb_build_object('ritual_start', pg_temp.hel(d1, '16:30'), 'quantity', 1)));
   select * into o from booking.orders where public_token = (b ->> 'token')::uuid;
   update booking.reservations set hold_expires_at = now() - interval '1 minute' where order_id = o.id;
   perform booking.expire_holds();
   perform pg_temp.ck((select count(*) from booking.reservations where order_id = o.id and status in ('pending', 'confirmed')) = 0, 'H10: pidon vanheneminen vapautti molemmat');
-  b := pg_temp.book(r16, d1, 2, jsonb_build_array(jsonb_build_object('ritual_start', pg_temp.hel(d1, '17:30'), 'quantity', 1)));
+  b := pg_temp.book(r16, d1, 2, jsonb_build_array(jsonb_build_object('ritual_start', pg_temp.hel(d1, '16:30'), 'quantity', 1)));
   select * into o from booking.orders where public_token = (b ->> 'token')::uuid;
   select * into pr from booking.reservations where order_id = o.id and parent_reservation_id is null;
   update booking.reservations set status = 'confirmed', hold_expires_at = null where id = pr.id;
@@ -279,7 +316,9 @@ begin
 end $t$;
 
 -- ---------- L rollback (md5) + migraatio uudelleen ----------
--- booking_171 rakentuu booking_166:n päälle: se kumotaan ensin (ja ajetaan lopuksi uudelleen)
+-- booking_171 ja booking_181 rakentuvat booking_166:n päälle: ne kumotaan ensin (ja ajetaan lopuksi uudelleen)
+\ir ../rollbacks/20261025230602_booking_181_ROLLBACK.sql
+select pg_temp.ck(md5(pg_get_functiondef('booking._ritual_addon_starts(timestamptz,timestamptz)'::regprocedure)) = '622d94213b88d532b415e9d548785019', 'L1d: booking_181 rollback (md5 622d9421…)');
 \if :has171
 \ir ../rollbacks/20261024212241_booking_171_ROLLBACK.sql
 \endif
@@ -300,6 +339,8 @@ select pg_temp.ck(to_regprocedure('booking.public_ritual_addon(bigint,date,integ
 select pg_temp.ck(md5(pg_get_functiondef('booking.public_preview_code(text,bigint,date,integer,jsonb,text,text)'::regprocedure)) = 'e8fe514b4ec9db4043d388e5547f94ad'
                   and md5(pg_get_functiondef('booking._quiet_apply(bigint,jsonb)'::regprocedure)) = 'dd2139dc889d981e6623ef1fceaeec3d', 'L5: booking_171 ajettu uudelleen');
 \endif
+\ir ../migrations/20261025230602_booking_181_ritual_start_times.sql
+select pg_temp.ck(md5(pg_get_functiondef('booking._ritual_addon_starts(timestamptz,timestamptz)'::regprocedure)) = 'acbdc2afdf6412c547067aec78f03414', 'L6: booking_181 ajettu uudelleen (md5 acbdc2af…)');
 
 select label from t166_r where not ok;
 do $$ declare p int; f int; begin

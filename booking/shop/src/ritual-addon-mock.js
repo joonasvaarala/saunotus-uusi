@@ -12,7 +12,7 @@ export const SHARED_PRODUCT = { id: 1, name: 'Yleinen vuoro (to, la-su)', name_e
   addons_enabled: true, allowed_addons: ['turvenaamio_jalkakylpy', 'saunavihta', 'pyyhe'], description: 'Sekavuoro, johon kaikki ovat tervetulleita.', description_en: null, timeline: null };
 export const RITUAL = { product_id: 8, name: 'Saunotusrituaali', name_en: 'Sauna ritual', unit: 20, vat: 25.5, minutes: 20, min: 1, max: 6 };
 const RULES = [[6, '14:00'], [7, '14:30'], [8, '15:00'], [9, '16:00'], [10, '16:30'], [11, '17:00']];
-const USED = { '16:30': 4, '17:30': 6 };   // demo: muiden rituaalivaraukset (rituaalipooli max 6)
+const USED = { '16:30': 4, '17:00': 6 };   // demo (booking_181: ajat vain 16.00/16.30/17.00): muiden rituaalivaraukset (rituaalipooli max 6)
 const helFmt = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 const parts = (ms) => Object.fromEntries(helFmt.formatToParts(new Date(ms)).map((p) => [p.type, p.value]));
 const hmOf = (ms) => { const p = parts(ms); return `${p.hour}:${p.minute}`; };
