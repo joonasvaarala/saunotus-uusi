@@ -952,7 +952,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       if (inv.status === 'draft') {
         st.invSeq += 1;
         inv.invoice_no = `L${String(st.invSeq).padStart(6, '0')}`;
-        inv.reference_no = fiReference(String(st.invSeq).padStart(3, '0'));
+        inv.reference_no = fiReference(`7310${st.invSeq}`);   // booking_175: etuliite (settings.invoice_reference_prefix, oletus 7310) + numero + 7-3-1
         inv.status = 'sent';
       }
       if (a.p_einvoice) {

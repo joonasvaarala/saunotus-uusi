@@ -21,8 +21,9 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
     upsell: { addons: ADDONS, treatments: [{ product_id: 10, name: 'Saunahoito', name_en: 'Sauna treatment' }] },
     instructions: [],
   };
-  const sync = () => { o.total = r2(o.items.reduce((s, i) => s + i.line_total, 0)); o.unpaid = r2(Math.max(0, o.total - o.paid)); o.payment_status = o.unpaid === 0 ? 'paid' : o.paid > 0 ? 'partially_paid' : 'unpaid'; };
+  const sync = () => { o.total = r2(o.items.reduce((s, i) => s + i.line_total, 0)); o.unpaid = r2(Math.max(0, o.total - o.paid)); o.payment_status = o.unpaid === 0 ? 'paid' : o.paid > 0 ? 'partially_paid' : scenario === 'invoiced' ? 'invoiced' : 'unpaid'; };   // booking_175: ?scenario=invoiced = yrityksen laskulla maksettava tilaus (Laskutettu)
   // Skenaariot lahjakorttinäkymille (?mock=1&scenario=gift|cards|cardspaid|cardsdelivery): gift = maksamatonta jäljellä (Käytä lahjakortti), cards = lahjakorttitilaus maksamatta, cardspaid = maksettu, cardsdelivery = maksettu + toimitusvalinnat (ostajalle / saajalle ajastettu / saajalle lähetetty)
+  if (scenario === 'invoiced') { o.customer_kind = 'company'; o.paid = 0; o.payments = []; o.receipts = []; }
   const giftCards = [];
   if (scenario === 'gift' || scenario === 'claims' || scenario === 'claimsoff' || scenario === 'claimproblem') { o.items = [{ id: 1, name: 'Yleinen saunavuoro', name_en: 'Public sauna session', quantity: 2, line_total: 72, vat_rate: 25.5 }, { id: 2, name: 'Pyyhe', name_en: 'Towel', quantity: 2, line_total: 10, vat_rate: 25.5 }]; o.paid = 20; o.payments[0].amount = 20; o.receipts = []; }
   if (scenario === 'cards' || scenario === 'cardspaid' || scenario === 'cardsdelivery') {

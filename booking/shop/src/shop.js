@@ -578,20 +578,31 @@ const opt = (id, label, attrs) => field(id, label, { required: false, ...attrs }
 // Asiakastiedot: yksityinen / yritys + nimi, sähköposti, puhelin. read(form, msg) validoi (virhe → msg + fokus, palauttaa null) ja palauttaa { kind, name, email, phone, company }.
 function customerFields() {
   let kind = 'private';
+  let invoiceMethod = 'einvoice';   // booking_175: yritysasiakas valitsee verkkolaskun tai PDF-laskun (sähköpostiin); OVT vain verkkolaskulla
   const kindInputs = [['private', t.kindPrivate], ['company', t.kindCompany]].map(([k, label]) => h('label', { class: 'bk-kind' }, h('input', { type: 'radio', name: 'kind', value: k, checked: k === 'private' || null, onchange: () => setKind(k) }), ' ', label));
   const nameLabel = h('label', { for: 'name', text: t.name });
+  const einvoiceBox = h('div', { class: 'bk-einvoice', id: 'bk-einvoice-fields', 'data-testid': 'einvoice-fields' },
+    h('h4', { text: t.einvoiceDetailsTitle }),
+    field('einvoice_address', t.einvoiceAddress, { maxlength: 40 }), field('einvoice_operator', t.einvoiceOperator, { maxlength: 40, hint: t.einvoiceDetailsHint }));
+  const methodInputs = [['einvoice', t.invoiceMethodEinvoice], ['pdf', t.invoiceMethodPdf]].map(([m, label]) =>
+    h('label', { class: 'bk-kind' }, h('input', { type: 'radio', name: 'invoice_method', value: m, checked: m === 'einvoice' || null, 'data-testid': `invoice-method-${m}`, onchange: () => setInvoiceMethod(m) }), ' ', label));
   const companyBox = h('fieldset', { class: 'bk-company', id: 'bk-company', hidden: true },
     h('legend', { text: t.companyTitle }),
     field('company_name', t.companyName, { maxlength: 200, autocomplete: 'organization' }), field('business_id', t.businessId, { maxlength: 20, inputmode: 'numeric', placeholder: '1234567-8', hint: t.businessIdHint }),
     field('street', t.street, { maxlength: 200, autocomplete: 'street-address' }),
     h('div', { class: 'bk-row2' }, field('zip', t.zip, { maxlength: 5, inputmode: 'numeric', autocomplete: 'postal-code' }), field('city', t.city, { maxlength: 100, autocomplete: 'address-level2' })),
-    h('h4', { text: t.einvoiceTitleRequired }),
-    field('einvoice_address', t.einvoiceAddress, { maxlength: 40 }), field('einvoice_operator', t.einvoiceOperator, { maxlength: 40, hint: t.einvoiceHintRequired }),
+    h('fieldset', { class: 'bk-kinds bk-invoice-method' }, h('legend', { text: t.invoiceMethodLabel }), h('div', { class: 'bk-kindrow' }, methodInputs)),
+    einvoiceBox,
     opt('reference', t.buyerReference, { maxlength: 100 }),
-    h('p', { class: 'bk-note', text: t.companyInvoiceNote }));
+    h('p', { class: 'bk-note', text: t.companyInvoiceMethodNote }));
+  function setInvoiceMethod(m) {
+    invoiceMethod = m === 'pdf' ? 'pdf' : 'einvoice'; einvoiceBox.hidden = invoiceMethod !== 'einvoice';
+    for (const id of ['einvoice_address', 'einvoice_operator']) { const el = document.getElementById(id); if (el) el.required = kind === 'company' && invoiceMethod === 'einvoice'; }
+  }
   function setKind(k) {
     kind = k; companyBox.hidden = k !== 'company'; if (k === 'company') revealIfHidden(companyBox); nameLabel.textContent = k === 'company' ? t.contactName : t.name;
-    for (const id of ['company_name', 'business_id', 'street', 'zip', 'city', 'einvoice_address', 'einvoice_operator']) { const el = document.getElementById(id); if (el) el.required = k === 'company'; }
+    for (const id of ['company_name', 'business_id', 'street', 'zip', 'city']) { const el = document.getElementById(id); if (el) el.required = k === 'company'; }
+    setInvoiceMethod(invoiceMethod);
   }
   const node = h('fieldset', { class: 'bk-section bk-contact' }, h('legend', { text: t.details }),
     h('fieldset', { class: 'bk-kinds' }, h('legend', { text: t.kindTitle }), h('div', { class: 'bk-kindrow' }, kindInputs)),
@@ -608,15 +619,19 @@ function customerFields() {
       if (needC.length) { msg.append(errorBox(t.required)); form[needC[0]].focus(); return null; }
       if (!validBusinessId(val('business_id'))) { msg.append(errorBox(t.invalidBusinessId)); form.business_id.focus(); return null; }
       if (!/^\d{5}$/.test(val('zip'))) { msg.append(errorBox(t.invalidZip)); form.zip.focus(); return null; }
-      if (!val('einvoice_address') || !val('einvoice_operator')) { msg.append(errorBox(t.einvoiceBoth)); form.einvoice_address.focus(); return null; }
-      if (!validOvt(val('einvoice_address'), val('business_id'))) { msg.append(errorBox(t.invalidOvt)); form.einvoice_address.focus(); return null; }
-      if (!validOperator(val('einvoice_operator'))) { msg.append(errorBox(t.einvoiceBoth)); form.einvoice_operator.focus(); return null; }
+      const ei = invoiceMethod === 'einvoice';
+      if (ei) {
+        if (!val('einvoice_address') || !val('einvoice_operator')) { msg.append(errorBox(t.einvoiceDetailsRequired)); form[val('einvoice_address') ? 'einvoice_operator' : 'einvoice_address'].focus(); return null; }
+        if (!validOvt(val('einvoice_address'), val('business_id'))) { msg.append(errorBox(t.invalidOvt)); form.einvoice_address.focus(); return null; }
+        if (!validOperator(val('einvoice_operator'))) { msg.append(errorBox(t.einvoiceDetailsRequired)); form.einvoice_operator.focus(); return null; }
+      }
       company = { company_name: val('company_name'), business_id: normBusinessId(val('business_id')), street: val('street'), zip: val('zip'), city: val('city'),
-        einvoice_address: normOvt(val('einvoice_address')), einvoice_operator: normOvt(val('einvoice_operator')), reference: val('reference') || null, require_einvoice: true };
+        invoice_method: invoiceMethod, einvoice_address: ei ? normOvt(val('einvoice_address')) : null, einvoice_operator: ei ? normOvt(val('einvoice_operator')) : null,
+        reference: val('reference') || null, require_einvoice: ei };
     }
     return { kind, name: val('name'), email: val('email'), phone: val('phone'), company };
   };
-  return { node, read, kind: () => kind };
+  return { node, read, kind: () => kind, invoiceMethod: () => invoiceMethod };
 }
 // Lisätiedot, ehdot ja markkinointisuostumus (nodes: lomakkeeseen järjestyksessä; terms/consent: valintaruudut)
 function legalFields() {
@@ -957,7 +972,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     if (r.ok) setTimeout(() => location.reload(), 800);
   } }, t.cancelBooking));
   mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { 'data-testid': 'conf-title', text: b.status === 'cancelled' ? t.confCancelled : b.status === 'expired' ? t.confExpired : b.status === 'pending' || (co && co.awaiting) ? ht(S.lang, 'h2.awaiting') : t.confTitle }), h('p', { class: 'bk-status', role: 'status', 'data-testid': 'conf-status', text: head }), holdHost, mpHost, dl,   // pitotilassa: otsikko + tilabadge → pitopaneeli → tiivis tilausyhteenveto → maksuosio (secEl lisätään yhteenvedon jälkeen)
-    b.status === 'confirmed' && b.customer_kind === 'company' && b.payment_status !== 'paid' ? h('p', { class: 'bk-pay', text: t.companyInvoiceNote }) : null,
+    b.status === 'confirmed' && b.customer_kind === 'company' && b.payment_status !== 'paid' ? h('p', { class: 'bk-pay', text: t.companyInvoiceMethodNote }) : null,
     b.status === 'confirmed' && b.payment_status !== 'paid' && b.payment_status !== 'invoiced' && b.customer_kind !== 'company' && !isTreatmentBooking(b) && !online ? h('p', { class: 'bk-pay', text: t.payLater }) : null, optNote && b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-option-note', text: optNote }) : null, actions, out,
     b.status === 'confirmed' && (b.has_ritual_addon || ritItems.length) ? h('p', { class: 'bk-note', 'data-testid': 'conf-ritual-note', text: rtx('ritualConfNote') }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email }))
       : b.status === 'confirmed' ? h('p', { class: 'bk-note', text: b.can_change ? t.changeInfo(b.change_hours_before, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) : t.changeLocked(b.change_hours_before) }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })) : null,
