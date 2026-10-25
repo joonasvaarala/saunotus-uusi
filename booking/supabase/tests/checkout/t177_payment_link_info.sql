@@ -81,7 +81,7 @@ begin
   if to_regprocedure('booking.public_payment_link_info(uuid)') is null then
     raise exception 'TESTRESULT pass=0 fail=1 skip=0 F A1 booking_177 puuttuu (public_payment_link_info)';
   end if;
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) = '1fb6153b39daa6f1055c93cac7cb4563', 'A1 public_payment_link_info = booking_177');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) in ('1fb6153b39daa6f1055c93cac7cb4563', '647c556562046c75b7e7e33703c050a0'), 'A1 public_payment_link_info = booking_177 tai booking_178');
   perform pg_temp.ck((select prosecdef and proconfig = array['search_path=""'] and provolatile = 'v' from pg_proc where oid = 'booking.public_payment_link_info(uuid)'::regprocedure),
       'A2 SECURITY DEFINER, search_path tyhjä');
   perform pg_temp.ck(has_function_privilege('anon', 'booking.public_payment_link_info(uuid)', 'execute')
@@ -139,8 +139,8 @@ begin
   -- ===== C ei henkilötietoja
   select count(*) into n from pg_temp.keys(r) k where k = any (pii);
   perform pg_temp.ck(n = 0, 'C1 ei henkilötieto- tai tunnisteavaimia');
-  perform pg_temp.ck((select array_agg(k order by k) from pg_temp.keys(r) k) = array['amount','amount_cents','can_pay','currency','date','end','end_date','expires_at','expires_date','expires_time',
-      'items','kind','name','name_en','ok','order_no','order_total','paid_at','quantity','reason','start','status'], 'C2 avaimet täsmälleen sallitut');
+  perform pg_temp.ck((select array_agg(k order by k) from pg_temp.keys(r) k where k <> 'last_attempt') = array['amount','amount_cents','can_pay','currency','date','end','end_date','expires_at','expires_date','expires_time',
+      'items','kind','name','name_en','ok','order_no','order_total','paid_at','quantity','reason','start','status'], 'C2 avaimet täsmälleen sallitut (booking_178: + last_attempt)');
   txt := r::text;
   perform pg_temp.ck(position(run in txt) = 0 and position('Tiina' in txt) = 0 and position('example.test' in txt) = 0 and position('0401770177' in txt) = 0
       and position('Salakatu' in txt) = 0 and position('Sipoo177' in txt) = 0 and position(otok::text in txt) = 0 and position(tk1::text in txt) = 0

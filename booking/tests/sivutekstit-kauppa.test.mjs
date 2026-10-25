@@ -98,6 +98,7 @@ test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-shop.mjs 
     ...J('content/site-texts.pending-import-70.json').map((r) => `${r.key}|${r.lang}`),   // booking_175: laskutustapa + Laskutettu
     ...J('content/site-texts.pending-import-72.json').map((r) => `${r.key}|${r.lang}`),   // booking_177: maksulinkkisivu
     ...J('content/site-texts.pending-import-73.json').map((r) => `${r.key}|${r.lang}`),   // booking_177b: maksulinkin yhteenveto
+    ...J('content/site-texts.pending-import-74.json').map((r) => `${r.key}|${r.lang}`),   // booking_178: maksulinkin uusinta
   ]);
   const imp = new Set(PENDING.map((r) => r.key));
   writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts.filter((r) => !imp.has(r.key)) }));   // tuotanto ennen #61:n tuontia
@@ -133,7 +134,8 @@ test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet ava
   const invoiceUi = J('content/site-texts.pending-import-70.json');   // booking_175: laskutustapa + Laskutettu
   const payLinkUi = J('content/site-texts.pending-import-72.json');   // booking_177: maksulinkkisivu
   const payLinkInfoUi = J('content/site-texts.pending-import-73.json');   // booking_177b: maksulinkin yhteenveto
-  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length + waitUi.length + waitParty.length + waitOffer.length + codeUi.length + partyType.length + cancelUi.length + quietUi.length + ritualUi.length + ritualCard.length + oneUi.length + sellersUi.length + invoiceUi.length + payLinkUi.length + payLinkInfoUi.length);
+  const payLinkRetryUi = J('content/site-texts.pending-import-74.json');   // booking_178: maksulinkin uusinta
+  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length + waitUi.length + waitParty.length + waitOffer.length + codeUi.length + partyType.length + cancelUi.length + quietUi.length + ritualUi.length + ritualCard.length + oneUi.length + sellersUi.length + invoiceUi.length + payLinkUi.length + payLinkInfoUi.length + payLinkRetryUi.length);
   assert.ok(!rows.some((x) => haveKeys.has(x.key)));
   for (const e of extraRows) assert.ok(!rows.some((x) => x.key === e.key), `${e.key}: jo tuotannossa, generaattori ei lisää`);
   const bad = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', join(work, 'ei-ole.json')], { encoding: 'utf8' });

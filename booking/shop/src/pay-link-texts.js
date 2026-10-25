@@ -1,4 +1,4 @@
-// Maksulinkkisivun tekstit (FI/EN; booking_177 → pending-import-72, booking_177b yhteenveto → pending-import-73): /maksa/?p=<link_token> ja /en/pay/?p=<link_token>. Avaimet ui.paylink.*. Ei yhteystietoja eikä osoitteita (puhelin tulee S.phone-arvosta).
+// Maksulinkkisivun tekstit (FI/EN; booking_177 → pending-import-72, booking_177b yhteenveto → pending-import-73, booking_178 uusinta → pending-import-74): /maksa/?p=<link_token> ja /en/pay/?p=<link_token>. Avaimet ui.paylink.*. Ei yhteystietoja eikä osoitteita (puhelin tulee S.phone-arvosta).
 export const PLT = {
   fi: {
     title: 'Maksulinkki',
@@ -41,6 +41,8 @@ export const PLT = {
     'info.cancelled': 'Tällä linkillä aloitettu maksu keskeytettiin, eikä linkkiä voi enää käyttää. Pyydä meiltä uusi maksulinkki.',
     'info.replaced': 'Tämä maksulinkki on korvattu uudella. Käytä uusinta saamaasi linkkiä tai pyydä meiltä uusi.',
     'info.stale': 'Tilauksen maksettava summa on muuttunut, joten tämä linkki ei ole enää voimassa. Pyydä meiltä uusi maksulinkki.',
+    // booking_178: peruttu / keskeytynyt maksu ei kuluta linkkiä — pending-import-74
+    'info.retry': 'Edellinen maksuyritys jäi kesken, eikä sinulta veloitettu mitään. Voit maksaa uudelleen samalla linkillä.',
   },
   en: {
     title: 'Payment link',
@@ -83,6 +85,8 @@ export const PLT = {
     'info.cancelled': 'The payment started with this link was cancelled, and the link can no longer be used. Ask us for a new payment link.',
     'info.replaced': 'This payment link has been replaced by a new one. Use the latest link you received or ask us for a new one.',
     'info.stale': 'The amount due on the order has changed, so this link is no longer valid. Ask us for a new payment link.',
+    // booking_178: a cancelled or interrupted payment does not use up the link — pending-import-74
+    'info.retry': 'Your previous payment attempt was not completed and you were not charged. You can pay again with this same link.',
   },
 };
 
