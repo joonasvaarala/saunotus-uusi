@@ -1,4 +1,4 @@
--- 20261025171500_day_digest_fixes.sql  (VÄLIAIKAINEN versio; nimetään uudelleen tuotantoajon jälkeen tuotannon versioon)
+-- 20261025173107_day_digest_fixes.sql  (ajettu tuotantoon 25.10.2026 versiona 20261025173107, PR #199; runko muuttumaton — vain kommenttirivejä saa muokata)
 -- Päiväkoosteen (day_digest, saman päivän useampi vuoroasia samalle henkilölle yhdellä viestillä) korjaukset. EI yhdistämistä yli päivien.
 -- Riippuvuus: horisonttimigraatio 20261025165813 (booking.shift_offer_in_horizon, horisonttiversio report_issues 2bf59cf8…) — history-sync PR #198 (main 3b63d72, migrations/20261025165813_shift_offer_horizon.sql).
 --  #1 B2: lähetetty kooste jatkaa jokaisen yhdistetyn tarjous-/muistutusvastaanottajan määräaikaa kuten yksittäinen lähetys
@@ -10,7 +10,7 @@
 --  #4 merge: horisontin ulkopuolinen jonossa oleva tarjous/muistutus/jo mennyt → skipped 'horizon' (fail-closed); samoin kooste,
 --     jonka kaikki rivit ovat horisontin ulkopuolella.
 --  report_issues: no_working_channel laskee koosteen jokaisena yhdistettynä tarjouksena.
--- Moottorin kytkimiin, allowlistiin, tervetuloon ja pohjiin ei kosketa (jälkitarkistus). Rollback: rollbacks/20261025171500_day_digest_fixes_ROLLBACK.sql
+-- Moottorin kytkimiin, allowlistiin, tervetuloon ja pohjiin ei kosketa (jälkitarkistus). Rollback: rollbacks/20261025173107_day_digest_fixes_ROLLBACK.sql
 -- md5(pg_get_functiondef) ennen -> jälkeen:
 --     booking.shift_offer_merge_same_day(timestamptz): 963eba4f116ca88cb7ab766533f5d05d -> 6f02c362e1708e7ebd96db25d0b680c9
 --     booking.shift_offer_deadline_on_sent(bigint,timestamptz): 103efa77f733a3c5d42bac53d49a4b4e -> 82529d71053b2ef6ca0a77e56443cde7

@@ -1,4 +1,4 @@
-// digestfix #3 (20261025171500_day_digest_fixes): päivän kooste (day_digest) noudattaa tarjouksen sääntöä (soefix B4/C1):
+// digestfix #3 (20261025173107_day_digest_fixes): päivän kooste (day_digest) noudattaa tarjouksen sääntöä (soefix B4/C1):
 // hyväksymätön day_digest-pohja → sähköposti heti, myös hiljaisina tunteina ja vaikka 24 h -ikkuna olisi auki.
 // Hyväksytty pohja → odottaa aamuun kuten tarjous. Ei verkkoa: fetch heittää virheen.
 // deno test -A --no-lock --node-modules-dir=none booking/supabase/functions/shift-offer-engine/digestfix_test.ts

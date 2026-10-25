@@ -1,4 +1,4 @@
--- tdigest: päiväkoosteen (day_digest) korjaukset, migraatio 20261025171500_day_digest_fixes.sql (väliaikainen versio):
+-- tdigest: päiväkoosteen (day_digest) korjaukset, migraatio 20261025173107_day_digest_fixes.sql:
 --   #1 B2 (kooste jatkaa jokaisen yhdistetyn määräajan, näytetty = kirjattu), #2 resend_lost (avoimista, uusi teksti),
 --   #3 yö / hyväksymätön pohja (wa_ready day_digest), #4 horisontti (skipped 'horizon', fail-closed), R report_issues.
 -- Puhdas SQL, kaikki data feikkiä (@example.test), mitään ei lähetetä (email_outbox-rivit vain tarkistetaan ja kumotaan).

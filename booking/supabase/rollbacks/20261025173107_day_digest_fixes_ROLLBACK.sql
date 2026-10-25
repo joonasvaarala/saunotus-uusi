@@ -1,7 +1,9 @@
--- ROLLBACK 20261025171500_day_digest_fixes.sql: palauttaa korvatut määrittelyt tavu tavulta (pg_get_functiondef ennen migraatiota; md5:t = tuotanto,
+-- ROLLBACK 20261025173107_day_digest_fixes.sql: palauttaa korvatut määrittelyt tavu tavulta (pg_get_functiondef ennen migraatiota; md5:t = tuotanto,
 -- luettu SELECTillä 25.10.2026) ja poistaa uudet apufunktiot. Ajetaan vain, jos migraatio on ajettu. Moottorin kytkimiin ei kosketa.
 -- Data jää: koosteiden body/payload (items, rendered_at, resent_from), skipped 'horizon' -rivit ja jo jatketut määräajat pysyvät.
 set local lock_timeout = '5s';
+-- migraation temp-taulu (on commit drop) voi olla olemassa, jos migraatio ja rollback ajetaan samassa transaktiossa
+drop table if exists pg_temp.digestfix_flags_before;
 
 do $g$
 declare v text; ok boolean := true; msg text := '';
