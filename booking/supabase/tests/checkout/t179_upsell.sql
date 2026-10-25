@@ -14,7 +14,7 @@ do $t$
 declare
   v_source bigint; v_ids bigint[]; v_failed boolean; v_result jsonb; v_def text;
   v_slot timestamptz; v_day date; v_extra timestamptz; v_made jsonb; v_tok uuid; v_oid bigint; v_sid uuid;
-  v_total numeric; v_pay numeric; v_n int; v_total2 numeric; v_pay2 numeric; v_n2 int; v_base int;
+  v_total numeric; v_pay numeric; v_n int; v_total2 numeric; v_pay2 numeric; v_n2 int; v_base int; v_hits int; v_hits2 int;
   v_mode text; v_dc bigint; v_ok boolean;
 begin
   select id into v_source from kb.products where id = 1;
@@ -39,7 +39,7 @@ begin
     select bool_and(p.prosecdef and coalesce(p.proconfig, '{}')::text like '%search_path=%')
       from pg_proc p join pg_namespace n on n.oid = p.pronamespace
      where n.nspname = 'booking' and p.proname in (
-       '_upsell_cutoff', 'admin_set_product_suggestions', 'admin_get_product_suggestions', '_upsell_options',
+       '_upsell_cutoff', 'admin_set_product_suggestions', 'admin_get_product_suggestions', '_upsell_day_slots', '_upsell_options',
        'public_upsell_suggestions', 'public_upsell_for_order', 'public_upsell_event', '_upsell_attach_reservation',
        'public_upsell_checkout_attach', 'public_upsell_add', '_upsell_paid_trg', 'admin_upsell_report')), 'S16 security definer + search_path');
 
@@ -57,6 +57,18 @@ begin
   perform pg_temp.ck(v_def like '%option_required%' and v_def like '%BK001%', 'S25 option_required pois ja saatavuusvirhe kiinni');
   perform pg_temp.ck(pg_get_functiondef('booking.public_upsell_checkout_attach(uuid,jsonb,uuid)'::regprocedure) like '%discount_code_id%' and pg_get_functiondef('booking.public_upsell_checkout_attach(uuid,jsonb,uuid)'::regprocedure) like '%annual_card%', 'S26 alennus ja vuosikortti estetty');
   perform pg_temp.ck(pg_get_functiondef('booking.public_upsell_add(uuid,jsonb,uuid,bigint)'::regprocedure) like '%p_origin%', 'S27 lisäpalvelun varaus päätellään lähtötuotteesta');
+  v_def := pg_get_functiondef('booking._upsell_day_slots(bigint,date,integer)'::regprocedure);
+  perform pg_temp.ck(v_def like '%_treatment_availability_core%' and v_def like '%public_booking_enabled%', 'S28 saatavuusydin ilman julkista rajoitusta');
+  perform pg_temp.ck(exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'booking' and p.proname = '_upsell_day_slots' and p.proconfig::text ilike '%lock_timeout=400ms%'), 'S29 lukkoaikakatkaisu 400 ms');
+  perform pg_temp.ck(
+    pg_get_functiondef('booking._upsell_options(bigint[],bigint[],date,integer,integer)'::regprocedure) not like '%public_treatment_availability%'
+    and pg_get_functiondef('booking._upsell_attach_reservation(bigint,bigint,timestamptz,integer,date)'::regprocedure) not like '%public_treatment_availability%'
+    and pg_get_functiondef('booking.public_upsell_add(uuid,jsonb,uuid,bigint)'::regprocedure) not like '%public_treatment_availability%',
+    'S30 ehdotukset eivät kuluta julkista saatavuusrajaa');
+  v_def := pg_get_functiondef('booking.public_upsell_checkout_attach(uuid,jsonb,uuid)'::regprocedure);
+  perform pg_temp.ck(v_def like '%payment_status%' and v_def like '%payment_lines%' and v_def like '%order_closed%', 'S31 liitos vaatii maksamattoman tilauksen');
+  perform pg_temp.ck(position('_order_rl' in v_def) > 0 and position('exception when' in v_def) > position('_order_rl' in v_def), 'S32 rajoitus ennen poikkeuslohkoa');
 
   if cardinality(v_ids) = 3 then
     insert into booking.product_suggestions(product_id, suggested_product_id, position, enabled)
@@ -97,7 +109,10 @@ begin
              (select p.amount from booking.payments p where p.order_id = o.id and p.status = 'pending' and p.provider = 'manual' order by p.id limit 1)
         into v_total, v_n, v_pay from booking.orders o where o.id = v_oid;
       v_sid := gen_random_uuid();
+      select count(*) into v_hits from booking.rate_limit_hits where bucket = 'oupschktk:' || v_tok::text;
       v_result := booking.public_upsell_checkout_attach(v_tok, jsonb_build_array(jsonb_build_object('product_id', 12, 'persons', 1, 'start', '1999-01-01T12:00:00Z')), v_sid);
+      select count(*) into v_hits2 from booking.rate_limit_hits where bucket = 'oupschktk:' || v_tok::text;
+      perform pg_temp.ck(v_hits2 = v_hits + 1, 'R1 epäonnistunut liitos kuluttaa rajoituksen');
       select o.total_gross, (select count(*) from booking.reservations r where r.order_id = o.id),
              (select p.amount from booking.payments p where p.order_id = o.id and p.status = 'pending' and p.provider = 'manual' order by p.id limit 1)
         into v_total2, v_n2, v_pay2 from booking.orders o where o.id = v_oid;
@@ -169,6 +184,57 @@ begin
       else
         perform pg_temp.ck(v_oid is not null, 'D4 vuosikorttitilausta ei syntynyt (' || coalesce(v_made->>'code', '') || ')');
       end if;
+    end if;
+
+    select q.starts_at into v_slot
+      from booking.public_treatment_availability(11, current_date, current_date + 14, 1) q
+     where q.status = 'available' and q.starts_at > now() + interval '3 hours'
+     order by q.starts_at limit 1;
+    if v_slot is not null and exists (select 1 from booking.payment_methods where code = 'mobilepay') then
+      v_made := booking.public_create_treatment_booking(11, v_slot, 1, 'Upsell Maksu', 'upsell179d@example.com', '+358401110014', false, 'fi', null, 'private', null, null, null);
+      v_tok := (v_made->>'token')::uuid;
+      select id, total_gross into v_oid, v_total from booking.orders where public_token = v_tok;
+      if v_oid is not null then
+        insert into booking.payments(order_id, method, provider, status, amount) values (v_oid, 'mobilepay', 'mobilepay', 'pending', v_total);
+        select count(*) into v_n from booking.reservations where order_id = v_oid;
+        v_result := booking.public_upsell_checkout_attach(v_tok, jsonb_build_array(jsonb_build_object('product_id', 12, 'persons', 1, 'start', v_slot)), gen_random_uuid());
+        select total_gross into v_total2 from booking.orders where id = v_oid;
+        select count(*) into v_n2 from booking.reservations where order_id = v_oid;
+        perform pg_temp.ck(v_result->>'code' = 'order_closed' and v_total2 = v_total and v_n2 = v_n, 'P1 kesken oleva MobilePay sulkee liitoksen');
+      else
+        perform pg_temp.ck(false, 'P1 varausta ei syntynyt (' || coalesce(v_made->>'code', '') || ')');
+      end if;
+    else
+      perform pg_temp.ck(v_slot is not null, 'P1 aika tai mobilepay puuttuu');
+    end if;
+
+    select q.starts_at into v_slot
+      from booking.public_treatment_availability(11, current_date, current_date + 14, 1) q
+     where q.status = 'available' and q.starts_at > now() + interval '3 hours'
+     order by q.starts_at limit 1;
+    if v_slot is not null then
+      v_made := booking.public_create_treatment_booking(11, v_slot, 1, 'Upsell Maksettu', 'upsell179e@example.com', '+358401110015', false, 'fi', null, 'private', null, null, null);
+      v_tok := (v_made->>'token')::uuid;
+      select id into v_oid from booking.orders where public_token = v_tok;
+      if v_oid is not null then
+        update booking.payments set status = 'paid', paid_at = now()
+         where order_id = v_oid and status = 'pending' and provider = 'manual';
+        if not found then
+          insert into booking.payments(order_id, method, provider, status, amount, paid_at)
+          values (v_oid, 'pay_later', 'manual', 'paid', (select total_gross from booking.orders where id = v_oid), now());
+        end if;
+        update booking.orders set payment_status = 'paid' where id = v_oid and payment_status is distinct from 'paid';
+        select total_gross into v_total from booking.orders where id = v_oid;
+        select count(*) into v_n from booking.reservations where order_id = v_oid;
+        v_result := booking.public_upsell_checkout_attach(v_tok, jsonb_build_array(jsonb_build_object('product_id', 12, 'persons', 1, 'start', v_slot)), gen_random_uuid());
+        select total_gross into v_total2 from booking.orders where id = v_oid;
+        select count(*) into v_n2 from booking.reservations where order_id = v_oid;
+        perform pg_temp.ck(v_result->>'code' = 'order_closed' and v_total2 = v_total and v_n2 = v_n, 'P2 maksettu paikkamerkki sulkee liitoksen');
+      else
+        perform pg_temp.ck(false, 'P2 varausta ei syntynyt (' || coalesce(v_made->>'code', '') || ')');
+      end if;
+    else
+      perform pg_temp.ck(false, 'P2 aikaa ei löytynyt');
     end if;
   end if;
 

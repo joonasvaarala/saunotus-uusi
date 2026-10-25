@@ -19,6 +19,10 @@ test('migraatio ei määritä olemassa olevia funktioita uudelleen', () => {
   assert.match(sql, /discount_code_id/);
   assert.match(sql, /annual_card/);
   assert.match(sql, /option_required/);
+  assert.match(sql, /_treatment_availability_core/);
+  assert.match(sql, /payment_status/);
+  assert.match(sql, /payment_lines/);
+  assert.doesNotMatch(sql, /public_treatment_availability\s*\(/);
   assert.match(sql, /enable row level security/);
   assert.match(sql, /set search_path = ''/);
   assert.doesNotMatch(read(mig), /service_role_key|eyJ/);
@@ -45,6 +49,12 @@ test('kassa liittää lisähoidon kerran eikä luo perusvarausta uudelleen', () 
   assert.match(read('booking/shop/src/order.js'), /orderUpsellSection/);
   assert.match(read('booking/admin/views/products.js'), /ctx\.role === 'admin'/);
   assert.match(read('.github/workflows/pages.yml'), /upsell-179\.test\.mjs/);
+  const css = read('booking/shop/src/shop.css');
+  const i0 = css.indexOf('/* booking_179');
+  const block = css.slice(i0, css.indexOf('/* booking_', i0 + 5));
+  assert.ok(block.includes('.bk-upsell-card'));
+  assert.doesNotMatch(block, /#c9c0b3|#6b5e52|#fff\b|rgba\(\s*10\s*,\s*20\s*,\s*12|rgba\(\s*0\s*,\s*0\s*,\s*0/i);
+  for (const hex of block.match(/#[0-9a-f]{3,8}\b/gi) || []) assert.ok(['#2B3A30', '#F4EFE7', '#7A5530'].includes(hex.toUpperCase()), hex);
 });
 
 test('pending-import-75: FI ja EN, max_len, ei päällekkäisiä avaimia', () => {

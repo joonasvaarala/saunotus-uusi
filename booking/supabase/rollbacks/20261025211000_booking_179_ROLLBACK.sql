@@ -14,6 +14,7 @@ drop function if exists booking.public_upsell_event(uuid, text, bigint, text, bi
 drop function if exists booking.public_upsell_for_order(uuid);
 drop function if exists booking.public_upsell_suggestions(bigint[], date, integer, timestamptz);
 drop function if exists booking._upsell_options(bigint[], bigint[], date, integer, integer);
+drop function if exists booking._upsell_day_slots(bigint, date, integer);
 drop function if exists booking.admin_get_product_suggestions(bigint);
 drop function if exists booking.admin_set_product_suggestions(bigint, jsonb);
 drop function if exists booking._upsell_cutoff();

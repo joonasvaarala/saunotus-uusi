@@ -3,7 +3,9 @@
 -- _treatment_slot_check-, _public_pay_json-, _create_link_payment-, payments_paid_trg- tai public_get_site_texts-funktiota.
 -- Hintoja, ALV:tä, osoitteita ja maksuasetuksia ei muuteta. Julkiset vastaukset eivät sisällä tokenia.
 -- Kaksivaiheinen kassa: perusvaraus syntyy entisellä RPC:llä, public_upsell_checkout_attach liittää lisähoidon jälkeen.
--- Jos liitos epäonnistuu, funktion muutokset perutaan (poikkeuskäsittelijä) ja perusvaraus jää edelliseen transaktioon.
+-- Jos liitos epäonnistuu, vain liitoksen alitransaktio perutaan. Rajoituslaskuri jää, ja perusvaraus on edellisessä transaktiossa.
+-- Liitos onnistuu vain maksamattomaan tilaukseen (payment_status unpaid, ei maksettua tai kesken olevaa verkkomaksua).
+-- Saatavuus haetaan _treatment_availability_core-funktiosta, ei julkisesta rajoitetusta RPC:stä.
 set local lock_timeout = '5s';
 
 insert into booking.settings(key, value, description, is_public)
@@ -103,8 +105,24 @@ end $f$;
 revoke all on function booking.admin_get_product_suggestions(bigint) from public, anon, authenticated;
 grant execute on function booking.admin_get_product_suggestions(bigint) to authenticated, service_role;
 
--- Saatavuus tuote kerrallaan. public_treatment_availability voi nostaa BK001 (rate_limited/busy) tai lock_not_available:
--- yksi tuote ohitetaan, lista ei kaadu. option_required-tuotteet jäävät pois (paneelissa ei ole pakollista valitsinta).
+-- Päivän vapaat ajat ilman julkista avail-rajoitusta. lock_timeout ja public_booking_enabled kuten public_treatment_availability.
+create function booking._upsell_day_slots(p_product bigint, p_day date, p_persons integer)
+returns table(starts_at timestamptz, ends_at timestamptz, total numeric)
+language plpgsql volatile security definer set search_path = '' set lock_timeout to '400ms' as $f$
+declare v_persons integer := greatest(1, least(coalesce(p_persons, 1), 50));
+begin
+  if not coalesce((booking._setting('public_booking_enabled', 'true'::jsonb) #>> '{}')::boolean, true) then return; end if;
+  return query
+    select c.starts_at, c.ends_at, c.total
+      from booking._treatment_availability_core(p_product, p_day, p_day, v_persons, false, false) c
+     where c.status = 'available';
+exception when lock_not_available then
+  perform booking._err('busy', 'Järjestelmä on hetkellä kiireinen, yritä hetken kuluttua uudelleen');
+end $f$;
+revoke all on function booking._upsell_day_slots(bigint, date, integer) from public, anon, authenticated;
+
+-- Saatavuus tuote kerrallaan. Lukko tai kiire (BK001) ohittaa yhden tuotteen, lista ei kaadu.
+-- option_required-tuotteet jäävät pois (paneelissa ei ole pakollista valitsinta).
 create function booking._upsell_options(p_origins bigint[], p_existing bigint[], p_date date, p_persons integer, p_limit integer default 9)
 returns jsonb language plpgsql volatile security definer set search_path = '' as $f$
 declare v_products jsonb := '[]'::jsonb; v_addons jsonb := '[]'::jsonb; v_slots jsonb; r record;
@@ -132,8 +150,7 @@ begin
     v_slots := '[]'::jsonb;
     begin
       select coalesce(jsonb_agg(jsonb_build_object('start', q.starts_at, 'end', q.ends_at, 'total', q.total) order by q.starts_at), '[]'::jsonb)
-        into v_slots from booking.public_treatment_availability(r.id, p_date, p_date, greatest(1, least(coalesce(p_persons, 1), 50))) q
-        where q.status = 'available';
+        into v_slots from booking._upsell_day_slots(r.id, p_date, p_persons) q;
     exception when sqlstate 'BK001' or lock_not_available then
       v_slots := '[]'::jsonb;
     end;
@@ -212,7 +229,7 @@ begin
   if not found or o.external_source is not null or o.status not in ('pending', 'confirmed') then perform booking._err('order_not_editable', 'Order cannot be amended'); end if;
   if p_start is null or p_persons not between 1 and 50 or (p_start at time zone booking._tz())::date <> p_main_day then perform booking._err('invalid_date', 'Choose your visit date'); end if;
   if exists (select 1 from booking.reservations where order_id = o.id and product_id = p_product_id and booking._res_active(status, hold_expires_at)) then perform booking._err('duplicate_product', 'Already in order'); end if;
-  if not exists (select 1 from booking.public_treatment_availability(p_product_id, p_main_day, p_main_day, p_persons) q where q.starts_at = p_start and q.status = 'available') then
+  if not exists (select 1 from booking._upsell_day_slots(p_product_id, p_main_day, p_persons) q where q.starts_at = p_start) then
     perform booking._err('slot_unavailable', 'Selected time is no longer available');
   end if;
   v_end := booking._treatment_slot_check(p_product_id, p_start, p_persons, true);
@@ -225,6 +242,8 @@ revoke all on function booking._upsell_attach_reservation(bigint, bigint, timest
 -- Ei korvaa public_create_booking / public_create_booking_code. Ei palauta tokenia.
 -- Tyhjä p_upsell kirjaa vain jo kassalla valitut suositellut lisäpalvelut (alennuskoodi sallittu).
 -- Ei-tyhjä lista hylätään, jos tilauksella on alennuskoodi tai vuosikorttimaksu (ei hiljaista täyden hinnan lisäystä alennettuun tilaukseen).
+-- Maksu kesken tai jo maksettu: order_closed. Koskematon pay_later-paikkamerkki (pending, manual, ei payment_lines) ei estä.
+-- _order_rl on poikkeuslohkon ulkopuolella, jotta epäonnistunut liitos kuluttaa rajoituksen.
 create function booking.public_upsell_checkout_attach(p_token uuid, p_upsell jsonb, p_session_id uuid)
 returns jsonb language plpgsql volatile security definer set search_path = '' as $f$
 declare o booking.orders; v_main bigint; v_main_start timestamptz; v_date date; e jsonb;
@@ -241,6 +260,18 @@ begin
       where r.order_id = o.id and r.status = 'pending' and r.hold_expires_at > now()) then
     return jsonb_build_object('ok', false, 'code', 'order_closed');
   end if;
+  if o.payment_status is distinct from 'unpaid'
+     or exists (
+       select 1 from booking.payments p
+        where p.order_id = o.id
+          and (
+            p.status in ('paid', 'partially_refunded', 'refunded')
+            or (p.status = 'pending' and p.provider is distinct from 'manual')
+            or exists (select 1 from booking.payment_lines pl where pl.payment_id = p.id)
+          )
+     ) then
+    return jsonb_build_object('ok', false, 'code', 'order_closed');
+  end if;
   if jsonb_array_length(p_upsell) > 0 and (
        o.discount_code_id is not null
        or exists (select 1 from booking.payments p where p.order_id = o.id and p.method = 'annual_card' and p.status in ('pending', 'paid'))
@@ -248,36 +279,39 @@ begin
     return jsonb_build_object('ok', false, 'code', 'code_conflict');
   end if;
   v_date := (v_main_start at time zone booking._tz())::date;
-  for e in select value from jsonb_array_elements(p_upsell) loop
-    if jsonb_typeof(e) <> 'object' or coalesce(e->>'product_id', '') !~ '^\d{1,18}$' or
-       coalesce(e->>'persons', '') !~ '^\d{1,3}$' then perform booking._err('invalid_items', 'Invalid treatment'); end if;
-    v_pid := (e->>'product_id')::bigint; v_pers := (e->>'persons')::int;
-    if v_pid = v_main then perform booking._err('duplicate_product', 'Already in order'); end if;
-    if exists (select 1 from booking.reservations where order_id = o.id and product_id = v_pid and booking._res_active(status, hold_expires_at)) then
-      continue;
-    end if;
-    v_start := (e->>'start')::timestamptz;
-    v_result := booking._upsell_attach_reservation(o.id, v_pid, v_start, v_pers, v_date);
-    v_res_id := (v_result->>'reservation_id')::bigint;
-    insert into booking.upsell_events(order_id, session_id, source, product_id, suggested_from_product_id, event, order_item_id)
-    values (o.id, p_session_id, 'checkout', v_pid, v_main, 'added', (select order_item_id from booking.reservations where id = v_res_id))
-    on conflict do nothing;
-    v_n := v_n + 1;
-  end loop;
-  if v_n > 0 then perform booking._sync_placeholder(o.id); end if;
-  insert into booking.upsell_events(order_id, session_id, source, product_id, suggested_from_product_id, suggested_addon_id, event, order_item_id)
-    select o.id, p_session_id, 'checkout', v_main, v_main, oi.addon_id, 'added', oi.id
-    from booking.order_items oi join booking.product_suggestions sug on sug.product_id = v_main and sug.suggested_addon_id = oi.addon_id and sug.enabled
-    where oi.order_id = o.id and oi.kind = 'addon' on conflict do nothing;
-  return jsonb_build_object('ok', true, 'added_count', v_n, 'total', (select total_gross from booking.orders where id = o.id));
-exception when sqlstate 'BK001' or exclusion_violation or invalid_text_representation or datetime_field_overflow then
-  return jsonb_build_object('ok', false, 'code', 'slot_unavailable');
+  begin
+    for e in select value from jsonb_array_elements(p_upsell) loop
+      if jsonb_typeof(e) <> 'object' or coalesce(e->>'product_id', '') !~ '^\d{1,18}$' or
+         coalesce(e->>'persons', '') !~ '^\d{1,3}$' then perform booking._err('invalid_items', 'Invalid treatment'); end if;
+      v_pid := (e->>'product_id')::bigint; v_pers := (e->>'persons')::int;
+      if v_pid = v_main then perform booking._err('duplicate_product', 'Already in order'); end if;
+      if exists (select 1 from booking.reservations where order_id = o.id and product_id = v_pid and booking._res_active(status, hold_expires_at)) then
+        continue;
+      end if;
+      v_start := (e->>'start')::timestamptz;
+      v_result := booking._upsell_attach_reservation(o.id, v_pid, v_start, v_pers, v_date);
+      v_res_id := (v_result->>'reservation_id')::bigint;
+      insert into booking.upsell_events(order_id, session_id, source, product_id, suggested_from_product_id, event, order_item_id)
+      values (o.id, p_session_id, 'checkout', v_pid, v_main, 'added', (select order_item_id from booking.reservations where id = v_res_id))
+      on conflict do nothing;
+      v_n := v_n + 1;
+    end loop;
+    if v_n > 0 then perform booking._sync_placeholder(o.id); end if;
+    insert into booking.upsell_events(order_id, session_id, source, product_id, suggested_from_product_id, suggested_addon_id, event, order_item_id)
+      select o.id, p_session_id, 'checkout', v_main, v_main, oi.addon_id, 'added', oi.id
+      from booking.order_items oi join booking.product_suggestions sug on sug.product_id = v_main and sug.suggested_addon_id = oi.addon_id and sug.enabled
+      where oi.order_id = o.id and oi.kind = 'addon' on conflict do nothing;
+    return jsonb_build_object('ok', true, 'added_count', v_n, 'total', (select total_gross from booking.orders where id = o.id));
+  exception when sqlstate 'BK001' or exclusion_violation or invalid_text_representation or datetime_field_overflow then
+    return jsonb_build_object('ok', false, 'code', 'slot_unavailable');
+  end;
 end $f$;
 revoke all on function booking.public_upsell_checkout_attach(uuid, jsonb, uuid) from public, anon, authenticated;
 grant execute on function booking.public_upsell_checkout_attach(uuid, jsonb, uuid) to anon, authenticated, service_role;
 
 -- Vahvistetun tilauksen lisäys kulkee olemassa olevan public_add_to_orderin kautta (hinta, kapasiteetti, maksulinkki vain jos Visma on live).
 -- Jos reservation_id puuttuu, se päätellään lähtötuotteen ainoasta aktiivisesta varauksesta (public_get_booking ei palauta reservation_id:tä).
+-- Rajoituslaskuri on alitransaktion ulkopuolella. Aikojen tarkistus käyttää _upsell_day_slots-funktiota.
 create function booking.public_upsell_add(p_token uuid, p_item jsonb, p_session_id uuid, p_origin bigint default null)
 returns jsonb language plpgsql volatile security definer set search_path = '' as $f$
 declare o booking.orders; v_first timestamptz; v_product bigint; v_addon bigint; v_result jsonb; v_before bigint; v_new bigint; v_date date;
@@ -299,11 +333,6 @@ begin
     if exists (select 1 from booking.reservations where order_id = o.id and product_id = v_product and booking._res_active(status, hold_expires_at)) then
       return jsonb_build_object('ok', false, 'code', 'duplicate_product');
     end if;
-    if ((p_item->>'start')::timestamptz at time zone booking._tz())::date <> v_date then return jsonb_build_object('ok', false, 'code', 'invalid_date'); end if;
-    if not exists (select 1 from booking.public_treatment_availability(v_product, v_date, v_date, (p_item->>'persons')::int) q
-                   where q.starts_at = (p_item->>'start')::timestamptz and q.status = 'available') then
-      return jsonb_build_object('ok', false, 'code', 'slot_unavailable');
-    end if;
   else
     if coalesce(p_item->>'addon_id', '') !~ '^\d{1,18}$' then return jsonb_build_object('ok', false, 'code', 'invalid_items'); end if;
     v_addon := (p_item->>'addon_id')::bigint;
@@ -322,17 +351,26 @@ begin
     if exists (select 1 from booking.order_items where order_id = o.id and addon_id = v_addon) then return jsonb_build_object('ok', false, 'code', 'duplicate_product'); end if;
     if coalesce(v_item->>'quantity', '') !~ '^\d{1,4}$' then v_item := v_item || jsonb_build_object('quantity', 1); end if;
   end if;
-  select coalesce(max(id), 0) into v_before from booking.order_items where order_id = o.id;
-  v_result := booking.public_add_to_order(p_token, jsonb_build_array(v_item));
-  if v_result->>'ok' <> 'true' then return jsonb_build_object('ok', false, 'code', coalesce(v_result->>'code', 'invalid_items')); end if;
-  select id into v_new from booking.order_items where order_id = o.id and id > v_before order by id desc limit 1;
-  if v_new is not null then
-    insert into booking.upsell_events(order_id, session_id, source, product_id, suggested_from_product_id, suggested_addon_id, event, order_item_id)
-    values (o.id, p_session_id, 'confirmation', v_product, p_origin, v_addon, 'added', v_new) on conflict do nothing;
-  end if;
-  return jsonb_build_object('ok', true, 'added_total', v_result->'added_total');
-exception when sqlstate 'BK001' or exclusion_violation or invalid_text_representation or datetime_field_overflow then
-  return jsonb_build_object('ok', false, 'code', 'slot_unavailable');
+  begin
+    if p_item->>'type' = 'reservation' then
+      if ((p_item->>'start')::timestamptz at time zone booking._tz())::date <> v_date then return jsonb_build_object('ok', false, 'code', 'invalid_date'); end if;
+      if not exists (select 1 from booking._upsell_day_slots(v_product, v_date, (p_item->>'persons')::int) q
+                     where q.starts_at = (p_item->>'start')::timestamptz) then
+        return jsonb_build_object('ok', false, 'code', 'slot_unavailable');
+      end if;
+    end if;
+    select coalesce(max(id), 0) into v_before from booking.order_items where order_id = o.id;
+    v_result := booking.public_add_to_order(p_token, jsonb_build_array(v_item));
+    if v_result->>'ok' <> 'true' then return jsonb_build_object('ok', false, 'code', coalesce(v_result->>'code', 'invalid_items')); end if;
+    select id into v_new from booking.order_items where order_id = o.id and id > v_before order by id desc limit 1;
+    if v_new is not null then
+      insert into booking.upsell_events(order_id, session_id, source, product_id, suggested_from_product_id, suggested_addon_id, event, order_item_id)
+      values (o.id, p_session_id, 'confirmation', v_product, p_origin, v_addon, 'added', v_new) on conflict do nothing;
+    end if;
+    return jsonb_build_object('ok', true, 'added_total', v_result->'added_total');
+  exception when sqlstate 'BK001' or exclusion_violation or invalid_text_representation or datetime_field_overflow then
+    return jsonb_build_object('ok', false, 'code', 'slot_unavailable');
+  end;
 end $f$;
 revoke all on function booking.public_upsell_add(uuid, jsonb, uuid, bigint) from public, anon, authenticated;
 grant execute on function booking.public_upsell_add(uuid, jsonb, uuid, bigint) to anon, authenticated, service_role;
