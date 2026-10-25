@@ -1,4 +1,4 @@
--- PALUU: purkaa 20261022180000_whatsapp_inbound.sql.
+-- PALUU: purkaa 20261022180434_whatsapp_inbound.sql.
 -- Ei pudota public.whatsapp_messages-taulua: se on tuotannossa jo ennen tätä migraatiota.
 -- Uudet sarakkeet, itsepalvelutaulut, funktiot ja whatsapp_inbound_enabled poistetaan.
 

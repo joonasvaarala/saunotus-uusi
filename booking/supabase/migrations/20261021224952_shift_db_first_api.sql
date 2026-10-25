@@ -1,5 +1,5 @@
 -- shift_db_first_api: DB-kirjoitus-RPC:t (bottien, hallinnan, tarjousmoottorin ja Oton työntekijäbotin) + vientijonon claim/complete/fail.
--- Vaatii 20261022013000_shift_db_first_core.sql.
+-- Vaatii 20261021224946_shift_db_first_core.sql.
 
 -- ---------- yhteinen validointi (palauttaa roolin) ----------
 create or replace function public._shift_validate_change(

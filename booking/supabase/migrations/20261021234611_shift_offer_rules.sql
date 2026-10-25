@@ -1,5 +1,5 @@
 -- shift_offer_rules: vapaiden vuorojen automaattisen tarjoamisen sääntödata + tarjoukset (Joonas 22.10.2026, SPEC.md).
--- Vaatii 20261022013000/013100 (DB-first). Yksi vuokralainen. Kaikki uusi on pois päältä: shift_offer_settings.enabled = false.
+-- Vaatii 20261021224946/224952 (DB-first). Yksi vuokralainen. Kaikki uusi on pois päältä: shift_offer_settings.enabled = false.
 -- Viikonpäivä = ISO (1 = ma ... 7 = su), Helsingin paikallinen päivä. Viikon pariteetti = ISO-viikkonumero (even/odd).
 -- Sulut: EI omaa sulkumallia. Rooli 'closed' (esim. hoidot pe, parittomat ma) ja perinnesaunotuksen hoitajasääntö ovat dataa,
 -- jonka perusteella tarjousmoottori/Tapio JÄTTÄÄ tarjoamatta ja tarvittaessa luo sulun olemassa olevaan booking.closure_*-malliin.
