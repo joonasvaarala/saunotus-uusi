@@ -33,6 +33,8 @@ const PENDING = J(FILE);
 const FALLBACK = J('content/site-texts.fallback.json');
 // Tuotannossa muokattu tuonnin jälkeen (varateksti versio 2). Tuontitiedosto säilyy v1-tekstinä eikä ylikirjoita kantaa.
 const REVISED = new Set(['email.gift_card.how_online', 'email.gift_card.how_offline', 'email.gift_card_pdf.how_online', 'email.gift_card_pdf.how_offline']);
+// booking_176: kumppanilahjakorttivarauksen vanha "Kiitos lahjakorttivarauksesta" -viesti korvattu varausvahvistuksella (email.voucher.confirm_*, pending-import-71) → avaimet poistuivat koodista (tuotannon rivit jäävät käyttämättöminä).
+const RETIRED = new Set(['email.voucher.received_subject', 'email.voucher.received_title', 'email.voucher.received_p1', 'email.voucher.received_p2', 'email.voucher.more_received']);
 const publishedText = (key, lang) => FALLBACK.texts.find((r) => r.key === key && r.lang === lang);
 const OTHERS = ['content/site-texts.imported-pr61.json', 'content/site-texts.imported-pr62.json', 'content/site-texts.imported-pr64.json', 'content/site-texts.imported.json', 'content/site-texts.imported-pr71.json'].map(J);
 const GOLDEN = J('booking/supabase/functions/send-emails/golden-email.json');
@@ -100,6 +102,7 @@ test('tiedosto on generoitu koodista (texts.ts) eikä voi poiketa oletuksista', 
   const gen = JSON.parse(readFileSync(out, 'utf8'));
   const g = new Map(gen.map((x) => [`${x.key}|${x.lang}`, x]));
   for (const f of PENDING) {
+    if (RETIRED.has(f.key)) { assert.ok(!g.has(`${f.key}|${f.lang}`), `${f.key}: poistettu avain (booking_176)`); continue; }
     const got = g.get(`${f.key}|${f.lang}`);
     if (REVISED.has(f.key)) {
       const fb = publishedText(f.key, f.lang);
@@ -112,7 +115,7 @@ test('tiedosto on generoitu koodista (texts.ts) eikä voi poiketa oletuksista', 
     } else assert.deepEqual(f, got, `${f.key}: tiedosto ≠ generaattori`);
   }
   const fb = new Set(FALLBACK.texts.map((x) => `${x.key}|${x.lang}`));
-  const extraKnown = new Map([...J('content/site-texts.pending-import-4.json'), ...J('content/site-texts.imported-pr75.json'), ...J('content/site-texts.pending-import-12.json'), ...J('content/site-texts.pending-import-14.json'), ...J('content/site-texts.pending-import-18.json'), ...J('content/site-texts.pending-import-29.json').filter((r) => r.key.startsWith('email.')), ...J('content/site-texts.pending-import-34.json').filter((r) => r.key.startsWith('email.')), ...J('content/site-texts.pending-import-46.json').filter((r) => r.key.startsWith('email.')), ...J('content/site-texts.pending-import-48.json').filter((r) => r.key.startsWith('email.')), ...J('content/site-texts.pending-import-54.json').filter((r) => r.key.startsWith('email.')), ...J('content/site-texts.pending-import-67.json'), ...J('content/site-texts.pending-import-69.json').filter((r) => r.key.startsWith('email.'))].map((r) => [`${r.key}|${r.lang}`, r]));
+  const extraKnown = new Map([...J('content/site-texts.pending-import-4.json'), ...J('content/site-texts.imported-pr75.json'), ...J('content/site-texts.pending-import-12.json'), ...J('content/site-texts.pending-import-14.json'), ...J('content/site-texts.pending-import-18.json'), ...J('content/site-texts.pending-import-29.json').filter((r) => r.key.startsWith('email.')), ...J('content/site-texts.pending-import-34.json').filter((r) => r.key.startsWith('email.')), ...J('content/site-texts.pending-import-46.json').filter((r) => r.key.startsWith('email.')), ...J('content/site-texts.pending-import-48.json').filter((r) => r.key.startsWith('email.')), ...J('content/site-texts.pending-import-54.json').filter((r) => r.key.startsWith('email.')), ...J('content/site-texts.pending-import-67.json'), ...J('content/site-texts.pending-import-69.json').filter((r) => r.key.startsWith('email.')), ...J('content/site-texts.pending-import-71.json')].map((r) => [`${r.key}|${r.lang}`, r]));
   for (const [k, x] of g) if (!PENDING.some((f) => `${f.key}|${f.lang}` === k)) {
     const row = extraKnown.get(k);
     if (row) assert.deepEqual({ ...row, reason: x.reason }, x, `${k}: tuontitiedosto ≠ generaattori`);

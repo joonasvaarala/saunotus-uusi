@@ -228,8 +228,10 @@ function giftCardMail(kind: "gift_card_buyer" | "gift_card_recipient", d: any, e
 // ---------- kumppanilahjakorttien lunastuspyynnöt (voucher_claim_received / voucher_claim_problem) ----------
 // data.voucher_claim: { claim_id, status, source, code_masked ("…1234"), problem_code (invalid_code|expired_code|already_used|other), customer_name } + data.order (order_url, varaukset). Täyttä koodia ei viesteissä.
 // booking_48: varaus ei vanhene lunastuspyynnön vuoksi -> viesteissä EI aikarajoja eikä "aika on pidetty varattuna … asti" (hold_until on poistettu käytöstä; kenttää ei lueta).
-// Yhteystieto: vain sähköposti (puhelinnumeroa ei ole vahvistettu -> ei näy näissä viesteissä, ei alatunnisteessakaan).
-// Allekirjoitus: Tapio / Sipoonjoen Perinnesauna. Ongelmaviesti jonotetaan vain kun asetus voucher_claims.problem_emails_enabled = true.
+// Ongelmaviesti: yhteystieto vain sähköposti (ei puhelinnumeroa, ei alatunnisteessakaan). booking_176: ongelmaviestiä ei jonoteta automaattisesti lainkaan (_vc_notify_problem pois).
+// booking_176: voucher_claim_received = kumppanilahjakorttivarauksen AINOA varausvahvistus (korvaa "Kiitos lahjakorttivarauksesta" -viestin, tilausvahvistuksen ja erillisen ohjeviestin):
+//   aika varattu + lahjakortti tarkistetaan + "Olemme sinuun yhteydessä, jos …", tiivis ohjelaatikko (order.instructions, email_outbox_claim), linkki koko ohjeeseen ja tilaussivulle, puhelin näkyy.
+// Allekirjoitus: Tapio / Sipoonjoen Perinnesauna.
 const VC_SOURCES = ["elamyslahjat", "kokemuskauppa", "kiitoskauppa", "offerilla"];   // kumppanien nimet: email.voucher.partner_<lähde>
 function voucherMail(kind: "voucher_claim_received" | "voucher_claim_problem", d: any, en: boolean, hello: string, X: X): Rendered {
   const vc = d?.voucher_claim ?? {};
@@ -244,11 +246,8 @@ function voucherMail(kind: "voucher_claim_received" | "voucher_claim_problem", d
   const viewLabel = X("email.voucher.view_order");
   const V = { what, label, email: EMAIL };
   let subject: string, title: string, paras: string[];
-  if (kind === "voucher_claim_received") {
-    subject = X("email.voucher.received_subject");
-    title = X("email.voucher.received_title");
-    paras = [X("email.voucher.received_p1", V), X("email.voucher.received_p2")];
-  } else {
+  if (kind === "voucher_claim_received") return voucherConfirmMail(d, en, hello, X, { what, orderUrl, ob, sign, signHtml });
+  {
     const how = X("email.voucher.problem_how");
     switch (vc.problem_code) {
       case "expired_code":
@@ -273,9 +272,26 @@ function voucherMail(kind: "voucher_claim_received" | "voucher_claim_problem", d
     }
   }
   paras = paras.filter(Boolean);
-  const more = kind === "voucher_claim_received" ? X("email.voucher.more_received") : X("email.voucher.more_problem");
+  const more = X("email.voucher.more_problem");
   const text = textBlock(hello, ...paras, ob.text, orderUrl && `${more}\n${orderUrl}`, contact, sign) + "\n";
   const html = wrapHtml(d, title, paras[0], h1(title) + p(esc(hello)) + paras.map((x) => p(esc(x))).join("") + ob.html + (orderUrl ? p(esc(more)) + button(orderUrl, viewLabel) : "") + p(esc(contact), `color:${MUTED};font-size:13px`) + p(signHtml), en, true);
+  return { subject, text, html };
+}
+
+// booking_176: kumppanilahjakorttivarauksen varausvahvistus (yksi viesti heti varauksen jälkeen). Koko ohje: tilaussivun ohjeosio (#ord-g).
+function voucherConfirmMail(d: any, en: boolean, hello: string, X: X, c: { what: string; orderUrl: string; ob: Block; sign: string; signHtml: string }): Rendered {
+  const no = d?.order?.order_no ?? "";
+  const subject = X("email.voucher.confirm_subject", { no });
+  const title = X("email.voucher.confirm_title");
+  const paras = [X("email.voucher.confirm_reserved", { what: c.what }), X("email.voucher.confirm_check"), X("email.voucher.confirm_problem")].filter(Boolean);
+  const notes = instructionNotes(d?.order?.instructions, X("email.voucher.confirm_guide_title"));
+  const guideUrl = notes.text && c.orderUrl ? `${c.orderUrl}#ord-g` : "";
+  const guide = X("email.voucher.confirm_guide");
+  const more = X("email.voucher.confirm_more");
+  const contact = X("email.common.contact", { phone: phoneFor(en) });
+  const text = textBlock(hello, ...paras, c.ob.text, notes.text, guideUrl && `${guide}:\n${guideUrl}`, c.orderUrl && `${more}\n${c.orderUrl}`, contact, c.sign) + "\n";
+  const html = wrapHtml(d, title, paras[0], h1(title) + p(esc(hello)) + paras.map((x) => p(esc(x))).join("") + c.ob.html + notes.html + (guideUrl ? button(guideUrl, guide) : "")
+    + (c.orderUrl ? p(esc(more)) + button(c.orderUrl, X("email.voucher.view_order")) : "") + p(esc(contact), `color:${MUTED};font-size:13px`) + p(c.signHtml), en);
   return { subject, text, html };
 }
 
@@ -346,6 +362,26 @@ function businessQuoteNotify(d: any, hello: string, X: X): Rendered {
   return { subject, text, html };
 }
 
+// booking_176: lahjakortti kattaa vain osan → YKSI yhdistetty viesti: lunastettu ja varaus vahvistettu, summa / lahjakortin arvo / erotus, Maksa nyt. Erotuksen maksusta ei kuittisähköpostia (kuitti tilaussivulla).
+function voucherDifferenceMail(d: any, en: boolean, hello: string, X: X, v: { no: string | number; total: string; voucher: string; difference: string }, c: { url: string; expires: string; ob: Block; contact: string }): Rendered {
+  const subject = X("email.payment_link.voucher_subject", v);
+  const title = X("email.voucher.difference_title");
+  const confirmed = X("email.voucher.difference_confirmed");
+  const intro = X("email.payment_link.voucher_intro", v);
+  const receipt = X("email.voucher.difference_receipt");
+  const exp = c.expires ? X("email.payment_link.expires", { date: c.expires }) : "";
+  const pay = X("email.payment_link.pay_button");
+  const L = { total: X("email.voucher.difference_total_label"), voucher: X("email.voucher.difference_voucher_label"), diff: X("email.payment_link.voucher_amount_label") };
+  const sign = `${X("email.common.closing")}\n${X("email.payment_link.sign_name")}\n${SELLER}`;
+  const lines = `${L.total}: ${v.total}\n${L.voucher}: ${v.voucher}\n${L.diff}: ${v.difference}`;
+  const text = textBlock(hello, confirmed, intro, lines, c.url && `${pay}:\n${c.url}`, exp, receipt, c.ob.text, c.contact, sign) + "\n";
+  const row = (k: string, val: string, big = false) => `<tr><td style="padding:4px 0;font-family:${SANS};font-size:14px;color:${big ? GREEN : INK};${big ? "font-weight:bold;" : ""}">${esc(k)}</td><td align="right" style="padding:4px 0;font-family:${big ? FONT : SANS};font-size:${big ? 22 : 14}px;color:${big ? GREEN : INK}">${esc(val)}</td></tr>`;
+  const sums = box(`<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${row(L.total, v.total)}${row(L.voucher, v.voucher)}${row(L.diff, v.difference, true)}</table>`);
+  const html = wrapHtml(d, title, confirmed, h1(title) + p(esc(hello)) + p(esc(confirmed)) + p(esc(intro)) + sums + (c.url ? button(c.url, pay) : "") + (exp ? p(esc(exp), `color:${MUTED};font-size:13px`) : "")
+    + p(esc(receipt), `color:${MUTED};font-size:13px`) + c.ob.html + p(esc(c.contact), `color:${MUTED};font-size:13px`) + p(esc(sign).replace(/\n/g, "<br>")), en);
+  return { subject, text, html };
+}
+
 export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T): Rendered {
   const en = (locale ?? d?.locale) === "en";
   const X: X = (key, vars) => t(key, en ? "en" : "fi", vars);
@@ -405,11 +441,12 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const vd = d?.voucher_difference;
       const vdOk = !!vd && [vd.total, vd.voucher_value, vd.difference].every((v: unknown) => v != null && v !== "" && Number.isFinite(Number(v))) && Number(vd.difference) > 0;
       const vdVars = vdOk ? { no, total: eur(vd.total, en), voucher: eur(vd.voucher_value, en), difference: eur(vd.difference, en) } : null;
-      const subject = vdVars ? X("email.payment_link.voucher_subject", vdVars) : X("email.payment_link.subject", { no });
-      const intro = vdVars ? X("email.payment_link.voucher_intro", vdVars) : X("email.payment_link.intro", { amount });
+      if (vdVars) return voucherDifferenceMail(d, en, hello, X, vdVars, { url, expires, ob, contact });
+      const subject = X("email.payment_link.subject", { no });
+      const intro = X("email.payment_link.intro", { amount });
       const exp = expires ? X("email.payment_link.expires", { date: expires }) : "";
       const title = X("email.payment_link.title");
-      const lab = vdVars ? X("email.payment_link.voucher_amount_label") : X("email.payment_link.amount_label");
+      const lab = X("email.payment_link.amount_label");
       const pay = X("email.payment_link.pay_button");
       const linkSign = `${X("email.common.closing")}\n${X("email.payment_link.sign_name")}\n${SELLER}`;
       const linkTail = `${p(esc(contact), `color:${MUTED};font-size:13px`)}${p(esc(linkSign).replace(/\n/g, "<br>"))}`;

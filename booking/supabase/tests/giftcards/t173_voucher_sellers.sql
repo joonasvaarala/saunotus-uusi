@@ -48,7 +48,7 @@ begin
   -- ===== A rakenne, md5, oikeudet, siemendata
   perform pg_temp.ck(md5(pg_get_functiondef('booking._vc_guess(text)'::regprocedure)) = '3f33a0425eb0fa346ba617659b7b729d', 'A1 _vc_guess = booking_173');
   perform pg_temp.ck(md5(pg_get_functiondef('booking._vc_sources()'::regprocedure)) = 'a1e85bd09bb916228984a4e667207bc5', 'A2 _vc_sources = booking_173');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.public_submit_voucher_claim(uuid,text,text,bigint)'::regprocedure)) = 'de84e5ce9b1062111c4248e7c582fdb8', 'A3 public_submit_voucher_claim = booking_173');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking.public_submit_voucher_claim(uuid,text,text,bigint)'::regprocedure)) in ('de84e5ce9b1062111c4248e7c582fdb8', 'd28a31d27147f4cf7bceb12150c9e77c'), 'A3 public_submit_voucher_claim = booking_173 (tai booking_176)');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.public_update_voucher_claim_code(uuid,bigint,text,text)'::regprocedure)) = '778fb281381aa026ed3e8afd49431ef6', 'A4 public_update_voucher_claim_code = booking_173');
   perform pg_temp.ck(md5(pg_get_functiondef('booking._vc_pay(booking.orders,booking.voucher_claims,numeric)'::regprocedure)) = '3c24fd721b0e8bc6f1bdfb8a800c5a0e', 'A5 _vc_pay = booking_173');
   perform pg_temp.ck(md5(pg_get_functiondef('booking._acct_excluded(bigint,bigint)'::regprocedure)) = '4cbe97dbc038d5839453cf90f30525a5', 'A6 _acct_excluded = booking_173');
