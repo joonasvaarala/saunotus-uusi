@@ -1,4 +1,4 @@
-// Maksulinkkisivun tekstit (FI/EN): /maksa/?p=<link_token> ja /en/pay/?p=<link_token>. Avaimet ui.paylink.*. Ei yhteystietoja eikä osoitteita (puhelin tulee S.phone-arvosta).
+// Maksulinkkisivun tekstit (FI/EN; booking_177 → pending-import-72, booking_177b yhteenveto → pending-import-73): /maksa/?p=<link_token> ja /en/pay/?p=<link_token>. Avaimet ui.paylink.*. Ei yhteystietoja eikä osoitteita (puhelin tulee S.phone-arvosta).
 export const PLT = {
   fi: {
     title: 'Maksulinkki',
@@ -22,6 +22,25 @@ export const PLT = {
     'err.provider': 'Visma Pay ei vastannut. Yritä hetken kuluttua uudelleen.',
     'err.network': 'Yhteys ei onnistunut. Tarkista verkkoyhteys ja yritä uudelleen.',
     'err.generic': 'Maksun aloitus epäonnistui. Yritä uudelleen tai ota yhteyttä.',
+    // booking_177b: yhteenveto ennen maksua (public_payment_link_info) — pending-import-73
+    loading: 'Haetaan maksun tietoja…',
+    leadOpen: 'Tarkista tiedot ja siirry maksamaan. Maksat Visma Payn sivulla kortilla tai verkkopankissa, ja palaat sen jälkeen tilaukseesi.',
+    'sum.due': 'Maksettava',
+    'sum.paid': 'Maksettu',
+    'sum.link': 'Linkin summa',
+    'sum.order': 'Tilausnumero',
+    'sum.items': 'Mitä maksat',
+    'sum.itemsOf': 'Tilauksen sisältö',
+    'sum.when': '{date} klo {start}–{end}',
+    'sum.qty': '{n} kpl',
+    'sum.valid': 'Linkki on voimassa {date} klo {time} asti.',
+    'sum.expiredAt': 'Linkki vanheni {date} klo {time}.',
+    'info.paid': 'Tämä maksulinkki on jo maksettu. Kiitos! Sinun ei tarvitse maksaa uudelleen.',
+    'info.order_paid': 'Tilaus on jo maksettu kokonaan. Tätä linkkiä ei tarvitse enää maksaa.',
+    'info.expired': 'Maksulinkki on vanhentunut, eikä sillä voi enää maksaa. Pyydä meiltä uusi maksulinkki.',
+    'info.cancelled': 'Tällä linkillä aloitettu maksu keskeytettiin, eikä linkkiä voi enää käyttää. Pyydä meiltä uusi maksulinkki.',
+    'info.replaced': 'Tämä maksulinkki on korvattu uudella. Käytä uusinta saamaasi linkkiä tai pyydä meiltä uusi.',
+    'info.stale': 'Tilauksen maksettava summa on muuttunut, joten tämä linkki ei ole enää voimassa. Pyydä meiltä uusi maksulinkki.',
   },
   en: {
     title: 'Payment link',
@@ -45,6 +64,25 @@ export const PLT = {
     'err.provider': 'Visma Pay did not respond. Please try again in a moment.',
     'err.network': 'The connection failed. Check your network and try again.',
     'err.generic': 'The payment could not be started. Try again or contact us.',
+    // booking_177b: summary before payment (public_payment_link_info) — pending-import-73
+    loading: 'Loading payment details…',
+    leadOpen: 'Check the details and continue to payment. You pay on the Visma Pay page by card or online bank, and then return to your order.',
+    'sum.due': 'Amount due',
+    'sum.paid': 'Paid',
+    'sum.link': 'Link amount',
+    'sum.order': 'Order number',
+    'sum.items': 'What you are paying for',
+    'sum.itemsOf': 'Order contents',
+    'sum.when': '{date}, {start}–{end}',
+    'sum.qty': '{n} pcs',
+    'sum.valid': 'The link is valid until {date} at {time}.',
+    'sum.expiredAt': 'The link expired on {date} at {time}.',
+    'info.paid': 'This payment link has already been paid. Thank you! You do not need to pay again.',
+    'info.order_paid': 'The order has already been paid in full. This link no longer needs to be paid.',
+    'info.expired': 'The payment link has expired and can no longer be used. Ask us for a new payment link.',
+    'info.cancelled': 'The payment started with this link was cancelled, and the link can no longer be used. Ask us for a new payment link.',
+    'info.replaced': 'This payment link has been replaced by a new one. Use the latest link you received or ask us for a new one.',
+    'info.stale': 'The amount due on the order has changed, so this link is no longer valid. Ask us for a new payment link.',
   },
 };
 

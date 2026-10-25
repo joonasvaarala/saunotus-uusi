@@ -1,0 +1,386 @@
+[
+ {
+  "key": "ui.paylink.loading",
+  "lang": "fi",
+  "text": "Haetaan maksun tietoja…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.loading",
+  "lang": "en",
+  "text": "Loading payment details…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.lead_open",
+  "lang": "fi",
+  "text": "Tarkista tiedot ja siirry maksamaan. Maksat Visma Payn sivulla kortilla tai verkkopankissa, ja palaat sen jälkeen tilaukseesi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.lead_open",
+  "lang": "en",
+  "text": "Check the details and continue to payment. You pay on the Visma Pay page by card or online bank, and then return to your order.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.due",
+  "lang": "fi",
+  "text": "Maksettava",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.due",
+  "lang": "en",
+  "text": "Amount due",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.paid",
+  "lang": "fi",
+  "text": "Maksettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.paid",
+  "lang": "en",
+  "text": "Paid",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.link",
+  "lang": "fi",
+  "text": "Linkin summa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.link",
+  "lang": "en",
+  "text": "Link amount",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.order",
+  "lang": "fi",
+  "text": "Tilausnumero",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.order",
+  "lang": "en",
+  "text": "Order number",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.items",
+  "lang": "fi",
+  "text": "Mitä maksat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.items",
+  "lang": "en",
+  "text": "What you are paying for",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.items_of",
+  "lang": "fi",
+  "text": "Tilauksen sisältö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.items_of",
+  "lang": "en",
+  "text": "Order contents",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.when",
+  "lang": "fi",
+  "text": "{{var:date}} klo {{var:start}}–{{var:end}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}",
+   "{{var:start}}",
+   "{{var:end}}"
+  ],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.when",
+  "lang": "en",
+  "text": "{{var:date}}, {{var:start}}–{{var:end}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}",
+   "{{var:start}}",
+   "{{var:end}}"
+  ],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.qty",
+  "lang": "fi",
+  "text": "{{var:n}} kpl",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.qty",
+  "lang": "en",
+  "text": "{{var:n}} pcs",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.valid",
+  "lang": "fi",
+  "text": "Linkki on voimassa {{var:date}} klo {{var:time}} asti.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}",
+   "{{var:time}}"
+  ],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.valid",
+  "lang": "en",
+  "text": "The link is valid until {{var:date}} at {{var:time}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}",
+   "{{var:time}}"
+  ],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.expired_at",
+  "lang": "fi",
+  "text": "Linkki vanheni {{var:date}} klo {{var:time}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}",
+   "{{var:time}}"
+  ],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.sum.expired_at",
+  "lang": "en",
+  "text": "The link expired on {{var:date}} at {{var:time}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:date}}",
+   "{{var:time}}"
+  ],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.info.paid",
+  "lang": "fi",
+  "text": "Tämä maksulinkki on jo maksettu. Kiitos! Sinun ei tarvitse maksaa uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.info.paid",
+  "lang": "en",
+  "text": "This payment link has already been paid. Thank you! You do not need to pay again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.info.order_paid",
+  "lang": "fi",
+  "text": "Tilaus on jo maksettu kokonaan. Tätä linkkiä ei tarvitse enää maksaa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.info.order_paid",
+  "lang": "en",
+  "text": "The order has already been paid in full. This link no longer needs to be paid.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.info.expired",
+  "lang": "fi",
+  "text": "Maksulinkki on vanhentunut, eikä sillä voi enää maksaa. Pyydä meiltä uusi maksulinkki.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.info.expired",
+  "lang": "en",
+  "text": "The payment link has expired and can no longer be used. Ask us for a new payment link.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.info.cancelled",
+  "lang": "fi",
+  "text": "Tällä linkillä aloitettu maksu keskeytettiin, eikä linkkiä voi enää käyttää. Pyydä meiltä uusi maksulinkki.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.info.cancelled",
+  "lang": "en",
+  "text": "The payment started with this link was cancelled, and the link can no longer be used. Ask us for a new payment link.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.info.replaced",
+  "lang": "fi",
+  "text": "Tämä maksulinkki on korvattu uudella. Käytä uusinta saamaasi linkkiä tai pyydä meiltä uusi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.info.replaced",
+  "lang": "en",
+  "text": "This payment link has been replaced by a new one. Use the latest link you received or ask us for a new one.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.info.stale",
+  "lang": "fi",
+  "text": "Tilauksen maksettava summa on muuttunut, joten tämä linkki ei ole enää voimassa. Pyydä meiltä uusi maksulinkki.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ },
+ {
+  "key": "ui.paylink.info.stale",
+  "lang": "en",
+  "text": "The amount due on the order has changed, so this link is no longer valid. Ask us for a new payment link.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_177b: maksulinkkisivun yhteenveto ennen maksua (summa, tilausnumero, rivit, voimassaolo) ja tilaviestit (maksettu, vanhentunut, korvattu); uusi avain, tuonti ei ylikirjoita vanhoja"
+ }
+]

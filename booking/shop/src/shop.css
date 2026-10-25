@@ -581,6 +581,21 @@ button.bk-cell.quiet.sel{box-shadow:inset 0 -4px 0 #F4EFE7}
 .bk-slotlist{grid-template-columns:minmax(0,1fr)}
 .bk-slot>*{min-width:0}
 .bk-slot-side{flex-wrap:wrap}
+/* booking_177b: maksulinkkisivun yhteenveto ennen maksua (/maksa/, /en/pay/). Värit #2B3A30 / #F4EFE7 / #7A5530, ei sivuttaisvieritystä 390 px:llä. */
+.pl-card{max-width:640px;overflow-wrap:anywhere}
+.pl-sum{background:#F4EFE7;border:1px solid #7A5530;border-radius:var(--r,12px);padding:16px 18px;margin:12px 0 16px;color:#2B3A30}
+.pl-sum p{margin:0}
+.pl-sum-label{font:600 13px/1.3 var(--label,inherit);text-transform:uppercase;letter-spacing:.08em;color:#7A5530;margin-top:12px!important}
+.pl-sum-label:first-child{margin-top:0!important}
+.pl-sum-amount{font:600 40px/1.15 var(--head,inherit);color:#2B3A30;margin:2px 0 8px!important}
+.pl-sum-order{font-size:16px;color:#2B3A30}
+.pl-items{list-style:none;margin:6px 0 0;padding:0}
+.pl-item{display:flex;flex-direction:column;gap:2px;padding:8px 0;border-top:1px solid rgba(122,85,48,.35)}
+.pl-item:first-child{border-top:0;padding-top:2px}
+.pl-item-name{font-weight:600;font-size:17px;color:#2B3A30}
+.pl-item-when{font-size:16px;color:#2B3A30}
+.pl-valid{margin-top:12px!important;font-size:15px;color:#2B3A30;border-top:1px solid rgba(122,85,48,.35);padding-top:10px}
+.pl-state{background:#F4EFE7;border-left:4px solid #7A5530;color:#2B3A30;padding:12px 16px;border-radius:6px;margin:12px 0;font-size:17px;line-height:1.5;font-weight:600}
 /* booking_166: saunarituaali lisäpalvelukorttina LISÄPALVELUT-osiossa (.bk-addon-muoto; vain tämän kortin tyylit; värit #2B3A30 / #F4EFE7 / #7A5530 / #6B5E52) */
 .bk-addon-ritual[hidden],.bk-addon-ritual [hidden],.bk-addons[hidden]{display:none}
 .bk-addon-ritual .bk-rit-annual{color:#6B5E52}
