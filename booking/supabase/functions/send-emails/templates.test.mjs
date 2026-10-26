@@ -420,3 +420,28 @@ test('booking_176: tavallinen maksulinkki ennallaan (ei voucher_difference-lohko
     assert.ok(m.subject.startsWith(l === 'fi' ? 'Maksulinkki tilaukseen 15321' : 'Payment link for order 15321') && !/lunastettu|redeemed/i.test(m.text));
   }
 });
+
+// Gmail iOS zoomaa leveimmän kohdan mukaan. Kortti on width="100%" + max-width:600px, ei width="600".
+const LAYOUT_KINDS = ['order_confirmation', 'payment_link', 'receipt', 'refund_receipt', 'cancel_request_ack', 'order_change', 'gift_card_buyer', 'gift_card_recipient', 'voucher_claim_received', 'voucher_claim_problem', 'business_quote_ack', 'business_quote_notify', 'invoice_pdf', 'product_message', 'waitlist_spot_freed', 'annual_card_code'];
+test('asiakasviestit: viewport ja juokseva kortti (ei width="600")', { skip }, () => {
+  for (const kind of LAYOUT_KINDS) for (const locale of ['fi', 'en']) {
+    const row = kind === 'refund_receipt' ? refundData(locale) : base(locale);
+    const m = R(kind, row, locale);
+    assert.match(m.html, /<meta name="viewport" content="width=device-width, initial-scale=1">/, `${kind} ${locale}: viewport`);
+    assert.doesNotMatch(m.html, /\bwidth="600"/, `${kind} ${locale}: kiinteä kortti`);
+    assert.doesNotMatch(m.html, /(?<!max-)width:\s*600px/, `${kind} ${locale}: kiinteä CSS-leveys`);
+    assert.match(m.html, /max-width:600px/, `${kind} ${locale}: kortin yläraja`);
+    assert.match(m.html, /<table role="presentation" width="100%"/, `${kind} ${locale}: ulompi taulukko`);
+    assert.match(m.html, /<!doctype html>/, kind);
+  }
+  const oc = R('order_confirmation', base('fi'));
+  assert.match(oc.html, /table-layout:fixed/, 'tuote/aika-taulukko kutistuu');
+  assert.match(oc.html, /overflow-wrap:anywhere/);
+  assert.match(oc.html, /word-break:break-all/);
+  assert.match(oc.html, /<wbr>/, 'tilauslinkki katkeaa');
+  assert.match(oc.html, new RegExp(`href="${ORDER_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"`), 'linkin osoite ennallaan');
+  const rec = R('receipt', base('fi'));
+  assert.match(rec.html, /white-space:pre-wrap/);
+  assert.match(rec.html, /overflow-wrap:anywhere/);
+  assert.doesNotMatch(rec.html, /\bwidth="600"/);
+});
