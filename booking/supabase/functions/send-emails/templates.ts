@@ -28,13 +28,13 @@ const FONT = "Georgia,'Times New Roman',serif", SANS = "Arial,Helvetica,sans-ser
 
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 const RICH_EMAIL = {
-  p: `margin:0 0 12px;font-family:${SANS};font-size:15px;line-height:1.5;color:${INK}`,
-  h2: `margin:16px 0 8px;font-family:${FONT};font-size:20px;line-height:1.3;color:${GREEN};font-weight:normal`,
-  h3: `margin:14px 0 6px;font-family:${SANS};font-size:16px;line-height:1.35;color:${GREEN};font-weight:bold`,
+  p: `margin:0 0 12px;font-family:${SANS};font-size:15px;line-height:1.5;color:${INK};overflow-wrap:anywhere;word-wrap:break-word`,
+  h2: `margin:16px 0 8px;font-family:${FONT};font-size:20px;line-height:1.3;color:${GREEN};font-weight:normal;overflow-wrap:anywhere;word-wrap:break-word`,
+  h3: `margin:14px 0 6px;font-family:${SANS};font-size:16px;line-height:1.35;color:${GREEN};font-weight:bold;overflow-wrap:anywhere;word-wrap:break-word`,
   ul: `margin:0 0 12px;padding:0 0 0 20px;font-family:${SANS};font-size:15px;line-height:1.5;color:${INK}`,
   ol: `margin:0 0 12px;padding:0 0 0 20px;font-family:${SANS};font-size:15px;line-height:1.5;color:${INK}`,
-  li: `margin:0 0 4px`,
-  a: `color:${GREEN};text-decoration:underline`,
+  li: `margin:0 0 4px;overflow-wrap:anywhere;word-wrap:break-word`,
+  a: `color:${GREEN};text-decoration:underline;overflow-wrap:anywhere;word-break:break-all`,
 };
 // rich === false: pohja on pelkkää tekstiä, vaikka täytetty merkkijono näyttäisi tagilta.
 // rich === true: pohja on rich. Puuttuva lippu (vanhat testit, ei viestipohjaa) päättelee merkkijonosta.
@@ -99,31 +99,40 @@ export function siteBase(d: any): string | null {
 export const logoUrl = (d: any): string => { const b = siteBase(d); return b ? `${b}/img/logo-kuitti.png` : LOGO_FALLBACK; };
 
 // ---------- HTML-rakennuspalikat (taulukkopohjaiset) ----------
-const p = (html: string, extra = "") => `<tr><td style="padding:0 32px 14px 32px;font-family:${SANS};font-size:15px;line-height:1.55;color:${INK};${extra}">${html}</td></tr>`;
-const h1 = (title: string) => `<tr><td style="padding:28px 32px 14px 32px;font-family:${FONT};font-size:24px;line-height:1.25;color:${GREEN};font-weight:normal">${esc(title)}</td></tr>`;
+// Gmailin iOS-sovellus zoomaa viestin leveimmän kohdan mukaan. Kuitti skaalautuu, koska sen runko on
+// yksi sarake ja white-space:pre-wrap. Tilausvahvistus lisää monisarakkeisen tuote/aika-taulukon ja
+// pitkän tilauslinkin painikkeen alle: ne levittävät dokumentin 600px-korttia leveämmäksi, jolloin
+// kortti jää noin 60 % ruudusta ja hiekkatusta täyttää reunat. Kortissa ei ole width="600"-attribuuttia
+// (width="100%" + max-width:600px). Asemointi on inline-tyyleissä; @media on vain lisä.
+const CELL_WRAP = "overflow-wrap:anywhere;word-wrap:break-word";
+const TD_WRAP = "overflow-wrap:break-word;word-wrap:break-word";
+const FLUID_TABLE = `role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:100%;table-layout:fixed;border-collapse:collapse"`;
+const shownUrl = (u: string) => esc(u).replace(/([/?&=#])/g, "$1<wbr>");
+const p = (html: string, extra = "") => `<tr><td style="padding:0 32px 14px 32px;font-family:${SANS};font-size:15px;line-height:1.55;color:${INK};${CELL_WRAP};${extra}">${html}</td></tr>`;
+const h1 = (title: string) => `<tr><td style="padding:28px 32px 14px 32px;font-family:${FONT};font-size:24px;line-height:1.25;color:${GREEN};font-weight:normal;${CELL_WRAP}">${esc(title)}</td></tr>`;
 const button = (url: string, label: string) => {
   const u = safeUrl(url); if (!u) return "";
-  return `<tr><td style="padding:6px 32px 8px 32px"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${GREEN}" style="border-radius:4px"><a href="${esc(u)}" style="display:inline-block;padding:12px 24px;font-family:${SANS};font-size:15px;font-weight:bold;color:${SAND_LIGHT};text-decoration:none;border-radius:4px">${esc(label)}</a></td></tr></table></td></tr>`
-    + `<tr><td style="padding:6px 32px 18px 32px;font-family:${SANS};font-size:12px;line-height:1.4;color:${MUTED};word-break:break-all">${esc(u)}</td></tr>`;
+  return `<tr><td style="padding:6px 32px 8px 32px"><table role="presentation" cellpadding="0" cellspacing="0" border="0" style="max-width:100%"><tr><td bgcolor="${GREEN}" style="border-radius:4px"><a href="${esc(u)}" style="display:inline-block;padding:12px 24px;font-family:${SANS};font-size:15px;font-weight:bold;color:${SAND_LIGHT};text-decoration:none;border-radius:4px">${esc(label)}</a></td></tr></table></td></tr>`
+    + `<tr><td style="padding:6px 32px 18px 32px;font-family:${SANS};font-size:12px;line-height:1.4;color:${MUTED};word-break:break-all;overflow-wrap:anywhere;word-wrap:break-word">${shownUrl(u)}</td></tr>`;
 };
-const th = (s: string, align = "left") => `<td align="${align}" style="padding:6px 8px;font-family:${SANS};font-size:12px;color:${MUTED};text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid ${SAND_LINE}">${esc(s)}</td>`;
-const td = (s: string, align = "left", bold = false) => `<td align="${align}" valign="top" style="padding:8px;font-family:${SANS};font-size:14px;line-height:1.4;color:${INK};border-bottom:1px solid ${SAND};${bold ? "font-weight:bold;" : ""}">${esc(s)}</td>`;
-const box = (inner: string) => `<tr><td style="padding:0 32px 18px 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${SAND_LIGHT}" style="background:${SAND_LIGHT};border:1px solid ${SAND_LINE};border-radius:4px"><tr><td style="padding:12px 16px">${inner}</td></tr></table></td></tr>`;
+const th = (s: string, align = "left", width = "") => `<td align="${align}"${width ? ` width="${width}"` : ""} style="padding:6px 8px;font-family:${SANS};font-size:12px;color:${MUTED};text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid ${SAND_LINE};${width ? `width:${width};` : ""}${TD_WRAP}">${esc(s)}</td>`;
+const td = (s: string, align = "left", bold = false, width = "") => `<td align="${align}" valign="top"${width ? ` width="${width}"` : ""} style="padding:8px;font-family:${SANS};font-size:14px;line-height:1.4;color:${INK};border-bottom:1px solid ${SAND};${bold ? "font-weight:bold;" : ""}${width ? `width:${width};` : ""}${TD_WRAP}">${esc(s)}</td>`;
+const box = (inner: string) => `<tr><td style="padding:0 32px 18px 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${SAND_LIGHT}" style="width:100%;max-width:100%;table-layout:fixed;border-collapse:collapse;background:${SAND_LIGHT};border:1px solid ${SAND_LINE};border-radius:4px"><tr><td style="padding:12px 16px;${CELL_WRAP}">${inner}</td></tr></table></td></tr>`;
 
 function wrapHtml(d: any, title: string, preheader: string, rows: string, en: boolean, noPhone = false): string {
   const logo = logoUrl(d);
-  return `<!doctype html><html lang="${en ? "en" : "fi"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${esc(title)}</title></head>
-<body style="margin:0;padding:0;background:${SAND};-webkit-text-size-adjust:100%">
+  return `<!doctype html><html lang="${en ? "en" : "fi"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><title>${esc(title)}</title><style type="text/css">@media only screen and (max-width:620px){.email-card{width:100%!important;max-width:100%!important} }</style></head>
+<body style="margin:0;padding:0;width:100%;background:${SAND};-webkit-text-size-adjust:100%;text-size-adjust:100%">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;font-size:1px;line-height:1px;color:${SAND}">${esc(preheader)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${SAND}" style="background:${SAND}"><tr><td align="center" style="padding:24px 10px">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="width:100%;max-width:600px;background:#ffffff;border-radius:6px;border-top:4px solid ${GREEN}">
-<tr><td style="padding:22px 32px 4px 32px"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-<td valign="middle" style="padding-right:12px"><img src="${esc(logo)}" width="56" alt="${esc(COMPANY)}" style="display:block;border:0;outline:none;height:auto;width:56px"></td>
-<td valign="middle" style="font-family:${FONT};font-size:18px;line-height:1.2;color:${GREEN}">${esc(SELLER)}<br><span style="font-family:${SANS};font-size:12px;color:${MUTED}">${esc(COMPANY)}</span></td>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${SAND}" style="width:100%;background:${SAND}"><tr><td align="center" style="padding:24px 10px">
+<table role="presentation" class="email-card" align="center" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="width:100%;max-width:600px;margin:0 auto;background:#ffffff;border-radius:6px;border-top:4px solid ${GREEN}">
+<tr><td style="padding:22px 32px 4px 32px"><table role="presentation" cellpadding="0" cellspacing="0" border="0" style="max-width:100%"><tr>
+<td valign="middle" style="padding-right:12px"><img src="${esc(logo)}" width="56" alt="${esc(COMPANY)}" style="display:block;border:0;outline:none;height:auto;width:56px;max-width:100%"></td>
+<td valign="middle" style="font-family:${FONT};font-size:18px;line-height:1.2;color:${GREEN};${CELL_WRAP}">${esc(SELLER)}<br><span style="font-family:${SANS};font-size:12px;color:${MUTED}">${esc(COMPANY)}</span></td>
 </tr></table></td></tr>
 ${rows}
-<tr><td style="padding:10px 32px 0 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-top:1px solid ${SAND_LINE};font-size:0;line-height:0">&nbsp;</td></tr></table></td></tr>
-<tr><td style="padding:8px 32px 26px 32px;font-family:${SANS};font-size:12px;line-height:1.6;color:${MUTED}">${esc(SELLER)} · ${esc(COMPANY)}<br>${esc(ADDRESS)}<br><a href="mailto:${EMAIL}" style="color:${GREEN_SOFT}">${EMAIL}</a>${noPhone ? "" : ` · <a href="tel:${PHONE_TEL}" style="color:${GREEN_SOFT};text-decoration:none">${phoneFor(en)}</a>`}</td></tr>
+<tr><td style="padding:10px 32px 0 32px"><table ${FLUID_TABLE}><tr><td style="border-top:1px solid ${SAND_LINE};font-size:0;line-height:0">&nbsp;</td></tr></table></td></tr>
+<tr><td style="padding:8px 32px 26px 32px;font-family:${SANS};font-size:12px;line-height:1.6;color:${MUTED};${CELL_WRAP}">${esc(SELLER)} · ${esc(COMPANY)}<br>${esc(ADDRESS)}<br><a href="mailto:${EMAIL}" style="color:${GREEN_SOFT}">${EMAIL}</a>${noPhone ? "" : ` · <a href="tel:${PHONE_TEL}" style="color:${GREEN_SOFT};text-decoration:none">${phoneFor(en)}</a>`}</td></tr>
 </table></td></tr></table></body></html>`;
 }
 
@@ -143,13 +152,13 @@ function orderBlock(d: any, en: boolean, X: X): Block {
   tl.push("", `${L.total}: ${eur(o.total, en)}`);
   let html = `<tr><td style="padding:4px 32px 4px 32px;font-family:${FONT};font-size:17px;color:${GREEN}">${L.order} ${esc(o.order_no)}</td></tr>`;
   if (res.length) {
-    html += `<tr><td style="padding:6px 32px 12px 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${th(L.product)}${th(L.when)}${th(L.persons, "right")}</tr>`
-      + res.map((r: any) => `<tr>${td(resName(r, en))}${td(`${dt(r.starts_at, en)}–${tm(r.ends_at, en)}`)}${td(String(r.persons ?? ""), "right")}</tr>`).join("") + `</table></td></tr>`;
+    html += `<tr><td style="padding:6px 32px 12px 32px"><table ${FLUID_TABLE}><tr>${th(L.product, "left", "32%")}${th(L.when, "left", "40%")}${th(L.persons, "right", "28%")}</tr>`
+      + res.map((r: any) => `<tr>${td(resName(r, en), "left", false, "32%")}${td(`${dt(r.starts_at, en)}–${tm(r.ends_at, en)}`, "left", false, "40%")}${td(String(r.persons ?? ""), "right", false, "28%")}</tr>`).join("") + `</table></td></tr>`;
   }
   if (items.length) {
-    html += `<tr><td style="padding:6px 32px 8px 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${th(L.product)}${th(L.qty, "right")}${th(L.sum, "right")}</tr>`
-      + items.map((i: any) => `<tr>${td(String(i.name ?? ""))}${td(String(i.quantity ?? ""), "right")}${td(eur(i.line_total, en), "right")}</tr>`).join("")
-      + `<tr><td colspan="2" align="right" style="padding:10px 8px;font-family:${SANS};font-size:15px;font-weight:bold;color:${GREEN}">${L.total}</td><td align="right" style="padding:10px 8px;font-family:${SANS};font-size:15px;font-weight:bold;color:${GREEN}">${esc(eur(o.total, en))}</td></tr></table></td></tr>`;
+    html += `<tr><td style="padding:6px 32px 8px 32px"><table ${FLUID_TABLE}><tr>${th(L.product, "left", "62%")}${th(L.qty, "right", "14%")}${th(L.sum, "right", "24%")}</tr>`
+      + items.map((i: any) => `<tr>${td(String(i.name ?? ""), "left", false, "62%")}${td(String(i.quantity ?? ""), "right", false, "14%")}${td(eur(i.line_total, en), "right", false, "24%")}</tr>`).join("")
+      + `<tr><td colspan="2" align="right" style="padding:10px 8px;font-family:${SANS};font-size:15px;font-weight:bold;color:${GREEN};${TD_WRAP}">${L.total}</td><td align="right" width="24%" style="padding:10px 8px;font-family:${SANS};font-size:15px;font-weight:bold;color:${GREEN};width:24%;${TD_WRAP}">${esc(eur(o.total, en))}</td></tr></table></td></tr>`;
   } else {
     html += p(`<b>${L.total}: ${esc(eur(o.total, en))}</b>`);
   }
@@ -169,7 +178,7 @@ function instructionNotes(list: unknown, title: string): { text: string; html: s
   if (!rows.length) return { text: "", html: "" };
   const text = [title, ...rows.map((row) => [row.head, row.text].filter(Boolean).join("\n"))].join("\n\n");
   const html = box(`<span style="font-family:${SANS};font-size:12px;color:${MUTED};text-transform:uppercase;letter-spacing:.04em">${esc(title)}</span><br><br>`
-    + rows.map((row) => `<span style="font-family:${SANS};font-size:14px;line-height:1.5;color:${INK}">${row.head ? `<b>${esc(row.head)}</b><br>` : ""}${row.html}</span>`).join("<br><br>"));
+    + rows.map((row) => `<span style="font-family:${SANS};font-size:14px;line-height:1.5;color:${INK};${CELL_WRAP}">${row.head ? `<b>${esc(row.head)}</b><br>` : ""}${row.html}</span>`).join("<br><br>"));
   return { text, html };
 }
 
@@ -203,7 +212,7 @@ function giftCardMail(kind: "gift_card_buyer" | "gift_card_recipient", d: any, e
   const cover = !buyer && c0.cover_message ? String(c0.cover_message).trim() : "";   // saateteksti: vain sähköpostissa, ei kortti-PDF:ssä
   const contact = X("email.common.contact", { phone: phoneFor(en) });
   const tl: string[] = []; let rows = h1(title) + p(esc(hello)) + p(esc(intro));
-  if (cover) rows += `<tr><td style="padding:0 32px 18px 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:10px 16px;border-left:3px solid #c49a6c;font-family:${FONT};font-style:italic;font-size:17px;line-height:1.45;color:${INK}">${esc(cover).replace(/\n/g, "<br>")}${from ? `<br><span style="font-family:${SANS};font-style:normal;font-size:13px;color:${MUTED}">— ${esc(from)}</span>` : ""}</td></tr></table></td></tr>`;
+  if (cover) rows += `<tr><td style="padding:0 32px 18px 32px"><table ${FLUID_TABLE}><tr><td style="padding:10px 16px;border-left:3px solid #c49a6c;font-family:${FONT};font-style:italic;font-size:17px;line-height:1.45;color:${INK};${CELL_WRAP}">${esc(cover).replace(/\n/g, "<br>")}${from ? `<br><span style="font-family:${SANS};font-style:normal;font-size:13px;color:${MUTED}">— ${esc(from)}</span>` : ""}</td></tr></table></td></tr>`;
   const hhmm = (s: string) => en ? s : s.replace(":", ".");
   for (const g of cards) {
     const url = gcUrl(d, g, en);
@@ -375,8 +384,8 @@ function voucherDifferenceMail(d: any, en: boolean, hello: string, X: X, v: { no
   const sign = `${X("email.common.closing")}\n${X("email.payment_link.sign_name")}\n${SELLER}`;
   const lines = `${L.total}: ${v.total}\n${L.voucher}: ${v.voucher}\n${L.diff}: ${v.difference}`;
   const text = textBlock(hello, confirmed, intro, lines, c.url && `${pay}:\n${c.url}`, exp, receipt, c.ob.text, c.contact, sign) + "\n";
-  const row = (k: string, val: string, big = false) => `<tr><td style="padding:4px 0;font-family:${SANS};font-size:14px;color:${big ? GREEN : INK};${big ? "font-weight:bold;" : ""}">${esc(k)}</td><td align="right" style="padding:4px 0;font-family:${big ? FONT : SANS};font-size:${big ? 22 : 14}px;color:${big ? GREEN : INK}">${esc(val)}</td></tr>`;
-  const sums = box(`<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${row(L.total, v.total)}${row(L.voucher, v.voucher)}${row(L.diff, v.difference, true)}</table>`);
+  const row = (k: string, val: string, big = false) => `<tr><td style="padding:4px 0;font-family:${SANS};font-size:14px;color:${big ? GREEN : INK};${big ? "font-weight:bold;" : ""}${CELL_WRAP}">${esc(k)}</td><td align="right" width="46%" style="padding:4px 0;font-family:${big ? FONT : SANS};font-size:${big ? 22 : 14}px;color:${big ? GREEN : INK};width:46%;${CELL_WRAP}">${esc(val)}</td></tr>`;
+  const sums = box(`<table ${FLUID_TABLE}>${row(L.total, v.total)}${row(L.voucher, v.voucher)}${row(L.diff, v.difference, true)}</table>`);
   const html = wrapHtml(d, title, confirmed, h1(title) + p(esc(hello)) + p(esc(confirmed)) + p(esc(intro)) + sums + (c.url ? button(c.url, pay) : "") + (exp ? p(esc(exp), `color:${MUTED};font-size:13px`) : "")
     + p(esc(receipt), `color:${MUTED};font-size:13px`) + c.ob.html + p(esc(c.contact), `color:${MUTED};font-size:13px`) + p(esc(sign).replace(/\n/g, "<br>")), en);
   return { subject, text, html };
@@ -428,7 +437,7 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const unsub = /^https:\/\/\S+$/.test(rawUnsub) ? rawUnsub : "";
       const unsubLabel = unsub ? X("email.product_message.unsubscribe") : "";
       const pre = (shown.rich ? shown.text.replace(/\s+/g, " ").trim() : body).slice(0, 140);
-      const bodyRow = body ? (shown.rich ? `<tr><td style="padding:0 32px 14px 32px">${shown.html}</td></tr>` : p(shown.html)) : "";
+      const bodyRow = body ? (shown.rich ? `<tr><td style="padding:0 32px 14px 32px;${CELL_WRAP}">${shown.html}</td></tr>` : p(shown.html)) : "";
       const text = textBlock(hello, shown.text, link, orderUrl && `${viewLabel}:\n${orderUrl}`, unsub && `${unsubLabel}\n${unsub}`, contact, sign) + "\n";
       const html = mk(subject, pre || subject, h1(subject) + helloRow + bodyRow + (link ? button(link, linkLabel) : "") + (orderUrl ? button(orderUrl, viewLabel) : "") + (unsub ? p(`<a href="${esc(unsub)}" style="color:${MUTED};font-size:13px">${esc(unsubLabel)}</a>`, `color:${MUTED};font-size:13px`) : "") + tail);
       return { subject, text, html };
@@ -469,7 +478,7 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const text = textBlock(hello, intro, meta.join("\n"), body, orderUrl && `${yourOrder}: ${orderUrl}`, contact, sign) + "\n";
       const html = mk(title, intro, h1(title) + helloRow + p(esc(intro))
         + (meta.length ? box(meta.map((m) => `<span style="font-family:${SANS};font-size:14px;color:${INK}">${esc(m)}</span>`).join("<br>")) : "")
-        + (body ? `<tr><td style="padding:0 32px 18px 32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:12px 14px;background:${SAND_LIGHT};border:1px solid ${SAND_LINE};border-radius:4px;font-family:Consolas,'Courier New',monospace;font-size:12px;line-height:1.5;color:${INK};white-space:pre-wrap">${esc(body)}</td></tr></table></td></tr>` : "")
+        + (body ? `<tr><td style="padding:0 32px 18px 32px"><table ${FLUID_TABLE}><tr><td style="padding:12px 14px;background:${SAND_LIGHT};border:1px solid ${SAND_LINE};border-radius:4px;font-family:Consolas,'Courier New',monospace;font-size:12px;line-height:1.5;color:${INK};white-space:pre-wrap;${CELL_WRAP}">${esc(body)}</td></tr></table></td></tr>` : "")
         + (orderUrl ? button(orderUrl, viewLabel) : "") + tail);
       return { subject, text, html };
     }
