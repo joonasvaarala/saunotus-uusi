@@ -2,7 +2,7 @@
  {
   "key": "ui.vismapay.pay_title",
   "lang": "fi",
-  "text": "Maksa Visma Paylla",
+  "text": "Maksa verkossa",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -12,7 +12,7 @@
  {
   "key": "ui.vismapay.pay_title",
   "lang": "en",
-  "text": "Pay with Visma Pay",
+  "text": "Pay online",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -42,7 +42,7 @@
  {
   "key": "ui.vismapay.pay_btn",
   "lang": "fi",
-  "text": "Maksa Visma Paylla",
+  "text": "Maksa verkossa",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -52,7 +52,7 @@
  {
   "key": "ui.vismapay.pay_btn",
   "lang": "en",
-  "text": "Pay with Visma Pay",
+  "text": "Pay online",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,

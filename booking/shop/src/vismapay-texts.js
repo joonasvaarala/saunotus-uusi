@@ -1,9 +1,9 @@
 // Visma Pay -maksun tekstit (FI/EN). Avaimet ui.vismapay.*. Ei yhteystietoja, hintoja eikä osoitteita.
 export const VT = {
   fi: {
-    payTitle: 'Maksa Visma Paylla',
+    payTitle: 'Maksa verkossa',
     payLead: 'Maksa maksamaton osa kortilla tai verkkopankissa. Siirryt Visma Payn sivulle ja palaat tälle sivulle maksun jälkeen.',
-    payBtn: 'Maksa Visma Paylla',
+    payBtn: 'Maksa verkossa',
     payBusy: 'Avataan Visma Payta…',
     payAmount: 'Maksettava: {amount}',
     testNote: 'Testitila: käytä Visma Payn testikorttia. Oikeaa rahaa ei veloiteta.',
@@ -38,9 +38,9 @@ export const VT = {
     'err.payment_in_progress': 'Maksun avaus on jo käynnissä. Odota hetki ja yritä uudelleen.',
   },
   en: {
-    payTitle: 'Pay with Visma Pay',
+    payTitle: 'Pay online',
     payLead: 'Pay the unpaid part by card or online bank. You go to the Visma Pay page and return to this page after payment.',
-    payBtn: 'Pay with Visma Pay',
+    payBtn: 'Pay online',
     payBusy: 'Opening Visma Pay…',
     payAmount: 'Amount due: {amount}',
     testNote: 'Test mode: use a Visma Pay test card. No real money is charged.',
