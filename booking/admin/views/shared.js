@@ -11,7 +11,7 @@ import { openOrderPaymentLink } from './order-add.js';
 import { formDialog } from './talous-ui.js';
 import { t } from '../talous-i18n.js';
 import { addonPicker } from './addons.js';
-import { reservationAddonLocks, addonReductionError } from '../addon-lock-logic.js';
+import { reservationAddonLocks, addonReductionError, orderInvoiceLocked, invoiceLockReason, staffInvoiceChange } from '../addon-lock-logic.js';
 import { alt } from '../addon-lock-texts.js';
 import { nbt } from '../nb-texts.js';
 import { memoText } from '../day-memos-texts.js';
@@ -159,7 +159,7 @@ export function reservationDialog(r, { methods = [], onChange, refs, can = () =>
         if (code) { error.textContent = alt(code === 'addon_paid' ? 'error_paid' : code === 'addon_link_open' ? 'error_link' : 'error_unknown'); error.hidden = false; error.focus(); return; }
         try { await rpc('admin_set_reservation_addons', { p_reservation_id: r.reservation_id, p_addons: picker.value() });
           toast('Lisäpalvelut tallennettu'); ddialog.close(); after(); }
-        catch (e) { error.textContent = errMsg(e); error.hidden = false; error.focus(); }
+        catch (e) { error.textContent = (e?.code === 'order_invoiced' || e?.details === 'order_invoiced') ? alt('error_invoiced') : errMsg(e); error.hidden = false; error.focus(); }
       }); } },
       h('p', { class: 'muted', text: `Enimmäismäärä = henkilömäärä (${r.persons}) × lisäpalvelun enimmäismäärä / hlö.` }),
       picker.node, error,
@@ -217,7 +217,9 @@ export function reservationDialog(r, { methods = [], onChange, refs, can = () =>
     reservation = (rawOrder.reservations || []).find((x) => String(x.id) === String(r.reservation_id)) || {};
     currentExtras = reservation.addons || [];
     drawOption(reservation);
+    const invoiced = orderInvoiceLocked(order);
     addonsBox.replaceChildren(...list(h('h4', {}, icon('leaf', 20), ' Lisäpalvelut'),
+      invoiced ? h('p', { class: 'muted', role: 'status', 'data-testid': 'invoice-addon-lock', text: alt('invoiced_rows', { no: order.invoice_no || '–' }) }) : null,
       currentExtras.length ? h('ul', { class: 'reslist' }, currentExtras.map((a) => h('li', { class: 'resrow' },
         h('span', { text: `${a.quantity} × ${a.name}` }), h('span', { class: 'meta', text: money(a.line_total) })))) : h('p', { class: 'muted', text: 'Ei lisäpalveluita.' }),
       actions.editAddons ? h('button', { type: 'button', class: 'btn sm', 'data-testid': 'res-edit-addons', text: 'Muokkaa lisäpalveluita', onclick: () => editAddons(currentExtras, rawOrder) }) : null));
@@ -231,17 +233,20 @@ export function reservationDialog(r, { methods = [], onChange, refs, can = () =>
         dd('Viite', rawOrder.invoice_reference),
         dd('Yhteyshenkilö', [x.contact_name, x.contact_email, x.contact_phone].filter(Boolean).join(' · ')))));
     }
-    orderVoucherBox({ rpc, orderId: r.order_id, onChanged: () => { fetchOrder(); onChange?.(); } }).then((node) => {
+    if (invoiced) { voucher.replaceChildren(); voucher.hidden = true; }
+    else orderVoucherBox({ rpc, orderId: r.order_id, onChanged: () => { fetchOrder(); onChange?.(); } }).then((node) => {
       if (!alive || !orderGate.isCurrent(token)) return;
       voucher.replaceChildren(...list(node)); voucher.hidden = !node;
     }).catch(() => {});
   }
 
   async function doPurchase() {
+    if (orderInvoiceLocked(order)) { toast(invoiceLockReason(order, alt), 'warn'); return; }
     if (flow?.addPurchase) { d.close(); flow.addPurchase(order); return; }
     d.close(); await openAddToOrder({ api, ctx, order, reservationId: r.reservation_id, onDone: onChange });
   }
   function doLink() {
+    if (orderInvoiceLocked(order)) { toast(invoiceLockReason(order, alt), 'warn'); return; }
     if (flow?.createLink) { d.close(); flow.createLink(order); return; }
     d.close(); openOrderPaymentLink({ api, ctx, order, onDone: onChange });
   }
@@ -252,12 +257,13 @@ export function reservationDialog(r, { methods = [], onChange, refs, can = () =>
       addPurchase: () => h('button', { type: 'button', class: 'btn primary', 'data-testid': 'order-reservation-add', text: tx('ui.admin.res.add_purchase'), onclick: doPurchase }),
       createLink: () => h('button', { type: 'button', class: 'btn', 'data-testid': 'order-reservation-create-link', text: tx('ui.admin.res.payment_link'), onclick: doLink }),
       arrive: () => act('Merkitse saapuneeksi', () => status('completed'), 'btn', 'res-arrive'),
-      change: () => h('button', { type: 'button', class: 'btn', 'data-testid': 'res-change', text: 'Muuta varausta', onclick: () => { d.close(); changeDialog(r, onChange); } }),
+      change: () => h('button', { type: 'button', class: 'btn', 'data-testid': 'res-change', text: 'Muuta varausta', onclick: () => { d.close(); changeDialog(r, onChange, order); } }),
       noShow: () => h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'res-no-show', text: 'Ei saapunut', onclick: () => formDialog(tx('ui.admin.res.no_show_title'), [h('p', { text: tx('ui.admin.res.no_show_text') })], tx('ui.admin.res.no_show_submit'), async () => { await status('no_show'); after(); }) }),
       cancel: () => h('button', { type: 'button', class: 'btn danger rd-danger', 'data-testid': 'res-cancel', text: 'Peru varaus', onclick: async (event) => {
         const btn = event.currentTarget; btn.disabled = true;
         try { await loadRcTexts(rpc); await cancelReservationDialog(r, {
-          rpc, canRefund: !!can('payments.refund'), online: createTalousApi({ rpc, io: { fn } }), onDone: after
+          rpc, canRefund: !!can('payments.refund'), online: createTalousApi({ rpc, io: { fn } }), onDone: after,
+          invoiceLocked: orderInvoiceLocked(order),
         }); } finally { btn.disabled = false; }
       } })
     };
@@ -298,7 +304,7 @@ export function reservationDialog(r, { methods = [], onChange, refs, can = () =>
 }
 
 // Varauksen muutos hallinnasta: sama voimassa oleva RPC ja samat parametrit kuin ennen.
-function changeDialog(r, onChange) {
+function changeDialog(r, onChange, order = null) {
   const day = (iso) => new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
   const st = { date: day(r.starts_at), session: null };
   const loads = createLatestGate();
@@ -325,6 +331,7 @@ function changeDialog(r, onChange) {
       return b;
     })) : empty('Ei samantyyppisiä vuoroja tälle päivälle.'));
   }
+  const changeUi = staffInvoiceChange(order);
   const f = h('form', { class: 'stack', onsubmit: (ev) => { ev.preventDefault(); run(f.querySelector('button[type=submit]'), async () => {
     const args = { p_reservation_id: r.reservation_id, p_persons: +persons.value !== r.persons ? +persons.value : null };
     if (st.session) { args.p_rule_id = st.session.rule_id; args.p_date = st.date; }
@@ -333,6 +340,8 @@ function changeDialog(r, onChange) {
     toast('Varaus muutettu'); d.close(); onChange?.();
   }); } },
     h('p', { class: 'muted', text: `Nykyinen: ${fmtDay(r.starts_at)}, ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)}, ${r.persons} hlö` }),
+    changeUi.locked ? h('p', { class: 'muted', role: 'status', 'data-testid': 'invoice-change-hint', text: alt('invoiced_hint') }) : null,
+    changeUi.locked ? h('p', { class: 'muted', 'data-testid': 'invoice-persons-hint', text: alt('persons_invoiced_hint') }) : null,
     h('div', { class: 'row wrap' }, field('Päivä', dateIn), h('div', { class: 'fld' }, h('span', { class: 'fld-lab', text: 'Henkilömäärä' }), pst.node)), sessionsBox,
     h('button', { class: 'btn primary', type: 'submit', text: 'Tallenna muutos' }));
   const d = dialog(`Muuta varausta #${r.order_no}`, f);

@@ -1,0 +1,302 @@
+[
+  {
+    "key": "ui.admin.addon_lock.invoiced",
+    "lang": "fi",
+    "text": "Laskutettu ({{var:no}}) – rivit ja maksut lukittu. Korjaa hyvityslaskulla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": ["{{var:no}}"],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.admin.addon_lock.invoiced",
+    "lang": "en",
+    "text": "Invoiced ({{var:no}}) – lines and payments are locked. Correct with a credit invoice.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": ["{{var:no}}"],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.admin.addon_lock.invoiced_rows",
+    "lang": "fi",
+    "text": "Laskutettu ({{var:no}}) – rivit lukittu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": ["{{var:no}}"],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.admin.addon_lock.invoiced_rows",
+    "lang": "en",
+    "text": "Invoiced ({{var:no}}) – lines are locked.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": ["{{var:no}}"],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.admin.addon_lock.error_invoiced",
+    "lang": "fi",
+    "text": "Tilaus on laskutettu: rivejä ja maksuja ei voi muuttaa. Tee korjaus hyvityslaskulla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.admin.addon_lock.error_invoiced",
+    "lang": "en",
+    "text": "This order is invoiced: lines and payments cannot be changed. Correct with a credit invoice.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.admin.addon_lock.invoiced_hint",
+    "lang": "fi",
+    "text": "Tilaus on laskutettu: varauksen voi muuttaa, mutta laskurivit ja summa eivät muutu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.admin.addon_lock.invoiced_hint",
+    "lang": "en",
+    "text": "This order is invoiced: the booking can be changed, but the invoice lines and total stay the same.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.admin.addon_lock.persons_invoiced_hint",
+    "lang": "fi",
+    "text": "Henkilömäärän muutos ei muuta laskun summaa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.admin.addon_lock.persons_invoiced_hint",
+    "lang": "en",
+    "text": "Changing the number of guests does not change the invoice total.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.admin.addon_lock.cancel_invoiced_hint",
+    "lang": "fi",
+    "text": "Laskutettu tilaus: hyvitys tehdään hyvityslaskulla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.admin.addon_lock.cancel_invoiced_hint",
+    "lang": "en",
+    "text": "Invoiced order: the refund is made with a credit invoice.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.admin.addon_lock.link_stale",
+    "lang": "fi",
+    "text": "Linkin summa ei vastaa enää maksamatonta osuutta – luo uusi linkki.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.admin.addon_lock.link_stale",
+    "lang": "en",
+    "text": "The link amount no longer matches the unpaid part – create a new link.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.admin.addon_lock.link_unpayable_invoiced",
+    "lang": "fi",
+    "text": "Linkkiä ei voi maksaa, koska tilaus on laskutettu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.admin.addon_lock.link_unpayable_invoiced",
+    "lang": "en",
+    "text": "The link cannot be paid because the order is invoiced.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.shop.invoiced_cancel_note",
+    "lang": "fi",
+    "text": "Tilaus on laskutettu. Peruutus tehdään henkilökunnan kautta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.shop.invoiced_cancel_note",
+    "lang": "en",
+    "text": "This order is invoiced. Cancellation is handled by our staff.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.shop.invoiced_persons_note",
+    "lang": "fi",
+    "text": "Tilaus on laskutettu, joten henkilömäärää ei voi muuttaa itse. Ota yhteyttä henkilökuntaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.shop.invoiced_persons_note",
+    "lang": "en",
+    "text": "This order is invoiced, so you cannot change the number of guests yourself. Please contact our staff.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.shop.invoiced_sum_note",
+    "lang": "fi",
+    "text": "Tilaus on laskutettu. Voit muuttaa varausta, mutta laskun summa ei muutu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.shop.invoiced_sum_note",
+    "lang": "en",
+    "text": "This order is invoiced. You can change the booking, but the invoice total stays the same.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.shop.error_order_invoiced",
+    "lang": "fi",
+    "text": "Tilaus on laskutettu. Peruutus tehdään henkilökunnan kautta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.shop.error_order_invoiced",
+    "lang": "en",
+    "text": "This order is invoiced. Cancellation is handled by our staff.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.shop.error_order_invoiced_persons",
+    "lang": "fi",
+    "text": "Tilaus on laskutettu, joten henkilömäärää ei voi muuttaa itse. Ota yhteyttä henkilökuntaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutetun tilauksen henkilömäärän esto, eri teksti kuin peruutus"
+  },
+  {
+    "key": "ui.shop.error_order_invoiced_persons",
+    "lang": "en",
+    "text": "This order is invoiced, so you cannot change the number of guests yourself. Please contact our staff.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutetun tilauksen henkilömäärän esto, eri teksti kuin peruutus"
+  },
+  {
+    "key": "ui.order.err.order_invoiced",
+    "lang": "fi",
+    "text": "Tilaus on laskutettu, eikä sen rivejä voi enää muuttaa verkossa. Ota yhteyttä henkilökuntaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.order.err.order_invoiced",
+    "lang": "en",
+    "text": "This order is invoiced and its lines can no longer be changed online. Please contact our staff.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.order.invoiced_note",
+    "lang": "fi",
+    "text": "Tilaus on laskutettu. Voit muuttaa varausta, mutta laskun summa ei muutu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  },
+  {
+    "key": "ui.order.invoiced_note",
+    "lang": "en",
+    "text": "This order is invoiced. You can change the booking, but the invoice total stays the same.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
+  }
+]

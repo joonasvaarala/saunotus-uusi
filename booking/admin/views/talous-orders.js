@@ -16,6 +16,8 @@ import { annualCardPanel, showAnnualCardDialog } from './annual-card-panel.js';
 import { acText } from '../annual-card-texts.js';
 import { orderVoucherBox } from './voucher-redeem.js';
 import { visibleOrderActions } from '../order-actions-logic.js';
+import { invoiceLockReason, linkStaleNote, orderInvoiceLocked } from '../addon-lock-logic.js';
+import { alt } from '../addon-lock-texts.js';
 import { linkDeadlineControl } from './link-deadline.js';
 import { linkValidityText, linkSubmitOnce } from '../payment-link-logic.js';
 
@@ -85,14 +87,16 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
   async function orderDetail(id) {
     // booking_146: vuosikorttitilauksen koodi, voimassaolo ja sähköpostin tila (virhe tai puuttuva RPC → osio jää pois)
     // booking_173: kumppanin lahjakortti (koodi, arvaus vs. valinta, myyjän vaihto, Lunasta, Merkitse lunastetuksi); virhe tai puuttuva RPC → osio jää pois
-    const [o, annual, vbox] = await Promise.all([api.getOrder(id), api.annualCardForOrder ? api.annualCardForOrder(id).catch(() => null) : null,
+    const [o, annual, vboxRaw] = await Promise.all([api.getOrder(id), api.annualCardForOrder ? api.annualCardForOrder(id).catch(() => null) : null,
       !rpc || api.isMock() ? null : orderVoucherBox({ rpc, orderId: id, onChanged: () => afterChange({}, id) }).catch(() => null)]);
+    const vbox = orderInvoiceLocked(o) ? null : vboxRaw;
     const b = o.balance, unpaid = b.unpaid;
     const sec = (title, ...kids) => h('section', { class: 'tl-sec' }, h('h3', { text: title }), ...kids);
     const payments = o.payments.length
       ? h('ul', { class: 'tl-sub', 'data-testid': 'order-payments' }, o.payments.map((p) => h('li', {},
         h('span', { class: 'tl-sub-main' }, h('strong', { text: methodLabel(p.method, p.method_label) }), ' ', pstatBadge(p.status), !o.is_native ? johkuBadge() : null),   // Johku-tilauksen maksu: ei kirjanpitoon (booking_41)
         h('span', { class: 'tl-sub-meta', text: [fmt.dt(p.paid_at || p.created_at), p.receipt_no ? `${t('receipt')} ${p.receipt_no}` : null, p.link_token && p.status === 'pending' ? t('payment.linkOpen') : null].filter(Boolean).join(' · ') }),
+        linkStaleNote(p, o, alt) ? h('p', { class: 'muted', 'data-testid': 'link-stale-note', text: linkStaleNote(p, o, alt) }) : null,
         h('span', { class: 'tl-sub-sum' }, h('strong', { text: fmt.money(p.amount) }), p.refunded_amount ? h('small', { text: ` ${t('refunded')} ${fmt.money(p.refunded_amount)}` }) : null),
         openRefunds(o, p))))
       : emptyBox(t(o.is_native ? 'order.noPayments' : 'order.noPaymentsJohku'));
@@ -107,7 +111,8 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
       b.pending_link ? sum(t('order.pendingLink'), fmt.money(b.pending_link)) : null, sum(t('order.unpaid'), fmt.money(unpaid), unpaid > 0 ? 'due' : '', 'order-unpaid'));
     const meta = h('p', { class: 'muted tl-meta', text: [o.customer.email, o.customer.phone, o.customer.business_id ? `${t('order.bid')} ${o.customer.business_id}` : null, sourceLabel(o.source_channel)].filter(Boolean).join(' · ') });
     const notes = [o.internal_note ? h('p', { class: 'tl-note', 'data-testid': 'order-note', text: `${t('order.note')}: ${o.internal_note}` }) : null,
-      o.requests.some((x) => x.status === 'open') ? h('p', { class: 'tl-note', 'data-testid': 'order-cancel-request', text: t('order.cancelRequest') }) : null];
+      o.requests.some((x) => x.status === 'open') ? h('p', { class: 'tl-note', 'data-testid': 'order-cancel-request', text: t('order.cancelRequest') }) : null,
+      orderInvoiceLocked(o) ? h('p', { class: 'tl-note', role: 'status', 'data-testid': 'order-invoice-lock', text: invoiceLockReason(o, alt) }) : null];
 
     const canRefund = api.isMock('refund') || ctx.can('payments.refund');
     const canAdd = api.isMock('addToOrder') || ctx.can('bookings.manage');
@@ -131,7 +136,9 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
   // ---- dialogit ----
   const fld = (label, ...kids) => h('label', { class: 'fld' }, h('span', { text: label }), ...kids);
   async function addDialog(o) {
+    if (orderInvoiceLocked(o)) { toast(invoiceLockReason(o, alt), 'warn'); return; }
     let addons = []; try { addons = await api.listAddons(); } catch { /* lisäpalveluluettelo puuttuu → vain mukautettu rivi */ }
+    const vatChoices = VAT_CHOICES;
     const en = getLang() === 'en';
     const type = h('select', { name: 'type', 'data-testid': 'add-type' }, ...(o.reservations.length && addons.length ? [h('option', { value: 'addon', text: t('add.addon') })] : []),
       h('option', { value: 'custom', text: t('add.custom'), disabled: api.isMock('addToOrder') || ctx.can('bookings.override') ? null : true }));
@@ -140,7 +147,7 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
     const addonBox = h('div', { class: 'stack', 'data-testid': 'add-addon-box' }, fld(t('add.reservation'), resSel), fld(t('add.addonName'), addonSel));
     const customBox = h('div', { class: 'stack', 'data-testid': 'add-custom-box', hidden: true }, fld(t('add.desc'), h('input', { name: 'desc', maxlength: 120 })),
       fld(t('add.amount'), h('input', { name: 'amount', type: 'number', step: '0.01', inputmode: 'decimal' })),
-      fld(t('add.vat'), h('select', { name: 'vat' }, VAT_CHOICES.map((v) => h('option', { value: v, text: fmt.pct(v) })))));
+      fld(t('add.vat'), h('select', { name: 'vat' }, vatChoices.map((v) => h('option', { value: v, text: fmt.pct(v) })))));
     const sync = () => { addonBox.hidden = type.value !== 'addon'; customBox.hidden = type.value !== 'custom'; };
     type.onchange = sync; sync();
     formDialog(t('btn.addToOrder'), [h('p', { class: 'muted', text: api.isMock('addToOrder') ? t('mock.note') : t('live.note') }), fld(t('add.what'), type), addonBox, customBox,
@@ -157,6 +164,7 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
     });
   }
   function linkDialog(o) {
+    if (orderInvoiceLocked(o)) { toast(invoiceLockReason(o, alt), 'warn'); return; }
     const deadline = linkDeadlineControl();
     formDialog(t('btn.linkTitle'), [
       h('p', { class: 'muted', text: api.isMock('createPaymentLink') ? t('mock.note') : t('live.note') }),
@@ -176,6 +184,7 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
   }
   const MANUAL = ['card_terminal', 'mobilepay', 'bank_transfer', 'invoice', 'other'];
   function recordDialog(o) {
+    if (orderInvoiceLocked(o)) { toast(invoiceLockReason(o, alt), 'warn'); return; }
     const fromRefs = (ctx.refs?.methods || []).filter((m) => m.is_manual && m.active && m.code !== 'pay_later' && m.code !== 'gift_card' && m.code !== 'cash');
     const methods = fromRefs.length ? fromRefs.map((m) => ({ code: m.code, label: m.label })) : MANUAL.map((c) => ({ code: c, label: null }));
     const amount = h('input', { name: 'amount', type: 'number', step: '0.01', min: '0.01', max: o.balance.unpaid, value: o.balance.unpaid, inputmode: 'decimal', required: true, 'data-testid': 'record-amount' });

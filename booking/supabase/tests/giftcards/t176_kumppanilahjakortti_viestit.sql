@@ -83,7 +83,7 @@ begin
   perform pg_temp.ck(md5(pg_get_functiondef('booking._on_payment_paid(bigint)'::regprocedure)) = 'af7f99e87ba7e00e0d5e3d5b6cbf2400', 'A1 _on_payment_paid = booking_176');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.email_outbox_claim(integer)'::regprocedure)) = '70602f6500703e8750e1539ae8809d38', 'A2 email_outbox_claim = booking_176');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.orders_confirmed_mail_trg()'::regprocedure)) = 'de9df39ff7972a951e61684f8f2db87b', 'A3 orders_confirmed_mail_trg = booking_176');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.public_submit_voucher_claim(uuid,text,text,bigint)'::regprocedure)) = 'd28a31d27147f4cf7bceb12150c9e77c', 'A4 public_submit_voucher_claim = booking_176');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking.public_submit_voucher_claim(uuid,text,text,bigint)'::regprocedure)) in ('d28a31d27147f4cf7bceb12150c9e77c', 'ae9e0fc42301619305a513c557199845'), 'A4 public_submit_voucher_claim = booking_176 (tai booking_185)');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.messages_dispatch(integer)'::regprocedure)) = '4b1f94601e23d9dc3eec34bcd5b4dc08', 'A5 messages_dispatch = booking_176');
   perform pg_temp.ck(md5(pg_get_functiondef('booking._vc_notify_problem(bigint)'::regprocedure)) = '3414022269f6db113f1085208eb6f040', 'A6 _vc_notify_problem = booking_176');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text)'::regprocedure)) = 'a4e69cb26eb44b72eacce7c167342884', 'A7 admin_mark_voucher_claim_redeemed = booking_176');

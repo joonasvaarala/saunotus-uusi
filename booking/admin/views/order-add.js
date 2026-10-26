@@ -9,8 +9,15 @@ import { orderText as tx } from '../orders-texts.js';
 import { newPurchaseItem, afterAddChoices } from '../order-reservation-logic.js';
 import { linkValidityText, linkSubmitOnce } from '../payment-link-logic.js';
 import { linkDeadlineControl } from './link-deadline.js';
+import { invoiceLockReason, orderInvoiceLocked } from '../addon-lock-logic.js';
+import { alt } from '../addon-lock-texts.js';
 
 const VAT_CHOICES = [25.5, 13.5, 0]; // Vanhan vapaan rivin valikoima; validointi palvelimella.
+const lockedStop = (order) => {
+  if (!orderInvoiceLocked(order)) return false;
+  toast(invoiceLockReason(order, alt) || alt('error_invoiced'), 'warn');
+  return true;
+};
 const fld = (name, ...nodes) => h('label', { class: 'fld' }, h('span', { text: name }), ...nodes);
 const quantity = (name, value = 1) => h('input', { name, type: 'number', min: 1, max: 99, value, inputmode: 'numeric', required: true });
 const helDay = () => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Helsinki', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
@@ -31,6 +38,7 @@ export function showLinkResult({ result, order }) {
 }
 
 export function openOrderPaymentLink({ api, ctx, order, onDone }) {
+  if (lockedStop(order)) return null;
   if (!ctx.can('payments.manage') || !order?.is_native || !(Number(order?.balance?.unpaid) > 0)) return null;
   const deadline = linkDeadlineControl();
   return formDialog(tx('ui.admin.orders.link_created'), [
@@ -45,6 +53,7 @@ export function openOrderPaymentLink({ api, ctx, order, onDone }) {
 
 // Muiden kuin lahjakorttimaksujen kirjaus. Ei korvaa Talous-näkymän laajempaa recordDialogia.
 export function openOrderRecordPayment({ api, ctx, order, onDone }) {
+  if (lockedStop(order)) return null;
   if (!ctx.can('payments.manage') || !order.is_native || !(order.balance?.unpaid > 0)) return null;
   const methods = (ctx.refs?.methods || []).filter((m) => m.active && m.is_manual && !['gift_card', 'cash', 'pay_later'].includes(m.code));
   if (!methods.length) { toast(tx('ui.admin.orders.record_no_methods'), 'warn'); return null; }
@@ -66,7 +75,7 @@ function showAdded({ api, ctx, order, result, onDone, onRecordPayment, onRefund 
   const actions = h('div', { class: 'row wrap' },
     balance.link ? h('button', { type: 'button', class: 'btn primary', 'data-testid': 'purchase-create-link', text: tx('ui.admin.orders.purchase_link'), onclick: () => { d.close(); openOrderPaymentLink({ api, ctx, order, onDone }); } }) : null,
     balance.record ? h('button', { type: 'button', class: 'btn', 'data-testid': 'purchase-record', text: tx('ui.admin.orders.purchase_record'), onclick: () => { d.close(); if (onRecordPayment) onRecordPayment(order); else openOrderRecordPayment({ api, ctx, order, onDone }); } }) : null,
-    h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'purchase-leave', text: tx('ui.admin.orders.purchase_leave'), onclick: () => d.close() }));
+    balance.leave ? h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'purchase-leave', text: tx('ui.admin.orders.purchase_leave'), onclick: () => d.close() }) : null);
   const d = dialog(tx('ui.admin.orders.purchase_added'), h('div', { class: 'stack' },
     h('ul', { class: 'reslist' }, ...list),
     h('dl', { class: 'kv' }, h('dt', { text: t('order.total') }), h('dd', { text: fmt.money(order.balance.total) }),
@@ -77,7 +86,9 @@ function showAdded({ api, ctx, order, result, onDone, onRecordPayment, onRefund 
 
 // Sama lomake palvelee Tilaukset- ja varausdialogia. reservationId lukitaan varausdialogissa.
 export async function openAddToOrder({ api, ctx, order, reservationId = null, onDone, onRecordPayment, onRefund }) {
+  if (lockedStop(order)) return null;
   if (!ctx.can('bookings.manage') || !order?.is_native || !order?.staff_can_add) return null;
+  const vatChoices = VAT_CHOICES;
   const en = getLang() === 'en';
   let addons = []; try { addons = await api.listAddons(); } catch { /* tuote- ja vapaa rivi vielä käytettävissä */ }
   const products = (ctx.refs?.products || []).filter((p) => p.active !== false);
@@ -111,7 +122,7 @@ export async function openAddToOrder({ api, ctx, order, reservationId = null, on
   const customBox = h('div', { class: 'stack' },
     fld(t('add.desc'), h('input', { name: 'desc', maxlength: 120 })),
     fld(t('add.amount'), h('input', { name: 'amount', type: 'number', step: '0.01' })),
-    fld(t('add.vat'), h('select', { name: 'vat' }, VAT_CHOICES.map((v) => h('option', { value: v, text: fmt.pct(v) })))));
+    fld(t('add.vat'), h('select', { name: 'vat' }, vatChoices.map((v) => h('option', { value: v, text: fmt.pct(v) })))));
   const qty = quantity('qty');
   const qtyField = fld(t('add.qty'), qty);
   let currentSlots = [], selectedDate = null, seq = 0;

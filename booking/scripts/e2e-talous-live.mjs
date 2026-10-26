@@ -156,7 +156,11 @@ async function readSuite() {
     expect(await dd(page, 'order-total') === +ord.balance.total && await dd(page, 'order-unpaid') === +ord.balance.unpaid, `${name}: laajennus: summat täsmäävät palvelimeen (${ord.balance.total}/${ord.balance.unpaid})`);
     expect(await page.locator('[data-testid=order-reservations] li').count() === ord.reservations.length && ord.reservations.length >= 1, `${name}: laajennus: varaukset`);
     expect(await page.locator('[data-testid=order-payments] li').count() === ord.payments.length, `${name}: laajennus: maksut (${ord.payments.length})`);
-    for (const id of ['btn-add', 'btn-link', 'btn-record', 'btn-refund']) expect(await page.locator(`[data-testid=${id}]`).first().count() === 1, `${name}: nappi ${id}`);
+    if (ord.invoice_locked) {
+      for (const id of ['btn-add', 'btn-link', 'btn-record']) expect(await page.locator(`[data-testid=${id}]`).count() === 0, `${name}: laskutettu tilaus, nappi ${id} piilossa`);
+    } else {
+      for (const id of ['btn-add', 'btn-link', 'btn-record', 'btn-refund']) expect(await page.locator(`[data-testid=${id}]`).first().count() === 1, `${name}: nappi ${id}`);
+    }
     await shot(page, `live-tilaus-auki-${vp}-fi`);
     // Johku-tilaus: napit pois käytöstä
     const jo = list.rows.find((r) => !r.is_native);

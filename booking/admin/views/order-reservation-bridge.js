@@ -5,6 +5,8 @@ import { reservationDialog } from './shared.js';
 import { openAddToOrder, openOrderRecordPayment } from './order-add.js';
 import { openOrderPaymentLink } from './order-add.js';
 import { canAddPurchase, orderDeepLink, reservationDeepLink } from '../order-reservation-logic.js';
+import { invoiceLockReason, orderInvoiceLocked } from '../addon-lock-logic.js';
+import { alt } from '../addon-lock-texts.js';
 import { orderText as tx } from '../orders-texts.js';
 
 const text = (s) => String(s ?? '');
@@ -25,6 +27,7 @@ export function installOrderReservationBridge({ node, api, ctx, rpc, view }) {
   async function addToOrder(orderId, reservationId = null) {
     try {
       const order = await getOrder(orderId);
+      if (orderInvoiceLocked(order)) { toast(invoiceLockReason(order, alt), 'warn'); return; }
       const allowed = canAddPurchase(order, ctx);
       if (!allowed.allowed) { toast(tx('ui.admin.orders.' + allowed.reason), 'warn'); return; }
       await openAddToOrder({ api, ctx, order, reservationId,
@@ -35,6 +38,7 @@ export function installOrderReservationBridge({ node, api, ctx, rpc, view }) {
     try {
       if (!ctx.can('payments.manage')) return;
       const order = await getOrder(orderId);
+      if (orderInvoiceLocked(order)) { toast(invoiceLockReason(order, alt), 'warn'); return; }
       openOrderPaymentLink({ api, ctx, order, onDone: () => afterChange(order) });
     } catch (e) { toast(errMsg(e), 'err'); }
   }

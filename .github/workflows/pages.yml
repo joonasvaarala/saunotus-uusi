@@ -112,6 +112,8 @@ jobs:
       - run: node --test booking/tests/saunarituaali-lisapalvelu.test.mjs
       # booking_180: maksettujen lisäpalvelurivien käyttöliittymän lukituslogiikka
       - run: node --test booking/tests/addon-lock-logic.test.mjs
+      # booking_185: laskutuslukko, lisäyspolut ja asiakkaan muutosnäkymä
+      - run: node --test booking/tests/invoice-lock.test.mjs
       # booking_182: tilauksesta varaukseen + lisäostot hallinnassa (ominaisuuskytkin, oletuksena pois)
       - run: node --test booking/tests/order-reservation-flow.test.mjs
       - run: node --test booking/tests/order-detail-layout.test.mjs

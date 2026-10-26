@@ -8,6 +8,7 @@ import { h, dialog, toast, money } from '../ui.js';
 import { t } from '../talous-i18n.js';
 import { friendly } from './talous-ui.js';
 import { rcText } from '../refund-cancel-texts.js';
+import { alt } from '../addon-lock-texts.js';
 import { isMissingRpc } from '../talous-api.js';
 
 let seq = 0;
@@ -36,7 +37,7 @@ export async function processOnlineRefunds(api, refunds = []) {
  * Varauksen peruutusdialogi. rpc = sb.js:n rpc (kokeilutilassa mock). canRefund = payments.refund (vain admin/manager);
  * ilman oikeutta hyvitysesikatselua ei edes haeta (palvelin kieltäisi). onDone(res) kutsutaan onnistuneen peruutuksen jälkeen.
  */
-export async function cancelReservationDialog(r, { rpc, canRefund = false, online = null, onDone }) {
+export async function cancelReservationDialog(r, { rpc, canRefund = false, online = null, onDone, invoiceLocked = false }) {
   const body = h('div', { class: 'stack rc-body', 'data-testid': 'rc-cancel' });
   const d = dialog(rcText('ui.admin.refund_cancel.cancel_title'), body);
   d.classList.add('rc-dlg');
@@ -50,7 +51,8 @@ export async function cancelReservationDialog(r, { rpc, canRefund = false, onlin
   const total = Math.round((+plan?.total || 0) * 100) / 100;
   const offline = (plan?.payments || []).some((p) => p.online_off);
   if (plan && +plan.unallocated > 0) notes.push(rcText('ui.admin.refund_cancel.refund_unallocated'));
-  if (plan && total > 0) {
+  if (invoiceLocked) notes.push(alt('cancel_invoiced_hint'));
+  else if (plan && total > 0) {
     if (offline) notes.push(rcText('ui.admin.refund_cancel.refund_online_off'));
     choice = yesNo({ name: 'refund', testid: 'rc-refund', legend: rcText('ui.admin.refund_cancel.refund_question'),
       hint: `${rcText('ui.admin.refund_cancel.refund_share', { amount: money(total) })}. ${rcText('ui.admin.refund_cancel.refund_share_note')}`,

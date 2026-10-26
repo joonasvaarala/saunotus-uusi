@@ -12,6 +12,7 @@ import { richHost } from './rich-view.js';
 import { cardShort } from './short-desc.js';
 import { cardMeta } from './card-meta.js';
 import { revealForm, revealIfHidden } from './gift-ui.js';
+import { customerInvoiceLock } from './invoice-lock.js';
 
 export function createTreatmentViews(c) {
   const { h, t, S, state, money, fmt, hm, dayLong, pad2, todayHel, addDays, pname, pdesc, pimg, setHero, mount, focusTop, errorBox, phoneBox, bk, customerFields, legalFields, holdInfo = async () => ({ on: false, minutes: 15, extra: () => [] }), tx = () => null, confirmUrl = (tok) => `${S.confirmHref}#${tok}` } = c;
@@ -78,20 +79,22 @@ export function createTreatmentViews(c) {
     const emit = () => opts.onChange?.(sel());
 
     // 1) henkilömäärä
-    const num = h('input', { id: 'tr-n', type: 'number', min: minN, max: maxN, inputmode: 'numeric', 'aria-label': t.persons, onchange: () => setN(+num.value || minN) });
-    const minus = h('button', { type: 'button', class: 'bk-step', 'aria-label': tr.fewer, onclick: () => setN(st.n - 1) }, '−');
-    const plus = h('button', { type: 'button', class: 'bk-step', 'aria-label': tr.more, onclick: () => setN(st.n + 1) }, '+');
-    const syncN = () => { num.value = st.n; minus.disabled = st.n <= minN; plus.disabled = st.n >= maxN; };
+    const lockPersons = opts.lockPersons === true;
+    const num = h('input', { id: 'tr-n', type: 'number', min: minN, max: maxN, inputmode: 'numeric', 'aria-label': t.persons, disabled: lockPersons || null, onchange: () => { if (!lockPersons) setN(+num.value || minN); } });
+    const minus = h('button', { type: 'button', class: 'bk-step', 'aria-label': tr.fewer, disabled: lockPersons || null, onclick: () => { if (!lockPersons) setN(st.n - 1); } }, '−');
+    const plus = h('button', { type: 'button', class: 'bk-step', 'aria-label': tr.more, disabled: lockPersons || null, onclick: () => { if (!lockPersons) setN(st.n + 1); } }, '+');
+    const syncN = () => { num.value = st.n; minus.disabled = lockPersons || st.n <= minN; plus.disabled = lockPersons || st.n >= maxN; if (lockPersons) num.disabled = true; };
     const personsBox = h('section', { class: 'bk-step-box', 'aria-labelledby': 'tr-h1' },
       h('h3', { id: 'tr-h1' }, h('span', { class: 'bk-stepn', 'aria-hidden': 'true', text: String(1 + off) }), tr.step1),
       h('div', { class: 'bk-stepper' }, minus, num, plus),
-      maxN > 1 ? h('p', { class: 'bk-hint', text: tr.maxPersons(maxN) }) : h('p', { class: 'bk-hint', text: tr.onePerson }));
+      maxN > 1 ? h('p', { class: 'bk-hint', text: tr.maxPersons(maxN) }) : h('p', { class: 'bk-hint', text: tr.onePerson }),
+      lockPersons && opts.personsNote ? h('p', { class: 'bk-note', 'data-testid': 'invoiced-persons-note', text: opts.personsNote }) : null);
     // 2) päivä
     const calBox = h('div', { class: 'bk-cal bk-cal-tr', 'aria-live': 'polite' });
     const dateBox = h('section', { class: 'bk-step-box', 'aria-labelledby': 'tr-h2' }, h('h3', { id: 'tr-h2' }, h('span', { class: 'bk-stepn', 'aria-hidden': 'true', text: String(2 + off) }), tr.step2), calBox);
     // 3) kellonaika
     const timeBox = h('section', { class: 'bk-step-box', 'aria-labelledby': 'tr-h3' });
-    const setN = (n) => { n = Math.min(Math.max(n, minN), maxN); if (n === st.n) { syncN(); return; } st.n = n; syncN(); st.time = null; st.slots = new Map(); st.seq++; calBox.replaceChildren(h('p', { class: 'bk-loading', role: 'status', text: t.loading })); clearTimeout(st.tm); st.tm = setTimeout(refresh, 350); };   // viive: nopea +/+ ei tee rinnakkaisia hakuja
+    const setN = (n) => { if (lockPersons) return; n = Math.min(Math.max(n, minN), maxN); if (n === st.n) { syncN(); return; } st.n = n; syncN(); st.time = null; st.slots = new Map(); st.seq++; calBox.replaceChildren(h('p', { class: 'bk-loading', role: 'status', text: t.loading })); clearTimeout(st.tm); st.tm = setTimeout(refresh, 350); };   // viive: nopea +/+ ei tee rinnakkaisia hakuja
     const choose = (ds) => { st.date = ds; st.time = null; drawCal(false); drawTimes(); emit(); revealForm(timeBox, timeBox.querySelector('#tr-h3')); };
     async function drawCal(load = true) {
       const seq = ++st.seq;
@@ -289,20 +292,22 @@ export function createTreatmentViews(c) {
     const curOpt = it.option?.code || null, showOpt = O.hasOptions(p);
     let opt = curOpt;
     const optP = showOpt ? optPicker(p, { value: curOpt, required: null, label: O.rowLabel(it, S.lang), hint: curOpt ? ot.hintChange : `${ot.notChosenNote} ${ot.hintChange}`, onChange: (code) => { opt = code; refresh(); } }) : null;
-    const slotChanged = () => !!cur?.slot && (cur.slot.start !== it.starts_at || cur.n !== it.persons), optChanged = () => O.optionChanged(it, opt);
+    const inv = customerInvoiceLock(b);
+    const slotChanged = () => !!cur?.slot && (cur.slot.start !== it.starts_at || (!inv.personsDisabled && cur.n !== it.persons)), optChanged = () => O.optionChanged(it, opt);
     const refresh = () => { save.disabled = !(slotChanged() || optChanged()); };
-    const picker = slotPicker(p, { n: it.persons, date: curDate, time: null, minStartMs: Date.now() + hours * 36e5,
+    const picker = slotPicker(p, { n: it.persons, date: curDate, time: null, minStartMs: Date.now() + hours * 36e5, lockPersons: inv.personsDisabled, personsNote: inv.personsDisabled ? t.invoicedPersonsNote : '',
       onChange: (s) => {
         cur = s;
         refresh();
-        sum.textContent = s.slot ? tr.selected(`${dayLong(s.slot.start)}, ${s.time}`, s.n, money(s.slot.total ?? A.priceFor(p, s.n))) : '';
+        sum.textContent = s.slot ? (inv.showPriceEstimate ? tr.selected(`${dayLong(s.slot.start)}, ${s.time}`, s.n, money(s.slot.total ?? A.priceFor(p, s.n))) : `${dayLong(s.slot.start)}, ${s.time} · ${t.invoicedSumNote}`) : '';
       } });
     save.addEventListener('click', async () => {
       if (!slotChanged() && !optChanged()) return;
       save.disabled = true; save.textContent = t.saving; msg.replaceChildren();
-      const r = await A.changeBooking(token, { ...(slotChanged() ? { start: cur.slot.start, persons: cur.n } : {}), option: optChanged() ? opt : null });
+      const r = await A.changeBooking(token, { ...(slotChanged() ? { start: cur.slot.start, persons: inv.personsDisabled ? null : cur.n } : {}), option: optChanged() ? opt : null });
       if (r.ok) { state.months.clear(); location.hash = token; window.scrollTo({ top: 0 }); return; }
       save.textContent = t.saveChange; save.disabled = false;
+      if (r.code === 'order_invoiced') { msg.replaceChildren(errorBox(t.errors.order_invoiced_persons)); msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true }); refresh(); return; }
       if (O.isOptionError(r.code) && optP) { if (r.code === 'invalid_option') { opt = curOpt; optP.set(curOpt); } optP.setError(errMsg(r)); optP.focus(); refresh(); return; }
       msg.replaceChildren(errorBox(errMsg(r))); msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true });
     });
