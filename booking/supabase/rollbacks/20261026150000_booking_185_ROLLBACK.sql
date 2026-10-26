@@ -6,7 +6,7 @@ set local lock_timeout = '5s';
 -- booking._change_booking_core(bigint,bigint,date,integer,boolean,integer,uuid,text): 5b1ed86eabfe27f596d5e6c560df6eb8 -> 285c3e210cf83896d0e726b77de8d068
 -- booking._clamp_addons(bigint,integer): 3ebba8f0ea558fca2b62d432011f052f -> 4d5c4ea6aa2127fee1ba8bb5c8ad3ddc
 -- booking._addon_total_after(bigint,integer): aece604d61d16ca4d67a05b521c931fd -> 95d05f1d98475a48bdedf00a7b2d3f14
--- booking.public_change_treatment_booking(uuid,timestamptz,integer,text): af127177098d1e73fa2a0128b580911b -> dfcaef15940390a28d8fc0ccfda2c5c6
+-- booking.public_change_treatment_booking(uuid,timestamptz,integer,text): 41af448ff8d688323fb898e42a28ae81 -> dfcaef15940390a28d8fc0ccfda2c5c6
 -- booking._annual_res_discount_trg(): 4e10525f4d6f052a4ca71a81caa05d8a -> 321df4915ae9ecb347feb3775dff216b
 -- booking.admin_cancel_reservation(bigint,text,boolean,text): e627951cee8875cbab0b8ad8b02d8de1 -> d0f88f33445a8f097f7a1adc5c289c0d
 -- booking.public_cancel_booking(uuid): e945c67903c5091e418131c16e667c04 -> 0a37e720e92f48f70494504c8af3c410
@@ -28,6 +28,8 @@ set local lock_timeout = '5s';
 -- booking._quiet_apply(bigint,jsonb): 02fcdcae63ac31a775e0bf6b66967f0e -> dd2139dc889d981e6623ef1fceaeec3d
 -- booking.vismapay_payment_prepare(uuid,uuid): cca997c4e900e78b8bb9e2e0c7da25d4 -> 703c03c301f5a3008192cdbe65e559e2
 -- booking.public_upsell_add(uuid,jsonb,uuid,bigint): 901f809663b1ffe3362126276213116f -> 97d73b5f177143afb120487ab412779e
+-- booking.public_submit_voucher_claim(uuid,text,text,bigint): ae9e0fc42301619305a513c557199845 -> d28a31d27147f4cf7bceb12150c9e77c
+-- booking._vc_resolve(bigint,text,text,text,numeric,text,text): 7092a7c9c6dbda6bd489649d9cdfaa02 -> fbd7286dba538f3c223ffd0d1eb1c4b4
 
 do $g$
 declare v text; ok boolean := true; msg text := '';
@@ -39,7 +41,7 @@ begin
   v := md5(pg_get_functiondef(to_regprocedure('booking._addon_total_after(bigint,integer)')));
   if v is null or v <> 'aece604d61d16ca4d67a05b521c931fd' then ok := false; msg := msg || ' _addon_total_after=' || coalesce(v, 'puuttuu'); end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking.public_change_treatment_booking(uuid,timestamptz,integer,text)')));
-  if v is null or v <> 'af127177098d1e73fa2a0128b580911b' then ok := false; msg := msg || ' public_change_treatment_booking=' || coalesce(v, 'puuttuu'); end if;
+  if v is null or v <> '41af448ff8d688323fb898e42a28ae81' then ok := false; msg := msg || ' public_change_treatment_booking=' || coalesce(v, 'puuttuu'); end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking._annual_res_discount_trg()')));
   if v is null or v <> '4e10525f4d6f052a4ca71a81caa05d8a' then ok := false; msg := msg || ' _annual_res_discount_trg=' || coalesce(v, 'puuttuu'); end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text)')));
@@ -82,6 +84,10 @@ begin
   if v is null or v <> 'cca997c4e900e78b8bb9e2e0c7da25d4' then ok := false; msg := msg || ' vismapay_payment_prepare=' || coalesce(v, 'puuttuu'); end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking.public_upsell_add(uuid,jsonb,uuid,bigint)')));
   if v is null or v <> '901f809663b1ffe3362126276213116f' then ok := false; msg := msg || ' public_upsell_add=' || coalesce(v, 'puuttuu'); end if;
+  v := md5(pg_get_functiondef(to_regprocedure('booking.public_submit_voucher_claim(uuid,text,text,bigint)')));
+  if v is null or v <> 'ae9e0fc42301619305a513c557199845' then ok := false; msg := msg || ' public_submit_voucher_claim=' || coalesce(v, 'puuttuu'); end if;
+  v := md5(pg_get_functiondef(to_regprocedure('booking._vc_resolve(bigint,text,text,text,numeric,text,text)')));
+  if v is null or v <> '7092a7c9c6dbda6bd489649d9cdfaa02' then ok := false; msg := msg || ' _vc_resolve=' || coalesce(v, 'puuttuu'); end if;
   if not ok then raise exception 'booking_185 ROLLBACK: määrittelyt eivät vastaa booking_185:tä:%. Ei muutoksia.', msg; end if;
 end $g$;
 
@@ -1684,6 +1690,126 @@ begin
   end;
 end $f$;
 
+
+CREATE OR REPLACE FUNCTION booking._vc_resolve(p_id bigint, p_status text, p_problem text, p_note text, p_value numeric, p_ref text, p_by text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare c booking.voucher_claims; o booking.orders; v_pay jsonb := null; v_note text; v_max int;
+        v_status text := p_status; v_problem text := p_problem; v_review boolean; v_notified boolean := false; v_ref text := nullif(left(btrim(coalesce(p_ref, '')), 200), '');
+begin
+  if p_status not in ('redeemed', 'problem', 'cancelled', 'open') then perform booking._err('invalid_status', 'Tila ei kelpaa (redeemed, problem, cancelled, open)'); end if;
+  if p_status = 'problem' and coalesce(p_problem, '') not in ('invalid_code', 'expired_code', 'already_used', 'other') then perform booking._err('invalid_problem_code', 'problem_code: invalid_code, expired_code, already_used tai other'); end if;
+  if p_status = 'cancelled' and p_by = 'bot' then perform booking._err('invalid_status', 'Botti ei peruuta pyyntöjä'); end if;
+  if p_note is not null and char_length(p_note) > 1000 then perform booking._err('invalid_note', 'Muistiinpano enintään 1000 merkkiä'); end if;
+  select * into c from booking.voucher_claims where id = p_id for update;
+  if not found then perform booking._err('not_found', 'Lunastuspyyntöä ei löydy'); end if;
+  if p_by = 'bot' and c.status not in ('open', 'processing') then perform booking._err('invalid_state', 'Pyyntö ei ole käsiteltävissä (tila ' || c.status || ')'); end if;
+  if p_by = 'staff' and c.status not in ('open', 'processing', 'problem') then perform booking._err('invalid_state', 'Pyyntöä ei voi enää muuttaa (tila ' || c.status || ')'); end if;
+  v_note := nullif(btrim(coalesce(p_note, '')), '');
+
+  if p_status = 'open' then
+    -- botti vapauttaa takaisin jonoon (kumppanin sivu ei vastaa yms.) tai henkilökunta avaa ongelman uudelleen
+    v_max := coalesce((booking._setting('voucher_claims.max_attempts', '6'::jsonb) #>> '{}')::int, 6);
+    if p_by = 'bot' and c.attempts >= v_max then
+      v_status := 'problem'; v_problem := 'other'; v_note := concat_ws(' / ', v_note, 'automaattinen: ' || c.attempts || ' yritystä epäonnistui, henkilökunnan tarkistettava');
+    end if;
+  end if;
+
+  if v_status = 'redeemed' then
+    select * into o from booking.orders where id = c.order_id for update;
+    v_review := false;
+    if o.status in ('pending', 'confirmed') and o.external_source is null then
+      v_pay := booking._vc_pay(o, c, p_value);
+      if (v_pay ->> 'payment_id') is null then v_review := true; v_note := concat_ws(' / ', v_note, 'tilauksella ei ollut maksettavaa: kumppanilahjakortti lunastettu ilman maksukirjausta'); end if;
+    else
+      v_review := true; v_note := concat_ws(' / ', v_note, 'tilaus oli ' || o.status || ': kumppanilahjakortti lunastettu mutta maksua ei kirjattu');
+    end if;
+    update booking.voucher_claims set status = 'redeemed', problem_code = null, voucher_value = coalesce(p_value, voucher_value), amount = coalesce((v_pay ->> 'amount')::numeric, 0),
+           payment_id = (v_pay ->> 'payment_id')::bigint, partner_ref = coalesce(v_ref, partner_ref), needs_review = v_review, resolved_at = now(), resolved_by = p_by,
+           last_checked_at = now(), notes = concat_ws(E'\n', notes, nullif(to_char(now() at time zone 'Europe/Helsinki', 'YYYY-MM-DD HH24:MI') || ' ' || p_by || ': ' || coalesce(v_note, 'lunastettu'), '')) where id = c.id;
+  elsif v_status = 'problem' then
+    update booking.voucher_claims set status = 'problem', problem_code = v_problem, hold_until = null, partner_ref = coalesce(v_ref, partner_ref), resolved_at = now(), resolved_by = p_by,
+           problem_notified_at = null, last_checked_at = now(),
+           notes = concat_ws(E'\n', notes, to_char(now() at time zone 'Europe/Helsinki', 'YYYY-MM-DD HH24:MI') || ' ' || p_by || ': ongelma ' || v_problem || coalesce(' – ' || v_note, '')) where id = c.id;
+    v_notified := booking._vc_notify_problem(c.id);
+  elsif v_status = 'cancelled' then
+    update booking.voucher_claims set status = 'cancelled', resolved_at = now(), resolved_by = p_by, last_checked_at = now(),
+           notes = concat_ws(E'\n', notes, to_char(now() at time zone 'Europe/Helsinki', 'YYYY-MM-DD HH24:MI') || ' ' || p_by || ': peruttu' || coalesce(' – ' || v_note, '')) where id = c.id;
+  else  -- open
+    update booking.voucher_claims set status = 'open', problem_code = null, hold_until = null, problem_notified_at = null, resolved_at = null, resolved_by = null, last_checked_at = now(),
+           notes = concat_ws(E'\n', notes, to_char(now() at time zone 'Europe/Helsinki', 'YYYY-MM-DD HH24:MI') || ' ' || p_by || ': palautettu jonoon' || coalesce(' – ' || v_note, '')) where id = c.id;
+  end if;
+  select * into c from booking.voucher_claims where id = p_id;
+  return jsonb_build_object('ok', true, 'claim', booking._vc_json(c, false), 'payment_id', c.payment_id, 'amount', c.amount, 'problem_email_queued', v_notified,
+                            'balance', case when c.status = 'redeemed' then booking._order_balance(c.order_id) end);
+end $function$;
+
+CREATE OR REPLACE FUNCTION booking.public_submit_voucher_claim(p_token uuid, p_code text, p_source text, p_order_item_id bigint DEFAULT NULL::bigint)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare o booking.orders; v_norm text := booking.gift_code_norm(p_code); v_src text := lower(btrim(coalesce(p_source, ''))); c booking.voucher_claims; ex booking.voucher_claims; cu booking.customers;
+        v_guess jsonb; v_unpaid numeric; v_n int; v_max int; v_res bigint; v_detail text; v_msg text;
+begin
+  if booking._gc_rl_blocked() then return jsonb_build_object('ok', false, 'code', 'rate_limited', 'message', 'Liian monta yritystä, yritä hetken kuluttua uudelleen'); end if;
+  if not booking._gc_flag('voucher_claims.enabled') then return jsonb_build_object('ok', false, 'code', 'voucher_claims_disabled', 'message', 'Kumppanilahjakorttien lunastus verkossa ei ole vielä käytössä'); end if;
+  if p_token is null or not booking._order_rl('vcsub', p_token, 30, 10) then return jsonb_build_object('ok', false, 'code', 'rate_limited', 'message', 'Liian monta yritystä, yritä hetken kuluttua uudelleen'); end if;
+  begin
+    select * into o from booking.orders where public_token = p_token for update;
+    if not found then perform booking._err('not_found', 'Tilausta ei löydy'); end if;
+    if v_src not in ('elamyslahjat', 'kokemuskauppa', 'offerilla') then perform booking._err('invalid_source', 'Valitse lahjakortin myyjä (Kokemuskauppa, Offerilla tai Elämyslahjat)'); end if;
+    if v_norm !~ '^[A-Z0-9]{6,24}$' then perform booking._err('invalid_code', 'Tarkista koodi'); end if;
+    if o.external_source is not null or o.status not in ('pending', 'confirmed') then perform booking._err('order_not_editable', 'Tilaukselle ei voi kirjata maksua'); end if;
+    if o.status = 'pending' and not exists (select 1 from booking.reservations r where r.order_id = o.id and r.status = 'pending' and r.hold_expires_at > now()) then perform booking._err('order_expired', 'Varaus on vanhentunut'); end if;
+    if exists (select 1 from booking.order_items oi where oi.order_id = o.id and oi.kind = 'gift_card') then perform booking._err('gift_card_not_allowed', 'Lahjakortilla ei voi ostaa lahjakorttia'); end if;
+    if exists (select 1 from booking.gift_cards g where g.code = v_norm and g.status not in ('cancelled', 'pending_payment')) then perform booking._err('use_own_card', 'Koodi on oma lahjakortti: käytä lahjakortin lunastusta'); end if;
+    if p_order_item_id is not null and not exists (select 1 from booking.order_items oi where oi.id = p_order_item_id and oi.order_id = o.id) then perform booking._err('invalid_item', 'Tilausriviä ei löydy'); end if;
+    v_unpaid := case when o.status = 'pending' then greatest(o.total_gross - (booking._order_balance(o.id) ->> 'net_paid')::numeric, 0) else (booking._order_balance(o.id) ->> 'unpaid')::numeric end;
+    if v_unpaid <= 0 then perform booking._err('nothing_to_pay', 'Tilauksella ei ole maksettavaa'); end if;
+    -- sama koodi jo aktiivisena tällä tilauksella -> idempotentti; muulla tilauksella tai jo lunastettu -> virhe
+    select * into ex from booking.voucher_claims where code = v_norm and status in ('open', 'processing', 'redeemed') limit 1;
+    if found then
+      if ex.order_id = o.id and ex.status in ('open', 'processing') then
+        perform booking._gc_log('ok');
+        return jsonb_build_object('ok', true, 'already', true, 'claim_no', ex.id, 'status', 'open', 'source', ex.source, 'source_label', booking._vc_source_label(ex.source), 'code_masked', booking._vc_mask(ex.code), 'hold_until', null);
+      end if;
+      perform booking._err('code_already_claimed', 'Tämä koodi on jo käytössä toisella varauksella');
+    end if;
+    select count(*) into v_n from booking.voucher_claims where order_id = o.id and status in ('open', 'processing', 'problem');
+    v_max := coalesce((booking._setting('voucher_claims.max_per_order', '10'::jsonb) #>> '{}')::int, 10);
+    if v_n >= v_max then perform booking._err('too_many_claims', 'Liian monta lahjakoodia tilauksella'); end if;
+    -- ongelmatilassa oleva pyyntö korvataan uudella koodilla/lähteellä
+    update booking.voucher_claims set status = 'cancelled', resolved_at = now(), resolved_by = 'customer', notes = concat_ws(E'\n', notes, to_char(now() at time zone 'Europe/Helsinki', 'YYYY-MM-DD HH24:MI') || ' customer: korvattu uudella koodilla')
+     where order_id = o.id and status = 'problem' and order_item_id is not distinct from p_order_item_id;
+    v_guess := booking._vc_guess(v_norm);
+    select * into cu from booking.customers where id = o.customer_id;
+    select r.id into v_res from booking.reservations r where r.order_id = o.id and r.status in ('pending', 'confirmed') and r.hidden_at is null order by r.starts_at limit 1;
+    insert into booking.voucher_claims(order_id, reservation_id, order_item_id, code, source, source_suggested, customer_name, customer_email, customer_phone, locale)
+    values (o.id, v_res, p_order_item_id, v_norm, v_src, v_guess ->> 'source', cu.name, cu.email, cu.phone, case when o.locale in ('fi', 'en', 'sv') then o.locale else 'fi' end) returning * into c;
+    perform booking._vc_keep_reserved(o.id);   -- booking_48: varaus ei vanhene pyynnön vuoksi (odottava varaus vahvistetaan, maksamaton saldo jää)
+    -- booking_176: yksi varausvahvistus tilausta kohden. Lähettämätön tilausvahvistus ohitetaan; voucher_claim_received jonoon vain, jos tilauksella ei ole jo jonossa tai lähetettyä vahvistusta.
+    update booking.email_outbox set status = 'skipped', last_error = 'booking_176: kumppanilahjakorttivaraus, vahvistus voucher_claim_received'
+     where dedupe_key = 'order_confirmation:' || o.id and status = 'pending' and attempts = 0;
+    if not exists (select 1 from booking.email_outbox e where e.order_id = o.id and e.kind = 'voucher_claim_received' and e.status in ('pending', 'sending', 'sent', 'dry_run', 'failed')) then
+      perform booking._enqueue_email('voucher_claim_received', o.id, null, null, 'vcrecv:' || c.id, jsonb_build_object('claim_id', c.id));
+    end if;
+  exception when sqlstate 'BK001' then
+    get stacked diagnostics v_detail = pg_exception_detail, v_msg = message_text;
+    if v_detail in ('invalid_code', 'invalid_source', 'not_found') then perform booking._gc_log('invalid'); end if;
+    return jsonb_build_object('ok', false, 'code', coalesce(v_detail, 'error'), 'message', v_msg);
+  end;
+  perform booking._gc_log('ok');
+  return jsonb_build_object('ok', true, 'claim_no', c.id, 'status', 'open', 'source', c.source, 'source_label', booking._vc_source_label(c.source), 'code_masked', booking._vc_mask(c.code),
+    'payment_method', booking._vc_method(c.source), 'payment_method_label', (select pm.label from booking.payment_methods pm where pm.code = booking._vc_method(c.source)),
+    'hold_until', null, 'source_mismatch', (c.source_suggested is not null and c.source_suggested <> c.source and coalesce(v_guess ->> 'confidence', '') in ('high', 'medium')));
+end $function$;
+
+-- 7) booking.messages_dispatch(integer)
 
 DROP FUNCTION IF EXISTS booking._order_invoice_locked(bigint);
 DROP FUNCTION IF EXISTS booking._addon_item_locked(bigint);

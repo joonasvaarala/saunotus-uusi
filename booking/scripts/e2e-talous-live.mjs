@@ -164,7 +164,7 @@ async function readSuite() {
     await shot(page, `live-tilaus-auki-${vp}-fi`);
     // Johku-tilaus: napit pois käytöstä
     const jo = list.rows.find((r) => !r.is_native);
-    if (jo) { await openOrder(page, jo.order_no); for (const id of ['btn-add', 'btn-record']) expect(await page.locator(`[data-testid=${id}]`).count() === 0, `${name}: Johku-tilaus: ${id} ei näy`); }
+    if (jo) { await openOrder(page, jo.order_no); for (const id of ['btn-add', 'btn-record']) expect(await page.locator(`[data-testid=${id}]`).first().isDisabled(), `${name}: Johku-tilaus: ${id} pois käytöstä`); }
     // --- Maksut ---
     await page.click('[data-testid=tab-payments-btn]'); await page.waitForSelector('[data-testid=payments-list] [data-testid=payment]');
     const prow = () => page.locator('[data-testid=payments-list] > [data-testid=payment]');

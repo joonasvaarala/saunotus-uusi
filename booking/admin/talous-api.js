@@ -82,17 +82,6 @@ export function normOrder(o) {
 }
 const L = (a) => (Array.isArray(a) ? a : []);
 // admin_list_vat_rates → { missing:[{kind,id,name}], quote_only:[…], rates:[…] }
-export const VAT_RATE_FALLBACK = [25.5, 13.5, 0];
-/** admin_list_vat_rates: vain aktiiviset kannat. Tyhjä tai epäonnistunut haku → vanha kolmen kannan lista. */
-export function activeVatRates(payload) {
-  const rates = [];
-  for (const row of payload?.rates || []) {
-    const n = Number(row?.rate);
-    if (row?.active === false || !Number.isFinite(n)) continue;
-    rates.push(n);
-  }
-  return rates.length ? rates : VAT_RATE_FALLBACK.slice();
-}
 export function normVatRates(r) {
   return { rates: L(r?.rates).map((x) => ({ rate: num(x.rate), label: x.label ?? '', active: x.active !== false, products: num(x.products), addons: num(x.addons) })),
     missing: L(r?.missing).map((x) => ({ kind: x.kind ?? 'product', id: x.id, name: x.name ?? '' })), quote_only: L(r?.quote_only).map((x) => ({ id: x.id, name: x.name ?? '' })) };

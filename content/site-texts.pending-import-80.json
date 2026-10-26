@@ -240,6 +240,26 @@
     "reason": "booking_185: laskutettuun tilaukseen ei voi lisätä rivejä eikä maksuja"
   },
   {
+    "key": "ui.shop.error_order_invoiced_persons",
+    "lang": "fi",
+    "text": "Tilaus on laskutettu, joten henkilömäärää ei voi muuttaa itse. Ota yhteyttä henkilökuntaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutetun tilauksen henkilömäärän esto, eri teksti kuin peruutus"
+  },
+  {
+    "key": "ui.shop.error_order_invoiced_persons",
+    "lang": "en",
+    "text": "This order is invoiced, so you cannot change the number of guests yourself. Please contact our staff.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "booking_185: laskutetun tilauksen henkilömäärän esto, eri teksti kuin peruutus"
+  },
+  {
     "key": "ui.order.err.order_invoiced",
     "lang": "fi",
     "text": "Tilaus on laskutettu, eikä sen rivejä voi enää muuttaa verkossa. Ota yhteyttä henkilökuntaan.",

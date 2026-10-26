@@ -4,7 +4,7 @@ import { h, dialog, toast } from '../ui.js';
 import { icon } from '../icons.js';
 import { receiptsList } from './talous-receipts.js';
 import { t, fmt, getLang } from '../talous-i18n.js';
-import { RPC, absLink, activeVatRates } from '../talous-api.js';
+import { RPC, absLink } from '../talous-api.js';
 import { redeemFields, redeemSubmit } from './talous-giftcards.js';
 import { johkuBadge, SOURCES, sourceLabel, payBadge, sourceBadge, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, dateFld, searchFld, expandRow, actionBtn, doneToast, formDialog, methodLabel, pstatBadge } from './talous-ui.js';
 import { countActive, filterDrawer } from '../filter-drawer.js';
@@ -22,6 +22,7 @@ import { linkDeadlineControl } from './link-deadline.js';
 import { linkValidityText, linkSubmitOnce } from '../payment-link-logic.js';
 
 export const ORDER_SORTS = ['created', 'order_no', 'total', 'payment_status', 'first_reservation'];
+const VAT_CHOICES = [25.5, 13.5, 0];
 
 const annualSec = (info, sec) => { const panel = annualCardPanel(info); return panel ? h('div', { 'data-testid': 'order-annual-card' }, sec(acText('ui.admin.annual_card.title'), panel)) : null; };
 
@@ -137,7 +138,7 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
   async function addDialog(o) {
     if (orderInvoiceLocked(o)) { toast(invoiceLockReason(o, alt), 'warn'); return; }
     let addons = []; try { addons = await api.listAddons(); } catch { /* lisäpalveluluettelo puuttuu → vain mukautettu rivi */ }
-    const vatChoices = activeVatRates(await api.listVatRates().catch(() => null));
+    const vatChoices = VAT_CHOICES;
     const en = getLang() === 'en';
     const type = h('select', { name: 'type', 'data-testid': 'add-type' }, ...(o.reservations.length && addons.length ? [h('option', { value: 'addon', text: t('add.addon') })] : []),
       h('option', { value: 'custom', text: t('add.custom'), disabled: api.isMock('addToOrder') || ctx.can('bookings.override') ? null : true }));

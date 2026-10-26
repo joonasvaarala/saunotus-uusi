@@ -1112,7 +1112,7 @@ async function viewChange(token, b) {
       if (st.session) { args.p_rule_id = st.session.rule_id; args.p_date = st.date; }
       if (!inv.personsDisabled && n !== it.persons) args.p_persons = n;
       const r = await rpc('public_change_booking', args);
-      if (!r.ok) throw Object.assign(new Error(t.errors[r.code] || t.errorGeneric), { code: r.code, mapped: true });
+      if (!r.ok) throw Object.assign(new Error((r.code === 'order_invoiced' ? t.errors.order_invoiced_persons : t.errors[r.code]) || t.errorGeneric), { code: r.code, mapped: true });
       state.months.clear();
       location.hash = token; window.scrollTo({ top: 0 });
     } catch (e) {

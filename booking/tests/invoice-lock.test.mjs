@@ -10,8 +10,7 @@ import {
 } from '../admin/addon-lock-logic.js';
 import { ADDON_LOCK_TEXTS, alt } from '../admin/addon-lock-texts.js';
 import { setLang } from '../admin/talous-i18n.js';
-import { activeVatRates, normOrder, normOrderPayment, VAT_RATE_FALLBACK } from '../admin/talous-api.js';
-import { afterAddChoices, cachedOrderFlowEnabled } from '../admin/order-reservation-logic.js';
+import { normOrder, normOrderPayment } from '../admin/talous-api.js';
 import { reservationActions } from '../admin/reservation-dialog-logic.js';
 import { customerInvoiceLock as shopLock } from '../shop/src/invoice-lock.js';
 import { T } from '../shop/src/i18n.js';
@@ -69,26 +68,6 @@ test('linkki: vanha summa kehottaa uuteen linkkiin, lasku ei', () => {
   setLang('fi');
 });
 
-test('ALV-valikko, Jätä maksamatta ja asetushaku', async () => {
-  assert.deepEqual(activeVatRates(null), VAT_RATE_FALLBACK);
-  assert.deepEqual(activeVatRates({ rates: [{ rate: 10, active: true }, { rate: 24, active: false }] }), [10]);
-  assert.deepEqual(activeVatRates({ rates: [] }), VAT_RATE_FALLBACK);
-  assert.equal(afterAddChoices({ unpaid: 12 }, () => true).leave, true);
-  assert.equal(afterAddChoices({ unpaid: 0 }, () => true).leave, false);
-  let calls = 0;
-  const first = await cachedOrderFlowEnabled(() => { calls += 1; return [{ value: true }]; });
-  const second = await cachedOrderFlowEnabled(() => { calls += 1; return [{ value: false }]; });
-  assert.equal(first, true);
-  assert.equal(second, true);
-  assert.equal(calls, 1);
-  const orders = read('admin/views/orders.js');
-  assert.match(orders, /cachedOrderFlowEnabled/);
-  assert.doesNotMatch(orders, /admin_order_reservation_flow_enabled'[\s\S]{0,80}catch/);
-  assert.match(read('admin/views/order-add.js'), /activeVatRates/);
-  assert.match(read('admin/views/talous-orders.js'), /activeVatRates/);
-  assert.match(read('admin/views/order-add.js'), /balance\.leave \?/);
-});
-
 test('normOrder kopioi lukituksen ja link_stale', () => {
   const o = normOrder({ order_id: 1, order_no: 2, invoice_locked: true, invoice_no: 'L9', balance: { unpaid: 1 }, can_add: true, staff_can_add: true,
     payments: [{ id: 3, status: 'pending', provider: 'mobilepay', link_token: 'x', link_stale: true, amount: 9, lines: [] }] });
@@ -114,10 +93,14 @@ test('asiakkaan lukko: ei peruutusnappia, henkilömäärä kiinni, aika sallittu
   assert.match(shop, /invoiced-persons-note/);
   assert.match(shop, /showPriceEstimate/);
   assert.match(read('shop/src/treatment-ui.js'), /lockPersons/);
-  assert.match(read('shop/src/order.js'), /err\.order_invoiced/);
+  assert.match(read('shop/src/order.js'), /invoiced-pay-note/);
+  assert.match(read('shop/src/shop.js'), /order_invoiced_persons/);
+  assert.match(read('shop/src/treatment-ui.js'), /order_invoiced_persons/);
   for (const lang of ['fi', 'en']) {
     assert.ok(T[lang].invoicedCancelNote && T[lang].invoicedPersonsNote && T[lang].invoicedSumNote);
-    assert.ok(T[lang].errors.order_invoiced);
+    assert.match(T[lang].errors.order_invoiced, /Peruutus|Cancellation/);
+    assert.match(T[lang].errors.order_invoiced_persons, /henkilömäär|number of guests/i);
+    assert.notEqual(T[lang].errors.order_invoiced, T[lang].errors.order_invoiced_persons);
     assert.ok(OT[lang]['err.order_invoiced'] && OT[lang].invoicedNote);
     assert.equal(T[lang].invoicedCancelNote.includes('€') || /\d/.test(T[lang].invoicedPersonsNote), false);
   }
@@ -130,7 +113,7 @@ test('tekstit FI/EN ja mock-skenaariot', async () => {
   }
   const rows = JSON.parse(readFileSync(join(root, '..', 'content/site-texts.pending-import-80.json'), 'utf8'));
   const keys = new Set(rows.map((r) => `${r.lang}:${r.key}`));
-  for (const key of ['ui.admin.addon_lock.invoiced', 'ui.shop.error_order_invoiced', 'ui.order.err.order_invoiced', 'ui.order.invoiced_note', 'ui.shop.invoiced_persons_note']) {
+  for (const key of ['ui.admin.addon_lock.invoiced', 'ui.shop.error_order_invoiced', 'ui.shop.error_order_invoiced_persons', 'ui.order.err.order_invoiced', 'ui.order.invoiced_note', 'ui.shop.invoiced_persons_note']) {
     assert.equal(keys.has(`fi:${key}`) && keys.has(`en:${key}`), true, key);
   }
   for (const row of rows) assert.equal(/€|\d+[.,]\d+/.test(row.text), false, row.key);

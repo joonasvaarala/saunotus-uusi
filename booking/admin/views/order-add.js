@@ -3,7 +3,7 @@
 import { rpc } from '../sb.js';
 import { h, dialog, toast, errMsg, fmtTime } from '../ui.js';
 import { t, fmt, getLang } from '../talous-i18n.js';
-import { absLink, RPC, activeVatRates } from '../talous-api.js';
+import { absLink, RPC } from '../talous-api.js';
 import { formDialog, doneToast } from './talous-ui.js';
 import { orderText as tx } from '../orders-texts.js';
 import { newPurchaseItem, afterAddChoices } from '../order-reservation-logic.js';
@@ -12,6 +12,7 @@ import { linkDeadlineControl } from './link-deadline.js';
 import { invoiceLockReason, orderInvoiceLocked } from '../addon-lock-logic.js';
 import { alt } from '../addon-lock-texts.js';
 
+const VAT_CHOICES = [25.5, 13.5, 0]; // Vanhan vapaan rivin valikoima; validointi palvelimella.
 const lockedStop = (order) => {
   if (!orderInvoiceLocked(order)) return false;
   toast(invoiceLockReason(order, alt) || alt('error_invoiced'), 'warn');
@@ -87,7 +88,7 @@ function showAdded({ api, ctx, order, result, onDone, onRecordPayment, onRefund 
 export async function openAddToOrder({ api, ctx, order, reservationId = null, onDone, onRecordPayment, onRefund }) {
   if (lockedStop(order)) return null;
   if (!ctx.can('bookings.manage') || !order?.is_native || !order?.staff_can_add) return null;
-  const vatChoices = activeVatRates(await api.listVatRates().catch(() => null));
+  const vatChoices = VAT_CHOICES;
   const en = getLang() === 'en';
   let addons = []; try { addons = await api.listAddons(); } catch { /* tuote- ja vapaa rivi vielä käytettävissä */ }
   const products = (ctx.refs?.products || []).filter((p) => p.active !== false);

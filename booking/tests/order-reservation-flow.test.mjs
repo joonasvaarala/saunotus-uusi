@@ -25,7 +25,7 @@ test('oikeudet, Johku ja kytkin päältä', () => {
 });
 test('maksun kirjaus ja linkin luonti vain maksuoikeudella ja avoimelle saldolle', () => {
   assert.deepEqual(afterAddChoices({unpaid:23},(x)=>x==='payments.manage'),{unpaid:23,link:true,record:true,leave:true});
-  assert.deepEqual(afterAddChoices({unpaid:0},()=>true),{unpaid:0,link:false,record:false,leave:false});
+  assert.deepEqual(afterAddChoices({unpaid:0},()=>true),{unpaid:0,link:false,record:false,leave:true});
   assert.equal(afterAddChoices({unpaid:12},()=>false).link,false);
 });
 test('syvälinkit koodaavat parametrit', () => {

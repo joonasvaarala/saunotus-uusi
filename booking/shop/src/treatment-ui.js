@@ -307,7 +307,7 @@ export function createTreatmentViews(c) {
       const r = await A.changeBooking(token, { ...(slotChanged() ? { start: cur.slot.start, persons: inv.personsDisabled ? null : cur.n } : {}), option: optChanged() ? opt : null });
       if (r.ok) { state.months.clear(); location.hash = token; window.scrollTo({ top: 0 }); return; }
       save.textContent = t.saveChange; save.disabled = false;
-      if (r.code === 'order_invoiced') { msg.replaceChildren(errorBox(t.errors.order_invoiced)); msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true }); refresh(); return; }
+      if (r.code === 'order_invoiced') { msg.replaceChildren(errorBox(t.errors.order_invoiced_persons)); msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true }); refresh(); return; }
       if (O.isOptionError(r.code) && optP) { if (r.code === 'invalid_option') { opt = curOpt; optP.set(curOpt); } optP.setError(errMsg(r)); optP.focus(); refresh(); return; }
       msg.replaceChildren(errorBox(errMsg(r))); msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true });
     });

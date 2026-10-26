@@ -1,7 +1,7 @@
 // Varausdialogi 04: yksi varauksen tietonäkymä kaikille viidelle avaustavalle.
 import { rpc, fn, select as dbSelect } from '../sb.js';
 import { createTalousApi, normOrder } from '../talous-api.js';
-import { canAddPurchase, cachedOrderFlowEnabled } from '../order-reservation-logic.js';
+import { canAddPurchase, isFlowEnabledValue } from '../order-reservation-logic.js';
 import { reservationActions, telHref, mailHref, createLatestGate } from '../reservation-dialog-logic.js';
 import { loadOrderTexts, orderText as tx } from '../orders-texts.js';
 import { loadRcTexts } from '../refund-cancel-texts.js';
@@ -23,8 +23,11 @@ import { missingOpen, grantButton } from './therapist.js';
 import { optionBadge, optionOf, optionPicker, ot, optErr } from '../options.js';
 import { orderVoucherBox } from './voucher-redeem.js';
 
+let flowPromise;
 function orderFlowEnabled() {
-  return cachedOrderFlowEnabled(() => dbSelect('settings', { select: 'value', key: 'eq.admin_order_reservation_flow_enabled', limit: 1 }));
+  if (!flowPromise) flowPromise = dbSelect('settings', { select: 'value', key: 'eq.admin_order_reservation_flow_enabled', limit: 1 })
+    .then(isFlowEnabledValue).catch(() => false);
+  return flowPromise;
 }
 const list = (...nodes) => nodes.flat(Infinity).filter((n) => n !== null && n !== undefined && n !== false);
 const dd = (label, value) => value == null || value === '' ? [] : [h('dt', { text: label }), h('dd', { text: value })];
