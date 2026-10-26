@@ -1,0 +1,163 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { reservationActions, arrivalActionsAllowed, moveTarget, addonsEditable, telHref, mailHref } from '../admin/reservation-dialog-logic.js';
+import { LINK_DEADLINE, linkExpiresDays, linkValidityText } from '../admin/payment-link-logic.js';
+
+const r = (status = 'confirmed', extra = {}) => ({ reservation_id: 11, status, space_code: 'rauni', persons: 1,
+  starts_at: '2026-11-28T22:30:00Z', notes: '', ...extra });
+const permitted = () => true;
+const order = (unpaid = 20, extra = {}) => ({ order_id: 7, is_native: true, staff_can_add: true,
+  balance: { total: 50, paid: 30, unpaid }, ...extra });
+const rawOrder = (addons = []) => ({ reservations: [{ id: 11, item_id: 30, addons }],
+  items: addons.map((a, i) => ({ id: i + 50, kind: 'addon', parent_item_id: 30, quantity: a.quantity })), payments: [] });
+const date = '2026-11-29T11:00:00Z';
+const actions = (status = 'confirmed', options = {}) => reservationActions(r(status), {
+  can: permitted, order: order(), rawOrder: rawOrder(), flowEnabled: true, now: date, ...options,
+});
+
+test('D1 ja D4: näkyvyys ja napin järjestys', () => {
+  assert.deepEqual(actions('pending').primary, ['confirm', 'addPurchase', 'createLink', 'change']);
+  assert.deepEqual(actions('confirmed').primary, ['addPurchase', 'createLink', 'arrive', 'change']);
+  assert.deepEqual(actions('confirmed').secondary, ['noShow', 'cancel']);
+  assert.deepEqual(actions('cancelled').secondary, ['confirm']);
+  assert.deepEqual(actions('expired').secondary, ['confirm']);
+  assert.deepEqual(actions('no_show').secondary, []);
+  assert.deepEqual(actions('completed').primary, ['addPurchase', 'createLink']);
+});
+
+test('D2: saapuminen vasta Helsingin varauspäivästä alkaen', () => {
+  for (const [now, wanted] of [
+    ['2026-11-28T21:59:00Z', false],
+    ['2026-11-28T22:00:00Z', true],
+    ['2026-11-28T22:29:00Z', true],
+    ['2026-11-28T22:31:00Z', true],
+    ['2026-11-30T08:00:00Z', true],
+  ]) assert.equal(arrivalActionsAllowed(r(), now), wanted, now);
+  assert.equal(arrivalActionsAllowed(r('pending'), date), false);
+  const before = actions('confirmed', { now: '2026-11-28T21:59:00Z' });
+  assert.equal(before.primary.includes('arrive'), false);
+  assert.equal(before.secondary.includes('noShow'), false);
+});
+
+test('D3: flow pois, maksulinkki silti näkyvissä', () => {
+  const a = actions('confirmed', { flowEnabled: false });
+  assert.equal(a.primary.includes('addPurchase'), false);
+  assert.equal(a.primary.includes('createLink'), true);
+  assert.equal(a.editAddons, true);
+  assert.equal(actions('confirmed', { order: order(0) }).primary.includes('createLink'), false);
+  assert.equal(actions('confirmed', { order: order(0) }).payment.recordPayment, false);
+  assert.equal(actions('confirmed', { order: order(10) }).payment.recordPayment, true);
+  assert.equal(actions('confirmed', { order: null }).primary.includes('addPurchase'), false);
+  assert.equal(actions('confirmed', { order: order(20, { staff_can_add: false }) }).primary.includes('addPurchase'), false);
+});
+
+test('Käyttöoikeudet ja Johku estävät niihin liittyvät napit', () => {
+  const noBookings = actions('confirmed', { can: (perm) => perm !== 'bookings.manage' });
+  assert.equal(noBookings.primary.includes('change'), false);
+  assert.equal(noBookings.primary.includes('addPurchase'), false);
+  assert.equal(noBookings.secondary.length, 0);
+  assert.equal(noBookings.note, null);
+  const noPayments = actions('confirmed', { can: (perm) => perm !== 'payments.manage' });
+  assert.equal(noPayments.primary.includes('createLink'), false);
+  assert.equal(noPayments.payment.openOrder, false);
+  assert.equal(noPayments.payment.recordPayment, false);
+  const johku = actions('confirmed', { order: order(50, { is_native: false, external_source: 'johku' }) });
+  assert.equal(johku.primary.includes('addPurchase'), false);
+  assert.equal(johku.primary.includes('createLink'), false);
+  assert.equal(johku.payment.recordPayment, false);
+  assert.equal(johku.editAddons, true);
+});
+
+test('D5: lisäpalveluiden muokkaus vain korjauksiin, kun lisäosto toimii', () => {
+  const noAddon = actions('confirmed');
+  assert.equal(noAddon.editAddons, false);
+  const addOn = [{ addon_id: 10, quantity: 2 }];
+  const orderWithAddons = rawOrder(addOn);
+  assert.equal(addonsEditable(orderWithAddons, 11), true);
+  assert.equal(actions('confirmed', { rawOrder: orderWithAddons }).editAddons, true);
+  assert.equal(actions('confirmed', { rawOrder: orderWithAddons, flowEnabled: false }).editAddons, true);
+  assert.equal(actions('pending', { rawOrder: rawOrder(), order: order(20, { staff_can_add: false }) }).editAddons, true);
+});
+
+test('Tilasiirron rajoitukset', () => {
+  assert.equal(moveTarget(r(), permitted), 'lovi');
+  assert.equal(moveTarget(r('confirmed', { persons: 2 }), permitted), null);
+  assert.equal(moveTarget(r('confirmed', { space_code: 'lovi' }), permitted), 'rauni');
+  assert.equal(moveTarget(r('confirmed', { space_code: null }), permitted), null);
+  assert.equal(moveTarget(r('cancelled'), permitted), null);
+  assert.equal(moveTarget(r(), () => false), null);
+});
+
+test('Asiakkaan turvalliset yhteystietolinkit', () => {
+  assert.equal(telHref('+358 40 123 45 67'), 'tel:+358401234567');
+  assert.equal(telHref(''), null);
+  assert.equal(telHref('abc'), null);
+  assert.equal(mailHref('  asiakas@example.test  '), 'mailto:asiakas@example.test');
+  assert.equal(mailHref('<img onerror=alert(1)>'), null);
+});
+
+test('D6: ei takarajaa oletuksena, valinnainen 1–60 päivän takaraja', () => {
+  assert.equal(LINK_DEADLINE.max, 60);
+  assert.deepEqual(linkExpiresDays({ enabled: false, days: 14 }), { ok: true, expiresDays: undefined });
+  for (const days of [1, 14, 60, '7']) assert.deepEqual(linkExpiresDays({ enabled: true, days }), { ok: true, expiresDays: Number(days) });
+  for (const days of [0, 61, 1.5, '', 'abc', null]) assert.deepEqual(linkExpiresDays({ enabled: true, days }), { ok: false, error: 'link_deadline_bad' });
+  const tx = (key, vars) => `${key}${vars?.date || ''}`;
+  assert.equal(linkValidityText({ expires_at: null }, tx, String), 'ui.admin.orders.link_no_deadline');
+  assert.equal(linkValidityText({ expires_at: '2026-12-01' }, tx, String), 'ui.admin.orders.link_valid_until2026-12-01');
+});
+
+// Lähdekoodin rakennetarkistukset eivät korvaa selaimessa tehtäviä e2e-testejä.
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+const admin = join(dirname(fileURLToPath(import.meta.url)), '..', 'admin');
+const root = join(admin, '..', '..');
+const readAdmin = (rel) => readFileSync(join(admin, rel), 'utf8');
+
+test('UI04: järjestys, testidit, suljetut harvinaiset osiot ja null-turvallisuus', () => {
+  const src = readAdmin('views/shared.js');
+  const anchors = ['res-summary', 'res-customer', 'res-primary-actions', 'res-payment', 'res-contents',
+    'res-note-editor', 'res-secondary-actions', 'res-more', 'res-move'];
+  const positions = anchors.map((value) => src.indexOf(`'data-testid': '${value}'`));
+  assert.ok(positions.every((n) => n >= 0), JSON.stringify(anchors.map((value, i) => [value, positions[i]])));
+  assert.ok(positions.every((n, i) => i === 0 || n > positions[i - 1]));
+  assert.match(src, /body\.append\(\.\.\.list\(/);
+  assert.doesNotMatch(src, /Verkkomaksulinkki \(Visma Pay\)|admin_create_payment_link|innerHTML/);
+  assert.match(src, /h\('details', \{ class: 'rd-more'/);
+  assert.match(src, /h\('details', \{ class: 'rd-more rd-move'/);
+  assert.match(src, /data-testid': 'res-no-show'/);
+  assert.match(src, /formDialog\(tx\('ui\.admin\.res\.no_show_title'/);
+});
+
+test('UI04: silta ei tee DOM-jälkikäsittelyä, vaan antaa flow-parametrin', () => {
+  const src = readAdmin('views/order-reservation-bridge.js');
+  assert.match(src, /flow:\s*\{/);
+  assert.match(src, /order-open-reservation/);
+  assert.match(src, /data-action=/);
+  assert.match(src, /MutationObserver/);
+  assert.doesNotMatch(src, /Verkkomaksulinkki|body\.append\(extra\)|innerHTML/);
+});
+
+test('UI04: takarajaohjaimen alkuvalinta on pois ja kentän päiväraja 60', () => {
+  const src = readAdmin('views/payment-link-04.js');
+  assert.match(src, /type: 'checkbox', name: 'deadline'/);
+  assert.match(src, /disabled: true/);
+  assert.match(src, /linkDeadlineControl/);
+  assert.match(src, /expiresDays = deadline\.read\(fd\)/);
+  assert.doesNotMatch(src, /max:\s*90|value:\s*14,\s*required:\s*true/);
+});
+
+test('UI04: FI/EN-avainluettelo vastaa pending-import-78-tiedostoa', async () => {
+  const textSource = readAdmin('reservation-texts-04.js');
+  const RESERVATION04_TEXTS = JSON.parse(textSource.match(/export const RESERVATION04_TEXTS = ([\s\S]*?);\nexport function/)[1]);
+  const lines = JSON.parse(readFileSync(join(root, 'content/site-texts.pending-import-78.json'), 'utf8'));
+  assert.equal(lines.length, Object.keys(RESERVATION04_TEXTS).length * 2);
+  for (const [key, texts] of Object.entries(RESERVATION04_TEXTS)) {
+    for (const lang of ['fi', 'en']) {
+      const item = lines.find((x) => x.key === key && x.lang === lang);
+      assert.equal(item?.text, texts[lang], `${key} ${lang}`);
+      assert.deepEqual(item?.placeholders,
+        [...texts[lang].matchAll(/\{\{var:[^}]+\}\}/g)].map((m) => m[0]));
+    }
+  }
+});

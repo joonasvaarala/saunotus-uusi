@@ -1,0 +1,1021 @@
+/* Hallinnan tyylit: mobiili ensin (alavalikko), työpöydällä sivupalkki. Ei kirjastoja. Värit samat kuin sivustolla. */
+:root{--ink:#2F2923;--text:#4F443A;--muted:#6B5E52;--gold:#7A5530;--green:#2B3A30;--icon:var(--green);--card:#fff;--bg:#F4EFE7;--line:rgba(63,53,44,.18);--ok:#1d4d2b;--okbg:#e8f3ea;--err:#7b1d12;--errbg:#fbeaea;--warnbg:#fdf1d8;--r:12px}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1{font-size:24px;margin:0 0 12px;color:var(--ink)}h2{font-size:19px;margin:22px 0 8px;color:var(--ink)}h3{font-size:16px;margin:14px 0 6px;color:var(--ink)}
+a{color:var(--gold)}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}   /* tumma kullanruskea: kontrasti 6,6:1 valkoista ja 5,8:1 hiekkaa vasten (≥3:1), ei sinistä */
+.top :focus-visible,.btn.primary:focus-visible,.pos-lines-btn:focus-visible{outline-color:#EDE3D0}   /* tummalla vihreällä: hiekka 9,4:1 */
+.top :focus-visible{outline-offset:-2px}
+input:focus-visible,select:focus-visible,textarea:focus-visible{border-color:var(--green)}
+[hidden]{display:none!important}
+.muted{color:var(--muted)}.err{color:var(--err)}.pad{padding:20px}.grow{flex:1;min-width:0}.center{justify-content:center}
+.stack{display:grid;gap:12px}.row{display:flex;gap:10px;align-items:center}.wrap{flex-wrap:wrap}
+small{color:var(--muted)}
+/* kirjautuminen */
+#login-screen,#setpw-screen{min-height:100vh;display:grid;place-items:center;padding:20px}
+.login{width:min(420px,100%);display:grid;gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+/* kuori */
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;min-height:56px;padding:10px 14px;background:var(--green);color:#fff}
+.brand{display:flex;align-items:center;min-height:44px;margin:-4px 0;flex:none}.brand img{display:block;height:36px;width:auto}   /* haalea logo (sävy #CFC5A8, kontrasti 6,9:1 tummanvihreää vasten) */
+.who{margin-left:auto;font-size:13px;opacity:.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.top .btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.55)}
+.top .btn.ghost:hover{background:rgba(255,255,255,.12)}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;background:linear-gradient(to right,#fff 30%,rgba(255,255,255,0)) left center/36px 100% no-repeat local,linear-gradient(to left,#fff 30%,rgba(255,255,255,0)) right center/36px 100% no-repeat local,radial-gradient(farthest-side at 0 50%,rgba(43,58,48,.35),rgba(43,58,48,0)) left center/12px 100% no-repeat scroll,radial-gradient(farthest-side at 100% 50%,rgba(43,58,48,.35),rgba(43,58,48,0)) right center/12px 100% no-repeat scroll,#fff;scrollbar-width:none;border-top:1px solid var(--line);overflow-x:auto;padding-bottom:env(safe-area-inset-bottom)}
+.nav::-webkit-scrollbar{display:none}
+.nav a{flex:1 0 62px;display:grid;justify-items:center;gap:0;padding:6px 4px;text-decoration:none;color:var(--muted);font-size:11px;min-height:56px}
+.nav a[aria-current]{color:var(--green);font-weight:700;box-shadow:inset 0 3px 0 var(--green)}
+.nav .ico{display:grid;place-items:center;height:26px;color:var(--icon)}.icon{display:block;width:24px;height:24px;flex:none}.nav .lbl{white-space:nowrap}
+main{padding:14px 14px 90px;max-width:1100px;margin:0 auto}
+@media(min-width:900px){
+  #shell{display:grid;grid-template-columns:220px 1fr;grid-template-rows:auto 1fr;min-height:100vh}
+  .top{grid-column:1/-1}
+  .nav{position:sticky;top:56px;align-self:start;height:calc(100vh - 56px);flex-direction:column;border-top:0;border-right:1px solid var(--line);padding:10px 0;overflow:auto;background:#fff}
+  .nav a{display:flex;flex:none;gap:10px;align-items:center;justify-content:flex-start;padding:12px 18px;font-size:15px;min-height:0}
+  .nav a[aria-current]{box-shadow:inset 3px 0 0 var(--green);background:var(--bg)}
+  main{padding:22px 28px;width:100%}
+}
+/* lomakkeet */
+.fld{display:grid;gap:4px;font-size:14px;font-weight:600;color:var(--ink)}
+.fld small{font-weight:400}
+input,select,textarea{font:inherit;padding:10px 12px;border:1px solid #8b7f73;border-radius:8px;background:#fff;color:var(--ink);min-height:44px;width:100%}
+textarea{min-height:auto}
+input[type=checkbox]{width:22px;height:22px;min-height:0;accent-color:var(--green)}
+.check{display:flex;gap:8px;align-items:center;font-weight:400}
+.btn{font:600 14px/1 inherit;font-family:inherit;padding:12px 16px;min-height:44px;border-radius:8px;border:1px solid var(--green);background:#fff;color:var(--green);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.btn:hover{background:var(--bg)}
+.btn.primary{background:var(--green);color:#fff}.btn.primary:hover{background:#1c2720}
+.btn.ghost{border-color:var(--line);color:var(--ink)}
+.btn.danger{border-color:#b3392b;color:#b3392b}.btn.danger:hover{background:var(--errbg)}
+.btn.sm{padding:8px 12px;min-height:36px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:default}
+button.link{background:none;border:0;padding:6px 0;font:inherit;color:var(--ink);text-align:left;cursor:pointer;text-decoration:underline;text-decoration-color:var(--line);min-height:36px}
+.err{background:var(--errbg);padding:10px 12px;border-radius:8px}
+/* listat */
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.toolbar input[type=date]{width:auto}
+.filters{display:grid;gap:10px;margin-bottom:10px}
+@media(min-width:700px){.filters{grid-template-columns:2fr 1fr 1fr}.filters .filter-groups{grid-column:1/-1}}
+.list{display:grid;gap:6px;margin:8px 0}
+.listrow{display:grid;gap:6px;text-align:left;font:inherit;color:var(--text);background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;width:100%}
+.listrow:hover{border-color:var(--green)}
+.listrow .meta,.resrow .meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+@media(min-width:700px){.listrow:not(.rescard){grid-template-columns:150px 1fr auto;align-items:center}}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:20px;background:#ece8e3;color:#5b524a;white-space:nowrap}
+.badge.ok,.badge.st-confirmed,.badge.pay-paid{background:var(--okbg);color:var(--ok)}
+.badge.err,.badge.st-cancelled,.badge.st-expired,.badge.st-no_show,.badge.pay-failed{background:#f3e3e3;color:var(--err)}
+.badge.warn,.badge.st-pending,.badge.pay-pending,.badge.pay-partially_paid{background:var(--warnbg);color:#6b4b00}
+.badge.pay-unpaid{background:#eee;color:#555}
+/* Johku-tunniste: hillitty hiekka + tummanvihreä teksti ja reuna (ei pelkkä väri: teksti "Johku"), kontrasti ~10:1 */
+.badge.src-johku{background:#EDE3D0;color:var(--green);border:1px solid rgba(43,58,48,.45);letter-spacing:.02em}
+.ext-id{overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+/* lähdesuodatin (Kaikki / Uudet / Johku) */
+.srcset{border:0;padding:0;margin:0;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.srcset legend{float:left;font-size:14px;font-weight:600;color:var(--ink);padding:0;margin-right:8px;line-height:44px}
+.srcopt{position:relative;display:inline-flex}
+.srcopt input{scroll-margin:70px 0 90px;position:absolute;opacity:0;inset:0;width:100%;height:100%;min-height:0;margin:0;cursor:pointer}
+.srcopt span{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:76px;padding:0 16px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-weight:600;font-size:14px}
+.srcopt input:checked+span{background:var(--green);border-color:var(--green);color:#fff}
+.srcopt input:focus-visible+span{outline:3px solid var(--gold);outline-offset:2px}
+/* ajanjakso + lähde: pikavalintaryhmät, otsikko ryhmän yläpuolella; oma ajanjakso -päivämääräkentät vain valittaessa */
+.filter-groups{display:flex;flex-wrap:wrap;gap:12px 32px;min-width:0}
+.srcset legend{float:none;display:block;width:100%;line-height:1.4;margin:0 0 6px}
+.srcset{display:block}.srcset .srcopt{margin:0 6px 6px 0}
+.perdates{flex:1 1 100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-width:520px}
+.perdates[hidden]{display:none}
+/* varauskortti: aika + tilausnumero ylärivillä, nimi + tuote keskellä, merkit vasemmassa ja hinta oikeassa alakulmassa */
+.rescard{grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:4px 12px}
+.rescard .rc-when{grid-column:1;min-width:0}
+.rescard .rc-no{grid-column:2;justify-self:end;font-size:13px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.rescard .rc-what{grid-column:1/-1;min-width:0;overflow-wrap:anywhere;padding:2px 0 4px}
+.rescard .rc-badges{grid-column:1;align-self:end;min-width:0}
+.rescard .rc-price{grid-column:2;justify-self:end;align-self:end;font-weight:700;color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums}
+.empty{color:var(--muted);padding:14px 0}
+/* päivänäkymä */
+.daygrid{display:grid;gap:10px}
+@media(min-width:1000px){.daygrid{grid-template-columns:1fr 1fr}.daygrid.day-view{grid-template-columns:minmax(0,760px)}}
+.session header{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.session .time{font-size:18px;color:var(--ink)}.session .ttl{font-weight:600;flex:1}.session .cnt{font-size:13px;color:var(--muted)}
+.session.exclusive{border-left:5px solid #a87b45}.session.shared{border-left:5px solid #7bb28a}
+.reslist{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:4px}
+.resrow{display:flex;flex-wrap:wrap;gap:4px 10px;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+.resrow.cancelled,.resrow.expired{opacity:.55}
+/* kv, dialogi */
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0}.kv dt{color:var(--muted);font-size:13px}.kv dd{margin:0;color:var(--ink)}
+.box{border:1px solid var(--line);border-radius:10px;padding:12px}
+fieldset.box legend{font-weight:600;padding:0 6px}
+.dlg{width:min(560px,calc(100% - 20px));max-height:min(92dvh,calc(100vh - 20px));overflow:auto;padding:0;border:0;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.dlg.wide{width:min(760px,calc(100% - 20px))}
+.dlg::backdrop{background:rgba(20,14,8,.5)}
+.dlg-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff}
+.dlg-head h2{margin:0}
+.dlg-body{padding:14px 16px 20px}
+.icon-btn{width:44px;height:44px;border:0;background:none;color:var(--icon);display:inline-grid;place-items:center;cursor:pointer}
+/* taulukko */
+.tablewrap{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:10px}
+.tbl{border-collapse:collapse;width:100%;font-size:14px}.tbl th,.tbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.tbl tr.off{opacity:.5}
+.resource,.setting{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.setting .fld{flex:1;min-width:220px}
+.varrow input{width:110px}
+/* uusi varaus */
+.ok-box{background:var(--okbg);border-color:#7bb28a}
+/* ilmoitus */
+.toast{position:fixed;left:50%;bottom:80px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:var(--green);color:#fff;padding:12px 18px;border-radius:30px;z-index:100;transition:.2s;max-width:90vw}
+.toast.err{background:#b3392b}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Migraatio 11: asiakastyyppi, yritystiedot, lisäpalvelut */
+.between{justify-content:space-between}
+.kindset{border:0;padding:0;margin:0;min-width:0}.kindset legend{font-weight:600;font-size:14px;color:var(--ink);padding:0;margin-bottom:6px}
+.kindopt{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer}
+.kindopt input{width:20px;height:20px;accent-color:var(--green)}
+.company-box h3:first-child{margin-top:0}
+.existing .kindset,.existing .company-box{display:none}
+.addon-picker legend{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--ink);padding:0 6px}
+.grow{flex:1 1 auto}
+.prep{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:8px 0 0;padding:8px 10px;border-radius:8px;background:var(--warnbg);border-left:4px solid var(--gold);color:var(--ink)}
+.prepday{border-left:4px solid var(--gold)}
+.addon-mark{display:flex;align-items:center;gap:4px;margin-top:2px;font-size:13px;color:var(--gold)}
+.resrow.has-addons{border-left:3px solid var(--gold);padding-left:6px}
+.resrow .link{text-align:left}
+.kv{grid-template-columns:auto minmax(0,1fr)}.kv dd{overflow-wrap:anywhere}
+h2 .icon,h3 .icon,.addon-mark .icon{display:inline-block;vertical-align:-3px;margin-right:4px;color:var(--icon)}
+.addon-mark .icon{vertical-align:-4px}
+/* resurssivaraukset (migraatio 17): tila- ja ylitysmerkit, legit, siirto, Tarkista-lista, varaustyypin valinta */
+.pageactions{margin:0 0 10px;gap:8px}
+.pageactions .btn{min-height:44px;display:inline-flex;align-items:center;gap:6px}
+.badge.space{background:#E4EBE5;color:var(--green);border:1px solid rgba(43,58,48,.35)}
+.badge.ovr{border:1px solid rgba(107,75,0,.45)}
+.legs{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:2px;font-size:13px;color:var(--muted)}
+.legs .leg{padding-left:10px;border-left:3px solid var(--line);overflow-wrap:anywhere}
+.legs .leg-therapist{border-left-color:#A87B45}.legs .leg-space{border-left-color:#7bb28a}
+.resbox:empty{display:none}
+.resbox{border:1px solid var(--line);border-radius:10px;padding:2px 12px 10px;background:#FBF8F2}
+.resbox h3{margin:10px 0 6px}
+.moverow{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+.moverow .row{align-items:flex-end}
+.typeset{margin:0 0 12px}
+.override-box{border-color:rgba(107,75,0,.45);background:var(--warnbg)}
+.override-box .ovr-reason[hidden]{display:none}
+.review-sec h2{display:flex;align-items:center;gap:8px;margin:0 0 4px;font-size:17px}
+.review-sec .reslist .resrow{align-items:flex-start}
+.review-ack{display:grid;gap:8px;width:100%;margin-top:8px}
+.review-ack .fld{flex:1 1 12rem;min-width:min(100%,12rem)}
+.review-block-reason{display:inline}
+.rv-link{color:var(--ink);text-decoration-color:var(--line);display:inline-block;min-height:44px;line-height:44px;overflow-wrap:anywhere}
+.rv-link strong{color:var(--green)}
+@media(min-width:700px){.rv-link{min-height:0;line-height:1.5}}
+/* tuotekuva (Tuotteet-näkymä) */
+.imgprev{aspect-ratio:3/2;max-width:360px;width:100%;border-radius:10px;background:var(--bg);border:1px dashed var(--line);display:grid;place-items:center;overflow:hidden}
+.imgprev.has{border-style:solid}
+.imgprev img{width:100%;height:100%;object-fit:cover;display:block}
+.pthumb{width:40px;height:40px;border-radius:8px;object-fit:cover;vertical-align:middle;margin-right:8px;background:var(--bg)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* sulut + kalenterisulut (migraatio 18) */
+.blocklist .resrow{align-items:flex-start;gap:10px}
+.blk{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-width:0;flex:1}
+.blk-time{font-weight:600}
+.blk-meta{display:inline-flex;gap:6px;flex-wrap:wrap}
+.blk-reason{overflow-wrap:anywhere}
+.blk small{flex-basis:100%}
+.calblock{background:#f6f1e7}
+.badge.cal{background:#ece3d0;color:var(--ink);border:1px solid var(--line)}
+.calgrid{list-style:none;margin:0;padding:0;display:grid;gap:10px;grid-template-columns:1fr}
+.calcard{margin:0}.calcard.off{background:#f6f1e7}
+.calhead{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-bottom:4px}
+.calcard p{margin:4px 0}
+.notice{background:#fff3d6;border:1px solid #e6c97a;color:var(--ink);padding:10px 12px;border-radius:8px}
+.evlist .resrow{align-items:flex-start;gap:10px;flex-wrap:wrap}
+.evmain{flex:1 1 240px;min-width:0;overflow-wrap:anywhere}
+.evbadges{display:inline-flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.evnote{display:block;margin-top:4px;color:var(--muted)}
+.evact{gap:6px}
+.evact .btn{min-height:44px}
+@media(min-width:700px){.calgrid{grid-template-columns:1fr 1fr}.evact .btn{min-height:0}}
+@media(min-width:700px){main{min-width:0}}   /* leveä taulukko (Resurssit: vuorosäännöt) ei saa venyttää sivua: taulukko vierittyy omassa laatikossaan */
+@media(max-width:699px){.blocklist .btn,.blk a{display:inline-flex;align-items:center;justify-content:center;min-height:44px}}
+.nbform h3:focus-visible{outline:3px solid var(--gold);outline-offset:4px;border-radius:4px}
+.nbsearch{display:flex;gap:8px;align-items:stretch}.nbsearch input{flex:1;min-width:0}.nbsearch .btn{min-height:44px;flex:none}
+.notfound{margin:0;padding:10px 12px;border-radius:10px;background:var(--bg);border-left:4px solid var(--green)}
+.nbform input,.nbform select,.nbform textarea{scroll-margin:76px 0 200px}
+/* ===== Uusi varaus (siistitty): numeroidut korttiosiot, stepper, hintayhteenveto + Tallenna alareunassa; vihreä/hiekka, ei sinistä, 44 px kosketuskohteet ===== */
+:root{--navh:57px}
+.nb{counter-reset:nbs;max-width:780px;gap:14px}
+.nb-top{margin-bottom:6px}.nb-top h1{margin:0}
+.nb-langs{display:inline-flex;border:1px solid var(--green);border-radius:8px;background:#fff}
+.nb-lang{min-width:48px;min-height:44px;border:0;background:#fff;color:var(--green);font:600 14px/1 system-ui,sans-serif;cursor:pointer}
+.nb-lang:first-child{border-radius:7px 0 0 7px}.nb-lang:last-child{border-radius:0 7px 7px 0}
+.nb-lang[aria-pressed=true]{background:var(--green);color:#fff}
+.nb-sec{padding:14px 14px 16px;display:grid;gap:12px;min-width:0;margin:0}
+.nb-h,.nb .addon-picker>legend{display:flex;align-items:center;gap:10px;margin:0;padding:0;font-size:17px;font-weight:700;line-height:1.25;color:var(--ink)}
+.nb-h::before,.nb .addon-picker>legend::before{counter-increment:nbs;content:counter(nbs);flex:none;display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--green);color:#fff;font-size:14px;font-weight:700}
+.nb .addon-picker>legend{float:left;width:100%;margin-bottom:12px}.nb .addon-picker>legend+*{clear:both}.nb .addon-picker>legend .icon{display:none}
+.nb-hint{margin:4px 0;font-size:15px}
+.nb-dayctl{display:flex;gap:8px;align-items:stretch}.nb-dayctl input{flex:1;min-width:0}
+.nb-daybtn{width:48px;min-width:48px;padding:0;flex:none}
+.fld-lab{font-weight:600;color:var(--ink)}
+.fld-hint{font-weight:400;font-size:13px;color:var(--muted)}
+.opt{font-weight:400;color:var(--muted)}
+.fld-err{display:block;font-weight:600;font-size:13px;color:var(--err)}
+input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{border-color:var(--err);box-shadow:0 0 0 1px var(--err)}
+/* vuorovalitsin */
+.slotpick{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.slotbtn{display:grid;gap:1px;align-content:center;text-align:left;min-height:68px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:#fff;font:inherit;color:var(--text);cursor:pointer}
+.slotbtn strong{font-size:17px;color:var(--ink);font-variant-numeric:tabular-nums}
+.slotbtn small{color:var(--text);font-weight:600}
+.slotbtn:hover:not(:disabled){border-color:var(--green)}
+.slotbtn[aria-checked=true]{border-color:var(--green);background:#E4EBE5;box-shadow:inset 0 0 0 1.5px var(--green)}
+.slotbtn.full,.slotbtn.unavailable{opacity:.55;cursor:default}
+.nb-picked{margin:0;padding:12px 14px;border-radius:12px;background:var(--green);color:#fff;font-size:17px;line-height:1.3;display:grid;gap:2px}
+.nb-picked small{color:#EDE3D0;font-weight:400;font-size:14px}
+.nbform h3.nb-picked:focus-visible{outline-offset:3px}
+/* stepper: − [ 3 ] + */
+.stepper{display:inline-flex;align-items:center;gap:6px;flex:none}
+.stp-btn{width:44px;height:44px;min-height:44px;padding:0;display:inline-grid;place-items:center;border:1.5px solid var(--green);border-radius:50%;background:#fff;color:var(--green);cursor:pointer;touch-action:manipulation}
+.stp-btn:hover:not(:disabled){background:#E4EBE5}.stp-btn:active:not(:disabled){background:#D3DDD5}
+.stp-btn:disabled{border-color:#C9C2B8;color:#A39A8E;background:#F6F3EE;cursor:default}
+.stepper .stp-in{width:calc(3ch + 24px);min-width:0;padding:8px 4px;text-align:center;font-weight:700;font-size:17px;font-variant-numeric:tabular-nums}
+.stp-zero .stp-in{color:var(--muted);font-weight:600}
+.stepper.lg .stp-btn{width:52px;height:52px;min-height:52px}.stepper.lg .stp-in{width:calc(3ch + 28px);min-height:52px;font-size:22px}
+.nb-persons{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.nb-persinfo{display:grid;gap:2px;flex:1 1 140px;min-width:0}
+/* lisäpalvelurivit */
+.addon-picker{min-width:0}
+.addonrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.addon-info{display:grid;gap:1px;min-width:0;flex:1}
+.addon-name{color:var(--ink);font-size:16px;line-height:1.3}
+.addon-price{font-size:14px;font-weight:600;color:var(--text)}
+.addon-desc{font-size:13px;line-height:1.3}
+.addon-sum{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:0;padding-top:12px;border-top:2px solid var(--green);color:var(--ink);font-weight:600}
+.addon-sum strong{font-size:18px}
+/* asiakas */
+.nb-search{display:grid;gap:6px}.nb-or{margin:0;font-size:14px}.nb-sec:has(.cf.existing) .nb-or{display:none}
+.found{display:grid;gap:6px}
+.found .listrow{grid-template-columns:1fr}
+.inv-editor{display:grid;gap:12px}
+.inv-editor input,.inv-editor select{scroll-margin-bottom:88px}
+.inv-editor .check{min-height:44px}
+.inv-lineblock{display:grid;gap:10px;min-width:0}
+.inv-lines-h{margin:4px 0 0}
+.inv-lines{display:grid;gap:10px}
+.inv-line{display:grid;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#FBF8F2;min-width:0}
+.inv-desc{min-width:0;position:relative}
+.inv-price-note{margin:0;color:var(--muted);font-size:13px;line-height:1.35}
+.inv-nums{display:grid;grid-template-columns:minmax(3.2rem,.8fr) minmax(3.4rem,.75fr) minmax(4.2rem,1fr);gap:6px;align-items:end}
+.inv-prices{display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:end}
+.inv-nums .fld,.inv-prices .fld{font-size:12px;line-height:1.2;min-width:0}
+.inv-nums .fld>span,.inv-prices .fld>span{overflow-wrap:anywhere}
+.inv-nums input,.inv-nums select,.inv-prices input{padding:8px 6px}
+.inv-nums input,.inv-prices input{text-align:right;font-variant-numeric:tabular-nums}
+.inv-suggest{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:4px}
+.inv-hit{width:100%;min-height:44px;display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:2px;text-align:left;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font:inherit;color:var(--ink);cursor:pointer}
+.inv-hit span{min-width:0;overflow-wrap:break-word}
+.inv-hit small{align-self:flex-end;white-space:nowrap;font-weight:600}
+.inv-hit-free{font-weight:600}
+.inv-hit[aria-selected=true],.inv-hit:hover{border-color:var(--green);background:#E4EBE5}
+.inv-line-foot{display:flex;justify-content:flex-end;align-items:center;gap:2px}
+.inv-line-sumline{margin:0;display:flex;gap:8px;align-items:baseline;white-space:nowrap}
+.inv-line-sumline>span{font-size:12px;font-weight:600;white-space:nowrap}
+.inv-line-sum{font-variant-numeric:tabular-nums;color:var(--ink)}
+.inv-line .icon-btn{color:var(--muted)}
+.inv-line .icon-btn:hover{color:var(--err)}
+.inv-add{justify-self:start;background:none;border:0;padding:8px 2px;min-height:44px;color:var(--green);font:600 16px/1.2 inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.inv-totals{display:grid;gap:4px}
+.inv-tot-row{display:flex;justify-content:space-between;gap:12px;margin:0;font-variant-numeric:tabular-nums}
+.inv-tot-row.grand{border-top:2px solid var(--green);padding-top:8px;margin-top:4px;font-weight:700;font-size:18px;color:var(--ink)}
+.dlg:has(> .inv-savebar){display:flex;flex-direction:column;overflow:hidden;height:min(92dvh,calc(100vh - 20px))}
+.dlg:has(> .inv-savebar) .dlg-head{flex:none;position:static}
+.dlg:has(> .inv-savebar) .dlg-body{flex:1 1 auto;min-height:0;overflow:auto}
+.inv-savebar{flex:none;background:#fff;margin:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line);box-shadow:0 -8px 16px rgba(43,58,48,.08)}
+.inv-savebar .btn{width:100%;min-height:48px;font-size:16px}
+.inv-save-err{margin:0 0 8px;padding:8px 10px;border-radius:8px;background:var(--errbg);color:var(--err);font-weight:600;font-size:14px}
+.inv-save-err[hidden]{display:none}
+.inv-savebar .btn[aria-busy=true]{opacity:.85;cursor:progress}
+.spinner{display:inline-block;width:1em;height:1em;margin-right:.4em;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;vertical-align:-2px;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spinner{animation-duration:2.4s}}
+@media(min-width:800px){
+  .inv-line{grid-template-columns:minmax(8rem,1.45fr) minmax(3.2rem,.42fr) minmax(3.4rem,.45fr) minmax(5.6rem,.8fr) minmax(5.6rem,.8fr) minmax(3.8rem,.5fr) auto 44px;align-items:end;column-gap:8px}
+  .inv-nums,.inv-prices,.inv-line-foot{display:contents}
+  .inv-desc{grid-column:1;grid-row:1}
+  .inv-nums .fld:nth-child(1){grid-column:2;grid-row:1}
+  .inv-nums .fld:nth-child(2){grid-column:3;grid-row:1}
+  .inv-nums .fld:nth-child(3){grid-column:6;grid-row:1}
+  .inv-prices .fld:nth-child(1){grid-column:4;grid-row:1}
+  .inv-prices .fld:nth-child(2){grid-column:5;grid-row:1}
+  .inv-line-sumline{grid-column:7;grid-row:1;align-self:end;padding-bottom:8px}
+  .inv-line .icon-btn{grid-column:8;grid-row:1}
+}
+.cf-pair{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.cf-addr{display:grid;gap:12px;grid-template-columns:110px minmax(0,1fr)}
+.cf-reach{margin-top:-6px}.company-box{background:#FBF8F2}
+.existing .cf-contact{display:none}
+.seg{display:grid;grid-template-columns:1fr 1fr}
+.seg .kindopt{position:relative;justify-content:center;min-height:48px;border:1.5px solid var(--green);border-radius:0;background:#fff;color:var(--green);font-weight:600;margin:0}
+.seg .kindopt:first-child{border-radius:10px 0 0 10px;border-right-width:.75px}.seg .kindopt:last-child{border-radius:0 10px 10px 0;border-left-width:.75px}
+.seg .kindopt input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.seg .kindopt:has(input:checked){background:var(--green);color:#fff}
+.seg .kindopt:has(input:focus-visible){outline:3px solid var(--gold);outline-offset:2px}
+.picked-cust{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 12px;border:1.5px solid var(--green);background:#E4EBE5;border-radius:10px}
+.pc-ico{color:var(--green);display:grid}.pc-txt{display:grid;flex:1;min-width:150px;overflow-wrap:anywhere}.pc-txt small{color:var(--text)}
+/* maksu */
+.check.big{align-items:flex-start;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#FBF8F2;min-height:44px;cursor:pointer}
+.check.big>input{margin-top:1px;flex:none}.check.big>span{display:grid;gap:2px}.check.big strong{color:var(--ink)}
+.check.big:has(input:checked){border-color:var(--green);background:#E4EBE5}
+.msg-products{max-height:240px;overflow:auto;display:grid;gap:4px;padding:4px}
+.msg-products .check{min-height:44px}
+.nb-price summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--green);font-weight:600;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(43,58,48,.4)}
+.nb-price[open] summary{margin-bottom:6px}
+/* hintayhteenveto + Tallenna: mobiilissa kiinni alapalkin (alanavigaatio) yläpuolella */
+.nb-bar{position:sticky;bottom:calc(var(--navh) + env(safe-area-inset-bottom));z-index:15;background:#fff;border:1px solid var(--line);border-top:3px solid var(--green);border-radius:12px;padding:10px 12px;display:grid;gap:8px;box-shadow:0 -6px 16px rgba(43,58,48,.14)}
+.nb-bar-row{display:flex;align-items:center;gap:12px}
+.nb-sum{display:grid;flex:1;min-width:0}.nb-sum-lines{font-size:13px;line-height:1.3;color:var(--text)}.nb-sum-lines:empty{display:none}
+.nb-sum-tot{font-size:15px;font-weight:600;color:var(--ink)}.nb-sum-total{font-size:22px;white-space:nowrap}
+.btn.lg{min-height:56px;padding:0 22px;font-size:17px;font-weight:700;flex:none;border-radius:10px}
+.btn:focus-visible{outline-offset:3px}
+.nb .btn,.nb button{font-family:inherit}.nb .btn{font-size:16px;font-weight:600;line-height:1.2}.nb .btn.lg{font-size:17px;font-weight:700}
+.nb-err{margin:0;padding:8px 10px;border-radius:8px;background:var(--errbg);color:var(--err);font-weight:600;font-size:14px;overflow-wrap:anywhere}
+@media(min-width:900px){.nb-bar{bottom:12px}}
+@media(max-width:380px){.btn.lg{padding:0 14px;font-size:16px}.nb-sum-total{font-size:20px}}
+/* onnistumisviesti */
+.nb-done{display:grid;gap:10px}.nb-done-head{display:flex;align-items:center;gap:10px}.nb-done-head h3{margin:0;font-size:19px}
+.nb-done-ico{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--green);color:#fff;flex:none}
+.nb-done p{margin:0;color:var(--ink)}
+.nb-done-actions{display:grid;gap:8px}
+@media(min-width:600px){.nb-done-actions{grid-template-columns:repeat(auto-fit,minmax(170px,max-content))}}
+.nb-result:empty{display:none}.nb-result{display:grid;gap:12px;scroll-margin-top:70px}
+/* tilauslinkki varauksen tiedoissa */
+.order-link{display:inline-flex;align-items:center;min-height:44px}
+/* ===== /Uusi varaus ===== */
+
+/* tuotelista: näkyvyys- ja kategoriasuodatin (samat pikavalintapainikkeet kuin varauslistassa), tulosrivi, tyhjä tulos */
+.prodfilters{grid-template-columns:minmax(0,1fr)}
+@media(min-width:700px){.prodfilters{grid-template-columns:minmax(0,1fr)}.prodfilters>.fld{max-width:420px}}
+.prod-head{align-items:center;gap:12px;margin:0 0 8px}
+.prod-head h1{margin:0}
+.prod-add,.prod-next .btn{min-height:44px}
+@media(max-width:699px){
+  .prod-head{align-items:stretch}
+  .prod-add,.prod-next .btn{width:100%}
+}
+.prodseg .srcopt span{min-width:0;padding:0 14px}
+.prodseg .srcopt input:checked+span{background:var(--green);border-color:var(--green);color:#fff}
+.prodcount{margin:6px 0 2px;display:flex;flex-wrap:wrap;align-items:center;gap:0 4px;min-height:44px}
+.prodcount .link{min-height:44px;padding:0 6px;background:none;border:0;font:inherit;color:var(--gold);text-decoration:underline;cursor:pointer}
+.prodempty{text-align:center;padding:22px 12px;border:1px dashed var(--line);border-radius:10px;background:#fff}
+.prodempty p{margin:0 0 10px;color:var(--ink)}
+.prodcatsel-w{display:grid}
+.prodcatset{display:none}
+.prodcatsel{min-height:44px}
+@media(min-width:700px){.prodcatset{display:block}.prodcatsel-w{display:none}}
+/* saunottaja puuttuu (migraatio 22) */
+.badge.tmiss{background:#F6E6C3;color:#5a3f00;border:1px solid rgba(90,63,0,.5)}
+.badge.tmiss-ok{border:1px solid var(--line)}
+.warn-box{display:grid;gap:6px;padding:12px 14px;border-radius:var(--r);background:var(--warnbg);border:1px solid rgba(90,63,0,.45);border-left:5px solid #8a5a00;color:#4a3300;margin-bottom:12px}
+.warn-box p{margin:0;color:#4a3300}
+.toast.warn{background:#6b4b00}
+[data-testid=therapist-state] .btn{margin-left:4px}
+.btn[data-testid=grant-btn]{min-height:44px;padding:10px 14px}
+/* Vapaat ajat (admin_treatment_availability): päivä- ja aikapainikkeet, vähintään 44 px; ei sinistä */
+.avail{display:grid;gap:8px}.avail-head{justify-content:space-between}.avail-head h3{margin:0}
+.avail .btn.sm[data-testid=avail-refresh]{min-height:44px;padding:10px 14px}
+.daychips,.slotgrid{display:flex;flex-wrap:wrap;gap:8px}
+.btn.daychip,.btn.slot{min-height:44px;padding:8px 12px}
+.btn.slot{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:76px}
+.btn.slot strong{font-size:16px}.btn.slot .sflag{font-size:11px;line-height:1.2;color:#5a3f00}
+.btn.slot.needs-ovr{border-style:dashed;border-color:#8a6a2c}
+.btn.daychip[aria-pressed=true],.btn.slot[aria-pressed=true]{background:var(--green);color:#fff;border-color:var(--green)}
+.btn.slot[aria-pressed=true] .sflag{color:#F6E6C3}
+.slot-picked{margin:0;padding:10px 12px;border-radius:8px;background:var(--okbg);color:var(--ok)}
+.slot-picked .badge{vertical-align:middle}
+.slot-timeline{margin:0;padding:8px 12px;border-radius:8px;background:#fff;border:1px solid var(--line);color:var(--text)}
+.avail-err{margin:0;color:var(--err);background:var(--errbg);padding:10px 12px;border-radius:8px}
+/* Päivänäkymä (v25): otsikkorivin oikea reuna (hlö + kapasiteettinappi), saapunut-ympyrä, lisäpalveluikonit, työvuoropalkki. Ei sinistä; kosketuskohteet ≥ 44 px */
+.session header{align-items:center}
+.session .hdr-right{margin-left:auto;display:inline-flex;align-items:center;gap:10px;flex:none}
+.session .hdr-right .cnt{font-size:15px;font-weight:600;color:var(--ink);white-space:nowrap}
+.btn.cap{min-height:44px;min-width:44px;padding:10px 14px;border:0;color:#fff;font-weight:700;font-size:14px;line-height:1.1;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center}
+.btn.cap.ok{background:#2E6B3F}.btn.cap.ok:hover{background:#25562f;color:#fff}
+.btn.cap.full{background:#9a2f22;cursor:default}.btn.cap.full:hover{background:#9a2f22}
+.resrow.has-arrive{flex-wrap:nowrap;gap:10px}
+.resrow .resmain{flex:1;min-width:0;display:grid;gap:2px}
+.resrow .resmain .meta{justify-content:flex-start}
+.arrive{flex:none;width:44px;height:44px;border-radius:50%;border:2px solid #2E6B3F;background:#fff;color:transparent;display:inline-grid;place-items:center;padding:0;cursor:pointer}
+.arrive:hover{background:#e8f3ea}
+.arrive.on{background:#2E6B3F;color:#fff}
+.arrive[aria-busy=true]{opacity:.7}
+.arrive .icon{display:block}
+.addon-items{display:flex;flex-wrap:wrap;gap:2px 12px}
+.addon-item{display:inline-flex;align-items:center;gap:4px;font-size:14px;color:var(--gold)}
+.addon-item .icon{color:var(--green);flex:none}
+.dayshifts{margin:0 0 10px;--heater:#6b4a2b;--heaterbg:#efe4d6;--heaterbar:#8a6a4a;--therapist:#1d4d2b;--therapistbg:#e3eadf;--therapistbar:#2b3a30;--reception:#5e4a12;--receptionbg:#f1ead2;--receptionbar:#b08d3c}
+.dayshifts ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.dshift{font-size:13px;line-height:1.35;padding:4px 10px;border-radius:14px;border:1px solid #8b7f73;background:#ece8e1;color:#5b524a}
+.dshift.shift-heater{background:var(--heaterbg);border-color:var(--heaterbar);color:var(--heater)}
+.dshift.shift-therapist{background:var(--therapistbg);border-color:var(--therapistbar);color:var(--therapist)}
+.dshift.shift-reception{background:var(--receptionbg);border-color:var(--receptionbar);color:var(--reception)}
+.dshift .who{font-weight:600}
+.dayshifts-none{margin:0 0 10px;font-size:13px}
+.dayshifts-note{margin:6px 0 0;font-size:12px}
+.inactive-res{margin-top:10px}.inactive-res summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--muted)}
+.session.slot{border-left:5px solid #8a6a4a}
+.session.event{border-left:5px solid #6b4a2b}
+.badge.ev{background:#efe4d6;color:#6b4a2b;border:1px solid #8a6a4a}
+.dayrev{max-width:760px;margin:0 0 12px;padding:12px 14px 14px;border-radius:12px;background:#f7f3ea;border:1px solid #e2d3b8;border-left:6px solid #a87b45}
+.dayrev h2{margin:0;font-size:15px;font-weight:600;color:#6b4a2b}
+.dayrev-sum{margin:2px 0 0;font-size:28px;line-height:1.15}
+.dayrev-sum strong{font-variant-numeric:tabular-nums;color:var(--ink)}
+.dayrev-note{margin:4px 0 0;font-size:13px}
+/* Valmistelu: päivän yhteenvetokortti (hillitty hiekka/vihreä, ei sinistä) */
+.prepcard{max-width:760px;margin:0 0 14px;padding:12px 14px 14px;border-radius:12px;background:#ecebd9;border:1px solid #c5c8a3;border-left:6px solid #7a8a52}
+.prepcard h2{margin:0 0 10px;font-size:17px;color:#33401f;display:flex;align-items:center;gap:6px}
+.prepcard h2 .icon{color:#4f6130}
+.prep-tiles{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.prep-tile{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"ic n" "l l";align-items:center;column-gap:8px;padding:8px 10px;border-radius:10px;background:#f8f6ea;border:1px solid #d6d8b8;color:#33401f}
+.prep-tile .pt-icons{grid-area:ic;display:inline-flex;gap:2px;color:#4f6130}
+.prep-tile .pt-n{grid-area:n;font-size:28px;line-height:1;font-weight:700;text-align:right;color:#26301a}
+.prep-tile .pt-l{grid-area:l;font-size:13px;color:#5a5f43;margin-top:2px}
+.prep-tile.persons .pt-icons{color:#6b4a2b}
+.prep-none{margin:8px 0 0;font-size:13px}
+.prep-rows{list-style:none;margin:10px 0 0;padding:8px 0 0;border-top:1px dashed #c5c8a3;display:grid;gap:3px;font-size:13px;color:#4a4f36}
+
+/* ---- Talous (vaihe A: UI-kehys) – hillityt vihreä/hiekka-värit, ei sinistä, 44 px kosketuskohteet ---- */
+.tl :focus-visible{outline-color:var(--green)}
+.tl-top{gap:10px;margin-bottom:4px}.tl-top h1{margin:0}.row.between{justify-content:space-between}
+.tl-langs{display:inline-flex;border:1px solid var(--green);border-radius:8px;overflow:hidden;background:#fff}
+.tl-lang{min-width:48px;min-height:44px;border:0;background:#fff;color:var(--green);font:600 14px/1 inherit;font-family:inherit;cursor:pointer}
+.tl-lang[aria-pressed=true]{background:var(--green);color:#fff}
+.tl-banner{background:#EDE3D0;border:1px solid rgba(122,85,48,.55);color:#3d2f1f;border-radius:10px;padding:10px 12px;margin:10px 0;font-size:14px}
+.tl-tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin:12px 0 14px}
+.tl-tabbtn{flex:1 1 0;min-width:0;min-height:44px;padding:8px 6px;border:0;background:transparent;color:var(--muted);font:600 15px/1.2 inherit;font-family:inherit;cursor:pointer;border-radius:8px 8px 0 0}
+.tl-tabbtn[aria-selected=true]{color:var(--green);font-weight:700;box-shadow:inset 0 -3px 0 var(--green);background:rgba(43,58,48,.06)}
+.tl-toolbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end;margin:0 0 10px}
+.tl-toolbar .tl-search,.tl-toolbar .tl-hint{grid-column:1/-1}.tl-toolbar .btn{width:100%}
+.filter-drawer{display:grid;gap:10px}
+.filters.filter-drawer{grid-template-columns:minmax(0,1fr)}
+.filter-drawer-bar{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:flex-end}
+.filter-drawer-bar>.fld{flex:1 1 220px;min-width:min(100%,220px);margin:0}
+.filter-toggle{flex:0 1 auto;width:auto;min-height:44px;display:inline-flex;align-items:center;gap:8px;padding:8px 12px}
+.tl-toolbar .filter-toggle{width:auto}
+.filter-toggle-label{font-weight:600}
+.filter-chev{display:inline-grid;place-items:center;transition:transform .15s}
+.filter-drawer.is-open .filter-chev{transform:rotate(180deg)}
+.filter-badge{background:var(--green);color:#fff;border-radius:999px;padding:2px 8px;font-size:13px;font-weight:700;line-height:1.35}
+.filter-drawer-bar>.tl-search{flex:1 1 100%;min-width:0}
+.filter-chip{flex:0 0 auto;display:inline-flex;align-items:center;min-height:44px;padding:8px 12px;border-radius:999px;background:var(--green);color:#fff;font-weight:700;font-size:14px;line-height:1.2;white-space:nowrap}
+.filter-search-note{flex:1 1 100%;margin:0;font-size:14px}
+.filter-panel{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
+.filter-panel .filter-groups{grid-column:1/-1}
+.tl-toolbar input,.tl-toolbar select{min-width:0}
+.tl-sortrow{display:flex;gap:6px}.tl-sortrow select{flex:1;min-width:0}.tl-sortrow .btn{width:auto;flex:none}
+.tl-dir{white-space:nowrap;gap:6px;padding:8px 12px;min-width:44px}.tl-sortrow .tl-dirtxt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.tl-dir .tl-up svg{transform:rotate(180deg)}
+.tl-count{margin:4px 0 0;font-size:14px}
+.tl-pager{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;margin:8px 0}
+.tl-pgbtn{min-width:44px;padding:0 8px}.tl-pgof{display:inline-flex;align-items:center;gap:6px;color:var(--ink);font-weight:600}
+.tl-pageinput{width:76px;text-align:center;padding:8px}
+.tl-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.tl-row{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}.tl-row.open{border-color:var(--green)}
+.tl-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto 24px;grid-template-areas:"main main sum chev" "date first first chev" "badges badges badges chev";gap:6px 10px;width:100%;text-align:left;font:inherit;color:var(--text);background:transparent;border:0;padding:10px 12px;min-height:44px;cursor:pointer;align-items:center}
+.tl-head:hover{background:rgba(43,58,48,.04)}
+.tl-c{min-width:0;overflow-wrap:anywhere}.tl-main{grid-area:main}.tl-date{grid-area:date}.tl-first{grid-area:first}.tl-sum{grid-area:sum;text-align:right;display:grid;justify-items:end}.tl-badges{grid-area:badges;display:flex;gap:6px;flex-wrap:wrap}
+.tl-name{color:var(--text)}.tl-lab{display:block;color:var(--muted);font-size:12px}.tl-date span,.tl-first span{font-size:14px}
+.tl-refund{color:var(--err)}
+.tl-chev{grid-area:chev;color:var(--icon);transition:transform .15s;display:grid;place-items:center}.tl-row.open .tl-chev{transform:rotate(180deg)}
+.tl-cols{display:none}
+.tl-panel{padding:6px 12px 14px;border-top:1px solid var(--line);background:#FBF8F2}
+.tl-detail{display:grid;gap:6px}.tl-meta{margin:6px 0 0;overflow-wrap:anywhere}
+.tl-sec h3{margin:10px 0 6px}
+.tl-sub{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.tl-sub li{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"m s" "t s";gap:2px 10px;padding:8px 10px;background:#fff;border:1px solid var(--line);border-radius:8px}
+.tl-sub-main{grid-area:m;min-width:0;overflow-wrap:anywhere}.tl-sub-meta{grid-area:t;color:var(--muted);font-size:13px;min-width:0;overflow-wrap:anywhere}.tl-sub-sum{grid-area:s;text-align:right;align-self:center}
+.tl-refunds{grid-column:1/-1;list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px}
+.tl-sub .tl-refunds li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:6px 8px;background:#FBF8F2;border-radius:8px}
+.tl-refunds .tl-btn{flex:0 0 auto;min-height:44px}
+.tl-sums{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 0}.tl-sums>div{flex:1 1 100px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.tl-sums dt{font-size:12px;color:var(--muted)}.tl-sums dd{margin:0;font-weight:700;color:var(--ink)}.tl-sums .due dd{color:var(--err)}
+.tl-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.tl-actions .btn{flex:1 1 160px;white-space:normal;text-align:center}
+.tl-btn{gap:8px}.tl-ico{display:inline-grid;place-items:center;color:var(--icon)}
+.tl-btn.is-off,.tl-btn:disabled{background:transparent;border:1px dashed #8b7f73;color:var(--muted);cursor:not-allowed;opacity:1}.tl-btn.is-off .tl-ico,.tl-btn:disabled .tl-ico{color:var(--muted)}
+.tl-hint{font-size:13px;margin:6px 0 0}
+.tl-rowbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px;padding:0 12px 8px;margin-top:-2px}.tl-rowbar-no{min-width:0;overflow-wrap:anywhere}
+.tl-rc-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}.tl-rc-btn{flex:1 1 130px;white-space:normal;text-align:center}
+.tl-rc-actions .tl-rc-btn,.tl-rowbar .tl-rc-btn{min-height:44px}.tl-rowbar .tl-rc-btn{flex:0 0 auto}
+.tl-sub.tl-rc li{grid-template-areas:"m s" "t s" "a a"}.tl-sub.tl-rc .tl-rc-actions{grid-area:a}
+.tl-rc-text{margin:0;padding:12px;background:#fff;border:1px solid var(--line);border-radius:8px;font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere;max-height:min(60vh,520px);overflow:auto;user-select:text}
+.tl-rc-dialog .tl-actions{margin-top:4px}
+.tl-table{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:8px}
+.tl-table th,.tl-table td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.tl-table .r{text-align:right}
+.tl-table thead th{background:#F1EBDF;color:var(--ink);font-size:13px}.tl-table tfoot th,.tl-table tfoot td{font-weight:700;border-bottom:0;background:#F6F1E7}
+.tl-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:12px 0}
+.tl-stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}.tl-stat dt{font-size:13px;color:var(--muted)}.tl-stat dd{margin:2px 0 0;font-size:19px;font-weight:700;color:var(--ink);overflow-wrap:anywhere}
+.tl-sales{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px 14px;margin:12px 0 4px}
+.tl-sales h2{margin:0 0 8px;font-size:18px;color:var(--ink)}
+.tl-sales-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tl-sales-year{min-height:44px;min-width:96px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font:600 16px/1.2 inherit}
+.tl-sales-nav{min-width:44px;min-height:44px;padding:0 12px;font-size:22px;line-height:1}
+.tl-sales-legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:10px 0 6px;font-size:14px;color:var(--ink)}
+.tl-sales-key{display:inline-flex;align-items:center;gap:6px}
+.tl-swatch{width:14px;height:14px;border-radius:3px;display:inline-block}
+.tl-sales-figure{min-width:0}
+.tl-sales-svg{width:100%;height:auto;display:block;overflow:visible}
+.tl-sales-svg .tl-sales-ytick{font-size:12px;font-variant-numeric:tabular-nums}
+.tl-sales-grid{stroke:rgba(63,53,44,.2);stroke-width:1px;vector-effect:non-scaling-stroke}
+.tl-sales-zero{stroke:rgba(63,53,44,.45);stroke-width:1.5px;vector-effect:non-scaling-stroke}
+.tl-sales-svg g{cursor:pointer}
+.tl-sales-svg g:focus-visible .tl-sales-hit{stroke:#7A5530;stroke-width:2px;vector-effect:non-scaling-stroke}
+.tl-sales-months{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));margin:2px 0 0;min-width:0}
+.tl-sales-m{appearance:none;background:none;border:0;padding:2px 0 0;margin:0;min-height:0;font-family:inherit;font-weight:600;font-size:12px;line-height:1.15;color:#6B5E52;text-align:center;cursor:pointer;min-width:0;max-width:100%}
+.tl-sales-tip{margin:8px 0 0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.4}
+@media(max-width:420px){.tl-sales-svg .tl-sales-ytick{font-size:11px}}
+@media(max-width:700px){
+  .tl-sales-months{align-items:start}
+  .tl-sales-m{writing-mode:vertical-rl;text-orientation:mixed;justify-self:center;height:4.7em;font-size:11px;line-height:1;font-weight:600;padding:0}
+}
+.tl-sales-totals{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:8px 0 0}
+.tl-sales-totals>div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.tl-sales-totals dt{font-size:13px;color:var(--muted)}
+.tl-sales-totals dd{margin:2px 0 0;font-size:18px;font-weight:700;color:var(--ink)}
+.tl-sales-note{font-size:13px;color:var(--muted);margin:8px 0 0}
+.tl-report-head h2{margin:4px 0 2px}
+.tl-segs{display:flex;border:1px solid var(--green);border-radius:8px;overflow:hidden;background:#fff}
+.tl-seg{flex:1;min-height:44px;padding:0 14px;border:0;background:#fff;color:var(--green);font:600 14px/1.2 inherit;font-family:inherit;cursor:pointer}.tl-seg[aria-checked=true]{background:var(--green);color:#fff}
+.tl-r-controls .tl-actions{grid-column:1/-1;margin:0}.tl-r-controls>.fld:first-child{grid-column:1/-1}.tl-seg{white-space:normal}
+.badge.pay-refunded,.badge.pay-partially_refunded{background:#EDE3D0;color:#4a3418}
+@media(max-width:699px){
+  .tl-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .tl-table,.tl-table tbody,.tl-table tfoot,.tl-table tr{display:block;border:0;background:transparent}
+  .tl-table tr{border:1px solid var(--line);border-radius:8px;margin:0 0 6px;padding:6px 10px;background:#fff}
+  .tl-table td,.tl-table th{display:flex;justify-content:space-between;gap:12px;padding:3px 0;border:0;text-align:right;background:transparent!important}
+  .tl-table td::before{content:attr(data-label);color:var(--muted);text-align:left;font-weight:400}
+  .tl-table th[scope=row]{display:block;text-align:left;font-weight:700}.tl-table td:empty{display:none}
+}
+@media(min-width:1100px){.tl-sortrow .tl-dirtxt{position:static;width:auto;height:auto;overflow:visible;clip:auto}}
+@media(min-width:900px){
+  .tl-cols{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.3fr) minmax(0,1fr) 120px minmax(0,1.6fr) 24px;gap:10px;padding:0 13px 4px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  .tl-cols.pay{grid-template-columns:minmax(0,1.3fr) minmax(0,2fr) minmax(0,1fr) 120px minmax(0,1.6fr) 24px}.tl-cols .r{text-align:right}
+  .tl-head{grid-template-columns:minmax(0,2fr) minmax(0,1.3fr) minmax(0,1fr) 120px minmax(0,1.6fr) 24px;grid-template-areas:"main date first sum badges chev"}
+  .tl-list.pay .tl-head{grid-template-columns:minmax(0,1.3fr) minmax(0,2fr) minmax(0,1fr) 120px minmax(0,1.6fr) 24px;grid-template-areas:"date main first sum badges chev"}
+  .tl-lab{display:none}
+  .tl-toolbar{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+/* Johku (ei kirjanpitoon) – booking_41: erillinen tilastolohko (katkoviiva + hiekka-tausta) ja pieni merkki; ei sinistä */
+.tl-johku-block{margin:28px 0 12px;padding:12px 14px 14px;background:#EDE3D0;border:2px dashed rgba(43,58,48,.55);border-radius:var(--r)}
+.tl-johku-block h3{margin:0 0 4px;font-size:17px}.tl-johku-note{margin:0 0 6px;font-size:14px}
+.tl-johku-block .tl-stat{background:#F8F3E8}.tl-johku-block .tl-table{background:#F8F3E8}.tl-johku-block .tl-stat small{display:block;margin-top:2px;font-size:13px}
+.tl-johku-note[role=note],.tl-detail>.tl-johku-note{padding:8px 12px;margin:0 0 10px;background:#EDE3D0;border:1px dashed rgba(43,58,48,.55);border-radius:10px;font-size:14px;color:var(--ink)}
+.tl-badges .badge.src-johku{white-space:nowrap}
+/* Lahjakorttilista (booking_145): tiheät rivit. Kapealla 3 riviä (koodi+nimi / tuote+saldo / voimassa+tila+lähde; alkuarvo tiedoissa), >=900px yksi rivi. Ei vaakavieritystä. */
+.tl-list.gc{gap:0;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tl-list.gc>.tl-row{border:0;border-radius:0;border-top:1px solid var(--line)}.tl-list.gc>.tl-row:first-child{border-top:0}
+.tl-list.gc>.tl-row.open{box-shadow:inset 3px 0 0 var(--green)}
+.tl-list.gc .tl-head{grid-template-columns:auto minmax(0,1fr) auto 20px;grid-template-areas:"main who who chev" "prod prod sum chev" "date badges src chev";gap:2px 10px;padding:7px 10px;min-height:44px;font-size:14px;line-height:1.3}
+.tl-list.gc .tl-lab{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.tl-list.gc .tl-c{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;overflow-wrap:normal}
+.tl-list.gc .gc-who{grid-area:who}.tl-list.gc .gc-prod{grid-area:prod;color:var(--muted)}.tl-list.gc .gc-src{grid-area:src;text-align:right}
+.tl-list.gc .tl-sum{display:block;white-space:nowrap}.tl-list.gc .tl-sum small{font-size:12px}
+.tl-list.gc .tl-date span{font-size:13px;color:var(--muted)}
+.tl-list.gc .tl-badges{flex-wrap:wrap;gap:4px;white-space:normal;overflow:visible}.tl-list.gc .badge{font-size:12px;padding:1px 7px}
+.tl-list.gc .gc-code{font-size:14px;overflow-wrap:normal}.tl-list.gc .tl-name{font-weight:600}
+.gc-src-own{font-size:12px;color:var(--muted)}
+.tl-list.gc .tl-chev svg{width:18px;height:18px}
+@media(max-width:599px){.tl-list.gc .tl-sum small.muted{display:none}.tl-list.gc .gc-src{justify-self:end}}
+@media(min-width:900px){
+  .tl-cols.gc,.tl-list.gc .tl-head{grid-template-columns:150px minmax(0,1.3fr) minmax(0,1.7fr) 116px 108px minmax(0,1.1fr) 64px 20px;gap:10px}
+  .tl-list.gc .tl-head{grid-template-areas:"main who prod sum date badges src chev";padding:5px 12px;min-height:40px}
+  .tl-cols.gc{padding:0 13px 4px}.tl-list.gc .tl-sum{text-align:right}
+}
+@media print{
+  .top,.nav,.tl-noprint,.tl-tabs,.tl-banner{display:none!important}
+  body{background:#fff}#shell{display:block}main{padding:0;max-width:none}
+  .tl-panel-wrap[hidden]{display:none!important}.tl-stat,.tl-table tr,.tl-sec{break-inside:avoid}
+}
+/* Lahjakortit (Talous › Lahjakortit): kytkinrivi, koodit, tiedot-lista. Ei sinistä; tila kerrotaan aina tekstillä (ei pelkällä värillä). */
+.gc-top{justify-content:space-between;align-items:flex-start;margin:0 0 10px;gap:10px 16px}.gc-switches{min-width:0;flex:1 1 260px}
+.gc-sw-list{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.gc-sw{display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;border:1px solid var(--line);background:#fff;color:var(--ink)}
+.gc-sw.on{background:var(--okbg);color:var(--ok);border-color:rgba(29,77,43,.35)}.gc-sw.off{background:#ece8e3;color:#5b524a}
+.gc-sw-dot{width:9px;height:9px;border-radius:50%;background:currentColor;flex:none}.gc-sw.off .gc-sw-dot{background:transparent;border:2px solid currentColor}
+.gc-new{gap:8px;flex:0 0 auto}.btn.primary.gc-new{min-height:44px}
+.gc-code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.02em;color:var(--ink);overflow-wrap:anywhere}
+.gc-bigcode{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:4px 0 8px}.gc-bigcode strong{font:700 20px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink);overflow-wrap:anywhere}
+.gc-dl{display:grid;grid-template-columns:minmax(110px,max-content) minmax(0,1fr);gap:4px 14px;margin:0}.gc-dl dt{color:var(--muted);font-size:13px}.gc-dl dd{margin:0;overflow-wrap:anywhere}
+.gc-link{min-height:44px;padding:6px 10px}.gc-over{color:var(--err);font-weight:700}
+.chk{display:flex;align-items:center;gap:10px;min-height:44px;font-weight:600;color:var(--ink)}.chk input{width:22px;height:22px;flex:none}
+@media(max-width:420px){.gc-dl{grid-template-columns:minmax(0,1fr)}.gc-dl dt{margin-top:6px}}
+.gc-pdfbox{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:0 0 14px}.gc-pdfbox .tl-hint{margin:0;flex:1 1 220px}
+/* Lahjakortin toimitusvalinta (sopimus §13.11) */
+.gc-dlv{border:0;margin:0;padding:0;min-width:0;display:grid;gap:8px}
+.gc-dlv[hidden],.gc-when-fields[hidden],.fld[hidden]{display:none}
+.gc-dlv>legend{padding:0;margin:0 0 4px;font-weight:700;color:var(--ink)}
+.gc-radios{display:flex;flex-wrap:wrap;gap:8px}
+.gc-radio{display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card,#fff);cursor:pointer;flex:1 1 150px}
+.gc-radio input{width:22px;height:22px;min-height:22px;padding:0;margin:0;flex:none;accent-color:var(--green)}
+.gc-radio:has(input:checked){border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.gc-radio:has(input:focus-visible){outline:3px solid var(--ink);outline-offset:2px}
+.gc-ferr{color:var(--err);font-weight:600}.gc-ferr:empty{display:none}
+.gc-dl dd{white-space:pre-wrap}
+
+/* Tuotevalinta / hoito (booking_50): merkki listoilla, varoitus "valitsematta", valitsin (radio-painikkeet .srcset/.srcopt, 44 px) */
+.badge.opt{background:#EDE3D0;color:var(--green);border:1px solid rgba(43,58,48,.35);white-space:normal}
+.badge.opt-missing{border:1px solid #b9954a;white-space:normal}
+.opt-box{background:#fff}.opt-warn{margin:0 0 8px;color:var(--ink)}
+.opt-host{margin:4px 0}.optset{margin:0 0 8px}
+.opt-dd .badge{margin-left:0}
+.optrow{display:grid;gap:6px;padding:10px 0;border-top:1px solid var(--line)}
+.optrow .optlist{display:flex;flex-wrap:wrap;gap:6px}
+.optitem{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-weight:600;font-size:14px;cursor:pointer;font-family:inherit}
+.optitem.off{color:var(--muted);text-decoration:line-through;background:var(--bg)}
+.optitem:hover{border-color:var(--green)}
+@media (max-width:480px){.opt-host .srcopt,.optset .srcopt{flex:1 1 100%}.optset .srcopt span{justify-content:flex-start;width:100%}}
+.opt-reminder{margin:0 0 10px;padding:10px 12px;border:1px solid #b9954a;border-radius:8px;background:var(--warnbg);color:var(--ink)}
+.opt-reminder a{color:var(--ink);font-weight:700}
+.active-filters{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 10px}
+.filter-drawer-bar>.active-filters{flex:1 1 100%;margin:0}
+.active-filters[hidden]{display:none}
+.active-filters .chip{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:4px 8px 4px 12px;border:1px solid #b9954a;border-radius:8px;background:var(--warnbg);color:var(--ink);font-weight:600}
+.optcard{display:grid;gap:8px}
+/* Lahjakoodit / lunastuspyynnöt (§13.12) – hillitty: hiekka + tummanvihreä, ei sinistä */
+.vcl-top{align-items:flex-start;gap:12px;margin:0 0 8px}.vcl-top>div{min-width:0;flex:1 1 280px}.vcl-top .btn{flex:0 0 auto}.vcl-h{margin:0 0 4px;font-size:20px;color:var(--ink)}
+.vcl-sum{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.vcl-chip{min-height:32px;display:inline-flex;align-items:center;padding:4px 12px;border-radius:20px;background:#EDE3D0;color:var(--ink);border:1px solid rgba(43,58,48,.35);font-size:14px;font-weight:600}
+.vcl-chip.bad{background:var(--errbg);color:var(--err);border-color:rgba(123,29,18,.4)}.vcl-chip.warn{background:var(--warnbg);color:#6b4b00;border-color:rgba(107,75,0,.45)}
+.vcl-notes{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;color:var(--ink)}
+.tl-vc-unknown{padding:10px 12px;background:#EDE3D0;border:1px dashed rgba(43,58,48,.55);border-radius:10px}.tl-vc-unknown[hidden]{display:none}.tl-vc-unknown p{margin:0}
+.tl-row[data-stale="1"]{border-color:rgba(107,75,0,.55)}
+/* 5 välilehteä: kapealla näytöllä kaksi riviä (3+2), sana ei katkea kesken */
+@media(max-width:560px){.tl-tabs:has(>.tl-tabbtn:nth-child(5)){flex-wrap:wrap;gap:2px 4px;border-bottom:0}.tl-tabs:has(>.tl-tabbtn:nth-child(5)) .tl-tabbtn{flex:1 1 30%;border-bottom:2px solid var(--line);overflow-wrap:normal;hyphens:none}.tl-tabs:has(>.tl-tabbtn:nth-child(5)) .tl-tabbtn[aria-selected=true]{border-bottom-color:var(--green);box-shadow:none}}
+
+/* Pikakassa: isot kosketuskohteet, puhelin 2 saraketta, tabletti 3, yhteissumma vieressä */
+.pos-layout{display:grid;gap:12px;align-items:start}
+.pos-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pos-btn{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:4px;min-height:88px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);font:600 16px/1.2 inherit;text-align:left;cursor:pointer}
+.pos-btn:hover{border-color:var(--green)}
+.pos-name{font-size:16px}
+.pos-price{font-size:18px}
+.pos-lines-btn{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:36px;margin:0;padding:4px 12px;border-radius:10px;border:1px solid var(--green);background:var(--green);color:#fff;font-family:inherit;font-weight:600;font-size:15px;line-height:1.2;text-align:left;cursor:pointer}
+.pos-lines-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pos-lines-count{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:1.5em;height:1.35em;padding:0 6px;border-radius:999px;background:#EDE3D0;color:var(--green);font-size:13px;font-weight:700;line-height:1}
+.pos-panel{display:grid;gap:8px;margin-top:12px}
+.pos-line{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px}
+.pos-step{min-width:48px;min-height:48px;padding:0}
+.pos-qty{min-width:24px;text-align:center;font-weight:700}
+.pos-methods,.pos-flows{display:grid;gap:8px}
+.pos-method{display:flex;gap:10px;align-items:center;min-height:48px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.pos-method.is-off{opacity:.65}
+.pos-method input,.pos-flows input{width:22px;height:22px;min-height:0}
+.pos-side{position:sticky;bottom:76px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:8px}
+.pos-total-label{margin:0;color:var(--muted);font-weight:600}
+.pos-total{margin:0;font-size:2.4rem;font-weight:800;color:var(--ink);line-height:1.1}
+.pos-pay{min-height:56px;width:100%;font-size:18px}
+.pos-paid{display:grid;gap:8px;text-align:center}
+.pos-url{overflow-wrap:anywhere;font-size:14px}
+.pos-legal{font-size:13px}
+.pos-devices{margin-top:18px}
+.pos-edit{width:100%;margin:8px 0}
+.pos-tools{margin-top:22px;padding-top:12px;border-top:1px solid var(--line)}
+.pos-edit-link{appearance:none;display:inline-flex;align-items:center;min-height:44px;margin:0;padding:4px 2px;border:0;background:transparent;color:var(--gold);font:600 15px/1.3 inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.pos-edit-link:hover{color:var(--ink)}
+.pos-empty{grid-column:1/-1;display:grid;gap:8px;padding:8px 0}
+.pos-editor{display:grid;gap:10px;margin:4px 0 12px}
+.pos-overlay{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;background:rgba(20,14,8,.5);padding:0}
+.pos-dialog{width:100%;max-height:min(92dvh,760px);overflow:auto;background:#fff;color:var(--ink);border-radius:16px 16px 0 0;padding:8px 14px calc(16px + env(safe-area-inset-bottom));display:grid;gap:10px;box-shadow:0 -12px 40px rgba(0,0,0,.28)}
+.pos-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;background:#fff;z-index:1;padding:4px 0}
+.pos-dialog-head h2{margin:0;font-size:20px}
+.pos-amount{margin:0;font-size:2rem;font-weight:800;color:var(--ink);line-height:1.1}
+html.pos-modal-open,body.pos-modal-open{overflow:hidden}
+@media(min-width:700px){.pos-overlay{align-items:center;padding:20px}.pos-dialog{width:min(480px,100%);border-radius:16px;padding:8px 16px 18px}}
+.pos-editor .btn,.qr-hit,.qr-create{min-height:52px}
+.set-tabs{display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;padding:4px 0 10px;margin:0 0 12px}
+.set-tab{flex:0 0 auto;min-height:48px;padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);font:600 15px/1.2 inherit;text-decoration:none;display:inline-flex;align-items:center}
+.set-tab[aria-selected=true]{background:var(--green);color:#fff;border-color:var(--green)}
+.qr-hit{width:100%;display:flex;gap:8px;align-items:center;justify-content:flex-start;text-align:left}
+.qr-hit.is-on{background:var(--green);color:#fff;border-color:var(--green)}
+.qr-row{display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px}
+.qr-inc{display:flex;align-items:center;min-width:48px;min-height:48px}
+.qr-inc input{width:28px;height:28px}
+.qr-actions{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.qr-actions .btn{min-height:52px;flex:1 1 140px}
+.qr-sheet{display:grid;gap:16px}
+.qr-card{break-inside:avoid;text-align:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+.qr-card h2{margin:0 0 4px;font-size:22px}
+.qr-price{font-size:20px;font-weight:700;margin:0 0 8px}
+.qr-scan{font-size:18px;margin:8px 0 0}
+.qr-card svg{width:min(100%,280px);height:auto}
+@media(min-width:700px){.qr-sheet{grid-template-columns:1fr 1fr}}
+@media print{
+  .set-noprint,.top,.nav,.pos,.set-tabs{display:none!important}
+  .qr-print-root{display:block!important}
+  .qr-sheet{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .qr-card{border:0}
+  .qr-card svg{width:70mm;height:70mm}
+}
+/* Rich-teksti (Quill 2): laiskasti ladattu Snow-teema ja sen oma kompakti kuvakerivi (suomenkieliset aria-label/title).
+   Värit #2B3A30 / #F4EFE7 / #7A5530; Quillin oletussininen hover/aktiivinen väri ohitetaan. */
+.rich-field{display:grid;gap:0;min-width:0}
+.rich-field .rich-toolbar.ql-toolbar.ql-snow{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;padding:4px;border:1px solid #8b7f73;border-bottom:0;border-radius:8px 8px 0 0;background:var(--bg);font-family:inherit}
+.rich-field .rich-toolbar.ql-toolbar.ql-snow .ql-formats{display:inline-flex;align-items:center;gap:0;margin:0}
+.rich-field .rich-toolbar.ql-toolbar.ql-snow button{float:none;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;padding:8px;border-radius:6px;color:var(--green)}
+.rich-field .rich-toolbar.ql-toolbar.ql-snow button svg{width:20px;height:20px;float:none}
+.rich-field .rich-toolbar.ql-toolbar.ql-snow .ql-stroke{stroke:var(--green)}
+.rich-field .rich-toolbar.ql-toolbar.ql-snow .ql-fill,.rich-field .rich-toolbar.ql-toolbar.ql-snow .ql-stroke.ql-fill{fill:var(--green)}
+.rich-field .rich-toolbar.ql-toolbar.ql-snow button:hover,.rich-field .rich-toolbar.ql-toolbar.ql-snow button:focus{color:var(--gold);background:#fff}
+.rich-field .rich-toolbar.ql-toolbar.ql-snow button:hover .ql-stroke,.rich-field .rich-toolbar.ql-toolbar.ql-snow button:focus .ql-stroke{stroke:var(--gold)}
+.rich-field .rich-toolbar.ql-toolbar.ql-snow button:hover .ql-fill,.rich-field .rich-toolbar.ql-toolbar.ql-snow button:focus .ql-fill,.rich-field .rich-toolbar.ql-toolbar.ql-snow button:hover .ql-stroke.ql-fill,.rich-field .rich-toolbar.ql-toolbar.ql-snow button:focus .ql-stroke.ql-fill{fill:var(--gold)}
+.rich-field .rich-toolbar.ql-toolbar.ql-snow button.ql-active{color:#fff;background:var(--green)}
+.rich-field .rich-toolbar.ql-toolbar.ql-snow button.ql-active .ql-stroke{stroke:#fff}
+.rich-field .rich-toolbar.ql-toolbar.ql-snow button.ql-active .ql-fill,.rich-field .rich-toolbar.ql-toolbar.ql-snow button.ql-active .ql-stroke.ql-fill{fill:#fff}
+.rich-field .rich-toolbar.ql-toolbar.ql-snow button:focus-visible{outline:2px solid var(--gold);outline-offset:0}
+.rich-field .ql-container.ql-snow{border:1px solid #8b7f73;border-radius:0 0 8px 8px;background:#fff;color:var(--ink);font-family:inherit;font-size:inherit}
+.rich-field .rich-toolbar.ql-toolbar.ql-snow + .rich-link-dialog{border-radius:0;border-left:1px solid #8b7f73;border-right:1px solid #8b7f73}
+.rich-field .ql-editor{min-height:120px;max-height:50vh;overflow-y:auto;padding:10px 12px;line-height:1.45}
+.rich-field .ql-container.ql-snow:focus-within{border-color:var(--green);box-shadow:0 0 0 2px rgba(43,58,48,.25)}
+.rich-field .ql-snow .ql-editor h2{font-size:1.3rem;margin:.35em 0;color:var(--ink)}
+.rich-field .ql-snow .ql-editor h3{font-size:1.08rem;margin:.35em 0;color:var(--ink)}
+.rich-field .ql-editor ul,.rich-field .ql-editor ol{padding-left:1.2em;margin:.3em 0}
+.rich-field .ql-editor a{color:var(--gold);text-decoration:underline}
+.rich-field .ql-snow a{color:var(--gold)}
+.rich-field .ql-editor.ql-blank::before{color:var(--muted)}
+.rich-field .ql-snow .ql-tooltip{display:none!important}  /* linkki muokataan omassa suomenkielisessä kentässä */
+.rich-field .rich-link-dialog{display:flex;flex-wrap:wrap;align-items:center;gap:6px;border:1px solid var(--line);padding:6px;background:#fff}
+.rich-field .rich-link-dialog[hidden],.rich-field .rich-btn[hidden]{display:none}
+.rich-field .rich-link-dialog input{flex:1 1 160px;min-width:0;min-height:40px;padding:6px 8px}
+.rich-field .rich-btn{min-height:40px;padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--green);font:600 14px/1.2 system-ui,sans-serif;cursor:pointer}
+.rich-field .rich-btn:hover{color:var(--gold)}
+.rich-field .rich-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media(max-width:480px){.rich-field .rich-toolbar.ql-toolbar.ql-snow{gap:2px 1px;padding:3px}.rich-field .rich-toolbar.ql-toolbar.ql-snow button{width:30px;height:38px;padding:9px 5px}}
+@media(max-width:350px){.rich-field .rich-toolbar.ql-toolbar.ql-snow .ql-formats:last-child{display:none}}  /* kumoa/tee uudelleen vain, jos mahtuvat */
+@media(min-width:700px){.pos-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:800px){.pos-layout{grid-template-columns:minmax(0,1fr) 280px}.pos-side{position:sticky;top:72px;bottom:auto}}
+.set-page .card h2{margin:0 0 6px}
+.set-page .card h3{margin:14px 0 6px}
+.set-page .warnbox{background:var(--warnbg);border:1px solid rgba(107,75,0,.35);border-radius:12px;padding:12px 14px;color:var(--ink)}
+.set-page .warnbox p{margin:0 0 6px}
+.set-page .warnbox p:last-child{margin:0}
+.set-page .switch-row{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.set-page .switch-row p{margin:2px 0 0}
+.set-page .switch{position:relative;flex:none;width:52px;height:32px;margin-top:2px}
+.set-page .switch input{position:absolute;inset:0;width:100%;height:100%;min-height:0;margin:0;opacity:0;cursor:pointer}
+.set-page .switch i{display:block;width:52px;height:32px;border-radius:999px;background:#cfc6bb;border:1px solid #8b7f73;position:relative}
+.set-page .switch i::after{content:"";position:absolute;top:2px;left:2px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.set-page .switch input:checked+i{background:var(--green);border-color:var(--green)}
+.set-page .switch input:checked+i::after{left:22px}
+.set-page .switch input:focus-visible+i{outline:3px solid var(--gold);outline-offset:2px}
+.set-page .switch input:disabled+i{opacity:.55}
+.set-page .unit{display:flex;align-items:center;gap:8px}
+.set-page .unit input{max-width:120px}
+.set-page .unit span{font-weight:400;color:var(--muted)}
+.set-page .stat{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.set-page .stat:first-of-type{border-top:0;padding-top:0}
+.set-page .stat b{color:var(--ink);font-weight:600}
+.set-page .summary{margin:0;color:var(--ink);white-space:pre-line}
+.set-page .set-save{margin-top:4px}
+.set-page .linkrow{display:flex;align-items:center;min-height:44px;font-weight:600}
+@media(max-width:899px){.set-page .set-save .btn{width:100%}}
+body.shot #shell{display:flex;flex-direction:column;min-height:0}
+body.shot .top{position:static;order:1}
+body.shot main{order:2;padding-bottom:16px}
+body.shot .nav{position:static;order:3;height:auto;width:auto;flex-direction:row;border-right:0;border-top:1px solid var(--line)}
+
+/* Hallinnan navigaatio ja yläpalkki (paketti 05), 2026-10. Vain teeman värit (vihreä #2B3A30, hiekka #F4EFE7, kulta #7A5530 muuttujina), ei sinistä. */
+.top{gap:9px;isolation:isolate;z-index:50}
+.top .who{margin:0;font-size:11px;opacity:1}
+.top .who:not(.is-mock){position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.top .who.is-mock{padding:4px 7px;border:1px solid rgba(255,255,255,.55);border-radius:6px;white-space:normal;max-width:180px;color:#fff}
+.quick-search{flex:1 1 260px;position:relative;max-width:420px;min-width:0}
+.quick-search-box{position:relative}.quick-search-box input{height:38px;min-height:38px;border-color:rgba(255,255,255,.55);border-radius:7px;padding:7px 12px;font-size:14px}
+.quick-search-toggle{display:none}
+.quick-search-box input::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;display:none}   /* selaimen oma sininen tyhjennysrasti pois (ei sinistä); Escape sulkee tulokset */
+.quick-search-results{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:35;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:9px;box-shadow:0 9px 30px rgba(43,58,48,.27);max-height:55vh;overflow:auto;padding:6px}
+.quick-search-results .quick-result{display:block;color:var(--ink);text-decoration:none;min-height:44px;padding:11px 10px;border-radius:5px;font-size:13px}
+.quick-result:hover,.quick-result:focus-visible{background:var(--bg)}
+.quick-search-results p{padding:9px;margin:0}
+.top .quick-action{white-space:nowrap;display:inline-flex;align-items:center;gap:5px;text-decoration:none;min-height:38px;padding:6px 9px;font-size:13px;font-weight:600}
+.user-menu{position:relative;display:flex;align-items:center;margin-left:auto;gap:8px;min-width:0}
+.top .user-toggle{display:flex;align-items:center;gap:6px;max-width:220px;min-height:38px;padding:5px 9px;font-size:13px}
+.user-toggle #user-short{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-toggle #user-role{font-size:11px;color:#EDE3D0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-toggle #user-initial{display:none}
+.user-dropdown{position:absolute;right:0;top:calc(100% + 7px);z-index:40;width:min(290px,calc(100vw - 16px));background:#fff;color:var(--ink);box-shadow:0 10px 30px rgba(43,58,48,.33);border:1px solid var(--line);border-radius:10px;padding:12px;overflow-wrap:anywhere}
+.user-dropdown p{font-size:13px;margin:0 0 5px}.user-dropdown p:nth-child(2){color:var(--muted)}
+.user-dropdown a{display:block;padding:10px 0;min-height:44px;color:var(--green);font-weight:650}
+.user-dropdown #logout{color:var(--ink);border-color:var(--line);width:100%}
+.nav-toggle{display:none}
+.top [data-icon],.nav-toggle [data-icon]{display:inline-flex;align-items:center}.top [data-icon] .icon{width:20px;height:20px}
+.user-toggle [data-icon] .icon{width:16px;height:16px}
+.user-dropdown a{display:flex;align-items:center;gap:6px}.user-dropdown [data-icon] .icon{width:16px;height:16px}
+.nav-toggle [data-icon] .icon{width:26px;height:26px}
+.orders-workspace>.tl-tabs{margin-bottom:14px}
+.orders-workspace>.orders-panel{min-width:0}
+@media(max-width:899px){
+  :root{--side-narrow:54px;--side-wide:178px;--navh:0px}   /* alavalikko korvautuu sivupalkilla: tarranauhat (nb-bar) alareunaan */
+  #shell{min-width:0}
+  #shell main{margin-left:var(--side-narrow);max-width:none;min-width:0;padding:12px 10px 24px;width:auto}
+  #shell.nav-expanded main{margin-left:var(--side-wide)}
+  #shell .nav{position:fixed;top:56px;left:0;right:auto;bottom:0;z-index:20;width:var(--side-narrow);height:calc(100dvh - 56px);display:flex;flex-direction:column;align-items:stretch;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;background:#fff;border-right:1px solid var(--line);border-top:0;padding:4px 0 64px;box-shadow:2px 0 7px rgba(43,58,48,.07)}
+  #shell.nav-expanded .nav{width:var(--side-wide)}
+  #shell .nav a{flex:none;display:flex;align-items:center;justify-content:flex-start;gap:11px;min-height:43px;padding:8px 14px;font-size:13px;white-space:nowrap}
+  #shell .nav a[aria-current]{box-shadow:inset 3px 0 0 var(--green);background:var(--bg)}
+  #shell .nav .ico{flex:none;width:26px;height:26px}
+  #shell .nav .lbl{display:none}
+  #shell.nav-expanded .nav .lbl{display:inline}
+  #shell .nav-toggle{position:fixed;z-index:25;display:grid;place-items:center;left:0;bottom:env(safe-area-inset-bottom);height:49px;width:var(--side-narrow);font-size:28px;background:#fff;color:var(--green);border:1px solid var(--line);border-left:0;cursor:pointer}
+  #shell.nav-expanded .nav-toggle{width:var(--side-wide)}
+  #shell.nav-expanded .nav-toggle span{transform:rotate(180deg)}
+  .top{height:56px;min-height:56px;padding:5px 8px;gap:5px;flex-wrap:nowrap}
+  .brand{min-height:40px}.brand img{height:32px}
+  .top .quick-action{width:38px;min-width:38px;padding:4px;justify-content:center;font-size:20px}
+  .top .quick-action .action-label{display:none}
+  .quick-search{position:static;flex:0 0 38px;max-width:38px}
+  .quick-search-toggle{display:flex!important;align-items:center;justify-content:center;font-size:23px;min-width:38px;min-height:38px;padding:0}
+  .quick-search-box{display:none;position:absolute;top:54px;left:calc(var(--side-narrow) + 6px);right:6px;z-index:35;padding:8px;background:var(--green);border-radius:0 0 10px 10px;box-shadow:0 8px 20px rgba(0,0,0,.2)}
+  .quick-search-box.mobile-open{display:block}
+  .quick-search-box input{width:100%}
+  .quick-search-results{top:calc(100% + 2px)}
+  .user-menu{margin-left:auto;gap:3px;flex:0 1 auto}
+  .top .user-toggle{min-width:42px;max-width:76px;padding:3px 5px;gap:2px}
+  .user-toggle #user-short{display:none}
+  .user-toggle #user-initial{display:inline}
+  .user-toggle #user-role{max-width:36px;font-size:10px}
+  .top .who.is-mock{position:absolute;top:56px;right:4px;max-width:260px;background:var(--green);padding:3px 6px;z-index:15}
+}
+@media(max-width:360px){.top{padding-left:4px;padding-right:4px;gap:2px}.brand img{height:29px}.top .quick-action{min-width:33px;width:33px}.quick-search{flex-basis:33px}.quick-search-toggle{min-width:33px}}
+@media print{#shell .nav-toggle{display:none!important}}
+body.shot #shell .nav-toggle{display:none!important}
+body.shot #shell main{margin-left:0}
+body.shot #shell .nav{position:static;width:auto;height:auto;display:flex;flex-direction:row;overflow:auto;padding:0;border-right:0;border-top:1px solid var(--line);box-shadow:none}
+body.shot #shell .nav .lbl{display:inline}
+/* Hyvitys ↔ peruutus (booking_136): kyllä/ei-valinta, mobiilissa ei vaakavieritystä (390 px) */
+.rc-choice{display:grid;gap:8px;min-width:0;margin:0;padding:0;border:0}
+.rc-choice legend{font-weight:600;padding:0;margin-bottom:4px}
+.rc-choice .rc-hint,.rc-note{margin:0;overflow-wrap:anywhere}
+.rc-opt{min-width:0}.rc-opt>span{min-width:0;overflow-wrap:anywhere}
+.rc-opt input[type=radio]{width:22px;height:22px;min-height:0;padding:0;margin:1px 0 0;flex:none;accent-color:var(--green)}
+.rc-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.rc-actions .btn{flex:1 1 140px;min-width:0;white-space:normal;line-height:1.25;text-align:center}
+.dlg .stack,.dlg form{min-width:0}
+/* Päivän muistiinpanot ja henkilöstötiedotteet (paketti 04, booking_140). Vain teeman muuttujat (vihreä, hiekka, kullanruskea), ei uusia värejä. */
+.day-bulletins,.day-notes{max-width:760px;min-width:0;margin:0 0 12px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card)}
+.day-bulletins{border-left:6px solid var(--gold)}
+.day-memos-heading{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
+.day-bulletins h2,.day-notes h2{margin:0 0 6px;font-size:15px;font-weight:600;color:var(--green)}
+.day-memos-heading h2{margin:0}
+.day-bulletins .btn .icon,.day-notes .btn .icon{width:18px;height:18px}
+.bulletin-list,.day-note-list{list-style:none;padding:0;margin:6px 0 0}
+.bulletin-item,.day-note-entry{padding:8px 0;border-top:1px solid var(--line);min-width:0}
+.bulletin-item:first-child,.day-note-entry:first-child{border-top:0}
+.bulletin-head{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.bulletin-toggle{display:inline-flex;align-items:center;gap:4px;min-height:44px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer;text-align:left;background:transparent;border:0;padding:4px 0;text-decoration:underline;text-decoration-color:var(--gold);text-underline-offset:3px}
+.bulletin-toggle .icon{color:var(--gold);transition:transform .15s}.bulletin-toggle.open .icon{transform:rotate(180deg)}
+.bulletin-preview{font-weight:600;color:var(--ink);padding:4px 0}
+.bulletin-actions{display:flex;gap:6px;flex-wrap:wrap}
+.bulletin-period{display:block}
+.bulletin-full,.day-note-body{white-space:pre-wrap;overflow-wrap:anywhere;margin:4px 0;color:var(--text)}
+.day-note-entry{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
+.day-note-main{min-width:0;flex:1}
+.day-note-form{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:10px}
+.day-note-form textarea{flex:1 1 240px;min-height:64px;max-width:100%}
+.res-note{display:block;margin:2px 0;padding:2px 0 2px 8px;font-size:13px;color:var(--text);white-space:pre-wrap;overflow-wrap:anywhere;border-left:2px solid var(--gold)}
+.res-note-editor textarea{width:100%}
+
+/* Yhteinen vieritysankkurien offset: hallinnan kiinteä yläpalkki. */
+.nbform, .nb-result, .nb-err, .nb-slots, [data-testid="booking-form"],
+[data-testid="resource-booking-form"], [data-testid="old-booking-form"],
+[data-testid="availability"], .ok-box, .slotpick, .err, .card.nb-sec, .nbform .row,
+.vc-notice { scroll-margin-top: 84px; }
+/* Paketti 11: Kävijät-välilehti (talous-analytics.js) */
+.tl-arange[aria-pressed=true]{background:var(--green);color:var(--card)}
+.tl-table-scroll{overflow-x:auto;margin:0 0 10px}
+.tl-analytics-step{margin:0 0 10px}.tl-analytics-bar{background:var(--line);border-radius:5px;margin:4px 0}
+.tl-analytics-fill{display:block;height:12px;border-radius:5px;background:var(--green)}
+.tl-analytics-kpi{margin:8px 0 0;font-weight:600}
+/* vuosikorttikoodi kassalla (booking_146): koodi isona, ei sinistä; tekstien kontrasti ≥ 4,5:1 */
+.ac-panel{display:grid;gap:8px}
+.ac-label{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.ac-code{display:block;font:700 30px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.12em;color:var(--green);background:var(--bg);border:1px solid var(--green);border-radius:8px;padding:12px 14px;user-select:all;-webkit-user-select:all;overflow-wrap:anywhere}
+.ac-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.ac-valid{margin:0;font-weight:600;color:var(--ink)}
+.ac-mail{margin:0;padding:8px 10px;border-radius:8px;border-left:4px solid}
+.ac-mail.ok{background:var(--okbg);color:var(--ok);border-color:var(--ok)}
+.ac-mail.warn{background:var(--warnbg);color:var(--ink);border-color:var(--gold)}
+.ac-mail.err{background:var(--errbg);color:var(--err);border-color:var(--err)}
+.ac-tell{margin:0;font-size:14px}
+/* booking_158: Tapahtumat-näkymä. Vain teeman muuttujat (vihreä, hiekka, kullanruskea), ei uusia värejä. */
+.ev-list,.ev-occ,.ev-occ-mini,.ev-block-list,.ev-block-ro{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.ev-card{display:grid;gap:8px}.ev-name{margin:0;font-size:1.15rem;overflow-wrap:anywhere}.ev-name a{color:var(--green)}
+.ev-occ-mini li{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;font-size:.95rem}
+.ev-note{background:var(--bg);border-left:4px solid var(--gold);color:var(--ink);padding:10px 12px;border-radius:8px;margin:8px 0}
+.ev-warn{background:var(--warnbg);color:var(--ink);padding:6px 10px;border-radius:8px;margin:4px 0 0;font-size:.92rem}
+.ev-filters{gap:12px;align-items:center;margin:8px 0 12px}
+.ev-chan{border:1px solid var(--line);margin:12px 0}.ev-chan legend{font-weight:600;color:var(--ink);padding:0 4px}
+.ev-add{margin:12px 0}.ev-add h2{margin:0;font-size:1.05rem}
+.ev-occ-item{display:grid;gap:8px}.ev-occ-item.off{opacity:.85;border-style:dashed}.ev-occ-label{color:var(--ink);overflow-wrap:anywhere}
+.ev-occ-actions{gap:6px}
+.ev-blocks{border-top:1px solid var(--line);padding-top:10px}.ev-blocks h3{margin:0;font-size:1rem}
+.ev-block-row{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--card)}.ev-block-row.bad{border-color:var(--err)}
+.ev-block-row .row{gap:8px;align-items:flex-end}
+.ev-tl{display:grid;gap:4px;margin:6px 0;max-width:720px}
+.ev-tl-scale{display:flex;justify-content:space-between;font-size:.85rem}
+.ev-tl-row{display:grid;grid-template-columns:minmax(90px,30%) 1fr;gap:8px;align-items:center;font-size:.9rem}
+.ev-tl-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.ev-tl-track{position:relative;height:14px;background:var(--bg);border-radius:7px;border:1px solid var(--line)}
+.ev-tl-bar{position:absolute;top:0;bottom:0;border-radius:7px}
+.ev-tl-bar.occ{background:var(--green)}.ev-tl-bar.excl{background:var(--gold)}
+.ev-tl-bar.shared{background:repeating-linear-gradient(45deg,var(--gold) 0 6px,var(--heaterbar) 6px 12px)}
+.ev-conflicts ul{margin:6px 0 0;padding-left:20px}
+@media (max-width:600px){.ev-tl-row{grid-template-columns:1fr}.ev-block-row .row>*{flex:1 1 100%}}
+/* booking_173: kumppanilahjakortin lunastus (tilauksen laatikko + Tarkista-osio). Tiivis rivi; vain teeman muuttujat (vihreä, hiekka, kulta). */
+.vcr-row{display:grid;gap:4px;padding:10px 0;border-top:1px solid var(--line)}
+.vcr-row:first-of-type{border-top:0}
+.vcr-line{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.vcr-code{font:700 16px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.05em;color:var(--ink);overflow-wrap:anywhere;user-select:all}
+.vcr-kv{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px;color:var(--text)}
+.vcr-k{color:var(--muted);font-size:14px}
+.vcr-sel{min-height:36px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
+.vcr-meta{margin:0;font-size:14px}
+.vcr-meta a{color:var(--gold);font-weight:600}
+.vcr-warn{margin:0;padding:6px 10px;border-left:4px solid var(--gold);background:var(--warnbg);color:var(--ink);font-size:14px}
+.vcr-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.vcr-actions .btn{text-decoration:none}
+.vcr-nourl{font-size:14px}
+.vcr-confirm{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.vcr-confirm p{margin:0 0 6px}
+.vcr-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px}
+.vcr-chip.on{background:var(--green);color:var(--card);border-color:var(--green)}
+.vcr-group h3{margin:10px 0 2px;font-size:15px}
+.vcr-box h3{display:flex;align-items:center;gap:6px}
+/* booking_174: lahjakortin arvo käsin vahvistuksessa + erotuksen maksulinkki. Vain teeman muuttujat (vihreä, hiekka, kulta, tumma teksti), ei sinistä; kapealla näytöllä ei vaakavieritystä. */
+.vcr-field{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;margin:0 0 8px;max-width:22rem}
+.vcr-value{width:100%;max-width:12rem;min-height:40px;padding:6px 10px;border:1px solid var(--muted);border-radius:8px;background:var(--card);color:var(--ink);font:inherit;font-size:16px}
+.vcr-value[aria-invalid=true]{border-color:var(--err);border-width:2px}
+.vcr-hint{font-size:14px;overflow-wrap:anywhere}
+.vcr-diff{margin:0 0 6px;padding:6px 10px;border-left:4px solid var(--gold);background:var(--card);color:var(--ink);font-size:14px;overflow-wrap:anywhere}
+.vcr-bad{margin:0 0 6px;color:var(--err);font-weight:600;font-size:14px;overflow-wrap:anywhere}
+.vcr-confirm{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.vcr-confirm .row.wrap .btn{white-space:normal}
+.vcr-confirm .btn.primary:disabled{opacity:1;background:var(--bg);color:var(--muted);border-color:var(--muted);cursor:not-allowed}
+
+/* Varausdialogi 04: selkeä järjestys ja maksulinkin takaraja */
+/* Varausdialogi 04 – sama hallinnan väri- ja komponenttijärjestelmä. */
+.rd-dialog { gap: 12px; min-width: 0; }
+.rd-dialog > * { min-width: 0; }
+.rd-summary { padding: 4px 2px 8px; }
+.rd-when { display: block; font-size: 19px; font-weight: 600; line-height: 1.45; }
+.rd-meta { margin-top: 4px; overflow-wrap: anywhere; }
+.rd-badges { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+.rd-alerts { margin-top: 10px; }
+.rd-alert { padding: 10px 12px; border: 1px solid var(--line); background: var(--warnbg); border-radius: var(--r); display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+.rd-card { padding: 13px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); min-width: 0; }
+.rd-card h3 { font-size: 1rem; margin: 0 0 10px; }
+.rd-card h4 { font-size: .92rem; margin: 10px 0 6px; }
+.rd-customer .rd-contact { display: flex; flex-direction: column; gap: 2px; }
+.rd-contact a { min-height: 44px; display: inline-flex; align-items: center; max-width: 100%; overflow-wrap: anywhere; word-break: break-word; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.rd-contact strong { font-weight: 600; }
+.rd-contact p { margin: 4px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.rd-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.rd-actions .btn { flex: 1 1 145px; min-height: 44px; white-space: normal; overflow-wrap: anywhere; }
+.rd-actions .btn:first-child.primary { flex-grow: 2; }
+.rd-payment .tl-sums { margin: 0 0 6px; }
+.rd-payment-actions { display: flex; flex-direction: column; gap: 7px; }
+.rd-payment .order-link { display: inline-flex; align-items: center; min-height: 44px; max-width: 100%; overflow-wrap: anywhere; }
+.rd-voucher[hidden], .rd-more[hidden], .rd-card[hidden], .rd-actions[hidden], .rd-secondary[hidden] { display: none; }
+.rd-contents .addons-box { min-width: 0; }
+.rd-contents .addons-box .resrow { min-width: 0; }
+.rd-contents .addons-box .resrow span { overflow-wrap: anywhere; }
+.rd-contents .opt-box { border: 0; padding: 0; margin: 0; }
+.rd-contents .opt-box + .addons-box { border-top: 1px solid var(--line); margin-top: 10px; padding-top: 7px; }
+.rd-contents .opt-box[hidden] + .addons-box { border: 0; margin-top: 0; padding-top: 0; }
+.rd-secondary { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 12px; align-items: center; }
+.rd-secondary .btn { min-height: 44px; white-space: normal; }
+.rd-secondary .rd-danger { margin-left: auto; }
+.rd-more { border: 1px solid var(--line); background: var(--card); border-radius: var(--r); padding: 0 12px; }
+.rd-more summary { display: list-item; cursor: pointer; min-height: 44px; padding-top: 11px; padding-bottom: 10px; font-weight: 600; }
+.rd-more[open] > summary { border-bottom: 1px solid var(--line); margin-bottom: 10px; }
+.rd-more .resbox { padding: 0; margin: 8px 0; border: 0; background: none; }
+.rd-more .resbox .kv, .rd-more .kv { min-width: 0; }
+.rd-more .moverow { margin: 4px 0 12px; }
+.rd-more .moverow .fld { display: block; }
+.rd-more .moverow input { max-width: 100%; }
+.rd-more .moverow .btn { min-height: 44px; margin-top: 10px; }
+.rd-more .rd-billing { margin-bottom: 12px; }
+.rd-dialog textarea { width: 100%; resize: vertical; min-height: 60px; }
+.rd-dialog button, .rd-dialog input, .rd-dialog select { max-width: 100%; }
+.pl-deadline { display: block; margin: 4px 0; }
+.pl-deadline .pl-toggle { min-height: 44px; display: flex; align-items: center; gap: 9px; cursor: pointer; }
+.pl-deadline .pl-days { margin-top: 8px; }
+.pl-deadline .pl-days[hidden] { display: none; }
+.pl-deadline input[type=checkbox] { width: 20px; height: 20px; }
+.pl-deadline input[type=number] { max-width: 150px; }
+@media (max-width: 699px) {
+  .rd-dialog { gap: 12px; }
+  .rd-actions { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; }
+  .rd-actions .btn { width: 100%; min-width: 0; }
+  .rd-actions .btn:first-child.primary { grid-column: 1 / -1; }
+  .rd-secondary { display: flex; flex-wrap: wrap; }
+  .rd-secondary .rd-danger { flex: 1 1 100%; margin-left: 0; }
+  .rd-when { font-size: 18px; }
+  .rd-more .kv { grid-template-columns: minmax(0,110px) minmax(0,1fr); }
+}
+@media (min-width: 700px) {
+  .rd-more .kv, .rd-dialog .kv { grid-template-columns: minmax(0,150px) minmax(0,1fr); }
+}

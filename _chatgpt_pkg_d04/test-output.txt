@@ -1,0 +1,109 @@
+Pohja main: f19cb1d601ec29a95e988c4183f10816f2b67715
+GitHub kirjoitusoikeus: 403 Resource not accessible by integration
+
+NODE: alkuperäisistä GitHub Pages -artifaktin admin-lähteistä rakennettu paikallinen testrepo
+Komento: node --test booking/tests/varausdialogi-04.test.mjs
+TAP version 13
+# Subtest: D1 ja D4: näkyvyys ja napin järjestys
+ok 1 - D1 ja D4: näkyvyys ja napin järjestys
+  ---
+  duration_ms: 15.154158
+  type: 'test'
+  ...
+# Subtest: D2: saapuminen vasta Helsingin varauspäivästä alkaen
+ok 2 - D2: saapuminen vasta Helsingin varauspäivästä alkaen
+  ---
+  duration_ms: 1.504535
+  type: 'test'
+  ...
+# Subtest: D3: flow pois, maksulinkki silti näkyvissä
+ok 3 - D3: flow pois, maksulinkki silti näkyvissä
+  ---
+  duration_ms: 1.092275
+  type: 'test'
+  ...
+# Subtest: Käyttöoikeudet ja Johku estävät niihin liittyvät napit
+ok 4 - Käyttöoikeudet ja Johku estävät niihin liittyvät napit
+  ---
+  duration_ms: 0.654816
+  type: 'test'
+  ...
+# Subtest: D5: lisäpalveluiden muokkaus vain korjauksiin, kun lisäosto toimii
+ok 5 - D5: lisäpalveluiden muokkaus vain korjauksiin, kun lisäosto toimii
+  ---
+  duration_ms: 0.952023
+  type: 'test'
+  ...
+# Subtest: Tilasiirron rajoitukset
+ok 6 - Tilasiirron rajoitukset
+  ---
+  duration_ms: 0.143697
+  type: 'test'
+  ...
+# Subtest: Asiakkaan turvalliset yhteystietolinkit
+ok 7 - Asiakkaan turvalliset yhteystietolinkit
+  ---
+  duration_ms: 1.22899
+  type: 'test'
+  ...
+# Subtest: D6: ei takarajaa oletuksena, valinnainen 1–60 päivän takaraja
+ok 8 - D6: ei takarajaa oletuksena, valinnainen 1–60 päivän takaraja
+  ---
+  duration_ms: 0.327042
+  type: 'test'
+  ...
+# Subtest: UI04: järjestys, testidit, suljetut harvinaiset osiot ja null-turvallisuus
+ok 9 - UI04: järjestys, testidit, suljetut harvinaiset osiot ja null-turvallisuus
+  ---
+  duration_ms: 0.784512
+  type: 'test'
+  ...
+# Subtest: UI04: silta ei tee DOM-jälkikäsittelyä, vaan antaa flow-parametrin
+ok 10 - UI04: silta ei tee DOM-jälkikäsittelyä, vaan antaa flow-parametrin
+  ---
+  duration_ms: 0.77715
+  type: 'test'
+  ...
+# Subtest: UI04: takarajaohjaimen alkuvalinta on pois ja kentän päiväraja 60
+ok 11 - UI04: takarajaohjaimen alkuvalinta on pois ja kentän päiväraja 60
+  ---
+  duration_ms: 0.238068
+  type: 'test'
+  ...
+# Subtest: UI04: FI/EN-avainluettelo vastaa pending-import-78-tiedostoa
+ok 12 - UI04: FI/EN-avainluettelo vastaa pending-import-78-tiedostoa
+  ---
+  duration_ms: 0.92275
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 120.511097
+
+NODE: kaikkien changed/-hakemiston .js/.mjs-tiedostojen node --check
+TULOS: ALL_CHANGED_NODE_CHECK_PASS (ei syntaksivirheitä)
+
+Tapio-dev, Supabase project aoejjmfzulhkhxbehphs
+BEGIN; kuusi CREATE OR REPLACE FUNCTION -määrittelyä, testidata; ROLLBACK;
+Todellinen osajoukkotestin SQL-tulos:
+TESTRESULT pass=8 fail=0 errors=
+
+Muuttuneiden funktioiden md5 / ACL:
+_create_link_payment:          533ac9af831c0c11e1f504e377a17827 -> 6cde7509c5bcf83ff12c40ab5c6f241f   ACL sama
+admin_create_payment_link:    fef2fe9aa3acf79b233086c133809918 -> 80004933a80f77a10fcf625f493a20ef   ACL sama
+admin_add_to_order:           f615f168c9af7a2f721ab2e9a7f59559 -> 245597cfe3ffa2db3d44cc8f0954e5f7   ACL sama
+_vc_redeem:                  6f52789346960d95370169446a61451b -> 04a27c3bbf7ae4b5c8e05d6aa5535d49   ACL sama
+vismapay_payment_apply:       03fbbd2486b2c22dfa02d7ec84da626f -> fd0a86e9291a66b043e7a9da6b4d6dee   ACL sama
+mobilepay_payment_prepare:    779fa5276d12e3a671a7ac394310fe97 -> a63e996709b88f91713418e8700dc8df   ACL sama
+Rollback-tarkistuksessa kaikki kuusi palautuivat vanhoihin md5-arvoihin.
+Erillisessä kyselyssä vahvistettu alkuperäinen _create_link_payment-md5 ROLLBACKin jälkeen: 533ac9af831c0c11e1f504e377a17827
+
+AJAMATTA: varsinainen t184-tiedoston testiajo; t174,t176,t177,t178; koko repon node-testit; build-pages; e2e/Playwright.
+Playwright paikallinen HTTP ja file:/// -navigaatio: net::ERR_BLOCKED_BY_ADMINISTRATOR
+GitHub PR ja haara: 403 Resource not accessible by integration

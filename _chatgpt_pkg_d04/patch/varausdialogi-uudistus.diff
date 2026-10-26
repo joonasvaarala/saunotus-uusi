@@ -1,0 +1,1895 @@
+--- a/booking/admin/admin.css
++++ b/booking/admin/admin.css
+@@ -954,3 +954,68 @@
+ .vcr-confirm{min-width:0;max-width:100%;overflow-wrap:anywhere}
+ .vcr-confirm .row.wrap .btn{white-space:normal}
+ .vcr-confirm .btn.primary:disabled{opacity:1;background:var(--bg);color:var(--muted);border-color:var(--muted);cursor:not-allowed}
++
++/* Varausdialogi 04: selkeä järjestys ja maksulinkin takaraja */
++/* Varausdialogi 04 – sama hallinnan väri- ja komponenttijärjestelmä. */
++.rd-dialog { gap: 12px; min-width: 0; }
++.rd-dialog > * { min-width: 0; }
++.rd-summary { padding: 4px 2px 8px; }
++.rd-when { display: block; font-size: 19px; font-weight: 600; line-height: 1.45; }
++.rd-meta { margin-top: 4px; overflow-wrap: anywhere; }
++.rd-badges { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
++.rd-alerts { margin-top: 10px; }
++.rd-alert { padding: 10px 12px; border: 1px solid var(--line); background: var(--warnbg); border-radius: var(--r); display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
++.rd-card { padding: 13px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); min-width: 0; }
++.rd-card h3 { font-size: 1rem; margin: 0 0 10px; }
++.rd-card h4 { font-size: .92rem; margin: 10px 0 6px; }
++.rd-customer .rd-contact { display: flex; flex-direction: column; gap: 2px; }
++.rd-contact a { min-height: 44px; display: inline-flex; align-items: center; max-width: 100%; overflow-wrap: anywhere; word-break: break-word; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
++.rd-contact strong { font-weight: 600; }
++.rd-contact p { margin: 4px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
++.rd-actions { display: flex; flex-wrap: wrap; gap: 8px; }
++.rd-actions .btn { flex: 1 1 145px; min-height: 44px; white-space: normal; overflow-wrap: anywhere; }
++.rd-actions .btn:first-child.primary { flex-grow: 2; }
++.rd-payment .tl-sums { margin: 0 0 6px; }
++.rd-payment-actions { display: flex; flex-direction: column; gap: 7px; }
++.rd-payment .order-link { display: inline-flex; align-items: center; min-height: 44px; max-width: 100%; overflow-wrap: anywhere; }
++.rd-voucher[hidden], .rd-more[hidden], .rd-card[hidden], .rd-actions[hidden], .rd-secondary[hidden] { display: none; }
++.rd-contents .addons-box { min-width: 0; }
++.rd-contents .addons-box .resrow { min-width: 0; }
++.rd-contents .addons-box .resrow span { overflow-wrap: anywhere; }
++.rd-contents .opt-box { border: 0; padding: 0; margin: 0; }
++.rd-contents .opt-box + .addons-box { border-top: 1px solid var(--line); margin-top: 10px; padding-top: 7px; }
++.rd-contents .opt-box[hidden] + .addons-box { border: 0; margin-top: 0; padding-top: 0; }
++.rd-secondary { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 12px; align-items: center; }
++.rd-secondary .btn { min-height: 44px; white-space: normal; }
++.rd-secondary .rd-danger { margin-left: auto; }
++.rd-more { border: 1px solid var(--line); background: var(--card); border-radius: var(--r); padding: 0 12px; }
++.rd-more summary { display: list-item; cursor: pointer; min-height: 44px; padding-top: 11px; padding-bottom: 10px; font-weight: 600; }
++.rd-more[open] > summary { border-bottom: 1px solid var(--line); margin-bottom: 10px; }
++.rd-more .resbox { padding: 0; margin: 8px 0; border: 0; background: none; }
++.rd-more .resbox .kv, .rd-more .kv { min-width: 0; }
++.rd-more .moverow { margin: 4px 0 12px; }
++.rd-more .moverow .fld { display: block; }
++.rd-more .moverow input { max-width: 100%; }
++.rd-more .moverow .btn { min-height: 44px; margin-top: 10px; }
++.rd-more .rd-billing { margin-bottom: 12px; }
++.rd-dialog textarea { width: 100%; resize: vertical; min-height: 60px; }
++.rd-dialog button, .rd-dialog input, .rd-dialog select { max-width: 100%; }
++.pl-deadline { display: block; margin: 4px 0; }
++.pl-deadline .pl-toggle { min-height: 44px; display: flex; align-items: center; gap: 9px; cursor: pointer; }
++.pl-deadline .pl-days { margin-top: 8px; }
++.pl-deadline .pl-days[hidden] { display: none; }
++.pl-deadline input[type=checkbox] { width: 20px; height: 20px; }
++.pl-deadline input[type=number] { max-width: 150px; }
++@media (max-width: 699px) {
++  .rd-dialog { gap: 12px; }
++  .rd-actions { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; }
++  .rd-actions .btn { width: 100%; min-width: 0; }
++  .rd-actions .btn:first-child.primary { grid-column: 1 / -1; }
++  .rd-secondary { display: flex; flex-wrap: wrap; }
++  .rd-secondary .rd-danger { flex: 1 1 100%; margin-left: 0; }
++  .rd-when { font-size: 18px; }
++  .rd-more .kv { grid-template-columns: minmax(0,110px) minmax(0,1fr); }
++}
++@media (min-width: 700px) {
++  .rd-more .kv, .rd-dialog .kv { grid-template-columns: minmax(0,150px) minmax(0,1fr); }
++}
+--- a/booking/admin/options-mock.js
++++ b/booking/admin/options-mock.js
+@@ -668,7 +668,7 @@
+     admin_create_payment_link: (a) => {
+       need('payments.manage');
+       const o = st.posOrders.find((x) => x.order_id === a.p_order_id);
+-      return { ok: true, payment_id: 1, link_path: '/maksa/?p=11111111-2222-4333-8444-555555555555', amount: o?.total ?? 0, online_payment_enabled: false };
++      return { ok: true, payment_id: 1, link_path: '/maksa/?p=11111111-2222-4333-8444-555555555555', amount: o?.total ?? 0, expires_at: a.p_expires_days == null ? null : new Date(Date.now() + a.p_expires_days * 864e5).toISOString(), online_payment_enabled: false };
+     },
+     admin_pos_send_link: (a) => {
+       needAny('pos.use', 'settings.edit');
+--- a/booking/admin/orders-texts.js
++++ b/booking/admin/orders-texts.js
+@@ -7,6 +7,32 @@
+ 
+ export const ORDER_TEXTS = {
+   fi: {
++    'ui.admin.res.order_no': 'Tilaus #{{var:no}}',
++    'ui.admin.res.summary_label': 'Varauksen yhteenveto',
++    'ui.admin.res.persons_shared': '{{var:n}} hlö · yleinen vuoro',
++    'ui.admin.res.persons_private': '{{var:n}} hlö · yksityisvuoro',
++    'ui.admin.res.hold_until': 'Pito päättyy klo {{var:time}}',
++    'ui.admin.res.customer': 'Asiakas',
++    'ui.admin.res.call': 'Soita asiakkaalle: {{var:phone}}',
++    'ui.admin.res.email': 'Lähetä sähköpostia: {{var:email}}',
++    'ui.admin.res.customer_message': 'Asiakkaan viesti',
++    'ui.admin.res.payment_title': 'Tilaus ja maksu',
++    'ui.admin.res.contents_title': 'Varauksen sisältö',
++    'ui.admin.res.more_details': 'Lisätiedot',
++    'ui.admin.res.move_title': 'Siirrä toiseen tilaan',
++    'ui.admin.res.move_reason': 'Siirron syy (valinnainen)',
++    'ui.admin.res.move_button': 'Siirrä tilaan {{var:space}}',
++    'ui.admin.res.move_help': 'Siirto onnistuu, jos kohdetila on vapaa ja tuotteella on sille sääntö.',
++    'ui.admin.res.other_actions': 'Muut toiminnot',
++    'ui.admin.res.no_show_title': 'Merkitäänkö varaus tilaan Ei saapunut?',
++    'ui.admin.res.no_show_text': 'Asiakas ei saapunut varaukseen. Maksuja ei hyvitetä automaattisesti.',
++    'ui.admin.res.no_show_submit': 'Merkitse: ei saapunut',
++    'ui.admin.orders.link_set_deadline': 'Aseta takaraja',
++    'ui.admin.orders.link_deadline_help': 'Ilman takarajaa linkki on voimassa, kunnes tilaus on maksettu tai linkki korvataan uudella.',
++    'ui.admin.orders.link_deadline_days': 'Takaraja (päivää)',
++    'ui.admin.orders.link_deadline_bad': 'Takarajan on oltava {{var:min}}–{{var:max}} päivää.',
++    'ui.admin.orders.link_no_deadline': 'Linkillä ei ole takarajaa.',
++    'ui.admin.orders.link_valid_until': 'Linkki on voimassa {{var:date}} asti.',
+     'ui.admin.orders.pay_filter': 'Maksutila',
+     'ui.admin.orders.pay_paid': 'Maksetut',
+     'ui.admin.orders.pay_unpaid': 'Maksamattomat',
+@@ -61,6 +87,32 @@
+     'ui.admin.res.payment_link': 'Luo maksulinkki',
+   },
+   en: {
++    'ui.admin.res.order_no': 'Order #{{var:no}}',
++    'ui.admin.res.summary_label': 'Booking summary',
++    'ui.admin.res.persons_shared': '{{var:n}} people · shared session',
++    'ui.admin.res.persons_private': '{{var:n}} people · private session',
++    'ui.admin.res.hold_until': 'Hold expires at {{var:time}}',
++    'ui.admin.res.customer': 'Customer',
++    'ui.admin.res.call': 'Call the customer: {{var:phone}}',
++    'ui.admin.res.email': 'Email the customer: {{var:email}}',
++    'ui.admin.res.customer_message': 'Message from the customer',
++    'ui.admin.res.payment_title': 'Order and payment',
++    'ui.admin.res.contents_title': 'Booking contents',
++    'ui.admin.res.more_details': 'More details',
++    'ui.admin.res.move_title': 'Move to another space',
++    'ui.admin.res.move_reason': 'Reason for the move (optional)',
++    'ui.admin.res.move_button': 'Move to {{var:space}}',
++    'ui.admin.res.move_help': 'The move works if the target space is free and the product has a rule for it.',
++    'ui.admin.res.other_actions': 'Other actions',
++    'ui.admin.res.no_show_title': 'Mark the booking as no-show?',
++    'ui.admin.res.no_show_text': 'The customer did not arrive. Payments are not refunded automatically.',
++    'ui.admin.res.no_show_submit': 'Mark as no-show',
++    'ui.admin.orders.link_set_deadline': 'Set a deadline',
++    'ui.admin.orders.link_deadline_help': 'Without a deadline the link stays valid until the order is paid or the link is replaced.',
++    'ui.admin.orders.link_deadline_days': 'Deadline (days)',
++    'ui.admin.orders.link_deadline_bad': 'The deadline must be {{var:min}}–{{var:max}} days.',
++    'ui.admin.orders.link_no_deadline': 'The link has no deadline.',
++    'ui.admin.orders.link_valid_until': 'The link is valid until {{var:date}}.',
+     'ui.admin.orders.pay_filter': 'Payment status',
+     'ui.admin.orders.pay_paid': 'Paid',
+     'ui.admin.orders.pay_unpaid': 'Unpaid',
+--- /dev/null
++++ b/booking/admin/payment-link-logic.js
+@@ -0,0 +1,18 @@
++// Varausdialogi 04: maksulinkin valinnainen takaraja (1–60 päivää).
++export const LINK_DEADLINE = Object.freeze({ min: 1, max: 60, initial: 14 });
++
++export function linkExpiresDays({ enabled, days } = {}) {
++  if (!enabled) return { ok: true, expiresDays: undefined };
++  if ((typeof days !== 'string' && typeof days !== 'number') || String(days).trim() === '')
++    return { ok: false, error: 'link_deadline_bad' };
++  const n = Number(days);
++  if (!Number.isInteger(n) || n < LINK_DEADLINE.min || n > LINK_DEADLINE.max)
++    return { ok: false, error: 'link_deadline_bad' };
++  return { ok: true, expiresDays: n };
++}
++
++export function linkValidityText(result, tx, fmtDate) {
++  const expires = result?.expires_at ?? result?.link_expires_at ?? result?.expires_date;
++  return expires ? tx('ui.admin.orders.link_valid_until', { date: fmtDate(expires) })
++    : tx('ui.admin.orders.link_no_deadline');
++}
+--- /dev/null
++++ b/booking/admin/reservation-dialog-logic.js
+@@ -0,0 +1,94 @@
++// Varausdialogi 04: toiminto-oikeudet ja näkyvyys ilman DOM-riippuvuuksia.
++import { canAddPurchase } from './order-reservation-logic.js';
++import { reservationAddonLocks } from './addon-lock-logic.js';
++
++const inSet = (value, ...values) => values.includes(value);
++const helDay = (value) => {
++  const d = value instanceof Date ? value : new Date(value);
++  return Number.isNaN(d.getTime()) ? null : d.toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki', year: 'numeric', month: '2-digit', day: '2-digit' });
++};
++
++/** Varauspäivä on Helsingissä alkanut; myös myöhemmät päivät kelpaavat. */
++export function arrivalActionsAllowed(r, now = new Date()) {
++  const start = helDay(r?.starts_at), today = helDay(now);
++  return r?.status === 'confirmed' && !!start && !!today && today >= start;
++}
++
++/** Resurssisiirto vain vapaan kohdetilan sääntöjen mukaan. */
++export function moveTarget(r, can = () => true) {
++  if (!can('bookings.manage') || r?.status !== 'confirmed') return null;
++  if (r.space_code === 'rauni') return Number(r.persons) > 1 ? null : 'lovi';
++  if (r.space_code === 'lovi') return 'rauni';
++  return null;
++}
++
++/** Korjauspolku sallitaan, jos lisäpalveluja on ja vähintään yhtä voi muuttaa. */
++export function addonsEditable(rawOrder, reservationId) {
++  const res = (rawOrder?.reservations || []).find((x) => String(x.id) === String(reservationId));
++  const rows = Array.isArray(res?.addons) ? res.addons : [];
++  if (!rows.length) return false;
++  const state = reservationAddonLocks(rawOrder, reservationId);
++  if (!state.complete) return true; // palvelin tekee lopullisen oikeus- ja lukitustarkistuksen
++  const quantity = rows.reduce((sum, a) => sum + Math.max(0, Number(a.quantity) || 0), 0);
++  const locked = [...state.locks.values()].reduce((sum, a) => sum + Math.max(0, Number(a.quantity) || 0), 0);
++  return quantity > locked;
++}
++
++export function telHref(phone) {
++  if (typeof phone !== 'string') return null;
++  const cleaned = phone.trim().replace(/[^\d+]/g, '');
++  if (!/^\+?\d{3,20}$/.test(cleaned)) return null;
++  return `tel:${cleaned}`;
++}
++
++export function mailHref(email) {
++  if (typeof email !== 'string') return null;
++  const cleaned = email.trim();
++  if (!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(cleaned)) return null;
++  return `mailto:${cleaned}`;
++}
++
++/**
++ * Käyttöliittymän ainoa näkyvyyslähde. Ei palauteta disabled-toimintoja.
++ * order = normOrder(admin_get_order(rawOrder)); rawOrder tarvitaan addon-lukkoihin.
++ */
++export function reservationActions(r, { can = () => true, order = null, rawOrder = null, flowEnabled = false, now = new Date() } = {}) {
++  const booking = !!can('bookings.manage'), payments = !!can('payments.manage');
++  const status = r?.status;
++  const changing = booking && inSet(status, 'pending', 'confirmed');
++  const confirmed = booking && status === 'confirmed';
++  const arriving = confirmed && arrivalActionsAllowed(r, now);
++  const reConfirm = booking && inSet(status, 'cancelled', 'expired');
++  const unpaid = Number(order?.balance?.unpaid || 0);
++  const orderReady = !!order;
++  const native = !!order?.is_native;
++  const link = payments && orderReady && native && unpaid > 0;
++  const addPurchase = flowEnabled && inSet(status, 'pending', 'confirmed', 'completed') &&
++    canAddPurchase(order, { can }).allowed;
++  const primary = [];
++  if (booking && status === 'pending') primary.push('confirm');
++  if (addPurchase) primary.push('addPurchase');
++  if (link) primary.push('createLink');
++  if (arriving) primary.push('arrive');
++  if (changing) primary.push('change');
++  const secondary = [];
++  if (arriving) secondary.push('noShow');
++  if (reConfirm) secondary.push('confirm');
++  if (changing) secondary.push('cancel');
++  const moveTo = moveTarget(r, can);
++  const ad = (rawOrder?.reservations || []).find((x) => String(x.id) === String(r?.reservation_id))?.addons || [];
++  return {
++    primary,
++    secondary,
++    payment: {
++      show: orderReady,
++      rows: orderReady ? order.balance : null,
++      createLink: link,
++      recordPayment: link,
++      openOrder: payments,
++    },
++    editAddons: changing && orderReady && (!addPurchase || (ad.length > 0 && addonsEditable(rawOrder, r?.reservation_id))),
++    note: booking ? 'edit' : r?.notes ? 'read' : null,
++    move: moveTo ? { show: true, to: moveTo } : null,
++  };
++}
+--- /dev/null
++++ b/booking/admin/reservation-texts-04.js
+@@ -0,0 +1,116 @@
++// Varausdialogin ja maksulinkin FI/EN-varatekstit, site_texts ohittaa ne.
++import { orderText } from './orders-texts.js';
++import { getLang } from './talous-i18n.js';
++export const RESERVATION04_TEXTS = {
++  "ui.admin.res.order_no": {
++    "fi": "Tilaus #{{var:no}}",
++    "en": "Order #{{var:no}}"
++  },
++  "ui.admin.res.summary_label": {
++    "fi": "Varauksen yhteenveto",
++    "en": "Booking summary"
++  },
++  "ui.admin.res.persons_shared": {
++    "fi": "{{var:n}} hlö · yleinen vuoro",
++    "en": "{{var:n}} people · shared session"
++  },
++  "ui.admin.res.persons_private": {
++    "fi": "{{var:n}} hlö · yksityisvuoro",
++    "en": "{{var:n}} people · private session"
++  },
++  "ui.admin.res.hold_until": {
++    "fi": "Pito päättyy klo {{var:time}}",
++    "en": "Hold expires at {{var:time}}"
++  },
++  "ui.admin.res.customer": {
++    "fi": "Asiakas",
++    "en": "Customer"
++  },
++  "ui.admin.res.call": {
++    "fi": "Soita asiakkaalle: {{var:phone}}",
++    "en": "Call the customer: {{var:phone}}"
++  },
++  "ui.admin.res.email": {
++    "fi": "Lähetä sähköpostia: {{var:email}}",
++    "en": "Email the customer: {{var:email}}"
++  },
++  "ui.admin.res.customer_message": {
++    "fi": "Asiakkaan viesti",
++    "en": "Message from the customer"
++  },
++  "ui.admin.res.payment_title": {
++    "fi": "Tilaus ja maksu",
++    "en": "Order and payment"
++  },
++  "ui.admin.res.contents_title": {
++    "fi": "Varauksen sisältö",
++    "en": "Booking contents"
++  },
++  "ui.admin.res.more_details": {
++    "fi": "Lisätiedot",
++    "en": "More details"
++  },
++  "ui.admin.res.move_title": {
++    "fi": "Siirrä toiseen tilaan",
++    "en": "Move to another space"
++  },
++  "ui.admin.res.move_reason": {
++    "fi": "Siirron syy (valinnainen)",
++    "en": "Reason for the move (optional)"
++  },
++  "ui.admin.res.move_button": {
++    "fi": "Siirrä tilaan {{var:space}}",
++    "en": "Move to {{var:space}}"
++  },
++  "ui.admin.res.move_help": {
++    "fi": "Siirto onnistuu, jos kohdetila on vapaa ja tuotteella on sille sääntö.",
++    "en": "The move works if the target space is free and the product has a rule for it."
++  },
++  "ui.admin.res.other_actions": {
++    "fi": "Muut toiminnot",
++    "en": "Other actions"
++  },
++  "ui.admin.res.no_show_title": {
++    "fi": "Merkitäänkö varaus tilaan Ei saapunut?",
++    "en": "Mark the booking as no-show?"
++  },
++  "ui.admin.res.no_show_text": {
++    "fi": "Asiakas ei saapunut varaukseen. Maksuja ei hyvitetä automaattisesti.",
++    "en": "The customer did not arrive. Payments are not refunded automatically."
++  },
++  "ui.admin.res.no_show_submit": {
++    "fi": "Merkitse: ei saapunut",
++    "en": "Mark as no-show"
++  },
++  "ui.admin.orders.link_set_deadline": {
++    "fi": "Aseta takaraja",
++    "en": "Set a deadline"
++  },
++  "ui.admin.orders.link_deadline_help": {
++    "fi": "Ilman takarajaa linkki on voimassa, kunnes tilaus on maksettu tai linkki korvataan uudella.",
++    "en": "Without a deadline the link stays valid until the order is paid or the link is replaced."
++  },
++  "ui.admin.orders.link_deadline_days": {
++    "fi": "Takaraja (päivää)",
++    "en": "Deadline (days)"
++  },
++  "ui.admin.orders.link_deadline_bad": {
++    "fi": "Takarajan on oltava {{var:min}}–{{var:max}} päivää.",
++    "en": "The deadline must be {{var:min}}–{{var:max}} days."
++  },
++  "ui.admin.orders.link_no_deadline": {
++    "fi": "Linkillä ei ole takarajaa.",
++    "en": "The link has no deadline."
++  },
++  "ui.admin.orders.link_valid_until": {
++    "fi": "Linkki on voimassa {{var:date}} asti.",
++    "en": "The link is valid until {{var:date}}."
++  }
++};
++export function reservationText(key, vars) {
++  const live = orderText(key, vars);
++  if (live !== key) return live;
++  const fallback = RESERVATION04_TEXTS[key]?.[getLang()] ?? RESERVATION04_TEXTS[key]?.fi;
++  if (!fallback) return key;
++  return fallback.replace(/\{\{var:(\w+)\}\}/g, (_, name) => String(vars?.[name] ?? ''));
++}
+--- a/booking/admin/talous-mock.js
++++ b/booking/admin/talous-mock.js
+@@ -393,12 +393,12 @@
+     const added = items.map((x, k) => ({ item_id: 9e6 + k, name: x.type === 'custom' ? x.description : x.code || `Rivi ${k + 1}`, line_total: x.type === 'custom' ? round2(+x.amount * (+x.quantity || 1)) : round2(5 * (+x.quantity || 1)), reservation_id: x.reservation_id ?? null }));
+     const addedTotal = round2(added.reduce((s, x) => s + x.line_total, 0)), b = balanceOf(o);
+     return { ok: true, mock: true, order_id: o.order_id, added, added_total: addedTotal, balance: { ...b, total: round2(b.total + addedTotal), unpaid: round2(b.unpaid + addedTotal) },
+-      payment: a.p_create_link ? { payment_id: 9e6, link_token: '00000000-0000-4000-a000-000000000001', link_path: '/maksa/?p=00000000-0000-4000-a000-000000000001', amount: round2(b.unpaid + addedTotal), expires_at: `${dayAdd(today, 14)}T21:00:00Z` } : null, email_queued: false };
++      payment: a.p_create_link ? { payment_id: 9e6, link_token: '00000000-0000-4000-a000-000000000001', link_path: '/maksa/?p=00000000-0000-4000-a000-000000000001', amount: round2(b.unpaid + addedTotal), expires_at: null } : null, email_queued: false };
+   }
+   function adminCreatePaymentLink(a = {}) {
+     const o = byId.get(+a.p_order_id); if (!o) throw fail('not_found', 'Tilausta ei löydy', 404);
+     if (!(o.unpaid_amount > 0)) throw fail('nothing_to_pay', 'Ei maksettavaa');
+-    return { ok: true, mock: true, payment_id: 9e6, link_token: '00000000-0000-4000-a000-000000000001', link_path: '/maksa/?p=00000000-0000-4000-a000-000000000001', amount: o.unpaid_amount, expires_at: `${dayAdd(today, +a.p_expires_days || 14)}T21:00:00Z`,
++    return { ok: true, mock: true, payment_id: 9e6, link_token: '00000000-0000-4000-a000-000000000001', link_path: '/maksa/?p=00000000-0000-4000-a000-000000000001', amount: o.unpaid_amount, expires_at: a.p_expires_days == null ? null : `${dayAdd(today, +a.p_expires_days)}T21:00:00Z`,
+       lines: o.items.map((x) => ({ order_item_id: x.id, description: x.name, amount_gross: x.gross })), online_payment_enabled: false, email_queued: false };
+   }
+   function adminRefund(a = {}) {
+--- a/booking/admin/views/order-add.js
++++ b/booking/admin/views/order-add.js
+@@ -7,39 +7,15 @@
+ import { formDialog, doneToast } from './talous-ui.js';
+ import { orderText as tx } from '../orders-texts.js';
+ import { newPurchaseItem, afterAddChoices } from '../order-reservation-logic.js';
++import { openOrderPaymentLink } from './payment-link-04.js';
+ 
+ const VAT_CHOICES = [25.5, 13.5, 0]; // Vanhan vapaan rivin valikoima; validointi palvelimella.
+ const fld = (name, ...nodes) => h('label', { class: 'fld' }, h('span', { text: name }), ...nodes);
+ const quantity = (name, value = 1) => h('input', { name, type: 'number', min: 1, max: 99, value, inputmode: 'numeric', required: true });
+ const helDay = () => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Helsinki', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+ 
+-export function showLinkResult({ result, order }) {
+-  const url = absLink(result?.link_path, order);
+-  if (!url) { toast(tx('ui.admin.orders.link_missing'), 'warn'); return; }
+-  const link = h('input', { type: 'text', readonly: true, value: url, 'aria-label': tx('ui.admin.orders.link_copy'), 'data-testid': 'order-flow-link-url', onfocus: (e) => e.target.select() });
+-  const copy = h('button', { type: 'button', class: 'btn', text: tx('ui.admin.orders.link_copy'), onclick: async () => {
+-    try { await navigator.clipboard.writeText(url); toast(tx('ui.admin.orders.link_copied')); }
+-    catch { link.focus(); link.select(); }
+-  } });
+-  dialog(tx('ui.admin.orders.link_created'), h('div', { class: 'stack' }, fld(tx('ui.admin.orders.link_copy'), link), copy,
+-    h('p', { class: 'muted', text: result?.online_payment_enabled ? t('link.online') : t('link.onsite') })));
+-}
+-
+-export function openOrderPaymentLink({ api, ctx, order, onDone }) {
+-  if (!ctx.can('payments.manage') || !order?.is_native || !(Number(order?.balance?.unpaid) > 0)) return null;
+-  return formDialog(tx('ui.admin.orders.link_created'), [
+-    h('p', { class: 'muted', text: tx('ui.admin.orders.link_only_uncovered') }),
+-    h('p', { text: t('link.amount', { sum: fmt.money(order.balance.unpaid) }) }),
+-    fld(t('link.days'), h('input', { name: 'days', type: 'number', min: 1, max: 90, value: 14, required: true })),
+-  ], t('link.submit'), async (fd) => {
+-    const days = Number(fd.get('days'));
+-    if (!Number.isInteger(days) || days < 1 || days > 90) throw new Error(tx('ui.admin.orders.bad_days'));
+-    const result = await api.createPaymentLink({ orderId: order.order_id, sendEmail: false, expiresDays: days });
+-    doneToast(result, RPC.createPaymentLink);
+-    onDone?.(result);
+-    setTimeout(() => showLinkResult({ result, order }), 0);
+-  });
+-}
++export { showLinkResult, linkDeadlineControl } from './payment-link-04.js';
++export { openOrderPaymentLink };
+ 
+ // Muiden kuin lahjakorttimaksujen kirjaus. Ei korvaa Talous-näkymän laajempaa recordDialogia.
+ export function openOrderRecordPayment({ api, ctx, order, onDone }) {
+--- a/booking/admin/views/order-reservation-bridge.js
++++ b/booking/admin/views/order-reservation-bridge.js
+@@ -1,8 +1,9 @@
+-// booking_182: lisäpolku nykyisten tilausten ja varausten näkymiin ilman muutoksia niiden vanhaan toteutukseen.
+-// Moduuli käynnistetään vain, kun booking.settings.admin_order_reservation_flow_enabled === true.
++// booking_182 + varausdialogi 04: tilauksen ja varauksen yhdistetty polku.
++// Oikeudet ja nappien sijoittelu käsitellään yhteisessä reservationDialogissa.
+ import { h, toast, errMsg } from '../ui.js';
+ import { reservationDialog } from './shared.js';
+-import { openAddToOrder, openOrderPaymentLink, openOrderRecordPayment } from './order-add.js';
++import { openAddToOrder, openOrderRecordPayment } from './order-add.js';
++import { openOrderPaymentLink } from './payment-link-04.js';
+ import { canAddPurchase, orderDeepLink, reservationDeepLink } from '../order-reservation-logic.js';
+ import { orderText as tx } from '../orders-texts.js';
+ 
+@@ -11,8 +12,6 @@
+ export function installOrderReservationBridge({ node, api, ctx, rpc, view }) {
+   const loading = new WeakSet();
+   const promises = new Map();
+-  // Yhdistetään vain samanaikaiset haut samalle tilaukselle. Valmista tulosta ei säilytetä,
+-  // koska vanhat dialogit (maksun kirjaus, hyvitys, linkki) muuttavat saldoa ilman tämän moduulin tietoa.
+   const getOrder = (id) => {
+     const k = String(id);
+     if (!promises.has(k)) promises.set(k, api.getOrder(id).finally(() => promises.delete(k)));
+@@ -21,7 +20,6 @@
+   const afterChange = (order) => {
+     promises.delete(String(order.order_id));
+     api.changed?.();
+-    // Haku hakee myös osittain maksetun tilauksen, vaikka oletussuodatin on maksetut.
+     view.setSearch(String(order.order_no), { open: true });
+   };
+   async function addToOrder(orderId, reservationId = null) {
+@@ -53,6 +51,12 @@
+       dlg = reservationDialog(row, {
+         methods: ctx.refs?.methods || [], refs: ctx.refs, can: ctx.can,
+         onChange: () => afterChange(order),
++        flow: {
++          addPurchase: () => { dlg.close(); addToOrder(order.order_id, reservation.reservation_id); },
++          createLink: () => { dlg.close(); createLink(order.order_id); },
++          orderHref: orderDeepLink,
++          orderLinkText: (no) => tx('ui.admin.res.open_order', { no }),
++        },
+       });
+     } catch { toast(tx('ui.admin.orders.reservation_open_failed'), 'warn'); return fallback(); }
+     if (!dlg) return fallback();
+@@ -60,35 +64,9 @@
+       const next = node.querySelector(`[data-booking182-id="${reservation.reservation_id}"]`);
+       (next || (opener.isConnected ? opener : null))?.focus();
+     }, { once: true });
+-    // Jo olemassa olevan tilauslinkin navigaatio korjataan uudelle Tilaukset-reitille.
+-    const back = dlg.querySelector('[data-testid="order-link"]');
+-    if (back && ctx.can('payments.manage')) {
+-      back.href = orderDeepLink(order.order_no);
+-      back.textContent = tx('ui.admin.res.open_order', { no: order.order_no });
+-    }
+-    const body = dlg.querySelector('.dlg-body');
+-    if (!body) return;
++    // Vanha lisäpalveluiden muokkausdialogi voi palauttaa addon_paid / addon_link_open.
++    // Näytetään tällöin korvaava lisäostopolku ja mahdollinen hyvitysnäkymä.
+     const check = canAddPurchase(order, ctx);
+-    const extra = h('div', { class: 'box stack', 'data-testid': 'order-reservation-purchase' },
+-      h('button', { type: 'button', class: 'btn primary',
+-        'data-testid': 'order-reservation-add',
+-        text: tx('ui.admin.res.add_purchase'),
+-        disabled: !check.allowed || null,
+-        onclick: () => { dlg.close(); addToOrder(order.order_id, reservation.reservation_id); },
+-      }),
+-      !check.allowed ? h('p', { class: 'muted', text: tx('ui.admin.orders.' + check.reason) }) : null);
+-    body.append(extra);
+-    // Vanha maksulinkki-placeholder poistetaan vain tämän ominaisuuden ollessa päällä.
+-    for (const el of body.querySelectorAll('.box')) {
+-      const heading = el.querySelector('strong');
+-      if (!heading || heading.textContent?.trim() !== 'Verkkomaksulinkki (Visma Pay)') continue;
+-      el.replaceChildren(...(ctx.can('payments.manage') ? [
+-        h('button', { type: 'button', class: 'btn', 'data-testid': 'order-reservation-create-link',
+-          text: tx('ui.admin.res.payment_link'), onclick: () => { dlg.close(); createLink(order.order_id); } }),
+-      ] : []));
+-    }
+-    // Vanha lisäpalveluiden muokkausdialogi voi palauttaa addon_paid / addon_link_open.
+-    // Tarjoa tällöin maksettua summaa rikkomatta lisäyspolku ja tilauksen hyvitys.
+     const errorObserver = new MutationObserver(() => {
+       for (const modal of document.querySelectorAll('dialog[open]')) {
+         if (modal === dlg || modal.querySelector('[data-testid="booking182-addon-help"]')) continue;
+@@ -108,7 +86,6 @@
+       attributeFilter: ['hidden'] });
+     dlg.addEventListener('close', () => errorObserver.disconnect(), { once: true });
+   }
+-  // Koristele alkuperäinen varauslista siten, että tuotteiden nimet pysyvät tekstisolmuina.
+   async function decorate(list) {
+     if (loading.has(list)) return;
+     loading.add(list);
+@@ -146,7 +123,6 @@
+       }
+     });
+   }
+-  // Korvaa vain kytkimen ollessa päällä vanhojen tilauspainikkeiden toiminta.
+   node.addEventListener('click', async (event) => {
+     const action = event.target.closest?.('[data-action="addToOrder"],[data-action="createPaymentLink"]');
+     if (!action || action.disabled) return;
+--- /dev/null
++++ b/booking/admin/views/payment-link-04.js
+@@ -0,0 +1,56 @@
++// Varausdialogi 04: jaettu maksulinkkidialogi, oletuksena ei takarajaa.
++import { h, dialog, toast } from '../ui.js';
++import { t, fmt } from '../talous-i18n.js';
++import { absLink, RPC } from '../talous-api.js';
++import { formDialog, doneToast } from './talous-ui.js';
++import { reservationText as tx } from '../reservation-texts-04.js';
++import { LINK_DEADLINE, linkExpiresDays, linkValidityText } from '../payment-link-logic.js';
++
++const fld = (name, ...nodes) => h('label', { class: 'fld' }, h('span', { text: name }), ...nodes);
++export function linkDeadlineControl() {
++  const checked = h('input', { type: 'checkbox', name: 'deadline', 'data-testid': 'link-deadline-toggle' });
++  const days = h('input', { type: 'number', name: 'days', 'data-testid': 'link-deadline-days',
++    min: LINK_DEADLINE.min, max: LINK_DEADLINE.max, value: LINK_DEADLINE.initial, inputmode: 'numeric', disabled: true });
++  const field = fld(tx('ui.admin.orders.link_deadline_days'), days);
++  field.classList.add('pl-days'); field.hidden = true;
++  checked.addEventListener('change', () => { field.hidden = !checked.checked; days.disabled = !checked.checked; });
++  const nodes = h('div', { class: 'pl-deadline' },
++    h('label', { class: 'pl-toggle' }, checked, h('span', { text: tx('ui.admin.orders.link_set_deadline') })),
++    h('p', { class: 'muted', text: tx('ui.admin.orders.link_deadline_help') }), field);
++  return {
++    nodes,
++    read(fd) {
++      const result = linkExpiresDays({ enabled: fd.has('deadline'), days: fd.get('days') });
++      if (!result.ok) throw new Error(tx('ui.admin.orders.link_deadline_bad', LINK_DEADLINE));
++      return result.expiresDays;
++    },
++  };
++}
++const validUntil = (result) => linkValidityText(result, tx, fmt.date);
++export function showLinkResult({ result, order }) {
++  const url = absLink(result?.link_path, order);
++  if (!url) { toast(tx('ui.admin.orders.link_missing'), 'warn'); return; }
++  const link = h('input', { type: 'text', readonly: true, value: url, 'aria-label': tx('ui.admin.orders.link_copy'),
++    'data-testid': 'order-flow-link-url', onfocus: (e) => e.target.select() });
++  const copy = h('button', { type: 'button', class: 'btn', text: tx('ui.admin.orders.link_copy'), onclick: async () => {
++    try { await navigator.clipboard.writeText(url); toast(tx('ui.admin.orders.link_copied')); }
++    catch { link.focus(); link.select(); }
++  } });
++  return dialog(tx('ui.admin.orders.link_created'), h('div', { class: 'stack' },
++    fld(tx('ui.admin.orders.link_copy'), link), copy,
++    h('p', { class: 'muted', text: validUntil(result) }),
++    h('p', { class: 'muted', text: result?.online_payment_enabled ? t('link.online') : t('link.onsite') })));
++}
++export function openOrderPaymentLink({ api, ctx, order, onDone }) {
++  if (!ctx.can('payments.manage') || !order?.is_native || !(Number(order?.balance?.unpaid) > 0)) return null;
++  const deadline = linkDeadlineControl();
++  return formDialog(tx('ui.admin.orders.link_created'), [
++    h('p', { class: 'muted', text: tx('ui.admin.orders.link_only_uncovered') }),
++    h('p', { text: t('link.amount', { sum: fmt.money(order.balance.unpaid) }) }), deadline.nodes,
++  ], t('link.submit'), async (fd) => {
++    const expiresDays = deadline.read(fd);
++    const result = await api.createPaymentLink({ orderId: order.order_id, sendEmail: false, expiresDays });
++    doneToast(result, RPC.createPaymentLink); onDone?.(result);
++    setTimeout(() => showLinkResult({ result, order }), 0);
++  });
++}
+--- a/booking/admin/views/shared.js
++++ b/booking/admin/views/shared.js
+@@ -1,8 +1,16 @@
+-// Jaetut komponentit: varauksen tiedot -dialogi (tilamuutokset, varauksen muutos, maksun kirjaus, maksulinkki-placeholder).
+-import { rpc, fn } from '../sb.js';
+-import { createTalousApi } from '../talous-api.js';
++// Varausdialogi 04: yksi varauksen tietonäkymä kaikille viidelle avaustavalle.
++import { rpc, fn, select as dbSelect } from '../sb.js';
++import { createTalousApi, normOrder } from '../talous-api.js';
++import { canAddPurchase, isFlowEnabledValue } from '../order-reservation-logic.js';
++import { reservationActions, telHref, mailHref } from '../reservation-dialog-logic.js';
++import { loadOrderTexts } from '../orders-texts.js';
++import { reservationText as tx } from '../reservation-texts-04.js';
+ import { loadRcTexts } from '../refund-cancel-texts.js';
+ import { cancelReservationDialog } from './refund-cancel.js';
++import { openAddToOrder } from './order-add.js';
++import { openOrderPaymentLink } from './payment-link-04.js';
++import { formDialog } from './talous-ui.js';
++import { t } from '../talous-i18n.js';
+ import { addonPicker } from './addons.js';
+ import { reservationAddonLocks, addonReductionError } from '../addon-lock-logic.js';
+ import { alt } from '../addon-lock-texts.js';
+@@ -16,185 +24,262 @@
+ import { optionBadge, optionOf, optionPicker, ot, optErr } from '../options.js';
+ import { orderVoucherBox } from './voucher-redeem.js';
+ 
+-export function reservationDialog(r, { methods, onChange, refs, can = () => true }) {
+-  const body = h('div', { class: 'stack' });
+-  const d = dialog(`Tilaus #${r.order_no}`, body);
+-  const act = (label, fn, cls = 'btn') => { const b = h('button', { type: 'button', class: cls, text: label, onclick: () => run(b, async () => { await fn(); toast('Tallennettu'); d.close(); onChange?.(); }) }); return b; };
+-  const status = (s, reason) => rpc('admin_set_reservation_status', { p_reservation_id: r.reservation_id, p_status: s, p_reason: reason ?? null });
+-  const method = h('select', { id: 'pm' }, methods.filter((m) => m.active && m.is_manual).map((m) => h('option', { value: m.code, text: m.label })));
+-  const amount = h('input', { type: 'number', step: '0.01', min: '0', value: r.total_gross, id: 'pa' });
+-  const orderBox = h('div', { class: 'stack order-extra' });
+-  const optDd = h('dd', { class: 'opt-dd', 'data-testid': 'res-option', hidden: true }); const optBox = h('div', { class: 'box opt-box', 'data-testid': 'option-box', hidden: true });   // hoito (booking_50)
+-  const resBox = h('div', { class: 'resbox' });   // resurssit: tila, legit, ylitys, siirto Rauni ↔ Lovi (migraatio 17)
+-  body.append(
+-    h('dl', { class: 'kv' },
+-      isJohku(r) ? [h('dt', { text: 'Lähde' }), h('dd', {}, sourceBadge(r), ' tuotu Johku-järjestelmästä'), h('dt', { text: 'Johku-tunnus' }), h('dd', { class: 'ext-id', text: r.external_id || '–' })] : null,
+-      h('dt', { text: 'Asiakas' }), h('dd', {}, h('strong', { text: r.customer_name || '–' }), h('br'), r.customer_email || '', r.customer_phone ? ` · ${r.customer_phone}` : ''),
+-      h('dt', { text: 'Palvelu' }), h('dd', { text: r.product_name }),
+-      h('dt', { class: 'opt-dt', hidden: true, text: ot('label') }), optDd,
+-      h('dt', { text: 'Aika' }), h('dd', { text: `${fmtDay(r.starts_at)}, ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)}` }),
+-      h('dt', { text: 'Henkilöt' }), h('dd', { text: `${r.persons} · ${r.mode === 'exclusive' ? 'yksityisvuoro' : 'yleinen vuoro'}` }),
+-      h('dt', { text: 'Tila' }), h('dd', {}, statusBadge(r.status), ' ', payBadge(r.payment_status), r.hold_expires_at ? ` (pito päättyy ${fmtTime(r.hold_expires_at)})` : ''),
+-      h('dt', { text: 'Summa' }), h('dd', {}, money(r.total_gross), r.annual_card_id ? [' ', badge('warn', 'Vuosikortti')] : null),
+-      h('dt', { text: 'Kanava' }), h('dd', { text: r.source_channel }),
+-      h('dt', { text: 'Luotu' }), h('dd', { text: fmtDT(r.created_at) }), r.notes ? [h('dt', { text: 'Huomio' }), h('dd', { text: r.notes })] : null),
+-    can('payments.manage') ? h('a', { class: 'btn ghost order-link', 'data-testid': 'order-link', href: `#/talous?tab=orders&order=${encodeURIComponent(r.order_no)}`, onclick: () => d.close(), text: nbt('nb.orderLink', { no: r.order_no }) }) : null,   // Talous → Tilaukset: tilaus auki (maksut, kuitit)
+-    resBox,
+-    // booking_140: varauksen sisäinen muistiinpano (reservations.notes, enintään 1000 merkkiä). Oikeus bookings.manage (sama kuin RPC:ssä).
+-    can('bookings.manage') ? (() => { const notes = h('textarea', { name: 'reservation_note', rows: 3, maxlength: 1000, value: r.notes || '' });
+-      const save = h('button', { type: 'button', class: 'btn sm', 'data-testid': 'res-note-save', text: memoText('ui.admin.day_memos.res_note_save'), onclick: () => run(save, async () => {
++let flowPromise;
++function orderFlowEnabled() {
++  if (!flowPromise) flowPromise = dbSelect('settings', { select: 'value', key: 'eq.admin_order_reservation_flow_enabled', limit: 1 })
++    .then(isFlowEnabledValue).catch(() => false);
++  return flowPromise;
++}
++const list = (...nodes) => nodes.flat(Infinity).filter((n) => n !== null && n !== undefined && n !== false);
++const dd = (label, value) => value == null || value === '' ? [] : [h('dt', { text: label }), h('dd', { text: value })];
++
++export function reservationDialog(r, { methods = [], onChange, refs, can = () => true, flow = null } = {}) {
++  loadOrderTexts(rpc).catch(() => {});
++  const api = createTalousApi({ rpc, io: { fn } });
++  const ctx = { can, refs };
++  const body = h('div', { class: 'stack rd-dialog' });
++  const d = dialog(r.product_name || tx('ui.admin.res.order_no', { no: r.order_no }), body);
++  let rawOrder = null, order = null, flowEnabled = !!flow, currentExtras = [], reservation = null;
++  const after = () => { d.close(); onChange?.(); };
++  const act = (label, job, cls = 'btn', testid = null) => {
++    const btn = h('button', { type: 'button', class: cls, 'data-testid': testid, text: label,
++      onclick: () => run(btn, async () => { await job(); toast('Tallennettu'); after(); }) });
++    return btn;
++  };
++  const status = (s) => rpc('admin_set_reservation_status', { p_reservation_id: r.reservation_id, p_status: s, p_reason: null });
++  const summary = h('section', { class: 'rd-summary', 'data-testid': 'res-summary', 'aria-label': tx('ui.admin.res.summary_label') },
++    h('strong', { class: 'rd-when', text: `${fmtDay(r.starts_at)}, ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)}` }),
++    h('div', { class: 'muted rd-meta', text: [tx(r.mode === 'exclusive' ? 'ui.admin.res.persons_private' : 'ui.admin.res.persons_shared', { n: r.persons }), r.space_code ? resName(refs, r.space_code) : null, optionOf(r).name].filter(Boolean).join(' · ') }),
++    h('div', { class: 'rd-badges' }, statusBadge(r.status), payBadge(r.payment_status),
++      isJohku(r) ? sourceBadge(r) : null, r.annual_card_id ? badge('warn', 'Vuosikortti') : null,
++      r.status === 'pending' && r.hold_expires_at ? h('small', { text: tx('ui.admin.res.hold_until', { time: fmtTime(r.hold_expires_at) }) }) : null),
++    !can('payments.manage') ? h('small', { class: 'muted', text: tx('ui.admin.res.order_no', { no: r.order_no }) }) : null);
++  const alerts = h('div', { class: 'rd-alerts', hidden: true }); summary.append(alerts);
++  const customer = h('section', { class: 'rd-card rd-customer', 'data-testid': 'res-customer' },
++    h('h3', { text: tx('ui.admin.res.customer') }));
++  const contact = h('div', { class: 'rd-contact' });
++  const renderCustomer = (o = {}) => {
++    const phone = telHref(r.customer_phone);
++    const email = mailHref(r.customer_email);
++    contact.replaceChildren(...list(
++      r.customer_name ? h('strong', { text: r.customer_name }) : null,
++      o.customer_kind === 'company' && o.billing?.company ? h('strong', { text: o.billing.company }) : null,
++      phone ? h('a', { href: phone, 'aria-label': tx('ui.admin.res.call', { phone: r.customer_phone }), text: r.customer_phone }) : null,
++      email ? h('a', { href: email, 'aria-label': tx('ui.admin.res.email', { email: r.customer_email }), text: r.customer_email }) : null,
++      o.customer_note ? h('div', {}, h('small', { class: 'muted', text: tx('ui.admin.res.customer_message') }), h('p', { text: o.customer_note })) : null));
++  };
++  customer.append(contact); renderCustomer();
++
++  // Jokaisen päätoiminnon paikka on vakio: haku ei siirrä jo renderöityjä osioita.
++  const primary = h('div', { class: 'tl-actions rd-actions', 'data-testid': 'res-primary-actions', hidden: true });
++  const payment = h('section', { class: 'rd-card rd-payment', 'data-testid': 'res-payment', hidden: true },
++    h('h3', { text: tx('ui.admin.res.payment_title') }));
++  const sums = h('dl', { class: 'tl-sums' }); const voucher = h('div', { class: 'rd-voucher', hidden: true });
++  const paymentActions = h('div', { class: 'rd-payment-actions' }); payment.append(sums, voucher, paymentActions);
++  const contents = h('section', { class: 'rd-card rd-contents', 'data-testid': 'res-contents', hidden: true },
++    h('h3', { text: tx('ui.admin.res.contents_title') }));
++  const optBox = h('div', { class: 'opt-box', 'data-testid': 'option-box', hidden: true });
++  const addonsBox = h('div', { class: 'addons-box' }); contents.append(optBox, addonsBox);
++  const noteBox = h('section', { class: 'rd-card res-note-editor', 'data-testid': 'res-note-editor' });
++  const storedNote = String(r.notes || '');
++  const mayEditNote = can('bookings.manage') ? true : false;
++  if (mayEditNote) {
++    const notes = h('textarea', { name: 'reservation_note', rows: 2, maxlength: 1000, value: storedNote });
++    const save = h('button', { type: 'button', class: 'btn sm', hidden: true, 'data-testid': 'res-note-save',
++      text: memoText('ui.admin.day_memos.res_note_save'), onclick: () => run(save, async () => {
+         const updated = await rpc('admin_set_reservation_note', { p_reservation_id: r.reservation_id, p_notes: notes.value });
+-        r.notes = updated?.notes ?? null; toast(memoText('ui.admin.day_memos.res_note_saved')); d.close(); onChange?.();
+-      }) }); return h('div', { class: 'box res-note-editor', 'data-testid': 'res-note-editor' }, field(memoText('ui.admin.day_memos.res_note_label'), notes), save); })() : null,
+-    optBox,
+-    orderBox,
+-    h('div', { class: 'row wrap' },
+-      ['pending', 'cancelled', 'expired'].includes(r.status) ? act('Vahvista', () => status('confirmed')) : null,
+-      r.status === 'confirmed' ? act('Merkitse saapuneeksi', () => status('completed')) : null,
+-      r.status === 'confirmed' ? act('Ei saapunut', () => status('no_show')) : null,
+-      ['pending', 'confirmed'].includes(r.status) ? h('button', { type: 'button', class: 'btn', onclick: () => { d.close(); changeDialog(r, onChange); } }, 'Muuta varausta') : null,
+-      // booking_136: peruutus omassa dialogissa; payments.refund-oikeudella kysytään, hyvitetäänkö varauksen osuus maksuista (oletus Ei)
+-      ['pending', 'confirmed'].includes(r.status) ? h('button', { type: 'button', class: 'btn danger', 'data-testid': 'res-cancel', onclick: async (ev) => {
+-        const b = ev.currentTarget; b.disabled = true;
+-        try {
+-          await loadRcTexts(rpc);
+-          await cancelReservationDialog(r, { rpc, canRefund: !!can('payments.refund'), online: createTalousApi({ rpc, io: { fn } }), onDone: () => { d.close(); onChange?.(); } });
+-        } finally { b.disabled = false; }
+-      } }, 'Peru varaus') : null),
+-    r.payment_status !== 'paid' ? h('fieldset', { class: 'box' }, h('legend', { text: 'Kirjaa maksu (käteinen / kortti / lasku …)' }),
+-      h('div', { class: 'row wrap' }, field('Maksutapa', method), field('Summa €', amount),
+-        act('Kirjaa maksu', () => rpc('admin_record_payment', { p_order_id: r.order_id, p_method: method.value, p_amount: +amount.value }), 'btn primary'))) : null,
+-    h('div', { class: 'box' }, h('strong', { text: 'Verkkomaksulinkki (Visma Pay)' }),
+-      h('p', { class: 'muted', text: 'Ei vielä käytössä. Painike luo maksurivin ja näyttää, että linkki toteutetaan Visma Pay -integraation yhteydessä.' }),
+-      (() => { const out = h('p', { class: 'muted' }); const b = h('button', { type: 'button', class: 'btn', text: 'Luo maksulinkki', onclick: () => run(b, async () => { const j = await rpc('admin_create_payment_link', { p_order_id: r.order_id }); out.textContent = j.link_url || j.link_path || j.message; }) }); return h('div', {}, b, out); })()));
+-  // Resurssit (migraatio 17): tila, elinkaari, ylitys, claim-ikkuna, vanhempi varaus, legit. Päivänäkymän RPC antaa täydet tiedot (ylitys, kiintiö, claim, leg_id);
+-  // varauslistan rivillä ne puuttuvat, joten ne haetaan kerran päivänäkymästä. Kaikki kentät valinnaisia.
+-  const drawResources = () => {
+-    const x = r;
+-    if (!x.space_code && !hasLegs(x) && !x.lifecycle && !x.therapist_missing) { resBox.replaceChildren(); return; }
+-    const other = x.space_code === 'rauni' ? 'lovi' : x.space_code === 'lovi' ? 'rauni' : null;
+-    const claim = (x.claim_offset_min > 0 || x.claim_minutes) ? `alkaa +${x.claim_offset_min || 0} min${x.claim_minutes ? `, kesto ${x.claim_minutes} min` : ''}` : null;
+-    const kids = [h('h3', { text: 'Resurssit' }), h('dl', { class: 'kv' },
+-      x.space_code ? [h('dt', { text: 'Tila' }), h('dd', {}, h('strong', { text: resName(refs, x.space_code) }), ' ', resourceBadges(x))] : null,
+-      x.lifecycle ? [h('dt', { text: 'Tuote' }), h('dd', { text: x.lifecycle === 'old' ? 'Vanha tuote (vanha varaus)' : 'Nykyinen tuote' })] : null,
+-      x.override_reason ? [h('dt', { text: 'Ylitys' }), h('dd', { text: x.override_reason })] : null,
+-      x.quota_exempt ? [h('dt', { text: 'Kiintiö' }), h('dd', { text: 'Kiintiövapaa (esim. lahjakortti): ei kuluta myyntikiintiötä' })] : null,
+-      claim ? [h('dt', { text: 'Tilan käyttö' }), h('dd', { text: claim })] : null,
+-      x.parent_reservation_id ? [h('dt', { text: 'Vanhempi varaus' }), h('dd', { text: `varaus #${x.parent_reservation_id}` })] : null,
+-      x.therapist_missing ? [h('dt', { text: 'Saunottaja' }), h('dd', { 'data-testid': 'therapist-state' }, missingOpen(x)
+-        ? [h('strong', { text: 'Puuttuu työvuorosta' }), ' ', h('small', { class: 'muted', text: 'Lisää saunottaja työvuoroon tai myönnä poikkeus.' }), ' ', grantButton(x, { ctx: { can }, onDone: () => { d.close(); onChange?.(); } })]
+-        : [h('strong', { text: 'Poikkeus myönnetty' }), x.therapist_exception_at ? ` ${fmtDT(x.therapist_exception_at)}` : '', x.therapist_exception_note ? [h('br'), h('small', { text: `Perustelu: ${x.therapist_exception_note}` })] : null])] : null),
+-      legsList(x.legs, refs)];
+-    if (other === 'lovi' && x.persons > 1 && x.status === 'confirmed') kids.push(h('p', { class: 'muted', text: 'Loviin mahtuu vain 1 henkilö, joten siirtoa Raunista Loviin ei tarjota.' }));
+-    else if (other && x.status === 'confirmed' && can('bookings.manage')) {
+-      const reason = h('input', { name: 'reason', maxlength: 200, placeholder: 'Syy (valinnainen)', 'aria-label': 'Siirron syy' });
+-      const err = h('p', { class: 'err', role: 'alert', hidden: true });
+-      const go = h('button', { type: 'button', class: 'btn sm', text: `Siirrä tilaan: ${resName(refs, other)}` });
++        r.notes = updated?.notes ?? null; toast(memoText('ui.admin.day_memos.res_note_saved')); after();
++      }) });
++    notes.addEventListener('input', () => { save.hidden = notes.value === storedNote; });
++    noteBox.append(field(memoText('ui.admin.day_memos.res_note_label'), notes), save);
++  } else if (storedNote) {
++    noteBox.append(h('h3', { text: memoText('ui.admin.day_memos.res_note_label') }), h('p', { text: storedNote }));
++  } else noteBox.hidden = true;
++  const secondary = h('div', { class: 'row wrap rd-secondary', 'data-testid': 'res-secondary-actions', 'aria-label': tx('ui.admin.res.other_actions'), hidden: true });
++  const more = h('details', { class: 'rd-more', 'data-testid': 'res-more' },
++    h('summary', { text: tx('ui.admin.res.more_details') }));
++  const resBox = h('div', { class: 'resbox' });
++  const moreDetails = h('dl', { class: 'kv' }); const billingBox = h('div', { class: 'rd-billing' });
++  more.append(moreDetails, resBox, billingBox);
++  const move = h('details', { class: 'rd-more rd-move', 'data-testid': 'res-move', hidden: true },
++    h('summary', { text: tx('ui.admin.res.move_title') }));
++  const moveBody = h('div', { class: 'moverow' }); move.append(moveBody);
++  body.append(...list(summary, customer, primary, payment, contents, noteBox.hidden ? null : noteBox, secondary, more, move));
++
++  function drawResources() {
++    if (!r.space_code && !hasLegs(r) && !r.lifecycle && !r.therapist_missing) { resBox.replaceChildren(); alerts.replaceChildren(); alerts.hidden = true; return; }
++    moreDetails.replaceChildren(...list(
++      dd('Kanava', r.source_channel), dd('Luotu', r.created_at ? fmtDT(r.created_at) : ''),
++      isJohku(r) ? [h('dt', { text: 'Lähde' }), h('dd', {}, sourceBadge(r), ' tuotu Johku-järjestelmästä')] : null,
++      isJohku(r) ? dd('Johku-tunnus', r.external_id) : null));
++    const claim = (r.claim_offset_min > 0 || r.claim_minutes) ? `alkaa +${r.claim_offset_min || 0} min${r.claim_minutes ? `, kesto ${r.claim_minutes} min` : ''}` : null;
++    resBox.replaceChildren(...list(
++      h('dl', { class: 'kv' }, ...list(
++        r.space_code ? [h('dt', { text: 'Tila' }), h('dd', {}, h('strong', { text: resName(refs, r.space_code) }), ...resourceBadges(r))] : null,
++        r.lifecycle ? dd('Tuote', r.lifecycle === 'old' ? 'Vanha tuote (vanha varaus)' : 'Nykyinen tuote') : null,
++        dd('Ylitys', r.override_reason), r.quota_exempt ? dd('Kiintiö', 'Kiintiövapaa') : null,
++        dd('Tilan käyttö', claim), r.parent_reservation_id ? dd('Vanhempi varaus', `varaus #${r.parent_reservation_id}`) : null,
++        r.therapist_exception_at ? dd('Saunottaja', `Poikkeus myönnetty ${fmtDT(r.therapist_exception_at)} ${r.therapist_exception_note || ''}`) : null)),
++      legsList(r.legs, refs)));
++    alerts.replaceChildren(...list(
++      missingOpen(r) ? h('div', { class: 'rd-alert', 'data-testid': 'therapist-state' },
++        h('strong', { text: 'Puuttuu työvuorosta' }), grantButton(r, { ctx: { can }, onDone: after })) : null,
++      r.option_missing ? h('p', { class: 'opt-warn', 'data-testid': 'option-missing-hint' }, optionBadge({ option_missing: true }), ' ', ot('missingHint')) : null));
++    alerts.hidden = !alerts.childNodes.length;
++  }
++  drawResources();
++  if (r.quota_exempt === undefined && r.reservation_id && (r.space_code || hasLegs(r))) {
++    const day = new Date(r.starts_at).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
++    rpc('admin_day_view', { p_date: day }).then((v) => {
++      const item = (v?.reservations || []).find((x) => x.reservation_id === r.reservation_id);
++      if (!item) return;
++      Object.assign(r, { quota_exempt: item.quota_exempt, override_reason: item.override_reason,
++        claim_offset_min: item.claim_offset_min, claim_minutes: item.claim_minutes,
++        therapist_missing: item.therapist_missing, therapist_missing_open: item.therapist_missing_open,
++        therapist_exception_at: item.therapist_exception_at, therapist_exception_note: item.therapist_exception_note,
++        legs: item.legs?.length ? item.legs : r.legs });
++      drawResources(); renderActions();
++    }).catch(() => {});
++  }
++
++  function editAddons(ad, raw) {
++    // booking_180: olemassa olevien lisäpalveluiden vähentäminen käyttää palvelimen lukitussääntöä.
++    const state = reservationAddonLocks(raw, r.reservation_id);
++    return rpc('admin_list_addons').then((all) => {
++      const picker = addonPicker(all, { getPersons: () => r.persons, getMode: () => r.mode, locks: state.locks });
++      picker.set(ad);
++      const error = h('p', { class: 'err', role: 'alert', tabindex: '-1', hidden: state.complete, text: state.complete ? '' : alt('error_unknown') });
++      const f = h('form', { class: 'stack', onsubmit: (event) => { event.preventDefault(); run(f.querySelector('button[type=submit]'), async () => {
++        const code = addonReductionError(state, picker.value());
++        if (code) { error.textContent = alt(code === 'addon_paid' ? 'error_paid' : code === 'addon_link_open' ? 'error_link' : 'error_unknown'); error.hidden = false; error.focus(); return; }
++        try { await rpc('admin_set_reservation_addons', { p_reservation_id: r.reservation_id, p_addons: picker.value() });
++          toast('Lisäpalvelut tallennettu'); ddialog.close(); after(); }
++        catch (e) { error.textContent = errMsg(e); error.hidden = false; error.focus(); }
++      }); } },
++      h('p', { class: 'muted', text: `Enimmäismäärä = henkilömäärä (${r.persons}) × lisäpalvelun enimmäismäärä / hlö.` }),
++      picker.node, error,
++      h('button', { class: 'btn primary', type: 'submit', text: 'Tallenna lisäpalvelut' }));
++      const ddialog = dialog(`Lisäpalvelut – tilaus #${r.order_no}`, f);
++    }).catch((e) => toast(errMsg(e), 'err'));
++  }
++  function drawOption(x) {
++    const choices = x.option_choices || [], cur = x.option || null;
++    if (!choices.length && !cur && !x.option_missing) { optBox.hidden = true; return; }
++    const editable = ['pending', 'confirmed'].includes(r.status) && can('bookings.manage');
++    const error = h('p', { class: 'err', role: 'alert', hidden: true, 'data-testid': 'option-error' });
++    const notify = h('input', { type: 'checkbox', name: 'notify', 'data-testid': 'option-notify' });
++    const picker = optionPicker({ choices, value: cur?.code || '', label: ot('change'), name: `ro-${r.reservation_id}` });
++    const save = h('button', { type: 'button', class: 'btn primary', hidden: true, 'data-testid': 'option-save', text: ot('save'), onclick: () => run(save, async () => {
++      try { const v = await rpc('admin_set_reservation_option', { p_reservation_id: r.reservation_id, p_option_code: picker.value, p_notify: notify.checked });
++        toast(v?.email_queued ? ot('savedMail') : ot('saved')); after(); }
++      catch (e) { error.textContent = optErr(e); error.hidden = false; }
++    }) });
++    if (picker.node) picker.node.addEventListener('change', () => { save.hidden = !picker.value || picker.value === (cur?.code || ''); });
++    optBox.replaceChildren(...list(
++      h('h4', { text: ot('label') }),
++      h('p', { class: 'muted' }, `${ot('current')}: `, h('span', { 'data-testid': 'res-option' }, h('strong', { 'data-testid': 'option-current', text: optionOf(x).name || ot('none') }))),
++      editable && choices.length ? [picker.node, h('label', { class: 'check' }, notify, ` ${ot('notify')}`), error, save] : null));
++    optBox.hidden = false;
++  }
++
++  function drawOrder() {
++    if (!rawOrder || !order) return;
++    payment.hidden = false; contents.hidden = false;
++    const b = order.balance || {}; const s = (key, value, cls = '') => [h('dt', { text: t(key) }), h('dd', { class: cls, text: money(value) })];
++    sums.replaceChildren(...list(s('order.total', b.total), s('order.paid', b.paid),
++      Number(b.unpaid) > 0 ? s('order.unpaid', b.unpaid, 'due') : null,
++      Number(b.pending_link) > 0 ? s('order.pendingLink', b.pending_link) : null));
++    const actions = reservationActions(r, { can, order, rawOrder, flowEnabled });
++    const paymentNodes = [];
++    if (actions.payment.recordPayment) {
++      const method = h('select', { name: 'method' }, methods.filter((m) => m.active && m.is_manual).map((m) => h('option', { value: m.code, text: m.label })));
++      const amount = h('input', { type: 'number', step: '0.01', min: '0.01', value: Number(b.unpaid || r.total_gross) });
++      paymentNodes.push(h('details', { class: 'rd-more', 'data-testid': 'res-record-payment' }, h('summary', { text: 'Kirjaa maksu' }),
++        h('div', { class: 'stack' }, field('Maksutapa', method), field('Summa €', amount),
++          act('Kirjaa maksu', () => rpc('admin_record_payment', { p_order_id: r.order_id, p_method: method.value, p_amount: +amount.value }), 'btn primary'))));
++    }
++    if (actions.payment.openOrder) {
++      paymentNodes.push(h('a', { class: 'order-link', 'data-testid': 'order-link',
++        href: flow?.orderHref?.(r.order_no) || `#/talous?tab=orders&order=${encodeURIComponent(r.order_no)}`,
++        text: flow?.orderLinkText?.(r.order_no) || nbt('nb.orderLink', { no: r.order_no }), onclick: () => d.close() }));
++    }
++    paymentActions.replaceChildren(...paymentNodes);
++    reservation = (rawOrder.reservations || []).find((x) => String(x.id) === String(r.reservation_id)) || {};
++    currentExtras = reservation.addons || [];
++    drawOption(reservation);
++    addonsBox.replaceChildren(...list(h('h4', {}, icon('leaf', 20), ' Lisäpalvelut'),
++      currentExtras.length ? h('ul', { class: 'reslist' }, currentExtras.map((a) => h('li', { class: 'resrow' },
++        h('span', { text: `${a.quantity} × ${a.name}` }), h('span', { class: 'meta', text: money(a.line_total) })))) : h('p', { class: 'muted', text: 'Ei lisäpalveluita.' }),
++      actions.editAddons ? h('button', { type: 'button', class: 'btn sm', 'data-testid': 'res-edit-addons', text: 'Muokkaa lisäpalveluita', onclick: () => editAddons(currentExtras, rawOrder) }) : null));
++    renderCustomer(rawOrder); drawResources();
++    if (rawOrder.customer_kind === 'company' && rawOrder.billing) {
++      const x = rawOrder.billing;
++      billingBox.replaceChildren(h('h4', { text: 'Yritysasiakas – laskutustiedot' }), h('dl', { class: 'kv' }, ...list(
++        dd('Yritys', x.company), dd('Y-tunnus', x.business_id),
++        dd('Osoite', [x.street, [x.zip, x.city].filter(Boolean).join(' ')].filter(Boolean).join(', ')),
++        dd('Verkkolasku', x.einvoice_address && [x.einvoice_address, x.einvoice_operator].filter(Boolean).join(' / ')),
++        dd('Viite', rawOrder.invoice_reference),
++        dd('Yhteyshenkilö', [x.contact_name, x.contact_email, x.contact_phone].filter(Boolean).join(' · ')))));
++    }
++    orderVoucherBox({ rpc, orderId: r.order_id, onChanged: () => { fetchOrder(); onChange?.(); } }).then((node) => {
++      voucher.replaceChildren(...list(node)); voucher.hidden = !node;
++    }).catch(() => {});
++  }
++
++  async function doPurchase() {
++    if (flow?.addPurchase) { d.close(); flow.addPurchase(order); return; }
++    d.close(); await openAddToOrder({ api, ctx, order, reservationId: r.reservation_id, onDone: onChange });
++  }
++  function doLink() {
++    if (flow?.createLink) { d.close(); flow.createLink(order); return; }
++    d.close(); openOrderPaymentLink({ api, ctx, order, onDone: onChange });
++  }
++  function renderActions() {
++    const options = reservationActions(r, { can, order, rawOrder, flowEnabled, now: new Date() });
++    const actions = {
++      confirm: () => act('Vahvista', () => status('confirmed'), 'btn primary', 'res-confirm'),
++      addPurchase: () => h('button', { type: 'button', class: 'btn primary', 'data-testid': 'order-reservation-add', text: tx('ui.admin.res.add_purchase'), onclick: doPurchase }),
++      createLink: () => h('button', { type: 'button', class: 'btn', 'data-testid': 'order-reservation-create-link', text: tx('ui.admin.res.payment_link'), onclick: doLink }),
++      arrive: () => act('Merkitse saapuneeksi', () => status('completed'), 'btn', 'res-arrive'),
++      change: () => h('button', { type: 'button', class: 'btn', 'data-testid': 'res-change', text: 'Muuta varausta', onclick: () => { d.close(); changeDialog(r, onChange); } }),
++      noShow: () => h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'res-no-show', text: 'Ei saapunut', onclick: () => formDialog(tx('ui.admin.res.no_show_title'), [h('p', { text: tx('ui.admin.res.no_show_text') })], tx('ui.admin.res.no_show_submit'), async () => { await status('no_show'); after(); }) }),
++      cancel: () => h('button', { type: 'button', class: 'btn danger rd-danger', 'data-testid': 'res-cancel', text: 'Peru varaus', onclick: async (event) => {
++        const btn = event.currentTarget; btn.disabled = true;
++        try { await loadRcTexts(rpc); await cancelReservationDialog(r, {
++          rpc, canRefund: !!can('payments.refund'), online: createTalousApi({ rpc, io: { fn } }), onDone: after
++        }); } finally { btn.disabled = false; }
++      } })
++    };
++    primary.replaceChildren(...options.primary.map((key) => actions[key]())); primary.hidden = !options.primary.length;
++    secondary.replaceChildren(...options.secondary.map((key) => actions[key]())); secondary.hidden = !options.secondary.length;
++    if (options.move?.show) { move.hidden = false; if (!move.isConnected) body.append(move); }
++    if (!options.move?.show && move.isConnected) move.remove();
++    moveBody.replaceChildren();
++    if (options.move?.show) {
++      const other = options.move.to;
++      const reason = h('input', { name: 'reason', maxlength: 200, placeholder: tx('ui.admin.res.move_reason'), 'aria-label': tx('ui.admin.res.move_reason') });
++      const error = h('p', { class: 'err', role: 'alert', hidden: true });
++      const go = h('button', { type: 'button', class: 'btn sm', text: tx('ui.admin.res.move_button', { space: resName(refs, other) }) });
+       go.addEventListener('click', () => run(go, async () => {
+-        err.hidden = true;
+-        try { await rpc('admin_move_reservation_space', { p_reservation_id: r.reservation_id, p_space_code: other, p_reason: reason.value.trim() || null }); } catch (e) { err.textContent = errMsg(e); err.hidden = false; return; }
+-        toast(`Varaus siirretty tilaan ${resName(refs, other)}`); d.close(); onChange?.();
++        error.hidden = true;
++        try { await rpc('admin_move_reservation_space', { p_reservation_id: r.reservation_id, p_space_code: other, p_reason: reason.value.trim() || null }); }
++        catch (e) { error.textContent = errMsg(e); error.hidden = false; return; }
++        toast(`Varaus siirretty tilaan ${resName(refs, other)}`); after();
+       }));
+-      kids.push(h('div', { class: 'moverow' }, h('div', { class: 'row wrap' }, field('Siirto Rauni ↔ Lovi', reason), go), err,
+-        h('p', { class: 'muted', text: 'Siirto onnistuu vain, jos tuotteella on sääntö kohdetilaan (Lovi: 1 hlö) eikä tila ole varattu tai suljettu.' })));
++      moveBody.append(field(tx('ui.admin.res.move_reason'), reason), go, error, h('p', { class: 'muted', text: tx('ui.admin.res.move_help') }));
+     }
+-    resBox.replaceChildren(...kids);
+-  };
+-  drawResources();
+-  if (r.quota_exempt === undefined && r.reservation_id && (r.space_code || hasLegs(r))) {   // täydennä päivänäkymästä (ylitys, kiintiö, claim, leg_id)
+-    const day = new Date(r.starts_at).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
+-    rpc('admin_day_view', { p_date: day }).then((v) => { const m = (v?.reservations || []).find((y) => y.reservation_id === r.reservation_id); if (m) { Object.assign(r, { quota_exempt: m.quota_exempt, override_reason: m.override_reason, claim_offset_min: m.claim_offset_min, claim_minutes: m.claim_minutes, therapist_missing: m.therapist_missing, therapist_missing_open: m.therapist_missing_open, therapist_exception_at: m.therapist_exception_at, therapist_exception_note: m.therapist_exception_note, legs: m.legs?.length ? m.legs : r.legs }); drawResources(); } }).catch(() => {});
+-  }
+-  // Hoito (booking_50): nykyinen valinta + vaihto (admin_set_reservation_option, bookings.manage) + valinnainen ilmoitus asiakkaalle
+-  const showOption = (x) => {   // x: { option, option_missing } tai listan option_* -kentät
+-    const { name, missing } = optionOf(x); const dt = optDd.previousElementSibling;
+-    optDd.replaceChildren(...[name ? name : null, missing ? optionBadge({ option_missing: true }) : null].filter(Boolean));
+-    optDd.hidden = dt.hidden = !(name || missing);
+-  };
+-  showOption(r);
+-  const drawOption = (res) => {
+-    const choices = res.option_choices || [];
+-    const cur = res.option || null;
+-    showOption(res);
+-    if (!choices.length && !cur) { optBox.hidden = true; return; }
+-    const editable = ['pending', 'confirmed'].includes(r.status) && can('bookings.manage');
+-    const err = h('p', { class: 'err', role: 'alert', hidden: true, 'data-testid': 'option-error' });
+-    const note = h('input', { type: 'checkbox', name: 'notify', 'data-testid': 'option-notify' });
+-    const pick = optionPicker({ choices, value: cur?.code || '', label: ot('change'), name: `ro-${r.reservation_id}`, onChange: () => sync() });
+-    const save = h('button', { type: 'button', class: 'btn primary', 'data-testid': 'option-save', text: ot('save'), disabled: true });
+-    const sync = () => { save.disabled = !pick.value || pick.value === (cur?.code || ''); err.hidden = true; };
+-    save.addEventListener('click', () => run(save, async () => {
+-      err.hidden = true;
+-      try {
+-        const v = await rpc('admin_set_reservation_option', { p_reservation_id: r.reservation_id, p_option_code: pick.value, p_notify: note.checked });
+-        toast(v?.email_queued ? ot('savedMail') : ot('saved')); d.close(); onChange?.();
+-      } catch (e) { err.textContent = optErr(e); err.hidden = false; }
+-    }));
+-    optBox.replaceChildren(h('h3', { text: ot('label') }),
+-      res.option_missing ? h('p', { class: 'opt-warn', 'data-testid': 'option-missing-hint' }, optionBadge({ option_missing: true }), ' ', ot('missingHint')) : h('p', { class: 'muted' }, `${ot('current')}: `, h('strong', { 'data-testid': 'option-current', text: optionOf(res).name || ot('none') })),
+-      ...(editable && choices.length ? [pick.node, h('label', { class: 'check' }, note, ` ${ot('notify')}`), err, h('div', { class: 'row' }, save)] : []));
+-    optBox.hidden = false;
+-  };
+-  // Tilauksen lisätiedot: laskutustiedot (yritysasiakas), lisäpalvelut (+ muokkaus)
+-  const drawOrder = async () => {
+-    let o; try { o = await rpc('admin_get_order', { p_order_id: r.order_id }); } catch { return; }
+-    const res = (o.reservations || []).find((x) => x.id === r.reservation_id) || {};
+-    const ad = res.addons || [];
+-    drawOption(res);
+-    const b = o.billing;
+-    const kids = [];
+-    if (o.customer_kind === 'company' && b) {
+-      kids.push(h('div', { class: 'box' }, h('h3', {}, 'Yritysasiakas – laskutustiedot'), h('dl', { class: 'kv' },
+-        h('dt', { text: 'Yritys' }), h('dd', { text: b.company || '–' }), h('dt', { text: 'Y-tunnus' }), h('dd', { text: b.business_id || '–' }),
+-        h('dt', { text: 'Osoite' }), h('dd', { text: [b.street, [b.zip, b.city].filter(Boolean).join(' ')].filter(Boolean).join(', ') || '–' }),
+-        b.einvoice_address ? [h('dt', { text: 'Verkkolasku' }), h('dd', { text: `${b.einvoice_address} / ${b.einvoice_operator || '–'}` })] : null,
+-        o.invoice_reference ? [h('dt', { text: 'Viite' }), h('dd', { text: o.invoice_reference })] : null,
+-        h('dt', { text: 'Yhteyshenkilö' }), h('dd', { text: [b.contact_name, b.contact_email, b.contact_phone].filter(Boolean).join(' · ') || '–' }))));
+-    }
+-    const editable = ['pending', 'confirmed'].includes(r.status);
+-    kids.push(h('div', { class: 'box addons-box' }, h('h3', {}, icon('leaf', 20), ' Lisäpalvelut'),
+-      ad.length ? h('ul', { class: 'reslist' }, ad.map((a) => h('li', { class: 'resrow' }, h('span', { text: `${a.quantity} × ${a.name}` }), h('span', { class: 'meta', text: money(a.line_total) })))) : h('p', { class: 'muted', text: 'Ei lisäpalveluita.' }),
+-      editable ? h('button', { type: 'button', class: 'btn sm', text: 'Muokkaa lisäpalveluita', onclick: () => editAddons(ad, o) }) : null));
+-    // booking_173: kumppanin lahjakortti (koodi + Kopioi, arvaus vs. valinta, myyjän vaihto, Lunasta, Merkitse lunastetuksi)
+-    const vbox = await orderVoucherBox({ rpc, orderId: r.order_id, onChanged: () => { drawOrder(); onChange?.(); } }).catch(() => null);
+-    if (vbox) kids.unshift(vbox);
+-    orderBox.replaceChildren(...kids);
+-  };
+-  const editAddons = async (current, order) => {
+-    const state = reservationAddonLocks(order, r.reservation_id);
+-    const all = await rpc('admin_list_addons');
+-    const picker = addonPicker(all, { getPersons: () => r.persons, getMode: () => r.mode, locks: state.locks });
+-    picker.set(current);
+-    const error = h('p', { class: 'err', role: 'alert', tabindex: '-1', hidden: state.complete || null,
+-      text: state.complete ? '' : alt('error_unknown') });
+-    const f = h('form', { class: 'stack', onsubmit: (ev) => { ev.preventDefault(); run(f.querySelector('button[type=submit]'), async () => {
+-      const code = addonReductionError(state, picker.value());
+-      if (code) {
+-        error.textContent = alt(code === 'addon_paid' ? 'error_paid' : code === 'addon_link_open' ? 'error_link' : 'error_unknown');
+-        error.hidden = false; error.focus(); return;
+-      }
+-      try {
+-        await rpc('admin_set_reservation_addons', { p_reservation_id: r.reservation_id, p_addons: picker.value() });
+-        toast('Lisäpalvelut tallennettu'); dd.close(); d.close(); onChange?.();
+-      } catch (e) {
+-        const c = e?.code || (e?.message || '').match(/addon_paid|addon_link_open/)?.[0];
+-        error.textContent = c === 'addon_paid' ? alt('error_paid') : c === 'addon_link_open' ? alt('error_link') : errMsg(e);
+-        error.hidden = false; error.focus();
+-      }
+-    }); } },
+-      h('p', { class: 'muted', text: `Enimmäismäärä = henkilömäärä (${r.persons}) × lisäpalvelun enimmäismäärä / hlö. Tilauksen summa päivittyy; odottava maksu päivitetään.` }),
+-      [...state.locks.values()].some((x) => x.paid) ? h('p', { class: 'muted', text: alt('hint') }) : null,
+-      [...state.locks.values()].some((x) => x.linked) ? h('p', { class: 'muted', text: alt('link_hint') }) : null,
+-      picker.node, error,
+-      h('button', { class: 'btn primary', type: 'submit', disabled: !state.complete || null, text: 'Tallenna lisäpalvelut' }));
+-    const dd = dialog(`Lisäpalvelut – tilaus #${r.order_no}`, f);
+-  };
+-  drawOrder();
++  }
++  renderActions();
++  async function fetchOrder() {
++    try { rawOrder = await rpc('admin_get_order', { p_order_id: r.order_id }); order = normOrder(rawOrder); drawOrder(); }
++    catch { rawOrder = null; order = null; }
++    renderActions();
++  }
++  Promise.all([fetchOrder(), flow ? Promise.resolve(true) : orderFlowEnabled().then((value) => { flowEnabled = value; renderActions(); })]).catch(() => {});
+   return d;
+ }
+ 
+-// Varauksen muutos hallinnasta: toinen vapaa vuoro samalle tuotteelle ja/tai henkilömäärä (admin_change_booking).
+-// Samat lukot ja säännöt kuin uudessa varauksessa; ei 48 h rajoitusta (se koskee vain asiakasta). Hinta ei muutu maksetulla tilauksella ilman uutta kirjausta.
++// Varauksen muutos hallinnasta: sama voimassa oleva RPC ja samat parametrit kuin ennen.
+ function changeDialog(r, onChange) {
+   const day = (iso) => new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
+   const st = { date: day(r.starts_at), session: null };
+@@ -204,8 +289,8 @@
+   async function load() {
+     sessionsBox.replaceChildren(h('p', { class: 'muted', text: 'Ladataan…' }));
+     const v = await rpc('admin_day_view', { p_date: st.date });
+-    const list = (v.sessions || []).filter((x) => x.product_id === r.product_id && x.status !== 'closed');
+-    sessionsBox.replaceChildren(list.length ? h('div', { class: 'slotpick', role: 'radiogroup', 'aria-label': 'Uusi vuoro' }, list.map((x) => {
++    const available = (v.sessions || []).filter((x) => x.product_id === r.product_id && x.status !== 'closed');
++    sessionsBox.replaceChildren(available.length ? h('div', { class: 'slotpick', role: 'radiogroup', 'aria-label': 'Uusi vuoro' }, available.map((x) => {
+       const same = x.starts_at === r.starts_at;
+       const ok = x.status === 'available' || same;
+       const b = h('button', { type: 'button', role: 'radio', 'aria-checked': 'false', class: `slotbtn ${x.status}`, disabled: !ok || null, onclick: () => { st.session = same ? null : x; sessionsBox.querySelectorAll('.slotbtn').forEach((y) => y.setAttribute('aria-checked', 'false')); b.setAttribute('aria-checked', 'true'); } },
+--- a/booking/admin/views/talous-orders.js
++++ b/booking/admin/views/talous-orders.js
+@@ -16,6 +16,9 @@
+ import { acText } from '../annual-card-texts.js';
+ import { orderVoucherBox } from './voucher-redeem.js';
+ import { visibleOrderActions } from '../order-actions-logic.js';
++import { linkDeadlineControl } from './payment-link-04.js';
++import { linkValidityText } from '../payment-link-logic.js';
++import { reservationText as rdText } from '../reservation-texts-04.js';
+ 
+ export const ORDER_SORTS = ['created', 'order_no', 'total', 'payment_status', 'first_reservation'];
+ const VAT_CHOICES = [25.5, 13.5, 0];
+@@ -155,13 +158,21 @@
+     });
+   }
+   function linkDialog(o) {
+-    formDialog(t('btn.linkTitle'), [h('p', { class: 'muted', text: api.isMock('createPaymentLink') ? t('mock.note') : t('live.note') }), h('p', { text: t('link.amount', { sum: fmt.money(o.balance.unpaid) }), 'data-testid': 'link-amount' }),
+-      fld(t('link.days'), h('input', { name: 'days', type: 'number', min: 1, max: 90, value: 14, inputmode: 'numeric' })), h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'email' }), ` ${t('link.email')}`)], t('link.submit'),
+-    async (fd) => {
+-      const res = await api.createPaymentLink({ orderId: o.order_id, sendEmail: fd.get('email') === 'on', expiresDays: Math.max(1, Math.trunc(+fd.get('days')) || 14) });
++    const deadline = linkDeadlineControl();
++    formDialog(t('btn.linkTitle'), [
++      h('p', { class: 'muted', text: api.isMock('createPaymentLink') ? t('mock.note') : t('live.note') }),
++      h('p', { text: t('link.amount', { sum: fmt.money(o.balance.unpaid) }), 'data-testid': 'link-amount' }),
++      deadline.nodes,
++      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'email' }), ` ${t('link.email')}`),
++    ], t('link.submit'), async (fd) => {
++      const expiresDays = deadline.read(fd);
++      const res = await api.createPaymentLink({ orderId: o.order_id, sendEmail: fd.get('email') === 'on', expiresDays });
+       doneToast(res, RPC.createPaymentLink); afterChange(res, o.order_id);
+       const url = absLink(res.link_path, o);
+-      if (url) dialog(t('link.created'), h('div', { class: 'stack' }, res.mock ? h('p', { class: 'muted', text: t('mock.note') }) : null, h('input', { readonly: true, value: url, 'aria-label': t('link.created'), 'data-testid': 'link-url', onfocus: (e) => e.target.select() }),
++      if (url) dialog(t('link.created'), h('div', { class: 'stack' },
++        res.mock ? h('p', { class: 'muted', text: t('mock.note') }) : null,
++        h('input', { readonly: true, value: url, 'aria-label': t('link.created'), 'data-testid': 'link-url', onfocus: (e) => e.target.select() }),
++        h('p', { class: 'muted', text: linkValidityText(res, rdText, fmt.date) }),
+         h('p', { class: 'muted', text: res.online_payment_enabled ? t('link.online') : t('link.onsite') })));
+     });
+   }
+--- a/booking/admin/voucher-redeem-mock.js
++++ b/booking/admin/voucher-redeem-mock.js
+@@ -81,7 +81,7 @@
+       const difference = Math.round((due - amount) * 100) / 100;
+       Object.assign(c, { status: 'redeemed', resolved_at: new Date().toISOString(), resolved_by: 'staff', amount, payment_id: 70000 + c.id });
+       if (r.reservation_id) r.payment_status = difference > 0 ? 'partial' : 'paid';
+-      const link = difference > 0 ? { payment_id: 80000 + c.id, amount: difference, link_token: `mock-${c.id}`, link_path: `/maksa/?p=mock-${c.id}`, link_expires_at: new Date(now.getTime() + 14 * 864e5).toISOString(), status: 'pending', online_payment_enabled: true } : null;
++      const link = difference > 0 ? { payment_id: 80000 + c.id, amount: difference, link_token: `mock-${c.id}`, link_path: `/maksa/?p=mock-${c.id}`, link_expires_at: null, status: 'pending', online_payment_enabled: true } : null;
+       return { ok: true, already: false, id: c.id, payment_id: c.payment_id, amount, redeemed_via: 'staff', resolved_at: c.resolved_at, payment_method: METHOD(c.source), payment_method_label: METHOD_LABEL(c.source),
+         voucher_value: amount, due, difference: link ? difference : null, payment_link: link, email_queued: !!link };
+     },
+--- /dev/null
++++ b/booking/tests/varausdialogi-04.test.mjs
+@@ -0,0 +1,163 @@
++import assert from 'node:assert/strict';
++import test from 'node:test';
++import { reservationActions, arrivalActionsAllowed, moveTarget, addonsEditable, telHref, mailHref } from '../admin/reservation-dialog-logic.js';
++import { LINK_DEADLINE, linkExpiresDays, linkValidityText } from '../admin/payment-link-logic.js';
++
++const r = (status = 'confirmed', extra = {}) => ({ reservation_id: 11, status, space_code: 'rauni', persons: 1,
++  starts_at: '2026-11-28T22:30:00Z', notes: '', ...extra });
++const permitted = () => true;
++const order = (unpaid = 20, extra = {}) => ({ order_id: 7, is_native: true, staff_can_add: true,
++  balance: { total: 50, paid: 30, unpaid }, ...extra });
++const rawOrder = (addons = []) => ({ reservations: [{ id: 11, item_id: 30, addons }],
++  items: addons.map((a, i) => ({ id: i + 50, kind: 'addon', parent_item_id: 30, quantity: a.quantity })), payments: [] });
++const date = '2026-11-29T11:00:00Z';
++const actions = (status = 'confirmed', options = {}) => reservationActions(r(status), {
++  can: permitted, order: order(), rawOrder: rawOrder(), flowEnabled: true, now: date, ...options,
++});
++
++test('D1 ja D4: näkyvyys ja napin järjestys', () => {
++  assert.deepEqual(actions('pending').primary, ['confirm', 'addPurchase', 'createLink', 'change']);
++  assert.deepEqual(actions('confirmed').primary, ['addPurchase', 'createLink', 'arrive', 'change']);
++  assert.deepEqual(actions('confirmed').secondary, ['noShow', 'cancel']);
++  assert.deepEqual(actions('cancelled').secondary, ['confirm']);
++  assert.deepEqual(actions('expired').secondary, ['confirm']);
++  assert.deepEqual(actions('no_show').secondary, []);
++  assert.deepEqual(actions('completed').primary, ['addPurchase', 'createLink']);
++});
++
++test('D2: saapuminen vasta Helsingin varauspäivästä alkaen', () => {
++  for (const [now, wanted] of [
++    ['2026-11-28T21:59:00Z', false],
++    ['2026-11-28T22:00:00Z', true],
++    ['2026-11-28T22:29:00Z', true],
++    ['2026-11-28T22:31:00Z', true],
++    ['2026-11-30T08:00:00Z', true],
++  ]) assert.equal(arrivalActionsAllowed(r(), now), wanted, now);
++  assert.equal(arrivalActionsAllowed(r('pending'), date), false);
++  const before = actions('confirmed', { now: '2026-11-28T21:59:00Z' });
++  assert.equal(before.primary.includes('arrive'), false);
++  assert.equal(before.secondary.includes('noShow'), false);
++});
++
++test('D3: flow pois, maksulinkki silti näkyvissä', () => {
++  const a = actions('confirmed', { flowEnabled: false });
++  assert.equal(a.primary.includes('addPurchase'), false);
++  assert.equal(a.primary.includes('createLink'), true);
++  assert.equal(a.editAddons, true);
++  assert.equal(actions('confirmed', { order: order(0) }).primary.includes('createLink'), false);
++  assert.equal(actions('confirmed', { order: order(0) }).payment.recordPayment, false);
++  assert.equal(actions('confirmed', { order: order(10) }).payment.recordPayment, true);
++  assert.equal(actions('confirmed', { order: null }).primary.includes('addPurchase'), false);
++  assert.equal(actions('confirmed', { order: order(20, { staff_can_add: false }) }).primary.includes('addPurchase'), false);
++});
++
++test('Käyttöoikeudet ja Johku estävät niihin liittyvät napit', () => {
++  const noBookings = actions('confirmed', { can: (perm) => perm !== 'bookings.manage' });
++  assert.equal(noBookings.primary.includes('change'), false);
++  assert.equal(noBookings.primary.includes('addPurchase'), false);
++  assert.equal(noBookings.secondary.length, 0);
++  assert.equal(noBookings.note, null);
++  const noPayments = actions('confirmed', { can: (perm) => perm !== 'payments.manage' });
++  assert.equal(noPayments.primary.includes('createLink'), false);
++  assert.equal(noPayments.payment.openOrder, false);
++  assert.equal(noPayments.payment.recordPayment, false);
++  const johku = actions('confirmed', { order: order(50, { is_native: false, external_source: 'johku' }) });
++  assert.equal(johku.primary.includes('addPurchase'), false);
++  assert.equal(johku.primary.includes('createLink'), false);
++  assert.equal(johku.payment.recordPayment, false);
++  assert.equal(johku.editAddons, true);
++});
++
++test('D5: lisäpalveluiden muokkaus vain korjauksiin, kun lisäosto toimii', () => {
++  const noAddon = actions('confirmed');
++  assert.equal(noAddon.editAddons, false);
++  const addOn = [{ addon_id: 10, quantity: 2 }];
++  const orderWithAddons = rawOrder(addOn);
++  assert.equal(addonsEditable(orderWithAddons, 11), true);
++  assert.equal(actions('confirmed', { rawOrder: orderWithAddons }).editAddons, true);
++  assert.equal(actions('confirmed', { rawOrder: orderWithAddons, flowEnabled: false }).editAddons, true);
++  assert.equal(actions('pending', { rawOrder: rawOrder(), order: order(20, { staff_can_add: false }) }).editAddons, true);
++});
++
++test('Tilasiirron rajoitukset', () => {
++  assert.equal(moveTarget(r(), permitted), 'lovi');
++  assert.equal(moveTarget(r('confirmed', { persons: 2 }), permitted), null);
++  assert.equal(moveTarget(r('confirmed', { space_code: 'lovi' }), permitted), 'rauni');
++  assert.equal(moveTarget(r('confirmed', { space_code: null }), permitted), null);
++  assert.equal(moveTarget(r('cancelled'), permitted), null);
++  assert.equal(moveTarget(r(), () => false), null);
++});
++
++test('Asiakkaan turvalliset yhteystietolinkit', () => {
++  assert.equal(telHref('+358 40 123 45 67'), 'tel:+358401234567');
++  assert.equal(telHref(''), null);
++  assert.equal(telHref('abc'), null);
++  assert.equal(mailHref('  asiakas@example.test  '), 'mailto:asiakas@example.test');
++  assert.equal(mailHref('<img onerror=alert(1)>'), null);
++});
++
++test('D6: ei takarajaa oletuksena, valinnainen 1–60 päivän takaraja', () => {
++  assert.equal(LINK_DEADLINE.max, 60);
++  assert.deepEqual(linkExpiresDays({ enabled: false, days: 14 }), { ok: true, expiresDays: undefined });
++  for (const days of [1, 14, 60, '7']) assert.deepEqual(linkExpiresDays({ enabled: true, days }), { ok: true, expiresDays: Number(days) });
++  for (const days of [0, 61, 1.5, '', 'abc', null]) assert.deepEqual(linkExpiresDays({ enabled: true, days }), { ok: false, error: 'link_deadline_bad' });
++  const tx = (key, vars) => `${key}${vars?.date || ''}`;
++  assert.equal(linkValidityText({ expires_at: null }, tx, String), 'ui.admin.orders.link_no_deadline');
++  assert.equal(linkValidityText({ expires_at: '2026-12-01' }, tx, String), 'ui.admin.orders.link_valid_until2026-12-01');
++});
++
++// Lähdekoodin rakennetarkistukset eivät korvaa selaimessa tehtäviä e2e-testejä.
++import { readFileSync } from 'node:fs';
++import { fileURLToPath } from 'node:url';
++import { dirname, join } from 'node:path';
++const admin = join(dirname(fileURLToPath(import.meta.url)), '..', 'admin');
++const root = join(admin, '..', '..');
++const readAdmin = (rel) => readFileSync(join(admin, rel), 'utf8');
++
++test('UI04: järjestys, testidit, suljetut harvinaiset osiot ja null-turvallisuus', () => {
++  const src = readAdmin('views/shared.js');
++  const anchors = ['res-summary', 'res-customer', 'res-primary-actions', 'res-payment', 'res-contents',
++    'res-note-editor', 'res-secondary-actions', 'res-more', 'res-move'];
++  const positions = anchors.map((value) => src.indexOf(`'data-testid': '${value}'`));
++  assert.ok(positions.every((n) => n >= 0), JSON.stringify(anchors.map((value, i) => [value, positions[i]])));
++  assert.ok(positions.every((n, i) => i === 0 || n > positions[i - 1]));
++  assert.match(src, /body\.append\(\.\.\.list\(/);
++  assert.doesNotMatch(src, /Verkkomaksulinkki \(Visma Pay\)|admin_create_payment_link|innerHTML/);
++  assert.match(src, /h\('details', \{ class: 'rd-more'/);
++  assert.match(src, /h\('details', \{ class: 'rd-more rd-move'/);
++  assert.match(src, /data-testid': 'res-no-show'/);
++  assert.match(src, /formDialog\(tx\('ui\.admin\.res\.no_show_title'/);
++});
++
++test('UI04: silta ei tee DOM-jälkikäsittelyä, vaan antaa flow-parametrin', () => {
++  const src = readAdmin('views/order-reservation-bridge.js');
++  assert.match(src, /flow:\s*\{/);
++  assert.match(src, /order-open-reservation/);
++  assert.match(src, /data-action=/);
++  assert.match(src, /MutationObserver/);
++  assert.doesNotMatch(src, /Verkkomaksulinkki|body\.append\(extra\)|innerHTML/);
++});
++
++test('UI04: takarajaohjaimen alkuvalinta on pois ja kentän päiväraja 60', () => {
++  const src = readAdmin('views/payment-link-04.js');
++  assert.match(src, /type: 'checkbox', name: 'deadline'/);
++  assert.match(src, /disabled: true/);
++  assert.match(src, /linkDeadlineControl/);
++  assert.match(src, /expiresDays = deadline\.read\(fd\)/);
++  assert.doesNotMatch(src, /max:\s*90|value:\s*14,\s*required:\s*true/);
++});
++
++test('UI04: FI/EN-avainluettelo vastaa pending-import-78-tiedostoa', async () => {
++  const textSource = readAdmin('reservation-texts-04.js');
++  const RESERVATION04_TEXTS = JSON.parse(textSource.match(/export const RESERVATION04_TEXTS = ([\s\S]*?);\nexport function/)[1]);
++  const lines = JSON.parse(readFileSync(join(root, 'content/site-texts.pending-import-78.json'), 'utf8'));
++  assert.equal(lines.length, Object.keys(RESERVATION04_TEXTS).length * 2);
++  for (const [key, texts] of Object.entries(RESERVATION04_TEXTS)) {
++    for (const lang of ['fi', 'en']) {
++      const item = lines.find((x) => x.key === key && x.lang === lang);
++      assert.equal(item?.text, texts[lang], `${key} ${lang}`);
++      assert.deepEqual(item?.placeholders,
++        [...texts[lang].matchAll(/\{\{var:[^}]+\}\}/g)].map((m) => m[0]));
++    }
++  }
++});
+--- /dev/null
++++ b/content/site-texts.pending-import-78.json
+@@ -0,0 +1,560 @@
++[
++  {
++    "key": "ui.admin.res.order_no",
++    "lang": "fi",
++    "text": "Tilaus #{{var:no}}",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [
++      "{{var:no}}"
++    ],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.order_no",
++    "lang": "en",
++    "text": "Order #{{var:no}}",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [
++      "{{var:no}}"
++    ],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.summary_label",
++    "lang": "fi",
++    "text": "Varauksen yhteenveto",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.summary_label",
++    "lang": "en",
++    "text": "Booking summary",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.persons_shared",
++    "lang": "fi",
++    "text": "{{var:n}} hlö · yleinen vuoro",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [
++      "{{var:n}}"
++    ],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.persons_shared",
++    "lang": "en",
++    "text": "{{var:n}} people · shared session",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [
++      "{{var:n}}"
++    ],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.persons_private",
++    "lang": "fi",
++    "text": "{{var:n}} hlö · yksityisvuoro",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [
++      "{{var:n}}"
++    ],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.persons_private",
++    "lang": "en",
++    "text": "{{var:n}} people · private session",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [
++      "{{var:n}}"
++    ],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.hold_until",
++    "lang": "fi",
++    "text": "Pito päättyy klo {{var:time}}",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [
++      "{{var:time}}"
++    ],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.hold_until",
++    "lang": "en",
++    "text": "Hold expires at {{var:time}}",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [
++      "{{var:time}}"
++    ],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.customer",
++    "lang": "fi",
++    "text": "Asiakas",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.customer",
++    "lang": "en",
++    "text": "Customer",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.call",
++    "lang": "fi",
++    "text": "Soita asiakkaalle: {{var:phone}}",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [
++      "{{var:phone}}"
++    ],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.call",
++    "lang": "en",
++    "text": "Call the customer: {{var:phone}}",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [
++      "{{var:phone}}"
++    ],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.email",
++    "lang": "fi",
++    "text": "Lähetä sähköpostia: {{var:email}}",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [
++      "{{var:email}}"
++    ],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.email",
++    "lang": "en",
++    "text": "Email the customer: {{var:email}}",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [
++      "{{var:email}}"
++    ],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.customer_message",
++    "lang": "fi",
++    "text": "Asiakkaan viesti",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.customer_message",
++    "lang": "en",
++    "text": "Message from the customer",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.payment_title",
++    "lang": "fi",
++    "text": "Tilaus ja maksu",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.payment_title",
++    "lang": "en",
++    "text": "Order and payment",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.contents_title",
++    "lang": "fi",
++    "text": "Varauksen sisältö",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.contents_title",
++    "lang": "en",
++    "text": "Booking contents",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.more_details",
++    "lang": "fi",
++    "text": "Lisätiedot",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.more_details",
++    "lang": "en",
++    "text": "More details",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.move_title",
++    "lang": "fi",
++    "text": "Siirrä toiseen tilaan",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.move_title",
++    "lang": "en",
++    "text": "Move to another space",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.move_reason",
++    "lang": "fi",
++    "text": "Siirron syy (valinnainen)",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.move_reason",
++    "lang": "en",
++    "text": "Reason for the move (optional)",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.move_button",
++    "lang": "fi",
++    "text": "Siirrä tilaan {{var:space}}",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [
++      "{{var:space}}"
++    ],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.move_button",
++    "lang": "en",
++    "text": "Move to {{var:space}}",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [
++      "{{var:space}}"
++    ],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.move_help",
++    "lang": "fi",
++    "text": "Siirto onnistuu, jos kohdetila on vapaa ja tuotteella on sille sääntö.",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.move_help",
++    "lang": "en",
++    "text": "The move works if the target space is free and the product has a rule for it.",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.other_actions",
++    "lang": "fi",
++    "text": "Muut toiminnot",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.other_actions",
++    "lang": "en",
++    "text": "Other actions",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.no_show_title",
++    "lang": "fi",
++    "text": "Merkitäänkö varaus tilaan Ei saapunut?",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.no_show_title",
++    "lang": "en",
++    "text": "Mark the booking as no-show?",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.no_show_text",
++    "lang": "fi",
++    "text": "Asiakas ei saapunut varaukseen. Maksuja ei hyvitetä automaattisesti.",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.no_show_text",
++    "lang": "en",
++    "text": "The customer did not arrive. Payments are not refunded automatically.",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.no_show_submit",
++    "lang": "fi",
++    "text": "Merkitse: ei saapunut",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.res.no_show_submit",
++    "lang": "en",
++    "text": "Mark as no-show",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
++  },
++  {
++    "key": "ui.admin.orders.link_set_deadline",
++    "lang": "fi",
++    "text": "Aseta takaraja",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
++  },
++  {
++    "key": "ui.admin.orders.link_set_deadline",
++    "lang": "en",
++    "text": "Set a deadline",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
++  },
++  {
++    "key": "ui.admin.orders.link_deadline_help",
++    "lang": "fi",
++    "text": "Ilman takarajaa linkki on voimassa, kunnes tilaus on maksettu tai linkki korvataan uudella.",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
++  },
++  {
++    "key": "ui.admin.orders.link_deadline_help",
++    "lang": "en",
++    "text": "Without a deadline the link stays valid until the order is paid or the link is replaced.",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
++  },
++  {
++    "key": "ui.admin.orders.link_deadline_days",
++    "lang": "fi",
++    "text": "Takaraja (päivää)",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
++  },
++  {
++    "key": "ui.admin.orders.link_deadline_days",
++    "lang": "en",
++    "text": "Deadline (days)",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
++  },
++  {
++    "key": "ui.admin.orders.link_deadline_bad",
++    "lang": "fi",
++    "text": "Takarajan on oltava {{var:min}}–{{var:max}} päivää.",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [
++      "{{var:min}}",
++      "{{var:max}}"
++    ],
++    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
++  },
++  {
++    "key": "ui.admin.orders.link_deadline_bad",
++    "lang": "en",
++    "text": "The deadline must be {{var:min}}–{{var:max}} days.",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [
++      "{{var:min}}",
++      "{{var:max}}"
++    ],
++    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
++  },
++  {
++    "key": "ui.admin.orders.link_no_deadline",
++    "lang": "fi",
++    "text": "Linkillä ei ole takarajaa.",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
++  },
++  {
++    "key": "ui.admin.orders.link_no_deadline",
++    "lang": "en",
++    "text": "The link has no deadline.",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [],
++    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
++  },
++  {
++    "key": "ui.admin.orders.link_valid_until",
++    "lang": "fi",
++    "text": "Linkki on voimassa {{var:date}} asti.",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [
++      "{{var:date}}"
++    ],
++    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
++  },
++  {
++    "key": "ui.admin.orders.link_valid_until",
++    "lang": "en",
++    "text": "The link is valid until {{var:date}}.",
++    "class": "normal",
++    "kind": "plain",
++    "max_len": 200,
++    "placeholders": [
++      "{{var:date}}"
++    ],
++    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
++  }
++]
+--- a/booking/supabase/tests/giftcards/t174_partner_receipt_no_email.sql
++++ b/booking/supabase/tests/giftcards/t174_partner_receipt_no_email.sql
+@@ -126,7 +126,7 @@
+   perform pg_temp.ck((select method = 'partner_voucher_kokemuskauppa' and amount = 50 and status = 'paid' from booking.payments where id = pay), 'E2 kumppanimaksu vain arvon suuruinen (50 €)');
+   perform pg_temp.ck(exists (select 1 from booking.receipts where payment_id = pay and kind = 'receipt' and total_gross = 50)
+       and not exists (select 1 from booking.email_outbox where order_id = o and kind = 'receipt'), 'E3 lahjakorttiosuus: kuitti 50 €, ei kuittisähköpostia');
+-  perform pg_temp.ck((select provider = 'visma_pay' and method = 'visma_pay' and status = 'pending' and amount = 30 and link_token is not null and link_expires_at > now()
++  perform pg_temp.ck((select provider = 'visma_pay' and method = 'visma_pay' and status = 'pending' and amount = 30 and link_token is not null and link_expires_at is null
+       from booking.payments where id = lnk), 'E4 erotus 30 € Visma Pay -maksulinkkinä (pending, voimassa)');
+   select to_jsonb(e) into x from booking.email_outbox e where e.order_id = o and e.kind = 'payment_link' and e.payment_id = lnk;
+   perform pg_temp.ck(x is not null and x ->> 'locale' = 'en' and x #>> '{payload,variant}' = 'voucher_difference' and (x #>> '{payload,total}')::numeric = 80
+--- a/.github/workflows/pages.yml
++++ b/.github/workflows/pages.yml
+@@ -113,6 +113,8 @@
+       # booking_182: tilauksesta varaukseen + lisäostot hallinnassa (ominaisuuskytkin, oletuksena pois)
+       - run: node --test booking/tests/order-reservation-flow.test.mjs
+       - run: node --test booking/tests/order-detail-layout.test.mjs
++      # Varausdialogi 04: oikeudet, järjestys, saapumispäivä ja maksulinkin takaraja
++      - run: node --test booking/tests/varausdialogi-04.test.mjs
+       - run: node --test booking/tests/talous.test.mjs
+       # .cache/articles: edellinen artikkelisnapshot (RPC-katkon varalta + siirrettyjen slugien tunnistus)
+       - uses: actions/cache@v4
+--- a/booking/tests/order-detail-layout.test.mjs
++++ b/booking/tests/order-detail-layout.test.mjs
+@@ -75,8 +75,12 @@
+   for (const action of ['addToOrder', 'createPaymentLink'])
+     assert.match(source, new RegExp("key: '" + action + "'"), `bridge-painike ${action}`);
+   assert.match(read('booking/admin/views/talous-ui.js'), /'data-action': key/, 'actionBtn välittää data-actionin');
+-  const blobSha = (s) => createHash('sha1').update(`blob ${Buffer.byteLength(s)}\0`).update(s).digest('hex');
+-  assert.equal(blobSha(read('booking/admin/views/order-reservation-bridge.js')), 'd473879ff33c2352e8a5a71ebafba330558e5877');
+-  assert.equal(blobSha(read('booking/admin/views/shared.js')), '52190d46118b916707f1be01efbe583919c20990', 'Verkkomaksulinkki (Visma Pay) -otsikko säilyy');
+-  assert.match(read('booking/admin/views/shared.js'), /Verkkomaksulinkki \(Visma Pay\)/);
++  const bridge = read('booking/admin/views/order-reservation-bridge.js');
++  const detail = read('booking/admin/views/shared.js');
++  assert.match(bridge, /flow:\s*\{/);
++  assert.match(bridge, /order-open-reservation/);
++  assert.match(bridge, /data-action=/);
++  assert.doesNotMatch(bridge, /body\.append\(extra\)|Verkkomaksulinkki/);
++  assert.match(detail, /data-testid': 'res-summary'/);
++  assert.match(detail, /data-testid': 'res-secondary-actions'/);
+ });

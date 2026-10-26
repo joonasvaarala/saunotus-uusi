@@ -1,0 +1,560 @@
+[
+  {
+    "key": "ui.admin.res.order_no",
+    "lang": "fi",
+    "text": "Tilaus #{{var:no}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:no}}"
+    ],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.order_no",
+    "lang": "en",
+    "text": "Order #{{var:no}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:no}}"
+    ],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.summary_label",
+    "lang": "fi",
+    "text": "Varauksen yhteenveto",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.summary_label",
+    "lang": "en",
+    "text": "Booking summary",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.persons_shared",
+    "lang": "fi",
+    "text": "{{var:n}} hlö · yleinen vuoro",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.persons_shared",
+    "lang": "en",
+    "text": "{{var:n}} people · shared session",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.persons_private",
+    "lang": "fi",
+    "text": "{{var:n}} hlö · yksityisvuoro",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.persons_private",
+    "lang": "en",
+    "text": "{{var:n}} people · private session",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.hold_until",
+    "lang": "fi",
+    "text": "Pito päättyy klo {{var:time}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:time}}"
+    ],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.hold_until",
+    "lang": "en",
+    "text": "Hold expires at {{var:time}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:time}}"
+    ],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.customer",
+    "lang": "fi",
+    "text": "Asiakas",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.customer",
+    "lang": "en",
+    "text": "Customer",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.call",
+    "lang": "fi",
+    "text": "Soita asiakkaalle: {{var:phone}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:phone}}"
+    ],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.call",
+    "lang": "en",
+    "text": "Call the customer: {{var:phone}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:phone}}"
+    ],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.email",
+    "lang": "fi",
+    "text": "Lähetä sähköpostia: {{var:email}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:email}}"
+    ],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.email",
+    "lang": "en",
+    "text": "Email the customer: {{var:email}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:email}}"
+    ],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.customer_message",
+    "lang": "fi",
+    "text": "Asiakkaan viesti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.customer_message",
+    "lang": "en",
+    "text": "Message from the customer",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.payment_title",
+    "lang": "fi",
+    "text": "Tilaus ja maksu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.payment_title",
+    "lang": "en",
+    "text": "Order and payment",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.contents_title",
+    "lang": "fi",
+    "text": "Varauksen sisältö",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.contents_title",
+    "lang": "en",
+    "text": "Booking contents",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.more_details",
+    "lang": "fi",
+    "text": "Lisätiedot",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.more_details",
+    "lang": "en",
+    "text": "More details",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.move_title",
+    "lang": "fi",
+    "text": "Siirrä toiseen tilaan",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.move_title",
+    "lang": "en",
+    "text": "Move to another space",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.move_reason",
+    "lang": "fi",
+    "text": "Siirron syy (valinnainen)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.move_reason",
+    "lang": "en",
+    "text": "Reason for the move (optional)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.move_button",
+    "lang": "fi",
+    "text": "Siirrä tilaan {{var:space}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:space}}"
+    ],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.move_button",
+    "lang": "en",
+    "text": "Move to {{var:space}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:space}}"
+    ],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.move_help",
+    "lang": "fi",
+    "text": "Siirto onnistuu, jos kohdetila on vapaa ja tuotteella on sille sääntö.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.move_help",
+    "lang": "en",
+    "text": "The move works if the target space is free and the product has a rule for it.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.other_actions",
+    "lang": "fi",
+    "text": "Muut toiminnot",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.other_actions",
+    "lang": "en",
+    "text": "Other actions",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.no_show_title",
+    "lang": "fi",
+    "text": "Merkitäänkö varaus tilaan Ei saapunut?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.no_show_title",
+    "lang": "en",
+    "text": "Mark the booking as no-show?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.no_show_text",
+    "lang": "fi",
+    "text": "Asiakas ei saapunut varaukseen. Maksuja ei hyvitetä automaattisesti.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.no_show_text",
+    "lang": "en",
+    "text": "The customer did not arrive. Payments are not refunded automatically.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.no_show_submit",
+    "lang": "fi",
+    "text": "Merkitse: ei saapunut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.res.no_show_submit",
+    "lang": "en",
+    "text": "Mark as no-show",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: hallinnan varausdialogin uudistus (views/shared.js)"
+  },
+  {
+    "key": "ui.admin.orders.link_set_deadline",
+    "lang": "fi",
+    "text": "Aseta takaraja",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
+  },
+  {
+    "key": "ui.admin.orders.link_set_deadline",
+    "lang": "en",
+    "text": "Set a deadline",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
+  },
+  {
+    "key": "ui.admin.orders.link_deadline_help",
+    "lang": "fi",
+    "text": "Ilman takarajaa linkki on voimassa, kunnes tilaus on maksettu tai linkki korvataan uudella.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
+  },
+  {
+    "key": "ui.admin.orders.link_deadline_help",
+    "lang": "en",
+    "text": "Without a deadline the link stays valid until the order is paid or the link is replaced.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
+  },
+  {
+    "key": "ui.admin.orders.link_deadline_days",
+    "lang": "fi",
+    "text": "Takaraja (päivää)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
+  },
+  {
+    "key": "ui.admin.orders.link_deadline_days",
+    "lang": "en",
+    "text": "Deadline (days)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
+  },
+  {
+    "key": "ui.admin.orders.link_deadline_bad",
+    "lang": "fi",
+    "text": "Takarajan on oltava {{var:min}}–{{var:max}} päivää.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:min}}",
+      "{{var:max}}"
+    ],
+    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
+  },
+  {
+    "key": "ui.admin.orders.link_deadline_bad",
+    "lang": "en",
+    "text": "The deadline must be {{var:min}}–{{var:max}} days.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:min}}",
+      "{{var:max}}"
+    ],
+    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
+  },
+  {
+    "key": "ui.admin.orders.link_no_deadline",
+    "lang": "fi",
+    "text": "Linkillä ei ole takarajaa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
+  },
+  {
+    "key": "ui.admin.orders.link_no_deadline",
+    "lang": "en",
+    "text": "The link has no deadline.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
+  },
+  {
+    "key": "ui.admin.orders.link_valid_until",
+    "lang": "fi",
+    "text": "Linkki on voimassa {{var:date}} asti.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:date}}"
+    ],
+    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
+  },
+  {
+    "key": "ui.admin.orders.link_valid_until",
+    "lang": "en",
+    "text": "The link is valid until {{var:date}}.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:date}}"
+    ],
+    "reason": "Varausdialogi 04: maksulinkin takarajaohjain (views/order-add.js, views/talous-orders.js)"
+  }
+]
