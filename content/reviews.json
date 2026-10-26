@@ -1,10 +1,10 @@
 {
  "place": {
   "name": "Sipoonjoen perinnesauna",
-  "rating": 4.5,
-  "count": 175,
+  "rating": 4.6,
+  "count": 177,
   "url": "https://www.google.fi/maps/place/Sipoonjoen+perinnesauna/@60.3457464,25.2570176,17z/data=!4m8!3m7!1s0x469203eb68e230d1:0x5d60aa5c693653de!8m2!3d60.3457464!4d25.2570176!9m1!1b1!16s%2Fg%2F11rkbtqpr2",
-  "captured_at": "2026-10-16"
+  "captured_at": "2026-10-26"
  },
  "min_per_lang": 3,
  "max_per_lang": 4,
@@ -37,9 +37,15 @@
    "author": "Marko Helin",
    "stars": 5,
    "lang": "fi",
-   "published": "2026-09-10T12:00:00.000Z",
-   "published_approx": true,
+   "published": "2026-08-16T16:51:37.977Z",
    "text": "Oli kiva kokemus ja kyllä suosittelen paikkaa muillekin. Sauna on pienehkö ja max 8 hlö mahtuu kerrallaan. 2 tunnissa ehtii hyvin saunoa ja vaikka grillata sen jälkeen"
+  },
+  {
+   "author": "elina r",
+   "stars": 4,
+   "lang": "fi",
+   "published": "2026-07-25T16:09:50.396Z",
+   "text": "Aivan mahtava kokemus pilvisenä kesäpäivänä. Käytiin kumpikin ekaa kertaa savusaunassa, joten otettiin tunnin vuoro, kun ei tiedetty mitä odottaa. Aika meni nopeasti ja oltais voitu olla kauemminkin. Tullaan taatusti uudestaan ja otetaan sitten pidempi vuoro. Paikalla oli 6 ihmistä, se tuntui sopivalta määrältä saunassa ja paljussa. Saunottaja oli ystävällinen ja kävi säännöllisesti putsaamassa paljua ja kysymässä laitetaanko lisää löylyä. Jos haluaa lähteä suoraan saunasta ihmisten ilmoille, niin kannattaa ottaa mukaan kunnon pesuaineet. Varpaanpäät on vieläkin mustat 😀 mutta ihoon jäi kiva mieto savun tuoksu ❤️"
   },
   {
    "author": "Melissa Sutinen",
