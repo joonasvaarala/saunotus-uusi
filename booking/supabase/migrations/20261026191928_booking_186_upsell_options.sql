@@ -6,12 +6,12 @@
 -- public_upsell_checkout_attach lukee rivin option_id:n. Tilaussivun public_upsell_add välittää option_coden
 -- jo public_add_to_orderille; sitä ei korvata, jotta laskutuslukko (booking_185) pysyy ennallaan.
 -- Laskutettu tilaus jää kiinni: _create_legs_booking kutsuu _order_invoice_locked ja nostaa order_invoiced.
--- Vartija: md5(pg_get_functiondef) = nykyinen tuotanto, muuten RAISE. Näitä md5-arvoja EI ole vahvistettu
--- tästä työtilasta (ei tietokantayhteyttä). Dry run Tapio-devissä tulostaa todellisen md5:n, jos vartija kaatuu.
--- Odotetut (vahvistamattomat, ks. PR):
---   booking._upsell_options(bigint[],bigint[],date,integer,integer): UNVERIFIED
---   booking.public_upsell_checkout_attach(uuid,jsonb,uuid): UNVERIFIED
---   booking._upsell_attach_reservation(bigint,bigint,timestamptz,integer,date): UNVERIFIED
+-- Vartija: md5(pg_get_functiondef) = nykyinen tuotanto, muuten RAISE. md5-arvot vahvistettu 2026-10-26 (Bottiavustus): dev ja prod samat.
+-- (Dry run Tapio-devissä tulostaa todellisen md5:n, jos vartija kaatuu.)
+-- Odotetut (vahvistetut):
+--   booking._upsell_options(bigint[],bigint[],date,integer,integer): d181764e2d3be272d956b07ae8def76a
+--   booking.public_upsell_checkout_attach(uuid,jsonb,uuid): b8e4587e1b5ea56af98aea7560400e5d
+--   booking._upsell_attach_reservation(bigint,bigint,timestamptz,integer,date): 9c0a0f309dc760bcec8936b868d4f0aa
 -- Rollback: rollbacks/20261026190000_booking_186_ROLLBACK.sql
 -- Testi: tests/checkout/t186_upsell_options.sql (fixtures/10_test_helpers.sql jälkeen).
 set local lock_timeout = '5s';
@@ -20,15 +20,15 @@ do $g$
 declare v text;
 begin
   v := md5(pg_get_functiondef(to_regprocedure('booking._upsell_options(bigint[],bigint[],date,integer,integer)')));
-  if v is distinct from 'UNVERIFIED_upsell_options' then
+  if v is distinct from 'd181764e2d3be272d956b07ae8def76a' then
     raise exception 'booking_186: _upsell_options md5=% ei vastaa odotettua (vahvistamaton; päivitä vartija dry runin md5:llä)', coalesce(v, 'puuttuu');
   end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking.public_upsell_checkout_attach(uuid,jsonb,uuid)')));
-  if v is distinct from 'UNVERIFIED_checkout_attach' then
+  if v is distinct from 'b8e4587e1b5ea56af98aea7560400e5d' then
     raise exception 'booking_186: public_upsell_checkout_attach md5=% ei vastaa odotettua (vahvistamaton; päivitä vartija dry runin md5:llä)', coalesce(v, 'puuttuu');
   end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking._upsell_attach_reservation(bigint,bigint,timestamptz,integer,date)')));
-  if v is distinct from 'UNVERIFIED_attach_reservation' then
+  if v is distinct from '9c0a0f309dc760bcec8936b868d4f0aa' then
     raise exception 'booking_186: _upsell_attach_reservation md5=% ei vastaa odotettua (vahvistamaton; päivitä vartija dry runin md5:llä)', coalesce(v, 'puuttuu');
   end if;
 end $g$;

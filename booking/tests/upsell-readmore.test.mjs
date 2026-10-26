@@ -86,12 +86,12 @@ test('pakollinen tuotevalinta näkyy ennen aikoja ja lähtee mukaan', () => {
   const info = fnBody(ui, 'productInfo');
   assert.match(info, /t\('option'\)/);
   assert.doesNotMatch(info, /bk-upsell-chip|public_upsell_add/);
-  const sql = read('booking/supabase/migrations/20261026190000_booking_186_upsell_options.sql');
+  const sql = read('booking/supabase/migrations/20261026191928_booking_186_upsell_options.sql');
   assert.doesNotMatch(sql, /not coalesce\(pc\.option_required/);
   assert.match(sql, /price_delta/);
   assert.match(sql, /p_option_id bigint default null/);
   assert.match(sql, /order_invoiced/);
-  assert.match(read('booking/supabase/rollbacks/20261026190000_booking_186_ROLLBACK.sql'), /not coalesce\(pc\.option_required, false\)/);
+  assert.match(read('booking/supabase/rollbacks/20261026191928_booking_186_ROLLBACK.sql'), /not coalesce\(pc\.option_required, false\)/);
   const t186 = read('booking/supabase/tests/checkout/t186_upsell_options.sql');
   assert.match(t186, /TESTRESULT pass=% fail=%/);
   assert.match(t186, /fixtures\/10_test_helpers\.sql/);
