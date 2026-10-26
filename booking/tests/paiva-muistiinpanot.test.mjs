@@ -160,8 +160,12 @@ test('näkymät eivät kovakoodaa uusia lauseita, kytkennät day.js/shared.js/da
   const view = read('booking/admin/views/day-memos.js');
   assert.doesNotMatch(view, /text: '[A-ZÄÖ][^']*'/, 'day-memos.js käyttää t()-avaimia');
   const day = read('booking/admin/views/day.js'), shared = read('booking/admin/views/shared.js'), parts = read('booking/admin/views/dayparts.js');
-  assert.match(day, /bulletinCard\(/); assert.match(day, /dayNotesCard\(/);
-  assert.match(day, /loadDayMemos\(date, bundle\?\.notes_bundle \|\| null\)/);
+  assert.match(day, /export const DAY_VIEW_SHOW_ANNOUNCEMENTS = false/);
+  assert.match(day, /export const DAY_VIEW_SHOW_DAY_NOTES = false/);
+  assert.match(day, /DAY_VIEW_SHOW_ANNOUNCEMENTS \? bulletinCard\(/);
+  assert.match(day, /DAY_VIEW_SHOW_DAY_NOTES \? dayNotesCard\(/);
+  assert.match(day, /\(DAY_VIEW_SHOW_ANNOUNCEMENTS \|\| DAY_VIEW_SHOW_DAY_NOTES\)\s*\?\s*await loadDayMemos\(date, bundle\?\.notes_bundle \|\| null\)\s*: null/);
+  assert.doesNotMatch(day, /await loadDayMemos\(date, bundle\?\.notes_bundle \|\| null\);\s*$/m, 'hakua ei tehdä ehdoitta');
   assert.match(day, /'data-testid': 'next-own-shift'/);
   assert.match(day, /admin_next_own_shift_date', \{ p_from_date: todayHel\(\) \}/);
   assert.match(day, /'data-testid': 'res-note'/);
