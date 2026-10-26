@@ -35,6 +35,7 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
     items: [{ product_name: 'Yleinen saunavuoro', quantity: 1, line_total: po.total, vat_rate: 25.5, product_id: 1, rule_id: null, starts_at: po.reservations[0].starts_at, ends_at: po.reservations[0].ends_at, persons: 2, mode: 'slots', status: 'confirmed', hold_expires_at: null, option: null }],
     addons: [], payment_methods: [], booking_kind: 'slots', can_change: false, change_deadline: null, change_hours_before: 48 });
   async function rpc(name, args = {}) {
+    if (scenario === 'invoice_locked' && name === 'public_cancel_booking') return { ok: false, code: 'order_invoiced', message: 'Tilaus on laskutettu. Peruutus tehdään henkilökunnan kautta.' };
     if (pay && PAY_RPC.has(name)) return pay.rpc(name, args);
     if (pay && name === 'public_get_booking') {
       const po = await pay.rpc('public_get_order', { p_token: args.p_token }), r = treatmentRpc(name, args, now());
@@ -105,6 +106,13 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
       case 'public_payment_options': return { ok: true, online_enabled: false, methods: [] };
       case 'public_checkout_payment_options': return { ok: true, mobilepay_enabled: false, gift_card_redeem_enabled: false, methods: [] };
       case 'public_get_booking': {
+        if (scenario === 'invoice_locked') {
+          const start = new Date(now() + 5 * 864e5).toISOString();
+          return { ok: true, order_no: 185, status: 'pending', payment_status: 'invoiced', invoice_locked: true, total: 40, currency: 'EUR',
+            can_change: true, change_deadline: new Date(now() + 3 * 864e5).toISOString(), change_hours_before: 48,
+            items: [{ product_name: 'Yleinen saunavuoro', product_id: 1, quantity: 1, line_total: 40, vat_rate: 25.5, persons: 2, starts_at: start, ends_at: new Date(now() + 5 * 864e5 + 90 * 60e3).toISOString(), rule_id: 1, status: 'confirmed', mode: 'slots' }],
+            addons: [] };
+        }
         const r = treatmentRpc(name, args, now());
         return r ? r.body : { ok: false, code: 'not_found', message: 'Varausta ei löytynyt' };
       }

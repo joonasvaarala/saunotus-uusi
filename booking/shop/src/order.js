@@ -26,6 +26,7 @@ import { applyShopTexts } from './site-texts.js';
 import { isHoldView, giftWasUsed } from './hold-logic.js';
 import { holdPanel } from './hold-ui.js';
 import { normCheckoutOptions } from './mobilepay-logic.js';
+import { customerInvoiceLock } from './invoice-lock.js';
 
 const S = window.BOOKING_SHOP;
 const L = OT[S.lang] ? S.lang : 'fi', t = OT[L], ox = OPT[L];   // ox: tuotevalinnan tekstit (booking_50)
@@ -249,7 +250,8 @@ async function main() {
         : mpBlock ? null : h('button', { type: 'button', class: 'btn light ord-btn', disabled: true, 'data-testid': 'pay-rest', text: `${t.payRest} (${money(unpaid)})` }),
       link || mpBlock || vpBlock || checking || vpState.show ? null : h('p', { class: 'bk-note', text: t.payRestSoon })) : null;
     const giftCards = gift.cards.length ? cardsSection({ S, L, api: gapi, cards: gift.cards }) : null;
-    const giftUse = gift.redeem && unpaid > 0 && !payHidden && !gift.cards.length && ['confirmed', 'pending'].includes(o.status) ? redeemSection({ L, api: gapi, token, onApplied: reloadAfterGift, onClaimed: reloadAfterClaim, onFail: (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) holdCtl?.poll(true); } }) : null;
+    const inv = customerInvoiceLock(o);
+    const giftUse = !inv.locked && gift.redeem && unpaid > 0 && !payHidden && !gift.cards.length && ['confirmed', 'pending'].includes(o.status) ? redeemSection({ L, api: gapi, token, onApplied: reloadAfterGift, onClaimed: reloadAfterClaim, onFail: (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) holdCtl?.poll(true); } }) : null;
     const claimBox = gift.claims.length ? claimsSection({ S, L, api: gapi, token, claims: gift.claims, notice, onChanged: reloadAfterClaim }) : null;
     notice = null;
     const receipts = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-r' }, h('h3', { id: 'ord-r', text: t.receiptsTitle }),
@@ -269,7 +271,7 @@ async function main() {
         if (link) location.assign(S.base ? S.base + link.link_path : link.link_path);
       },
     }) : null;
-    const add = closedHold || o.reservations.length === 0 ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-a' }, h('h3', { id: 'ord-a', text: t.addTitle }), o.can_add && o.upsell_addons.length ? addForm(o) : h('p', { class: 'bk-note', text: t.addClosed }), treats,
+    const add = closedHold || o.reservations.length === 0 ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-a' }, h('h3', { id: 'ord-a', text: t.addTitle }), o.can_add && o.upsell_addons.length && !inv.locked ? addForm(o) : h('p', { class: 'bk-note', text: inv.locked ? t['err.order_invoiced'] : t.addClosed }), treats,
       h('p', { class: 'bk-note' }, `${t.addNewBooking} `, h('a', { href: S.shopHref, text: t.addNewBookingLink })));
     const extra = guides || add || upsell ? h('div', { class: 'ord-extra', 'data-testid': 'order-extra' }, guides, upsell, add) : null;
     const cancel = closedHold || o.reservations.length === 0 ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c', 'data-testid': 'cancel-section' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), ...cancelBody(o, note));

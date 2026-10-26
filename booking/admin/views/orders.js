@@ -7,7 +7,7 @@ import { createOrdersTab } from './talous-orders.js';
 import { loadOrderTexts } from '../orders-texts.js';
 import { initialOrdersTab } from '../admin-navigation.js';
 import { navText } from '../nav-texts.js';
-import { isFlowEnabledValue } from '../order-reservation-logic.js';
+import { cachedOrderFlowEnabled } from '../order-reservation-logic.js';
 
 export async function render({ ctx, refs, reload, query, legacyReservations = false }) {
   const canOrders = ctx.can('payments.manage');
@@ -56,7 +56,7 @@ export async function render({ ctx, refs, reload, query, legacyReservations = fa
         const api = createTalousApi({ rpc, io: { select: dbSelect, functionUrl, fnBlob, fn } });
         const gift = createGiftApi({ rpc, io: { functionUrl } });
         // booking_182: ominaisuuskytkin; kun pois päältä, uutta koodia ei ladata lainkaan
-        const flowEnabled = isFlowEnabledValue(await dbSelect('settings', { select: 'value', key: 'eq.admin_order_reservation_flow_enabled', limit: 1 }).catch(() => []));
+        const flowEnabled = await cachedOrderFlowEnabled(() => dbSelect('settings', { select: 'value', key: 'eq.admin_order_reservation_flow_enabled', limit: 1 }));
         if (seq !== sequence) return;
         const view = createOrdersTab({ api, ctx, gift, rpc });   // rpc: lahjakorttilaatikko (booking_173)
         panel.replaceChildren(view.node);

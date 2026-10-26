@@ -33,6 +33,7 @@ import { normalizeOffer, ritualPrice, ritualMax, cardQty, reconcileCard, ritualA
 import { RITUAL_TEXTS, RITUAL_ERRORS } from './ritual-addon-texts.js';
 import { oneKey } from './plural.js';
 import { eventText, occurrenceText, occurrenceLabel, findEvent, saleState, upcoming, isMultiDay } from './event-sale.js';
+import { customerInvoiceLock } from './invoice-lock.js';
 
 const S = window.BOOKING_SHOP;                   // build-aikainen konfiguraatio (kieli, polut, ei-verkossa-varattavat tuotteet)
 const t = T[S.lang] || T.fi;
@@ -985,20 +986,22 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     const url = URL.createObjectURL(new Blob([ics(b)], { type: 'text/calendar' }));
     actions.append(h('a', { class: 'btn light', href: url, download: `varaus-${b.order_no}.ics`, text: t.addCal }));
   }
+  const inv = customerInvoiceLock(b);
   if (b.status === 'confirmed' && b.can_change) actions.append(h('a', { class: 'btn gold', href: `#${token}/muuta`, text: t.changeBooking }));
-  if (b.status === 'pending') actions.append(h('button', { type: 'button', class: 'btn light', onclick: async () => {
+  if (b.status === 'pending' && inv.showPendingCancel) actions.append(h('button', { type: 'button', class: 'btn light', onclick: async () => {
     if (!confirm(t.cancelConfirm)) return;
     const r = await rpc('public_cancel_booking', { p_token: token });
     out.replaceChildren(r.ok ? h('p', { class: 'bk-ok', text: t.cancelled }) : errorBox(t.errors[r.code] || t.cancelFail));
     if (r.ok) setTimeout(() => location.reload(), 800);
   } }, t.cancelBooking));
+  if (b.status === 'pending' && inv.locked) actions.append(h('p', { class: 'bk-note', role: 'status', 'data-testid': 'invoiced-cancel-note', text: t.invoicedCancelNote }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })));
   mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { 'data-testid': 'conf-title', text: b.status === 'cancelled' ? t.confCancelled : b.status === 'expired' ? t.confExpired : b.status === 'pending' || (co && co.awaiting) ? ht(S.lang, 'h2.awaiting') : t.confTitle }), h('p', { class: 'bk-status', role: 'status', 'data-testid': 'conf-status', text: head }), holdHost, mpHost, dl,   // pitotilassa: otsikko + tilabadge → pitopaneeli → tiivis tilausyhteenveto → maksuosio (secEl lisätään yhteenvedon jälkeen)
     b.status === 'confirmed' && b.customer_kind === 'company' && b.payment_status !== 'paid' ? h('p', { class: 'bk-pay', text: t.companyInvoiceMethodNote }) : null,
     b.status === 'confirmed' && b.payment_status !== 'paid' && b.payment_status !== 'invoiced' && b.customer_kind !== 'company' && !isTreatmentBooking(b) && !online ? h('p', { class: 'bk-pay', text: t.payLater }) : null, optNote && b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-option-note', text: optNote }) : null, actions, out,
     b.status === 'confirmed' && (b.has_ritual_addon || ritItems.length) ? h('p', { class: 'bk-note', 'data-testid': 'conf-ritual-note', text: rtx('ritualConfNote') }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email }))
       : b.status === 'confirmed' ? h('p', { class: 'bk-note', text: b.can_change ? t.changeInfo(b.change_hours_before, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) : t.changeLocked(b.change_hours_before) }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })) : null,
     h('p', { class: 'bk-note', text: t.emailNote }), h('p', {}, h('a', { href: S.infoHref, text: t.directions }))));
-  if (b.status === 'confirmed') {
+  if (b.status === 'confirmed' && !inv.locked) {
     root.querySelector('.bk-conf')?.append(orderUpsellSection({
       S, L, token, order: confirmationUpsellOrder(b), rpc,
       onAdded: () => viewConfirmation({ refresh: true, host: mpHost, noReturn: true }),
@@ -1052,9 +1055,10 @@ async function viewChange(token, b) {
   const msg = h('div', { id: 'bk-msg', 'aria-live': 'polite' });
   const sessionsBox = h('div', { class: 'bk-slots', 'aria-live': 'polite' });
   const summary = h('p', { class: 'bk-meta' });
-  const num = h('input', { id: 'bk-n', type: 'number', min: 1, inputmode: 'numeric', 'aria-label': t.persons, onchange: () => { n = +num.value || 1; clamp(); upd(); } });
-  const minus = h('button', { type: 'button', class: 'bk-step', 'aria-label': '−', onclick: () => { n--; upd(); } }, '−');
-  const plus = h('button', { type: 'button', class: 'bk-step', 'aria-label': '+', onclick: () => { n++; upd(); } }, '+');
+  const inv = customerInvoiceLock(b);
+  const num = h('input', { id: 'bk-n', type: 'number', min: 1, inputmode: 'numeric', 'aria-label': t.persons, disabled: inv.personsDisabled || null, onchange: () => { if (inv.personsDisabled) { n = it.persons; upd(); return; } n = +num.value || 1; clamp(); upd(); } });
+  const minus = h('button', { type: 'button', class: 'bk-step', 'aria-label': '−', disabled: inv.personsDisabled || null, onclick: () => { if (inv.personsDisabled) return; n--; upd(); } }, '−');
+  const plus = h('button', { type: 'button', class: 'bk-step', 'aria-label': '+', disabled: inv.personsDisabled || null, onclick: () => { if (inv.personsDisabled) return; n++; upd(); } }, '+');
   const submit = h('button', { type: 'submit', class: 'btn gold', text: t.saveChange });
   const isCur = (r) => r.rule_id === it.rule_id && r.session_date === curDate;
   const target = () => st.session || st.rows.find(isCur) || null;     // valittu vuoro tai nykyinen (jos samalla päivällä)
@@ -1066,14 +1070,16 @@ async function viewChange(token, b) {
   };
   function clamp() { const { min, max } = limits(); n = Math.min(Math.max(n, min), max); }
   function upd() {
-    clamp(); const { min, max } = limits(); const s = target();
-    num.min = min; num.max = max; num.value = n; minus.disabled = n <= min; plus.disabled = n >= max;
-    // lisäpalvelut säilyvät; määrät rajataan uuteen henkilömäärään (sama kuin palvelimella)
+    if (inv.personsDisabled) n = it.persons;
+    else clamp();
+    const { min, max } = limits(); const s = target();
+    num.min = min; num.max = max; num.value = n; minus.disabled = inv.personsDisabled || n <= min; plus.disabled = inv.personsDisabled || n >= max;
+    if (inv.personsDisabled) num.disabled = true;
     const addonsNew = (b.addons || []).reduce((x, a) => x + Math.min(a.quantity, addonLimit(a, n)) * +a.unit_price, 0);
-    const newTotal = s ? priceFor(s, n) + addonsNew : null;
-    const changed = !!st.session || n !== it.persons;
-    summary.textContent = s ? `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)} · ${n} ${t.person} · ${money(newTotal)}` : '';
-    const priceBlocked = b.payment_status === 'paid' && newTotal != null && Math.abs(newTotal - b.total) > 0.005;
+    const newTotal = !inv.showPriceEstimate && s ? null : (s ? priceFor(s, n) + addonsNew : null);
+    const changed = !!st.session || (!inv.personsDisabled && n !== it.persons);
+    summary.textContent = s ? `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)} · ${n} ${t.person}${inv.showPriceEstimate && newTotal != null ? ` · ${money(newTotal)}` : ''}` : '';
+    const priceBlocked = inv.showPriceEstimate && b.payment_status === 'paid' && newTotal != null && Math.abs(newTotal - b.total) > 0.005;
     msg.replaceChildren(...(priceBlocked ? [h('p', { class: 'bk-note', text: t.changePaidPrice })] : []));
     submit.disabled = !changed || priceBlocked;
   }
@@ -1104,7 +1110,7 @@ async function viewChange(token, b) {
     try {
       const args = { p_token: token };
       if (st.session) { args.p_rule_id = st.session.rule_id; args.p_date = st.date; }
-      if (n !== it.persons) args.p_persons = n;
+      if (!inv.personsDisabled && n !== it.persons) args.p_persons = n;
       const r = await rpc('public_change_booking', args);
       if (!r.ok) throw Object.assign(new Error(t.errors[r.code] || t.errorGeneric), { code: r.code, mapped: true });
       state.months.clear();
@@ -1114,7 +1120,9 @@ async function viewChange(token, b) {
       msg.replaceChildren(errorBox(e.mapped ? e.message : t.errorGeneric)); msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true });
       if (['capacity_exceeded', 'private_booked', 'public_shift_booked', 'space_closed'].includes(e.code)) loadSessions();
     }
-  } }, h('fieldset', {}, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, minus, num, plus)), summary, msg, submit);
+  } }, h('fieldset', {}, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, minus, num, plus),
+    inv.personsDisabled ? h('p', { class: 'bk-note', 'data-testid': 'invoiced-persons-note', text: t.invoicedPersonsNote }) : null), summary,
+    inv.locked ? h('p', { class: 'bk-note', 'data-testid': 'invoiced-sum-note', text: t.invoicedSumNote }) : null, msg, submit);
   mount(h('p', {}, h('a', { href: `#${token}`, text: t.back })), h('h2', { text: t.changeTitle }),
     h('p', { class: 'bk-note', text: t.changeInfo(hours, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) }),
     h('dl', { class: 'bk-sum' }, h('dt', { text: t.what }), h('dd', { text: it.product_name }), h('dt', { text: t.when }), h('dd', { text: `${dayLong(it.starts_at)}, ${hm(it.starts_at)}–${hm(it.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(it.persons) })),

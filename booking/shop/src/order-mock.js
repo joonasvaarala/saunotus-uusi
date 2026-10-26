@@ -24,6 +24,10 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
   const sync = () => { o.total = r2(o.items.reduce((s, i) => s + i.line_total, 0)); o.unpaid = r2(Math.max(0, o.total - o.paid)); o.payment_status = o.unpaid === 0 ? 'paid' : o.paid > 0 ? 'partially_paid' : scenario === 'invoiced' ? 'invoiced' : 'unpaid'; };   // booking_175: ?scenario=invoiced = yrityksen laskulla maksettava tilaus (Laskutettu)
   // Skenaariot lahjakorttinäkymille (?mock=1&scenario=gift|cards|cardspaid|cardsdelivery): gift = maksamatonta jäljellä (Käytä lahjakortti), cards = lahjakorttitilaus maksamatta, cardspaid = maksettu, cardsdelivery = maksettu + toimitusvalinnat (ostajalle / saajalle ajastettu / saajalle lähetetty)
   if (scenario === 'invoiced') { o.customer_kind = 'company'; o.paid = 0; o.payments = []; o.receipts = []; }
+  if (scenario === 'invoice_locked') {
+    o.invoice_locked = true; o.can_add = false; o.status = 'pending';
+    o.payments.push({ status: 'pending', amount: 999, provider: 'visma_pay', method_label: 'Visma Pay', link_token: '00000000-0000-4000-a000-000000000185', link_path: '/maksa/?p=00000000-0000-4000-a000-000000000185', link_stale: true });
+  }
   const giftCards = [];
   if (scenario === 'gift' || scenario === 'claims' || scenario === 'claimsoff' || scenario === 'claimproblem') { o.items = [{ id: 1, name: 'Yleinen saunavuoro', name_en: 'Public sauna session', quantity: 2, line_total: 72, vat_rate: 25.5 }, { id: 2, name: 'Pyyhe', name_en: 'Towel', quantity: 2, line_total: 10, vat_rate: 25.5 }]; o.paid = 20; o.payments[0].amount = 20; o.receipts = []; }
   if (scenario === 'cards' || scenario === 'cardspaid' || scenario === 'cardsdelivery') {
@@ -142,6 +146,7 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
     // public_get_booking (vain pitotilassa; vahvistussivu käyttää shop-mock.js:n omaa): pidon tila + payment_methods (myös perutut maksut → lahjakortti käytetty)
     ...(hold ? { public_get_booking: () => ({ ...snap(), payment_methods: hold.methods() }) } : {}),
     public_add_to_order: ({ p_items }) => {
+      if (o.invoice_locked) return bad('order_invoiced', 'Tilaus on laskutettu, eikä sen rivejä voi enää muuttaa verkossa. Ota yhteyttä henkilökuntaan.');
       if (!o.can_add) return bad('order_closed', 'Lisäysaika on päättynyt');
       if (!Array.isArray(p_items) || !p_items.length) return bad('invalid_items', 'Ei rivejä');
       let added = 0;
@@ -166,6 +171,7 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
     public_change_order_time: ({ p_reservation_id, p_start, p_rule_id, p_date, p_persons, p_option_code }) => {
       if (!o.can_change) return bad('change_too_late', 'Muutosaika on päättynyt');
       const res = o.reservations.find((x) => x.reservation_id === p_reservation_id); if (!res) return bad('not_found', 'Varausta ei löytynyt');
+      if (o.invoice_locked && p_persons != null && +p_persons !== res.persons) return bad('order_invoiced', 'Tilaus on laskutettu, eikä sen rivejä voi enää muuttaa verkossa. Ota yhteyttä henkilökuntaan.');
       const code = String(p_option_code ?? '').trim().toLowerCase();
       if (!code && p_start == null && p_rule_id == null && p_date == null && p_persons == null) return bad('invalid_change', 'Ei muutettavaa');
       if (p_start != null || p_rule_id != null || p_date != null || p_persons != null) return bad('invalid_change', 'Mock tukee vain hoidon vaihtoa');

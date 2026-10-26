@@ -1,6 +1,6 @@
 // Varausdialogi 04: toiminto-oikeudet ja näkyvyys ilman DOM-riippuvuuksia.
 import { canAddPurchase } from './order-reservation-logic.js';
-import { reservationAddonLocks } from './addon-lock-logic.js';
+import { reservationAddonLocks, orderInvoiceLocked } from './addon-lock-logic.js';
 
 const inSet = (value, ...values) => values.includes(value);
 const helDay = (value) => {
@@ -62,8 +62,9 @@ export function reservationActions(r, { can = () => true, order = null, rawOrder
   const unpaid = Number(order?.balance?.unpaid || 0);
   const orderReady = !!order;
   const native = !!order?.is_native;
-  const link = payments && orderReady && native && unpaid > 0;
-  const addPurchase = flowEnabled && inSet(status, 'pending', 'confirmed', 'completed') &&
+  const locked = orderInvoiceLocked(order);
+  const link = payments && orderReady && native && unpaid > 0 && !locked;
+  const addPurchase = !locked && flowEnabled && inSet(status, 'pending', 'confirmed', 'completed') &&
     canAddPurchase(order, { can }).allowed;
   const primary = [];
   if (booking && status === 'pending') primary.push('confirm');
@@ -87,7 +88,7 @@ export function reservationActions(r, { can = () => true, order = null, rawOrder
       recordPayment: link,
       openOrder: payments,
     },
-    editAddons: changing && orderReady && (!addPurchase || (ad.length > 0 && addonsEditable(rawOrder, r?.reservation_id))),
+    editAddons: !locked && changing && orderReady && (!addPurchase || (ad.length > 0 && addonsEditable(rawOrder, r?.reservation_id))),
     note: booking ? 'edit' : r?.notes ? 'read' : null,
     move: moveTo ? { show: true, to: moveTo } : null,
   };

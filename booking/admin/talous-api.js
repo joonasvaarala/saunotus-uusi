@@ -62,7 +62,7 @@ export const normReceipt = (x) => ({ ...normReceiptRef(x), total: num(x.total_gr
 export function normOrderPayment(p) {
   const receipts = (p.receipts || []).map(normReceiptRef);
   return { payment_id: p.id ?? p.payment_id, method: p.method, method_label: p.method_label ?? null, status: p.status, amount: num(p.amount), refunded_amount: num(p.refunded_amount), rounding: num(p.rounding), paid_at: p.paid_at ?? null,
-    created_at: p.created_at ?? null, provider: p.provider ?? null, link_token: p.link_token ?? null, link_path: p.link_path ?? null, link_expires_at: p.link_expires_at ?? null, note: p.note ?? null,
+    created_at: p.created_at ?? null, provider: p.provider ?? null, link_token: p.link_token ?? null, link_path: p.link_path ?? null, link_expires_at: p.link_expires_at ?? null, link_stale: p.link_stale === true, note: p.note ?? null,
     lines: (p.lines || []).map(normLine), receipts, refunds: (p.refunds || []).map((x) => ({ id: x.id, amount: num(x.amount), status: x.status, reason: x.reason ?? null, created_at: x.created_at ?? null, done_at: x.done_at ?? null })),
     receipt_no: receipts.find((x) => x.kind === 'receipt')?.receipt_no ?? null };
 }
@@ -74,6 +74,7 @@ export function normOrder(o) {
   return { order_id: o.order_id, order_no: o.order_no, johku_order_no: o.johku_order_no ?? null, status: o.status ?? null, payment_status: o.payment_status ?? 'unpaid', source_channel: o.source_channel ?? '', is_native: o.is_native !== false,
     created_at: o.created_at, customer: o.customer || {}, customer_name: o.customer?.name ?? '', internal_note: o.internal_note ?? null, customer_note: o.customer_note ?? null,
     public_token: o.public_token ?? null, order_page_path: o.order_page_path ?? null, can_add: !!o.can_add, staff_can_add: !!o.staff_can_add, add_until: o.add_until ?? null,
+    invoice_locked: o.invoice_locked === true, invoice_no: o.invoice_no ?? null,
     balance: { total, paid: num(b.paid), refunded: num(b.refunded), pending_link: num(b.pending_link), unpaid: num(b.unpaid), unpaid_unlinked: num(b.unpaid_unlinked, num(b.unpaid)), net_paid: num(b.net_paid) },
     total_gross: total, paid_amount: num(b.paid), unpaid_amount: num(b.unpaid),
     items: (o.items || []).map((x) => ({ id: x.id, parent_item_id: x.parent_item_id ?? null, kind: x.kind, name: x.name, quantity: num(x.quantity, 1), unit_price: num(x.unit_price), line_total: num(x.line_total), vat_rate: num(x.vat_rate), covered: num(x.covered), remaining: num(x.remaining) })),
@@ -81,6 +82,17 @@ export function normOrder(o) {
 }
 const L = (a) => (Array.isArray(a) ? a : []);
 // admin_list_vat_rates → { missing:[{kind,id,name}], quote_only:[…], rates:[…] }
+export const VAT_RATE_FALLBACK = [25.5, 13.5, 0];
+/** admin_list_vat_rates: vain aktiiviset kannat. Tyhjä tai epäonnistunut haku → vanha kolmen kannan lista. */
+export function activeVatRates(payload) {
+  const rates = [];
+  for (const row of payload?.rates || []) {
+    const n = Number(row?.rate);
+    if (row?.active === false || !Number.isFinite(n)) continue;
+    rates.push(n);
+  }
+  return rates.length ? rates : VAT_RATE_FALLBACK.slice();
+}
 export function normVatRates(r) {
   return { rates: L(r?.rates).map((x) => ({ rate: num(x.rate), label: x.label ?? '', active: x.active !== false, products: num(x.products), addons: num(x.addons) })),
     missing: L(r?.missing).map((x) => ({ kind: x.kind ?? 'product', id: x.id, name: x.name ?? '' })), quote_only: L(r?.quote_only).map((x) => ({ id: x.id, name: x.name ?? '' })) };

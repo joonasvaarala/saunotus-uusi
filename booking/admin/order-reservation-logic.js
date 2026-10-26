@@ -16,7 +16,7 @@ export function afterAddChoices(balance, can = () => false) {
     unpaid,
     link: unpaid > 0 && !!can('payments.manage'),
     record: unpaid > 0 && !!can('payments.manage'),
-    leave: true,
+    leave: unpaid > 0,
   };
 }
 
@@ -47,3 +47,12 @@ export function newPurchaseItem(type, data) {
 }
 
 export const isFlowEnabledValue = (rows) => rows?.[0]?.value === true;
+
+let flowPromise;
+/** Sama asetus haetaan kerran istunnon aikana (Tilaukset-välilehti ja varausdialogi). */
+export function cachedOrderFlowEnabled(load) {
+  if (!flowPromise) {
+    flowPromise = Promise.resolve().then(() => load()).then((rows) => isFlowEnabledValue(rows)).catch(() => false);
+  }
+  return flowPromise;
+}

@@ -60,6 +60,50 @@ export function addonMinimum(lockState, addonId) {
   return lockState?.locks?.get(Number(addonId))?.quantity || 0;
 }
 
+/** Lähetetty veloituslasku: tilaus on lukittu lisäyksiltä. Henkilökunnan siirto ja peruutus ilman hyvitystä jäävät auki. */
+export function orderInvoiceLocked(order) {
+  return order?.invoice_locked === true;
+}
+
+/** Henkilökunnan muutosdialogi: stepper ja siirto jäävät päälle, uusi hinta piilotetaan. */
+export function staffInvoiceChange(order) {
+  const locked = orderInvoiceLocked(order);
+  return { locked, personsEnabled: true, moveEnabled: true, showNewPrice: !locked };
+}
+
+/** Peruutusdialogi: laskutetulla tilauksella ei kysytä rivihyvitystä. */
+export function staffInvoiceCancel(order) {
+  return { allowRefundChoice: !orderInvoiceLocked(order) };
+}
+
+/** Asiakkaan vahvistus- ja muutosnäkymä. */
+export function customerInvoiceLock(booking) {
+  const locked = orderInvoiceLocked(booking);
+  return { locked, showPendingCancel: !locked, personsDisabled: locked, showPriceEstimate: !locked };
+}
+
+const openLinkPayment = (payment) => payment?.status === 'pending' && payment?.link_token
+  && payment?.provider != null && payment.provider !== 'manual';
+
+/** 'unpayable' kun lasku on lähetetty, 'stale' kun linkin summa ei täsmää, muuten tyhjä. */
+export function linkStaleKind(payment, order) {
+  if (orderInvoiceLocked(order) && (openLinkPayment(payment) || payment?.link_stale === true)) return 'unpayable';
+  if (payment?.link_stale === true) return 'stale';
+  return '';
+}
+
+export function invoiceLockReason(order, text = (key, vars) => key) {
+  if (!orderInvoiceLocked(order)) return '';
+  return text('invoiced', { no: order.invoice_no || '–' });
+}
+
+export function linkStaleNote(payment, order, text = (key) => key) {
+  const kind = linkStaleKind(payment, order);
+  if (kind === 'unpayable') return text('link_unpayable_invoiced');
+  if (kind === 'stale') return text('link_stale');
+  return '';
+}
+
 export function addonReductionError(lockState, proposed) {
   if (!lockState?.complete) return 'addon_lock_unknown';
   const wanted = new Map();
