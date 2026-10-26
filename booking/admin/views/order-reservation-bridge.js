@@ -1,8 +1,9 @@
-// booking_182: lisäpolku nykyisten tilausten ja varausten näkymiin ilman muutoksia niiden vanhaan toteutukseen.
-// Moduuli käynnistetään vain, kun booking.settings.admin_order_reservation_flow_enabled === true.
+// booking_182 + varausdialogi 04: tilauksen ja varauksen yhdistetty polku.
+// Oikeudet ja nappien sijoittelu käsitellään yhteisessä reservationDialogissa.
 import { h, toast, errMsg } from '../ui.js';
 import { reservationDialog } from './shared.js';
-import { openAddToOrder, openOrderPaymentLink, openOrderRecordPayment } from './order-add.js';
+import { openAddToOrder, openOrderRecordPayment } from './order-add.js';
+import { openOrderPaymentLink } from './order-add.js';
 import { canAddPurchase, orderDeepLink, reservationDeepLink } from '../order-reservation-logic.js';
 import { orderText as tx } from '../orders-texts.js';
 
@@ -11,8 +12,6 @@ const text = (s) => String(s ?? '');
 export function installOrderReservationBridge({ node, api, ctx, rpc, view }) {
   const loading = new WeakSet();
   const promises = new Map();
-  // Yhdistetään vain samanaikaiset haut samalle tilaukselle. Valmista tulosta ei säilytetä,
-  // koska vanhat dialogit (maksun kirjaus, hyvitys, linkki) muuttavat saldoa ilman tämän moduulin tietoa.
   const getOrder = (id) => {
     const k = String(id);
     if (!promises.has(k)) promises.set(k, api.getOrder(id).finally(() => promises.delete(k)));
@@ -21,7 +20,6 @@ export function installOrderReservationBridge({ node, api, ctx, rpc, view }) {
   const afterChange = (order) => {
     promises.delete(String(order.order_id));
     api.changed?.();
-    // Haku hakee myös osittain maksetun tilauksen, vaikka oletussuodatin on maksetut.
     view.setSearch(String(order.order_no), { open: true });
   };
   async function addToOrder(orderId, reservationId = null) {
@@ -53,6 +51,12 @@ export function installOrderReservationBridge({ node, api, ctx, rpc, view }) {
       dlg = reservationDialog(row, {
         methods: ctx.refs?.methods || [], refs: ctx.refs, can: ctx.can,
         onChange: () => afterChange(order),
+        flow: {
+          addPurchase: () => { dlg.close(); addToOrder(order.order_id, reservation.reservation_id); },
+          createLink: () => { dlg.close(); createLink(order.order_id); },
+          orderHref: orderDeepLink,
+          orderLinkText: (no) => tx('ui.admin.res.open_order', { no }),
+        },
       });
     } catch { toast(tx('ui.admin.orders.reservation_open_failed'), 'warn'); return fallback(); }
     if (!dlg) return fallback();
@@ -60,35 +64,9 @@ export function installOrderReservationBridge({ node, api, ctx, rpc, view }) {
       const next = node.querySelector(`[data-booking182-id="${reservation.reservation_id}"]`);
       (next || (opener.isConnected ? opener : null))?.focus();
     }, { once: true });
-    // Jo olemassa olevan tilauslinkin navigaatio korjataan uudelle Tilaukset-reitille.
-    const back = dlg.querySelector('[data-testid="order-link"]');
-    if (back && ctx.can('payments.manage')) {
-      back.href = orderDeepLink(order.order_no);
-      back.textContent = tx('ui.admin.res.open_order', { no: order.order_no });
-    }
-    const body = dlg.querySelector('.dlg-body');
-    if (!body) return;
-    const check = canAddPurchase(order, ctx);
-    const extra = h('div', { class: 'box stack', 'data-testid': 'order-reservation-purchase' },
-      h('button', { type: 'button', class: 'btn primary',
-        'data-testid': 'order-reservation-add',
-        text: tx('ui.admin.res.add_purchase'),
-        disabled: !check.allowed || null,
-        onclick: () => { dlg.close(); addToOrder(order.order_id, reservation.reservation_id); },
-      }),
-      !check.allowed ? h('p', { class: 'muted', text: tx('ui.admin.orders.' + check.reason) }) : null);
-    body.append(extra);
-    // Vanha maksulinkki-placeholder poistetaan vain tämän ominaisuuden ollessa päällä.
-    for (const el of body.querySelectorAll('.box')) {
-      const heading = el.querySelector('strong');
-      if (!heading || heading.textContent?.trim() !== 'Verkkomaksulinkki (Visma Pay)') continue;
-      el.replaceChildren(...(ctx.can('payments.manage') ? [
-        h('button', { type: 'button', class: 'btn', 'data-testid': 'order-reservation-create-link',
-          text: tx('ui.admin.res.payment_link'), onclick: () => { dlg.close(); createLink(order.order_id); } }),
-      ] : []));
-    }
     // Vanha lisäpalveluiden muokkausdialogi voi palauttaa addon_paid / addon_link_open.
-    // Tarjoa tällöin maksettua summaa rikkomatta lisäyspolku ja tilauksen hyvitys.
+    // Näytetään tällöin korvaava lisäostopolku ja mahdollinen hyvitysnäkymä.
+    const check = canAddPurchase(order, ctx);
     const errorObserver = new MutationObserver(() => {
       for (const modal of document.querySelectorAll('dialog[open]')) {
         if (modal === dlg || modal.querySelector('[data-testid="booking182-addon-help"]')) continue;
@@ -108,7 +86,6 @@ export function installOrderReservationBridge({ node, api, ctx, rpc, view }) {
       attributeFilter: ['hidden'] });
     dlg.addEventListener('close', () => errorObserver.disconnect(), { once: true });
   }
-  // Koristele alkuperäinen varauslista siten, että tuotteiden nimet pysyvät tekstisolmuina.
   async function decorate(list) {
     if (loading.has(list)) return;
     loading.add(list);
@@ -146,7 +123,6 @@ export function installOrderReservationBridge({ node, api, ctx, rpc, view }) {
       }
     });
   }
-  // Korvaa vain kytkimen ollessa päällä vanhojen tilauspainikkeiden toiminta.
   node.addEventListener('click', async (event) => {
     const action = event.target.closest?.('[data-action="addToOrder"],[data-action="createPaymentLink"]');
     if (!action || action.disabled) return;

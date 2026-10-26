@@ -115,6 +115,8 @@ jobs:
       # booking_182: tilauksesta varaukseen + lisäostot hallinnassa (ominaisuuskytkin, oletuksena pois)
       - run: node --test booking/tests/order-reservation-flow.test.mjs
       - run: node --test booking/tests/order-detail-layout.test.mjs
+      # Varausdialogi 04: oikeudet, järjestys, saapumispäivä ja maksulinkin takaraja
+      - run: node --test booking/tests/varausdialogi-04.test.mjs
       - run: node --test booking/tests/talous.test.mjs
       # .cache/articles: edellinen artikkelisnapshot (RPC-katkon varalta + siirrettyjen slugien tunnistus)
       - uses: actions/cache@v4

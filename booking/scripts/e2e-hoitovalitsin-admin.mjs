@@ -116,11 +116,11 @@ for (const lang of ['fi', 'en']) {
   await page.waitForSelector('[data-testid=option-box]:not([hidden]) [data-testid=admin-option-picker]');
   expect((await page.textContent('[data-testid=res-option]')).includes(T[lang].notChosen), `tiedot ${lang}: kenttä näyttää valitsematta`);
   expect(await page.isVisible('[data-testid=option-missing-hint]'), `tiedot ${lang}: kehote valita hoito`);
-  expect(await page.isDisabled('[data-testid=option-save]'), `tiedot ${lang}: tallennus pois käytöstä ennen valintaa`);
+  expect(await page.locator('[data-testid=option-save]').isHidden(), `tiedot ${lang}: tallennus piilossa ennen valintaa`);
   await layout(page, '[data-testid=option-box]', `tiedot ${lang} ${w}`);
   if (lang === 'fi') await page.screenshot({ path: join(SHOT, `admin-${w}-varauksen-tiedot-valitsematta.png`), fullPage: false });
   await page.click(`[data-testid=admin-option-picker] label.srcopt:has-text("${T[lang].birch}")`); await settle(page);
-  expect(!(await page.isDisabled('[data-testid=option-save]')), `tiedot ${lang}: tallennus sallittu valinnan jälkeen`);
+  expect(await page.locator('[data-testid=option-save]').isVisible(), `tiedot ${lang}: tallennus näkyy valinnan jälkeen`);
   await page.check('[data-testid=option-notify]');
   await page.click('[data-testid=option-save]'); await settle(page); await page.waitForSelector('dialog', { state: 'detached' });
   const sc = await calls(page, 'admin_set_reservation_option');

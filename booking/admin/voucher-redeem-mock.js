@@ -81,7 +81,7 @@ export function voucherRedeemMockHandlers({ st, need, err, now = new Date() }) {
       const difference = Math.round((due - amount) * 100) / 100;
       Object.assign(c, { status: 'redeemed', resolved_at: new Date().toISOString(), resolved_by: 'staff', amount, payment_id: 70000 + c.id });
       if (r.reservation_id) r.payment_status = difference > 0 ? 'partial' : 'paid';
-      const link = difference > 0 ? { payment_id: 80000 + c.id, amount: difference, link_token: `mock-${c.id}`, link_path: `/maksa/?p=mock-${c.id}`, link_expires_at: new Date(now.getTime() + 14 * 864e5).toISOString(), status: 'pending', online_payment_enabled: true } : null;
+      const link = difference > 0 ? { payment_id: 80000 + c.id, amount: difference, link_token: `mock-${c.id}`, link_path: `/maksa/?p=mock-${c.id}`, link_expires_at: null, status: 'pending', online_payment_enabled: true } : null;
       return { ok: true, already: false, id: c.id, payment_id: c.payment_id, amount, redeemed_via: 'staff', resolved_at: c.resolved_at, payment_method: METHOD(c.source), payment_method_label: METHOD_LABEL(c.source),
         voucher_value: amount, due, difference: link ? difference : null, payment_link: link, email_queued: !!link };
     },

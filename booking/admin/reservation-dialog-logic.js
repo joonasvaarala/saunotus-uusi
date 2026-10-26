@@ -92,3 +92,12 @@ export function reservationActions(r, { can = () => true, order = null, rawOrder
     move: moveTo ? { show: true, to: moveTo } : null,
   };
 }
+
+/** Uusin pyyntö voittaa: vanha vastaus ei saa maalata dialogia sen jälkeen. */
+export function createLatestGate() {
+  let current = 0;
+  return {
+    next() { current += 1; return current; },
+    isCurrent(token) { return token === current; },
+  };
+}

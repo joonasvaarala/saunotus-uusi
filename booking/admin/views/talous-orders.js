@@ -16,6 +16,8 @@ import { annualCardPanel, showAnnualCardDialog } from './annual-card-panel.js';
 import { acText } from '../annual-card-texts.js';
 import { orderVoucherBox } from './voucher-redeem.js';
 import { visibleOrderActions } from '../order-actions-logic.js';
+import { linkDeadlineControl } from './link-deadline.js';
+import { linkValidityText, linkSubmitOnce } from '../payment-link-logic.js';
 
 export const ORDER_SORTS = ['created', 'order_no', 'total', 'payment_status', 'first_reservation'];
 const VAT_CHOICES = [25.5, 13.5, 0];
@@ -155,15 +157,22 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
     });
   }
   function linkDialog(o) {
-    formDialog(t('btn.linkTitle'), [h('p', { class: 'muted', text: api.isMock('createPaymentLink') ? t('mock.note') : t('live.note') }), h('p', { text: t('link.amount', { sum: fmt.money(o.balance.unpaid) }), 'data-testid': 'link-amount' }),
-      fld(t('link.days'), h('input', { name: 'days', type: 'number', min: 1, max: 90, value: 14, inputmode: 'numeric' })), h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'email' }), ` ${t('link.email')}`)], t('link.submit'),
-    async (fd) => {
-      const res = await api.createPaymentLink({ orderId: o.order_id, sendEmail: fd.get('email') === 'on', expiresDays: Math.max(1, Math.trunc(+fd.get('days')) || 14) });
+    const deadline = linkDeadlineControl();
+    formDialog(t('btn.linkTitle'), [
+      h('p', { class: 'muted', text: api.isMock('createPaymentLink') ? t('mock.note') : t('live.note') }),
+      h('p', { text: t('link.amount', { sum: fmt.money(o.balance.unpaid) }), 'data-testid': 'link-amount' }),
+      deadline.nodes,
+      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'email' }), ` ${t('link.email')}`),
+    ], t('link.submit'), linkSubmitOnce((fd) => deadline.read(fd), async (expiresDays, sent) => {
+      const res = await api.createPaymentLink({ orderId: o.order_id, sendEmail: sent.get('email') === 'on', expiresDays });
       doneToast(res, RPC.createPaymentLink); afterChange(res, o.order_id);
       const url = absLink(res.link_path, o);
-      if (url) dialog(t('link.created'), h('div', { class: 'stack' }, res.mock ? h('p', { class: 'muted', text: t('mock.note') }) : null, h('input', { readonly: true, value: url, 'aria-label': t('link.created'), 'data-testid': 'link-url', onfocus: (e) => e.target.select() }),
+      if (url) dialog(t('link.created'), h('div', { class: 'stack' },
+        res.mock ? h('p', { class: 'muted', text: t('mock.note') }) : null,
+        h('input', { readonly: true, value: url, 'aria-label': t('link.created'), 'data-testid': 'link-url', onfocus: (e) => e.target.select() }),
+        h('p', { class: 'muted', text: linkValidityText(res, orderText, fmt.date) }),
         h('p', { class: 'muted', text: res.online_payment_enabled ? t('link.online') : t('link.onsite') })));
-    });
+    }));
   }
   const MANUAL = ['card_terminal', 'mobilepay', 'bank_transfer', 'invoice', 'other'];
   function recordDialog(o) {

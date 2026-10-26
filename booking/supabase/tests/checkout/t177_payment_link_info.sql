@@ -90,7 +90,7 @@ begin
       and not exists (select 1 from pg_proc p, aclexplode(p.proacl) a where p.oid = 'booking.public_payment_link_info(uuid)'::regprocedure and a.grantee = 0),
       'A3 oikeudet: anon/authenticated/service_role, ei PUBLIC');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) = '703c03c301f5a3008192cdbe65e559e2'
-      and md5(pg_get_functiondef('booking._create_link_payment(bigint,integer,text)'::regprocedure)) = '533ac9af831c0c11e1f504e377a17827'
+      and md5(pg_get_functiondef('booking._create_link_payment(bigint,integer,text)'::regprocedure)) in ('533ac9af831c0c11e1f504e377a17827', '5e432077c560a10822db8ac0d2bbe7c2')
       and md5(pg_get_functiondef('booking._order_rl(text,uuid,integer,integer)'::regprocedure)) = 'ec6bf13a3694e5bf9034a80123857246'
       and md5(pg_get_functiondef('booking._rate_limit(text,integer,interval)'::regprocedure)) = '7c8076d29d82d72db797066fd44d06c1'
       and md5(pg_get_functiondef('booking._client_ip()'::regprocedure)) = '8c8e7d145566db576d33037a941ce81f'

@@ -419,8 +419,10 @@ async function adminSuite() {
       await page.fill('dialog[open] [data-testid=record-amount]', '1'); await page.click('dialog[open] button[type=submit]'); await page.waitForSelector('#toast.show.warn'); expect(/Mock/.test(await page.locator('#toast').innerText()), `${name}: kirjaus mock-toast`);
       await openFirst('unpaid');
       await page.click('[data-testid=btn-link]'); await page.waitForSelector('dialog[open] form'); expect(/€/.test(await page.locator('dialog[open] [data-testid=link-amount]').innerText()), `${name}: linkin summa`);
+      expect(!(await page.locator('dialog[open] [data-testid=link-deadline-toggle]').isChecked()) && await page.locator('dialog[open] [data-testid=link-deadline-days]').isHidden(), `${name}: takaraja oletuksena pois`);
       await page.click('dialog[open] button[type=submit]'); await page.waitForSelector('dialog[open] [data-testid=link-url]');
       expect(/\/maksa\/\?p=/.test(await page.locator('dialog[open] [data-testid=link-url]').inputValue()), `${name}: maksulinkki-osoite`);
+      expect(/Linkillä ei ole takarajaa/.test(await page.locator('dialog[open]').innerText()), `${name}: linkillä ei ole takarajaa`);
       await shot(page, 'talous-dialogi-linkki-390-fi'); await page.keyboard.press('Escape');
       await openFirst('paid');
       expect(!(await page.locator('[data-testid=btn-refund]').isDisabled()), `${name}: hyvitys käytössä mockissa`);

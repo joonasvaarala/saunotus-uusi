@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { reservationActions, arrivalActionsAllowed, moveTarget, addonsEditable, telHref, mailHref } from '../admin/reservation-dialog-logic.js';
-import { LINK_DEADLINE, linkExpiresDays, linkValidityText } from '../admin/payment-link-logic.js';
+import { reservationActions, arrivalActionsAllowed, moveTarget, addonsEditable, telHref, mailHref, createLatestGate } from '../admin/reservation-dialog-logic.js';
+import { LINK_DEADLINE, linkExpiresDays, linkValidityText, linkSubmitOnce } from '../admin/payment-link-logic.js';
 
 const r = (status = 'confirmed', extra = {}) => ({ reservation_id: 11, status, space_code: 'rauni', persons: 1,
   starts_at: '2026-11-28T22:30:00Z', notes: '', ...extra });
@@ -100,10 +100,41 @@ test('D6: ei takarajaa oletuksena, valinnainen 1–60 päivän takaraja', () => 
   assert.equal(LINK_DEADLINE.max, 60);
   assert.deepEqual(linkExpiresDays({ enabled: false, days: 14 }), { ok: true, expiresDays: undefined });
   for (const days of [1, 14, 60, '7']) assert.deepEqual(linkExpiresDays({ enabled: true, days }), { ok: true, expiresDays: Number(days) });
-  for (const days of [0, 61, 1.5, '', 'abc', null]) assert.deepEqual(linkExpiresDays({ enabled: true, days }), { ok: false, error: 'link_deadline_bad' });
+  for (const days of [0, 61, 1.5, '', 'abc', null, '1e1', '7.0', '7.5']) assert.deepEqual(linkExpiresDays({ enabled: true, days }), { ok: false, error: 'link_deadline_bad' });
   const tx = (key, vars) => `${key}${vars?.date || ''}`;
   assert.equal(linkValidityText({ expires_at: null }, tx, String), 'ui.admin.orders.link_no_deadline');
+  assert.equal(linkValidityText({ expires_at: 'null' }, tx, String), 'ui.admin.orders.link_no_deadline');
+  assert.equal(linkValidityText({ link_expires_at: null, expires_date: null }, tx, () => 'Invalid Date'), 'ui.admin.orders.link_no_deadline');
   assert.equal(linkValidityText({ expires_at: '2026-12-01' }, tx, String), 'ui.admin.orders.link_valid_until2026-12-01');
+});
+
+test('maksulinkki: kaksoislähetys estetään ja virhe vapauttaa lukon', async () => {
+  let calls = 0;
+  const once = linkSubmitOnce(() => undefined, async (days) => { calls += 1; return days; });
+  const first = once({});
+  const second = once({});
+  assert.equal(await first, undefined);
+  assert.equal(await second, undefined);
+  assert.equal(calls, 1);
+  let reads = 0;
+  const bad = linkSubmitOnce(() => { reads += 1; throw new Error('bad'); }, async () => { calls += 1; });
+  await assert.rejects(() => bad({}), /bad/);
+  await assert.rejects(() => bad({}), /bad/);
+  assert.equal(reads, 2);
+  assert.equal(calls, 1);
+  let sent = 0;
+  const retry = linkSubmitOnce(() => 14, async () => { sent += 1; if (sent === 1) throw new Error('net'); return 14; });
+  await assert.rejects(() => retry({}), /net/);
+  assert.equal(await retry({}), 14);
+  assert.equal(sent, 2);
+});
+
+test('vanha vastaus ei ole enää voimassa', () => {
+  const gate = createLatestGate();
+  const older = gate.next();
+  const newer = gate.next();
+  assert.equal(gate.isCurrent(older), false);
+  assert.equal(gate.isCurrent(newer), true);
 });
 
 // Lähdekoodin rakennetarkistukset eivät korvaa selaimessa tehtäviä e2e-testejä.
@@ -139,25 +170,40 @@ test('UI04: silta ei tee DOM-jälkikäsittelyä, vaan antaa flow-parametrin', ()
 });
 
 test('UI04: takarajaohjaimen alkuvalinta on pois ja kentän päiväraja 60', () => {
-  const src = readAdmin('views/payment-link-04.js');
-  assert.match(src, /type: 'checkbox', name: 'deadline'/);
-  assert.match(src, /disabled: true/);
-  assert.match(src, /linkDeadlineControl/);
-  assert.match(src, /expiresDays = deadline\.read\(fd\)/);
-  assert.doesNotMatch(src, /max:\s*90|value:\s*14,\s*required:\s*true/);
+  const orderAdd = readAdmin('views/order-add.js');
+  const orders = readAdmin('views/talous-orders.js');
+  const control = readAdmin('views/link-deadline.js');
+  const src = `${orderAdd}\n${orders}\n${control}`;
+  assert.match(control, /type: 'checkbox', name: 'deadline'/);
+  assert.match(control, /disabled: true/);
+  assert.match(control, /linkDeadlineControl/);
+  assert.match(orderAdd, /deadline\.read\(fd\)/);
+  assert.match(orderAdd, /createPaymentLink\(\{[^}]*sendEmail: false/s);
+  assert.match(orders, /deadline\.read\(fd\)/);
+  assert.match(orders, /linkSubmitOnce/);
+  assert.doesNotMatch(src, /max:\s*90|value:\s*14,\s*required:\s*true|\|\| 14\)/);
+  assert.doesNotMatch(readAdmin('views/shared.js'), /payment-link-04|reservation-texts-04/);
+  assert.doesNotMatch(src, /p_expires_days:\s*null|expiresDays:\s*null/);
 });
 
 test('UI04: FI/EN-avainluettelo vastaa pending-import-78-tiedostoa', async () => {
-  const textSource = readAdmin('reservation-texts-04.js');
-  const RESERVATION04_TEXTS = JSON.parse(textSource.match(/export const RESERVATION04_TEXTS = ([\s\S]*?);\nexport function/)[1]);
+  const { ORDER_TEXTS } = await import('../admin/orders-texts.js');
   const lines = JSON.parse(readFileSync(join(root, 'content/site-texts.pending-import-78.json'), 'utf8'));
-  assert.equal(lines.length, Object.keys(RESERVATION04_TEXTS).length * 2);
-  for (const [key, texts] of Object.entries(RESERVATION04_TEXTS)) {
-    for (const lang of ['fi', 'en']) {
-      const item = lines.find((x) => x.key === key && x.lang === lang);
-      assert.equal(item?.text, texts[lang], `${key} ${lang}`);
-      assert.deepEqual(item?.placeholders,
-        [...texts[lang].matchAll(/\{\{var:[^}]+\}\}/g)].map((m) => m[0]));
-    }
+  const keys = [...new Set(lines.map((x) => x.key))];
+  assert.equal(lines.length, keys.length * 2);
+  for (const item of lines) {
+    assert.equal(ORDER_TEXTS[item.lang][item.key], item.text, `${item.key} ${item.lang}`);
+    assert.equal(item.text.includes('<'), false, item.key);
+    assert.deepEqual(item.placeholders, [...item.text.matchAll(/\{\{var:[^}]+\}\}/g)].map((m) => m[0]));
   }
+});
+
+test('asiakkaan maksusivu: tyhjä voimassaolo ei ole Invalid Date', async () => {
+  const { normLinkInfo, linkInfoView, fmtDate } = await import('../shop/src/pay-link-logic.js');
+  const info = normLinkInfo({ ok: true, status: 'open', reason: 'open', can_pay: true, amount: 10, currency: 'EUR', expires_date: null, expires_time: null, items: [] });
+  assert.equal(info.expires_date, null);
+  assert.equal(linkInfoView(info).validKey, null);
+  assert.equal(fmtDate('fi', null), '');
+  assert.equal(fmtDate('en', 'null'), '');
+  assert.equal(linkInfoView(normLinkInfo({ ok: true, status: 'open', reason: 'open', can_pay: true, amount: 10, expires_date: 'null', items: [] })).validKey, null);
 });

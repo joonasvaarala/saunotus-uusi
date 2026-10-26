@@ -282,8 +282,10 @@ async function writeSuite() {
   expect(!(await page.locator('[data-testid=btn-link]').isDisabled()), `${name}: maksulinkki-nappi käytössä (LIVE)`);
   await page.click('[data-testid=btn-link]'); await page.waitForSelector('dialog[open] form');
   expect(num((await page.locator('[data-testid=link-amount]').innerText()).match(/[\d\s\u00a0\u202f]+,\d{2}/)?.[0]) === +o2.total, `${name}: linkin summa = jäännös`);
+  expect(!(await page.locator('dialog[open] [data-testid=link-deadline-toggle]').isChecked()) && await page.locator('dialog[open] [data-testid=link-deadline-days]').isHidden(), `${name}: takaraja oletuksena pois`);
   await page.click('dialog[open] button[type=submit]');
   await page.waitForSelector('dialog[open] [data-testid=link-url]', { timeout: 10000 });
+  expect(!/\bnull\b|Invalid Date/i.test(await page.locator('dialog[open]').innerText()), `${name}: voimassaolo ei näytä nullia`);
   const url = await page.locator('dialog[open] [data-testid=link-url]').inputValue();
   const ord2 = await must('admin_get_order', { p_order_id: o2.order_id }), pend = ord2.payments.find((p) => p.status === 'pending' && p.link_path);
   if (!pend) note(`linkin jälkeen ei pending-maksua: ${JSON.stringify(ord2.payments.map((p) => [p.id, p.status, p.method]))}`);

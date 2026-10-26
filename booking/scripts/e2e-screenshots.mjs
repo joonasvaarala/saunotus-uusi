@@ -538,20 +538,23 @@ if (process.env.ONLY !== 'shop') {
     await shot(page, `admin-${name}-23-paivanakyma-johku.png`, false);
     // --- varauksen tiedot: Johku-tunnus; uudella varauksella ei ---
     await page.locator('.resrow:has(.badge.src-johku) button.link').first().click();
-    await page.waitForSelector('dialog[open] .kv');
+    await page.waitForSelector('dialog[open] details[data-testid=res-more]');
+    await page.locator('dialog[open] details[data-testid=res-more]').evaluate((el) => { el.open = true; });
     const dj = await page.locator('dialog[open]').innerText();
     if (!/Lähde\s*Johku/.test(dj) || !/Johku-tunnus\s*DEMO-R-\d+/.test(dj)) problems.push(`johku-${name}: Johku-varauksen tiedoissa pitää olla Lähde: Johku ja Johku-tunnus: ${dj.slice(0, 200).replace(/\n/g, ' | ')}`);
     await shot(page, `admin-${name}-24-varauksen-tiedot-johku.png`, false);
     await page.keyboard.press('Escape');
     await page.locator('.resrow:not(:has(.badge.src-johku)) button.link').first().click();
-    await page.waitForSelector('dialog[open] .kv');
+    await page.waitForSelector('dialog[open] details[data-testid=res-more]');
+    await page.locator('dialog[open] details[data-testid=res-more]').evaluate((el) => { el.open = true; });
     if (/Johku/.test(await page.locator('dialog[open]').innerText())) problems.push(`johku-${name}: uuden varauksen tiedoissa ei saa olla Johku-tunnistetta`);
     await page.keyboard.press('Escape');
     // varauslistalta avattu Johku-varaus näyttää myös tunnuksen
     await page.evaluate(() => { location.hash = '#/varaukset'; });
     await page.waitForSelector('#view .listrow .badge.src-johku');
     await page.locator('#view .listrow:has(.badge.src-johku)').first().click();
-    await page.waitForSelector('dialog[open] .kv');
+    await page.waitForSelector('dialog[open] details[data-testid=res-more]');
+    await page.locator('dialog[open] details[data-testid=res-more]').evaluate((el) => { el.open = true; });
     if (!/Johku-tunnus\s*DEMO-R-\d+/.test(await page.locator('dialog[open]').innerText())) problems.push(`johku-${name}: varauslistalta avatun Johku-varauksen tiedoista puuttuu Johku-tunnus`);
     await page.keyboard.press('Escape');
     await ctx.close();
@@ -750,17 +753,23 @@ if (process.env.ONLY !== 'shop') {
     await shot(page, `admin-${name}-51-paivanakyma-legit.png`, true);
     // --- varauksen tiedot: Resurssit-laatikko + siirto Rauni → Lovi → takaisin ---
     await page.evaluate(() => { const b = [...document.querySelectorAll('#view .resrow button.link')].find((x) => x.querySelector(':scope > strong')?.nextSibling?.textContent.trim() === '· 1 hlö' && x.closest('.resrow').querySelector('.badge.space')); b.click(); });   // 1 hlö: Lovi-siirto mahdollinen
-    await page.waitForSelector('dialog[open] .resbox .kv');
+    await page.waitForSelector('dialog[open] details[data-testid=res-more]');
+    if (await page.locator('dialog[open] details[data-testid=res-move]').evaluate((el) => el.open)) problems.push(`resurssi-${name}: tilasiirto on auki heti, vaikka sen pitää olla suljettu`);
+    await page.locator('dialog[open] details[data-testid=res-more]').evaluate((el) => { el.open = true; });
+    await page.waitForSelector('dialog[open] ul.legs[aria-label=Resurssit]');
     const dlgTxt = await page.locator('dialog[open]').innerText();
-    if (!/Resurssit/.test(dlgTxt) || !/Hoitosauna Rauni/.test(dlgTxt) || (await page.locator('dialog[open] .resbox .leg').count()) < 1) problems.push(`resurssi-${name}: varauksen tiedoissa pitää näkyä Resurssit (tila + saunottajaleg)`);
+    if ((await page.locator('dialog[open] ul.legs[aria-label=Resurssit]').count()) < 1 || !/Hoitosauna Rauni/.test(dlgTxt) || (await page.locator('dialog[open] .resbox .leg').count()) < 1) problems.push(`resurssi-${name}: varauksen tiedoissa pitää näkyä Resurssit (tila + saunottajaleg)`);
     await shot(page, `admin-${name}-52-varauksen-tiedot-resurssit.png`, false);
     if ((await noHScroll(page)) > 0 || (await page.evaluate(() => { const d = document.querySelector('dialog[open]'); return d.scrollWidth - d.clientWidth; })) > 0) problems.push(`resurssi-${name}: vaakavieritys varauksen tiedoissa`);
+    await page.locator('dialog[open] details[data-testid=res-move]').evaluate((el) => { el.open = true; });
     await page.fill('dialog[open] input[name=reason]', 'Testisiirto (e2e)');
     await page.locator('dialog[open] .moverow button:has-text("Siirrä tilaan")').click();
     await page.waitForSelector('dialog[open]', { state: 'detached', timeout: 8000 }).catch(() => problems.push(`resurssi-${name}: siirto Raunista Loviin ei onnistunut`));
     await page.waitForTimeout(500);
     if ((await page.locator('#view .resrow .badge.space:has-text("Lovi")').count()) !== 1) problems.push(`resurssi-${name}: siirron jälkeen yhdellä varauksella pitää olla Lovi-merkki`);
     await page.locator('#view .resrow:has(.badge.space:has-text("Lovi")) button.link').first().click();
+    await page.waitForSelector('dialog[open] details[data-testid=res-move]');
+    await page.locator('dialog[open] details[data-testid=res-move]').evaluate((el) => { el.open = true; });
     await page.waitForSelector('dialog[open] .moverow');
     await page.locator('dialog[open] .moverow button:has-text("Siirrä tilaan")').click();   // takaisin Rauniin
     await page.waitForSelector('dialog[open]', { state: 'detached', timeout: 8000 }).catch(() => problems.push(`resurssi-${name}: siirto takaisin Rauniin ei onnistunut`));
@@ -809,6 +818,8 @@ if (process.env.ONLY !== 'shop') {
     if ((await page.locator('#view .resrow .badge.ovr').count()) < 1) problems.push(`resurssi-${name}: päivänäkymässä pitää näkyä Ylitys-merkki`);
     for (let i = 0, n = await page.locator('#view .resrow:has-text("E2E"), #view .resrow:has(.badge.ovr)').count(); i < n; i++) {
       await page.locator('#view .resrow:has(.badge.ovr)').first().locator('button.link').click();
+      await page.waitForSelector('dialog[open] details[data-testid=res-more]');
+      await page.locator('dialog[open] details[data-testid=res-more]').evaluate((el) => { el.open = true; });
       await page.waitForSelector('dialog[open] .resbox');
       if (!/E2E-testi|Demo: ylitys/.test(await page.locator('dialog[open] .resbox').innerText())) problems.push(`resurssi-${name}: ylityksen syy puuttuu varauksen tiedoista`);
       await page.locator('dialog[open] button:has-text("Peru varaus")').click(); await page.waitForTimeout(600);
@@ -834,7 +845,10 @@ if (process.env.ONLY !== 'shop') {
     await page.waitForSelector('#view .resrow');
     const mine = page.locator('#view .resrow:has-text("Vanha Testi")');
     if ((await mine.count()) < 1 || (await mine.first().locator('.badge.lc-old').count()) !== 1) problems.push(`resurssi-${name}: luotu vanha varaus ei näy päivänäkymässä Vanha tuote -merkillä`);
-    await mine.first().locator('button.link').click(); await page.waitForSelector('dialog[open] .resbox');
+    await mine.first().locator('button.link').click();
+    await page.waitForSelector('dialog[open] details[data-testid=res-more]');
+    await page.locator('dialog[open] details[data-testid=res-more]').evaluate((el) => { el.open = true; });
+    await page.waitForSelector('dialog[open] .resbox');
     await page.locator('dialog[open] button:has-text("Peru varaus")').click(); await page.waitForTimeout(600);
     await ctx.close();
   }
@@ -1243,6 +1257,7 @@ if (process.env.ONLY !== 'shop') for (const [name, vp] of [['mobile', { width: 3
   await shot(page, `admin-${name}-91-paivanakyma-ei-saunottajaa.png`, false);
   await page.locator('#view .resrow:has(.badge.tmiss) button.link').first().click();
   await page.waitForSelector('dialog[open] [data-testid=therapist-state]');
+  if (await page.locator('dialog[open] details[data-testid=res-more]').evaluate((el) => el.open)) problems.push(`${tag}: lisätiedot ovat auki, vaikka saunottajan tila näkyy yhteenvedossa`);
   const st = await page.locator('dialog[open] [data-testid=therapist-state]').innerText();
   if (!/Puuttuu työvuorosta/.test(st) || !(await page.locator('dialog[open] [data-testid=grant-btn]').count())) problems.push(`${tag}: varauksen tiedoissa pitää näkyä "Puuttuu työvuorosta" ja Myönnä poikkeus: ${st}`);
   await shot(page, `admin-${name}-92-varauksen-tiedot-ei-saunottajaa.png`, false);

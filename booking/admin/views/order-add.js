@@ -1,12 +1,14 @@
 // booking_182: jaettu tilausten lisäostojen ja maksulinkkien UI, ei viestien lähetystä.
 // Palvelin laskee kaikkien muiden kuin custom-rivien hinnat.
 import { rpc } from '../sb.js';
-import { h, dialog, toast, errMsg, fmtTime, addDays } from '../ui.js';
+import { h, dialog, toast, errMsg, fmtTime } from '../ui.js';
 import { t, fmt, getLang } from '../talous-i18n.js';
 import { absLink, RPC } from '../talous-api.js';
 import { formDialog, doneToast } from './talous-ui.js';
 import { orderText as tx } from '../orders-texts.js';
 import { newPurchaseItem, afterAddChoices } from '../order-reservation-logic.js';
+import { linkValidityText, linkSubmitOnce } from '../payment-link-logic.js';
+import { linkDeadlineControl } from './link-deadline.js';
 
 const VAT_CHOICES = [25.5, 13.5, 0]; // Vanhan vapaan rivin valikoima; validointi palvelimella.
 const fld = (name, ...nodes) => h('label', { class: 'fld' }, h('span', { text: name }), ...nodes);
@@ -16,29 +18,29 @@ const helDay = () => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Helsin
 export function showLinkResult({ result, order }) {
   const url = absLink(result?.link_path, order);
   if (!url) { toast(tx('ui.admin.orders.link_missing'), 'warn'); return; }
-  const link = h('input', { type: 'text', readonly: true, value: url, 'aria-label': tx('ui.admin.orders.link_copy'), 'data-testid': 'order-flow-link-url', onfocus: (e) => e.target.select() });
+  const link = h('input', { type: 'text', readonly: true, value: url, 'aria-label': tx('ui.admin.orders.link_copy'),
+    'data-testid': 'order-flow-link-url', onfocus: (e) => e.target.select() });
   const copy = h('button', { type: 'button', class: 'btn', text: tx('ui.admin.orders.link_copy'), onclick: async () => {
     try { await navigator.clipboard.writeText(url); toast(tx('ui.admin.orders.link_copied')); }
     catch { link.focus(); link.select(); }
   } });
-  dialog(tx('ui.admin.orders.link_created'), h('div', { class: 'stack' }, fld(tx('ui.admin.orders.link_copy'), link), copy,
+  return dialog(tx('ui.admin.orders.link_created'), h('div', { class: 'stack' },
+    fld(tx('ui.admin.orders.link_copy'), link), copy,
+    h('p', { class: 'muted', text: linkValidityText(result, tx, fmt.date) }),
     h('p', { class: 'muted', text: result?.online_payment_enabled ? t('link.online') : t('link.onsite') })));
 }
 
 export function openOrderPaymentLink({ api, ctx, order, onDone }) {
   if (!ctx.can('payments.manage') || !order?.is_native || !(Number(order?.balance?.unpaid) > 0)) return null;
+  const deadline = linkDeadlineControl();
   return formDialog(tx('ui.admin.orders.link_created'), [
     h('p', { class: 'muted', text: tx('ui.admin.orders.link_only_uncovered') }),
-    h('p', { text: t('link.amount', { sum: fmt.money(order.balance.unpaid) }) }),
-    fld(t('link.days'), h('input', { name: 'days', type: 'number', min: 1, max: 90, value: 14, required: true })),
-  ], t('link.submit'), async (fd) => {
-    const days = Number(fd.get('days'));
-    if (!Number.isInteger(days) || days < 1 || days > 90) throw new Error(tx('ui.admin.orders.bad_days'));
-    const result = await api.createPaymentLink({ orderId: order.order_id, sendEmail: false, expiresDays: days });
-    doneToast(result, RPC.createPaymentLink);
-    onDone?.(result);
+    h('p', { text: t('link.amount', { sum: fmt.money(order.balance.unpaid) }) }), deadline.nodes,
+  ], t('link.submit'), linkSubmitOnce((fd) => deadline.read(fd), async (expiresDays) => {
+    const result = await api.createPaymentLink({ orderId: order.order_id, sendEmail: false, expiresDays });
+    doneToast(result, RPC.createPaymentLink); onDone?.(result);
     setTimeout(() => showLinkResult({ result, order }), 0);
-  });
+  }));
 }
 
 // Muiden kuin lahjakorttimaksujen kirjaus. Ei korvaa Talous-näkymän laajempaa recordDialogia.
