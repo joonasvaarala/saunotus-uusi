@@ -805,7 +805,13 @@ async function viewCheckout(ruleId, ds, productId, via) {
   const addonsBox = h('fieldset', { class: 'bk-section bk-addons', 'data-testid': 'checkout-addons', hidden: !addonRows.length }, h('legend', { text: t.addonsTitle }), h('p', { class: 'bk-hint', text: t.addonsHint }),
     h('ul', { class: 'bk-addonlist' }, ritCard, addonRows.map((r) => r.node)), ritMsg);
   // booking_179: ei esivalintaa eikä erillistä maksuvirtaa. Lisähoito liittyy samaan tilaukseen varauksen jälkeen.
-  upsellUI = checkoutUpsellSection({ S, L: S.lang, productId: p.id, date: ds, visitStart: s.starts_at, persons: n, rpc, addons, onChange: upd });
+  upsellUI = checkoutUpsellSection({ S, L: S.lang, productId: p.id, date: ds, visitStart: s.starts_at, persons: n, rpc, addons, onChange: upd,
+    details: (id) => {
+      const row = [...(state.catalog || []), ...(state.treatments || [])].find((x) => +x.id === +id) || null;
+      const img = state.images.get(+id);
+      if (!row && !img) return null;
+      return { ...(row || {}), image_url: img?.url || '', image_alt: img?.alt || '', min_persons: row?.min_persons ?? row?.capacity_min ?? null, max_persons: row?.max_persons ?? row?.capacity_max ?? null };
+    } });
   const msg = h('div', { id: 'bk-msg' });
   const hm0 = holdModeOf(null, state.settings);   // oletus asetuksesta (vain luku); palvelimen public_checkout_payment_options päivittää alla
   const hmode = { on: false, minutes: hm0.minutes };   // uusi pitotila vain kun palvelin sanoo (hold_until_paid); asetus ohjaa vain vanhaa ohjetekstiä

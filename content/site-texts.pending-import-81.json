@@ -1,0 +1,42 @@
+[
+ {
+  "key": "ui.upsell.duration",
+  "lang": "fi",
+  "text": "Kesto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "ehdotuksen tietoikkuna: kesto. Ei tietokantamuutosta; tuo ennen julkaisua."
+ },
+ {
+  "key": "ui.upsell.duration",
+  "lang": "en",
+  "text": "Duration",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "ehdotuksen tietoikkuna: kesto. Ei tietokantamuutosta; tuo ennen julkaisua."
+ },
+ {
+  "key": "ui.upsell.persons",
+  "lang": "fi",
+  "text": "Henkilömäärä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "ehdotuksen tietoikkuna: henkilömäärä. Ei tietokantamuutosta; tuo ennen julkaisua."
+ },
+ {
+  "key": "ui.upsell.persons",
+  "lang": "en",
+  "text": "Guests",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "ehdotuksen tietoikkuna: henkilömäärä. Ei tietokantamuutosta; tuo ennen julkaisua."
+ }
+]
