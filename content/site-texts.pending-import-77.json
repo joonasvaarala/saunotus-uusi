@@ -1,0 +1,876 @@
+[
+  {
+    "key": "ui.admin.orders.open_reservation",
+    "lang": "fi",
+    "text": "Avaa varaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.open_reservation_label",
+    "lang": "fi",
+    "text": "Avaa varaus: {{var:product}}, {{var:time}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:product}}",
+      "{{var:time}}"
+    ],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.reservation_open_failed",
+    "lang": "fi",
+    "text": "Varauksen avaaminen ei onnistunut. Avaa varausluettelo.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.add_purchase",
+    "lang": "fi",
+    "text": "Lisäosto tähän tilaukseen",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.add_type_addon",
+    "lang": "fi",
+    "text": "Lisäpalvelu varaukselle",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.add_type_reservation",
+    "lang": "fi",
+    "text": "Lisähoito tai -vuoro",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.add_type_product",
+    "lang": "fi",
+    "text": "Vuokratuote",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.rental",
+    "lang": "fi",
+    "text": "Vuokratuote",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.add_session",
+    "lang": "fi",
+    "text": "Saunavuoro",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.add_treatment",
+    "lang": "fi",
+    "text": "Hoito tai rituaali",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.book_kind",
+    "lang": "fi",
+    "text": "Varaustyyppi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.choose_service",
+    "lang": "fi",
+    "text": "Valitse hoito tai rituaali",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.choose_day",
+    "lang": "fi",
+    "text": "Valitse päivä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.choose_time",
+    "lang": "fi",
+    "text": "Valitse vapaa aika",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.persons",
+    "lang": "fi",
+    "text": "Henkilömäärä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.loading_slots",
+    "lang": "fi",
+    "text": "Haetaan saatavuutta…",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.no_slots",
+    "lang": "fi",
+    "text": "Ei vapaita aikoja valitulle päivälle.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.slots_found",
+    "lang": "fi",
+    "text": "Vapaita aikoja: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.slots_error",
+    "lang": "fi",
+    "text": "Saatavuuden haku epäonnistui",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.invalid_type",
+    "lang": "fi",
+    "text": "Virheellinen tuotetyyppi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.purchase_no_email",
+    "lang": "fi",
+    "text": "Maksulinkkiä tai lisäostoa ei lähetetä sähköpostilla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.purchase_added",
+    "lang": "fi",
+    "text": "Lisäosto lisätty tilaukseen",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.purchase_link",
+    "lang": "fi",
+    "text": "Luo maksulinkki lisäostolle",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.purchase_record",
+    "lang": "fi",
+    "text": "Kirjaa maksu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.purchase_leave",
+    "lang": "fi",
+    "text": "Jätä maksamatta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.link_only_uncovered",
+    "lang": "fi",
+    "text": "Linkki koskee vain vielä kattamattomia tilausrivejä. Linkkiä ei lähetetä sähköpostiin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.link_copy",
+    "lang": "fi",
+    "text": "Kopioi maksulinkki",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.link_copied",
+    "lang": "fi",
+    "text": "Maksulinkki kopioitu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.link_missing",
+    "lang": "fi",
+    "text": "Maksulinkin osoitetta ei palautettu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.link_created",
+    "lang": "fi",
+    "text": "Maksulinkki luotu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.bad_days",
+    "lang": "fi",
+    "text": "Voimassaolon on oltava 1–90 päivää",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.record_no_methods",
+    "lang": "fi",
+    "text": "Sopivia manuaalisia maksutapoja ei löytynyt",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.flag_off",
+    "lang": "fi",
+    "text": "Toiminto ei ole käytössä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.no_permission",
+    "lang": "fi",
+    "text": "Ei oikeutta lisäostoihin",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.johku",
+    "lang": "fi",
+    "text": "Johku-tilaukseen ei voi lisätä ostoja",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.closed",
+    "lang": "fi",
+    "text": "Tilausta ei voi enää muokata",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.add_new",
+    "lang": "fi",
+    "text": "Lisäosto tähän tilaukseen",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.res.open_order",
+    "lang": "fi",
+    "text": "Avaa tilaus #{{var:no}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:no}}"
+    ],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.res.add_purchase",
+    "lang": "fi",
+    "text": "Lisäosto tähän tilaukseen",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.res.paid_addon_purchase",
+    "lang": "fi",
+    "text": "Lisää uusi lisäpalvelu lisäoston kautta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.res.paid_addon_refund",
+    "lang": "fi",
+    "text": "Vähennä jo maksettua lisäpalvelua tilauksen hyvityksen kautta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.res.open_refund",
+    "lang": "fi",
+    "text": "Avaa tilaus hyvitystä varten",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.res.payment_link",
+    "lang": "fi",
+    "text": "Luo maksulinkki",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.open_reservation",
+    "lang": "en",
+    "text": "Open booking",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.open_reservation_label",
+    "lang": "en",
+    "text": "Open booking: {{var:product}}, {{var:time}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:product}}",
+      "{{var:time}}"
+    ],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.reservation_open_failed",
+    "lang": "en",
+    "text": "Could not open booking. Open the booking list.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.add_purchase",
+    "lang": "en",
+    "text": "Add purchase to this order",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.add_type_addon",
+    "lang": "en",
+    "text": "Add-on for booking",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.add_type_reservation",
+    "lang": "en",
+    "text": "Additional treatment or session",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.add_type_product",
+    "lang": "en",
+    "text": "Rental product",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.rental",
+    "lang": "en",
+    "text": "Rental product",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.add_session",
+    "lang": "en",
+    "text": "Sauna session",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.add_treatment",
+    "lang": "en",
+    "text": "Treatment or ritual",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.book_kind",
+    "lang": "en",
+    "text": "Booking type",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.choose_service",
+    "lang": "en",
+    "text": "Choose a treatment or ritual",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.choose_day",
+    "lang": "en",
+    "text": "Choose date",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.choose_time",
+    "lang": "en",
+    "text": "Choose available time",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.persons",
+    "lang": "en",
+    "text": "Number of people",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.loading_slots",
+    "lang": "en",
+    "text": "Loading availability…",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.no_slots",
+    "lang": "en",
+    "text": "No availability on the selected date.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.slots_found",
+    "lang": "en",
+    "text": "Available times: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.slots_error",
+    "lang": "en",
+    "text": "Failed to load availability",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.invalid_type",
+    "lang": "en",
+    "text": "Invalid product type",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.purchase_no_email",
+    "lang": "en",
+    "text": "No email will be sent for the purchase or payment link.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.purchase_added",
+    "lang": "en",
+    "text": "Purchase added to order",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.purchase_link",
+    "lang": "en",
+    "text": "Create a payment link",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.purchase_record",
+    "lang": "en",
+    "text": "Record payment",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.purchase_leave",
+    "lang": "en",
+    "text": "Leave unpaid",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.link_only_uncovered",
+    "lang": "en",
+    "text": "The link covers only outstanding order items. No email will be sent.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.link_copy",
+    "lang": "en",
+    "text": "Copy payment link",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.link_copied",
+    "lang": "en",
+    "text": "Payment link copied",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.link_missing",
+    "lang": "en",
+    "text": "No payment link URL returned",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.link_created",
+    "lang": "en",
+    "text": "Payment link created",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.bad_days",
+    "lang": "en",
+    "text": "Validity must be 1–90 days",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.record_no_methods",
+    "lang": "en",
+    "text": "No suitable manual payment methods",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.flag_off",
+    "lang": "en",
+    "text": "Feature disabled",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.no_permission",
+    "lang": "en",
+    "text": "No permission to add purchases",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.johku",
+    "lang": "en",
+    "text": "Johku orders cannot be edited",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.closed",
+    "lang": "en",
+    "text": "This order can no longer be edited",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.orders.add_new",
+    "lang": "en",
+    "text": "Add purchase to this order",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.res.open_order",
+    "lang": "en",
+    "text": "Open order #{{var:no}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:no}}"
+    ],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.res.add_purchase",
+    "lang": "en",
+    "text": "Add purchase to this order",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.res.paid_addon_purchase",
+    "lang": "en",
+    "text": "Use Add Purchase to add an additional add-on.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.res.paid_addon_refund",
+    "lang": "en",
+    "text": "Use the order refund flow to remove a paid add-on.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.res.open_refund",
+    "lang": "en",
+    "text": "Open order to refund",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  },
+  {
+    "key": "ui.admin.res.payment_link",
+    "lang": "en",
+    "text": "Create payment link",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_182: hallinnan tilaus-varaus-lisäosto"
+  }
+]
