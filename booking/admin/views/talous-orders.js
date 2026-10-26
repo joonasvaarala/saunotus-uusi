@@ -15,6 +15,7 @@ import { yesNo } from './refund-cancel.js';
 import { annualCardPanel, showAnnualCardDialog } from './annual-card-panel.js';
 import { acText } from '../annual-card-texts.js';
 import { orderVoucherBox } from './voucher-redeem.js';
+import { visibleOrderActions } from '../order-actions-logic.js';
 
 export const ORDER_SORTS = ['created', 'order_no', 'total', 'payment_status', 'first_reservation'];
 const VAT_CHOICES = [25.5, 13.5, 0];
@@ -107,16 +108,22 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
       o.requests.some((x) => x.status === 'open') ? h('p', { class: 'tl-note', 'data-testid': 'order-cancel-request', text: t('order.cancelRequest') }) : null];
 
     const canRefund = api.isMock('refund') || ctx.can('payments.refund');
+    const canAdd = api.isMock('addToOrder') || ctx.can('bookings.manage');
     const refundable = o.payments.filter((p) => ['paid', 'partially_refunded'].includes(p.status) && p.amount > p.refunded_amount);
-    const addOff = !o.is_native ? t('btn.addJohku') : !o.staff_can_add ? t('btn.addClosed') : null;
-    const actions = h('div', { class: 'tl-actions', 'data-testid': 'order-actions' },
-      actionBtn({ key: 'addToOrder', label: t('btn.addToOrder'), ico: 'plus', testid: 'btn-add', extraDisabled: addOff, onClick: () => addDialog(o) }),
-      actionBtn({ key: 'createPaymentLink', label: unpaid > 0 ? t('btn.link', { sum: fmt.money(unpaid) }) : t('btn.linkNone'), ico: 'link', testid: 'btn-link', extraDisabled: unpaid > 0 && o.is_native ? null : t('btn.linkNoneWhy'), onClick: () => linkDialog(o) }),
-      actionBtn({ key: 'recordPayment', label: t('btn.record'), ico: 'plus', testid: 'btn-record', extraDisabled: !o.is_native ? t('btn.addJohku') : unpaid > 0 ? null : t('btn.recordNone'), onClick: () => recordDialog(o) }),
-      actionBtn({ key: 'refund', label: t('btn.refund'), ico: 'undo', testid: 'btn-refund', extraDisabled: !canRefund ? t('btn.refundNoPerm') : refundable.length ? null : t('btn.refundNone'), onClick: () => refundDialog(o, refundable) }));
-    const receipts = sec(`${t('receipts.title')} (${o.receipts.length})`, receiptsList({ api, ctx, receipts: o.receipts }), o.receipts.length ? h('p', { class: 'muted tl-hint', text: t('receipts.emailNote') }) : null);
-    return h('div', { class: 'tl-detail' }, meta, ...notes, sums, annualSec(annual, sec), sec(t('order.payments'), payments), vbox, !o.is_native && !o.receipts.length ? null : receipts,   // Johku-tilaukselle ei synny kuittia (booking_41)
-       sec(t('order.reservations'), reservations), actions);
+    const visible = visibleOrderActions(o, { canRefund, canAdd });
+    const actionFactories = {
+      addToOrder: () => actionBtn({ key: 'addToOrder', label: t('btn.addToOrder'), ico: 'plus', testid: 'btn-add', onClick: () => addDialog(o) }),
+      createPaymentLink: () => actionBtn({ key: 'createPaymentLink', label: t('btn.link', { sum: fmt.money(unpaid) }), ico: 'link', testid: 'btn-link', onClick: () => linkDialog(o) }),
+      recordPayment: () => actionBtn({ key: 'recordPayment', label: t('btn.record'), ico: 'plus', testid: 'btn-record', onClick: () => recordDialog(o) }),
+      refund: () => actionBtn({ key: 'refund', label: t('btn.refund'), ico: 'undo', testid: 'btn-refund', onClick: () => refundDialog(o, refundable) }),
+    };
+    const actions = visible.length
+      ? h('div', { class: 'tl-actions', 'data-testid': 'order-actions' }, ...visible.map((key) => actionFactories[key]()))
+      : null;
+    const receipts = sec(`${t('receipts.title')} (${o.receipts.length})`, receiptsList({ api, ctx, receipts: o.receipts }));
+    return h('div', { class: 'tl-detail' }, meta, ...notes, sums, annualSec(annual, sec),
+      sec(t('order.reservations'), reservations), actions, sec(t('order.payments'), payments), vbox,
+      !o.is_native && !o.receipts.length ? null : receipts);   // Johku-tilaukselle ei synny kuittia (booking_41)
   }
 
   // ---- dialogit ----

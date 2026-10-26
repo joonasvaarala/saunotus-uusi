@@ -281,10 +281,13 @@ async function adminSuite() {
     if (vp === 360 || vp === 1280) await shot(page, `talous-tilaukset-${vp}-${lang}`);
     // laajennus
     await rows().first().locator('.tl-head').click();
-    await page.waitForSelector('[data-testid=order-actions]');
+    await page.waitForSelector('[data-testid=orders-list] .tl-detail');
     expect(await page.locator('[data-testid=order-reservations]').count() === 1 && await page.locator('[data-testid=order-payments], .tl-panel .tl-empty').count() >= 1, `${name}: laajennuksessa varaukset ja maksut`);
-    for (const id of ['btn-add', 'btn-link', 'btn-refund']) expect(await page.locator(`[data-testid=${id}]`).first().count() === 1, `${name}: nappi ${id}`);
-    expect(await page.locator('[data-testid=btn-add]').first().innerText() === T['btn.addToOrder'], `${name}: "Lisää tilaukseen" -teksti`);
+    const visibleButtons = page.locator('[data-testid=order-actions] button');
+    expect(!(await visibleButtons.evaluateAll((buttons) => buttons.some((button) => button.disabled))), `${name}: vain käytössä olevat napit näkyvät`);
+    expect(await page.locator('[data-testid=btn-link], [data-testid=btn-record]').count() === 0, `${name}: maksetussa tilauksessa ei maksu- tai linkkinappia`);
+    if (await page.locator('[data-testid=btn-add]').count())
+      expect(await page.locator('[data-testid=btn-add]').first().innerText() === T['btn.addToOrder'], `${name}: "Lisää tilaukseen" -teksti`);
     await layoutChecks(page, `${name} tilaus laajennettuna`);
     if (vp === 390 || vp === 1280) await shot(page, `talous-tilaus-auki-${vp}-${lang}`);
     // haku: tilausnumero → osuu, nimi → osuu
@@ -464,8 +467,9 @@ async function adminSuite() {
     await page.locator('[data-testid=orders-list] > [data-testid=order]').first().locator('.tl-head').click(); await page.waitForSelector('[data-testid=order-actions]');
     expect(calls('admin_get_order').length === 1 && typeof calls('admin_get_order')[0].args.p_order_id === 'number', `${name}: admin_get_order kutsuttu`);
     // oikeassa tilassa napit ovat käytössä palvelimen sääntöjen mukaan (tässä: maksettu natiivitilaus → lisäys sallittu, linkki ei (ei maksettavaa), hyvitys vaatii payments.refund (PERMS ilman))
-    expect(!(await page.locator('[data-testid=btn-add]').first().isDisabled()) && await page.locator('[data-testid=btn-link]').first().isDisabled() && await page.locator('[data-testid=btn-refund]').first().isDisabled(), `${name}: napit oikeassa tilassa (lisäys käytössä, linkki/hyvitys sääntöjen mukaan)`);
-    expect(await page.locator('[data-testid=btn-record]').count() === 1 && !(await page.locator('.tl-detail').innerText()).match(/vaiheessa|phase [A-D]|odottaa palvelimen/i), `${name}: ei stub-tekstejä`);
+    expect(!(await page.locator('[data-testid=btn-add]').first().isDisabled()) && await page.locator('[data-testid=btn-link]').count() === 0 && await page.locator('[data-testid=btn-refund]').count() === 0,
+      `${name}: vain käytettävissä oleva lisäysnappi näkyy (ei linkkiä eikä hyvitystä)`);
+    expect(await page.locator('[data-testid=btn-record]').count() === 0 && !(await page.locator('.tl-detail').innerText()).match(/vaiheessa|phase [A-D]|odottaa palvelimen/i), `${name}: ei maksun kirjausta eikä stub-tekstejä`);
     // kuitit oikealla RPC-polulla: admin_get_receipt (teksti), admin_resend_receipt, PDF-linkki tokenilla, sähköpostin tila integration_config:sta
     await page.waitForSelector('[data-testid=order-receipts] [data-testid=receipt-item]');
     const ri = page.locator('[data-testid=order-receipts] [data-testid=receipt-item]').first();
