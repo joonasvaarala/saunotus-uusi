@@ -91,12 +91,12 @@ begin
   select value, true into s_rl, v_has_rl from booking.settings where key = 'rl_order_get_per_10min';
 
   -- ===== A rakenne
-  perform pg_temp.ck(md5(pg_get_functiondef(fns[1]::regprocedure)) = '5e432077c560a10822db8ac0d2bbe7c2'
+  perform pg_temp.ck(md5(pg_get_functiondef(fns[1]::regprocedure)) in ('5e432077c560a10822db8ac0d2bbe7c2', 'f40db96ca201e40467f20cc1db5866c9')
       and md5(pg_get_functiondef(fns[2]::regprocedure)) = '80004933a80f77a10fcf625f493a20ef'
       and md5(pg_get_functiondef(fns[3]::regprocedure)) = '5babbf859133aebd3e9e7c827bee3261'
       and md5(pg_get_functiondef(fns[4]::regprocedure)) = '2aa8e44cb2c6f150d3488f53f8d94c25'
       and md5(pg_get_functiondef(fns[5]::regprocedure)) = '2f8a7e56ae9bb4e29f4025f91e7ea706'
-      and md5(pg_get_functiondef(fns[6]::regprocedure)) = '37573920d2f9f882e3d95c4f0c66575f', 'A1 muutetut funktiot = booking_184');
+      and md5(pg_get_functiondef(fns[6]::regprocedure)) in ('37573920d2f9f882e3d95c4f0c66575f', 'e6888446c4b44e554d31c0920609ddb6'), 'A1 muutetut funktiot = booking_184 (tai booking_185: _create_link_payment, mobilepay_payment_prepare)');
   perform pg_temp.ck((select bool_and(prosecdef and proconfig = array['search_path=""'] and proowner = 'postgres'::regrole) and count(*) = 6
       from pg_proc where oid = any (fns::regprocedure[])), 'A2 SECURITY DEFINER, search_path tyhjä, omistaja postgres');
   perform pg_temp.ck(not exists (select 1 from pg_proc p, aclexplode(p.proacl) a where p.oid = any (fns::regprocedure[]) and a.grantee = 0)
@@ -113,7 +113,7 @@ begin
       and md5(pg_get_functiondef('booking.admin_pos_send_link(bigint,text,boolean)'::regprocedure)) = '735e92d8c8c52784bbba9b928c5a122b'
       and md5(pg_get_functiondef('booking.expire_payment_links()'::regprocedure)) = '0109d701ab1ccc4e57f6210989644f5c'
       and md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) = '647c556562046c75b7e7e33703c050a0'
-      and md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) = '703c03c301f5a3008192cdbe65e559e2'
+      and md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) in ('703c03c301f5a3008192cdbe65e559e2', 'cca997c4e900e78b8bb9e2e0c7da25d4')
       and md5(pg_get_functiondef('booking._order_balance(bigint)'::regprocedure)) = 'a6b31f93559de53d75a52d8a285f1170'
       and md5(pg_get_functiondef('booking.is_staff()'::regprocedure)) = '40d8b86aa41ab71f29ef4e6c5257aa77', 'A5 riippuvuudet ennallaan (asiakkaan 14 vrk, pikakassa 1 vrk)');
 

@@ -1,5 +1,12 @@
--- booking_185: laskutuslukko. Aja migraation ja fixtures/10_test_helpers.sql:n jälkeen.
--- Yksi transaktio, kaikki testivaraukset kumoutuvat lopussa. Ei ajettu tästä työtilasta (ei Tapio-dev-kantaa).
+-- booking_185: laskutuslukko.
+-- Ajo: migraation ja booking/supabase/tests/fixtures/10_test_helpers.sql:n JÄLKEEN (PG17, Tapio-dev).
+-- Repon fixture on sama tiedosto kuin Tapio-devin 10_test_helpers.sql (md5 0458821cff5d672d80443d66b01f0d5f); sitä ei muuteta.
+-- Tämä skripti korvaa test.pub_bookin: jaettu apuri jättää verkkomaksun pidon pending-tilaan, testi vahvistaa tilauksen.
+-- Asettaa booking_horizon_days = 400 ja public_treatment_horizon_days = 150, lisää invoice_counters-sarjan L jos se puuttuu,
+-- ja lähettää laskut sähköpostilla (admin_send_invoice: verkkolasku pois, sähköposti päälle). Lahjakortin koodi alkaa HH.
+-- Hoitojen saatavuusikkuna on 13 vuorokautta (funktio rajaa 14).
+-- Yksi transaktio, kaikki testivaraukset kumoutuvat lopussa.
+-- Tapio-dev PG17, edellinen t185: pass=94 fail=5. Tämä versio korjaa ne viisi odotusta. Ei ajettu uudelleen tästä työtilasta.
 -- Tapaus 19: t180_addons_paid_guard.sql, t182_order_reservation_addons.sql ja t184_paylink_no_deadline.sql
 -- ajetaan ERIKSEEN migraation jälkeen. Niillä on oma BEGIN/ROLLBACK, joten niitä ei upoteta tähän.
 -- "Veloitus ennallaan" = order_items (to_jsonb ilman updated_at), orders.total_gross, payments
@@ -37,6 +44,24 @@ create function pg_temp.snap(p_order bigint) returns jsonb language sql as $$
     'invoice_lines', coalesce((select jsonb_agg(to_jsonb(l) order by l.id) from booking.invoice_lines l join booking.invoices i on i.id = l.invoice_id where i.order_id = p_order), '[]'::jsonb))
 $$;
 
+-- Jaettu test.pub_book jättää verkkomaksun pidon pending-tilaan. Tämä vahvistaa tilauksen ja varauksen.
+create or replace function test.pub_book(p_rule bigint, p_date date, p_persons int, p_email text default null, p_name text default 'Testi Asiakas')
+returns jsonb language plpgsql as $$
+declare b jsonb; o bigint;
+begin
+  b := booking.public_create_booking(p_rule, p_date, p_persons, p_name, coalesce(p_email, 'asiakas' || nextval('test.seq') || '@example.com'), '0401234567', false, 'fi', null);
+  if coalesce((b->>'ok')::boolean, false) then
+    select id into o from booking.orders where public_token = (b->>'token')::uuid;
+    update booking.reservations set status = 'confirmed', hold_expires_at = null where order_id = o and status = 'pending';
+    update booking.orders set status = 'confirmed' where id = o and status = 'pending';
+  end if;
+  return b;
+end $$;
+
+insert into booking.invoice_counters(series, last_seq) values ('L', 0) on conflict do nothing;
+update booking.settings set value = '400'::jsonb where key = 'booking_horizon_days';
+update booking.settings set value = '150'::jsonb where key = 'public_treatment_horizon_days';
+
 do $t185$
 declare
   adm uuid := test.mk_staff('admin@t185.example.test', 'admin');
@@ -45,7 +70,8 @@ declare
   mode0 jsonb; redeem0 jsonb; hours0 jsonb; vc0 jsonb; visma_mode text;
   b jsonb; v jsonb; s0 jsonb; s1 jsonb; gb0 jsonb; gb1 jsonb; go0 jsonb; go1 jsonb;
   oid bigint; res_id bigint; item_id bigint; inv bigint; tok uuid; persons0 int; total0 numeric; pay_id bigint;
-  card_id bigint; alt_space text; inv_pay bigint; inv_amt numeric; n_claims int;
+  card_id bigint; alt_space text; inv_pay bigint; inv_amt numeric; n_claims int; credit_id bigint;
+  addon_max int; clamp_qty int; opt_code text;
   addon_id bigint; space_code text; tprod bigint; tstart timestamptz; tstart2 timestamptz;
   oid_t bigint; res_t bigint; tok_t uuid; inv_t bigint;
   oid_d bigint; res_d bigint; total_d numeric;
@@ -76,7 +102,7 @@ begin
   update booking.orders set payment_status = 'invoiced' where id = oid;
   select id into inv from booking.invoices where order_id = oid and kind = 'debit';
   perform pg_temp.ck(inv is not null and (select status from booking.invoices where id = inv) = 'draft', '1.0b luonnos syntyi');
-  v := pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, true, false)', inv));
+  v := pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, false, true)', inv));
   perform pg_temp.ck(v ->> 'err' is null and (select status from booking.invoices where id = inv) = 'sent', '1.0c lasku lähetetty ' || coalesce(v ->> 'err', v ->> 'msg', ''));
   perform pg_temp.ck(booking._order_invoice_locked(oid), '1.0d lukko päällä');
 
@@ -96,11 +122,11 @@ begin
   v := pg_temp.as_(adm, format('select booking.admin_record_payment(%s, %L, 1.00, null, null)', oid, 'card_terminal'));
   perform pg_temp.ck(v ->> 'err' = 'order_invoiced' and pg_temp.snap(oid) = s0, '1 admin_record_payment');
   insert into booking.gift_cards(code, issuer, kind, initial_amount, balance, status, source, vat_treatment, accounting_origin, balance_verified, valid_to)
-  values ('T185LOCK0001', 'own', 'value', 50, 50, 'active', 'native', 'at_redemption', 'native', true, current_date + 100)
+  values ('HH185LOCK001', 'own', 'value', 50, 50, 'active', 'native', 'at_redemption', 'native', true, current_date + 100)
   returning id into gc_id;
-  v := pg_temp.as_(adm, format('select booking.admin_redeem_gift_card(%s, %L, 10, null)', oid, 'T185LOCK0001'));
+  v := pg_temp.as_(adm, format('select booking.admin_redeem_gift_card(%s, %L, 10, null)', oid, 'HH185LOCK001'));
   perform pg_temp.ck(v ->> 'err' = 'order_invoiced' and pg_temp.snap(oid) = s0, '1 admin_redeem_gift_card');
-  v := booking.public_apply_gift_card(tok, 'T185LOCK0001', 10);
+  v := booking.public_apply_gift_card(tok, 'HH185LOCK001', 10);
   perform pg_temp.ck(v ->> 'code' = 'order_invoiced' and pg_temp.snap(oid) = s0, '1 public_apply_gift_card');
 
   -- lisäyspolut, joita kääreet eivät aina tavoita
@@ -191,7 +217,7 @@ begin
   v := pg_temp.as_(adm, format('select booking.admin_change_booking(%s, null, null, %s)', res_id, persons0));
   perform pg_temp.ck(coalesce(v ->> 'ok', '') = 'true' and (select persons from booking.reservations where id = res_id) = persons0 and pg_temp.snap(oid) = s0, '3 henkilömäärän lasku');
   v := pg_temp.as_(adm, format('select booking.admin_change_booking(%s, null, null, 500)', res_id));
-  perform pg_temp.ck(v ->> 'err' = 'capacity_exceeded' and (select persons from booking.reservations where id = res_id) = persons0 and pg_temp.snap(oid) = s0, '3 kapasiteetti ' || coalesce(v ->> 'err', ''));
+  perform pg_temp.ck(v ->> 'err' = 'persons_max' and (select persons from booking.reservations where id = res_id) = persons0 and pg_temp.snap(oid) = s0, '3 kapasiteetti ' || coalesce(v ->> 'err', ''));
 
   -- ===== 4 asiakas, maksettu + lähetetty =====
   b := test.pub_book(vrule, dt + 21, 2, 'paid@t185.example.test');
@@ -203,7 +229,7 @@ begin
   perform pg_temp.ck(v ->> 'ok' = 'true', '4 maksu ennen laskua');
   update booking.orders set payment_status = 'invoiced' where id = oid_p;
   select id into inv from booking.invoices where order_id = oid_p and kind = 'debit';
-  v := pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, true, false)', inv));
+  v := pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, false, true)', inv));
   perform pg_temp.ck((select status from booking.invoices where id = inv) = 'sent', '4 lasku lähetetty');
   s0 := pg_temp.snap(oid_p);
   v := booking.public_change_booking(tok_p, null, null, persons0 + 1);
@@ -227,8 +253,8 @@ begin
   -- hoito, jos vapaa aika löytyy
   select pc.product_id into tprod from booking.product_config pc where pc.public_slots and pc.bookable order by pc.product_id limit 1;
   if tprod is not null then
-    select q.starts_at into tstart from booking.public_treatment_availability(tprod, current_date + 14, current_date + 50, 2) q where q.status = 'available' order by 1 limit 1;
-    select q.starts_at into tstart2 from booking.public_treatment_availability(tprod, current_date + 14, current_date + 50, 2) q where q.status = 'available' and q.starts_at > tstart + interval '1 day' order by 1 limit 1;
+    select q.starts_at into tstart from booking.public_treatment_availability(tprod, current_date + 14, current_date + 27, 2) q where q.status = 'available' order by 1 limit 1;
+    select q.starts_at into tstart2 from booking.public_treatment_availability(tprod, current_date + 14, current_date + 27, 2) q where q.status = 'available' and q.starts_at > tstart + interval '1 day' order by 1 limit 1;
   end if;
   perform pg_temp.ck(tstart is not null and tstart2 is not null, '4b hoitoaika löytyi');
   if tstart is not null then
@@ -237,18 +263,18 @@ begin
     if coalesce((b ->> 'ok')::boolean, false) then
       tok_t := (b ->> 'token')::uuid;
       oid_t := (select id from booking.orders where public_token = tok_t);
-      select id into res_t from booking.reservations where order_id = oid_t and status = 'confirmed' order by id limit 1;
       total0 := (select total_gross from booking.orders where id = oid_t);
       v := pg_temp.as_(adm, format('select booking.admin_record_payment(%s, %L, %s, null, null)', oid_t, 'card_terminal', total0));
+      select id into res_t from booking.reservations where order_id = oid_t and status = 'confirmed' order by id limit 1;
       update booking.orders set payment_status = 'invoiced' where id = oid_t;
       select id into inv_t from booking.invoices where order_id = oid_t and kind = 'debit';
-      v := pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, true, false)', inv_t));
+      v := pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, false, true)', inv_t));
       s0 := pg_temp.snap(oid_t);
       v := booking.public_change_treatment_booking(tok_t, null, 3, null);
       perform pg_temp.ck(v ->> 'code' = 'order_invoiced' and pg_temp.snap(oid_t) = s0, '4b hoito henkilömäärä');
       v := booking.public_change_treatment_booking(tok_t, tstart2, null, null);
       perform pg_temp.ck(coalesce((v ->> 'ok')::boolean, false) and v ->> 'code' is distinct from 'price_change_requires_staff' and pg_temp.snap(oid_t) = s0, '4b hoito aikasiirto');
-      perform pg_temp.ck((select new_data ->> 'invoice_locked' from booking.audit_log where row_pk = res_t::text and action = 'CUSTOMER_CHANGE' order by id desc limit 1) = 'true', '4b hoito audit invoice_locked');
+      perform pg_temp.ck(res_t is not null and (select new_data ->> 'invoice_locked' from booking.audit_log where row_pk = res_t::text and action = 'CUSTOMER_CHANGE' order by id desc limit 1) = 'true', '4b hoito audit invoice_locked');
       v := booking.public_change_treatment_booking(tok_t, tstart2, 1, null);
       perform pg_temp.ck(v ->> 'code' = 'order_invoiced' and pg_temp.snap(oid_t) = s0, '4b hoito siirto ja henkilömäärä');
     end if;
@@ -266,7 +292,7 @@ begin
   select id, persons into res_id, persons0 from booking.reservations where order_id = oid limit 1;
   update booking.orders set payment_status = 'invoiced' where id = oid;
   select id into inv from booking.invoices where order_id = oid and kind = 'debit';
-  v := pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, true, false)', inv));
+  v := pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, false, true)', inv));
   perform pg_temp.ck((select status from booking.invoices where id = inv) = 'sent', '4d lasku lähetetty');
   insert into booking.payments(order_id, method, provider, status, amount)
   values (oid, 'invoice', 'manual', 'pending', (select total_gross from booking.orders where id = oid))
@@ -299,16 +325,20 @@ begin
     and (select line_total_gross from booking.order_items where id = pay_id) = total0
     and not exists (select 1 from booking.refunds where order_id = oid), '5 maksettu lisäpalvelu ei rajaudu eikä hyvity');
 
-  -- 6a: maksamaton lisäpalvelu ilman linkkiä rajataan
+  -- 6a: maksamaton lisäpalvelu ilman linkkiä rajataan. saunavihta.max_per_person on devissä 20,
+  -- joten määrä 2 ei ylitä yhden hengen rajaa. Määrä on raja + 1: kahdelle se mahtuu, yhdelle se rajataan.
   b := test.pub_book(vrule, dt + 70, 2, 'clamp@t185.example.test');
   oid := (test.ord((b ->> 'token')::uuid)).id;
   select id, order_item_id into res_id, item_id from booking.reservations where order_id = oid limit 1;
-  v := pg_temp.as_(adm, format('select booking.admin_set_reservation_addons(%s, %L::jsonb)', res_id, jsonb_build_array(jsonb_build_object('id', addon_id, 'quantity', 2))::text));
-  perform pg_temp.ck(v ->> 'ok' = 'true' and not exists (select 1 from booking.payments p where p.order_id = oid and p.provider <> 'manual' and p.status = 'pending'), '6a lisäpalvelu ilman linkkiä');
+  select max_per_person into addon_max from booking.addons where id = addon_id;
+  clamp_qty := coalesce(addon_max, 0) + 1;
+  perform pg_temp.ck(addon_max between 1 and 98 and clamp_qty <= least(addon_max * 2, 99), '6a määrä ylittää yhden hengen rajan ' || coalesce(addon_max::text, 'null'));
+  v := pg_temp.as_(adm, format('select booking.admin_set_reservation_addons(%s, %L::jsonb)', res_id, jsonb_build_array(jsonb_build_object('id', addon_id, 'quantity', clamp_qty))::text));
+  perform pg_temp.ck(v ->> 'ok' = 'true' and not exists (select 1 from booking.payments p where p.order_id = oid and p.provider <> 'manual' and p.status = 'pending'), '6a lisäpalvelu ilman linkkiä ' || coalesce(v ->> 'err', ''));
   v := pg_temp.as_(adm, format('select booking.admin_change_booking(%s, null, null, 1)', res_id));
   perform pg_temp.ck(coalesce(v ->> 'ok', '') = 'true'
-    and (select quantity from booking.order_items where parent_item_id = item_id and kind = 'addon' order by id limit 1) = 1
-    and (select price_breakdown ->> 'clamped_from' from booking.order_items where parent_item_id = item_id and kind = 'addon' order by id limit 1) = '2', '6a maksamaton lisäpalvelu rajattiin');
+    and (select quantity from booking.order_items where parent_item_id = item_id and kind = 'addon' order by id limit 1) = least(addon_max, 99)
+    and (select price_breakdown ->> 'clamped_from' from booking.order_items where parent_item_id = item_id and kind = 'addon' order by id limit 1) = clamp_qty::text, '6a maksamaton lisäpalvelu rajattiin');
 
   -- 6b: avoin takarajaton linkki lukitsee lisäpalvelun, määrää ei rajata
   b := test.pub_book(vrule, dt + 196, 2, 'link@t185.example.test');
@@ -358,7 +388,7 @@ begin
   select link_token into link_tok from booking.payments where order_id = oid and status = 'pending' and provider = 'visma_pay' order by id desc limit 1;
   update booking.orders set payment_status = 'invoiced' where id = oid;
   select id into inv from booking.invoices where order_id = oid and kind = 'debit';
-  v := pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, true, false)', inv));
+  v := pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, false, true)', inv));
   s0 := pg_temp.snap(oid);
   begin
     perform booking.mobilepay_payment_prepare(null, link_tok, 120, 'WEB_REDIRECT');
@@ -387,9 +417,12 @@ begin
   select id into res_id from booking.reservations where order_id = oid limit 1;
   update booking.orders set payment_status = 'invoiced' where id = oid;
   select id into inv from booking.invoices where order_id = oid and kind = 'debit';
-  v := pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, true, false)', inv));
+  v := pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, false, true)', inv));
   v := pg_temp.as_(adm, format('select booking.admin_credit_invoice(%s)', inv));
-  perform pg_temp.ck(v ->> 'err' is null and (select status from booking.invoices where id = inv) = 'credited', '9 hyvityslasku ' || coalesce(v ->> 'err', ''));
+  credit_id := nullif(v ->> 'id', '')::bigint;
+  perform pg_temp.ck(v ->> 'err' is null and credit_id is not null and v ->> 'kind' = 'credit' and v ->> 'status' = 'draft', '9 hyvitysluonnos ' || coalesce(v ->> 'err', v ->> 'msg', ''));
+  v := pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, false, true)', credit_id));
+  perform pg_temp.ck(v ->> 'err' is null and (select status from booking.invoices where id = inv) = 'credited', '9 hyvityslasku lähetetty ' || coalesce(v ->> 'err', v ->> 'msg', ''));
   perform pg_temp.ck(booking._order_invoice_locked(oid), '9 lukko hyvityksen jälkeen');
   s0 := pg_temp.snap(oid);
   v := pg_temp.as_(adm, format('select booking.admin_add_to_order(%s, %L::jsonb, false, false, null)', oid, '[{"type":"custom","description":"ei saa","amount":1,"vat_rate":25.5}]'::jsonb));
@@ -403,7 +436,7 @@ begin
   select id into res_id from booking.reservations where order_id = oid limit 1;
   update booking.orders set payment_status = 'invoiced' where id = oid;
   select id into inv from booking.invoices where order_id = oid and kind = 'debit';
-  perform pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, true, false)', inv));
+  perform pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, false, true)', inv));
   s0 := pg_temp.snap(oid);
   v := pg_temp.as_(adm, format('select booking.admin_cancel_reservation(%s, %L, false, null)', res_id, 't185'));
   perform pg_temp.ck(coalesce(v ->> 'ok', '') = 'true' and (select status from booking.reservations where id = res_id) = 'cancelled'
@@ -417,7 +450,7 @@ begin
   perform pg_temp.as_(adm, format('select booking.admin_record_payment(%s, %L, %s, null, null)', oid, 'card_terminal', total0));
   update booking.orders set payment_status = 'invoiced' where id = oid;
   select id into inv from booking.invoices where order_id = oid and kind = 'debit';
-  perform pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, true, false)', inv));
+  perform pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, false, true)', inv));
   s0 := pg_temp.snap(oid);
   v := pg_temp.as_(adm, format('select booking.admin_cancel_reservation(%s, %L, true, %L)', res_id, 't185', 't185'));
   perform pg_temp.ck(v ->> 'err' = 'order_invoiced' and (select status from booking.reservations where id = res_id) = 'confirmed'
@@ -441,7 +474,7 @@ begin
   oid := (test.ord(tok)).id;
   update booking.orders set payment_status = 'invoiced' where id = oid;
   select id into inv from booking.invoices where order_id = oid and kind = 'debit';
-  perform pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, true, false)', inv));
+  perform pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, false, true)', inv));
   s0 := pg_temp.snap(oid);
   v := booking.public_cancel_booking(tok);
   perform pg_temp.ck(v ->> 'code' = 'order_invoiced' and pg_temp.snap(oid) = s0 and (select status from booking.orders where id = oid) = 'confirmed', '13 confirmed');
@@ -458,7 +491,7 @@ begin
   oid := (test.ord(tok)).id;
   update booking.orders set payment_status = 'invoiced' where id = oid;
   select id into inv from booking.invoices where order_id = oid and kind = 'debit';
-  perform pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, true, false)', inv));
+  perform pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, false, true)', inv));
   v := booking.public_request_cancel(tok, 't185');
   perform pg_temp.ck(coalesce((v ->> 'ok')::boolean, false) and exists (select 1 from booking.order_requests where order_id = oid and kind = 'cancel'), '13 peruutuspyyntö ' || coalesce(v ->> 'code', ''));
 
@@ -471,7 +504,7 @@ begin
    where r.order_id = oid limit 1;
   update booking.orders set payment_status = 'invoiced' where id = oid;
   select id into inv from booking.invoices where order_id = oid and kind = 'debit';
-  perform pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, true, false)', inv));
+  perform pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, false, true)', inv));
   s0 := pg_temp.snap(oid);
   v := pg_temp.as_(adm, format('select booking.admin_set_reservation_option(%s, null, false)', res_id));
   perform pg_temp.ck(v ->> 'err' is distinct from 'order_invoiced' and pg_temp.snap(oid) = s0, '14 hoito/valinta ' || coalesce(v ->> 'err', v ->> 'ok', ''));
@@ -486,16 +519,21 @@ begin
    order by pc.product_id
    limit 1;
   tstart := null;
+  opt_code := null;
   if tprod is not null then
-    select q.starts_at into tstart from booking.public_treatment_availability(tprod, current_date + 60, current_date + 120, 1) q
+    select q.starts_at into tstart from booking.public_treatment_availability(tprod, current_date + 60, current_date + 73, 1) q
      where q.status = 'available' order by 1 limit 1;
+    select po.code into opt_code from booking.product_options po
+     where po.product_id = tprod and po.active order by po.sort_order, po.id limit 1;
   end if;
-  perform pg_temp.ck(tprod is not null and tstart is not null, '14 kahden tilan tuote ja aika ' || coalesce(tprod::text, 'ei'));
-  if tstart is not null then
-    b := booking.public_create_treatment_booking(tprod, tstart, 1, 'Testi Siirto', 'mvsp@t185.example.test', '+358401112244', false, 'fi', null, 'private', null, null);
+  perform pg_temp.ck(tprod is not null and tstart is not null and opt_code is not null, '14 kahden tilan tuote, aika ja vaihtoehto ' || coalesce(tprod::text, 'ei') || ' ' || coalesce(opt_code, ''));
+  if tstart is not null and opt_code is not null then
+    b := booking.public_create_treatment_booking(tprod, tstart, 1, 'Testi Siirto', 'mvsp@t185.example.test', '+358401112244', false, 'fi', null, 'private', null, opt_code);
     perform pg_temp.ck((b ->> 'ok')::boolean, '14 hoito varattu ' || coalesce(b ->> 'code', ''));
     if coalesce((b ->> 'ok')::boolean, false) then
       oid := (select id from booking.orders where public_token = (b ->> 'token')::uuid);
+      update booking.reservations set status = 'confirmed', hold_expires_at = null where order_id = oid and status = 'pending';
+      update booking.orders set status = 'confirmed' where id = oid and status = 'pending';
       select r.id, sp.code into res_id, space_code
         from booking.reservations r join booking.resources sp on sp.id = r.space_id
        where r.order_id = oid and r.status = 'confirmed' order by r.id limit 1;
@@ -509,7 +547,7 @@ begin
        limit 1;
       update booking.orders set payment_status = 'invoiced' where id = oid;
       select id into inv from booking.invoices where order_id = oid and kind = 'debit';
-      perform pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, true, false)', inv));
+      perform pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, false, true)', inv));
       s0 := pg_temp.snap(oid);
       v := pg_temp.as_(adm, format('select booking.admin_move_reservation_space(%s, %L, %L)', res_id, alt_space, 't185'));
       perform pg_temp.ck(alt_space is not null and alt_space is distinct from space_code
@@ -526,7 +564,7 @@ begin
   perform pg_temp.ck((select mode from booking.reservations where id = res_id) = 'shared', '15 yleinen vuoro');
   update booking.orders set payment_status = 'invoiced' where id = oid;
   select id into inv from booking.invoices where order_id = oid and kind = 'debit';
-  perform pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, true, false)', inv));
+  perform pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, false, true)', inv));
   perform pg_temp.ck(booking._order_invoice_locked(oid), '15 lukko ennen korttia');
   update booking.orders set total_gross = 0 where id = oid;
   update booking.order_items set line_total_gross = 0, unit_price_gross = 0, discount_amount = -1, discount_code_id = null where id = item_id;
@@ -551,7 +589,7 @@ begin
   gb0 := booking.public_get_booking(tok);
   go0 := booking.public_get_order(tok);
   perform pg_temp.ck((gb0 ->> 'invoice_locked') = 'false' and (go0 ->> 'invoice_locked') = 'false' and (go0 ->> 'ok') = 'true', '16 lukitsematon ennen lähetystä');
-  perform pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, true, false)', inv));
+  perform pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, false, true)', inv));
   perform test.reset_rl();
   gb1 := booking.public_get_booking(tok);
   go1 := booking.public_get_order(tok);
@@ -588,7 +626,7 @@ begin
   oid := (test.ord(tok)).id;
   update booking.orders set payment_status = 'invoiced' where id = oid;
   select id into inv from booking.invoices where order_id = oid and kind = 'debit';
-  perform pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, true, false)', inv));
+  perform pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, false, true)', inv));
   insert into booking.voucher_claims(order_id, code, source, customer_name, locale)
   values (oid, 'T185VCOPEN1', 'elamyslahjat', 'T185', 'fi') returning id into cl_id;
   s0 := pg_temp.snap(oid);
