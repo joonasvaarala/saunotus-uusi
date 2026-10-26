@@ -13,6 +13,12 @@ import { bulletinCard, dayNotesCard, loadDayMemos } from './day-memos.js';
 import { loadMemoTexts, memoText } from '../day-memos-texts.js';
 import { cachedDayBundle, seedDayBundle, clearDayBundles } from '../day-bundle-cache.js';
 
+// Tiedotteet ja päivän muistiinpanot: toistaiseksi pois päivänäkymästä.
+// Palauta käyttöön vaihtamalla false → true (yksi tai molemmat). Kortteja ei piirretä eikä
+// admin_list_day_notes-kutsua tehdä, kun lippu on false. Koodi, taulut ja RPC:t säilyvät.
+export const DAY_VIEW_SHOW_ANNOUNCEMENTS = false;
+export const DAY_VIEW_SHOW_DAY_NOTES = false;
+
 // Vanha kanta / väärällä allekirjoituksella julkaistu bundle: 42883, PGRST202 -> varapolku 60 s.
 let bundleMissing = 0;
 function rpcMissing(e) {
@@ -87,7 +93,10 @@ export async function render({ ctx, refs, reload, query }) {
   // Ilman nippua shiftsBar hakee itse: admin_day_shifts tai oikeuden mukainen admin_upcoming_shifts (own/all).
   const shifts = await shiftsBar(date, ctx.can, bundle && Array.isArray(bundle.shifts) ? { rows: bundle.shifts, scope: 'all', why: null } : null);
   // booking_140: nippu tuo notes_bundle-kentän; vanha nippu (ilman kenttää) → erillinen admin_list_day_notes.
-  const memos = await loadDayMemos(date, bundle?.notes_bundle || null);
+  // Molemmat liput pois → ei kortteja eikä erillistä hakua (nipun notes_bundle jätetään käyttämättä).
+  const memos = (DAY_VIEW_SHOW_ANNOUNCEMENTS || DAY_VIEW_SHOW_DAY_NOTES)
+    ? await loadDayMemos(date, bundle?.notes_bundle || null)
+    : null;
   const codes = new Map((addonList || []).map((a) => [a.id, a.code]));
   const go = (d) => { location.hash = `#/?d=${d}`; };
   const toolbar = h('div', { class: 'toolbar' },
@@ -175,9 +184,9 @@ export async function render({ ctx, refs, reload, query }) {
     h('button', { type: 'button', class: 'btn ghost sm', onclick: () => blockDialog(date, refs, reload) }, '+ Lisää sulku'));
   const prepBox = prepCard({ totals: view.addon_totals, prep: view.prep, persons: sumPersons(active), bookings: active.length, codes });
   return [h('h1', { text: fmtDay(`${date}T12:00:00Z`) }),
-    bulletinCard({ date, bulletins: memos?.bulletins || [], can: ctx.can, reload }),
+    DAY_VIEW_SHOW_ANNOUNCEMENTS ? bulletinCard({ date, bulletins: memos?.bulletins || [], can: ctx.can, reload }) : null,
     revenue, shifts, optNote, toolbar,
-    dayNotesCard({ date, dayNotes: memos?.day_notes || [], can: ctx.can, reload }), prepBox,
+    DAY_VIEW_SHOW_DAY_NOTES ? dayNotesCard({ date, dayNotes: memos?.day_notes || [], can: ctx.can, reload }) : null, prepBox,
     h('div', { class: 'daygrid day-view' }, timeline.length ? timeline : empty('Ei vuoroja tälle päivälle.')),
     inactive.length ? h('details', { class: 'card inactive-res', 'data-testid': 'inactive-res' }, h('summary', { text: `Peruutetut ja päättyneet varaukset (${inactive.length})` }), h('ul', { class: 'reslist' }, inactive.map(resRow))) : null,
     h('p', { class: 'muted', text: `${active.length} aktiivista varausta, ${sumPersons(active)} henkilöä yhteensä.` }), blocks];
