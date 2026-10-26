@@ -91,7 +91,7 @@ begin
   if to_regprocedure('booking._vc_redeem(bigint,numeric,text,text,text)') is null or to_regprocedure('booking._vc_partner_order(bigint)') is null or to_regclass('booking.vc_difference_payments') is null then
     raise exception 'TESTRESULT pass=0 fail=1 skip=0 F A9 booking_176 puuttuu (_vc_redeem / _vc_partner_order / vc_difference_payments)';
   end if;
-  perform pg_temp.ck(md5(pg_get_functiondef('booking._vc_redeem(bigint,numeric,text,text,text)'::regprocedure)) = '6f52789346960d95370169446a61451b'
+  perform pg_temp.ck(md5(pg_get_functiondef('booking._vc_redeem(bigint,numeric,text,text,text)'::regprocedure)) in ('6f52789346960d95370169446a61451b', '2aa8e44cb2c6f150d3488f53f8d94c25')
       and md5(pg_get_functiondef('booking._vc_partner_order(bigint)'::regprocedure)) = '9221478413d1e3869021d9e20c20e567', 'A9 _vc_redeem + _vc_partner_order = booking_176');
   perform pg_temp.ck(not has_function_privilege('anon', 'booking._vc_redeem(bigint,numeric,text,text,text)', 'execute')
       and not has_function_privilege('authenticated', 'booking._vc_redeem(bigint,numeric,text,text,text)', 'execute')

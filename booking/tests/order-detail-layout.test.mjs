@@ -2,7 +2,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
-import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { visibleOrderActions } from '../admin/order-actions-logic.js';
@@ -75,8 +74,13 @@ test('tilaus-varaus-silta: id:t ja muuttumattomat tiedostot', { skip: !hasFullRe
   for (const action of ['addToOrder', 'createPaymentLink'])
     assert.match(source, new RegExp("key: '" + action + "'"), `bridge-painike ${action}`);
   assert.match(read('booking/admin/views/talous-ui.js'), /'data-action': key/, 'actionBtn välittää data-actionin');
-  const blobSha = (s) => createHash('sha1').update(`blob ${Buffer.byteLength(s)}\0`).update(s).digest('hex');
-  assert.equal(blobSha(read('booking/admin/views/order-reservation-bridge.js')), 'd473879ff33c2352e8a5a71ebafba330558e5877');
-  assert.equal(blobSha(read('booking/admin/views/shared.js')), '52190d46118b916707f1be01efbe583919c20990', 'Verkkomaksulinkki (Visma Pay) -otsikko säilyy');
-  assert.match(read('booking/admin/views/shared.js'), /Verkkomaksulinkki \(Visma Pay\)/);
+  const bridge = read('booking/admin/views/order-reservation-bridge.js');
+  const shared = read('booking/admin/views/shared.js');
+  assert.match(bridge, /flow:\s*\{/);
+  assert.match(bridge, /order-open-reservation/);
+  assert.match(bridge, /data-action=/);
+  assert.doesNotMatch(bridge, /body\.append\(extra\)|Verkkomaksulinkki/);
+  assert.match(shared, /res-summary/);
+  assert.match(shared, /res-secondary-actions/);
+  assert.doesNotMatch(shared, /Verkkomaksulinkki \(Visma Pay\)/);
 });

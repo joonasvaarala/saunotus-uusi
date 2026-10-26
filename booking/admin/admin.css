@@ -954,3 +954,66 @@ body.shot #shell .nav .lbl{display:inline}
 .vcr-confirm{min-width:0;max-width:100%;overflow-wrap:anywhere}
 .vcr-confirm .row.wrap .btn{white-space:normal}
 .vcr-confirm .btn.primary:disabled{opacity:1;background:var(--bg);color:var(--muted);border-color:var(--muted);cursor:not-allowed}
+
+/* Varausdialogi 04: selkeä järjestys ja maksulinkin takaraja */
+/* Varausdialogi 04 – sama hallinnan väri- ja komponenttijärjestelmä. */
+.rd-dialog { gap: 12px; min-width: 0; }
+.rd-dialog > * { min-width: 0; }
+.rd-summary { padding: 4px 2px 8px; }
+.rd-when { display: block; font-size: 19px; font-weight: 600; line-height: 1.45; }
+.rd-meta { margin-top: 4px; overflow-wrap: anywhere; }
+.rd-badges { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+.rd-alerts { margin-top: 10px; }
+.rd-alert { padding: 10px 12px; border: 1px solid var(--line); background: var(--warnbg); border-radius: var(--r); display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+.rd-card { padding: 13px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); min-width: 0; }
+.rd-card h3 { font-size: 1rem; margin: 0 0 10px; }
+.rd-card h4 { font-size: .92rem; margin: 10px 0 6px; }
+.rd-customer .rd-contact { display: flex; flex-direction: column; gap: 2px; }
+.rd-contact a { min-height: 44px; display: inline-flex; align-items: center; max-width: 100%; overflow-wrap: anywhere; word-break: break-word; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.rd-contact strong { font-weight: 600; }
+.rd-contact p { margin: 4px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.rd-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.rd-actions .btn { flex: 1 1 145px; min-height: 44px; white-space: normal; overflow-wrap: anywhere; }
+.rd-actions .btn:first-child.primary { flex-grow: 2; }
+.rd-payment .tl-sums { margin: 0 0 6px; }
+.rd-payment-actions { display: flex; flex-direction: column; gap: 7px; }
+.rd-payment .order-link { display: inline-flex; align-items: center; min-height: 44px; max-width: 100%; overflow-wrap: anywhere; }
+.rd-voucher[hidden], .rd-more[hidden], .rd-card[hidden], .rd-actions[hidden], .rd-secondary[hidden] { display: none; }
+.rd-contents .addons-box { min-width: 0; }
+.rd-contents .addons-box .resrow { min-width: 0; }
+.rd-contents .addons-box .resrow span { overflow-wrap: anywhere; }
+.rd-contents .opt-box { border: 0; padding: 0; margin: 0; }
+.rd-contents .opt-box + .addons-box { border-top: 1px solid var(--line); margin-top: 10px; padding-top: 7px; }
+.rd-contents .opt-box[hidden] + .addons-box { border: 0; margin-top: 0; padding-top: 0; }
+.rd-secondary { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 12px; align-items: center; }
+.rd-secondary .btn { min-height: 44px; white-space: normal; }
+.rd-secondary .rd-danger { margin-left: auto; }
+.rd-more { border: 1px solid var(--line); background: var(--card); border-radius: var(--r); padding: 0 12px; }
+.rd-more summary { display: list-item; cursor: pointer; min-height: 44px; padding-top: 11px; padding-bottom: 10px; font-weight: 600; }
+.rd-more[open] > summary { border-bottom: 1px solid var(--line); margin-bottom: 10px; }
+.rd-more .resbox { padding: 0; margin: 8px 0; border: 0; background: none; }
+.rd-more .resbox .kv, .rd-more .kv { min-width: 0; }
+.rd-more .moverow { margin: 4px 0 12px; }
+.rd-more .moverow .fld { display: block; }
+.rd-more .moverow input { max-width: 100%; }
+.rd-more .moverow .btn { min-height: 44px; margin-top: 10px; }
+.rd-more .rd-billing { margin-bottom: 12px; }
+.rd-dialog textarea { width: 100%; resize: vertical; min-height: 60px; }
+.rd-dialog button, .rd-dialog input, .rd-dialog select { max-width: 100%; }
+.pl-deadline { display: block; margin: 4px 0; }
+.pl-deadline .pl-toggle { min-height: 44px; display: flex; align-items: center; gap: 9px; cursor: pointer; }
+.pl-deadline .pl-days { margin-top: 8px; }
+.pl-deadline .pl-days[hidden] { display: none; }
+.pl-deadline input[type=checkbox] { width: 20px; height: 20px; }
+.pl-deadline input[type=number] { max-width: 9.375em; }
+.rd-more .kv, .rd-dialog .kv { grid-template-columns: minmax(0, 9.375em) minmax(0, 1fr); }
+@media (max-width: 43.6875em) {
+  .rd-dialog { gap: 12px; }
+  .rd-actions { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; }
+  .rd-actions .btn { width: 100%; min-width: 0; }
+  .rd-actions .btn:first-child.primary { grid-column: 1 / -1; }
+  .rd-secondary { display: flex; flex-wrap: wrap; }
+  .rd-secondary .rd-danger { flex: 1 1 100%; margin-left: 0; }
+  .rd-when { font-size: 18px; }
+  .rd-more .kv { grid-template-columns: minmax(0, 6.875em) minmax(0, 1fr); }
+}

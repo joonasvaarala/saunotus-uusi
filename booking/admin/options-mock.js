@@ -128,6 +128,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       { key: 'invoice_bank', value: '', is_public: false },
       { key: 'invoice_due_days', value: 14, is_public: false },
       { key: 'seller', value: 'Havuhattu', is_public: false },
+      { key: 'admin_order_reservation_flow_enabled', value: true, is_public: false },
     ],
     procountor: {
       mode: 'off', environment: 'pts', daily_enabled: false, api_prefix: '/supported/api', vat_status: '', approved_by: '', bank_account: '',
@@ -481,7 +482,12 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       catch (e) { throw err(e.code || 'invalid_value', e.message); }
       return { ok: true };
     },
-    'select:settings': () => st.generalSettings.map((s) => ({ ...s })),
+    'select:settings': (q = {}) => {
+      let rows = st.generalSettings.map((s) => ({ ...s }));
+      if (typeof q.key === 'string' && q.key.startsWith('eq.')) rows = rows.filter((s) => s.key === q.key.slice(3));
+      if (q.limit != null) rows = rows.slice(0, Number(q.limit) || 0);
+      return rows;
+    },
     public_get_site_texts: () => ({ ok: true, texts: [
       { key: 'ui.admin.day.revenue_title', lang: 'fi', text: 'Päivän tuotto' },
       { key: 'ui.admin.day.revenue_title', lang: 'en', text: "Day's revenue" },
@@ -521,10 +527,15 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     },
     admin_get_order: (a) => {
       const r = st.reservations.find((x) => x.order_id === a.p_order_id); if (!r) throw err('not_found', 'Tilausta ei löydy');
-      return { order_id: r.order_id, order_no: r.order_no, status: r.order_status, payment_status: r.payment_status, total: r.total_gross, source_channel: 'web', created_at: r.created_at, customer_kind: 'private', billing: null, invoice_reference: null,
+      const total = Number(r.total_gross) || 0;
+      const paid = r.payment_status === 'paid' ? total : 0;
+      const unpaid = r.payment_status === 'paid' ? 0 : total;
+      return { order_id: r.order_id, order_no: r.order_no, status: r.order_status, payment_status: r.payment_status, total, source_channel: 'web', created_at: r.created_at, customer_kind: 'private', billing: null, invoice_reference: null,
         customer: { id: r.customer_id, name: r.customer_name, email: r.customer_email, phone: r.customer_phone },
-        reservations: [{ id: r.reservation_id, status: r.status, product_name: r.product_name, mode: r.mode, starts_at: r.starts_at, ends_at: r.ends_at, persons: r.persons, notes: r.notes, item_total: r.total_gross, product_id: r.product_id,
-          option: optJson(r.option_id), option_choices: choicesJson(r.product_id), option_missing: missing(r), addons: [] }], items: [], payments: [], balance: 0, is_native: true };
+        reservations: [{ id: r.reservation_id, status: r.status, product_name: r.product_name, mode: r.mode, starts_at: r.starts_at, ends_at: r.ends_at, persons: r.persons, notes: r.notes, item_total: total, product_id: r.product_id,
+          option: optJson(r.option_id), option_choices: choicesJson(r.product_id), option_missing: missing(r), addons: [] }], items: [], payments: [],
+        balance: { total, paid, refunded: 0, pending_link: 0, unpaid, unpaid_unlinked: unpaid, net_paid: paid },
+        is_native: r.source !== 'johku', staff_can_add: r.source !== 'johku' && ['confirmed', 'completed'].includes(r.order_status) };
     },
     admin_set_reservation_option: (a) => {
       need('bookings.manage');
@@ -668,7 +679,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     admin_create_payment_link: (a) => {
       need('payments.manage');
       const o = st.posOrders.find((x) => x.order_id === a.p_order_id);
-      return { ok: true, payment_id: 1, link_path: '/maksa/?p=11111111-2222-4333-8444-555555555555', amount: o?.total ?? 0, online_payment_enabled: false };
+      return { ok: true, payment_id: 1, link_path: '/maksa/?p=11111111-2222-4333-8444-555555555555', amount: o?.total ?? 0, expires_at: a.p_expires_days == null ? null : new Date(Date.now() + a.p_expires_days * 864e5).toISOString(), online_payment_enabled: false };
     },
     admin_pos_send_link: (a) => {
       needAny('pos.use', 'settings.edit');

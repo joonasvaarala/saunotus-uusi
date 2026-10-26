@@ -126,8 +126,8 @@ begin
   perform pg_temp.ck((select method = 'partner_voucher_kokemuskauppa' and amount = 50 and status = 'paid' from booking.payments where id = pay), 'E2 kumppanimaksu vain arvon suuruinen (50 €)');
   perform pg_temp.ck(exists (select 1 from booking.receipts where payment_id = pay and kind = 'receipt' and total_gross = 50)
       and not exists (select 1 from booking.email_outbox where order_id = o and kind = 'receipt'), 'E3 lahjakorttiosuus: kuitti 50 €, ei kuittisähköpostia');
-  perform pg_temp.ck((select provider = 'visma_pay' and method = 'visma_pay' and status = 'pending' and amount = 30 and link_token is not null and link_expires_at > now()
-      from booking.payments where id = lnk), 'E4 erotus 30 € Visma Pay -maksulinkkinä (pending, voimassa)');
+  perform pg_temp.ck((select provider = 'visma_pay' and method = 'visma_pay' and status = 'pending' and amount = 30 and link_token is not null and link_expires_at is null
+      and raw ->> 'paylink' = 'no_deadline' from booking.payments where id = lnk), 'E4 erotus 30 € Visma Pay -maksulinkkinä (pending, ei takarajaa, booking_184)');
   select to_jsonb(e) into x from booking.email_outbox e where e.order_id = o and e.kind = 'payment_link' and e.payment_id = lnk;
   perform pg_temp.ck(x is not null and x ->> 'locale' = 'en' and x #>> '{payload,variant}' = 'voucher_difference' and (x #>> '{payload,total}')::numeric = 80
       and (x #>> '{payload,voucher_value}')::numeric = 50 and (x #>> '{payload,difference}')::numeric = 30, 'E5 payment_link-sähköposti: EN, total 80 / voucher 50 / difference 30');

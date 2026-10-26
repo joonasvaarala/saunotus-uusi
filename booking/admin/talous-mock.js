@@ -393,13 +393,15 @@ const PREPAID_ON = '2026-10-15';
     const added = items.map((x, k) => ({ item_id: 9e6 + k, name: x.type === 'custom' ? x.description : x.code || `Rivi ${k + 1}`, line_total: x.type === 'custom' ? round2(+x.amount * (+x.quantity || 1)) : round2(5 * (+x.quantity || 1)), reservation_id: x.reservation_id ?? null }));
     const addedTotal = round2(added.reduce((s, x) => s + x.line_total, 0)), b = balanceOf(o);
     return { ok: true, mock: true, order_id: o.order_id, added, added_total: addedTotal, balance: { ...b, total: round2(b.total + addedTotal), unpaid: round2(b.unpaid + addedTotal) },
-      payment: a.p_create_link ? { payment_id: 9e6, link_token: '00000000-0000-4000-a000-000000000001', link_path: '/maksa/?p=00000000-0000-4000-a000-000000000001', amount: round2(b.unpaid + addedTotal), expires_at: `${dayAdd(today, 14)}T21:00:00Z` } : null, email_queued: false };
+      payment: a.p_create_link ? { payment_id: 9e6, link_token: '00000000-0000-4000-a000-000000000001', link_path: '/maksa/?p=00000000-0000-4000-a000-000000000001', amount: round2(b.unpaid + addedTotal), expires_at: null } : null, email_queued: false };
   }
   function adminCreatePaymentLink(a = {}) {
-    const o = byId.get(+a.p_order_id); if (!o) throw fail('not_found', 'Tilausta ei löydy', 404);
-    if (!(o.unpaid_amount > 0)) throw fail('nothing_to_pay', 'Ei maksettavaa');
-    return { ok: true, mock: true, payment_id: 9e6, link_token: '00000000-0000-4000-a000-000000000001', link_path: '/maksa/?p=00000000-0000-4000-a000-000000000001', amount: o.unpaid_amount, expires_at: `${dayAdd(today, +a.p_expires_days || 14)}T21:00:00Z`,
-      lines: o.items.map((x) => ({ order_item_id: x.id, description: x.name, amount_gross: x.gross })), online_payment_enabled: false, email_queued: false };
+    // Päivänäkymän tilaus on options-mockissa, ei tässä luettelossa. Tuntematon tilaus on silti
+    // kokeilutilan kuittaus: takaraja tulee vain p_expires_daysista (puuttuva = ei takarajaa).
+    const o = byId.get(+a.p_order_id);
+    if (o && !(o.unpaid_amount > 0)) throw fail('nothing_to_pay', 'Ei maksettavaa');
+    return { ok: true, mock: true, payment_id: 9e6, link_token: '00000000-0000-4000-a000-000000000001', link_path: '/maksa/?p=00000000-0000-4000-a000-000000000001', amount: o ? o.unpaid_amount : 1, expires_at: a.p_expires_days == null ? null : `${dayAdd(today, +a.p_expires_days)}T21:00:00Z`,
+      lines: o ? o.items.map((x) => ({ order_item_id: x.id, description: x.name, amount_gross: x.gross })) : [], online_payment_enabled: false, email_queued: false };
   }
   function adminRefund(a = {}) {
     const p = payById.get(+a.p_payment_id); if (!p) throw fail('not_found', 'Maksua ei löydy', 404);
