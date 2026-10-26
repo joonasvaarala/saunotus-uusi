@@ -1,0 +1,42 @@
+[
+ {
+  "key": "ui.upsell.choose_option",
+  "lang": "fi",
+  "text": "Valitse hoito",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "ehdotuksen pakollinen tuotevalinta. Ei hintamuutosta; tuo ennen julkaisua."
+ },
+ {
+  "key": "ui.upsell.choose_option",
+  "lang": "en",
+  "text": "Choose a treatment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "ehdotuksen pakollinen tuotevalinta. Ei hintamuutosta; tuo ennen julkaisua."
+ },
+ {
+  "key": "ui.upsell.option",
+  "lang": "fi",
+  "text": "Hoito",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "ehdotuksen tietoikkuna: valittu hoito. Ei hintamuutosta; tuo ennen julkaisua."
+ },
+ {
+  "key": "ui.upsell.option",
+  "lang": "en",
+  "text": "Treatment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "ehdotuksen tietoikkuna: valittu hoito. Ei hintamuutosta; tuo ennen julkaisua."
+ }
+]

@@ -313,7 +313,9 @@ jobs:
       - run: node --test booking/tests/osoite-saunotus-fi-170.test.mjs
       # booking_179: ehdotetut tuotteet (enintään 3 / päätuote). Kassa ja vahvistussivu, seurantataulu.
       # Tekstit content/site-texts.pending-import-75.json. SQL: t179 paikallisessa PG:ssä (migraatio + testi + rollback + uudelleenajo).
-      - run: node --test booking/tests/upsell-logic.test.mjs booking/tests/upsell-179.test.mjs
+      # booking_186: pakollinen tuotevalinta ehdotuksissa. SQL: booking/supabase/tests/checkout/t186_upsell_options.sql
+      # paikallisessa PG:ssä (fixtures/10_test_helpers.sql + migraatio + rollback). Työnkulussa ei ole Postgresia.
+      - run: node --test booking/tests/upsell-logic.test.mjs booking/tests/upsell-179.test.mjs booking/tests/upsell-readmore.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

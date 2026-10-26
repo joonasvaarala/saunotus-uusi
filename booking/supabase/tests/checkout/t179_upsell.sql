@@ -34,7 +34,7 @@ begin
   perform pg_temp.ck(not has_function_privilege('anon', 'booking.admin_upsell_report(date,date)', 'EXECUTE'), 'S12 anon ei raporttia');
   perform pg_temp.ck(not has_function_privilege('anon', 'booking.admin_set_product_suggestions(bigint,jsonb)', 'EXECUTE'), 'S13 anon ei tallenna');
   perform pg_temp.ck(not has_function_privilege('public', 'booking._upsell_options(bigint[],bigint[],date,integer,integer)', 'EXECUTE'), 'S14 sisäinen funktio ei publicille');
-  perform pg_temp.ck(not has_function_privilege('anon', 'booking._upsell_attach_reservation(bigint,bigint,timestamptz,integer,date)', 'EXECUTE'), 'S15 liitosydin ei anonille');
+  perform pg_temp.ck(not has_function_privilege('anon', 'booking._upsell_attach_reservation(bigint,bigint,timestamptz,integer,date,bigint)', 'EXECUTE'), 'S15 liitosydin ei anonille');
   perform pg_temp.ck((
     select bool_and(p.prosecdef and coalesce(p.proconfig, '{}')::text like '%search_path=%')
       from pg_proc p join pg_namespace n on n.oid = p.pronamespace
@@ -63,7 +63,7 @@ begin
     where n.nspname = 'booking' and p.proname = '_upsell_day_slots' and p.proconfig::text ilike '%lock_timeout=400ms%'), 'S29 lukkoaikakatkaisu 400 ms');
   perform pg_temp.ck(
     pg_get_functiondef('booking._upsell_options(bigint[],bigint[],date,integer,integer)'::regprocedure) not like '%public_treatment_availability%'
-    and pg_get_functiondef('booking._upsell_attach_reservation(bigint,bigint,timestamptz,integer,date)'::regprocedure) not like '%public_treatment_availability%'
+    and pg_get_functiondef('booking._upsell_attach_reservation(bigint,bigint,timestamptz,integer,date,bigint)'::regprocedure) not like '%public_treatment_availability%'
     and pg_get_functiondef('booking.public_upsell_add(uuid,jsonb,uuid,bigint)'::regprocedure) not like '%public_treatment_availability%',
     'S30 ehdotukset eivät kuluta julkista saatavuusrajaa');
   v_def := pg_get_functiondef('booking.public_upsell_checkout_attach(uuid,jsonb,uuid)'::regprocedure);
