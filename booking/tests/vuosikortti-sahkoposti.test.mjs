@@ -168,7 +168,7 @@ test('mock + API: vuosikorttitilaus näyttää koodin vasta maksun jälkeen; oik
 test('käyttöliittymä: tilauksen tiedot + maksun kirjauksen jälkeinen dialogi, iso koodi, kopiointi, teeman värit, build-lista ja CI', () => {
   const to = rd('booking/admin/views/talous-orders.js');
   assert.match(to, /api\.annualCardForOrder\(id\)\.catch\(\(\) => null\)/);
-  assert.match(to, /sums, annualSec\(annual, sec\), sec\(t\('order\.payments'\), payments\)/);
+  assert.match(to, /sums, annualSec\(annual, sec\),\s*sec\(t\('order\.reservations'\), reservations\)/);   // tilausnäkymä 03: vuosikortti summien jälkeen, sitten varaukset
   assert.match(to, /doneToast\(res, RPC\.recordPayment\); afterChange\(res, o\.order_id\);\n.*\n\s*if \(api\.annualCardForOrder\) api\.annualCardForOrder\(o\.order_id\)\.then\(\(ac\) => showAnnualCardDialog\(ac\)\)/);
   const panel = rd('booking/admin/views/annual-card-panel.js');
   assert.match(panel, /navigator\.clipboard\?\.writeText/);

@@ -114,6 +114,7 @@ jobs:
       - run: node --test booking/tests/addon-lock-logic.test.mjs
       # booking_182: tilauksesta varaukseen + lisäostot hallinnassa (ominaisuuskytkin, oletuksena pois)
       - run: node --test booking/tests/order-reservation-flow.test.mjs
+      - run: node --test booking/tests/order-detail-layout.test.mjs
       - run: node --test booking/tests/talous.test.mjs
       # .cache/articles: edellinen artikkelisnapshot (RPC-katkon varalta + siirrettyjen slugien tunnistus)
       - uses: actions/cache@v4

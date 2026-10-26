@@ -134,11 +134,11 @@ for (const lang of ['fi', 'en']) {
     expect(page.st.calls.some((x) => x.name === 'admin_refund'), `${name}: admin_refund kutsuttu`);
     await page.context().close();
   }
-  // 4) Ei oikeutta payments.refund: hyvitysnappi pois käytöstä (palvelin tarkistaa joka tapauksessa), uudelleenkäsittelynappia ei näytetä
+  // 4) Ei oikeutta payments.refund: hyvitysnappia ei renderöidä (palvelin tarkistaa joka tapauksessa), uudelleenkäsittelynappia ei näytetä
   {
     const name = `${lang}/ei-oikeutta`;
     const page = await session({ lang, provider: 'mobilepay', perms: PERMS.filter((p) => p !== 'payments.refund'), fnReplies: [] });
-    expect(await page.locator('[data-testid=btn-refund]').first().isDisabled(), `${name}: hyvitysnappi pois käytöstä`);
+    expect((await page.locator('[data-testid=btn-refund]').count()) === 0, `${name}: hyvitysnappia ei näytetä ilman oikeutta`);
     expect((await page.locator('[data-testid=btn-refund-retry]').count()) === 0, `${name}: ei uudelleenkäsittelynappia`);
     await page.context().close();
   }
