@@ -1,0 +1,782 @@
+[
+ {
+  "key": "ui.order.pay_lead_online",
+  "lang": "fi",
+  "text": "Maksa verkossa. Valitse maksutapa, siirryt maksusivulle ja palaat tälle sivulle maksun jälkeen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.order.pay_lead_online",
+  "lang": "en",
+  "text": "Pay online. Choose a payment method, continue to the payment page and return to this page afterwards.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.order.pay_test_online",
+  "lang": "fi",
+  "text": "Testitila: maksu menee testipalvelimelle. Oikeaa rahaa ei veloiteta. Tämä näkyy vain testisivustolla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.order.pay_test_online",
+  "lang": "en",
+  "text": "Test mode: the payment goes to the test server and no real money is charged. This is only shown on the test site.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.order.refund_pending",
+  "lang": "fi",
+  "text": "Hyvitys on käynnissä. Hyvityskuitti näkyy tässä, kun hyvitys on valmis.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.order.refund_pending",
+  "lang": "en",
+  "text": "A refund is in progress. The refund receipt appears here when the refund is complete.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.hold.choose_online",
+  "lang": "fi",
+  "text": "Valitse maksutapa: verkkomaksu tai lahjakortti. Lahjakortti voi kattaa osan summasta – loppuosan voit maksaa verkossa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.hold.choose_online",
+  "lang": "en",
+  "text": "Choose how to pay: online payment or gift card. A gift card can cover part of the amount – you can pay the rest online.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.hold.method.online",
+  "lang": "fi",
+  "text": "Maksa verkossa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.hold.method.online",
+  "lang": "en",
+  "text": "Pay online",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.lead_online",
+  "lang": "fi",
+  "text": "Maksa verkossa. Valitse maksutapa, siirryt maksusivulle ja palaat tälle sivulle maksun jälkeen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.lead_online",
+  "lang": "en",
+  "text": "Pay online. Choose a payment method, continue to the payment page and return to this page afterwards.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.lead_online_confirmed",
+  "lang": "fi",
+  "text": "Voit maksaa nyt verkossa tai lahjakortilla. Maksu on mahdollista myös paikan päällä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.lead_online_confirmed",
+  "lang": "en",
+  "text": "You can pay online now or with a gift card. Paying on site is also possible.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.method_bank",
+  "lang": "fi",
+  "text": "Verkkopankki",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.method_bank",
+  "lang": "en",
+  "text": "Online bank",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.method_card",
+  "lang": "fi",
+  "text": "Kortti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.method_card",
+  "lang": "en",
+  "text": "Card",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.method_apple",
+  "lang": "fi",
+  "text": "Apple Pay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.method_apple",
+  "lang": "en",
+  "text": "Apple Pay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.method_google",
+  "lang": "fi",
+  "text": "Google Pay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.method_google",
+  "lang": "en",
+  "text": "Google Pay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.method_wallet",
+  "lang": "fi",
+  "text": "MobilePay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.method_wallet",
+  "lang": "en",
+  "text": "MobilePay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.pay_busy_online",
+  "lang": "fi",
+  "text": "Avataan maksusivua…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.pay_busy_online",
+  "lang": "en",
+  "text": "Opening the payment page…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.pay_test_online",
+  "lang": "fi",
+  "text": "Testitila: maksu menee testipalvelimelle. Oikeaa rahaa ei veloiteta. Tämä näkyy vain testisivustolla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.pay_test_online",
+  "lang": "en",
+  "text": "Test mode: the payment goes to the test server and no real money is charged. This is only shown on the test site.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.checkout_online_pay",
+  "lang": "fi",
+  "text": "Maksu varauksen jälkeen: verkossa tai lahjakortilla vahvistussivulla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.checkout_online_pay",
+  "lang": "en",
+  "text": "Payment after booking: online or with a gift card on the confirmation page.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.checkout_online_pay_site",
+  "lang": "fi",
+  "text": "Maksu varauksen jälkeen: verkossa tai lahjakortilla vahvistussivulla, tai paikan päällä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.checkout_online_pay_site",
+  "lang": "en",
+  "text": "Payment after booking: online or with a gift card on the confirmation page, or on site.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.checkout_hold_online_pay",
+  "lang": "fi",
+  "text": "Valitse maksutapa (verkkomaksu tai lahjakortti) varauksen jälkeen vahvistussivulla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.checkout_hold_online_pay",
+  "lang": "en",
+  "text": "Choose how to pay (online payment or gift card) on the confirmation page after booking.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_checking",
+  "lang": "fi",
+  "text": "Tarkistetaan maksua",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_checking",
+  "lang": "en",
+  "text": "Checking the payment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_checking_lead",
+  "lang": "fi",
+  "text": "Odota hetki. Maksun tulos näkyy tällä sivulla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_checking_lead",
+  "lang": "en",
+  "text": "Please wait. The result is shown on this page.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_paid",
+  "lang": "fi",
+  "text": "Maksu vastaanotettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_paid",
+  "lang": "en",
+  "text": "Payment received",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_paid_lead",
+  "lang": "fi",
+  "text": "Kiitos. Maksu on kirjattu ja kuitti tulee sähköpostiisi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_paid_lead",
+  "lang": "en",
+  "text": "Thank you. The payment is recorded and the receipt is sent to your email.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_review",
+  "lang": "fi",
+  "text": "Maksu vaatii tarkistuksen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_review",
+  "lang": "en",
+  "text": "Payment needs a check",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_review_lead",
+  "lang": "fi",
+  "text": "Maksu saapui, mutta henkilökunta tarkistaa sen ennen vahvistusta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_review_lead",
+  "lang": "en",
+  "text": "The payment arrived, and our staff will check it before confirming.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_failed",
+  "lang": "fi",
+  "text": "Maksu ei onnistunut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_failed",
+  "lang": "en",
+  "text": "The payment did not go through",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_failed_lead",
+  "lang": "fi",
+  "text": "Maksua ei veloitettu. Voit yrittää uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_failed_lead",
+  "lang": "en",
+  "text": "You were not charged. You can try again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_wait",
+  "lang": "fi",
+  "text": "Maksua vielä käsitellään",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_wait",
+  "lang": "en",
+  "text": "The payment is still being processed",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_wait_lead",
+  "lang": "fi",
+  "text": "Jos maksoit, odota hetki ja päivitä sivu. Muuten voit yrittää uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.return_wait_lead",
+  "lang": "en",
+  "text": "If you paid, wait a moment and refresh the page. Otherwise you can try again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.err_network",
+  "lang": "fi",
+  "text": "Yhteys ei onnistunut. Tarkista verkkoyhteys ja yritä uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.err_network",
+  "lang": "en",
+  "text": "The connection failed. Check your network and try again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.err_generic",
+  "lang": "fi",
+  "text": "Maksun aloitus epäonnistui. Yritä uudelleen tai ota yhteyttä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.err_generic",
+  "lang": "en",
+  "text": "The payment could not be started. Try again or contact us.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.err_off",
+  "lang": "fi",
+  "text": "Verkkomaksu ei ole juuri nyt käytössä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.err_off",
+  "lang": "en",
+  "text": "Online payment is not available right now.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.err_rate",
+  "lang": "fi",
+  "text": "Liian monta yritystä. Yritä hetken kuluttua uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.err_rate",
+  "lang": "en",
+  "text": "Too many attempts. Please try again in a moment.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.err_busy",
+  "lang": "fi",
+  "text": "Maksun avaus on jo käynnissä. Odota hetki ja yritä uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.err_busy",
+  "lang": "en",
+  "text": "A payment is already being opened. Wait a moment and try again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.err_paid",
+  "lang": "fi",
+  "text": "Tämä maksu on jo maksettu. Kiitos.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paychoice.err_paid",
+  "lang": "en",
+  "text": "This payment has already been paid. Thank you.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paylink.lead_online",
+  "lang": "fi",
+  "text": "Maksa tilauksesi verkossa. Valitse maksutapa, siirryt maksusivulle ja palaat sen jälkeen tilaukseesi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paylink.lead_online",
+  "lang": "en",
+  "text": "Pay for your order online. Choose a payment method, continue to the payment page and then return to your order.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paylink.busy_online",
+  "lang": "fi",
+  "text": "Avataan maksusivua…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paylink.busy_online",
+  "lang": "en",
+  "text": "Opening the payment page…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paylink.redirecting_online",
+  "lang": "fi",
+  "text": "Siirrytään maksusivulle…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paylink.redirecting_online",
+  "lang": "en",
+  "text": "Taking you to the payment page…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paylink.lead_open_online",
+  "lang": "fi",
+  "text": "Tarkista tiedot ja siirry maksamaan verkossa. Valitse maksutapa, ja palaat sen jälkeen tilaukseesi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paylink.lead_open_online",
+  "lang": "en",
+  "text": "Check the details and continue to payment online. Choose a payment method, and then return to your order.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paylink.err.provider_online",
+  "lang": "fi",
+  "text": "Verkkomaksu ei vastannut. Yritä hetken kuluttua uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.paylink.err.provider_online",
+  "lang": "en",
+  "text": "Online payment did not respond. Please try again in a moment.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.admin.procountor.method_montonio",
+  "lang": "fi",
+  "text": "Montonio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ },
+ {
+  "key": "ui.admin.procountor.method_montonio",
+  "lang": "en",
+  "text": "Montonio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_188: verkkomaksu"
+ }
+]

@@ -11,7 +11,7 @@ export function linkTokenFrom(search) {
 const MAP = {
   invalid_param: 'invalid', not_found: 'not_found', link_expired: 'expired', payment_not_pending: 'expired',
   link_stale: 'stale', nothing_to_pay: 'stale', already_paid: 'paid', other_provider_started: 'other',
-  order_not_payable: 'not_payable', vismapay_off: 'off', vismapay_live_not_implemented: 'off', not_configured: 'off',
+  order_not_payable: 'not_payable', online_off: 'off', vismapay_off: 'off', vismapay_live_not_implemented: 'off', not_configured: 'off',
   maintenance: 'off', unsupported_currency: 'not_payable', payment_in_progress: 'busy', rate_limited: 'rate',
   provider_error: 'provider', internal_error: 'provider', network: 'network', timeout: 'network',
 };
@@ -53,7 +53,7 @@ export function normLinkInfo(r) {
 
 const INFO_MSG = {
   link_paid: 'info.paid', order_paid: 'info.order_paid', link_expired: 'info.expired', payment_cancelled: 'info.cancelled', payment_not_pending: 'info.expired',
-  replaced: 'info.replaced', link_stale: 'info.stale', other_provider_started: 'err.other', order_not_payable: 'err.not_payable', vismapay_off: 'err.off', not_found: 'err.not_found',
+  replaced: 'info.replaced', link_stale: 'info.stale', other_provider_started: 'err.other', order_not_payable: 'err.not_payable', online_off: 'err.off', vismapay_off: 'err.off', not_found: 'err.not_found',
 };
 const STATUS_MSG = { paid: 'info.paid', expired: 'info.expired', replaced: 'info.replaced', not_payable: 'err.not_payable', not_found: 'err.not_found' };
 

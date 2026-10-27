@@ -122,6 +122,14 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
     o.paid = paid ? 290 : 0; o.payments = paid ? [{ status: 'paid', amount: 290, paid_at: `${day(-1)}T10:00:00Z`, method_label: 'Korttimaksu', link_token: null, link_path: null }] : [];
     o.receipts = paid ? [{ receipt_no: 'K-2026-000142', kind: 'receipt', issued_at: `${day(-1)}T10:00:00Z`, token: '9a8b7c6d-1111-4222-8333-444455550142', total: 290 }] : [];
   }
+  const onlinePayMethod = (token, test) => ({ code: 'online', kind: 'online', provider: 'montonio', label: 'Maksa verkossa', label_en: 'Pay online', test,
+    choices: [
+      { method: 'paymentInitiation', label: 'Verkkopankki', label_en: 'Online bank' },
+      { method: 'cardPayments', label: 'Kortti', label_en: 'Card' },
+      { method: 'applePay', label: 'Apple Pay', label_en: 'Apple Pay' },
+      { method: 'googlePay', label: 'Google Pay', label_en: 'Google Pay' },
+      { method: 'mobilePay', label: 'MobilePay', label_en: 'MobilePay' }],
+    start: { function: 'montonio-start', method: 'POST', body: { order_token: token } } });
   const handlers = {
     public_annual_card_purchase_code: () => !annualSc ? { ok: true, has_card: false, code: null }
       : annualSc === 'annual' ? { ok: true, has_card: true, code: 'KUUSI482', valid_from: day(-1), valid_to: day(363), active: true } : { ok: true, has_card: true, code: null },
@@ -132,15 +140,15 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
     },
     // booking_57: pay_later (testi) vain pitoskenaarioissa, kun testui != 0 ja tilaus odottaa maksua (kuten palvelin: lippu päällä + awaiting_payment)
     public_payment_options: ({ p_token }) => withPayLater(mpScenario && mpScenario !== 'mp-off'
-      ? { ok: true, online_enabled: true, methods: [{ code: 'mobilepay', provider: 'vipps_mobilepay', label: 'MobilePay', label_en: 'MobilePay', test: mpScenario !== 'mp-prod', start: { function: 'mobilepay-start', method: 'POST', body: { order_token: p_token } } }],
+      ? { ok: true, online_enabled: true, methods: [onlinePayMethod(p_token, mpScenario !== 'mp-prod')],
         order: { order_no: o.order_no, status: o.status, payment_status: o.payment_status, unpaid: o.unpaid, can_pay_online: o.unpaid > 0 && ['pending', 'confirmed'].includes(o.status), mobilepay_pending: mp.started && o.unpaid > 0 } }
       : { ok: true, online_enabled: false, methods: [] }),
     public_confirm_pay_later: ({ p_order_token }) => confirmPayLater(p_order_token),
     // §14.7 (booking_52): kassan maksutavat ilman tokenia; MobilePay mp-skenaarion mukaan, lahjakortti gift-mockin redeem_enabled-asetuksesta
     public_checkout_payment_options: () => {
       const mpOn = !!mpScenario && mpScenario !== 'mp-off', gc = !!gm.handlers.public_gift_card_packages().redeem_enabled;
-      return { ok: true, mobilepay_enabled: mpOn, gift_card_redeem_enabled: gc, ...(hold ? { hold_until_paid: true, hold_minutes: 15, group_threshold_persons: 0, group_hold_days: 7 } : {}), methods: [
-        ...(mpOn ? [{ code: 'mobilepay', kind: 'online', provider: 'vipps_mobilepay', label: 'MobilePay', label_en: 'MobilePay', test: mpScenario !== 'mp-prod', start: { function: 'mobilepay-start', method: 'POST', body: { order_token: '<tilauksen public_token>' } } }] : []),
+      return { ok: true, mobilepay_enabled: false, online_enabled: mpOn, gift_card_redeem_enabled: gc, ...(hold ? { hold_until_paid: true, hold_minutes: 15, group_threshold_persons: 0, group_hold_days: 7 } : {}), methods: [
+        ...(mpOn ? [onlinePayMethod('<tilauksen public_token>', mpScenario !== 'mp-prod')] : []),
         ...(gc ? [{ code: 'gift_card', kind: 'redeem', provider: 'gift_card', label: 'Lahjakortti', label_en: 'Gift card', test: false, check_rpc: 'public_check_gift_card', apply_rpc: 'public_apply_gift_card' }] : [])] };
     },
     // public_get_booking (vain pitotilassa; vahvistussivu käyttää shop-mock.js:n omaa): pidon tila + payment_methods (myös perutut maksut → lahjakortti käytetty)
@@ -209,7 +217,8 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
   async function mpFetch(url, init = {}) {
     await wait();
     const name = String(url).split('?')[0].split('/').pop(); let body = {}; try { body = JSON.parse(init.body || '{}'); } catch { /* tyhjä */ }
-    if (name === 'mobilepay-start') {
+    if (name === 'montonio-start' || name === 'mobilepay-start') {
+      const payFlag = name === 'montonio-start' ? 'online' : 'mobilepay';
       if (mpResult === 'neterror') throw new TypeError('Failed to fetch');
       if (mpResult === 'starterror') return res(503, bad('provider_error', 'MobilePay-maksun aloitus epäonnistui, yritä hetken kuluttua uudelleen'));
       hold?.tick(); if (hold?.guard()) { const c = hold.guard(); return res(409, bad(c, HOLD_ERRORS[c])); }
@@ -217,7 +226,7 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
       mp.started = true;
       const here = new URL(typeof location !== 'undefined' ? location.href : 'http://localhost/tilaus/'); const back = new URL(here.href);
       const keep = {}; for (const k of ['mpinterval', 'mpmax']) if (here.searchParams.has(k)) keep[k] = here.searchParams.get(k);
-      back.search = new URLSearchParams({ t: body.order_token || TOKEN, mock: '1', scenario, ...(mpResult ? { mpresult: mpResult } : {}), ...keep, pay: 'mobilepay' }).toString();
+      back.search = new URLSearchParams({ t: body.order_token || body.link_token || TOKEN, mock: '1', scenario, ...(mpResult ? { mpresult: mpResult } : {}), ...keep, pay: payFlag }).toString();
       /* Vahvistussivulla token on hashissa: säilytä se (tilaussivulla hash on tyhjä). */
       return res(200, { ok: true, reuse: false, redirect_url: back.href, reference: 'sauna-o15321-p1-a1', payment_id: 1 });
     }

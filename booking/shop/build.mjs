@@ -111,7 +111,7 @@ const PAY_PATHS = { fi: '/maksa/', en: '/en/pay/' };
 for (const lang of ['fi', 'en']) {
   const o = lang === 'fi' ? 'en' : 'fi';
   const title = lang === 'fi' ? 'Maksulinkki' : 'Payment link';
-  const lead = lang === 'fi' ? 'Maksa tilauksesi turvallisesti Visma Payn kautta.' : 'Pay for your order securely with Visma Pay.';
+  const lead = lang === 'fi' ? 'Maksa tilauksesi verkossa.' : 'Pay for your order online.';
   const noscript = lang === 'fi' ? 'Maksaminen vaatii JavaScriptin. Voit myös soittaa meille' : 'Payment requires JavaScript. You can also call us';
   const S = { lang, page: 'paylink', base: BASE, links: LINKS(lang), siteTextsUrl: `${BASE}/booking/site-texts.json`, orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order }, otherHref: BASE + PAY_PATHS[o], phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email };
   const body = R.pageHero({ title, text: lead, img: 'ovi-kaiverrus' }, lang, 'book')

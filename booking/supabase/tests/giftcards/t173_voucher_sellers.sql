@@ -52,7 +52,7 @@ begin
   perform pg_temp.ck(md5(pg_get_functiondef('booking.public_update_voucher_claim_code(uuid,bigint,text,text)'::regprocedure)) = '778fb281381aa026ed3e8afd49431ef6', 'A4 public_update_voucher_claim_code = booking_173');
   perform pg_temp.ck(md5(pg_get_functiondef('booking._vc_pay(booking.orders,booking.voucher_claims,numeric)'::regprocedure)) = '3c24fd721b0e8bc6f1bdfb8a800c5a0e', 'A5 _vc_pay = booking_173');
   perform pg_temp.ck(md5(pg_get_functiondef('booking._acct_excluded(bigint,bigint)'::regprocedure)) = '4cbe97dbc038d5839453cf90f30525a5', 'A6 _acct_excluded = booking_173');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.admin_set_procountor_settings(jsonb)'::regprocedure)) = '0b67b832a42a1f85fca071a3dc4ac471', 'A7 admin_set_procountor_settings = booking_173');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking.admin_set_procountor_settings(jsonb)'::regprocedure)) in ('0b67b832a42a1f85fca071a3dc4ac471', '1195e099ba7447d6eca60d3c0a2aa4d9'), 'A7 admin_set_procountor_settings = booking_173 tai booking_188');
   perform pg_temp.ck(md5(pg_get_functiondef('booking._procountor_daily_build(date,jsonb,jsonb)'::regprocedure)) = 'f3e26f0ea30ab0e7a15f18c61aaf661e', 'A8 _procountor_daily_build = booking_173');
   perform pg_temp.ck((select string_agg(code || '=' || label, ',' order by code) from booking.payment_methods where code like 'partner_voucher_%')
       = 'partner_voucher_elamyslahjat=Lahjakortti – Elämyslahjat,partner_voucher_kokemuskauppa=Lahjakortti – Kokemuskauppa,partner_voucher_offerilla=Lahjakortti – Offerilla', 'A9 kolme maksutapaa + nimet');

@@ -91,10 +91,10 @@ begin
   select value, true into s_rl, v_has_rl from booking.settings where key = 'rl_order_get_per_10min';
 
   -- ===== A rakenne
-  perform pg_temp.ck(md5(pg_get_functiondef(fns[1]::regprocedure)) in ('5e432077c560a10822db8ac0d2bbe7c2', 'f40db96ca201e40467f20cc1db5866c9')
-      and md5(pg_get_functiondef(fns[2]::regprocedure)) = '80004933a80f77a10fcf625f493a20ef'
+  perform pg_temp.ck(md5(pg_get_functiondef(fns[1]::regprocedure)) in ('5e432077c560a10822db8ac0d2bbe7c2', 'f40db96ca201e40467f20cc1db5866c9', 'adc14e6983e60d80498508c9b969f60d')
+      and md5(pg_get_functiondef(fns[2]::regprocedure)) in ('80004933a80f77a10fcf625f493a20ef', '5d44526fd3c8ce105d8f6c1f6bc74327')
       and md5(pg_get_functiondef(fns[3]::regprocedure)) = '5babbf859133aebd3e9e7c827bee3261'
-      and md5(pg_get_functiondef(fns[4]::regprocedure)) = '2aa8e44cb2c6f150d3488f53f8d94c25'
+      and md5(pg_get_functiondef(fns[4]::regprocedure)) in ('2aa8e44cb2c6f150d3488f53f8d94c25', '6576dc3dda048de2a438f1cdf333b0d9')
       and md5(pg_get_functiondef(fns[5]::regprocedure)) = '2f8a7e56ae9bb4e29f4025f91e7ea706'
       and md5(pg_get_functiondef(fns[6]::regprocedure)) in ('37573920d2f9f882e3d95c4f0c66575f', 'e6888446c4b44e554d31c0920609ddb6'), 'A1 muutetut funktiot = booking_184 (tai booking_185: _create_link_payment, mobilepay_payment_prepare)');
   perform pg_temp.ck((select bool_and(prosecdef and proconfig = array['search_path=""'] and proowner = 'postgres'::regrole) and count(*) = 6
@@ -112,7 +112,7 @@ begin
   perform pg_temp.ck(md5(pg_get_functiondef('booking._public_pay_json(bigint)'::regprocedure)) = 'cc3e61dbdfbd9a816cd9c982c73820c5'
       and md5(pg_get_functiondef('booking.admin_pos_send_link(bigint,text,boolean)'::regprocedure)) = '735e92d8c8c52784bbba9b928c5a122b'
       and md5(pg_get_functiondef('booking.expire_payment_links()'::regprocedure)) = '0109d701ab1ccc4e57f6210989644f5c'
-      and md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) in ('647c556562046c75b7e7e33703c050a0', '1b729ef4d72dc925001169c38bad3315')
+      and md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) in ('647c556562046c75b7e7e33703c050a0', '1b729ef4d72dc925001169c38bad3315', '2c9e06b3153aa5c0edd25341024ae6a8')
       and md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) in ('703c03c301f5a3008192cdbe65e559e2', 'cca997c4e900e78b8bb9e2e0c7da25d4', 'd1f8df803a45c2b77aa9f8554fc41890')
       and md5(pg_get_functiondef('booking._order_balance(bigint)'::regprocedure)) = 'a6b31f93559de53d75a52d8a285f1170'
       and md5(pg_get_functiondef('booking.is_staff()'::regprocedure)) = '40d8b86aa41ab71f29ef4e6c5257aa77', 'A5 riippuvuudet ennallaan (asiakkaan 14 vrk, pikakassa 1 vrk)');
@@ -121,6 +121,8 @@ begin
   insert into booking.integration_config(key, mode, settings) values ('vismapay', 'test', '{"approved_by":"t184"}'::jsonb)
     on conflict (key) do update set mode = 'test', settings = booking.integration_config.settings || '{"approved_by":"t184"}'::jsonb;
   insert into booking.integration_config(key, mode, settings) values ('mobilepay', 'test', '{"approved_by":"t184"}'::jsonb)
+    on conflict (key) do update set mode = 'test', settings = booking.integration_config.settings || '{"approved_by":"t184"}'::jsonb;
+  insert into booking.integration_config(key, mode, settings) values ('montonio', 'test', '{"approved_by":"t184"}'::jsonb)
     on conflict (key) do update set mode = 'test', settings = booking.integration_config.settings || '{"approved_by":"t184"}'::jsonb;
   if v_has_rl then update booking.settings set value = '500'::jsonb where key = 'rl_order_get_per_10min';
   else insert into booking.settings(key, value) values ('rl_order_get_per_10min', '500'::jsonb); end if;
@@ -211,22 +213,23 @@ begin
   perform pg_temp.ck(r = '{"ok":true,"outcome":"cancelled"}'::jsonb and prow.status = 'cancelled' and pg_temp.audits(pc, 'VISMAPAY_CANCELLED') = 1
       and pg_temp.audits(pc, 'VISMAPAY_CANCELLED_RETRYABLE') = 0, 'F6 verkkokaupan null-rivi: peruutus → cancelled kuten ennen (ei retryable) ' || left(r::text, 100));
 
-  -- ===== G MobilePay
+  -- ===== G MobilePay (lepotilassa): montonio-linkkiä ei avata MobilePaylla
   r := pg_temp.link(u_adm, o10); p1 := (r ->> 'pid')::bigint;
   r := pg_temp.mp(null, pg_temp.tok(p1), 'WEB_REDIRECT');
-  perform pg_temp.ck(r ->> 'ok' = 'true' and (r ->> 'payment_id')::bigint = p1 and (select provider = 'mobilepay' and link_expires_at is null and raw ->> 'paylink' = 'no_deadline' from booking.payments where id = p1),
-      'G1 takarajaton linkki MobilePaylle: null ja merkintä säilyvät ' || left(r::text, 100));
+  perform pg_temp.ck(r ->> 'code' = 'payment_not_online'
+      and (select provider = 'montonio' and link_expires_at is null and raw ->> 'paylink' = 'no_deadline' and status = 'pending' from booking.payments where id = p1),
+      'G1 linkkitoken MobilePaylla montonio-linkille: payment_not_online, rivi ennallaan ' || left(r::text, 120));
   select public_token into otok from booking.orders where id = o10;
   r := pg_temp.mp(otok, null, 'QR');
-  perform pg_temp.ck(r ->> 'ok' = 'true' and (r ->> 'payment_id')::bigint = p1 and (select link_expires_at is null and status = 'pending' from booking.payments where id = p1),
-      'G2 tilaustoken QR samalle takarajattomalle linkille: EI 20 min katkaisua ' || left(r::text, 100));
+  perform pg_temp.ck((select provider = 'montonio' and link_expires_at is null and raw ->> 'paylink' = 'no_deadline' and status = 'pending' from booking.payments where id = p1),
+      'G2 tilaustoken ei muuta takarajatonta montonio-linkkiä ' || left(r::text, 100));
   o := pg_temp.mkorder(cu, 30);
   r := pg_temp.link(u_adm, o, 14); p2 := (r ->> 'pid')::bigint;
   r := pg_temp.mp(null, pg_temp.tok(p2), 'WEB_REDIRECT');
   select public_token into otok from booking.orders where id = o;
   r := pg_temp.mp(otok, null, 'QR');
-  perform pg_temp.ck(r ->> 'ok' = 'true' and (r ->> 'payment_id')::bigint = p2 and (select link_expires_at > now() + interval '13 days' from booking.payments where id = p2),
-      'G3 14 vrk linkki: QR ei lyhennä ' || left(r::text, 100));
+  perform pg_temp.ck(r ->> 'code' = 'payment_not_online' and (select provider = 'montonio' and link_expires_at > now() + interval '13 days' from booking.payments where id = p2),
+      'G3 14 vrk montonio-linkki: MobilePay ei lyhennä ' || left(r::text, 100));
   o := pg_temp.mkorder(cu, 30);
   select public_token into otok from booking.orders where id = o;
   r := pg_temp.mp(otok, null, 'WEB_REDIRECT'); pc := (r ->> 'payment_id')::bigint;

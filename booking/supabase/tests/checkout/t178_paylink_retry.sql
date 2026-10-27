@@ -107,7 +107,7 @@ begin
   end if;
   perform pg_temp.ck(md5(pg_get_functiondef('booking.vismapay_payment_apply(text,text,numeric,jsonb)'::regprocedure)) in ('03fbbd2486b2c22dfa02d7ec84da626f', '2f8a7e56ae9bb4e29f4025f91e7ea706')
       and md5(pg_get_functiondef('booking.vismapay_payment_lookup(text)'::regprocedure)) = 'ddec24e2970bde7ff4dc6c6ecc3a63ac'
-      and md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) in ('647c556562046c75b7e7e33703c050a0', '1b729ef4d72dc925001169c38bad3315')
+      and md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) in ('647c556562046c75b7e7e33703c050a0', '1b729ef4d72dc925001169c38bad3315', '2c9e06b3153aa5c0edd25341024ae6a8')
       and md5(pg_get_functiondef('booking._vismapay_attempt_trg()'::regprocedure)) = '8553fa9e304740124b64dd361439820a', 'A1 muutetut funktiot = booking_178');
   perform pg_temp.ck((select bool_and(prosecdef and proconfig = array['search_path=""']) from pg_proc where oid in ('booking.vismapay_payment_apply(text,text,numeric,jsonb)'::regprocedure,
       'booking.vismapay_payment_lookup(text)'::regprocedure, 'booking.public_payment_link_info(uuid)'::regprocedure, 'booking._vismapay_attempt_trg()'::regprocedure)), 'A2 SECURITY DEFINER, search_path tyhjä');
@@ -124,7 +124,7 @@ begin
       and md5(pg_get_functiondef('booking.vismapay_payment_event(text,text,text,text,jsonb)'::regprocedure)) = 'e6834eb7c9da8a0a8c531706eb6692fc'
       and md5(pg_get_functiondef('booking.payment_mark_paid(text,text,numeric,jsonb)'::regprocedure)) = '8ceb0a7dea60d37e3ea6a17cec0e4c25'
       and md5(pg_get_functiondef('booking.payment_mark_failed(text,text,text,jsonb)'::regprocedure)) = '2dfe2d2c0757157be90484d60cef8046'
-      and md5(pg_get_functiondef('booking._create_link_payment(bigint,integer,text)'::regprocedure)) in ('533ac9af831c0c11e1f504e377a17827', '5e432077c560a10822db8ac0d2bbe7c2', 'f40db96ca201e40467f20cc1db5866c9')
+      and md5(pg_get_functiondef('booking._create_link_payment(bigint,integer,text)'::regprocedure)) in ('533ac9af831c0c11e1f504e377a17827', '5e432077c560a10822db8ac0d2bbe7c2', 'f40db96ca201e40467f20cc1db5866c9', 'adc14e6983e60d80498508c9b969f60d')
       and md5(pg_get_functiondef('booking._order_balance(bigint)'::regprocedure)) = 'a6b31f93559de53d75a52d8a285f1170'
       and md5(pg_get_functiondef('booking.vismapay_order_refs(uuid)'::regprocedure)) = '79c7bbe4e02a4411d3ccdc821b662013', 'A4 riippuvuudet ennallaan');
   perform pg_temp.ck((select relrowsecurity from pg_class where oid = 'booking.vismapay_attempts'::regclass)
@@ -133,6 +133,8 @@ begin
 
   -- ===== fixture (feikki, vain tässä transaktiossa)
   insert into booking.integration_config(key, mode, settings) values ('vismapay', 'test', '{"approved_by":"t178"}'::jsonb)
+    on conflict (key) do update set mode = 'test', settings = booking.integration_config.settings || '{"approved_by":"t178"}'::jsonb;
+  insert into booking.integration_config(key, mode, settings) values ('montonio', 'test', '{"approved_by":"t178"}'::jsonb)
     on conflict (key) do update set mode = 'test', settings = booking.integration_config.settings || '{"approved_by":"t178"}'::jsonb;
   if v_has_rl then update booking.settings set value = '500'::jsonb where key = 'rl_order_get_per_10min';
   else insert into booking.settings(key, value) values ('rl_order_get_per_10min', '500'::jsonb); end if;

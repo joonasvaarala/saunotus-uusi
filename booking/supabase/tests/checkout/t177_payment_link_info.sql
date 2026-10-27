@@ -81,7 +81,7 @@ begin
   if to_regprocedure('booking.public_payment_link_info(uuid)') is null then
     raise exception 'TESTRESULT pass=0 fail=1 skip=0 F A1 booking_177 puuttuu (public_payment_link_info)';
   end if;
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) in ('1fb6153b39daa6f1055c93cac7cb4563', '647c556562046c75b7e7e33703c050a0', '1b729ef4d72dc925001169c38bad3315'), 'A1 public_payment_link_info = booking_177, booking_178 tai booking_187');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) in ('1fb6153b39daa6f1055c93cac7cb4563', '647c556562046c75b7e7e33703c050a0', '1b729ef4d72dc925001169c38bad3315', '2c9e06b3153aa5c0edd25341024ae6a8'), 'A1 public_payment_link_info = booking_177, booking_178, booking_187 tai booking_188');
   perform pg_temp.ck((select prosecdef and proconfig = array['search_path=""'] and provolatile = 'v' from pg_proc where oid = 'booking.public_payment_link_info(uuid)'::regprocedure),
       'A2 SECURITY DEFINER, search_path tyhjä');
   perform pg_temp.ck(has_function_privilege('anon', 'booking.public_payment_link_info(uuid)', 'execute')
@@ -90,7 +90,7 @@ begin
       and not exists (select 1 from pg_proc p, aclexplode(p.proacl) a where p.oid = 'booking.public_payment_link_info(uuid)'::regprocedure and a.grantee = 0),
       'A3 oikeudet: anon/authenticated/service_role, ei PUBLIC');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) in ('703c03c301f5a3008192cdbe65e559e2', 'cca997c4e900e78b8bb9e2e0c7da25d4', 'd1f8df803a45c2b77aa9f8554fc41890')
-      and md5(pg_get_functiondef('booking._create_link_payment(bigint,integer,text)'::regprocedure)) in ('533ac9af831c0c11e1f504e377a17827', '5e432077c560a10822db8ac0d2bbe7c2', 'f40db96ca201e40467f20cc1db5866c9')
+      and md5(pg_get_functiondef('booking._create_link_payment(bigint,integer,text)'::regprocedure)) in ('533ac9af831c0c11e1f504e377a17827', '5e432077c560a10822db8ac0d2bbe7c2', 'f40db96ca201e40467f20cc1db5866c9', 'adc14e6983e60d80498508c9b969f60d')
       and md5(pg_get_functiondef('booking._order_rl(text,uuid,integer,integer)'::regprocedure)) = 'ec6bf13a3694e5bf9034a80123857246'
       and md5(pg_get_functiondef('booking._rate_limit(text,integer,interval)'::regprocedure)) = '7c8076d29d82d72db797066fd44d06c1'
       and md5(pg_get_functiondef('booking._client_ip()'::regprocedure)) = '8c8e7d145566db576d33037a941ce81f'
@@ -100,6 +100,8 @@ begin
 
   -- ===== fixture (feikki, vain tässä transaktiossa)
   insert into booking.integration_config(key, mode, settings) values ('vismapay', 'test', '{"approved_by":"t177"}'::jsonb)
+    on conflict (key) do update set mode = 'test', settings = booking.integration_config.settings || '{"approved_by":"t177"}'::jsonb;
+  insert into booking.integration_config(key, mode, settings) values ('montonio', 'test', '{"approved_by":"t177"}'::jsonb)
     on conflict (key) do update set mode = 'test', settings = booking.integration_config.settings || '{"approved_by":"t177"}'::jsonb;
   if v_has_rl then update booking.settings set value = '200'::jsonb where key = 'rl_order_get_per_10min';
   else insert into booking.settings(key, value) values ('rl_order_get_per_10min', '200'::jsonb); end if;
@@ -131,10 +133,10 @@ begin
       and r -> 'items' -> 1 ->> 'name' = 'T177 Pyyhe' and r -> 'items' -> 1 ->> 'date' is null, 'B3 rivit: nimi FI/EN, pvm ja klo 17:00–19:00 (Europe/Helsinki), lisärivi ilman aikaa');
   perform pg_temp.ck(r ->> 'expires_date' = (select to_char(link_expires_at at time zone 'Europe/Helsinki', 'YYYY-MM-DD') from booking.payments where link_token = tk1)
       and r ->> 'expires_time' ~ '^\d\d:\d\d$' and (r ->> 'expires_at')::timestamptz > now() + interval '13 days', 'B4 voimassaolo (expires_at + Helsingin pvm/klo)');
-  update booking.integration_config set mode = 'off' where key = 'vismapay';
+  update booking.integration_config set mode = 'off' where key = 'montonio';
   r2 := pg_temp.info(tk1);
-  perform pg_temp.ck(r2 ->> 'status' = 'not_payable' and r2 ->> 'reason' = 'vismapay_off' and not (r2 ->> 'can_pay')::boolean and (r2 ->> 'amount')::numeric = 30, 'B5 Visma pois → not_payable/vismapay_off');
-  update booking.integration_config set mode = 'test' where key = 'vismapay';
+  perform pg_temp.ck(r2 ->> 'status' = 'not_payable' and r2 ->> 'reason' = 'online_off' and not (r2 ->> 'can_pay')::boolean and (r2 ->> 'amount')::numeric = 30, 'B5 verkkomaksu pois → not_payable/online_off');
+  update booking.integration_config set mode = 'test' where key = 'montonio';
 
   -- ===== C ei henkilötietoja
   select count(*) into n from pg_temp.keys(r) k where k = any (pii);

@@ -110,7 +110,7 @@ function procountorCard(state, failed) {
 }
 
 const SALES = [['25.5', 'sales_25_5'], ['13.5', 'sales_13_5'], ['0', 'sales_0'], ['14', 'sales_14'], ['24', 'sales_24'], ['10', 'sales_10']];
-const METHODS = [['cash', 'method_cash'], ['card_terminal', 'method_card_terminal'], ['mobilepay', 'method_mobilepay'], ['bank_transfer', 'method_bank_transfer'], ['invoice', 'method_invoice'], ['gift_card', 'method_gift_card'], ['partner_voucher_kokemuskauppa', 'method_partner_voucher_kokemuskauppa'], ['partner_voucher_offerilla', 'method_partner_voucher_offerilla'], ['partner_voucher_elamyslahjat', 'method_partner_voucher_elamyslahjat'], ['partner_voucher', 'method_partner_voucher_fallback'], ['visma_pay', 'method_visma_pay'], ['annual_card', 'method_annual_card'], ['pay_later', 'method_pay_later'], ['other', 'method_other']];
+const METHODS = [['cash', 'method_cash'], ['card_terminal', 'method_card_terminal'], ['mobilepay', 'method_mobilepay'], ['bank_transfer', 'method_bank_transfer'], ['invoice', 'method_invoice'], ['gift_card', 'method_gift_card'], ['partner_voucher_kokemuskauppa', 'method_partner_voucher_kokemuskauppa'], ['partner_voucher_offerilla', 'method_partner_voucher_offerilla'], ['partner_voucher_elamyslahjat', 'method_partner_voucher_elamyslahjat'], ['partner_voucher', 'method_partner_voucher_fallback'], ['visma_pay', 'method_visma_pay'], ['montonio', 'method_montonio'], ['annual_card', 'method_annual_card'], ['pay_later', 'method_pay_later'], ['other', 'method_other']];
 
 function procountorForm(cfg, isAdmin, reload) {
   if (!cfg) {
@@ -188,6 +188,7 @@ function homePanel(bundle, ctx) {
     card(tx('links_title'), tx('links_help'),
       stat('Visma Pay', modeBadge(bundle.vismapay?.mode)),
       stat('MobilePay', modeBadge(bundle.mobilepay?.mode)),
+      stat('Montonio', modeBadge(bundle.montonio?.mode)),
       stat(tx('mail_mode'), modeBadge(bundle.resend?.mode)),
       stat('Procountor', modeBadge(bundle.procountor?.mode)),
       stat(tx('conn_calendar'), modeBadge(bundle.booking_calendar?.mode)),
@@ -389,6 +390,7 @@ function connectionsPanel(bundle, procountor, procountorFailed, editor, isAdmin,
     h('p', { class: 'muted', text: tx('conn_lead') }),
     card('Visma Pay', tx('readonly_note'), stat('Visma Pay', modeBadge(bundle.vismapay?.mode))),
     card('MobilePay', tx('readonly_note'), stat('MobilePay', modeBadge(bundle.mobilepay?.mode))),
+    card('Montonio', tx('readonly_note'), stat('Montonio', modeBadge(bundle.montonio?.mode))),
     card(tx('mail_status_title'), tx('mail_status_help'),
       stat(tx('mail_mode'), modeBadge(bundle.resend?.mode)),
       stat(tx('mail_allow'), badge(bundle.resend?.allowlist_on ? 'warn' : '', bundle.resend?.allowlist_on ? tx('allowlist_on') : tx('allowlist_off')))),
