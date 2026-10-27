@@ -333,6 +333,54 @@ html.co-js.co-show-sauna #yritysvuorot,html.co-js.co-show-day #tarjous{display:b
 .quiet-week-note{margin:12px 0 0;padding:10px 14px;border-left:4px solid #7A5530;background:#F4EFE7;color:#2B3A30;border-radius:8px;font-size:15px}
 @media (min-width:1000px){.sess.quiet{grid-template-areas:"t" "n" "q" "b"}.sess.quiet .qp{margin:0 0 12px}}
 @media (forced-colors:active){.sess.quiet .qb{border:1px solid CanvasText}}
+/* Etusivu (lyhyt): elämysrivi, tiivis viikko mobiilissa, nauhat, valikon varausnappi. */
+.hero.home .in{padding:72px 0 64px;min-height:420px}
+.section.home-tight{padding:48px 0}
+.section.strip{padding:28px 0}
+.xp{display:flex;gap:16px;list-style:none;margin:0;padding:0 2px 12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:thin}
+.xp>li{flex:0 0 min(78vw,280px);scroll-snap-align:start;min-width:0}
+.xp .card{height:100%}
+.xp .card.noimg{border-top:4px solid var(--accent)}
+.xp .bd p.xp-desc{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden;margin:0 0 .7em}
+.xp .xp-meta{margin:auto 0 0;font:600 13px/1.35 var(--label);color:var(--ink)}
+.xp .card .cta{color:var(--gold)}
+@media (min-width:1100px){.xp{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));overflow:visible;padding-bottom:0}.xp>li{flex:none}}
+.week-soon,.week-more{display:none}
+.tradition{max-width:40rem;margin-inline:auto}
+.tradition .lead{margin-top:0}
+.tradition-price{font:400 32px/1 var(--head);color:var(--gold);margin:0 0 18px}
+.tradition-price small{display:block;font:500 11px/1.3 var(--label);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.strip-row{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.strip-row .sec-title{font-size:clamp(26px,3vw,36px);margin:0 0 .25em}
+.strip-row p{margin:0;max-width:46em}
+.strip-row .btn{flex:none;display:inline-flex;align-items:center;min-height:44px}
+.nav-mob nav a.nav-cta{display:block;margin:16px 0 4px;padding:15px 26px;border:1px solid #a87b45;border-bottom:1px solid #a87b45;border-radius:8px;background:linear-gradient(180deg,#d1a56f,#a87b45);color:#1c1209;font:600 12px/1 var(--label);letter-spacing:.1em;text-transform:uppercase;text-decoration:none;text-align:center;box-shadow:0 6px 16px rgba(168,123,69,.28)}
+.nav-mob nav a.nav-cta:hover{background:linear-gradient(180deg,#dcb480,#b98a52);color:#1c1209}
+@media (max-width:719px){
+  .hero.home .in{padding:calc(var(--ih) * .46) 0 36px}
+  .section.home-tight{padding:36px 0}
+  .week-wrap:has(.week.soon.is-filtered) .week-soon{display:block;margin:0 0 8px;font:600 12px/1.3 var(--label);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+  .week-wrap:has(.week.soon.is-filtered) .week-more{display:block;margin:12px 0 0}
+  .week-more summary{cursor:pointer;display:inline-flex;align-items:center;min-height:44px;font:600 12px/1 var(--label);letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+  .week-more .c,.week-more[open] .o{display:none}
+  .week-more[open] .c{display:inline}
+  .week-wrap:not(:has(.week-more[open])) .week.soon.is-filtered>li:not(.is-today):not(.is-next){display:none}
+  .week.soon{gap:0;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 8px 22px rgba(60,45,30,.07)}
+  .week.soon>li,.week.soon>li.off,.week.soon>li.we,.week.soon>li.is-today,.week.soon>li.is-today.off,.week.soon>li.is-today.we{display:grid;grid-template-columns:86px minmax(0,1fr);align-items:center;gap:0 10px;border:0;border-radius:0;border-bottom:1px solid var(--line);box-shadow:none;padding:6px 12px;background:transparent}
+  .week.soon>li:last-child{border-bottom:0}
+  .week.soon>li.we{background:#efe6d8}
+  .week.soon>li.is-today,.week.soon>li.is-today.off,.week.soon>li.is-today.we{background:#f6ecdc;box-shadow:inset 4px 0 0 var(--accent);padding:6px 12px}
+  .week.soon h3{margin:0;font-size:11px;min-height:0}
+  .week.soon .sess{padding:6px 0;column-gap:8px}
+  .week.soon .sess .t{font-size:18px}
+  .week.soon .sess .n{font-size:15px;margin-top:0}
+  .week.soon .sess .bk{min-height:44px;min-width:72px;padding:0 12px}
+  .week.soon>li.off .none{grid-column:2;margin:0;font-size:15px}
+  .week.soon>li.off .alt{grid-column:2}
+  .strip-row{flex-direction:column;align-items:flex-start;gap:14px}
+}
+@media (prefers-reduced-motion:reduce){.xp{scroll-behavior:auto}}
+
 /* Leveyslukko (varmistus, Joonas 25.10.2026): sivu ei koskaan vieritä sivusuunnassa puhelimella. Juurisyyt (&nbsp;-kuvaukset, kalenteri, vuorolista) on korjattu erikseen;
    clip ei luo vierityssäiliötä (position:sticky toimii), hidden on vara vanhoille selaimille. */
 html,body{max-width:100%;overflow-x:hidden}

@@ -133,7 +133,7 @@ Esirenderöity sisältöosio (`/saunatietoa/`, EN `/en/sauna-knowledge/`), jonka
 
 **Sivutekstit tietokannasta (sopimus §18):** asiakkaalle näkyvät tekstit luetaan buildissa `public_get_site_texts`-RPC:llä (välimuisti → repon varateksti, ei kaada buildia; tuntematon `{{paikkamerkki}}` kaataa). Ks. [docs/SIVUTEKSTIT.md](docs/SIVUTEKSTIT.md).
 
-**Etusivun osio:** etusivulla (FI/EN) on esirenderöity "Saunatietoa" / "Sauna knowledge" -osio, jossa 3 uusinta artikkelia (kuva, otsikko, summary, pvm) ja linkki "Kaikki artikkelit" / "All articles". Osio haetaan samalla buildin haulla kuin muu Saunatietoa; jos artikkeleita ei ole tai haku epäonnistuu, osio jää pois kokonaan. Testisivustolla (`SITE_ENV=test`) feikkiartikkeleilla tehty esikatselu: `/esikatselu/etusivu-artikkelit/` ja `/en/preview/home-articles/` (noindex, ei sitemapissa, ei tuotannossa). Ks. docs/SAUNATIETOA.md → Etusivun osio.
+**Etusivun osio:** etusivulla on kompakti Saunatietoa-nauha ja linkki listaukseen, ei artikkelikortteja. Ks. docs/SAUNATIETOA.md → Etusivun nauha.
 
 ## Päätökset ja rajaukset
 

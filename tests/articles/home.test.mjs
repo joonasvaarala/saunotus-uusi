@@ -77,16 +77,20 @@ test('XSS: otsikko ja summary escapataan; slug-polku ei riko attribuuttia', () =
   assert.doesNotMatch(html, /<script|<img src=x/);
   assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt; &amp; &quot;q&quot;/);
 });
-test('etusivu: osio upotetaan Saunatietoa-kortit featured-osion jälkeen + CSS vain kun osio näkyy; tyhjänä ei jälkeäkään', () => {
+test('etusivu: Saunatietoa on nauha listauslinkillä, ei artikkelikortteja eikä home.css:ää; arvostelut jäävät ylemmäs', () => {
   setHomeSections({ fi: homeSectionHtml(items('fi'), 'fi', variantsFor('fi')), en: '' });
   const fi = R.home('fi'), en = R.home('en');
-  assert.match(fi, /class="section home-art" id="saunatietoa"/);
-  assert.ok(fi.indexOf('home-art"') < fi.indexOf('id="arvostelut"'));
-  assert.match(fi, /\.hart\{|\.hart \.im|\.home-art/);
-  assert.doesNotMatch(en, /home-art|hart-list|\.hart/);   // EN: ei artikkeleita → ei osiota eikä CSS:ää
+  assert.match(fi, /id="saunatietoa"/);
+  assert.match(fi, /href="\/saunatietoa\/"/);
+  assert.match(en, /id="saunatietoa"/);
+  assert.match(en, /href="\/en\/sauna-knowledge\/"/);
+  assert.doesNotMatch(fi, /class="section home-art"|hart-list|\.hart\{/);
+  assert.doesNotMatch(en, /class="section home-art"|hart-list|\.hart\{/);
+  assert.ok(fi.indexOf('id="arvostelut"') < fi.indexOf('id="saunatietoa"'));
   assert.equal((fi.match(/<h1/g) || []).length, 1);
   setHomeSections({});
-  assert.doesNotMatch(R.home('fi'), /home-art|\.hart/);
+  assert.doesNotMatch(R.home('fi'), /class="section home-art"|\.hart\{/);
+  assert.match(R.home('fi'), /id="saunatietoa"/);
 });
 test('RPC-virhe tai tyhjä lista: loadArticles ei kaada, osio pois', async () => {
   const quiet = { warn() {}, log() {} };
@@ -107,34 +111,38 @@ function build(name, env) {
   return { dist, out: r.stdout + r.stderr };
 }
 const rd = (d, p) => readFileSync(join(d, p), 'utf8');
-test('build (fixture, testi): FI etusivulla kortit, EN etusivulla kortti; esikatselusivut olemassa, noindex, ei sitemapissa', () => {
+test('build (fixture, testi): etusivulla Saunatietoa-nauha, ei artikkelikortteja; esikatselusivut noindex, ei sitemapissa', () => {
   const b = build('t', { ARTICLES_FIXTURE: '1', SITE_ENV: 'test' });
-  assert.match(rd(b.dist, 'index.html'), /class="section home-art"/);
-  assert.match(rd(b.dist, 'en/index.html'), /class="section home-art"[\s\S]*href="\/en\/sauna-knowledge\/how-to-sauna\/"/);
+  assert.match(rd(b.dist, 'index.html'), /id="saunatietoa"/);
+  assert.doesNotMatch(rd(b.dist, 'index.html'), /class="section home-art"/);
+  assert.match(rd(b.dist, 'en/index.html'), /id="saunatietoa"[\s\S]*href="\/en\/sauna-knowledge\/"/);
+  assert.doesNotMatch(rd(b.dist, 'en/index.html'), /how-to-sauna/);
   for (const p of ['esikatselu/etusivu-artikkelit/index.html', 'en/preview/home-articles/index.html']) {
     const h = rd(b.dist, p);
-    assert.equal(cards(h).length, 3); assert.match(h, /<meta name="robots" content="noindex,nofollow">/); assert.match(h, /class="prev-note"/);
-    assert.doesNotMatch(h, /noindex-testi|vanhempi-artikkeli|older-article/);
+    assert.equal(cards(h).length, 0); assert.match(h, /id="saunatietoa"/); assert.match(h, /<meta name="robots" content="noindex,nofollow">/); assert.match(h, /class="prev-note"/);
+    assert.doesNotMatch(h, /noindex-testi|vanhempi-artikkeli|older-article|class="section home-art"/);
   }
   assert.doesNotMatch(rd(b.dist, 'sitemap.xml'), /esikatselu|preview/);
 });
-test('build (tuotanto): ei esikatselusivuja; tyhjä lista → ei osiota; RPC-virhe → osio pois, build ei kaadu', () => {
+test('build (tuotanto): ei esikatselusivuja; tyhjä lista ja RPC-virhe → ei korttiosiota, nauha säilyy, build ei kaadu', () => {
   const e = build('pe', { ARTICLES_FIXTURE: join(root, 'tests/articles/fixtures/rpc-empty.json') });
   assert.doesNotMatch(rd(e.dist, 'index.html'), /home-art/); assert.doesNotMatch(rd(e.dist, 'en/index.html'), /home-art/);
+  assert.match(rd(e.dist, 'index.html'), /id="saunatietoa"/);
   assert.ok(!existsSync(join(e.dist, 'esikatselu')) && !existsSync(join(e.dist, 'en/preview')));
   const f = build('pf', { BOOKING_SUPABASE_URL: 'http://localhost:9', BOOKING_ANON_KEY: 'sb_publishable_x' });
   assert.doesNotMatch(rd(f.dist, 'index.html'), /home-art/); assert.match(f.out, /etusivun osio FI piilossa/);
+  assert.match(rd(f.dist, 'index.html'), /id="saunatietoa"/);
   const p = build('pp', { ARTICLES_FIXTURE: '1' });
-  assert.match(rd(p.dist, 'index.html'), /class="section home-art"/);
+  assert.match(rd(p.dist, 'index.html'), /id="saunatietoa"/);
+  assert.doesNotMatch(rd(p.dist, 'index.html'), /class="section home-art"/);
   assert.ok(!existsSync(join(p.dist, 'esikatselu')));
 });
 
 // ---- check-articles.mjs: etusivun osion tarkistus havaitsee virheet ----
 const chk = (dist) => checkDist({ dist, siteUrl: 'https://example.test', isTest: true, sections: { fi: '/saunatietoa/', en: '/en/sauna-knowledge/' }, legacy: { fi: [], en: ['/en/sauna-guide/'] } });
 const mut = (name, fromName, fn) => { const d = join(work, name); cpSync(join(work, fromName), d, { recursive: true }); const f = join(d, 'index.html'); writeFileSync(f, fn(readFileSync(f, 'utf8'))); return d; };
-test('check-articles: etusivun osio läpi; havaitsee kortin rikkinäisen linkin, 4. kortin ja osion tyhjässä tilassa', () => {
+test('check-articles: etusivun nauha läpi; havaitsee puuttuvan listauslinkin ja korttiosion tyhjässä tilassa', () => {
   assert.deepEqual(chk(join(work, 't')).errors, []);
-  assert.ok(chk(mut('m1', 't', (h) => h.replace('href="/saunatietoa/miten-saunotaan-oikein/"', 'href="/saunatietoa/ei-ole/"'))).errors.some((x) => /ei osoita artikkelisivuun/.test(x)));
-  assert.ok(chk(mut('m2', 't', (h) => h.replace(/(<li class="card hart.*?<\/li>)/s, '$1$1$1$1'))).errors.some((x) => /sallittu 1–3/.test(x)));
+  assert.ok(chk(mut('m1', 't', (h) => h.replace('id="saunatietoa"', 'id="ei-nauhaa"'))).errors.some((x) => /Saunatietoa-nauhasta puuttuu linkki/.test(x)));
   assert.ok(chk(mut('m3', 'pe', (h) => h.replace('<main id="main">', '<main id="main"><section class="section home-art"><div class="wrap"></div></section>'))).errors.some((x) => /näkyy vaikka artikkeleita ei ole/.test(x)));
 });

@@ -1,0 +1,61 @@
+{
+ "_doc": "Tulevan Saunotus-sivun sisältö (EI navigaatiossa, EI content/pages-kansiossa, joten tästä ei synny sivutekstiavaimia). Tekstit ja kuvaviite ovat samat kuin content/pages/home.json about-kentässä (FI+EN), jotta etusivun lyhennys ei kadota osiota \"Elämys, joka juontaa juurensa perinteeseen\". Sivua ei vielä rakenneta eikä linkitetä. Myöhemmin blogiartikkelit tulevat tämän sivun alle.",
+ "fi": {
+  "kicker": "mitä on saunotus?",
+  "title": "Elämys, joka juontaa juurensa perinteeseen",
+  "text": "Saunotus on ohjattu moniaistinen saunarituaali, joka juontaa juurensa suomalaiseen kulttuuriperinteeseen. Se herättää vanhat saunaperinteet eloon mytologian, rituaalilaulujen, luonnonantimien, tuoksujen, elementtien ja löylyn kautta – löylyn, joka on sekä saunan henki että sen lämpö.",
+  "elements": [
+   {
+    "icon": "ikoni-maa",
+    "title": "maa",
+    "text": "Kiukaan kivet, metsän antimet ja luonnon tuoksut johdattavat pysähtymään tähän hetkeen"
+   },
+   {
+    "icon": "ikoni-ilma",
+    "title": "ilma",
+    "text": "Vihdan synnyttämä löylyn tuulahdus ja lämpö herättelevät kehoa ja aisteja"
+   },
+   {
+    "icon": "ikoni-tuli",
+    "title": "tuli",
+    "text": "Saunan lämpö ja vihdan työ kuljettavat lämmön syvälle kehoon"
+   },
+   {
+    "icon": "ikoni-vesi",
+    "title": "vesi",
+    "text": "Kiukaalle luotu vesi synnyttää löylyn, viilentävä vesi rauhoittaa ja tasapainottaa"
+   }
+  ],
+  "cta": "Opi lisää saunaperinteestä",
+  "img": "saunotus-selka"
+ },
+ "en": {
+  "kicker": "what is saunotus?",
+  "title": "An experience rooted in tradition",
+  "text": "Saunotus is a guided, multisensory sauna ritual rooted in Finnish cultural tradition. It brings the old sauna traditions to life through mythology, ritual songs, gifts of nature, scents, the elements and löyly – the steam that is both the spirit of the sauna and its heat.",
+  "elements": [
+   {
+    "icon": "ikoni-maa",
+    "title": "earth",
+    "text": "The stones of the stove, the gifts of the forest and the scents of nature lead you to pause in this moment"
+   },
+   {
+    "icon": "ikoni-ilma",
+    "title": "air",
+    "text": "The breath of steam created by the whisk and the heat awaken the body and the senses"
+   },
+   {
+    "icon": "ikoni-tuli",
+    "title": "fire",
+    "text": "The warmth of the sauna and the work of the whisk carry the heat deep into the body"
+   },
+   {
+    "icon": "ikoni-vesi",
+    "title": "water",
+    "text": "Water thrown on the stove creates the steam, cooling water calms and balances"
+   }
+  ],
+  "cta": "Learn more about sauna tradition",
+  "img": "saunotus-selka"
+ }
+}
