@@ -3,7 +3,7 @@
 --   psql -X -v ON_ERROR_STOP=0 -f booking/supabase/tests/fixtures/10_test_helpers.sql -f booking/supabase/tests/checkout/t187_company_online_payment.sql
 -- Ei psql-metakomentoja (ei \i). Ei run.sh-listassa (run.sh ajaa vain tests/[0-9]*.test.sql). Aja kuten t186.
 -- Yksi transaktio. Lopun poikkeus kumoaa kaiken. Ei lähetä mitään ulos. Vapaa vuoro haetaan; jos ei löydy → skip ja suora tilausrivi.
--- Visma Pay ajetaan dry_run-tilassa (palautetaan). MobilePay-valmistelu on eri tilauksella (dry_run-maksu estäisi toisen välittäjän).
+-- booking_189: Visma Pay ja MobilePay eivät käynnistä maksua. Online-yrityksen maksu kokeillaan Montoniolla.
 -- Odotettu: ERROR: TESTRESULT pass=N fail=0 skip=S :: ALL OK
 begin;
 set local lock_timeout = '5s';
@@ -95,7 +95,7 @@ begin
   perform pg_temp.ck(md5(pg_get_functiondef('booking._stamp_order_billing(bigint,bigint,jsonb)'::regprocedure)) = 'ded4c037a352e2b65b6f5e3100643334', '1 _stamp_order_billing = booking_187');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.public_create_booking(bigint,date,integer,text,text,text,boolean,text,text,text,jsonb,jsonb)'::regprocedure)) = '6bf51ffd45c259ef5546aa19f63f5066', '1 public_create_booking = booking_187');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.public_create_treatment_booking(bigint,timestamptz,integer,text,text,text,boolean,text,text,text,jsonb,text,jsonb)'::regprocedure)) = 'ece168b714a2478bd8a1e5d31f6e6fb7', '1 public_create_treatment_booking = booking_187');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) = 'd1f8df803a45c2b77aa9f8554fc41890', '1 vismapay_payment_prepare = booking_187');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) in ('d1f8df803a45c2b77aa9f8554fc41890', 'd22cda7beb5cea5967b267e52d79ab99'), '1 vismapay_payment_prepare = booking_187 tai booking_189');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.public_payment_options(uuid)'::regprocedure)) in ('46834d95db5127935ad94e8759758ceb', '2557c31f99a77e70e5a3f35a3c44304e'), '1 public_payment_options = booking_187 tai booking_188');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) in ('1b729ef4d72dc925001169c38bad3315', '2c9e06b3153aa5c0edd25341024ae6a8'), '1 public_payment_link_info = booking_187 tai booking_188');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.public_get_booking(uuid)'::regprocedure)) = '31b07afa6d8e5b61ed9c044d39e76275', '1 public_get_booking = booking_187');
@@ -103,7 +103,7 @@ begin
   perform pg_temp.ck(md5(pg_get_functiondef('booking.orders_invoice_status_trg()'::regprocedure)) = '7f7eced664b101cb2672a78059c90682', '1 orders_invoice_status_trg = booking_187');
   perform pg_temp.ck(md5(pg_get_functiondef('booking._order_pays_by_invoice(text,jsonb)'::regprocedure)) = '40b7b4498592ad7ae0b2883941364573', '1 _order_pays_by_invoice = booking_187');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.public_create_booking_code(bigint,date,integer,text,text,text,boolean,text,text,text,jsonb,jsonb,text)'::regprocedure)) = '0741abee882e4a30cf46f5c8160de7a3'
-    and md5(pg_get_functiondef('booking.mobilepay_payment_prepare(uuid,uuid,integer,text)'::regprocedure)) = 'e6888446c4b44e554d31c0920609ddb6'
+    and md5(pg_get_functiondef('booking.mobilepay_payment_prepare(uuid,uuid,integer,text)'::regprocedure)) in ('e6888446c4b44e554d31c0920609ddb6', 'c6a64c1ff9353a5e581d72af10966665')
     and md5(pg_get_functiondef('booking.public_checkout_payment_options()'::regprocedure)) in ('e6f019284f2b222013133af83d8fface', '36b2d584cb3dd5abdf3bdf48e448c6aa')
     and md5(pg_get_functiondef('booking._public_pay_json(bigint)'::regprocedure)) = 'cc3e61dbdfbd9a816cd9c982c73820c5'
     and md5(pg_get_functiondef('booking.orders_invoice_draft_trg()'::regprocedure)) = 'a48fe50340cff5f6e9709ad46055ecb9'
@@ -204,18 +204,16 @@ begin
   perform pg_temp.ck(g ->> 'invoice_method' = 'online' and g ->> 'customer_kind' = 'company'
     and r ->> 'invoice_method' = 'online' and r ->> 'customer_kind' = 'company', '4 get_booking ja get_order palauttavat invoice_method');
 
-  -- ===== 5 Visma dry_run (tämä tilaus) ja MobilePay (toinen tilaus)
-  update booking.integration_config set mode = 'dry_run' where key = 'vismapay';
-  r := booking.vismapay_payment_prepare(tok, null);
-  perform pg_temp.ck(coalesce((r ->> 'ok')::boolean, false) and coalesce(r ->> 'dry_run', '') = 'true' and r ->> 'code' is distinct from 'order_not_payable', '5 Visma dry_run sallii online-yrityksen');
-  update booking.integration_config set mode = vp0 where key = 'vismapay';
+  -- ===== 5 Montonio sallii online-yrityksen (Visma Pay ja MobilePay eivät käynnistä maksua)
+  insert into booking.integration_config(key, mode, settings) values ('montonio', 'test', '{"approved_by":"t187"}'::jsonb)
+    on conflict (key) do update set mode = 'test', settings = booking.integration_config.settings || '{"approved_by":"t187"}'::jsonb;
   o2 := pg_temp.direct_online(pg_temp.bid(), 't187-mp-' || run || '@example.test', 'pending');
-  r := pg_temp.call(format('booking.mobilepay_payment_prepare(%L::uuid, null, 120, %L)', (select public_token from booking.orders where id = o2), 'WEB_REDIRECT'));
-  perform pg_temp.ck(coalesce((r ->> 'ok')::boolean, false) and r ->> 'reference' is not null and r ->> 'err' is distinct from 'order_not_payable', '5 MobilePay-valmistelu sallii online-yrityksen');
+  r := booking.montonio_payment_prepare((select public_token from booking.orders where id = o2), null, 'cardPayments');
+  perform pg_temp.ck(coalesce((r ->> 'ok')::boolean, false) and r ->> 'order_number' is not null and r ->> 'code' is distinct from 'order_not_payable', '5 Montonio-valmistelu sallii online-yrityksen ' || left(coalesce(r::text, ''), 120));
 
   -- ===== 6 maksu + kuitti, ei laskua
   if coalesce((r ->> 'ok')::boolean, false) then
-    g := pg_temp.call(format('booking.payment_mark_paid(%L, %L, %s, %L::jsonb)', 'mobilepay', r ->> 'reference', r ->> 'amount', '{"t187":true}'));
+    g := pg_temp.call(format('booking.payment_mark_paid(%L, %L, %s, %L::jsonb)', 'montonio', r ->> 'order_number', r ->> 'amount', '{"t187":true}'));
     perform pg_temp.ck(coalesce((g ->> 'ok')::boolean, false)
       and (select status from booking.orders where id = o2) = 'confirmed'
       and (select payment_status from booking.orders where id = o2) = 'paid'
@@ -227,7 +225,7 @@ begin
                     and rc.text_body like '%T187 Verkko Oy%')
       and not exists (select 1 from booking.email_outbox e where e.order_id = o2 and e.kind = 'invoice_pdf'), '6 maksettu, kuitti yritystiedoin, ei laskua eikä invoice_pdf');
   else
-    perform pg_temp.ck(false, '6 MobilePay-valmistelu epäonnistui, maksua ei voitu kuitata');
+    perform pg_temp.ck(false, '6 Montonio-valmistelu epäonnistui, maksua ei voitu kuitata');
   end if;
 
   -- ===== 7 vanhentunut pito perutaan kuten yksityiseltä
@@ -253,11 +251,11 @@ begin
     and not exists (select 1 from booking.email_outbox e where e.order_id = ol and e.kind = 'invoice_pdf'), '9 verkkolasku: confirmed, invoiced, luonnos, ei sähköpostia');
   r := booking.vismapay_payment_prepare((select public_token from booking.orders where id = ol), null);
   g := booking.public_payment_options((select public_token from booking.orders where id = ol));
-  perform pg_temp.ck(r ->> 'code' = 'order_not_payable' and coalesce((g -> 'order' ->> 'can_pay_online')::boolean, true) = false, '9 verkkolaskun verkkomaksu estetty');
+  perform pg_temp.ck(r ->> 'code' = 'payment_not_online' and coalesce((g -> 'order' ->> 'can_pay_online')::boolean, true) = false, '9 verkkolaskun verkkomaksu estetty');
   update booking.invoices set status = 'sent', locked_at = now() where order_id = ol and kind = 'debit';
   perform pg_temp.ck(booking._order_invoice_locked(ol), '9b booking_185 lukko yhä päällä lähetetylle laskulle');
   r := booking.vismapay_payment_prepare((select public_token from booking.orders where id = ol), null);
-  perform pg_temp.ck(r ->> 'code' = 'order_not_payable', '9b lukittu lasku: Visma order_not_payable');
+  perform pg_temp.ck(r ->> 'code' = 'payment_not_online', '9b lukittu lasku: verkkomaksun aloitus estetty');
 
   -- ===== 10 pdf ennallaan
   o := pg_temp.invoice_order(pg_temp.bid(), 'pdf');
@@ -278,7 +276,7 @@ begin
   perform pg_temp.ck(r ->> 'status' = 'not_payable' and r ->> 'reason' = 'order_not_payable'
     and coalesce((g -> 'order' ->> 'can_pay_online')::boolean, true) = false, '11 hallinnan yritys: maksulinkki not_payable, ei verkkomaksua');
   r := booking.vismapay_payment_prepare((select public_token from booking.orders where id = o), null);
-  perform pg_temp.ck(r ->> 'code' = 'order_not_payable', '11 hallinnan yritys: Visma order_not_payable');
+  perform pg_temp.ck(r ->> 'code' = 'payment_not_online', '11 hallinnan yritys: verkkomaksun aloitus estetty');
 
   -- ===== 12 yksityinen ennallaan
   r := null;

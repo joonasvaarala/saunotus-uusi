@@ -89,7 +89,7 @@ begin
       and has_function_privilege('service_role', 'booking.public_payment_link_info(uuid)', 'execute')
       and not exists (select 1 from pg_proc p, aclexplode(p.proacl) a where p.oid = 'booking.public_payment_link_info(uuid)'::regprocedure and a.grantee = 0),
       'A3 oikeudet: anon/authenticated/service_role, ei PUBLIC');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) in ('703c03c301f5a3008192cdbe65e559e2', 'cca997c4e900e78b8bb9e2e0c7da25d4', 'd1f8df803a45c2b77aa9f8554fc41890')
+  perform pg_temp.ck(md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) in ('703c03c301f5a3008192cdbe65e559e2', 'cca997c4e900e78b8bb9e2e0c7da25d4', 'd1f8df803a45c2b77aa9f8554fc41890', 'd22cda7beb5cea5967b267e52d79ab99')
       and md5(pg_get_functiondef('booking._create_link_payment(bigint,integer,text)'::regprocedure)) in ('533ac9af831c0c11e1f504e377a17827', '5e432077c560a10822db8ac0d2bbe7c2', 'f40db96ca201e40467f20cc1db5866c9', 'adc14e6983e60d80498508c9b969f60d')
       and md5(pg_get_functiondef('booking._order_rl(text,uuid,integer,integer)'::regprocedure)) = 'ec6bf13a3694e5bf9034a80123857246'
       and md5(pg_get_functiondef('booking._rate_limit(text,integer,interval)'::regprocedure)) = '7c8076d29d82d72db797066fd44d06c1'

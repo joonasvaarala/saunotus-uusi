@@ -1,7 +1,7 @@
 -- t188: booking_188 verkkomaksu (Montonio / Stargate Orders API).
 -- Ajaa migraation JÄLKEEN, yhdessä transaktiossa. Lopussa tahallinen TESTRESULT + ROLLBACK.
--- Oletus: integration_config.montonio.mode = off (migraatio ei kytke test- eikä live-tilaa).
--- Jos omistaja on jo asettanut tilan testiksi, A2 epäonnistuu. Palauta off tai ohita A2.
+-- Montonion tila asetetaan testin sisällä: ensin off (A2, C1), sitten test + approved_by (D–I).
+-- Läpäisee, oli kannan tila off tai test. Alkuperäinen tila palautetaan ennen tulosta; ROLLBACK kumoaa kaiken.
 -- Procountorin mode ja daily_enabled eivät saa muuttua.
 begin;
 set local lock_timeout = '3s';
@@ -35,8 +35,11 @@ declare
   cu bigint; o bigint; o2 bigint; o3 bigint; pid bigint; rf bigint;
   r jsonb; r2 jsonb; a1 text; a2 text; amt numeric; tok uuid; ltok uuid;
   pc_mode text; pc_daily text; d text; log text; np int; nf int; ns int;
+  mo_mode text; mo_settings jsonb;
 begin
   select mode, settings ->> 'daily_enabled' into pc_mode, pc_daily from booking.integration_config where key = 'procountor';
+  select mode, settings into mo_mode, mo_settings from booking.integration_config where key = 'montonio';
+  update booking.integration_config set mode = 'off' where key = 'montonio';
 
   -- ===== A rakenne
   perform pg_temp.ck(to_regclass('booking.montonio_attempts') is not null, 'A1 montonio_attempts');
@@ -51,7 +54,7 @@ begin
       and not has_function_privilege('authenticated', 'booking.montonio_payment_prepare(uuid,uuid,text)', 'execute')
       and has_function_privilege('authenticated', 'booking.admin_set_montonio_mode(text,text)', 'execute')
       and not has_function_privilege('anon', 'booking.admin_set_montonio_mode(text,text)', 'execute'), 'A1 oikeudet');
-  perform pg_temp.ck((select mode from booking.integration_config where key = 'montonio') = 'off', 'A2 mode off oletuksena (epäonnistuu jos test on jo kytketty)');
+  perform pg_temp.ck((select mode from booking.integration_config where key = 'montonio') = 'off', 'A2 mode off (asetettu testin transaktiossa)');
   perform pg_temp.ck(exists (select 1 from booking.payment_methods where code = 'montonio' and is_manual = false and active = false), 'A3 payment_methods montonio ei ole käteismenetelmä');
   perform pg_temp.ck((select mode from booking.integration_config where key = 'procountor') is not distinct from pc_mode
       and (select settings ->> 'daily_enabled' from booking.integration_config where key = 'procountor') is not distinct from pc_daily, 'A4 procountor ennallaan heti migraation jälkeen');
@@ -119,10 +122,13 @@ begin
   perform pg_temp.svc();
   r := booking.montonio_payment_prepare(tok, null, 'paymentInitiation');
   a1 := r ->> 'order_number'; amt := (r ->> 'amount')::numeric; pid := (r ->> 'payment_id')::bigint;
+  perform pg_temp.logout();
   -- payments_updated sets updated_at = now() on every update, so the backdate must bypass the trigger.
+  -- disable trigger vaatii taulun omistajan; service_role ei ole omistaja.
   alter table booking.payments disable trigger payments_updated;
   update booking.payments set updated_at = now() - interval '3 minutes' where id = pid;
   alter table booking.payments enable trigger payments_updated;
+  perform pg_temp.svc();
   r := booking.montonio_payment_prepare(tok, null, 'paymentInitiation');
   a2 := r ->> 'order_number';
   perform pg_temp.ck(a2 ~ '-a2$' and a2 is distinct from a1, 'F1 toinen yritys a2 ' || coalesce(a2, 'null'));
@@ -168,6 +174,9 @@ begin
 
   perform pg_temp.ck((select mode from booking.integration_config where key = 'procountor') is not distinct from pc_mode
       and (select settings ->> 'daily_enabled' from booking.integration_config where key = 'procountor') is not distinct from pc_daily, 'K procountor mode ja daily_enabled ennallaan');
+
+  if mo_mode is null then delete from booking.integration_config where key = 'montonio';
+  else update booking.integration_config set mode = mo_mode, settings = mo_settings where key = 'montonio'; end if;
 
   log := current_setting('t188.log', true);
   np := (select count(*) from regexp_split_to_table(log, E'\n') l where l like 'P %');

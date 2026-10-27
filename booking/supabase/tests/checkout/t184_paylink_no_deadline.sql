@@ -107,7 +107,7 @@ begin
       and md5(pg_get_functiondef(fns[3]::regprocedure)) = '5babbf859133aebd3e9e7c827bee3261'
       and md5(pg_get_functiondef(fns[4]::regprocedure)) in ('2aa8e44cb2c6f150d3488f53f8d94c25', '6576dc3dda048de2a438f1cdf333b0d9')
       and md5(pg_get_functiondef(fns[5]::regprocedure)) = '2f8a7e56ae9bb4e29f4025f91e7ea706'
-      and md5(pg_get_functiondef(fns[6]::regprocedure)) in ('37573920d2f9f882e3d95c4f0c66575f', 'e6888446c4b44e554d31c0920609ddb6'), 'A1 muutetut funktiot = booking_184 (tai booking_185: _create_link_payment, mobilepay_payment_prepare)');
+      and md5(pg_get_functiondef(fns[6]::regprocedure)) in ('37573920d2f9f882e3d95c4f0c66575f', 'e6888446c4b44e554d31c0920609ddb6', 'c6a64c1ff9353a5e581d72af10966665'), 'A1 muutetut funktiot = booking_184 (tai booking_185 / booking_189: mobilepay_payment_prepare)');
   perform pg_temp.ck((select bool_and(prosecdef and proconfig = array['search_path=""'] and proowner = 'postgres'::regrole) and count(*) = 6
       from pg_proc where oid = any (fns::regprocedure[])), 'A2 SECURITY DEFINER, search_path tyhjä, omistaja postgres');
   perform pg_temp.ck(not exists (select 1 from pg_proc p, aclexplode(p.proacl) a where p.oid = any (fns::regprocedure[]) and a.grantee = 0)
@@ -124,7 +124,7 @@ begin
       and md5(pg_get_functiondef('booking.admin_pos_send_link(bigint,text,boolean)'::regprocedure)) = '735e92d8c8c52784bbba9b928c5a122b'
       and md5(pg_get_functiondef('booking.expire_payment_links()'::regprocedure)) = '0109d701ab1ccc4e57f6210989644f5c'
       and md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) in ('647c556562046c75b7e7e33703c050a0', '1b729ef4d72dc925001169c38bad3315', '2c9e06b3153aa5c0edd25341024ae6a8')
-      and md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) in ('703c03c301f5a3008192cdbe65e559e2', 'cca997c4e900e78b8bb9e2e0c7da25d4', 'd1f8df803a45c2b77aa9f8554fc41890')
+      and md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) in ('703c03c301f5a3008192cdbe65e559e2', 'cca997c4e900e78b8bb9e2e0c7da25d4', 'd1f8df803a45c2b77aa9f8554fc41890', 'd22cda7beb5cea5967b267e52d79ab99')
       and md5(pg_get_functiondef('booking._order_balance(bigint)'::regprocedure)) = 'a6b31f93559de53d75a52d8a285f1170'
       and md5(pg_get_functiondef('booking.is_staff()'::regprocedure)) = '40d8b86aa41ab71f29ef4e6c5257aa77', 'A5 riippuvuudet ennallaan (asiakkaan 14 vrk, pikakassa 1 vrk)');
 
@@ -216,13 +216,15 @@ begin
   -- verkkokaupan maksurivi ilman takarajaa (public_create_booking / public_buy_gift_card -tyyli): EI linkki
   insert into booking.payments(order_id, method, provider, status, amount, currency, note) values (o9, 'visma_pay', 'visma_pay', 'pending', 30, 'EUR', 'Visma Pay') returning id into pc;
   select public_token into otok from booking.orders where id = o9;
-  r := pg_temp.prep(null, otok); a1 := r ->> 'order_number';
-  perform pg_temp.ck(r ->> 'ok' = 'true' and (r ->> 'payment_id')::bigint = pc and (select link_expires_at is null from booking.payments where id = pc), 'F5 tilaustoken käyttää verkkokaupan null-rivin');
-  perform pg_temp.created(a1);
-  r := pg_temp.apply(a1, 'cancelled');
-  select * into prow from booking.payments where id = pc;
-  perform pg_temp.ck(r = '{"ok":true,"outcome":"cancelled"}'::jsonb and prow.status = 'cancelled' and pg_temp.audits(pc, 'VISMAPAY_CANCELLED') = 1
-      and pg_temp.audits(pc, 'VISMAPAY_CANCELLED_RETRYABLE') = 0, 'F6 verkkokaupan null-rivi: peruutus → cancelled kuten ennen (ei retryable) ' || left(r::text, 100));
+  r := pg_temp.prep(null, otok);
+  perform pg_temp.ck(r ->> 'code' = 'payment_not_online'
+      and (select provider = 'visma_pay' and status = 'pending' and link_expires_at is null from booking.payments where id = pc),
+      'F5 tilaustoken ei avaa Visma-maksua, rivi jää pending ' || left(r::text, 100));
+  r := pg_temp.prep(null, otok);
+  perform pg_temp.ck(r ->> 'code' = 'payment_not_online'
+      and (select status from booking.payments where id = pc) = 'pending'
+      and (select count(*) from booking.payments where order_id = o9 and provider = 'visma_pay') = 1,
+      'F6 toinen Visma-aloitus ei luo riviä eikä merkitse maksettua ' || left(r::text, 100));
 
   -- ===== G MobilePay (lepotilassa): montonio-linkkiä ei avata MobilePaylla
   r := pg_temp.link(u_adm, o10); p1 := (r ->> 'pid')::bigint;
@@ -243,11 +245,13 @@ begin
       'G3 14 vrk montonio-linkki: tilaustokenin MobilePay-aloitus estetty, linkki ei lyhene ' || left(r::text, 100));
   o := pg_temp.mkorder(cu, 30);
   select public_token into otok from booking.orders where id = o;
-  r := pg_temp.mp(otok, null, 'WEB_REDIRECT'); pc := (r ->> 'payment_id')::bigint;
-  perform pg_temp.ck((select link_expires_at between now() + interval '119 minutes' and now() + interval '121 minutes' from booking.payments where id = pc), 'G4 verkkokaupan MobilePay 120 min');
+  n := (select count(*) from booking.payments where order_id = o);
+  r := pg_temp.mp(otok, null, 'WEB_REDIRECT');
+  perform pg_temp.ck(r ->> 'code' = 'payment_not_online' and (select count(*) from booking.payments where order_id = o) = n,
+      'G4 verkkokaupan MobilePay-aloitus estetty ' || left(r::text, 100));
   r := pg_temp.mp(otok, null, 'QR');
-  perform pg_temp.ck(r ->> 'ok' = 'true' and (r ->> 'payment_id')::bigint = pc and (select link_expires_at <= now() + interval '20 minutes' from booking.payments where id = pc),
-      'G5 verkkokaupan maksu: QR lyhentää ≤ 20 min kuten ennen ' || left(r::text, 100));
+  perform pg_temp.ck(r ->> 'code' = 'payment_not_online' and (select count(*) from booking.payments where order_id = o) = n,
+      'G5 QR-aloitus estetty, uutta maksuriviä ei synny ' || left(r::text, 100));
 
   -- palautus (transaktio kumotaan joka tapauksessa)
   if s_vp.key is null then delete from booking.integration_config where key = 'vismapay'; else update booking.integration_config set mode = s_vp.mode, settings = s_vp.settings where key = 'vismapay'; end if;

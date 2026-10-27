@@ -393,20 +393,12 @@ begin
   select id into inv from booking.invoices where order_id = oid and kind = 'debit';
   v := pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, false, true)', inv));
   s0 := pg_temp.snap(oid);
-  begin
-    perform booking.mobilepay_payment_prepare(null, link_tok, 120, 'WEB_REDIRECT');
-    v := jsonb_build_object('err', 'none');
-  exception when others then
-    get stacked diagnostics d = pg_exception_detail;
-    v := jsonb_build_object('err', coalesce(d, sqlstate));
-  end;
-  perform pg_temp.ck(v ->> 'err' = 'order_not_payable' and pg_temp.snap(oid) = s0, '8 mobilepay order_not_payable');
+  v := booking.mobilepay_payment_prepare(null, link_tok, 120, 'WEB_REDIRECT');
+  perform pg_temp.ck(v ->> 'code' = 'payment_not_online' and pg_temp.snap(oid) = s0, '8 mobilepay estetty');
   v := booking.vismapay_payment_prepare(null, link_tok);
-  perform pg_temp.ck(v ->> 'code' = 'order_not_payable' and pg_temp.snap(oid) = s0, '8 vismapay linkki');
-  update booking.integration_config set mode = 'dry_run' where key = 'vismapay';
+  perform pg_temp.ck(v ->> 'code' = 'payment_not_online' and pg_temp.snap(oid) = s0, '8 vismapay linkki estetty');
   v := booking.vismapay_payment_prepare(tok, null);
-  perform pg_temp.ck(v ->> 'code' = 'order_not_payable' and coalesce((v ->> 'ok')::boolean, false) = false and pg_temp.snap(oid) = s0, '8 vismapay dry_run');
-  update booking.integration_config set mode = visma_mode where key = 'vismapay' and visma_mode is not null;
+  perform pg_temp.ck(v ->> 'code' = 'payment_not_online' and coalesce((v ->> 'ok')::boolean, false) = false and pg_temp.snap(oid) = s0, '8 vismapay tilaustoken estetty');
 
   -- sallittu: laskun merkintä maksetuksi ei ole order_invoiced
   v := pg_temp.as_(adm, format('select booking.admin_mark_invoice_paid(%s)', inv));
