@@ -47,6 +47,7 @@ jobs:
       - run: npm ci
       # Saunatietoa: markdown-, lähde-/RPC-, sivupohja- ja build-tarkistustestit (fixture, ei verkkoa)
       - run: node --test tests/articles/*.test.mjs
+      - run: node --test tests/home-front.test.mjs
       # Pelkkä fixture-build (testi + tuotanto): validoi JSON-LD, canonicalit, hreflangit, sitemapin, robotsin
       - run: SITE_TEXTS_FIXTURE=1 ARTICLES_FIXTURE=1 SITE_ENV=test SITE_URL=https://example.test DIST=$RUNNER_TEMP/dist-fixture-test node scripts/build.mjs
       - run: DIST=$RUNNER_TEMP/dist-fixture-test SITE_ENV=test SITE_URL=https://example.test node scripts/check-articles.mjs

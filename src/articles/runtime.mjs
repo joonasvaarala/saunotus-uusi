@@ -15,9 +15,13 @@ function load() {
   try { state = JSON.parse(readFileSync(stateFile(), 'utf8')); } catch { state = { count: { fi: 0, en: 0 } }; }
   return state;
 }
+export function publishedArticleCount(lang) {
+  return load().count?.[lang] || 0;
+}
+
 // Navigaatiolinkki ({href,label}) tai null kun linkkiä ei näytetä (ei artikkeleita eikä nav.showWhenEmpty)
 export function articlesNav(lang) {
-  const n = load().count?.[lang] || 0;
+  const n = publishedArticleCount(lang);
   if (!n && !cfg.nav.showWhenEmpty) return null;
   return { href: listHref(lang), label: label(lang) };
 }

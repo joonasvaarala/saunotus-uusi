@@ -1,0 +1,14 @@
+{
+  "_doc": "booking.public_product_images -tilannekuva (27.10.2026). Build päivittää listan RPC:llä kun BOOKING_SUPABASE_URL ja BOOKING_ANON_KEY ovat asetettu; muuten tämä tiedosto. Vain hallinnan tuotekuvat, ei sivuston markkinointikuvia. storage_base on julkinen bucket-osoite.",
+  "storage_base": "https://sxbofnuisemspgquoxyv.supabase.co/storage/v1/object/public/product-images",
+  "images": [
+    {
+      "product_id": 10,
+      "slug": "saunahoito-2",
+      "path": "products/10-ifj3bf.webp",
+      "alt": null,
+      "width": 1600,
+      "height": 1067
+    }
+  ]
+}

@@ -2,13 +2,13 @@
 import { readFileSync } from 'node:fs';
 import { sortReviews } from './reviews-sort.mjs';
 import { cards, alts, pageDoc } from './content-texts.mjs';
-import { articlesNav, homeSection } from './articles/runtime.mjs';
+import { articlesNav, publishedArticleCount } from './articles/runtime.mjs';
 import { tx } from './site-texts.mjs';
 import { seoSchemaForPage, jsonLdScript } from './seo-enhance.mjs';
 import { privacyAnalyticsHtml, policyHasAnalyticsSection } from './privacy-analytics.mjs';
 import { policyText, privacyDocFor, linkContacts } from './policy-lang.mjs';
-import { shopProductsHtml } from './shop-products.mjs';
 import { quietWeekAttrs } from './quiet-week.mjs';
+import { experienceHtml, traditionHtml, infoStrip, companyStrip, homeText } from './home-front.mjs';
 import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
 import { selectShopEvents, shopEventsHtml, shopHash } from './event-cards.mjs';
 import {
@@ -109,7 +109,7 @@ export const cardList = (arr, lang, cls = '', opt) => `<ul class="cards ${cls}">
 export const C = (path) => path.split('.').reduce((a, k) => a[k], cards);
 
 // ---- viikko-ohjelma (kb.opening_hours) ----
-export function week(lang) {
+export function week(lang, opt = {}) {
   const u = ui(lang);
   const lab = (type, day) => site.sessionLabels[day >= 6 && type === 'public' ? 'weekend' : type]?.[lang] || '';
   // Yksi vuororivi: aika (ei rituaalilla) · nimi · Varaa-painike. Koko rivi on klikattava (a::after), .sr-selite säilyy.
@@ -131,7 +131,7 @@ export function week(lang) {
     li.push(`<li data-wd="${d}"${cls ? ` class="${cls}"` : ''}><h3>${e(u.daysLong[d - 1])}<span class="today">${e(u.today)}</span></h3>${sess.length + ritual.length ? `<ul class="sl">${sess.join('')}${ritual.join('')}</ul>` : ''}${none}</li>`);
   }
   // booking_162: data-quiet-* → hiljaisten aikojen ale lisätään selaimessa (booking/shop/src/quiet-week.js); ilman tarjouksia ei muutosta
-  return `<ol class="week" aria-label="${e(u.weekTitle)}"${quietWeekAttrs(lang, { esc: e, products: kb.products, reserve: u.reserve })}>${li.join('')}</ol>`;
+  return `<ol class="week${opt.soon ? ' soon' : ''}" aria-label="${e(u.weekTitle)}"${quietWeekAttrs(lang, { esc: e, products: kb.products, reserve: u.reserve })}>${li.join('')}</ol>`;
 }
 
 // ---- tapahtumat (kb.event_dates) ----
@@ -151,9 +151,10 @@ export function upcomingEvents(lang) {
 // booking_158: uuden kaupan tapahtumat (kb.json events_shop = booking.public_events(current_date, 'shop')), kun niissä on tulevia kertoja
 // (myyntitilasta riippumatta). Kortti linkittää kaupan tuotesivulle (FI /varaa/#/tuote/<slug>, EN /en/book/#/tuote/<slug>), ei Johkuun.
 // Muuten (ei events_shop-dataa, esim. migraatio ajamatta) vanha data (kb.event_dates + cards.json), linkki silti kaupan tuotesivulle.
-function shopEventsSection(lang) {
-  const list = selectShopEvents(kb.events_shop, Date.now());
+function shopEventsSection(lang, limit) {
+  let list = selectShopEvents(kb.events_shop, Date.now());
   if (!list.length) return null;
+  if (limit) list = list.slice(0, limit);
   const cardOf = (ev) => Object.entries(cards.events).find(([id, c]) => !id.startsWith('_') && (c.kb || id) === ev.slug)?.[1] || null;
   const fallbackImg = Object.entries(cards.events).find(([id, c]) => !id.startsWith('_') && c.img)?.[1]?.img;
   return shopEventsHtml(list, lang, {
@@ -162,10 +163,11 @@ function shopEventsSection(lang) {
     img: (ev) => { const id = cardOf(ev)?.img || fallbackImg; return id ? pic(id, lang, { sizes: '(min-width:1100px) 280px, 90vw', alt: '' }) : ''; },
   });
 }
-export function eventsHtml(lang, empty) {
-  const shop = shopEventsSection(lang);
+export function eventsHtml(lang, empty, opt = {}) {
+  const shop = shopEventsSection(lang, opt.limit);
   if (shop) return shop;
-  const ev = upcomingEvents(lang);
+  let ev = upcomingEvents(lang);
+  if (opt.limit) ev = ev.slice(0, opt.limit);
   if (!ev.length) return `<p class="center">${e(empty)}</p>`;
   return `<ul class="events">${ev.map(({ c, p, dates }) => {
     const t = c[lang];
@@ -239,7 +241,17 @@ const mailBtn = (label, subject, cls = 'btn') => `<a class="${cls}" href="${e(ma
 function jsonLd(lang) {
   const b = kb.business;
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  const spec = kb.hours.filter((h) => h.opens && ['public', 'men', 'women', 'silent'].includes(h.session_type)).map((h) => ({ '@type': 'OpeningHoursSpecification', dayOfWeek: days[h.weekday - 1], opens: hm(h.opens).includes(':') ? hm(h.opens) : hm(h.opens) + ':00', closes: hm(h.closes).includes(':') ? hm(h.closes) : hm(h.closes) + ':00' }));
+  // Aukiolo = viikko-ohjelman kaikki kellonajat (myös Turvetorstai), aikaisin alku → myöhäisin loppu per viikonpäivä.
+  const padHm = (t) => { const x = hm(t); return x.includes(':') ? x : x + ':00'; };
+  const byDay = new Map();
+  for (const h of kb.hours) {
+    if (!h.opens || !h.closes) continue;
+    const opens = padHm(h.opens), closes = padHm(h.closes);
+    const prev = byDay.get(h.weekday);
+    if (!prev) byDay.set(h.weekday, { opens, closes });
+    else { if (opens < prev.opens) prev.opens = opens; if (closes > prev.closes) prev.closes = closes; }
+  }
+  const spec = [...byDay.entries()].sort((a, b) => a[0] - b[0]).map(([wd, t]) => ({ '@type': 'OpeningHoursSpecification', dayOfWeek: days[wd - 1], opens: t.opens, closes: t.closes }));
   return JSON.stringify({
     '@context': 'https://schema.org', '@type': ['DaySpa', 'HealthAndBeautyBusiness'], '@id': abs('/#business'), name: b.trade_name, legalName: b.legal_name,
     url: SITE_URL + '/', telephone: site.contact.phoneTel, email: site.contact.email, image: abs('/img/og-hero-ovi-uusi.jpg'),
@@ -290,7 +302,7 @@ ${isTest ? `<div class="testbar" role="note">${e(u.siteTestNote)}</div>` : ''}
 <nav class="nav-desk" aria-label="${e(u.menuLabel)}">${nav}</nav>
 ${langSw}
 <a class="btn sm" href="${bookHref}">${e(u.book)}</a>
-<details class="nav-mob"><summary>${e(u.menu)}</summary><nav aria-label="${e(u.menuLabel)}">${nav}<a href="${bookHref}">${e(u.bookFull)}</a></nav></details>
+<details class="nav-mob"><summary>${e(u.menu)}</summary><nav aria-label="${e(u.menuLabel)}">${nav}<a class="btn gold nav-cta" href="${bookHref}">${e(u.bookFull)}</a></nav></details>
 </div></header>
 <main id="main">
 ${body}
@@ -305,7 +317,7 @@ ${body}
 <div class="fbottom"><span>© ${new Date().getFullYear()} ${e(kb.business.legal_name)} · ${e(ui(lang).businessId)} ${e(kb.business.business_id)}</span><ul><li><a href="${fl('terms', lang)}">${e(u.legal)}</a></li><li>${pagePath('privacy', lang) ? `<a href="${fl('privacy', lang)}">${e(lang === 'en' ? privacyDocFor(P('privacy').fi, kb.policies, 'en')?.hero.title || u.privacy : u.privacy)}` : `<a href="${pageHref('privacy', 'fi')}"${lang === 'en' ? ' hreflang="fi" lang="fi"' : ''}>${e(u.privacy)}`}</a></li></ul></div>
 </div></footer>
 ${chat}
-<script>(function(){var d=new Intl.DateTimeFormat('en-US',{weekday:'short',timeZone:'Europe/Helsinki'}).format(new Date()),i={Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6}[d],l=document.querySelectorAll('.week>li');if(l[i]){l[i].classList.add('is-today');l[i].setAttribute('aria-current','date')}})()</script>
+<script>(function(){var d=new Intl.DateTimeFormat('en-US',{weekday:'short',timeZone:'Europe/Helsinki'}).format(new Date()),i={Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6}[d],l=document.querySelectorAll('.week>li');if(l[i]){l[i].classList.add('is-today');l[i].setAttribute('aria-current','date')}var n=l[(i+1)%7];if(n)n.classList.add('is-next');document.querySelectorAll('.week.soon').forEach(function(w){w.classList.add('is-filtered')})})()</script>
 </body></html>`;
 }
 
@@ -316,26 +328,21 @@ export const homeMeta = (lang) => P('home')[lang].meta;
 export function home(lang, opt = {}) {
   const d = P('home')[lang], u = ui(lang);
   const hero = `<section class="hero home">${heroPicture({ alt: alt('hero-ovi-uusi', lang) })}<div class="wrap in"><h1>${e(d.hero.title)}</h1><p>${e(d.hero.text)}</p><div class="actions"><a class="btn gold" href="${pageHref('book', lang)}">${e(d.hero.cta1)}</a><a class="btn ghost" href="${pageHref('gift', lang)}">${e(d.hero.cta2)}</a></div></div></section>`;
-  const tiles = `<div class="wrap"><ul class="tiles" style="list-style:none;padding:0;margin-bottom:0">${d.tiles.map((t) => `<li class="tile">${icon(t.icon, 44)}<h2>${e(t.title)}</h2><p>${e(t.text)}</p><div class="lk">${t.links.map((l) => `<a href="${e(link(l.to, lang, 'home'))}">${e(l.label)}</a>`).join('')}</div></li>`).join('')}</ul></div>`;
-  const wk = sec('', `<div class="week-head">${head(u.weekKicker, u.weekTitle, '', { left: true })}<a class="btn light sm" href="${pageHref('sauna', lang, 'yleiset')}">${e(u.allSessions)}</a></div>${week(lang)}`);
-  const rc = C('treatments.avoin-rituaali'), rp = product(rc.kb);
+  // Yksi tuoterivi (src/home-front.mjs): nimi, kuvaus, hinta ja kuva tuotteesta. home.jsonin tiles/featured/about jäävät tiedostoon (sivutekstit) mutta eivät renderöidy.
+  const choose = sec('home-tight', experienceHtml(lang), 'valitse-elamys');
+  const wk = sec('home-tight', `<div class="week-head">${head(u.weekKicker, u.weekTitle, '', { left: true })}<a class="btn light sm" href="${pageHref('sauna', lang, 'yleiset')}">${e(u.allSessions)}</a></div><div class="week-wrap"><p class="week-soon">${e(homeText('ui.site.home_week_soon', lang))}</p>${week(lang, { soon: true })}<details class="week-more"><summary><span class="o">${e(homeText('ui.site.home_week_all', lang))}</span><span class="c">${e(homeText('ui.site.home_week_less', lang))}</span></summary></details></div>`);
   const r = d.ritual;
-  const ritual = sec('', `<div class="ritual">${pic('rituaali', lang, { sizes: '(min-width:1200px) 1180px, 100vw' })}<div class="in"><p class="kicker">${e(r.kicker)}</p><h2>${e(r.title)}</h2>${r.paras.map((x) => `<p>${e(x)}</p>`).join('')}<ul class="facts">${r.facts.map((f) => `<li>${icon(f.icon, 30)}${e(f.text)}</li>`).join('')}</ul><p class="price">${e(money(rp.price, lang))}<small>${e(u.perPerson)}</small></p><a class="btn gold" href="${e(bookingUrl(rp.booking_url, lang))}" target="_blank" rel="noopener">${e(r.cta)}${NEW(lang)}</a></div></div>`);
-  const feat = sec('', `${head('', d.featured.title, '', { orn: true })}<ul class="cards five">${d.featured.items.map((it) => card({ kb: it.kb, img: it.img, show: it.show, exact: it.exact, over: it.over ? Object.fromEntries(Object.entries(it.over).map(([k, v]) => [k, { [lang]: v }])) : {}, note: it.note, extra: false, fi: { kicker: it.pill, title: it.title, text: it.text, cta: it.cta }, en: { kicker: it.pill, title: it.title, text: it.text, cta: it.cta } }, lang, { url: it.to ? link(it.to, lang, 'home') : undefined, sizes: '(min-width:1100px) 220px, (min-width:640px) 45vw, 100vw' }).replace(/ target="_blank"/, '').replace(NEW(lang), '')).join('')}</ul>`);
-  const a = d.about;
-  const about = sec('tint', `<div class="about"><div><p class="kicker">${e(a.kicker)}</p><h2 class="sec-title">${e(a.title)}</h2><p>${e(a.text)}</p><ul class="elements">${a.elements.map((x) => `<li>${icon(x.icon, 32)}<b>${e(x.title)}</b>${e(x.text)}</li>`).join('')}</ul><a class="btn light" href="${e(site.trainingUrl)}" rel="noopener">${e(a.cta)}${NEW(lang)}</a></div><div class="im">${pic(a.img, lang, { sizes: '(min-width:900px) 560px, 100vw' })}</div></div>`);
-  const ev = sec('', `${head('', d.events.title, u.eventsIntro, { orn: true })}${eventsHtml(lang, d.events.empty)}<p class="center" style="margin-top:28px"><a class="btn light sm" href="${pageHref('book', lang)}">${e(u.allEvents)}</a></p>`, 'tapahtumat');
-  // Varaa verkosta: kaikki uuden kaupan varattavat tuotteet linkkeinä kaupan tuotesivuille (src/shop-products.mjs)
-  const shopList = sec('tint', shopProductsHtml(lang, { esc: e, pageHref, head, product: (s) => kb.products.find((x) => x.slug === s) || null }), 'varaa-verkosta');
+  const tradition = sec('home-tight', traditionHtml(lang, { kicker: r.kicker, title: r.title, cta: r.cta, perPerson: u.perPerson }));
+  const ev = sec('home-tight', `${head('', d.events.title, '', { orn: true })}${eventsHtml(lang, d.events.empty, { limit: 2 })}<p class="center" style="margin-top:22px"><a class="btn light sm" href="${pageHref('book', lang)}">${e(u.allEvents)}</a></p>`, 'tapahtumat');
+  // Nauha vain kun kielellä on julkaistuja artikkeleita. Tyhjä lista ei saa jättää /saunatietoa/-linkkiä etusivulle.
+  const infoStripSec = publishedArticleCount(lang) > 0 ? sec('strip', infoStrip(lang), 'saunatietoa') : '';
   const co = d.company;
-  const comp = sec('tint', `<div class="company"><div><p class="kicker">${e(co.kicker)}</p><h2 class="sec-title">${e(co.title)}</h2><p>${e(co.text)}</p><div class="actions" style="display:flex;gap:12px;flex-wrap:wrap">${mailBtn(co.cta, co.mailSubject)}<a class="btn light" href="${pageHref('companies', lang)}">${e(co.cta2)}</a></div></div><div class="im">${pic(co.img, lang, { sizes: '(min-width:900px) 520px, 100vw' })}</div></div>`);
+  const comp = sec('strip tint', companyStrip(lang, { title: co.title, cta: co.cta2, href: pageHref('companies', lang) }), 'yrityksille');
   const s = d.story;
-  const story = sec('', `${head(s.kicker, s.title, s.lead, { orn: true })}<ol class="timeline">${s.items.map((i) => `<li><b>${e(i.year)}</b>${e(i.text)}</li>`).join('')}</ol><p class="center">${e(s.thanks)}</p><p class="center"><a href="${e(site.social[1].url)}" rel="noopener">${e(s.ig)}${NEW(lang)}</a></p>`);
+  const faq = sec('faq home-tight', `<header class="center"><h2 class="sec-title">${e(u.faqKicker)}</h2></header><details><summary>${e(s.title)}</summary><p>${e(s.lead)}</p><ol class="timeline">${s.items.map((i) => `<li><b>${e(i.year)}</b>${e(i.text)}</li>`).join('')}</ol><p>${e(s.thanks)}</p><p><a href="${e(site.social[1].url)}" rel="noopener">${e(s.ig)}${NEW(lang)}</a></p></details>`);
   const pre = heroPreload();
-  // Saunatietoa-osio: esirenderöity buildissa (src/articles/pages.mjs homeSectionHtml); tyhjä merkkijono = ei artikkeleita / haku epäonnistui → osio pois kokonaan
-  const arts = opt.articlesHtml ?? homeSection(lang);
-  const body = (opt.previewNote ? `<p class="prev-note" role="note">${e(opt.previewNote)}</p>` : '') + hero + tiles + wk + shopList + ritual + feat + arts + reviewsSection(lang) + about + ev + comp + story;
-  return layout({ lang, key: 'home', meta: opt.meta || d.meta, preload: pre, body, extraCss: arts ? homeArticlesCss : '', seo: opt.seo || null });
+  const body = (opt.previewNote ? `<p class="prev-note" role="note">${e(opt.previewNote)}</p>` : '') + hero + choose + wk + tradition + reviewsSection(lang) + ev + infoStripSec + comp + faq;
+  return layout({ lang, key: 'home', meta: opt.meta || d.meta, preload: pre, body, seo: opt.seo || null });
 }
 
 export function sauna(lang) {

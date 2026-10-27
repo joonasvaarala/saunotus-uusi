@@ -5,6 +5,8 @@ import { site, SITE_URL, isTest, abs, kb } from '../src/lib.mjs';
 import * as R from '../src/render.mjs';
 import { loadForBuild, renderForBuild, renderHomePreview } from '../src/articles/index.mjs';
 import { loadSiteTexts, setSiteTexts } from '../src/site-texts.mjs';
+import { refreshLiveCatalog } from '../src/catalog-live.mjs';
+import { refreshProductImages } from '../src/product-images.mjs';
 import { applyContentTexts } from '../src/content-texts.mjs';
 import { validLegacyRedirects, redirectHtml } from '../src/seo-enhance.mjs';
 
@@ -31,8 +33,10 @@ const render = {
   home: R.home, sauna: R.sauna, treatments: R.treatments, gift: R.gift, book: R.book, info: R.info, companies: R.companies,
   terms: (l) => R.policyPage('terms', 'terms', l), privacy: (l) => R.policyPage('privacy', 'privacy', l),
 };
-// Artikkelisivut + etusivun osio ennen perussivuja: kuvaversiot ja etusivun esirenderöity osio (setHomeSections) tarvitaan R.home():ssa
+// Artikkelisivut ennen perussivuja (navigaatiolinkki). Etusivun tuotekortit: public_catalog + public_product_images, epäonnistuminen → kb-snapshot.
 const articles = await renderForBuild(articleData, OUT, { write });
+await refreshLiveCatalog();
+await refreshProductImages();
 const urls = [];
 for (const [key, paths] of Object.entries(site.pages)) {
   for (const lang of ['fi', 'en']) {
