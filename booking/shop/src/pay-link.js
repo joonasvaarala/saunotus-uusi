@@ -8,6 +8,7 @@ import { functionUrl, rpc } from './sb.js';
 import { h } from './gift-ui.js';
 import { createOnlinePayApi } from './online-pay-api.js';
 import { PAY_METHODS, safeOnlineRedirect } from './online-pay-logic.js';
+import { paymentMethodList, setMethodLabel, setBusyState, methodLabelKey } from './online-pay-ui.js';
 import { pt } from './pay-choices-texts.js';
 import { PLT, plt } from './pay-link-texts.js';
 import { linkTokenFrom, classifyLinkError, switchHref, normLinkInfo, linkInfoView, fmtDate } from './pay-link-logic.js';
@@ -23,9 +24,13 @@ export function payLinkView({ L, token, api, loadInfo = null, phone = '', phoneT
     return c;
   };
   let busy = false;
-  const labelKey = { paymentInitiation: 'methodBank', cardPayments: 'methodCard', applePay: 'methodApple', googlePay: 'methodGoogle', mobilePay: 'methodWallet' };
-  const buttons = [];
-  const setBusy = (on, active, label) => { for (const b of buttons) b.disabled = on; if (active) active.textContent = on ? tx('busyOnline') : label; };
+  let buttons = [];
+  const setBusy = (on, active, label) => {
+    for (const b of buttons) b.disabled = on;
+    if (!active) return;
+    setBusyState(active, on);
+    setMethodLabel(active, on ? tx('busyOnline') : label);
+  };
   async function start(code, btn, label) {
     if (busy) return;
     busy = true; setBusy(true, btn, label); msg.replaceChildren();
@@ -47,14 +52,16 @@ export function payLinkView({ L, token, api, loadInfo = null, phone = '', phoneT
     if (c.final) { for (const b of buttons) b.remove(); }   // lopullinen tila: uusi yritys ei auta (.btn-tyyli ohittaisi hidden-attribuutin)
     busy = false; if (!c.final) setBusy(false, btn, label);
   }
-  for (const code of PAY_METHODS) {
-    const label = pt(L, labelKey[code] || 'methodBank');
-    const btn = h('button', { type: 'button', class: 'btn ord-btn', 'data-testid': code === 'paymentInitiation' ? 'pl-button' : `pl-method-${code}`, text: label, onclick: () => start(code, btn, label) });
-    buttons.push(btn);
-  }
+  const list = paymentMethodList({
+    choices: PAY_METHODS.map((code) => ({ method: code, label: pt(L, methodLabelKey(code)) })),
+    groupTestId: 'pl-methods',
+    testId: (c) => c.method === 'paymentInitiation' ? 'pl-button' : `pl-method-${c.method}`,
+    onSelect: (c, btn, label) => start(c.method, btn, label),
+  });
+  buttons = list.buttons;
   const lead = h('p', { 'data-testid': 'pl-lead', text: tx('leadOnline') });
   const card = h('section', { class: 'ord-card pl-card', 'data-testid': 'pay-link-page', 'aria-labelledby': 'pl-title' },
-    h('h3', { id: 'pl-title', text: tx('title') }), lead, ...buttons, msg, contact);
+    h('h3', { id: 'pl-title', text: tx('title') }), lead, list.root, msg, contact);
   if (!token) { showError('invalid_param'); for (const b of buttons) b.remove(); card.ready = Promise.resolve(null); return card; }
   if (!loadInfo) { card.ready = Promise.resolve(null); return card; }
   // yhteenveto: painikkeet odottavat vastausta (ei kaksoistilaa), mutta eivät koskaan aloita maksua itse

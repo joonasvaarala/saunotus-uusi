@@ -250,7 +250,7 @@ async function main() {
       refundNote,
       payLead ? h('p', { class: 'bk-note', 'data-testid': 'ord-pay-lead', text: payLead }) : null,
       payAmount ? h('p', { class: 'mp-amount', 'data-testid': 'ord-pay-amount', text: payAmount }) : null,
-      payTest ? h('p', { class: 'mp-test', role: 'note', 'data-testid': 'op-test', text: payTest }) : null,
+      payTest ? h('p', { class: 'bk-note op-testnote', role: 'note', 'data-testid': 'op-test', text: payTest }) : null,
       co?.awaiting ? h('p', { class: 'bk-note', 'data-testid': 'ord-hold-choose', text: ht(L, 'chooseOnline') }) : null,
       onBlock ? h('div', { class: 'ord-pay-methods', 'data-testid': 'ord-pay-methods' }, onBlock) : null,
       checking ? null : link ? h('a', { class: 'btn ord-btn', 'data-testid': 'pay-link', href: S.base ? S.base + link.link_path : link.link_path, text: `${t.payRest} (${money(unpaid)})` })

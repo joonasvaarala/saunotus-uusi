@@ -444,14 +444,36 @@ a.bk-sd:hover{filter:brightness(.97)}
 .ord-opt-sec h4{font:600 13px var(--label);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
 @media(max-width:420px){.bk-opt legend{font-size:22px}}
 
-/* ---- Maksuvalinta vahvistussivulla (MobilePay + lahjakortti): sama tyyli kuin tilaussivun maksukortit; vain MobilePay-painike on brändivärinen ---- */
+/* ---- Maksuvalinta vahvistussivulla: verkkomaksun tavat + lahjakortti. Tavat ovat .op-method (yhteinen komponentti). ---- */
 .bk-paychoices{margin:18px 0}
 .bk-paychoices h3{margin:0 0 8px}
 .bk-paychoices>*+*{margin-top:12px}
 .bk-paychoices .bk-ok{margin:0}
 .pc-opt{display:grid;gap:10px;padding:14px 0 0;border-top:1px solid var(--line)}
 .pc-opt .mp-block{margin:0}
-.pc-gift-btn{width:100%;max-width:420px}
+/* Verkkomaksun tavat: samankokoiset rivit, ei pillivarjoa. Kapea = lista, leveä = kaksi yhtä suurta saraketta. */
+.op-block{display:grid;gap:10px}
+.op-block>p{margin:0}
+.op-testnote{margin:0;padding:0;border:0;background:none;color:var(--muted);font-size:13px;line-height:1.45;font-weight:400}
+.op-methods{container-type:inline-size;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0}
+.op-method{flex:1 1 100%;max-width:100%;min-width:0;min-height:52px;display:flex;align-items:center;gap:12px;padding:8px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font:700 16px/1.25 var(--body);letter-spacing:0;text-transform:none;text-align:left;cursor:pointer;box-shadow:none;touch-action:manipulation}
+.op-method-ico{flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:#e8f3ea;color:var(--green)}
+.op-method-ico svg,.op-method-go svg,.op-gift-ico svg{width:22px;height:22px;display:block}
+.op-method-label{flex:1;min-width:0}
+.op-method-go{flex:none;display:grid;place-items:center;width:18px;height:18px;color:var(--muted)}
+.op-method:hover{border-color:var(--green)}
+.op-method:hover .op-method-ico{background:var(--green);color:var(--bg)}
+.op-method:focus{outline:none}
+.op-method:focus-visible,.bk-paychoices .pc-gift-btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.op-method:active{background:var(--tint)}
+.op-method:disabled{background:transparent;border:1px dashed #8b7f73;color:var(--muted);cursor:not-allowed}
+.op-method:disabled .op-method-ico{background:transparent;color:var(--muted)}
+@container (max-width:220px){.op-method{padding:8px 12px;gap:10px}.op-method-go{display:none}.op-method-ico{width:32px;height:32px}}
+@container (min-width:480px){.op-method{flex:1 1 calc(50% - 4px);max-width:calc(50% - 4px)}}
+@media (forced-colors:active){.op-method,.bk-paychoices .pc-gift-btn{border:1px solid ButtonText}.op-method:focus-visible,.bk-paychoices .pc-gift-btn:focus-visible{outline:3px solid Highlight}}
+.bk-paychoices .pc-gift-btn{width:100%;max-width:none;min-height:52px;box-shadow:none;border-radius:12px;font:700 16px/1.25 var(--body);letter-spacing:0;text-transform:none;display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:10px 16px}
+.op-gift-ico{display:grid;place-items:center;width:22px;height:22px;flex:none}
+.pc-gift-btn{width:100%;max-width:none}
 .pc-gift-panel{display:grid;gap:10px}
 .pc-gift-panel[hidden]{display:none}
 .gc-redeem-bare{display:grid;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:#fff}
@@ -487,7 +509,7 @@ a.bk-sd:hover{filter:brightness(.97)}
 
 /* Testivaihtoehto "maksu paikan päällä" (booking_57): oikea nappi, sivuston tyyli (kulta/vaalea, ei sinistä), 44 px, selite napin alla */
 .pc-paylater{gap:8px}
-.pc-paylater-btn{width:100%;max-width:420px;min-height:44px;border:2px dashed var(--gold)}
+.pc-paylater-btn{width:100%;max-width:none;min-height:52px;border:2px dashed var(--gold)}
 .pc-paylater-btn:disabled{opacity:.7;cursor:not-allowed}
 .pc-paylater .bk-note{margin:0}
 .pc-paylater-msg{margin:0}

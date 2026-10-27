@@ -73,8 +73,8 @@ test('logiikka: normLinkInfo hyväksyy vain ok-vastauksen tunnetulla tilalla; li
 test('näkymä open: summa, tilausnumero, rivit pvm/klo, voimassaolo ennen painiketta; maksua ei aloiteta latauksessa', async () => {
   let v = await view('fi', OPEN);
   assert.equal(v.attrs['data-status'], 'open'); assert.equal(v.attrs['aria-busy'], 'false');
-  const order = v.children.map((c) => c.attrs?.['data-testid']).filter(Boolean);
-  assert.ok(order.indexOf('pl-summary') < order.indexOf('pl-button'), `yhteenveto ennen painiketta: ${order}`);
+  const ids = v.all().map((e) => e.attrs['data-testid']).filter(Boolean);
+  assert.ok(ids.indexOf('pl-summary') < ids.indexOf('pl-button'), `yhteenveto ennen painiketta: ${ids}`);
   assert.equal(v.q('pl-sum-amount').textContent, '4,00 €');
   assert.match(v.q('pl-order').textContent, /Tilausnumero 15655/);
   const items = v.qa('pl-item');

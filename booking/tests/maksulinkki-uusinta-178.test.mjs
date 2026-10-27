@@ -67,7 +67,8 @@ test('näkymä: peruttu yritys → yhteenveto, uusintaviesti ja painike (FI+EN);
     assert.equal(v.attrs['data-status'], 'open');
     const r = v.q('pl-retry'); assert.ok(r, 'uusintaviesti'); assert.match(r.textContent, re); assert.equal(r.attrs['data-code'], la); assert.equal(r.attrs.role, 'status');
     const order = v.children.map((c) => c.attrs?.['data-testid']).filter(Boolean);
-    assert.ok(order.indexOf('pl-summary') < order.indexOf('pl-retry') && order.indexOf('pl-retry') < order.indexOf('pl-lead') && order.indexOf('pl-lead') < order.indexOf('pl-button'), `järjestys: ${order}`);
+    const ids = v.all().map((e) => e.attrs['data-testid']).filter(Boolean);
+    assert.ok(order.indexOf('pl-summary') < order.indexOf('pl-retry') && order.indexOf('pl-retry') < order.indexOf('pl-lead') && ids.indexOf('pl-lead') < ids.indexOf('pl-button'), `järjestys: ${order} / ${ids}`);
     assert.ok(v.q('pl-button') && !v.q('pl-button').disabled); assert.equal(v.q('pl-state'), null); assert.equal(v.q('pl-sum-amount').textContent, '30,00 €');
   }
   assert.equal((await view('fi', OPEN)).q('pl-retry'), null, 'ei aiempaa yritystä → ei viestiä');
