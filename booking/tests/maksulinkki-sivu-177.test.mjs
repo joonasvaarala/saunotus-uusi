@@ -150,6 +150,27 @@ test('build: /maksa/ ja /en/pay/ syntyvät polkuetuliitteellä (GitHub Pages) ja
   }
 });
 
+test('maksutavat: MobilePay mukana, checkout-isäntä sallitaan, valittu rivi erottuu', async () => {
+  const { PAY_METHODS, safeOnlineRedirect } = await imp('online-pay-logic.js');
+  const { paymentMethodList } = await imp('online-pay-ui.js');
+  assert.deepEqual(PAY_METHODS, ['paymentInitiation', 'cardPayments', 'applePay', 'googlePay', 'mobilePay']);
+  assert.equal(safeOnlineRedirect('https://sandbox-checkout.montonio.com/pay/1'), 'https://sandbox-checkout.montonio.com/pay/1');
+  assert.equal(safeOnlineRedirect('https://checkout.montonio.com/pay/1'), 'https://checkout.montonio.com/pay/1');
+  assert.equal(safeOnlineRedirect('http://checkout.montonio.com/pay/1'), null);
+  assert.equal(safeOnlineRedirect('https://evil.example/pay'), null);
+  const list = paymentMethodList({
+    choices: PAY_METHODS.map((m) => ({ method: m, label: m })),
+    selected: 'mobilePay',
+    testId: (c) => c.method,
+    onSelect: () => {},
+  });
+  const on = list.buttons.find((b) => String(b.className).includes('is-on'));
+  assert.equal(on.getAttribute('data-testid'), 'mobilePay');
+  assert.equal(on.getAttribute('aria-pressed'), 'true');
+  assert.equal(list.buttons.filter((b) => b.getAttribute('aria-pressed') === 'false').length, 4);
+  assert.equal(list.root.getAttribute('data-testid'), 'op-methods');
+});
+
 test('hallinnan maksulinkki: absLink säilyttää sivuston polkuetuliitteen (ei …github.io/maksa/)', async () => {
   const A = await import(pathToFileURL(join(root, 'booking/admin/talous-api.js')).href);
   assert.equal(A.absLink('/maksa/?p=1', { order_page_path: 'https://joonasvaarala.github.io/saunotus-uusi/tilaus/?t=abc' }), 'https://joonasvaarala.github.io/saunotus-uusi/maksa/?p=1');

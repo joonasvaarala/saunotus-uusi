@@ -81,6 +81,20 @@ test('alkoholi: sanaraja, alkoholiton ja viinirypäle sallitaan', () => {
   assert.equal(drinksAlcohol('olut'), true);
 });
 
+test('juomasivu käyttää yhteistä maksutapariviä, MobilePay mukana', () => {
+  const drinks = readFileSync(new URL('../drinks/drinks.js', import.meta.url), 'utf8');
+  const build = readFileSync(new URL('../../scripts/build-pages.mjs', import.meta.url), 'utf8');
+  const css = readFileSync(new URL('../drinks/drinks.css', import.meta.url), 'utf8');
+  assert.match(drinks, /paymentMethodList/);
+  assert.match(drinks, /from '\.\.\/shop\/src\/online-pay-logic\.js'/);
+  assert.match(drinks, /safeOnlineRedirect/);
+  assert.match(drinks, /Maksa verkossa/);
+  assert.doesNotMatch(drinks, /Montonio/);
+  assert.match(css, /\.op-method\.is-on/);
+  assert.match(css, /\.bk-error/);
+  assert.match(build, /DRINK_PAY_UI = \['online-pay-ui\.js', 'online-pay-logic\.js'/);
+});
+
 test('juomasivu lukee laite-parametrin', () => {
   assert.equal(deviceFromSearch('?laite=pukuhuone-abcdef1234&mock=1'), 'pukuhuone-abcdef1234');
   assert.equal(deviceFromSearch('?device=abc'), 'abc');

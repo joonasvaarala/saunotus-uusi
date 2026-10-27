@@ -1,7 +1,11 @@
 // Julkinen kylmälaite-sivu. Ei kirjautumista. Hinta tulee palvelimelta.
+// Maksutavat ovat sama rivi kuin tilaussivulla ja maksulinkissä (online-pay-ui). MobilePay kulkee samassa listassa.
 import { drinksText as tx, loadDrinksTexts } from './drinks-texts.js';
 import { checkoutItems, cartTotal, drinksCartAdd, drinksCartSet, productLabel, deviceFromSearch, placeLabel } from './drinks-logic.js';
 import { createDrinksMock } from './drinks-mock.js';
+import { PAY_METHODS, safeOnlineRedirect } from '../shop/src/online-pay-logic.js';
+import { methodLabelKey, paymentMethodList } from '../shop/src/online-pay-ui.js';
+import { pt } from '../shop/src/pay-choices-texts.js';
 
 const lang = document.documentElement.lang === 'en' ? 'en' : 'fi';
 const t = (k) => tx(k, lang);
@@ -40,17 +44,11 @@ const app = document.getElementById('app');
 let products = [];
 let cart = [];
 let device = null;
-const PAY_METHODS = [
-  ['paymentInitiation', 'Verkkopankki', 'Online bank'],
-  ['cardPayments', 'Kortti', 'Card'],
-  ['applePay', 'Apple Pay', 'Apple Pay'],
-  ['googlePay', 'Google Pay', 'Google Pay'],
-  ['mobilePay', 'MobilePay', 'MobilePay'],
-];
 let method = 'paymentInitiation';
 let email = '';
 let phase = 'shop';
 let note = '';
+let noteErr = false;
 let order = null;
 let poll = null;
 
@@ -96,46 +94,45 @@ function draw() {
   main.append(list);
   const emailInp = el('input', { type: 'email', autocomplete: 'email', value: email, 'aria-label': t('email'), 'data-testid': 'drinks-email' });
   emailInp.addEventListener('input', () => { email = emailInp.value; });
+  const methods = paymentMethodList({
+    choices: PAY_METHODS.map((code) => ({ method: code, label: pt(lang, methodLabelKey(code)) })),
+    groupTestId: 'drinks-methods',
+    selected: method,
+    testId: (c) => `drinks-${c.method}`,
+    onSelect: (c) => { if (phase === 'paying') return; method = c.method; note = ''; draw(); },
+  });
+  if (phase === 'paying') for (const b of methods.buttons) b.disabled = true;
+  const payPanel = el('section', { class: 'pay-panel', 'aria-label': lang === 'en' ? 'Pay online' : 'Maksa verkossa' },
+    methods.root,
+    note ? el('p', { class: noteErr ? 'bk-error' : 'bk-note', role: noteErr ? 'alert' : 'status', 'data-testid': 'drinks-note', text: note }) : null,
+    el('label', { class: 'email' }, t('email'), el('span', { class: 'note', text: t('email_hint') }), emailInp),
+    el('p', { class: 'legal', text: t('pay_legal') }));
   const bar = el('div', { class: 'bar' },
     el('p', { class: 'total', 'data-testid': 'drinks-total', text: money(cartTotal(cart)) }),
-    el('div', { class: 'methods', 'data-testid': 'drinks-methods' },
-      ...PAY_METHODS.map(([code, fi, en]) => el('button', { type: 'button', 'aria-pressed': method === code ? 'true' : 'false', 'data-testid': `drinks-${code}`, text: lang === 'en' ? en : fi, onclick: () => { method = code; draw(); } }))),
-    el('label', { class: 'email' }, t('email'), el('span', { class: 'note', text: t('email_hint') }), emailInp),
-    note ? el('p', { class: 'note', 'data-testid': 'drinks-note', text: note }) : null,
-    el('p', { class: 'legal', text: t('pay_legal') }),
     el('button', { type: 'button', class: 'pay', 'data-testid': 'drinks-pay', text: phase === 'paying' ? t('waiting') : t('pay'), onclick: () => pay() }));
-  app.replaceChildren(main, bar);
+  app.replaceChildren(main, payPanel, bar);
 }
 
 async function pay() {
   if (!cart.length || phase === 'paying') return;
-  if (!deviceCode || device?.active === false || device?.unknown) { note = t('qr_missing'); draw(); return; }
-  if (email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email.trim())) { note = t('invalid_email'); draw(); return; }
-  note = '';
+  if (!deviceCode || device?.active === false || device?.unknown) { note = t('qr_missing'); noteErr = true; draw(); return; }
+  if (email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email.trim())) { note = t('invalid_email'); noteErr = true; draw(); return; }
+  note = ''; noteErr = false;
   const res = await rpc('public_drinks_checkout', { p_device: deviceCode, p_items: checkoutItems(cart), p_email: email.trim() || null, p_locale: lang });
-  if (!res?.ok) { note = res?.message || res?.code || t('empty'); draw(); return; }
+  if (!res?.ok) { note = res?.message || res?.code || t('empty'); noteErr = true; draw(); return; }
   order = res;
   phase = 'paying';
   const started = mock
     ? { ok: true, redirect_url: null, dry_run: true }
     : await callFn('montonio-start', { order_token: res.public_token, method });
   if (mock) mock.arm(res.public_token);
-  const back = safeOnline(started?.redirect_url);
+  const back = safeOnlineRedirect(started?.redirect_url);
   if (back) { location.href = back; return; }
-  if (started?.code === 'online_off' || started?.code === 'not_configured') note = t('visma_off');
-  else if (started?.dry_run || mock) note = t('visma_dry');
-  else if (started?.ok === false) note = t('visma_off');
+  if (started?.dry_run || mock) { note = t('visma_dry'); noteErr = false; }
+  else if (started?.code === 'online_off' || started?.code === 'not_configured') { note = t('visma_off'); noteErr = true; }
+  else { note = pt(lang, 'errGeneric'); noteErr = true; }
   draw();
   watch(res.public_token);
-}
-
-function safeOnline(url) {
-  try {
-    const u = new URL(String(url || ''));
-    const hosts = ['sandbox-stargate.montonio.com', 'stargate.montonio.com', 'sandbox-gateway.montonio.com', 'gateway.montonio.com', 'pay.montonio.com'];
-    if (u.protocol !== 'https:' || !hosts.includes(u.hostname)) return null;
-    return u.href;
-  } catch { return null; }
 }
 
 function watch(token) {

@@ -1,6 +1,7 @@
 // Verkkomaksu: maksutavan valinta ja sallitut paluuosoitteet. Asiakkaalle ei näytetä välittäjän nimeä.
 export const PAY_METHODS = ['paymentInitiation', 'cardPayments', 'applePay', 'googlePay', 'mobilePay'];
-const HOSTS = new Set(['sandbox-stargate.montonio.com', 'stargate.montonio.com', 'sandbox-gateway.montonio.com', 'gateway.montonio.com', 'pay.montonio.com']);
+// Kortti ja lompakko palauttavat checkout-isännän; pankki gatewayn. Asiakkaalle ei näytetä välittäjän nimeä.
+const HOSTS = new Set(['sandbox-stargate.montonio.com', 'stargate.montonio.com', 'sandbox-gateway.montonio.com', 'gateway.montonio.com', 'pay.montonio.com', 'sandbox-checkout.montonio.com', 'checkout.montonio.com']);
 
 /** public_payment_options / public_checkout_payment_options: code online, tai null. */
 export function onlineMethod(methods) {

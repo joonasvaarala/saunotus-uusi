@@ -66,6 +66,9 @@ Deno.test("resolveHost: test on sandbox, live vaatii live-tilan, väärä pari h
   assertEquals(safePaymentUrl("https://sandbox-stargate.montonio.com/pay/1")?.includes("sandbox-stargate"), true);
   assertEquals(safePaymentUrl("https://sandbox-gateway.montonio.com/payment/uuid"), "https://sandbox-gateway.montonio.com/payment/uuid");
   assertEquals(safePaymentUrl("https://gateway.montonio.com/some-random-uuid"), "https://gateway.montonio.com/some-random-uuid");
+  assertEquals(safePaymentUrl("https://sandbox-checkout.montonio.com/session/card"), "https://sandbox-checkout.montonio.com/session/card");
+  assertEquals(safePaymentUrl("https://checkout.montonio.com/session/wallet"), "https://checkout.montonio.com/session/wallet");
+  assertEquals(safePaymentUrl("http://checkout.montonio.com/session/card"), null);
   assertEquals(safePaymentUrl("https://payments.montonio.com/pay"), null);
 });
 

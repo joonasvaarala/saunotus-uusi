@@ -92,6 +92,7 @@ function resolveFile(p) {
   if (p.startsWith('/admin/')) return join(booking, 'admin', p.slice(7) || 'index.html');
   if (p === '/juomat/' || p.startsWith('/juomat/')) return drinksFile('/juomat/', p, 'index.html');
   if (p === '/en/drinks/' || p.startsWith('/en/drinks/')) return drinksFile('/en/drinks/', p, 'index.en.html');
+  if (p.startsWith('/shop/src/') && !p.includes('..')) return join(booking, 'shop/src', p.slice('/shop/src/'.length));
   return join(SHOP, p);
 }
 // MOCK Supabase Storage (vain demossa): bucket product-images. Lataukset ~/tmp/booking-demo-storage, demokuvat booking/dev/demo-images.
