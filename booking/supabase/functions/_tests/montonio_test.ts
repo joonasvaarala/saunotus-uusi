@@ -62,7 +62,11 @@ Deno.test("resolveHost: test on sandbox, live vaatii live-tilan, väärä pari h
   assertEquals(resolveHost("off", testEnv()).ok, false);
   assertEquals(readCreds(envOf({})) , null);
   assertEquals(safePaymentUrl("https://evil.example/pay"), null);
+  assertEquals(safePaymentUrl("http://sandbox-gateway.montonio.com/payment/uuid"), null);
   assertEquals(safePaymentUrl("https://sandbox-stargate.montonio.com/pay/1")?.includes("sandbox-stargate"), true);
+  assertEquals(safePaymentUrl("https://sandbox-gateway.montonio.com/payment/uuid"), "https://sandbox-gateway.montonio.com/payment/uuid");
+  assertEquals(safePaymentUrl("https://gateway.montonio.com/some-random-uuid"), "https://gateway.montonio.com/some-random-uuid");
+  assertEquals(safePaymentUrl("https://payments.montonio.com/pay"), null);
 });
 
 Deno.test("createOrder: JWT-runko ja kuvaus ilman välittäjän nimeä", async () => {

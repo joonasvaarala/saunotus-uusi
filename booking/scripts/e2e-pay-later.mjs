@@ -36,18 +36,16 @@ const WIDTHS = [360, 390, 430, 1280];
 const PATH = { fi: { shop: '/varaa/', order: '/tilaus/', confirm: '/varaa/vahvistus/' }, en: { shop: '/en/book/', order: '/en/order/', confirm: '/en/book/confirmation/' } };
 const TOKEN = '3f2b8c1e-5a7d-4e9f-8b6a-1c2d3e4f5a6b';
 
-const STUB = `class B extends HTMLElement{connectedCallback(){const r=this.attachShadow({mode:'open'});r.innerHTML='<button type="button" part="b" style="display:block;width:100%;min-height:48px;background:#5a78ff;color:#fff;border:0;border-radius:24px;font:700 17px sans-serif">'+(this.getAttribute('language')==='en'?'Pay with MobilePay':'Maksa MobilePaylla')+'</button>';r.querySelector('button').addEventListener('click',()=>this.dispatchEvent(new Event('click',{bubbles:true})));}}customElements.get('vipps-mobilepay-button')||customElements.define('vipps-mobilepay-button',B);`;
 async function newPage(width, lang = 'fi', name = 'p', { deviceSkewMs = 0 } = {}) {
   const mobile = width < 600;
   const ctx = await browser.newContext({ viewport: { width, height: mobile ? 844 : 900 }, isMobile: mobile, hasTouch: mobile, locale: lang === 'en' ? 'en-GB' : 'fi-FI', timezoneId: TZ });
-  await ctx.route('https://cdn.vippsmobilepay.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/javascript', body: STUB }));   // MobilePayn virallinen painike: tynkä (ei verkkoa)
   if (deviceSkewMs) await ctx.addInitScript((skew) => { const R = Date.now.bind(Date); Date.now = () => R() + skew; const O = Date; globalThis.Date = class extends O { constructor(...a) { if (a.length) super(...a); else super(R() + skew); } static now() { return R() + skew; } }; }, deviceSkewMs);   // laitteen kello väärässä
   const page = await ctx.newPage(); page.ctx = ctx;
   page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) problems.push(`${name} console.${m.type()}: ${m.text()} ${m.location().url || ''}`); });
   page.on('pageerror', (e) => problems.push(`${name} pageerror: ${e.message}`));
   page.on('requestfailed', (r) => { if (!/ERR_ABORTED/.test(r.failure()?.errorText || '')) problems.push(`${name} requestfailed: ${r.url()}`); });
   page.on('response', (r) => { if (r.status() >= 400) problems.push(`${name} HTTP ${r.status()}: ${r.url()}`); });
-  page.on('request', (r) => { if (!r.url().startsWith(ORIGIN) && !r.url().startsWith('data:') && !r.url().startsWith('https://cdn.vippsmobilepay.com/')) problems.push(`${name} ulkoinen pyyntö: ${r.url()}`); if (/\/rest\/v1\/|\/functions\/v1\/|:4181/.test(r.url())) problems.push(`${name} PYYNTÖ BACKENDILLE (mock-tilan pitäisi olla offline): ${r.url()}`); });
+  page.on('request', (r) => { if (!r.url().startsWith(ORIGIN) && !r.url().startsWith('data:')) problems.push(`${name} ulkoinen pyyntö: ${r.url()}`); if (/\/rest\/v1\/|\/functions\/v1\/|:4181/.test(r.url())) problems.push(`${name} PYYNTÖ BACKENDILLE (mock-tilan pitäisi olla offline): ${r.url()}`); });
   return page;
 }
 const settle = (page) => page.waitForTimeout(150);
@@ -106,7 +104,7 @@ for (const lang of ['fi', 'en']) for (const w of [390, 1280]) {
   expect((await text(page, '[data-testid=pc-paylater] .pc-paylater-note')) === ht(lang, 'payLater.text'), `${lang} ${w}: selitysteksti`);
   expect(!(await has(page, '[data-testid=pc-onsite-test]')), `${lang} ${w}: vanha tietolaatikko poissa`);
   const box = await (await page.$('[data-testid=pc-paylater-btn]')).boundingBox(); expect(box.height >= 43.5 && box.width >= 43.5, `${lang} ${w}: nappi ≥ 44 px (${Math.round(box.width)}x${Math.round(box.height)})`);
-  expect(await page.evaluate(() => { const b = document.querySelector('[data-testid=pc-paylater-btn]'), m = document.querySelector('[data-testid=pc-mobilepay]'), p = document.querySelector('[data-testid=hold-panel]'); return !!(p.compareDocumentPosition(b) & 4) && !!(m.compareDocumentPosition(b) & 4); }), `${lang} ${w}: nappi pitopaneelin ja MobilePayn jälkeen`);
+  expect(await page.evaluate(() => { const b = document.querySelector('[data-testid=pc-paylater-btn]'), m = document.querySelector('[data-testid=pc-online]'), p = document.querySelector('[data-testid=hold-panel]'); return !!(p.compareDocumentPosition(b) & 4) && !!(m.compareDocumentPosition(b) & 4); }), `${lang} ${w}: nappi pitopaneelin ja verkkomaksun jälkeen`);
   expect(!/vahvistuu, kun koko summa|confirmed once the full amount/i.test(await page.textContent('body')), `${lang} ${w}: poistettu lause ei näy`);
   expect((await text(page, '[data-testid=hold-must]')) === ht(lang, 'mustPay', { minutes: 15 }), `${lang} ${w}: 15 min -ohje jäljellä`);
   await layout(page, '#booking-app', `pay-later nappi ${lang} ${w}`);
@@ -128,7 +126,7 @@ for (const lang of ['fi', 'en']) for (const w of [390, 1280]) {
   expect(/Maksamatta|Unpaid/.test(await text(page, 'dl.bk-sum')), `${lang} ${w}: yhteenvedossa maksutila Maksamatta/Unpaid`);
   expect((await text(page, '[data-testid=conf-title]')) !== ht(lang, 'h2.awaiting'), `${lang} ${w}: otsikko ei enää "odottaa maksua"`);
   expect(await has(page, 'a[download]'), `${lang} ${w}: kalenterilisäys tarjolla vahvistuksen jälkeen`);
-  expect(await has(page, '[data-testid=pc-mobilepay]'), `${lang} ${w}: MobilePay-maksu jää tarjolle (maksamatta)`);
+  expect(await has(page, '[data-testid=pc-online]'), `${lang} ${w}: verkkomaksu jää tarjolle (maksamatta)`);
   await layout(page, '#booking-app', `pay-later onnistui ${lang} ${w}`);
   await page.screenshot({ path: join(SHOT, `vahvistus-${lang}-${w}-onnistui.png`), fullPage: true });
   await page.ctx.close();
@@ -187,7 +185,7 @@ for (const [sc, extra, label] of [['hold', '&testui=0', 'testui=0 (tuotanto: lip
 {   // testui ei tuo nappia ilman palvelimen tapaa: BOOKING_CONFIG.mobilepayTestUi=true + scenario pay
   const page = await newPage(390, 'fi', 'none-cfg');
   await page.addInitScript(() => { window.BOOKING_CONFIG = { ...(window.BOOKING_CONFIG || {}), mobilepayTestUi: true }; });
-  await goto(page, conf('fi', 'pay')); await page.waitForSelector('[data-testid=pc-mobilepay]');
+  await goto(page, conf('fi', 'pay')); await page.waitForSelector('[data-testid=pc-online]');
   expect(!(await has(page, '[data-testid=pc-paylater-btn]')), 'env testUi ei riitä: ei nappia ilman pay_later-tapaa palvelimelta');
   await page.ctx.close();
 }

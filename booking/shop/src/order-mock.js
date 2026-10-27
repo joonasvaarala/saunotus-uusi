@@ -73,9 +73,10 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
       body: locale === 'en' ? 'Sample instruction on the trial page. This is not a real customer message.' : 'Esimerkkiohje kokeilusivulla. Tämä ei ole oikea asiakasviesti.',
       rich: false, delivery_mode: 'order_only', link_url: null }];
   }
-  const mp = { started: false, returning: false, polls: 0, settled: false };
+  const payOnLoad = (() => { try { return new URLSearchParams(globalThis.location?.search || '').get('pay') || ''; } catch { return ''; } })();
+  const mp = { started: false, returning: ['online', 'mobilepay', 'vismapay'].includes(payOnLoad), polls: 0, settled: false };
   const mpMarkPaid = () => {
-    const amt = o.unpaid; o.paid = r2(o.paid + amt); o.payments.push({ status: 'paid', amount: amt, paid_at: new Date().toISOString(), method_label: 'MobilePay', link_token: null, link_path: null });
+    const amt = o.unpaid; o.paid = r2(o.paid + amt); o.payments.push({ status: 'paid', amount: amt, paid_at: new Date().toISOString(), method_label: 'Maksa verkossa', link_token: null, link_path: null });
     o.receipts.push({ receipt_no: 'K-2026-000777', kind: 'receipt', issued_at: new Date().toISOString(), token: '9a8b7c6d-1111-4222-8333-444455556677', total: amt }); o.status = 'confirmed'; sync(); mp.settled = true;
   };
   sync();
@@ -136,7 +137,9 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
     public_get_order: ({ p_token }) => {
       if (mp.returning && mpResult === 'netfail') throw new TypeError('Failed to fetch');
       if (mp.returning && !mp.settled && ['paid', 'review'].includes(mpResult || 'paid') && ++mp.polls >= 3) mpMarkPaid();
-      return p_token === TOKEN || p_token ? snap() : bad('not_found', 'Tilausta ei löytynyt');
+      const row = p_token === TOKEN || p_token ? snap() : bad('not_found', 'Tilausta ei löytynyt');
+      if (row?.ok && mp.returning && mpResult === 'failed' && !mp.settled) row.payment_status = 'failed';
+      return row;
     },
     // booking_57: pay_later (testi) vain pitoskenaarioissa, kun testui != 0 ja tilaus odottaa maksua (kuten palvelin: lippu päällä + awaiting_payment)
     public_payment_options: ({ p_token }) => withPayLater(mpScenario && mpScenario !== 'mp-off'

@@ -119,7 +119,10 @@ begin
   perform pg_temp.svc();
   r := booking.montonio_payment_prepare(tok, null, 'paymentInitiation');
   a1 := r ->> 'order_number'; amt := (r ->> 'amount')::numeric; pid := (r ->> 'payment_id')::bigint;
+  -- payments_updated sets updated_at = now() on every update, so the backdate must bypass the trigger.
+  alter table booking.payments disable trigger payments_updated;
   update booking.payments set updated_at = now() - interval '3 minutes' where id = pid;
+  alter table booking.payments enable trigger payments_updated;
   r := booking.montonio_payment_prepare(tok, null, 'paymentInitiation');
   a2 := r ->> 'order_number';
   perform pg_temp.ck(a2 ~ '-a2$' and a2 is distinct from a1, 'F1 toinen yritys a2 ' || coalesce(a2, 'null'));
@@ -132,7 +135,10 @@ begin
   -- ===== G hyvitys: leima ei luo H-kuittia, complete luo
   select id into pid from booking.payments where provider_ref = a2;
   insert into booking.refunds(payment_id, order_id, amount, reason, status, provider, lines)
-  values (pid, o3, amt, 't188 hyvitys', 'requested', 'montonio', '[]'::jsonb) returning id into rf;
+  select pid, o3, amt, 't188 hyvitys', 'requested', 'montonio',
+         coalesce((select jsonb_agg(jsonb_build_object('payment_line_id', pl.id, 'amount', pl.amount_gross) order by pl.id)
+                     from booking.payment_lines pl where pl.payment_id = pid), '[]'::jsonb)
+  returning id into rf;
   perform pg_temp.svc();
   r := booking.montonio_refund_stamp(rf, 'refund-uuid-t188', 'PENDING', jsonb_build_object('status', 'PENDING'));
   perform pg_temp.ck(r ->> 'ok' = 'true' and (select status from booking.refunds where id = rf) = 'processing'

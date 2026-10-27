@@ -85,6 +85,11 @@ test('näkymä: painike → Visma-ohjaus; virheet FI/EN; lopullinen virhe poista
   let v = payLinkView({ L: 'fi', token: TOK, api: { start: async () => ({ ok: true, redirect_url: PAY, amount: 30 }) }, phone: '010 299 2866', phoneTel: '+358102992866', navigate: (u) => nav.push(u), money: (n) => `${n} €` });
   assert.equal(v.attrs['data-testid'], 'pay-link-page');
   assert.equal(v.q('pl-button').textContent, 'Verkkopankki');
+  assert.equal(v.q('pl-method-mobilePay').textContent, 'MobilePay');
+  const enLabels = payLinkView({ L: 'en', token: TOK, api: { start: async () => ({ ok: false, code: 'off' }) } });
+  assert.equal(enLabels.q('pl-button').textContent, 'Online bank');
+  assert.equal(enLabels.q('pl-method-cardPayments').textContent, 'Card');
+  assert.doesNotMatch(v.textContent, /Maksa MobilePaylla|Montonio/i);
   const tel = v.q('pl-contact').all().find((e) => e.tagName === 'A');
   assert.equal(tel.attrs.href, 'tel:+358102992866'); assert.equal(tel.textContent, '010 299 2866');
   await v.q('pl-button').click();

@@ -1,5 +1,5 @@
 // Maksulinkkisivu /maksa/?p=<link_token> (EN /en/pay/?p=…). Sähköpostin maksulinkit (settings.payment_link_path), hallinnan ja pikakassan linkit.
-// Painike kutsuu vismapay-start {link_token} (sama edge kuin tilaussivun Visma-painike) ja ohjaa Visma Payn sivulle. Maksua ei avata ilman painallusta
+// Painikkeet kutsuvat montonio-start {link_token, method}. Nappitekstit tulevat ui.paychoice.method_* -avaimista. Maksua ei avata ilman painallusta
 // (sähköpostin linkkiesikatselu ei luo maksua). Virheet (vanhentunut, maksettu, virheellinen) FI/EN.
 // booking_177b: latauksessa VAIN LUKU -kutsu rpc public_payment_link_info(p_token) → yhteenveto ennen painiketta (summa, tilausnumero, rivit pvm/klo,
 // voimassaolo) tai selkeä tila (maksettu / vanhentunut / korvattu / ei löydy), jolloin painike poistetaan. Jos RPC puuttuu (404/PGRST202), verkko
@@ -8,6 +8,7 @@ import { functionUrl, rpc } from './sb.js';
 import { h } from './gift-ui.js';
 import { createOnlinePayApi } from './online-pay-api.js';
 import { PAY_METHODS, safeOnlineRedirect } from './online-pay-logic.js';
+import { pt } from './pay-choices-texts.js';
 import { PLT, plt } from './pay-link-texts.js';
 import { linkTokenFrom, classifyLinkError, switchHref, normLinkInfo, linkInfoView, fmtDate } from './pay-link-logic.js';
 import { applyShopTexts } from './site-texts.js';
@@ -22,8 +23,7 @@ export function payLinkView({ L, token, api, loadInfo = null, phone = '', phoneT
     return c;
   };
   let busy = false;
-  const labels = { paymentInitiation: 'Verkkopankki', cardPayments: 'Kortti', applePay: 'Apple Pay', googlePay: 'Google Pay', mobilePay: 'MobilePay' };
-  const labelsEn = { paymentInitiation: 'Online bank', cardPayments: 'Card', applePay: 'Apple Pay', googlePay: 'Google Pay', mobilePay: 'MobilePay' };
+  const labelKey = { paymentInitiation: 'methodBank', cardPayments: 'methodCard', applePay: 'methodApple', googlePay: 'methodGoogle', mobilePay: 'methodWallet' };
   const buttons = [];
   const setBusy = (on, active, label) => { for (const b of buttons) b.disabled = on; if (active) active.textContent = on ? tx('busyOnline') : label; };
   async function start(code, btn, label) {
@@ -48,7 +48,7 @@ export function payLinkView({ L, token, api, loadInfo = null, phone = '', phoneT
     busy = false; if (!c.final) setBusy(false, btn, label);
   }
   for (const code of PAY_METHODS) {
-    const label = L === 'en' ? labelsEn[code] : labels[code];
+    const label = pt(L, labelKey[code] || 'methodBank');
     const btn = h('button', { type: 'button', class: 'btn ord-btn', 'data-testid': code === 'paymentInitiation' ? 'pl-button' : `pl-method-${code}`, text: label, onclick: () => start(code, btn, label) });
     buttons.push(btn);
   }

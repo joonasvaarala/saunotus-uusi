@@ -67,5 +67,16 @@ export async function runOnlineReturn({ host, L, getOrder, reconcile = null, onD
     if (i < rounds - 1) await new Promise((ok) => setTimeout(ok, intervalMs));
   }
   show(state);
+  if (state === 'paid' || state === 'failed' || state === 'review') stripPayParam();
   if (onDone) await onDone(state);
+}
+
+/** Lopputilan jälkeen pay-parametri pois, jotta sivun lataus ei käynnistä tarkistusta uudelleen. Odottava tila säilyttää sen. */
+function stripPayParam() {
+  try {
+    const u = new URL(location.href);
+    if (!u.searchParams.has('pay')) return;
+    u.searchParams.delete('pay');
+    history.replaceState(history.state, '', u.pathname + u.search + u.hash);
+  } catch { /* osoitetta ei voi muuttaa */ }
 }

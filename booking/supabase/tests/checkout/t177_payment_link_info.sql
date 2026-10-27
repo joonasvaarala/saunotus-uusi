@@ -176,9 +176,9 @@ begin
   r2 := pg_temp.info(tk2);
   perform pg_temp.ck(tk3 not in (tk1, tk2) and r2 ->> 'status' = 'replaced' and r2 ->> 'reason' = 'replaced', 'D6 vanhentunut + uudempi linkki → replaced');
   update booking.payments set provider_ref = 'sauna-t177-' || run, provider_status = 'initiating' where link_token = tk3;
-  perform booking.payment_mark_failed('visma_pay', 'sauna-t177-' || run, 'cancelled', null);
+  perform booking.payment_mark_failed('montonio', 'sauna-t177-' || run, 'cancelled', null);
   r := pg_temp.info(tk3);
-  perform pg_temp.ck(r ->> 'status' = 'expired' and r ->> 'reason' = 'payment_cancelled' and position('sauna-t177' in r::text) = 0, 'D7 maksu peruttu Visma Payssa → expired/payment_cancelled (ei tunnistetta)');
+  perform pg_temp.ck(r ->> 'status' = 'expired' and r ->> 'reason' = 'payment_cancelled' and position('sauna-t177' in r::text) = 0, 'D7 maksu peruttu → expired/payment_cancelled (ei tunnistetta)');
   tk3 := pg_temp.mklink(u_adm, o);
   update booking.payments set status = 'paid', paid_at = now() where link_token = tk3;
   r := pg_temp.info(tk3);

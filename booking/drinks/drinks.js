@@ -132,7 +132,7 @@ async function pay() {
 function safeOnline(url) {
   try {
     const u = new URL(String(url || ''));
-    const hosts = ['sandbox-stargate.montonio.com', 'stargate.montonio.com', 'gateway.montonio.com', 'pay.montonio.com'];
+    const hosts = ['sandbox-stargate.montonio.com', 'stargate.montonio.com', 'sandbox-gateway.montonio.com', 'gateway.montonio.com', 'pay.montonio.com'];
     if (u.protocol !== 'https:' || !hosts.includes(u.hostname)) return null;
     return u.href;
   } catch { return null; }

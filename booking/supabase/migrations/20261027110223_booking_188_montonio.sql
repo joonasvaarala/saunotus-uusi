@@ -1,7 +1,7 @@
 -- booking_188: verkkomaksu siirtyy Montonioon (Stargate Orders API). Visma Pay ja MobilePay jäävät lepotilaan.
 -- Asiakkaalle näkyvä nimi on "Maksa verkossa" / "Pay online". Migraatio EI kytke test- eikä live-tilaa eikä koske Procountorin tilaan tai daily_enablediin.
 -- md5 = md5(pg_get_functiondef). Vanhat tarkistettu paikallisella PostgreSQL 16.15:llä tuotannon dumpeista (täsmäävät kirjattuihin md5:iin).
--- Uudet laskettu samalla menetelmällä. Rollback: rollbacks/20261027120000_booking_188_ROLLBACK.sql
+-- Uudet laskettu samalla menetelmällä. Rollback: rollbacks/20261027110223_booking_188_ROLLBACK.sql
 -- Testi: tests/checkout/t188_montonio.sql
 --
 -- Korvattavat (vanha -> uusi):
