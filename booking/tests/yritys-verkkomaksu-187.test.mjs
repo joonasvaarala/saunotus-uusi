@@ -123,6 +123,28 @@ test('kauppa: kolme radiota, online piilottaa OVT:n, huomautus ja nappi vaihtuva
   assert.match(rd('booking/shop/src/order-api.js'), /invoice_method: r\.invoice_method/);
 });
 
+test('K4: sauna- ja lahjakoodikassa avaa formPaysOnlinen kind-merkkijonolla, hoitokassa jo oikein', () => {
+  const shop = rd('booking/shop/src/shop.js');
+  const tr = rd('booking/shop/src/treatment-ui.js');
+  // Saunavuoro ja lahjakoodi jakavat viewCheckoutin. Kutsu ei saa saada customerFields-oliota sellaisenaan.
+  assert.match(shop, /const paysOnline = \(\) => formPaysOnline\(\{ kind: cf\.kind\(\), invoiceMethod: cf\.invoiceMethod \}\)/);
+  assert.doesNotMatch(shop, /formPaysOnline\(cf\)/);
+  assert.match(shop, /code\.value \? await rpc\('public_create_booking_code'/);
+  assert.match(tr, /formPaysOnline\(\{ kind: cust\.kind, invoiceMethod: \(\) => cust\.company\?\.invoice_method \}\)/);
+  const unwrap = (cf) => formPaysOnline({ kind: cf.kind(), invoiceMethod: cf.invoiceMethod });
+  const einvoice = { kind: () => 'company', invoiceMethod: () => 'einvoice' };
+  const pdf = { kind: () => 'company', invoiceMethod: () => 'pdf' };
+  const online = { kind: () => 'company', invoiceMethod: () => 'online' };
+  const priv = { kind: () => 'private', invoiceMethod: () => 'einvoice' };
+  assert.equal(unwrap(einvoice), false);
+  assert.equal(unwrap(pdf), false);
+  assert.equal(unwrap(online), true);
+  assert.equal(unwrap(priv), true);
+  // Ansa: kind funktiona (customerFields()-olio sellaisenaan) on aina tosi, myös verkkolaskulla.
+  assert.equal(formPaysOnline(einvoice), true);
+  assert.equal(formPaysOnline({ kind: einvoice.kind(), invoiceMethod: einvoice.invoiceMethod }), false);
+});
+
 test('paysByInvoice ja formPaysOnline: verkkomaksava yritys kuten yksityinen, laskuyritys ei', () => {
   assert.equal(paysByInvoice({ customer_kind: 'private' }), false);
   assert.equal(paysByInvoice({ customer_kind: 'company', invoice_method: 'einvoice' }), true);

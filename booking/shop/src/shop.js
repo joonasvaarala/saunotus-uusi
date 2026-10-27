@@ -823,7 +823,8 @@ async function viewCheckout(ruleId, ds, productId, via) {
   const legal = legalFields(), { terms, consent } = legal;
   // Ilmainen (vuosikortti tai 100 % koodi) → "Vahvista varaus"; muuten ennallaan.
   const free = () => !!code.quote && code.sig === sig() && +code.quote.total === 0;
-  const paysOnline = () => formPaysOnline(cf);
+  // cf.kind on funktio. formPaysOnline vertaa kindiä merkkijonoon, joten olio pitää avata.
+  const paysOnline = () => formPaysOnline({ kind: cf.kind(), invoiceMethod: cf.invoiceMethod });
   const submitLabel = () => { if (!submit.disabled) submit.textContent = free() ? t.codeConfirm : paysOnline() && hmode.on ? ht(S.lang, 'checkout.button') : t.book; };
   const codeInput = h('input', { id: 'bk-code', name: 'discount_code', maxlength: 40, autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false', 'aria-describedby': 'bk-code-status',
     oninput: (e) => { const v = normalizeCode(e.target.value); if (v !== e.target.value) e.target.value = v; },
