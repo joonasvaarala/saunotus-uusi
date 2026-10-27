@@ -152,8 +152,8 @@ test('options: public_payment_options(p_token); puuttuva RPC ja virhe → null (
 test('mock: public_payment_options noudattaa §14.1-muotoa; mpFetch vastaa start/reconcile-muodoilla', async () => {
   const m = createOrderMock({ scenario: 'mp' });
   const o = await m.rpc('public_payment_options', { p_token: TOKEN });
-  assert.equal(o.ok, true); assert.equal(o.online_enabled, true); assert.equal(o.methods[0].code, 'mobilepay'); assert.equal(o.methods[0].test, true);
-  assert.deepEqual(o.methods[0].start, { function: 'mobilepay-start', method: 'POST', body: { order_token: TOKEN } });
+  assert.equal(o.ok, true); assert.equal(o.online_enabled, true); assert.equal(o.methods[0].code, 'online'); assert.equal(o.methods[0].test, true);
+  assert.deepEqual(o.methods[0].start, { function: 'montonio-start', method: 'POST', body: { order_token: TOKEN } });
   for (const k of ['order_no', 'status', 'payment_status', 'unpaid', 'can_pay_online', 'mobilepay_pending']) assert.ok(k in o.order, k);
   assert.equal(o.order.can_pay_online, true); assert.equal(o.order.unpaid, 40);
   assert.equal((await createOrderMock({ scenario: 'mp-prod' }).rpc('public_payment_options', { p_token: TOKEN })).methods[0].test, false);

@@ -52,11 +52,14 @@ test('maksutavat: ei käteistä, korttipääte näkyy mutta ei ole valittavissa'
   assert.deepEqual(pos, ['payment_link', 'mobilepay', 'card_terminal']);
   assert.equal(tenderAvailable(list.find((t) => t.code === 'card_terminal'), { mobilepay_mode: 'test' }), false);
   assert.equal(tenderAvailable(list.find((t) => t.code === 'mobilepay'), { mobilepay_mode: 'off' }), false);
-  assert.equal(tenderAvailable(list.find((t) => t.code === 'mobilepay'), { mobilepay_mode: 'test' }), true);
+  assert.equal(tenderAvailable(list.find((t) => t.code === 'mobilepay'), { mobilepay_mode: 'test' }), false);
+  assert.equal(tenderAvailable(list.find((t) => t.code === 'visma_pay'), { vismapay_mode: 'test' }), false);
   const link = list.find((t) => t.code === 'payment_link');
   assert.equal(tenderAvailable(link, { vismapay_mode: 'off' }), false);
   assert.equal(tenderAvailable(link, {}), false);
   assert.equal(tenderAvailable(link, { vismapay_mode: 'dry_run' }), true);
+  assert.equal(tenderAvailable(link, { montonio_mode: 'off', vismapay_mode: 'test' }), false);
+  assert.equal(tenderAvailable(link, { montonio_mode: 'test', vismapay_mode: 'off' }), true);
 });
 
 test('sähköposti: sama sääntö kuin palvelimella', () => {

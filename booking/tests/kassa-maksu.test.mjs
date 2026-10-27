@@ -54,13 +54,13 @@ test('tekstit: lahjakortin saldotekstit (uudet o.*-avaimet) FI/EN-pariteetti', (
 
 test('offers: tarjotaan vain maksettavalle varaukselle, päätökset tulevat palvelimelta', () => {
   const m = model({ mpShow: true, redeem: true });
-  assert.deepEqual(offers(m, booking()), { mobilepay: true, vismapay: false, gift: true, claims: false, payLater: false });
-  assert.deepEqual(offers(m, booking({ status: 'pending' })), { mobilepay: true, vismapay: false, gift: true, claims: false, payLater: false });
-  assert.deepEqual(offers(m, booking({ payment_status: 'paid' })), { mobilepay: false, vismapay: false, gift: false, claims: false, payLater: false });
-  assert.deepEqual(offers(m, booking({ status: 'cancelled' })), { mobilepay: false, vismapay: false, gift: false, claims: false, payLater: false });
-  assert.deepEqual(offers(model(), booking()), { mobilepay: false, vismapay: false, gift: false, claims: false, payLater: false }, 'ei oletettua maksutapaa');
+  assert.deepEqual(offers(m, booking()), { mobilepay: true, vismapay: false, online: false, gift: true, claims: false, payLater: false });
+  assert.deepEqual(offers(m, booking({ status: 'pending' })), { mobilepay: true, vismapay: false, online: false, gift: true, claims: false, payLater: false });
+  assert.deepEqual(offers(m, booking({ payment_status: 'paid' })), { mobilepay: false, vismapay: false, online: false, gift: false, claims: false, payLater: false });
+  assert.deepEqual(offers(m, booking({ status: 'cancelled' })), { mobilepay: false, vismapay: false, online: false, gift: false, claims: false, payLater: false });
+  assert.deepEqual(offers(model(), booking()), { mobilepay: false, vismapay: false, online: false, gift: false, claims: false, payLater: false }, 'ei oletettua maksutapaa');
   assert.deepEqual(offers(model({ claims: [{ id: 1 }] }), booking({ payment_status: 'paid' })).claims, true, 'lunastuspyynnöt näkyvät maksun jälkeenkin');
-  assert.deepEqual(offers(m, null), { mobilepay: false, vismapay: false, gift: false, claims: false, payLater: false });
+  assert.deepEqual(offers(m, null), { mobilepay: false, vismapay: false, online: false, gift: false, claims: false, payLater: false });
 });
 
 test('dueAmount: palvelimen unpaid ensin, sitten varauksen kentät, muuten ei summaa', () => {
@@ -169,14 +169,14 @@ test('booking_52 mockit: public_get_booking items[] ja public_get_order reservat
   const r = o.reservations.find((x) => x.option_choices?.length);
   if (r) { assert.equal(r.option_label, 'Valitse hoito'); assert.equal(r.option_label_en, 'Choose your treatment'); assert.equal(r.option_label_fi, 'Valitse hoito'); }
   const c = await createOrderMock({ scenario: 'mp' }).rpc('public_checkout_payment_options', {});
-  assert.equal(c.ok, true); assert.equal(c.mobilepay_enabled, true); assert.equal(c.gift_card_redeem_enabled, true);
-  assert.deepEqual(c.methods.map((m) => m.code), ['mobilepay', 'gift_card']); assert.equal(c.methods[0].test, true);
+  assert.equal(c.ok, true); assert.equal(c.mobilepay_enabled, false); assert.equal(c.online_enabled, true); assert.equal(c.gift_card_redeem_enabled, true);
+  assert.deepEqual(c.methods.map((m) => m.code), ['online', 'gift_card']); assert.equal(c.methods[0].test, true);
   const prod = await createOrderMock({ scenario: 'mp-prod' }).rpc('public_checkout_payment_options', {}); assert.equal(prod.methods[0].test, false);
   const off = await createOrderMock({ scenario: 'mp-off' }).rpc('public_checkout_payment_options', {}); assert.equal(off.mobilepay_enabled, false); assert.deepEqual(off.methods.map((m) => m.code), ['gift_card']);
   const s = createShopMock({ storage: null });
   assert.deepEqual(await s.rpc('public_checkout_payment_options', {}), { ok: true, mobilepay_enabled: false, gift_card_redeem_enabled: false, methods: [] });
   const sp = createShopMock({ storage: null, scenario: 'pay' });
-  assert.deepEqual((await sp.rpc('public_checkout_payment_options', {})).methods.map((m) => m.code), ['mobilepay', 'gift_card']);
+  assert.deepEqual((await sp.rpc('public_checkout_payment_options', {})).methods.map((m) => m.code), ['online', 'gift_card']);
 });
 
 test('order-api normOrder säilyttää option_label(_fi/_en); puuttuessa null → fallback oletusotsikkoon', async () => {
@@ -193,7 +193,7 @@ test('shop-mock: oletus ei muutu; scenario=pay antaa MobilePayn, lahjakortin ja 
   assert.equal(plain.mpFetch, undefined);
   const s = createShopMock({ storage: null, scenario: 'pay' });
   const o = await s.rpc('public_payment_options', { p_token: TOKEN });
-  assert.equal(o.ok, true); assert.ok(o.methods.some((x) => x.code === 'mobilepay'));
+  assert.equal(o.ok, true); assert.ok(o.methods.some((x) => x.code === 'online'));
   const b = await s.rpc('public_get_booking', { p_token: TOKEN });
   assert.equal(b.ok, true); assert.equal(b.payment_status, 'unpaid'); assert.equal(b.total, 40);
   const pk = await s.rpc('public_gift_card_packages', {}); assert.equal(pk.redeem_enabled, true);

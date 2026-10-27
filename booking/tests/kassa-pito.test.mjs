@@ -197,7 +197,7 @@ test('normOrder / normCheckoutOptions: pitokentät läpi; vanha vastaus → null
 test('offers: alustavaa ja vanhentunutta ei makseta; odottava ja vahvistettu maksamatta saa maksutavat', () => {
   const model = { mpShow: true, redeem: true, claims: [] };
   const b = (s, over = {}) => ({ status: s === 'expired' ? 'expired' : s === 'confirmed_unpaid' ? 'confirmed' : 'pending', payment_status: 'unpaid', checkout_state: s, ...over });
-  assert.deepEqual(offers(model, b('awaiting_payment')), { mobilepay: true, vismapay: false, gift: true, claims: false, payLater: false });
+  assert.deepEqual(offers(model, b('awaiting_payment')), { mobilepay: true, vismapay: false, online: false, gift: true, claims: false, payLater: false });
   assert.equal(offers(model, b('confirmed_unpaid')).mobilepay, true);
   assert.equal(offers(model, b('preliminary')).mobilepay, false); assert.equal(offers(model, b('preliminary')).gift, false);
   assert.equal(offers(model, b('expired')).mobilepay, false);

@@ -102,7 +102,7 @@ test('confirmPayLater: kutsuu confirm_rpc:tä { p_order_token }; verkkovirhe →
 test('mock: hold + testui → methods sisältää pay_later (palvelimen muoto); testui=0 → ei; vain awaiting_payment', async () => {
   const m = om('hold'), o = await m.rpc('public_payment_options', { p_token: TOKEN });
   const pl = o.methods.find((x) => x.code === 'pay_later'); assert.deepEqual(pl, PAY_LATER_METHOD); assert.equal(pl.enabled, true); assert.equal(pl.test, true); assert.equal(pl.confirm_rpc, 'public_confirm_pay_later');
-  assert.ok(o.methods.find((x) => x.code === 'mobilepay'));
+  assert.ok(o.methods.find((x) => x.code === 'online'));
   assert.equal((await om('hold', { payLaterTest: false }).rpc('public_payment_options', { p_token: TOKEN })).methods.some((x) => x.code === 'pay_later'), false, 'testui=0');
   for (const sc of ['hold-unpaid', 'hold-confirmed', 'hold-expired', 'hold-cancelled', 'hold-preliminary']) assert.equal((await om(sc).rpc('public_payment_options', { p_token: TOKEN })).methods.some((x) => x.code === 'pay_later'), false, sc);
   for (const sc of ['pay', 'mp', 'gift']) assert.equal((await om(sc).rpc('public_payment_options', { p_token: TOKEN })).methods.some((x) => x.code === 'pay_later'), false, `${sc}: vanhat skenaariot ennallaan`);
