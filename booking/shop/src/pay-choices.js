@@ -14,6 +14,7 @@ import { normVisma, shouldShowVisma } from './vismapay-logic.js';
 import { createVismapayApi } from './vismapay-api.js';
 import { vismaPayBlock } from './vismapay-ui.js';
 import { ht, payLaterError } from './hold-texts.js';
+import { paysByInvoice } from './company-pay.js';
 
 const PAYABLE = ['confirmed', 'pending'];
 let seq = 0;
@@ -38,7 +39,7 @@ export async function loadPayChoices({ rpc, token = null, fetchImpl, cfg = (type
 
 // Mitä asiakkaalle voidaan tarjota: { mobilepay, gift, claims, payLater } (booking = public_get_booking-vastaus). payLater = booking_57-testivaihtoehto: vain kun palvelin listasi pay_later-tavan (ei env.testUi-ehtoa)
 export function offers(model, booking) {
-  const payable = !!booking && PAYABLE.includes(booking.status) && booking.payment_status !== 'paid' && booking.payment_status !== 'invoiced' && booking.customer_kind !== 'company' && booking.checkout_state !== 'preliminary' && booking.checkout_state !== 'expired';   // yritysverkkolasku ja alustava varaus eivät maksa verkossa
+  const payable = !!booking && PAYABLE.includes(booking.status) && booking.payment_status !== 'paid' && booking.payment_status !== 'invoiced' && !paysByInvoice(booking) && booking.checkout_state !== 'preliminary' && booking.checkout_state !== 'expired';   // laskulla maksettava yritys ja alustava varaus eivät maksa verkossa
   return { mobilepay: payable && model.mpShow, vismapay: payable && !!model.vpShow, gift: payable && model.redeem, claims: !!booking && model.claims.length > 0, payLater: payable && !!model.payLater };
 }
 // Maksettava jäljellä: ensisijaisesti palvelimen public_payment_options.order.unpaid; muuten total - paid; muuten null (summaa ei näytetä)

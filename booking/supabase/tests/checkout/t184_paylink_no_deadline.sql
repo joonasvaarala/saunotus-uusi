@@ -112,8 +112,8 @@ begin
   perform pg_temp.ck(md5(pg_get_functiondef('booking._public_pay_json(bigint)'::regprocedure)) = 'cc3e61dbdfbd9a816cd9c982c73820c5'
       and md5(pg_get_functiondef('booking.admin_pos_send_link(bigint,text,boolean)'::regprocedure)) = '735e92d8c8c52784bbba9b928c5a122b'
       and md5(pg_get_functiondef('booking.expire_payment_links()'::regprocedure)) = '0109d701ab1ccc4e57f6210989644f5c'
-      and md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) = '647c556562046c75b7e7e33703c050a0'
-      and md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) in ('703c03c301f5a3008192cdbe65e559e2', 'cca997c4e900e78b8bb9e2e0c7da25d4')
+      and md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) in ('647c556562046c75b7e7e33703c050a0', '1b729ef4d72dc925001169c38bad3315')
+      and md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) in ('703c03c301f5a3008192cdbe65e559e2', 'cca997c4e900e78b8bb9e2e0c7da25d4', 'd1f8df803a45c2b77aa9f8554fc41890')
       and md5(pg_get_functiondef('booking._order_balance(bigint)'::regprocedure)) = 'a6b31f93559de53d75a52d8a285f1170'
       and md5(pg_get_functiondef('booking.is_staff()'::regprocedure)) = '40d8b86aa41ab71f29ef4e6c5257aa77', 'A5 riippuvuudet ennallaan (asiakkaan 14 vrk, pikakassa 1 vrk)');
 

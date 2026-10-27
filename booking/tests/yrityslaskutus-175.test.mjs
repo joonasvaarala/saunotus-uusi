@@ -125,7 +125,7 @@ test('Laskut-linkki: #/laskut?invoice=<id> avaa laskun; avaus hallinnan varaukse
 
 test('kauppa: laskutustapa verkkolasku / PDF, OVT vain verkkolaskulla, invoice_method RPC:lle; tila Laskutettu', async () => {
   const shop = rd('shop/src/shop.js');
-  assert.match(shop, /\[\['einvoice', t\.invoiceMethodEinvoice\], \['pdf', t\.invoiceMethodPdf\]\]/);
+  assert.match(shop, /\[\['einvoice', t\.invoiceMethodEinvoice\], \['pdf', t\.invoiceMethodPdf\], \['online', t\.invoiceMethodOnline\]\]/);
   assert.match(shop, /einvoiceBox\.hidden = invoiceMethod !== 'einvoice'/);
   assert.match(shop, /el\.required = kind === 'company' && invoiceMethod === 'einvoice'/);
   assert.match(shop, /invoice_method: invoiceMethod, einvoice_address: ei \? normOvt\(val\('einvoice_address'\)\) : null/);

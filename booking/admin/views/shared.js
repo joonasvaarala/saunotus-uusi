@@ -22,6 +22,7 @@ import { legsList, resName, resourceBadges, hasLegs } from './legs.js';
 import { missingOpen, grantButton } from './therapist.js';
 import { optionBadge, optionOf, optionPicker, ot, optErr } from '../options.js';
 import { orderVoucherBox } from './voucher-redeem.js';
+import { billingMethodText } from '../billing-method-texts.js';
 
 let flowPromise;
 function orderFlowEnabled() {
@@ -226,10 +227,13 @@ export function reservationDialog(r, { methods = [], onChange, refs, can = () =>
     renderCustomer(rawOrder); drawResources();
     if (rawOrder.customer_kind === 'company' && rawOrder.billing) {
       const x = rawOrder.billing;
-      billingBox.replaceChildren(h('h4', { text: 'Yritysasiakas – laskutustiedot' }), h('dl', { class: 'kv' }, ...list(
+      const method = x.invoice_method || null;
+      const online = method === 'online';
+      billingBox.replaceChildren(h('h4', { text: online ? billingMethodText('company_details') : 'Yritysasiakas – laskutustiedot' }), h('dl', { class: 'kv' }, ...list(
         dd('Yritys', x.company), dd('Y-tunnus', x.business_id),
         dd('Osoite', [x.street, [x.zip, x.city].filter(Boolean).join(' ')].filter(Boolean).join(', ')),
-        dd('Verkkolasku', x.einvoice_address && [x.einvoice_address, x.einvoice_operator].filter(Boolean).join(' / ')),
+        method ? [h('dt', { text: billingMethodText('label') }), h('dd', { 'data-testid': 'res-billing-method', text: billingMethodText(method) })] : [],
+        online ? [] : dd('Verkkolasku', x.einvoice_address && [x.einvoice_address, x.einvoice_operator].filter(Boolean).join(' / ')),
         dd('Viite', rawOrder.invoice_reference),
         dd('Yhteyshenkilö', [x.contact_name, x.contact_email, x.contact_phone].filter(Boolean).join(' · ')))));
     }

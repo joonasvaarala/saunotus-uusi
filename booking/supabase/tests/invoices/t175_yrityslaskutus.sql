@@ -16,6 +16,7 @@
 -- Ajo: psql -X -v ON_ERROR_STOP=0 -f t175_yrityslaskutus.sql   (tai liitä koko tiedosto SQL-editoriin; tulos virheviestissä TESTRESULT …)
 -- Jälkitarkistus ROLLBACKin jälkeen (erillinen SELECT tiedoston lopussa): t175 leftover rows = 0.
 begin;
+insert into booking.invoice_counters(series, last_seq) values ('L', 0) on conflict do nothing;  -- PATCH: kuten t185 (dev: invoices_series_fkey)
 set local lock_timeout = '3s';
 set local statement_timeout = '120s';
 select set_config('t175.log', '', true);
@@ -98,16 +99,16 @@ begin
   insert into booking.staff(user_id, email, name, role) values (u_adm, 't175-admin-' || run || '@example.test', 't175 admin', 'admin');
 
   -- ===== A rakenne
-  perform pg_temp.ck(md5(pg_get_functiondef('booking._clean_company(jsonb)'::regprocedure)) = '53fa5a8a98e98aeb4a97000d2f6b37ec', 'A1 _clean_company = booking_175');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking._stamp_order_billing(bigint,bigint,jsonb)'::regprocedure)) = '693f24abfe0dddfbf4a2e345e1596e73', 'A2 _stamp_order_billing = booking_175');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking._clean_company(jsonb)'::regprocedure)) in ('53fa5a8a98e98aeb4a97000d2f6b37ec', '019579f7b2a615f691c206aeb214195d'), 'A1 _clean_company = booking_175 tai booking_187');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking._stamp_order_billing(bigint,bigint,jsonb)'::regprocedure)) in ('693f24abfe0dddfbf4a2e345e1596e73', 'ded4c037a352e2b65b6f5e3100643334'), 'A2 _stamp_order_billing = booking_175 tai booking_187');
   perform pg_temp.ck(md5(pg_get_functiondef('booking._invoice_allocate(bigint)'::regprocedure)) = '46a3326812f896077fc2614ba783ff3d', 'A3 _invoice_allocate = booking_175');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.orders_invoice_draft_trg()'::regprocedure)) = 'a48fe50340cff5f6e9709ad46055ecb9', 'A4 orders_invoice_draft_trg = booking_175');
   perform pg_temp.ck(md5(pg_get_functiondef('booking._invoice_queue_dispatch(bigint)'::regprocedure)) = 'f3cfdb0e2d484ab6f63c6286c4ff8560'
       and md5(pg_get_functiondef('booking._ensure_draft_invoice(bigint)'::regprocedure)) = 'eefa8e82c7aab1a148bdb3e319ae65ae'
       and md5(pg_get_functiondef('booking._fi_reference(text)'::regprocedure)) = 'f7c4076dcc85d8efc97e7335c349da2c'
       and md5(pg_get_functiondef('booking.admin_send_invoice(bigint,boolean,boolean)'::regprocedure)) = '7ea29743e8e199c74ced1d62c730b27f'
-      and md5(pg_get_functiondef('booking.orders_invoice_status_trg()'::regprocedure)) = '9ec5c212604145e284fa07d2fd2686f6'
-      and md5(pg_get_functiondef('booking.invoices_lock_trg()'::regprocedure)) = '63f39183d475f2b04bcc7a9e9aaf251e', 'A5 laskutuksen riippuvuudet = tuotanto (ei muutettu)');
+      and md5(pg_get_functiondef('booking.orders_invoice_status_trg()'::regprocedure)) in ('9ec5c212604145e284fa07d2fd2686f6', '7f7eced664b101cb2672a78059c90682')
+      and md5(pg_get_functiondef('booking.invoices_lock_trg()'::regprocedure)) = '63f39183d475f2b04bcc7a9e9aaf251e', 'A5 laskutuksen riippuvuudet = tuotanto (orders_invoice_status_trg = booking_175 tai booking_187)');
   perform pg_temp.ck(md5(pg_get_functiondef('booking._on_payment_paid(bigint)'::regprocedure)) in ('de9084871640d213d10527a045157bf2', 'af7f99e87ba7e00e0d5e3d5b6cbf2400')
       and md5(pg_get_functiondef('booking.email_outbox_claim(integer)'::regprocedure)) in ('2db9a1233a06e6293d0877f17de1ab72', '70602f6500703e8750e1539ae8809d38')
       and md5(pg_get_functiondef('booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text)'::regprocedure)) in ('525d1fa96fd7c37df4d7e502edf1bf71', 'a4e69cb26eb44b72eacce7c167342884')

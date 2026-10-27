@@ -75,6 +75,7 @@ export function normOrder(o) {
     created_at: o.created_at, customer: o.customer || {}, customer_name: o.customer?.name ?? '', internal_note: o.internal_note ?? null, customer_note: o.customer_note ?? null,
     public_token: o.public_token ?? null, order_page_path: o.order_page_path ?? null, can_add: !!o.can_add, staff_can_add: !!o.staff_can_add, add_until: o.add_until ?? null,
     invoice_locked: o.invoice_locked === true, invoice_no: o.invoice_no ?? null,
+    customer_kind: o.customer?.customer_kind ?? o.customer_kind ?? null, billing_method: o.billing?.invoice_method ?? null,
     balance: { total, paid: num(b.paid), refunded: num(b.refunded), pending_link: num(b.pending_link), unpaid: num(b.unpaid), unpaid_unlinked: num(b.unpaid_unlinked, num(b.unpaid)), net_paid: num(b.net_paid) },
     total_gross: total, paid_amount: num(b.paid), unpaid_amount: num(b.unpaid),
     items: (o.items || []).map((x) => ({ id: x.id, parent_item_id: x.parent_item_id ?? null, kind: x.kind, name: x.name, quantity: num(x.quantity, 1), unit_price: num(x.unit_price), line_total: num(x.line_total), vat_rate: num(x.vat_rate), covered: num(x.covered), remaining: num(x.remaining) })),

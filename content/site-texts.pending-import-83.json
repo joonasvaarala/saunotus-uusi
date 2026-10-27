@@ -1,0 +1,142 @@
+[
+  {
+    "key": "ui.shop.invoice_method_online",
+    "lang": "fi",
+    "text": "Maksa verkossa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_187: yrityksen verkkomaksu"
+  },
+  {
+    "key": "ui.shop.invoice_method_online",
+    "lang": "en",
+    "text": "Pay online",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_187: yrityksen verkkomaksu"
+  },
+  {
+    "key": "ui.shop.company_online_note",
+    "lang": "fi",
+    "text": "Siirryt maksamaan verkossa tilauksen jälkeen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_187: yrityksen verkkomaksu"
+  },
+  {
+    "key": "ui.shop.company_online_note",
+    "lang": "en",
+    "text": "You will continue to online payment after placing the order.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_187: yrityksen verkkomaksu"
+  },
+  {
+    "key": "ui.admin.billing_method.label",
+    "lang": "fi",
+    "text": "Laskutustapa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_187: yrityksen verkkomaksu"
+  },
+  {
+    "key": "ui.admin.billing_method.label",
+    "lang": "en",
+    "text": "Billing method",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_187: yrityksen verkkomaksu"
+  },
+  {
+    "key": "ui.admin.billing_method.einvoice",
+    "lang": "fi",
+    "text": "Verkkolasku",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_187: yrityksen verkkomaksu"
+  },
+  {
+    "key": "ui.admin.billing_method.einvoice",
+    "lang": "en",
+    "text": "E-invoice",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_187: yrityksen verkkomaksu"
+  },
+  {
+    "key": "ui.admin.billing_method.pdf",
+    "lang": "fi",
+    "text": "PDF-lasku sähköpostiin",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_187: yrityksen verkkomaksu"
+  },
+  {
+    "key": "ui.admin.billing_method.pdf",
+    "lang": "en",
+    "text": "PDF invoice by email",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_187: yrityksen verkkomaksu"
+  },
+  {
+    "key": "ui.admin.billing_method.online",
+    "lang": "fi",
+    "text": "Verkkomaksu (ei laskua)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_187: yrityksen verkkomaksu"
+  },
+  {
+    "key": "ui.admin.billing_method.online",
+    "lang": "en",
+    "text": "Online payment (no invoice)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_187: yrityksen verkkomaksu"
+  },
+  {
+    "key": "ui.admin.billing_method.company_details",
+    "lang": "fi",
+    "text": "Yritysasiakas – yritystiedot",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_187: yrityksen verkkomaksu"
+  },
+  {
+    "key": "ui.admin.billing_method.company_details",
+    "lang": "en",
+    "text": "Business customer – company details",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_187: yrityksen verkkomaksu"
+  }
+]

@@ -13,6 +13,7 @@ import { cardShort } from './short-desc.js';
 import { cardMeta } from './card-meta.js';
 import { revealForm, revealIfHidden } from './gift-ui.js';
 import { customerInvoiceLock } from './invoice-lock.js';
+import { formPaysOnline } from './company-pay.js';
 
 export function createTreatmentViews(c) {
   const { h, t, S, state, money, fmt, hm, dayLong, pad2, todayHel, addDays, pname, pdesc, pimg, setHero, mount, focusTop, errorBox, phoneBox, bk, customerFields, legalFields, holdInfo = async () => ({ on: false, minutes: 15, extra: () => [] }), tx = () => null, confirmUrl = (tok) => `${S.confirmHref}#${tok}` } = c;
@@ -241,7 +242,8 @@ export function createTreatmentViews(c) {
     function review(cust, note) {
       const err = h('div', { id: 'bk-rmsg', 'aria-live': 'polite' });
       const hi = { on: false, minutes: 15, extra: () => [] };   // pitotila (§17) selviää palvelimelta kun vaihe avautuu; oletus = vanha käytös
-      const bookText = () => (hi.on ? ht(S.lang, 'checkout.button') : t.book);
+      const onlinePay = formPaysOnline({ kind: cust.kind, invoiceMethod: () => cust.company?.invoice_method });   // booking_187: verkkomaksava yritys kuten yksityinen
+      const bookText = () => (onlinePay && hi.on ? ht(S.lang, 'checkout.button') : t.book);
       const ok = h('button', { type: 'button', class: 'btn', 'data-testid': 'review-submit', text: t.book });
       const edit = h('button', { type: 'button', class: 'btn light', text: tr.edit, onclick: () => { topBox.hidden = false; holder.replaceChildren(formView); revealForm(formView, form.querySelector('input,textarea')); } });
       const dl = h('dl', { class: 'bk-sum' }, h('dt', { text: t.what }), h('dd', { text: pname(p) }), showOpt ? [h('dt', { text: ot.what }), h('dd', { 'data-testid': 'review-option', text: optText() })] : null, h('dt', { text: tr.date }), h('dd', { text: dayLong(slot.start) }), h('dt', { text: tr.time }),
@@ -251,7 +253,7 @@ export function createTreatmentViews(c) {
         null);
       const head = h('h2', { id: 'tr-review-h', text: tr.reviewTitle, tabindex: '-1' });
       ok.addEventListener('click', async () => {
-        ok.disabled = edit.disabled = true; ok.textContent = hi.on ? ht(S.lang, 'checkout.creating') : t.booking; err.replaceChildren();
+        ok.disabled = edit.disabled = true; ok.textContent = onlinePay && hi.on ? ht(S.lang, 'checkout.creating') : t.booking; err.replaceChildren();
         const r = await A.createBooking(p, { start: slot.start, persons: n, name: cust.name, email: cust.email, phone: cust.phone, marketing: consent.checked, locale: S.lang, note, kind: cust.kind, company: cust.company, option: opt, addons: ap ? ap.payload() : [] });
         if (r.ok && r.token) { state.months.clear(); location.assign(confirmUrl(r.token)); return; }
         ok.disabled = edit.disabled = false; ok.textContent = bookText();
@@ -268,10 +270,19 @@ export function createTreatmentViews(c) {
         err.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(err); err.firstChild.focus({ preventScroll: true });
       });
       const lead = h('p', { class: 'bk-note', 'data-testid': 'review-lead', text: tr.reviewLead }), holdExtra = h('div', { 'data-testid': 'review-hold-extra' });
-      holdInfo().then((x) => { Object.assign(hi, x); if (!hi.on) return; if (!ok.disabled) ok.textContent = bookText(); lead.textContent = ht(S.lang, 'checkout.review', { minutes: hi.minutes }); holdExtra.replaceChildren(...hi.extra(S.lang)); });
+      holdInfo().then((x) => {
+        Object.assign(hi, x);
+        if (!onlinePay) { if (!ok.disabled) ok.textContent = t.book; return; }   // laskulla maksettava yritys: ei pitonappia eikä pito-ohjetta
+        if (!hi.on) return;
+        if (!ok.disabled) ok.textContent = bookText();
+        lead.textContent = ht(S.lang, 'checkout.review', { minutes: hi.minutes });
+        holdExtra.replaceChildren(...hi.extra(S.lang));
+      });
       holder.replaceChildren(h('div', { class: 'bk-review' }, head, lead, holdExtra, dl,
         h('p', { class: 'bk-totalrow' }, t.total + ': ', h('strong', { class: 'bk-total', 'data-testid': 'review-total', text: money(totalNow()) }), ' ', h('small', { text: t.vatIncl })),
-        cust.kind === 'company' ? h('p', { class: 'bk-pay bk-paynow', text: t.companyInvoiceMethodNote }) : null, err, h('div', { class: 'bk-actions' }, edit, ok)));
+        !onlinePay && cust.kind === 'company' ? h('p', { class: 'bk-pay bk-paynow', 'data-testid': 'review-invoice-note', text: t.companyInvoiceMethodNote }) : null,
+        onlinePay && cust.kind === 'company' ? h('p', { class: 'bk-pay bk-paynow', 'data-testid': 'review-online-note', text: t.companyOnlineNote }) : null,
+        err, h('div', { class: 'bk-actions' }, edit, ok)));
       topBox.hidden = true; revealForm(holder, head);
     }
     holder.append(formView);

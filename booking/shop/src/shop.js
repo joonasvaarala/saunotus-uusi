@@ -34,6 +34,7 @@ import { RITUAL_TEXTS, RITUAL_ERRORS } from './ritual-addon-texts.js';
 import { oneKey } from './plural.js';
 import { eventText, occurrenceText, occurrenceLabel, findEvent, saleState, upcoming, isMultiDay } from './event-sale.js';
 import { customerInvoiceLock } from './invoice-lock.js';
+import { formPaysOnline, paysByInvoice } from './company-pay.js';
 
 const S = window.BOOKING_SHOP;                   // build-aikainen konfiguraatio (kieli, polut, ei-verkossa-varattavat tuotteet)
 const t = T[S.lang] || T.fi;
@@ -578,15 +579,15 @@ function viewEventClosed(ev) {
 const field = (id, label, { hint, ...attrs } = {}) => h('div', { class: 'bk-field' }, h('label', { for: id, text: label }), h('input', { id, name: id, required: true, 'aria-describedby': hint ? `${id}-hint` : null, ...attrs }), hint ? h('small', { class: 'bk-hint', id: `${id}-hint`, text: hint }) : null);
 const opt = (id, label, attrs) => field(id, label, { required: false, ...attrs });
 // Asiakastiedot: yksityinen / yritys + nimi, sähköposti, puhelin. read(form, msg) validoi (virhe → msg + fokus, palauttaa null) ja palauttaa { kind, name, email, phone, company }.
-function customerFields() {
+function customerFields({ onChange } = {}) {
   let kind = 'private';
-  let invoiceMethod = 'einvoice';   // booking_175: yritysasiakas valitsee verkkolaskun tai PDF-laskun (sähköpostiin); OVT vain verkkolaskulla
+  let invoiceMethod = 'einvoice';   // booking_175/187: verkkolasku (oletus), PDF-lasku tai Maksa verkossa; OVT vain verkkolaskulla
   const kindInputs = [['private', t.kindPrivate], ['company', t.kindCompany]].map(([k, label]) => h('label', { class: 'bk-kind' }, h('input', { type: 'radio', name: 'kind', value: k, checked: k === 'private' || null, onchange: () => setKind(k) }), ' ', label));
   const nameLabel = h('label', { for: 'name', text: t.name });
   const einvoiceBox = h('div', { class: 'bk-einvoice', id: 'bk-einvoice-fields', 'data-testid': 'einvoice-fields' },
     h('h4', { text: t.einvoiceDetailsTitle }),
     field('einvoice_address', t.einvoiceAddress, { maxlength: 40 }), field('einvoice_operator', t.einvoiceOperator, { maxlength: 40, hint: t.einvoiceDetailsHint }));
-  const methodInputs = [['einvoice', t.invoiceMethodEinvoice], ['pdf', t.invoiceMethodPdf]].map(([m, label]) =>
+  const methodInputs = [['einvoice', t.invoiceMethodEinvoice], ['pdf', t.invoiceMethodPdf], ['online', t.invoiceMethodOnline]].map(([m, label]) =>
     h('label', { class: 'bk-kind' }, h('input', { type: 'radio', name: 'invoice_method', value: m, checked: m === 'einvoice' || null, 'data-testid': `invoice-method-${m}`, onchange: () => setInvoiceMethod(m) }), ' ', label));
   const companyBox = h('fieldset', { class: 'bk-company', id: 'bk-company', hidden: true },
     h('legend', { text: t.companyTitle }),
@@ -596,10 +597,13 @@ function customerFields() {
     h('fieldset', { class: 'bk-kinds bk-invoice-method' }, h('legend', { text: t.invoiceMethodLabel }), h('div', { class: 'bk-kindrow' }, methodInputs)),
     einvoiceBox,
     opt('reference', t.buyerReference, { maxlength: 100 }),
-    h('p', { class: 'bk-note', text: t.companyInvoiceMethodNote }));
+    h('p', { class: 'bk-note', 'data-testid': 'company-method-note', text: t.companyInvoiceMethodNote }));
+  const methodNote = companyBox.querySelector('[data-testid="company-method-note"]');
   function setInvoiceMethod(m) {
-    invoiceMethod = m === 'pdf' ? 'pdf' : 'einvoice'; einvoiceBox.hidden = invoiceMethod !== 'einvoice';
+    invoiceMethod = m === 'pdf' ? 'pdf' : m === 'online' ? 'online' : 'einvoice'; einvoiceBox.hidden = invoiceMethod !== 'einvoice';
+    if (methodNote) methodNote.textContent = invoiceMethod === 'online' ? t.companyOnlineNote : t.companyInvoiceMethodNote;
     for (const id of ['einvoice_address', 'einvoice_operator']) { const el = document.getElementById(id); if (el) el.required = kind === 'company' && invoiceMethod === 'einvoice'; }
+    if (onChange) onChange();
   }
   function setKind(k) {
     kind = k; companyBox.hidden = k !== 'company'; if (k === 'company') revealIfHidden(companyBox); nameLabel.textContent = k === 'company' ? t.contactName : t.name;
@@ -784,13 +788,13 @@ async function viewCheckout(ruleId, ds, productId, via) {
     num.value = n; minus.disabled = wlLock || annualOn() || n <= s.min_persons; plus.disabled = wlLock || annualOn() || n >= max; num.readOnly = wlLock || annualOn();
     for (const r of addonRows) r.sync();
     rit.sync?.();
-    submitLabel();
-    payNote.hidden = payExtra.hidden = free();   // maksuton varaus: ei maksuohjetta
+    syncPay();
   };
   const num = h('input', { id: 'bk-n', type: 'number', min: s.min_persons, max, inputmode: 'numeric', 'aria-label': t.persons, onchange: () => { if (locked()) { upd(); return; } n = Math.min(Math.max(+num.value || s.min_persons, s.min_persons), max); upd(); } });
   const minus = h('button', { type: 'button', class: 'bk-step', 'aria-label': '−', onclick: () => { n--; upd(); } }, '−');
   const plus = h('button', { type: 'button', class: 'bk-step', 'aria-label': '+', onclick: () => { n++; upd(); } }, '+');
-  const cf = customerFields();
+  let syncPay = () => {};
+  const cf = customerFields({ onChange: () => syncPay() });
   // lisäpalvelurivi: nimi, hinta, kuvaus + määrävalitsin (− n +)
   const addonRows = addons.map((a) => {
     const q = h('input', { id: `bk-a-${a.id}`, type: 'number', min: 0, inputmode: 'numeric', 'aria-label': `${aname(a)}: ${t.addonQty}`, onchange: () => { qty.set(a.id, Math.max(0, Math.min(Math.floor(+q.value) || 0, addonLimit(a, n)))); upd(); } });
@@ -819,7 +823,8 @@ async function viewCheckout(ruleId, ds, productId, via) {
   const legal = legalFields(), { terms, consent } = legal;
   // Ilmainen (vuosikortti tai 100 % koodi) → "Vahvista varaus"; muuten ennallaan.
   const free = () => !!code.quote && code.sig === sig() && +code.quote.total === 0;
-  const submitLabel = () => { if (!submit.disabled) submit.textContent = free() ? t.codeConfirm : hmode.on ? ht(S.lang, 'checkout.button') : t.book; };
+  const paysOnline = () => formPaysOnline(cf);
+  const submitLabel = () => { if (!submit.disabled) submit.textContent = free() ? t.codeConfirm : paysOnline() && hmode.on ? ht(S.lang, 'checkout.button') : t.book; };
   const codeInput = h('input', { id: 'bk-code', name: 'discount_code', maxlength: 40, autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false', 'aria-describedby': 'bk-code-status',
     oninput: (e) => { const v = normalizeCode(e.target.value); if (v !== e.target.value) e.target.value = v; },
     onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); if (!codeInput.readOnly) applyCode(normalizeCode(codeInput.value)); } } });
@@ -867,7 +872,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
     }
     if (!terms.checked) { msg.append(errorBox(t.acceptTermsErr)); revealIfHidden(msg); terms.focus({ preventScroll: true }); return; }
     const wasFree = free();
-    submit.disabled = true; submit.textContent = wasFree ? t.codeConfirming : hmode.on ? ht(S.lang, 'checkout.creating') : t.booking;
+    submit.disabled = true; submit.textContent = wasFree ? t.codeConfirming : paysOnline() && hmode.on ? ht(S.lang, 'checkout.creating') : t.booking;
     try {
       const chosen = chosenAddons();
       const args = { p_rule_id: s.rule_id, p_date: ds, p_persons: n, p_name: cust.name, p_email: cust.email, p_phone: cust.phone, p_marketing_consent: consent.checked, p_locale: S.lang, p_note: (f.get('note') || '').trim() || null,
@@ -882,7 +887,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
       if (extras.length || upsellUI.hasSuggestedAddon(chosen)) {
         const attached = await rpc('public_upsell_checkout_attach', { p_token: r.token, p_upsell: extras, p_session_id: upsellUI.session }).catch(() => null);
         if (!attached?.ok) {
-          submit.textContent = wasFree ? t.codeConfirm : hmode.on ? ht(S.lang, 'checkout.button') : t.book;
+          submit.textContent = wasFree ? t.codeConfirm : paysOnline() && hmode.on ? ht(S.lang, 'checkout.button') : t.book;
           const href = `${S.confirmHref}${mockQs()}#${r.token}`;
           msg.replaceChildren(errorBox(upsellUI.text('attach_failed') || t.errorGeneric),
             h('p', {}, h('a', { href, text: upsellUI.text('open_order') || href })));
@@ -918,15 +923,30 @@ async function viewCheckout(ruleId, ds, productId, via) {
   // Maksuohje: tulee asetuksesta (public_payment_mode) ja palvelimen maksutavoista (MobilePay / lahjakortti) – ei oleteta pay_later-tilaa. Oletusteksti ensin, päivitys kun maksutavat on haettu.
   const payNote = h('p', { class: 'bk-pay', 'data-testid': 'checkout-paynote', text: hm0.legacy ? t.payHold(hmode.minutes) : t.payLater });
   const payExtra = h('div', { 'data-testid': 'checkout-hold-extra' });
-  holdInfo().then((hi) => {
-    hmode.on = hi.on; hmode.minutes = hi.minutes;
-    if (hi.on) {   // pitotila (§17): paikanpito, maksutapa valitaan seuraavassa vaiheessa, varaus vahvistuu vasta maksun jälkeen
-      submitLabel();
+  let holdSnap = null;
+  syncPay = () => {
+    submitLabel();
+    if (free()) { payNote.hidden = payExtra.hidden = true; return; }   // maksuton varaus: ei maksuohjetta
+    payNote.hidden = false;
+    if (!paysOnline()) {   // booking_187 K4: laskulla maksettava yritys ei näe pitotilan nappia eikä ohjetta
+      payNote.textContent = t.companyInvoiceMethodNote;
+      payExtra.hidden = true;
+      return;
+    }
+    payExtra.hidden = false;
+    const hi = holdSnap;
+    if (hi?.on) {
       payNote.textContent = ht(S.lang, 'checkout.lead', { minutes: hi.minutes });
       payExtra.replaceChildren(...hi.extra(S.lang));
       return;
     }
-    if (hi.onlineSite) payNote.textContent = hi.legacyHold ? `${t.payHold(hi.minutes)} ${pt(S.lang, 'checkoutHoldOnline')}` : pt(S.lang, 'checkoutOnlineSite');   // vanha käytös ennallaan
+    payExtra.replaceChildren();
+    if (hi?.onlineSite) payNote.textContent = hi.legacyHold ? `${t.payHold(hi.minutes)} ${pt(S.lang, 'checkoutHoldOnline')}` : pt(S.lang, 'checkoutOnlineSite');
+    else payNote.textContent = (hi?.legacyHold || hm0.legacy) ? t.payHold((hi && hi.minutes) || hmode.minutes) : t.payLater;
+  };
+  holdInfo().then((hi) => {
+    holdSnap = hi; hmode.on = hi.on; hmode.minutes = hi.minutes;
+    syncPay();
   });
   mount(h('h2', { text: t.bookTitle }), pick, wlNote,
     h('div', { class: 'bk-checkout' }, form,
@@ -1002,8 +1022,8 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   } }, t.cancelBooking));
   if (b.status === 'pending' && inv.locked) actions.append(h('p', { class: 'bk-note', role: 'status', 'data-testid': 'invoiced-cancel-note', text: t.invoicedCancelNote }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })));
   mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { 'data-testid': 'conf-title', text: b.status === 'cancelled' ? t.confCancelled : b.status === 'expired' ? t.confExpired : b.status === 'pending' || (co && co.awaiting) ? ht(S.lang, 'h2.awaiting') : t.confTitle }), h('p', { class: 'bk-status', role: 'status', 'data-testid': 'conf-status', text: head }), holdHost, mpHost, dl,   // pitotilassa: otsikko + tilabadge → pitopaneeli → tiivis tilausyhteenveto → maksuosio (secEl lisätään yhteenvedon jälkeen)
-    b.status === 'confirmed' && b.customer_kind === 'company' && b.payment_status !== 'paid' ? h('p', { class: 'bk-pay', text: t.companyInvoiceMethodNote }) : null,
-    b.status === 'confirmed' && b.payment_status !== 'paid' && b.payment_status !== 'invoiced' && b.customer_kind !== 'company' && !isTreatmentBooking(b) && !online ? h('p', { class: 'bk-pay', text: t.payLater }) : null, optNote && b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-option-note', text: optNote }) : null, actions, out,
+    b.status === 'confirmed' && paysByInvoice(b) && b.payment_status !== 'paid' ? h('p', { class: 'bk-pay', text: t.companyInvoiceMethodNote }) : null,
+    b.status === 'confirmed' && b.payment_status !== 'paid' && b.payment_status !== 'invoiced' && !paysByInvoice(b) && !isTreatmentBooking(b) && !online ? h('p', { class: 'bk-pay', text: t.payLater }) : null, optNote && b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-option-note', text: optNote }) : null, actions, out,
     b.status === 'confirmed' && (b.has_ritual_addon || ritItems.length) ? h('p', { class: 'bk-note', 'data-testid': 'conf-ritual-note', text: rtx('ritualConfNote') }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email }))
       : b.status === 'confirmed' ? h('p', { class: 'bk-note', text: b.can_change ? t.changeInfo(b.change_hours_before, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) : t.changeLocked(b.change_hours_before) }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })) : null,
     h('p', { class: 'bk-note', text: t.emailNote }), h('p', {}, h('a', { href: S.infoHref, text: t.directions }))));
