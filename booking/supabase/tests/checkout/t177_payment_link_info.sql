@@ -81,7 +81,7 @@ begin
   if to_regprocedure('booking.public_payment_link_info(uuid)') is null then
     raise exception 'TESTRESULT pass=0 fail=1 skip=0 F A1 booking_177 puuttuu (public_payment_link_info)';
   end if;
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) in ('1fb6153b39daa6f1055c93cac7cb4563', '647c556562046c75b7e7e33703c050a0'), 'A1 public_payment_link_info = booking_177 tai booking_178');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) in ('1fb6153b39daa6f1055c93cac7cb4563', '647c556562046c75b7e7e33703c050a0', '1b729ef4d72dc925001169c38bad3315'), 'A1 public_payment_link_info = booking_177, booking_178 tai booking_187');
   perform pg_temp.ck((select prosecdef and proconfig = array['search_path=""'] and provolatile = 'v' from pg_proc where oid = 'booking.public_payment_link_info(uuid)'::regprocedure),
       'A2 SECURITY DEFINER, search_path tyhjä');
   perform pg_temp.ck(has_function_privilege('anon', 'booking.public_payment_link_info(uuid)', 'execute')
@@ -89,7 +89,7 @@ begin
       and has_function_privilege('service_role', 'booking.public_payment_link_info(uuid)', 'execute')
       and not exists (select 1 from pg_proc p, aclexplode(p.proacl) a where p.oid = 'booking.public_payment_link_info(uuid)'::regprocedure and a.grantee = 0),
       'A3 oikeudet: anon/authenticated/service_role, ei PUBLIC');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) in ('703c03c301f5a3008192cdbe65e559e2', 'cca997c4e900e78b8bb9e2e0c7da25d4')
+  perform pg_temp.ck(md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) in ('703c03c301f5a3008192cdbe65e559e2', 'cca997c4e900e78b8bb9e2e0c7da25d4', 'd1f8df803a45c2b77aa9f8554fc41890')
       and md5(pg_get_functiondef('booking._create_link_payment(bigint,integer,text)'::regprocedure)) in ('533ac9af831c0c11e1f504e377a17827', '5e432077c560a10822db8ac0d2bbe7c2', 'f40db96ca201e40467f20cc1db5866c9')
       and md5(pg_get_functiondef('booking._order_rl(text,uuid,integer,integer)'::regprocedure)) = 'ec6bf13a3694e5bf9034a80123857246'
       and md5(pg_get_functiondef('booking._rate_limit(text,integer,interval)'::regprocedure)) = '7c8076d29d82d72db797066fd44d06c1'

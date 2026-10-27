@@ -31,7 +31,7 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
   try { restoreBookings(JSON.parse(storage?.getItem(KEY) || 'null')); } catch { /* tyhjä alku */ }
   const save = () => { try { storage?.setItem(KEY, JSON.stringify(snapshotBookings())); } catch { /* ei säilytystä */ } };
   const missing = (name) => new ApiError(`Could not find the function booking.${name} in the schema cache`, { status: 404, code: 'PGRST202' });
-  const canned = (po) => ({ ok: true, order_no: po.order_no, status: po.status, payment_status: po.payment_status, total: po.total, currency: 'EUR', created_at: po.created_at, first_name: po.first_name, customer_kind: 'private',
+  const canned = (po) => ({ ok: true, order_no: po.order_no, status: po.status, payment_status: po.payment_status, total: po.total, currency: 'EUR', created_at: po.created_at, first_name: po.first_name, customer_kind: po.customer_kind || 'private', invoice_method: po.invoice_method ?? null,
     items: [{ product_name: 'Yleinen saunavuoro', quantity: 1, line_total: po.total, vat_rate: 25.5, product_id: 1, rule_id: null, starts_at: po.reservations[0].starts_at, ends_at: po.reservations[0].ends_at, persons: 2, mode: 'slots', status: 'confirmed', hold_expires_at: null, option: null }],
     addons: [], payment_methods: [], booking_kind: 'slots', can_change: false, change_deadline: null, change_hours_before: 48 });
   async function rpc(name, args = {}) {

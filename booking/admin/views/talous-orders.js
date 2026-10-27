@@ -20,6 +20,7 @@ import { invoiceLockReason, linkStaleNote, orderInvoiceLocked } from '../addon-l
 import { alt } from '../addon-lock-texts.js';
 import { linkDeadlineControl } from './link-deadline.js';
 import { linkValidityText, linkSubmitOnce } from '../payment-link-logic.js';
+import { billingMethodText } from '../billing-method-texts.js';
 
 export const ORDER_SORTS = ['created', 'order_no', 'total', 'payment_status', 'first_reservation'];
 const VAT_CHOICES = [25.5, 13.5, 0];
@@ -109,7 +110,9 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
     const sum = (label, value, cls = '', tid) => h('div', { class: cls }, h('dt', { text: label }), h('dd', { 'data-testid': tid, text: value }));
     const sums = h('dl', { class: 'tl-sums' }, sum(t('order.total'), fmt.money(b.total), '', 'order-total'), sum(t('order.paid'), fmt.money(b.paid)), b.refunded ? sum(t('order.refunded'), fmt.money(b.refunded)) : null,
       b.pending_link ? sum(t('order.pendingLink'), fmt.money(b.pending_link)) : null, sum(t('order.unpaid'), fmt.money(unpaid), unpaid > 0 ? 'due' : '', 'order-unpaid'));
-    const meta = h('p', { class: 'muted tl-meta', text: [o.customer.email, o.customer.phone, o.customer.business_id ? `${t('order.bid')} ${o.customer.business_id}` : null, sourceLabel(o.source_channel)].filter(Boolean).join(' · ') });
+    const metaBits = [o.customer.email, o.customer.phone, o.customer.business_id ? `${t('order.bid')} ${o.customer.business_id}` : null, sourceLabel(o.source_channel)].filter(Boolean).join(' · ');
+    const billMethod = o.customer_kind === 'company' ? o.billing_method : null;
+    const meta = h('p', { class: 'muted tl-meta', text: metaBits }, billMethod ? h('span', { 'data-testid': 'order-billing-method', text: `${metaBits ? ' · ' : ''}${billingMethodText('label')}: ${billingMethodText(billMethod)}` }) : null);
     const notes = [o.internal_note ? h('p', { class: 'tl-note', 'data-testid': 'order-note', text: `${t('order.note')}: ${o.internal_note}` }) : null,
       o.requests.some((x) => x.status === 'open') ? h('p', { class: 'tl-note', 'data-testid': 'order-cancel-request', text: t('order.cancelRequest') }) : null,
       orderInvoiceLocked(o) ? h('p', { class: 'tl-note', role: 'status', 'data-testid': 'order-invoice-lock', text: invoiceLockReason(o, alt) }) : null];

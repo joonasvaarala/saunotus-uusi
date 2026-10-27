@@ -25,6 +25,7 @@ export function normOrder(r) {
     receipts: (r.receipts || []).map((x) => ({ receipt_no: x.receipt_no, kind: x.kind || 'receipt', issued_at: x.issued_at ?? null, token: x.token ?? null, total: num(x.total) })),
     can_add: !!r.can_add, add_until: r.add_until ?? null, can_change: !!r.can_change, change_deadline: r.change_deadline ?? null, change_hours_before: r.change_hours_before ?? null,
     invoice_locked: r.invoice_locked === true,
+    customer_kind: r.customer_kind ?? null, invoice_method: r.invoice_method ?? null,   // booking_187: tilaussivu erottaa verkkomaksun laskusta
     // booking_149: asiakkaan peruutuspyynnön takaraja (vuoron alku − customer_change_hours_before). can_request_cancel null = vanha backend (ei kenttää) → lomake kuten ennen.
     can_request_cancel: r.can_request_cancel == null ? null : !!r.can_request_cancel, cancel_deadline: r.cancel_deadline ?? null, cancel_hours_before: r.cancel_hours_before ?? null, cancel_closed: !!r.cancel_closed,
     cancel_request: r.cancel_request ? { status: r.cancel_request.status, created_at: r.cancel_request.created_at } : null, online_payment_enabled: !!r.online_payment_enabled,

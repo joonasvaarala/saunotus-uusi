@@ -107,7 +107,7 @@ begin
   end if;
   perform pg_temp.ck(md5(pg_get_functiondef('booking.vismapay_payment_apply(text,text,numeric,jsonb)'::regprocedure)) in ('03fbbd2486b2c22dfa02d7ec84da626f', '2f8a7e56ae9bb4e29f4025f91e7ea706')
       and md5(pg_get_functiondef('booking.vismapay_payment_lookup(text)'::regprocedure)) = 'ddec24e2970bde7ff4dc6c6ecc3a63ac'
-      and md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) = '647c556562046c75b7e7e33703c050a0'
+      and md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) in ('647c556562046c75b7e7e33703c050a0', '1b729ef4d72dc925001169c38bad3315')
       and md5(pg_get_functiondef('booking._vismapay_attempt_trg()'::regprocedure)) = '8553fa9e304740124b64dd361439820a', 'A1 muutetut funktiot = booking_178');
   perform pg_temp.ck((select bool_and(prosecdef and proconfig = array['search_path=""']) from pg_proc where oid in ('booking.vismapay_payment_apply(text,text,numeric,jsonb)'::regprocedure,
       'booking.vismapay_payment_lookup(text)'::regprocedure, 'booking.public_payment_link_info(uuid)'::regprocedure, 'booking._vismapay_attempt_trg()'::regprocedure)), 'A2 SECURITY DEFINER, search_path tyhjä');
@@ -120,7 +120,7 @@ begin
       and not exists (select 1 from pg_proc p, aclexplode(p.proacl) a where p.oid in ('booking.vismapay_payment_apply(text,text,numeric,jsonb)'::regprocedure,
             'booking.vismapay_payment_lookup(text)'::regprocedure, 'booking.public_payment_link_info(uuid)'::regprocedure, 'booking._vismapay_attempt_trg()'::regprocedure) and a.grantee = 0),
       'A3 oikeudet: apply/lookup vain service_role, link_info anon, ei PUBLIC');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) in ('703c03c301f5a3008192cdbe65e559e2', 'cca997c4e900e78b8bb9e2e0c7da25d4')
+  perform pg_temp.ck(md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) in ('703c03c301f5a3008192cdbe65e559e2', 'cca997c4e900e78b8bb9e2e0c7da25d4', 'd1f8df803a45c2b77aa9f8554fc41890')
       and md5(pg_get_functiondef('booking.vismapay_payment_event(text,text,text,text,jsonb)'::regprocedure)) = 'e6834eb7c9da8a0a8c531706eb6692fc'
       and md5(pg_get_functiondef('booking.payment_mark_paid(text,text,numeric,jsonb)'::regprocedure)) = '8ceb0a7dea60d37e3ea6a17cec0e4c25'
       and md5(pg_get_functiondef('booking.payment_mark_failed(text,text,text,jsonb)'::regprocedure)) = '2dfe2d2c0757157be90484d60cef8046'
