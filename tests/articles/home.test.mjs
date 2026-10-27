@@ -9,7 +9,7 @@ import { join, resolve } from 'node:path';
 delete process.env.SITE_ENV; process.env.SITE_URL = 'https://saunotus.fi';
 const { pickHomeItems, homeSectionHtml } = await import('../../src/articles/pages.mjs');
 const { loadArticles, makeFixtureRpc } = await import('../../src/articles/source.mjs');
-const { setHomeSections, homeSection } = await import('../../src/articles/runtime.mjs');
+const { setArticlesState, setHomeSections, homeSection } = await import('../../src/articles/runtime.mjs');
 const R = await import('../../src/render.mjs');
 const { cfg } = await import('../../src/articles/config.mjs');
 const { checkDist } = await import('../../scripts/check-articles.mjs');
@@ -77,7 +77,8 @@ test('XSS: otsikko ja summary escapataan; slug-polku ei riko attribuuttia', () =
   assert.doesNotMatch(html, /<script|<img src=x/);
   assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt; &amp; &quot;q&quot;/);
 });
-test('etusivu: Saunatietoa on nauha listauslinkillä, ei artikkelikortteja eikä home.css:ää; arvostelut jäävät ylemmäs', () => {
+test('etusivu: Saunatietoa on nauha listauslinkillä, ei artikkelikortteja eikä home.css:ää; arvostelut jäävät ylemmäs; tyhjä lista piilottaa nauhan', () => {
+  setArticlesState({ count: { fi: 3, en: 3 }, source: 'test' });
   setHomeSections({ fi: homeSectionHtml(items('fi'), 'fi', variantsFor('fi')), en: '' });
   const fi = R.home('fi'), en = R.home('en');
   assert.match(fi, /id="saunatietoa"/);
@@ -91,6 +92,9 @@ test('etusivu: Saunatietoa on nauha listauslinkillä, ei artikkelikortteja eikä
   setHomeSections({});
   assert.doesNotMatch(R.home('fi'), /class="section home-art"|\.hart\{/);
   assert.match(R.home('fi'), /id="saunatietoa"/);
+  setArticlesState({ count: { fi: 0, en: 0 }, source: 'test' });
+  assert.doesNotMatch(R.home('fi'), /saunatietoa/);
+  assert.doesNotMatch(R.home('en'), /sauna-knowledge/);
 });
 test('RPC-virhe tai tyhjä lista: loadArticles ei kaada, osio pois', async () => {
   const quiet = { warn() {}, log() {} };
@@ -124,14 +128,14 @@ test('build (fixture, testi): etusivulla Saunatietoa-nauha, ei artikkelikortteja
   }
   assert.doesNotMatch(rd(b.dist, 'sitemap.xml'), /esikatselu|preview/);
 });
-test('build (tuotanto): ei esikatselusivuja; tyhjä lista ja RPC-virhe → ei korttiosiota, nauha säilyy, build ei kaadu', () => {
+test('build (tuotanto): ei esikatselusivuja; tyhjä lista ja RPC-virhe → ei korttiosiota eikä nauhaa, build ei kaadu', () => {
   const e = build('pe', { ARTICLES_FIXTURE: join(root, 'tests/articles/fixtures/rpc-empty.json') });
-  assert.doesNotMatch(rd(e.dist, 'index.html'), /home-art/); assert.doesNotMatch(rd(e.dist, 'en/index.html'), /home-art/);
-  assert.match(rd(e.dist, 'index.html'), /id="saunatietoa"/);
+  assert.doesNotMatch(rd(e.dist, 'index.html'), /home-art|saunatietoa/);
+  assert.doesNotMatch(rd(e.dist, 'en/index.html'), /home-art|sauna-knowledge/);
   assert.ok(!existsSync(join(e.dist, 'esikatselu')) && !existsSync(join(e.dist, 'en/preview')));
   const f = build('pf', { BOOKING_SUPABASE_URL: 'http://localhost:9', BOOKING_ANON_KEY: 'sb_publishable_x' });
-  assert.doesNotMatch(rd(f.dist, 'index.html'), /home-art/); assert.match(f.out, /etusivun osio FI piilossa/);
-  assert.match(rd(f.dist, 'index.html'), /id="saunatietoa"/);
+  assert.doesNotMatch(rd(f.dist, 'index.html'), /home-art|saunatietoa/);
+  assert.match(f.out, /etusivun osio FI piilossa/);
   const p = build('pp', { ARTICLES_FIXTURE: '1' });
   assert.match(rd(p.dist, 'index.html'), /id="saunatietoa"/);
   assert.doesNotMatch(rd(p.dist, 'index.html'), /class="section home-art"/);

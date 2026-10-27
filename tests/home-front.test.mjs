@@ -8,6 +8,7 @@ process.env.SITE_URL = 'https://saunotus.fi';
 
 const { experienceHtml, HOME_TEXTS, HOME_EXPERIENCES, cardDuration } = await import('../src/home-front.mjs');
 const { setLiveCatalog, clearLiveCatalog } = await import('../src/catalog-live.mjs');
+const { setArticlesState } = await import('../src/articles/runtime.mjs');
 const R = await import('../src/render.mjs');
 
 const kb = JSON.parse(readFileSync(new URL('../content/kb/kb.json', import.meta.url), 'utf8'));
@@ -76,6 +77,7 @@ test('public_catalog peittää kb-hinnan ja nimen; HTML escapetaan', () => {
 
 test('etusivu: järjestys, ei varaa-verkosta-listaa, torstai 16:00, kaksi tapahtumaa, haitari, valikon kultanappi', () => {
   clearLiveCatalog();
+  setArticlesState({ count: { fi: 1, en: 1 }, source: 'test' });
   const fi = R.home('fi');
   const en = R.home('en');
   assert.doesNotMatch(fi, /id="varaa-verkosta"|class="shopgrps"|class="tiles"|Elämys, joka juontaa juurensa perinteeseen|Hyvät löylyt|Suosittelemme/);
@@ -109,4 +111,7 @@ test('etusivu: järjestys, ei varaa-verkosta-listaa, torstai 16:00, kaksi tapaht
   const choose = fi.slice(fi.indexOf('id="valitse-elamys"'), fi.indexOf('class="week soon"'));
   const tradition = fi.slice(fi.indexOf('class="tradition"'), fi.indexOf('id="arvostelut"'));
   assert.doesNotMatch(choose + tradition, /johku/i);
+  setArticlesState({ count: { fi: 0, en: 0 }, source: 'test' });
+  assert.doesNotMatch(R.home('fi'), /saunatietoa/);
+  assert.doesNotMatch(R.home('en'), /sauna-knowledge/);
 });

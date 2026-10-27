@@ -133,7 +133,7 @@ Esirenderöity sisältöosio (`/saunatietoa/`, EN `/en/sauna-knowledge/`), jonka
 
 **Sivutekstit tietokannasta (sopimus §18):** asiakkaalle näkyvät tekstit luetaan buildissa `public_get_site_texts`-RPC:llä (välimuisti → repon varateksti, ei kaada buildia; tuntematon `{{paikkamerkki}}` kaataa). Ks. [docs/SIVUTEKSTIT.md](docs/SIVUTEKSTIT.md).
 
-**Etusivun osio:** etusivulla on kompakti Saunatietoa-nauha ja linkki listaukseen, ei artikkelikortteja. Ks. docs/SAUNATIETOA.md → Etusivun nauha.
+**Etusivun osio:** etusivulla on kompakti Saunatietoa-nauha ja linkki listaukseen, kun kielellä on julkaistuja artikkeleita. Tyhjällä listalla nauhaa ei ole. Artikkelikortteja ei upoteta. Ks. docs/SAUNATIETOA.md → Etusivun nauha.
 
 ## Päätökset ja rajaukset
 

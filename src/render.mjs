@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { sortReviews } from './reviews-sort.mjs';
 import { cards, alts, pageDoc } from './content-texts.mjs';
-import { articlesNav } from './articles/runtime.mjs';
+import { articlesNav, publishedArticleCount } from './articles/runtime.mjs';
 import { tx } from './site-texts.mjs';
 import { seoSchemaForPage, jsonLdScript } from './seo-enhance.mjs';
 import { privacyAnalyticsHtml, policyHasAnalyticsSection } from './privacy-analytics.mjs';
@@ -334,7 +334,8 @@ export function home(lang, opt = {}) {
   const r = d.ritual;
   const tradition = sec('home-tight', traditionHtml(lang, { kicker: r.kicker, title: r.title, cta: r.cta, perPerson: u.perPerson }));
   const ev = sec('home-tight', `${head('', d.events.title, '', { orn: true })}${eventsHtml(lang, d.events.empty, { limit: 2 })}<p class="center" style="margin-top:22px"><a class="btn light sm" href="${pageHref('book', lang)}">${e(u.allEvents)}</a></p>`, 'tapahtumat');
-  const infoStripSec = sec('strip', infoStrip(lang), 'saunatietoa');
+  // Nauha vain kun kielellä on julkaistuja artikkeleita. Tyhjä lista ei saa jättää /saunatietoa/-linkkiä etusivulle.
+  const infoStripSec = publishedArticleCount(lang) > 0 ? sec('strip', infoStrip(lang), 'saunatietoa') : '';
   const co = d.company;
   const comp = sec('strip tint', companyStrip(lang, { title: co.title, cta: co.cta2, href: pageHref('companies', lang) }), 'yrityksille');
   const s = d.story;

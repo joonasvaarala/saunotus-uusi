@@ -40,7 +40,7 @@ Rakennus hakee kaikki slug-ohjaukset **yhdellä kutsulla**: `public_articles_red
 
 ## Etusivun nauha
 
-Etusivulla (FI `/`, EN `/en/`) **Saunatietoa** / **Sauna knowledge** on kompakti nauha: lyhyt teksti ja linkki listaukseen (`/saunatietoa/`, EN `/en/sauna-knowledge/`). Artikkelikortteja ei upoteta etusivulle. Nauhan teksti on sivuteksti `ui.site.home_info_lead` (varateksti `src/home-front.mjs`, tuonti `content/site-texts.pending-import-85.json`).
+Etusivulla (FI `/`, EN `/en/`) **Saunatietoa** / **Sauna knowledge** on kompakti nauha: lyhyt teksti ja linkki listaukseen (`/saunatietoa/`, EN `/en/sauna-knowledge/`). Artikkelikortteja ei upoteta etusivulle. Nauha renderöidään vain, kun kyseisellä kielellä on julkaistuja artikkeleita (sama laskuri kuin valikon linkillä, `publishedArticleCount`). Tyhjä lista ei lisää nauhaa eikä osoitetta etusivulle. Nauhan teksti on sivuteksti `ui.site.home_info_lead` (varateksti `src/home-front.mjs`, tuonti `content/site-texts.pending-import-85.json`).
 
 Kolmen uusimman artikkelin korttirenderöinti (`homeSectionHtml`, `pickHomeItems`) jää käyttöön listauksen ja testien tarpeisiin, mutta `R.home()` ei upota sitä eikä etusivulle tule `src/articles/home.css`. `scripts/check-articles.mjs` vaatii nauhan listauslinkin, kun kielellä on artikkeleita, eikä salli vanhaa korttiosiota (`home-art`) kun artikkeleita ei ole. Valikon linkki noudattaa edelleen `nav.showWhenEmpty`.
 
