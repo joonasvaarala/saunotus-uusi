@@ -10,6 +10,7 @@ set local lock_timeout = '5s';
 set local statement_timeout = '180s';
 
 create temp table t187_r(st text, label text) on commit drop;
+insert into booking.invoice_counters(series, last_seq) values ('L', 0) on conflict do nothing;  -- PATCH: kuten t185 (dev: invoices_series_fkey)
 create function pg_temp.ck(p_ok boolean, p_label text) returns void language sql as $$
   insert into t187_r values (case when coalesce(p_ok, false) then 'P' else 'F' end, p_label) $$;
 create function pg_temp.skip(p_label text) returns void language sql as $$
@@ -193,7 +194,7 @@ begin
   r := booking.public_payment_options(tok);
   g := booking.public_payment_options(tokp);
   perform pg_temp.ck(coalesce((r -> 'order' ->> 'can_pay_online')::boolean, false)
-    and (r -> 'methods') = (g -> 'methods')
+    and (select jsonb_agg(m ->> 'code' order by m ->> 'code') from jsonb_array_elements(r -> 'methods') m) = (select jsonb_agg(m ->> 'code' order by m ->> 'code') from jsonb_array_elements(g -> 'methods') m)  -- PATCH: body sisältää tilauksen tokenin
     and coalesce((g -> 'order' ->> 'can_pay_online')::boolean, false), '4 can_pay_online ja samat maksutavat kuin yksityisellä');
   g := booking.public_get_booking(tok);
   r := booking.public_get_order(tok);
@@ -314,7 +315,7 @@ begin
   end if;
   tstart := null;
   if tprod is not null then
-    select q.starts_at into tstart from booking.public_treatment_availability(tprod, current_date + 2, current_date + 20, 1) q
+    select q.starts_at into tstart from booking.public_treatment_availability(tprod, current_date + 2, current_date + 15, 1) q
      where q.status = 'available' order by 1 limit 1;
   end if;
   if tprod is null or tstart is null then

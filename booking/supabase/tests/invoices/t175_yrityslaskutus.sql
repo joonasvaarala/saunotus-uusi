@@ -16,6 +16,7 @@
 -- Ajo: psql -X -v ON_ERROR_STOP=0 -f t175_yrityslaskutus.sql   (tai liitä koko tiedosto SQL-editoriin; tulos virheviestissä TESTRESULT …)
 -- Jälkitarkistus ROLLBACKin jälkeen (erillinen SELECT tiedoston lopussa): t175 leftover rows = 0.
 begin;
+insert into booking.invoice_counters(series, last_seq) values ('L', 0) on conflict do nothing;  -- PATCH: kuten t185 (dev: invoices_series_fkey)
 set local lock_timeout = '3s';
 set local statement_timeout = '120s';
 select set_config('t175.log', '', true);

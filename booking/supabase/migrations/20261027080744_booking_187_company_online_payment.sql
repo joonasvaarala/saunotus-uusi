@@ -8,7 +8,7 @@
 -- Menetelmä toisti kaikkien dumppattujen funktioiden tuotannon md5:t (runko + yksi rivinvaihto, ilman puolipistettä).
 -- Ei ajettu Tapio-devissä (PG17). Uudet md5:t on tarkistettava devissä ennen tuotantoa.
 -- Pohja: main @ fede14382d660f3502336013840aeb89760e5191 (briefin a347e368 oli vanhentunut).
--- Rollback: rollbacks/20261027090000_booking_187_ROLLBACK.sql
+-- Rollback: rollbacks/20261027080744_booking_187_ROLLBACK.sql
 --   Rollback ei muuta dataa. billing.invoice_method='online' -tilaukset jäävät. Palautuksen jälkeen ne ovat
 --   "yritys ilman laskutustapaa": verkkomaksu on estetty (helper poistuu, portit vertaavat taas customer_kind='company').
 -- Testi: tests/checkout/t187_company_online_payment.sql (fixtures/10_test_helpers.sql jälkeen, ei run.sh-listassa).
@@ -942,6 +942,6 @@ begin
   return new;
 end $function$;
 
--- Rollback (täysi SQL): rollbacks/20261027090000_booking_187_ROLLBACK.sql
+-- Rollback (täysi SQL): rollbacks/20261027080744_booking_187_ROLLBACK.sql
 -- Palauttaa F1–F10 tuotannon runkoihin ja pudottaa _order_pays_by_invoice vasta kun F5–F7 on palautettu.
 -- Dataa ei muuteta. Jäljelle jäävät invoice_method='online'-tilaukset eivät enää pääse verkkomaksuun.

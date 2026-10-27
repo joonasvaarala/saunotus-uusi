@@ -15,8 +15,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '../..');
 const rd = (p) => readFileSync(join(root, p), 'utf8');
 const md5 = (s) => createHash('md5').update(s).digest('hex');
-const MIG = 'booking/supabase/migrations/20261027090000_booking_187_company_online_payment.sql';
-const RB = 'booking/supabase/rollbacks/20261027090000_booking_187_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261027080744_booking_187_company_online_payment.sql';
+const RB = 'booking/supabase/rollbacks/20261027080744_booking_187_ROLLBACK.sql';
 const REPLACED = {
   'booking._clean_company': ['53fa5a8a98e98aeb4a97000d2f6b37ec', '019579f7b2a615f691c206aeb214195d'],
   'booking._stamp_order_billing': ['693f24abfe0dddfbf4a2e345e1596e73', 'ded4c037a352e2b65b6f5e3100643334'],
