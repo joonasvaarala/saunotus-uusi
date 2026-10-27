@@ -152,6 +152,27 @@ export function checkDist({ dist, siteUrl, isTest, sections, legacy = {} }) {
       for (const im of p.imgs) if (!/fetchpriority="high"|loading="lazy"/.test(im) && !/favicon/.test(im)) err(`${w}: img ilman lazy/eager-merkintää: ${im.slice(0, 80)}`);
       if (!/<nav class="crumbs"/.test(p.body)) err(`${w}: murupolku puuttuu`);
       if (!/class="article-cta"/.test(p.body)) err(`${w}: CTA-lohko puuttuu`);
+      const faqH2 = /<h2\b[^>]*\bid="usein-kysyttya"[^>]*>/.exec(p.body);
+      if (faqH2) {
+        const rest = p.body.slice(faqH2.index + faqH2[0].length);
+        const cut = rest.search(/<h2\b/);
+        const block = cut >= 0 ? rest.slice(0, cut) : rest;
+        const qs = [...block.matchAll(/<h3\b[^>]*>([\s\S]*?)<\/h3>/g)].map((x) => dec(x[1].replace(/<[^>]+>/g, '')).replace(/\s+/g, ' ').trim());
+        if (qs.length) {
+          const faq = lds.find((x) => x['@type'] === 'FAQPage');
+          if (!faq) err(`${w}: FAQPage puuttuu (${qs.length} kysymystä otsikon Usein kysyttyä alla)`);
+          else {
+            if (faq['@context'] !== 'https://schema.org') err(`${w}: FAQPage @context väärin`);
+            if (faq['@id'] !== `${canon}#usein-kysyttya`) err(`${w}: FAQPage @id (${faq['@id']}) ≠ ${canon}#usein-kysyttya`);
+            const me = faq.mainEntity;
+            if (!Array.isArray(me) || me.length !== qs.length) err(`${w}: FAQPage kysymyksiä ${me?.length ?? 0}, sivulla ${qs.length}`);
+            else me.forEach((q, i) => {
+              if (q['@type'] !== 'Question' || q.name !== qs[i]) err(`${w}: FAQPage kysymys ${i + 1} ei vastaa otsikkoa`);
+              if (q.acceptedAnswer?.['@type'] !== 'Answer' || !String(q.acceptedAnswer.text || '').trim()) err(`${w}: FAQPage vastaus ${i + 1} puuttuu`);
+            });
+          }
+        }
+      }
     }
 
     // hreflang

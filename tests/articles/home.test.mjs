@@ -123,7 +123,8 @@ test('build (tuotanto): ei esikatselusivuja; tyhjä lista → ei osiota; RPC-vir
   assert.doesNotMatch(rd(e.dist, 'index.html'), /home-art/); assert.doesNotMatch(rd(e.dist, 'en/index.html'), /home-art/);
   assert.ok(!existsSync(join(e.dist, 'esikatselu')) && !existsSync(join(e.dist, 'en/preview')));
   const f = build('pf', { BOOKING_SUPABASE_URL: 'http://localhost:9', BOOKING_ANON_KEY: 'sb_publishable_x' });
-  assert.doesNotMatch(rd(f.dist, 'index.html'), /home-art/); assert.match(f.out, /etusivun osio FI piilossa/);
+  // RPC ei vastaa eikä välimuistia ole: tuontitiedoston artikkelit näytetään silti, rakennus ei kaadu.
+  assert.match(rd(f.dist, 'index.html'), /class="section home-art"/); assert.match(f.out, /pending-import-blogisarja/); assert.match(f.out, /etusivun osio FI näkyy/);
   const p = build('pp', { ARTICLES_FIXTURE: '1' });
   assert.match(rd(p.dist, 'index.html'), /class="section home-art"/);
   assert.ok(!existsSync(join(p.dist, 'esikatselu')));

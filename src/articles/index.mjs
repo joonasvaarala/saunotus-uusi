@@ -10,6 +10,7 @@ import { loadArticles, makeRpc, makeFixtureRpc, readCommittedSlugs } from './sou
 import { prepareImages, makeFetchImage } from './images.mjs';
 import { buildArticleSite, homeSectionHtml } from './pages.mjs';
 import { setArticlesState, setHomeSections } from './runtime.mjs';
+import { mergePendingArticles, IMAGE_DIR, copyLocalArticleImages } from './pending.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 export const FIXTURE_DEFAULT = join(root, 'tests/articles/fixtures/rpc.json');
@@ -32,15 +33,18 @@ export async function loadForBuild(env = process.env, log = console) {
   const data = await loadArticles({ rpc, cacheDir, committedSlugs: [...readCommittedSlugs(join(root, 'content/articles-slugs.json')), ...fixtureKnown], strict: env.ARTICLES_STRICT === '1', log });
   data.cacheDir = cacheDir; data.fixture = !!fx;
   if (fx && data.source === 'rpc') data.source = 'fixture';
+  // Tuontitiedoston artikkelit mukaan vain oikeaan rakennukseen. Fixture-testeissä (ARTICLES_FIXTURE) niitä ei sekoiteta feikkidataan.
+  if (!fx) mergePendingArticles(data, log);
   setArticlesState({ count: { fi: data.lang.fi.items.length, en: data.lang.en.items.length }, source: data.source });
   return data;
 }
 
 /** Vaihe 2: kuvat + sivut hakemistoon out. Palauttaa sitemap-rivit. */
 export async function renderForBuild(data, out, { write, env = process.env, log = console }) {
+  copyLocalArticleImages(out);
   const images = [];
-  for (const L of LANGS) for (const it of data.lang[L].items) { if (it.card.image) images.push(it.card.image); images.push(...(it.article.images || [])); if (it.seo?.og_image) images.push(it.seo.og_image); }
-  const variants = env.ARTICLES_IMAGES === '0' ? new Map() : await prepareImages({ images, outDir: out, cacheDir: data.cacheDir, widths: cfg.widths, fetchImage: makeFetchImage({ fixtureDir: FIXTURE_IMAGES }), log });
+  for (const L of LANGS) for (const it of data.lang[L].items) { if (it.card.image) images.push(it.card.image); images.push(...(it.article.images || [])); if (it.seo?.og_image) images.push(it.seo.og_image); if (it.localInline) images.push(it.localInline); }
+  const variants = env.ARTICLES_IMAGES === '0' ? new Map() : await prepareImages({ images, outDir: out, cacheDir: data.cacheDir, widths: cfg.widths, fetchImage: makeFetchImage({ fixtureDir: FIXTURE_IMAGES, localDir: IMAGE_DIR }), log });
   const r = buildArticleSite(data, variants);
   // Etusivun osio (esirenderöity, kieli sivun mukaan). Epäonnistuminen tai 0 artikkelia → osio pois; rakennus ei kaadu.
   const home = { fi: '', en: '' };

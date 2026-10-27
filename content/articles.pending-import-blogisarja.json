@@ -1,0 +1,254 @@
+{
+ "_doc": "Kuusi Saunatietoa-artikkelia. ÄLÄ aja tätä tiedostoa CI:stä tai sivuston rakennuksesta tietokantaan. Ylläpitäjä tuo rivit hallinnan kautta. Jokaiselle artikkelille: 1) select booking.admin_upsert_article(null, upsert) luonnoksena (vain upsert-objekti; publish_at, source_url ja images ovat tuntemattomia kenttiä ja hylätään). 2) Lataa hero-jpg (images[role=hero].file, kansio content/article-images/) Storage-ämpäriin article-images polkuun articles/<id>/<unix-ms>-<tunnus>.jpg. Tiedoston pitää olla olemassa storage.objects-taulussa ennen rekisteröintiä. Enintään 5 Mt. 3) select booking.admin_register_article_image(<id>, <polku>, width, height, alt_fi, null, null, null, bytes, 'image/jpeg', 0, true). width, height, alt_fi ja bytes ovat tämän tiedoston images-rivillä. 4) select booking.admin_publish_article(<id>, publish_at). Käytä publish_at-arvoa, jotta järjestys ja etusivun kolme uusinta pysyvät näin. Välikuvaa (<slug>-2.jpg ja <slug>-2.webp) ei viedä tietokantaan. Sivusto näyttää sen tekstin puolivälissä. savusaunan-loylyllä ei ole välikuvaa. source_url on Instagram-lähde. Sitä ei saa laittaa content_fi-kenttään eikä näyttää sivulla. Kun slug näkyy public_get_article-vastauksessa, rakennus käyttää tietokannan tekstiä. Paikallinen jpg peittää pääkuvan niin kauan kuin tiedosto on kansiossa content/article-images/. Kuvat: content/article-images/<slug>-hero.jpg ja .webp (pääkuva, myös og:image) sekä valinnainen <slug>-2.jpg ja .webp. Alt-tekstit ovat kuvatoimituksen tekstit sellaisenaan (images[].alt_fi). Rakennus lukee pikselikoon jpg:stä ja kopioi tiedostot osoitteeseen /img/articles/. Sivulla picture: webp ensin, jpg varakuvana. Osoite on /saunatietoa/<slug>/. Tuotannon canonical on https://saunotus.fi/saunatietoa/<slug>/. Testisivusto käyttää omaa SITE_URL-osoitettaan. Jos osion polku myöhemmin vaihtuu, lisää vanha polku content/articles.json legacyPaths-listaan. Slugia ei vaihdeta. Jos artikkeli poistetaan julkaisusta tietokannassa, poista se myös tästä tiedostosta. Muuten rakennus näyttää sen uudelleen, kunnes slug on taas julkisessa RPC:ssä.",
+ "url_pattern": {
+  "fi": "/saunatietoa/<slug>/",
+  "test": "https://joonasvaarala.github.io/saunotus-uusi/saunatietoa/<slug>/",
+  "canonical_production": "https://saunotus.fi/saunatietoa/<slug>/"
+ },
+ "images_dir": "content/article-images",
+ "articles": [
+  {
+   "source_url": "https://www.instagram.com/p/DFZ45wUNWje/",
+   "publish_at": "2026-10-27T08:00:00.000Z",
+   "images": [
+    {
+     "role": "hero",
+     "file": "saunavuoro-kun-aika-katoaa-hero.jpg",
+     "webp": "saunavuoro-kun-aika-katoaa-hero.webp",
+     "alt_fi": "Nuotio palaa ketjuista riippuvassa tulikorissa lumisen kodan keskellä. Ympärillä on taljoilla peitettyjä pölkkyjakkaroita.",
+     "width": 1600,
+     "height": 1067,
+     "bytes": 709940
+    },
+    {
+     "role": "inline",
+     "file": "saunavuoro-kun-aika-katoaa-2.jpg",
+     "webp": "saunavuoro-kun-aika-katoaa-2.webp",
+     "alt_fi": "Kolme ihmistä istuu kesäisessä kodassa kahvikupit käsissään. Etualalla palaa nuotio, ja seinän vieressä on halkopino.",
+     "width": 1600,
+     "height": 1067,
+     "bytes": 711351
+    }
+   ],
+   "upsert": {
+    "slug_fi": "saunavuoro-kun-aika-katoaa",
+    "title_fi": "Kun aika katoaa saunavuorolla",
+    "meta_title_fi": "Saunavuoro savusaunassa: kun aika katoaa lauteilla",
+    "meta_description_fi": "Miksi kello unohtuu saunavuorolla? Otto Kronqvist kertoo, miten ajantaju katoaa savusaunan lauteilla Sipoossa ja miksi se ilahduttaa saunaisäntää.",
+    "summary_fi": "Miksi kello unohtuu saunavuorolla? Otto Kronqvist kertoo, miten ajantaju katoaa savusaunan lauteilla Sipoossa ja miksi se ilahduttaa saunaisäntää.",
+    "author_name": "Otto Kronqvist",
+    "tags": [
+     "saunavuoro",
+     "saunavuoro savusaunassa",
+     "saunominen",
+     "jälkilöylyt"
+    ],
+    "content_fi": "Kuinka kauan saunavuoro oikeastaan kestää? Ja miksi siihen on niin vaikea vastata jälkikäteen?\n\nMoni saunavieras sanoo meille, että saunavuorolla ajantaju häviää. Niinhän se todella tekee. Huomasin itsekin eräänä iltana ihan vahingossa saunoneeni ja paljuilleeni peräti kuusi tuntia. Kävin vuoron perään löylyissä ja vilvoittelemassa, ja jossain välissä ilta oli muuttunut yöksi. Kellosta en ollut välittänyt koko aikana.\n\nOlemme tottuneet vilkuilemaan kelloa. Töissä kalenteri on täynnä, ja kotona puhelin muistuttaa seuraavasta menosta jo ennen kuin edellinen on ohi. Kello kulkee mukana silloinkin, kun mihinkään ei ole kiire. Monelle saunavuoro onkin harvoja hetkiä viikossa, jolloin kelloa ei tarvitse katsoa. Saunavuoron alussa puhelin vielä vilkaistaan ennen kuin se jää kassiin. Siinä vaiheessa ilta on vielä aikataulu. Muutaman tunnin päästä aikataulu on unohtunut.\n\n## Saunavuoro ja läsnäolo\n\nMistä tämä sitten johtuu? Ehkä syynä on löylyjen ja ympäristön rentouttava vaikutus. Kun mieli laskeutuu raukeaan tilaan eikä kiire paina joka suunnasta, kellon vilkuilulle ei tunnu olevan tarvetta. Kun puhelin jää pukuhuoneeseen, lauteilla ajatukset kulkevat löylyn tahdissa. Jos tulee saunaan suoraan töistä, ensimmäiset löylyt kuluvat helposti työpäivän purkamiseen.\n\nEnsimmäisillä löylyillä moni vielä miettii, paljonko aikaa on jäljellä. Muutaman vilvoittelukierroksen jälkeen laskeminen yleensä unohtuu. Löylyä heitetään lisää, joku lähtee vilvoittelemaan ja joku jää vielä ylälauteelle. Kukaan ei kysy, mitä kello on. Savusaunan kivissä ja seinissä lämpö kestää pitkään, joten löylyjä riittää myöhäiseenkin iltaan.\n\nPidämme tällaisesta palautteesta erityisen paljon. Meille ajantajun katoaminen on merkki onnistuneesta saunakokemuksesta. Se kertoo, että lämmitys on onnistunut ja ilta on saanut mennä omalla painollaan.\n\nSaunan ääressä aika on ennenkin mennyt omalla painollaan. Saunaa on lämmitetty lauantaisin ja jouluna, ja saunaan on menty, kun se on ollut valmis. Lämmitys ja löylyt ovat vieneet sen ajan, minkä ne ovat vieneet. Savusauna on peräisin ajalta, jolloin kelloa ei lauteille tarvittu, ja sama meininki tuntuu jatkuvan yhä. Hämärässä löylyhuoneessa ei näe, onko ulkona ilta vai yö. Talvella pimeä tulee jo ennen saunavuoroa, ja kesällä valoisa ilta jatkuu niin pitkään, että kellonaikaa on vaikea arvata.\n\n## Kun saunavuoro venyy\n\nToki ajattomuudella on kääntöpuolensa. Toisinaan illan päätteeksi joudun hellästi muistuttelemaan jälkilöylyporukoita, että makkaratulilta olisi jo aika suunnata kotiin. Muuten ilta venähtäisi meilläkin yötöiksi.\n\nMuistuttelu on silti mukava tehtävä. Jos porukkaa pitää patistella kotiin, ilta on mennyt niin kuin toivoimmekin. Tulen ääressä istutaan usein vielä hetki, vaikka takki on jo päällä. Jos muistutus pitää toistaa, ei se mitään. Kotimatkalla ehtii katsoa kelloa ja hämmästellä, mihin ilta meni.\n\nSauna ei kysy, kauanko aiot viipyä. Vinkiksi nautiskelijoille: kun haluaa saunoa kiireettä, kannattaa jättää samalle illalle muut menot pois. Viikonlopun jälkilöylyillä aikaa on reilusti, joten kiireettömään saunomiseen ja tulisteluun riittää hetki jos toinenkin.\n\nAjattomuus on harvinaista herkkua.\n\nLue myös: [Yleinen savusauna ja tila hiljaisuudelle](/saunatietoa/yleinen-savusauna-ja-tila-hiljaisuudelle/) ja [Savusaunan noki ja harjaamisen taito](/saunatietoa/savusaunan-noki/)\n\n## Usein kysyttyä\n\n### Pitääkö saunavuoro varata etukäteen?\n\nKyllä. Paikka saunavuorolle kannattaa aina varata etukäteen, jotta vältät hukkareissun, jos vuoro onkin täynnä. Sipoonjoen perinnesaunan vuorot löytyvät osoitteesta [saunotus.fi](/varaa/).\n\n### Mitä saunavuoron jälkeen voi tehdä?\n\nLöylyjen jälkeen voi tulistella makkaratulilla ja istua vielä hetken tulen ääressä ennen kotimatkaa.\n\n:::author\n\n**Otto Kronqvist**\n\nOtto Kronqvist on Sipoonjoen perinnesaunan saunaisäntä. Maahan rakennettu savusauna sijaitsee osoitteessa Hindsbyntie 124, Sipoo. Yleiset saunavuorot löytyvät osoitteesta [saunotus.fi](/varaa/).\n\n:::\n\n:::cta\n\n[Varaa saunavuoro](/varaa/)\n\n:::",
+    "featured": false,
+    "sort_order": 1,
+    "noindex": false
+   }
+  },
+  {
+   "source_url": "https://www.instagram.com/p/DHA8qvetPLu/",
+   "publish_at": "2026-10-26T08:00:00.000Z",
+   "images": [
+    {
+     "role": "hero",
+     "file": "savusaunan-noki-hero.jpg",
+     "webp": "savusaunan-noki-hero.webp",
+     "alt_fi": "Kolme saunojaa istuu ja nauraa holvikattoisessa savusaunassa, jonka seinät ja katto ovat noesta mustat. Etualalla palavat kynttilät.",
+     "width": 1600,
+     "height": 900,
+     "bytes": 374416
+    },
+    {
+     "role": "inline",
+     "file": "savusaunan-noki-2.jpg",
+     "webp": "savusaunan-noki-2.webp",
+     "alt_fi": "Lähikuva savusaunan holvikaton kaarevista laudoista ja takaseinästä, jotka noki on värjännyt mustanruskeiksi.",
+     "width": 1600,
+     "height": 1067,
+     "bytes": 299771
+    }
+   ],
+   "upsert": {
+    "slug_fi": "savusaunan-noki",
+    "title_fi": "Savusaunan noki ja harjaamisen taito",
+    "meta_title_fi": "Savusaunan noki: likaa vai osa saunakokemusta?",
+    "meta_description_fi": "Onko savusaunan noki likaa? Otto Kronqvist kertoo noen harjaamisesta ja siitä, miksi nokiläiskä kyynärpäässä kuuluu savusaunan arkeen.",
+    "summary_fi": "Onko savusaunan noki likaa? Otto Kronqvist kertoo noen harjaamisesta ja siitä, miksi nokiläiskä kyynärpäässä kuuluu savusaunan arkeen.",
+    "author_name": "Otto Kronqvist",
+    "tags": [
+     "savusaunan noki",
+     "savusaunan puhdistus",
+     "savun tuoksu",
+     "maasauna"
+    ],
+    "content_fi": "Onko noki likaa? Ja jos on, miksi niin moni haluaa istua nokisessa saunassa? Savusaunan noki herättää kysymyksiä jokaisessa, joka astuu mustien seinien sisään ensimmäistä kertaa.\n\nMeidän savusauna on varsin nokinen paikka. Löylyhuone on maan alla, ja sen seinät ja holvimainen katto ovat tummuneet savusta. Olen usein miettinyt, piileekö juuri nokisuudessa tämän maanalaisen löylyhuoneen taika.\n\nMaanantaisin saunanlämmittäjän rutiineihin kuuluu katto- ja seinäharkkojen harjausta sekä löylyhuoneen pesua. Se on saunan arkea, jota saunavieraat eivät yleensä näe. Työ on yksinkertaista, ja juuri siksi se rauhoittaa. Harja kulkee harkko kerrallaan, ja savun tuoksu tarttuu vaatteisiin ja kulkee mukana kotiin asti.\n\n## Miksi savusaunan noki syntyy\n\nNoen muodostumista ei savusaunassa voi estää. Kun tuli palaa pesässä eikä savulle ole piippua, noki asettuu kattoon ja seiniin. Se kuuluu savusaunan luonteeseen samalla tavalla kuin savun tuoksu. Kun puhdistustyöt tehdään säännöllisesti, saunatila pysyy niin vähänokisena kuin savusauna vain voi olla. Täysin noettomaksi sitä ei saa, enkä usko, että moni saunavieraistamme sitä edes toivoisi.\n\nMonille savusaunan kävijöille nokiläiskä kyynärpäässä tai nokiset kasvot saunomisen jälkeen ovat tuttu näky. Ne ovat monellakin tapaa osa kokemusta. Jälki lähtee pesulla, ja muisto illasta jää. Toisille savusaunan nokisuus taas voi tuntua vieraalta, jopa epämiellyttävältä. Sekin on ymmärrettävää. Olemme tottuneet kiiltävän puhtaisiin pesutiloihin, ja silloin musta seinä voi ensikertalaisesta tuntua oudolta. Kotona noki seinässä tarkoittaisi, että jokin on mennyt pieleen. Savusaunassa se kertoo, että sauna on lämmitetty niin kuin kuuluu.\n\nEnsikertalaiselle vinkiksi: noesta ei kannata huolestua. Se lähtee iholta saippualla ja vedellä, ja suihkun jälkeen jäljelle jää lähinnä savun tuoksu hiuksissa. Jos nokiläiskää ei huomaa itse, kaveri kyllä huomauttaa siitä viimeistään makkaratulilla. Nokinen kyynärpää on kuin pieni muisto yhteisestä illasta.\n\nSilti savusaunan lumo elää vahvana. Savun tuoksu ja alkuperäisen saunan tunnelma ovat säilyttäneet vetovoimansa vuosisatojen ajan. Voisiko olla niin, että noki ei siksi saunassa tunnukaan lialta? Ehkä se on enemmänkin merkki jostain aidosta ja ajattomasta.\n\nNoki ja savun tuoksu tulevat samasta tulesta. Jos haluaa toisen, saa kaupan päälle myös toisen. Maasaunassa tämä korostuu, sillä holvimainen katto pitää lämmön ja tuoksun sisällään.\n\n## Savusaunan puhdistus ja harjaantuminen\n\nHarja ja harjaantuminen kuulostavat sukulaisilta, ja maanantain työ saa ne tuntumaan siltä. Sama liike toistuu viikosta toiseen. Harkot harjataan ja löylyhuone pestään, ja seuraavalla viikolla työ alkaa alusta. Saunavieraat näkevät harjaustyöstä lähinnä lopputuloksen, tumman mutta siistin löylyhuoneen. Valmiiksi työ ei tule koskaan. Toistossa harjaantuu, kuten sanakin vihjaa.\n\nSavusaunan hoito on kuulunut saunan arkeen siinä missä lämmityskin. Noki palaa takaisin seiniin jo seuraavalla lämmityskerralla, ja niin sen kuuluukin.\n\nNiin tai näin, harjaus jatkuu, ja savuntuoksuinen saunamme lämpenee taas tälläkin viikolla.\n\nLue myös: [Mikä tekee savusaunasta aidon savusaunan?](/saunatietoa/aito-savusauna/) ja [Savusaunan löyly on jotain aivan muuta](/saunatietoa/savusaunan-loyly/)\n\n## Usein kysyttyä\n\n### Miksi savusauna on nokinen?\n\nSavusaunassa ei ole savupiippua, joten lämmityksen aikana savu jää löylyhuoneeseen ja noki asettuu kattoon ja seiniin. Noen muodostumista ei voi estää.\n\n### Miten savusaunan nokea hoidetaan?\n\nSipoonjoen perinnesaunalla katto- ja seinäharkot harjataan ja löylyhuone pestään säännöllisesti. Näin sauna pysyy niin vähänokisena kuin savusauna voi olla.\n\n:::author\n\n**Otto Kronqvist**\n\nOtto Kronqvist on Sipoonjoen perinnesaunan saunaisäntä. Maahan rakennettu savusauna sijaitsee osoitteessa Hindsbyntie 124, Sipoo. Lisää savusaunasta osoitteessa [saunotus.fi](/).\n\n:::\n\n:::cta\n\n[Varaa saunavuoro](/varaa/)\n\n:::",
+    "featured": false,
+    "sort_order": 2,
+    "noindex": false
+   }
+  },
+  {
+   "source_url": "https://www.instagram.com/p/DE2RguDtqdc/",
+   "publish_at": "2026-10-25T08:00:00.000Z",
+   "images": [
+    {
+     "role": "hero",
+     "file": "aito-savusauna-hero.jpg",
+     "webp": "aito-savusauna-hero.webp",
+     "alt_fi": "Nainen istuu silmät kiinni ja hymyilee savusaunan lauteella. Taustalla on nokimusta hirsiseinä ja tummunut luukku.",
+     "width": 1600,
+     "height": 1067,
+     "bytes": 320150
+    },
+    {
+     "role": "inline",
+     "file": "aito-savusauna-2.jpg",
+     "webp": "aito-savusauna-2.webp",
+     "alt_fi": "Halot palavat riippuvassa tulikorissa lumen keskellä. Ympärillä on taljoilla peitettyjä pölkkyjä ja kirves pölkyssä.",
+     "width": 1600,
+     "height": 1067,
+     "bytes": 617839
+    }
+   ],
+   "upsert": {
+    "slug_fi": "aito-savusauna",
+    "title_fi": "Mikä tekee savusaunasta aidon savusaunan?",
+    "meta_title_fi": "Aito savusauna: mikä tekee savusaunasta savusaunan?",
+    "meta_description_fi": "Riittääkö savun tuoksu? Otto Kronqvist kertoo, mikä on aito savusauna ja miten sen tunnistaa kertalämmitteisyydestä.",
+    "summary_fi": "Riittääkö savun tuoksu? Otto Kronqvist kertoo, mikä on aito savusauna ja miten sen tunnistaa kertalämmitteisyydestä.",
+    "author_name": "Otto Kronqvist",
+    "tags": [
+     "aito savusauna",
+     "mikä on savusauna",
+     "kertalämmitteinen sauna",
+     "savusaunan lämmitys"
+    ],
+    "content_fi": "Mikä on savusauna? Riittääkö, että saunassa tuoksuu savu? Ja mistä tietää, että kyseessä on aito savusauna?\n\nSavusauna on alkanut kiinnostaa ihmisiä, ja se ilahduttaa meitä. Etelä-Suomessa yleiset savusaunat ovat harvinaista herkkua, ja otamme ilolla vastaan jokaisen tätä perinnettä vaalivan uuden tulokkaan. Samalla sana savusauna on lähtenyt elämään omaa elämäänsä. Olemme useamman kerran törmänneet savusaunaan, joka onkin oikeasti jatkuvalämmitteinen puusauna. Kerran kyseessä oli sähkösauna, jonka pieneen tulipesään sai muutaman tikun palamaan savun tuoksua luomaan.\n\nSiinä kohtaa piti vähän hieraista silmiä. Onko nykyään todella ookoo kutsua mitä tahansa savun tuoksuista tilaa savusaunaksi? Me olemme sitä mieltä, että sanalla on väliä. Kun puhumme savusaunasta, puhumme tietystä tavasta lämmittää sauna.\n\n## Aito savusauna on kertalämmitteinen\n\nSavusaunassa ei ole savupiippua. Kiuas lämmitetään niin, että savu jää löylyhuoneeseen ja poistuu sieltä räppänän tai oven kautta. Kertalämmitteisyys on savusaunan perusperiaate. Kivet kuumennetaan punaisiksi niin, että noki palaa pois ja löyly on puhdasta ja pitkäkestoista.\n\nKun lämmitys on valmis, tuli saa sammua ja savu tuuletetaan ulos. Vasta sen jälkeen saunaan mennään. Lauteilla istuessa pesässä ei enää pala, ja lämpö tulee kivistä ja seinistä, joihin se on lämmityksen aikana varastoitunut. Miten savusaunan sitten tunnistaa paikan päällä? Yksi vihje on se, ettei saunassa ole piippua. Toinen vihje löytyy lauteilta. Kukaan ei lisää puita pesään kesken saunomisen, sillä tuli on sammunut jo ennen kuin ensimmäinen saunoja astui sisään.\n\nTähän lopputulokseen ei ole oikotietä. Savusaunan lämmitys on artesaanityötä. Säätila vaikuttaa vetoon, ja puiden kosteus siihen, miten tuli palaa. Kiuaskivien laadullakin on väliä. Ennen kaikkea lämmitys vaatii kärsivällisyyttä. Lämmitys alkaa hyvissä ajoin ennen saunavuoroa, ja saunojat pääsevät lauteille vasta, kun työ on tehty. Huolellinen lämmitystyö ei anna armoa, satoi tai paistoi.\n\n## Savusaunan lämmitys opettaa odottamaan\n\nSavusaunan kanssa ei voi hätäillä. Jos kivet eivät ole valmiit, ne eivät ole valmiit, vaikka saunojat odottaisivat jo pihalla pyyhkeet kainalossa. Kuinka paljon puuta pesään laitetaan ja milloin kivet ovat valmiit, sen oppii lämmittämällä kerta kerralta. Jokainen sauna on vähän erilainen, ja omaan saunaan pitää tutustua.\n\nMeillä Suomessa on vuosituhantinen savusaunaperinne, joka ei synny puolivillaisilla ratkaisuilla. Suomalainen saunaperinne hyväksyttiin vuonna 2020 Unescon aineettoman kulttuuriperinnön luetteloon. Sipoonjoelle tulee myös kansainvälisiä vieraita, jotka ovat kuulleet suomalaisesta savusaunaperinteestä. Heille haluamme tarjota sen, mistä he ovat lukeneet.\n\nJatkuvalämmitteinen puusauna on hieno sauna, ja sähkösauna on monelle mieluisa paikka rentoutua. Ne ovat kuitenkin eri saunoja kuin savusauna. Kun asiat nimetään oikein, saunoja tietää, mihin on tulossa, eikä kenenkään tarvitse pettyä pihalla.\n\nOlemme ylpeitä tästä perinteestä ja siitä, että Sipoonjoen perinnesaunalla saunojaa odottaa aito savusauna. Sauna lämmitetään vuosituhansien periaatteiden mukaan.\n\nKun seuraavan kerran näet mainoksessa sanan savusauna, voit kysyä kaksi asiaa. Onko saunassa piippu? Palaako tuli saunomisen aikana? Jos vastaus on kyllä, kyseessä on jokin muu sauna.\n\nLöylyissä sen tuntee.\n\nLue myös: [Savusaunan löyly on jotain aivan muuta](/saunatietoa/savusaunan-loyly/) ja [Savusaunan noki ja harjaamisen taito](/saunatietoa/savusaunan-noki/)\n\n## Usein kysyttyä\n\n### Mikä on savusauna?\n\nSavusauna on sauna, jossa ei ole savupiippua. Kiuas lämmitetään kerran niin, että savu jää löylyhuoneeseen, ja ennen saunomista tuli sammuu ja savu tuuletetaan ulos.\n\n### Mikä ero on savusaunalla ja jatkuvalämmitteisellä puusaunalla?\n\nJatkuvalämmitteisessä saunassa tuli palaa kiukaassa saunomisen aikana ja savu poistuu piipun kautta. Savusauna on kertalämmitteinen, ja lauteilla istuessa lämpö tulee kivistä ja seinistä.\n\n:::author\n\n**Otto Kronqvist**\n\nOtto Kronqvist on Sipoonjoen perinnesaunan saunaisäntä. Maahan rakennettu savusauna sijaitsee osoitteessa Hindsbyntie 124, Sipoo. Lisää savusaunasta osoitteessa [saunotus.fi](/).\n\n:::\n\n:::cta\n\n[Varaa saunavuoro](/varaa/)\n\n:::",
+    "featured": false,
+    "sort_order": 3,
+    "noindex": false
+   }
+  },
+  {
+   "source_url": "https://www.instagram.com/p/C84ckXaNOUN/",
+   "publish_at": "2026-10-24T08:00:00.000Z",
+   "images": [
+    {
+     "role": "hero",
+     "file": "savusaunan-loyly-hero.jpg",
+     "webp": "savusaunan-loyly-hero.webp",
+     "alt_fi": "Kolme saunojaa rentoutuu kynttilöin valaistussa maasaunassa, jossa on musta holvikatto ja puiset lauteet.",
+     "width": 1600,
+     "height": 1067,
+     "bytes": 474057
+    }
+   ],
+   "upsert": {
+    "slug_fi": "savusaunan-loyly",
+    "title_fi": "Savusaunan löyly on jotain aivan muuta",
+    "meta_title_fi": "Savusaunan löyly ja savusaunan historia",
+    "meta_description_fi": "Mikä tekee savusaunan löylystä erityisen? Otto Kronqvist kirjoittaa lämmittäjän työstä ja savusaunan historiasta Sipoossa.",
+    "summary_fi": "Mikä tekee savusaunan löylystä erityisen? Otto Kronqvist kirjoittaa lämmittäjän työstä ja savusaunan historiasta Sipoossa.",
+    "author_name": "Otto Kronqvist",
+    "tags": [
+     "savusaunan löyly",
+     "savusaunan historia",
+     "jatkuvalämmitteinen sauna",
+     "savusauna sipoo"
+    ],
+    "content_fi": "”Niin että teillä on savusauna? No se on tosiaan jotain aivan muuta.”\n\nNäin totesi latvialainen saunottaja kesällä 2024 aamusaunan jäljestä. Hänen puulämmitteisen kärrysaunansa lämpömittari näytti lähemmäs sataa astetta. Sama lukema taitaa usein olla tuoreeltaan lämmitetyn savusaunankin lämpötila. Varmaksihan tätä ei voi tietää, koska meikäläiset eivät harrasta lämpömittareita.\n\nOlemme tottuneet kysymään, kuinka kuuma sauna oli. Savusaunassa kysymme mieluummin, millainen löyly oli. Lämpömittari ei kerro, onko löyly kostea vai kuiva, eikä se kerro, kuinka kauan löyly kantaa. Jos lämpötila kiinnostaa, oman mittarin saa tuoda mukaan. Me jatkamme arvailua.\n\n## Savusaunan historia on pitkä\n\nMikä savusaunassa sitten on niin erikoista? Aika harva tietää, miten uusi juttu jatkuvalämmitteinen sauna onkaan. Se kehitettiin alun perin täisaunaksi sota-aikana. Myös perinteisenä pidetyn harjakattoisen rantasaunan esikuva on peräisin Sveitsistä ja ruotsalaisista uimamajoista.\n\nPiipullinen rantasauna on mökkikuvissa ja matkailumainoksissa, ja moni meistä on kasvanut sellaisen lauteilla. Siksi on hauska muistaa, miten lyhyt sen historia on savusaunaan verrattuna.\n\nKaikki tuhannet vuodet ennen 1940-lukua Suomessa ja Baltiassa on saunottu savun mustuttamissa hirsisaunoissa. Pohjoisessa, missä puut kasvavat kitukasvuisiksi, saunottiin yksinkertaisissa turvekylyissä.\n\nSavusauna on siis ihka-aitoa muinaisteknologiaa. Onko mitään yksinkertaisempaa kuin lämmittää kivet punahehkuisiksi ja valella vettä niiden päälle? Savusauna toimii yhä samalla periaatteella kuin ennenkin. Ennen vanhaan savusaunassa hoidettiin muitakin arjen askareita kuin peseytyminen.\n\n## Millainen on savusaunan löyly\n\nSavusaunan löyly on kostea. Kun lämmitys on onnistunut, löylyt ovat raikkaat ja pitkäkestoiset. Lauteilla istuessa pesässä ei enää pala tuli. Itse koen, että hengitys kulkee silloin kevyemmin ja pidemmätkin saunaistunnot tuntuvat luontevilta.\n\nSavusaunan lämmittäminen on oma taiteenlajinsa. Vuodenaika ja ilmanpaine vaikuttavat siihen, millaiset löylyt kiuas tuottaa. Myös lämmityksessä käytetyllä puulla on merkitystä. Sähkösaunan voi laittaa päälle ja lähteä kauppaan. Savusaunassa lämmittäjä on koko ajan paikalla ja seuraa tulta. Hän ei millään muotoa voi irrottaa itseään lämmitystyöstä. Saunanlämmittäjän työnantaja asuu kiukaassa, ja tämä pomo ei kuuntele tekosyitä, jos työtä ei tehdä huolellisesti.\n\n## Savusauna Sipoossa\n\nMeille olisi suuri ilo, jos savusaunakulttuuri alkaisi taas kukoistaa. Niinpä rohkaisemme jokaista mökkisaunaa suunnittelevaa pohtimaan, pitäisikö sittenkin rakentaa savusauna. Rakentaminen vaatii aikaa ja lämmittäminen kärsivällisyyttä, mutta vaiva palkitaan löylyissä. Mökkisaunan rakentajaa voi mietityttää noki tai lämmitykseen kuluva aika. Ne ovat hyviä kysymyksiä, ja niihin kannattaa etsiä vastaukset ennen päätöstä. Savusaunan lämmittämisen oppii kyllä, kun on valmis antamaan sille aikaa. Ennen piirustusten tilaamista kannattaa käydä saunomassa savusaunassa ja kokeilla, miltä löyly tuntuu.\n\nMikäli omaa saunaprojektia ei ole meneillään, savusaunan löylyistä pääsee onneksi nauttimaan täällä Sipoonjokilaaksossa melkeinpä viikon jokaisena päivänä. Sipoonjoen perinnesauna on maahan rakennettu savusauna, joka avattiin tammikuussa 2022. Lämpö asettuu taloksi saunan seiniin ja holvimaiseen kattoon, ja kun rakenteet lämpenevät illan mittaan, löylyt muuttuvat niiden mukana.\n\nSe on tosiaan jotain aivan muuta.\n\nLue myös: [Mikä tekee savusaunasta aidon savusaunan?](/saunatietoa/aito-savusauna/) ja [Miltä mies näyttää? Saunominen ja itsearvostus](/saunatietoa/saunominen-ja-itsearvostus/)\n\n## Usein kysyttyä\n\n### Millainen on savusaunan löyly?\n\nSavusaunan löyly on kostea. Koska tuli on sammunut ennen saunomista, moni kokee hengityksen kulkevan kevyemmin ja pitkienkin saunaistuntojen tuntuvan luontevilta.\n\n### Kuinka kuuma savusauna on?\n\nEmme mittaa savusaunamme lämpöä lämpömittarilla. Tuoreeltaan lämmitetty savusauna voi kuitenkin olla lähellä sataa astetta.\n\n### Missä voi kokea savusaunan Sipoossa?\n\nSipoonjoen perinnesauna on maahan rakennettu savusauna osoitteessa Hindsbyntie 124, Sipoo. Saunavuorot löytyvät osoitteesta [saunotus.fi](/varaa/).\n\n:::author\n\n**Otto Kronqvist**\n\nOtto Kronqvist on Sipoonjoen perinnesaunan saunaisäntä. Maahan rakennettu savusauna sijaitsee osoitteessa Hindsbyntie 124, Sipoo. Lue lisää löylystä osoitteessa [saunotus.fi](/).\n\n:::\n\n:::cta\n\n[Varaa saunavuoro](/varaa/)\n\n:::",
+    "featured": false,
+    "sort_order": 4,
+    "noindex": false
+   }
+  },
+  {
+   "source_url": "https://www.instagram.com/p/C6qstDSNZvU/",
+   "publish_at": "2026-10-23T08:00:00.000Z",
+   "images": [
+    {
+     "role": "hero",
+     "file": "yleinen-savusauna-ja-tila-hiljaisuudelle-hero.jpg",
+     "webp": "yleinen-savusauna-ja-tila-hiljaisuudelle-hero.webp",
+     "alt_fi": "Luminen joenrantametsä. Puiden välistä näkyy osittain jäätynyt joki, jonka tummaa vettä peittävät jää ja lumi.",
+     "width": 1600,
+     "height": 1067,
+     "bytes": 499870
+    },
+    {
+     "role": "inline",
+     "file": "yleinen-savusauna-ja-tila-hiljaisuudelle-2.jpg",
+     "webp": "yleinen-savusauna-ja-tila-hiljaisuudelle-2.webp",
+     "alt_fi": "Paksun lumen peittämiä kuusia ja lehtipuiden oksia hiljaisessa talvimetsässä.",
+     "width": 1600,
+     "height": 1067,
+     "bytes": 772909
+    }
+   ],
+   "upsert": {
+    "slug_fi": "yleinen-savusauna-ja-tila-hiljaisuudelle",
+    "title_fi": "Yleinen savusauna ja tila hiljaisuudelle",
+    "meta_title_fi": "Yleinen savusauna pääkaupunkiseudulla ja hiljaisuus",
+    "meta_description_fi": "Millainen on hyvä yleinen savusauna, kun vuorot täyttyvät? Otto Kronqvist kirjoittaa saunaetiketistä ja hiljaisuuden tilasta lauteilla.",
+    "summary_fi": "Millainen on hyvä yleinen savusauna, kun vuorot täyttyvät? Otto Kronqvist kirjoittaa saunaetiketistä ja hiljaisuuden tilasta lauteilla.",
+    "author_name": "Otto Kronqvist",
+    "tags": [
+     "yleinen savusauna",
+     "yleinen sauna pääkaupunkiseutu",
+     "hiljainen saunavuoro",
+     "saunaetiketti"
+    ],
+    "content_fi": "”Helsingin hipsterit pilaavat Kuusijärven viihtyisyyden.”\n\nNäin raflaavasti Vantaan Sanomat otsikoi keväällä 2024 artikkelinsa naapurisavusaunamme yleisöryntäyksestä. Klikkiotsikko sikseen, jutussa oli paljon oikein mainiota pohdintaa yleisten saunojen suosion nurjista puolista. Se sai meidätkin miettimään, millainen yleinen savusauna on silloin, kun kaikki haluavat lauteille samaan aikaan.\n\nYleisten saunojen suosio näkyy myös meillä Sipoossa. Varsinkin viikonloppuvuorot ovat toisinaan täynnä viikkoja eteenpäin, ja aika usein meiltä kysytään, eikö sekaan mahtuisi vielä yksi pariskunta tai pieni porukka. Houkutus päästää vielä vähän lisää väkeä saunomaan on tietenkin suuri. Haluamme kuitenkin pitää kiinni periaatteellisesta päätöksestämme pitää löylyvuoron osallistujamäärä maltillisena. Kieltäytyminen ei ole koskaan mukavaa. Jos viikonloppu on täynnä, kannattaa katsoa myös arki-illat. Maltillisen väkimäärän ansiosta jokainen vuorolle tullut mahtuu kuitenkin lauteille ja ehtii vilvoittelemaan kaikessa rauhassa.\n\n## Millainen on hyvä yleinen savusauna\n\nSaunassa saa täälläkin olla täydet penkit. Kokemuksemme mukaan ääriään myöten täysi sauna ja hallitsematon kävijävirta voivat kuitenkin tehdä saunakokemuksesta levottoman. Monissa yleisissä saunoissa tämä on pienempi haitta. Saunan puolella on menoa ja meininkiä kuin pubissa konsanaan, ja ilta voi jatkua luontevasti löylyhuoneesta ravintolan puolelle. Sekin on hieno tapa viettää iltaa. On hienoa, että yleiset savusaunat kiinnostavat näin paljon, myös naapurissamme Kuusijärvellä.\n\nSipoonjoen perinnesaunalla haluamme tarjota mahdollisuuden nautiskella saunaa ympäröivästä luonnosta ja vetäytyä tarvittaessa vilvoittelutauolle ihan omaan rauhaankin. Sauna on Hindsbyssä Sipoonkorven kupeessa, ja vilvoittelutauolla ympärillä on joki ja metsä. Pääkaupunkiseudulta ajaa tänne sen verran pitkän matkan, että kaupungin hälinä ehtii jäädä taakse jo ennen pihaan kääntymistä.\n\n## Saunaetiketti yleisessä saunassa\n\nYleinen sauna on yhteinen tila, ja sen ytimessä on kunnioitus kanssasaunojia kohtaan. Meillä kaikilla on omat saunatapamme. Ei haittaa laisinkaan esimerkiksi kysyä muilta ennen kuin heittää löylyä. Joku haluaa kovemmat löylyt ja toinen kevyemmät, ja kysymällä molemmat saavat omansa. Samoin paikkaansa lämminvesialtaassa voi tarjota seuraavalle tulijalle, jos on itse ehtinyt istuskella siellä jo tovin. Kun joku tulee lauteille, vähän voi siirtyä, jotta tilaa riittää kaikille. Löylykauhan voi myös ojentaa vieruskaverille.\n\nPaikka kannattaa aina varata etukäteen. Näin välttyy hukkareissulta, jos saunavuoro onkin täynnä. Varaaminen helpottaa myös meitä, kun tiedämme, montako saunojaa illalla on tulossa. Olisi harmi ajaa Sipoonjoelle asti ja kääntyä takaisin pihalta.\n\n## Hiljainen saunavuoro\n\nKeskustelun ohella maasaunan lämmössä on paikallaan antaa tilaa myös hiljaisuudelle. Siksi meillä on keskiviikkoisin hiljainen saunavuoro, jolla saunotaan hiljaisuudessa. Hiljainen vuoro voi kuulostaa vakavalta, mutta käytännössä se on aika arkinen juttu. Puhuminen jätetään hetkeksi sivuun, ja lauteilla kuunnellaan löylyä. Siellä saa silti hymyillä toiselle tai nyökätä löylyn merkiksi. Kun puhe lakkaa, löylyn suhahdus kivillä kuuluu yllättävän hyvin.\n\nMeille on edelleen jokainen tervetullut, ehkä jopa erityisesti kaikki hipsterit Helsingistä ja muualtakin. Kunhan paikka on varattu.\n\nHiljaisuudessakin voi saunoa yhdessä.\n\nLue myös: [Kun aika katoaa saunavuorolla](/saunatietoa/saunavuoro-kun-aika-katoaa/) ja [Miltä mies näyttää? Saunominen ja itsearvostus](/saunatietoa/saunominen-ja-itsearvostus/)\n\n## Usein kysyttyä\n\n### Pitääkö yleiseen savusaunaan varata paikka?\n\nKyllä. Sipoonjoen perinnesaunalla paikka saunavuorolle kannattaa aina varata etukäteen, sillä varsinkin viikonloppuvuorot täyttyvät usein. Varaukset tehdään osoitteessa [saunotus.fi](/varaa/).\n\n### Mikä on hiljainen saunavuoro?\n\nHiljainen saunavuoro on yleinen saunavuoro, jolla saunotaan hiljaisuudessa. Sipoonjoen perinnesaunalla hiljainen vuoro on keskiviikkoisin.\n\n### Miten yleisessä saunassa toimitaan?\n\nKanssasaunojia kunnioitetaan. On hyvä tapa kysyä muilta ennen löylyn heittämistä ja antaa paikkansa lämminvesialtaassa seuraavalle, kun on istunut siellä jo tovin.\n\n:::author\n\n**Otto Kronqvist**\n\nOtto Kronqvist on Sipoonjoen perinnesaunan saunaisäntä. Maahan rakennettu savusauna sijaitsee osoitteessa Hindsbyntie 124, Sipoo. Yleiset saunavuorot löytyvät osoitteesta [saunotus.fi](/varaa/).\n\n:::\n\n:::cta\n\n[Varaa saunavuoro](/varaa/)\n\n:::",
+    "featured": false,
+    "sort_order": 5,
+    "noindex": false
+   }
+  },
+  {
+   "source_url": "https://www.instagram.com/p/Crfilqetq5N/",
+   "publish_at": "2026-10-22T08:00:00.000Z",
+   "images": [
+    {
+     "role": "hero",
+     "file": "saunominen-ja-itsearvostus-hero.jpg",
+     "webp": "saunominen-ja-itsearvostus-hero.webp",
+     "alt_fi": "Saunoja istuu lauteella ja ottaa kämmenet kupissa vastaan kauhasta valuvaa vettä. Vieressä on koivun lehtiä ja kukkia.",
+     "width": 1600,
+     "height": 1067,
+     "bytes": 352041
+    },
+    {
+     "role": "inline",
+     "file": "saunominen-ja-itsearvostus-2.jpg",
+     "webp": "saunominen-ja-itsearvostus-2.webp",
+     "alt_fi": "Toisen ihmisen kädet asettavat narulla sidotun männynhavuvihdan saunojan syliin.",
+     "width": 1600,
+     "height": 1067,
+     "bytes": 476438
+    }
+   ],
+   "upsert": {
+    "slug_fi": "saunominen-ja-itsearvostus",
+    "title_fi": "Miltä mies näyttää? Saunominen ja itsearvostus",
+    "meta_title_fi": "Saunominen ja itsearvostus: miltä mies näyttää?",
+    "meta_description_fi": "Voiko saunominen auttaa arvostamaan omaa kehoa? Otto Kronqvist kirjoittaa ulkonäköpaineista ja kohtaamisista savusaunan lauteilla.",
+    "summary_fi": "Voiko saunominen auttaa arvostamaan omaa kehoa? Otto Kronqvist kirjoittaa ulkonäköpaineista ja kohtaamisista savusaunan lauteilla.",
+    "author_name": "Otto Kronqvist",
+    "tags": [
+     "saunominen",
+     "miesten saunavuoro",
+     "sauna ja jooga",
+     "savusauna sipoo"
+    ],
+    "content_fi": "”Miltä mies näyttää?”\n\nNäin kysyttiin keväällä 2023 Iltalehden jutun otsikossa. Jutussa neljä eri-ikäistä ja eri näköistä miestä istahti Sipoonjoen perinnesaunan lauteille puhumaan kohtaamistaan ulkonäköpaineista. Olin itse yksi heistä, ja juttu sai miettimään, mitä saunominen voi kertoa omasta kehosta. Miltä mies sitten näyttää? Lauteilla vastaus on aika yksinkertainen: ihan tavalliselta.\n\nKuinka moni mies on istunut kaverinsa kanssa saunassa vuosia ja puhunut kaikesta muusta kuin omasta kehostaan? Mainokset ja somen kuvavirta näyttävät, millainen kehon pitäisi olla, ja omaa kehoa tulee helposti verrattua niihin. Saunan lauteilla vertailukohta on toinen. Vieressä istuu tavallisia ihmisiä tavallisissa kehoissa.\n\n## Saunominen ja itsearvostus\n\nKerroin jutussa matkasta, jonka olen kulkenut itseni tuntemisen ja arvostamisen tiellä. Kerroin myös siitä, miten tärkeässä roolissa joogaharjoitus on tässä prosessissa ollut. Joogassa huomio kääntyy siihen, miltä keho tuntuu. Siinä ei kilpailla siitä, kenen jalka nousee korkealle. Kun harjoittelee riittävän pitkään, tämä tuntuma alkaa vähitellen painaa enemmän kuin peilikuva.\n\nSanoin jutussa myös näin: ”Ja sauna, sauna on suomalaisten jooga. Siellä kaikki ovat riisuttuina ja saa olla juuri sellainen kuin haluaa.”\n\nLauseen voi ottaa pilke silmäkulmassa, mutta siinä on minulle tärkeä ajatus. Saunominen tekee saman asian ilman joogamattoa. Vaatteilla kerromme arjessa paljon siitä, keitä olemme. Saunassa ne jäävät naulakkoon, ja niiden mukana osa roolista. Kun löyly osuu hartioihin, huomio siirtyy siihen, miltä lämpö tuntuu. Vatsan muoto tai käsivarsien paksuus ei siinä hetkessä paljon paina. Lämpö tuntuu iholla samalla tavalla, näytti keho miltä tahansa.\n\nKenties saunominen voisi olla liittolainen matkalla oman kehon tuntemuksesta kumpuavaan itsearvostukseen. Tarkoitan sitä, kuten jutussa sanoin, ”että voi olla minkä tahansa näköinen tai kokoinen ja arvostaa itseään, eikä olla riippuvainen siitä, arvostavatko muut.”\n\n## Yleisillä vuoroilla kohdataan kanssaihmisenä\n\nSipoonjoen perinnesauna pyrkii olemaan juuri tällainen paikka niin miehille kuin naisillekin. On ollut ilahduttavaa huomata kerta kerran jälkeen, millainen ihmisten moninaisuus meidän yleisillä vuoroillamme vallitsee. Saunan lauteilla kohdataan toinen ensisijaisesti kanssaihmisenä, eikä tällaisessa kohtaamisessa ole sijaa rooleille tai titteleille. Pukuhuoneessa harvoin kysytään, mitä teet työksesi. Ensimmäinen kerta yleisessä saunassa voi silti jännittää, ja se on ihan tavallista. Lauteilla huomaa pian, että muut keskittyvät omiin löylyihinsä.\n\nSuomessa alastomuus on perinteisesti ollut luonteva osa saunomista. Saunaan on menty perheen kesken, ja keho on ollut lauteilla tavallinen asia. Lauteilla on istunut lapsia ja vanhuksia, laihoja ja pyöreitä, eikä siitä ole tehty numeroa. Siitä luontevuudesta kannattaa pitää kiinni nyt, kun ruudut ympärillämme täyttyvät muokatuista kuvista.\n\nMeillä on maanantaisin miesten saunavuoro ja tiistaisin naisten saunavuoro. Miesten vuorolla näihin teemoihin on luontevaa soljua löylyjen lomassa, jos siltä tuntuu. Yhtä hyvin voi vain istua ja nauttia löylyistä. Vuorolle voi tulla yksin tai kaverin kanssa.\n\nLauteilla jokainen näyttää ihmiseltä.\n\nLue myös: [Yleinen savusauna ja tila hiljaisuudelle](/saunatietoa/yleinen-savusauna-ja-tila-hiljaisuudelle/) ja [Kun aika katoaa saunavuorolla](/saunatietoa/saunavuoro-kun-aika-katoaa/)\n\n## Usein kysyttyä\n\n### Onko Sipoonjoen perinnesaunalla miesten ja naisten saunavuoroja?\n\nKyllä. Maanantaisin on miesten saunavuoro ja tiistaisin naisten saunavuoro. Lisäksi viikolla on yleisiä vuoroja. Ajankohdat löytyvät osoitteesta [saunotus.fi](/varaa/).\n\n### Mitä tarkoittaa, että sauna on suomalaisten jooga?\n\nAjatus on Otto Kronqvistin. Saunassa kaikki ovat riisuttuina, ja siellä saa olla juuri sellainen kuin haluaa. Huomio siirtyy kehon tuntemuksiin samalla tavalla kuin joogaharjoituksessa.\n\n:::author\n\n**Otto Kronqvist**\n\nOtto Kronqvist on Sipoonjoen perinnesaunan saunaisäntä. Maahan rakennettu savusauna sijaitsee osoitteessa Hindsbyntie 124, Sipoo. Yleiset saunavuorot löytyvät osoitteesta [saunotus.fi](/varaa/).\n\n:::\n\n:::cta\n\n[Varaa saunavuoro](/varaa/)\n\n:::",
+    "featured": false,
+    "sort_order": 6,
+    "noindex": false
+   }
+  }
+ ]
+}
