@@ -131,7 +131,7 @@ begin
       and not exists (select 1 from pg_proc p, aclexplode(p.proacl) a where p.oid in ('booking.vismapay_payment_apply(text,text,numeric,jsonb)'::regprocedure,
             'booking.vismapay_payment_lookup(text)'::regprocedure, 'booking.public_payment_link_info(uuid)'::regprocedure, 'booking._vismapay_attempt_trg()'::regprocedure) and a.grantee = 0),
       'A3 oikeudet: apply/lookup vain service_role, link_info anon, ei PUBLIC');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) in ('703c03c301f5a3008192cdbe65e559e2', 'cca997c4e900e78b8bb9e2e0c7da25d4', 'd1f8df803a45c2b77aa9f8554fc41890')
+  perform pg_temp.ck(md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) in ('703c03c301f5a3008192cdbe65e559e2', 'cca997c4e900e78b8bb9e2e0c7da25d4', 'd1f8df803a45c2b77aa9f8554fc41890', 'd22cda7beb5cea5967b267e52d79ab99')
       and md5(pg_get_functiondef('booking.vismapay_payment_event(text,text,text,text,jsonb)'::regprocedure)) = 'e6834eb7c9da8a0a8c531706eb6692fc'
       and md5(pg_get_functiondef('booking.payment_mark_paid(text,text,numeric,jsonb)'::regprocedure)) = '8ceb0a7dea60d37e3ea6a17cec0e4c25'
       and md5(pg_get_functiondef('booking.payment_mark_failed(text,text,text,jsonb)'::regprocedure)) = '2dfe2d2c0757157be90484d60cef8046'
@@ -207,87 +207,20 @@ begin
   perform pg_temp.ck(r ->> 'outcome' = 'paid' and (select status from booking.payments where id = pay) = 'paid' and pg_temp.paidn(o) = 1
       and pg_temp.info(tk) ->> 'reason' = 'link_paid', 'B16 uusi yritys maksettu → link_paid, yksi maksu');
 
-  -- ===== C myöhästynyt maksu vanhalle yritykselle
+  -- ===== C Visma Pay -aloitus estetty (booking_189). Linkin uusinta on osiossa B, tuplamaksu t188:ssa.
   o2 := pg_temp.mkorder(cu, pid, sp, 40, v_start + interval '1 day');
   tk2 := pg_temp.mklink(u_adm, o2);
   select id into pay2 from booking.payments where link_token = tk2;
-  a1 := pg_temp.prep(tk2, null) ->> 'order_number';
-  perform pg_temp.created(a1);
-  update booking.payments set raw = raw || jsonb_build_object('token_valid_until', (floor(extract(epoch from now())) - 60)::bigint::text) where id = pay2;   -- token vanheni
-  a2 := pg_temp.prep(tk2, null) ->> 'order_number';
-  perform pg_temp.created(a2);
-  perform pg_temp.ck(a1 ~ '-a1$' and a2 ~ '-a2$' and (select provider_ref from booking.payments where id = pay2) = a2, 'C1 token vanheni → uusi yritys -a2');
-  r := pg_temp.lookup(a1); r2 := pg_temp.lookup(a2);
-  perform pg_temp.ck((r ->> 'found')::boolean and (r ->> 'payment_id')::bigint = pay2 and not (r ->> 'current')::boolean and r ->> 'env' = 'test'
-      and (r2 ->> 'current')::boolean and (r2 ->> 'payment_id')::bigint = pay2, 'C2 lookup löytää vanhan ja nykyisen tilausnumeron');
-  r := pg_temp.apply(a1, 'paid', 40);
-  select * into prow from booking.payments where id = pay2;
-  perform pg_temp.ck(r ->> 'outcome' = 'paid' and prow.status = 'paid' and prow.provider_ref = a1 and pg_temp.paidn(o2) = 1
-      and (select sum(amount) from booking.payments where order_id = o2 and status = 'paid') = 40, 'C3 myöhästynyt maksu -a1 kirjattu kerran, provider_ref = -a1');
-  perform pg_temp.ck((select outcome from booking.vismapay_attempts where order_number = a1) = 'paid'
-      and (select superseded_at is not null from booking.vismapay_attempts where order_number = a2)
-      and pg_temp.audits(pay2, 'VISMAPAY_LATE_PAID') = 1 and pg_temp.audits(pay2, 'VISMAPAY_PAID') = 1, 'C4 -a2 korvattu, audit VISMAPAY_LATE_PAID + VISMAPAY_PAID');
-  r := pg_temp.apply(a1, 'paid', 40);
-  perform pg_temp.ck((r ->> 'already')::boolean and r ->> 'outcome' = 'paid' and pg_temp.paidn(o2) = 1 and pg_temp.audits(pay2, 'VISMAPAY_PAID') = 1, 'C5 toisto idempotentti');
-  r := pg_temp.apply(a2, 'paid', 40);
-  r2 := pg_temp.apply(a2, 'paid', 40);
-  perform pg_temp.ck(r ->> 'outcome' = 'needs_review' and r ->> 'code' = 'duplicate_paid' and r2 ->> 'code' = 'duplicate_paid' and pg_temp.paidn(o2) = 1
-      and (select count(*) from booking.payments where order_id = o2) = 1 and (select provider_ref from booking.payments where id = pay2) = a1,
-      'C6 toinen yritys maksettu → EI toista maksua (duplicate_paid)');
-  perform pg_temp.ck(pg_temp.audits(pay2, 'VISMAPAY_DUPLICATE_PAID') = 1 and (select outcome from booking.vismapay_attempts where order_number = a2) = 'duplicate_paid'
-      and (select internal_note from booking.orders where id = o2) like '%TUPLAVELOITUS%' || a2 || '%', 'C7 TUPLAVELOITUS-merkintä ja audit kerran');
   r := pg_temp.prep(tk2, null);
-  perform pg_temp.ck(r ->> 'code' = 'already_paid' and pg_temp.info(tk2) ->> 'reason' = 'link_paid', 'C8 prepare → already_paid, link_paid');
-  r := pg_temp.apply(a2, 'cancelled');
-  perform pg_temp.ck((r ->> 'already')::boolean and (select status from booking.payments where id = pay2) = 'paid', 'C9 peruutus maksetulle → ennallaan');
-
-  -- ===== D vanhentunut linkki + peruutus
-  o3 := pg_temp.mkorder(cu, pid, sp, 30, v_start + interval '2 days');
-  tk3 := pg_temp.mklink(u_adm, o3);
-  select id into pay3 from booking.payments where link_token = tk3;
-  a1 := pg_temp.prep(tk3, null) ->> 'order_number';
-  perform pg_temp.created(a1);
-  update booking.payments set created_at = now() - interval '15 days', link_expires_at = now() - interval '1 minute' where id = pay3;
-  r := pg_temp.apply(a1, 'cancelled');
-  perform pg_temp.ck(r ->> 'outcome' = 'cancelled' and (r ->> 'retryable')::boolean = false and r ->> 'reason' = 'link_expired'
-      and (select status from booking.payments where id = pay3) = 'cancelled' and pg_temp.audits(pay3, 'VISMAPAY_CANCELLED') = 1, 'D1 vanhentunut linkki → peruutus kuluttaa (cancelled)');
-  r := pg_temp.info(tk3);
-  perform pg_temp.ck(r ->> 'status' = 'expired' and r ->> 'reason' = 'link_expired' and not (r ->> 'can_pay')::boolean and r -> 'last_attempt' = 'null'::jsonb, 'D2 link_info → expired/link_expired');
-  r := pg_temp.prep(tk3, null);
-  perform pg_temp.ck(r ->> 'code' = 'payment_not_pending', 'D3 prepare → payment_not_pending');
-
-  -- ===== E korvattu linkki ja muuttunut summa
-  o4 := pg_temp.mkorder(cu, pid, sp, 30, v_start + interval '3 days');
-  tk4 := pg_temp.mklink(u_adm, o4);
-  a1 := pg_temp.prep(tk4, null) ->> 'order_number';
-  perform pg_temp.created(a1);
-  perform pg_temp.login(u_adm);
-  perform booking.admin_record_payment(o4, 'bank_transfer', 10, 'T178 osamaksu');
-  perform pg_temp.logout();
-  r := pg_temp.apply(a1, 'cancelled');
-  perform pg_temp.ck((r ->> 'unchanged')::boolean and (select status from booking.payments where link_token = tk4) = 'cancelled', 'E1 korvattu linkki: myöhästynyt peruutus ei muuta');
-  r := pg_temp.info(tk4);
-  perform pg_temp.ck(r ->> 'status' = 'replaced' and r ->> 'reason' = 'replaced', 'E2 link_info → replaced');
-  tk5 := pg_temp.mklink(u_adm, o4);
-  perform pg_temp.ck(pg_temp.info(tk5) ->> 'status' = 'open' and (pg_temp.info(tk5) ->> 'amount')::numeric = 20, 'E3 uusi linkki open 20 €');
-  a2 := pg_temp.prep(tk5, null) ->> 'order_number';
-  perform pg_temp.created(a2);
-  update booking.orders set total_gross = 25 where id = o4;   -- summa pieneni: linkki 20 € > maksamatta 15 €
-  r := pg_temp.apply(a2, 'cancelled');
-  perform pg_temp.ck(r ->> 'reason' = 'link_stale' and (select status from booking.payments where link_token = tk5) = 'cancelled'
-      and pg_temp.info(tk5) ->> 'status' = 'replaced' and pg_temp.info(tk5) ->> 'reason' = 'link_stale', 'E4 summa muuttui → cancelled → replaced/link_stale');
-
-  -- ===== F verkkokaupan tavallinen maksu ennallaan
-  o6 := pg_temp.mkorder(cu, pid, sp, 30, v_start + interval '4 days');
-  select public_token into otok from booking.orders where id = o6;
-  r := pg_temp.prep(null, otok); a1 := r ->> 'order_number'; pay6 := (r ->> 'payment_id')::bigint;
-  perform pg_temp.created(a1);
-  r := pg_temp.apply(a1, 'cancelled');
-  select * into prow from booking.payments where id = pay6;
-  perform pg_temp.ck(r = '{"ok":true,"outcome":"cancelled"}'::jsonb and prow.status = 'cancelled' and prow.provider_status = 'cancelled'
-      and pg_temp.audits(pay6, 'VISMAPAY_CANCELLED') = 1 and pg_temp.audits(pay6, 'VISMAPAY_CANCELLED_RETRYABLE') = 0, 'F1 tavallinen maksu: peruutus → cancelled kuten ennen');
+  perform pg_temp.ck(r ->> 'code' = 'payment_not_online' and coalesce((r ->> 'ok')::boolean, false) = false
+      and (select provider = 'montonio' and status = 'pending' and provider_ref is null from booking.payments where id = pay2),
+      'C1 linkkitoken: Visma-aloitus estetty, rivi ennallaan ' || left(r::text, 80));
+  select public_token into otok from booking.orders where id = o2;
   r := pg_temp.prep(null, otok);
-  perform pg_temp.ck(r ->> 'ok' = 'true' and (r ->> 'payment_id')::bigint <> pay6 and r ->> 'order_number' ~ '-a1$', 'F2 uusi yritys = uusi maksurivi kuten ennen');
+  perform pg_temp.ck(r ->> 'code' = 'payment_not_online'
+      and (select count(*) from booking.payments where order_id = o2) = 1
+      and (select provider from booking.payments where id = pay2) = 'montonio',
+      'C2 tilaustoken: Visma-aloitus estetty, ei uutta maksuriviä ' || left(r::text, 80));
 
   -- ===== G SQLSTATE ja parametrit
   perform pg_temp.anon();
