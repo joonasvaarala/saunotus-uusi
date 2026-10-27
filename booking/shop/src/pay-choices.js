@@ -17,7 +17,7 @@ import { ht, payLaterError } from './hold-texts.js';
 import { paysByInvoice } from './company-pay.js';
 import { onlineMethod, showOnline } from './online-pay-logic.js';
 import { createOnlinePayApi } from './online-pay-api.js';
-import { onlinePayBlock } from './online-pay-ui.js';
+import { onlinePayBlock, payMark, setMethodLabel } from './online-pay-ui.js';
 
 const PAYABLE = ['confirmed', 'pending'];
 let seq = 0;
@@ -105,8 +105,10 @@ export function payChoicesSection({ S, L, token, model, booking, onApplied, onCl
   if (of.gift) {
     const panel = h('div', { class: 'pc-gift-panel', id: `${id}-g`, hidden: true, 'data-testid': 'pc-gift-panel' },
       redeemSection({ L, api: model.gapi, token, bare: true, balance: true, unpaid: due, onApplied, onClaimed, onFail: onHoldError ? (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) onHoldError(code); } : null }));
-    const btn = h('button', { type: 'button', class: 'btn light ord-btn pc-gift-btn', 'aria-expanded': 'false', 'aria-controls': `${id}-g`, 'data-testid': 'pc-gift-btn', text: tx('giftBtn'),
-      onclick: () => { const open = panel.hidden; panel.hidden = !open; btn.setAttribute('aria-expanded', String(open)); btn.textContent = tx(open ? 'giftBtnClose' : 'giftBtn'); if (open) panel.querySelector('input')?.focus(); } });
+    const giftLabel = h('span', { class: 'op-method-label', text: tx('giftBtn') });
+    const btn = h('button', { type: 'button', class: 'btn light ord-btn pc-gift-btn', 'aria-expanded': 'false', 'aria-controls': `${id}-g`, 'data-testid': 'pc-gift-btn',
+      onclick: () => { const open = panel.hidden; panel.hidden = !open; btn.setAttribute('aria-expanded', String(open)); setMethodLabel(btn, tx(open ? 'giftBtnClose' : 'giftBtn')); if (open) panel.querySelector('input')?.focus(); } }, payMark('gift'), giftLabel);
+    btn._opLabel = giftLabel;
     kids.push(h('div', { class: 'pc-opt', 'data-testid': 'pc-gift' }, btn, panel));
   }
   if (of.payLater) kids.push(payLaterBlock({ L, model, onPayLater, onHoldError }));   // booking_57: oikea nappi (ei enää pelkkä tietolaatikko); näkyy vain kun palvelin listaa pay_later-tavan
