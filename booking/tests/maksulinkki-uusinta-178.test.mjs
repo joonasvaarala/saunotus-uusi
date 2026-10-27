@@ -73,9 +73,9 @@ test('näkymä: peruttu yritys → yhteenveto, uusintaviesti ja painike (FI+EN);
   assert.equal((await view('fi', OPEN)).q('pl-retry'), null, 'ei aiempaa yritystä → ei viestiä');
   assert.equal((await view('fi', { ...OPEN, status: 'expired', reason: 'link_expired', can_pay: false, last_attempt: 'cancelled' })).q('pl-retry'), null);
   const nav = []; let started = 0;
-  const v = payLinkView({ L: 'fi', token: TOK, api: { start: async () => { started++; return { ok: true, redirect_url: 'https://www.vismapay.com/pbwapi/token/uusi', amount: 30 }; } },
+  const v = payLinkView({ L: 'fi', token: TOK, api: { start: async () => { started++; return { ok: true, redirect_url: 'https://pay.montonio.com/session/uusi', amount: 30 }; } },
     loadInfo: async () => ({ ...OPEN, last_attempt: 'cancelled' }), money, navigate: (u) => nav.push(u) });
-  await v.ready; assert.equal(started, 0); await v.q('pl-button').click(); assert.equal(started, 1); assert.deepEqual(nav, ['https://www.vismapay.com/pbwapi/token/uusi']);
+  await v.ready; assert.equal(started, 0); await v.q('pl-button').click(); assert.equal(started, 1); assert.deepEqual(nav, ['https://pay.montonio.com/session/uusi']);
 });
 
 test('tekstit: pending-import-74 = ui.paylink.info.retry FI+EN koodin oletuksista, ei <, ei päällekkäin muiden tiedostojen kanssa', async () => {

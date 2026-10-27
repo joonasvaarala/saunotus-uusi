@@ -80,10 +80,10 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
   function openRefunds(o, p) {
     const rows = (p.refunds || []).filter((r) => ['requested', 'processing', 'failed'].includes(r.status));
     if (!rows.length) return null;
-    const canRetry = (p.provider === 'mobilepay' || p.provider === 'visma_pay') && !api.isMock('refund') && ctx.can('payments.refund');
+    const canRetry = (p.provider === 'mobilepay' || p.provider === 'visma_pay' || p.provider === 'montonio') && !api.isMock('refund') && ctx.can('payments.refund');
     return h('ul', { class: 'tl-refunds', 'data-testid': 'order-open-refunds' }, rows.map((r) => h('li', { 'data-testid': 'open-refund', 'data-status': r.status },
       h('span', { class: `badge ${r.status === 'failed' ? 'st-cancelled' : 'st-pending'}`, text: t(r.status === 'failed' ? 'refund.failed' : 'refund.pending') }), ' ', h('span', { text: `${fmt.money(r.amount)}${r.reason ? ' · ' + r.reason : ''}` }),
-      canRetry && r.status !== 'failed' ? actionBtn({ key: 'refund-retry', label: t('refund.retry'), testid: 'btn-refund-retry', onClick: async () => { if (p.provider === 'visma_pay') await processVismaRefund(r.id); else await processMobilepayRefund(r.id); afterChange(null, o.order_id); } }) : null)));
+      canRetry && r.status !== 'failed' ? actionBtn({ key: 'refund-retry', label: t('refund.retry'), testid: 'btn-refund-retry', onClick: async () => { if (p.provider === 'visma_pay') await processVismaRefund(r.id); else if (p.provider === 'montonio') await processMontonioRefund(r.id); else await processMobilepayRefund(r.id); afterChange(null, o.order_id); } }) : null)));
   }
   async function orderDetail(id) {
     // booking_146: vuosikorttitilauksen koodi, voimassaolo ja sähköpostin tila (virhe tai puuttuva RPC → osio jää pois)
@@ -238,10 +238,12 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
     // MobilePay-verkkomaksu (provider 'mobilepay'): hyvitys lähtee MobilePayhin heti (§14.4); vihje näkyy vain sille maksulle
     const mpHint = h('p', { class: 'muted tl-hint', 'data-testid': 'refund-mp-hint', text: t('refund.mobilepay') });
     const vpHint = h('p', { class: 'muted tl-hint', 'data-testid': 'refund-vp-hint', text: t('refund.visma') });
+    const moHint = h('p', { class: 'muted tl-hint', 'data-testid': 'refund-mo-hint', text: t('refund.montonio') });
     const syncHint = () => {
       const prov = refundable.find((p) => String(p.payment_id) === sel.value)?.provider;
       mpHint.hidden = prov !== 'mobilepay';
       vpHint.hidden = prov !== 'visma_pay';
+      moHint.hidden = prov !== 'montonio';
     };
     sel.addEventListener('change', syncHint); syncHint();
     // booking_136: perutaanko myös tilauksen varaukset? Näkyy vain, kun voimassa olevia varauksia on ja käyttäjällä on bookings.manage (palvelin tarkistaa saman). Oletus Ei.
@@ -250,7 +252,7 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
       ? yesNo({ name: 'cancel_reservations', testid: 'refund-cancel-res', legend: rcText('ui.admin.refund_cancel.order_question'), hint: rcText('ui.admin.refund_cancel.order_count', { count: active }),
         no: rcText('ui.admin.refund_cancel.order_no'), yes: rcText('ui.admin.refund_cancel.order_yes') }) : null;
     formDialog(t('btn.refund'), [h('p', { class: 'muted', text: api.isMock('refund') ? t('mock.note') : t('live.note') }), fld(t('refund.payment'), sel), fld(t('refund.amount'), amount),
-      fld(t('refund.reason'), h('input', { name: 'reason', required: true, maxlength: 200 })), vpHint, mpHint, cancelQ ? cancelQ.node : null], t('refund.submit'),
+      fld(t('refund.reason'), h('input', { name: 'reason', required: true, maxlength: 200 })), vpHint, mpHint, moHint, cancelQ ? cancelQ.node : null], t('refund.submit'),
     async (fd) => {
       const amt = +fd.get('amount'), p = refundable.find((x) => String(x.payment_id) === fd.get('payment'));
       if (!(amt > 0) || amt > left(p)) throw new Error(t('refund.badAmount'));
@@ -263,11 +265,13 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
       // Verkkomaksu: rivi on 'requested' → käsittely heti (käyttäjän JWT, payments.refund), tulos näkyviin
       if (res?.status === 'requested' && !res.mock && p.provider === 'mobilepay') await processMobilepayRefund(res.refund_id);
       if (res?.status === 'requested' && !res.mock && p.provider === 'visma_pay') await processVismaRefund(res.refund_id);
+      if (res?.status === 'requested' && !res.mock && p.provider === 'montonio') await processMontonioRefund(res.refund_id);
       afterChange(res, o.order_id);
     });
   }
   const MP_KINDS = { done: 'ok', failed: 'err', retry_later: 'warn', unverified: 'warn', db_error: 'warn', none: 'warn', off: 'warn', forbidden: 'err', error: 'warn' };
   const VP_KINDS = { done: 'ok', failed: 'err', retry_later: 'warn', awaiting_customer: 'warn', unverified: 'warn', db_error: 'warn', none: 'warn', off: 'warn', forbidden: 'err', error: 'warn', not_settled: 'err', not_configured: 'warn' };
+  const MO_KINDS = { done: 'ok', pending: 'warn', awaiting_settlement: 'warn', failed: 'err', retry_later: 'warn', db_error: 'warn', not_configured: 'warn', none: 'warn', off: 'warn', forbidden: 'err', error: 'warn' };
   async function processMobilepayRefund(refundId) {
     const m = await api.mobilepayRefund(refundId);
     const key = `refund.mp.${m.result}`;
@@ -278,6 +282,12 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
     const m = await api.vismapayRefund(refundId);
     const key = VP_KINDS[m.result] ? `refund.vp.${m.result}` : 'refund.vp.error';
     toast(t(key), VP_KINDS[m.result] || 'warn');
+    return m;
+  }
+  async function processMontonioRefund(refundId) {
+    const m = await api.montonioRefund(refundId);
+    const key = MO_KINDS[m.result] ? `refund.mo.${m.result}` : 'refund.mo.error';
+    toast(t(key), MO_KINDS[m.result] || 'warn');
     return m;
   }
   // ---- työkalupalkki ----

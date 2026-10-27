@@ -34,14 +34,13 @@ const OFF = { tilaus: (l) => VIEWS.tilaus[l].replace('scenario=gift', 'scenario=
 async function open(view, lang, width, { url, reduce = false } = {}) {
   const mobile = width < 600;
   const ctx = await browser.newContext({ viewport: { width, height: mobile ? 844 : 900 }, isMobile: mobile, hasTouch: mobile, locale: lang === 'en' ? 'en-GB' : 'fi-FI', timezoneId: 'Europe/Helsinki', reducedMotion: reduce ? 'reduce' : 'no-preference' });
-  await ctx.route('https://cdn.vippsmobilepay.com/**', (r) => r.fulfill({ status: 200, contentType: 'text/javascript', body: '' }));
   // laskuri: kaikki scrollIntoView-kutsut asetuksineen
   await ctx.addInitScript(() => { window.__sc = []; const o = Element.prototype.scrollIntoView; Element.prototype.scrollIntoView = function (a) { window.__sc.push({ cls: this.className || this.tagName, tid: this.getAttribute('data-testid'), arg: a === undefined ? null : JSON.parse(JSON.stringify(a)) }); return o.call(this, a); }; });
   const page = await ctx.newPage(); page.ctx = ctx;
   const name = `${view}/${lang}/${width}`;
   page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) problems.push(`${name} console.${m.type()}: ${m.text()}`); });
   page.on('pageerror', (e) => problems.push(`${name} pageerror: ${e.message}`));
-  page.on('request', (r) => { if (!r.url().startsWith(ORIGIN) && !r.url().startsWith('data:') && !r.url().startsWith('https://cdn.vippsmobilepay.com/')) problems.push(`${name} ulkoinen pyyntö: ${r.url()}`); });
+  page.on('request', (r) => { if (!r.url().startsWith(ORIGIN) && !r.url().startsWith('data:')) problems.push(`${name} ulkoinen pyyntö: ${r.url()}`); });
   await page.goto(ORIGIN + (url || VIEWS[view][lang]));
   if (view === 'kassa') { await page.waitForSelector('[data-testid=pc-gift-btn]'); await page.click('[data-testid=pc-gift-btn]'); } else await page.waitForSelector('[data-testid=gc-code]');
   return page;

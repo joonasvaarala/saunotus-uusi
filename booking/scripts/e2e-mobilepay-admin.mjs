@@ -1,6 +1,6 @@
-// E2E (Playwright + google-chrome): hallinnan hyvitysvirta MobilePay-maksulle (sopimus §14.4) – vain mock-datalla, EI tuotantokantaa eikä oikeaa MobilePayta.
-// admin_refund luo rivin status='requested' → hallinta kutsuu POST mobilepay-refund {refund_id} käyttäjän JWT:llä → tulos näkyy (valmis / hylätty / yritä uudelleen / ei varmistettu / ei oikeutta / verkkovirhe);
-// keskeneräisen hyvityksen voi käsitellä uudelleen maksun alta. Muun maksutavan hyvitys ei kutsu mobilepay-refundia.
+// E2E (Playwright + google-chrome): hallinnan hyvitysvirta verkkomaksulle (provider montonio) – vain mock-datalla, EI tuotantokantaa eikä oikeaa maksuvälittäjää.
+// admin_refund luo rivin status='requested' → hallinta kutsuu POST montonio-refund {refund_id} käyttäjän JWT:llä.
+// Keskeneräisen hyvityksen voi käsitellä uudelleen. Muun maksutavan hyvitys ei kutsu montonio-refundia.
 //   PW_DIR=/workspace/node_modules node booking/scripts/e2e-mobilepay-admin.mjs        (ei vaadi rakennusta: hallinta ajetaan lähdekoodista)
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
@@ -34,7 +34,7 @@ const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
 const JWT = `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64({ sub: 'u1', email: 'manager@test.local', role: 'authenticated', exp: 4102444800 })}.${Buffer.from('x').toString('base64url')}`;
 const mk = createMock({ delay: 0 });
 
-// Yksi tilaus (mockin maksettu natiivitilaus), jonka maksu on joko MobilePay tai korttipääte; hyvitysrivit pidetään tässä tilassa
+// Yksi tilaus (mockin maksettu natiivitilaus), jonka maksu on joko verkkomaksu (montonio) tai käteinen; hyvitysrivit pidetään tässä tilassa
 async function session({ lang, provider, perms, fnReplies }) {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: lang === 'fi' ? 'fi-FI' : 'en-GB', timezoneId: 'Europe/Helsinki' });
   const page = await ctx.newPage();
@@ -52,16 +52,16 @@ async function session({ lang, provider, perms, fnReplies }) {
     if (name === 'admin_list_products') return json([]);
     if (name === 'public_gift_card_packages') return json({ ok: true, sale_enabled: false, redeem_enabled: false, max_cards_per_order: 10, currency: 'EUR', packages: [] });
     if (name === 'admin_refund') {
-      st.refunds.push({ id: 777 + st.refunds.length, amount: a.p_amount, status: provider === 'mobilepay' ? 'requested' : 'done', reason: a.p_reason, created_at: new Date().toISOString() });
+      st.refunds.push({ id: 777 + st.refunds.length, amount: a.p_amount, status: provider === 'montonio' ? 'requested' : 'done', reason: a.p_reason, created_at: new Date().toISOString() });
       const r = st.refunds.at(-1); return json({ ok: true, refund_id: r.id, status: r.status, amount: r.amount });
     }
     try {
       const r = await mk.rpc(name, a);
-      if (name === 'admin_get_order') { r.payments[0].provider = provider; if (provider === 'mobilepay') { r.payments[0].method = 'mobilepay'; r.payments[0].method_label = 'MobilePay'; } r.payments[0].refunds = st.refunds.map((x) => ({ ...x })); }
+      if (name === 'admin_get_order') { r.payments[0].provider = provider; if (provider === 'montonio') { r.payments[0].method = 'montonio'; r.payments[0].method_label = 'Maksa verkossa'; } r.payments[0].refunds = st.refunds.map((x) => ({ ...x })); }
       return json(r);
     } catch (e) { return json({ code: 'PGRST202', message: e.message }, e.status || 404); }
   });
-  await ctx.route(`${ORIGIN}/functions/v1/mobilepay-refund`, async (route) => {
+  await ctx.route(`${ORIGIN}/functions/v1/montonio-refund`, async (route) => {
     const r = route.request(); st.fnCalls.push({ auth: r.headers().authorization || null, apikey: r.headers().apikey || null, body: JSON.parse(r.postData() || '{}'), method: r.method() });
     const reply = st.replies.shift() || { result: 'done' };
     const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' };
@@ -87,14 +87,14 @@ for (const lang of ['fi', 'en']) {
   const T = TEXTS[lang], PERMS = ['payments.manage', 'payments.refund', 'bookings.manage', 'customers.manage', 'reports.view'];
   // 1) MobilePay-maksu: retry_later → keskeneräinen rivi + uudelleenkäsittely → done
   {
-    const name = `${lang}/mobilepay`;
-    const page = await session({ lang, provider: 'mobilepay', perms: PERMS, fnReplies: [{ result: 'retry_later' }, { result: 'done' }] });
+    const name = `${lang}/montonio`;
+    const page = await session({ lang, provider: 'montonio', perms: PERMS, fnReplies: [{ result: 'retry_later' }, { result: 'done' }] });
     await openRefund(page);
-    expect(await page.locator('dialog[open] [data-testid=refund-mp-hint]').isVisible(), `${name}: MobilePay-vihje näkyy dialogissa`);
-    expect((await page.locator('dialog[open] [data-testid=refund-mp-hint]').innerText()) === T['refund.mobilepay'], `${name}: vihjeen teksti`);
+    expect(await page.locator('dialog[open] [data-testid=refund-mo-hint]').isVisible(), `${name}: verkkomaksun vihje näkyy dialogissa`);
+    expect((await page.locator('dialog[open] [data-testid=refund-mo-hint]').innerText()) === T['refund.montonio'], `${name}: vihjeen teksti`);
     await submitRefund(page);
-    expect((await toastText(page, 'warn')) === T['refund.mp.retry_later'], `${name}: retry_later-ilmoitus`);
-    expect(page.st.fnCalls.length === 1, `${name}: mobilepay-refund kutsuttu kerran (${page.st.fnCalls.length})`);
+    expect((await toastText(page, 'warn')) === T['refund.mo.retry_later'], `${name}: retry_later-ilmoitus`);
+    expect(page.st.fnCalls.length === 1, `${name}: montonio-refund kutsuttu kerran (${page.st.fnCalls.length})`);
     const c = page.st.fnCalls[0];
     expect(c.method === 'POST' && JSON.stringify(c.body) === JSON.stringify({ refund_id: 777 }), `${name}: runko {refund_id: 777} ${JSON.stringify(c.body)}`);
     expect(c.auth === `Bearer ${JWT}` && c.apikey === 'anon-test', `${name}: käyttäjän JWT + apikey (${c.auth?.slice(0, 20)})`);
@@ -105,18 +105,18 @@ for (const lang of ['fi', 'en']) {
     const rb = await page.locator('[data-testid=btn-refund-retry]').boundingBox(); expect(rb && rb.height >= 43.5, `${name}: nappi ≥44 px (${rb?.height})`);
     expect((await page.locator('[data-testid=btn-refund-retry]').innerText()).includes(T['refund.retry']), `${name}: napin teksti`);
     await page.click('[data-testid=btn-refund-retry]');
-    expect((await toastText(page, 'ok')) === T['refund.mp.done'], `${name}: done-ilmoitus`);
+    expect((await toastText(page, 'ok')) === T['refund.mo.done'], `${name}: done-ilmoitus`);
     expect(page.st.fnCalls.length === 2 && page.st.fnCalls[1].body.refund_id === 777, `${name}: sama refund_id uudelleen (Idempotency-Key palvelimella)`);
     await page.waitForSelector('[data-testid=open-refund]', { state: 'detached' });
     expect((await page.locator('[data-testid=order-open-refunds]').count()) === 0, `${name}: valmis hyvitys poistuu keskeneräisistä`);
     await page.context().close();
   }
   // 2) failed / unverified / forbidden (403) / verkkovirhe / ei-JSON 502: ilmoitus oikeaa tyyppiä, mitään ei heitetä
-  for (const [label, reply, key, kind] of [['failed', { result: 'failed', detail: { error: 'x' } }, 'refund.mp.failed', 'err'], ['unverified', { result: 'unverified' }, 'refund.mp.unverified', 'warn'],
-    ['forbidden', { status: 403, body: { ok: false, code: 'forbidden', message: 'forbidden' } }, 'refund.mp.forbidden', 'err'], ['verkko', { abort: true }, 'refund.mp.error', 'warn'], ['502', { status: 502, body: { message: 'Bad gateway' } }, 'refund.mp.error', 'warn'],
-    ['off', { status: 200, body: { ok: true, mode: 'off', processed: [] } }, 'refund.mp.off', 'warn']]) {
-    const name = `${lang}/mobilepay/${label}`;
-    const page = await session({ lang, provider: 'mobilepay', perms: PERMS, fnReplies: [reply] });
+  for (const [label, reply, key, kind] of [['failed', { result: 'failed', detail: { error: 'x' } }, 'refund.mo.failed', 'err'], ['pending', { result: 'pending' }, 'refund.mo.pending', 'warn'],
+    ['forbidden', { status: 403, body: { ok: false, code: 'forbidden', message: 'forbidden' } }, 'refund.mo.forbidden', 'err'], ['verkko', { abort: true }, 'refund.mo.error', 'warn'], ['502', { status: 502, body: { message: 'Bad gateway' } }, 'refund.mo.error', 'warn'],
+    ['off', { status: 200, body: { ok: true, mode: 'off', processed: [] } }, 'refund.mo.off', 'warn']]) {
+    const name = `${lang}/montonio/${label}`;
+    const page = await session({ lang, provider: 'montonio', perms: PERMS, fnReplies: [reply] });
     await openRefund(page); await submitRefund(page);
     expect((await toastText(page, kind)) === T[key], `${name}: ilmoitus ${key} (${await page.locator('#toast').innerText()})`);
     expect(page.st.fnCalls.length === 1, `${name}: yksi kutsu`);
@@ -128,16 +128,16 @@ for (const lang of ['fi', 'en']) {
     const name = `${lang}/manual`;
     const page = await session({ lang, provider: 'manual', perms: PERMS, fnReplies: [] });
     await openRefund(page);
-    expect(!(await page.locator('dialog[open] [data-testid=refund-mp-hint]').isVisible()), `${name}: ei MobilePay-vihjettä`);
+    expect(!(await page.locator('dialog[open] [data-testid=refund-mo-hint]').isVisible()), `${name}: ei verkkomaksun vihjettä`);
     await submitRefund(page); await page.waitForSelector('dialog[open]', { state: 'detached' }); await page.waitForTimeout(300);
-    expect(page.st.fnCalls.length === 0, `${name}: mobilepay-refundia ei kutsuta`);
+    expect(page.st.fnCalls.length === 0, `${name}: montonio-refundia ei kutsuta`);
     expect(page.st.calls.some((x) => x.name === 'admin_refund'), `${name}: admin_refund kutsuttu`);
     await page.context().close();
   }
   // 4) Ei oikeutta payments.refund: hyvitysnappia ei renderöidä (palvelin tarkistaa joka tapauksessa), uudelleenkäsittelynappia ei näytetä
   {
     const name = `${lang}/ei-oikeutta`;
-    const page = await session({ lang, provider: 'mobilepay', perms: PERMS.filter((p) => p !== 'payments.refund'), fnReplies: [] });
+    const page = await session({ lang, provider: 'montonio', perms: PERMS.filter((p) => p !== 'payments.refund'), fnReplies: [] });
     expect((await page.locator('[data-testid=btn-refund]').count()) === 0, `${name}: hyvitysnappia ei näytetä ilman oikeutta`);
     expect((await page.locator('[data-testid=btn-refund-retry]').count()) === 0, `${name}: ei uudelleenkäsittelynappia`);
     await page.context().close();
@@ -145,4 +145,4 @@ for (const lang of ['fi', 'en']) {
 }
 await browser.close(); server.close();
 if (problems.length) { console.error(`ONGELMIA (${problems.length}/${checks}):\n` + [...new Set(problems)].join('\n')); process.exit(1); }
-console.log(`ok: hallinnan MobilePay-hyvitysvirta, ${checks} tarkistusta, 0 ongelmaa`);
+console.log(`ok: hallinnan verkkomaksun hyvitysvirta, ${checks} tarkistusta, 0 ongelmaa`);

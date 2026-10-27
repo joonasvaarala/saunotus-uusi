@@ -15,6 +15,9 @@ import { createVismapayApi } from './vismapay-api.js';
 import { vismaPayBlock } from './vismapay-ui.js';
 import { ht, payLaterError } from './hold-texts.js';
 import { paysByInvoice } from './company-pay.js';
+import { onlineMethod, showOnline } from './online-pay-logic.js';
+import { createOnlinePayApi } from './online-pay-api.js';
+import { onlinePayBlock } from './online-pay-ui.js';
 
 const PAYABLE = ['confirmed', 'pending'];
 let seq = 0;
@@ -24,23 +27,27 @@ export async function loadPayChoices({ rpc, token = null, fetchImpl, cfg = (type
   const env = { testUi: testUiEnabled(cfg, search), mock: !!fetchImpl, official: cfg.mobilepayOfficialButton !== false };
   const mp = createMobilepayApi({ rpc, token, functionUrl, anonKey: cfg.anonKey, fetchImpl });
   const gapi = createGiftApi({ rpc, mock: false });
-  if (!token) {   // kassa (ei tokenia, §14.7): yksi RPC kertoo MobilePayn ja lahjakortin käytön; ei public_payment_options(null)-kutsua
-    const co = normCheckoutOptions(await mp.checkoutOptions());
-    return { env, mp, gapi, opts: co, mpShow: false, redeem: co.gift, claims: [], checkout: co };
+  if (!token) {   // kassa (ei tokenia, §14.7): yksi RPC kertoo verkkomaksun ja lahjakortin käytön; ei public_payment_options(null)-kutsua
+    const raw = await mp.checkoutOptions();
+    const co = normCheckoutOptions(raw);
+    co.online = onlineMethod(raw?.methods);
+    return { env, mp, gapi, opts: co, mpShow: false, onlineShow: showOnline(co.online, env), redeem: co.gift, claims: [], checkout: co };
   }
   const [o, pk] = await Promise.all([mp.options().catch(() => null), gapi.packages().catch(() => null)]);
   const opts = normOptions(o);
   const vpOpts = normVisma(o);
   const vp = createVismapayApi({ token, functionUrl, anonKey: cfg.anonKey, fetchImpl });
+  const online = onlineMethod(o?.methods);
+  const onlineApi = createOnlinePayApi({ token, functionUrl, anonKey: cfg.anonKey, fetchImpl });
   const redeem = !!(pk?.ok && pk.redeem_enabled);
   const vc = redeem ? await gapi.orderClaims(token).catch(() => null) : null;   // kumppanilahjakortit (§13.12): pyynnöt vain kun lunastus käytössä
-  return { env, mp, gapi, opts, vp, vpOpts, payLater: opts.payLater || null, mpShow: shouldShowButton(opts, env), vpShow: shouldShowVisma(vpOpts), redeem, claims: vc?.ok && Array.isArray(vc.claims) ? vc.claims : [] };
+  return { env, mp, gapi, opts, vp, vpOpts, online: onlineApi, onlineOpts: online, payLater: opts.payLater || null, mpShow: shouldShowButton(opts, env), vpShow: shouldShowVisma(vpOpts), onlineShow: !!(online && o?.order?.can_pay_online === true && showOnline(online, env)), redeem, claims: vc?.ok && Array.isArray(vc.claims) ? vc.claims : [] };
 }
 
 // Mitä asiakkaalle voidaan tarjota: { mobilepay, gift, claims, payLater } (booking = public_get_booking-vastaus). payLater = booking_57-testivaihtoehto: vain kun palvelin listasi pay_later-tavan (ei env.testUi-ehtoa)
 export function offers(model, booking) {
   const payable = !!booking && PAYABLE.includes(booking.status) && booking.payment_status !== 'paid' && booking.payment_status !== 'invoiced' && !paysByInvoice(booking) && booking.checkout_state !== 'preliminary' && booking.checkout_state !== 'expired';   // laskulla maksettava yritys ja alustava varaus eivät maksa verkossa
-  return { mobilepay: payable && model.mpShow, vismapay: payable && !!model.vpShow, gift: payable && model.redeem, claims: !!booking && model.claims.length > 0, payLater: payable && !!model.payLater };
+  return { mobilepay: payable && model.mpShow, vismapay: payable && !!model.vpShow, online: payable && !!model.onlineShow, gift: payable && model.redeem, claims: !!booking && model.claims.length > 0, payLater: payable && !!model.payLater };
 }
 // Maksettava jäljellä: ensisijaisesti palvelimen public_payment_options.order.unpaid; muuten total - paid; muuten null (summaa ei näytetä)
 export function dueAmount(model, booking) {
@@ -50,10 +57,10 @@ export function dueAmount(model, booking) {
   return booking && booking.payment_status === 'unpaid' && Number.isFinite(+booking.total) ? +booking.total : null;
 }
 // Tuleeko kassalla/vahvistussivulla näyttää "maksu paikan päällä" -oletusta: ei silloin kun verkkomaksutapa on tarjolla
-export const onlineAvailable = (model) => !!model && (model.mpShow || model.vpShow || model.redeem);
+export const onlineAvailable = (model) => !!model && (model.onlineShow || model.mpShow || model.vpShow || model.redeem);
 
-// Kassa (ennen varausta, ei tokenia): tieto vain siitä että verkkomaksutapa on käytössä (MobilePay-tapa; testitila vain testiympäristössä) tai lahjakortin käyttö on päällä
-export const onlineAtCheckout = (model) => !!model && !!((model.opts?.method && (model.opts.method.test !== true || model.env.testUi)) || model.opts?.visma || model.redeem);
+// Kassa (ennen varausta, ei tokenia): verkkomaksu (code online; vanha mobilepay/visma vain jos palvelin vielä listaa sen) tai lahjakortti. Testitila vain testiympäristössä.
+export const onlineAtCheckout = (model) => !!model && !!((model.opts?.online && (model.opts.online.test !== true || model.env.testUi)) || (model.opts?.method && (model.opts.method.test !== true || model.env.testUi)) || model.opts?.visma || model.redeem);
 
 // booking_57: "Testivaihtoehto: maksu paikan päällä". Nappi kutsuu palvelimen ilmoittamaa confirm_rpc:tä (public_confirm_pay_later) order_token:illa.
 // Onnistuessa (ok:true, checkout_state confirmed_unpaid) kutsutaan onPayLater(vastaus) → sivu latautuu uudelleen ja näyttää vahvistetun, maksamattoman tilan. Virheillä ystävällinen FI/EN-viesti (role=alert); nappi pois käytöstä kesken pyynnön (ei tuplaklikkiä).
@@ -84,18 +91,17 @@ export function payNotice(L, notice) {
 export function payChoicesSection({ S, L, token, model, booking, onApplied, onClaimed, onChanged, onPayLater = null, notice = null, hold = false, onHoldError = null }) {
   const F = makeFmt(L), tx = (k, v) => pt(L, k, v);
   const of = offers(model, booking);
-  if (!of.mobilepay && !of.vismapay && !of.gift && !of.claims && !of.payLater) return null;
+  if (!of.online && !of.gift && !of.claims && !of.payLater) return null;
   const due = dueAmount(model, booking);
   const id = `pc-${++seq}`;
   const kids = [h('h3', { id: `${id}-t`, text: tx('title') })];
-  if (of.mobilepay || of.vismapay || of.gift) {
+  if (of.online || of.gift) {
     if (due != null && due > 0) kids.push(h('p', { class: 'mp-amount', 'data-testid': 'pc-due', text: tx('amountDue', { amount: F.money(due) }) }));
-    kids.push(h('p', { class: 'bk-note', 'data-testid': 'pc-lead', text: hold ? ht(L, 'choose') : booking.status === 'confirmed' ? tx('leadConfirmed') : tx('leadPending') }));   // pitotilassa ei mainita "maksu paikan päällä": varaus vahvistuu vasta maksun jälkeen
+    kids.push(h('p', { class: 'bk-note', 'data-testid': 'pc-lead', text: hold ? ht(L, 'chooseOnline') : booking.status === 'confirmed' ? tx('leadOnlineConfirmed') : tx('leadOnline') }));   // pitotilassa ei mainita "maksu paikan päällä": varaus vahvistuu vasta maksun jälkeen
   }
   const claimNotice = notice && notice.kind === 'claim' && of.claims ? { ok: true, text: notice.text, extra: notice.extra } : null;   // lunastuspyynnön vahvistus näytetään pyyntölistan yläosassa (kuten tilaussivulla)
   if (notice && !claimNotice) kids.push(payNotice(L, notice));
-  if (of.mobilepay) kids.push(h('div', { class: 'pc-opt', 'data-testid': 'pc-mobilepay' }, payBlock({ S, L, api: model.mp, opts: model.opts, env: model.env, onFail: onHoldError ? (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) onHoldError(code); } : null })));
-  if (of.vismapay) kids.push(h('div', { class: 'pc-opt', 'data-testid': 'pc-vismapay' }, vismaPayBlock({ L, api: model.vp, opts: model.vpOpts, amount: due != null && due > 0 ? F.money(due) : '' })));
+  if (of.online) kids.push(h('div', { class: 'pc-opt', 'data-testid': 'pc-online' }, onlinePayBlock({ L, api: model.online, method: model.onlineOpts, env: model.env, testid: 'pc-method', showTest: true, onFail: onHoldError ? (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) onHoldError(code); } : null })));
   if (of.gift) {
     const panel = h('div', { class: 'pc-gift-panel', id: `${id}-g`, hidden: true, 'data-testid': 'pc-gift-panel' },
       redeemSection({ L, api: model.gapi, token, bare: true, balance: true, unpaid: due, onApplied, onClaimed, onFail: onHoldError ? (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) onHoldError(code); } : null }));

@@ -67,7 +67,7 @@ declare
   adm uuid := test.mk_staff('admin@t185.example.test', 'admin');
   vrule bigint := test.rule('Miesten sauna%');
   dt date := test.next_dow(1) + 98;
-  mode0 jsonb; redeem0 jsonb; hours0 jsonb; vc0 jsonb; visma_mode text;
+  mode0 jsonb; redeem0 jsonb; hours0 jsonb; vc0 jsonb; visma_mode text; mo_mode text;
   b jsonb; v jsonb; s0 jsonb; s1 jsonb; gb0 jsonb; gb1 jsonb; go0 jsonb; go1 jsonb;
   oid bigint; res_id bigint; item_id bigint; inv bigint; tok uuid; persons0 int; total0 numeric; pay_id bigint;
   card_id bigint; alt_space text; inv_pay bigint; inv_amt numeric; n_claims int; credit_id bigint;
@@ -85,6 +85,9 @@ begin
   select value into hours0 from booking.settings where key = 'customer_change_hours_before';
   select value into vc0 from booking.settings where key = 'voucher_claims.enabled';
   select mode into visma_mode from booking.integration_config where key = 'vismapay';
+  select mode into mo_mode from booking.integration_config where key = 'montonio';
+  insert into booking.integration_config(key, mode, settings) values ('montonio', 'test', '{"approved_by":"t185"}'::jsonb)
+    on conflict (key) do update set mode = 'test', settings = booking.integration_config.settings || '{"approved_by":"t185"}'::jsonb;
   insert into booking.settings(key, value) values ('invoice_dispatch_mode', '"dry_run"'::jsonb)
     on conflict (key) do update set value = '"dry_run"'::jsonb;
   insert into booking.settings(key, value) values ('gift_cards.redeem_enabled', 'true'::jsonb)
@@ -347,7 +350,7 @@ begin
   v := pg_temp.as_(adm, format('select booking.admin_set_reservation_addons(%s, %L::jsonb)', res_id, jsonb_build_array(jsonb_build_object('id', addon_id, 'quantity', 2))::text));
   v := pg_temp.as_(adm, format('select booking.admin_create_payment_link(%s, false, null, null)', oid));
   perform pg_temp.ck(v ->> 'err' is null, '6b takarajaton linkki ' || coalesce(v ->> 'err', ''));
-  select id, amount into pay_id, link_amt from booking.payments where order_id = oid and status = 'pending' and provider = 'visma_pay' order by id desc limit 1;
+  select id, amount into pay_id, link_amt from booking.payments where order_id = oid and status = 'pending' and provider = 'montonio' order by id desc limit 1;
   perform pg_temp.ck((select link_expires_at is null and raw ->> 'paylink' = 'no_deadline' from booking.payments where id = pay_id), '6b linkki on takarajaton');
   v := pg_temp.as_(adm, format('select booking.admin_change_booking(%s, null, null, 1)', res_id));
   perform pg_temp.ck(coalesce(v ->> 'ok', '') = 'true'
@@ -385,7 +388,7 @@ begin
   oid := (test.ord(tok)).id;
   v := pg_temp.as_(adm, format('select booking.admin_create_payment_link(%s, false, null, null)', oid));
   perform pg_temp.ck(v ->> 'err' is null, '8 linkki ennen laskua');
-  select link_token into link_tok from booking.payments where order_id = oid and status = 'pending' and provider = 'visma_pay' order by id desc limit 1;
+  select link_token into link_tok from booking.payments where order_id = oid and status = 'pending' and provider = 'montonio' order by id desc limit 1;
   update booking.orders set payment_status = 'invoiced' where id = oid;
   select id into inv from booking.invoices where order_id = oid and kind = 'debit';
   v := pg_temp.as_(adm, format('select booking.admin_send_invoice(%s, false, true)', inv));
@@ -607,7 +610,7 @@ begin
   oid := (test.ord((b ->> 'token')::uuid)).id;
   select id into res_id from booking.reservations where order_id = oid limit 1;
   v := pg_temp.as_(adm, format('select booking.admin_create_payment_link(%s, false, null, null)', oid));
-  select id, amount into pay_id, total0 from booking.payments where order_id = oid and status = 'pending' and provider = 'visma_pay' order by id desc limit 1;
+  select id, amount into pay_id, total0 from booking.payments where order_id = oid and status = 'pending' and provider = 'montonio' order by id desc limit 1;
   v := pg_temp.as_(adm, format('select booking.admin_change_booking(%s, null, null, 1)', res_id));
   unpaid := (booking._order_balance(oid) ->> 'unpaid')::numeric;
   v := pg_temp.as_(adm, format('select booking.admin_get_order(%s)', oid));
@@ -701,6 +704,7 @@ begin
   if vc0 is null then delete from booking.settings where key = 'voucher_claims.enabled';
   else update booking.settings set value = vc0 where key = 'voucher_claims.enabled'; end if;
   if visma_mode is not null then update booking.integration_config set mode = visma_mode where key = 'vismapay'; end if;
+  if mo_mode is not null then update booking.integration_config set mode = mo_mode where key = 'montonio'; end if;
 exception when others then
   raise exception 't185 keskeytyi: %', sqlerrm;
 end $t185$;

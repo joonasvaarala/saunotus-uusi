@@ -40,7 +40,14 @@ const app = document.getElementById('app');
 let products = [];
 let cart = [];
 let device = null;
-let method = 'mobilepay';
+const PAY_METHODS = [
+  ['paymentInitiation', 'Verkkopankki', 'Online bank'],
+  ['cardPayments', 'Kortti', 'Card'],
+  ['applePay', 'Apple Pay', 'Apple Pay'],
+  ['googlePay', 'Google Pay', 'Google Pay'],
+  ['mobilePay', 'MobilePay', 'MobilePay'],
+];
+let method = 'paymentInitiation';
 let email = '';
 let phase = 'shop';
 let note = '';
@@ -91,9 +98,8 @@ function draw() {
   emailInp.addEventListener('input', () => { email = emailInp.value; });
   const bar = el('div', { class: 'bar' },
     el('p', { class: 'total', 'data-testid': 'drinks-total', text: money(cartTotal(cart)) }),
-    el('div', { class: 'methods' },
-      el('button', { type: 'button', 'aria-pressed': method === 'mobilepay' ? 'true' : 'false', text: t('mobilepay'), onclick: () => { method = 'mobilepay'; draw(); } }),
-      el('button', { type: 'button', 'aria-pressed': method === 'visma_pay' ? 'true' : 'false', 'data-testid': 'drinks-visma', text: t('visma'), onclick: () => { method = 'visma_pay'; draw(); } })),
+    el('div', { class: 'methods', 'data-testid': 'drinks-methods' },
+      ...PAY_METHODS.map(([code, fi, en]) => el('button', { type: 'button', 'aria-pressed': method === code ? 'true' : 'false', 'data-testid': `drinks-${code}`, text: lang === 'en' ? en : fi, onclick: () => { method = code; draw(); } }))),
     el('label', { class: 'email' }, t('email'), el('span', { class: 'note', text: t('email_hint') }), emailInp),
     note ? el('p', { class: 'note', 'data-testid': 'drinks-note', text: note }) : null,
     el('p', { class: 'legal', text: t('pay_legal') }),
@@ -110,30 +116,24 @@ async function pay() {
   if (!res?.ok) { note = res?.message || res?.code || t('empty'); draw(); return; }
   order = res;
   phase = 'paying';
-  if (method === 'mobilepay') {
-    const started = mock
-      ? { ok: true, redirect_url: null }
-      : await callFn('mobilepay-start', { order_token: res.public_token, user_flow: 'WEB_REDIRECT' });
-    if (mock) mock.arm(res.public_token);
-    if (started?.redirect_url) { location.href = started.redirect_url; return; }
-    if (!mock && started && started.ok === false) note = started.message || started.code || '';
-  } else {
-    const started = await callFn('vismapay-start', { order_token: res.public_token });
-    const back = safeVisma(started?.redirect_url);
-    if (back) { location.href = back; return; }
-    if (started?.code === 'vismapay_off') note = t('visma_off');
-    else if (started?.code === 'vismapay_live_not_implemented' || started?.code === 'not_configured') note = t('visma_live');
-    else if (started?.dry_run || mock) note = t('visma_dry');
-    else if (started?.ok === false) note = started.message || t('visma_off');
-  }
+  const started = mock
+    ? { ok: true, redirect_url: null, dry_run: true }
+    : await callFn('montonio-start', { order_token: res.public_token, method });
+  if (mock) mock.arm(res.public_token);
+  const back = safeOnline(started?.redirect_url);
+  if (back) { location.href = back; return; }
+  if (started?.code === 'online_off' || started?.code === 'not_configured') note = t('visma_off');
+  else if (started?.dry_run || mock) note = t('visma_dry');
+  else if (started?.ok === false) note = t('visma_off');
   draw();
   watch(res.public_token);
 }
 
-function safeVisma(url) {
+function safeOnline(url) {
   try {
     const u = new URL(String(url || ''));
-    if (u.protocol !== 'https:' || u.hostname !== 'www.vismapay.com' || !u.pathname.startsWith('/pbwapi/token/')) return null;
+    const hosts = ['sandbox-stargate.montonio.com', 'stargate.montonio.com', 'sandbox-gateway.montonio.com', 'gateway.montonio.com', 'pay.montonio.com'];
+    if (u.protocol !== 'https:' || !hosts.includes(u.hostname)) return null;
     return u.href;
   } catch { return null; }
 }
@@ -141,7 +141,7 @@ function safeVisma(url) {
 function watch(token) {
   if (poll) clearInterval(poll);
   const tick = async () => {
-    if (!mock) await callFn(method === 'visma_pay' ? 'vismapay-notify' : 'mobilepay-notify', { action: 'reconcile', order_token: token }).catch(() => {});
+    if (!mock) await callFn('montonio-notify', { action: 'reconcile', order_token: token }).catch(() => {});
     const st = await rpc('public_drinks_status', { p_token: token });
     if (st?.payment_status === 'paid') {
       clearInterval(poll); phase = 'paid'; order = { ...order, ...st }; cart = []; draw();

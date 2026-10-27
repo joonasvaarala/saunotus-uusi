@@ -323,7 +323,7 @@ test('Maksa avaa popupin; Escape, tausta ja sulku palauttavat fokuksen ja scroll
   const radios = all(dlg).filter((n) => n.getAttribute('name') === 'tender');
   assert.deepEqual(radios.map((n) => n.value), ['payment_link', 'mobilepay', 'card_terminal']);
   assert.equal(radios.find((n) => n.value === 'card_terminal').hasAttribute('disabled'), true);
-  assert.equal(radios.find((n) => n.value === 'mobilepay').hasAttribute('disabled'), false);
+  assert.equal(radios.find((n) => n.value === 'mobilepay').hasAttribute('disabled'), true);
   assert.equal(radios.find((n) => n.value === 'payment_link').hasAttribute('disabled'), false);
   assert.equal(all(root).some((n) => n.getAttribute('name') === 'tender'), false);
   assert.equal(dlg.textContent.includes('Käteinen'), false);
@@ -434,7 +434,7 @@ test('kaksi peräkkäistä vahvistusta luo yhden kassatilauksen', async () => {
   assert.equal(mock.state.calls.filter((c) => c.name === 'admin_pos_send_link').length, 1);
 });
 
-test('mobilepay-startin virhe peruu tilauksen ja näyttää virheen dialogissa', async () => {
+test('MobilePay-maksutapa ei ole enää valittavissa pikakassassa', async () => {
   const prev = globalThis.location.search;
   globalThis.location.search = '';
   const mock = createAdminMock({ delay: 0 });
@@ -442,31 +442,14 @@ test('mobilepay-startin virhe peruu tilauksen ja näyttää virheen dialogissa',
     const root = await mount(mock.rpc);
     q(root, 'pos-product-101').click();
     q(root, 'pos-pay').click();
-    let dlg = document.getElementById('pos-pay-dialog');
-    all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'mobilepay').dispatch('change');
-    dlg = document.getElementById('pos-pay-dialog');
+    const dlg = document.getElementById('pos-pay-dialog');
+    const mp = all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'mobilepay');
+    assert.ok(mp);
+    assert.equal(mp.disabled, true);
     q(dlg, 'pos-confirm').click();
     await flush();
-    dlg = document.getElementById('pos-pay-dialog');
-    assert.ok(dlg);
-    const err = q(dlg, 'pos-pay-error');
-    assert.ok(err);
-    assert.equal(err.getAttribute('role'), 'alert');
-    assert.equal(err.className, 'err');
-    assert.match(err.textContent, /mobilepay-start/);
-    assert.ok(q(dlg, 'pos-confirm'));
-    assert.equal(q(dlg, 'pos-confirm').textContent, 'Vahvista maksu');
-    assert.equal(q(dlg, 'pos-status'), null);
-    assert.equal(q(root, 'pos-pay').textContent, 'Maksa');
-    const checkout = mock.state.calls.filter((c) => c.name === 'admin_pos_checkout');
-    const voids = mock.state.calls.filter((c) => c.name === 'admin_pos_void');
-    assert.equal(checkout.length, 1);
-    assert.equal(voids.length, 1);
-    assert.equal(voids[0].args.p_order_id, mock.state.posOrders[0].order_id);
-    assert.equal(mock.state.posOrders[0].status, 'cancelled');
-    const note = document.getElementById('toast');
-    assert.match(note.textContent, /mobilepay-start/);
-    assert.match(note.className, /\berr\b/);
+    assert.equal(mock.state.calls.some((c) => c.name === 'admin_pos_checkout'), false);
+    assert.match(document.getElementById('toast').textContent, /Valitse maksutapa/);
   } finally {
     globalThis.location.search = prev;
   }

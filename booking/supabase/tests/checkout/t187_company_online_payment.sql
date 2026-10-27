@@ -75,7 +75,7 @@ end $$;
 do $t$
 declare
   run text := lower(substr(md5(random()::text), 1, 8));
-  vp0 text; mp0 text; pc0 text; mode0 text; cinv0 text; mode_j jsonb; cinv_j jsonb;
+  vp0 text; mp0 text; pc0 text; mo0 text; mode0 text; cinv0 text; mode_j jsonb; cinv_j jsonb;
   r jsonb; g jsonb; o bigint; o2 bigint; op bigint; oc bigint; oe bigint; ol bigint; tok uuid; tokp uuid;
   b1 text; b2 text; d date; rl record; k int; n int; np int; nf int; ns int; fails text;
   tprod bigint; tstart timestamptz; opt text; code text; methods jsonb;
@@ -83,6 +83,7 @@ begin
   select mode into vp0 from booking.integration_config where key = 'vismapay';
   select mode into mp0 from booking.integration_config where key = 'mobilepay';
   select mode into pc0 from booking.integration_config where key = 'procountor';
+  select mode into mo0 from booking.integration_config where key = 'montonio';
   select value into mode_j from booking.settings where key = 'public_payment_mode';
   select value into cinv_j from booking.settings where key = 'checkout_company_invoice_enabled';
   mode0 := mode_j #>> '{}'; cinv0 := cinv_j #>> '{}';
@@ -95,15 +96,15 @@ begin
   perform pg_temp.ck(md5(pg_get_functiondef('booking.public_create_booking(bigint,date,integer,text,text,text,boolean,text,text,text,jsonb,jsonb)'::regprocedure)) = '6bf51ffd45c259ef5546aa19f63f5066', '1 public_create_booking = booking_187');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.public_create_treatment_booking(bigint,timestamptz,integer,text,text,text,boolean,text,text,text,jsonb,text,jsonb)'::regprocedure)) = 'ece168b714a2478bd8a1e5d31f6e6fb7', '1 public_create_treatment_booking = booking_187');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) = 'd1f8df803a45c2b77aa9f8554fc41890', '1 vismapay_payment_prepare = booking_187');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.public_payment_options(uuid)'::regprocedure)) = '46834d95db5127935ad94e8759758ceb', '1 public_payment_options = booking_187');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) = '1b729ef4d72dc925001169c38bad3315', '1 public_payment_link_info = booking_187');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking.public_payment_options(uuid)'::regprocedure)) in ('46834d95db5127935ad94e8759758ceb', '2557c31f99a77e70e5a3f35a3c44304e'), '1 public_payment_options = booking_187 tai booking_188');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) in ('1b729ef4d72dc925001169c38bad3315', '2c9e06b3153aa5c0edd25341024ae6a8'), '1 public_payment_link_info = booking_187 tai booking_188');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.public_get_booking(uuid)'::regprocedure)) = '31b07afa6d8e5b61ed9c044d39e76275', '1 public_get_booking = booking_187');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.public_get_order(uuid)'::regprocedure)) = '5d0a5c1623ed4495be2d3ad0173284f1', '1 public_get_order = booking_187');
+  perform pg_temp.ck(md5(pg_get_functiondef('booking.public_get_order(uuid)'::regprocedure)) in ('5d0a5c1623ed4495be2d3ad0173284f1', '78d7b0b394dbd4d6d0a47a234d613159'), '1 public_get_order = booking_187 tai booking_188');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.orders_invoice_status_trg()'::regprocedure)) = '7f7eced664b101cb2672a78059c90682', '1 orders_invoice_status_trg = booking_187');
   perform pg_temp.ck(md5(pg_get_functiondef('booking._order_pays_by_invoice(text,jsonb)'::regprocedure)) = '40b7b4498592ad7ae0b2883941364573', '1 _order_pays_by_invoice = booking_187');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.public_create_booking_code(bigint,date,integer,text,text,text,boolean,text,text,text,jsonb,jsonb,text)'::regprocedure)) = '0741abee882e4a30cf46f5c8160de7a3'
     and md5(pg_get_functiondef('booking.mobilepay_payment_prepare(uuid,uuid,integer,text)'::regprocedure)) = 'e6888446c4b44e554d31c0920609ddb6'
-    and md5(pg_get_functiondef('booking.public_checkout_payment_options()'::regprocedure)) = 'e6f019284f2b222013133af83d8fface'
+    and md5(pg_get_functiondef('booking.public_checkout_payment_options()'::regprocedure)) in ('e6f019284f2b222013133af83d8fface', '36b2d584cb3dd5abdf3bdf48e448c6aa')
     and md5(pg_get_functiondef('booking._public_pay_json(bigint)'::regprocedure)) = 'cc3e61dbdfbd9a816cd9c982c73820c5'
     and md5(pg_get_functiondef('booking.orders_invoice_draft_trg()'::regprocedure)) = 'a48fe50340cff5f6e9709ad46055ecb9'
     and md5(pg_get_functiondef('booking._order_invoice_locked(bigint)'::regprocedure)) = '96713008e2d1fce8c81aeda3a2b6b025', '1 riippuvuudet = tuotanto');
@@ -131,6 +132,8 @@ begin
     and not booking._order_pays_by_invoice('company', '{"invoice_method":"online"}'::jsonb), '1 apufunktio: vain laskuyritys');
   perform pg_temp.ck(mode0 = 'hold_until_paid' and coalesce(cinv0, 'true') = 'true', '1 asetukset hold_until_paid ja yrityslasku päällä');
   perform pg_temp.ck(mp0 = 'test' and vp0 = 'test' and pc0 is distinct from 'live', '1 integraatiot: mobilepay/vismapay test, procountor ei live');
+  insert into booking.integration_config(key, mode, settings) values ('montonio', 'test', '{"approved_by":"t187"}'::jsonb)
+    on conflict (key) do update set mode = 'test', settings = booking.integration_config.settings || '{"approved_by":"t187"}'::jsonb;
 
   b1 := pg_temp.bid(); b2 := pg_temp.bid();
 
@@ -370,9 +373,12 @@ begin
   update booking.settings set value = mode_j where key = 'public_payment_mode';
   update booking.settings set value = cinv_j where key = 'checkout_company_invoice_enabled' and cinv_j is not null;
   update booking.integration_config set mode = vp0 where key = 'vismapay';
+  if mo0 is null then delete from booking.integration_config where key = 'montonio';
+  else update booking.integration_config set mode = mo0 where key = 'montonio'; end if;
   perform pg_temp.ck((select mode from booking.integration_config where key = 'vismapay') = vp0
     and (select mode from booking.integration_config where key = 'mobilepay') = mp0
     and (select mode from booking.integration_config where key = 'procountor') = pc0
+    and (select mode from booking.integration_config where key = 'montonio') is not distinct from mo0
     and (select value #>> '{}' from booking.settings where key = 'public_payment_mode') = mode0, '1b asetukset ja integraatiot palautettu');
 
   select count(*) filter (where st = 'P'), count(*) filter (where st = 'F'), count(*) filter (where st = 'S'),

@@ -42,6 +42,7 @@ const { payLinkView } = await imp('pay-link.js');
 const { createVismapayApi } = await imp('vismapay-api.js');
 const TOK = 'c5e82850-2458-4f3e-abcd-1b52cb9e8c17';
 const VISMA = 'https://www.vismapay.com/pbwapi/token/abc123';
+const PAY = 'https://pay.montonio.com/session/abc123';
 
 test('tekstit: FI/EN samat avaimet, ei tyhjiä, ei <, ei osoitteita, ei emojeita', () => {
   assert.deepEqual(Object.keys(PLT.fi).sort(), Object.keys(PLT.en).sort());
@@ -81,13 +82,18 @@ test('vismapay-api: linkToken → POST vismapay-start {link_token} (ei order_tok
 
 test('näkymä: painike → Visma-ohjaus; virheet FI/EN; lopullinen virhe poistaa painikkeen; puuttuva token → virhe heti; puhelin', async () => {
   const nav = [];
-  let v = payLinkView({ L: 'fi', token: TOK, api: { start: async () => ({ ok: true, redirect_url: VISMA, amount: 30 }) }, phone: '010 299 2866', phoneTel: '+358102992866', navigate: (u) => nav.push(u), money: (n) => `${n} €` });
+  let v = payLinkView({ L: 'fi', token: TOK, api: { start: async () => ({ ok: true, redirect_url: PAY, amount: 30 }) }, phone: '010 299 2866', phoneTel: '+358102992866', navigate: (u) => nav.push(u), money: (n) => `${n} €` });
   assert.equal(v.attrs['data-testid'], 'pay-link-page');
-  assert.equal(v.q('pl-button').textContent, 'Siirry maksamaan');
+  assert.equal(v.q('pl-button').textContent, 'Verkkopankki');
+  assert.equal(v.q('pl-method-mobilePay').textContent, 'MobilePay');
+  const enLabels = payLinkView({ L: 'en', token: TOK, api: { start: async () => ({ ok: false, code: 'off' }) } });
+  assert.equal(enLabels.q('pl-button').textContent, 'Online bank');
+  assert.equal(enLabels.q('pl-method-cardPayments').textContent, 'Card');
+  assert.doesNotMatch(v.textContent, /Maksa MobilePaylla|Montonio/i);
   const tel = v.q('pl-contact').all().find((e) => e.tagName === 'A');
   assert.equal(tel.attrs.href, 'tel:+358102992866'); assert.equal(tel.textContent, '010 299 2866');
   await v.q('pl-button').click();
-  assert.deepEqual(nav, [VISMA]);
+  assert.deepEqual(nav, [PAY]);
   assert.match(v.q('pl-amount').textContent, /30 €/);
   // ei-Visma-osoite hylätään (ei avointa uudelleenohjausta)
   nav.length = 0;
@@ -109,7 +115,7 @@ test('näkymä: painike → Visma-ohjaus; virheet FI/EN; lopullinen virhe poista
 test('lähde: payLinkView ei kutsu palvelinta ennen painallusta; sivu käynnistyy vain page=paylink; kielivalinta saa ?p=', () => {
   const s = rd('booking/shop/src/pay-link.js');
   assert.match(s, /window\.BOOKING_SHOP\?\.page === 'paylink'\) main\(\)/);
-  assert.match(s, /createVismapayApi\(\{ linkToken: token, functionUrl, anonKey: cfg\.anonKey \}\)/);
+  assert.match(s, /createOnlinePayApi\(\{ linkToken: token, functionUrl, anonKey: cfg\.anonKey \}\)/);
   assert.match(s, /\.lang a\[hreflang\]/);
   assert.doesNotMatch(s, /#[0-9a-f]{6}/i, 'ei kovakoodattuja värejä (tyylit shop.css:stä)');
 });
@@ -163,7 +169,8 @@ test('tekstit: pending-import-72 = ui.paylink.* FI+EN koodin oletuksista, uudet 
   const rows = JSON.parse(rd('content/site-texts.pending-import-72.json'));
   const rows73 = JSON.parse(rd('content/site-texts.pending-import-73.json'));
   const rows74 = JSON.parse(rd('content/site-texts.pending-import-74.json'));   // booking_178: uusintaviesti
-  assert.equal(rows.length, 42); assert.equal(rows.length + rows73.length + rows74.length, def.size); assert.equal(def.size, Object.keys(PLT.fi).length * 2);
+  const rows84 = JSON.parse(rd('content/site-texts.pending-import-84.json')).filter((r) => r.key.startsWith('ui.paylink.'));   // booking_188
+  assert.equal(rows.length, 42); assert.equal(rows.length + rows73.length + rows74.length + rows84.length, def.size); assert.equal(def.size, Object.keys(PLT.fi).length * 2);
   assert.ok(!rows73.some((r) => rows.some((x) => x.key === r.key)), 'import-72 ja -73 eivät mene päällekkäin');
   for (const r of rows) { assert.ok(r.key.startsWith('ui.paylink.')); assert.equal(r.text, def.get(`${r.key}|${r.lang}`), `${r.key} ${r.lang}`); assert.ok(r.max_len >= r.text.length); }
   const keys = new Set(rows.map((r) => r.key));

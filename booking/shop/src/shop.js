@@ -4,6 +4,7 @@
 import { rpc, storageUrl, setRpcOverride } from './sb.js';
 import { ensureAllMonths } from './availability-months.js';
 import { runReturn } from './mobilepay-ui.js';
+import { runOnlineReturn } from './online-pay-ui.js';
 import { loadPayChoices, payChoicesSection, payNotice, onlineAvailable, onlineAtCheckout } from './pay-choices.js';
 import { pt } from './pay-choices-texts.js';
 import { T } from './i18n.js';
@@ -137,8 +138,10 @@ const bk = (hash) => `${S.shopHref}${mockQs()}#${hash}`;
 // Kassan pitotila ja maksutavat yhdestä paikasta (vuoro- ja hoitokassa): palvelin (public_checkout_payment_options) päättää, ei kovakoodata. Virhe → vanha käytös.
 const holdInfo = () => loadPayChoices({ rpc, fetchImpl: MOCK_FETCH }).then((m) => {
   const hv = holdModeOf(m.checkout, state.settings);
-  const codes = [m.opts?.method && (m.opts.method.test !== true || m.env.testUi) ? 'mobilepay' : null, m.redeem ? 'gift_card' : null].filter(Boolean);
-  return { on: hv.on, minutes: hv.minutes, legacyHold: !!hv.legacy, codes, unavailable: !!(m.checkout?.ok && !m.checkout.method && !m.redeem), onlineSite: onlineAtCheckout(m),
+  const onlineOk = !!(m.opts?.online && (m.opts.online.test !== true || m.env.testUi));
+  const legacyOk = !!(m.opts?.method && (m.opts.method.test !== true || m.env.testUi));
+  const codes = [onlineOk ? 'online' : null, m.redeem ? 'gift_card' : null].filter(Boolean);
+  return { on: hv.on, minutes: hv.minutes, legacyHold: !!hv.legacy, codes, unavailable: !!(m.checkout?.ok && !onlineOk && !legacyOk && !m.redeem), onlineSite: onlineAtCheckout(m),
     extra: (L) => [codes.length ? h('p', { class: 'bk-note', 'data-testid': 'checkout-methods', text: ht(L, 'checkout.methods', { methods: methodList(L, codes) }) }) : null,
       m.checkout?.ok && !m.checkout.method && !m.redeem ? h('p', { class: 'bk-notice', role: 'status', 'data-testid': 'checkout-unavailable', text: ht(L, 'err.online_payment_unavailable') }) : null].filter(Boolean) };
 }).catch(() => { const hv = holdModeOf(null, state.settings); return { on: hv.on, minutes: hv.minutes, legacyHold: !!hv.legacy, codes: [], unavailable: false, onlineSite: false, extra: () => [] }; });
@@ -942,7 +945,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
       return;
     }
     payExtra.replaceChildren();
-    if (hi?.onlineSite) payNote.textContent = hi.legacyHold ? `${t.payHold(hi.minutes)} ${pt(S.lang, 'checkoutHoldOnline')}` : pt(S.lang, 'checkoutOnlineSite');
+    if (hi?.onlineSite) payNote.textContent = hi.legacyHold ? `${t.payHold(hi.minutes)} ${pt(S.lang, 'checkoutHoldOnlinePay')}` : pt(S.lang, 'checkoutOnlinePaySite');
     else payNote.textContent = (hi?.legacyHold || hm0.legacy) ? t.payHold((hi && hi.minutes) || hmode.minutes) : t.payLater;
   };
   holdInfo().then((hi) => {
@@ -983,7 +986,8 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   // Maksutavat (MobilePay, lahjakortti) samoista moduuleista kuin tilaussivulla; virhe / puuttuva RPC → null (ei maksuosiota, vanha näkymä). Paluu MobilePaysta (?pay=mobilepay) tarvitsee mp-rajapinnan aina.
   const canPay = ['confirmed', 'pending'].includes(b.status) && b.payment_status !== 'paid' && !(co && (co.preliminary || co.expired || co.cancelled));   // alustavaa/vanhentunutta varausta ei makseta (order_preliminary / order_expired)
   const L = S.lang === 'en' ? 'en' : 'fi';
-  const retPay = new URLSearchParams(location.search).get('pay') === 'mobilepay' && !noReturn;
+  const payQ = new URLSearchParams(location.search).get('pay');
+  const retPay = ['online', 'mobilepay', 'vismapay'].includes(payQ) && !noReturn;
   const model = canPay || retPay ? await loadPayChoices({ rpc, token, fetchImpl: MOCK_FETCH }).catch(() => null) : null;
   const online = !!model && canPay && onlineAvailable(model);   // verkkomaksutapa tarjolla → ei oleteta "maksu paikan päällä"
   const pay = { paid: t.paid, unpaid: online ? pt(L, 'unpaidOnline') : t.unpaid, pending: t.pending, partially_paid: pt(L, 'partlyPaid') }[b.payment_status] || b.payment_status;
@@ -1054,12 +1058,15 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   if (!secEl && notice && (notice.kind === 'gift' || notice.kind === 'paylater')) secEl = payNotice(L, notice);   // kokonaan maksettu: maksuosio poistuu, mutta ilmoitus jää
   if (secEl) { if (holdV) dl.after(secEl); else root.firstElementChild.querySelector('.bk-actions')?.before(secEl); }   // pitotilassa maksuvalinta yhteenvedon alla
   if (refresh) { const el = root.querySelector('[data-testid=pc-notice],[data-testid=vc-notice]'); if (el) { el.scrollIntoView({ block: 'center' }); el.focus({ preventScroll: true }); } else if (holdV && !retPay) holdHost.querySelector('h3')?.focus(); } else focusTop();   // pitotilan vaihtuessa fokus tilaotsikkoon
-  if (retPay && model) {   // paluu MobilePaysta: reconcile + public_get_booking-polling → tulos (maksettu / epäonnistui / odottaa), sivu päivittyy lopuksi
+  if (retPay && model) {   // paluu maksusivulta: tilaus kysytään uudelleen; kesken oleva MobilePay/Visma täsmäytetään vielä (runReturn jää tuotuna)
     const num = (k) => { const v = +new URLSearchParams(location.search).get(k); return Number.isFinite(v) && v > 0 ? v : undefined; };
-    runReturn({ mp: model.mp, host: mpHost, S, L, orderNo: b.order_no, timing: MOCK ? { intervalMs: num('mpinterval'), maxMs: num('mpmax') } : {},
+    const intervalMs = MOCK ? (num('mpinterval') || 2500) : 2500;
+    const rounds = MOCK && num('mpmax') ? Math.max(1, Math.round(num('mpmax') / intervalMs)) : 8;
+    if (payQ === 'mobilepay') void runReturn;
+    const reconcile = payQ === 'mobilepay' ? () => model.mp.reconcile() : payQ === 'vismapay' && model.vp ? () => model.vp.reconcile() : null;
+    runOnlineReturn({ host: mpHost, L, reconcile, intervalMs, rounds,
       getOrder: async () => { const n = await rpc('public_get_booking', { p_token: token }); return n?.ok ? n : null; },
-      onDone: async (res) => { if (res?.state === 'net') return;   /* verkkovirhe: jätä tarkista-uudelleen -paneeli näkyviin äläkä lataa sivua uudelleen */
-        await viewConfirmation({ refresh: true, host: mpHost, noReturn: true }); } }).catch(() => {});
+      onDone: async () => { await viewConfirmation({ refresh: true, host: mpHost, noReturn: true }); } }).catch(() => {});
   }
 }
 

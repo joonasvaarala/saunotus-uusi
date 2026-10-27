@@ -79,6 +79,17 @@ begin perform pg_temp.svc();
 create function pg_temp.apply(p_onum text, p_outcome text, p_amount numeric default null) returns jsonb language plpgsql as $$
 declare r jsonb;
 begin perform pg_temp.svc(); r := booking.vismapay_payment_apply(p_onum, p_outcome, p_amount, jsonb_build_object('t178', true, 'visma_status', 14)); perform pg_temp.logout(); return r; end $$;
+create function pg_temp.mprep(p_link uuid, p_order uuid) returns jsonb language plpgsql as $$
+declare r jsonb;
+begin perform pg_temp.svc(); r := booking.montonio_payment_prepare(p_order, p_link, 'cardPayments'); perform pg_temp.logout(); return r; end $$;
+create function pg_temp.mcreated(p_onum text) returns jsonb language plpgsql as $$
+declare r jsonb;
+begin perform pg_temp.svc();
+  r := booking.montonio_payment_event(p_onum, 'CREATED', 'https://pay.montonio.com/session/t178' || md5(p_onum), 'uuid-t178-' || left(md5(p_onum), 12), '{}'::jsonb);
+  perform pg_temp.logout(); return r; end $$;
+create function pg_temp.mapply(p_onum text, p_outcome text, p_amount numeric default null) returns jsonb language plpgsql as $$
+declare r jsonb;
+begin perform pg_temp.svc(); r := booking.montonio_payment_apply(p_onum, p_outcome, p_amount, jsonb_build_object('t178', true)); perform pg_temp.logout(); return r; end $$;
 create function pg_temp.lookup(p_onum text) returns jsonb language plpgsql as $$
 declare r jsonb;
 begin perform pg_temp.svc(); r := booking.vismapay_payment_lookup(p_onum); perform pg_temp.logout(); return r; end $$;
@@ -107,7 +118,7 @@ begin
   end if;
   perform pg_temp.ck(md5(pg_get_functiondef('booking.vismapay_payment_apply(text,text,numeric,jsonb)'::regprocedure)) in ('03fbbd2486b2c22dfa02d7ec84da626f', '2f8a7e56ae9bb4e29f4025f91e7ea706')
       and md5(pg_get_functiondef('booking.vismapay_payment_lookup(text)'::regprocedure)) = 'ddec24e2970bde7ff4dc6c6ecc3a63ac'
-      and md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) in ('647c556562046c75b7e7e33703c050a0', '1b729ef4d72dc925001169c38bad3315')
+      and md5(pg_get_functiondef('booking.public_payment_link_info(uuid)'::regprocedure)) in ('647c556562046c75b7e7e33703c050a0', '1b729ef4d72dc925001169c38bad3315', '2c9e06b3153aa5c0edd25341024ae6a8')
       and md5(pg_get_functiondef('booking._vismapay_attempt_trg()'::regprocedure)) = '8553fa9e304740124b64dd361439820a', 'A1 muutetut funktiot = booking_178');
   perform pg_temp.ck((select bool_and(prosecdef and proconfig = array['search_path=""']) from pg_proc where oid in ('booking.vismapay_payment_apply(text,text,numeric,jsonb)'::regprocedure,
       'booking.vismapay_payment_lookup(text)'::regprocedure, 'booking.public_payment_link_info(uuid)'::regprocedure, 'booking._vismapay_attempt_trg()'::regprocedure)), 'A2 SECURITY DEFINER, search_path tyhjä');
@@ -124,7 +135,7 @@ begin
       and md5(pg_get_functiondef('booking.vismapay_payment_event(text,text,text,text,jsonb)'::regprocedure)) = 'e6834eb7c9da8a0a8c531706eb6692fc'
       and md5(pg_get_functiondef('booking.payment_mark_paid(text,text,numeric,jsonb)'::regprocedure)) = '8ceb0a7dea60d37e3ea6a17cec0e4c25'
       and md5(pg_get_functiondef('booking.payment_mark_failed(text,text,text,jsonb)'::regprocedure)) = '2dfe2d2c0757157be90484d60cef8046'
-      and md5(pg_get_functiondef('booking._create_link_payment(bigint,integer,text)'::regprocedure)) in ('533ac9af831c0c11e1f504e377a17827', '5e432077c560a10822db8ac0d2bbe7c2', 'f40db96ca201e40467f20cc1db5866c9')
+      and md5(pg_get_functiondef('booking._create_link_payment(bigint,integer,text)'::regprocedure)) in ('533ac9af831c0c11e1f504e377a17827', '5e432077c560a10822db8ac0d2bbe7c2', 'f40db96ca201e40467f20cc1db5866c9', 'adc14e6983e60d80498508c9b969f60d')
       and md5(pg_get_functiondef('booking._order_balance(bigint)'::regprocedure)) = 'a6b31f93559de53d75a52d8a285f1170'
       and md5(pg_get_functiondef('booking.vismapay_order_refs(uuid)'::regprocedure)) = '79c7bbe4e02a4411d3ccdc821b662013', 'A4 riippuvuudet ennallaan');
   perform pg_temp.ck((select relrowsecurity from pg_class where oid = 'booking.vismapay_attempts'::regclass)
@@ -133,6 +144,8 @@ begin
 
   -- ===== fixture (feikki, vain tässä transaktiossa)
   insert into booking.integration_config(key, mode, settings) values ('vismapay', 'test', '{"approved_by":"t178"}'::jsonb)
+    on conflict (key) do update set mode = 'test', settings = booking.integration_config.settings || '{"approved_by":"t178"}'::jsonb;
+  insert into booking.integration_config(key, mode, settings) values ('montonio', 'test', '{"approved_by":"t178"}'::jsonb)
     on conflict (key) do update set mode = 'test', settings = booking.integration_config.settings || '{"approved_by":"t178"}'::jsonb;
   if v_has_rl then update booking.settings set value = '500'::jsonb where key = 'rl_order_get_per_10min';
   else insert into booking.settings(key, value) values ('rl_order_get_per_10min', '500'::jsonb); end if;
@@ -149,48 +162,48 @@ begin
   select id into pay from booking.payments where link_token = tk;
   perform pg_temp.ck(pid is not null and tk is not null and pay is not null, 'X0 fixture: tuote, tilaus, maksulinkki');
 
-  -- ===== B peruutus → linkki yhä maksettavissa uudella yrityksellä
-  r := pg_temp.prep(tk, null); a1 := r ->> 'order_number';
+  -- ===== B peruutus → Montonio-linkki yhä maksettavissa uudella yrityksellä
+  r := pg_temp.mprep(tk, null); a1 := r ->> 'order_number';
   perform pg_temp.ck(r ->> 'ok' = 'true' and a1 ~ '-a1$' and (r ->> 'reuse')::boolean = false, 'B1 ensimmäinen yritys -a1');
-  perform pg_temp.created(a1);
-  r := pg_temp.prep(tk, null);
-  perform pg_temp.ck(r ->> 'order_number' = a1 and (r ->> 'reuse')::boolean, 'B2 voimassa oleva token käytetään uudelleen (ei rinnakkaista yritystä)');
-  perform pg_temp.ck((select count(*) from booking.vismapay_attempts where payment_id = pay) = 1
-      and (select superseded_at is null and outcome is null and attempt = 1 and env = 'test' from booking.vismapay_attempts where order_number = a1), 'B3 yritys kirjattu (vismapay_attempts)');
-  r := pg_temp.apply(a1, 'cancelled');
+  perform pg_temp.mcreated(a1);
+  r := pg_temp.mprep(tk, null);
+  perform pg_temp.ck(r ->> 'order_number' = a1 and (r ->> 'reuse')::boolean, 'B2 voimassa oleva ohjaus käytetään uudelleen (ei rinnakkaista yritystä)');
+  perform pg_temp.ck((select count(*) from booking.montonio_attempts where payment_id = pay) = 1
+      and (select superseded_at is null and outcome is null and attempt = 1 and env = 'test' from booking.montonio_attempts where order_number = a1), 'B3 yritys kirjattu (montonio_attempts)');
+  r := pg_temp.mapply(a1, 'cancelled');
   select * into prow from booking.payments where id = pay;
   perform pg_temp.ck(r ->> 'ok' = 'true' and r ->> 'outcome' = 'cancelled' and (r ->> 'retryable')::boolean, 'B4 peruutus → retryable');
   perform pg_temp.ck(prow.status = 'pending' and prow.provider_status = 'cancelled' and prow.provider_ref = a1 and not (prow.raw ? 'token') and not (prow.raw ? 'redirect_url')
-      and not (prow.raw ? 'token_valid_until') and prow.link_url is null and prow.raw ->> 'last_state' = 'cancelled', 'B5 maksu pending, vanha token ja ohjausosoite poistettu');
-  perform pg_temp.ck(pg_temp.audits(pay, 'VISMAPAY_CANCELLED_RETRYABLE') = 1 and pg_temp.audits(pay, 'VISMAPAY_CANCELLED') = 0
-      and (select outcome from booking.vismapay_attempts where order_number = a1) = 'cancelled', 'B6 audit VISMAPAY_CANCELLED_RETRYABLE, yritys = cancelled');
+      and not (prow.raw ? 'token_valid_until') and prow.link_url is null and prow.raw ->> 'last_state' = 'cancelled', 'B5 maksu pending, vanha ohjausosoite poistettu');
+  perform pg_temp.ck(pg_temp.audits(pay, 'MONTONIO_CANCELLED_RETRYABLE') = 1 and pg_temp.audits(pay, 'MONTONIO_CANCELLED') = 0
+      and (select outcome from booking.montonio_attempts where order_number = a1) = 'cancelled', 'B6 audit MONTONIO_CANCELLED_RETRYABLE, yritys = cancelled');
   r := pg_temp.info(tk);
   perform pg_temp.ck(r ->> 'status' = 'open' and r ->> 'reason' = 'open' and (r ->> 'can_pay')::boolean and r ->> 'last_attempt' = 'cancelled' and (r ->> 'amount')::numeric = 30,
       'B7 link_info: open, last_attempt = cancelled');
   perform pg_temp.ck((select payment_status from booking.orders where id = o) = 'pending', 'B8 tilauksen maksutila pending (linkki auki)');
-  r := pg_temp.apply(a1, 'cancelled');
-  perform pg_temp.ck(r ->> 'outcome' = 'cancelled' and (r ->> 'unchanged')::boolean and pg_temp.audits(pay, 'VISMAPAY_CANCELLED_RETRYABLE') = 1, 'B9 toistuva peruutusilmoitus idempotentti');
-  r := pg_temp.prep(tk, null); a2 := r ->> 'order_number';
+  r := pg_temp.mapply(a1, 'cancelled');
+  perform pg_temp.ck(r ->> 'outcome' = 'cancelled' and (r ->> 'unchanged')::boolean and pg_temp.audits(pay, 'MONTONIO_CANCELLED_RETRYABLE') = 1, 'B9 toistuva peruutusilmoitus idempotentti');
+  r := pg_temp.mprep(tk, null); a2 := r ->> 'order_number';
   perform pg_temp.ck(r ->> 'ok' = 'true' and a2 ~ '-a2$' and a2 <> a1 and (r ->> 'reuse')::boolean = false and r ->> 'redirect_url' is null and (r ->> 'payment_id')::bigint = pay,
-      'B10 uusi painallus → uusi yritys -a2 samalle maksulle (ei vanhaa tokenia)');
-  perform pg_temp.ck((select superseded_at is not null from booking.vismapay_attempts where order_number = a1)
-      and (select superseded_at is null and attempt = 2 from booking.vismapay_attempts where order_number = a2), 'B11 -a1 korvattu, -a2 nykyinen');
-  perform pg_temp.created(a2);
+      'B10 uusi painallus → uusi yritys -a2 samalle maksulle (ei vanhaa ohjausta)');
+  perform pg_temp.ck((select superseded_at is not null from booking.montonio_attempts where order_number = a1)
+      and (select superseded_at is null and attempt = 2 from booking.montonio_attempts where order_number = a2), 'B11 -a1 korvattu, -a2 nykyinen');
+  perform pg_temp.mcreated(a2);
   r := pg_temp.info(tk);
   perform pg_temp.ck(r ->> 'status' = 'open' and r -> 'last_attempt' = 'null'::jsonb, 'B12 uusi yritys käynnissä → last_attempt null');
-  r := pg_temp.apply(a1, 'failed');
+  r := pg_temp.mapply(a1, 'failed');
   select * into prow from booking.payments where id = pay;
   perform pg_temp.ck(r ->> 'outcome' = 'failed' and (r ->> 'unchanged')::boolean and (r ->> 'stale')::boolean and prow.provider_ref = a2 and prow.raw ->> 'last_state' = 'CREATED'
-      and prow.raw ->> 'token' is not null, 'B13 vanhan yrityksen ilmoitus ei muuta nykyistä yritystä');
-  r := pg_temp.apply(a2, 'failed');
-  r2 := pg_temp.apply(a2, 'failed');
+      and prow.raw ->> 'redirect_url' is not null, 'B13 vanhan yrityksen ilmoitus ei muuta nykyistä yritystä');
+  r := pg_temp.mapply(a2, 'failed');
+  r2 := pg_temp.mapply(a2, 'failed');
   select * into prow from booking.payments where id = pay;
   perform pg_temp.ck(r ->> 'outcome' = 'failed' and (r ->> 'retryable')::boolean and (r2 ->> 'unchanged')::boolean and prow.status = 'pending'
-      and pg_temp.audits(pay, 'VISMAPAY_FAILED_RETRYABLE') = 1 and pg_temp.info(tk) ->> 'last_attempt' = 'failed', 'B14 hylätty kortti (failed) → yhä open, toisto idempotentti');
-  r := pg_temp.prep(tk, null); a3 := r ->> 'order_number';
-  perform pg_temp.ck(a3 ~ '-a3$' and (select count(*) from booking.vismapay_attempts where payment_id = pay) = 3, 'B15 kolmas yritys -a3');
-  perform pg_temp.created(a3);
-  r := pg_temp.apply(a3, 'paid', 30);
+      and pg_temp.audits(pay, 'MONTONIO_FAILED_RETRYABLE') = 1 and pg_temp.info(tk) ->> 'last_attempt' = 'failed', 'B14 hylätty kortti (failed) → yhä open, toisto idempotentti');
+  r := pg_temp.mprep(tk, null); a3 := r ->> 'order_number';
+  perform pg_temp.ck(a3 ~ '-a3$' and (select count(*) from booking.montonio_attempts where payment_id = pay) = 3, 'B15 kolmas yritys -a3');
+  perform pg_temp.mcreated(a3);
+  r := pg_temp.mapply(a3, 'paid', 30);
   perform pg_temp.ck(r ->> 'outcome' = 'paid' and (select status from booking.payments where id = pay) = 'paid' and pg_temp.paidn(o) = 1
       and pg_temp.info(tk) ->> 'reason' = 'link_paid', 'B16 uusi yritys maksettu → link_paid, yksi maksu');
 

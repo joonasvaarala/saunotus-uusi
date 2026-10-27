@@ -108,9 +108,10 @@ export function overviewNotices(bundle) {
   const notes = [];
   const vp = bundle?.vismapay?.mode;
   const mp = bundle?.mobilepay?.mode;
+  const mo = bundle?.montonio?.mode;
   const em = bundle?.resend?.mode;
-  if (vp === 'test' || mp === 'test') notes.push('warn_pay_test');
-  if (vp === 'live' || mp === 'live') notes.push('warn_pay_live');
+  if (vp === 'test' || mp === 'test' || mo === 'test') notes.push('warn_pay_test');
+  if (vp === 'live' || mp === 'live' || mo === 'live') notes.push('warn_pay_live');
   if (em === 'live' && !bundle?.resend?.allowlist_on) notes.push('warn_allowlist_open');
   else if (em !== 'live') notes.push('warn_email_not_live');
   return notes;

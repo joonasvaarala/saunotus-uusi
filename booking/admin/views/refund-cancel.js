@@ -24,12 +24,14 @@ export function yesNo({ name, legend, no, yes, hint = null, testid, disabled = f
 
 const MP_KINDS = { done: 'ok', failed: 'err', retry_later: 'warn', unverified: 'warn', db_error: 'warn', none: 'warn', off: 'warn', forbidden: 'err', error: 'warn' };
 const VP_KINDS = { ...MP_KINDS, awaiting_customer: 'warn', not_settled: 'err', not_configured: 'warn' };
-/** Verkkomaksun hyvitysrivit (status requested) käsitellään heti: api = createTalousApi(...) (mobilepayRefund / vismapayRefund). */
+const MO_KINDS = { done: 'ok', pending: 'warn', awaiting_settlement: 'warn', failed: 'err', retry_later: 'warn', db_error: 'warn', not_configured: 'warn', none: 'warn', off: 'warn', forbidden: 'err', error: 'warn' };
+/** Verkkomaksun hyvitysrivit (status requested) käsitellään heti: api = createTalousApi(...) (mobilepayRefund / vismapayRefund / montonioRefund). */
 export async function processOnlineRefunds(api, refunds = []) {
   for (const x of refunds) {
     if (x?.status !== 'requested' || !api) continue;
     if (x.provider === 'mobilepay') { const m = await api.mobilepayRefund(x.refund_id); toast(t(MP_KINDS[m.result] ? `refund.mp.${m.result}` : 'refund.mp.error'), MP_KINDS[m.result] || 'warn'); }
     if (x.provider === 'visma_pay') { const m = await api.vismapayRefund(x.refund_id); toast(t(VP_KINDS[m.result] ? `refund.vp.${m.result}` : 'refund.vp.error'), VP_KINDS[m.result] || 'warn'); }
+    if (x.provider === 'montonio') { const m = await api.montonioRefund(x.refund_id); toast(t(MO_KINDS[m.result] ? `refund.mo.${m.result}` : 'refund.mo.error'), MO_KINDS[m.result] || 'warn'); }
   }
 }
 

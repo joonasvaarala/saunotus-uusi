@@ -1,13 +1,14 @@
 // Maksulinkkisivu /maksa/?p=<link_token> (EN /en/pay/?p=…). Sähköpostin maksulinkit (settings.payment_link_path), hallinnan ja pikakassan linkit.
-// Painike kutsuu vismapay-start {link_token} (sama edge kuin tilaussivun Visma-painike) ja ohjaa Visma Payn sivulle. Maksua ei avata ilman painallusta
+// Painikkeet kutsuvat montonio-start {link_token, method}. Nappitekstit tulevat ui.paychoice.method_* -avaimista. Maksua ei avata ilman painallusta
 // (sähköpostin linkkiesikatselu ei luo maksua). Virheet (vanhentunut, maksettu, virheellinen) FI/EN.
 // booking_177b: latauksessa VAIN LUKU -kutsu rpc public_payment_link_info(p_token) → yhteenveto ennen painiketta (summa, tilausnumero, rivit pvm/klo,
 // voimassaolo) tai selkeä tila (maksettu / vanhentunut / korvattu / ei löydy), jolloin painike poistetaan. Jos RPC puuttuu (404/PGRST202), verkko
 // pettää tai nopeusraja täyttyy → sivu toimii kuten booking_177:ssä (yleinen kortti + painike; vismapay-start tarkistaa tilan painettaessa).
 import { functionUrl, rpc } from './sb.js';
 import { h } from './gift-ui.js';
-import { createVismapayApi } from './vismapay-api.js';
-import { safeVismaRedirect } from './vismapay-logic.js';
+import { createOnlinePayApi } from './online-pay-api.js';
+import { PAY_METHODS, safeOnlineRedirect } from './online-pay-logic.js';
+import { pt } from './pay-choices-texts.js';
 import { PLT, plt } from './pay-link-texts.js';
 import { linkTokenFrom, classifyLinkError, switchHref, normLinkInfo, linkInfoView, fmtDate } from './pay-link-logic.js';
 import { applyShopTexts } from './site-texts.js';
@@ -22,34 +23,42 @@ export function payLinkView({ L, token, api, loadInfo = null, phone = '', phoneT
     return c;
   };
   let busy = false;
-  const btn = h('button', { type: 'button', class: 'btn ord-btn', 'data-testid': 'pl-button', text: tx('btn'), onclick: async () => {
+  const labelKey = { paymentInitiation: 'methodBank', cardPayments: 'methodCard', applePay: 'methodApple', googlePay: 'methodGoogle', mobilePay: 'methodWallet' };
+  const buttons = [];
+  const setBusy = (on, active, label) => { for (const b of buttons) b.disabled = on; if (active) active.textContent = on ? tx('busyOnline') : label; };
+  async function start(code, btn, label) {
     if (busy) return;
-    busy = true; btn.disabled = true; btn.textContent = tx('busy'); msg.replaceChildren();
+    busy = true; setBusy(true, btn, label); msg.replaceChildren();
     let r = null;
-    try { r = await api.start(); } catch { r = { ok: false, code: 'network' }; }
-    const url = r?.ok ? safeVismaRedirect(r.redirect_url) : null;
+    try { r = await api.start(code); } catch { r = { ok: false, code: 'network' }; }
+    const url = r?.ok ? safeOnlineRedirect(r.redirect_url) : null;
     if (url) {
-      msg.replaceChildren(h('p', { class: 'bk-note', role: 'status', 'data-testid': 'pl-redirect', text: tx('redirecting') }),
+      msg.replaceChildren(h('p', { class: 'bk-note', role: 'status', 'data-testid': 'pl-redirect', text: tx('redirectingOnline') }),
         r.amount != null ? h('p', { class: 'mp-amount', 'data-testid': 'pl-amount', text: tx('amount', { amount: money(r.amount) }) }) : null);
       navigate(url);
       return;
     }
     if (r?.ok && (r.dry_run || r.mode === 'dry_run')) {
       msg.replaceChildren(h('p', { class: 'bk-note', role: 'status', 'data-testid': 'pl-dryrun', text: tx('dryRun') }));
-      busy = false; btn.disabled = false; btn.textContent = tx('btn');
+      busy = false; setBusy(false, btn, label);
       return;
     }
     const c = showError(r?.ok ? 'generic' : r?.code);
-    if (c.final) btn.remove();   // lopullinen tila: uusi yritys ei auta (.btn-tyyli ohittaisi hidden-attribuutin)
-    busy = false; btn.disabled = false; btn.textContent = tx('btn');
-  } });
-  const lead = h('p', { 'data-testid': 'pl-lead', text: tx('lead') });
+    if (c.final) { for (const b of buttons) b.remove(); }   // lopullinen tila: uusi yritys ei auta (.btn-tyyli ohittaisi hidden-attribuutin)
+    busy = false; if (!c.final) setBusy(false, btn, label);
+  }
+  for (const code of PAY_METHODS) {
+    const label = pt(L, labelKey[code] || 'methodBank');
+    const btn = h('button', { type: 'button', class: 'btn ord-btn', 'data-testid': code === 'paymentInitiation' ? 'pl-button' : `pl-method-${code}`, text: label, onclick: () => start(code, btn, label) });
+    buttons.push(btn);
+  }
+  const lead = h('p', { 'data-testid': 'pl-lead', text: tx('leadOnline') });
   const card = h('section', { class: 'ord-card pl-card', 'data-testid': 'pay-link-page', 'aria-labelledby': 'pl-title' },
-    h('h3', { id: 'pl-title', text: tx('title') }), lead, btn, msg, contact);
-  if (!token) { showError('invalid_param'); btn.remove(); card.ready = Promise.resolve(null); return card; }
+    h('h3', { id: 'pl-title', text: tx('title') }), lead, ...buttons, msg, contact);
+  if (!token) { showError('invalid_param'); for (const b of buttons) b.remove(); card.ready = Promise.resolve(null); return card; }
   if (!loadInfo) { card.ready = Promise.resolve(null); return card; }
-  // yhteenveto: painike odottaa vastausta (ei kaksoistilaa), mutta ei koskaan aloita maksua itse
-  btn.disabled = true; lead.textContent = tx('loading'); card.setAttribute('aria-busy', 'true');
+  // yhteenveto: painikkeet odottavat vastausta (ei kaksoistilaa), mutta eivät koskaan aloita maksua itse
+  for (const b of buttons) b.disabled = true; lead.textContent = tx('loading'); card.setAttribute('aria-busy', 'true');
   card.ready = (async () => {
     let info = null;
     try { info = normLinkInfo(await loadInfo()); } catch { info = null; }
@@ -59,18 +68,18 @@ export function payLinkView({ L, token, api, loadInfo = null, phone = '', phoneT
   function renderInfo(info) {
     const v = linkInfoView(info);
     card.setAttribute('aria-busy', 'false');
-    if (!busy) btn.disabled = false;
-    if (!info) { lead.textContent = tx('lead'); return; }   // RPC puuttuu / verkko / nopeusraja → kuten ennen
+    if (!busy) for (const b of buttons) b.disabled = false;
+    if (!info) { lead.textContent = tx('leadOnline'); return; }   // RPC puuttuu / verkko / nopeusraja → yleinen kortti + painikkeet
     card.setAttribute('data-status', info.status);
     const sum = v.showSummary ? summary(info, v) : null;
     if (v.pay) {
-      lead.textContent = tx('leadOpen');
+      lead.textContent = tx('leadOpenOnline');
       if (sum) lead.before(sum);
       // booking_178: edellinen yritys peruttiin / keskeytyi → linkki on yhä voimassa, kerrotaan ettei veloitettu
       if (v.retryKey) lead.before(h('p', { class: 'bk-note pl-retry', role: 'status', 'data-testid': 'pl-retry', 'data-code': info.last_attempt, text: tx(v.retryKey) }));
       return;
     }
-    btn.remove(); lead.remove();
+    for (const b of buttons) b.remove(); lead.remove();
     const state = h('p', { class: 'pl-state', role: 'status', 'data-testid': 'pl-state', 'data-status': info.status, 'data-code': info.reason, text: tx(v.msgKey) });
     msg.replaceChildren(state);
     if (sum) contact.before(sum);   // tila ensin, sitten mitä linkki koski
@@ -107,7 +116,7 @@ async function main() {
   // kielivalinta säilyttää ?p= (FI /maksa/ ↔ EN /en/pay/)
   if (S.otherHref) for (const a of document.querySelectorAll('.lang a[hreflang]')) a.setAttribute('href', switchHref(S.otherHref, location.search));
   const cfg = window.BOOKING_CONFIG || {};
-  const api = createVismapayApi({ linkToken: token, functionUrl, anonKey: cfg.anonKey });
+  const api = createOnlinePayApi({ linkToken: token, functionUrl, anonKey: cfg.anonKey });
   const money = (n) => new Intl.NumberFormat(L === 'fi' ? 'fi-FI' : 'en-GB', { style: 'currency', currency: 'EUR' }).format(+n || 0);
   // vain luku; puuttuva RPC (404/PGRST202) tai verkkovirhe heittää → null → yleinen kortti + painike
   const loadInfo = token ? () => rpc('public_payment_link_info', { p_token: token }) : null;

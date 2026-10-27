@@ -35,17 +35,15 @@ const WIDTHS = [360, 390, 430, 1280];
 const PATH = { fi: { shop: '/varaa/', order: '/tilaus/' }, en: { shop: '/en/book/', order: '/en/order/' } };
 const TOKEN = '3f2b8c1e-5a7d-4e9f-8b6a-1c2d3e4f5a6b';
 
-const STUB = `class B extends HTMLElement{connectedCallback(){const r=this.attachShadow({mode:'open'});r.innerHTML='<button type="button" part="b" style="display:block;width:100%;min-height:48px;background:#2B3A30;color:#fff;border:0;border-radius:24px;font:700 17px sans-serif">'+(this.getAttribute('language')==='en'?'Pay with MobilePay':'Maksa MobilePaylla')+'</button>';r.querySelector('button').addEventListener('click',()=>this.dispatchEvent(new Event('click',{bubbles:true})));}}customElements.get('vipps-mobilepay-button')||customElements.define('vipps-mobilepay-button',B);`;
 async function newPage(width, lang = 'fi', name = 'p') {
   const mobile = width < 600;
   const ctx = await browser.newContext({ viewport: { width, height: mobile ? 844 : 900 }, isMobile: mobile, hasTouch: mobile, locale: lang === 'en' ? 'en-GB' : 'fi-FI', timezoneId: TZ });
-  await ctx.route('https://cdn.vippsmobilepay.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/javascript', body: STUB }));   // MobilePayn virallinen painike: tynkä (ei verkkoa; tynkä vihreä, ei brändiväriä)
   const page = await ctx.newPage(); page.ctx = ctx;
   page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) problems.push(`${name} console.${m.type()}: ${m.text()} ${m.location().url || ''}`); });
   page.on('pageerror', (e) => problems.push(`${name} pageerror: ${e.message}`));
   page.on('requestfailed', (r) => { if (!/ERR_ABORTED/.test(r.failure()?.errorText || '')) problems.push(`${name} requestfailed: ${r.url()}`); });
   page.on('response', (r) => { if (r.status() >= 400) problems.push(`${name} HTTP ${r.status()}: ${r.url()}`); });
-  page.on('request', (r) => { if (!r.url().startsWith(ORIGIN) && !r.url().startsWith('data:') && !r.url().startsWith('https://cdn.vippsmobilepay.com/')) problems.push(`${name} ulkoinen pyyntö: ${r.url()}`); if (/\/rest\/v1\/|\/functions\/v1\/|:4181/.test(r.url())) problems.push(`${name} PYYNTÖ BACKENDILLE (mock-tilan pitäisi olla offline): ${r.url()}`); });
+  page.on('request', (r) => { if (!r.url().startsWith(ORIGIN) && !r.url().startsWith('data:')) problems.push(`${name} ulkoinen pyyntö: ${r.url()}`); if (/\/rest\/v1\/|\/functions\/v1\/|:4181/.test(r.url())) problems.push(`${name} PYYNTÖ BACKENDILLE (mock-tilan pitäisi olla offline): ${r.url()}`); });
   return page;
 }
 const settle = (page) => page.waitForTimeout(150);

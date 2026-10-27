@@ -43,6 +43,11 @@ export const PLT = {
     'info.stale': 'Tilauksen maksettava summa on muuttunut, joten tämä linkki ei ole enää voimassa. Pyydä meiltä uusi maksulinkki.',
     // booking_178: peruttu / keskeytynyt maksu ei kuluta linkkiä — pending-import-74
     'info.retry': 'Edellinen maksuyritys jäi kesken, eikä sinulta veloitettu mitään. Voit maksaa uudelleen samalla linkillä.',
+    leadOnline: 'Maksa tilauksesi verkossa. Valitse maksutapa, siirryt maksusivulle ja palaat sen jälkeen tilaukseesi.',
+    busyOnline: 'Avataan maksusivua…',
+    redirectingOnline: 'Siirrytään maksusivulle…',
+    leadOpenOnline: 'Tarkista tiedot ja siirry maksamaan verkossa. Valitse maksutapa, ja palaat sen jälkeen tilaukseesi.',
+    'err.providerOnline': 'Verkkomaksu ei vastannut. Yritä hetken kuluttua uudelleen.',
   },
   en: {
     title: 'Payment link',
@@ -87,6 +92,11 @@ export const PLT = {
     'info.stale': 'The amount due on the order has changed, so this link is no longer valid. Ask us for a new payment link.',
     // booking_178: a cancelled or interrupted payment does not use up the link — pending-import-74
     'info.retry': 'Your previous payment attempt was not completed and you were not charged. You can pay again with this same link.',
+    leadOnline: 'Pay for your order online. Choose a payment method, continue to the payment page and then return to your order.',
+    busyOnline: 'Opening the payment page…',
+    redirectingOnline: 'Taking you to the payment page…',
+    leadOpenOnline: 'Check the details and continue to payment online. Choose a payment method, and then return to your order.',
+    'err.providerOnline': 'Online payment did not respond. Please try again in a moment.',
   },
 };
 

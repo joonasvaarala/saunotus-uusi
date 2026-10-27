@@ -88,7 +88,7 @@ test('näkymä open: summa, tilausnumero, rivit pvm/klo, voimassaolo ennen paini
   assert.equal(v.q('pl-valid').textContent, 'The link is valid until Sun 8 Nov 2026 at 11:42.');
   // painallus käynnistää maksun vasta nyt
   const nav = []; let started = 0;
-  v = payLinkView({ L: 'fi', token: TOK, api: { start: async () => { started++; return { ok: true, redirect_url: 'https://www.vismapay.com/pbwapi/token/x', amount: 4 }; } }, loadInfo: async () => OPEN, money, navigate: (u) => nav.push(u) });
+  v = payLinkView({ L: 'fi', token: TOK, api: { start: async () => { started++; return { ok: true, redirect_url: 'https://pay.montonio.com/session/x', amount: 4 }; } }, loadInfo: async () => OPEN, money, navigate: (u) => nav.push(u) });
   assert.equal(v.q('pl-button').disabled, true, 'odottaa yhteenvetoa'); await v.ready; assert.equal(started, 0);
   await v.q('pl-button').click(); assert.equal(started, 1); assert.equal(nav.length, 1);
 });
@@ -124,7 +124,7 @@ test('näkymä: RPC puuttuu (404/PGRST202), verkkovirhe, nopeusraja tai outo vas
   for (const r of [e404, new TypeError('Failed to fetch'), { ok: false, code: 'rate_limited' }, null, { foo: 1 }]) {
     const v = await view('fi', r);
     assert.ok(v.q('pl-button') && !v.q('pl-button').disabled, String(r?.message || JSON.stringify(r)));
-    assert.equal(v.q('pl-summary'), null); assert.equal(v.q('pl-state'), null); assert.equal(v.q('pl-lead').textContent, PLT.fi.lead);
+    assert.equal(v.q('pl-summary'), null); assert.equal(v.q('pl-state'), null); assert.equal(v.q('pl-lead').textContent, PLT.fi.leadOnline);
     assert.equal(v.attrs['data-status'], undefined);
   }
   // ilman tokenia ei kutsuta RPC:tä
@@ -135,7 +135,7 @@ test('näkymä: RPC puuttuu (404/PGRST202), verkkovirhe, nopeusraja tai outo vas
 test('lähde: latauksessa vain public_payment_link_info (vain luku); maksun aloitus vain painikkeesta; tyylit värit #2B3A30/#F4EFE7/#7A5530', () => {
   const s = rd('booking/shop/src/pay-link.js');
   assert.match(s, /rpc\('public_payment_link_info', \{ p_token: token \}\)/);
-  assert.equal((s.match(/api\.start\(\)/g) || []).length, 1, 'vismapay-start vain painikkeen käsittelijässä');
+  assert.equal((s.match(/api\.start\(/g) || []).length, 1, 'maksun aloitus vain painikkeen käsittelijässä');
   const css = rd('booking/shop/src/shop.css'); const i0 = css.indexOf('/* booking_177b'); const pl = css.slice(i0, css.indexOf('/* booking_', i0 + 5));
   for (const c of pl.match(/#[0-9a-f]{3,6}\b/gi) || []) assert.ok(['#2B3A30', '#F4EFE7', '#7A5530'].includes(c.toUpperCase()), `väri ${c}`);
   assert.doesNotMatch(pl, /blue|#00f|#1d6fd8/i);

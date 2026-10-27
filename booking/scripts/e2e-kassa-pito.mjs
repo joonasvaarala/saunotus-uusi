@@ -35,18 +35,16 @@ const WIDTHS = [360, 390, 430, 1280];
 const PATH = { fi: { shop: '/varaa/', order: '/tilaus/', confirm: '/varaa/vahvistus/' }, en: { shop: '/en/book/', order: '/en/order/', confirm: '/en/book/confirmation/' } };
 const TOKEN = '3f2b8c1e-5a7d-4e9f-8b6a-1c2d3e4f5a6b';
 
-const STUB = `class B extends HTMLElement{connectedCallback(){const r=this.attachShadow({mode:'open'});r.innerHTML='<button type="button" part="b" style="display:block;width:100%;min-height:48px;background:#5a78ff;color:#fff;border:0;border-radius:24px;font:700 17px sans-serif">'+(this.getAttribute('language')==='en'?'Pay with MobilePay':'Maksa MobilePaylla')+'</button>';r.querySelector('button').addEventListener('click',()=>this.dispatchEvent(new Event('click',{bubbles:true})));}}customElements.get('vipps-mobilepay-button')||customElements.define('vipps-mobilepay-button',B);`;
 async function newPage(width, lang = 'fi', name = 'p', { deviceSkewMs = 0 } = {}) {
   const mobile = width < 600;
   const ctx = await browser.newContext({ viewport: { width, height: mobile ? 844 : 900 }, isMobile: mobile, hasTouch: mobile, locale: lang === 'en' ? 'en-GB' : 'fi-FI', timezoneId: TZ });
-  await ctx.route('https://cdn.vippsmobilepay.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/javascript', body: STUB }));   // MobilePayn virallinen painike: tynkä (ei verkkoa)
   if (deviceSkewMs) await ctx.addInitScript((skew) => { const R = Date.now.bind(Date); Date.now = () => R() + skew; const O = Date; globalThis.Date = class extends O { constructor(...a) { if (a.length) super(...a); else super(R() + skew); } static now() { return R() + skew; } }; }, deviceSkewMs);   // laitteen kello väärässä
   const page = await ctx.newPage(); page.ctx = ctx;
   page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) problems.push(`${name} console.${m.type()}: ${m.text()} ${m.location().url || ''}`); });
   page.on('pageerror', (e) => problems.push(`${name} pageerror: ${e.message}`));
   page.on('requestfailed', (r) => { if (!/ERR_ABORTED/.test(r.failure()?.errorText || '')) problems.push(`${name} requestfailed: ${r.url()}`); });
   page.on('response', (r) => { if (r.status() >= 400) problems.push(`${name} HTTP ${r.status()}: ${r.url()}`); });
-  page.on('request', (r) => { if (!r.url().startsWith(ORIGIN) && !r.url().startsWith('data:') && !r.url().startsWith('https://cdn.vippsmobilepay.com/')) problems.push(`${name} ulkoinen pyyntö: ${r.url()}`); if (/\/rest\/v1\/|\/functions\/v1\/|:4181/.test(r.url())) problems.push(`${name} PYYNTÖ BACKENDILLE (mock-tilan pitäisi olla offline): ${r.url()}`); });
+  page.on('request', (r) => { if (!r.url().startsWith(ORIGIN) && !r.url().startsWith('data:')) problems.push(`${name} ulkoinen pyyntö: ${r.url()}`); if (/\/rest\/v1\/|\/functions\/v1\/|:4181/.test(r.url())) problems.push(`${name} PYYNTÖ BACKENDILLE (mock-tilan pitäisi olla offline): ${r.url()}`); });
   return page;
 }
 const settle = (page) => page.waitForTimeout(150);
@@ -125,18 +123,18 @@ for (const lang of ['fi', 'en']) {
   expect(!(await has(page, '[data-testid=hold-lead]')) && !/voimassa 15 minuuttia|held for 15 minutes/.test(await text(page, '[data-testid=hold-panel]')), `${lang}: toistava "Paikkavaraus on voimassa…" -teksti on poistettu paneelista`);
   expect((await text(page, '[data-testid=hold-must]')) === X[lang].must, `${lang}: 15 min -maksuohje kirjaimellisesti (Joonaksen teksti)`);
   expect((await text(page, '[data-testid=conf-title]')) === X[lang].h2, `${lang}: otsikko "${X[lang].h2}" (ei "Kiitos varauksesta!")`);
-  expect(await page.evaluate(() => { const st = document.querySelector('[data-testid=conf-status]'), m = document.querySelector('[data-testid=hold-must]'), p = document.querySelector('[data-testid=pc-mobilepay]'); return !!(st.compareDocumentPosition(m) & 4) && !!(m.compareDocumentPosition(p) & 4); }), `${lang}: maksuohje tilan jälkeen ja maksuosion yläpuolella`);
+  expect(await page.evaluate(() => { const st = document.querySelector('[data-testid=conf-status]'), m = document.querySelector('[data-testid=hold-must]'), p = document.querySelector('[data-testid=pc-online]'); return !!(st.compareDocumentPosition(m) & 4) && !!(m.compareDocumentPosition(p) & 4); }), `${lang}: maksuohje tilan jälkeen ja maksuosion yläpuolella`);
   expect(await has(page, 'button[data-testid=pc-paylater-btn]') && /test|testi/i.test(await text(page, '[data-testid=pc-paylater-btn]')), `${lang}: testivaihtoehto-nappi (pay_later) näkyy kun palvelin tarjoaa sen ja on merkitty testiksi`);
   const t1 = await secs(page); expect(t1 != null && t1 >= 895 && t1 <= 900, `${lang}: laskuri alkaa ~15:00 (${t1})`);
   expect((await page.getAttribute('[data-testid=hold-timer]', 'role')) === 'timer' && (await page.getAttribute('[data-testid=hold-timer]', 'aria-live')) === 'off', `${lang}: laskuri role=timer, aria-live=off (ei joka sekunti)`);
   expect((await page.getAttribute('[data-testid=hold-timer]', 'aria-labelledby')) !== null, `${lang}: laskurilla on nimi`);
   expect((await page.getAttribute('[data-testid=hold-announce]', 'role')) === 'status' && (await page.getAttribute('[data-testid=hold-announce]', 'aria-live')) === 'polite', `${lang}: erillinen ilmoitusalue (status/polite)`);
   expect(((await page.textContent('[data-testid=hold-announce]')) || '') === '', `${lang}: ilmoitusalue on alussa tyhjä (ei puheliasta)`);
-  expect(await has(page, '[data-testid=pc-mobilepay]') && await has(page, '[data-testid=pc-gift-btn]'), `${lang}: maksuvalinta (MobilePay + lahjakortti) näkyy ennen vahvistusta`);
+  expect(await has(page, '[data-testid=pc-online]') && await has(page, '[data-testid=pc-gift-btn]'), `${lang}: maksuvalinta (MobilePay + lahjakortti) näkyy ennen vahvistusta`);
   expect(!/paikan päällä|on site/i.test(await text(page, '[data-testid=pc-lead]')), `${lang}: ei "maksu paikan päällä" -ohjetta pitotilassa`);
   expect(!(await has(page, 'a[download]')), `${lang}: ei kalenterilisäystä ennen vahvistusta`);
   expect((await text(page, '[data-testid=conf-status]')).length > 0 && !/vahvistettu|confirmed/i.test(await text(page, '[data-testid=conf-status]')), `${lang}: tilarivi ei väitä varausta vahvistetuksi`);
-  const order = await page.evaluate(() => { const p = document.querySelector('[data-testid=hold-panel]'), s = document.querySelector('[data-testid=pc-mobilepay]'), d = document.querySelector('dl.bk-sum'); return p.compareDocumentPosition(d) & 4 && d.compareDocumentPosition(s) & 4; });
+  const order = await page.evaluate(() => { const p = document.querySelector('[data-testid=hold-panel]'), s = document.querySelector('[data-testid=pc-online]'), d = document.querySelector('dl.bk-sum'); return p.compareDocumentPosition(d) & 4 && d.compareDocumentPosition(s) & 4; });
   expect(!!order, `${lang}: järjestys: tilabadge → pitopaneeli/laskuri → yhteenveto → maksuvalinta (yhteenveto ei enää maksuosion alla)`);
   { const sum = await text(page, '[data-testid=conf-summary]'); expect(/\d/.test(sum) && (await page.locator('dl.bk-sum').count()) === 1 && await has(page, '[data-testid=conf-remaining]'), `${lang}: tiivis yhteenveto (tilausnro, palvelu, aika, henkilömäärä, yhteensä, maksun tila, maksettavaa jäljellä) vain kerran`); }
   await page.waitForTimeout(2300); const t2 = await secs(page); expect(t2 != null && t1 - t2 >= 1 && t1 - t2 <= 4, `${lang}: laskuri etenee (${t1} → ${t2})`);
@@ -177,7 +175,7 @@ for (const lang of ['fi', 'en']) {
   expect(!(await has(page, '[data-testid=hold-gift-returned]')) && !/lahjakort|gift card/i.test(await text(page, '[data-testid=hold-panel]')), `${lang}: EI lahjakorttilausetta kun lahjakorttia ei käytetty`);
   expect(await page.evaluate(() => document.activeElement?.matches('[data-testid=hold-panel] h3')), `${lang}: tilan vaihtuessa fokus siirtyy tilaotsikkoon (ruudunlukija)`);
   expect(await has(page, '[data-testid=hold-new]') && (await text(page, '[data-testid=hold-new]')) === X[lang].newBooking, `${lang}: "aloita alusta" -linkki`);
-  expect(!(await has(page, '[data-testid=pc-mobilepay]')) && !(await has(page, '[data-testid=pc-gift-btn]')), `${lang}: maksuvalinta poistuu vanhentuneelta`);
+  expect(!(await has(page, '[data-testid=pc-online]')) && !(await has(page, '[data-testid=pc-gift-btn]')), `${lang}: maksuvalinta poistuu vanhentuneelta`);
   expect(!(await has(page, '[data-testid=hold-timer]')), `${lang}: laskuri poistuu vanhentuneelta`);
   const href = await page.getAttribute('[data-testid=hold-new]', 'href'); expect(href.startsWith(PATH[lang].shop) && href.includes('mock=1'), `${lang}: uusi varaus -linkki vie kauppaan (säilyttää mock): ${href}`);
   await layout(page, view(page, 'confirm'), `expired confirm ${lang} 390`);
@@ -191,7 +189,7 @@ for (const lang of ['fi', 'en']) {
 for (const lang of ['fi', 'en']) {
   const page = await newPage(390, lang, `partial-${lang}`);
   await goto(page, conf(lang, 'hold-partial', '&holdsec=6')); await waitHold(page, 'awaiting_payment');
-  expect(await has(page, '[data-testid=pc-mobilepay]'), `${lang}: osamaksun jälkeen loppuosan maksutapa näkyy (MobilePay)`);
+  expect(await has(page, '[data-testid=pc-online]'), `${lang}: osamaksun jälkeen loppuosan maksutapa näkyy (MobilePay)`);
   expect(/20/.test(await text(page, '[data-testid=pc-due]')), `${lang}: jäljellä oleva summa näkyy (${await text(page, '[data-testid=pc-due]')})`);
   await waitHold(page, 'expired', 25000);
   expect((await text(page, '[data-testid=hold-msg]')) === X[lang].expired, `${lang}: vanhentunut-teksti (lahjakorttiosuus)`);
@@ -207,7 +205,7 @@ for (const lang of ['fi', 'en']) {
     const o = await newPage(390, lang, `order-${sc}-${lang}`);
     await goto(o, ord(lang, sc)); await waitHold(o, 'expired');
     expect((await has(o, '[data-testid=hold-gift-returned]')) === gift, `tilaus ${lang} ${sc}: lahjakorttilause ${gift ? 'näkyy' : 'ei näy'}`);
-    expect(!(await has(o, '[data-testid=pay-rest], [data-testid=mp-block], [data-testid=add-submit], [data-testid=cancel-submit]')), `tilaus ${lang} ${sc}: ei maksu-/lisäys-/peruutustoimintoja vanhentuneella`);
+    expect(!(await has(o, '[data-testid=pay-rest], [data-testid=op-block], [data-testid=add-submit], [data-testid=cancel-submit]')), `tilaus ${lang} ${sc}: ei maksu-/lisäys-/peruutustoimintoja vanhentuneella`);
     await o.ctx.close();
   }
 }
@@ -217,7 +215,7 @@ for (const lang of ['fi', 'en']) {
   const page = await newPage(390, lang, `proc-${lang}`);
   await goto(page, conf(lang, 'hold-processing', '&procsec=4')); await waitHold(page, 'processing_payment');
   expect(!(await has(page, '[data-testid=hold-timer]')), `${lang}: käsittelyn aikana ei vanhenemislaskuria (ajastin ei estä maksua)`);
-  expect(!(await has(page, '[data-testid=pc-mobilepay]')) && !(await has(page, '[data-testid=pc-gift-btn]')), `${lang}: käsittelyn aikana ei toista maksua`);
+  expect(!(await has(page, '[data-testid=pc-online]')) && !(await has(page, '[data-testid=pc-gift-btn]')), `${lang}: käsittelyn aikana ei toista maksua`);
   expect((await page.getAttribute('[data-testid=hold-msg]', 'role')) === 'status', `${lang}: käsittelyviesti role=status`);
   await page.screenshot({ path: join(SHOT, `vahvistus-${lang}-390-kasittely.png`), fullPage: true });
   await page.waitForFunction(() => !document.querySelector('[data-testid=hold-panel]'), null, { timeout: 25000 });
@@ -225,7 +223,7 @@ for (const lang of ['fi', 'en']) {
   await page.ctx.close();
   const o = await newPage(390, lang, `order-proc-${lang}`);
   await goto(o, ord(lang, 'hold-processing', '&procsec=4')); await waitHold(o, 'processing_payment');
-  expect(!(await has(o, '[data-testid=hold-timer]')) && !(await has(o, '[data-testid=mp-block]')) && !(await has(o, '[data-testid=pay-rest]')), `tilaus ${lang}: käsittelyssä ei laskuria eikä maksua`);
+  expect(!(await has(o, '[data-testid=hold-timer]')) && !(await has(o, '[data-testid=op-block]')) && !(await has(o, '[data-testid=pay-rest]')), `tilaus ${lang}: käsittelyssä ei laskuria eikä maksua`);
   await o.waitForFunction(() => !document.querySelector('[data-testid=hold-panel]'), null, { timeout: 25000 });
   expect((await text(o, '.ord-badges')).length > 0 && !(await has(o, '[data-testid=hold-panel]')), `tilaus ${lang}: käsittely valmistui → paneeli poistui`);
   await o.ctx.close();
@@ -235,21 +233,21 @@ for (const lang of ['fi', 'en']) {
 for (const lang of ['fi', 'en']) {
   let page = await newPage(390, lang, `prelim-${lang}`);
   await goto(page, conf(lang, 'hold-preliminary')); await waitHold(page, 'preliminary');
-  expect(!(await has(page, '[data-testid=hold-timer]')) && !(await has(page, '[data-testid=pc-mobilepay]')) && !(await has(page, '[data-testid=pc-gift-btn]')), `${lang}: alustava: ei laskuria eikä maksua`);
+  expect(!(await has(page, '[data-testid=hold-timer]')) && !(await has(page, '[data-testid=pc-online]')) && !(await has(page, '[data-testid=pc-gift-btn]')), `${lang}: alustava: ei laskuria eikä maksua`);
   expect(/\d+[./]\d+[./]\d{4}/.test(await text(page, '[data-testid=hold-msg]')), `${lang}: alustava: viesti kertoo päivän (${await text(page, '[data-testid=hold-msg]')})`);
   await page.screenshot({ path: join(SHOT, `vahvistus-${lang}-390-alustava.png`), fullPage: true }); await page.ctx.close();
   page = await newPage(390, lang, `order-prelim-${lang}`);
   await goto(page, ord(lang, 'hold-preliminary')); await waitHold(page, 'preliminary');
-  expect(!(await has(page, '[data-testid=mp-block]')) && !(await has(page, '[data-testid=pay-rest]')) && !(await has(page, '[data-testid=pc-gift]')), `tilaus ${lang}: alustava: ei maksutoimintoja`); await page.ctx.close();
+  expect(!(await has(page, '[data-testid=op-block]')) && !(await has(page, '[data-testid=pay-rest]')) && !(await has(page, '[data-testid=pc-gift]')), `tilaus ${lang}: alustava: ei maksutoimintoja`); await page.ctx.close();
   page = await newPage(390, lang, `confirmed-${lang}`);
   await goto(page, conf(lang, 'hold-confirmed')); await page.waitForSelector('[data-testid=conf-status]');
-  expect(!(await has(page, '[data-testid=hold-panel]')) && !(await has(page, '[data-testid=pc-mobilepay]')) && /vahvistettu|confirmed/i.test(await text(page, '[data-testid=conf-status]')), `${lang}: vahvistettu: ei pitopaneelia, ei maksuvalintaa`); await page.ctx.close();
+  expect(!(await has(page, '[data-testid=hold-panel]')) && !(await has(page, '[data-testid=pc-online]')) && /vahvistettu|confirmed/i.test(await text(page, '[data-testid=conf-status]')), `${lang}: vahvistettu: ei pitopaneelia, ei maksuvalintaa`); await page.ctx.close();
   page = await newPage(390, lang, `unpaid-${lang}`);
   await goto(page, conf(lang, 'hold-unpaid')); await page.waitForSelector('[data-testid=conf-status]');
-  expect(!(await has(page, '[data-testid=hold-panel]')) && await has(page, '[data-testid=pc-mobilepay]') && /vahvistettu|confirmed/i.test(await text(page, '[data-testid=conf-status]')), `${lang}: vahvistettu maksamatta: maksuvalinta jää tarjolle, ei pitopaneelia`); await page.ctx.close();
+  expect(!(await has(page, '[data-testid=hold-panel]')) && await has(page, '[data-testid=pc-online]') && /vahvistettu|confirmed/i.test(await text(page, '[data-testid=conf-status]')), `${lang}: vahvistettu maksamatta: maksuvalinta jää tarjolle, ei pitopaneelia`); await page.ctx.close();
   page = await newPage(390, lang, `cancelled-${lang}`);
   await goto(page, conf(lang, 'hold-cancelled')); await page.waitForSelector('[data-testid=conf-status]');
-  expect(!(await has(page, '[data-testid=hold-panel]')) && !(await has(page, '[data-testid=pc-mobilepay]')) && /peruttu|cancel/i.test(await text(page, '[data-testid=conf-status]')), `${lang}: peruttu: ei maksua`); await page.ctx.close();
+  expect(!(await has(page, '[data-testid=hold-panel]')) && !(await has(page, '[data-testid=pc-online]')) && /peruttu|cancel/i.test(await text(page, '[data-testid=conf-status]')), `${lang}: peruttu: ei maksua`); await page.ctx.close();
   for (const sc of ['hold-confirmed', 'hold-unpaid', 'hold-cancelled']) {
     const o = await newPage(390, lang, `order-${sc}-${lang}`);
     await goto(o, ord(lang, sc)); await o.waitForSelector('[data-testid=order-title]');
@@ -264,7 +262,7 @@ for (const lang of ['fi', 'en']) {
   const o = await newPage(390, lang, `order-hold-${lang}`);
   await goto(o, ord(lang, 'hold')); await waitHold(o, 'awaiting_payment');
   expect((await text(o, '[data-testid=hold-must]')) === X[lang].must && !(await has(o, '[data-testid=hold-lead]')) && (await secs(o)) > 890, `tilaus ${lang}: 15 min -ohje (ei toistoa) + laskuri`);
-  expect(await has(o, '[data-testid=mp-block]') && await has(o, '[data-testid=ord-hold-choose]'), `tilaus ${lang}: maksuvalinta näkyy`);
+  expect(await has(o, '[data-testid=op-block]') && await has(o, '[data-testid=ord-hold-choose]'), `tilaus ${lang}: maksuvalinta näkyy`);
   await layout(o, '#order-app', `hold order ${lang} 390`);
   await o.screenshot({ path: join(SHOT, `tilaus-${lang}-390-odottaa.png`), fullPage: true });
   await o.ctx.close();
@@ -279,9 +277,9 @@ for (const lang of ['fi', 'en']) {
 for (const lang of ['fi', 'en']) {
   const page = await newPage(390, lang, `mp-${lang}`);
   await goto(page, conf(lang, 'hold', '&mpinterval=300')); await waitHold(page, 'awaiting_payment');
-  await page.click('[data-testid=mp-button]');
+  await page.click('[data-testid=pc-method-paymentInitiation]');
   await page.waitForFunction(() => /confirmed|vahvistettu/i.test(document.querySelector('[data-testid=conf-status]')?.textContent || ''), null, { timeout: 25000 });
-  expect(!(await has(page, '[data-testid=hold-panel]')), `${lang}: MobilePay-maksun jälkeen vahvistettu, pitopaneeli pois`);
+  expect(!(await has(page, '[data-testid=hold-panel]')), `${lang}: verkkomaksun jälkeen vahvistettu, pitopaneeli pois`);
   expect(page.url().includes('mock=1') && page.url().includes('scenario=hold'), `${lang}: paluu säilyttää mock-parametrit (${page.url()})`);
   await page.ctx.close();
 }
@@ -342,32 +340,37 @@ for (const lang of ['fi', 'en']) {
   }
 }
 
-// ======================= 10) virhekoodit maksupainikkeesta (order_expired / order_preliminary / payment_in_progress): FI + EN + onFail =======================
+// ======================= 10) verkkomaksun virheet (order_expired / order_preliminary / payment_in_progress): FI + EN + onFail =======================
 for (const lang of ['fi', 'en']) {
   const page = await newPage(390, lang, `errors-${lang}`);
   await goto(page, conf(lang, 'hold')); await waitHold(page, 'awaiting_payment');
-  const res = await page.evaluate(async ({ lang }) => {
-    const { payBlock } = await import('/booking/mobilepay-ui.js');
+  const res = await page.evaluate(async (lang) => {
+    const { onlinePayBlock } = await import('/booking/online-pay-ui.js');
     const out = {};
     for (const code of ['order_expired', 'order_preliminary', 'payment_in_progress', 'online_payment_unavailable']) {
       let failed = null;
-      const node = payBlock({ S: {}, L: lang, api: { start: async () => ({ ok: false, code, message: 'x' }) }, opts: { method: { code: 'mobilepay' } }, env: { mock: true, official: false }, onFail: (c) => { failed = c; } });
-      document.body.append(node); for (let i = 0; i < 40 && !node.querySelector('[data-testid=mp-button]'); i++) await new Promise((r) => setTimeout(r, 25)); node.querySelector('[data-testid=mp-button]').click(); await new Promise((r) => setTimeout(r, 80));
-      out[code] = { text: node.querySelector('[data-testid=mp-error]')?.textContent, failed }; node.remove();
+      const node = onlinePayBlock({ L: lang, api: { start: async () => ({ ok: false, code }) }, method: { code: 'online', test: false }, showTest: false, testid: 'pc-method', onFail: (c) => { failed = c; } });
+      document.body.append(node);
+      node.querySelector('[data-testid=pc-method-paymentInitiation]').click();
+      await new Promise((r) => setTimeout(r, 40));
+      out[code] = { text: node.querySelector('[data-testid=op-error]')?.textContent || '', failed }; node.remove();
     }
     return out;
-  }, { lang });
-  expect(res.order_expired?.text === X[lang].expiredErr && res.order_expired.failed === 'order_expired', `${lang}: order_expired: viesti + onFail (${JSON.stringify(res.order_expired)})`);
-  expect(res.order_preliminary?.text === X[lang].prelimErr, `${lang}: order_preliminary viesti (${res.order_preliminary?.text})`);
-  expect(res.payment_in_progress?.text === X[lang].progressErr, `${lang}: payment_in_progress viesti (${res.payment_in_progress?.text})`);
-  expect(res.online_payment_unavailable?.text === X[lang].unavailable, `${lang}: online_payment_unavailable viesti (${res.online_payment_unavailable?.text})`);
+  }, lang);
+  const generic = lang === 'en' ? 'The payment could not be started. Try again or contact us.' : 'Maksun aloitus epäonnistui. Yritä uudelleen tai ota yhteyttä.';
+  const busy = lang === 'en' ? 'A payment is already being opened. Wait a moment and try again.' : 'Maksun avaus on jo käynnissä. Odota hetki ja yritä uudelleen.';
+  expect(res.order_expired?.text === generic && res.order_expired.failed === 'order_expired', `${lang}: order_expired: yleinen virhe + onFail (${JSON.stringify(res.order_expired)})`);
+  expect(res.order_preliminary?.text === generic && res.order_preliminary.failed === 'order_preliminary', `${lang}: order_preliminary: yleinen virhe + onFail (${JSON.stringify(res.order_preliminary)})`);
+  expect(res.payment_in_progress?.text === busy && res.payment_in_progress.failed === 'payment_in_progress', `${lang}: payment_in_progress (${JSON.stringify(res.payment_in_progress)})`);
+  expect(res.online_payment_unavailable?.text === generic && res.online_payment_unavailable.failed === 'online_payment_unavailable', `${lang}: online_payment_unavailable (${JSON.stringify(res.online_payment_unavailable)})`);
+  expect(!/Maksa MobilePaylla|Pay with MobilePay/.test(JSON.stringify(res)), `${lang}: virhenäkymä ei näytä MobilePay-otsikkoa`);
   await page.ctx.close();
 }
 
 // ======================= 11) vanha käytös ennallaan (scenario=pay, ei pitotilaa) =======================
 for (const lang of ['fi', 'en']) {
   const page = await newPage(390, lang, `legacy-${lang}`);
-  await goto(page, conf(lang, 'pay')); await page.waitForSelector('[data-testid=pc-mobilepay]');
+  await goto(page, conf(lang, 'pay')); await page.waitForSelector('[data-testid=pc-online]');
   expect(!(await has(page, '[data-testid=hold-panel]')) && !(await has(page, '[data-testid=hold-timer]')) && !(await has(page, '[data-testid=pc-paylater]')), `${lang}: vanha tila: ei pitopaneelia eikä testivaihtoehtoa`);
   expect((await text(page, '[data-testid=conf-title]')) === X[lang].h2, `${lang}: vanha tila: maksamattoman otsikko "${X[lang].h2}"`);
   expect(await has(page, 'a[download]'), `${lang}: vanha tila: kalenterilisäys säilyy`);
@@ -375,7 +378,7 @@ for (const lang of ['fi', 'en']) {
   await page.ctx.close();
   const o = await newPage(390, lang, `legacy-order-${lang}`);
   await goto(o, ord(lang, 'pay')); await o.waitForSelector('[data-testid=order-page]');
-  expect(!(await has(o, '[data-testid=hold-panel]')) && await has(o, '[data-testid=mp-block]'), `tilaus ${lang}: vanha tila: ei pitopaneelia, MobilePay näkyy`);
+  expect(!(await has(o, '[data-testid=hold-panel]')) && await has(o, '[data-testid=op-block]'), `tilaus ${lang}: vanha tila: ei pitopaneelia, verkkomaksu näkyy`);
   await o.ctx.close();
 }
 

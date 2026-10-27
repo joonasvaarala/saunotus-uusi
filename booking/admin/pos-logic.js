@@ -45,8 +45,12 @@ export function tenderAvailable(tender, modes) {
   if (!tender) return false;
   if (tender.handler === 'terminal' || tender.code === 'card_terminal') return false;
   if (!tender.active) return false;
-  if (tender.handler === 'mobilepay') return !!(modes?.mobilepay_mode && modes.mobilepay_mode !== 'off');
-  if (tender.handler === 'visma_pay' || tender.handler === 'payment_link') return !!(modes?.vismapay_mode && modes.vismapay_mode !== 'off');
+  if (tender.handler === 'mobilepay' || tender.code === 'mobilepay') return false;
+  if (tender.handler === 'visma_pay' || tender.code === 'visma_pay') return false;
+  if (tender.handler === 'payment_link' || tender.code === 'payment_link') {
+    if (modes && Object.prototype.hasOwnProperty.call(modes, 'montonio_mode')) return !!(modes.montonio_mode && modes.montonio_mode !== 'off');
+    return !!(modes?.vismapay_mode && modes.vismapay_mode !== 'off');
+  }
   return true;
 }
 

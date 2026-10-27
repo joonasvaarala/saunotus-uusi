@@ -32,6 +32,15 @@ verify_jwt = false   # asiakas tilaussivulta/maksulinkistä; tunnistus: tilaukse
 verify_jwt = false   # Vippsin webhook (HMAC-allekirjoitus tarkistetaan funktiossa) + tilaussivun reconcile (order_token)
 [functions.mobilepay-refund]
 verify_jwt = true    # henkilökunta (payments.refund tarkistetaan funktiossa) tai service role
+# Verkkomaksu (Stargate). Salaisuudet: MONTONIO_ACCESS_KEY, MONTONIO_SECRET_KEY, MONTONIO_MODE (sandbox|live). Kytkin: integration_config 'montonio' (off/dry_run/test/live). test = sandbox.
+[functions.montonio-start]
+verify_jwt = false   # asiakas tilaussivulta tai maksulinkistä (?p=); tilaus/linkki tarkistetaan RPC:ssä
+[functions.montonio-return]
+verify_jwt = false   # asiakkaan paluu; order-token varmennetaan funktiossa, ohjaus vain tietokannan tilaussivulle
+[functions.montonio-notify]
+verify_jwt = false   # palvelinilmoitus (orderToken/refundToken) ja tilaussivun reconcile (order_token)
+[functions.montonio-refund]
+verify_jwt = true    # henkilökunta (payments.refund tarkistetaan funktiossa) tai service role
 
 [functions.procountor-sync]
 verify_jwt = false   # pg_cron kutsuu; tunnistus x-sync-secret (booking._cron_secret_ok). Ei JWT:tä.

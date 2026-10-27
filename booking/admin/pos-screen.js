@@ -164,6 +164,10 @@ export async function renderPos({ ctx, rpc, fn }) {
     ]);
     catalog = Array.isArray(cat) ? cat : [];
     modes = ten || modes;
+    try {
+      const st = await rpc('admin_get_montonio_status');
+      if (st && st.mode) modes = { ...modes, montonio_mode: st.mode };
+    } catch { /* pos.use ilman settings.edit: maksulinkki käyttää vismapay_mode-varaa */ }
     tenders = tendersFor(ten?.tenders || [], 'pos');
     allProducts = Array.isArray(products) ? products : [];
     editing = tillEditorOpen(catalog.length, editing);
