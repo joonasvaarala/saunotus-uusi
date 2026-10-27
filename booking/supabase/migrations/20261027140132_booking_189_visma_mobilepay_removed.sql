@@ -2,7 +2,7 @@
 -- Ei koske booking_188:n funktiorunkoja. Ei kytke Montonion tilaa eikä Procountoria.
 -- md5 = md5(pg_get_functiondef), PostgreSQL 16.15. Vanhat täsmäävät kirjattuihin pinneihin
 -- (mobilepay e6888446c4b44e554d31c0920609ddb6, vismapay d1f8df803a45c2b77aa9f8554fc41890, _issue_receipt ae8b663945b78d1849b0028987689c8e).
--- Rollback: rollbacks/20261027140000_booking_189_ROLLBACK.sql
+-- Rollback: rollbacks/20261027140132_booking_189_ROLLBACK.sql
 -- Testi: tests/checkout/t189_visma_mobilepay_removed.sql
 --
 -- Korvattavat (vanha -> uusi):
