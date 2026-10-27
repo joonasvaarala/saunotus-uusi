@@ -72,14 +72,18 @@ let nImports = 0;
 
 // 3c) kylmälaite-sivu → /juomat/ ja /en/drinks/ (polut ovat koodissa, eivät site.jsonissa)
 const DRINK_JS = ['drinks.js', 'drinks-texts.js', 'drinks-logic.js', 'drinks-mock.js', 'phone-fi.js', 'qrsvg.js'];
+// Juomasivu käyttää kaupan maksutapariviä. Kopioidaan moduuligraafi sivun viereen (dist/juomat ei näe booking/shop/src:tä).
+const DRINK_PAY_UI = ['online-pay-ui.js', 'online-pay-logic.js', 'pay-choices-texts.js', 'gift-ui.js', 'gift-texts.js'];
 function publishDrinks(srcName, destRel) {
   const dir = join(OUT, destRel);
   rmSync(dir, { recursive: true, force: true });
   mkdirSync(dir, { recursive: true });
   for (const f of [...DRINK_JS, 'drinks.css', 'qrcode-generator.js']) cpSync(join('booking/drinks', f), join(dir, f));
-  for (const f of DRINK_JS) {
+  for (const f of DRINK_PAY_UI) cpSync(join('booking/shop/src', f), join(dir, f));
+  for (const f of [...DRINK_JS, ...DRINK_PAY_UI]) {
     const p = join(dir, f);
     let t = readFileSync(p, 'utf8');
+    t = t.replace(/(\b(?:from|import)\s*)(['"])\.\.\/shop\/src\/([^'"?]+\.js)\2/g, (_, a, q, u) => `${a}${q}./${u}${q}`);
     t = t.replace(/(\b(?:from|import)\s*)(['"])(\.{1,2}\/[^'"?]+\.js)\2/g, (_, a, q, u) => `${a}${q}${u}${VER}${q}`);
     writeFileSync(p, t);
   }

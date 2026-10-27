@@ -83,10 +83,18 @@ export function resolveHost(dbMode: string, env: Env): { ok: true; env: PayEnv; 
   return { ok: false, code: "off" };
 }
 
-// Stargate Orders API: sandbox paymentUrl is https://sandbox-gateway.montonio.com/…,
-// live paymentUrl is https://gateway.montonio.com/… (docs.montonio.com/api/stargate/guides/orders).
-// API bases stay sandbox-stargate / stargate. pay.montonio.com is the hosted session host.
-const HOSTS = new Set(["sandbox-stargate.montonio.com", "stargate.montonio.com", "sandbox-gateway.montonio.com", "gateway.montonio.com", "pay.montonio.com"]);
+// Stargate Orders API: bank paymentUrl is sandbox-gateway / gateway.
+// Card and wallet paymentUrl is sandbox-checkout / checkout (hosted checkout).
+// API bases stay sandbox-stargate / stargate. pay.montonio.com is an older session host.
+const HOSTS = new Set([
+  "sandbox-stargate.montonio.com",
+  "stargate.montonio.com",
+  "sandbox-gateway.montonio.com",
+  "gateway.montonio.com",
+  "pay.montonio.com",
+  "sandbox-checkout.montonio.com",
+  "checkout.montonio.com",
+]);
 
 export function safePaymentUrl(url: string | null | undefined): string | null {
   if (!url) return null;

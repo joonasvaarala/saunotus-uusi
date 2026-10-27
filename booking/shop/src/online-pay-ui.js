@@ -1,5 +1,5 @@
-// Yksi verkkomaksuosio: viisi tapaa, paluu ilman välittäjän nimeä.
-// Maksutapapainikkeet (paymentMethodList) ovat sama komponentti tilaussivulla, vahvistuksessa, maksulinkissä ja lisämaksuissa.
+// Yksi verkkomaksuosio: viisi tapaa (pankki, kortti, Apple Pay, Google Pay, MobilePay), paluu ilman välittäjän nimeä.
+// Maksutapapainikkeet (paymentMethodList) ovat sama komponentti tilaussivulla, vahvistuksessa, kassalla, maksulinkissä, lahjakortin ja vuosikortin maksussa (tilaussivu) ja juomasivulla.
 import { h } from './gift-ui.js';
 import { pt } from './pay-choices-texts.js';
 import { onlineChoices, safeOnlineRedirect } from './online-pay-logic.js';
@@ -80,14 +80,16 @@ export function payMark(kind) {
  * Sama maksutaparivi kaikkialla. choices: [{method, label}]. onSelect(choice, button, label).
  * Ei aloita maksua itse.
  */
-export function paymentMethodList({ choices, onSelect, testId, groupTestId = 'op-methods' }) {
+export function paymentMethodList({ choices, onSelect, testId, groupTestId = 'op-methods', selected = null }) {
   const buttons = [];
   const nodes = choices.map((c) => {
+    const on = selected != null && c.method === selected;
     const lab = h('span', { class: 'op-method-label', text: c.label });
     const go = h('span', { class: 'op-method-go', 'aria-hidden': 'true' });
     go.append(iconSvg(MARKS.chevron));
     const btn = h('button', {
-      type: 'button', class: 'op-method', 'data-testid': testId(c),
+      type: 'button', class: on ? 'op-method is-on' : 'op-method', 'data-testid': testId(c),
+      ...(selected != null ? { 'aria-pressed': on ? 'true' : 'false' } : {}),
       onclick: () => onSelect(c, btn, c.label),
     }, payMark(c.method), lab, go);
     btn._opLabel = lab;
