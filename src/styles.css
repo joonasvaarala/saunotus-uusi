@@ -359,18 +359,25 @@ html.co-js.co-show-sauna #yritysvuorot,html.co-js.co-show-day #tarjous{display:b
 @media (max-width:719px){
   .hero.home .in{padding:calc(var(--ih) * .46) 0 36px}
   .section.home-tight{padding:36px 0}
+  /* Tiivis viikko: osion alapadding + seuraavan osion yläpadding tekivät ison tyhjän välin Näytä koko viikko -napin alle. */
+  .section.home-tight:has(.week-wrap){padding-bottom:8px}
+  .section.home-tight:has(.week-wrap)+.section.home-tight{padding-top:12px}
   .week-wrap:has(.week.soon.is-filtered) .week-soon{display:block;margin:0 0 8px;font:600 12px/1.3 var(--label);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
-  .week-wrap:has(.week.soon.is-filtered) .week-more{display:block;margin:12px 0 0}
-  .week-more summary{cursor:pointer;display:inline-flex;align-items:center;min-height:44px;font:600 12px/1 var(--label);letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+  .week-wrap:has(.week.soon.is-filtered) .week-more{display:block;margin:10px 0 0}
+  .week-more summary.btn{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;padding:0 18px;border:1.5px solid var(--ink);border-radius:30px;background:#fff;color:var(--ink);font:600 12px/1 var(--label);letter-spacing:.08em;text-transform:uppercase;box-shadow:none;text-decoration:none}
+  .week-more summary.btn::-webkit-details-marker{display:none}
   .week-more .c,.week-more[open] .o{display:none}
   .week-more[open] .c{display:inline}
   .week-wrap:not(:has(.week-more[open])) .week.soon.is-filtered>li:not(.is-today):not(.is-next){display:none}
   .week.soon{gap:0;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 8px 22px rgba(60,45,30,.07)}
-  .week.soon>li,.week.soon>li.off,.week.soon>li.we,.week.soon>li.is-today,.week.soon>li.is-today.off,.week.soon>li.is-today.we{display:grid;grid-template-columns:86px minmax(0,1fr);align-items:center;gap:0 10px;border:0;border-radius:0;border-bottom:1px solid var(--line);box-shadow:none;padding:6px 12px;background:transparent}
+  /* Päivä + Tänään-merkki omaan sarakkeeseensa (merkki nimen alle). Kiinteä 86px päästi merkin kellonajan päälle. */
+  .week.soon>li,.week.soon>li.off,.week.soon>li.we,.week.soon>li.is-today,.week.soon>li.is-today.off,.week.soon>li.is-today.we{display:grid;grid-template-columns:max-content minmax(0,1fr);align-items:center;gap:0 10px;border:0;border-radius:0;border-bottom:1px solid var(--line);box-shadow:none;padding:8px 12px;background:transparent}
   .week.soon>li:last-child{border-bottom:0}
   .week.soon>li.we{background:#efe6d8}
-  .week.soon>li.is-today,.week.soon>li.is-today.off,.week.soon>li.is-today.we{background:#f6ecdc;box-shadow:inset 4px 0 0 var(--accent);padding:6px 12px}
-  .week.soon h3{margin:0;font-size:11px;min-height:0}
+  .week.soon>li.is-today,.week.soon>li.is-today.off,.week.soon>li.is-today.we{background:#f6ecdc;box-shadow:inset 4px 0 0 var(--accent);padding:8px 12px}
+  .week.soon h3{margin:0;flex-direction:column;align-items:flex-start;gap:4px;font-size:11px;letter-spacing:.05em;line-height:1.15;min-height:0}
+  .week.soon .today{padding:3px 6px;font-size:9px;letter-spacing:.06em;line-height:1.2}
+  .week.soon .sl{min-width:0}
   .week.soon .sess{padding:6px 0;column-gap:8px}
   .week.soon .sess .t{font-size:18px}
   .week.soon .sess .n{font-size:15px;margin-top:0}

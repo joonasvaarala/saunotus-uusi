@@ -48,6 +48,15 @@ jobs:
       # Saunatietoa: markdown-, lähde-/RPC-, sivupohja- ja build-tarkistustestit (fixture, ei verkkoa)
       - run: node --test tests/articles/*.test.mjs
       - run: node --test tests/home-front.test.mjs
+      # Tiivis viikko: Tänään-merkki ei saa peittää aikaa (Playwright + järjestelmän Chrome).
+      - name: Chrome tiiviin viikon testiin
+        run: |
+          if ! command -v google-chrome >/dev/null 2>&1 && ! command -v google-chrome-stable >/dev/null 2>&1; then
+            wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+            sudo apt-get update -qq
+            sudo apt-get install -y /tmp/chrome.deb
+          fi
+      - run: node --test tests/home-week-compact.test.mjs
       # Pelkkä fixture-build (testi + tuotanto): validoi JSON-LD, canonicalit, hreflangit, sitemapin, robotsin
       - run: SITE_TEXTS_FIXTURE=1 ARTICLES_FIXTURE=1 SITE_ENV=test SITE_URL=https://example.test DIST=$RUNNER_TEMP/dist-fixture-test node scripts/build.mjs
       - run: DIST=$RUNNER_TEMP/dist-fixture-test SITE_ENV=test SITE_URL=https://example.test node scripts/check-articles.mjs
