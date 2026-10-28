@@ -122,7 +122,7 @@
  {
   "key": "ui.site.treatments_start_first_text",
   "lang": "fi",
-  "text": "Avoimet rituaalit tarjoavat mahdollisuuden tutustua saunotukseen yhdessä muiden kanssa.",
+  "text": "Avoin rituaali tutustuttaa saunotukseen yhdessä muiden kanssa, saunahoito kiireettömästi omassa rauhassa.",
   "class": "normal",
   "kind": "plain",
   "max_len": 250,
@@ -132,7 +132,7 @@
  {
   "key": "ui.site.treatments_start_first_text",
   "lang": "en",
-  "text": "Open rituals offer a chance to get to know saunotus together with others.",
+  "text": "An open ritual introduces you to saunotus together with others; a sauna treatment does so unhurriedly, in your own peace.",
   "class": "normal",
   "kind": "plain",
   "max_len": 250,
