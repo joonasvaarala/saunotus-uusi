@@ -73,10 +73,13 @@ function buildSale(pk) {
       let personsCtl = null;
       if (flex && hi > lo) {
         const num = h('input', { type: 'number', min: lo, max: hi, step: 1, inputmode: 'numeric', value: head, 'aria-label': tx('personsLabel'), 'data-testid': 'gc-persons' });
-        const setN = (n) => { head = Math.min(Math.max(Math.trunc(n) || lo, lo), hi); num.value = head; draw(); };
+        let minus = null, plus = null;
+        const bounds = () => { if (minus) minus.disabled = head <= lo; if (plus) plus.disabled = head >= hi; };   // + pois käytöstä enimmäismäärässä (esim. saunotus_2: max 2)
+        const setN = (n) => { head = Math.min(Math.max(Math.trunc(n) || lo, lo), hi); num.value = head; draw(); bounds(); };
         num.addEventListener('change', () => setN(Number(num.value)));
         personsCtl = h('div', { class: 'gc-persons' }, h('span', { class: 'lbl', text: tx('personsLabel') }),
-          h('div', { class: 'bk-stepper' }, h('button', { type: 'button', class: 'bk-step', 'aria-label': tx('qtyMinus'), text: '−', onclick: () => setN(head - 1) }), num, h('button', { type: 'button', class: 'bk-step', 'aria-label': tx('qtyPlus'), text: '+', onclick: () => setN(head + 1) })));
+          h('div', { class: 'bk-stepper' }, minus = h('button', { type: 'button', class: 'bk-step', 'aria-label': tx('qtyMinus'), text: '−', 'data-testid': 'gc-persons-minus', onclick: () => setN(head - 1) }), num, plus = h('button', { type: 'button', class: 'bk-step', 'aria-label': tx('qtyPlus'), text: '+', 'data-testid': 'gc-persons-plus', onclick: () => setN(head + 1) })));
+        bounds();
       }
       kids.push(priceEl, p.unit_price != null ? h('p', { class: 'gc-unit', text: tx('perPerson', { price: money(p.unit_price) }) }) : null, personsCtl, meta,
         h('button', { type: 'button', class: 'btn gc-btn', text: tx('add'), 'aria-label': `${tx('add')}: ${pick(p, 'name')}`, onclick: () => addLine(p.code, null, flex ? head : null) }));
