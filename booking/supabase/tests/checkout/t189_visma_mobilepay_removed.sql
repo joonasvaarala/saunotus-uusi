@@ -38,7 +38,7 @@ begin
       and md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) = 'd22cda7beb5cea5967b267e52d79ab99'
       and md5(pg_get_functiondef('booking.admin_refund(bigint,numeric,text,jsonb,boolean)'::regprocedure)) = '709d5fd54d877846682571b60c5d21bd'
       and position('_receipt_per_person_units' in pg_get_functiondef('booking._issue_receipt(bigint)'::regprocedure)) > 0
-      and position('_receipt_per_person_units' in pg_get_functiondef('booking._issue_refund_receipt(bigint)'::regprocedure)) > 0
+      and position('_receipt_refund_units' in pg_get_functiondef('booking._issue_refund_receipt(bigint)'::regprocedure)) > 0
       and md5(pg_get_functiondef('booking.admin_pos_tenders()'::regprocedure)) = '443e6462ede3ec9d3118d08be43759fa', 'A1 md5 = booking_189; kuitin henkilöerittely = booking_199');
   perform pg_temp.ck((select bool_and(prosecdef and proconfig = array['search_path=""'] and proowner = 'postgres'::regrole)
       from pg_proc where oid in (

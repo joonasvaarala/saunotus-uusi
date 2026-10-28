@@ -1,4 +1,5 @@
--- t199: booking_199. Henkilöhintainen kuitti näyttää henkilömäärän ja à-hinnan.
+-- t199: booking_199/200. Henkilöhintainen kuitti näyttää henkilömäärän ja à-hinnan.
+-- Osahyvitys on 1 × à-hinta, ei alkuperäinen henkilömäärä × puolitettu hinta.
 -- Loppusumma ja ALV eivät muutu. Ajo migraatioiden ja fixtures/10_test_helpers.sql:n jälkeen.
 -- Lopussa RAISE 'TESTRESULT pass=N fail=M' ja ROLLBACK.
 begin;
@@ -36,7 +37,7 @@ declare
   run text := substr(md5(random()::text || clock_timestamp()::text), 1, 8);
   cu bigint; rid bigint; line jsonb; snap jsonb; gross numeric; u jsonb;
   log text; np int; nf int;
-  old_id bigint; old_total numeric; old_vat jsonb; pay bigint; item bigint;
+  pay bigint; ord bigint; v_pl bigint; rf bigint; hid bigint; sale bigint;
 begin
   u := booking._receipt_per_person_units(58, 2);
   perform pg_temp.ck((u ->> 'quantity')::int = 2 and (u ->> 'unit_gross')::numeric = 29, 'A1 58 € / 2 hlö = 2 × 29');
@@ -50,6 +51,7 @@ begin
     jsonb_build_object('name', 'Yleinen vuoro', 'gross', 58, 'kind', 'reservation', 'item_qty', 1, 'pay_qty', 1,
       'breakdown', jsonb_build_object('mode', 'per_person', 'unit_price', 29, 'persons', 2)),
     jsonb_build_object('name', 'Pyyhe', 'gross', 5, 'kind', 'addon', 'item_qty', 1, 'pay_qty', 1, 'breakdown', '{}'::jsonb)));
+  sale := rid;
   select snapshot, total_gross into snap, gross from booking.receipts where id = rid;
   select l into line from jsonb_array_elements(snap -> 'lines') l where l ->> 'description' = 'Yleinen vuoro';
   perform pg_temp.ck((line ->> 'quantity')::int = 2 and (line ->> 'unit_gross')::numeric = 29 and (line ->> 'line_gross')::numeric = 58, 'B1 yleinen vuoro 2 × 29 = 58');
@@ -70,32 +72,28 @@ begin
   select l into line from jsonb_array_elements((select snapshot -> 'lines' from booking.receipts where id = rid)) l;
   perform pg_temp.ck((line ->> 'quantity')::int = 1 and (line ->> 'line_gross')::numeric = 10, 'C2 epätasainen per_person jää yhdelle riville');
 
-  insert into booking.orders(customer_id, status, payment_status, total_gross, source_channel, locale)
-  values (cu, 'confirmed', 'paid', 58, 'admin', 'fi') returning id into item;
-  insert into booking.payments(order_id, method, status, amount, provider)
-  values (item, 'card_terminal', 'pending', 58, 'manual') returning id into pay;
-  insert into booking.order_items(order_id, product_name, kind, quantity, unit_price_gross, line_total_gross, vat_rate, price_breakdown)
-  values (item, 'Yleinen vuoro', 'reservation', 1, 58, 58, 25.5, '{"mode":"per_person","unit_price":29,"persons":2}'::jsonb)
-  returning id into old_id;
-  insert into booking.payment_lines(payment_id, order_item_id, description, kind, quantity, amount_gross, vat_rate)
-  values (pay, old_id, 'Yleinen vuoro', 'reservation', 1, 58, 25.5);
-  insert into booking.receipts(receipt_no, kind, series, year, seq, order_id, payment_id, total_gross, snapshot, text_body, pdf_path)
-  values ('T199-' || run, 'receipt', 'T199', 2099, 1, item, pay, 58,
-    jsonb_build_object('v', 1, 'document', 'receipt', 'receipt_no', 'T199-' || run, 'locale', 'fi', 'total_gross', 58, 'total_net', 46.22, 'total_vat', 11.78, 'total_paid', 58, 'rounding', 0,
-      'seller', '{}'::jsonb, 'payment', jsonb_build_object('method_label', 'Kortti'),
-      'vat', jsonb_build_array(jsonb_build_object('rate', 25.5, 'net', 46.22, 'vat', 11.78, 'gross', 58)),
-      'lines', jsonb_build_array(jsonb_build_object('description', 'Yleinen vuoro', 'quantity', 1, 'unit_gross', 58, 'unit_net', 46.22, 'line_gross', 58, 'line_net', 46.22, 'vat_rate', 25.5))),
-    'vanha', 'T199-' || run || '.pdf')
-  returning id, total_gross, snapshot -> 'vat' into old_id, old_total, old_vat;
-  perform pg_temp.ck(booking._receipt_refresh_per_person_qty() >= 1, 'D1 vanha kuitti päivitetään');
-  select snapshot, total_gross into snap, gross from booking.receipts where id = old_id;
+  perform pg_temp.ck(to_regprocedure('booking._receipt_refresh_per_person_qty()') is null, 'D1 kertakorjaus ei ole enää kutsuttavissa');
+  u := booking._receipt_refund_units(-29, 29, 2, null);
+  perform pg_temp.ck((u ->> 'quantity')::int = 1 and (u ->> 'unit_gross')::numeric = -29, 'E1 yhden henkilön osuus on 1 × -29, ei 2 × -14,50');
+  u := booking._receipt_refund_units(-58, 29, 2, null);
+  perform pg_temp.ck((u ->> 'quantity')::int = 2 and (u ->> 'unit_gross')::numeric = -29, 'E2 koko rivin hyvitys on 2 × -29');
+  u := booking._receipt_refund_units(-20, 29, 2, null);
+  perform pg_temp.ck((u ->> 'quantity')::int = 1 and (u ->> 'unit_gross')::numeric = -20, 'E3 epätasainen hyvitys on 1 × summa');
+  u := booking._receipt_refund_units(-29, 29, 2, 1);
+  perform pg_temp.ck((u ->> 'quantity')::int = 1 and (u ->> 'unit_gross')::numeric = -29, 'E4 rivin persons=1 säilyy');
+
+  select r.payment_id, r.order_id into pay, ord from booking.receipts r where r.id = sale;
+  select l.id into v_pl from booking.payment_lines l where l.payment_id = pay and l.description = 'Yleinen vuoro';
+  insert into booking.refunds(payment_id, order_id, amount, reason, status, provider, lines, done_at)
+  values (pay, ord, 29, 'yksi henkilö', 'done', 'manual', jsonb_build_array(jsonb_build_object('payment_line_id', v_pl, 'amount', 29)), now())
+  returning id into rf;
+  hid := booking._issue_refund_receipt(rf);
+  select snapshot, total_gross into snap, gross from booking.receipts where id = hid;
   select l into line from jsonb_array_elements(snap -> 'lines') l;
-  perform pg_temp.ck(gross = old_total and snap -> 'vat' = old_vat
-                      and (line ->> 'quantity')::int = 2 and (line ->> 'unit_gross')::numeric = 29 and (line ->> 'line_gross')::numeric = 58
-                      and (line ->> 'line_net')::numeric = 46.22
-                      and (select pdf_path is null from booking.receipts where id = old_id)
-                      and position('2 × 29,00 € = 58,00 €' in (select text_body from booking.receipts where id = old_id)) > 0, 'D2 1 × 58 muuttuu 2 × 29, summa ja ALV ennallaan');
-  perform pg_temp.ck(booking._receipt_refresh_per_person_qty() = 0, 'D3 toinen ajo ei muuta mitään');
+  perform pg_temp.ck(hid is not null and gross = -29
+                      and (line ->> 'quantity')::int = 1 and (line ->> 'unit_gross')::numeric = -29 and (line ->> 'line_gross')::numeric = -29
+                      and (select sum((x ->> 'gross')::numeric) from jsonb_array_elements(snap -> 'vat') x) = gross
+                      and position('1 × -29,00 € = -29,00 €' in (select text_body from booking.receipts where id = hid)) > 0, 'F1 hyvityskuitti 1 × -29, ALV ja summa -29');
 
   log := current_setting('t199.log', true);
   np := (select count(*) from regexp_split_to_table(log, E'\n') l where l like 'P %');
