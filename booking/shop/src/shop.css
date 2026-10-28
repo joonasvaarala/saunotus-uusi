@@ -53,14 +53,18 @@ button.bk-cell:hover{filter:brightness(.97)}
 .dot.free{background:#7bb28a}.dot.full{background:#d4b9b9}.dot.unavail{background:#cfc8bf}
 /* vuorot */
 .bk-slotlist{list-style:none;margin:0;padding:0;display:grid;gap:10px;max-width:760px}
-.bk-slot{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 16px;align-items:center;background:var(--card);border:1px solid var(--line);border-left:5px solid #7bb28a;border-radius:var(--r);padding:14px 16px}
+/* Aika ja nimi vasemmalla, tila ja painike oikealla. Rivi rivittyy, kun merkki + painike
+   (loppuunmyyty: "Vuoro on loppuunmyyty" + "Liity jonoon") eivät mahdu viereen — muuten
+   minmax(0,1fr) + nowrap puristaa kellon yhden merkin levyiseksi. */
+.bk-slot{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-left:5px solid #7bb28a;border-radius:var(--r);padding:14px 16px}
 .bk-slot.full{border-left-color:#d4b9b9;opacity:.85}
 .bk-slot.unavailable{border-left-color:#bdb5ab;opacity:.8}
-.bk-slot-main{display:flex;flex-direction:column;gap:2px}
+.bk-slot-main{display:flex;flex-direction:column;gap:2px;flex:1 1 4rem;min-width:min(100%,4rem)}
 .bk-time{font:600 22px var(--head);font-size:26px;color:var(--ink)}
 .bk-sub{color:var(--muted);font-size:15px}
 .bk-price{font-size:15px}
-.bk-slot-side{display:flex;align-items:center;justify-content:flex-end;gap:12px;justify-self:end;flex-wrap:nowrap}
+.bk-slot-side{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:12px;flex:0 0 auto;margin-left:auto;max-width:100%}
+.bk-slot-side>*{flex:none;max-width:100%}
 .bk-badge{font:600 12px var(--label);padding:6px 10px;border-radius:30px;background:#e8f3ea;color:#1d4d2b;white-space:nowrap}
 .bk-badge.full{background:#f3e3e3;color:#7b2d2d}.bk-badge.unavailable{background:#ece8e3;color:#5b524a}
 /* lomake */
@@ -612,10 +616,12 @@ button.bk-cell.quiet.sel{box-shadow:inset 0 -4px 0 #F4EFE7}
 .bk-grid{grid-template-columns:repeat(7,minmax(0,1fr))}
 .bk-cell{min-width:0}
 @media(max-width:359px){.bk-cal{padding:10px}.bk-grid{gap:3px}}
-/* vuorolista 320 px: rivi ei saa levittää listaa (tila-merkki + Valitse/Liity jonoon rivittyvät tarvittaessa) */
+/* vuorolista kapealla: rivi ei levitä listaa. Tekstille jää lukuleveys; tila-merkki ja
+   Valitse/Liity jonoon rivittyvät viereen tai alle, eivät purista kelloa nollaan. */
 .bk-slotlist{grid-template-columns:minmax(0,1fr)}
-.bk-slot>*{min-width:0}
-.bk-slot-side{flex-wrap:nowrap}
+.bk-slot{min-width:0;max-width:100%}
+.bk-slot>.bk-slot-main{min-width:min(100%,4rem)}
+.bk-slot>.bk-slot-side{flex-wrap:wrap;max-width:100%;min-width:0}
 /* booking_179: ehdotetut tuotteet, korttirivi, tietoikkuna ja alapaneeli. */
 .bk-upsell[hidden],.bk-upsell-inline[hidden]{display:none!important}
 .bk-upsell-row{display:flex;gap:12px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding:8px 0 14px;scrollbar-width:thin}
