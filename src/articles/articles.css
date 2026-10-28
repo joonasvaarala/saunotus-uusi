@@ -17,7 +17,7 @@
 .art-meta li{display:inline-block}
 .art-wrap{width:min(100% - 40px,960px);margin-inline:auto}
 .art-hero{margin:-64px 0 40px;border-radius:14px;overflow:hidden;background:#2a211a;box-shadow:0 20px 44px rgba(43,58,48,.28)}
-.art-hero img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover}
+.art-hero img{width:100%;height:auto;object-fit:cover}
 .art-hero figcaption,.art-fig figcaption{font-size:14px;line-height:1.5;color:var(--muted);padding:10px 4px 0}
 .art-hero figcaption{background:var(--bg);padding:10px 16px 12px}
 .art-body{width:min(100%,720px);margin-inline:auto;font-size:18px;line-height:1.75;color:var(--text);overflow-wrap:break-word;hyphens:auto;-webkit-hyphens:auto}
@@ -39,6 +39,9 @@
 .article-cta .cta-title{font:500 clamp(26px,3.2vw,32px)/1.2 var(--head);color:#fff;margin:0 0 .5em}
 .article-cta .btn{min-height:44px;display:inline-flex;align-items:center}
 .art-body .article-cta a:not(.btn){color:#f0d9b5}
+.article-author{margin:2.2em 0;padding:22px 24px 8px;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:14px}
+.article-author h2{font:600 22px/1.3 var(--head);color:var(--ink);margin:0 0 .4em}
+.article-author p{margin:0 0 1em}
 .art-foot{width:min(100%,720px);margin:40px auto 56px;padding-top:24px;border-top:1px solid var(--line)}
 .lbl{font:600 11px/1.4 var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0 0 6px}
 .tagbar{list-style:none;margin:0 0 18px;padding:0;display:flex;flex-wrap:wrap;gap:8px}
@@ -71,6 +74,7 @@
 .art-hero{margin:-56px 0 28px;border-radius:12px}
 .art-body{font-size:17px}
 .article-cta{padding:22px 20px 6px}
+.article-author{padding:18px 16px 4px}
 .crumbs ol{font-size:11.5px}
 }
 @media (prefers-reduced-motion:reduce){.tagbar a,.pager a{transition:none}}

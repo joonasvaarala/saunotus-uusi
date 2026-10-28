@@ -113,7 +113,7 @@ test('tyhjä lista: rakennus onnistuu, siisti tyhjä tila, noindex, ei navigaati
   assert.doesNotMatch(read(dist, 'sitemap.xml'), /saunatietoa|sauna-knowledge|sauna-guide/);
   assert.match(read(dist, 'saunatietoa/index.html'), /Artikkeleita ei ole vielä julkaistu/);
 });
-test('RPC ei vastaa (yhteys evätty): rakennus EI kaadu, varoitus, tyhjä osio', () => {
+test('RPC ei vastaa (yhteys evätty): rakennus EI kaadu, varoitus, tuontitiedoston artikkelit mukana', () => {
   const { dist, out } = build('down', { BOOKING_SUPABASE_URL: 'http://localhost:9', BOOKING_ANON_KEY: 'sb_publishable_testi', SITE_ENV: 'test' });
   assert.match(out, /VAROITUS[\s\S]*RPC public_list_articles/);
   assert.deepEqual(check(dist, true).errors, []);

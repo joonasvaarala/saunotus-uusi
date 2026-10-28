@@ -100,3 +100,16 @@ test('CTA: HTML escapataan lohkon sisällä', () => {
   const { html } = r(':::cta\n**<b>x</b>**\n<i>y</i>\n[a](https://e.fi)\n:::');
   assert.doesNotMatch(html, /<b>|<i>/);
 });
+test(':::author → aside.article-author, nimi H2:na ja bio; HTML escapataan', () => {
+  const { html, headings } = r(':::author\n**Otto Kronqvist**\nTeksti <script> ja [saunotus.fi](/varaa/).\n:::');
+  assert.match(html, /<aside class="article-author"><h2 id="otto-kronqvist">Otto Kronqvist<\/h2><p>Teksti &lt;script&gt; ja <a href="\/base\/varaa\/">saunotus\.fi<\/a>\.<\/p><\/aside>/);
+  assert.doesNotMatch(html, /<script/);
+  assert.ok(headings.every((h) => h.text !== 'Otto Kronqvist'));
+});
+test('Usein kysyttyä: H3-kysymykset faqs-taulukkoon, linkistä vain nimi', () => {
+  const { faqs } = r('## Muu\n\n### Ei kuulu\n\nTämä ei ole kysymysosio.\n\n## Usein kysyttyä\n\n### Pitääkö varata?\n\nKyllä. Katso [saunotus.fi](/varaa/).\n\n### Toinen?\n\nVastaus.');
+  assert.deepEqual(faqs, [
+    { question: 'Pitääkö varata?', answer: 'Kyllä. Katso saunotus.fi.' },
+    { question: 'Toinen?', answer: 'Vastaus.' },
+  ]);
+});

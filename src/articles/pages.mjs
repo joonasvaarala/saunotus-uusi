@@ -14,10 +14,38 @@ const pageHrefs = (lang) => ({ home: pageHref('home', lang), list: href(listPath
 export function imgHtml(im, variants, { sizes = '100vw', eager = false } = {}) {
   const v = variants?.get(im.url);
   const attrs = `width="${im.width}" height="${im.height}" alt="${e(im.alt || '')}"${eager ? ' fetchpriority="high" decoding="async"' : ' loading="lazy" decoding="async"'}`;
+  if (im.pair?.jpg && im.pair?.webp) {
+    const jpg = href(`/img/articles/${im.pair.jpg}`);
+    const webp = href(`/img/articles/${im.pair.webp}`);
+    const webpParts = [];
+    if (v?.widths?.length && im.width > 0) {
+      for (const w of v.widths) if (w < im.width) webpParts.push(`${href(`/img/articles/${v.id}-${w}.webp`)} ${w}w`);
+    }
+    webpParts.push(webpParts.length ? `${webp} ${im.width}w` : webp);
+    return `<picture><source type="image/webp" srcset="${webpParts.join(', ')}" sizes="${sizes}"><img src="${jpg}" ${attrs}></picture>`;
+  }
   if (!v) return `<img src="${e(im.url)}" ${attrs}>`;
   const set = (ext) => v.widths.map((w) => `${href(`/img/articles/${v.id}-${w}.${ext}`)} ${w}w`).join(', ');
   const last = v.widths[v.widths.length - 1];
   return `<picture><source type="image/avif" srcset="${set('avif')}" sizes="${sizes}"><source type="image/webp" srcset="${set('webp')}" sizes="${sizes}"><img src="${href(`/img/articles/${v.id}-${last}.webp`)}" ${attrs}></picture>`;
+}
+
+// Paikallinen kuvapari (content/article-images): og:image ja Article.image osoittavat toimitettuun webp-tiedostoon.
+function localArticleImage(im) {
+  if (!im?.pair?.webp) return im;
+  return { ...im, url: abs(`/img/articles/${im.pair.webp}`) };
+}
+
+/** Välikuva tekstin puoliväliin, ennen "Lue myös" / Usein kysyttyä / kirjoittajaa. */
+function injectAtMiddle(html, fig) {
+  const stop = html.search(/<p>Lue myös|<h2\b[^>]*\bid="usein-kysyttya"|<aside class="article-(?:author|cta)"/);
+  const head = stop >= 0 ? html.slice(0, stop) : html;
+  const tail = stop >= 0 ? html.slice(stop) : '';
+  const blocks = [...head.matchAll(/<(p|h2|h3|ul|ol|blockquote|figure)\b[^>]*>[\s\S]*?<\/\1>/g)];
+  if (blocks.length < 2) return fig + html;
+  const b = blocks[Math.floor(blocks.length / 2) - 1];
+  const at = b.index + b[0].length;
+  return `${head.slice(0, at)}\n${fig}\n${head.slice(at)}${tail}`;
 }
 
 // ---- yhteiset palaset ----
@@ -121,6 +149,10 @@ function articlePage(it, ctx) {
     images: imgs, resolveHref: href,
     imageHtml: (im) => `<figure class="art-fig">${imgHtml(im, variants, { sizes: '(min-width:800px) 720px, 100vw' })}${im.caption ? `<figcaption>${e(im.caption)}</figcaption>` : ''}</figure>`,
   });
+  if (it.localInline) {
+    const fig = `<figure class="art-fig">${imgHtml(it.localInline, variants, { sizes: '(min-width:800px) 720px, 100vw' })}</figure>`;
+    md.html = injectAtMiddle(md.html, fig);
+  }
   for (const w of md.warnings) ctx.warn(`${lang}/${slug}: ${w}`);
 
   // JSON-LD: tietokannan Article sellaisenaan, URL:t korjattu tämän ympäristön osoitteiksi
@@ -131,9 +163,16 @@ function articlePage(it, ctx) {
   ld.inLanguage ||= lang;
   ld.headline ||= a.title; ld.description ||= seo.description;
   ld.datePublished ||= a.published_at; ld.dateModified ||= a.updated_at || a.published_at;
-  if (!ld.image?.length && hero?.url) ld.image = [hero.url];
   ld.publisher = { ...(ld.publisher || { '@type': 'Organization', name: siteName(lang) }), url: abs('/') };
   if (!ld.author) ld.author = { '@type': 'Organization', name: siteName(lang) };
+  if (a.author === 'Otto Kronqvist') {
+    ld.author = { '@type': 'Person', name: 'Otto Kronqvist' };
+    ld.publisher = { ...ld.publisher, '@type': 'Organization', name: 'Sipoonjoen perinnesauna' };
+  }
+  const ogBase = seo.og_image || hero;
+  const ogShown = localArticleImage(ogBase);
+  if (ogShown?.url && ogShown !== ogBase) ld.image = [ogShown.url];
+  else if (!ld.image?.length && ogBase?.url) ld.image = [ogBase.url];
 
   const tags = (a.tags || []).map((x) => ({ slug: tagSlug(x), label: x }));
   const related = ctx.related(it);
@@ -154,13 +193,15 @@ function articlePage(it, ctx) {
     + (related.length ? `<section class="section tint art-related" aria-labelledby="rel-h"><div class="wrap"><h2 class="sec-title" id="rel-h">${e(t(lang, 'related'))}</h2><ul class="cards art-cards">${related.map((r) => card(r, lang, variants)).join('')}</ul></div></section>` : '');
 
   const ogExtra = `<meta property="article:published_time" content="${e(a.published_at)}"><meta property="article:modified_time" content="${e(a.updated_at || a.published_at)}">${a.category ? `<meta property="article:section" content="${e(a.category)}">` : ''}${(a.tags || []).map((x) => `<meta property="article:tag" content="${e(x)}">`).join('')}`;
-  const og = seo.og_image || hero;
+  const og = ogShown?.url ? ogShown : ogBase;
+  const jsonLd = [ld, ldBreadcrumb(lang, a, canonical)];
+  if (md.faqs.length) jsonLd.push({ '@context': 'https://schema.org', '@type': 'FAQPage', '@id': `${canonical}#usein-kysyttya`, mainEntity: md.faqs.map((f) => ({ '@type': 'Question', name: f.question, acceptedAnswer: { '@type': 'Answer', text: f.answer } })) });
   const html = R.layout({
     lang, key: null, meta: { title: seo.title || a.title, description: seo.description || a.summary }, body,
     seo: {
       url: canonical, hreflangs, robots: seo.robots || (a.noindex ? 'noindex,follow' : 'index,follow'), ogType: seo.og_type || 'article',
       ogImage: og?.url ? { url: og.url, width: og.width, height: og.height, alt: og.alt } : null, ogExtra, extraCss: R.articlesCss, navCurrent: 'articles',
-      jsonLd: [ld, ldBreadcrumb(lang, a, canonical)],
+      jsonLd,
       switchHref: otherSlug ? href(articlePath(other(lang), otherSlug)) : (ctx.hasList[other(lang)] ? href(listPath(other(lang))) : pageHref('home', other(lang))),
     },
   });

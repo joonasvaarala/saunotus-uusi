@@ -128,14 +128,20 @@ test('build (fixture, testi): etusivulla Saunatietoa-nauha, ei artikkelikortteja
   }
   assert.doesNotMatch(rd(b.dist, 'sitemap.xml'), /esikatselu|preview/);
 });
-test('build (tuotanto): ei esikatselusivuja; tyhjä lista ja RPC-virhe → ei korttiosiota eikä nauhaa, build ei kaadu', () => {
+test('build (tuotanto): ei esikatselusivuja; tyhjä lista piilottaa nauhan, tuontitiedosto näyttää sen, build ei kaadu', () => {
   const e = build('pe', { ARTICLES_FIXTURE: join(root, 'tests/articles/fixtures/rpc-empty.json') });
   assert.doesNotMatch(rd(e.dist, 'index.html'), /home-art|saunatietoa/);
   assert.doesNotMatch(rd(e.dist, 'en/index.html'), /home-art|sauna-knowledge/);
   assert.ok(!existsSync(join(e.dist, 'esikatselu')) && !existsSync(join(e.dist, 'en/preview')));
   const f = build('pf', { BOOKING_SUPABASE_URL: 'http://localhost:9', BOOKING_ANON_KEY: 'sb_publishable_x' });
-  assert.doesNotMatch(rd(f.dist, 'index.html'), /home-art|saunatietoa/);
-  assert.match(f.out, /etusivun osio FI piilossa/);
+  // RPC ei vastaa eikä välimuistia ole: tuontitiedoston kuusi artikkelia lasketaan julkaistuiksi.
+  // Etusivulle tulee Saunatietoa-nauha (publishedArticleCount > 0), ei vanhaa korttiosiota.
+  assert.match(rd(f.dist, 'index.html'), /id="saunatietoa"/);
+  assert.match(rd(f.dist, 'index.html'), /href="\/saunatietoa\/"/);
+  assert.doesNotMatch(rd(f.dist, 'index.html'), /class="section home-art"/);
+  assert.doesNotMatch(rd(f.dist, 'en/index.html'), /id="saunatietoa"/);
+  assert.match(f.out, /pending-import-blogisarja/);
+  assert.match(f.out, /etusivun osio FI näkyy/);
   const p = build('pp', { ARTICLES_FIXTURE: '1' });
   assert.match(rd(p.dist, 'index.html'), /id="saunatietoa"/);
   assert.doesNotMatch(rd(p.dist, 'index.html'), /class="section home-art"/);

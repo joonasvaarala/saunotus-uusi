@@ -23,9 +23,19 @@ Työnimi **Saunatietoa** (FI `/saunatietoa/`, EN "Sauna knowledge" `/en/sauna-kn
 
 Tuotantojulkaisua ei tehdä tässä työssä. Testisivusto (GitHub Pages, `SITE_ENV=test`) on noindex.
 
+## Blogisarja ennen tietokantatuontia
+
+Kuusi suomenkielistä artikkelia on tiedostossa `content/articles.pending-import-blogisarja.json`. Rakennus **ei kirjoita tietokantaan**. Kun `ARTICLES_FIXTURE` ei ole päällä ja julkinen RPC ei vielä palauta slugia, rakennus liittää artikkelin mukaan listaukseen, sivuksi ja sitemapiin ja varoittaa. Silloin suomen `publishedArticleCount` on suurempi kuin nolla, ja etusivun Saunatietoa-nauha (linkki listaukseen, ei artikkelikortteja) renderöityy. Kun sama slug on julkaistu (`public_get_article`), tietokannan teksti voittaa. Jos artikkeli myöhemmin piilotetaan tietokannassa, poista se myös tästä tiedostosta. Muuten rakennus näyttää sen uudelleen.
+
+**Osoite pysyy slugissa.** Nykyinen polku on `/saunatietoa/<slug>/` (testisivusto `https://joonasvaarala.github.io/saunotus-uusi/saunatietoa/<slug>/`). Tuotannon canonical on `https://saunotus.fi/saunatietoa/<slug>/`, koska `SITE_URL` on siellä `https://saunotus.fi`. Testisivuston canonical on testisivuston oma osoite (sivut ovat `noindex`). Jos osio myöhemmin siirtyy toisen polun alle, vanha polku lisätään `content/articles.json` → `legacyPaths`-listaan. Silloin rakennus tekee ohjaussivut. Slugia ei vaihdeta.
+
+**Kuvat.** Tiedostot ovat kansiossa `content/article-images/`. Pääkuva on `<slug>-hero.jpg` ja `<slug>-hero.webp`. Välikuva, jos artikkelilla on sellainen, on `<slug>-2.jpg` ja `<slug>-2.webp` (savusaunan-loyly: vain pääkuva). Rakennus kopioi ne osoitteeseen `/img/articles/` samalla nimellä. Sivulla `<picture>` tarjoaa webp-version ja jpg-varakuvan, `width`/`height` mukana. Pääkuva ladataan heti, välikuva laiskasti. Välikuva tulee tekstin puoliväliin. Alt-teksti on tuontitiedoston `images[].alt_fi`. Rakennus lukee pikselikoon jpg-tiedostosta. Paikallinen pääkuva peittää tietokannan pääkuvan niin kauan kuin tiedosto on kansiossa. Tietokantaan viedään hero-jpg (Storage, enintään 5 Mt). Välikuva jää repossa olevaksi tiedostoksi.
+
+**Tuonti hallintaan** (ylläpitäjä, ei CI): jokaiselle artikkelille `admin_upsert_article(null, upsert)` luonnoksena, lataa hero-jpg Storageen polkuun `articles/<id>/<aikaleima>-<tunnus>.jpg`, kutsu `admin_register_article_image(..., alt_fi, p_set_hero := true)` ja `admin_publish_article(id, publish_at)`. Kentät `publish_at`, `source_url` ja `images` eivät kuulu `upsert`-objektiin. `source_url` on Instagram-lähde, eikä sitä renderöidä sivulle. Tarkat arvot ja järjestys ovat tuontitiedoston `_doc`-kentässä.
+
 ## Vikasietoisuus
 
-- RPC ei vastaa tai palauttaa virheen: build **ei kaadu**. Se käyttää edellistä snapshotia (`.cache/articles/snapshot.json`, CI:ssä `actions/cache`). Jos snapshotia ei ole, osio jätetään pois ja rakennus varoittaa. Per artikkeli sama: yksittäisen artikkelin haun epäonnistuessa käytetään sen edellistä versiota.
+- RPC ei vastaa tai palauttaa virheen: build **ei kaadu**. Se käyttää edellistä snapshotia (`.cache/articles/snapshot.json`, CI:ssä `actions/cache`). Jos snapshotia ei ole, RPC:stä tulevat artikkelit jäävät pois ja rakennus varoittaa. Tuontitiedoston slugit liitetään silti mukaan (ks. yllä), ja etusivun nauha näkyy kun niitä on. Per artikkeli sama: yksittäisen artikkelin haun epäonnistuessa käytetään sen edellistä versiota.
 - `ARTICLES_STRICT=1` tekee RPC-virheestä rakennusvirheen (esim. kun halutaan varmistaa tuotantodeploy).
 - Sitemap: jos `public_articles_sitemap` ei vastaa, rivit johdetaan haetuista artikkeleista.
 - Nav-linkki (FI/EN) näytetään vain, kun julkaistuja artikkeleita on (§16.6). `nav.showWhenEmpty` voi pakottaa sen näkyviin. Tyhjä listaus on siisti ("Artikkeleita julkaistaan pian") ja `noindex`, eikä se ole sitemapissa.
@@ -62,7 +72,7 @@ Kolmen uusimman artikkelin korttirenderöinti (`homeSectionHtml`, `pickHomeItems
 
 - Listaus (sivutus 12/sivu), tagisivut (`/saunatietoa/tagi/<tagi>/`, noindex, ei sitemapissa), artikkeli.
 - Artikkelissa: `<title>`/description, `canonical` (RPC:n `canonical_url`-ylikirjoitus huomioidaan), `hreflang` fi/en/x-default vain kun käännös on olemassa, Open Graph + Twitter-kortti (`og:type=article`, `article:published_time`, tagit), JSON-LD `Article` (headline, datePublished/dateModified, image, author, publisher, inLanguage, mainEntityOfPage) ja `BreadcrumbList`, `<` escapataan JSON-LD:ssä.
-- Markdown (§16.2) renderöidään omalla turvallisella renderöijällä: kaikki HTML escapataan, vain turvalliset linkit (`https:`, `mailto:`, sisäiset polut), `img:<id>`-viittaukset artikkelin kuviin, `:::cta`-lohko varauskutsulle. Jakaminen on vain `mailto:`-linkki (ei kolmannen osapuolen skriptejä).
+- Markdown (§16.2) renderöidään omalla turvallisella renderöijällä: kaikki HTML escapataan, vain turvalliset linkit (`https:`, `mailto:`, sisäiset polut), `img:<id>`-viittaukset artikkelin kuviin, `:::cta`-lohko varauskutsulle ja `:::author`-lohko kirjoittajalaatikolle. H2 "Usein kysyttyä" ja sen jälkeiset H3-kysymykset tuottavat myös JSON-LD `FAQPage`-lohkon. Jakaminen on vain `mailto:`-linkki (ei kolmannen osapuolen skriptejä).
 - Kuvat: `<picture>` avif + webp, `srcset` 480/800/1200/1600 (ei suurempaa kuin alkuperäinen), `sizes`, `width`/`height`, `alt`, `loading=lazy` (hero eager + `fetchpriority=high`). Jos `sharp` puuttuu tai kuvan lataus epäonnistuu, käytetään alkuperäistä Storage-URL:ia.
 - Varauskutsu (CTA) artikkelin lopussa linkittää varauskauppaan (`/varaa/`, `/en/book/`).
 - Sitemap: olemassa oleva `sitemap.xml` + artikkelirivit (`hreflang`-alternates, `lastmod`). Robots kuten muualla (`SITE_ENV`).
@@ -84,4 +94,4 @@ Testidata: `docs/saunatietoa-testidata.sql` luo feikkiartikkelit **vain testipro
 
 ## Koodikartta
 
-`content/articles.json` (asetukset) · `src/articles/` (`config`, `source` RPC + cache, `markdown`, `images`, `pages`, `index`, `articles.css`, `home.css` etusivun osio, `runtime`) · `src/render.mjs` (`layout()`: SEO-ylikirjoitukset, nav) · `scripts/build.mjs` (kytkentä, sitemap) · `scripts/check-articles.mjs`, `scripts/articles-shots.mjs` · `tests/articles/`.
+`content/articles.json` (asetukset) · `content/articles.pending-import-blogisarja.json` (tuonti, ei tietokantakirjoitusta) · `content/article-images/` (paikkakuvat) · `src/articles/` (`config`, `source` RPC + cache, `pending`, `markdown`, `images`, `pages`, `index`, `articles.css`, `home.css` etusivun osio, `runtime`) · `src/render.mjs` (`layout()`: SEO-ylikirjoitukset, nav) · `scripts/build.mjs` (kytkentä, sitemap) · `scripts/check-articles.mjs`, `scripts/articles-shots.mjs` · `tests/articles/`.

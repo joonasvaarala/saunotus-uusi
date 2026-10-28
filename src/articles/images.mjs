@@ -8,11 +8,16 @@ import { join } from 'node:path';
 export const FIXTURE_HOST = 'https://fixture.example/';
 export const imgId = (url) => createHash('sha1').update(url).digest('hex').slice(0, 12);
 
-export function makeFetchImage({ fixtureDir } = {}) {
+export function makeFetchImage({ fixtureDir, localDir } = {}) {
   return async (url) => {
     if (url.startsWith(FIXTURE_HOST)) {
+      const name = decodeURIComponent(url.split('/').pop() || '');
+      let path;
+      try { path = new URL(url).pathname; } catch { path = ''; }
+      // content/article-images/<slug>.jpg (paikkakuvat). Storage-fixture (…/storage/…) luetaan fixture-kansiosta.
+      if (path.startsWith('/article-images/') && localDir && existsSync(join(localDir, name))) return readFileSync(join(localDir, name));
       if (!fixtureDir) throw new Error('fixture-kuvakansio puuttuu');
-      return readFileSync(join(fixtureDir, url.split('/').pop()));
+      return readFileSync(join(fixtureDir, name));
     }
     const res = await fetch(url, { signal: AbortSignal.timeout(20000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
