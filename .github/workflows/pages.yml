@@ -322,6 +322,8 @@ jobs:
       - run: node --test booking/tests/ux-kauppa-1028.test.mjs
       # booking_192: hallinnan alennuskoodi, lahjakortti, ylibuukkaus ja aikataulun ulkopuolinen varaus.
       # Tekstit content/site-texts.pending-import-89.json. SQL: booking/supabase/tests/hallinta/t192_admin_overbook_gift.sql
+      # booking_194: yksityistä vuoroa ei ylibuukata; ylibuukkaus vain admin-roolille. Tekstit pending-import-90.json.
+      # SQL: booking/supabase/tests/hallinta/t194_private_no_double_book.sql
       # ajetaan paikallisessa PG17:ssä (migraatiot + fixtures/10_test_helpers.sql). Työnkulussa ei ole Postgresia.
       - run: node --test booking/tests/admin-ylivaraus.test.mjs
       # booking_161: kb.products-kuvausten Johku-linkit → uuden kaupan osoitteet (migraatio + rollback, md5-vartijat). SQL: t161 PG17:ssä.

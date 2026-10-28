@@ -12,7 +12,7 @@ import { loadOptionConfig, configLabel, optionPicker, optErr, optName, ot } from
 import { h, field, toast, run, fmtDay, fmtTime, money, todayHel, helsinkiIso, errMsg, dayStartIso, addDays, fmtDT, revealSection, revealIfHidden } from '../ui.js';
 import { loadBookingTexts, bookingText, noticeText } from '../booking-texts.js';
 import { confirmDialog } from '../confirm.js';
-import { capacityNotice, scheduleNotice } from '../nb-logic.js';
+import { capacityNotice, scheduleNotice, bookingAction } from '../nb-logic.js';
 
 export const BOOKING_TYPES = [['', 'Vuoro'], ['resurssi', 'Resurssivaraus'], ['vanha', 'Vanha varaus']];
 // Varaustyypin valinta (radiogroup; nuolinäppäimet): vuoropohjainen / resurssivaraus / vanha varaus. Vaihto tallentuu URL:iin (#/uusi?tyyppi=…).
@@ -22,6 +22,7 @@ export const typeSwitch = (current, d) => h('fieldset', { class: 'srcset typeset
 const addMin = (hhmm, n) => { const [a, b] = hhmm.split(':').map(Number); const t = (a * 60 + b + n) % 1440; return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`; };
 
 export async function render({ ctx, refs, query, kind }) {
+  const isAdmin = ctx.role === 'admin';
   const old = kind === 'vanha';
   const [addons, rules, optCfg] = await Promise.all([
     rpc('admin_list_addons').catch(() => []),
@@ -65,9 +66,10 @@ export async function render({ ctx, refs, query, kind }) {
   const warnBox = h('div', { class: 'nb-warn', role: 'status', hidden: true, 'data-testid': 'booking-warning' });
   const paintResWarn = () => {
     const p = st.product; const n = +persons.value || 0;
-    const notices = [capacityNotice({ max_persons: p?.config?.max_persons, mode: 'resource', remaining: null }, n), scheduleNotice(null)].filter(Boolean);
-    warnBox.hidden = !notices.length; warnBox.replaceChildren(...notices.map((x) => h('p', { text: noticeText(x) })));
-    return notices;
+    const raw = [capacityNotice({ max_persons: p?.config?.max_persons, mode: 'resource', remaining: null }, n), scheduleNotice(null)].filter(Boolean);
+    const shown = bookingAction(raw, isAdmin).shown;
+    warnBox.hidden = !shown.length; warnBox.replaceChildren(...shown.map((x) => h('p', { text: noticeText(x) })));
+    return raw;
   };
   persons.addEventListener('input', paintResWarn);
   const paid = h('input', { type: 'checkbox', name: 'paid' });
@@ -160,11 +162,12 @@ export async function render({ ctx, refs, query, kind }) {
     const addonsSel = picker.node.hidden ? [] : picker.value();
     let preview = { overbook: [], off_schedule: [] };
     try { preview = await rpc('admin_preview_booking_limits', { p_kind: 'resource', p_product_id: st.product.id, p_start: start, p_end: endIso, p_persons: +persons.value, p_space_id: spaceSel.value ? +spaceSel.value : null }); } catch { /* paikallinen varoitus riittää */ }
-    const notices = [...(preview.overbook || []).map((x) => ({ kind: 'overbook', ...x })), ...(preview.off_schedule || []).map((x) => ({ kind: 'off', ...x })), ...paintResWarn()];
-    const overN = notices.some((x) => x.kind === 'overbook');
-    const offN = notices.some((x) => x.kind === 'off');
-    if (notices.length) {
-      const yes = await confirmDialog({ title: overN && offN ? bookingText('both_title') : overN ? bookingText('over_title') : bookingText('off_title'), body: [...notices.map(noticeText), overN ? bookingText('over_ask') : null, offN ? bookingText('off_ask') : null], yes: bookingText('confirm_yes'), no: bookingText('confirm_no') });
+    const action = bookingAction([...(preview.conflict || []).map((x) => ({ kind: 'conflict', code: x.code })), ...(preview.overbook || []).map((x) => ({ kind: 'overbook', ...x })), ...(preview.off_schedule || []).map((x) => ({ kind: 'off', ...x })), ...paintResWarn()], isAdmin);
+    if (action.blocked.length) { errBox.textContent = action.blocked.map(noticeText).join(' '); errBox.hidden = false; revealIfHidden(errBox); return; }
+    const overN = action.allowOverbook;
+    const offN = action.allowOff;
+    if (overN || offN) {
+      const yes = await confirmDialog({ title: overN && offN ? bookingText('both_title') : overN ? bookingText('over_title') : bookingText('off_title'), body: [...action.shown.map(noticeText), overN ? bookingText('over_ask') : null, offN ? bookingText('off_ask') : null], yes: bookingText('confirm_yes'), no: bookingText('confirm_no') });
       if (!yes) return;
     }
     const args = { p_product_id: st.product.id, p_start: start, p_persons: +persons.value, ...(st.customer ? { p_customer_id: st.customer.id } : { p_customer: cf.data() }),

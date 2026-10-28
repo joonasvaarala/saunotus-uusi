@@ -11,13 +11,14 @@ import { icon } from '../icons.js';
 import { stepper } from '../stepper.js';
 import { nbt as T, nbLang } from '../nb-texts.js';
 import { setLang, LANGS, getLang } from '../talous-i18n.js';
-import { priceFor, personsRange, staffPersonsMax, effectiveKind, invoiceRefFor, paidDefault, parsePrice, summary, bookingNotices, applyDiscount } from '../nb-logic.js';
+import { priceFor, personsRange, staffPersonsMax, effectiveKind, invoiceRefFor, paidDefault, parsePrice, summary, bookingNotices, applyDiscount, bookingAction, isPrivateConflict, slotBookable } from '../nb-logic.js';
 import { loadBookingTexts, bookingText, noticeText } from '../booking-texts.js';
 import { confirmDialog } from '../confirm.js';
 import { typeSwitch, render as renderResource } from './resbooking.js';
 import { invoiceHref, openInvoiceAfterBooking } from '../invoice-link.js';
 
 export async function render({ ctx, refs, query, reload }) {
+  const isAdmin = ctx.role === 'admin';
   const kind = query.get('tyyppi');   // migraatio 17: resurssivaraus / vanha varaus omalla lomakkeellaan
   if (kind === 'resurssi' || kind === 'vanha') return renderResource({ ctx, refs, query, kind });
   const [addons, rules] = await Promise.all([
@@ -49,10 +50,14 @@ export async function render({ ctx, refs, query, reload }) {
     const holdPrivTxt = (s) => (s.wlHold ? ` · ${T('nb.holdPriv', { time: fmtTime(s.wlHold.until) })}` : '');
     if (st.pre) { const m = list.find((s) => String(s.rule_id) === st.pre.r && s.starts_at === st.pre.t && s.status === 'available'); st.pre = null; if (m) st.session = m; }   // Vapaana-napista (päivänäkymä): esivalittu vuoro
     sessionsBox.replaceChildren(list.length ? h('div', { class: 'slotpick', role: 'radiogroup', 'aria-label': T('nb.slots') }, list.map((s) => {
-      const ok = s.status === 'available';
-      const bookable = ok || s.status === 'full' || s.status === 'unavailable';
-      const b = h('button', { type: 'button', role: 'radio', 'aria-checked': st.session?.rule_id === s.rule_id && st.session?.starts_at === s.starts_at ? 'true' : 'false', class: `slotbtn ${s.status}`, disabled: !bookable || null, onclick: () => { st.session = s; st.discount = null; sessionsBox.querySelectorAll('.slotbtn').forEach((x) => x.setAttribute('aria-checked', 'false')); b.setAttribute('aria-checked', 'true'); drawForm(true); } },
-        h('strong', { text: `${fmtTime(s.starts_at)}–${fmtTime(s.ends_at)}` }), h('span', { text: slotName(s) }), h('small', { text: ok ? (s.mode === 'exclusive' ? T('nb.privFree') + holdPrivTxt(s) : T('nb.free', { n: s.remaining }) + holdTxt(s)) : s.status === 'full' ? `${T('nb.full')} · ${bookingText('slot_full')}` : s.status === 'unavailable' ? bookingText('slot_closed') : T('nb.na') }));
+      const ok = s.status === 'available' && !isPrivateConflict(s);
+      const bookable = slotBookable(s);
+      const caption = isPrivateConflict(s) ? bookingText('slot_taken')
+        : ok ? (s.mode === 'exclusive' ? T('nb.privFree') + holdPrivTxt(s) : T('nb.free', { n: s.remaining }) + holdTxt(s))
+        : s.status === 'full' ? bookingText(isAdmin ? 'slot_full' : 'slot_full_staff')
+        : s.status === 'unavailable' ? bookingText('slot_closed') : T('nb.na');
+      const b = h('button', { type: 'button', role: 'radio', 'aria-checked': st.session?.rule_id === s.rule_id && st.session?.starts_at === s.starts_at ? 'true' : 'false', class: `slotbtn ${s.status}${isPrivateConflict(s) ? ' private' : ''}`, 'data-state': isPrivateConflict(s) ? 'private' : (s.status || ''), disabled: !bookable || null, onclick: () => { st.session = s; st.discount = null; sessionsBox.querySelectorAll('.slotbtn').forEach((x) => x.setAttribute('aria-checked', 'false')); b.setAttribute('aria-checked', 'true'); drawForm(true); } },
+        h('strong', { text: `${fmtTime(s.starts_at)}–${fmtTime(s.ends_at)}` }), h('span', { text: slotName(s) }), h('small', { text: caption }));
       return b;
     })) : empty(T('nb.noSlots')));
   }
@@ -94,10 +99,10 @@ export async function render({ ctx, refs, query, reload }) {
       return { sm, total: card ? 0 : Math.max(0, applyDiscount(sm.total, disc)), disc };
     };
     const paintWarnings = () => {
-      const notices = dedupeNotices([...bookingNotices(s, pers.get()), ...serverNotices]);
-      warnBox.hidden = !notices.length;
-      warnBox.replaceChildren(...notices.map((n) => h('p', { text: noticeText(n) })));
-      return notices;
+      const action = bookingAction(dedupeNotices([...bookingNotices(s, pers.get()), ...serverNotices]), isAdmin);
+      warnBox.hidden = !action.shown.length;
+      warnBox.replaceChildren(...action.shown.map((n) => h('p', { text: noticeText(n) })));
+      return action;
     };
     const upd = () => {
       const card = cardChk.checked;
@@ -188,7 +193,8 @@ export async function render({ ctx, refs, query, reload }) {
         const r = await rpc('admin_preview_booking_limits', { p_kind: 'shift', p_rule_id: s.rule_id, p_date: st.date, p_persons: pers.get(), p_start: s.off_schedule ? s.starts_at : null, p_end: s.off_schedule ? s.ends_at : null });
         if (seq !== previewSeq) return;
         serverNotices = (r?.overbook || []).map((x) => x.code === 'capacity_exceeded' && x.capacity != null ? { kind: 'overbook', code: 'capacity_exceeded', used: x.used, capacity: x.capacity } : x.code === 'persons_max' ? { kind: 'overbook', code: 'persons_max', persons: x.persons, max: x.max } : { kind: 'overbook', code: x.code })
-          .concat((r?.off_schedule || []).map((x) => ({ kind: 'off', code: x.code })));
+          .concat((r?.off_schedule || []).map((x) => ({ kind: 'off', code: x.code })))
+          .concat((r?.conflict || []).map((x) => ({ kind: 'conflict', code: x.code })));
       } catch { if (seq === previewSeq) serverNotices = []; }
       if (seq === previewSeq) paintWarnings();
     }
@@ -239,13 +245,17 @@ export async function render({ ctx, refs, query, reload }) {
         revealIfHidden(bad[0]); bad[0].focus({ preventScroll: true }); return;
       }
       await refreshPreview();
-      const notices = paintWarnings();
-      if (notices.length) {
-        const over = notices.some((x) => x.kind === 'overbook');
-        const off = notices.some((x) => x.kind === 'off');
+      const action = paintWarnings();
+      if (action.blocked.length) {
+        revealIfHidden(warnBox);
+        return;
+      }
+      const over = action.allowOverbook;
+      const off = action.allowOff || !!s.off_schedule;
+      if (over || action.allowOff) {
         const yes = await confirmDialog({
-          title: over && off ? bookingText('both_title') : over ? bookingText('over_title') : bookingText('off_title'),
-          body: [...notices.map(noticeText), over ? bookingText('over_ask') : null, off ? bookingText('off_ask') : null],
+          title: over && action.allowOff ? bookingText('both_title') : over ? bookingText('over_title') : bookingText('off_title'),
+          body: [...action.shown.map(noticeText), over ? bookingText('over_ask') : null, action.allowOff ? bookingText('off_ask') : null],
           yes: bookingText('confirm_yes'), no: bookingText('confirm_no'),
         });
         if (!yes) return;
@@ -266,8 +276,8 @@ export async function render({ ctx, refs, query, reload }) {
             p_discount_code: st.discount?.code || null,
             p_gift_card_code: gift ? giftIn.value.trim() : null,
             p_remainder_method: gift ? (restSel.value || null) : null,
-            p_allow_overbook: notices.some((x) => x.kind === 'overbook'),
-            p_allow_off_schedule: notices.some((x) => x.kind === 'off') || !!s.off_schedule,
+            p_allow_overbook: over,
+            p_allow_off_schedule: off,
             p_start: s.off_schedule ? s.starts_at : null,
             p_end: s.off_schedule ? s.ends_at : null,
           });
@@ -301,7 +311,7 @@ export async function render({ ctx, refs, query, reload }) {
       try {
         const rows = await rpc('admin_list_reservations', { p_search: String(r.order_no), p_limit: 10, p_offset: 0 });
         const row = rows.find((x) => x.reservation_id === r.reservation_id) || rows.find((x) => x.order_no === r.order_no) || rows[0];
-        if (row) reservationDialog(row, { methods: refs.methods, onChange: () => {}, refs, can: ctx.can });
+        if (row) reservationDialog(row, { methods: refs.methods, onChange: () => {}, refs, can: ctx.can, role: ctx.role });
       } catch (e) { toast(errMsg(e), 'err'); } finally { openBooking.disabled = false; }
     } });
     result.replaceChildren(...[warningBox(r, { ctx, onDone: () => { result.replaceChildren(); } }), h('div', { class: 'card ok-box nb-done', 'data-testid': 'booking-created' },

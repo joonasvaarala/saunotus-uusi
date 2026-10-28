@@ -1,5 +1,6 @@
 // Uusi varaus ja siirto: alennuskoodi, lahjakortti, ylibuukkaus, aikataulun ulkopuolella.
-// Avaimet ui.admin.booking.*. public_get_site_texts peittää sanakirjan. Tuonti: content/site-texts.pending-import-89.json.
+// Avaimet ui.admin.booking.*. public_get_site_texts peittää sanakirjan.
+// Tuonti: content/site-texts.pending-import-89.json ja booking_194: pending-import-90.json.
 import { getLang } from './talous-i18n.js';
 
 export const PREFIX = 'ui.admin.booking.';
@@ -45,7 +46,15 @@ export const BOOKING_TEXTS = {
     'ui.admin.booking.confirm_no': 'Peruuta',
     'ui.admin.booking.both_title': 'Poikkeus aikataulusta',
     'ui.admin.booking.slot_full': 'täynnä – voi ylibuukata',
+    'ui.admin.booking.slot_full_staff': 'täynnä – vain admin voi ylibuukata',
+    'ui.admin.booking.slot_taken': 'varattu',
     'ui.admin.booking.slot_closed': 'suljettu – voi varata silti',
+    'ui.admin.booking.over_admin_only': 'Vuoro on täynnä – vain admin voi ylibuukata.',
+    'ui.admin.booking.over_admin_persons': 'Enimmäishenkilömäärä ylittyy – vain admin voi ylibuukata.',
+    'ui.admin.booking.conflict_private': 'Ajalle on jo yksityinen varaus – päällekkäistä varausta ei voi tehdä.',
+    'ui.admin.booking.conflict_occupied': 'Tälle ajalle on jo varaus – yksityisvuoroa ei voi varata päällekkäin.',
+    'ui.admin.booking.conflict_space': 'Tila on jo varattu tälle ajalle – päällekkäistä varausta ei voi tehdä.',
+    'ui.admin.booking.conflict_therapist': 'Saunottaja on jo varattu tälle ajalle – päällekkäistä varausta ei voi tehdä.',
     'ui.admin.booking.change_need': 'Valitse uusi vuoro, aika tai henkilömäärä.',
   },
   en: {
@@ -88,7 +97,15 @@ export const BOOKING_TEXTS = {
     'ui.admin.booking.confirm_no': 'Cancel',
     'ui.admin.booking.both_title': 'Schedule exception',
     'ui.admin.booking.slot_full': 'full – can overbook',
+    'ui.admin.booking.slot_full_staff': 'full – only an admin can overbook',
+    'ui.admin.booking.slot_taken': 'booked',
     'ui.admin.booking.slot_closed': 'closed – can book anyway',
+    'ui.admin.booking.over_admin_only': 'The session is full – only an admin can overbook.',
+    'ui.admin.booking.over_admin_persons': 'The maximum number of guests is exceeded – only an admin can overbook.',
+    'ui.admin.booking.conflict_private': 'There is already a private booking at this time – an overlapping booking cannot be made.',
+    'ui.admin.booking.conflict_occupied': 'There is already a booking at this time – a private session cannot overlap it.',
+    'ui.admin.booking.conflict_space': 'The room is already booked at this time – an overlapping booking cannot be made.',
+    'ui.admin.booking.conflict_therapist': 'The therapist is already booked at this time – an overlapping booking cannot be made.',
     'ui.admin.booking.change_need': 'Pick a new session, time or number of guests.',
   },
 };
@@ -133,10 +150,17 @@ export function bookingText(key, vars, lang = getLang()) {
 
 export function noticeText(notice) {
   if (!notice) return '';
+  if (notice.kind === 'admin_only' || notice.code === 'overbook_admin_only') {
+    if (notice.code === 'persons_max' || notice.code === 'persons_limit') return bookingText('over_admin_persons');
+    return bookingText('over_admin_only');
+  }
+  if (notice.code === 'private_booked') return bookingText('conflict_private');
+  if (notice.code === 'public_shift_booked') return bookingText('conflict_occupied');
+  if (notice.code === 'space_busy') return bookingText('conflict_space');
+  if (notice.code === 'no_therapist') return bookingText('conflict_therapist');
   if (notice.code === 'capacity_exceeded') return bookingText('over_capacity', { used: notice.used, capacity: notice.capacity });
   if (notice.code === 'capacity_soft') return bookingText('over_soft', { persons: notice.persons, free: notice.free });
   if (notice.code === 'persons_max' || notice.code === 'persons_limit') return bookingText('over_max', { persons: notice.persons ?? notice.n, max: notice.max });
-  if (['space_busy', 'private_booked', 'public_shift_booked', 'no_therapist'].includes(notice.code)) return bookingText('over_conflict');
   if (notice.code === 'closure' || notice.code === 'space_closed' || notice.code === 'therapist_closed') return bookingText('off_closure');
   if (notice.code === 'outside_hours') return bookingText('off_hours');
   if (notice.code === 'time_window' || notice.code === 'ritual_start') return bookingText('off_window');

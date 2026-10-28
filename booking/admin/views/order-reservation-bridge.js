@@ -53,7 +53,7 @@ export function installOrderReservationBridge({ node, api, ctx, rpc, view }) {
       const row = rows.find((r) => Number(r.reservation_id) === Number(reservation.reservation_id));
       if (!row) return fallback();
       dlg = reservationDialog(row, {
-        methods: ctx.refs?.methods || [], refs: ctx.refs, can: ctx.can,
+        methods: ctx.refs?.methods || [], refs: ctx.refs, can: ctx.can, role: ctx.role,
         onChange: () => afterChange(order),
         flow: {
           addPurchase: () => { dlg.close(); addToOrder(order.order_id, reservation.reservation_id); },

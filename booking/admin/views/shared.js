@@ -14,7 +14,7 @@ import { addonPicker } from './addons.js';
 import { reservationAddonLocks, addonReductionError, orderInvoiceLocked, invoiceLockReason, staffInvoiceChange } from '../addon-lock-logic.js';
 import { alt } from '../addon-lock-texts.js';
 import { nbt } from '../nb-texts.js';
-import { staffPersonsMax, bookingNotices } from '../nb-logic.js';
+import { staffPersonsMax, bookingNotices, bookingAction, isPrivateConflict, slotBookable } from '../nb-logic.js';
 import { loadBookingTexts, bookingText, noticeText } from '../booking-texts.js';
 import { confirmDialog } from '../confirm.js';
 import { helsinkiIso } from '../ui.js';
@@ -37,7 +37,7 @@ function orderFlowEnabled() {
 const list = (...nodes) => nodes.flat(Infinity).filter((n) => n !== null && n !== undefined && n !== false);
 const dd = (label, value) => value == null || value === '' ? [] : [h('dt', { text: label }), h('dd', { text: value })];
 
-export function reservationDialog(r, { methods = [], onChange, refs, can = () => true, flow = null } = {}) {
+export function reservationDialog(r, { methods = [], onChange, refs, can = () => true, flow = null, role = null } = {}) {
   loadOrderTexts(rpc).catch(() => {});
   const api = createTalousApi({ rpc, io: { fn } });
   const ctx = { can, refs };
@@ -265,7 +265,7 @@ export function reservationDialog(r, { methods = [], onChange, refs, can = () =>
       addPurchase: () => h('button', { type: 'button', class: 'btn primary', 'data-testid': 'order-reservation-add', text: tx('ui.admin.res.add_purchase'), onclick: doPurchase }),
       createLink: () => h('button', { type: 'button', class: 'btn', 'data-testid': 'order-reservation-create-link', text: tx('ui.admin.res.payment_link'), onclick: doLink }),
       arrive: () => act('Merkitse saapuneeksi', () => status('completed'), 'btn', 'res-arrive'),
-      change: () => h('button', { type: 'button', class: 'btn', 'data-testid': 'res-change', text: 'Muuta varausta', onclick: () => { d.close(); changeDialog(r, onChange, order); } }),
+      change: () => h('button', { type: 'button', class: 'btn', 'data-testid': 'res-change', text: 'Muuta varausta', onclick: () => { d.close(); changeDialog(r, onChange, order, role); } }),
       noShow: () => h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'res-no-show', text: 'Ei saapunut', onclick: () => formDialog(tx('ui.admin.res.no_show_title'), [h('p', { text: tx('ui.admin.res.no_show_text') })], tx('ui.admin.res.no_show_submit'), async () => { await status('no_show'); after(); }) }),
       cancel: () => h('button', { type: 'button', class: 'btn danger rd-danger', 'data-testid': 'res-cancel', text: 'Peru varaus', onclick: async (event) => {
         const btn = event.currentTarget; btn.disabled = true;
@@ -312,7 +312,8 @@ export function reservationDialog(r, { methods = [], onChange, refs, can = () =>
 }
 
 // Varauksen muutos hallinnasta: sama voimassa oleva RPC ja samat parametrit kuin ennen.
-function changeDialog(r, onChange, order = null) {
+function changeDialog(r, onChange, order = null, role = null) {
+  const isAdmin = role === 'admin';
   loadBookingTexts(rpc).catch(() => {});
   const day = (iso) => new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
   const st = { date: day(r.starts_at), session: null, blocks: [] };
@@ -329,8 +330,9 @@ function changeDialog(r, onChange, order = null) {
     if (base?.off_schedule && timeIn.value && timeIn.value !== fmtTime(r.starts_at)) notices.push({ kind: 'off', code: 'outside_hours' });
     const seen = new Set();
     const uniq = notices.filter((n) => { const k = n.kind + n.code; if (seen.has(k)) return false; seen.add(k); return true; });
-    warnBox.hidden = !uniq.length;
-    warnBox.replaceChildren(...uniq.map((n) => h('p', { text: noticeText(n) })));
+    const shown = bookingAction(uniq, isAdmin).shown;
+    warnBox.hidden = !shown.length;
+    warnBox.replaceChildren(...shown.map((n) => h('p', { text: noticeText(n) })));
     return uniq;
   }
   async function load() {
@@ -348,9 +350,11 @@ function changeDialog(r, onChange, order = null) {
     st.slots = available;
     sessionsBox.replaceChildren(available.length ? h('div', { class: 'slotpick', role: 'radiogroup', 'aria-label': 'Uusi vuoro' }, available.map((x) => {
       const same = x.starts_at === r.starts_at;
-      const ok = x.status === 'available' || x.status === 'full' || x.status === 'unavailable' || same;
-      const b = h('button', { type: 'button', role: 'radio', 'aria-checked': 'false', class: `slotbtn ${x.status}`, disabled: !ok || null, onclick: () => { st.session = same ? null : x; sessionsBox.querySelectorAll('.slotbtn').forEach((y) => y.setAttribute('aria-checked', 'false')); b.setAttribute('aria-checked', 'true'); paintMove(); } },
-        h('strong', { text: `${fmtTime(x.starts_at)}–${fmtTime(x.ends_at)}` }), h('small', { text: same ? 'nykyinen vuoro' : x.status === 'available' ? (x.mode === 'exclusive' ? 'vapaa' : `${x.remaining} vapaana`) : x.status === 'full' ? bookingText('slot_full') : bookingText('slot_closed') }));
+      const conflict = isPrivateConflict(x) && !same;
+      const ok = same || slotBookable(x);
+      const caption = same ? 'nykyinen vuoro' : conflict ? bookingText('slot_taken') : x.status === 'available' ? (x.mode === 'exclusive' ? 'vapaa' : `${x.remaining} vapaana`) : x.status === 'full' ? bookingText(isAdmin ? 'slot_full' : 'slot_full_staff') : bookingText('slot_closed');
+      const b = h('button', { type: 'button', role: 'radio', 'aria-checked': 'false', class: `slotbtn ${x.status}${conflict ? ' private' : ''}`, 'data-state': conflict ? 'private' : (x.status || ''), disabled: !ok || null, onclick: () => { st.session = same ? null : x; sessionsBox.querySelectorAll('.slotbtn').forEach((y) => y.setAttribute('aria-checked', 'false')); b.setAttribute('aria-checked', 'true'); paintMove(); } },
+        h('strong', { text: `${fmtTime(x.starts_at)}–${fmtTime(x.ends_at)}` }), h('small', { text: caption }));
       return b;
     })) : empty(bookingText('off_no_rule')));
     paintMove();
@@ -372,15 +376,17 @@ function changeDialog(r, onChange, order = null) {
     try {
       const prev = await rpc('admin_preview_booking_limits', { p_kind: 'shift', p_rule_id: args.p_rule_id || r.rule_id, p_date: args.p_date || st.date, p_persons: +persons.value, p_start: args.p_start || null, p_end: args.p_end || null, p_exclude_reservation: r.reservation_id });
       previewNotes = (prev?.overbook || []).map((x) => ({ kind: 'overbook', code: x.code, used: x.used, capacity: x.capacity, persons: x.persons, max: x.max }))
-        .concat((prev?.off_schedule || []).map((x) => ({ kind: 'off', code: x.code })));
+        .concat((prev?.off_schedule || []).map((x) => ({ kind: 'off', code: x.code })))
+        .concat((prev?.conflict || []).map((x) => ({ kind: 'conflict', code: x.code })));
     } catch { /* varoitus jää paikalliseksi, jos esikatselua ei vielä ole */ }
-    const all = [...notices, ...previewNotes];
-    const over = all.some((x) => x.kind === 'overbook') || (st.session && (st.session.status === 'full' || (st.session.status === 'unavailable' && !st.session.blocked)));
-    const off = all.some((x) => x.kind === 'off') || !!st.session?.blocked || !!args.p_start || (!st.slots?.length && !!args.p_date);
+    const action = bookingAction([...notices, ...previewNotes], isAdmin);
+    if (action.blocked.length) throw new Error(action.blocked.map(noticeText).join(' '));
+    const over = action.allowOverbook;
+    const off = action.allowOff || !!st.session?.blocked || !!args.p_start || (!st.slots?.length && !!args.p_date);
     if (over || off) {
       const yes = await confirmDialog({
         title: over && off ? bookingText('both_title') : over ? bookingText('over_title') : bookingText('off_title'),
-        body: [...all.map(noticeText), over ? bookingText('over_ask') : null, off ? bookingText('off_ask') : null],
+        body: [...action.shown.map(noticeText), over ? bookingText('over_ask') : null, off ? bookingText('off_ask') : null],
         yes: bookingText('confirm_yes'), no: bookingText('confirm_no'), testid: 'move-confirm',
       });
       if (!yes) return;

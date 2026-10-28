@@ -41,6 +41,8 @@ export const SESSIONS = [
   slot(1, 16, 0, 17, 30, { pool_capacity: 16, pool_peak: 4 }), slot(2, 17, 30, 19, 0, { remaining: 0, status: 'full', pool_capacity: 10, pool_peak: 11 }),
   slot(3, 19, 0, 20, 30, { remaining: 5, pool_capacity: 10, pool_peak: 5 }),
   slot(4, 14, 0, 17, 0, { product_id: 2, label: 'Yksityisvuoro', mode: 'exclusive', remaining: 1, min_persons: 1, max_persons: 10, price_mode: 'base_plus_extra', unit_price: 0, base_price: 150, included_persons: 6, extra_person_price: 15 }),
+  slot(5, 19, 0, 21, 0, { product_id: 2, label: 'Savusaunan jälkilöylyt', mode: 'exclusive', status: 'unavailable', remaining: 0, private_conflict: true, max_persons: 16, price_mode: 'fixed', base_price: 180 }),
+  slot(6, 13, 0, 14, 0, { label: 'Suljettu vuoro', status: 'unavailable', blocked: true, private_conflict: false }),
 ];
 export const ADDONS = [
   { id: 1, code: 'turvenaamio_jalkakylpy', name: 'Turvenaamio ja jalkakylpy', name_en: 'Peat mask and foot bath', description: 'Lisäpalvelu varaukseen: turvenaamio ja jalkakylpy.', description_en: 'Add-on for your booking: peat mask and foot bath.', price: 15, max_per_person: 1, applies_modes: ['shared', 'exclusive'], active: true },
@@ -59,8 +61,8 @@ export const PERMS = ['payments.manage', 'bookings.manage', 'customers.manage', 
 export function rpcMock(st, name, a) {
   st.calls.push({ name, args: a });
   switch (name) {
-    case 'current_staff_role': return 'owner';
-    case 'admin_my_permissions': return { role: 'owner', role_label: 'Omistaja', permissions: PERMS };
+    case 'current_staff_role': return st.role || 'admin';
+    case 'admin_my_permissions': return { role: st.role || 'admin', role_label: (st.role || 'admin') === 'admin' ? 'Pääkäyttäjä' : 'Työntekijä', permissions: PERMS };
     case 'admin_list_products': return [{ id: 1, name: 'Yleinen vuoro', category: 'public', active: true, config: {} }, { id: 2, name: 'Yksityisvuoro', category: 'private', active: true, config: {} }];
     case 'admin_list_addons': return ADDONS;
     case 'admin_day_view': return { date: a.p_date, sessions: SESSIONS, reservations: [] };
@@ -94,11 +96,13 @@ export function rpcMock(st, name, a) {
     case 'admin_preview_booking_limits': {
       const s = SESSIONS.find((x) => x.rule_id === a.p_rule_id) || SESSIONS[0];
       const n = a.p_persons || 1;
-      const over = []; const off = [];
+      const over = []; const off = []; const conflict = [];
+      if (s.private_conflict) conflict.push({ code: s.mode === 'exclusive' ? 'public_shift_booked' : 'private_booked' });
+      if (s.max_persons != null && n > s.max_persons) over.push({ code: 'persons_max', persons: n, max: s.max_persons });
       if (s.pool_capacity != null && (s.pool_peak || 0) + n > s.pool_capacity) over.push({ code: 'capacity_exceeded', used: (s.pool_peak || 0) + n, capacity: s.pool_capacity });
-      if (s.status === 'unavailable') off.push({ code: 'closure' });
+      if (s.status === 'unavailable' && s.blocked) off.push({ code: 'closure' });
       if (a.p_start && s.status !== 'off_schedule') off.push({ code: 'outside_hours' });
-      return { ok: true, overbook: over, off_schedule: off, overbooked: over.length > 0, off: off.length > 0 };
+      return { ok: true, overbook: over, off_schedule: off, conflict, overbooked: over.length > 0, off: off.length > 0, blocked: conflict.length > 0 };
     }
     case 'admin_change_booking': return { ok: true };
     default: { const e = new Error(`Could not find the function booking.${name}`); e.status = 404; e.code = 'PGRST202'; e.pgrst = true; throw e; }

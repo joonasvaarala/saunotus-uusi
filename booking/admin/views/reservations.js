@@ -85,7 +85,7 @@ export async function render({ ctx, refs, reload, query, routePath = 'varaukset'
     }
     if (reset && !rows.length) list.append(empty('Ei varauksia hakuehdoilla.'));
     // kortti: ylärivillä aika (vasen) + tilausnumero (oikea yläkulma), keskellä nimi + tuote, alarivillä merkit (vasen alakulma) + hinta (oikea alakulma)
-    for (const r of rows) list.append(h('button', { type: 'button', class: 'listrow rescard', 'data-testid': 'reservation-row', 'data-reservation-id': r.reservation_id, 'data-option-missing': r.option_missing ? '1' : '0', onclick: () => reservationDialog(r, { methods: refs.methods, onChange: () => load(true), refs, can: ctx.can }) },
+    for (const r of rows) list.append(h('button', { type: 'button', class: 'listrow rescard', 'data-testid': 'reservation-row', 'data-reservation-id': r.reservation_id, 'data-option-missing': r.option_missing ? '1' : '0', onclick: () => reservationDialog(r, { methods: refs.methods, onChange: () => load(true), refs, can: ctx.can, role: ctx.role }) },
       h('span', { class: 'rc-when' }, h('strong', { text: fmtDate(r.starts_at) }), ` ${fmtTime(r.starts_at)}`),
       h('span', { class: 'rc-no', text: `#${r.order_no}`, title: 'Tilausnumero' }),
       h('span', { class: 'rc-what' }, h('strong', { text: r.customer_name || '–' }), h('small', { text: ` ${r.product_name} · ${r.persons} hlö` })),
@@ -93,7 +93,7 @@ export async function render({ ctx, refs, reload, query, routePath = 'varaukset'
       h('span', { class: 'rc-price', text: money(r.total_gross) })));
     if (f.id && !openedDeepLink) {
       const target = rows.find((row) => String(row.reservation_id) === String(f.id));
-      if (target) { openedDeepLink = true; reservationDialog(target, { methods: refs.methods, onChange: () => load(true), refs, can: ctx.can }); }
+      if (target) { openedDeepLink = true; reservationDialog(target, { methods: refs.methods, onChange: () => load(true), refs, can: ctx.can, role: ctx.role }); }
     }
     offset += rows.length; count.textContent = `${Math.min(offset, total)} / ${total} varausta · ${periodLabel()}${f.treatment === TREATMENT_UNASSIGNED ? ` · ${optionText('ui.admin.options.filter_unassigned')}` : ''}`;
     more.replaceChildren(offset < total ? h('button', { type: 'button', class: 'btn ghost', onclick: () => load(false) }, 'Näytä lisää') : '');

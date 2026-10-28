@@ -34,15 +34,41 @@ export function capacityNotice(session, persons) {
   if (session.status === 'full' && session.mode !== 'exclusive') {
     return { kind: 'overbook', code: 'capacity_exceeded', used: n, capacity: Math.max(0, free ?? 0) };
   }
-  if (session.mode === 'exclusive' && session.status && !['available', 'off_schedule'].includes(session.status) && !session.blocked) {
-    return { kind: 'overbook', code: 'space_busy' };
-  }
   return null;
+}
+
+// Yksityinen päällekkäisyys: palvelin merkitsee private_conflict. Ilman kenttää unavailable ilman sulkua on sama tilanne.
+export function isPrivateConflict(session) {
+  if (!session) return false;
+  if (session.private_conflict === true) return true;
+  if (session.private_conflict === false) return false;
+  return session.status === 'unavailable' && !session.blocked;
+}
+
+export function slotKind(session) {
+  if (!session) return 'na';
+  if (isPrivateConflict(session)) return 'private';
+  if (session.status === 'available') return 'free';
+  if (session.status === 'full') return 'full';
+  if (session.status === 'unavailable' || session.blocked) return 'closed';
+  if (session.status === 'off_schedule' || session.off_schedule) return 'off';
+  return 'na';
+}
+
+export function slotBookable(session) {
+  const k = slotKind(session);
+  return k === 'free' || k === 'full' || k === 'closed' || k === 'off';
+}
+
+export function conflictNotice(session) {
+  if (!isPrivateConflict(session)) return null;
+  return { kind: 'conflict', code: session.mode === 'exclusive' ? 'public_shift_booked' : 'private_booked' };
 }
 
 // Aikataulun ulkopuolinen syy: ei vuoroa, sulku, aikaikkuna tai muu kuin vuoron kellonaika.
 export function scheduleNotice(session) {
   if (!session) return null;
+  if (isPrivateConflict(session)) return null;
   if (session.blocked || session.off_code === 'closure' || session.status === 'unavailable' && session.blocked) {
     return { kind: 'off', code: 'closure' };
   }
@@ -54,7 +80,25 @@ export function scheduleNotice(session) {
 }
 
 export function bookingNotices(session, persons) {
-  return [capacityNotice(session, persons), scheduleNotice(session)].filter(Boolean);
+  return [conflictNotice(session), capacityNotice(session, persons), scheduleNotice(session)].filter(Boolean);
+}
+
+// Ei-admin: kapasiteetin ja henkilömäärän ylitys on kova esto. Aikataulun ulkopuolinen varaus säilyy.
+export function presentNotices(notices, isAdmin) {
+  const list = notices || [];
+  if (isAdmin) return list;
+  return list.map((n) => (n && n.kind === 'overbook' ? { ...n, kind: 'admin_only' } : n));
+}
+
+export function bookingAction(notices, isAdmin) {
+  const shown = presentNotices(notices, isAdmin);
+  const blocked = shown.filter((n) => n && (n.kind === 'conflict' || n.kind === 'admin_only'));
+  return {
+    shown,
+    blocked,
+    allowOverbook: !!isAdmin && shown.some((n) => n && n.kind === 'overbook'),
+    allowOff: shown.some((n) => n && n.kind === 'off'),
+  };
 }
 
 export const applyDiscount = (total, discount) => {
