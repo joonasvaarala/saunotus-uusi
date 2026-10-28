@@ -99,7 +99,7 @@ test('tuntemattoman tuotteen varasivu: kuvaus puhdistettuna (ei raakaa HTML:ää
 
 test('kauppa käyttää short-desc.js:ää: kortit (shop.js + treatment-ui.js) ja yläbanneri; splitCatalog välittää kentät', () => {
   const shop = read('booking/shop/src/shop.js'), tui = read('booking/shop/src/treatment-ui.js');
-  assert.match(shop, /import \{ heroShort, cardShort, fallbackDesc \} from '\.\/short-desc\.js';/);
+  assert.match(shop, /import \{ heroShort, cardShort, fallbackDesc(, leadShort)? \} from '\.\/short-desc\.js';/);
   assert.match(shop, /const cardExcerpt = \(p\) => cardShort\(h, p, S\.lang, pdesc\(p\)\);/);
   assert.match(shop, /heroShort\(h, p, S\.lang, pdesc\(p\)\)/);
   assert.match(shop, /el\.querySelector\('\.bk-hero-short'\)\?\.remove\(\);/, 'edellisen tuotteen lyhyt kuvaus poistetaan');

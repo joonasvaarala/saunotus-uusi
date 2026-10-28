@@ -36,6 +36,15 @@ export function heroShort(h, p, lang, desc) {
   return { node: null, text: softenSpaces(s) || derivedShort(desc) };
 }
 
+/** Tuotesivun ingressi kalenterin vieressä (Joonas 28.10.2026): tuotteen lyhyt kuvaus; tyhjä → johdettu ote kuvauksesta. null jos ei kumpaakaan.
+ *  Uima-asu- ja peruutustiedot eivät kuulu tähän: ne ovat Lisätietoja-osiossa (moreNotes). */
+export function leadShort(h, p, lang, desc) {
+  const s = shortRaw(p, lang);
+  const el = s ? richHost(h, s, 'bk-lead') : (derivedShort(desc) ? h('p', { class: 'bk-lead', text: derivedShort(desc) }) : null);
+  el?.setAttribute?.('data-testid', 'lead');
+  return el;
+}
+
 /** Tuotekortin kuvausosa (.bk-desc): lyhyt kuvaus kokonaan (puhdistettuna), muuten johdettu ote. */
 export function cardShort(h, p, lang, desc) {
   const s = shortRaw(p, lang);
