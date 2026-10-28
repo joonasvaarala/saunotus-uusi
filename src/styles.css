@@ -298,7 +298,7 @@ address{font-style:normal;background:var(--card);border:1px solid var(--line);bo
   .nav-desk a[href*="treatments-rituals"]{max-width:8.3em}
   .nav-desk a[href*="/sauna/"]{max-width:6.4em}
   .nav-desk a[href*="companies"]{max-width:7.7em}
-  .nav-desk a[href*="sauna-knowledge"]{max-width:8.3em}
+  .nav-desk a[href*="knowledge"]{max-width:8.3em}
   .nav-desk a[href*="gift-card"]{max-width:4.6em}
 }
 @media (max-width:1099px){.nav-desk,.hdr>.btn{display:none}.nav-mob{display:block}.brand{flex-shrink:1}}
