@@ -1,6 +1,7 @@
 // Hallinnan navigaation, yläpalkin, pikahaun ja Tilaukset-näkymän tekstit (FI + EN). Avaimet: ui.admin.nav.* (paketti 05).
 // public_get_site_texts peittää sanakirjan. Haku epäonnistuu, rivi puuttuu tai paikkamerkki ei täyty → NAV_TEXTS.
-// Tuonti: content/site-texts.pending-import-38.json (vain uudet avaimet, ei ylikirjoita olemassa olevia).
+// Tuonti: content/site-texts.pending-import-38.json (alkuperäiset avaimet) ja
+// content/site-texts.pending-import-88.json (ryhmien ja välilehtien nimet). Ei ylikirjoita olemassa olevia.
 import { getLang } from './talous-i18n.js';
 import { getSiteTexts } from './site-texts-cache.js';
 
@@ -37,6 +38,19 @@ export const NAV_TEXTS = {
     'ui.admin.nav.sort_newest': 'Uusin tilaus ensin',
     'ui.admin.nav.sort_oldest': 'Vanhin tilaus ensin',
     'ui.admin.nav.customer_not_found': 'Asiakasta ei löytynyt',
+    'ui.admin.nav.cash_finance': 'Kassa ja talous',
+    'ui.admin.nav.spaces_blocks': 'Tilat ja sulut',
+    'ui.admin.nav.pos': 'Pikakassa',
+    'ui.admin.nav.finance': 'Talous',
+    'ui.admin.nav.invoices': 'Laskut',
+    'ui.admin.nav.products': 'Tuotteet',
+    'ui.admin.nav.events': 'Tapahtumat',
+    'ui.admin.nav.discounts': 'Alennuskoodit',
+    'ui.admin.nav.quiet_hours': 'Hiljaiset ajat',
+    'ui.admin.nav.resources': 'Resurssit',
+    'ui.admin.nav.closures': 'Kalenterisulut',
+    'ui.admin.nav.settings': 'Asetukset',
+    'ui.admin.nav.users': 'Käyttäjät',
   },
   en: {
     'ui.admin.nav.orders': 'Orders',
@@ -68,6 +82,19 @@ export const NAV_TEXTS = {
     'ui.admin.nav.sort_newest': 'Newest order first',
     'ui.admin.nav.sort_oldest': 'Oldest order first',
     'ui.admin.nav.customer_not_found': 'Customer not found',
+    'ui.admin.nav.cash_finance': 'Cash and finance',
+    'ui.admin.nav.spaces_blocks': 'Spaces and closures',
+    'ui.admin.nav.pos': 'Quick till',
+    'ui.admin.nav.finance': 'Finance',
+    'ui.admin.nav.invoices': 'Invoices',
+    'ui.admin.nav.products': 'Products',
+    'ui.admin.nav.events': 'Events',
+    'ui.admin.nav.discounts': 'Discount codes',
+    'ui.admin.nav.quiet_hours': 'Quiet hours',
+    'ui.admin.nav.resources': 'Resources',
+    'ui.admin.nav.closures': 'Calendar blocks',
+    'ui.admin.nav.settings': 'Settings',
+    'ui.admin.nav.users': 'Users',
   },
 };
 

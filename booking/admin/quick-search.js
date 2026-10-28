@@ -46,11 +46,17 @@ export async function findQuickResults(rpc, ctx, text) {
   return results.slice(0, 24);
 }
 
+// Napautuksen kohde on usein ikoni (svg/span) eikä itse button. Juuri kattaa molemmat ja hakukentän.
+export function isQuickSearchInside(target, root) {
+  const el = target?.nodeType === 1 ? target : target?.parentElement;
+  return !!(el && root && (el === root || root.contains?.(el)));
+}
 export function setupQuickSearch({ input, panel, toggle, box, ctx, rpc }) {
   let timer, seq = 0;
+  const root = toggle.closest?.('.quick-search') || toggle.parentElement;
   const clear = () => { panel.hidden = true; panel.replaceChildren(); };
   const close = () => { clear(); box.classList.remove('mobile-open'); toggle.setAttribute('aria-expanded', 'false'); };
-  const open = () => { box.classList.add('mobile-open'); toggle.setAttribute('aria-expanded', 'true'); input.focus(); };
+  const open = () => { box.classList.add('mobile-open'); toggle.setAttribute('aria-expanded', 'true'); input.focus({ preventScroll: true }); };
   toggle.addEventListener('click', () => box.classList.contains('mobile-open') ? close() : open());
   input.addEventListener('input', () => {
     clearTimeout(timer);
@@ -69,6 +75,6 @@ export function setupQuickSearch({ input, panel, toggle, box, ctx, rpc }) {
     if (ev.key === 'Escape') { close(); toggle.focus(); }
     if (ev.key === 'Enter') { const first = panel.querySelector('a[href]'); if (first) { ev.preventDefault(); first.click(); } }
   });
-  document.addEventListener('click', (ev) => { if (!box.contains(ev.target) && ev.target !== toggle) close(); });
+  document.addEventListener('click', (ev) => { if (!isQuickSearchInside(ev.target, root)) close(); });
   return { close, open };
 }

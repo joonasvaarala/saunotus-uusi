@@ -2,16 +2,13 @@
 import { signIn, signOut, getSession, onAuthChange, rpc, select, adoptSessionFromHash, setPassword, setRpcOverride, setMockSession } from './sb.js';
 import { h, toast, errMsg, todayHel } from './ui.js';
 import { icon } from './icons.js';
-import { t as tl } from './talous-i18n.js';
 import { createAdminMock } from './options-mock.js';
 import { loadFilterTexts } from './filter-texts.js';
 import { primeSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 import { needsManualRoute, parseAdminHash } from './reservation-query.js';
-import { posText } from './pos-texts.js';
-import { resolveAdminPath, compactIdentity, toggleMobileNav } from './admin-navigation.js';
+import { resolveAdminPath, compactIdentity, toggleMobileNav, navGroupById, groupAllowed, selectGroupTab, shouldCollapseMobileNav, shouldCollapseOnNavLink } from './admin-navigation.js';
 import { setupQuickSearch } from './quick-search.js';
 import { loadNavTexts, navText } from './nav-texts.js';
-import { evText } from './events-texts.js';
 
 const $ = (id) => document.getElementById(id);
 // Kokeilutila: osoite /hallinta/?mock=1 → keinoistunto + selaimen oma mock-data (options-mock.js). EI verkkokutsuja eikä kirjautumista; mikään ei tallennu. Ilman parametria ennallaan.
@@ -47,23 +44,17 @@ const loadErrorView = () => h('div', { class: 'pad', role: 'alert' },
 
 const ROUTES = [
   { path: '', label: 'Päivä', icon: 'day', mod: () => loadView('day') },
-  { path: 'tilaukset', label: 'Tilaukset', labelFn: () => navText('ui.admin.nav.orders'), icon: 'list', mod: () => loadView('orders') },
-  { path: 'talous', label: 'Talous', labelFn: () => tl('nav'), icon: 'euro', any: ['payments.manage', 'giftcards.manage'], mod: () => loadView('talous') },
-  { path: 'pikakassa', label: 'Pikakassa', labelFn: () => posText('nav', 'fi'), icon: 'till', any: ['pos.use'], mod: () => loadView('pos') },
-  { path: 'laskut', label: 'Laskut', icon: 'receipt', any: ['invoices.manage'], mod: () => loadView('invoices') },
   { path: 'kalenteri', label: 'Kalenteri', icon: 'calendar', mod: () => loadView('calendar') },
-  { path: 'tarkista', label: 'Tarkista', icon: 'check', mod: () => loadView('review') },
-  { path: 'uusi', label: 'Uusi varaus', icon: 'plus', mod: () => loadView('newbooking') },
+  { path: 'tilaukset', label: 'Tilaukset', labelFn: () => navText('ui.admin.nav.orders'), icon: 'list', mod: () => loadView('orders') },
   { path: 'asiakkaat', label: 'Asiakkaat', icon: 'users', mod: () => loadView('customers') },
-  { path: 'alennuskoodit', label: 'Alennuskoodit', icon: 'percent', any: ['catalog.edit', 'annual_cards.manage'], mod: () => loadView('discounts') },
-  { path: 'hiljaiset-ajat', label: 'Hiljaiset ajat', icon: 'leaf', any: ['catalog.edit', 'settings.edit'], mod: () => loadView('quiet') },   // booking_162
-  { path: 'tuotteet', label: 'Tuotteet', icon: 'tag', mod: () => loadView('products') },
-  { path: 'tapahtumat', label: 'Tapahtumat', labelFn: () => evText('nav'), icon: 'leaf', mod: () => loadView('events') },   // booking_158: tapahtumat ja koulutukset (henkilökunta lukee, catalog.edit muokkaa)
+  { path: 'kassa', label: 'Kassa ja talous', labelFn: () => navText('ui.admin.nav.cash_finance'), icon: 'euro', groupId: 'cash', mod: () => loadView('nav-group') },
+  { path: 'tuotteet', label: 'Tuotteet', labelFn: () => navText('ui.admin.nav.products'), icon: 'tag', groupId: 'products', mod: () => loadView('nav-group') },
   { path: 'viestit', label: 'Viestit', icon: 'mail', any: ['messages.edit'], mod: () => loadView('messages') },
-  { path: 'resurssit', label: 'Resurssit', icon: 'cabin', mod: () => loadView('resources') },
-  { path: 'sulkukalenterit', label: 'Kalenterisulut', icon: 'lock', any: ['blocks.manage'], mod: () => loadView('closures') },
-  { path: 'asetukset', label: 'Asetukset', icon: 'sliders', any: ['settings.edit', 'pos.use'], mod: () => loadView('settings') },
-  { path: 'kayttajat', label: 'Käyttäjät', icon: 'key', any: ['staff.manage'], mod: () => loadView('users') },
+  { path: 'tilat', label: 'Tilat ja sulut', labelFn: () => navText('ui.admin.nav.spaces_blocks'), icon: 'cabin', groupId: 'spaces', mod: () => loadView('nav-group') },
+  { path: 'asetukset', label: 'Asetukset', labelFn: () => navText('ui.admin.nav.settings'), icon: 'sliders', groupId: 'settings', mod: () => loadView('nav-group') },
+  // Yläpalkin + ja tarkistusmerkki. Eivät ole sivupalkissa, mutta osoitteet #/uusi ja #/tarkista toimivat.
+  { path: 'uusi', label: 'Uusi varaus', icon: 'plus', rail: false, mod: () => loadView('newbooking') },
+  { path: 'tarkista', label: 'Tarkista', icon: 'check', rail: false, mod: () => loadView('review') },
 ];
 
 // Viitedata (tuotteet, maksutavat, resurssit), ladataan kerran istuntoa kohti
@@ -74,9 +65,9 @@ export async function refs(force = false) {
   return ctx.refs;
 }
 
-const allowed = (r) => !r.any || r.any.some((p) => ctx.can(p));
+const allowed = (r) => (r.groupId ? groupAllowed(navGroupById(r.groupId), (p) => ctx.can(p)) : !r.any || r.any.some((p) => ctx.can(p)));
 function drawNav(current) {
-  $('nav').replaceChildren(...ROUTES.filter(allowed).map((r) => h('a', { href: `#/${r.path}`, 'aria-label': r.labelFn ? r.labelFn() : r.label, title: r.labelFn ? r.labelFn() : r.label, 'aria-current': r.path === current ? 'page' : null }, h('span', { class: 'ico', 'aria-hidden': 'true' }, icon(r.icon)), h('span', { class: 'lbl', text: r.labelFn ? r.labelFn() : r.label }))));
+  $('nav').replaceChildren(...ROUTES.filter((r) => r.rail !== false && allowed(r)).map((r) => h('a', { href: `#/${r.path}`, 'aria-label': r.labelFn ? r.labelFn() : r.label, title: r.labelFn ? r.labelFn() : r.label, 'aria-current': r.path === current ? 'page' : null }, h('span', { class: 'ico', 'aria-hidden': 'true' }, icon(r.icon)), h('span', { class: 'lbl', text: r.labelFn ? r.labelFn() : r.label }))));
   // Pystypalkissa aktiivinen navigaatiolinkki pysyy näkyvillä ilman vaakavieritystä.
   const nav = $('nav'), cur = nav.querySelector('[aria-current]');
   if (cur && !nav.contains(document.activeElement)) cur.scrollIntoView?.({ block: 'nearest' });
@@ -98,10 +89,13 @@ async function route() {
     if (r.path === '') { dayModule = m; if (lastPath !== null && lastPath !== '') m.clearDayBundleCache?.(); }
     lastPath = r.path;
     await refs();
-    const out = await m.render({ ctx, refs: ctx.refs, reload: () => { dayModule?.clearDayBundleCache?.(); route(); }, query, rest, legacyReservations: resolved.legacyReservations });
+    const group = resolved.groupId ? navGroupById(resolved.groupId) : null;
+    const tab = group ? selectGroupTab(group, resolved.tabId, (p) => ctx.can(p)) : null;
+    const out = await m.render({ ctx, refs: ctx.refs, reload: () => { dayModule?.clearDayBundleCache?.(); route(); }, query, rest, legacyReservations: resolved.legacyReservations, groupId: resolved.groupId, tabId: resolved.tabId, loadView });
     if (seq !== routeSeq) return;
     view.replaceChildren(...[].concat(out).filter(Boolean));
-    document.title = `${r.labelFn ? r.labelFn() : r.label} – hallinta`;
+    const title = tab ? navText(tab.labelKey) : (r.labelFn ? r.labelFn() : r.label);
+    document.title = `${title} – hallinta`;
     if (r.path === '') setTimeout(() => m.prefetchAdjacentDay?.(query.get('d') || todayHel()), 0);
   } catch (e) {
     if (seq !== routeSeq) return;
@@ -179,7 +173,11 @@ function paintTopBarTexts() {
   const nt = $('nav-toggle'); nt.setAttribute('aria-label', tn(nt.getAttribute('aria-expanded') === 'true' ? 'collapse' : 'expand'));
 }
 const mobileToggle = $('nav-toggle');
+const mobileNavQuery = window.matchMedia('(max-width: 899px)');
 mobileToggle.addEventListener('click', () => toggleMobileNav($('shell'), mobileToggle));
+const navState = () => ({ expanded: $('shell').classList.contains('nav-expanded'), mobile: mobileNavQuery.matches, nav: $('nav'), toggle: mobileToggle });
+$('nav').addEventListener('click', (ev) => { if (shouldCollapseOnNavLink(ev.target, navState())) toggleMobileNav($('shell'), mobileToggle, false); });
+document.addEventListener('click', (ev) => { if (shouldCollapseMobileNav(ev.target, navState())) toggleMobileNav($('shell'), mobileToggle, false); });
 const userToggle = $('user-menu-toggle'), userDropdown = $('user-dropdown');
 function setUserOpen(open) {
   userToggle.setAttribute('aria-expanded', String(open));

@@ -202,7 +202,7 @@ test('Ikonit ja käyttöliittymä: gift-ikoni, lahjakorttinäkymän ikonit ja oi
   assert.ok(ICONS.gift);
   assert.match(src, /giftcards\.admin/); assert.match(src, /payments\.manage/);
   assert.match(readFileSync(join(root, 'admin/views/talous.js'), 'utf8'), /giftcards\.manage/);
-  assert.match(readFileSync(join(root, 'admin/admin.js'), 'utf8'), /any: \['payments\.manage', 'giftcards\.manage'\]/);
+  assert.match(readFileSync(join(root, 'admin/admin-navigation.js'), 'utf8'), /any: \['payments\.manage', 'giftcards\.manage'\]/);
   assert.doesNotMatch(readFileSync(join(root, 'admin/views/talous-orders.js'), 'utf8'), /recordPayment\([^)]*gift_card/, 'gift_card ei saa mennä admin_record_payment:iin');
   const css = readFileSync(join(root, 'admin/admin.css'), 'utf8');
   assert.ok(!/#(?:00[0-9a-f]{2}ff|0[0-9a-f]{2}[0-9a-f]{2}ee)\b/i.test(css.slice(css.indexOf('/* Lahjakortit'))), 'ei sinistä');

@@ -60,22 +60,22 @@ for (const role of ['admin', 'staff']) {
   const pg = await page(role, '#/', MOBILE);
   await pg.waitForSelector('#nav a', { timeout: 10000 });
   await glyphFree(pg, `${role} 390`);
-  const narrow = await pg.evaluate(() => ({ nav: document.getElementById('nav').getBoundingClientRect().width, main: document.getElementById('view').getBoundingClientRect().left,
+  const narrow = await pg.evaluate(() => ({ nav: document.getElementById('nav-rail').getBoundingClientRect().width, main: document.getElementById('view').getBoundingClientRect().left,
     lbl: getComputedStyle(document.querySelector('#nav .lbl')).display, links: document.querySelectorAll('#nav a').length,
     labels: [...document.querySelectorAll('#nav a')].map((a) => a.getAttribute('aria-label')), icons: document.querySelectorAll('.top svg.icon, #nav-toggle svg.icon').length }));
   log(role, 'kapea', JSON.stringify(narrow));
-  expect(Math.round(narrow.nav) === 54, `${role}: sivupalkin leveys ${narrow.nav}`);
-  expect(narrow.main >= 54, `${role}: sisältö sivupalkin alla (${narrow.main})`);
+  expect(Math.round(narrow.nav) === 48, `${role}: sivupalkin leveys ${narrow.nav}`);
+  expect(narrow.main >= 48, `${role}: sisältö sivupalkin alla (${narrow.main})`);
   expect(narrow.lbl === 'none', `${role}: tekstit näkyvät kapeassa palkissa`);
-  expect(narrow.labels[1] === 'Tilaukset' && !narrow.labels.includes('Varaukset'), `${role}: nav-järjestys ${narrow.labels}`);
+  expect(narrow.labels[0] === 'Päivä' && narrow.labels[1] === 'Kalenteri' && narrow.labels[2] === 'Tilaukset' && !narrow.labels.includes('Varaukset') && !narrow.labels.includes('Uusi varaus') && !narrow.labels.includes('Tarkista'), `${role}: nav-järjestys ${narrow.labels}`);
   expect(narrow.icons >= 5, `${role}: SVG-ikonit puuttuvat (${narrow.icons})`);
   await noHScroll(pg, `${role} 390 päivä`);
   await pg.screenshot({ path: `${SHOT}/nav-390-${role}-kapea.png` });
   await pg.locator('#nav-toggle').evaluate((e) => e.click()); await pg.waitForTimeout(300);
-  const wide = await pg.evaluate(() => ({ nav: document.getElementById('nav').getBoundingClientRect().width, exp: document.getElementById('nav-toggle').getAttribute('aria-expanded'),
+  const wide = await pg.evaluate(() => ({ nav: document.getElementById('nav-rail').getBoundingClientRect().width, exp: document.getElementById('nav-toggle').getAttribute('aria-expanded'),
     label: document.getElementById('nav-toggle').getAttribute('aria-label'), lbl: getComputedStyle(document.querySelector('#nav .lbl')).display }));
   log(role, 'laaja', JSON.stringify(wide));
-  expect(Math.round(wide.nav) === 178 && wide.exp === 'true' && wide.label === 'Pienennä valikko' && wide.lbl !== 'none', `${role}: laajennus ${JSON.stringify(wide)}`);
+  expect(Math.round(wide.nav) === 196 && wide.exp === 'true' && wide.label === 'Pienennä valikko' && wide.lbl !== 'none', `${role}: laajennus ${JSON.stringify(wide)}`);
   await noHScroll(pg, `${role} 390 laaja`);
   await pg.screenshot({ path: `${SHOT}/nav-390-${role}-laaja.png` });
   await pg.locator('#nav-toggle').evaluate((e) => e.click()); await pg.waitForTimeout(300);
