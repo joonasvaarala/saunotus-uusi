@@ -51,8 +51,10 @@ export function srcsetFor(objectUrl, format, widths) {
 export function productImageSpec(objectUrl, { widths = CARD_WIDTHS, sizes = SIZES.shop, alt = '', width = 600, height = 400, lazy = true } = {}) {
   const ws = cleanWidths(widths);
   const use = canTransform(objectUrl) && ws.length > 0;
+  // src on alkuperäinen tiedosto: selain, joka ei ymmärrä srcsetiä, ja muunnosten vikaantuminen
+  // (render/image pois käytöstä) näyttävät saman kuvan. picture/srcset-selain ei lataa src:iä.
   const img = {
-    src: use ? transformUrl(objectUrl, { width: ws[ws.length - 1], format: 'origin' }) : objectUrl,
+    src: objectUrl,
     alt: alt || '',
     width,
     height,

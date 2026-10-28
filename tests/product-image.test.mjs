@@ -23,8 +23,8 @@ test('srcset 600 ja 900, avif ja webp, jpeg-varakuva, sama tiedosto', () => {
     assert.match(html, new RegExp(`width=900[^"]*format=${fmt}[^"]* 900w`));
   }
   assert.match(html, /resize=contain/);
-  assert.match(html, /products\/1-wq1bnlln\.jpg/);
-  assert.doesNotMatch(html, /\/object\/public\//);
+  assert.match(html, /<img src="https:\/\/sxbofnuisemspgquoxyv\.supabase\.co\/storage\/v1\/object\/public\/product-images\/products\/1-wq1bnlln\.jpg"/);
+  for (const m of html.matchAll(/srcset="([^"]*)"/g)) assert.doesNotMatch(m[1], /\/object\/public\//);
   assert.match(html, /sizes="\(min-width: 900px\) 350px, 92vw"/);
   assert.match(html, /width="1600" height="1068" alt="Yleinen &amp; vuoro" loading="lazy"/);
   assert.doesNotMatch(html, /fetchpriority/);
@@ -37,7 +37,8 @@ test('hero ei ole lazy; paikallinen demo jää alkuperäiseen kuvaan', () => {
   assert.equal(hero.img.loading, undefined);
   assert.equal(hero.img.fetchpriority, 'high');
   assert.equal(hero.sources.length, 2);
-  assert.match(hero.img.src, /width=1600/);
+  assert.match(hero.img.src, /\/object\/public\/product-images\/products\/1-wq1bnlln\.jpg$/);
+  assert.match(hero.img.srcset, /width=1600/);
   const local = productImageHtml(LOCAL, { alt: 'A "kuva"' });
   assert.equal(local, `<img src="${LOCAL}" width="600" height="400" alt="A &quot;kuva&quot;" loading="lazy" decoding="async">`);
   assert.doesNotMatch(local, /picture|srcset|render\/image/);
