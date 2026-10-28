@@ -94,12 +94,12 @@ test('Ikonit: stepperin ikonit on määritelty', async () => {
   const { ICONS } = await imp('admin/icons.js');
   for (const k of ['minus', 'add', 'pgprev', 'pgnext', 'check']) assert.ok(ICONS[k], k);
 });
-test('Tyylit: ei sinistä focus-rengasta, nav-järjestys: Talous heti Tilaukset-kohdan jälkeen (Varaukset on Tilausten välilehti)', () => {
+test('Tyylit: ei sinistä focus-rengasta, nav-järjestys: yhdeksän kohtaa (Talous on Kassa ja talous -ryhmän välilehti)', () => {
   const css = readFileSync(join(root, 'admin/admin.css'), 'utf8');
   assert.ok(!/1d6fd8/i.test(css), 'sininen #1d6fd8 pois');
   assert.match(css, /:focus-visible\{outline:3px solid var\(--gold\)/);
   const js = readFileSync(join(root, 'admin/admin.js'), 'utf8');
   const order = [...js.matchAll(/\{ path: '([^']*)', label:/g)].map((m) => m[1]);
-  assert.equal(order[order.indexOf('tilaukset') + 1], 'talous');
-  assert.deepEqual(order.slice(0, 9), ['', 'tilaukset', 'talous', 'pikakassa', 'laskut', 'kalenteri', 'tarkista', 'uusi', 'asiakkaat']);
+  assert.deepEqual(order.slice(0, 9), ['', 'kalenteri', 'tilaukset', 'asiakkaat', 'kassa', 'tuotteet', 'viestit', 'tilat', 'asetukset']);
+  assert.deepEqual(order.slice(9), ['uusi', 'tarkista']);
 });

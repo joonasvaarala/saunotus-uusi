@@ -301,7 +301,8 @@ test('jälkilöylyt: vain vapaa tuleva vuoro tänään+6; varattu, mennyt ja vie
   assert.equal(L.offerForSlot([offer], out[1]), null);
 });
 test('hallinta: reitti Hiljaiset ajat (catalog.edit / settings.edit) alennuskoodien jälkeen; CI ajaa tämän testin', () => {
-  const admin = rd('booking/admin/admin.js');
-  assert.match(admin, /path: 'alennuskoodit'[^\n]*\n\s*\{ path: 'hiljaiset-ajat', label: 'Hiljaiset ajat', icon: 'leaf', any: \['catalog\.edit', 'settings\.edit'\], mod: \(\) => loadView\('quiet'\) \}/);
+  const nav = rd('booking/admin/admin-navigation.js');
+  assert.match(nav, /id: 'alennuskoodit', path: 'alennuskoodit'[\s\S]{0,220}id: 'hiljaiset-ajat', path: 'hiljaiset-ajat', labelKey: 'ui\.admin\.nav\.quiet_hours', view: 'quiet', any: \['catalog\.edit', 'settings\.edit'\]/);
+  assert.match(rd('booking/admin/admin.js'), /groupId: 'products', mod: \(\) => loadView\('nav-group'\)/);
   assert.match(rd('.github/workflows/pages.yml'), /node --test booking\/tests\/hiljaiset-ajat\.test\.mjs/);
 });

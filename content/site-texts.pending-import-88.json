@@ -1,0 +1,262 @@
+[
+ {
+  "key": "ui.admin.nav.cash_finance",
+  "lang": "fi",
+  "text": "Kassa ja talous",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.spaces_blocks",
+  "lang": "fi",
+  "text": "Tilat ja sulut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.pos",
+  "lang": "fi",
+  "text": "Pikakassa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.finance",
+  "lang": "fi",
+  "text": "Talous",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.invoices",
+  "lang": "fi",
+  "text": "Laskut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.products",
+  "lang": "fi",
+  "text": "Tuotteet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.events",
+  "lang": "fi",
+  "text": "Tapahtumat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.discounts",
+  "lang": "fi",
+  "text": "Alennuskoodit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.quiet_hours",
+  "lang": "fi",
+  "text": "Hiljaiset ajat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.resources",
+  "lang": "fi",
+  "text": "Resurssit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.closures",
+  "lang": "fi",
+  "text": "Kalenterisulut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.settings",
+  "lang": "fi",
+  "text": "Asetukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.users",
+  "lang": "fi",
+  "text": "Käyttäjät",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.cash_finance",
+  "lang": "en",
+  "text": "Cash and finance",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.spaces_blocks",
+  "lang": "en",
+  "text": "Spaces and closures",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.pos",
+  "lang": "en",
+  "text": "Quick till",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.finance",
+  "lang": "en",
+  "text": "Finance",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.invoices",
+  "lang": "en",
+  "text": "Invoices",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.products",
+  "lang": "en",
+  "text": "Products",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.events",
+  "lang": "en",
+  "text": "Events",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.discounts",
+  "lang": "en",
+  "text": "Discount codes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.quiet_hours",
+  "lang": "en",
+  "text": "Quiet hours",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.resources",
+  "lang": "en",
+  "text": "Resources",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.closures",
+  "lang": "en",
+  "text": "Calendar blocks",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.settings",
+  "lang": "en",
+  "text": "Settings",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.nav.users",
+  "lang": "en",
+  "text": "Users",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan navigaation ryhmittely: ryhmien ja välilehtien nimet (booking/admin/nav-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ }
+]

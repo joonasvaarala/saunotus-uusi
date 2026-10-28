@@ -4,7 +4,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { resolveAdminPath, initialOrdersTab, compactIdentity, toggleMobileNav } from '../admin/admin-navigation.js';
+import { resolveAdminPath, initialOrdersTab, compactIdentity, toggleMobileNav, navGroupById, visibleGroupTabs, groupAllowed, selectGroupTab, shouldCollapseMobileNav, shouldCollapseOnNavLink } from '../admin/admin-navigation.js';
+import { isQuickSearchInside } from '../admin/quick-search.js';
 import { parseAdminHash, reservationSortParam, reservationsHref, stateFromQuery, UNASSIGNED_HREF } from '../admin/reservation-query.js';
 import { cleanSearch, findQuickResults, resultHref, giftSearchTerm } from '../admin/quick-search.js';
 import { NAV_TEXTS, navText, primeNavTexts, clearNavTextCache } from '../admin/nav-texts.js';
@@ -13,10 +14,14 @@ import { ICONS } from '../admin/icons.js';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const src = (p) => readFileSync(join(root, p), 'utf8');
 
-test('päänavigaatio: Tilaukset heti Päivän jälkeen, Varaukset vain välilehtenä', () => {
+test('päänavigaatio: yhdeksän kohtaa, Varaukset vain Tilaukset-välilehtenä', () => {
   const js = src('admin/admin.js');
-  assert.match(js, /path: '', label: 'Päivä'[\s\S]{0,100}path: 'tilaukset', label: 'Tilaukset', labelFn: \(\) => navText\('ui\.admin\.nav\.orders'\)/);
+  const order = [...js.matchAll(/\{ path: '([^']*)', label:/g)].map((m) => m[1]);
+  assert.deepEqual(order, ['', 'kalenteri', 'tilaukset', 'asiakkaat', 'kassa', 'tuotteet', 'viestit', 'tilat', 'asetukset', 'uusi', 'tarkista']);
+  assert.match(js, /path: 'uusi'[\s\S]{0,120}rail: false/);
+  assert.match(js, /path: 'tarkista'[\s\S]{0,120}rail: false/);
   assert.doesNotMatch(js, /path: 'varaukset', label:/);
+  assert.doesNotMatch(js, /path: 'pikakassa', label:/);
   assert.match(src('admin/views/orders.js'), /\['reservations', 'ui\.admin\.nav\.reservations'\]/);
   assert.equal(NAV_TEXTS.fi['ui.admin.nav.reservations'], 'Varaukset');
   assert.match(src('admin/views/orders.js'), /orders-tab-\$\{key\}/);
@@ -30,7 +35,7 @@ test('päänavigaatio: Tilaukset heti Päivän jälkeen, Varaukset vain välileh
 test('vanhat varauslinkit ja niiden parametrit ohjautuvat Varaukset-välilehteen', () => {
   for (const hash of ['#/varaukset', '#/varaukset?id=33', '#/varaukset?q=Virtanen&period=all', UNASSIGNED_HREF]) {
     const parsed = parseAdminHash(hash), resolved = resolveAdminPath(parsed.path);
-    assert.deepEqual(resolved, { path: 'tilaukset', legacyReservations: true });
+    assert.deepEqual(resolved, { path: 'tilaukset', legacyReservations: true, groupId: null, tabId: null });
     assert.equal(initialOrdersTab({ legacyReservations: resolved.legacyReservations, query: parsed.query }), 'reservations');
   }
   assert.equal(stateFromQuery(parseAdminHash('#/varaukset?id=33&period=past&sort=newest').query).id, '33');
@@ -78,12 +83,31 @@ test('mobiilipalkin nuoli laajentaa, pienentää ja päivittää aria-expanded-t
   assert.equal(toggleMobileNav(shell,btn),false);
   assert.equal(attrs.get('aria-expanded'),'false');
   assert.equal(names.has('nav-expanded'),false);
-  const html = src('admin/index.html'), css = src('admin/admin.css');
-  assert.match(html, /id="nav-toggle"[^>]*aria-expanded="false"/);
+  const html = src('admin/index.html'), css = src('admin/admin.css'), js = src('admin/admin.js');
+  assert.match(html, /id="nav-rail"[\s\S]*id="nav"[\s\S]*id="nav-toggle"[^>]*aria-expanded="false"/);
   assert.match(css, /@media\(max-width:899px\)/);
+  assert.match(css, /--side-narrow:48px/);
   assert.match(css, /#shell \.nav \.lbl\{display:none\}/);
   assert.match(css, /#shell\.nav-expanded \.nav \.lbl\{display:inline\}/);
-  assert.match(css, /#shell \.nav\{position:fixed;top:56px;left:0;right:auto;bottom:0/);
+  assert.match(css, /#shell \.nav-rail\{position:fixed;top:56px;left:0;bottom:0/);
+  assert.match(css, /#shell \.nav\{position:relative;[\s\S]{0,220}min-height:0/);
+  assert.match(css, /#shell \.nav a\{[^}]*min-height:44px/);
+  assert.match(css, /#shell \.nav-toggle\{position:sticky;bottom:0/);
+  assert.match(css, /#shell \.nav-toggle\{[^}]*min-height:44px/);
+  assert.match(css, /#shell\.nav-expanded \.nav-toggle \[data-icon\]\{display:inline-flex;transform:rotate\(180deg\)/);
+  assert.match(css, /@media\(min-width:900px\)\{[\s\S]*\.nav\{position:sticky;top:56px/);
+  assert.match(js, /shouldCollapseOnNavLink\(ev\.target/);
+  assert.match(js, /shouldCollapseMobileNav\(ev\.target/);
+  const el = (parent) => ({ parent, nodeType: 1, contains(n) { let x = n; while (x) { if (x === this) return true; x = x.parent; } return false; }, closest(sel) { let x = this; while (x) { if (sel === 'a[href]' && x.href) return x; x = x.parent; } return null; } });
+  const rail = el(null), link = el(rail); link.href = '#/kalenteri'; const svg = el(link);
+  const main = el(null), toggle = el(null), icon = el(toggle);
+  const open = { expanded: true, mobile: true, nav: rail, toggle };
+  assert.equal(shouldCollapseOnNavLink(svg, open), true);
+  assert.equal(shouldCollapseOnNavLink(svg, { ...open, mobile: false }), false);
+  assert.equal(shouldCollapseMobileNav(main, open), true);
+  assert.equal(shouldCollapseMobileNav(icon, open), false);
+  assert.equal(shouldCollapseMobileNav(link, open), false);
+  assert.equal(shouldCollapseMobileNav(main, { ...open, expanded: false }), false);
 });
 
 test('pikahaku löytää asiakkaita, varauksia, tilauksia, lahjakortteja ja luo suorat linkit', async () => {
@@ -134,21 +158,29 @@ test('yläpalkin pikatoiminnot, käyttäjävalikko, kokeilutila ja uloskirjautum
   assert.deepEqual(label,{name:'Joonas',initial:'J',role:'Ylläpitäjä'});
 });
 
-test('tekstit: ui.admin.nav.* FI+EN sanakirjassa ja pending-import-38:ssa, ei päällekkäin muiden tuontien kanssa', async () => {
+test('tekstit: ui.admin.nav.* FI+EN sanakirjassa ja pending-import-38/88:ssa, ei päällekkäin muiden tuontien kanssa', async () => {
   const { readdirSync } = await import('node:fs');
-  const rows = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-38.json'), 'utf8'));
+  const rows38 = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-38.json'), 'utf8'));
+  const rows88 = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-88.json'), 'utf8'));
+  const rows = [...rows38, ...rows88];
   assert.deepEqual(Object.keys(NAV_TEXTS.fi).sort(), Object.keys(NAV_TEXTS.en).sort());
   assert.equal(rows.length, Object.keys(NAV_TEXTS.fi).length * 2);
+  const seen = new Set();
   for (const r of rows) {
     assert.ok(r.key.startsWith('ui.admin.nav.'), r.key);
     assert.equal(r.text, NAV_TEXTS[r.lang][r.key], r.key);
     assert.equal(r.class, 'normal'); assert.equal(r.kind, 'plain');
     assert.ok(r.max_len >= r.text.length && r.max_len >= 80, r.key);
     assert.deepEqual(r.placeholders, [...r.text.matchAll(/\{\{var:[a-z0-9_]+\}\}/g)].map((m) => m[0]), r.key);
+    assert.equal(seen.has(`${r.key}|${r.lang}`), false, r.key);
+    seen.add(`${r.key}|${r.lang}`);
   }
+  assert.deepEqual([...new Set(rows.map((r) => r.key))].sort(), Object.keys(NAV_TEXTS.fi).sort());
+  const newKeys = new Set(rows88.map((r) => r.key));
+  for (const r of rows38) assert.equal(newKeys.has(r.key), false, r.key);
   const taken = new Set();
   for (const f of readdirSync(join(root, '../content'))) {
-    if (!/^site-texts\.(pending-import-(?!38\.)|imported|fallback)/.test(f) || !f.endsWith('.json')) continue;
+    if (!/^site-texts\.(pending-import-(?!38\.|88\.)|imported|fallback)/.test(f) || !f.endsWith('.json')) continue;
     const j = JSON.parse(readFileSync(join(root, '../content', f), 'utf8'));
     for (const r of Array.isArray(j) ? j : j.texts || []) taken.add(`${r.key}|${r.lang}`);
   }
@@ -163,6 +195,54 @@ test('tekstit: ui.admin.nav.* FI+EN sanakirjassa ja pending-import-38:ssa, ei p�
     assert.doesNotMatch(src(f), /'(Haetaan…|Ei hakutuloksia\.|Ladataan…|Pienennä valikko|Laajenna valikko|Tilaukset ja varaukset)'/, f);
   }
   assert.match(src('../scripts/build-pages.mjs'), /'nav-texts\.js', 'admin-navigation\.js', 'quick-search\.js', 'views\/orders\.js'/);
+  assert.equal(NAV_TEXTS.fi['ui.admin.nav.cash_finance'], 'Kassa ja talous');
+  assert.equal(NAV_TEXTS.en['ui.admin.nav.spaces_blocks'], 'Spaces and closures');
+});
+
+test('ryhmät: vanhat osoitteet avaavat oikean välilehden, oikeus rajaa välilehdet', () => {
+  const can = (list) => (p) => list.includes(p);
+  assert.deepEqual(resolveAdminPath('pikakassa'), { path: 'kassa', legacyReservations: false, groupId: 'cash', tabId: 'pikakassa' });
+  assert.deepEqual(resolveAdminPath('laskut'), { path: 'kassa', legacyReservations: false, groupId: 'cash', tabId: 'laskut' });
+  assert.deepEqual(resolveAdminPath('talous'), { path: 'kassa', legacyReservations: false, groupId: 'cash', tabId: 'talous' });
+  assert.deepEqual(resolveAdminPath('kassa'), { path: 'kassa', legacyReservations: false, groupId: 'cash', tabId: null });
+  assert.deepEqual(resolveAdminPath('tapahtumat'), { path: 'tuotteet', legacyReservations: false, groupId: 'products', tabId: 'tapahtumat' });
+  assert.deepEqual(resolveAdminPath('alennuskoodit'), { path: 'tuotteet', legacyReservations: false, groupId: 'products', tabId: 'alennuskoodit' });
+  assert.deepEqual(resolveAdminPath('hiljaiset-ajat'), { path: 'tuotteet', legacyReservations: false, groupId: 'products', tabId: 'hiljaiset-ajat' });
+  assert.deepEqual(resolveAdminPath('tuotteet'), { path: 'tuotteet', legacyReservations: false, groupId: 'products', tabId: 'tuotteet' });
+  assert.deepEqual(resolveAdminPath('resurssit'), { path: 'tilat', legacyReservations: false, groupId: 'spaces', tabId: 'resurssit' });
+  assert.deepEqual(resolveAdminPath('sulkukalenterit'), { path: 'tilat', legacyReservations: false, groupId: 'spaces', tabId: 'sulkukalenterit' });
+  assert.deepEqual(resolveAdminPath('kayttajat'), { path: 'asetukset', legacyReservations: false, groupId: 'settings', tabId: 'kayttajat' });
+  assert.deepEqual(resolveAdminPath('asetukset'), { path: 'asetukset', legacyReservations: false, groupId: 'settings', tabId: 'asetukset' });
+  assert.deepEqual(resolveAdminPath('uusi'), { path: 'uusi', legacyReservations: false, groupId: null, tabId: null });
+  assert.deepEqual(resolveAdminPath('tarkista'), { path: 'tarkista', legacyReservations: false, groupId: null, tabId: null });
+  assert.deepEqual(resolveAdminPath(''), { path: '', legacyReservations: false, groupId: null, tabId: null });
+  const cash = navGroupById('cash');
+  assert.deepEqual(visibleGroupTabs(cash, can(['pos.use'])).map((t) => t.id), ['pikakassa']);
+  assert.equal(groupAllowed(cash, can([])), false);
+  assert.equal(selectGroupTab(cash, 'laskut', can(['pos.use'])).id, 'pikakassa');
+  assert.equal(selectGroupTab(cash, null, can(['invoices.manage', 'pos.use'])).id, 'pikakassa');
+  const products = navGroupById('products');
+  assert.deepEqual(visibleGroupTabs(products, can([])).map((t) => t.id), ['tuotteet', 'tapahtumat']);
+  assert.equal(groupAllowed(products, can([])), true);
+  const spaces = navGroupById('spaces');
+  assert.deepEqual(visibleGroupTabs(spaces, can(['blocks.manage'])).map((t) => t.id), ['resurssit', 'sulkukalenterit']);
+  assert.equal(selectGroupTab(spaces, 'sulkukalenterit', can([])).id, 'resurssit');
+  const settings = navGroupById('settings');
+  assert.deepEqual(visibleGroupTabs(settings, can(['staff.manage'])).map((t) => t.id), ['kayttajat']);
+  assert.deepEqual(visibleGroupTabs(settings, can(['pos.use'])).map((t) => t.id), ['asetukset']);
+  assert.match(src('admin/views/nav-group.js'), /data-testid': `nav-group-tab-\$\{tab\.id\}`/);
+  assert.match(src('admin/views/nav-group.js'), /const next = `#\/\$\{tab\.path\}`/);
+});
+
+test('pikahaku: suurennuslasin napautus ei ole ulkopuolinen klikkaus', () => {
+  const el = (parent) => ({ parent, nodeType: 1, contains(n) { let x = n; while (x) { if (x === this) return true; x = x.parent; } return false; } });
+  const root = el(null), toggle = el(root), svg = el(toggle), box = el(root), input = el(box), main = el(null);
+  assert.equal(isQuickSearchInside(svg, root), true);
+  assert.equal(isQuickSearchInside(toggle, root), true);
+  assert.equal(isQuickSearchInside(input, root), true);
+  assert.equal(isQuickSearchInside(main, root), false);
+  assert.match(src('admin/quick-search.js'), /if \(!isQuickSearchInside\(ev\.target, root\)\) close\(\)/);
+  assert.doesNotMatch(src('admin/quick-search.js'), /ev\.target !== toggle/);
 });
 
 test('ulkoasu: uusi yläpalkki/sivupalkki käyttää vain teeman värejä ja SVG-ikoneita, ei glyfejä eikä emojeja', () => {

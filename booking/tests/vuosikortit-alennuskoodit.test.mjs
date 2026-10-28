@@ -164,7 +164,7 @@ test('tilaussivu: vuosikortin koodi näytetään public_annual_card_purchase_cod
 });
 
 test('hallinta: Alennuskoodit-reitti (oikeus catalog.edit tai annual_cards.manage), arvo merkkijonona, vuosikortti asiakkaalle koodilla', async () => {
-  assert.match(ADMIN, /path: 'alennuskoodit'.*any: \['catalog\.edit', 'annual_cards\.manage'\].*loadView\('discounts'\)/);
+  assert.match(rd('booking/admin/admin-navigation.js'), /path: 'alennuskoodit', labelKey: 'ui\.admin\.nav\.discounts', view: 'discounts', any: \['catalog\.edit', 'annual_cards\.manage'\]/);
   assert.match(DISC, /value: sh \? '100' : v\.replace\(',', '\.'\)/);
   assert.match(DISC, /rpc\('admin_list_annual_cards_details'\)/);
   assert.match(CUST, /rpc\('admin_create_annual_card'/);
