@@ -382,6 +382,9 @@ html.co-js.co-show-sauna #yritysvuorot,html.co-js.co-show-day #tarjous{display:b
   .week.soon .sess .t{font-size:18px}
   .week.soon .sess .n{font-size:15px;margin-top:0}
   .week.soon .sess .bk{min-height:44px;min-width:72px;padding:0 12px}
+  .week.soon>li>.sl{grid-column:2}
+  .week.soon .sess .n{overflow-wrap:anywhere}
+  .week.soon .sess.quiet .qp{font-size:14px;margin-top:2px}
   .week.soon>li.off .none{grid-column:2;margin:0;font-size:15px}
   .week.soon>li.off .alt{grid-column:2}
   .strip-row{flex-direction:column;align-items:flex-start;gap:14px}

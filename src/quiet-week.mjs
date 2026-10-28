@@ -1,6 +1,7 @@
 // booking_162: hiljaisten aikojen ale sivuston viikko-ohjelmassa (etusivu + saunavuorot). Rakennusvaiheessa vain data-attribuutit:
 // tekstit (sivutekstit ui.site.quiet_*, varateksti = sama kuin content/site-texts.pending-import-59.json) ja yksityisvuorotuotteiden nimet/slugit.
-// Ajonaikainen lisäys: booking/shop/src/quiet-week.js (public_quiet_offers; pois päältä tai virhe → viikko-ohjelma ei muutu).
+// Ajonaikainen lisäys: booking/shop/src/quiet-week.js. Vapaat jälkilöylyt (kb 26) haetaan public_availabilitysta;
+// hiljaisen ajan ale public_quiet_offersista. Jos kumpikaan haku ei onnistu, viikko-ohjelma ei muutu.
 import { tx } from './site-texts.mjs';
 
 export const QUIET_SITE_TEXTS = Object.freeze({

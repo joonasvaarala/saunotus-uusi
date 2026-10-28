@@ -109,6 +109,32 @@ export function createQuietOfferCache({ rpc, now = () => Date.now(), audience = 
 }
 
 // ---- sivuston viikko-ohjelma (etusivu + saunavuorot) ----
+/** Savusaunan jälkilöylyt (kb 26). Viikko-ohjelma näyttää vain tämän tuotteen vapaat vuorot. */
+export const JALKIL_ID = 26;
+
+/**
+ * Vapaat jälkilöylyt näkyville päiville (tänään + 6). Julkinen lähde on public_availability(26):
+ * vain status available ja alku tulevaisuudessa. Varatut (full/unavailable), suljetut ja menneet jäävät pois.
+ * Rivillä ei tarvitse olla product_id:tä (public_availability ei palauta sitä); puuttuva tulkitaan productId:ksi.
+ */
+export function bookablePrivateSlots(rows, { today, now, productId = JALKIL_ID } = {}) {
+  if (!/^\d{4}-\d\d-\d\d$/.test(today || '') || !Number.isFinite(+now)) return [];
+  const last = addDaysIso(today, 6);
+  return (rows || []).filter((r) => {
+    const id = r?.product_id == null ? +productId : +r.product_id;
+    if (id !== +productId || r.status !== 'available') return false;
+    if (!/^\d{4}-\d\d-\d\d$/.test(r.session_date || '') || r.session_date < today || r.session_date > last) return false;
+    const start = Date.parse(r.starts_at);
+    return Number.isFinite(start) && start > +now && Number.isFinite(+r.rule_id) && Number.isFinite(+r.base_price);
+  }).map((r) => ({ ...r, product_id: r.product_id == null ? +productId : +r.product_id }))
+    .sort((a, b) => Date.parse(a.starts_at) - Date.parse(b.starts_at) || +a.rule_id - +b.rule_id);
+}
+
+/** Saman vuoron hiljaisen ajan tarjous, jos palvelin sellaisen antoi. */
+export function offerForSlot(offers, slot) {
+  return (offers || []).find((o) => validOffer(o) && +o.product_id === +slot.product_id && +o.rule_id === +slot.rule_id && o.session_date === slot.session_date) || null;
+}
+
 export const weekdayIso = (ds) => { if (!/^\d{4}-\d\d-\d\d$/.test(ds || '')) return null; const d = new Date(`${ds}T12:00:00Z`); return Number.isNaN(+d) ? null : (d.getUTCDay() || 7); };
 /** Seuraavat 7 päivää (tänään + 6) viikonpäivittäin: viikko-ohjelmassa on yksi rivi kullekin viikonpäivälle, joten sama viikonpäivä ei toistu. */
 export function quietByWeekday(offers, today) {

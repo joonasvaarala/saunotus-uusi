@@ -280,7 +280,25 @@ test('viikko-ohjelma: <ol data-quiet-week> tekstit + yksityisvuorotuotteet (25, 
   const build = rd('booking/shop/build.mjs');
   assert.match(build, /out\.includes\('data-quiet-week'\) && !out\.includes\('\/booking\/quiet-week\.js'\)/);
   assert.match(build, /window\.BOOKING_QUIET=/);
-  assert.match(rd('booking/shop/src/quiet-week.js'), /rpc\('public_quiet_offers', \{ p_from: today, p_to: addDaysIso\(today, 6\), p_audience: 'consumer' \}\)/);
+  assert.match(rd('booking/shop/src/quiet-week.js'), /rpc\('public_quiet_offers', \{ p_from: from, p_to: to, p_audience: 'consumer' \}\)/);
+  assert.match(rd('booking/shop/src/quiet-week.js'), /rpc\('public_availability', \{ p_product_id: JALKIL_ID, p_from: from, p_to: to \}\)/);
+});
+test('jälkilöylyt: vain vapaa tuleva vuoro tänään+6; varattu, mennyt ja vieras tuote pois; ale osuu samaan vuoroon', () => {
+  const today = '2026-10-28', now = Date.parse('2026-10-28T00:30:00Z');
+  const row = (date, status, hh, extra = {}) => ({ rule_id: 22, status, session_date: date, starts_at: `${date}T${hh}:00:00Z`, ends_at: `${date}T19:00:00Z`, base_price: 180, ...extra });
+  const out = L.bookablePrivateSlots([
+    row('2026-10-28', 'full', '17'),
+    row('2026-10-28', 'available', '17'),
+    row('2026-10-28', 'available', '00'),
+    row('2026-10-29', 'available', '17'),
+    row('2026-10-30', 'unavailable', '17'),
+    row('2026-11-04', 'available', '17'),
+    row('2026-10-28', 'available', '17', { product_id: 25, rule_id: 9, base_price: 100 }),
+  ], { today, now });
+  assert.deepEqual(out.map((r) => [r.session_date, r.product_id]), [['2026-10-28', 26], ['2026-10-29', 26]]);
+  const offer = { product_id: 26, rule_id: 22, session_date: '2026-10-28', percent: 20, base_price: 180, discounted_price: 144, starts_at: out[0].starts_at };
+  assert.equal(L.offerForSlot([offer, { percent: 0 }], out[0])?.percent, 20);
+  assert.equal(L.offerForSlot([offer], out[1]), null);
 });
 test('hallinta: reitti Hiljaiset ajat (catalog.edit / settings.edit) alennuskoodien jälkeen; CI ajaa tämän testin', () => {
   const admin = rd('booking/admin/admin.js');
