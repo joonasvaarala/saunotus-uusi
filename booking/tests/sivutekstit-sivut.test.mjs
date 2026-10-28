@@ -71,6 +71,7 @@ test('tuontitiedosto: ei päällekkäisiä avaimia PR 1:n (#61), aiemman tuonnin
   assert.ok(Math.ceil(PENDING.length / 500) <= 3, `${PENDING.length} riviä`);
 });
 const PAGE_EXTRA = J('content/site-texts.imported-pr75.json').filter((r) => !r.key.startsWith('email.'));
+const PAGE_UX = J('content/site-texts.pending-import-1028.json').filter((r) => r.key.startsWith('ui.footer.') || r.key.startsWith('page.gift.'));
 test('tuontitiedosto on generoitu koodista: vanhat avaimet = imported-pr64, Yrityksille-lisäys = imported-pr75 (sivut)', () => {
   const prod = join(work, 'prod.json'), out = join(work, 'out.json');
   writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts }));
@@ -79,7 +80,13 @@ test('tuontitiedosto on generoitu koodista: vanhat avaimet = imported-pr64, Yrit
   const rows = JSON.parse(readFileSync(out, 'utf8'));
   const oldIds = new Set(PENDING.map((x) => `${x.key}|${x.lang}`));
   assert.deepEqual(rows.filter((x) => oldIds.has(`${x.key}|${x.lang}`)), PENDING);
-  assert.deepEqual(rows.filter((x) => !oldIds.has(`${x.key}|${x.lang}`)), PAGE_EXTRA);
+  const extra = rows.filter((x) => !oldIds.has(`${x.key}|${x.lang}`));
+  const uxIds = new Set(PAGE_UX.map((r) => `${r.key}|${r.lang}`));
+  assert.deepEqual(extra.filter((x) => !uxIds.has(`${x.key}|${x.lang}`)), PAGE_EXTRA);
+  for (const r of PAGE_UX) {
+    const got = extra.find((x) => x.key === r.key && x.lang === r.lang);
+    assert.equal(got?.text, r.text, r.key);
+  }
 });
 test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet avaimet) eikä kosketa tuotannon tekstiä', () => {
   const have = PENDING.filter((r) => r.key.startsWith('seo.') || r.key === 'ui.site.book');
@@ -88,7 +95,7 @@ test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet ava
   const r = spawnSync('node', [join(root, 'scripts/site-texts-extract-pages.mjs'), '--prod', prod, '--out', out], { encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);
   const rows = JSON.parse(readFileSync(out, 'utf8'));
-  assert.equal(rows.length, PENDING.length - have.length + PAGE_EXTRA.length);
+  assert.equal(rows.length, PENDING.length - have.length + PAGE_EXTRA.length + PAGE_UX.length);
   assert.ok(!rows.some((x) => x.key.startsWith('seo.') || x.key === 'ui.site.book'));
   for (const x of PAGE_EXTRA) assert.ok(rows.some((r) => r.key === x.key && r.lang === x.lang), x.key);
   assert.notEqual(spawnSync('node', [join(root, 'scripts/site-texts-extract-pages.mjs'), '--prod', join(work, 'ei-ole.json')], { encoding: 'utf8' }).status, 0);
@@ -136,7 +143,7 @@ test('HTML: kantaan ei mene <strong> vaan **lihavointi** (kind lite); muunnos on
 test('peitto: kierros – tuontitiedosto peittona → kaikki oliot täsmälleen ennallaan; resetContentTexts palauttaa oletukset', async () => {
   const { state } = await stateWith(PENDING);
   const res = CT.applyContentTexts(state, { log: quiet });
-  assert.equal(res.used, PENDING.length); assert.equal(res.fallback, PAGE_EXTRA.length); assert.equal(res.failed, 0);
+  assert.equal(res.used, PENDING.length); assert.equal(res.fallback, PAGE_EXTRA.length + PAGE_UX.length); assert.equal(res.failed, 0);
   assert.equal(snap(), BASE, 'tuonnin jälkeen oliot poikkeavat oletuksista');
   const none = CT.applyContentTexts(await B.loadSiteTexts({ env: { SITE_TEXTS_FIXTURE: join(work, 'ei-ole.json') }, log: quiet, cacheDir: join(work, 'c2'), fallbackFile: join(work, 'ei-ole-varatekstia.json') }).catch(() => null), { log: quiet });
   assert.equal(none.used, 0); assert.equal(snap(), BASE);
@@ -181,7 +188,7 @@ test('build: tuontitiedosto "tietokannassa" → koko sivusto (kaikki HTML) tavu 
   const base = build('base', (await stateWith([])).file);
   assert.match(base.log, /staattiset sivut: 0 tekstiä tietokannasta, \d+ repon oletuksella/);
   const all = build('all', (await stateWith(PENDING)).file);
-  assert.match(all.log, new RegExp(`staattiset sivut: ${PENDING.length} tekstiä tietokannasta, ${PAGE_EXTRA.length} repon oletuksella`));
+  assert.match(all.log, new RegExp(`staattiset sivut: ${PENDING.length} tekstiä tietokannasta, ${PAGE_EXTRA.length + PAGE_UX.length} repon oletuksella`));
   const fa = files(base.out), fb = files(all.out);
   assert.deepEqual(fb, fa); assert.ok(fa.length > 15);
   for (const f of fa) if (/\.(html|xml|txt|json)$/.test(f)) assert.equal(readFileSync(join(all.out, f), 'utf8'), readFileSync(join(base.out, f), 'utf8'), `${f} muuttui`);

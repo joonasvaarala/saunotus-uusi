@@ -70,7 +70,21 @@ const MARKS = {
   chevron: [['path', { ...STROKE, d: 'M9 6.5 15 12l-6 5.5' }]],
 };
 
+// Viralliset merkit (Apple Pay, Google Pay, MobilePay): sama tiedosto kuin alatunnisteessa (public/img/pay/).
+// Ei värjätä eikä kehystetä vihreään laattaan: merkin omat värit ja tyhjä tila säilyvät.
+const BRAND_FILE = { applePay: 'apple-pay.svg', googlePay: 'google-pay.svg', mobilePay: 'mobilepay.svg' };
+function payMarkSrc(file) {
+  const cfg = typeof window !== 'undefined' ? window.BOOKING_CONFIG : null;
+  const shop = typeof window !== 'undefined' ? window.BOOKING_SHOP : null;
+  const base = (cfg && cfg.payMarks) || (shop?.links?.base != null ? `${shop.links.base}/img/pay/` : '/img/pay/');
+  return `${String(base).replace(/\/?$/, '/')}${file}`;
+}
 export function payMark(kind) {
+  if (BRAND_FILE[kind]) {
+    const wrap = h('span', { class: 'op-method-mark', 'aria-hidden': 'true' });
+    wrap.append(h('img', { src: payMarkSrc(BRAND_FILE[kind]), alt: '', width: 54, height: 22, decoding: 'async' }));
+    return wrap;
+  }
   const wrap = h('span', { class: kind === 'gift' ? 'op-gift-ico' : 'op-method-ico', 'aria-hidden': 'true' });
   wrap.append(iconSvg(MARKS[kind] || MARKS.cardPayments));
   return wrap;

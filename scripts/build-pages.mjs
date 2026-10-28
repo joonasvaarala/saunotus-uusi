@@ -45,7 +45,7 @@ cpSync('booking/shop/src/invoice-validate.js', join(OUT, 'shop', 'src', 'invoice
 cpSync('booking/shop/src/phone.js', join(OUT, 'shop', 'src', 'phone.js'));
 cpSync('booking/shop/src/discount-code-logic.js', join(OUT, 'shop', 'src', 'discount-code-logic.js')); // booking_142: hallinnan alennuskoodit, asiakaskortti ja options-mock tuovat tämän
 cpSync('booking/shop/src/discount-texts.js', join(OUT, 'shop', 'src', 'discount-texts.js')); // discount-code-logic.js tuo tämän
-const cfg = { url: SUPA, anonKey: KEY, rest: '/rest/v1', auth: '/auth/v1', functions: '/functions/v1', schema: 'booking' };
+const cfg = { url: SUPA, anonKey: KEY, rest: '/rest/v1', auth: '/auth/v1', functions: '/functions/v1', schema: 'booking', payMarks: `${BASE}/img/pay/` };
 writeFileSync(join(A, 'config.js'), `// Generoitu julkaisussa (scripts/build-pages.mjs). Vain julkinen anon/publishable-avain; service_role ei koskaan tähän.\nwindow.BOOKING_CONFIG=${JSON.stringify(cfg, null, 2)};\n`);
 
 // 3b) versiotunnus kaikkiin hallinnan moduuleihin ja resursseihin (välimuistin sekoittumisen esto; GitHub Pages välimuistittaa tiedostoja ~10 min)

@@ -85,7 +85,7 @@ test('paikkamerkit ja lomake', () => {
 
 test('pending-import-29: tilaussivun ja sähköpostin kiinteät tekstit', () => {
   const seen = new Set();
-  assert.equal(pending.length, 28);
+  assert.equal(pending.length, 26);
   for (const r of pending) {
     const w = `${r.key} [${r.lang}]`;
     assert.match(r.key, KEY_RE, w);
@@ -101,7 +101,7 @@ test('pending-import-29: tilaussivun ja sähköpostin kiinteät tekstit', () => 
     assert.ok(!seen.has(`${r.key}|${r.lang}`), w);
     seen.add(`${r.key}|${r.lang}`);
   }
-  const keys = ['guide_title', 'guide_show', 'guide_hide', 'guide_lead', 'guide_link', 'treat_lead', 'unsub_title', 'unsub_done', 'unsub_missing', 'unsub_error'];
+  const keys = ['guide_title', 'guide_show', 'guide_hide', 'guide_lead', 'guide_link', 'unsub_title', 'unsub_done', 'unsub_missing', 'unsub_error'];
   for (const row of collectDefaults().filter((r) => r.id === 'OT' && keys.some((k) => r.key === `ui.order.${k}`))) {
     const got = pending.find((r) => r.key === row.key && r.lang === row.lang);
     assert.ok(got, row.key);
@@ -109,7 +109,7 @@ test('pending-import-29: tilaussivun ja sähköpostin kiinteät tekstit', () => 
     const fi = collectDefaults().find((r) => r.id === 'OT' && r.key === row.key && r.lang === 'fi').text;
     assert.equal(got.class, classFor(row.key, fi));
   }
-  assert.equal(pending.filter((r) => r.key.startsWith('ui.order.guide_') || r.key === 'ui.order.treat_lead').length, 12);
+  assert.equal(pending.filter((r) => r.key.startsWith('ui.order.guide_')).length, 10);
 });
 
 test('migraatio ja hallinta', () => {
@@ -131,7 +131,7 @@ test('migraatio ja hallinta', () => {
   assert.match(migration, /no_consent/);
   assert.match(migration, /public_marketing_unsubscribe/);
   assert.match(read('booking/shop/src/order.js'), /guide-toggle/);
-  assert.match(read('booking/shop/src/order.js'), /upsell-treatments/);
+  assert.doesNotMatch(read('booking/shop/src/order.js'), /upsell-treatments/);
   assert.match(read('booking/shop/src/order.js'), /public_marketing_unsubscribe/);
   assert.match(read('.github/workflows/pages.yml'), /booking\/tests\/viestit\.test\.mjs/);
   const allow = sendIndex.indexOf('const blocked = outboxAllowlistBlock');

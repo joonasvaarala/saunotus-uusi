@@ -50,6 +50,7 @@ const cfg = {
   // MobilePay (§14): testitilan tapa (public_payment_options methods[].test=true) näytetään vain kun true. Oletus: päällä vain SITE_ENV=test -julkaisussa (testisivusto); tuotannossa pois. BOOKING_MOBILEPAY_TEST_UI=1|0 ylikirjoittaa; muokattavissa julkaisussa. mobilepayOfficialButton=false → aina oma varapainike (ei ulkoista skriptiä).
   mobilepayTestUi: process.env.BOOKING_MOBILEPAY_TEST_UI ? /^(1|true)$/i.test(process.env.BOOKING_MOBILEPAY_TEST_UI) : process.env.SITE_ENV === 'test', mobilepayOfficialButton: !/^(0|false)$/i.test(process.env.BOOKING_MOBILEPAY_OFFICIAL_BUTTON || ''), siteEnv: process.env.SITE_ENV || '',
   giftCardPdf: /^(0|false)$/i.test(process.env.BOOKING_GIFT_CARD_PDF || '') ? false : (/^(1|true)?$/i.test(process.env.BOOKING_GIFT_CARD_PDF || '') ? true : process.env.BOOKING_GIFT_CARD_PDF),
+  payMarks: `${BASE}/img/pay/`,
 };
 writeFileSync(join(A, 'config.js'), `// Muokkaa tätä tiedostoa julkaisussa (ei vaadi uudelleenrakennusta). anon-avain saa olla julkinen.\nwindow.BOOKING_CONFIG=${JSON.stringify(cfg, null, 2)};\n`);
 // Staattinen tuotedata: tuntemattoman tuotteen "ota yhteyttä" -sivu + hoitotuotteiden kortit (hinta, kesto, henkilömäärät; ks. treatments.js loadProducts)
@@ -66,6 +67,8 @@ writeFileSync(join(A, 'static-products.json'), JSON.stringify(Object.fromEntries
 const write = (urlPath, html) => { const f = join(OUT, urlPath, 'index.html'); mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, html); };
 // Sivutekstit (§18, osa 3): avaimet page.*/seo.* tietokannasta (tx), repon oletus shop-page-texts.js kunnes avaimet on tuotu (varatekstien käyttö lasketaan ja raportoidaan).
 let pageFallbacks = 0;
+// Peruutusehto on valinnainen: page.*-avain puuttuu ilman verkkoa (site-texts.json sisältää vain ui.*), jolloin tyhjä.
+const cancelRuleText = (lang) => { try { return ST.tx('page.info.cancel_text', lang, { state: siteTexts }); } catch (err) { if (err?.name === 'MissingTextError') return ''; throw err; } };
 const px = (key, lang) => ST.tx(key, lang, { state: siteTexts, fallback: pageDefault(key, lang), log: { warn: (m) => { if (/siirtymäajan varatekstiä/.test(m)) pageFallbacks++; else console.warn(m); } } });
 const pageSet = (lang) => ({ title: px('page.book.title', lang), text: px('page.book.lead', lang), meta: px('seo.book.title', lang), desc: px('seo.book.description', lang), noscript: px('page.book.noscript', lang), ctitle: px('page.book_confirm.title', lang), cmeta: px('seo.book_confirm.title', lang) });
 const T = { fi: pageSet('fi'), en: pageSet('en') };
@@ -76,6 +79,7 @@ for (const lang of ['fi', 'en']) {
       lang, page: page === 'shop' ? 'shop' : 'confirm', shopHref: BASE + PATHS[lang].shop, confirmHref: BASE + PATHS[lang].confirm,
       orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order },   // vuosikortin osto → tilaussivu (booking_142)
       termsHref: L.pageHref('terms', lang), infoHref: L.pageHref('info', lang), phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email,
+      cancelRule: cancelRuleText(lang),
       staticProductsUrl: `${BASE}/booking/static-products.json`, siteTextsUrl: `${BASE}/booking/site-texts.json`, links: LINKS(lang),
     };
     const body = R.pageHero({ title: page === 'shop' ? t.title : t.ctitle, text: page === 'shop' ? t.text : '', img: 'ovi-kaiverrus' }, lang, 'book')
@@ -150,6 +154,7 @@ for (const lang of ['fi', 'en']) {
     lang, page: 'shop', audience: 'business', shopHref: BASE + urlPath, confirmHref: BASE + PATHS[lang].confirm,
     orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order },
     termsHref: L.pageHref('terms', lang), infoHref: L.pageHref('info', lang), phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email,
+    cancelRule: cancelRuleText(lang),
     staticProductsUrl: `${BASE}/booking/static-products.json`, siteTextsUrl: `${BASE}/booking/site-texts.json`, links: LINKS(lang),
   };
   html = html.replace('</head>', `<link rel="stylesheet" href="${BASE}/booking/shop.css"></head>`)

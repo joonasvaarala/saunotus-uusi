@@ -112,18 +112,20 @@ export const C = (path) => path.split('.').reduce((a, k) => a[k], cards);
 export function week(lang, opt = {}) {
   const u = ui(lang);
   const lab = (type, day) => site.sessionLabels[day >= 6 && type === 'public' ? 'weekend' : type]?.[lang] || '';
-  // Yksi vuororivi: aika (ei rituaalilla) · nimi · Varaa-painike. Koko rivi on klikattava (a::after), .sr-selite säilyy.
+  // Yksi vuororivi: aika · nimi · Varaa-painike. Koko rivi on klikattava (a::after), .sr-selite säilyy. Rituaalilla aika, jos aukiolo on tiedossa.
   const row = (time, name, url, day) => `<li class="sess${time ? '' : ' nt'}">${time ? `<span class="t">${time}</span>` : ''}<span class="n">${e(name)}</span><a class="bk" href="${e(url)}" target="_blank" rel="noopener"><span class="bk-l">${e(u.reserve)}</span><span class="sr"> – ${e(name)}, ${e(u.daysLong[day - 1])}</span>${NEW(lang)}</a></li>`;
   const li = [];
   for (let d = 1; d <= 7; d++) {
     const rows = kb.hours.filter((h) => h.weekday === d);
-    const sess = rows.filter((h) => h.opens).map((h) => {
+    const clock = (t) => { const [hh, mm] = String(t).slice(0, 5).split(':'); return `${Number(hh)}${lang === 'en' ? ':' : '.'}${mm}`; };
+    const sess = rows.filter((h) => h.opens && h.session_type !== 'ritual').map((h) => {
       const pr = kb.products.find((x) => x.id === h.product_id);
-      return row(`${hm(h.opens)}–${hm(h.closes)}`, lab(h.session_type, d), pr ? bookingUrl(pr.booking_url, lang) : jk('publicAll', lang), d);
+      return row(`${clock(h.opens)}–${clock(h.closes)}`, lab(h.session_type, d), pr ? bookingUrl(pr.booking_url, lang) : jk('publicAll', lang), d);
     });
     const ritual = rows.filter((h) => h.session_type === 'ritual').map((h) => {
       const pr = kb.products.find((x) => x.id === h.product_id);
-      return row('', site.sessionLabels.ritual[lang], pr ? bookingUrl(pr.booking_url, lang) : jk('ceremonies', lang), d);
+      const time = h.opens && h.closes ? `${clock(h.opens)}–${clock(h.closes)}` : '';
+      return row(time, site.sessionLabels.ritual[lang], pr ? bookingUrl(pr.booking_url, lang) : jk('ceremonies', lang), d);
     });
     const none = rows.some((h) => h.session_type === 'private_only')
       ? `<p class="none">${e(u.noPublic)}</p><ul class="alt"><li><a href="${e(jk('private', lang))}" target="_blank" rel="noopener">${e(u.privateLink)}${NEW(lang)}</a></li><li><a href="${e(jk('events', lang))}" target="_blank" rel="noopener">${e(u.eventsLink)}${NEW(lang)}</a></li></ul>` : '';
@@ -314,7 +316,7 @@ ${body}
 <div><h2>${e(u.footerInfo)}</h2><ul>${u.infoLinks.map(([id, l]) => `<li><a href="${pageHref('info', lang, id)}">${e(l)}</a></li>`).join('')}</ul></div>
 <div><h2>${e(u.footerContact)}</h2><ul><li><address style="all:unset">${e(site.contact.street)}<br>${e(site.contact.postal)} ${e(site.contact.city)}</address></li><li><a href="tel:${site.contact.phoneTel}">${e(phoneDisplay(lang))}</a></li><li><a href="mailto:${site.contact.email}">${e(site.contact.email)}</a></li><li><a href="${e(site.contact.mapsUrl)}" rel="noopener">${e(ui(lang).directions)}${NEW(lang)}</a></li>${site.social.map((s) => `<li><a href="${e(s.url)}" rel="noopener">${e(s.name)}${NEW(lang)}</a></li>`).join('')}</ul></div>
 </div>
-<div class="fbottom"><span>© ${new Date().getFullYear()} ${e(kb.business.legal_name)} · ${e(ui(lang).businessId)} ${e(kb.business.business_id)}</span><ul><li><a href="${fl('terms', lang)}">${e(u.legal)}</a></li><li>${pagePath('privacy', lang) ? `<a href="${fl('privacy', lang)}">${e(lang === 'en' ? privacyDocFor(P('privacy').fi, kb.policies, 'en')?.hero.title || u.privacy : u.privacy)}` : `<a href="${pageHref('privacy', 'fi')}"${lang === 'en' ? ' hreflang="fi" lang="fi"' : ''}>${e(u.privacy)}`}</a></li></ul></div>
+<div class="fbottom"><p class="fpay"><span>${e(u.footerPayOnline)}</span><span class="fpay-marks">${['bank', 'card', 'apple-pay', 'google-pay', 'mobilepay'].map((id) => `<img src="${href(`/img/pay/${id}.svg`)}" alt="" height="18" width="${id === 'bank' || id === 'card' ? 18 : 48}" loading="lazy" decoding="async">`).join('')}</span></p><span>© ${new Date().getFullYear()} ${e(kb.business.legal_name)} · ${e(ui(lang).businessId)} ${e(kb.business.business_id)}</span><ul><li><a href="${fl('terms', lang)}">${e(u.legal)}</a></li><li>${pagePath('privacy', lang) ? `<a href="${fl('privacy', lang)}">${e(lang === 'en' ? privacyDocFor(P('privacy').fi, kb.policies, 'en')?.hero.title || u.privacy : u.privacy)}` : `<a href="${pageHref('privacy', 'fi')}"${lang === 'en' ? ' hreflang="fi" lang="fi"' : ''}>${e(u.privacy)}`}</a></li></ul></div>
 </div></footer>
 ${chat}
 <script>(function(){var d=new Intl.DateTimeFormat('en-US',{weekday:'short',timeZone:'Europe/Helsinki'}).format(new Date()),i={Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6}[d],l=document.querySelectorAll('.week>li');if(l[i]){l[i].classList.add('is-today');l[i].setAttribute('aria-current','date')}var n=l[(i+1)%7];if(n)n.classList.add('is-next');document.querySelectorAll('.week.soon').forEach(function(w){w.classList.add('is-filtered')})})()</script>
@@ -380,8 +382,8 @@ export function gift(lang) {
     + sec('', `<div class="company"><div><p class="kicker">${e(d.openTitle)}</p><h2 class="sec-title">${e(d.openTitle)}</h2><p>${e(d.openText)}</p><p class="price" style="color:var(--gold)">${e(`${u.fromWord} ${money(priceOf(ap), lang)}`)}</p><a class="btn" href="${e(bookingUrl(ap.booking_url, lang))}" target="_blank" rel="noopener">${e(C('gift.avoin')[lang].cta)}${NEW(lang)}</a></div><div class="im">${pic(C('gift.avoin').img, lang, { sizes: '(min-width:900px) 520px, 100vw', alt: '' })}</div></div>`, 'avoin')
     + sec('tint', `${head('', d.packTitle, '', { orn: true })}${cardList(pack, lang, 'five', { sizes: '(min-width:1100px) 230px, 90vw' })}<p class="center" style="margin-top:24px"><a class="btn light sm" href="${e(jk('giftAll', lang))}" target="_blank" rel="noopener">${e(d.allGift)}${NEW(lang)}</a></p>`, 'paketit')
     + sec('', `${head('', d.haveTitle, d.haveText, { orn: true })}<div class="cards two" style="display:grid;gap:22px">
-<article class="card"><div class="bd"><p class="kicker">${e(d.own.kicker)}</p><h3 style="font-family:var(--head);font-size:26px">${e(d.own.title)}</h3><p>${e(d.own.text)}</p><p><a class="btn" href="${e(jk('giftReservation', lang))}" target="_blank" rel="noopener">${e(d.own.cta)}${NEW(lang)}</a></p></div></article>
-<article class="card"><div class="bd"><p class="kicker">${e(d.third.kicker)}</p><h3 style="font-family:var(--head);font-size:26px">${e(d.third.title)}</h3><p>${e(d.third.text)} <a href="${e(site.giftCardSupportUrl)}" rel="noopener">${e(d.third.link)}${NEW(lang)}</a>.</p><p>${e(d.third.text2)}</p><p><a class="btn" href="${e(jk('giftReservation', lang))}" target="_blank" rel="noopener">${e(d.third.cta)}${NEW(lang)}</a></p></div></article></div>`, 'on-jo-lahjakortti')
+<article class="card"><div class="bd"><p class="kicker">${e(d.own.kicker)}</p><h3 style="font-family:var(--head);font-size:26px">${e(d.own.title)}</h3><p>${e(d.own.how || d.own.text)}</p><p><a class="btn" href="${e(jk('giftReservation', lang))}" target="_blank" rel="noopener">${e(d.own.cta)}${NEW(lang)}</a></p></div></article>
+<article class="card"><div class="bd"><p class="kicker">${e(d.third.kicker)}</p><h3 style="font-family:var(--head);font-size:26px">${e(d.third.title)}</h3><p>${e(d.third.text)} <a href="${e(site.giftCardSupportUrl)}" rel="noopener">${e(d.third.link)}${NEW(lang)}</a>.</p><p>${e(d.third.pay || d.third.text2)}</p><p><a class="btn" href="${e(jk('giftReservation', lang))}" target="_blank" rel="noopener">${e(d.third.cta)}${NEW(lang)}</a></p></div></article></div>`, 'on-jo-lahjakortti')
     + sec('tint', `<div class="narrow center"><h2 class="sec-title">${e(ext.title)}</h2><p>${e(ext.text)}</p><p>${mailBtn(site.contact.email, ext.title, 'btn light sm')} <a class="btn light sm" href="tel:${site.contact.phoneTel}">${e(phoneDisplay(lang))}</a></p><p>${e(ext.third)}</p></div>`, 'jatkaminen');
   return layout({ lang, key: 'gift', meta: d.meta, body });
 }

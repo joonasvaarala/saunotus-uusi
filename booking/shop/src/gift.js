@@ -170,7 +170,10 @@ function buildSale(pk) {
       h('fieldset', { class: 'gc-card' }, h('legend', { text: tx('buyerTitle') }), buyerFields.name.wrap, buyerFields.email.wrap, buyerFields.phone.wrap,
         h('div', { class: 'bk-check' }, buyerFields.terms, h('label', { for: 'gc-terms' }, `${tx('acceptTerms')} `, h('a', { href: S.termsHref, target: '_blank', rel: 'noopener', text: tx('termsLink') }), ' *')), buyerFields.termsErr,
         h('div', { class: 'bk-check' }, buyerFields.marketing, h('label', { for: 'gc-mkt', text: tx('marketing') }))),
-      totalEl, msg, submitBtn);
+      totalEl,
+      h('img', { class: 'gc-preview', src: `${S.base || ''}/img/gift-card-${L}.webp`, alt: tx('previewAlt'), width: 240, height: 340, 'data-testid': 'gc-preview' }),
+      h('p', { class: 'bk-note gc-payline', 'data-testid': 'gc-payline', text: tx('payLine') }),
+      msg, submitBtn);
     // palauta jo täytetyt ostajatiedot
     for (const k of ['name', 'email', 'phone']) buyerFields[k].control.value = buyer[k];
     buyerFields.terms.checked = buyer.terms; buyerFields.marketing.checked = buyer.marketing;

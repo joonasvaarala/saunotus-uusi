@@ -37,6 +37,8 @@ import { oneKey } from './plural.js';
 import { eventText, occurrenceText, occurrenceLabel, findEvent, saleState, upcoming, isMultiDay } from './event-sale.js';
 import { customerInvoiceLock } from './invoice-lock.js';
 import { formPaysOnline, paysByInvoice } from './company-pay.js';
+import { clockFromIso } from './clock.js';
+import { cardAnchor } from './card-link.js';
 
 const S = window.BOOKING_SHOP;                   // build-aikainen konfiguraatio (kieli, polut, ei-verkossa-varattavat tuotteet)
 const t = T[S.lang] || T.fi;
@@ -59,7 +61,7 @@ const h = (tag, attrs, ...kids) => {
 };
 const money = (n) => new Intl.NumberFormat(S.lang === 'fi' ? 'fi-FI' : 'en-FI', { style: 'currency', currency: 'EUR', minimumFractionDigits: Number.isInteger(+n) ? 0 : 2 }).format(+n);
 const fmt = (iso, o) => new Intl.DateTimeFormat(S.lang === 'fi' ? 'fi-FI' : 'en-GB', { timeZone: TZ, ...o }).format(new Date(iso));
-const hm = (iso) => fmt(iso, { hour: 'numeric', minute: '2-digit', hourCycle: 'h23' }).replace('.', ':').replace(/:00$/, '');
+const hm = (iso) => clockFromIso(iso, S.lang);
 const dayLong = (iso) => fmt(iso, { weekday: 'long', day: 'numeric', month: 'long' });
 const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const todayHel = () => new Date().toLocaleDateString('sv-SE', { timeZone: TZ });
@@ -251,12 +253,13 @@ function viewList(query) {
   const list = cat.filter((p) => k === 'all' || kindOf(p) === k);
   const tabs = h('nav', { class: 'bk-tabs', 'aria-label': t.title }, kinds.map((x) => h('a', { href: bk(`/?k=${x}`), 'aria-current': x === k ? 'true' : null, text: t['k_' + x] || t[x] || x })));
   const cards = h('ul', { class: 'bk-cards' }, list.map((p) => p.treatment ? tv.card(p) : h('li', { class: 'bk-card' },
-    pimg(p, 'card-img'),
-    h('h3', {}, h('a', { href: bk(`/tuote/${p.slug}`), text: pname(p) })),
-    cardExcerpt(p),
-    cardMeta(h, priceText(p), pdur(p)),   // ajankohta omalla rivillään hinnan yläpuolella (card-meta.js)
-    h('p', { class: 'bk-quiet-line', hidden: true, 'data-qp': p.id, 'data-qmark': 'list' }),   // booking_162: täyttyy vain, jos tuotteella on hiljaisen ajan ale
-    h('a', { class: 'btn sm', href: bk(`/tuote/${p.slug}`) }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) })))));
+    cardAnchor(h, bk(`/tuote/${p.slug}`),
+      pimg(p, 'card-img'),
+      h('h3', { text: pname(p) }),
+      cardExcerpt(p),
+      cardMeta(h, priceText(p), pdur(p)),   // ajankohta omalla rivillään hinnan yläpuolella (card-meta.js)
+      h('p', { class: 'bk-quiet-line', hidden: true, 'data-qp': p.id, 'data-qmark': 'list' }),   // booking_162: täyttyy vain, jos tuotteella on hiljaisen ajan ale
+      h('span', { class: 'btn sm' }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) }))))));
   const annual = annualPromo();
   mount(h('header', { class: 'bk-head' }, h('h2', { text: t.title }), h('p', { class: 'lead', text: t.lead })), modeSwitch('cat'), tabs, cards, annual);
 }
@@ -538,7 +541,7 @@ async function viewProduct(slug, dateStr, query) {
     const markSel = () => calBox.querySelectorAll('.bk-cell[aria-pressed]').forEach((b) => { const on = b.textContent === String(+sel?.slice(8)) && sel?.startsWith(`${y}-${pad2(m + 1)}`); b.classList.toggle('sel', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
     const drawSlots = () => {
       if (!sel) { slotBox.replaceChildren(); return; }
-      const rows = visibleWaitlistSlots(byDay[sel] || []);   // vapaat ensin, loppuunmyydyt lopuksi
+      const rows = visibleWaitlistSlots(byDay[sel] || []);   // alkamisajan mukaan; loppuunmyyty jää harmaana paikalleen
       slotBox.replaceChildren(h('h3', { text: `${t.pickSlot} – ${dayLong(`${sel}T12:00:00Z`)}` }),
         rows.length ? h('ul', { class: 'bk-slotlist' }, rows.map((r) => slotItem(r, sel, p))) : h('p', { text: t.noSlots }));
     };
@@ -647,12 +650,13 @@ function customerFields({ onChange } = {}) {
   return { node, read, kind: () => kind, invoiceMethod: () => invoiceMethod };
 }
 // Lisätiedot, ehdot ja markkinointisuostumus (nodes: lomakkeeseen järjestyksessä; terms/consent: valintaruudut)
-function legalFields() {
+function legalFields({ showCancel = false } = {}) {
   const terms = h('input', { type: 'checkbox', id: 'bk-terms', required: true });
   const consent = h('input', { type: 'checkbox', id: 'bk-consent' });
   const nodes = [h('div', { class: 'bk-field' }, h('label', { for: 'note', text: t.note }), h('textarea', { id: 'note', name: 'note', rows: 3, maxlength: 1000 })),
+    showCancel && S.cancelRule ? h('p', { class: 'bk-note bk-cancel-rule', 'data-testid': 'checkout-cancel-rule', text: S.cancelRule }) : null,
     h('div', { class: 'bk-check' }, terms, h('label', { for: 'bk-terms' }, t.acceptTerms + ' ', h('a', { href: S.termsHref, target: '_blank', rel: 'noopener', text: t.termsLink }), ' *')),
-    h('div', { class: 'bk-check' }, consent, h('label', { for: 'bk-consent', text: t.consentMarketing }))];
+    h('div', { class: 'bk-check' }, consent, h('label', { for: 'bk-consent', text: t.consentMarketing }))].filter((n) => n != null);
   return { nodes, terms, consent };
 }
 
@@ -718,7 +722,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
   const ritWant = () => !!rit.offer && rit.sel.qty > 0 && !annualOn();
   const ritOn = () => ritWant() && !!rit.sel.key;
   const ritualSum = () => (ritWant() ? ritualPrice(rit.offer, rit.sel.qty) : 0);
-  const rtm = (iso) => fmt(iso, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).replace('.', ':');
+  const rtm = (iso) => clockFromIso(iso, S.lang);
   const ritName = () => (S.lang === 'en' && rit.offer?.name_en) || rit.offer?.name || rtx('ritualTitle');
   const ritErr = (text) => { if (!rit.ui) return; rit.ui.err.textContent = text || ''; rit.ui.err.hidden = !text; rit.ui.sel.setAttribute('aria-invalid', text ? 'true' : 'false'); };
   async function loadRitual() {
@@ -827,7 +831,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
   const hm0 = holdModeOf(null, state.settings);   // oletus asetuksesta (vain luku); palvelimen public_checkout_payment_options päivittää alla
   const hmode = { on: false, minutes: hm0.minutes };   // uusi pitotila vain kun palvelin sanoo (hold_until_paid); asetus ohjaa vain vanhaa ohjetekstiä
   const submit = h('button', { type: 'submit', class: 'btn gold', 'data-testid': 'checkout-submit', text: hmode.on ? ht(S.lang, 'checkout.button') : t.book });
-  const legal = legalFields(), { terms, consent } = legal;
+  const legal = legalFields({ showCancel: true }), { terms, consent } = legal;
   // Ilmainen (vuosikortti tai 100 % koodi) → "Vahvista varaus"; muuten ennallaan.
   const free = () => !!code.quote && code.sig === sig() && +code.quote.total === 0;
   // cf.kind on funktio. formPaysOnline vertaa kindiä merkkijonoon, joten olio pitää avata.
@@ -965,6 +969,18 @@ async function viewCheckout(ruleId, ds, productId, via) {
   loadRitual();
 }
 
+function retryBookingHref(b, it, stMap) {
+  const slug = stMap?.get(+it?.product_id)?.slug;
+  if (!slug || !it?.starts_at) return bk('/');
+  const ds = new Date(it.starts_at).toLocaleDateString('sv-SE', { timeZone: TZ });
+  if (isTreatmentBooking(b)) {
+    const parts = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(it.starts_at));
+    const hh = parts.find((p) => p.type === 'hour')?.value || '00';
+    const mm = parts.find((p) => p.type === 'minute')?.value || '00';
+    return bk(`/tuote/${slug}?n=${it.persons || 1}&d=${ds}&t=${hh}${mm}`);
+  }
+  return bk(`/tuote/${slug}/${ds}`);
+}
 // ---- vahvistussivu ----
 const ics = (b) => {
   const { main, ritual } = splitItems(b.items), z = (iso) => new Date(iso).toISOString().replace(/[-:]|\.\d{3}/g, '');
@@ -1007,6 +1023,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     const tp = state.treatments.find((x) => x.id === +it.product_id);
     if (tp && needsOption(tp)) { optRow = ox.notChosen; optNote = ox.notChosenConfirm; }
   }
+  const unpaidEnd = ['cancelled', 'expired'].includes(b.status) && !['paid', 'refunded', 'partially_refunded'].includes(b.payment_status) && !paysByInvoice(b);
   const dl = h('dl', { class: 'bk-sum' },
     h('dt', { text: t.order }), h('dd', { text: String(b.order_no) }), h('dt', { text: t.what }), h('dd', { text: prodName }),
     optRow ? [h('dt', { text: ox.what }), h('dd', { 'data-testid': 'conf-option', class: it.option ? '' : 'bk-opt-missing', text: optRow })] : null,
@@ -1035,7 +1052,9 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     b.status === 'confirmed' && b.payment_status !== 'paid' && b.payment_status !== 'invoiced' && !paysByInvoice(b) && !isTreatmentBooking(b) && !online ? h('p', { class: 'bk-pay', text: t.payLater }) : null, optNote && b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-option-note', text: optNote }) : null, actions, out,
     b.status === 'confirmed' && (b.has_ritual_addon || ritItems.length) ? h('p', { class: 'bk-note', 'data-testid': 'conf-ritual-note', text: rtx('ritualConfNote') }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email }))
       : b.status === 'confirmed' ? h('p', { class: 'bk-note', text: b.can_change ? t.changeInfo(b.change_hours_before, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) : t.changeLocked(b.change_hours_before) }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })) : null,
-    h('p', { class: 'bk-note', text: t.emailNote }), h('p', {}, h('a', { href: S.infoHref, text: t.directions }))));
+    unpaidEnd ? h('p', { class: 'bk-note', 'data-testid': 'conf-unpaid', text: t.unpaidCancel }) : null,
+    unpaidEnd ? h('p', { class: 'bk-actions' }, h('a', { class: 'btn', 'data-testid': 'conf-retry', href: retryBookingHref(b, it, stMap), text: t.tryAgain })) : null,
+    h('p', {}, h('a', { href: S.infoHref, text: t.directions }))));
   if (b.status === 'confirmed' && !inv.locked) {
     root.querySelector('.bk-conf')?.append(orderUpsellSection({
       S, L, token, order: confirmationUpsellOrder(b), rpc,
