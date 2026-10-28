@@ -40,6 +40,9 @@ import { customerInvoiceLock } from './invoice-lock.js';
 import { formPaysOnline, paysByInvoice } from './company-pay.js';
 import { clockFromIso } from './clock.js';
 import { cardAnchor } from './card-link.js';
+import { bindLangLinks, restoreDraft } from './lang-switch.js';
+import { confirmPageKind } from './confirm-heading.js';
+import { includedPlain, swimwearPlain, swimwearKey } from './product-layout.js';
 
 const S = window.BOOKING_SHOP;                   // build-aikainen konfiguraatio (kieli, polut, ei-verkossa-varattavat tuotteet)
 const t = T[S.lang] || T.fi;
@@ -218,7 +221,15 @@ const dayState = (rows) => (!rows?.length ? 'none' : rows.some((r) => r.status =
 // Sivun oma hero (<section class="hero page">) on build-aikaista HTML:ää: oletus palautetaan kaikissa muissa näkymissä. Ei erillistä hero-kenttää: sama tuotekuva (object-fit: cover, keskitetty).
 // Lyhyt kuvaus (booking_156): tuotteen oma short_description(_en) korvaa johdetun otteen; tyhjä → ensimmäinen virke kuvauksesta (heroShort, short-desc.js). Pitkä kuvaus pysyy sisältöosassa.
 const hero = { def: null };
+function placeGiftNudge(show) {
+  document.querySelector('main .hero.page .bk-gift-nudge')?.remove();
+  if (!show || S.audience === 'business' || S.page !== 'shop' || !S.links?.gift || !t.giftLink) return;
+  const sub = document.querySelector('main .hero.page .in p');
+  if (!sub) return;
+  sub.after(h('p', { class: 'bk-gift-nudge' }, h('a', { href: S.links.gift, 'data-testid': 'gift-nudge', text: t.giftLink })));
+}
 function setHero(p) {
+  placeGiftNudge(false);
   const el = document.querySelector('main .hero.page'); document.documentElement.classList.remove('bk-hero-wait');
   if (!el) return;
   const h1 = el.querySelector('h1'), sub = el.querySelector('.in p'), cur = el.querySelector('picture');
@@ -245,6 +256,7 @@ function setHero(p) {
 const cardExcerpt = (p) => cardShort(h, p, S.lang, pdesc(p));
 // ---- näkymä 1: tuotelista ----
 function viewList(query) {
+  placeGiftNudge(true);
   const cat = [...state.catalog, ...state.treatments.filter(treatmentListed)];   // lisätuotteet (LISTING_HIDDEN_SLUGS) eivät näy listalla; tuotesivu toimii
   const kinds = chipsFor(cat);   // tyhjä kategoria ei saa chippiä; tapahtuma omassa chipissä (catalog-kind.js)
   const k = kinds.includes(query.get('k')) ? query.get('k') : 'all';
@@ -412,6 +424,7 @@ function prodCard(p, rs, ds, open, onToggle, treat = false) {
   return li;
 }
 async function viewDay(dateStr, keep, openSlug) {
+  placeGiftNudge(true);
   const today = todayHel(), horizon = state.settings.booking_horizon_days || 120, maxDs = addDays(today, horizon);
   let ds = /^\d{4}-\d\d-\d\d$/.test(dateStr || '') ? dateStr : today;
   if (Number.isNaN(Date.parse(`${ds}T12:00:00Z`))) ds = today;
@@ -506,11 +519,19 @@ async function viewProduct(slug, dateStr, query) {
   const wrap = h('div', { class: 'bk-prod' });
   const draw = async () => {
     const calBox = h('div', { class: 'bk-cal' }), slotBox = h('div', { class: 'bk-slots', 'aria-live': 'polite' });
+    const desc = pdesc(p) || '';
+    const inc = includedPlain(desc), swim = swimwearPlain(desc);
     wrap.replaceChildren(
       h('p', {}, h('a', { href: bk('/'), text: t.backList })),
-      richHost(h, pdesc(p) || '', 'bk-desc'),
-      h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), pdur(p) ? ` · ${pdur(p)}` : ''),
-      h('h3', { text: t.pickDate }), calBox, slotBox);
+      h('div', { class: 'bk-prod-layout' },
+        h('div', { class: 'bk-facts' },
+          h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), pdur(p) ? ` · ${pdur(p)}` : ''),
+          inc ? h('p', { class: 'bk-included', 'data-testid': 'included', text: inc }) : null,
+          swim ? h('p', { class: 'bk-note bk-swim', 'data-testid': 'swimwear', text: swim }) : null,
+          S.cancelRule ? h('p', { class: 'bk-note bk-cancel-rule', 'data-testid': 'product-cancel', text: S.cancelRule }) : null,
+          h('a', { class: 'bk-jump', href: '#valitse-aika', text: t.pickTime })),
+        h('div', { class: 'bk-prod-cal', id: 'valitse-aika' }, h('h3', { text: t.pickDate }), calBox, slotBox),
+        desc ? h('details', { class: 'bk-more' }, h('summary', { text: t.moreInfo }), richHost(h, desc, 'bk-desc')) : null));
     let byDay = {};
     try { byDay = await loadMonth(p.id, y, m); } catch (e) { calBox.append(errorBox(t.loadError)); return; }
     const first = new Date(y, m, 1), days = new Date(y, m + 1, 0).getDate(), lead = (first.getDay() + 6) % 7;
@@ -1022,6 +1043,16 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     const tp = state.treatments.find((x) => x.id === +it.product_id);
     if (tp && needsOption(tp)) { optRow = ox.notChosen; optNote = ox.notChosenConfirm; }
   }
+  const pageKind = confirmPageKind(b, co, paysByInvoice(b));
+  const pageTitle = { finish: t.finishTitle, cancelled: t.confCancelled, expired: t.confExpired, preliminary: ht(S.lang, 'status.preliminary') }[pageKind];
+  if (pageTitle) {
+    const h1 = document.querySelector('main .hero.page h1');
+    if (h1) h1.textContent = pageTitle;
+    const rest = document.title.includes(' | ') ? document.title.split(' | ').slice(1).join(' | ') : 'Sipoonjoen Perinnesauna';
+    document.title = `${pageTitle} | ${rest}`;
+    document.querySelector('meta[property="og:title"]')?.setAttribute('content', document.title);
+  }
+  const swimKey = (b.status === 'confirmed' || co?.confirmed) ? swimwearKey(sp?.slug) : null;
   const unpaidEnd = ['cancelled', 'expired'].includes(b.status) && !['paid', 'refunded', 'partially_refunded'].includes(b.payment_status) && !paysByInvoice(b);
   const dl = h('dl', { class: 'bk-sum' },
     h('dt', { text: t.order }), h('dd', { text: String(b.order_no) }), h('dt', { text: t.what }), h('dd', { text: prodName }),
@@ -1047,6 +1078,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   } }, t.cancelBooking));
   if (b.status === 'pending' && inv.locked) actions.append(h('p', { class: 'bk-note', role: 'status', 'data-testid': 'invoiced-cancel-note', text: t.invoicedCancelNote }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })));
   mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { 'data-testid': 'conf-title', text: b.status === 'cancelled' ? t.confCancelled : b.status === 'expired' ? t.confExpired : b.status === 'pending' || (co && co.awaiting) ? ht(S.lang, 'h2.awaiting') : t.confTitle }), h('p', { class: 'bk-status', role: 'status', 'data-testid': 'conf-status', text: head }), holdHost, mpHost, dl,   // pitotilassa: otsikko + tilabadge → pitopaneeli → tiivis tilausyhteenveto → maksuosio (secEl lisätään yhteenvedon jälkeen)
+    swimKey ? h('p', { class: 'bk-note bk-swim', 'data-testid': 'conf-swim', text: t[swimKey] }) : null,
     b.status === 'confirmed' && paysByInvoice(b) && b.payment_status !== 'paid' ? h('p', { class: 'bk-pay', text: t.companyInvoiceMethodNote }) : null,
     b.status === 'confirmed' && b.payment_status !== 'paid' && b.payment_status !== 'invoiced' && !paysByInvoice(b) && !isTreatmentBooking(b) && !online ? h('p', { class: 'bk-pay', text: t.payLater }) : null, optNote && b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-option-note', text: optNote }) : null, actions, out,
     b.status === 'confirmed' && (b.has_ritual_addon || ritItems.length) ? h('p', { class: 'bk-note', 'data-testid': 'conf-ritual-note', text: rtx('ritualConfNote') }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email }))
@@ -1241,8 +1273,9 @@ async function route(keep = false) {
   } catch (e) {
     console.warn('booking route error', e);
     mount(errorBox(t.loadError), phoneBox());
-  } finally { document.documentElement.classList.remove('bk-hero-wait'); }
+  } finally { document.documentElement.classList.remove('bk-hero-wait'); restoreDraft(root); }
 }
+if (S.otherHref) bindLangLinks(S.otherHref);
 let last = '';
 window.addEventListener('hashchange', () => {
   // päivän valinta kalenterissa vaihtaa hashin ilman uudelleenpiirtoa (replaceState ei laukaise tapahtumaa); muut siirtymät piirretään uudelleen

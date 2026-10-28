@@ -230,7 +230,7 @@
  {
   "key": "ui.gift.buy_lead_one",
   "lang": "fi",
-  "text": "Valitse avoin lahjakortti tai valmis paketti kahdelle. Kortti on voimassa {{var:months}} kuukauden ajan maksun jälkeen.",
+  "text": "Valitse avoin lahjakortti tai valmis paketti. Kortti on voimassa {{var:months}} kuukauden ajan maksun jälkeen.",
   "class": "protected",
   "kind": "plain",
   "max_len": 300,
@@ -242,7 +242,7 @@
  {
   "key": "ui.gift.buy_lead_one",
   "lang": "en",
-  "text": "Choose an open-value gift card or a ready-made package for two. The card is valid for {{var:months}} month after payment.",
+  "text": "Choose an open-value gift card or a ready-made package. The card is valid for {{var:months}} month after payment.",
   "class": "protected",
   "kind": "plain",
   "max_len": 350,

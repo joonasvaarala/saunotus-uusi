@@ -1,22 +1,42 @@
 // Paketti 11: Schema.org-lisäykset sivupohjiin + vanhojen WordPress-osoitteiden ohjaussivut.
-// Ei riippuvuuksia eikä selaimen ajonaikaista JS:ää. Hinnat samasta kb:stä ja samalla laskulla kuin näkyvät korttihinnat
+// Ei riippuvuuksia eikä selaimen ajonaikaista JS:ää. Sauna- ja hoitosivujen hinnat samasta kb:stä ja samalla laskulla kuin näkyvät korttihinnat
 // (priceOf), ja tuote merkitään vain, jos sen kortti (otsikko) näkyy samalla sivulla. Hintoja ei muuteta.
+// Lahjakorttisivu: Product/Offer tulee julkaistusta valikoimasta (gift-offers.js), ei cards.jsonin vanhoista Johku-korteista.
 // Ei aggregateRating-merkintää: arviot ovat Googlen (kolmannen osapuolen) arvioita, eikä niitä saa merkitä omaksi rakenteiseksi dataksi.
 import { kb, abs, e, priceOf, fromMode, site } from './lib.mjs';
 import { cards, pageDoc } from './content-texts.mjs';
 import { faqFor } from './kb-en.mjs';
 import { tx } from './site-texts.mjs';
+import { PUBLISHED_GIFT_PACKAGES } from '../booking/shop/src/gift-offers.js';
 
 // Sivut, joiden kortit saavat Product/Offer-merkinnän (sivuavain → korttiryhmät, joista kortteja voi näkyä)
-const PRODUCT_PAGES = new Set(['sauna', 'treatments', 'gift']);
+const PRODUCT_PAGES = new Set(['sauna', 'treatments']);
 const CARD_GROUPS = ['sauna', 'treatments', 'gift'];
 const bySlug = (slug) => kb.products.find((p) => p.slug === slug);
 const exactPrice = (c, p) => Number.isFinite(+priceOf(p)) && +priceOf(p) > 0 && (c.exact || !fromMode(p));
 
+function giftOfferSchema(lang, url, body) {
+  const out = [];
+  for (const p of PUBLISHED_GIFT_PACKAGES) {
+    const title = lang === 'en' ? p.name_en : p.name;
+    const description = (lang === 'en' ? p.description_en : p.description) || title;
+    const price = p.is_open ? p.min_amount : p.price;
+    if (!title || !(+price > 0) || !body.includes(`>${e(title)}`)) continue;
+    out.push({
+      '@context': 'https://schema.org', '@type': 'Product', '@id': `${url}#tuote-${p.code}`,
+      name: title, description, image: abs('/img/og-hero-ovi-uusi.jpg'),
+      brand: { '@id': abs('/#business') },
+      offers: { '@type': 'Offer', priceCurrency: 'EUR', price: String(+price), availability: 'https://schema.org/InStock', url },
+    });
+  }
+  return out;
+}
+
 /** Sivukohtaiset lisä-JSON-LD:t: Product+Offer näkyville hintakorteille, FAQPage infosivun näkyville kysymyksille. */
 export function seoSchemaForPage({ lang, key, url, body = '' }) {
   const out = [];
-  if (PRODUCT_PAGES.has(key)) {
+  if (key === 'gift') out.push(...giftOfferSchema(lang, url, body));
+  else if (PRODUCT_PAGES.has(key)) {
     const seen = new Set();
     for (const g of CARD_GROUPS) for (const c of Object.values(cards[g] || {})) {
       if (!c?.kb || !(c.show || []).includes('price') || seen.has(c.kb)) continue;

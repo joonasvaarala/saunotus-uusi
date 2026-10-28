@@ -117,7 +117,7 @@ test('EN-sivu: julkaistun EN-selosteen kohta 7 "Cookie-free visitor analytics" �
   assert.ok(PA.policyHasAnalyticsSection(p.body_en), 'snapshotin body_en sisältää kohdan 7');
   const html = quiet(() => R.policyPage('privacy', 'privacy', 'en'));
   assert.equal((html.match(/<h2>Cookieless visitor analytics<\/h2>/g) || []).length, 0);
-  assert.equal((html.match(/<p>7\. Cookie-free visitor analytics<\/p>/g) || []).length, 1);
+  assert.equal((html.match(/<h3 id="privacy-7">7\. Cookie-free visitor analytics<\/h3>/g) || []).length, 1);
   const fi = quiet(() => R.policyPage('privacy', 'privacy', 'fi'));
   assert.equal((fi.match(/<h2>Evästeetön kävijämittaus<\/h2>/g) || []).length, 0);
 });

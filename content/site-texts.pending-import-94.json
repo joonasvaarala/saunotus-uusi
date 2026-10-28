@@ -1,0 +1,182 @@
+[
+  {
+    "key": "page.book.lead",
+    "lang": "fi",
+    "text": "Valitse kokemus, päivä ja vuoro. Varaus vahvistuu maksun jälkeen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "R06: varauskaupan johdanto ei lupaa vahvistusta ennen maksua. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "page.book.lead",
+    "lang": "en",
+    "text": "Choose an experience, a day and a session. The booking is confirmed after payment.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "R06: varauskaupan johdanto ei lupaa vahvistusta ennen maksua. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.shop.lead",
+    "lang": "fi",
+    "text": "Valitse kokemus, päivä ja vuoro. Varaus vahvistuu maksun jälkeen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "R06: sama johdanto kaupan sanakirjassa. FI+EN."
+  },
+  {
+    "key": "ui.shop.lead",
+    "lang": "en",
+    "text": "Choose an experience, a day and a session. The booking is confirmed after payment.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "R06: sama johdanto kaupan sanakirjassa. FI+EN."
+  },
+  {
+    "key": "ui.shop.finish_title",
+    "lang": "fi",
+    "text": "Viimeistele varaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "R06: maksamattoman varauksen H1 ja selaimen otsikko. FI+EN."
+  },
+  {
+    "key": "ui.shop.finish_title",
+    "lang": "en",
+    "text": "Finish your booking",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "R06: maksamattoman varauksen H1 ja selaimen otsikko. FI+EN."
+  },
+  {
+    "key": "ui.shop.more_info",
+    "lang": "fi",
+    "text": "Lisätietoja",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "R08: tuotesivun pitkä kuvaus avattavana. FI+EN."
+  },
+  {
+    "key": "ui.shop.more_info",
+    "lang": "en",
+    "text": "More information",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "R08: tuotesivun pitkä kuvaus avattavana. FI+EN."
+  },
+  {
+    "key": "ui.shop.pick_time",
+    "lang": "fi",
+    "text": "Valitse aika",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "R08: mobiilin ankkuri kalenteriin. FI+EN."
+  },
+  {
+    "key": "ui.shop.pick_time",
+    "lang": "en",
+    "text": "Choose a time",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "R08: mobiilin ankkuri kalenteriin. FI+EN."
+  },
+  {
+    "key": "ui.shop.swim_public",
+    "lang": "fi",
+    "text": "Torstain, lauantain ja sunnuntain yleisellä vuorolla saunotaan uima-asussa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "R03: vahvistuksen uima-asuohje yleiselle vuorolle. FI+EN."
+  },
+  {
+    "key": "ui.shop.swim_public",
+    "lang": "en",
+    "text": "Swimwear is worn on the Thursday, Saturday and Sunday public sessions.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "R03: vahvistuksen uima-asuohje yleiselle vuorolle. FI+EN."
+  },
+  {
+    "key": "ui.shop.swim_optional",
+    "lang": "fi",
+    "text": "Tällä vuorolla uima-asu on vapaaehtoinen (maanantai–keskiviikko).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "R03: vahvistuksen uima-asuohje ma–ke. FI+EN."
+  },
+  {
+    "key": "ui.shop.swim_optional",
+    "lang": "en",
+    "text": "Swimwear is optional on this session (Monday–Wednesday).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "R03: vahvistuksen uima-asuohje ma–ke. FI+EN."
+  },
+  {
+    "key": "page.info.sections.1.blocks.5.note",
+    "lang": "fi",
+    "text": "**Uima-asun käyttö riippuu vuorosta.** Torstain yleisellä vuorolla sekä lauantain ja sunnuntain vuoroilla saunotaan uima-asussa. Uima-asu on vapaaehtoinen vain maanantain miestenvuorolla, tiistain naistenvuorolla ja keskiviikon hiljaisella sekavuorolla. Henkilökohtaisissa saunahoidoissa ja saunotuksissa voit olla oman toiveesi mukaan kokonaan tai osittain ilman uima-asua.",
+    "class": "normal",
+    "kind": "lite",
+    "max_len": 1200,
+    "placeholders": [],
+    "reason": "R03: infosivun uima-asuohje nimeää torstain ja viikonlopun. FI+EN. **lihavointi** = strong."
+  },
+  {
+    "key": "page.info.sections.1.blocks.5.note",
+    "lang": "en",
+    "text": "**Swimsuit use depends on the session.** Swimwear is worn on the Thursday public session and on Saturday and Sunday. Swimwear is optional only on the Monday men's session, the Tuesday women's session and the Wednesday silent mixed session. In personal sauna treatments and saunotus sessions you can be fully or partially without a swimsuit, as you wish.",
+    "class": "normal",
+    "kind": "lite",
+    "max_len": 1200,
+    "placeholders": [],
+    "reason": "R03: infosivun uima-asuohje nimeää torstain ja viikonlopun. FI+EN. **lihavointi** = strong."
+  },
+  {
+    "key": "ui.card.treatments.morsiussauna.cta",
+    "lang": "fi",
+    "text": "Kysy ajankohtaa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "R13: yhteydenotolla varattavan Morsiussaunan kortti ei lupaa verkkovarausta. FI+EN."
+  },
+  {
+    "key": "ui.card.treatments.morsiussauna.cta",
+    "lang": "en",
+    "text": "Ask for a time",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "R13: yhteydenotolla varattavan Morsiussaunan kortti ei lupaa verkkovarausta. FI+EN."
+  }
+]

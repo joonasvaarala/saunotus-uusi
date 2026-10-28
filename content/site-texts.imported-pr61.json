@@ -5694,7 +5694,7 @@
  {
   "key": "ui.gift.buy_lead",
   "lang": "fi",
-  "text": "Valitse avoin lahjakortti tai valmis paketti kahdelle. Kortti on voimassa {{var:months}} kuukautta maksun jälkeen.",
+  "text": "Valitse avoin lahjakortti tai valmis paketti. Kortti on voimassa {{var:months}} kuukautta maksun jälkeen.",
   "class": "protected",
   "kind": "plain",
   "max_len": 300,
@@ -5706,10 +5706,10 @@
  {
   "key": "ui.gift.buy_lead",
   "lang": "en",
-  "text": "Choose an open-value gift card or a ready-made package for two. The card is valid for {{var:months}} months after payment.",
+  "text": "Choose an open-value gift card or a ready-made package. The card is valid for {{var:months}} months after payment.",
   "class": "protected",
   "kind": "plain",
-  "max_len": 350,
+  "max_len": 300,
   "placeholders": [
    "{{var:months}}"
   ],
@@ -5758,7 +5758,7 @@
  {
   "key": "ui.gift.pkg_kicker",
   "lang": "fi",
-  "text": "Paketti kahdelle",
+  "text": "Paketti",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -5768,7 +5768,7 @@
  {
   "key": "ui.gift.pkg_kicker",
   "lang": "en",
-  "text": "Package for two",
+  "text": "Package",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,

@@ -2,6 +2,7 @@
 // Lähteet ovat samat kuin kaupalla: public_availability_all, public_events ja public_catalog.
 // Päiviä ei näytetä. Täysi vuoro ja täysi tapahtuma piilotetaan. Hakuvirheessä kutsua ei tehdä, ja ohjelma jää ennalleen.
 import { addDaysIso, weekdayIso } from './quiet-offers-logic.js';
+import { dayLabel } from './event-date.js';
 
 const TZ = 'Europe/Helsinki';
 
@@ -102,18 +103,12 @@ export function weekEvents(events, { today, now } = {}) {
   return out.sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time, 'fi') || String(a.key).localeCompare(String(b.key)));
 }
 
-const MON_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const dm = (iso, lang) => {
-  const [y, m, d] = ymdHel(iso).split('-').map(Number);
-  if (!y) return '';
-  return lang === 'en' ? `${d} ${MON_EN[m - 1]}` : `${d}.${m}.`;
-};
-/** Kortin päivä(t), ei vuotta. Monipäiväinen: alku–loppu. */
-export function cardDates(o, lang = 'fi') {
+/** Kortin päivä(t). Kuluva vuosi ilman vuotta, muu vuosi vuoden kanssa. Monipäiväinen: alku–loppu. */
+export function cardDates(o, lang = 'fi', now = Date.now()) {
   if (!o?.starts_at) return '';
-  const a = dm(o.starts_at, lang);
+  const a = dayLabel(o.starts_at, lang, now);
   if (!a) return '';
-  if (o.ends_at && ymdHel(o.ends_at) !== ymdHel(o.starts_at)) return `${a}–${dm(o.ends_at, lang)}`;
+  if (o.ends_at && ymdHel(o.ends_at) !== ymdHel(o.starts_at)) return `${a}–${dayLabel(o.ends_at, lang, now)}`;
   return a;
 }
 /** Kortin kellonaika ilman päivämäärää. EN 16:00–19:00, FI klo 16.00–19.00. Vain yksipäiväiselle. */

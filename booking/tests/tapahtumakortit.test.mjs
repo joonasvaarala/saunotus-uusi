@@ -35,9 +35,12 @@ test('selectShopEvents: vain vapaat tulevat kerrat; full, closed ja menneet pois
 
 test('päivät ja kellonajat: yksipäiväinen ja monipäiväinen FI/EN', () => {
   const one = o('2026-11-14T14:00:00Z', '2026-11-14T17:00:00Z'), two = o('2026-11-28T07:00:00Z', '2026-11-29T14:00:00Z');
-  assert.equal(C.occDates(one, 'fi'), '14.11.');
-  assert.equal(C.occDates(two, 'fi'), '28.11.–29.11.');
-  assert.equal(C.occDates(two, 'en'), '28 Nov–29 Nov');
+  const nextYear = o('2027-02-06T14:00:00Z', '2027-02-06T17:00:00Z');
+  assert.equal(C.occDates(one, 'fi', NOW), '14.11.');
+  assert.equal(C.occDates(two, 'fi', NOW), '28.11.–29.11.');
+  assert.equal(C.occDates(two, 'en', NOW), '28 Nov–29 Nov');
+  assert.equal(C.occDates(nextYear, 'fi', NOW), '6.2.2027');
+  assert.equal(C.occDates(nextYear, 'en', NOW), '6 Feb 2027');
   assert.equal(C.occTime(one, 'fi'), 'klo 16.00–19.00');
   assert.equal(C.occTime(one, 'en'), '16:00–19:00');
   assert.equal(C.occTime(two, 'fi'), '');

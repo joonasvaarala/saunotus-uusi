@@ -126,6 +126,7 @@ test('etusivu: järjestys, ei varaa-verkosta-listaa, torstai 16:00, kaksi tapaht
   assert.doesNotMatch(ev, /Sipoonjoen Kekri|Perinnesaunotusilta/);
   assert.match(ev, /data-live-events/);
   assert.match(ev, /Kaikki tapahtumat/);
+  assert.match(ev, /href="\/varaa\/#\/\?k=tapahtuma"/);
   assert.match(fi, /<summary>Voiko vuoroon saapua myöhässä\?<\/summary>/);
   assert.match(fi, /<summary>Voinko perua tai muuttaa varausta\?<\/summary>/);
   assert.match(fi, /<summary>Mitä pitää ottaa mukaan\?<\/summary>/);
