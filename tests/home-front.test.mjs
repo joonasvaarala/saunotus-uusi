@@ -26,7 +26,7 @@ test('perinne-osio säilyttää home.json about -kentän FI+EN sanasta sanaan', 
 });
 
 test('pending-import-85 vastaa HOME_TEXTS-varatekstejä, FI+EN, ei HTML:ää', () => {
-  const extra = JSON.parse(readFileSync(new URL('../content/site-texts.pending-import-86.json', import.meta.url), 'utf8'));
+  const extra = JSON.parse(readFileSync(new URL('../content/site-texts.pending-import-87.json', import.meta.url), 'utf8'));
   const gift = new Set(['ui.site.home_gift_cta']);
   for (const [key, v] of Object.entries(HOME_TEXTS)) for (const lang of ['fi', 'en']) {
     const pool = gift.has(key) ? extra : pending;
