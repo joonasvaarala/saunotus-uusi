@@ -16,6 +16,8 @@ drop function if exists booking.admin_event_occurrence_cancel(bigint);
 drop function if exists booking._event_message_blocked(text);
 
 drop trigger if exists reservations_drop_event_note on booking.reservations;
+drop trigger if exists customers_drop_event_notes on booking.customers;
+drop function if exists booking.customers_drop_event_notes();
 drop function if exists booking.reservations_drop_event_note();
 drop table if exists booking.event_participant_notes;
 drop table if exists booking.event_messages;
@@ -183,6 +185,8 @@ begin
     from pg_constraint c
    where c.conrelid = 'booking.email_outbox'::regclass and c.conname = 'email_outbox_kind_check';
   if def is null or position('event_message' in def) = 0 then return; end if;
+  -- event_message-rivejä ei voi jättää vanhan rajoitteen alle; ilman claim-haaraa niitä ei lähetettäisi muutenkaan.
+  delete from booking.email_outbox where kind = 'event_message';
   expr := regexp_replace(def, '''event_message''::text,\s*', '', 'g');
   if position('event_message' in expr) > 0 then
     raise exception 'booking_202 rollback: event_message jäi rajoitteeseen';

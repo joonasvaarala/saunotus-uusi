@@ -60,19 +60,22 @@ alter table booking.event_messages enable row level security;
 revoke all on booking.event_messages from public, anon, authenticated;
 grant all on booking.event_messages to service_role;
 
+-- Muistiinpanoa ei auditoida: audit_logia ei anonymisoida tämän taulun osalta (updated_by/updated_at riittävät).
 drop trigger if exists audit_trg on booking.event_participant_notes;
 drop trigger if exists audit_trg on booking.event_messages;
-select booking._add_audit('booking.event_participant_notes');
 select booking._add_audit('booking.event_messages');
 
 create or replace function booking.reservations_drop_event_note() returns trigger
 language plpgsql security definer set search_path = '' as $$
 begin
-  -- booking_160 nollaa varauksen vapaat tekstit yhdessä. Silloin myös henkilökunnan muistiinpano poistuu.
+  -- booking_160 nollaa varauksen vapaat tekstit yhdessä vasta, kun asiakas on anonymisoitu (tai tilauksella ei ole asiakasta).
+  -- Tavallinen muokkaus (esim. notes tyhjäksi) ei poista henkilökunnan muistiinpanoa.
   if new.notes is null and new.cancel_reason is null and new.therapist_exception_note is null
      and new.override_reason is null and new.hidden_reason is null
      and (old.notes is not null or old.cancel_reason is not null or old.therapist_exception_note is not null
-          or old.override_reason is not null or old.hidden_reason is not null) then
+          or old.override_reason is not null or old.hidden_reason is not null)
+     and exists (select 1 from booking.orders o left join booking.customers c on c.id = o.customer_id
+                  where o.id = new.order_id and (o.customer_id is null or c.anonymized_at is not null)) then
     delete from booking.event_participant_notes where reservation_id = new.id;
   end if;
   return null;
@@ -81,6 +84,22 @@ drop trigger if exists reservations_drop_event_note on booking.reservations;
 create trigger reservations_drop_event_note after update of notes, cancel_reason, therapist_exception_note, override_reason, hidden_reason
   on booking.reservations for each row execute function booking.reservations_drop_event_note();
 revoke all on function booking.reservations_drop_event_note() from public, anon, authenticated;
+
+-- Asiakkaan anonymisointi (privacy_retention_run asettaa anonymized_at) poistaa kaikki hänen tapahtumamuistiinpanonsa,
+-- myös varauksista, joilla ei ole muita vapaita tekstejä (niitä booking_160 ei päivitä).
+create or replace function booking.customers_drop_event_notes() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  delete from booking.event_participant_notes n
+   using booking.reservations x, booking.orders o
+   where n.reservation_id = x.id and x.order_id = o.id and o.customer_id = new.id;
+  return null;
+end $$;
+drop trigger if exists customers_drop_event_notes on booking.customers;
+create trigger customers_drop_event_notes after update of anonymized_at on booking.customers
+  for each row when (old.anonymized_at is null and new.anonymized_at is not null)
+  execute function booking.customers_drop_event_notes();
+revoke all on function booking.customers_drop_event_notes() from public, anon, authenticated;
 
 -- Maksuvälittäjän nimeä ei hyväksytä asiakkaalle lähtevään tekstiin.
 create or replace function booking._event_message_blocked(p_text text) returns boolean
@@ -196,21 +215,28 @@ begin
     if v_has_res and r.active and not v_active then
       perform booking._err('has_reservations', 'Kerralla on varauksia: kertaa ei voi passivoida. Peruuta kerta.');
     end if;
-    if coalesce(v_max, pc.max_persons) is not null and coalesce(v_max, pc.max_persons) < v_sold then
+    -- Hallinnan ylibuukkaama kerta (booking_192) on yhä muokattavissa; enimmäismäärää ei silti voi laskea alle myydyn.
+    if p_patch ? 'max_persons' and coalesce(v_max, pc.max_persons) is not null and coalesce(v_max, pc.max_persons) < v_sold then
       perform booking._err('max_below_sold', format('Enimmäismäärä ei voi olla pienempi kuin myydyt paikat (%s)', v_sold));
     end if;
     update booking.schedule_rules
        set label = v_label, label_en = v_label_en, weekdays = array[extract(isodow from v_date)::smallint], start_time = v_start,
            duration_minutes = v_dur, valid_from = v_date, valid_to = v_date, min_persons = v_min, max_persons = v_max,
-           price_variant_id = v_variant, deadline_minutes = v_deadline, active = v_active
+           price_variant_id = v_variant, deadline_minutes = v_deadline, active = v_active,
+           cancelled_at = case when v_active then null else cancelled_at end
      where id = r.id;
     v_id := r.id;
     if (v_date, v_start, v_dur) is distinct from (r.valid_from, r.start_time, r.duration_minutes) then
       v_new_start := (v_date + v_start) at time zone booking._tz();
       v_new_end := v_new_start + make_interval(mins => v_dur);
+      -- Kerran oma pooli: myydyt paikat siirtyvät sellaisenaan. Pooli nostetaan hetkeksi myytyyn määrään, jotta
+      -- hallinnan ylibuukkaama kerta siirtyy; _event_rule_pool_sync palauttaa kapasiteetin alla. Uusia paikkoja ei synny.
+      update booking.resources set capacity = v_sold where code = 'event_rule_' || r.id::text and capacity < v_sold;
+      -- Vanhentuneita pitoja ei siirretä (reservations_validate perii ne _expire_holdsilla saman lauseen aikana).
       update booking.reservations x
          set starts_at = v_new_start, ends_at = v_new_end
-       where x.rule_id = r.id and x.status in ('pending', 'confirmed', 'completed', 'no_show');
+       where x.rule_id = r.id
+         and (booking._res_active(x.status, x.hold_expires_at) or x.status in ('completed', 'no_show'));
       get diagnostics v_moved = row_count;
       update booking.waitlist_entries w
          set starts_at = v_new_start, ends_at = v_new_end, session_date = v_date
@@ -235,6 +261,10 @@ begin
   update booking.schedule_rules
      set cancelled_at = coalesce(cancelled_at, now()), active = false
    where id = r.id;
+  -- Perutun kerran jono suljetaan, ettei lippujen peruutus lähetä "paikka vapautui" -viestejä.
+  update booking.waitlist_entries w
+     set status = 'cancelled', updated_at = now()
+   where w.rule_id = r.id and w.status in ('waiting', 'notified');
   perform booking._event_sync_blocks(r.id);
   return booking._event_rule_json(r.id);
 end $$;
