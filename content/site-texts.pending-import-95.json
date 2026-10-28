@@ -1,0 +1,562 @@
+[
+ {
+  "key": "ui.site.treatments_hero_book",
+  "lang": "fi",
+  "text": "Varaa saunotus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_hero_book",
+  "lang": "en",
+  "text": "Book a saunotus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_hero_gift",
+  "lang": "fi",
+  "text": "Anna lahjaksi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_hero_gift",
+  "lang": "en",
+  "text": "Give as a gift",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_smoke",
+  "lang": "fi",
+  "text": "Sisältää savusaunan",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_smoke",
+  "lang": "en",
+  "text": "Includes the smoke sauna",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_ask",
+  "lang": "fi",
+  "text": "Kysy ajankohtaa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_ask",
+  "lang": "en",
+  "text": "Ask for a time",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_start_title",
+  "lang": "fi",
+  "text": "Mistä aloittaa?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_start_title",
+  "lang": "en",
+  "text": "Where to start?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_start_first_title",
+  "lang": "fi",
+  "text": "Ensimmäinen kerta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_start_first_title",
+  "lang": "en",
+  "text": "A first time",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_start_first_text",
+  "lang": "fi",
+  "text": "Avoimet rituaalit tarjoavat mahdollisuuden tutustua saunotukseen yhdessä muiden kanssa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_start_first_text",
+  "lang": "en",
+  "text": "Open rituals offer a chance to get to know saunotus together with others.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_start_own_title",
+  "lang": "fi",
+  "text": "Oma syvä kokemus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_start_own_title",
+  "lang": "en",
+  "text": "A deep experience of your own",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_start_own_text",
+  "lang": "fi",
+  "text": "Ohjattu saunaelämys hoitosauna Raunissa yhdelle tai kahdelle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_start_own_text",
+  "lang": "en",
+  "text": "A guided sauna experience in the Rauni treatment sauna for one or two people.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_start_group_title",
+  "lang": "fi",
+  "text": "Porukalla",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_start_group_title",
+  "lang": "en",
+  "text": "With a group",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_start_group_text",
+  "lang": "fi",
+  "text": "Yhteinen ohjattu saunaelämys omalle ryhmälle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_start_group_text",
+  "lang": "en",
+  "text": "A shared, guided sauna experience for your own group.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_steps_title",
+  "lang": "fi",
+  "text": "Näin saunotus etenee",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_steps_title",
+  "lang": "en",
+  "text": "How a saunotus goes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_step_arrive_title",
+  "lang": "fi",
+  "text": "Saapuminen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_step_arrive_title",
+  "lang": "en",
+  "text": "Arrival",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_step_arrive_text",
+  "lang": "fi",
+  "text": "Saunotus tehdään hoitosauna Raunissa. Hoitoasiakkaiden käytössä ovat pukukoppi, suihku ja huussi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_step_arrive_text",
+  "lang": "en",
+  "text": "Saunotus takes place in the Rauni treatment sauna. Treatment guests have a changing cubicle, a shower and an outdoor toilet.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_step_loyly_title",
+  "lang": "fi",
+  "text": "Löylyntervehdys",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_step_loyly_title",
+  "lang": "en",
+  "text": "The löyly greeting",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_step_loyly_text",
+  "lang": "fi",
+  "text": "Hoito alkaa rauhoittavalla löylyntervehdysrituaalilla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_step_loyly_text",
+  "lang": "en",
+  "text": "The treatment begins with a calming löyly greeting.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_step_care_title",
+  "lang": "fi",
+  "text": "Hoito",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_step_care_title",
+  "lang": "en",
+  "text": "The treatment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_step_care_text",
+  "lang": "fi",
+  "text": "Saunottaja johdattaa kokemusta lämmöllä, ilmalla, vedellä sekä vihdoilla, yrteillä, suolalla ja hunajalla. Halutessa mukaan voi tulla turvehoito. Voimakkuus mukautuu asiakkaan kokemuksen, toiveiden ja jaksamisen mukaan.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 650,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_step_care_text",
+  "lang": "en",
+  "text": "The sauna practitioner guides the experience using heat, air, water, whisks, herbs, salt and honey. If you wish, a peat treatment can also be included. The intensity of the löyly, the heat and the treatment is adapted to your experience, wishes and energy.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 650,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_step_tea_title",
+  "lang": "fi",
+  "text": "Rauhoittuminen ja yrttitee",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_step_tea_title",
+  "lang": "en",
+  "text": "Settling and herbal tea",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_step_tea_text",
+  "lang": "fi",
+  "text": "Saunotukseen kuuluu kellutus viileässä altaassa ja lämmittävä yrttitee. Syväsaunotukseen kuuluu myös pientä purtavaa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_step_tea_text",
+  "lang": "en",
+  "text": "Saunotus includes floating in a cool tub and a warming herbal tea. Deep saunotus also includes a light snack.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_fit_title",
+  "lang": "fi",
+  "text": "Sopiiko tämä minulle?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_fit_title",
+  "lang": "en",
+  "text": "Is this for me?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_fit_intensity",
+  "lang": "fi",
+  "text": "Saunottaja mukauttaa löylyn, lämmön ja hoidon voimakkuuden aina asiakkaan kokemuksen, toiveiden ja jaksamisen mukaan.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_fit_intensity",
+  "lang": "en",
+  "text": "The sauna practitioner always adapts the intensity of the löyly, the heat and the treatment to your experience, wishes and energy.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_fit_dress",
+  "lang": "fi",
+  "text": "Hoitoon voi osallistua alasti, osittain uima-asussa tai kokonaan uima-asussa. Kehon peittämiseen voidaan käyttää esimerkiksi vihtoja tai pyyhkeitä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_fit_dress",
+  "lang": "en",
+  "text": "You can take part in the treatment naked, partly in swimwear or fully in swimwear. Birch whisks or towels can be used to cover the body.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_fit_new",
+  "lang": "fi",
+  "text": "Myös löylyyn vähemmän tottunut asiakas voi saada saunotuksesta syvästi rentouttavan ja turvallisen kokemuksen.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_fit_new",
+  "lang": "en",
+  "text": "Even a guest less used to löyly can find the session a deeply relaxing and safe experience.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_session_link",
+  "lang": "fi",
+  "text": "Varaa saunavuoro",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_session_link",
+  "lang": "en",
+  "text": "Book a sauna session",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_faq_dress_q",
+  "lang": "fi",
+  "text": "Voinko osallistua uima-asussa tai alasti?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_faq_dress_q",
+  "lang": "en",
+  "text": "Can I take part in swimwear or naked?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_faq_new_q",
+  "lang": "fi",
+  "text": "Tarvitaanko aiempaa kokemusta?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_faq_new_q",
+  "lang": "en",
+  "text": "Do I need previous experience?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_faq_where_q",
+  "lang": "fi",
+  "text": "Missä hoidot ja saunotukset tehdään?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ },
+ {
+  "key": "ui.site.treatments_faq_where_q",
+  "lang": "en",
+  "text": "Where do the treatments and saunotus take place?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hoidot ja rituaalit -sivun uudistus (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla. Hinnat, kestot, slugit ja savusauna-lippu tulevat tuotteesta, eivät tästä."
+ }
+]

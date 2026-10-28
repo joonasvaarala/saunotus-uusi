@@ -13,6 +13,7 @@ import { privacyAnalyticsHtml, policyHasAnalyticsSection } from './privacy-analy
 import { policyText, privacyDocFor, linkContacts } from './policy-lang.mjs';
 import { quietWeekAttrs } from './quiet-week.mjs';
 import { experienceHtml, traditionHtml, infoStrip, companyStrip, homeText, homeBookCta } from './home-front.mjs';
+import { treatmentsBody } from './treatments-page.mjs';
 import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
 import { selectShopEvents, shopEventsHtml, shopHash } from './event-cards.mjs';
 import {
@@ -373,17 +374,9 @@ export function sauna(lang) {
 }
 
 export function treatments(lang) {
-  const d = P('treatments')[lang], u = ui(lang);
-  const T = (ks) => ks.map((k) => C('treatments.' + k));
-  const tb = u.trainingBanner;
-  const body = pageHero(d.hero, lang, 'treatments')
-    + sec('', `<div class="narrow center"><p class="kicker">${e(d.intro.kicker)}</p><h2 class="sec-title">${e(d.intro.title)}</h2><p class="lead">${e(d.intro.text)}</p><p class="note-box" style="text-align:left">${e(d.intro.note)}</p></div>`)
-    + sec('tint', `${head('', d.s1.title, d.s1.text, { orn: true })}${cardList(T(['saunahoito', 'saunotus', 'syvasaunotus', 'ryhma']), lang, 'two')}<p class="center" style="margin-top:20px">${e(d.s1.note)}</p>`, d.s1.id)
-    // rituaalit: Saunotusrituaali (kortti rituaali-lisa, kb 8) ei ole listalla, vaan jää lisätuotteeksi (booking_159); tuotesivu /varaa/#/tuote/saunotusrituaali toimii ennallaan
-    + sec('', `${head('', d.s2.title, d.s2.text, { orn: true })}${cardList(T(['avoin-rituaali', 'turvetorstai', 'perinnesaunotusilta']), lang)}`, d.s2.id)
-    + sec('tint', `${head('', d.s3.title, d.s3.text, { orn: true })}${cardList(T(['morsiussauna', 'turvesauna', 'synttarisauna']), lang, 'three')}<p class="center" style="margin-top:22px">${e(d.s3.note)} ${mailBtn(site.contact.email, d.s3.title, 'btn light sm')}</p>`, d.s3.id)
-    + sec('', `${head('', d.s4.title, d.s4.text, { orn: true })}${cardList(T(['opiskelija']), lang, 'two')}`)
-    + sec('tint', `<div class="narrow center"><h2 class="sec-title">${e(tb.title)}</h2><p>${e(tb.text)}</p><a class="btn" href="${e(site.trainingUrl)}" rel="noopener">${e(tb.cta)}${NEW(lang)}</a></div>`);
+  const d = P('treatments')[lang];
+  // Tuotekortit, polut, eteneminen ja UKK: src/treatments-page.mjs. Saunotusrituaali (kb 8) ei ole listalla (booking_159).
+  const body = treatmentsBody(lang, { reviews: reviewsSection(lang) });
   return layout({ lang, key: 'treatments', meta: d.meta, body });
 }
 

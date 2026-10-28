@@ -380,6 +380,55 @@ html.co-js.co-show-sauna #yritysvuorot,html.co-js.co-show-day #tarjous{display:b
   .tradition-photo img{object-position:50% 40%}
   .tradition-copy{padding:22px 18px 26px}
 }
+/* Hoidot ja rituaalit: tuotekortti sama kuin kaupassa (booking/shop/src/shop.css .bk-card). */
+.bk-cards{list-style:none;margin:0;padding:0;display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr))}
+.bk-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:0;display:flex;flex-direction:column;box-shadow:0 8px 22px rgba(63,53,44,.07)}
+.bk-card-link{display:flex;flex-direction:column;gap:6px;height:100%;padding:20px;color:inherit;text-decoration:none;border-radius:inherit}
+.bk-card-link:hover h3{color:var(--gold)}
+.bk-card-link:focus{outline:none}
+.bk-card-link:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.bk-card h3{margin:0;font-size:25px;font-weight:500}
+.bk-card .bk-desc{flex:1;font-size:16px;margin:0}
+.bk-card .btn{align-self:flex-start;margin-top:6px}
+.bk-meta{margin:0;color:var(--muted)}
+.bk-meta strong{color:var(--ink)}
+.bk-card-meta{margin-top:auto;display:flex;flex-direction:column;gap:2px;padding-top:4px}
+.bk-card-meta .bk-card-when{font-size:15px;line-height:1.45}
+.bk-card-meta .bk-card-price{line-height:1.4}
+.bk-img{position:relative;display:block;overflow:hidden;background:var(--tint)}
+.bk-img picture{display:block;width:100%;height:100%}
+.bk-img img{display:block;width:100%;height:100%;object-fit:cover}
+.bk-card .card-img{aspect-ratio:3/2;margin:-20px -20px 12px;border-radius:var(--r) var(--r) 0 0}
+.tr-smoke{margin:2px 0 0;font:600 11px/1.3 var(--label);letter-spacing:.06em;text-transform:uppercase;color:var(--green)}
+.tr-note{margin:22px auto 0;max-width:46em}
+.tr-note a{white-space:nowrap}
+.narrow.center .note-box{text-align:left}
+.tr-paths{list-style:none;margin:0;padding:0;display:grid;gap:18px}
+.tr-path{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px 22px 18px;display:flex;flex-direction:column;box-shadow:0 8px 22px rgba(63,53,44,.07)}
+.tr-path h3{font-size:26px;margin:0 0 .35em}
+.tr-path > p{margin:0 0 .6em}
+.tr-path-links{list-style:none;margin:auto 0 0;padding:0;display:grid;gap:2px}
+.tr-path-links a{display:inline-flex;align-items:center;min-height:44px;font:600 14px/1.35 var(--label);text-decoration:none}
+.tr-path-links a:hover{text-decoration:underline}
+.tr-steps{list-style:none;margin:0;padding:0;display:grid;gap:18px;counter-reset:tr}
+.tr-steps li{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:0 8px 22px rgba(63,53,44,.07)}
+.tr-step-img{aspect-ratio:3/2;overflow:hidden;background:var(--tint)}
+.tr-step-img img{width:100%;height:100%;object-fit:cover}
+.tr-steps h3{font-size:24px;margin:14px 16px .35em}
+.tr-steps p{font-size:15.5px;margin:0 16px 16px}
+.tr-fit{display:grid;gap:28px;align-items:center}
+.tr-fit ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:12px}
+.tr-fit li{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
+.tr-fit li p{margin:0}
+.tr-fit-photo{border-radius:18px;overflow:hidden;box-shadow:0 16px 36px rgba(60,45,30,.1)}
+.tr-fit-photo img{width:100%;height:100%;object-fit:cover;aspect-ratio:3/2}
+.faq .note-box p{margin:0}
+@media (min-width:720px){.tr-steps{grid-template-columns:1fr 1fr}}
+@media (min-width:900px){.tr-paths{grid-template-columns:repeat(3,minmax(0,1fr))}.tr-fit{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)}#saunotukset .bk-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1100px){.tr-steps{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:719px){.tr-path{padding:18px 16px 14px}.tr-steps h3{font-size:22px}}
+#mista-aloittaa,#saunotukset,#avoimet,#yksityiset,#nain-saunotus-etenee,#sopiiko-minulle,#ukk{scroll-margin-top:84px}
+
 /* Varausnappi arvostelujen ja Tapahtumat-otsikon välissä. Kulta erottuu Google-linkin ääriviivanapista. */
 .home-book{margin:0;padding:28px 20px 8px;text-align:center}
 .home-book .btn{min-height:48px}

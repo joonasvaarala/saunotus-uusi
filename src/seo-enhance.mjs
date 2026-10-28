@@ -8,9 +8,10 @@ import { cards, pageDoc } from './content-texts.mjs';
 import { faqFor } from './kb-en.mjs';
 import { tx } from './site-texts.mjs';
 import { PUBLISHED_GIFT_PACKAGES } from '../booking/shop/src/gift-offers.js';
+import { treatmentFaq, treatmentOffers } from './treatments-page.mjs';
 
-// Sivut, joiden kortit saavat Product/Offer-merkinnän (sivuavain → korttiryhmät, joista kortteja voi näkyä)
-const PRODUCT_PAGES = new Set(['sauna', 'treatments']);
+// Saunavuorot: Product/Offer näkyvistä cards.json-korteista. Hoidot ja rituaalit merkitään erikseen tuotteen korteista.
+const PRODUCT_PAGES = new Set(['sauna']);
 const CARD_GROUPS = ['sauna', 'treatments', 'gift'];
 const bySlug = (slug) => kb.products.find((p) => p.slug === slug);
 const exactPrice = (c, p) => Number.isFinite(+priceOf(p)) && +priceOf(p) > 0 && (c.exact || !fromMode(p));
@@ -36,7 +37,17 @@ function giftOfferSchema(lang, url, body) {
 export function seoSchemaForPage({ lang, key, url, body = '' }) {
   const out = [];
   if (key === 'gift') out.push(...giftOfferSchema(lang, url, body));
-  else if (PRODUCT_PAGES.has(key)) {
+  else if (key === 'treatments') {
+    for (const p of treatmentOffers(lang)) {
+      if (!p.exact || !p.name || !body.includes(`>${e(p.name)}`)) continue;
+      out.push({
+        '@context': 'https://schema.org', '@type': 'Product', '@id': `${url}#tuote-${p.id}`,
+        name: p.name, description: p.description, image: abs('/img/og-hero-ovi-uusi.jpg'),
+        brand: { '@id': abs('/#business') },
+        offers: { '@type': 'Offer', priceCurrency: 'EUR', price: String(p.price), availability: 'https://schema.org/InStock', url },
+      });
+    }
+  } else if (PRODUCT_PAGES.has(key)) {
     const seen = new Set();
     for (const g of CARD_GROUPS) for (const c of Object.values(cards[g] || {})) {
       if (!c?.kb || !(c.show || []).includes('price') || seen.has(c.kb)) continue;
@@ -50,6 +61,11 @@ export function seoSchemaForPage({ lang, key, url, body = '' }) {
         offers: { '@type': 'Offer', priceCurrency: 'EUR', price: String(+priceOf(p)), availability: 'https://schema.org/InStock', url },
       });
     }
+  }
+  if (key === 'treatments') {
+    const all = treatmentFaq(lang).filter((x) => x.question && x.answer && body.includes(`<summary>${e(x.question)}</summary>`));
+    if (all.length) out.push({ '@context': 'https://schema.org', '@type': 'FAQPage', '@id': `${url}#ukk`,
+      mainEntity: all.map((x) => ({ '@type': 'Question', name: x.question, acceptedAnswer: { '@type': 'Answer', text: x.answer } })) });
   }
   if (key === 'info') {
     // UKK näkyy infosivulla <details><summary>…; sivun omat (suomenkieliset) id:t ratkaistaan kielelle kuten sivulla (kb-en.mjs),
