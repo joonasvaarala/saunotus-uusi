@@ -102,7 +102,8 @@ test('tilaussivu: #ord-g vieritetään näkyviin renderöinnin jälkeen kerran (
   const ord = rd('shop/src/order.js');
   assert.match(ord, /import \{[^}]*revealHashOnce[^}]*\} from '\.\/gift-ui\.js'/);
   assert.ok(ord.includes("root.setAttribute('aria-busy', 'false'); revealHashOnce(document, hashState); if (root.querySelector('[data-testid=order-page]')) hashState.done = true; };"), 'mount → revealHashOnce');
-  assert.ok(ord.includes("location.replace(`${S.orderHref[want]}${location.search}${/^#ord-[a-z0-9-]{1,40}$/i.test(location.hash) ? location.hash : ''}`)"), 'kielen vaihto säilyttää #ord-*');
+  assert.ok(ord.includes('const safeHash = /^#ord-[a-z0-9-]{1,40}$/i.test(location.hash) ? location.hash : \'\''), 'kielen vaihto säilyttää #ord-*');
+  assert.match(ord, /S\.orderHref\[want\]\}\$\{location\.search\}\$\{safeHash\}/);
   assert.match(ord, /h\('h3', \{ id: 'ord-g'/);
   assert.match(rd('supabase/functions/send-emails/templates.ts'), /\$\{c\.orderUrl\}#ord-g/);
   assert.match(rd('shop/src/shop.css'), /\.ord-card\[aria-labelledby=ord-g\]\{scroll-margin-top:\d+px\}/);

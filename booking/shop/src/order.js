@@ -28,8 +28,11 @@ import { isHoldView, giftWasUsed } from './hold-logic.js';
 import { holdPanel, additionHoldSection } from './hold-ui.js';
 import { normCheckoutOptions } from './mobilepay-logic.js';
 import { customerInvoiceLock } from './invoice-lock.js';
+import { bindLangLinks } from './lang-switch.js';
+import { fixCustomerPhrase } from './arrival-phrase.js';
 
 const S = window.BOOKING_SHOP;
+if (S.otherHref) bindLangLinks(S.otherHref);
 const L = OT[S.lang] ? S.lang : 'fi', t = OT[L], ox = OPT[L];   // ox: tuotevalinnan tekstit (booking_50)
 const TZ = 'Europe/Helsinki';
 const root = document.getElementById('order-app');
@@ -63,11 +66,11 @@ function instructionsSection(list) {
     const short = String(g.short_text ?? '').trim();
     previews.append(h('article', { class: 'ord-guide', 'data-testid': 'guide-preview' },
       g.title ? h('h4', { text: g.title }) : null,
-      short ? richHost(h, short, 'ord-guide-short', g.short_rich === true) : null));
+      short ? richHost(h, fixCustomerPhrase(short, L), 'ord-guide-short', g.short_rich === true) : null));
     const link = safeHttps(g.link_url);
     panel.append(h('article', { class: 'ord-guide', 'data-testid': 'guide-item' },
       g.title ? h('h4', { text: g.title }) : null,
-      richHost(h, g.body, 'ord-guide-text', g.rich),
+      richHost(h, fixCustomerPhrase(g.body, L), 'ord-guide-text', g.rich),
       link ? h('p', {}, h('a', { href: link, target: '_blank', rel: 'noopener noreferrer', text: t.guideLink })) : null));
   }
   const btn = h('button', { type: 'button', class: 'btn light ord-btn', 'data-testid': 'guide-toggle', 'aria-expanded': 'false', text: t.guideShow, onclick: () => {
@@ -110,7 +113,14 @@ async function main() {
   if (!o?.ok) return mount(h('p', { class: 'bk-error', role: 'alert', text: t.notFound }), phoneBox());
   // sopimuksen linkki on yksi (/tilaus/?t=…): jos tilauksen kieli (locale) on toinen kuin sivun, siirrytään saman tilauksen toiskieliseen sivuun (token säilyy)
   const want = ['fi', 'en'].includes(o.locale) ? o.locale : L;
-  if (want !== L && S.orderHref?.[want] && !new URLSearchParams(location.search).has('mock')) { location.replace(`${S.orderHref[want]}${location.search}${/^#ord-[a-z0-9-]{1,40}$/i.test(location.hash) ? location.hash : ''}`); return; }
+  const explicit = params.get('lang');
+  const safeHash = /^#ord-[a-z0-9-]{1,40}$/i.test(location.hash) ? location.hash : '';
+  // ?lang= on kielivalitsimen valinta: FI→EN→FI pysyy samassa tilauksessa eikä hyppää tilauksen localeen.
+  if ((explicit === 'fi' || explicit === 'en') && explicit !== L && S.orderHref?.[explicit] && !params.has('mock')) {
+    const sp = new URLSearchParams(location.search); sp.set('lang', explicit);
+    location.replace(`${S.orderHref[explicit]}?${sp}${safeHash}`); return;
+  }
+  if (!explicit && want !== L && S.orderHref?.[want] && !params.has('mock')) { location.replace(`${S.orderHref[want]}${location.search}${safeHash}`); return; }
   // Lahjakortit (§13): "Käytä lahjakortti" vain kun redeem_enabled; ostetut kortit vain jos tilauksella on niitä. Puuttuva RPC / virhe → ei mitään näkyviin.
   const gapi = createGiftApi({ rpc: api.mock ? api.rpc : rpc, mock: false });
   const gift = { redeem: false, cards: [], claims: [] };

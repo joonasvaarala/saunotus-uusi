@@ -120,5 +120,5 @@ test('kaupan tuoteosio: jokainen uuden kaupan varattava tuote (15) on shopProduc
   assert.doesNotMatch(render, /shopList|id="varaa-verkosta"/);
   assert.match(render, /eventsHtml\(lang, d\.events\.empty\)/);
   assert.doesNotMatch(render, /eventsHtml\([^)]*limit:\s*2/);
-  assert.match(render, /href="\$\{pageHref\('book', lang\)\}">\$\{e\(u\.allEvents\)\}/);
+  assert.match(render, /href="\$\{pageHref\('book', lang, '\/\?k=tapahtuma'\)\}">\$\{e\(u\.allEvents\)\}/);
 });

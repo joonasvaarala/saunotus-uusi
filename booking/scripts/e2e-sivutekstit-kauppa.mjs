@@ -72,7 +72,7 @@ const body = (page) => page.locator('main').innerText();
 const noRaw = (txt, label) => expect(!/\{\{|\}\}|\{[a-z]+\}|(^|\s)(null|undefined|NaN)(\s|$)/.test(txt), `${label}: raaka paikkamerkki / null / undefined sivulla`);
 const hscroll = async (page, label) => expect(!(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)), `${label}: vaakavieritys`);
 const shot = (page, name) => page.screenshot({ path: join(SHOT, `${name}.png`), fullPage: false });
-const DEFAULTS = { fi: { title: 'Varaa saunaelämys', lead: 'Valitse kokemus, päivä ja vuoro. Varaus vahvistetaan heti.' }, en: {} };
+const DEFAULTS = { fi: { title: 'Varaa saunaelämys', lead: 'Valitse kokemus, päivä ja vuoro. Varaus vahvistuu maksun jälkeen.' }, en: {} };
 const T = (await import(pathToFileURL(join(root, 'booking/shop/src/i18n.js')))).T, OT = (await import(pathToFileURL(join(root, 'booking/shop/src/order-texts.js')))).OT;
 
 // ================= A) tietokannan teksti näkyy =================

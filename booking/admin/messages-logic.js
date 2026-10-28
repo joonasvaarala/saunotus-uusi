@@ -25,7 +25,7 @@ export const PLACEHOLDERS = [
   { key: 'asiakas_nimi', help: 'Asiakkaan koko nimi' },
   { key: 'tilaus_linkki', help: 'Linkki tilaussivulle (sama osoite kuin tilausvahvistuksessa)' },
   { key: 'tuote', help: 'Ne tilauksen tuotteet, joihin tämä viesti on kytketty' },
-  { key: 'saapumisaika', help: 'Näiden tuotteiden saapumisajat, Helsinki, muodossa pp.kk.vvvv tt:mm' },
+  { key: 'saapumisaika', help: 'Näiden tuotteiden saapumisajat, Helsinki. FI: pp.kk.vvvv klo tt.mm. EN: pp.kk.vvvv at tt:mm. Älä kirjoita klo-sanaa pohjaan merkin eteen.' },
   { key: 'linkki', help: 'Viestin linkkikenttä (esim. Google-arvostelu). Tyhjä, jos kenttä on tyhjä.' },
 ];
 export const GRACE_MS = 36 * 60 * 60 * 1000;
