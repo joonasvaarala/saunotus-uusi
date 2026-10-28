@@ -236,7 +236,7 @@ async function main() {
       holdCtl = holdPanel({ L, co, minutes: holdX.minutes, giftUsed: holdX.gift, newHref: `${S.shopHref}${api.mock ? '?mock=1' : ''}`,
         fmtDate: (ms) => df({ day: 'numeric', month: 'numeric', year: 'numeric' }).format(new Date(ms)),
         refresh: co.awaiting ? async () => { const n = await api.get(); if (n?.ok) cur = n; return n?.ok ? n.checkout : null; } : null,
-        onChange: async () => { try { const n = await api.get(); if (n?.ok) { await redraw(n); root.querySelector('[data-testid=hold-panel] h3')?.focus(); return; } } catch { /* vanha näkymä */ } draw(cur); } });   // fokus uuden tilan otsikkoon
+        onChange: async () => { try { const n = await api.get(); if (n?.ok) { await redraw(n); root.querySelector('[data-testid=hold-panel] h3')?.focus({ focusVisible: false }); return; } } catch { /* vanha näkymä */ } draw(cur); } });   // fokus uuden tilan otsikkoon
       holdEl = holdCtl.node;
     }
     let closedEl = null;

@@ -20,7 +20,7 @@ function applyMode(mode, { focus = false } = {}) {
   }
   if (focus && mode) {
     const h = document.querySelector(mode === 'sauna' ? '#yritysvuorot h2' : '#tarjous h2');
-    if (h) { h.setAttribute('tabindex', '-1'); h.focus(); }
+    if (h) { h.setAttribute('tabindex', '-1'); h.focus({ focusVisible: false }); }
   }
 }
 
@@ -35,7 +35,7 @@ function showCode(form, code) {
     const generic = form.querySelector('[data-code="error_generic"]');
     if (generic) { generic.hidden = false; hit = generic; }
   }
-  if (hit) { hit.setAttribute('tabindex', '-1'); hit.focus(); }
+  if (hit) { hit.setAttribute('tabindex', '-1'); hit.focus({ focusVisible: false }); }
   return hit;
 }
 

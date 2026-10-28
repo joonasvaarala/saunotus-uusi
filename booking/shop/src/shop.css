@@ -104,9 +104,7 @@ button.bk-cell:hover{filter:brightness(.97)}
 .bk-actions{display:flex;flex-wrap:wrap;gap:12px;margin:16px 0}
 .bk-actions .btn{cursor:pointer}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
-#booking-app [tabindex="-1"]:focus:not(:focus-visible){outline:none}
-#booking-app :is(h1,h2,h3):focus-visible,.hero.page :is(h1,h2):focus-visible{outline:3px solid var(--gold);outline-offset:3px}
-.hero.page :is(h1,h2):focus:not(:focus-visible){outline:none}
+/* Ohjelmallisen otsikon kehys on pois (src/styles.css, tabindex=-1). Älä palauta :focus-visible-ääriviivaa hero- tai #booking-app-otsikoille: Chrome näyttää sen sivun latauksessa. */
 
 /* Migraatio 11: asiakastyyppi, yritystiedot, lisäpalvelut (v9: samat osio-otsikot, leveys ja välit kuin muulla lomakkeella) */
 .bk-form .bk-kinds{margin:0 0 16px}
@@ -391,7 +389,7 @@ a.bk-sd:hover{filter:brightness(.97)}
 .vc-choose[hidden]{display:none}
 .vc-choose{scroll-margin-top:84px}.gc-msg,.vc-choose .ord-msg{scroll-margin:84px 0 24px}   /* sticky-yläpalkki (69 px) ei peitä lomaketta eikä viestiä vieritettäessä */
 .ord-card[aria-labelledby=ord-g]{scroll-margin-top:84px}   /* booking_176: sähköpostin #ord-g-linkki (revealHashOnce) */
-.vc-ctitle{margin:0;font:600 22px var(--head);color:var(--ink)}.vc-ctitle:focus{outline:none}.vc-ctitle:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.vc-ctitle{margin:0;font:600 22px var(--head);color:var(--ink)}.vc-ctitle:focus,.vc-ctitle:focus-visible{outline:none}
 .vc-code{margin:0;font:700 17px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;color:var(--ink);overflow-wrap:anywhere}
 .vc-src>legend{font:700 16px var(--body);color:var(--ink)}
 .vc-radios{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))}.vc-opt{flex:none}
@@ -403,7 +401,7 @@ a.bk-sd:hover{filter:brightness(.97)}
 .vc-mask{font:600 15px ui-monospace,Menlo,Consolas,monospace;color:var(--muted)}
 .vc-text{margin:6px 0 0;color:var(--ink);font-size:16px;overflow-wrap:anywhere}
 .vc-item .bk-contact{margin:8px 0 0}
-.vc-notice{margin:0 0 12px;padding:14px 16px;border-radius:10px;border:1px solid #1d4d2b;border-left-width:5px;background:#e8f3ea;color:#1d3a27}.vc-notice:focus{outline:none}.vc-notice:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.vc-notice{margin:0 0 12px;padding:14px 16px;border-radius:10px;border:1px solid #1d4d2b;border-left-width:5px;background:#e8f3ea;color:#1d3a27}.vc-notice:focus,.vc-notice:focus-visible{outline:none}
 .vc-notice.bad{border-color:#7b2d2d;background:#f3e3e3;color:#5a1f1f}
 .vc-notice p{margin:0}.vc-notice-main{font-weight:700}.vc-notice-extra{margin-top:6px!important;font-size:15px}
 .vc-fixbox{margin-top:10px}

@@ -77,7 +77,7 @@ export function createWaitlistView({ h, t, S, state, loadMonth, setHero, mount, 
                 done.replaceChildren(h('p', { class: 'bk-ok', role: 'status', text: t.waitlistLeft }), h('a', { href: back, text: t.waitlistBack }));
               } catch { b.disabled = false; done.append(errorBox(t.errorGeneric)); }
             } }), h('a', { href: back, text: t.waitlistBack })));
-        mount(done); done.scrollIntoView({ block: 'start', behavior: 'smooth' }); done.focus({ preventScroll: true });
+        mount(done); done.scrollIntoView({ block: 'start', behavior: 'smooth' }); done.focus({ preventScroll: true, focusVisible: false });
       } catch (e) { msg.append(errorBox(e?.mapped ? e.message : t.errorGeneric)); btn.disabled = false; btn.textContent = t.waitlistJoin; }
     } },
       h('p', { class: 'bk-note', text: isEvent ? t.waitlistEventIntro : t.waitlistIntro }),

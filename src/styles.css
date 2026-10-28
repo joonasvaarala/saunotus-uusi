@@ -13,9 +13,11 @@ img{height:auto}
 a{color:var(--gold);text-underline-offset:3px}
 a:hover{color:var(--ink)}
 :focus-visible{outline:3px solid #1d6fd8;outline-offset:3px;border-radius:3px}
-/* Ohjelmallinen otsikkokohdistus (tabindex=-1) ei näytä kehystä. Näppäimistön kohdistus pysyy näkyvissä, brändin kulta. */
-.hero.page :is(h1,h2):focus{outline:none}
-.hero.page :is(h1,h2):focus-visible{outline:3px solid var(--gold);outline-offset:4px}
+/* Ohjelmallinen kohde (tabindex=-1 + .focus(), esim. hero-otsikko, reitin h2 ja #main-skip-kohde) ei piirrä kehystä.
+   Chrome laskee sen :focus-visibleksi ennen ensimmäistä osoitinta, joten pelkkä :focus { outline:none } ei riitä.
+   !important voittaa myöhemmät otsikkokohtaiset :focus-visible-säännöt. Näppäimistökehys säilyy linkeillä, painikkeilla ja kentillä. */
+:is(h1,h2,h3,h4,h5,h6,main,section,p,div,legend,li,span,dl)[tabindex="-1"]:focus,
+:is(h1,h2,h3,h4,h5,h6,main,section,p,div,legend,li,span,dl)[tabindex="-1"]:focus-visible{outline:none!important}
 h1,h2,h3,h4{font-family:var(--head);color:var(--ink);font-weight:500;line-height:1.15;margin:0 0 .5em}
 p{margin:0 0 1em}
 ul{margin:0 0 1em;padding-left:1.2em}

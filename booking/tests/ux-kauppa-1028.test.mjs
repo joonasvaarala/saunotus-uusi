@@ -82,6 +82,18 @@ test('maksutapojen merkit ovat jaetussa kansiossa eikä välittäjän nimeä nä
   assert.match(read('src/render.mjs'), /footerPayOnline/);
 });
 
+test('ohjelmallinen otsikkofokus ei piirrä kehystä, näppäimistökehys säilyy', () => {
+  const css = read('src/styles.css');
+  const shopCss = read('booking/shop/src/shop.css');
+  assert.match(css, /:focus-visible\{outline:3px solid #1d6fd8/);
+  assert.match(css, /\[tabindex="-1"\]:focus-visible\{outline:none!important\}/);
+  assert.doesNotMatch(css, /\.hero\.page :is\(h1,h2\):focus-visible\{outline:/);
+  assert.doesNotMatch(shopCss, /\.hero\.page :is\(h1,h2\):focus-visible\{outline:3px/);
+  assert.doesNotMatch(shopCss, /#booking-app :is\(h1,h2,h3\):focus-visible\{outline:3px/);
+  assert.match(read('booking/shop/src/shop.js'), /focusVisible: false/);
+  assert.match(read('src/render.mjs'), /<main id="main" tabindex="-1">/);
+});
+
 test('tuontitiedosto sisältää uudet FI- ja EN-tekstit', () => {
   const keys = ['ui.shop.unpaid_cancel', 'ui.shop.try_again', 'ui.treatment.continue_summary', 'ui.gift.pay_line', 'ui.gift.preview_alt', 'ui.footer.pay_online', 'page.gift.own.how', 'page.gift.third.pay'];
   for (const key of keys) for (const lang of ['fi', 'en']) {

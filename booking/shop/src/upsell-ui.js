@@ -108,7 +108,7 @@ function bindLayer(overlay, panel, before) {
     if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); exit(); return; }
     if (e.key !== 'Tab') return;
     const list = focusables(panel);
-    if (!list.length) { e.preventDefault(); panel.focus(); return; }
+    if (!list.length) { e.preventDefault(); panel.focus({ focusVisible: false }); return; }
     const i = list.indexOf(document.activeElement);
     if (e.shiftKey) { if (i <= 0) { e.preventDefault(); list.at(-1).focus(); } }
     else if (i === -1 || i === list.length - 1) { e.preventDefault(); list[0].focus(); }
