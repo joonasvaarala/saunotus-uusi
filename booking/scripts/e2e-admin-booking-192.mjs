@@ -18,6 +18,15 @@ for (const vp of [390, 1280]) {
   await page.setViewportSize({ width: vp, height: vp >= 900 ? 900 : 844 });
   await page.goto(`${ORIGIN}/admin/#/uusi?d=${DAY}`);
   await page.waitForSelector('.slotbtn');
+  const taken = page.locator('.slotbtn[data-state=private]');
+  expect(await taken.count() === 1, `${vp}: yksityinen päällekkäisyys näkyy korttina`);
+  expect(await taken.isDisabled(), `${vp}: varattu-kortti ei ole valittavissa`);
+  expect(/varattu/i.test(await taken.innerText()), `${vp}: kortissa lukee varattu`);
+  const closed = page.locator('.slotbtn.unavailable:not(.private)');
+  expect(await closed.count() >= 1 && !(await closed.first().isDisabled()), `${vp}: suljettu vuoro on yhä valittavissa`);
+  expect(/suljettu/i.test(await closed.first().innerText()), `${vp}: suljettu – voi varata silti`);
+  expect(await page.locator('[data-testid=off-schedule]').count() === 1, `${vp}: aikataulun ulkopuolinen varaus säilyy`);
+  await page.screenshot({ path: `/tmp/nb194-${vp}.png` });
   const giftHidden = await page.locator('[data-testid=gift-card-field]').count();
   expect(giftHidden === 0 || await page.locator('[data-testid=gift-card-field]').isHidden(), `${vp}: lahjakorttikenttä piilossa ennen valintaa`);
   await page.locator('.slotbtn').nth(1).click();
@@ -54,6 +63,30 @@ for (const vp of [390, 1280]) {
   expect(saved?.args?.p_gift_card_code === 'TESTCARD0001', `${vp}: lahjakortin koodi mukana`);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
   expect(!overflow, `${vp}: ei vaakavieritystä`);
+  await page.close();
+}
+
+for (const vp of [390, 1280]) {
+  const st = { calls: [], role: 'staff' };
+  const page = await newPage(browser, { vp, st, onProblem: (m) => problems.push(`staff ${vp} ${m}`) });
+  await page.setViewportSize({ width: vp, height: vp >= 900 ? 900 : 844 });
+  await page.goto(`${ORIGIN}/admin/#/uusi?d=${DAY}`);
+  await page.waitForSelector('.slotbtn');
+  expect(/vain admin voi ylibuukata/.test(await page.locator('.slotbtn.full').innerText()), `${vp}: staff näkee täyden vuoron ilman ylibuukkauslupaa`);
+  await page.locator('.slotbtn.full').click();
+  await page.waitForSelector('[data-testid=booking-form]');
+  await page.waitForTimeout(400);
+  const warn = (await page.locator('[data-testid=booking-warning]').innerText()).replace(/\s+/g, ' ');
+  expect(/Vuoro on täynnä – vain admin voi ylibuukata/.test(warn), `${vp}: staffin kova esto, oli "${warn}"`);
+  await fillCustomer(page);
+  await page.locator('[data-testid=save-booking]').click();
+  await page.waitForTimeout(300);
+  expect(await page.locator('[data-testid=confirm-dialog]').count() === 0, `${vp}: staff ei saa vahvistusdialogia`);
+  expect(st.calls.filter((c) => c.name === 'admin_create_booking').length === 0, `${vp}: staff ei lähetä varausta`);
+  expect(await page.locator('[data-testid=form-error]').isHidden(), `${vp}: esto näkyy varoituksena, ei erillisenä palvelinvirheenä`);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
+  expect(!overflow, `${vp}: staff ei vaakavieritystä`);
+  await page.screenshot({ path: `/tmp/nb194-staff-${vp}.png` });
   await page.close();
 }
 

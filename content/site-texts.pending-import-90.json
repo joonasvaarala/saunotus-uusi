@@ -1,0 +1,162 @@
+[
+  {
+    "key": "ui.admin.booking.slot_full_staff",
+    "lang": "fi",
+    "text": "täynnä – vain admin voi ylibuukata",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_194: täysi vuoro ei-adminille. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.slot_full_staff",
+    "lang": "en",
+    "text": "full – only an admin can overbook",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_194: täysi vuoro ei-adminille. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.slot_taken",
+    "lang": "fi",
+    "text": "varattu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 20,
+    "placeholders": [],
+    "reason": "booking_194: yksityinen päällekkäisyys vuorokortissa. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.slot_taken",
+    "lang": "en",
+    "text": "booked",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 20,
+    "placeholders": [],
+    "reason": "booking_194: yksityinen päällekkäisyys vuorokortissa. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.over_admin_only",
+    "lang": "fi",
+    "text": "Vuoro on täynnä – vain admin voi ylibuukata.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_194: ylibuukkaus vain adminille. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.over_admin_only",
+    "lang": "en",
+    "text": "The session is full – only an admin can overbook.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_194: ylibuukkaus vain adminille. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.over_admin_persons",
+    "lang": "fi",
+    "text": "Enimmäishenkilömäärä ylittyy – vain admin voi ylibuukata.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_194: henkilömäärän ylitys vain adminille. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.over_admin_persons",
+    "lang": "en",
+    "text": "The maximum number of guests is exceeded – only an admin can overbook.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_194: henkilömäärän ylitys vain adminille. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.conflict_private",
+    "lang": "fi",
+    "text": "Ajalle on jo yksityinen varaus – päällekkäistä varausta ei voi tehdä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_194: yksityinen varaus estää päällekkäisyyden. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.conflict_private",
+    "lang": "en",
+    "text": "There is already a private booking at this time – an overlapping booking cannot be made.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "booking_194: yksityinen varaus estää päällekkäisyyden. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.conflict_occupied",
+    "lang": "fi",
+    "text": "Tälle ajalle on jo varaus – yksityisvuoroa ei voi varata päällekkäin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_194: yksityisvuoro ei mene varatun päälle. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.conflict_occupied",
+    "lang": "en",
+    "text": "There is already a booking at this time – a private session cannot overlap it.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_194: yksityisvuoro ei mene varatun päälle. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.conflict_space",
+    "lang": "fi",
+    "text": "Tila on jo varattu tälle ajalle – päällekkäistä varausta ei voi tehdä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_194: istunnon poissulku. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.conflict_space",
+    "lang": "en",
+    "text": "The room is already booked at this time – an overlapping booking cannot be made.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "booking_194: istunnon poissulku. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.conflict_therapist",
+    "lang": "fi",
+    "text": "Saunottaja on jo varattu tälle ajalle – päällekkäistä varausta ei voi tehdä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_194: saunottajan päällekkäisyys. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.conflict_therapist",
+    "lang": "en",
+    "text": "The therapist is already booked at this time – an overlapping booking cannot be made.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "booking_194: saunottajan päällekkäisyys. FI+EN."
+  }
+]

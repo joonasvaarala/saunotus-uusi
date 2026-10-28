@@ -54,7 +54,7 @@ select ok((select count(*) from booking.audit_log where table_name = 'orders' an
 
 -- manuaalinen varaus kunnioittaa päällekkäisyyssääntöjä
 select test.login(:'sid');
-select throws_ok(format($$select booking.admin_create_booking(%s, %L, 4, null, '{"name": "P A", "email": "puhelin@example.com", "phone": "0407654321"}')$$, :r_priv, :'thu'), 'BK001', 'Ajalle on jo varauksia yleisille vuoroille – yksityisvuoroa ei voi varata', 'manuaalinenkaan yksityisvuoro ei mene yleisen vuoron päälle');
+select throws_ok(format($$select booking.admin_create_booking(%s, %L, 4, null, '{"name": "P A", "email": "puhelin@example.com", "phone": "0407654321"}')$$, :r_priv, :'thu'), 'BK001', 'Tälle ajalle on jo varaus – yksityisvuoroa ei voi varata päällekkäin.', 'manuaalinenkaan yksityisvuoro ei mene yleisen vuoron päälle');
 select throws_ok(format($$select booking.admin_create_booking(%s, %L, 13, null, '{"name": "P A", "email": "puhelin@example.com", "phone": "0407654321"}')$$, :r_thu, :'thu'), 'BK001', null, 'manuaalinen varaus ei ylitä kapasiteettia (4 + 13 > 16)');
 select test.logout();
 

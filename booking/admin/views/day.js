@@ -122,7 +122,7 @@ export async function render({ ctx, refs, reload, query }) {
   const merged = (r) => { const x = dv.get(r.reservation_id) || {}; const m = { ...r, source: r.source ?? x.source, external_id: r.external_id ?? x.external_id }; for (const k of RES_KEYS) if (x[k] !== undefined) m[k] = x[k]; return m; };
   // Lahjakorttivaraus listataan tavallisen vuoron alle; pieni "Lahjakortti"-merkki (ui.admin.day.gift_card_badge, §18). Johku-merkki ennallaan.
   const giftBadge = (r, x) => (isGiftCardReservation(r) || isGiftCardReservation(x) ? h('span', { class: 'badge gift', 'data-testid': 'gift-badge', text: dayText('ui.admin.day.gift_card_badge') }) : null);
-  const open = (r) => reservationDialog(merged(r), { methods: refs.methods, onChange: reload, refs, can: ctx.can });
+  const open = (r) => reservationDialog(merged(r), { methods: refs.methods, onChange: reload, refs, can: ctx.can, role: ctx.role });
   const resRow = (r) => { const x = dv.get(r.reservation_id) || {}; const ad = (x.addons && x.addons.length) ? x.addons : (r.addons || []); const src = { source: r.source ?? x.source, external_id: r.external_id ?? x.external_id };
     const kind = x.customer_kind || r.customer_kind; const company = x.company || r.company; const legs = (x.legs && x.legs.length) ? x.legs : (r.legs || []); const space = x.space_code || r.space_code;
     let stBadge = statusBadge(r.status);
