@@ -148,6 +148,7 @@
    "footerInfo": "Käytännön info",
    "footerServices": "Palvelut",
    "footerContact": "Yhteystiedot",
+   "footerPayOnline": "Maksa verkossa",
    "infoLinks": [
     [
      "mita-mukaan",
@@ -293,6 +294,7 @@
    "footerInfo": "Practical info",
    "footerServices": "Services",
    "footerContact": "Contact",
+   "footerPayOnline": "Pay online",
    "infoLinks": [
     [
      "mita-mukaan",

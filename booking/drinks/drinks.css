@@ -32,6 +32,9 @@ h1 { font-size: 1.6rem; margin: 0 0 4px; }
 .op-method:disabled .op-method-ico { background: transparent; color: var(--muted); }
 .op-method.is-on { border-color: #2B3A30; box-shadow: inset 0 0 0 1px #2B3A30; }
 .op-method.is-on .op-method-ico { background: #2B3A30; color: #F4EFE7; }
+.op-method-mark { flex: none; display: grid; place-items: center; height: 36px; min-width: 44px; padding: 5px 7px; background: #fff; border-radius: 8px; border: 1px solid rgba(63,53,44,.12); }
+.op-method-mark img { height: 18px; width: auto; max-width: 72px; display: block; }
+.op-method:hover .op-method-mark, .op-method.is-on .op-method-mark, .op-method:disabled .op-method-mark { background: #fff; }
 @container (max-width: 220px) { .op-method { padding: 8px 12px; gap: 10px; } .op-method-go { display: none; } .op-method-ico { width: 32px; height: 32px; } }
 @container (min-width: 480px) { .op-method { flex: 1 1 calc(50% - 4px); max-width: calc(50% - 4px); } }
 label.email { display: grid; gap: 4px; font-size: 15px; }

@@ -8602,66 +8602,6 @@
   "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/gift-texts.js); sisältö ennallaan, ei uusia sanamuotoja"
  },
  {
-  "key": "ui.gift.o.amount",
-  "lang": "fi",
-  "text": "Käytettävä summa (€, valinnainen)",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/gift-texts.js); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "ui.gift.o.amount",
-  "lang": "en",
-  "text": "Amount to use (€, optional)",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/gift-texts.js); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "ui.gift.o.amount_hint",
-  "lang": "fi",
-  "text": "Vain omalle lahjakortillemme. Jätä tyhjäksi, niin käytetään kortin saldo tai tilauksen maksamaton osa (pienempi).",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 300,
-  "placeholders": [],
-  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/gift-texts.js); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "ui.gift.o.amount_hint",
-  "lang": "en",
-  "text": "Only for our own gift cards. Leave empty to use the card balance or the unpaid part of the order (whichever is smaller).",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 300,
-  "placeholders": [],
-  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/gift-texts.js); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "ui.gift.o.amount_err",
-  "lang": "fi",
-  "text": "Anna summa numeroina (esim. 25 tai 25,50).",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/gift-texts.js); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
-  "key": "ui.gift.o.amount_err",
-  "lang": "en",
-  "text": "Enter the amount in digits (e.g. 25 or 25.50).",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Osa 3 PR 1: kovakoodattu asiakasnäkyvä teksti (booking/shop/src/gift-texts.js); sisältö ennallaan, ei uusia sanamuotoja"
- },
- {
   "key": "ui.gift.o.apply",
   "lang": "fi",
   "text": "Käytä lahjakortti",

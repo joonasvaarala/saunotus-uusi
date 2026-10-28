@@ -13819,48 +13819,6 @@
    "placeholders": []
   },
   {
-   "key": "ui.gift.o.amount",
-   "lang": "en",
-   "text": "Amount to use (€, optional)",
-   "version": 1,
-   "placeholders": []
-  },
-  {
-   "key": "ui.gift.o.amount",
-   "lang": "fi",
-   "text": "Käytettävä summa (€, valinnainen)",
-   "version": 1,
-   "placeholders": []
-  },
-  {
-   "key": "ui.gift.o.amount_err",
-   "lang": "en",
-   "text": "Enter the amount in digits (e.g. 25 or 25.50).",
-   "version": 1,
-   "placeholders": []
-  },
-  {
-   "key": "ui.gift.o.amount_err",
-   "lang": "fi",
-   "text": "Anna summa numeroina (esim. 25 tai 25,50).",
-   "version": 1,
-   "placeholders": []
-  },
-  {
-   "key": "ui.gift.o.amount_hint",
-   "lang": "en",
-   "text": "Only for our own gift cards. Leave empty to use the card balance or the unpaid part of the order (whichever is smaller).",
-   "version": 1,
-   "placeholders": []
-  },
-  {
-   "key": "ui.gift.o.amount_hint",
-   "lang": "fi",
-   "text": "Vain omalle lahjakortillemme. Jätä tyhjäksi, niin käytetään kortin saldo tai tilauksen maksamaton osa (pienempi).",
-   "version": 1,
-   "placeholders": []
-  },
-  {
    "key": "ui.gift.o.apply",
    "lang": "en",
    "text": "Use gift card",

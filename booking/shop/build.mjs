@@ -50,6 +50,7 @@ const cfg = {
   // MobilePay (§14): testitilan tapa (public_payment_options methods[].test=true) näytetään vain kun true. Oletus: päällä vain SITE_ENV=test -julkaisussa (testisivusto); tuotannossa pois. BOOKING_MOBILEPAY_TEST_UI=1|0 ylikirjoittaa; muokattavissa julkaisussa. mobilepayOfficialButton=false → aina oma varapainike (ei ulkoista skriptiä).
   mobilepayTestUi: process.env.BOOKING_MOBILEPAY_TEST_UI ? /^(1|true)$/i.test(process.env.BOOKING_MOBILEPAY_TEST_UI) : process.env.SITE_ENV === 'test', mobilepayOfficialButton: !/^(0|false)$/i.test(process.env.BOOKING_MOBILEPAY_OFFICIAL_BUTTON || ''), siteEnv: process.env.SITE_ENV || '',
   giftCardPdf: /^(0|false)$/i.test(process.env.BOOKING_GIFT_CARD_PDF || '') ? false : (/^(1|true)?$/i.test(process.env.BOOKING_GIFT_CARD_PDF || '') ? true : process.env.BOOKING_GIFT_CARD_PDF),
+  payMarks: `${BASE}/img/pay/`,
 };
 writeFileSync(join(A, 'config.js'), `// Muokkaa tätä tiedostoa julkaisussa (ei vaadi uudelleenrakennusta). anon-avain saa olla julkinen.\nwindow.BOOKING_CONFIG=${JSON.stringify(cfg, null, 2)};\n`);
 // Staattinen tuotedata: tuntemattoman tuotteen "ota yhteyttä" -sivu + hoitotuotteiden kortit (hinta, kesto, henkilömäärät; ks. treatments.js loadProducts)
@@ -76,6 +77,7 @@ for (const lang of ['fi', 'en']) {
       lang, page: page === 'shop' ? 'shop' : 'confirm', shopHref: BASE + PATHS[lang].shop, confirmHref: BASE + PATHS[lang].confirm,
       orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order },   // vuosikortin osto → tilaussivu (booking_142)
       termsHref: L.pageHref('terms', lang), infoHref: L.pageHref('info', lang), phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email,
+      cancelRule: ST.tx('page.info.cancel_text', lang, { state: siteTexts, fallback: '' }),
       staticProductsUrl: `${BASE}/booking/static-products.json`, siteTextsUrl: `${BASE}/booking/site-texts.json`, links: LINKS(lang),
     };
     const body = R.pageHero({ title: page === 'shop' ? t.title : t.ctitle, text: page === 'shop' ? t.text : '', img: 'ovi-kaiverrus' }, lang, 'book')
@@ -150,6 +152,7 @@ for (const lang of ['fi', 'en']) {
     lang, page: 'shop', audience: 'business', shopHref: BASE + urlPath, confirmHref: BASE + PATHS[lang].confirm,
     orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order },
     termsHref: L.pageHref('terms', lang), infoHref: L.pageHref('info', lang), phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email,
+    cancelRule: ST.tx('page.info.cancel_text', lang, { state: siteTexts, fallback: '' }),
     staticProductsUrl: `${BASE}/booking/static-products.json`, siteTextsUrl: `${BASE}/booking/site-texts.json`, links: LINKS(lang),
   };
   html = html.replace('</head>', `<link rel="stylesheet" href="${BASE}/booking/shop.css"></head>`)
