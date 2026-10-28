@@ -10,7 +10,7 @@ import { isHoldScenario, holdMockParams, HOLD_ERRORS } from './hold-mock.js';
 import { pickCatalog } from './catalog-audience.js';
 import { mockQuietOffers } from './quiet-offers-mock.js';
 import { createRitualMock, SHARED_PRODUCT } from './ritual-addon-mock.js';
-
+import { mockProductImages } from './mock-product-images.js';
 const KEY = 'booking.shopmock.v1';
 const MUTATING = new Set(['public_create_treatment_booking', 'public_change_treatment_booking']);
 // scenario=pay|pay-prod|pay-off: vahvistussivun maksuvalinta (MobilePay + lahjakortti) – maksutila, lahjakortit ja mobilepay-funktiot tulevat order-mock.js:stä (sama mock kuin tilaussivulla); mpResult = paluutulos (paid|failed|pending|…).
@@ -95,7 +95,7 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
         return mockQuietOffers(rows, now());
       }
       case 'public_settings': return { public_booking_enabled: true, public_treatment_horizon_days: 14 };
-      case 'public_product_images': return [];
+      case 'public_product_images': return mockProductImages(globalThis.location?.search || '');
       // booking_158: tapahtumat myynti suljettuna (events.sale_enabled = false) → kaikki kerrat 'closed'; ?mock=1 → #/tuote/perinnesaunotusilta
       case 'public_events': {
         const at = (d, hh, mm = 0) => { const x = new Date(now()); x.setUTCDate(x.getUTCDate() + d); x.setUTCHours(hh - 2, mm, 0, 0); return x.toISOString(); };

@@ -5,6 +5,7 @@
 // Varattu, mennyt tai virheellinen vuoro ei näy. Jos kumpikaan haku ei onnistu, ohjelma jää ennalleen.
 // Ei innerHTML:ää: kaikki solmut createElement + textContent.
 import { rpc } from './sb.js';
+import { liveImageUrl } from './product-image.js';
 import { quietByWeekday, addDaysIso, fillText, pctText, validOffer, bookablePrivateSlots, offerForSlot, weekdayIso, JALKIL_ID } from './quiet-offers-logic.js';
 import { dateForWeekday, shiftIsFull, weekEvents, eventDisplayName, freeShopEvents, cardDates, cardTime, eventIsFull, eventWaitlistPath } from './week-live.js';
 
@@ -152,6 +153,11 @@ export function applyEventCards(list, events, { lang = 'fi', shopHref = '', now 
     list.replaceWith(p);
     return 0;
   }
+  const fallbackPic = new Map();
+  for (const host of list.querySelectorAll('[data-product-image]')) {
+    const pic = host.querySelector('picture, img');
+    if (host.dataset.slug && pic) fallbackPic.set(host.dataset.slug, pic);
+  }
   list.replaceChildren();
   for (const ev of rows) {
     const name = (lang === 'en' && ev.name_en) || ev.name;
@@ -163,17 +169,23 @@ export function applyEventCards(list, events, { lang = 'fi', shopHref = '', now 
     li.dataset.testid = 'site-event-card';
     if (full) li.dataset.full = '1';
     const im = el('div', 'im');
-    if (ev.image_path && imageBase) {
+    im.dataset.productImage = '';
+    if (ev.slug) im.dataset.slug = ev.slug;
+    im.dataset.sizes = '(min-width:1100px) 280px, 90vw';
+    const prev = ev.slug ? fallbackPic.get(ev.slug) : null;
+    const path = String(ev.image_path || '');
+    const direct = /^https?:\/\//.test(path) || path.startsWith('/img/');
+    const url = !path ? '' : direct ? path : (imageBase ? liveImageUrl(String(imageBase).replace(/\/$/, ''), { path, updated_at: ev.image_updated_at, alt: ev.image_alt }) : '');
+    if (url) {
       const img = doc.createElement('img');
-      const path = String(ev.image_path);
-      img.src = /^https?:\/\//.test(path) || path.startsWith('/img/') ? path : imageBase + path.replace(/^\//, '');
+      img.src = url;
       img.alt = ev.image_alt || '';
       img.loading = 'lazy';
       img.decoding = 'async';
-      img.width = 800; img.height = 533;
-      img.addEventListener('error', () => img.remove(), { once: true });
+      img.width = 900; img.height = 600;
+      img.addEventListener('error', () => { if (prev) img.replaceWith(prev.cloneNode(true)); else img.remove(); }, { once: true });
       im.append(img);
-    }
+    } else if (prev) im.append(prev.cloneNode(true));
     if (full) im.append(el('span', 'pill full', fullLabel));
     if (ev.price != null && Number.isFinite(+ev.price)) im.append(el('span', 'badge', money(ev.price)));
     const bd = el('div', 'bd');

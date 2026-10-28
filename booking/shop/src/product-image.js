@@ -87,3 +87,42 @@ export function productImageElement(h, objectUrl, opts = {}) {
   const im = h('img', img);
   return h('picture', opts.pictureClass ? { class: opts.pictureClass } : {}, ...sources.map((s) => h('source', s)), im);
 }
+
+// Tiedostonimi on products/<tuote-id>-<tunnus>. Sama polku voi silti jäädä välimuistiin
+// (muunnos-URL tai päällekirjoitus), joten osoitteeseen tulee versio: updated_at, tai polku jos sitä ei ole.
+const IMAGE_PATH_RE = /^products\/[0-9]{1,18}-[a-z0-9]{6,32}\.(jpg|jpeg|png|webp)$/;
+
+export function imageVersionOf(row) {
+  if (!row) return '';
+  const stamp = row.updated_at ?? row.image_updated_at;
+  if (stamp != null && String(stamp).trim()) return String(stamp).trim();
+  return row.path ? String(row.path) : '';
+}
+
+export function withImageVersion(objectUrl, version) {
+  const v = version == null ? '' : String(version).trim();
+  if (!objectUrl || !v) return objectUrl || '';
+  try {
+    const u = new URL(objectUrl);
+    u.searchParams.set('v', v);
+    return u.toString();
+  } catch {
+    const sep = String(objectUrl).includes('?') ? '&' : '?';
+    return `${objectUrl}${sep}v=${encodeURIComponent(v)}`;
+  }
+}
+
+/** Julkinen object-URL tuotekuvalle. Tyhjä, jos polku ei ole hallinnan sallimaa muotoa. */
+export function liveImageUrl(imageBase, row) {
+  const path = String(row?.path || '').replace(/^\//, '');
+  if (!IMAGE_PATH_RE.test(path)) return '';
+  const base = String(imageBase || '').replace(/\/$/, '');
+  if (!base) return '';
+  return withImageVersion(`${base}/${path.split('/').map(encodeURIComponent).join('/')}`, imageVersionOf(row) || path);
+}
+
+/** storageUrl()-osoite + versio. Tyhjä osoite pysyy tyhjänä. */
+export function catalogImageUrl(objectUrl, row) {
+  if (!objectUrl) return '';
+  return withImageVersion(objectUrl, imageVersionOf(row) || row?.path || '');
+}

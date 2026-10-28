@@ -91,8 +91,12 @@ test('kortit: hinta, kesto ja slug tuotteesta; savusaunamerkki vain lipulla; Mor
     assert.match(html, lang === 'fi' ? /Sopiiko tämä minulle\?/ : /Is this for me\?/);
     assert.match(html, /rituaali-1536\.avif|rituaali-1024\.avif/);
     assert.match(html, /saunotus-1920\.avif|saunotus-1200\.avif/);
-    assert.match(html, /hunaja-(?:480|800|1200)\.(?:avif|webp)/, 'Saunahoidon kortti: hunajahoidon kuva');
-    assert.doesNotMatch(html, /products\/10-ifj3bf\.webp/, 'ei samaa kuvaa kuin Saunotuksella');
+    const hoitoCard = cardOf(html, 'saunahoito-2');
+    assert.match(hoitoCard, /<img [^>]*src="[^"]*products\/10-ifj3bf\.webp/, 'Saunahoito käyttää tuotteen kuvaa');
+    assert.match(hoitoCard, /data-product-image/);
+    assert.match(hoitoCard, /data-slug="saunahoito-2"/);
+    assert.match(hoitoCard, /[?&]v=/);
+    assert.doesNotMatch(hoitoCard.split('<template')[0], /hunaja-/, 'sivun hunajakartoitus ei ole kortin näkyvä kuva');
     assert.doesNotMatch(html, /<p class="note-box">/, 'introsta poistettu huomiolaatikko');
     assert.doesNotMatch(html, /<p class="lead">[^<]*<\/p><p class="note-box">/);
     assert.match(html, lang === 'fi' ? /Hoitojen hintaan ei sisälly pääsyä savusaunaan tai paljuihin/ : /does not include access to the smoke sauna or the hot tubs/);

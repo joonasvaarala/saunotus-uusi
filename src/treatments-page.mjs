@@ -6,8 +6,8 @@ import { tx } from './site-texts.mjs';
 import { alts, pageDoc } from './content-texts.mjs';
 import { site, e, pageHref, money, picture, icon } from './lib.mjs';
 import { liveProduct } from './catalog-live.mjs';
-import { productImageFor, productImageUrl } from './product-images.mjs';
-import { productImageHtml, CARD_WIDTHS, SIZES } from '../booking/shop/src/product-image.js';
+import { productCardInner } from './product-card-image.mjs';
+import { SIZES } from '../booking/shop/src/product-image.js';
 import { shopHash } from './event-cards.mjs';
 import { shortRaw, derivedExcerpt } from '../booking/shop/src/short-desc.js';
 import { visibleText } from '../booking/shop/src/rich-view.js';
@@ -114,10 +114,6 @@ const FALLBACK_IMG = Object.freeze({
   'synttarisauna': 'j-synttarisauna',
 });
 
-// Sivukohtainen korttikuva (Joonas 28.10.2026): Saunahoidon tuotekuva (10-ifj3bf.webp) on käytännössä sama kuva kuin Saunotuksella,
-// joten tällä sivulla Saunahoito käyttää hunajahoidon kuvaa (content/images.json). Kaupan tuotekuva ei muutu.
-const PAGE_IMG = Object.freeze({ 'saunahoito-2': 'hunaja' });
-
 const quiet = { warn() {} };
 const tt = (key, lang) => tx(key, lang, { fallback: TREATMENTS_TEXTS[key][lang], log: quiet });
 const pic = (id, lang, o = {}) => picture(id, { alt: o.alt ?? alts[id]?.[lang] ?? '', ...o });
@@ -152,18 +148,11 @@ function blurb(p, lang) {
 }
 
 function cardImage(p, lang, name) {
-  const own = PAGE_IMG[p.slug];
-  if (own) return `<span class="bk-img card-img">${pic(own, lang, { sizes: SIZES.shop, alt: alts[own]?.[lang] || name })}</span>`;
-  const row = productImageFor(p.slug);
-  const url = productImageUrl(row);
-  if (url) {
-    const alt = (row.alt && String(row.alt).trim()) || name;
-    const html = productImageHtml(url, { widths: CARD_WIDTHS, sizes: SIZES.shop, alt, width: row.width || 900, height: row.height || 600, lazy: true });
-    return `<span class="bk-img card-img">${html}</span>`;
-  }
   const id = FALLBACK_IMG[p.slug];
-  if (!id) return '';
-  return `<span class="bk-img card-img">${pic(id, lang, { sizes: SIZES.shop, alt: alts[id]?.[lang] || name })}</span>`;
+  const fallbackHtml = id ? pic(id, lang, { sizes: SIZES.shop, alt: alts[id]?.[lang] || name }) : '';
+  const im = productCardInner({ slug: p.slug, alt: name, fallbackHtml, sizes: SIZES.shop });
+  if (!im.has) return '';
+  return `<span class="bk-img card-img"${im.attrs}>${im.html}</span>`;
 }
 
 export function treatmentCard(p, lang) {

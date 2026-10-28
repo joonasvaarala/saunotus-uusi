@@ -17,6 +17,7 @@ import { treatmentsBody } from './treatments-page.mjs';
 import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
 import { selectShopEvents, shopEventsHtml, shopHash, eventWaitlistPath } from './event-cards.mjs';
 import { EVENT_CARD_TEXTS } from './event-full-texts.mjs';
+import { productCardInner } from './product-card-image.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
   johku, bookingUrl, phoneDisplay, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
@@ -104,7 +105,10 @@ export function card(c, lang, opt = {}) {
   const url = opt.url || (c.johku ? jk(c.johku, lang) : lang === 'en' && c.johkuEn ? jk(c.johkuEn, lang) : p ? bookingUrl(p.booking_url, lang) : jk('home', lang));
   const items = p ? metaItems(c, p, lang) : [];
   const list = t.list ? `<ul class="list">${[].concat(t.list).map((x) => `<li>${e(x)}</li>`).join('')}</ul>` : '';
-  return `<li class="card"><div class="im">${pic(c.img, lang, { sizes: opt.sizes || '(min-width:1100px) 280px, (min-width:640px) 45vw, 100vw', alt: '' })}${t.kicker ? `<span class="pill">${e(t.kicker)}</span>` : ''}</div>
+  const sizes = opt.sizes || '(min-width:1100px) 280px, (min-width:640px) 45vw, 100vw';
+  const fallback = c.img ? pic(c.img, lang, { sizes, alt: '' }) : '';
+  const im = c.kb ? productCardInner({ slug: c.kb, alt: opt.title || t.title || '', fallbackHtml: fallback, sizes }) : { attrs: '', html: fallback };
+  return `<li class="card"><div class="im"${im.attrs}>${im.html}${t.kicker ? `<span class="pill">${e(t.kicker)}</span>` : ''}</div>
 <div class="bd"><h3><a href="${e(url)}" target="_blank" rel="noopener">${e(opt.title || t.title)}${NEW(lang)}</a></h3>
 <p>${e(t.text)}</p>${list}${t.more ? `<details class="more"><summary>${e(ui(lang).moreInfo)}</summary><p>${e(t.more)}</p></details>` : ''}
 ${c.note || t.note ? `<p class="note">${e(c.note || t.note)}</p>` : ''}
@@ -175,7 +179,12 @@ function shopEventsSection(lang, limit, empty) {
   return shopEventsHtml(list, lang, {
     e, money, card: cardOf, arrow: ui(lang).reserveArrow, fullText, fullCta, empty,
     link: (ev) => pageHref('book', lang, eventWaitlistPath(ev) || shopHash(ev.slug)),
-    img: (ev) => { const id = cardOf(ev)?.img || fallbackImg; return id ? pic(id, lang, { sizes: '(min-width:1100px) 280px, 90vw', alt: '' }) : ''; },
+    img: (ev) => {
+      const sizes = '(min-width:1100px) 280px, 90vw';
+      const id = cardOf(ev)?.img || fallbackImg;
+      const fallback = id ? pic(id, lang, { sizes, alt: '' }) : '';
+      return productCardInner({ slug: ev.slug, alt: '', fallbackHtml: fallback, sizes }).html;
+    },
   });
 }
 export function eventsHtml(lang, empty, opt = {}) {
@@ -188,7 +197,9 @@ export function eventsHtml(lang, empty, opt = {}) {
     const t = c[lang];
     const times = [...new Set(dates.map((d) => eventTimeFor(d, lang, enTime)).filter(Boolean))];
     const dl = dates.slice(0, 6).map((d) => fmtDate(d.starts_on, lang)).join(' · ');
-    return `<li class="card ev"><div class="im">${pic(c.img, lang, { sizes: '(min-width:1100px) 280px, 90vw', alt: '' })}<span class="badge">${e(money(p.price, lang))}</span></div>
+    const evSizes = '(min-width:1100px) 280px, 90vw';
+    const evIm = productCardInner({ slug: p.slug, alt: t.title || '', fallbackHtml: c.img ? pic(c.img, lang, { sizes: evSizes, alt: '' }) : '', sizes: evSizes });
+    return `<li class="card ev"><div class="im"${evIm.attrs}>${evIm.html}<span class="badge">${e(money(p.price, lang))}</span></div>
 <div class="bd"><h3><a href="${e(p.slug ? pageHref('book', lang, shopHash(p.slug)) : bookingUrl(p.booking_url, lang))}"${p.slug ? '' : ' target="_blank" rel="noopener"'}>${e(t.title)}${p.slug ? '' : NEW(lang)}</a></h3>
 <p class="dates">${e(dl)}${times.length ? ' · ' + e(times[0]) : ''}</p><p>${e(t.text)}</p></div><div class="cta" aria-hidden="true">${e(ui(lang).reserveArrow)}</div></li>`;
   }).join('')}</ul>`;
@@ -385,6 +396,12 @@ export function treatments(lang) {
   return layout({ lang, key: 'treatments', meta: d.meta, body });
 }
 
+// Paketti edustaa viimeistä tuoteriviään (pelkkä vuoro → se vuoro; vuoro + hoito → hoito).
+const packageSlug = (pkg) => {
+  const ids = (pkg.items || []).map((i) => i.kb_product_id).filter((id) => id != null);
+  const id = ids.length ? ids[ids.length - 1] : null;
+  return id == null ? '' : (kb.products.find((p) => p.id === id)?.slug || '');
+};
 function giftOfferCard(p, lang) {
   const title = lang === 'en' ? p.name_en : p.name;
   const text = lang === 'en' ? (p.description_en || '') : (p.description || '');
@@ -392,7 +409,9 @@ function giftOfferCard(p, lang) {
   const list = lines.length ? `<ul class="list">${lines.map((row) => `<li>${row.href ? `<a href="${e(row.href)}">${e(row.label)}</a>` : e(row.label)}</li>`).join('')}</ul>` : '';
   const price = `${money(p.price, lang)} · ${gtText(lang, 'persons', { n: p.persons })}`;
   const unit = p.unit_price != null ? `<li><small>${e(gtText(lang, 'perPerson', { price: money(p.unit_price, lang) }))}</small></li>` : '';
-  return `<li class="card" data-gift-package="${e(p.code)}"><div class="im">${pic(GIFT_PACKAGE_IMAGE[p.code] || 'j-yleinen', lang, { sizes: '(min-width:1100px) 230px, 90vw', alt: '' })}<span class="pill">${e(gtText(lang, 'pkgKicker'))}</span></div>
+  const sizes = '(min-width:1100px) 230px, 90vw';
+  const im = productCardInner({ slug: packageSlug(p), alt: title, fallbackHtml: pic(GIFT_PACKAGE_IMAGE[p.code] || 'j-yleinen', lang, { sizes, alt: '' }), sizes });
+  return `<li class="card" data-gift-package="${e(p.code)}"><div class="im"${im.attrs}>${im.html}<span class="pill">${e(gtText(lang, 'pkgKicker'))}</span></div>
 <div class="bd"><h3>${e(title)}</h3>
 <p>${e(text)}</p>${list}
 <ul class="meta"><li class="pr">${e(price)}</li>${unit}<li>${e(gtText(lang, 'valid', { months: p.valid_months }))}</li></ul></div></li>`;
@@ -406,8 +425,10 @@ export function gift(lang) {
   const pack = PUBLISHED_GIFT_PACKAGES.filter((p) => !p.is_open).map((p) => giftOfferCard(p, lang)).join('');
   const ext = d.extend;
   const meta = { ...d.meta, description: giftMetaDescription(lang) };
+  const openSizes = '(min-width:900px) 520px, 100vw';
+  const openIm = productCardInner({ slug: ap.slug, alt: openPkg[lang === 'en' ? 'name_en' : 'name'], fallbackHtml: pic(C('gift.avoin').img, lang, { sizes: openSizes, alt: '' }), sizes: openSizes });
   const body = pageHero(d.hero, lang, 'gift')
-    + sec('', `<div class="company"><div><p class="kicker">${e(d.openTitle)}</p><h2 class="sec-title">${e(openPkg[lang === 'en' ? 'name_en' : 'name'])}</h2><p>${e(d.openText)}</p><p class="price" style="color:var(--gold)">${e(`${u.fromWord} ${money(from, lang)}`)}</p><a class="btn" href="${e(bookingUrl(ap.booking_url, lang))}" target="_blank" rel="noopener">${e(C('gift.avoin')[lang].cta)}${NEW(lang)}</a></div><div class="im">${pic(C('gift.avoin').img, lang, { sizes: '(min-width:900px) 520px, 100vw', alt: '' })}</div></div>`, 'avoin')
+    + sec('', `<div class="company"><div><p class="kicker">${e(d.openTitle)}</p><h2 class="sec-title">${e(openPkg[lang === 'en' ? 'name_en' : 'name'])}</h2><p>${e(d.openText)}</p><p class="price" style="color:var(--gold)">${e(`${u.fromWord} ${money(from, lang)}`)}</p><a class="btn" href="${e(bookingUrl(ap.booking_url, lang))}" target="_blank" rel="noopener">${e(C('gift.avoin')[lang].cta)}${NEW(lang)}</a></div><div class="im"${openIm.attrs}>${openIm.html}</div></div>`, 'avoin')
     + sec('tint', `${head('', d.packTitle, '', { orn: true })}<ul class="cards five">${pack}</ul><p class="center" style="margin-top:24px"><a class="btn light sm" href="${e(jk('giftAll', lang))}" target="_blank" rel="noopener">${e(d.allGift)}${NEW(lang)}</a></p>`, 'paketit')
     + sec('', `${head('', d.haveTitle, d.haveText, { orn: true })}<div class="cards two" style="display:grid;gap:22px">
 <article class="card"><div class="bd"><p class="kicker">${e(d.own.kicker)}</p><h3 style="font-family:var(--head);font-size:26px">${e(d.own.title)}</h3><p>${e(d.own.how || d.own.text)}</p><p><a class="btn" href="${e(jk('giftReservation', lang))}" target="_blank" rel="noopener">${e(d.own.cta)}${NEW(lang)}</a></p></div></article>

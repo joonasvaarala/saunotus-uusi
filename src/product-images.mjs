@@ -18,10 +18,18 @@ const clean = (rows) => {
   for (const r of rows) {
     const path = String(r?.path || '');
     if (!r || typeof r.slug !== 'string' || !r.slug || !PATH_RE.test(path)) continue;
-    images.push({ product_id: r.product_id ?? null, slug: r.slug, path, alt: r.alt ?? null, ...dimsOf(path) });
+    const stamp = r.updated_at == null || r.updated_at === '' ? null : String(r.updated_at);
+    images.push({ product_id: r.product_id ?? null, slug: r.slug, path, alt: r.alt ?? null, updated_at: stamp, ...dimsOf(path) });
   }
   return images;
 };
+
+/** Testit: vaihtaa muistissa olevan kuvalistan. Palauttaa palautuksen. */
+export function setProductImages(images) {
+  const prev = data;
+  data = { ...data, images: Array.isArray(images) ? images : [] };
+  return () => { data = prev; };
+}
 
 export const productImageFor = (slug) => (data.images || []).find((x) => x.slug === slug) || null;
 export function productImageUrl(row) {
