@@ -11,7 +11,7 @@ const imp = (p) => import(pathToFileURL(join(root, p)));
 const L = await imp('admin/nb-logic.js');
 const { BOOKING_TEXTS, bookingText, noticeText } = await imp('admin/booking-texts.js');
 const { errMsg } = await imp('admin/ui.js');
-const sql = readFileSync(join(root, 'supabase/migrations/20261028120000_booking_192_admin_overbook_gift_discount.sql'), 'utf8');
+const sql = readFileSync(join(root, 'supabase/migrations/20261028121833_booking_192_admin_overbook_gift_discount.sql'), 'utf8');
 const texts = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-89.json'), 'utf8'));
 
 test('Kapasiteettivaroitus heti: 12/10, enimmäismäärä ja resurssikonflikti', () => {

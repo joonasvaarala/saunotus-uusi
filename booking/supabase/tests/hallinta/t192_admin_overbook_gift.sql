@@ -59,7 +59,7 @@ begin
     v_off := (now() at time zone 'Europe/Helsinki')::date + 3;
     for i in 1..14 loop
       v_wd := extract(isodow from v_off)::int;
-      exit when not (v_wd = any (select weekdays from booking.schedule_rules where id = v_id));
+      exit when not (v_wd::smallint = any ((select weekdays from booking.schedule_rules where id = v_id)::smallint[]));
       v_off := v_off + 1;
     end loop;
     perform test.login(v_adm);
@@ -76,12 +76,12 @@ begin
 
   update booking.settings set value = 'true'::jsonb where key = 'gift_cards.redeem_enabled';
   update booking.settings set value = 'true'::jsonb where key = 'gift_cards.johku_cards_redeemable';
-  perform test.login(v_adm);
-  perform booking.admin_save_discount_code(null, jsonb_build_object('code', v_code, 'kind', 'percent', 'value', '10', 'usage_type', 'permanent', 'target_scope', 'order'));
   insert into booking.gift_cards(code, issuer, kind, initial_amount, balance, status, source, vat_treatment, accounting_origin, balance_verified, valid_to)
   values (v_gc, 'own', 'value', 5, 5, 'active', 'native', 'at_redemption', 'native', true, current_date + 100);
   insert into booking.gift_cards(code, issuer, source, accounting_origin, vat_treatment, sale_vat_rate, initial_amount, balance, status, buyer_name, activated_at, valid_to, balance_verified)
   values (v_jk, 'johku', 'johku', 'johku', 'at_sale', 25.5, 80, 80, 'active', 'Johku Ostaja', now(), current_date + 200, true);
+  perform test.login(v_adm);
+  perform booking.admin_save_discount_code(null, jsonb_build_object('code', v_code, 'kind', 'percent', 'value', '10', 'usage_type', 'permanent', 'target_scope', 'order'));
   j := booking.admin_preview_discount_code(v_code, v_rule, v_date, 1, null, null, null);
   perform pg_temp.ck((j ->> 'ok')::boolean and (j ->> 'discount')::numeric > 0 and j ->> 'type' = 'discount', 'D1: esikatselu käyttää alennusta: ' || coalesce(j ->> 'message', j ->> 'discount'));
   j := booking.admin_check_gift_card(v_gc);
