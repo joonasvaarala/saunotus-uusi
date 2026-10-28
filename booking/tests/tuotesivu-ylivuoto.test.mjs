@@ -59,6 +59,11 @@ test('shop.css + styles.css: rivitys- ja leveysvarmistukset, leveyslukko varmist
   assert.match(css, /\.hero\.page \.in>p\{max-width:min\(30em,100%\)\}/);
   assert.match(css, /#booking-app :is\(img,video,iframe,embed,object,svg,table\)[^{]*\{max-width:100%\}/);
   assert.match(css, /\.bk-grid\{grid-template-columns:repeat\(7,minmax\(0,1fr\)\)\}/, 'kalenteri mahtuu 320 px:iin');
+  assert.match(css, /\.bk-slot\{display:flex;flex-wrap:wrap;/, 'vuororivi rivittyy, kun merkki ja painike eivät mahdu viereen');
+  assert.match(css, /\.bk-slot-main\{[^}]*min-width:min\(100%,4rem\)/, 'kellolle ja nimelle jää lukuleveys');
+  assert.match(css, /\.bk-slot-side\{[^}]*flex-wrap:wrap/, 'tila-merkki ja Liity jonoon rivittyvät');
+  assert.doesNotMatch(css, /\.bk-slot-side\{[^}]*flex-wrap:nowrap/, 'nowrap ei saa puristaa täyttä vuoroa');
+  assert.doesNotMatch(css, /\.bk-slot>\*\{min-width:0\}/, 'lasten min-width:0 pudotti tekstisarakkeen nollaan');
   const st = read('src/styles.css');
   assert.match(st, /html,body\{max-width:100%;overflow-x:hidden\}\n@supports \(overflow-x:clip\)\{html,body\{overflow-x:clip\}\}/, 'leveyslukko varmistuksena (juurisyyt korjattu erikseen)');
 });
