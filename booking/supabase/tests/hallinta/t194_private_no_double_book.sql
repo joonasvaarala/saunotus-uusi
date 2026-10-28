@@ -20,6 +20,8 @@ declare
   v_ex bigint; v_sh bigint; v_wd smallint; v_cap_rule bigint; v_cap_date date; v_cap_rem int; v_cap_max int;
   v_overlap date; v_ex_day date; v_move_from date; v_person_day date; v_off date; v_off_rule bigint; v_off_wd int;
   j jsonb; v_move bigint; v_res bigint; v_prod bigint; v_pmax int; v_opt text; v_ts timestamptz; v_code text; i int;
+  v_wl_day date; v_early bigint; v_late bigint; v_bwd smallint; v_buf_day date; v_buf0 int;
+  v_late_start timestamptz; v_late_end timestamptz; v_space bigint; v_late_mode text;
 begin
   perform test.logout();
 
@@ -205,6 +207,75 @@ begin
   j := booking.public_create_booking(v_sh, v_ex_day, 1, 'Julkinen Paalle', 'pub194@example.test', '0401940099', false, 'fi', null, 'private', null, null);
   perform pg_temp.ck(coalesce(j ->> 'ok', 'false') <> 'true' and j ->> 'code' = 'private_booked', 'P3: julkinen ei tee jaettua varausta yksityisen päälle: ' || coalesce(j ->> 'code', 'ok'));
   perform test.logout();
+
+  -- 1) exclusive-jonopito ei väisty ylibuukkauksella (admin on staff, _waitlist_hold_counts päästäisi läpi).
+  v_wl_day := test.next_dow(v_wd::int, 56);
+  insert into booking.waitlist_entries(product_id, rule_id, session_date, starts_at, ends_at, space_id, persons,
+    customer_name, customer_email, status, notified_at, hold_expires_at)
+  select r.product_id, r.id, v_wl_day,
+         (v_wl_day + r.start_time) at time zone 'Europe/Helsinki',
+         (v_wl_day + r.start_time + make_interval(mins => r.duration_minutes)) at time zone 'Europe/Helsinki',
+         r.space_id, 1, 'Jono Testi', 'jono194@example.test', 'notified', now(), now() + interval '3 hours'
+    from booking.schedule_rules r where r.id = v_ex;
+  perform test.login(v_adm);
+  v_code := pg_temp.err(format(
+    'select booking.admin_create_booking(p_rule_id := %s, p_date := %L, p_persons := 1, p_customer := %L::jsonb, p_allow_overbook := true)',
+    v_ex, v_wl_day, '{"name":"Admin Jono","kind":"private"}'));
+  perform pg_temp.ck(v_code = 'private_booked', 'W1: exclusive-jonopito ei väisty ylibuukkauksella: ' || coalesce(v_code, 'null'));
+  j := booking.admin_day_view(v_wl_day);
+  perform pg_temp.ck(exists (
+    select 1 from jsonb_array_elements(j -> 'sessions') s
+     where (s ->> 'rule_id')::bigint = v_ex and (s ->> 'private_conflict')::boolean),
+    'W2: vuorokortti varattu exclusive-jonopidon takia');
+  perform test.logout();
+
+  -- 2) puskuri: vierekkäiset vuorot eivät osu ilman puskuria, osuvat kun resurssin buffer_after_min kasvaa.
+  select e.id, l.id, w.wd into v_early, v_late, v_bwd
+    from booking.schedule_rules e
+    join booking.schedule_rules l
+      on l.active and l.space_id = e.space_id
+     and l.start_time = e.start_time + make_interval(mins => e.duration_minutes)
+     and l.weekdays && e.weekdays
+    cross join lateral (select u.wd from unnest(e.weekdays) u(wd) where u.wd = any (l.weekdays) limit 1) w
+   where e.active and (e.mode = 'exclusive' or l.mode = 'exclusive')
+     and (select res.buffer_after_min from booking.resources res where res.id = e.space_id) = 0
+     and (e.valid_to is null or e.valid_to >= (now() at time zone 'Europe/Helsinki')::date + 80)
+     and (l.valid_to is null or l.valid_to >= (now() at time zone 'Europe/Helsinki')::date + 80)
+   order by (e.mode = 'exclusive' and l.mode = 'exclusive') desc, e.id
+   limit 1;
+  if v_early is null then
+    perform pg_temp.ck(false, 'B0: ei vierekkäistä exclusive-vuoroparia puskuritestiin');
+  else
+    v_buf_day := test.next_dow(v_bwd::int, 70);
+    select r.space_id, r.mode,
+           (v_buf_day + r.start_time) at time zone 'Europe/Helsinki',
+           (v_buf_day + r.start_time + make_interval(mins => r.duration_minutes)) at time zone 'Europe/Helsinki'
+      into v_space, v_late_mode, v_late_start, v_late_end
+      from booking.schedule_rules r where r.id = v_late;
+    j := pg_temp.pub(v_early, v_buf_day, 1, 'buf194-early@example.test');
+    perform pg_temp.ck((j ->> 'ok')::boolean, 'B0: viereinen vuoro luotu: ' || coalesce(j ->> 'code', j ->> 'message', 'ok'));
+    select buffer_after_min into v_buf0 from booking.resources where id = v_space;
+    perform pg_temp.ck(booking._private_overlap_code(v_space, v_late_mode, v_late_start, v_late_end, null,
+        (select array_agg(pool_id) from booking.schedule_rule_pools where rule_id = v_late)) is null,
+      'B1: ilman puskuria vierekkäiset vuorot eivät ole private_conflict');
+    update booking.resources set buffer_after_min = greatest(v_buf0, 0) + 30 where id = v_space;
+    perform pg_temp.ck(booking._private_overlap_code(v_space, v_late_mode, v_late_start, v_late_end, null,
+        (select array_agg(pool_id) from booking.schedule_rule_pools where rule_id = v_late)) is not null,
+      'B2: puskuri tekee private_conflictin');
+    perform test.login(v_adm);
+    j := booking.admin_day_view(v_buf_day);
+    perform pg_temp.ck(exists (
+      select 1 from jsonb_array_elements(j -> 'sessions') s
+       where (s ->> 'rule_id')::bigint = v_late and (s ->> 'private_conflict')::boolean),
+      'B3: vuorokortti varattu puskurin takia');
+    v_code := pg_temp.err(format(
+      'select booking.admin_create_booking(p_rule_id := %s, p_date := %L, p_persons := 1, p_customer := %L::jsonb, p_allow_overbook := true)',
+      v_late, v_buf_day, '{"name":"Admin Puskuri","kind":"private"}'));
+    perform pg_temp.ck(v_code in ('private_booked', 'public_shift_booked', 'space_busy'),
+      'B4: tallennus epäonnistuu samassa puskurissa: ' || coalesce(v_code, 'null'));
+    update booking.resources set buffer_after_min = v_buf0 where id = v_space;
+    perform test.logout();
+  end if;
 
   raise exception 'TESTRESULT pass=% fail=% :: %', (select count(*) from t194_r where ok), (select count(*) from t194_r where not ok),
     coalesce((select string_agg(label, ' | ') from t194_r where not ok), 'ALL OK');

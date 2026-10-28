@@ -3,6 +3,8 @@
 -- Yksityinen = varaus, joka vie resurssin yksinoikeudella:
 --   reservations.mode = 'exclusive' tai reservation_legs.mode = 'exclusive' (product_space_rules.mode),
 --   sekä resources.session_exclusive (eri istunto samassa tilassa, esim. Rauni/Lovi).
+--   Exclusive-jonopito (waitlist notified) on sama kova esto, myös p_allow_overbookilla.
+--   Puskuri (buffer_after_min, rituaali–rituaali oma) on mukana sekä moottorissa että private_conflict-kortissa.
 -- Ei tuotenimistä. Jaettu vuoro (schedule_rules.mode = 'shared') saa yhä ylittää kapasiteetin,
 -- mutta ei yksityisen varauksen päälle.
 --
@@ -39,50 +41,61 @@ $$;
 
 comment on function booking._staff_overbook() is 'booking_194: kapasiteetin tai henkilömäärän ylitys vain admin-roolille. Aikataulun ulkopuolinen varaus on erillinen lippu.';
 
--- ---------- 2) onko ajalla yksinoikeusvaraus (näkymä ja esikatselu; ei puskuria) ----------
-create or replace function booking._private_overlap_code(
-  p_space bigint, p_mode text, p_start timestamptz, p_end timestamptz, p_exclude bigint default null)
-returns text
-language sql stable security definer set search_path = '' as $$
-  select case
-    when exists (
-      select 1 from booking.reservations x
-       where x.space_id = p_space and x.id is distinct from p_exclude and x.mode = 'exclusive'
-         and booking._res_active(x.status, x.hold_expires_at)
-         and x.starts_at + make_interval(mins => coalesce(x.claim_offset_min, 0)) < p_end
-         and (case when x.claim_minutes is null then x.ends_at
-                   else x.starts_at + make_interval(mins => coalesce(x.claim_offset_min, 0) + x.claim_minutes) end) > p_start
-    ) or exists (
-      select 1 from booking.reservation_legs l
-      join booking.reservations r on r.id = l.reservation_id
-       where l.resource_id = p_space and l.role = 'space' and l.mode = 'exclusive'
-         and l.reservation_id is distinct from p_exclude
-         and booking._res_active(r.status, r.hold_expires_at)
-         and l.starts_at < p_end and l.ends_at > p_start
-    ) then 'private_booked'
-    when coalesce(p_mode, '') = 'exclusive' and (
-      exists (
-        select 1 from booking.reservations x
-         where x.space_id = p_space and x.id is distinct from p_exclude
-           and booking._res_active(x.status, x.hold_expires_at)
-           and x.starts_at + make_interval(mins => coalesce(x.claim_offset_min, 0)) < p_end
-           and (case when x.claim_minutes is null then x.ends_at
-                     else x.starts_at + make_interval(mins => coalesce(x.claim_offset_min, 0) + x.claim_minutes) end) > p_start
-      ) or exists (
-        select 1 from booking.reservation_legs l
-        join booking.reservations r on r.id = l.reservation_id
-         where l.resource_id = p_space and l.role = 'space'
-           and l.reservation_id is distinct from p_exclude
-           and booking._res_active(r.status, r.hold_expires_at)
-           and l.starts_at < p_end and l.ends_at > p_start
-      )
-    ) then 'public_shift_booked'
-    else null
-  end
+-- ---------- 2) yksinoikeus, puskuri ja exclusive-jonopito (näkymä ja esikatselu = moottori) ----------
+-- Haltijan oma lunastus (waitlist_hold_exempt = pidon id) ja jonon sisäinen laskenta ('all') eivät törmää itseensä.
+-- Henkilökunta ja p_allow_overbook eivät ohita exclusive-pitoa: _waitlist_hold_counts päästää staffin läpi, tätä ei.
+create or replace function booking._exclusive_hold_blocks(p_space bigint, p_start timestamptz, p_end timestamptz)
+returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (
+    select 1 from booking.waitlist_entries w
+    join booking.schedule_rules sr on sr.id = w.rule_id and sr.mode = 'exclusive'
+    join booking.resources res on res.id = p_space
+    where w.space_id = p_space and w.status = 'notified' and w.hold_expires_at > now()
+      and p_start < w.ends_at + make_interval(mins => res.buffer_after_min)
+      and w.starts_at < p_end + make_interval(mins => res.buffer_after_min)
+      and coalesce(current_setting('booking.waitlist_hold_exempt', true), '') is distinct from 'all'
+      and coalesce(current_setting('booking.waitlist_hold_exempt', true), '') is distinct from w.id::text)
 $$;
 
-comment on function booking._private_overlap_code(bigint, text, timestamptz, timestamptz, bigint) is
-  'booking_194: private_booked jos tilalla on exclusive-varaus tai -leg; public_shift_booked jos uusi varaus on exclusive ja tilalla on mikä tahansa varaus. null = ei yksinoikeuskonfliktia.';
+create or replace function booking._private_overlap_code(
+  p_space bigint, p_mode text, p_start timestamptz, p_end timestamptz,
+  p_exclude bigint default null, p_pools bigint[] default null)
+returns text language plpgsql stable security definer set search_path = '' as $$
+declare
+  v_res booking.resources;
+  v_ritual boolean := booking._is_ritual(p_pools);
+  v_gap integer;
+  v_key text := booking._session_key(p_pools, p_mode, p_start);
+  x record;
+begin
+  select * into v_res from booking.resources where id = p_space;
+  if not found or p_start is null or p_end is null or p_end <= p_start then return null; end if;
+  for x in
+    select c.mode, c.claim_start, c.claim_end, c.session_key, c.pool_ids
+      from booking.v_claims c
+     where c.resource_id = p_space and c.role = 'space' and c.reservation_id is distinct from p_exclude
+       and booking._res_active(c.status, c.hold_expires_at)
+       and c.claim_start < p_end + make_interval(mins => greatest(v_res.buffer_after_min, coalesce(v_res.buffer_ritual_ritual_min, 0)))
+       and c.claim_end > p_start - make_interval(mins => greatest(v_res.buffer_after_min, coalesce(v_res.buffer_ritual_ritual_min, 0)))
+     order by (c.mode = 'exclusive') desc
+  loop
+    v_gap := case when v_ritual and booking._is_ritual(x.pool_ids) and v_res.buffer_ritual_ritual_min is not null
+                  then v_res.buffer_ritual_ritual_min else v_res.buffer_after_min end;
+    if not (p_start < x.claim_end + make_interval(mins => v_gap) and x.claim_start < p_end + make_interval(mins => v_gap)) then
+      continue;
+    end if;
+    if x.mode = 'exclusive' then return 'private_booked'; end if;
+    if coalesce(p_mode, '') = 'exclusive' then return 'public_shift_booked'; end if;
+    if v_res.session_exclusive and (v_key is null or v_key is distinct from x.session_key) then return 'space_busy'; end if;
+  end loop;
+  if booking._exclusive_hold_blocks(p_space, p_start, p_end) then return 'private_booked'; end if;
+  return null;
+end $$;
+
+comment on function booking._exclusive_hold_blocks(bigint, timestamptz, timestamptz) is
+  'booking_194: voimassa oleva exclusive-jonopito (puskuri mukana). Ei väisty ylibuukkauksella eikä staff-roolilla. Haltijan exempt ja ''all'' eivät osu.';
+comment on function booking._private_overlap_code(bigint, text, timestamptz, timestamptz, bigint, bigint[]) is
+  'booking_194: sama ikkuna kuin _check_claim (buffer_after_min, rituaali–rituaali buffer_ritual_ritual_min, exclusive-jonopito). null = kortti ei ole varattu.';
 
 -- ---------- 3) moottori: yksinoikeus ei ole ylibuukkausta ----------
 CREATE OR REPLACE FUNCTION booking._check_claim(p_res_id bigint, p_leg_id bigint, p_resource bigint, p_role text, p_mode text, p_start timestamp with time zone, p_end timestamp with time zone, p_persons integer, p_pools bigint[], p_skill text, p_session_key text, p_quota_exempt boolean DEFAULT false, p_override boolean DEFAULT false, p_phase text DEFAULT 'all'::text)
@@ -93,7 +106,7 @@ CREATE OR REPLACE FUNCTION booking._check_claim(p_res_id bigint, p_leg_id bigint
 AS $function$
 declare
   v_res booking.resources; v_range tstzrange := tstzrange(p_start, p_end, '[)');
-  x record; v_pool bigint; v_cap integer; v_peak integer; v_gap integer; v_maxgap integer; v_ritual boolean; v_savu boolean;
+  x record; v_pool bigint; v_cap integer; v_peak integer; v_gap integer; v_maxgap integer; v_ritual boolean;
   v_ob boolean := booking._staff_overbook(); v_os boolean := booking._staff_off_schedule();
 begin
   select * into v_res from booking.resources where id = p_resource;
@@ -119,7 +132,6 @@ begin
     return;
   end if;
 
-  v_savu := (v_res.code = 'savusauna');
   v_ritual := booking._is_ritual(p_pools);
   v_maxgap := greatest(v_res.buffer_after_min, coalesce(v_res.buffer_ritual_ritual_min, 0));
   -- booking_194: exclusive ja session_exclusive eivät riipu ylibuukkauslipusta. Kapasiteetti (shared, sama istunto) riippuu.
@@ -145,16 +157,9 @@ begin
     end if;
   end loop;
 
-  if not v_ob then
-    if exists (select 1 from booking.waitlist_entries w
-                 join booking.schedule_rules sr on sr.id = w.rule_id and sr.mode = 'exclusive'
-                where w.space_id = p_resource and w.status = 'notified' and w.hold_expires_at > now()
-                  and p_start < w.ends_at + make_interval(mins => v_res.buffer_after_min)
-                  and w.starts_at < p_end + make_interval(mins => v_res.buffer_after_min)
-                  and booking._waitlist_hold_counts(w.id)) then
-      if v_savu then perform booking._err('private_booked', 'Ajalle on jo yksityinen varaus – päällekkäistä varausta ei voi tehdä.');
-      else perform booking._err('space_busy', 'Tila on varattu tälle ajalle (' || v_res.code || ')'); end if;
-    end if;
+  -- Exclusive-jonopito on yksityinen claim: ylibuukkaus ei ohita (eikä _waitlist_hold_countsin staff-poikkeus).
+  if booking._exclusive_hold_blocks(p_resource, p_start, p_end) then
+    perform booking._err('private_booked', 'Ajalle on jo yksityinen varaus – päällekkäistä varausta ei voi tehdä.');
   end if;
 
   if p_mode = 'shared' and not v_ob then
@@ -213,7 +218,8 @@ begin
         exit;
       end if;
     end loop;
-    v_code := booking._private_overlap_code(r.space_id, r.mode, s_start, s_end, p_exclude_reservation);
+    v_code := booking._private_overlap_code(r.space_id, r.mode, s_start, s_end, p_exclude_reservation,
+      (select array_agg(rp.pool_id) from booking.schedule_rule_pools rp where rp.rule_id = r.id));
     if v_code is not null then
       v_conflict := v_conflict || jsonb_build_array(jsonb_build_object('code', v_code));
     end if;
@@ -299,7 +305,8 @@ begin
                         where b.active and b.space_id = sr.space_id
                           and b.starts_at < s.ends_at and b.ends_at > s.starts_at) as blocked,
                booking._private_overlap_code((select sr.space_id from booking.schedule_rules sr where sr.id = s.rule_id),
-                                            s.mode, s.starts_at, s.ends_at, null) is not null as private_conflict
+                                            s.mode, s.starts_at, s.ends_at, null,
+                                            (select array_agg(rp.pool_id) from booking.schedule_rule_pools rp where rp.rule_id = s.rule_id)) is not null as private_conflict
       ) cap), '[]'::jsonb),
     'reservations', coalesce((select jsonb_agg(jsonb_build_object(
         'reservation_id', r.id, 'order_id', o.id, 'order_no', o.order_no, 'status', r.status, 'payment_status', o.payment_status,
@@ -336,5 +343,7 @@ begin
         from booking.space_blocks b join booking.resources br on br.id = b.space_id where b.active and b.starts_at < v_to and b.ends_at > v_from), '[]'::jsonb));
 end $function$;
 
-revoke all on function booking._private_overlap_code(bigint, text, timestamptz, timestamptz, bigint) from public, anon, authenticated;
-grant execute on function booking._private_overlap_code(bigint, text, timestamptz, timestamptz, bigint) to service_role;
+revoke all on function booking._exclusive_hold_blocks(bigint, timestamptz, timestamptz),
+  booking._private_overlap_code(bigint, text, timestamptz, timestamptz, bigint, bigint[]) from public, anon, authenticated;
+grant execute on function booking._exclusive_hold_blocks(bigint, timestamptz, timestamptz),
+  booking._private_overlap_code(bigint, text, timestamptz, timestamptz, bigint, bigint[]) to service_role;

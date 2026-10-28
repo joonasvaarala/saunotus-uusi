@@ -98,6 +98,9 @@ test('Migraatio: liput vain hallinnan RPC:issä, julkinen kapasiteetti ei negati
   assert.doesNotMatch(sql194, /p_allow_off_schedule boolean default false[\s\S]{0,80}is_admin/);
   assert.match(sql194, /Ajalle on jo yksityinen varaus/);
   assert.match(sql194, /yksityisvuoroa ei voi varata päällekkäin/);
+  assert.match(sql194, /_exclusive_hold_blocks/);
+  assert.match(sql194, /buffer_after_min/);
+  assert.doesNotMatch(sql194, /if not v_ob then[\s\S]{0,200}waitlist_entries/);
   const pub = readFileSync(join(root, 'admin/views/newbooking.js'), 'utf8');
   assert.match(pub, /data-testid': 'gift-card-field'/);
   assert.match(pub, /data-testid': 'discount-code'/);
