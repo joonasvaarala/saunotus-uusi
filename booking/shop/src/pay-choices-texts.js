@@ -2,7 +2,9 @@
 // MobilePay-painikkeen ja lahjakorttilomakkeen omat tekstit tulevat mobilepay-texts.js:stä ja gift-texts.js:stä (sama logiikka kuin tilaussivulla).
 export const PT = {
   fi: {
-    title: 'Maksa varaus', amountDue: 'Maksettavaa jäljellä: {amount}',
+    title: 'Maksa varaus', amountDue: 'Maksettavaa jäljellä: {amount}', amountToPay: 'Maksettavaa: {amount}',
+    payHeading: 'Maksa verkossa',
+    leadFinish: 'Valitse maksutapa ja maksa verkossa. Siirryt maksusivulle ja palaat sen jälkeen tilaukseesi.',
     leadConfirmed: 'Voit maksaa nyt verkossa MobilePaylla tai lahjakortilla. Maksu on mahdollista myös paikan päällä.',
     leadPending: 'Valitse maksutapa.',
     giftBtn: 'Maksa lahjakortilla', giftBtnClose: 'Piilota lahjakortin maksu',
@@ -24,6 +26,7 @@ export const PT = {
     returnReview: 'Maksu vaatii tarkistuksen', returnReviewLead: 'Maksu saapui, mutta henkilökunta tarkistaa sen ennen vahvistusta.',
     returnFailed: 'Maksu ei onnistunut', returnFailedLead: 'Maksua ei veloitettu. Voit yrittää uudelleen.',
     returnWait: 'Maksua vielä käsitellään', returnWaitLead: 'Jos maksoit, odota hetki ja päivitä sivu. Muuten voit yrittää uudelleen.',
+    returnOpen: 'Maksu jäi kesken', returnOpenLead: 'Maksua ei veloitettu. Voit jatkaa maksamaan alta.',
     errNetwork: 'Yhteys ei onnistunut. Tarkista verkkoyhteys ja yritä uudelleen.',
     errGeneric: 'Maksun aloitus epäonnistui. Yritä uudelleen tai ota yhteyttä.',
     errOff: 'Verkkomaksu ei ole juuri nyt käytössä.',
@@ -32,7 +35,9 @@ export const PT = {
     errPaid: 'Tämä maksu on jo maksettu. Kiitos.',
   },
   en: {
-    title: 'Pay for your booking', amountDue: 'Amount left to pay: {amount}',
+    title: 'Pay for your booking', amountDue: 'Amount left to pay: {amount}', amountToPay: 'To pay: {amount}',
+    payHeading: 'Pay online',
+    leadFinish: 'Choose a payment method and pay online. You continue to the payment page and then return to your order.',
     leadConfirmed: 'You can pay online now with MobilePay or a gift card. Paying on site is also possible.',
     leadPending: 'Choose a payment method.',
     giftBtn: 'Pay with a gift card', giftBtnClose: 'Hide gift card payment',
@@ -54,6 +59,7 @@ export const PT = {
     returnReview: 'Payment needs a check', returnReviewLead: 'The payment arrived, and our staff will check it before confirming.',
     returnFailed: 'The payment did not go through', returnFailedLead: 'You were not charged. You can try again.',
     returnWait: 'The payment is still being processed', returnWaitLead: 'If you paid, wait a moment and refresh the page. Otherwise you can try again.',
+    returnOpen: 'The payment was not completed', returnOpenLead: 'You were not charged. You can continue to payment below.',
     errNetwork: 'The connection failed. Check your network and try again.',
     errGeneric: 'The payment could not be started. Try again or contact us.',
     errOff: 'Online payment is not available right now.',

@@ -15,9 +15,10 @@ import { normOptions, shouldShowButton, testUiEnabled } from './mobilepay-logic.
 import { runReturn } from './mobilepay-ui.js';
 import { createVismapayApi } from './vismapay-api.js';
 import { normVisma, shouldShowVisma } from './vismapay-logic.js';
-import { onlineMethod, showOnline } from './online-pay-logic.js';
+import { onlineMethod, onlineChoices, showOnline, safeOnlineRedirect } from './online-pay-logic.js';
 import { createOnlinePayApi } from './online-pay-api.js';
 import { onlinePayBlock, runOnlineReturn } from './online-pay-ui.js';
+import { takeFreshPay, payStepKind, giftPayOffered, customerBadges, duePresentation } from './pay-step.js';
 import { pt } from './pay-choices-texts.js';
 import { OPT } from './options-texts.js';
 import { optName, optionMissingOnOrder, optionChanged, rowLabel } from './options-logic.js';
@@ -174,6 +175,44 @@ async function main() {
   if (payQ === 'online' && payableStatus) onState.checking = true;
   if (payQ === 'vismapay' && payableStatus) vpState.checking = true;
   if (payQ === 'mobilepay' && payableStatus) mpState.checking = true;
+  const payReturn = ['online', 'vismapay', 'mobilepay'].includes(payQ);
+  const freshPay = !payReturn && takeFreshPay(token);
+  let preferFinish = false;
+  let openPay = false;
+  let startError = '';
+  const heroEl = document.querySelector('main .hero.page h1');
+  const hero0 = heroEl?.textContent || '';
+  const setHero = (text) => {
+    if (heroEl) heroEl.textContent = text || hero0;
+    if (!text) return;
+    const rest = document.title.includes(' | ') ? document.title.split(' | ').slice(1).join(' | ') : 'Sipoonjoen Perinnesauna';
+    document.title = `${text} | ${rest}`;
+  };
+  const stepOf = (order) => {
+    const co = order.checkout;
+    const hidden = !!co && (co.preliminary || co.expired || co.cancelled || co.processing);
+    const choices = onState.show ? onlineChoices(onState.method) : [];
+    const locked = customerInvoiceLock(order).locked;
+    const giftOn = giftPayOffered({ locked, redeem: gift.redeem, unpaid: order.unpaid, hidden, hasCards: gift.cards.length > 0, status: order.status });
+    const linkRow = order.online_payment_enabled && !onState.show ? (order.payments || []).find((p) => p.status === 'pending' && p.link_path) : null;
+    const payable = order.unpaid > 0 && !hidden && !locked && (onState.show || giftOn || !!linkRow);
+    return { choices, giftOn, linkRow, hidden, locked, kind: payStepKind({ fresh: freshPay, returning: payReturn, payable, onlineCount: choices.length, gift: giftOn, link: !!linkRow }) };
+  };
+  const firstStep = stepOf(o);
+  if (firstStep.kind === 'redirect-link' && firstStep.linkRow) {
+    mount(h('p', { class: 'bk-loading', role: 'status', 'data-testid': 'pay-redirect', text: pt(L, 'payBusyOnline') }));
+    location.assign(S.base ? S.base + firstStep.linkRow.link_path : firstStep.linkRow.link_path);
+    return;
+  }
+  if (firstStep.kind === 'redirect') {
+    mount(h('p', { class: 'bk-loading', role: 'status', 'data-testid': 'pay-redirect', text: pt(L, 'payBusyOnline') }));
+    let started = null;
+    try { started = await onlineApi.start(firstStep.choices[0].method); } catch { started = { ok: false, code: 'network' }; }
+    const url = started?.ok ? safeOnlineRedirect(started.redirect_url) : null;
+    if (url) { location.assign(url); return; }
+    startError = pt(L, 'errGeneric');
+    preferFinish = true;
+  } else if (firstStep.kind === 'finish') preferFinish = true;
   draw(o);
   const redraw = async (n) => { await Promise.all([loadMp(), loadAnnual()]); await loadHold(n); draw(n); };
   async function reloadAfterGift(text) {
@@ -202,9 +241,20 @@ async function main() {
     const co = o.checkout, holdV = isHoldView(co), closedHold = !!co && (co.expired || co.cancelled);   // closedHold: vanhentunutta/peruttua tilausta ei lisätä eikä peruta   // co = null → vanha näkymä muuttumattomana
     const stKey = o.cancel_request?.status === 'open' ? 'cancel_requested' : o.status;
     const unpaid = o.unpaid;
+    const pres = duePresentation({ paid: o.paid, unpaid });
+    const holdKind = holdV ? (co.expired ? 'expired' : co.preliminary ? 'preliminary' : co.processing ? 'processing' : 'awaiting') : null;
+    const badges = customerBadges({
+      status: stKey, paymentStatus: o.payment_status, paid: o.paid, unpaid, online: !!(onState.show || o.online_payment_enabled), hold: holdKind,
+      texts: {
+        cancel: t['st.cancel_requested'], cancelled: t['st.cancelled'], expired: t['st.expired'], invoiced: t['pay.invoiced'],
+        refunded: t['pay.refunded'], partialRefund: t['pay.partially_refunded'], paid: t['pay.paid'], failed: t.payFailedCust,
+        partial: t['pay.partially_paid'], open: t.payOpen, confirmed: t['st.confirmed'],
+        processing: ht(L, 'status.processing'), preliminary: ht(L, 'status.preliminary'),
+      },
+    });
     const head = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-h' },
       h('h2', { id: 'ord-h', 'data-testid': 'order-title', text: `${t.order} #${o.order_no}` }),
-      h('div', { class: 'ord-badges' }, badge(`st-${stKey}`, holdV ? ht(L, { awaiting_payment: 'status.awaiting', processing_payment: 'status.processing', preliminary: 'status.preliminary', expired: 'status.expired' }[co.state]) : t[`st.${stKey}`] || stKey), badge(`pay-${o.payment_status}`, t[`pay.${o.payment_status}`] || o.payment_status)),
+      h('div', { class: 'ord-badges', 'data-testid': 'order-badges' }, badges.map((b) => badge(b.kind, b.text))),
       o.created_at ? h('p', { class: 'bk-meta', text: `${t.created}: ${dt(o.created_at)}` }) : null);
     const dOnly = (ds) => df({ day: 'numeric', month: 'numeric', year: 'numeric' }).format(new Date(`${ds}T12:00:00Z`));
     const annualEl = annual ? h('section', { class: 'ord-card ord-annual', 'aria-labelledby': 'ord-ac', 'data-testid': 'annual-card-code' }, h('h3', { id: 'ord-ac', text: t.annualCodeTitle }),
@@ -252,8 +302,9 @@ async function main() {
       h('ul', { class: 'ord-lines', 'data-testid': 'order-lines' }, o.items.map((i) => h('li', {},
         h('span', { class: 'ord-l-main' }, h('strong', { text: i.quantity > 1 ? `${nm(i)} × ${i.quantity}` : nm(i) })),
         h('span', { class: 'ord-l-sum', text: money(i.line_total) })))),
-      h('dl', { class: 'ord-sums' }, h('div', {}, h('dt', { text: `${t.total} (${t.vatIncl})` }), h('dd', { 'data-testid': 'order-total', text: money(o.total) })), h('div', {}, h('dt', { text: t.paid }), h('dd', { text: money(o.paid) })),
-        h('div', { class: unpaid > 0 ? 'due' : '' }, h('dt', { text: t.unpaid }), h('dd', { 'data-testid': 'order-unpaid', text: money(unpaid) }))));
+      h('dl', { class: 'ord-sums' }, h('div', {}, h('dt', { text: `${t.total} (${t.vatIncl})` }), h('dd', { 'data-testid': 'order-total', text: money(o.total) })),
+        pres.partial || o.paid > 0 ? h('div', {}, h('dt', { text: t.paid }), h('dd', { text: money(o.paid) })) : null,
+        unpaid > 0 ? h('div', { class: pres.alarm ? 'due' : '' }, h('dt', { text: pres.partial ? t.unpaid : t.dueNow }), h('dd', { 'data-testid': 'order-unpaid', text: money(unpaid) })) : null));
     // maksulinkki: avoin (pending) maksu + verkkomaksu käytössä → linkki; muuten maksu paikan päällä
     const link = o.online_payment_enabled && !onState.show ? o.payments.find((p) => p.status === 'pending' && p.link_path) : null;
     const payHidden = !!co && (co.preliminary || co.expired || co.cancelled || co.processing);   // alustavaa/vanhentunutta ei makseta; käsittelyn aikana ei toista maksua
@@ -261,25 +312,47 @@ async function main() {
     const onOn = onState.show && !checking && unpaid > 0;
     const onBlock = onOn ? onlinePayBlock({ L, api: onlineApi, method: onState.method, env: mpEnv, testid: 'ord-method', showTest: false, onFail: (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) holdCtl?.poll(true); } }) : null;
     const due = money(unpaid);
-    const payLead = onOn ? t.payLeadOnline : '';
-    const payAmount = onOn ? pt(L, 'amountDue', { amount: due }) : '';
-    const payTest = onOn && onState.method?.test === true ? t.payTestOnline : '';
+    const cta = pres.partial ? `${t.payRest} (${due})` : (preferFinish ? t.payOnlineHeading : `${t.payContinue} (${due})`);
+    const showMethods = onOn && (openPay || preferFinish);
+    const payTest = showMethods && onState.method?.test === true ? t.payTestOnline : '';
     const refundNote = (o.payments || []).some((p) => p.refund_pending) ? h('p', { class: 'bk-note', 'data-testid': 'ord-refund-pending', text: t.refundPending }) : null;
     const inv = customerInvoiceLock(o);
+    const continueBtn = () => {
+      if (checking) return null;
+      if (link && !showMethods) return h('a', { class: 'btn ord-btn', 'data-testid': 'pay-continue', href: S.base ? S.base + link.link_path : link.link_path, text: cta });
+      if (showMethods) return null;
+      if (onBlock) return h('button', { type: 'button', class: 'btn ord-btn', 'data-testid': 'pay-continue', text: cta, onclick: () => {
+        const only = onlineChoices(onState.method);
+        if (only.length === 1 && !giftUseSoon()) { void startOne(only[0].method); return; }
+        openPay = true; preferFinish = true; draw(cur);
+      } });
+      return h('p', { class: 'bk-note', text: t.payRestSoon });
+    };
+    const giftUseSoon = () => !inv.locked && gift.redeem && unpaid > 0 && !payHidden && !gift.cards.length && ['confirmed', 'pending'].includes(o.status);
+    async function startOne(method) {
+      const btn = root.querySelector('[data-testid=pay-continue]');
+      if (btn) { btn.disabled = true; btn.textContent = pt(L, 'payBusyOnline'); }
+      let started = null;
+      try { started = await onlineApi.start(method); } catch { started = { ok: false, code: 'network' }; }
+      const url = started?.ok ? safeOnlineRedirect(started.redirect_url) : null;
+      if (url) { location.assign(url); return; }
+      startError = pt(L, 'errGeneric');
+      openPay = true; preferFinish = true;
+      draw(cur);
+    }
     const pay = inv.locked
       ? h('section', { class: 'ord-card', role: 'status', 'data-testid': 'invoiced-pay-note' }, h('p', { class: 'bk-note', text: t.invoicedNote }))
       : unpaid > 0 && !payHidden ? h('section', { class: 'ord-card ord-pay', 'aria-labelledby': 'ord-p', 'data-testid': 'order-pay' },
-      h('h3', { id: 'ord-p', class: 'mp-title', text: t.paymentTitle }),
+      h('h3', { id: 'ord-p', text: preferFinish || showMethods ? t.payOnlineHeading : (pres.partial ? t.paymentTitle : t.payOpen) }),
       refundNote,
-      payLead ? h('p', { class: 'bk-note', 'data-testid': 'ord-pay-lead', text: payLead }) : null,
-      payAmount ? h('p', { class: 'mp-amount', 'data-testid': 'ord-pay-amount', text: payAmount }) : null,
+      preferFinish ? null : h('p', { class: 'bk-note', 'data-testid': 'ord-pay-lead', text: pres.partial ? t.payLeadOnline : t.payOpenLead }),
+      showMethods && pres.partial ? h('p', { class: 'mp-amount', 'data-testid': 'ord-pay-amount', text: pt(L, 'amountDue', { amount: due }) }) : null,
       payTest ? h('p', { class: 'bk-note op-testnote', role: 'note', 'data-testid': 'op-test', text: payTest }) : null,
-      co?.awaiting ? h('p', { class: 'bk-note', 'data-testid': 'ord-hold-choose', text: ht(L, 'chooseOnline') }) : null,
-      onBlock ? h('div', { class: 'ord-pay-methods', 'data-testid': 'ord-pay-methods' }, onBlock) : null,
-      checking ? null : link ? h('a', { class: 'btn ord-btn', 'data-testid': 'pay-link', href: S.base ? S.base + link.link_path : link.link_path, text: `${t.payRest} (${money(unpaid)})` })
-        : onBlock ? null : h('button', { type: 'button', class: 'btn light ord-btn', disabled: true, 'data-testid': 'pay-rest', text: `${t.payRest} (${money(unpaid)})` }),
-      link || onBlock || checking ? null : h('p', { class: 'bk-note', text: t.payRestSoon })) : (refundNote ? h('section', { class: 'ord-card', 'data-testid': 'order-pay' }, h('h3', { text: t.paymentTitle }), refundNote) : null);
-    const giftCards = gift.cards.length ? cardsSection({ S, L, api: gapi, cards: gift.cards }) : null;
+      startError ? h('p', { class: 'bk-error', role: 'alert', 'data-testid': 'op-error', text: startError }) : null,
+      showMethods && giftUseSoon() ? h('p', { class: 'bk-note', 'data-testid': 'ord-hold-choose', text: ht(L, 'chooseOnline') }) : null,
+      showMethods && onBlock ? h('div', { class: 'ord-pay-methods', 'data-testid': 'ord-pay-methods' }, onBlock) : null,
+      continueBtn()) : (refundNote ? h('section', { class: 'ord-card', 'data-testid': 'order-pay' }, h('h3', { text: t.payOpen }), refundNote) : null);
+    const giftCards = gift.cards.length ? cardsSection({ S, L, api: gapi, cards: gift.cards, hidePending: true }) : null;
     const giftUse = !inv.locked && gift.redeem && unpaid > 0 && !payHidden && !gift.cards.length && ['confirmed', 'pending'].includes(o.status) ? redeemSection({ L, api: gapi, token, onApplied: reloadAfterGift, onClaimed: reloadAfterClaim, onFail: (code) => { if (['order_expired', 'order_preliminary', 'payment_in_progress'].includes(code)) holdCtl?.poll(true); } }) : null;
     const claimBox = gift.claims.length ? claimsSection({ S, L, api: gapi, token, claims: gift.claims, notice, onChanged: reloadAfterClaim }) : null;
     notice = null;
@@ -303,7 +376,18 @@ async function main() {
       h('p', { class: 'bk-note' }, `${t.addNewBooking} `, h('a', { href: S.shopHref, text: t.addNewBookingLink })));
     const extra = guides || add || upsell ? h('div', { class: 'ord-extra', 'data-testid': 'order-extra' }, guides, upsell, add) : null;
     const cancel = closedHold || o.reservations.length === 0 ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c', 'data-testid': 'cancel-section' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), ...cancelBody(o, note));
-    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, closedEl, resv, additions, optSec, lines, pay, giftCards, claimBox, annualEl, giftUse, receipts, extra, cancel, msg));
+    const mockNote = api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null;
+    if (preferFinish && unpaid > 0 && !payHidden && !inv.locked && !checking) {
+      setHero(t.finishTitle);
+      const intro = h('section', { class: 'ord-card ord-finish', 'data-testid': 'order-finish' },
+        h('h2', { 'data-testid': 'finish-title', text: t.finishTitle }),
+        h('p', { 'data-testid': 'finish-lead', text: t.finishLead }),
+        h('p', { class: 'bk-meta', text: `${t.order} #${o.order_no}` }));
+      mount(mockNote, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, intro, holdEl, lines, pay, giftCards, giftUse, msg));
+      return;
+    }
+    setHero('');
+    mount(mockNote, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, closedEl, resv, additions, optSec, lines, pay, giftCards, claimBox, annualEl, giftUse, receipts, extra, cancel, msg));
   }
   function receiptPdfHref(pdfUrl) {
     try {

@@ -238,6 +238,7 @@ function buildSale(pk) {
       const r = await api.buy(G.buyArgs({ lines, pkgs, buyer, locale: L }));
       if (r?.ok) {
         // Verkkomaksuun suoraan; maksusivu avautuu heti myös silloin, kun erillistä maksulinkkiä ei palauteta.
+        try { sessionStorage.setItem(`bk-pay-now-${String(r.token || '').toLowerCase()}`, '1'); } catch { /* yksityinen tila */ }
         if (r.payment_url) { location.assign(r.payment_url); return; }
         if (r.token) { location.assign(orderHref(r.token)); return; }
         return done(r); // Vanhan/poikkeavan RPC-vastauksen varavahvistus ilman tilauslinkkiä.

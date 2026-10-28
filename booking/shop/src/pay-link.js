@@ -11,6 +11,7 @@ import { PAY_METHODS, safeOnlineRedirect } from './online-pay-logic.js';
 import { paymentMethodList, setMethodLabel, setBusyState, methodLabelKey } from './online-pay-ui.js';
 import { pt } from './pay-choices-texts.js';
 import { PLT, plt } from './pay-link-texts.js';
+import { OT } from './order-texts.js';
 import { linkTokenFrom, classifyLinkError, switchHref, normLinkInfo, linkInfoView, fmtDate } from './pay-link-logic.js';
 import { applyShopTexts } from './site-texts.js';
 
@@ -61,7 +62,7 @@ export function payLinkView({ L, token, api, loadInfo = null, phone = '', phoneT
   buttons = list.buttons;
   const lead = h('p', { 'data-testid': 'pl-lead', text: tx('leadOnline') });
   const card = h('section', { class: 'ord-card pl-card', 'data-testid': 'pay-link-page', 'aria-labelledby': 'pl-title' },
-    h('h3', { id: 'pl-title', text: tx('title') }), lead, list.root, msg, contact);
+    h('h3', { id: 'pl-title', text: (OT[L] || OT.fi).finishTitle || tx('title') }), lead, list.root, msg, contact);
   if (!token) { showError('invalid_param'); for (const b of buttons) b.remove(); card.ready = Promise.resolve(null); return card; }
   if (!loadInfo) { card.ready = Promise.resolve(null); return card; }
   // yhteenveto: painikkeet odottavat vastausta (ei kaksoistilaa), mutta eivät koskaan aloita maksua itse

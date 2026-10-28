@@ -108,6 +108,7 @@ test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-shop.mjs 
     ...J('content/site-texts.pending-import-91.json').map((r) => `${r.key}|${r.lang}`),   // tapahtumat-chippi
     ...J('content/site-texts.pending-import-92.json').filter((r) => r.key.startsWith('ui.shop.') || r.key.startsWith('ui.gift.')).map((r) => `${r.key}|${r.lang}`),
     ...J('content/site-texts.pending-import-94.json').filter((r) => r.key.startsWith('ui.') && !FALLBACK.texts.some((x) => x.key === r.key && x.lang === r.lang)).map((r) => `${r.key}|${r.lang}`),   // audit 28.10: uudet ui-avaimet (lead on jo varatekstissä)
+    ...J('content/site-texts.pending-import-98.json').map((r) => `${r.key}|${r.lang}`),   // oston jälkeinen maksu
   ]);
   const imp = new Set(PENDING.map((r) => r.key));
   writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts.filter((r) => !imp.has(r.key)) }));   // tuotanto ennen #61:n tuontia
@@ -152,7 +153,8 @@ test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet ava
   const eventChipUi = J('content/site-texts.pending-import-91.json');
   const giftPersonsUi = J('content/site-texts.pending-import-92.json').filter((r) => r.key.startsWith('ui.shop.') || r.key.startsWith('ui.gift.'));
   const audit94Ui = J('content/site-texts.pending-import-94.json').filter((r) => r.key.startsWith('ui.') && !FALLBACK.texts.some((x) => x.key === r.key && x.lang === r.lang));
-  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length + waitUi.length + waitParty.length + waitOffer.length + codeUi.length + partyType.length + cancelUi.length + quietUi.length + ritualUi.length + ritualCard.length + oneUi.length + sellersUi.length + invoiceUi.length + payLinkUi.length + payLinkInfoUi.length + payLinkRetryUi.length + invoiceLockUi.length + companyPayUi.length + onlinePayUi.length + additionHoldUi.length + uxShopUi.length + eventChipUi.length + giftPersonsUi.length + audit94Ui.length);
+  const payStepUi = J('content/site-texts.pending-import-98.json');
+  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length + waitUi.length + waitParty.length + waitOffer.length + codeUi.length + partyType.length + cancelUi.length + quietUi.length + ritualUi.length + ritualCard.length + oneUi.length + sellersUi.length + invoiceUi.length + payLinkUi.length + payLinkInfoUi.length + payLinkRetryUi.length + invoiceLockUi.length + companyPayUi.length + onlinePayUi.length + additionHoldUi.length + uxShopUi.length + eventChipUi.length + giftPersonsUi.length + audit94Ui.length + payStepUi.length);
   assert.ok(!rows.some((x) => haveKeys.has(x.key)));
   for (const e of extraRows) assert.ok(!rows.some((x) => x.key === e.key), `${e.key}: jo tuotannossa, generaattori ei lisää`);
   const bad = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', join(work, 'ei-ole.json')], { encoding: 'utf8' });

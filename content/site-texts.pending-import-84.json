@@ -62,7 +62,7 @@
  {
   "key": "ui.hold.choose_online",
   "lang": "fi",
-  "text": "Valitse maksutapa: verkkomaksu tai lahjakortti. Lahjakortti voi kattaa osan summasta – loppuosan voit maksaa verkossa.",
+  "text": "Valitse maksutapa: verkkomaksu tai lahjakortti.",
   "class": "normal",
   "kind": "plain",
   "max_len": 300,
@@ -72,7 +72,7 @@
  {
   "key": "ui.hold.choose_online",
   "lang": "en",
-  "text": "Choose how to pay: online payment or gift card. A gift card can cover part of the amount – you can pay the rest online.",
+  "text": "Choose how to pay: online payment or a gift card.",
   "class": "normal",
   "kind": "plain",
   "max_len": 300,

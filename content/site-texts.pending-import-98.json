@@ -1,0 +1,282 @@
+[
+  {
+    "key": "ui.order.finish_title",
+    "lang": "fi",
+    "text": "Viimeistele tilaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Oston jälkeinen maksu: ystävällinen otsikko tilaussivun tilamerkkien sijaan. Uusi avain, tuonti ei ylikirjoita vanhoja."
+  },
+  {
+    "key": "ui.order.finish_title",
+    "lang": "en",
+    "text": "Complete your order",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Oston jälkeinen maksu: ystävällinen otsikko tilaussivun tilamerkkien sijaan. Uusi avain, tuonti ei ylikirjoita vanhoja."
+  },
+  {
+    "key": "ui.order.finish_lead",
+    "lang": "fi",
+    "text": "Tarkista tiedot ja maksa verkossa. Siirryt maksusivulle ja palaat sen jälkeen tilaukseesi.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "Oston jälkeinen maksu: lyhyt ohje ennen maksutavan valintaa. Uusi avain, tuonti ei ylikirjoita vanhoja."
+  },
+  {
+    "key": "ui.order.finish_lead",
+    "lang": "en",
+    "text": "Check the details and pay online. You continue to the payment page and then return to your order.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "Oston jälkeinen maksu: lyhyt ohje ennen maksutavan valintaa. Uusi avain, tuonti ei ylikirjoita vanhoja."
+  },
+  {
+    "key": "ui.order.pay_open",
+    "lang": "fi",
+    "text": "Maksu on vielä kesken",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilaussivun yksi merkki avoimelle maksulle. Korvaa parin Odottaa maksua ja Maksu kesken. Uusi avain."
+  },
+  {
+    "key": "ui.order.pay_open",
+    "lang": "en",
+    "text": "Payment is not finished yet",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilaussivun yksi merkki avoimelle maksulle. Korvaa parin Odottaa maksua ja Maksu kesken. Uusi avain."
+  },
+  {
+    "key": "ui.order.pay_open_lead",
+    "lang": "fi",
+    "text": "Maksu on vielä kesken. Sinua ei ole veloitettu. Voit jatkaa maksamaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tilaussivu myöhemmälle käynnille tai keskeytetyn maksun jälkeen. Uusi avain."
+  },
+  {
+    "key": "ui.order.pay_open_lead",
+    "lang": "en",
+    "text": "Payment is not finished yet. You have not been charged. You can continue to payment.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 220,
+    "placeholders": [],
+    "reason": "Tilaussivu myöhemmälle käynnille tai keskeytetyn maksun jälkeen. Uusi avain."
+  },
+  {
+    "key": "ui.order.pay_continue",
+    "lang": "fi",
+    "text": "Jatka maksamaan",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilaussivun painike, kun maksu on kesken eikä lahjakortti ole kattanut osaa. Uusi avain."
+  },
+  {
+    "key": "ui.order.pay_continue",
+    "lang": "en",
+    "text": "Continue to payment",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilaussivun painike, kun maksu on kesken eikä lahjakortti ole kattanut osaa. Uusi avain."
+  },
+  {
+    "key": "ui.order.pay_online_heading",
+    "lang": "fi",
+    "text": "Maksa verkossa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Maksuvaiheen otsikko ja painike. Välittäjän nimeä ei näytetä. Uusi avain."
+  },
+  {
+    "key": "ui.order.pay_online_heading",
+    "lang": "en",
+    "text": "Pay online",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Maksuvaiheen otsikko ja painike. Välittäjän nimeä ei näytetä. Uusi avain."
+  },
+  {
+    "key": "ui.order.due_now",
+    "lang": "fi",
+    "text": "Maksettavaa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "Summan nimi, kun mitään ei ole vielä maksettu. Maksamatta jää osasuoritukselle. Uusi avain."
+  },
+  {
+    "key": "ui.order.due_now",
+    "lang": "en",
+    "text": "To pay",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "Summan nimi, kun mitään ei ole vielä maksettu. Maksamatta jää osasuoritukselle. Uusi avain."
+  },
+  {
+    "key": "ui.order.pay_failed_cust",
+    "lang": "fi",
+    "text": "Maksu ei onnistunut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Asiakkaan merkki epäonnistuneelle maksulle. Uusi avain."
+  },
+  {
+    "key": "ui.order.pay_failed_cust",
+    "lang": "en",
+    "text": "The payment did not go through",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Asiakkaan merkki epäonnistuneelle maksulle. Uusi avain."
+  },
+  {
+    "key": "ui.paychoice.amount_to_pay",
+    "lang": "fi",
+    "text": "Maksettavaa: {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": ["{{var:amount}}"],
+    "reason": "Maksuvaiheen summa, kun lahjakortti ei ole kattanut osaa. Uusi avain."
+  },
+  {
+    "key": "ui.paychoice.amount_to_pay",
+    "lang": "en",
+    "text": "To pay: {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": ["{{var:amount}}"],
+    "reason": "Maksuvaiheen summa, kun lahjakortti ei ole kattanut osaa. Uusi avain."
+  },
+  {
+    "key": "ui.paychoice.pay_heading",
+    "lang": "fi",
+    "text": "Maksa verkossa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Vahvistussivun maksuosion otsikko. Välittäjän nimeä ei näytetä. Uusi avain."
+  },
+  {
+    "key": "ui.paychoice.pay_heading",
+    "lang": "en",
+    "text": "Pay online",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Vahvistussivun maksuosion otsikko. Välittäjän nimeä ei näytetä. Uusi avain."
+  },
+  {
+    "key": "ui.paychoice.lead_finish",
+    "lang": "fi",
+    "text": "Valitse maksutapa ja maksa verkossa. Siirryt maksusivulle ja palaat sen jälkeen tilaukseesi.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "Vahvistussivun maksuohje, kun lahjakortti ei ole vaihtoehto. Uusi avain."
+  },
+  {
+    "key": "ui.paychoice.lead_finish",
+    "lang": "en",
+    "text": "Choose a payment method and pay online. You continue to the payment page and then return to your order.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "Vahvistussivun maksuohje, kun lahjakortti ei ole vaihtoehto. Uusi avain."
+  },
+  {
+    "key": "ui.paychoice.return_open",
+    "lang": "fi",
+    "text": "Maksu jäi kesken",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Paluu maksusta, kun maksua ei veloitettu eikä sitä enää käsitellä. Uusi avain."
+  },
+  {
+    "key": "ui.paychoice.return_open",
+    "lang": "en",
+    "text": "The payment was not completed",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Paluu maksusta, kun maksua ei veloitettu eikä sitä enää käsitellä. Uusi avain."
+  },
+  {
+    "key": "ui.paychoice.return_open_lead",
+    "lang": "fi",
+    "text": "Maksua ei veloitettu. Voit jatkaa maksamaan alta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Paluu keskeytetystä maksusta. Uusi avain."
+  },
+  {
+    "key": "ui.paychoice.return_open_lead",
+    "lang": "en",
+    "text": "You were not charged. You can continue to payment below.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Paluu keskeytetystä maksusta. Uusi avain."
+  },
+  {
+    "key": "ui.shop.pay_still_open",
+    "lang": "fi",
+    "text": "Maksu on vielä kesken",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Varausvahvistuksen tila, kun varaus odottaa maksua. Uusi avain."
+  },
+  {
+    "key": "ui.shop.pay_still_open",
+    "lang": "en",
+    "text": "Payment is not finished yet",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Varausvahvistuksen tila, kun varaus odottaa maksua. Uusi avain."
+  }
+]
