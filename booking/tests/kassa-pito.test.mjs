@@ -58,7 +58,7 @@ test('järjestys + kompakti banneri: otsikko + tilabadge → pitopaneeli → tii
   assert.ok(shop.includes('holdHost, mpHost, dl,'), 'vahvistussivu: pitopaneeli ennen yhteenvetoa');
   assert.ok(shop.includes('dl.after(secEl)'), 'vahvistussivu: maksuosio yhteenvedon alle');
   assert.equal((shop.match(/dl\.dataset\.testid = 'conf-summary'/g) || []).length, 1, 'vahvistussivun yhteenveto rakennetaan vain kerran (ei duplikaattia)');
-  assert.ok(/head, holdEl, closedEl, resv, optSec, lines, pay, giftCards, claimBox,/.test(ord), 'tilaussivu: pitopaneeli → peruutusviesti → varaus + summat → maksuosio (booking_131: maksuosio ennen lahjakortteja)');
+  assert.ok(/head, holdEl, closedEl, resv, additions, optSec, lines, pay, giftCards, claimBox,/.test(ord), 'tilaussivu: pitopaneeli → peruutusviesti → varaus + maksamaton lisäys + summat → maksuosio (booking_131: maksuosio ennen lahjakortteja)');
   assert.ok(ui.includes("class: kind === 'awaiting' ? 'sr-only' : ''"), 'awaiting: "Maksa varaus vahvistaaksesi" -otsikko vain ruudunlukijalle (toisto h2:n ja tilabadgen kanssa)');
   assert.ok(css.includes('.bk-hold-awaiting{display:flex'), 'kompakti banneri (lause + laskuri samalla rivillä)');
   assert.equal(ht('fi', 'summary.remaining'), 'Maksettavaa jäljellä'); assert.equal(ht('en', 'summary.remaining'), 'Amount left to pay');

@@ -149,6 +149,8 @@ jobs:
         with:
           node-version: 22
       - run: node --test booking/supabase/functions/send-emails/templates.test.mjs
+      # booking_190: maksamattoman pidon viesti ja lisäyksen peruutusnappi. SQL: booking/supabase/tests/checkout/t190_addon_hold_unpaid_email.sql
+      - run: node --test booking/tests/lisatilaus-pito.test.mjs
       # booking_174: kumppanilahjakortin arvo käsin + erotus maksulinkkinä, kuitti vain kirjanpitoon (pending-import-69). SQL-testi t174 ajetaan psql:llä.
       - run: node --test booking/tests/lahjakortti-arvo-erotus-174.test.mjs
       # booking_177: maksulinkkisivu /maksa/?p= (+ /en/pay/) → vismapay-start {link_token} (pending-import-72)

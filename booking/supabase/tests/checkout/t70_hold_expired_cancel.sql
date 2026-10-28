@@ -18,7 +18,10 @@ begin
   select last_value into v_seq0 from booking.orders_order_no_seq;
   select coalesce(max(id), 0) into v_maxid from booking.orders;
   update booking.settings set value = '"hold_until_paid"'::jsonb where key = 'public_payment_mode';
-  update booking.integration_config set mode = 'test' where key = 'mobilepay';
+  update booking.settings set value = 'true'::jsonb where key = 'gift_cards.redeem_enabled';
+  update booking.integration_config set mode = 'test', settings = coalesce(settings, '{}'::jsonb) || '{"approved_by":"t70"}'::jsonb where key = 'mobilepay';
+  insert into booking.integration_config(key, mode, settings) values ('montonio', 'test', '{"approved_by":"t70"}'::jsonb)
+    on conflict (key) do update set mode = 'test', settings = booking.integration_config.settings || '{"approved_by":"t70"}'::jsonb;
   insert into booking.gift_cards(code, issuer, kind, initial_amount, balance, status, source, vat_treatment, accounting_origin, balance_verified, valid_to)
   values ('HH69TEST0001', 'own', 'value', 1000, 1000, 'active', 'native', 'at_redemption', 'native', true, current_date + 100) returning id into g1;
   for r_s in select q.starts_at from (
@@ -43,7 +46,8 @@ begin
   perform pg_temp.ck(not exists (select 1 from booking.v_claims c where c.order_id = oid and booking._res_active(c.status, c.hold_expires_at)), 'A7: claimit eivät varaa aikaa');
   r := booking.public_get_order(tok);
   perform pg_temp.ck(r ->> 'status' = 'cancelled' and r ->> 'checkout_state' = 'cancelled' and r ->> 'cancel_reason' = 'hold_expired', 'A8: tilaussivu: cancelled + cancel_reason hold_expired');
-  perform pg_temp.ck(not exists (select 1 from booking.email_outbox where order_id = oid), 'A9: vanheneminen ei jonota sähköpostia');
+  perform pg_temp.ck((select count(*) from booking.email_outbox where order_id = oid and kind = 'unpaid_booking_cancelled') = 1
+    and (select dedupe_key from booking.email_outbox where order_id = oid and kind = 'unpaid_booking_cancelled') = 'unpaid_booking_cancelled:' || oid::text, 'A9: vanheneminen jonottaa yhden maksamaton-viestin');
   r := pg_temp.mk(v_slots[1], 'a2@t69.example');
   perform pg_temp.ck((r ->> 'ok')::boolean, 'A10: sama aika on taas varattavissa (' || coalesce(r ->> 'code', '') || ')');
 
@@ -59,10 +63,11 @@ begin
   perform pg_temp.ck((select status from booking.payments where order_id = oid and method = 'gift_card') = 'cancelled', 'B4: korttimaksu cancelled');
   perform pg_temp.ck(not exists (select 1 from booking.email_outbox where order_id = oid and kind in ('order_confirmation', 'receipt')), 'B5: ei vahvistusta eikä kuittia');
 
-  -- C) MobilePay kesken ei vapaudu
+  -- C) verkkomaksu kesken ei vapaudu (booking_189: MobilePay-aloitus ei enää luo maksua; pito on Montoniossa)
   r := pg_temp.mk(v_slots[3], 'c1@t69.example'); tok := (r ->> 'token')::uuid; oid := pg_temp.oid(tok);
-  r := booking.mobilepay_payment_prepare(tok, null, 120);
-  perform pg_temp.ck((r ->> 'ok')::boolean, 'C1: MobilePay aloitettu');
+  r := booking.montonio_payment_prepare(tok, null, 'cardPayments');
+  perform pg_temp.ck((r ->> 'ok')::boolean, 'C1: verkkomaksu aloitettu (' || coalesce(r ->> 'code', '') || ')');
+  r := booking.montonio_payment_event(r ->> 'order_number', 'CREATED', 'https://pay.example/t70', '00000000-0000-4000-8000-000000000070', null);
   update booking.reservations set hold_expires_at = now() - interval '1 minute' where order_id = oid;
   perform booking.expire_holds();
   perform pg_temp.ck((select status from booking.orders where id = oid) = 'pending' and (select status from booking.reservations where order_id = oid) = 'pending', 'C2: inflight-pitoa ei peruta');

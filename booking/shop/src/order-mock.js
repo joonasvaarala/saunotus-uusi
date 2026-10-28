@@ -20,7 +20,13 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
     can_add: true, add_until: `${day(3)}T14:00:00Z`, can_change: true, change_deadline: `${day(2)}T11:00:00Z`, change_hours_before: 24, cancel_request: null, online_payment_enabled: false,
     upsell: { addons: ADDONS, treatments: [{ product_id: 10, name: 'Saunahoito', name_en: 'Sauna treatment' }] },
     instructions: [],
+    pending_additions: [],
   };
+  if (scenario === 'lisays') {
+    const until = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+    o.pending_additions = [{ item_id: 8801, kind: 'addon', name: 'Pyyhe', name_en: 'Towel', quantity: 1, line_total: 5, reservation_id: 501, hold_expires_at: until, seconds_left: 900, expired: false }];
+    o.items.push({ id: 8801, name: 'Pyyhe', name_en: 'Towel', quantity: 1, line_total: 5, vat_rate: 25.5 });
+  }
   const sync = () => { o.total = r2(o.items.reduce((s, i) => s + i.line_total, 0)); o.unpaid = r2(Math.max(0, o.total - o.paid)); o.payment_status = o.unpaid === 0 ? 'paid' : o.paid > 0 ? 'partially_paid' : scenario === 'invoiced' ? 'invoiced' : 'unpaid'; };   // booking_175: ?scenario=invoiced = yrityksen laskulla maksettava tilaus (Laskutettu)
   // Skenaariot lahjakorttinäkymille (?mock=1&scenario=gift|cards|cardspaid|cardsdelivery): gift = maksamatonta jäljellä (Käytä lahjakortti), cards = lahjakorttitilaus maksamatta, cardspaid = maksettu, cardsdelivery = maksettu + toimitusvalinnat (ostajalle / saajalle ajastettu / saajalle lähetetty)
   if (scenario === 'invoiced') { o.customer_kind = 'company'; o.invoice_method = 'einvoice'; o.paid = 0; o.payments = []; o.receipts = []; }
@@ -193,6 +199,15 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
       return { ok: true, mock: true, order_no: o.order_no, starts_at: res.starts_at, ends_at: res.ends_at, persons: res.persons, total: o.total, price_diff: 0, payment: null, balance: { total: o.total, paid: o.paid, unpaid: o.unpaid }, online_payment_enabled: false, option: res.option };
     },
     public_request_cancel: ({ p_reason }) => { if (o.cancel_request) return bad('request_exists', 'Peruutuspyyntö on jo lähetetty'); if (cancelState().cancel_closed) return bad('cancel_too_late', `Peruutus ei ole enää mahdollinen, koska vuoron alkuun on alle ${CANCEL_H} tuntia.`); o.cancel_request = { status: 'open', created_at: new Date().toISOString(), reason: p_reason || null }; return { ok: true, mock: true }; },
+    public_cancel_addition: ({ p_item_id }) => {
+      const before = o.pending_additions.length;
+      const row = o.pending_additions.find((a) => a.item_id === p_item_id);
+      if (!row || row.expired) return bad('not_cancellable', 'Lisäystä ei voi perua');
+      o.pending_additions = o.pending_additions.filter((a) => a.item_id !== p_item_id);
+      o.items = o.items.filter((i) => i.id !== p_item_id);
+      sync();
+      return { ok: true, released: before - o.pending_additions.length };
+    },
     public_get_receipt: ({ p_order_token, p_receipt_no }) => {
       const r = o.receipts.find((x) => x.receipt_no === p_receipt_no); if (!r) return bad('receipt_not_found', 'Kuittia ei löytynyt');
       return { ok: true, mock: true, id: 1, receipt_no: r.receipt_no, kind: r.kind, issued_at: r.issued_at, total_gross: r.total, snapshot: null, public_token: r.token, pdf_url: null, sent_at: r.issued_at,

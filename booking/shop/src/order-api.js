@@ -6,7 +6,7 @@ import { createOrderMock } from './order-mock.js';
 import { normOptions, reservationItem } from './options-logic.js';
 import { normCheckout } from './hold-logic.js';
 import { holdMockParams } from './hold-mock.js';
-export const RPC = { get: 'public_get_order', addToOrder: 'public_add_to_order', requestCancel: 'public_request_cancel', getReceipt: 'public_get_receipt', changeOrderTime: 'public_change_order_time' };
+export const RPC = { get: 'public_get_order', addToOrder: 'public_add_to_order', requestCancel: 'public_request_cancel', getReceipt: 'public_get_receipt', changeOrderTime: 'public_change_order_time', cancelAddition: 'public_cancel_addition' };
 export const isMissingRpc = (e) => !!e && (e.status === 404 || e.code === 'PGRST202' || e.code === '42883' || /could not find the function/i.test(e.message || ''));
 export const wantsMock = (loc = typeof location !== 'undefined' ? location : null) => !!loc && new URLSearchParams(loc.search || '').get('mock') === '1';
 export const validToken = (t) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(t || ''));
@@ -33,7 +33,8 @@ export function normOrder(r) {
       // booking_141: lyhyt ohje aina näkyvissä (short_rich vain tosi/epätosi; puuttuva = pelkkä teksti).
       short_text: String(g.short_text ?? ''), short_rich: g.short_rich === true, delivery_mode: g.delivery_mode === 'order_only' ? 'order_only' : 'scheduled' })),
     upsell_addons: (r.upsell?.addons || []).map((a) => ({ id: a.id, code: a.code, name: a.name, name_en: a.name_en ?? null, price: num(a.price), max: num(a.max, 20) })),
-    upsell_treatments: (r.upsell?.treatments || []).map((x) => ({ product_id: x.product_id ?? null, name: x.name || '', name_en: x.name_en ?? null })) };
+    upsell_treatments: (r.upsell?.treatments || []).map((x) => ({ product_id: x.product_id ?? null, name: x.name || '', name_en: x.name_en ?? null })),
+    pending_additions: (r.pending_additions || []).map((a) => ({ item_id: a.item_id, kind: a.kind || '', name: a.name || '', name_en: a.name_en ?? null, quantity: num(a.quantity, 1), line_total: num(a.line_total), reservation_id: a.reservation_id ?? null, hold_expires_at: a.hold_expires_at ?? null, seconds_left: num(a.seconds_left), expired: a.expired === true })) };
 }
 export function rpcBackend(rpc, token) {
   return {
@@ -43,6 +44,7 @@ export function rpcBackend(rpc, token) {
     changeOrderTime: ({ reservationId, optionCode, start, ruleId, date, persons }) => rpc(RPC.changeOrderTime, { p_token: token, p_reservation_id: reservationId, p_start: start ?? null, p_rule_id: ruleId ?? null, p_date: date ?? null, p_persons: persons ?? null, p_option_code: optionCode ?? null }),
     addReservation: (r) => rpc(RPC.addToOrder, { p_token: token, p_items: [reservationItem(r)] }),
     requestCancel: ({ reason }) => rpc(RPC.requestCancel, reason ? { p_token: token, p_reason: reason } : { p_token: token }),
+    cancelAddition: ({ itemId }) => rpc(RPC.cancelAddition, { p_token: token, p_item_id: itemId }),
     getReceipt: ({ receiptNo }) => rpc(RPC.getReceipt, { p_order_token: token, p_receipt_no: receiptNo }),   // HUOM: parametri on p_order_token (ei p_token)
   };
 }
@@ -51,5 +53,5 @@ export function createOrderApi({ rpc, token, mock = wantsMock(), mockFactory = (
   const backendRpc = mock ? inst.rpc : rpc;
   const be = rpcBackend(backendRpc, token);
   const wrap = (key) => async (a) => { try { return await be[key](a); } catch (e) { if (!mock && isMissingRpc(e)) return { ok: false, notReady: true, rpc: RPC[key] }; throw e; } };
-  return { mock, rpc: backendRpc, mpFetch: inst?.mpFetch ?? null, get: wrap('get'), addToOrder: wrap('addToOrder'), requestCancel: wrap('requestCancel'), getReceipt: wrap('getReceipt'), changeOrderTime: wrap('changeOrderTime'), addReservation: wrap('addReservation') };
+  return { mock, rpc: backendRpc, mpFetch: inst?.mpFetch ?? null, get: wrap('get'), addToOrder: wrap('addToOrder'), requestCancel: wrap('requestCancel'), getReceipt: wrap('getReceipt'), changeOrderTime: wrap('changeOrderTime'), addReservation: wrap('addReservation'), cancelAddition: wrap('cancelAddition') };
 }

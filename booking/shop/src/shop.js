@@ -23,7 +23,7 @@ import { OPT } from './options-texts.js';
 import { optName, needsOption, findOption } from './options-logic.js';
 import { ht, holdError, methodList } from './hold-texts.js';
 import { normCheckout, isHoldView, holdModeOf, giftWasUsed } from './hold-logic.js';
-import { holdPanel } from './hold-ui.js';
+import { holdPanel, additionHoldSection } from './hold-ui.js';
 import { normBusinessId, validBusinessId, normOvt, validOvt, validOperator } from './invoice-validate.js';
 import { isRichHtml } from './rich-text.js';
 import { visibleText, richHost } from './rich-view.js';
@@ -1057,6 +1057,18 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     unpaidEnd ? h('p', { class: 'bk-actions' }, h('a', { class: 'btn', 'data-testid': 'conf-retry', href: retryBookingHref(b, it, stMap), text: t.tryAgain })) : null,
     h('p', {}, h('a', { href: S.infoHref, text: t.directions }))));
   if (b.status === 'confirmed' && !inv.locked) {
+    const holdMinutes = holdModeOf(model?.checkout, state.settings).minutes || 15;
+    const pendingAdds = additionHoldSection({
+      L, items: b.pending_additions || [], minutes: holdMinutes,
+      text: { title: t.additionTitle, hold: t[oneKey('additionHold', L, { minutes: holdMinutes }, t)], expired: t.additionExpired, cancel: t.cancelAddition },
+      onCancel: async (item, btn) => {
+        if (btn) btn.disabled = true;
+        const r = await rpc('public_cancel_addition', { p_token: token, p_item_id: item.item_id }).catch(() => null);
+        if (r?.ok) { out.replaceChildren(h('p', { class: 'bk-ok', role: 'status', text: t.additionCancelDone })); viewConfirmation({ refresh: true, host: mpHost, noReturn: true }); }
+        else { if (btn) btn.disabled = false; out.replaceChildren(errorBox(t.errors[r?.code] || t.cancelFail)); }
+      },
+    });
+    if (pendingAdds) root.querySelector('.bk-conf')?.append(pendingAdds);
     root.querySelector('.bk-conf')?.append(orderUpsellSection({
       S, L, token, order: confirmationUpsellOrder(b), rpc,
       onAdded: () => viewConfirmation({ refresh: true, host: mpHost, noReturn: true }),
