@@ -156,7 +156,7 @@ export const PUBLISHED_GIFT_PACKAGES = [
     max_amount: null,
     persons: 2,
     min_persons: 1,
-    max_persons: 4,
+    max_persons: 2,   // Joonas 28.10.: saunotus enintään 2 hengelle (sama raja booking.gift_card_packages-rivillä)
     unit_price: null,
     vat_rate: 25.5,
     valid_months: 6,
