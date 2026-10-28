@@ -45,15 +45,15 @@ test('tuotelistan kortit (vuoro + hoito) käyttävät cardMeta-riviä; CSS kohdi
   assert.doesNotMatch(css.match(/\.bk-card-meta[^}]*\}/g).join(''), /blue|#00f|#0000ff/i);
 });
 
-test('päivänäkymä: yksityisvuorot → yleiset vuorot → muut, hoidot viimeisenä', () => {
+test('päivänäkymä: yksityisvuorot → yleiset vuorot → tapahtumat → muut, hoidot viimeisenä', () => {
   const shop = read('shop/src/shop.js');
-  assert.match(shop, /const DAY_KIND_ORDER = \['yksityinen', 'yleinen', 'muut'\];/);
+  assert.match(shop, /import \{ kindOf, chipsFor, DAY_KIND_ORDER \} from '\.\/catalog-kind\.js';/);
   assert.match(shop, /const groups = DAY_KIND_ORDER\.map\(/);
   assert.doesNotMatch(shop, /\['yleinen', 'yksityinen'/);
   const v = shop.slice(shop.indexOf('async function viewDay('), shop.indexOf('if (treatBox) fillTreatments('));
   assert.ok(v.indexOf('const groups = DAY_KIND_ORDER') < v.indexOf('if (treatBox) results.append(treatBox)'), 'hoidot-osio lisätään ryhmien jälkeen');
   const i18n = read('shop/src/i18n.js');
-  for (const k of ['k_yksityinen', 'k_yleinen', 'k_hoito']) assert.ok((i18n.match(new RegExp(`\\b${k}\\b`, 'g')) || []).length >= 2, `${k} FI + EN`);
+  for (const k of ['k_yksityinen', 'k_yleinen', 'k_tapahtuma', 'k_hoito']) assert.ok((i18n.match(new RegExp(`\\b${k}\\b`, 'g')) || []).length >= 2, `${k} FI + EN`);
 });
 
 test('keepTimes: kellonaikaväli ei katkea viivasta, "klo 17" pysyy yhdessä; teksti muuten ennallaan', () => {
