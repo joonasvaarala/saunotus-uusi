@@ -1,6 +1,6 @@
 -- t174: booking_174 (tuotantoversio 20261024235019).
 --   1) Kumppanilahjakortin maksu (partner_voucher + kolme myyjäkohtaista) → K-kuitti kirjanpitoon (+ accounting_outbox, kun Procountor ei ole off),
---      EI kuittisähköpostia. Tavallinen maksu (korttipääte) → kuitti + kuittisähköposti kuten ennen.
+--      EI kuittisähköpostia. Tavallinen maksu (korttipääte) → kuitti kirjanpitoon; kuittisähköposti status skipped, last_error receipt_auto_send disabled (booking_191).
 --   2) Lahjakortin arvo käsin ennen hyväksyntää (admin_mark_voucher_claim_redeemed p_amount): arvo < maksettava → kumppanimaksu arvon suuruisena,
 --      erotus Visma Pay -maksulinkkinä (payment_link-sähköposti, payload voucher_difference: total / voucher_value / difference); täysi arvo → ei linkkiä;
 --      arvo > maksettava → BK001 voucher_exceeds_total; arvo <= 0 tai yli 2 desimaalia → BK001 invalid_amount. Erotuksen maksu → tavallinen kuittisähköposti.
@@ -91,7 +91,7 @@ begin
   end loop;
   perform pg_temp.ck(cnt = 4, 'B5 kaikki neljä myyjää käyty');
 
-  -- ===== C tavallinen maksu (henkilökunta, korttipääte): kuitti + kuittisähköposti kuten ennen
+  -- ===== C tavallinen maksu (henkilökunta, korttipääte): kuitti kirjanpitoon, kuittisähköposti skipped (booking_191)
   o := pg_temp.mkorder(cu, 35, 'fi', 'T174 kortti');
   perform pg_temp.login(u_adm);
   r := booking.admin_record_payment(o, 'card_terminal', 35, 't174 kortti', null);
@@ -99,7 +99,7 @@ begin
   select id into pay from booking.payments where order_id = o and status = 'paid' and method = 'card_terminal';
   select id into rc from booking.receipts where payment_id = pay and kind = 'receipt';
   perform pg_temp.ck(rc is not null, 'C1 korttimaksu: kuitti');
-  perform pg_temp.ck(exists (select 1 from booking.email_outbox where kind = 'receipt' and receipt_id = rc and payment_id = pay and dedupe_key = 'receipt:' || rc), 'C2 korttimaksu: kuittisähköposti jonossa');
+  perform pg_temp.ck(exists (select 1 from booking.email_outbox where kind = 'receipt' and receipt_id = rc and payment_id = pay and dedupe_key = 'receipt:' || rc and status = 'skipped' and last_error = 'receipt_auto_send disabled'), 'C2 korttimaksu: kuittisähköposti skipped (receipt_auto_send disabled)');
   perform pg_temp.ck(exists (select 1 from booking.accounting_outbox where receipt_id = rc), 'C3 korttimaksu: kirjanpitojonossa');
 
   -- ===== D partner_voucher_accounted = false: ei kuittia, ei sähköpostia (ennallaan)
@@ -147,12 +147,12 @@ begin
   else
     perform pg_temp.skip('E10 email_outbox_claim ohitettu: jonossa muita lähetettäviä viestejä');
   end if;
-  -- asiakas maksaa erotuksen → kuitti (booking_174: + kuittisähköposti; booking_176: ei kuittisähköpostia, kuitti tilaussivulla)
+  -- asiakas maksaa erotuksen → kuitti (ilman booking_176:ta kuittisähköposti skipped, receipt_auto_send disabled; booking_176: ei kuittisähköpostia, kuitti tilaussivulla)
   update booking.payments set status = 'paid', paid_at = now() where id = lnk;
   select id into rc from booking.receipts where payment_id = lnk and kind = 'receipt';
   if to_regclass('booking.vc_difference_payments') is null then
-    perform pg_temp.ck(rc is not null and exists (select 1 from booking.email_outbox where kind = 'receipt' and receipt_id = rc), 'E11 erotuksen maksu: kuitti + kuittisähköposti');
-    perform pg_temp.ck((select count(*) from booking.email_outbox where order_id = o and kind = 'receipt') = 1, 'E12 tilauksella vain erotuksen kuittisähköposti');
+    perform pg_temp.ck(rc is not null and exists (select 1 from booking.email_outbox where kind = 'receipt' and receipt_id = rc and status = 'skipped' and last_error = 'receipt_auto_send disabled'), 'E11 erotuksen maksu: kuitti, kuittisähköposti skipped (receipt_auto_send disabled)');
+    perform pg_temp.ck((select count(*) from booking.email_outbox where order_id = o and kind = 'receipt' and status = 'skipped' and last_error = 'receipt_auto_send disabled') = 1, 'E12 tilauksella vain erotuksen kuittisähköposti (skipped)');
   else
     perform pg_temp.ck(rc is not null and not exists (select 1 from booking.email_outbox where kind = 'receipt' and receipt_id = rc), 'E11 erotuksen maksu: kuitti, ei kuittisähköpostia (booking_176)');
     perform pg_temp.ck((select count(*) from booking.email_outbox where order_id = o and kind = 'receipt') = 0, 'E12 tilauksella ei kuittisähköpostia (booking_176)');

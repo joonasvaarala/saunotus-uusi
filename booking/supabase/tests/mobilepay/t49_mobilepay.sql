@@ -87,7 +87,7 @@ begin
   insert into _t select o.payment_status = 'paid', 'T9c tilaus paid' from booking.orders o where o.id = v_order;
   insert into _t select count(*) = 1, 'T9d kuitti syntyi (_on_payment_paid)' from booking.receipts where payment_id = v_pid;
   insert into _t select count(*) >= 1, 'T9e2 kirjanpito-outbox-rivi syntyi (procountor dry_run)' from booking.accounting_outbox where payment_id = v_pid;
-  insert into _t select count(*) >= 1, 'T9e kuittiviesti jonossa' from booking.email_outbox where kind = 'receipt' and payment_id = v_pid;
+  insert into _t select count(*) >= 1 and bool_and(status = 'skipped' and last_error = 'receipt_auto_send disabled'), 'T9e kuittiviesti ohitettu (status skipped, receipt_auto_send disabled)' from booking.email_outbox where kind = 'receipt' and payment_id = v_pid;
   r := booking.payment_mark_paid('mobilepay', v_ref2, 40, null);
   insert into _t values (r ->> 'already' = 'true', 'T9f idempotentti (already)');
   begin perform booking.mobilepay_payment_prepare(v_tok, null); insert into _t values (false, 'T9g maksettua ei voi maksaa uudelleen');

@@ -5,7 +5,8 @@
 --      jo jonossa oleva lähettämätön tilausvahvistus ohitetaan; email_outbox_claim antaa vahvistukselle lyhyet ohjeet (order.instructions).
 --      Ensimmäinen pyyntö peruttu ennen lähetystä, toinen voimassa → sama vahvistus lähtee voimassa olevan pyynnön tiedoilla (tasan yksi); kaikki peruttu → send-emails ohittaa;
 --      ohitetun jälkeen uusi koodi → tasan yksi uusi vahvistus.
---   C) kohta 6: tavallinen varaus saa edelleen tilausvahvistuksen + ohjeviestin, korttimaksu kuitin + kuittisähköpostin, maksulinkki sähköpostin.
+--   C) kohta 6: tavallinen varaus saa edelleen tilausvahvistuksen + ohjeviestin ja maksulinkkisähköpostin.
+--      Korttimaksu luo kuitin; kuittisähköposti on status skipped, last_error receipt_auto_send disabled (booking_191).
 --   D) kohta 2: lahjakortti kattaa koko summan → lunastuksesta ei yhtään viestiä.
 --   E) kohta 3: lahjakortti kattaa osan → yksi viesti (payment_link / voucher_difference), henkilökunta ja botti (svc_mark_voucher_claim_redeemed)
 --      sekä vanha polku (admin_resolve_voucher_claim / svc_resolve_voucher_claim tila 'redeemed') samalla tavalla.
@@ -224,7 +225,7 @@ begin
   r := booking.admin_create_payment_link(o2, true, 14, 't176 linkki');
   perform pg_temp.logout();
   select id into rc from booking.receipts where order_id = o2 and kind = 'receipt';
-  perform pg_temp.ck(rc is not null and exists (select 1 from booking.email_outbox where kind = 'receipt' and receipt_id = rc and dedupe_key = 'receipt:' || rc), 'C3 korttimaksu: kuitti + kuittisähköposti kuten ennen');
+  perform pg_temp.ck(rc is not null and exists (select 1 from booking.email_outbox where kind = 'receipt' and receipt_id = rc and dedupe_key = 'receipt:' || rc and status = 'skipped' and last_error = 'receipt_auto_send disabled'), 'C3 korttimaksu: kuitti syntyy, kuittisähköposti skipped (receipt_auto_send disabled)');
   perform pg_temp.ck(pg_temp.mails(o2, 'payment_link') = 1 and pg_temp.mails(o2) = 4, 'C4 maksulinkki sähköpostina kuten ennen (4 viestiä yhteensä)');
 
   -- ===== D kohta 2: koko summa lahjakortilla → ei viestiä lunastuksesta
