@@ -15,5 +15,6 @@ Deno.test("pyyhe ja kiinteä hinta käyttävät omaa kappalemääräänsä", () 
   assertEquals(receiptQtyUnitFormula({ quantity: 1, unit_gross: 5, line_gross: 5 }, "fi"), "1 × 5,00 € = 5,00 €");
   assertEquals(receiptQtyUnitFormula({ quantity: 1, unit_gross: 58, line_gross: 58 }, "fi"), "1 × 58,00 € = 58,00 €");
   assertEquals(receiptQtyUnitFormula({ quantity: 2, unit_gross: -29, line_gross: -58 }, "fi"), "2 × -29,00 € = -58,00 €");
+  assertEquals(receiptQtyUnitFormula({ quantity: 1, unit_gross: -29, line_gross: -29 }, "fi"), "1 × -29,00 € = -29,00 €");
   assertEquals(receiptQtyUnitFormula({ quantity: 2, line_gross: 58 }, "fi"), null);
 });
