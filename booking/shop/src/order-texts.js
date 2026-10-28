@@ -22,11 +22,12 @@ export const OT = {
     addNewBooking: 'Haluatko varata uuden käynnin? Tee uusi varaus varauskalenterissa.', addNewBookingLink: 'Avaa varauskalenteri', addClosed: 'Lisäykset eivät ole enää mahdollisia, koska varaus on päättynyt. Tee uusi varaus kalenterissa.',
     cancelTitle: 'Peruutuspyyntö', cancelLead: 'Henkilökunta käsittelee peruutuspyynnöt. Saat vahvistuksen sähköpostilla; hyvitys tehdään alkuperäiselle maksutavalle.', cancelReason: 'Syy (valinnainen)', cancelSubmit: 'Lähetä peruutuspyyntö',
     cancelDone: 'Peruutuspyyntö lähetetty. Henkilökunta ottaa yhteyttä.', cancelPending: 'Peruutuspyyntö on jo lähetetty ja odottaa käsittelyä.', cancelConfirm: 'Lähetetäänkö peruutuspyyntö?',
-    // booking_149 (Joonaksen päätös 24.10.2026): asiakkaan itse tekemä peruutus ja hyvitys vain, jos vuoron alkuun on vähintään {hours} (48) tuntia. {phone} = S.phone (sivutekstissä {{var:phone}}).
+    // booking_149 (Joonaksen päätös 24.10.2026): asiakkaan itse tekemä peruutus ja hyvitys vain, jos vuoron alkuun on vähintään {hours} (48) tuntia.
+    // {email} = S.email (sivutekstissä {{var:email}}), mailto-linkki tilaussivulla. Asiakas ohjataan sähköpostiin, ei puhelimeen.
     cancelRule: 'Peruutuspyynnön voi lähettää viimeistään {hours} tuntia ennen vuoron alkua, eli viimeistään {date}. Alle {hours} tuntia ennen vuoroa peruutus ei ole enää mahdollinen.',
-    cancelClosed: 'Peruutus ei ole enää mahdollinen, koska vuoron alkuun on alle {hours} tuntia. Jos sinulla on kysyttävää, soita meille: {phone}.',
+    cancelClosed: 'Peruutus ei ole enää mahdollinen, koska vuoron alkuun on alle {hours} tuntia. Jos sinulla on kysyttävää, lähetä meille sähköpostia: {email}.',
     'err.cancel_too_late': 'Peruutusaika on päättynyt. Peruutus ei ole enää mahdollinen.',
-    reservationsTitle: 'Varauksesi', addReservation: 'Varaus', changeNote: 'Muutokset ja peruutukset viimeistään {date}. Sen jälkeen ota yhteyttä puhelimitse.', changeClosed: 'Muutosaika on päättynyt. Ota yhteyttä puhelimitse.',
+    reservationsTitle: 'Varauksesi', addReservation: 'Varaus', changeNote: 'Muutokset ja peruutukset viimeistään {date}. Sen jälkeen lähetä meille sähköpostia:', changeClosed: 'Muutosaika on päättynyt. Jos sinulla on kysyttävää, lähetä meille sähköpostia:',
     'cancel.open': 'Peruutuspyyntö on jo lähetetty ja odottaa käsittelyä.', 'cancel.approved': 'Peruutuspyyntö on hyväksytty.', 'cancel.rejected': 'Peruutuspyyntöä ei voitu hyväksyä. Ota yhteyttä.',
     'err.order_closed': 'Lisäysaika on päättynyt. Tee uusi varaus kalenterissa.', 'err.rate_limited': 'Liian monta yritystä. Yritä hetken kuluttua uudelleen.', 'err.invalid_items': 'Lisäys ei onnistunut: tarkista määrä.', 'err.item_not_found': 'Lisäpalvelua ei löytynyt.',
     'err.option_required': 'Valitse hoito ennen tallennusta.', 'err.invalid_option': 'Valittua hoitoa ei voi valita. Valitse hoito uudelleen.', 'err.change_too_late': 'Muutosaika on päättynyt. Ota yhteyttä puhelimitse.', 'err.not_changeable': 'Tätä varausta ei voi muuttaa verkossa. Ota yhteyttä.', 'err.invalid_change': 'Ei muutettavaa. Valitse toinen hoito.', 'err.not_found': 'Varausta ei löytynyt.',
@@ -63,9 +64,9 @@ export const OT = {
     cancelTitle: 'Cancellation request', cancelLead: 'Our staff handle cancellation requests. You will receive a confirmation by email; refunds go to the original payment method.', cancelReason: 'Reason (optional)', cancelSubmit: 'Send cancellation request',
     cancelDone: 'Cancellation request sent. Our staff will contact you.', cancelPending: 'A cancellation request has already been sent and is awaiting handling.', cancelConfirm: 'Send the cancellation request?',
     cancelRule: 'You can send a cancellation request up to {hours} hours before your session starts, that is by {date}. Less than {hours} hours before the session, cancellation is no longer possible.',
-    cancelClosed: 'Cancellation is no longer possible because your session starts in less than {hours} hours. If you have any questions, please call us: {phone}.',
+    cancelClosed: 'Cancellation is no longer possible because your session starts in less than {hours} hours. If you have any questions, email us: {email}.',
     'err.cancel_too_late': 'The cancellation deadline has passed. Cancellation is no longer possible.',
-    reservationsTitle: 'Your bookings', addReservation: 'Booking', changeNote: 'Changes and cancellations are possible until {date}. After that please call us.', changeClosed: 'The change deadline has passed. Please call us.',
+    reservationsTitle: 'Your bookings', addReservation: 'Booking', changeNote: 'Changes and cancellations are possible until {date}. After that, email us:', changeClosed: 'The change deadline has passed. If you have any questions, email us:',
     'cancel.open': 'A cancellation request has already been sent and is awaiting handling.', 'cancel.approved': 'The cancellation request has been approved.', 'cancel.rejected': 'The cancellation request could not be approved. Please contact us.',
     'err.order_closed': 'The time for additions has ended. Please make a new booking in the calendar.', 'err.rate_limited': 'Too many attempts. Please try again in a moment.', 'err.invalid_items': 'Could not add: please check the quantity.', 'err.item_not_found': 'Add-on not found.',
     'err.option_required': 'Please choose a treatment before saving.', 'err.invalid_option': 'The selected treatment cannot be chosen. Please choose again.', 'err.change_too_late': 'The change deadline has passed. Please call us.', 'err.not_changeable': 'This booking cannot be changed online. Please contact us.', 'err.invalid_change': 'Nothing to change. Please choose a different treatment.', 'err.not_found': 'Booking not found.',
@@ -83,13 +84,13 @@ export const OT = {
 // Yksikkömuodot (plural.js oneKey): käytetään kun lukumäärä on 1; puuttuu → monikkoavain (julkaistu teksti ennallaan). Tuonti: content/site-texts.pending-import-64.json.
 Object.assign(OT.fi, {
   cancelRuleOne: "Peruutuspyynnön voi lähettää viimeistään {hours} tunti ennen vuoron alkua, eli viimeistään {date}. Alle {hours} tunti ennen vuoroa peruutus ei ole enää mahdollinen.",
-  cancelClosedOne: "Peruutus ei ole enää mahdollinen, koska vuoron alkuun on alle {hours} tunti. Jos sinulla on kysyttävää, soita meille: {phone}.",
+  cancelClosedOne: "Peruutus ei ole enää mahdollinen, koska vuoron alkuun on alle {hours} tunti. Jos sinulla on kysyttävää, lähetä meille sähköpostia: {email}.",
   closedHoldExpiredOne: "Tämä varaus on peruttu, koska maksua ei saatu {minutes} minuutin kuluessa. Paikka on vapautettu muille. Mitään ei ole veloitettu. Voit tehdä uuden varauksen Sipoonjoen Perinnesaunaan.",
   additionHoldOne: "Lisäystä pidetään {minutes} minuutti. Jos sitä ei makseta, paikka vapautuu.",
 });
 Object.assign(OT.en, {
   cancelRuleOne: "You can send a cancellation request up to {hours} hour before your session starts, that is by {date}. Less than {hours} hour before the session, cancellation is no longer possible.",
-  cancelClosedOne: "Cancellation is no longer possible because your session starts in less than {hours} hour. If you have any questions, please call us: {phone}.",
+  cancelClosedOne: "Cancellation is no longer possible because your session starts in less than {hours} hour. If you have any questions, email us: {email}.",
   closedHoldExpiredOne: "This booking was cancelled because payment was not received within {minutes} minute. The time has been released for others. You have not been charged. You can make a new booking at Sipoonjoen Perinnesauna.",
   additionHoldOne: "The add-on is held for {minutes} minute. If it is not paid, the place is released.",
 });

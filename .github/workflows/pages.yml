@@ -272,7 +272,7 @@ jobs:
       # (rakenne; SQL-testi t165 paikallisesti PG17:llä, työnkulussa ei ole Postgresia)
       - run: node --test booking/tests/tietosuoja-en-avaimet.test.mjs
       # booking_149: asiakkaan peruutuspyyntö (ja sen kautta hyvitys) vain, jos vuoron alkuun on vähintään customer_change_hours_before (48) h;
-      # palvelin pakottaa (cancel_too_late), tilaussivu piilottaa lomakkeen ja näyttää puhelinnumeron; hallinnan peruutus/hyvitys aina. Tekstit pending-import-49.
+      # palvelin pakottaa (cancel_too_late), tilaussivu piilottaa lomakkeen ja ohjaa sähköpostiin; hallinnan peruutus/hyvitys aina. Tekstit pending-import-49.
       # t149 (booking/supabase/tests/peruutus/t149_customer_cancel_48h.sql) ajetaan paikallisessa PG17:ssä t143:n tapaan (työnkulussa ei ole Postgresia).
       - run: node --test booking/tests/peruutusraja-48h.test.mjs
       # booking_147: tuotteen kesto englanniksi (kb.products.duration_text_en, Bottiavustuksen tuotantomigraatio kb_products_duration_text_en):

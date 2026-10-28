@@ -278,7 +278,7 @@ async function main() {
         h('span', { class: 'ord-l-main' }, h('strong', { text: r.receipt_no }), ' ', badge('', t[r.kind] || r.kind)), h('span', { class: 'ord-l-meta', text: `${r.issued_at ? dt(r.issued_at) : ''}${r.total ? ' · ' + money(r.total) : ''}` }),
         h('span', { class: 'ord-l-sum' }, h('button', { type: 'button', class: 'btn light ord-btn', 'data-testid': 'receipt-dl', onclick: (ev) => download(ev.currentTarget, r.receipt_no), text: t.download }))))) : h('p', { class: 'bk-note', text: t.noReceipts }));
     const msg = h('div', { 'aria-live': 'polite', class: 'ord-msg', 'data-testid': 'order-msg' });
-    const note = o.change_deadline ? h('p', { class: 'bk-note', 'data-testid': 'change-note', text: o.can_change ? t.changeNote.replace('{date}', dt(o.change_deadline)) : t.changeClosed }) : null;
+    const note = o.change_deadline ? emailText(o.can_change ? t.changeNote.replace('{date}', dt(o.change_deadline)) : t.changeClosed, { class: 'bk-note', 'data-testid': 'change-note' }) : null;
     const guides = instructionsSection(o.instructions);
     const upsell = !closedHold && o.can_add && o.reservations.length ? orderUpsellSection({
       S, L, token, order: o, rpc: api.mock ? api.rpc : rpc,
@@ -293,7 +293,7 @@ async function main() {
       h('p', { class: 'bk-note' }, `${t.addNewBooking} `, h('a', { href: S.shopHref, text: t.addNewBookingLink })));
     const extra = guides || add || upsell ? h('div', { class: 'ord-extra', 'data-testid': 'order-extra' }, guides, upsell, add) : null;
     const cancel = closedHold || o.reservations.length === 0 ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c', 'data-testid': 'cancel-section' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), ...cancelBody(o, note));
-    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, closedEl, resv, additions, optSec, lines, pay, giftCards, claimBox, annualEl, giftUse, receipts, extra, cancel, msg, phoneBox()));
+    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, closedEl, resv, additions, optSec, lines, pay, giftCards, claimBox, annualEl, giftUse, receipts, extra, cancel, msg));
   }
   async function download(btn, receiptNo) {
     btn.disabled = true;
@@ -357,22 +357,28 @@ async function main() {
       }));
   }
   // booking_149: palvelin kertoo, saako asiakas vielä pyytää peruutusta (vähintään cancel_hours_before h ennen vuoron alkua). Rajan jälkeen lomaketta ei näytetä,
-  // vaan teksti + puhelinnumero (tel-linkki). Vanha backend (can_request_cancel puuttuu) → kuten ennen: muutosnote + lomake.
+  // vaan teksti + sähköposti (mailto). Vanha backend (can_request_cancel puuttuu) → kuten ennen: muutosnote + lomake.
   function cancelBody(o, note) {
     if (o.cancel_request) return [note, h('p', { class: 'bk-ok', role: 'status', 'data-testid': 'cancel-pending', text: t[`cancel.${o.cancel_request.status}`] || t['cancel.open'] })];
     if (o.can_request_cancel == null) return [note, cancelForm()];
     const hours = String(o.cancel_hours_before ?? 48);
-    if (o.cancel_closed) return [phoneText(t[oneKey('cancelClosed', L, { hours }, t)].split('{hours}').join(hours), { class: 'bk-note ord-cancel-closed', role: 'status', 'data-testid': 'cancel-closed' })];
+    if (o.cancel_closed) return [emailText(t[oneKey('cancelClosed', L, { hours }, t)].split('{hours}').join(hours), { class: 'bk-note ord-cancel-closed', role: 'status', 'data-testid': 'cancel-closed' })];
     if (!o.can_request_cancel) return [note];
     const rule = o.cancel_deadline ? h('p', { class: 'bk-note', 'data-testid': 'cancel-rule', text: t[oneKey('cancelRule', L, { hours }, t)].split('{hours}').join(hours).replace('{date}', dt(o.cancel_deadline)) }) : note;
     return [rule, cancelForm()];
   }
-  // {phone} (repon oletus) tai jo täytetty numero (sivuteksti {{var:phone}} → S.phone) → tel-linkki
-  function phoneText(text, attrs) {
-    const mark = text.includes('{phone}') ? '{phone}' : S.phone && text.includes(S.phone) ? S.phone : null;
-    if (!mark) return h('p', attrs, text, ' ', h('a', { href: `tel:${S.phoneTel}`, text: S.phone }));
-    const [a, ...rest] = text.split(mark);
-    return h('p', attrs, a, h('a', { href: `tel:${S.phoneTel}`, 'data-testid': 'cancel-phone', text: S.phone }), rest.join(mark));
+  // {email} (repon oletus) tai jo täytetty osoite (sivuteksti {{var:email}} → S.email) → mailto-linkki.
+  // Lause, joka päättyy "sähköpostia:" / "email us:", saa osoitteen perään (muutos- ja peruutusohje, jossa osoite ei ole tekstin sisällä).
+  function emailText(text, attrs) {
+    const email = String(S.email || '');
+    const link = () => h('a', { href: `mailto:${email}`, 'data-testid': 'order-email', text: email });
+    const mark = text.includes('{email}') ? '{email}' : email && text.includes(email) ? email : null;
+    if (mark && email) {
+      const [a, ...rest] = text.split(mark);
+      return h('p', attrs, a, link(), rest.join(mark));
+    }
+    if (email && /(?:sähköpostia|email us):\s*$/i.test(text)) return h('p', attrs, text, ' ', link());
+    return h('p', attrs, text);
   }
   function cancelForm() {
     const reason = h('textarea', { id: 'ord-reason', rows: 3, maxlength: 500, 'data-testid': 'cancel-reason' });

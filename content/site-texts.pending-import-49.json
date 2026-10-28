@@ -28,28 +28,28 @@
  {
   "key": "ui.order.cancel_closed",
   "lang": "fi",
-  "text": "Peruutus ei ole enää mahdollinen, koska vuoron alkuun on alle {{var:hours}} tuntia. Jos sinulla on kysyttävää, soita meille: {{var:phone}}.",
+  "text": "Peruutus ei ole enää mahdollinen, koska vuoron alkuun on alle {{var:hours}} tuntia. Jos sinulla on kysyttävää, lähetä meille sähköpostia: {{var:email}}.",
   "class": "protected",
   "kind": "plain",
   "max_len": 350,
   "placeholders": [
    "{{var:hours}}",
-   "{{var:phone}}"
+   "{{var:email}}"
   ],
-  "reason": "booking_149 (Joonaksen päätös 24.10.2026): asiakkaan itse tekemä peruutus ja hyvitys ei ole sallittu alle 48 h ennen vuoron alkua; tilaussivun peruutuskohdan teksti (booking/shop/src/order-texts.js). {{var:hours}} = asetus customer_change_hours_before, {{var:phone}} = sivuston puhelinnumero. Sama kuin koodin oletus, ei vielä tuotannossa."
+  "reason": "booking_149: tilaussivun suljettu peruutus ohjaa sähköpostiin ({{var:email}}), ei puhelimeen. {{var:hours}} = customer_change_hours_before. Sama kuin koodin oletus. Avain on jo kannassa: muutos overrides-tiedostolla."
  },
  {
   "key": "ui.order.cancel_closed",
   "lang": "en",
-  "text": "Cancellation is no longer possible because your session starts in less than {{var:hours}} hours. If you have any questions, please call us: {{var:phone}}.",
+  "text": "Cancellation is no longer possible because your session starts in less than {{var:hours}} hours. If you have any questions, email us: {{var:email}}.",
   "class": "protected",
   "kind": "plain",
   "max_len": 400,
   "placeholders": [
    "{{var:hours}}",
-   "{{var:phone}}"
+   "{{var:email}}"
   ],
-  "reason": "booking_149 (Joonaksen päätös 24.10.2026): asiakkaan itse tekemä peruutus ja hyvitys ei ole sallittu alle 48 h ennen vuoron alkua; tilaussivun peruutuskohdan teksti (booking/shop/src/order-texts.js). {{var:hours}} = asetus customer_change_hours_before, {{var:phone}} = sivuston puhelinnumero. Sama kuin koodin oletus, ei vielä tuotannossa."
+  "reason": "booking_149: tilaussivun suljettu peruutus ohjaa sähköpostiin ({{var:email}}), ei puhelimeen. {{var:hours}} = customer_change_hours_before. Sama kuin koodin oletus. Avain on jo kannassa: muutos overrides-tiedostolla."
  },
  {
   "key": "ui.order.err.cancel_too_late",

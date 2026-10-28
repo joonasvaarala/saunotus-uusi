@@ -1,0 +1,50 @@
+[
+ {
+  "key": "ui.order.cancel_closed",
+  "lang": "fi",
+  "old": "Peruutus ei ole enää mahdollinen, koska vuoron alkuun on alle {{var:hours}} tuntia. Jos sinulla on kysyttävää, soita meille: {{var:phone}}.",
+  "new": "Peruutus ei ole enää mahdollinen, koska vuoron alkuun on alle {{var:hours}} tuntia. Jos sinulla on kysyttävää, lähetä meille sähköpostia: {{var:email}}."
+ },
+ {
+  "key": "ui.order.cancel_closed",
+  "lang": "en",
+  "old": "Cancellation is no longer possible because your session starts in less than {{var:hours}} hours. If you have any questions, please call us: {{var:phone}}.",
+  "new": "Cancellation is no longer possible because your session starts in less than {{var:hours}} hours. If you have any questions, email us: {{var:email}}."
+ },
+ {
+  "key": "ui.order.cancel_closed_one",
+  "lang": "fi",
+  "old": "Peruutus ei ole enää mahdollinen, koska vuoron alkuun on alle {{var:hours}} tunti. Jos sinulla on kysyttävää, soita meille: {{var:phone}}.",
+  "new": "Peruutus ei ole enää mahdollinen, koska vuoron alkuun on alle {{var:hours}} tunti. Jos sinulla on kysyttävää, lähetä meille sähköpostia: {{var:email}}."
+ },
+ {
+  "key": "ui.order.cancel_closed_one",
+  "lang": "en",
+  "old": "Cancellation is no longer possible because your session starts in less than {{var:hours}} hour. If you have any questions, please call us: {{var:phone}}.",
+  "new": "Cancellation is no longer possible because your session starts in less than {{var:hours}} hour. If you have any questions, email us: {{var:email}}."
+ },
+ {
+  "key": "ui.order.change_note",
+  "lang": "fi",
+  "old": "Muutokset ja peruutukset viimeistään {{var:date}}. Sen jälkeen ota yhteyttä puhelimitse.",
+  "new": "Muutokset ja peruutukset viimeistään {{var:date}}. Sen jälkeen lähetä meille sähköpostia:"
+ },
+ {
+  "key": "ui.order.change_note",
+  "lang": "en",
+  "old": "Changes and cancellations are possible until {{var:date}}. After that please call us.",
+  "new": "Changes and cancellations are possible until {{var:date}}. After that, email us:"
+ },
+ {
+  "key": "ui.order.change_closed",
+  "lang": "fi",
+  "old": "Muutosaika on päättynyt. Ota yhteyttä puhelimitse.",
+  "new": "Muutosaika on päättynyt. Jos sinulla on kysyttävää, lähetä meille sähköpostia:"
+ },
+ {
+  "key": "ui.order.change_closed",
+  "lang": "en",
+  "old": "The change deadline has passed. Please call us.",
+  "new": "The change deadline has passed. If you have any questions, email us:"
+ }
+]
