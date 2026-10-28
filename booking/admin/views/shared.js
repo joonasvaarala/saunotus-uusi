@@ -14,6 +14,10 @@ import { addonPicker } from './addons.js';
 import { reservationAddonLocks, addonReductionError, orderInvoiceLocked, invoiceLockReason, staffInvoiceChange } from '../addon-lock-logic.js';
 import { alt } from '../addon-lock-texts.js';
 import { nbt } from '../nb-texts.js';
+import { staffPersonsMax, bookingNotices } from '../nb-logic.js';
+import { loadBookingTexts, bookingText, noticeText } from '../booking-texts.js';
+import { confirmDialog } from '../confirm.js';
+import { helsinkiIso } from '../ui.js';
 import { memoText } from '../day-memos-texts.js';
 import { stepper } from '../stepper.js';
 import { icon } from '../icons.js';
@@ -309,13 +313,26 @@ export function reservationDialog(r, { methods = [], onChange, refs, can = () =>
 
 // Varauksen muutos hallinnasta: sama voimassa oleva RPC ja samat parametrit kuin ennen.
 function changeDialog(r, onChange, order = null) {
+  loadBookingTexts(rpc).catch(() => {});
   const day = (iso) => new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
-  const st = { date: day(r.starts_at), session: null };
+  const st = { date: day(r.starts_at), session: null, blocks: [] };
   const loads = createLatestGate();
   let open = true;
   const sessionsBox = h('div', { class: 'stack' });
-  const pst = stepper({ label: 'Henkilömäärä', value: r.persons, min: 1, max: 99, size: 'lg' }); const persons = pst.input;
+  const warnBox = h('div', { class: 'nb-warn', role: 'status', hidden: true, 'data-testid': 'move-warning' });
+  const pst = stepper({ label: 'Henkilömäärä', value: r.persons, min: 1, max: staffPersonsMax({ min_persons: 1 }), size: 'lg', onChange: () => paintMove() }); const persons = pst.input;
+  const timeIn = h('input', { type: 'time', step: '300', value: fmtTime(r.starts_at), 'data-testid': 'move-time', 'aria-label': bookingText('off_time') });
   const dateIn = h('input', { type: 'date', value: st.date, onchange: (e) => { st.date = e.target.value; st.session = null; load(); } });
+  function paintMove() {
+    const base = st.session || (st.slots && !st.slots.length ? { status: 'off_schedule', off_schedule: true, off_code: 'no_session', mode: r.mode, blocked: (st.blocks || []).some((b) => b.starts_at < `${st.date}T23:59` && b.ends_at > `${st.date}T00:00`) } : null);
+    const notices = base ? bookingNotices(base, +persons.value || r.persons) : [];
+    if (base?.off_schedule && timeIn.value && timeIn.value !== fmtTime(r.starts_at)) notices.push({ kind: 'off', code: 'outside_hours' });
+    const seen = new Set();
+    const uniq = notices.filter((n) => { const k = n.kind + n.code; if (seen.has(k)) return false; seen.add(k); return true; });
+    warnBox.hidden = !uniq.length;
+    warnBox.replaceChildren(...uniq.map((n) => h('p', { text: noticeText(n) })));
+    return uniq;
+  }
   async function load() {
     const token = loads.next();
     sessionsBox.replaceChildren(h('p', { class: 'muted', text: 'Ladataan…' }));
@@ -326,27 +343,58 @@ function changeDialog(r, onChange, order = null) {
       return;
     }
     if (!open || !loads.isCurrent(token)) return;
+    st.blocks = v.blocks || [];
     const available = (v.sessions || []).filter((x) => x.product_id === r.product_id && x.status !== 'closed');
+    st.slots = available;
     sessionsBox.replaceChildren(available.length ? h('div', { class: 'slotpick', role: 'radiogroup', 'aria-label': 'Uusi vuoro' }, available.map((x) => {
       const same = x.starts_at === r.starts_at;
-      const ok = x.status === 'available' || same;
-      const b = h('button', { type: 'button', role: 'radio', 'aria-checked': 'false', class: `slotbtn ${x.status}`, disabled: !ok || null, onclick: () => { st.session = same ? null : x; sessionsBox.querySelectorAll('.slotbtn').forEach((y) => y.setAttribute('aria-checked', 'false')); b.setAttribute('aria-checked', 'true'); } },
-        h('strong', { text: `${fmtTime(x.starts_at)}–${fmtTime(x.ends_at)}` }), h('small', { text: same ? 'nykyinen vuoro' : ok ? (x.mode === 'exclusive' ? 'vapaa' : `${x.remaining} vapaana`) : x.status === 'full' ? 'täynnä' : 'ei varattavissa' }));
+      const ok = x.status === 'available' || x.status === 'full' || x.status === 'unavailable' || same;
+      const b = h('button', { type: 'button', role: 'radio', 'aria-checked': 'false', class: `slotbtn ${x.status}`, disabled: !ok || null, onclick: () => { st.session = same ? null : x; sessionsBox.querySelectorAll('.slotbtn').forEach((y) => y.setAttribute('aria-checked', 'false')); b.setAttribute('aria-checked', 'true'); paintMove(); } },
+        h('strong', { text: `${fmtTime(x.starts_at)}–${fmtTime(x.ends_at)}` }), h('small', { text: same ? 'nykyinen vuoro' : x.status === 'available' ? (x.mode === 'exclusive' ? 'vapaa' : `${x.remaining} vapaana`) : x.status === 'full' ? bookingText('slot_full') : bookingText('slot_closed') }));
       return b;
-    })) : empty('Ei samantyyppisiä vuoroja tälle päivälle.'));
+    })) : empty(bookingText('off_no_rule')));
+    paintMove();
   }
   const changeUi = staffInvoiceChange(order);
+  timeIn.addEventListener('input', () => paintMove());
   const f = h('form', { class: 'stack', onsubmit: (ev) => { ev.preventDefault(); run(f.querySelector('button[type=submit]'), async () => {
+    const notices = paintMove();
+    const custom = !st.session && timeIn.value && (st.date !== day(r.starts_at) || timeIn.value !== fmtTime(r.starts_at));
     const args = { p_reservation_id: r.reservation_id, p_persons: +persons.value !== r.persons ? +persons.value : null };
     if (st.session) { args.p_rule_id = st.session.rule_id; args.p_date = st.date; }
-    if (args.p_persons == null && !st.session) throw new Error('Valitse uusi vuoro tai muuta henkilömäärää');
+    else if (custom && r.rule_id) {
+      const start = helsinkiIso(`${st.date}T${timeIn.value}`);
+      const dur = Math.max(0, new Date(r.ends_at) - new Date(r.starts_at)) || 90 * 60000;
+      args.p_rule_id = r.rule_id; args.p_date = st.date; args.p_start = start; args.p_end = new Date(new Date(start).getTime() + dur).toISOString();
+    }
+    if (args.p_persons == null && !st.session && !custom) throw new Error(bookingText('change_need'));
+    let previewNotes = [];
+    try {
+      const prev = await rpc('admin_preview_booking_limits', { p_kind: 'shift', p_rule_id: args.p_rule_id || r.rule_id, p_date: args.p_date || st.date, p_persons: +persons.value, p_start: args.p_start || null, p_end: args.p_end || null, p_exclude_reservation: r.reservation_id });
+      previewNotes = (prev?.overbook || []).map((x) => ({ kind: 'overbook', code: x.code, used: x.used, capacity: x.capacity, persons: x.persons, max: x.max }))
+        .concat((prev?.off_schedule || []).map((x) => ({ kind: 'off', code: x.code })));
+    } catch { /* varoitus jää paikalliseksi, jos esikatselua ei vielä ole */ }
+    const all = [...notices, ...previewNotes];
+    const over = all.some((x) => x.kind === 'overbook') || (st.session && (st.session.status === 'full' || (st.session.status === 'unavailable' && !st.session.blocked)));
+    const off = all.some((x) => x.kind === 'off') || !!st.session?.blocked || !!args.p_start || (!st.slots?.length && !!args.p_date);
+    if (over || off) {
+      const yes = await confirmDialog({
+        title: over && off ? bookingText('both_title') : over ? bookingText('over_title') : bookingText('off_title'),
+        body: [...all.map(noticeText), over ? bookingText('over_ask') : null, off ? bookingText('off_ask') : null],
+        yes: bookingText('confirm_yes'), no: bookingText('confirm_no'), testid: 'move-confirm',
+      });
+      if (!yes) return;
+    }
+    args.p_allow_overbook = over;
+    args.p_allow_off_schedule = off;
     await rpc('admin_change_booking', args);
     toast('Varaus muutettu'); d.close(); onChange?.();
   }); } },
     h('p', { class: 'muted', text: `Nykyinen: ${fmtDay(r.starts_at)}, ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)}, ${r.persons} hlö` }),
     changeUi.locked ? h('p', { class: 'muted', role: 'status', 'data-testid': 'invoice-change-hint', text: alt('invoiced_hint') }) : null,
     changeUi.locked ? h('p', { class: 'muted', 'data-testid': 'invoice-persons-hint', text: alt('persons_invoiced_hint') }) : null,
-    h('div', { class: 'row wrap' }, field('Päivä', dateIn), h('div', { class: 'fld' }, h('span', { class: 'fld-lab', text: 'Henkilömäärä' }), pst.node)), sessionsBox,
+    h('div', { class: 'row wrap' }, field('Päivä', dateIn), field(bookingText('off_time'), timeIn), h('div', { class: 'fld' }, h('span', { class: 'fld-lab', text: 'Henkilömäärä' }), pst.node)),
+    sessionsBox, warnBox,
     h('button', { class: 'btn primary', type: 'submit', text: 'Tallenna muutos' }));
   const d = dialog(`Muuta varausta #${r.order_no}`, f);
   d.addEventListener('close', () => { open = false; });

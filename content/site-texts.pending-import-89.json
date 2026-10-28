@@ -1,0 +1,462 @@
+[
+  {
+    "key": "ui.admin.booking.discount",
+    "lang": "fi",
+    "text": "Alennuskoodi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "booking_192: hallinnan uusi varaus. FI+EN, luokka normal. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.booking.discount",
+    "lang": "en",
+    "text": "Discount code",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "booking_192: hallinnan uusi varaus. FI+EN, luokka normal. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.booking.discount_apply",
+    "lang": "fi",
+    "text": "Käytä koodi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "booking_192: alennuskoodi. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.discount_apply",
+    "lang": "en",
+    "text": "Apply code",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "booking_192: alennuskoodi. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.discount_remove",
+    "lang": "fi",
+    "text": "Poista koodi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "booking_192: alennuskoodi. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.discount_remove",
+    "lang": "en",
+    "text": "Remove code",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "booking_192: alennuskoodi. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.discount_line",
+    "lang": "fi",
+    "text": "Alennus {code}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_192: alennusrivi yhteenviedossa. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.discount_line",
+    "lang": "en",
+    "text": "Discount {code}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_192: alennusrivi yhteenviedossa. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.discount_ok",
+    "lang": "fi",
+    "text": "Koodi {code} käytössä, alennus {amount}.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_192: alennuskoodi hyväksytty. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.discount_ok",
+    "lang": "en",
+    "text": "Code {code} applied, discount {amount}.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_192: alennuskoodi hyväksytty. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.gift_code",
+    "lang": "fi",
+    "text": "Lahjakortin koodi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "booking_192: lahjakorttimaksu. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.gift_code",
+    "lang": "en",
+    "text": "Gift card code",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "booking_192: lahjakorttimaksu. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.gift_check",
+    "lang": "fi",
+    "text": "Tarkista",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 20,
+    "placeholders": [],
+    "reason": "booking_192: lahjakortin saldon tarkistus. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.gift_check",
+    "lang": "en",
+    "text": "Check",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 20,
+    "placeholders": [],
+    "reason": "booking_192: lahjakortin saldon tarkistus. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.gift_ok",
+    "lang": "fi",
+    "text": "Saldo {balance}, voimassa {until}.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_192: lahjakortin saldo. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.gift_ok",
+    "lang": "en",
+    "text": "Balance {balance}, valid until {until}.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_192: lahjakortin saldo. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.gift_rest",
+    "lang": "fi",
+    "text": "Lahjakortti kattaa {covered}. Jäljelle jää {rest}.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_192: lahjakortin ja loppusumman erotus. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.gift_rest",
+    "lang": "en",
+    "text": "The gift card covers {covered}. {rest} remains.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_192: lahjakortin ja loppusumman erotus. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.gift_rest_method",
+    "lang": "fi",
+    "text": "Loppusumman maksutapa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "booking_192: jäljelle jäävä maksutapa. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.gift_rest_method",
+    "lang": "en",
+    "text": "Payment method for the rest",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "booking_192: jäljelle jäävä maksutapa. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.gift_rest_unpaid",
+    "lang": "fi",
+    "text": "Jätä maksamatta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "booking_192: loppusumma voi jäädä maksamatta. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.gift_rest_unpaid",
+    "lang": "en",
+    "text": "Leave unpaid",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "booking_192: loppusumma voi jäädä maksamatta. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.gift_need_code",
+    "lang": "fi",
+    "text": "Anna lahjakortin koodi.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_192: lahjakortti ilman koodia. FI+EN. Teknistä RPC-nimeä ei näytetä."
+  },
+  {
+    "key": "ui.admin.booking.gift_need_code",
+    "lang": "en",
+    "text": "Enter the gift card code.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_192: lahjakortti ilman koodia. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.gift_required",
+    "lang": "fi",
+    "text": "Lahjakorttimaksu tarvitsee lahjakortin koodin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_192: korvaa teknisen virheen Lahjakorttimaksu vaatii kortin. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.gift_required",
+    "lang": "en",
+    "text": "A gift card payment needs the gift card code.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_192: korvaa teknisen virheen. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.over_capacity",
+    "lang": "fi",
+    "text": "Vuoron kapasiteetti ylittyy: {used}/{capacity} henkilöä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_192: ylibuukkausvaroitus. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.over_capacity",
+    "lang": "en",
+    "text": "Session capacity exceeded: {used}/{capacity} people",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_192: ylibuukkausvaroitus. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.over_max",
+    "lang": "fi",
+    "text": "Palvelun enimmäishenkilömäärä ylittyy: {persons}/{max}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_192: enimmäishenkilömäärä. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.over_max",
+    "lang": "en",
+    "text": "The service maximum is exceeded: {persons}/{max}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_192: enimmäishenkilömäärä. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.over_ask",
+    "lang": "fi",
+    "text": "Haluatko varmasti ylibuukata?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 60,
+    "placeholders": [],
+    "reason": "booking_192: ylibuukkauksen vahvistus. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.over_ask",
+    "lang": "en",
+    "text": "Do you really want to overbook?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 60,
+    "placeholders": [],
+    "reason": "booking_192: ylibuukkauksen vahvistus. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.off_ask",
+    "lang": "fi",
+    "text": "Haluatko varmasti jatkaa?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "booking_192: aikataulun ulkopuolinen vahvistus. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.off_ask",
+    "lang": "en",
+    "text": "Do you really want to continue?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "booking_192: aikataulun ulkopuolinen vahvistus. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.off_no_rule",
+    "lang": "fi",
+    "text": "Tälle päivälle ei ole vuoroa aikataulussa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_192: ei aikataulusääntöä. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.off_no_rule",
+    "lang": "en",
+    "text": "There is no session on this day in the schedule.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_192: ei aikataulusääntöä. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.off_closure",
+    "lang": "fi",
+    "text": "Aika osuu sulkukalenteriin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 60,
+    "placeholders": [],
+    "reason": "booking_192: sulkukalenteri. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.off_closure",
+    "lang": "en",
+    "text": "The time falls on a closure in the calendar.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 60,
+    "placeholders": [],
+    "reason": "booking_192: sulkukalenteri. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.off_hours",
+    "lang": "fi",
+    "text": "Aika on vuoron normaalin aikataulun ulkopuolella.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_192: aukioloaikojen ulkopuolella. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.off_hours",
+    "lang": "en",
+    "text": "The time is outside the session’s normal schedule.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_192: aukioloaikojen ulkopuolella. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.off_open",
+    "lang": "fi",
+    "text": "Varaa aikataulun ulkopuolelle",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "booking_192: aikataulun ulkopuolinen luonti. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.off_open",
+    "lang": "en",
+    "text": "Book outside the schedule",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "booking_192: aikataulun ulkopuolinen luonti. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.confirm_yes",
+    "lang": "fi",
+    "text": "Kyllä, jatka",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 20,
+    "placeholders": [],
+    "reason": "booking_192: vahvistusdialogi. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.confirm_yes",
+    "lang": "en",
+    "text": "Yes, continue",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 20,
+    "placeholders": [],
+    "reason": "booking_192: vahvistusdialogi. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.confirm_no",
+    "lang": "fi",
+    "text": "Peruuta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 20,
+    "placeholders": [],
+    "reason": "booking_192: vahvistusdialogi. FI+EN."
+  },
+  {
+    "key": "ui.admin.booking.confirm_no",
+    "lang": "en",
+    "text": "Cancel",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 20,
+    "placeholders": [],
+    "reason": "booking_192: vahvistusdialogi. FI+EN."
+  }
+]

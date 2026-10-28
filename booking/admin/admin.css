@@ -336,6 +336,10 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .btn:focus-visible{outline-offset:3px}
 .nb .btn,.nb button{font-family:inherit}.nb .btn{font-size:16px;font-weight:600;line-height:1.2}.nb .btn.lg{font-size:17px;font-weight:700}
 .nb-err{margin:0;padding:8px 10px;border-radius:8px;background:var(--errbg);color:var(--err);font-weight:600;font-size:14px;overflow-wrap:anywhere}
+.nb-warn{margin:0 0 8px;padding:8px 10px;border-radius:8px;background:var(--warnbg);border-left:4px solid #8a5a00;color:#4a3300;font-weight:600;font-size:14px;overflow-wrap:anywhere}
+.nb-warn p{margin:0 0 4px}.nb-warn p:last-child{margin:0}
+.nb-off{margin-top:8px}.nb-off summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:700;color:var(--ink)}
+.nb-rest{margin:0;color:#4a3300;font-weight:600}
 @media(min-width:900px){.nb-bar{bottom:12px}}
 @media(max-width:380px){.btn.lg{padding:0 14px;font-size:16px}.nb-sum-total{font-size:20px}}
 /* onnistumisviesti */
