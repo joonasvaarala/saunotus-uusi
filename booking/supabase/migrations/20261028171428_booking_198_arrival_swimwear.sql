@@ -5,6 +5,7 @@
 -- "Saavu klo 31.10.2026 16:30". Uusi FI-arvo on "31.10.2026 klo 16.30", joten
 -- pohjista poistetaan erillinen "klo " paikkamerkin edestä.
 -- Yleisen vuoron kuvauksesta korjataan torstain uima-asu (käytetään, kuten la–su).
+-- Tuotekuvauksessa sanojen välissä voi olla NBSP (U+00A0), siksi regexp_replace molemmille kielille.
 -- Viikko-ohjelman Turvetorstai 16–19 on repossa content/kb/kb.json (ei tätä taulua).
 
 set local lock_timeout = '5s';
@@ -66,6 +67,6 @@ where short_fi like '%klo {saapumisaika}%'
    or subject_en ilike '%thursday session, swimwear is optional%';
 
 update kb.products set
-  description = regexp_replace(description, 'Torstain[[:space:]]+vuorolla[[:space:]]+uima-asu[[:space:]]+on[[:space:]]+vapaaehtoinen', 'Torstain vuorolla saunotaan uima-asussa', 'g'),
-  description_en = replace(description_en, 'On the Thursday session, swimwear is optional', 'On the Thursday session, swimwear is worn')
+  description = regexp_replace(description, 'Torstain[[:space:]\u00a0]+vuorolla[[:space:]\u00a0]+uima-asu[[:space:]\u00a0]+on[[:space:]\u00a0]+vapaaehtoinen', 'Torstain vuorolla saunotaan uima-asussa', 'g'),
+  description_en = regexp_replace(description_en, 'On[[:space:]\u00a0]+the[[:space:]\u00a0]+Thursday[[:space:]\u00a0]+session,[[:space:]\u00a0]+swimwear[[:space:]\u00a0]+is[[:space:]\u00a0]+optional', 'On the Thursday session, swimwear is worn', 'g')
 where slug = 'yleinensauna';
