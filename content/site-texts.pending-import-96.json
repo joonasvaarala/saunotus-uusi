@@ -1,0 +1,22 @@
+[
+  {
+    "key": "ui.gift.pkg_kicker",
+    "lang": "fi",
+    "text": "Lahjakortti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lahjakorttisivun pakettikortin otsikkosilmä: PAKETTI → LAHJAKORTTI. Sama avain esirenderöinnissä ja kaupassa. FI+EN. Linkit ja #paketit ennallaan."
+  },
+  {
+    "key": "ui.gift.pkg_kicker",
+    "lang": "en",
+    "text": "Gift card",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lahjakorttisivun pakettikortin otsikkosilmä: PACKAGE → GIFT CARD. Sama avain esirenderöinnissä ja kaupassa. FI+EN. Linkit ja #paketit ennallaan."
+  }
+]

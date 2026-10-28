@@ -5758,7 +5758,7 @@
  {
   "key": "ui.gift.pkg_kicker",
   "lang": "fi",
-  "text": "Paketti",
+  "text": "Lahjakortti",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -5768,7 +5768,7 @@
  {
   "key": "ui.gift.pkg_kicker",
   "lang": "en",
-  "text": "Package",
+  "text": "Gift card",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,

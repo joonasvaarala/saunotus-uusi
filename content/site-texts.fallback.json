@@ -14437,14 +14437,14 @@
   {
    "key": "ui.gift.pkg_kicker",
    "lang": "en",
-   "text": "Package",
+   "text": "Gift card",
    "version": 1,
    "placeholders": []
   },
   {
    "key": "ui.gift.pkg_kicker",
    "lang": "fi",
-   "text": "Paketti",
+   "text": "Lahjakortti",
    "version": 1,
    "placeholders": []
   },
