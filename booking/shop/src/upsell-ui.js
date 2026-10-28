@@ -1,7 +1,7 @@
 // Optional, mobile-first upsell UI. All visible copy is loaded from ui.upsell.* site_texts.
 import { createTexts, loadShopTexts } from './site-texts.js';
 import { storageUrl } from './sb.js';
-import { productImageElement, CARD_WIDTHS, SIZES } from './product-image.js';
+import { productImageElement, CARD_WIDTHS, SIZES, catalogImageUrl } from './product-image.js';
 import { richHost } from './rich-view.js';
 import { needsOption, optName, optLabel } from './options-logic.js';
 import { candidates, visitDate, rankSlots, excerpt, productName, stripNameHeading, durationText, personsText, mergeFacts } from './upsell-logic.js';
@@ -33,7 +33,8 @@ const track = (rpc, source, p, event) => rpc('public_upsell_event', { p_session_
 const trackAddon=(rpc,source,a,event)=>rpc('public_upsell_event',{p_session_id:sourceSession,p_source:source,p_product_id:a.origin,p_event:event,p_origin:a.origin,p_addon_id:a.addon_id}).catch(()=>{});
 
 function image(product, alt = '', preset = 'upsell') {
-  const src = product.image_url || (product.image_path ? storageUrl('product-images', product.image_path) : '');
+  const raw = product.image_url || (product.image_path ? storageUrl('product-images', product.image_path) : '');
+  const src = raw ? catalogImageUrl(raw, { path: product.image_path, updated_at: product.updated_at || product.image_updated_at }) : '';
   if (!src) return null;
   const sizes = preset === 'sheet' ? SIZES.sheet : SIZES.upsell;
   const node = productImageElement(h, src, { widths: CARD_WIDTHS, sizes, alt, width: 900, height: 600, lazy: true });

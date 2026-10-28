@@ -49,7 +49,7 @@ export function shopEventsHtml(events, lang, deps) {
     const price = ev.price != null ? money(ev.price, lang) : (ev.price_text || '');
     const full = eventIsFull(ev);
     const cta = full && fullCta ? fullCta : arrow;
-    return `<li class="card ev${full ? ' is-full' : ''}" data-testid="site-event-card"${full ? ' data-full="1"' : ''}><div class="im">${img(ev)}${full && fullText ? `<span class="pill full">${e(fullText)}</span>` : ''}${price ? `<span class="badge">${e(price)}</span>` : ''}</div>
+    return `<li class="card ev${full ? ' is-full' : ''}" data-testid="site-event-card"${full ? ' data-full="1"' : ''}><div class="im" data-product-image data-slug="${e(ev.slug)}" data-sizes="(min-width:1100px) 280px, 90vw">${img(ev)}${full && fullText ? `<span class="pill full">${e(fullText)}</span>` : ''}${price ? `<span class="badge">${e(price)}</span>` : ''}</div>
 <div class="bd"><h3><a href="${e(link(ev))}">${e(title)}${full && fullText ? `<span class="sr">, ${e(fullText)}</span>` : ''}</a></h3>
 <p class="dates">${e(dl)}${t ? ' · ' + e(t) : ''}</p>${text ? `<p>${e(text)}</p>` : ''}</div><div class="cta" aria-hidden="true">${e(cta)}</div></li>`;
   }).join('')}</ul>`;

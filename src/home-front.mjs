@@ -5,8 +5,8 @@ import { tx } from './site-texts.mjs';
 import { alts } from './content-texts.mjs';
 import { site, e, pageHref, money, dur, priceOf, picture } from './lib.mjs';
 import { liveProduct } from './catalog-live.mjs';
-import { productImageFor, productImageUrl } from './product-images.mjs';
-import { productImageHtml, CARD_WIDTHS, SIZES } from '../booking/shop/src/product-image.js';
+import { productCardInner } from './product-card-image.mjs';
+import { SIZES } from '../booking/shop/src/product-image.js';
 import { shopHash } from './event-cards.mjs';
 import { shortRaw, derivedExcerpt } from '../booking/shop/src/short-desc.js';
 import { visibleText } from '../booking/shop/src/rich-view.js';
@@ -64,16 +64,9 @@ function cardBlurb(p, lang) {
   return text.replace(/\s+/g, ' ').trim();
 }
 
-function cardImage(p, lang, name, fallbackId) {
-  const row = productImageFor(p.slug);
-  const url = productImageUrl(row);
-  if (url) {
-    const alt = (row.alt && String(row.alt).trim()) || name;
-    const w = row.width || 900, h = row.height || 600;
-    return `<div class="im">${productImageHtml(url, { widths: CARD_WIDTHS, sizes: SIZES.home, alt, width: w, height: h, lazy: true })}</div>`;
-  }
-  if (!fallbackId) return '';
-  return `<div class="im">${picture(fallbackId, { alt: name, sizes: '(min-width:1100px) 220px, 78vw' })}</div>`;
+function cardImage(p, name, fallbackId) {
+  const fallbackHtml = fallbackId ? picture(fallbackId, { alt: name, sizes: SIZES.home }) : '';
+  return productCardInner({ slug: p.slug, alt: name, fallbackHtml, sizes: SIZES.home });
 }
 
 export function experienceHtml(lang) {
@@ -82,13 +75,15 @@ export function experienceHtml(lang) {
     const p = liveProduct(spec.slug);
     if (!p) return '';
     const name = (lang === 'en' && p.name_en) || p.name || spec.slug;
-    const img = cardImage(p, lang, name, spec.fallbackImg);
+    const im = cardImage(p, name, spec.fallbackImg);
+    const box = im.has ? `<div class="im"${im.attrs}>${im.html}</div>` : '';
+    const host = im.has ? '' : im.attrs;
     const blurb = cardBlurb(p, lang);
     const durTxt = cardDuration(p, lang);
     const per = p.price_type === 'per_person' ? ` ${u.perPersonShort}` : '';
     const meta = `${u.fromWord} ${money(priceOf(p), lang)}${per}${durTxt ? ` · ${durTxt}` : ''}`;
     const cta = spec.cta === 'gift' ? homeText('ui.site.home_gift_cta', lang) : u.reserveArrow;
-    return `<li class="card${img ? '' : ' noimg'}">${img}<div class="bd"><h3><a href="${e(experienceHref(spec, lang))}">${e(name)}</a></h3>${blurb ? `<p class="xp-desc">${e(blurb)}</p>` : ''}<p class="xp-meta">${e(meta)}</p></div><div class="cta" aria-hidden="true">${e(cta)}</div></li>`;
+    return `<li class="card${box ? '' : ' noimg'}"${host}>${box}<div class="bd"><h3><a href="${e(experienceHref(spec, lang))}">${e(name)}</a></h3>${blurb ? `<p class="xp-desc">${e(blurb)}</p>` : ''}<p class="xp-meta">${e(meta)}</p></div><div class="cta" aria-hidden="true">${e(cta)}</div></li>`;
   }).join('');
   return `<header class="center"><h2 class="sec-title">${e(homeText('ui.site.home_choose_title', lang))}</h2></header><ul class="xp" aria-label="${e(homeText('ui.site.home_choose_title', lang))}">${items}</ul>`;
 }
