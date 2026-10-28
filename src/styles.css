@@ -26,17 +26,22 @@ ul{margin:0 0 1em;padding-left:1.2em}
 .narrow{width:min(100% - 40px,820px);margin-inline:auto}
 /* header */
 .site-header{position:sticky;top:0;z-index:50;background:rgba(244,239,231,.97);border-bottom:1px solid var(--line);backdrop-filter:saturate(1.2) blur(6px)}
-.hdr{display:flex;align-items:center;gap:20px;min-height:68px}
-.brand{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--ink);margin-right:auto;min-width:0}
+/* Valikko käyttää sivun leveyttä (sisältö pysyy --w:ssä), jotta linkit mahtuvat yhdelle riville leveällä desktopilla ilman fontin pienennystä. */
+.site-header .wrap{width:min(100% - 40px,1360px)}
+.hdr{display:flex;align-items:center;gap:clamp(10px,1.15vw,22px);min-height:68px;container-type:inline-size;container-name:sitehdr}
+.brand{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--ink);margin-right:auto;min-width:0;flex-shrink:0}
 .brand img{width:28px;height:auto;flex:none}
 /* Logotyyppi: iso SAUNOTUS + alarivi (yläbrändi + yritys, kuten alapalkin vihreä logo). Alarivin näkyvä leveys ≈ SAUNOTUS-sanan leveys; koko pysyy 68 px:n palkissa (sticky-offsetit ennallaan) */
 .brand-txt{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
 .brand b{display:block;font:500 26px/1 var(--head);letter-spacing:.22em;color:var(--ink)}
 .brand small{display:block;font:500 9.5px/1.25 var(--label);letter-spacing:.13em;text-transform:uppercase;color:var(--gold);margin-top:7px;white-space:nowrap}
 .brand:hover b{color:var(--gold)}
-.nav-desk{display:flex;gap:26px;align-items:center}
+.nav-desk{display:flex;flex-wrap:nowrap;align-items:center;gap:clamp(12px,1.35vw,26px)}
 .nav-desk a,.nav-mob a{font:500 11px/1 var(--label);letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;padding:8px 0}
+/* Riviväli ja tasaus: yksisanainen linkki pysyy keskellä, kun naapuri on kahdella rivillä. Ei nowrapia eikä fontin kutistusta. */
+.nav-desk a{line-height:1.35;text-align:center;text-wrap:balance;white-space:normal;overflow-wrap:normal}
 .nav-desk a:hover,.nav-desk a[aria-current]{color:var(--gold)}
+.hdr>.lang,.hdr>.btn{flex:none}
 .btn{display:inline-block;font:600 12px/1 var(--label);letter-spacing:.1em;text-transform:uppercase;text-decoration:none;background:var(--green);color:#fff;padding:15px 26px;border-radius:8px;border:1px solid var(--green);box-shadow:0 6px 16px rgba(43,58,48,.25);transition:background .2s,color .2s}
 .btn:hover{background:#1c2720;color:#fff}
 .btn.sm{padding:12px 22px;border-radius:30px}
@@ -285,8 +290,18 @@ address{font-style:normal;background:var(--card);border:1px solid var(--line);bo
 .fbottom ul{display:flex;gap:18px}
 .testbar{background:#fff3cd;color:#5b4300;text-align:center;font:600 12px/1.4 var(--label);padding:6px 12px}
 @media (max-width:1100px){.cards.five{grid-template-columns:repeat(3,1fr)}.tiles{grid-template-columns:repeat(2,1fr)}.fgrid{grid-template-columns:1fr 1fr}.cards.three{grid-template-columns:repeat(2,1fr)}}
-@media (min-width:901px) and (max-width:1100px){.hdr{gap:12px}.nav-desk{gap:16px}}
-@media (max-width:1060px){.nav-desk,.hdr>.btn{display:none}.nav-mob{display:block}}
+/* Kun yhdellä rivillä ei ole tilaa: jokainen monisanainen kohta katkeaa kahdeksi tasapainoiseksi riviksi (max-width ≈ pidempi rivi). Yksisanaiset jäävät yhdelle. Alle tämän desktop-valikko ei enää mahdu → mobiilivalikko. */
+@container sitehdr (max-width:1220px){
+  .hdr{gap:clamp(8px,1vw,14px)}
+  .nav-desk{gap:clamp(10px,1.1vw,16px)}
+  .nav-desk a[href*="hoidot-rituaalit"]{max-width:7.1em}
+  .nav-desk a[href*="treatments-rituals"]{max-width:8.3em}
+  .nav-desk a[href*="/sauna/"]{max-width:6.4em}
+  .nav-desk a[href*="companies"]{max-width:7.7em}
+  .nav-desk a[href*="knowledge"]{max-width:8.3em}
+  .nav-desk a[href*="gift-card"]{max-width:4.6em}
+}
+@media (max-width:1099px){.nav-desk,.hdr>.btn{display:none}.nav-mob{display:block}.brand{flex-shrink:1}}
 @media (max-width:900px){.about,.company{grid-template-columns:1fr}.info-sec{grid-template-columns:1fr;gap:12px}.quick{grid-template-columns:1fr;margin-top:-20px}.facts{grid-template-columns:repeat(2,1fr)}.ritual .in{padding:44px 26px}.ritual::after{background:rgba(8,6,4,.78)}.elements{grid-template-columns:repeat(2,1fr)}.elements li:nth-child(2){border-right:0}.elements li:nth-child(-n+2){border-bottom:1px solid var(--line)}}
 @media (max-width:640px){body{font-size:16px}.brand b{font-size:clamp(15px,4.5vw,19px);letter-spacing:.14em}.brand small{font-size:8px;letter-spacing:.1em;margin-top:4px;line-height:1.3;white-space:normal;width:0;min-width:100%}.brand{gap:8px}.lang a,.lang span{padding:10px}.nav-mob summary{padding:11px 10px}.tiles{grid-template-columns:1fr;margin-top:-60px}.cards.five,.cards.two,.cards.three{grid-template-columns:1fr}.hero .in{min-height:440px;padding:60px 0 110px}.section{padding:52px 0}.fgrid{grid-template-columns:1fr}.hdr{gap:10px}}
 @media (max-width:359px){.brand img{width:22px}.brand{gap:6px}.brand b{font-size:15px;letter-spacing:.1em}.hdr{gap:6px}.lang a,.lang span{min-width:38px;padding:0 6px}.nav-mob summary{padding:0 8px;letter-spacing:.05em}}
