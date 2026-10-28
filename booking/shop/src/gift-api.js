@@ -2,7 +2,7 @@
 // Puuttuva RPC (404 / PGRST202 / 42883) → {ok:false, notReady:true}. Mock vain osoitteella ?mock=1.
 import { normalizeCode } from './gift-logic.js';
 import { createGiftMock } from './gift-mock.js';
-export const GRPC = { packages: 'public_gift_card_packages', buy: 'public_buy_gift_card', check: 'public_check_gift_card', apply: 'public_apply_gift_card', orderCards: 'public_get_order_gift_cards', card: 'public_get_gift_card',
+export const GRPC = { packages: 'public_gift_card_packages', annual: 'public_annual_card_offer', buy: 'public_buy_gift_card', check: 'public_check_gift_card', apply: 'public_apply_gift_card', orderCards: 'public_get_order_gift_cards', card: 'public_get_gift_card',
   resolve: 'public_resolve_gift_code', submitClaim: 'public_submit_voucher_claim', orderClaims: 'public_get_order_voucher_claims', updateClaim: 'public_update_voucher_claim_code' };   // kumppanilahjakortit: §13.12 (booking_47/48)
 const isMissingRpc = (e) => !!e && (e.status === 404 || e.code === 'PGRST202' || e.code === '42883' || /could not find the function/i.test(e.message || ''));
 const wantsMock = () => typeof location !== 'undefined' && new URLSearchParams(location.search || '').get('mock') === '1';
@@ -11,7 +11,9 @@ export function normPackages(r) {
   if (!r || r.ok === false) return r || { ok: false };
   return { ok: true, sale_enabled: r.sale_enabled === true, redeem_enabled: r.redeem_enabled === true, max_cards: num(r.max_cards_per_order, 10), currency: r.currency || 'EUR',
     packages: (r.packages || []).map((p) => ({ code: p.code, name: p.name, name_en: p.name_en || p.name, description: p.description || '', description_en: p.description_en || p.description || '', kind: p.kind, is_open: !!p.is_open,
-      price: p.price == null ? null : num(p.price), min_amount: num(p.min_amount, 29), max_amount: num(p.max_amount, 500), persons: p.persons == null ? null : num(p.persons), vat_rate: num(p.vat_rate), valid_months: num(p.valid_months, 6), items: Array.isArray(p.items) ? p.items : [] })) };
+      price: p.price == null ? null : num(p.price), min_amount: num(p.min_amount, 29), max_amount: num(p.max_amount, 500), persons: p.persons == null ? null : num(p.persons),
+      min_persons: p.min_persons == null ? null : num(p.min_persons), max_persons: p.max_persons == null ? null : num(p.max_persons), unit_price: p.unit_price == null ? null : num(p.unit_price),
+      vat_rate: num(p.vat_rate), valid_months: num(p.valid_months, 6), items: Array.isArray(p.items) ? p.items : [] })) };
 }
 export function createGiftApi({ rpc, mock = wantsMock(), mockFactory = () => createGiftMock({ delay: 120 }) } = {}) {
   const call = mock ? mockFactory().rpc : rpc;
@@ -20,6 +22,7 @@ export function createGiftApi({ rpc, mock = wantsMock(), mockFactory = () => cre
   return {
     mock,
     packages: (force = false) => (pk && !force ? pk : (pk = run(GRPC.packages, {}).then(normPackages).catch((e) => { pk = null; throw e; }))),
+    annualOffer: () => run(GRPC.annual, {}),
     buy: (args) => run(GRPC.buy, args),
     check: (code) => run(GRPC.check, { p_code: normalizeCode(code) }),
     apply: ({ token, code, amount }) => run(GRPC.apply, amount == null ? { p_token: token, p_code: normalizeCode(code) } : { p_token: token, p_code: normalizeCode(code), p_amount: amount }),

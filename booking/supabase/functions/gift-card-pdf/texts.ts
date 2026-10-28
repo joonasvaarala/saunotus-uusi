@@ -16,6 +16,8 @@ export const GIFT_CARD_PDF_TEXTS: TextTable = {
   "email.gift_card_pdf.valid_value": { fi: "{{var:date}} asti", en: "{{var:date}}" },
   "email.gift_card_pdf.persons_label": { fi: "Henkilömäärä", en: "Persons" },
   "email.gift_card_pdf.persons_value": { fi: "{{var:n}} henkilöä", en: "{{var:n}} persons" },
+  "email.gift_card_pdf.persons_line": { fi: "{{var:n}} henkilölle", en: "For {{var:n}} people" },
+  "email.gift_card_pdf.persons_one": { fi: "{{var:n}} henkilölle", en: "For {{var:n}} person" },
   "email.gift_card_pdf.balance": { fi: "Saldo", en: "Balance" },
   "email.gift_card_pdf.issued": { fi: "Myönnetty", en: "Issued" },
   "email.gift_card_pdf.how_online": { fi: "Varaa aika osoitteessa {{var:web}} ja syötä koodi maksuvaiheessa.", en: "Book your time at {{var:web}} and enter the code at checkout.", cls: "protected" },

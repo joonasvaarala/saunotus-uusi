@@ -1,0 +1,154 @@
+[
+  {
+    "key": "ui.shop.gift_link",
+    "lang": "fi",
+    "text": "Etsitkö lahjaa? Osta lahjakortti →",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_196: varaussivun huomaamaton linkki lahjakorttisivulle. FI+EN."
+  },
+  {
+    "key": "ui.shop.gift_link",
+    "lang": "en",
+    "text": "Looking for a gift? Buy a gift card →",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_196: varaussivun huomaamaton linkki lahjakorttisivulle. FI+EN."
+  },
+  {
+    "key": "ui.gift.persons_label",
+    "lang": "fi",
+    "text": "Henkilömäärä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_196: lahjakorttipaketin henkilömäärän valinta. FI+EN."
+  },
+  {
+    "key": "ui.gift.persons_label",
+    "lang": "en",
+    "text": "Number of people",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_196: lahjakorttipaketin henkilömäärän valinta. FI+EN."
+  },
+  {
+    "key": "ui.gift.per_person",
+    "lang": "fi",
+    "text": "{{var:price}} / hlö",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:price}}"
+    ],
+    "reason": "booking_196: paketin hinta henkilöä kohden. FI+EN."
+  },
+  {
+    "key": "ui.gift.per_person",
+    "lang": "en",
+    "text": "{{var:price}} / person",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:price}}"
+    ],
+    "reason": "booking_196: paketin hinta henkilöä kohden. FI+EN."
+  },
+  {
+    "key": "ui.gift.annual_buy",
+    "lang": "fi",
+    "text": "Osta vuosikortti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_196: vuosikortin ostolinkki lahjakorttisivulla vain kun myynti on auki. FI+EN."
+  },
+  {
+    "key": "ui.gift.annual_buy",
+    "lang": "en",
+    "text": "Buy an annual card",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_196: vuosikortin ostolinkki lahjakorttisivulla vain kun myynti on auki. FI+EN."
+  },
+  {
+    "key": "ui.gift.err.invalid_persons",
+    "lang": "fi",
+    "text": "Tarkista henkilömäärä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_196: virheellinen henkilömäärä lahjakorttipaketissa. FI+EN."
+  },
+  {
+    "key": "ui.gift.err.invalid_persons",
+    "lang": "en",
+    "text": "Please check the number of people.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_196: virheellinen henkilömäärä lahjakorttipaketissa. FI+EN."
+  },
+  {
+    "key": "email.gift_card_pdf.persons_line",
+    "lang": "fi",
+    "text": "{{var:n}} henkilölle",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+  },
+  {
+    "key": "email.gift_card_pdf.persons_line",
+    "lang": "en",
+    "text": "For {{var:n}} people",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+  },
+  {
+    "key": "email.gift_card_pdf.persons_one",
+    "lang": "fi",
+    "text": "{{var:n}} henkilölle",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+  },
+  {
+    "key": "email.gift_card_pdf.persons_one",
+    "lang": "en",
+    "text": "For {{var:n}} person",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (gift-card-pdf/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+  }
+]

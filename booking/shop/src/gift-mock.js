@@ -1,135 +1,10 @@
 // Lahjakorttien MOCK-PALVELIN (kauppa): keksityt kortit muistissa; vain kun osoitteessa on ?mock=1 (sekä testit). Ei kosketa palvelinta.
 // Vastaa KOODARI_talous_A_D_fi.md §13.2: nimet, p_-parametrit, vastausrakenteet, virheet {ok:false, code, message}.
 // public_gift_card_packages-vastauksen sisältö (testiprojekti = tuotannon siemendata, 17.10.2026): nimet, hinnat, kuvaukset ja items-rakenne ({label, label_en, persons, kb_product_id} | {label, label_en, persons, addon_code}; label_en lisätty migraatiossa booking_45)
-import { resolveDelivery, guessSource, isMismatch, claimMethod, CLAIM_SOURCES, SOURCE_LABELS } from './gift-logic.js';
-export const MOCK_PACKAGES = [
-  {
-    code: 'open',
-    name: 'Avoin lahjakortti',
-    name_en: 'Open gift card',
-    description: 'Vapaa summa; käy kaikkiin palveluihin. Voimassa 6 kuukautta.',
-    description_en: 'Any amount; valid for all services. Valid for 6 months.',
-    kind: 'value',
-    is_open: true,
-    price: null,
-    min_amount: 29,
-    max_amount: 500,
-    persons: null,
-    vat_rate: 25.5,
-    valid_months: 6,
-    items: []
-  },
-  {
-    code: 'entry_2',
-    name: 'Savusaunavuoro kahdelle',
-    name_en: 'Smoke sauna session for two',
-    description: 'Savusaunavuoro kahdelle hengelle (2 × 29 €).',
-    description_en: 'Smoke sauna session for two (2 × €29).',
-    kind: 'product',
-    is_open: false,
-    price: 58,
-    min_amount: null,
-    max_amount: null,
-    persons: 2,
-    vat_rate: 25.5,
-    valid_months: 6,
-    items: [
-      {
-        label: 'Yleinen vuoro',
-        label_en: 'General session',
-        persons: 2,
-        kb_product_id: 1
-      }
-    ]
-  },
-  {
-    code: 'peat_mask_2',
-    name: 'Savusaunaelämys turvenaamiolla ja jalkakylvyllä kahdelle',
-    name_en: 'Smoke sauna experience with peat mask and foot bath for two',
-    description: 'Sisäänpääsy kahdelle + omatoiminen turvenaamio ja jalkakylpy (2 × 15 €).',
-    description_en: 'Admission for two + self-guided peat mask and foot bath.',
-    kind: 'product',
-    is_open: false,
-    price: 88,
-    min_amount: null,
-    max_amount: null,
-    persons: 2,
-    vat_rate: 25.5,
-    valid_months: 6,
-    items: [
-      {
-        label: 'Yleinen vuoro',
-        label_en: 'General session',
-        persons: 2,
-        kb_product_id: 1
-      },
-      {
-        label: 'Turvenaamio ja jalkakylpy',
-        label_en: 'Peat mask and foot bath',
-        persons: 2,
-        addon_code: 'turvenaamio_jalkakylpy'
-      }
-    ]
-  },
-  {
-    code: 'sauna_treatment_2',
-    name: 'Savusaunaelämys ja saunahoito kahdelle',
-    name_en: 'Smoke sauna experience and sauna treatment for two',
-    description: 'Sisäänpääsy kahdelle + saunahoito kahdelle (60 min).',
-    description_en: 'Admission for two + sauna treatment for two (60 min).',
-    kind: 'product',
-    is_open: false,
-    price: 192,
-    min_amount: null,
-    max_amount: null,
-    persons: 2,
-    vat_rate: 25.5,
-    valid_months: 6,
-    items: [
-      {
-        label: 'Yleinen vuoro',
-        label_en: 'General session',
-        persons: 2,
-        kb_product_id: 1
-      },
-      {
-        label: 'Saunahoito',
-        label_en: 'Sauna treatment',
-        persons: 2,
-        kb_product_id: 10
-      }
-    ]
-  },
-  {
-    code: 'saunotus_2',
-    name: 'Savusaunaelämys ja saunotus kahdelle',
-    name_en: 'Smoke sauna experience and ritual sauna bathing for two',
-    description: 'Sisäänpääsy kahdelle + saunotus kahdelle (2 h).',
-    description_en: 'Admission for two + ritual sauna bathing for two (2 h).',
-    kind: 'product',
-    is_open: false,
-    price: 328,
-    min_amount: null,
-    max_amount: null,
-    persons: 2,
-    vat_rate: 25.5,
-    valid_months: 6,
-    items: [
-      {
-        label: 'Yleinen vuoro',
-        label_en: 'General session',
-        persons: 2,
-        kb_product_id: 1
-      },
-      {
-        label: 'Saunotus',
-        label_en: 'Ritual sauna bathing',
-        persons: 2,
-        kb_product_id: 11
-      }
-    ]
-  }
-];
+import { resolveDelivery, guessSource, isMismatch, claimMethod, CLAIM_SOURCES, SOURCE_LABELS, packageAmount } from './gift-logic.js';
+import { PUBLISHED_GIFT_PACKAGES } from './gift-offers.js';
+export const MOCK_PACKAGES = PUBLISHED_GIFT_PACKAGES;
+
 export const MOCK_TOKEN = '3f2b8c1e-5a7d-4e9f-8b6a-1c2d3e4f5a6b';
 const fmtCode = (n) => `${n.slice(0, 4)}-${n.slice(4, 8)}-${n.slice(8)}`;
 const norm = (s) => String(s ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -167,6 +42,7 @@ export function createGiftMock({ delay = 0, settings = {}, today = new Date().to
   let orderNo = 15400;
   const handlers = {
     public_gift_card_packages: () => ({ ok: true, sale_enabled: cfg.sale_enabled, redeem_enabled: cfg.redeem_enabled, max_cards_per_order: cfg.max_cards, currency: 'EUR', packages: JSON.parse(JSON.stringify(MOCK_PACKAGES)) }),
+    public_annual_card_offer: () => (cfg.annual_available ? { available: true, product_id: 43, name: 'Vuosikortti', name_en: 'Annual card', price: 290, vat_rate: 25.5, valid_months: 12 } : { available: false }),
     public_check_gift_card: ({ p_code }) => {
       if (limited()) return bad('rate_limited', 'Liian monta yritystä');
       const c = find(p_code); if (!c) { fails.push(1); return bad('invalid_code', 'Koodia ei löytynyt'); }
@@ -249,9 +125,11 @@ export function createGiftMock({ delay = 0, settings = {}, today = new Date().to
       const items = a.p_items, cs = [];
       let total = 0;
       items.forEach((it) => {
-        const p = MOCK_PACKAGES.find((x) => x.code === it.package), q = it.quantity ?? 1, amt = p.is_open ? +it.amount : p.price;
+        const p = MOCK_PACKAGES.find((x) => x.code === it.package), q = it.quantity ?? 1;
+        const persons = p.is_open ? null : (Number.isInteger(it.persons) ? it.persons : (p.persons || 2));
+        const amt = p.is_open ? +it.amount : (packageAmount(p, persons) ?? p.price);
         const dl = deliveryOf(it, a, p).value;
-        for (let i = 0; i < q; i++) { total += amt; cs.push({ public_token: uuid(myCards.length + cs.length + 1), package_code: p.code, package_name: p.name, amount: amt, status: 'pending_payment', vat_treatment: 'at_sale', recipient_name: it.recipient_name ?? a.p_recipient_name ?? null, delivery_to: dl.delivery_to, deliver_on: dl.deliver_on, deliver_time: dl.deliver_time }); }
+        for (let i = 0; i < q; i++) { total += amt; cs.push({ public_token: uuid(myCards.length + cs.length + 1), package_code: p.code, package_name: p.name, amount: amt, persons, status: 'pending_payment', vat_treatment: 'at_sale', recipient_name: it.recipient_name ?? a.p_recipient_name ?? null, delivery_to: dl.delivery_to, deliver_on: dl.deliver_on, deliver_time: dl.deliver_time }); }
       });
       myCards.push(...cs);
       return { ok: true, mock: true, order_no: ++orderNo, token: MOCK_TOKEN, status: 'confirmed', total: r2(total), payment_mode: 'pay_later', payment_url: null, cards: cs, note: 'Kortit aktivoituvat, kun tilaus on maksettu.' };

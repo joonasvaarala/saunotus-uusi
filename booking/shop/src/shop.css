@@ -303,6 +303,15 @@ a.bk-sd:hover{filter:brightness(.97)}
 .gc-open .gc-tile .bk-field{max-width:320px;margin:4px 0 0}
 .gc-pkgs{list-style:none;margin:0 0 26px;padding:0;display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr))}
 .gc-items{margin:0;padding-left:20px;font-size:15px;color:var(--text)}
+.gc-items a{color:var(--gold);text-underline-offset:3px;text-decoration-thickness:1px}
+.gc-items a:hover{color:var(--ink)}
+.gc-unit{margin:0;color:var(--muted);font-size:14px}
+.gc-persons{display:flex;align-items:center;gap:10px;margin:2px 0 0}
+.gc-persons .lbl{font-size:14px;color:var(--muted)}
+.gc-lwho{margin:2px 0 0;color:var(--muted);font-size:14px}
+.hero.page .bk-gift-nudge{margin:8px auto 0;max-width:28em;font-size:15px;line-height:1.4}
+.hero.page .bk-gift-nudge a{color:#f3ece2;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;opacity:.78}
+.hero.page .bk-gift-nudge a:hover,.hero.page .bk-gift-nudge a:focus-visible{opacity:1;color:#fff}
 .gc-price{margin:4px 0 0;font:600 26px var(--head);color:var(--gold)}
 .gc-per{font:400 15px var(--body);color:var(--muted)}
 .gc-meta{margin:0;color:var(--muted);font-size:15px}

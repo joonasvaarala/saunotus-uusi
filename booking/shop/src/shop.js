@@ -220,7 +220,15 @@ const dayState = (rows) => (!rows?.length ? 'none' : rows.some((r) => r.status =
 // Sivun oma hero (<section class="hero page">) on build-aikaista HTML:ää: oletus palautetaan kaikissa muissa näkymissä. Ei erillistä hero-kenttää: sama tuotekuva (object-fit: cover, keskitetty).
 // Lyhyt kuvaus (booking_156): tuotteen oma short_description(_en) korvaa johdetun otteen; tyhjä → ensimmäinen virke kuvauksesta (heroShort, short-desc.js). Pitkä kuvaus pysyy sisältöosassa.
 const hero = { def: null };
+function placeGiftNudge(show) {
+  document.querySelector('main .hero.page .bk-gift-nudge')?.remove();
+  if (!show || S.audience === 'business' || S.page !== 'shop' || !S.links?.gift || !t.giftLink) return;
+  const sub = document.querySelector('main .hero.page .in p');
+  if (!sub) return;
+  sub.after(h('p', { class: 'bk-gift-nudge' }, h('a', { href: S.links.gift, 'data-testid': 'gift-nudge', text: t.giftLink })));
+}
 function setHero(p) {
+  placeGiftNudge(false);
   const el = document.querySelector('main .hero.page'); document.documentElement.classList.remove('bk-hero-wait');
   if (!el) return;
   const h1 = el.querySelector('h1'), sub = el.querySelector('.in p'), cur = el.querySelector('picture');
@@ -247,6 +255,7 @@ function setHero(p) {
 const cardExcerpt = (p) => cardShort(h, p, S.lang, pdesc(p));
 // ---- näkymä 1: tuotelista ----
 function viewList(query) {
+  placeGiftNudge(true);
   const cat = [...state.catalog, ...state.treatments.filter(treatmentListed)];   // lisätuotteet (LISTING_HIDDEN_SLUGS) eivät näy listalla; tuotesivu toimii
   const kinds = ['all', ...new Set(cat.map(kindOf))];
   const k = kinds.includes(query.get('k')) ? query.get('k') : 'all';
@@ -414,6 +423,7 @@ function prodCard(p, rs, ds, open, onToggle, treat = false) {
   return li;
 }
 async function viewDay(dateStr, keep, openSlug) {
+  placeGiftNudge(true);
   const today = todayHel(), horizon = state.settings.booking_horizon_days || 120, maxDs = addDays(today, horizon);
   let ds = /^\d{4}-\d\d-\d\d$/.test(dateStr || '') ? dateStr : today;
   if (Number.isNaN(Date.parse(`${ds}T12:00:00Z`))) ds = today;

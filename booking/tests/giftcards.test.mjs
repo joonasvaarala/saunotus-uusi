@@ -155,10 +155,10 @@ test('Mock: lunastus – osittainen, virheet (vanhentunut, tyhjä, Johku suljett
 });
 
 test('Mock: pakettien hinnat ja nimet vastaavat tuotannon public_gift_card_packages-vastausta', () => {
-  assert.deepEqual(MOCK_PACKAGES.map((p) => [p.code, p.price]), [['open', null], ['entry_2', 58], ['peat_mask_2', 88], ['sauna_treatment_2', 192], ['saunotus_2', 328]]);
+  assert.deepEqual(MOCK_PACKAGES.map((p) => [p.code, p.price]), [['open', null], ['entry_2', 58], ['peat_mask_2', 88], ['saunarituaali_2', 98], ['sauna_treatment_2', 192], ['saunotus_2', 328]]);
   const o = MOCK_PACKAGES[0]; assert.equal(o.min_amount, 29); assert.equal(o.max_amount, 500);
-  assert.equal(MOCK_PACKAGES[1].name, 'Savusaunavuoro kahdelle');
-  assert.equal(MOCK_PACKAGES[1].name_en, 'Smoke sauna session for two');
+  assert.equal(MOCK_PACKAGES[1].name, 'Savusaunavuoro');
+  assert.equal(MOCK_PACKAGES[1].name_en, 'Smoke sauna session');
   assert.equal(MOCK_PACKAGES[1].price, 58);
   assert.equal(MOCK_PACKAGES[1].vat_rate, 25.5);
   assert.ok(MOCK_PACKAGES.every((p) => p.vat_treatment === 'at_sale' && p.vat_rate === 25.5));
