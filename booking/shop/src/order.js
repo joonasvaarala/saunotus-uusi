@@ -185,8 +185,8 @@ async function main() {
   const setHero = (text) => {
     if (heroEl) heroEl.textContent = text || hero0;
     if (!text) return;
-    const rest = document.title.includes(' | ') ? document.title.split(' | ').slice(1).join(' | ') : 'Sipoonjoen Perinnesauna';
-    document.title = `${text} | ${rest}`;
+    const rest = document.title.includes(' | ') ? document.title.split(' | ').slice(1).join(' | ') : '';
+    document.title = rest ? `${text} | ${rest}` : text;
   };
   const stepOf = (order) => {
     const co = order.checkout;

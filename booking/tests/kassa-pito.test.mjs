@@ -68,7 +68,7 @@ test('tekstit: 15 min -maksuohje (Joonaksen teksti), otsikko "Varauksesi odottaa
   assert.equal(ht('en', 'mustPay', { minutes: 15 }), 'The booking must be paid within 15 minutes, otherwise it is cancelled and your spot is released.');
   assert.equal(ht('fi', 'h2.awaiting'), 'Varauksesi odottaa maksua'); assert.equal(ht('en', 'h2.awaiting'), 'Your booking is awaiting payment');
   assert.ok(/testi/i.test(ht('fi', 'payLater.btn')) && /test/i.test(ht('en', 'payLater.btn')));
-  assert.ok(src('../shop/src/shop.js').includes("'h2.awaiting'"), 'otsikko pitotilassa');
+  assert.ok(/paying \? t\.finishTitle/.test(src('../shop/src/shop.js')), 'otsikko maksua odottaessa: Viimeistele varaus (#252)');
 });
 test('tilaussivu: peruttu ja vanhentunut varaus kertoo peruutuksesta ja linkittää uuteen varaukseen (site_texts, ei kovakoodattua lausetta)', () => {
   const ord = src('../shop/src/order.js');
