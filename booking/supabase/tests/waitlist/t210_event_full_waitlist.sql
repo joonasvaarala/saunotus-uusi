@@ -21,10 +21,13 @@ declare j jsonb; begin
 end $$;
 do $t$
 declare
-  v_ev bigint; v_ev2 bigint; v_pool bigint; v_pool2 bigint; v_staff uuid; v jsonb; b jsonb; j jsonb;
-  de date := test.next_dow(5) + 140;
-  de2 date := test.next_dow(5) + 154;
+  v_ev bigint; v_ev2 bigint; v_pool bigint; v_pool2 bigint; v_staff uuid; v jsonb; b jsonb; j jsonb; v_err text;
+  de date := test.next_dow(5) + 91;  -- varaushorisontti 120 pv
+  de2 date := test.next_dow(5) + 105;
 begin
+  -- Verkkomaksu testitilaan (kehityskannassa maksut pois päältä; transaktio perutaan lopussa), kuten t190.
+  insert into booking.integration_config(key, mode, settings) values ('montonio', 'test', '{"approved_by":"t210"}'::jsonb)
+    on conflict (key) do update set mode = 'test', settings = booking.integration_config.settings || '{"approved_by":"t210"}'::jsonb;
   update booking.product_config set bookable = true, shop_visible = true, max_persons = 12, required_skill = null where product_id = 32;
   insert into booking.resources(code, name, kind, parent_id, capacity, active)
     values ('t210_event', 'T210 tapahtuma', 'capacity_pool', 1, 4, true) returning id into v_pool;
@@ -43,6 +46,7 @@ begin
   j := pg_temp.join(v_ev, de, 2, 'eka@t210.example', 'fi', true);
   perform pg_temp.ck((j ->> 'ok')::boolean and j ->> 'kind' = 'event' and not (j ? 'customer_email'), 'B2: liittyminen ok');
   perform pg_temp.ck(pg_temp.mails('eka@t210.example', 'waitlist_joined') = 1, 'B3: yksi vahvistusviesti');
+  perform pg_temp.ck((select status from booking.email_outbox where kind = 'waitlist_joined' and payload ->> 'to_email' = 'eka@t210.example') = 'skipped', 'B3b: varattu testitunnus (.example) ei lähde');
   perform pg_temp.ck((select locale from booking.email_outbox where kind = 'waitlist_joined' and payload ->> 'to_email' = 'eka@t210.example') = 'fi', 'B4: vahvistus FI');
   perform pg_temp.ck((select privacy_consent_at is not null from booking.waitlist_entries where customer_email = 'eka@t210.example'), 'B5: suostumus tallessa');
   j := pg_temp.join(v_ev, de, 3, 'toka@t210.example', 'en', true);
@@ -81,14 +85,15 @@ begin
   insert into booking.settings(key, value) values ('waitlist_event_notify', 'true'::jsonb)
     on conflict (key) do update set value = excluded.value;
 
+  v_err := null;
   perform test.anon();
   begin
     perform booking.admin_event_waitlist(v_ev);
-    perform pg_temp.ck(false, 'F1: anon ei saa jonoa');
   exception when others then
-    perform pg_temp.ck(sqlerrm ilike '%oikeu%' or sqlerrm ilike '%forbidden%' or sqlerrm ilike '%Ei oikeuksia%', 'F1: anon ei saa jonoa');
+    v_err := sqlerrm;
   end;
   perform test.logout();
+  perform pg_temp.ck(v_err ilike '%oikeu%' or v_err ilike '%forbidden%' or v_err ilike '%Ei oikeuksia%' or v_err ilike '%permission denied%', 'F1: anon ei saa jonoa');
   perform pg_temp.ck(not has_table_privilege('anon', 'booking.waitlist_notify_log', 'SELECT')
     and not has_table_privilege('anon', 'booking.waitlist_entries', 'SELECT'), 'F2: anon ei lue jonoa eikä lokia');
   v_staff := test.mk_staff('staff210@t210.example', 'admin');

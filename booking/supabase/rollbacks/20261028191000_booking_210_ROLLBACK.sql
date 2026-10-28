@@ -260,21 +260,28 @@ drop table if exists booking.waitlist_notify_log;
 alter table booking.waitlist_entries drop column if exists privacy_consent_at;
 
 delete from booking.email_outbox where kind = 'waitlist_joined';
-alter table booking.email_outbox drop constraint if exists email_outbox_kind_check;
-alter table booking.email_outbox add constraint email_outbox_kind_check
-  check (kind in ('order_confirmation', 'payment_link', 'receipt', 'refund_receipt', 'cancel_request_ack', 'order_change', 'gift_card_buyer', 'gift_card_recipient', 'voucher_claim_received', 'voucher_claim_problem', 'business_quote_ack', 'business_quote_notify', 'invoice_pdf', 'product_message', 'waitlist_spot_freed', 'annual_card_code', 'staff_shift_notice', 'unpaid_booking_cancelled'));
+-- Poistetaan vain waitlist_joined (muiden migraatioiden lajit, esim. booking_202 event_message, säilyvät).
+do $k$
+declare def text;
+begin
+  select pg_get_constraintdef(c.oid) into def from pg_constraint c
+   where c.conrelid = 'booking.email_outbox'::regclass and c.conname = 'email_outbox_kind_check';
+  if def is null or position('''waitlist_joined''' in def) = 0 then return; end if;
+  execute 'alter table booking.email_outbox drop constraint email_outbox_kind_check';
+  execute 'alter table booking.email_outbox add constraint email_outbox_kind_check '
+    || replace(replace(def, '''waitlist_joined''::text, ', ''), ', ''waitlist_joined''::text', '');
+end $k$;
 
 delete from booking.settings where key = 'waitlist_event_notify';
 
-do $$
-begin
-  if to_regprocedure('booking.email_outbox_claim_base_210(integer)') is not null
-     and to_regprocedure('booking.email_outbox_claim(integer)') is not null then
-    drop function booking.email_outbox_claim(integer);
-    alter function booking.email_outbox_claim_base_210(integer) rename to email_outbox_claim;
-  end if;
-end $$;
-revoke all on function booking.email_outbox_claim(integer) from public, anon, authenticated;
-grant execute on function booking.email_outbox_claim(integer) to service_role;
+-- booking_146:n claim-kerros ennalleen (vain waitlist_spot_freed).
+create or replace function booking.email_outbox_claim_base_146(p_limit integer default 20) returns jsonb
+language sql security definer set search_path = '' as $$
+  select coalesce(jsonb_agg(case when z.item->>'kind'='waitlist_spot_freed'
+    then z.item || jsonb_build_object('waitlist',(select e.payload from booking.email_outbox e where e.id=(z.item->>'id')::bigint))
+    else z.item end order by z.ord),'[]'::jsonb)
+  from jsonb_array_elements(booking.email_outbox_claim_base_132(p_limit)) with ordinality as z(item,ord);
+$$;
+revoke all on function booking.email_outbox_claim_base_146(integer) from public, anon, authenticated;
 revoke all on function booking.public_join_waitlist(bigint, date, integer, text, text, text, text, boolean) from public;
 grant execute on function booking.public_join_waitlist(bigint, date, integer, text, text, text, text, boolean) to anon, authenticated, service_role;

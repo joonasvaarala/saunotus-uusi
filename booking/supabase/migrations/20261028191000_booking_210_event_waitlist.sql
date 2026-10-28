@@ -34,9 +34,18 @@ grant all on booking.waitlist_notify_log to service_role;
 insert into booking.settings(key, value) values ('waitlist_event_notify', 'true'::jsonb)
 on conflict (key) do nothing;
 
-alter table booking.email_outbox drop constraint if exists email_outbox_kind_check;
-alter table booking.email_outbox add constraint email_outbox_kind_check
-  check (kind in ('order_confirmation', 'payment_link', 'receipt', 'refund_receipt', 'cancel_request_ack', 'order_change', 'gift_card_buyer', 'gift_card_recipient', 'voucher_claim_received', 'voucher_claim_problem', 'business_quote_ack', 'business_quote_notify', 'invoice_pdf', 'product_message', 'waitlist_spot_freed', 'waitlist_joined', 'annual_card_code', 'staff_shift_notice', 'unpaid_booking_cancelled'));
+-- Lisätään vain waitlist_joined olemassa olevaan listaan (ei kovakoodattua listaa: säilyttää muiden migraatioiden lajit, esim. booking_202 event_message).
+do $k$
+declare def text;
+begin
+  select pg_get_constraintdef(c.oid) into def from pg_constraint c
+   where c.conrelid = 'booking.email_outbox'::regclass and c.conname = 'email_outbox_kind_check';
+  if def is null then raise exception 'booking_210: email_outbox_kind_check puuttuu'; end if;
+  if position('''waitlist_joined''' in def) > 0 then return; end if;
+  if def not like '%ARRAY[%' then raise exception 'booking_210: email_outbox_kind_check muotoa ei tunnistettu'; end if;
+  execute 'alter table booking.email_outbox drop constraint email_outbox_kind_check';
+  execute 'alter table booking.email_outbox add constraint email_outbox_kind_check ' || replace(def, 'ARRAY[', 'ARRAY[''waitlist_joined''::text, ');
+end $k$;
 
 drop function if exists booking.public_join_waitlist(bigint, date, integer, text, text, text, text, boolean);
 
@@ -60,11 +69,17 @@ declare
   v_pname text;
   v_site text;
   v_shop text;
+  v_ip text := booking._client_ip();
+  v_status text;
 begin
   if booking._setting('waitlist_enabled', 'true'::jsonb) <> 'true'::jsonb then
     return jsonb_build_object('ok',false,'code','disabled');
   end if;
   if not booking._rate_limit('waitlist:email:' || v_email, 8, interval '10 minutes') then
+    return jsonb_build_object('ok',false,'code','rate_limited');
+  end if;
+  -- booking_210: tapahtumajono lähettää vahvistusviestin, joten myös IP-kohtainen raja (sama malli kuin lahjakorttiostossa).
+  if v_ip is not null and not booking._rate_limit('waitlist:ip:' || v_ip, 20, interval '10 minutes') then
     return jsonb_build_object('ok',false,'code','rate_limited');
   end if;
   if length(v_name) not between 2 and 120 then return jsonb_build_object('ok',false,'code','invalid_name'); end if;
@@ -115,8 +130,11 @@ begin
       into v_pname from kb.products p where p.id = v_rule.product_id;
     v_site := rtrim(coalesce(booking._setting('site_base_url') #>> '{}',''),'/');
     v_shop := case when p_locale = 'en' then '/en/book/' else '/varaa/' end;
+    -- Kuten _enqueue_email: resend-tila off -> skipped. Lisäksi varatut testitunnukset (RFC 2606/6761: .invalid, .test, .example, .localhost) -> skipped.
+    v_status := case when coalesce((select c.mode from booking.integration_config c where c.key = 'resend'), 'off') = 'off'
+                       or v_email ~ '[.](invalid|test|example|localhost)$' then 'skipped' else 'pending' end;
     insert into booking.email_outbox(kind,locale,dedupe_key,status,payload)
-    values ('waitlist_joined', p_locale, 'waitlist_joined:'||v_id, 'pending', jsonb_build_object(
+    values ('waitlist_joined', p_locale, 'waitlist_joined:'||v_id, v_status, jsonb_build_object(
       'to_email', v_email, 'to_name', v_name, 'product_name', v_pname,
       'starts_at', v_s.starts_at, 'ends_at', v_s.ends_at, 'persons', v_persons,
       'leave_url', v_site||v_shop||'?poistu_jonosta='||v_token))
@@ -379,33 +397,23 @@ begin
     where w.rule_id = p_rule_id and w.status in ('waiting','notified','booked')), '[]'::jsonb);
 end $$;
 
-do $$
-begin
-  if to_regprocedure('booking.email_outbox_claim_base_210(integer)') is null then
-    alter function booking.email_outbox_claim(integer) rename to email_outbox_claim_base_210;
-  end if;
-end $$;
-revoke all on function booking.email_outbox_claim_base_210(integer) from public, anon, authenticated;
-
-create or replace function booking.email_outbox_claim(p_limit integer default 20) returns jsonb
-language sql volatile security definer set search_path = '' as $$
-  select coalesce(jsonb_agg(
-    case when z.item->>'kind' in ('waitlist_joined', 'waitlist_spot_freed')
-      then z.item || jsonb_build_object('waitlist', coalesce(z.item->'waitlist',
-           (select e.payload from booking.email_outbox e where e.id = (z.item->>'id')::bigint)))
-      else z.item end
-    order by z.ord), '[]'::jsonb)
-  from jsonb_array_elements(booking.email_outbox_claim_base_210(p_limit)) with ordinality as z(item, ord);
+-- Jonoviestien payload claimiin: laajennetaan booking_146:n kerrosta (ei uutta nimeämistä), jolloin ylin email_outbox_claim
+-- (booking_190 / booking_202) säilyy sellaisenaan ja kutsuu edelleen tätä kerrosta.
+create or replace function booking.email_outbox_claim_base_146(p_limit integer default 20) returns jsonb
+language sql security definer set search_path = '' as $$
+  select coalesce(jsonb_agg(case when z.item->>'kind' in ('waitlist_spot_freed', 'waitlist_joined')
+    then z.item || jsonb_build_object('waitlist',(select e.payload from booking.email_outbox e where e.id=(z.item->>'id')::bigint))
+    else z.item end order by z.ord),'[]'::jsonb)
+  from jsonb_array_elements(booking.email_outbox_claim_base_132(p_limit)) with ordinality as z(item,ord);
 $$;
+revoke all on function booking.email_outbox_claim_base_146(integer) from public, anon, authenticated;
 
 revoke all on function booking.public_join_waitlist(bigint, date, integer, text, text, text, text, boolean, boolean) from public;
 revoke all on function booking._waitlist_event_capacity_trg() from public, anon, authenticated;
 revoke all on function booking._waitlist_pool_capacity_trg() from public, anon, authenticated;
 revoke all on function booking.admin_event_waitlist(bigint) from public, anon;
-revoke all on function booking.email_outbox_claim(integer) from public, anon, authenticated;
 grant execute on function booking.public_join_waitlist(bigint, date, integer, text, text, text, text, boolean, boolean) to anon, authenticated, service_role;
 grant execute on function booking.admin_event_waitlist(bigint) to authenticated, service_role;
-grant execute on function booking.email_outbox_claim(integer) to service_role;
 
 comment on function booking.public_join_waitlist(bigint, date, integer, text, text, text, text, boolean, boolean) is
   'booking_210: jonoon liittyminen. Tapahtuma vaatii p_privacy_consent. Ei palauta muiden tietoja. Rajattu nopeus.';
