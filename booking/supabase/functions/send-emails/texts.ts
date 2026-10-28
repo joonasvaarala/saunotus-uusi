@@ -188,6 +188,14 @@ export const EMAIL_TEXTS: TextTable = {
   "email.waitlist.book_button": { fi: "Varaa paikka", en: "Book your place" },
   "email.waitlist.leave": { fi: "Etkö enää tarvitse ilmoituksia tästä vuorosta?", en: "No longer need notifications for this session?" },
   "email.waitlist.leave_link": { fi: "Poistu jonotuslistalta", en: "Leave the waiting list" },
+  // booking_210: tapahtuman jonoon liittymisen vahvistus. Allekirjoitus Tapio. Ei varausta.
+  "email.waitlist_joined.subject": { fi: `Olet jonossa – ${SN}`, en: `You are on the waiting list – ${SN}` },
+  "email.waitlist_joined.title": { fi: "Olet jonossa", en: "You are on the waiting list" },
+  "email.waitlist_joined.intro": { fi: "Kiitos. Sinut on lisätty tapahtuman jonotuslistalle.", en: "Thank you. You have been added to the waiting list for this event." },
+  "email.waitlist_joined.session": { fi: "{{var:what}}, {{var:when}}, {{var:n}} hlö", en: "{{var:what}}, {{var:when}}, {{var:n}} guests" },
+  "email.waitlist_joined.notice": { fi: "Emme varaa paikkaa automaattisesti. Jos paikkoja vapautuu, lähetämme sähköpostin ja varauslinkin. Paikan saa ensimmäinen, joka ehtii varata.", en: "We do not book a place automatically. If places become free, we email you a booking link. The first person to book gets the place.", cls: "protected" },
+  "email.waitlist_joined.leave": { fi: "Haluatko pois jonosta?", en: "Want to leave the waiting list?" },
+  "email.waitlist_joined.sign_name": { fi: "Tapio", en: "Tapio" },
   // ---- vuosikortin koodi (booking_146) ----
   "email.annual_card.subject": { fi: `Vuosikorttisi koodi – ${SN}`, en: `Your annual card code – ${SN}` },
   "email.annual_card.title": { fi: "Vuosikorttisi on valmis", en: "Your annual card is ready" },

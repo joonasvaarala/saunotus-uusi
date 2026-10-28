@@ -10,6 +10,7 @@ import { pt } from './pay-choices-texts.js';
 import { T } from './i18n.js';
 import { createWaitlistView } from './waitlist-ui.js';
 import { visibleWaitlistSlots, fullyBooked, hasWaitlistSlots } from './waitlist-logic.js';
+import { indexShopEvents, missingEventProducts, eventIsFull, eventWaitlistPath, byEventStart } from './event-full.js';
 import { loadProducts as loadTreatmentProducts, splitCatalog, isListed as treatmentListed, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
 import { pickCatalog } from './catalog-audience.js';
 import { heroShort, cardShort, fallbackDesc } from './short-desc.js';
@@ -257,21 +258,32 @@ function setHero(p) {
 // Kortin kuvaus (booking_156): lyhyt kuvaus puhdistettuna, tyhjä → johdettu ote 170 merkkiä (short-desc.js).
 const cardExcerpt = (p) => cardShort(h, p, S.lang, pdesc(p));
 // ---- näkymä 1: tuotelista ----
-function viewList(query) {
+async function viewList(query) {
   placeGiftNudge(true);
+  const events = await publicEvents();
+  const eventIndex = indexShopEvents(events);
+  for (const p of missingEventProducts(state.catalog, events)) state.catalog.push(p);
   const cat = [...state.catalog, ...state.treatments.filter(treatmentListed)];   // lisätuotteet (LISTING_HIDDEN_SLUGS) eivät näy listalla; tuotesivu toimii
   const kinds = chipsFor(cat);   // tyhjä kategoria ei saa chippiä; tapahtuma omassa chipissä (catalog-kind.js)
   const k = kinds.includes(query.get('k')) ? query.get('k') : 'all';
-  const list = cat.filter((p) => k === 'all' || kindOf(p) === k);
+  let list = cat.filter((p) => k === 'all' || kindOf(p) === k);
+  if (k === 'tapahtuma') list = [...list].sort(byEventStart(eventIndex));
   const tabs = h('nav', { class: 'bk-tabs', 'aria-label': t.title }, kinds.map((x) => h('a', { href: bk(`/?k=${x}`), 'aria-current': x === k ? 'true' : null, text: t['k_' + x] || t[x] || x })));
-  const cards = h('ul', { class: 'bk-cards' }, list.map((p) => p.treatment ? tv.card(p) : h('li', { class: 'bk-card' },
-    cardAnchor(h, bk(`/tuote/${p.slug}`),
-      pimg(p, 'card-img'),
-      h('h3', { text: pname(p) }),
-      cardExcerpt(p),
-      cardMeta(h, priceText(p), pdur(p)),   // ajankohta omalla rivillään hinnan yläpuolella (card-meta.js)
-      h('p', { class: 'bk-quiet-line', hidden: true, 'data-qp': p.id, 'data-qmark': 'list' }),   // booking_162: täyttyy vain, jos tuotteella on hiljaisen ajan ale
-      h('span', { class: 'btn sm' }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) }))))));
+  const cards = h('ul', { class: 'bk-cards' }, list.map((p) => {
+    if (p.treatment) return tv.card(p);
+    const ev = eventIndex.get(+p.id);
+    const full = p.category === 'event' && eventIsFull(ev);
+    const queue = full ? eventWaitlistPath(ev) : '';
+    return h('li', { class: `bk-card${full ? ' is-full' : ''}`, ...(full ? { 'data-testid': 'event-full-card' } : {}) },
+      cardAnchor(h, queue ? bk(queue) : bk(`/tuote/${p.slug}`),
+        pimg(p, 'card-img'),
+        full ? h('span', { class: 'bk-full-badge', text: t.full }) : null,
+        h('h3', { text: pname(p) }),
+        cardExcerpt(p),
+        cardMeta(h, priceText(p), pdur(p)),   // ajankohta omalla rivillään hinnan yläpuolella (card-meta.js)
+        h('p', { class: 'bk-quiet-line', hidden: true, 'data-qp': p.id, 'data-qmark': 'list' }),   // booking_162: täyttyy vain, jos tuotteella on hiljaisen ajan ale
+        h('span', { class: 'btn sm' }, full ? t.eventWaitlistCta : t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) + (full ? `, ${t.full}` : '') }))));
+  }));
   const annual = annualPromo();
   // Sivun hero toistaa saman otsikon ja ingressin. Listalla jätetään yksi.
   mount(modeSwitch('cat'), tabs, cards, annual);
@@ -371,8 +383,8 @@ function dayItem({ r, p }, ds, withName = false) {
     h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }),
       withName ? h('span', { class: 'bk-prodname' }, h('a', { href: bk(`/tuote/${p.slug}/${ds}`), text: pname(p) })) : null, sub ? h('span', { class: 'bk-sub', text: sub }) : null, h('span', { class: 'bk-price', text: price, ...qAttrs(ok, p, r, 'day') })),
     h('div', { class: 'bk-slot-side' },
-      ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: 'bk-badge full', text: t.waitlistSessionSoldOut }),
-      ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}?via=day`) }, t.choose, h('span', { class: 'sr', text: ` ${title}, ${pname(p)}` })) : h('a', { class: 'btn sm light bk-waitlist-link', href: bk(`/jono/${r.rule_id}/${ds}/${p.id}?via=day`), text: t.waitlistJoinShort })));
+      ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: 'bk-badge full', text: p.category === 'event' ? t.full : t.waitlistSessionSoldOut }),
+      ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}?via=day`) }, t.choose, h('span', { class: 'sr', text: ` ${title}, ${pname(p)}` })) : h('a', { class: 'btn sm light bk-waitlist-link', href: bk(`/jono/${r.rule_id}/${ds}/${p.id}?via=day`), text: p.category === 'event' ? t.eventWaitlistCta : t.waitlistJoinShort })));
 }
 // hoito-/rituaaliajan rivi päivänäkymässä: valinta vie hoitovarausvirtaan (tuotesivu) esivalitulla päivällä ja ajalla (henkilömäärä 1, vaihdettavissa)
 function treatItem({ r, p }, ds) {
@@ -420,9 +432,9 @@ function prodCard(p, rs, ds, open, onToggle, treat = false) {
   const btn = h('button', { type: 'button', id: `${id}-btn`, class: 'bk-pc-head', 'aria-expanded': open ? 'true' : 'false', 'aria-controls': `${id}-panel`, onclick: () => onToggle(p, li) },
     pimg(p, 'pc-img', { alt: false, w: 160, hgt: 160 }),
     h('span', { class: 'bk-pc-main' }, h('strong', { class: 'bk-pc-name', text: pname(p) }), short ? h('span', { class: 'bk-pc-desc', text: short }) : null,
-      h('span', { class: 'bk-pc-meta', ...(treat || !avail.length ? {} : { 'data-qp': p.id, 'data-qday': ds, 'data-qmark': 'card' }) }, h('span', { class: 'bk-price', text: priceText(p) }), fullOnly ? h('span', { class: 'bk-badge full', text: t.waitlistSoldOut }) : h('span', { class: 'bk-badge free', text: `${t.timesFree(avail.length)}${avail.length ? ` · ${t.firstAt} ${hm(avail[0].r.starts_at)}` : ''}` }))),
+      h('span', { class: 'bk-pc-meta', ...(treat || !avail.length ? {} : { 'data-qp': p.id, 'data-qday': ds, 'data-qmark': 'card' }) }, h('span', { class: 'bk-price', text: priceText(p) }), fullOnly ? h('span', { class: 'bk-badge full', text: p.category === 'event' ? t.full : t.waitlistSoldOut }) : h('span', { class: 'bk-badge free', text: `${t.timesFree(avail.length)}${avail.length ? ` · ${t.firstAt} ${hm(avail[0].r.starts_at)}` : ''}` }))),
     h('span', { class: 'bk-pc-chev', 'aria-hidden': 'true' }));
-  const li = h('li', { class: `bk-pc${fullOnly ? ' full' : ''}${open ? ' open' : ''}`, 'data-slug': p.slug }, btn, panel);
+  const li = h('li', { class: `bk-pc${p.category === 'event' ? ' is-event' : ''}${fullOnly ? ' full' : ''}${open ? ' open' : ''}`, 'data-slug': p.slug }, btn, panel);
   return li;
 }
 async function viewDay(dateStr, keep, openSlug) {
@@ -581,8 +593,8 @@ function slotItem(r, ds, p) {
   return h('li', { class: `bk-slot ${r.status}` },
     h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }), sub ? h('span', { class: 'bk-sub', text: sub }) : null, h('span', { class: 'bk-price', text: price, ...qAttrs(ok, p, r, 'slot') })),
     h('div', { class: 'bk-slot-side' },
-      ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: 'bk-badge full', text: t.waitlistSessionSoldOut }),
-      ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}`) }, t.choose, h('span', { class: 'sr', text: ` ${title}` })) : h('a', { class: 'btn sm light bk-waitlist-link', href: bk(`/jono/${r.rule_id}/${ds}/${p.id}`), text: t.waitlistJoinShort })));
+      ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: 'bk-badge full', text: p.category === 'event' ? t.full : t.waitlistSessionSoldOut }),
+      ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}`) }, t.choose, h('span', { class: 'sr', text: ` ${title}` })) : h('a', { class: 'btn sm light bk-waitlist-link', href: bk(`/jono/${r.rule_id}/${ds}/${p.id}`), text: p.category === 'event' ? t.eventWaitlistCta : t.waitlistJoinShort })));
 }
 
 // booking_158: tapahtumat (public_events, kanava shop). Virhe tai vanha kanta ilman RPC:tä → [] (vanha käytös).
@@ -1271,7 +1283,7 @@ async function route(keep = false) {
     else if (parts[0] === 'hoito' && parts[1]) { const tp = state.treatments.find((x) => x.slug === parts[1]); if (tp) await tv.viewCheckout(tp, parts[2], parts[3], q); else await viewProduct(parts[1], null, q); }
     else if (parts[0] === 'varaa' && parts[1] && parts[2]) await viewCheckout(parts[1], parts[2], parts[3], q.get('via'));
     else if (parts[0] === 'jono' && parts[1] && parts[2] && parts[3]) await wv.viewWaitlist(parts[1], parts[2], parts[3], q.get('via'));
-    else { viewList(q); focusTop(); }
+    else { await viewList(q); focusTop(); }
   } catch (e) {
     console.warn('booking route error', e);
     mount(errorBox(t.loadError), phoneBox());

@@ -15,7 +15,8 @@ import { quietWeekAttrs } from './quiet-week.mjs';
 import { experienceHtml, traditionHtml, infoStrip, companyStrip, homeText, homeBookCta } from './home-front.mjs';
 import { treatmentsBody } from './treatments-page.mjs';
 import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
-import { selectShopEvents, shopEventsHtml, shopHash } from './event-cards.mjs';
+import { selectShopEvents, shopEventsHtml, shopHash, eventWaitlistPath } from './event-cards.mjs';
+import { EVENT_CARD_TEXTS } from './event-full-texts.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
   johku, bookingUrl, phoneDisplay, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
@@ -157,19 +158,23 @@ export function upcomingEvents(lang) {
   }
   return out.sort((a, b) => a.dates[0].starts_on.localeCompare(b.dates[0].starts_on));
 }
-// booking_158: uuden kaupan tapahtumat (kb.json events_shop = booking.public_events). Vain vapaat kerrat.
-// Kortti linkittää kaupan tuotesivulle (FI /varaa/#/tuote/<slug>, EN /en/book/#/tuote/<slug>), ei Johkuun.
+// booking_158 / booking_210: uuden kaupan tapahtumat (kb.json events_shop = booking.public_events).
+// Tulevat vapaat ja täydet kerrat. Täysi tapahtuma himmennetään; yksi kerta vie jonoon, useampi tuotesivulle.
+// Kortti linkittää kauppaan (FI /varaa/#/…, EN /en/book/#/…), ei Johkuun.
 // Selain korvaa listan tuoreella public_events-vastauksella (data-live-events). Hakuvirhe → tämä snapshot jää.
 // Muuten (ei events_shop-dataa) vanha data (kb.event_dates + cards.json), linkki silti kaupan tuotesivulle.
+const eventCardText = (key, lang) => tx(key, lang, { fallback: EVENT_CARD_TEXTS[key][lang] ?? EVENT_CARD_TEXTS[key].fi, log: { warn() {} } });
 function shopEventsSection(lang, limit, empty) {
   let list = selectShopEvents(kb.events_shop, Date.now());
   if (!list.length) return null;
   if (limit) list = list.slice(0, limit);
   const cardOf = (ev) => Object.entries(cards.events).find(([id, c]) => !id.startsWith('_') && (c.kb || id) === ev.slug)?.[1] || null;
   const fallbackImg = Object.entries(cards.events).find(([id, c]) => !id.startsWith('_') && c.img)?.[1]?.img;
+  const fullText = eventCardText('ui.site.event_full', lang);
+  const fullCta = eventCardText('ui.site.event_waitlist', lang);
   return shopEventsHtml(list, lang, {
-    e, money, card: cardOf, arrow: ui(lang).reserveArrow, empty,
-    link: (ev) => pageHref('book', lang, shopHash(ev.slug)),
+    e, money, card: cardOf, arrow: ui(lang).reserveArrow, fullText, fullCta, empty,
+    link: (ev) => pageHref('book', lang, eventWaitlistPath(ev) || shopHash(ev.slug)),
     img: (ev) => { const id = cardOf(ev)?.img || fallbackImg; return id ? pic(id, lang, { sizes: '(min-width:1100px) 280px, 90vw', alt: '' }) : ''; },
   });
 }

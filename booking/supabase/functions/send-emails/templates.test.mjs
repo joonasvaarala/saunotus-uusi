@@ -422,7 +422,7 @@ test('booking_176: tavallinen maksulinkki ennallaan (ei voucher_difference-lohko
 });
 
 // Gmail iOS zoomaa leveimmän kohdan mukaan. Kortti on width="100%" + max-width:600px, ei width="600".
-const LAYOUT_KINDS = ['order_confirmation', 'payment_link', 'receipt', 'refund_receipt', 'cancel_request_ack', 'order_change', 'gift_card_buyer', 'gift_card_recipient', 'voucher_claim_received', 'voucher_claim_problem', 'business_quote_ack', 'business_quote_notify', 'invoice_pdf', 'product_message', 'waitlist_spot_freed', 'annual_card_code', 'unpaid_booking_cancelled'];
+const LAYOUT_KINDS = ['order_confirmation', 'payment_link', 'receipt', 'refund_receipt', 'cancel_request_ack', 'order_change', 'gift_card_buyer', 'gift_card_recipient', 'voucher_claim_received', 'voucher_claim_problem', 'business_quote_ack', 'business_quote_notify', 'invoice_pdf', 'product_message', 'waitlist_spot_freed', 'waitlist_joined', 'annual_card_code', 'unpaid_booking_cancelled'];
 test('asiakasviestit: viewport ja juokseva kortti (ei width="600")', { skip }, () => {
   for (const kind of LAYOUT_KINDS) for (const locale of ['fi', 'en']) {
     const row = kind === 'refund_receipt' ? refundData(locale) : base(locale);
