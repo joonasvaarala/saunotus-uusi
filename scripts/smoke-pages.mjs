@@ -64,7 +64,7 @@ async function newPage(name, { allowFail = null, viewport = { width: 1100, heigh
     }
     if (u.pathname.endsWith('/rpc/public_gift_card_packages')) return giftMode === 'missing' ? json({ code: 'PGRST202', message: 'Could not find the function booking.public_gift_card_packages in the schema cache' }, 404) : json({ ok: true, sale_enabled: giftMode === 'on', redeem_enabled: giftMode === 'on', max_cards_per_order: 10, currency: 'EUR', packages: GIFT_PKGS });
     if (u.pathname.endsWith('/rpc/public_product_images')) return json([{ product_id: 1, slug: 'yleinen', path: 'products/1-smoke01.png', alt: null }]);   // migraatio 19: vain tuotteella 1 on kuva
-    if (u.pathname.startsWith('/storage/v1/object/public/product-images/')) return route.fulfill({ status: 200, contentType: 'image/png', headers: { 'access-control-allow-origin': '*' }, body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64') });
+    if (u.pathname.includes('/product-images/')) return route.fulfill({ status: 200, contentType: 'image/png', headers: { 'access-control-allow-origin': '*' }, body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64') });
     if (u.pathname.endsWith('/rpc/public_catalog')) return json([
       { id: 1, slug: 'yleinen', name: 'Yleinen vuoro', name_en: 'Public session', description: 'x', description_en: 'x', category: 'sauna', sale_kind: 'public_shift', price: 29, price_type: 'per_person', min_persons: 1, max_persons: 10 },
       { id: 3, slug: 'taynna', name: 'Täysi tuote', name_en: 'Fully booked product', description: 'x', description_en: 'x', category: 'sauna', sale_kind: 'public_shift', price: 40, price_type: 'per_person', min_persons: 1, max_persons: 10 },
@@ -238,7 +238,7 @@ for (const [base, L] of [['/varaa/', { cat: 'Selaa kategorioittain', day: 'Selaa
     await page.goto(`${BASE}${base}#/tuote/yleinen`); await page.waitForSelector('.bk-prod');
     await page.waitForSelector('main .hero.page.has-prod');
     const h1 = await heroOf();
-    if (!/product-images\/products\/1-smoke01\.png$/.test(h1.src) || !/^(Yleinen vuoro|Public session)$/.test(h1.h1) || h1.h1n !== 1 || h1.sub !== 'x') problems.push(`${base}: tuotesivun hero väärin: ${JSON.stringify(h1)}`);
+    if (!/product-images\/products\/1-smoke01\.png/.test(h1.src) || !/^(Yleinen vuoro|Public session)$/.test(h1.h1) || h1.h1n !== 1 || h1.sub !== 'x') problems.push(`${base}: tuotesivun hero väärin: ${JSON.stringify(h1)}`);
     await page.goto(`${BASE}${base}#/tuote/oma`); await page.waitForSelector('.bk-prod');
     await page.waitForFunction(() => !document.querySelector('main .hero.page.has-prod'));
     const h2 = await heroOf();
