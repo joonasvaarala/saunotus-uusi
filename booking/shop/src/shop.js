@@ -160,7 +160,8 @@ const texts = createTexts({ lang: S.lang, format: { price: (n) => money(n), dura
 const state = { catalog: null, settings: null, images: new Map(), treatments: [], months: new Map(), busy: false, annualOffer: null };
 // tyhjät (null/false) lapset ohitetaan: replaceChildren(null) kirjoittaisi sivulle tekstin "null" (esim. tuotesivu ilman hoitovalitsinta)
 const mount = (...nodes) => { root.replaceChildren(...nodes.flat().filter((n) => n != null && n !== false)); root.setAttribute('aria-busy', 'false'); };
-const focusTop = () => { const el = [...root.querySelectorAll('h2,h1')].find((n) => !n.closest('.bk-rich')) || document.querySelector('main .hero.page h1'); if (el) { el.setAttribute('tabindex', '-1'); el.focus({ preventScroll: false }); } };
+const focusQuiet = (el, extra = {}) => { if (el) el.focus({ preventScroll: true, focusVisible: false, ...extra }); };
+const focusTop = () => { const el = [...root.querySelectorAll('h2,h1')].find((n) => !n.closest('.bk-rich')) || document.querySelector('main .hero.page h1, main h1'); if (el) { el.setAttribute('tabindex', '-1'); focusQuiet(el, { preventScroll: false }); } };
 const spinner = () => mount(h('p', { class: 'bk-loading', role: 'status', text: t.loading }));
 const errorBox = (msg) => h('p', { class: 'bk-error', role: 'alert', text: msg });
 const phoneBox = () => h('p', { class: 'bk-contact' }, h('a', { href: `tel:${S.phoneTel}`, text: S.phone }), ' · ', h('a', { href: `mailto:${S.email}`, text: S.email }));
@@ -505,7 +506,7 @@ async function viewDay(dateStr, keep, openSlug) {
     h('section', { class: 'bk-daypick', 'aria-label': t.pickDay }, nav, strip,
       h('p', { class: 'bk-legend' }, h('span', { class: 'dot free' }), t.free, ' ', h('span', { class: 'dot full' }), t.full, ' ', h('span', { class: 'dot unavail' }), t.unavailable, qLegend()), tools),
     h('div', { class: 'bk-slots', 'aria-live': 'polite' }, results));
-  if (keep) { const el = document.getElementById('bk-day-h'); if (el) { revealIfHidden(el); el.focus({ preventScroll: true }); } } else focusTop();
+  if (keep) { const el = document.getElementById('bk-day-h'); if (el) { revealIfHidden(el); focusQuiet(el); } } else focusTop();
   if (!keep && openSlug) document.querySelector('.bk-pc.open')?.scrollIntoView({ block: 'start' });   // Takaisin lomakkeelta → sama tuote auki ja näkyvissä
   if (treatBox) fillTreatments(treatBox, results, ds, today, tmax, openSlug, toggle, free.length > 0);
 }
@@ -947,7 +948,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
       msg.replaceChildren(errorBox(e.mapped ? e.message : t.errorGeneric));   // palvelimen raaka message ei koskaan asiakkaalle (ui.shop.error_generic)
       if (['capacity_exceeded', 'private_booked', 'public_shift_booked', 'space_closed'].includes(e.code)) state.months.clear();
       if (isRitualError(e.code)) loadRitual();   // booking_166: rituaaliaika ehti täyttyä → vapaat ajat uudelleen
-      msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true });
+      msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); focusQuiet(msg.firstChild);
     }
   } },
     h('fieldset', { class: 'bk-section' }, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, minus, num, plus)),
@@ -1137,7 +1138,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   }
   if (!secEl && notice && (notice.kind === 'gift' || notice.kind === 'paylater')) secEl = payNotice(L, notice);   // kokonaan maksettu: maksuosio poistuu, mutta ilmoitus jää
   if (secEl) { if (holdV) dl.after(secEl); else root.firstElementChild.querySelector('.bk-actions')?.before(secEl); }   // pitotilassa maksuvalinta yhteenvedon alla
-  if (refresh) { const el = root.querySelector('[data-testid=pc-notice],[data-testid=vc-notice]'); if (el) { el.scrollIntoView({ block: 'center' }); el.focus({ preventScroll: true }); } else if (holdV && !retPay) holdHost.querySelector('h3')?.focus(); } else focusTop();   // pitotilan vaihtuessa fokus tilaotsikkoon
+  if (refresh) { const el = root.querySelector('[data-testid=pc-notice],[data-testid=vc-notice]'); if (el) { el.scrollIntoView({ block: 'center' }); focusQuiet(el); } else if (holdV && !retPay) focusQuiet(holdHost.querySelector('h3')); } else focusTop();   // pitotilan vaihtuessa fokus tilaotsikkoon
   if (retPay && model) {   // paluu maksusivulta: tilaus kysytään uudelleen; kesken oleva MobilePay/Visma täsmäytetään vielä (runReturn jää tuotuna)
     const num = (k) => { const v = +new URLSearchParams(location.search).get(k); return Number.isFinite(v) && v > 0 ? v : undefined; };
     const intervalMs = MOCK ? (num('mpinterval') || 2500) : 2500;
@@ -1231,7 +1232,7 @@ async function viewChange(token, b) {
       location.hash = token; window.scrollTo({ top: 0 });
     } catch (e) {
       submit.textContent = t.saveChange; upd();
-      msg.replaceChildren(errorBox(e.mapped ? e.message : t.errorGeneric)); msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true });
+      msg.replaceChildren(errorBox(e.mapped ? e.message : t.errorGeneric)); msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); focusQuiet(msg.firstChild);
       if (['capacity_exceeded', 'private_booked', 'public_shift_booked', 'space_closed'].includes(e.code)) loadSessions();
     }
   } }, h('fieldset', {}, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, minus, num, plus),

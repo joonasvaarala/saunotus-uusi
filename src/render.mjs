@@ -336,7 +336,7 @@ ${langSw}
 <a class="btn sm" href="${bookHref}">${e(u.book)}</a>
 <details class="nav-mob"><summary>${e(u.menu)}</summary><nav aria-label="${e(u.menuLabel)}">${nav}<a class="btn gold nav-cta" href="${bookHref}">${e(u.bookFull)}</a></nav></details>
 </div></header>
-<main id="main">
+<main id="main" tabindex="-1">
 ${body}
 </main>
 <footer class="site-footer"><div class="wrap">

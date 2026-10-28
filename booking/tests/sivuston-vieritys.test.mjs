@@ -26,7 +26,7 @@ test('revealForm vierittää lomakkeen alkuun kerran, fokus ei tee uutta vierity
   const cart = element(), title = element();
   assert.equal(revealForm(cart, title, win(false)), true);
   assert.deepEqual(cart.calls.scroll, [{ block: 'start', behavior: 'smooth' }]);
-  assert.deepEqual(title.calls.focus, [{ preventScroll: true }]);
+  assert.deepEqual(title.calls.focus, [{ preventScroll: true, focusVisible: false }]);
   assert.deepEqual(title.calls.attrs, [['tabindex', '-1']]);
   assert.equal(title.calls.scroll.length, 0);
 });
@@ -37,7 +37,7 @@ test('reduced-motion → auto, myös hallinnan revealSection', () => {
   revealForm(shop, null, win(true)); revealSection(admin, head, win(true));
   assert.deepEqual(shop.calls.scroll, [{ block: 'start', behavior: 'auto' }]);
   assert.deepEqual(admin.calls.scroll, [{ block: 'start', behavior: 'auto' }]);
-  assert.deepEqual(head.calls.focus, [{ preventScroll: true }]);
+  assert.deepEqual(head.calls.focus, [{ preventScroll: true, focusVisible: false }]);
 });
 
 test('revealIfHidden ei vieritä näkyvissä olevaa ilmoitusta eikä ensilatausta', () => {
