@@ -83,6 +83,10 @@ test('kortit: hinta, kesto ja slug tuotteesta; savusaunamerkki vain lipulla; Mor
     assert.match(html, /id="arvostelut"|id="reviews"/);
     assert.match(html, /class="rv-grid"/);
     assert.match(html, lang === 'fi' ? /Mistä aloittaa\?/ : /Where to start\?/);
+    const first = html.match(/<li class="tr-path"><h3>[^<]*<\/h3>.*?<\/ul><\/li>/)[0];
+    assert.match(first, lang === 'fi' ? /href="\/varaa\/#\/tuote\/saunahoito-2">Saunahoito</ : /href="\/en\/book\/#\/tuote\/saunahoito-2">Sauna Treatment</, 'ensimmäinen kerta: Saunahoito');
+    assert.match(first, /tuote\/saunarituaali-ja-savusaunavuoro"/);
+    assert.doesNotMatch(first, /turvetorstai/, 'Turvetorstai ei enää ensimmäisen kerran polussa');
     assert.match(html, lang === 'fi' ? /Näin saunotus etenee/ : /How a saunotus goes/);
     assert.match(html, lang === 'fi' ? /Sopiiko tämä minulle\?/ : /Is this for me\?/);
     assert.match(html, /rituaali-1536\.avif|rituaali-1024\.avif/);

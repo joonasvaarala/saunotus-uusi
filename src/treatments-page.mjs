@@ -24,8 +24,8 @@ export const TREATMENTS_TEXTS = Object.freeze({
   'ui.site.treatments_start_title': { fi: 'Mistä aloittaa?', en: 'Where to start?' },
   'ui.site.treatments_start_first_title': { fi: 'Ensimmäinen kerta', en: 'A first time' },
   'ui.site.treatments_start_first_text': {
-    fi: 'Avoimet rituaalit tarjoavat mahdollisuuden tutustua saunotukseen yhdessä muiden kanssa.',
-    en: 'Open rituals offer a chance to get to know saunotus together with others.',
+    fi: 'Avoin rituaali tutustuttaa saunotukseen yhdessä muiden kanssa, saunahoito kiireettömästi omassa rauhassa.',
+    en: 'An open ritual introduces you to saunotus together with others; a sauna treatment does so unhurriedly, in your own peace.',
   },
   'ui.site.treatments_start_own_title': { fi: 'Oma syvä kokemus', en: 'A deep experience of your own' },
   'ui.site.treatments_start_own_text': {
@@ -88,7 +88,7 @@ export const TREATMENT_GROUPS = Object.freeze([
 ]);
 
 export const START_PATHS = Object.freeze([
-  { title: 'ui.site.treatments_start_first_title', text: 'ui.site.treatments_start_first_text', slugs: ['saunarituaali-ja-savusaunavuoro', 'turvetorstai'] },
+  { title: 'ui.site.treatments_start_first_title', text: 'ui.site.treatments_start_first_text', slugs: ['saunarituaali-ja-savusaunavuoro', 'saunahoito-2'] },
   { title: 'ui.site.treatments_start_own_title', text: 'ui.site.treatments_start_own_text', slugs: ['saunotus-2', 'syvasaunotus'] },
   { title: 'ui.site.treatments_start_group_title', text: 'ui.site.treatments_start_group_text', slugs: ['perinnesaunotus-ryhmalle', 'morsiussauna'] },
 ]);
