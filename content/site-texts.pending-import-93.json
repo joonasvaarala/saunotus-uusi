@@ -1,0 +1,22 @@
+[
+ {
+  "key": "ui.site.home_book_cta",
+  "lang": "fi",
+  "text": "Varaa saunavuoro →",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "Etusivun varausnappi arvostelujen ja Tapahtumat-osion välissä (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN, luokka normal. Ei vielä tuotannossa. Tuo admin_texts_importilla. Linkki on sivuston /varaa/ (EN /en/book/), ei uusi osoite."
+ },
+ {
+  "key": "ui.site.home_book_cta",
+  "lang": "en",
+  "text": "Book a sauna →",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "Etusivun varausnappi arvostelujen ja Tapahtumat-osion välissä (Joonas 28.10.2026): uusi asiakasnäkyvä teksti, FI+EN, luokka normal. Ei vielä tuotannossa. Tuo admin_texts_importilla. Linkki on sivuston /varaa/ (EN /en/book/), ei uusi osoite."
+ }
+]

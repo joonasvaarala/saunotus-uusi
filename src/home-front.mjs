@@ -38,6 +38,7 @@ export const HOME_TEXTS = Object.freeze({
     en: 'A calm smoke sauna for workplace wellbeing, small groups and shared evenings.',
   },
   'ui.site.home_gift_cta': { fi: 'Osta lahjaksi →', en: 'Buy as a gift →' },
+  'ui.site.home_book_cta': { fi: 'Varaa saunavuoro →', en: 'Book a sauna →' },
 });
 
 const quiet = { warn() {} };
@@ -101,6 +102,11 @@ export function traditionHtml(lang, { kicker, title, cta, perPerson }) {
   const href = pageHref('book', lang, shopHash(p.slug));
   const photo = picture(RITUAL_PHOTO, { alt: alts[RITUAL_PHOTO]?.[lang] || '', sizes: '(min-width:900px) 640px, 100vw' });
   return `<div class="tradition"><div class="tradition-copy"><p class="kicker">${e(kicker)}</p><h2 class="sec-title">${e(title)}</h2><p class="lead">${e(homeText('ui.site.home_tradition_lead', lang))}</p><p class="tradition-price">${e(money(p.price, lang))}<small>${e(perPerson)}</small></p><a class="btn gold" href="${e(href)}">${e(cta)}</a></div><div class="tradition-photo">${photo}</div></div>`;
+}
+
+/** Arvostelujen ja Tapahtumat-osion väliin: varaus etusivun päätoimintona. */
+export function homeBookCta(lang) {
+  return `<p class="home-book"><a class="btn gold" href="${e(pageHref('book', lang))}">${e(homeText('ui.site.home_book_cta', lang))}</a></p>`;
 }
 
 export function infoStrip(lang) {
