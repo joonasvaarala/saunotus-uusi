@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..');
 const rd = (p) => readFileSync(join(root, p), 'utf8');
-const mig = rd('booking/supabase/migrations/20261028030913_booking_190_addon_hold_unpaid_email.sql');
+const mig = rd('booking/supabase/migrations/20261028040716_booking_190_addon_hold_unpaid_email.sql');
 const texts = JSON.parse(rd('content/site-texts.pending-import-86.json'));
 
 test('migraatio käyttää kassan pitoa, expire_holdsia ja resend-kytkintä', () => {
