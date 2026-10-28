@@ -11,17 +11,17 @@
    "extra": true,
    "fi": {
     "kicker": "Hoitava",
-    "title": "saunahoito",
+    "title": "Saunahoito",
     "text": "Saunahoito on lempeä ja kiireetön saunaelämys, jossa löyly, lämpö ja valitsemasi luonnonhoito tuovat hetken pysähtymistä arjen keskelle. Hoidon laajuus mukautuu henkilömäärän mukaan kokonaisvaltaisesta yksilöhoidosta yhteiseen rentoutumishetkeen.",
     "more": "Hoito alkaa löylyntervehdysrituaalilla, jonka jälkeen saunottaja toteuttaa valitun hoidon: hunaja-, vihta-, suola- tai turvehoidon (valinta kassalla). Toteutetaan hoitosauna Raunissa. Hoidon hintaan ei sisälly pääsyä savusaunaan tai paljuihin – saunavuoro varataan erikseen. Hoitoon voi osallistua alasti, osittain tai kokonaan uima-asussa.",
-    "cta": "Varaa aika →"
+    "cta": "Varaa →"
    },
    "en": {
     "kicker": "Healing",
-    "title": "sauna treatment",
+    "title": "Sauna Treatment",
     "text": "A sauna treatment is a gentle, unhurried sauna experience where the steam, the warmth and the natural treatment you choose bring a moment of stillness into everyday life. The scope adapts to the group size, from a full individual treatment to a shared moment of relaxation.",
     "more": "The treatment begins with a löyly greeting ritual, after which the sauna healer performs the treatment you have chosen: a honey, whisk, salt or peat treatment (chosen at checkout). It takes place in the Rauni treatment sauna. The price does not include access to the smoke sauna or the hot tubs – a sauna session is booked separately. You may take part naked, partly or fully in a swimsuit.",
-    "cta": "Book a time →"
+    "cta": "Book →"
    }
   },
   "saunotus": {
@@ -35,17 +35,17 @@
    "exact": true,
    "fi": {
     "kicker": "Elämyksellinen",
-    "title": "saunotus",
+    "title": "Saunotus",
     "text": "Saunotus on kahden tunnin kokonaisvaltainen saunaelämys, jossa löyly, vihdat, yrtit ja muut luonnonantimet johdattavat syvään rentoutumisen tilaan. Jokainen saunotus rakentuu asiakkaan ja hetken mukaan.",
     "more": "Saunotukseen kuuluvat vihdat, kasvit, yrtit, suola ja hunaja, halutessa turvehoito; loitsuja, vihtomista, löylyn, veden ja ilman tekniikoita, kellutus viileässä altaassa ja yrttitee. Saunottaja mukauttaa voimakkuuden asiakkaan mukaan. Toteutetaan hoitosauna Raunissa. Hoidon hintaan ei sisälly pääsyä savusaunaan tai paljuihin.",
-    "cta": "Varaa aika →"
+    "cta": "Varaa →"
    },
    "en": {
     "kicker": "Immersive",
-    "title": "saunotus (sauna ritual)",
+    "title": "Guided Sauna Session (Saunotus)",
     "text": "Saunotus is a two-hour, all-encompassing sauna experience where steam, whisks, herbs and other gifts of nature lead you into deep relaxation. Every session is shaped by the guest and the moment.",
     "more": "A saunotus includes whisks, plants, herbs, salt and honey and, if you wish, a peat treatment; incantations, whisking, techniques with steam, water and air, a float in the cool pool and herbal tea. The sauna healer adapts the intensity to you. It takes place in the Rauni treatment sauna. The price does not include access to the smoke sauna or the hot tubs.",
-    "cta": "Book a time →"
+    "cta": "Book →"
    }
   },
   "syvasaunotus": {
@@ -59,17 +59,17 @@
    "exact": true,
    "fi": {
     "kicker": "Ikimuistoinen",
-    "title": "syväsaunotus",
+    "title": "Syväsaunotus",
     "text": "Syväsaunotus on pitkä ja syvästi hoitava saunotusrituaali, jossa saunottaja voi johdattaa asiakkaan yhä syvempään rentoutumisen ja läsnäolon tilaan. Pitkä kesto mahdollistaa rauhallisen etenemisen ja kokonaisvaltaisen saunaelämyksen.",
     "more": "Kolmen tunnin saunotusrituaali useassa vaiheessa: vihdat, kasvit, yrtit, suola, hunaja ja halutessa turve; loitsuja, rytmistä vihtomista, lämpimän ja viileän vaihtelua ja kellutus viileässä altaassa. Sisältää yrttiteetä ja pientä purtavaa. Toteutetaan hoitosauna Raunissa. Hoidon hintaan ei sisälly pääsyä savusaunaan tai paljuihin.",
-    "cta": "Varaa aika →"
+    "cta": "Varaa →"
    },
    "en": {
     "kicker": "Unforgettable",
-    "title": "deep saunotus",
+    "title": "Deep Guided Sauna Session (Syväsaunotus)",
     "text": "The deep saunotus is a long, deeply healing sauna ritual in which the sauna healer can lead you ever deeper into relaxation and presence. The long duration allows a calm pace and a complete sauna experience.",
     "more": "A three-hour sauna ritual in several stages: whisks, plants, herbs, salt, honey and, if you wish, peat; incantations, rhythmic whisking, alternating warm and cool, and a float in the cool pool. Includes herbal tea and a light snack. It takes place in the Rauni treatment sauna. The price does not include access to the smoke sauna or the hot tubs.",
-    "cta": "Book a time →"
+    "cta": "Book →"
    }
   },
   "ryhma": {
@@ -83,17 +83,17 @@
    "exact": true,
    "fi": {
     "kicker": "Ryhmälle",
-    "title": "perinnesaunotus ryhmälle",
+    "title": "Perinnesaunotus ryhmälle",
     "text": "Perinnesaunottaja johdattaa ryhmän metsän ja saunan parantavaan maailmaan. Sisältö vaihtelee henkilömäärän mukaan ja voidaan räätälöidä – kerro toiveet varauksen lisätiedoissa.",
     "more": "Hinta ei sisällä pääsyä savusaunaan tai paljuihin (ostettavissa erikseen). Toteutetaan hoitosauna Raunissa.",
-    "cta": "Varaa aika →"
+    "cta": "Varaa →"
    },
    "en": {
     "kicker": "For groups",
-    "title": "traditional sauna ritual for a group",
+    "title": "Traditional Sauna Session for Groups",
     "text": "A traditional sauna healer leads the group into the healing world of the forest and the sauna. The content varies with the number of guests and can be tailored – tell us your wishes in the booking notes.",
     "more": "The price does not include access to the smoke sauna or the hot tubs (available separately). It takes place in the Rauni treatment sauna.",
-    "cta": "Book a time →"
+    "cta": "Book →"
    },
    "over": {
     "persons": {
@@ -113,14 +113,14 @@
    "exact": true,
    "fi": {
     "kicker": "Satunnainen",
-    "title": "saunahoito opiskelijatyönä",
+    "title": "Saunahoito opiskelijatyönä",
     "text": "Saunottajakoulutuksen opiskelijoiden tekemiä saunahoitoja tarjotaan vain muutaman kerran vuodessa koulutusten yhteydessä, erikseen ilmoitettuina päivinä – ei säännöllisesti varattavissa. Hoitoa ei voi valita, vaan se määräytyy koulutuksen teeman mukaan.",
     "more": "Hoitajina ovat Terve Löyly -saunottajakoulutuksen opiskelijat saunottajien opastuksessa. Hoidon hintaan ei kuulu pääsy savusaunaan tai paljuihin.",
     "cta": "Katso ajankohdat →"
    },
    "en": {
     "kicker": "Occasional",
-    "title": "sauna treatment by students",
+    "title": "Sauna Treatment by Students",
     "text": "Sauna treatments given by sauna healer trainees are offered only a few times a year in connection with the trainings, on separately announced days – not bookable regularly. The treatment cannot be chosen; it depends on the theme of the training.",
     "more": "The treatments are given by students of the Terve Löyly sauna healer training under the guidance of sauna healers. The price does not include access to the smoke sauna or the hot tubs.",
     "cta": "See dates →"
@@ -137,13 +137,13 @@
    "exact": true,
    "fi": {
     "kicker": "Lisäpalvelu yleiselle vuorolle",
-    "title": "saunotusrituaali",
+    "title": "Saunotusrituaali",
     "text": "Lyhyt saunotusrituaali hoitosauna Raunissa (enintään kuusi henkeä kerrallaan): löylyntervehdys, kevyttä lämmittelyvihdontaa ja vuodenkierron mukainen minihoito. Voi osallistua uimapuvussa tai alasti.",
     "cta": "Varaa →"
    },
    "en": {
     "kicker": "Add-on for a public session",
-    "title": "sauna ritual (saunotusrituaali)",
+    "title": "Guided Sauna Ritual (Saunotusrituaali)",
     "text": "A short sauna ritual in the Rauni treatment sauna (up to six guests at a time): a löyly greeting, light warm-up whisking and a mini treatment that follows the turn of the year. You may take part in a swimsuit or naked.",
     "cta": "Book →"
    }
@@ -169,15 +169,15 @@
    },
    "fi": {
     "kicker": "Sisältää savusaunan!",
-    "title": "avoin saunotusrituaali",
+    "title": "Saunarituaali ja savusaunavuoro (la & su)",
     "text": "Astu syvälle itämerensuomalaiseen saunotusperinteeseen ja koe vuodenaikojen mukana elävä rituaali. Sisältää pääsyn myös savusaunaan ja paljuihin.",
-    "cta": "Varaa aika →"
+    "cta": "Varaa →"
    },
    "en": {
     "kicker": "Smoke sauna included!",
-    "title": "open sauna ritual",
+    "title": "Sauna Ritual and Smoke Sauna Session (Sat & Sun)",
     "text": "Step deep into the Baltic-Finnic sauna tradition and experience a ritual that lives with the seasons. Includes access to the smoke sauna and the hot tubs.",
-    "cta": "Book a time →"
+    "cta": "Book →"
    }
   },
   "turvetorstai": {
@@ -196,15 +196,15 @@
    },
    "fi": {
     "kicker": "Sisältää savusaunan!",
-    "title": "turvetorstai",
+    "title": "Turvetorstai (to)",
     "text": "Turvetorstaina saunottaja johdattaa illan pehmeään löylyntervehdykseen ja lämmittelyyn vihdoilla, jonka jälkeen levitetään puhdistava luonnonturve iholle.",
-    "cta": "Varaa aika →"
+    "cta": "Varaa →"
    },
    "en": {
     "kicker": "Smoke sauna included!",
-    "title": "Peat Thursday",
+    "title": "Peat Thursday (Turvetorstai, Thu)",
     "text": "On Peat Thursday the sauna healer leads the evening into a soft löyly greeting and warm-up with whisks, after which cleansing natural peat is spread on the skin.",
-    "cta": "Book a time →"
+    "cta": "Book →"
    }
   },
   "perinnesaunotusilta": {
@@ -224,15 +224,15 @@
    },
    "fi": {
     "kicker": "Koe esivanhempien sauna",
-    "title": "perinnesaunotusillat",
+    "title": "Perinnesaunotusilta",
     "text": "Perinnesaunotusilloissa syvennytään itämerensuomalaiseen saunaperinteeseen savusaunan lempeissä löylyissä. Illan teema vaihtuu vuodenkierron mukaisesti.",
-    "cta": "Varaa aika →"
+    "cta": "Varaa →"
    },
    "en": {
     "kicker": "Experience the sauna of the ancestors",
-    "title": "traditional sauna evenings",
+    "title": "Traditional Sauna Evening (Perinnesaunotusilta)",
     "text": "In the traditional sauna evenings we delve into the Baltic-Finnic sauna tradition in the gentle steam of the smoke sauna. The theme of the evening changes with the turn of the year.",
-    "cta": "Book a time →"
+    "cta": "Book →"
    }
   },
   "morsiussauna": {
@@ -250,17 +250,17 @@
    },
    "fi": {
     "kicker": "Tärkeisiin hetkiin!",
-    "title": "morsiussauna",
+    "title": "Morsiussauna",
     "text": "Perinnesaunan morsiussauna tarjoaa morsiamelle mahdollisuuden hiljentyä ja valmistautua uuteen elämänvaiheeseen. Vanhan saunaperinteen hengessä jaettu löylyhetki kulkee mukana vielä pitkään juhlapäivän jälkeen.",
     "more": "Ohjattu saunaseremonia: opastus morsiussaunaperinteeseen, seremoniavihdonta morsiamelle, ruusukuorinta, yrttilöylyt, lemmenloitsuja ja morsiustaikoja toiveiden mukaan. Seremonia kestää noin tunnin, jonka jälkeen voi jäädä viettämään iltaa omalla porukalla. Morsiussaunan tekee aina naispuolinen saunottaja.",
-    "cta": "Varaa aika →"
+    "cta": "Varaa →"
    },
    "en": {
     "kicker": "For important moments!",
-    "title": "bridal sauna",
+    "title": "Bridal Sauna (Morsiussauna)",
     "text": "The bridal sauna of the heritage sauna gives the bride a chance to quiet down and prepare for a new stage of life. A shared moment in the steam, in the spirit of the old sauna tradition, stays with you long after the celebration.",
     "more": "A guided sauna ceremony: an introduction to the bridal sauna tradition, ceremonial whisking for the bride, a rose scrub, herbal steam, love charms and bridal magic according to wishes. The ceremony lasts about an hour, after which you can stay on and spend the evening with your own group. The bridal sauna is always performed by a female sauna healer.",
-    "cta": "Book a time →"
+    "cta": "Book →"
    }
   },
   "turvesauna": {
@@ -272,17 +272,17 @@
    ],
    "fi": {
     "kicker": "Sisältää savusaunan!",
-    "title": "turvesauna",
+    "title": "Turvesauna",
     "text": "Turve on äiti maan lahja, jonka lämmin pehmeys auttaa kehoa rauhoittumaan ja syvärentoutumaan. Tule kokemaan turpeen hoitava voima saunottajan ohjaamassa turverituaalissa.",
     "more": "Turvesaunaseremonia ryhmälle: ohjattu ensilöylyseremonia, saunottajan ohjaama kokovartaloturvehoito sekä löylyn luontia ja lempeää ilmavihdontaa. Seremonia kestää noin tunnin; varaus 2–3 h. Seremonian jälkeen voi nauttia maasavusaunan löylyistä sekä kylmä- ja lämminpaljuista.",
-    "cta": "Varaa aika →"
+    "cta": "Varaa →"
    },
    "en": {
     "kicker": "Smoke sauna included!",
-    "title": "peat sauna",
+    "title": "Peat Sauna (Turvesauna)",
     "text": "Peat is a gift of mother earth whose warm softness helps the body calm down and relax deeply. Come and experience the healing power of peat in a peat ritual led by a sauna healer.",
     "more": "A peat sauna ceremony for a group: a guided first-löyly ceremony, a full-body peat treatment led by the sauna healer, löyly making and gentle air whisking. The ceremony lasts about an hour; the booking is 2–3 h. After the ceremony you can enjoy the steam of the smoke sauna and the cold and warm hot tubs.",
-    "cta": "Book a time →"
+    "cta": "Book →"
    },
    "over": {
     "persons": {
@@ -300,17 +300,17 @@
    ],
    "fi": {
     "kicker": "Koe esivanhempien sauna",
-    "title": "synttärisauna",
+    "title": "Synttärisauna",
     "text": "Syntymäpäivä on hetki pysähtyä kuljetun polun äärelle ja suunnata katse kohti uutta elämänvaihetta. Saunotus tasapainottaa ja harmonisoi oloa, antaen voimaa tulevaan vuoteen.",
     "more": "Sisältää ohjatun saunaseremonian, toiveiden mukaan vihdontaa tai minihoitoja sekä löylyn luontia ja lempeää ilmavihdontaa. Seremonia kestää noin tunnin; varaus 2–3 h. Seremonian jälkeen voi nauttia maasavusaunan löylyistä sekä kylmä- ja lämminpaljuista.",
-    "cta": "Varaa aika →"
+    "cta": "Varaa →"
    },
    "en": {
     "kicker": "Experience the sauna of the ancestors",
-    "title": "birthday sauna",
+    "title": "Birthday Sauna (Synttärisauna)",
     "text": "A birthday is a moment to pause at the path you have walked and look towards a new stage of life. The saunotus balances and harmonises, giving strength for the coming year.",
     "more": "Includes a guided sauna ceremony, whisking or mini treatments as wished, and löyly making with gentle air whisking. The ceremony lasts about an hour; the booking is 2–3 h. After the ceremony you can enjoy the steam of the smoke sauna and the cold and warm hot tubs.",
-    "cta": "Book a time →"
+    "cta": "Book →"
    },
    "over": {
     "persons": {
@@ -341,16 +341,16 @@
     }
    },
    "fi": {
-    "kicker": "Sekavuoro",
-    "title": "Yleinen vuoro (to, la–su)",
+    "kicker": "Kaikille",
+    "title": "Yleinen vuoro (to, la-su)",
     "text": "Sekavuoro, johon kaikki ovat tervetulleita. Sisältää pääsyn sauna-alueelle, kylmä- ja lämminvesialtaisiin sekä laavulle. Viikonloppuisin (la ja su) yleinen vuoro on klo 14–19 ja saunomisaika kaksi tuntia; paikka on aina varattava etukäteen ja saunotaan uima-asussa. Torstaisin yleinen vuoro on klo 17–19.",
-    "cta": "Varaa vuorosi →"
+    "cta": "Varaa →"
    },
    "en": {
-    "kicker": "Mixed session",
-    "title": "Public session (Thu, Sat–Sun)",
+    "kicker": "For everyone",
+    "title": "Public Sauna Session (Thu, Sat–Sun)",
     "text": "A mixed session where everyone is welcome. Includes access to the sauna area, the cold and warm pools and the lean-to. At weekends (Sat and Sun) the public session runs 2–7 pm with a two-hour sauna time; a place must always be booked in advance and swimsuits are worn. On Thursdays the public session is 5–7 pm.",
-    "cta": "Book your session →"
+    "cta": "Book →"
    }
   },
   "miehet": {
@@ -370,15 +370,15 @@
    },
    "fi": {
     "kicker": "Maanantaisin",
-    "title": "Miesten sauna",
+    "title": "Miesten sauna (ma)",
     "text": "Maanantaisin miesten vuoro klo 16–19. Voit saapua oman aikataulusi mukaan klo 16 jälkeen. Sisältää pääsyn sauna-alueelle, kylmä- ja lämminvesialtaisiin sekä laavun käytön; makkaroita voi paistaa. Uima-asu on vapaaehtoinen.",
-    "cta": "Varaa vuorosi →"
+    "cta": "Varaa →"
    },
    "en": {
     "kicker": "Mondays",
-    "title": "Men's sauna",
+    "title": "Men's Sauna (Mon)",
     "text": "The men's session is on Mondays 4–7 pm. You can arrive at your own pace after 4 pm. Includes access to the sauna area, the cold and warm pools and the lean-to, where you can grill sausages. A swimsuit is optional.",
-    "cta": "Book your session →"
+    "cta": "Book →"
    }
   },
   "naiset": {
@@ -398,15 +398,15 @@
    },
    "fi": {
     "kicker": "Tiistaisin",
-    "title": "Naisten sauna",
+    "title": "Naisten sauna (ti)",
     "text": "Tiistait on pyhitetty naisille: naisten vuoro klo 16–19. Sisältää pääsyn sauna-alueelle, kylmä- ja lämminvesialtaisiin sekä laavun ja hirsimökin käytön. Uima-asu on vapaaehtoinen. Jos toivot naispuolista saunottajaa hoitoon, suositellaan varaamaan hoito tiistain naisten vuoron yhteyteen.",
-    "cta": "Varaa vuorosi →"
+    "cta": "Varaa →"
    },
    "en": {
     "kicker": "Tuesdays",
-    "title": "Women's sauna",
+    "title": "Women's Sauna (Tue)",
     "text": "Tuesdays are devoted to women: the women's session is 4–7 pm. Includes access to the sauna area, the cold and warm pools and the use of the lean-to and the log cabin. A swimsuit is optional. If you would like a female sauna healer for a treatment, we recommend booking it alongside the Tuesday women's session.",
-    "cta": "Book your session →"
+    "cta": "Book →"
    }
   },
   "hiljainen": {
@@ -426,15 +426,15 @@
    },
    "fi": {
     "kicker": "Keskiviikkoisin",
-    "title": "Hiljainen sauna",
+    "title": "Hiljainen sauna (ke)",
     "text": "Keskiviikkoisin hiljainen sekavuoro klo 16–19: puhelimet ja keskustelut jäävät saunan ulkopuolelle, kuulumisia voi vaihtaa laavulla tai terassilla. Voit saapua klo 16 jälkeen oman aikataulusi mukaan. Uima-asu on vapaaehtoinen.",
-    "cta": "Varaa vuorosi →"
+    "cta": "Varaa →"
    },
    "en": {
     "kicker": "Wednesdays",
-    "title": "Silent sauna",
+    "title": "Silent Sauna (Wed)",
     "text": "On Wednesdays a silent mixed session, 4–7 pm: phones and conversation stay outside the sauna, and you can catch up on the lean-to or the terrace. You can arrive after 4 pm at your own pace. A swimsuit is optional.",
-    "cta": "Book your session →"
+    "cta": "Book →"
    }
   },
   "oma-vuoro": {
@@ -454,13 +454,13 @@
     "kicker": "Yksityinen",
     "title": "Oma savusaunavuoro",
     "text": "Koko Sipoonjoen Perinnesaunan miljöö omaan käyttöön (esim. ilta ystävien kanssa, synttärit, polttarit). Sisältää savusaunan, lämmin- ja kylmävesialtaat sekä laavun ja hirsimökin vapaan käytön. Tilat voi vuokrata ennen yleisiä vuoroja tai koko päiväksi. Hinnat ovat voimassa vain yksityishenkilöille; yrityksille omat tuotteet.",
-    "cta": "Varaa vuoro →"
+    "cta": "Varaa →"
    },
    "en": {
     "kicker": "Private",
-    "title": "Your own smoke sauna session",
+    "title": "Private Smoke Sauna Session",
     "text": "The whole setting of the heritage sauna for your own use (e.g. an evening with friends, birthdays, bachelor parties). Includes the smoke sauna, the warm and cold pools and free use of the lean-to and the log cabin. The facilities can be rented before the public sessions or for the whole day. Prices apply to private individuals only; companies have their own products.",
-    "cta": "Book a session →"
+    "cta": "Book →"
    }
   },
   "jalkiloylyt": {
@@ -485,13 +485,13 @@
     "kicker": "Yksityinen",
     "title": "Savusaunan jälkilöylyt",
     "text": "Yleisten vuorojen jälkeen viipyilevät ja pehmeät jälkilöylyt omalle porukalle klo 19 alkaen: klo 21 saakka viikolla ja klo 22 saakka viikonloppuisin. Sisältää savusaunan, lämmin- ja kylmävesialtaat sekä laavun vapaan käytön. Jälkilöylyt huomioidaan lämmityksessä.",
-    "cta": "Varaa jälkilöylyt →"
+    "cta": "Varaa →"
    },
    "en": {
     "kicker": "Private",
-    "title": "After-session smoke sauna",
+    "title": "After Session Sauna (jälkilöylyt) in the Smoke Sauna",
     "text": "After the public sessions: lingering, soft steam for your own group from 7 pm – until 9 pm on weekdays and until 10 pm at weekends. Includes free use of the smoke sauna, the warm and cold pools and the lean-to. The after-session is taken into account when heating the sauna.",
-    "cta": "Book an after-session →"
+    "cta": "Book →"
    }
   }
  },
@@ -504,13 +504,13 @@
    ],
    "fi": {
     "kicker": "Avoin lahjakortti",
-    "title": "avoin lahjakortti",
+    "title": "Avoin lahjakortti",
     "text": "Arvolahjakortti, jonka arvon voit valita vapaasti väliltä 29–500 €. Käy kaikkiin Sipoonjoen Perinnesaunan palveluihin, ja sillä voi maksaa myös osan arvokkaammasta elämyksestä. Voimassa kuusi kuukautta ostopäivästä; voidaan toimittaa suoraan vastaanottajalle.",
     "cta": "Osta lahjakortti →"
    },
    "en": {
     "kicker": "Open gift card",
-    "title": "open gift card",
+    "title": "Open-Value Gift Card",
     "text": "A value gift card whose amount you can choose freely between €29 and €500. Valid for all services at Sipoonjoen Perinnesauna, and it can also pay part of a more valuable experience. Valid for six months from purchase; it can be delivered straight to the recipient.",
     "cta": "Buy a gift card →"
    }
@@ -604,13 +604,13 @@
    "exact": true,
    "fi": {
     "kicker": "Säännölliselle saunojalle",
-    "title": "vuosikortti",
+    "title": "Vuosikortti",
     "text": "Rajattomat yleiset saunavuorot vuoden ajan. Henkilökohtainen, ei siirrettävissä; voimassa yhden vuoden ostopäivästä. Käytettävissä kaikilla yleisillä vuoroilla, ei turvetorstaina tai muissa seremonioissa. Vuoro varataan etukäteen, ja vain yksi varaus voi olla kerrallaan voimassa.",
     "cta": "Osta →"
    },
    "en": {
     "kicker": "For the regular sauna-goer",
-    "title": "annual card",
+    "title": "Annual card",
     "text": "Unlimited public sauna sessions for a year. Personal and non-transferable; valid for one year from the purchase date. Usable at all public sessions, but not on Peat Thursday or at other ceremonies. A session must be booked in advance, and only one booking can be active at a time.",
     "cta": "Buy →"
    }

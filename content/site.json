@@ -191,6 +191,8 @@
    "siteTestNote": "Testiympäristö – ei julkinen julkaisu.",
    "companies": "Yrityksille",
    "footerTag": "Maan sisälle rakennettu savusauna Sipoonjoen rannalla, Sipoonkorven kansallispuiston kupeessa.",
+   "footerOpen": "Avoinna",
+   "mapCredit": "Kartta © OpenStreetMapin tekijät",
    "faqKicker": "Usein kysyttyä",
    "termsTitle": "Ehdot",
    "privacyTitle": "Tietosuoja",
@@ -337,6 +339,8 @@
    "siteTestNote": "Test environment – not a public release.",
    "companies": "For companies",
    "footerTag": "A smoke sauna built into the ground on the banks of the Sipoonjoki river, next to Sipoonkorpi National Park.",
+   "footerOpen": "Open",
+   "mapCredit": "Map © OpenStreetMap contributors",
    "faqKicker": "FAQ",
    "termsTitle": "Terms and conditions",
    "privacyTitle": "Privacy",
@@ -378,32 +382,32 @@
  },
  "sessionLabels": {
   "men": {
-   "fi": "Miestenvuoro",
-   "en": "Men's session"
+   "fi": "Miesten sauna (ma)",
+   "en": "Men's Sauna (Mon)"
   },
   "women": {
-   "fi": "Naistenvuoro",
-   "en": "Women's session"
+   "fi": "Naisten sauna (ti)",
+   "en": "Women's Sauna (Tue)"
   },
   "silent": {
-   "fi": "Hiljainen vuoro",
-   "en": "Silent session"
+   "fi": "Hiljainen sauna (ke)",
+   "en": "Silent Sauna (Wed)"
   },
   "peat": {
-   "fi": "Turvetorstai",
-   "en": "Peat Thursday"
+   "fi": "Turvetorstai (to)",
+   "en": "Peat Thursday (Turvetorstai, Thu)"
   },
   "public": {
-   "fi": "Yleinen vuoro",
-   "en": "Public session"
+   "fi": "Yleinen vuoro (to, la-su)",
+   "en": "Public Sauna Session (Thu, Sat–Sun)"
   },
   "weekend": {
-   "fi": "Yleinen savusauna",
-   "en": "Public smoke sauna"
+   "fi": "Yleinen vuoro (to, la-su)",
+   "en": "Public Sauna Session (Thu, Sat–Sun)"
   },
   "ritual": {
-   "fi": "Saunarituaali-ilta",
-   "en": "Sauna ritual evening"
+   "fi": "Saunarituaali ja savusaunavuoro (la & su)",
+   "en": "Sauna Ritual and Smoke Sauna Session (Sat & Sun)"
   }
  }
 }

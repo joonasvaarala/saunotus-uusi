@@ -261,7 +261,8 @@ function viewList(query) {
       h('p', { class: 'bk-quiet-line', hidden: true, 'data-qp': p.id, 'data-qmark': 'list' }),   // booking_162: täyttyy vain, jos tuotteella on hiljaisen ajan ale
       h('span', { class: 'btn sm' }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) }))))));
   const annual = annualPromo();
-  mount(h('header', { class: 'bk-head' }, h('h2', { text: t.title }), h('p', { class: 'lead', text: t.lead })), modeSwitch('cat'), tabs, cards, annual);
+  // Sivun hero toistaa saman otsikon ja ingressin. Listalla jätetään yksi.
+  mount(modeSwitch('cat'), tabs, cards, annual);
 }
 
 // Vuosikortti (booking_142): myynti näkyy vain, kun palvelin sanoo available (asetus annual_card_sale_enabled, oletus pois);

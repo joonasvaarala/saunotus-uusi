@@ -85,8 +85,10 @@ test('etusivu: Saunatietoa on nauha listauslinkillä, ei artikkelikortteja eikä
   assert.match(fi, /href="\/saunatietoa\/"/);
   assert.match(en, /id="saunatietoa"/);
   assert.match(en, /href="\/en\/sauna-knowledge\/"/);
-  assert.doesNotMatch(fi, /class="section home-art"|hart-list|\.hart\{/);
-  assert.doesNotMatch(en, /class="section home-art"|hart-list|\.hart\{/);
+  assert.match(fi, /class="section home-art"/);
+  assert.match(fi, /hart-list/);
+  assert.match(fi, /miten-saunotaan-oikein/);
+  assert.doesNotMatch(en, /class="section home-art"|hart-list/);
   assert.ok(fi.indexOf('id="arvostelut"') < fi.indexOf('id="saunatietoa"'));
   assert.equal((fi.match(/<h1/g) || []).length, 1);
   setHomeSections({});
@@ -115,16 +117,18 @@ function build(name, env) {
   return { dist, out: r.stdout + r.stderr };
 }
 const rd = (d, p) => readFileSync(join(d, p), 'utf8');
-test('build (fixture, testi): etusivulla Saunatietoa-nauha, ei artikkelikortteja; esikatselusivut noindex, ei sitemapissa', () => {
+test('build (fixture, testi): etusivulla 1–3 artikkelikorttia; esikatselu noindex, ei sitemapissa', () => {
   const b = build('t', { ARTICLES_FIXTURE: '1', SITE_ENV: 'test' });
   assert.match(rd(b.dist, 'index.html'), /id="saunatietoa"/);
-  assert.doesNotMatch(rd(b.dist, 'index.html'), /class="section home-art"/);
+  assert.match(rd(b.dist, 'index.html'), /class="section home-art"/);
+  assert.ok(cards(rd(b.dist, 'index.html')).length >= 1 && cards(rd(b.dist, 'index.html')).length <= 3);
   assert.match(rd(b.dist, 'en/index.html'), /id="saunatietoa"[\s\S]*href="\/en\/sauna-knowledge\/"/);
-  assert.doesNotMatch(rd(b.dist, 'en/index.html'), /how-to-sauna/);
+  assert.match(rd(b.dist, 'en/index.html'), /how-to-sauna/);
   for (const p of ['esikatselu/etusivu-artikkelit/index.html', 'en/preview/home-articles/index.html']) {
     const h = rd(b.dist, p);
-    assert.equal(cards(h).length, 0); assert.match(h, /id="saunatietoa"/); assert.match(h, /<meta name="robots" content="noindex,nofollow">/); assert.match(h, /class="prev-note"/);
-    assert.doesNotMatch(h, /noindex-testi|vanhempi-artikkeli|older-article|class="section home-art"/);
+    assert.equal(cards(h).length, 3); assert.match(h, /id="saunatietoa"/); assert.match(h, /<meta name="robots" content="noindex,nofollow">/); assert.match(h, /class="prev-note"/);
+    assert.match(h, /class="section home-art"/);
+    assert.doesNotMatch(h, /noindex-testi|vanhempi-artikkeli|older-article/);
   }
   assert.doesNotMatch(rd(b.dist, 'sitemap.xml'), /esikatselu|preview/);
 });
@@ -134,17 +138,16 @@ test('build (tuotanto): ei esikatselusivuja; tyhjä lista piilottaa nauhan, tuon
   assert.doesNotMatch(rd(e.dist, 'en/index.html'), /home-art|sauna-knowledge/);
   assert.ok(!existsSync(join(e.dist, 'esikatselu')) && !existsSync(join(e.dist, 'en/preview')));
   const f = build('pf', { BOOKING_SUPABASE_URL: 'http://localhost:9', BOOKING_ANON_KEY: 'sb_publishable_x' });
-  // RPC ei vastaa eikä välimuistia ole: tuontitiedoston kuusi artikkelia lasketaan julkaistuiksi.
-  // Etusivulle tulee Saunatietoa-nauha (publishedArticleCount > 0), ei vanhaa korttiosiota.
+  // RPC ei vastaa eikä välimuistia ole: tuontitiedoston artikkelit lasketaan julkaistuiksi ja nousevat korteiksi.
   assert.match(rd(f.dist, 'index.html'), /id="saunatietoa"/);
   assert.match(rd(f.dist, 'index.html'), /href="\/saunatietoa\/"/);
-  assert.doesNotMatch(rd(f.dist, 'index.html'), /class="section home-art"/);
+  assert.match(rd(f.dist, 'index.html'), /class="section home-art"/);
   assert.doesNotMatch(rd(f.dist, 'en/index.html'), /id="saunatietoa"/);
   assert.match(f.out, /pending-import-blogisarja/);
   assert.match(f.out, /etusivun osio FI näkyy/);
   const p = build('pp', { ARTICLES_FIXTURE: '1' });
   assert.match(rd(p.dist, 'index.html'), /id="saunatietoa"/);
-  assert.doesNotMatch(rd(p.dist, 'index.html'), /class="section home-art"/);
+  assert.match(rd(p.dist, 'index.html'), /class="section home-art"/);
   assert.ok(!existsSync(join(p.dist, 'esikatselu')));
 });
 
@@ -153,6 +156,6 @@ const chk = (dist) => checkDist({ dist, siteUrl: 'https://example.test', isTest:
 const mut = (name, fromName, fn) => { const d = join(work, name); cpSync(join(work, fromName), d, { recursive: true }); const f = join(d, 'index.html'); writeFileSync(f, fn(readFileSync(f, 'utf8'))); return d; };
 test('check-articles: etusivun nauha läpi; havaitsee puuttuvan listauslinkin ja korttiosion tyhjässä tilassa', () => {
   assert.deepEqual(chk(join(work, 't')).errors, []);
-  assert.ok(chk(mut('m1', 't', (h) => h.replace('id="saunatietoa"', 'id="ei-nauhaa"'))).errors.some((x) => /Saunatietoa-nauhasta puuttuu linkki/.test(x)));
+  assert.ok(chk(mut('m1', 't', (h) => h.replace('class="btn light sm more-all" href="/saunatietoa/"', 'class="btn light sm more-all" href="/pois/"'))).errors.some((x) => /artikkeliosiosta puuttuu linkki/.test(x)));
   assert.ok(chk(mut('m3', 'pe', (h) => h.replace('<main id="main">', '<main id="main"><section class="section home-art"><div class="wrap"></div></section>'))).errors.some((x) => /näkyy vaikka artikkeleita ei ole/.test(x)));
 });
