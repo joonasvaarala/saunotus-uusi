@@ -308,6 +308,14 @@ a.bk-sd:hover{filter:brightness(.97)}
 .gc-unit{margin:0;color:var(--muted);font-size:14px}
 .gc-persons{display:flex;align-items:center;gap:10px;margin:2px 0 0}
 .gc-persons .lbl{font-size:14px;color:var(--muted)}
+/* Korttiruudukko (min. 230 px) on kapeampi kuin otsikko + askellin. Vähintään 768 px rivi rivityy ja plus-painike jää kortin sisään. Alle 768 px yksi rivi, kuten ennen. */
+@media(min-width:768px){
+  .gc-pkgs>.gc-tile{min-width:0}
+  .gc-persons{flex-wrap:wrap;row-gap:8px;min-width:0;max-width:100%}
+  .gc-persons .bk-stepper{max-width:100%;min-width:0}
+  .gc-persons .bk-step{flex:none}
+  .gc-persons .bk-stepper input{width:auto;flex:0 1 64px;min-width:44px;max-width:64px}
+}
 .gc-lwho{margin:2px 0 0;color:var(--muted);font-size:14px}
 .hero.page .bk-gift-nudge{margin:8px auto 0;max-width:28em;font-size:15px;line-height:1.4}
 .hero.page .bk-gift-nudge a{color:#f3ece2;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;opacity:.78}
