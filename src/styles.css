@@ -210,6 +210,9 @@ details.more p{margin:8px 0 0}
 /* events */
 .events{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px;list-style:none;margin:0;padding:0}
 .ev .dates{font:600 12px/1.5 var(--label);color:var(--gold);letter-spacing:.04em;margin:0 0 .6em}
+.card.ev.is-full .im img{filter:grayscale(.72) saturate(.28);opacity:.72}
+.card.ev .pill.full{background:#7b2d2d;letter-spacing:.08em}
+.card.ev.is-full .cta{color:var(--muted)}
 /* company */
 .company{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:36px}
 .company .im{border-radius:10px;overflow:hidden;box-shadow:0 14px 30px rgba(0,0,0,.2)}

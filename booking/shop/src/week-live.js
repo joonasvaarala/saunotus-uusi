@@ -1,6 +1,8 @@
 // Viikko-ohjelman ajonaikainen täydennys (etusivu + saunavuorot).
 // Lähteet ovat samat kuin kaupalla: public_availability_all, public_events ja public_catalog.
-// Päiviä ei näytetä. Täysi vuoro ja täysi tapahtuma piilotetaan. Hakuvirheessä kutsua ei tehdä, ja ohjelma jää ennalleen.
+// Päiviä ei näytetä. Täysi yleinen vuoro piilotetaan. Tuleva täysi tapahtuma jää tapahtumakortille
+// (booking_210: himmennetty, Täynnä, jonotus). Viikkoriville täyttä tapahtumaa ei lisätä.
+// Hakuvirheessä kutsua ei tehdä, ja ohjelma jää ennalleen.
 import { addDaysIso, weekdayIso } from './quiet-offers-logic.js';
 import { dayLabel } from './event-date.js';
 
@@ -77,7 +79,8 @@ export function asEventList(raw) {
 
 /**
  * Julkiset tapahtumat, joilla on vapaa paikka näkyvällä viikolla (tänään + 6).
- * status full ja closed jäävät pois. Menneet ja ikkunan ulkopuoliset jäävät pois.
+ * status full ja closed jäävät pois viikkoriviltä (täysi yleinen vuoro piilotetaan erikseen).
+ * Menneet ja ikkunan ulkopuoliset jäävät pois. Täysi tapahtuma näkyy tapahtumakortilla, ei tässä.
  */
 export function weekEvents(events, { today, now } = {}) {
   if (!/^\d{4}-\d\d-\d\d$/.test(today || '') || !Number.isFinite(+now)) return [];
@@ -120,15 +123,30 @@ export function cardTime(o, lang = 'fi') {
   return lang === 'en' ? t : `klo ${t.replace(/:/g, '.')}`;
 }
 
-/** Kaikki tulevat tapahtumat, joilla on vapaa paikka. full ja closed pois. Sama sääntö kuin selectShopEvents. */
+/** Tulevat tapahtumat, joilla on vapaa tai täysi kerta. closed ja menneet pois. Järjestys ensimmäisen kerran mukaan. */
 export function freeShopEvents(events, now = Date.now()) {
   if (!Number.isFinite(+now)) return [];
   return asEventList(events).filter((ev) => ev && ev.category === 'event' && typeof ev.slug === 'string' && ev.slug && ev.name)
     .map((ev) => ({ ...ev, occurrences: (Array.isArray(ev.occurrences) ? ev.occurrences : [])
-      .filter((o) => o && o.status === 'available' && o.starts_at && Date.parse(o.ends_at || o.starts_at) > +now)
+      .filter((o) => o && (o.status === 'available' || o.status === 'full') && o.starts_at && Date.parse(o.ends_at || o.starts_at) > +now)
       .sort((a, b) => String(a.starts_at).localeCompare(String(b.starts_at))) }))
     .filter((ev) => ev.occurrences.length)
-    .sort((a, b) => String(a.occurrences[0].starts_at).localeCompare(String(b.occurrences[0].starts_at)));
+    .sort((a, b) => String(a.occurrences[0].starts_at).localeCompare(String(b.occurrences[0].starts_at)) || String(a.slug).localeCompare(String(b.slug)));
+}
+
+/** Kortti on täynnä, kun jokainen tuleva kerta on full (ei yhtään available). */
+export function eventIsFull(ev) {
+  const occ = ev?.occurrences;
+  return Array.isArray(occ) && occ.length > 0 && occ.every((o) => o && o.status === 'full');
+}
+
+/** Yhden täyden kerran jonopolku. Useampi täysi kerta → tyhjä (tuotesivu, jossa jokainen kerta erikseen). */
+export function eventWaitlistPath(ev) {
+  if (!eventIsFull(ev) || ev.occurrences.length !== 1) return '';
+  const o = ev.occurrences[0];
+  const date = ymdHel(o.starts_at);
+  if (!date || !/^\d+$/.test(String(o.rule_id ?? '')) || !/^\d+$/.test(String(ev.product_id ?? ''))) return '';
+  return `/jono/${o.rule_id}/${date}/${ev.product_id}`;
 }
 
 /** Nimi katalogista, jos tuote on siinä; muuten public_events-nimi. */
