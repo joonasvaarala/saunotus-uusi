@@ -320,6 +320,10 @@ jobs:
       - run: node --test booking/tests/kortit-jarjestys.test.mjs
       # UX-katsaus 28.10.2026: maksutapamerkit, peruttu varaus, yhteenvetopainike, tuotekorttilinkki, lahjakorttiohje, peruutusehto, vuorolistan järjestys
       - run: node --test booking/tests/ux-kauppa-1028.test.mjs
+      # booking_192: hallinnan alennuskoodi, lahjakortti, ylibuukkaus ja aikataulun ulkopuolinen varaus.
+      # Tekstit content/site-texts.pending-import-89.json. SQL: booking/supabase/tests/hallinta/t192_admin_overbook_gift.sql
+      # ajetaan paikallisessa PG17:ssä (migraatiot + fixtures/10_test_helpers.sql). Työnkulussa ei ole Postgresia.
+      - run: node --test booking/tests/admin-ylivaraus.test.mjs
       # booking_161: kb.products-kuvausten Johku-linkit → uuden kaupan osoitteet (migraatio + rollback, md5-vartijat). SQL: t161 PG17:ssä.
       - run: node --test booking/tests/kb-johku-linkit-161.test.mjs
       # booking_163: kb.products.booking_url Johku → uuden kaupan tuotesivu (migraatio + rollback, vartijat). SQL: t163 PG17:ssä.

@@ -111,10 +111,15 @@ export const ERR_FI = {
   invalid_calendar: 'Kalenterin tunnus ei kelpaa.',
   closure_calendar: 'Sulkukalenteria ei käytetä varauksille.',
   unknown_resource: 'Tuntematon resurssi.',
+  gift_card_required: 'Lahjakorttimaksu tarvitsee lahjakortin koodin.',
+  gift_card_code_required: 'Anna lahjakortin koodi.',
 };
+const TECHNICAL_GIFT = /admin_redeem_gift_card|public_apply_gift_card/;
 export const errMsg = (e) => {
+  const raw = e?.message || '';
+  if (TECHNICAL_GIFT.test(raw) || TECHNICAL_GIFT.test(e?.code || '')) return ERR_FI.gift_card_required;
   const t = e?.code && ERR_FI[e.code];
-  if (!t) return e?.message || String(e);
+  if (!t) return raw || String(e);
   const perm = e.code === 'forbidden' && /\(([a-z_.]+)\)/.exec(e.message || '');   // "Ei oikeutta tähän toimintoon (bookings.override)"
   return perm ? `${t.replace(/\.$/, '')} (${perm[1]}).` : t;
 };

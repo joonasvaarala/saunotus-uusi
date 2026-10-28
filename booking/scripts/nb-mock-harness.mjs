@@ -23,6 +23,7 @@ export async function startServer(adminDir = join(ROOT, 'booking/admin')) {
     if (p === '/admin/config.js') { res.writeHead(200, { 'content-type': 'text/javascript' }); return res.end(`window.BOOKING_CONFIG=${JSON.stringify({ url: ORIGIN, anonKey: 'anon-test', rest: '/rest/v1', auth: '/auth/v1', functions: '/functions/v1', schema: 'booking' })};`); }
     let file;
     if (p === '/admin/sb.js') file = join(ROOT, 'booking/shared/sb.js');
+    else if (p.startsWith('/shop/')) file = join(ROOT, 'booking/shop', p.slice(6));
     else if (p.startsWith('/admin/')) file = join(adminDir, p.slice(7) || 'index.html');
     else { res.writeHead(p === '/admin' ? 301 : 404, p === '/admin' ? { location: '/admin/' } : {}); return res.end(); }
     try { if ((await stat(file)).isDirectory()) file = join(file, 'index.html'); const buf = await readFile(file); res.writeHead(200, { 'content-type': types[extname(file)] || 'application/octet-stream', 'cache-control': 'no-store' }); res.end(buf); }
@@ -37,8 +38,8 @@ const slot = (id, hh, mm, endH, endM, over = {}) => ({ rule_id: id, product_id: 
   price_mode: 'per_person', unit_price: 18, base_price: 0, included_persons: 0, extra_person_price: 0,
   starts_at: new Date(`${DAY}T${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:00+03:00`).toISOString(), ends_at: new Date(`${DAY}T${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}:00+03:00`).toISOString(), ...over });
 export const SESSIONS = [
-  slot(1, 16, 0, 17, 30), slot(2, 17, 30, 19, 0, { remaining: 0, status: 'full' }),
-  slot(3, 19, 0, 20, 30, { remaining: 5 }),
+  slot(1, 16, 0, 17, 30, { pool_capacity: 16, pool_peak: 4 }), slot(2, 17, 30, 19, 0, { remaining: 0, status: 'full', pool_capacity: 10, pool_peak: 11 }),
+  slot(3, 19, 0, 20, 30, { remaining: 5, pool_capacity: 10, pool_peak: 5 }),
   slot(4, 14, 0, 17, 0, { product_id: 2, label: 'Yksityisvuoro', mode: 'exclusive', remaining: 1, min_persons: 1, max_persons: 10, price_mode: 'base_plus_extra', unit_price: 0, base_price: 150, included_persons: 6, extra_person_price: 15 }),
 ];
 export const ADDONS = [
@@ -75,6 +76,31 @@ export function rpcMock(st, name, a) {
     case 'admin_list_reservations': return [{ reservation_id: 500, order_id: 900, order_no: 15005, status: 'confirmed', order_status: 'confirmed', payment_status: 'unpaid', product_id: 1, product_name: 'Yleinen vuoro', mode: 'shared', starts_at: SESSIONS[0].starts_at, ends_at: SESSIONS[0].ends_at,
       persons: 2, total_gross: 36, customer_id: 11, customer_name: 'Matti Meikäläinen', customer_email: 'matti@example.com', customer_phone: '+358401234567', source_channel: 'admin', created_at: new Date().toISOString(), hold_expires_at: null, notes: null, annual_card_id: null, total_count: 1 }];
     case 'admin_create_payment_link': return { message: 'Maksulinkki tulossa' };
+    case 'public_get_site_texts': return { ok: true, texts: [] };
+    case 'admin_check_gift_card': {
+      const code = String(a.p_code || '').replace(/[^a-z0-9]/gi, '').toUpperCase();
+      if (code === 'TESTCARD0001') return { ok: true, code: 'TEST-CARD-0001', balance: 10, valid_to: '2027-12-31', redeemable: true, status: 'active', source: 'native' };
+      if (code === 'JOHKUTEST001') return { ok: true, code: 'JOHKU-TEST-001', balance: 40, valid_to: '2027-06-01', redeemable: true, status: 'active', source: 'johku' };
+      return { ok: false, code: 'invalid_code', message: 'Koodia ei löydy tai se ei ole käytettävissä' };
+    }
+    case 'admin_preview_discount_code': {
+      const code = String(a.p_code || '').toUpperCase();
+      if (code !== 'KIITOSKAUPPA') return { ok: false, code: 'invalid_code', message: 'Koodia ei löytynyt' };
+      const persons = a.p_persons || 1;
+      const sub = (a.p_price ?? 18 * persons);
+      const discount = Math.round(sub * 0.1 * 100) / 100;
+      return { ok: true, type: 'discount', code, kind: 'percent', value: 10, subtotal: sub, discount, total: sub - discount };
+    }
+    case 'admin_preview_booking_limits': {
+      const s = SESSIONS.find((x) => x.rule_id === a.p_rule_id) || SESSIONS[0];
+      const n = a.p_persons || 1;
+      const over = []; const off = [];
+      if (s.pool_capacity != null && (s.pool_peak || 0) + n > s.pool_capacity) over.push({ code: 'capacity_exceeded', used: (s.pool_peak || 0) + n, capacity: s.pool_capacity });
+      if (s.status === 'unavailable') off.push({ code: 'closure' });
+      if (a.p_start && s.status !== 'off_schedule') off.push({ code: 'outside_hours' });
+      return { ok: true, overbook: over, off_schedule: off, overbooked: over.length > 0, off: off.length > 0 };
+    }
+    case 'admin_change_booking': return { ok: true };
     default: { const e = new Error(`Could not find the function booking.${name}`); e.status = 404; e.code = 'PGRST202'; e.pgrst = true; throw e; }
   }
 }
@@ -86,7 +112,11 @@ export async function newPage(browser, { vp = 390, lang = 'fi', st, onProblem = 
   page.on('console', (m) => { if (['error', 'warning'].includes(m.type()) && !/status of 4\d\d/.test(m.text())) onProblem(`console ${m.type()}: ${m.text()}`); });
   await page.route(`${ORIGIN}/rest/v1/**`, async (route) => {
     const u = new URL(route.request().url()), json = (body, status = 200) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
-    if (route.request().method() !== 'POST') return json(u.pathname.endsWith('/payment_methods') ? [{ code: 'pay_later', label: 'Maksetaan paikan päällä', is_manual: true, active: true }, { code: 'cash', label: 'Käteinen', is_manual: true, active: true }, { code: 'card_terminal', label: 'Korttipääte', is_manual: true, active: true }, { code: 'mobilepay', label: 'MobilePay', is_manual: true, active: true }, { code: 'invoice', label: 'Lasku (yritykset)', is_manual: true, active: true }] : []);
+    if (route.request().method() !== 'POST') {
+      if (u.pathname.endsWith('/payment_methods')) return json([{ code: 'pay_later', label: 'Maksetaan paikan päällä', is_manual: true, active: true }, { code: 'cash', label: 'Käteinen', is_manual: true, active: true }, { code: 'card_terminal', label: 'Korttipääte', is_manual: true, active: true }, { code: 'mobilepay', label: 'MobilePay', is_manual: true, active: true }, { code: 'invoice', label: 'Lasku (yritykset)', is_manual: true, active: true }, { code: 'gift_card', label: 'Lahjakortti', is_manual: false, active: true }]);
+      if (u.pathname.includes('/schedule_rules')) return json([{ id: 9, product_id: 1, label: 'Arki-iltavuoro', mode: 'shared', start_time: '16:00:00', duration_minutes: 90, min_persons: 1, max_persons: 16, weekdays: [1], space_id: 1 }]);
+      return json([]);
+    }
     let a = {}; try { a = JSON.parse(route.request().postData() || '{}'); } catch { /* tyhjä */ }
     try { return json(rpcMock(st, u.pathname.split('/rpc/')[1], a)); } catch (e) { return json(e.pgrst ? { code: 'PGRST202', message: e.message } : { code: 'BK001', details: e.code, message: e.message }, e.status || 400); }
   });

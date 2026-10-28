@@ -10,6 +10,9 @@ import { availabilityPanel, isSlotProduct } from './availability.js';
 import { resName, catLabel } from './legs.js';
 import { loadOptionConfig, configLabel, optionPicker, optErr, optName, ot } from '../options.js';
 import { h, field, toast, run, fmtDay, fmtTime, money, todayHel, helsinkiIso, errMsg, dayStartIso, addDays, fmtDT, revealSection, revealIfHidden } from '../ui.js';
+import { loadBookingTexts, bookingText, noticeText } from '../booking-texts.js';
+import { confirmDialog } from '../confirm.js';
+import { capacityNotice, scheduleNotice } from '../nb-logic.js';
 
 export const BOOKING_TYPES = [['', 'Vuoro'], ['resurssi', 'Resurssivaraus'], ['vanha', 'Vanha varaus']];
 // Varaustyypin valinta (radiogroup; nuolinäppäimet): vuoropohjainen / resurssivaraus / vanha varaus. Vaihto tallentuu URL:iin (#/uusi?tyyppi=…).
@@ -45,7 +48,28 @@ export async function render({ ctx, refs, query, kind }) {
   const price = h('input', { type: 'number', step: '0.01', min: '0', name: 'price', placeholder: 'Tuotteen hinta' });
   const invRef = h('input', { name: 'invref', maxlength: 100 });
   const note = h('textarea', { name: 'note', rows: 2 });
+  await loadBookingTexts(rpc).catch(() => false);
   const method = h('select', { name: 'method' }, refs.methods.filter((m) => m.active).map((m) => h('option', { value: m.code, text: m.label, selected: m.code === 'pay_later' || null })));
+  const discountIn = h('input', { name: 'discount', maxlength: 40, autocomplete: 'off', 'data-testid': 'discount-code', placeholder: bookingText('discount_ph') });
+  const discountStatus = h('p', { class: 'fld-hint', hidden: true, 'data-testid': 'discount-status' });
+  const giftIn = h('input', { name: 'gift', maxlength: 24, autocomplete: 'off', 'data-testid': 'gift-code', placeholder: bookingText('gift_ph') });
+  const giftStatus = h('p', { class: 'fld-hint', hidden: true, 'data-testid': 'gift-status' });
+  const giftWrap = h('div', { hidden: true, 'data-testid': 'gift-card-field', class: 'stack' }, field(bookingText('gift_code'), giftIn), h('button', { type: 'button', class: 'btn sm', 'data-testid': 'gift-check', text: bookingText('gift_check'), onclick: async () => {
+    giftStatus.hidden = false;
+    try { const r = await rpc('admin_check_gift_card', { p_code: giftIn.value }); giftStatus.textContent = r?.ok ? (r.valid_to ? bookingText('gift_ok', { balance: money(r.balance), until: r.valid_to }) : bookingText('gift_ok_open', { balance: money(r.balance) })) : (r?.message || bookingText('gift_need_code')); }
+    catch (e) { giftStatus.textContent = errMsg(e); }
+  } }), giftStatus);
+  method.addEventListener('change', () => { giftWrap.hidden = method.value !== 'gift_card'; });
+  const restSel = h('select', { name: 'remainder', 'data-testid': 'gift-remainder' }, h('option', { value: '', text: bookingText('gift_rest_unpaid') }), ...refs.methods.filter((m) => m.active && m.code !== 'gift_card').map((m) => h('option', { value: m.code, text: m.label })));
+  giftWrap.append(field(bookingText('gift_rest_method'), restSel));
+  const warnBox = h('div', { class: 'nb-warn', role: 'status', hidden: true, 'data-testid': 'booking-warning' });
+  const paintResWarn = () => {
+    const p = st.product; const n = +persons.value || 0;
+    const notices = [capacityNotice({ max_persons: p?.config?.max_persons, mode: 'resource', remaining: null }, n), scheduleNotice(null)].filter(Boolean);
+    warnBox.hidden = !notices.length; warnBox.replaceChildren(...notices.map((x) => h('p', { text: noticeText(x) })));
+    return notices;
+  };
+  persons.addEventListener('input', paintResWarn);
   const paid = h('input', { type: 'checkbox', name: 'paid' });
   // Lisäpalvelut hoito-/saunotus-/tapahtumavarauksessa (resurssivaraus): vain lisäpalvelut, joiden applies_modes sisältää 'resource' (pyyhe).
   // Saunavihta, turvenaamio ja jalkakylpy tarjotaan vain yleisillä vuoroilla ja yksityisvarauksessa (Joonas 17.10.). Tapahtuma (kategoria event) = tila 'event': ei lisäpalveluita (pyyhekään ei).
@@ -115,6 +139,7 @@ export async function render({ ctx, refs, query, kind }) {
     field('Laskun viite / tilausnumero (valinnainen)', invRef),
     field('Sisäinen huomio', note),
     h('div', { class: 'row wrap' }, field('Maksutapa', method), h('label', { class: 'check' }, paid, ' Maksettu jo')),
+    giftWrap, field(bookingText('discount'), discountIn), discountStatus, warnBox,
     canOverride ? ovrBox : null, errBox,
     h('button', { class: 'btn primary', type: 'submit', text: old ? 'Kirjaa vanha varaus' : 'Luo resurssivaraus' }));
   f.addEventListener('submit', (ev) => { ev.preventDefault(); run(f.querySelector('button[type=submit]'), async () => { try {   // virhe vain lomakkeen sisällä (ei lisäksi ilmoitusta, joka peittäisi lomakkeen)
@@ -131,11 +156,24 @@ export async function render({ ctx, refs, query, kind }) {
     if (ocfg?.options.length && ocfg.required && !optPick?.value) { optPick?.focus(); fail(ot('err_option_required')); }
     const useOvr = canOverride && ovr.checked;
     if (useOvr && ovrReason.value.trim().length < 3) { ovrReason.focus(); fail('Ylitys vaatii perustelun (vähintään 3 merkkiä).'); }
+    if (method.value === 'gift_card' && !giftIn.value.trim()) { giftStatus.hidden = false; giftStatus.textContent = bookingText('gift_need_code'); fail(bookingText('gift_need_code')); }
     const addonsSel = picker.node.hidden ? [] : picker.value();
+    let preview = { overbook: [], off_schedule: [] };
+    try { preview = await rpc('admin_preview_booking_limits', { p_kind: 'resource', p_product_id: st.product.id, p_start: start, p_end: endIso, p_persons: +persons.value, p_space_id: spaceSel.value ? +spaceSel.value : null }); } catch { /* paikallinen varoitus riittää */ }
+    const notices = [...(preview.overbook || []).map((x) => ({ kind: 'overbook', ...x })), ...(preview.off_schedule || []).map((x) => ({ kind: 'off', ...x })), ...paintResWarn()];
+    const overN = notices.some((x) => x.kind === 'overbook');
+    const offN = notices.some((x) => x.kind === 'off');
+    if (notices.length) {
+      const yes = await confirmDialog({ title: overN && offN ? bookingText('both_title') : overN ? bookingText('over_title') : bookingText('off_title'), body: [...notices.map(noticeText), overN ? bookingText('over_ask') : null, offN ? bookingText('off_ask') : null], yes: bookingText('confirm_yes'), no: bookingText('confirm_no') });
+      if (!yes) return;
+    }
     const args = { p_product_id: st.product.id, p_start: start, p_persons: +persons.value, ...(st.customer ? { p_customer_id: st.customer.id } : { p_customer: cf.data() }),
       p_end: endIso, p_space_id: spaceSel.value ? +spaceSel.value : null, p_payment_method: method.value, p_paid: paid.checked, p_note: note.value || null,
       p_price: price.value ? +price.value : null, p_override: useOvr, p_override_reason: useOvr ? ovrReason.value.trim() : null,
-      p_addons: addonsSel.length ? addonsSel : null, p_parent_reservation_id: parentSel.value ? +parentSel.value : null, p_invoice_reference: invRef.value.trim() || null };
+      p_addons: addonsSel.length ? addonsSel : null, p_parent_reservation_id: parentSel.value ? +parentSel.value : null, p_invoice_reference: invRef.value.trim() || null,
+      p_discount_code: discountIn.value.trim() || null, p_gift_card_code: method.value === 'gift_card' ? giftIn.value.trim() : null,
+      p_remainder_method: method.value === 'gift_card' ? (restSel.value || null) : null,
+      p_allow_overbook: overN, p_allow_off_schedule: offN };
     if (ocfg?.options.length) args.p_option_code = optPick?.value || null;   // vain tuotteille joilla vaihtoehtoja (ei parametria muille)
     let r;
     r = await rpc(old ? 'admin_create_old_booking' : 'admin_create_resource_booking', args);
