@@ -26,8 +26,11 @@ test('perinne-osio säilyttää home.json about -kentän FI+EN sanasta sanaan', 
 });
 
 test('pending-import-85 vastaa HOME_TEXTS-varatekstejä, FI+EN, ei HTML:ää', () => {
+  const extra = JSON.parse(readFileSync(new URL('../content/site-texts.pending-import-87.json', import.meta.url), 'utf8'));
+  const gift = new Set(['ui.site.home_gift_cta']);
   for (const [key, v] of Object.entries(HOME_TEXTS)) for (const lang of ['fi', 'en']) {
-    const row = pending.find((x) => x.key === key && x.lang === lang);
+    const pool = gift.has(key) ? extra : pending;
+    const row = pool.find((x) => x.key === key && x.lang === lang);
     assert.ok(row, `${key} ${lang}`);
     assert.equal(row.text, v[lang]);
     assert.equal(row.class, 'normal');
@@ -36,7 +39,7 @@ test('pending-import-85 vastaa HOME_TEXTS-varatekstejä, FI+EN, ei HTML:ää', (
     assert.ok(!row.text.includes('<'));
     assert.doesNotMatch(row.text, /johku/i);
   }
-  assert.equal(pending.length, Object.keys(HOME_TEXTS).length * 2);
+  assert.equal(pending.length, (Object.keys(HOME_TEXTS).length - gift.size) * 2);
 });
 
 test('elämyskortit: nimi, hinta ja kesto tuotteesta; lahjakortti #avoin; kuva vain hallinnan kuvasta', () => {
@@ -62,7 +65,9 @@ test('elämyskortit: nimi, hinta ja kesto tuotteesta; lahjakortti #avoin; kuva v
     assert.match(html, /resize=contain/);
     assert.match(html, /sizes="\(min-width: 1100px\) 220px, 280px"/);
     assert.match(html, /width="1600" height="1067" alt="[^"]*" loading="lazy" decoding="async"/);
-    assert.equal(cards.filter((c) => c.startsWith(' noimg')).length, 4);
+    assert.equal(cards.filter((c) => c.startsWith(' noimg')).length, 3);
+    assert.match(html, /j-avoin-lahjakortti-800\.webp/);
+    assert.match(html, lang === 'fi' ? /Osta lahjaksi →/ : /Buy as a gift →/);
     assert.match(html, lang === 'fi' ? /href="\/lahjakortti\/#avoin"/ : /href="\/en\/gift-card\/#avoin"/);
     assert.doesNotMatch(html, /\/tuote\/lahjakortti|johku|target="_blank"/i);
   }
@@ -105,9 +110,17 @@ test('etusivu: järjestys, ei varaa-verkosta-listaa, torstai 16:00, kaksi tapaht
   assert.ok(!ld.openingHoursSpecification.some((x) => x.dayOfWeek === 'Friday'));
   const ev = fi.slice(fi.indexOf('id="tapahtumat"'), fi.indexOf('id="saunatietoa"'));
   const n = (ev.match(/<li class="card ev"/g) || []).length;
-  assert.ok(n >= 1 && n <= 2, `tapahtumia ${n}`);
+  assert.equal(n, 2, `vapaita tapahtumia ${n}`);
+  assert.match(ev, /Naisten jouluinen saunailta/);
+  assert.match(ev, /Saunottajien yhteisöpäivä/);
+  assert.doesNotMatch(ev, /Sipoonjoen Kekri|Perinnesaunotusilta/);
+  assert.match(ev, /data-live-events/);
   assert.match(ev, /Kaikki tapahtumat/);
-  assert.match(fi, /<details><summary>Milloin sauna on rakennettu\?<\/summary>/);
+  assert.match(fi, /<summary>Voiko vuoroon saapua myöhässä\?<\/summary>/);
+  assert.match(fi, /<summary>Voinko perua tai muuttaa varausta\?<\/summary>/);
+  assert.match(fi, /<summary>Mitä pitää ottaa mukaan\?<\/summary>/);
+  assert.match(fi, /<summary>Mikä on jälkilöyly tai yksityisvuoro\?<\/summary>/);
+  assert.doesNotMatch(fi, /Milloin sauna on rakennettu/);
   assert.match(fi, /nav-mob[\s\S]*?<a class="btn gold nav-cta" href="\/varaa\/">Varaa saunaelämys<\/a>/);
   assert.doesNotMatch(fi, /<summary>[^<]*<\/summary>\s*<a class="btn/);
   assert.match(fi, />Koulutukset</);

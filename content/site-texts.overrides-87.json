@@ -1,0 +1,530 @@
+[
+ {
+  "key": "ui.articles.cta_button",
+  "lang": "fi",
+  "old": "Varaa aika",
+  "new": "Varaa"
+ },
+ {
+  "key": "ui.articles.cta_button",
+  "lang": "en",
+  "old": "Book now",
+  "new": "Book"
+ },
+ {
+  "key": "ui.card.treatments.saunahoito.title",
+  "lang": "fi",
+  "old": "saunahoito",
+  "new": "Saunahoito"
+ },
+ {
+  "key": "ui.card.treatments.saunahoito.title",
+  "lang": "en",
+  "old": "sauna treatment",
+  "new": "Sauna Treatment"
+ },
+ {
+  "key": "ui.card.treatments.saunahoito.cta",
+  "lang": "fi",
+  "old": "Varaa aika →",
+  "new": "Varaa →"
+ },
+ {
+  "key": "ui.card.treatments.saunahoito.cta",
+  "lang": "en",
+  "old": "Book a time →",
+  "new": "Book →"
+ },
+ {
+  "key": "ui.card.treatments.saunotus.title",
+  "lang": "fi",
+  "old": "saunotus",
+  "new": "Saunotus"
+ },
+ {
+  "key": "ui.card.treatments.saunotus.title",
+  "lang": "en",
+  "old": "saunotus (sauna ritual)",
+  "new": "Guided Sauna Session (Saunotus)"
+ },
+ {
+  "key": "ui.card.treatments.saunotus.cta",
+  "lang": "fi",
+  "old": "Varaa aika →",
+  "new": "Varaa →"
+ },
+ {
+  "key": "ui.card.treatments.saunotus.cta",
+  "lang": "en",
+  "old": "Book a time →",
+  "new": "Book →"
+ },
+ {
+  "key": "ui.card.treatments.syvasaunotus.title",
+  "lang": "fi",
+  "old": "syväsaunotus",
+  "new": "Syväsaunotus"
+ },
+ {
+  "key": "ui.card.treatments.syvasaunotus.title",
+  "lang": "en",
+  "old": "deep saunotus",
+  "new": "Deep Guided Sauna Session (Syväsaunotus)"
+ },
+ {
+  "key": "ui.card.treatments.syvasaunotus.cta",
+  "lang": "fi",
+  "old": "Varaa aika →",
+  "new": "Varaa →"
+ },
+ {
+  "key": "ui.card.treatments.syvasaunotus.cta",
+  "lang": "en",
+  "old": "Book a time →",
+  "new": "Book →"
+ },
+ {
+  "key": "ui.card.treatments.ryhma.title",
+  "lang": "fi",
+  "old": "perinnesaunotus ryhmälle",
+  "new": "Perinnesaunotus ryhmälle"
+ },
+ {
+  "key": "ui.card.treatments.ryhma.title",
+  "lang": "en",
+  "old": "traditional sauna ritual for a group",
+  "new": "Traditional Sauna Session for Groups"
+ },
+ {
+  "key": "ui.card.treatments.ryhma.cta",
+  "lang": "fi",
+  "old": "Varaa aika →",
+  "new": "Varaa →"
+ },
+ {
+  "key": "ui.card.treatments.ryhma.cta",
+  "lang": "en",
+  "old": "Book a time →",
+  "new": "Book →"
+ },
+ {
+  "key": "ui.card.treatments.opiskelija.title",
+  "lang": "fi",
+  "old": "saunahoito opiskelijatyönä",
+  "new": "Saunahoito opiskelijatyönä"
+ },
+ {
+  "key": "ui.card.treatments.opiskelija.title",
+  "lang": "en",
+  "old": "sauna treatment by students",
+  "new": "Sauna Treatment by Students"
+ },
+ {
+  "key": "ui.card.treatments.rituaali_lisa.title",
+  "lang": "fi",
+  "old": "saunotusrituaali",
+  "new": "Saunotusrituaali"
+ },
+ {
+  "key": "ui.card.treatments.rituaali_lisa.title",
+  "lang": "en",
+  "old": "sauna ritual (saunotusrituaali)",
+  "new": "Guided Sauna Ritual (Saunotusrituaali)"
+ },
+ {
+  "key": "ui.card.treatments.avoin_rituaali.title",
+  "lang": "fi",
+  "old": "avoin saunotusrituaali",
+  "new": "Saunarituaali ja savusaunavuoro (la & su)"
+ },
+ {
+  "key": "ui.card.treatments.avoin_rituaali.title",
+  "lang": "en",
+  "old": "open sauna ritual",
+  "new": "Sauna Ritual and Smoke Sauna Session (Sat & Sun)"
+ },
+ {
+  "key": "ui.card.treatments.avoin_rituaali.cta",
+  "lang": "fi",
+  "old": "Varaa aika →",
+  "new": "Varaa →"
+ },
+ {
+  "key": "ui.card.treatments.avoin_rituaali.cta",
+  "lang": "en",
+  "old": "Book a time →",
+  "new": "Book →"
+ },
+ {
+  "key": "ui.card.treatments.turvetorstai.title",
+  "lang": "fi",
+  "old": "turvetorstai",
+  "new": "Turvetorstai (to)"
+ },
+ {
+  "key": "ui.card.treatments.turvetorstai.title",
+  "lang": "en",
+  "old": "Peat Thursday",
+  "new": "Peat Thursday (Turvetorstai, Thu)"
+ },
+ {
+  "key": "ui.card.treatments.turvetorstai.cta",
+  "lang": "fi",
+  "old": "Varaa aika →",
+  "new": "Varaa →"
+ },
+ {
+  "key": "ui.card.treatments.turvetorstai.cta",
+  "lang": "en",
+  "old": "Book a time →",
+  "new": "Book →"
+ },
+ {
+  "key": "ui.card.treatments.perinnesaunotusilta.title",
+  "lang": "fi",
+  "old": "perinnesaunotusillat",
+  "new": "Perinnesaunotusilta"
+ },
+ {
+  "key": "ui.card.treatments.perinnesaunotusilta.title",
+  "lang": "en",
+  "old": "traditional sauna evenings",
+  "new": "Traditional Sauna Evening (Perinnesaunotusilta)"
+ },
+ {
+  "key": "ui.card.treatments.perinnesaunotusilta.cta",
+  "lang": "fi",
+  "old": "Varaa aika →",
+  "new": "Varaa →"
+ },
+ {
+  "key": "ui.card.treatments.perinnesaunotusilta.cta",
+  "lang": "en",
+  "old": "Book a time →",
+  "new": "Book →"
+ },
+ {
+  "key": "ui.card.treatments.morsiussauna.title",
+  "lang": "fi",
+  "old": "morsiussauna",
+  "new": "Morsiussauna"
+ },
+ {
+  "key": "ui.card.treatments.morsiussauna.title",
+  "lang": "en",
+  "old": "bridal sauna",
+  "new": "Bridal Sauna (Morsiussauna)"
+ },
+ {
+  "key": "ui.card.treatments.morsiussauna.cta",
+  "lang": "fi",
+  "old": "Varaa aika →",
+  "new": "Varaa →"
+ },
+ {
+  "key": "ui.card.treatments.morsiussauna.cta",
+  "lang": "en",
+  "old": "Book a time →",
+  "new": "Book →"
+ },
+ {
+  "key": "ui.card.treatments.turvesauna.title",
+  "lang": "fi",
+  "old": "turvesauna",
+  "new": "Turvesauna"
+ },
+ {
+  "key": "ui.card.treatments.turvesauna.title",
+  "lang": "en",
+  "old": "peat sauna",
+  "new": "Peat Sauna (Turvesauna)"
+ },
+ {
+  "key": "ui.card.treatments.turvesauna.cta",
+  "lang": "fi",
+  "old": "Varaa aika →",
+  "new": "Varaa →"
+ },
+ {
+  "key": "ui.card.treatments.turvesauna.cta",
+  "lang": "en",
+  "old": "Book a time →",
+  "new": "Book →"
+ },
+ {
+  "key": "ui.card.treatments.synttarisauna.title",
+  "lang": "fi",
+  "old": "synttärisauna",
+  "new": "Synttärisauna"
+ },
+ {
+  "key": "ui.card.treatments.synttarisauna.title",
+  "lang": "en",
+  "old": "birthday sauna",
+  "new": "Birthday Sauna (Synttärisauna)"
+ },
+ {
+  "key": "ui.card.treatments.synttarisauna.cta",
+  "lang": "fi",
+  "old": "Varaa aika →",
+  "new": "Varaa →"
+ },
+ {
+  "key": "ui.card.treatments.synttarisauna.cta",
+  "lang": "en",
+  "old": "Book a time →",
+  "new": "Book →"
+ },
+ {
+  "key": "ui.card.sauna.yleinen.kicker",
+  "lang": "fi",
+  "old": "Sekavuoro",
+  "new": "Kaikille"
+ },
+ {
+  "key": "ui.card.sauna.yleinen.kicker",
+  "lang": "en",
+  "old": "Mixed session",
+  "new": "For everyone"
+ },
+ {
+  "key": "ui.card.sauna.yleinen.title",
+  "lang": "fi",
+  "old": "Yleinen vuoro (to, la–su)",
+  "new": "Yleinen vuoro (to, la-su)"
+ },
+ {
+  "key": "ui.card.sauna.yleinen.title",
+  "lang": "en",
+  "old": "Public session (Thu, Sat–Sun)",
+  "new": "Public Sauna Session (Thu, Sat–Sun)"
+ },
+ {
+  "key": "ui.card.sauna.yleinen.cta",
+  "lang": "fi",
+  "old": "Varaa vuorosi →",
+  "new": "Varaa →"
+ },
+ {
+  "key": "ui.card.sauna.yleinen.cta",
+  "lang": "en",
+  "old": "Book your session →",
+  "new": "Book →"
+ },
+ {
+  "key": "ui.card.sauna.miehet.title",
+  "lang": "fi",
+  "old": "Miesten sauna",
+  "new": "Miesten sauna (ma)"
+ },
+ {
+  "key": "ui.card.sauna.miehet.title",
+  "lang": "en",
+  "old": "Men's sauna",
+  "new": "Men's Sauna (Mon)"
+ },
+ {
+  "key": "ui.card.sauna.miehet.cta",
+  "lang": "fi",
+  "old": "Varaa vuorosi →",
+  "new": "Varaa →"
+ },
+ {
+  "key": "ui.card.sauna.miehet.cta",
+  "lang": "en",
+  "old": "Book your session →",
+  "new": "Book →"
+ },
+ {
+  "key": "ui.card.sauna.naiset.title",
+  "lang": "fi",
+  "old": "Naisten sauna",
+  "new": "Naisten sauna (ti)"
+ },
+ {
+  "key": "ui.card.sauna.naiset.title",
+  "lang": "en",
+  "old": "Women's sauna",
+  "new": "Women's Sauna (Tue)"
+ },
+ {
+  "key": "ui.card.sauna.naiset.cta",
+  "lang": "fi",
+  "old": "Varaa vuorosi →",
+  "new": "Varaa →"
+ },
+ {
+  "key": "ui.card.sauna.naiset.cta",
+  "lang": "en",
+  "old": "Book your session →",
+  "new": "Book →"
+ },
+ {
+  "key": "ui.card.sauna.hiljainen.title",
+  "lang": "fi",
+  "old": "Hiljainen sauna",
+  "new": "Hiljainen sauna (ke)"
+ },
+ {
+  "key": "ui.card.sauna.hiljainen.title",
+  "lang": "en",
+  "old": "Silent sauna",
+  "new": "Silent Sauna (Wed)"
+ },
+ {
+  "key": "ui.card.sauna.hiljainen.cta",
+  "lang": "fi",
+  "old": "Varaa vuorosi →",
+  "new": "Varaa →"
+ },
+ {
+  "key": "ui.card.sauna.hiljainen.cta",
+  "lang": "en",
+  "old": "Book your session →",
+  "new": "Book →"
+ },
+ {
+  "key": "ui.card.sauna.oma_vuoro.title",
+  "lang": "en",
+  "old": "Your own smoke sauna session",
+  "new": "Private Smoke Sauna Session"
+ },
+ {
+  "key": "ui.card.sauna.oma_vuoro.cta",
+  "lang": "fi",
+  "old": "Varaa vuoro →",
+  "new": "Varaa →"
+ },
+ {
+  "key": "ui.card.sauna.oma_vuoro.cta",
+  "lang": "en",
+  "old": "Book a session →",
+  "new": "Book →"
+ },
+ {
+  "key": "ui.card.sauna.jalkiloylyt.title",
+  "lang": "en",
+  "old": "After-session smoke sauna",
+  "new": "After Session Sauna (jälkilöylyt) in the Smoke Sauna"
+ },
+ {
+  "key": "ui.card.sauna.jalkiloylyt.cta",
+  "lang": "fi",
+  "old": "Varaa jälkilöylyt →",
+  "new": "Varaa →"
+ },
+ {
+  "key": "ui.card.sauna.jalkiloylyt.cta",
+  "lang": "en",
+  "old": "Book an after-session →",
+  "new": "Book →"
+ },
+ {
+  "key": "ui.card.gift.avoin.title",
+  "lang": "fi",
+  "old": "avoin lahjakortti",
+  "new": "Avoin lahjakortti"
+ },
+ {
+  "key": "ui.card.gift.avoin.title",
+  "lang": "en",
+  "old": "open gift card",
+  "new": "Open-Value Gift Card"
+ },
+ {
+  "key": "ui.card.gift.vuosikortti.title",
+  "lang": "fi",
+  "old": "vuosikortti",
+  "new": "Vuosikortti"
+ },
+ {
+  "key": "ui.card.gift.vuosikortti.title",
+  "lang": "en",
+  "old": "annual card",
+  "new": "Annual card"
+ },
+ {
+  "key": "ui.session.men",
+  "lang": "fi",
+  "old": "Miestenvuoro",
+  "new": "Miesten sauna (ma)"
+ },
+ {
+  "key": "ui.session.men",
+  "lang": "en",
+  "old": "Men's session",
+  "new": "Men's Sauna (Mon)"
+ },
+ {
+  "key": "ui.session.women",
+  "lang": "fi",
+  "old": "Naistenvuoro",
+  "new": "Naisten sauna (ti)"
+ },
+ {
+  "key": "ui.session.women",
+  "lang": "en",
+  "old": "Women's session",
+  "new": "Women's Sauna (Tue)"
+ },
+ {
+  "key": "ui.session.silent",
+  "lang": "fi",
+  "old": "Hiljainen vuoro",
+  "new": "Hiljainen sauna (ke)"
+ },
+ {
+  "key": "ui.session.silent",
+  "lang": "en",
+  "old": "Silent session",
+  "new": "Silent Sauna (Wed)"
+ },
+ {
+  "key": "ui.session.peat",
+  "lang": "fi",
+  "old": "Turvetorstai",
+  "new": "Turvetorstai (to)"
+ },
+ {
+  "key": "ui.session.peat",
+  "lang": "en",
+  "old": "Peat Thursday",
+  "new": "Peat Thursday (Turvetorstai, Thu)"
+ },
+ {
+  "key": "ui.session.public",
+  "lang": "fi",
+  "old": "Yleinen vuoro",
+  "new": "Yleinen vuoro (to, la-su)"
+ },
+ {
+  "key": "ui.session.public",
+  "lang": "en",
+  "old": "Public session",
+  "new": "Public Sauna Session (Thu, Sat–Sun)"
+ },
+ {
+  "key": "ui.session.weekend",
+  "lang": "fi",
+  "old": "Yleinen savusauna",
+  "new": "Yleinen vuoro (to, la-su)"
+ },
+ {
+  "key": "ui.session.weekend",
+  "lang": "en",
+  "old": "Public smoke sauna",
+  "new": "Public Sauna Session (Thu, Sat–Sun)"
+ },
+ {
+  "key": "ui.session.ritual",
+  "lang": "fi",
+  "old": "Saunarituaali-ilta",
+  "new": "Saunarituaali ja savusaunavuoro (la & su)"
+ },
+ {
+  "key": "ui.session.ritual",
+  "lang": "en",
+  "old": "Sauna ritual evening",
+  "new": "Sauna Ritual and Smoke Sauna Session (Sat & Sun)"
+ }
+]

@@ -2050,7 +2050,7 @@
  {
   "key": "ui.articles.cta_button",
   "lang": "fi",
-  "text": "Varaa aika",
+  "text": "Varaa",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2422,7 +2422,7 @@
  {
   "key": "ui.articles.cta_button",
   "lang": "en",
-  "text": "Book now",
+  "text": "Book",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2492,7 +2492,7 @@
  {
   "key": "ui.card.treatments.saunahoito.title",
   "lang": "fi",
-  "text": "saunahoito",
+  "text": "Saunahoito",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2522,7 +2522,7 @@
  {
   "key": "ui.card.treatments.saunahoito.cta",
   "lang": "fi",
-  "text": "Varaa aika →",
+  "text": "Varaa →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2542,7 +2542,7 @@
  {
   "key": "ui.card.treatments.saunahoito.title",
   "lang": "en",
-  "text": "sauna treatment",
+  "text": "Sauna Treatment",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2572,7 +2572,7 @@
  {
   "key": "ui.card.treatments.saunahoito.cta",
   "lang": "en",
-  "text": "Book a time →",
+  "text": "Book →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2592,7 +2592,7 @@
  {
   "key": "ui.card.treatments.saunotus.title",
   "lang": "fi",
-  "text": "saunotus",
+  "text": "Saunotus",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2622,7 +2622,7 @@
  {
   "key": "ui.card.treatments.saunotus.cta",
   "lang": "fi",
-  "text": "Varaa aika →",
+  "text": "Varaa →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2642,7 +2642,7 @@
  {
   "key": "ui.card.treatments.saunotus.title",
   "lang": "en",
-  "text": "saunotus (sauna ritual)",
+  "text": "Guided Sauna Session (Saunotus)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2672,7 +2672,7 @@
  {
   "key": "ui.card.treatments.saunotus.cta",
   "lang": "en",
-  "text": "Book a time →",
+  "text": "Book →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2692,7 +2692,7 @@
  {
   "key": "ui.card.treatments.syvasaunotus.title",
   "lang": "fi",
-  "text": "syväsaunotus",
+  "text": "Syväsaunotus",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2722,7 +2722,7 @@
  {
   "key": "ui.card.treatments.syvasaunotus.cta",
   "lang": "fi",
-  "text": "Varaa aika →",
+  "text": "Varaa →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2742,7 +2742,7 @@
  {
   "key": "ui.card.treatments.syvasaunotus.title",
   "lang": "en",
-  "text": "deep saunotus",
+  "text": "Deep Guided Sauna Session (Syväsaunotus)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2772,7 +2772,7 @@
  {
   "key": "ui.card.treatments.syvasaunotus.cta",
   "lang": "en",
-  "text": "Book a time →",
+  "text": "Book →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2792,7 +2792,7 @@
  {
   "key": "ui.card.treatments.ryhma.title",
   "lang": "fi",
-  "text": "perinnesaunotus ryhmälle",
+  "text": "Perinnesaunotus ryhmälle",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2822,7 +2822,7 @@
  {
   "key": "ui.card.treatments.ryhma.cta",
   "lang": "fi",
-  "text": "Varaa aika →",
+  "text": "Varaa →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2842,7 +2842,7 @@
  {
   "key": "ui.card.treatments.ryhma.title",
   "lang": "en",
-  "text": "traditional sauna ritual for a group",
+  "text": "Traditional Sauna Session for Groups",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2872,7 +2872,7 @@
  {
   "key": "ui.card.treatments.ryhma.cta",
   "lang": "en",
-  "text": "Book a time →",
+  "text": "Book →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2912,7 +2912,7 @@
  {
   "key": "ui.card.treatments.opiskelija.title",
   "lang": "fi",
-  "text": "saunahoito opiskelijatyönä",
+  "text": "Saunahoito opiskelijatyönä",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -2962,7 +2962,7 @@
  {
   "key": "ui.card.treatments.opiskelija.title",
   "lang": "en",
-  "text": "sauna treatment by students",
+  "text": "Sauna Treatment by Students",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3012,7 +3012,7 @@
  {
   "key": "ui.card.treatments.rituaali_lisa.title",
   "lang": "fi",
-  "text": "saunotusrituaali",
+  "text": "Saunotusrituaali",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3052,7 +3052,7 @@
  {
   "key": "ui.card.treatments.rituaali_lisa.title",
   "lang": "en",
-  "text": "sauna ritual (saunotusrituaali)",
+  "text": "Guided Sauna Ritual (Saunotusrituaali)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3132,7 +3132,7 @@
  {
   "key": "ui.card.treatments.avoin_rituaali.title",
   "lang": "fi",
-  "text": "avoin saunotusrituaali",
+  "text": "Saunarituaali ja savusaunavuoro (la & su)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3152,7 +3152,7 @@
  {
   "key": "ui.card.treatments.avoin_rituaali.cta",
   "lang": "fi",
-  "text": "Varaa aika →",
+  "text": "Varaa →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3172,7 +3172,7 @@
  {
   "key": "ui.card.treatments.avoin_rituaali.title",
   "lang": "en",
-  "text": "open sauna ritual",
+  "text": "Sauna Ritual and Smoke Sauna Session (Sat & Sun)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3192,7 +3192,7 @@
  {
   "key": "ui.card.treatments.avoin_rituaali.cta",
   "lang": "en",
-  "text": "Book a time →",
+  "text": "Book →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3232,7 +3232,7 @@
  {
   "key": "ui.card.treatments.turvetorstai.title",
   "lang": "fi",
-  "text": "turvetorstai",
+  "text": "Turvetorstai (to)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3252,7 +3252,7 @@
  {
   "key": "ui.card.treatments.turvetorstai.cta",
   "lang": "fi",
-  "text": "Varaa aika →",
+  "text": "Varaa →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3272,7 +3272,7 @@
  {
   "key": "ui.card.treatments.turvetorstai.title",
   "lang": "en",
-  "text": "Peat Thursday",
+  "text": "Peat Thursday (Turvetorstai, Thu)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3292,7 +3292,7 @@
  {
   "key": "ui.card.treatments.turvetorstai.cta",
   "lang": "en",
-  "text": "Book a time →",
+  "text": "Book →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3332,7 +3332,7 @@
  {
   "key": "ui.card.treatments.perinnesaunotusilta.title",
   "lang": "fi",
-  "text": "perinnesaunotusillat",
+  "text": "Perinnesaunotusilta",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3352,7 +3352,7 @@
  {
   "key": "ui.card.treatments.perinnesaunotusilta.cta",
   "lang": "fi",
-  "text": "Varaa aika →",
+  "text": "Varaa →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3372,7 +3372,7 @@
  {
   "key": "ui.card.treatments.perinnesaunotusilta.title",
   "lang": "en",
-  "text": "traditional sauna evenings",
+  "text": "Traditional Sauna Evening (Perinnesaunotusilta)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3392,7 +3392,7 @@
  {
   "key": "ui.card.treatments.perinnesaunotusilta.cta",
   "lang": "en",
-  "text": "Book a time →",
+  "text": "Book →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3432,7 +3432,7 @@
  {
   "key": "ui.card.treatments.morsiussauna.title",
   "lang": "fi",
-  "text": "morsiussauna",
+  "text": "Morsiussauna",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3462,7 +3462,7 @@
  {
   "key": "ui.card.treatments.morsiussauna.cta",
   "lang": "fi",
-  "text": "Varaa aika →",
+  "text": "Varaa →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3482,7 +3482,7 @@
  {
   "key": "ui.card.treatments.morsiussauna.title",
   "lang": "en",
-  "text": "bridal sauna",
+  "text": "Bridal Sauna (Morsiussauna)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3512,7 +3512,7 @@
  {
   "key": "ui.card.treatments.morsiussauna.cta",
   "lang": "en",
-  "text": "Book a time →",
+  "text": "Book →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3532,7 +3532,7 @@
  {
   "key": "ui.card.treatments.turvesauna.title",
   "lang": "fi",
-  "text": "turvesauna",
+  "text": "Turvesauna",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3562,7 +3562,7 @@
  {
   "key": "ui.card.treatments.turvesauna.cta",
   "lang": "fi",
-  "text": "Varaa aika →",
+  "text": "Varaa →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3582,7 +3582,7 @@
  {
   "key": "ui.card.treatments.turvesauna.title",
   "lang": "en",
-  "text": "peat sauna",
+  "text": "Peat Sauna (Turvesauna)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3612,7 +3612,7 @@
  {
   "key": "ui.card.treatments.turvesauna.cta",
   "lang": "en",
-  "text": "Book a time →",
+  "text": "Book →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3652,7 +3652,7 @@
  {
   "key": "ui.card.treatments.synttarisauna.title",
   "lang": "fi",
-  "text": "synttärisauna",
+  "text": "Synttärisauna",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3682,7 +3682,7 @@
  {
   "key": "ui.card.treatments.synttarisauna.cta",
   "lang": "fi",
-  "text": "Varaa aika →",
+  "text": "Varaa →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3702,7 +3702,7 @@
  {
   "key": "ui.card.treatments.synttarisauna.title",
   "lang": "en",
-  "text": "birthday sauna",
+  "text": "Birthday Sauna (Synttärisauna)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3732,7 +3732,7 @@
  {
   "key": "ui.card.treatments.synttarisauna.cta",
   "lang": "en",
-  "text": "Book a time →",
+  "text": "Book →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3802,7 +3802,7 @@
  {
   "key": "ui.card.sauna.yleinen.kicker",
   "lang": "fi",
-  "text": "Sekavuoro",
+  "text": "Kaikille",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3812,7 +3812,7 @@
  {
   "key": "ui.card.sauna.yleinen.title",
   "lang": "fi",
-  "text": "Yleinen vuoro (to, la–su)",
+  "text": "Yleinen vuoro (to, la-su)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3832,7 +3832,7 @@
  {
   "key": "ui.card.sauna.yleinen.cta",
   "lang": "fi",
-  "text": "Varaa vuorosi →",
+  "text": "Varaa →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3842,7 +3842,7 @@
  {
   "key": "ui.card.sauna.yleinen.kicker",
   "lang": "en",
-  "text": "Mixed session",
+  "text": "For everyone",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3852,7 +3852,7 @@
  {
   "key": "ui.card.sauna.yleinen.title",
   "lang": "en",
-  "text": "Public session (Thu, Sat–Sun)",
+  "text": "Public Sauna Session (Thu, Sat–Sun)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3872,7 +3872,7 @@
  {
   "key": "ui.card.sauna.yleinen.cta",
   "lang": "en",
-  "text": "Book your session →",
+  "text": "Book →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3912,7 +3912,7 @@
  {
   "key": "ui.card.sauna.miehet.title",
   "lang": "fi",
-  "text": "Miesten sauna",
+  "text": "Miesten sauna (ma)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3932,7 +3932,7 @@
  {
   "key": "ui.card.sauna.miehet.cta",
   "lang": "fi",
-  "text": "Varaa vuorosi →",
+  "text": "Varaa →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3952,7 +3952,7 @@
  {
   "key": "ui.card.sauna.miehet.title",
   "lang": "en",
-  "text": "Men's sauna",
+  "text": "Men's Sauna (Mon)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -3972,7 +3972,7 @@
  {
   "key": "ui.card.sauna.miehet.cta",
   "lang": "en",
-  "text": "Book your session →",
+  "text": "Book →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -4012,7 +4012,7 @@
  {
   "key": "ui.card.sauna.naiset.title",
   "lang": "fi",
-  "text": "Naisten sauna",
+  "text": "Naisten sauna (ti)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -4032,7 +4032,7 @@
  {
   "key": "ui.card.sauna.naiset.cta",
   "lang": "fi",
-  "text": "Varaa vuorosi →",
+  "text": "Varaa →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -4052,7 +4052,7 @@
  {
   "key": "ui.card.sauna.naiset.title",
   "lang": "en",
-  "text": "Women's sauna",
+  "text": "Women's Sauna (Tue)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -4072,7 +4072,7 @@
  {
   "key": "ui.card.sauna.naiset.cta",
   "lang": "en",
-  "text": "Book your session →",
+  "text": "Book →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -4112,7 +4112,7 @@
  {
   "key": "ui.card.sauna.hiljainen.title",
   "lang": "fi",
-  "text": "Hiljainen sauna",
+  "text": "Hiljainen sauna (ke)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -4132,7 +4132,7 @@
  {
   "key": "ui.card.sauna.hiljainen.cta",
   "lang": "fi",
-  "text": "Varaa vuorosi →",
+  "text": "Varaa →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -4152,7 +4152,7 @@
  {
   "key": "ui.card.sauna.hiljainen.title",
   "lang": "en",
-  "text": "Silent sauna",
+  "text": "Silent Sauna (Wed)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -4172,7 +4172,7 @@
  {
   "key": "ui.card.sauna.hiljainen.cta",
   "lang": "en",
-  "text": "Book your session →",
+  "text": "Book →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -4232,7 +4232,7 @@
  {
   "key": "ui.card.sauna.oma_vuoro.cta",
   "lang": "fi",
-  "text": "Varaa vuoro →",
+  "text": "Varaa →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -4252,7 +4252,7 @@
  {
   "key": "ui.card.sauna.oma_vuoro.title",
   "lang": "en",
-  "text": "Your own smoke sauna session",
+  "text": "Private Smoke Sauna Session",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -4272,7 +4272,7 @@
  {
   "key": "ui.card.sauna.oma_vuoro.cta",
   "lang": "en",
-  "text": "Book a session →",
+  "text": "Book →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -4352,7 +4352,7 @@
  {
   "key": "ui.card.sauna.jalkiloylyt.cta",
   "lang": "fi",
-  "text": "Varaa jälkilöylyt →",
+  "text": "Varaa →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -4372,7 +4372,7 @@
  {
   "key": "ui.card.sauna.jalkiloylyt.title",
   "lang": "en",
-  "text": "After-session smoke sauna",
+  "text": "After Session Sauna (jälkilöylyt) in the Smoke Sauna",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -4392,7 +4392,7 @@
  {
   "key": "ui.card.sauna.jalkiloylyt.cta",
   "lang": "en",
-  "text": "Book an after-session →",
+  "text": "Book →",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -4412,7 +4412,7 @@
  {
   "key": "ui.card.gift.avoin.title",
   "lang": "fi",
-  "text": "avoin lahjakortti",
+  "text": "Avoin lahjakortti",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -4452,7 +4452,7 @@
  {
   "key": "ui.card.gift.avoin.title",
   "lang": "en",
-  "text": "open gift card",
+  "text": "Open-Value Gift Card",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -4812,7 +4812,7 @@
  {
   "key": "ui.card.gift.vuosikortti.title",
   "lang": "fi",
-  "text": "vuosikortti",
+  "text": "Vuosikortti",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -4852,7 +4852,7 @@
  {
   "key": "ui.card.gift.vuosikortti.title",
   "lang": "en",
-  "text": "annual card",
+  "text": "Annual card",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -10604,7 +10604,7 @@
  {
   "key": "ui.session.men",
   "lang": "fi",
-  "text": "Miestenvuoro",
+  "text": "Miesten sauna (ma)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -10614,7 +10614,7 @@
  {
   "key": "ui.session.men",
   "lang": "en",
-  "text": "Men's session",
+  "text": "Men's Sauna (Mon)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -10624,7 +10624,7 @@
  {
   "key": "ui.session.women",
   "lang": "fi",
-  "text": "Naistenvuoro",
+  "text": "Naisten sauna (ti)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -10634,7 +10634,7 @@
  {
   "key": "ui.session.women",
   "lang": "en",
-  "text": "Women's session",
+  "text": "Women's Sauna (Tue)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -10644,7 +10644,7 @@
  {
   "key": "ui.session.silent",
   "lang": "fi",
-  "text": "Hiljainen vuoro",
+  "text": "Hiljainen sauna (ke)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -10654,7 +10654,7 @@
  {
   "key": "ui.session.silent",
   "lang": "en",
-  "text": "Silent session",
+  "text": "Silent Sauna (Wed)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -10664,7 +10664,7 @@
  {
   "key": "ui.session.peat",
   "lang": "fi",
-  "text": "Turvetorstai",
+  "text": "Turvetorstai (to)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -10674,7 +10674,7 @@
  {
   "key": "ui.session.peat",
   "lang": "en",
-  "text": "Peat Thursday",
+  "text": "Peat Thursday (Turvetorstai, Thu)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -10684,7 +10684,7 @@
  {
   "key": "ui.session.public",
   "lang": "fi",
-  "text": "Yleinen vuoro",
+  "text": "Yleinen vuoro (to, la-su)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -10694,7 +10694,7 @@
  {
   "key": "ui.session.public",
   "lang": "en",
-  "text": "Public session",
+  "text": "Public Sauna Session (Thu, Sat–Sun)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -10704,7 +10704,7 @@
  {
   "key": "ui.session.weekend",
   "lang": "fi",
-  "text": "Yleinen savusauna",
+  "text": "Yleinen vuoro (to, la-su)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -10714,7 +10714,7 @@
  {
   "key": "ui.session.weekend",
   "lang": "en",
-  "text": "Public smoke sauna",
+  "text": "Public Sauna Session (Thu, Sat–Sun)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -10724,7 +10724,7 @@
  {
   "key": "ui.session.ritual",
   "lang": "fi",
-  "text": "Saunarituaali-ilta",
+  "text": "Saunarituaali ja savusaunavuoro (la & su)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -10734,7 +10734,7 @@
  {
   "key": "ui.session.ritual",
   "lang": "en",
-  "text": "Sauna ritual evening",
+  "text": "Sauna Ritual and Smoke Sauna Session (Sat & Sun)",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,

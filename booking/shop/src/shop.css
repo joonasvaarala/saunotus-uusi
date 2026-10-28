@@ -97,7 +97,9 @@ button.bk-cell:hover{filter:brightness(.97)}
 .bk-actions{display:flex;flex-wrap:wrap;gap:12px;margin:16px 0}
 .bk-actions .btn{cursor:pointer}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
-#booking-app [tabindex="-1"]:focus{outline:none}
+#booking-app [tabindex="-1"]:focus:not(:focus-visible){outline:none}
+#booking-app :is(h1,h2,h3):focus-visible,.hero.page :is(h1,h2):focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.hero.page :is(h1,h2):focus:not(:focus-visible){outline:none}
 
 /* Migraatio 11: asiakastyyppi, yritystiedot, lisäpalvelut (v9: samat osio-otsikot, leveys ja välit kuin muulla lomakkeella) */
 .bk-form .bk-kinds{margin:0 0 16px}

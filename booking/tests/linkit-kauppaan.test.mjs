@@ -118,6 +118,7 @@ test('kaupan tuoteosio: jokainen uuden kaupan varattava tuote (15) on shopProduc
   const render = readFileSync(join(root, '../src/render.mjs'), 'utf8');
   assert.match(render, /experienceHtml\(lang\)/);
   assert.doesNotMatch(render, /shopList|id="varaa-verkosta"/);
-  assert.match(render, /eventsHtml\(lang, d\.events\.empty, \{ limit: 2 \}\)/);
+  assert.match(render, /eventsHtml\(lang, d\.events\.empty\)/);
+  assert.doesNotMatch(render, /eventsHtml\([^)]*limit:\s*2/);
   assert.match(render, /href="\$\{pageHref\('book', lang\)\}">\$\{e\(u\.allEvents\)\}/);
 });

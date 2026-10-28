@@ -48,6 +48,7 @@
 .tagbar a{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:30px;border:1.5px solid var(--gold);color:var(--gold);background:transparent;font:600 12px/1.2 var(--label);letter-spacing:.06em;text-decoration:none}
 .tagbar a:hover{background:var(--gold);color:#fff}
 .tagbar a[aria-current]{background:var(--green);border-color:var(--green);color:#fff}
+.tagbar-more{margin-top:36px}
 .art-list{padding-top:44px}
 .art-list>.wrap>.tagbar,.art-list .tagbar{margin-bottom:28px}
 .art-list nav.tagbar ul{list-style:none;margin:0 0 28px;padding:0;display:flex;flex-wrap:wrap;gap:8px}

@@ -6,6 +6,7 @@
 // Ei innerHTML:ää: kaikki solmut createElement + textContent.
 import { rpc } from './sb.js';
 import { quietByWeekday, addDaysIso, fillText, pctText, validOffer, bookablePrivateSlots, offerForSlot, weekdayIso, JALKIL_ID } from './quiet-offers-logic.js';
+import { dateForWeekday, shiftIsFull, weekEvents, eventDisplayName, freeShopEvents, cardDates, cardTime } from './week-live.js';
 
 const TZ = 'Europe/Helsinki';
 export function decorateWeek(list, offers, { lang = 'fi', shopHref = '', today, slots, now } = {}) {
@@ -87,20 +88,131 @@ export function decorateWeek(list, offers, { lang = 'fi', shopHref = '', today, 
   return added;
 }
 
+// Täydet vuorot pois ja vapaat tapahtumat viikonpäivälleen. availability tai events === null → sitä osaa ei kosketa.
+export function applyLiveWeek(list, { availability = null, events = null, catalog = null, lang = 'fi', shopHref = '', today, now } = {}) {
+  const d = list.dataset;
+  const el = (tag, cls, text) => { const n = list.ownerDocument.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  const startMin = (txt) => { const m = /^(\d{1,2})(?:[:.](\d\d))?/.exec(String(txt || '').trim()); return m ? +m[1] * 60 + +(m[2] || 0) : null; };
+  const place = (ul, li, label) => {
+    const mine = startMin(label);
+    const next = mine == null ? null : [...ul.children].find((x) => { const v = startMin(x.querySelector('.t')?.textContent); return v != null && v > mine; });
+    if (next) ul.insertBefore(li, next); else ul.append(li);
+  };
+  let hidden = 0, added = 0;
+  if (Array.isArray(availability)) {
+    for (const day of list.querySelectorAll(':scope > li[data-wd]')) {
+      const date = dateForWeekday(today, +day.dataset.wd);
+      if (!date) continue;
+      for (const row of day.querySelectorAll(':scope > ul.sl > li.sess[data-pid]')) {
+        if (row.dataset.testid === 'site-week-event' || row.dataset.testid === 'site-jalkiloyly' || row.dataset.testid === 'site-quiet-session') continue;
+        if (!shiftIsFull(availability, { productId: row.dataset.pid, date, open: row.dataset.open || '', close: row.dataset.close || '' })) continue;
+        row.hidden = true;
+        hidden++;
+      }
+    }
+  }
+  if (events != null) {
+    for (const ev of weekEvents(events, { today, now })) {
+      const day = list.querySelector(`:scope > li[data-wd="${ev.weekday}"]`);
+      if (!day) continue;
+      const name = eventDisplayName(ev, catalog, lang);
+      if (!name) continue;
+      let ul = day.querySelector(':scope > ul.sl');
+      if (!ul) { ul = el('ul', 'sl'); day.querySelector(':scope > h3')?.after(ul); }
+      if ([...day.querySelectorAll(':scope li[data-slot-key]')].some((n) => n.dataset.slotKey === ev.key)) continue;
+      const li = el('li', ev.time ? 'sess' : 'sess nt');
+      li.dataset.testid = 'site-week-event';
+      li.dataset.slotKey = ev.key;
+      const a = el('a', 'bk');
+      a.href = `${shopHref}#/tuote/${encodeURIComponent(ev.slug)}/${ev.date}`;
+      a.append(el('span', 'bk-l', d.quietReserve || ''), el('span', 'sr', ` – ${name}`));
+      if (ev.time) li.append(el('span', 't', ev.time));
+      li.append(el('span', 'n', name), a);
+      place(ul, li, ev.time);
+      day.classList.remove('off');
+      added++;
+    }
+  }
+  return { hidden, added };
+}
+
+const plain = (s) => String(s ?? '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+
+/** Etusivun tapahtumakortit public_eventsistä. events === null → lista jää ennalleen. Vain vapaat kerrat. */
+export function applyEventCards(list, events, { lang = 'fi', shopHref = '', now = Date.now(), reserve = '', imageBase = '' } = {}) {
+  if (events == null || !list) return 0;
+  const rows = freeShopEvents(events, now);
+  const doc = list.ownerDocument;
+  const el = (tag, cls, text) => { const n = doc.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  const money = (n) => new Intl.NumberFormat(lang === 'fi' ? 'fi-FI' : 'en-FI', { style: 'currency', currency: 'EUR', minimumFractionDigits: Number.isInteger(+n) ? 0 : 2 }).format(+n);
+  if (!rows.length) {
+    const p = el('p', 'center', list.dataset.empty || '');
+    list.replaceWith(p);
+    return 0;
+  }
+  list.replaceChildren();
+  for (const ev of rows) {
+    const name = (lang === 'en' && ev.name_en) || ev.name;
+    const text = plain((lang === 'en' && ev.description_short_en) || ev.description_short);
+    const dates = [...new Set(ev.occurrences.slice(0, 6).map((o) => cardDates(o, lang)))].filter(Boolean).join(' · ');
+    const time = cardTime(ev.occurrences[0], lang);
+    const li = el('li', 'card ev');
+    li.dataset.testid = 'site-event-card';
+    const im = el('div', 'im');
+    if (ev.image_path && imageBase) {
+      const img = doc.createElement('img');
+      img.src = imageBase + String(ev.image_path).replace(/^\//, '');
+      img.alt = ev.image_alt || '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.width = 800; img.height = 533;
+      img.addEventListener('error', () => img.remove(), { once: true });
+      im.append(img);
+    }
+    if (ev.price != null && Number.isFinite(+ev.price)) im.append(el('span', 'badge', money(ev.price)));
+    const bd = el('div', 'bd');
+    const h3 = el('h3');
+    const a = el('a', '', name);
+    a.href = `${shopHref}#/tuote/${encodeURIComponent(ev.slug)}`;
+    h3.append(a);
+    const when = el('p', 'dates', time ? `${dates} · ${time}` : dates);
+    bd.append(h3, when);
+    if (text) bd.append(el('p', '', text));
+    const cta = el('div', 'cta', reserve ? (String(reserve).includes('→') ? reserve : `${reserve} →`) : '');
+    cta.setAttribute('aria-hidden', 'true');
+    li.append(im, bd, cta);
+    list.append(li);
+  }
+  return rows.length;
+}
+
 const cfg = globalThis.window?.BOOKING_QUIET;
 if (cfg && globalThis.document && window.BOOKING_CONFIG?.url) {
   const lists = [...document.querySelectorAll('ol.week[data-quiet-week]')];
-  if (lists.length) {
+  const eventLists = [...document.querySelectorAll('ul.events[data-live-events]')];
+  if (lists.length || eventLists.length) {
     const today = new Date().toLocaleDateString('sv-SE', { timeZone: TZ });
     const from = today, to = addDaysIso(today, 6);
+    const listOrNull = (rows) => (Array.isArray(rows) ? rows : null);
     Promise.all([
       rpc('public_quiet_offers', { p_from: from, p_to: to, p_audience: 'consumer' }).then((rows) => (Array.isArray(rows) ? rows : [])).catch(() => null),
       rpc('public_availability', { p_product_id: JALKIL_ID, p_from: from, p_to: to }).then((rows) => (Array.isArray(rows) ? rows : [])).catch(() => null),
-    ]).then(([offers, slots]) => {
-      if (offers == null && slots == null) return;
+      rpc('public_availability_all', { p_from: from, p_to: to, p_audience: 'consumer' }).then(listOrNull).catch(() => null),
+      rpc('public_events', { p_from: from, p_channel: 'shop' }).then((rows) => rows).catch(() => null),
+      rpc('public_catalog', {}).then((rows) => (Array.isArray(rows) ? rows : [])).catch(() => null),
+    ]).then(([offers, slots, availability, events, catalog]) => {
+      if (offers == null && slots == null && availability == null && events == null) return;
       const opt = { lang: cfg.lang, shopHref: cfg.shopHref, today, now: Date.now() };
       if (slots != null) opt.slots = slots;
-      for (const l of lists) decorateWeek(l, offers || [], opt);
-    }).catch(() => { /* viikko-ohjelma ennallaan */ });
+      for (const l of lists) {
+        if (offers != null || slots != null) decorateWeek(l, offers || [], opt);
+        if (availability != null || events != null) applyLiveWeek(l, { availability, events, catalog, lang: cfg.lang, shopHref: cfg.shopHref, today, now: Date.now() });
+      }
+      if (events != null && (Array.isArray(events) || typeof events === 'string')) {
+        const reserve = lists[0]?.dataset.quietReserve || '';
+        const imageBase = `${String(window.BOOKING_CONFIG.url).replace(/\/$/, '')}/storage/v1/object/public/product-images/`;
+        for (const ul of eventLists) applyEventCards(ul, events, { lang: cfg.lang, shopHref: cfg.shopHref, now: Date.now(), reserve, imageBase });
+      }
+    }).catch(() => { /* viikko-ohjelma ja tapahtumakortit ennallaan */ });
   }
 }
