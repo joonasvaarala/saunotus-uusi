@@ -56,7 +56,12 @@ test('elämyskortit: nimi, hinta ja kesto tuotteesta; lahjakortti #avoin; kuva v
     assert.match(html, lang === 'fi' ? /alk\. 29 €/ : /from €29/);
     assert.match(html, /href="\/varaa\/#\/tuote\/yleinensauna"|href="\/en\/book\/#\/tuote\/yleinensauna"/);
     assert.match(html, /products\/10-ifj3bf\.webp/);
-    assert.match(html, /width="1600" height="1067"/);
+    assert.match(html, /<picture><source type="image\/avif" srcset="[^"]*width=600[^"]*600w, [^"]*width=900[^"]*900w"/);
+    assert.match(html, /type="image\/webp"/);
+    assert.match(html, /format=origin/);
+    assert.match(html, /resize=contain/);
+    assert.match(html, /sizes="\(min-width: 1100px\) 220px, 280px"/);
+    assert.match(html, /width="1600" height="1067" alt="[^"]*" loading="lazy" decoding="async"/);
     assert.equal(cards.filter((c) => c.startsWith(' noimg')).length, 4);
     assert.match(html, lang === 'fi' ? /href="\/lahjakortti\/#avoin"/ : /href="\/en\/gift-card\/#avoin"/);
     assert.doesNotMatch(html, /\/tuote\/lahjakortti|johku|target="_blank"/i);

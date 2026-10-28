@@ -188,6 +188,7 @@ a.bk-sd:hover{filter:brightness(.97)}
 .bk-pick-change{display:inline-flex;align-items:center;min-height:44px;font-weight:600;font-size:15px;color:var(--gold);text-decoration:underline;text-underline-offset:3px}
 /* tuotekuvat (public_product_images): kiinteä kuvasuhde varaa tilan etukäteen, object-fit:cover rajaa; tausta näkyy latauksen ajan */
 .bk-img{display:block;overflow:hidden;background:var(--tint,#efe6d8)}
+.bk-img picture{display:block;width:100%;height:100%}
 .bk-img img{display:block;width:100%;height:100%;object-fit:cover}
 .bk-card .card-img{aspect-ratio:3/2;margin:-20px -20px 12px;border-radius:var(--r) var(--r) 0 0}
 .bk-pc-head .pc-img{flex:none;width:88px;height:88px;border-radius:10px}
@@ -613,7 +614,8 @@ button.bk-cell.quiet.sel{box-shadow:inset 0 -4px 0 #F4EFE7}
 .bk-upsell-card{width:100%;min-width:180px;max-width:280px;flex:0 0 min(78vw,280px);border:1px solid #7A5530;background:#F4EFE7;color:#2B3A30;border-radius:14px;padding:0;display:flex;flex-direction:column;text-align:left;overflow:hidden;scroll-snap-align:start}
 .bk-upsell-open{display:flex;flex-direction:column;width:100%;margin:0;padding:0;border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
 .bk-upsell-open strong{display:block;font-size:16px;padding:12px 12px 0}
-.bk-upsell-card img,.bk-upsell-photo{width:100%;height:125px;object-fit:cover;display:block}
+.bk-upsell-card :is(picture,img),.bk-upsell-photo,.bk-upsell-photo img{width:100%;height:125px;object-fit:cover;display:block}
+.bk-upsell-card picture,.bk-upsell-photo{overflow:hidden}
 .bk-upsell-info{padding:4px 12px 12px;display:grid;gap:5px;min-width:0}
 .bk-upsell-clamp{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;line-height:1.4;color:#2B3A30}
 .bk-upsell-blurb,.bk-upsell-lead{margin:0;min-width:0;line-height:1.45;color:#2B3A30;overflow-wrap:anywhere}
@@ -624,7 +626,7 @@ button.bk-cell.quiet.sel{box-shadow:inset 0 -4px 0 #F4EFE7}
 .bk-upsell-detail-backdrop{z-index:10000}
 .bk-upsell-sheet{box-sizing:border-box;background:#F4EFE7;color:#2B3A30;border-radius:22px 22px 0 0;width:100%;max-width:680px;max-height:86dvh;overflow:auto;padding:20px 20px 30px;box-shadow:0 -8px 40px rgba(43,58,48,.2)}
 .bk-upsell-detail{padding:0 0 28px;max-width:720px}
-.bk-upsell-detail .bk-upsell-photo{height:200px;border-radius:22px 22px 0 0}
+.bk-upsell-detail .bk-upsell-photo,.bk-upsell-detail .bk-upsell-photo img{height:200px;border-radius:22px 22px 0 0}
 .bk-upsell-detail .bk-upsell-sheet-head,.bk-upsell-detail .bk-upsell-facts,.bk-upsell-detail .bk-upsell-body{margin-left:20px;margin-right:20px}
 .bk-upsell-detail .bk-upsell-sheet-head{padding-top:16px}
 .bk-upsell-sheet-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.bk-upsell-sheet-head h3{margin:0;font:500 1.6rem/1.2 var(--head,Georgia,serif)}
@@ -643,7 +645,7 @@ button.bk-cell.quiet.sel{box-shadow:inset 0 -4px 0 #F4EFE7}
 .bk-upsell-chip small{font-size:11px;color:#7A5530}.bk-upsell-chip[aria-pressed=true]{background:#2B3A30;color:#F4EFE7}.bk-upsell-addon-row{display:flex;gap:8px;flex-wrap:wrap}
 .bk-upsell-addon{border:1px solid #7A5530;color:#2B3A30;background:#F4EFE7;border-radius:10px;padding:9px 12px;cursor:pointer}
 .bk-upsell-inline{padding:10px 0}.bk-upsell-feedback:not(:empty){margin-top:8px}
-@media(min-width:700px){.bk-upsell-backdrop{align-items:center;padding:24px}.bk-upsell-sheet{border-radius:20px;max-height:85vh}.bk-upsell-detail .bk-upsell-photo{border-radius:20px 20px 0 0;height:240px}}
+@media(min-width:700px){.bk-upsell-backdrop{align-items:center;padding:24px}.bk-upsell-sheet{border-radius:20px;max-height:85vh}.bk-upsell-detail .bk-upsell-photo,.bk-upsell-detail .bk-upsell-photo img{border-radius:20px 20px 0 0;height:240px}}
 @media(prefers-reduced-motion:reduce){.bk-upsell-row{scroll-behavior:auto}}
 /* booking_177b: maksulinkkisivun yhteenveto ennen maksua (/maksa/, /en/pay/). Värit #2B3A30 / #F4EFE7 / #7A5530, ei sivuttaisvieritystä 390 px:llä. */
 .pl-card{max-width:640px;overflow-wrap:anywhere}

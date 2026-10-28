@@ -5,6 +5,7 @@ import { tx } from './site-texts.mjs';
 import { site, e, pageHref, money, dur, priceOf } from './lib.mjs';
 import { liveProduct } from './catalog-live.mjs';
 import { productImageFor, productImageUrl } from './product-images.mjs';
+import { productImageHtml, CARD_WIDTHS, SIZES } from '../booking/shop/src/product-image.js';
 import { shopHash } from './event-cards.mjs';
 import { shortRaw, derivedExcerpt } from '../booking/shop/src/short-desc.js';
 import { visibleText } from '../booking/shop/src/rich-view.js';
@@ -65,8 +66,8 @@ function cardImage(p, lang, name) {
   const url = productImageUrl(row);
   if (!url) return '';
   const alt = (row.alt && String(row.alt).trim()) || name;
-  const w = row.width || 800, h = row.height || 533;
-  return `<div class="im"><img src="${e(url)}" width="${w}" height="${h}" alt="${e(alt)}" loading="lazy" decoding="async"></div>`;
+  const w = row.width || 900, h = row.height || 600;
+  return `<div class="im">${productImageHtml(url, { widths: CARD_WIDTHS, sizes: SIZES.home, alt, width: w, height: h, lazy: true })}</div>`;
 }
 
 export function experienceHtml(lang) {

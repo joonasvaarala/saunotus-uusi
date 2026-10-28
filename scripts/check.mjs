@@ -45,7 +45,7 @@ for (const f of files) {
     // varauskaupan SPA-reitit (#/tuote/…, #/?k=…) ja SPA-sivun omat ankkurit eivät ole dokumenttiankkureita
     if (hash && !/^[/?]/.test(hash)) { const tf = fileOf(u); if (ids.get(tf) && !ids.get(tf).has(hash) && !htmlOf.get(tf)?.includes('id="booking-app"')) errs.push(`${where}: ankkuri #${hash} puuttuu sivulta ${u}`); }
   }
-  for (const m of h.matchAll(/(?:srcset|imagesrcset)="([^"]*)"/g)) for (const part of m[1].split(',')) { const u = part.trim().split(/\s+/)[0]; if (u && !exists(u)) errs.push(`${where}: srcset rikki ${u}`); }
+  for (const m of h.matchAll(/(?:srcset|imagesrcset)="([^"]*)"/g)) for (const part of m[1].split(',')) { const u = part.trim().split(/\s+/)[0]; if (u && !/^https?:/.test(u) && !exists(u)) errs.push(`${where}: srcset rikki ${u}`); }
   for (const m of h.matchAll(/url\((\/[^)]+)\)/g)) if (!exists(m[1])) errs.push(`${where}: css url rikki ${m[1]}`);
   // hreflang-vastaavuus
   for (const m of h.matchAll(/hreflang="(\w[\w-]*)" href="([^"]+)"/g)) { const u = m[2].replace(/^https?:\/\/[^/]+/, ''); if (!exists(u)) warns.push(`${where}: hreflang ${m[1]} -> ${u} ei löydy dististä (normaalia jos kanoninen osoite eri)`); }

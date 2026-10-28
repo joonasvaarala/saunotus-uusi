@@ -17,6 +17,7 @@ import { createTreatmentViews } from './treatment-ui.js';
 import { cardMeta } from './card-meta.js';
 import { createTexts, loadShopTexts, applyShopTexts } from './site-texts.js';
 import { checkoutUpsellSection, orderUpsellSection, confirmationUpsellOrder } from './upsell-ui.js';
+import { productImageElement, CARD_WIDTHS, THUMB_WIDTHS, HERO_WIDTHS, SIZES } from './product-image.js';
 import { fmtMinutes } from './site-texts-logic.js';
 import { OPT } from './options-texts.js';
 import { optName, needsOption, findOption } from './options-logic.js';
@@ -187,13 +188,16 @@ async function loadBase() {
   if (richDemo) { const sample = [...state.catalog, ...state.treatments][0]; if (sample) { sample.description = richDemo; sample.description_en = richDemo; } }
   for (const i of Array.isArray(imgs) ? imgs : []) if (i?.path) state.images.set(+i.product_id, { url: storageUrl('product-images', i.path), alt: i.alt || '' });
 }
-// Tuotekuva: kiinteä kuvasuhde (varaa tilan → ei layout-hyppyä), lazy-lataus, alt = ylläpidon alt-teksti tai tuotteen nimi.
+// Tuotekuva: kiinteä kuvasuhde (varaa tilan → ei layout-hyppyä), lazy-lataus alle taitteen, alt = ylläpidon alt-teksti tai tuotteen nimi.
 // alt=false → koriste (nimi on jo vieressä tekstinä). Rikkinäinen kuva poistetaan kokonaan (ei rikkinäistä kuvaketta).
+// Kortti ~350 px: srcset 600/900. Pikkukuva 72–88 px: 320 px. Supabase-muunnos tai alkuperäinen (product-image.js).
 // Palauttaa null jos tuotteella ei ole kuvaa.
+const IMG_PRESET = { 'card-img': { widths: CARD_WIDTHS, sizes: SIZES.shop }, 'pc-img': { widths: THUMB_WIDTHS, sizes: SIZES.thumb }, 'pick-img': { widths: THUMB_WIDTHS, sizes: SIZES.thumb } };
 const pimg = (p, cls, { alt = true, eager = false, w = 600, hgt = 400 } = {}) => {
   const i = state.images.get(p.id); if (!i) return null;
-  const im = h('img', { src: i.url, alt: alt ? (i.alt || pname(p)) : '', width: w, height: hgt, loading: eager ? 'eager' : 'lazy', decoding: 'async' });
-  const box = h('span', { class: `bk-img ${cls}` }, im);
+  const node = productImageElement(h, i.url, { ...(IMG_PRESET[cls] || IMG_PRESET['card-img']), alt: alt ? (i.alt || pname(p)) : '', width: w, height: hgt, lazy: !eager });
+  const im = node.querySelector('img');
+  const box = h('span', { class: `bk-img ${cls}` }, node);
   im.addEventListener('error', () => box.remove(), { once: true });
   return box;
 };
@@ -222,8 +226,8 @@ function setHero(p) {
   const i = p && state.images.get(p.id);
   let next = hero.def.pic;
   if (i) {
-    const im = h('img', { src: i.url, alt: i.alt || '', width: 1600, height: 1000, fetchpriority: 'high', decoding: 'async' });
-    next = h('picture', { class: 'prod-pic' }, im);
+    next = productImageElement(h, i.url, { widths: HERO_WIDTHS, sizes: SIZES.hero, alt: i.alt || '', width: 1600, height: 1000, lazy: false, pictureClass: 'prod-pic' });
+    const im = next.querySelector('img');
     im.addEventListener('error', () => { if (next.isConnected) { next.replaceWith(hero.def.pic); el.classList.remove('has-prod'); } }, { once: true });
   }
   if (cur !== next) cur.replaceWith(next);
