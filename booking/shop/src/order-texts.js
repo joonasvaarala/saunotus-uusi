@@ -16,6 +16,7 @@ export const OT = {
     linesTitle: 'Tilauksen rivit', qty: 'Määrä', persons: '{n} hlö', addonOf: 'Lisäpalvelu', cancelledRow: 'Peruttu',
     receiptsTitle: 'Kuitit', noReceipts: 'Kuitteja ei ole vielä.', download: 'Lataa', receipt: 'Kuitti', refund_receipt: 'Hyvityskuitti',
     addTitle: 'Lisää tilaukseen', addLead: 'Voit lisätä lisäpalveluita tilaukseen, kunnes alkuperäinen varaus on päättynyt.', addAddon: 'Lisäpalvelu', addQty: 'Määrä', addSubmit: 'Lisää tilaukseen', addDone: 'Lisäys tehty. Päivitetty tilaus näkyy yllä.',
+    additionTitle: 'Maksamaton lisäys', additionHold: 'Lisäystä pidetään {minutes} minuuttia. Jos sitä ei makseta, paikka vapautuu.', additionExpired: 'Maksamatonta lisäystä ei maksettu ajoissa. Paikka vapautetaan.', cancelAddition: 'Peru lisätilaus', additionCancelDone: 'Lisätilaus peruttu. Paikka on vapautettu.',
     guideTitle: 'Ohjeet', guideShow: 'Näytä ohjeet', guideHide: 'Piilota ohjeet', guideLead: 'Tässä ovat tilauksen tuotteiden ohjeet. Avaa ne napista.', guideLink: 'Avaa linkki',
     unsubTitle: 'Markkinointiviestit', unsubDone: 'Markkinointiviestit on peruttu. Ohjeet ja palautepyynnöt voivat silti tulla.', unsubMissing: 'Linkki ei kelpaa.', unsubError: 'Peruutus ei onnistunut. Yritä hetken kuluttua uudelleen.',
     treatLead: 'Lisäpalvelun voi lisätä tähän tilaukseen valinnasta. Uuden käynnin aika valitaan varauskalenterissa.',
@@ -56,6 +57,7 @@ export const OT = {
     linesTitle: 'Order lines', qty: 'Qty', persons: '{n} pers.', addonOf: 'Add-on', cancelledRow: 'Cancelled',
     receiptsTitle: 'Receipts', noReceipts: 'No receipts yet.', download: 'Download', receipt: 'Receipt', refund_receipt: 'Refund receipt',
     addTitle: 'Add to your order', addLead: 'You can add extras to your order until the original booking has ended.', addAddon: 'Add-on', addQty: 'Quantity', addSubmit: 'Add to order', addDone: 'Added. The updated order is shown above.',
+    additionTitle: 'Unpaid add-on', additionHold: 'The add-on is held for {minutes} minutes. If it is not paid, the place is released.', additionExpired: 'The unpaid add-on was not paid in time. The place is being released.', cancelAddition: 'Cancel add-on', additionCancelDone: 'Add-on cancelled. The place has been released.',
     guideTitle: 'Instructions', guideShow: 'Show instructions', guideHide: 'Hide instructions', guideLead: 'These are the instructions for the products in your order. Open them with the button.', guideLink: 'Open the link',
     unsubTitle: 'Marketing messages', unsubDone: 'Marketing messages are stopped. Instructions and feedback requests may still be sent.', unsubMissing: 'This link is not valid.', unsubError: 'Could not unsubscribe. Please try again in a moment.',
     treatLead: 'An add-on can be added to this order from the selector. A time for a new visit is chosen in the booking calendar.',
@@ -85,9 +87,11 @@ Object.assign(OT.fi, {
   cancelRuleOne: "Peruutuspyynnön voi lähettää viimeistään {hours} tunti ennen vuoron alkua, eli viimeistään {date}. Alle {hours} tunti ennen vuoroa peruutus ei ole enää mahdollinen.",
   cancelClosedOne: "Peruutus ei ole enää mahdollinen, koska vuoron alkuun on alle {hours} tunti. Jos sinulla on kysyttävää, soita meille: {phone}.",
   closedHoldExpiredOne: "Tämä varaus on peruttu, koska maksua ei saatu {minutes} minuutin kuluessa. Paikka on vapautettu muille. Mitään ei ole veloitettu. Voit tehdä uuden varauksen Sipoonjoen Perinnesaunaan.",
+  additionHoldOne: "Lisäystä pidetään {minutes} minuutti. Jos sitä ei makseta, paikka vapautuu.",
 });
 Object.assign(OT.en, {
   cancelRuleOne: "You can send a cancellation request up to {hours} hour before your session starts, that is by {date}. Less than {hours} hour before the session, cancellation is no longer possible.",
   cancelClosedOne: "Cancellation is no longer possible because your session starts in less than {hours} hour. If you have any questions, please call us: {phone}.",
   closedHoldExpiredOne: "This booking was cancelled because payment was not received within {minutes} minute. The time has been released for others. You have not been charged. You can make a new booking at Sipoonjoen Perinnesauna.",
+  additionHoldOne: "The add-on is held for {minutes} minute. If it is not paid, the place is released.",
 });

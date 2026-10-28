@@ -64,6 +64,13 @@ export const EMAIL_TEXTS: TextTable = {
   "email.cancel_request_ack.title": { fi: "Peruutuspyyntö vastaanotettu", en: "Cancellation request received" },
   "email.cancel_request_ack.message": { fi: "Olemme vastaanottaneet peruutuspyyntösi. Henkilökuntamme käsittelee sen ja ottaa yhteyttä. Varaus on voimassa, kunnes peruutus on vahvistettu.", en: "We have received your cancellation request. Our staff will handle it and contact you. The booking remains valid until the cancellation is confirmed.", cls: "protected" },
   // ---- tilauksen muutos ----
+  "email.unpaid_booking.subject": { fi: `Varaus ei vahvistunut {{var:no}} – ${SN}`, en: `Your booking didn't go through {{var:no}} – ${SN}` },
+  "email.unpaid_booking.title": { fi: "Varaus ei vahvistunut", en: "Booking not confirmed" },
+  "email.unpaid_booking.intro": { fi: "Varaustasi ei vahvistettu, koska maksua ei saatu valmiiksi. Paikka on vapautettu, eikä sinua ole veloitettu.", en: "Your booking didn't go through because payment wasn't completed. The time has been released and you have not been charged." },
+  "email.unpaid_booking.product": { fi: "Tuote: {{var:what}}", en: "Product: {{var:what}}" },
+  "email.unpaid_booking.when": { fi: "Aika: {{var:when}}", en: "Time: {{var:when}}" },
+  "email.unpaid_booking.try_again": { fi: "Yritä uudelleen", en: "Try again" },
+  "email.unpaid_booking.sign_name": { fi: "Tapio", en: "Tapio" },
   "email.order_change.subject": { fi: "Tilauksesi on muuttunut – {{var:no}}", en: "Your order has changed – {{var:no}}" },
   "email.order_change.title": { fi: "Tilaus päivitetty", en: "Order updated" },
   "email.order_change.message": { fi: "Tilaustasi on päivitetty. Ajantasaiset tiedot ovat alla.", en: "Your order has been updated. The current details are below." },

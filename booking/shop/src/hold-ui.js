@@ -78,3 +78,24 @@ export function holdPanel({ L = 'fi', co, minutes = 15, giftUsed = false, newHre
   }
   return { node, stop, clock, poll };
 }
+
+// booking_190: maksamaton lisäys (hoito tai lisäpalvelu) vahvistetussa tilauksessa. texts: title, hold, expired, cancel (hold saa {minutes}).
+export function additionHoldSection({ L = 'fi', items = [], minutes = 15, text = {}, onCancel } = {}) {
+  const rows = (items || []).filter((i) => i && i.item_id != null);
+  if (!rows.length) return null;
+  const fill = (s) => String(s || '').split('{minutes}').join(String(minutes));
+  const nameOf = (i) => (L === 'en' && i.name_en) || i.name || '';
+  const list = h('ul', { class: 'ord-lines', 'data-testid': 'pending-additions' }, rows.map((i) => {
+    const expired = i.expired === true || Number(i.seconds_left) <= 0;
+    const btn = expired ? null : h('button', {
+      type: 'button', class: 'btn light ord-btn', 'data-testid': 'cancel-addition', 'data-item-id': String(i.item_id),
+      onclick: () => onCancel?.(i, btn),
+    }, text.cancel || '');
+    return h('li', { 'data-testid': 'pending-addition', 'data-item-id': String(i.item_id) },
+      h('span', { class: 'ord-l-main' }, h('strong', { text: nameOf(i) })),
+      h('p', { class: 'bk-note', 'data-testid': expired ? 'addition-expired' : 'addition-hold-msg', text: fill(expired ? text.expired : text.hold) }),
+      btn);
+  }));
+  return h('section', { class: 'ord-card', 'aria-labelledby': 'add-hold-h', 'data-testid': 'addition-hold' },
+    h('h3', { id: 'add-hold-h', text: text.title || '' }), list);
+}

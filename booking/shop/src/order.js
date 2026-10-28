@@ -25,7 +25,7 @@ import { createOptionPicker } from './options-ui.js';
 import { ht, holdError } from './hold-texts.js';
 import { applyShopTexts } from './site-texts.js';
 import { isHoldView, giftWasUsed } from './hold-logic.js';
-import { holdPanel } from './hold-ui.js';
+import { holdPanel, additionHoldSection } from './hold-ui.js';
 import { normCheckoutOptions } from './mobilepay-logic.js';
 import { customerInvoiceLock } from './invoice-lock.js';
 
@@ -202,6 +202,19 @@ async function main() {
         annual.valid_from && annual.valid_to ? h('p', { class: 'bk-meta', text: `${t.annualCodeValid}: ${dOnly(annual.valid_from)} – ${dOnly(annual.valid_to)}` }) : null,
         h('p', { text: t.annualCodeLead }), S.shopHref ? h('p', {}, h('a', { href: S.shopHref, text: t.annualCodeBook })) : null]
         : h('p', { class: 'bk-note', text: t.annualCodePending })) : null;
+    const additions = additionHoldSection({
+      L, items: o.pending_additions || [], minutes: holdX.minutes,
+      text: { title: t.additionTitle, hold: t[oneKey('additionHold', L, { minutes: holdX.minutes }, t)], expired: t.additionExpired, cancel: t.cancelAddition },
+      onCancel: async (item, btn) => {
+        if (btn) btn.disabled = true;
+        try {
+          const r = await api.cancelAddition({ itemId: item.item_id });
+          if (r?.notReady) throw new Error('cancel-addition');
+          if (r?.ok === false) { flash(false, failText(r)); if (btn) btn.disabled = false; return; }
+          const fresh = await api.get(); if (!fresh?.ok) throw new Error('get'); await redraw(fresh); flash(true, t.additionCancelDone);
+        } catch { flash(false, t.error); if (btn) btn.disabled = false; }
+      },
+    });
     const resv = o.reservations.length ? h('section', { class: 'ord-card', 'aria-labelledby': 'ord-rv' }, h('h3', { id: 'ord-rv', text: t.reservationsTitle }),
       h('ul', { class: 'ord-lines', 'data-testid': 'order-reservations' }, o.reservations.map((r) => h('li', {},
         h('span', { class: 'ord-l-main' }, h('strong', { text: r.product_name }), r.status === 'cancelled' ? ' ' : null, r.status === 'cancelled' ? badge('st-cancelled', t.cancelledRow) : null,
@@ -281,7 +294,7 @@ async function main() {
       h('p', { class: 'bk-note' }, `${t.addNewBooking} `, h('a', { href: S.shopHref, text: t.addNewBookingLink })));
     const extra = guides || add || upsell ? h('div', { class: 'ord-extra', 'data-testid': 'order-extra' }, guides, upsell, add) : null;
     const cancel = closedHold || o.reservations.length === 0 ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c', 'data-testid': 'cancel-section' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), ...cancelBody(o, note));
-    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, closedEl, resv, optSec, lines, pay, giftCards, claimBox, annualEl, giftUse, receipts, extra, cancel, msg, phoneBox()));
+    mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, closedEl, resv, additions, optSec, lines, pay, giftCards, claimBox, annualEl, giftUse, receipts, extra, cancel, msg, phoneBox()));
   }
   async function download(btn, receiptNo) {
     btn.disabled = true;

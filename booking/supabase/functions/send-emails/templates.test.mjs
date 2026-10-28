@@ -422,7 +422,7 @@ test('booking_176: tavallinen maksulinkki ennallaan (ei voucher_difference-lohko
 });
 
 // Gmail iOS zoomaa leveimmän kohdan mukaan. Kortti on width="100%" + max-width:600px, ei width="600".
-const LAYOUT_KINDS = ['order_confirmation', 'payment_link', 'receipt', 'refund_receipt', 'cancel_request_ack', 'order_change', 'gift_card_buyer', 'gift_card_recipient', 'voucher_claim_received', 'voucher_claim_problem', 'business_quote_ack', 'business_quote_notify', 'invoice_pdf', 'product_message', 'waitlist_spot_freed', 'annual_card_code'];
+const LAYOUT_KINDS = ['order_confirmation', 'payment_link', 'receipt', 'refund_receipt', 'cancel_request_ack', 'order_change', 'gift_card_buyer', 'gift_card_recipient', 'voucher_claim_received', 'voucher_claim_problem', 'business_quote_ack', 'business_quote_notify', 'invoice_pdf', 'product_message', 'waitlist_spot_freed', 'annual_card_code', 'unpaid_booking_cancelled'];
 test('asiakasviestit: viewport ja juokseva kortti (ei width="600")', { skip }, () => {
   for (const kind of LAYOUT_KINDS) for (const locale of ['fi', 'en']) {
     const row = kind === 'refund_receipt' ? refundData(locale) : base(locale);
@@ -444,4 +444,22 @@ test('asiakasviestit: viewport ja juokseva kortti (ei width="600")', { skip }, (
   assert.match(rec.html, /white-space:pre-wrap/);
   assert.match(rec.html, /overflow-wrap:anywhere/);
   assert.doesNotMatch(rec.html, /\bwidth="600"/);
+});
+
+test('unpaid_booking_cancelled: maksu ei valmistunut, Yritä uudelleen saman tuotteen sivulle, Tapio, ei välittäjän nimeä', { skip }, () => {
+  const row = (locale, url, what) => ({ ...base(locale), kind: 'unpaid_booking_cancelled', unpaid_booking: { retry_url: url, product_name: what, starts_at: '2026-11-07T15:00:00Z' } });
+  const fi = R('unpaid_booking_cancelled', row('fi', 'https://saunotus.fi/varaa/#/tuote/saunahoito-2', 'Saunahoito'), 'fi');
+  const en = R('unpaid_booking_cancelled', row('en', 'https://saunotus.fi/en/book/#/tuote/saunahoito-2', 'Sauna treatment'), 'en');
+  assert.match(fi.subject, /^Varaus ei vahvistunut 15321/);
+  assert.match(fi.text, /maksua ei saatu valmiiksi/);
+  assert.ok(fi.text.includes('Yritä uudelleen') && fi.text.includes('https://saunotus.fi/varaa/#/tuote/saunahoito-2') && fi.text.includes('Tuote: Saunahoito'));
+  assert.match(fi.text, /Ystävällisin terveisin,\nTapio\nSipoonjoen Perinnesauna\n$/);
+  assert.ok(hrefs(fi.html).includes('https://saunotus.fi/varaa/#/tuote/saunahoito-2'));
+  assert.match(en.subject, /^Your booking didn't go through 15321/);
+  assert.match(en.text, /payment wasn't completed/);
+  assert.ok(en.text.includes('Try again') && en.text.includes('https://saunotus.fi/en/book/#/tuote/saunahoito-2'));
+  assert.match(en.text, /Kind regards,\nTapio\nSipoonjoen Perinnesauna\n$/);
+  for (const m of [fi, en]) assert.doesNotMatch(m.subject + m.text + m.html, /montonio|visma|mobilepay|vipps/i);
+  const bad = R('unpaid_booking_cancelled', row('fi', 'javascript:alert(1)', 'Saunahoito'), 'fi');
+  assert.ok(!bad.html.includes('javascript:'));
 });

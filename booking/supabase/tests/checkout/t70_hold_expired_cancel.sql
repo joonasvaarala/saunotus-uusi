@@ -43,7 +43,8 @@ begin
   perform pg_temp.ck(not exists (select 1 from booking.v_claims c where c.order_id = oid and booking._res_active(c.status, c.hold_expires_at)), 'A7: claimit eivät varaa aikaa');
   r := booking.public_get_order(tok);
   perform pg_temp.ck(r ->> 'status' = 'cancelled' and r ->> 'checkout_state' = 'cancelled' and r ->> 'cancel_reason' = 'hold_expired', 'A8: tilaussivu: cancelled + cancel_reason hold_expired');
-  perform pg_temp.ck(not exists (select 1 from booking.email_outbox where order_id = oid), 'A9: vanheneminen ei jonota sähköpostia');
+  perform pg_temp.ck((select count(*) from booking.email_outbox where order_id = oid and kind = 'unpaid_booking_cancelled') = 1
+    and (select dedupe_key from booking.email_outbox where order_id = oid and kind = 'unpaid_booking_cancelled') = 'unpaid_booking_cancelled:' || oid::text, 'A9: vanheneminen jonottaa yhden maksamaton-viestin');
   r := pg_temp.mk(v_slots[1], 'a2@t69.example');
   perform pg_temp.ck((r ->> 'ok')::boolean, 'A10: sama aika on taas varattavissa (' || coalesce(r ->> 'code', '') || ')');
 

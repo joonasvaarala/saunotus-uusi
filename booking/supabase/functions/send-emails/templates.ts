@@ -3,7 +3,7 @@
 // data = booking.email_outbox_claim()-rivi (ks. docs/talous-integraatiot.md): { kind, locale, to_name, order{order_no, order_url, total, items[], reservations[]}, receipt{receipt_no, kind, text_body, total, issued_at}, payment{amount, link_url, link_expires_at} }.
 // FI + EN, HTML (taulukkopohjainen, inline-tyylit, sähköpostiyhteensopiva) + tekstiversio. Ei ulkoisia riippuvuuksia (puhdas funktio, testattu node --test).
 // Tyyli: tumma vihreä + hiekka, ei sinistä. Logo: sivuston /img/logo-kuitti.png (osoite johdetaan tilauslinkistä; muuten LOGO_FALLBACK).
-export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify" | "invoice_pdf" | "product_message" | "waitlist_spot_freed" | "annual_card_code";
+export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify" | "invoice_pdf" | "product_message" | "waitlist_spot_freed" | "annual_card_code" | "unpaid_booking_cancelled";
 export interface Rendered { subject: string; text: string; html: string }
 // Asiakasnäkyvät tekstit: texts.ts (repon oletukset = varateksti) tai tietokannasta (email.*-avaimet, _shared/site_texts.ts). render() ottaa valinnaisen tekstihaun (4. parametri).
 import { makeT, type TFn } from "../_shared/site_texts.ts";
@@ -557,6 +557,26 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const html = mk(title, intro, h1(title) + helloRow + p(esc(intro)) + box(`<span style="font-family:${SANS};font-size:15px;line-height:1.5;color:${INK}">${esc(session)}</span>`) + p(esc(notice))
         + (book ? button(book, bookLabel) : "")
         + (leaveUrl ? p(`${esc(leaveLead)} <a href="${esc(leaveUrl)}" style="color:${GREEN_SOFT}">${esc(leaveLabel)}</a>`, `color:${MUTED};font-size:13px`) : "") + tail);
+      return { subject, text, html };
+    }
+    case "unpaid_booking_cancelled": {
+      // booking_190: kassapito vanheni, maksua ei saatu valmiiksi. Yritä uudelleen = saman tuotteen varaussivu. Allekirjoitus Tapio.
+      const u = d?.unpaid_booking || {};
+      const retry = safeUrl(u.retry_url);
+      const what = String(u.product_name || "").trim();
+      const when = u.starts_at ? dt(u.starts_at, en) : "";
+      const subject = X("email.unpaid_booking.subject", { no });
+      const title = X("email.unpaid_booking.title");
+      const intro = X("email.unpaid_booking.intro");
+      const again = X("email.unpaid_booking.try_again");
+      const product = what ? X("email.unpaid_booking.product", { what }) : "";
+      const time = when ? X("email.unpaid_booking.when", { when }) : "";
+      const cardSign = `${X("email.common.closing")}\n${X("email.unpaid_booking.sign_name")}\n${SELLER}`;
+      const cardTail = `${p(esc(contact), `color:${MUTED};font-size:13px`)}${p(esc(cardSign).replace(/\n/g, "<br>"))}`;
+      const text = textBlock(hello, intro, product, time, retry && `${again}:\n${retry}`, contact, cardSign) + "\n";
+      const html = mk(title, intro, h1(title) + helloRow + p(esc(intro))
+        + (product || time ? box([product, time].filter(Boolean).map((line) => `<span style="font-family:${SANS};font-size:15px;line-height:1.5;color:${INK}">${esc(line)}</span>`).join("<br>")) : "")
+        + (retry ? button(retry, again) : "") + cardTail);
       return { subject, text, html };
     }
     case "order_change":
