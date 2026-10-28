@@ -1,0 +1,22 @@
+[
+  {
+    "key": "ui.shop.k_tapahtuma",
+    "lang": "fi",
+    "text": "Tapahtumat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Kaupan kategoriachippi tapahtumille (category event), erillään Muut-ryhmästä. FI+EN. Tuo admin_texts_importilla. Ei skeemamuutosta."
+  },
+  {
+    "key": "ui.shop.k_tapahtuma",
+    "lang": "en",
+    "text": "Events",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Kaupan kategoriachippi tapahtumille (category event), erillään Muut-ryhmästä. FI+EN. Tuo admin_texts_importilla. Ei skeemamuutosta."
+  }
+]

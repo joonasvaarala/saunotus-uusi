@@ -316,8 +316,9 @@ jobs:
       # booking_158 (käyttöliittymä): hallinnan Tapahtumat-näkymä (kerrat yksitellen/monivalinta, osallistujamäärät, resurssivaraukset suhteellinen/kellonaika,
       # saunottajat, kanavat, kopio 'Kopio: nimi'), kaupan suljettu tapahtumasivu, etusivun tapahtumakortit (events_shop → /varaa/#/tuote/<slug>), XSS. Tekstit pending-import-57.
       - run: node --test booking/tests/tapahtumat-158-ui.test.mjs booking/tests/tapahtumakortit.test.mjs
-      # Kauppa: tuotekortin ajankohta omalla rivillään hinnan yläpuolella (card-meta.js); päivänäkymä yksityisvuorot → yleiset → hoidot (FI/EN)
-      - run: node --test booking/tests/kortit-jarjestys.test.mjs
+      # Kauppa: tuotekortin ajankohta omalla rivillään hinnan yläpuolella (card-meta.js); päivänäkymä yksityisvuorot → yleiset → tapahtumat → hoidot (FI/EN)
+      # Tapahtumat-chippi (category event) erillään Muut-ryhmästä. Tekstit pending-import-91.
+      - run: node --test booking/tests/kortit-jarjestys.test.mjs booking/tests/kategoria-tapahtumat.test.mjs
       # UX-katsaus 28.10.2026: maksutapamerkit, peruttu varaus, yhteenvetopainike, tuotekorttilinkki, lahjakorttiohje, peruutusehto, vuorolistan järjestys
       - run: node --test booking/tests/ux-kauppa-1028.test.mjs
       # booking_192: hallinnan alennuskoodi, lahjakortti, ylibuukkaus ja aikataulun ulkopuolinen varaus.
