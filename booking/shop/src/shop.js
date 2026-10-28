@@ -70,7 +70,9 @@ const dayLong = (iso) => fmt(iso, { weekday: 'long', day: 'numeric', month: 'lon
 const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const todayHel = () => new Date().toLocaleDateString('sv-SE', { timeZone: TZ });
 const pad2 = (n) => String(n).padStart(2, '0');
-const cleanLabel = (l) => (l || '').replace(/\(\s*\d+(?:[.,]\d+)?\s*h\s*\)/g, '').replace(/\b(ma|ti|ke|to|pe|la|su)(–(ma|ti|ke|to|pe|la|su))?\b/g, '').replace(/\d{1,2}(:\d{2})?(–\d{1,2}(:\d{2})?)?/g, '').replace(/\s{2,}/g, ' ').trim();
+// pelkkä päivämäärä/kellonaika (esim. "31.10.2026 klo 15.00" / "31.10.2026 at 15:00") → jäljelle jää vain välimerkkejä ja klo/at: ei alaotsikkoa
+const labelRest = (r) => (/^[\s.,:;–-]*(?:(?:klo|at)\b[\s.,:;–-]*)?$/i.test(r) ? '' : r);
+const cleanLabel = (l) => labelRest((l || '').replace(/\(\s*\d+(?:[.,]\d+)?\s*h\s*\)/g, '').replace(/\b(ma|ti|ke|to|pe|la|su)(–(ma|ti|ke|to|pe|la|su))?\b/g, '').replace(/\d{1,2}(:\d{2})?(–\d{1,2}(:\d{2})?)?/g, '').replace(/\s{2,}/g, ' ').trim());
 const priceFor = (s, n) => (s.price_mode === 'per_person' ? s.unit_price * n : s.price_mode === 'fixed' ? s.base_price : s.base_price + Math.max(0, n - (s.included_persons || 0)) * (s.extra_person_price || 0));
 // lisäpalvelun enimmäismäärä: henkilömäärä × max/hlö, enintään 99 (sama kuin booking._addon_limit)
 const addonLimit = (a, n) => Math.min((a.max_per_person ?? 99) * Math.max(1, n), 99);
@@ -508,7 +510,7 @@ async function viewProduct(slug, dateStr, query) {
     if (ev) { viewEventClosed(ev); return; }
     const st = (await fetch(S.staticProductsUrl).then((r) => r.json()).catch(() => ({})))[slug];
     mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })),
-      h('h2', { text: st ? st.name : t.unknownProduct }), st ? fallbackDesc(h, st, S.lang) : null,   // kuvaus voi olla rikasta: puhdistettuna (rich-view.js), ei raakana tekstinä
+      h('h2', { text: st ? pname(st) : t.unknownProduct }), st ? fallbackDesc(h, st, S.lang) : null,   // kuvaus voi olla rikasta: puhdistettuna (rich-view.js), ei raakana tekstinä
       st ? h('div', { class: 'bk-notice' }, h('p', { text: t.contactUs }), phoneBox()) : null);
     focusTop(); return;
   }

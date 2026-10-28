@@ -114,6 +114,10 @@ const FALLBACK_IMG = Object.freeze({
   'synttarisauna': 'j-synttarisauna',
 });
 
+// Sivukohtainen korttikuva (Joonas 28.10.2026): Saunahoidon tuotekuva (10-ifj3bf.webp) on käytännössä sama kuva kuin Saunotuksella,
+// joten tällä sivulla Saunahoito käyttää hunajahoidon kuvaa (content/images.json). Kaupan tuotekuva ei muutu.
+const PAGE_IMG = Object.freeze({ 'saunahoito-2': 'hunaja' });
+
 const quiet = { warn() {} };
 const tt = (key, lang) => tx(key, lang, { fallback: TREATMENTS_TEXTS[key][lang], log: quiet });
 const pic = (id, lang, o = {}) => picture(id, { alt: o.alt ?? alts[id]?.[lang] ?? '', ...o });
@@ -148,6 +152,8 @@ function blurb(p, lang) {
 }
 
 function cardImage(p, lang, name) {
+  const own = PAGE_IMG[p.slug];
+  if (own) return `<span class="bk-img card-img">${pic(own, lang, { sizes: SIZES.shop, alt: alts[own]?.[lang] || name })}</span>`;
   const row = productImageFor(p.slug);
   const url = productImageUrl(row);
   if (url) {
@@ -249,6 +255,6 @@ function faq(d, lang) {
 
 export function treatmentsBody(lang, { reviews = '' } = {}) {
   const d = pageDoc('treatments')[lang];
-  const intro = sec('', `<div class="narrow center"><p class="kicker">${e(d.intro.kicker)}</p><h2 class="sec-title">${e(d.intro.title)}</h2><p class="lead">${e(d.intro.text)}</p><p class="note-box">${e(d.intro.note)}</p></div>`);
+  const intro = sec('', `<div class="narrow center"><p class="kicker">${e(d.intro.kicker)}</p><h2 class="sec-title">${e(d.intro.title)}</h2><p class="lead">${e(d.intro.text)}</p></div>`);
   return hero(d, lang) + intro + paths(lang) + groups(d, lang) + steps(lang) + fit(lang) + reviews + faq(d, lang);
 }

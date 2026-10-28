@@ -85,6 +85,9 @@ test('kauppa: EN-sivu näyttää vuoron label_en, puuttuessa label; FI aina labe
   assert.equal(rl({ lang: 'en' })({ label: 'Iltasauna', label_en: '' }), 'Iltasauna');
   assert.equal((shop.match(/cleanLabel\(rlabel\(r\)\)/g) || []).length, 4, 'tuotekortti, varausyhteenveto, vuorolista (2)');
   assert.doesNotMatch(shop, /cleanLabel\(r\.label\)/, 'ei suoraa label-näyttöä');
+  assert.match(shop, /h\('h2', \{ text: st \? pname\(st\) : t\.unknownProduct \}\)/, 'yhteydenottotuote: EN-nimi (name_en) static-products.jsonista');
+  assert.doesNotMatch(shop, /st \? st\.name :/, 'ei suomenkielistä nimeä EN-kaupassa');
+  assert.match(shop, /const labelRest = /, 'pelkkä päivämäärä/kellonaika ei jätä "klo"-jäännöstä');
 });
 
 const FAKE = {
