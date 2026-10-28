@@ -286,7 +286,7 @@ async function main() {
     const receipts = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-r' }, h('h3', { id: 'ord-r', text: t.receiptsTitle }),
       o.receipts.length ? h('ul', { class: 'ord-lines', 'data-testid': 'receipts' }, o.receipts.map((r) => h('li', {},
         h('span', { class: 'ord-l-main' }, h('strong', { text: r.receipt_no }), ' ', badge('', t[r.kind] || r.kind)), h('span', { class: 'ord-l-meta', text: `${r.issued_at ? dt(r.issued_at) : ''}${r.total ? ' · ' + money(r.total) : ''}` }),
-        h('span', { class: 'ord-l-sum' }, h('button', { type: 'button', class: 'btn light ord-btn', 'data-testid': 'receipt-dl', onclick: (ev) => download(ev.currentTarget, r.receipt_no), text: t.download }))))) : h('p', { class: 'bk-note', text: t.noReceipts }));
+        h('span', { class: 'ord-l-sum' }, h('button', { type: 'button', class: 'btn light ord-btn', 'data-testid': 'receipt-dl', onclick: (ev) => download(ev.currentTarget, r), text: t.download }))))) : h('p', { class: 'bk-note', text: t.noReceipts }));
     const msg = h('div', { 'aria-live': 'polite', class: 'ord-msg', 'data-testid': 'order-msg' });
     const note = o.change_deadline ? emailText(o.can_change ? t.changeNote.replace('{date}', dt(o.change_deadline)) : t.changeClosed, { class: 'bk-note', 'data-testid': 'change-note' }) : null;
     const guides = instructionsSection(o.instructions);
@@ -305,13 +305,21 @@ async function main() {
     const cancel = closedHold || o.reservations.length === 0 ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c', 'data-testid': 'cancel-section' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), ...cancelBody(o, note));
     mount(api.mock ? h('p', { class: 'ord-mock', role: 'status', 'data-testid': 'mock-banner', text: t.mockBanner }) : null, h('div', { class: 'ord', 'data-testid': 'order-page' }, mpHost, head, holdEl, closedEl, resv, additions, optSec, lines, pay, giftCards, claimBox, annualEl, giftUse, receipts, extra, cancel, msg));
   }
-  async function download(btn, receiptNo) {
+  function receiptPdfHref(pdfUrl) {
+    try {
+      const u = new URL(pdfUrl);
+      if (validToken(token) && !u.searchParams.get('o')) u.searchParams.set('o', token);
+      return u.toString();
+    } catch { return pdfUrl; }
+  }
+  async function download(btn, receipt) {
     btn.disabled = true;
     try {
-      const r = await api.getReceipt({ receiptNo });
+      const r = await api.getReceipt({ receiptNo: receipt.receipt_no });
       if (r?.notReady || !r?.ok) throw new Error('receipt');
-      const url = r.pdf_url || URL.createObjectURL(new Blob([r.text_body || ''], { type: 'text/plain;charset=utf-8' }));
-      const a = h('a', { href: url, download: r.pdf_url ? null : `${receiptNo}.txt`, target: r.pdf_url ? '_blank' : null, rel: 'noopener' }); document.body.append(a); a.click(); a.remove();
+      if (receipt.token && r.public_token && String(r.public_token).toLowerCase() !== String(receipt.token).toLowerCase()) throw new Error('receipt');
+      const url = r.pdf_url ? receiptPdfHref(r.pdf_url) : URL.createObjectURL(new Blob([r.text_body || ''], { type: 'text/plain;charset=utf-8' }));
+      const a = h('a', { href: url, download: r.pdf_url ? null : `${receipt.receipt_no}.txt`, target: r.pdf_url ? '_blank' : null, rel: 'noopener' }); document.body.append(a); a.click(); a.remove();
     } catch { flash(false, t.error); } finally { btn.disabled = false; }
   }
   const flash = (ok, text) => { const m = root.querySelector('[data-testid=order-msg]'); if (m) { m.replaceChildren(h('p', { class: ok ? 'bk-ok' : 'bk-error', role: ok ? 'status' : 'alert', text })); revealIfHidden(m); } };

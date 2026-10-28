@@ -9,6 +9,7 @@ import { RITUAL_TEXTS, RITUAL_ERRORS } from './ritual-addon-texts.js';
 export const T = {
   fi: {
     title: 'Varaa saunaelämys', lead: 'Valitse kokemus, päivä ja vuoro. Varaus vahvistetaan heti.',
+    giftLink: 'Etsitkö lahjaa? Osta lahjakortti →',
     modeLabel: 'Selaustapa', modeCat: 'Selaa kategorioittain', modeDay: 'Selaa päivän mukaan', dayTitle: 'Varaa päivän mukaan', dayLead: 'Valitse päivä ja katso, mitkä palvelut ovat silloin varattavissa. Ajat näkyvät kun valitset palvelun.',
     pickDay: 'Valitse päivä', today: 'Tänään', prevWeek: 'Edellinen viikko', nextWeek: 'Seuraava viikko', daySessions: (n) => (n === 1 ? '1 vapaa vuoro' : `${n} vapaata vuoroa`), noSessions: 'ei vuoroja',
     pickProduct: 'Valitse tuote, niin näet sen vapaat ajat.', timesFree: (n) => (n === 1 ? '1 aika vapaana' : `${n} aikaa vapaana`), firstAt: 'ensimmäinen klo', productInfo: 'Tuotteen tiedot ja muut päivät',
@@ -86,6 +87,7 @@ export const T = {
   },
   en: {
     title: 'Book a sauna experience', lead: 'Choose an experience, a day and a session. Your booking is confirmed instantly.',
+    giftLink: 'Looking for a gift? Buy a gift card →',
     modeLabel: 'Browse mode', modeCat: 'Browse by category', modeDay: 'Browse by date', dayTitle: 'Book by date', dayLead: 'Pick a date to see which services you can book. Times appear when you choose a service.',
     pickDay: 'Pick a date', today: 'Today', prevWeek: 'Previous week', nextWeek: 'Next week', daySessions: (n) => (n === 1 ? '1 session available' : `${n} sessions available`), noSessions: 'no sessions',
     pickProduct: 'Choose a service to see its available times.', timesFree: (n) => (n === 1 ? '1 time available' : `${n} times available`), firstAt: 'first at', productInfo: 'Service details and other dates',

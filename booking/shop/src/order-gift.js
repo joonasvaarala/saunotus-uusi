@@ -176,7 +176,7 @@ export function cardsSection({ S, L, api, cards }) {
       finally { btn.disabled = false; if (!panel.hidden) revealIfHidden(panel); }
     } });
     return h('li', { class: 'gc-ocard', 'data-testid': 'gc-card' },
-      h('span', { class: 'ord-l-main' }, h('strong', { text: c.package_name || c.package_code }), ' ', h('span', { class: `ord-badge ${badgeClass(c.status)}`, text: status })),
+      h('span', { class: 'ord-l-main' }, h('strong', { text: `${c.package_name || c.package_code}${c.persons ? ` · ${tx('persons', { n: c.persons })}` : ''}` }), ' ', h('span', { class: `ord-badge ${badgeClass(c.status)}`, text: status })),
       h('span', { class: 'ord-l-sum', text: money(c.amount) }),
       h('span', { class: 'ord-l-meta', text: [c.recipient_name ? `${tx('o.cardTo')}: ${c.recipient_name}` : '', c.valid_to ? `${tx('o.cardValidTo')}: ${date(c.valid_to)}` : tx('o.cardNotReady')].filter(Boolean).join(' · ') }),
       dlvNote ? h('span', { class: 'ord-l-meta gc-dlvnote', 'data-testid': 'gc-delivery', text: dlvNote }) : null,

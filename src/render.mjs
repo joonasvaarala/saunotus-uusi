@@ -6,6 +6,9 @@ import { articlesNav, publishedArticleCount, homeSection } from './articles/runt
 import { openingSummary } from './opening.mjs';
 import { tx } from './site-texts.mjs';
 import { seoSchemaForPage, jsonLdScript } from './seo-enhance.mjs';
+import { PUBLISHED_GIFT_PACKAGES, GIFT_PACKAGE_IMAGE, giftMetaDescription } from '../booking/shop/src/gift-offers.js';
+import { itemLines } from '../booking/shop/src/gift-logic.js';
+import { gtText } from '../booking/shop/src/gift-texts.js';
 import { privacyAnalyticsHtml, policyHasAnalyticsSection } from './privacy-analytics.mjs';
 import { policyText, privacyDocFor, linkContacts } from './policy-lang.mjs';
 import { quietWeekAttrs } from './quiet-week.mjs';
@@ -384,19 +387,35 @@ export function treatments(lang) {
   return layout({ lang, key: 'treatments', meta: d.meta, body });
 }
 
+function giftOfferCard(p, lang) {
+  const title = lang === 'en' ? p.name_en : p.name;
+  const text = lang === 'en' ? (p.description_en || '') : (p.description || '');
+  const lines = itemLines(p, lang, pageHref('book', lang));
+  const list = lines.length ? `<ul class="list">${lines.map((row) => `<li>${row.href ? `<a href="${e(row.href)}">${e(row.label)}</a>` : e(row.label)}</li>`).join('')}</ul>` : '';
+  const price = `${money(p.price, lang)} · ${gtText(lang, 'persons', { n: p.persons })}`;
+  const unit = p.unit_price != null ? `<li><small>${e(gtText(lang, 'perPerson', { price: money(p.unit_price, lang) }))}</small></li>` : '';
+  return `<li class="card" data-gift-package="${e(p.code)}"><div class="im">${pic(GIFT_PACKAGE_IMAGE[p.code] || 'j-yleinen', lang, { sizes: '(min-width:1100px) 230px, 90vw', alt: '' })}<span class="pill">${e(gtText(lang, 'pkgKicker'))}</span></div>
+<div class="bd"><h3>${e(title)}</h3>
+<p>${e(text)}</p>${list}
+<ul class="meta"><li class="pr">${e(price)}</li>${unit}<li>${e(gtText(lang, 'valid', { months: p.valid_months }))}</li></ul></div></li>`;
+}
 export function gift(lang) {
   const d = P('gift')[lang], u = ui(lang);
+  const openPkg = PUBLISHED_GIFT_PACKAGES.find((p) => p.is_open);
   const ap = product(C('gift.avoin').kb);
-  const pack = ['koivuvihta', 'turvenaamio', 'hoito', 'hoito-kahdelle', 'vuosikortti'].map((k) => C('gift.' + k));
+  const from = priceOf(ap);
+  if (+from !== +openPkg.min_amount) throw new Error(`avoin lahjakortti: kb ${from} €, julkaistu minimi ${openPkg.min_amount} €`);
+  const pack = PUBLISHED_GIFT_PACKAGES.filter((p) => !p.is_open).map((p) => giftOfferCard(p, lang)).join('');
   const ext = d.extend;
+  const meta = { ...d.meta, description: giftMetaDescription(lang) };
   const body = pageHero(d.hero, lang, 'gift')
-    + sec('', `<div class="company"><div><p class="kicker">${e(d.openTitle)}</p><h2 class="sec-title">${e(d.openTitle)}</h2><p>${e(d.openText)}</p><p class="price" style="color:var(--gold)">${e(`${u.fromWord} ${money(priceOf(ap), lang)}`)}</p><a class="btn" href="${e(bookingUrl(ap.booking_url, lang))}" target="_blank" rel="noopener">${e(C('gift.avoin')[lang].cta)}${NEW(lang)}</a></div><div class="im">${pic(C('gift.avoin').img, lang, { sizes: '(min-width:900px) 520px, 100vw', alt: '' })}</div></div>`, 'avoin')
-    + sec('tint', `${head('', d.packTitle, '', { orn: true })}${cardList(pack, lang, 'five', { sizes: '(min-width:1100px) 230px, 90vw' })}<p class="center" style="margin-top:24px"><a class="btn light sm" href="${e(jk('giftAll', lang))}" target="_blank" rel="noopener">${e(d.allGift)}${NEW(lang)}</a></p>`, 'paketit')
+    + sec('', `<div class="company"><div><p class="kicker">${e(d.openTitle)}</p><h2 class="sec-title">${e(openPkg[lang === 'en' ? 'name_en' : 'name'])}</h2><p>${e(d.openText)}</p><p class="price" style="color:var(--gold)">${e(`${u.fromWord} ${money(from, lang)}`)}</p><a class="btn" href="${e(bookingUrl(ap.booking_url, lang))}" target="_blank" rel="noopener">${e(C('gift.avoin')[lang].cta)}${NEW(lang)}</a></div><div class="im">${pic(C('gift.avoin').img, lang, { sizes: '(min-width:900px) 520px, 100vw', alt: '' })}</div></div>`, 'avoin')
+    + sec('tint', `${head('', d.packTitle, '', { orn: true })}<ul class="cards five">${pack}</ul><p class="center" style="margin-top:24px"><a class="btn light sm" href="${e(jk('giftAll', lang))}" target="_blank" rel="noopener">${e(d.allGift)}${NEW(lang)}</a></p>`, 'paketit')
     + sec('', `${head('', d.haveTitle, d.haveText, { orn: true })}<div class="cards two" style="display:grid;gap:22px">
 <article class="card"><div class="bd"><p class="kicker">${e(d.own.kicker)}</p><h3 style="font-family:var(--head);font-size:26px">${e(d.own.title)}</h3><p>${e(d.own.how || d.own.text)}</p><p><a class="btn" href="${e(jk('giftReservation', lang))}" target="_blank" rel="noopener">${e(d.own.cta)}${NEW(lang)}</a></p></div></article>
 <article class="card"><div class="bd"><p class="kicker">${e(d.third.kicker)}</p><h3 style="font-family:var(--head);font-size:26px">${e(d.third.title)}</h3><p>${e(d.third.text)} <a href="${e(site.giftCardSupportUrl)}" rel="noopener">${e(d.third.link)}${NEW(lang)}</a>.</p><p>${e(d.third.pay || d.third.text2)}</p><p><a class="btn" href="${e(jk('giftReservation', lang))}" target="_blank" rel="noopener">${e(d.third.cta)}${NEW(lang)}</a></p></div></article></div>`, 'on-jo-lahjakortti')
     + sec('tint', `<div class="narrow center"><h2 class="sec-title">${e(ext.title)}</h2><p>${e(ext.text)}</p><p>${mailBtn(site.contact.email, ext.title, 'btn light sm')} <a class="btn light sm" href="tel:${site.contact.phoneTel}">${e(phoneDisplay(lang))}</a></p><p>${e(ext.third)}</p></div>`, 'jatkaminen');
-  return layout({ lang, key: 'gift', meta: d.meta, body });
+  return layout({ lang, key: 'gift', meta, body });
 }
 
 export function book(lang) {

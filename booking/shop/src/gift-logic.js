@@ -39,7 +39,7 @@ export function validateBuyer(b) {
   if (!b.terms) err.terms = 'terms';
   return err;
 }
-export const lineAmount = (line, pkg) => (!pkg ? 0 : pkg.is_open ? (parseAmount(line.amount) ?? 0) : +pkg.price);
+export const lineAmount = (line, pkg) => (!pkg ? 0 : pkg.is_open ? (parseAmount(line.amount) ?? 0) : (packageAmount(pkg, line.persons ?? pkg.persons) ?? +pkg.price));
 export const lineTotal = (line, pkg) => round2(lineAmount(line, pkg) * (Number(line.qty) || 0));
 export function totals(lines, pkgs) {
   const by = new Map(pkgs.map((p) => [p.code, p]));
@@ -52,6 +52,12 @@ export function itemsPayload(lines, pkgs) {
   return lines.map((l) => {
     const p = by.get(l.pkg), it = { package: l.pkg, quantity: Math.trunc(Number(l.qty)) || 1 };
     if (p?.is_open) it.amount = parseAmount(l.amount);
+    else if (packageIsFlexible(p)) {
+      const n = Math.trunc(Number(l.persons ?? p.persons)) || p.persons || 1;
+      it.persons = n;
+      const amt = packageAmount(p, n);
+      if (amt != null) it.amount = amt;
+    }
     const rn = String(l.recipientName ?? '').trim(), re = String(l.recipientEmail ?? '').trim().toLowerCase(), gr = cleanGreeting(l.greeting);
     const to = l.deliveryTo === 'recipient' ? 'recipient' : 'buyer';
     it.delivery_to = to;   // valinta aina eksplisiittisesti (oletus: minulle)
@@ -149,7 +155,49 @@ export const SERVER_FIELD = { deliver_on_past: 'deliverOn', deliver_on_too_far: 
 export const DELIVERY_ERROR_CODES = Object.keys(SERVER_FIELD);
 
 // Paketin sisältölista (public_gift_card_packages.items[]): FI = label, EN = label_en (migraatio booking_45). Vain rivit joilla on nimi kyseisellä kielellä (ei FI-nimeä EN-sivulle).
-export const itemLabels = (p, lang) => (Array.isArray(p?.items) ? p.items : []).map((it) => String((lang === 'en' ? it?.label_en : it?.label) ?? '').trim()).filter(Boolean);
+export const itemLabels = (p, lang) => itemLines(p, lang).map((x) => x.label);
+
+// Kaupan tuotesivut (booking_163). Lisäpalvelulla (addon_code, ei näitä id:itä) ei ole omaa sivua.
+export const SHOP_PRODUCT_SLUG = Object.freeze({
+  1: 'yleinensauna', 2: 'miestensauna-2', 3: 'naistensauna', 4: 'hiljainen-sauna', 5: 'turvetorstai', 6: 'tunnin-vuoro',
+  7: 'saunarituaali-ja-savusaunavuoro', 8: 'saunotusrituaali', 10: 'saunahoito-2', 11: 'saunotus-2', 12: 'syvasaunotus',
+  25: 'oma-saunavuoro', 26: 'jalkiloylyt', 48: 'saunavuoro-yrityksille', 49: 'jalkiloylyt-yrityksille',
+});
+export function itemLines(p, lang, shopHref = '') {
+  const base = String(shopHref || '').replace(/#.*$/, '').replace(/\/+$/, '');
+  return (Array.isArray(p?.items) ? p.items : []).map((it) => {
+    const label = String((lang === 'en' ? it?.label_en : it?.label) ?? '').trim();
+    if (!label) return null;
+    const slug = SHOP_PRODUCT_SLUG[Number(it?.kb_product_id)];
+    return { label, href: slug && base ? `${base}/#/tuote/${encodeURIComponent(slug)}` : null };
+  }).filter(Boolean);
+}
+
+// Esirenderöity #avoin/#paketit korvataan vain, kun paketit saatiin ja myynti on auki. API-virhe (ok:false tai ei vastausta) jättää julkaistun listan paikalleen.
+export const giftSaleReplacesStatic = (pk) => !!(pk?.ok && pk.sale_enabled && Array.isArray(pk.packages) && pk.packages.length);
+// Vuosikortin ostolinkki vain kun palvelin sanoo available. Muuten ei lupausta eikä linkkiä.
+export function annualCardBuyHref(offer, shopHref) {
+  if (!offer?.available) return '';
+  const base = String(shopHref || '').replace(/#.*$/, '').replace(/\/+$/, '');
+  return base ? `${base}/#/vuosikortti` : '';
+}
+// booking_196: hinta = osien hinta valitulle henkilömäärälle. Lineaarinen osa unit×n, saunahoito/saunotus perushinta + lisä.
+export const packageIsFlexible = (p) => !p?.is_open && (p?.min_persons != null && p?.max_persons != null || (p?.items || []).some((it) => it?.unit_price != null));
+export function packageAmount(p, n) {
+  const persons = Math.trunc(Number(n));
+  if (!p || p.is_open || !Number.isInteger(persons) || persons < 1) return null;
+  const min = p.min_persons ?? 1, max = p.max_persons ?? p.persons ?? persons;
+  if (p.min_persons != null && (persons < min || persons > max)) return null;
+  const parts = (Array.isArray(p.items) ? p.items : []).filter((it) => it && it.unit_price != null);
+  if (!parts.length) return p.persons && persons === +p.persons && p.price != null ? +p.price : (p.unit_price != null ? Math.round(+p.unit_price * persons * 100) / 100 : null);
+  let sum = 0;
+  for (const part of parts) {
+    const unit = +part.unit_price;
+    if (part.price_type === 'base_plus_extra') sum += unit + (+part.extra_price || 0) * Math.max(0, persons - (part.included ?? 1));
+    else sum += unit * persons;
+  }
+  return Math.round(sum * 100) / 100;
+}
 
 // ---------- Yksi koodikenttä: oma kortti vs. kumppanin lahjakortti (sopimus §13.12, migraatiot booking_47/48) ----------
 // Palvelin on totuus (public_resolve_gift_code); nämä ovat vain nopea käyttäjäpalaute ja mockin peili.
