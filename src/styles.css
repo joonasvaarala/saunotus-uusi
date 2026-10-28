@@ -380,6 +380,16 @@ html.co-js.co-show-sauna #yritysvuorot,html.co-js.co-show-day #tarjous{display:b
   .tradition-photo img{object-position:50% 40%}
   .tradition-copy{padding:22px 18px 26px}
 }
+/* Varausnappi arvostelujen ja Tapahtumat-otsikon välissä. Kulta erottuu Google-linkin ääriviivanapista. */
+.home-book{margin:0;padding:28px 20px 8px;text-align:center}
+.home-book .btn{min-height:48px}
+.rv-sec:has(+ .home-book){padding-bottom:8px}
+.rv-sec:has(+ .home-book) > .wrap > p.center:last-child{margin-bottom:0}
+.home-book + .section.home-tight{padding-top:32px}
+@media (max-width:719px){
+  .home-book{padding:24px 20px 4px}
+  .home-book + .section.home-tight{padding-top:28px}
+}
 .strip-row{display:flex;align-items:center;justify-content:space-between;gap:24px}
 .strip-row .sec-title{font-size:clamp(26px,3vw,36px);margin:0 0 .25em}
 .strip-row p{margin:0;max-width:46em}

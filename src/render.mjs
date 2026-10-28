@@ -9,7 +9,7 @@ import { seoSchemaForPage, jsonLdScript } from './seo-enhance.mjs';
 import { privacyAnalyticsHtml, policyHasAnalyticsSection } from './privacy-analytics.mjs';
 import { policyText, privacyDocFor, linkContacts } from './policy-lang.mjs';
 import { quietWeekAttrs } from './quiet-week.mjs';
-import { experienceHtml, traditionHtml, infoStrip, companyStrip, homeText } from './home-front.mjs';
+import { experienceHtml, traditionHtml, infoStrip, companyStrip, homeText, homeBookCta } from './home-front.mjs';
 import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
 import { selectShopEvents, shopEventsHtml, shopHash } from './event-cards.mjs';
 import {
@@ -354,7 +354,7 @@ export function home(lang, opt = {}) {
   const faqs = HOME_FAQ.map((id) => faqFor(id, lang)).filter(Boolean).map((f) => `<details${f.lang !== lang ? ` lang="${e(f.lang)}"` : ''}><summary>${e(f.question)}</summary><p>${e(clean(f.answer))}</p></details>`).join('');
   const faq = sec('faq home-tight', `<header class="center"><h2 class="sec-title">${e(u.faqKicker)}</h2></header><div class="narrow faq">${faqs}</div>`);
   const pre = heroPreload();
-  const body = (opt.previewNote ? `<p class="prev-note" role="note">${e(opt.previewNote)}</p>` : '') + hero + choose + wk + tradition + reviewsSection(lang) + ev + infoStripSec + comp + faq;
+  const body = (opt.previewNote ? `<p class="prev-note" role="note">${e(opt.previewNote)}</p>` : '') + hero + choose + wk + tradition + reviewsSection(lang) + homeBookCta(lang) + ev + infoStripSec + comp + faq;
   return layout({ lang, key: 'home', meta: opt.meta || d.meta, preload: pre, body, seo: opt.seo || null, extraCss: art && String(art).includes('home-art') ? homeArticlesCss : '' });
 }
 

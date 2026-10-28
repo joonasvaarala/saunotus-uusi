@@ -27,9 +27,11 @@ test('perinne-osio säilyttää home.json about -kentän FI+EN sanasta sanaan', 
 
 test('pending-import-85 vastaa HOME_TEXTS-varatekstejä, FI+EN, ei HTML:ää', () => {
   const extra = JSON.parse(readFileSync(new URL('../content/site-texts.pending-import-87.json', import.meta.url), 'utf8'));
+  const bookCta = JSON.parse(readFileSync(new URL('../content/site-texts.pending-import-93.json', import.meta.url), 'utf8'));
   const gift = new Set(['ui.site.home_gift_cta']);
+  const book = new Set(['ui.site.home_book_cta']);
   for (const [key, v] of Object.entries(HOME_TEXTS)) for (const lang of ['fi', 'en']) {
-    const pool = gift.has(key) ? extra : pending;
+    const pool = gift.has(key) ? extra : book.has(key) ? bookCta : pending;
     const row = pool.find((x) => x.key === key && x.lang === lang);
     assert.ok(row, `${key} ${lang}`);
     assert.equal(row.text, v[lang]);
@@ -39,7 +41,8 @@ test('pending-import-85 vastaa HOME_TEXTS-varatekstejä, FI+EN, ei HTML:ää', (
     assert.ok(!row.text.includes('<'));
     assert.doesNotMatch(row.text, /johku/i);
   }
-  assert.equal(pending.length, (Object.keys(HOME_TEXTS).length - gift.size) * 2);
+  assert.equal(pending.length, (Object.keys(HOME_TEXTS).length - gift.size - book.size) * 2);
+  assert.equal(bookCta.length, book.size * 2);
 });
 
 test('elämyskortit: nimi, hinta ja kesto tuotteesta; lahjakortti #avoin; kuva vain hallinnan kuvasta', () => {
@@ -97,7 +100,14 @@ test('etusivu: järjestys, ei varaa-verkosta-listaa, torstai 16:00, kaksi tapaht
   assert.ok(fi.indexOf('id="valitse-elamys"') < fi.indexOf('class="week soon"'));
   assert.ok(fi.indexOf('class="week soon"') < fi.indexOf('class="tradition"'));
   assert.ok(fi.indexOf('class="tradition"') < fi.indexOf('id="arvostelut"'));
-  assert.ok(fi.indexOf('id="arvostelut"') < fi.indexOf('id="tapahtumat"'));
+  assert.ok(fi.indexOf('id="arvostelut"') < fi.indexOf('class="home-book"'));
+  assert.ok(fi.indexOf('class="home-book"') < fi.indexOf('id="tapahtumat"'));
+  const between = fi.slice(fi.indexOf('id="arvostelut"'), fi.indexOf('id="tapahtumat"'));
+  assert.ok(between.indexOf('class="btn light sm"') < between.indexOf('class="home-book"'));
+  assert.match(between, /<p class="home-book"><a class="btn gold" href="\/varaa\/">Varaa saunavuoro →<\/a><\/p>/);
+  const betweenEn = en.slice(en.indexOf('id="reviews"'), en.indexOf('id="tapahtumat"'));
+  assert.match(betweenEn, /<p class="home-book"><a class="btn gold" href="\/en\/book\/">Book a sauna →<\/a><\/p>/);
+  assert.doesNotMatch(R.book('fi'), /class="home-book"/);
   assert.ok(fi.indexOf('id="tapahtumat"') < fi.indexOf('id="saunatietoa"'));
   assert.ok(fi.indexOf('id="saunatietoa"') < fi.indexOf('id="yrityksille"'));
   assert.match(fi, /Näytä koko viikko/);
