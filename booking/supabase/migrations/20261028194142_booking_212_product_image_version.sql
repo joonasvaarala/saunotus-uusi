@@ -4,7 +4,7 @@
 -- ja selain liittää arvon kuvan osoitteeseen (?v=), jotta sama polku ei näytä välimuistin vanhaa tiedostoa.
 -- Rivijoukko, polku, alt ja järjestys eivät muutu. Ei uutta saraketta: updated_at on ollut product_configissa booking_01:stä.
 -- CREATE OR REPLACE säilyttää omistajan ja oikeudet (anon, authenticated, service_role).
--- Paluu: booking/supabase/rollbacks/20261028194500_booking_212_ROLLBACK.sql.
+-- Paluu: booking/supabase/rollbacks/20261028194142_booking_212_ROLLBACK.sql.
 set local lock_timeout = '5s';
 
 create or replace function booking.public_product_images()

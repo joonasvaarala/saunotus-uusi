@@ -59,10 +59,10 @@ test('mockin img=2 vaihtaa tuotekuvan polun ja version', () => {
 });
 
 test('booking_212 lisää updated_at:n eikä muuta kuvien joukkoa', () => {
-  const sql = readFileSync(new URL('../booking/supabase/migrations/20261028194500_booking_212_product_image_version.sql', import.meta.url), 'utf8');
+  const sql = readFileSync(new URL('../booking/supabase/migrations/20261028194142_booking_212_product_image_version.sql', import.meta.url), 'utf8');
   assert.match(sql, /'updated_at', pc\.updated_at/);
   assert.match(sql, /where pc\.bookable and pc\.shop_visible and pc\.image_path is not null/);
-  const back = readFileSync(new URL('../booking/supabase/rollbacks/20261028194500_booking_212_ROLLBACK.sql', import.meta.url), 'utf8');
+  const back = readFileSync(new URL('../booking/supabase/rollbacks/20261028194142_booking_212_ROLLBACK.sql', import.meta.url), 'utf8');
   assert.match(back, /'path', pc\.image_path/);
   assert.doesNotMatch(back, /'updated_at'/);
 });

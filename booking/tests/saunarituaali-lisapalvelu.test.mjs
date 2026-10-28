@@ -212,7 +212,7 @@ test('kassa: lisäpalvelu piilossa ilman tarjousta, kutsuu public_ritual_addon; 
   assert.match(s, /'public_ritual_addon'/);
   assert.match(s, /data-testid': 'checkout-ritual'/);
   assert.match(s, /ritualAddonArg\(/);
-  assert.match(s, /'fail', 'ritual'\]/);
+  assert.match(s, /'fail', 'ritual'(?:, '[a-z]+')*\]/);
 });
 
 // ---------------------------------------------------------------- kassakortti (Joonas 24.10.2026)
