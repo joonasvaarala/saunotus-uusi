@@ -86,7 +86,7 @@ revoke all on function booking._gc_quote(booking.gift_card_packages, jsonb) from
 do $m196$
 declare
   v7 numeric; v_slug text; v_amt numeric;
-  r record; t booking.site_texts; v jsonb; v_changed text[] := '{}';
+  r record;
 begin
   if (select price from booking.gift_card_packages where code = 'entry_2') is distinct from 58.00
      or (select price from booking.gift_card_packages where code = 'peat_mask_2') is distinct from 88.00
@@ -179,28 +179,19 @@ begin
   perform booking._texts_reg('booking.gift_card_packages', 'code', 'giftpkg', 'description', 'description', $$'fi'$$, $$'normal'$$, $$s.active and s.code = 'saunarituaali_2'$$, 2000);
   perform booking._texts_reg('booking.gift_card_packages', 'code', 'giftpkg', 'description', 'description_en', $$'en'$$, $$'normal'$$, $$s.active and s.code = 'saunarituaali_2'$$, 2000);
 
-  for r in select * from (values
+  -- Jo julkaistut kauppatekstit: vain vanha "kahdelle"-lause. Ei texts_proposea (auth.uid() on migraatiossa null).
+  -- seo.gift.description on content/site-texts.pending-import-92.json.
+  update booking.site_texts s
+     set published_text = v.new_text, needs_translation = false
+    from (values
       ('ui.gift.pkg_kicker', 'fi', 'Paketti kahdelle', 'Paketti'),
       ('ui.gift.pkg_kicker', 'en', 'Package for two', 'Package'),
       ('ui.gift.buy_lead', 'fi', 'Valitse avoin lahjakortti tai valmis paketti kahdelle. Kortti on voimassa {{var:months}} kuukautta maksun jälkeen.', 'Valitse avoin lahjakortti tai valmis paketti. Kortti on voimassa {{var:months}} kuukautta maksun jälkeen.'),
       ('ui.gift.buy_lead', 'en', 'Choose an open-value gift card or a ready-made package for two. The card is valid for {{var:months}} months after payment.', 'Choose an open-value gift card or a ready-made package. The card is valid for {{var:months}} months after payment.'),
       ('ui.gift.buy_lead_one', 'fi', 'Valitse avoin lahjakortti tai valmis paketti kahdelle. Kortti on voimassa {{var:months}} kuukauden ajan maksun jälkeen.', 'Valitse avoin lahjakortti tai valmis paketti. Kortti on voimassa {{var:months}} kuukauden ajan maksun jälkeen.'),
-      ('ui.gift.buy_lead_one', 'en', 'Choose an open-value gift card or a ready-made package for two. The card is valid for {{var:months}} month after payment.', 'Choose an open-value gift card or a ready-made package. The card is valid for {{var:months}} month after payment.'),
-      ('seo.gift.description', 'fi', 'Anna lahjaksi aikaa, lämpöä ja hyvää oloa: avoin lahjakortti alk. 29 €, savusaunaelämys-paketit ja vuosikortti. Lahjakortin voimassaolon jatkaminen on maksutonta.', 'Anna lahjaksi aikaa, lämpöä ja hyvää oloa: avoin lahjakortti alk. 29 €, Savusaunavuoro 58 €, Savusaunaelämys turvenaamiolla ja jalkakylvyllä 88 €, Saunotusrituaali ja yleinen vuoro 98 €, Savusaunaelämys ja saunahoito 192 € ja Savusaunaelämys ja saunotus 328 €. Lahjakortin voimassaolon jatkaminen on maksutonta.'),
-      ('seo.gift.description', 'en', 'Give time, warmth and wellbeing: an open gift card from €29, smoke sauna experience packages and an annual card. Extending the validity of a gift card is free of charge.', 'Give time, warmth and wellbeing: an open gift card from €29, Smoke sauna session €58, Smoke sauna experience with peat mask and foot bath €88, Sauna ritual and public session €98, Smoke sauna experience and sauna treatment €192 and Smoke sauna experience and ritual sauna bathing €328. Extending the validity of a gift card is free of charge.')
-    ) x(key, lang, old_text, new_text)
-  loop
-    select * into t from booking.site_texts s where s.key = r.key and s.lang = r.lang for update;
-    if not found then raise notice 'booking_196: avainta % [%] ei ole, ohitetaan', r.key, r.lang; continue; end if;
-    if t.published_text = r.new_text then continue; end if;
-    if t.published_text is distinct from r.old_text then
-      raise notice 'booking_196: % [%] on muokattu, ei ylikirjoiteta', r.key, r.lang; continue;
-    end if;
-    v := booking.texts_propose(r.key, r.lang, r.new_text, 'booking_196: lahjakorttisivu vastaa julkaistua valikoimaa');
-    perform booking.admin_texts_approve((v ->> 'version_id')::bigint, 'booking_196', true);
-    v_changed := v_changed || r.key;
-  end loop;
-  update booking.site_texts set needs_translation = false where key = any (v_changed) and lang in ('fi', 'en');
+      ('ui.gift.buy_lead_one', 'en', 'Choose an open-value gift card or a ready-made package for two. The card is valid for {{var:months}} month after payment.', 'Choose an open-value gift card or a ready-made package. The card is valid for {{var:months}} month after payment.')
+    ) as v(key, lang, old_text, new_text)
+   where s.key = v.key and s.lang = v.lang and s.published_text = v.old_text;
 end
 $m196$;
 
@@ -312,6 +303,8 @@ declare g booking.gift_cards; v_red boolean; v_persons int; v_items jsonb;
 begin
   select * into g from booking.gift_cards where public_token = p_public_token and p_public_token is not null;
   if not found then return jsonb_build_object('ok', false, 'code', 'not_found', 'message', 'Korttia ei löydy'); end if;
+  -- booking_160: PDF poistettu säilytysajan (3 v) päätyttyä
+  if g.pdf_deleted_at is not null then return jsonb_build_object('ok', false, 'code', 'not_found', 'message', 'Korttia ei löydy'); end if;
   if g.status not in ('active', 'used', 'expired') then return jsonb_build_object('ok', false, 'code', 'not_ready', 'message', 'Kortti aktivoituu kun tilaus on maksettu'); end if;
   v_red := booking._gc_flag('gift_cards.redeem_enabled') and (g.source <> 'johku' or booking._gc_flag('gift_cards.johku_cards_redeemable'));
   select coalesce(g.persons, p.persons) into v_persons from booking.gift_card_packages p where p.code = g.package_code;

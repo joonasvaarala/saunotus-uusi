@@ -82,7 +82,7 @@ async function layout(page) {
       return { x: r.x, y: r.y, top: r.top, right: r.right, bottom: r.bottom, left: r.left, width: r.width, height: r.height };
     };
     const summary = document.querySelector('.week-more summary');
-    const kicker = document.querySelector('.tradition .kicker');
+    const tradition = document.querySelector('.tradition');
     const ss = getComputedStyle(summary);
     const week = document.querySelector('.week.soon');
     return {
@@ -91,7 +91,7 @@ async function layout(page) {
       badge: box(badgeEl),
       targets: [...row.querySelectorAll('.sess .t, .sess .n, .sess .bk')].map((el) => ({ text: el.textContent.trim().slice(0, 48), box: box(el) })),
       slLeft: box(row.querySelector('.sl')).left,
-      gap: kicker.getBoundingClientRect().top - summary.getBoundingClientRect().bottom,
+      gap: tradition.getBoundingClientRect().top - summary.getBoundingClientRect().bottom,
       summary: {
         h: summary.getBoundingClientRect().height,
         border: parseFloat(ss.borderTopWidth),

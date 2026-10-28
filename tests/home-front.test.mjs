@@ -27,9 +27,11 @@ test('perinne-osio säilyttää home.json about -kentän FI+EN sanasta sanaan', 
 
 test('pending-import-85 vastaa HOME_TEXTS-varatekstejä, FI+EN, ei HTML:ää', () => {
   const extra = JSON.parse(readFileSync(new URL('../content/site-texts.pending-import-87.json', import.meta.url), 'utf8'));
+  const bookCta = JSON.parse(readFileSync(new URL('../content/site-texts.pending-import-93.json', import.meta.url), 'utf8'));
   const gift = new Set(['ui.site.home_gift_cta']);
+  const book = new Set(['ui.site.home_book_cta']);
   for (const [key, v] of Object.entries(HOME_TEXTS)) for (const lang of ['fi', 'en']) {
-    const pool = gift.has(key) ? extra : pending;
+    const pool = gift.has(key) ? extra : book.has(key) ? bookCta : pending;
     const row = pool.find((x) => x.key === key && x.lang === lang);
     assert.ok(row, `${key} ${lang}`);
     assert.equal(row.text, v[lang]);
@@ -39,7 +41,8 @@ test('pending-import-85 vastaa HOME_TEXTS-varatekstejä, FI+EN, ei HTML:ää', (
     assert.ok(!row.text.includes('<'));
     assert.doesNotMatch(row.text, /johku/i);
   }
-  assert.equal(pending.length, (Object.keys(HOME_TEXTS).length - gift.size) * 2);
+  assert.equal(pending.length, (Object.keys(HOME_TEXTS).length - gift.size - book.size) * 2);
+  assert.equal(bookCta.length, book.size * 2);
 });
 
 test('elämyskortit: nimi, hinta ja kesto tuotteesta; lahjakortti #avoin; kuva vain hallinnan kuvasta', () => {
@@ -97,7 +100,14 @@ test('etusivu: järjestys, ei varaa-verkosta-listaa, torstai 16:00, kaksi tapaht
   assert.ok(fi.indexOf('id="valitse-elamys"') < fi.indexOf('class="week soon"'));
   assert.ok(fi.indexOf('class="week soon"') < fi.indexOf('class="tradition"'));
   assert.ok(fi.indexOf('class="tradition"') < fi.indexOf('id="arvostelut"'));
-  assert.ok(fi.indexOf('id="arvostelut"') < fi.indexOf('id="tapahtumat"'));
+  assert.ok(fi.indexOf('id="arvostelut"') < fi.indexOf('class="home-book"'));
+  assert.ok(fi.indexOf('class="home-book"') < fi.indexOf('id="tapahtumat"'));
+  const between = fi.slice(fi.indexOf('id="arvostelut"'), fi.indexOf('id="tapahtumat"'));
+  assert.ok(between.indexOf('class="btn light sm"') < between.indexOf('class="home-book"'));
+  assert.match(between, /<p class="home-book"><a class="btn gold" href="\/varaa\/">Varaa saunavuoro →<\/a><\/p>/);
+  const betweenEn = en.slice(en.indexOf('id="reviews"'), en.indexOf('id="tapahtumat"'));
+  assert.match(betweenEn, /<p class="home-book"><a class="btn gold" href="\/en\/book\/">Book a sauna →<\/a><\/p>/);
+  assert.doesNotMatch(R.book('fi'), /class="home-book"/);
   assert.ok(fi.indexOf('id="tapahtumat"') < fi.indexOf('id="saunatietoa"'));
   assert.ok(fi.indexOf('id="saunatietoa"') < fi.indexOf('id="yrityksille"'));
   assert.match(fi, /Näytä koko viikko/);
@@ -129,6 +139,21 @@ test('etusivu: järjestys, ei varaa-verkosta-listaa, torstai 16:00, kaksi tapaht
   const choose = fi.slice(fi.indexOf('id="valitse-elamys"'), fi.indexOf('class="week soon"'));
   const tradition = fi.slice(fi.indexOf('class="tradition"'), fi.indexOf('id="arvostelut"'));
   assert.doesNotMatch(choose + tradition, /johku/i);
+  assert.match(tradition, /Saunarituaali-ilta/);
+  assert.match(tradition, /Saunarituaali on ohjattu, vuodenaikojen mukaan elävä hetki hoitosauna Raunissa/);
+  assert.match(tradition, /Katso ajat ja varaa/);
+  assert.match(tradition, /class="tradition-photo"/);
+  assert.match(tradition, /type="image\/avif" srcset="[^"]*\/img\/rituaali-640\.avif 640w, [^"]*\/img\/rituaali-1024\.avif 1024w, [^"]*\/img\/rituaali-1536\.avif 1536w"/);
+  assert.match(tradition, /type="image\/webp" srcset="[^"]*\/img\/rituaali-640\.webp 640w/);
+  assert.match(tradition, /src="\/img\/rituaali-1536\.webp"/);
+  assert.match(tradition, /sizes="\(min-width:900px\) 640px, 100vw"/);
+  assert.match(tradition, /width="1536" height="778" alt="Saunottaja ja vieraita lauteilla saunarituaalissa" loading="lazy" decoding="async"/);
+  assert.doesNotMatch(tradition, /class="facts"|class="ico"|Ohjattu rituaali|20 minuuttia/);
+  const traditionEn = en.slice(en.indexOf('class="tradition"'), en.indexOf('id="arvostelut"'));
+  assert.match(traditionEn, /Sauna ritual evening/);
+  assert.match(traditionEn, /The sauna ritual is a guided moment in the Rauni treatment sauna/);
+  assert.match(traditionEn, /alt="A sauna healer and guests on the benches during a sauna ritual"/);
+  assert.match(traditionEn, /€49/);
   setArticlesState({ count: { fi: 0, en: 0 }, source: 'test' });
   assert.doesNotMatch(R.home('fi'), /saunatietoa/);
   assert.doesNotMatch(R.home('en'), /sauna-knowledge/);

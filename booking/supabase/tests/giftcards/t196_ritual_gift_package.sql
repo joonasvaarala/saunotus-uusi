@@ -39,6 +39,10 @@ begin
   perform pg_temp.ck((select code from booking.gift_cards where code = 'HH3A7CEFHJKL') is null
     or (select persons is null and initial_amount is not null from booking.gift_cards where code = 'HH3A7CEFHJKL'), 'E4: siemenkortin saldo säilyy eikä persons täyty');
 
+  update booking.gift_cards set pdf_deleted_at = now() where id = g.id;
+  v := booking.svc_get_gift_card_pdf_data(g.public_token);
+  perform pg_temp.ck(v ->> 'code' = 'not_found' and coalesce(v ->> 'ok', 'false') = 'false', 'F1: pdf_deleted_at → not_found (booking_160)');
+
   raise exception 'TESTRESULT pass=% fail=% :: %', (select count(*) from t196_r where ok), (select count(*) from t196_r where not ok),
     coalesce((select string_agg(label, ' | ') from t196_r where not ok), 'ALL OK');
 end
