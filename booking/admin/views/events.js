@@ -8,6 +8,7 @@ import { loadEventsTexts, evText as T } from '../events-texts.js';
 import { getLang } from '../talous-i18n.js';
 import { buildSeries, defaultLabel, validateBlock, blockToRow, blocksPayload, timeline, selectableResources, channelsOf, normChannels, CHANNELS,
   copyArgs, copyName, occSummary, conflictsOf, localParts, MAX_BLOCKS } from '../events-logic.js';
+import { eventQueueParts } from '../event-waitlist.js';
 
 const ERR_CODES = new Set(['conflict', 'has_reservations', 'has_waitlist', 'max_below_sold', 'multi_day_training_only', 'invalid_resource', 'not_event', 'event_managed']);
 const evErr = (e) => (e?.code && ERR_CODES.has(e.code) ? T(`err_${e.code}`) : errMsg(e));
@@ -131,6 +132,7 @@ export async function render({ ctx, refs, reload, query }) {
     const blocksHost = h('div', { class: 'ev-blocks-host' });
     const showBlocks = () => { blocksHost.replaceChildren(canEdit ? blocksEditor(p, r) : blocksReadOnly(r)); };
     const btn = (testid, text, onclick, cls = 'btn sm') => h('button', { type: 'button', class: cls, 'data-testid': testid, onclick }, text, h('span', { class: 'sr', text: ` – ${label}` }));
+    const queue = eventQueueParts(h, { lang: getLang(), ruleId: r.id, rpc });
     const li = h('li', { class: `card ev-occ-item${s.active ? '' : ' off'}`, 'data-testid': 'event-occurrence' },
       h('div', { class: 'row between wrap' },
         h('div', {}, h('strong', { class: 'ev-occ-label', text: label }), h('div', { class: 'muted', text: span(r.starts_at, r.ends_at) })),
@@ -140,9 +142,11 @@ export async function render({ ctx, refs, reload, query }) {
           !s.active ? badge('muted', T('badge_inactive')) : null, s.full ? badge('err', T('badge_full')) : null, s.past ? badge('muted', T('badge_past')) : null)),
       h('div', { class: 'row wrap ev-occ-actions' },
         btn('event-occ-blocks', T('blocks'), () => showBlocks(), 'btn sm ghost'),
+        queue.button,
         canEdit ? btn('event-occ-edit', T('edit_occurrence'), () => editOcc(p, r)) : null,
         canEdit ? btn('event-occ-copy', T('copy_to_date'), () => copyOcc(r)) : null,
         canEdit ? btn('event-occ-delete', T('delete'), () => deleteOcc(r, label), 'btn sm danger') : null),
+      queue.host,
       blocksHost);
     if ((r.blocks || []).length && !canEdit) showBlocks();
     return li;

@@ -46,7 +46,8 @@ test('vahvistussivu ei näytä viestipalvelun keskeneräisyyslausetta ja maksama
 });
 
 test('tuotekortti on yksi linkki', () => {
-  assert.match(shop, /cardAnchor\(h, bk\(`\/tuote\/\$\{p\.slug\}`\)/);
+  // booking_210: täyden tapahtuman kortti vie jonoon, muuten tuotesivulle (yksi linkki kummassakin).
+  assert.match(shop, /cardAnchor\(h, (?:queue \? bk\(queue\) : )?bk\(`\/tuote\/\$\{p\.slug\}`\)/);
   assert.match(read('booking/shop/src/treatment-ui.js'), /cardAnchor\(h, bk\(`\/tuote\/\$\{p\.slug\}`\)/);
   assert.match(read('booking/shop/src/card-link.js'), /querySelectorAll\('a'\)/);
 });

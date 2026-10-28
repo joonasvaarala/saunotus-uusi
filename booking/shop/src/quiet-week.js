@@ -6,7 +6,7 @@
 // Ei innerHTML:ää: kaikki solmut createElement + textContent.
 import { rpc } from './sb.js';
 import { quietByWeekday, addDaysIso, fillText, pctText, validOffer, bookablePrivateSlots, offerForSlot, weekdayIso, JALKIL_ID } from './quiet-offers-logic.js';
-import { dateForWeekday, shiftIsFull, weekEvents, eventDisplayName, freeShopEvents, cardDates, cardTime } from './week-live.js';
+import { dateForWeekday, shiftIsFull, weekEvents, eventDisplayName, freeShopEvents, cardDates, cardTime, eventIsFull, eventWaitlistPath } from './week-live.js';
 
 const TZ = 'Europe/Helsinki';
 export function decorateWeek(list, offers, { lang = 'fi', shopHref = '', today, slots, now } = {}) {
@@ -138,13 +138,15 @@ export function applyLiveWeek(list, { availability = null, events = null, catalo
 
 const plain = (s) => String(s ?? '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
 
-/** Etusivun tapahtumakortit public_eventsistä. events === null → lista jää ennalleen. Vain vapaat kerrat. */
+/** Etusivun tapahtumakortit public_eventsistä. events === null → lista jää ennalleen. Vapaat ja täydet tulevat kerrat. */
 export function applyEventCards(list, events, { lang = 'fi', shopHref = '', now = Date.now(), reserve = '', imageBase = '' } = {}) {
   if (events == null || !list) return 0;
   const rows = freeShopEvents(events, now);
   const doc = list.ownerDocument;
   const el = (tag, cls, text) => { const n = doc.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
   const money = (n) => new Intl.NumberFormat(lang === 'fi' ? 'fi-FI' : 'en-FI', { style: 'currency', currency: 'EUR', minimumFractionDigits: Number.isInteger(+n) ? 0 : 2 }).format(+n);
+  const fullLabel = list.dataset.fullLabel || (lang === 'en' ? 'Full' : 'Täynnä');
+  const fullCta = list.dataset.fullCta || (lang === 'en' ? 'Join the waitlist →' : 'Liity jonoon →');
   if (!rows.length) {
     const p = el('p', 'center', list.dataset.empty || '');
     list.replaceWith(p);
@@ -156,12 +158,15 @@ export function applyEventCards(list, events, { lang = 'fi', shopHref = '', now 
     const text = plain((lang === 'en' && ev.description_short_en) || ev.description_short);
     const dates = [...new Set(ev.occurrences.slice(0, 6).map((o) => cardDates(o, lang, now)))].filter(Boolean).join(' · ');
     const time = cardTime(ev.occurrences[0], lang);
-    const li = el('li', 'card ev');
+    const full = eventIsFull(ev);
+    const li = el('li', full ? 'card ev is-full' : 'card ev');
     li.dataset.testid = 'site-event-card';
+    if (full) li.dataset.full = '1';
     const im = el('div', 'im');
     if (ev.image_path && imageBase) {
       const img = doc.createElement('img');
-      img.src = imageBase + String(ev.image_path).replace(/^\//, '');
+      const path = String(ev.image_path);
+      img.src = /^https?:\/\//.test(path) || path.startsWith('/img/') ? path : imageBase + path.replace(/^\//, '');
       img.alt = ev.image_alt || '';
       img.loading = 'lazy';
       img.decoding = 'async';
@@ -169,16 +174,20 @@ export function applyEventCards(list, events, { lang = 'fi', shopHref = '', now 
       img.addEventListener('error', () => img.remove(), { once: true });
       im.append(img);
     }
+    if (full) im.append(el('span', 'pill full', fullLabel));
     if (ev.price != null && Number.isFinite(+ev.price)) im.append(el('span', 'badge', money(ev.price)));
     const bd = el('div', 'bd');
     const h3 = el('h3');
     const a = el('a', '', name);
-    a.href = `${shopHref}#/tuote/${encodeURIComponent(ev.slug)}`;
+    const queue = full ? eventWaitlistPath(ev) : '';
+    a.href = queue ? `${shopHref}#${queue}` : `${shopHref}#/tuote/${encodeURIComponent(ev.slug)}`;
+    if (full) a.append(el('span', 'sr', `, ${fullLabel}`));
     h3.append(a);
     const when = el('p', 'dates', time ? `${dates} · ${time}` : dates);
     bd.append(h3, when);
     if (text) bd.append(el('p', '', text));
-    const cta = el('div', 'cta', reserve ? (String(reserve).includes('→') ? reserve : `${reserve} →`) : '');
+    const label = full ? fullCta : (reserve ? (String(reserve).includes('→') ? reserve : `${reserve} →`) : '');
+    const cta = el('div', 'cta', label);
     cta.setAttribute('aria-hidden', 'true');
     li.append(im, bd, cta);
     list.append(li);

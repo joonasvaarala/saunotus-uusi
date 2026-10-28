@@ -1,0 +1,598 @@
+[
+ {
+  "key": "ui.shop.event_waitlist_cta",
+  "lang": "fi",
+  "text": "Liity jonoon",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.shop.event_waitlist_cta",
+  "lang": "en",
+  "text": "Join the waitlist",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.shop.waitlist_privacy",
+  "lang": "fi",
+  "text": "Hyväksyn, että tietoni tallennetaan jonotuslistalle tietosuojaselosteen mukaisesti.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.shop.waitlist_privacy",
+  "lang": "en",
+  "text": "I agree that my details are stored on the waiting list as described in the privacy policy.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.shop.waitlist_privacy_link",
+  "lang": "fi",
+  "text": "Tietosuojaseloste",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.shop.waitlist_privacy_link",
+  "lang": "en",
+  "text": "Privacy policy",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.shop.waitlist_privacy_required",
+  "lang": "fi",
+  "text": "Hyväksy tietosuojaseloste jatkaaksesi.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.shop.waitlist_privacy_required",
+  "lang": "en",
+  "text": "Please accept the privacy policy to continue.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.shop.waitlist_event_intro",
+  "lang": "fi",
+  "text": "Liity jonoon maksutta. Emme varaa paikkaa automaattisesti. Jos paikkoja vapautuu, lähetämme sähköpostin ja varauslinkin. Paikan saa ensimmäinen, joka ehtii varata.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 450,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.shop.waitlist_event_intro",
+  "lang": "en",
+  "text": "Join the waiting list for free. We do not book a place automatically. If places become free, we email you a booking link. The first person to book gets the place.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 450,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.shop.waitlist_event_done",
+  "lang": "fi",
+  "text": "Olet jonossa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.shop.waitlist_event_done",
+  "lang": "en",
+  "text": "You are on the waiting list",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.shop.waitlist_event_done_text",
+  "lang": "fi",
+  "text": "Lähetimme vahvistuksen sähköpostiisi. Jos paikkoja vapautuu, ilmoitamme sähköpostitse. Ilmoitus ei varaa paikkaa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.shop.waitlist_event_done_text",
+  "lang": "en",
+  "text": "We sent a confirmation to your email. If places become free, we will email you. The message does not reserve a place.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.shop.waitlist_errors.privacy_required",
+  "lang": "fi",
+  "text": "Hyväksy tietosuojaseloste jatkaaksesi.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.shop.waitlist_errors.privacy_required",
+  "lang": "en",
+  "text": "Please accept the privacy policy to continue.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.site.event_full",
+  "lang": "fi",
+  "text": "Täynnä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.site.event_full",
+  "lang": "en",
+  "text": "Full",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.site.event_waitlist",
+  "lang": "fi",
+  "text": "Liity jonoon →",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.site.event_waitlist",
+  "lang": "en",
+  "text": "Join the waitlist →",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_open",
+  "lang": "fi",
+  "text": "Jono",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_open",
+  "lang": "en",
+  "text": "Waitlist",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_title",
+  "lang": "fi",
+  "text": "Jono",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_title",
+  "lang": "en",
+  "text": "Waitlist",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_empty",
+  "lang": "fi",
+  "text": "Ei jonottajia.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_empty",
+  "lang": "en",
+  "text": "No one is waiting.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_loading",
+  "lang": "fi",
+  "text": "Ladataan jonoa…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_loading",
+  "lang": "en",
+  "text": "Loading the waitlist…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_error",
+  "lang": "fi",
+  "text": "Jonon lataus epäonnistui.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_error",
+  "lang": "en",
+  "text": "Could not load the waitlist.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_persons",
+  "lang": "fi",
+  "text": "{{var:n}} hlö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_persons",
+  "lang": "en",
+  "text": "{{var:n}} guests",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_waiting",
+  "lang": "fi",
+  "text": "Jonossa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_waiting",
+  "lang": "en",
+  "text": "Waiting",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_notified",
+  "lang": "fi",
+  "text": "Ilmoitettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_notified",
+  "lang": "en",
+  "text": "Notified",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_booked",
+  "lang": "fi",
+  "text": "Varannut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_booked",
+  "lang": "en",
+  "text": "Booked",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_cancelled",
+  "lang": "fi",
+  "text": "Poistunut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_cancelled",
+  "lang": "en",
+  "text": "Left",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_expired",
+  "lang": "fi",
+  "text": "Vanhentunut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_expired",
+  "lang": "en",
+  "text": "Expired",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_privacy",
+  "lang": "fi",
+  "text": "Tietosuoja hyväksytty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.queue_privacy",
+  "lang": "en",
+  "text": "Privacy accepted",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_210: täydet tapahtumat näkyviin ja jonoon. Uusi teksti, FI+EN, varateksti koodissa, ei vielä tuotannossa."
+ },
+ {
+  "key": "email.waitlist_joined.subject",
+  "lang": "fi",
+  "text": "Olet jonossa – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist_joined.subject",
+  "lang": "en",
+  "text": "You are on the waiting list – {{setting:business_name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{setting:business_name}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist_joined.title",
+  "lang": "fi",
+  "text": "Olet jonossa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist_joined.title",
+  "lang": "en",
+  "text": "You are on the waiting list",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist_joined.intro",
+  "lang": "fi",
+  "text": "Kiitos. Sinut on lisätty tapahtuman jonotuslistalle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist_joined.intro",
+  "lang": "en",
+  "text": "Thank you. You have been added to the waiting list for this event.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist_joined.session",
+  "lang": "fi",
+  "text": "{{var:what}}, {{var:when}}, {{var:n}} hlö",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:what}}",
+   "{{var:when}}",
+   "{{var:n}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist_joined.session",
+  "lang": "en",
+  "text": "{{var:what}}, {{var:when}}, {{var:n}} guests",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:what}}",
+   "{{var:when}}",
+   "{{var:n}}"
+  ],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist_joined.notice",
+  "lang": "fi",
+  "text": "Emme varaa paikkaa automaattisesti. Jos paikkoja vapautuu, lähetämme sähköpostin ja varauslinkin. Paikan saa ensimmäinen, joka ehtii varata.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist_joined.notice",
+  "lang": "en",
+  "text": "We do not book a place automatically. If places become free, we email you a booking link. The first person to book gets the place.",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 350,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist_joined.leave",
+  "lang": "fi",
+  "text": "Haluatko pois jonosta?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist_joined.leave",
+  "lang": "en",
+  "text": "Want to leave the waiting list?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist_joined.sign_name",
+  "lang": "fi",
+  "text": "Tapio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "email.waitlist_joined.sign_name",
+  "lang": "en",
+  "text": "Tapio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 3: kovakoodattu asiakasnäkyvä teksti (send-emails/texts.ts); sisältö ennallaan, ei uusia sanamuotoja"
+ }
+]

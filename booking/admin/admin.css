@@ -922,6 +922,9 @@ body.shot #shell .nav .lbl{display:inline}
 .ev-add{margin:12px 0}.ev-add h2{margin:0;font-size:1.05rem}
 .ev-occ-item{display:grid;gap:8px}.ev-occ-item.off{opacity:.85;border-style:dashed}.ev-occ-label{color:var(--ink);overflow-wrap:anywhere}
 .ev-occ-actions{gap:6px}
+.ev-queue{margin-top:4px}
+.ev-queue-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
+.ev-queue-list li{border-top:1px solid var(--line);padding-top:8px}
 .ev-blocks{border-top:1px solid var(--line);padding-top:10px}.ev-blocks h3{margin:0;font-size:1rem}
 .ev-block-row{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--card)}.ev-block-row.bad{border-color:var(--err)}
 .ev-block-row .row{gap:8px;align-items:flex-end}

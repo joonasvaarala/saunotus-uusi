@@ -80,7 +80,7 @@ for (const lang of ['fi', 'en']) {
       lang, page: page === 'shop' ? 'shop' : 'confirm', shopHref: BASE + PATHS[lang].shop, confirmHref: BASE + PATHS[lang].confirm,
       otherHref: BASE + PATHS[other][page === 'shop' ? 'shop' : 'confirm'],
       orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order },   // vuosikortin osto → tilaussivu (booking_142)
-      termsHref: L.pageHref('terms', lang), infoHref: L.pageHref('info', lang), phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email,
+      termsHref: L.pageHref('terms', lang), privacyHref: L.pageHref('privacy', lang), infoHref: L.pageHref('info', lang), phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email,
       cancelRule: cancelRuleText(lang),
       staticProductsUrl: `${BASE}/booking/static-products.json`, siteTextsUrl: `${BASE}/booking/site-texts.json`, links: LINKS(lang),
     };
@@ -161,7 +161,7 @@ for (const lang of ['fi', 'en']) {
     lang, page: 'shop', audience: 'business', shopHref: BASE + urlPath, confirmHref: BASE + PATHS[lang].confirm,
     orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order },
     otherHref: BASE + site.pages.companies[lang === 'fi' ? 'en' : 'fi'],
-    termsHref: L.pageHref('terms', lang), infoHref: L.pageHref('info', lang), phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email,
+    termsHref: L.pageHref('terms', lang), privacyHref: L.pageHref('privacy', lang), infoHref: L.pageHref('info', lang), phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email,
     cancelRule: cancelRuleText(lang),
     staticProductsUrl: `${BASE}/booking/static-products.json`, siteTextsUrl: `${BASE}/booking/site-texts.json`, links: LINKS(lang),
   };
