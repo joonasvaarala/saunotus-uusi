@@ -10,6 +10,26 @@
   "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/site.json (ui)); sisältö ennallaan, ei uusia sanamuotoja"
  },
  {
+  "key": "ui.footer.open",
+  "lang": "fi",
+  "text": "Avoinna",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/site.json (ui)); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.site.map_credit",
+  "lang": "fi",
+  "text": "Kartta © OpenStreetMapin tekijät",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/site.json (ui)); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
   "key": "nav.main.companies",
   "lang": "en",
   "text": "For companies",
@@ -18,6 +38,46 @@
   "max_len": 200,
   "placeholders": [],
   "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/site.json (ui)); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.footer.open",
+  "lang": "en",
+  "text": "Open",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/site.json (ui)); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.site.map_credit",
+  "lang": "en",
+  "text": "Map © OpenStreetMap contributors",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/site.json (ui)); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.articles.more_topics",
+  "lang": "fi",
+  "text": "Muut aiheet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/articles.json (ui)); sisältö ennallaan, ei uusia sanamuotoja"
+ },
+ {
+  "key": "ui.articles.more_topics",
+  "lang": "en",
+  "text": "More topics",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/articles.json (ui)); sisältö ennallaan, ei uusia sanamuotoja"
  },
  {
   "key": "page.companies.flow.seo_description",

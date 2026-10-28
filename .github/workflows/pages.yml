@@ -47,7 +47,7 @@ jobs:
       - run: npm ci
       # Saunatietoa: markdown-, lähde-/RPC-, sivupohja- ja build-tarkistustestit (fixture, ei verkkoa)
       - run: node --test tests/articles/*.test.mjs
-      - run: node --test tests/home-front.test.mjs
+      - run: node --test tests/home-front.test.mjs tests/product-image.test.mjs tests/week-programme.test.mjs
       # Tiivis viikko: Tänään-merkki ei saa peittää aikaa (Playwright + järjestelmän Chrome).
       - name: Chrome tiiviin viikon testiin
         run: |
@@ -318,6 +318,8 @@ jobs:
       - run: node --test booking/tests/tapahtumat-158-ui.test.mjs booking/tests/tapahtumakortit.test.mjs
       # Kauppa: tuotekortin ajankohta omalla rivillään hinnan yläpuolella (card-meta.js); päivänäkymä yksityisvuorot → yleiset → hoidot (FI/EN)
       - run: node --test booking/tests/kortit-jarjestys.test.mjs
+      # UX-katsaus 28.10.2026: maksutapamerkit, peruttu varaus, yhteenvetopainike, tuotekorttilinkki, lahjakorttiohje, peruutusehto, vuorolistan järjestys
+      - run: node --test booking/tests/ux-kauppa-1028.test.mjs
       # booking_161: kb.products-kuvausten Johku-linkit → uuden kaupan osoitteet (migraatio + rollback, md5-vartijat). SQL: t161 PG17:ssä.
       - run: node --test booking/tests/kb-johku-linkit-161.test.mjs
       # booking_163: kb.products.booking_url Johku → uuden kaupan tuotesivu (migraatio + rollback, vartijat). SQL: t163 PG17:ssä.

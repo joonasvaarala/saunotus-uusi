@@ -1,6 +1,7 @@
 // Optional, mobile-first upsell UI. All visible copy is loaded from ui.upsell.* site_texts.
 import { createTexts, loadShopTexts } from './site-texts.js';
 import { storageUrl } from './sb.js';
+import { productImageElement, CARD_WIDTHS, SIZES } from './product-image.js';
 import { richHost } from './rich-view.js';
 import { needsOption, optName, optLabel } from './options-logic.js';
 import { candidates, visitDate, rankSlots, excerpt, productName, stripNameHeading, durationText, personsText, mergeFacts } from './upsell-logic.js';
@@ -31,12 +32,14 @@ const sourceSession = uid();
 const track = (rpc, source, p, event) => rpc('public_upsell_event', { p_session_id:sourceSession, p_source:source, p_product_id:p.product_id, p_event:event, p_origin:p.origin || null }).catch(()=>{});
 const trackAddon=(rpc,source,a,event)=>rpc('public_upsell_event',{p_session_id:sourceSession,p_source:source,p_product_id:a.origin,p_event:event,p_origin:a.origin,p_addon_id:a.addon_id}).catch(()=>{});
 
-function image(product, alt = '') {
+function image(product, alt = '', preset = 'upsell') {
   const src = product.image_url || (product.image_path ? storageUrl('product-images', product.image_path) : '');
   if (!src) return null;
-  const img = h('img', { src, alt, loading:'lazy', decoding:'async' });
-  img.addEventListener('error', () => img.remove(), { once: true });
-  return img;
+  const sizes = preset === 'sheet' ? SIZES.sheet : SIZES.upsell;
+  const node = productImageElement(h, src, { widths: CARD_WIDTHS, sizes, alt, width: 900, height: 600, lazy: true });
+  const im = node.querySelector('img');
+  im.addEventListener('error', () => node.remove(), { once: true });
+  return node;
 }
 function optionChoices(p) {
   return (Array.isArray(p?.options) ? p.options : []).filter((o) => o && o.active !== false && (o.id != null || o.code));
@@ -149,7 +152,7 @@ function productInfo({ p, t, L, before, choice }) {
   const body = html.trim()
     ? richHost(h, html, 'bk-upsell-desc')
     : (excerpt(p, L, 4000, true) ? h('p', { class:'bk-upsell-desc', text:excerpt(p, L, 4000, true) }) : null);
-  const photo = image(p, p.image_alt || '');
+  const photo = image(p, p.image_alt || '', 'sheet');
   if (photo) photo.classList.add('bk-upsell-photo');
   panel.append(...[photo, h('header', { class:'bk-upsell-sheet-head' }, h('h3', { id:headingId, text:name }), closeBtn), facts.childElementCount ? facts : null, body ? h('div', { class:'bk-upsell-body' }, body) : null].filter(Boolean));
   overlay.append(panel);

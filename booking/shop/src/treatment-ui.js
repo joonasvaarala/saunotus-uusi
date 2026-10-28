@@ -14,12 +14,15 @@ import { cardMeta } from './card-meta.js';
 import { revealForm, revealIfHidden } from './gift-ui.js';
 import { customerInvoiceLock } from './invoice-lock.js';
 import { formPaysOnline } from './company-pay.js';
+import { clockFromIso, clockFromHm } from './clock.js';
+import { cardAnchor } from './card-link.js';
 
 export function createTreatmentViews(c) {
   const { h, t, S, state, money, fmt, hm, dayLong, pad2, todayHel, addDays, pname, pdesc, pimg, setHero, mount, focusTop, errorBox, phoneBox, bk, customerFields, legalFields, holdInfo = async () => ({ on: false, minutes: 15, extra: () => [] }), tx = () => null, confirmUrl = (tok) => `${S.confirmHref}#${tok}` } = c;
   const tr = t.tr;
   const horizonDays = () => A.horizonDays(state.settings);
-  const tm = (iso) => fmt(iso, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).replace('.', ':');
+  const tm = (iso) => clockFromIso(iso, S.lang);
+  const tmLabel = (v) => (/^\d{1,2}:\d{2}$/.test(String(v || '')) ? clockFromHm(v, S.lang) : tm(v));
   const dayShort = (iso) => fmt(iso, S.lang === 'fi' ? { weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric' } : { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
   const when = (iso) => `${dayShort(iso)}${S.lang === 'fi' ? ', klo ' : ' · '}${tm(iso)}`;
   const q = (hash) => new URLSearchParams(hash.split('?')[1] || '');
@@ -54,12 +57,13 @@ export function createTreatmentViews(c) {
 
   // tuotekortti tuotelistaan (sama rakenne kuin vuorotuotteilla)
   const card = (p) => h('li', { class: 'bk-card' },
-    pimg(p, 'card-img'),
-    h('h3', {}, h('a', { href: bk(`/tuote/${p.slug}`), text: pname(p) })),
-    cardShort(h, p, S.lang, pdesc(p)),   // booking_156: lyhyt kuvaus puhdistettuna, tyhjä → johdettu ote (short-desc.js)
-    cardMeta(h, priceText(p), durText(p)),   // kesto/ajankohta omalla rivillään hinnan yläpuolella (card-meta.js)
-    timelineNode(p),
-    h('a', { class: 'btn sm', href: bk(`/tuote/${p.slug}`) }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) })));
+    cardAnchor(h, bk(`/tuote/${p.slug}`),
+      pimg(p, 'card-img'),
+      h('h3', { text: pname(p) }),
+      cardShort(h, p, S.lang, pdesc(p)),   // booking_156: lyhyt kuvaus puhdistettuna, tyhjä → johdettu ote (short-desc.js)
+      cardMeta(h, priceText(p), durText(p)),   // kesto/ajankohta omalla rivillään hinnan yläpuolella (card-meta.js)
+      timelineNode(p),
+      h('span', { class: 'btn sm' }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) }))));
 
   // ---- valitsin: henkilömäärä → päivä (vain vapaat) → kellonaika ----
   // opts: { n, date, time, minStartMs, onChange(sel) }; sel = { n, date, time, slot|null }
@@ -142,7 +146,7 @@ export function createTreatmentViews(c) {
           : h('div', { 'aria-live': 'polite' }, h('p', { class: 'bk-note', text: `${dayLong(`${st.date}T12:00:00Z`)} – ${tr.startTimes}` }),
             list.length ? h('ul', { class: 'bk-times' }, list.map((s) => h('li', {}, h('button', { type: 'button', class: 'bk-time-btn', 'aria-pressed': s.time === st.time ? 'true' : 'false',
               onclick: () => { st.time = s.time; drawTimes(); emit(); revealIfHidden(timeBox.closest('.bk-picker')?.parentElement?.querySelector('.bk-continue')); timeBox.querySelector('[aria-pressed="true"]')?.focus({ preventScroll: true }); } },
-              h('strong', { text: s.time }), s.end ? h('span', { class: 'bk-time-end', text: `–${tm(s.end)}` }) : null))))
+              h('strong', { text: tmLabel(s.time) }), s.end ? h('span', { class: 'bk-time-end', text: `–${tm(s.end)}` }) : null))))
               : h('p', { class: 'bk-note', text: A.isPackage(p) ? tr.noTimes : t.noSlots })));
     }
     async function refresh() { st.hop = 0; await drawCal(); drawTimes(); emit(); }
@@ -215,9 +219,9 @@ export function createTreatmentViews(c) {
     const totalEl = h('strong', { class: 'bk-total', 'data-testid': 'sum-total', text: money(totalNow()) });
     const refreshSum = () => { sumList.replaceChildren(...sumRows().flat(2).filter(Boolean)); totalEl.textContent = money(totalNow()); };
     const optP = showOpt ? optPicker(p, { value: opt, required: needOpt, onChange: (code) => { opt = code; optDd.textContent = optText(); pickWhen.textContent = whenText(); } }) : null;
-    const cf = customerFields(), legal = legalFields(), { terms, consent } = legal;
+    const cf = customerFields(), legal = legalFields({ showCancel: true }), { terms, consent } = legal;
     const msg = h('div', { id: 'bk-msg' });
-    const next = h('button', { type: 'submit', class: 'btn', text: tr.toReview });
+    const next = h('button', { type: 'submit', class: 'btn', text: tr.continueSummary });
     const form = h('form', { class: 'bk-form', novalidate: true, onsubmit: (ev) => {
       ev.preventDefault(); msg.replaceChildren();
       if (!O.optionOk(p, opt)) { optP.setError(ot['err.option_required']); optP.focus(); return; }

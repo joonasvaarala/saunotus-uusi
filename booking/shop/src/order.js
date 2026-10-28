@@ -280,7 +280,6 @@ async function main() {
     const msg = h('div', { 'aria-live': 'polite', class: 'ord-msg', 'data-testid': 'order-msg' });
     const note = o.change_deadline ? h('p', { class: 'bk-note', 'data-testid': 'change-note', text: o.can_change ? t.changeNote.replace('{date}', dt(o.change_deadline)) : t.changeClosed }) : null;
     const guides = instructionsSection(o.instructions);
-    const treats = (o.upsell_treatments || []).length ? h('div', { 'data-testid': 'upsell-treatments' }, h('p', { class: 'bk-note', text: t.treatLead }), h('ul', { class: 'ord-lines' }, o.upsell_treatments.map((x) => h('li', { text: nm(x) })))) : null;
     const upsell = !closedHold && o.can_add && o.reservations.length ? orderUpsellSection({
       S, L, token, order: o, rpc: api.mock ? api.rpc : rpc,
       onAdded: async () => {
@@ -290,7 +289,7 @@ async function main() {
         if (link) location.assign(S.base ? S.base + link.link_path : link.link_path);
       },
     }) : null;
-    const add = closedHold || o.reservations.length === 0 ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-a' }, h('h3', { id: 'ord-a', text: t.addTitle }), o.can_add && o.upsell_addons.length && !inv.locked ? addForm(o) : h('p', { class: 'bk-note', text: inv.locked ? t['err.order_invoiced'] : t.addClosed }), treats,
+    const add = closedHold || o.reservations.length === 0 ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-a' }, h('h3', { id: 'ord-a', text: t.addTitle }), o.can_add && o.upsell_addons.length && !inv.locked ? addForm(o) : h('p', { class: 'bk-note', text: inv.locked ? t['err.order_invoiced'] : t.addClosed }),
       h('p', { class: 'bk-note' }, `${t.addNewBooking} `, h('a', { href: S.shopHref, text: t.addNewBookingLink })));
     const extra = guides || add || upsell ? h('div', { class: 'ord-extra', 'data-testid': 'order-extra' }, guides, upsell, add) : null;
     const cancel = closedHold || o.reservations.length === 0 ? null : h('section', { class: 'ord-card', 'aria-labelledby': 'ord-c', 'data-testid': 'cancel-section' }, h('h3', { id: 'ord-c', text: t.cancelTitle }), ...cancelBody(o, note));

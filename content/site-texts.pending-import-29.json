@@ -50,16 +50,6 @@
   "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
  },
  {
-  "key": "ui.order.treat_lead",
-  "lang": "fi",
-  "text": "Lisäpalvelun voi lisätä tähän tilaukseen valinnasta. Uuden käynnin aika valitaan varauskalenterissa.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
-  "placeholders": [],
-  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
- },
- {
   "key": "ui.order.guide_title",
   "lang": "en",
   "text": "Instructions",
@@ -106,16 +96,6 @@
   "class": "normal",
   "kind": "plain",
   "max_len": 80,
-  "placeholders": [],
-  "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
- },
- {
-  "key": "ui.order.treat_lead",
-  "lang": "en",
-  "text": "An add-on can be added to this order from the selector. A time for a new visit is chosen in the booking calendar.",
-  "class": "normal",
-  "kind": "plain",
-  "max_len": 200,
   "placeholders": [],
   "reason": "Tuoteviestit (booking_121). FI+EN. Hinnat, verokannat ja osoitteet eivät ole tekstejä."
  },

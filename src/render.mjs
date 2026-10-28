@@ -2,7 +2,8 @@
 import { readFileSync } from 'node:fs';
 import { sortReviews } from './reviews-sort.mjs';
 import { cards, alts, pageDoc } from './content-texts.mjs';
-import { articlesNav, publishedArticleCount } from './articles/runtime.mjs';
+import { articlesNav, publishedArticleCount, homeSection } from './articles/runtime.mjs';
+import { openingSummary } from './opening.mjs';
 import { tx } from './site-texts.mjs';
 import { seoSchemaForPage, jsonLdScript } from './seo-enhance.mjs';
 import { privacyAnalyticsHtml, policyHasAnalyticsSection } from './privacy-analytics.mjs';
@@ -112,18 +113,22 @@ export const C = (path) => path.split('.').reduce((a, k) => a[k], cards);
 export function week(lang, opt = {}) {
   const u = ui(lang);
   const lab = (type, day) => site.sessionLabels[day >= 6 && type === 'public' ? 'weekend' : type]?.[lang] || '';
-  // Yksi vuororivi: aika (ei rituaalilla) · nimi · Varaa-painike. Koko rivi on klikattava (a::after), .sr-selite säilyy.
-  const row = (time, name, url, day) => `<li class="sess${time ? '' : ' nt'}">${time ? `<span class="t">${time}</span>` : ''}<span class="n">${e(name)}</span><a class="bk" href="${e(url)}" target="_blank" rel="noopener"><span class="bk-l">${e(u.reserve)}</span><span class="sr"> – ${e(name)}, ${e(u.daysLong[day - 1])}</span>${NEW(lang)}</a></li>`;
+  // Yksi vuororivi: aika · nimi · Varaa-painike. Koko rivi on klikattava (a::after), .sr-selite säilyy. Rituaalilla aika, jos aukiolo on tiedossa.
+  // data-pid/data-open/data-close: viikko-ohjelma piilottaa täyden vuoron selaimessa (week-live.js). Kellonaika aina minuutteineen.
+  const row = (time, name, url, day, meta = {}) => `<li class="sess${time ? '' : ' nt'}"${meta.pid ? ` data-pid="${meta.pid}"` : ''}${meta.open ? ` data-open="${e(meta.open)}" data-close="${e(meta.close)}"` : ''}>${time ? `<span class="t">${time}</span>` : ''}<span class="n">${e(name)}</span><a class="bk" href="${e(url)}" target="_blank" rel="noopener"><span class="bk-l">${e(u.reserve)}</span><span class="sr"> – ${e(name)}, ${e(u.daysLong[day - 1])}</span>${NEW(lang)}</a></li>`;
   const li = [];
   for (let d = 1; d <= 7; d++) {
     const rows = kb.hours.filter((h) => h.weekday === d);
-    const sess = rows.filter((h) => h.opens).map((h) => {
+    const clock = (t) => { const [hh, mm] = String(t).slice(0, 5).split(':'); return `${Number(hh)}${lang === 'en' ? ':' : '.'}${mm}`; };
+    const when = (h) => (h.opens && h.closes ? { pid: h.product_id, open: String(h.opens).slice(0, 5), close: String(h.closes).slice(0, 5) } : { pid: h.product_id });
+    const sess = rows.filter((h) => h.opens && h.session_type !== 'ritual').map((h) => {
       const pr = kb.products.find((x) => x.id === h.product_id);
-      return row(`${hm(h.opens)}–${hm(h.closes)}`, lab(h.session_type, d), pr ? bookingUrl(pr.booking_url, lang) : jk('publicAll', lang), d);
+      return row(`${clock(h.opens)}–${clock(h.closes)}`, lab(h.session_type, d), pr ? bookingUrl(pr.booking_url, lang) : jk('publicAll', lang), d, when(h));
     });
     const ritual = rows.filter((h) => h.session_type === 'ritual').map((h) => {
       const pr = kb.products.find((x) => x.id === h.product_id);
-      return row('', site.sessionLabels.ritual[lang], pr ? bookingUrl(pr.booking_url, lang) : jk('ceremonies', lang), d);
+      const time = h.opens && h.closes ? `${clock(h.opens)}–${clock(h.closes)}` : '';
+      return row(time, site.sessionLabels.ritual[lang], pr ? bookingUrl(pr.booking_url, lang) : jk('ceremonies', lang), d, when(h));
     });
     const none = rows.some((h) => h.session_type === 'private_only')
       ? `<p class="none">${e(u.noPublic)}</p><ul class="alt"><li><a href="${e(jk('private', lang))}" target="_blank" rel="noopener">${e(u.privateLink)}${NEW(lang)}</a></li><li><a href="${e(jk('events', lang))}" target="_blank" rel="noopener">${e(u.eventsLink)}${NEW(lang)}</a></li></ul>` : '';
@@ -148,28 +153,29 @@ export function upcomingEvents(lang) {
   }
   return out.sort((a, b) => a.dates[0].starts_on.localeCompare(b.dates[0].starts_on));
 }
-// booking_158: uuden kaupan tapahtumat (kb.json events_shop = booking.public_events(current_date, 'shop')), kun niissä on tulevia kertoja
-// (myyntitilasta riippumatta). Kortti linkittää kaupan tuotesivulle (FI /varaa/#/tuote/<slug>, EN /en/book/#/tuote/<slug>), ei Johkuun.
-// Muuten (ei events_shop-dataa, esim. migraatio ajamatta) vanha data (kb.event_dates + cards.json), linkki silti kaupan tuotesivulle.
-function shopEventsSection(lang, limit) {
+// booking_158: uuden kaupan tapahtumat (kb.json events_shop = booking.public_events). Vain vapaat kerrat.
+// Kortti linkittää kaupan tuotesivulle (FI /varaa/#/tuote/<slug>, EN /en/book/#/tuote/<slug>), ei Johkuun.
+// Selain korvaa listan tuoreella public_events-vastauksella (data-live-events). Hakuvirhe → tämä snapshot jää.
+// Muuten (ei events_shop-dataa) vanha data (kb.event_dates + cards.json), linkki silti kaupan tuotesivulle.
+function shopEventsSection(lang, limit, empty) {
   let list = selectShopEvents(kb.events_shop, Date.now());
   if (!list.length) return null;
   if (limit) list = list.slice(0, limit);
   const cardOf = (ev) => Object.entries(cards.events).find(([id, c]) => !id.startsWith('_') && (c.kb || id) === ev.slug)?.[1] || null;
   const fallbackImg = Object.entries(cards.events).find(([id, c]) => !id.startsWith('_') && c.img)?.[1]?.img;
   return shopEventsHtml(list, lang, {
-    e, money, card: cardOf, arrow: ui(lang).reserveArrow,
+    e, money, card: cardOf, arrow: ui(lang).reserveArrow, empty,
     link: (ev) => pageHref('book', lang, shopHash(ev.slug)),
     img: (ev) => { const id = cardOf(ev)?.img || fallbackImg; return id ? pic(id, lang, { sizes: '(min-width:1100px) 280px, 90vw', alt: '' }) : ''; },
   });
 }
 export function eventsHtml(lang, empty, opt = {}) {
-  const shop = shopEventsSection(lang, opt.limit);
+  const shop = shopEventsSection(lang, opt.limit, empty);
   if (shop) return shop;
   let ev = upcomingEvents(lang);
   if (opt.limit) ev = ev.slice(0, opt.limit);
   if (!ev.length) return `<p class="center">${e(empty)}</p>`;
-  return `<ul class="events">${ev.map(({ c, p, dates }) => {
+  return `<ul class="events" data-live-events data-empty="${e(empty)}">${ev.map(({ c, p, dates }) => {
     const t = c[lang];
     const times = [...new Set(dates.map((d) => eventTimeFor(d, lang, enTime)).filter(Boolean))];
     const dl = dates.slice(0, 6).map((d) => fmtDate(d.starts_on, lang)).join(' · ');
@@ -236,6 +242,12 @@ export function reviewsSection(lang, { compact = false, id } = {}) {
 }
 
 const mailBtn = (label, subject, cls = 'btn') => `<a class="${cls}" href="${e(mailto(subject))}">${e(label)}</a>`;
+const HOME_FAQ = [3, 10, 8, 6];
+function footerHours(lang) {
+  const summary = openingSummary(kb.hours, ui(lang).days);
+  if (!summary) return '';
+  return `<p class="fhours">${e(ui(lang).footerOpen)} ${e(summary)}</p>`;
+}
 
 // ---- layout ----
 function jsonLd(lang) {
@@ -309,12 +321,12 @@ ${body}
 </main>
 <footer class="site-footer"><div class="wrap">
 <div class="fgrid">
-<div class="fbrand"><img src="${href('/img/favicon.svg')}" width="34" height="47" alt="" loading="lazy"><div><b>SAUNOTUS</b><small>${e(u.brandTitle)}</small><p>${e(u.footerTag)}</p></div></div>
+<div class="fbrand"><img src="${href('/img/favicon.svg')}" width="34" height="47" alt="" loading="lazy"><div><b>SAUNOTUS</b><small>${e(u.brandTitle)}</small><p>${e(u.footerTag)}</p>${footerHours(lang)}</div></div>
 <div><h2>${e(u.footerServices)}</h2><ul><li><a href="${fl('sauna', lang)}">${e(u.nav[0][1])}</a></li><li><a href="${fl('treatments', lang)}">${e(u.nav[1][1])}</a></li><li><a href="${fl('gift', lang)}">${e(u.nav[3][1])}</a></li>${an ? `<li><a href="${e(an.href)}">${e(an.label)}</a></li>` : ''}<li><a href="${fl('companies', lang)}">${e(u.companies)}</a></li><li><a href="${e(site.trainingUrl)}" rel="noopener">${e(u.nav[2][1])}${NEW(lang)}</a></li><li><a href="${fl('book', lang)}">${e(u.bookFull)}</a></li></ul></div>
 <div><h2>${e(u.footerInfo)}</h2><ul>${u.infoLinks.map(([id, l]) => `<li><a href="${pageHref('info', lang, id)}">${e(l)}</a></li>`).join('')}</ul></div>
 <div><h2>${e(u.footerContact)}</h2><ul><li><address style="all:unset">${e(site.contact.street)}<br>${e(site.contact.postal)} ${e(site.contact.city)}</address></li><li><a href="tel:${site.contact.phoneTel}">${e(phoneDisplay(lang))}</a></li><li><a href="mailto:${site.contact.email}">${e(site.contact.email)}</a></li><li><a href="${e(site.contact.mapsUrl)}" rel="noopener">${e(ui(lang).directions)}${NEW(lang)}</a></li>${site.social.map((s) => `<li><a href="${e(s.url)}" rel="noopener">${e(s.name)}${NEW(lang)}</a></li>`).join('')}</ul></div>
 </div>
-<div class="fbottom"><span>© ${new Date().getFullYear()} ${e(kb.business.legal_name)} · ${e(ui(lang).businessId)} ${e(kb.business.business_id)}</span><ul><li><a href="${fl('terms', lang)}">${e(u.legal)}</a></li><li>${pagePath('privacy', lang) ? `<a href="${fl('privacy', lang)}">${e(lang === 'en' ? privacyDocFor(P('privacy').fi, kb.policies, 'en')?.hero.title || u.privacy : u.privacy)}` : `<a href="${pageHref('privacy', 'fi')}"${lang === 'en' ? ' hreflang="fi" lang="fi"' : ''}>${e(u.privacy)}`}</a></li></ul></div>
+<div class="fbottom"><p class="fpay"><span>${e(u.footerPayOnline)}</span><span class="fpay-marks">${['bank', 'card', 'apple-pay', 'google-pay', 'mobilepay'].map((id) => `<img src="${href(`/img/pay/${id}.svg`)}" alt="" height="18" width="${id === 'bank' || id === 'card' ? 18 : 48}" loading="lazy" decoding="async">`).join('')}</span></p><span>© ${new Date().getFullYear()} ${e(kb.business.legal_name)} · ${e(ui(lang).businessId)} ${e(kb.business.business_id)}</span><ul><li><a href="${fl('terms', lang)}">${e(u.legal)}</a></li><li>${pagePath('privacy', lang) ? `<a href="${fl('privacy', lang)}">${e(lang === 'en' ? privacyDocFor(P('privacy').fi, kb.policies, 'en')?.hero.title || u.privacy : u.privacy)}` : `<a href="${pageHref('privacy', 'fi')}"${lang === 'en' ? ' hreflang="fi" lang="fi"' : ''}>${e(u.privacy)}`}</a></li></ul></div>
 </div></footer>
 ${chat}
 <script>(function(){var d=new Intl.DateTimeFormat('en-US',{weekday:'short',timeZone:'Europe/Helsinki'}).format(new Date()),i={Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6}[d],l=document.querySelectorAll('.week>li');if(l[i]){l[i].classList.add('is-today');l[i].setAttribute('aria-current','date')}var n=l[(i+1)%7];if(n)n.classList.add('is-next');document.querySelectorAll('.week.soon').forEach(function(w){w.classList.add('is-filtered')})})()</script>
@@ -333,16 +345,17 @@ export function home(lang, opt = {}) {
   const wk = sec('home-tight', `<div class="week-head">${head(u.weekKicker, u.weekTitle, '', { left: true })}<a class="btn light sm" href="${pageHref('sauna', lang, 'yleiset')}">${e(u.allSessions)}</a></div><div class="week-wrap"><p class="week-soon">${e(homeText('ui.site.home_week_soon', lang))}</p>${week(lang, { soon: true })}<details class="week-more"><summary class="btn light sm"><span class="o">${e(homeText('ui.site.home_week_all', lang))}</span><span class="c">${e(homeText('ui.site.home_week_less', lang))}</span></summary></details></div>`);
   const r = d.ritual;
   const tradition = sec('home-tight', traditionHtml(lang, { kicker: r.kicker, title: r.title, cta: r.cta, perPerson: u.perPerson }));
-  const ev = sec('home-tight', `${head('', d.events.title, '', { orn: true })}${eventsHtml(lang, d.events.empty, { limit: 2 })}<p class="center" style="margin-top:22px"><a class="btn light sm" href="${pageHref('book', lang)}">${e(u.allEvents)}</a></p>`, 'tapahtumat');
+  const ev = sec('home-tight', `${head('', d.events.title, '', { orn: true })}${eventsHtml(lang, d.events.empty)}<p class="center" style="margin-top:22px"><a class="btn light sm" href="${pageHref('book', lang)}">${e(u.allEvents)}</a></p>`, 'tapahtumat');
   // Nauha vain kun kielellä on julkaistuja artikkeleita. Tyhjä lista ei saa jättää /saunatietoa/-linkkiä etusivulle.
-  const infoStripSec = publishedArticleCount(lang) > 0 ? sec('strip', infoStrip(lang), 'saunatietoa') : '';
+  const art = opt.articlesHtml != null ? opt.articlesHtml : homeSection(lang);
+  const infoStripSec = art || (publishedArticleCount(lang) > 0 ? sec('strip', infoStrip(lang), 'saunatietoa') : '');
   const co = d.company;
   const comp = sec('strip tint', companyStrip(lang, { title: co.title, cta: co.cta2, href: pageHref('companies', lang) }), 'yrityksille');
-  const s = d.story;
-  const faq = sec('faq home-tight', `<header class="center"><h2 class="sec-title">${e(u.faqKicker)}</h2></header><details><summary>${e(s.title)}</summary><p>${e(s.lead)}</p><ol class="timeline">${s.items.map((i) => `<li><b>${e(i.year)}</b>${e(i.text)}</li>`).join('')}</ol><p>${e(s.thanks)}</p><p><a href="${e(site.social[1].url)}" rel="noopener">${e(s.ig)}${NEW(lang)}</a></p></details>`);
+  const faqs = HOME_FAQ.map((id) => faqFor(id, lang)).filter(Boolean).map((f) => `<details${f.lang !== lang ? ` lang="${e(f.lang)}"` : ''}><summary>${e(f.question)}</summary><p>${e(clean(f.answer))}</p></details>`).join('');
+  const faq = sec('faq home-tight', `<header class="center"><h2 class="sec-title">${e(u.faqKicker)}</h2></header><div class="narrow faq">${faqs}</div>`);
   const pre = heroPreload();
   const body = (opt.previewNote ? `<p class="prev-note" role="note">${e(opt.previewNote)}</p>` : '') + hero + choose + wk + tradition + reviewsSection(lang) + ev + infoStripSec + comp + faq;
-  return layout({ lang, key: 'home', meta: opt.meta || d.meta, preload: pre, body, seo: opt.seo || null });
+  return layout({ lang, key: 'home', meta: opt.meta || d.meta, preload: pre, body, seo: opt.seo || null, extraCss: art && String(art).includes('home-art') ? homeArticlesCss : '' });
 }
 
 export function sauna(lang) {
@@ -380,8 +393,8 @@ export function gift(lang) {
     + sec('', `<div class="company"><div><p class="kicker">${e(d.openTitle)}</p><h2 class="sec-title">${e(d.openTitle)}</h2><p>${e(d.openText)}</p><p class="price" style="color:var(--gold)">${e(`${u.fromWord} ${money(priceOf(ap), lang)}`)}</p><a class="btn" href="${e(bookingUrl(ap.booking_url, lang))}" target="_blank" rel="noopener">${e(C('gift.avoin')[lang].cta)}${NEW(lang)}</a></div><div class="im">${pic(C('gift.avoin').img, lang, { sizes: '(min-width:900px) 520px, 100vw', alt: '' })}</div></div>`, 'avoin')
     + sec('tint', `${head('', d.packTitle, '', { orn: true })}${cardList(pack, lang, 'five', { sizes: '(min-width:1100px) 230px, 90vw' })}<p class="center" style="margin-top:24px"><a class="btn light sm" href="${e(jk('giftAll', lang))}" target="_blank" rel="noopener">${e(d.allGift)}${NEW(lang)}</a></p>`, 'paketit')
     + sec('', `${head('', d.haveTitle, d.haveText, { orn: true })}<div class="cards two" style="display:grid;gap:22px">
-<article class="card"><div class="bd"><p class="kicker">${e(d.own.kicker)}</p><h3 style="font-family:var(--head);font-size:26px">${e(d.own.title)}</h3><p>${e(d.own.text)}</p><p><a class="btn" href="${e(jk('giftReservation', lang))}" target="_blank" rel="noopener">${e(d.own.cta)}${NEW(lang)}</a></p></div></article>
-<article class="card"><div class="bd"><p class="kicker">${e(d.third.kicker)}</p><h3 style="font-family:var(--head);font-size:26px">${e(d.third.title)}</h3><p>${e(d.third.text)} <a href="${e(site.giftCardSupportUrl)}" rel="noopener">${e(d.third.link)}${NEW(lang)}</a>.</p><p>${e(d.third.text2)}</p><p><a class="btn" href="${e(jk('giftReservation', lang))}" target="_blank" rel="noopener">${e(d.third.cta)}${NEW(lang)}</a></p></div></article></div>`, 'on-jo-lahjakortti')
+<article class="card"><div class="bd"><p class="kicker">${e(d.own.kicker)}</p><h3 style="font-family:var(--head);font-size:26px">${e(d.own.title)}</h3><p>${e(d.own.how || d.own.text)}</p><p><a class="btn" href="${e(jk('giftReservation', lang))}" target="_blank" rel="noopener">${e(d.own.cta)}${NEW(lang)}</a></p></div></article>
+<article class="card"><div class="bd"><p class="kicker">${e(d.third.kicker)}</p><h3 style="font-family:var(--head);font-size:26px">${e(d.third.title)}</h3><p>${e(d.third.text)} <a href="${e(site.giftCardSupportUrl)}" rel="noopener">${e(d.third.link)}${NEW(lang)}</a>.</p><p>${e(d.third.pay || d.third.text2)}</p><p><a class="btn" href="${e(jk('giftReservation', lang))}" target="_blank" rel="noopener">${e(d.third.cta)}${NEW(lang)}</a></p></div></article></div>`, 'on-jo-lahjakortti')
     + sec('tint', `<div class="narrow center"><h2 class="sec-title">${e(ext.title)}</h2><p>${e(ext.text)}</p><p>${mailBtn(site.contact.email, ext.title, 'btn light sm')} <a class="btn light sm" href="tel:${site.contact.phoneTel}">${e(phoneDisplay(lang))}</a></p><p>${e(ext.third)}</p></div>`, 'jatkaminen');
   return layout({ lang, key: 'gift', meta: d.meta, body });
 }
@@ -404,7 +417,7 @@ export function info(lang) {
     if (x.p !== undefined) return `<p>${x.p}</p>${x.link ? `<p><a href="${e(x.link.url === 'hsl' ? site.contact.hslUrl : x.link.url)}" rel="noopener">${e(x.link.label)}${NEW(lang)}</a></p>` : ''}${x.mail ? `<p><a href="${e(mailto())}">${e(site.contact.email)}</a></p>` : ''}`;
     if (x.ul) return `<ul>${x.ul.map((i) => `<li>${e(i)}</li>`).join('')}</ul>`;
     if (x.note) return `<p class="note-box">${x.note}</p>`;
-    if (x.address) return `<address><strong>${e(kb.business.trade_name)}</strong><br>${e(site.contact.street)}, ${e(site.contact.postal)} ${e(site.contact.city)}<br><a href="${e(site.contact.mapsUrl)}" rel="noopener">${e(ui(lang).openInMaps)}${NEW(lang)}</a></address>`;
+    if (x.address) return `<div class="loc"><address><strong>${e(kb.business.trade_name)}</strong><br>${e(site.contact.street)}, ${e(site.contact.postal)} ${e(site.contact.city)}<br><a href="${e(site.contact.mapsUrl)}" rel="noopener">${e(ui(lang).openInMaps)}${NEW(lang)}</a></address><figure class="loc-map"><img src="${href('/img/sijainti-kartta.jpg')}" width="800" height="400" alt="${e(`${site.contact.street}, ${site.contact.postal} ${site.contact.city}`)}" loading="lazy" decoding="async"><figcaption>${e(ui(lang).mapCredit)}</figcaption></figure></div>`;
     return '';
   }).join('');
   const secs = d.sections.map((s) => `<div class="info-sec" id="${s.id}"><div>${icon(s.icon, 40)}<h2>${e(s.title)}</h2><p class="tag">${e(s.tag)}</p></div><div>${blocks(s.blocks)}</div></div>`).join('');

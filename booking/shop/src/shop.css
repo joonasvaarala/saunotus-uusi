@@ -15,10 +15,13 @@
 .bk-tabs a{font:600 12px/1 var(--label);letter-spacing:.08em;text-transform:uppercase;text-decoration:none;padding:12px 16px;border:1px solid var(--line);border-radius:30px;background:#fff;color:var(--ink)}
 .bk-tabs a[aria-current]{background:var(--green);color:#fff;border-color:var(--green)}
 .bk-cards{list-style:none;margin:0;padding:0;display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr))}
-.bk-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:6px;box-shadow:0 8px 22px rgba(63,53,44,.07)}
+.bk-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:0;display:flex;flex-direction:column;gap:0;box-shadow:0 8px 22px rgba(63,53,44,.07)}
+.bk-card-link{display:flex;flex-direction:column;gap:6px;height:100%;padding:20px;color:inherit;text-decoration:none;border-radius:inherit}
+.bk-card-link:hover h3{color:var(--gold)}
+.bk-card-link:focus{outline:none}
+.bk-card-link:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .bk-card h3{margin:0;font-size:25px}
-.bk-card h3 a{color:var(--ink);text-decoration:none}
-.bk-card h3 a:hover{color:var(--gold)}
+.bk-card h3 a,.bk-card-link h3{color:var(--ink);text-decoration:none}
 .bk-card .bk-desc{flex:1;font-size:16px;margin:0}
 .bk-card .btn{align-self:flex-start;margin-top:6px}
 .bk-meta{margin:0;color:var(--muted)}
@@ -50,14 +53,14 @@ button.bk-cell:hover{filter:brightness(.97)}
 .dot.free{background:#7bb28a}.dot.full{background:#d4b9b9}.dot.unavail{background:#cfc8bf}
 /* vuorot */
 .bk-slotlist{list-style:none;margin:0;padding:0;display:grid;gap:10px;max-width:760px}
-.bk-slot{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-left:5px solid #7bb28a;border-radius:var(--r);padding:14px 16px}
+.bk-slot{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 16px;align-items:center;background:var(--card);border:1px solid var(--line);border-left:5px solid #7bb28a;border-radius:var(--r);padding:14px 16px}
 .bk-slot.full{border-left-color:#d4b9b9;opacity:.85}
 .bk-slot.unavailable{border-left-color:#bdb5ab;opacity:.8}
 .bk-slot-main{display:flex;flex-direction:column;gap:2px}
 .bk-time{font:600 22px var(--head);font-size:26px;color:var(--ink)}
 .bk-sub{color:var(--muted);font-size:15px}
 .bk-price{font-size:15px}
-.bk-slot-side{display:flex;align-items:center;gap:12px}
+.bk-slot-side{display:flex;align-items:center;justify-content:flex-end;gap:12px;justify-self:end;flex-wrap:nowrap}
 .bk-badge{font:600 12px var(--label);padding:6px 10px;border-radius:30px;background:#e8f3ea;color:#1d4d2b;white-space:nowrap}
 .bk-badge.full{background:#f3e3e3;color:#7b2d2d}.bk-badge.unavailable{background:#ece8e3;color:#5b524a}
 /* lomake */
@@ -94,7 +97,9 @@ button.bk-cell:hover{filter:brightness(.97)}
 .bk-actions{display:flex;flex-wrap:wrap;gap:12px;margin:16px 0}
 .bk-actions .btn{cursor:pointer}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
-#booking-app [tabindex="-1"]:focus{outline:none}
+#booking-app [tabindex="-1"]:focus:not(:focus-visible){outline:none}
+#booking-app :is(h1,h2,h3):focus-visible,.hero.page :is(h1,h2):focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.hero.page :is(h1,h2):focus:not(:focus-visible){outline:none}
 
 /* Migraatio 11: asiakastyyppi, yritystiedot, lisäpalvelut (v9: samat osio-otsikot, leveys ja välit kuin muulla lomakkeella) */
 .bk-form .bk-kinds{margin:0 0 16px}
@@ -188,6 +193,7 @@ a.bk-sd:hover{filter:brightness(.97)}
 .bk-pick-change{display:inline-flex;align-items:center;min-height:44px;font-weight:600;font-size:15px;color:var(--gold);text-decoration:underline;text-underline-offset:3px}
 /* tuotekuvat (public_product_images): kiinteä kuvasuhde varaa tilan etukäteen, object-fit:cover rajaa; tausta näkyy latauksen ajan */
 .bk-img{display:block;overflow:hidden;background:var(--tint,#efe6d8)}
+.bk-img picture{display:block;width:100%;height:100%}
 .bk-img img{display:block;width:100%;height:100%;object-fit:cover}
 .bk-card .card-img{aspect-ratio:3/2;margin:-20px -20px 12px;border-radius:var(--r) var(--r) 0 0}
 .bk-pc-head .pc-img{flex:none;width:88px;height:88px;border-radius:10px}
@@ -320,6 +326,8 @@ a.bk-sd:hover{filter:brightness(.97)}
 .gc-counter.gc-over{color:#7b1d12;font-weight:700}
 .gc-total{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin:6px 0 14px;padding:14px 18px;background:var(--tint);border-radius:var(--r);font-size:18px}
 .gc-total .gc-sum{font:600 28px var(--head);color:var(--ink)}
+.gc-preview{display:block;width:min(220px,72%);height:auto;margin:4px 0 12px;border-radius:10px;box-shadow:0 8px 22px rgba(63,53,44,.12)}
+.gc-payline{margin:0 0 12px}
 .gc-msg:empty{display:none}
 .gc-done{max-width:640px}
 .gc-donecards{list-style:none;margin:10px 0;padding:0;display:grid;gap:6px}
@@ -470,6 +478,9 @@ a.bk-sd:hover{filter:brightness(.97)}
 .op-method:disabled .op-method-ico{background:transparent;color:var(--muted)}
 .op-method.is-on{border-color:#2B3A30;box-shadow:inset 0 0 0 1px #2B3A30}
 .op-method.is-on .op-method-ico{background:#2B3A30;color:#F4EFE7}
+.op-method-mark{flex:none;display:grid;place-items:center;height:36px;min-width:44px;padding:5px 7px;background:#fff;border-radius:8px;border:1px solid rgba(63,53,44,.12)}
+.op-method-mark img{height:18px;width:auto;max-width:72px;display:block}
+.op-method:hover .op-method-mark,.op-method.is-on .op-method-mark,.op-method:disabled .op-method-mark{background:#fff}
 @container (max-width:220px){.op-method{padding:8px 12px;gap:10px}.op-method-go{display:none}.op-method-ico{width:32px;height:32px}}
 @container (min-width:480px){.op-method{flex:1 1 calc(50% - 4px);max-width:calc(50% - 4px)}}
 @media (forced-colors:active){.op-method,.bk-paychoices .pc-gift-btn{border:1px solid ButtonText}.op-method:focus-visible,.bk-paychoices .pc-gift-btn:focus-visible{outline:3px solid Highlight}}
@@ -604,7 +615,7 @@ button.bk-cell.quiet.sel{box-shadow:inset 0 -4px 0 #F4EFE7}
 /* vuorolista 320 px: rivi ei saa levittää listaa (tila-merkki + Valitse/Liity jonoon rivittyvät tarvittaessa) */
 .bk-slotlist{grid-template-columns:minmax(0,1fr)}
 .bk-slot>*{min-width:0}
-.bk-slot-side{flex-wrap:wrap}
+.bk-slot-side{flex-wrap:nowrap}
 /* booking_179: ehdotetut tuotteet, korttirivi, tietoikkuna ja alapaneeli. */
 .bk-upsell[hidden],.bk-upsell-inline[hidden]{display:none!important}
 .bk-upsell-row{display:flex;gap:12px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding:8px 0 14px;scrollbar-width:thin}
@@ -613,7 +624,8 @@ button.bk-cell.quiet.sel{box-shadow:inset 0 -4px 0 #F4EFE7}
 .bk-upsell-card{width:100%;min-width:180px;max-width:280px;flex:0 0 min(78vw,280px);border:1px solid #7A5530;background:#F4EFE7;color:#2B3A30;border-radius:14px;padding:0;display:flex;flex-direction:column;text-align:left;overflow:hidden;scroll-snap-align:start}
 .bk-upsell-open{display:flex;flex-direction:column;width:100%;margin:0;padding:0;border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
 .bk-upsell-open strong{display:block;font-size:16px;padding:12px 12px 0}
-.bk-upsell-card img,.bk-upsell-photo{width:100%;height:125px;object-fit:cover;display:block}
+.bk-upsell-card :is(picture,img),.bk-upsell-photo,.bk-upsell-photo img{width:100%;height:125px;object-fit:cover;display:block}
+.bk-upsell-card picture,.bk-upsell-photo{overflow:hidden}
 .bk-upsell-info{padding:4px 12px 12px;display:grid;gap:5px;min-width:0}
 .bk-upsell-clamp{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;line-height:1.4;color:#2B3A30}
 .bk-upsell-blurb,.bk-upsell-lead{margin:0;min-width:0;line-height:1.45;color:#2B3A30;overflow-wrap:anywhere}
@@ -624,7 +636,7 @@ button.bk-cell.quiet.sel{box-shadow:inset 0 -4px 0 #F4EFE7}
 .bk-upsell-detail-backdrop{z-index:10000}
 .bk-upsell-sheet{box-sizing:border-box;background:#F4EFE7;color:#2B3A30;border-radius:22px 22px 0 0;width:100%;max-width:680px;max-height:86dvh;overflow:auto;padding:20px 20px 30px;box-shadow:0 -8px 40px rgba(43,58,48,.2)}
 .bk-upsell-detail{padding:0 0 28px;max-width:720px}
-.bk-upsell-detail .bk-upsell-photo{height:200px;border-radius:22px 22px 0 0}
+.bk-upsell-detail .bk-upsell-photo,.bk-upsell-detail .bk-upsell-photo img{height:200px;border-radius:22px 22px 0 0}
 .bk-upsell-detail .bk-upsell-sheet-head,.bk-upsell-detail .bk-upsell-facts,.bk-upsell-detail .bk-upsell-body{margin-left:20px;margin-right:20px}
 .bk-upsell-detail .bk-upsell-sheet-head{padding-top:16px}
 .bk-upsell-sheet-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.bk-upsell-sheet-head h3{margin:0;font:500 1.6rem/1.2 var(--head,Georgia,serif)}
@@ -643,7 +655,7 @@ button.bk-cell.quiet.sel{box-shadow:inset 0 -4px 0 #F4EFE7}
 .bk-upsell-chip small{font-size:11px;color:#7A5530}.bk-upsell-chip[aria-pressed=true]{background:#2B3A30;color:#F4EFE7}.bk-upsell-addon-row{display:flex;gap:8px;flex-wrap:wrap}
 .bk-upsell-addon{border:1px solid #7A5530;color:#2B3A30;background:#F4EFE7;border-radius:10px;padding:9px 12px;cursor:pointer}
 .bk-upsell-inline{padding:10px 0}.bk-upsell-feedback:not(:empty){margin-top:8px}
-@media(min-width:700px){.bk-upsell-backdrop{align-items:center;padding:24px}.bk-upsell-sheet{border-radius:20px;max-height:85vh}.bk-upsell-detail .bk-upsell-photo{border-radius:20px 20px 0 0;height:240px}}
+@media(min-width:700px){.bk-upsell-backdrop{align-items:center;padding:24px}.bk-upsell-sheet{border-radius:20px;max-height:85vh}.bk-upsell-detail .bk-upsell-photo,.bk-upsell-detail .bk-upsell-photo img{border-radius:20px 20px 0 0;height:240px}}
 @media(prefers-reduced-motion:reduce){.bk-upsell-row{scroll-behavior:auto}}
 /* booking_177b: maksulinkkisivun yhteenveto ennen maksua (/maksa/, /en/pay/). Värit #2B3A30 / #F4EFE7 / #7A5530, ei sivuttaisvieritystä 390 px:llä. */
 .pl-card{max-width:640px;overflow-wrap:anywhere}

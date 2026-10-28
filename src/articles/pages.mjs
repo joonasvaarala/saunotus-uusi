@@ -102,6 +102,17 @@ function tagIndex(items) {
   return m;
 }
 
+// Ylhäällä 5 pääaihetta (4–6). Enintään 6 tagia mahtuu ylös kokonaan. Aktiivinen tagi pidetään ylhäällä.
+export const TAGS_ON_TOP = 5;
+export function partitionTags(tags, current = null) {
+  const list = Array.isArray(tags) ? tags : [];
+  if (list.length <= 6) return { main: list, rest: [] };
+  const main = list.slice(0, TAGS_ON_TOP);
+  if (current && !main.some((g) => g.slug === current.slug)) main[main.length - 1] = current;
+  const keep = new Set(main.map((g) => g.slug));
+  return { main, rest: list.filter((g) => !keep.has(g.slug)) };
+}
+
 // ---- listaus / tagisivu ----
 function listingPages({ lang, items, tags, tag, variants, hasOther }) {
   const size = cfg.pageSize, total = Math.max(1, Math.ceil(items.length / size));
@@ -112,11 +123,14 @@ function listingPages({ lang, items, tags, tag, variants, hasOther }) {
     const title0 = tag ? t(lang, 'tagTitle', { tag: tag.label }) : label(lang);
     const h1 = tag ? title0 : label(lang);
     const lead = tag ? t(lang, 'tagDescription', { tag: tag.label }) : t(lang, 'listLead');
-    const tagbar = tags.length ? `<nav class="tagbar" aria-label="${e(t(lang, 'tagsLabel'))}"><ul><li><a href="${e(href(listPath(lang)))}"${!tag ? ' aria-current="page"' : ''}>${e(t(lang, 'allTags'))}</a></li>${tags.map((g) => `<li><a href="${e(href(tagPath(lang, g.slug)))}"${tag?.slug === g.slug ? ' aria-current="page"' : ''}>${e(g.label)}</a></li>`).join('')}</ul></nav>` : '';
+    const parts = partitionTags(tags, tag);
+    const tagLink = (g) => `<li><a href="${e(href(tagPath(lang, g.slug)))}"${tag?.slug === g.slug ? ' aria-current="page"' : ''}>${e(g.label)}</a></li>`;
+    const tagbar = tags.length ? `<nav class="tagbar" aria-label="${e(t(lang, 'tagsLabel'))}"><ul><li><a href="${e(href(listPath(lang)))}"${!tag ? ' aria-current="page"' : ''}>${e(t(lang, 'allTags'))}</a></li>${parts.main.map(tagLink).join('')}</ul></nav>` : '';
+    const tagMore = parts.rest.length ? `<nav class="tagbar tagbar-more" aria-label="${e(t(lang, 'moreTopics'))}"><p class="lbl">${e(t(lang, 'moreTopics'))}</p><ul>${parts.rest.map(tagLink).join('')}</ul></nav>` : '';
     const pager = total > 1 ? `<nav class="pager" aria-label="${e(t(lang, 'pagination'))}">${p > 1 ? `<a rel="prev" href="${e(href(pathOf(p - 1)))}">${e(t(lang, 'prev'))}</a>` : '<span></span>'}<span class="pg" aria-current="page">${e(t(lang, 'page', { n: p }))} / ${total}</span>${p < total ? `<a rel="next" href="${e(href(pathOf(p + 1)))}">${e(t(lang, 'next'))}</a>` : '<span></span>'}</nav>` : '';
     const empty = `<div class="art-empty"><p>${e(t(lang, 'empty'))}</p><p><a class="btn light" href="${e(pageHref('sauna', lang))}">${e(t(lang, 'emptyLink'))}</a></p></div>`;
     const body = band(`${crumbs(lang, tag ? [[title0, null]] : [])}<p class="kicker">${e(t(lang, 'kicker'))}</p><h1>${e(h1)}</h1><p class="lead">${e(lead)}</p>`, 'list')
-      + `<section class="section art-list"><div class="wrap">${tagbar}${chunk.length ? `<ul class="cards art-cards">${chunk.map((it) => card(it, lang, variants)).join('')}</ul>` : empty}${pager}</div></section>`;
+      + `<section class="section art-list"><div class="wrap">${tagbar}${chunk.length ? `<ul class="cards art-cards">${chunk.map((it) => card(it, lang, variants)).join('')}</ul>` : empty}${pager}${tagMore}</div></section>`;
     const url = abs(pathOf(p));
     const noindex = !items.length || !!tag;   // tyhjä listaus ja tagisivut: noindex,follow
     const title = [tag ? t(lang, 'tagTitle', { tag: tag.label }) : t(lang, 'listMeta', { label: label(lang) }), p > 1 ? t(lang, 'page', { n: p }) : null].filter(Boolean).join(', ');

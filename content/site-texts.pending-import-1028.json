@@ -1,0 +1,162 @@
+[
+ {
+  "key": "ui.shop.unpaid_cancel",
+  "lang": "fi",
+  "text": "Varausta ei vahvistettu, koska maksua ei suoritettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "UX 28.10.2026: maksamaton peruutus vahvistussivulla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.shop.unpaid_cancel",
+  "lang": "en",
+  "text": "The booking was not confirmed because the payment was not completed.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 160,
+  "placeholders": [],
+  "reason": "UX 28.10.2026: maksamaton peruutus vahvistussivulla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.shop.try_again",
+  "lang": "fi",
+  "text": "Yritä uudelleen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "UX 28.10.2026: maksamaton peruutus vahvistussivulla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.shop.try_again",
+  "lang": "en",
+  "text": "Try again",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "UX 28.10.2026: maksamaton peruutus vahvistussivulla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.treatment.continue_summary",
+  "lang": "fi",
+  "text": "Jatka yhteenvetoon",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "UX 28.10.2026: yhteystietojen jälkeinen painike. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.treatment.continue_summary",
+  "lang": "en",
+  "text": "Continue to summary",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "UX 28.10.2026: yhteystietojen jälkeinen painike. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.gift.pay_line",
+  "lang": "fi",
+  "text": "Maksa verkossa. PDF-lahjakortti lähetetään sähköpostiin heti maksun jälkeen, tai saajalle valitsemanasi ajankohtana.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "UX 28.10.2026: lahjakortin tilaus. PDF lähtee maksun jälkeen, ajastettu saajalle valittuna aikana. FI+EN."
+ },
+ {
+  "key": "ui.gift.pay_line",
+  "lang": "en",
+  "text": "Pay online. The PDF gift card is emailed right after payment, or to the recipient at the time you choose.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "UX 28.10.2026: lahjakortin tilaus. PDF lähtee maksun jälkeen, ajastettu saajalle valittuna aikana. FI+EN."
+ },
+ {
+  "key": "ui.gift.preview_alt",
+  "lang": "fi",
+  "text": "Lahjakortin esikatselu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "UX 28.10.2026: lahjakortin esikatselukuvan alt-teksti. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.gift.preview_alt",
+  "lang": "en",
+  "text": "Gift card preview",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "UX 28.10.2026: lahjakortin esikatselukuvan alt-teksti. FI+EN, luokka normal."
+ },
+ {
+  "key": "ui.footer.pay_online",
+  "lang": "fi",
+  "text": "Maksa verkossa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "UX 28.10.2026: alatunnisteen maksutapamerkit. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.footer.pay_online",
+  "lang": "en",
+  "text": "Pay online",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "UX 28.10.2026: alatunnisteen maksutapamerkit. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "page.gift.own.how",
+  "lang": "fi",
+  "text": "Sipoonjoen Perinnesaunan lahjakortilla varaat suoraan varausjärjestelmässä. Kirjoita 12-merkkinen koodi maksuvaiheessa: valitse Maksa lahjakortilla ja syötä koodi kenttään Lahjakortin koodi. Kassan alennus- tai vuosikorttikoodi on eri kenttä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "UX 28.10.2026: lahjakortin käyttöohje vastaa maksuvaihetta. FI+EN, luokka normal."
+ },
+ {
+  "key": "page.gift.own.how",
+  "lang": "en",
+  "text": "With a Sipoonjoen Perinnesauna gift card you book directly in the booking system. Enter the 12-character code at the payment step: choose Pay with a gift card and type the code in the Gift card code field. The discount or annual card code at checkout is a different field.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "UX 28.10.2026: lahjakortin käyttöohje vastaa maksuvaihetta. FI+EN, luokka normal."
+ },
+ {
+  "key": "page.gift.third.pay",
+  "lang": "fi",
+  "text": "Varausta varten tarvitset lahjakortin koodin, joka löytyy lahjakortin keskiosasta voimassaolopäivän vierestä. Älä käytä viivakoodin yhteydessä olevaa koodia. Valitse haluamasi yleinen vuoro ja tee varaus. Syötä koodi maksuvaiheessa kenttään Lahjakortin koodi. Mahdolliset lisäpalvelut varataan erillisellä tilauksella. Tervetuloa saunomaan!",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "UX 28.10.2026: kumppanin lahjakortin ohje vastaa maksuvaihetta. FI+EN, luokka normal."
+ },
+ {
+  "key": "page.gift.third.pay",
+  "lang": "en",
+  "text": "For the booking you need the gift card code, found in the middle of the card next to the expiry date. Do not use the code next to the barcode. Choose the public session you want and make the booking. Enter the code at the payment step in the Gift card code field. Any additional services are booked with a separate order. Welcome to the sauna!",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "UX 28.10.2026: kumppanin lahjakortin ohje vastaa maksuvaihetta. FI+EN, luokka normal."
+ }
+]

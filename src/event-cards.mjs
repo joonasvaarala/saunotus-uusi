@@ -1,8 +1,7 @@
 // booking_158: etusivun tapahtumakortit uuden kaupan tapahtumista (booking.public_events(current_date, 'shop') → kb.json events_shop).
 // Puhdas moduuli (ei lib.mjs-riippuvuutta), testit: booking/tests/tapahtumakortit.test.mjs.
-// - Käytetään aina, kun events_shop sisältää tulevia tapahtumakertoja (category 'event'), myyntitilasta riippumatta
-//   (Joonas 24.10.2026: testisivusto rakennetaan valmiiksi; myynnin ollessa pois kerrat ovat 'closed' ja kaupan tuotesivu näyttää
-//   suljetun tilan). Muuten render.mjs käyttää vanhaa dataa (kb.event_dates + cards.json), mutta linkki on silti kaupan tuotesivu.
+// - Vain tulevat tapahtumakerrat, joilla on vapaita paikkoja (status available). full ja closed eivät näy.
+//   Muuten render.mjs käyttää vanhaa dataa (kb.event_dates + cards.json), mutta linkki on silti kaupan tuotesivu.
 // - Linkki: aina kaupan tuotesivu FI /varaa/#/tuote/<slug>, EN /en/book/#/tuote/<slug> (ei Johkua).
 // - Nimet ja kuvaukset ovat tietokannasta: kaikki tulostetaan e():llä, kuvaus pelkkänä tekstinä (tagit pois).
 const TZ = 'Europe/Helsinki';
@@ -24,14 +23,15 @@ export function occTime(o, lang = 'fi') {
 }
 export const plainText = (s) => String(s ?? '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
 /**
- * events_shop → kortit: vain category 'event' ja tulevat (ends_at > now) kerrat (myös 'closed'), tapahtumat ilman kertoja pois,
- * järjestys ensimmäisen kerran mukaan. Virheellinen syöte → [] (vanha polku).
+ * events_shop → kortit: vain category 'event' ja tulevat kerrat, joilla on vapaita paikkoja (status available).
+ * full ja closed jäävät pois. Tapahtuma ilman vapaata kertaa pois. Järjestys ensimmäisen vapaan kerran mukaan.
+ * Virheellinen syöte → [] (vanha polku).
  */
 export function selectShopEvents(list, now = Date.now()) {
   if (!Array.isArray(list)) return [];
   return list.filter((ev) => ev && ev.category === 'event' && typeof ev.slug === 'string' && ev.slug && ev.name)
     .map((ev) => ({ ...ev, occurrences: (Array.isArray(ev.occurrences) ? ev.occurrences : [])
-      .filter((o) => o && o.starts_at && Date.parse(o.ends_at || o.starts_at) > now)
+      .filter((o) => o && o.status === 'available' && o.starts_at && Date.parse(o.ends_at || o.starts_at) > now)
       .sort((a, b) => String(a.starts_at).localeCompare(String(b.starts_at))) }))
     .filter((ev) => ev.occurrences.length)
     .sort((a, b) => String(a.occurrences[0].starts_at).localeCompare(String(b.occurrences[0].starts_at)));
@@ -41,8 +41,8 @@ export function selectShopEvents(list, now = Date.now()) {
  * Kaupan linkki avautuu samaan välilehteen (oma sivusto).
  */
 export function shopEventsHtml(events, lang, deps) {
-  const { e, money, link, img, card = () => null, arrow = '', fullText = '' } = deps;
-  return `<ul class="events">${events.map((ev) => {
+  const { e, money, link, img, card = () => null, arrow = '', fullText = '', empty = '' } = deps;
+  return `<ul class="events" data-live-events data-empty="${e(empty)}">${events.map((ev) => {
     const c = card(ev)?.[lang];
     const title = c?.title || (lang === 'en' && ev.name_en) || ev.name;
     const text = c?.text || plainText((lang === 'en' && ev.description_short_en) || ev.description_short);

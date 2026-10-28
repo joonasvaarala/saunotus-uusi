@@ -9,7 +9,7 @@ import * as G from './gift-logic.js';
 const badgeClass = (st) => (st === 'active' ? 'st-confirmed' : st === 'pending_payment' || st === 'pending_verification' ? 'st-pending' : st === 'cancelled' || st === 'expired' ? 'st-expired' : '');
 
 // Yksi kenttä "Lahjakortin koodi" (sopimus §13.12): public_resolve_gift_code kertoo mikä koodi on.
-//   oma kortti → nykyinen lunastus (public_apply_gift_card, summa valinnainen); tuntematon → myyjän vahvistus (Kokemuskauppa / Offerilla / Elämyslahjat, esivalinta suggested_source,
+//   oma kortti → public_apply_gift_card ilman summaa (palvelin käyttää pienempää saldosta ja maksamattomasta); tuntematon → myyjän vahvistus (Kokemuskauppa / Offerilla / Elämyslahjat, esivalinta suggested_source,
 //   asiakas voi vaihtaa ennen lähetystä; booking_173) → public_submit_voucher_claim → selkeä vahvistusteksti + maksutapa "Lahjakortti – <myyjä>". Näytetään kun redeem_enabled, maksamatonta on ja tilauksella ei ole lahjakorttirivejä (lahjakortilla ei osteta lahjakorttia).
 // bare = ilman omaa otsikkoa/ohjetta (vahvistussivun maksuvalinnan sisällä, otsikko tulee valintapainikkeesta); balance = lisää "Näytä saldo" (public_check_gift_card; unpaid = maksettava, näyttää käytettävissä olevan osuuden).
 // onApplied(text) = oma kortti käytetty; onClaimed({ text, extra }) = kumppanin lahjakortti lähetetty lunastettavaksi (tilaus + pyyntölista ladataan uudelleen).
@@ -20,14 +20,11 @@ export function redeemSection({ L, api, token, onApplied, onClaimed, bare = fals
   const errText = (code) => (code === 'notReady' ? tx('notReady') : tx(G.errorKey(code, has)));
   const code = h('input', { type: 'text', autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false', maxlength: 40, 'data-testid': 'gc-code' });
   const fc = field({ label: tx('o.code'), control: code, hint: tx('o.codeHint'), name: 'rc' });
-  const amt = h('input', { type: 'text', inputmode: 'decimal', autocomplete: 'off', 'data-testid': 'gc-amount' });
-  const fa = field({ label: tx('o.amount'), control: amt, hint: tx('o.amountHint'), name: 'ra' });
   const msg = h('div', { class: 'ord-msg gc-msg', 'aria-live': 'polite', 'data-testid': 'gc-msg' });
   const btn = h('button', { type: 'submit', class: 'btn ord-btn', 'data-testid': 'gc-apply', text: tx('o.apply') });
   const choose = h('div', { class: 'vc-choose', role: 'group', 'aria-labelledby': 'vc-ctitle-' + (++chooseSeq), hidden: true, 'data-testid': 'vc-choose' });
   const hideChoose = () => { choose.hidden = true; choose.replaceChildren(); };
   code.addEventListener('input', () => { fc.setError(''); msg.replaceChildren(); hideChoose(); });
-  amt.addEventListener('input', () => fa.setError(''));
   const showError = (text) => { msg.replaceChildren(h('p', { class: 'bk-error', role: 'alert', text })); revealIfHidden(msg); };
 
   // myyjän vahvistus (tuntematon koodi, kumppanilunastus päällä): järjestelmän tunnistus esivalittuna, asiakas vahvistaa tai vaihtaa ennen lähetystä.
@@ -87,11 +84,9 @@ export function redeemSection({ L, api, token, onApplied, onClaimed, bare = fals
   const form = h('form', { class: 'ord-form bk-form', novalidate: true, onsubmit: async (ev) => {
     ev.preventDefault(); if (btn.disabled) return; msg.replaceChildren(); hideChoose();
     if (!G.codeValid(code.value)) { fc.setError(tx('vc.err.invalid_code')); code.focus(); return; }
-    let amount = null;
-    if (amt.value.trim()) { amount = G.parseAmount(amt.value); if (amount == null || amount <= 0) { fa.setError(tx('o.amountErr')); amt.focus(); return; } }
     btn.disabled = true; btn.textContent = tx('o.applying');
     try {
-      const out = await G.resolveCode({ api, token, code: code.value, amount });
+      const out = await G.resolveCode({ api, token, code: code.value });
       if (out.type === 'applied') {
         const r = out.result, left = r.gift_card?.balance ?? 0, money = F.money;
         const text = [left > 0 ? tx('o.done', { amount: money(r.amount), balance: money(left) }) : tx('o.doneEmpty', { amount: money(r.amount) }), r.balance && +r.balance.unpaid <= 0 ? tx('o.paidFull') : r.balance ? tx('o.restDue', { unpaid: money(r.balance.unpaid) }) : ''].filter(Boolean).join(' ');
@@ -103,7 +98,7 @@ export function redeemSection({ L, api, token, onApplied, onClaimed, bare = fals
       else { showError(errText(out.code)); if (onFail) onFail(out.code); }
     } catch { showError(tx('err.generic')); }
     btn.disabled = false; btn.textContent = tx('o.apply');
-  } }, fc.wrap, fa.wrap, h('div', { class: 'gc-btnrow' }, btn, chk), msg);
+  } }, fc.wrap, h('div', { class: 'gc-btnrow' }, btn, chk), msg);
   if (bare) return h('div', { class: 'gc-redeem-bare', role: 'group', 'aria-label': tx('o.useTitle'), 'data-testid': 'gc-redeem' }, h('p', { class: 'bk-note', text: tx('o.useLeadSellers') }), form, choose);
   return h('section', { class: 'ord-card', 'aria-labelledby': 'ord-gc', 'data-testid': 'gc-redeem' }, h('h3', { id: 'ord-gc', text: tx('o.useTitle') }), h('p', { class: 'bk-note', text: tx('o.useLeadSellers') }), form, choose);
 }

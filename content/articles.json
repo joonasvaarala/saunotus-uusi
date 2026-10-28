@@ -67,12 +67,13 @@
    "otherLang": "Read this article in English",
    "ctaTitle": "Varaa oma saunahetkesi",
    "ctaText": "Sipoonjoen Perinnesauna tarjoaa savusaunan, saunahoidot ja lahjakortit. Valitse aika ja varaa verkossa.",
-   "ctaButton": "Varaa aika",
+   "ctaButton": "Varaa",
    "movedTitle": "Sivu on siirtynyt",
    "movedText": "Tämä artikkeli on siirretty uuteen osoitteeseen.",
    "movedLink": "Siirry artikkeliin",
    "homeAll": "Kaikki artikkelit",
-   "readMore": "Lue lisää"
+   "readMore": "Lue lisää",
+   "moreTopics": "Muut aiheet"
   },
   "en": {
    "kicker": "Sipoonjoki Heritage Sauna",
@@ -107,12 +108,13 @@
    "otherLang": "Lue artikkeli suomeksi",
    "ctaTitle": "Book your own sauna moment",
    "ctaText": "Sipoonjoki Heritage Sauna offers a smoke sauna, sauna treatments and gift cards. Choose a time and book online.",
-   "ctaButton": "Book now",
+   "ctaButton": "Book",
    "movedTitle": "This page has moved",
    "movedText": "This article has moved to a new address.",
    "movedLink": "Go to the article",
    "homeAll": "All articles",
-   "readMore": "Read more"
+   "readMore": "Read more",
+   "moreTopics": "More topics"
   }
  },
  "home": {

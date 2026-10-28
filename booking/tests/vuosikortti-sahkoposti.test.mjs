@@ -73,7 +73,7 @@ test('sähköpostipohja: index.ts ohittaa perutun / puuttuvan kortin ennen rende
   assert.match(idx, /const acBlock = annualCardBlock\(r\);\n\s*if \(acBlock\) \{ await bk\.rpc\("email_outbox_mark", \{ p_id: r\.id, p_result: "skipped", p_error: acBlock \}\)/);
   assert.ok(idx.indexOf('annualCardBlock(r)') < idx.indexOf('render(r.kind as Kind, r, r.locale, t)'));
   const tpl = rd('booking/supabase/functions/send-emails/templates.ts');
-  assert.match(tpl, /\| "annual_card_code";/);
+  assert.match(tpl, /\| "annual_card_code"( \| "[a-z_]+")*;/);
   assert.match(tpl, /case "annual_card_code": \{/);
   assert.doesNotMatch(tpl.slice(tpl.indexOf('case "annual_card_code"'), tpl.indexOf('case "waitlist_spot_freed"')), /whatsapp/i);
 });

@@ -19,8 +19,8 @@ const rows = [
   { rule_id: 4, status: 'full', starts_at: '2026-11-02T14:00:00Z' },
 ];
 
-test('tuotenäkymä: vapaat ensin, loppuunmyydyt lopuksi, unavailable piilossa', () => {
-  assert.deepEqual(visibleWaitlistSlots(rows).map(x => x.rule_id), [3, 4, 1]);
+test('tuotenäkymä: alkamisajan mukaan, loppuunmyyty paikallaan, unavailable piilossa', () => {
+  assert.deepEqual(visibleWaitlistSlots(rows).map(x => x.rule_id), [4, 1, 3]);
   assert.equal(hasWaitlistSlots([{ status: 'unavailable' }]), false);
   assert.equal(fullyBooked([{ status: 'full' }, { status: 'unavailable' }]), true);
   assert.equal(fullyBooked([{ status: 'available' }, { status: 'full' }]), false);
@@ -28,7 +28,7 @@ test('tuotenäkymä: vapaat ensin, loppuunmyydyt lopuksi, unavailable piilossa',
 
 test('päivänäkymä: samoja tilasääntöjä sovelletaan {r,p}-riveihin', () => {
   const wrapped = rows.map(r => ({ r, p: { id: 1 } }));
-  assert.deepEqual(visibleWaitlistSlots(wrapped).map(x => x.r.rule_id), [3, 4, 1]);
+  assert.deepEqual(visibleWaitlistSlots(wrapped).map(x => x.r.rule_id), [4, 1, 3]);
   const products = [[1, wrapped.slice(0,2)], [2, wrapped.slice(2,3)], [3, wrapped.slice(3)]];
   products.sort((a,b) => Number(fullyBooked(a[1])) - Number(fullyBooked(b[1])));
   assert.equal(products[0][0], 2);

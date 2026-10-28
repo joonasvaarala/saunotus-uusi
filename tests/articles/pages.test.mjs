@@ -181,6 +181,17 @@ test('CTA: artikkelin oma :::cta renderöityy; oletus-CTA lisätään kun lohkoa
   assert.match(page(r, '/saunatietoa/savusauna-lampiaminen/').html, /class="article-cta"[\s\S]*href="\/varaa\/"/);
   assert.match(page(r, '/en/sauna-knowledge/how-to-sauna/').html, /href="\/en\/book\/">Book now<\/a>/);
 });
+test('tagiseinä: yli kuusi aihetta → viisi ylhäällä, loput sivun lopussa', async () => {
+  const { partitionTags } = await import('../../src/articles/pages.mjs');
+  const tags = 'abcdefghij'.split('').map((id) => ({ slug: id, label: id }));
+  assert.deepEqual(partitionTags(tags).main.map((t) => t.slug), ['a', 'b', 'c', 'd', 'e']);
+  assert.deepEqual(partitionTags(tags).rest.map((t) => t.slug), ['f', 'g', 'h', 'i', 'j']);
+  assert.equal(partitionTags(tags.slice(0, 6)).rest.length, 0);
+  const current = tags[8];
+  const parts = partitionTags(tags, current);
+  assert.ok(parts.main.some((t) => t.slug === 'i'));
+  assert.ok(!parts.rest.some((t) => t.slug === 'i'));
+});
 test('listaus: kortit linkittävät artikkeleihin kuvaavalla ankkuritekstillä; tagit ja luettelo ovat saavutettavia', async () => {
   const r = await build(await load());
   const html = page(r, '/saunatietoa/').html;
