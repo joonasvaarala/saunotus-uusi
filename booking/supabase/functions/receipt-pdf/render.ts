@@ -17,6 +17,18 @@ export function round2(n: number): number {
   const s = x < 0 ? -1 : 1;
   return s * Math.round((Math.abs(x) + Number.EPSILON) * 100) / 100;
 }
+/** Henkilöhinta kuitilla: "2 × 29,00 € = 58,00 €". Rivin brutto ei muutu. */
+export function receiptQtyUnitFormula(l: { quantity?: unknown; unit_gross?: unknown; line_gross?: unknown }, loc: string): string | null {
+  if (l.unit_gross == null || l.unit_gross === "") return null;
+  const qty = Number(l.quantity ?? 1);
+  const unit = Number(l.unit_gross);
+  const gross = Number(l.line_gross ?? 0);
+  if (!Number.isFinite(qty) || !Number.isFinite(unit) || !Number.isFinite(gross)) return null;
+  const q = Number.isInteger(qty) ? String(qty) : String(qty);
+  const fmt = (n: number) => (loc === "en" ? round2(n).toFixed(2) : round2(n).toFixed(2).replace(".", ",")) + " €";
+  return `${q} × ${fmt(unit)} = ${fmt(gross)}`;
+}
+
 /** line_net on snapshotissa; vanha kuitti ilman sitä johdetaan brutto × kanta / (100 + kanta). */
 export function lineAmounts(l: { line_gross?: unknown; line_net?: unknown; vat_rate?: unknown }): { net: number; vat: number; gross: number; rate: number } {
   const gross = Number(l.line_gross ?? 0);
@@ -104,14 +116,18 @@ export async function buildReceiptPdf(s: any, tfn: TFn = DEFAULT_T): Promise<Uin
     let d = l.description as string;
     if (l.starts_at) d += ` (${new Intl.DateTimeFormat("fi-FI", { timeZone: "Europe/Helsinki", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(l.starts_at)).replace(",", "")}–${new Intl.DateTimeFormat("fi-FI", { timeZone: "Europe/Helsinki", hour: "2-digit", minute: "2-digit" }).format(new Date(l.ends_at))})`;
     const amt = lineAmounts(l);
-    const ls = wrap(d, font, 9, cx.qty - 36 - M); need(ls.length * 12 + 6);
+    const colW = cx.qty - 36 - M;
+    const formula = receiptQtyUnitFormula(l, loc);
+    const fls = formula ? wrap(formula, font, 8, colW) : [];
+    const ls = wrap(d, font, 9, colW); need(ls.length * 12 + fls.length * 11 + 6);
     ls.forEach((t, i) => text(page, t, M, y - i * 12, 9));
+    fls.forEach((t, i) => text(page, t, M, y - ls.length * 12 - i * 11, 8, font, grey));
     right(page, String(l.quantity), cx.qty, y, 8.5);
     right(page, money(amt.net, loc), cx.net, y, 8.5);
     right(page, rate(amt.rate, loc), cx.pct, y, 8.5);
     right(page, money(amt.vat, loc), cx.vat, y, 8.5);
     right(page, money(amt.gross, loc), cx.gross, y, 8.5);
-    y -= ls.length * 12 + 4;
+    y -= ls.length * 12 + fls.length * 11 + 4;
   }
   need(140); page.drawLine({ start: { x: M, y: y + 6 }, end: { x: M + W, y: y + 6 }, thickness: 0.4, color: grey }); y -= 10;
   // ALV-erittely
