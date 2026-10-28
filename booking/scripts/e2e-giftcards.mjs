@@ -454,13 +454,16 @@ async function shopSuite() {
     expect(await page.locator('#avoin').count() === 1 && await page.locator('#paketit').count() === 1, `${name}: staattiset osiot #avoin ja #paketit säilyvät`);
     expect(await page.locator('#gift-app').isHidden() && await page.locator('#gift-balance').isHidden(), `${name}: myynti- ja saldolohko piilossa`);
     expect(!(await page.locator('body').innerText()).match(/ei vielä käytössä|not available yet|tulossa|coming soon/i), `${name}: ei "ei vielä käytössä" -tekstiä`);
-    expect(await page.locator('#avoin a[href*="johku"], #paketit a[href*="johku"]').count() > 0, `${name}: Johku-linkit paikallaan`);
+    expect(await page.locator('#avoin a[href*="johku"], #paketit a[href*="johku"]').count() === 0, `${name}: ei Johku-linkkiä`);
+    expect(/Savusaunavuoro|Smoke sauna session/.test(await page.locator('#paketit').innerText()) && !/koivuvihta|birch whisk|Vuosikortti|Annual card/.test(await page.locator('#paketit').innerText()), `${name}: esirenderöity valikoima, ei vanhoja kortteja eikä vuosikorttilupausta`);
     expect(rpcCalls(page, 'public_gift_card_packages').length === 1 && !rpcCalls(page, 'public_buy_gift_card').length, `${name}: vain paketit-RPC kutsuttu`);
     await page.context().close();
   }
   // 1b) RPC puuttuu → sivu ennallaan
   { const name = 'lahjakorttisivu RPC puuttuu', page = await newShopPage(name, { missingRpc: true }); await page.goto(`${ORIGIN}/lahjakortti/`); await page.waitForTimeout(400);
-    expect(await page.locator('#avoin').count() === 1 && await page.locator('#gift-app').isHidden(), `${name}: sivu ennallaan`); await page.context().close(); }
+    expect(await page.locator('#avoin').count() === 1 && await page.locator('#paketit').count() === 1 && await page.locator('#gift-app').isHidden(), `${name}: API-virhe jättää esirenderöidyn valikoiman`);
+    expect(/Savusaunavuoro/.test(await page.locator('#paketit').innerText()) && await page.locator('#gift-app .gc-tile').count() === 0, `${name}: dynaaminen kauppa ei korvaa listaa`);
+    await page.context().close(); }
 
   // 2) myynti FI: validoinnit, tervehdys, ostoskori, osto
   {
@@ -468,10 +471,10 @@ async function shopSuite() {
     await page.goto(`${ORIGIN}/lahjakortti/`); await page.waitForSelector('#gift-app .gc-tile');
     expect(await page.locator('#avoin').count() === 1 && await page.locator('#gift-app #avoin').count() === 1 && await page.locator('#gift-app #paketit').count() === 1, `${name}: ankkurit #avoin/#paketit ovat myyntilohkossa`);
     expect(await page.locator('section#avoin, section#paketit').count() === 0, `${name}: staattiset Johku-osiot korvattu`);
-    expect(await page.locator('#paketit .gc-tile').count() === 4, `${name}: 4 pakettia`);
+    expect(await page.locator('#paketit .gc-tile').count() === 5, `${name}: 5 pakettia`);
     const names = await page.locator('#paketit h3').allInnerTexts(), prices = await page.locator('#paketit .gc-price').allInnerTexts();
     expect(names.length === 4 && names.every((n, i) => n === MOCK_PACKAGES[i + 1].name), `${name}: nimet palvelimelta (${names})`);
-    expect(prices.map((p) => num(p.split('·')[0])).join() === '58,88,192,328', `${name}: hinnat palvelimelta (${prices.map((p) => num(p.split('·')[0]))})`);
+    expect(prices.map((p) => num(p.split('·')[0])).join() === '58,88,98,192,328', `${name}: hinnat palvelimelta (${prices.map((p) => num(p.split('·')[0]))})`);
     expect(await page.locator('#gc-cart').innerText().then((t) => /Valitse ensin lahjakortti/.test(t)), `${name}: tyhjä ostoskori -ohje`);
     // avoin summa: virheelliset
     for (const bad of ['', '28', '501', '12.345', 'abc', '-5']) { await page.fill('#avoin input', bad); await page.click('#avoin .gc-btn'); expect(/29–500/.test(await page.locator('#avoin .gc-err').innerText()), `${name}: virheellinen summa "${bad}" hylätään`); }
@@ -479,7 +482,7 @@ async function shopSuite() {
     await page.fill('#avoin input', '75,5'); await page.click('#avoin .gc-btn'); await page.waitForSelector('.gc-line');
     expect(await page.locator('#avoin .gc-err').innerText() === '', `${name}: virhe pois kun summa kelpaa`);
     // paketti kahdesti → kaksi riviä; määrä + ja −
-    await page.locator('#paketit .gc-tile').nth(0).locator('.gc-btn').click(); await page.locator('#paketit .gc-tile').nth(3).locator('.gc-btn').click();
+    await page.locator('#paketit .gc-tile').nth(0).locator('.gc-btn').click(); await page.locator('#paketit .gc-tile').nth(4).locator('.gc-btn').click();
     expect(await page.locator('.gc-line').count() === 3, `${name}: 3 riviä`);
     await page.locator('.gc-line').nth(1).getByRole('button', { name: 'Lisää määrää' }).click(); await page.locator('.gc-line').nth(1).getByRole('button', { name: 'Lisää määrää' }).click();
     await page.locator('.gc-line').nth(1).getByRole('button', { name: 'Vähennä määrää' }).click();
@@ -514,7 +517,7 @@ async function shopSuite() {
     expect(a && a.p_name === 'Olli Ostaja' && a.p_email === 'olli@example.fi' && a.p_phone === '+358 40 123 4567' && a.p_marketing_consent === true && a.p_locale === 'fi', `${name}: ostajan kentät (${JSON.stringify({ ...a, p_items: undefined })})`);
     expect(a && JSON.stringify(a.p_items) === JSON.stringify([
       { package: 'open', quantity: 1, amount: 75.5, delivery_to: 'recipient', recipient_name: 'Mikko Mallikas', greeting: 'Hyvää syntymäpäivää!\nNauti saunasta.', recipient_email: 'mikko@example.fi' },
-      { package: 'entry_2', quantity: 2, delivery_to: 'buyer' }, { package: 'saunotus_2', quantity: 1, delivery_to: 'buyer' }]), `${name}: p_items täsmälleen sopimuksen mukaan (${JSON.stringify(a?.p_items)})`);
+      { package: 'entry_2', quantity: 2, persons: 2, amount: 58, delivery_to: 'buyer' }, { package: 'saunotus_2', quantity: 1, persons: 2, amount: 328, delivery_to: 'buyer' }]), `${name}: p_items täsmälleen sopimuksen mukaan (${JSON.stringify(a?.p_items)})`);
     expect(Object.keys(a).sort().join() === 'p_email,p_items,p_locale,p_marketing_consent,p_name,p_phone', `${name}: vain sopimuksen parametrit (${Object.keys(a)})`);
     const done = await page.locator('.gc-done').innerText();
     expect(/Kiitos tilauksesta/.test(done) && /#15401/.test(done) && /Odottaa maksua/.test(done) && /maksettu/.test(done), `${name}: kuittaus (${done.slice(0, 60)})`);
@@ -734,7 +737,7 @@ async function shopSuite() {
     await page.click('.gc-submit'); await page.waitForSelector('.gc-done, .gc-err:not(:empty), .gc-msg .bk-error', { timeout: 5000 });
     if (!(await page.locator('.gc-done').count())) { expect(false, `${name}: osto ei onnistunut: ${(await page.locator('.gc-err:not(:empty), .gc-msg').allInnerTexts()).join(' | ')}`); await page.context().close(); return; }
     const it = rpcCalls(page, 'public_buy_gift_card').at(-1).args.p_items;
-    expect(JSON.stringify(it[0]) === JSON.stringify({ package: 'entry_2', quantity: 1, delivery_to: 'buyer', greeting: 'Moi' }), `${name}: minulle → ei saajaa, saatetta eikä ajankohtaa (${JSON.stringify(it[0])})`);
+    expect(JSON.stringify(it[0]) === JSON.stringify({ package: 'entry_2', quantity: 1, persons: 2, amount: 58, delivery_to: 'buyer', greeting: 'Moi' }), `${name}: minulle → ei saajaa, saatetta eikä ajankohtaa (${JSON.stringify(it[0])})`);
     expect(it[1].delivery_to === 'recipient' && !('deliver_on' in it[1]) && !('deliver_time' in it[1]) && it[1].cover_message === 'Terve', `${name}: heti → ei deliver_on/deliver_time (${JSON.stringify(it[1])})`);
     expect(it[2].deliver_on === iso && !('deliver_time' in it[2]), `${name}: ajankohta ilman kellonaikaa → vain deliver_on (${JSON.stringify(it[2])})`);
     const notes = await page.locator('[data-testid=done-delivery]').allInnerTexts();
@@ -763,7 +766,7 @@ async function shopSuite() {
     await page.goto(`${ORIGIN}${GIFT(lang)}`); await page.waitForSelector('#gift-app .gc-tile');
     { // sisältölista: FI = items[].label, EN = items[].label_en (booking_45); avoimella kortilla ei listaa
       const lists = await page.locator('#paketit .gc-tile [data-testid=gc-items]').allInnerTexts(), all = lists.join('|');
-      expect(lists.length === 4 && (await page.locator('#avoin [data-testid=gc-items]').count()) === 0, `${name}: sisältölista 4 paketilla (${lists.length})`);
+      expect(lists.length === 5 && (await page.locator('#avoin [data-testid=gc-items]').count()) === 0, `${name}: sisältölista 5 paketilla (${lists.length})`);
       expect(lang === 'en' ? /General session/.test(all) && /Peat mask and foot bath/.test(all) && /Sauna treatment/.test(all) && /Ritual sauna bathing/.test(all) && !/Yleinen vuoro|Saunahoito|Turvenaamio/.test(all) : /Yleinen vuoro/.test(all) && /Turvenaamio ja jalkakylpy/.test(all) && !/General session|Peat mask/.test(all), `${name}: sisältölistan kieli (${all.replace(/\n/g, '/')})`);
       if (vp === 390 || vp === 1280) await page.locator('#paketit').screenshot({ path: join(SHOT, `kauppa-paketit-sisalto-${lang}-${vp}.png`) });
     }

@@ -92,10 +92,11 @@ export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOve
   const value = money(Number(d.initial_amount ?? 0), en);
   const recipient = san(d.recipient_name), buyer = san(d.buyer_name), greeting = sanGreeting(d.greeting);
   const items: any[] = isOpen ? [] : (Array.isArray(d.package?.items) ? d.package.items : []);
-  const itemLines = items.map((it) => { const lb = san((en ? it.label_en : it.label) ?? it.label ?? it.label_en ?? ""); return lb ? `${lb}${it.persons ? ` × ${it.persons}` : ""}` : ""; }).filter(Boolean).slice(0, 4);
+  const itemLines = items.map((it) => san((en ? it.label_en : it.label) ?? it.label ?? it.label_en ?? "")).filter(Boolean).slice(0, 4);
+  const partyN = !isOpen ? Number(d.persons ?? d.package?.persons) || 0 : 0;
+  const partyLine = partyN ? TX(partyN === 1 ? "email.gift_card_pdf.persons_one" : "email.gift_card_pdf.persons_line", { n: partyN }) : "";
   const meta: [string, string][] = [];
   const validTxt = d.valid_to ? TX("email.gift_card_pdf.valid_value", { date: dateOnly(d.valid_to, en) }) : "";
-  if (!isOpen && d.package?.persons) meta.push([TX("email.gift_card_pdf.persons_label"), TX("email.gift_card_pdf.persons_value", { n: d.package.persons })]);
   if (!hidePrice && Math.abs(Number(d.balance ?? 0) - Number(d.initial_amount ?? 0)) > 0.004) meta.push([TX("email.gift_card_pdf.balance"), money(Number(d.balance ?? 0), en)]);
   meta.push([TX("email.gift_card_pdf.issued"), helsinkiDate(d.issued_at, en)]);
   const web = stripProto(S.web ?? "saunotus.fi");
@@ -209,6 +210,7 @@ export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOve
         let nsz = 23; let nl = wrap(pkgName, serifB, nsz, colW); if (nl.length > 2) { nsz = 19; nl = wrap(pkgName, serifB, nsz, colW); }
         t += nsz * 0.7;
         for (const l of nl.slice(0, 3)) { txt(l, cx, t, nsz, serifB, C.ink, "c"); t += nsz * 1.08; }
+        if (partyLine) { t += 4; txt(partyLine, cx, t + 12, 14, serifI, C.gold, "c"); t += 12; }
         t += 6; txt(value, cx, t + 14, 26, serif, C.gold, "c"); t += 20;
         const il = wrap(itemLines.join("   ·   "), sans, 10, colW);
         if (il.length) { t += 6; for (const l of il) { t += 13.5; txt(l, cx, t, 10, sans, C.muted, "c"); } }
@@ -217,6 +219,7 @@ export async function buildGiftCardPdf(d: any, logo?: Uint8Array | null, langOve
         for (const s2 of [26, 22, 19]) { if (nl.length <= 2) break; nsz = s2; nl = wrap(pkgName, serifB, nsz, colW); }
         t += nsz * 0.72;
         for (const l of nl.slice(0, 3)) { txt(l, cx, t, nsz, serifB, C.ink, "c"); t += nsz * 1.08; }
+        if (partyLine) { t += 6; txt(partyLine, cx, t + 14, 16, serifI, C.gold, "c"); t += 16; }
         const il = itemLines.flatMap((l) => wrap(l, sans, 11.5, colW));
         if (il.length) {
           t += 12; caps(TX("email.gift_card_pdf.includes"), cx, t + 6, 6.8, sansB, C.gold, 2.4, "c"); t += 10;

@@ -5,8 +5,8 @@ import { HT } from './hold-texts.js';
 export const GT = {
   fi: {
     'err.order_expired': HT.fi['err.order_expired'], 'err.order_preliminary': HT.fi['err.order_preliminary'], 'err.payment_in_progress': HT.fi['err.payment_in_progress'],   // pito (§17.3): tekstit yhdessä paikassa (hold-texts.js)
-    buyTitle: 'Osta lahjakortti', buyLead: 'Valitse avoin lahjakortti tai valmis paketti kahdelle. Kortti on voimassa {months} kuukautta maksun jälkeen.',
-    chooseTitle: 'Valitse lahjakortti', openKicker: 'Vapaa summa', pkgKicker: 'Paketti kahdelle', persons: '{n} henkilölle', amountFrom: '{min}–{max} €', valid: 'Voimassa {months} kk', contents: 'Paketin sisältö',
+    buyTitle: 'Osta lahjakortti', buyLead: 'Valitse avoin lahjakortti tai valmis paketti. Kortti on voimassa {months} kuukautta maksun jälkeen.',
+    chooseTitle: 'Valitse lahjakortti', openKicker: 'Vapaa summa', pkgKicker: 'Paketti', persons: '{n} henkilölle', personsLabel: 'Henkilömäärä', perPerson: '{price} / hlö', amountFrom: '{min}–{max} €', valid: 'Voimassa {months} kk', contents: 'Paketin sisältö',
     itemsTitle: 'Sisältö', add: 'Lisää tilaukseen', added: 'Lisätty tilaukseen', addOpen: 'Lisää summa tilaukseen',
     amountLabel: 'Summa (€)', amountHint: 'Valitse {min}–{max} €, enintään kaksi desimaalia.', 'err.amount': 'Anna summa väliltä {min}–{max} € (enintään kaksi desimaalia).',
     cartTitle: 'Tilauksesi', cartEmpty: 'Valitse ensin lahjakortti yllä.', cardsCount: '{n} korttia', cardsCount1: '1 kortti', maxCards: 'Tilaukseen mahtuu enintään {n} korttia.', maxCardsReached: 'Korttien enimmäismäärä ({n}) on täynnä.',
@@ -31,6 +31,7 @@ export const GT = {
     previewAlt: 'Lahjakortin esikatselu',
     doneTitle: 'Kiitos tilauksesta!', doneOrder: 'Tilausnumero', doneTotal: 'Yhteensä', doneCards: 'Kortit', doneStatus: 'Odottaa maksua',
     doneNote: 'Lahjakortti aktivoituu ja koodi on käytettävissä, kun tilaus on maksettu. Voit seurata korttien tilaa tilaussivulla – tallenna linkki.', donePayLater: 'Maksu paikan päällä tai laskulla sopimuksen mukaan. Ota yhteyttä, jos haluat maksaa muuten.', doneOpen: 'Avaa tilaussivu', donePay: 'Siirry maksamaan', doneNew: 'Tee uusi tilaus', doneRef: 'Tilausnumero {no}',
+    'err.invalid_persons': 'Tarkista henkilömäärä.', annualBuy: 'Osta vuosikortti',
     'err.sale_disabled': 'Lahjakorttien verkkomyynti ei ole vielä käytössä.', 'err.rate_limited': 'Liian monta yritystä. Yritä hetken kuluttua uudelleen.', 'err.invalid_name': 'Tarkista nimi.', 'err.invalid_email': 'Tarkista sähköpostiosoite.', 'err.invalid_phone': 'Tarkista puhelinnumero.', 'err.invalid_items': 'Tilauksen rivit ovat virheelliset. Päivitä sivu ja yritä uudelleen.', 'err.invalid_package': 'Valittua lahjakorttia ei löytynyt. Päivitä sivu.', 'err.package_inactive': 'Valittu lahjakortti ei ole enää myynnissä.', 'err.invalid_quantity': 'Tarkista korttien määrä.', 'err.too_many_cards': 'Tilaukseen mahtuu enintään {n} korttia.', 'err.invalid_amount': 'Summa ei kelpaa: {min}–{max} €, enintään kaksi desimaalia.', 'err.invalid_greeting': 'Tervehdys on liian pitkä (enintään {max} merkkiä).', 'err.generic': 'Toiminto epäonnistui. Yritä uudelleen tai ota yhteyttä.',
     loading: 'Ladataan…', loadError: 'Lahjakorttien tietoja ei saatu ladattua. Yritä uudelleen tai ota yhteyttä:', notReady: 'Verkkoliittymä ei ole vielä käytössä. Ota yhteyttä:', mockBanner: 'Esimerkkisivu: tiedot ovat keksittyjä eikä mikään tallennu.', contact: 'Kysyttävää? Ota yhteyttä:',
     // Saldotarkistus
@@ -71,8 +72,8 @@ export const GT = {
   },
   en: {
     'err.order_expired': HT.en['err.order_expired'], 'err.order_preliminary': HT.en['err.order_preliminary'], 'err.payment_in_progress': HT.en['err.payment_in_progress'],
-    buyTitle: 'Buy a gift card', buyLead: 'Choose an open-value gift card or a ready-made package for two. The card is valid for {months} months after payment.',
-    chooseTitle: 'Choose a gift card', openKicker: 'Any amount', pkgKicker: 'Package for two', persons: 'For {n} people', amountFrom: '€{min}–{max}', valid: 'Valid for {months} months', contents: 'Package contents',
+    buyTitle: 'Buy a gift card', buyLead: 'Choose an open-value gift card or a ready-made package. The card is valid for {months} months after payment.',
+    chooseTitle: 'Choose a gift card', openKicker: 'Any amount', pkgKicker: 'Package', persons: 'For {n} people', personsLabel: 'Number of people', perPerson: '{price} / person', amountFrom: '€{min}–{max}', valid: 'Valid for {months} months', contents: 'Package contents',
     itemsTitle: 'Includes', add: 'Add to order', added: 'Added to order', addOpen: 'Add amount to order',
     amountLabel: 'Amount (€)', amountHint: 'Choose €{min}–{max}, up to two decimals.', 'err.amount': 'Enter an amount between €{min} and €{max} (up to two decimals).',
     cartTitle: 'Your order', cartEmpty: 'Choose a gift card above first.', cardsCount: '{n} cards', cardsCount1: '1 card', maxCards: 'An order can include up to {n} cards.', maxCardsReached: 'The maximum number of cards ({n}) has been reached.',
@@ -97,6 +98,7 @@ export const GT = {
     previewAlt: 'Gift card preview',
     doneTitle: 'Thank you for your order!', doneOrder: 'Order number', doneTotal: 'Total', doneCards: 'Cards', doneStatus: 'Awaiting payment',
     doneNote: 'The gift card is activated and its code becomes available once the order is paid. You can follow the status of your cards on the order page – please save the link.', donePayLater: 'Payment on site or by invoice as agreed. Contact us if you would like to pay another way.', doneOpen: 'Open order page', donePay: 'Go to payment', doneNew: 'Make a new order', doneRef: 'Order number {no}',
+    'err.invalid_persons': 'Please check the number of people.', annualBuy: 'Buy an annual card',
     'err.sale_disabled': 'Online sales of gift cards are not available yet.', 'err.rate_limited': 'Too many attempts. Please try again shortly.', 'err.invalid_name': 'Please check the name.', 'err.invalid_email': 'Please check the email address.', 'err.invalid_phone': 'Please check the phone number.', 'err.invalid_items': 'The order lines are invalid. Reload the page and try again.', 'err.invalid_package': 'The selected gift card was not found. Please reload the page.', 'err.package_inactive': 'The selected gift card is no longer on sale.', 'err.invalid_quantity': 'Please check the number of cards.', 'err.too_many_cards': 'An order can include up to {n} cards.', 'err.invalid_amount': 'The amount is not valid: €{min}–{max}, up to two decimals.', 'err.invalid_greeting': 'The greeting is too long (max {max} characters).', 'err.generic': 'The action failed. Please try again or contact us.',
     loading: 'Loading…', loadError: 'Could not load gift card information. Please try again or contact us:', notReady: 'The online service is not available yet. Please contact us:', mockBanner: 'Demo page: the data is fictional and nothing is saved.', contact: 'Questions? Contact us:',
     balTitle: 'Check your gift card balance', balLead: 'Enter the gift card code. Upper/lower case, dashes and spaces do not matter.', balCode: 'Gift card code', balHint: 'Format HHxx-xxxx-xxxx', balBtn: 'Check balance', balChecking: 'Checking…',
@@ -135,7 +137,7 @@ export const GT = {
 };
 // Yksikkömuodot (plural.js oneKey): käytetään kun lukumäärä on 1; puuttuu → monikkoavain (julkaistu teksti ennallaan). Tuonti: content/site-texts.pending-import-64.json.
 Object.assign(GT.fi, {
-  buyLeadOne: "Valitse avoin lahjakortti tai valmis paketti kahdelle. Kortti on voimassa {months} kuukauden ajan maksun jälkeen.",
+  buyLeadOne: "Valitse avoin lahjakortti tai valmis paketti. Kortti on voimassa {months} kuukauden ajan maksun jälkeen.",
   personsOne: "{n} henkilölle",
   validOne: "Voimassa {months} kk",
   maxCardsOne: "Tilaukseen mahtuu enintään {n} kortti.",
@@ -144,7 +146,7 @@ Object.assign(GT.fi, {
   "err.deliver_on_too_far_one": "Ajankohta voi olla enintään {months} kk päässä.",
 });
 Object.assign(GT.en, {
-  buyLeadOne: "Choose an open-value gift card or a ready-made package for two. The card is valid for {months} month after payment.",
+  buyLeadOne: "Choose an open-value gift card or a ready-made package. The card is valid for {months} month after payment.",
   personsOne: "For {n} person",
   validOne: "Valid for {months} month",
   maxCardsOne: "An order can include up to {n} card.",

@@ -54,7 +54,7 @@ test('ostajan tarkistus', () => {
 });
 test('p_items ja kutsun parametrit täsmälleen sopimuksen §13.2 mukaan', () => {
   const lines = [{ pkg: 'open', amount: '75,5', qty: 1, recipientName: ' Mikko ', recipientEmail: 'Mikko@Example.FI', greeting: ' Hei\u0000! ' }, { pkg: 'entry_2', amount: '', qty: 2, recipientName: '', recipientEmail: '', greeting: '' }];
-  assert.deepEqual(G.itemsPayload(lines, pkgs), [{ package: 'open', quantity: 1, amount: 75.5, delivery_to: 'buyer', recipient_name: 'Mikko', greeting: 'Hei!' }, { package: 'entry_2', quantity: 2, delivery_to: 'buyer' }], 'oletus = minulle; saajan sähköposti ei lähde kun toimitus ostajalle');
+  assert.deepEqual(G.itemsPayload(lines, pkgs), [{ package: 'open', quantity: 1, amount: 75.5, delivery_to: 'buyer', recipient_name: 'Mikko', greeting: 'Hei!' }, { package: 'entry_2', quantity: 2, persons: 2, amount: 58, delivery_to: 'buyer' }], 'oletus = minulle; saajan sähköposti ei lähde kun toimitus ostajalle');
   const a = G.buyArgs({ lines, pkgs, buyer: { name: ' Olli ', email: ' Olli@X.fi ', phone: ' 040 1 ', marketing: 0 }, locale: 'en' });
   assert.deepEqual(Object.keys(a).sort(), ['p_email', 'p_items', 'p_locale', 'p_marketing_consent', 'p_name', 'p_phone']);
   assert.equal(a.p_locale, 'en'); assert.equal(a.p_marketing_consent, false); assert.equal(a.p_email, 'olli@x.fi');
@@ -66,7 +66,7 @@ test('summat ja korttimäärä; enimmäismäärä', () => {
   assert.equal(G.cardsLeft(lines, 10), 6); assert.equal(G.cardsLeft(lines, 3), 0);
 });
 test('hinnat ja nimet vastaavat tuotantoa (kauppa-mock = hallinnan mock)', () => {
-  assert.deepEqual(MOCK_PACKAGES.map((p) => [p.code, p.price, p.min_amount]).map(([c, p, m]) => [c, p, c === 'open' ? m : null]), [['open', null, 29], ['entry_2', 58, null], ['peat_mask_2', 88, null], ['sauna_treatment_2', 192, null], ['saunotus_2', 328, null]]);
+  assert.deepEqual(MOCK_PACKAGES.map((p) => [p.code, p.price, p.min_amount]).map(([c, p, m]) => [c, p, c === 'open' ? m : null]), [['open', null, 29], ['entry_2', 58, null], ['peat_mask_2', 88, null], ['saunarituaali_2', 98, null], ['sauna_treatment_2', 192, null], ['saunotus_2', 328, null]]);
   assert.deepEqual(MOCK_PACKAGES.map((p) => [p.code, p.name]), ADMIN_PACKAGES.map((p) => [p.code, p.name]));
 });
 test('tekstit: FI/EN-avaimet samat, paikkamerkit samat, ei tyhjiä', () => {
@@ -137,6 +137,23 @@ test('Paketin sisältölista: FI = label, EN = label_en (vain rivit joilla nimi 
   assert.deepEqual(itemLabels({ items: [{ label: 'Yleinen vuoro', persons: 2 }, { persons: 2, addon_code: 'x' }] }, 'en'), [], 'ei label_en → ei listaa EN-sivulle');
   assert.deepEqual(itemLabels({ items: [{ label: 'Yleinen vuoro' }, { addon_code: 'x' }] }, 'fi'), ['Yleinen vuoro']);
   assert.deepEqual(itemLabels(pkgs.find((x) => x.is_open), 'en'), []); assert.deepEqual(itemLabels(null, 'fi'), []);
+  const entry = pkgs.find((x) => x.code === 'entry_2');
+  assert.deepEqual(G.itemLines(entry, 'fi', '/varaa/'), [{ label: 'Yleinen vuoro', href: '/varaa/#/tuote/yleinensauna' }]);
+  assert.equal(G.itemLines(pkgs.find((x) => x.code === 'peat_mask_2'), 'fi', '/varaa/').find((x) => x.label.startsWith('Turve')).href, null);
+  assert.equal(G.itemLines(pkgs.find((x) => x.code === 'saunarituaali_2'), 'fi', '/en/book').find((x) => x.label.startsWith('Sauna')).href, '/en/book/#/tuote/saunarituaali-ja-savusaunavuoro');
+  assert.equal(G.packageAmount(entry, 1), 29);
+  assert.equal(G.packageAmount(entry, 2), 58);
+  assert.equal(G.packageAmount(entry, 3), 87);
+  assert.equal(G.packageAmount(entry, 7), null);
+  assert.equal(G.packageAmount(pkgs.find((x) => x.code === 'peat_mask_2'), 1), 44);
+  assert.equal(G.packageAmount(pkgs.find((x) => x.code === 'peat_mask_2'), 2), 88);
+  assert.equal(G.packageAmount(pkgs.find((x) => x.code === 'saunarituaali_2'), 2), 98);
+  assert.equal(G.packageAmount(pkgs.find((x) => x.code === 'saunarituaali_2'), 6), 294);
+  assert.equal(G.packageAmount(pkgs.find((x) => x.code === 'sauna_treatment_2'), 1), 128);
+  assert.equal(G.packageAmount(pkgs.find((x) => x.code === 'sauna_treatment_2'), 2), 192);
+  assert.equal(G.packageAmount(pkgs.find((x) => x.code === 'sauna_treatment_2'), 4), 320);
+  assert.equal(G.packageAmount(pkgs.find((x) => x.code === 'saunotus_2'), 2), 328);
+  assert.equal(G.packageAmount(pkgs.find((x) => x.code === 'saunotus_2'), 1), 239);
 });
 
 // ---------- Toimitusvalinta (sopimus §13.11, booking_46) ----------
@@ -192,10 +209,10 @@ test('p_items: delivery_to aina; saaja-valinnalla email/saate/ajankohta; ajankoh
   const base = { qty: 1, recipientName: ' Sanna ', recipientEmail: ' Saaja@Example.FI ', greeting: 'Hei', deliveryTo: 'recipient', coverMessage: ' Terveiset\r\nMoi ', sendMode: 'now', deliverOn: '2026-12-24', deliverTime: '18:30' };
   const lines = [{ pkg: 'entry_2', ...base }, { pkg: 'entry_2', ...base, sendMode: 'later' }, { pkg: 'entry_2', ...base, sendMode: 'later', deliverTime: '' }, { pkg: 'entry_2', ...base, deliveryTo: 'buyer', sendMode: 'later' }];
   const it = G.itemsPayload(lines, pkgs);
-  assert.deepEqual(it[0], { package: 'entry_2', quantity: 1, delivery_to: 'recipient', recipient_name: 'Sanna', greeting: 'Hei', recipient_email: 'saaja@example.fi', cover_message: 'Terveiset\nMoi' }, 'heti → ei deliver_on/deliver_time');
+  assert.deepEqual(it[0], { package: 'entry_2', quantity: 1, persons: 2, amount: 58, delivery_to: 'recipient', recipient_name: 'Sanna', greeting: 'Hei', recipient_email: 'saaja@example.fi', cover_message: 'Terveiset\nMoi' }, 'heti → ei deliver_on/deliver_time');
   assert.deepEqual([it[1].deliver_on, it[1].deliver_time], ['2026-12-24', '18:30']);
   assert.deepEqual([it[2].deliver_on, 'deliver_time' in it[2]], ['2026-12-24', false], 'kellonaika valinnainen');
-  assert.deepEqual(it[3], { package: 'entry_2', quantity: 1, delivery_to: 'buyer', recipient_name: 'Sanna', greeting: 'Hei' }, 'minulle → ei saajan sähköpostia, saatetta eikä ajankohtaa');
+  assert.deepEqual(it[3], { package: 'entry_2', quantity: 1, persons: 2, amount: 58, delivery_to: 'buyer', recipient_name: 'Sanna', greeting: 'Hei' }, 'minulle → ei saajan sähköpostia, saatetta eikä ajankohtaa');
 });
 test('mock-palvelin: public_buy_gift_card palauttaa jokaisen virhekoodin {ok:false, code} ja toimituskentät kortilla', async () => {
   const m = createGiftMock({ delay: 0 });

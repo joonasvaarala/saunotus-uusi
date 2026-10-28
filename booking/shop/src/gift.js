@@ -1,6 +1,7 @@
 // Lahjakorttisivu (/lahjakortti/, /en/gift-card/): verkkomyynti (public_gift_card_packages + public_buy_gift_card) ja saldotarkistus (public_check_gift_card).
-// Näkyvyys: myyntilohko vain kun sale_enabled=true (korvaa silloin staattiset Johku-osiot #avoin ja #paketit); saldotarkistus vain kun redeem_enabled=true.
-// Muuten sivu jää ennalleen (ei "ei vielä käytössä" -tekstejä). Sopimus: KOODARI_talous_A_D_fi.md §13.0, §13.2.
+// Näkyvyys: myyntilohko vain kun sale_enabled=true (korvaa silloin esirenderöidyt #avoin ja #paketit); saldotarkistus vain kun redeem_enabled=true.
+// API-virhe jättää esirenderöidyn julkaistun valikoiman (gift-offers.js). Vuosikortin ostolinkki vain jos public_annual_card_offer.available.
+// Sopimus: KOODARI_talous_A_D_fi.md §13.0, §13.2.
 import { rpc } from './sb.js';
 import { GT } from './gift-texts.js';
 import { createGiftApi } from './gift-api.js';
@@ -34,19 +35,19 @@ function buildSale(pk) {
   const cap = () => G.cardsLeft(lines, pk.max_cards);
 
   // -- tarjotin
-  const addLine = (code, amount) => {
+  const addLine = (code, amount, persons) => {
     const p = by.get(code); if (!p) return false;
     if (cap() < 1) { live.textContent = tx('maxCardsReached', { n: pk.max_cards }); return false; }
     if (lines.length >= 10) { live.textContent = tx('maxCardsReached', { n: pk.max_cards }); return false; }
-    lines.push({ id: ++seq, pkg: code, amount: amount ?? '', qty: 1, recipientName: '', recipientEmail: '', greeting: '', deliveryTo: 'buyer', coverMessage: '', sendMode: 'now', deliverOn: '', deliverTime: '' });
+    lines.push({ id: ++seq, pkg: code, amount: amount ?? '', qty: 1, persons: persons ?? null, recipientName: '', recipientEmail: '', greeting: '', deliveryTo: 'buyer', coverMessage: '', sendMode: 'now', deliverOn: '', deliverTime: '' });
     renderCart(); revealForm(cartHost, cartHost.querySelector('legend')); live.textContent = `${tx('added')}: ${pick(p, 'name')}`;
     return true;
   };
   const tile = (p) => {
-    // Sisältölista: p.items[].label (FI) / label_en (EN, booking_45); jos kyseisen kielen nimiä ei ole, listaa ei näytetä (kuvaus kertoo sisällön)
-    const contents = G.itemLabels(p, L);
+    // Sisältölista: nimi linkittää tuotesivulle, jos tuotteella on sivu (booking_163). Lisäpalvelu jää tekstiksi.
+    const contents = G.itemLines(p, L, S.links?.shop || '');
     const meta = h('p', { class: 'gc-meta' }, p.is_open ? tx('amountFrom', { min: p.min_amount, max: p.max_amount }) : '', p.is_open ? ' · ' : '', tx('valid', { months: p.valid_months }));
-    const kids = [h('p', { class: 'kicker', text: p.is_open ? tx('openKicker') : tx('pkgKicker') }), h('h3', { text: pick(p, 'name') }), pick(p, 'description') ? h('p', { class: 'gc-desc', text: pick(p, 'description') }) : null, !p.is_open && contents.length ? h('ul', { class: 'gc-items', 'data-testid': 'gc-items', 'aria-label': tx('contents') }, contents.map((t) => h('li', { text: t }))) : null];
+    const kids = [h('p', { class: 'kicker', text: p.is_open ? tx('openKicker') : tx('pkgKicker') }), h('h3', { text: pick(p, 'name') }), pick(p, 'description') ? h('p', { class: 'gc-desc', text: pick(p, 'description') }) : null, !p.is_open && contents.length ? h('ul', { class: 'gc-items', 'data-testid': 'gc-items', 'aria-label': tx('contents') }, contents.map((row) => h('li', {}, row.href ? h('a', { href: row.href, text: row.label }) : row.label))) : null];
     if (p.is_open) {
       const amt = h('input', { type: 'text', inputmode: 'decimal', autocomplete: 'off', value: '', placeholder: '50' });
       const f = field({ label: tx('amountLabel'), control: amt, hint: tx('amountHint', { min: p.min_amount, max: p.max_amount }), name: 'open' });
@@ -59,8 +60,26 @@ function buildSale(pk) {
       amt.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); btn.click(); } });
       kids.push(meta, f.wrap, btn);
     } else {
-      kids.push(h('p', { class: 'gc-price' }, money(p.price), p.persons ? h('span', { class: 'gc-per', text: ` · ${tx('persons', { n: p.persons })}` }) : ''), meta,
-        h('button', { type: 'button', class: 'btn gc-btn', text: tx('add'), 'aria-label': `${tx('add')}: ${pick(p, 'name')}`, onclick: () => addLine(p.code) }));
+      const flex = G.packageIsFlexible(p);
+      const lo = p.min_persons || 1, hi = p.max_persons || p.persons || lo;
+      let head = Math.min(Math.max(p.persons || 2, lo), hi);
+      const priceEl = h('p', { class: 'gc-price', 'data-testid': 'gc-price' });
+      const draw = () => {
+        const amt = flex ? G.packageAmount(p, head) : p.price;
+        priceEl.replaceChildren(document.createTextNode(money(amt ?? p.price)));
+        if (head) priceEl.append(h('span', { class: 'gc-per', text: ` · ${tx('persons', { n: head })}` }));
+      };
+      draw();
+      let personsCtl = null;
+      if (flex && hi > lo) {
+        const num = h('input', { type: 'number', min: lo, max: hi, step: 1, inputmode: 'numeric', value: head, 'aria-label': tx('personsLabel'), 'data-testid': 'gc-persons' });
+        const setN = (n) => { head = Math.min(Math.max(Math.trunc(n) || lo, lo), hi); num.value = head; draw(); };
+        num.addEventListener('change', () => setN(Number(num.value)));
+        personsCtl = h('div', { class: 'gc-persons' }, h('span', { class: 'lbl', text: tx('personsLabel') }),
+          h('div', { class: 'bk-stepper' }, h('button', { type: 'button', class: 'bk-step', 'aria-label': tx('qtyMinus'), text: '−', onclick: () => setN(head - 1) }), num, h('button', { type: 'button', class: 'bk-step', 'aria-label': tx('qtyPlus'), text: '+', onclick: () => setN(head + 1) })));
+      }
+      kids.push(priceEl, p.unit_price != null ? h('p', { class: 'gc-unit', text: tx('perPerson', { price: money(p.unit_price) }) }) : null, personsCtl, meta,
+        h('button', { type: 'button', class: 'btn gc-btn', text: tx('add'), 'aria-label': `${tx('add')}: ${pick(p, 'name')}`, onclick: () => addLine(p.code, null, flex ? head : null) }));
     }
     return h(p.is_open ? 'div' : 'li', { class: `gc-tile${p.is_open ? ' open' : ''}` }, kids);
   };
@@ -138,8 +157,9 @@ function buildSale(pk) {
     };
     sync();
     el.total = h('strong', { class: 'gc-ltotal', text: money(G.lineTotal(l, p)) });
+    const who = !p.is_open && l.persons ? h('p', { class: 'gc-lwho', text: tx('persons', { n: l.persons }) }) : null;
     const li = h('li', { class: 'gc-line', 'data-line': l.id },
-      h('div', { class: 'gc-lhead' }, h('h4', { text: pick(p, 'name') }), h('button', { type: 'button', class: 'gc-remove', text: tx('remove'), onclick: () => { lines.splice(lines.indexOf(l), 1); renderCart(); live.textContent = tx('remove'); } })),
+      h('div', { class: 'gc-lhead' }, h('div', {}, h('h4', { text: pick(p, 'name') }), who), h('button', { type: 'button', class: 'gc-remove', text: tx('remove'), onclick: () => { lines.splice(lines.indexOf(l), 1); renderCart(); live.textContent = tx('remove'); } })),
       h('div', { class: 'gc-lqty' }, h('span', { class: 'gc-lab', text: tx('qty') }), stepper, h('span', { class: 'gc-lsum' }, h('span', { class: 'gc-lab', text: tx('lineTotal') }), ' ', el.total)),
       rows, dlv, fs.recipientName.wrap, fs.recipientEmail.wrap, when, fs.greeting.wrap, fs.cover.wrap);
     el.li = li; el.fs = fs; lineEls.set(l.id, el); sync();
@@ -231,7 +251,7 @@ function buildSale(pk) {
     : tx('doneToBuyer'));
   function done(r) {
     const cards = (r.cards || []);
-    const list = cards.length ? h('ul', { class: 'gc-donecards' }, cards.map((c) => h('li', {}, h('strong', { text: c.package_name ? (L === 'en' ? (by.get(c.package_code)?.name_en || c.package_name) : c.package_name) : c.package_code }), ` · ${money(c.amount)}`, c.recipient_name ? ` · ${c.recipient_name}` : '', h('br'), h('span', { class: 'bk-note gc-dlvnote', 'data-testid': 'done-delivery', text: deliveryNote(c) })))) : null;
+    const list = cards.length ? h('ul', { class: 'gc-donecards' }, cards.map((c) => h('li', {}, h('strong', { text: c.package_name ? (L === 'en' ? (by.get(c.package_code)?.name_en || c.package_name) : c.package_name) : c.package_code }), c.persons ? ` · ${tx('persons', { n: c.persons })}` : '', ` · ${money(c.amount)}`, c.recipient_name ? ` · ${c.recipient_name}` : '', h('br'), h('span', { class: 'bk-note gc-dlvnote', 'data-testid': 'done-delivery', text: deliveryNote(c) })))) : null;
     const box = h('section', { class: 'bk-conf pending gc-done', 'aria-labelledby': 'gc-done-h', tabindex: '-1' },
       h('h3', { id: 'gc-done-h', text: tx('doneTitle') }), h('span', { class: 'bk-status', text: tx('doneStatus') }),
       h('dl', { class: 'bk-sum' }, h('dt', { text: tx('doneOrder') }), h('dd', { text: `#${r.order_no}` }), h('dt', { text: tx('doneTotal') }), h('dd', { text: money(r.total) })), list,
@@ -277,17 +297,26 @@ function buildBalance() {
     h('form', { class: 'bk-form gc-balform', novalidate: true, onsubmit: submit }, f.wrap, btn), out);
 }
 
+function placeAnnual(offer) {
+  const href = G.annualCardBuyHref(offer, S.links?.shop || '');
+  if (!href) return;
+  const link = h('p', { class: 'center gc-annual', 'data-testid': 'gc-annual' }, h('a', { class: 'btn light sm', href, text: tx('annualBuy') }));
+  const saleSec = saleRoot?.closest('section');
+  if (saleRoot && saleSec && !saleSec.hidden) { saleRoot.append(link); return; }
+  document.getElementById('paketit')?.append(link);
+}
 async function main() {
-  let pk;
+  let pk = null;
   const textsReady = applyShopTexts(S);                          // sivutekstit tietokannasta (osa 3): puuttuva avain/tiedosto → repon oletus
-  try { pk = await api.packages(); } catch { return; }          // verkko-/palvelinvika → sivu jää staattiseksi (Johku)
-  if (!pk?.ok) return;                                           // puuttuva RPC / virhe → ei muutoksia
+  const annualP = api.annualOffer().catch(() => null);           // vuosikortti erikseen: ei kaada lahjakorttivalikoimaa
+  try { pk = await api.packages(); } catch { pk = null; }        // verkko-/palvelinvika → esirenderöity julkaistu valikoima jää
   await textsReady;
-  if (pk.sale_enabled && saleRoot && pk.packages.length) {
-    document.getElementById('avoin')?.remove(); document.getElementById('paketit')?.remove();   // staattiset Johku-osiot korvataan
+  if (G.giftSaleReplacesStatic(pk) && saleRoot) {
+    document.getElementById('avoin')?.remove(); document.getElementById('paketit')?.remove();
     saleRoot.replaceChildren(buildSale(pk)); show(saleRoot);
   }
-  if (pk.redeem_enabled && balRoot) { balRoot.replaceChildren(buildBalance()); show(balRoot); }
+  placeAnnual(await annualP);
+  if (pk?.redeem_enabled && balRoot) { balRoot.replaceChildren(buildBalance()); show(balRoot); }
   if (location.hash) { const t = document.getElementById(location.hash.slice(1)); t?.scrollIntoView(); }
 }
 main();
