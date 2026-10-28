@@ -9,7 +9,7 @@ import * as G from './gift-logic.js';
 const badgeClass = (st) => (st === 'active' ? 'st-confirmed' : st === 'pending_payment' || st === 'pending_verification' ? 'st-pending' : st === 'cancelled' || st === 'expired' ? 'st-expired' : '');
 
 // Yksi kenttä "Lahjakortin koodi" (sopimus §13.12): public_resolve_gift_code kertoo mikä koodi on.
-//   oma kortti → nykyinen lunastus (public_apply_gift_card, summa valinnainen); tuntematon → myyjän vahvistus (Kokemuskauppa / Offerilla / Elämyslahjat, esivalinta suggested_source,
+//   oma kortti → public_apply_gift_card ilman summaa (palvelin käyttää pienempää saldosta ja maksamattomasta); tuntematon → myyjän vahvistus (Kokemuskauppa / Offerilla / Elämyslahjat, esivalinta suggested_source,
 //   asiakas voi vaihtaa ennen lähetystä; booking_173) → public_submit_voucher_claim → selkeä vahvistusteksti + maksutapa "Lahjakortti – <myyjä>". Näytetään kun redeem_enabled, maksamatonta on ja tilauksella ei ole lahjakorttirivejä (lahjakortilla ei osteta lahjakorttia).
 // bare = ilman omaa otsikkoa/ohjetta (vahvistussivun maksuvalinnan sisällä, otsikko tulee valintapainikkeesta); balance = lisää "Näytä saldo" (public_check_gift_card; unpaid = maksettava, näyttää käytettävissä olevan osuuden).
 // onApplied(text) = oma kortti käytetty; onClaimed({ text, extra }) = kumppanin lahjakortti lähetetty lunastettavaksi (tilaus + pyyntölista ladataan uudelleen).
