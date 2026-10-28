@@ -43,8 +43,8 @@ begin
     and not has_function_privilege('authenticated', 'booking.email_outbox_claim(integer)', 'execute')
     and has_function_privilege('service_role', 'booking.email_outbox_claim(integer)', 'execute'), 'T1: oikeudet');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.admin_create_annual_card(bigint,date,date,text,text)'::regprocedure)) = 'b80c1d146fc6b57ea99bb1635f8814ca'
-    and md5(pg_get_functiondef('booking._enqueue_email(text,bigint,bigint,bigint,text,jsonb)'::regprocedure)) = '350304b26e7240c42a6cf38f604eb689'
-    and md5(pg_get_functiondef('booking.admin_annual_card_for_order(bigint)'::regprocedure)) = 'bcb6357539f043c779c7dab808a4618c', 'T2: 5-param. myöntö, _enqueue_email ja admin_annual_card_for_order ennallaan');
+    and md5(pg_get_functiondef('booking._enqueue_email(text,bigint,bigint,bigint,text,jsonb)'::regprocedure)) = 'e2eee7206bd6006ed93a81b1cdeecb32'
+    and md5(pg_get_functiondef('booking.admin_annual_card_for_order(bigint)'::regprocedure)) = 'bcb6357539f043c779c7dab808a4618c', 'T2: 5-param. myöntö ja admin_annual_card_for_order ennallaan, _enqueue_email = booking_191');
   perform pg_temp.ck((select pg_get_triggerdef(oid) from pg_trigger where tgname = 'annual_cards_email' and tgrelid = 'booking.annual_cards'::regclass)
     ~* 'AFTER INSERT ON booking.annual_cards FOR EACH ROW EXECUTE', 'T3: trigger AFTER INSERT (ei UPDATE), ilman ostoehtoa');
 

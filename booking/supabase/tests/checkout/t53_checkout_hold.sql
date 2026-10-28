@@ -80,7 +80,7 @@ begin
   perform pg_temp.ck((select status from booking.reservations where order_id = oid) = 'confirmed' and (select hold_expires_at from booking.reservations where order_id = oid) is null, 'B10: varaus confirmed, pito poistunut');
   perform pg_temp.ck((select count(*) from booking.email_outbox where order_id = oid and kind = 'order_confirmation') = 1, 'B11: täsmälleen yksi vahvistusviesti');
   perform pg_temp.ck((select count(*) from booking.receipts where order_id = oid and kind = 'receipt') = 2, 'B12: kuitit molemmista korttimaksuista vahvistuksen jälkeen (' || (select count(*) from booking.receipts where order_id = oid) || ')');
-  perform pg_temp.ck((select count(*) from booking.email_outbox where order_id = oid and kind = 'receipt') = 2, 'B13: kuittiviestit jonossa (2)');
+  perform pg_temp.ck((select count(*) from booking.email_outbox where order_id = oid and kind = 'receipt' and status = 'skipped' and last_error = 'receipt_auto_send disabled') = 2, 'B13: kuittiviestit ohitettu (2, status skipped, receipt_auto_send disabled)');
   r := booking.public_apply_gift_card(tok, 'HHTEST000002', null);
   perform pg_temp.ck(r ->> 'code' = 'nothing_to_pay', 'B14: maksettua tilausta ei voi maksaa uudelleen (' || coalesce(r ->> 'code', 'ok') || ')');
   perform pg_temp.ck(booking._checkout_state_json(oid) ->> 'checkout_state' = 'confirmed', 'B15: lopputila confirmed');
@@ -143,7 +143,7 @@ begin
   r := booking.payment_mark_paid('mobilepay', ref, v_total, '{"test":true}'::jsonb);
   perform pg_temp.ck((r ->> 'ok')::boolean and (r ->> 'overpaid_amount')::numeric = 0, 'E3: payment_mark_paid ok, ei ylimaksua');
   perform pg_temp.ck((select status from booking.orders where id = oid) = 'confirmed' and (select status from booking.reservations where order_id = oid) = 'confirmed' and (select payment_status from booking.orders where id = oid) = 'paid', 'E4: vahvistui kun summa katettu');
-  perform pg_temp.ck((select count(*) from booking.email_outbox where order_id = oid and kind = 'order_confirmation') = 1 and (select count(*) from booking.receipts where order_id = oid) = 1 and (select count(*) from booking.email_outbox where order_id = oid and kind = 'receipt') = 1, 'E5: yksi vahvistusviesti + yksi kuitti');
+  perform pg_temp.ck((select count(*) from booking.email_outbox where order_id = oid and kind = 'order_confirmation') = 1 and (select count(*) from booking.receipts where order_id = oid) = 1 and (select count(*) from booking.email_outbox where order_id = oid and kind = 'receipt' and status = 'skipped' and last_error = 'receipt_auto_send disabled') = 1, 'E5: yksi vahvistusviesti + yksi kuitti (kuittiviesti skipped, receipt_auto_send disabled)');
   perform pg_temp.ck((booking.payment_mark_paid('mobilepay', ref, v_total, null) ->> 'already')::boolean, 'E6: toinen callback idempotentti (ei tuplakuittia)');
   perform pg_temp.ck((select count(*) from booking.receipts where order_id = oid) = 1, 'E7: ei tuplakuittia');
   -- uusi maksuyritys maksetulle tilaukselle

@@ -25,7 +25,7 @@ do $$ declare r jsonb; v_id bigint; v_tok uuid; v_oid bigint; v_ids bigint[]; v_
   perform pg_temp.t_ok(n_before = 1 and (select count(*) from booking.email_outbox where dedupe_key = 'gcrecip:' || v_id and kind = 'gift_card_recipient' and order_id is null) = 1
      and (select status from booking.email_outbox where dedupe_key = 'gcbuyer:' || v_oid) = case when (select mode from booking.integration_config where key = 'resend') = 'off' then 'skipped' else 'pending' end,
      'P8 maksu -> 1 ostajan viesti + 1 saajan viesti (status resend-tilan mukaan)');
-  perform pg_temp.t_ok((select count(*) from booking.email_outbox where kind = 'receipt' and order_id = v_oid) >= 1, 'P9 kuittiviesti syntyy edelleen normaalisti');
+  perform pg_temp.t_ok((select count(*) from booking.email_outbox where kind = 'receipt' and order_id = v_oid and status = 'skipped' and last_error = 'receipt_auto_send disabled') >= 1, 'P9 kuittiviesti ohitettu (status skipped, receipt_auto_send disabled)');
   cl := booking.email_outbox_claim(50);
   select x into row_b from jsonb_array_elements(cl) x where x ->> 'kind' = 'gift_card_buyer' and (x -> 'order' ->> 'order_no')::bigint = (select order_no from booking.orders where id = v_oid);
   select x into row_r from jsonb_array_elements(cl) x where x ->> 'kind' = 'gift_card_recipient' and x ->> 'to' = 'mikko-mallikas@example.invalid';

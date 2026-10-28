@@ -113,9 +113,9 @@ begin
       and md5(pg_get_functiondef('booking.email_outbox_claim(integer)'::regprocedure)) in ('2db9a1233a06e6293d0877f17de1ab72', '70602f6500703e8750e1539ae8809d38')
       and md5(pg_get_functiondef('booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text)'::regprocedure)) in ('525d1fa96fd7c37df4d7e502edf1bf71', 'a4e69cb26eb44b72eacce7c167342884')
       and md5(pg_get_functiondef('booking._vc_due(booking.orders,booking.voucher_claims)'::regprocedure)) = 'bea9cd9a32eb273ee72caed0aedd1e2e', 'A6 booking_173/174 ennallaan (tai booking_176)');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking._enqueue_email(text,bigint,bigint,bigint,text,jsonb)'::regprocedure)) = '350304b26e7240c42a6cf38f604eb689'
+  perform pg_temp.ck(md5(pg_get_functiondef('booking._enqueue_email(text,bigint,bigint,bigint,text,jsonb)'::regprocedure)) = 'e2eee7206bd6006ed93a81b1cdeecb32'
       and md5(pg_get_functiondef('booking.email_outbox_claim_base_132(integer)'::regprocedure)) = '0b10986533285645d8592449a90a1e0c'
-      and md5(pg_get_functiondef('booking.email_outbox_mark(bigint,text,text,text)'::regprocedure)) = '2ba0222fdfee71942fb09053bd7ea803', 'A6b sähköpostijono ennallaan (_enqueue_email, claim, mark)');
+      and md5(pg_get_functiondef('booking.email_outbox_mark(bigint,text,text,text)'::regprocedure)) = '2ba0222fdfee71942fb09053bd7ea803', 'A6b sähköpostijono: _enqueue_email = booking_191, claim ja mark ennallaan');
   perform pg_temp.ck(pre0 = '"7310"'::jsonb and not (select is_public from booking.settings where key = 'invoice_reference_prefix'), 'A7 asetus invoice_reference_prefix = "7310", ei julkinen');
   perform pg_temp.ck(auto0 = 'false'::jsonb and not (select is_public from booking.settings where key = 'invoice_einvoice_auto_send'), 'A7b asetus invoice_einvoice_auto_send = false (oletus), ei julkinen');
   perform pg_temp.ck(not has_function_privilege('anon', 'booking._clean_company(jsonb)', 'execute')
