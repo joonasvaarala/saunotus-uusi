@@ -24,6 +24,8 @@ declare
   v_late_start timestamptz; v_late_end timestamptz; v_space bigint; v_late_mode text;
 begin
   perform test.logout();
+  -- Fixtuurit julkisella polulla ilman verkkomaksua (testiympäristössä maksuntarjoaja voi olla pois). Kumoutuu lopussa.
+  update booking.settings set value = '"pay_later"'::jsonb where key = 'public_payment_mode';
 
   select ex.id, sh.id, w.wd into v_ex, v_sh, v_wd
     from booking.schedule_rules ex
@@ -183,18 +185,18 @@ begin
     select po.code into v_opt from booking.product_options po where po.product_id = v_prod and po.active order by po.sort_order, po.id limit 1;
     v_ts := (test.next_dow(1, 50) + time '16:00') at time zone 'Europe/Helsinki';
     j := booking.admin_create_resource_booking(p_product_id := v_prod, p_start := v_ts, p_persons := 1,
-          p_customer := '{"name":"Hoito A","kind":"private"}'::jsonb, p_option_code := v_opt);
+          p_customer := '{"name":"Hoito A","kind":"private","phone":"0401940001"}'::jsonb, p_option_code := v_opt);
     perform pg_temp.ck((j ->> 'reservation_id') is not null, 'R1: exclusive-resurssivaraus: ' || coalesce(j ->> 'code', j ->> 'message', 'ok'));
     v_res := (j ->> 'reservation_id')::bigint;
     if v_res is not null then
       v_code := pg_temp.err(format(
         'select booking.admin_create_resource_booking(p_product_id := %s, p_start := %L, p_persons := 1, p_customer := %L::jsonb, p_option_code := %L, p_allow_overbook := true)',
-        v_prod, v_ts, '{"name":"Hoito B","kind":"private"}', v_opt));
+        v_prod, v_ts, '{"name":"Hoito B","kind":"private","phone":"0401940002"}', v_opt));
       perform pg_temp.ck(v_code in ('private_booked', 'space_busy', 'public_shift_booked'), 'R2: toinen hoito samaan aikaan, lippu ei auta: ' || v_code);
     end if;
     if v_pmax is not null and v_pmax < 40 then
       j := booking.admin_create_resource_booking(p_product_id := v_prod, p_start := v_ts + interval '1 day', p_persons := v_pmax + 1,
-            p_customer := '{"name":"Hoito Hlot","kind":"private"}'::jsonb, p_option_code := v_opt, p_allow_overbook := true);
+            p_customer := '{"name":"Hoito Hlot","kind":"private","phone":"0401940003"}'::jsonb, p_option_code := v_opt, p_allow_overbook := true);
       perform pg_temp.ck((j ->> 'reservation_id') is not null, 'R3: hoidon henkilömäärän ylitys adminille: ' || coalesce(j ->> 'message', j ->> 'code', 'ok'));
     end if;
   else
@@ -273,8 +275,8 @@ begin
       v_late, v_buf_day, '{"name":"Admin Puskuri","kind":"private"}'));
     perform pg_temp.ck(v_code in ('private_booked', 'public_shift_booked', 'space_busy'),
       'B4: tallennus epäonnistuu samassa puskurissa: ' || coalesce(v_code, 'null'));
-    update booking.resources set buffer_after_min = v_buf0 where id = v_space;
     perform test.logout();
+    update booking.resources set buffer_after_min = v_buf0 where id = v_space;
   end if;
 
   raise exception 'TESTRESULT pass=% fail=% :: %', (select count(*) from t194_r where ok), (select count(*) from t194_r where not ok),
