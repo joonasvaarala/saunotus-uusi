@@ -154,7 +154,7 @@ export function applyEventCards(list, events, { lang = 'fi', shopHref = '', now 
   for (const ev of rows) {
     const name = (lang === 'en' && ev.name_en) || ev.name;
     const text = plain((lang === 'en' && ev.description_short_en) || ev.description_short);
-    const dates = [...new Set(ev.occurrences.slice(0, 6).map((o) => cardDates(o, lang)))].filter(Boolean).join(' · ');
+    const dates = [...new Set(ev.occurrences.slice(0, 6).map((o) => cardDates(o, lang, now)))].filter(Boolean).join(' · ');
     const time = cardTime(ev.occurrences[0], lang);
     const li = el('li', 'card ev');
     li.dataset.testid = 'site-event-card';

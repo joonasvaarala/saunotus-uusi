@@ -49,7 +49,8 @@ test('viikon tapahtuma: vain vapaa kerta omalle viikonpäivälle, ei päivämä�
 test('tapahtumakortit: snapshotista vain vapaat kerrat (18.12. ja 20.2.), täydet pois', () => {
   const free = freeShopEvents(kb.events_shop, NOW);
   assert.deepEqual(free.map((e) => e.slug), ['naisten-joulusauna', 'saunottajien-yhteisopaiva-2']);
-  assert.equal(cardDates(free[0].occurrences[0], 'fi'), '18.12.');
+  assert.equal(cardDates(free[0].occurrences[0], 'fi', NOW), '18.12.');
+  assert.equal(cardDates(free[1].occurrences[0], 'fi', NOW), '20.2.2027');
   assert.equal(cardTime(free[0].occurrences[0], 'fi'), 'klo 16.00–19.00');
   assert.equal(cardTime(free[0].occurrences[0], 'en'), '16:00–19:00');
   assert.equal(freeShopEvents(null, NOW).length, 0);

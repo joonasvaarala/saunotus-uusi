@@ -345,7 +345,7 @@ export function home(lang, opt = {}) {
   const wk = sec('home-tight', `<div class="week-head">${head(u.weekKicker, u.weekTitle, '', { left: true })}<a class="btn light sm" href="${pageHref('sauna', lang, 'yleiset')}">${e(u.allSessions)}</a></div><div class="week-wrap"><p class="week-soon">${e(homeText('ui.site.home_week_soon', lang))}</p>${week(lang, { soon: true })}<details class="week-more"><summary class="btn light sm"><span class="o">${e(homeText('ui.site.home_week_all', lang))}</span><span class="c">${e(homeText('ui.site.home_week_less', lang))}</span></summary></details></div>`);
   const r = d.ritual;
   const tradition = sec('home-tight', traditionHtml(lang, { kicker: r.kicker, title: r.title, cta: r.cta, perPerson: u.perPerson }));
-  const ev = sec('home-tight', `${head('', d.events.title, '', { orn: true })}${eventsHtml(lang, d.events.empty)}<p class="center" style="margin-top:22px"><a class="btn light sm" href="${pageHref('book', lang)}">${e(u.allEvents)}</a></p>`, 'tapahtumat');
+  const ev = sec('home-tight', `${head('', d.events.title, '', { orn: true })}${eventsHtml(lang, d.events.empty)}<p class="center" style="margin-top:22px"><a class="btn light sm" href="${pageHref('book', lang, '/?k=tapahtuma')}">${e(u.allEvents)}</a></p>`, 'tapahtumat');
   // Nauha vain kun kielellä on julkaistuja artikkeleita. Tyhjä lista ei saa jättää /saunatietoa/-linkkiä etusivulle.
   const art = opt.articlesHtml != null ? opt.articlesHtml : homeSection(lang);
   const infoStripSec = art || (publishedArticleCount(lang) > 0 ? sec('strip', infoStrip(lang), 'saunatietoa') : '');
@@ -410,7 +410,8 @@ export function book(lang) {
   return layout({ lang, key: 'book', meta: d.meta, body });
 }
 
-const clean = (s) => s.replace(/lisählöt/g, 'lisähenkilöt').replace(/\s*Vanhan sivuston mukaan[^.]*\./g, '').replace(/\s+$/g, '');
+// "Vanhan sivuston mukaan…" on toimitusmerkintä, ei asiakastekstiä. "esim." ei katkaise virkettä.
+const clean = (s) => s.replace(/lisählöt/g, 'lisähenkilöt').replace(/esim\./g, 'esim\u0001').replace(/\s*Vanhan sivuston mukaan[^.]*\./g, '').replace(/\u0001/g, '.').replace(/\s+$/g, '');
 export function info(lang) {
   const d = P('info')[lang], u = ui(lang);
   const blocks = (b) => b.map((x) => {
@@ -478,7 +479,11 @@ export function policyPage(name, key, lang) {
     : d.policies.map((id) => policyFor(id, lang)).filter(Boolean);
   // Tietosuojasivulla puhelin (tel:) ja sähköposti (mailto:) linkeiksi escapoidusta tekstistä (policy-lang.mjs linkContacts).
   const para = (l) => (name === 'privacy' ? linkContacts(e(l), site.contact) : e(l));
-  const txt = (s) => clean(s).split(/\n+/).map((l) => `<p>${para(l)}</p>`).join('');
+  const txt = (s) => clean(s).split(/\n+/).map((l) => {
+    const line = l.trim();
+    const n = name === 'privacy' && /^(\d+)\.\s+\S/.exec(line);
+    return n ? `<h3 id="privacy-${n[1]}">${para(line)}</h3>` : `<p>${para(line)}</p>`;
+  }).join('');
   const body = pageHero(d.hero, lang, key)
     + sec('', `<div class="narrow prose">${d.note ? `<p class="note-box">${e(d.note)}</p>` : ''}${items.map((p) => p.lang && p.lang !== lang ? `<div lang="${e(p.lang)}"><h2>${e(p.title)}</h2>${txt(p.body)}</div>` : `<h2>${e(p.title)}</h2>${txt(p.body)}`).join('')}${name === 'privacy' && !items.some((p) => policyHasAnalyticsSection(p.body)) ? privacyAnalyticsHtml(lang, e, txt) : ''}</div>`);
   return layout({ lang, key, meta: d.meta, body });

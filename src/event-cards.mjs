@@ -1,5 +1,6 @@
 // booking_158: etusivun tapahtumakortit uuden kaupan tapahtumista (booking.public_events(current_date, 'shop') → kb.json events_shop).
 // Puhdas moduuli (ei lib.mjs-riippuvuutta), testit: booking/tests/tapahtumakortit.test.mjs.
+import { dayLabel, ymdHel } from '../booking/shop/src/event-date.js';
 // - Vain tulevat tapahtumakerrat, joilla on vapaita paikkoja (status available). full ja closed eivät näy.
 //   Muuten render.mjs käyttää vanhaa dataa (kb.event_dates + cards.json), mutta linkki on silti kaupan tuotesivu.
 // - Linkki: aina kaupan tuotesivu FI /varaa/#/tuote/<slug>, EN /en/book/#/tuote/<slug> (ei Johkua).
@@ -7,13 +8,14 @@
 const TZ = 'Europe/Helsinki';
 /** Kaupan tuotesivun hash-polku: pageHref('book', lang, shopHash(slug)) → /varaa/#/tuote/<slug> tai /en/book/#/tuote/<slug>. */
 export const shopHash = (slug) => `/tuote/${encodeURIComponent(String(slug || ''))}`;
-const ymd = (iso) => new Date(iso).toLocaleDateString('sv-SE', { timeZone: TZ });
+const ymd = (iso) => ymdHel(iso, TZ);
 const hm = (iso) => new Date(iso).toLocaleTimeString('fi-FI', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).replace(':', '.');
-const dm = (iso, lang) => { const [y, m, d] = ymd(iso).split('-').map(Number); return lang === 'en' ? `${d} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][m - 1]}` : `${d}.${m}.`; };
-/** Kerran päivä(t): sama päivä '14.11.' / monipäiväinen '13.11.–15.11.' (EN '13 Nov–15 Nov'). */
-export function occDates(o, lang = 'fi') {
+/** Kerran päivä(t): sama päivä '14.11.' / monipäiväinen '13.11.–15.11.' (EN '13 Nov–15 Nov'). Muu kuin kuluva vuosi: '6.2.2027'. */
+export function occDates(o, lang = 'fi', now = Date.now()) {
   if (!o?.starts_at) return '';
-  return o.ends_at && ymd(o.ends_at) !== ymd(o.starts_at) ? `${dm(o.starts_at, lang)}–${dm(o.ends_at, lang)}` : dm(o.starts_at, lang);
+  const a = dayLabel(o.starts_at, lang, now);
+  if (!a) return '';
+  return o.ends_at && ymd(o.ends_at) !== ymd(o.starts_at) ? `${a}–${dayLabel(o.ends_at, lang, now)}` : a;
 }
 /** Kellonaika 'klo 16.00–19.00' / '16:00–19:00' (vain yksipäiväisille). */
 export function occTime(o, lang = 'fi') {
@@ -46,7 +48,7 @@ export function shopEventsHtml(events, lang, deps) {
     const c = card(ev)?.[lang];
     const title = c?.title || (lang === 'en' && ev.name_en) || ev.name;
     const text = c?.text || plainText((lang === 'en' && ev.description_short_en) || ev.description_short);
-    const dl = [...new Set(ev.occurrences.slice(0, 6).map((o) => occDates(o, lang)))].join(' · ');
+    const dl = [...new Set(ev.occurrences.slice(0, 6).map((o) => occDates(o, lang, Date.now())))].join(' · ');
     const t = occTime(ev.occurrences[0], lang);
     const price = ev.price != null ? money(ev.price, lang) : (ev.price_text || '');
     const full = ev.occurrences.every((o) => o.status === 'full');
