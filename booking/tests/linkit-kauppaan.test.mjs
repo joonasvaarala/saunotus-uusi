@@ -89,7 +89,7 @@ test('build.mjs: yksi linkkilogiikka (johku-links.js), linkkitiedot kaikille kau
   assert.ok(readFileSync(join(root, '../.github/workflows/pages.yml'), 'utf8').includes('booking/tests/linkit-kauppaan.test.mjs'));
 });
 
-test('etusivu: jokainen uuden kaupan varattava tuote (15) näkyy "Varaa verkosta" -osiossa kaupan linkillä; tekstit pending-import-58', async () => {
+test('kaupan tuoteosio: jokainen uuden kaupan varattava tuote (15) on shopProductsHtml-listassa kaupan linkillä; etusivu ei upota osiota (pending-import-58)', async () => {
   const SP = await import(pathToFileURL(join(root, '../src/shop-products.mjs')).href);
   const kb = JSON.parse(readFileSync(join(root, '../content/kb/kb.json'), 'utf8'));
   const prod = (s) => kb.products.find((p) => p.slug === s) || null;
@@ -116,6 +116,8 @@ test('etusivu: jokainen uuden kaupan varattava tuote (15) näkyy "Varaa verkosta
   }
   for (const r of rows) assert.ok(!r.text.includes('<') && !/johku/i.test(r.text), r.key);
   const render = readFileSync(join(root, '../src/render.mjs'), 'utf8');
-  assert.match(render, /\+ hero \+ tiles \+ wk \+ shopList \+/);
-  assert.match(render, /const ev = sec\([^\n]*href="\$\{pageHref\('book', lang\)\}">\$\{e\(u\.allEvents\)\}<\/a>/);
+  assert.match(render, /experienceHtml\(lang\)/);
+  assert.doesNotMatch(render, /shopList|id="varaa-verkosta"/);
+  assert.match(render, /eventsHtml\(lang, d\.events\.empty, \{ limit: 2 \}\)/);
+  assert.match(render, /href="\$\{pageHref\('book', lang\)\}">\$\{e\(u\.allEvents\)\}/);
 });

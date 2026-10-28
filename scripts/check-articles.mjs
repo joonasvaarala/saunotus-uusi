@@ -231,15 +231,25 @@ export function checkDist({ dist, siteUrl, isTest, sections, legacy = {} }) {
     const arts = secPages.filter((p) => kind(p) === 'article' && p.lang === lang);
     const home = join(dist, lang === 'fi' ? 'index.html' : 'en/index.html');
     const homeHtml = existsSync(home) ? readFileSync(home, 'utf8') : '';
-    // navigaatiolinkki: etusivun artikkeliosion oma linkki (Kaikki artikkelit) ei lasketa mukaan
-    const hs0 = homeHtml.indexOf('class="section home-art"');
-    const homeNoSec = hs0 < 0 ? homeHtml : homeHtml.slice(0, hs0) + homeHtml.slice(homeHtml.indexOf('</section>', hs0));
+    // navigaatiolinkki: etusivun Saunatietoa-nauha ja vanha korttiosio eivät ole valikon linkkejä
+    const cutMarker = (html, marker) => {
+      const at = html.indexOf(marker);
+      if (at < 0) return html;
+      const start = html.lastIndexOf('<section', at);
+      const end = html.indexOf('</section>', at);
+      if (start < 0 || end < 0) return html;
+      return html.slice(0, start) + html.slice(end + 10);
+    };
+    const homeNoSec = cutMarker(cutMarker(homeHtml, 'id="saunatietoa"'), 'class="section home-art"');
     const navLinked = homeNoSec.includes(`href="${base}${sections[lang]}"`);
-    // etusivun Saunatietoa-osio: ei artikkeleita → ei osiota; muuten 1–3 korttia, joista jokainen linkittää yhteen olemassa olevaan artikkelisivuun + linkki listaukseen
     const hs = homeHtml.indexOf('class="section home-art"');
+    const stripAt = homeHtml.indexOf('id="saunatietoa"');
+    const stripSec = stripAt < 0 ? '' : homeHtml.slice(homeHtml.lastIndexOf('<section', stripAt), homeHtml.indexOf('</section>', stripAt));
+    const stripOk = stripSec.includes(`href="${base}${sections[lang]}"`);
+    // Etusivu: kompakti nauha (id=saunatietoa) linkittää listaukseen. Vanhaa korttiosiota (home-art) ei enää upoteta;
+    // jos se silti on sivulla, kortit tarkistetaan kuten ennen. Tyhjällä osiolla korttiosiota ei saa olla.
     if (!arts.length) { if (hs >= 0) err(`etusivun (${lang}) artikkeliosio näkyy vaikka artikkeleita ei ole`); }
-    else if (hs < 0) warn(`etusivun (${lang}) artikkeliosiota ei ole (kaikki artikkelit noindex tai osio epäonnistui)`);
-    else {
+    else if (hs >= 0) {
       const sec = homeHtml.slice(hs, homeHtml.indexOf('</section>', hs));
       const cards = sec.split('<li class="card hart').slice(1);
       if (cards.length < 1 || cards.length > 3) err(`etusivun (${lang}) artikkeliosiossa ${cards.length} korttia (sallittu 1–3)`);
@@ -250,7 +260,7 @@ export function checkDist({ dist, siteUrl, isTest, sections, legacy = {} }) {
         else if (!arts.some((a) => `${base}${a.rel}` === links[0])) err(`etusivun (${lang}) artikkelikortin linkki ${links[0]} ei osoita artikkelisivuun`);
         for (const im of c.match(/<img [^>]*>/g) || []) if (!/ width="\d+"/.test(im) || !/ height="\d+"/.test(im) || !/ alt="/.test(im) || !/loading="lazy"/.test(im)) err(`etusivun (${lang}) artikkelikortin kuvasta puuttuu width/height/alt/lazy: ${im.slice(0, 80)}`);
       }
-    }
+    } else if (!stripOk) err(`etusivun (${lang}) Saunatietoa-nauhasta puuttuu linkki listaukseen`);
     if (!arts.length) {
       if (!/noindex/.test(first.robots.join(','))) err(`${first.rel}: tyhjän listauksen pitää olla noindex`);
       if (smByLoc.has(first.url)) err(`${first.rel}: tyhjä listaus ei kuulu sitemapiin`);

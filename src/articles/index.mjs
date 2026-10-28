@@ -61,8 +61,8 @@ export async function renderForBuild(data, out, { write, env = process.env, log 
 }
 
 /**
- * Esikatselusivut (vain testisivustolla, SITE_ENV=test): koko etusivu feikkiartikkeleilla (tests/articles/fixtures/home-preview.json), noindex, ei sitemapissa, ei linkitettyä.
- * Tuotantobuildissa (SITE_ENV != test) ei luoda mitään. Kortit linkittävät '#' (feikkiartikkeleilla ei ole sivuja).
+ * Esikatselusivut (vain testisivustolla, SITE_ENV=test): koko etusivu (lyhyt nauha, ei artikkelikortteja), noindex, ei sitemapissa, ei linkitettyä.
+ * Tuotantobuildissa (SITE_ENV != test) ei luoda mitään. previewNote erottaa sivun tuotannon etusivusta.
  */
 export async function renderHomePreview(out, { write, env = process.env, log = console, cacheDir = null } = {}) {
   if (!isTest || !cfg.home?.preview) return [];

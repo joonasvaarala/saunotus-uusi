@@ -1,0 +1,142 @@
+[
+ {
+  "key": "ui.site.home_choose_title",
+  "lang": "fi",
+  "text": "Valitse elämys",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "Etusivun lyhennys (Joonas 27.10.2026): uusi asiakasnäkyvä teksti, FI+EN, luokka normal. Ei vielä tuotannossa. Tuo admin_texts_importilla. Tuotekorttien nimet, kuvaukset, hinnat ja kuvat eivät ole tässä: ne tulevat tuotteesta (public_catalog / public_product_images)."
+ },
+ {
+  "key": "ui.site.home_choose_title",
+  "lang": "en",
+  "text": "Choose an experience",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "Etusivun lyhennys (Joonas 27.10.2026): uusi asiakasnäkyvä teksti, FI+EN, luokka normal. Ei vielä tuotannossa. Tuo admin_texts_importilla. Tuotekorttien nimet, kuvaukset, hinnat ja kuvat eivät ole tässä: ne tulevat tuotteesta (public_catalog / public_product_images)."
+ },
+ {
+  "key": "ui.site.home_week_soon",
+  "lang": "fi",
+  "text": "Tänään ja huomenna",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "Etusivun lyhennys (Joonas 27.10.2026): uusi asiakasnäkyvä teksti, FI+EN, luokka normal. Ei vielä tuotannossa. Tuo admin_texts_importilla. Tuotekorttien nimet, kuvaukset, hinnat ja kuvat eivät ole tässä: ne tulevat tuotteesta (public_catalog / public_product_images)."
+ },
+ {
+  "key": "ui.site.home_week_soon",
+  "lang": "en",
+  "text": "Today and tomorrow",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "Etusivun lyhennys (Joonas 27.10.2026): uusi asiakasnäkyvä teksti, FI+EN, luokka normal. Ei vielä tuotannossa. Tuo admin_texts_importilla. Tuotekorttien nimet, kuvaukset, hinnat ja kuvat eivät ole tässä: ne tulevat tuotteesta (public_catalog / public_product_images)."
+ },
+ {
+  "key": "ui.site.home_week_all",
+  "lang": "fi",
+  "text": "Näytä koko viikko",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "Etusivun lyhennys (Joonas 27.10.2026): uusi asiakasnäkyvä teksti, FI+EN, luokka normal. Ei vielä tuotannossa. Tuo admin_texts_importilla. Tuotekorttien nimet, kuvaukset, hinnat ja kuvat eivät ole tässä: ne tulevat tuotteesta (public_catalog / public_product_images)."
+ },
+ {
+  "key": "ui.site.home_week_all",
+  "lang": "en",
+  "text": "Show the full week",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "Etusivun lyhennys (Joonas 27.10.2026): uusi asiakasnäkyvä teksti, FI+EN, luokka normal. Ei vielä tuotannossa. Tuo admin_texts_importilla. Tuotekorttien nimet, kuvaukset, hinnat ja kuvat eivät ole tässä: ne tulevat tuotteesta (public_catalog / public_product_images)."
+ },
+ {
+  "key": "ui.site.home_week_less",
+  "lang": "fi",
+  "text": "Näytä vain tänään ja huomenna",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "Etusivun lyhennys (Joonas 27.10.2026): uusi asiakasnäkyvä teksti, FI+EN, luokka normal. Ei vielä tuotannossa. Tuo admin_texts_importilla. Tuotekorttien nimet, kuvaukset, hinnat ja kuvat eivät ole tässä: ne tulevat tuotteesta (public_catalog / public_product_images)."
+ },
+ {
+  "key": "ui.site.home_week_less",
+  "lang": "en",
+  "text": "Show only today and tomorrow",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "Etusivun lyhennys (Joonas 27.10.2026): uusi asiakasnäkyvä teksti, FI+EN, luokka normal. Ei vielä tuotannossa. Tuo admin_texts_importilla. Tuotekorttien nimet, kuvaukset, hinnat ja kuvat eivät ole tässä: ne tulevat tuotteesta (public_catalog / public_product_images)."
+ },
+ {
+  "key": "ui.site.home_tradition_lead",
+  "lang": "fi",
+  "text": "Saunarituaali on ohjattu, vuodenaikojen mukaan elävä hetki hoitosauna Raunissa, ja sen jälkeen savusaunan löylyt. Saunotus juontaa juurensa suomalaiseen saunaperinteeseen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "Etusivun lyhennys (Joonas 27.10.2026): uusi asiakasnäkyvä teksti, FI+EN, luokka normal. Ei vielä tuotannossa. Tuo admin_texts_importilla. Tuotekorttien nimet, kuvaukset, hinnat ja kuvat eivät ole tässä: ne tulevat tuotteesta (public_catalog / public_product_images)."
+ },
+ {
+  "key": "ui.site.home_tradition_lead",
+  "lang": "en",
+  "text": "The sauna ritual is a guided moment in the Rauni treatment sauna that changes with the seasons, followed by the smoke sauna. Saunotus is rooted in Finnish sauna tradition.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "Etusivun lyhennys (Joonas 27.10.2026): uusi asiakasnäkyvä teksti, FI+EN, luokka normal. Ei vielä tuotannossa. Tuo admin_texts_importilla. Tuotekorttien nimet, kuvaukset, hinnat ja kuvat eivät ole tässä: ne tulevat tuotteesta (public_catalog / public_product_images)."
+ },
+ {
+  "key": "ui.site.home_info_lead",
+  "lang": "fi",
+  "text": "Tarinoita vihdasta, saunottajasta ja savusaunan perinteestä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "Etusivun lyhennys (Joonas 27.10.2026): uusi asiakasnäkyvä teksti, FI+EN, luokka normal. Ei vielä tuotannossa. Tuo admin_texts_importilla. Tuotekorttien nimet, kuvaukset, hinnat ja kuvat eivät ole tässä: ne tulevat tuotteesta (public_catalog / public_product_images)."
+ },
+ {
+  "key": "ui.site.home_info_lead",
+  "lang": "en",
+  "text": "Stories about the birch whisk, the sauna practitioner and smoke-sauna tradition.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "Etusivun lyhennys (Joonas 27.10.2026): uusi asiakasnäkyvä teksti, FI+EN, luokka normal. Ei vielä tuotannossa. Tuo admin_texts_importilla. Tuotekorttien nimet, kuvaukset, hinnat ja kuvat eivät ole tässä: ne tulevat tuotteesta (public_catalog / public_product_images)."
+ },
+ {
+  "key": "ui.site.home_company_lead",
+  "lang": "fi",
+  "text": "Rauhallinen savusauna työhyvinvointiin, pienryhmille ja yhteisiin iltoihin.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "Etusivun lyhennys (Joonas 27.10.2026): uusi asiakasnäkyvä teksti, FI+EN, luokka normal. Ei vielä tuotannossa. Tuo admin_texts_importilla. Tuotekorttien nimet, kuvaukset, hinnat ja kuvat eivät ole tässä: ne tulevat tuotteesta (public_catalog / public_product_images)."
+ },
+ {
+  "key": "ui.site.home_company_lead",
+  "lang": "en",
+  "text": "A calm smoke sauna for workplace wellbeing, small groups and shared evenings.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 500,
+  "placeholders": [],
+  "reason": "Etusivun lyhennys (Joonas 27.10.2026): uusi asiakasnäkyvä teksti, FI+EN, luokka normal. Ei vielä tuotannossa. Tuo admin_texts_importilla. Tuotekorttien nimet, kuvaukset, hinnat ja kuvat eivät ole tässä: ne tulevat tuotteesta (public_catalog / public_product_images)."
+ }
+]
