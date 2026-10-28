@@ -9,7 +9,7 @@
 --   * ilmoitukset lokiin booking.waitlist_notify_log (ei sähköpostia lokissa; entry_id).
 --   * hallinta: booking.admin_event_waitlist(rule_id), vain henkilökunta.
 -- Ei hintaa, ALV:tä eikä URL-muutoksia. Ei ajeta tästä työtilasta.
--- Rollback: booking/supabase/rollbacks/20261028191000_booking_210_ROLLBACK.sql
+-- Rollback: booking/supabase/rollbacks/20261028193012_booking_210_ROLLBACK.sql
 set local lock_timeout = '5s';
 
 alter table booking.waitlist_entries add column if not exists privacy_consent_at timestamptz;
