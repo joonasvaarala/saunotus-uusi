@@ -180,26 +180,26 @@
  {
   "key": "ui.order.cancel_closed_one",
   "lang": "fi",
-  "text": "Peruutus ei ole enää mahdollinen, koska vuoron alkuun on alle {{var:hours}} tunti. Jos sinulla on kysyttävää, soita meille: {{var:phone}}.",
+  "text": "Peruutus ei ole enää mahdollinen, koska vuoron alkuun on alle {{var:hours}} tunti. Jos sinulla on kysyttävää, lähetä meille sähköpostia: {{var:email}}.",
   "class": "protected",
   "kind": "plain",
   "max_len": 350,
   "placeholders": [
    "{{var:hours}}",
-   "{{var:phone}}"
+   "{{var:email}}"
   ],
   "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
  },
  {
   "key": "ui.order.cancel_closed_one",
   "lang": "en",
-  "text": "Cancellation is no longer possible because your session starts in less than {{var:hours}} hour. If you have any questions, please call us: {{var:phone}}.",
+  "text": "Cancellation is no longer possible because your session starts in less than {{var:hours}} hour. If you have any questions, email us: {{var:email}}.",
   "class": "protected",
   "kind": "plain",
   "max_len": 400,
   "placeholders": [
    "{{var:hours}}",
-   "{{var:phone}}"
+   "{{var:email}}"
   ],
   "reason": "monikkokorjaus (yksikkömuoto kun lukumäärä on 1: 1 guest / 1 henkilö, Joonas 24.10.2026): uusi valinnainen avain, FI+EN. Ei SQL-muutosta: Bottiavustus tuo admin_texts_importilla milloin vain. Kauppa käyttää koodin oletusta siihen asti (julkaistu monikkoavain ennallaan). Kauppa: booking/shop/src/plural.js."
  },

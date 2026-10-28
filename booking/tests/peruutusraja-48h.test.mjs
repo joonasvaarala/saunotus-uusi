@@ -75,17 +75,19 @@ test('mock: yli 48 h → peruutuspyyntö sallittu; alle 48 h → suljettu ja pal
   assert.equal((await closed.get()).cancel_request, null);
 });
 
-test('tilaussivu: lomake vain kun palvelin sallii; rajan jälkeen teksti + tel-linkki; cancel_too_late → päivitys', () => {
+test('tilaussivu: lomake vain kun palvelin sallii; rajan jälkeen teksti + mailto; cancel_too_late → päivitys; korttien alle ei yhteystietoriviä', () => {
   const js = read('booking/shop/src/order.js');
   assert.match(js, /function cancelBody\(o, note\)/);
   assert.match(js, /if \(o\.can_request_cancel == null\) return \[note, cancelForm\(\)\];/, 'vanha backend kuten ennen');
-  assert.match(js, /if \(o\.cancel_closed\) return \[phoneText\(t\[oneKey\('cancelClosed', L, \{ hours \}, t\)\]/);
+  assert.match(js, /if \(o\.cancel_closed\) return \[emailText\(t\[oneKey\('cancelClosed', L, \{ hours \}, t\)\]/);
   assert.match(js, /if \(!o\.can_request_cancel\) return \[note\];/, 'ei lomaketta kun peruutus ei ole sallittu');
-  assert.match(js, /href: `tel:\$\{S\.phoneTel\}`/);
+  assert.match(js, /href: `mailto:\$\{email\}`, 'data-testid': 'order-email'/);
   assert.match(js, /r\.code === 'cancel_too_late'/);
+  const page = js.split("data-testid': 'order-page'")[1].split(');')[0];
+  assert.ok(page && !page.includes('phoneBox'), 'tilaussivun korttien alle ei tule puhelin–sähköposti-riviä');
 });
 
-test('tekstit: FI+EN samat avaimet, {hours}/{date}/{phone}, ei numeroa käsin, ei HTML:ää eikä emojeja', () => {
+test('tekstit: FI+EN samat avaimet, {hours}/{date}/{email}, ei numeroa käsin, ei HTML:ää eikä emojeja', () => {
   for (const k of ['cancelRule', 'cancelClosed', 'err.cancel_too_late']) {
     for (const L of ['fi', 'en']) {
       const s = OT[L][k];
@@ -96,7 +98,17 @@ test('tekstit: FI+EN samat avaimet, {hours}/{date}/{phone}, ei numeroa käsin, e
   }
   assert.match(OT.fi.cancelRule, /\{hours\} tuntia ennen vuoron alkua.*\{date\}.*Alle \{hours\} tuntia ennen vuoroa peruutus ei ole enää mahdollinen/);
   assert.match(OT.en.cancelRule, /\{hours\} hours before.*\{date\}.*no longer possible/);
-  for (const L of ['fi', 'en']) assert.match(OT[L].cancelClosed, /\{hours\}.*\{phone\}/);
+  for (const L of ['fi', 'en']) {
+    assert.match(OT[L].cancelClosed, /\{hours\}.*\{email\}/);
+    assert.match(OT[L].cancelClosedOne, /\{hours\}.*\{email\}/);
+    assert.doesNotMatch(OT[L].cancelClosed + OT[L].cancelClosedOne, /\{phone\}|soita|call us/i);
+  }
+  assert.match(OT.fi.cancelClosed, /lähetä meille sähköpostia: \{email\}\./);
+  assert.match(OT.en.cancelClosed, /email us: \{email\}\./);
+  assert.match(OT.fi.changeNote, /lähetä meille sähköpostia:$/);
+  assert.match(OT.en.changeNote, /email us:$/);
+  assert.match(OT.fi.changeClosed, /lähetä meille sähköpostia:$/);
+  assert.match(OT.en.changeClosed, /email us:$/);
 });
 
 test('pending-import-49 vastaa koodin oletuksia (ui.order.*), FI+EN, paikkamerkit, ei <-merkkiä, ei muissa tuontitiedostoissa', () => {
@@ -113,7 +125,8 @@ test('pending-import-49 vastaa koodin oletuksia (ui.order.*), FI+EN, paikkamerki
     assert.deepEqual([...r.placeholders].sort(), [...new Set(r.text.match(/\{\{[^{}]*\}\}/g) || [])].sort(), w);
     assert.doesNotMatch(r.text, /[<>]|https?:\/\//, w);
   }
-  assert.ok(rows.find((r) => r.key === 'ui.order.cancel_closed' && r.lang === 'fi').text.includes('{{var:phone}}'));
+  assert.ok(rows.find((r) => r.key === 'ui.order.cancel_closed' && r.lang === 'fi').text.includes('{{var:email}}'));
+  assert.ok(!rows.some((r) => r.text.includes('{{var:phone}}')));
   for (const k of keys) assert.ok(rows.some((r) => r.key === k && r.lang === 'fi') && rows.some((r) => r.key === k && r.lang === 'en'), k);
   for (const f of readdirSync(join(repo, 'content'))) {
     if (!/^site-texts\.(pending-import|imported|fallback)/.test(f) || f === 'site-texts.pending-import-49.json' || !f.endsWith('.json')) continue;

@@ -5330,7 +5330,7 @@
  {
   "key": "ui.order.change_note",
   "lang": "fi",
-  "text": "Muutokset ja peruutukset viimeistään {{var:date}}. Sen jälkeen ota yhteyttä puhelimitse.",
+  "text": "Muutokset ja peruutukset viimeistään {{var:date}}. Sen jälkeen lähetä meille sähköpostia:",
   "class": "protected",
   "kind": "plain",
   "max_len": 250,
@@ -5342,7 +5342,7 @@
  {
   "key": "ui.order.change_note",
   "lang": "en",
-  "text": "Changes and cancellations are possible until {{var:date}}. After that please call us.",
+  "text": "Changes and cancellations are possible until {{var:date}}. After that, email us:",
   "class": "protected",
   "kind": "plain",
   "max_len": 250,
@@ -5354,7 +5354,7 @@
  {
   "key": "ui.order.change_closed",
   "lang": "fi",
-  "text": "Muutosaika on päättynyt. Ota yhteyttä puhelimitse.",
+  "text": "Muutosaika on päättynyt. Jos sinulla on kysyttävää, lähetä meille sähköpostia:",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -5364,7 +5364,7 @@
  {
   "key": "ui.order.change_closed",
   "lang": "en",
-  "text": "The change deadline has passed. Please call us.",
+  "text": "The change deadline has passed. If you have any questions, email us:",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
