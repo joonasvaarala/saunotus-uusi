@@ -1026,5 +1026,48 @@ body.shot #shell .nav .lbl{display:inline}
   .rd-secondary { display: flex; flex-wrap: wrap; }
   .rd-secondary .rd-danger { flex: 1 1 100%; margin-left: 0; }
   .rd-when { font-size: 18px; }
-  .rd-more .kv { grid-template-columns: minmax(0, 6.875em) minmax(0, 1fr); }
+.rd-more .kv { grid-template-columns: minmax(0, 6.875em) minmax(0, 1fr); }
+  }
+/* booking_202: tapahtumien yleiskatsaus, kalenteri, osallistujat ja viesti. Vain teeman muuttujat. */
+.ev-kpis{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+@media(min-width:700px){.ev-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.ev-kpi{display:grid;gap:2px;margin:0}.ev-kpi strong{color:var(--ink);font-size:1.15rem;overflow-wrap:anywhere}
+.ev-table-wrap{overflow-x:auto;max-width:100%}
+.ev-table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
+.ev-table th,.ev-table td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.ev-table th{font-size:.85rem;color:var(--muted);font-weight:600}
+.ev-table tr:last-child td{border-bottom:0}
+.ev-cap{display:grid;gap:4px;min-width:7rem}
+.ev-cap-track{display:block;height:8px;border-radius:8px;background:var(--bg);border:1px solid var(--line);overflow:hidden}
+.ev-cap-fill{display:block;height:100%;background:var(--green)}
+.ev-cap-num{font-variant-numeric:tabular-nums;color:var(--ink);font-size:.92rem}
+.ev-quick{gap:6px}
+.ev-tabs{overflow-x:auto}
+.ev-cal{display:grid;gap:8px}
+.ev-cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.ev-dow{text-align:center;font-size:.75rem;color:var(--muted);font-weight:600}
+.ev-day{min-height:44px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit;padding:4px;display:grid;align-content:center;justify-items:center;gap:2px;cursor:pointer}
+.ev-day.pad{border:0;background:transparent;cursor:default}
+.ev-day.on{background:var(--green);color:var(--card);border-color:var(--green)}
+.ev-day.has{box-shadow:inset 0 -3px 0 var(--gold)}
+.ev-day-n{font-weight:600}.ev-day-c{font-size:.75rem}
+.ev-preview{list-style:none;margin:0;padding:0;display:grid;gap:4px;max-height:240px;overflow:auto}
+.ev-preview li{padding:6px 0;border-bottom:1px solid var(--line)}
+.ev-mail{white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--bg);color:var(--ink);padding:10px 12px;border-radius:8px;margin:0}
+.ev-contact{display:grid;gap:2px}.ev-contact a{color:var(--ink);white-space:nowrap}
+.ev-extra{white-space:pre-wrap;overflow-wrap:anywhere}
+.ev-inline{border-top:1px solid var(--line);padding-top:8px}
+.ev-log{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.ev-print-only{display:none}
+@media(max-width:700px){
+  .ev-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .ev-table,.ev-table tbody,.ev-table tr,.ev-table td{display:block;width:100%}
+  .ev-table tr{border:1px solid var(--line);border-radius:var(--r);margin:0 0 10px;padding:8px;background:var(--card)}
+  .ev-table td{border:0;padding:4px 0}
+  .ev-table td::before{content:attr(data-label);display:block;font-size:.75rem;font-weight:600;color:var(--muted)}
+}
+@media print{
+  body.ev-printing .ev-no-print,body.ev-printing .ev-screen-only,body.ev-printing .tl-tabs,body.ev-printing .top,body.ev-printing .nav{display:none !important}
+  body.ev-printing .ev-print-only{display:block !important}
+  body.ev-printing main{padding:0;max-width:none}
 }

@@ -1,0 +1,2246 @@
+[
+ {
+  "key": "ui.admin.events.lead_manage",
+  "lang": "fi",
+  "text": "Tulevat ja menneet kerrat, paikat, osallistujat ja viestit. Tuotetiedot ja hinnat muokataan Tuotteet-sivulla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 149,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.lead_manage",
+  "lang": "en",
+  "text": "Upcoming and past occurrences, capacity, participants and messages. Product details and prices are edited on the Products page.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 167,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.view_list",
+  "lang": "fi",
+  "text": "Lista",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.view_list",
+  "lang": "en",
+  "text": "List",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.view_calendar",
+  "lang": "fi",
+  "text": "Kalenteri",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.view_calendar",
+  "lang": "en",
+  "text": "Calendar",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.when_upcoming",
+  "lang": "fi",
+  "text": "Tulevat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.when_upcoming",
+  "lang": "en",
+  "text": "Upcoming",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.when_past",
+  "lang": "fi",
+  "text": "Menneet",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.when_past",
+  "lang": "en",
+  "text": "Past",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.when_all",
+  "lang": "fi",
+  "text": "Kaikki ajat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.when_all",
+  "lang": "en",
+  "text": "All dates",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.filter_event_all",
+  "lang": "fi",
+  "text": "Kaikki tapahtumat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.filter_event_all",
+  "lang": "en",
+  "text": "All events",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.filter_status",
+  "lang": "fi",
+  "text": "Tila",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.filter_status",
+  "lang": "en",
+  "text": "Status",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.filter_pick_event",
+  "lang": "fi",
+  "text": "Tapahtuma",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.filter_pick_event",
+  "lang": "en",
+  "text": "Event",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.status_all",
+  "lang": "fi",
+  "text": "Kaikki tilat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.status_all",
+  "lang": "en",
+  "text": "All statuses",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.status_on_sale",
+  "lang": "fi",
+  "text": "Myynnissä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.status_on_sale",
+  "lang": "en",
+  "text": "On sale",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.status_full",
+  "lang": "fi",
+  "text": "Täynnä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.status_full",
+  "lang": "en",
+  "text": "Full",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.status_cancelled",
+  "lang": "fi",
+  "text": "Peruttu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.status_cancelled",
+  "lang": "en",
+  "text": "Cancelled",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.status_sales_closed",
+  "lang": "fi",
+  "text": "Myynti suljettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.status_sales_closed",
+  "lang": "en",
+  "text": "Sales closed",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_when",
+  "lang": "fi",
+  "text": "Ajankohta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_when",
+  "lang": "en",
+  "text": "When",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_sold",
+  "lang": "fi",
+  "text": "Myyty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_sold",
+  "lang": "en",
+  "text": "Sold",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_status",
+  "lang": "fi",
+  "text": "Tila",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_status",
+  "lang": "en",
+  "text": "Status",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_actions",
+  "lang": "fi",
+  "text": "Toiminnot",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_actions",
+  "lang": "en",
+  "text": "Actions",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.quick_people",
+  "lang": "fi",
+  "text": "Osallistujat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.quick_people",
+  "lang": "en",
+  "text": "Participants",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.quick_message",
+  "lang": "fi",
+  "text": "Viesti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.quick_message",
+  "lang": "en",
+  "text": "Message",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.overview_empty",
+  "lang": "fi",
+  "text": "Ei kertoja valitulla suodattimella.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.overview_empty",
+  "lang": "en",
+  "text": "No occurrences match the filter.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.kpi_upcoming",
+  "lang": "fi",
+  "text": "Tulevia kertoja",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.kpi_upcoming",
+  "lang": "en",
+  "text": "Upcoming occurrences",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.kpi_sold",
+  "lang": "fi",
+  "text": "Myytyjä paikkoja",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.kpi_sold",
+  "lang": "en",
+  "text": "Places sold",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.kpi_next",
+  "lang": "fi",
+  "text": "Seuraava kerta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.kpi_next",
+  "lang": "en",
+  "text": "Next occurrence",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.tab_overview",
+  "lang": "fi",
+  "text": "Yleiskatsaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.tab_overview",
+  "lang": "en",
+  "text": "Overview",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.tab_occurrences",
+  "lang": "fi",
+  "text": "Kerrat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.tab_occurrences",
+  "lang": "en",
+  "text": "Occurrences",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.tab_participants",
+  "lang": "fi",
+  "text": "Osallistujat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.tab_participants",
+  "lang": "en",
+  "text": "Participants",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.tab_messages",
+  "lang": "fi",
+  "text": "Viestit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.tab_messages",
+  "lang": "en",
+  "text": "Messages",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.tab_settings",
+  "lang": "fi",
+  "text": "Asetukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.tab_settings",
+  "lang": "en",
+  "text": "Settings",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.settings_lead",
+  "lang": "fi",
+  "text": "Tuotetiedot ja hinnat muokataan Tuotteet-sivulla. Myyntikanavat ja kopiointi ovat tässä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 128,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.settings_lead",
+  "lang": "en",
+  "text": "Product details and prices are edited on the Products page. Sales channels and copying are here.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 136,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.participants_all",
+  "lang": "fi",
+  "text": "Kaikki kerrat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.participants_all",
+  "lang": "en",
+  "text": "All occurrences",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.participants_empty",
+  "lang": "fi",
+  "text": "Ei osallistujia.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.participants_empty",
+  "lang": "en",
+  "text": "No participants.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.participants_unavailable",
+  "lang": "fi",
+  "text": "Osallistujalistaa ei vielä saatu. Lista toimii, kun tietokannan päivitys on ajettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 123,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.participants_unavailable",
+  "lang": "en",
+  "text": "The participant list is not available yet. It works after the database update has been applied.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 135,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_name",
+  "lang": "fi",
+  "text": "Nimi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_name",
+  "lang": "en",
+  "text": "Name",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_contact",
+  "lang": "fi",
+  "text": "Yhteystieto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_contact",
+  "lang": "en",
+  "text": "Contact",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_persons",
+  "lang": "fi",
+  "text": "Henkilöitä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_persons",
+  "lang": "en",
+  "text": "Persons",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_payment",
+  "lang": "fi",
+  "text": "Maksu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_payment",
+  "lang": "en",
+  "text": "Payment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_booked",
+  "lang": "fi",
+  "text": "Varattu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_booked",
+  "lang": "en",
+  "text": "Booked",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_extra",
+  "lang": "fi",
+  "text": "Lisätiedot",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_extra",
+  "lang": "en",
+  "text": "Additional info",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_note",
+  "lang": "fi",
+  "text": "Muistiinpano",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.col_note",
+  "lang": "en",
+  "text": "Note",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.note_placeholder",
+  "lang": "fi",
+  "text": "Henkilökunnan muistiinpano",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.note_placeholder",
+  "lang": "en",
+  "text": "Staff note",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.note_save",
+  "lang": "fi",
+  "text": "Tallenna muistiinpano",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.note_save",
+  "lang": "en",
+  "text": "Save note",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.note_saved",
+  "lang": "fi",
+  "text": "Muistiinpano tallennettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.note_saved",
+  "lang": "en",
+  "text": "Note saved",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.csv_download",
+  "lang": "fi",
+  "text": "Lataa CSV",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.csv_download",
+  "lang": "en",
+  "text": "Download CSV",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.print_list",
+  "lang": "fi",
+  "text": "Tulostettava lista",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.print_list",
+  "lang": "en",
+  "text": "Printable list",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.print_title",
+  "lang": "fi",
+  "text": "Osallistujalista",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.print_title",
+  "lang": "en",
+  "text": "Participant list",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.extra_option",
+  "lang": "fi",
+  "text": "Valinta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.extra_option",
+  "lang": "en",
+  "text": "Choice",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.extra_customer",
+  "lang": "fi",
+  "text": "Asiakkaan viesti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.extra_customer",
+  "lang": "en",
+  "text": "Customer message",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.extra_adults",
+  "lang": "fi",
+  "text": "aikuista",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.extra_adults",
+  "lang": "en",
+  "text": "adults",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.extra_children",
+  "lang": "fi",
+  "text": "lasta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.extra_children",
+  "lang": "en",
+  "text": "children",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_subject",
+  "lang": "fi",
+  "text": "Aihe",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_subject",
+  "lang": "en",
+  "text": "Subject",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_body",
+  "lang": "fi",
+  "text": "Viesti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_body",
+  "lang": "en",
+  "text": "Message",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_scope_one",
+  "lang": "fi",
+  "text": "Tämän kerran osallistujat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_scope_one",
+  "lang": "en",
+  "text": "Participants of this occurrence",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_scope_all",
+  "lang": "fi",
+  "text": "Kaikkien kertojen osallistujat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_scope_all",
+  "lang": "en",
+  "text": "Participants of all occurrences",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_preview",
+  "lang": "fi",
+  "text": "Esikatselu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_preview",
+  "lang": "en",
+  "text": "Preview",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_recipients",
+  "lang": "fi",
+  "text": "Vastaanottajia {{var:n}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_recipients",
+  "lang": "en",
+  "text": "{{var:n}} recipients",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_confirm",
+  "lang": "fi",
+  "text": "Olen tarkistanut vastaanottajat ja viestin",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_confirm",
+  "lang": "en",
+  "text": "I have checked the recipients and the message",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_send",
+  "lang": "fi",
+  "text": "Lähetä viesti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_send",
+  "lang": "en",
+  "text": "Send message",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_sent",
+  "lang": "fi",
+  "text": "Viesti jonossa {{var:n}} vastaanottajalle",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_sent",
+  "lang": "en",
+  "text": "Message queued for {{var:n}} recipients",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_log",
+  "lang": "fi",
+  "text": "Lähetetyt viestit",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_log",
+  "lang": "en",
+  "text": "Sent messages",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_log_empty",
+  "lang": "fi",
+  "text": "Ei lähetettyjä viestejä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_log_empty",
+  "lang": "en",
+  "text": "No sent messages.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_sign_note",
+  "lang": "fi",
+  "text": "Lähtevä viesti allekirjoitetaan nimellä Tapio. Maksuvälittäjän nimeä ei lähetetä asiakkaalle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 133,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_sign_note",
+  "lang": "en",
+  "text": "Outgoing messages are signed Tapio. The payment provider name is not sent to the customer.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 130,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_skipped",
+  "lang": "fi",
+  "text": "Ohitettu {{var:n}} (ei sähköpostia tai lähetys pois päältä).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_skipped",
+  "lang": "en",
+  "text": "Skipped {{var:n}} (no email address, or sending is off).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_queued_line",
+  "lang": "fi",
+  "text": "{{var:when}}: {{var:subject}} ({{var:n}})",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [
+   "{{var:when}}",
+   "{{var:subject}}",
+   "{{var:n}}"
+  ],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.msg_queued_line",
+  "lang": "en",
+  "text": "{{var:when}}: {{var:subject}} ({{var:n}})",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [
+   "{{var:when}}",
+   "{{var:subject}}",
+   "{{var:n}}"
+  ],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.messages_unavailable",
+  "lang": "fi",
+  "text": "Viestejä ei vielä saatu. Lähetys toimii, kun tietokannan päivitys on ajettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.messages_unavailable",
+  "lang": "en",
+  "text": "Messages are not available yet. Sending works after the database update has been applied.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 129,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_no_subject",
+  "lang": "fi",
+  "text": "Kirjoita aihe.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_no_subject",
+  "lang": "en",
+  "text": "Enter a subject.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_subject_long",
+  "lang": "fi",
+  "text": "Aihe on liian pitkä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_subject_long",
+  "lang": "en",
+  "text": "The subject is too long.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_no_body",
+  "lang": "fi",
+  "text": "Kirjoita viesti.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_no_body",
+  "lang": "en",
+  "text": "Enter a message.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_body_long",
+  "lang": "fi",
+  "text": "Viesti on liian pitkä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_body_long",
+  "lang": "en",
+  "text": "The message is too long.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_provider_name",
+  "lang": "fi",
+  "text": "Poista maksuvälittäjän nimi. Sitä ei näytetä asiakkaille.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_provider_name",
+  "lang": "en",
+  "text": "Remove the payment provider name. It is not shown to customers.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_no_recipients",
+  "lang": "fi",
+  "text": "Ei vastaanottajia.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_no_recipients",
+  "lang": "en",
+  "text": "No recipients.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_no_confirm",
+  "lang": "fi",
+  "text": "Vahvista lähetys esikatselun jälkeen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_no_confirm",
+  "lang": "en",
+  "text": "Confirm sending after the preview.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_bad_range",
+  "lang": "fi",
+  "text": "Loppupäivä on ennen alkupäivää.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_bad_range",
+  "lang": "en",
+  "text": "The end date is before the start date.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_no_weekdays",
+  "lang": "fi",
+  "text": "Valitse vähintään yksi viikonpäivä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_no_weekdays",
+  "lang": "en",
+  "text": "Choose at least one weekday.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.pick_dates",
+  "lang": "fi",
+  "text": "Valitse päivät",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.pick_dates",
+  "lang": "en",
+  "text": "Choose dates",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.pick_hint",
+  "lang": "fi",
+  "text": "Napauta päiviä kalenterista. Toisto lisää saman viikonpäivät valitulle jaksolle.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.pick_hint",
+  "lang": "en",
+  "text": "Tap dates in the calendar. Repeat adds the same weekdays for the chosen period.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.repeat",
+  "lang": "fi",
+  "text": "Toista viikoittain",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.repeat",
+  "lang": "en",
+  "text": "Repeat weekly",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.repeat_from",
+  "lang": "fi",
+  "text": "Alkaen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.repeat_from",
+  "lang": "en",
+  "text": "From",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.repeat_until",
+  "lang": "fi",
+  "text": "Saakka",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.repeat_until",
+  "lang": "en",
+  "text": "Until",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.wd_1",
+  "lang": "fi",
+  "text": "Ma",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.wd_1",
+  "lang": "en",
+  "text": "Mon",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.wd_2",
+  "lang": "fi",
+  "text": "Ti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.wd_2",
+  "lang": "en",
+  "text": "Tue",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.wd_3",
+  "lang": "fi",
+  "text": "Ke",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.wd_3",
+  "lang": "en",
+  "text": "Wed",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.wd_4",
+  "lang": "fi",
+  "text": "To",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.wd_4",
+  "lang": "en",
+  "text": "Thu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.wd_5",
+  "lang": "fi",
+  "text": "Pe",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.wd_5",
+  "lang": "en",
+  "text": "Fri",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.wd_6",
+  "lang": "fi",
+  "text": "La",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.wd_6",
+  "lang": "en",
+  "text": "Sat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.wd_7",
+  "lang": "fi",
+  "text": "Su",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.wd_7",
+  "lang": "en",
+  "text": "Sun",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.add_time",
+  "lang": "fi",
+  "text": "Lisää alkuaika",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.add_time",
+  "lang": "en",
+  "text": "Add start time",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.remove_time",
+  "lang": "fi",
+  "text": "Poista aika",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.remove_time",
+  "lang": "en",
+  "text": "Remove time",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.preview_title",
+  "lang": "fi",
+  "text": "Luotavat kerrat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.preview_title",
+  "lang": "en",
+  "text": "Occurrences to create",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.preview_empty",
+  "lang": "fi",
+  "text": "Valitse vähintään yksi päivä ja alkuaika.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.preview_empty",
+  "lang": "en",
+  "text": "Choose at least one date and one start time.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.confirm_create",
+  "lang": "fi",
+  "text": "Vahvista ja lisää",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.confirm_create",
+  "lang": "en",
+  "text": "Confirm and add",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.add_open",
+  "lang": "fi",
+  "text": "Lisää kertoja",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.add_open",
+  "lang": "en",
+  "text": "Add occurrences",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.cal_prev",
+  "lang": "fi",
+  "text": "Edellinen kuukausi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.cal_prev",
+  "lang": "en",
+  "text": "Previous month",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.cal_next",
+  "lang": "fi",
+  "text": "Seuraava kuukausi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.cal_next",
+  "lang": "en",
+  "text": "Next month",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.warn_bookings",
+  "lang": "fi",
+  "text": "Kerralla on {{var:n}} varausta. Osallistujille ei lähde viestiä, ellet lähetä sitä erikseen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 132,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.warn_bookings",
+  "lang": "en",
+  "text": "This occurrence has {{var:n}} bookings. Participants are not notified unless you send a message.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 136,
+  "placeholders": [
+   "{{var:n}}"
+  ],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.time_changed_title",
+  "lang": "fi",
+  "text": "Aika muuttui",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.time_changed_title",
+  "lang": "en",
+  "text": "Time changed",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.time_changed_body",
+  "lang": "fi",
+  "text": "Haluatko kirjoittaa osallistujille viestin uudesta ajasta? Viestiä ei lähetetä automaattisesti.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 135,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.time_changed_body",
+  "lang": "en",
+  "text": "Do you want to write a message about the new time? Nothing is sent automatically.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 121,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.time_changed_send",
+  "lang": "fi",
+  "text": "Kirjoita viesti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.time_changed_send",
+  "lang": "en",
+  "text": "Write a message",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.time_changed_skip",
+  "lang": "fi",
+  "text": "Ei viestiä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.time_changed_skip",
+  "lang": "en",
+  "text": "No message",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.time_changed_subject",
+  "lang": "fi",
+  "text": "Ajan muutos: {{var:label}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [
+   "{{var:label}}"
+  ],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.time_changed_subject",
+  "lang": "en",
+  "text": "Time change: {{var:label}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [
+   "{{var:label}}"
+  ],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.time_changed_draft",
+  "lang": "fi",
+  "text": "Ajankohta on muuttunut. Uusi aika: {{var:when}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [
+   "{{var:when}}"
+  ],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.time_changed_draft",
+  "lang": "en",
+  "text": "The time has changed. New time: {{var:when}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [
+   "{{var:when}}"
+  ],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.cancel",
+  "lang": "fi",
+  "text": "Peruuta kerta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.cancel",
+  "lang": "en",
+  "text": "Cancel occurrence",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.cancel_confirm",
+  "lang": "fi",
+  "text": "Perutaanko kerta {{var:label}}? Varaukset jäävät näkyviin, myynti päättyy ja tilavaraukset vapautuvat.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 142,
+  "placeholders": [
+   "{{var:label}}"
+  ],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.cancel_confirm",
+  "lang": "en",
+  "text": "Cancel occurrence {{var:label}}? Bookings stay visible, sales stop and the space bookings are released.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 143,
+  "placeholders": [
+   "{{var:label}}"
+  ],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.cancelled_done",
+  "lang": "fi",
+  "text": "Kerta peruttu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.cancelled_done",
+  "lang": "en",
+  "text": "Occurrence cancelled",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.cancel_instead",
+  "lang": "fi",
+  "text": "Kerralla on varauksia, joten sitä ei voi poistaa. Voit perua kerran.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.cancel_instead",
+  "lang": "en",
+  "text": "This occurrence has bookings, so it cannot be deleted. You can cancel it.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.occ_inline_save",
+  "lang": "fi",
+  "text": "Tallenna kerta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.occ_inline_save",
+  "lang": "en",
+  "text": "Save occurrence",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_202: hallinnan tapahtumanäkymä (yleiskatsaus, osallistujat, viestit, kertojen lisäys). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "email.event_message.subject_fallback",
+  "lang": "fi",
+  "text": "Viesti tapahtumasta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_202: tapahtuman osallistujaviesti, allekirjoitus Tapio, ei maksuvälittäjän nimeä. Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "email.event_message.subject_fallback",
+  "lang": "en",
+  "text": "A message about the event",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_202: tapahtuman osallistujaviesti, allekirjoitus Tapio, ei maksuvälittäjän nimeä. Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "email.event_message.sign_name",
+  "lang": "fi",
+  "text": "Tapio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_202: tapahtuman osallistujaviesti, allekirjoitus Tapio, ei maksuvälittäjän nimeä. Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "email.event_message.sign_name",
+  "lang": "en",
+  "text": "Tapio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_202: tapahtuman osallistujaviesti, allekirjoitus Tapio, ei maksuvälittäjän nimeä. Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "email.event_message.event",
+  "lang": "fi",
+  "text": "Tapahtuma: {{var:what}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:what}}"
+  ],
+  "reason": "booking_202: tapahtuman osallistujaviesti, allekirjoitus Tapio, ei maksuvälittäjän nimeä. Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "email.event_message.event",
+  "lang": "en",
+  "text": "Event: {{var:what}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:what}}"
+  ],
+  "reason": "booking_202: tapahtuman osallistujaviesti, allekirjoitus Tapio, ei maksuvälittäjän nimeä. Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "email.event_message.when",
+  "lang": "fi",
+  "text": "Aika: {{var:when}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:when}}"
+  ],
+  "reason": "booking_202: tapahtuman osallistujaviesti, allekirjoitus Tapio, ei maksuvälittäjän nimeä. Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "email.event_message.when",
+  "lang": "en",
+  "text": "Time: {{var:when}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:when}}"
+  ],
+  "reason": "booking_202: tapahtuman osallistujaviesti, allekirjoitus Tapio, ei maksuvälittäjän nimeä. Uusi teksti, ei vielä tuotannossa."
+ }
+]

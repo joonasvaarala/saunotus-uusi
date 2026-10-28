@@ -138,10 +138,13 @@ test('tekstit: kaikki uudet FI+EN pending-import-57:ssä, ei <-merkkiä, paikkam
   globalThis.localStorage ??= { getItem: () => null, setItem() {}, removeItem() {} };
   const { EVENTS_TEXTS } = await import(pathToFileURL(join(root, 'admin/events-texts.js')).href);
   const rows = JSON.parse(read(P57));
+  const rows97 = JSON.parse(read('content/site-texts.pending-import-97.json'));
+  const keys97 = new Set(rows97.map((r) => r.key));
   const want = new Set([...Object.keys(EVENTS_TEXTS.fi), ...Object.keys(S.EVENT_SHOP_TEXTS.fi)]);
+  const want57 = new Set([...want].filter((k) => !keys97.has(k)));
   const got = new Set(rows.map((r) => r.key));
-  assert.deepEqual([...got].sort(), [...want].sort());
-  for (const k of want) for (const lang of ['fi', 'en']) {
+  assert.deepEqual([...got].sort(), [...want57].sort());
+  for (const k of want57) for (const lang of ['fi', 'en']) {
     const r = rows.find((x) => x.key === k && x.lang === lang);
     assert.ok(r && r.text.trim(), `${k} ${lang}`);
     const dict = k.startsWith('ui.shop.') ? S.EVENT_SHOP_TEXTS : EVENTS_TEXTS;
@@ -152,10 +155,13 @@ test('tekstit: kaikki uudet FI+EN pending-import-57:ssä, ei <-merkkiä, paikkam
     assert.deepEqual(r.placeholders, [...new Set(r.text.match(/\{\{var:[a-z_]+\}\}/g) || [])]);
     assert.match(r.reason, /^booking_158: /);
   }
-  assert.equal(rows.length, want.size * 2);
-  // muut pending-tiedostot eivät määrittele samoja avaimia
+  assert.equal(rows.length, want57.size * 2);
+  // muut pending-tiedostot eivät määrittele 57:n avaimia. 97:n uudet avaimet ovat sanakirjassa, eivät 57:ssä.
   for (const f of readdirSync(join(repo, 'content')).filter((f) => /^site-texts\.pending-import-\d+\.json$/.test(f) && !f.endsWith('-57.json'))) {
-    for (const r of JSON.parse(read(`content/${f}`))) assert.ok(!want.has(r.key), `${r.key} myös ${f}`);
+    for (const r of JSON.parse(read(`content/${f}`))) {
+      if (f.endsWith('-97.json')) assert.ok(keys97.has(r.key) && !want57.has(r.key), `${r.key} ei kuulu 97:ään`);
+      else assert.ok(!want.has(r.key), `${r.key} myös ${f}`);
+    }
   }
   // näkymän kirjaimelliset avaimet löytyvät sanakirjasta
   const view = read('booking/admin/views/events.js');

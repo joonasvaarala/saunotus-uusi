@@ -2,7 +2,7 @@
 // Vastaa booking_158-migraation RPC-muotoja (admin_event_list, admin_event_rule_upsert/_delete/_copy, admin_event_blocks_set,
 // admin_event_set_channels, admin_event_copy, admin_product_copy, public_events). Myynti suljettu (events.sale_enabled = false) kuten tuotannossa.
 // Esimerkki: Perinnesaunotusilta, Rauni +0…+120 min ja Savusauna +120 min…19:00 (kellonaika); koulutus kahdelle päivälle.
-import { helsinkiIso, localParts, addDays, defaultLabel, copyName, CHANNELS } from './events-logic.js';
+import { helsinkiIso, localParts, addDays, defaultLabel, copyName, CHANNELS, messageDraft } from './events-logic.js';
 
 export const EVENT_MOCK_RESOURCES = [
   { id: 1, code: 'rauni', name: 'Rauni', kind: 'space', active: true },
@@ -16,11 +16,12 @@ const err = (code, message, details) => Object.assign(new Error(message || code)
 const clone = (v) => structuredClone(v);
 
 export function createEventsMock({ today, resources = EVENT_MOCK_RESOURCES, products = null } = {}) {
-  const st = { saleEnabled: false, ruleSeq: 500, blockSeq: 900, productSeq: 700, events: [] };
+  const st = { saleEnabled: false, ruleSeq: 500, blockSeq: 900, productSeq: 700, msgSeq: 1, events: [], participants: [], messages: [] };
   const resById = new Map(resources.map((r) => [r.id, r]));
   const ruleObj = (p, r) => {
     const starts_at = helsinkiIso(`${r.date}T${r.start_time}`), ends_at = new Date(Date.parse(starts_at) + r.duration_minutes * 60000).toISOString();
     return { ...r, product_id: p.product_id, kind: 'event', starts_at, ends_at, space_id: null, pool_id: null,
+      cancelled_at: r.cancelled_at || null, reservation_count: r.reservation_count ?? r.sold_persons ?? 0,
       blocks: (r.blocks || []).map((b) => blockObj(starts_at, b)) };
   };
   const blockObj = (s0, b) => {
@@ -46,6 +47,19 @@ export function createEventsMock({ today, resources = EVENT_MOCK_RESOURCES, prod
       channels: null, max_persons: 8, duration_minutes: 1980, image_path: null, price: 390, price_text: null,
       rules: [rule(t1, '09:00', 1980, 8, { sold_persons: 2 })] },
   ];
+  const evening = st.events[0].rules[0];
+  const full = st.events[0].rules[1];
+  const past = addDays(today, -14);
+  st.events[0].rules.push(rule(past, '16:00', 180, 10, { sold_persons: 6, active: true }));
+  st.events[1].rules.push(rule(addDays(today, 30), '17:00', 150, 12, { sold_persons: 3, cancelled_at: `${today}T08:00:00.000Z`, active: false, reservation_count: 3, label: 'Peruttu kerta' }));
+  const bookedAt = `${addDays(today, -2)}T08:15:00.000Z`;
+  st.participants = [
+    { reservation_id: 9101, rule_id: evening.id, order_id: 8101, order_no: 88021, name: 'Maija Mallikas', email: 'maija.mallikas@example.com', phone: '0401234567', persons: 2, order_status: 'confirmed', payment_status: 'paid', booked_at: bookedAt, customer_note: 'Tulen ystävän kanssa.', option_label: null, option_label_en: null, adults: 2, children: null, staff_note: 'Paikka oven vieressä.' },
+    { reservation_id: 9102, rule_id: evening.id, order_id: 8102, order_no: 88022, name: 'Elias Esimerkki', email: 'elias.esimerkki@example.com', phone: '0509876543', persons: 2, order_status: 'confirmed', payment_status: 'unpaid', booked_at: bookedAt, customer_note: null, option_label: null, option_label_en: null, adults: 1, children: 1, staff_note: '' },
+    { reservation_id: 9103, rule_id: full.id, order_id: 8103, order_no: 88030, name: 'Aino Asiakas', email: 'aino.asiakas@example.com', phone: '0451112233', persons: 4, order_status: 'confirmed', payment_status: 'paid', booked_at: bookedAt, customer_note: null, option_label: null, option_label_en: null, adults: 4, children: null, staff_note: '' },
+  ];
+  evening.reservation_count = 2;
+  st.messages = [{ id: 1, product_id: 31, rule_id: evening.id, subject: 'Muistutus illasta', body: 'Otathan pyyhkeen mukaan.', recipient_count: 2, queued_count: 2, skipped_count: 0, created_at: bookedAt }];
   const find = (id) => { const p = st.events.find((x) => x.product_id === +id); if (!p) throw err('not_found', 'Tapahtumaa ei löydy'); return p; };
   const locate = (id) => { for (const p of st.events) { const r = p.rules.find((x) => x.id === +id); if (r) return { p, r }; } throw err('not_found', 'Tapahtumakertaa ei löydy'); };
   const listRow = (p, includePast) => ({ product_id: p.product_id, slug: p.slug, name: p.name, name_en: p.name_en, category: p.category, active: p.active, bookable: p.bookable, shop_visible: p.shop_visible,
@@ -60,9 +74,15 @@ export function createEventsMock({ today, resources = EVENT_MOCK_RESOURCES, prod
       if (a.p_id) {
         const { p, r } = locate(a.p_id);
         if (patch.max_persons != null && patch.max_persons < r.sold_persons) throw err('max_below_sold', 'Osallistujamäärä on pienempi kuin myyty määrä');
+        const before = `${r.date}|${r.start_time}|${r.duration_minutes}`;
+        if (patch.active === false && r.active !== false && (r.sold_persons || r.reservation_count)) throw err('has_reservations', 'Kerralla on varauksia');
         for (const [k, v] of Object.entries(patch)) if (v !== undefined) r[k] = v;
+        if (patch.start_time) r.start_time = String(patch.start_time).slice(0, 5);
         if (!r.label) r.label = defaultLabel(r.date, r.start_time);
-        return ruleObj(p, r);
+        const after = `${r.date}|${r.start_time}|${r.duration_minutes}`;
+        const obj = ruleObj(p, r);
+        obj.moved_bookings = before !== after ? (r.sold_persons || 0) : 0;
+        return obj;
       }
       const p = find(a.p_product_id);
       if (!patch.date || !patch.start_time) throw err('invalid_param', 'date ja start_time vaaditaan');
@@ -121,6 +141,42 @@ export function createEventsMock({ today, resources = EVENT_MOCK_RESOURCES, prod
       st.events.push({ ...clone(src), product_id: id, slug: `${src.slug}-kopio-${id}`, name: copyName(src.name), active: false, bookable: false, shop_visible: false, rules });
       products?.push({ id, name: copyName(src.name), name_en: src.name_en, price: src.price, vat_rate: 25.5, active: false, category: src.category, config: { bookable: false, shop_visible: false, lifecycle: 'current' } });
       return { product_id: id, slug: `${src.slug}-kopio-${id}`, rules_copied: rules.length };
+    },
+    admin_event_participants: (a) => {
+      const p = find(a.p_product_id);
+      const ids = new Set(p.rules.map((r) => r.id));
+      return st.participants.filter((x) => ids.has(x.rule_id) && (!a.p_rule_id || x.rule_id === +a.p_rule_id));
+    },
+    admin_event_participant_note_set: (a) => {
+      const row = st.participants.find((x) => x.reservation_id === +a.p_reservation_id);
+      if (!row) throw err('not_found', 'Varausta ei löydy');
+      const note = String(a.p_note ?? '').trim();
+      if (note.length > 2000) throw err('invalid_param', 'Muistiinpano on liian pitkä');
+      row.staff_note = note;
+      return { ok: true, reservation_id: row.reservation_id, note };
+    },
+    admin_event_occurrence_cancel: (a) => {
+      const { p, r } = locate(a.p_id);
+      r.cancelled_at = r.cancelled_at || new Date().toISOString();
+      r.active = false;
+      return ruleObj(p, r);
+    },
+    admin_event_messages_list: (a) => st.messages.filter((m) => m.product_id === +a.p_product_id),
+    admin_event_message_send: (a) => {
+      const draft = messageDraft({ subject: a.p_subject, body: a.p_body });
+      if (!draft.ok) throw err(draft.error, draft.error);
+      const p = find(a.p_product_id);
+      const ids = new Set(p.rules.filter((r) => !a.p_rule_id || r.id === +a.p_rule_id).map((r) => r.id));
+      const rows = st.participants.filter((x) => ids.has(x.rule_id) && x.order_status !== 'cancelled' && x.email);
+      const byOrder = new Map();
+      for (const row of rows) if (!byOrder.has(row.order_id)) byOrder.set(row.order_id, row);
+      const recipients = [...byOrder.values()].map((r) => ({ name: r.name, order_no: r.order_no, persons: r.persons }));
+      const preview = { ok: true, recipient_count: recipients.length, skipped_count: 0, recipients, subject: draft.subject, signature: 'Tapio' };
+      if (a.p_confirm !== true) return preview;
+      if (!recipients.length) throw err('no_recipients', 'Ei vastaanottajia');
+      const msg = { id: ++st.msgSeq, product_id: p.product_id, rule_id: a.p_rule_id || null, subject: draft.subject, body: draft.body, recipient_count: recipients.length, queued_count: recipients.length, skipped_count: 0, created_at: new Date().toISOString() };
+      st.messages.unshift(msg);
+      return { ...preview, sent: true, queued_count: recipients.length, id: msg.id };
     },
     public_events: (a) => {
       const ch = a.p_channel || 'shop';

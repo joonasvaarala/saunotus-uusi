@@ -3,7 +3,7 @@
 // data = booking.email_outbox_claim()-rivi (ks. docs/talous-integraatiot.md): { kind, locale, to_name, order{order_no, order_url, total, items[], reservations[]}, receipt{receipt_no, kind, text_body, total, issued_at}, payment{amount, link_url, link_expires_at} }.
 // FI + EN, HTML (taulukkopohjainen, inline-tyylit, sähköpostiyhteensopiva) + tekstiversio. Ei ulkoisia riippuvuuksia (puhdas funktio, testattu node --test).
 // Tyyli: tumma vihreä + hiekka, ei sinistä. Logo: sivuston /img/logo-kuitti.png (osoite johdetaan tilauslinkistä; muuten LOGO_FALLBACK).
-export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify" | "invoice_pdf" | "product_message" | "waitlist_spot_freed" | "annual_card_code" | "unpaid_booking_cancelled";
+export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify" | "invoice_pdf" | "product_message" | "waitlist_spot_freed" | "annual_card_code" | "unpaid_booking_cancelled" | "event_message";
 export interface Rendered { subject: string; text: string; html: string }
 // Asiakasnäkyvät tekstit: texts.ts (repon oletukset = varateksti) tai tietokannasta (email.*-avaimet, _shared/site_texts.ts). render() ottaa valinnaisen tekstihaun (4. parametri).
 import { makeT, type TFn } from "../_shared/site_texts.ts";
@@ -577,6 +577,24 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const html = mk(title, intro, h1(title) + helloRow + p(esc(intro))
         + (product || time ? box([product, time].filter(Boolean).map((line) => `<span style="font-family:${SANS};font-size:15px;line-height:1.5;color:${INK}">${esc(line)}</span>`).join("<br>")) : "")
         + (retry ? button(retry, again) : "") + cardTail);
+      return { subject, text, html };
+    }
+    case "event_message": {
+      // booking_202: henkilökunnan viesti tapahtuman osallistujille. Ei tilauslohkoa, ei summia, ei maksuvälittäjän nimeä. Allekirjoitus Tapio.
+      const em = d?.event_message || {};
+      const rawSubject = String(em.subject || "").replace(/[<>]/g, "").replace(/\s+/g, " ").trim();
+      const subject = rawSubject || X("email.event_message.subject_fallback");
+      const body = String(em.body || "").replace(/montonio|visma|paybyway|mobilepay|vipps|paytrail/ig, "").trim();
+      const what = String((en && em.event_name_en) || em.event_name || "").trim();
+      const when = String(em.when_text || "").trim();
+      const eventLine = what ? X("email.event_message.event", { what }) : "";
+      const whenLine = when ? X("email.event_message.when", { when }) : "";
+      const cardSign = `${X("email.common.closing")}\n${X("email.event_message.sign_name")}\n${SELLER}`;
+      const cardTail = `${p(esc(contact), `color:${MUTED};font-size:13px`)}${p(esc(cardSign).replace(/\n/g, "<br>"))}`;
+      const text = textBlock(hello, body, eventLine, whenLine, contact, cardSign) + "\n";
+      const html = mk(subject, (body || subject).slice(0, 140), h1(subject) + helloRow + (body ? p(esc(body).replace(/\n/g, "<br>")) : "")
+        + (eventLine || whenLine ? box([eventLine, whenLine].filter(Boolean).map((line) => `<span style="font-family:${SANS};font-size:15px;line-height:1.5;color:${INK}">${esc(line)}</span>`).join("<br>")) : "")
+        + cardTail);
       return { subject, text, html };
     }
     case "order_change":
