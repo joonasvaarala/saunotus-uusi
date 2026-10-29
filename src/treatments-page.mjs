@@ -55,8 +55,8 @@ export const TREATMENTS_TEXTS = Object.freeze({
   },
   'ui.site.treatments_step_tea_title': { fi: 'Rauhoittuminen ja yrttitee', en: 'Settling and herbal tea' },
   'ui.site.treatments_step_tea_text': {
-    fi: 'Saunotukseen kuuluu kellutus viileässä altaassa ja lämmittävä yrttitee. Syväsaunotukseen kuuluu myös pientä purtavaa.',
-    en: 'Saunotus includes floating in a cool tub and a warming herbal tea. Deep saunotus also includes a light snack.',
+    fi: 'Saunotukseen kuuluu lämmittävä yrttitee. Syväsaunotukseen kuuluu myös pientä purtavaa.',
+    en: 'Saunotus includes a warming herbal tea. Deep saunotus also includes a light snack.',
   },
   'ui.site.treatments_fit_title': { fi: 'Sopiiko tämä minulle?', en: 'Is this for me?' },
   'ui.site.treatments_fit_intensity': {
