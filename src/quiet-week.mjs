@@ -24,6 +24,7 @@ export const quietSiteText = (key, lang) => tx(key, lang, { fallback: varTokens(
 export function quietWeekAttrs(lang, { esc, products, reserve }) {
   const map = Object.fromEntries((products || []).filter((p) => (p.category === 'private_sauna' || /\/yksityisvuorot\//.test(p.booking_url || '')) && p.slug)
     .map((p) => [p.id, { n: (lang === 'en' && p.name_en) || p.name, s: p.slug }]));
-  const a = { badge: quietSiteText('ui.site.quiet_badge', lang), sr: quietSiteText('ui.site.quiet_sr', lang), note: quietSiteText('ui.site.quiet_note', lang), reserve, products: JSON.stringify(map) };
+  // note-tekstiä ei viedä sivulle: huomiolaatikkoa ei renderöidä (etusivu + saunavuorot). Avain jää sanakirjaan.
+  const a = { badge: quietSiteText('ui.site.quiet_badge', lang), sr: quietSiteText('ui.site.quiet_sr', lang), reserve, products: JSON.stringify(map) };
   return ` data-quiet-week${Object.entries(a).map(([k, v]) => ` data-quiet-${k}="${esc(v)}"`).join('')}`;
 }

@@ -362,7 +362,6 @@ html.co-js.co-show-sauna #yritysvuorot,html.co-js.co-show-day #tarjous{display:b
 .sess.quiet .qb{font:700 12px/1 var(--label);letter-spacing:.04em;color:#F4EFE7;background:#2B3A30;border-radius:999px;padding:5px 9px}
 .sess.quiet del{color:#7A5530}
 .sess.quiet strong{color:#2B3A30;font-weight:700}
-.quiet-week-note{margin:12px 0 0;padding:10px 14px;border-left:4px solid #7A5530;background:#F4EFE7;color:#2B3A30;border-radius:8px;font-size:15px}
 @media (min-width:1000px){.sess.quiet{grid-template-areas:"t" "n" "q" "b"}.sess.quiet .qp{margin:0 0 12px}}
 @media (forced-colors:active){.sess.quiet .qb{border:1px solid CanvasText}}
 /* Etusivu (lyhyt): elämysrivi, tiivis viikko mobiilissa, nauhat, valikon varausnappi. */

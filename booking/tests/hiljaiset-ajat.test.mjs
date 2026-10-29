@@ -276,12 +276,19 @@ test('viikko-ohjelma: <ol data-quiet-week> tekstit + yksityisvuorotuotteet (25, 
     assert.deepEqual(Object.keys(prods).sort(), ['25', '26']);
     assert.equal(prods[26].s, 'jalkiloylyt');
     assert.match(html, lang === 'fi' ? /data-quiet-badge="−\{pct\} %"/ : /data-quiet-badge="−\{pct\}%"/);
+    assert.doesNotMatch(html, /data-quiet-note=/, `${lang}: huomiolaatikon tekstiä ei sivulle`);
+    assert.doesNotMatch(html, /Hiljaisen ajan ale: vielä vapaat|private sessions still available/);
   }
   const build = rd('booking/shop/build.mjs');
   assert.match(build, /out\.includes\('data-quiet-week'\) && !out\.includes\('\/booking\/quiet-week\.js'\)/);
   assert.match(build, /window\.BOOKING_QUIET=/);
   assert.match(rd('booking/shop/src/quiet-week.js'), /rpc\('public_quiet_offers', \{ p_from: from, p_to: to, p_audience: 'consumer' \}\)/);
   assert.match(rd('booking/shop/src/quiet-week.js'), /rpc\('public_availability', \{ p_product_id: JALKIL_ID, p_from: from, p_to: to \}\)/);
+});
+test('viikko-ohjelma ei renderöi hiljaisen ajan huomiolaatikkoa', () => {
+  assert.doesNotMatch(rd('booking/shop/src/quiet-week.js'), /quiet-week-note/);
+  assert.doesNotMatch(rd('src/styles.css'), /\.quiet-week-note/);
+  assert.doesNotMatch(rd('src/quiet-week.mjs'), /note: quietSiteText\('ui\.site\.quiet_note'/);
 });
 test('jälkilöylyt: vain vapaa tuleva vuoro tänään+6; varattu, mennyt ja vieras tuote pois; ale osuu samaan vuoroon', () => {
   const today = '2026-10-28', now = Date.parse('2026-10-28T00:30:00Z');

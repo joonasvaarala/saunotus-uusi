@@ -30,7 +30,7 @@ export function decorateWeek(list, offers, { lang = 'fi', shopHref = '', today, 
     if (!ul) { ul = el('ul', 'sl'); day.querySelector(':scope > h3')?.after(ul); }
     return { day, ul };
   };
-  let added = 0, discounted = 0;
+  let added = 0;
   const useSlots = Array.isArray(slots);
   const byDay = quietByWeekday((offers || []).filter((o) => validOffer(o) && products[o.product_id] && !(useSlots && +o.product_id === JALKIL_ID)), today);
   for (const [wd, rows] of byDay) {
@@ -51,7 +51,7 @@ export function decorateWeek(list, offers, { lang = 'fi', shopHref = '', today, 
       a.append(el('span', 'bk-l', d.quietReserve || ''), el('span', 'sr', ` – ${p.n}, ${fillText(d.quietSr, vars)}`));
       li.append(el('span', 't', `${time(o.starts_at)}–${time(o.ends_at)}`), el('span', 'n', p.n), price, a);
       place(host.ul, li, time(o.starts_at));
-      added++; discounted++;
+      added++;
     }
     host.day.classList.remove('off');
   }
@@ -81,11 +81,11 @@ export function decorateWeek(list, offers, { lang = 'fi', shopHref = '', today, 
       a.append(el('span', 'bk-l', d.quietReserve || ''), el('span', 'sr', ` – ${p.n}, ${sr}`));
       li.append(el('span', 't', `${time(slot.starts_at)}–${time(slot.ends_at)}`), el('span', 'n', p.n), price, a);
       place(host.ul, li, time(slot.starts_at));
-      added++; if (offer) discounted++;
+      added++;
       host.day.classList.remove('off');
     }
   }
-  if (discounted && d.quietNote && !list.nextElementSibling?.classList.contains('quiet-week-note')) list.after(el('p', 'quiet-week-note', d.quietNote));
+  // Huomiolaatikkoa ei lisätä. Alennetut vuororivit ja hinnat jäävät.
   return added;
 }
 
