@@ -317,6 +317,10 @@ jobs:
       # booking_158 (käyttöliittymä): hallinnan Tapahtumat-näkymä (kerrat yksitellen/monivalinta, osallistujamäärät, resurssivaraukset suhteellinen/kellonaika,
       # saunottajat, kanavat, kopio 'Kopio: nimi'), kaupan suljettu tapahtumasivu, etusivun tapahtumakortit (events_shop → /varaa/#/tuote/<slug>), XSS. Tekstit pending-import-57.
       - run: node --test booking/tests/tapahtumat-158-ui.test.mjs booking/tests/tapahtumakortit.test.mjs
+      # booking_202: tapahtumahallinta (yleiskatsaus, osallistujat, CSV, viesti Tapio, kerran peruutus ja ajan siirto).
+      # Tekstit content/site-texts.imported-pr250.json. SQL: booking/supabase/tests/t202_event_admin.sql
+      # ajetaan paikallisessa PG17:ssä (migraatiot + fixtures/10_test_helpers.sql). Työnkulussa ei ole Postgresia.
+      - run: node --test booking/tests/tapahtumat-202.test.mjs booking/tests/tapahtumat-202-ui.test.mjs
       # Kauppa: tuotekortin ajankohta omalla rivillään hinnan yläpuolella (card-meta.js); päivänäkymä yksityisvuorot → yleiset → tapahtumat → hoidot (FI/EN)
       # Tapahtumat-chippi (category event) erillään Muut-ryhmästä. Tekstit pending-import-91.
       - run: node --test booking/tests/kortit-jarjestys.test.mjs booking/tests/kategoria-tapahtumat.test.mjs

@@ -1,6 +1,7 @@
-// booking_158: hallinnan Tapahtumat-näkymän puhdas logiikka (ei DOMia, ei verkkoa → testattavissa Nodessa: booking/tests/tapahtumat.test.mjs).
-// Sarjan luonti (päivät × alkuajat), resurssivarausten aikalaskenta (suhteellinen / kellonaika) ja validointi, kopiointikutsujen argumentit,
-// myyntikanavat ja valittavat resurssit. Aikavyöhyke aina Europe/Helsinki (sama kuin booking._tz()).
+// booking_158 + booking_202: hallinnan Tapahtumat-näkymän puhdas logiikka (ei DOMia, ei verkkoa → testattavissa Nodessa).
+// Sarjan luonti (päivät × alkuajat, viikkotoisto), resurssivarausten aikalaskenta, kerran tila, osallistuja-CSV ja viestin esikatselu.
+// Aikavyöhyke aina Europe/Helsinki (sama kuin booking._tz()). Asiakasviestiin ei päädy maksuvälittäjän nimeä.
+import { csvText } from './csv.js';
 export const TZ = 'Europe/Helsinki';
 export const CHANNELS = ['shop', 'widget'];               // booking._channels_effective: shop = verkkokauppa, widget = koulutussivun widget
 export const MAX_SERIES = 60;                             // yhdellä tallennuksella enintään näin monta kertaa
@@ -45,13 +46,44 @@ export function defaultLabel(date, time, lang = 'fi') {
 }
 
 const intOr = (v, d = null) => (v === '' || v == null ? d : Number.isInteger(+v) ? +v : NaN);
+/** ISO-viikonpäivä 1=ma … 7=su päivämäärälle YYYY-MM-DD (keskipäivä UTC, ei kesäaikasiirtymää). */
+export function weekdayIso(date) {
+  const d = new Date(`${date}T12:00:00Z`);
+  const js = d.getUTCDay();
+  return js === 0 ? 7 : js;
+}
 /**
- * Sarja: jokainen päivä × jokainen alkuaika = yksi kerta (admin_event_rule_upsert p_patch). Yksi päivä ja yksi aika = yksittäinen kerta.
- * input: { dates, times, duration_minutes, max_persons, min_persons, deadline_minutes, label, label_en } (dates/times: merkkijono tai taulukko)
- * → { ok: true, patches: [...] } tai { ok: false, error: koodi, invalid? }
+ * Viikkotoisto: jokainen valittu viikonpäivä väliltä from…until (molemmat mukana).
+ * → { ok, dates } tai { ok: false, error }.
+ */
+export function repeatDates({ from, until, weekdays } = {}) {
+  const a = parseDate(from), b = parseDate(until);
+  if (!a || !b) return { ok: false, error: 'bad_date', invalid: [from, until].filter((x) => String(x ?? '').trim() && !parseDate(x)) };
+  if (b < a) return { ok: false, error: 'bad_range' };
+  const days = [...new Set((weekdays || []).map((d) => +d).filter((d) => d >= 1 && d <= 7))];
+  if (!days.length) return { ok: false, error: 'no_weekdays' };
+  const out = [];
+  for (let d = a; d <= b; d = addDays(d, 1)) {
+    if (days.includes(weekdayIso(d))) out.push(d);
+    if (out.length > 400) return { ok: false, error: 'too_many', count: out.length };
+  }
+  return { ok: true, dates: out };
+}
+
+/**
+ * Sarja: jokainen päivä × jokainen alkuaika = yksi kerta. repeat {from, until, weekdays} lisää viikonpäivät,
+ * ja ne yhdistetään dates-listaan. → { ok: true, patches } tai { ok: false, error }.
  */
 export function buildSeries(input = {}) {
-  const ds = parseList(input.dates, parseDate), ts = parseList(input.times, parseTime);
+  let dateSource = input.dates;
+  if (input.repeat) {
+    const rep = repeatDates(input.repeat);
+    if (!rep.ok) return rep;
+    const extra = parseList(input.dates, parseDate);
+    if (extra.invalid.length) return { ok: false, error: 'bad_date', invalid: extra.invalid };
+    dateSource = [...new Set([...extra.values, ...rep.dates])].sort();
+  }
+  const ds = parseList(dateSource, parseDate), ts = parseList(input.times, parseTime);
   if (ds.invalid.length) return { ok: false, error: 'bad_date', invalid: ds.invalid };
   if (ts.invalid.length) return { ok: false, error: 'bad_time', invalid: ts.invalid };
   if (!ds.values.length) return { ok: false, error: 'no_dates' };
@@ -91,6 +123,18 @@ export function helsinkiIso(local) {
 export function localParts(iso) {
   const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: TZ, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).formatToParts(new Date(iso)).map((x) => [x.type, x.value]));
   return { date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${p.minute}` };
+}
+
+/**
+ * booking_202: siirto menneisyyteen estetään (palvelin tarkistaa saman). Vain jos päivä tai alkuaika muuttuu.
+ * before/after = { date: 'YYYY-MM-DD', start_time: 'HH:MM' } Helsingin aikaa. now = Date (testejä varten).
+ */
+export function isPastMove(before, after, now = new Date()) {
+  const t = (x) => String(x?.start_time || '').slice(0, 5);
+  if (!after?.date || !t(after)) return false;
+  if (before && before.date === after.date && t(before) === t(after)) return false;
+  const n = localParts(now.toISOString());
+  return `${after.date} ${t(after)}` <= `${n.date} ${n.time}`;
 }
 
 /**
@@ -176,6 +220,70 @@ export function copyArgs({ product_id, event = false, include_rules = false, shi
 export function occSummary(r, now = Date.now()) {
   const sold = +r.sold_persons || 0, max = r.max_persons == null ? null : +r.max_persons;
   return { sold, max, remaining: max == null ? null : Math.max(0, max - sold), full: max != null && sold >= max, waitlist: +r.waitlist_count || 0, past: Date.parse(r.ends_at) < now, active: r.active !== false };
+}
+/**
+ * Kaupallinen tila. saleEnabled=false (events.sale_enabled) → sales_closed, paitsi peruttu tai mennyt.
+ * full jää lipuksi, jotta täysi kerta näkyy myös myynnin ollessa kiinni.
+ * status: on_sale | full | cancelled | sales_closed | past
+ */
+export function occurrenceFlags(rule, { saleEnabled = true, now = Date.now() } = {}) {
+  const s = occSummary(rule || {}, now);
+  const cancelled = !!rule?.cancelled_at;
+  const start = rule?.starts_at ? Date.parse(rule.starts_at) : NaN;
+  const deadline = rule?.deadline_minutes == null || rule?.deadline_minutes === '' ? 0 : +rule.deadline_minutes;
+  const deadlineClosed = !s.past && !cancelled && Number.isFinite(start) && deadline > 0 && now >= start - deadline * 60000;
+  const inactive = rule?.active === false && !cancelled;
+  let status = 'on_sale';
+  if (cancelled) status = 'cancelled';
+  else if (s.past) status = 'past';
+  else if (inactive || deadlineClosed || saleEnabled === false) status = 'sales_closed';
+  else if (s.full) status = 'full';
+  return { ...s, status, cancelled, deadlineClosed, shopClosed: saleEnabled === false };
+}
+/** Varaukset, jotka estävät poiston (kaikki rivit, ei vain aktiiviset). Puuttuva luku → myyty määrä. */
+export function bookingCount(rule) {
+  if (rule?.reservation_count != null && rule.reservation_count !== '') return +rule.reservation_count || 0;
+  return +rule?.sold_persons || 0;
+}
+
+const PROVIDER_RE = /montonio|visma|paybyway|mobilepay|vipps|paytrail|\bstripe\b|\bpaypal\b|\bnets\b/i;
+/** Henkilökunnan viesti. Maksuvälittäjän nimeä ei hyväksytä. Allekirjoitusta ei tallenneta tähän — sen lisää lähetys. */
+export function messageDraft({ subject, body } = {}) {
+  const sub = String(subject ?? '').replace(/\s+/g, ' ').trim();
+  const text = String(body ?? '').replace(/\u0000/g, '').trim();
+  if (!sub) return { ok: false, error: 'no_subject' };
+  if (sub.length > 200) return { ok: false, error: 'subject_long' };
+  if (!text) return { ok: false, error: 'no_body' };
+  if (text.length > 4000) return { ok: false, error: 'body_long' };
+  if (PROVIDER_RE.test(sub) || PROVIDER_RE.test(text)) return { ok: false, error: 'provider_name' };
+  return { ok: true, subject: sub, body: text };
+}
+/** Sama kuin send-emails/templates.ts: oma tervehdys tekstin alussa → pohjan tervehdys pois (ei kaksoistervehdystä). */
+export const OWN_GREETING_RE = /^\s*(hei|heippa|moi|moikka|terve|tervehdys|hyvää (huomenta|päivää|iltaa)|hello|hi|dear|good (morning|afternoon|evening))(?=[\s,!.:]|$)[^\n]{0,60}(\n|$)/i;
+/** Esikatselu samaan järjestykseen kuin sähköpostipohja: tervehdys, teksti, tapahtuma, aika, Tapio. */
+export function customerMessageText({ subject, body, eventName, whenText, lang = 'fi' } = {}) {
+  const d = messageDraft({ subject, body });
+  if (!d.ok) return d;
+  const en = lang === 'en';
+  const hello = en ? 'Hello,' : 'Hei,';
+  const close = en ? 'Kind regards,' : 'Ystävällisin terveisin,';
+  const what = String(eventName ?? '').trim();
+  const when = String(whenText ?? '').trim();
+  const about = [what && (en ? `Event: ${what}` : `Tapahtuma: ${what}`), when && (en ? `Time: ${when}` : `Aika: ${when}`)].filter(Boolean).join('\n');
+  const own = OWN_GREETING_RE.test(d.body);
+  const text = `${own ? '' : `${hello}\n\n`}${d.body}${about ? `\n\n${about}` : ''}\n\n${close}\nTapio\nSipoonjoen Perinnesauna\n`;
+  return { ok: true, subject: d.subject, body: d.body, text, signature: 'Tapio' };
+}
+
+export const PARTICIPANT_CSV_FIELDS = ['occurrence', 'name', 'email', 'phone', 'persons', 'order_status', 'payment_status', 'booked_at', 'extra', 'note'];
+/** Excel-ystävällinen CSV: UTF-8 BOM, puolipiste, CRLF, kaavainjektio estetty. */
+export function participantsToCsv(rows, headers) {
+  const cols = PARTICIPANT_CSV_FIELDS;
+  const head = (headers || cols).map((h) => csvText(h));
+  if (head.length !== cols.length) return '';
+  const lines = [head.join(';')];
+  for (const r of rows || []) lines.push(cols.map((c) => csvText(r?.[c] ?? '')).join(';'));
+  return `\uFEFF${lines.join('\r\n')}\r\n`;
 }
 /** Konfliktilista virheestä (admin_event_blocks_set: details.hint = JSON-taulukko). Tuntematon muoto → []. */
 export function conflictsOf(e) {

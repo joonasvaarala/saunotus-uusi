@@ -422,7 +422,7 @@ test('booking_176: tavallinen maksulinkki ennallaan (ei voucher_difference-lohko
 });
 
 // Gmail iOS zoomaa leveimmän kohdan mukaan. Kortti on width="100%" + max-width:600px, ei width="600".
-const LAYOUT_KINDS = ['order_confirmation', 'payment_link', 'receipt', 'refund_receipt', 'cancel_request_ack', 'order_change', 'gift_card_buyer', 'gift_card_recipient', 'voucher_claim_received', 'voucher_claim_problem', 'business_quote_ack', 'business_quote_notify', 'invoice_pdf', 'product_message', 'waitlist_spot_freed', 'waitlist_joined', 'annual_card_code', 'unpaid_booking_cancelled'];
+const LAYOUT_KINDS = ['order_confirmation', 'payment_link', 'receipt', 'refund_receipt', 'cancel_request_ack', 'order_change', 'gift_card_buyer', 'gift_card_recipient', 'voucher_claim_received', 'voucher_claim_problem', 'business_quote_ack', 'business_quote_notify', 'invoice_pdf', 'product_message', 'waitlist_spot_freed', 'waitlist_joined', 'annual_card_code', 'unpaid_booking_cancelled', 'event_message'];
 test('asiakasviestit: viewport ja juokseva kortti (ei width="600")', { skip }, () => {
   for (const kind of LAYOUT_KINDS) for (const locale of ['fi', 'en']) {
     const row = kind === 'refund_receipt' ? refundData(locale) : base(locale);
@@ -462,4 +462,36 @@ test('unpaid_booking_cancelled: maksu ei valmistunut, Yritä uudelleen saman tuo
   for (const m of [fi, en]) assert.doesNotMatch(m.subject + m.text + m.html, /montonio|visma|mobilepay|vipps/i);
   const bad = R('unpaid_booking_cancelled', row('fi', 'javascript:alert(1)', 'Saunahoito'), 'fi');
   assert.ok(!bad.html.includes('javascript:'));
+});
+
+test('event_message: henkilökunnan viesti, Tapio, ei tilaussummaa eikä välittäjän nimeä', { skip }, () => {
+  const row = (locale, subject) => ({ ...base(locale), kind: 'event_message', event_message: { subject, body: 'Ota pyyhe mukaan.\nNähdään illalla.', event_name: 'Joulusauna', event_name_en: 'Christmas sauna', when_text: '14.11.2026 17:00' } });
+  const fi = R('event_message', row('fi', 'Muistutus illasta'), 'fi');
+  const en = R('event_message', row('en', 'Reminder'), 'en');
+  assert.equal(fi.subject, 'Muistutus illasta');
+  assert.match(fi.text, /Ota pyyhe mukaan/);
+  assert.match(fi.text, /Tapahtuma: Joulusauna/);
+  assert.match(fi.text, /Aika: 14\.11\.2026 17:00/);
+  assert.match(fi.text, /Ystävällisin terveisin,\nTapio\nSipoonjoen Perinnesauna\n$/);
+  assert.match(en.text, /Event: Christmas sauna/);
+  assert.match(en.text, /Kind regards,\nTapio\nSipoonjoen Perinnesauna\n$/);
+  for (const m of [fi, en]) {
+    assert.doesNotMatch(m.subject + m.text + m.html, /montonio|visma|mobilepay|vipps|paybyway/i);
+    assert.doesNotMatch(m.text, /36[,.]00|Yhteensä|Total/);
+  }
+  const stripped = R('event_message', { ...base('fi'), kind: 'event_message', event_message: { subject: 'Hei', body: 'Maksu Montonio kautta', event_name: 'Ilta', when_text: '1.1.2027 17:00' } }, 'fi');
+  assert.doesNotMatch(stripped.text + stripped.html, /montonio/i);
+  // Ei kaksoistervehdystä: oma "Hei!" korvaa pohjan tervehdyksen; ilman omaa tervehdystä pohja tervehtii kerran.
+  const own = R('event_message', { ...base('fi'), kind: 'event_message', event_message: { subject: 'Muistutus', body: 'Hei!\n\nOta pyyhe mukaan.' } }, 'fi');
+  assert.equal((own.text.match(/^Hei\b/gm) || []).length, 1);
+  assert.match(own.text, /^Hei!\n\nOta pyyhe mukaan\./);
+  assert.doesNotMatch(own.html, /Hei Matti|Hei,/); // pohjan tervehdys pois myös HTML:stä
+  const ownEn = R('event_message', { ...base('en'), kind: 'event_message', event_message: { subject: 'Reminder', body: 'Hello everyone,\nBring a towel.' } }, 'en');
+  assert.equal((ownEn.text.match(/^(Hello|Hi)\b/gm) || []).length, 1);
+  assert.equal((fi.text.match(/^Hei\b/gm) || []).length, 1);
+  const hyvaa = R('event_message', { ...base('fi'), kind: 'event_message', event_message: { subject: 'X', body: 'Hyvää huomenta! Ilta alkaa klo 17.' } }, 'fi');
+  assert.equal((hyvaa.text.match(/^Hei\b/gm) || []).length, 0);
+  const fallback = R('event_message', { ...base('fi'), kind: 'event_message', event_message: {} }, 'fi');
+  assert.equal(fallback.subject, 'Viesti tapahtumasta');
+  assert.match(fallback.text, /Tapio/);
 });
