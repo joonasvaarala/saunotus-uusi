@@ -183,18 +183,18 @@ export function createTreatmentViews(c) {
       if (cur?.slot) location.hash = `#/hoito/${p.slug}/${cur.date}/${A.timeToken(cur.time)}?n=${cur.n}${optQ(opt)}`;
     });
     const desc = pdesc(p) || '';
-    // Joonas 28.10.2026: kalenterin vieressä hinta + lyhyt kuvaus (+ aikajana ja tuotekohtainen lahjakorttiohje).
-    // Uima-asuohje on pitkässä kuvauksessa, peruutusehto Lisätietoja-osion lopussa ja kassalla.
+    // Joonas 29.10.2026: hinta, lyhyt kuvaus, sitten pitkä kuvaus (Lue lisää). Aikajana ja lahjakorttiohje pysyvät näkyvissä.
+    // Uima-asuohje on pitkässä kuvauksessa, peruutusehto saman osion lopussa ja kassalla.
     mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })),
       h('div', { class: 'bk-prod-layout' },
         h('div', { class: 'bk-facts' },
           metaP(p),
           leadShort(h, p, S.lang, desc),
+          moreInfo(desc),
           timelineNode(p),
           voucherNode(p),
           h('a', { class: 'bk-jump', href: '#valitse-aika', text: t.pickTime })),
-        h('div', { class: 'bk-prod-cal', id: 'valitse-aika' }, optStep, picker.node, h('div', { class: 'bk-continue' }, sum, go)),
-        moreInfo(desc)));
+        h('div', { class: 'bk-prod-cal', id: 'valitse-aika' }, optStep, picker.node, h('div', { class: 'bk-continue' }, sum, go))));
     await picker.ready;
     if (!query.get('n')) focusTop();
   }

@@ -1,0 +1,42 @@
+[
+  {
+    "key": "ui.shop.read_more",
+    "lang": "fi",
+    "text": "Lue lisää",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tuotesivu: pitkä kuvaus aukeaa lyhyen kuvauksen alta. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.shop.read_more",
+    "lang": "en",
+    "text": "Read more",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tuotesivu: pitkä kuvaus aukeaa lyhyen kuvauksen alta. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.shop.show_less",
+    "lang": "fi",
+    "text": "Näytä vähemmän",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tuotesivu: avatun pitkän kuvauksen sulkemisteksti. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.shop.show_less",
+    "lang": "en",
+    "text": "Show less",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tuotesivu: avatun pitkän kuvauksen sulkemisteksti. FI+EN. Tuo admin_texts_importilla."
+  }
+]
