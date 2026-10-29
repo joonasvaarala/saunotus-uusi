@@ -2242,5 +2242,25 @@
    "{{var:when}}"
   ],
   "reason": "booking_202: tapahtuman osallistujaviesti, allekirjoitus Tapio, ei maksuvälittäjän nimeä. Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_past_move",
+  "lang": "fi",
+  "text": "Kertaa ei voi siirtää menneisyyteen. Valitse tuleva päivä ja aika.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_202: siirto menneisyyteen estetty (Joonas 29.10.). Uusi teksti, ei vielä tuotannossa."
+ },
+ {
+  "key": "ui.admin.events.err_past_move",
+  "lang": "en",
+  "text": "An occurrence cannot be moved into the past. Choose a future date and time.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_202: siirto menneisyyteen estetty (Joonas 29.10.). Uusi teksti, ei vielä tuotannossa."
  }
 ]

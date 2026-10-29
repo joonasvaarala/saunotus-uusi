@@ -609,8 +609,10 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const whenLine = when ? X("email.event_message.when", { when }) : "";
       const cardSign = `${X("email.common.closing")}\n${X("email.event_message.sign_name")}\n${SELLER}`;
       const cardTail = `${p(esc(contact), `color:${MUTED};font-size:13px`)}${p(esc(cardSign).replace(/\n/g, "<br>"))}`;
-      const text = textBlock(hello, body, eventLine, whenLine, contact, cardSign) + "\n";
-      const html = mk(subject, (body || subject).slice(0, 140), h1(subject) + helloRow + (body ? p(esc(body).replace(/\n/g, "<br>")) : "")
+      // Kaksoistervehdyksen esto: jos henkilökunnan teksti alkaa omalla tervehdyksellä (Hei!, Moi Matti, Hello…), pohjan tervehdys jätetään pois.
+      const ownGreeting = /^\s*(hei|heippa|moi|moikka|terve|tervehdys|hyvää (huomenta|päivää|iltaa)|hello|hi|dear|good (morning|afternoon|evening))(?=[\s,!.:]|$)[^\n]{0,60}(\n|$)/i.test(body);
+      const text = textBlock(ownGreeting ? "" : hello, body, eventLine, whenLine, contact, cardSign) + "\n";
+      const html = mk(subject, (body || subject).slice(0, 140), h1(subject) + (ownGreeting ? "" : helloRow) + (body ? p(esc(body).replace(/\n/g, "<br>")) : "")
         + (eventLine || whenLine ? box([eventLine, whenLine].filter(Boolean).map((line) => `<span style="font-family:${SANS};font-size:15px;line-height:1.5;color:${INK}">${esc(line)}</span>`).join("<br>")) : "")
         + cardTail);
       return { subject, text, html };

@@ -169,6 +169,11 @@ begin
   else v_start := r.start_time; end if;
   if v_date is null then perform booking._err('invalid_param', 'Päivä puuttuu'); end if;
   if v_start is null then perform booking._err('invalid_param', 'Alkuaika puuttuu'); end if;
+  -- booking_202 (Joonas 29.10.): olemassa olevaa kertaa ei voi siirtää menneisyyteen (uusi alkuhetki <= nyt).
+  if p_id is not null and (v_date, v_start) is distinct from (r.valid_from, r.start_time)
+     and ((v_date + v_start) at time zone booking._tz()) <= now() then
+    perform booking._err('past_move', 'Kertaa ei voi siirtää menneisyyteen');
+  end if;
 
   v_dur := case when p_patch ? 'duration_minutes' then booking._event_jint(p_patch -> 'duration_minutes', 'duration_minutes', 1, 20160)
                 else coalesce(r.duration_minutes, pc.duration_minutes, p.duration_minutes) end;

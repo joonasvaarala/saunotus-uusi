@@ -36,3 +36,24 @@ test('osallistujavastaus ei sisällä maksuvälittäjää eikä sisäisiä osoit
   assert.match(fn, /staff_note/);
   assert.doesNotMatch(fn, /payments|provider|billing|address|marketing_consent/);
 });
+
+test('siirto menneisyyteen estetään palvelimella ja käyttöliittymässä (Joonas 29.10.)', async () => {
+  assert.match(mig, /perform booking\._err\('past_move'/);
+  assert.match(mig, /at time zone booking\._tz\(\)\) <= now\(\)/);
+  const { isPastMove } = await import(join(root, 'booking/admin/events-logic.js'));
+  const now = new Date('2026-10-29T10:00:00Z'); // Helsinki 12:00
+  assert.equal(isPastMove({ date: '2026-11-13', start_time: '17:00' }, { date: '2026-10-28', start_time: '17:00' }, now), true);
+  assert.equal(isPastMove({ date: '2026-11-13', start_time: '17:00' }, { date: '2026-10-29', start_time: '11:59' }, now), true);
+  assert.equal(isPastMove({ date: '2026-11-13', start_time: '17:00' }, { date: '2026-10-29', start_time: '12:01' }, now), false);
+  assert.equal(isPastMove({ date: '2026-10-01', start_time: '17:00:00' }, { date: '2026-10-01', start_time: '17:00' }, now), false, 'ennallaan oleva mennyt kerta saa muuttaa muuta');
+  const view = readFileSync(join(root, 'booking/admin/views/events.js'), 'utf8');
+  assert.match(view, /isPastMove\(\{ date: r\.date/);
+  assert.match(view, /'past_move'/);
+});
+
+test('esikatselu ei tuplaa tervehdystä (sama sääntö kuin sähköpostipohjassa)', async () => {
+  const { customerMessageText } = await import(join(root, 'booking/admin/events-logic.js'));
+  assert.match(customerMessageText({ subject: 'a', body: 'Hei kaikki!\nTervetuloa' }).text, /^Hei kaikki!\nTervetuloa/);
+  assert.match(customerMessageText({ subject: 'a', body: 'Heinäkuussa nähdään' }).text, /^Hei,\n\nHeinäkuussa/);
+  assert.match(customerMessageText({ subject: 'a', body: 'Hello all,\nsee you', lang: 'en' }).text, /^Hello all,\nsee you/);
+});

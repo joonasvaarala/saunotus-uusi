@@ -71,6 +71,11 @@ begin
   res := booking.admin_event_rule_upsert(v_rule, null, '{"start_time":"18:00"}'::jsonb);
   perform pg_temp.ck((res ->> 'start_time') = '18:00' and (res ->> 'moved_bookings')::int >= 1, 'D3: aika siirtyy ja varaukset mukana');
   perform pg_temp.ck((select to_char(starts_at at time zone 'Europe/Helsinki', 'HH24:MI') from booking.reservations where id = v_res) = '18:00', 'D4: varauksen kello on 18:00');
+  -- Siirto menneisyyteen estetty (Joonas 29.10.); kerta ja varaus pysyvät ennallaan. Keston muutos ilman siirtoa sallittu.
+  perform pg_temp.ck(test.code(format($q$select booking.admin_event_rule_upsert(%s, null, jsonb_build_object('date', (now() at time zone 'Europe/Helsinki')::date - 1))$q$, v_rule)) = 'past_move', 'D5: siirto eiliseen estetty');
+  perform pg_temp.ck(test.code(format($q$select booking.admin_event_rule_upsert(%s, null, jsonb_build_object('date', (now() at time zone 'Europe/Helsinki')::date, 'start_time', '00:00'))$q$, v_rule)) = 'past_move', 'D6: siirto tämän päivän menneeseen aikaan estetty');
+  perform pg_temp.ck((select valid_from = d and start_time = '18:00' from booking.schedule_rules where id = v_rule)
+    and (select to_char(starts_at at time zone 'Europe/Helsinki', 'HH24:MI') from booking.reservations where id = v_res) = '18:00', 'D7: kerta ja varaus ennallaan');
   res := booking.admin_event_message_send(33, v_rule, 'Muistutus', 'Ota pyyhe mukaan.', false);
   perform pg_temp.ck((res ->> 'sent')::boolean = false and (res ->> 'recipient_count')::int = 1 and res ->> 'signature' = 'Tapio'
     and not (res::text ~* 'montonio|visma|paybyway'), 'E1: esikatselu ei lähetä');

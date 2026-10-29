@@ -9,10 +9,10 @@ import { downloadCsv } from '../csv.js';
 import { loadEventsTexts, evText as T } from '../events-texts.js';
 import { getLang } from '../talous-i18n.js';
 import { buildSeries, defaultLabel, validateBlock, blockToRow, blocksPayload, timeline, selectableResources, channelsOf, normChannels, CHANNELS,
-  copyArgs, copyName, conflictsOf, localParts, MAX_BLOCKS, occurrenceFlags, bookingCount, messageDraft, customerMessageText, participantsToCsv, weekdayIso } from '../events-logic.js';
+  copyArgs, copyName, conflictsOf, localParts, MAX_BLOCKS, occurrenceFlags, bookingCount, isPastMove, messageDraft, customerMessageText, participantsToCsv, weekdayIso } from '../events-logic.js';
 import { eventQueueParts } from '../event-waitlist.js';
 
-const ERR_CODES = new Set(['conflict', 'has_reservations', 'has_waitlist', 'max_below_sold', 'multi_day_training_only', 'invalid_resource', 'not_event', 'event_managed',
+const ERR_CODES = new Set(['conflict', 'has_reservations', 'has_waitlist', 'max_below_sold', 'past_move', 'multi_day_training_only', 'invalid_resource', 'not_event', 'event_managed',
   'no_subject', 'subject_long', 'no_body', 'body_long', 'provider_name', 'no_recipients', 'no_confirm', 'bad_range', 'no_weekdays']);
 const evErr = (e) => (e?.code && ERR_CODES.has(e.code) ? T(`err_${e.code}`) : errMsg(e));
 const span = (iso1, iso2) => {
@@ -230,7 +230,7 @@ export async function render({ ctx, refs, reload, query }) {
     const booked = bookingCount(r);
     const f = h('form', { class: 'stack ev-inline', 'data-testid': 'event-occ-form', novalidate: true },
       booked ? h('p', { class: 'ev-warn', text: T('warn_bookings', { n: booked }) }) : null,
-      h('div', { class: 'row wrap' }, field(T('add_dates'), h('input', { name: 'date', type: 'date', value: r.date, required: true })), field(T('add_times'), h('input', { name: 'start_time', type: 'time', value: String(r.start_time || '').slice(0, 5), required: true })), field(T('duration'), num('duration_minutes', r.duration_minutes, { min: 15, max: 20160 }))),
+      h('div', { class: 'row wrap' }, field(T('add_dates'), h('input', { name: 'date', type: 'date', value: r.date, required: true, min: r.date >= localParts(new Date().toISOString()).date ? localParts(new Date().toISOString()).date : null })), field(T('add_times'), h('input', { name: 'start_time', type: 'time', value: String(r.start_time || '').slice(0, 5), required: true })), field(T('duration'), num('duration_minutes', r.duration_minutes, { min: 15, max: 20160 }))),
       h('div', { class: 'row wrap' }, field(T('max_persons'), num('max_persons', r.max_persons, { min: 1, max: 500, 'data-testid': 'event-occ-max' })), field(T('min_persons'), num('min_persons', r.min_persons, { min: 1, max: 500 })), field(T('deadline'), num('deadline_minutes', r.deadline_minutes, { min: 0, max: 20160 }))),
       h('div', { class: 'row wrap' }, field(T('label_fi'), h('input', { name: 'label', value: r.label || '', maxlength: 200 })), field(T('label_en'), h('input', { name: 'label_en', value: r.label_en || '', maxlength: 200 }))),
       h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'active', checked: r.active !== false && !r.cancelled_at || null, disabled: booked ? true : null }), ' ', T('active')),
@@ -239,6 +239,7 @@ export async function render({ ctx, refs, reload, query }) {
       const fd = new FormData(f), n = (k) => (String(fd.get(k) ?? '').trim() === '' ? null : Number(fd.get(k)));
       const patch = { date: fd.get('date'), start_time: String(fd.get('start_time') || '').slice(0, 5), duration_minutes: n('duration_minutes'),
         max_persons: n('max_persons'), min_persons: n('min_persons'), deadline_minutes: n('deadline_minutes'), label: String(fd.get('label') || '').trim() || null, label_en: String(fd.get('label_en') || '').trim() || null, active: f.active.checked && !r.cancelled_at };
+      if (isPastMove({ date: r.date, start_time: r.start_time }, { date: patch.date, start_time: patch.start_time })) { toast(T('err_past_move'), 'err'); return; }
       const before = `${r.date}|${String(r.start_time).slice(0, 5)}|${r.duration_minutes}`;
       const out = await rpc('admin_event_rule_upsert', { p_id: r.id, p_product_id: null, p_patch: patch });
       const after = `${out?.date}|${String(out?.start_time || '').slice(0, 5)}|${out?.duration_minutes}`;

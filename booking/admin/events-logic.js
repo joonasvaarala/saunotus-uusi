@@ -126,6 +126,18 @@ export function localParts(iso) {
 }
 
 /**
+ * booking_202: siirto menneisyyteen estetään (palvelin tarkistaa saman). Vain jos päivä tai alkuaika muuttuu.
+ * before/after = { date: 'YYYY-MM-DD', start_time: 'HH:MM' } Helsingin aikaa. now = Date (testejä varten).
+ */
+export function isPastMove(before, after, now = new Date()) {
+  const t = (x) => String(x?.start_time || '').slice(0, 5);
+  if (!after?.date || !t(after)) return false;
+  if (before && before.date === after.date && t(before) === t(after)) return false;
+  const n = localParts(now.toISOString());
+  return `${after.date} ${t(after)}` <= `${n.date} ${n.time}`;
+}
+
+/**
  * Lohkon aikaväli (ms) kerran suhteen. occ = { starts_at, ends_at }.
  * block = { timing: 'relative', offset_min, minutes } tai { timing: 'clock', start: 'YYYY-MM-DDTHH:MM', end: 'YYYY-MM-DDTHH:MM' } (Helsingin aikaa)
  */
@@ -246,6 +258,8 @@ export function messageDraft({ subject, body } = {}) {
   if (PROVIDER_RE.test(sub) || PROVIDER_RE.test(text)) return { ok: false, error: 'provider_name' };
   return { ok: true, subject: sub, body: text };
 }
+/** Sama kuin send-emails/templates.ts: oma tervehdys tekstin alussa → pohjan tervehdys pois (ei kaksoistervehdystä). */
+export const OWN_GREETING_RE = /^\s*(hei|heippa|moi|moikka|terve|tervehdys|hyvää (huomenta|päivää|iltaa)|hello|hi|dear|good (morning|afternoon|evening))(?=[\s,!.:]|$)[^\n]{0,60}(\n|$)/i;
 /** Esikatselu samaan järjestykseen kuin sähköpostipohja: tervehdys, teksti, tapahtuma, aika, Tapio. */
 export function customerMessageText({ subject, body, eventName, whenText, lang = 'fi' } = {}) {
   const d = messageDraft({ subject, body });
@@ -256,7 +270,8 @@ export function customerMessageText({ subject, body, eventName, whenText, lang =
   const what = String(eventName ?? '').trim();
   const when = String(whenText ?? '').trim();
   const about = [what && (en ? `Event: ${what}` : `Tapahtuma: ${what}`), when && (en ? `Time: ${when}` : `Aika: ${when}`)].filter(Boolean).join('\n');
-  const text = `${hello}\n\n${d.body}${about ? `\n\n${about}` : ''}\n\n${close}\nTapio\nSipoonjoen Perinnesauna\n`;
+  const own = OWN_GREETING_RE.test(d.body);
+  const text = `${own ? '' : `${hello}\n\n`}${d.body}${about ? `\n\n${about}` : ''}\n\n${close}\nTapio\nSipoonjoen Perinnesauna\n`;
   return { ok: true, subject: d.subject, body: d.body, text, signature: 'Tapio' };
 }
 

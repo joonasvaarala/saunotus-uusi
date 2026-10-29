@@ -481,6 +481,16 @@ test('event_message: henkilökunnan viesti, Tapio, ei tilaussummaa eikä välitt
   }
   const stripped = R('event_message', { ...base('fi'), kind: 'event_message', event_message: { subject: 'Hei', body: 'Maksu Montonio kautta', event_name: 'Ilta', when_text: '1.1.2027 17:00' } }, 'fi');
   assert.doesNotMatch(stripped.text + stripped.html, /montonio/i);
+  // Ei kaksoistervehdystä: oma "Hei!" korvaa pohjan tervehdyksen; ilman omaa tervehdystä pohja tervehtii kerran.
+  const own = R('event_message', { ...base('fi'), kind: 'event_message', event_message: { subject: 'Muistutus', body: 'Hei!\n\nOta pyyhe mukaan.' } }, 'fi');
+  assert.equal((own.text.match(/^Hei\b/gm) || []).length, 1);
+  assert.match(own.text, /^Hei!\n\nOta pyyhe mukaan\./);
+  assert.doesNotMatch(own.html, /Hei Matti|Hei,/); // pohjan tervehdys pois myös HTML:stä
+  const ownEn = R('event_message', { ...base('en'), kind: 'event_message', event_message: { subject: 'Reminder', body: 'Hello everyone,\nBring a towel.' } }, 'en');
+  assert.equal((ownEn.text.match(/^(Hello|Hi)\b/gm) || []).length, 1);
+  assert.equal((fi.text.match(/^Hei\b/gm) || []).length, 1);
+  const hyvaa = R('event_message', { ...base('fi'), kind: 'event_message', event_message: { subject: 'X', body: 'Hyvää huomenta! Ilta alkaa klo 17.' } }, 'fi');
+  assert.equal((hyvaa.text.match(/^Hei\b/gm) || []).length, 0);
   const fallback = R('event_message', { ...base('fi'), kind: 'event_message', event_message: {} }, 'fi');
   assert.equal(fallback.subject, 'Viesti tapahtumasta');
   assert.match(fallback.text, /Tapio/);
