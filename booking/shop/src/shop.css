@@ -54,6 +54,19 @@ button.bk-cell:hover{filter:brightness(.97)}
 .bk-legend{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:14px;color:var(--muted);margin:12px 0 0}
 .dot{display:inline-block;width:12px;height:12px;border-radius:50%;border:1px solid var(--line);margin-right:4px;vertical-align:-1px}
 .dot.free{background:#7bb28a}.dot.full{background:#d4b9b9}.dot.unavail{background:#cfc8bf}
+/* Tapahtuma: päivänapit ja kellonajat (ei kuukausikalenteria). Täysi kerta himmennetään kuten vuorolistan full-rivi. */
+.bk-ev{width:100%;max-width:460px;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.bk-ev-dates,.bk-ev-times{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0}
+.bk-ev-times{margin-top:4px}
+.bk-ev-date,.bk-ev-time{appearance:none;box-sizing:border-box;min-height:48px;max-width:100%;padding:10px 14px;border-radius:10px;border:1px solid #7bb28a;background:#e8f3ea;color:#1d4d2b;font:600 16px/1.25 var(--body);cursor:pointer;text-decoration:none;display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 8px;text-align:center;touch-action:manipulation}
+.bk-ev-date.is-full,.bk-ev-time.is-full{background:#f3eeee;border-color:#d4b9b9;color:#7b4a4a;opacity:.85}
+.bk-ev-date[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff;opacity:1}
+.bk-ev-date:hover,.bk-ev-time:hover{filter:brightness(.97)}
+.bk-ev-date:focus-visible,.bk-ev-time:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.bk-ev-full{font:700 14px/1.2 var(--body)}
+.bk-ev-go{font-weight:700}
+.bk-ev-sub{font-weight:400;font-size:14px}
+@media (forced-colors:active){.bk-ev-date,.bk-ev-time{border:1px solid CanvasText}}
 /* vuorot */
 .bk-slotlist{list-style:none;margin:0;padding:0;display:grid;gap:10px;max-width:760px}
 /* Aika ja nimi vasemmalla, tila ja painike oikealla. Rivi rivittyy, kun merkki + painike
@@ -629,7 +642,7 @@ button.bk-cell.quiet.sel{box-shadow:inset 0 -4px 0 #F4EFE7}
 .hero.page .in>p{max-width:min(30em,100%)}
 .hero.page.has-prod .in p,.hero.page .bk-hero-short{max-width:min(34em,100%)}
 #booking-app :is(img,video,iframe,embed,object,svg,table),.bk-rich :is(img,video,iframe,table){max-width:100%}
-#booking-app :is(.bk-prod,.bk-slots,.bk-cal,.bk-checkout>*,.bk-aside,.bk-form,.bk-prod-layout,.bk-facts,.bk-prod-cal){min-width:0}
+#booking-app :is(.bk-prod,.bk-slots,.bk-cal,.bk-ev,.bk-checkout>*,.bk-aside,.bk-form,.bk-prod-layout,.bk-facts,.bk-prod-cal){min-width:0}
 /* Tuotesivu: hinta ja lyhyt kuvaus ensin, pitkä kuvaus heti sen alla (Lue lisää, suljettu), sitten varaus. Leveällä kalenteri vieressä. */
 .bk-prod-layout{display:grid;gap:18px}
 .bk-lead{margin:10px 0 0;font-size:18px;line-height:1.55;color:var(--ink);max-width:34em}   /* tuotesivun ingressi = lyhyt kuvaus (leadShort) */

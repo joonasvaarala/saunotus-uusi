@@ -1,0 +1,42 @@
+[
+  {
+    "key": "ui.shop.event_pick_time",
+    "lang": "fi",
+    "text": "Valitse kellonaika",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tapahtumatuotteen varaussivu: päivänapit ja niiden alle kellonajat, ei kuukausikalenteria. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.shop.event_pick_time",
+    "lang": "en",
+    "text": "Choose a time",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tapahtumatuotteen varaussivu: päivänapit ja niiden alle kellonajat, ei kuukausikalenteria. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.shop.event_no_dates",
+    "lang": "fi",
+    "text": "Ei tulevia tapahtumakertoja.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tapahtumatuotteen varaussivu: päivänapit ja niiden alle kellonajat, ei kuukausikalenteria. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.shop.event_no_dates",
+    "lang": "en",
+    "text": "No upcoming event times.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tapahtumatuotteen varaussivu: päivänapit ja niiden alle kellonajat, ei kuukausikalenteria. FI+EN. Tuo admin_texts_importilla."
+  }
+]
