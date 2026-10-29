@@ -30,7 +30,7 @@ test('tiedosto: vain policy.7.body fi, protected/plain, ehdotus (ei tuontia), po
   assert.equal(md5(t), 'f1fd3bc09b7021c500d295f1ba60d317');
   const cur = J('content/kb/kb.json').policies.find((p) => p.id === 7);
   const next = J('content/site-texts.pending-propose-61.json')[0];
-  assert.ok([row.base_md5, md5(t), next.new_md5].includes(md5(cur.body)), 'kb.json:n policy 7 ei ole mikään tunnettu versio');
+  assert.ok([row.base_md5, md5(t), next.new_md5, '0b51adfd5cb3e7e6fb1f2f17797739a1'].includes(md5(cur.body)), 'kb.json:n policy 7 ei ole mikään tunnettu versio');
 });
 
 test('teksti on pelkkää tekstiä (_text_validate plain): ei <, ei linkkimerkintää, ei paikkamerkkejä, ei ohjausmerkkejä', () => {

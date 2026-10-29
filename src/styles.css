@@ -13,9 +13,11 @@ img{height:auto}
 a{color:var(--gold);text-underline-offset:3px}
 a:hover{color:var(--ink)}
 :focus-visible{outline:3px solid #1d6fd8;outline-offset:3px;border-radius:3px}
-/* Ohjelmallinen otsikkokohdistus (tabindex=-1) ei näytä kehystä. Näppäimistön kohdistus pysyy näkyvissä, brändin kulta. */
-.hero.page :is(h1,h2):focus{outline:none}
-.hero.page :is(h1,h2):focus-visible{outline:3px solid var(--gold);outline-offset:4px}
+/* Ohjelmallinen kohde (tabindex=-1 + .focus(), esim. hero-otsikko, reitin h2 ja #main-skip-kohde) ei piirrä kehystä.
+   Chrome laskee sen :focus-visibleksi ennen ensimmäistä osoitinta, joten pelkkä :focus { outline:none } ei riitä.
+   !important voittaa myöhemmät otsikkokohtaiset :focus-visible-säännöt. Näppäimistökehys säilyy linkeillä, painikkeilla ja kentillä. */
+:is(h1,h2,h3,h4,h5,h6,main,section,p,div,legend,li,span,dl)[tabindex="-1"]:focus,
+:is(h1,h2,h3,h4,h5,h6,main,section,p,div,legend,li,span,dl)[tabindex="-1"]:focus-visible{outline:none!important}
 h1,h2,h3,h4{font-family:var(--head);color:var(--ink);font-weight:500;line-height:1.15;margin:0 0 .5em}
 p{margin:0 0 1em}
 ul{margin:0 0 1em;padding-left:1.2em}
@@ -26,17 +28,22 @@ ul{margin:0 0 1em;padding-left:1.2em}
 .narrow{width:min(100% - 40px,820px);margin-inline:auto}
 /* header */
 .site-header{position:sticky;top:0;z-index:50;background:rgba(244,239,231,.97);border-bottom:1px solid var(--line);backdrop-filter:saturate(1.2) blur(6px)}
-.hdr{display:flex;align-items:center;gap:20px;min-height:68px}
-.brand{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--ink);margin-right:auto;min-width:0}
+/* Valikko käyttää sivun leveyttä (sisältö pysyy --w:ssä), jotta linkit mahtuvat yhdelle riville leveällä desktopilla ilman fontin pienennystä. */
+.site-header .wrap{width:min(100% - 40px,1360px)}
+.hdr{display:flex;align-items:center;gap:clamp(10px,1.15vw,22px);min-height:68px;container-type:inline-size;container-name:sitehdr}
+.brand{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--ink);margin-right:auto;min-width:0;flex-shrink:0}
 .brand img{width:28px;height:auto;flex:none}
 /* Logotyyppi: iso SAUNOTUS + alarivi (yläbrändi + yritys, kuten alapalkin vihreä logo). Alarivin näkyvä leveys ≈ SAUNOTUS-sanan leveys; koko pysyy 68 px:n palkissa (sticky-offsetit ennallaan) */
 .brand-txt{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
 .brand b{display:block;font:500 26px/1 var(--head);letter-spacing:.22em;color:var(--ink)}
 .brand small{display:block;font:500 9.5px/1.25 var(--label);letter-spacing:.13em;text-transform:uppercase;color:var(--gold);margin-top:7px;white-space:nowrap}
 .brand:hover b{color:var(--gold)}
-.nav-desk{display:flex;gap:26px;align-items:center}
+.nav-desk{display:flex;flex-wrap:nowrap;align-items:center;gap:clamp(12px,1.35vw,26px)}
 .nav-desk a,.nav-mob a{font:500 11px/1 var(--label);letter-spacing:.1em;text-transform:uppercase;color:var(--ink);text-decoration:none;padding:8px 0}
+/* Riviväli ja tasaus: yksisanainen linkki pysyy keskellä, kun naapuri on kahdella rivillä. Ei nowrapia eikä fontin kutistusta. */
+.nav-desk a{line-height:1.35;text-align:center;text-wrap:balance;white-space:normal;overflow-wrap:normal}
 .nav-desk a:hover,.nav-desk a[aria-current]{color:var(--gold)}
+.hdr>.lang,.hdr>.btn{flex:none}
 .btn{display:inline-block;font:600 12px/1 var(--label);letter-spacing:.1em;text-transform:uppercase;text-decoration:none;background:var(--green);color:#fff;padding:15px 26px;border-radius:8px;border:1px solid var(--green);box-shadow:0 6px 16px rgba(43,58,48,.25);transition:background .2s,color .2s}
 .btn:hover{background:#1c2720;color:#fff}
 .btn.sm{padding:12px 22px;border-radius:30px}
@@ -205,6 +212,9 @@ details.more p{margin:8px 0 0}
 /* events */
 .events{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px;list-style:none;margin:0;padding:0}
 .ev .dates{font:600 12px/1.5 var(--label);color:var(--gold);letter-spacing:.04em;margin:0 0 .6em}
+.card.ev.is-full .im img{filter:grayscale(.72) saturate(.28);opacity:.72}
+.card.ev .pill.full{background:#7b2d2d;letter-spacing:.08em}
+.card.ev.is-full .cta{color:var(--muted)}
 /* company */
 .company{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:36px}
 .company .im{border-radius:10px;overflow:hidden;box-shadow:0 14px 30px rgba(0,0,0,.2)}
@@ -285,8 +295,18 @@ address{font-style:normal;background:var(--card);border:1px solid var(--line);bo
 .fbottom ul{display:flex;gap:18px}
 .testbar{background:#fff3cd;color:#5b4300;text-align:center;font:600 12px/1.4 var(--label);padding:6px 12px}
 @media (max-width:1100px){.cards.five{grid-template-columns:repeat(3,1fr)}.tiles{grid-template-columns:repeat(2,1fr)}.fgrid{grid-template-columns:1fr 1fr}.cards.three{grid-template-columns:repeat(2,1fr)}}
-@media (min-width:901px) and (max-width:1100px){.hdr{gap:12px}.nav-desk{gap:16px}}
-@media (max-width:1060px){.nav-desk,.hdr>.btn{display:none}.nav-mob{display:block}}
+/* Kun yhdellä rivillä ei ole tilaa: jokainen monisanainen kohta katkeaa kahdeksi tasapainoiseksi riviksi (max-width ≈ pidempi rivi). Yksisanaiset jäävät yhdelle. Alle tämän desktop-valikko ei enää mahdu → mobiilivalikko. */
+@container sitehdr (max-width:1220px){
+  .hdr{gap:clamp(8px,1vw,14px)}
+  .nav-desk{gap:clamp(10px,1.1vw,16px)}
+  .nav-desk a[href*="hoidot-rituaalit"]{max-width:7.1em}
+  .nav-desk a[href*="treatments-rituals"]{max-width:8.3em}
+  .nav-desk a[href*="/sauna/"]{max-width:6.4em}
+  .nav-desk a[href*="companies"]{max-width:7.7em}
+  .nav-desk a[href*="knowledge"]{max-width:8.3em}
+  .nav-desk a[href*="gift-card"]{max-width:4.6em}
+}
+@media (max-width:1099px){.nav-desk,.hdr>.btn{display:none}.nav-mob{display:block}.brand{flex-shrink:1}}
 @media (max-width:900px){.about,.company{grid-template-columns:1fr}.info-sec{grid-template-columns:1fr;gap:12px}.quick{grid-template-columns:1fr;margin-top:-20px}.facts{grid-template-columns:repeat(2,1fr)}.ritual .in{padding:44px 26px}.ritual::after{background:rgba(8,6,4,.78)}.elements{grid-template-columns:repeat(2,1fr)}.elements li:nth-child(2){border-right:0}.elements li:nth-child(-n+2){border-bottom:1px solid var(--line)}}
 @media (max-width:640px){body{font-size:16px}.brand b{font-size:clamp(15px,4.5vw,19px);letter-spacing:.14em}.brand small{font-size:8px;letter-spacing:.1em;margin-top:4px;line-height:1.3;white-space:normal;width:0;min-width:100%}.brand{gap:8px}.lang a,.lang span{padding:10px}.nav-mob summary{padding:11px 10px}.tiles{grid-template-columns:1fr;margin-top:-60px}.cards.five,.cards.two,.cards.three{grid-template-columns:1fr}.hero .in{min-height:440px;padding:60px 0 110px}.section{padding:52px 0}.fgrid{grid-template-columns:1fr}.hdr{gap:10px}}
 @media (max-width:359px){.brand img{width:22px}.brand{gap:6px}.brand b{font-size:15px;letter-spacing:.1em}.hdr{gap:6px}.lang a,.lang span{min-width:38px;padding:0 6px}.nav-mob summary{padding:0 8px;letter-spacing:.05em}}
@@ -380,6 +400,55 @@ html.co-js.co-show-sauna #yritysvuorot,html.co-js.co-show-day #tarjous{display:b
   .tradition-photo img{object-position:50% 40%}
   .tradition-copy{padding:22px 18px 26px}
 }
+/* Hoidot ja rituaalit: tuotekortti sama kuin kaupassa (booking/shop/src/shop.css .bk-card). */
+.bk-cards{list-style:none;margin:0;padding:0;display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr))}
+.bk-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:0;display:flex;flex-direction:column;box-shadow:0 8px 22px rgba(63,53,44,.07)}
+.bk-card-link{display:flex;flex-direction:column;gap:6px;height:100%;padding:20px;color:inherit;text-decoration:none;border-radius:inherit}
+.bk-card-link:hover h3{color:var(--gold)}
+.bk-card-link:focus{outline:none}
+.bk-card-link:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.bk-card h3{margin:0;font-size:25px;font-weight:500}
+.bk-card .bk-desc{flex:1;font-size:16px;margin:0}
+.bk-card .btn{align-self:flex-start;margin-top:6px}
+.bk-meta{margin:0;color:var(--muted)}
+.bk-meta strong{color:var(--ink)}
+.bk-card-meta{margin-top:auto;display:flex;flex-direction:column;gap:2px;padding-top:4px}
+.bk-card-meta .bk-card-when{font-size:15px;line-height:1.45}
+.bk-card-meta .bk-card-price{line-height:1.4}
+.bk-img{position:relative;display:block;overflow:hidden;background:var(--tint)}
+.bk-img picture{display:block;width:100%;height:100%}
+.bk-img img{display:block;width:100%;height:100%;object-fit:cover}
+.bk-card .card-img{aspect-ratio:3/2;margin:-20px -20px 12px;border-radius:var(--r) var(--r) 0 0}
+.tr-smoke{margin:2px 0 0;font:600 11px/1.3 var(--label);letter-spacing:.06em;text-transform:uppercase;color:var(--green)}
+.tr-note{margin:22px auto 0;max-width:46em}
+.tr-note a{white-space:nowrap}
+.narrow.center .note-box{text-align:left}
+.tr-paths{list-style:none;margin:0;padding:0;display:grid;gap:18px}
+.tr-path{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px 22px 18px;display:flex;flex-direction:column;box-shadow:0 8px 22px rgba(63,53,44,.07)}
+.tr-path h3{font-size:26px;margin:0 0 .35em}
+.tr-path > p{margin:0 0 .6em}
+.tr-path-links{list-style:none;margin:auto 0 0;padding:0;display:grid;gap:2px}
+.tr-path-links a{display:inline-flex;align-items:center;min-height:44px;font:600 14px/1.35 var(--label);text-decoration:none}
+.tr-path-links a:hover{text-decoration:underline}
+.tr-steps{list-style:none;margin:0;padding:0;display:grid;gap:18px;counter-reset:tr}
+.tr-steps li{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:0 8px 22px rgba(63,53,44,.07)}
+.tr-step-img{aspect-ratio:3/2;overflow:hidden;background:var(--tint)}
+.tr-step-img img{width:100%;height:100%;object-fit:cover}
+.tr-steps h3{font-size:24px;margin:14px 16px .35em}
+.tr-steps p{font-size:15.5px;margin:0 16px 16px}
+.tr-fit{display:grid;gap:28px;align-items:center}
+.tr-fit ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:12px}
+.tr-fit li{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
+.tr-fit li p{margin:0}
+.tr-fit-photo{border-radius:18px;overflow:hidden;box-shadow:0 16px 36px rgba(60,45,30,.1)}
+.tr-fit-photo img{width:100%;height:100%;object-fit:cover;aspect-ratio:3/2}
+.faq .note-box p{margin:0}
+@media (min-width:720px){.tr-steps{grid-template-columns:1fr 1fr}}
+@media (min-width:900px){.tr-paths{grid-template-columns:repeat(3,minmax(0,1fr))}.tr-fit{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)}#saunotukset .bk-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1100px){.tr-steps{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:719px){.tr-path{padding:18px 16px 14px}.tr-steps h3{font-size:22px}}
+#mista-aloittaa,#saunotukset,#avoimet,#yksityiset,#nain-saunotus-etenee,#sopiiko-minulle,#ukk{scroll-margin-top:84px}
+
 /* Varausnappi arvostelujen ja Tapahtumat-otsikon välissä. Kulta erottuu Google-linkin ääriviivanapista. */
 .home-book{margin:0;padding:28px 20px 8px;text-align:center}
 .home-book .btn{min-height:48px}

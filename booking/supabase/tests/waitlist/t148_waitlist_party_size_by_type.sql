@@ -20,7 +20,7 @@ create function pg_temp.held(p_email text) returns boolean language sql as $$
 create function pg_temp.rid(p_email text) returns bigint language sql as $$
   select r.id from booking.reservations r join booking.orders o on o.id = r.order_id join booking.customers c on c.id = o.customer_id where c.email = p_email order by r.id limit 1 $$;
 create function pg_temp.join(p_rule bigint, p_date date, p_persons int, p_email text) returns jsonb language plpgsql as $$
-declare j jsonb; begin perform test.anon(); j := booking.public_join_waitlist(p_rule, p_date, p_persons, 'Jono ' || p_email, p_email); perform test.logout(); return j; end $$;
+declare j jsonb; begin perform test.anon(); j := booking.public_join_waitlist(p_rule, p_date, p_persons, 'Jono ' || p_email, p_email, null, 'fi', false, true); perform test.logout(); return j; end $$;
 create function pg_temp.claim(p_token text) returns jsonb language plpgsql as $$
 declare c jsonb; begin perform test.anon(); c := booking.public_waitlist_claim(p_token::uuid); perform test.logout(); return c; end $$;
 -- Julkinen tila anonina: tuotteen haku ja kuukauden kaikki tuotteet (booking_133) täsmäävät.

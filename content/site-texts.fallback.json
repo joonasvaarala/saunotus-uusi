@@ -3453,14 +3453,14 @@
   {
    "key": "page.book.lead",
    "lang": "en",
-   "text": "Choose an experience, a day and a session – your booking is confirmed instantly.",
+   "text": "Choose an experience, a day and a session. The booking is confirmed after payment.",
    "version": 1,
    "placeholders": []
   },
   {
    "key": "page.book.lead",
    "lang": "fi",
-   "text": "Valitse kokemus, päivä ja vuoro – varaus vahvistetaan heti.",
+   "text": "Valitse kokemus, päivä ja vuoro. Varaus vahvistuu maksun jälkeen.",
    "version": 1,
    "placeholders": []
   },
@@ -5599,14 +5599,14 @@
   {
    "key": "page.info.sections.1.blocks.5.note",
    "lang": "en",
-   "text": "**Swimsuit use depends on the session.** Swimsuits are worn in mixed public sessions. On the Monday men's session, the Tuesday women's session and the Wednesday silent mixed session, wearing a swimsuit is optional. In personal sauna treatments and saunotus sessions you can be fully or partially without a swimsuit, as you wish.",
+   "text": "**Swimsuit use depends on the session.** Swimwear is worn on the Thursday public session and on Saturday and Sunday. Swimwear is optional only on the Monday men's session, the Tuesday women's session and the Wednesday silent mixed session. In personal sauna treatments and saunotus sessions you can be fully or partially without a swimsuit, as you wish.",
    "version": 1,
    "placeholders": []
   },
   {
    "key": "page.info.sections.1.blocks.5.note",
    "lang": "fi",
-   "text": "**Uima-asun käyttö riippuu vuorosta.** Yleisillä sekavuoroilla saunotaan uima-asussa. Maanantain miestenvuorolla, tiistain naistenvuorolla sekä keskiviikon hiljaisella sekavuorolla uima-asun käyttö ei kuitenkaan ole pakollista. Henkilökohtaisissa saunahoidoissa ja saunotuksissa voit olla oman toiveesi mukaan kokonaan tai osittain ilman uima-asua.",
+   "text": "**Uima-asun käyttö riippuu vuorosta.** Torstain yleisellä vuorolla sekä lauantain ja sunnuntain vuoroilla saunotaan uima-asussa. Uima-asu on vapaaehtoinen vain maanantain miestenvuorolla, tiistain naistenvuorolla ja keskiviikon hiljaisella sekavuorolla. Henkilökohtaisissa saunahoidoissa ja saunotuksissa voit olla oman toiveesi mukaan kokonaan tai osittain ilman uima-asua.",
    "version": 1,
    "placeholders": []
   },
@@ -10633,14 +10633,14 @@
   {
    "key": "ui.card.treatments.morsiussauna.cta",
    "lang": "en",
-   "text": "Book a time →",
+   "text": "Ask for a time",
    "version": 1,
    "placeholders": []
   },
   {
    "key": "ui.card.treatments.morsiussauna.cta",
    "lang": "fi",
-   "text": "Varaa aika →",
+   "text": "Kysy ajankohtaa",
    "version": 1,
    "placeholders": []
   },
@@ -14437,14 +14437,14 @@
   {
    "key": "ui.gift.pkg_kicker",
    "lang": "en",
-   "text": "Package",
+   "text": "Gift card",
    "version": 1,
    "placeholders": []
   },
   {
    "key": "ui.gift.pkg_kicker",
    "lang": "fi",
-   "text": "Paketti",
+   "text": "Lahjakortti",
    "version": 1,
    "placeholders": []
   },
@@ -20345,14 +20345,14 @@
   {
    "key": "ui.shop.lead",
    "lang": "en",
-   "text": "Choose an experience, a day and a session. Your booking is confirmed instantly.",
+   "text": "Choose an experience, a day and a session. The booking is confirmed after payment.",
    "version": 1,
    "placeholders": []
   },
   {
    "key": "ui.shop.lead",
    "lang": "fi",
-   "text": "Valitse kokemus, päivä ja vuoro. Varaus vahvistetaan heti.",
+   "text": "Valitse kokemus, päivä ja vuoro. Varaus vahvistuu maksun jälkeen.",
    "version": 1,
    "placeholders": []
   },

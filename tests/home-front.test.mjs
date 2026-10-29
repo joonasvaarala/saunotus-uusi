@@ -123,9 +123,15 @@ test('etusivu: järjestys, ei varaa-verkosta-listaa, torstai 16:00, kaksi tapaht
   assert.equal(n, 2, `vapaita tapahtumia ${n}`);
   assert.match(ev, /Naisten jouluinen saunailta/);
   assert.match(ev, /Saunottajien yhteisöpäivä/);
-  assert.doesNotMatch(ev, /Sipoonjoen Kekri|Perinnesaunotusilta/);
+  // booking_210: täydet tapahtumat näkyvät himmennettyinä Täynnä-merkillä ja jonolinkillä.
+  const full = ev.match(/<li class="card ev is-full"[\s\S]*?<\/li>/g) || [];
+  assert.equal(full.length, 2, `täysiä tapahtumia ${full.length}`);
+  assert.ok(full.every((c) => /class="pill full">Täynnä</.test(c) && /Liity jonoon/.test(c)));
+  assert.match(full.join(''), /Sipoonjoen Kekri/);
+  assert.match(full.join(''), /Perinnesaunotusilta/);
   assert.match(ev, /data-live-events/);
   assert.match(ev, /Kaikki tapahtumat/);
+  assert.match(ev, /href="\/varaa\/#\/\?k=tapahtuma"/);
   assert.match(fi, /<summary>Voiko vuoroon saapua myöhässä\?<\/summary>/);
   assert.match(fi, /<summary>Voinko perua tai muuttaa varausta\?<\/summary>/);
   assert.match(fi, /<summary>Mitä pitää ottaa mukaan\?<\/summary>/);

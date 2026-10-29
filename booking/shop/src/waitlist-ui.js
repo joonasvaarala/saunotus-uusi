@@ -46,23 +46,30 @@ export function createWaitlistView({ h, t, S, state, loadMonth, setHero, mount, 
       key === 'phone' ? h('small', { class: 'bk-hint', text: t.waitlistPhoneHint }) : null);
     const msg = h('div', { 'aria-live': 'polite' });
     const btn = h('button', { type: 'submit', class: 'btn gold', text: t.waitlistJoin });
-    const form = h('form', { class: 'bk-form', onsubmit: async (ev) => {
+    const isEvent = party.kind === 'event';
+    const privacy = isEvent ? h('div', { class: 'bk-check' },
+      h('input', { type: 'checkbox', id: 'bk-wl-privacy', name: 'privacy', required: true, 'data-testid': 'waitlist-privacy' }),
+      h('label', { for: 'bk-wl-privacy' }, t.waitlistPrivacy + ' ', h('a', { href: S.privacyHref || (S.lang === 'en' ? '/en/privacy/' : '/tietosuoja/'), target: '_blank', rel: 'noopener', text: t.waitlistPrivacyLink }))) : null;
+    const form = h('form', { class: 'bk-form', 'data-testid': 'waitlist-form', onsubmit: async (ev) => {
       ev.preventDefault(); msg.replaceChildren(); update();
+      if (isEvent && !form.privacy.checked) { msg.append(errorBox(t.waitlistPrivacyRequired)); form.privacy.focus(); return; }
       if (!form.reportValidity()) return;
       btn.disabled = true; btn.textContent = t.waitlistSubmitting;
       const f = new FormData(form);
       try {
-        const r = await rpc('public_join_waitlist', {
+        const args = {
           p_rule_id: s.rule_id, p_date: ds, p_persons: priv ? null : n,
           p_name: String(f.get('name') || '').trim(), p_email: String(f.get('email') || '').trim(),
           p_phone: String(f.get('phone') || '').trim() || null, p_locale: S.lang, p_whatsapp_opt_in: false,
-        });
+        };
+        if (isEvent) args.p_privacy_consent = true;
+        const r = await rpc('public_join_waitlist', args);
         if (!r?.ok) throw Object.assign(new Error(err(r?.code, party.kind)), { mapped: true });
-        const done = h('section', { class: 'bk-conf', tabindex: '-1', role: 'status' },
+        const done = h('section', { class: 'bk-conf', tabindex: '-1', role: 'status', 'data-testid': 'waitlist-done' },
           h('span', { class: 'bk-status', text: t.waitlistTitle }),
-          h('h2', { text: t.waitlistDone }),
+          h('h2', { text: isEvent ? t.waitlistEventDone : t.waitlistDone }),
           h('p', { text: `${pname(p)} · ${dayLong(s.starts_at)} · ${hm(s.starts_at)}–${hm(s.ends_at)}${priv || r.persons == null ? '' : ` · ${r.persons} ${t.person}`}` }),
-          h('p', { class: 'bk-note', text: t.waitlistDoneText }),
+          h('p', { class: 'bk-note', text: isEvent ? t.waitlistEventDoneText : t.waitlistDoneText }),
           h('div', { class: 'bk-actions' },
             h('button', { type: 'button', class: 'btn sm light', text: t.waitlistLeave, onclick: async (ev) => {
               const b = ev.currentTarget; b.disabled = true;
@@ -70,20 +77,20 @@ export function createWaitlistView({ h, t, S, state, loadMonth, setHero, mount, 
                 done.replaceChildren(h('p', { class: 'bk-ok', role: 'status', text: t.waitlistLeft }), h('a', { href: back, text: t.waitlistBack }));
               } catch { b.disabled = false; done.append(errorBox(t.errorGeneric)); }
             } }), h('a', { href: back, text: t.waitlistBack })));
-        mount(done); done.scrollIntoView({ block: 'start', behavior: 'smooth' }); done.focus({ preventScroll: true });
+        mount(done); done.scrollIntoView({ block: 'start', behavior: 'smooth' }); done.focus({ preventScroll: true, focusVisible: false });
       } catch (e) { msg.append(errorBox(e?.mapped ? e.message : t.errorGeneric)); btn.disabled = false; btn.textContent = t.waitlistJoin; }
     } },
-      h('p', { class: 'bk-note', text: t.waitlistIntro }),
+      h('p', { class: 'bk-note', text: isEvent ? t.waitlistEventIntro : t.waitlistIntro }),
       priv ? h('p', { class: 'bk-note', 'data-testid': 'wl-private-note', text: t.waitlistPrivateNote })
         : h('fieldset', { class: 'bk-section' }, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, dec, num, inc),
           h('small', { class: 'bk-hint', text: party.kind === 'event' ? t.waitlistPersonsHintEvent : t.waitlistPersonsHint })),
       input('name', t.name, { required: true, maxlength: 120, autocomplete: 'name' }),
       input('email', t.email, { required: true, type: 'email', maxlength: 200, autocomplete: 'email' }),
       input('phone', t.phone, { type: 'tel', maxlength: 30, autocomplete: 'tel' }),
-      msg, btn);
+      privacy, msg, btn);
     const aside = h('aside', { class: 'bk-aside', 'aria-label': t.summary }, h('h3', { text: t.summary }),
       h('p', { text: pname(p) }), h('p', { text: `${dayLong(s.starts_at)} · ${hm(s.starts_at)}–${hm(s.ends_at)}` }),
-      h('p', { class: 'bk-note', text: t.waitlistIntro }));
+      h('p', { class: 'bk-note', text: isEvent ? t.waitlistEventIntro : t.waitlistIntro }));
     mount(h('h2', { text: t.waitlistTitle }), h('p', {}, h('a', { href: back, text: t.back })),
       pick, h('div', { class: 'bk-checkout' }, form, aside));
     focusTop();

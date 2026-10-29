@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { shiftIsFull, weekEvents, freeShopEvents, dateForWeekday, cardDates, cardTime, parseClock, rangeLabel } from '../booking/shop/src/week-live.js';
+import { shiftIsFull, weekEvents, freeShopEvents, eventIsFull, dateForWeekday, cardDates, cardTime, parseClock, rangeLabel } from '../booking/shop/src/week-live.js';
 import { openingSummary } from '../src/opening.mjs';
 
 const kb = JSON.parse(readFileSync(new URL('../content/kb/kb.json', import.meta.url), 'utf8'));
@@ -41,17 +41,24 @@ test('viikon tapahtuma: vain vapaa kerta omalle viikonpäivälle, ei päivämä�
   assert.equal(near.length, 1);
   assert.equal(near[0].weekday, 6);
   assert.equal(near[0].time, '16.00–19.00');
+  assert.equal(weekEvents([{ ...christmas, occurrences: [{ ...christmas.occurrences[0], starts_at: '2026-10-31T14:00:00Z', ends_at: '2026-10-31T17:00:00Z', status: 'full' }] }], { today: TODAY, now: NOW }).length, 0, 'täysi tapahtuma ei tule viikkoriviin');
   assert.equal(rangeLabel('2026-10-31T14:30:00Z', '2026-10-31T16:30:00Z', 'en'), '16:30–18:30');
   assert.doesNotMatch(near[0].time, /\d{1,2}\.\d{1,2}\./);
   assert.equal(dateForWeekday(TODAY, 6), '2026-10-31');
 });
 
-test('tapahtumakortit: snapshotista vain vapaat kerrat (18.12. ja 20.2.), täydet pois', () => {
+test('tapahtumakortit: täydet tulevat mukana aikajärjestyksessä, menneet ja closed pois', () => {
   const free = freeShopEvents(kb.events_shop, NOW);
-  assert.deepEqual(free.map((e) => e.slug), ['naisten-joulusauna', 'saunottajien-yhteisopaiva-2']);
-  assert.equal(cardDates(free[0].occurrences[0], 'fi'), '18.12.');
-  assert.equal(cardTime(free[0].occurrences[0], 'fi'), 'klo 16.00–19.00');
-  assert.equal(cardTime(free[0].occurrences[0], 'en'), '16:00–19:00');
+  assert.deepEqual(free.map((e) => e.slug), ['sipoonjoen-kekri', 'perinnesaunotusilta', 'naisten-joulusauna', 'saunottajien-yhteisopaiva-2']);
+  assert.equal(eventIsFull(free[0]), true);
+  assert.equal(eventIsFull(free[1]), true);
+  assert.equal(eventIsFull(free[2]), false);
+  assert.equal(cardDates(free[2].occurrences[0], 'fi', NOW), '18.12.');
+  assert.equal(cardDates(free[3].occurrences[0], 'fi', NOW), '20.2.2027');
+  assert.equal(cardTime(free[2].occurrences[0], 'fi'), 'klo 16.00–19.00');
+  assert.equal(cardTime(free[2].occurrences[0], 'en'), '16:00–19:00');
   assert.equal(freeShopEvents(null, NOW).length, 0);
-  assert.equal(freeShopEvents([{ category: 'event', slug: 'x', name: 'X', occurrences: [{ status: 'full', starts_at: '2026-12-01T14:00:00Z', ends_at: '2026-12-01T17:00:00Z' }] }], NOW).length, 0);
+  const fullOnly = freeShopEvents([{ category: 'event', slug: 'x', name: 'X', product_id: 9, occurrences: [{ rule_id: 3, status: 'full', starts_at: '2026-12-01T14:00:00Z', ends_at: '2026-12-01T17:00:00Z' }] }], NOW);
+  assert.equal(fullOnly.length, 1);
+  assert.equal(eventIsFull(fullOnly[0]), true);
 });

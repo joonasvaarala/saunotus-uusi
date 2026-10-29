@@ -13,8 +13,11 @@ import { privacyAnalyticsHtml, policyHasAnalyticsSection } from './privacy-analy
 import { policyText, privacyDocFor, linkContacts } from './policy-lang.mjs';
 import { quietWeekAttrs } from './quiet-week.mjs';
 import { experienceHtml, traditionHtml, infoStrip, companyStrip, homeText, homeBookCta } from './home-front.mjs';
+import { treatmentsBody } from './treatments-page.mjs';
 import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
-import { selectShopEvents, shopEventsHtml, shopHash } from './event-cards.mjs';
+import { selectShopEvents, shopEventsHtml, shopHash, eventWaitlistPath } from './event-cards.mjs';
+import { EVENT_CARD_TEXTS } from './event-full-texts.mjs';
+import { productCardInner } from './product-card-image.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
   johku, bookingUrl, phoneDisplay, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
@@ -102,7 +105,10 @@ export function card(c, lang, opt = {}) {
   const url = opt.url || (c.johku ? jk(c.johku, lang) : lang === 'en' && c.johkuEn ? jk(c.johkuEn, lang) : p ? bookingUrl(p.booking_url, lang) : jk('home', lang));
   const items = p ? metaItems(c, p, lang) : [];
   const list = t.list ? `<ul class="list">${[].concat(t.list).map((x) => `<li>${e(x)}</li>`).join('')}</ul>` : '';
-  return `<li class="card"><div class="im">${pic(c.img, lang, { sizes: opt.sizes || '(min-width:1100px) 280px, (min-width:640px) 45vw, 100vw', alt: '' })}${t.kicker ? `<span class="pill">${e(t.kicker)}</span>` : ''}</div>
+  const sizes = opt.sizes || '(min-width:1100px) 280px, (min-width:640px) 45vw, 100vw';
+  const fallback = c.img ? pic(c.img, lang, { sizes, alt: '' }) : '';
+  const im = c.kb ? productCardInner({ slug: c.kb, alt: opt.title || t.title || '', fallbackHtml: fallback, sizes }) : { attrs: '', html: fallback };
+  return `<li class="card"><div class="im"${im.attrs}>${im.html}${t.kicker ? `<span class="pill">${e(t.kicker)}</span>` : ''}</div>
 <div class="bd"><h3><a href="${e(url)}" target="_blank" rel="noopener">${e(opt.title || t.title)}${NEW(lang)}</a></h3>
 <p>${e(t.text)}</p>${list}${t.more ? `<details class="more"><summary>${e(ui(lang).moreInfo)}</summary><p>${e(t.more)}</p></details>` : ''}
 ${c.note || t.note ? `<p class="note">${e(c.note || t.note)}</p>` : ''}
@@ -156,20 +162,29 @@ export function upcomingEvents(lang) {
   }
   return out.sort((a, b) => a.dates[0].starts_on.localeCompare(b.dates[0].starts_on));
 }
-// booking_158: uuden kaupan tapahtumat (kb.json events_shop = booking.public_events). Vain vapaat kerrat.
-// Kortti linkittää kaupan tuotesivulle (FI /varaa/#/tuote/<slug>, EN /en/book/#/tuote/<slug>), ei Johkuun.
+// booking_158 / booking_210: uuden kaupan tapahtumat (kb.json events_shop = booking.public_events).
+// Tulevat vapaat ja täydet kerrat. Täysi tapahtuma himmennetään; yksi kerta vie jonoon, useampi tuotesivulle.
+// Kortti linkittää kauppaan (FI /varaa/#/…, EN /en/book/#/…), ei Johkuun.
 // Selain korvaa listan tuoreella public_events-vastauksella (data-live-events). Hakuvirhe → tämä snapshot jää.
 // Muuten (ei events_shop-dataa) vanha data (kb.event_dates + cards.json), linkki silti kaupan tuotesivulle.
+const eventCardText = (key, lang) => tx(key, lang, { fallback: EVENT_CARD_TEXTS[key][lang] ?? EVENT_CARD_TEXTS[key].fi, log: { warn() {} } });
 function shopEventsSection(lang, limit, empty) {
   let list = selectShopEvents(kb.events_shop, Date.now());
   if (!list.length) return null;
   if (limit) list = list.slice(0, limit);
   const cardOf = (ev) => Object.entries(cards.events).find(([id, c]) => !id.startsWith('_') && (c.kb || id) === ev.slug)?.[1] || null;
   const fallbackImg = Object.entries(cards.events).find(([id, c]) => !id.startsWith('_') && c.img)?.[1]?.img;
+  const fullText = eventCardText('ui.site.event_full', lang);
+  const fullCta = eventCardText('ui.site.event_waitlist', lang);
   return shopEventsHtml(list, lang, {
-    e, money, card: cardOf, arrow: ui(lang).reserveArrow, empty,
-    link: (ev) => pageHref('book', lang, shopHash(ev.slug)),
-    img: (ev) => { const id = cardOf(ev)?.img || fallbackImg; return id ? pic(id, lang, { sizes: '(min-width:1100px) 280px, 90vw', alt: '' }) : ''; },
+    e, money, card: cardOf, arrow: ui(lang).reserveArrow, fullText, fullCta, empty,
+    link: (ev) => pageHref('book', lang, eventWaitlistPath(ev) || shopHash(ev.slug)),
+    img: (ev) => {
+      const sizes = '(min-width:1100px) 280px, 90vw';
+      const id = cardOf(ev)?.img || fallbackImg;
+      const fallback = id ? pic(id, lang, { sizes, alt: '' }) : '';
+      return productCardInner({ slug: ev.slug, alt: '', fallbackHtml: fallback, sizes }).html;
+    },
   });
 }
 export function eventsHtml(lang, empty, opt = {}) {
@@ -182,7 +197,9 @@ export function eventsHtml(lang, empty, opt = {}) {
     const t = c[lang];
     const times = [...new Set(dates.map((d) => eventTimeFor(d, lang, enTime)).filter(Boolean))];
     const dl = dates.slice(0, 6).map((d) => fmtDate(d.starts_on, lang)).join(' · ');
-    return `<li class="card ev"><div class="im">${pic(c.img, lang, { sizes: '(min-width:1100px) 280px, 90vw', alt: '' })}<span class="badge">${e(money(p.price, lang))}</span></div>
+    const evSizes = '(min-width:1100px) 280px, 90vw';
+    const evIm = productCardInner({ slug: p.slug, alt: t.title || '', fallbackHtml: c.img ? pic(c.img, lang, { sizes: evSizes, alt: '' }) : '', sizes: evSizes });
+    return `<li class="card ev"><div class="im"${evIm.attrs}>${evIm.html}<span class="badge">${e(money(p.price, lang))}</span></div>
 <div class="bd"><h3><a href="${e(p.slug ? pageHref('book', lang, shopHash(p.slug)) : bookingUrl(p.booking_url, lang))}"${p.slug ? '' : ' target="_blank" rel="noopener"'}>${e(t.title)}${p.slug ? '' : NEW(lang)}</a></h3>
 <p class="dates">${e(dl)}${times.length ? ' · ' + e(times[0]) : ''}</p><p>${e(t.text)}</p></div><div class="cta" aria-hidden="true">${e(ui(lang).reserveArrow)}</div></li>`;
   }).join('')}</ul>`;
@@ -319,7 +336,7 @@ ${langSw}
 <a class="btn sm" href="${bookHref}">${e(u.book)}</a>
 <details class="nav-mob"><summary>${e(u.menu)}</summary><nav aria-label="${e(u.menuLabel)}">${nav}<a class="btn gold nav-cta" href="${bookHref}">${e(u.bookFull)}</a></nav></details>
 </div></header>
-<main id="main">
+<main id="main" tabindex="-1">
 ${body}
 </main>
 <footer class="site-footer"><div class="wrap">
@@ -348,7 +365,7 @@ export function home(lang, opt = {}) {
   const wk = sec('home-tight', `<div class="week-head">${head(u.weekKicker, u.weekTitle, '', { left: true })}<a class="btn light sm" href="${pageHref('sauna', lang, 'yleiset')}">${e(u.allSessions)}</a></div><div class="week-wrap"><p class="week-soon">${e(homeText('ui.site.home_week_soon', lang))}</p>${week(lang, { soon: true })}<details class="week-more"><summary class="btn light sm"><span class="o">${e(homeText('ui.site.home_week_all', lang))}</span><span class="c">${e(homeText('ui.site.home_week_less', lang))}</span></summary></details></div>`);
   const r = d.ritual;
   const tradition = sec('home-tight', traditionHtml(lang, { kicker: r.kicker, title: r.title, cta: r.cta, perPerson: u.perPerson }));
-  const ev = sec('home-tight', `${head('', d.events.title, '', { orn: true })}${eventsHtml(lang, d.events.empty)}<p class="center" style="margin-top:22px"><a class="btn light sm" href="${pageHref('book', lang)}">${e(u.allEvents)}</a></p>`, 'tapahtumat');
+  const ev = sec('home-tight', `${head('', d.events.title, '', { orn: true })}${eventsHtml(lang, d.events.empty)}<p class="center" style="margin-top:22px"><a class="btn light sm" href="${pageHref('book', lang, '/?k=tapahtuma')}">${e(u.allEvents)}</a></p>`, 'tapahtumat');
   // Nauha vain kun kielellä on julkaistuja artikkeleita. Tyhjä lista ei saa jättää /saunatietoa/-linkkiä etusivulle.
   const art = opt.articlesHtml != null ? opt.articlesHtml : homeSection(lang);
   const infoStripSec = art || (publishedArticleCount(lang) > 0 ? sec('strip', infoStrip(lang), 'saunatietoa') : '');
@@ -373,20 +390,18 @@ export function sauna(lang) {
 }
 
 export function treatments(lang) {
-  const d = P('treatments')[lang], u = ui(lang);
-  const T = (ks) => ks.map((k) => C('treatments.' + k));
-  const tb = u.trainingBanner;
-  const body = pageHero(d.hero, lang, 'treatments')
-    + sec('', `<div class="narrow center"><p class="kicker">${e(d.intro.kicker)}</p><h2 class="sec-title">${e(d.intro.title)}</h2><p class="lead">${e(d.intro.text)}</p><p class="note-box" style="text-align:left">${e(d.intro.note)}</p></div>`)
-    + sec('tint', `${head('', d.s1.title, d.s1.text, { orn: true })}${cardList(T(['saunahoito', 'saunotus', 'syvasaunotus', 'ryhma']), lang, 'two')}<p class="center" style="margin-top:20px">${e(d.s1.note)}</p>`, d.s1.id)
-    // rituaalit: Saunotusrituaali (kortti rituaali-lisa, kb 8) ei ole listalla, vaan jää lisätuotteeksi (booking_159); tuotesivu /varaa/#/tuote/saunotusrituaali toimii ennallaan
-    + sec('', `${head('', d.s2.title, d.s2.text, { orn: true })}${cardList(T(['avoin-rituaali', 'turvetorstai', 'perinnesaunotusilta']), lang)}`, d.s2.id)
-    + sec('tint', `${head('', d.s3.title, d.s3.text, { orn: true })}${cardList(T(['morsiussauna', 'turvesauna', 'synttarisauna']), lang, 'three')}<p class="center" style="margin-top:22px">${e(d.s3.note)} ${mailBtn(site.contact.email, d.s3.title, 'btn light sm')}</p>`, d.s3.id)
-    + sec('', `${head('', d.s4.title, d.s4.text, { orn: true })}${cardList(T(['opiskelija']), lang, 'two')}`)
-    + sec('tint', `<div class="narrow center"><h2 class="sec-title">${e(tb.title)}</h2><p>${e(tb.text)}</p><a class="btn" href="${e(site.trainingUrl)}" rel="noopener">${e(tb.cta)}${NEW(lang)}</a></div>`);
+  const d = P('treatments')[lang];
+  // Tuotekortit, polut, eteneminen ja UKK: src/treatments-page.mjs. Saunotusrituaali (kb 8) ei ole listalla (booking_159).
+  const body = treatmentsBody(lang, { reviews: reviewsSection(lang) });
   return layout({ lang, key: 'treatments', meta: d.meta, body });
 }
 
+// Paketti edustaa viimeistä tuoteriviään (pelkkä vuoro → se vuoro; vuoro + hoito → hoito).
+const packageSlug = (pkg) => {
+  const ids = (pkg.items || []).map((i) => i.kb_product_id).filter((id) => id != null);
+  const id = ids.length ? ids[ids.length - 1] : null;
+  return id == null ? '' : (kb.products.find((p) => p.id === id)?.slug || '');
+};
 function giftOfferCard(p, lang) {
   const title = lang === 'en' ? p.name_en : p.name;
   const text = lang === 'en' ? (p.description_en || '') : (p.description || '');
@@ -394,7 +409,9 @@ function giftOfferCard(p, lang) {
   const list = lines.length ? `<ul class="list">${lines.map((row) => `<li>${row.href ? `<a href="${e(row.href)}">${e(row.label)}</a>` : e(row.label)}</li>`).join('')}</ul>` : '';
   const price = `${money(p.price, lang)} · ${gtText(lang, 'persons', { n: p.persons })}`;
   const unit = p.unit_price != null ? `<li><small>${e(gtText(lang, 'perPerson', { price: money(p.unit_price, lang) }))}</small></li>` : '';
-  return `<li class="card" data-gift-package="${e(p.code)}"><div class="im">${pic(GIFT_PACKAGE_IMAGE[p.code] || 'j-yleinen', lang, { sizes: '(min-width:1100px) 230px, 90vw', alt: '' })}<span class="pill">${e(gtText(lang, 'pkgKicker'))}</span></div>
+  const sizes = '(min-width:1100px) 230px, 90vw';
+  const im = productCardInner({ slug: packageSlug(p), alt: title, fallbackHtml: pic(GIFT_PACKAGE_IMAGE[p.code] || 'j-yleinen', lang, { sizes, alt: '' }), sizes });
+  return `<li class="card" data-gift-package="${e(p.code)}"><div class="im"${im.attrs}>${im.html}<span class="pill">${e(gtText(lang, 'pkgKicker'))}</span></div>
 <div class="bd"><h3>${e(title)}</h3>
 <p>${e(text)}</p>${list}
 <ul class="meta"><li class="pr">${e(price)}</li>${unit}<li>${e(gtText(lang, 'valid', { months: p.valid_months }))}</li></ul></div></li>`;
@@ -408,8 +425,10 @@ export function gift(lang) {
   const pack = PUBLISHED_GIFT_PACKAGES.filter((p) => !p.is_open).map((p) => giftOfferCard(p, lang)).join('');
   const ext = d.extend;
   const meta = { ...d.meta, description: giftMetaDescription(lang) };
+  const openSizes = '(min-width:900px) 520px, 100vw';
+  const openIm = productCardInner({ slug: ap.slug, alt: openPkg[lang === 'en' ? 'name_en' : 'name'], fallbackHtml: pic(C('gift.avoin').img, lang, { sizes: openSizes, alt: '' }), sizes: openSizes });
   const body = pageHero(d.hero, lang, 'gift')
-    + sec('', `<div class="company"><div><p class="kicker">${e(d.openTitle)}</p><h2 class="sec-title">${e(openPkg[lang === 'en' ? 'name_en' : 'name'])}</h2><p>${e(d.openText)}</p><p class="price" style="color:var(--gold)">${e(`${u.fromWord} ${money(from, lang)}`)}</p><a class="btn" href="${e(bookingUrl(ap.booking_url, lang))}" target="_blank" rel="noopener">${e(C('gift.avoin')[lang].cta)}${NEW(lang)}</a></div><div class="im">${pic(C('gift.avoin').img, lang, { sizes: '(min-width:900px) 520px, 100vw', alt: '' })}</div></div>`, 'avoin')
+    + sec('', `<div class="company"><div><p class="kicker">${e(d.openTitle)}</p><h2 class="sec-title">${e(openPkg[lang === 'en' ? 'name_en' : 'name'])}</h2><p>${e(d.openText)}</p><p class="price" style="color:var(--gold)">${e(`${u.fromWord} ${money(from, lang)}`)}</p><a class="btn" href="${e(bookingUrl(ap.booking_url, lang))}" target="_blank" rel="noopener">${e(C('gift.avoin')[lang].cta)}${NEW(lang)}</a></div><div class="im"${openIm.attrs}>${openIm.html}</div></div>`, 'avoin')
     + sec('tint', `${head('', d.packTitle, '', { orn: true })}<ul class="cards five">${pack}</ul><p class="center" style="margin-top:24px"><a class="btn light sm" href="${e(jk('giftAll', lang))}" target="_blank" rel="noopener">${e(d.allGift)}${NEW(lang)}</a></p>`, 'paketit')
     + sec('', `${head('', d.haveTitle, d.haveText, { orn: true })}<div class="cards two" style="display:grid;gap:22px">
 <article class="card"><div class="bd"><p class="kicker">${e(d.own.kicker)}</p><h3 style="font-family:var(--head);font-size:26px">${e(d.own.title)}</h3><p>${e(d.own.how || d.own.text)}</p><p><a class="btn" href="${e(jk('giftReservation', lang))}" target="_blank" rel="noopener">${e(d.own.cta)}${NEW(lang)}</a></p></div></article>
@@ -429,7 +448,8 @@ export function book(lang) {
   return layout({ lang, key: 'book', meta: d.meta, body });
 }
 
-const clean = (s) => s.replace(/lisählöt/g, 'lisähenkilöt').replace(/\s*Vanhan sivuston mukaan[^.]*\./g, '').replace(/\s+$/g, '');
+// "Vanhan sivuston mukaan…" on toimitusmerkintä, ei asiakastekstiä. "esim." ei katkaise virkettä.
+const clean = (s) => s.replace(/lisählöt/g, 'lisähenkilöt').replace(/esim\./g, 'esim\u0001').replace(/\s*Vanhan sivuston mukaan[^.]*\./g, '').replace(/\u0001/g, '.').replace(/\s+$/g, '');
 export function info(lang) {
   const d = P('info')[lang], u = ui(lang);
   const blocks = (b) => b.map((x) => {
@@ -497,7 +517,11 @@ export function policyPage(name, key, lang) {
     : d.policies.map((id) => policyFor(id, lang)).filter(Boolean);
   // Tietosuojasivulla puhelin (tel:) ja sähköposti (mailto:) linkeiksi escapoidusta tekstistä (policy-lang.mjs linkContacts).
   const para = (l) => (name === 'privacy' ? linkContacts(e(l), site.contact) : e(l));
-  const txt = (s) => clean(s).split(/\n+/).map((l) => `<p>${para(l)}</p>`).join('');
+  const txt = (s) => clean(s).split(/\n+/).map((l) => {
+    const line = l.trim();
+    const n = name === 'privacy' && /^(\d+)\.\s+\S/.exec(line);
+    return n ? `<h3 id="privacy-${n[1]}">${para(line)}</h3>` : `<p>${para(line)}</p>`;
+  }).join('');
   const body = pageHero(d.hero, lang, key)
     + sec('', `<div class="narrow prose">${d.note ? `<p class="note-box">${e(d.note)}</p>` : ''}${items.map((p) => p.lang && p.lang !== lang ? `<div lang="${e(p.lang)}"><h2>${e(p.title)}</h2>${txt(p.body)}</div>` : `<h2>${e(p.title)}</h2>${txt(p.body)}`).join('')}${name === 'privacy' && !items.some((p) => policyHasAnalyticsSection(p.body)) ? privacyAnalyticsHtml(lang, e, txt) : ''}</div>`);
   return layout({ lang, key, meta: d.meta, body });

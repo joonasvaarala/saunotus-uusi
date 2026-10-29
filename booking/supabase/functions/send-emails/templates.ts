@@ -3,7 +3,7 @@
 // data = booking.email_outbox_claim()-rivi (ks. docs/talous-integraatiot.md): { kind, locale, to_name, order{order_no, order_url, total, items[], reservations[]}, receipt{receipt_no, kind, text_body, total, issued_at}, payment{amount, link_url, link_expires_at} }.
 // FI + EN, HTML (taulukkopohjainen, inline-tyylit, sähköpostiyhteensopiva) + tekstiversio. Ei ulkoisia riippuvuuksia (puhdas funktio, testattu node --test).
 // Tyyli: tumma vihreä + hiekka, ei sinistä. Logo: sivuston /img/logo-kuitti.png (osoite johdetaan tilauslinkistä; muuten LOGO_FALLBACK).
-export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify" | "invoice_pdf" | "product_message" | "waitlist_spot_freed" | "annual_card_code" | "unpaid_booking_cancelled" | "event_message";
+export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify" | "invoice_pdf" | "product_message" | "waitlist_spot_freed" | "waitlist_joined" | "annual_card_code" | "unpaid_booking_cancelled" | "event_message";
 export interface Rendered { subject: string; text: string; html: string }
 // Asiakasnäkyvät tekstit: texts.ts (repon oletukset = varateksti) tai tietokannasta (email.*-avaimet, _shared/site_texts.ts). render() ottaa valinnaisen tekstihaun (4. parametri).
 import { makeT, type TFn } from "../_shared/site_texts.ts";
@@ -557,6 +557,24 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const html = mk(title, intro, h1(title) + helloRow + p(esc(intro)) + box(`<span style="font-family:${SANS};font-size:15px;line-height:1.5;color:${INK}">${esc(session)}</span>`) + p(esc(notice))
         + (book ? button(book, bookLabel) : "")
         + (leaveUrl ? p(`${esc(leaveLead)} <a href="${esc(leaveUrl)}" style="color:${GREEN_SOFT}">${esc(leaveLabel)}</a>`, `color:${MUTED};font-size:13px`) : "") + tail);
+      return { subject, text, html };
+    }
+    case "waitlist_joined": {
+      // booking_210: jonoon liittymisen vahvistus. Ei varausta. Allekirjoitus Tapio.
+      const w = d?.waitlist || {};
+      const leaveUrl = safeUrl(w.leave_url);
+      const subject = X("email.waitlist_joined.subject");
+      const title = X("email.waitlist_joined.title");
+      const intro = X("email.waitlist_joined.intro");
+      const session = X("email.waitlist_joined.session", { what: String(w.product_name ?? "").trim(), when: dt(w.starts_at, en), n: String(Number(w.persons) || 1) });
+      const notice = X("email.waitlist_joined.notice");
+      const leaveLead = X("email.waitlist_joined.leave");
+      const leaveLabel = X("email.waitlist.leave_link");
+      const cardSign = `${X("email.common.closing")}\n${X("email.waitlist_joined.sign_name")}\n${SELLER}`;
+      const cardTail = `${p(esc(contact), `color:${MUTED};font-size:13px`)}${p(esc(cardSign).replace(/\n/g, "<br>"))}`;
+      const text = textBlock(hello, intro, session, notice, leaveUrl && `${leaveLead}\n${leaveUrl}`, contact, cardSign) + "\n";
+      const html = mk(title, intro, h1(title) + helloRow + p(esc(intro)) + box(`<span style="font-family:${SANS};font-size:15px;line-height:1.5;color:${INK}">${esc(session)}</span>`) + p(esc(notice))
+        + (leaveUrl ? p(`${esc(leaveLead)} <a href="${esc(leaveUrl)}" style="color:${GREEN_SOFT}">${esc(leaveLabel)}</a>`, `color:${MUTED};font-size:13px`) : "") + cardTail);
       return { subject, text, html };
     }
     case "unpaid_booking_cancelled": {

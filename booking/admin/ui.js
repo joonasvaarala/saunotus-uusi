@@ -145,8 +145,9 @@ export const prefersReducedMotion = (win = globalThis) => !!win?.matchMedia?.('(
 export function revealSection(el, focusEl = el, win = globalThis) {
   if (!el) return false;
   el.scrollIntoView?.({ block: 'start', behavior: prefersReducedMotion(win) ? 'auto' : 'smooth' });
-  if (focusEl && !focusEl.matches?.('a[href],button,input,select,textarea,[tabindex]')) focusEl.setAttribute?.('tabindex', '-1');
-  focusEl?.focus?.({ preventScroll: true });
+  const interactive = !!focusEl?.matches?.('a[href],button,input,select,textarea,summary');
+  if (focusEl && !interactive && !focusEl.matches?.('[tabindex]')) focusEl.setAttribute?.('tabindex', '-1');
+  focusEl?.focus?.({ preventScroll: true, ...(interactive ? {} : { focusVisible: false }) });
   return true;
 }
 export function revealIfHidden(el, win = globalThis) {

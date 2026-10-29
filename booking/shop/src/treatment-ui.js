@@ -9,6 +9,7 @@ import { ht, holdError } from './hold-texts.js';
 import { fmtMinutes } from './site-texts-logic.js';
 import { createAddonPicker } from './treatment-addons.js';
 import { richHost } from './rich-view.js';
+import { includedPlain, swimwearPlain } from './product-layout.js';
 import { cardShort } from './short-desc.js';
 import { cardMeta } from './card-meta.js';
 import { revealForm, revealIfHidden } from './gift-ui.js';
@@ -182,10 +183,19 @@ export function createTreatmentViews(c) {
       if (!O.optionOk(p, opt)) { optP.setError(ot['err.option_required']); optP.focus(); return; }
       if (cur?.slot) location.hash = `#/hoito/${p.slug}/${cur.date}/${A.timeToken(cur.time)}?n=${cur.n}${optQ(opt)}`;
     });
+    const desc = pdesc(p) || '', inc = includedPlain(desc), swim = swimwearPlain(desc);
     mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })),
-      richHost(h, pdesc(p) || '', 'bk-desc'), voucherNode(p),
-      metaP(p), timelineNode(p),
-      optStep, picker.node, h('div', { class: 'bk-continue' }, sum, go));
+      h('div', { class: 'bk-prod-layout' },
+        h('div', { class: 'bk-facts' },
+          metaP(p),
+          inc ? h('p', { class: 'bk-included', 'data-testid': 'included', text: inc }) : null,
+          timelineNode(p),
+          swim ? h('p', { class: 'bk-note bk-swim', 'data-testid': 'swimwear', text: swim }) : null,
+          S.cancelRule ? h('p', { class: 'bk-note bk-cancel-rule', 'data-testid': 'product-cancel', text: S.cancelRule }) : null,
+          voucherNode(p),
+          h('a', { class: 'bk-jump', href: '#valitse-aika', text: t.pickTime })),
+        h('div', { class: 'bk-prod-cal', id: 'valitse-aika' }, optStep, picker.node, h('div', { class: 'bk-continue' }, sum, go)),
+        desc ? h('details', { class: 'bk-more' }, h('summary', { text: t.moreInfo }), richHost(h, desc, 'bk-desc')) : null));
     await picker.ready;
     if (!query.get('n')) focusTop();
   }
@@ -271,7 +281,7 @@ export function createTreatmentViews(c) {
         }
         const lost = A.isSlotLost(r.code);
         err.replaceChildren(...[errorBox(r.ok ? tr.errors.generic : errMsg(r)), lost ? h('p', {}, h('a', { class: 'btn sm', href: back, text: tr.pickAnother })) : null].filter(Boolean));   // replaceChildren(null) kirjoittaisi tekstin "null"
-        err.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(err); err.firstChild.focus({ preventScroll: true });
+        err.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(err); err.firstChild.focus({ preventScroll: true, focusVisible: false });
       });
       const lead = h('p', { class: 'bk-note', 'data-testid': 'review-lead', text: tr.reviewLead }), holdExtra = h('div', { 'data-testid': 'review-hold-extra' });
       holdInfo().then((x) => {
@@ -322,9 +332,9 @@ export function createTreatmentViews(c) {
       const r = await A.changeBooking(token, { ...(slotChanged() ? { start: cur.slot.start, persons: inv.personsDisabled ? null : cur.n } : {}), option: optChanged() ? opt : null });
       if (r.ok) { state.months.clear(); location.hash = token; window.scrollTo({ top: 0 }); return; }
       save.textContent = t.saveChange; save.disabled = false;
-      if (r.code === 'order_invoiced') { msg.replaceChildren(errorBox(t.errors.order_invoiced_persons)); msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true }); refresh(); return; }
+      if (r.code === 'order_invoiced') { msg.replaceChildren(errorBox(t.errors.order_invoiced_persons)); msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true, focusVisible: false }); refresh(); return; }
       if (O.isOptionError(r.code) && optP) { if (r.code === 'invalid_option') { opt = curOpt; optP.set(curOpt); } optP.setError(errMsg(r)); optP.focus(); refresh(); return; }
-      msg.replaceChildren(errorBox(errMsg(r))); msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true });
+      msg.replaceChildren(errorBox(errMsg(r))); msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true, focusVisible: false });
     });
     mount(h('p', {}, h('a', { href: `#${token}`, text: t.back })), h('h2', { text: t.changeTitle }),
       h('p', { class: 'bk-note', text: t.changeInfo(hours, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) }),

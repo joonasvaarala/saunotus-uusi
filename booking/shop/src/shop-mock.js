@@ -10,7 +10,7 @@ import { isHoldScenario, holdMockParams, HOLD_ERRORS } from './hold-mock.js';
 import { pickCatalog } from './catalog-audience.js';
 import { mockQuietOffers } from './quiet-offers-mock.js';
 import { createRitualMock, SHARED_PRODUCT } from './ritual-addon-mock.js';
-
+import { mockProductImages } from './mock-product-images.js';
 const KEY = 'booking.shopmock.v1';
 const MUTATING = new Set(['public_create_treatment_booking', 'public_change_treatment_booking']);
 // scenario=pay|pay-prod|pay-off: vahvistussivun maksuvalinta (MobilePay + lahjakortti) – maksutila, lahjakortit ja mobilepay-funktiot tulevat order-mock.js:stä (sama mock kuin tilaussivulla); mpResult = paluutulos (paid|failed|pending|…).
@@ -56,10 +56,14 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
         const token = globalThis.crypto?.randomUUID?.() || '11111111-1111-4111-8111-' + String(waitlist.size + 1).padStart(12, '0');
         const old = [...waitlist.values()].find((x) => x.rule_id === +args.p_rule_id && x.date === args.p_date && x.email === String(args.p_email || '').toLowerCase() && x.status !== 'cancelled');
         const row = old || { token, rule_id: +args.p_rule_id, date: args.p_date, email: String(args.p_email || '').toLowerCase() };
-        if (!Number.isInteger(+args.p_persons) || +args.p_persons < 1 || +args.p_persons > 6) return { ok: false, code: 'invalid_persons' };   // booking_134: 1–6
+        const eventJoin = +args.p_rule_id === 9101;
+        if (eventJoin && args.p_privacy_consent !== true) return { ok: false, code: 'privacy_required' };
+        if (!eventJoin) { if (+args.p_persons > 6) return { ok: false, code: 'invalid_persons' }; }   // booking_134: 1–6
+        if (!eventJoin && (!Number.isInteger(+args.p_persons) || +args.p_persons < 1)) return { ok: false, code: 'invalid_persons' };
+        if (eventJoin && (!Number.isInteger(+args.p_persons) || +args.p_persons < 1 || +args.p_persons > 12)) return { ok: false, code: 'invalid_persons' };
         row.persons = +args.p_persons; row.status = 'waiting';
         waitlist.set(row.token, row); saveWaitlist();
-        return { ok: true, token: row.token, persons: row.persons, starts_at: `${args.p_date}T12:00:00+03:00`, ends_at: `${args.p_date}T14:00:00+03:00` };
+        return { ok: true, token: row.token, persons: row.persons, kind: eventJoin ? 'event' : 'general', starts_at: `${args.p_date}T14:00:00Z`, ends_at: `${args.p_date}T17:00:00Z` };
       }
       case 'public_waitlist_claim': {   // booking_134: mockissa paikkoja riittää aina, jos jonovaraus on voimassa
         const row = waitlist.get(args.p_token);
@@ -91,11 +95,13 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
         return mockQuietOffers(rows, now());
       }
       case 'public_settings': return { public_booking_enabled: true, public_treatment_horizon_days: 14 };
-      case 'public_product_images': return [];
+      case 'public_product_images': return mockProductImages(globalThis.location?.search || '');
       // booking_158: tapahtumat myynti suljettuna (events.sale_enabled = false) → kaikki kerrat 'closed'; ?mock=1 → #/tuote/perinnesaunotusilta
       case 'public_events': {
         const at = (d, hh, mm = 0) => { const x = new Date(now()); x.setUTCDate(x.getUTCDate() + d); x.setUTCHours(hh - 2, mm, 0, 0); return x.toISOString(); };
         return [
+          { product_id: 9101, slug: 'kekri-taynna', name: 'Sipoonjoen Kekri', name_en: 'Sipoonjoki Kekri', description_short: 'Kekrijuhla on täynnä. Voit liittyä jonoon.', description_short_en: 'The Kekri feast is full. You can join the waiting list.', price: 79, price_text: null, image_path: null, image_alt: null, category: 'event', sale_open: true,
+            occurrences: [{ rule_id: 9101, starts_at: at(14, 15), ends_at: at(14, 19), label: null, label_en: null, status: 'full', remaining: 0, price: 79 }] },
           { product_id: 31, slug: 'perinnesaunotusilta', name: 'Perinnesaunotusilta', name_en: 'Traditional sauna evening', description_short: 'Perinteinen saunotusilta savusaunassa.', description_short_en: 'A traditional sauna evening in the smoke sauna.', price: 69, price_text: null, image_path: null, image_alt: null, category: 'event', sale_open: false,
             occurrences: [{ rule_id: 9001, starts_at: at(21, 16), ends_at: at(21, 19), label: null, label_en: null, status: 'closed', remaining: null, price: 69 }, { rule_id: 9002, starts_at: at(49, 16), ends_at: at(49, 19), label: 'Joulun perinnesaunotus', label_en: 'Christmas sauna evening', status: 'closed', remaining: null, price: 69 }] },
           { product_id: 33, slug: 'saunottajakoulutus', name: 'Saunottajakoulutus', name_en: 'Sauna host training', description_short: null, description_short_en: null, price: 390, price_text: null, image_path: null, image_alt: null, category: 'training', sale_open: false,
@@ -117,6 +123,12 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
         return r ? r.body : { ok: false, code: 'not_found', message: 'Varausta ei löytynyt' };
       }
       default: {
+        if (name === 'public_availability' && +args.p_product_id === 9101) {
+          const start = new Date(now()); start.setUTCDate(start.getUTCDate() + 14); start.setUTCHours(13, 0, 0, 0);
+          const end = new Date(start.getTime() + 4 * 36e5);
+          const day = start.toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
+          return [{ rule_id: 9101, product_id: 9101, label: 'Kekri', label_en: 'Kekri', mode: 'shared', session_date: day, starts_at: start.toISOString(), ends_at: end.toISOString(), status: 'full', remaining: 0, min_persons: 1, max_persons: 12, price_mode: 'per_person', unit_price: 79, base_price: null }];
+        }
         if (failOnce && MUTATING.has(name)) { const code = failOnce; failOnce = null; return { ok: false, code, message: code === 'option_required' ? 'Valitse hoito' : code === 'invalid_option' ? 'Valittu hoito ei kelpaa' : HOLD_ERRORS[code] }; }
         if (noTimes && name === 'public_treatment_availability') return [];
         const r = treatmentRpc(name, args, now());

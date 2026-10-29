@@ -57,7 +57,7 @@ Samat nimet suomeksi ja englanniksi. Hallinta listaa ne lomakkeessa.
 | `{asiakas_nimi}` | Asiakkaan koko nimi. |
 | `{tilaus_linkki}` | Sama tilaussivun osoite kuin vahvistuksessa: `site_base_url` + `order_page_path` + `?t=` + tilauksen tunniste. Uutta osoitetta ei keksitä. |
 | `{tuote}` | Niiden osumien nimet, joihin tämä viesti on kytketty. Englanninkielisessä viestissä `name_en`, jos se on annettu. |
-| `{saapumisaika}` | Näiden varausten alkuajat, Europe/Helsinki, `pp.kk.vvvv tt:mm`, pilkulla erotettuna. |
+| `{saapumisaika}` | Näiden varausten alkuajat, Europe/Helsinki, pilkulla erotettuna. FI `pp.kk.vvvv klo tt.mm`, EN `pp.kk.vvvv at tt:mm`. Pohjaan ei kirjoiteta erillistä klo-sanaa merkin eteen. |
 | `{linkki}` | Viestin https-linkki. Tyhjä, jos kenttä on tyhjä tai osoite ei ole https. |
 
 Tuntematon aaltosulku jää tekstiin. Tunnettu merkki, jolle ei ole arvoa, vaihtuu tyhjään.

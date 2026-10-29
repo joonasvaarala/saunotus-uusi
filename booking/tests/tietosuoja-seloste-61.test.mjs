@@ -104,7 +104,7 @@ test('tietosuojasivu: kun kb-tekstissä on kohta 7, erillistä ui.site.privacy_a
   assert.equal(PA.policyHasAnalyticsSection('8. Cookieless visitor analytics'), true);
   const p = lib.kb.policies.find((x) => x.id === 7);
   const orig = p.body;
-  const count = (html) => (html.match(/Evästeetön kävijämittaus<\/(h2|p)>/g) || []).length;
+  const count = (html) => (html.match(/Evästeetön kävijämittaus<\/(h2|h3|p)>/g) || []).length;
   try {
     p.body = v3;
     const a = quiet(() => R.policyPage('privacy', 'privacy', 'fi'));
@@ -113,7 +113,7 @@ test('tietosuojasivu: kun kb-tekstissä on kohta 7, erillistä ui.site.privacy_a
     p.body = t;
     const b = quiet(() => R.policyPage('privacy', 'privacy', 'fi'));
     assert.doesNotMatch(b, /<h2>Evästeetön kävijämittaus<\/h2>/);
-    assert.match(b, /<p>7\. Evästeetön kävijämittaus<\/p>/);
+    assert.match(b, /<h3 id="privacy-7">7\. Evästeetön kävijämittaus<\/h3>/);
     assert.equal(count(b), 1);
     assert.match(b, /<a href="tel:\+358102992866">010 299 2866<\/a>/);
   } finally { p.body = orig; }

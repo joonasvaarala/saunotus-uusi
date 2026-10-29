@@ -6,7 +6,7 @@ export const GT = {
   fi: {
     'err.order_expired': HT.fi['err.order_expired'], 'err.order_preliminary': HT.fi['err.order_preliminary'], 'err.payment_in_progress': HT.fi['err.payment_in_progress'],   // pito (§17.3): tekstit yhdessä paikassa (hold-texts.js)
     buyTitle: 'Osta lahjakortti', buyLead: 'Valitse avoin lahjakortti tai valmis paketti. Kortti on voimassa {months} kuukautta maksun jälkeen.',
-    chooseTitle: 'Valitse lahjakortti', openKicker: 'Vapaa summa', pkgKicker: 'Paketti', persons: '{n} henkilölle', personsLabel: 'Henkilömäärä', perPerson: '{price} / hlö', amountFrom: '{min}–{max} €', valid: 'Voimassa {months} kk', contents: 'Paketin sisältö',
+    chooseTitle: 'Valitse lahjakortti', openKicker: 'Vapaa summa', pkgKicker: 'Lahjakortti', persons: '{n} henkilölle', personsLabel: 'Henkilömäärä', perPerson: '{price} / hlö', amountFrom: '{min}–{max} €', valid: 'Voimassa {months} kk', contents: 'Paketin sisältö',
     itemsTitle: 'Sisältö', add: 'Lisää tilaukseen', added: 'Lisätty tilaukseen', addOpen: 'Lisää summa tilaukseen',
     amountLabel: 'Summa (€)', amountHint: 'Valitse {min}–{max} €, enintään kaksi desimaalia.', 'err.amount': 'Anna summa väliltä {min}–{max} € (enintään kaksi desimaalia).',
     cartTitle: 'Tilauksesi', cartEmpty: 'Valitse ensin lahjakortti yllä.', cardsCount: '{n} korttia', cardsCount1: '1 kortti', maxCards: 'Tilaukseen mahtuu enintään {n} korttia.', maxCardsReached: 'Korttien enimmäismäärä ({n}) on täynnä.',
@@ -73,7 +73,7 @@ export const GT = {
   en: {
     'err.order_expired': HT.en['err.order_expired'], 'err.order_preliminary': HT.en['err.order_preliminary'], 'err.payment_in_progress': HT.en['err.payment_in_progress'],
     buyTitle: 'Buy a gift card', buyLead: 'Choose an open-value gift card or a ready-made package. The card is valid for {months} months after payment.',
-    chooseTitle: 'Choose a gift card', openKicker: 'Any amount', pkgKicker: 'Package', persons: 'For {n} people', personsLabel: 'Number of people', perPerson: '{price} / person', amountFrom: '€{min}–{max}', valid: 'Valid for {months} months', contents: 'Package contents',
+    chooseTitle: 'Choose a gift card', openKicker: 'Any amount', pkgKicker: 'Gift card', persons: 'For {n} people', personsLabel: 'Number of people', perPerson: '{price} / person', amountFrom: '€{min}–{max}', valid: 'Valid for {months} months', contents: 'Package contents',
     itemsTitle: 'Includes', add: 'Add to order', added: 'Added to order', addOpen: 'Add amount to order',
     amountLabel: 'Amount (€)', amountHint: 'Choose €{min}–{max}, up to two decimals.', 'err.amount': 'Enter an amount between €{min} and €{max} (up to two decimals).',
     cartTitle: 'Your order', cartEmpty: 'Choose a gift card above first.', cardsCount: '{n} cards', cardsCount1: '1 card', maxCards: 'An order can include up to {n} cards.', maxCardsReached: 'The maximum number of cards ({n}) has been reached.',

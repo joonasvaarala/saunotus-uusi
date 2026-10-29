@@ -157,5 +157,5 @@ const mut = (name, fromName, fn) => { const d = join(work, name); cpSync(join(wo
 test('check-articles: etusivun nauha läpi; havaitsee puuttuvan listauslinkin ja korttiosion tyhjässä tilassa', () => {
   assert.deepEqual(chk(join(work, 't')).errors, []);
   assert.ok(chk(mut('m1', 't', (h) => h.replace('class="btn light sm more-all" href="/saunatietoa/"', 'class="btn light sm more-all" href="/pois/"'))).errors.some((x) => /artikkeliosiosta puuttuu linkki/.test(x)));
-  assert.ok(chk(mut('m3', 'pe', (h) => h.replace('<main id="main">', '<main id="main"><section class="section home-art"><div class="wrap"></div></section>'))).errors.some((x) => /näkyy vaikka artikkeleita ei ole/.test(x)));
+  assert.ok(chk(mut('m3', 'pe', (h) => h.replace(/<main id="main"[^>]*>/, '<main id="main"><section class="section home-art"><div class="wrap"></div></section>'))).errors.some((x) => /näkyy vaikka artikkeleita ei ole/.test(x)));
 });

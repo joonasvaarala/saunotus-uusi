@@ -5,8 +5,9 @@
 // Varattu, mennyt tai virheellinen vuoro ei näy. Jos kumpikaan haku ei onnistu, ohjelma jää ennalleen.
 // Ei innerHTML:ää: kaikki solmut createElement + textContent.
 import { rpc } from './sb.js';
+import { liveImageUrl } from './product-image.js';
 import { quietByWeekday, addDaysIso, fillText, pctText, validOffer, bookablePrivateSlots, offerForSlot, weekdayIso, JALKIL_ID } from './quiet-offers-logic.js';
-import { dateForWeekday, shiftIsFull, weekEvents, eventDisplayName, freeShopEvents, cardDates, cardTime } from './week-live.js';
+import { dateForWeekday, shiftIsFull, weekEvents, eventDisplayName, freeShopEvents, cardDates, cardTime, eventIsFull, eventWaitlistPath } from './week-live.js';
 
 const TZ = 'Europe/Helsinki';
 export function decorateWeek(list, offers, { lang = 'fi', shopHref = '', today, slots, now } = {}) {
@@ -138,47 +139,67 @@ export function applyLiveWeek(list, { availability = null, events = null, catalo
 
 const plain = (s) => String(s ?? '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
 
-/** Etusivun tapahtumakortit public_eventsistä. events === null → lista jää ennalleen. Vain vapaat kerrat. */
+/** Etusivun tapahtumakortit public_eventsistä. events === null → lista jää ennalleen. Vapaat ja täydet tulevat kerrat. */
 export function applyEventCards(list, events, { lang = 'fi', shopHref = '', now = Date.now(), reserve = '', imageBase = '' } = {}) {
   if (events == null || !list) return 0;
   const rows = freeShopEvents(events, now);
   const doc = list.ownerDocument;
   const el = (tag, cls, text) => { const n = doc.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
   const money = (n) => new Intl.NumberFormat(lang === 'fi' ? 'fi-FI' : 'en-FI', { style: 'currency', currency: 'EUR', minimumFractionDigits: Number.isInteger(+n) ? 0 : 2 }).format(+n);
+  const fullLabel = list.dataset.fullLabel || (lang === 'en' ? 'Full' : 'Täynnä');
+  const fullCta = list.dataset.fullCta || (lang === 'en' ? 'Join the waitlist →' : 'Liity jonoon →');
   if (!rows.length) {
     const p = el('p', 'center', list.dataset.empty || '');
     list.replaceWith(p);
     return 0;
   }
+  const fallbackPic = new Map();
+  for (const host of list.querySelectorAll('[data-product-image]')) {
+    const pic = host.querySelector('picture, img');
+    if (host.dataset.slug && pic) fallbackPic.set(host.dataset.slug, pic);
+  }
   list.replaceChildren();
   for (const ev of rows) {
     const name = (lang === 'en' && ev.name_en) || ev.name;
     const text = plain((lang === 'en' && ev.description_short_en) || ev.description_short);
-    const dates = [...new Set(ev.occurrences.slice(0, 6).map((o) => cardDates(o, lang)))].filter(Boolean).join(' · ');
+    const dates = [...new Set(ev.occurrences.slice(0, 6).map((o) => cardDates(o, lang, now)))].filter(Boolean).join(' · ');
     const time = cardTime(ev.occurrences[0], lang);
-    const li = el('li', 'card ev');
+    const full = eventIsFull(ev);
+    const li = el('li', full ? 'card ev is-full' : 'card ev');
     li.dataset.testid = 'site-event-card';
+    if (full) li.dataset.full = '1';
     const im = el('div', 'im');
-    if (ev.image_path && imageBase) {
+    im.dataset.productImage = '';
+    if (ev.slug) im.dataset.slug = ev.slug;
+    im.dataset.sizes = '(min-width:1100px) 280px, 90vw';
+    const prev = ev.slug ? fallbackPic.get(ev.slug) : null;
+    const path = String(ev.image_path || '');
+    const direct = /^https?:\/\//.test(path) || path.startsWith('/img/');
+    const url = !path ? '' : direct ? path : (imageBase ? liveImageUrl(String(imageBase).replace(/\/$/, ''), { path, updated_at: ev.image_updated_at, alt: ev.image_alt }) : '');
+    if (url) {
       const img = doc.createElement('img');
-      img.src = imageBase + String(ev.image_path).replace(/^\//, '');
+      img.src = url;
       img.alt = ev.image_alt || '';
       img.loading = 'lazy';
       img.decoding = 'async';
-      img.width = 800; img.height = 533;
-      img.addEventListener('error', () => img.remove(), { once: true });
+      img.width = 900; img.height = 600;
+      img.addEventListener('error', () => { if (prev) img.replaceWith(prev.cloneNode(true)); else img.remove(); }, { once: true });
       im.append(img);
-    }
+    } else if (prev) im.append(prev.cloneNode(true));
+    if (full) im.append(el('span', 'pill full', fullLabel));
     if (ev.price != null && Number.isFinite(+ev.price)) im.append(el('span', 'badge', money(ev.price)));
     const bd = el('div', 'bd');
     const h3 = el('h3');
     const a = el('a', '', name);
-    a.href = `${shopHref}#/tuote/${encodeURIComponent(ev.slug)}`;
+    const queue = full ? eventWaitlistPath(ev) : '';
+    a.href = queue ? `${shopHref}#${queue}` : `${shopHref}#/tuote/${encodeURIComponent(ev.slug)}`;
+    if (full) a.append(el('span', 'sr', `, ${fullLabel}`));
     h3.append(a);
     const when = el('p', 'dates', time ? `${dates} · ${time}` : dates);
     bd.append(h3, when);
     if (text) bd.append(el('p', '', text));
-    const cta = el('div', 'cta', reserve ? (String(reserve).includes('→') ? reserve : `${reserve} →`) : '');
+    const label = full ? fullCta : (reserve ? (String(reserve).includes('→') ? reserve : `${reserve} →`) : '');
+    const cta = el('div', 'cta', label);
     cta.setAttribute('aria-hidden', 'true');
     li.append(im, bd, cta);
     list.append(li);

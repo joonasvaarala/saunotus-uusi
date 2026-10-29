@@ -12,7 +12,7 @@ test('revealForm: scrollIntoView kutsutaan tasan kerran (block start, smooth) ja
   const form = el(), title = el();
   assert.equal(revealForm(form, title, win(false)), true);
   assert.deepEqual(form.calls.scroll, [{ block: 'start', behavior: 'smooth' }]);
-  assert.deepEqual(title.calls.focus, [{ preventScroll: true }], 'focus({ preventScroll: true }) → vain yksi vieritys');
+  assert.deepEqual(title.calls.focus, [{ preventScroll: true, focusVisible: false }], 'focus({ preventScroll: true }) → vain yksi vieritys; ohjelmallinen kohde ei pyydä focus-visible-kehystä');
   assert.equal(title.calls.scroll.length, 0);
 });
 

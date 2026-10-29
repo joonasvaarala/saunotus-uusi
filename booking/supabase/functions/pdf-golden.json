@@ -12,13 +12,13 @@
  "gift.en_open_as_fi": "6877747fa7a9e9011e3c9751f7e74d26841577017b18675f2f3e52cd5006ee58",
  "gift.fi_open_as_en": "dedac13c61f2be76e603fe9223677aa5d92e2c07d12dcb4b4a13760cd3a7fa83",
  "gift.no_seller": "cc4d7578a754f5e0acf56dd1e9abebabe86123a83bd030d4e307477a77a5b222",
- "receipt.fi": "13f4d0f079a1ac6218f3768945e35c85863d6b62668669054e65f1bb5a7f0e4a",
- "receipt.en": "cb1e7afd98f42001d334ac032ce2f95eca40e0a3dead0b53a25b742336cc9bdf",
- "receipt.fi_invoice_buyer": "3140d4bd704947039e432eb80ecf3c7922732c8fb051f192c9a15b237667ff40",
- "receipt.en_invoice_buyer": "76c6d662dc5b17210c99583260f79daf6fa4260121a1e54d68f5838805be9456",
- "receipt.fi_refund": "09bddee2e322e6d5348bde094f0efcb23b7d5684f9bd736e387ba2dc7ababa34",
- "receipt.en_refund": "9e79fc133c583338785f8df67f2b9f9fb4e128601ad30d7025de01a78a795903",
- "receipt.fi_rounding_nofooter": "56c7bbb144028da608f1c7539ccc8b6c14baa03fe50e08e0a22efd1b5ce25f75",
- "receipt.en_rounding_plus": "8a17ba94e53a10b6a85a4e9be2c2217b7e805743af0a53aab25ce66c27b75d2d",
- "receipt.fi_monta_riviä": "3b00e7e0db26381949b483907d966a0cafd8ebf481ee41717c8ff00962a0cabc"
+ "receipt.fi": "35658033ff6cec9bbd986b495c5adba33e88e5b9a80b0afd6dff447ebfe49f20",
+ "receipt.en": "731043be25518a4dc5edf338da676ca87a8e58322d12d05640038828759a37f6",
+ "receipt.fi_invoice_buyer": "c127da5e39eb95b531a7336df2db38ea5eeede765a35971389cc5810bedea686",
+ "receipt.en_invoice_buyer": "44c62e20fad713afe0e62b74f23cac820945d1acd6e47fea32d64daa92d9c2cd",
+ "receipt.fi_refund": "3b575f4e492c4885f4433f3cb5a6ec0d53ffa1208983db82d3ce0b9d364e2c0a",
+ "receipt.en_refund": "0eef321e88c50817eb32ac72d28432e53ed6fbaad103526f4207384174040d8a",
+ "receipt.fi_rounding_nofooter": "2aa99ed5ef8abc765fae307a665bfb93d6475d61c77a798e7155c35223bedd1a",
+ "receipt.en_rounding_plus": "93f286deb3c6301364f1bdd374b1fe9766243a160650e15e33e34f4c7954f6bf",
+ "receipt.fi_monta_riviä": "27f78ed53989e10e6d7732d24fbb984a13e82b613435cd3510d3bc53c82c0af8"
 }

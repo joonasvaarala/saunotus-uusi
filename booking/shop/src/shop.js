@@ -10,6 +10,7 @@ import { pt } from './pay-choices-texts.js';
 import { T } from './i18n.js';
 import { createWaitlistView } from './waitlist-ui.js';
 import { visibleWaitlistSlots, fullyBooked, hasWaitlistSlots } from './waitlist-logic.js';
+import { indexShopEvents, missingEventProducts, eventIsFull, eventWaitlistPath, byEventStart } from './event-full.js';
 import { loadProducts as loadTreatmentProducts, splitCatalog, isListed as treatmentListed, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
 import { pickCatalog } from './catalog-audience.js';
 import { heroShort, cardShort, fallbackDesc } from './short-desc.js';
@@ -18,7 +19,7 @@ import { cardMeta } from './card-meta.js';
 import { kindOf, chipsFor, DAY_KIND_ORDER } from './catalog-kind.js';
 import { createTexts, loadShopTexts, applyShopTexts } from './site-texts.js';
 import { checkoutUpsellSection, orderUpsellSection, confirmationUpsellOrder } from './upsell-ui.js';
-import { productImageElement, CARD_WIDTHS, THUMB_WIDTHS, HERO_WIDTHS, SIZES } from './product-image.js';
+import { productImageElement, CARD_WIDTHS, THUMB_WIDTHS, HERO_WIDTHS, SIZES, catalogImageUrl } from './product-image.js';
 import { fmtMinutes } from './site-texts-logic.js';
 import { OPT } from './options-texts.js';
 import { optName, needsOption, findOption } from './options-logic.js';
@@ -40,6 +41,9 @@ import { customerInvoiceLock } from './invoice-lock.js';
 import { formPaysOnline, paysByInvoice } from './company-pay.js';
 import { clockFromIso } from './clock.js';
 import { cardAnchor } from './card-link.js';
+import { bindLangLinks, restoreDraft } from './lang-switch.js';
+import { confirmPageKind } from './confirm-heading.js';
+import { includedPlain, swimwearPlain, swimwearKey } from './product-layout.js';
 
 const S = window.BOOKING_SHOP;                   // build-aikainen konfiguraatio (kieli, polut, ei-verkossa-varattavat tuotteet)
 const t = T[S.lang] || T.fi;
@@ -67,7 +71,9 @@ const dayLong = (iso) => fmt(iso, { weekday: 'long', day: 'numeric', month: 'lon
 const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const todayHel = () => new Date().toLocaleDateString('sv-SE', { timeZone: TZ });
 const pad2 = (n) => String(n).padStart(2, '0');
-const cleanLabel = (l) => (l || '').replace(/\(\s*\d+(?:[.,]\d+)?\s*h\s*\)/g, '').replace(/\b(ma|ti|ke|to|pe|la|su)(–(ma|ti|ke|to|pe|la|su))?\b/g, '').replace(/\d{1,2}(:\d{2})?(–\d{1,2}(:\d{2})?)?/g, '').replace(/\s{2,}/g, ' ').trim();
+// pelkkä päivämäärä/kellonaika (esim. "31.10.2026 klo 15.00" / "31.10.2026 at 15:00") → jäljelle jää vain välimerkkejä ja klo/at: ei alaotsikkoa
+const labelRest = (r) => (/^[\s.,:;–-]*(?:(?:klo|at)\b[\s.,:;–-]*)?$/i.test(r) ? '' : r);
+const cleanLabel = (l) => labelRest((l || '').replace(/\(\s*\d+(?:[.,]\d+)?\s*h\s*\)/g, '').replace(/\b(ma|ti|ke|to|pe|la|su)(–(ma|ti|ke|to|pe|la|su))?\b/g, '').replace(/\d{1,2}(:\d{2})?(–\d{1,2}(:\d{2})?)?/g, '').replace(/\s{2,}/g, ' ').trim());
 const priceFor = (s, n) => (s.price_mode === 'per_person' ? s.unit_price * n : s.price_mode === 'fixed' ? s.base_price : s.base_price + Math.max(0, n - (s.included_persons || 0)) * (s.extra_person_price || 0));
 // lisäpalvelun enimmäismäärä: henkilömäärä × max/hlö, enintään 99 (sama kuin booking._addon_limit)
 const addonLimit = (a, n) => Math.min((a.max_per_person ?? 99) * Math.max(1, n), 99);
@@ -134,7 +140,7 @@ const MOCK = new URLSearchParams(location.search).get('mock') === '1';
 let MOCK_FETCH;   // ?mock=1&scenario=pay: mobilepay-start / mobilepay-notify -funktioiden mock (fetch-yhteensopiva)
 if (MOCK) { const sm = (await import('./shop-mock.js')).createShopMock({ fail: new URLSearchParams(location.search).get('fail'), scenario: new URLSearchParams(location.search).get('scenario') || '', mpResult: new URLSearchParams(location.search).get('mpresult') || '' }); setRpcOverride(sm.rpc); MOCK_FETCH = sm.mpFetch; }
 // Mock-tilan parametrit säilyvät linkeissä ja ohjauksissa (scenario=hold… toimii koko kulun läpi kassalta vahvistussivulle)
-const mockQs = () => { if (!MOCK) return ''; const cur = new URLSearchParams(location.search), q = new URLSearchParams({ mock: '1' }); for (const k of ['scenario', 'mpresult', 'mpinterval', 'mpmax', 'holdsec', 'fail', 'ritual']) if (cur.has(k)) q.set(k, cur.get(k)); return `?${q}`; };
+const mockQs = () => { if (!MOCK) return ''; const cur = new URLSearchParams(location.search), q = new URLSearchParams({ mock: '1' }); for (const k of ['scenario', 'mpresult', 'mpinterval', 'mpmax', 'holdsec', 'fail', 'ritual', 'img']) if (cur.has(k)) q.set(k, cur.get(k)); return `?${q}`; };
 const bk = (hash) => `${S.shopHref}${mockQs()}#${hash}`;
 // Kassan pitotila ja maksutavat yhdestä paikasta (vuoro- ja hoitokassa): palvelin (public_checkout_payment_options) päättää, ei kovakoodata. Virhe → vanha käytös.
 const holdInfo = () => loadPayChoices({ rpc, fetchImpl: MOCK_FETCH }).then((m) => {
@@ -154,7 +160,8 @@ const texts = createTexts({ lang: S.lang, format: { price: (n) => money(n), dura
 const state = { catalog: null, settings: null, images: new Map(), treatments: [], months: new Map(), busy: false, annualOffer: null };
 // tyhjät (null/false) lapset ohitetaan: replaceChildren(null) kirjoittaisi sivulle tekstin "null" (esim. tuotesivu ilman hoitovalitsinta)
 const mount = (...nodes) => { root.replaceChildren(...nodes.flat().filter((n) => n != null && n !== false)); root.setAttribute('aria-busy', 'false'); };
-const focusTop = () => { const el = [...root.querySelectorAll('h2,h1')].find((n) => !n.closest('.bk-rich')) || document.querySelector('main .hero.page h1'); if (el) { el.setAttribute('tabindex', '-1'); el.focus({ preventScroll: false }); } };
+const focusQuiet = (el, extra = {}) => { if (el) el.focus({ preventScroll: true, focusVisible: false, ...extra }); };
+const focusTop = () => { const el = [...root.querySelectorAll('h2,h1')].find((n) => !n.closest('.bk-rich')) || document.querySelector('main .hero.page h1, main h1'); if (el) { el.setAttribute('tabindex', '-1'); focusQuiet(el, { preventScroll: false }); } };
 const spinner = () => mount(h('p', { class: 'bk-loading', role: 'status', text: t.loading }));
 const errorBox = (msg) => h('p', { class: 'bk-error', role: 'alert', text: msg });
 const phoneBox = () => h('p', { class: 'bk-contact' }, h('a', { href: `tel:${S.phoneTel}`, text: S.phone }), ' · ', h('a', { href: `mailto:${S.email}`, text: S.email }));
@@ -186,7 +193,7 @@ async function loadBase() {
   // ?mock=1&rich=1 ja window.BOOKING_RICH_SAMPLE: paikallinen kuvakaappaus. Ei tallenna, ei koske muita tuotteita.
   const richDemo = MOCK && new URLSearchParams(location.search).get('rich') === '1' && typeof window.BOOKING_RICH_SAMPLE === 'string' ? window.BOOKING_RICH_SAMPLE : '';
   if (richDemo) { const sample = [...state.catalog, ...state.treatments][0]; if (sample) { sample.description = richDemo; sample.description_en = richDemo; } }
-  for (const i of Array.isArray(imgs) ? imgs : []) if (i?.path) state.images.set(+i.product_id, { url: storageUrl('product-images', i.path), alt: i.alt || '' });
+  for (const i of Array.isArray(imgs) ? imgs : []) if (i?.path) state.images.set(+i.product_id, { url: catalogImageUrl(storageUrl('product-images', i.path), i), alt: i.alt || '' });
 }
 // Tuotekuva: kiinteä kuvasuhde (varaa tilan → ei layout-hyppyä), lazy-lataus alle taitteen, alt = ylläpidon alt-teksti tai tuotteen nimi.
 // alt=false → koriste (nimi on jo vieressä tekstinä). Rikkinäinen kuva poistetaan kokonaan (ei rikkinäistä kuvaketta).
@@ -252,21 +259,32 @@ function setHero(p) {
 // Kortin kuvaus (booking_156): lyhyt kuvaus puhdistettuna, tyhjä → johdettu ote 170 merkkiä (short-desc.js).
 const cardExcerpt = (p) => cardShort(h, p, S.lang, pdesc(p));
 // ---- näkymä 1: tuotelista ----
-function viewList(query) {
+async function viewList(query) {
   placeGiftNudge(true);
+  const events = await publicEvents();
+  const eventIndex = indexShopEvents(events);
+  for (const p of missingEventProducts(state.catalog, events)) state.catalog.push(p);
   const cat = [...state.catalog, ...state.treatments.filter(treatmentListed)];   // lisätuotteet (LISTING_HIDDEN_SLUGS) eivät näy listalla; tuotesivu toimii
   const kinds = chipsFor(cat);   // tyhjä kategoria ei saa chippiä; tapahtuma omassa chipissä (catalog-kind.js)
   const k = kinds.includes(query.get('k')) ? query.get('k') : 'all';
-  const list = cat.filter((p) => k === 'all' || kindOf(p) === k);
+  let list = cat.filter((p) => k === 'all' || kindOf(p) === k);
+  if (k === 'tapahtuma') list = [...list].sort(byEventStart(eventIndex));
   const tabs = h('nav', { class: 'bk-tabs', 'aria-label': t.title }, kinds.map((x) => h('a', { href: bk(`/?k=${x}`), 'aria-current': x === k ? 'true' : null, text: t['k_' + x] || t[x] || x })));
-  const cards = h('ul', { class: 'bk-cards' }, list.map((p) => p.treatment ? tv.card(p) : h('li', { class: 'bk-card' },
-    cardAnchor(h, bk(`/tuote/${p.slug}`),
-      pimg(p, 'card-img'),
-      h('h3', { text: pname(p) }),
-      cardExcerpt(p),
-      cardMeta(h, priceText(p), pdur(p)),   // ajankohta omalla rivillään hinnan yläpuolella (card-meta.js)
-      h('p', { class: 'bk-quiet-line', hidden: true, 'data-qp': p.id, 'data-qmark': 'list' }),   // booking_162: täyttyy vain, jos tuotteella on hiljaisen ajan ale
-      h('span', { class: 'btn sm' }, t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) }))))));
+  const cards = h('ul', { class: 'bk-cards' }, list.map((p) => {
+    if (p.treatment) return tv.card(p);
+    const ev = eventIndex.get(+p.id);
+    const full = p.category === 'event' && eventIsFull(ev);
+    const queue = full ? eventWaitlistPath(ev) : '';
+    return h('li', { class: `bk-card${full ? ' is-full' : ''}`, ...(full ? { 'data-testid': 'event-full-card' } : {}) },
+      cardAnchor(h, queue ? bk(queue) : bk(`/tuote/${p.slug}`),
+        pimg(p, 'card-img'),
+        full ? h('span', { class: 'bk-full-badge', text: t.full }) : null,
+        h('h3', { text: pname(p) }),
+        cardExcerpt(p),
+        cardMeta(h, priceText(p), pdur(p)),   // ajankohta omalla rivillään hinnan yläpuolella (card-meta.js)
+        h('p', { class: 'bk-quiet-line', hidden: true, 'data-qp': p.id, 'data-qmark': 'list' }),   // booking_162: täyttyy vain, jos tuotteella on hiljaisen ajan ale
+        h('span', { class: 'btn sm' }, full ? t.eventWaitlistCta : t.choose, h('span', { class: 'sr', text: ' – ' + pname(p) + (full ? `, ${t.full}` : '') }))));
+  }));
   const annual = annualPromo();
   // Sivun hero toistaa saman otsikon ja ingressin. Listalla jätetään yksi.
   mount(modeSwitch('cat'), tabs, cards, annual);
@@ -366,8 +384,8 @@ function dayItem({ r, p }, ds, withName = false) {
     h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }),
       withName ? h('span', { class: 'bk-prodname' }, h('a', { href: bk(`/tuote/${p.slug}/${ds}`), text: pname(p) })) : null, sub ? h('span', { class: 'bk-sub', text: sub }) : null, h('span', { class: 'bk-price', text: price, ...qAttrs(ok, p, r, 'day') })),
     h('div', { class: 'bk-slot-side' },
-      ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: 'bk-badge full', text: t.waitlistSessionSoldOut }),
-      ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}?via=day`) }, t.choose, h('span', { class: 'sr', text: ` ${title}, ${pname(p)}` })) : h('a', { class: 'btn sm light bk-waitlist-link', href: bk(`/jono/${r.rule_id}/${ds}/${p.id}?via=day`), text: t.waitlistJoinShort })));
+      ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: 'bk-badge full', text: p.category === 'event' ? t.full : t.waitlistSessionSoldOut }),
+      ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}?via=day`) }, t.choose, h('span', { class: 'sr', text: ` ${title}, ${pname(p)}` })) : h('a', { class: 'btn sm light bk-waitlist-link', href: bk(`/jono/${r.rule_id}/${ds}/${p.id}?via=day`), text: p.category === 'event' ? t.eventWaitlistCta : t.waitlistJoinShort })));
 }
 // hoito-/rituaaliajan rivi päivänäkymässä: valinta vie hoitovarausvirtaan (tuotesivu) esivalitulla päivällä ja ajalla (henkilömäärä 1, vaihdettavissa)
 function treatItem({ r, p }, ds) {
@@ -415,9 +433,9 @@ function prodCard(p, rs, ds, open, onToggle, treat = false) {
   const btn = h('button', { type: 'button', id: `${id}-btn`, class: 'bk-pc-head', 'aria-expanded': open ? 'true' : 'false', 'aria-controls': `${id}-panel`, onclick: () => onToggle(p, li) },
     pimg(p, 'pc-img', { alt: false, w: 160, hgt: 160 }),
     h('span', { class: 'bk-pc-main' }, h('strong', { class: 'bk-pc-name', text: pname(p) }), short ? h('span', { class: 'bk-pc-desc', text: short }) : null,
-      h('span', { class: 'bk-pc-meta', ...(treat || !avail.length ? {} : { 'data-qp': p.id, 'data-qday': ds, 'data-qmark': 'card' }) }, h('span', { class: 'bk-price', text: priceText(p) }), fullOnly ? h('span', { class: 'bk-badge full', text: t.waitlistSoldOut }) : h('span', { class: 'bk-badge free', text: `${t.timesFree(avail.length)}${avail.length ? ` · ${t.firstAt} ${hm(avail[0].r.starts_at)}` : ''}` }))),
+      h('span', { class: 'bk-pc-meta', ...(treat || !avail.length ? {} : { 'data-qp': p.id, 'data-qday': ds, 'data-qmark': 'card' }) }, h('span', { class: 'bk-price', text: priceText(p) }), fullOnly ? h('span', { class: 'bk-badge full', text: p.category === 'event' ? t.full : t.waitlistSoldOut }) : h('span', { class: 'bk-badge free', text: `${t.timesFree(avail.length)}${avail.length ? ` · ${t.firstAt} ${hm(avail[0].r.starts_at)}` : ''}` }))),
     h('span', { class: 'bk-pc-chev', 'aria-hidden': 'true' }));
-  const li = h('li', { class: `bk-pc${fullOnly ? ' full' : ''}${open ? ' open' : ''}`, 'data-slug': p.slug }, btn, panel);
+  const li = h('li', { class: `bk-pc${p.category === 'event' ? ' is-event' : ''}${fullOnly ? ' full' : ''}${open ? ' open' : ''}`, 'data-slug': p.slug }, btn, panel);
   return li;
 }
 async function viewDay(dateStr, keep, openSlug) {
@@ -488,7 +506,7 @@ async function viewDay(dateStr, keep, openSlug) {
     h('section', { class: 'bk-daypick', 'aria-label': t.pickDay }, nav, strip,
       h('p', { class: 'bk-legend' }, h('span', { class: 'dot free' }), t.free, ' ', h('span', { class: 'dot full' }), t.full, ' ', h('span', { class: 'dot unavail' }), t.unavailable, qLegend()), tools),
     h('div', { class: 'bk-slots', 'aria-live': 'polite' }, results));
-  if (keep) { const el = document.getElementById('bk-day-h'); if (el) { revealIfHidden(el); el.focus({ preventScroll: true }); } } else focusTop();
+  if (keep) { const el = document.getElementById('bk-day-h'); if (el) { revealIfHidden(el); focusQuiet(el); } } else focusTop();
   if (!keep && openSlug) document.querySelector('.bk-pc.open')?.scrollIntoView({ block: 'start' });   // Takaisin lomakkeelta → sama tuote auki ja näkyvissä
   if (treatBox) fillTreatments(treatBox, results, ds, today, tmax, openSlug, toggle, free.length > 0);
 }
@@ -505,7 +523,7 @@ async function viewProduct(slug, dateStr, query) {
     if (ev) { viewEventClosed(ev); return; }
     const st = (await fetch(S.staticProductsUrl).then((r) => r.json()).catch(() => ({})))[slug];
     mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })),
-      h('h2', { text: st ? st.name : t.unknownProduct }), st ? fallbackDesc(h, st, S.lang) : null,   // kuvaus voi olla rikasta: puhdistettuna (rich-view.js), ei raakana tekstinä
+      h('h2', { text: st ? pname(st) : t.unknownProduct }), st ? fallbackDesc(h, st, S.lang) : null,   // kuvaus voi olla rikasta: puhdistettuna (rich-view.js), ei raakana tekstinä
       st ? h('div', { class: 'bk-notice' }, h('p', { text: t.contactUs }), phoneBox()) : null);
     focusTop(); return;
   }
@@ -516,11 +534,19 @@ async function viewProduct(slug, dateStr, query) {
   const wrap = h('div', { class: 'bk-prod' });
   const draw = async () => {
     const calBox = h('div', { class: 'bk-cal' }), slotBox = h('div', { class: 'bk-slots', 'aria-live': 'polite' });
+    const desc = pdesc(p) || '';
+    const inc = includedPlain(desc), swim = swimwearPlain(desc);
     wrap.replaceChildren(
       h('p', {}, h('a', { href: bk('/'), text: t.backList })),
-      richHost(h, pdesc(p) || '', 'bk-desc'),
-      h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), pdur(p) ? ` · ${pdur(p)}` : ''),
-      h('h3', { text: t.pickDate }), calBox, slotBox);
+      h('div', { class: 'bk-prod-layout' },
+        h('div', { class: 'bk-facts' },
+          h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), pdur(p) ? ` · ${pdur(p)}` : ''),
+          inc ? h('p', { class: 'bk-included', 'data-testid': 'included', text: inc }) : null,
+          swim ? h('p', { class: 'bk-note bk-swim', 'data-testid': 'swimwear', text: swim }) : null,
+          S.cancelRule ? h('p', { class: 'bk-note bk-cancel-rule', 'data-testid': 'product-cancel', text: S.cancelRule }) : null,
+          h('a', { class: 'bk-jump', href: '#valitse-aika', text: t.pickTime })),
+        h('div', { class: 'bk-prod-cal', id: 'valitse-aika' }, h('h3', { text: t.pickDate }), calBox, slotBox),
+        desc ? h('details', { class: 'bk-more' }, h('summary', { text: t.moreInfo }), richHost(h, desc, 'bk-desc')) : null));
     let byDay = {};
     try { byDay = await loadMonth(p.id, y, m); } catch (e) { calBox.append(errorBox(t.loadError)); return; }
     const first = new Date(y, m, 1), days = new Date(y, m + 1, 0).getDate(), lead = (first.getDay() + 6) % 7;
@@ -568,8 +594,8 @@ function slotItem(r, ds, p) {
   return h('li', { class: `bk-slot ${r.status}` },
     h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }), sub ? h('span', { class: 'bk-sub', text: sub }) : null, h('span', { class: 'bk-price', text: price, ...qAttrs(ok, p, r, 'slot') })),
     h('div', { class: 'bk-slot-side' },
-      ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: 'bk-badge full', text: t.waitlistSessionSoldOut }),
-      ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}`) }, t.choose, h('span', { class: 'sr', text: ` ${title}` })) : h('a', { class: 'btn sm light bk-waitlist-link', href: bk(`/jono/${r.rule_id}/${ds}/${p.id}`), text: t.waitlistJoinShort })));
+      ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: 'bk-badge full', text: p.category === 'event' ? t.full : t.waitlistSessionSoldOut }),
+      ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}`) }, t.choose, h('span', { class: 'sr', text: ` ${title}` })) : h('a', { class: 'btn sm light bk-waitlist-link', href: bk(`/jono/${r.rule_id}/${ds}/${p.id}`), text: p.category === 'event' ? t.eventWaitlistCta : t.waitlistJoinShort })));
 }
 
 // booking_158: tapahtumat (public_events, kanava shop). Virhe tai vanha kanta ilman RPC:tä → [] (vanha käytös).
@@ -922,7 +948,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
       msg.replaceChildren(errorBox(e.mapped ? e.message : t.errorGeneric));   // palvelimen raaka message ei koskaan asiakkaalle (ui.shop.error_generic)
       if (['capacity_exceeded', 'private_booked', 'public_shift_booked', 'space_closed'].includes(e.code)) state.months.clear();
       if (isRitualError(e.code)) loadRitual();   // booking_166: rituaaliaika ehti täyttyä → vapaat ajat uudelleen
-      msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true });
+      msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); focusQuiet(msg.firstChild);
     }
   } },
     h('fieldset', { class: 'bk-section' }, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, minus, num, plus)),
@@ -1032,6 +1058,16 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     const tp = state.treatments.find((x) => x.id === +it.product_id);
     if (tp && needsOption(tp)) { optRow = ox.notChosen; optNote = ox.notChosenConfirm; }
   }
+  const pageKind = confirmPageKind(b, co, paysByInvoice(b));
+  const pageTitle = { finish: t.finishTitle, cancelled: t.confCancelled, expired: t.confExpired, preliminary: ht(S.lang, 'status.preliminary') }[pageKind];
+  if (pageTitle) {
+    const h1 = document.querySelector('main .hero.page h1');
+    if (h1) h1.textContent = pageTitle;
+    const rest = document.title.includes(' | ') ? document.title.split(' | ').slice(1).join(' | ') : 'Sipoonjoen Perinnesauna';
+    document.title = `${pageTitle} | ${rest}`;
+    document.querySelector('meta[property="og:title"]')?.setAttribute('content', document.title);
+  }
+  const swimKey = (b.status === 'confirmed' || co?.confirmed) ? swimwearKey(sp?.slug) : null;
   const unpaidEnd = ['cancelled', 'expired'].includes(b.status) && !['paid', 'refunded', 'partially_refunded'].includes(b.payment_status) && !paysByInvoice(b);
   const dl = h('dl', { class: 'bk-sum' },
     h('dt', { text: t.order }), h('dd', { text: String(b.order_no) }), h('dt', { text: t.what }), h('dd', { text: prodName }),
@@ -1057,6 +1093,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   } }, t.cancelBooking));
   if (b.status === 'pending' && inv.locked) actions.append(h('p', { class: 'bk-note', role: 'status', 'data-testid': 'invoiced-cancel-note', text: t.invoicedCancelNote }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })));
   mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { 'data-testid': 'conf-title', text: b.status === 'cancelled' ? t.confCancelled : b.status === 'expired' ? t.confExpired : b.status === 'pending' || (co && co.awaiting) ? ht(S.lang, 'h2.awaiting') : t.confTitle }), h('p', { class: 'bk-status', role: 'status', 'data-testid': 'conf-status', text: head }), holdHost, mpHost, dl,   // pitotilassa: otsikko + tilabadge → pitopaneeli → tiivis tilausyhteenveto → maksuosio (secEl lisätään yhteenvedon jälkeen)
+    swimKey ? h('p', { class: 'bk-note bk-swim', 'data-testid': 'conf-swim', text: t[swimKey] }) : null,
     b.status === 'confirmed' && paysByInvoice(b) && b.payment_status !== 'paid' ? h('p', { class: 'bk-pay', text: t.companyInvoiceMethodNote }) : null,
     b.status === 'confirmed' && b.payment_status !== 'paid' && b.payment_status !== 'invoiced' && !paysByInvoice(b) && !isTreatmentBooking(b) && !online ? h('p', { class: 'bk-pay', text: t.payLater }) : null, optNote && b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-option-note', text: optNote }) : null, actions, out,
     b.status === 'confirmed' && (b.has_ritual_addon || ritItems.length) ? h('p', { class: 'bk-note', 'data-testid': 'conf-ritual-note', text: rtx('ritualConfNote') }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email }))
@@ -1101,7 +1138,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   }
   if (!secEl && notice && (notice.kind === 'gift' || notice.kind === 'paylater')) secEl = payNotice(L, notice);   // kokonaan maksettu: maksuosio poistuu, mutta ilmoitus jää
   if (secEl) { if (holdV) dl.after(secEl); else root.firstElementChild.querySelector('.bk-actions')?.before(secEl); }   // pitotilassa maksuvalinta yhteenvedon alla
-  if (refresh) { const el = root.querySelector('[data-testid=pc-notice],[data-testid=vc-notice]'); if (el) { el.scrollIntoView({ block: 'center' }); el.focus({ preventScroll: true }); } else if (holdV && !retPay) holdHost.querySelector('h3')?.focus(); } else focusTop();   // pitotilan vaihtuessa fokus tilaotsikkoon
+  if (refresh) { const el = root.querySelector('[data-testid=pc-notice],[data-testid=vc-notice]'); if (el) { el.scrollIntoView({ block: 'center' }); focusQuiet(el); } else if (holdV && !retPay) focusQuiet(holdHost.querySelector('h3')); } else focusTop();   // pitotilan vaihtuessa fokus tilaotsikkoon
   if (retPay && model) {   // paluu maksusivulta: tilaus kysytään uudelleen; kesken oleva MobilePay/Visma täsmäytetään vielä (runReturn jää tuotuna)
     const num = (k) => { const v = +new URLSearchParams(location.search).get(k); return Number.isFinite(v) && v > 0 ? v : undefined; };
     const intervalMs = MOCK ? (num('mpinterval') || 2500) : 2500;
@@ -1195,7 +1232,7 @@ async function viewChange(token, b) {
       location.hash = token; window.scrollTo({ top: 0 });
     } catch (e) {
       submit.textContent = t.saveChange; upd();
-      msg.replaceChildren(errorBox(e.mapped ? e.message : t.errorGeneric)); msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); msg.firstChild.focus({ preventScroll: true });
+      msg.replaceChildren(errorBox(e.mapped ? e.message : t.errorGeneric)); msg.firstChild.setAttribute('tabindex', '-1'); revealIfHidden(msg); focusQuiet(msg.firstChild);
       if (['capacity_exceeded', 'private_booked', 'public_shift_booked', 'space_closed'].includes(e.code)) loadSessions();
     }
   } }, h('fieldset', {}, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, minus, num, plus),
@@ -1247,12 +1284,13 @@ async function route(keep = false) {
     else if (parts[0] === 'hoito' && parts[1]) { const tp = state.treatments.find((x) => x.slug === parts[1]); if (tp) await tv.viewCheckout(tp, parts[2], parts[3], q); else await viewProduct(parts[1], null, q); }
     else if (parts[0] === 'varaa' && parts[1] && parts[2]) await viewCheckout(parts[1], parts[2], parts[3], q.get('via'));
     else if (parts[0] === 'jono' && parts[1] && parts[2] && parts[3]) await wv.viewWaitlist(parts[1], parts[2], parts[3], q.get('via'));
-    else { viewList(q); focusTop(); }
+    else { await viewList(q); focusTop(); }
   } catch (e) {
     console.warn('booking route error', e);
     mount(errorBox(t.loadError), phoneBox());
-  } finally { document.documentElement.classList.remove('bk-hero-wait'); }
+  } finally { document.documentElement.classList.remove('bk-hero-wait'); restoreDraft(root); }
 }
+if (S.otherHref) bindLangLinks(S.otherHref);
 let last = '';
 window.addEventListener('hashchange', () => {
   // päivän valinta kalenterissa vaihtaa hashin ilman uudelleenpiirtoa (replaceState ei laukaise tapahtumaa); muut siirtymät piirretään uudelleen

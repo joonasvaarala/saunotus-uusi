@@ -46,7 +46,8 @@ test('vahvistussivu ei näytä viestipalvelun keskeneräisyyslausetta ja maksama
 });
 
 test('tuotekortti on yksi linkki', () => {
-  assert.match(shop, /cardAnchor\(h, bk\(`\/tuote\/\$\{p\.slug\}`\)/);
+  // booking_210: täyden tapahtuman kortti vie jonoon, muuten tuotesivulle (yksi linkki kummassakin).
+  assert.match(shop, /cardAnchor\(h, (?:queue \? bk\(queue\) : )?bk\(`\/tuote\/\$\{p\.slug\}`\)/);
   assert.match(read('booking/shop/src/treatment-ui.js'), /cardAnchor\(h, bk\(`\/tuote\/\$\{p\.slug\}`\)/);
   assert.match(read('booking/shop/src/card-link.js'), /querySelectorAll\('a'\)/);
 });
@@ -79,6 +80,18 @@ test('maksutapojen merkit ovat jaetussa kansiossa eikä välittäjän nimeä nä
   assert.doesNotMatch(ui, /Montonio|montonio/);
   assert.match(read('src/render.mjs'), /img\/pay\/\$\{id\}\.svg/);
   assert.match(read('src/render.mjs'), /footerPayOnline/);
+});
+
+test('ohjelmallinen otsikkofokus ei piirrä kehystä, näppäimistökehys säilyy', () => {
+  const css = read('src/styles.css');
+  const shopCss = read('booking/shop/src/shop.css');
+  assert.match(css, /:focus-visible\{outline:3px solid #1d6fd8/);
+  assert.match(css, /\[tabindex="-1"\]:focus-visible\{outline:none!important\}/);
+  assert.doesNotMatch(css, /\.hero\.page :is\(h1,h2\):focus-visible\{outline:/);
+  assert.doesNotMatch(shopCss, /\.hero\.page :is\(h1,h2\):focus-visible\{outline:3px/);
+  assert.doesNotMatch(shopCss, /#booking-app :is\(h1,h2,h3\):focus-visible\{outline:3px/);
+  assert.match(read('booking/shop/src/shop.js'), /focusVisible: false/);
+  assert.match(read('src/render.mjs'), /<main id="main" tabindex="-1">/);
 });
 
 test('tuontitiedosto sisältää uudet FI- ja EN-tekstit', () => {

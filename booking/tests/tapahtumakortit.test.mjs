@@ -16,7 +16,7 @@ const NOW = Date.parse('2026-10-24T12:00:00Z');
 const ev = (over = {}, occ = []) => ({ product_id: 31, slug: 'perinnesaunotusilta', name: 'Perinnesaunotusilta', name_en: 'Traditional sauna evening', category: 'event', price: 69, sale_open: true, occurrences: occ, ...over });
 const o = (starts_at, ends_at, status = 'available') => ({ rule_id: 1, starts_at, ends_at, status });
 
-test('selectShopEvents: vain vapaat tulevat kerrat; full, closed ja menneet pois; tyhjä/virheellinen → []', () => {
+test('selectShopEvents: tulevat vapaat ja täydet; closed ja menneet pois; aikajärjestys; tyhjä/virheellinen → []', () => {
   const list = [
     ev({}, [o('2026-11-14T14:00:00Z', '2026-11-14T17:00:00Z'), o('2026-10-01T14:00:00Z', '2026-10-01T17:00:00Z'), o('2026-11-21T14:00:00Z', '2026-11-21T17:00:00Z', 'closed')]),
     ev({ product_id: 32, slug: 'naisten-joulusauna', name: 'Naisten joulusauna' }, [o('2026-11-07T14:00:00Z', '2026-11-07T17:00:00Z', 'full')]),
@@ -25,19 +25,28 @@ test('selectShopEvents: vain vapaat tulevat kerrat; full, closed ja menneet pois
     ev({ product_id: 35, slug: 'kiinni', name: 'Kiinni', sale_open: false }, [o('2026-12-01T14:00:00Z', '2026-12-01T17:00:00Z', 'closed')]),
   ];
   const sel = C.selectShopEvents(list, NOW);
-  assert.deepEqual(sel.map((x) => x.slug), ['perinnesaunotusilta']);
-  assert.equal(sel[0].occurrences.length, 1, 'vain available-kerta');
+  assert.deepEqual(sel.map((x) => x.slug), ['naisten-joulusauna', 'perinnesaunotusilta']);
+  assert.equal(C.eventIsFull(sel[0]), true);
+  assert.equal(C.eventIsFull(sel[1]), false);
+  assert.equal(sel[1].occurrences.length, 1, 'vain available-kerta, closed ja mennyt pois');
+  assert.equal(C.eventWaitlistPath(sel[0]), '/jono/1/2026-11-07/32');
+  assert.equal(C.eventWaitlistPath(sel[1]), '');
   assert.equal(C.linkTarget, undefined, 'Johku-linkkivaihtoehto poistettu');
   for (const bad of [undefined, null, {}, 'x', []]) assert.deepEqual(C.selectShopEvents(bad, NOW), []);
   assert.equal(C.selectShopEvents([ev({ sale_open: false }, [o('2026-11-14T14:00:00Z', '2026-11-14T17:00:00Z', 'closed')])], NOW).length, 0);
-  assert.equal(C.selectShopEvents([ev({ sale_open: true }, [o('2026-11-14T14:00:00Z', '2026-11-14T17:00:00Z', 'full')])], NOW).length, 0);
+  const full = C.selectShopEvents([ev({ sale_open: true }, [o('2026-11-14T14:00:00Z', '2026-11-14T17:00:00Z', 'full')])], NOW);
+  assert.equal(full.length, 1);
+  assert.equal(C.eventIsFull(full[0]), true);
 });
 
 test('päivät ja kellonajat: yksipäiväinen ja monipäiväinen FI/EN', () => {
   const one = o('2026-11-14T14:00:00Z', '2026-11-14T17:00:00Z'), two = o('2026-11-28T07:00:00Z', '2026-11-29T14:00:00Z');
-  assert.equal(C.occDates(one, 'fi'), '14.11.');
-  assert.equal(C.occDates(two, 'fi'), '28.11.–29.11.');
-  assert.equal(C.occDates(two, 'en'), '28 Nov–29 Nov');
+  const nextYear = o('2027-02-06T14:00:00Z', '2027-02-06T17:00:00Z');
+  assert.equal(C.occDates(one, 'fi', NOW), '14.11.');
+  assert.equal(C.occDates(two, 'fi', NOW), '28.11.–29.11.');
+  assert.equal(C.occDates(two, 'en', NOW), '28 Nov–29 Nov');
+  assert.equal(C.occDates(nextYear, 'fi', NOW), '6.2.2027');
+  assert.equal(C.occDates(nextYear, 'en', NOW), '6 Feb 2027');
   assert.equal(C.occTime(one, 'fi'), 'klo 16.00–19.00');
   assert.equal(C.occTime(one, 'en'), '16:00–19:00');
   assert.equal(C.occTime(two, 'fi'), '');
@@ -76,6 +85,22 @@ test('vanha data (events_shop puuttuu tai tyhjä): kortit kb.event_dates + cards
       assert.ok(legacyEn.includes(`href="${lib.e(lib.pageHref('book', 'en', C.shopHash(p.slug)))}"`), `EN ${p.slug}`);
     }
   } finally { if (saved === undefined) delete lib.kb.events_shop; else lib.kb.events_shop = saved; }
+});
+
+test('täysi kortti: himmennys, Täynnä ja Liity jonoon; vapaa kortti säilyttää Varaa', () => {
+  const full = ev({ product_id: 33, slug: 'kekri' }, [o('2026-11-07T14:00:00Z', '2026-11-07T17:00:00Z', 'full')]);
+  const open = ev({}, [o('2026-11-14T14:00:00Z', '2026-11-14T17:00:00Z')]);
+  const html = C.shopEventsHtml([full, open], 'fi', {
+    e: lib.e, money: lib.money, fullText: 'Täynnä', fullCta: 'Liity jonoon →', arrow: 'Varaa →',
+    link: (x) => lib.pageHref('book', 'fi', C.eventWaitlistPath(x) || C.shopHash(x.slug)), img: () => '',
+  });
+  assert.match(html, /class="card ev is-full"/);
+  assert.match(html, /class="pill full">Täynnä/);
+  assert.match(html, /href="\/varaa\/#\/jono\/1\/2026-11-07\/33"/);
+  assert.match(html, /Liity jonoon →/);
+  assert.match(html, /href="\/varaa\/#\/tuote\/perinnesaunotusilta"/);
+  assert.match(html, /Varaa →/);
+  assert.doesNotMatch(html.split('is-full')[1] || '', /class="card ev is-full"/);
 });
 
 test('XSS: tietokannan nimet, kuvaukset ja slug escapattuina; kuvaus pelkkänä tekstinä', () => {

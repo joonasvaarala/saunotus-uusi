@@ -10,6 +10,7 @@ import { loadEventsTexts, evText as T } from '../events-texts.js';
 import { getLang } from '../talous-i18n.js';
 import { buildSeries, defaultLabel, validateBlock, blockToRow, blocksPayload, timeline, selectableResources, channelsOf, normChannels, CHANNELS,
   copyArgs, copyName, conflictsOf, localParts, MAX_BLOCKS, occurrenceFlags, bookingCount, messageDraft, customerMessageText, participantsToCsv, weekdayIso } from '../events-logic.js';
+import { eventQueueParts } from '../event-waitlist.js';
 
 const ERR_CODES = new Set(['conflict', 'has_reservations', 'has_waitlist', 'max_below_sold', 'multi_day_training_only', 'invalid_resource', 'not_event', 'event_managed',
   'no_subject', 'subject_long', 'no_body', 'body_long', 'provider_name', 'no_recipients', 'no_confirm', 'bad_range', 'no_weekdays']);
@@ -205,6 +206,7 @@ export async function render({ ctx, refs, reload, query }) {
     const showBlocks = () => { blocksHost.replaceChildren(canEdit ? blocksEditor(p, r) : blocksReadOnly(r)); };
     const btn = (testid, text, onclick, cls = 'btn sm') => h('button', { type: 'button', class: cls, 'data-testid': testid, onclick }, text, h('span', { class: 'sr', text: ` – ${label}` }));
     const booked = bookingCount(r);
+    const queue = eventQueueParts(h, { lang: getLang(), ruleId: r.id, rpc });
     const li = h('li', { class: `card ev-occ-item${flags.active && !flags.cancelled ? '' : ' off'}`, 'data-testid': 'event-occurrence' },
       h('div', { class: 'row between wrap' },
         h('div', {}, h('strong', { class: 'ev-occ-label', text: label }), h('div', { class: 'muted', text: span(r.starts_at, r.ends_at) })),
@@ -212,10 +214,12 @@ export async function render({ ctx, refs, reload, query }) {
       h('div', { class: 'row wrap ev-occ-actions' },
         btn('event-occ-blocks', T('blocks'), () => showBlocks(), 'btn sm ghost'),
         h('a', { class: 'btn sm ghost', href: hrefOf(listQuery({ tapahtuma: p.product_id, valilehti: 'osallistujat', kerta: r.id })) }, T('quick_people')),
+        queue.button,
         canEdit ? btn('event-occ-edit', T('edit_occurrence'), () => { editHost.replaceChildren(inlineForm(p, r, () => editHost.replaceChildren())); }) : null,
         canEdit ? btn('event-occ-copy', T('copy_to_date'), () => copyOcc(r)) : null,
         canEdit && booked ? btn('event-occ-cancel', T('cancel'), () => cancelOcc(r, label), 'btn sm danger') : null,
         canEdit ? btn('event-occ-delete', T('delete'), () => deleteOcc(p, r, label), 'btn sm danger') : null),
+      queue.host,
       editHost, blocksHost);
     if ((r.blocks || []).length && !canEdit) showBlocks();
     return li;

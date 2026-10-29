@@ -73,12 +73,14 @@ const px = (key, lang) => ST.tx(key, lang, { state: siteTexts, fallback: pageDef
 const pageSet = (lang) => ({ title: px('page.book.title', lang), text: px('page.book.lead', lang), meta: px('seo.book.title', lang), desc: px('seo.book.description', lang), noscript: px('page.book.noscript', lang), ctitle: px('page.book_confirm.title', lang), cmeta: px('seo.book_confirm.title', lang) });
 const T = { fi: pageSet('fi'), en: pageSet('en') };
 for (const lang of ['fi', 'en']) {
+  const other = lang === 'fi' ? 'en' : 'fi';
   for (const page of ['shop', 'confirm']) {
     const t = T[lang];
     const S = {
       lang, page: page === 'shop' ? 'shop' : 'confirm', shopHref: BASE + PATHS[lang].shop, confirmHref: BASE + PATHS[lang].confirm,
+      otherHref: BASE + PATHS[other][page === 'shop' ? 'shop' : 'confirm'],
       orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order },   // vuosikortin osto → tilaussivu (booking_142)
-      termsHref: L.pageHref('terms', lang), infoHref: L.pageHref('info', lang), phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email,
+      termsHref: L.pageHref('terms', lang), privacyHref: L.pageHref('privacy', lang), infoHref: L.pageHref('info', lang), phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email,
       cancelRule: cancelRuleText(lang),
       staticProductsUrl: `${BASE}/booking/static-products.json`, siteTextsUrl: `${BASE}/booking/site-texts.json`, links: LINKS(lang),
     };
@@ -87,7 +89,10 @@ for (const lang of ['fi', 'en']) {
       + `<script src="${BASE}/booking/config.js"></script><script>window.BOOKING_SHOP=${JSON.stringify(S)}</script><script type="module" src="${BASE}/booking/shop.js"></script>`;
     let html = R.layout({ lang, key: 'book', meta: { title: page === 'shop' ? t.meta : t.cmeta, description: t.desc, og: 'ovi-kaiverrus' }, body });
     html = html.replace('</head>', `<link rel="stylesheet" href="${BASE}/booking/shop.css">${page === 'shop' ? '<script>if(/^#\\/(tuote|varaa|hoito)\\//.test(location.hash))document.documentElement.classList.add("bk-hero-wait")</script>' : ''}</head>`);
-    if (page === 'confirm') html = html.replace(/<link rel="canonical"[^>]*>(<link rel="alternate"[^>]*>)*/, '').replace('<meta name="description"', '<meta name="robots" content="noindex,nofollow"><meta name="description"');
+    if (page === 'confirm') {
+      html = html.replace(/<link rel="canonical"[^>]*>(<link rel="alternate"[^>]*>)*/, '').replace('<meta name="description"', '<meta name="robots" content="noindex,nofollow"><meta name="description"');
+      html = html.replace(/(<div class="lang"[^>]*>(?:(?!<\/div>).)*?<a href=")[^"]*(")/s, `$1${BASE + PATHS[other].confirm}$2`);
+    }
     write(PATHS[lang][page === 'shop' ? 'shop' : 'confirm'], html);
   }
 }
@@ -98,14 +103,16 @@ const OT = { fi: orderSet('fi'), en: orderSet('en') };
 if (pageFallbacks) console.log(`site-texts: ${pageFallbacks} varaus-/tilaussivun tekstiä käyttää repon varatekstiä (avain ei vielä tietokannassa)`);
 for (const lang of ['fi', 'en']) {
   const t = OT[lang];
-  const S = { lang, page: 'order', base: BASE, links: LINKS(lang), siteTextsUrl: `${BASE}/booking/site-texts.json`, orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order }, shopHref: BASE + PATHS[lang].shop, phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email };
+  const other = lang === 'fi' ? 'en' : 'fi';
+  const S = { lang, page: 'order', base: BASE, links: LINKS(lang), siteTextsUrl: `${BASE}/booking/site-texts.json`, orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order }, otherHref: BASE + PATHS[other].order, shopHref: BASE + PATHS[lang].shop, phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email };
   const body = R.pageHero({ title: t.title, text: t.text, img: 'ovi-kaiverrus' }, lang, 'book')
     + `<section class="section"><div class="wrap"><div id="order-app" aria-busy="true"><noscript><p>${e(t.noscript)}: <a href="tel:${site.contact.phoneTel}">${e(L.phoneDisplay(lang))}</a></p></noscript></div></div></section>`
     + `<script src="${BASE}/booking/config.js"></script><script>window.BOOKING_SHOP=${JSON.stringify(S)}</script><script type="module" src="${BASE}/booking/order.js"></script>`;
   let html = R.layout({ lang, key: 'book', meta: { title: t.meta, description: t.text, og: 'ovi-kaiverrus' }, body });
   html = html.replace('</head>', `<meta name="referrer" content="no-referrer"><link rel="stylesheet" href="${BASE}/booking/shop.css"></head>`);
   html = html.replace(/<link rel="canonical"[^>]*>(<link rel="alternate"[^>]*>)*/, '').replace(/<meta name="robots" content="[^"]*">/, '').replace('<meta name="description"', '<meta name="robots" content="noindex,nofollow"><meta name="description"');
-  write(PATHS[lang].order, html);   // polku = sopimus: settings.order_page_path = '/tilaus/' (linkki …/tilaus/?t=<public_token>); EN-sivu /en/order/ (tilauksen locale ohjaa oikeaan kieleen, ks. order.js)
+  html = html.replace(/(<div class="lang"[^>]*>(?:(?!<\/div>).)*?<a href=")[^"]*(")/s, `$1${BASE + PATHS[other].order}$2`);
+  write(PATHS[lang].order, html);   // polku = sopimus: settings.order_page_path = '/tilaus/' (linkki …/tilaus/?t=<public_token>); EN-sivu /en/order/ (tilauksen locale ohjaa oikeaan kieleen, ks. order.js). Kielivalinta säilyttää ?t= ja ?lang=.
 }
 
 // 3b2) maksulinkkisivu /maksa/?p=<link_token> (settings.payment_link_path = '/maksa/'; sähköpostin, hallinnan ja pikakassan maksulinkit) + EN /en/pay/.
@@ -153,7 +160,8 @@ for (const lang of ['fi', 'en']) {
   const S = {
     lang, page: 'shop', audience: 'business', shopHref: BASE + urlPath, confirmHref: BASE + PATHS[lang].confirm,
     orderHref: { fi: BASE + PATHS.fi.order, en: BASE + PATHS.en.order },
-    termsHref: L.pageHref('terms', lang), infoHref: L.pageHref('info', lang), phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email,
+    otherHref: BASE + site.pages.companies[lang === 'fi' ? 'en' : 'fi'],
+    termsHref: L.pageHref('terms', lang), privacyHref: L.pageHref('privacy', lang), infoHref: L.pageHref('info', lang), phone: L.phoneDisplay(lang), phoneTel: site.contact.phoneTel, email: site.contact.email,
     cancelRule: cancelRuleText(lang),
     staticProductsUrl: `${BASE}/booking/static-products.json`, siteTextsUrl: `${BASE}/booking/site-texts.json`, links: LINKS(lang),
   };
@@ -181,6 +189,10 @@ let changed = 0;
     if (out.includes('data-quiet-week') && !out.includes('/booking/quiet-week.js')) {
       const Q = { lang, shopHref: BASE + PATHS[lang].shop };
       out = out.replace('</body>', `${out.includes('/booking/config.js') ? '' : `<script src="${BASE}/booking/config.js"></script>`}<script>window.BOOKING_QUIET=${JSON.stringify(Q)}</script><script type="module" src="${BASE}/booking/quiet-week.js"></script></body>`);
+    }
+    // Tuotekortin kuva elävästä katalogista (public_product_images). Esirenderöity kuva jää, jos haku epäonnistuu.
+    if (out.includes('data-product-image') && !out.includes('/booking/product-cards-live.js')) {
+      out = out.replace('</body>', `${out.includes('/booking/config.js') ? '' : `<script src="${BASE}/booking/config.js"></script>`}<script type="module" src="${BASE}/booking/product-cards-live.js"></script></body>`);
     }
     if (out !== src) writeFileSync(p, out);
   }

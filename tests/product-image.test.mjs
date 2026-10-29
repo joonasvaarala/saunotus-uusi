@@ -1,7 +1,7 @@
 // Tuotekuvan srcset: Supabase-muunnos (600/900, avif+webp, jpeg-varakuva) tai alkuperäinen URL.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { canTransform, transformUrl, productImageHtml, productImageSpec, CARD_WIDTHS, SIZES } from '../booking/shop/src/product-image.js';
+import { canTransform, transformUrl, productImageHtml, productImageSpec, CARD_WIDTHS, SIZES, withImageVersion, liveImageUrl, imageVersionOf, catalogImageUrl } from '../booking/shop/src/product-image.js';
 
 const OBJ = 'https://sxbofnuisemspgquoxyv.supabase.co/storage/v1/object/public/product-images/products/1-wq1bnlln.jpg';
 const LOCAL = 'http://localhost:4181/storage/v1/object/public/product-images/products/1-abcdef.jpg';
@@ -42,4 +42,18 @@ test('hero ei ole lazy; paikallinen demo jää alkuperäiseen kuvaan', () => {
   const local = productImageHtml(LOCAL, { alt: 'A "kuva"' });
   assert.equal(local, `<img src="${LOCAL}" width="600" height="400" alt="A &quot;kuva&quot;" loading="lazy" decoding="async">`);
   assert.doesNotMatch(local, /picture|srcset|render\/image/);
+});
+
+test('kuviosoite versioidaan updated_atilla tai polulla', () => {
+  assert.equal(imageVersionOf({ updated_at: '2026-10-28T18:00:00.000Z', path: 'products/1-aaaaaa.webp' }), '2026-10-28T18:00:00.000Z');
+  assert.equal(imageVersionOf({ path: 'products/1-aaaaaa.webp' }), 'products/1-aaaaaa.webp');
+  const url = withImageVersion(OBJ, '2026-10-28T18:00:00.000Z');
+  assert.match(url, /[?&]v=2026-10-28T18%3A00%3A00\.000Z$/);
+  const html = productImageHtml(url, { widths: CARD_WIDTHS, sizes: SIZES.shop, alt: 'A', width: 900, height: 600 });
+  assert.match(html, /[?&]v=2026-10-28T18%3A00%3A00\.000Z/);
+  assert.match(html, /width=600/);
+  assert.equal(liveImageUrl('https://cdn.test/product-images', { path: '../x.png' }), '');
+  assert.equal(liveImageUrl('https://cdn.test/product-images/', { path: 'products/1-aaaaaa.webp', updated_at: 't' }), 'https://cdn.test/product-images/products/1-aaaaaa.webp?v=t');
+  assert.equal(catalogImageUrl('', { path: 'products/1-aaaaaa.webp' }), '');
+  assert.match(catalogImageUrl(LOCAL, { path: 'products/1-abcdef.jpg' }), /[?&]v=products%2F1-abcdef\.jpg$/);
 });
