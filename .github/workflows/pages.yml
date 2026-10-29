@@ -352,6 +352,12 @@ jobs:
       - run: node --test booking/tests/upsell-logic.test.mjs booking/tests/upsell-179.test.mjs booking/tests/upsell-readmore.test.mjs
       # booking_214: hoitojen saatavuus = pidon säännöt myös kirjautuneelle henkilökunnalle (suljetut ajat eivät näy vapaina).
       - run: node --test booking/tests/saatavuus-sulku-214.test.mjs
+      # booking_215: maksamattomien maksulinkkien muistutukset ja Seurattavat maksut -näkymä (Joonas 29.10.2026).
+      # Tekstit content/site-texts.pending-import-102.json. Sähköpostipohja payment_link_reminder (templates.test.mjs).
+      # SQL: booking/supabase/tests/talous/t215_payment_link_reminders.sql ajetaan paikallisessa PG17:ssä
+      # (migraatiot + fixtures/10_test_helpers.sql). Työnkulussa ei ole Postgresia.
+      # Cron-jobia ei luoda migraatiossa. Tuotannossa: booking/supabase/manual/booking_215_payment_link_reminders_cron.sql.
+      - run: node --test booking/tests/maksulinkki-muistutukset.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

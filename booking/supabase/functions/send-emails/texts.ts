@@ -47,6 +47,12 @@ export const EMAIL_TEXTS: TextTable = {
   "email.payment_link.amount_label": { fi: "Maksettava", en: "Amount to pay" },
   "email.payment_link.pay_button": { fi: "Maksa nyt", en: "Pay now" },
   "email.payment_link.sign_name": { fi: "Tapio", en: "Tapio" },
+  // booking_215: maksamattoman maksulinkin muistutus. Sama linkki, ei maksuvälittäjän nimeä, allekirjoitus Tapio.
+  "email.payment_link_reminder.subject": { fi: `Muistutus: maksulinkki tilaukseen {{var:no}} – ${SN}`, en: `Reminder: payment link for order {{var:no}} – ${SN}` },
+  "email.payment_link_reminder.title": { fi: "Muistutus maksusta", en: "Payment reminder" },
+  "email.payment_link_reminder.intro": { fi: "Tilauksesi maksu ({{var:amount}}) on yhä avoinna. Voit maksaa sen alla olevasta linkistä.", en: "The payment for your order ({{var:amount}}) is still open. You can pay it using the link below." },
+  "email.payment_link_reminder.cancel": { fi: "Ellei maksua ole maksettu {{var:date}} mennessä, varaus perutaan.", en: "If the payment is not received by {{var:date}}, the booking will be cancelled." },
+  "email.payment_link_reminder.pay_button": { fi: "Maksa verkossa", en: "Pay online" },
   // booking_174: kumppanilahjakortin arvo pienempi kuin varauksen summa → erotus maksulinkillä (payload voucher_difference)
   "email.payment_link.voucher_subject": { fi: `Lahjakorttivarauksesi erotuksen maksu {{var:no}} – ${SN}`, en: `Pay the difference for your gift card booking {{var:no}} – ${SN}` },
   "email.payment_link.voucher_intro": { fi: "Lahjakorttivarauksesi summa oli {{var:total}}, lahjakortin arvo oli {{var:voucher}}. Voit maksaa erotuksen {{var:difference}} alla olevasta linkistä.", en: "The total of your gift card booking was {{var:total}} and the value of the gift card was {{var:voucher}}. You can pay the difference of {{var:difference}} using the link below." },

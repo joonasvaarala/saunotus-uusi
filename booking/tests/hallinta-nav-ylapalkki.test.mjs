@@ -162,7 +162,8 @@ test('tekstit: ui.admin.nav.* FI+EN sanakirjassa ja pending-import-38/88:ssa, ei
   const { readdirSync } = await import('node:fs');
   const rows38 = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-38.json'), 'utf8'));
   const rows88 = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-88.json'), 'utf8'));
-  const rows = [...rows38, ...rows88];
+  const rows102 = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-102.json'), 'utf8')).filter((r) => r.key.startsWith('ui.admin.nav.'));
+  const rows = [...rows38, ...rows88, ...rows102];
   assert.deepEqual(Object.keys(NAV_TEXTS.fi).sort(), Object.keys(NAV_TEXTS.en).sort());
   assert.equal(rows.length, Object.keys(NAV_TEXTS.fi).length * 2);
   const seen = new Set();
@@ -180,7 +181,7 @@ test('tekstit: ui.admin.nav.* FI+EN sanakirjassa ja pending-import-38/88:ssa, ei
   for (const r of rows38) assert.equal(newKeys.has(r.key), false, r.key);
   const taken = new Set();
   for (const f of readdirSync(join(root, '../content'))) {
-    if (!/^site-texts\.(pending-import-(?!38\.|88\.)|imported|fallback)/.test(f) || !f.endsWith('.json')) continue;
+    if (!/^site-texts\.(pending-import-(?!38\.|88\.|102\.)|imported|fallback)/.test(f) || !f.endsWith('.json')) continue;
     const j = JSON.parse(readFileSync(join(root, '../content', f), 'utf8'));
     for (const r of Array.isArray(j) ? j : j.texts || []) taken.add(`${r.key}|${r.lang}`);
   }

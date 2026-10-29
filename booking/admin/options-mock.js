@@ -11,6 +11,7 @@ import { applySection, exampleBundle } from './settings-logic.js';
 import { analyticsMock } from './analytics-mock.js';
 import { createEventsMock, EVENT_MOCK_RESOURCES } from './events-mock.js';
 import { generatedAnnualCardCode, generatedDiscountCode, normalizeCode } from '../shop/src/discount-code-logic.js';
+import { paylinkWatchHandlers } from './paylink-watch-mock.js';
 const TZ = 'Europe/Helsinki';
 const todayHel = (now = new Date()) => now.toLocaleDateString('sv-SE', { timeZone: TZ });
 const addDays = (ds, n) => { const d = new Date(`${ds}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
@@ -1031,6 +1032,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       return inv;
     },
   };
+  Object.assign(handlers, paylinkWatchHandlers({ st, need, err, now }));
   // booking_158: tapahtumat ja koulutukset (events-mock.js) + tuotteen kopio (admin_product_copy: 'Kopio: nimi', piilotettu, ei myynnissä)
   const eventsMock = createEventsMock({ today, products: st.products });
   Object.assign(handlers, eventsMock.handlers, {

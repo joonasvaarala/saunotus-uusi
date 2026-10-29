@@ -1,0 +1,1076 @@
+[
+  {
+    "key": "ui.admin.nav.paylink_watch",
+    "lang": "fi",
+    "text": "Seurattavat maksut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.title",
+    "lang": "fi",
+    "text": "Seurattavat maksut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.intro",
+    "lang": "fi",
+    "text": "Avoimet maksulinkit. Ennakkomaksu muistutetaan 3 päivän jälkeen ja vuorokausi ennen eräpäivää. Paikan päällä annettu linkki muistutetaan 3 päivän välein, enintään 4 kertaa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.empty",
+    "lang": "fi",
+    "text": "Ei avoimia maksulinkkejä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.search",
+    "lang": "fi",
+    "text": "Hae nimellä tai tilausnumerolla",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.filter.all",
+    "lang": "fi",
+    "text": "Kaikki",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.filter.watching",
+    "lang": "fi",
+    "text": "Seurannassa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.filter.paused",
+    "lang": "fi",
+    "text": "Keskeytetyt",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.filter.needs_action",
+    "lang": "fi",
+    "text": "Vaatii toimenpiteitä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.col.amount",
+    "lang": "fi",
+    "text": "Summa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.col.customer",
+    "lang": "fi",
+    "text": "Asiakas",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.col.order",
+    "lang": "fi",
+    "text": "Tilaus / varaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.col.age",
+    "lang": "fi",
+    "text": "Linkin ikä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.col.due",
+    "lang": "fi",
+    "text": "Eräpäivä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.col.reminders",
+    "lang": "fi",
+    "text": "Muistutukset",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.col.next",
+    "lang": "fi",
+    "text": "Seuraava muistutus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.col.status",
+    "lang": "fi",
+    "text": "Tila",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.col.actions",
+    "lang": "fi",
+    "text": "Toiminnot",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.age",
+    "lang": "fi",
+    "text": "{{var:days}} pv {{var:hours}} h",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:days}}",
+      "{{var:hours}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.age_hours",
+    "lang": "fi",
+    "text": "{{var:hours}} h",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:hours}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.no_due",
+    "lang": "fi",
+    "text": "Ei eräpäivää",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.reminders_none",
+    "lang": "fi",
+    "text": "Ei vielä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.reminders_n",
+    "lang": "fi",
+    "text": "{{var:n}} kpl, viimeisin {{var:when}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}",
+      "{{var:when}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.next_none",
+    "lang": "fi",
+    "text": "–",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.status.watching",
+    "lang": "fi",
+    "text": "Seurannassa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.status.paused",
+    "lang": "fi",
+    "text": "Muistutukset keskeytetty",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.status.needs_action",
+    "lang": "fi",
+    "text": "Vaatii toimenpiteitä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.kind.prepaid",
+    "lang": "fi",
+    "text": "Ennakkomaksu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.kind.onsite",
+    "lang": "fi",
+    "text": "Paikan päällä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.action.remind_now",
+    "lang": "fi",
+    "text": "Lähetä muistutus nyt",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.action.pause",
+    "lang": "fi",
+    "text": "Keskeytä muistutukset",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.action.handled",
+    "lang": "fi",
+    "text": "Merkitse hoidetuksi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.handled_title",
+    "lang": "fi",
+    "text": "Merkitse hoidetuksi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.handled_body",
+    "lang": "fi",
+    "text": "Kirjaa {{var:amount}} käsin. Avoin maksulinkki perutaan ja kuitti jää kirjanpitoon. Asiakkaalle ei lähde erillistä kuittiviestiä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.method",
+    "lang": "fi",
+    "text": "Maksutapa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.note",
+    "lang": "fi",
+    "text": "Muistiinpano",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.confirm_handled",
+    "lang": "fi",
+    "text": "Kirjaa maksu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.sent",
+    "lang": "fi",
+    "text": "Muistutus laitettu jonoon.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.paused_ok",
+    "lang": "fi",
+    "text": "Muistutukset keskeytetty.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.handled_ok",
+    "lang": "fi",
+    "text": "Maksu kirjattu{{var:receipt}}.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:receipt}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.receipt_bit",
+    "lang": "fi",
+    "text": ", kuitti {{var:no}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:no}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.no_perm",
+    "lang": "fi",
+    "text": "Tarvitset oikeuden payments.manage.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.count",
+    "lang": "fi",
+    "text": "{{var:n}} avointa linkkiä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.reservation_more",
+    "lang": "fi",
+    "text": "+ {{var:n}} muuta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.loading",
+    "lang": "fi",
+    "text": "Ladataan…",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.order_link",
+    "lang": "fi",
+    "text": "Tilaus {{var:no}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:no}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.nav.paylink_watch",
+    "lang": "en",
+    "text": "Payments to follow",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.title",
+    "lang": "en",
+    "text": "Payments to follow",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.intro",
+    "lang": "en",
+    "text": "Open payment links. A prepaid link is reminded after 3 days and one day before the due date. An on-site link is reminded every 3 days, at most 4 times.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.empty",
+    "lang": "en",
+    "text": "No open payment links.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.search",
+    "lang": "en",
+    "text": "Search by name or order number",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.filter.all",
+    "lang": "en",
+    "text": "All",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.filter.watching",
+    "lang": "en",
+    "text": "Watching",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.filter.paused",
+    "lang": "en",
+    "text": "Paused",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.filter.needs_action",
+    "lang": "en",
+    "text": "Needs action",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.col.amount",
+    "lang": "en",
+    "text": "Amount",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.col.customer",
+    "lang": "en",
+    "text": "Customer",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.col.order",
+    "lang": "en",
+    "text": "Order / booking",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.col.age",
+    "lang": "en",
+    "text": "Link age",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.col.due",
+    "lang": "en",
+    "text": "Due date",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.col.reminders",
+    "lang": "en",
+    "text": "Reminders",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.col.next",
+    "lang": "en",
+    "text": "Next reminder",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.col.status",
+    "lang": "en",
+    "text": "Status",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.col.actions",
+    "lang": "en",
+    "text": "Actions",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.age",
+    "lang": "en",
+    "text": "{{var:days}} d {{var:hours}} h",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:days}}",
+      "{{var:hours}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.age_hours",
+    "lang": "en",
+    "text": "{{var:hours}} h",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:hours}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.no_due",
+    "lang": "en",
+    "text": "No due date",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.reminders_none",
+    "lang": "en",
+    "text": "None yet",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.reminders_n",
+    "lang": "en",
+    "text": "{{var:n}}, last {{var:when}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}",
+      "{{var:when}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.next_none",
+    "lang": "en",
+    "text": "–",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.status.watching",
+    "lang": "en",
+    "text": "Watching",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.status.paused",
+    "lang": "en",
+    "text": "Reminders paused",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.status.needs_action",
+    "lang": "en",
+    "text": "Needs action",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.kind.prepaid",
+    "lang": "en",
+    "text": "Prepaid",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.kind.onsite",
+    "lang": "en",
+    "text": "On site",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.action.remind_now",
+    "lang": "en",
+    "text": "Send reminder now",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.action.pause",
+    "lang": "en",
+    "text": "Pause reminders",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.action.handled",
+    "lang": "en",
+    "text": "Mark handled",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.handled_title",
+    "lang": "en",
+    "text": "Mark handled",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.handled_body",
+    "lang": "en",
+    "text": "Record {{var:amount}} manually. The open payment link is cancelled and the receipt stays in the books. No separate receipt email is sent.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.method",
+    "lang": "en",
+    "text": "Payment method",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.note",
+    "lang": "en",
+    "text": "Note",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.confirm_handled",
+    "lang": "en",
+    "text": "Record payment",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.sent",
+    "lang": "en",
+    "text": "Reminder queued.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.paused_ok",
+    "lang": "en",
+    "text": "Reminders paused.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.handled_ok",
+    "lang": "en",
+    "text": "Payment recorded{{var:receipt}}.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:receipt}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.receipt_bit",
+    "lang": "en",
+    "text": ", receipt {{var:no}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:no}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.no_perm",
+    "lang": "en",
+    "text": "You need the payments.manage permission.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.count",
+    "lang": "en",
+    "text": "{{var:n}} open links",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.reservation_more",
+    "lang": "en",
+    "text": "+ {{var:n}} more",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.loading",
+    "lang": "en",
+    "text": "Loading…",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.paylink_watch.order_link",
+    "lang": "en",
+    "text": "Order {{var:no}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:no}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "email.payment_link_reminder.subject",
+    "lang": "fi",
+    "text": "Muistutus: maksulinkki tilaukseen {{var:no}} – {{setting:business_name}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [
+      "{{var:no}}",
+      "{{setting:business_name}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "email.payment_link_reminder.subject",
+    "lang": "en",
+    "text": "Reminder: payment link for order {{var:no}} – {{setting:business_name}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [
+      "{{var:no}}",
+      "{{setting:business_name}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "email.payment_link_reminder.title",
+    "lang": "fi",
+    "text": "Muistutus maksusta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "email.payment_link_reminder.title",
+    "lang": "en",
+    "text": "Payment reminder",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "email.payment_link_reminder.intro",
+    "lang": "fi",
+    "text": "Tilauksesi maksu ({{var:amount}}) on yhä avoinna. Voit maksaa sen alla olevasta linkistä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "email.payment_link_reminder.intro",
+    "lang": "en",
+    "text": "The payment for your order ({{var:amount}}) is still open. You can pay it using the link below.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "email.payment_link_reminder.cancel",
+    "lang": "fi",
+    "text": "Ellei maksua ole maksettu {{var:date}} mennessä, varaus perutaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [
+      "{{var:date}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "email.payment_link_reminder.cancel",
+    "lang": "en",
+    "text": "If the payment is not received by {{var:date}}, the booking will be cancelled.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [
+      "{{var:date}}"
+    ],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "email.payment_link_reminder.pay_button",
+    "lang": "fi",
+    "text": "Maksa verkossa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "email.payment_link_reminder.pay_button",
+    "lang": "en",
+    "text": "Pay online",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
+  }
+]
