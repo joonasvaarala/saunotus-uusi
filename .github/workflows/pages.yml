@@ -344,6 +344,8 @@ jobs:
       # booking_186: pakollinen tuotevalinta ehdotuksissa. SQL: booking/supabase/tests/checkout/t186_upsell_options.sql
       # paikallisessa PG:ssä (fixtures/10_test_helpers.sql + migraatio + rollback). Työnkulussa ei ole Postgresia.
       - run: node --test booking/tests/upsell-logic.test.mjs booking/tests/upsell-179.test.mjs booking/tests/upsell-readmore.test.mjs
+      # booking_214: hoitojen saatavuus = pidon säännöt myös kirjautuneelle henkilökunnalle (suljetut ajat eivät näy vapaina).
+      - run: node --test booking/tests/saatavuus-sulku-214.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
