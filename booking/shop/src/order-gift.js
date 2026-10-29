@@ -150,7 +150,7 @@ export function claimsSection({ S, L, api, token, claims, notice = null, onChang
 }
 
 // Ostetut kortit + koodin näyttö
-export function cardsSection({ S, L, api, cards }) {
+export function cardsSection({ S, L, api, cards, hidePending = false }) {
   const F = makeFmt(L), { tx, money, date } = F;
   const items = cards.map((c) => {
     const panel = h('div', { class: 'gc-reveal', hidden: true, 'data-testid': 'gc-reveal' });
@@ -175,11 +175,12 @@ export function cardsSection({ S, L, api, cards }) {
       } catch { panel.replaceChildren(h('p', { class: 'bk-error', role: 'alert', text: tx('o.codeError') })); panel.hidden = false; }
       finally { btn.disabled = false; if (!panel.hidden) revealIfHidden(panel); }
     } });
+    const pending = c.status === 'pending_payment';
     return h('li', { class: 'gc-ocard', 'data-testid': 'gc-card' },
-      h('span', { class: 'ord-l-main' }, h('strong', { text: `${c.package_name || c.package_code}${c.persons ? ` · ${tx('persons', { n: c.persons })}` : ''}` }), ' ', h('span', { class: `ord-badge ${badgeClass(c.status)}`, text: status })),
+      h('span', { class: 'ord-l-main' }, h('strong', { text: `${c.package_name || c.package_code}${c.persons ? ` · ${tx('persons', { n: c.persons })}` : ''}` }), pending && hidePending ? null : [' ', h('span', { class: `ord-badge ${badgeClass(c.status)}`, text: status })]),
       h('span', { class: 'ord-l-sum', text: money(c.amount) }),
-      h('span', { class: 'ord-l-meta', text: [c.recipient_name ? `${tx('o.cardTo')}: ${c.recipient_name}` : '', c.valid_to ? `${tx('o.cardValidTo')}: ${date(c.valid_to)}` : tx('o.cardNotReady')].filter(Boolean).join(' · ') }),
-      dlvNote ? h('span', { class: 'ord-l-meta gc-dlvnote', 'data-testid': 'gc-delivery', text: dlvNote }) : null,
+      h('span', { class: 'ord-l-meta gc-sub', text: [c.recipient_name ? `${tx('o.cardTo')}: ${c.recipient_name}` : '', c.valid_to ? `${tx('o.cardValidTo')}: ${date(c.valid_to)}` : tx('o.cardNotReady')].filter(Boolean).join(' · ') }),
+      dlvNote ? h('p', { class: 'gc-dlvnote', 'data-testid': 'gc-delivery', text: dlvNote }) : null,
       rec ? (c.ready ? h('span', { class: 'ord-l-meta gc-dlvnote', text: tx('o.dlvSurprise') }) : null) : (c.ready ? h('div', { class: 'gc-oact' }, btn, panel) : null));
   });
   return h('section', { class: 'ord-card', 'aria-labelledby': 'ord-gcs', 'data-testid': 'gc-cards' }, h('h3', { id: 'ord-gcs', text: tx('o.cardsTitle') }), h('p', { class: 'bk-note', text: tx('o.cardsLead') }), h('ul', { class: 'ord-lines gc-olist' }, items));

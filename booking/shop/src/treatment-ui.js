@@ -269,7 +269,7 @@ export function createTreatmentViews(c) {
       ok.addEventListener('click', async () => {
         ok.disabled = edit.disabled = true; ok.textContent = onlinePay && hi.on ? ht(S.lang, 'checkout.creating') : t.booking; err.replaceChildren();
         const r = await A.createBooking(p, { start: slot.start, persons: n, name: cust.name, email: cust.email, phone: cust.phone, marketing: consent.checked, locale: S.lang, note, kind: cust.kind, company: cust.company, option: opt, addons: ap ? ap.payload() : [] });
-        if (r.ok && r.token) { state.months.clear(); location.assign(confirmUrl(r.token)); return; }
+        if (r.ok && r.token) { state.months.clear(); try { sessionStorage.setItem(`bk-pay-now-${String(r.token).toLowerCase()}`, '1'); } catch { /* yksityinen tila */ } location.assign(confirmUrl(r.token)); return; }
         ok.disabled = edit.disabled = false; ok.textContent = bookText();
         if (!r.ok && O.isOptionError(r.code) && optP) {   // palvelin hylkäsi valinnan: takaisin lomakkeelle, valitsin korostettuna (virheellinen valinta tyhjennetään)
           if (r.code === 'invalid_option') { opt = null; optP.set(null); optDd.textContent = optText(); pickWhen.textContent = whenText(); }

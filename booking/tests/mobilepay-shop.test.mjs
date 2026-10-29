@@ -157,7 +157,12 @@ test('mock: public_payment_options noudattaa §14.1-muotoa; mpFetch vastaa start
   for (const k of ['order_no', 'status', 'payment_status', 'unpaid', 'can_pay_online', 'mobilepay_pending']) assert.ok(k in o.order, k);
   assert.equal(o.order.can_pay_online, true); assert.equal(o.order.unpaid, 40);
   assert.equal((await createOrderMock({ scenario: 'mp-prod' }).rpc('public_payment_options', { p_token: TOKEN })).methods[0].test, false);
-  for (const sc of ['', 'mp-off', 'gift', 'cards']) assert.deepEqual((await createOrderMock({ scenario: sc }).rpc('public_payment_options', { p_token: TOKEN })).methods, [], `skenaario ${sc || '(oletus)'}: ei MobilePayta`);
+  for (const sc of ['', 'mp-off', 'gift', 'cards']) {
+    const methods = (await createOrderMock({ scenario: sc }).rpc('public_payment_options', { p_token: TOKEN })).methods;
+    assert.equal(methods.some((m) => m.code === 'mobilepay'), false, `${sc || '(oletus)'}: ei MobilePayta`);
+    if (sc === 'cards') assert.equal(methods[0]?.code, 'online', 'lahjakorttitilaus maksetaan verkossa');
+    else assert.deepEqual(methods, [], `skenaario ${sc || '(oletus)'}: ei verkkomaksua`);
+  }
   const start = JSON.parse(await (await m.mpFetch('https://x/functions/v1/mobilepay-start', { method: 'POST', body: JSON.stringify({ order_token: TOKEN }) })).text());
   assert.equal(start.ok, true); assert.ok(/pay=mobilepay/.test(start.redirect_url)); assert.ok(start.reference);
   const rec = JSON.parse(await (await m.mpFetch('https://x/functions/v1/mobilepay-notify', { method: 'POST', body: JSON.stringify({ action: 'reconcile', order_token: TOKEN }) })).text());

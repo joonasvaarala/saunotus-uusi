@@ -5,7 +5,9 @@ import { rpc, storageUrl, setRpcOverride } from './sb.js';
 import { ensureAllMonths } from './availability-months.js';
 import { runReturn } from './mobilepay-ui.js';
 import { runOnlineReturn } from './online-pay-ui.js';
-import { loadPayChoices, payChoicesSection, payNotice, onlineAvailable, onlineAtCheckout } from './pay-choices.js';
+import { loadPayChoices, payChoicesSection, payNotice, onlineAvailable, onlineAtCheckout, offers } from './pay-choices.js';
+import { onlineChoices, safeOnlineRedirect } from './online-pay-logic.js';
+import { markFreshPay, takeFreshPay, payStepKind } from './pay-step.js';
 import { pt } from './pay-choices-texts.js';
 import { T } from './i18n.js';
 import { createWaitlistView } from './waitlist-ui.js';
@@ -324,6 +326,7 @@ async function viewAnnualPurchase() {
       const r = await rpc('public_buy_annual_card', { p_name: val('name'), p_email: val('email'), p_phone: val('phone'), p_marketing_consent: legal.consent.checked, p_locale: S.lang });
       if (!r?.ok) throw Object.assign(new Error((r?.code === 'sale_disabled' ? t.annualUnavailable : t.codeErrors[r?.code] || t.errors[r?.code]) || t.errorGeneric), { mapped: true });
       const orderHref = S.orderHref?.[S.lang] || (S.lang === 'en' ? '/en/order/' : '/tilaus/');
+      markFreshPay(r.token);
       location.assign(`${orderHref}?t=${encodeURIComponent(r.token)}${MOCK ? '&mock=1&scenario=annual' : ''}`);
     } catch (e) {
       submit.disabled = false; submit.textContent = t.annualBuySubmit;
@@ -942,6 +945,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
           return; // perusvaraus on jo olemassa: ei toista public_create_booking-kutsua
         }
       }
+      markFreshPay(r.token);
       location.assign(`${S.confirmHref}${mockQs()}#${r.token}`);
     } catch (e) {
       submit.disabled = false; submitLabel();
@@ -1037,7 +1041,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   const sp = stMap.get(+it.product_id), prodName = (S.lang === 'en' && sp?.name_en) || it.product_name;   // englanniksi kb-nimi (palvelin palauttaa suomenkielisen)
   const co = normCheckout(b);   // §17: null = vanha backend / ei pitotilaa → vanha näkymä muuttumattomana
   const holdV = isHoldView(co);
-  const head = holdV ? ht(S.lang, { awaiting_payment: 'status.awaiting', processing_payment: 'status.processing', preliminary: 'status.preliminary', expired: 'status.expired' }[co.state]) : { confirmed: t.confConfirmed, pending: t.confPending, cancelled: t.confCancelled, expired: t.confExpired }[b.status] || b.status;
+  let head = holdV ? ht(S.lang, { awaiting_payment: 'status.awaiting', processing_payment: 'status.processing', preliminary: 'status.preliminary', expired: 'status.expired' }[co.state]) : { confirmed: t.confConfirmed, pending: t.confPending, cancelled: t.confCancelled, expired: t.confExpired }[b.status] || b.status;
   // Maksutavat (MobilePay, lahjakortti) samoista moduuleista kuin tilaussivulla; virhe / puuttuva RPC → null (ei maksuosiota, vanha näkymä). Paluu MobilePaysta (?pay=mobilepay) tarvitsee mp-rajapinnan aina.
   const canPay = ['confirmed', 'pending'].includes(b.status) && b.payment_status !== 'paid' && !(co && (co.preliminary || co.expired || co.cancelled));   // alustavaa/vanhentunutta varausta ei makseta (order_preliminary / order_expired)
   const L = S.lang === 'en' ? 'en' : 'fi';
@@ -1045,6 +1049,17 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   const retPay = ['online', 'mobilepay', 'vismapay'].includes(payQ) && !noReturn;
   const model = canPay || retPay ? await loadPayChoices({ rpc, token, fetchImpl: MOCK_FETCH }).catch(() => null) : null;
   const online = !!model && canPay && onlineAvailable(model);   // verkkomaksutapa tarjolla → ei oleteta "maksu paikan päällä"
+  const choiceOffers = model ? offers(model, b) : null;
+  const onlineList = model?.onlineShow ? onlineChoices(model.onlineOpts) : [];
+  const freshPay = !retPay && !refresh && takeFreshPay(token);
+  const step = payStepKind({ fresh: freshPay, returning: !!retPay, payable: !!(canPay && choiceOffers && (choiceOffers.online || choiceOffers.gift) && !co?.processing && !paysByInvoice(b)), onlineCount: onlineList.length, gift: !!choiceOffers?.gift });
+  if (step === 'redirect' && model?.online) {
+    mount(h('p', { class: 'bk-loading', role: 'status', 'data-testid': 'pay-redirect', text: pt(L, 'payBusyOnline') }));
+    let started = null;
+    try { started = await model.online.start(onlineList[0].method); } catch { started = null; }
+    const go = started?.ok ? safeOnlineRedirect(started.redirect_url) : null;
+    if (go) { location.assign(go); return; }
+  }
   const pay = { paid: t.paid, unpaid: online ? pt(L, 'unpaidOnline') : t.unpaid, pending: t.pending, partially_paid: pt(L, 'partlyPaid') }[b.payment_status] || b.payment_status;
   const out = h('div', { id: 'bk-cancel-msg', 'aria-live': 'polite' });
   const holdHost = h('div', { 'data-testid': 'hold-host' });
@@ -1059,6 +1074,9 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     if (tp && needsOption(tp)) { optRow = ox.notChosen; optNote = ox.notChosenConfirm; }
   }
   const pageKind = confirmPageKind(b, co, paysByInvoice(b));
+  const paying = pageKind === 'finish' && !co?.processing;
+  if (paying) head = t.payStillOpen;
+  else if (co?.processing) head = ht(S.lang, 'status.processing');
   const pageTitle = { finish: t.finishTitle, cancelled: t.confCancelled, expired: t.confExpired, preliminary: ht(S.lang, 'status.preliminary') }[pageKind];
   if (pageTitle) {
     const h1 = document.querySelector('main .hero.page h1');
@@ -1075,11 +1093,11 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     h('dt', { text: t.when }), h('dd', { text: `${dayLong(it.starts_at)}, ${hm(it.starts_at)}–${hm(it.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(it.persons) }),
     (b.addons || []).flatMap((a) => [h('dt', { text: (S.lang === 'en' && a.name_en) || a.name }), h('dd', { text: `${a.quantity} × ${money(a.unit_price)}` })]),
     ritItems.flatMap((x) => [h('dt', { text: (S.lang === 'en' && (x.name_en || ritEn.get(+x.product_id))) || x.product_name }), h('dd', { 'data-testid': 'conf-ritual', text: `${dayLong(x.starts_at)}, ${rtx('ritualSummary', { time: fmt(x.starts_at, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).replace('.', ':'), n: x.persons })} · ${money(x.line_total)}` })]),
-    h('dt', { text: t.total }), h('dd', { text: `${money(b.total)} (${t.vatIncl})` }), h('dt', { text: t.payStatus }), h('dd', { text: pay }),
-    holdV && co.awaiting && co.remaining > 0 ? [h('dt', { text: ht(S.lang, 'summary.remaining') }), h('dd', { 'data-testid': 'conf-remaining', text: money(co.remaining) })] : null);   // pitotilassa: maksettavaa jäljellä (lahjakorttiosuuden jälkeen)
+    h('dt', { text: t.total }), h('dd', { text: `${money(b.total)} (${t.vatIncl})` }), h('dt', { text: t.payStatus }), h('dd', { text: paying && !(+b.paid > 0) ? t.payStillOpen : pay }),
+    holdV && co.awaiting && co.remaining > 0 && +b.total > +co.remaining + 0.004 ? [h('dt', { text: ht(S.lang, 'summary.remaining') }), h('dd', { 'data-testid': 'conf-remaining', text: money(co.remaining) })] : null);   // vain kun lahjakortti kattoi osan: maksettavaa jäljellä
   dl.dataset.testid = 'conf-summary';
   const actions = h('div', { class: 'bk-actions' });
-  if (b.status !== 'cancelled' && b.status !== 'expired' && !holdV) {   // kalenterilisäys vasta vahvistetusta varauksesta
+  if (b.status === 'confirmed' && !holdV) {   // kalenterilisäys vasta vahvistetusta varauksesta
     const url = URL.createObjectURL(new Blob([ics(b)], { type: 'text/calendar' }));
     actions.append(h('a', { class: 'btn light', href: url, download: `varaus-${b.order_no}.ics`, text: t.addCal }));
   }
@@ -1092,7 +1110,8 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     if (r.ok) setTimeout(() => location.reload(), 800);
   } }, t.cancelBooking));
   if (b.status === 'pending' && inv.locked) actions.append(h('p', { class: 'bk-note', role: 'status', 'data-testid': 'invoiced-cancel-note', text: t.invoicedCancelNote }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })));
-  mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { 'data-testid': 'conf-title', text: b.status === 'cancelled' ? t.confCancelled : b.status === 'expired' ? t.confExpired : b.status === 'pending' || (co && co.awaiting) ? ht(S.lang, 'h2.awaiting') : t.confTitle }), h('p', { class: 'bk-status', role: 'status', 'data-testid': 'conf-status', text: head }), holdHost, mpHost, dl,   // pitotilassa: otsikko + tilabadge → pitopaneeli → tiivis tilausyhteenveto → maksuosio (secEl lisätään yhteenvedon jälkeen)
+  const confH2 = b.status === 'cancelled' ? t.confCancelled : b.status === 'expired' ? t.confExpired : co?.processing ? ht(S.lang, 'title.processing') : paying ? t.finishTitle : t.confTitle;
+  mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { 'data-testid': 'conf-title', text: confH2 }), h('p', { class: 'bk-status', role: 'status', 'data-testid': 'conf-status', text: head }), holdHost, mpHost, dl,   // pitotilassa: otsikko + tila → pitopaneeli → tiivis tilausyhteenveto → maksuosio (secEl lisätään yhteenvedon jälkeen)
     swimKey ? h('p', { class: 'bk-note bk-swim', 'data-testid': 'conf-swim', text: t[swimKey] }) : null,
     b.status === 'confirmed' && paysByInvoice(b) && b.payment_status !== 'paid' ? h('p', { class: 'bk-pay', text: t.companyInvoiceMethodNote }) : null,
     b.status === 'confirmed' && b.payment_status !== 'paid' && b.payment_status !== 'invoiced' && !paysByInvoice(b) && !isTreatmentBooking(b) && !online ? h('p', { class: 'bk-pay', text: t.payLater }) : null, optNote && b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-option-note', text: optNote }) : null, actions, out,
@@ -1132,7 +1151,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     holdHost.append(holdCtl.node);
   }
   if (model && canPay && !retPay && !co?.processing) {
-    secEl = payChoicesSection({ S, L, token, model, booking: b, notice, hold: !!co?.awaiting, onHoldError: () => holdCtl?.poll(true),
+    secEl = payChoicesSection({ S, L, token, model, booking: b, notice, hold: !!co?.awaiting && !paying, heading: paying ? pt(L, 'payHeading') : null, leadText: paying ? (choiceOffers?.gift ? ht(S.lang, 'chooseOnline') : pt(L, 'leadFinish')) : null, onHoldError: () => holdCtl?.poll(true),
       onPayLater: () => again({ kind: 'paylater', title: t.confConfirmed, text: ht(L, 'payLater.done') }),   // booking_57: vahvistettu maksamatta → sivu latautuu uudelleen (confirmed_unpaid)
       onApplied: (text) => { try { if (co?.awaiting) sessionStorage.setItem(`bk-gift-${token}`, '1'); } catch { /* ei sessionStorage */ } again({ kind: 'gift', text }); }, onClaimed: (n) => again({ kind: 'claim', ...n }), onChanged: (n) => again({ kind: 'claim', ...n }) });
   }

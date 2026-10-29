@@ -362,9 +362,15 @@ a.bk-sd:hover{filter:brightness(.97)}
 .gc-code{margin:0 0 6px;font:700 clamp(22px,6vw,30px) ui-monospace,Menlo,Consolas,monospace;letter-spacing:.08em;color:var(--ink);overflow-wrap:anywhere}
 .gc-greet{white-space:pre-wrap;font-weight:400}
 
-.ord-lines li.gc-ocard{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"m s" "t s" "a a";gap:2px 12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.ord-lines li.gc-ocard{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"m s" "t t" "d d" "a a";gap:4px 12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;align-items:start}
 .gc-ocard .gc-oact{grid-area:a;margin-top:8px}
-.gc-ocard .ord-l-meta{grid-area:t}
+.gc-ocard .ord-l-meta,.gc-ocard .gc-sub{grid-area:t}
+.gc-ocard .gc-dlvnote{grid-area:d;display:block;margin:0}
+@media (max-width:480px){
+  .ord-lines li.gc-ocard{grid-template-areas:"m m" "s s" "t t" "d d" "a a"}
+  .gc-ocard .ord-l-sum{justify-self:start;text-align:left}
+}
+.ord-pay > a.btn,.ord-pay > button.btn{width:100%}
 .ord-form .gc-field label{font-weight:700}
 @media(min-width:760px){.gc-open .gc-tile{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(220px,1fr);column-gap:28px;align-items:start}.gc-open .gc-tile>.kicker,.gc-open .gc-tile>h3,.gc-open .gc-tile>.gc-desc,.gc-open .gc-tile>.gc-meta{grid-column:1}.gc-open .gc-tile>.bk-field,.gc-open .gc-tile>.gc-btn{grid-column:2}}
 .gc .bk-stepper input{width:64px;height:48px}

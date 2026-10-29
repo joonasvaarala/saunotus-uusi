@@ -88,16 +88,18 @@ export function payNotice(L, notice) {
   return h('p', { class: 'bk-ok', role: 'status', tabindex: '-1', 'data-testid': 'pc-notice' }, h('strong', { text: `${notice.title || pt(L, 'noticeTitle')}. ` }), notice.text || '', notice.extra ? ` ${notice.extra}` : '');
 }
 
-export function payChoicesSection({ S, L, token, model, booking, onApplied, onClaimed, onChanged, onPayLater = null, notice = null, hold = false, onHoldError = null }) {
+export function payChoicesSection({ S, L, token, model, booking, onApplied, onClaimed, onChanged, onPayLater = null, notice = null, hold = false, onHoldError = null, heading = null, leadText = null }) {
   const F = makeFmt(L), tx = (k, v) => pt(L, k, v);
   const of = offers(model, booking);
   if (!of.online && !of.gift && !of.claims && !of.payLater) return null;
   const due = dueAmount(model, booking);
+  const partial = !!(booking && +booking.paid > 0.004 && due > 0);
   const id = `pc-${++seq}`;
-  const kids = [h('h3', { id: `${id}-t`, text: tx('title') })];
+  const kids = [h('h3', { id: `${id}-t`, text: heading || tx('title') })];
   if (of.online || of.gift) {
-    if (due != null && due > 0) kids.push(h('p', { class: 'mp-amount', 'data-testid': 'pc-due', text: tx('amountDue', { amount: F.money(due) }) }));
-    kids.push(h('p', { class: 'bk-note', 'data-testid': 'pc-lead', text: hold ? ht(L, 'chooseOnline') : booking.status === 'confirmed' ? tx('leadOnlineConfirmed') : tx('leadOnline') }));   // pitotilassa ei mainita "maksu paikan päällä": varaus vahvistuu vasta maksun jälkeen
+    if (due != null && due > 0) kids.push(h('p', { class: 'mp-amount', 'data-testid': 'pc-due', text: tx(partial ? 'amountDue' : 'amountToPay', { amount: F.money(due) }) }));
+    const lead = leadText || (hold ? ht(L, 'chooseOnline') : booking.status === 'confirmed' ? tx('leadOnlineConfirmed') : tx('leadOnline'));
+    kids.push(h('p', { class: 'bk-note', 'data-testid': 'pc-lead', text: lead }));   // pitotilassa ei mainita "maksu paikan päällä": varaus vahvistuu vasta maksun jälkeen
   }
   const claimNotice = notice && notice.kind === 'claim' && of.claims ? { ok: true, text: notice.text, extra: notice.extra } : null;   // lunastuspyynnön vahvistus näytetään pyyntölistan yläosassa (kuten tilaussivulla)
   if (notice && !claimNotice) kids.push(payNotice(L, notice));

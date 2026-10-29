@@ -159,25 +159,37 @@ export function onlinePayBlock({ L, api, method, env = {}, amount = '', navigate
 export async function runOnlineReturn({ host, L, getOrder, reconcile = null, onDone, intervalMs = 2500, rounds = 8 }) {
   const tx = (k) => pt(L, k);
   const show = (state) => {
-    const key = state === 'paid' ? 'returnPaid' : state === 'review' ? 'returnReview' : state === 'failed' ? 'returnFailed' : 'returnWait';
+    const key = state === 'paid' ? 'returnPaid' : state === 'review' ? 'returnReview' : state === 'failed' ? 'returnFailed' : state === 'open' ? 'returnOpen' : 'returnWait';
     host.replaceChildren(h('section', { class: 'ord-card', role: 'status', 'data-testid': 'op-return', 'data-state': state },
       h('h3', { text: tx(key) }), h('p', { text: tx(key + 'Lead') })));
   };
   host.replaceChildren(h('section', { class: 'ord-card', role: 'status', 'data-testid': 'op-return', 'data-state': 'checking' },
     h('h3', { text: tx('returnChecking') }), h('p', { text: tx('returnCheckingLead') })));
   let state = 'wait';
+  let last = null;
   for (let i = 0; i < rounds; i++) {
     if (reconcile) { try { const r = await reconcile(); if (r?.payment_status === 'paid') { state = 'paid'; break; } } catch { /* jatketaan tilauksen kyselyyn */ } }
     try {
       const o = await getOrder();
+      if (o) last = o;
       if (o?.payment_status === 'paid') { state = 'paid'; break; }
       if (o?.payment_status === 'failed') { state = 'failed'; break; }
     } catch { /* jatketaan */ }
     if (i < rounds - 1) await new Promise((ok) => setTimeout(ok, intervalMs));
   }
+  if (state === 'wait' && paymentLeftOpen(last)) state = 'open';
   show(state);
-  if (state === 'paid' || state === 'failed' || state === 'review') stripPayParam();
+  if (state === 'paid' || state === 'failed' || state === 'review' || state === 'open') stripPayParam();
   if (onDone) await onDone(state);
+}
+
+/** Keskeytetty tai avoimeksi jäänyt maksu: ei "käsitellään yhä", jos tilaus ei ole käsittelyssä. */
+function paymentLeftOpen(o) {
+  if (!o) return false;
+  if (o.payment_status === 'paid' || o.payment_status === 'failed') return false;
+  const processing = o.payment_in_progress === true || o.checkout?.processing || o.checkout?.inProgress || o.checkout_state === 'processing_payment';
+  if (processing) return false;
+  return ['unpaid', 'pending', 'partially_paid'].includes(o.payment_status);
 }
 
 /** Lopputilan jälkeen pay-parametri pois, jotta sivun lataus ei käynnistä tarkistusta uudelleen. Odottava tila säilyttää sen. */

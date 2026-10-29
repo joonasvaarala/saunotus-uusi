@@ -41,6 +41,7 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
     o.items = [{ id: 1, name: 'Avoin lahjakortti', name_en: 'Open gift card', quantity: 1, line_total: 75, vat_rate: 25.5 }, { id: 2, name: 'Saunahoito kahdelle', name_en: 'Sauna treatment for two', quantity: 1, line_total: 192, vat_rate: 25.5 }];
     o.reservations = []; o.receipts = []; o.can_add = false; o.can_change = false; o.change_deadline = null; o.add_until = null; o.upsell = { addons: [], treatments: [] };
     o.paid = paid ? 267 : 0; o.payments = paid ? [{ status: 'paid', amount: 267, paid_at: `${day(-1)}T10:00:00Z`, method_label: 'Käteinen', link_token: null, link_path: null }] : [];
+    if (!paid) { o.status = 'pending'; o.online_payment_enabled = true; }
     giftCards.push({ token: '00000000-0000-4000-8000-000000000001', package_code: 'open', package_name: 'Avoin lahjakortti', amount: 75, status: paid ? 'active' : 'pending_payment', valid_to: paid ? day(180) : null, recipient_name: 'Mikko Mallikas', ready: paid, code: 'HH3A7CEFHJKL', balance: 75, greeting: 'Hyvää syntymäpäivää! Nauti saunasta.', delivery_to: 'buyer', deliver_on: null, deliver_time: null, delivered_at: null },
       { token: '00000000-0000-4000-8000-000000000002', package_code: 'sauna_treatment_2', package_name: 'Saunahoito kahdelle', amount: 192, status: paid ? 'active' : 'pending_payment', valid_to: paid ? day(180) : null, recipient_name: null, ready: paid, code: 'HH7MRTUVWXY3', balance: 192, greeting: null, delivery_to: 'buyer', deliver_on: null, deliver_time: null, delivered_at: null });
     if (scenario === 'cardsdelivery') {
@@ -127,6 +128,7 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
     o.items = [{ id: 1, name: 'Vuosikortti', name_en: 'Annual card', quantity: 1, line_total: 290, vat_rate: 25.5 }];
     o.reservations = []; o.can_add = false; o.can_change = false; o.change_deadline = null; o.add_until = null; o.upsell = { addons: [], treatments: [] };
     o.paid = paid ? 290 : 0; o.payments = paid ? [{ status: 'paid', amount: 290, paid_at: `${day(-1)}T10:00:00Z`, method_label: 'Korttimaksu', link_token: null, link_path: null }] : [];
+    if (!paid) { o.status = 'pending'; o.online_payment_enabled = true; }
     o.receipts = paid ? [{ receipt_no: 'K-2026-000142', kind: 'receipt', issued_at: `${day(-1)}T10:00:00Z`, token: '9a8b7c6d-1111-4222-8333-444455550142', total: 290 }] : [];
   }
   const onlinePayMethod = (token, test) => ({ code: 'online', kind: 'online', provider: 'montonio', label: 'Maksa verkossa', label_en: 'Pay online', test,
@@ -148,10 +150,13 @@ export function createOrderMock({ delay = 0, scenario = '', mpResult = '', giftS
       return row;
     },
     // booking_57: pay_later (testi) vain pitoskenaarioissa, kun testui != 0 ja tilaus odottaa maksua (kuten palvelin: lippu päällä + awaiting_payment)
-    public_payment_options: ({ p_token }) => withPayLater(mpScenario && mpScenario !== 'mp-off'
-      ? { ok: true, online_enabled: true, methods: [onlinePayMethod(p_token, mpScenario !== 'mp-prod')],
-        order: { order_no: o.order_no, status: o.status, payment_status: o.payment_status, unpaid: o.unpaid, can_pay_online: o.unpaid > 0 && ['pending', 'confirmed'].includes(o.status), mobilepay_pending: mp.started && o.unpaid > 0 } }
-      : { ok: true, online_enabled: false, methods: [] }),
+    public_payment_options: ({ p_token }) => {
+      const productPay = (scenario === 'cards' || scenario === 'annualpending') && o.unpaid > 0;
+      return withPayLater((mpScenario && mpScenario !== 'mp-off') || productPay
+        ? { ok: true, online_enabled: true, methods: [onlinePayMethod(p_token, productPay || mpScenario !== 'mp-prod')],
+          order: { order_no: o.order_no, status: o.status, payment_status: o.payment_status, unpaid: o.unpaid, can_pay_online: o.unpaid > 0 && ['pending', 'confirmed'].includes(o.status), mobilepay_pending: mp.started && o.unpaid > 0 } }
+        : { ok: true, online_enabled: false, methods: [] });
+    },
     public_confirm_pay_later: ({ p_order_token }) => confirmPayLater(p_order_token),
     // §14.7 (booking_52): kassan maksutavat ilman tokenia; MobilePay mp-skenaarion mukaan, lahjakortti gift-mockin redeem_enabled-asetuksesta
     public_checkout_payment_options: () => {

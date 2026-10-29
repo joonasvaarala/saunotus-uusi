@@ -932,7 +932,7 @@
  {
   "key": "ui.drinks.pay",
   "lang": "fi",
-  "text": "Maksa",
+  "text": "Maksa verkossa",
   "class": "normal",
   "kind": "plain",
   "max_len": 400,
@@ -1142,7 +1142,7 @@
  {
   "key": "ui.drinks.pay",
   "lang": "en",
-  "text": "Pay",
+  "text": "Pay online",
   "class": "normal",
   "kind": "plain",
   "max_len": 400,
