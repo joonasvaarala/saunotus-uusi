@@ -37,6 +37,7 @@ import { normalizeOffer, ritualPrice, ritualMax, cardQty, reconcileCard, ritualA
 import { RITUAL_TEXTS, RITUAL_ERRORS } from './ritual-addon-texts.js';
 import { oneKey } from './plural.js';
 import { eventText, occurrenceText, occurrenceLabel, findEvent, saleState, upcoming, isMultiDay } from './event-sale.js';
+import { groupEventDays, eventDayLabel } from './event-pick.js';
 import { customerInvoiceLock } from './invoice-lock.js';
 import { formPaysOnline, paysByInvoice } from './company-pay.js';
 import { clockFromIso } from './clock.js';
@@ -140,7 +141,7 @@ const MOCK = new URLSearchParams(location.search).get('mock') === '1';
 let MOCK_FETCH;   // ?mock=1&scenario=pay: mobilepay-start / mobilepay-notify -funktioiden mock (fetch-yhteensopiva)
 if (MOCK) { const sm = (await import('./shop-mock.js')).createShopMock({ fail: new URLSearchParams(location.search).get('fail'), scenario: new URLSearchParams(location.search).get('scenario') || '', mpResult: new URLSearchParams(location.search).get('mpresult') || '' }); setRpcOverride(sm.rpc); MOCK_FETCH = sm.mpFetch; }
 // Mock-tilan parametrit säilyvät linkeissä ja ohjauksissa (scenario=hold… toimii koko kulun läpi kassalta vahvistussivulle)
-const mockQs = () => { if (!MOCK) return ''; const cur = new URLSearchParams(location.search), q = new URLSearchParams({ mock: '1' }); for (const k of ['scenario', 'mpresult', 'mpinterval', 'mpmax', 'holdsec', 'fail', 'ritual', 'img']) if (cur.has(k)) q.set(k, cur.get(k)); return `?${q}`; };
+const mockQs = () => { if (!MOCK) return ''; const cur = new URLSearchParams(location.search), q = new URLSearchParams({ mock: '1' }); for (const k of ['scenario', 'mpresult', 'mpinterval', 'mpmax', 'holdsec', 'fail', 'ritual', 'img', 'events']) if (cur.has(k)) q.set(k, cur.get(k)); return `?${q}`; };
 const bk = (hash) => `${S.shopHref}${mockQs()}#${hash}`;
 // Kassan pitotila ja maksutavat yhdestä paikasta (vuoro- ja hoitokassa): palvelin (public_checkout_payment_options) päättää, ei kovakoodata. Virhe → vanha käytös.
 const holdInfo = () => loadPayChoices({ rpc, fetchImpl: MOCK_FETCH }).then((m) => {
@@ -217,6 +218,23 @@ async function loadMonth(productId, year, month) {   // month: 0–11
   for (const r of rows || []) (byDay[r.session_date] ||= []).push(r);
   for (const k in byDay) byDay[k].sort((a, b) => a.starts_at.localeCompare(b.starts_at));
   state.months.set(key, byDay);
+  return byDay;
+}
+// Tapahtuman tulevat kerrat voivat olla eri kuukausissa. public_availability sallii enintään 92 päivää / kutsu, joten haetaan kuukausi kerrallaan (sama välimuisti).
+async function loadSpan(productId, fromDs, toDs) {
+  const months = [];
+  let [y, m] = fromDs.split('-').map(Number);
+  m -= 1;
+  const end = toDs.slice(0, 7);
+  for (let i = 0; i < 8; i++) {
+    months.push([y, m]);
+    if (`${y}-${pad2(m + 1)}` >= end) break;
+    m += 1;
+    if (m > 11) { m = 0; y += 1; }
+  }
+  const parts = await Promise.all(months.map(([yy, mm]) => loadMonth(productId, yy, mm)));
+  const byDay = {};
+  for (const part of parts) for (const [d, rows] of Object.entries(part || {})) if (d >= fromDs && d <= toDs) byDay[d] = rows;
   return byDay;
 }
 const dayState = (rows) => (!rows?.length ? 'none' : rows.some((r) => r.status === 'available') ? 'free' : rows.some((r) => r.status === 'full') ? 'full' : 'unavail');
@@ -529,7 +547,7 @@ async function viewDay(dateStr, keep, openSlug) {
   if (treatBox) fillTreatments(treatBox, results, ds, today, tmax, openSlug, toggle, free.length > 0);
 }
 
-// ---- näkymä 2: tuote → kalenteri → vuorot ----
+// ---- näkymä 2: tuote → kalenteri → vuorot. Tapahtuma (category event): päivänapit, ei kuukausikalenteria. ----
 async function viewProduct(slug, dateStr, query) {
   const tp = !state.catalog.some((x) => x.slug === slug) && state.treatments.find((x) => x.slug === slug);
   if (tp) return tv.viewTreatment(tp, query || new URLSearchParams());   // hoito-/rituaalituote: oma kulku (treatment-ui.js)
@@ -547,11 +565,55 @@ async function viewProduct(slug, dateStr, query) {
   }
   const today = todayHel();
   const horizon = state.settings.booking_horizon_days || 120;
+  const eventProduct = p.category === 'event';
   let [y, m] = (dateStr || today).split('-').map(Number); m -= 1;
   let sel = dateStr || null;
   const wrap = h('div', { class: 'bk-prod' });
+  // Tapahtuma: tulevat kerrat päivänappeina (aria-pressed). Kellonajat tulevat vasta päivän valinnan jälkeen.
+  // Yksi kellonaika näytetään silti yhtenä nappina. Täysi päivä himmennetään (Täynnä); jonotus on kellonajan napissa.
+  function eventTimeLink(r, ds) {
+    const ok = r.status === 'available';
+    const title = isMultiDay(r) ? occurrenceText(r, S.lang) : `${hm(r.starts_at)}–${hm(r.ends_at)}`;
+    const sub = cleanLabel(rlabel(r));
+    const action = ok ? t.choose : t.eventWaitlistCta;
+    return h('a', {
+      class: `bk-ev-time${ok ? '' : ' is-full'}`,
+      href: bk(ok ? `/varaa/${r.rule_id}/${ds}/${p.id}` : `/jono/${r.rule_id}/${ds}/${p.id}`),
+      'data-testid': 'event-time',
+      'aria-label': [title, sub, ok ? null : t.full, action].filter(Boolean).join(', '),
+    },
+      h('span', { class: 'bk-ev-when', text: title }),
+      sub ? h('span', { class: 'bk-ev-sub', text: sub }) : null,
+      ok ? null : h('span', { class: 'bk-ev-full', text: t.full }),
+      h('span', { class: 'bk-ev-go', text: action }));
+  }
+  async function fillEventDates(calBox, slotBox) {
+    let byDay = {};
+    try { byDay = await loadSpan(p.id, today, addDays(today, horizon)); }
+    catch { calBox.append(errorBox(t.loadError)); return; }
+    const days = groupEventDays(byDay, { now: Date.now(), today });
+    if (sel && !days.some((d) => d.date === sel)) sel = null;
+    if (!days.length) { calBox.append(h('p', { class: 'bk-note', 'data-testid': 'event-no-dates', text: t.eventNoDates })); return; }
+    const longOf = (ds) => dayLong(`${ds}T12:00:00Z`);
+    const mark = () => { for (const b of calBox.querySelectorAll('.bk-ev-date')) b.setAttribute('aria-pressed', b.dataset.date === sel ? 'true' : 'false'); };
+    const drawTimes = () => {
+      const day = days.find((d) => d.date === sel);
+      if (!day) { slotBox.replaceChildren(); return; }
+      slotBox.replaceChildren(
+        h('h3', { id: 'bk-ev-time-h', text: t.eventPickTime }),
+        h('div', { class: 'bk-ev-times', role: 'group', 'aria-labelledby': 'bk-ev-time-h' }, day.slots.map((r) => eventTimeLink(r, day.date))));
+    };
+    calBox.append(h('div', { class: 'bk-ev-dates', role: 'group', 'aria-labelledby': 'bk-ev-date-h', 'data-testid': 'event-dates' },
+      days.map((day) => h('button', {
+        type: 'button', class: `bk-ev-date${day.full ? ' is-full' : ''}`, 'data-date': day.date, 'data-testid': 'event-date',
+        'aria-pressed': 'false', 'aria-label': day.full ? `${longOf(day.date)}, ${t.full}` : longOf(day.date),
+        onclick: () => { sel = day.date; history.replaceState(null, '', bk(`/tuote/${slug}/${day.date}`)); mark(); drawTimes(); revealForm(slotBox, slotBox.querySelector('h3')); },
+      }, h('span', { class: 'bk-ev-when', text: eventDayLabel(day.date, S.lang) }), day.full ? h('span', { class: 'bk-ev-full', text: t.full }) : null))));
+    mark();
+    drawTimes();
+  }
   const draw = async () => {
-    const calBox = h('div', { class: 'bk-cal' }), slotBox = h('div', { class: 'bk-slots', 'aria-live': 'polite' });
+    const calBox = h('div', eventProduct ? { class: 'bk-ev', 'data-testid': 'event-pick' } : { class: 'bk-cal' }), slotBox = h('div', { class: 'bk-slots', 'aria-live': 'polite' });
     const desc = pdesc(p) || '';
     // Joonas 29.10.2026: hinta, lyhyt kuvaus, sitten pitkä kuvaus (Lue lisää, suljettu). Uima-asuohje on pitkässä kuvauksessa
     // ja peruutusehto saman osion lopussa (sama teksti näkyy myös kassalla, legalFields showCancel).
@@ -563,7 +625,8 @@ async function viewProduct(slug, dateStr, query) {
           leadShort(h, p, S.lang, desc),
           moreInfo(desc),
           h('a', { class: 'bk-jump', href: '#valitse-aika', text: t.pickTime })),
-        h('div', { class: 'bk-prod-cal', id: 'valitse-aika' }, h('h3', { text: t.pickDate }), calBox, slotBox)));
+        h('div', { class: 'bk-prod-cal', id: 'valitse-aika' }, h('h3', eventProduct ? { id: 'bk-ev-date-h', text: t.pickDate } : { text: t.pickDate }), calBox, slotBox)));
+    if (eventProduct) { await fillEventDates(calBox, slotBox); return; }
     let byDay = {};
     try { byDay = await loadMonth(p.id, y, m); } catch (e) { calBox.append(errorBox(t.loadError)); return; }
     const first = new Date(y, m, 1), days = new Date(y, m + 1, 0).getDate(), lead = (first.getDay() + 6) % 7;

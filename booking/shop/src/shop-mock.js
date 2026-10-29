@@ -12,6 +12,25 @@ import { mockQuietOffers } from './quiet-offers-mock.js';
 import { createRitualMock, SHARED_PRODUCT } from './ritual-addon-mock.js';
 import { mockProductImages } from './mock-product-images.js';
 const KEY = 'booking.shopmock.v1';
+// ?mock=1&events=1: myynnissä oleva tapahtuma, jolla on tulevia kertoja (päivänappien kuvakaappaus). Hinta on demon 59 €, ei tuotannon hintaa.
+const EVENT_DEMO = {
+  id: 31, slug: 'perinnesaunotusilta', name: 'Perinnesaunotusilta', name_en: 'Traditional sauna evening', category: 'event', sale_kind: 'other',
+  price: 59, price_type: 'per_person', duration_text: '1 h 30 min', duration_text_en: '1 h 30 min', duration_minutes: 90,
+  short_description: 'Saunottajan ohjaama saunaseremonia, jossa käytetään vuodenajan antimia, kasveja, vihtoja ja saunaloitsuja.',
+  short_description_en: 'A guided sauna ceremony with the herbs, whisks and sauna charms of the season.',
+  description: 'Seremonian jälkeen voit jatkaa illasta nauttimista savusaunassa, altailla ja laavulla.',
+  description_en: 'After the ceremony you can stay on in the smoke sauna, the pools and the lean-to.',
+  booking_kind: 'rules', min_persons: 1, max_persons: 12,
+};
+function eventDemoSlots(now) {
+  const at = (d, hh, mm = 0) => { const x = new Date(now()); x.setUTCDate(x.getUTCDate() + d); x.setUTCHours(hh - 2, mm, 0, 0); return x; };
+  const row = (rule, d, hh, mm, status, remaining) => {
+    const start = at(d, hh, mm), end = new Date(start.getTime() + 90 * 60e3);
+    return { rule_id: rule, product_id: 31, label: null, label_en: null, mode: 'shared', session_date: start.toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }), starts_at: start.toISOString(), ends_at: end.toISOString(), status, remaining, min_persons: 1, max_persons: 12, price_mode: 'per_person', unit_price: 59, base_price: null };
+  };
+  // +15 yksi aika, +22 kaksi aikaa (toinen täynnä), +29 kokonaan täynnä
+  return [row(9311, 15, 18, 0, 'available', 8), row(9312, 22, 16, 0, 'available', 6), row(9313, 22, 18, 30, 'full', 0), row(9314, 29, 18, 0, 'full', 0)];
+}
 const MUTATING = new Set(['public_create_treatment_booking', 'public_change_treatment_booking']);
 // scenario=pay|pay-prod|pay-off: vahvistussivun maksuvalinta (MobilePay + lahjakortti) – maksutila, lahjakortit ja mobilepay-funktiot tulevat order-mock.js:stä (sama mock kuin tilaussivulla); mpResult = paluutulos (paid|failed|pending|…).
 // Demo ilman omaa varausta: tuntematon token → valmis maksamaton varaus (vahvistussivu: /varaa/vahvistus/?mock=1&scenario=pay#<mikä tahansa uuid>).
@@ -24,6 +43,7 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
   const saveWaitlist = () => { try { storage?.setItem(waitlistKey, JSON.stringify([...waitlist.values()])); } catch { /* storage pois */ } };
   const annualSale = /[?&]annual=1(&|$)/.test(globalThis.location?.search || '');
   const quietOn = /[?&]quiet=1(&|$)/.test(globalThis.location?.search || '');   // booking_162
+  const eventsOn = /[?&]events=1(&|$)/.test(globalThis.location?.search || '');   // tapahtuman päivänapit: myynnissä oleva Perinnesaunotusilta (oletus pois, muut mockit ennallaan)
   // booking_166: ?ritual=1 → yleinen vuoro (kb 1) + saunarituaali lisäpalveluna (ritual-addon-mock.js); oletus pois (muut mockit ennallaan)
   const ritual = /[?&]ritual=1(&|$)/.test(globalThis.location?.search || '') ? createRitualMock({ storage, now, fail }) : null;
   const noTimes = fail === 'notimes';   // ?mock=1&fail=notimes: public_treatment_availability palauttaa aina tyhjän ("Ei vapaita aikoja" -tila)
@@ -78,8 +98,8 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
       // vuosikortti (booking_142): ?mock=1&annual=1 näyttää myynnin (oletus pois kuten tuotannossa); osto ohjaa tilaussivun mockiin (scenario=annual)
       case 'public_annual_card_offer': return annualSale ? { available: true, product_id: 43, name: 'Vuosikortti', name_en: 'Annual card', price: 290, vat_rate: 25.5, valid_months: 12 } : { available: false };
       case 'public_buy_annual_card': return annualSale ? { ok: true, order_no: 9142, token: '00000000-0000-4000-8000-000000000142', status: 'pending', total: 290, payment_mode: 'pay_later' } : { ok: false, code: 'sale_disabled', message: 'Vuosikorttien verkkomyynti ei ole käytössä' };
-      case 'public_catalog': return catalogEntries();
-      case 'public_catalog_for': return pickCatalog(catalogEntries(), args.p_audience);
+      case 'public_catalog': return eventsOn ? [...catalogEntries(), EVENT_DEMO] : catalogEntries();
+      case 'public_catalog_for': return eventsOn ? [...pickCatalog(catalogEntries(), args.p_audience), EVENT_DEMO] : pickCatalog(catalogEntries(), args.p_audience);
       case '__availability_all':
       case 'public_availability_all': {
         const catalog = pickCatalog(catalogEntries(), args.p_audience);
@@ -123,6 +143,9 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
         return r ? r.body : { ok: false, code: 'not_found', message: 'Varausta ei löytynyt' };
       }
       default: {
+        if (name === 'public_availability' && eventsOn && +args.p_product_id === 31) {
+          return eventDemoSlots(now).filter((r) => r.session_date >= args.p_from && r.session_date <= args.p_to);
+        }
         if (name === 'public_availability' && +args.p_product_id === 9101) {
           const start = new Date(now()); start.setUTCDate(start.getUTCDate() + 14); start.setUTCHours(13, 0, 0, 0);
           const end = new Date(start.getTime() + 4 * 36e5);
