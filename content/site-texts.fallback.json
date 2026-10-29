@@ -6866,14 +6866,14 @@
   {
    "key": "product.11.description",
    "lang": "en",
-   "text": "A two-hour, all-round sauna experience: birch whisks, plants, herbs, salt and honey, and optionally a peat treatment; incantations, whisking, techniques with löyly (steam), water and air, a float in a cool pool and herbal tea. The therapist adapts the intensity to you. Available for 1–2 guests. The price does not include entrance to the smoke sauna or hot tubs (tickets are sold separately). Held in the Rauni healing sauna. Sauna therapists: Laura Foon, Joonas Vaarala and Saara Mäntykoski. You may take part nude, partly or fully in swimwear.",
+   "text": "A two-hour, all-round sauna experience: birch whisks, plants, herbs, salt and honey, and optionally a peat treatment; incantations, whisking, techniques with löyly (steam), water and air, and herbal tea. The therapist adapts the intensity to you. Available for 1–2 guests. The price does not include entrance to the smoke sauna or hot tubs (tickets are sold separately). Held in the Rauni healing sauna. Sauna therapists: Laura Foon, Joonas Vaarala and Saara Mäntykoski. You may take part nude, partly or fully in swimwear.",
    "version": 1,
    "placeholders": []
   },
   {
    "key": "product.11.description",
    "lang": "fi",
-   "text": "Kahden tunnin kokonaisvaltainen saunaelämys: vihdat, kasvit, yrtit, suola ja hunaja, halutessa turvehoito; loitsuja, vihtomista, löylyn, veden ja ilman tekniikoita, kellutus viileässä altaassa ja yrttitee. Saunottaja mukauttaa voimakkuuden asiakkaan mukaan. Varattavissa 1–2 hengelle. Hoidon hintaan ei sisälly pääsyä savusaunaan tai paljuihin (pääsyliput erikseen). Toteutetaan hoitosauna Raunissa. Saunottajat: Laura Foon, Joonas Vaarala ja Saara Mäntykoski. Hoitoon voi osallistua alasti, osittain tai kokonaan uima-asussa.",
+   "text": "Kahden tunnin kokonaisvaltainen saunaelämys: vihdat, kasvit, yrtit, suola ja hunaja, halutessa turvehoito; loitsuja, vihtomista, löylyn, veden ja ilman tekniikoita sekä yrttitee. Saunottaja mukauttaa voimakkuuden asiakkaan mukaan. Varattavissa 1–2 hengelle. Hoidon hintaan ei sisälly pääsyä savusaunaan tai paljuihin (pääsyliput erikseen). Toteutetaan hoitosauna Raunissa. Saunottajat: Laura Foon, Joonas Vaarala ja Saara Mäntykoski. Hoitoon voi osallistua alasti, osittain tai kokonaan uima-asussa.",
    "version": 1,
    "placeholders": []
   },
@@ -11095,14 +11095,14 @@
   {
    "key": "ui.card.treatments.saunotus.more",
    "lang": "en",
-   "text": "A saunotus includes whisks, plants, herbs, salt and honey and, if you wish, a peat treatment; incantations, whisking, techniques with steam, water and air, a float in the cool pool and herbal tea. The sauna healer adapts the intensity to you. It takes place in the Rauni treatment sauna. The price does not include access to the smoke sauna or the hot tubs.",
+   "text": "A saunotus includes whisks, plants, herbs, salt and honey and, if you wish, a peat treatment; incantations, whisking, techniques with steam, water and air, and herbal tea. The sauna healer adapts the intensity to you. It takes place in the Rauni treatment sauna. The price does not include access to the smoke sauna or the hot tubs.",
    "version": 1,
    "placeholders": []
   },
   {
    "key": "ui.card.treatments.saunotus.more",
    "lang": "fi",
-   "text": "Saunotukseen kuuluvat vihdat, kasvit, yrtit, suola ja hunaja, halutessa turvehoito; loitsuja, vihtomista, löylyn, veden ja ilman tekniikoita, kellutus viileässä altaassa ja yrttitee. Saunottaja mukauttaa voimakkuuden asiakkaan mukaan. Toteutetaan hoitosauna Raunissa. Hoidon hintaan ei sisälly pääsyä savusaunaan tai paljuihin.",
+   "text": "Saunotukseen kuuluvat vihdat, kasvit, yrtit, suola ja hunaja, halutessa turvehoito; loitsuja, vihtomista, löylyn, veden ja ilman tekniikoita sekä yrttitee. Saunottaja mukauttaa voimakkuuden asiakkaan mukaan. Toteutetaan hoitosauna Raunissa. Hoidon hintaan ei sisälly pääsyä savusaunaan tai paljuihin.",
    "version": 1,
    "placeholders": []
   },

@@ -382,7 +382,7 @@
  {
   "key": "ui.site.treatments_step_tea_text",
   "lang": "fi",
-  "text": "Saunotukseen kuuluu kellutus viileässä altaassa ja lämmittävä yrttitee. Syväsaunotukseen kuuluu myös pientä purtavaa.",
+  "text": "Saunotukseen kuuluu lämmittävä yrttitee. Syväsaunotukseen kuuluu myös pientä purtavaa.",
   "class": "normal",
   "kind": "plain",
   "max_len": 300,
@@ -392,7 +392,7 @@
  {
   "key": "ui.site.treatments_step_tea_text",
   "lang": "en",
-  "text": "Saunotus includes floating in a cool tub and a warming herbal tea. Deep saunotus also includes a light snack.",
+  "text": "Saunotus includes a warming herbal tea. Deep saunotus also includes a light snack.",
   "class": "normal",
   "kind": "plain",
   "max_len": 300,

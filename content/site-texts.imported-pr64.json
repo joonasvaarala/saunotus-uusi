@@ -2612,10 +2612,10 @@
  {
   "key": "ui.card.treatments.saunotus.more",
   "lang": "fi",
-  "text": "Saunotukseen kuuluvat vihdat, kasvit, yrtit, suola ja hunaja, halutessa turvehoito; loitsuja, vihtomista, löylyn, veden ja ilman tekniikoita, kellutus viileässä altaassa ja yrttitee. Saunottaja mukauttaa voimakkuuden asiakkaan mukaan. Toteutetaan hoitosauna Raunissa. Hoidon hintaan ei sisälly pääsyä savusaunaan tai paljuihin.",
+  "text": "Saunotukseen kuuluvat vihdat, kasvit, yrtit, suola ja hunaja, halutessa turvehoito; loitsuja, vihtomista, löylyn, veden ja ilman tekniikoita sekä yrttitee. Saunottaja mukauttaa voimakkuuden asiakkaan mukaan. Toteutetaan hoitosauna Raunissa. Hoidon hintaan ei sisälly pääsyä savusaunaan tai paljuihin.",
   "class": "normal",
   "kind": "plain",
-  "max_len": 900,
+  "max_len": 850,
   "placeholders": [],
   "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/cards.json); sisältö ennallaan, ei uusia sanamuotoja"
  },
@@ -2662,10 +2662,10 @@
  {
   "key": "ui.card.treatments.saunotus.more",
   "lang": "en",
-  "text": "A saunotus includes whisks, plants, herbs, salt and honey and, if you wish, a peat treatment; incantations, whisking, techniques with steam, water and air, a float in the cool pool and herbal tea. The sauna healer adapts the intensity to you. It takes place in the Rauni treatment sauna. The price does not include access to the smoke sauna or the hot tubs.",
+  "text": "A saunotus includes whisks, plants, herbs, salt and honey and, if you wish, a peat treatment; incantations, whisking, techniques with steam, water and air, and herbal tea. The sauna healer adapts the intensity to you. It takes place in the Rauni treatment sauna. The price does not include access to the smoke sauna or the hot tubs.",
   "class": "normal",
   "kind": "plain",
-  "max_len": 900,
+  "max_len": 850,
   "placeholders": [],
   "reason": "Osa 3 PR 2: kovakoodattu asiakasnäkyvä teksti (content/cards.json); sisältö ennallaan, ei uusia sanamuotoja"
  },
