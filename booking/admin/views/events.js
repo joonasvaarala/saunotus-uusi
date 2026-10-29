@@ -2,7 +2,7 @@
 // (Yleiskatsaus, Kerrat, Osallistujat, Viestit, Asetukset), kertojen lisäys kalenterista ja viikkotoistolla,
 // osallistujalista (CSV + tuloste, henkilökunnan muistiinpanot) ja viesti osallistujille.
 // Henkilökunta näkee, catalog.edit muokkaa kertoja, messages.edit lähettää viestin. Kaikki nimet textContentina.
-// Tekstit: events-texts.js (FI+EN, pending-import-57 ja pending-import-97). RPC:t booking_158 + booking_202.
+// Tekstit: events-texts.js (FI+EN, pending-import-57 ja imported-pr250). RPC:t booking_158 + booking_202.
 import { rpc } from '../sb.js';
 import { h, dialog, field, toast, badge, errMsg, fmtDate, fmtTime, fmtDT, todayHel, STATUS, PAY } from '../ui.js';
 import { downloadCsv } from '../csv.js';

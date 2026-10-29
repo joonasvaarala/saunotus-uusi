@@ -6,7 +6,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..');
-const mig = readFileSync(join(root, 'booking/supabase/migrations/20261028183000_booking_202_event_admin.sql'), 'utf8');
+const mig = readFileSync(join(root, 'booking/supabase/migrations/20261029065818_booking_202_event_admin.sql'), 'utf8');
 
 test('booking_202 on 201:n jälkeen eikä koske hintoihin tai kassaan', () => {
   assert.match(mig, /booking_202/);

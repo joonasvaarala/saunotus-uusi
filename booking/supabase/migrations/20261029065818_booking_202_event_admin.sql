@@ -14,7 +14,7 @@
 -- 6) email_outbox.kind saa arvon event_message. email_outbox_claim liittää event_message-lohkon.
 --    Asiakasviestin allekirjoitus on Tapio (send-emails). Maksuvälittäjän nimeä ei tallenneta eikä lähetetä.
 -- Ei hintojen, ALV:n, tuoteosoitteiden eikä kassan muutoksia.
--- Rollback: ../rollbacks/20261028183000_booking_202_ROLLBACK.sql
+-- Rollback: ../rollbacks/20261029065818_booking_202_ROLLBACK.sql
 set local lock_timeout = '5s';
 
 alter table booking.schedule_rules add column if not exists cancelled_at timestamptz;

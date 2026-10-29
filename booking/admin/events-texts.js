@@ -1,5 +1,5 @@
 // booking_158 + booking_202: hallinnan Tapahtumat-näkymän tekstit (FI+EN). Tuotannossa sama sisältö tuodaan site_texts-tauluun
-// (pending-import-57 = alkuperäiset, pending-import-97 = osallistujat, viestit ja uusi kerran lisäys). Sanakirja on varalla,
+// (pending-import-57 = alkuperäiset, imported-pr250 (ent. pending-import-97, tuotu tuotantoon 29.10.) = osallistujat, viestit ja uusi kerran lisäys). Sanakirja on varalla,
 // kunnes tuonti on ajettu. Haku epäonnistuu tai rivi puuttuu → sanakirja. Paikkamerkit {{var:nimi}} täytetään koodissa.
 import { getLang } from './talous-i18n.js';
 

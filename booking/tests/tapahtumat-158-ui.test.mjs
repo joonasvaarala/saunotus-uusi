@@ -138,7 +138,7 @@ test('tekstit: kaikki uudet FI+EN pending-import-57:ssä, ei <-merkkiä, paikkam
   globalThis.localStorage ??= { getItem: () => null, setItem() {}, removeItem() {} };
   const { EVENTS_TEXTS } = await import(pathToFileURL(join(root, 'admin/events-texts.js')).href);
   const rows = JSON.parse(read(P57));
-  const rows97 = JSON.parse(read('content/site-texts.pending-import-97.json'));
+  const rows97 = JSON.parse(read('content/site-texts.imported-pr250.json'));
   const keys97 = new Set(rows97.map((r) => r.key));
   const want = new Set([...Object.keys(EVENTS_TEXTS.fi), ...Object.keys(S.EVENT_SHOP_TEXTS.fi)]);
   const want57 = new Set([...want].filter((k) => !keys97.has(k)));

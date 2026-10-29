@@ -15,7 +15,7 @@ grant all on t202_r to public;
 create function pg_temp.ck(p_ok boolean, p_label text) returns void language sql as $$ insert into t202_r values (coalesce(p_ok, false), p_label) $$;
 grant execute on all functions in schema pg_temp to public;
 
-\ir ../migrations/20261028183000_booking_202_event_admin.sql
+\ir ../migrations/20261029065818_booking_202_event_admin.sql
 
 update booking.settings set value = '400'::jsonb where key = 'booking_horizon_days';
 update booking.settings set value = '"pay_later"'::jsonb where key = 'public_payment_mode';
