@@ -37,7 +37,6 @@ export const EMAIL_TEXTS: TextTable = {
   "email.product_message.unsubscribe": { fi: "Peruuta markkinointiviestit", en: "Unsubscribe from marketing messages" },
   // booking_202: tapahtuman osallistujaviesti. Aihe ja teksti tulevat henkilökunnalta; allekirjoitus on aina Tapio. Ei maksuvälittäjän nimeä.
   "email.event_message.subject_fallback": { fi: "Viesti tapahtumasta", en: "A message about the event" },
-  "email.event_message.sign_name": { fi: "Tapio", en: "Tapio" },
   "email.event_message.event": { fi: "Tapahtuma: {{var:what}}", en: "Event: {{var:what}}" },
   "email.event_message.when": { fi: "Aika: {{var:when}}", en: "Time: {{var:when}}" },
   // ---- maksulinkki ----

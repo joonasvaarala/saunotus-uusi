@@ -598,7 +598,8 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       return { subject, text, html };
     }
     case "event_message": {
-      // booking_202: henkilökunnan viesti tapahtuman osallistujille. Ei tilauslohkoa, ei summia, ei maksuvälittäjän nimeä. Allekirjoitus Tapio.
+      // booking_202/213: henkilökunnan viesti tapahtuman osallistujille. Ei tilauslohkoa, ei summia, ei maksuvälittäjän nimeä.
+      // booking_213 (Joonas 29.10.2026): ei automaattista allekirjoitusta (ei Tapio, ei loppukaneettia) – henkilökunta kirjoittaa allekirjoituksen itse viestiin.
       const em = d?.event_message || {};
       const rawSubject = String(em.subject || "").replace(/[<>]/g, "").replace(/\s+/g, " ").trim();
       const subject = rawSubject || X("email.event_message.subject_fallback");
@@ -607,11 +608,10 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const when = String(em.when_text || "").trim();
       const eventLine = what ? X("email.event_message.event", { what }) : "";
       const whenLine = when ? X("email.event_message.when", { when }) : "";
-      const cardSign = `${X("email.common.closing")}\n${X("email.event_message.sign_name")}\n${SELLER}`;
-      const cardTail = `${p(esc(contact), `color:${MUTED};font-size:13px`)}${p(esc(cardSign).replace(/\n/g, "<br>"))}`;
+      const cardTail = p(esc(contact), `color:${MUTED};font-size:13px`);
       // Kaksoistervehdyksen esto: jos henkilökunnan teksti alkaa omalla tervehdyksellä (Hei!, Moi Matti, Hello…), pohjan tervehdys jätetään pois.
       const ownGreeting = /^\s*(hei|heippa|moi|moikka|terve|tervehdys|hyvää (huomenta|päivää|iltaa)|hello|hi|dear|good (morning|afternoon|evening))(?=[\s,!.:]|$)[^\n]{0,60}(\n|$)/i.test(body);
-      const text = textBlock(ownGreeting ? "" : hello, body, eventLine, whenLine, contact, cardSign) + "\n";
+      const text = textBlock(ownGreeting ? "" : hello, body, eventLine, whenLine, contact) + "\n";
       const html = mk(subject, (body || subject).slice(0, 140), h1(subject) + (ownGreeting ? "" : helloRow) + (body ? p(esc(body).replace(/\n/g, "<br>")) : "")
         + (eventLine || whenLine ? box([eventLine, whenLine].filter(Boolean).map((line) => `<span style="font-family:${SANS};font-size:15px;line-height:1.5;color:${INK}">${esc(line)}</span>`).join("<br>")) : "")
         + cardTail);

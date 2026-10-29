@@ -260,19 +260,18 @@ export function messageDraft({ subject, body } = {}) {
 }
 /** Sama kuin send-emails/templates.ts: oma tervehdys tekstin alussa → pohjan tervehdys pois (ei kaksoistervehdystä). */
 export const OWN_GREETING_RE = /^\s*(hei|heippa|moi|moikka|terve|tervehdys|hyvää (huomenta|päivää|iltaa)|hello|hi|dear|good (morning|afternoon|evening))(?=[\s,!.:]|$)[^\n]{0,60}(\n|$)/i;
-/** Esikatselu samaan järjestykseen kuin sähköpostipohja: tervehdys, teksti, tapahtuma, aika, Tapio. */
+/** Esikatselu samaan järjestykseen kuin sähköpostipohja: tervehdys, teksti, tapahtuma, aika. Ei automaattista allekirjoitusta (booking_213): henkilökunta kirjoittaa sen itse. */
 export function customerMessageText({ subject, body, eventName, whenText, lang = 'fi' } = {}) {
   const d = messageDraft({ subject, body });
   if (!d.ok) return d;
   const en = lang === 'en';
   const hello = en ? 'Hello,' : 'Hei,';
-  const close = en ? 'Kind regards,' : 'Ystävällisin terveisin,';
   const what = String(eventName ?? '').trim();
   const when = String(whenText ?? '').trim();
   const about = [what && (en ? `Event: ${what}` : `Tapahtuma: ${what}`), when && (en ? `Time: ${when}` : `Aika: ${when}`)].filter(Boolean).join('\n');
   const own = OWN_GREETING_RE.test(d.body);
-  const text = `${own ? '' : `${hello}\n\n`}${d.body}${about ? `\n\n${about}` : ''}\n\n${close}\nTapio\nSipoonjoen Perinnesauna\n`;
-  return { ok: true, subject: d.subject, body: d.body, text, signature: 'Tapio' };
+  const text = `${own ? '' : `${hello}\n\n`}${d.body}${about ? `\n\n${about}` : ''}\n`;
+  return { ok: true, subject: d.subject, body: d.body, text, signature: null };
 }
 
 export const PARTICIPANT_CSV_FIELDS = ['occurrence', 'name', 'email', 'phone', 'persons', 'order_status', 'payment_status', 'booked_at', 'extra', 'note'];

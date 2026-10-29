@@ -27,7 +27,7 @@ test('kerran tila: myynnissä, täynnä, peruttu, myynti suljettu', () => {
   assert.equal(occurrenceFlags({ ...base, ends_at: '2026-10-01T18:00:00.000Z' }, { saleEnabled: true, now }).status, 'past');
 });
 
-test('CSV: BOM, puolipiste, kaavainjektio; viesti allekirjoitetaan Tapio ja hylkää välittäjän nimen', () => {
+test('CSV: BOM, puolipiste, kaavainjektio; viestissä ei automaattista allekirjoitusta (booking_213), hylkää välittäjän nimen', () => {
   const csv = participantsToCsv([{ occurrence: 'Ilta', name: '=Maija', email: 'a@b.fi', phone: '040', persons: 2, order_status: 'Vahvistettu', payment_status: 'Maksettu', booked_at: '1.11.2026', extra: 'Valinta: hunaja', note: 'ovi' }],
     ['kerta', 'nimi', 'sposti', 'puh', 'hlot', 'tila', 'maksu', 'varattu', 'lisa', 'muistio']);
   assert.ok(csv.startsWith('\uFEFF'));
@@ -37,7 +37,9 @@ test('CSV: BOM, puolipiste, kaavainjektio; viesti allekirjoitetaan Tapio ja hylk
   assert.equal(messageDraft({ subject: 'Hei', body: 'Maksu Montonio' }).error, 'provider_name');
   const msg = customerMessageText({ subject: 'Ilta', body: 'Ota pyyhe.', eventName: 'Joulusauna', whenText: '14.11.2026 17:00', lang: 'fi' });
   assert.equal(msg.ok, true);
-  assert.match(msg.text, /Ystävällisin terveisin,\nTapio\nSipoonjoen Perinnesauna/);
+  assert.match(msg.text, /^Hei,\n\nOta pyyhe\.\n\nTapahtuma: Joulusauna\nAika: 14\.11\.2026 17:00\n$/);
+  assert.equal(msg.signature, null);
+  assert.doesNotMatch(msg.text, /Tapio|Ystävällisin terveisin/);
   assert.doesNotMatch(msg.text, /montonio|visma|mobilepay/i);
 });
 
