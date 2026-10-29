@@ -258,12 +258,23 @@ function setHero(p, { short = true } = {}) {   // short=false: tuotesivu, jossa 
 
 // Kortin kuvaus (booking_156): lyhyt kuvaus puhdistettuna, tyhjä → johdettu ote 170 merkkiä (short-desc.js).
 const cardExcerpt = (p) => cardShort(h, p, S.lang, pdesc(p));
-// Tuotesivun Lisätietoja-osio: pitkä kuvaus (sis. uima-asuohjeen) + yleinen peruutusehto (page.info.cancel_text).
+// Tuotesivun Lue lisää heti lyhyen kuvauksen jälkeen: pitkä kuvaus (sis. uima-asuohjeen) + yleinen peruutusehto
+// (page.info.cancel_text). Suljettu oletuksena. Painike, ei <details>: lataus ei jätä fokuskehystä (Chrome laskee
+// ohjelmallisen fokuksen :focus-visibleksi). Näppäimistö toimii natiivisti (Enter/välilyönti), aria-expanded kertoo tilan.
 function moreInfo(desc) {
-  if (!desc && !S.cancelRule) return null;
-  return h('details', { class: 'bk-more', 'data-testid': 'more-info' }, h('summary', { text: t.moreInfo }),
+  const bits = [
     desc ? richHost(h, desc, 'bk-desc') : null,
-    S.cancelRule ? h('p', { class: 'bk-note bk-cancel-rule', 'data-testid': 'product-cancel', text: S.cancelRule }) : null);
+    S.cancelRule ? h('p', { class: 'bk-note bk-cancel-rule', 'data-testid': 'product-cancel', text: S.cancelRule }) : null,
+  ].filter(Boolean);
+  if (!bits.length) return null;
+  const panel = h('div', { class: 'bk-more-panel', id: 'bk-read-more', hidden: true }, bits);
+  const btn = h('button', { type: 'button', class: 'bk-more-toggle', 'aria-expanded': 'false', 'aria-controls': 'bk-read-more', text: t.readMore, onclick: () => {
+    const open = btn.getAttribute('aria-expanded') !== 'true';
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.textContent = open ? t.showLess : t.readMore;
+    panel.hidden = !open;
+  } });
+  return h('div', { class: 'bk-more', 'data-testid': 'more-info' }, btn, panel);
 }
 // ---- näkymä 1: tuotelista ----
 async function viewList(query) {
@@ -542,17 +553,17 @@ async function viewProduct(slug, dateStr, query) {
   const draw = async () => {
     const calBox = h('div', { class: 'bk-cal' }), slotBox = h('div', { class: 'bk-slots', 'aria-live': 'polite' });
     const desc = pdesc(p) || '';
-    // Joonas 28.10.2026: kalenterin vieressä vain hinta + lyhyt kuvaus. Uima-asuohje on pitkässä kuvauksessa ja peruutusehto
-    // Lisätietoja-osion lopussa (sama teksti näkyy myös kassalla, legalFields showCancel).
+    // Joonas 29.10.2026: hinta, lyhyt kuvaus, sitten pitkä kuvaus (Lue lisää, suljettu). Uima-asuohje on pitkässä kuvauksessa
+    // ja peruutusehto saman osion lopussa (sama teksti näkyy myös kassalla, legalFields showCancel).
     wrap.replaceChildren(
       h('p', {}, h('a', { href: bk('/'), text: t.backList })),
       h('div', { class: 'bk-prod-layout' },
         h('div', { class: 'bk-facts' },
           h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), pdur(p) ? ` · ${pdur(p)}` : ''),
           leadShort(h, p, S.lang, desc),
+          moreInfo(desc),
           h('a', { class: 'bk-jump', href: '#valitse-aika', text: t.pickTime })),
-        h('div', { class: 'bk-prod-cal', id: 'valitse-aika' }, h('h3', { text: t.pickDate }), calBox, slotBox),
-        moreInfo(desc)));
+        h('div', { class: 'bk-prod-cal', id: 'valitse-aika' }, h('h3', { text: t.pickDate }), calBox, slotBox)));
     let byDay = {};
     try { byDay = await loadMonth(p.id, y, m); } catch (e) { calBox.append(errorBox(t.loadError)); return; }
     const first = new Date(y, m, 1), days = new Date(y, m + 1, 0).getDate(), lead = (first.getDay() + 6) % 7;
