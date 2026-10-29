@@ -102,7 +102,7 @@ test('pending-import-101: FI+EN, sama kuin koodin oletus, ei vielä varatekstiss
 test('mock events=1 on erillinen lippu: oletuskatalogi ei saa tapahtumaa', () => {
   const src = read('booking/shop/src/shop-mock.js');
   assert.match(src, /events=1/);
-  assert.match(src, /eventsOn \? \[\.\.\.catalogEntries\(\), EVENT_DEMO\] : catalogEntries\(\)/);
+  assert.match(src, /\.\.\.\(eventsOn \? \[EVENT_DEMO\] : \[\]\)/);
   assert.match(src, /public_availability' && eventsOn && \+args\.p_product_id === 31/);
   assert.match(src, /slug: 'perinnesaunotusilta'/);
   assert.match(src, /category: 'event'/);

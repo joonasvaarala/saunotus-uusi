@@ -137,6 +137,8 @@ test('jälkilöyly: vapaa alennettu vuoro tänään, täysi hinta huomenna, vara
       }
       const added = await decorate(page, pg.lang);
       assert.ok(added >= 3, `${pg.path} lisäsi ${added}`);
+      assert.equal(await page.locator('.quiet-week-note').count(), 0, `${pg.path} ei huomiolaatikkoa`);
+      assert.doesNotMatch(await page.locator('body').innerText(), /vielä vapaat yksityisvuorot|private sessions still available in the next few days/);
       await page.evaluate(() => {
         const items = [...document.querySelectorAll('ol.week.soon > li')];
         items.forEach((li, n) => {
@@ -148,6 +150,10 @@ test('jälkilöyly: vapaa alennettu vuoro tänään, täysi hinta huomenna, vara
         if (more) more.open = false;
       });
       await focusWeek(page);
+      if (shots && width === 390 && (pg.path === '/' || pg.path === '/saunavuorot/')) {
+        mkdirSync(shots, { recursive: true });
+        await page.screenshot({ path: join(shots, pg.path === '/' ? 'etusivu-viikko-mobiili.png' : 'saunavuorot-viikko-mobiili.png') });
+      }
       const compact = await boxes(page);
       const home = pg.path === '/' || pg.path === '/en/';
       if (home) assert.equal(compact.soonVisible, 2, `${width} ${pg.path} kompakti`);

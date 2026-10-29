@@ -17,6 +17,7 @@ import { heroShort, cardShort, fallbackDesc, leadShort } from './short-desc.js';
 import { createTreatmentViews } from './treatment-ui.js';
 import { cardMeta } from './card-meta.js';
 import { kindOf, chipsFor, DAY_KIND_ORDER } from './catalog-kind.js';
+import { wholeSpaceBooking } from './whole-space.js';
 import { createTexts, loadShopTexts, applyShopTexts } from './site-texts.js';
 import { checkoutUpsellSection, orderUpsellSection, confirmationUpsellOrder } from './upsell-ui.js';
 import { productImageElement, CARD_WIDTHS, THUMB_WIDTHS, HERO_WIDTHS, SIZES, catalogImageUrl } from './product-image.js';
@@ -141,7 +142,7 @@ const MOCK = new URLSearchParams(location.search).get('mock') === '1';
 let MOCK_FETCH;   // ?mock=1&scenario=pay: mobilepay-start / mobilepay-notify -funktioiden mock (fetch-yhteensopiva)
 if (MOCK) { const sm = (await import('./shop-mock.js')).createShopMock({ fail: new URLSearchParams(location.search).get('fail'), scenario: new URLSearchParams(location.search).get('scenario') || '', mpResult: new URLSearchParams(location.search).get('mpresult') || '' }); setRpcOverride(sm.rpc); MOCK_FETCH = sm.mpFetch; }
 // Mock-tilan parametrit säilyvät linkeissä ja ohjauksissa (scenario=hold… toimii koko kulun läpi kassalta vahvistussivulle)
-const mockQs = () => { if (!MOCK) return ''; const cur = new URLSearchParams(location.search), q = new URLSearchParams({ mock: '1' }); for (const k of ['scenario', 'mpresult', 'mpinterval', 'mpmax', 'holdsec', 'fail', 'ritual', 'img', 'events']) if (cur.has(k)) q.set(k, cur.get(k)); return `?${q}`; };
+const mockQs = () => { if (!MOCK) return ''; const cur = new URLSearchParams(location.search), q = new URLSearchParams({ mock: '1' }); for (const k of ['scenario', 'mpresult', 'mpinterval', 'mpmax', 'holdsec', 'fail', 'ritual', 'img', 'events', 'priv']) if (cur.has(k)) q.set(k, cur.get(k)); return `?${q}`; };
 const bk = (hash) => `${S.shopHref}${mockQs()}#${hash}`;
 // Kassan pitotila ja maksutavat yhdestä paikasta (vuoro- ja hoitokassa): palvelin (public_checkout_payment_options) päättää, ei kovakoodata. Virhe → vanha käytös.
 const holdInfo = () => loadPayChoices({ rpc, fetchImpl: MOCK_FETCH }).then((m) => {
@@ -420,7 +421,7 @@ function dayItem({ r, p }, ds, withName = false) {
     h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }),
       withName ? h('span', { class: 'bk-prodname' }, h('a', { href: bk(`/tuote/${p.slug}/${ds}`), text: pname(p) })) : null, sub ? h('span', { class: 'bk-sub', text: sub }) : null, h('span', { class: 'bk-price', text: price, ...qAttrs(ok, p, r, 'day') })),
     h('div', { class: 'bk-slot-side' },
-      ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: 'bk-badge full', text: p.category === 'event' ? t.full : t.waitlistSessionSoldOut }),
+      spotBadge(r, p, ok, p.category === 'event' ? t.full : t.waitlistSessionSoldOut),
       ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}?via=day`) }, t.choose, h('span', { class: 'sr', text: ` ${title}, ${pname(p)}` })) : h('a', { class: 'btn sm light bk-waitlist-link', href: bk(`/jono/${r.rule_id}/${ds}/${p.id}?via=day`), text: p.category === 'event' ? t.eventWaitlistCta : t.waitlistJoinShort })));
 }
 // hoito-/rituaaliajan rivi päivänäkymässä: valinta vie hoitovarausvirtaan (tuotesivu) esivalitulla päivällä ja ajalla (henkilömäärä 1, vaihdettavissa)
@@ -664,6 +665,11 @@ async function viewProduct(slug, dateStr, query) {
   };
   mount(wrap); await draw(); if (!dateStr) focusTop();
 }
+// Yksityisvuoro ja jälkilöylyt: ei "N vapaana" (se on kapasiteetti). Täynnä ja ei varattavissa jäävät.
+function spotBadge(r, p, ok, fullText, n = r.remaining) {
+  if (ok && wholeSpaceBooking(r, p)) return null;
+  return h('span', { class: `bk-badge ${ok ? 'free' : 'full'}`, text: ok ? t.freeSpots(n) : fullText });
+}
 function slotItem(r, ds, p) {
   const ok = r.status === 'available';
   // monipäiväinen kerta (koulutus, booking_158): alku- ja loppupäivä näkyviin
@@ -674,7 +680,7 @@ function slotItem(r, ds, p) {
   return h('li', { class: `bk-slot ${r.status}` },
     h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }), sub ? h('span', { class: 'bk-sub', text: sub }) : null, h('span', { class: 'bk-price', text: price, ...qAttrs(ok, p, r, 'slot') })),
     h('div', { class: 'bk-slot-side' },
-      ok ? h('span', { class: 'bk-badge free', text: t.freeSpots(r.remaining) }) : h('span', { class: 'bk-badge full', text: p.category === 'event' ? t.full : t.waitlistSessionSoldOut }),
+      spotBadge(r, p, ok, p.category === 'event' ? t.full : t.waitlistSessionSoldOut),
       ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}`) }, t.choose, h('span', { class: 'sr', text: ` ${title}` })) : h('a', { class: 'btn sm light bk-waitlist-link', href: bk(`/jono/${r.rule_id}/${ds}/${p.id}`), text: p.category === 'event' ? t.eventWaitlistCta : t.waitlistJoinShort })));
 }
 
@@ -1292,8 +1298,12 @@ async function viewChange(token, b) {
         const title = `${hm(r.starts_at)}–${hm(r.ends_at)}`;
         const btn = h('button', { type: 'button', role: 'radio', class: 'btn sm', 'aria-checked': (st.session ? st.session === r : cur) ? 'true' : 'false', disabled: !ok || null, onclick: () => {
           st.session = cur ? null : r; sessionsBox.querySelectorAll('[role=radio]').forEach((x) => x.setAttribute('aria-checked', 'false')); btn.setAttribute('aria-checked', 'true'); upd(); } }, cur ? t.currentSlot : t.choose, h('span', { class: 'sr', text: ` ${title}` }));
+        const prod = state.catalog.find((x) => x.id === it.product_id);
+        const lateText = late ? t.tooLate(hours) : null;
+        const freeN = cur ? r.remaining + it.persons : r.remaining;
+        const badge = lateText ? h('span', { class: 'bk-badge unavail', text: lateText }) : spotBadge(r, prod, ok, r.status === 'full' ? t.full : t.unavailable, freeN);
         return h('li', { class: `bk-slot ${ok ? 'available' : r.status}` }, h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }), cleanLabel(rlabel(r)) ? h('span', { class: 'bk-sub', text: cleanLabel(rlabel(r)) }) : null),
-          h('div', { class: 'bk-slot-side' }, h('span', { class: `bk-badge ${ok ? 'free' : late ? 'unavail' : r.status}`, text: late ? t.tooLate(hours) : ok ? t.freeSpots(cur ? r.remaining + it.persons : r.remaining) : r.status === 'full' ? t.full : t.unavailable }), btn));
+          h('div', { class: 'bk-slot-side' }, badge, btn));
       })) : h('p', { text: t.noSlots }));
     upd();
   }

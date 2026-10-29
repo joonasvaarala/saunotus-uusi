@@ -22,6 +22,20 @@ const EVENT_DEMO = {
   description_en: 'After the ceremony you can stay on in the smoke sauna, the pools and the lean-to.',
   booking_kind: 'rules', min_persons: 1, max_persons: 12,
 };
+const PRIV_DEMO = [
+  { id: 25, slug: 'oma-saunavuoro', name: 'Oma saunavuoro', name_en: 'Private sauna session', category: 'private_sauna', sale_kind: 'private_shift', price: 220, price_type: 'from', duration_text: '2 h', duration_text_en: '2 h', booking_kind: 'rules', min_persons: 1, max_persons: 20, short_description: 'Koko miljöö omaan käyttöön.', short_description_en: 'The whole setting for your group.' },
+  { id: 26, slug: 'jalkiloylyt', name: 'Savusaunan jälkilöylyt', name_en: 'After Session Sauna', category: 'private_sauna', sale_kind: 'private_shift', price: 180, price_type: 'from', duration_text: '2 h', duration_text_en: '2 h', booking_kind: 'rules', min_persons: 1, max_persons: 20, included_persons: 6, extra_person_price: 10, short_description: 'Yleisten vuorojen jälkeen pehmeät jälkilöylyt.', short_description_en: 'Soft after-session löyly after the public sessions.' },
+];
+function privDemoSlots(now, productId) {
+  const at = (d, hh, mm = 0) => { const x = new Date(now()); x.setUTCDate(x.getUTCDate() + d); x.setUTCHours(hh - 2, mm, 0, 0); return x; };
+  const row = (rule, d, hh, status) => {
+    const start = at(d, hh), end = new Date(start.getTime() + (hh === 19 ? 3 : 2) * 36e5);
+    const jalki = productId === 26;
+    return { rule_id: rule, product_id: productId, label: jalki ? 'Jälkilöylyt' : 'Oma saunavuoro', label_en: jalki ? 'After session' : 'Private session', mode: 'exclusive', session_date: start.toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }), starts_at: start.toISOString(), ends_at: end.toISOString(), status, remaining: status === 'full' ? 0 : 20, min_persons: 1, max_persons: 20, price_mode: jalki ? 'base_plus_extra' : 'fixed', unit_price: null, base_price: jalki ? 250 : 220, included_persons: 6, extra_person_price: 10 };
+  };
+  const base = productId === 26 ? 2600 : 2500;
+  return [row(base + 1, 2, 19, 'available'), row(base + 2, 2, 16, 'full')];
+}
 function eventDemoSlots(now) {
   const at = (d, hh, mm = 0) => { const x = new Date(now()); x.setUTCDate(x.getUTCDate() + d); x.setUTCHours(hh - 2, mm, 0, 0); return x; };
   const row = (rule, d, hh, mm, status, remaining) => {
@@ -44,6 +58,7 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
   const annualSale = /[?&]annual=1(&|$)/.test(globalThis.location?.search || '');
   const quietOn = /[?&]quiet=1(&|$)/.test(globalThis.location?.search || '');   // booking_162
   const eventsOn = /[?&]events=1(&|$)/.test(globalThis.location?.search || '');   // tapahtuman päivänapit: myynnissä oleva Perinnesaunotusilta (oletus pois, muut mockit ennallaan)
+  const privOn = /[?&]priv=1(&|$)/.test(globalThis.location?.search || '');   // yksityisvuoro + jälkilöylyt (koko tila, ei "N vapaana")
   // booking_166: ?ritual=1 → yleinen vuoro (kb 1) + saunarituaali lisäpalveluna (ritual-addon-mock.js); oletus pois (muut mockit ennallaan)
   const ritual = /[?&]ritual=1(&|$)/.test(globalThis.location?.search || '') ? createRitualMock({ storage, now, fail }) : null;
   const noTimes = fail === 'notimes';   // ?mock=1&fail=notimes: public_treatment_availability palauttaa aina tyhjän ("Ei vapaita aikoja" -tila)
@@ -98,8 +113,8 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
       // vuosikortti (booking_142): ?mock=1&annual=1 näyttää myynnin (oletus pois kuten tuotannossa); osto ohjaa tilaussivun mockiin (scenario=annual)
       case 'public_annual_card_offer': return annualSale ? { available: true, product_id: 43, name: 'Vuosikortti', name_en: 'Annual card', price: 290, vat_rate: 25.5, valid_months: 12 } : { available: false };
       case 'public_buy_annual_card': return annualSale ? { ok: true, order_no: 9142, token: '00000000-0000-4000-8000-000000000142', status: 'pending', total: 290, payment_mode: 'pay_later' } : { ok: false, code: 'sale_disabled', message: 'Vuosikorttien verkkomyynti ei ole käytössä' };
-      case 'public_catalog': return eventsOn ? [...catalogEntries(), EVENT_DEMO] : catalogEntries();
-      case 'public_catalog_for': return eventsOn ? [...pickCatalog(catalogEntries(), args.p_audience), EVENT_DEMO] : pickCatalog(catalogEntries(), args.p_audience);
+      case 'public_catalog': return [...catalogEntries(), ...(eventsOn ? [EVENT_DEMO] : []), ...(privOn ? PRIV_DEMO : [])];
+      case 'public_catalog_for': return [...pickCatalog(catalogEntries(), args.p_audience), ...(eventsOn ? [EVENT_DEMO] : []), ...(privOn ? PRIV_DEMO : [])];
       case '__availability_all':
       case 'public_availability_all': {
         const catalog = pickCatalog(catalogEntries(), args.p_audience);
@@ -143,6 +158,9 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
         return r ? r.body : { ok: false, code: 'not_found', message: 'Varausta ei löytynyt' };
       }
       default: {
+        if (name === 'public_availability' && privOn && ( +args.p_product_id === 25 || +args.p_product_id === 26)) {
+          return privDemoSlots(now, +args.p_product_id).filter((r) => r.session_date >= args.p_from && r.session_date <= args.p_to);
+        }
         if (name === 'public_availability' && eventsOn && +args.p_product_id === 31) {
           return eventDemoSlots(now).filter((r) => r.session_date >= args.p_from && r.session_date <= args.p_to);
         }

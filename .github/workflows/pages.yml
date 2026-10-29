@@ -118,6 +118,8 @@ jobs:
       - run: node --test booking/tests/yritysasiakashaku.test.mjs
       # Hiljaisten aikojen ale (booking_162): logiikka, tekstit FI/EN + pending-import-59, migraatio/rollback-rakenne, mockit, viikko-ohjelma
       - run: node --test booking/tests/hiljaiset-ajat.test.mjs
+      # Yksityisvuoro ja jälkilöylyt: ei "N vapaana" -merkkiä (remaining on kapasiteetti). Yleinen ja tapahtuma ennallaan.
+      - run: node --test booking/tests/koko-tila-vapaana.test.mjs
       # Saunarituaali yleisen vuoron lisäpalveluna (booking_166): aikasääntö, kassan logiikka, mock, tekstit FI/EN + pending-import-62, migraatio/rollback-rakenne
       - run: node --test booking/tests/saunarituaali-lisapalvelu.test.mjs
       # booking_180: maksettujen lisäpalvelurivien käyttöliittymän lukituslogiikka
