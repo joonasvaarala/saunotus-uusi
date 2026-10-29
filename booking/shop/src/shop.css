@@ -658,7 +658,11 @@ button.bk-cell.quiet.sel{box-shadow:inset 0 -4px 0 #F4EFE7}
 .bk-more-panel{padding:0 0 4px}
 .bk-more-panel[hidden]{display:none}
 .bk-more .bk-cancel-rule{margin:8px 0 14px}
-.bk-jump{display:inline-flex;margin-top:8px}
+#valitse-aika{scroll-margin-top:84px}   /* sticky-yläpalkki ei peitä varausosiota, kun "Valitse aika" vierittää siihen */
+.bk-jump{display:inline-flex;align-items:center;min-height:44px;margin-top:8px;padding:0;border:0;background:transparent;color:var(--gold);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.bk-jump:hover{color:var(--ink)}
+.bk-jump:focus{outline:none}
+.bk-jump:focus-visible{outline:3px solid var(--ink);outline-offset:2px;border-radius:4px}
 @media(min-width:960px){
   .bk-prod-layout{grid-template-columns:minmax(300px,460px) minmax(0,1fr);grid-template-areas:"cal facts";align-items:start}
   .bk-facts{grid-area:facts}

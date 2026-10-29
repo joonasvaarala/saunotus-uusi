@@ -30,7 +30,7 @@ import { normBusinessId, validBusinessId, normOvt, validOvt, validOperator } fro
 import { isRichHtml } from './rich-text.js';
 import { visibleText, richHost } from './rich-view.js';
 import { softenSpaces } from './text-spaces.js';
-import { revealForm, revealIfHidden } from './gift-ui.js';
+import { revealForm, revealIfHidden, bookingJump } from './gift-ui.js';
 import { normalizeCode, quoteSignature, isAnnualQuote, isCodeError } from './discount-code-logic.js';
 import { createQuietOfferCache, indexOffers, findOffer, dayMaxPercent, productMaxPercent, quietPrices, quietCheckout, quietBase, pctText, fillText, quietWindow, offerKey } from './quiet-offers-logic.js';
 import { normalizeOffer, ritualPrice, ritualMax, cardQty, reconcileCard, ritualAddonArg, ritualSig, splitItems, isRitualError } from './ritual-addon-logic.js';
@@ -624,7 +624,7 @@ async function viewProduct(slug, dateStr, query) {
           h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), pdur(p) ? ` · ${pdur(p)}` : ''),
           leadShort(h, p, S.lang, desc),
           moreInfo(desc),
-          h('a', { class: 'bk-jump', href: '#valitse-aika', text: t.pickTime })),
+          eventProduct ? null : bookingJump(h, t.pickTime)),
         h('div', { class: 'bk-prod-cal', id: 'valitse-aika' }, h('h3', eventProduct ? { id: 'bk-ev-date-h', text: t.pickDate } : { text: t.pickDate }), calBox, slotBox)));
     if (eventProduct) { await fillEventDates(calBox, slotBox); return; }
     let byDay = {};
