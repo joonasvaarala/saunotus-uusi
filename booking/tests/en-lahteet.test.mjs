@@ -73,7 +73,7 @@ test('SQL-testi t151 ja kb-mock: _en-sarakkeet mockissa kuten tuotannossa', () =
     /kb\.event_dates add column if not exists time_text_en text/, /kb\.opening_hours add column if not exists session_name_en text/, /kb\.locations add column if not exists name_en text/, /kb\.businesses add column if not exists description_en text/]) assert.match(mock, re);
 });
 
-test('kauppa: EN-sivu näyttää vuoron label_en, puuttuessa label; FI aina label; kaikki kolme kohtaa', () => {
+test('kauppa: EN-sivu näyttää vuoron label_en, puuttuessa label; FI aina label', () => {
   const shop = read('booking/shop/src/shop.js');
   const line = /const rlabel = \(r\) => .*;/.exec(shop)?.[0];
   assert.equal(line, "const rlabel = (r) => (S.lang === 'en' && r.label_en) || r.label;");
@@ -83,7 +83,7 @@ test('kauppa: EN-sivu näyttää vuoron label_en, puuttuessa label; FI aina labe
   assert.equal(rl({ lang: 'fi' })(r), 'Iltasauna');
   assert.equal(rl({ lang: 'en' })({ label: 'Iltasauna', label_en: null }), 'Iltasauna');
   assert.equal(rl({ lang: 'en' })({ label: 'Iltasauna', label_en: '' }), 'Iltasauna');
-  assert.equal((shop.match(/cleanLabel\(rlabel\(r\)\)/g) || []).length, 4, 'tuotekortti, varausyhteenveto, vuorolista (2)');
+  assert.equal((shop.match(/cleanLabel\(rlabel\(r\)\)/g) || []).length, 5, 'tuotekortti, varausyhteenveto, vuorolista (2), tapahtuman kellonaikanapit');
   assert.doesNotMatch(shop, /cleanLabel\(r\.label\)/, 'ei suoraa label-näyttöä');
   assert.match(shop, /h\('h2', \{ text: st \? pname\(st\) : t\.unknownProduct \}\)/, 'yhteydenottotuote: EN-nimi (name_en) static-products.jsonista');
   assert.doesNotMatch(shop, /st \? st\.name :/, 'ei suomenkielistä nimeä EN-kaupassa');
