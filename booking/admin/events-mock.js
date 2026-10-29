@@ -51,6 +51,8 @@ export function createEventsMock({ today, resources = EVENT_MOCK_RESOURCES, prod
   const full = st.events[0].rules[1];
   const past = addDays(today, -14);
   st.events[0].rules.push(rule(past, '16:00', 180, 10, { sold_persons: 6, active: true }));
+  // booking_213: Johku-myynnistä tuotu kerta – myydyt sisältävät Johku-paikat (8 / 8, täynnä).
+  st.events[1].rules.push(rule(addDays(today, 3), '17:00', 150, 8, { sold_persons: 8, johku_persons: 8, johku_count: 6, reservation_count: 6 }));
   st.events[1].rules.push(rule(addDays(today, 30), '17:00', 150, 12, { sold_persons: 3, cancelled_at: `${today}T08:00:00.000Z`, active: false, reservation_count: 3, label: 'Peruttu kerta' }));
   const bookedAt = `${addDays(today, -2)}T08:15:00.000Z`;
   st.participants = [
@@ -171,7 +173,7 @@ export function createEventsMock({ today, resources = EVENT_MOCK_RESOURCES, prod
       const byOrder = new Map();
       for (const row of rows) if (!byOrder.has(row.order_id)) byOrder.set(row.order_id, row);
       const recipients = [...byOrder.values()].map((r) => ({ name: r.name, order_no: r.order_no, persons: r.persons }));
-      const preview = { ok: true, recipient_count: recipients.length, skipped_count: 0, recipients, subject: draft.subject, signature: 'Tapio' };
+      const preview = { ok: true, recipient_count: recipients.length, skipped_count: 0, recipients, subject: draft.subject, signature: null };
       if (a.p_confirm !== true) return preview;
       if (!recipients.length) throw err('no_recipients', 'Ei vastaanottajia');
       const msg = { id: ++st.msgSeq, product_id: p.product_id, rule_id: a.p_rule_id || null, subject: draft.subject, body: draft.body, recipient_count: recipients.length, queued_count: recipients.length, skipped_count: 0, created_at: new Date().toISOString() };

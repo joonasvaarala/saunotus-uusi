@@ -464,7 +464,7 @@ test('unpaid_booking_cancelled: maksu ei valmistunut, Yritä uudelleen saman tuo
   assert.ok(!bad.html.includes('javascript:'));
 });
 
-test('event_message: henkilökunnan viesti, Tapio, ei tilaussummaa eikä välittäjän nimeä', { skip }, () => {
+test('event_message: henkilökunnan viesti, ei automaattista allekirjoitusta, ei tilaussummaa eikä välittäjän nimeä', { skip }, () => {
   const row = (locale, subject) => ({ ...base(locale), kind: 'event_message', event_message: { subject, body: 'Ota pyyhe mukaan.\nNähdään illalla.', event_name: 'Joulusauna', event_name_en: 'Christmas sauna', when_text: '14.11.2026 17:00' } });
   const fi = R('event_message', row('fi', 'Muistutus illasta'), 'fi');
   const en = R('event_message', row('en', 'Reminder'), 'en');
@@ -472,10 +472,10 @@ test('event_message: henkilökunnan viesti, Tapio, ei tilaussummaa eikä välitt
   assert.match(fi.text, /Ota pyyhe mukaan/);
   assert.match(fi.text, /Tapahtuma: Joulusauna/);
   assert.match(fi.text, /Aika: 14\.11\.2026 17:00/);
-  assert.match(fi.text, /Ystävällisin terveisin,\nTapio\nSipoonjoen Perinnesauna\n$/);
+  assert.match(fi.text, /Aika: 14\.11\.2026 17:00\n\n[^\n]+\n$/); // viimeisenä yhteystietorivi, ei allekirjoitusta
   assert.match(en.text, /Event: Christmas sauna/);
-  assert.match(en.text, /Kind regards,\nTapio\nSipoonjoen Perinnesauna\n$/);
   for (const m of [fi, en]) {
+    assert.doesNotMatch(m.text + m.html, /Tapio|Ystävällisin terveisin|Kind regards/); // booking_213: henkilökunta allekirjoittaa itse
     assert.doesNotMatch(m.subject + m.text + m.html, /montonio|visma|mobilepay|vipps|paybyway/i);
     assert.doesNotMatch(m.text, /36[,.]00|Yhteensä|Total/);
   }
@@ -493,5 +493,5 @@ test('event_message: henkilökunnan viesti, Tapio, ei tilaussummaa eikä välitt
   assert.equal((hyvaa.text.match(/^Hei\b/gm) || []).length, 0);
   const fallback = R('event_message', { ...base('fi'), kind: 'event_message', event_message: {} }, 'fi');
   assert.equal(fallback.subject, 'Viesti tapahtumasta');
-  assert.match(fallback.text, /Tapio/);
+  assert.doesNotMatch(fallback.text + fallback.html, /Tapio/);
 });

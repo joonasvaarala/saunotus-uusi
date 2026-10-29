@@ -16,6 +16,7 @@ create function pg_temp.ck(p_ok boolean, p_label text) returns void language sql
 grant execute on all functions in schema pg_temp to public;
 
 \ir ../migrations/20261029065818_booking_202_event_admin.sql
+\ir ../migrations/20261029072745_booking_213_event_johku_capacity.sql
 
 update booking.settings set value = '400'::jsonb where key = 'booking_horizon_days';
 update booking.settings set value = '"pay_later"'::jsonb where key = 'public_payment_mode';
@@ -77,7 +78,7 @@ begin
   perform pg_temp.ck((select valid_from = d and start_time = '18:00' from booking.schedule_rules where id = v_rule)
     and (select to_char(starts_at at time zone 'Europe/Helsinki', 'HH24:MI') from booking.reservations where id = v_res) = '18:00', 'D7: kerta ja varaus ennallaan');
   res := booking.admin_event_message_send(33, v_rule, 'Muistutus', 'Ota pyyhe mukaan.', false);
-  perform pg_temp.ck((res ->> 'sent')::boolean = false and (res ->> 'recipient_count')::int = 1 and res ->> 'signature' = 'Tapio'
+  perform pg_temp.ck((res ->> 'sent')::boolean = false and (res ->> 'recipient_count')::int = 1 and res ->> 'signature' is null
     and not (res::text ~* 'montonio|visma|paybyway'), 'E1: esikatselu ei lähetä');
   select count(*) into v_before from booking.email_outbox where kind = 'event_message';
   res := booking.admin_event_message_send(33, v_rule, 'Muistutus', 'Ota pyyhe mukaan.', true);

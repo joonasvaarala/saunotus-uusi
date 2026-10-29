@@ -1230,7 +1230,7 @@
  {
   "key": "ui.admin.events.msg_sign_note",
   "lang": "fi",
-  "text": "Lähtevä viesti allekirjoitetaan nimellä Tapio. Maksuvälittäjän nimeä ei lähetetä asiakkaalle.",
+  "text": "Viesti lähtee sellaisenaan – kirjoita allekirjoitus itse.",
   "class": "normal",
   "kind": "plain",
   "max_len": 133,
@@ -1240,7 +1240,7 @@
  {
   "key": "ui.admin.events.msg_sign_note",
   "lang": "en",
-  "text": "Outgoing messages are signed Tapio. The payment provider name is not sent to the customer.",
+  "text": "The message is sent as written – add your own sign-off.",
   "class": "normal",
   "kind": "plain",
   "max_len": 130,
