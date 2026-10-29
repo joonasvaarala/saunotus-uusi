@@ -377,7 +377,7 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .prodcatsel{min-height:44px}
 @media(min-width:700px){.prodcatset{display:block}.prodcatsel-w{display:none}}
 /* saunottaja puuttuu (migraatio 22) */
-.badge.tmiss{background:#F6E6C3;color:#5a3f00;border:1px solid rgba(90,63,0,.5)}
+.badge.tmiss,.badge.needs-action{background:#F6E6C3;color:#5a3f00;border:1px solid rgba(90,63,0,.5)}
 .badge.tmiss-ok{border:1px solid var(--line)}
 .warn-box{display:grid;gap:6px;padding:12px 14px;border-radius:var(--r);background:var(--warnbg);border:1px solid rgba(90,63,0,.45);border-left:5px solid #8a5a00;color:#4a3300;margin-bottom:12px}
 .warn-box p{margin:0;color:#4a3300}
@@ -1074,3 +1074,10 @@ body.shot #shell .nav .lbl{display:inline}
   body.ev-printing .ev-print-only{display:block !important}
   body.ev-printing main{padding:0;max-width:none}
 }
+.paylink-watch .paylink-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 12px}
+.paylink-watch .paylink-tools input{flex:1 1 auto;min-width:0;min-height:44px}
+.paylink-watch .paylink-tools select{min-height:44px}
+.paylink-watch .paylink-actions{display:flex;flex-wrap:wrap;gap:6px}
+.paylink-watch .paylink-actions .btn{width:auto;min-height:44px}
+.paylink-watch tr.needs-action{box-shadow:inset 4px 0 0 var(--gold)}
+.paylink-watch tr.needs-action td{background:var(--bg)}

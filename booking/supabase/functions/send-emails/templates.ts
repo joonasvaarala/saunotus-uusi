@@ -3,7 +3,7 @@
 // data = booking.email_outbox_claim()-rivi (ks. docs/talous-integraatiot.md): { kind, locale, to_name, order{order_no, order_url, total, items[], reservations[]}, receipt{receipt_no, kind, text_body, total, issued_at}, payment{amount, link_url, link_expires_at} }.
 // FI + EN, HTML (taulukkopohjainen, inline-tyylit, sähköpostiyhteensopiva) + tekstiversio. Ei ulkoisia riippuvuuksia (puhdas funktio, testattu node --test).
 // Tyyli: tumma vihreä + hiekka, ei sinistä. Logo: sivuston /img/logo-kuitti.png (osoite johdetaan tilauslinkistä; muuten LOGO_FALLBACK).
-export type Kind = "order_confirmation" | "payment_link" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify" | "invoice_pdf" | "product_message" | "waitlist_spot_freed" | "waitlist_joined" | "annual_card_code" | "unpaid_booking_cancelled" | "event_message";
+export type Kind = "order_confirmation" | "payment_link" | "payment_link_reminder" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify" | "invoice_pdf" | "product_message" | "waitlist_spot_freed" | "waitlist_joined" | "annual_card_code" | "unpaid_booking_cancelled" | "event_message";
 export interface Rendered { subject: string; text: string; html: string }
 // Asiakasnäkyvät tekstit: texts.ts (repon oletukset = varateksti) tai tietokannasta (email.*-avaimet, _shared/site_texts.ts). render() ottaa valinnaisen tekstihaun (4. parametri).
 import { makeT, type TFn } from "../_shared/site_texts.ts";
@@ -55,6 +55,14 @@ export function annualCardBlock(row: { kind?: string; annual_card?: { code?: unk
   if (c.revoked === true) return "vuosikortti on peruttu";
   if (c.active === false) return "vuosikortti ei ole käytössä";
   if (!String(c.code ?? "").trim()) return "vuosikortin koodi puuttuu";
+  return null;
+}
+/** Muistutusta ei lähetetä, jos maksulinkki ei ole enää auki (claim poistaa link_url:n) tai tilaus on peruttu. */
+export function paymentReminderBlock(row: { kind?: string; order?: { status?: unknown }; payment?: { link_url?: unknown } | null } | null | undefined): string | null {
+  if (row?.kind !== "payment_link_reminder") return null;
+  const st = String(row.order?.status || "");
+  if (["cancelled", "expired", "draft"].includes(st)) return "tilaus ei ole lähetettävissä";
+  if (!String(row.payment?.link_url || "").trim()) return "maksulinkki ei ole enää avoinna";
   return null;
 }
 /** Tuoteviestiä ei lähetetä, jos pohja on pois päältä, tilaus on peruttu tai hyvitetty, tai teksti on tyhjä. null = saa renderöidä. Allowlistia tämä ei koske. */
@@ -462,6 +470,26 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const text = textBlock(hello, intro, url && `${title}:\n${url}`, exp, ob.text, contact, linkSign) + "\n";
       const html = mk(title, intro, h1(title) + helloRow + p(esc(intro)) + box(`<span style="font-family:${SANS};font-size:12px;color:${MUTED};text-transform:uppercase;letter-spacing:.04em">${esc(lab)}</span><br><span style="font-family:${FONT};font-size:24px;color:${GREEN}">${esc(amount)}</span>`)
         + (url ? button(url, pay) : "") + (exp ? p(esc(exp), `color:${MUTED};font-size:13px`) : "") + ob.html + linkTail);
+      return { subject, text, html };
+    }
+    case "payment_link_reminder": {
+      // booking_215: sama maksulinkki kuin payment_link-pohjassa. Asiakas ei näe maksuvälittäjän nimeä (painike: Maksa verkossa). Allekirjoitus Tapio.
+      const url = safeUrl(d?.payment?.link_url) || orderUrl;
+      const amount = eur(d?.payment?.amount, en);
+      const pr = d?.payment_reminder || {};
+      const cancel = pr.cancel_if_unpaid === true;
+      const due = cancel && d?.payment?.link_expires_at ? day(d.payment.link_expires_at, en) : "";
+      const subject = X("email.payment_link_reminder.subject", { no });
+      const intro = X("email.payment_link_reminder.intro", { amount });
+      const warn = due ? X("email.payment_link_reminder.cancel", { date: due }) : "";
+      const title = X("email.payment_link_reminder.title");
+      const lab = X("email.payment_link.amount_label");
+      const pay = X("email.payment_link_reminder.pay_button");
+      const linkSign = `${X("email.common.closing")}\n${X("email.payment_link.sign_name")}\n${SELLER}`;
+      const linkTail = `${p(esc(contact), `color:${MUTED};font-size:13px`)}${p(esc(linkSign).replace(/\n/g, "<br>"))}`;
+      const text = textBlock(hello, intro, warn, url && `${pay}:\n${url}`, ob.text, contact, linkSign) + "\n";
+      const html = mk(title, intro, h1(title) + helloRow + p(esc(intro)) + box(`<span style="font-family:${SANS};font-size:12px;color:${MUTED};text-transform:uppercase;letter-spacing:.04em">${esc(lab)}</span><br><span style="font-family:${FONT};font-size:24px;color:${GREEN}">${esc(amount)}</span>`)
+        + (warn ? p(esc(warn)) : "") + (url ? button(url, pay) : "") + ob.html + linkTail);
       return { subject, text, html };
     }
     case "receipt":

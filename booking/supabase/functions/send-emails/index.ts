@@ -3,7 +3,7 @@
 // Lähetystapa settings.transport: resend (oletus, RESEND_API_KEY, idempotenssi ennallaan) tai gmail_smtp (GMAIL_SMTP_USER + GMAIL_SMTP_APP_PASSWORD; ei lokiteta).
 // Live + epätyhjä settings.test_recipients: vastaanottaja listan ulkopuolella -> skipped 'ei allowlistissa' ennen renderöintiä. Tyhjä lista = ei rajausta.
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { render, outboundReplyTo, productMessageBlock, annualCardBlock, type Kind } from "./templates.ts";
+import { render, outboundReplyTo, productMessageBlock, annualCardBlock, paymentReminderBlock, type Kind } from "./templates.ts";
 import { EMAIL_TEXTS } from "./texts.ts";
 import { fetchSiteTexts, makeT } from "../_shared/site_texts.ts";
 import { GMAIL_SECRET_ERROR, outboxAllowlistBlock, parseTestRecipients, resolveTransport, sendViaGmail } from "./mailer.ts";
@@ -58,6 +58,8 @@ Deno.serve(async (req) => {
       }
       if (r.kind === "voucher_claim_problem" && r.voucher_claim?.status !== "problem") { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: "pyyntö ei enää ongelmatilassa" }); stats.skipped++; continue; }
       if (r.kind === "voucher_claim_received" && (!r.voucher_claim || ["cancelled", "expired"].includes(r.voucher_claim.status))) { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: "pyyntö peruttu/vanhentunut" }); stats.skipped++; continue; }
+      const prBlock = paymentReminderBlock(r);
+      if (prBlock) { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: prBlock }); stats.skipped++; continue; }
       const pmBlock = productMessageBlock(r);
       if (pmBlock) { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: pmBlock }); stats.skipped++; continue; }
       const acBlock = annualCardBlock(r);

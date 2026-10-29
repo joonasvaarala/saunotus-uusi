@@ -495,3 +495,28 @@ test('event_message: henkilökunnan viesti, ei automaattista allekirjoitusta, ei
   assert.equal(fallback.subject, 'Viesti tapahtumasta');
   assert.doesNotMatch(fallback.text + fallback.html, /Tapio/);
 });
+
+test('payment_link_reminder: sama linkki, Tapio, Maksa verkossa, peruutuspäivä, ei Montonio-nimeä', { skip }, () => {
+  const pay = { ...base('fi').payment, link_expires_at: '2026-11-14T20:00:00Z' };
+  const fi = R('payment_link_reminder', { ...base('fi'), kind: 'payment_link_reminder', payment: pay, payment_reminder: { n: 2, kind: 'prepaid_before_expiry', cancel_if_unpaid: true } }, 'fi');
+  assert.equal(fi.subject, 'Muistutus: maksulinkki tilaukseen 15321 – Sipoonjoen Perinnesauna');
+  assert.match(fi.text, /Maksa verkossa/);
+  assert.match(fi.text, /varaus perutaan/);
+  assert.match(fi.text, /14\.11\.2026|14\.11\.2026/);
+  assert.match(fi.html, /Maksa verkossa/);
+  assert.ok(fi.text.includes(PAY_URL) && fi.html.includes(PAY_URL));
+  assert.match(fi.text, /Tapio/);
+  assert.doesNotMatch(fi.subject + fi.text + fi.html, /montonio|visma|mobilepay|vipps|paybyway/i);
+  const en = R('payment_link_reminder', { ...base('en'), kind: 'payment_link_reminder', payment: { ...base('en').payment, link_expires_at: '2026-11-14T20:00:00Z' }, payment_reminder: { cancel_if_unpaid: true } }, 'en');
+  assert.equal(en.subject, 'Reminder: payment link for order 15321 – Sipoonjoen Perinnesauna');
+  assert.match(en.text, /Pay online/);
+  assert.match(en.text, /booking will be cancelled/);
+  assert.match(en.text, /Tapio/);
+  assert.doesNotMatch(en.text, /Maksa verkossa|varaus perutaan/);
+  const onsite = R('payment_link_reminder', { ...base('fi'), kind: 'payment_link_reminder', payment: { ...pay, link_expires_at: null }, payment_reminder: { cancel_if_unpaid: false, kind: 'onsite' } }, 'fi');
+  assert.doesNotMatch(onsite.text, /varaus perutaan/);
+  assert.match(onsite.text, /Maksa verkossa/);
+  assert.equal(T.paymentReminderBlock({ kind: 'payment_link_reminder', payment: { link_url: '' }, order: { status: 'confirmed' } }), 'maksulinkki ei ole enää avoinna');
+  assert.equal(T.paymentReminderBlock({ kind: 'payment_link_reminder', payment: { link_url: PAY_URL }, order: { status: 'cancelled' } }), 'tilaus ei ole lähetettävissä');
+  assert.equal(T.paymentReminderBlock({ kind: 'payment_link', payment: { link_url: PAY_URL } }), null);
+});
