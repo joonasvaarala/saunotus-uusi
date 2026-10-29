@@ -965,7 +965,7 @@
     "text": "Muistutus: maksulinkki tilaukseen {{var:no}} – {{setting:business_name}}",
     "class": "normal",
     "kind": "plain",
-    "max_len": 240,
+    "max_len": 200,
     "placeholders": [
       "{{var:no}}",
       "{{setting:business_name}}"
@@ -978,7 +978,7 @@
     "text": "Reminder: payment link for order {{var:no}} – {{setting:business_name}}",
     "class": "normal",
     "kind": "plain",
-    "max_len": 240,
+    "max_len": 200,
     "placeholders": [
       "{{var:no}}",
       "{{setting:business_name}}"
@@ -991,7 +991,7 @@
     "text": "Muistutus maksusta",
     "class": "normal",
     "kind": "plain",
-    "max_len": 80,
+    "max_len": 200,
     "placeholders": [],
     "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
   },
@@ -1001,7 +1001,7 @@
     "text": "Payment reminder",
     "class": "normal",
     "kind": "plain",
-    "max_len": 80,
+    "max_len": 200,
     "placeholders": [],
     "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
   },
@@ -1011,7 +1011,7 @@
     "text": "Tilauksesi maksu ({{var:amount}}) on yhä avoinna. Voit maksaa sen alla olevasta linkistä.",
     "class": "normal",
     "kind": "plain",
-    "max_len": 240,
+    "max_len": 250,
     "placeholders": [
       "{{var:amount}}"
     ],
@@ -1023,7 +1023,7 @@
     "text": "The payment for your order ({{var:amount}}) is still open. You can pay it using the link below.",
     "class": "normal",
     "kind": "plain",
-    "max_len": 240,
+    "max_len": 250,
     "placeholders": [
       "{{var:amount}}"
     ],
@@ -1035,7 +1035,7 @@
     "text": "Ellei maksua ole maksettu {{var:date}} mennessä, varaus perutaan.",
     "class": "normal",
     "kind": "plain",
-    "max_len": 240,
+    "max_len": 200,
     "placeholders": [
       "{{var:date}}"
     ],
@@ -1047,7 +1047,7 @@
     "text": "If the payment is not received by {{var:date}}, the booking will be cancelled.",
     "class": "normal",
     "kind": "plain",
-    "max_len": 240,
+    "max_len": 200,
     "placeholders": [
       "{{var:date}}"
     ],
@@ -1059,7 +1059,7 @@
     "text": "Maksa verkossa",
     "class": "normal",
     "kind": "plain",
-    "max_len": 80,
+    "max_len": 200,
     "placeholders": [],
     "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
   },
@@ -1069,7 +1069,7 @@
     "text": "Pay online",
     "class": "normal",
     "kind": "plain",
-    "max_len": 80,
+    "max_len": 200,
     "placeholders": [],
     "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
   }
