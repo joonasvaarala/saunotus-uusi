@@ -13,7 +13,7 @@ import { visibleWaitlistSlots, fullyBooked, hasWaitlistSlots } from './waitlist-
 import { indexShopEvents, missingEventProducts, eventIsFull, eventWaitlistPath, byEventStart } from './event-full.js';
 import { loadProducts as loadTreatmentProducts, splitCatalog, isListed as treatmentListed, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
 import { pickCatalog } from './catalog-audience.js';
-import { heroShort, cardShort, fallbackDesc } from './short-desc.js';
+import { heroShort, cardShort, fallbackDesc, leadShort } from './short-desc.js';
 import { createTreatmentViews } from './treatment-ui.js';
 import { cardMeta } from './card-meta.js';
 import { kindOf, chipsFor, DAY_KIND_ORDER } from './catalog-kind.js';
@@ -43,7 +43,7 @@ import { clockFromIso } from './clock.js';
 import { cardAnchor } from './card-link.js';
 import { bindLangLinks, restoreDraft } from './lang-switch.js';
 import { confirmPageKind } from './confirm-heading.js';
-import { includedPlain, swimwearPlain, swimwearKey } from './product-layout.js';
+import { swimwearKey } from './product-layout.js';
 
 const S = window.BOOKING_SHOP;                   // build-aikainen konfiguraatio (kieli, polut, ei-verkossa-varattavat tuotteet)
 const t = T[S.lang] || T.fi;
@@ -232,7 +232,7 @@ function placeGiftNudge(show) {
   if (!sub) return;
   sub.after(h('p', { class: 'bk-gift-nudge' }, h('a', { href: S.links.gift, 'data-testid': 'gift-nudge', text: t.giftLink })));
 }
-function setHero(p) {
+function setHero(p, { short = true } = {}) {   // short=false: tuotesivu, jossa lyhyt kuvaus on ingressinä kalenterin vieressä
   placeGiftNudge(false);
   const el = document.querySelector('main .hero.page'); document.documentElement.classList.remove('bk-hero-wait');
   if (!el) return;
@@ -250,7 +250,7 @@ function setHero(p) {
   h1.textContent = p ? pname(p) : hero.def.h1;
   el.querySelector('.bk-hero-short')?.remove();
   if (sub) {
-    const hs = p ? heroShort(h, p, S.lang, pdesc(p)) : { node: null, text: hero.def.sub };
+    const hs = !p ? { node: null, text: hero.def.sub } : short ? heroShort(h, p, S.lang, pdesc(p)) : { node: null, text: '' };
     sub.textContent = hs.text; sub.hidden = !sub.textContent;
     if (hs.node) sub.after(hs.node);   // rikas lyhyt kuvaus: puhdistettu <div class="bk-hero-short bk-rich"> (ei <p>:n sisään)
   }
@@ -258,6 +258,13 @@ function setHero(p) {
 
 // Kortin kuvaus (booking_156): lyhyt kuvaus puhdistettuna, tyhjä → johdettu ote 170 merkkiä (short-desc.js).
 const cardExcerpt = (p) => cardShort(h, p, S.lang, pdesc(p));
+// Tuotesivun Lisätietoja-osio: pitkä kuvaus (sis. uima-asuohjeen) + yleinen peruutusehto (page.info.cancel_text).
+function moreInfo(desc) {
+  if (!desc && !S.cancelRule) return null;
+  return h('details', { class: 'bk-more', 'data-testid': 'more-info' }, h('summary', { text: t.moreInfo }),
+    desc ? richHost(h, desc, 'bk-desc') : null,
+    S.cancelRule ? h('p', { class: 'bk-note bk-cancel-rule', 'data-testid': 'product-cancel', text: S.cancelRule }) : null);
+}
 // ---- näkymä 1: tuotelista ----
 async function viewList(query) {
   placeGiftNudge(true);
@@ -516,7 +523,7 @@ async function viewProduct(slug, dateStr, query) {
   const tp = !state.catalog.some((x) => x.slug === slug) && state.treatments.find((x) => x.slug === slug);
   if (tp) return tv.viewTreatment(tp, query || new URLSearchParams());   // hoito-/rituaalituote: oma kulku (treatment-ui.js)
   const p = state.catalog.find((x) => x.slug === slug);
-  setHero(p || null);
+  setHero(p || null, { short: false });   // lyhyt kuvaus on tuotesivulla ingressinä (leadShort), ei toistu yläbannerissa
   if (!p) {
     // booking_158: tapahtuma/koulutus, jonka myynti on suljettu (public_catalog ei näytä sitä): tiedot ja ajankohdat public_eventsistä, ei ostoa
     const ev = findEvent(await publicEvents(), slug);
@@ -535,18 +542,17 @@ async function viewProduct(slug, dateStr, query) {
   const draw = async () => {
     const calBox = h('div', { class: 'bk-cal' }), slotBox = h('div', { class: 'bk-slots', 'aria-live': 'polite' });
     const desc = pdesc(p) || '';
-    const inc = includedPlain(desc), swim = swimwearPlain(desc);
+    // Joonas 28.10.2026: kalenterin vieressä vain hinta + lyhyt kuvaus. Uima-asuohje on pitkässä kuvauksessa ja peruutusehto
+    // Lisätietoja-osion lopussa (sama teksti näkyy myös kassalla, legalFields showCancel).
     wrap.replaceChildren(
       h('p', {}, h('a', { href: bk('/'), text: t.backList })),
       h('div', { class: 'bk-prod-layout' },
         h('div', { class: 'bk-facts' },
           h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), pdur(p) ? ` · ${pdur(p)}` : ''),
-          inc ? h('p', { class: 'bk-included', 'data-testid': 'included', text: inc }) : null,
-          swim ? h('p', { class: 'bk-note bk-swim', 'data-testid': 'swimwear', text: swim }) : null,
-          S.cancelRule ? h('p', { class: 'bk-note bk-cancel-rule', 'data-testid': 'product-cancel', text: S.cancelRule }) : null,
+          leadShort(h, p, S.lang, desc),
           h('a', { class: 'bk-jump', href: '#valitse-aika', text: t.pickTime })),
         h('div', { class: 'bk-prod-cal', id: 'valitse-aika' }, h('h3', { text: t.pickDate }), calBox, slotBox),
-        desc ? h('details', { class: 'bk-more' }, h('summary', { text: t.moreInfo }), richHost(h, desc, 'bk-desc')) : null));
+        moreInfo(desc)));
     let byDay = {};
     try { byDay = await loadMonth(p.id, y, m); } catch (e) { calBox.append(errorBox(t.loadError)); return; }
     const first = new Date(y, m, 1), days = new Date(y, m + 1, 0).getDate(), lead = (first.getDay() + 6) % 7;
@@ -1246,7 +1252,7 @@ async function viewChange(token, b) {
 }
 
 // ---- hoito- ja rituaalivaraukset: käyttöliittymä saa tarvitsemansa apurit täältä (luodaan vasta kun kaikki on määritelty) ----
-const tv = createTreatmentViews({ h, t, S, state, money, fmt, hm, dayLong, pad2, todayHel, addDays, pname, pdesc, pimg, setHero, mount, focusTop, errorBox, phoneBox, bk, customerFields, legalFields, setLast: () => { last = location.hash; }, holdInfo, tx: texts.tx, confirmUrl: (token) => `${S.confirmHref}${mockQs()}#${token}` });
+const tv = createTreatmentViews({ moreInfo, h, t, S, state, money, fmt, hm, dayLong, pad2, todayHel, addDays, pname, pdesc, pimg, setHero, mount, focusTop, errorBox, phoneBox, bk, customerFields, legalFields, setLast: () => { last = location.hash; }, holdInfo, tx: texts.tx, confirmUrl: (token) => `${S.confirmHref}${mockQs()}#${token}` });
 
 const wv = createWaitlistView({ h, t, S, state, loadMonth, setHero, mount, focusTop, errorBox, phoneBox, bk, rpc, pname, dayLong, hm });
 

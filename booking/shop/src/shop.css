@@ -25,7 +25,7 @@
 .bk-card-link:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .bk-card h3{margin:0;font-size:25px}
 .bk-card h3 a,.bk-card-link h3{color:var(--ink);text-decoration:none}
-.bk-card .bk-desc{flex:1;font-size:16px;margin:0}
+.bk-card .bk-desc{flex:1;font-size:16px;margin:0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden} /* kortti: lyhyt kuvaus tiivistettynä 3 riviin; koko teksti tuotesivun ingressissä (.bk-lead) */
 .bk-card .btn{align-self:flex-start;margin-top:6px}
 .bk-meta{margin:0;color:var(--muted)}
 .bk-meta strong{color:var(--ink)}
@@ -624,7 +624,7 @@ button.bk-cell.quiet.sel{box-shadow:inset 0 -4px 0 #F4EFE7}
    Juurisyy (&nbsp; joka sanavälissä) korjataan renderöinnissä (text-spaces.js); nämä säännöt varmistavat, ettei
    yksittäinen pitkä sana, osoite tai upotus levitä sivua. Leveyslukko (styles.css) on vain varmistus. */
 #booking-app,.hero.page .in{overflow-wrap:break-word}
-.bk-rich,.bk-desc,.bk-hero-short,.hero.page .in p,.bk-meta,.bk-notice,.ord-guide-text,.ord-guide-short{overflow-wrap:anywhere}
+.bk-rich,.bk-desc,.bk-hero-short,.hero.page .in p,.bk-meta,.bk-notice,.ord-guide-text,.ord-guide-short,.bk-lead{overflow-wrap:anywhere}
 .hero.page .in>h1{max-width:100%}
 .hero.page .in>p{max-width:min(30em,100%)}
 .hero.page.has-prod .in p,.hero.page .bk-hero-short{max-width:min(34em,100%)}
@@ -632,7 +632,10 @@ button.bk-cell.quiet.sel{box-shadow:inset 0 -4px 0 #F4EFE7}
 #booking-app :is(.bk-prod,.bk-slots,.bk-cal,.bk-checkout>*,.bk-aside,.bk-form,.bk-prod-layout,.bk-facts,.bk-prod-cal){min-width:0}
 /* Tuotesivu: hinta ja olennainen ensin, kalenteri heti, pitkä kuvaus Lisätiedoissa. Leveällä kalenteri vieressä. */
 .bk-prod-layout{display:grid;gap:18px}
-.bk-included{margin:0}
+.bk-lead{margin:10px 0 0;font-size:18px;line-height:1.55;color:var(--ink);max-width:34em}   /* tuotesivun ingressi = lyhyt kuvaus (leadShort) */
+.bk-lead.bk-rich p{margin:0 0 .5em}
+.bk-lead.bk-rich>:last-child{margin-bottom:0}
+.bk-more .bk-cancel-rule{margin:0 0 14px}
 .bk-jump{display:inline-flex;margin-top:8px}
 .bk-more{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:0 14px}
 .bk-more>summary{cursor:pointer;font-weight:700;padding:12px 0}
