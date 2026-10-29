@@ -1075,9 +1075,9 @@ body.shot #shell .nav .lbl{display:inline}
   body.ev-printing main{padding:0;max-width:none}
 }
 .paylink-watch .paylink-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 12px}
-.paylink-watch .paylink-tools input{flex:1 1 220px;min-height:44px}
+.paylink-watch .paylink-tools input{flex:1 1 auto;min-width:0;min-height:44px}
 .paylink-watch .paylink-tools select{min-height:44px}
 .paylink-watch .paylink-actions{display:flex;flex-wrap:wrap;gap:6px}
 .paylink-watch .paylink-actions .btn{width:auto;min-height:44px}
-.paylink-watch tr.needs-action{box-shadow:inset 4px 0 0 #7A5530}
-.paylink-watch tr.needs-action td{background:#EDE3D0}
+.paylink-watch tr.needs-action{box-shadow:inset 4px 0 0 var(--gold)}
+.paylink-watch tr.needs-action td{background:var(--bg)}
