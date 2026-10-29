@@ -45,7 +45,7 @@ export function leadShort(h, p, lang, desc) {
   return el;
 }
 
-/** Tuotekortin kuvausosa (.bk-desc): lyhyt kuvaus kokonaan (puhdistettuna), muuten johdettu ote. */
+/** Tuotekortin kuvausosa (.bk-desc): lyhyt kuvaus (puhdistettuna; CSS tiivistää 3 riviin), muuten johdettu ote. */
 export function cardShort(h, p, lang, desc) {
   const s = shortRaw(p, lang);
   return s ? richHost(h, s, 'bk-desc') : h('p', { class: 'bk-desc', text: derivedExcerpt(desc) });
