@@ -39,7 +39,7 @@ for (const [file, fn] of [['shop/src/shop.js', 'viewProduct'], ['shop/src/treatm
     assert.doesNotMatch(facts, /swimwear|S\.cancelRule|includedPlain/);
     const leadAt = facts.indexOf('leadShort(h, p, S.lang, desc)');
     const moreAt = facts.indexOf('moreInfo(desc)');
-    const jumpAt = facts.indexOf("'bk-jump'");
+    const jumpAt = facts.indexOf('bookingJump(h, t.pickTime)');
     assert.ok(leadAt >= 0 && moreAt > leadAt && jumpAt > moreAt, 'pitkä kuvaus heti lyhyen kuvauksen jälkeen, ennen Valitse aika -linkkiä');
     assert.equal(body.slice(body.indexOf("'bk-prod-cal'")).includes('moreInfo(desc)'), false, 'vanha alaosio ei jää kalenterin alle');
     assert.match(body, /setHero\(p( \|\| null)?, \{ short: false \}\)/);

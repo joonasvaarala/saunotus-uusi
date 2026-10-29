@@ -11,7 +11,7 @@ import { createAddonPicker } from './treatment-addons.js';
 import { richHost } from './rich-view.js';
 import { cardShort, leadShort } from './short-desc.js';
 import { cardMeta } from './card-meta.js';
-import { revealForm, revealIfHidden } from './gift-ui.js';
+import { revealForm, revealIfHidden, bookingJump } from './gift-ui.js';
 import { customerInvoiceLock } from './invoice-lock.js';
 import { formPaysOnline } from './company-pay.js';
 import { clockFromIso, clockFromHm } from './clock.js';
@@ -193,7 +193,7 @@ export function createTreatmentViews(c) {
           moreInfo(desc),
           timelineNode(p),
           voucherNode(p),
-          h('a', { class: 'bk-jump', href: '#valitse-aika', text: t.pickTime })),
+          bookingJump(h, t.pickTime)),
         h('div', { class: 'bk-prod-cal', id: 'valitse-aika' }, optStep, picker.node, h('div', { class: 'bk-continue' }, sum, go))));
     await picker.ready;
     if (!query.get('n')) focusTop();

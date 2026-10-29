@@ -314,6 +314,8 @@ jobs:
       - run: node --test booking/tests/tuotesivu-ingressi.test.mjs
       # Tapahtumatuotteen varaus: päivänapit ja kellonajat, ei kuukausikalenteria. Muut tuotteet pitävät kalenterin. Tekstit pending-import-101.
       - run: node --test booking/tests/tapahtuma-paivat.test.mjs
+      # Mobiilin Valitse aika: tapahtumatuotteella ei linkkiä; kalenteri vierittää #valitse-aika ilman hash-reitin vaihtoa.
+      - run: node --test booking/tests/valitse-aika-hyppy.test.mjs
       # booking_158: tapahtumat ja koulutukset (tietokantaosa): tapahtumakerrat (schedule_rules.kind = 'event'), resurssivaraukset
       # (event_resource_blocks -> space_blocks), myyntikanavat, kopiointi, public_events, Lovi-sääntö. Myynti pois (events.sale_enabled = false).
       # SQL: t158 PG17:ssä (migraatio + rollback x2 + md5 + uudelleenajo).

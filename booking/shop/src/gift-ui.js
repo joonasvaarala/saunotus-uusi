@@ -32,6 +32,17 @@ export function field({ label, control, hint, name }) {
 // revealForm: vie lomakkeen alkuun (block:'start'; sticky-yläpalkki huomioitu CSS:n scroll-margin-top:ssa), siirtää fokuksen otsikkoon ilman toista vieritystä (preventScroll)
 // ja kunnioittaa prefers-reduced-motionia (behavior:'auto' = ei animaatiota). Kutsutaan vain kun lomake juuri avautuu, ei renderöinnillä eikä kirjoittaessa.
 export const prefersReducedMotion = (win = globalThis) => !!win?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+// Mobiilin "Valitse aika": vierittää varausosioon (#valitse-aika). Painike, ei href="#…", koska hash-reititin
+// tulkitsee ankkurin uudeksi näkymäksi ja palaa tuotelistan alkuun. Tapahtumatuote ei käytä tätä (päivät ovat heti näkyvissä).
+export function bookingJump(h, label) {
+  return h('button', {
+    type: 'button', class: 'bk-jump', 'data-testid': 'jump-booking',
+    onclick: () => {
+      const el = document.getElementById('valitse-aika');
+      if (el) revealForm(el, el.querySelector('h3') || el);
+    },
+  }, label);
+}
 export function revealForm(el, focusEl = el, win = globalThis) {
   if (!el) return false;
   el.scrollIntoView?.({ block: 'start', behavior: prefersReducedMotion(win) ? 'auto' : 'smooth' });
