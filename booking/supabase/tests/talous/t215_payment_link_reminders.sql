@@ -97,11 +97,12 @@ begin
   pid := pg_temp.link(u_adm, o, 7);
   update booking.payments set created_at = v_noon - interval '5 days', link_expires_at = v_noon + interval '2 days' where id = pid;
   perform pg_temp.ck(booking.payment_link_reminders_sweep(v_noon) = 1 and pg_temp.nout(pid) = 1, 'B1 5 vrk vanha ennakko: yksi muistutus');
-  perform pg_temp.ck((select kind = 'prepaid_unpaid' and emailed and (payload ->> 'cancel_if_unpaid')::boolean
+  perform pg_temp.ck((select r.kind = 'prepaid_unpaid' and r.emailed and (e.payload ->> 'cancel_if_unpaid')::boolean
         from booking.payment_link_reminders r join booking.email_outbox e on e.id = r.email_outbox_id
        where r.payment_id = pid and r.reminder_no = 1), 'B2 ensimmäinen on 3 vrk -muistutus ja peruutusvaroitus');
   perform pg_temp.ck(booking.payment_link_reminders_sweep(v_noon) = 0 and pg_temp.nout(pid) = 1, 'B3 sama hetki ei lähetä toista (dedupe)');
-  perform pg_temp.ck(booking.payment_link_reminders_sweep(v_noon + interval '25 hours') = 1
+  n := booking.payment_link_reminders_sweep(v_noon + interval '25 hours');
+  perform pg_temp.ck(n = 1
       and (select kind from booking.payment_link_reminders where payment_id = pid and reminder_no = 2) = 'prepaid_before_expiry', 'B4 vuorokausi ennen eräpäivää: toinen muistutus');
   update booking.payments set reminders_handled_at = now() where id = pid;
 
@@ -117,7 +118,8 @@ begin
   p3 := pg_temp.link(u_adm, o3, 4);
   update booking.payments set created_at = v_noon, link_expires_at = v_noon + interval '96 hours' where id = p3;
   perform pg_temp.ck(booking.payment_link_reminders_sweep(v_noon + interval '1 hour') = 0, 'B6 tasan 4 vrk: 3 vrk -muistutusta ei ole vielä eikä se ole vuorossa');
-  perform pg_temp.ck(booking.payment_link_reminders_sweep(v_noon + interval '73 hours') = 1
+  n := booking.payment_link_reminders_sweep(v_noon + interval '73 hours');
+  perform pg_temp.ck(n = 1
       and not exists (select 1 from booking.payment_link_reminders where payment_id = p3 and reminder_no = 1 and emailed)
       and exists (select 1 from booking.payment_link_reminders where payment_id = p3 and reminder_no = 2 and kind = 'prepaid_before_expiry' and emailed), 'B6b tasan 4 vrk: vain eräpäivämuistutus');
   update booking.payments set reminders_handled_at = now() where id in (p2, p3);
@@ -130,9 +132,11 @@ begin
   perform pg_temp.ck(booking.payment_link_reminders_sweep(v_noon) = 1, 'C1 ensimmäinen 72 h jälkeen');
   perform pg_temp.ck(booking.payment_link_reminders_sweep(v_noon + interval '73 hours') = 1, 'C2 toinen');
   perform pg_temp.ck(booking.payment_link_reminders_sweep(v_noon + interval '146 hours') = 1, 'C3 kolmas');
-  perform pg_temp.ck(booking.payment_link_reminders_sweep(v_noon + interval '219 hours') = 1
+  n := booking.payment_link_reminders_sweep(v_noon + interval '219 hours');
+  perform pg_temp.ck(n = 1
       and (select reminders_needs_action from booking.payments where id = p4), 'C4 neljäs merkitsee vaatii toimenpiteitä');
-  perform pg_temp.ck(booking.payment_link_reminders_sweep(v_noon + interval '400 hours') = 0
+  n := booking.payment_link_reminders_sweep(v_noon + interval '400 hours');
+  perform pg_temp.ck(n = 0
       and (select count(*) from booking.payment_link_reminders where payment_id = p4 and emailed and kind = 'onsite') = 4, 'C5 viidettä automaattista ei lähde');
 
   -- D ikkuna, rajaukset, peruutus

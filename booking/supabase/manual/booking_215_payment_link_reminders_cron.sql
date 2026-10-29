@@ -1,6 +1,6 @@
 -- PROD ONLY. Älä aja DEV-kantaan.
 -- booking_215: kytke maksulinkkien automaattiset muistutukset ja 15 minuutin pg_cron-ajo.
--- Aja vasta, kun migraatio 20261029170000_booking_215_payment_link_reminders.sql on kannassa.
+-- Aja vasta, kun migraatio 20261029173000_booking_215_payment_link_reminders.sql on kannassa.
 -- DEV:ssä tätä ei ajeta: siellä ei saa olla cron-jobia eikä muistutuslähetystä.
 -- Sweep ei lähetä, ellei payment_link.reminders_enabled ole true. Tämä tiedosto asettaa sen.
 -- Cron luodaan vain, jos cron-skeema on olemassa. Yksi transaktio: jos cron puuttuu, asetuskaan ei jää päälle.

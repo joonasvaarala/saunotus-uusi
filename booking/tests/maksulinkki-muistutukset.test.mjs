@@ -55,8 +55,8 @@ test('tuontitiedosto 102: FI+EN, ei päällekkäin, sähköposti ja näkymä', (
 });
 
 test('migraatio ei kytke cronia eikä lähetystä; PROD-ajo on erillisessä tiedostossa', () => {
-  const sql = src('supabase/migrations/20261029170000_booking_215_payment_link_reminders.sql');
-  const rollback = src('supabase/rollbacks/20261029170000_booking_215_ROLLBACK.sql');
+  const sql = src('supabase/migrations/20261029173000_booking_215_payment_link_reminders.sql');
+  const rollback = src('supabase/rollbacks/20261029173000_booking_215_ROLLBACK.sql');
   const prod = src('supabase/manual/booking_215_payment_link_reminders_cron.sql');
   assert.match(sql, /payment_link\.reminders_enabled', 'false'/);
   assert.match(sql, /payment_link\.remind_prepaid_after_hours', '72'/);
