@@ -41,6 +41,10 @@ test('migraatio lisää vain katalogin lisähenkilökentät ja rollback palautta
   assert.doesNotMatch(body, /r\.included_persons|v\.included_persons|v\.extra_person_price/);
   assert.equal(fnBody(read(RB)), prev, 'rollback = booking_158');
   assert.match(read('.github/workflows/pages.yml'), /node --test booking\/tests\/hoito-hinta-henkilomaara\.test\.mjs/);
+  const css = read('booking/shop/src/shop.css');
+  const total = css.match(/\.bk-party-total\{[^}]+\}/)[0];
+  assert.match(total, /font:700 32px/, 'mobiilissa iso lihavoitu hinta, ei vain työpöydän mediaqueryssa');
+  assert.match(css, /@media\(min-width:700px\)\{\.bk-party-total\{font-size:40px\}/);
 });
 
 function installDom() {
@@ -283,8 +287,11 @@ test('tuotesivu näyttää henkilömäärän hinnan heti ja säilyttää kelvoll
   await views.viewTreatment(hoito, new URLSearchParams(''));
   const price = () => mounted.querySelector('[data-testid=treatment-price]').textContent;
   const sum = () => mounted.querySelector('.bk-pick-sum').textContent;
-  assert.equal(price(), '99 €');
-  assert.match(sum(), /Yhteensä 99 €/);
+  const step = mounted.querySelector('#tr-n').closest('section');
+  assert.equal(step.querySelector('[data-testid=treatment-price]'), mounted.querySelector('[data-testid=treatment-price]'), 'hinta on henkilömäärän yhteydessä');
+  assert.equal(price(), '1 hlö · 99 €');
+  assert.equal(mounted.querySelector('[data-testid=treatment-price-note]').textContent, '99 € (sis. 1 hlö, lisähenkilö +35 €)');
+  assert.equal(sum(), '1 hlö · 99 €');
   assert.doesNotMatch(sum(), /Valittu:/);
   const day = mounted.querySelector('button[data-date="2026-11-14"]');
   assert.ok(day, 'vapaa päivä');
@@ -298,10 +305,10 @@ test('tuotesivu näyttää henkilömäärän hinnan heti ja säilyttää kelvoll
   assert.match(sum(), /99 €/);
   const plus = mounted.querySelectorAll('.bk-step')[1];
   dom.click(plus);
-  assert.equal(price(), '134 €', 'hinta päivittyy ennen saatavuushakua');
+  assert.equal(price(), '2 hlö · 134 €', 'hinta päivittyy ennen saatavuushakua');
   assert.equal(pressed().textContent.includes('16.00'), true, 'aikaa ei tyhjennetä heti');
   await new Promise((r) => setTimeout(r, 500));
-  assert.equal(price(), '134 €');
+  assert.equal(price(), '2 hlö · 134 €');
   assert.ok(pressed(), '16:00 käy kahdelle');
   assert.match(pressed().textContent, /16\.00/);
   assert.match(sum(), /Valittu:/);
@@ -315,8 +322,8 @@ test('tuotesivu näyttää henkilömäärän hinnan heti ja säilyttää kelvoll
   dom.click(plus);
   await new Promise((r) => setTimeout(r, 500));
   assert.equal(pressed(), undefined, '17:00 ei käy kahdelle');
-  assert.equal(price(), '134 €');
-  assert.match(sum(), /Yhteensä 134 €/);
+  assert.equal(price(), '2 hlö · 134 €');
+  assert.equal(sum(), '2 hlö · 134 €');
   assert.doesNotMatch(sum(), /Valittu:/);
   SB.setRpcOverride(null);
 });
