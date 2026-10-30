@@ -116,6 +116,19 @@ $function$;
 comment on function public.ops_health() is 'Varmistaja-valvonta: vain ei-arkaluonteiset terveysaikaleimat ja tilat (ei virhetekstejä, ei tunnuksia). Kevennetty 2026-10-25 (ops_health_light). Peruutus: drop function if exists public.ops_health();';
 
 -- Päivittäinen cron-historian siivous klo 03:40 Europe/Helsinki (pg_cron ajaa UTC:nä: 01:40 UTC talviaikaan).
+-- Tyhjä kanta: mock-cron tuntee vain unschedule(text). Tuotannon pg_cronissa bigint-versio on jo.
+do $un$
+begin
+  if to_regprocedure('cron.unschedule(bigint)') is null then
+    create function cron.unschedule(p_jobid bigint) returns boolean
+    language plpgsql as $fn$
+    begin
+      delete from cron.job where jobid = p_jobid;
+      return found;
+    end
+    $fn$;
+  end if;
+end $un$;
 select cron.unschedule(jobid) from cron.job where jobname = 'ops_cron_history_cleanup';
 select cron.schedule('ops_cron_history_cleanup', '40 1 * * *',
   $$delete from cron.job_run_details where start_time < now() - interval '7 days'$$);

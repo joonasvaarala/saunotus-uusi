@@ -70,7 +70,6 @@ export async function buildReportPdf(rep: any, kind: string, lang = "fi", tfn: T
   }
 
   const t = rep.totals ?? {};
-  const daily = kind === "daily";
   const summary: string[][] = [
     [TX("ui.admin.reports.sales_count"), String(t.receipts ?? 0)],
     [TX("ui.admin.reports.refund_count"), String(t.refund_receipts ?? 0)],
@@ -88,8 +87,13 @@ export async function buildReportPdf(rep: any, kind: string, lang = "fi", tfn: T
   table(TX("ui.admin.reports.by_product"), prodHead, prodCols, (rep.by_product || []).map(lineOf));
   table(TX("ui.admin.reports.refunds_by_product"), prodHead, prodCols, (rep.refunds_by_product || []).map(lineOf));
   if (!(rep.refunds_by_product || []).length) { need(16); text(TX("ui.admin.reports.no_refunds"), M, 7, font, grey); y -= 14; }
-  const vatRows = Array.isArray(rep.vat_summary) ? rep.vat_summary : (rep.by_vat || []);
-  table(TX("ui.admin.reports.vat_breakdown"), [TX("ui.admin.reports.col_vat_pct"), TX("ui.admin.reports.col_net"), TX("ui.admin.reports.col_gross"), TX("ui.admin.reports.col_vat_eur")], [0, 180, 300, 420], vatRows.map((v: any) => [rate(v.rate, loc), eur(v.net), eur(v.gross), eur(v.vat)]));
+  const vatHead = [TX("ui.admin.reports.col_vat_pct"), TX("ui.admin.reports.col_net"), TX("ui.admin.reports.col_gross"), TX("ui.admin.reports.col_vat_eur")];
+  const vatCols = [0, 180, 300, 420];
+  const vatLine = (v: any) => [rate(v.rate, loc), eur(v.net), eur(v.gross), eur(v.vat)];
+  if (Array.isArray(rep.by_vat_sales)) table(TX("ui.admin.reports.vat_sales"), vatHead, vatCols, rep.by_vat_sales.map(vatLine));
+  if (Array.isArray(rep.by_vat_refunds)) table(TX("ui.admin.reports.vat_refunds"), vatHead, vatCols, rep.by_vat_refunds.map(vatLine));
+  const vatRows = Array.isArray(rep.by_vat) ? rep.by_vat : (rep.vat_summary || []);
+  table(TX("ui.admin.reports.vat_net"), vatHead, vatCols, vatRows.map(vatLine));
   need(28); text(TX("ui.admin.reports.vat_breakdown_note"), M, 7, font, grey); y -= 16;
   const gcp = rep.gift_card_period || {};
   const sold = gcp.sold || {};
@@ -105,7 +109,15 @@ export async function buildReportPdf(rep: any, kind: string, lang = "fi", tfn: T
     [TX("ui.admin.reports.gc_comp_redeemed"), String(comp.redeemed_count ?? 0), eur(comp.redeemed_gross)],
   ]);
   need(28); text(TX("ui.admin.reports.gc_comp_note"), M, 7, font, grey); y -= 16;
-  if (!daily) table(TX("ui.admin.reports.payments"), [TX("ui.admin.reports.col_method"), TX("ui.admin.reports.col_gross")], [0, 515], (rep.by_method || []).map((m: any) => [String(m.label ?? m.method ?? ""), eur(Number(m.gross ?? 0) + Number(m.refunds ?? 0))]));
+  const open = (rep.gift_card_period || {}).open || {};
+  const openRow = (key: string, label: string) => { const b = open[key] || {}; return [label, eur(b.opening), eur(b.sold), eur(b.redeemed), eur(b.expired), eur(b.closing)]; };
+  table(TX("ui.admin.reports.gc_open_title"), [TX("ui.admin.reports.col_product"), TX("ui.admin.reports.gc_opening"), TX("ui.admin.reports.gc_sold_period"), TX("ui.admin.reports.gc_redeemed_period"), TX("ui.admin.reports.gc_expired"), TX("ui.admin.reports.gc_closing")], [0, 160, 240, 320, 400, 515], [
+    openRow("native_paid", TX("ui.admin.reports.gc_bucket_own")),
+    openRow("native_complimentary", TX("ui.admin.reports.gc_bucket_free")),
+    openRow("johku", TX("ui.admin.reports.gc_bucket_johku")),
+  ]);
+  need(28); text(TX("ui.admin.reports.gc_johku_liability"), M, 7, font, grey); y -= 16;
+  table(TX("ui.admin.reports.payments"), [TX("ui.admin.reports.col_method"), TX("ui.admin.reports.col_gross")], [0, 515], (rep.by_method || []).map((m: any) => [String(m.label ?? m.method ?? ""), eur(Number(m.gross ?? 0) + Number(m.refunds ?? 0))]));
   const rec = rep.reconciliation;
   if (rec) {
     const rows = [
@@ -113,10 +125,9 @@ export async function buildReportPdf(rep: any, kind: string, lang = "fi", tfn: T
       [TX("ui.admin.reports.reconcile_refunds"), eur(rec.refunds_gross)],
       [TX("ui.admin.reports.reconcile_products"), eur(rec.product_gross)],
     ];
-    if (!daily) {
-      rows.push([TX("ui.admin.reports.reconcile_payments"), eur(rec.payments_gross)]);
-      rows.push([TX("ui.admin.reports.reconcile_diff"), eur(rec.difference)]);
-    }
+    rows.push([TX("ui.admin.reports.reconcile_payments"), eur(rec.payments_gross)]);
+    rows.push([TX("ui.admin.reports.reconcile_diff"), eur(rec.difference)]);
+    if (rec.methods_net != null) rows.push([TX("ui.admin.reports.pay_net"), eur(rec.methods_net)]);
     if (Math.abs(Number(rec.vat_rounding ?? 0)) >= 0.005 || rec.rounding_code) rows.push([TX("ui.admin.reports.rounding_row"), eur(rec.vat_rounding)]);
     if (Math.abs(Number(rec.cash_rounding ?? 0)) >= 0.005) rows.push([TX("ui.admin.reports.cash_rounding"), eur(rec.cash_rounding)]);
     table(TX("ui.admin.reports.reconcile"), ["", TX("ui.admin.reports.col_gross")], [0, 515], rows);

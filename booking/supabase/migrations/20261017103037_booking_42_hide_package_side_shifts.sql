@@ -7,6 +7,10 @@ do $$
 declare n int; v_cnt int;
 begin
   select count(*) into v_cnt from booking.reservations where external_meta->'model' ? 'merged_into_package' and hidden_at is null;
+  if v_cnt = 0 then
+    raise notice 'booking_42: ei merged_into_package-varauksia, piilotus ohitetaan';
+    return;
+  end if;
   if v_cnt <> 25 then raise exception 'odotettiin 25 piilotettavaa oheisvuoroa, löytyi %', v_cnt; end if;
 
   update booking.reservations r set

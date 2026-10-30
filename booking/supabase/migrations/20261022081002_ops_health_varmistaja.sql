@@ -3,6 +3,30 @@
 -- Alla olevat lauseet ovat sellaisenaan tuotannon migraatiohistoriasta (supabase_migrations.schema_migrations.statements). Älä aja uudelleen tuotantoon.
 -- Varmistaja-valvonta (Hetzner-palvelin): vain ei-arkaluonteiset terveystiedot anon-roolille.
 -- Ei virhetekstejä, ei tunnuksia, ei henkilötietoja. Peruutus: drop function if exists public.ops_health();
+-- Tyhjä kanta: pg_cron- ja pg_net-taulut eivät ole mukana. Tuotannossa ne ovat jo, create/add if not exists ei muuta niitä.
+create schema if not exists cron;
+create table if not exists cron.job (
+  jobid bigint generated always as identity primary key,
+  jobname text,
+  schedule text,
+  command text,
+  active boolean not null default true
+);
+alter table cron.job add column if not exists active boolean not null default true;
+create table if not exists cron.job_run_details (
+  jobid bigint,
+  runid bigint generated always as identity,
+  start_time timestamptz,
+  status text
+);
+create schema if not exists net;
+create table if not exists net._http_response (
+  id bigint generated always as identity primary key,
+  status_code integer,
+  timed_out boolean,
+  created timestamptz default now()
+);
+
 create or replace function public.ops_health()
 returns jsonb
 language sql
