@@ -1,5 +1,5 @@
 // montonio-refund: hallinnan hyvitys. Kuitti syntyy vasta SUCCESSFUL-ilmoituksesta, ei tästä pyynnöstä.
-// Vaatii payments.refund, service role -avaimen tai portin varmentaman service_role-JWT:n.
+// Vaatii payments.refund, bookings.manage tai admin-roolin, service role -avaimen tai portin varmentaman service_role-JWT:n.
 import { CORS_HEADERS, dbError, type Db, type Env, type Fetch, jsonResponse } from "../_shared/mobilepay.ts";
 import { processRefund } from "../_shared/montonio_flow.ts";
 import { PayApi, readCreds, resolveHost } from "../_shared/montonio.ts";

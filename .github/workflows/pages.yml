@@ -134,6 +134,8 @@ jobs:
       # Varausdialogi 04: oikeudet, järjestys, saapumispäivä ja maksulinkin takaraja
       - run: node --test booking/tests/varausdialogi-04.test.mjs
       - run: node --test booking/tests/talous.test.mjs
+      # booking_218–219: hyvitysten seuranta, suoriteperuste, käyttöönoton nollausskripti (SQL: t218, t219, t220)
+      - run: node --test booking/tests/kirjanpito-kaynnistys.test.mjs
       # .cache/articles: edellinen artikkelisnapshot (RPC-katkon varalta + siirrettyjen slugien tunnistus)
       - uses: actions/cache@v4
         with:

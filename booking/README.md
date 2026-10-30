@@ -24,6 +24,21 @@ Ei palvelinkoodia, ei build-vaihetta selaimen koodille, ei kirjastoriippuvuuksia
 | `scripts/e2e-shop-vain-vapaat.mjs` | Kaupan asiakasnäkymä näyttää vain vapaat vuorot (päivänäkymän tuotekortti, tuotesivun vuorolista, ajanmuutosnäkymä; täynnä-päivä → ”Ei vapaita vuoroja”). Ei tarvitse tietokantaa: kaupan build + mockatut `public_*`-RPC:t (sekä vapaita että täynnä-vuoroja) |
 | `docs/` | Maksurajapinta, Johku-tuonti, ristiriidat ja tulkinnat, Bottiavustuspyyntö, kuvakaappaukset |
 
+## Käyttöönoton nollaus (1.11.2026)
+
+Uusi kirjanpito alkaa puhtaalta pöydältä. Skripti `scripts/reset_before_launch.sql` **ei ole migraatio** eikä sitä ajeta automaattisesti. Ylläpitäjä ajaa sen itse tietokannan omistajana, yhdessä transaktiossa.
+
+Tiedoston ajo on kuivaharjoitus: se luo funktiot `booking.cutover_reset(boolean)` ja `booking.cutover_reset_verify()` ja tulostaa poistettavat rivit tauluittain. Poisto:
+
+```sql
+begin;
+select booking.cutover_reset(false);
+select booking.cutover_reset_verify();
+commit;
+```
+
+`verify` kertoo, että natiivi myynti on nolla sekä kassaperusteisessa että suoriteperusteisessa raportissa jaksolla 2000–2099. Johku-tuonti, tuotteet, hinnat, asetukset, henkilökunta, työvuorot, tekstit ja tapahtumien määritykset säilyvät. Kuitti-, lasku- ja hyvityslaskusarjat (K, H, L ja muut) nollataan. Seuraava tilausnumero on 10001, tai suurin säilytetty Johku-tilausnumero + 1, jos se on suurempi. Muuttumattomien taulujen triggerit (`receipts_guard`, `invoices_lock`, `invoice_lines_lock`, `gift_card_ledger_append_only`) otetaan pois päältä vain poiston ajaksi ja kytketään takaisin samassa transaktiossa.
+
 ## Arkkitehtuuri
 
 ```mermaid
