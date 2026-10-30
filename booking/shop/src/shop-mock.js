@@ -22,6 +22,22 @@ const EVENT_DEMO = {
   description_en: 'After the ceremony you can stay on in the smoke sauna, the pools and the lean-to.',
   booking_kind: 'rules', min_persons: 1, max_persons: 12,
 };
+// Yrityskalenteri (?mock=1, audience=business): vain nämä kaksi. Ei julkisia tapahtumia eikä kuluttajan vuoroja.
+const BUSINESS_SHIFTS = [
+  { id: 48, slug: 'saunavuoro-yrityksille', name: 'Savusaunavuoro yrityksille', name_en: 'Smoke Sauna Session for Businesses', category: 'corporate', audience: 'business', sale_kind: 'private_shift', price: 350, price_type: 'from', duration_text: '2 h', duration_text_en: '2 h', duration_minutes: 120, booking_kind: 'rules', min_persons: 1, max_persons: 20, short_description: 'Tuo työporukkasi meille ryhmäytymään ja rentoutumaan', short_description_en: 'Bring your work team to us to bond and relax' },
+  { id: 49, slug: 'jalkiloylyt-yrityksille', name: 'Savusaunan jälkilöylyt yrityksille', name_en: 'After Session Sauna in the Smoke Sauna for Businesses', category: 'corporate', audience: 'business', sale_kind: 'private_shift', price: 250, price_type: 'from', duration_text: '2–3 h', duration_text_en: '2–3 h', duration_minutes: 120, booking_kind: 'rules', min_persons: 1, max_persons: 20, included_persons: 6, extra_person_price: 10, short_description: 'Edullisesti saunomaan oman firman porukalla yleisten vuorojen jälkeen.', short_description_en: 'An affordable sauna session for your company group after the public sessions.' },
+];
+function businessShiftSlots(now, productId) {
+  const at = (d, hh, mm = 0) => { const x = new Date(now()); x.setUTCDate(x.getUTCDate() + d); x.setUTCHours(hh - 2, mm, 0, 0); return x; };
+  const row = (rule, d, hh, status) => {
+    const start = at(d, hh), end = new Date(start.getTime() + 2 * 36e5);
+    const jalki = productId === 49;
+    return { rule_id: rule, product_id: productId, label: jalki ? 'Jälkilöylyt yrityksille' : 'Savusaunavuoro yrityksille', label_en: jalki ? 'After session for companies' : 'Smoke sauna for companies', mode: 'exclusive', session_date: start.toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }), starts_at: start.toISOString(), ends_at: end.toISOString(), status, remaining: status === 'full' ? 0 : 20, min_persons: 1, max_persons: 20, price_mode: jalki ? 'base_plus_extra' : 'fixed', unit_price: null, base_price: jalki ? 250 : 350, included_persons: jalki ? 6 : null, extra_person_price: jalki ? 10 : null };
+  };
+  const base = productId === 49 ? 4900 : 4800;
+  const hh = productId === 49 ? 19 : 14;
+  return [row(base + 1, 1, hh, 'available'), row(base + 2, 2, hh, 'available')];
+}
 const PRIV_DEMO = [
   { id: 25, slug: 'oma-saunavuoro', name: 'Oma saunavuoro', name_en: 'Private sauna session', category: 'private_sauna', sale_kind: 'private_shift', price: 220, price_type: 'from', duration_text: '2 h', duration_text_en: '2 h', booking_kind: 'rules', min_persons: 1, max_persons: 20, short_description: 'Koko miljöö omaan käyttöön.', short_description_en: 'The whole setting for your group.' },
   { id: 26, slug: 'jalkiloylyt', name: 'Savusaunan jälkilöylyt', name_en: 'After Session Sauna', category: 'private_sauna', sale_kind: 'private_shift', price: 180, price_type: 'from', duration_text: '2 h', duration_text_en: '2 h', booking_kind: 'rules', min_persons: 1, max_persons: 20, included_persons: 6, extra_person_price: 10, short_description: 'Yleisten vuorojen jälkeen pehmeät jälkilöylyt.', short_description_en: 'Soft after-session löyly after the public sessions.' },
@@ -114,14 +130,21 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
       case 'public_annual_card_offer': return annualSale ? { available: true, product_id: 43, name: 'Vuosikortti', name_en: 'Annual card', price: 290, vat_rate: 25.5, valid_months: 12 } : { available: false };
       case 'public_buy_annual_card': return annualSale ? { ok: true, order_no: 9142, token: '00000000-0000-4000-8000-000000000142', status: 'pending', total: 290, payment_mode: 'pay_later' } : { ok: false, code: 'sale_disabled', message: 'Vuosikorttien verkkomyynti ei ole käytössä' };
       case 'public_catalog': return [...catalogEntries(), ...(eventsOn ? [EVENT_DEMO] : []), ...(privOn ? PRIV_DEMO : [])];
-      case 'public_catalog_for': return [...pickCatalog(catalogEntries(), args.p_audience), ...(eventsOn ? [EVENT_DEMO] : []), ...(privOn ? PRIV_DEMO : [])];
+      case 'public_catalog_for': {
+        const rows = [...pickCatalog(catalogEntries(), args.p_audience), ...(eventsOn ? [EVENT_DEMO] : []), ...(privOn ? PRIV_DEMO : [])];
+        // Julkinen tapahtuma (events=1) ja kuluttajan yksityisvuorot eivät kuulu yrityskalenteriin.
+        return args.p_audience === 'business' ? [...BUSINESS_SHIFTS] : rows;
+      }
       case '__availability_all':
       case 'public_availability_all': {
         const catalog = pickCatalog(catalogEntries(), args.p_audience);
-        return catalog.filter((p) => p.booking_kind !== 'slots').flatMap((p) => {
+        const base = catalog.filter((p) => p.booking_kind !== 'slots').flatMap((p) => {
           const response = treatmentRpc('public_availability', { p_product_id: p.id, p_from: args.p_from, p_to: args.p_to }, now());
           return Array.isArray(response?.body) ? response.body.map((r) => ({ ...r, product_id: +p.id })) : [];
         });
+        if (args.p_audience !== 'business') return base;
+        const extra = [48, 49].flatMap((id) => businessShiftSlots(now, id).filter((r) => r.session_date >= args.p_from && r.session_date <= args.p_to));
+        return [...base, ...extra];
       }
       // booking_162: hiljaisten aikojen ale vain ?quiet=1 (oletus pois kuten tuotannossa)
       case 'public_quiet_offers': {
@@ -158,6 +181,9 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
         return r ? r.body : { ok: false, code: 'not_found', message: 'Varausta ei löytynyt' };
       }
       default: {
+        if (name === 'public_availability' && (+args.p_product_id === 48 || +args.p_product_id === 49)) {
+          return businessShiftSlots(now, +args.p_product_id).filter((r) => r.session_date >= args.p_from && r.session_date <= args.p_to);
+        }
         if (name === 'public_availability' && privOn && ( +args.p_product_id === 25 || +args.p_product_id === 26)) {
           return privDemoSlots(now, +args.p_product_id).filter((r) => r.session_date >= args.p_from && r.session_date <= args.p_to);
         }

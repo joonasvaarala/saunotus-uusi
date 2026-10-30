@@ -19,3 +19,13 @@ export const chipsFor = (products) => {
   const present = new Set((products || []).map(kindOf));
   return ['all', ...CHIP_ORDER.filter((k) => present.has(k))];
 };
+
+/**
+ * Yrityskalenteri (audience business) ei näytä julkisia tapahtumia (category event).
+ * Muu yleisö palauttaa saman taulukon, jotta katalogiin voi yhä työntää tapahtumia.
+ */
+export function productsForAudience(products, audience) {
+  const list = Array.isArray(products) ? products : [];
+  if (audience !== 'business') return list;
+  return list.filter((p) => kindOf(p) !== 'tapahtuma');
+}

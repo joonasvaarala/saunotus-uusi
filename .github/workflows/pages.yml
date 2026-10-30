@@ -102,6 +102,8 @@ jobs:
       - run: node --test booking/tests/sivutekstit-sivut.test.mjs
       # Yrityksille: yritysvuorot pois kuluttajan kalenterista, sivu FI+EN, tarjouspyynnön validointi
       - run: node --test booking/tests/yrityksille.test.mjs
+      # Yrityskalenteri ei näytä julkisia tapahtumia (Tapahtumat-chippi, Kekri, joulusaunat, perinnesaunotusilta)
+      - run: node --test booking/tests/yritys-kalenteri-tapahtumat.test.mjs
       # yläpalkin alarivi (SAUNOTUS + Sipoonjoen Perinnesauna): teksti tekstitaulusta ({{setting:business_name}}), varateksti, saavutettava nimi, tuontitiedosto, tyylit/kontrasti
       - run: node --test booking/tests/header-alarivi.test.mjs
       # hallinnan Vapaat ajat: tuotteet config.public_slots-kentästä (ei id-listaa), kb 7 (120 min, pakettiaikajana), mock vs. tuotannon funktio
