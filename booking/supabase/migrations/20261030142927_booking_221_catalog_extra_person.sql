@@ -7,8 +7,8 @@
 -- tiivistää yhdeksi katalogiriviksi muuttamatta näytettyä hintaa. Katalogin price on jo p.price (ei varianttia, ei sääntöä).
 -- Siksi nämä kaksi kenttää tulevat samoista kb.products-sarakkeista kuin _treatment_price, jotta hoitotuotteen
 -- näytetty summa = kassan summa (esim. saunahoito 2 hlö = 99 + 35 = 134). Hintoja, price- eikä price_type-arvoja ei muuteta.
--- Paluu: booking/supabase/rollbacks/20261030161000_booking_221_ROLLBACK.sql (palauttaa booking_158:n public_catalogin).
--- Ylläpitäjä nimeää tuotantoversion. Tätä ei ajeta tuotantoon tästä muutoksesta.
+-- Paluu: booking/supabase/rollbacks/20261030142927_booking_221_ROLLBACK.sql (palauttaa booking_158:n public_catalogin).
+-- Ajettu: DEV 20261030142905, PROD 20261030142927 (tiedostonimi = PROD-versio).
 set local lock_timeout = '5s';
 
 CREATE OR REPLACE FUNCTION booking.public_catalog()

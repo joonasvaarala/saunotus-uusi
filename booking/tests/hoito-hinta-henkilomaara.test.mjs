@@ -13,8 +13,8 @@ import { T } from '../shop/src/i18n.js';
 const root = dirname(fileURLToPath(import.meta.url));
 const repo = join(root, '..', '..');
 const read = (rel) => readFileSync(join(repo, rel), 'utf8');
-const MIG = 'booking/supabase/migrations/20261030161000_booking_221_catalog_extra_person.sql';
-const RB = 'booking/supabase/rollbacks/20261030161000_booking_221_ROLLBACK.sql';
+const MIG = 'booking/supabase/migrations/20261030142927_booking_221_catalog_extra_person.sql';
+const RB = 'booking/supabase/rollbacks/20261030142927_booking_221_ROLLBACK.sql';
 const PREV = 'booking/supabase/migrations/20261024185009_booking_158_events.sql';
 
 function fnBody(sql) {
