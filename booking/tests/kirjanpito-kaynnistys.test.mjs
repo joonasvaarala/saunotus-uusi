@@ -59,8 +59,8 @@ test('tuontitiedosto 105: FI+EN, ei päällekkäin, vastaa sanakirjoja', () => {
   }
   assert.equal(rows.find((r) => r.key === 'ui.admin.refund_watch.manual' && r.lang === 'fi').text, 'Kirjaa käsin tehty hyvitys');
   assert.equal(rows.find((r) => r.key === 'ui.admin.accrual.advances' && r.lang === 'fi').text, 'Saadut ennakot');
-  assert.match(src('supabase/migrations/20261030120000_booking_218_refund_watch.sql'), /admin_record_manual_refund/);
-  assert.match(src('supabase/migrations/20261030120100_booking_219_accrual_report.sql'), /admin_report_accrual/);
+  assert.match(src('supabase/migrations/20261030111918_booking_218_refund_watch.sql'), /admin_record_manual_refund/);
+  assert.match(src('supabase/migrations/20261030111923_booking_219_accrual_report.sql'), /admin_report_accrual/);
   assert.match(src('admin/views/talous-reports.js'), /r-basis-\$\{id\}/);
   assert.match(src('admin/views/talous-reports.js'), /basis_service/);
   assert.match(src('admin/views/talous-reports.js'), /reportAccrualCsv/);

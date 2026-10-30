@@ -11,7 +11,7 @@
 -- Hyvityskuitin antopäivä on hyvityksen done_at (käsinkirjaus: henkilökunnan antama päivä).
 -- Rivin starts_at kopioidaan varauksesta, jotta suoriteperuste löytää palvelupäivän.
 -- Oikeus: bookings.manage tai rooli admin. Ei cronia, ei tuotantoajoa.
--- Rollback: ../rollbacks/20261030120000_booking_218_ROLLBACK.sql
+-- Rollback: ../rollbacks/20261030111918_booking_218_ROLLBACK.sql
 
 set local lock_timeout = '5s';
 

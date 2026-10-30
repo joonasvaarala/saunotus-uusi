@@ -11,7 +11,7 @@
 -- Saadut ennakot päivänä D: maksettu viimeistään D ja palvelupäivä D:n jälkeen, miinus
 -- siihen mennessä kirjatut hyvitykset. Käyttämätön oma lahjakorttisaldo on oma rivinsä.
 -- Johku jää _acct_excluded-suodatuksen taakse, kuten muissakin kirjanpitoraporteissa.
--- Rollback: ../rollbacks/20261030120100_booking_219_ROLLBACK.sql
+-- Rollback: ../rollbacks/20261030111923_booking_219_ROLLBACK.sql
 
 set local lock_timeout = '5s';
 
