@@ -19,9 +19,6 @@
 set local lock_timeout = '5s';
 set local statement_timeout = '60s';
 
--- Tyhjä kanta: kb-fixture ei sisällä source_url-saraketta. Tuotannossa se on jo.
-alter table kb.products add column if not exists source_url text;
-
 do $mfi$
 declare
   old_base constant text := 'https://uusi.saunotus.com';
