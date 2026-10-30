@@ -47,7 +47,7 @@ test('tuotelistan kortit (vuoro + hoito) käyttävät cardMeta-riviä; CSS kohdi
 
 test('päivänäkymä: yksityisvuorot → yleiset vuorot → tapahtumat → muut, hoidot viimeisenä', () => {
   const shop = read('shop/src/shop.js');
-  assert.match(shop, /import \{ kindOf, chipsFor, DAY_KIND_ORDER \} from '\.\/catalog-kind\.js';/);
+  assert.match(shop, /import \{ kindOf, chipsFor, DAY_KIND_ORDER, productsForAudience \} from '\.\/catalog-kind\.js';/);
   assert.match(shop, /const groups = DAY_KIND_ORDER\.map\(/);
   assert.doesNotMatch(shop, /\['yleinen', 'yksityinen'/);
   const v = shop.slice(shop.indexOf('async function viewDay('), shop.indexOf('if (treatBox) fillTreatments('));

@@ -16,7 +16,7 @@ import { pickCatalog } from './catalog-audience.js';
 import { heroShort, cardShort, fallbackDesc, leadShort } from './short-desc.js';
 import { createTreatmentViews } from './treatment-ui.js';
 import { cardMeta } from './card-meta.js';
-import { kindOf, chipsFor, DAY_KIND_ORDER } from './catalog-kind.js';
+import { kindOf, chipsFor, DAY_KIND_ORDER, productsForAudience } from './catalog-kind.js';
 import { wholeSpaceBooking } from './whole-space.js';
 import { createTexts, loadShopTexts, applyShopTexts } from './site-texts.js';
 import { checkoutUpsellSection, orderUpsellSection, confirmationUpsellOrder } from './upsell-ui.js';
@@ -191,7 +191,7 @@ async function loadBase() {
   texts.setRows(siteTexts); texts.setData({ catalog, settings: settings || {} });
   await applyShopTexts(S, { rows: siteTexts, data: { catalog, settings: settings || {}, format: { price: (n) => money(n), duration: (m) => fmtMinutes(m) } } });   // osa 3: sanakirjat DB-tekstein (puuttuva avain → repon oletus)
   const split = splitCatalog(catalog, stat);   // vuoropohjaiset tuotteet (rules) ja hoito-/rituaalituotteet (slots) erikseen
-  state.catalog = split.rules; state.treatments = audience === 'business' ? [] : split.treatments; treatmentsReady = Promise.resolve(); state.settings = settings || {};
+  state.catalog = productsForAudience(split.rules, audience); state.treatments = audience === 'business' ? [] : split.treatments; treatmentsReady = Promise.resolve(); state.settings = settings || {};
   // ?mock=1&rich=1 ja window.BOOKING_RICH_SAMPLE: paikallinen kuvakaappaus. Ei tallenna, ei koske muita tuotteita.
   const richDemo = MOCK && new URLSearchParams(location.search).get('rich') === '1' && typeof window.BOOKING_RICH_SAMPLE === 'string' ? window.BOOKING_RICH_SAMPLE : '';
   if (richDemo) { const sample = [...state.catalog, ...state.treatments][0]; if (sample) { sample.description = richDemo; sample.description_en = richDemo; } }
@@ -298,11 +298,13 @@ function moreInfo(desc) {
 // ---- näkymä 1: tuotelista ----
 async function viewList(query) {
   placeGiftNudge(true);
-  const events = await publicEvents();
+  // Yrityskalenteri ei hae eikä yhdistä julkisia tapahtumia. Kuluttajan kauppa hakee public_events kuten ennen.
+  const events = S.audience === 'business' ? [] : await publicEvents();
   const eventIndex = indexShopEvents(events);
   for (const p of missingEventProducts(state.catalog, events)) state.catalog.push(p);
-  const cat = [...state.catalog, ...state.treatments.filter(treatmentListed)];   // lisätuotteet (LISTING_HIDDEN_SLUGS) eivät näy listalla; tuotesivu toimii
-  const kinds = chipsFor(cat);   // tyhjä kategoria ei saa chippiä; tapahtuma omassa chipissä (catalog-kind.js)
+  if (S.audience === 'business') state.catalog = productsForAudience(state.catalog, 'business');
+  const cat = productsForAudience([...state.catalog, ...state.treatments.filter(treatmentListed)], S.audience);   // lisätuotteet (LISTING_HIDDEN_SLUGS) eivät näy listalla; tuotesivu toimii
+  const kinds = chipsFor(cat).filter((x) => S.audience !== 'business' || x !== 'tapahtuma');   // tyhjä kategoria ei saa chippiä; yrityksille ei Tapahtumat-chippiä
   const k = kinds.includes(query.get('k')) ? query.get('k') : 'all';
   let list = cat.filter((p) => k === 'all' || kindOf(p) === k);
   if (k === 'tapahtuma') list = [...list].sort(byEventStart(eventIndex));
@@ -389,13 +391,14 @@ function modeSwitch(active, ds) {
     h('a', { href: bk(`/paiva/${ds || state.lastDay || todayHel()}`), 'aria-current': active === 'day' ? 'page' : null, text: t.modeDay }));
 }
 async function ensureMonths(pairs) { // yksi public_availability_all-kutsu / kuukausi, kaikille tuotteille
-  return ensureAllMonths({ pairs, catalog: state.catalog, months: state.months, rpc,
+  return ensureAllMonths({ pairs, catalog: productsForAudience(state.catalog, S.audience), months: state.months, rpc,
     fallback: loadMonth, audience: S.audience === 'business' ? 'business' : 'consumer' });
 }
 const dayRows = (ds) => {
   const [y, m] = monthOf(ds);
-  return state.catalog.flatMap((p) => (state.months.get(`${p.id}:${y}-${m}`)?.[ds] || []).map((r) => ({ r, p })))
-    .sort((a, b) => a.r.starts_at.localeCompare(b.r.starts_at) || state.catalog.indexOf(a.p) - state.catalog.indexOf(b.p));
+  const products = productsForAudience(state.catalog, S.audience);   // viikkoliuska ja päivän vuorot: ei julkisia tapahtumia yrityksille
+  return products.flatMap((p) => (state.months.get(`${p.id}:${y}-${m}`)?.[ds] || []).map((r) => ({ r, p })))
+    .sort((a, b) => a.r.starts_at.localeCompare(b.r.starts_at) || products.indexOf(a.p) - products.indexOf(b.p));
 };
 const freeCount = (ds) => dayRows(ds).filter((x) => x.r.status === 'available').length;
 async function findNextFree(ds, maxDs) {   // seuraava päivä, jolla on vapaita vuoroja (enintään 3 seuraavaa kuukautta, korkeintaan varausikkunan loppuun)
@@ -477,6 +480,7 @@ function prodCard(p, rs, ds, open, onToggle, treat = false) {
 }
 async function viewDay(dateStr, keep, openSlug) {
   placeGiftNudge(true);
+  if (S.audience === 'business') state.catalog = productsForAudience(state.catalog, 'business');
   const today = todayHel(), horizon = state.settings.booking_horizon_days || 120, maxDs = addDays(today, horizon);
   let ds = /^\d{4}-\d\d-\d\d$/.test(dateStr || '') ? dateStr : today;
   if (Number.isNaN(Date.parse(`${ds}T12:00:00Z`))) ds = today;
@@ -524,7 +528,7 @@ async function viewDay(dateStr, keep, openSlug) {
       nextDs ? h('p', {}, t.nextFree + ' ', h('a', { class: 'btn sm', href: bk(`/paiva/${nextDs}`), text: dayLong(`${nextDs}T12:00:00Z`) })) : h('p', { text: t.noNextFree }));
   }
   // Näytetään myös kokonaan loppuunmyydyt tuotteet; "unavailable" on aina piilossa.
-  const prods = state.catalog.map((p) => [p, rows.filter((x) => x.p.id === p.id)])
+  const prods = productsForAudience(state.catalog, S.audience).map((p) => [p, rows.filter((x) => x.p.id === p.id)])
     .filter(([, rs]) => hasWaitlistSlots(rs))
     .sort((a, b) => Number(fullyBooked(a[1])) - Number(fullyBooked(b[1])));
   const bySlug = new Map(prods.map(([p]) => [p.slug, p]));
@@ -552,11 +556,12 @@ async function viewDay(dateStr, keep, openSlug) {
 async function viewProduct(slug, dateStr, query) {
   const tp = !state.catalog.some((x) => x.slug === slug) && state.treatments.find((x) => x.slug === slug);
   if (tp) return tv.viewTreatment(tp, query || new URLSearchParams());   // hoito-/rituaalituote: oma kulku (treatment-ui.js)
-  const p = state.catalog.find((x) => x.slug === slug);
+  const p = productsForAudience(state.catalog, S.audience).find((x) => x.slug === slug);
   setHero(p || null, { short: false });   // lyhyt kuvaus on tuotesivulla ingressinä (leadShort), ei toistu yläbannerissa
   if (!p) {
-    // booking_158: tapahtuma/koulutus, jonka myynti on suljettu (public_catalog ei näytä sitä): tiedot ja ajankohdat public_eventsistä, ei ostoa
-    const ev = findEvent(await publicEvents(), slug);
+    // booking_158: tapahtuma/koulutus, jonka myynti on suljettu (public_catalog ei näytä sitä): tiedot ja ajankohdat public_eventsistä, ei ostoa.
+    // Yrityskalenteri ei avaa julkista tapahtumaa suoralla osoitteellakaan.
+    const ev = S.audience === 'business' ? null : findEvent(await publicEvents(), slug);
     if (ev) { viewEventClosed(ev); return; }
     const st = (await fetch(S.staticProductsUrl).then((r) => r.json()).catch(() => ({})))[slug];
     mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })),
