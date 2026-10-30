@@ -45,6 +45,7 @@ export const FN_SPECS = {
   'T:tooLate': { args: ['h'], fi: 'Alkaa alle {{var:h}} h päästä', en: 'Starts in under {{var:h}} h' },
   'T:tr.maxPersons': { args: ['n'], one: { arg: 'n', fi: 'Enintään {{var:n}} henkilö.', en: 'Up to {{var:n}} guest.' }, fi: 'Enintään {{var:n}} henkilöä.', en: 'Up to {{var:n}} guests.' },
   'T:tr.selected': { args: ['when', 'n', 'price'], one: { arg: 'n', fi: 'Valittu: {{var:when}} · {{var:n}} hlö · {{var:price}}', en: 'Selected: {{var:when}} · {{var:n}} guest · {{var:price}}' }, fi: 'Valittu: {{var:when}} · {{var:n}} hlö · {{var:price}}', en: 'Selected: {{var:when}} · {{var:n}} guests · {{var:price}}' },
+  'T:tr.party': { args: ['n', 'price'], one: { arg: 'n', fi: '{{var:n}} hlö · {{var:price}}', en: '{{var:n}} guest · {{var:price}}' }, fi: '{{var:n}} hlö · {{var:price}}', en: '{{var:n}} guests · {{var:price}}' },
 };
 
 const snake = (s) => s.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();

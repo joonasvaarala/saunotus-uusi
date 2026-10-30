@@ -83,7 +83,20 @@ export function createTreatmentViews(c) {
       st.loaded.set(k, by); return by;
     };
     const sel = () => ({ n: st.n, date: st.date, time: st.time, slot: (st.slots.get(st.date) || []).find((s) => s.time === st.time) || null });
-    const emit = () => opts.onChange?.(sel());
+    const showPrice = opts.showPrice !== false;
+    const partyTotal = h('strong', { class: 'bk-party-total', 'data-testid': 'treatment-price' });
+    const partyNote = h('span', { class: 'bk-party-note', 'data-testid': 'treatment-price-note' });
+    const party = showPrice ? h('p', { class: 'bk-party', 'data-testid': 'treatment-party', 'aria-live': 'polite' }, partyTotal, partyNote) : null;
+    const partyNoteText = () => (p.price_type === 'per_person' || (p.price_type === 'base_plus_extra_person' && p.extra_person_price && A.maxPersons(p) > 1) ? priceText(p) : '');
+    const paintParty = (s) => {
+      if (!party) return;
+      const total = s.slot?.total != null ? money(s.slot.total) : priceText(p, s.n);
+      partyTotal.textContent = tr.party(s.n, total);
+      const note = partyNoteText();
+      partyNote.textContent = note;
+      partyNote.hidden = !note;
+    };
+    const emit = () => { const s = sel(); paintParty(s); opts.onChange?.(s); };
 
     // 1) henkilömäärä
     const lockPersons = opts.lockPersons === true;
@@ -93,7 +106,7 @@ export function createTreatmentViews(c) {
     const syncN = () => { num.value = st.n; minus.disabled = lockPersons || st.n <= minN; plus.disabled = lockPersons || st.n >= maxN; if (lockPersons) num.disabled = true; };
     const personsBox = h('section', { class: 'bk-step-box', 'aria-labelledby': 'tr-h1' },
       h('h3', { id: 'tr-h1' }, h('span', { class: 'bk-stepn', 'aria-hidden': 'true', text: String(1 + off) }), tr.step1),
-      h('div', { class: 'bk-stepper' }, minus, num, plus),
+      h('div', { class: 'bk-persons' }, h('div', { class: 'bk-stepper' }, minus, num, plus), party),
       maxN > 1 ? h('p', { class: 'bk-hint', text: tr.maxPersons(maxN) }) : h('p', { class: 'bk-hint', text: tr.onePerson }),
       lockPersons && opts.personsNote ? h('p', { class: 'bk-note', 'data-testid': 'invoiced-persons-note', text: opts.personsNote }) : null);
     // 2) päivä
@@ -174,7 +187,6 @@ export function createTreatmentViews(c) {
     const sum = h('p', { class: 'bk-pick-sum', 'aria-live': 'polite' });
     const go = h('button', { type: 'button', class: 'btn', disabled: true, text: tr.continue });
     const startN = Math.min(Math.max(+query.get('n') || A.minPersons(p), A.minPersons(p)), A.maxPersons(p));
-    const priceEl = h('strong', { 'data-testid': 'treatment-price', text: priceText(p, startN) });
     let cur = null;
     // pakollinen hoitovalinta (booking_50): vaihe 1; jatkaminen vasta kun valinta on tehty
     const needOpt = O.needsOption(p), showOpt = O.hasOptions(p);
@@ -184,9 +196,8 @@ export function createTreatmentViews(c) {
     const optStep = showOpt ? h('section', { class: 'bk-step-box bk-step-opt' }, optP.node) : null;
     const upd = () => {
       const s = cur || { n: startN }, slotOk = !!(s.date && s.slot), optOk = O.optionOk(p, opt), price = shown(s);
-      priceEl.textContent = price;
       go.disabled = !(slotOk && optOk);
-      sum.textContent = !optOk ? ot.pickToContinue : slotOk ? tr.selected(`${dayLong(s.slot.start)}, ${s.time}`, s.n, price) + (opt ? ` · ${O.optName(O.findOption(p, opt), S.lang)}` : '') : `${t.total} ${price}`;
+      sum.textContent = !optOk ? ot.pickToContinue : slotOk ? tr.selected(`${dayLong(s.slot.start)}, ${s.time}`, s.n, price) + (opt ? ` · ${O.optName(O.findOption(p, opt), S.lang)}` : '') : tr.party(s.n || startN, price);
       if (s.n) history.replaceState(null, '', bk(`/tuote/${p.slug}?n=${s.n}${s.date ? `&d=${s.date}` : ''}${s.date && s.time ? `&t=${A.timeToken(s.time)}` : ''}${optQ(opt)}`)); c.setLast();
     };
     const picker = slotPicker(p, { n: +query.get('n') || undefined, date: /^\d{4}-\d\d-\d\d$/.test(query.get('d') || '') ? query.get('d') : null, time: A.timeFromToken(query.get('t')), stepOffset: needOpt ? 1 : 0,
@@ -201,7 +212,7 @@ export function createTreatmentViews(c) {
     mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })),
       h('div', { class: 'bk-prod-layout' },
         h('div', { class: 'bk-facts' },
-          metaP(p, priceEl),
+          metaP(p),
           leadShort(h, p, S.lang, desc),
           moreInfo(desc),
           timelineNode(p),
@@ -332,12 +343,12 @@ export function createTreatmentViews(c) {
     const inv = customerInvoiceLock(b);
     const slotChanged = () => !!cur?.slot && (cur.slot.start !== it.starts_at || (!inv.personsDisabled && cur.n !== it.persons)), optChanged = () => O.optionChanged(it, opt);
     const refresh = () => { save.disabled = !(slotChanged() || optChanged()); };
-    const picker = slotPicker(p, { n: it.persons, date: curDate, time: null, minStartMs: Date.now() + hours * 36e5, lockPersons: inv.personsDisabled, personsNote: inv.personsDisabled ? t.invoicedPersonsNote : '',
+    const picker = slotPicker(p, { n: it.persons, date: curDate, time: null, minStartMs: Date.now() + hours * 36e5, lockPersons: inv.personsDisabled, personsNote: inv.personsDisabled ? t.invoicedPersonsNote : '', showPrice: inv.showPriceEstimate,
       onChange: (s) => {
         cur = s;
         refresh();
         const total = s.slot?.total ?? A.priceFor(p, s.n);
-        sum.textContent = s.slot ? (inv.showPriceEstimate ? tr.selected(`${dayLong(s.slot.start)}, ${s.time}`, s.n, money(total)) : `${dayLong(s.slot.start)}, ${s.time} · ${t.invoicedSumNote}`) : (inv.showPriceEstimate ? `${t.total} ${money(A.priceFor(p, s.n))}` : '');
+        sum.textContent = s.slot ? (inv.showPriceEstimate ? tr.selected(`${dayLong(s.slot.start)}, ${s.time}`, s.n, money(total)) : `${dayLong(s.slot.start)}, ${s.time} · ${t.invoicedSumNote}`) : (inv.showPriceEstimate ? tr.party(s.n, money(A.priceFor(p, s.n))) : '');
       } });
     save.addEventListener('click', async () => {
       if (!slotChanged() && !optChanged()) return;
