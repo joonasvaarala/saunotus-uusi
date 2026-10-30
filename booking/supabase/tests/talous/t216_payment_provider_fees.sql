@@ -120,7 +120,8 @@ begin
   perform pg_temp.ck(position('hyvitys;toteutunut;1;20,00;0,20;-20,20' in csv) > 0, 'C7 hyvitysrivi');
   perform pg_temp.ck(position('puuttuu;1;20,00;;' in csv) > 0, 'C8 puuttuva provisio tyhjänä');
   perform pg_temp.ck(pg_temp.try($q$select booking.admin_report_provider_fees('2032-01-01','2033-06-01','json')$q$) like 'BK001:invalid_param%', 'C9 liian pitkä jakso');
-  perform pg_temp.ck(pg_temp.try($q$select booking.admin_upsert_payment_fee_rule('{"provider":"Montonio","method":"*","fixed_eur":1,"percent":1}'::jsonb)$q$) like 'BK001:invalid_value%', 'D1 palvelukoodi pienin kirjaimin');
+  perform pg_temp.ck((booking.admin_upsert_payment_fee_rule('{"provider":" Montonio ","method":"*","fixed_eur":1,"percent":1}'::jsonb) #>> '{rule,provider}') = 'montonio', 'D1 palvelukoodi pienin kirjaimin');
+  perform pg_temp.ck(pg_temp.try($q$select booking.admin_upsert_payment_fee_rule('{"provider":"Monto nio","method":"*","fixed_eur":1,"percent":1}'::jsonb)$q$) like 'BK001:invalid_value%', 'D1b virheellinen palvelukoodi');
   perform pg_temp.logout();
 
   perform pg_temp.login(u_st);

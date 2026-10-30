@@ -18,7 +18,7 @@ const quoted = (file, name) => {
 };
 
 test('provisio poimitaan samassa j채rjestyksess채 kuin SQL ja edge', () => {
-  const sql = src('supabase/migrations/booking_216_payment_provider_fees.sql');
+  const sql = src('supabase/migrations/20261030111928_booking_216_payment_provider_fees.sql');
   assert.deepEqual(quoted('supabase/functions/_shared/provider_fee.ts', 'EURO_KEYS'), EURO_KEYS);
   assert.deepEqual(quoted('supabase/functions/_shared/provider_fee.ts', 'CENT_KEYS'), CENT_KEYS);
   assert.deepEqual(quoted('supabase/functions/_shared/provider_fee.ts', 'NEST_KEYS'), NEST_KEYS);
@@ -99,8 +99,8 @@ test('pending-import-103 vastaa sanakirjaa, FI+EN, ei Montonio-nime채 eik채 p채�
 });
 
 test('migraatio booking_216, rollback, SQL-testi ja hallinnan kytkent채', () => {
-  const mig = src('supabase/migrations/booking_216_payment_provider_fees.sql');
-  const rb = src('supabase/rollbacks/booking_216_ROLLBACK.sql');
+  const mig = src('supabase/migrations/20261030111928_booking_216_payment_provider_fees.sql');
+  const rb = src('supabase/rollbacks/20261030111928_booking_216_ROLLBACK.sql');
   assert.match(mig, /admin_report_provider_fees/);
   assert.match(mig, /payment_fee_rules/);
   assert.match(mig, /provider_fee/);

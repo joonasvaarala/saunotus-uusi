@@ -1,7 +1,5 @@
 -- booking_216: maksuvälittäjän provisio (raportti + säännöt).
--- Tiedostonimi ilman tuotantoaikaleimaa. Ylläpitäjä nimeää sen muotoon
--- YYYYMMDDHHMMSS_booking_216_payment_provider_fees.sql ennen tuotantoajoa.
--- Älä aja tuotantoon tästä haarasta.
+-- Ajettu: DEV 20261030111845, PROD 20261030111928 (tiedostonimi = PROD-versio).
 --
 -- 1) payments.provider_fee ja refunds.provider_fee: välittäjän ilmoittama provisio (EUR).
 --    Täydennetään raw-jsonista, kun siinä on tunnistettu kenttä (webhook / API).
@@ -9,7 +7,7 @@
 -- 3) admin_report_provider_fees: jakso, palvelu, maksutapa, kpl, brutto, provisio, netto.
 --    Hyvitykset erikseen. Lähde actual | estimated | missing.
 -- Asiakkaan funktioita ei korvata. Kuitti ja kauppa eivät saa välittäjän tuotemerkkiä tästä.
--- Paluu: booking/supabase/rollbacks/booking_216_ROLLBACK.sql
+-- Paluu: booking/supabase/rollbacks/20261030111928_booking_216_ROLLBACK.sql
 
 alter table booking.payments add column if not exists provider_fee numeric(12,4);
 alter table booking.refunds add column if not exists provider_fee numeric(12,4);
