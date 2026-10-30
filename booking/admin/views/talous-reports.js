@@ -36,7 +36,7 @@ export function createReportsTab({ api, canFull = true }) {
   const st = { basis: 'payment', kind: 'daily', date: today, year: +today.slice(0, 4), month: +today.slice(5, 7), from: `${today.slice(0, 8)}01`, to: today, gc: 'open', section: 'sales' };
   const out = h('div', { class: 'tl-report', 'data-testid': 'report-out' });
   const gcOut = h('div', { 'data-testid': 'r-gc-out' });
-  let seq = 0, gseq = 0, current = null;
+  let seq = 0, gseq = 0, fseq = 0, current = null, feeCurrent = null;
   const ym = () => `${st.year}-${String(st.month).padStart(2, '0')}`;
   const spanOf = () => (st.kind === 'daily' ? { from: st.date, to: st.date } : st.kind === 'this' ? monthBounds(today.slice(0, 7)) : st.kind === 'prev' ? monthBounds(shiftMonth(today.slice(0, 7), -1)) : st.kind === 'monthly' ? monthBounds(ym()) : { from: st.from, to: st.to });
   async function loadSales() {
@@ -67,6 +67,26 @@ export function createReportsTab({ api, canFull = true }) {
       gcOut.replaceChildren(gcView(r));
     } catch (e) { if (my === gseq) gcOut.replaceChildren(errorBox(e, loadGc)); }
   }
+  function feeSpan() {
+    if (st.kind === 'daily') return { from: st.date, to: st.date };
+    if (st.kind === 'monthly') return monthBounds(ym());
+    return spanOf();
+  }
+  async function loadFees() {
+    if (!canFull) { feeOut.replaceChildren(); return; }
+    const my = ++fseq;
+    feeCsvBtn.disabled = true; feePdfBtn.disabled = true;
+    feeOut.replaceChildren(loading());
+    const span = feeSpan();
+    try {
+      const r = await api.reportProviderFees(span.from, span.to);
+      if (my !== fseq) return;
+      feeCurrent = r;
+      feeCsvBtn.disabled = !r; feePdfBtn.disabled = !r;
+      feeOut.replaceChildren(r ? feeView(r) : h('p', { class: 'muted', 'data-testid': 'r-fees-unavailable', text: rt('ui.admin.reports.fee_unavailable') }));
+    } catch (e) { if (my === fseq) feeOut.replaceChildren(errorBox(e, loadFees)); }
+  }
+  const reloadReport = () => { loadSales(); loadFees(); };
   const periodLabel = (r) => (r.period.kind === 'day' ? fmt.date(r.period.from) : `${r.period.kind === 'month' ? fmt.month(r.period.from.slice(0, 7)) : rt('ui.admin.reports.range')} (${fmt.date(r.period.from)} – ${fmt.date(r.period.to)})`);
   function view(r) {
     const M = fmt.money, T = r.totals;
@@ -174,6 +194,25 @@ export function createReportsTab({ api, canFull = true }) {
     return h('div', {}, section(rt('ui.admin.reports.gc_own'), r.own.rows, { count: r.own.at_redemption.count + r.own.at_sale.count + comp.count, balance: r.own.at_redemption.balance + r.own.at_sale.balance + comp.balance, initial: r.own.at_redemption.initial + r.own.at_sale.initial + comp.initial }, 'r-gc-own', ownNote),
       section(rt('ui.admin.reports.gc_johku'), r.johku.rows, r.johku.totals, 'r-gc-johku', rt('ui.admin.reports.gc_note')));
   }
+  function feeView(r) {
+    const M = fmt.money;
+    const basis = (b) => rt(`ui.admin.reports.fee_basis_${b === 'actual' || b === 'estimated' || b === 'missing' ? b : 'missing'}`);
+    const cols = [rt('ui.admin.reports.fee_col_provider'), rt('ui.admin.reports.fee_col_method'), rt('ui.admin.reports.fee_col_basis'), rt('ui.admin.reports.fee_col_count'), rt('ui.admin.reports.fee_col_gross'), rt('ui.admin.reports.fee_col_fee'), rt('ui.admin.reports.fee_col_net')];
+    const money = (n) => (n == null ? '–' : M(n));
+    const rowsOf = (dir) => (r.rows || []).filter((x) => x.direction === dir).map((x) => [x.provider_label || x.provider, x.method_label || x.method, basis(x.basis), fmt.int(x.count), M(x.gross), money(x.fee), money(x.net)]);
+    const feeTable = (testid, caption, rows) => h('section', { class: 'tl-sec' }, h('h3', { text: caption }), h('table', { class: 'tl-table', 'data-testid': testid },
+      h('thead', {}, h('tr', {}, cols.map((c, i) => h('th', { scope: 'col', class: i ? 'r' : '', text: c })))),
+      h('tbody', {}, rows.map((row) => h('tr', {}, row.map((c, i) => h(i ? 'td' : 'th', i ? { class: 'r', 'data-label': cols[i], text: c } : { scope: 'row', text: c })))))));
+    const block = (dir, title, testid) => {
+      const rows = rowsOf(dir);
+      return rows.length ? feeTable(testid, title, rows) : h('section', { class: 'tl-sec', 'data-testid': testid }, h('h3', { text: title }), h('p', { class: 'muted', text: rt('ui.admin.reports.fee_empty') }));
+    };
+    const tot = r.totals || {};
+    const settle = tot.missing > 0 || tot.settlement == null
+      ? h('p', { class: 'muted', 'data-testid': 'r-fees-missing', text: rt('ui.admin.reports.fee_missing_note') })
+      : h('p', { 'data-testid': 'r-fees-settlement', text: `${rt('ui.admin.reports.fee_settlement')}: ${M(tot.settlement)}` });
+    return h('div', { 'data-testid': 'r-fees-body' }, block('sale', rt('ui.admin.reports.fee_sales'), 'r-fees-sales'), block('refund', rt('ui.admin.reports.fee_refunds'), 'r-fees-refunds'), settle, h('p', { class: 'muted', text: rt('ui.admin.reports.fee_net_note') }));
+  }
 
   function viewAccrual(r) {
     const M = fmt.money;
@@ -220,16 +259,16 @@ export function createReportsTab({ api, canFull = true }) {
   const sectionBtns = { sales: sectionBtn('sales'), methods: sectionBtn('methods') };
   const syncSection = () => { for (const id of ['sales', 'methods']) sectionBtns[id].setAttribute('aria-checked', String(st.section === id)); };
   const kindLabel = { daily: rt('ui.admin.reports.day'), this: rt('ui.admin.reports.this_month'), prev: rt('ui.admin.reports.prev_month'), monthly: rt('ui.admin.reports.pick_month'), range: rt('ui.admin.reports.range') };
-  const kindBtn = (k) => { const off = k !== 'daily' && !canFull; return h('button', { type: 'button', role: 'radio', class: 'tl-seg', 'aria-checked': String(st.kind === k), 'data-testid': `r-kind-${k}`, disabled: off || null, title: off ? t('r.monthlyNoPerm') : null, onclick: () => { st.kind = k; syncKind(); loadSales(); } }, kindLabel[k]); };
+  const kindBtn = (k) => { const off = k !== 'daily' && !canFull; return h('button', { type: 'button', role: 'radio', class: 'tl-seg', 'aria-checked': String(st.kind === k), 'data-testid': `r-kind-${k}`, disabled: off || null, title: off ? t('r.monthlyNoPerm') : null, onclick: () => { st.kind = k; syncKind(); reloadReport(); } }, kindLabel[k]); };
   const kindBtns = Object.fromEntries(KINDS.map((k) => [k, kindBtn(k)]));
-  const dateIn = h('input', { type: 'date', value: st.date, max: today, 'data-testid': 'r-date', 'aria-label': t('r.date'), onchange: (e) => { if (e.target.value) { st.date = e.target.value; loadSales(); } } });
-  const monthSel = h('select', { 'data-testid': 'r-month', 'aria-label': t('r.month'), onchange: (e) => { st.month = +e.target.value; loadSales(); } }, Array.from({ length: 12 }, (_, i) => h('option', { value: i + 1, text: fmt.month(`2026-${String(i + 1).padStart(2, '0')}`).replace(/\s*\d{4}$/, '').replace(/^./, (c) => c.toUpperCase()) })));
+  const dateIn = h('input', { type: 'date', value: st.date, max: today, 'data-testid': 'r-date', 'aria-label': t('r.date'), onchange: (e) => { if (e.target.value) { st.date = e.target.value; reloadReport(); } } });
+  const monthSel = h('select', { 'data-testid': 'r-month', 'aria-label': t('r.month'), onchange: (e) => { st.month = +e.target.value; reloadReport(); } }, Array.from({ length: 12 }, (_, i) => h('option', { value: i + 1, text: fmt.month(`2026-${String(i + 1).padStart(2, '0')}`).replace(/\s*\d{4}$/, '').replace(/^./, (c) => c.toUpperCase()) })));
   monthSel.value = st.month;
   const years = [st.year - 2, st.year - 1, st.year].filter((y) => y >= 2024);
-  const yearSel = h('select', { 'data-testid': 'r-year', 'aria-label': t('r.year'), onchange: (e) => { st.year = +e.target.value; loadSales(); } }, years.map((y) => h('option', { value: y, text: String(y) })));
+  const yearSel = h('select', { 'data-testid': 'r-year', 'aria-label': t('r.year'), onchange: (e) => { st.year = +e.target.value; reloadReport(); } }, years.map((y) => h('option', { value: y, text: String(y) })));
   yearSel.value = st.year;
-  const fromIn = h('input', { type: 'date', value: st.from, 'data-testid': 'r-from', 'aria-label': rt('ui.admin.reports.from'), onchange: (e) => { if (e.target.value) { st.from = e.target.value; if (st.to < st.from) st.to = st.from; toIn.value = st.to; loadSales(); } } });
-  const toIn = h('input', { type: 'date', value: st.to, 'data-testid': 'r-to', 'aria-label': rt('ui.admin.reports.to'), onchange: (e) => { if (e.target.value) { st.to = e.target.value; if (st.from > st.to) st.from = st.to; fromIn.value = st.from; loadSales(); } } });
+  const fromIn = h('input', { type: 'date', value: st.from, 'data-testid': 'r-from', 'aria-label': rt('ui.admin.reports.from'), onchange: (e) => { if (e.target.value) { st.from = e.target.value; if (st.to < st.from) st.to = st.from; toIn.value = st.to; reloadReport(); } } });
+  const toIn = h('input', { type: 'date', value: st.to, 'data-testid': 'r-to', 'aria-label': rt('ui.admin.reports.to'), onchange: (e) => { if (e.target.value) { st.to = e.target.value; if (st.from > st.to) st.from = st.to; fromIn.value = st.from; reloadReport(); } } });
   const dayFld = h('label', { class: 'fld tl-r-day' }, h('span', { text: t('r.date') }), dateIn);
   const monFld = h('div', { class: 'fld tl-r-mon' }, h('span', { text: t('r.month') }), h('div', { class: 'tl-sortrow' }, monthSel, yearSel));
   const rangeFld = h('div', { class: 'fld tl-r-range' }, h('span', { text: rt('ui.admin.reports.range') }), h('div', { class: 'tl-sortrow' }, fromIn, toIn));
@@ -291,6 +330,31 @@ export function createReportsTab({ api, canFull = true }) {
     h('div', { class: 'fld' }, h('span', { text: t('r.type') }), h('div', { role: 'radiogroup', 'aria-label': t('r.type'), class: 'tl-segs' }, ...KINDS.map((k) => kindBtns[k]))), h('div', { class: 'fld' }, h('span', { text: rt('ui.admin.reports.sales_tab') }), h('div', { role: 'radiogroup', 'aria-label': rt('ui.admin.reports.sales_tab'), class: 'tl-segs', 'data-testid': 'r-sections' }, sectionBtns.sales, sectionBtns.methods)), dayFld, monFld, rangeFld,
     h('div', { class: 'tl-actions' }, csvBtn, sumCsvBtn, methodsCsvBtn, accCsvBtn, pdfSrvBtn, txPdfBtn, pdfBtn), h('p', { class: 'muted tl-hint', text: t('r.pdfNote') }), canFull ? null : h('p', { class: 'tl-hint', role: 'note', 'data-testid': 'r-limited', text: t('r.limited') }));
   const gcPanel = h('section', { class: 'tl-sec tl-noprint', 'data-testid': 'r-gc' }, h('h3', { text: rt('ui.admin.reports.gc_title') }), h('div', { class: 'tl-toolbar' }, h('label', { class: 'fld' }, h('span', { text: rt('ui.admin.reports.gc_filter') }), gcFilter), gcCsvBtn, gcPdfBtn), gcOut);
-  const node = h('div', { class: 'tl-tab', 'data-testid': 'tab-reports' }, controls, out, gcPanel);
-  return { node, load: () => Promise.all([loadSales(), loadGc()]) };
+  const feeOut = h('div', { 'data-testid': 'r-fees-out' });
+  async function grabFeeCsv() {
+    const span = feeSpan();
+    feeCsvBtn.disabled = true;
+    try {
+      const res = await api.reportProviderFees(span.from, span.to, 'csv');
+      if (res?.content) downloadCsv(res.filename || `provisio_${span.from}_${span.to}.csv`, res.content);
+    } catch (e) { toast(errMsg(e), 'err'); } finally { feeCsvBtn.disabled = !feeCurrent; }
+  }
+  async function grabFeePdf() {
+    const span = feeSpan();
+    feePdfBtn.disabled = true;
+    try {
+      const res = await api.reportPdf({ pdf: 'fees', period: { from: span.from, to: span.to, kind: 'range' } });
+      if (!res) { document.title = `${t('nav')} – ${rt('ui.admin.reports.fee_title')}`; window.print(); return; }
+      saveBlob(`provisio_${span.from}_${span.to}.pdf`, new Blob([res.blob], { type: 'application/pdf' }));
+    } catch (e) { toast(`${t('r.pdfFailed')} ${errMsg(e)}`, 'err'); } finally { feePdfBtn.disabled = !feeCurrent; }
+  }
+  const feeCsvBtn = btn('r-fees-csv', rt('ui.admin.reports.fee_csv'), grabFeeCsv, !canFull);
+  const feePdfBtn = btn('r-fees-pdf', rt('ui.admin.reports.fee_pdf'), grabFeePdf, !canFull);
+  const feePanel = h('section', { class: 'tl-sec', 'data-testid': 'r-fees', hidden: canFull ? null : true },
+    h('h3', { text: rt('ui.admin.reports.fee_title') }),
+    h('p', { class: 'muted', text: rt('ui.admin.reports.fee_help') }),
+    h('div', { class: 'tl-actions tl-noprint' }, feeCsvBtn, feePdfBtn),
+    feeOut);
+  const node = h('div', { class: 'tl-tab', 'data-testid': 'tab-reports' }, controls, out, feePanel, gcPanel);
+  return { node, load: () => Promise.all([loadSales(), loadFees(), loadGc()]) };
 }

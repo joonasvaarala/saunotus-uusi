@@ -13,7 +13,7 @@ import { createMock } from './talous-mock.js';
 export const RPC = {
   listOrders: 'admin_list_orders', getOrder: 'admin_get_order', listPayments: 'admin_list_payments', listAddons: 'admin_list_addons',
   addToOrder: 'admin_add_to_order', createPaymentLink: 'admin_create_payment_link', refund: 'admin_refund', refundOrder: 'admin_refund_order', reservationRefundPreview: 'admin_reservation_refund_preview', cancelReservation: 'admin_cancel_reservation', recordPayment: 'admin_record_payment', listVatRates: 'admin_list_vat_rates',
-  reportDaily: 'admin_report_daily', reportMonthly: 'admin_report_month', reportRange: 'admin_report_range', reportTransactions: 'admin_report_transactions', reportGiftCards: 'admin_report_gift_cards', reportCsv: 'admin_report_csv', reportAccrual: 'admin_report_accrual', reportAccrualCsv: 'admin_report_accrual_csv', salesChart: 'admin_sales_chart',
+  reportDaily: 'admin_report_daily', reportMonthly: 'admin_report_month', reportRange: 'admin_report_range', reportTransactions: 'admin_report_transactions', reportGiftCards: 'admin_report_gift_cards', reportCsv: 'admin_report_csv', reportAccrual: 'admin_report_accrual', reportAccrualCsv: 'admin_report_accrual_csv', reportProviderFees: 'admin_report_provider_fees', salesChart: 'admin_sales_chart',
   getReceipt: 'admin_get_receipt', resendReceipt: 'admin_resend_receipt',
   annualCardForOrder: 'admin_annual_card_for_order',   // booking_146: tilauksen vuosikortti + koodin sähköpostin tila
 };
@@ -220,6 +220,7 @@ export function rpcBackend(rpc) {
     reportTransactions: (a) => call('reportTransactions', { p_from: a.from, p_to: a.to }),
     reportGiftCards: (a) => call('reportGiftCards', { p_filter: a.filter, p_format: a.format || 'json' }),
     reportCsv: (a) => call('reportCsv', compact({ p_from: a.from, p_to: a.to, p_kind: a.kind || 'lines' })),
+    reportProviderFees: (a) => call('reportProviderFees', { p_from: a.from, p_to: a.to, p_format: a.format || 'json' }),
     reportAccrual: (a) => call('reportAccrual', { p_from: a.from, p_to: a.to }),
     reportAccrualCsv: (a) => call('reportAccrualCsv', { p_from: a.from, p_to: a.to }),
     salesChart: (year) => call('salesChart', { p_year: year }),
@@ -323,6 +324,27 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
       const prefix = kind === 'summary' ? 'yhteenveto' : kind === 'vat' ? 'myynti_vat' : kind === 'methods' ? 'maksutavat' : 'tapahtumat';
       return { source: 'server', filename: res.filename || `${prefix}_${report.period.from}_${report.period.to}.csv`, content: String(res.content ?? ''), mime: res.mime || 'text/csv' };
     },
+    // booking_216: provisio. Puuttuva RPC ei siirrä muita raportteja mockiin (vanha kanta).
+    async reportProviderFees(from, to, format = 'json') {
+      const norm = (r) => {
+        if (format === 'csv') return { filename: r?.filename || `provisio_${from}_${to}.csv`, content: String(r?.content ?? ''), mime: r?.mime || 'text/csv' };
+        const row = (x) => ({
+          provider: x.provider || '', provider_label: x.provider_label || x.provider || '', method: x.method || '', method_label: x.method_label || x.method || '',
+          direction: x.direction === 'refund' ? 'refund' : 'sale', basis: ['actual', 'estimated', 'missing'].includes(x.basis) ? x.basis : 'missing',
+          count: num(x.count), gross: num(x.gross), fee: x.fee == null ? null : num(x.fee), net: x.net == null ? null : num(x.net),
+        });
+        const t = r?.totals || {};
+        const maybe = (v) => (v == null ? null : num(v));
+        return { period: r?.period || { from, to, kind: 'range' }, basis: r?.basis || 'paid_at', rows: L(r?.rows).map(row), totals: {
+          sales_count: num(t.sales_count), sales_gross: num(t.sales_gross), sales_fee: maybe(t.sales_fee), sales_net: maybe(t.sales_net),
+          refund_count: num(t.refund_count), refund_gross: num(t.refund_gross), refund_fee: maybe(t.refund_fee), refund_net: maybe(t.refund_net),
+          settlement: maybe(t.settlement), missing: num(t.missing),
+        } };
+      };
+      if (!real) return norm(await getMock().reportProviderFees({ from, to, format }));
+      try { return norm(await real.reportProviderFees({ from, to, format })); }
+      catch (e) { if (isMissingRpc(e)) return null; throw e; }
+    },
     async reportGiftCards(filter = 'open', format = 'json') {
       const res = await run('reportGiftCards', { filter, format });
       if (format === 'csv') return { source: 'server', filename: res.filename || `lahjakortit_${filter}.csv`, content: String(res.content ?? ''), mime: res.mime || 'text/csv' };
@@ -397,7 +419,8 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
     async reportPdf(report) {
       if (!real || !io.fnBlob) return null;
       const p = report.period || {}, mode = report.pdf || 'summary';
-      const q = mode === 'transactions' ? { kind: 'transactions', from: p.from, to: p.to }
+      const q = mode === 'fees' ? { kind: 'fees', from: p.from, to: p.to }
+        : mode === 'transactions' ? { kind: 'transactions', from: p.from, to: p.to }
         : mode === 'giftcards' ? { kind: 'giftcards', filter: report.filter || 'all' }
         : p.kind === 'day' ? { kind: 'daily', date: p.from }
         : p.kind === 'month' ? { kind: 'month', ym: String(p.from || '').slice(0, 7) }

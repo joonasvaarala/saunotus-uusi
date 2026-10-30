@@ -1,0 +1,702 @@
+[
+  {
+    "key": "ui.admin.reports.fee_title",
+    "lang": "fi",
+    "text": "Maksuvälittäjän provisio",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_title",
+    "lang": "en",
+    "text": "Payment provider fees",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_help",
+    "lang": "fi",
+    "text": "Jakso on maksun maksupäivä ja hyvityksen valmistumispäivä (Helsinki). Toteutunut provisio tulee välittäjän ilmoituksesta. Muuten käytetään asetuksen kiinteää summaa ja prosenttia. Arvio on merkitty.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_help",
+    "lang": "en",
+    "text": "The period is the payment date and the refund completion date (Helsinki). An actual fee comes from the provider message. Otherwise the fixed amount and percentage from settings are used. An estimate is marked.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 250,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_sales",
+    "lang": "fi",
+    "text": "Maksut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_sales",
+    "lang": "en",
+    "text": "Payments",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_refunds",
+    "lang": "fi",
+    "text": "Hyvitykset",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_refunds",
+    "lang": "en",
+    "text": "Refunds",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_col_provider",
+    "lang": "fi",
+    "text": "Palvelu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_col_provider",
+    "lang": "en",
+    "text": "Provider",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_col_method",
+    "lang": "fi",
+    "text": "Maksutapa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_col_method",
+    "lang": "en",
+    "text": "Payment method",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_col_count",
+    "lang": "fi",
+    "text": "kpl",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_col_count",
+    "lang": "en",
+    "text": "pcs",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_col_gross",
+    "lang": "fi",
+    "text": "Brutto",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_col_gross",
+    "lang": "en",
+    "text": "Gross",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_col_fee",
+    "lang": "fi",
+    "text": "Provisio",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_col_fee",
+    "lang": "en",
+    "text": "Fee",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_col_net",
+    "lang": "fi",
+    "text": "Netto",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_col_net",
+    "lang": "en",
+    "text": "Net",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_col_basis",
+    "lang": "fi",
+    "text": "Lähde",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_col_basis",
+    "lang": "en",
+    "text": "Source",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_basis_actual",
+    "lang": "fi",
+    "text": "Toteutunut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_basis_actual",
+    "lang": "en",
+    "text": "Actual",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_basis_estimated",
+    "lang": "fi",
+    "text": "Arvio",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_basis_estimated",
+    "lang": "en",
+    "text": "Estimate",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_basis_missing",
+    "lang": "fi",
+    "text": "Puuttuu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_basis_missing",
+    "lang": "en",
+    "text": "Missing",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_empty",
+    "lang": "fi",
+    "text": "Ei maksuja tai hyvityksiä tällä jaksolla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_empty",
+    "lang": "en",
+    "text": "No payments or refunds in this period.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_missing_note",
+    "lang": "fi",
+    "text": "Osasta tapahtumia puuttuu provisio. Tilitettävää summaa ei lasketa, ennen kuin välittäjä on ilmoittanut provision tai sääntö on tallennettu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_missing_note",
+    "lang": "en",
+    "text": "Some transactions have no fee. The settled amount is not calculated until the provider reports a fee or a rule is saved.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_csv",
+    "lang": "fi",
+    "text": "Provisio CSV",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_csv",
+    "lang": "en",
+    "text": "Fees CSV",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_pdf",
+    "lang": "fi",
+    "text": "Provisio PDF",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_pdf",
+    "lang": "en",
+    "text": "Fees PDF",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_settlement",
+    "lang": "fi",
+    "text": "Tilitettävä summa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_settlement",
+    "lang": "en",
+    "text": "Amount settled",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_unavailable",
+    "lang": "fi",
+    "text": "Provisioraportti ei ole vielä käytössä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_unavailable",
+    "lang": "en",
+    "text": "The fee report is not available yet.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_net_note",
+    "lang": "fi",
+    "text": "Maksun netto on brutto vähennettynä provisiolla. Hyvityksen netto vähentää tilitettävää summaa: hyvitetty brutto ja hyvityksen provisio.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_net_note",
+    "lang": "en",
+    "text": "The payment net is the gross amount minus the fee. A refund net reduces the amount settled: the refunded gross and the refund fee.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_title",
+    "lang": "fi",
+    "text": "Provisiosäännöt",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_title",
+    "lang": "en",
+    "text": "Fee rules",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_help",
+    "lang": "fi",
+    "text": "Sääntö on kiinteä summa euroina plus prosentti bruttosummasta, palvelu- ja maksutapakohtaisesti. Sitä käytetään vain, jos välittäjä ei ole ilmoittanut provisiota. Valinta kaikki maksutavat koskee palvelun jokaista tapaa. Tarkempi sääntö voittaa sen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 250,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_help",
+    "lang": "en",
+    "text": "A rule is a fixed amount in euros plus a percentage of the gross amount, for one provider and payment method. It is used only when the provider did not report a fee. The choice all methods applies to every method of that provider. A more specific rule overrides it.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_provider",
+    "lang": "fi",
+    "text": "Palvelu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_provider",
+    "lang": "en",
+    "text": "Provider",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_method",
+    "lang": "fi",
+    "text": "Maksutapa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_method",
+    "lang": "en",
+    "text": "Payment method",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_all_methods",
+    "lang": "fi",
+    "text": "Kaikki maksutavat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_all_methods",
+    "lang": "en",
+    "text": "All methods",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_fixed",
+    "lang": "fi",
+    "text": "Kiinteä €",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_fixed",
+    "lang": "en",
+    "text": "Fixed €",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_percent",
+    "lang": "fi",
+    "text": "Prosentti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_percent",
+    "lang": "en",
+    "text": "Percent",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_active",
+    "lang": "fi",
+    "text": "Käytössä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_active",
+    "lang": "en",
+    "text": "In use",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_save",
+    "lang": "fi",
+    "text": "Tallenna sääntö",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_save",
+    "lang": "en",
+    "text": "Save rule",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_saved",
+    "lang": "fi",
+    "text": "Sääntö tallennettu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_saved",
+    "lang": "en",
+    "text": "Rule saved",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_remove",
+    "lang": "fi",
+    "text": "Poista",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_remove",
+    "lang": "en",
+    "text": "Remove",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_empty",
+    "lang": "fi",
+    "text": "Ei tallennettuja sääntöjä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_empty",
+    "lang": "en",
+    "text": "No saved rules.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_invalid",
+    "lang": "fi",
+    "text": "Tarkista palvelu, maksutapa, kiinteä summa ja prosentti.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_invalid",
+    "lang": "en",
+    "text": "Check the provider, payment method, fixed amount and percent.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_loading",
+    "lang": "fi",
+    "text": "Ladataan sääntöjä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.reports.fee_rules_loading",
+    "lang": "en",
+    "text": "Loading rules.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_216: maksuvälittäjän provisioraportti ja säännöt hallinnassa. FI+EN. Tuo admin_texts_importilla."
+  }
+]

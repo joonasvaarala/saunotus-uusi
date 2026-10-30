@@ -3,6 +3,7 @@
 import type { Db } from "./mobilepay.ts";
 import { dbError } from "./mobilepay.ts";
 import { centsEqual, notSettled, paymentStatusOf, refundStatusOf, type PayApi, PayError } from "./montonio.ts";
+import { feeSlice } from "./provider_fee.ts";
 
 export type ApplyOutcome = "paid" | "failed" | "cancelled" | "pending" | "authorized" | "needs_review";
 
@@ -37,10 +38,10 @@ export async function applyVerified(db: Db, payload: Record<string, unknown>, ex
   if (status === "PAID") {
     const total = Number(payload.grandTotal);
     if (!Number.isFinite(total) || !centsEqual(total, expect.amount)) {
-      const applied = await applyOutcome(db, ref, "needs_review", Number.isFinite(total) ? total : null, { reason: "amount_mismatch", paymentStatus: status });
+      const applied = await applyOutcome(db, ref, "needs_review", Number.isFinite(total) ? total : null, { reason: "amount_mismatch", paymentStatus: status, ...(feeSlice(payload) || {}) });
       return { http: applied.ok ? 200 : 503, outcome: "needs_review" };
     }
-    const applied = await applyOutcome(db, ref, "paid", total, { paymentStatus: status, paymentMethod: payload.paymentMethod ?? null, uuid: payload.uuid ?? null });
+    const applied = await applyOutcome(db, ref, "paid", total, { paymentStatus: status, paymentMethod: payload.paymentMethod ?? null, uuid: payload.uuid ?? null, ...(feeSlice(payload) || {}) });
     if (!applied.ok) return { http: 503, outcome: "retry" };
     if (applied.outcome === "needs_review" || applied.code === "amount_mismatch" || applied.code === "duplicate_paid") return { http: 200, outcome: "needs_review" };
     return { http: 200, outcome: "paid" };
@@ -92,7 +93,7 @@ export async function applyRefundStatus(db: Db, claim: Claim, payload: Record<st
   const uuid = String(payload.refundUuid || payload.uuid || claim.provider_refund_id || "");
   if (status === "SUCCESSFUL" || status === "REFUNDED") {
     if (!uuid) return { result: "retry_later" };
-    return complete(db, claim, uuid, { refundStatus: status });
+    return complete(db, claim, uuid, { refundStatus: status, ...(feeSlice(payload) || {}) });
   }
   if (status === "REJECTED" || status === "CANCELED" || status === "CANCELLED") {
     if (notSettled(payload)) return release(db, claim.refund_id, { refundStatus: status });
@@ -122,7 +123,7 @@ export async function processRefund(api: PayApi, db: Db, claim: Claim): Promise<
   if (notSettled(created)) return release(db, claim.refund_id, { status });
   if (uuid) {
     const { error } = await db.rpc("montonio_refund_stamp", {
-      p_refund_id: claim.refund_id, p_provider_refund_id: uuid, p_provider_status: status || "PENDING", p_raw: { status: status || "PENDING" },
+      p_refund_id: claim.refund_id, p_provider_refund_id: uuid, p_provider_status: status || "PENDING", p_raw: { status: status || "PENDING", ...(feeSlice(created) || {}) },
     });
     if (error) return { result: "db_error", detail: dbError(error)!.code };
   }
