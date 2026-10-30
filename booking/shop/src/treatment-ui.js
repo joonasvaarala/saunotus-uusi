@@ -32,8 +32,10 @@ export function createTreatmentViews(c) {
   const optPicker = (p, o) => createOptionPicker({ h, lang: S.lang, product: p, options: p.options, ...o });
   const optQ = (code) => (code ? `&o=${encodeURIComponent(code)}` : '');
 
-  // hintarivi: perushinta + lisähenkilö
-  const priceText = (p) => {
+  // Kortti (ei henkilömäärää): perushinta, ja lisähenkilön kaava kun katalogi sen antaa.
+  // Tuotesivu (n annettu): valitun henkilömäärän summa heti, sama kaava kuin kassa (priceFor = _treatment_price).
+  const priceText = (p, n) => {
+    if (n != null && Number.isFinite(+n)) return money(A.priceFor(p, +n));
     const base = p.price_type === 'per_person' ? `${money(p.price)} ${t.perPerson}` : money(p.price);
     return p.price_type === 'base_plus_extra_person' && p.extra_person_price && A.maxPersons(p) > 1 ? `${base} (${t.included(p.included_persons || 1)}, ${t.extra(money(p.extra_person_price))})` : base;
   };
@@ -47,7 +49,7 @@ export function createTreatmentViews(c) {
   // lahjakorttihuomautus (booking_61: voucher_note / voucher_note_en): erillinen huomautus, ei osa tuotekuvausta; en puuttuu → fi
   const voucherNote = (p) => ((S.lang === 'en' && p.voucher_note_en) || p.voucher_note || '').trim();
   const voucherNode = (p) => (voucherNote(p) ? h('aside', { class: 'bk-voucher-note', 'data-testid': 'voucher-note', role: 'note' }, h('p', { text: voucherNote(p) })) : null);
-  const metaP = (p) => h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), durText(p) ? ` · ${durText(p)}` : '');
+  const metaP = (p, priceEl) => h('p', { class: 'bk-meta' }, priceEl || h('strong', { text: priceText(p) }), durText(p) ? ` · ${durText(p)}` : '');
   // palkki: vain näkyvät jaksot, leveys = kesto (rituaali : savusauna = 20 : 90)
   const bar = (p) => h('span', { class: 'bk-tl-bar', 'aria-hidden': 'true' }, A.timelineOf(p).map((x) => h('span', { class: `bk-tl-seg ${x.key.replace(/[^a-z0-9_-]/gi, '')}`, style: `flex:${x.min} 1 0` })));
   const timelineNode = (p) => (A.isPackage(p) ? h('div', { class: 'bk-timeline', 'data-testid': 'timeline' }, h('p', { class: 'bk-tl-text', text: timelineText(p) }), bar(p)) : null);
@@ -99,7 +101,13 @@ export function createTreatmentViews(c) {
     const dateBox = h('section', { class: 'bk-step-box', 'aria-labelledby': 'tr-h2' }, h('h3', { id: 'tr-h2' }, h('span', { class: 'bk-stepn', 'aria-hidden': 'true', text: String(2 + off) }), tr.step2), calBox);
     // 3) kellonaika
     const timeBox = h('section', { class: 'bk-step-box', 'aria-labelledby': 'tr-h3' });
-    const setN = (n) => { if (lockPersons) return; n = Math.min(Math.max(n, minN), maxN); if (n === st.n) { syncN(); return; } st.n = n; syncN(); st.time = null; st.slots = new Map(); st.seq++; calBox.replaceChildren(h('p', { class: 'bk-loading', role: 'status', text: t.loading })); clearTimeout(st.tm); st.tm = setTimeout(refresh, 350); };   // viive: nopea +/+ ei tee rinnakkaisia hakuja
+    const setN = (n) => {   // viive: nopea +/+ ei tee rinnakkaisia hakuja. Aikaa ei tyhjennetä tässä: drawTimes pudottaa sen vain, jos uusi henkilömäärä ei enää tarjoa sitä.
+      if (lockPersons) return; n = Math.min(Math.max(n, minN), maxN); if (n === st.n) { syncN(); return; }
+      st.n = n; syncN(); st.slots = new Map(); st.seq++;
+      calBox.replaceChildren(h('p', { class: 'bk-loading', role: 'status', text: t.loading }));
+      emit();   // hinta uudelle henkilömäärälle heti, ennen kuin saatavuus ehtii päivittyä
+      clearTimeout(st.tm); st.tm = setTimeout(refresh, 350);
+    };
     const choose = (ds) => { st.date = ds; st.time = null; drawCal(false); drawTimes(); emit(); revealForm(timeBox, timeBox.querySelector('#tr-h3')); };
     async function drawCal(load = true) {
       const seq = ++st.seq;
@@ -140,7 +148,8 @@ export function createTreatmentViews(c) {
     st.hop = 0;
     function drawTimes() {
       const list = st.date ? st.slots.get(st.date) || [] : [];
-      if (st.ready && st.time && !list.some((s) => s.time === st.time)) st.time = null;
+      const known = !!(st.date && st.slots.has(st.date));   // tyhjä välimuisti (henkilömäärä juuri vaihtui) ei ole sama kuin "aika ei enää käy"
+      if (st.ready && st.time && known && !list.some((s) => s.time === st.time)) st.time = null;
       timeBox.replaceChildren(h('h3', { id: 'tr-h3' }, h('span', { class: 'bk-stepn', 'aria-hidden': 'true', text: String(3 + off) }), tr.step3),
         !st.date ? h('p', { class: 'bk-note', text: tr.pickDayFirst }) : !st.ready ? h('p', { class: 'bk-loading', role: 'status', text: t.loading })
           : h('div', { 'aria-live': 'polite' }, h('p', { class: 'bk-note', text: `${dayLong(`${st.date}T12:00:00Z`)} – ${tr.startTimes}` }),
@@ -150,7 +159,7 @@ export function createTreatmentViews(c) {
               : h('p', { class: 'bk-note', text: A.isPackage(p) ? tr.noTimes : t.noSlots })));
     }
     async function refresh() { st.hop = 0; await drawCal(); drawTimes(); emit(); }
-    syncN(); drawTimes();
+    syncN(); drawTimes(); emit();   // hinta näkyy ennen kalenterin latausta ja ennen kellonajan valintaa
     const ready = (async () => {
       await drawCal(); st.ready = true;
       // URL:n päivä/aika voivat olla vanhentuneet: drawCal/drawTimes tyhjentävät puuttuvan valinnan
@@ -164,16 +173,20 @@ export function createTreatmentViews(c) {
     setHero(p, { short: false });   // lyhyt kuvaus ingressinä kalenterin vieressä (leadShort)
     const sum = h('p', { class: 'bk-pick-sum', 'aria-live': 'polite' });
     const go = h('button', { type: 'button', class: 'btn', disabled: true, text: tr.continue });
+    const startN = Math.min(Math.max(+query.get('n') || A.minPersons(p), A.minPersons(p)), A.maxPersons(p));
+    const priceEl = h('strong', { 'data-testid': 'treatment-price', text: priceText(p, startN) });
     let cur = null;
     // pakollinen hoitovalinta (booking_50): vaihe 1; jatkaminen vasta kun valinta on tehty
     const needOpt = O.needsOption(p), showOpt = O.hasOptions(p);
     let opt = O.validCode(p, query.get('o'));
+    const shown = (s) => (s.slot?.total != null ? money(s.slot.total) : priceText(p, s.n || startN));
     const optP = showOpt ? optPicker(p, { value: opt, required: needOpt, step: needOpt ? '1' : null, onChange: (code) => { opt = code; upd(); } }) : null;
     const optStep = showOpt ? h('section', { class: 'bk-step-box bk-step-opt' }, optP.node) : null;
     const upd = () => {
-      const s = cur || {}, slotOk = !!(s.date && s.slot), optOk = O.optionOk(p, opt);
+      const s = cur || { n: startN }, slotOk = !!(s.date && s.slot), optOk = O.optionOk(p, opt), price = shown(s);
+      priceEl.textContent = price;
       go.disabled = !(slotOk && optOk);
-      sum.textContent = !optOk ? ot.pickToContinue : slotOk ? tr.selected(`${dayLong(s.slot.start)}, ${s.time}`, s.n, money(s.slot.total ?? A.priceFor(p, s.n))) + (opt ? ` · ${O.optName(O.findOption(p, opt), S.lang)}` : '') : '';
+      sum.textContent = !optOk ? ot.pickToContinue : slotOk ? tr.selected(`${dayLong(s.slot.start)}, ${s.time}`, s.n, price) + (opt ? ` · ${O.optName(O.findOption(p, opt), S.lang)}` : '') : `${t.total} ${price}`;
       if (s.n) history.replaceState(null, '', bk(`/tuote/${p.slug}?n=${s.n}${s.date ? `&d=${s.date}` : ''}${s.date && s.time ? `&t=${A.timeToken(s.time)}` : ''}${optQ(opt)}`)); c.setLast();
     };
     const picker = slotPicker(p, { n: +query.get('n') || undefined, date: /^\d{4}-\d\d-\d\d$/.test(query.get('d') || '') ? query.get('d') : null, time: A.timeFromToken(query.get('t')), stepOffset: needOpt ? 1 : 0,
@@ -188,7 +201,7 @@ export function createTreatmentViews(c) {
     mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })),
       h('div', { class: 'bk-prod-layout' },
         h('div', { class: 'bk-facts' },
-          metaP(p),
+          metaP(p, priceEl),
           leadShort(h, p, S.lang, desc),
           moreInfo(desc),
           timelineNode(p),
@@ -323,7 +336,8 @@ export function createTreatmentViews(c) {
       onChange: (s) => {
         cur = s;
         refresh();
-        sum.textContent = s.slot ? (inv.showPriceEstimate ? tr.selected(`${dayLong(s.slot.start)}, ${s.time}`, s.n, money(s.slot.total ?? A.priceFor(p, s.n))) : `${dayLong(s.slot.start)}, ${s.time} · ${t.invoicedSumNote}`) : '';
+        const total = s.slot?.total ?? A.priceFor(p, s.n);
+        sum.textContent = s.slot ? (inv.showPriceEstimate ? tr.selected(`${dayLong(s.slot.start)}, ${s.time}`, s.n, money(total)) : `${dayLong(s.slot.start)}, ${s.time} · ${t.invoicedSumNote}`) : (inv.showPriceEstimate ? `${t.total} ${money(A.priceFor(p, s.n))}` : '');
       } });
     save.addEventListener('click', async () => {
       if (!slotChanged() && !optChanged()) return;

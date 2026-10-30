@@ -120,7 +120,8 @@ export const addonsSum = (addons, qty) => addons.reduce((x, a) => x + (qty.get(a
 
 // ---- tuotteet ----
 // Hoitotuotteet = public_catalog()-rivit, joilla booking_kind === 'slots' (piilotetut tuotteet eivät näy katalogissa). Katalogirivi täydennetään build-aikaisella
-// kb-datalla (static-products.json: lisähenkilön hinta, kuvaus), jotta kortit ja hinta-arvio toimivat myös jos katalogi ei anna kaikkea.
+// kb-datalla (static-products.json: kuvaus). included_persons ja extra_person_price tulevat katalogista kun avaimet ovat rivillä
+// (booking_221, sama kb.products-lähde kuin booking._treatment_price); vanha katalogi ilman avaimia säilyttää staattisen arvon.
 // splitCatalog: jakaa jo haetun katalogin → { rules: vuoropohjaiset, treatments }. Ei booking_kind-kenttää (vanha kanta) → kaikki 'rules'.
 export function splitCatalog(catalog, staticById) {
   const rules = [], treatments = [];
@@ -132,8 +133,12 @@ export function splitCatalog(catalog, staticById) {
       duration_minutes: num(r.duration_minutes), duration_text: r.duration_text, duration_text_en: r.duration_text_en, capacity_min: num(r.min_persons), capacity_max: num(r.max_persons), category: r.category, slug: r.slug,
       voucher_note: r.voucher_note, voucher_note_en: r.voucher_note_en, addons_enabled: r.addons_enabled === true ? true : null, allowed_addons: Array.isArray(r.allowed_addons) && r.allowed_addons.length ? r.allowed_addons : null, timeline: Array.isArray(r.timeline) && r.timeline.length ? r.timeline : null, timeline_text: r.timeline_text, timeline_text_en: r.timeline_text_en })
       .filter(([, v]) => v != null && v !== ''));
+    // booking_221: katalogin null korvaa vanhentuneen staattisen lisähinnan (kassa ei veloita lisästä, jos sarake on null). Avain puuttuu (vanha kanta) → staattinen arvo jää.
+    const pricing = {};
+    if ('included_persons' in r) pricing.included_persons = num(r.included_persons);
+    if ('extra_person_price' in r) pricing.extra_person_price = num(r.extra_person_price);
     const no = normOptions(r);   // booking_50: options (aktiiviset), option_required, option_label(_en)
-    treatments.push({ ...st, ...o, id, treatment: true, sale_kind: r.sale_kind, options: no.options, option_required: no.required, option_label: no.label, option_label_en: no.label_en });
+    treatments.push({ ...st, ...o, ...pricing, id, treatment: true, sale_kind: r.sale_kind, options: no.options, option_required: no.required, option_label: no.label, option_label_en: no.label_en });
   }
   const ord = (id) => { const i = KB_IDS.indexOf(id); return i < 0 ? KB_IDS.length : i; };   // tuntematon slots-tuote (uusi paketti) → listan loppuun, ei alkuun
   treatments.sort((a, b) => ord(a.id) - ord(b.id));
@@ -145,8 +150,18 @@ export async function loadProducts(staticById) {
 }
 export const maxPersons = (p) => p.capacity_max || 1;
 export const minPersons = (p) => p.capacity_min || 1;
-// Hinta henkilömäärälle (palvelin laskee lopullisen; vastauksen total/price ohittaa tämän jos annettu)
-export const priceFor = (p, n) => (p.price_type === 'per_person' ? p.price * n : p.price + Math.max(0, n - (p.included_persons || 1)) * (p.extra_person_price || 0));
+// Hinta henkilömäärälle. Sama kaava kuin booking._treatment_price (kassa): per_person → hinta × hlö;
+// muuten perushinta + lisähenkilöt. included_persons NULL → ei lisäveloitusta (coalesce(included, henkilömäärä)).
+// Valitun ajan vastauksen total ohittaa tämän, jos palvelin sen antaa.
+export const priceFor = (p, n) => {
+  const persons = +n || 0;
+  const price = +p.price || 0;
+  if (p.price_type === 'per_person') return price * persons;
+  const raw = p.included_persons;
+  const included = raw == null || raw === '' || !Number.isFinite(+raw) ? persons : +raw;
+  const extra = Number.isFinite(+p.extra_person_price) ? +p.extra_person_price : 0;
+  return price + extra * Math.max(0, persons - included);
+};
 
 // ---- vapaus ----
 // → Map<'YYYY-MM-DD', [{ start: ISO, end: ISO, time: 'HH:MM', total }]> (järjestetty). Rivit: { session_date, starts_at, ends_at, status:'available', total, … } (vain vapaat alkuajat).
