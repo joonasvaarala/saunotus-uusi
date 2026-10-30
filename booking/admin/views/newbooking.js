@@ -135,7 +135,7 @@ export async function render({ ctx, refs, query, reload }) {
     const ui = {}; let paidTouched = false;
     const paid = h('input', { type: 'checkbox', name: 'paid' });
     paid.addEventListener('change', () => { paidTouched = true; });
-    const method = h('select', { name: 'method' }, refs.methods.filter((m) => m.active).map((m) => h('option', { value: m.code, text: m.label, selected: m.code === 'pay_later' || null })));
+    const method = h('select', { name: 'method' }, refs.methods.filter((m) => m.active && m.is_manual).map((m) => h('option', { value: m.code, text: m.label, selected: m.code === 'pay_later' || null })));
     method.addEventListener('change', () => { if (!paidTouched) paid.checked = paidDefault(method.value); syncGift(); upd(); });
     ui.method = method;
     const codeIn = h('input', { name: 'discount', maxlength: 40, autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false', placeholder: bookingText('discount_ph'), 'data-testid': 'discount-code' });
@@ -145,7 +145,7 @@ export async function render({ ctx, refs, query, reload }) {
     const giftIn = h('input', { name: 'gift', maxlength: 24, autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false', placeholder: bookingText('gift_ph'), 'data-testid': 'gift-code' });
     const giftStatus = h('p', { class: 'fld-hint', hidden: true, 'data-testid': 'gift-status' });
     const giftCheck = h('button', { type: 'button', class: 'btn sm', 'data-testid': 'gift-check', text: bookingText('gift_check'), onclick: () => checkGift() });
-    const restSel = h('select', { name: 'remainder', 'data-testid': 'gift-remainder' }, h('option', { value: '', text: bookingText('gift_rest_unpaid') }), ...refs.methods.filter((m) => m.active && m.code !== 'gift_card').map((m) => h('option', { value: m.code, text: m.label })));
+    const restSel = h('select', { name: 'remainder', 'data-testid': 'gift-remainder' }, h('option', { value: '', text: bookingText('gift_rest_unpaid') }), ...refs.methods.filter((m) => m.active && m.is_manual && m.code !== 'gift_card').map((m) => h('option', { value: m.code, text: m.label })));
     const restWrap = h('div', { hidden: true, 'data-testid': 'gift-rest' }, h('p', { class: 'nb-rest', 'data-testid': 'gift-rest-line' }), h('label', { class: 'fld' }, h('span', { class: 'fld-lab', text: bookingText('gift_rest_method') }), restSel));
     const giftWrap = h('div', { class: 'stack', hidden: true, 'data-testid': 'gift-card-field' },
       h('div', { class: 'nbsearch' }, h('label', { class: 'fld', style: 'flex:1' }, h('span', { class: 'fld-lab', text: bookingText('gift_code') }), giftIn), giftCheck),

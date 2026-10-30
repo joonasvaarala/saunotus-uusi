@@ -44,10 +44,12 @@ revoke all on all tables in schema botgw from public, anon, authenticated;
 grant select, insert, update, delete on all tables in schema botgw to service_role;
 
 -- Oton rivi valmiiksi, POIS PÄÄLTÄ, ei avainta.
+-- Tyhjä kanta: Oton staff-riviä ei ole. Tuotannossa rivi on, ja on conflict do nothing pitää ajon ennallaan.
 insert into botgw.bot_clients (name, staff_id, scopes, active, note)
-values ('otto-grok-bot', '2975633f-c53f-48d6-8a38-41cae0be5a83',
+select 'otto-grok-bot', '2975633f-c53f-48d6-8a38-41cae0be5a83',
         array['me','shifts.read','offers.respond','inbox.read','backlog.read','backlog.write'], false,
-        'Oton Grok Bot. Avain annetaan vain Joonaksen hyväksynnällä suojatulla lomakkeella.')
+        'Oton Grok Bot. Avain annetaan vain Joonaksen hyväksynnällä suojatulla lomakkeella.'
+ where exists (select 1 from public.staff where id = '2975633f-c53f-48d6-8a38-41cae0be5a83')
 on conflict (name) do nothing;
 
 -- Sisäinen: tunnista asiakas tiivisteellä ja vaadi scope.

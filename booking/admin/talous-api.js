@@ -115,13 +115,18 @@ export function normReport(r) {
     totals: { receipts: num(tt.receipts), refund_receipts: num(tt.refund_receipts), gross: num(tt.gross), net: num(tt.net), vat: num(tt.vat), refunds_gross: num(tt.refunds_gross), gross_after_refunds: num(grossAfter), vat_after_refunds: num(tt.vat_after_refunds ?? tt.vat), net_ex_vat_after_refunds: num(tt.net_ex_vat_after_refunds ?? tt.net), rounding: num(tt.rounding) },
     by_method: L(r.by_method).map((m) => ({ method: m.method, label: m.label ?? null, payments: num(m.payments), gross: num(m.gross), refunds: num(m.refunds), rounding: num(m.rounding) })),
     by_vat: L(r.by_vat).map((v) => ({ rate: num(v.rate), net: num(v.net), vat: num(v.vat), gross: num(v.gross) })),
+    by_vat_sales: L(r.by_vat_sales).map((v) => ({ rate: num(v.rate), net: num(v.net), vat: num(v.vat), gross: num(v.gross) })),
+    by_vat_refunds: L(r.by_vat_refunds).map((v) => ({ rate: num(v.rate), net: num(v.net), vat: num(v.vat), gross: num(v.gross) })),
     by_method_vat: L(r.by_method_vat).map((v) => ({ method: v.method, rate: num(v.rate), net: num(v.net), vat: num(v.vat), gross: num(v.gross) })),
     by_category: L(r.by_category).map((c) => ({ category: c.category, label: c.label ?? null, rate: num(c.rate), quantity: num(c.quantity), gross: num(c.gross), net: num(c.net), vat: num(c.vat) })),
     by_product: Array.isArray(r.by_product) ? r.by_product.map((p) => ({ product: p.product ?? '', rate: num(p.rate), quantity: num(p.quantity), net: num(p.net), vat: num(p.vat), gross: num(p.gross) })) : null,
     refunds_by_product: Array.isArray(r.refunds_by_product) ? r.refunds_by_product.map((p) => ({ product: p.product ?? '', rate: num(p.rate), quantity: num(p.quantity), net: num(p.net), vat: num(p.vat), gross: num(p.gross) })) : null,
     reconciliation: r.reconciliation && typeof r.reconciliation === 'object' ? {
       sales_gross: num(r.reconciliation.sales_gross), refunds_gross: num(r.reconciliation.refunds_gross), product_gross: num(r.reconciliation.product_gross),
-      payments_gross: num(r.reconciliation.payments_gross), difference: num(r.reconciliation.difference), line_vat: num(r.reconciliation.line_vat), receipt_vat: num(r.reconciliation.receipt_vat),
+      payments_gross: num(r.reconciliation.payments_gross), difference: num(r.reconciliation.difference),
+      methods_net: r.reconciliation.methods_net == null ? null : num(r.reconciliation.methods_net),
+      methods_difference: r.reconciliation.methods_difference == null ? null : num(r.reconciliation.methods_difference),
+      line_vat: num(r.reconciliation.line_vat), receipt_vat: num(r.reconciliation.receipt_vat),
       vat_rounding: num(r.reconciliation.vat_rounding), cash_rounding: num(r.reconciliation.cash_rounding), rounding_code: r.reconciliation.rounding_code ?? null,
     } : null,
     vat_summary: Array.isArray(r.vat_summary) ? r.vat_summary.map((v) => ({ rate: num(v.rate), net: num(v.net), vat: num(v.vat), gross: num(v.gross) })) : null,
@@ -135,6 +140,11 @@ export function normReport(r) {
         issued_count: num(r.gift_card_period.complimentary?.issued_count), issued_gross: num(r.gift_card_period.complimentary?.issued_gross),
         redeemed_count: num(r.gift_card_period.complimentary?.redeemed_count), redeemed_gross: num(r.gift_card_period.complimentary?.redeemed_gross),
       },
+      open: ['native_paid', 'native_complimentary', 'johku'].reduce((acc, key) => {
+        const b = r.gift_card_period.open?.[key] || {};
+        acc[key] = { opening: num(b.opening), sold: num(b.sold), redeemed: num(b.redeemed), other: num(b.other), expired: num(b.expired), closing: num(b.closing), cards: num(b.cards), accounting: b.accounting === true, difference: num(b.difference) };
+        return acc;
+      }, { johku_accounting: false }),
     } : null,
     prepaid_redemptions: r.prepaid_redemptions && typeof r.prepaid_redemptions === 'object' ? {
       accounting: false, payments: num(r.prepaid_redemptions.payments), gross: num(r.prepaid_redemptions.gross), net: num(r.prepaid_redemptions.net), vat: num(r.prepaid_redemptions.vat),
@@ -310,7 +320,7 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
     // Palauttaa { source:'server', filename, content }. (csv.js = asiakaspuolen varakirjoittaja samoille sarakkeille, ei käytössä kun palvelin vastaa.)
     async reportCsv(report, kind = 'lines') {
       const res = await run('reportCsv', { from: report.period.from, to: report.period.to, kind });
-      const prefix = kind === 'summary' ? 'yhteenveto' : kind === 'vat' ? 'kuitit_vat' : 'tapahtumat';
+      const prefix = kind === 'summary' ? 'yhteenveto' : kind === 'vat' ? 'myynti_vat' : kind === 'methods' ? 'maksutavat' : 'tapahtumat';
       return { source: 'server', filename: res.filename || `${prefix}_${report.period.from}_${report.period.to}.csv`, content: String(res.content ?? ''), mime: res.mime || 'text/csv' };
     },
     async reportGiftCards(filter = 'open', format = 'json') {

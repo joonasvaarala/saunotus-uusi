@@ -109,16 +109,16 @@ begin
 
   v_year := booking._receipt_year(now());
   v_k := coalesce((select last_seq from booking.receipt_counters where series = 'K' and year = v_year), 0);
-  v_l := coalesce((select last_seq from booking.receipt_counters where series = 'L' and year = v_year), 0);
+  v_l := coalesce((select last_seq from booking.receipt_counters where series = 'G' and year = v_year), 0);
   perform public.t117_login(u_mgr);
   res := public.t117_call(format($q$booking.admin_redeem_gift_card(%s, %L, 40, 'liikaa')$q$, o_mix, v_code));
   perform public.t117_ck(res ->> 'err' = 'gift_card_vat_rate', 'V9: muu verokanta hylätään: ' || coalesce(res ->> 'err', 'ok'));
   res := public.t117_call(format($q$booking.admin_redeem_gift_card(%s, %L, 36, 'vain yleinen')$q$, o_mix, v_code));
   v_pay := (res ->> 'payment_id')::bigint;
   perform public.t117_ck(res ->> 'accounted' = 'false' and res ->> 'receipt_no' is not null, 'V10: tiedoksi-kuitti, ei myyntiä: ' || coalesce(res ->> 'err', res ->> 'receipt_no', 'null'));
-  perform public.t117_ck(res ->> 'receipt_no' = format('L-%s-%s', v_year, lpad((v_l + 1)::text, 6, '0')), 'V10b: tiedoksi-kuitti on L-sarjaa: ' || coalesce(res ->> 'receipt_no', res ->> 'err', 'null'));
+  perform public.t117_ck(res ->> 'receipt_no' = format('G-%s-%s', v_year, lpad((v_l + 1)::text, 6, '0')), 'V10b: tiedoksi-kuitti on G-sarjaa: ' || coalesce(res ->> 'receipt_no', res ->> 'err', 'null'));
   perform public.t117_logout();
-  perform public.t117_ck((select series from booking.receipts where payment_id = v_pay) = 'L', 'V10c: kuitin sarja on L');
+  perform public.t117_ck((select series from booking.receipts where payment_id = v_pay) = 'G', 'V10c: kuitin sarja on G');
   perform public.t117_ck(coalesce((select last_seq from booking.receipt_counters where series = 'K' and year = v_year), 0) = v_k, 'V10d: K-laskuri ei kasva lunastuksesta');
   update booking.payments set paid_at = '2032-06-15 12:30:00+00' where id = v_pay;
   -- Kuitti on muuttumaton. Testi siirtää tiedoksi-kuitin jaksoon, koska trigger leimaa now().

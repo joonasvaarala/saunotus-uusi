@@ -10,6 +10,17 @@ begin
     raise notice 'history-sync 20261021213132: jo ajettu, ohitetaan';
     return;
   end if;
+  -- Tyhjä kanta: updated_at-triggerfunktio tulee tuotannon public-skeemasta, ei näistä migraatioista.
+  if to_regprocedure('public.set_updated_at()') is null then
+    create function public.set_updated_at() returns trigger
+    language plpgsql
+    as $fn$
+    begin
+      new.updated_at := now();
+      return new;
+    end
+    $fn$;
+  end if;
   execute $hs_20261021213132$
 -- staff_bot_shift_change_queue: työntekijäbotin vuoromuutospyynnöt jonoon (scope shifts.manage).
 --
